@@ -715,3 +715,74 @@ copy's own mode, BOTH confirm sheets gaining the explicit "land it in Standard i
 consequence named, Castle landings typing the current pair, and pins per arm across three doors. That is a real
 acceptance unit, not a rider beside seven others — her word at the sitting: "take it only if it fits a batch
 cleanly, else it leads the next run." It leads the next run; the ticket carries this sizing as a comment.
+
+## 6b. U3 BRIEF — VX-423, ONE REFRESH AUTHORITY (a fresh Opus implementer; Fable cold review rides the phase ladder)
+
+**Read first, in full:** CLAUDE.md + its canon; `notes/SessionResiliencyProtocol.md`; this plan §6 (the cut, the
+environment traps — they bind verbatim) and this brief; the VX-423 ticket's trace comments as mirrored here; the
+code: `App/Variorum/Shared/AuthSession.swift` WHOLE, `App/Variorum/Shared/AppServices.swift` (the main instance's
+birth), `App/Variorum/Shared/LobbyVaultRoad.swift` + `App/Variorum/Shared/Protection/FollowingSessionProvider.swift`
+(the lobby/vault instance), `App/Variorum/Shared/AppBootstrap.swift` (who owns which), and every other
+`AuthSession(` construction site (`rg "AuthSession(" App/ Sources/`). Work from `~/dev/variorum-vx-329`; commits say
+`Part of VX-423`. NOTHING in `Sources/VariorumCore/Sync/` — if the fix wants a line there, STOP and flag it to the
+orchestrator.
+
+**The traced mechanism (VX-308 F-U1-1 + the VX-423 scout, code-confirmed):** two long-lived `AuthSession` actors
+share ONE Keychain item (service `io.lduarte.Variorum.auth`, account `real-session-bound`) and ONE ROTATING refresh
+token: instance A (AppServices — the sync transport, KeyVaultClient, EncryptionSession, AccountLifecycle) and
+instance B (the bootstrap's lobby road, alive for the process). Each loads the Keychain once and never re-reads;
+refresh is single-flighted WITHIN an actor only. A rotates RT1→…→RTn; B later refreshes with stale RT1; GoTrue
+reads that as token reuse (`refresh_token_already_used`) and revokes the session — sync dies until re-login.
+
+**The goal:** ONE refresh authority per process. The spec-defensible shape (propose-then-build if you see a
+cleaner one — the architect rules on a fork): ONE `AuthSession` instance per process, owned at the composition
+root and handed to both the services and the lobby road (the lobby's `FollowingSessionProvider` follows it), so
+the single-flight covers every caller. A narrower alternative (cross-instance single-flight + keychain re-read
+before any refresh) is acceptable only if the one-instance shape breaks a lifecycle the record names (the lobby
+lives across locked windows; the services die at relock — say exactly why if you take it).
+
+**Evidence closing the unit:** a RED-ON-OLD pin on the two-refreshers race (a fake GoTrue endpoint that revokes on
+a reused refresh token; two instances sharing one stored token; the old shape burns the token — the pin red on the
+pre-fix code, verified by behavioral revert, green after); the auth/account suites green headless; the protection
+set green both configurations; `build-for-testing` green on both targets; the record (§5, the live-status form)
+with counts, PROVISIONALs bundled, findings routed. Hard limits: §6's environment traps verbatim (headless only, no
+stage, no subagents, no network, foreground waits, checkpoint commits pushed per piece).
+
+## 6c. R1 BRIEF — THE RIDERS (a fresh Opus implementer; pin-before-fix PER MEMBER; Fable review rides the ladder)
+
+**Read first, in full:** CLAUDE.md + its canon; `notes/SessionResiliencyProtocol.md`; this plan §6 + §6a's
+environment traps (verbatim binding) + the U1 RECORD's F-flags (the shape you inherit); `notes/CastleRules.md`
+rules 9, 11, 17, 21, 25–27; `notes/SurfaceContracts.md` Doors (Library protection); the member tickets' substance
+as mirrored below (the Linear bodies point at `notes/plans/vx-309-copies-and-words.md` §8 — read the walk rows that
+bore each member). Work from `~/dev/variorum-vx-329`; commits say `Part of VX-nnn` per member. NOTHING under
+`Sources/VariorumCore/Sync/`. VX-470 is NOT yours (it leads the next run — the sizing record above).
+
+**The members, each with its pin-before-fix (red on old, revert-verified):**
+- **VX-461 — the export door writes an empty file.** `DataSafetyPane` → `StorePlaintextExport.export`: the
+  suspected mechanism is the save panel's security-scoped grant not held around the export's ATTACH on the
+  detached task's connection (the vx-309 §8 W-VX309-4 trace; a one-literal-path sandbox probe did NOT prove the
+  journal-sidecar story — trace to a CONCRETE mechanism before fixing, and say it in the record). Rule 26's
+  switch-day instruction leans on this door. The deliberate backups-folder refusal arm stays byte-unchanged.
+- **VX-463 — conceal the words fields (her ruling: "conceal with a reveal eye").** Every typed-words field
+  (make-mine both faces, the join/move sheets' account-words field, the key doors' words arms) conceals like the
+  passphrase field, with the same reveal eye; one shared field component if one already serves the passphrase.
+- **VX-464 — the join refusal's referent.** The wrong-account-passphrase refusal on the join and move sheets says
+  the ACCOUNT, not "this library" (one sentence class; the make-mine faces keep theirs).
+- **VX-473 — the hold banner's `hasAccount`.** On the new road it reads whether the OPEN LIBRARY's record names an
+  account, never whether the Mac is signed in; the unsynced adopted library's banner drops the "catch up with your
+  account" clause.
+- **VX-469 (c) — the Use Castle confirm's one line.** The confirm says Previous Libraries' quiet roads on this Mac
+  stand (her framing: Castle's promise is about live libraries; the warning idiom of the backups sentence).
+  Wording PROVISIONAL, bundled.
+- **VX-468 — the what's-new card waits (her "wait").** The card does not greet the first open of a library adopted
+  by Make this my library / restore; it waits for the next ordinary launch (the calm-first-open rule's idiom).
+- **VX-462 — the set-up arm's words moment goes quiet.** VX-456's quiet check answers false on a set-up-built
+  vault (the own-words-lock clause); make set-up → leave → re-join quiet exactly as join → leave → re-join is,
+  by whichever of the ticket's two candidates traces clean (drop the own words lock once the copy holds the same
+  words, or a recorded same-words mark at set-up). The standing `withKnownIssue` wrappers in
+  `JoinWordsMomentSetUpArmTests` DROP with the fix (they are the red-on-old). Custody-adjacent: the Fable ladder
+  reviews it.
+
+**Evidence closing the unit:** per-member pins red-on-old (named in the record with their revert checks); the
+protection + faces suites green headless both configurations; `build-for-testing` green both targets; the record
+(§5) with per-member dispositions, the Mac-suite list for the stage batch, PROVISIONALs bundled.
