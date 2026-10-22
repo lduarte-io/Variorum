@@ -223,3 +223,46 @@ round-1 finding's fix otherwise CONFIRMED. By the ladder rule the new MAJOR earn
 only (five expectations made true to the approved text; the approved product text stands), so round 3's re-check is
 narrow: the flipped pins, the closing Mac run's `DataSafetyRunbookTests` result, and the two MINOR word corrections
 if she lands them.**
+
+---
+
+## ROUND-2 FIX LEG (Opus implementer, 2026-10-22) — the MAJOR only
+
+**Not done by this leg (stated first):** no `xcodebuild test` run (out of this leg's limits by the brief — the
+orchestrator's closing Mac run, `-only-testing:VariorumTests/DataSafetyRunbookTests` plus the closing full run, is the
+re-cover of record); the two MINORs (the cadence comparative and the per-row opens claim — her words, routed to her
+bundle) and the delta-brief MINOR and both NITs are untouched; zero product edits (the `DataSafetyCopy.runbook`
+literal, `notes/DataSafetyRunbook.md` and every product file byte-unchanged); nothing under `Sources/VariorumCore/Sync/`.
+
+**LIVE STATUS**
+- The five flips in `App/Variorum/VariorumTests/DataSafetyTests.swift` — DONE (this commit).
+- Compile evidence (`swift build` headless + `xcodebuild build-for-testing` from `App/Variorum/`) — **PENDING** (flips
+  in the next commit).
+
+**The red-on-old is the CURRENT red** — no new pin owed (the finding's own disposition). Its mechanism, re-proven by
+me before the edit: each of the five old expectation strings occurs **0** times in the runbook literal
+(`DataSafetyCopy.swift` lines 92–288) and **0** times in its byte-equal twin `notes/DataSafetyRunbook.md` (`grep -c -F`
+per string), so `sectionEightIsComposedFromTheProtectionBrainAndClaimsNothingStale` (3 expectations) and
+`theRunbookCoversWhatItsTableOfContentsPromises` (2) fail at the tip `6882f89b8` exactly as the finding says.
+
+**The flips (justified edits — each new expectation quotes the approved literal exactly, wraps included):**
+
+| Line | Old expectation (absent from the literal) | New expectation (the approved text's own claim) |
+|---|---|---|
+| :266 | `**Standard** — the floor: you lose your writing only if you lose every Apple device` | `**your passphrase or your twelve words — together with any⏎copy of your library — always open it.**` — the ONE floor (literal :285–286) |
+| :267 | `**Castle** — the floor: lose every enrolled device and both your passphrase and your twelve` | `A library whose every key-file copy and every backup are gone is gone;⏎synced libraries are the exception — your account's passphrase or twelve words recover them from the account.` — amended rule 27 whole, the loss leg and its exception (literal :286–287) |
+| :268 | `Nobody can help — not Apple, not us.` | `Nothing else opens it, by design — not Apple, not us.` — Castle's line as now worded, message "never softened" kept (literal :283) |
+| :293 | `A PEER, not a backup` | `A **peer**, not a backup` — her no-shouty-caps edit (literal :131) |
+| :294 | `recovery phrase` | `Your passphrase and your twelve words do not encrypt anything themselves` — the same §8 sentence that once glossed "(the recovery phrase)", now in the twelve-words vocabulary, still naming the two roads the comment promises (literal :275); "recovery phrase" is a retired word (`U2WordsTests.retired`) |
+
+(⏎ = the literal's real line break, written `\n` in the Swift pin.) The arms the finding said to keep — :259–262 and
+the 13s-b absence arms — are untouched and still hold (each string `grep -c` 0 in the twin); the eight headings and
+"Always copy out as new" each occur once. The U1 comment above the floors is rewritten true (the composition retired
+at U1; her rewrite's one floor); the test's NAME still says "ComposedFromTheProtectionBrain" — historical, left as is
+(a rename would be outside this leg; noted for the closeout if wanted).
+
+**Byte proof** (`r2fix_byteproof.py`, scratchpad): rebuilds the literal from the Swift source (the lines between
+`static let runbook = """` and the closing `        """`, the 8-space indent stripped — 195 lines, 93..287) and counts
+each new expectation, exactly as Swift evaluates it, in the rebuilt literal and in `notes/DataSafetyRunbook.md`: all
+five **x1 · x1**; all five old strings **x0 · x0**; `ALL CHECKS PASS`. Per-segment `grep -n -F` on
+`DataSafetyCopy.swift`: :285 / :286 / :286 / :287 / :283 / :131 / :275.

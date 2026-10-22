@@ -260,12 +260,18 @@ struct DataSafetyRunbookTests {
                 "the plaintext-era claim must not survive anywhere in the runbook")
         #expect(!runbook.contains("your writing is still here"),
                 "the unconditional conclusion contradicts the ruled floors")
-        // VX-329 U1: the posture cards §8 was composed from left with today's road; their two floors stand in the
-        // runbook as the cards last said them (the runbook's rewrite to the pair road is hers — the U1 record's
-        // F-U1-4), so the floors are pinned as they stand.
-        #expect(runbook.contains("**Standard** — the floor: you lose your writing only if you lose every Apple device"))
-        #expect(runbook.contains("**Castle** — the floor: lose every enrolled device and both your passphrase and your twelve"))
-        #expect(runbook.contains("Nobody can help — not Apple, not us."), "Castle's floor, never softened")
+        // VX-329 U1: the posture cards §8 was composed from left with today's road. Her approved RESTORE.md rewrite
+        // (`543645f53`, the U1 record's F-U1-4) replaced their two floors with ONE floor — amended rule 27 — and
+        // re-worded Castle's line; ladder round 2's MAJOR flips these pins to the approved text exactly as the
+        // literal has it, line wraps included (JUSTIFIED EDITS; the words are hers and unchanged).
+        #expect(runbook.contains("**your passphrase or your twelve words — together with any\n"
+                                 + "copy of your library — always open it.**"),
+                "the one floor: either secret, with any copy, always opens it")
+        #expect(runbook.contains("A library whose every key-file copy and every backup are gone is gone;\n"
+                                 + "synced libraries are the exception — your account's passphrase or twelve words "
+                                 + "recover them from the account."),
+                "rule 27 as amended: the loss leg and its synced exception, both secrets named")
+        #expect(runbook.contains("Nothing else opens it, by design — not Apple, not us."), "Castle's line, never softened")
         // 13s-b U1b (R-13s-37, a JUSTIFIED EDIT — the arm INVERTS): the
         // book is neither seeded nor restorable, so §8's pointer retired
         // with it; the floors above are byte-untouched.
@@ -290,8 +296,11 @@ struct DataSafetyRunbookTests {
         }
         // The mirror section's load-bearing claim (her overnight questions):
         // a peer, not a backup — and the two proven roads named.
-        #expect(DataSafetyCopy.runbook.contains("A PEER, not a backup"))
-        #expect(DataSafetyCopy.runbook.contains("recovery phrase"))
+        // (VX-329 ladder round 2, justified edits: her rewrite's no-shouty-caps pass bolds the peer, and §8 names the
+        // two roads in the twelve-words vocabulary — the "recovery phrase" gloss is a retired word,
+        // `U2WordsTests.retired`.)
+        #expect(DataSafetyCopy.runbook.contains("A **peer**, not a backup"))
+        #expect(DataSafetyCopy.runbook.contains("Your passphrase and your twelve words do not encrypt anything themselves"))
         // The recovery-as-copy doctrine (her regret-road ruling).
         #expect(DataSafetyCopy.runbook.contains("Always copy out as new"))
     }
