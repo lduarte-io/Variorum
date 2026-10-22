@@ -1787,3 +1787,56 @@ SupabaseTransport + SyncEngine with the fabricated keys injected, sealed by the 
   Castle entry — verified in the entry's step list; distinct from the gate-governed quiet-road item).
 - **Updating-never-loses clarified:** future locksteps pause sync (outbox intact) and resume on the same library
   after update; this crossing's stranded-unpushed cost is rule 26's one-time call.
+
+## 8. THE REHEARSAL RECORD (the orchestrator, Fable, 2026-10-22 — §2's proof on the throwaway; stage claim
+`vx-329` held and released; captures `~/vx329-walk/`, deleted at closeout; the ref guard on every SQL apply;
+every typed secret the throwaway's own, disposable by design)
+
+**THE §2 QUESTION IS ANSWERED YES — rule 15 held across the switch, proven end to end on real Postgres:**
+
+- **The fixture (faithful to her crossing):** B's data rows wiped (a rehearsal-only dumb-road act); a
+  pre-VX307-shaped vault PLANTED for B — format 1, mode NULL, the apple-held wrap present (the Standard arm),
+  BOTH class keys including the dormant journal bridge (her real vault's shape; the first plant without it was
+  caught by the CLIENT's own strict row decode — recorded below), real Argon2id v1 KDF, real wraps from the
+  core's own functions, kp2 enrolled in Vault; **artifact 17's backfill UPDATE run VERBATIM** on it → `mode =
+  'standard'` from the apple-held arm, rotation columns null, `earlier_row_keys` NULL (a pre-switch account has
+  no earlier keys). Then **14 rows pushed as B through the REAL SupabaseTransport + SyncEngine** (the production
+  serializer; owner stamp inlined from `adoptOwnerID`'s semantics), verified ciphertext on the mirror (3/3
+  variants `e1:`, 0 plain).
+- **The JOIN, through the app's own act (GUI, the dev slot, the walk switch verified IN-PROCESS before any
+  credential):** a fresh library minted calm on the emptied dev slot (the words card + the passphrase card, no
+  banner); Settings ▸ Protection ▸ Sync ▸ Sign in as B → **Turn on sync = the JOIN against the BACKFILLED
+  vault: the sheet read the backfilled mode live ("Your account is in Standard, like this library."), rule 7's
+  sentences, both secret fields concealed with VX-463's reveal eye; the account's passphrase typed → THE WORDS
+  MOMENT spoke her F-U2-1 draft byte-faithful** ("Your twelve words are vx308b@example.com's twelve words. Your
+  previous twelve words still open backups you made before today. …") → "This library syncs with your account."
+  + Replace All Keys appeared + the sync-on receipt. The A4 fence held throughout ("Sync off (dev store)" — the
+  dev store never runs rounds; by design, so the PULL proof ran headless).
+- **THE PULL, headless through the same client path (the fixture tool's pull arm):** a FRESH in-memory store,
+  knowing nothing but the typed account passphrase — `fetchVault` (format 1, revision 1) → Argon2id by the
+  vault's own descriptor → `unwrapMaster(withPassphraseKey:)` → `unwrapClassKey(.corpus)` → the REAL engine's
+  `pullToHead` → **11 applied + 3 merged, and the pre-switch notes read back VERBATIM DECRYPTED**:
+  "[Rehearsal — before the switch] Written under the pre-switch corpus key." / "If you can read this after the
+  join, rule 15 held across the switch." / "[Second note (pre-switch)] A second note, same era." (The first
+  pull inside its own push's 2-second A5 visibility horizon honestly applied 0 — the horizon working.)
+- **THE RESTORE, whole:** the dev slot's 9 files back `cmp`-identical (re-verified after the straggler quit —
+  one honesty beat: the walk app was still alive at the swap; mv kept its inodes on the aside copies so the
+  restored files were never written; killed, re-verified 9/9); the relaunch WITHOUT the walk switch → **rule
+  21's notice ONCE ("This is a different library than the one this Mac last had open")** → OK → the dev library
+  open QUIETLY by its own road, the VX-309 hold banner standing, Resume never pressed, "Sync off (dev store)".
+  The walk library's files discarded (throwaway content); its keychain adds (custody/memory/Apple for the walk
+  library id, B's account session signed in then quit) recorded here as the dev scope's residue — the VX-309
+  class. **The known VX-465 consequence stands recorded:** the walk library's creation deleted the dev library's
+  memory item (rule 21's one-library memory), so the dev library's next era re-mints — by design, her
+  accept-as-designed ruling.
+- **Walk machinery, said honestly:** my first launch opened the EXISTING dev library via quiet road (the stale
+  `io.lduarte.Variorum/Variorum-dev` directory was a decoy — the real dev slot lives in the DEBUG app's own
+  container `io.lduarte.Variorum.debug`; the stale dir's 12 files were asided and restored untouched); one
+  Tab-focus miss typed the throwaway password into the visible email field (the vx-309 class — cleared,
+  retyped by direct field clicks; disposable credential); the fixture tool's three findings on itself (the CASE
+  uuid/void mix → a DO block; the shell-eaten dollar-quote tag; the missing journal-bridge key caught by the
+  client's strict decode) each fixed in the scratchpad tool, never in product.
+
+**What this record proves for the switch-day script:** §2's answer ("by the join") is REHEARSED — the markers in
+`notes/plans/vx-329-switch-day.md` flip in this commit. What stays HERS: the byte-copy rehearsal (the staged copy
++ README), the deploy, the installs, the release.
