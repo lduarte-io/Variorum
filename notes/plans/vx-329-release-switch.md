@@ -438,6 +438,91 @@ suites), `MobileStructuralTests` (`MobileCopyRegisterSweepTests`), `MobileTravel
 (`MobilePocketGuidePrivacyTests`), `MobileKDFLatencyTests`. Opt-in, unchanged in kind: `ICloudAppleKeysLeafTests`
 (`VARIORUM_APPLE_KEY_ROUND_TRIP=1`).
 
+### U3 RECORD — VX-423, ONE REFRESH AUTHORITY (Opus implementer, 2026-10-22; IN PROGRESS)
+
+**Not done in U3, first:** PENDING — filled at the close.
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+this plan §1–§6 (the CUT, the environment traps, §6b — this brief) and the U1 RECORD (the shape inherited); the VX-308
+F-U1-1 trace and its routing (`notes/plans/vx-308-accounts-key-doors.md` R-3, the arbitration, the hand-forwards); the
+code — `AuthSession.swift` WHOLE, `AppServices.swift` WHOLE, `AppBootstrap.swift` WHOLE, `FollowingSessionProvider
+.swift`, `WireVaultLeaf.swift`, `ProtectionSystem.swift`, `ProtectionOpenRoad.swift`'s `RoadInputs`/`ComposedRoad`, the two
+app roots' `AppServices(` sites (`VariorumApp.swift`, `VariorumMobileApp.swift`), the core seam (`Auth/UserSession.swift`)
+and the vault client's session use (`Protection/Wire/AccountVaultClient.swift`); every `AuthSession(` construction site
+(`rg "AuthSession(" App/ Sources/` — product: `AppServices.swift:182`, `WireVaultLeaf.swift:40`; the rest tests); every
+reader and writer of the session's keychain item (the one WRITER is `AuthSession` through its store; the readers are
+`OwnerIdentity`'s install, `RoadInputs.live`'s `sessionFact`, the leaf's `signedInUser`). `LobbyVaultRoad` (the brief's
+name for the second instance's old home) was DELETED at U1 — the second instance today is the protection road's vault
+leaf, traced below from the current code. Machinery: the orchestrator's own commits interleave on this branch (the
+switch-day script, the release notes) — every U3 commit is pathspec-limited, rebased before each push.
+
+**THE MECHANISM, re-traced on the current tree (inputs → wrong state):**
+1. Instance A — `AppServices.init` (`AppServices.swift:182`) mints `AuthSession(configuration: ProjectConfig
+   .variorumAuth, store: .keychain(scope:))` when no `auth` is passed; both app roots pass none (`VariorumApp.swift:210`,
+   `VariorumMobileApp.swift:88`). A rides the sync transport (`makeSyncTransport(auth)`), the account lifecycle, sign-in,
+   sign-out and Delete Account. Made per `.ready`, dies at relock (the root's `onWillLock` nils the services).
+2. Instance B — every `roadInputs.compose()` (each open, each lock, the empty-slot doors, the bring-in) runs
+   `ProtectionSystem.live(variant:)` → `ProtectionSystem.init`'s default vault → `WireVaultLeaf.live(scope:deviceName:)`
+   → a `FollowingSessionProvider` whose `make` mints ANOTHER `AuthSession` over the SAME keychain item
+   (`WireVaultLeaf.swift:40`) at its first call for a user, kept for as long as that user stays signed in. The open
+   library's road session holds that leaf for the whole `.ready` (the pane's vault reads, the account acts, the
+   crossings' preflights all reach it).
+3. Each `AuthSession` reads the item ONCE (`ensureLoadedFromStore`) and keeps its tokens in memory; its refresh is
+   single-flighted within ITSELF only (`refreshTask`). The two never re-read each other's writes.
+4. The race: B reads RT1 (a pane read, the access token still fresh). An hour on, A's sync round refreshes RT1 → RT2
+   (saved). B's next vault read finds its cached access token expired and refreshes with its cached RT1 — GoTrue's
+   reuse detection (outside its short reuse interval) answers `refresh_token_already_used` and REVOKES THE FAMILY, RT2
+   included. A's next refresh is refused: sync stops until she signs in again (the board's VX-423 symptom). The mirror
+   order (A stale behind B) burns the same way.
+
+**MY READINGS (each the brief's letter as I read it — building on them):**
+- **R-U3-1 — THE PREFERRED SHAPE, NO FORK.** One `AuthSession` per process, owned by `AppBootstrap` (the process-lived
+  composition-root object — `newRoadSyncKeys`' precedent: the bootstrap owns a seam object, the root hands it to
+  `AppServices`), handed to BOTH consumers: the services (`AppServices(auth:)` — REQUIRED, the default mint deleted; both
+  roots pass `bootstrap.auth`) and the protection road (`RoadInputs.live(variant:auth:)` → `ProtectionSystem
+  .live(variant:session:)` → `WireVaultLeaf.live(deviceName:session:)`). The narrower alternative is NOT taken: the
+  one-instance shape breaks no lifecycle — the authority lives on the bootstrap, across every locked window, lobby and
+  reopen; the services that die at relock only BORROW it (their `onChange` handler is replaced at each `start()`).
+- **R-U3-2 — `FollowingSessionProvider` DELETED, ITS JOB DONE BY CONSTRUCTION.** Handed the one authority, the leaf
+  follows a sign-out and a sign-in to another account because every sign-in and sign-out in the process lands in that
+  actor (`AppServices.signInWithVariorum`/`signOutVariorum`/`deleteAccount` are the only doors — `rg`'d). Kept, the
+  provider would wrap the same instance with a per-call keychain read and a duplicate `notSignedIn` guard — dormant
+  code. R-3's claim (VX-308) is re-pinned on the new shape (P3 below); its old suite (`FollowingSessionProviderTests`)
+  goes with its subject.
+- **R-U3-3 — A SYSTEM COMPOSED WITHOUT THE AUTHORITY RIDES NO ONE'S SIGN-IN.** `ProtectionSystem.init` (the test worlds'
+  door) takes `session:` defaulted to a provider that refuses `notSignedIn` — exactly what the per-system session it
+  replaces answered over a throwaway scope holding no session, so no test world's vault refusal changes; production's
+  door (`ProtectionSystem.live`) REQUIRES the session. Nothing but the bootstrap mints an `AuthSession`.
+- **R-U3-4 — PER PROCESS, NOT PER MACHINE.** A second process over the same scope (two instances of one build) is
+  outside the unit (the brief: "one refresh authority per process"); the readers that read the item directly
+  (`OwnerIdentity`, `sessionFact`) read, never refresh, and are untouched (F-U1-1's owner stamp is U1's flag).
+
+**THE PINS (planned; each named with its red-on-old in LIVE STATUS):**
+- P1 — THE TWO-REFRESHERS RACE (behavioral): a fake GoTrue that rotates every refresh token and, on a reused one,
+  answers `refresh_token_already_used` and revokes the family; ONE stored token; the services' consumer (the authority
+  itself, as `AppServices` holds it) and the vault leaf as production composes it (`WireVaultLeaf.live(deviceName:session:)`
+  over a scripted vault endpoint); the sequential race of step 4 and the concurrent one (both consumers past expiry at
+  once → ONE refresh request). Plus the mechanism's witness: two instances over one stored token DO burn on this fake (so
+  P1's green is never vacuous). Red-on-old by behavioral revert (the leaf riding its own second instance over the same
+  stored session — the pre-fix `make`).
+- P2 — THE COMPOSITION (source): exactly one `AuthSession(` construction in product code, in `AppBootstrap`; both roots
+  hand `auth: bootstrap.auth`; the production init composes `RoadInputs.live(variant: variant, auth: auth)`;
+  `FollowingSessionProvider` gone. Red on the pre-fix tree by construction (two constructions, neither in the bootstrap).
+- P3 — R-3 ON THE NEW SHAPE (regression guard, green on both sides by design): the leaf, handed the authority, follows a
+  sign-out and a sign-in to another account.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton: DONE (this commit).
+- Piece 0 — the headless harness (the VX-308/309 recipe, pointed at this worktree, in this session's scratchpad):
+  NOT-STARTED.
+- Piece 1 — P2 committed BEFORE the fix, run red on the pre-fix product sources: NOT-STARTED.
+- Piece 2 — THE FIX (the bootstrap's authority; `AppServices(auth:)` required; the roots; `RoadInputs`/`ProtectionSystem`/
+  `WireVaultLeaf`; `FollowingSessionProvider` + its suite deleted) + P1/P3: NOT-STARTED.
+- Piece 3 — P1's behavioral revert (announced here before it starts; commit-before-revert; restore verified by
+  `git diff --exit-code`): NOT-STARTED. No revert is in flight.
+- Piece 4 — evidence: the harness (P1–P3 + the app's protection/auth suites it carries), core auth/account + protection
+  sets debug AND release, `build-for-testing` both targets: NOT-STARTED.
+
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
 **Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
