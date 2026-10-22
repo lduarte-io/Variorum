@@ -147,7 +147,7 @@ nonisolated enum DataSafetyCopy {
           machines never mix. In Finder: Go ▸ Go to Folder… and paste that path.
         - **In your folder** (once you pick one in Settings ▸ Data Safety, or take the iCloud Drive offer at the first
           backup): `<the folder you picked>/Variorum/Backups/`, the same library-and-Mac folders inside. One copy a day
-          lands there; the ones beside the store run more often.
+          lands in each place.
         - **The plain-text copies**, in that same picked folder: `<the folder you picked>/Variorum/md-exports/` — one dated
           folder per export, holding every note as a `.md` file; written weekly while the plain-text option is on, the 4
           most recent kept. **These are readable by anything that can read the folder** — you, any program, and whatever
@@ -174,8 +174,8 @@ nonisolated enum DataSafetyCopy {
         **Read §4 first if anything has been deleted since the copy was made.** Then use the app's own door — nothing is
         moved by hand:
 
-        1. **Settings ▸ Data Safety ▸ Restore from Backup** lists your copies, newest first, and each row says what opens
-           it. (A copy somewhere else — AirDropped, on a drive — goes through **File ▸ Open Library…** instead; same
+        1. **Settings ▸ Data Safety ▸ Restore from Backup** lists your copies, newest first; the pane says what opens a
+           copy. (A copy somewhere else — AirDropped, on a drive — goes through **File ▸ Open Library…** instead; same
            doors.)
         2. **Look inside first** if you only want to check what a copy holds — it opens read-only with its own secrets,
            the app writes nothing, and closing it forgets it (see §6).
