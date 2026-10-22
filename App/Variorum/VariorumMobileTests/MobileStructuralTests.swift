@@ -1232,13 +1232,12 @@ struct MobileCopyRegisterSweepTests {
         let appRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumMobileTests
             .deletingLastPathComponent()  // App/Variorum
+        // VX-329 U1: today's copy homes and shared faces were deleted with today's road; the copy the road still speaks
+        // moved to `Shared/Protection/ProtectionCopy.swift`, and the road's own words (`ProtectionWords`, which the phone's
+        // road faces render) join the walk — the Mac's twin reads the same home.
         var files: [URL] = [
-            "Shared/StoreProtection.swift", "Shared/PostureCopy.swift", "Shared/KeyDoorCopy.swift",
+            "Shared/Protection/ProtectionCopy.swift", "Shared/Protection/ProtectionWords.swift",
             "Shared/SampleLibrary/SampleLibraryEncryptionBook.swift",
-            "Shared/EncryptionViews.swift", "Shared/KeyDoorView.swift", "Shared/KeyDoorModel.swift",
-            "Shared/PostureSwitchModel.swift", "Shared/PostureFollowModel.swift",
-            "Shared/SyncEnrollmentView.swift", "Shared/SyncEnrollmentModel.swift",
-            "Shared/EncryptionSession.swift",
         ].map { appRoot.appendingPathComponent($0) }
         let faces = appRoot.appendingPathComponent("VariorumMobile/Features/Protection", isDirectory: true)
         let walk = try #require(FileManager.default.enumerator(at: faces, includingPropertiesForKeys: nil))

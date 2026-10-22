@@ -1383,8 +1383,8 @@ struct MobileTutorialLibraryWalkTests {
 /// people will be mobile only users"*: a phone-only reader never opens the
 /// Mac's field guide, so a teaching that lived only there would not reach
 /// them. Same anti-drift discipline as the Mac's suite: the prose names the
-/// app's own words (`ProtectionCopy`, `MobileProtectionSheet.doorTitle`), so
-/// a re-worded pane makes this red rather than merely stale.
+/// app's own words (`ProtectionCopy`), so a re-worded sentence makes this red
+/// rather than merely stale.
 @MainActor
 @Suite("Mobile tutorial walk — keeping it private")
 struct MobilePocketGuidePrivacyTests {
@@ -1415,11 +1415,9 @@ struct MobilePocketGuidePrivacyTests {
             }
             #expect(prose.contains(ProtectionCopy.keystoneAccountPassword))
             #expect(prose.lowercased().contains(ProtectionCopy.keystoneOpenMeansReadable.lowercased()))
-            for posture in [Posture.standard, Posture.castle] {
-                #expect(prose.contains(ProtectionCopy.postureName(posture)))
-            }
-            #expect(prose.contains(ProtectionCopy.privacyStandardFloorSentence))
-            #expect(prose.contains(ProtectionCopy.privacyCastleFloorSentence))
+            // (VX-329 U1: the posture names and the two floor sentences came from today's copy, deleted with today's
+            // road; the floors still ride the lesson inside copy §7's paragraphs, pinned verbatim above — the chapter's
+            // rewrite for the road is VM-8's, the U1 record's F-U1-5.)
             // 13s-b U1b (R-13s-37): the book's-door arm inverts — the
             // pointer paragraph retired with the book's seed and doors.
             #expect(!prose.contains(SampleLibraryEncryptionBook.name),

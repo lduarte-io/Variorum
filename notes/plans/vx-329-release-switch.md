@@ -210,7 +210,7 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   holds nothing), `StoreEncryptionMigration.rekey` (today's export-and-swap); RELOCATED R-U1-1; `LibraryClassifier` per
   R-U1-2; the tools per R-U1-3. `OwnCopies.pairIsDue` (per place — the backup clock's container due-check) added.
 - Piece 3 — the old suites (VX-233's drill, VX-406's list, VX-380's attacker test, every test of deleted code):
-  IN-PROGRESS. **The core half DONE** (`232561ddf` + this commit; `swift build --build-tests` green; `swift test` (debug):
+  DONE (the counts are the Evidence line's). **The core half DONE** (`232561ddf` + this commit; `swift build --build-tests` green; `swift test` (debug):
   VariorumCoreTests **3296 tests in 430 suites passed** (2 known issues, pre-existing); VariorumMCPTests 383 tests, ONE
   red — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (18.98 s against its
   15 s bound, the suite run under the full core load) — re-run ALONE green (3/3, 2.2 s): a load-timing flake, not this
@@ -265,7 +265,15 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   today's store id assertions in the road route tests INVERTED (no file of today's names beside the library);
   today's test init (`testOpener:gate:testPresence:`) stripped from every road harness. RELOCATED byte-for-byte: the
   `SurfaceComposition` read (`VariorumTests/SurfaceComposition.swift`), the `AppleKeyRoundTrip` switch. **The phone's
-  test target: NEXT.**
+  test target: DONE** (this commit — `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+  build-for-testing` GREEN): DELETED `MobileProtectionSurfaceTests` (today's phone lobby), `MobileEncryptionTestSupport`,
+  the phone's `VaultRPCEmulation` (orphaned); `MobileProtectionTests` rebuilt to its surviving subjects (the encrypted
+  birth and the at-open migration; the lock's teardown factory `mobileWillLock`, driven directly — the bootstrap
+  calling it before the pool closes is the Mac's `RoadLockRouteTests` pin; the relock policy and coordinator REWIRED
+  onto `RoadRelockPolicy`; the locked capture; the floor) — its lobby, copy-grammar, one-secret, follow and replay
+  suites went with today's road; `MobileTravellingDotsTests` (today's lobby pin), `MobileTutorialWalkTests` (today's
+  posture names and floor constants — the paragraphs stay pinned verbatim), `MobileStructuralTests` (the register
+  walk's file list: today's files out, `ProtectionCopy.swift` + `ProtectionWords.swift` in). **Piece 3: DONE.**
 - Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): NOT-STARTED.
 - Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.
 - Piece 6 — the sweep table: NOT-STARTED.
