@@ -285,5 +285,6 @@ nonisolated enum DataSafetyCopy {
         And the floor, the same one the app's own pages state: **your passphrase or your twelve words — together with any
         copy of your library — always open it.** A library whose every key-file copy and every backup are gone is gone;
         synced libraries are the exception — your account's passphrase or twelve words recover them from the account.
+
         """
 }
