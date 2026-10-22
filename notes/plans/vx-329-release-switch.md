@@ -1354,6 +1354,35 @@ name), `MobileCopyRegisterSweepTests` (the words file changed). The Mac's pins o
 on the stage, if wanted: `LibraryWordsCardTests`, `ProtectionRestoreReceiptTests`, `ProtectionFacesRouteTests`,
 `ProtectionOpenRoadPlantedTests`, `CopyRegisterPinTests`.
 
+### U4 RECORD — THE PRE-DESIGN FACE (Opus implementer, 2026-10-22; IN PROGRESS — the brief is §6d)
+
+**Not done in U4, first:** PENDING (filled at the unit's close). Standing limits from the brief: no stage, no Debug launch,
+no store touch, no network, no subagent, no `xcodebuild test` (the Mac-suite list below is the orchestrator's closing run);
+zero `Sources/VariorumCore/Sync/` lines; no product words beyond hers; the phone's face is VM-8's (flagged, not built).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+`notes/CastleRules.md` whole (rules 17, 20, 21, 26, 27 the unit's heart); this plan §1–§5 (the U1 record whole, piece 5
+and R-U1-2 among it), §6 (the cut, the OPEN DESIGN NOTE, the environment traps), §6a, §8 + its addendum, §6d; the code:
+`Protection/Assess/` (`Assess.swift`, `Assessment.swift`, `Facts.swift`, `Catalog.swift`, `CatalogNames.swift`),
+`Persistence/LibraryClassifier.swift` (R-U1-2's older-name rules), `Executor/Acts/Copies.swift` (Make this my library's
+swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-less creation), `Model/Plan.swift`,
+`Files/ProtectionLibraryFiles.swift`, the app's `SQLCipherLibraryLeaf` (the hard-link swap), `ProtectionOpenRoad.swift`,
+`ProtectionRoadActs.swift` (rule 27's and T-5's set-aside), `ProtectionLobbyFace/Model`, `CatalogLister`,
+`ProtectionFactsGatherer`, `ProtectionPlaces`, `AppBootstrap.swift` (the lobby composition, the landing gates),
+`VariorumApp.swift`'s state switch, `StoreLockView.swift` (`RoadLockView`), `LibraryMissingView.swift`, the phone's
+`MobileRoadFaces.swift`, and the pins that read them (`PreDesignStoreRefusalTests`, `ProtectionWordsPlanTests`,
+`U2PinsRule27Tests`, `AssessTests`, `CopyRegisterPinTests`, `RoadLockViewNamesPinTests`, `EmptySlotDoorsSurfaceTests`).
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton: DONE (this commit).
+- Piece 1 — THE FACT (core, pure, names only): NOT-STARTED — `LaunchVerdict.preDesignStore` from `AssessRules.launch`
+  (a store in the slot, no format-3 key file listed beside it, a pre-design key-file NAME at the container's root —
+  `catalog.foreign`, never read); the route shows the face without trying a quiet road on the old store.
+- Piece 2 — THE FACE (Mac): NOT-STARTED — her words byte-faithful (`ProtectionWords`), the lobby face's fact, the two
+  doors, Start fresh's confirm.
+- Piece 3 — Start fresh's ACT (the crash-safe set-aside, then the calm creation): NOT-STARTED.
+- Piece 4 — closing evidence (headless both configurations, `build-for-testing` both targets): NOT-STARTED.
+
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
 **Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
