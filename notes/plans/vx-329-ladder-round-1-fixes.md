@@ -31,7 +31,21 @@ the stage batch record); the findings file `notes/plans/vx-329-ladder-round-1.md
   |LocalMachineryRecreationTests|ProtectionRecordSchemaTests`) `✔ Test run with 50 tests in 6 suites passed` (R1's 49/6 +
   this pin). **REVERT CHECK (on `da778d459`, the tree clean first):** the sweep's three lines restored alone → the pin RED
   for its stated reason (the same 2 issues); restored by `git checkout --`, `git diff --exit-code` clean.
-- Finding 2 (MINOR, the pg_temp belt's drift pin): NOT-STARTED — the plan below.
+- Finding 2 (MINOR, the pg_temp belt's drift pin): **DONE** (`deee7fe79`) — as planned, in `AuthRLSDDLTests` (MARK
+  "VX-213's pg_temp belt"): the pure `searchPathResolution(deploy:furniture:)` over `searchPathDeployOrder` (01–04, the
+  lockstep chain, `13j-window-pull-rename` after 10, the ladder overlay after 11, `beta-signup-auto-entitle` after 12,
+  `pgTempBeltFile` right after 17, every later lockstep file after it), per exact signature with dollar-quoted bodies
+  masked; `rls_auto_enable()` the one furniture exemption, its reason as data. **The real arm**
+  `everyDefinerPathEndsInPgTempOnceTheBeltIsRead`: no problems, **18 functions checked** (printed once, transiently:
+  the 13 definer RPCs + `sync_challenge` + the 4 helpers — exactly the belt's chain list; `sync_reencrypt` seen dropped
+  by 17). **The bite proof** `aDoctoredChainIsFlaggedByTheSearchPathCheck`: the belt unread → every one of the 18
+  flagged; a doctored LATER lockstep file re-creating `key_vault_update` with bare `public` → exactly that one flagged;
+  a later definer carrying its own `pg_temp` → clean; the belt's `sync_challenge` alter without `extensions` →
+  `alter-changes-list`; a typo'd `next_tenant_seq(text)` alter → `alter-unknown` + the real one unbelted; the furniture
+  list emptied → exactly `alter-unknown:rls_auto_enable()`. Both GREEN on first run (`✔ … 2 tests in 1 suite passed`).
+  **RED-ON-OLD (behavioral revert, on `deee7fe79`, the tree clean first):** the belt's one registration line
+  (`"17_phase_vx307_vault.sql": pgTempBeltFile`) removed → the real arm RED (`Expectation failed:
+  resolution.problems.isEmpty`); restored by `git checkout --`, `git diff --exit-code` clean.
 - Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): **DONE** (this commit) — option (a), the orchestrator's ruling
   confirmed by the reviewer. DELETED: `Sources/VariorumCore/Crypto/VaultBootstrap.swift` (`VaultBootstrap`,
   `VaultBootstrapError`, its private `isTransientTransport`) and `Tests/VariorumCoreTests/VaultBootstrapTests.swift`.
