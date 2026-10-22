@@ -78,7 +78,8 @@ done   # per-file, so an absent -wal/-shm never aborts the move (zsh's (N) keeps
   refusal's words should name the way out (export from the old build · sign into sync · start fresh) — saying that
   needs a new fact and new words, deliberately not invented overnight (U1 piece 5's record).
 
-## The beta testers' line (rule 26's procedure — HER framing at the morning sitting)
+## The beta testers' line (rule 26's procedure — HER framing at the morning sitting; the message below made
+paste-ready at U4's close, the pre-design face's doors now standing)
 
 **The robust instruction, hers: "Copy out anything you need, then update and start fresh."** The timing fact that
 makes it the right one: the sync-once road closes at HER DEPLOY, not at the tester's update — once the mirror
@@ -87,5 +88,21 @@ be unable to follow by the time they hear it. Whatever they had ALREADY pushed b
 join on 0.10 with nothing done; unpushed writing comes out of the old build by hand. **And the export must not be
 Data Safety's door on the OLD build** — VX-461's fix ships in 0.10 and will never be in 0.9.8, where that door
 writes an empty file — so the old-build export is **Copy full text per note** (or the scheduled Markdown export,
-turned on and left to run). The careless have a way back regardless: 0.10 writes nothing to a store it refuses,
-so reinstalling 0.9.8 still opens it.
+turned on and left to run). Since U4, the careless are not wedged either: a 0.10 build meeting the old library
+says her face ("This library is from an older version of Variorum.") and offers **Start fresh…** (the old library
+set aside whole in Previous Libraries) beside Open Library… — and 0.10 writes nothing to a store it refuses, so
+reinstalling 0.9.8 still opens it.
+
+**The paste-ready message (send with the 0.10 release note):**
+
+> Variorum 0.10 rebuilds how libraries are protected, and it can't open libraries made by earlier versions.
+> Before you update, copy out anything you need: in the old version, use Copy full text on each note you want to
+> keep (not the old version's Data Safety export — it writes an empty file). If your library syncs with an
+> account, everything already synced comes back when you sign in on 0.10 — nothing else to do.
+>
+> After you update, Variorum will say "This library is from an older version of Variorum." Press Start fresh —
+> your old library is set aside whole in Previous Libraries; nothing is deleted. Then sign in if you sync, and
+> your writing comes back; if you don't sync, paste back what you copied.
+>
+> If you ever need the old version again, reinstalling it still opens your old library — 0.10 never writes to a
+> library it can't open.
