@@ -543,7 +543,20 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
   `theVaultLeafFollowsASignOutAndASignInToAnotherAccount`). **The harness on the fixed tree: `✔ Test run with 375 tests
   in 60 suites passed`** (0 skipped; 368 − the deleted provider test + this unit's 8; P2 GREEN 4/4). The Mac and phone
   builds: PENDING (piece 4).
-- Piece 3 — P1's behavioral revert: IN-PROGRESS — **REVERTS STARTING on the committed tree `550ff123a`** (restore =
+- Piece 3 — P1's behavioral revert: DONE — no revert is in flight (both runs restored, `git status` + `git diff
+  --exit-code` clean). **REVERT RUN 2 (on `21f956933`, the corrected pin): the race pins RED for the reasons their names
+  state** — `aRotationByTheServicesNeverLeavesTheVaultLeafASpentToken` ✘ 5 issues (the leaf's second read refused
+  `VaultRefusal.notSignedIn` — its own instance refreshed its cached `rt-1`; the services' next refresh refused
+  `refresh_token_already_used`; presented `[rt-1, rt-1, rt-2]`, refused `[rt-1, rt-2]`, the family revoked);
+  `bothConsumersPastExpiryAtOnceRefreshOnce` ✘ 3 issues (two refresh requests carrying `rt-1` — `[rt-1, rt-1]` — the one
+  that landed second refused, the family revoked); the witness ✔ and the R-3 follow guard ✔ (the pre-fix provider
+  followed too — green on both sides, as designed). Restored → the fixed tree green (piece 4's run). The revert, exactly
+  (two hunks): in `AuthSession`, after `init` — `nonisolated var revertStore: AuthTokensStore { store }` and `nonisolated
+  func revertSibling() -> AuthSession { AuthSession(configuration: configuration, store: store, expiryMargin:
+  expiryMargin, now: now, http: http) }`; in `WireVaultLeaf.live`, the client's `sessionProvider: session` replaced by
+  `FollowingSessionProvider(signedInUser: { store.load()?.userID }, make: { authority.revertSibling() })` over `let
+  authority = session as! AuthSession; let store = authority.revertStore` — plus `FollowingSessionProvider.swift` restored
+  from `550ff123a^`. The record of the first attempt: **REVERTS STARTED on the committed tree `550ff123a`** (restore =
   `git checkout -- App/Variorum/Shared/AuthSession.swift App/Variorum/Shared/Protection/WireVaultLeaf.swift` + removing
   the restored `FollowingSessionProvider.swift`, verified by `git status`/`git diff --exit-code` clean). THE REVERT (the
   pre-fix vault-leaf composition, over the pin world's stored session and endpoint): `FollowingSessionProvider.swift`
