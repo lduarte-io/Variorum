@@ -12,11 +12,19 @@ import OSLog
 /// its identity resumes the download where the stage stops.
 ///
 /// THE IDENTITY (one `sync_state` header row): the committed cursor the stage extends (`base`), how far it reaches
-/// (`seq`), the round's corpus key id and device id, and the build that wrote it — the stage `format` and the lockstep
-/// marker (ladder R1, F1: the stage is an ON-DISK format that outlives app updates). A round resumes only when base,
-/// key, device, format and marker all match; anything else — a header that will not decode included — discards the
-/// stage and fetches from the cursor, and so does a staged row that will not decode (one re-download, never a
-/// wedge). The stage is never a second truth: the apply
+/// (`seq`), the round's corpus key id and device id, the build that wrote it — the stage `format` and the lockstep
+/// marker (ladder R1, F1: the stage is an ON-DISK format that outlives app updates) — and the purge ledger's scan
+/// point it was fetched under (ladder R2, R2-1). A round resumes only when base, key, device, format, marker and scan
+/// point all match; anything else — a header that will not decode included — discards the stage and fetches from the
+/// cursor, and so does a staged row that will not decode (one re-download, never a wedge).
+///
+/// WHY THE SCAN POINT (R2-1): 13j's returner road keeps purged rows off a device two ways — the feed never serves
+/// them, and the pre-round ledger reconciliation (`PurgeJanitor.reconcileLedger`) drops any the store HOLDS, then
+/// moves its scan point past their entries for good. That pass looks only at the live tables, never here, so a stage
+/// fetched before a ledger advance may hold a row since purged, and resuming it would write that row back on this
+/// device alone, permanently. A stage is valid only for the ledger state it was fetched under: any advance discards
+/// it. The cost is one re-download exactly when a purge landed meanwhile (the ledger page is unpaged, so a pre-pass
+/// with nothing new moves nothing). The stage is never a second truth: the apply
 /// reads it whole, in `server_seq` order — exactly the rows today's in-memory fetch would have held — and empties it
 /// in the transaction that moves the cursor, whether that apply reaches the head or stalls.
 ///
@@ -50,6 +58,28 @@ enum PullStage {
         /// F1 (1): the stage format and the lockstep marker of the build that wrote it.
         var format: Int
         var lockstep: Int
+        /// R2-1: the purge ledger's scan point the stage was fetched under. NON-optional on purpose: a header written
+        /// before the stage named it lacks the key, so its synthesized decode throws, `readHeader` reads it as
+        /// unreadable, and `plan` discards the stage — never resumed.
+        var ledgerScanPoint: Int64
+
+        /// Whether this stage was fetched under the round identity given (its reach aside).
+        func belongs(base: Int64, keyID: String, deviceID: String, ledgerScanPoint: Int64) -> Bool {
+            self.base == base && self.keyID == keyID && self.deviceID == deviceID
+                && format == PullStage.format && lockstep == SyncSchema.lockstepVersion
+                && self.ledgerScanPoint == ledgerScanPoint
+        }
+    }
+
+    /// R2-1 — the purge ledger's scan point: `PurgeJanitor`'s `last_purge_seq`, an absent row read as 0 exactly as
+    /// the janitor reads it. Every ledger advance moves it (the pre-round reconciliation, the sweep's own purges, the
+    /// returner's reload), and it only ever grows.
+    static let ledgerScanPointKey = "last_purge_seq"
+
+    static func ledgerScanPoint(_ db: Database) throws -> Int64 {
+        try String.fetchOne(
+            db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [ledgerScanPointKey])
+            .flatMap(Int64.init) ?? 0
     }
 
     /// Ladder R1, N2 — THE ONE-WRITER BELT's refusal: the committed cursor moved while this round was downloading
@@ -83,8 +113,9 @@ enum PullStage {
         _ db: Database, base: Int64, keyID: String, deviceID: String
     ) throws -> Plan {
         let header = try readHeader(db)
-        if let header, header.base == base, header.keyID == keyID, header.deviceID == deviceID,
-           header.format == format, header.lockstep == SyncSchema.lockstepVersion,
+        if let header,
+           header.belongs(
+               base: base, keyID: keyID, deviceID: deviceID, ledgerScanPoint: try ledgerScanPoint(db)),
            header.seq > base {
             return .resume(from: header.seq)
         }
@@ -133,7 +164,8 @@ enum PullStage {
         }
         try writeHeader(db, Header(
             base: base, seq: seq, keyID: keyID, deviceID: deviceID,
-            format: format, lockstep: SyncSchema.lockstepVersion))
+            format: format, lockstep: SyncSchema.lockstepVersion,
+            ledgerScanPoint: try ledgerScanPoint(db)))  // R2-1: read in this write's own transaction
     }
 
     /// Every staged row, in `server_seq` order — the batch the apply consumes — or nil when any staged payload will
@@ -162,7 +194,7 @@ enum PullStage {
             db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [headerKey])
         else { return nil }
         // An unreadable header is a stage nobody can vouch for: treated as absent, so `plan` discards it (a header
-        // from before the stage named its format reads as unreadable too — F1).
+        // from before the stage named its format — F1 — or its ledger scan point — R2-1 — reads as unreadable too).
         return try? JSONDecoder().decode(Header.self, from: Data(value.utf8))
     }
 
