@@ -704,4 +704,68 @@ struct ResumableCatchUpTests {
         let missing = try await rowsMissingAtOrBelowCursor(b, server: server)
         #expect(missing.isEmpty)
     }
+
+    // MARK: Ladder round 3 — R3-1: a retire stops the download, never the save
+
+    /// The mid-save hook's shared state (the SQL function below runs on B's writer, outside any actor).
+    private final class MidSaveHook: @unchecked Sendable {
+        var fired = false
+        var scheduler: SyncScheduler?
+    }
+
+    /// THE PIN (R3-1; red on the tip `fed71e05b`: `retire()`'s cancel reached the save's GRDB write, which turned it
+    /// into an interrupt — the save rolled back, the cursor at 0 and the whole download still staged; the round-3
+    /// reviewer's probe). D3 stops a retired round's DOWNLOAD between windows; its SAVE is never cancelled, so a lock
+    /// landing during it waits for it (`StoreBinding.lock()` checkpoints on the outgoing writer first — the behavior
+    /// before D3) and the save commits. The lock, deterministically: a temp trigger on B's connection fires on the first
+    /// `block` row the save writes (apply mode only) and retires the scheduler, waiting until the retire is delivered.
+    @Test func aRetireDuringTheSaveLetsTheSaveCommit() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, seed: 2)
+        try seedCorpus(a, posts: 12, blocksPerPost: 10)
+        try await a.push()
+        let head = await server.headSeq
+
+        let hook = MidSaveHook()
+        let scheduler = SyncScheduler(engine: b.engine(batchSize: 40))
+        hook.scheduler = scheduler
+        try await b.db.write { db in
+            db.add(function: DatabaseFunction("vx494_retire_mid_save", argumentCount: 0, pure: false) { _ in
+                if !hook.fired, let scheduler = hook.scheduler {
+                    hook.fired = true
+                    let delivered = DispatchSemaphore(value: 0)
+                    Task.detached {
+                        await scheduler.retire()
+                        delivered.signal()
+                    }
+                    delivered.wait()
+                }
+                return nil
+            })
+            try db.execute(sql: """
+                CREATE TEMP TRIGGER vx494_retire_mid_save AFTER INSERT ON main.block
+                WHEN (SELECT COUNT(*) FROM main._sync_applying) > 0
+                BEGIN SELECT vx494_retire_mid_save(); END
+                """)
+        }
+
+        try await b.withAsync { _ in
+            await scheduler.trigger()
+        }
+        await scheduler.awaitIdle()
+
+        #expect(hook.fired, "non-vacuous: the retire landed during the save")
+        let cursor = try b.cursor()
+        let staged = try stagedRowCount(b)
+        #expect(cursor == head, "a retire that lands during the save lets the save commit")
+        #expect(staged == 0, "the save's commit empties the stage")
+        let status = await scheduler.status
+        #expect(status.roundsCompleted == 1, "a retired scheduler starts no further round")
+        #expect(status.isSyncing == false)
+
+        // Nothing lost: the save that committed under the retire was whole.
+        try await productionQuiescence(a, b, server: server)
+        #expect(try a.syncedDump() == b.syncedDump(), "converged: the retired round's save was the whole download")
+    }
 }
