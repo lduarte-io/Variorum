@@ -1,10 +1,12 @@
 # VX-494 — the large-corpus first catch-up never lands
 
-**STATUS: OPEN 2026-10-23 — investigating (the mechanism re-read from the morning's unified log; reproduction at scale
-next).** Branch `vx-494-catchup-hang`, worktree `~/dev/variorum-vx-494`, the Pro. `Sync/` work — the fix is the
-orchestrator's own hands (Fable at kickoff; the session moved to Opus 5.5 at her word mid-investigation, 2026-10-23
-~03:40 MDT, "fable kept hitting the safeguards" — the cast note for the ladder is in OPEN ITEMS). The charter is
-`notes/handoffs/vx-494-kickoff.md`. Pin-before-fix; the ladder is a fresh cold reviewer (Sync/ — no waiver). Commits
+**STATUS: OPEN 2026-10-23 — the fix built, live-proven on the throwaway at her corpus's scale, ladder round 1 in
+(1 MAJOR, 5 MINOR, 4 NIT — the fixes go to a fresh implementer session).** Branch `vx-494-catchup-hang`, worktree
+`~/dev/variorum-vx-494`, the Pro. **The cast (R-494-1, her waiver of the Fable rule for `Sync/`):** Opus orchestrates
+and writes the `Sync/` fix; a fresh `opus-reviewer` runs every ladder round; ladder fixes go to a fresh
+`opus-implementer` per round (normal /architect-phase discipline, her word "use normal /architect-phase discipline",
+~04:45). The session moved Fable → Opus 5.5 at her word ~03:40 ("fable kept hitting the safeguards"). The charter is
+`notes/handoffs/vx-494-kickoff.md`; the morning handoff `notes/handoffs/vx-494-handoff.md`. Pin-before-fix; commits
 say `Part of VX-494`; NO trailers.
 
 ## LIVE STATUS (flip per piece, same commit; unverified claims marked PENDING)
@@ -19,6 +21,123 @@ say `Part of VX-494`; NO trailers.
 | 5 | Ladder | NOT-STARTED |
 | 6 | Closing runs, PR, merge | NOT-STARTED |
 | 7 | Release build + A1 + install; her crossing retry | NOT-STARTED |
+
+## LADDER ROUND 1 — THE FINAL CALLS (the orchestrator, same-model arbitration against the spec, 2026-10-23 ~05:15)
+
+The round's record is `vx-494-ladder-round-1.md` (a fresh `opus-reviewer`, REVIEW_PROMPT verbatim: 0 BLOCKER, 1 MAJOR,
+5 MINOR, 4 NIT; its targeted sync sweep 343/80 green; its F1 probe on a scratch copy of the package, never this repo).
+Each finding's disposition, and who carries it:
+
+- **F1 [MAJOR] — CONFIRMED (probe-proven: a corrupted, drifted or refused staged row failed 3 of 3 later rounds with
+  the cursor at 0; a hand-clear healed it). FIX (1) + (2), the implementer:** (1) the header gains `format` (a
+  `PullStage` constant, bumped whenever the staged row's encoding or meaning changes) and `lockstep`
+  (`SyncSchema.lockstepVersion`); `plan` resumes only when BOTH match as well as base/key/device, else
+  `.discardThenFresh`. (2) A staged row that will not decode discards the whole stage (logged) and the round fetches
+  fresh from the cursor — one re-download, never a wedge (the header's own `try?` posture, extended to the rows).
+  **(3) DECLINED, reason:** discarding the stage on any non-cancellation apply failure would throw the download away in
+  exactly the case D2 exists for — Castle's lock closes the library mid-save and the apply fails with a closed-pool
+  error, not a `CancellationError`; and a CONTENT poison the server still serves failed every round before the stage
+  too (any server change to the row arrives at a higher seq and replaces the staged copy). PINS: the reviewer's (p1)
+  undecodable payload → the next round completes at head with an empty stage; (p2) a header with `format` one behind →
+  the next round's first `since` is 0; plus the lockstep leg of (p2). Each red on the tip `34abbef16`'s code.
+- **F2 [MINOR] — CONFIRMED (a pin, no code):** after the interrupted and the resumed round, the fake server's device
+  cursor for B still reads 0 (the resumed round reported nothing — the 13j rule). A guard; its teeth by reverting
+  `windowDevice` to "the round's first window".
+- **F3 [MINOR] — CONFIRMED (two guard pins, no code):** (a) a stage fetched under one corpus key id is never resumed
+  under another (the next round's first `since` is 0); (b) `resyncReinitialize()` empties the stage and the next round
+  starts from 0 — the base-0 corner the plan's base check cannot see. Each with its teeth (revert its line).
+- **F4 [MINOR] — CONFIRMED (the orchestrator's, at closeout):** the canon contract lines in place — AppSpec §7's
+  local-only machinery block (`sync_pull_stage`, v1_32, the export drops it; the `pull_stage` header key beside
+  `last_server_seq`), SyncSpec §3 (the machinery list; the cursor no longer the ONE live key) and §5 (the staged,
+  resumable download; the pull window its own size; the apply's one transaction unchanged) — each one pointer to this
+  file; the dated narrative into AppSpecRecord. Added to the handoff's step 6.
+- **F5 [MINOR] — CONFIRMED (the orchestrator):** D4 is minted as its own ticket (the save — one all-or-nothing
+  transaction holding the writer ~4 min at ~420 rows/s on her corpus; the phone's case in VM-8).
+- **F6 [MINOR] — CONFIRMED, RECORDED (her call):** v1_32 makes every plaintext export written by 0.10 (9093)
+  un-importable by the fixed build (T-8's `applied == known`, P-VX309-U1b-7 PROVISIONAL) though the export drops the
+  table. Reach today: exports made on her Pro since the 9093 install. Her question, bundled: should LOCAL-ONLY
+  migrations count toward "this build's export"? (QUESTIONS entry at the merge.)
+- **N1 [NIT] — ACCEPTED (the implementer):** the doc drift — `retire()`'s first paragraph and `SyncSession.stop()`'s doc
+  (the round is now cancelled); `PullStage`'s stale `resumePoint` name; "what it fetched is staged" → only COMPLETED
+  windows are staged (the window in flight is dropped); the "~550 → ~55" line stated as measured now that the live
+  proof ran (56 windows); `LocalMachineryRecreation`'s "four tables" → the registry's set.
+- **N2 [NIT, SPECULATIVE reachability] — ACCEPTED as a belt WITH a pin built first:** inside the apply transaction,
+  refuse when the committed cursor no longer equals the round's `since` (another writer committed under this round) —
+  throw, keep the stage; the next round re-plans (its base check then discards a stage whose base moved). The pin
+  builds the interleaving the reviewer traced (a commit of a moved cursor + a cleared stage landing while the round is
+  still fetching — a transport hook) and must be RED on the tip (the round commits past rows it never applied —
+  `syncedDump` diverges) before the belt lands; green → record-only, no belt.
+- **N3 [NIT] — PART ACCEPTED (the implementer):** `stage` uses a cached statement and encodes before entering the
+  writer. The disk-footprint half is the live proof's O-2 (measured: 79 MB → 150 MB) — her call, bundled.
+- **N4 [NIT] — DONE (the orchestrator):** the STATUS header rewritten to R-494-1's cast.
+
+## THE LIVE PROOF — the script (written before the walk; the acceptance gate, use-shaped)
+
+On the throwaway (ref-guarded), stage claim `vx-494`, the walk build of the FIXED tip in `DerivedData/vx494b`, the
+throwaway env mapped and verified by `ps eww` before anything else. The corpus: a generated book (1,200 notes × 30
+paragraphs — `scratchpad/make-scale-corpus.py`, deterministic prose, no real content) IMPORTED into the planting
+library L1 (`1eb1d88c`, the pre-fix walk build — the push path is unchanged) and pushed to throwaway A: the server holds
+1,200 containers · 36,000 blocks · 36,000 variants · 36,000 placements · 1,200 memberships (~110k rows — her corpus's
+scale; A's write budget 11 of its 500k first-load pool before it).
+1. Quit L1; its slot files aside by `mv` (a second aside dir, `Variorum-dev-aside-vx494-L1`).
+2. Launch the fixed build → a fresh library L2 on the empty slot (Standard), A's sign-in carried by the dev scope.
+3. Settings ▸ Protection ▸ Turn on sync → the JOIN arm → the passphrase by the fenced helper → the first catch-up.
+4. Measure the download: data windows counted by response size (a 2,000-row window is hundreds of KB; the
+   challenge and empty calls ~1 KB) — expected ~56 windows, not ~550.
+5. **THE INTERRUPTION:** quit the app partway through the download (~half the windows), relaunch (Standard opens
+   quietly) — PASS = the next round downloads only the REMAINING windows (the resume), then saves; FAIL = ~56 again.
+6. Measure the save (CPU + WAL, as on her Pro); then the proof of commit: the server's `device_cursor` for L2's
+   device reads the head, the row reads Synced, the Bookcase shows the scale book.
+7. Restore the dev slot whole BEFORE the closing Mac run (the test host is the dev-store app): sign the walk session
+   OUT (O-B2), quit, remove the walk libraries' slot files + their `Backups/<id>` subfolders (and the walk backups'
+   far-folder copies), `mv` the 9 dev files back (same inodes), plain relaunch — rule 21's notice once — then quit.
+
+## THE LIVE PROOF — the record (2026-10-23 04:41–05:0x MDT, stage claim `vx-494`; the throwaway only, `ps eww`-verified every launch)
+
+- **The plant:** the generated book (1,200 notes × 30 paragraphs) imported into L1 (`1eb1d88c`, the pre-fix walk
+  build) at 04:41 — one import transaction (CPU ~80%, WAL to ~31 MB) — then pushed in 200-row chunks to throwaway A:
+  server counts 1,200 containers · 36,000 blocks · 36,000 variants · 36,000 placements · 1,200 memberships (~110k rows).
+  The planter's own echo pull then ran in the pre-fix 200-row windows (the old shape, visible as ~40 requests/min);
+  quit at 04:55 (no stage on the pre-fix build — nothing to resume there), its 5 slot files aside to
+  `Variorum-dev-aside-vx494-L1`.
+- **The fresh library on the FIXED build** (`DerivedData/vx494b`, built from `34abbef16` — the product = `c33f18f09`):
+  L2 `35067e12` (device `5546f6f7`) created in Standard on the empty slot; A's sign-in carried. Settings ▸ Protection ▸
+  Turn on sync = the JOIN arm ("Your account already syncs. Type its passphrase or its twelve words once…") → the
+  passphrase by the fenced helper → `enroll: begun #1` (04:56:01).
+- **OBSERVATION O-1 (her call; a ticket candidate):** the Standard join raised a SYSTEM Touch ID prompt —
+  "Variorum Dev is trying to Unlock your Variorum library. Touch ID to continue with Variorum Dev." — and waited on it
+  (~2 min; no network, low CPU). Cancelled by the session (no finger, never her password): the join then COMPLETED
+  *[removed for publication]*
+  What the cancelled prompt skipped is unverified (suspected: the on-device quiet road's re-lock under the new pair);
+  the relaunch below opened quietly regardless (`custody silent 16`).
+- **THE DOWNLOAD (D1 live):** the first catch-up began at once after the join (04:58:2x) — **56 data windows, 16.9 MB,
+  done by 04:59:30: the whole ~110k-row feed in ~70 seconds** (her Pro this morning: ~550 windows, 11 min 36 s, on
+  her server's heavier per-call cost). 56 windows × 2,000 rows = the feed: the window size is live in the app.
+- **THE INTERRUPTION:** a quit at 04:59:15 was REFUSED (`User canceled (-128)`): the join's modal ("Your twelve words
+  are vx308a@example.com's twelve words…", OK) held the app. The process was then KILLED (`kill -9`, 04:59:38 — a
+  crash's shape, harsher than a lock or a quit; the throwaway's walk library, never a real store): the download had
+  finished at 04:59:30, so **the kill landed in the SAVE** — the case under which today's code throws the whole
+  download away (her Pro's save ran ~4 min 20 s).
+- **THE RESUME (D2 live, the hard case):** relaunch 05:00:00 → `road: opened — library 35067e12 … device 5546f6f7`
+  quietly → **six small calls at 05:00:01 (the janitor's pre-pass, the lockstep check, a challenge fetch, ONE empty pull
+  from the stage's reach) and ZERO data windows** — then the save straight from the stage (CPU 100%). PENDING: the save's
+  length, the proof of commit (L2's `device_cursor` at the head), the row, the Bookcase.
+- **OBSERVATION O-2 (the stage's disk footprint):** with the whole feed staged, L2's store file read **79 MB** (the
+  staged JSON beside the empty library) at 05:00; the stage empties with the commit, but SQLite keeps its pages as
+  free pages until reused (no VACUUM runs) — PENDING the post-commit size. Her library would carry ~the same order.
+- **THE SAVE FROM THE STAGE + THE PROOF OF COMMIT:** the save ran 05:00:01 → ~05:07:10 (~7 min at ~100% of one core,
+  WAL to 143 MB; the cold reviewer's test runs shared the CPU), then the follow-up round's ~20 small requests. **L2's
+  `device_cursor` = `last_seq` 110,424, `seen_at` 11:07:17 UTC — exactly throwaway A's head (110,424)**; the
+  Bookcase shows "VX-494 scale corpus — 1200 notes · 12 ch · 1,080,072w"; the row "Synced 5:07 AM". THE ACCEPTANCE
+  GATE PASSES: D1 (56 windows, ~70 s) and D2 (a crash during the save, zero re-download, the save from the stage,
+  committed to head) live on real Postgres at her corpus's scale.
+- **O-2 measured:** the same corpus WITHOUT a stage (the planter L1) is a **79 MB** store; L2 after the stage's commit
+  is **150 MB** (+ a 150 MB WAL awaiting checkpoint) — the stage leaves ~its own size (~the data's size) as free pages.
+  The app never VACUUMs (and VACUUM may renumber rowids behind the search index's external-content table — not a
+  drop-in), and backups use the page-copying backup API (`AppDatabase.swift:227`), so the slack rides in that
+  device's backups until growth reuses it. Correctness untouched; a fresh device's first catch-up only. HER CALL
+  (bundled): accept for 0.10 + a compaction-design ticket, or hold the Air until it exists.
+- Quit at 05:08 (zero instances).
 
 ## THE BEHAVIORAL REVERTS (run 2026-10-23 ~04:50 on the committed tip `3f15dc6f0`'s product files; each one file,
 restored by `git checkout --`, `git diff --exit-code` clean after every one — **no revert is in flight**)
@@ -42,8 +161,9 @@ restored by `git checkout --`, `git diff --exit-code` clean after every one — 
 **Two more runs (the closing-coverage baseline for the reviewer):** the core suite RELEASE (`swift test -c release`):
 `✔ Test run with 3284 tests in 429 suites passed`; in BOTH configurations the one red is the same MCP harness timing test
 (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 18.97 s vs its 15 s bound,
-both runs within 0.001 s of each other — deterministic, not load-shaped; PENDING: its run on `main` to show it
-pre-exists this branch — no MCP code is in this diff).
+both runs within 0.001 s of each other — deterministic, not load-shaped; RUN ALONE it passes on BOTH sides —
+`main` `✔ 3 tests in 1 suite passed after 2.166 s`, this branch `✔ … after 2.178 s` — so the red is load-shaped (the
+full suite's parallelism), the known MCP harness load-flake family; no MCP code is in this diff).
 
 ## THE EVIDENCE (2026-10-23, re-read by this session)
 
