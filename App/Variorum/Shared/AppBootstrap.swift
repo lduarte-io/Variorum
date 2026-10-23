@@ -742,10 +742,12 @@ final class AppBootstrap {
             state = .opening
         }
         let closesThePool = open != nil
+        // VX-488 R1 F1: the library open now — its account's session hold leaves with it once the landing creates the new one.
+        let outgoing = open
         let result = await Task.detached(priority: .userInitiated) {
             if closesThePool { binding?.lock() }
             // The context off the main actor: it reads the sign-in (a Keychain read).
-            return await ProtectionCopyDoors.landPlaintextExport(road.context(), plan: plan)
+            return await ProtectionCopyDoors.landPlaintextExport(road.context(), plan: plan, outgoing: outgoing)
         }.value
         open?.endAct()
         guard let created = result.created else {

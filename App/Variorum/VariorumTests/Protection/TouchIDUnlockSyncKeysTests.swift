@@ -215,3 +215,40 @@ struct TouchIDUnlockSyncKeysTests {
         #expect(stale.road.custody.handedPresses.last?.isInvalidated == true, "the press ended")
     }
 }
+
+/// VX-488 ladder round 1, F1 — the THIRD clear (the orchestrator's adjudication: the plain-text bring-in is one of the
+/// finding's adopt/step-aside roads, and it never runs Make this my library). With a library OPEN, bringing in a plain-text
+/// copy sets that library aside whole and CREATES a new one on the creation road; the outgoing library's account hold must
+/// leave with it — with the process's one sync-keys leaf (F-M1-1) nothing else would ever clear it. Planted (no keychain).
+@Suite("VX-488 R1 F1 — the plain-text bring-in drops the outgoing account's session hold (planted)", .serialized)
+@MainActor
+struct SessionHoldBringInTests {
+    typealias Account = PlantedAccount
+
+    /// A bound Castle + Touch ID library, OPEN with its account's keys held in session (the Touch ID unlock's load); a
+    /// plain-text copy brought in over it: the new library names no account, and the hold is gone. A landing that could not
+    /// land (a read-only road refuses before anything steps aside) keeps it — the library stays.
+    @Test func bringingInAPlainTextCopyDropsTheOutgoingAccountsSessionHold() async throws {
+        let world = try await TouchIDUnlockSyncKeysTests.castleTouchIDSynced()
+        let item = try TouchIDUnlockSyncKeysTests.touchIDItem(world)
+        world.keys.holdInSession(item, accountID: Account.account)
+        try CopyDoorsPlant.migrate(world.road, key: world.session.key)
+        let export = try ExportPlant.export(
+            into: world.road.slot.root.appendingPathComponent("Downloads/vx488-export", isDirectory: true))
+        guard case .plan(let plan) = ProtectionCopyDoors.readPlaintextExport(export) else {
+            Issue.record("the export plans")
+            return
+        }
+
+        let refused = await ProtectionCopyDoors.landPlaintextExport(
+            world.road.context(writes: false), plan: plan, outgoing: world.session)
+        #expect(refused.created == nil && refused.refusal != nil, "a read-only road lands nothing")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == item, "nothing landed — the hold stays")
+
+        let landed = await ProtectionCopyDoors.landPlaintextExport(world.road.context(), plan: plan, outgoing: world.session)
+        let created = try #require(landed.created, "the copy lands as a new library")
+        #expect(created.session.library.record?.account == nil, "the new library names no account")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil,
+                "the outgoing library's account hold left with it")
+    }
+}

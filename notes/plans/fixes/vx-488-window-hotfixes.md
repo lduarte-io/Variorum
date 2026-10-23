@@ -490,6 +490,32 @@ ladder re-reads it.
   **`** TEST BUILD SUCCEEDED **`** — no error, no warning in a touched file. F4: no code (VX-490). The plain-text bring-in
   residue above waits on the reviewer's call.
 
+#### THE THIRD CLEAR (the plain-text bring-in — RULED IN as part of F1 by the orchestrator's adjudication)
+- **Premise note:** THE FINAL CALLS took Make this my library to be "the one act every adopt road runs"; the plain-text
+  bring-in with a library open never runs it — the open library steps aside WHOLE and a NEW library is created on the
+  creation road (`ProtectionCopyDoors.landPlaintextExport` → `ProtectionOpenRoad.create`). Ruled in: one of the finding's
+  adopt/step-aside roads, carrying its exact traced mechanism.
+- **Where, and when the record is in hand:** the drop is `ProtectionRoadLock.dropSessionMemory(outgoing)` inside
+  `landPlaintextExport`, right after the creation landed (`result.created` set) — "once the landing has created its
+  library". `outgoing` is the bootstrap's OPEN session, handed down by `AppBootstrap.bringInPlaintextExport` (`outgoing:
+  open`, bound to a `let` before the detached task); its `library.record` is the outgoing record, held in that session
+  object since the open and never touched by the landing — so it is still in hand AFTER the step-aside (the library left
+  the slot on disk; its record did not leave the session). A landing that lands nothing (a refusal, a failed creation)
+  drops nothing: the bootstrap then reopens the old library, whose hold stands. The no-library faces pass no session
+  (`outgoing` nil) and drop nothing. Placed in the road rather than in the bootstrap's own body so the pin runs on the
+  planted road headless (the bootstrap is the Mac target's, `xcodebuild test` only) — the bootstrap's one change is the
+  argument.
+- Piece T0 — the pin + the seam, committed BEFORE the fix: DONE (this commit). The seam: `landPlaintextExport` gains
+  `outgoing: ProtectionRoadSession? = nil` (UNUSED in this commit — behavior byte-identical to the tree before it) and the
+  bootstrap passes its open session. The pin `SessionHoldBringInTests.bringingInAPlainTextCopyDropsTheOutgoingAccounts
+  SessionHold` (`TouchIDUnlockSyncKeysTests.swift` — a bound Castle + Touch ID library open with its account's keys in
+  session, a plain-text copy brought in over it; a read-only landing first, which lands nothing and must keep the hold).
+  **RED on this tree** (the harness, `--filter SessionHoldBringIn`): `✘ Test run with 1 test in 1 suite failed … with 1
+  issue` — `world.keys.sessionSyncKeys(accountID: Account.account) == nil` only (the copy landed, the new library names no
+  account, the refused landing kept the hold — all ✔).
+- Piece T1 — the drop: NOT-STARTED. Piece T2 — the revert (R10: the drop removed): NOT-STARTED. Piece T3 — evidence:
+  NOT-STARTED.
+
 ## M2 RECORD (implementer session B — Opus, xhigh) — VX-486
 
 **NOT DONE BY THIS SESSION (first, as the contract asks):** no `xcodebuild test`, no stage, no app launch, no dev/real-store
