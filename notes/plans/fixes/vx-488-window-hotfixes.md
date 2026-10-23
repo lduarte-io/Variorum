@@ -14,7 +14,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight read whole; Linear current (VX-483 joined as member, High, In Progress); main merged into the branch (`9d69c026f`); this record | DONE (this commit) |
-| 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end); F-M1-1 RULED (i) — BUILD IN-PROGRESS ("F-M1-1 BUILT" under THE RULING) |
+| 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end); fork F-M1-1 RESOLVED — ruled (i), BUILT `164304e91` ("F-M1-1 BUILT" under THE RULING; R7 red, evidence green) |
 | 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | NOT-STARTED — the briefs are M2/M3 below |
 | 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | NOT-STARTED |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | NOT-STARTED |
@@ -343,7 +343,7 @@ a guard that a key-change path's explicit clear still clears through the shared 
 ladder re-reads it.
 
 ### F-M1-1 BUILT (implementer session A, after THE RULING)
-- Piece F0 — the composition pin committed BEFORE the fix: DONE (this commit).
+- Piece F0 — the composition pin committed BEFORE the fix: DONE (`0a9ae0927`).
   `App/Variorum/VariorumTests/Protection/OneSyncKeysLeafTests.swift` — `OneSyncKeysLeafCompositionTests` (source read,
   the VX-423 pin's idiom and helpers): the product constructs `KeychainSyncKeysLeaf(` once, in `AppBootstrap.swift`;
   `ProtectionSystem(` once, in `ProtectionSystem.swift` (`live`); the bootstrap → `RoadInputs.live` → `ProtectionSystem
@@ -351,15 +351,16 @@ ladder re-reads it.
   OneSyncKeysLeaf`): `✘ Test run with 1 test in 1 suite failed … with 4 issues` — the mint found in
   `ProtectionSystem.swift` (the init's per-system default), and none of the three hand-offs present; the one-construction
   line ✔ (true on both sides).
-- Piece F1 — the fix + the behavioral pin + the clear guard: DONE (this commit).
+- Piece F1 — the fix + the behavioral pin + the clear guard: DONE (`164304e91`).
   - **THE SITES (every production `ProtectionSystem` construction, swept — `grep 'ProtectionSystem(\|ProtectionSystem\.live\|
     KeychainSyncKeysLeaf('` over `Shared/`, `Variorum/`, `VariorumMobile/`, `VariorumMCPShim/` and `Sources/`):** the
     product has exactly ONE system constructor, `ProtectionSystem.live(variant:session:syncKeys:)` (`ProtectionSystem.swift`),
     called from exactly ONE place, `RoadInputs.live`'s `makeSystem` (`ProtectionOpenRoad.swift`), built once per process by
-    the production `AppBootstrap.init` — so every composition rides the one leaf: `beginOpening` (:233 — every launch,
-    every reopen after a crossing / a re-keying account act / Make this my library / the landings, every lobby and its
-    presses), `startFreshOverAPreDesignStore` (:530), `createOnNewRoadFromAFace` (:554), and the four other
-    `roadInputs.compose()` sites (:645, :704, :794 — the copy doors' and landings' roads — and :1251, the lock's lobby). The
+    the production `AppBootstrap.init` — so every composition rides the one leaf. The `roadInputs.compose()` sites (line
+    numbers on the fixed tree, `AppBootstrap.swift`): `beginOpening` :245 (every launch; every reopen after a crossing, a
+    re-keying account act, Make this my library and the landings; every lobby and its presses), `startFreshOverAPreDesign
+    Store` :542, `createOnNewRoadFromAFace` :566, `copyDoorsRoadsWithoutALibrary` :657, `bringInPlaintextExport` :716,
+    `makeThisMyLibraryInTheEmptySlot` :806, `lockOnNewRoad` :1263 (the lock's lobby). The
     phone's root composes through the same `AppBootstrap` (no construction of its own); the MCP shim composes none. The
     mint `?? KeychainSyncKeysLeaf(scope:)` in `ProtectionSystem.init` is DELETED and `syncKeys:` made REQUIRED there (and on
     `live` and `RoadInputs.live`), so a future site cannot silently mint its own — the compiler refuses it.
@@ -387,9 +388,24 @@ ladder re-reads it.
     system composed after; an executor's `holdInSession(nil, …)` — the rollback's / the leave's line — the same). **The
     harness: `--filter "OneSyncKeysLeaf|OneRefreshAuthority|TouchIDUnlockSyncKeys"` `✔ Test run with 15 tests in 5 suites
     passed`; the whole harness `✔ Test run with 388 tests in 67 suites passed`** (385/65 + this piece's 3 tests, 2 suites).
-- Piece F2 — the behavioral revert: IN-PROGRESS — **REVERT R7 STARTING on the committed tree `164304e91`**: in
-  `ProtectionOpenRoad.swift` `RoadInputs.live`'s `makeSystem` hands each system a FRESH `KeychainSyncKeysLeaf(scope:)` (the
-  per-system mint, as before the fix); restored by `git checkout -- App/Variorum/Shared/Protection/ProtectionOpenRoad.swift`,
-  verified by `git diff --exit-code`.
-- Piece F3 — evidence (the protection set both configurations, the harness, build-for-testing Mac + iOS): NOT-STARTED.
+- Piece F2 — the behavioral revert: DONE — **no revert is in flight** (restored by `git checkout --`, `git diff
+  --exit-code` clean). **R7** (on `164304e91` — `RoadInputs.live`'s `makeSystem` handing each system a fresh
+  `KeychainSyncKeysLeaf(scope:)`, the per-system mint): the harness `--filter OneSyncKeysLeaf` `✘ Test run with 3 tests in 2
+  suites failed … with 7 issues` — THE PIN ✘×3 (the reopened system's leaf empty: `…?.rowKeyID == "held-by-the-act"`, the
+  executor on it reads nothing, the two leaves not one), THE GUARD ✘×2 (the lock's drop and the executor's clear on a
+  later system no longer reach the acting system's private leaf), THE COMPOSITION ✘×2 (a mint outside the bootstrap; the
+  road no longer hands `syncKeys: syncKeys`).
+- Piece F3 — evidence: DONE (the final tree = `164304e91`'s product files; foreground, in sequence): the harness **`✔ Test
+  run with 388 tests in 67 suites passed`**; the core protection + auth/account set (untouched by this piece — the
+  confirmation) debug **`✔ Test run with 531 tests in 101 suites passed`**, release (`swift test -c release`) **`✔ Test run
+  with 507 tests in 97 suites passed`**, 0 skipped either; `xcodebuild -scheme Variorum -destination 'platform=macOS'
+  -derivedDataPath App/Variorum/DerivedData/vx488-m1 build-for-testing` **`** TEST BUILD SUCCEEDED **`** and `-scheme
+  VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath App/Variorum/DerivedData/vx488-m1-ios
+  build-for-testing` **`** TEST BUILD SUCCEEDED **`** — no error, no warning in a touched file (both logs grepped).
+- **THE STAGE BATCH gains (Mac target, compiled here):** `OneSyncKeysLeafCompositionTests` + `OneSyncKeysLeafRoadTests`
+  (NEW, harness-green), `OneRefreshAuthorityCompositionTests` (its two loosened strings, harness-green),
+  `ProtectionSystemCompositionTests` (its system now handed a leaf explicitly — real keychain, throwaway scope), and every
+  suite over `RoadWorld` (`ProtectionRoadTestSupport.swift` — `ProtectionRoadRouteTests`, `RoadLockRouteTests`,
+  `ProtectionCrossingRouteTests` and the other bootstrap-constructing route suites: the bootstrap's inits changed).
+- **PROVISIONALs:** none (the ruling decided the shape; nothing product-visible beyond (a)'s intent delivered).
 
