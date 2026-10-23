@@ -106,6 +106,9 @@ round 3, the cap.** Dispositions:
 - **R2-6 [NIT] — ACCEPTED (the implementer):** on `PullStage.CursorMovedUnderRound` the scheduler requests one
   follow-up round (the next round re-plans and heals), so the row never sits on the belt's text. A pin: the scheduler
   runs the follow-up.
+  **CONFIRMED AS BUILT (the orchestrator, 06:55):** one follow-up per refusal, never on a retired scheduler and never
+  twice in a row (`nextRoundIsBeltFollowUp`) — exactly the call's intent (a heal that can never loop); a second refusal
+  waits for the next trigger like any failed round.
 - **THE ARCHITECT'S NOTE (recorded before the round-2 fixes start):** the stage has drawn a MAJOR in each round (F1,
   R2-1) — each a real invalidation edge of a new persisted cache. If round 3 (the cap) raises another MAJOR or BLOCKER
   in D2, the stage does NOT merge tonight: the merge carries D1 + D3 (D1 alone brings her corpus's first catch-up to
