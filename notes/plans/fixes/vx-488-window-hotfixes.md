@@ -505,7 +505,7 @@ ladder re-reads it.
   (`outgoing` nil) and drop nothing. Placed in the road rather than in the bootstrap's own body so the pin runs on the
   planted road headless (the bootstrap is the Mac target's, `xcodebuild test` only) — the bootstrap's one change is the
   argument.
-- Piece T0 — the pin + the seam, committed BEFORE the fix: DONE (this commit). The seam: `landPlaintextExport` gains
+- Piece T0 — the pin + the seam, committed BEFORE the fix: DONE (`261c495c6`). The seam: `landPlaintextExport` gains
   `outgoing: ProtectionRoadSession? = nil` (UNUSED in this commit — behavior byte-identical to the tree before it) and the
   bootstrap passes its open session. The pin `SessionHoldBringInTests.bringingInAPlainTextCopyDropsTheOutgoingAccounts
   SessionHold` (`TouchIDUnlockSyncKeysTests.swift` — a bound Castle + Touch ID library open with its account's keys in
@@ -513,8 +513,11 @@ ladder re-reads it.
   **RED on this tree** (the harness, `--filter SessionHoldBringIn`): `✘ Test run with 1 test in 1 suite failed … with 1
   issue` — `world.keys.sessionSyncKeys(accountID: Account.account) == nil` only (the copy landed, the new library names no
   account, the refused landing kept the hold — all ✔).
-- Piece T1 — the drop: NOT-STARTED. Piece T2 — the revert (R10: the drop removed): NOT-STARTED. Piece T3 — evidence:
-  NOT-STARTED.
+- Piece T1 — the drop: DONE (this commit). `landPlaintextExport`, right after `result.created` is set: `if let outgoing {
+  ProtectionRoadLock.dropSessionMemory(outgoing) }`. The harness `--filter "SessionHoldBringIn|PlaintextExportBringInRoad|
+  WordsLedgerCarryRoad"` (the pin + every other caller's suite): **`✔ Test run with 11 tests in 3 suites passed`**.
+- Piece T2 — the revert: NOT-STARTED — named before it runs: **R10** (`ProtectionCopyDoors.swift` — the drop removed), on
+  the committed tree, restored by `git checkout --`, `git diff --exit-code` after. Piece T3 — evidence: NOT-STARTED.
 
 ## M2 RECORD (implementer session B — Opus, xhigh) — VX-486
 

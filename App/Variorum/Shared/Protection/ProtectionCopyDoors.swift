@@ -501,6 +501,10 @@ nonisolated enum ProtectionCopyDoors {
             return result
         }
         result.created = (session, words)
+        // VX-488 R1 F1 — the third clear: the library that was OPEN has stepped aside and a new one (no account) stands, so
+        // its account's session hold leaves with it — its record is still in hand in its session (only its files left the
+        // slot). With the process's one sync-keys leaf (VX-487 F-M1-1) nothing else would ever clear it.
+        if let outgoing { ProtectionRoadLock.dropSessionMemory(outgoing) }
         // What the export holds, said BEFORE the import — a crash part of the way leaves this line without the end's, so
         // what landed reads against what was to land (the ruling's requirement on the crash window).
         ProtectionOpenRoad.log(
