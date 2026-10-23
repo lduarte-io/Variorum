@@ -325,3 +325,19 @@ and `MobileProtectionTests` (they name the leaves — compiled in the iOS build-
   reached). (ii) `reopenAround` carries the account's held keys from the old session's leaf into the reopened one (a
   hand-off at the one seam; narrower lifetime, more ad hoc). (iii) accept: re-keying acts leave sync locked until the
   next Touch ID moment, said by M2's row (the record's (c)-adjacent residue).
+
+**THE RULING (the orchestrator, Fable, 2026-10-22 — repo-first before the build proceeds; under the mandate, as the
+completion of (a)'s author-ruled intent, not a new product call):** **option (i) — ONE production sync-keys leaf per
+process, owned at the composition root** and injected through the existing `syncKeys:` parameter on every production
+`ProtectionSystem` construction (never a static singleton — CLAUDE.md's no-global-singletons line; the VX-423
+one-authority precedent's shape). The reasons, in order of weight: (1) the key-changing paths EXPLICITLY clear session
+memory (`PlanRunner.swift:546/549/571`, `AccountActs.swift:229`, `ProtectionRoadLock.swift:58`) — writers that bother
+to clear a store prove the design assumed the store persisted; the per-system leaf is the accident. (2) (a)'s ruled
+intent ("the act just handled them") is only delivered if the hold survives the act's own reopen — option (iii) would
+under-deliver the ruling, and the product consequence lands exactly on her Air crossing (Start fresh → join → sync
+should run, not sit locked). (3) The explicit clears keep their semantics byte-unchanged on the shared leaf; "gone at
+a relock or a crash" holds exactly as the leaf's header promises. PIN (red-on-old by behavioral revert): through the
+PRODUCTION composition path (the planted world shares one leaf set and cannot see this) — keys held via one
+composition-built system survive into the next system the same composition builds (red on the per-system mint), plus
+a guard that a key-change path's explicit clear still clears through the shared leaf. The implementer builds it; the
+ladder re-reads it.
