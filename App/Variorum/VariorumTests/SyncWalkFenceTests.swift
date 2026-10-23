@@ -78,7 +78,11 @@ struct SyncWalkFenceTests {
         let end = try #require(services.range(of: "#endif", range: release.upperBound..<services.endIndex))
         let debugArm = services[debug.upperBound..<release.lowerBound]
         let releaseArm = services[release.upperBound..<end.lowerBound]
-        #expect(debugArm.contains("ProjectConfig.walkSyncFenceLift"), "the launch's one decision — never a second parse")
+        // The CODE expression, never a mention (the arm's comment names the decision too — RM3-4 found the first form
+        // of this line matching that comment with the lift unread).
+        #expect(debugArm.contains("allowsSync: Self.allowsSync(storeVariant: storeVariant, walkLift: ProjectConfig.walkSyncFenceLift)"),
+                "the launch's one decision — never a second parse")
+        #expect(!debugArm.contains("allowsSync: storeVariant == .real"), "the DEBUG arm reads the lift")
         #expect(releaseArm.contains("sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)"),
                 "Release: the fence absolute, the line byte-unchanged")
         #expect(!releaseArm.contains("walk") && !releaseArm.contains("ProtectionWalkSwitch"))
