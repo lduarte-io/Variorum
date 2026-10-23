@@ -29,6 +29,13 @@ actor FaultInjectingTransport: SyncTransport {
     private var whilePushInFlight: (@Sendable () async throws -> Void)?
     private var replayNextPull = false
     private var lastPullWindow: [SyncPulledRow] = []
+    /// VX-494: fail the Nth pull call from arming (1-based) — the download
+    /// dying partway through a long first catch-up.
+    private var failPullAtCall: Int?
+    private var pullsSinceArm = 0
+    /// VX-494: every pull call's `since`, in order — where each download
+    /// window started, so a test can tell a resume from a restart.
+    private(set) var pullSinces: [Int64] = []
 
     /// Calls observed, for the positive-activity assertions.
     private(set) var pushCalls = 0
@@ -49,6 +56,11 @@ actor FaultInjectingTransport: SyncTransport {
         whilePushInFlight = hook
     }
     func armReplayNextPull() { replayNextPull = true }
+    /// VX-494: the Nth pull call from now throws (1-based), once.
+    func armFailPull(atCall call: Int) {
+        failPullAtCall = call
+        pullsSinceArm = 0
+    }
 
     // MARK: SyncTransport
 
@@ -103,6 +115,14 @@ actor FaultInjectingTransport: SyncTransport {
 
     func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         pullCalls += 1
+        pullSinces.append(since)
+        if let call = failPullAtCall {
+            pullsSinceArm += 1
+            if pullsSinceArm == call {
+                failPullAtCall = nil
+                throw InjectedNetworkFault()
+            }
+        }
         if replayNextPull, !lastPullWindow.isEmpty {
             replayNextPull = false
             return lastPullWindow
