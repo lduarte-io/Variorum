@@ -51,7 +51,8 @@ Each finding's disposition, and who carries it:
   `last_server_seq`), SyncSpec §3 (the machinery list; the cursor no longer the ONE live key) and §5 (the staged,
   resumable download; the pull window its own size; the apply's one transaction unchanged) — each one pointer to this
   file; the dated narrative into AppSpecRecord. Added to the handoff's step 6.
-- **F5 [MINOR] — CONFIRMED (the orchestrator):** D4 is minted as its own ticket (the save — one all-or-nothing
+- **F5 [MINOR] — CONFIRMED, DONE (the orchestrator): VX-497** — D4 minted as its own ticket (Improvement, Confirmed,
+  Performance, Medium, project 18a, related VX-494/VX-495) (the save — one all-or-nothing
   transaction holding the writer ~4 min at ~420 rows/s on her corpus; the phone's case in VM-8).
 - **F6 [MINOR] — CONFIRMED, RECORDED (her call):** v1_32 makes every plaintext export written by 0.10 (9093)
   un-importable by the fixed build (T-8's `applied == known`, P-VX309-U1b-7 PROVISIONAL) though the export drops the
@@ -70,6 +71,43 @@ Each finding's disposition, and who carries it:
 - **N3 [NIT] — PART ACCEPTED (the implementer):** `stage` uses a cached statement and encodes before entering the
   writer. The disk-footprint half is the live proof's O-2 (measured: 79 MB → 150 MB) — her call, bundled.
 - **N4 [NIT] — DONE (the orchestrator):** the STATUS header rewritten to R-494-1's cast.
+
+## LADDER R1 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/SyncSpec.md` WHOLE (this is `Sync/`);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (THE FIX DESIGN, THE FINAL CALLS above are your charter);
+`vx-494-ladder-round-1.md` WHOLE (each finding's mechanism and proposed pins); the code: `Sync/PullStage.swift`,
+`Sync/SyncEngine.swift` (`pullRound`, `resyncReinitialize`), `Sync/SyncScheduler.swift`, `Persistence/
+LocalMachineryRecreation.swift`, `App/Variorum/Shared/SyncSession.swift` (`stop()`'s doc only), and
+`Tests/VariorumCoreTests/ResumableCatchUpTests.swift` + `Support/FaultInjectingTransport.swift` + `Support/FakeSyncServer.swift`.
+
+**Your scope — exactly THE FINAL CALLS' implementer items, nothing else:** F1 (1)+(2) with pins (p1), (p2) and
+(p2)'s lockstep leg; the F2 pin; the F3 pins (a), (b); N2 — the interleaving pin FIRST, the belt only if it is RED on
+the tip (green ⇒ record-only, no belt, say so); N1's doc fixes; N3's cached statement + encode-before-write. **Not
+yours:** F4 (canon), F5 (done — VX-497), F6 and O-2 (hers), N4 (done), F1 (3) (declined). An item that turns out to
+need a design call STOPS and comes back to the orchestrator as a proposal (the architect rules forks).
+
+**The discipline (binding):** pin before fix, per item — each bug-class pin committed RED on the pre-fix tree before
+its fix; a guard pin says it is a guard and shows its teeth by a behavioral revert. Then the BEHAVIORAL REVERTS, named
+in your LIVE STATUS before any runs (commit first; restore by `git checkout --` of the one file; `git diff
+--exit-code` clean after each; "no revert is in flight" written when done). Commit per piece, push after every commit,
+your LIVE STATUS below flipped in the same commit, every unverified claim PENDING. Foreground waits only (poll a log,
+never end your turn waiting). No subagents. Headless only: `swift build` / `swift test` from
+`<home>/dev/variorum-vx-494`, plus ONE `xcodebuild -scheme Variorum -destination 'platform=macOS'
+-derivedDataPath App/Variorum/DerivedData/vx494-r1fix build-for-testing` at the end (the app target's doc line); NO
+`xcodebuild test`, NO stage, NO app launch, NO dev-store or real-store touch, NO server contact. Commits say
+`Part of VX-494`; NO trailers of any kind.
+
+**Evidence at your close (in your LIVE STATUS):** the new pins' red-on-old lines; each revert's run line; then on
+the final tree `swift test --filter ResumableCatchUpTests`, the sync sweep `swift test --filter
+"Sync|FaultInjection|Purge|Migration|LocalMachinery|StorePlaintext|Soak|Convergence|Scheduler|AbuseGuard|RestoreMatrix"`,
+the whole core suite debug (`swift test`) and release (`swift test -c release`) — each line quoted; the known MCP
+timing flake (`MCPHarnessTimeLimitTests`, load-shaped, passes alone on both sides) named if it appears, never fixed
+here; and the build-for-testing line.
+
+### LADDER R1 FIXES — LIVE STATUS (the implementer owns this section)
+
+- (empty — the implementer writes it from its first commit)
 
 ## THE LIVE PROOF — the script (written before the walk; the acceptance gate, use-shaped)
 
