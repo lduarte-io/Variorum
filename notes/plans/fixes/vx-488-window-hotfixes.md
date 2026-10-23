@@ -1,7 +1,9 @@
 # VX-488 — Run: the 0.10 window hotfixes (VX-487 · VX-486 · VX-483)
 
-**STATUS: OPEN (kickoff 2026-10-22, the takeover orchestrator — Fable, `/architect-phase vx-488`; she is live and
-ruling).** Branch `vx-488-window-hotfixes`, worktree `~/dev/variorum-vx-488`; ONE PR titled `VX-488: …` at the close.
+**STATUS: MERGED 2026-10-23 (PR #184, merge `e63602bac`) — the run's four members shipped and live-proven; THE
+WINDOW CONTINUES under VX-494 (her crossing's blocker — the large-corpus first catch-up hangs; the successor's
+kickoff is `notes/handoffs/vx-494-kickoff.md`). The release tail HOLDS until her crossing lands.** Branch and
+worktree removed at the merge (commits reachable through `e63602bac`).
 The world-state and the window's remaining steps are `notes/handoffs/vx-488-kickoff.md` (read it whole); in one
 breath: VX-329 is merged, the marker-14 production deploy is DONE and verified, the Pro runs 0.10 (9047) and HER
 CROSSING IS MID-FLIGHT AND BLOCKED by VX-487 (nothing lost; nothing pulled yet); the release is NOT published.
@@ -20,9 +22,28 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | DONE — r1 (`vx-488-ladder-round-1.md`): 0 BLOCKER, 0 MAJOR, 1 MINOR (F1 — the shared leaf's stale session hold across the adopt roads) + 3 NIT; the cross-model flow run whole (implementer agreed ×4, F1's home refined; the final calls `06f4fe957`); the fixes: F1 as THREE clears (the swap step — premise corrected in the open; the unbound forget; the plain-text bring-in road RULED IN by the orchestrator at the implementer's flag), each red by its own revert (R8/R9/R10); F2/F3 wording; F4 deferred as VX-490. r2, fresh reviewer (`vx-488-ladder-round-2.md`, `e743a8340`): ALL FIXES SOUND, no new BLOCKER/MAJOR, one record-wording NIT (no action owed) — **PASS, the ladder closed at two rounds** |
 | 4b | THE CLOSING BATCH (the re-cover of record at the final tree, post-ladder; stage claim `vx-488`) | DONE — the full Mac suite: `✔ Test run with 5118 tests in 898 suites passed after 2088.879 seconds with 14 known issues`, exit 0 (the 14 are the standing wrappers; no new test-host crash in DiagnosticReports); the full phone suite: `✔ Test run with 808 tests in 126 suites passed … with 4 known issues`, exit 0 |
 | 5 | THE LIVE REHEARSAL (stage window; her Touch ID presses; the acceptance gate) | DONE — THE PROOF LANDED, both halves: the act-side round ("Synced 2:21 AM" off the set-up, no relaunch) and the unlock-side proof (fresh process, her ONE press, "Synced 2:27 AM", no act, no second prompt); VX-486's line + door live; M3's lift on every round + the no-env arm at the restore; the dev slot restored whole (rule 21's notice once, quiet open, the October-20 hold standing). THE REHEARSAL RECORD below |
-| 6 | Merge (PR, merge commit), tickets Done, in-flight row retired | NOT-STARTED |
-| 7 | Rebuild Release, fresh A1, install on the Pro; her crossing retry | NOT-STARTED (after 6) |
-| 8 | The window tail: Air prompt → release publish → site delta → close-out on main → VM-8 prompt | NOT-STARTED (appendices A/B of the kickoff file) |
+| 6 | Merge (PR, merge commit), tickets Done, in-flight row retired | DONE — PR #184 merged (merge `e63602bac`); VX-488/487/486/483/489 Done; born VX-490 (ladder F4, Debt Low) + VX-491 (the proof-refusal presentation, Improvement Low); in-flight row retired on main (`422df9cf5`) + board snapshot; worktree + branch removed |
+| 7 | Rebuild Release, fresh A1, install on the Pro; her crossing retry | INSTALL DONE — A1 `Backups/safety-copies/variorum-vx488-a1-20261023T083711Z` (6 files, zero instances), Release built from the merge, **0.10 (9093) at /Applications** (codesign OK, sha256 identical). **HER CROSSING BLOCKED by VX-494** — THE CROSSING ATTEMPT RECORD below; her library safe throughout |
+| 8 | The window tail: Air prompt → release publish → site delta → close-out on main → VM-8 prompt | HELD on VX-494 (her crossing must land first); the steps stay the VX-488 kickoff file's 2–7 + appendices A/B |
+
+## THE CROSSING ATTEMPT RECORD (2026-10-23, 02:44–03:15 MDT — her hands + the orchestrator's server-side reads)
+
+Her Pro, 0.10 (9093), the fresh bound Castle library from her 10-22 crossing. Three launches, one signature:
+**the engine's round makes exactly ONE pull call and then hangs** — `device_cursor.seen_at` single-stamped per
+round start (08:4x, 08:56:55, 09:06:20 UTC), `last_seq` pinned at 0 throughout, `data_max` unmoved at 229138 (no
+apply, no push of the seed rows, no second call), the row showing "Syncing…" with Sync now greyed indefinitely.
+Along the way, three REAL field findings filed with her words: **VX-492** (the 10-minute Castle idle lock fired
+mid-catch-up — High), **VX-493** (a lock mid-round strands the in-flight flag; later evidence showed the cursor
+was pinned BEFORE the first lock, so the lock was never the root cause — High), and **VX-494** (THE BLOCKER,
+Urgent Pre-launch: the large-corpus first catch-up hangs; the same build's same-night THROWAWAY catch-up — a
+handful of rows — synced clean, so the hang is scale-dependent). Side sightings, recorded: a WRONG-BUILD launch
+from Finder showed a lobby with "Touch ID isn't set up for this library" (she was likely in a stale copy; on the
+installed build she re-armed the gate — Settings ▸ Protection ▸ On this Mac — and the act loaded the keys, fix
+(a) live on her real store); the typed-unlock residue (M1 (c), the OPEN ITEM) bit for real in that window — the
+row wore M2's new line + Protection… door IN PRODUCTION, working as designed. Her app left RUNNING at her choice
+(the stuck spinner is harmless); her old store whole in `~/Documents/Variorum-pre-0.10-store-KEEP` + Previous
+Libraries + the A1s; the server corpus intact; the Air on 0.9.8 untouched. **The successor's charter is
+`notes/handoffs/vx-494-kickoff.md`.**
 
 ## The members
 
