@@ -15,7 +15,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 |---|---|---|
 | 0 | Kickoff: preflight read whole; Linear current (VX-483 joined as member, High, In Progress); main merged into the branch (`9d69c026f`); this record | DONE (this commit) |
 | 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end); fork F-M1-1 RESOLVED — ruled (i), BUILT `164304e91` ("F-M1-1 BUILT" under THE RULING; R7 red, evidence green) |
-| 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | NOT-STARTED — the briefs are M2/M3 below |
+| 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | IN-PROGRESS — the record skeletons + settled designs ("M2 RECORD", "M3 RECORD" at the end); next: the harness, the pre-fix pins |
 | 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | NOT-STARTED |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | NOT-STARTED |
 | 5 | THE LIVE REHEARSAL (stage window; her Touch ID presses; the acceptance gate) | NOT-STARTED |
@@ -409,3 +409,77 @@ ladder re-reads it.
   `ProtectionCrossingRouteTests` and the other bootstrap-constructing route suites: the bootstrap's inits changed).
 - **PROVISIONALs:** none (the ruling decided the shape; nothing product-visible beyond (a)'s intent delivered).
 
+
+## M2 RECORD (implementer session B — Opus, xhigh) — VX-486
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** no `xcodebuild test`, no stage, no app launch, no dev/real-store
+touch (the run's traps) — the Mac-target suites this unit touches run in the orchestrator's stage batch (listed at the
+close); the row's door is walked in THE LIVE REHEARSAL, not here. The locked line's words and the door's label are
+PROVISIONAL and HERS (OPEN ITEMS).
+
+### LIVE STATUS (per piece; PENDING = unverified)
+- Piece R — this record skeleton + the preflight read whole (CLAUDE.md + canon, this file whole incl. the M1 RECORD, the
+  kickoff, the resiliency protocol, CastleRules WHOLE, SurfaceContracts whole — "The app" and "Doors to the outside", the
+  named code; the ticket's text read once, read-only): DONE (this commit).
+- Piece 0 — a headless harness for the row's face (the M1 harness recipe, Shared/ compiled whole): NOT-STARTED.
+- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE the fix (the line's words; the locked face never
+  offers the Account sheet): NOT-STARTED.
+- Piece 2 — the fix + the new-seam pins: NOT-STARTED. The settled design (below).
+- Piece 3 — the behavioral reverts: NOT-STARTED (each named here BEFORE it runs).
+- Piece 4 — evidence (headless suites, build-for-testing both targets): NOT-STARTED.
+
+### THE DESIGN (settled before the build — within the brief's named latitude; see the seam note)
+- **The face:** `SyncRowFace.Door.Act` gains `.openProtection` (Settings ▸ Protection through the pane request). The
+  keysLocked face's one door becomes `Door(label: "Protection…", act: .openProtection)`, minted ONLY when the face is told
+  a door can act there (`canOpenProtection`, defaulted false — the `canCheckForUpdates` idiom, P-2); with no door it is the
+  sentence alone, exactly as `.appOutOfDate` without an updater. `keysReplaced` and `accountMismatch` keep `Account…`
+  (not this unit's).
+- **The door (the `CheckForUpdatesDoor` precedent):** `ProtectionPaneDoor` — an environment-injected act, nil by default
+  (the phone, every test composition) ⇒ no door renders. The Mac's main window injects it from the bootstrap's one
+  `ProtectionController`; the press is the MCP twin's own shape (`EditorCommands`' ⌥⌘,: `mcp.requestSettings();
+  openSettings()`): the pane request first, then `openSettings()` — the Settings window adopts the request on appear (a
+  fresh window) or on change (one already up) — `AppSettingsView.adoptProtectionRequest`, unchanged.
+- **The seam note (reuse vs a neutral twin — the brief's own question):** `requestProtectionPaneForRoadCrossing()`
+  reused as-is would be a dishonest name at a non-crossing caller (its doc: "a crossing ends on Protection"); so
+  `ProtectionController` gains the NEUTRAL entry `requestProtectionPane()` (the `MCPDoor.requestSettings()` twin), and the
+  crossing's method delegates to it (byte-identical effect: `settingsRequest += 1`). And the counter alone opens nothing —
+  it re-points a Settings window — so the door also opens the window (the MCP press's second line). Both are the brief's
+  named precedent; flagged for the architect to re-rule at the ladder if the reuse was meant literally.
+- **The phone:** Settings ▸ Protection is a Mac pane (the phone's Protection screen is VM-8's), so the phone injects no
+  door and its locked row is the sentence alone (P-2). OBSERVATION for VM-8: the phone's locked row thereby loses the
+  `Account…` door it showed (the phone's Account sheet is reached only from this row); VM-8 injects the phone's door when
+  its Protection screen lands.
+- **The line:** `lockedLabel` off the old road's words — the drafts in "THE WORDS" below (PROVISIONAL, HERS).
+
+### THE WORDS (PROVISIONAL — hers to reword; bundled in OPEN ITEMS)
+- PENDING (written at Piece 2).
+
+### Her second symptom (the Account… button doing nothing when the Account sheet is already up)
+- PENDING (traced at Piece 2).
+
+## M3 RECORD (implementer session B — Opus, xhigh) — VX-483
+
+**NOT DONE BY THIS SESSION:** no `xcodebuild test`, no stage, no app launch, no env-set run — the lift is proven LIVE in
+THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the round landing against the throwaway).
+
+### LIVE STATUS (per piece; PENDING = unverified)
+- Piece 0 — the harness (shared with M2's): NOT-STARTED.
+- Piece 1 — the fix + its pins (three arms + the composition): NOT-STARTED. The settled design (below).
+- Piece 2 — the behavioral reverts (named here BEFORE they run): NOT-STARTED.
+- Piece 3 — evidence: NOT-STARTED.
+
+### THE DESIGN (settled before the build)
+- **The decision, pure, DEBUG-only** (`ProtectionWalkSwitch`, beside the walk project it reads — the file is `#if DEBUG`
+  whole): `syncFenceLift(walkProject:productionHost:)` → `.none` (no walk project resolved this launch — the fence
+  holds) · `.lifted(host:)` (a walk project that is not the production mirror) · `.refusedProduction(host:)` (the walk
+  project's URL carries the production REF — derived from `ProjectConfig.productionProjectURL`'s host, never a second
+  literal — anywhere, case-folded; an underivable ref refuses too: fail closed). Its input is `ProjectConfig`'s OWN
+  resolved walk project (the one `projectOverrideForThisLaunch` read — exposed, never a second env parse).
+- **The launch's one decision, logged once** (`ProjectConfig.walkSyncFenceLift`, inside its one `#if DEBUG` fence): a
+  lift says the host only; a refusal says it refused and why, naming the host only — never the URL, never the key.
+- **The derivation site** (`AppServices.init`): DEBUG — `allowsSync = storeVariant == .real || (storeVariant == .dev &&
+  lift.lifts)`; Release — the line byte-unchanged (`allowsSync: storeVariant == .real`), the fence absolute.
+- **A second-order fence kept (found in the trace):** the retired-credential sweep gated on `sync.allowsSync` ("the A4
+  fence's own seam … IS `storeVariant == .real`"); under a lift that equality breaks, and a lifted dev session would
+  reach the INSTALLED build's login-keychain items — the round-2 N1 class. Its guard becomes `storeVariant == .real`
+  (semantically identical in Release, where `allowsSync ≡ storeVariant == .real`).
