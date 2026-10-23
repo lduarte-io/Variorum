@@ -440,7 +440,15 @@ PROVISIONAL and HERS (OPEN ITEMS).
   "SyncLockedRowTests|SyncWalkFenceTests"`): `theLockedLineSpeaksTheRoadsWordsNeverThePassphrase` ✘×3 (the words; "passphrase";
   "encryption") and `theLockedRowNeverOffersTheAccountSheet` ✘×2 (the `.openAccount(.account)` act; the `Account…`
   label) — `✘ Test run with 5 tests in 2 suites failed … with 8 issues` (M3's three in the same run, its record).
-- Piece 2 — the fix + the new-seam pins: NOT-STARTED. The settled design (below).
+- Piece 2 — the fix + the new-seam pins: DONE (this commit). `Shared/ProtectionController.swift` (the neutral
+  `requestProtectionPane()`; the crossing's method delegates), `Shared/SyncStatusViews.swift` (`.openProtection`,
+  `canOpenProtection`, `openProtectionLabel`, `ProtectionPaneDoor` + its environment key, the row's press, the line),
+  `Variorum/VariorumApp.swift` (the main window injects `ProtectionPaneDoor.settings(bootstrap.protection)`). Four
+  new-seam pins in `SyncLockedRowTests` (`theLockedRowsOneDoorIsTheProtectionPane`,
+  `withNoProtectionPaneTheLockedRowSaysTheSentenceAlone`, `theProtectionDoorAsksForTheProtectionPane`,
+  `onlyTheLockedFaceMintsTheProtectionDoor`). **The harness on the fixed tree: `--filter SyncLockedRowTests` `✔ Test run
+  with 6 tests in 1 suite passed`** (Piece 1's two now green + the four). The whole-harness and build-for-testing runs are
+  Piece 4's (PENDING).
 - Piece 3 — the behavioral reverts: NOT-STARTED (each named here BEFORE it runs).
 - Piece 4 — evidence (headless suites, build-for-testing both targets): NOT-STARTED.
 
@@ -468,10 +476,27 @@ PROVISIONAL and HERS (OPEN ITEMS).
 - **The line:** `lockedLabel` off the old road's words — the drafts in "THE WORDS" below (PROVISIONAL, HERS).
 
 ### THE WORDS (PROVISIONAL — hers to reword; bundled in OPEN ITEMS)
-- PENDING (written at Piece 2).
+- **The line (P-VX486-2), BUILT:** "Sync locked — this Mac hasn't unlocked your account's sync keys" (the phone's arm
+  reads "this iPhone" — `ProtectionCopy.deviceName`). It names the state in the road's own vocabulary ("your account's sync
+  keys" — `ProtectionWords.stopSyncingLead`'s words; "unlock" — the lobby's verb) and promises no act: the door beside it
+  says where to go. Posture-neutral on purpose — it stays true under Castle with Touch ID (heals at the next Touch ID
+  unlock or a key-door act, VX-487), under Always ask, and after a typed unlock (M1 (c), her open design question).
+- **One alternative (hers to pick):** "Sync locked — unlock with Touch ID to sync again" — the lobby's own button words
+  ("Unlock with Touch ID"), the plainest road for HER posture (Castle + Touch ID); not built because it is false under
+  Always ask and names a road the typed-unlock residue (M1 (c)) has not ruled.
+- **The door's label (P-VX486-1), BUILT:** "Protection…" — the pane's own name (`ProtectionCopy.protectionPaneTitle`) in
+  the row's `Account…` idiom.
 
 ### Her second symptom (the Account… button doing nothing when the Account sheet is already up)
-- PENDING (traced at Piece 2).
+- **Traced, SUSPECTED (not reproduced — no walk in this session, and her words for this symptom are not in the ticket):**
+  the row presents its Account sheet ITSELF (`SyncStatusRow`'s own `.sheet(item: $accountSheetTab)`), never through the
+  one protection presenter; on the Mac that sheet is attached to the row's own window, which takes no clicks while the
+  sheet is up — so a press on that window's `Account…` behind it does nothing by the window's modality (the sheet already
+  up IS the Account surface). The single presenter (VX-239/VX-243) is not on this road: it serves Settings ▸ Protection's
+  sheets, one at a time (a second press there while one stands presents nothing — its designed shape). **Disposition: no
+  fix** (nothing trivial to change: the behavior is AppKit's sheet modality); and in the locked state the row no longer
+  offers `Account…` at all, so this symptom's trigger is gone where she met it. If the rehearsal shows a different shape
+  (e.g., the Settings window's Account sheet up while the main window's row is pressed), it is a ticket for her.
 
 ## M3 RECORD (implementer session B — Opus, xhigh) — VX-483
 

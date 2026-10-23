@@ -182,6 +182,10 @@ struct VariorumApp: App {
                     // door, from the ONE update channel; nil unless it is
                     // live (never in a Debug build), and then no door shows.
                     .environment(\.checkForUpdatesDoor, appDelegate.updates.syncRowDoor)
+                    // VX-486: the locked sync row's door to Settings ▸
+                    // Protection — the bootstrap's one pane ask (the
+                    // crossings' own road), adopted by the Settings window.
+                    .environment(\.protectionPaneDoor, ProtectionPaneDoor.settings(bootstrap.protection))
                     .task {
                         // 13x U2 row 7: the hold's projection — fresh per
                         // ready (this task re-runs after every adoption's

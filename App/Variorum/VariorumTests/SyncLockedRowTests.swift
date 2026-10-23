@@ -44,4 +44,80 @@ struct SyncLockedRowTests {
                 "the Account sheet has nowhere to take what the locked state needs")
         #expect(!face.doors.contains { $0.label == "Account…" })
     }
+
+    /// THE DOOR-ACT PIN: where a Protection pane door was injected (the Mac's main window), the locked row's ONE door is
+    /// `Protection…` and its act is the pane request — never `.openAccount`. (Its door label is PROVISIONAL, hers.)
+    @Test func theLockedRowsOneDoorIsTheProtectionPane() {
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true, isSyncing: false,
+            lastError: Self.locked, lastErrorIsOffline: false, canOpenProtection: true)
+        #expect(face.kind == .keysLocked)
+        #expect(face.doors == [SyncRowFace.Door(label: "Protection…", act: .openProtection)])
+        #expect(SyncRowFace.openProtectionLabel == ProtectionCopy.protectionPaneTitle + "…",
+                "the pane's own name, in the row's Account… idiom")
+    }
+
+    /// P-2: with no Protection pane to land in (the phone — its Protection screen is VM-8's — and every composition that
+    /// injects no door), the locked row says its sentence alone, exactly as the out-of-date face without an updater.
+    @Test func withNoProtectionPaneTheLockedRowSaysTheSentenceAlone() {
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true, isSyncing: false,
+            lastError: Self.locked, lastErrorIsOffline: false, canOpenProtection: false)
+        #expect(face.kind == .keysLocked)
+        #expect(face.doors.isEmpty)
+    }
+
+    /// The injected door's act IS the Protection pane ask: one fresh request on the bootstrap's one controller, which the
+    /// Settings window adopts (`AppSettingsView.adopts` — `request > adopted`; on appear for a fresh window, on change for
+    /// one already up). The crossings' own ask is unchanged — the same counter, through the same neutral entry.
+    @Test func theProtectionDoorAsksForTheProtectionPane() {
+        let protection = ProtectionController()
+        let door = ProtectionPaneDoor.settings(protection)
+        let before = protection.settingsRequest
+        door.request()
+        #expect(protection.settingsRequest == before + 1, "one fresh ask per press")
+        #expect(protection.settingsRequest > protection.settingsRequestAdopted, "the Settings window adopts it")
+        protection.settingsRequestAdopted = protection.settingsRequest
+        door.request()
+        #expect(protection.settingsRequest > protection.settingsRequestAdopted, "every press is a fresh ask")
+        let crossingBefore = protection.settingsRequest
+        protection.requestProtectionPaneForRoadCrossing()
+        #expect(protection.settingsRequest == crossingBefore + 1, "the crossing's ask, unchanged")
+    }
+
+    /// Only the LOCKED state wears the Protection door; the replaced-keys and account-mismatch rows keep their own
+    /// `Account…` (not this fix's), and no other face mints it — across every state the face family reaches.
+    @Test func onlyTheLockedFaceMintsTheProtectionDoor() {
+        let errors: [String?] = [
+            nil, "Sync error: something else", Self.locked,
+            String(describing: SyncError.encryptionKeysReplaced),
+            String(describing: SyncError.keyProofRefused),
+            String(describing: SyncError.accountMismatch(bound: "a", signedIn: "b")),
+            String(describing: SyncError.schemaLockstepMismatch(client: 12, server: 13)),
+        ]
+        for isSyncing in [false, true] {
+            for error in errors {
+                for offline in [false, true] {
+                    let face = SyncRowFace.face(
+                        allowsSync: true, isConfigured: true, signedIn: true, isSyncing: isSyncing,
+                        lastError: error, lastErrorIsOffline: offline, canOpenProtection: true)
+                    if face.doors.contains(where: { $0.act == .openProtection }) {
+                        #expect(face.kind == .keysLocked, "\(face.kind) minted the Protection door")
+                    }
+                }
+            }
+        }
+        let replaced = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true, isSyncing: false,
+            lastError: String(describing: SyncError.encryptionKeysReplaced), lastErrorIsOffline: false,
+            canOpenProtection: true)
+        #expect(replaced.kind == .keysReplaced)
+        #expect(replaced.doors == [SyncRowFace.Door(label: "Account…", act: .openAccount(.account))])
+        let mismatch = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true, isSyncing: false,
+            lastError: String(describing: SyncError.accountMismatch(bound: "a", signedIn: "b")),
+            lastErrorIsOffline: false, canOpenProtection: true)
+        #expect(mismatch.kind == .accountMismatch)
+        #expect(mismatch.doors == [SyncRowFace.Door(label: "Account…", act: .openAccount(.account))])
+    }
 }

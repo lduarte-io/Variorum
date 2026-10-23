@@ -43,6 +43,11 @@
 //  pre-deploy state, R-13r-7) keeps the generic face: no friend can reach
 //  it, because the §12 choreography deploys the mirror before any release.
 //
+//  VX-486 (her live finding at the 0.10 window): the LOCKED state's line and
+//  door follow the road — the line names the state in the road's words, and
+//  the one door opens Settings ▸ Protection (`ProtectionPaneDoor`, injected
+//  only where that pane exists; the phone says the sentence alone — P-2).
+//
 
 import SwiftUI
 import VariorumCore
@@ -82,6 +87,13 @@ nonisolated struct SyncRowFace: Equatable {
             /// channel, injected as `checkForUpdatesDoor`). Minted only when
             /// the face was told a live updater exists (P-2).
             case checkForUpdates
+            /// VX-486: Settings ▸ Protection, through the one programmatic
+            /// open-at-pane road (`ProtectionController.settingsRequest`,
+            /// injected as `protectionPaneDoor`) — where the road's doors
+            /// live. Minted only when the face was told a door can act
+            /// there (P-2: the Mac's main window; never the phone, whose
+            /// Protection screen is VM-8's).
+            case openProtection
         }
         var label: String
         var act: Act
@@ -95,7 +107,9 @@ nonisolated struct SyncRowFace: Equatable {
     /// `stalled` (row 12 — 17d P31) is `Status.pullStalled`, defaulted so
     /// every existing state pin reads unmodified: it decorates only the
     /// CLEAN branch (an error face already says something is wrong, and a
-    /// syncing row is mid-answer).
+    /// syncing row is mid-answer). `canOpenProtection` (VX-486) is the
+    /// `canCheckForUpdates` idiom: true only where a Protection pane door
+    /// was injected (P-2).
     static func face(
         allowsSync: Bool,
         isConfigured: Bool,
@@ -104,7 +118,8 @@ nonisolated struct SyncRowFace: Equatable {
         lastError: String?,
         lastErrorIsOffline: Bool,
         stalled: Bool = false,
-        canCheckForUpdates: Bool = false
+        canCheckForUpdates: Bool = false,
+        canOpenProtection: Bool = false
     ) -> SyncRowFace {
         // The A4 fence: a dev-store session never syncs — no sign-in door
         // either (the one mirror belongs to the real store; signing in
@@ -134,12 +149,17 @@ nonisolated struct SyncRowFace: Equatable {
             }
             if Self.isKeysLockedError(error) {
                 // Phase 14b (L9): the keys-refusal presents as a paused
-                // state naming its fix. VX-329 U1 — PROVISIONAL P-VX329-U1-4:
-                // its door opened today's Encryption tab (today's road, deleted);
-                // it opens the Account sheet, the row's other doors' target.
-                return SyncRowFace(kind: .keysLocked, doors: [
-                    Door(label: "Account…", act: .openAccount(.account)),
-                ])
+                // state naming its fix. VX-486 (her live finding — P-VX329-U1-4's
+                // Account sheet had nowhere to take what the state needs): the
+                // door lands in Settings ▸ Protection, where the road's doors
+                // live (a Touch ID unlock or a key-door act loads the keys —
+                // VX-487), and only where that pane exists (P-2): with no
+                // door the row says the sentence alone, as `.appOutOfDate`.
+                return SyncRowFace(
+                    kind: .keysLocked,
+                    doors: canOpenProtection
+                        ? [Door(label: Self.openProtectionLabel, act: .openProtection)]
+                        : [])
             }
             if Self.isAccountMismatchError(error) {
                 // VX-314: the library belongs to another account than the
@@ -284,6 +304,10 @@ nonisolated struct SyncRowFace: Equatable {
     /// a Mac pin holds the two equal — `Shared/` cannot see the channel).
     static let checkForUpdatesLabel = "Check for Updates\u{2026}"
 
+    /// VX-486 — the locked row's door: the pane's own name (`ProtectionCopy.protectionPaneTitle`) in the row's
+    /// `Account…` idiom. PROVISIONAL (P-VX486-1), hers to reword.
+    static let openProtectionLabel = "\(ProtectionCopy.protectionPaneTitle)\u{2026}"
+
     /// The row's line (calm: the quiet caption, never the error red).
     static let appOutOfDateLabel = "Sync paused \u{2014} this version of Variorum needs an update"
 
@@ -314,6 +338,31 @@ extension EnvironmentValues {
     }
 }
 
+/// VX-486: the locked row's door to Settings ▸ Protection, handed to the row from where the pane request lives (the
+/// `CheckForUpdatesDoor` precedent). The Mac's main window injects it from the bootstrap's one `ProtectionController`
+/// (`settings(_:)`); the phone injects none (its Protection screen is VM-8's), and nil ⇒ the row renders no door (P-2).
+/// The ask re-points a Settings window; the row's press brings the window up beside it (`openSettings()`, the Mac's
+/// environment action — ⌥⌘,'s own two lines: `mcp.requestSettings(); openSettings()`).
+struct ProtectionPaneDoor {
+    let request: @MainActor () -> Void
+
+    /// The production door: the controller's pane ask (adopted by `AppSettingsView.adoptProtectionRequest`).
+    static func settings(_ protection: ProtectionController) -> ProtectionPaneDoor {
+        ProtectionPaneDoor { [weak protection] in protection?.requestProtectionPane() }
+    }
+}
+
+private struct ProtectionPaneDoorKey: EnvironmentKey {
+    static let defaultValue: ProtectionPaneDoor? = nil
+}
+
+extension EnvironmentValues {
+    var protectionPaneDoor: ProtectionPaneDoor? {
+        get { self[ProtectionPaneDoorKey.self] }
+        set { self[ProtectionPaneDoorKey.self] = newValue }
+    }
+}
+
 /// One row: signed-in + configured → last sync / pending / error;
 /// signed out → the sign-in door.
 struct SyncStatusRow: View {
@@ -326,6 +375,15 @@ struct SyncStatusRow: View {
     /// R-13r-13: the update channel's act where one can run (the Mac's
     /// live channel); nil everywhere else, and then no door renders.
     @Environment(\.checkForUpdatesDoor) private var checkForUpdatesDoor
+    /// VX-486: the locked row's door to Settings ▸ Protection where the
+    /// pane exists (the Mac's main window); nil everywhere else, and then
+    /// the locked row renders no door.
+    @Environment(\.protectionPaneDoor) private var protectionPaneDoor
+    #if os(macOS)
+    /// VX-486: the Protection door brings the Settings window up beside
+    /// its pane ask (the ask alone only re-points a window already open).
+    @Environment(\.openSettings) private var openSettings
+    #endif
     /// CF-14: the ONE sheet, opened at the tab the pressed door names
     /// (nil = not presented).
     @State private var accountSheetTab: AccountTab?
@@ -341,7 +399,8 @@ struct SyncStatusRow: View {
             lastError: sync.status.lastError,
             lastErrorIsOffline: sync.status.lastErrorIsOffline,
             stalled: sync.status.pullStalled,
-            canCheckForUpdates: checkForUpdatesDoor != nil)
+            canCheckForUpdates: checkForUpdatesDoor != nil,
+            canOpenProtection: protectionPaneDoor != nil)
     }
 
     var body: some View {
@@ -539,13 +598,25 @@ struct SyncStatusRow: View {
             accountSheetTab = tab
         case .checkForUpdates:
             checkForUpdatesDoor?.perform()
+        case .openProtection:
+            // VX-486: the pane ask first (a Settings window adopts it on
+            // appear or on change), then the window itself.
+            protectionPaneDoor?.request()
+            #if os(macOS)
+            openSettings()
+            #endif
         }
     }
 
     /// The locked-state line's one string (Phase 14b, L9 — the SyncSpec
     /// §12-grammar presentation of `SyncError.encryptionKeysUnavailable`),
-    /// exposed for the presented-state pin like `offlineLabel`.
-    static let lockedLabel = "Sync locked — enter your encryption passphrase"
+    /// exposed for the presented-state pin like `offlineLabel`. VX-486: off
+    /// the deleted road's words ("enter your encryption passphrase" — the
+    /// Encryption tab it pointed at is gone, and the row cannot take one);
+    /// it names the state — the account's sync keys not unlocked on this
+    /// device — and the door beside it lands where the road's doors live.
+    /// PROVISIONAL (P-VX486-2), hers to reword.
+    static let lockedLabel = "Sync locked — this \(ProtectionCopy.deviceName) hasn't unlocked your account's sync keys"
 
     /// CF-16's row line: the replaced-keys presentation of the engine's
     /// payload-crypto refusal (wording derived from the ruled surface
