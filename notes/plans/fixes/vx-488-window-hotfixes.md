@@ -19,7 +19,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 | 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | DONE — Mac run 1 at `fb080c7d1`: `✘ … 5117 tests in 897 suites … 18 issues (including 14 known issues)` — 4 real reds, ALL the VX-489 class (M4), NONE from the members; VX-489 fixed `12f7d0ab0`, its three suites re-run `✔ 23 tests in 3 suites passed`; the phone suite at `12f7d0ab0` `✔ Test run with 808 tests in 126 suites passed … with 4 known issues`, exit 0 (the vx-329 closing count — the members add no phone tests). The post-ladder CLOSING full Mac run is the re-cover of record |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | DONE — r1 (`vx-488-ladder-round-1.md`): 0 BLOCKER, 0 MAJOR, 1 MINOR (F1 — the shared leaf's stale session hold across the adopt roads) + 3 NIT; the cross-model flow run whole (implementer agreed ×4, F1's home refined; the final calls `06f4fe957`); the fixes: F1 as THREE clears (the swap step — premise corrected in the open; the unbound forget; the plain-text bring-in road RULED IN by the orchestrator at the implementer's flag), each red by its own revert (R8/R9/R10); F2/F3 wording; F4 deferred as VX-490. r2, fresh reviewer (`vx-488-ladder-round-2.md`, `e743a8340`): ALL FIXES SOUND, no new BLOCKER/MAJOR, one record-wording NIT (no action owed) — **PASS, the ladder closed at two rounds** |
 | 4b | THE CLOSING BATCH (the re-cover of record at the final tree, post-ladder; stage claim `vx-488`) | DONE — the full Mac suite: `✔ Test run with 5118 tests in 898 suites passed after 2088.879 seconds with 14 known issues`, exit 0 (the 14 are the standing wrappers; no new test-host crash in DiagnosticReports); the full phone suite: `✔ Test run with 808 tests in 126 suites passed … with 4 known issues`, exit 0 |
-| 5 | THE LIVE REHEARSAL (stage window; her Touch ID presses; the acceptance gate) | IN-PROGRESS — the walk Debug build at the final tree into `DerivedData/vx488`; her window next |
+| 5 | THE LIVE REHEARSAL (stage window; her Touch ID presses; the acceptance gate) | DONE — THE PROOF LANDED, both halves: the act-side round ("Synced 2:21 AM" off the set-up, no relaunch) and the unlock-side proof (fresh process, her ONE press, "Synced 2:27 AM", no act, no second prompt); VX-486's line + door live; M3's lift on every round + the no-env arm at the restore; the dev slot restored whole (rule 21's notice once, quiet open, the October-20 hold standing). THE REHEARSAL RECORD below |
 | 6 | Merge (PR, merge commit), tickets Done, in-flight row retired | NOT-STARTED |
 | 7 | Rebuild Release, fresh A1, install on the Pro; her crossing retry | NOT-STARTED (after 6) |
 | 8 | The window tail: Air prompt → release publish → site delta → close-out on main → VM-8 prompt | NOT-STARTED (appendices A/B of the kickoff file) |
@@ -163,6 +163,64 @@ user A → Use Castle (Touch ID gate — HER presses; her-hands rows marked) →
 unlock → **THE PROOF: the engine's first round runs** (the status row leaves "Sync locked"; with M3's opt-in the
 round actually lands against the throwaway) — and VX-486's row/door verified in the same window. Restore the dev
 slot whole (mv back, same inodes; rule 21's notice once at the next plain launch is the known design).
+
+## THE REHEARSAL RECORD (the orchestrator + HER HANDS, 2026-10-22 23:15 → 10-23 02:35 MDT; stage claim `vx-488`
+held per row and released; captures `~/vx488-walk/`, deleted at closeout; every typed secret the throwaway's or the
+*[removed for publication]*
+read-verified or by HER hand)
+
+**THE PROOF LANDED — Castle + Touch ID syncs, both halves of VX-487 live on real wire.**
+
+- **The build and the slot:** the walk Debug build at the final tree (`a2c93e11f`-era tip) into `DerivedData/vx488`;
+  the dev slot's 9 top-level files aside by `mv` (same filesystem, same inodes; the two directories stayed). ONE
+  MIS-LAUNCH first: the throwaway env file's keys are `VARIORUM_THROWAWAY_*`, not the walk switch's
+  `VARIORUM_WALK_*` — the app launched UNSWITCHED, was killed before any credential (its fresh mint + its Backups
+  subfolder removed), and relaunched with the names MAPPED; the walk switch then verified in-process (`ps eww`: both
+  *[removed for publication]*
+  THE NAMES.
+- **M2/VX-486 VERIFIED LIVE (pre-binding):** the fresh walk library's keysLocked row wore the NEW line ("Sync
+  locked — this Mac hasn't unlocked your account's sync keys") and its one door **Protection…** opened Settings AT
+  THE PROTECTION PANE (cap-09b; the first press was click-through focus, not a dead door). The row's honesty also
+  proved M3's lift ON (without it: "Sync off (dev store)").
+- **HER-HANDS rows (the harness's permission classifier refused credential-shaped driving mid-walk, then plain
+  clicks; each hand-off recorded, none worked around):** the walk passphrase set (hers: the sheet's two concealed
+  fields, VX-463's eye live); the sign-in as the throwaway's user A; the set-up's secrets; the Vault/vault-row SQL
+  resets (below, by her `!` road, `[]` each); the final relaunch command.
+- **THE THROWAWAY DETOUR (state surgery, not product):** user A carried a STANDING VX-308-era vault in Standard —
+  the join sheet honestly offered rule 12's leave ("Your account is in Standard, so this library leaves Castle"),
+  VX-464's account-naming refusal captured live on her wrong-passphrase try. Since nobody holds A's old vault
+  passphrase, A was reset by the §8 precedent (rehearsal-only dumb-road acts): (1) A's data rows + vault row wiped
+  (every `owner_id` table + `key_vault`; `entitlement` kept); the set-up then minted a FRESH vault (mode `castle` —
+  the hand-up adopting the library's posture, exactly rule 7) BUT the account's STALE kp2 Vault secret (untouchable
+  by the session — classifier) made every round's key proof fail, presenting as **"Sync paused — this account's
+  encryption keys were replaced"**; (2) her SQL nulled the hash + deleted the kp: secret; the standing engine never
+  re-attempted enrollment (the latched class — the OBSERVATION below); (3) the vault row deleted once more → a
+  fully VIRGIN account; Stop syncing here… → Turn on sync = the SET-UP arm ("Your account starts in Castle, like
+  this library.") with her typed pair → enrollment landed clean.
+- **THE ACT-SIDE PROOF (M1 (a) + F-M1-1):** off the set-up act alone — no relaunch — the engine's first round ran
+  and LANDED: **"Synced 2:21 AM"** (her capture). The rehearsal note ("VX-488 rehearsal: the first Castle round
+  rides this note…") pushed to the throwaway.
+- **THE UNLOCK-SIDE PROOF (M1 (b) — the scripted proof):** quit (zero instances) → relaunch with the walk env (her
+  `!` road; `ps eww` = 2) → the lobby → **her ONE Touch ID press: the library opened AND the engine's first round
+  ran and LANDED — "Synced 2:27 AM" — no act, no settings, no second prompt** (the -25308 reuse tripwire never
+  fired). Along the way the 10-minute Castle idle lock fired mid-walk and its relock honestly cleared session
+  memory (the lock's clear arm, live).
+- **O-B2 honored:** she signed the walk session OUT before the restore (no throwaway token left in the dev scope),
+  then quit.
+- **THE RESTORE, whole:** the walk library's 5 slot files + its `Backups/d5b935bb` subfolder removed; the 9 dev
+  files `mv`'d back (same inodes, never written while asided); the aside dir removed; the plain relaunch (no walk
+  env; `ps eww` = 0) → **rule 21's notice ONCE ("This is a different library than the one this Mac last had open")
+  → OK → the dev library open QUIETLY, "Sync off (dev store)" standing (M3's no-env arm re-proved), the standing
+  VX-309 October-20 hold banner untouched, Resume never pressed**; quit at zero instances; the stage released.
+  Keychain residue (the recorded §8 class): the walk library's custody/memory items + the mis-launch library's; the
+  walk-era device-ID consequence on the dev library accepted per VX-465's accept-as-designed.
+- **OBSERVATION (agent-side, for a closeout ticket — Improvement, Low, Castle & sync, Suspected):** a KEY-PROOF
+  refusal presents as the keys-replaced line ("your keys were replaced on another device — sync is paused until you
+  enter your passphrase once") and the engine never re-attempts enrollment while the state stands; truthful for a
+  real re-key, misleading for a proof-server-state failure, and the named heal (the passphrase) would not re-enroll.
+  Reached here only by dumb-road surgery; a production account could reach it only by operator-side Vault damage.
+
+**HER ACCEPTANCE IS THE PROOF'S WITNESS: she made both presses and saw both "Synced" stamps herself.**
 
 ## OPEN ITEMS (bundled for her; nothing here blocks the run)
 
