@@ -29,7 +29,8 @@ import OSLog
 /// in the transaction that moves the cursor, whether that apply reaches the head or stalls.
 ///
 /// ONE WRITER: the stage assumes one round at a time per store — the scheduler's serialization (`SyncScheduler`
-/// is the only production caller of `pull()`); a retired chain is cancelled (VX-494 D3) and, when
+/// is the only production caller of `pull()`); a retired chain's download is cancelled (VX-494 D3 — a save already
+/// running finishes, ladder R3, R3-1) and, when
 /// `SyncSession.configure` finds it, drained before the replacement starts; a lock closes the retired chain's pool
 /// outright. The one road with no drain is `stop()` then `configure()` (a sign-out then a sign-in): `stop()` retires
 /// the chain in an unstructured task and forgets it, so a new round could in principle overlap the old round's last

@@ -520,6 +520,7 @@ public struct SyncEngine: Sendable {
                 // rest of the feed in the background. The windows it COMPLETED
                 // are staged; the one in flight is dropped (its stage write
                 // meets the cancellation too) and is fetched again next round.
+                // Only the download: the save below is shielded (ladder R3, R3-1).
                 try Task.checkCancellation()
                 // Phase 13j: the device id rides only a window whose `since` is
                 // this device's COMMITTED cursor — the server's device_cursor
@@ -595,7 +596,9 @@ public struct SyncEngine: Sendable {
 
         let batch = pulled
         let reach = fetchCursor
-        return try await applyingRemoteWithDeferredFKs { db in
+        // Ladder R3, R3-1: the save runs to its end once it starts — a retire
+        // (D3) stops the download above, never this transaction.
+        return try await applyingRemoteShieldedFromCancellation { db in
             // Ladder R1, N2 — THE ONE-WRITER BELT (`PullStage`'s doc): the
             // stage extends the cursor this round started from; if another
             // round committed under this one, saving now could move the
@@ -832,6 +835,20 @@ public struct SyncEngine: Sendable {
             try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
             return try body(db)
         }
+    }
+
+    /// VX-494 ladder R3, R3-1 — THE SAVE, SHIELDED from the round's cancellation. A retired round (a lock's
+    /// teardown, a chain replacement — D3) stops its DOWNLOAD between windows, but never its SAVE: GRDB turns a
+    /// task's cancellation into an interrupt of the write in flight, which rolls it back, and the save is the long
+    /// phase of a first catch-up (~4 min on her ~108k rows) — cancelled, the next round would redo it whole, and a
+    /// Mac that locks while left alone would never land it. So the save runs in an unstructured task this round
+    /// awaits: it inherits the round's task-locals (the dependencies), never its cancellation. A lock that lands
+    /// during it waits for it on the writer (`StoreBinding.lock()` checkpoints on the outgoing writer before it
+    /// closes) — the behavior before D3, and P-VX308-U4-2's precedent (a lock asked while an act runs waits for it).
+    func applyingRemoteShieldedFromCancellation<T: Sendable>(
+        _ body: @escaping @Sendable (Database) throws -> T
+    ) async throws -> T {
+        try await Task { try await self.applyingRemoteWithDeferredFKs(body) }.value
     }
 
     /// All row IDs arriving in this batch, by table — a forward-referenced

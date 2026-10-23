@@ -144,8 +144,9 @@ public actor SyncScheduler {
     }
 
     /// Retires this scheduler permanently: no NEW round can ever start,
-    /// and the current one, if any, is CANCELLED (below — VX-494 D3);
-    /// `awaitIdle` observes it end.
+    /// and the current one, if any, is CANCELLED (below — VX-494 D3: its
+    /// download stops, a save already running finishes); `awaitIdle`
+    /// observes it end.
     /// The session layer retires a chain BEFORE draining and replacing it —
     /// a trigger Task that captured the old scheduler before the swap must
     /// not be able to revive the retired chain after the drain (Phase 8
@@ -159,6 +160,13 @@ public actor SyncScheduler {
     /// the offline class every round half already survives (outbox intact,
     /// cursor unmoved, the windows it COMPLETED staged — the one in flight is
     /// dropped and fetched again by the next round).
+    ///
+    /// The cancel never reaches the SAVE (ladder R3, R3-1): the pull's one
+    /// apply transaction runs shielded from it
+    /// (`SyncEngine.applyingRemoteShieldedFromCancellation`), so a retire that
+    /// lands during the save lets it commit — and a lock that follows waits
+    /// for it on the writer, exactly as before D3. Cancelled, the save would
+    /// roll back and the next round would redo the whole of it.
     public func retire() {
         retired = true
         followUpRequested = false
