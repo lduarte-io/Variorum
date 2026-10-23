@@ -1,5 +1,5 @@
-# VX-494 — the morning handoff: finishing the 0.10 window (written 2026-10-23 ~04:40 MDT; FINALIZED overnight —
-every `PENDING` below is filled before the night ends, or says plainly why it wasn't)
+# VX-494 — the morning handoff: finishing the 0.10 window (written 2026-10-23 ~04:40 MDT; FINALIZED ~09:25 MDT —
+VX-494 merged and installed; nothing below is pending)
 
 ## THE PASTE-READY KICKOFF PROMPT (for her, in the morning)
 
@@ -21,8 +21,12 @@ says so.
    on 0.10 (9093). The known per-Mac redo list after a fresh library: MCP client setups re-run when you want them
    (Settings ▸ MCP), the search index rebuilds itself, per-note mode/place memory and this Mac's store-scoped
    defaults start fresh. If you set the idle lock to Never for the crossing, set it back (Settings ▸ Protection).
-   PENDING(the install line — whether the fixed build is on the Pro, its build number, and the one-line check:
-   About Variorum shows it; the sync row says Synced).
+   **The fixed build is INSTALLED on the Pro: 0.10 (9162)** (2026-10-23 ~09:20, from main at the VX-494 merge; A1
+   `Backups/safety-copies/variorum-vx494-a1-20261023T150419Z`, 6 files cmp-verified; codesign OK; sha256 identical;
+   NOT launched — its first launch migrates your library to v1_32, a local-only empty table). Check: About Variorum
+   says 9162, and the sync row says Synced (the round is incremental now — your Pro is caught up). Rollback, only if
+   you ever need it: the 9093 bundle is kept at `/Users/Shared/vx494-rollback/Variorum-0.10-9093.app` — but after
+   9162 has opened your library, going back also needs that A1 (9093 refuses a store migrated past it).
 3. **The Air (a Claude session ON the Air, then your hands):** paste APPENDIX A below into a Claude session running
    in the Air's own GUI login (ssh builds fail codesign). It installs the fixed build — it refuses to build from a
    main that doesn't contain the VX-494 merge. Then your Air crossing by hand: open Variorum → the pre-design face →
@@ -106,8 +110,11 @@ rules this night added to `.claude/settings.local.json` (the helper, `cliclick`,
 - **Evidence:** the 18 VX-494 pins green; the sync sweep 344/80; the core debug 3326/434 + release 3297/429 (the one
   red each, the known MCP timing load-flake, passes alone on this branch AND main); the full Mac suite 5118/898 (the
   one red a masthead layout test, green alone → VX-499); the full phone suite 808/126 green.
-- **Merge + install:** PENDING(the PR number and merge SHA; the Pro install — A1 name, build number, codesign,
-  sha256 — or HELD with the reason).
+- **Merge + install:** PR #185 merged (merge `44226636b`; the merge-moment ledgers `ec94f64b8` — AppSpecRecord's dated
+  entry, QUESTIONS #239, the in-flight row retired); VX-494 Done; the worktree and branch removed. The Pro runs **0.10
+  (9162)** (step 2 above). The dev slot was restored whole at 06:03 (your dev library opened quietly with the
+  October-20 hold standing). The throwaway still holds test user A's generated 110k-row book and a Standard vault under
+  the throwaway passphrase — yours to delete with the project.
 - **The dev slot:** PENDING(restored whole — the walk library removed, your 9 dev files back by `mv`, the plain
   relaunch's notice once — or, if a step needed you, exactly what remains).
 

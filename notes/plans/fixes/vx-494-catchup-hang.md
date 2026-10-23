@@ -1,6 +1,6 @@
 # VX-494 — the large-corpus first catch-up never lands
 
-**STATUS: OPEN 2026-10-23 — the fix built and live-proven on the throwaway at her corpus's scale; THE LADDER CLOSED at
+**STATUS: CLOSED 2026-10-23 — MERGED (PR #185, merge `44226636b`) and INSTALLED on the Pro (0.10 (9162)); the fix built and live-proven on the throwaway at her corpus's scale; THE LADDER CLOSED at
 its cap (three fresh `opus-reviewer` rounds: r1 1 MAJOR, r2 1 MAJOR, r3 1 MAJOR — each fixed by a fresh implementer, the
 final round's fixes checked line by line by the orchestrator); the closing Mac + phone runs next, then the closeout, the
 PR merge and the Pro install.** Branch `vx-494-catchup-hang`, worktree `~/dev/variorum-vx-494`, the Pro. **The cast
@@ -20,8 +20,8 @@ hitting the safeguards"). The charter is `notes/handoffs/vx-494-kickoff.md`; the
 | 3 | The mechanism named (trace) | DONE — H1 CONFIRMED by her real crossing (HER EXPERIMENT'S RESULT): the first catch-up commits when left alone (11.6 min download + 4.3 min save); every morning failure was an interruption of an all-or-nothing round |
 | 4 | Fix + red-on-old pin | DONE — D1+D2 `c1583de0b`, D3 `c33f18f09`, the schema `f6658017b`; pins red-on-old (`b5ff84236`) + six reverts; THE LIVE PROOF (05:07); the R1 fixes `5f983faa7`…`8ec29c300`; the R2 fixes `1b9cf434d`…`1fa82b065`; the R3 fixes `a790a5d24`…`8919a74ba` — each round's LIVE STATUS below |
 | 5 | Ladder | DONE at the cap — r1/r2/r3 (`vx-494-ladder-round-1.md`/`-2.md`/`-3.md`), every finding dispositioned (the FINAL CALLS sections); r3's fixes checked line by line (THE ORCHESTRATOR'S CHECK below) |
-| 6 | Closing runs, PR, merge | CLOSING RUNS DONE (THE CLOSING RUNS below); the PR + merge next |
-| 7 | Release build + A1 + install; her crossing retry | NOT-STARTED |
+| 6 | Closing runs, PR, merge | DONE — THE CLOSING RUNS below; PR #185 merged (merge `44226636b`); the merge-moment ledgers on main `ec94f64b8` (AppSpecRecord, QUESTIONS #239, the in-flight row retired); VX-494 Done (VX-492/493 left open with the re-trace for her #239 (e)); born VX-495…VX-499; the worktree + branch removed |
+| 7 | Release build + A1 + install; her crossing retry | DONE — her crossing had ALREADY landed (04:12, left alone); A1 `Backups/safety-copies/variorum-vx494-a1-20261023T150419Z` (6 files, `cmp` each, zero instances); the 9093 bundle kept at `/Users/Shared/vx494-rollback/`; Release built from main into `DerivedData/release-vx494` → **0.10 (9162)** at `/Applications` (codesign OK, the binary sha256-identical to the product); NOT launched (its first open migrates her store to v1_32 — hers) |
 
 ## LADDER ROUND 1 — THE FINAL CALLS (the orchestrator, same-model arbitration against the spec, 2026-10-23 ~05:15)
 
