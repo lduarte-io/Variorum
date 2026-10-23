@@ -117,3 +117,55 @@ coordinator — claim directly); NO second /Applications refresh anywhere withou
 delete AFTER everything; `/Users/Shared/vx329-rehearsal/` STAYS (hers). Linear by the raw GraphQL
 (`~/.variorum/linear.key`; the MCP needs OAuth). If a step needs her (Touch ID presses, GUI, her credentials,
 adjudication) — pause and ask; her real credentials are never typed or handled by a session.
+
+## APPENDIX A — the Air install prompt (paste-ready FOR HER, for a Claude session ON the Air, after this run merges)
+
+```
+Install Variorum 0.10 on this Mac (the Air) — the VX-329/VX-488 release window is live, at Lillian's
+explicit say-so. The marker-14 mirror deploy is DONE; the Pro session handles everything else. Your one
+job is the Air's /Applications refresh, nothing more.
+
+Repo ~/dev/variorum, branch main: git pull --ff-only and verify the tip CONTAINS the VX-488 merge (git log
+--oneline -5 shows the hotfix-run merge; refuse to build from anything older). Variorum is QUIT on this Mac
+and must stay quit (pgrep -fl 'Variorum.app/Contents/MacOS' prints nothing; if an instance appears, STOP and
+tell her — never quit or kill it yourself). The A1 safety copy is ALREADY taken
+(Backups/safety-copies/variorum-vx329-air-a1-20261022T2330Z) plus her Desktop copy — do NOT touch the store,
+do not launch the app.
+
+1. Claim this Mac's own stage lock: Tools/stage claim --who air-0.10-install --reason "the window's Air
+   install" --minutes 60.
+2. cd ~/dev/variorum/App/Variorum && xcodebuild -scheme Variorum -configuration Release -destination
+   'platform=macOS' -derivedDataPath DerivedData/release-0.10 build
+   (a FAILED DerivedData from an ssh attempt sits there — building over it is fine; "CoreSimulator is out of
+   date" is noise; the ssh failure was codesign errSecInternalComponent, which your GUI-session keychain fixes).
+3. On BUILD SUCCEEDED: rm -rf /Applications/Variorum.app && ditto
+   DerivedData/release-0.10/Build/Products/Release/Variorum.app /Applications/Variorum.app
+4. Verify: codesign --verify --deep --strict /Applications/Variorum.app (silence = good); the version reads
+   0.10; sha256 of the installed binary == the fresh product's.
+5. Do NOT launch Variorum — her crossing is hers, by hand, after.
+6. Tools/stage release --who air-0.10-install; report the tip SHA, BUILD SUCCEEDED, codesign output, version,
+   sha256 match. Nothing else: no suites, no walks, no store reads — this Mac runs those only at her explicit
+   say-so, which covers exactly this install.
+```
+
+## APPENDIX B — the VM-8 kickoff prompt (paste-ready FOR HER, after the whole window closes)
+
+```
+/architect-phase vm-8 — the phone's Castle catch-up. The Macs crossed to 0.10 (VX-329 PR #183 + the VX-488
+window hotfixes, marker 14 deployed); my phone's build deliberately refuses to sync until this lands — speed
+matters. Workspace: a main-based worktree (~/dev/variorum-vm-8); VM-5 retired the mobile branch, my phone runs
+main-built installs. Read first, in full: notes/MobileSoul.md (PL-47..PL-51 — PL-51 is this run's charter), the
+VM-8 ticket + its comments, notes/CastleRules.md WHOLE, notes/SurfaceContracts.md (Doors — protection +
+portability), the vx-329 plan's phone records (the U1 F-U1-3 flag, the PHONE FIX LEG record with F-PH-1/F-PH-2,
+the U4 record's F-U4-2/F-U4-3), notes/plans/fixes/vx-488-window-hotfixes.md (the Castle sync-keys fix is
+core/shared — the phone INHERITS it, and this run's acceptance must prove the phone's own Castle first round,
+Face ID gate — the same class the Mac just fixed), and MobileStructuralTests' MobileNoRedirectSweepTests
+exemption list (every `why` names which face makes it reachable). The scope: the phone's road faces — the
+Protection screen, the crossings (Face ID gate choice), the account doors + join, the words-card band (VM-23),
+and HER PRE-DESIGN FACE with Start fresh (the shared fact and whole set-aside already compile for iOS — only
+the face is missing). My wording calls (F-PH-1's Mac-naming model sentences, F-PH-2's leave sentence) are
+MINE — bundle them, don't invent. Evidence: the phone suites green, a simulator walk, and the DEVICE INSTALL
+at the end (the devicectl road) so my phone syncs against marker 14 — acceptance is my phone pulling my
+library whole, INCLUDING its first round under my account's Castle mode. The diff touches custody-adjacent
+words and Shared/ protection code: Fable cold-reviews.
+```
