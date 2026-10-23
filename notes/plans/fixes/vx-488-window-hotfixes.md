@@ -450,7 +450,7 @@ ladder re-reads it.
   items go as before; re-run RED on the pre-fix product (the fix files stashed, then restored): `✘ Test run with 2 tests in
   1 suite failed … with 3 issues` — the swap pin ✘ ×2, the forget pin ✘ on `session[account] == nil` only (its item line
   ✔).
-- Piece L1 — the fixes: DONE (this commit) — the design as built, with ONE PREMISE CORRECTION to THE FINAL CALLS' clear 1:
+- Piece L1 — the fixes: DONE (`094130af7`) — the design as built, with ONE PREMISE CORRECTION to THE FINAL CALLS' clear 1:
   - **Clear 1 sits in the swap step itself (`ActContext.makeMineSwap`), not in `forgetOtherLibraries`.** The ruling
     places it in the after-commit "where `outgoing` is the acting context's `library.record?.account` (the old record,
     still in hand at that step)" — but by `forgetOtherLibraries` the OLD record is NOT in hand: `makeMineSwap` has just
@@ -476,10 +476,19 @@ ladder re-reads it.
   **The pins on the fixed tree:** core `--filter SyncKeysSessionHold` `✔ Test run with 5 tests in 2 suites passed`; the
   harness `--filter "TouchIDUnlockSyncKeys|OneSyncKeysLeaf"` `✔ Test run with 7 tests in 3 suites passed` (the reworded
   lines are log-only).
-- Piece L2 — the behavioral reverts: NOT-STARTED — named before they run: **R8** (`Copies.swift` — clear 1's drop
-  removed) → the swap pin; **R9** (`AccountActs.swift` — clear 2's line removed) → the forget pin. Each on the committed
-  tree, restored by `git checkout --` of its one file, `git diff --exit-code` after.
-- Piece L3 — evidence: NOT-STARTED.
+- Piece L2 — the behavioral reverts: DONE — **no revert is in flight** (each on `094130af7`, restored by `git checkout --`
+  of its one file, `git diff --exit-code` clean after each; `swift test --filter SyncKeysSessionHold`): **R8**
+  (`Copies.swift` — clear 1's drop removed) `✘ Test run with 5 tests in 2 suites failed … with 2 issues` — the swap pin ✘
+  ×2 (both gates: `mine.world.session[account] == nil`), the forget pin ✔, pin 1's three ✔; **R9** (`AccountActs.swift` —
+  clear 2's line removed) `✘ … with 1 issue` — the forget pin ✘ (`fixture.world.session[account] == nil`), the swap pin
+  ✔. Each clear is pinned by its own test alone.
+- Piece L3 — evidence: DONE (the final tree = `094130af7`'s product files; foreground, in sequence): the core protection +
+  auth/account set (the same filter + the new suite) debug **`✔ Test run with 533 tests in 102 suites passed`**, release
+  (`swift test -c release`) **`✔ Test run with 509 tests in 98 suites passed`**, 0 skipped either, the new suite ran in
+  both; the harness **`✔ Test run with 388 tests in 67 suites passed`**; `build-for-testing` Mac (`-scheme Variorum`,
+  `DerivedData/vx488-m1`) **`** TEST BUILD SUCCEEDED **`** and iOS (`-scheme VariorumMobile`, `DerivedData/vx488-m1-ios`)
+  **`** TEST BUILD SUCCEEDED **`** — no error, no warning in a touched file. F4: no code (VX-490). The plain-text bring-in
+  residue above waits on the reviewer's call.
 
 ## M2 RECORD (implementer session B — Opus, xhigh) — VX-486
 
