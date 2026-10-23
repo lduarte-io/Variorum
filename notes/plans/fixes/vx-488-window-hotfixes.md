@@ -511,7 +511,18 @@ THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the r
   walk switch: `.dev` never syncs, `.real` may; green on both sides); `theDerivationReadsTheLaunchsLiftOnlyInDebug` ✘
   (no `#if DEBUG` arm before the assignment — one undivided line); `theRetiredCredentialSweepGuardsOnTheRealStoreNeverTheLift`
   ✘×2 (the guard reads `sync.allowsSync`).
-- Piece 1 — the fix + the new-seam pins (the lift's three arms, pure): NOT-STARTED. The settled design (below).
+- Piece 1 — the fix + the new-seam pins: DONE (this commit). `Shared/Protection/ProtectionWalkSwitch.swift`
+  (`SyncFenceLift`, the pure `syncFenceLift(walkProject:productionHost:)`, the logged `syncFenceLiftForThisLaunch`),
+  `Shared/ProjectConfig.swift` (`walkProject` internal; `walkSyncFenceLift` — the launch's one decision — inside its one
+  `#if DEBUG` fence), `Shared/AppServices.swift` (the DEBUG/Release arms of the derivation; the pure DEBUG
+  `allowsSync(storeVariant:walkLift:)`; the sweep's `storeVariant == .real` guard), `Shared/SyncSession.swift` (its A4
+  header comment made true — no code). Four new-seam pins in `SyncWalkFenceTests` (`noWalkProjectHoldsTheFence`,
+  `aWalkProjectThatIsNotProductionLiftsTheFence`, `theProductionRefIsRefusedAndTheFenceStands` — six production-ref
+  shapes built from `ProjectConfig.productionProjectURL` plus the fail-closed arm — and
+  `thisLaunchsDecisionWithNoWalkSwitchIsNone`). **The harness on the fixed tree: `--filter
+  "SyncWalkFenceTests|SyncLockedRowTests|ProtectionWalkProjectTests"` `✔ Test run with 16 tests in 3 suites passed`**
+  (Piece 0b's two red pins now green; the existing walk-project source pin — one `#if DEBUG` fence in `ProjectConfig` —
+  still green).
 - Piece 2 — the behavioral reverts (named here BEFORE they run): NOT-STARTED.
 - Piece 3 — evidence: NOT-STARTED.
 

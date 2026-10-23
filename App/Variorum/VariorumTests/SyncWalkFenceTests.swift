@@ -85,6 +85,74 @@ struct SyncWalkFenceTests {
         #expect(!services.contains("ProcessInfo"), "AppServices reads no environment of its own")
     }
 
+    // MARK: - The lift's three arms (pure — the walk project injected; this process's environment untouched)
+
+    /// The production mirror's own host — the ONE place its ref is written (`ProjectConfig.productionProjectURL`); the
+    /// pins build every production-shaped URL from it, never a second literal.
+    private static var productionHost: String? { ProjectConfig.productionProjectURL.host }
+
+    private static func walk(_ url: String) -> ProtectionWalkSwitch.WalkProject {
+        ProtectionWalkSwitch.WalkProject(url: URL(string: url)!, apiKey: "sb_publishable_walk")
+    }
+
+    /// ARM 1, pure: no walk project resolved ⇒ the fence holds (and the derivation keeps the real store's road).
+    @Test func noWalkProjectHoldsTheFence() {
+        let lift = ProtectionWalkSwitch.syncFenceLift(walkProject: nil, productionHost: Self.productionHost)
+        #expect(lift == .none)
+        #expect(!lift.lifts)
+        #expect(AppServices.allowsSync(storeVariant: .dev, walkLift: lift) == false)
+        #expect(AppServices.allowsSync(storeVariant: .real, walkLift: lift) == true)
+    }
+
+    /// ARM 2 — THE LIFT: a walk project that is not the production mirror (the throwaway's shape) ⇒ the dev store may
+    /// configure sync against it, said by its host alone.
+    @Test func aWalkProjectThatIsNotProductionLiftsTheFence() {
+        let lift = ProtectionWalkSwitch.syncFenceLift(
+            walkProject: Self.walk("https://walkthrowaway.supabase.co"), productionHost: Self.productionHost)
+        #expect(lift == .lifted(host: "walkthrowaway.supabase.co"))
+        #expect(lift.lifts)
+        #expect(AppServices.allowsSync(storeVariant: .dev, walkLift: lift) == true, "the walk's rounds land")
+        #expect(AppServices.allowsSync(storeVariant: .real, walkLift: lift) == true, "the real store's road unchanged")
+    }
+
+    /// ARM 3 — THE REFUSAL, fail-loud: a walk project carrying the production mirror's REF anywhere (its own URL, a
+    /// capitalised host, a trailing dot, a sub-host, a path) never lifts — the fence stands; and a production host with
+    /// no derivable ref refuses too (fail closed).
+    @Test func theProductionRefIsRefusedAndTheFenceStands() throws {
+        let production = ProjectConfig.productionProjectURL
+        let host = try #require(production.host)
+        let ref = try #require(host.split(separator: ".").first.map(String.init))
+        let shapes = [
+            production.absoluteString,
+            "https://\(host.uppercased())",
+            "https://\(host).",
+            "https://db.\(host)",
+            "https://\(host)/rest/v1",
+            "https://walkthrowaway.supabase.co/\(ref)",
+        ]
+        for shape in shapes {
+            let project = Self.walk(shape)
+            let lift = ProtectionWalkSwitch.syncFenceLift(walkProject: project, productionHost: Self.productionHost)
+            #expect(lift == .refusedProduction(host: project.url.host ?? ""), "\(shape) must refuse")
+            #expect(!lift.lifts)
+            #expect(AppServices.allowsSync(storeVariant: .dev, walkLift: lift) == false, "the fence stands")
+        }
+        // Fail closed: no production host to derive the ref from refuses every walk project.
+        for productionHost: String? in [nil, ""] {
+            let lift = ProtectionWalkSwitch.syncFenceLift(
+                walkProject: Self.walk("https://walkthrowaway.supabase.co"), productionHost: productionHost)
+            #expect(lift == .refusedProduction(host: "walkthrowaway.supabase.co"))
+        }
+    }
+
+    /// THE LAUNCH'S ONE DECISION in this process (no walk switch): the fence holds — the value `AppServices` reads.
+    @Test func thisLaunchsDecisionWithNoWalkSwitchIsNone() throws {
+        try #require(ProcessInfo.processInfo.environment[ProtectionWalkSwitch.projectURLKey] == nil,
+                     "this pin's world is a launch with no walk switch")
+        #expect(ProjectConfig.walkProject == nil)
+        #expect(ProjectConfig.walkSyncFenceLift == .none)
+    }
+
     /// A SECOND-ORDER FENCE KEPT (red on old: the guard read `sync.allowsSync`): the retired-credential sweep reaches the
     /// machine's LOGIN keychain — the installed build's items — so it runs for the REAL store only, by the store variant
     /// itself; a lifted dev-store session must never reach it (the bridge retirement's round-2 N1 class).

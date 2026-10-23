@@ -139,6 +139,60 @@ nonisolated enum ProtectionWalkSwitch {
         return project
     }
 
+    // MARK: - VX-483 — the A4 fence's walk lift (a walk's rounds land against the throwaway project, in the app)
+
+    /// What THIS launch's walk project does to the A4 fence (a dev-store session never configures sync —
+    /// `AppServices`' derivation). The lift is DEBUG walk machinery (this file is `#if DEBUG` whole), decided once per
+    /// process from `ProjectConfig`'s OWN resolved walk project — never a second environment parse.
+    enum SyncFenceLift: Equatable, Sendable {
+        /// No walk project resolved this launch (no switch, or one that names nothing): the fence stands.
+        case none
+        /// A walk project that is NOT the production mirror: the dev store's sessions may configure sync against it (the
+        /// coordinates `ProjectConfig` already points every transport and the sign-in at).
+        case lifted(host: String)
+        /// A walk project whose URL carries the production mirror's ref — REFUSED, fail-loud: the fence stands, and the
+        /// launch says why.
+        case refusedProduction(host: String)
+
+        /// Whether the dev store may configure sync this launch.
+        var lifts: Bool {
+            if case .lifted = self { return true }
+            return false
+        }
+    }
+
+    /// The lift's rule, pure. `productionHost` is the production mirror's own host (`ProjectConfig.productionProjectURL`
+    /// — the one place its ref is written); the REF is that host's first label, matched case-folded ANYWHERE in the walk
+    /// project's URL (a subdomain, a trailing dot, a capitalised host, a path all refuse). A production host with no
+    /// derivable ref refuses too — the fence fails closed.
+    static func syncFenceLift(walkProject: WalkProject?, productionHost: String?) -> SyncFenceLift {
+        guard let walkProject else { return .none }
+        let host = walkProject.url.host ?? ""
+        guard let ref = productionHost?.split(separator: ".").first.map({ $0.lowercased() }), !ref.isEmpty,
+              !walkProject.url.absoluteString.lowercased().contains(ref)
+        else { return .refusedProduction(host: host) }
+        return .lifted(host: host)
+    }
+
+    /// The launch's one decision (`ProjectConfig.walkSyncFenceLift` calls it once, at first use), said once in the
+    /// protection log — the host only, never the URL or the key. Nothing is said when no walk project resolved.
+    static func syncFenceLiftForThisLaunch(walkProject: WalkProject?, productionHost: String?) -> SyncFenceLift {
+        let lift = syncFenceLift(walkProject: walkProject, productionHost: productionHost)
+        switch lift {
+        case .none:
+            break
+        case .lifted(let host):
+            ProtectionOpenRoad.log(
+                "A4 FENCE (VX-483): LIFTED for this launch — the dev store may sync against the walk project at \(host), "
+                    + "not the production mirror")
+        case .refusedProduction(let host):
+            ProtectionOpenRoad.log(
+                "A4 FENCE (VX-483): the lift is REFUSED — the walk project (\(host)) carries the production mirror's ref; "
+                    + "the dev store's sync fence stands")
+        }
+        return lift
+    }
+
     /// Forget `roads` through the production leaves — the dev scope's silent items; this library's Apple keys.
     static func forget(_ roads: Set<Road>, _ system: ProtectionSystem) {
         if roads.contains(.silent) {
