@@ -728,6 +728,24 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   *[removed for publication]*
   (Copy full text) before or after Start fresh (the aside in Previous Libraries stays whole); signing in brings
   back nothing for her.
+*[removed for publication]*
+  OBVIOUSLY has to be pre launch… how did that get exposed via testing and not considered a bug / traced / fixed? …
+  *[removed for publication]*
+  case proves the class can silently cost a whole first sync; Pre-launch pending her word); VX-506 Low → Medium with the
+  field evidence (the pre-join locked line asserts "your account's sync keys" for a VAULTLESS account — it misled her
+  *[removed for publication]*
+  open this library" is the PASSPHRASE leg against the library (`wordsDoNotOpen` is a separate sentence), so his library
+  THEN had a passphrase; his 4:35 sheet reads "This library has no passphrase yet" — unreachable for the same library —
+  so he pressed START FRESH AGAIN in between, and the twelve words saved in his 1Password belong to the DEAD library.
+  The road given (one sitting, no gaps): the words card → record THOSE words → Turn on sync → new passphrase twice →
+  those words → done; a refusal on that exact sequence is a real bug. Server certainty stands: no vault ever landed for
+  *[removed for publication]*
+  road — the marker-14 server refuses every 0.9.8 round whole (the §12 grammar); her writing comes out by Copy full
+  text / the scheduled Markdown export, then update → Start fresh → JOIN (her vault exists — she gets the join arm,
+  with yesterday's passphrase). THE SITE PAGES drafted and committed locally (the agent's d317b52 — /variorum/privacy +
+  /variorum/support, the App Store brief's load-bearing paths; /variorum/help 301s): the orchestrator's review + deploy
+  pending; ONE fact flag — pre-0.10 vaults may hold a dormant Apple-held master copy (17 leaves the column unread, not
+  *[removed for publication]*
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
