@@ -25,8 +25,9 @@ import OSLog
 /// device alone, permanently. A stage is valid only for the ledger state it was fetched under: any advance discards
 /// it. The cost is one re-download exactly when a purge landed meanwhile (the ledger page is unpaged, so a pre-pass
 /// with nothing new moves nothing). The stage is never a second truth: the apply
-/// reads it whole, in `server_seq` order — exactly the rows today's in-memory fetch would have held — and empties it
-/// in the transaction that moves the cursor, whether that apply reaches the head or stalls.
+/// reads it whole, in `server_seq` order — each row once, at its newest staged seq: what a fresh round from the base
+/// would fetch — and empties it in the transaction that moves the cursor, whether that apply reaches the head or
+/// stalls.
 ///
 /// ONE WRITER: the stage assumes one round at a time per store — the scheduler's serialization (`SyncScheduler`
 /// is the only production caller of `pull()`); a retired chain's download is cancelled (VX-494 D3 — a save already

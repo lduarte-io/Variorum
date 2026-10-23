@@ -553,9 +553,10 @@ public struct SyncEngine: Sendable {
                 }
                 fetchCursor = windowEnd
             }
-            // The batch: every staged row in `server_seq` order — exactly what
-            // the in-memory fetch held before the stage existed, now including
-            // windows an earlier, interrupted round already downloaded.
+            // The batch: every staged row in `server_seq` order — each row
+            // once, at its newest staged seq: what a fresh round from the base
+            // would fetch — now including windows an earlier, interrupted round
+            // already downloaded.
             if let rows = try await database.read({ try PullStage.rows($0) }) {
                 pulled = rows
                 break
