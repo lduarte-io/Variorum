@@ -1,5 +1,6 @@
 import Foundation
 import GRDB
+import OSLog
 
 /// VX-494 (D2) — THE PULL STAGE: a first catch-up's downloaded windows, held in the local-only `sync_pull_stage`
 /// table (v1_32) until the round's one apply transaction commits them.
@@ -11,8 +12,11 @@ import GRDB
 /// its identity resumes the download where the stage stops.
 ///
 /// THE IDENTITY (one `sync_state` header row): the committed cursor the stage extends (`base`), how far it reaches
-/// (`seq`), and the round's corpus key id and device id. A round resumes only when all three of base, key and device
-/// match; anything else discards the stage and fetches from the cursor. The stage is never a second truth: the apply
+/// (`seq`), the round's corpus key id and device id, and the build that wrote it — the stage `format` and the lockstep
+/// marker (ladder R1, F1: the stage is an ON-DISK format that outlives app updates). A round resumes only when base,
+/// key, device, format and marker all match; anything else — a header that will not decode included — discards the
+/// stage and fetches from the cursor, and so does a staged row that will not decode (one re-download, never a
+/// wedge). The stage is never a second truth: the apply
 /// reads it whole, in `server_seq` order — exactly the rows today's in-memory fetch would have held — and empties it
 /// in the transaction that moves the cursor, whether that apply reaches the head or stalls.
 ///
@@ -23,11 +27,30 @@ import GRDB
 enum PullStage {
     static let headerKey = "pull_stage"
 
+    /// THE STAGE FORMAT (ladder R1, F1 (1)): what a staged row's payload IS — today the synthesized `Codable` JSON of
+    /// `SyncPulledRow` (and so of `SyncRow` and `SyncValue`), applied by today's apply. **Bump it whenever that
+    /// encoding or its meaning to the apply changes** (a renamed or added property on those types, a new wire→row
+    /// transform): a stage written under another format is discarded, never resumed.
+    static let format = 1
+
+    /// The core's one log line (F1 (2) — a discarded stage is worth a line in the unified log; nothing else here
+    /// speaks).
+    static let log = Logger(subsystem: "io.lduarte.Variorum", category: "sync")
+
     struct Header: Codable, Equatable {
         var base: Int64
         var seq: Int64
         var keyID: String
         var deviceID: String
+        /// F1 (1): the stage format and the lockstep marker of the build that wrote it.
+        var format: Int
+        var lockstep: Int
+    }
+
+    /// A stage this round fetched itself, from its committed cursor, that still will not decode — impossible while
+    /// this build encodes what it decodes; the stage is cleared and the round refuses rather than loop.
+    struct UndecodableStage: Error, CustomStringConvertible {
+        var description: String { "the pull stage this round downloaded would not decode" }
     }
 
     /// What a round does with the stage it finds — decided by a READ, so an ordinary round (no stage) never takes
@@ -44,6 +67,7 @@ enum PullStage {
     ) throws -> Plan {
         let header = try readHeader(db)
         if let header, header.base == base, header.keyID == keyID, header.deviceID == deviceID,
+           header.format == format, header.lockstep == SyncSchema.lockstepVersion,
            header.seq > base {
             return .resume(from: header.seq)
         }
@@ -73,15 +97,23 @@ enum PullStage {
                     """,
                 arguments: [item.row.table, item.row.rowID, item.serverSeq, payload])
         }
-        try writeHeader(db, Header(base: base, seq: seq, keyID: keyID, deviceID: deviceID))
+        try writeHeader(db, Header(
+            base: base, seq: seq, keyID: keyID, deviceID: deviceID,
+            format: format, lockstep: SyncSchema.lockstepVersion))
     }
 
-    /// Every staged row, in `server_seq` order — the batch the apply consumes.
-    static func rows(_ db: Database) throws -> [SyncPulledRow] {
+    /// Every staged row, in `server_seq` order — the batch the apply consumes — or nil when any staged payload will
+    /// not decode (F1 (2)): a row nobody can read is treated as the unreadable header is, and the caller discards
+    /// the stage. A database error still throws.
+    static func rows(_ db: Database) throws -> [SyncPulledRow]? {
         let decoder = JSONDecoder()
-        return try String.fetchAll(
-            db, sql: "SELECT payload FROM \(SyncPullStageSchema.table) ORDER BY server_seq")
-            .map { try decoder.decode(SyncPulledRow.self, from: Data($0.utf8)) }
+        var rows: [SyncPulledRow] = []
+        for payload in try String.fetchAll(
+            db, sql: "SELECT payload FROM \(SyncPullStageSchema.table) ORDER BY server_seq") {
+            guard let row = try? decoder.decode(SyncPulledRow.self, from: Data(payload.utf8)) else { return nil }
+            rows.append(row)
+        }
+        return rows
     }
 
     /// The stage and its header, gone — inside the apply transaction that moves the cursor, and wherever the

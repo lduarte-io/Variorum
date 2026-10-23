@@ -494,9 +494,10 @@ public struct SyncEngine: Sendable {
         // minutes of download that every interruption threw away. A stage
         // resumes only for this round's own identity (`PullStage.plan`).
         var fetchCursor = since
-        switch try await database.read({
+        let plan = try await database.read {
             try PullStage.plan($0, base: since, keyID: keyID, deviceID: deviceID)
-        }) {
+        }
+        switch plan {
         case .resume(let reach):
             fetchCursor = reach
         case .fresh:
@@ -504,44 +505,63 @@ public struct SyncEngine: Sendable {
         case .discardThenFresh:
             try await database.write { try PullStage.clear($0) }
         }
+        // Ladder R1, F1 (2): only a stage an EARLIER round left can fail to
+        // decode (this round's own windows were encoded by this build a
+        // moment ago) — so one discard-and-refetch from the committed cursor,
+        // then never again this round.
+        var mayRefetch = plan != .fresh && plan != .discardThenFresh
+        var pulled: [SyncPulledRow]
         while true {
-            // VX-494 (D3): a retired round (a lock's teardown, a chain
-            // replacement) stops between windows instead of downloading the
-            // rest of the feed in the background; what it fetched is staged.
-            try Task.checkCancellation()
-            // Phase 13j: the device id rides only a window whose `since` is
-            // this device's COMMITTED cursor — the server's device_cursor
-            // upsert is what makes the purge horizon computable. Any other
-            // window (mid-round, or a resumed round's first) passes nil: its
-            // `since` is an uncommitted fetch position, and recording one
-            // would over-report what this device has integrated if the apply
-            // below never commits.
-            let windowSince = fetchCursor
-            let windowDevice = fetchCursor == since ? deviceID : nil
-            let window = try await signer.call(rpc: "sync_pull") { proof in
-                try await self.transport.pull(
-                    since: windowSince, limit: self.pullWindowSize, activeKeyID: keyID,
-                    keyProof: proof, deviceID: windowDevice)
+            while true {
+                // VX-494 (D3): a retired round (a lock's teardown, a chain
+                // replacement) stops between windows instead of downloading the
+                // rest of the feed in the background; what it fetched is staged.
+                try Task.checkCancellation()
+                // Phase 13j: the device id rides only a window whose `since` is
+                // this device's COMMITTED cursor — the server's device_cursor
+                // upsert is what makes the purge horizon computable. Any other
+                // window (mid-round, or a resumed round's first) passes nil: its
+                // `since` is an uncommitted fetch position, and recording one
+                // would over-report what this device has integrated if the apply
+                // below never commits.
+                let windowSince = fetchCursor
+                let windowDevice = fetchCursor == since ? deviceID : nil
+                let window = try await signer.call(rpc: "sync_pull") { proof in
+                    try await self.transport.pull(
+                        since: windowSince, limit: self.pullWindowSize, activeKeyID: keyID,
+                        keyProof: proof, deviceID: windowDevice)
+                }
+                guard !window.isEmpty else { break }
+                // THE SEAM, pull half (Phase 14b): every arriving row is opened
+                // BEFORE it is written anywhere — a decrypt refusal (plaintext-in-
+                // encrypted-column, tamper, wrong key) throws here, with the
+                // cursor unmoved and this window unstaged. Everything downstream
+                // (the stage, straggler guard, merge, repairs, apply) is
+                // plaintext-only and byte-untouched.
+                let opened = try window.map(crypto.decryptFromWire)
+                let windowEnd = window.last!.serverSeq
+                try await database.write { db in
+                    try PullStage.stage(
+                        db, opened, base: since, keyID: keyID, deviceID: deviceID, through: windowEnd)
+                }
+                fetchCursor = windowEnd
             }
-            guard !window.isEmpty else { break }
-            // THE SEAM, pull half (Phase 14b): every arriving row is opened
-            // BEFORE it is written anywhere — a decrypt refusal (plaintext-in-
-            // encrypted-column, tamper, wrong key) throws here, with the
-            // cursor unmoved and this window unstaged. Everything downstream
-            // (the stage, straggler guard, merge, repairs, apply) is
-            // plaintext-only and byte-untouched.
-            let opened = try window.map(crypto.decryptFromWire)
-            let windowEnd = window.last!.serverSeq
-            try await database.write { db in
-                try PullStage.stage(
-                    db, opened, base: since, keyID: keyID, deviceID: deviceID, through: windowEnd)
+            // The batch: every staged row in `server_seq` order — exactly what
+            // the in-memory fetch held before the stage existed, now including
+            // windows an earlier, interrupted round already downloaded.
+            if let rows = try await database.read({ try PullStage.rows($0) }) {
+                pulled = rows
+                break
             }
-            fetchCursor = windowEnd
+            // F1 (2): a staged row nobody can read is a stage nobody can vouch
+            // for — discarded like an unreadable header, never resumed again.
+            try await database.write { try PullStage.clear($0) }
+            guard mayRefetch else { throw PullStage.UndecodableStage() }
+            PullStage.log.error(
+                "pull stage: a staged row would not decode; the stage was discarded and the download starts again from the committed cursor \(since, privacy: .public)")
+            mayRefetch = false
+            fetchCursor = since
         }
-        // The batch: every staged row in `server_seq` order — exactly what
-        // the in-memory fetch held before the stage existed, now including
-        // windows an earlier, interrupted round already downloaded.
-        let pulled = try await database.read { try PullStage.rows($0) }
         var emptyReport = PullReport()
         emptyReport.newCursor = since
         guard !pulled.isEmpty else {
