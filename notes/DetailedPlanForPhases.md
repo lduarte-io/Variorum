@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-510 — Run: the first-run sync failures** (URGENT; `/architect-phase vx-510`, kickoff `notes/handoffs/vx-510-kickoff.md`; members VX-498 · VX-507 · VX-506 · VX-509, rider VX-503, the VX-508 watch; record `notes/plans/fixes/vx-510-first-run-sync.md`). Surfaces: the Standard set-up/join acts (`Shared/Protection`, `Shared/SyncSession`, the act→scheduler seam), the sync status row, the walk fence (the prod test-account exception at her 2026-10-23 ruling), `Tools/` test roads; Sync/-custody slot HELD by this run | VX-510 · `vx-510-first-run-sync` | `~/dev/variorum-vx-510` · the Pro | In flight (kickoff 2026-10-23) |
 
 ### Latest closeout
 
