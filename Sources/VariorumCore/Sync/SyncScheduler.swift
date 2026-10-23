@@ -108,6 +108,8 @@ public actor SyncScheduler {
     private let janitor: PurgeJanitor?
     private var running = false
     private var followUpRequested = false
+    /// VX-494 (D3): the running loop, so `retire()` can cancel its round.
+    private var loopTask: Task<Void, Never>?
     /// Set once by `retire()`; a retired scheduler never starts a round.
     private var retired = false
     private var idleWaiters: [CheckedContinuation<Void, Never>] = []
@@ -133,7 +135,7 @@ public actor SyncScheduler {
             return
         }
         running = true
-        Task { await self.runLoop() }
+        loopTask = Task { await self.runLoop() }
     }
 
     /// Retires this scheduler permanently: no NEW round can ever start
@@ -142,9 +144,18 @@ public actor SyncScheduler {
     /// a trigger Task that captured the old scheduler before the swap must
     /// not be able to revive the retired chain after the drain (Phase 8
     /// review round 2; the follow-up flag is cleared for the same reason).
+    ///
+    /// VX-494 (D3): retiring also CANCELS the round in flight. Before, it ran
+    /// on in the background — after a lock it kept downloading the whole feed
+    /// until its save failed on the closed library (her first crossing round
+    /// did exactly that, ~50 s past the lock). The engine stops between pull
+    /// windows; a cancelled network call throws like a dropped connection,
+    /// the offline class every round half already survives (outbox intact,
+    /// cursor unmoved, the downloaded windows staged).
     public func retire() {
         retired = true
         followUpRequested = false
+        loopTask?.cancel()
     }
 
     /// Suspends until no round is running and no follow-up is pending —
@@ -162,6 +173,7 @@ public actor SyncScheduler {
             await runOneRound()
         } while followUpRequested
         running = false
+        loopTask = nil
         let waiters = idleWaiters
         idleWaiters.removeAll()
         for waiter in waiters { waiter.resume() }
