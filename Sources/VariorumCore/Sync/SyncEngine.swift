@@ -540,9 +540,10 @@ public struct SyncEngine: Sendable {
                 // plaintext-only and byte-untouched.
                 let opened = try window.map(crypto.decryptFromWire)
                 let windowEnd = window.last!.serverSeq
+                let staged = try PullStage.encode(opened)  // off the writer (R1, N3)
                 try await database.write { db in
                     try PullStage.stage(
-                        db, opened, base: since, keyID: keyID, deviceID: deviceID, through: windowEnd)
+                        db, staged, base: since, keyID: keyID, deviceID: deviceID, through: windowEnd)
                 }
                 fetchCursor = windowEnd
             }

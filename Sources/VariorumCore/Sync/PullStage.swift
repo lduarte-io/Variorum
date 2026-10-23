@@ -95,24 +95,41 @@ enum PullStage {
         return (headerRow || staged) ? .discardThenFresh : .fresh
     }
 
-    /// One downloaded window: its opened rows upserted (a row's newer download replaces an older one — the
-    /// state-based feed serves a row again at a higher seq when it changed), the header advanced to the window's end.
+    /// One staged row with its payload already encoded (ladder R1, N3): the JSON encoding runs BEFORE the writer is
+    /// taken, so a window's write holds the writer only for the upserts.
+    struct EncodedRow: Sendable {
+        let table: String
+        let rowID: String
+        let serverSeq: Int64
+        let payload: String
+    }
+
+    /// A downloaded window's opened rows, encoded for the stage — off the writer.
+    static func encode(_ window: [SyncPulledRow]) throws -> [EncodedRow] {
+        let encoder = JSONEncoder()
+        return try window.map { item in
+            EncodedRow(
+                table: item.row.table, rowID: item.row.rowID, serverSeq: item.serverSeq,
+                payload: String(decoding: try encoder.encode(item), as: UTF8.self))
+        }
+    }
+
+    /// One downloaded window: its encoded rows upserted through one cached statement (a row's newer download
+    /// replaces an older one — the state-based feed serves a row again at a higher seq when it changed), the header
+    /// advanced to the window's end.
     static func stage(
-        _ db: Database, _ window: [SyncPulledRow], base: Int64, keyID: String, deviceID: String,
+        _ db: Database, _ window: [EncodedRow], base: Int64, keyID: String, deviceID: String,
         through seq: Int64
     ) throws {
-        let encoder = JSONEncoder()
-        for item in window {
-            let payload = String(decoding: try encoder.encode(item), as: UTF8.self)
-            try db.execute(
-                sql: """
-                    INSERT INTO \(SyncPullStageSchema.table) (table_name, row_id, server_seq, payload)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT (table_name, row_id) DO UPDATE
-                      SET server_seq = excluded.server_seq, payload = excluded.payload
-                      WHERE excluded.server_seq > \(SyncPullStageSchema.table).server_seq
-                    """,
-                arguments: [item.row.table, item.row.rowID, item.serverSeq, payload])
+        let upsert = try db.cachedStatement(sql: """
+            INSERT INTO \(SyncPullStageSchema.table) (table_name, row_id, server_seq, payload)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (table_name, row_id) DO UPDATE
+              SET server_seq = excluded.server_seq, payload = excluded.payload
+              WHERE excluded.server_seq > \(SyncPullStageSchema.table).server_seq
+            """)
+        for row in window {
+            try upsert.execute(arguments: [row.table, row.rowID, row.serverSeq, row.payload])
         }
         try writeHeader(db, Header(
             base: base, seq: seq, keyID: keyID, deviceID: deviceID,
