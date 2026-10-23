@@ -59,7 +59,7 @@ EXPORT_OPTIONS="${HERE}/ExportOptions.plist"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 PB=/usr/libexec/PlistBuddy
 
-usage() { echo "usage: $0 [--walk] --version X.Y.Z [--out DIR] [--stop-before-appcast]" >&2; exit 2; }
+usage() { echo "usage: $0 [--walk] --version X.Y[.Z] [--out DIR] [--stop-before-appcast]" >&2; exit 2; }
 MODE=release; VERSION=""; OUT=""; STOP_BEFORE_APPCAST=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -77,11 +77,11 @@ step() { echo; echo "[release] ===== $* ====="; }
 
 # ------------------------------------------------------------------ 0. preflight
 step "0. preflight (${MODE} ${VERSION})"
-[[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || refuse "--version must be X.Y.Z (got '${VERSION}')"
+[[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || refuse "--version must be X.Y or X.Y.Z (got '${VERSION}')"
 if [ "$MODE" = walk ]; then
   [[ "$VERSION" =~ ^0\.0\.[0-9]+$ ]] || refuse "a WALK build's version is 0.0.N, so no walk artifact can ever wear a release number (got ${VERSION})"
 else
-  [[ "$VERSION" =~ ^0\.0\. ]] && refuse "0.0.x is the WALK range; pass --walk, or choose a release number"
+  [[ "$VERSION" =~ ^0\.0(\.|$) ]] && refuse "0.0.x is the WALK range; pass --walk, or choose a release number"
 fi
 DIRTY="$(git -C "$REPO" status --porcelain | wc -l | tr -d ' ')"
 [ "$DIRTY" = "0" ] || refuse "the working tree has ${DIRTY} uncommitted change(s): a ${MODE} build is ONE commit's build (commit first)"
