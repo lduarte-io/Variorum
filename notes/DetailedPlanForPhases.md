@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-494 — the 0.10 window's blocker: the large-corpus first catch-up hangs after one pull call** (Urgent, Pre-launch; `Sync/` — Fable's own hands; the charter `notes/handoffs/vx-494-kickoff.md`; record `notes/plans/fixes/vx-494-catchup-hang.md`). Holds the one Sync/-custody slot. The 0.10 release tail stays HELD on this fix. | VX-494 · `vx-494-catchup-hang` | `~/dev/variorum-vx-494` · the Pro | OPEN 2026-10-23 |
 
 ### Latest closeout
 
