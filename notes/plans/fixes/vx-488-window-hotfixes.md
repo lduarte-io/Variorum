@@ -387,6 +387,9 @@ ladder re-reads it.
     system composed after; an executor's `holdInSession(nil, …)` — the rollback's / the leave's line — the same). **The
     harness: `--filter "OneSyncKeysLeaf|OneRefreshAuthority|TouchIDUnlockSyncKeys"` `✔ Test run with 15 tests in 5 suites
     passed`; the whole harness `✔ Test run with 388 tests in 67 suites passed`** (385/65 + this piece's 3 tests, 2 suites).
-- Piece F2 — the behavioral revert (the per-system mint restored): NOT-STARTED.
+- Piece F2 — the behavioral revert: IN-PROGRESS — **REVERT R7 STARTING on the committed tree `164304e91`**: in
+  `ProtectionOpenRoad.swift` `RoadInputs.live`'s `makeSystem` hands each system a FRESH `KeychainSyncKeysLeaf(scope:)` (the
+  per-system mint, as before the fix); restored by `git checkout -- App/Variorum/Shared/Protection/ProtectionOpenRoad.swift`,
+  verified by `git diff --exit-code`.
 - Piece F3 — evidence (the protection set both configurations, the harness, build-for-testing Mac + iOS): NOT-STARTED.
 
