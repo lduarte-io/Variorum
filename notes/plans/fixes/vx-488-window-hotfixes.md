@@ -421,9 +421,25 @@ PROVISIONAL and HERS (OPEN ITEMS).
 - Piece R — this record skeleton + the preflight read whole (CLAUDE.md + canon, this file whole incl. the M1 RECORD, the
   kickoff, the resiliency protocol, CastleRules WHOLE, SurfaceContracts whole — "The app" and "Doors to the outside", the
   named code; the ticket's text read once, read-only): DONE (this commit).
-- Piece 0 — a headless harness for the row's face (the M1 harness recipe, Shared/ compiled whole): NOT-STARTED.
-- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE the fix (the line's words; the locked face never
-  offers the Account sheet): NOT-STARTED.
+- Piece 0 — the headless harness: DONE (not durable — this session's scratchpad `m2m3-h`; the M1 recipe: tools 6.2,
+  macOS 26, the app target's concurrency settings on `Variorum`, the test target without default `MainActor`). Shared/
+  compiled whole FAILS (the real `AppSession`'s macOS arm composes the editor's routers — Mac-app files), so `Variorum` =
+  the M1 harness's symlinks + `SyncStatusViews`, `SyncSession`, `AppServices`, `ProtectionController`, the REAL
+  `ProjectConfig`, `TierViews`, `AuthViews`, `ErrorPresentation`, `IdleCommitScheduler`, `StoreBackup`,
+  `OperationsRunner`, `DeviceName`, `BackupDestination`, `BackupLog`, `MarkdownInsurance`, `BookNameCopy`,
+  `ExportWriter`, `Theme/*`, `SampleLibrary/*` (minus `SeededBookRestore`), and ONE stub file (a slim `AppSession` +
+  `StatusCenter` — the members `AppServices` and the row read); the tests = `SyncStalledRowTests`,
+  `TierAndOnboardingTests`, `Phase9cAuthWiringTests`, `ProtectionWalkProjectTests` + this unit's two suites, with
+  `AppTestKeyProvider` and `SeededGenerator` copied byte-for-byte. **BASELINE on the pre-fix tree (`3726a1c89`): `✘ Test
+  run with 30 tests in 6 suites failed … with 4 issues`** — all 4 are harness-PATH artifacts in three `Phase9cAuthWiring`
+  source pins that read `#filePath` without resolving symlinks (`theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut`,
+  `thePasteInIsFullyRetiredInTheSharedSources`, `theBecomeActiveHookRunsOneSyncRound` — they find no sources beside the
+  symlink); they run in the Mac target (the stage batch). Every other test green.
+- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE the fix: DONE (this commit).
+  `App/Variorum/VariorumTests/SyncLockedRowTests.swift` — **RED on the pre-fix tree** (the harness, `--filter
+  "SyncLockedRowTests|SyncWalkFenceTests"`): `theLockedLineSpeaksTheRoadsWordsNeverThePassphrase` ✘×3 (the words; "passphrase";
+  "encryption") and `theLockedRowNeverOffersTheAccountSheet` ✘×2 (the `.openAccount(.account)` act; the `Account…`
+  label) — `✘ Test run with 5 tests in 2 suites failed … with 8 issues` (M3's three in the same run, its record).
 - Piece 2 — the fix + the new-seam pins: NOT-STARTED. The settled design (below).
 - Piece 3 — the behavioral reverts: NOT-STARTED (each named here BEFORE it runs).
 - Piece 4 — evidence (headless suites, build-for-testing both targets): NOT-STARTED.
