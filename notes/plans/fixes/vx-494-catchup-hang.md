@@ -100,6 +100,14 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   the page (index-ordered keyset per table) — is a SERVER change, so a deploy at her word; proposed separately, not
   tied to this fix. Note for her: total cost is QUADRATIC in corpus size with today's query (calls ∝ N, each ∝ N),
   and a large enough account would hit the statement timeout on its first window whatever the page size.
+- **D1's server check (2026-10-23 ~04:25, read-only, production — EXPLAIN ANALYZE of the served query's exact shape
+  for her tenant at `since = 0`; timings only, no rows returned):** the `authenticated` role's statement timeout is
+  **8 s**; the plan is Seq Scan on every table → to_jsonb of every eligible row (58,347 past the A5 horizon filter) →
+  a full Sort → Gather Merge → Limit, so the page size barely moves the cost: **LIMIT 200 = 2,934 ms, LIMIT 2,000 =
+  1,477 ms** (the second warmer). A 2,000-row window therefore costs about what a 200-row one does and cuts her
+  catch-up's ~550 calls to ~55. Ceiling recorded for VX-495: the from-zero call already sits at ~1.5–3 s on her
+  ~108k rows and grows with the account, so an account a few times hers would meet the 8 s timeout on its first
+  window whatever the page size — the server query is the real cure (VX-495).
 - **D2 — the download is resumable.** A local-only table `sync_pull_stage(table_name, row_id, server_seq,
   payload, PK(table_name,row_id))` (migration `v1_32`, its own commit; registered in `SyncSchema.localOnlyTables` and
   `LocalMachineryRecreation`; no mirror, no lockstep — never synced) plus ONE `sync_state` header key carrying the
