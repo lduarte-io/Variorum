@@ -95,13 +95,15 @@ nonisolated final class InMemoryAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendabl
 
 /// A custody leaf over planted items that RECORDS every read by class, and can be told to fail reads or
 /// the listing — the gatherer's facts are pinned from it.
-nonisolated final class PlantedCustodyLeaf: CustodyLeaf, @unchecked Sendable {
+nonisolated final class PlantedCustodyLeaf: CustodyLeaf, TouchIDPressHanding, @unchecked Sendable {
     var items: [CustodyItemFact: StoreKey] = [:]
     var unreadable: Set<String> = []
     var listingFails = false
     private(set) var reads: [ProtectionNames.CustodyClass] = []
     /// VX-306 U3: every write and delete, in order (Look inside's write-nothing proof reads it).
     private(set) var writes: [String] = []
+    /// VX-487 (b): every press a Touch ID read that OPENED its item handed its caller, in order (the one-press pins).
+    private(set) var handedPresses: [TouchIDPressContext] = []
 
     struct Unreadable: Error {}
 
@@ -114,6 +116,15 @@ nonisolated final class PlantedCustodyLeaf: CustodyLeaf, @unchecked Sendable {
         reads.append(itemClass)
         if unreadable.contains(fingerprint) { throw Unreadable() }
         return items[CustodyItemFact(fingerprint: fingerprint, itemClass: itemClass)]
+    }
+
+    /// VX-487 (b): the lobby's press — read as `readCustody(.touchid)` reads (the same read recorded), handing a press
+    /// when it opened its item (a planted context: no prompt, no biometry hardware).
+    func readTouchIDCustody(fingerprint: String) throws -> (key: StoreKey?, press: TouchIDPressContext?) {
+        guard let key = try readCustody(fingerprint: fingerprint, itemClass: .touchid) else { return (nil, nil) }
+        let press = TouchIDPressContext()
+        handedPresses.append(press)
+        return (key, press)
     }
 
     func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass, libraryID: String) throws {

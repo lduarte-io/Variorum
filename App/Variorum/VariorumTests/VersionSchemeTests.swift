@@ -36,8 +36,8 @@ struct VersionSchemeTests {
 
     @Test func theMarketingVersionIsTheFriendsBetasLine() {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        #expect(version?.hasPrefix("0.9.") == true,
-                "R-13r-6: 0.9.x for the beta (read '\(version ?? "nil")')")
+        #expect(version?.hasPrefix("0.") == true,
+                "R-13r-6 as amended at the VX-329 release word (0.10; no 1.0 until her public launch): pre-1.0 until the launch (read '\(version ?? "nil")')")
     }
 
     /// The phase's SHAPE, read from the project file: it is the Mac target's
@@ -71,13 +71,15 @@ struct VersionSchemeTests {
         // MARKETING_VERSION increments WITH each beta release, so this pin
         // holds the SHAPE, never a literal release number (the original
         // "0.9.0;" literal went red at c4974c4a's 0.9.1 bump — repaired at
-        // the ladder's fix pass). The letter held: the Mac target's TWO
-        // configurations carry the SAME 0.9.x line — the one the running
-        // test host was built as — and no other target wears it.
+        // the ladder's fix pass; the "0.9." prefix went red at b59c68592's
+        // 0.10 bump, her release word — widened to the pre-1.0 line at
+        // VX-489). The letter holds: the Mac target's TWO configurations
+        // carry the SAME pre-1.0 line — the one the running test host was
+        // built as — and no other target wears it (the mobile target's is 1.0).
         let builtVersion = try #require(
             Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
         let marketingLines = project.components(separatedBy: "\n")
-            .filter { $0.contains("MARKETING_VERSION = 0.9.") }
+            .filter { $0.contains("MARKETING_VERSION = 0.") }
         #expect(marketingLines.count == 2,
                 "the Mac target's two configurations; the mobile target is not this phase's")
         #expect(marketingLines.allSatisfy { $0.contains("MARKETING_VERSION = \(builtVersion);") },

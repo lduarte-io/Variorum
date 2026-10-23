@@ -81,10 +81,10 @@ struct OneRefreshAuthorityCompositionTests {
 
     @Test func theProtectionRoadIsComposedOverTheSameAuthority() throws {
         let bootstrap = try Self.code("Shared/AppBootstrap.swift")
-        #expect(bootstrap.contains("RoadInputs.live(variant: variant, auth: auth)"),
+        #expect(bootstrap.contains("RoadInputs.live(variant: variant, auth: auth"),  // VX-487 F-M1-1: + the one sync-keys leaf
                 "the production road's every composed system rides the bootstrap's authority")
         let road = try Self.code("Shared/Protection/ProtectionOpenRoad.swift")
-        #expect(road.contains("ProtectionSystem.live(variant: variant, session: auth)"))
+        #expect(road.contains("ProtectionSystem.live(variant: variant, session: auth"))  // VX-487 F-M1-1: + the leaf
         let system = try Self.code("Shared/Protection/ProtectionSystem.swift")
         #expect(system.contains("WireVaultLeaf.live(deviceName: deviceName, session: session)"),
                 "the system's vault leaf is served by the session it is handed")

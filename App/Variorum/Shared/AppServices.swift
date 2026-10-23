@@ -182,7 +182,18 @@ final class AppServices {
         // `io.lduarte.Variorum` — they share the machine's LOGIN KEYCHAIN,
         // not an identity; the retirement's round-2 N1 corrected this
         // comment's old "share a bundle identity" wording.)
+        #if DEBUG
+        // VX-483 — THE WALK'S LIFT (DEBUG walk machinery): the launch's ONE
+        // decision (`ProjectConfig.walkSyncFenceLift` — from the walk project
+        // every transport and the sign-in already read) lets a DEV store
+        // sync against a walk project that is not the production mirror; a
+        // production ref refuses and the fence stands.
+        sync = SyncSession(
+            database: session.database,
+            allowsSync: Self.allowsSync(storeVariant: storeVariant, walkLift: ProjectConfig.walkSyncFenceLift))
+        #else
         sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
+        #endif
         // 13j ladder B (B3): the purge doors' receipts and the local purge
         // road both read this — one truth, the sync session's own.
         session.syncConfigured = { [weak sync = sync] in sync?.isConfigured ?? false }
@@ -260,15 +271,31 @@ final class AppServices {
     /// `start()` and every sign-in. REAL STORE ONLY (round-2 N1): a
     /// dev-store session — Xcode Run, the test host — shares the machine's
     /// login keychain with the installed Release build under a different
-    /// bundle identity, and the retired item there is the INSTALLED build's;
-    /// the A4 fence's own seam gates it (`sync.allowsSync` IS
-    /// `storeVariant == .real`). OFF-MAIN always (the 13e class: no
+    /// bundle identity, and the retired item there is the INSTALLED build's.
+    /// Gated on the store variant ITSELF (VX-483: it read `sync.allowsSync`,
+    /// which was `storeVariant == .real` until the walk's lift — a lifted
+    /// dev-store session syncs, and must still never reach the installed
+    /// build's items). OFF-MAIN always (the 13e class: no
     /// synchronous Keychain call ever runs on the main thread — the two
     /// `SecItemDelete`s ride a detached utility task).
     private func runRetiredCredentialSweep() {
-        guard sync.allowsSync else { return }
+        guard storeVariant == .real else { return }
         Task.detached(priority: .utility) { [legacyCleanup] in legacyCleanup() }
     }
+
+    #if DEBUG
+    /// VX-483 — THE A4 FENCE's derivation in a DEBUG build, pure (pinned): the REAL store may always pair with the one
+    /// mirror; a DEV store only under the walk's lift (a walk project that is not the production mirror — never a
+    /// refused one). Release derives `storeVariant == .real` inline, unchanged.
+    nonisolated static func allowsSync(
+        storeVariant: AppDatabase.StoreVariant, walkLift: ProtectionWalkSwitch.SyncFenceLift
+    ) -> Bool {
+        switch storeVariant {
+        case .real: return true
+        case .dev: return walkLift.lifts
+        }
+    }
+    #endif
 
     // MARK: - The Variorum sign-in (Phase 14a: direct — the identity)
 

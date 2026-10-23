@@ -16,6 +16,11 @@
 //  (each composed system used to mint one over the scope's stored session, refreshing the rotating token beside the
 //  services'). A system composed without it (a test world) rides no one's sign-in (`NobodySignedIn`).
 //
+//  VX-487 F-M1-1 — the SYNC-KEYS leaf is HANDED too, never minted here (`syncKeys:` is required): production's is the
+//  process's one leaf (`AppBootstrap.syncKeys` → `RoadInputs.live` → `live(variant:session:syncKeys:)`), whose session
+//  memory must outlive any one composed system — every re-keying act reopens through a fresh composition, and a leaf
+//  minted per system lost the act's hold at that reopen ("Sync locked" after a join). Test worlds hand their own.
+//
 //  The TYPES compile in both configurations (rule 24); their USE was U1b's Debug gate until VX-329 U1's switch — every
 //  build's bootstrap composes it now, through `RoadInputs.live`. Tests compose it over a throwaway scope and a temp slot,
 //  overriding the leaves that must not reach iCloud.
@@ -40,7 +45,7 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
     init(
         scope: String, places: ProtectionPlaces, deviceName: String = DeviceName.current,
         floor: PassphraseKDF.Floor = PassphraseKDF.floor,
-        custody: (any CustodyLeaf)? = nil, syncKeys: (any SyncKeysLeaf)? = nil, apple: (any AppleKeysLeaf)? = nil,
+        custody: (any CustodyLeaf)? = nil, syncKeys: any SyncKeysLeaf, apple: (any AppleKeysLeaf)? = nil,
         session: any UserSessionProviding = NobodySignedIn(), vault: (any VaultLeaf)? = nil,
         memory: (any MemoryStoreLeaf)? = nil, biometry: (any BiometryLeaf)? = nil, clock: (any ClockLeaf)? = nil,
         ids: (any IDsLeaf)? = nil
@@ -60,7 +65,7 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
         self.diagnostics = diagnostics
         lister = CatalogLister(places: places)
         leaves = ExecutorLeaves(
-            custody: custody, syncKeys: syncKeys ?? KeychainSyncKeysLeaf(scope: scope),
+            custody: custody, syncKeys: syncKeys,
             apple: apple ?? ICloudAppleKeysLeaf(scope: scope),
             // VX-307 U1: the production wire leaf (the marker-14 shape) when
             // the project is configured; else the vault stays unreachable and
@@ -102,13 +107,17 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
 
     /// The store variant's protection system: its slot (`AppDatabase.defaultStoreURL`), and today's picked
     /// backup destination as the far folder (resolved security-scoped at each use). `session` — REQUIRED — is the
-    /// process's one refresh authority the vault leaf rides (VX-423; the bootstrap's).
-    static func live(variant: AppDatabase.StoreVariant, session: any UserSessionProviding) throws -> ProtectionSystem {
+    /// process's one refresh authority the vault leaf rides (VX-423; the bootstrap's). `syncKeys` — REQUIRED (VX-487
+    /// F-M1-1) — is the process's one sync-keys leaf (the bootstrap's), so session memory an act or a Touch ID unlock held
+    /// through one composed system is the next system's too (a re-keying act's reopen composes a new one).
+    static func live(
+        variant: AppDatabase.StoreVariant, session: any UserSessionProviding, syncKeys: any SyncKeysLeaf
+    ) throws -> ProtectionSystem {
         let slot = try AppDatabase.defaultStoreURL(variant: variant)
         let places = ProtectionPlaces(slot: slot, farFolder: {
             BackupDestination.resolve().map { ProtectionFarFolder(picked: $0.picked, scoped: true) }
         })
-        return ProtectionSystem(scope: variant.rawValue, places: places, session: session)
+        return ProtectionSystem(scope: variant.rawValue, places: places, syncKeys: syncKeys, session: session)
     }
 
     /// The executor's configuration now: the library ID the live key file names (else "" — unlock names it).

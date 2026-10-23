@@ -14,7 +14,8 @@
 //  THE PRESS: a Touch ID read runs through an `LAContext` the system prompts on — never when `LAEnvironment`
 //  says Touch ID is unusable for now (nothing is attempted; `lastPress` says why). `lastPress` records what
 //  the most recent press did (cancelled · failed on an item that exists · unusable for now) — the lobby's
-//  `TouchIDPress` fact (U1b).
+//  `TouchIDPress` fact (U1b). VX-487 (b): the lobby's press reads through `readTouchIDCustody`, which hands its caller the
+//  context it evaluated (`TouchIDPressContext.swift`) so the account's Touch ID sync-keys item reads under the same press.
 //  THE LISTING reads attributes only and SKIPS an item that would need authentication — no listing ever
 //  presses an item (`ProtectionKeychain`); the Touch ID items are then found BY NAME — a non-prompting
 //  existence probe of `<scope>-<fp>-touchid` for every fingerprint this device knows of
@@ -32,7 +33,7 @@ import LocalAuthentication
 import Security
 import VariorumCore
 
-nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
+nonisolated final class KeychainCustodyLeaf: CustodyLeaf, TouchIDPressHanding, @unchecked Sendable {
     static let service = ProtectionNames.custodyService
     /// The words the system's Touch ID sheet shows (today's unlock words, `StoreKeyGuard.unlockGated`).
     static let pressReason = "Unlock your Variorum library"
@@ -115,48 +116,63 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
     }
 
     func readCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws -> StoreKey? {
-        let account = account(fingerprint, itemClass)
         switch itemClass {
         case .silent:
-            return try ProtectionKeychain.readData(service: Self.service, account: account, residence: .deviceOnly)
+            return try ProtectionKeychain.readData(
+                service: Self.service, account: account(fingerprint, itemClass), residence: .deviceOnly)
                 .flatMap { StoreKey(data: $0) }
         case .touchid:
-            guard try ProtectionKeychain.exists(service: Self.service, account: account, residence: .deviceOnly) else {
-                return nil
-            }
-            if let transient = biometry.biometry().transient {
-                setLastPress(.transient(transient))
-                return nil
-            }
-            #if DEBUG
-            if takeWalkFailure() {
-                setLastPress(.failedOnExistingItem)
-                ProtectionOpenRoad.log("WALK SWITCH: the planted failure answered this press — no prompt (leaf \(walkInstanceName))")
-                return nil
-            }
-            // MINOR-3's one look: every real press names its leaf, beside the arm's line.
-            ProtectionOpenRoad.log("road: a Touch ID press — the system prompt (leaf \(walkInstanceName))")
-            #endif
-            let context = LAContext()
-            context.localizedReason = Self.pressReason
-            context.localizedFallbackTitle = ""  // the fallback is the passphrase road, never a system credential
-            do {
-                let data = try ProtectionKeychain.readData(
-                    service: Self.service, account: account, residence: .deviceOnly, context: context)
-                // An item the probe found that the press reads as absent was invalidated (the facts §4.5:
-                // older systems answer "not found" for an enrollment change) — failed on an item that exists.
-                setLastPress(data == nil ? .failedOnExistingItem : nil)
-                return data.flatMap { StoreKey(data: $0) }
-            } catch ProtectionKeychain.KeychainError.status(let status, _) where status == errSecUserCanceled {
-                setLastPress(.cancelled)
-                return nil
-            } catch ProtectionKeychain.KeychainError.status(let status, _)
-                where status == errSecAuthFailed || status == errSecInteractionNotAllowed {
-                // Unusable for now (the reading after the press says so), else failed on an item that exists
-                // — a biometry change, or the hash moved with nothing changed: the item is the final word.
-                setLastPress(biometry.biometry().transient.map { .transient($0) } ?? .failedOnExistingItem)
-                return nil
-            }
+            // The press this read evaluates is not handed on here: it ends when the context is released.
+            return try readTouchID(fingerprint: fingerprint).key
+        }
+    }
+
+    /// VX-487 (b) — `TouchIDPressHanding`: the lobby's press, handing its caller the context it evaluated (so the account's
+    /// Touch ID sync-keys item reads under the same authentication — one press, never two prompts). The leaf keeps nothing.
+    func readTouchIDCustody(fingerprint: String) throws -> (key: StoreKey?, press: TouchIDPressContext?) {
+        try readTouchID(fingerprint: fingerprint)
+    }
+
+    /// THE PRESS — a Touch ID item's read through an `LAContext` the system prompts on; never while Touch ID is only
+    /// unusable for now. The context comes back beside the key only when the read OPENED its item.
+    private func readTouchID(fingerprint: String) throws -> (key: StoreKey?, press: TouchIDPressContext?) {
+        let account = account(fingerprint, .touchid)
+        guard try ProtectionKeychain.exists(service: Self.service, account: account, residence: .deviceOnly) else {
+            return (nil, nil)
+        }
+        if let transient = biometry.biometry().transient {
+            setLastPress(.transient(transient))
+            return (nil, nil)
+        }
+        #if DEBUG
+        if takeWalkFailure() {
+            setLastPress(.failedOnExistingItem)
+            ProtectionOpenRoad.log("WALK SWITCH: the planted failure answered this press — no prompt (leaf \(walkInstanceName))")
+            return (nil, nil)
+        }
+        // MINOR-3's one look: every real press names its leaf, beside the arm's line.
+        ProtectionOpenRoad.log("road: a Touch ID press — the system prompt (leaf \(walkInstanceName))")
+        #endif
+        let context = LAContext()
+        context.localizedReason = Self.pressReason
+        context.localizedFallbackTitle = ""  // the fallback is the passphrase road, never a system credential
+        do {
+            let data = try ProtectionKeychain.readData(
+                service: Self.service, account: account, residence: .deviceOnly, context: context)
+            // An item the probe found that the press reads as absent was invalidated (the facts §4.5:
+            // older systems answer "not found" for an enrollment change) — failed on an item that exists.
+            setLastPress(data == nil ? .failedOnExistingItem : nil)
+            let key = data.flatMap { StoreKey(data: $0) }
+            return (key, key == nil ? nil : TouchIDPressContext(context))
+        } catch ProtectionKeychain.KeychainError.status(let status, _) where status == errSecUserCanceled {
+            setLastPress(.cancelled)
+            return (nil, nil)
+        } catch ProtectionKeychain.KeychainError.status(let status, _)
+            where status == errSecAuthFailed || status == errSecInteractionNotAllowed {
+            // Unusable for now (the reading after the press says so), else failed on an item that exists
+            // — a biometry change, or the hash moved with nothing changed: the item is the final word.
+            setLastPress(biometry.biometry().transient.map { .transient($0) } ?? .failedOnExistingItem)
+            return (nil, nil)
         }
     }
 

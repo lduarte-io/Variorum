@@ -475,7 +475,11 @@ nonisolated enum ProtectionCopyDoors {
     /// its first open, through the import road (`Operations.importPlaintextExport` — no undo stack: a library's birth); the
     /// store's pool closed. The end says what landed (the log line here; the receipt the caller owes) — a partial landing
     /// is visible against it (the ruling's one requirement on the crash window, PROVISIONAL P-VX309-U1b-8).
-    static func landPlaintextExport(_ ctx: RoadContext, plan: PlaintextExportPlan) async -> PlaintextLanding {
+    /// `outgoing` (VX-488 R1 F1): the library OPEN when the landing began (nil from the no-library faces) — the session whose
+    /// record names the account whose hold must leave with it.
+    static func landPlaintextExport(
+        _ ctx: RoadContext, plan: PlaintextExportPlan, outgoing: ProtectionRoadSession? = nil
+    ) async -> PlaintextLanding {
         let places = ctx.system.places
         var result = PlaintextLanding()
         // A read-only road (a hosted test run's) never creates — so nothing steps aside for a creation that cannot land.
@@ -497,6 +501,10 @@ nonisolated enum ProtectionCopyDoors {
             return result
         }
         result.created = (session, words)
+        // VX-488 R1 F1 — the third clear: the library that was OPEN has stepped aside and a new one (no account) stands, so
+        // its account's session hold leaves with it — its record is still in hand in its session (only its files left the
+        // slot). With the process's one sync-keys leaf (VX-487 F-M1-1) nothing else would ever clear it.
+        if let outgoing { ProtectionRoadLock.dropSessionMemory(outgoing) }
         // What the export holds, said BEFORE the import — a crash part of the way leaves this line without the end's, so
         // what landed reads against what was to land (the ruling's requirement on the crash window).
         ProtectionOpenRoad.log(

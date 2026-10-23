@@ -13,13 +13,17 @@
 //  (`SyncCustodyRecord`, `DeviceKeySyncProvider`, `E2EEKeychainStorage`) was deleted with today's road at VX-329 U1; this
 //  leaf is the engine's one custody since.
 //
+//  VX-487 (b): the Touch ID unlock loads the account's Touch ID item into session memory in the SAME press — the read rides
+//  the context the custody read evaluated (`readSyncKeys(accountID:riding:)`, `TouchIDPressContext.swift`); the
+//  context-less Touch ID read below still mints its own (an act's press).
+//
 
 import Foundation
 import LocalAuthentication
 import Security
 import VariorumCore
 
-nonisolated final class KeychainSyncKeysLeaf: SyncKeysLeaf, @unchecked Sendable {
+nonisolated final class KeychainSyncKeysLeaf: SyncKeysLeaf, TouchIDPressRiding, @unchecked Sendable {
     static let service = ProtectionNames.syncKeysService
 
     let scope: String
@@ -71,6 +75,17 @@ nonisolated final class KeychainSyncKeysLeaf: SyncKeysLeaf, @unchecked Sendable 
             && (status == errSecUserCanceled || status == errSecAuthFailed || status == errSecInteractionNotAllowed) {
             return nil  // the press failed or was cancelled
         }
+    }
+
+    /// VX-487 (b) — `TouchIDPressRiding`: the account's Touch ID item read under the lobby's press, already evaluated by the
+    /// custody read (one press, never two prompts). `interactionNotAllowed` makes the ride unable to show UI: an
+    /// authenticated context answers without asking (SecItem.h); a read it does not cover throws
+    /// `errSecInteractionNotAllowed` instead of prompting — the caller logs it and the library opens all the same.
+    func readSyncKeys(accountID: String, riding press: TouchIDPressContext) throws -> AccountKeys? {
+        press.context.interactionNotAllowed = true
+        return try ProtectionKeychain.readData(
+            service: Self.service, account: account(accountID, .touchid), residence: .deviceOnly, context: press.context)
+            .flatMap { try? ProtectionCoding.decoder().decode(AccountKeys.self, from: $0) }
     }
 
     func writeSyncKeys(_ keys: AccountKeys, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {

@@ -22,7 +22,10 @@
 //  included — into the mirror that replicates to her real devices.
 //  `allowsSync` is therefore derived from the store variant (AppServices):
 //  a dev-store session NEVER configures sync, whatever transport a caller
-//  composes.
+//  composes. (VX-483 — the one exception, DEBUG walk machinery only: a
+//  launch whose walk switch resolved to a project that is NOT the
+//  production mirror lifts the fence for that launch; a production ref
+//  refuses. Release: absolute.)
 //
 //  Triggers wired HERE (both platforms): after local writes settle (the
 //  outbox observation, debounced). Platform files add their own: foreground/

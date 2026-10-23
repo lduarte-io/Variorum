@@ -14,7 +14,8 @@
 //    - THE IDLE CLOCK's stamp (decision 18 — time since Variorum was last used): the Mac's event monitor and both
 //      platforms' became-active hooks stamp it.
 //    - THE SETTINGS PANE REQUEST (VX-206's road, VX-307 U2a's use): a crossing's reopen rebuilds the Settings scene at
-//      its default pane; the crossing asks for Protection back, and the scene adopts the request.
+//      its default pane; the crossing asks for Protection back, and the scene adopts the request. VX-486: the locked
+//      sync row's door asks the same way (`requestProtectionPane`).
 //
 
 import Foundation
@@ -50,10 +51,18 @@ final class ProtectionController {
     private(set) var settingsRequest = 0
     @ObservationIgnored var settingsRequestAdopted = 0
 
+    /// VX-486 — THE ASK ITSELF, under a neutral name (the `MCPDoor.requestSettings()` twin): Settings ▸ Protection,
+    /// adopted by the Settings window on appear (a fresh window) or on change (one already up). The ask re-points a
+    /// window; it opens none — a caller that must also bring Settings up opens it beside the ask (the locked sync row's
+    /// door: `ProtectionPaneDoor`, then `openSettings()` — ⌥⌘,'s own press shape).
+    func requestProtectionPane() {
+        settingsRequest += 1
+    }
+
     /// VX-307 U2a — a crossing ends on Protection (`AppBootstrap.crossOnNewRoad`: its reopen rebuilt Settings at
     /// General). Unconditional: the crossings' doors live only in Settings ▸ Protection.
     func requestProtectionPaneForRoadCrossing() {
-        settingsRequest += 1
+        requestProtectionPane()
     }
 
     // MARK: - Re-lock monitors (Mac — sleep · screen lock · idle)

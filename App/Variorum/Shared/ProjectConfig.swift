@@ -48,11 +48,17 @@ nonisolated enum ProjectConfig {
     /// and `VARIORUM_WALK_ANON_KEY` set reads THOSE coordinates for this
     /// launch (the account arms' walk against a throwaway project —
     /// `ProtectionWalkSwitch.projectOverride`, read once, logged once);
-    /// otherwise — and always in Release — the production ones.
-    private static let walkProject = ProtectionWalkSwitch.projectOverrideForThisLaunch(
+    /// otherwise — and always in Release — the production ones. (Internal
+    /// since VX-483: the A4 fence's lift reads THIS value.)
+    static let walkProject = ProtectionWalkSwitch.projectOverrideForThisLaunch(
         productionHost: productionProjectURL.host)
     static let variorumProjectURL = walkProject?.url ?? productionProjectURL
     static let variorumPublishableKey = walkProject?.apiKey ?? productionPublishableKey
+    /// VX-483 — the A4 fence's walk lift, decided ONCE from the walk project above (the same value every transport and
+    /// the sign-in read — never a second environment parse) and said once: lifted only for a walk project that is not
+    /// the production mirror; a production ref refuses, fail-loud. `AppServices` reads it in DEBUG only.
+    static let walkSyncFenceLift = ProtectionWalkSwitch.syncFenceLiftForThisLaunch(
+        walkProject: walkProject, productionHost: productionProjectURL.host)
     #else
     static let variorumProjectURL = productionProjectURL
     static let variorumPublishableKey = productionPublishableKey
