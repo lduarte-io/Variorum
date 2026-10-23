@@ -770,3 +770,32 @@ exports (F6); does a resuming device count as "seen" (R2-3); the stage's disk sl
 join's Touch ID prompt (O-1); VX-492/493's closures; Pre-launch on 495–497; the belt's words; whether a lock should wait
 for a save in flight (R3-1); VX-498. MOBILE PARITY: the phone inherits all three through the shared engine — VM-8's
 acceptance measures its first catch-up (its save is the number to watch). canon-size 125,087 / 150,000.
+
+## 2026-10-23 — the 0.10 window's close (VX-488's narrative; the window sitting; the release)
+
+**VX-488 (PR #184, merge e63602bac, 2026-10-23 — "Run: the 0.10 window hotfixes"; the record
+`notes/plans/fixes/vx-488-window-hotfixes.md`).** The run that unblocked her crossing: VX-487 (Castle + Touch ID left
+the engine unable to read the sync keys — the act's castle/touchID arm now also holds them in session, and the Touch ID
+unlock loads the account's item riding the same press, never a second prompt), VX-486 (the locked sync row's door now
+opens Settings ▸ Protection and the line was reworded off the old-road vocabulary — P-VX486-1/-2, PROVISIONAL, ruled
+"fine on provisional wording" at the window sitting, R-494-4 — the SurfaceContracts sentence landed at this close), and
+VX-483 (the walk-rounds opt-in behind the production-ref refusal). The typed-unlock residue M1 (c) was recorded, not
+built — ruled at the window sitting into **VX-501** (a typed unlock holds sync keys in session until lock; High,
+Pre-launch). The Fable ladder ran as the standing rule demands for custody code.
+
+**The window sitting (2026-10-23, the morning-to-evening session; every ruling verbatim in
+`notes/plans/fixes/vx-494-catchup-hang.md` R-494-4…R-494-13).** Her Pro acceptance (9162, Synced); the post-merge Fable
+cold review at her word (0 BLOCKER · 0 MAJOR · 2 MINOR · 3 NIT; FB-1/FB-4 doc fixes at her word); the Air's install and
+her ~8-minute crossing; RELEASE 0.10 (build 9172) published (the DMG byte-verified, the appcast live, the Pro refreshed
+to the published build; the release toolchain's X.Y.Z-only checks swept to accept X.Y); the site's
+`/variorum/privacy` + `/variorum/support` drafted and deployed at her word, every served HTML comment stripped at her
+ruling ("if it's just on the internet… it's getting scraped and saved. so remove that"); her #239 answers (a)–(i)
+*[removed for publication]*
+*[removed for publication]*
+road's enrollment act chartered for git-history archaeology); **VX-508** found (a pre-0.10 vault keeps a dormant
+Apple-wrapped master as artifact 17's left-unread history — one account; cleared at her word after its 0.10 join);
+**her re-ruling closing the window: "forget about mobile, figuring out this exact issue will be the next thing that we
+do… this is obviously the biggest issue right now"** — VX-510 ("Run: the first-run sync failures", Urgent: VX-498,
+VX-507, VX-509, VX-506) runs next under a fresh orchestrator with several live accounts as the acceptance and
+read-only production verification; VM-8 deferred behind it, its kickoff standing in the handoff's Appendix B.
+canon-size 125,087 / 150,000.

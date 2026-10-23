@@ -3548,4 +3548,11 @@ catch-up's SAVE:** the save now runs shielded from a retire, so a Castle lock th
 (minutes) before the lobby — exactly as before this branch (the lock waits on the store's writer; the P-VX308-U4-2
 precedent). Keep, or should a lock pre-empt the save (it rolls back and redoes at the next unlock — no re-download, the
 stage survives)? **(i) VX-498** (filed from the walk, Low): after turning on sync in Standard, the row kept "Sync
-locked" until a relaunch. Status: OPEN — hers at the window's sitting.
+locked" until a relaunch. Status: **ANSWERED 2026-10-23, the window sitting (her words verbatim in
+`notes/plans/fixes/vx-494-catchup-hang.md` R-494-4/R-494-6):** (a) ticketed — VX-502, Pre-launch at her word ("yeah, I
+agree that we should fix this. Put it on pre-launch"); (b) keep as-is ("I think it's fine for a device that later
+comples to discard its stage and re-download fresh ??"); (c) accepted for 0.10, VX-504 the compaction design ("it's
+fine I guess"); (d) VX-503 minted ("yes, ticket that, we should investigate it"); (e) both closed ("Ok, close both.");
+(f) VX-495 and VX-496 Pre-launch ("Agreed… yes, pre launch. mark it as such."), VX-497 deferred to VM-8's measurement
+with the note in the phone prompt; (g) VX-505 minted, riding the sweep; (h) keep the shield ("Agreed."); (i) as filed
+("fine.") — later raised to High and into VX-510 after the sitting's tester trace.

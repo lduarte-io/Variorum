@@ -52,7 +52,24 @@ says so.
    (AppSpec §7's local-only block — `sync_pull_stage` + the `pull_stage` key; SyncSpec §3 + §5), its dated entry in
    AppSpecRecord and its question bundle QUESTIONS #239 on main at the merge; canon-size 125,087 / 150,000.
 7. **VM-8 last (your kickoff):** APPENDIX B below — the phone's Castle catch-up, now naming VX-494's fix (the phone's
-   first pull is the same class at the same scale, and it inherits the resumable download).
+   first pull is the same class at the same scale, and it inherits the resumable download). **AMENDED at the window
+   sitting (2026-10-23, her re-ruling R-494-12): VM-8 is DEFERRED behind VX-510 ("Run: the first-run sync failures" —
+   the kickoff `notes/handoffs/vx-510-kickoff.md`); Appendix B stays paste-ready for after that run.**
+
+## THE SITTING'S ADDENDUM (2026-10-23, the window's close — the day's tickets by priority)
+
+- **Urgent:** VX-510 (Run: the first-run sync failures — NEXT, a fresh orchestrator; members VX-498 · VX-506 ·
+  VX-507 · VX-509).
+*[removed for publication]*
+  keys — Pre-launch), VX-507 (the act confirms its first round — Pre-launch), VX-508 (the dormant Apple-wrapped
+  *[removed for publication]*
+  umbrella: VX-495/496/497/502/503/504/505/508).
+- **Medium:** VX-502 (exports across local-only migrations — Pre-launch), VX-503 (the Standard join's Touch ID
+  prompt), VX-506 (the pre-join wording; raised from Low on field evidence).
+- **Low:** VX-504 (the store's free-page slack), VX-505 (the belt's words).
+- **Closed at her word:** VX-492 (resolved by VX-494), VX-493 (fixed-by-VX-494, re-traced).
+- The sitting's full narrative: `notes/plans/fixes/vx-494-catchup-hang.md` R-494-4…R-494-13; the release and site
+  records in the same file (R-494-10) and `notes/AppSpecRecord.md`'s 2026-10-23 window entry.
 
 **Your calls owed (bundle them at step 1 or as they come up):**
 - **QUESTIONS #239 — the VX-494 bundle** (each item there in full): (a) F6 — v1_32 makes plain-text exports written by
