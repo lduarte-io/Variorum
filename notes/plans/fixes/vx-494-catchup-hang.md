@@ -72,6 +72,46 @@ Each finding's disposition, and who carries it:
   writer. The disk-footprint half is the live proof's O-2 (measured: 79 MB → 150 MB) — her call, bundled.
 - **N4 [NIT] — DONE (the orchestrator):** the STATUS header rewritten to R-494-1's cast.
 
+## LADDER ROUND 2 — THE FINAL CALLS (the orchestrator, 2026-10-23 ~06:15)
+
+The round's record is `vx-494-ladder-round-2.md` (a fresh `opus-reviewer`, REVIEW_PROMPT verbatim: 0 BLOCKER, 1 MAJOR, 3
+MINOR, 2 NIT; every R1 fix verified sound — F1 (1)+(2), the F2/F3 guards, N1, N3; two R1 reverts re-run red on their
+own pins; its runs `ResumableCatchUpTests` 12/1 and the sync sweep 355/81 green on a scratch copy). **A new MAJOR ⇒ a
+round 3, the cap.** Dispositions:
+
+- **R2-1 [MAJOR] — CONFIRMED (probe-proven on a scratch copy whose `Sources/` match the tip byte for byte; the control
+  with the stage hand-cleared stays correct): a staged row is invisible to the pre-round ledger reconciliation**
+  (`PurgeJanitor.reconcileLedger` drops purged ids only from the live tables, then advances its scan point), so a
+  device that drops out of the purge horizon mid-catch-up resumes a stage holding a since-purged row and resurrects it
+  permanently. **FIX (2), the implementer:** the stage header records the ledger scan point (`sync_state`'s purge-scan
+  key, read in the stage write's transaction); `plan` resumes only while it is unchanged — any ledger advance discards
+  the stage (a stage is valid only for the ledger state it was fetched under). Fix (1) (deleting staged rows by ledger
+  entry) DECLINED as a second road beside it: (2) is one rule, conservative, and covers every road the ledger moves on.
+  PIN: the reviewer's probe (`ZZReviewerR2ProbeTests` in the session scratchpad — copy its scene into
+  `ResumableCatchUpTests`), red on the tip.
+- **R2-2 [MINOR, reachability SPECULATIVE; the pin red on the tip] — CONFIRMED: the N2 belt checks the cursor's VALUE,
+  and some clears leave it unmoved** (a first-row stall commits `newCursor = since` and clears; `discardThenFresh`;
+  `resyncReinitialize` at base 0). **FIX (the reviewer's): CONTINUITY** — `stage` refuses unless (no header and
+  `windowSince == base`) or `header.seq == windowSince`; the apply refuses unless the header exists with `seq ==
+  fetchCursor`; the cursor check stays beside them. PIN: the reviewer's probe scene (B synced to the stall point
+  first), red on the tip.
+- **R2-3 [MINOR] — RECORDED, HER QUESTION (no code):** a resumed round's windows carry no device id, so the server's
+  `seen_at` is not refreshed by resumed rounds; before the stage a stuck device held the account's purge horizon, now a
+  device that ONLY ever resumes drifts out of it after 60 days. With D1 a resume finishes in ~a minute, and R2-1's fix
+  discards the stage the moment any purge lands, so the residue is a device that resumes and never completes for 60
+  days. Bundled for her: does an actively resuming device count as "seen"? (QUESTIONS at the merge.)
+- **R2-4 [MINOR] — CONFIRMED (the orchestrator, at closeout):** the handoff gains F4's canon lines in step 6 and the
+  calls owed gain F6, O-1, O-2 and R2-3.
+- **R2-5 [NIT] — CONFIRMED (the orchestrator):** the LIVE STATUS table's rows 4 and 5 brought current.
+- **R2-6 [NIT] — ACCEPTED (the implementer):** on `PullStage.CursorMovedUnderRound` the scheduler requests one
+  follow-up round (the next round re-plans and heals), so the row never sits on the belt's text. A pin: the scheduler
+  runs the follow-up.
+- **THE ARCHITECT'S NOTE (recorded before the round-2 fixes start):** the stage has drawn a MAJOR in each round (F1,
+  R2-1) — each a real invalidation edge of a new persisted cache. If round 3 (the cap) raises another MAJOR or BLOCKER
+  in D2, the stage does NOT merge tonight: the merge carries D1 + D3 (D1 alone brings her corpus's first catch-up to
+  ~70 s of download + ~4–5 min of save — inside Castle's 10-minute idle lock), D2 reverts off the branch, and the stage
+  goes back to her as a design question with the ladder's findings. A clean round 3 merges all three.
+
 ## LADDER R1 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
 
 **Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/SyncSpec.md` WHOLE (this is `Sync/`);
@@ -198,6 +238,27 @@ scale; A's write budget 11 of its 500k first-load pool before it).
   device's backups until growth reuses it. Correctness untouched; a fresh device's first catch-up only. HER CALL
   (bundled): accept for 0.10 + a compaction-design ticket, or hold the Air until it exists.
 - Quit at 05:08 (zero instances).
+
+## THE DEV SLOT — RESTORED WHOLE (2026-10-23 06:00–06:03, stage claim `vx-494`)
+
+- **No re-walk after the R1 fixes, by the orchestrator's call:** the fixes change only edge handling (the stage's
+  format/lockstep identity, an undecodable row's discard, the apply's moved-cursor belt) — all pinned headlessly with
+  revert-proven teeth; the happy path the walk proved (D1's windows, D2's resume, the commit) is unchanged.
+- **O-B2 honored:** L2 relaunched with the walk env (`ps eww`: the throwaway ref, no production ref) → Settings ▸
+  Protection ▸ Sign out… → "Sign out of this Mac?" → Sign Out → "You're signed out of sync." → quit (zero instances).
+- **Removed (each listed first; every one tonight's, of the two walk libraries `1eb1d88c`/`35067e12`, keys
+  `7b426467`/`7736e51a`):** L2's 5 slot files; the `Variorum-dev-aside-vx494-L1` dir (L1's 5 files); the slot's
+  `Backups/1eb1d88c` + `Backups/35067e12` (2 pairs each); the far folder's `~/Documents/Variorum/Backups/1eb1d88c` +
+  `/35067e12` (1 pair each).
+- **The 9 dev files `mv`'d back** from `Variorum-dev-aside-vx494` (same inodes, 191598614–191598620, 192555064/5;
+  never written while asided); the aside dir removed.
+- **The plain relaunch** — the PRE-fix walk build `DerivedData/vx494` (main's schema, so the dev store is NOT migrated
+  to v1_32 ahead of main), no walk env (`ps eww` = 0) → `road: opened — library e11e5233` → **rule 21's notice ONCE**
+  ("This is a different library than the one this Mac last had open") → OK → the dev library open QUIETLY, "Sync off
+  (dev store)", the October-20 hold banner standing, Resume never pressed → quit, zero instances.
+- **Residue (the recorded §8 class):** the walk libraries' custody/memory keychain items; the walk-era device-ID
+  consequence on the dev library (VX-465's accept-as-designed). The throwaway keeps A's 110k-row planted corpus and
+  vault (Standard, the throwaway passphrase) — hers to delete with the project.
 
 ## THE BEHAVIORAL REVERTS (run 2026-10-23 ~04:50 on the committed tip `3f15dc6f0`'s product files; each one file,
 restored by `git checkout --`, `git diff --exit-code` clean after every one — **no revert is in flight**)
