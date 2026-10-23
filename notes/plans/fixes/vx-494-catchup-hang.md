@@ -677,6 +677,16 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   unlock holds the account's sync keys in session until lock. The sitting's answer on remediation until then: switch
   the gate to Touch ID, or sign out of sync and back in (the join loads the keys), or any key door. **P-VX486-1/-2:**
   "fine on provisional wording." — the provisional lines stand.
+- **R-494-6 (2026-10-23, the window sitting, continued — at her Air crossing):** F6/VX-502: "yeah, I agree that we
+  should fix this. Put it on pre-launch, maybe in the same umbrella as the others since they're all the same area." —
+  Pre-launch added (already under VX-500). (b): "I agree." (c): her question answered at the sitting (the stage and the
+  library briefly share the file; SQLite keeps the emptied stage's pages as reusable free room). Her Air observation,
+  verbatim: "I'm getting 'sync locked - this mac hasn't unlocked your account's sync keys'. is that expected? I can go
+  to sync and go to Turn on sync and it says 'your account already syncs' - should that not be sign into sync instead
+  of turn on?" — EXPECTED by construction (sign-in configures and triggers; an un-joined library's round refuses
+  `encryptionKeysUnavailable`; the funnel lands at the join) — the WORDING is **VX-506** (Wording, Low, under VX-500),
+  her lines to pick at the fix. Her note: "I normally leave my idle lock on Never anyway." VX-503's Pre-launch call:
+  asked, recommendation given (yes — the join is every second device's first-run road), her word pending.
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
