@@ -33,9 +33,15 @@ import OSLog
 /// `SyncSession.configure` finds it, drained before the replacement starts; a lock closes the retired chain's pool
 /// outright. The one road with no drain is `stop()` then `configure()` (a sign-out then a sign-in): `stop()` retires
 /// the chain in an unstructured task and forgets it, so a new round could in principle overlap the old round's last
-/// write. THE BELT (ladder R1, N2): the apply refuses when the committed cursor is no longer the one its stage
-/// extends (`CursorMovedUnderRound`) — nothing written, the stage kept; the next round re-plans and its base check
-/// discards a stage whose base moved.
+/// writes. THE BELT, so an overlap can only refuse, never commit past rows nobody applied:
+///  - the apply refuses when the committed cursor is no longer the one its stage extends (`CursorMovedUnderRound` —
+///    ladder R1, N2);
+///  - CONTINUITY (ladder R2, R2-2), because another round can empty the stage WITHOUT moving the cursor (a save that
+///    stalls at its batch's first row — the steady state of a stalled device — or a discard): a window is staged only
+///    onto an EMPTY stage from the round's base, or onto a stage of the round's identity whose reach is exactly where
+///    the window starts; and the apply saves only a stage of the round's identity reaching exactly its fetch cursor
+///    (`StageMovedUnderRound`). So the stage always holds one unbroken download from its base to its reach.
+/// Each refusal writes nothing and keeps whatever stage stands; the next round re-plans from the committed cursor.
 /// Writes here touch only local-only tables (no outbox trigger fires), so they run as plain writes.
 enum PullStage {
     static let headerKey = "pull_stage"
@@ -94,6 +100,17 @@ enum PullStage {
         }
     }
 
+    /// Ladder R2, R2-2 — THE ONE-WRITER BELT's continuity refusal: the stage this round is extending or saving is no
+    /// longer the one it wrote or resumed (another round on this store emptied, replaced or advanced it, or the
+    /// ledger moved under it). Writing on would stage a download with a hole in it, and saving it could commit the
+    /// cursor past rows nobody applied. Nothing is written; the next round re-plans from the committed cursor.
+    struct StageMovedUnderRound: Error, CustomStringConvertible {
+        var description: String {
+            "another sync round changed this round's download while it was running; "
+                + "the next round starts from the committed cursor"
+        }
+    }
+
     /// A stage this round fetched itself, from its committed cursor, that still will not decode — impossible while
     /// this build encodes what it decodes; the stage is cleared and the round refuses rather than loop.
     struct UndecodableStage: Error, CustomStringConvertible {
@@ -119,8 +136,7 @@ enum PullStage {
            header.seq > base {
             return .resume(from: header.seq)
         }
-        let staged = try Bool.fetchOne(
-            db, sql: "SELECT EXISTS (SELECT 1 FROM \(SyncPullStageSchema.table))") ?? false
+        let staged = try hasStagedRows(db)
         let headerRow = try Bool.fetchOne(
             db, sql: "SELECT EXISTS (SELECT 1 FROM sync_state WHERE key = ?)", arguments: [headerKey]) ?? false
         return (headerRow || staged) ? .discardThenFresh : .fresh
@@ -145,13 +161,26 @@ enum PullStage {
         }
     }
 
-    /// One downloaded window: its encoded rows upserted through one cached statement (a row's newer download
-    /// replaces an older one — the state-based feed serves a row again at a higher seq when it changed), the header
-    /// advanced to the window's end.
+    /// One downloaded window — the feed's `(windowSince, seq]`: its encoded rows upserted through one cached statement
+    /// (a row's newer download replaces an older one — the state-based feed serves a row again at a higher seq when
+    /// it changed), the header advanced to the window's end. CONTINUITY first (R2-2 — the ONE WRITER belt above): the
+    /// window lands only on an EMPTY stage when it starts at the round's base, or on a stage of the round's identity
+    /// whose reach is exactly `windowSince`; anything else throws `StageMovedUnderRound`, nothing written.
     static func stage(
         _ db: Database, _ window: [EncodedRow], base: Int64, keyID: String, deviceID: String,
-        through seq: Int64
+        from windowSince: Int64, through seq: Int64
     ) throws {
+        let scanPoint = try ledgerScanPoint(db)  // R2-1: read in this write's own transaction
+        switch try headerRow(db) {
+        case .absent:
+            guard windowSince == base, try !hasStagedRows(db) else { throw StageMovedUnderRound() }
+        case .unreadable:
+            throw StageMovedUnderRound()
+        case .readable(let header):
+            guard header.belongs(base: base, keyID: keyID, deviceID: deviceID, ledgerScanPoint: scanPoint),
+                  header.seq == windowSince
+            else { throw StageMovedUnderRound() }
+        }
         let upsert = try db.cachedStatement(sql: """
             INSERT INTO \(SyncPullStageSchema.table) (table_name, row_id, server_seq, payload)
             VALUES (?, ?, ?, ?)
@@ -164,8 +193,21 @@ enum PullStage {
         }
         try writeHeader(db, Header(
             base: base, seq: seq, keyID: keyID, deviceID: deviceID,
-            format: format, lockstep: SyncSchema.lockstepVersion,
-            ledgerScanPoint: try ledgerScanPoint(db)))  // R2-1: read in this write's own transaction
+            format: format, lockstep: SyncSchema.lockstepVersion, ledgerScanPoint: scanPoint))
+    }
+
+    /// R2-2 (ii) — the apply's half of CONTINUITY, inside its transaction before any write: the stage it saves is still
+    /// this round's — of the round's identity, reaching exactly the round's fetch cursor. Anything else (the stage
+    /// emptied, replaced or advanced by another writer since the round's last window, or the ledger moved under it)
+    /// throws `StageMovedUnderRound`.
+    static func verifyRoundsStage(
+        _ db: Database, base: Int64, keyID: String, deviceID: String, reach: Int64
+    ) throws {
+        guard case .readable(let header) = try headerRow(db),
+              header.belongs(
+                  base: base, keyID: keyID, deviceID: deviceID, ledgerScanPoint: try ledgerScanPoint(db)),
+              header.seq == reach
+        else { throw StageMovedUnderRound() }
     }
 
     /// Every staged row, in `server_seq` order — the batch the apply consumes — or nil when any staged payload will
@@ -189,13 +231,29 @@ enum PullStage {
         try db.execute(sql: "DELETE FROM sync_state WHERE key = ?", arguments: [headerKey])
     }
 
-    private static func readHeader(_ db: Database) throws -> Header? {
+    private enum HeaderRow {
+        case absent
+        case unreadable
+        case readable(Header)
+    }
+
+    private static func headerRow(_ db: Database) throws -> HeaderRow {
         guard let value = try String.fetchOne(
             db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [headerKey])
-        else { return nil }
-        // An unreadable header is a stage nobody can vouch for: treated as absent, so `plan` discards it (a header
-        // from before the stage named its format — F1 — or its ledger scan point — R2-1 — reads as unreadable too).
-        return try? JSONDecoder().decode(Header.self, from: Data(value.utf8))
+        else { return .absent }
+        // An unreadable header is a stage nobody can vouch for: `plan` discards it and `stage` never writes over it (a
+        // header from before the stage named its format — F1 — or its ledger scan point — R2-1 — reads as unreadable).
+        guard let header = try? JSONDecoder().decode(Header.self, from: Data(value.utf8)) else { return .unreadable }
+        return .readable(header)
+    }
+
+    private static func readHeader(_ db: Database) throws -> Header? {
+        if case .readable(let header) = try headerRow(db) { return header }
+        return nil
+    }
+
+    private static func hasStagedRows(_ db: Database) throws -> Bool {
+        try Bool.fetchOne(db, sql: "SELECT EXISTS (SELECT 1 FROM \(SyncPullStageSchema.table))") ?? false
     }
 
     private static func writeHeader(_ db: Database, _ header: Header) throws {

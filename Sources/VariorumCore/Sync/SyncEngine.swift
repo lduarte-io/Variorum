@@ -547,7 +547,8 @@ public struct SyncEngine: Sendable {
                 let staged = try PullStage.encode(opened)  // off the writer (R1, N3)
                 try await database.write { db in
                     try PullStage.stage(
-                        db, staged, base: since, keyID: keyID, deviceID: deviceID, through: windowEnd)
+                        db, staged, base: since, keyID: keyID, deviceID: deviceID,
+                        from: windowSince, through: windowEnd)
                 }
                 fetchCursor = windowEnd
             }
@@ -593,6 +594,7 @@ public struct SyncEngine: Sendable {
         }
 
         let batch = pulled
+        let reach = fetchCursor
         return try await applyingRemoteWithDeferredFKs { db in
             // Ladder R1, N2 — THE ONE-WRITER BELT (`PullStage`'s doc): the
             // stage extends the cursor this round started from; if another
@@ -603,6 +605,12 @@ public struct SyncEngine: Sendable {
             guard committed == since else {
                 throw PullStage.CursorMovedUnderRound(roundBase: since, committed: committed)
             }
+            // Ladder R2, R2-2 — the belt's CONTINUITY half: another round can
+            // empty or replace the stage without moving the cursor, so the
+            // value check alone cannot see it. Save only this round's own
+            // stage — its identity, reaching exactly this round's fetch cursor.
+            try PullStage.verifyRoundsStage(
+                db, base: since, keyID: keyID, deviceID: deviceID, reach: reach)
             var report = PullReport()
             // Straggler guard, to a FIXPOINT: rows apply in seq order up to
             // the first row whose FK closure is satisfiable neither locally
