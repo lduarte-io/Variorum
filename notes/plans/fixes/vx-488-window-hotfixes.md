@@ -190,7 +190,21 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
   `AccountLifecycleTests`, `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`,
   `SupabaseTransportSessionTests`, as one `--filter`): **`✔ Test run with 531 tests in 101 suites passed`** — the
   scenario world's promises (which read session memory) hold with the arm's new hold.
-- Piece 3 — fix (b) + its seams + pins 3 and 5: NOT-STARTED — the settled design below.
+- Piece 3 — fix (b) + its seams + pins 3 and 5: DONE (this commit). NEW `Shared/Protection/TouchIDPressContext.swift`
+  (`TouchIDPressContext` — the evaluated `LAContext`, ended by `invalidate()`; `TouchIDPressHanding`; `TouchIDPressRiding`
+  — `nonisolated` protocols, app-level). `KeychainCustodyLeaf`: the Touch ID read factored into `readTouchID` (body
+  byte-identical but for its returns), `readCustody(.touchid)` = its key (behavior unchanged — the key doors' press), and
+  `readTouchIDCustody` hands the evaluated context on ONLY when the read opened its item; the leaf keeps nothing.
+  `KeychainSyncKeysLeaf.readSyncKeys(accountID:riding:)` — the Touch ID item under the press's context,
+  `interactionNotAllowed` set first; any non-`errSecItemNotFound` answer THROWS (so the log names the status).
+  `ProtectionOpenRoad.pressTouchID` — reads through `TouchIDPressHanding` when the leaf offers it (else as before), ends
+  the press with a `defer` right after the read, and on `.opened` calls the new `loadSyncKeysForTheSession` (bound
+  library only; logs and returns on no press / no item / a throw — never fails the unlock). The planted leaves join both
+  protocols (`PlantedCustodyLeaf.handedPresses`; `PlantedSyncKeysLeaf.touchIDReads` / `ridingReads` /
+  `ridingReadFails`, an ended press refused). The provider's header made true. Pins 3 + 5 added to
+  `TouchIDUnlockSyncKeysTests.swift`. **The harness on the fixed tree: `✔ Test run with 4 tests in 1 suite passed`
+  (`--filter TouchIDUnlockSyncKeysTests` — pins 2, 3, 4, 5) and the whole harness `✔ Test run with 385 tests in 65 suites
+  passed`** (381 baseline + this unit's 4; 0 failures). No revert is in flight.
 - Piece 4 — the behavioral reverts (named below, each run on a committed tree): NOT-STARTED.
 - Piece 5 — evidence (core protection suites debug + release; the harness; build-for-testing Mac + iOS): NOT-STARTED.
 - Piece 6 — the close (this record final; the run table's row 1): NOT-STARTED.

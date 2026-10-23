@@ -13,7 +13,9 @@
 //  intact, cursor unmoved (SyncSpec §3's refusal grammar). It reads SESSION MEMORY first, then the SILENT
 //  item; it NEVER reads the Touch ID item (a press per round is nobody's wish — under Always-ask Castle,
 //  rounds run while an act or unlock has loaded session memory; P-VX307-U1-3). The device identity is the
-//  record's own (rule 23), read from the attached session.
+//  record's own (rule 23), read from the attached session. VX-487: that design is BUILT now on both sides — a Castle act
+//  with Touch ID holds the keys in session beside the item (`CommonSteps.holdSyncKeys`), and the Touch ID unlock loads
+//  them in the same press (`ProtectionOpenRoad.loadSyncKeysForTheSession`); before it, Castle + Touch ID never synced.
 //
 //  VX-329 U1 — THE RELEASE SWITCH: the road reaches every store now, so this provider is the engine's live key seam
 //  (it was structural and dormant while the new road reached only the dev store, whose `SyncSession` never configures).

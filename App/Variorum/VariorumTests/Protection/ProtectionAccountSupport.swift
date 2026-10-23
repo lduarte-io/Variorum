@@ -102,15 +102,35 @@ nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
 }
 
 /// Sync keys in memory, with session memory (the gatherer's facts read the items).
-nonisolated final class PlantedSyncKeysLeaf: SyncKeysLeaf, @unchecked Sendable {
+nonisolated final class PlantedSyncKeysLeaf: SyncKeysLeaf, TouchIDPressRiding, @unchecked Sendable {
     /// The same race class as the vault fake's: locked bodies.
     private let lock = NSLock()
     var items: [SyncKeysItemFact: AccountKeys] = [:]
     var session: [String: AccountKeys] = [:]
+    /// VX-487 (b): every CONTEXT-LESS Touch ID read — on the real leaf each one mints its own `LAContext`, a prompt of its
+    /// own (the one-press pin asserts the unlock makes none).
+    private(set) var touchIDReads = 0
+    /// VX-487 (b): every read that RODE a press, the press it rode, in order.
+    private(set) var ridingReads: [TouchIDPressContext] = []
+    /// VX-487 (b): the next riding reads THROW (a keychain answer the press did not cover) — the never-hostage pin.
+    var ridingReadFails = false
+
+    struct RidingReadFailed: Error {}
 
     func syncKeyItems() throws -> [SyncKeysItemFact] { lock.withLock { Array(items.keys) } }
     func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? {
-        lock.withLock { items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] }
+        lock.withLock {
+            if itemClass == .touchid { touchIDReads += 1 }
+            return items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)]
+        }
+    }
+    func readSyncKeys(accountID: String, riding press: TouchIDPressContext) throws -> AccountKeys? {
+        try lock.withLock {
+            ridingReads.append(press)
+            // An ended press authorizes nothing (the real context answers LAErrorInvalidContext).
+            if ridingReadFails || press.isInvalidated { throw RidingReadFailed() }
+            return items[SyncKeysItemFact(accountID: accountID, itemClass: .touchid)]
+        }
     }
     func writeSyncKeys(_ keys: AccountKeys, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
         lock.withLock { items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = keys }

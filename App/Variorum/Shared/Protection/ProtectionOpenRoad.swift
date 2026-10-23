@@ -390,8 +390,10 @@ nonisolated enum ProtectionOpenRoad {
     }
 
     /// THE PRESS (VX-310): the Touch ID item for the current key (the live key file's), else the first one this
-    /// scope lists — read through `readCustody(.touchid)`, which prompts. Never pressed while Touch ID is only
-    /// unusable for now (the face says why first).
+    /// scope lists — read through the custody leaf's Touch ID read, which prompts. Never pressed while Touch ID is only
+    /// unusable for now (the face says why first). VX-487 (b): the press the read evaluated is kept for THIS call only —
+    /// a library it opens that is bound to an account loads that account's sync keys into session memory riding it
+    /// (`loadSyncKeysForTheSession` — one press, never two prompts) — and ended on every path.
     static func pressTouchID(_ ctx: RoadContext, facts: ProtectionFacts?) async -> RoadAttempt {
         let custody = ctx.system.custody
         let touchItems = (facts?.custody ?? []).filter { $0.itemClass == .touchid }
@@ -399,13 +401,20 @@ nonisolated enum ProtectionOpenRoad {
         guard let item = touchItems.first(where: { $0.fingerprint == hint }) ?? touchItems.first else {
             return .touchIDNotOpened(press: nil, biometry: ctx.system.leaves.biometry.biometry(), itemGone: true)
         }
-        let key: StoreKey?
+        var key: StoreKey?
+        var evaluated: TouchIDPressContext?
         do {
-            key = try custody.readCustody(fingerprint: item.fingerprint, itemClass: .touchid)
+            if let handing = custody as? TouchIDPressHanding {
+                (key, evaluated) = try handing.readTouchIDCustody(fingerprint: item.fingerprint)
+            } else {
+                key = try custody.readCustody(fingerprint: item.fingerprint, itemClass: .touchid)
+            }
         } catch {
             log("road: the Touch ID read failed — \(String(describing: error))")
             key = nil
         }
+        // VX-487 (b): the press ends with this call, whatever the open does next.
+        defer { evaluated?.invalidate() }
         let press = (custody as? KeychainCustodyLeaf)?.lastPress
         guard let key else {
             // No key, no recorded press: the item was not there to press (the probe found none).
@@ -413,13 +422,44 @@ nonisolated enum ProtectionOpenRoad {
             return .touchIDNotOpened(press: press, biometry: ctx.system.leaves.biometry.biometry(), itemGone: gone)
         }
         switch await open(ctx, candidates: [key], typed: .none) {
-        case .opened(let session): return .opened(session)
+        case .opened(let session):
+            loadSyncKeysForTheSession(session, riding: evaluated)
+            return .opened(session)
         case .recordMissing: return .recordMissing
         case .unreadableLiveKeyFile: return .refused(ProtectionWords.liveKeyFileUnreadable)
         case .noneOpens, .failed:
             // The item's key opens nothing here: failed on an item that exists (the item is the final word).
             return .touchIDNotOpened(
                 press: .failedOnExistingItem, biometry: ctx.system.leaves.biometry.biometry(), itemGone: false)
+        }
+    }
+
+    /// **VX-487 (b) — THE TOUCH ID UNLOCK LOADS THE ACCOUNT'S SYNC KEYS FOR THE SESSION.** Under Castle with Touch ID the
+    /// account's keys live in a Touch ID item (rule 15's custody), which the engine's provider never reads (a press per
+    /// round is nobody's wish — P-VX307-U1-3: "rounds run while an act or unlock has loaded session memory"). So the
+    /// press that opened a library whose RECORD names an account (the provider's own truth) reads that account's item
+    /// riding the same press — never a second prompt — and holds the keys in session memory (gone at a relock or a
+    /// crash). NEVER HOSTAGE: no press to ride, no item, or a read that fails is said in the log and the library opens all
+    /// the same; the row says locked until an act or the next Touch ID unlock loads them. An unbound library reads
+    /// nothing. (The typed roads load nothing — the run record's OPEN ITEMS, her call.)
+    static func loadSyncKeysForTheSession(_ session: ProtectionRoadSession, riding press: TouchIDPressContext?) {
+        guard let account = session.library.record?.account else { return }
+        guard let press, !press.isInvalidated, let leaf = session.system.leaves.syncKeys as? TouchIDPressRiding else {
+            log("road: the Touch ID unlock opened a synced library with no press to ride — its sync keys stay unloaded "
+                + "until an act or the next Touch ID unlock")
+            return
+        }
+        do {
+            guard let keys = try leaf.readSyncKeys(accountID: account, riding: press) else {
+                log("road: the Touch ID unlock's sync-keys read found no Touch ID item for the account — nothing loaded")
+                return
+            }
+            session.system.leaves.syncKeys.holdInSession(keys, accountID: account)
+            log("road: the Touch ID unlock loaded the account's sync keys for the session (sync key "
+                + "\(keys.rowKeyID.prefix(8)))")
+        } catch {
+            log("road: the Touch ID unlock's sync-keys read failed — \(String(describing: error)); the library opens, "
+                + "its sync keys stay unloaded")
         }
     }
 

@@ -8,8 +8,13 @@
 //  the sync keys are `ProtectionAccountSupport`'s; also runs headless in the implementer's SwiftPM harness).
 //    - pin 2: the press of a library bound to an account loads the keys into session memory, and the engine's seam
 //      (`NewRoadSyncKeyProvider`) reads them. RED on the pre-fix tree.
+//    - pin 3: ONE PRESS, NEVER TWO PROMPTS — the custody read is the one gated read that prompts; the sync-keys read RIDES
+//      the press it handed on (`TouchIDPressContext`), no context-less Touch ID read of the sync-keys item happens (each
+//      would mint a context and prompt), and the press is ended with the unlock.
 //    - pin 4 (a guard — the brief named it "already pinned", but no test named the provider): the provider reads session
 //      memory first, then the silent item, and NEVER the Touch ID item.
+//    - pin 5: NEVER HOSTAGE — a sync-keys read that throws, an item that is gone, a library bound to no account, a press
+//      whose key opens nothing: the unlock goes as it would have (opened / not opened), nothing loaded, the press ended.
 //
 
 import Foundation
@@ -74,17 +79,23 @@ struct TouchIDUnlockSyncKeysTests {
         world.keys.holdInSession(nil, accountID: Account.account)
     }
 
-    /// The lobby a relaunch (or a lock) lands in, and THE PRESS from it.
-    static func press(_ world: World) async throws -> ProtectionRoadSession {
-        let lobby = ProtectionOpenRoad.lobbyFacts(world.road.context())
+    /// The lobby a relaunch (or a lock) lands in, and THE PRESS from it — what it did.
+    static func attempt(_ road: PlantedRoad) async -> RoadAttempt {
+        let lobby = ProtectionOpenRoad.lobbyFacts(road.context())
         #expect(ProtectionLobbyFace.derive(lobby).touchIDButton, "the lobby offers Touch ID")
-        guard case .opened(let opened) = await ProtectionOpenRoad.pressTouchID(world.road.context(), facts: lobby.facts)
-        else {
+        return await ProtectionOpenRoad.pressTouchID(road.context(), facts: lobby.facts)
+    }
+
+    /// …a press that opens the library.
+    static func press(_ road: PlantedRoad) async throws -> ProtectionRoadSession {
+        guard case .opened(let opened) = await attempt(road) else {
             Issue.record("the Touch ID press opens the library")
             throw RoadWorld.RoadWorldError.notCreated
         }
         return opened
     }
+
+    static func press(_ world: World) async throws -> ProtectionRoadSession { try await press(world.road) }
 
     /// PIN 2 — the Touch ID unlock of a library bound to an account loads the account's keys into SESSION MEMORY, and the
     /// engine's seam reads them: the round is no longer refused. RED on the pre-fix tree — no unlock loaded session memory,
@@ -125,5 +136,82 @@ struct TouchIDUnlockSyncKeysTests {
         #expect((try? provider.currentKeys())?.corpusKeyID == "session-row-key", "session memory first")
         provider.attach(nil)
         #expect(throws: (any Error).self, "nothing attached, nothing read") { _ = try provider.currentKeys() }
+    }
+
+    /// PIN 3 — ONE PRESS, NEVER TWO PROMPTS. The custody read is the press's ONE gated read (the prompt); the sync-keys
+    /// read RIDES the very press it handed on; no context-less Touch ID read of the sync-keys item happens (on the real
+    /// leaf each mints its own context — a second prompt); the press is ended with the unlock. A load that pressed again
+    /// (a context-less read) would load the keys all the same — pin 2 stays green — and fail HERE.
+    @Test func pin3_onePressNeverTwoPrompts_theSyncKeysReadRidesTheCustodyReadsPress() async throws {
+        let world = try await Self.castleTouchIDSynced()
+        Self.relaunched(world)
+        let custodyPresses = world.road.custody.reads.filter { $0 == .touchid }.count
+        let freshSyncPresses = world.keys.touchIDReads
+        let rides = world.keys.ridingReads.count
+        let opened = try await Self.press(world)
+        #expect(world.road.custody.reads.filter { $0 == .touchid }.count == custodyPresses + 1,
+                "ONE gated custody read — the press")
+        let handed = try #require(world.road.custody.handedPresses.last, "the custody read handed its press on")
+        #expect(world.keys.ridingReads.count == rides + 1, "the sync-keys item read once, riding a press")
+        #expect(world.keys.ridingReads.last === handed, "…THE press the custody read evaluated")
+        #expect(world.keys.touchIDReads == freshSyncPresses,
+                "no fresh-context Touch ID read of the sync-keys item — no second prompt")
+        #expect(handed.isInvalidated, "the press ends with the unlock")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) != nil && opened.library.record?.mode == .castle)
+    }
+
+    /// PIN 5 — NEVER HOSTAGE (the brief's limit): the sync-keys load can only ADD session memory; it never changes what
+    /// the press does. A read that throws, an item that is gone: the library opens, nothing loaded, the press ended. A
+    /// Castle + Touch ID library bound to NO account opens and reads nothing. A press whose key opens nothing is not
+    /// opened — and reads nothing.
+    @Test func pin5_aFailingOrAbsentSyncKeysReadNeverFailsTheUnlock() async throws {
+        // The read throws (a keychain answer the press does not cover — errSecInteractionNotAllowed on the real leaf).
+        let failing = try await Self.castleTouchIDSynced()
+        Self.relaunched(failing)
+        failing.keys.ridingReadFails = true
+        let rides = failing.keys.ridingReads.count
+        let opened = try await Self.press(failing)
+        #expect(opened.library.record?.mode == .castle && opened.key == failing.session.key, "the library opens")
+        #expect(failing.keys.ridingReads.count == rides + 1, "the read was tried")
+        #expect(failing.keys.sessionSyncKeys(accountID: Account.account) == nil, "nothing loaded")
+        #expect(failing.road.custody.handedPresses.last?.isInvalidated == true, "the press ended")
+
+        // The item is gone: the library opens, nothing loaded.
+        let absent = try await Self.castleTouchIDSynced()
+        Self.relaunched(absent)
+        absent.keys.items[SyncKeysItemFact(accountID: Account.account, itemClass: .touchid)] = nil
+        let reopened = try await Self.press(absent)
+        #expect(reopened.library.record?.account == Account.account)
+        #expect(absent.keys.sessionSyncKeys(accountID: Account.account) == nil, "nothing loaded")
+
+        // A library bound to NO account: the press opens it and reads no sync keys at all.
+        let local = PlantedRoad()
+        let localKeys = PlantedSyncKeysLeaf()
+        local.syncKeys = localKeys
+        local.biometry = .ready
+        let (created, words) = try await local.created()
+        let crossed = try await Crossing.press(
+            created, .useCastle, typed: TypedSecrets(words: words, newPassphrase: Crossing.passphrase), gate: .touchID)
+        #expect(crossed.outcome == .made(.useCastle, exportTurnedOff: false))
+        let unbound = try await Self.press(local)
+        #expect(unbound.library.record?.mode == .castle && unbound.library.record?.account == nil)
+        #expect(localKeys.ridingReads.isEmpty && localKeys.touchIDReads == 0 && localKeys.session.isEmpty,
+                "an unbound library reads nothing")
+        #expect(local.custody.handedPresses.last?.isInvalidated == true, "the press ended")
+
+        // The item's key opens nothing here: not opened (the item is the final word) — and no sync keys read.
+        let stale = try await Self.castleTouchIDSynced()
+        Self.relaunched(stale)
+        let item = try #require(stale.road.custody.items.keys.first { $0.itemClass == .touchid })
+        stale.road.custody.items[item] = StoreKey.mint()
+        let staleRides = stale.keys.ridingReads.count
+        guard case .touchIDNotOpened(let press, _, let gone) = await Self.attempt(stale.road) else {
+            Issue.record("a key that opens nothing does not open the library")
+            return
+        }
+        #expect(press == .failedOnExistingItem && !gone)
+        #expect(stale.keys.ridingReads.count == staleRides && stale.keys.sessionSyncKeys(accountID: Account.account) == nil,
+                "nothing opened, nothing read")
+        #expect(stale.road.custody.handedPresses.last?.isInvalidated == true, "the press ended")
     }
 }
