@@ -142,7 +142,42 @@ trailers of any kind.
 
 ### LADDER R2 FIXES — LIVE STATUS (the implementer owns this section)
 
-- (empty — the implementer writes it from its first commit)
+**NOT DONE HERE, by the brief:** R2-3 (hers), R2-4 and R2-5 (the orchestrator's); no stage, no app launch, no walk, no
+`xcodebuild test`, no store or server contact; no `build-for-testing` unless an `App/` file changes (none is planned —
+nothing in `App/` names the stage or its errors). **IN PROGRESS — no revert is in flight.**
+
+Session: a fresh `opus-implementer` (Opus 5.5), 2026-10-23, worktree `~/dev/variorum-vx-494`, headless only. Read in
+full before any code: CLAUDE.md + canon, SyncSpec, the purge memo §2 and §4, the resiliency protocol, this file, both
+ladder rounds, `PullStage.swift`, `SyncEngine.swift` (`pullRound`, `pullToHead`, `resyncReinitialize`),
+`SyncScheduler.swift`, `PurgeJanitor.swift` (`reconcileLedger` and the three writers of `last_purge_seq`: the sweep's
+own-purge advance, `reconcileLedger`, `reonboardFromAccount`), `ResumableCatchUpTests` + its support, and the R2
+reviewer's probe. One fact checked for R2-1's cost: `sync_purge_ledger` (13y's body, 11's verbatim) and the fake both
+return EVERY entry above the scan point in one page (no LIMIT), so a fresh device's first pre-pass consumes the whole
+ledger and a later pre-pass moves the scan point only when a new purge landed — fix (2) costs one re-download exactly
+then, and D2's resume is untouched otherwise.
+
+**The design, one rule at three doors.** The stage's IDENTITY becomes base · key id · device id · format · lockstep ·
+**the ledger scan point** (`last_purge_seq`, absent ⇒ 0 — `PurgeJanitor.stateValue`'s own reading). `plan` resumes
+only on an identical identity (R2-1); `stage` extends only a stage of this identity whose reach is exactly where this
+window starts, or starts one only from the round's base (R2-2 (i)); the apply saves only a stage of this identity whose
+reach is the round's fetch cursor, beside the unchanged cursor check (R2-2 (ii)). A mid-round change of any leg —
+the scan point included — refuses (`PullStage.StageMovedUnderRound`, nothing written), never re-vouches: a stage is
+valid only for the ledger state it was fetched under. **A header from before this change** has no `ledgerScanPoint` key;
+the field is a NON-optional `Int64` in the synthesized `Decodable`, so decoding throws `keyNotFound`, `readHeader`'s
+`try?` reads it as unreadable, and `plan` answers `.discardThenFresh` (and `stage` refuses an unreadable header rather
+than overwrite it). `format` stays 1 (it names the staged ROW's encoding, which does not change). R2-6: the scheduler
+requests ONE follow-up round on either belt refusal (`PullStage.isOneWriterRefusal`), never on a retired scheduler,
+and never a second consecutive one (a belt-refused follow-up waits for the next trigger — no loop by construction).
+
+| # | Item | Plan | Status |
+|---|---|---|---|
+| R2-0 | This status | — | DONE (this commit) |
+| R2-P | The pins, committed before any fix (one commit) | `ResumableCatchUpTests` gains: **(R2-1)** the reviewer's probe scene — B's first catch-up interrupted with the doomed note staged live; A deletes, backdates, B drops out of the horizon, A's sweep purges the family; B returns (`reconcileLedger()` then `pull`) ⇒ the first `since` is 0 (stage discarded), the doomed container absent, and after explicit rounds (the purge idiom — a purge consumes a seq no feed row carries) both outboxes empty and the dumps equal; **(R2-1u, a guard)** the header's `ledgerScanPoint` key removed (the pre-change shape) ⇒ the next first `since` is 0; **(R2-2)** the reviewer's `probeTheBeltMissesAFirstRowStall` scene (B committed to the stall point first) ⇒ no row at or below B's cursor missing, then the heal ⇒ converged; **(R2-6)** the N2 scene driven through a `SyncScheduler` (no janitor), ONE trigger ⇒ `roundsCompleted == 2` and `lastError == nil` (the follow-up healed); **(R2-6b, a guard)** a transport hook that clears B's stage before each round's second window (three raids) ⇒ one trigger ends after exactly 2 rounds (the follow-up ran once, never a loop). The fault transport gains `armWhileEachPull(times:where:_:)`. Expected on the tip's product code: R2-1, R2-1u, R2-2, R2-6 RED; R2-6b RED for another reason (the tip has no continuity, so nothing refuses — 1 round); its teeth are a revert | NOT-STARTED |
+| R2-1 | The ledger scan point in the stage's identity | `Header.ledgerScanPoint` (non-optional); `stage` records `last_purge_seq` read in its own transaction; `plan` resumes only while it is unchanged; the doc (THE IDENTITY) names it and why (13j's returner road: the pre-round reconciliation drops purged rows only from the live tables, so a stage outliving a ledger advance would resurrect them) | NOT-STARTED |
+| R2-2 | Continuity | `stage(…, from windowSince:, through:)` refuses unless (no header row and `windowSince == base`) or (a readable header of this identity with `seq == windowSince`); the apply transaction, after the cursor check, refuses unless a readable header of this identity exists with `seq ==` the round's fetch cursor; both throw `StageMovedUnderRound`, nothing written; the ONE WRITER doc rewritten | NOT-STARTED |
+| R2-6 | The follow-up round | `SyncScheduler.runOneRound`'s catch: on `PullStage.isOneWriterRefusal(error)`, not retired, and the round was not itself a belt-requested follow-up ⇒ `followUpRequested = true` | NOT-STARTED |
+| R2-R | The behavioral reverts | Named here BEFORE any runs, at a committed pre-revert tip; each one file, `git checkout --` restore, `git diff --exit-code` clean after each | NOT-STARTED |
+| R2-E | Final evidence | `ResumableCatchUpTests`; the sync sweep; core debug + release (the known MCP timing flake named if it appears, never fixed) | NOT-STARTED |
 
 ## LADDER R1 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
 
