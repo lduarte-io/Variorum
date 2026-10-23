@@ -134,6 +134,15 @@ final class AppBootstrap {
     /// (`refresh_token_already_used`: the family revoked, sync stopped until a new sign-in). Construction reads nothing
     /// (13e B-1's lazy load: the Keychain is consulted at first use, on the actor's executor).
     @ObservationIgnored let auth: AuthSession
+    /// VX-487 F-M1-1 — THE PROCESS'S ONE SYNC-KEYS LEAF (the run record's THE RULING, option (i) — VX-423's shape): the
+    /// account's sync keys in SESSION memory (Always ask's custody; a Castle + Touch ID act's hold and the Touch ID
+    /// unlock's load) live in this one instance, handed to every system the road composes (`RoadInputs.live` →
+    /// `ProtectionSystem.live`), because every re-keying act reopens through a FRESH composition and a leaf minted per
+    /// system lost the act's hold at that reopen ("Sync locked" right after a join). Owned HERE because the bootstrap lives
+    /// for the process; the explicit clears (the lock's drop, a rollback's, a leave's) reach it unchanged, and "gone at a
+    /// relock or a crash" holds by them and by the process. One process serves one store variant, so one leaf is one per
+    /// scope. Construction reads nothing (the Keychain is touched only by a read or a write).
+    @ObservationIgnored private let syncKeys: any SyncKeysLeaf
     /// VX-306 U2 — the open library's protection faces: rule 27's banner, rule 3's reminder and its set-passphrase
     /// sheet, the receipts the open owes.
     private(set) var roadStanding: RoadStandingModel?
@@ -171,7 +180,8 @@ final class AppBootstrap {
         // pre-13x 2c (corner 47): the session's Keychain item is SCOPED by store variant — a dev-store build starts
         // signed out and never adopts the installed build's session.
         auth = Self.authority(.keychain(scope: variant.rawValue))
-        roadInputs = RoadInputs.live(variant: variant, auth: auth)
+        syncKeys = KeychainSyncKeysLeaf(scope: variant.rawValue)
+        roadInputs = RoadInputs.live(variant: variant, auth: auth, syncKeys: syncKeys)
         reminderLedger = PassphraseReminderLedger()
         exportSwitch = Self.markdownInsuranceSwitch(suiteName: nil)
         protection = ProtectionController()
@@ -195,6 +205,8 @@ final class AppBootstrap {
         // VX-423: a test bootstrap's authority is signed out and in memory — its road is the harness's (a planted
         // system), and no test reaches the scope's Keychain item through it.
         auth = Self.authority(.inMemory())
+        // VX-487 F-M1-1: the harness's own leaf (its one system — tests inject their own; nothing is minted here).
+        syncKeys = protectionRoad.system.leaves.syncKeys
         roadInputs = RoadInputs.test(protectionRoad)
         reminderLedger = PassphraseReminderLedger(
             defaults: UserDefaults(suiteName: PassphraseReminderLedger.testSuiteName) ?? .standard)

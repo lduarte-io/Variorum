@@ -18,7 +18,8 @@ import VariorumCore
 struct ProtectionSystemCompositionTests {
     static func system(_ slot: TempSlot, _ scope: ThrowawayScope, apple: InMemoryAppleKeysLeaf) -> ProtectionSystem {
         ProtectionSystem(
-            scope: scope.scope, places: slot.places, deviceName: "Test Mac", floor: .relaxedForTests, apple: apple,
+            scope: scope.scope, places: slot.places, deviceName: "Test Mac", floor: .relaxedForTests,
+            syncKeys: KeychainSyncKeysLeaf(scope: scope.scope), apple: apple,  // VX-487 F-M1-1: handed, never defaulted
             biometry: FixedBiometryLeaf(.none), ids: FastIDsLeaf())
     }
 

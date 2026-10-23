@@ -692,11 +692,14 @@ nonisolated struct RoadInputs: Sendable {
     /// Production: the variant's slot and far folder; the scoped sign-in (read off the main actor, a read); and
     /// READ-ONLY in a hosted test run (the test host is the dev-store app — `KeychainTestTripwire`). VX-423: every
     /// system composed here rides `auth`, the process's one refresh authority (the bootstrap's) — its vault leaf never
-    /// mints a session of its own.
-    static func live(variant: AppDatabase.StoreVariant, auth: AuthSession) -> RoadInputs {
+    /// mints a session of its own. VX-487 F-M1-1: and over `syncKeys`, the process's one sync-keys leaf (the bootstrap's),
+    /// so session memory held through one composed system survives into the next — a re-keying act's reopen composes a
+    /// fresh system, and the act's hold must reach the reopened session the engine reads.
+    static func live(variant: AppDatabase.StoreVariant, auth: AuthSession, syncKeys: any SyncKeysLeaf) -> RoadInputs {
         let scope = variant.rawValue
+        nonisolated(unsafe) let syncKeys = syncKeys
         return RoadInputs(
-            makeSystem: { try? ProtectionSystem.live(variant: variant, session: auth) },
+            makeSystem: { try? ProtectionSystem.live(variant: variant, session: auth, syncKeys: syncKeys) },
             sessionFact: {
                 KeychainAuthStorage.load(service: KeychainAuthStorage.variorumService, scope: scope)
                     .map { SessionFact.signedIn(accountID: $0.userID, email: $0.email) } ?? .signedOut

@@ -351,13 +351,42 @@ ladder re-reads it.
   OneSyncKeysLeaf`): `✘ Test run with 1 test in 1 suite failed … with 4 issues` — the mint found in
   `ProtectionSystem.swift` (the init's per-system default), and none of the three hand-offs present; the one-construction
   line ✔ (true on both sides).
-- Piece F1 — the fix + the behavioral pin + the clear guard: NOT-STARTED — the design: the bootstrap's production init mints
-  `KeychainSyncKeysLeaf(scope: variant.rawValue)` ONCE (`AppBootstrap.syncKeys`, beside `auth`), hands it to `RoadInputs
-  .live(variant:auth:syncKeys:)` (required) → `ProtectionSystem.live(variant:session:syncKeys:)` (required) →
-  `ProtectionSystem.init(… syncKeys:)` — made REQUIRED and non-optional, its `?? KeychainSyncKeysLeaf(scope:)` default
-  deleted, so no construction anywhere can silently mint its own (the compiler refuses a missed site); the test bootstrap
-  takes its harness system's leaf; the four test-side `ProtectionSystem(` sites pass their own (two gain an explicit
-  `KeychainSyncKeysLeaf(scope:)` — byte-identical behavior: a fresh one per call, as the default made).
+- Piece F1 — the fix + the behavioral pin + the clear guard: DONE (this commit).
+  - **THE SITES (every production `ProtectionSystem` construction, swept — `grep 'ProtectionSystem(\|ProtectionSystem\.live\|
+    KeychainSyncKeysLeaf('` over `Shared/`, `Variorum/`, `VariorumMobile/`, `VariorumMCPShim/` and `Sources/`):** the
+    product has exactly ONE system constructor, `ProtectionSystem.live(variant:session:syncKeys:)` (`ProtectionSystem.swift`),
+    called from exactly ONE place, `RoadInputs.live`'s `makeSystem` (`ProtectionOpenRoad.swift`), built once per process by
+    the production `AppBootstrap.init` — so every composition rides the one leaf: `beginOpening` (:233 — every launch,
+    every reopen after a crossing / a re-keying account act / Make this my library / the landings, every lobby and its
+    presses), `startFreshOverAPreDesignStore` (:530), `createOnNewRoadFromAFace` (:554), and the four other
+    `roadInputs.compose()` sites (:645, :704, :794 — the copy doors' and landings' roads — and :1251, the lock's lobby). The
+    phone's root composes through the same `AppBootstrap` (no construction of its own); the MCP shim composes none. The
+    mint `?? KeychainSyncKeysLeaf(scope:)` in `ProtectionSystem.init` is DELETED and `syncKeys:` made REQUIRED there (and on
+    `live` and `RoadInputs.live`), so a future site cannot silently mint its own — the compiler refuses it.
+  - **THE ROOT:** `AppBootstrap.syncKeys` (beside `auth`, VX-423's shape) — the production init mints
+    `KeychainSyncKeysLeaf(scope: variant.rawValue)` once and hands it to `RoadInputs.live(variant: variant, auth: auth,
+    syncKeys: syncKeys)`; the test init takes its harness system's own leaf (tests inject their own). ONE process serves ONE
+    store variant (`AppBootstrap(variant:)` once per app process; the MCP shim is a separate process), so one leaf is one
+    per scope — no second scope coexists in a process today.
+  - **THE CLEARS, byte-unchanged:** `PlanRunner.swift` :546/:549/:571, `AccountActs.swift` :229, `ProtectionRoadLock.swift`
+    :58 — not touched; they now reach the one leaf.
+  - **TEST SITES:** `ProtectionSystemCompositionTests` and `RoadWorld` (`ProtectionRoadTestSupport.swift`) pass
+    `KeychainSyncKeysLeaf(scope: scope.scope)` — a fresh one per call, byte-identical to the deleted default;
+    `PlantedRoad` and the gatherer's rig already passed their own. The VX-423 pin's two literal call strings
+    (`OneRefreshAuthorityTests` — `RoadInputs.live(variant: variant, auth: auth` and `ProtectionSystem.live(variant:
+    variant, session: auth`) lost their closing parenthesis so the added argument reads through; their meaning (the
+    authority is handed) unchanged.
+  - **A CORRECTION to F0's pin, recorded:** its expected `live` line named the arguments in an order Swift refuses (the
+    init declares `syncKeys` before `session`); corrected to `ProtectionSystem(scope: variant.rawValue, places: places,
+    syncKeys: syncKeys, session: session)`. Its red on the pre-fix tree is unaffected (the old line had no `syncKeys` at
+    all).
+  - **THE PINS** (`OneSyncKeysLeafTests.swift`): `OneSyncKeysLeafRoadTests.keysHeldThroughOneComposedSystemSurviveInto
+    TheNextTheSameRoadComposes` (through `RoadInputs.live` → `compose()` twice: a hold through the first system is read by
+    the second and by an executor built on it) and the GUARD `aKeyChangePathsExplicitClearStillClearsThroughTheSharedLeaf`
+    (the lock's `dropSessionMemory` on a session a later composition built clears the earlier system's hold, for every
+    system composed after; an executor's `holdInSession(nil, …)` — the rollback's / the leave's line — the same). **The
+    harness: `--filter "OneSyncKeysLeaf|OneRefreshAuthority|TouchIDUnlockSyncKeys"` `✔ Test run with 15 tests in 5 suites
+    passed`; the whole harness `✔ Test run with 388 tests in 67 suites passed`** (385/65 + this piece's 3 tests, 2 suites).
 - Piece F2 — the behavioral revert (the per-system mint restored): NOT-STARTED.
 - Piece F3 — evidence (the protection set both configurations, the harness, build-for-testing Mac + iOS): NOT-STARTED.
 

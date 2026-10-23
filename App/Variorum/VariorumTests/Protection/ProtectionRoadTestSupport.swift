@@ -24,7 +24,8 @@ final class RoadWorld {
     func system() -> ProtectionSystem {
         ProtectionSystem(
             scope: scope.scope, places: slot.places, deviceName: "Test Mac", floor: .relaxedForTests,
-            custody: custody, apple: apple, biometry: biometry, ids: FastIDsLeaf())
+            custody: custody, syncKeys: KeychainSyncKeysLeaf(scope: scope.scope),  // VX-487 F-M1-1: handed, never defaulted
+            apple: apple, biometry: biometry, ids: FastIDsLeaf())
     }
 
     func context(writes: Bool = true) -> RoadContext {
