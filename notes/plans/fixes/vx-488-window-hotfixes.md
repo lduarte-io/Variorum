@@ -449,7 +449,12 @@ PROVISIONAL and HERS (OPEN ITEMS).
   `onlyTheLockedFaceMintsTheProtectionDoor`). **The harness on the fixed tree: `--filter SyncLockedRowTests` `✔ Test run
   with 6 tests in 1 suite passed`** (Piece 1's two now green + the four). The whole-harness and build-for-testing runs are
   Piece 4's (PENDING).
-- Piece 3 — the behavioral reverts: NOT-STARTED (each named here BEFORE it runs).
+- Piece 3 — the behavioral reverts: IN-PROGRESS — named BEFORE they run, on the committed tree `f825ed8e7` (each one
+  file, restored by `git checkout --` + `git diff --exit-code`; the harness, `--filter "SyncLockedRowTests|
+  SyncWalkFenceTests"`): **RM2-1** the locked face's door back to `Account…` → `.openAccount(.account)`; **RM2-2** the
+  line back to "Sync locked — enter your encryption passphrase"; **RM2-3** `ProtectionPaneDoor.settings` a no-op;
+  **RM2-4** the Protection door minted whatever `canOpenProtection` says (P-2 broken); **RM2-5** the Protection door
+  also on the replaced-keys face. Results PENDING (filled as each runs).
 - Piece 4 — evidence (headless suites, build-for-testing both targets): NOT-STARTED.
 
 ### THE DESIGN (settled before the build — within the brief's named latitude; see the seam note)
@@ -523,7 +528,11 @@ THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the r
   "SyncWalkFenceTests|SyncLockedRowTests|ProtectionWalkProjectTests"` `✔ Test run with 16 tests in 3 suites passed`**
   (Piece 0b's two red pins now green; the existing walk-project source pin — one `#if DEBUG` fence in `ProjectConfig` —
   still green).
-- Piece 2 — the behavioral reverts (named here BEFORE they run): NOT-STARTED.
+- Piece 2 — the behavioral reverts: IN-PROGRESS — named BEFORE they run, on `f825ed8e7` (same protocol and filter as
+  M2's): **RM3-1** `AppServices.allowsSync(storeVariant:walkLift:)` → `storeVariant == .real` (no lift); **RM3-2** the
+  refusal removed (every walk project lifts); **RM3-3** the ref matched by EXACT HOST only (the existing switch's
+  comparison); **RM3-4** the DEBUG derivation arm back to `allowsSync: storeVariant == .real` (the lift never read);
+  **RM3-5** the sweep's guard back to `sync.allowsSync`. Results PENDING.
 - Piece 3 — evidence: NOT-STARTED.
 
 ### THE DESIGN (settled before the build)
