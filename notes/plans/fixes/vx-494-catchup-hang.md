@@ -1,13 +1,14 @@
 # VX-494 — the large-corpus first catch-up never lands
 
-**STATUS: OPEN 2026-10-23 — the fix built, live-proven on the throwaway at her corpus's scale, ladder round 1 in
-(1 MAJOR, 5 MINOR, 4 NIT — the fixes go to a fresh implementer session).** Branch `vx-494-catchup-hang`, worktree
-`~/dev/variorum-vx-494`, the Pro. **The cast (R-494-1, her waiver of the Fable rule for `Sync/`):** Opus orchestrates
-and writes the `Sync/` fix; a fresh `opus-reviewer` runs every ladder round; ladder fixes go to a fresh
-`opus-implementer` per round (normal /architect-phase discipline, her word "use normal /architect-phase discipline",
-~04:45). The session moved Fable → Opus 5.5 at her word ~03:40 ("fable kept hitting the safeguards"). The charter is
-`notes/handoffs/vx-494-kickoff.md`; the morning handoff `notes/handoffs/vx-494-handoff.md`. Pin-before-fix; commits
-say `Part of VX-494`; NO trailers.
+**STATUS: OPEN 2026-10-23 — the fix built and live-proven on the throwaway at her corpus's scale; THE LADDER CLOSED at
+its cap (three fresh `opus-reviewer` rounds: r1 1 MAJOR, r2 1 MAJOR, r3 1 MAJOR — each fixed by a fresh implementer, the
+final round's fixes checked line by line by the orchestrator); the closing Mac + phone runs next, then the closeout, the
+PR merge and the Pro install.** Branch `vx-494-catchup-hang`, worktree `~/dev/variorum-vx-494`, the Pro. **The cast
+(R-494-1, her waiver of the Fable rule for `Sync/`):** Opus orchestrates and writes the `Sync/` fix; a fresh
+`opus-reviewer` runs every ladder round; ladder fixes go to a fresh `opus-implementer` per round (normal
+/architect-phase discipline, her word ~04:45). The session moved Fable → Opus 5.5 at her word ~03:40 ("fable kept
+hitting the safeguards"). The charter is `notes/handoffs/vx-494-kickoff.md`; the morning handoff
+`notes/handoffs/vx-494-handoff.md`. Pin-before-fix; commits say `Part of VX-494`; NO trailers.
 
 ## LIVE STATUS (flip per piece, same commit; unverified claims marked PENDING)
 
@@ -15,11 +16,11 @@ say `Part of VX-494`; NO trailers.
 |---|---|---|
 | 0 | Kickoff: preflight read whole; worktree + branch; in-flight row on main; VX-494 In Progress | DONE |
 | 1 | The evidence re-read (the morning's unified log + read-only server probes) — THE EVIDENCE below | DONE (this commit) |
-| 2 | Reproduction at scale (headless fake-server scale test; then the throwaway live, her sign-in) | IN-PROGRESS — the stage window is OPEN (claim `vx-494`, 03:48 MDT, 240 min): throwaway user A RESET to virgin (the §8 precedent — the 21 data tables, `device_cursor`, `purged_row`, `key_vault`, the `kp:` secret; entitlement kept; verified 0/0/0, entitlement 1; ref-guarded); the dev slot's 9 top-level files ASIDE by `mv` into `Variorum-dev-aside-vx494/` beside the slot (same inodes); the walk build (`DerivedData/vx494`, the branch tip) launched with the throwaway env mapped to `VARIORUM_WALK_*`, verified in-process by `ps eww` (2 vars, the throwaway ref, no production ref) — `A4 FENCE (VX-483): LIFTED`, fresh library `1eb1d88c` CREATED in Standard (silent custody). Waiting on HER sign-in as A + the set-up. RESTORE (owed at the window's end): sign the walk session OUT (O-B2), quit, remove the walk library's files + its Backups subfolder, `mv` the 9 back, plain relaunch (rule 21's notice once) — **THE OVERNIGHT ROAD PROVEN (04:30–04:36, her present):** the test app relaunched on the throwaway (`ps eww` checked: the throwaway ref, no production ref); her sign-in as A held; Settings ▸ Protection ▸ Turn on sync = the SET-UP arm ("Your account starts in Standard, like this library"), its three fields typed by the fenced helper (`~/.variorum/bin/type-throwaway-passphrase` — the throwaway passphrase twice, then the TEST library's twelve words, minted at its first look and kept 600 beside the passphrase); the act landed (`turnOnSync — library 1eb1d88c now names account <account-uuid>, standard`); after a relaunch the round ran unattended — the server shows A's `kp:` enrollment and device `90013cc3`'s cursor row (10:35:21 UTC), the row **"Synced 4:35 AM"**. OBSERVATION (a closeout ticket, Low): right after the Standard set-up the row stayed "Sync locked" until the relaunch — no round ran on the act's own (the Castle set-up's act-side round did run at the VX-488 rehearsal) |
+| 2 | Reproduction at scale | DONE — her REAL crossing landed left alone (HER EXPERIMENT'S RESULT, 04:12); the overnight road proven with her present (the fenced helper; "Synced 4:35 AM"); THE LIVE PROOF on the fixed build at her corpus's scale (05:07); the dev slot RESTORED WHOLE (06:00–06:03 — THE DEV SLOT section). The Standard set-up's "Sync locked until a relaunch" observation → **VX-498** (Bug, Suspected, Castle & sync, Low) |
 | 3 | The mechanism named (trace) | DONE — H1 CONFIRMED by her real crossing (HER EXPERIMENT'S RESULT): the first catch-up commits when left alone (11.6 min download + 4.3 min save); every morning failure was an interruption of an all-or-nothing round |
-| 4 | Fix + red-on-old pin | DONE — D1+D2 `c1583de0b`, D3 `c33f18f09`, the schema `f6658017b`; pins red-on-old (`b5ff84236`) + six reverts (RV6 hollow, recorded); THE LIVE PROOF passed (05:07); the R1 fixes (a fresh implementer) `5f983faa7`…`8ec29c300` — see THE BEHAVIORAL REVERTS, THE LIVE PROOF and LADDER R1 FIXES below |
-| 5 | Ladder | IN-PROGRESS — r1 (`vx-494-ladder-round-1.md`): 1 MAJOR + 5 MINOR + 4 NIT, fixed by a fresh implementer; r2 (`vx-494-ladder-round-2.md`): 1 MAJOR (R2-1) + 3 MINOR + 2 NIT, ⇒ r3 (the cap); the R2 fixes go to a fresh implementer (LADDER R2 FIXES — THE BRIEF) |
-| 6 | Closing runs, PR, merge | NOT-STARTED |
+| 4 | Fix + red-on-old pin | DONE — D1+D2 `c1583de0b`, D3 `c33f18f09`, the schema `f6658017b`; pins red-on-old (`b5ff84236`) + six reverts; THE LIVE PROOF (05:07); the R1 fixes `5f983faa7`…`8ec29c300`; the R2 fixes `1b9cf434d`…`1fa82b065`; the R3 fixes `a790a5d24`…`8919a74ba` — each round's LIVE STATUS below |
+| 5 | Ladder | DONE at the cap — r1/r2/r3 (`vx-494-ladder-round-1.md`/`-2.md`/`-3.md`), every finding dispositioned (the FINAL CALLS sections); r3's fixes checked line by line (THE ORCHESTRATOR'S CHECK below) |
+| 6 | Closing runs, PR, merge | IN-PROGRESS — the full Mac + phone suites on the final tree (stage claim `vx-494`) |
 | 7 | Release build + A1 + install; her crossing retry | NOT-STARTED |
 
 ## LADDER ROUND 1 — THE FINAL CALLS (the orchestrator, same-model arbitration against the spec, 2026-10-23 ~05:15)
@@ -206,6 +207,28 @@ round-3 clean bill's lost-ack class).
 | R3-5 | NIT: decode through a cursor | `PullStage.rows` iterates `String.fetchCursor` and decodes each payload as it reads (same order, same nil-on-undecodable, same thrown database errors). No behavior change — the F1 (2) pin and the suite are its evidence | DONE (`5d1d36362`) — `PullStage.rows` iterates `String.fetchCursor` (`while let payload = try payloads.next()`) and decodes each payload as it reads it: the same `ORDER BY server_seq`, the same nil on the first undecodable payload, the same thrown database errors; the payload strings are never all held beside the batch. `swift test --filter ResumableCatchUpTests`: `✔ Test run with 18 tests in 1 suite passed after 8.523 seconds` — the F1 (2) pin `anUndecodableStagedRowCostsOneDownloadNeverAWedge` ✔ (the nil road), every resume pin ✔ (the order). A cost, not a bug: no pin claimed, as the final call says |
 | R3-R | The behavioral revert | Named here BEFORE it runs, at a committed pre-revert tip: **RV-R3a** (R3-1) the helper's body made `try await applyingRemoteWithDeferredFKs(body)` — the shield removed (`SyncEngine.swift`) → predicted ✘ `aRetireDuringTheSaveLetsTheSaveCommit` only; D3's `retiringASchedulerStopsItsInFlightDownload` stays ✔. One file; `swift test --filter ResumableCatchUpTests`; restore by `git checkout --`; `git diff --exit-code` clean | DONE (named `15ef83bde`, run recorded `cb09ed912`) — **RUN exactly as predicted; restored by `git checkout --`, `git diff --exit-code` clean; no revert is in flight.** Pre-revert state = the pushed tip `5d1d36362` (tree clean). RV-R3a (`SyncEngine.swift:852`, the helper's body `try await Task { try await self.applyingRemoteWithDeferredFKs(body) }.value` → `try await applyingRemoteWithDeferredFKs(body)`): `swift test --filter ResumableCatchUpTests` `✘ Test run with 18 tests in 1 suite failed after 8.765 seconds with 2 issues` — both `aRetireDuringTheSaveLetsTheSaveCommit`'s (`cursor == head → false`: `cursor → 0`, `head → 375`; `staged == 0 → false`) and nothing else; D3's `retiringASchedulerStopsItsInFlightDownload` ✔. The shield is pinned by its revert |
 | R3-E | Final evidence | On the final tree: `ResumableCatchUpTests`; the sync sweep (R1's filter); core debug + release (the known MCP timing flake named, never fixed); the one `build-for-testing` (`DerivedData/vx494-r3fix`) | DONE (`da963ce7d`, `6a389a6ae`, this commit) — On the final product tree (`5d1d36362`'s `Sources/` and `App/`, unchanged since): `swift test --filter ResumableCatchUpTests` `✔ Test run with 18 tests in 1 suite passed after 8.687 seconds` · the sync sweep (R1's filter) `✔ Test run with 344 tests in 80 suites passed after 44.207 seconds` (R2's 344 — the new pin's name matches none of the filter's words; the resume suite carries it) · **core debug** (`swift test`, 07:51→07:55): `VariorumCoreTests` `✔ Test run with 3326 tests in 434 suites passed after 211.240 seconds` (R2's 3325 + the new pin), the third target `✔ Test run with 32 tests in 4 suites passed after 30.449 seconds`, the MCP target `✘ Test run with 383 tests in 71 suites failed after 30.822 seconds with 1 issue` — the known load-flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (16.03 s vs its 15 s bound; no MCP code in this diff), which RUN ALONE passes: `✔ Test run with 3 tests in 1 suite passed after 2.201 seconds` · **core release** (split in two as before — one call is capped at 10 minutes: `swift build -c release --build-tests -Xswiftc -enable-testing` 07:56→08:03, `Build complete! (451.21 sec)`, then `swift test -c release --skip-build` 08:03→08:07): `VariorumCoreTests` `✔ Test run with 3297 tests in 429 suites passed after 184.229 seconds` (R2's 3296 + the new pin), the third target `✔ Test run with 32 tests in 4 suites passed after 18.307 seconds`, the MCP target `✘ Test run with 383 tests in 71 suites failed after 27.893 seconds with 1 issue` — the same known load-flake (16.63 s vs 15 s), which RUN ALONE passes: `✔ Test run with 3 tests in 1 suite passed after 2.158 seconds` · **build-for-testing** (`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx494-r3fix build-for-testing`, 08:08→08:10, fresh derived data): `** TEST BUILD SUCCEEDED **` |
+
+## THE ORCHESTRATOR'S CHECK — the final round's fixes, line by line (2026-10-23 ~08:10; no round 4 reads them)
+
+Read against each finding on the diff `8dcdb5b5a..8919a74ba` (product files):
+- **R3-1 ✔** `SyncEngine.applyingRemoteShieldedFromCancellation` = `try await Task { try await
+  self.applyingRemoteWithDeferredFKs(body) }.value` — an unstructured task inherits the round's task-locals (the
+  swift-dependencies values the apply's `database` resolves) and NOT its cancellation; awaiting `.value` waits for the
+  save without cancelling it. `pullRound`'s apply calls it; the between-window `Task.checkCancellation()` stays, so D3
+  still stops the DOWNLOAD (its pin green beside the new one). The docs that carried the false premise are corrected in
+  place (`retire()`, `SyncSession.stop()`, the engine's window comment, `PullStage`'s ONE WRITER line). Pin
+  `aRetireDuringTheSaveLetsTheSaveCommit` red on the tip (`cursor 0 / head 375 / staged 375`), green after, red again
+  under RV-R3a — re-run green by the orchestrator in the closing evidence below.
+- **R3-3 ✔** the two "exactly" lines now say "each row once, at its newest staged seq: what a fresh round from the
+  base would fetch".
+- **R3-4 ✔** `"last_purge_seq"` appears ONCE in `Sources/` + `App/` (`PurgeJanitor.swift:828`, `ledgerScanPointKey`);
+  the janitor's three reads/three writes and `PullStage`'s three readers go through `PurgeJanitor.ledgerScanPoint`
+  (`stateValue`'s absent-is-0 rule, unchanged).
+- **R3-5 ✔** `PullStage.rows` iterates a `String.fetchCursor` inside the read and decodes per row; an undecodable row
+  still returns nil (F1 (2)'s discard intact), cursor errors still throw.
+- The implementer's three deliberate non-shields (the empty-window dedupe pass, the push's chunks, the gap between the
+  batch read and the shielded save) are each sound as recorded: short repair-only or lost-ack-class transactions, and
+  a save that had not yet started running to its end is exactly fix (a)'s shape.
 
 ## LADDER R2 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
 
