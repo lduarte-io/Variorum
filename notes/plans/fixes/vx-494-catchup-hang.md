@@ -786,6 +786,16 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   *[removed for publication]*
   pins: VX-498 + VX-507, VX-509 as the evidence vehicle, VX-506 riding. Her phone stays down until VM-8 runs after —
   her accepted cost, her call.
+*[removed for publication]*
+  never dleeted his account or started over. We have no idea why it didn't work." So his Oct-13 account is the
+  ORIGINAL, and the surviving stories are only: (a) the old build's enrollment act failed its server write while the
+  UI read as success, or (e) the act was refused/never completed and nothing afterward was loud enough to say so —
+  we watched the same human moment TODAY on 0.10 (he typed into the sheet, was refused, walked away believing it
+  done). The server can no longer distinguish them (no vault, auth logs expired); the two roads that still can:
+  (i) VX-510's trace of the CURRENT act — can 0.10's set-up fail to land the vault while reading as success?
+  (ii) THE ARCHAEOLOGY — the old road's enrollment act was deleted at VX-329 but lives in git history: the trace
+  *[removed for publication]*
+  class (the act confirms its first round or says what blocks it — silence becomes impossible).
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
