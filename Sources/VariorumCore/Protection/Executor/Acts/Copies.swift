@@ -185,6 +185,8 @@ extension ActContext {
     func makeMineSwap(setAside: Bool = true) throws {
         let key = try requireToKey()
         let (_, deviceID) = try makeMineIdentity()
+        // VX-488 R1 F1: the account the OUTGOING record names — read before the record is replaced below.
+        let outgoingAccount = library.record?.account
         if !(try libraryOpens(key)) {
             plan.deviceID = deviceID
             plan.steps[plan.steps.firstIndex { $0.name == "swap" }!].done = true
@@ -199,6 +201,12 @@ extension ActContext {
         }
         library.key = key
         guard let record = try leaves.library.readRecord(with: key) else { throw ExecutorRefusal.recordMissing }
+        // VX-488 R1 F1 — the outgoing library's account hold leaves with it: the landed record names no account (rule 17),
+        // and with the process's one sync-keys leaf (VX-487 F-M1-1) nothing else would ever clear it (the relock that would
+        // has stepped aside with its library). Always ask's session-only custody included.
+        if let outgoingAccount, outgoingAccount != record.account {
+            leaves.syncKeys.holdInSession(nil, accountID: outgoingAccount)
+        }
         library.record = record
         library.keyFile = try executor.liveFormat3()
         library.section = record.verifiedSections { $0 == Self.fp(key) ? key : nil }

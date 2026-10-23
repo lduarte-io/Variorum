@@ -104,10 +104,11 @@ struct SyncKeysSessionHoldAcrossAdoptTests {
     }
 
     /// The account family's finish-from-record (a leave whose plan is gone, past its unbinding): `forgetUnboundSyncKeys`
-    /// forgets the unbound account's session hold beside its items. (A real crash empties session memory; the hold is
-    /// planted after the relaunch so the step's own clear is what the assertion sees.)
+    /// forgets the unbound account's session hold beside its items. Touch ID — the account HAS an item for the step to
+    /// iterate (the idiom's reach; Always ask's session-only custody is clear 1's direct drop). (A real crash empties
+    /// session memory; the hold is planted after the relaunch so the step's own clear is what the assertion sees.)
     @Test func theUnboundForgetClearsSessionBesideTheItems() async throws {
-        let fixture = try EX(.castle, synced: true, gate: .alwaysAsk)
+        let fixture = try EX(.castle, synced: true, gate: .touchID)
         let account = try #require(fixture.account)
         fixture.world.crashAfterWrites = 4  // the begin's three writes, then the leave's unbinding record write
         let e1 = fixture.executor()
@@ -124,6 +125,7 @@ struct SyncKeysSessionHoldAcrossAdoptTests {
             Issue.record("the leave finishes from its record: \(settled)")
             return
         }
+        #expect(fixture.world.syncItems.keys.filter { $0.accountID == account }.isEmpty, "its items forgotten (as before)")
         #expect(fixture.world.session[account] == nil, "the unbound account's session hold forgotten with its items")
         expectSettled(fixture, l2)
     }

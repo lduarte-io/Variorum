@@ -286,7 +286,8 @@ never hostage) and the one prompt; the typed roads are untouched ((c), her OPEN 
   is worth one.
 - O-2 (for the rehearsal): the protection log says what the load did, one line per press —
   `road: the Touch ID unlock loaded the account's sync keys for the session (sync key xxxxxxxx)` on success; else `…
-  found no Touch ID item …`, `… with no press to ride …`, or `… sync-keys read failed — <the keychain status> …`.
+  found no readable Touch ID item …`, `… with no press to ride …`, `… whose sync-keys leaf cannot ride a press …` (planted
+  worlds only), or `… sync-keys read failed — <the keychain status> …` (wording per ladder R1 F2/F3).
 
 **THE MAC-SUITE LIST (the orchestrator's stage batch — compiled here, the planted ones run headless):**
 `TouchIDUnlockSyncKeysTests` (NEW, harness-green), `RoadLockTests`, `RoadRearmTests`, `ProtectionLobbyModelTests`,
@@ -434,7 +435,7 @@ ladder re-reads it.
 
 
 ### LADDER R1 FIXES (implementer session A — F1 + F2 + F3 as THE FINAL CALLS confirmed them; F4 deferred, VX-490)
-- Piece L0 — the F1 pins committed BEFORE the fix: DONE (this commit). `SyncKeysSessionHoldTests.swift` gains
+- Piece L0 — the F1 pins committed BEFORE the fix: DONE (`2fa806cca`). `SyncKeysSessionHoldTests.swift` gains
   `SyncKeysSessionHoldAcrossAdoptTests`: `makeThisMyLibraryDropsTheOutgoingAccountsSessionHold` (the SWAP road — a
   synced Castle library adopts a copy, Always ask and Touch ID legs; the outgoing account's hold must be gone) and
   `theUnboundForgetClearsSessionBesideTheItems` (a leave crashed just past its unbinding, its plan gone — the
@@ -442,8 +443,14 @@ ladder re-reads it.
   relaunch, since a real crash already empties session memory). **RED on the pre-fix tree** (`swift test --filter
   SyncKeysSessionHold`): `✘ Test run with 5 tests in 2 suites failed … with 3 issues` — the swap pin ✘ ×2 (both gates:
   `mine.world.session[account] == nil`), the forget pin ✘ ×1 (its last line only — the crash landed past the unbinding
-  and the leave finished from its record, both `#require`d); pin 1's three ✔.
-- Piece L1 — the fixes: NOT-STARTED — the design, with ONE PREMISE CORRECTION to THE FINAL CALLS' clear 1:
+  and the leave finished from its record, both `#require`d); pin 1's three ✔. **Re-pointed in L1** (before the fix
+  landed): the forget pin first ran under Always ask, where the account has NO item — `forgetUnboundSyncKeys` (and the
+  ruled idiom beside its item deletion) iterates items, so it can never reach a session-only hold; that case is clear 1's
+  direct drop, exactly the ruling's reason for it. The pin now runs under Touch ID (an item to iterate) and also asserts the
+  items go as before; re-run RED on the pre-fix product (the fix files stashed, then restored): `✘ Test run with 2 tests in
+  1 suite failed … with 3 issues` — the swap pin ✘ ×2, the forget pin ✘ on `session[account] == nil` only (its item line
+  ✔).
+- Piece L1 — the fixes: DONE (this commit) — the design as built, with ONE PREMISE CORRECTION to THE FINAL CALLS' clear 1:
   - **Clear 1 sits in the swap step itself (`ActContext.makeMineSwap`), not in `forgetOtherLibraries`.** The ruling
     places it in the after-commit "where `outgoing` is the acting context's `library.record?.account` (the old record,
     still in hand at that step)" — but by `forgetOtherLibraries` the OLD record is NOT in hand: `makeMineSwap` has just
@@ -466,7 +473,13 @@ ladder re-reads it.
   `bringInPlaintextExport`, once the landing created its library, `if let open { ProtectionRoadLock.dropSessionMemory(open)
   }` (the outgoing session's record names X). The other creation roads hold nothing to drop (Start fresh over a
   pre-design store and a face's Start a New Library never had a new-road library open in the process).
-- Piece L2 — the behavioral reverts: NOT-STARTED. Piece L3 — evidence: NOT-STARTED.
+  **The pins on the fixed tree:** core `--filter SyncKeysSessionHold` `✔ Test run with 5 tests in 2 suites passed`; the
+  harness `--filter "TouchIDUnlockSyncKeys|OneSyncKeysLeaf"` `✔ Test run with 7 tests in 3 suites passed` (the reworded
+  lines are log-only).
+- Piece L2 — the behavioral reverts: NOT-STARTED — named before they run: **R8** (`Copies.swift` — clear 1's drop
+  removed) → the swap pin; **R9** (`AccountActs.swift` — clear 2's line removed) → the forget pin. Each on the committed
+  tree, restored by `git checkout --` of its one file, `git diff --exit-code` after.
+- Piece L3 — evidence: NOT-STARTED.
 
 ## M2 RECORD (implementer session B — Opus, xhigh) — VX-486
 

@@ -444,14 +444,20 @@ nonisolated enum ProtectionOpenRoad {
     /// nothing. (The typed roads load nothing — the run record's OPEN ITEMS, her call.)
     static func loadSyncKeysForTheSession(_ session: ProtectionRoadSession, riding press: TouchIDPressContext?) {
         guard let account = session.library.record?.account else { return }
-        guard let press, !press.isInvalidated, let leaf = session.system.leaves.syncKeys as? TouchIDPressRiding else {
+        guard let press, !press.isInvalidated else {
             log("road: the Touch ID unlock opened a synced library with no press to ride — its sync keys stay unloaded "
                 + "until an act or the next Touch ID unlock")
             return
         }
+        guard let leaf = session.system.leaves.syncKeys as? TouchIDPressRiding else {
+            log("road: the Touch ID unlock opened a synced library whose sync-keys leaf cannot ride a press — its sync "
+                + "keys stay unloaded until an act or the next Touch ID unlock")
+            return
+        }
         do {
             guard let keys = try leaf.readSyncKeys(accountID: account, riding: press) else {
-                log("road: the Touch ID unlock's sync-keys read found no Touch ID item for the account — nothing loaded")
+                log("road: the Touch ID unlock's sync-keys read found no readable Touch ID item for the account — "
+                    + "nothing loaded")
                 return
             }
             session.system.leaves.syncKeys.holdInSession(keys, accountID: account)

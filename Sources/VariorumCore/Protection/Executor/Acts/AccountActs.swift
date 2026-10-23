@@ -230,11 +230,13 @@ extension ActContext {
     }
 
     /// With no plan: every sync-keys item for an account the record no longer
-    /// names goes.
+    /// names goes — and its session hold beside it (VX-488 R1 F1: the
+    /// rollback's idiom, `PlanRunner`'s unbound sweep).
     func forgetUnboundSyncKeys() throws {
         let bound = library.record?.account
         for item in try leaves.syncKeys.syncKeyItems() where item.accountID != bound {
             try leaves.syncKeys.deleteSyncKeys(accountID: item.accountID, itemClass: item.itemClass)
+            leaves.syncKeys.holdInSession(nil, accountID: item.accountID)
         }
     }
 
