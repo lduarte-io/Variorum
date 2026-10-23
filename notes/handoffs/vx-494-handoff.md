@@ -9,9 +9,8 @@ first-catch-up bug; my Pro crossing already LANDED at 04:12. You take the window
 order the handoff gives. READ FIRST, IN FULL, YOURSELF: notes/handoffs/vx-494-handoff.md (this file — the night's
 result, my checklist, the paste-ready Air and VM-8 prompts), then notes/plans/fixes/vx-494-catchup-hang.md WHOLE (the
 record), then notes/handoffs/vx-488-kickoff.md (the window's held steps + appendices), then the standard preflight
-(CLAUDE.md + canon, SyncSpec WHOLE, CastleRules WHOLE, SessionResiliencyProtocol). If PR #<PENDING> is not merged yet,
-the file lives on branch vx-494-catchup-hang in ~/dev/variorum-vx-494. Opus orchestrates and reviews (my ruling
-R-494-1 — Fable hit safeguards). I'm present: walk me through the checklist one step at a time, my hands where it
+(CLAUDE.md + canon, SyncSpec WHOLE, CastleRules WHOLE, SessionResiliencyProtocol). VX-494 is merged (see the night's
+result for the PR and merge commit). Opus orchestrates and reviews (my ruling R-494-1 — Fable hit safeguards). I'm present: walk me through the checklist one step at a time, my hands where it
 says so.
 ```
 
@@ -27,9 +26,11 @@ says so.
 3. **The Air (a Claude session ON the Air, then your hands):** paste APPENDIX A below into a Claude session running
    in the Air's own GUI login (ssh builds fail codesign). It installs the fixed build — it refuses to build from a
    main that doesn't contain the VX-494 merge. Then your Air crossing by hand: open Variorum → the pre-design face →
-   Start fresh → sign in → Turn on sync → JOIN (type your account passphrase) → the first catch-up. With the fix it
-   downloads in ~55 requests instead of ~550 and survives a lock or quit (it resumes); the save still takes a few
-   minutes at full CPU, and the Library stays empty until it lands. Leave it alone until the row says Synced. The
+   Start fresh → sign in → Turn on sync → JOIN (type your account passphrase; a system Touch ID prompt may appear
+   during the join — your finger) → the first catch-up. With the fix the DOWNLOAD takes about a minute (2,000-row
+   pages; the live proof pulled ~110k rows in ~70 s) and a lock, quit or crash during it RESUMES; the SAVE then runs a
+   few minutes at full CPU with the Library empty until it lands — a lock during the save waits for it (it is never
+   thrown away). Leave it alone, on power, until the row says Synced. The
    Air's A1 is already taken (`variorum-vx329-air-a1-20261022T2330Z` + your Desktop copy).
 4. **The release publish (at your standing word — already given):** the DMG + appcast road (memory
    `variorum-release-publishing`; the worked example `notes/handoffs/vx-348-handoff.md`). `ReleaseNotes-0.10.md` is
@@ -40,23 +41,39 @@ says so.
 5. **The site delta (you authorized either road):** hand `notes/stargazing-castle-rebuild-delta-brief.md` to your
    site agent, or have the session edit the site directly.
 6. **The window close-out on main (the session's):** the vx307 deploy checklist flipped to RUN with the window's
-   numbers; SyncSpec §12's HELD marker-14 entry gains its result; the master plan's closeout paragraph; the canon
-   deltas in the two-file shape (the locked-row line in SurfaceContracts; the dated narratives — VX-488's and
-   VX-494's — into AppSpecRecord); `Tools/canon-size` reported; board snapshot; memory run-states.
+   numbers; SyncSpec §12's HELD marker-14 entry gains its result; the master plan's closeout paragraph (the window's —
+   VX-488 and VX-494 both merged without one, at the window's word); the VX-488 canon deltas in the two-file shape (the
+   locked-row line in SurfaceContracts; VX-488's dated narrative into AppSpecRecord); `Tools/canon-size` reported;
+   board snapshot; memory run-states. **VX-494's own canon already landed:** its contract lines at its merge
+   (AppSpec §7's local-only block — `sync_pull_stage` + the `pull_stage` key; SyncSpec §3 + §5), its dated entry in
+   AppSpecRecord and its question bundle QUESTIONS #239 on main at the merge; canon-size 125,087 / 150,000.
 7. **VM-8 last (your kickoff):** APPENDIX B below — the phone's Castle catch-up, now naming VX-494's fix (the phone's
    first pull is the same class at the same scale, and it inherits the resumable download).
 
 **Your calls owed (bundle them at step 1 or as they come up):**
-- **VX-492** (Castle's idle lock fires during a first catch-up): with the download resumable, a lock now costs a
-  pause, not the download — keep the lock as is (close VX-492 as resolved by VX-494), or hold the lock while a first
-  catch-up runs?
+- **QUESTIONS #239 — the VX-494 bundle** (each item there in full): (a) F6 — v1_32 makes plain-text exports written by
+  0.10 (9093) un-importable by the fixed build (T-8's `applied == known`); should LOCAL-ONLY migrations count?
+  (b) R2-3 — does an actively resuming device count as "seen" by the purge horizon? (c) O-2 — the stage leaves free
+  pages about the library's size on a fresh device's first catch-up (79 → 150 MB in the proof), and its backups carry
+  them: accept for 0.10 + a compaction-design ticket, or hold the Air? (d) O-1 — the Standard join raised a system
+  Touch ID prompt that, cancelled, still let the join complete: intended, and what does it guard? (e) VX-492/VX-493's
+  closures (below); (f) Pre-launch on VX-495/496/497; (g) the one-writer belt's words, if it ever fires; (h) R3-1 — a
+  lock during a first catch-up's SAVE waits for the save (as before this branch): keep, or pre-empt and redo? (i)
+  VX-498.
+- **VX-492** (Castle's idle lock fires during a first catch-up): a lock during the DOWNLOAD now costs a pause (the
+  download resumes at the next unlock), and a lock during the SAVE waits for it to land — close VX-492 as resolved by
+  VX-494, or hold the lock while a first catch-up runs?
 - **VX-493** (a lock strands "Syncing…"): RE-TRACED — the lock replaces the whole services object, so the row can't
   strand; the real defect was the retired round downloading on in the background, fixed by VX-494's D3. Close it as
   fixed-by-VX-494 (re-traced)?
-- **VX-495** (the faster server query) and **VX-496** (the progress line): Pre-launch or not — your call per ticket.
+- **VX-495** (the faster server query, High), **VX-496** (the progress line, High), **VX-497** (the save's duration —
+  one all-or-nothing transaction holding the writer minutes; the phone's risk, Medium): Pre-launch or not — your call
+  per ticket.
 - The VX-488 carry-overs still open: M1 (c) (a typed unlock in Castle loads no sync keys), P-VX486-1/-2 (the locked
   row's door label and line), VX-490 / VX-491 (Low).
-- PENDING(any finding the ladder or the closing runs raised that needs you).
+- Filed from the night, for triage: **VX-498** (after turning on sync in Standard, the row kept "Sync locked" until a
+  relaunch — Bug, Suspected, Low) · **VX-499** (a masthead layout test fails under the full Mac suite but passes alone
+  — Test-only, Low).
 
 *[removed for publication]*
 you're done with it; with it, delete `~/.variorum/bin/type-throwaway-passphrase`,
@@ -74,8 +91,21 @@ rules this night added to `.claude/settings.local.json` (the helper, `cliclick`,
   read-only: 8 s timeout, ~1.5–3 s per call at the start); D2 — the download is staged in a local-only table
   (`sync_pull_stage`, migration v1_32), so an interrupted round resumes where it stopped; D3 — retiring a sync chain
   (a lock, a chain replacement) cancels its round instead of leaving it downloading in the background.
-- **Evidence:** PENDING(core suite debug + release; the ladder rounds and their dispositions; the live throwaway
-  proof — a large test library, a mid-download quit, the resume; the closing Mac + phone runs).
+- **The fix as finally built:** D1 as above; D2's stage resumes only for the round identity that fetched it — the
+  committed cursor, corpus key, device, stage format, lockstep marker and purge-ledger scan point — as one contiguous
+  run, and an undecodable row discards it (one re-download, never a wedge); D3 — a retired round stops its DOWNLOAD
+  between pages but never its SAVE (the save runs shielded; a lock waits for it, as before this branch).
+- **The live proof (05:07, the throwaway, a generated ~110k-row book):** the fixed build's first catch-up downloaded
+  the whole feed in 56 pages / ~70 s; the app was KILLED during the save; the relaunch re-downloaded nothing, saved
+  from the stage, and committed at the head (the device cursor 110,424 = the head; "Synced 5:07 AM"; the Bookcase
+  showed the 1,200-note book).
+- **The ladder (three fresh Opus reviewers — the cap):** r1 1 MAJOR (a staged row that won't decode wedged sync) + 5
+  MINOR + 4 NIT; r2 1 MAJOR (a staged row could escape the purge ledger and resurrect a purged note) + 3 MINOR + 2 NIT;
+  r3 1 MAJOR (the retire's cancel reached the save) + 1 MINOR + 3 NIT. Every finding fixed by a fresh implementer with
+  red-on-old pins and behavioral reverts, or dispositioned in the record; the final round checked line by line.
+- **Evidence:** the 18 VX-494 pins green; the sync sweep 344/80; the core debug 3326/434 + release 3297/429 (the one
+  red each, the known MCP timing load-flake, passes alone on this branch AND main); the full Mac suite 5118/898 (the
+  one red a masthead layout test, green alone → VX-499); the full phone suite 808/126 green.
 - **Merge + install:** PENDING(the PR number and merge SHA; the Pro install — A1 name, build number, codesign,
   sha256 — or HELD with the reason).
 - **The dev slot:** PENDING(restored whole — the walk library removed, your 9 dev files back by `mv`, the plain
