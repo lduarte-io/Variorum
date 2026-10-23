@@ -116,6 +116,14 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   instances), her throwaway sign-in kept; the test set-up waits. Her concern recorded: "i don't want my library to
   become the account's library?? that doesn't seem good" — the set-up's words meant the fresh EMPTY test library
   and the throwaway account; answered in session.
+- **R-494-2 (2026-10-23 ~04:01) — the scope: D1–D3 tonight; the server query and the progress line after the Castle
+  switch, as their own tickets:** "huh maybe we should do a faster server query. i have been annoyed by how slow sync
+  is before already - maybe file a ticket for that right nwo. and we do also need a visible progress line - that
+  would save me this current half hour test, so file a ticket for that too. we can fix 1-3 tonight and then i'll do
+  the other two once the castle switch is fully done." Minted: **VX-495** (the changefeed query — Improvement,
+  Confirmed, Performance, High; project 18a) and **VX-496** (the sync row's progress line — Improvement, Confirmed,
+  Castle & sync, High; project 18a); both related to VX-494, Pre-launch left for her call. "1-3" = D1 (bigger
+  pages), D2 (resumable download), D3 (the stranded "Syncing…", VX-493's mechanism).
 
 ## OPEN ITEMS
 - VX-492 (the idle lock fires mid-catch-up) and VX-493 (a lock mid-round strands the in-flight flag) are now
