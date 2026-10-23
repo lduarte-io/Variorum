@@ -62,6 +62,46 @@ which is why the same build synced clean there.
 **OPEN QUESTION Q1 (the reproduction answers it):** left alone, does the one apply transaction over ~108k rows commit,
 and how long does it hold the writer? Nobody has observed it. If it does not commit, there is a second mechanism.
 
+## THE FIX DESIGN (PROPOSED — built after her experiment's result; every product-visible edge marked)
+
+Three parts, each its own pin; the apply transaction's body (straggler fixpoint, merges, repairs, the cursor) stays
+BYTE-IDENTICAL, so §5–§7's semantics do not move.
+
+- **D1 — the pull window gets its own size.** Today one `batchSize` (200) sizes both the push chunk and the pull
+  window. The pull window becomes its own parameter (proposed 2,000 rows). Why it matters: the server's
+  `sync_pull` re-sorts every row still ahead of the cursor on EVERY call (the morning's per-call ~1.9 s → 0.4 s
+  decay is that shape), so total download time ≈ calls × average cost, and the call count is the lever the client
+  holds: ~550 calls → ~55 on her corpus. Server-side ceiling to check before choosing the size: Supabase's
+  statement timeout for `authenticated` (per-call cost must stay well under it; an EXPLAIN ANALYZE of the served
+  query at `since = 0` for 200 vs 2,000 rows, read-only, decides). The real cure — a per-page cost proportional to
+  the page (index-ordered keyset per table) — is a SERVER change, so a deploy at her word; proposed separately, not
+  tied to this fix. Note for her: total cost is QUADRATIC in corpus size with today's query (calls ∝ N, each ∝ N),
+  and a large enough account would hit the statement timeout on its first window whatever the page size.
+- **D2 — the download is resumable.** A local-only table `sync_pull_stage(table_name, row_id, server_seq,
+  payload, PK(table_name,row_id))` (migration `v1_32`, its own commit; registered in `SyncSchema.localOnlyTables` and
+  `LocalMachineryRecreation`; no mirror, no lockstep — never synced) plus ONE `sync_state` header key carrying the
+  stage's identity: the committed cursor it extends, its fetch position, the round's corpus key id and device id.
+  Each fetched window is decrypted (the seam unchanged — before any write) and upserted into the stage in its own
+  small write (a row's newer version replaces an older one: keep the higher `server_seq`), the header advancing with
+  it. At head, the staged rows (ordered by `server_seq`) feed the UNCHANGED apply transaction, which also clears the
+  stage and the header — so a rolled-back apply keeps the stage, and a stall (the cursor held at the stall point)
+  discards the stage exactly as today's round discards the rows after the stall. A round resumes from the stage only
+  when its identity matches (same committed cursor, key id, device id); anything else clears it and fetches from the
+  cursor. `resyncReinitialize` clears it. **The 13j device rule is kept as written:** the device id rides only a
+  window whose `since` is the COMMITTED cursor, so a resumed round reports no device stamp (it never over-reports
+  what is integrated; the purge horizon stays conservative — her account's horizon is already held at this device's
+  committed 0 until the apply lands).
+- **D3 — a stopped session never strands "Syncing…" (VX-493's mechanism, read in code):** `SyncSession.stop()`
+  (`App/Variorum/Shared/SyncSession.swift:189`) cancels the status observation and retires the scheduler but leaves
+  the published `status.isSyncing` as it was — a lock mid-round shows "Syncing…" until something reconfigures — and
+  the retired scheduler's in-flight round keeps downloading in the background. Proposed: `stop()` clears the
+  published in-flight flag; `retire()` cancels the running round, and the fetch loop checks cancellation between
+  windows (with D2, a cancelled round loses nothing). VX-493 rides as a member-like rider (its own pin, `Part of
+  VX-493` commits) — offered to her; VX-492 (the idle lock firing mid-catch-up) is hers to re-rule once D2 makes the
+  lock cost nothing but a pause.
+- **Not proposed (product-visible, hers):** a progress line on the sync row ("Syncing — 40,000 of 108,000"); the
+  server query rewrite.
+
 ## HER RULINGS (verbatim-faithful, dated)
 
 - **R-494-1 (2026-10-23 ~03:55 MDT) — the cast: Opus writes the `Sync/` fix and a fresh `opus-reviewer` runs the
