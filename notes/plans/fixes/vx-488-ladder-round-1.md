@@ -126,3 +126,40 @@ only; the shared instance is lock-guarded (verified: `KeychainSyncKeysLeaf.lock`
 
 No BLOCKER or MAJOR. F1 (MINOR) goes to the implementer verbatim with its pin shape; F2–F4 are NITs the
 implementer may fold into F1's commit or decline with a line. Round 2 re-reads the fixes per the standing rules.
+
+## THE FINAL CALLS (the reviewer, after the implementer's agree/dispute — all four AGREE, none disputed)
+
+The implementer's F1 claims re-verified by this reviewer before ruling: `Copies.makeMineRecord` mints
+`account: nil` (Copies.swift:153–160); the make-mine plan's steps carry no sync-keys touch
+(`["custodyItem", ("mintOwnAppleKey",) "keyFile", "stage", "recordIntoStaged", "newMemory", "swap"] +
+["forgetOtherLibraries", "backup"]`, Copies.swift:77–84); the session-memory reads are vault-row-key-checked
+(`held.rowKeyID == vault.rowKeyID` — KeyDoors.swift:259–262, AccountActs.bindIfVaultIsOurs:247), so a stale hold
+is the account's current keys or ignored — F1's MINOR severity stands.
+
+- **F1 — CONFIRMED, with the refined home, two one-line clears (the swap road's is the load-bearing one):**
+  1. **The swap act's after-commit** (the `forgetOtherLibraries` neighborhood — the one act every adopt road
+     runs: Make this my library, Open Library's landing, the Data Safety restore): drop the OUTGOING record's
+     account hold — `leaves.syncKeys.holdInSession(nil, accountID: outgoing)` where `outgoing` is the acting
+     context's `library.record?.account` (the old record, still in hand at that step). This DIRECT drop is ruled
+     over the PlanRunner items-iteration idiom because it also covers Always ask, where session memory exists
+     with NO keychain item to iterate; it needs no new leaf seam; and it is inductively complete (every hold is
+     minted for a then-bound or signed-in account, and each swap clears its own outgoing — so at rest the leaf
+     holds at most the current record's account). Idempotent on a crash-resume, and the crash itself already
+     emptied session memory, so the resume's `account: nil` read is safe.
+  2. **`forgetUnboundSyncKeys` clears session beside the item deletion** (PlanRunner:546's exact idiom) — the
+     asymmetry fix, cheap, keeps the two forget idioms aligned.
+  **The pin** exercises the swap road (red on this tree): hold under X through a composed system; run the
+  make-mine act (or its after-commit step) landing a record naming no/another account; assert
+  `sessionSyncKeys(accountID: X) == nil`; plus one assertion on the forget step for clear 2.
+- **F2 — CONFIRMED as worded by the implementer:** the log line rewords to name a readable item (e.g. "no
+  readable Touch ID item"); the decode idiom stays in step with the context-less read. One line.
+- **F3 — CONFIRMED:** split or reword the "no press to ride" line so the leaf-not-riding case (unreachable in
+  production) is not narrated as a missing press. Wording only.
+- **F4 — CONFIRMED AS THE END STATE, DEFERRED AS A TICKET (not this run):** `SyncKeysLeaf & Sendable` is the
+  right constraint, but the ripple the implementer traced (retyping or dropping the bootstrap's stored property,
+  moving the composition pin's literal) is zero-behavior churn in a hotfix window gating her crossing — exactly
+  what this run should not carry. The orchestrator mints the ticket (Debt, Low, Castle & sync), pointing at this
+  finding; the `nonisolated(unsafe)` hush stands this run with the module's own precedent
+  (`ProtectionSystem.touchIDCandidates`).
+
+Fix order: F1 (both clears + the pin, pin-before-fix), F2 and F3 ride the same commit. Round 2 re-reads the fixes.
