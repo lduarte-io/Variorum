@@ -62,10 +62,21 @@ which is why the same build synced clean there.
 **OPEN QUESTION Q1 (the reproduction answers it):** left alone, does the one apply transaction over ~108k rows commit,
 and how long does it hold the writer? Nobody has observed it. If it does not commit, there is a second mechanism.
 
-## OPEN ITEMS
+## HER RULINGS (verbatim-faithful, dated)
 
-- The cast note: the kickoff named Fable's own hands for `Sync/`; the session now runs on Opus 5.5 at her word. The
-  ladder's reviewer type is hers to confirm at the review (the standing default is a fresh `fable-reviewer` for
-  `Sync/`).
+- **R-494-1 (2026-10-23 ~03:55 MDT) — the cast: Opus writes the `Sync/` fix and a fresh `opus-reviewer` runs the
+  ladder** (her waiver of the standing Fable review for `Sync/`): "yeah go with opus - i think fable will almost
+  certainly just hit a bunch of safeguards."
+- **Her experiment (2026-10-23 ~03:55) — the real crossing, left alone:** her question, "if it's just a matter of
+  waiting, should I sign back into my own account and just wait 15 minutes to see what happens?" Answered yes, on
+  her REAL app at `/Applications` (never the Debug app — her account fence), idle lock confirmed Never, app left open
+  and visible, the Mac held awake by this session (`caffeinate -dims -t 3600`), ~30 minutes rather than 15 (≈12 of
+  downloading, then the one save, whose length nobody has seen). It answers Q1 on her exact data; the session watches
+  read-only (the app's log, the server's `device_cursor` and data max). The walk app was quit first (zero
+  instances), her throwaway sign-in kept; the test set-up waits. Her concern recorded: "i don't want my library to
+  become the account's library?? that doesn't seem good" — the set-up's words meant the fresh EMPTY test library
+  and the throwaway account; answered in session.
+
+## OPEN ITEMS
 - VX-492 (the idle lock fires mid-catch-up) and VX-493 (a lock mid-round strands the in-flight flag) are now
   in-mechanism: re-check both against the fix before closing either.
