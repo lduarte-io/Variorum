@@ -330,6 +330,13 @@ extension ActContext {
     /// item where this press chose Touch ID and a finger is enrolled, else
     /// session memory; a silent item in Standard. One item per account: the
     /// other class goes.
+    ///
+    /// VX-487 (a): the Touch ID arm ALSO holds the keys in session memory —
+    /// the act just handled them, and the engine's provider never reads the
+    /// Touch ID item (a press per round is nobody's wish), so rounds run while
+    /// an act or a Touch ID unlock has loaded session memory (P-VX307-U1-3).
+    /// Before this the arm cleared the session and the keys lived only in the
+    /// item: "Sync locked" for good.
     func holdSyncKeys(_ held: AccountKeys, castleWay: Bool) throws {
         guard let account = accountID else { return }
         let items = try leaves.syncKeys.syncKeyItems()
@@ -347,7 +354,7 @@ extension ActContext {
                 if try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: .touchid) != held {
                     try leaves.syncKeys.writeSyncKeys(held, accountID: account, itemClass: .touchid)
                 }
-                leaves.syncKeys.holdInSession(nil, accountID: account)
+                leaves.syncKeys.holdInSession(held, accountID: account)  // VX-487 (a)
             } else {
                 try drop(.touchid)
                 leaves.syncKeys.holdInSession(held, accountID: account)

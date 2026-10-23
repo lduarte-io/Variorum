@@ -184,7 +184,12 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
   `pin2_theTouchIDUnlockLoadsTheAccountsKeysForTheEngine` ✘ ×3 (session memory nil after the press; the provider's
   `currentKeys()` refused — the corpus key id nil against the item's and the vault's); the world's own setup (turn sync on,
   synced Use Castle with Touch ID, the lobby's Touch ID button) raised NO issue. `pin4_…` ✔ (a guard by design).
-- Piece 2 — fix (a): NOT-STARTED — the settled design below.
+- Piece 2 — fix (a): DONE (this commit). `CommonSteps.swift` — the castle + Touch ID arm's `holdInSession(nil, …)` →
+  `holdInSession(held, …)` (one line) and the doc comment made true. **Pin 1 GREEN**; the core protection + auth/account
+  set (debug — every suite type under `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`,
+  `AccountLifecycleTests`, `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`,
+  `SupabaseTransportSessionTests`, as one `--filter`): **`✔ Test run with 531 tests in 101 suites passed`** — the
+  scenario world's promises (which read session memory) hold with the arm's new hold.
 - Piece 3 — fix (b) + its seams + pins 3 and 5: NOT-STARTED — the settled design below.
 - Piece 4 — the behavioral reverts (named below, each run on a committed tree): NOT-STARTED.
 - Piece 5 — evidence (core protection suites debug + release; the harness; build-for-testing Mac + iOS): NOT-STARTED.
