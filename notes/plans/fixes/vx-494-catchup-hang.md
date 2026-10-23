@@ -20,6 +20,31 @@ say `Part of VX-494`; NO trailers.
 | 6 | Closing runs, PR, merge | NOT-STARTED |
 | 7 | Release build + A1 + install; her crossing retry | NOT-STARTED |
 
+## THE BEHAVIORAL REVERTS (run 2026-10-23 ~04:50 on the committed tip `3f15dc6f0`'s product files; each one file,
+restored by `git checkout --`, `git diff --exit-code` clean after every one — **no revert is in flight**)
+
+`swift test --filter ResumableCatchUpTests` under each:
+- **RV1** (`pullWindowSize` default back to 200): `✘ … 5 tests … with 1 issue` — `theProductionEngineDownloadsInLargeWindows`
+  ✘ (`pullCalls == 2`) only.
+- **RV2** (`pullRound` ignores `.resume`): `✘ … with 2 issues` — `anInterruptedFirstCatchUpResumesWhereItStopped` ✘
+  (`secondRound.first == failedAt`, `!secondRound.contains(0)`) only.
+- **RV3** (the plan drops the device-id match): `✘ … with 1 issue` — the device GUARD ✘ (`secondRound.first == 0`) only.
+- **RV4** (the apply's `PullStage.clear` removed): `✘ … with 2 issues` — the stall GUARD ✘ and D2's empty-stage line ✘
+  (`stagedRowCount == 0`), both.
+- **RV5** (`retire()` no longer cancels): `✘ … with 2 issues` — `retiringASchedulerStopsItsInFlightDownload` ✘ (`pulls == 1`,
+  `cursor == 0`) only.
+- **RV6 — HOLLOW, recorded not fixed** (the fetch loop's explicit `Task.checkCancellation()` removed, retire's cancel
+  kept): `✔ … 5 tests … passed` — the retired round still stops, because the stage's own `database.write` honors the
+  task's cancellation before it runs (and in production `URLSession` throws on a cancelled task too). The line stays as
+  an explicit belt between windows; no test can tell it apart from the two cancellation points beside it, so it is not
+  claimed as pinned.
+
+**Two more runs (the closing-coverage baseline for the reviewer):** the core suite RELEASE (`swift test -c release`):
+`✔ Test run with 3284 tests in 429 suites passed`; in BOTH configurations the one red is the same MCP harness timing test
+(`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 18.97 s vs its 15 s bound,
+both runs within 0.001 s of each other — deterministic, not load-shaped; PENDING: its run on `main` to show it
+pre-exists this branch — no MCP code is in this diff).
+
 ## THE EVIDENCE (2026-10-23, re-read by this session)
 
 **The kickoff's reading was "one pull call, then a hang." The morning's unified log says otherwise: every attempt
