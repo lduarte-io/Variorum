@@ -746,6 +746,21 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   /variorum/support, the App Store brief's load-bearing paths; /variorum/help 301s): the orchestrator's review + deploy
   pending; ONE fact flag — pre-0.10 vaults may hold a dormant Apple-held master copy (17 leaves the column unread, not
   *[removed for publication]*
+*[removed for publication]*
+  *[removed for publication]*
+  it, so her `'standard'` proves the row EXISTED at the deploy — **she enrolled BEFORE the marker flipped**, had
+  hours where 0.9.8 rounds could have run, and none did: the marker didn't stop her; VX-498's class (or an immediate
+  quit) did — the VX-498 comment carries it. The SAME read found artifact 17 deliberately LEFT
+  `master_wrapped_by_apple_held` + `apple_key_id` in place ("LEFT UNREAD … pre-event history") and
+  *[removed for publication]*
+  (Bug, Confirmed, Castle & sync, High, under VX-500; Pre-launch her call) — the fix shape honors rule 22 (null the
+  *[removed for publication]*
+  `/variorum/privacy` + `/variorum/support` live (noindex drafts at her word, placeholder-marked; `/variorum/help`
+  301s; the App Store brief's load-bearing paths), the agent's commit `d317b52` + the orchestrator's review fix
+  `543ebd4` (the policy's account-keys Apple sentence scoped to the truth, with VX-508's comment beside it); every
+  quoted rule checked verbatim against CastleRules; the agent's open items for her edit pass are in the pages'
+  source comments (the update-check question, noindex, the AI section, the Previous-Libraries-in-Castle entry;
+  no Supabase retention number — the docs name none for sign-in events).
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
