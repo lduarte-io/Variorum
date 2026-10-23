@@ -687,6 +687,19 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   `encryptionKeysUnavailable`; the funnel lands at the join) — the WORDING is **VX-506** (Wording, Low, under VX-500),
   her lines to pick at the fix. Her note: "I normally leave my idle lock on Never anyway." VX-503's Pre-launch call:
   asked, recommendation given (yes — the join is every second device's first-run road), her word pending.
+- **R-494-7 (2026-10-23, after the publish) — her tester report, dispositioned EXPECTED:** a tester on 0.10 (Start
+  fresh, signed in, Standard) pressed Turn on sync and met the SET-UP arm ("Your library's passphrase and twelve
+  words become the account's… This library has no passphrase yet. Choose one…") asking a new passphrase and the
+  library's twelve words. Her question: "is that normal since they were in standard and didn't have 12 words before?…
+  Is this a sign something is wrong?" — EXPECTED by the code: `RoadAccountFaces` picks the arm from the server's vault
+  read (`.read(exists: false)` ⇒ set-up; `exists: true` ⇒ the join; `.unreachable` refuses rather than guessing), so
+  the set-up arm showing means the account positively has NO vault — this tester never enrolled under the old
+  encryption passphrase, nothing of theirs is sealed on the server, nothing to lose. The words field is rule 14's
+  reminder-moment (the account's recovery key provably in their hands); her advice to the tester (the card above the
+  quick entry shows the library's words — rule 2's first-look mint) was the designed road. The one caveat asked back:
+  if this tester is THE backfilled-'standard'-vault tester (marker 14's deploy backfilled exactly one), the set-up arm
+  would be a finding — her answer pending. 0.10's release also live-tests the appcast road (her Air updates 9168→9172
+  via Sparkle).
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
