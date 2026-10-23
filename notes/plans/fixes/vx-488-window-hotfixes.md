@@ -165,7 +165,7 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
 
 ### LIVE STATUS (per piece; PENDING = unverified)
 - Piece R — this record skeleton + the preflight read whole (CLAUDE.md + canon, this file, the kickoff, the resiliency
-  protocol, CastleRules WHOLE, SyncSpec WHOLE, the named code, the planted test worlds): DONE (this commit).
+  protocol, CastleRules WHOLE, SyncSpec WHOLE, the named code, the planted test worlds): DONE (`0b6acf703`).
 - Piece 0 — the headless harness: DONE (not durable — this session's scratchpad `m1-harness`; the VX-329 U3 recipe
   re-pointed at this worktree: tools 6.2, macOS 26, the app target's concurrency settings on `Variorum`, the test target
   WITHOUT default `MainActor`; `Variorum` symlinks every `Shared/Protection/*.swift` but `ProtectionBackupHook.swift`, plus
@@ -173,7 +173,7 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
   WhatsNewLedger.swift` and the recipe's one stub file; the test target symlinks the U3 harness's 61 files re-pointed here
   MINUS `KeychainOffMainTests` (it touches the login keychain — not this unit's) plus the `RoadWorldError` stub).
   **HARNESS BASELINE on the pre-fix tree (`0b6acf703`): `✔ Test run with 381 tests in 64 suites passed`** (0 failures).
-- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE any fix: DONE (this commit).
+- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE any fix: DONE (`1ce8b2748`).
   `Tests/VariorumCoreTests/Protection/Executor/SyncKeysSessionHoldTests.swift` (pin 1) — **RED on the pre-fix tree**
   (`swift test --filter SyncKeysSessionHoldTests`): `✘ Test run with 3 tests in 1 suite failed … with 2 issues` —
   `useCastleWithTouchIDHoldsTheNewKeysInSessionBesideTheItem` ✘ (`fixture.world.session[account] == item`) and
@@ -184,13 +184,13 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
   `pin2_theTouchIDUnlockLoadsTheAccountsKeysForTheEngine` ✘ ×3 (session memory nil after the press; the provider's
   `currentKeys()` refused — the corpus key id nil against the item's and the vault's); the world's own setup (turn sync on,
   synced Use Castle with Touch ID, the lobby's Touch ID button) raised NO issue. `pin4_…` ✔ (a guard by design).
-- Piece 2 — fix (a): DONE (this commit). `CommonSteps.swift` — the castle + Touch ID arm's `holdInSession(nil, …)` →
+- Piece 2 — fix (a): DONE (`82376db6a`). `CommonSteps.swift` — the castle + Touch ID arm's `holdInSession(nil, …)` →
   `holdInSession(held, …)` (one line) and the doc comment made true. **Pin 1 GREEN**; the core protection + auth/account
   set (debug — every suite type under `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`,
   `AccountLifecycleTests`, `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`,
   `SupabaseTransportSessionTests`, as one `--filter`): **`✔ Test run with 531 tests in 101 suites passed`** — the
   scenario world's promises (which read session memory) hold with the arm's new hold.
-- Piece 3 — fix (b) + its seams + pins 3 and 5: DONE (this commit). NEW `Shared/Protection/TouchIDPressContext.swift`
+- Piece 3 — fix (b) + its seams + pins 3 and 5: DONE (`96455fb2c`). NEW `Shared/Protection/TouchIDPressContext.swift`
   (`TouchIDPressContext` — the evaluated `LAContext`, ended by `invalidate()`; `TouchIDPressHanding`; `TouchIDPressRiding`
   — `nonisolated` protocols, app-level). `KeychainCustodyLeaf`: the Touch ID read factored into `readTouchID` (body
   byte-identical but for its returns), `readCustody(.touchid)` = its key (behavior unchanged — the key doors' press), and
@@ -205,7 +205,7 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
   `TouchIDUnlockSyncKeysTests.swift`. **The harness on the fixed tree: `✔ Test run with 4 tests in 1 suite passed`
   (`--filter TouchIDUnlockSyncKeysTests` — pins 2, 3, 4, 5) and the whole harness `✔ Test run with 385 tests in 65 suites
   passed`** (381 baseline + this unit's 4; 0 failures). No revert is in flight.
-- Piece 4 — the behavioral reverts: DONE — **no revert is in flight** (each restored by `git checkout --` of its one file,
+- Piece 4 — the behavioral reverts: DONE (`ff4045654` named them before they ran, `6937db19b` the results) — **no revert is in flight** (each restored by `git checkout --` of its one file,
   `git diff --exit-code` clean after every one). Run on the committed tree `96455fb2c` (core: `swift test --filter
   SyncKeysSessionHoldTests`; app: the harness, `--filter TouchIDUnlockSyncKeysTests`):
   - **R1** (`CommonSteps.swift` — the arm back to `holdInSession(nil, …)`): `✘ Test run with 3 tests in 1 suite failed …
@@ -237,7 +237,7 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
     build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `-scheme VariorumMobile -destination 'generic/platform=iOS
     Simulator' -derivedDataPath App/Variorum/DerivedData/vx488-m1-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`**
     — the new `TouchIDPressContext.swift` compiled in both; no warning in any file this unit touched (both logs grepped).
-- Piece 6 — the close: DONE (this commit).
+- Piece 6 — the close: DONE (`dbaec3f2b`; the hashes filled in by the next commit).
 
 **THE PINS (all five dispositioned):**
 1. FIXED — pin 1 `SyncKeysSessionHoldTests` (core): red on the pre-fix tree and under R1; green after (a), debug + release.
