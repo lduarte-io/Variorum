@@ -412,21 +412,47 @@ struct ResumableCatchUpTests {
         let transport = FaultInjectingTransport(server: server)
         let a = try SyncClient(name: "A", prefix: "AA", transport: server)
         let b = try SyncClient(name: "B", prefix: "BB", transport: transport, seed: 2)
+        let feed = try await stragglerFeed(a, server: server)
 
-        // The feed: a post with one block (at or below S) · at S+1 a straggler placement whose block has not
-        // reached the server · then 120 standalone posts, none referencing anything before them.
+        // THE INTERLEAVING (the hook runs as B's third window is requested, before the server answers it).
+        let otherReport = await armAnotherRound(on: b, server: server, transport: transport, atCall: 3)
+
+        // The round under test. A refusal is an honest answer; committing past rows it never applied is the failure.
+        _ = try? await b.pull(batchSize: 20)
+        #expect(otherReport.value?.stalled == true && otherReport.value?.newCursor == feed.stallPoint,
+                "non-vacuous: the other writer committed the cursor at the stall and cleared the stage")
+        let missing = try await rowsMissingAtOrBelowCursor(b, server: server)
+        #expect(missing.isEmpty,
+                "B's committed cursor never passes a row B does not hold — \(missing.count) missing, e.g. \(missing.prefix(2))")
+
+        // The straggler heals (its block reaches the server): both devices converge, nothing lost.
+        try await healTheStraggler(a, server: server, blockID: feed.blockID)
+        try await productionQuiescence(a, b, server: server)
+        #expect(try a.syncedDump() == b.syncedDump(), "converged: nothing lost under the interleaving")
+    }
+
+    // MARK: The one-writer scenes (ladder R1 N2; ladder R2 R2-2 and R2-6)
+
+    private static let lateBlockID = "a-block-that-arrives-late"
+
+    /// The straggler feed: A's post with one block (at or below the stall point) · at the next seq a placement whose
+    /// block has not reached the server · then 120 standalone posts, none referencing anything before them.
+    /// `beforeTheStraggler` runs once the post is on the server, before the straggler is pushed.
+    private func stragglerFeed(
+        _ a: SyncClient, server: FakeSyncServer, beforeTheStraggler: () async throws -> Void = {}
+    ) async throws -> (blockID: String, stallPoint: Int64) {
         let (postID, blockID) = try a.with { ops, _ in
             let post = try ops.createPost(title: "the post", profile: .journal)
             return (post.id, try ops.newBlock(in: post.id, text: "the block", at: .end).block.id)
         }
         try await a.push()
         let stallPoint = await server.headSeq
-        let lateBlockID = "a-block-that-arrives-late"
+        try await beforeTheStraggler()
         let straggler = SyncRow(
             table: "container_block", rowID: "straggler-placement",
             columns: [
                 "id": .text("straggler-placement"), "container_id": .text(postID),
-                "block_id": .text(lateBlockID), "position": .text("b0"),
+                "block_id": .text(Self.lateBlockID), "position": .text("b0"),
                 "chosen_variant_id": .null, "created_at": .text("2026-07-01T00:00:00.000Z"),
                 "updated_at": .text("2026-07-01T00:00:00.000Z"), "deleted_at": .null,
             ],
@@ -439,12 +465,19 @@ struct ResumableCatchUpTests {
         }
         try await a.push()
         #expect(await server.headSeq - stallPoint > 100, "non-vacuous: many rows past the straggler")
+        return (blockID, stallPoint)
+    }
 
-        // THE INTERLEAVING (the hook runs as B's third window is requested, before the server answers it).
-        let db = b.db
-        let keys = ClientIdentityKeyProvider(inner: b.keyProvider, deviceID: b.deviceID)
+    /// THE OTHER WRITER: when the `call`th pull from now is requested (before the server answers it), ANOTHER real
+    /// engine round runs to its end on `client`'s store, straight to the server — same device, same key: a retired
+    /// chain nobody drained (the `stop()` → `configure()` road). Its report lands in the returned box.
+    private func armAnotherRound(
+        on client: SyncClient, server: FakeSyncServer, transport: FaultInjectingTransport, atCall call: Int
+    ) async -> LockIsolated<SyncEngine.PullReport?> {
+        let db = client.db
+        let keys = ClientIdentityKeyProvider(inner: client.keyProvider, deviceID: client.deviceID)
         let otherReport = LockIsolated<SyncEngine.PullReport?>(nil)
-        await transport.armWhilePull(atCall: 3) {
+        await transport.armWhilePull(atCall: call) {
             let report = try await withDependencies {
                 $0.database = db
                 $0.date = DateGenerator { Date(timeIntervalSince1970: 1_782_865_000) }
@@ -457,28 +490,218 @@ struct ResumableCatchUpTests {
             }
             otherReport.setValue(report)
         }
+        return otherReport
+    }
 
-        // The round under test. A refusal is an honest answer; committing past rows it never applied is the failure.
+    /// The straggler heals: its block (a copy of A's under the late id) reaches the server.
+    private func healTheStraggler(_ a: SyncClient, server: FakeSyncServer, blockID: String) async throws {
+        let blockTable = try #require(SyncSchema.table(named: "block"))
+        let blockRow = try #require(try await a.db.read { try SyncRow.fetch($0, table: blockTable, rowID: blockID) })
+        var lateColumns = blockRow.columns
+        lateColumns["id"] = .text(Self.lateBlockID)
+        lateColumns["default_variant_id"] = .null
+        lateColumns["last_container_id"] = .null
+        let lateBlock = try SyncTestKeys.sealedForWire(
+            SyncRow(table: "block", rowID: Self.lateBlockID, columns: lateColumns, syncVersion: 0))
+        _ = try await server.push(
+            [lateBlock], activeKeyID: SyncTestKeys.corpusKeyID,
+            keyProof: server.mintProof(rpc: "sync_push"))
+    }
+
+    // MARK: Ladder round 2 — R2-1: a stage never outlives a purge the ledger named
+
+    /// A stamp safely past the 30-day window for the harness clock (which starts 2026-07-01).
+    private static let oldStamp = "2026-05-01T00:00:00.000Z"
+
+    /// Backdates one deletion's EXACT stamp across every tombstoned table (the purge suite's helper).
+    private func backdate(_ client: SyncClient, from original: String, to stamp: String) throws {
+        try client.db.write { db in
+            for table in SyncSchema.tables where table.hasTombstone {
+                try db.execute(
+                    sql: "UPDATE \(table.name) SET deleted_at = ? WHERE deleted_at = ?",
+                    arguments: [stamp, original])
+            }
+        }
+    }
+
+    /// One device's committed round (the purge suite's): push, then pull twice — the second pull's first window
+    /// reports the advanced cursor, which is what the horizon reads.
+    private func committedRound(_ client: SyncClient) async throws {
+        try await client.push()
+        try await client.pull()
+        try await client.pull()
+    }
+
+    private func sweep(_ client: SyncClient, _ server: FakeSyncServer) async throws -> PurgeJanitor.SweepReport {
+        try await client.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: client.keyProvider).sweep()
+        }
+    }
+
+    /// THE PIN (R2-1; red on the tip `b37c47c7c`: the stage resumed and the save wrote the purged note back, live, on
+    /// B alone and for good — the round-2 reviewer's probe). The 13j returner road keeps purged rows off a device
+    /// that left the horizon: the feed never serves them, and the pre-round ledger reconciliation drops any it still
+    /// HOLDS, then moves its scan point past their entries. A staged row is held nowhere that pass looks — so a stage
+    /// fetched before a ledger advance is discarded, never resumed, and the purged note never comes back.
+    @Test func aStageFetchedBeforeAPurgeLandedIsNeverResumedAfterIt() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, clockOffset: 90, seed: 2)
+
+        let doomed = try a.with { ops, _ in
+            let post = try ops.createPost(title: "doomed", profile: .generic)
+            _ = try ops.newBlock(in: post.id, text: "Words that will be deleted.", at: .end)
+            return post.id
+        }
+        try seedCorpus(a, posts: 12, blocksPerPost: 10)
+        try await a.push()
+
+        // B's first catch-up dies on its sixth window: five windows staged (the doomed note LIVE), nothing committed.
+        await transport.armFailPull(atCall: 6)
+        await #expect(throws: InjectedNetworkFault.self) {
+            try await b.pull(batchSize: 40)
+        }
+        #expect(try b.cursor() == 0)
+        #expect(try b.db.fetchInt(
+            "SELECT COUNT(*) FROM sync_pull_stage WHERE table_name = 'container' AND row_id = ?", [doomed]) == 1,
+                "non-vacuous: the doomed note's container is staged live")
+
+        // A deletes the note on the 30-day road (backdated); B goes dark past the 60-day window; A's sweep purges
+        // the family — the mirror holds no row of it, and its ids enter the ledger.
+        let stamp = try a.with { ops, db in
+            try ops.deleteContainer(doomed)
+            return try #require(try db.fetchString("SELECT deleted_at FROM container WHERE id = ?", [doomed]))
+        }
+        try backdate(a, from: stamp, to: Self.oldStamp)
+        try await committedRound(a)
+        await server.setHorizonDropoutTicks(10)
+        await server.advanceClock(by: 100)
+        try await committedRound(a)
+        #expect(try await sweep(a, server).familiesPurged >= 1, "non-vacuous: the family was purged on the mirror")
+        #expect(await server.currentRow(table: "container", rowID: doomed) == nil)
+
+        // B returns: the scheduler's pre-round ledger reconciliation (B holds none of the family — only its stage
+        // does — so it drops nothing and moves its scan point past the entries), then the round's pull.
+        let dropped = try await b.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: b.keyProvider).reconcileLedger()
+        }
+        #expect(dropped == 0, "non-vacuous: the family lives only in the stage")
+        let next = try await sinces(transport) {
+            _ = try await b.pull(batchSize: 40)
+        }
+        #expect(next.first == 0, "a stage fetched before the ledger moved is discarded, never resumed")
+        #expect(try b.db.fetchInt("SELECT COUNT(*) FROM container WHERE id = ?", [doomed]) == 0,
+                "a purged note never comes back on a returning device")
+
+        // Explicit rounds — a purge consumes a seq no feed row carries, so cursor == head is not the quiet condition
+        // (the purge suite's idiom): converged, the note nowhere.
+        _ = try await sweep(b, server)
+        try await committedRound(a)
+        try await committedRound(b)
+        try await committedRound(a)
+        #expect(try b.db.fetchInt("SELECT COUNT(*) FROM container WHERE id = ?", [doomed]) == 0)
+        #expect(try a.outboxCount() == 0)
+        #expect(try b.outboxCount() == 0)
+        #expect(try a.syncedDump() == b.syncedDump(), "converged: the purge holds on the returning device")
+    }
+
+    /// GUARD (R2-1, the upgrade road; red on the tip too, where no header carries the scan point): a stage header
+    /// written before the stage named its ledger scan point is unreadable to this build — discarded, never resumed.
+    @Test func aStageHeaderFromBeforeTheLedgerScanPointIsNeverResumed() async throws {
+        try await expectRewrittenHeaderIsNeverResumed {
+            $0.removeValue(forKey: "ledgerScanPoint")
+        }
+    }
+
+    // MARK: Ladder round 2 — R2-2: the belt checks the stage's continuity, not only the cursor's value
+
+    /// THE PIN (R2-2; red on the tip: the belt compared the cursor's VALUE, and a commit that stalls at its batch's
+    /// FIRST row clears the stage without moving it — the round-2 reviewer's probe, 40 rows missing). B is current to
+    /// the stall point, so the straggler is its next first row. B's round stages two windows; at its third, another
+    /// round on B's store resumes that stage, stalls at the straggler (index 0 — the cursor unmoved) and empties the
+    /// stage. B's round must refuse or commit honestly: its cursor never passes a row it does not hold.
+    @Test func aRoundNeverCommitsPastRowsAFirstRowStallClearedFromUnderIt() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, seed: 2)
+        let feed = try await stragglerFeed(a, server: server) {
+            _ = try await b.pull(batchSize: 20)  // B committed to the stall point before the straggler exists
+        }
+        #expect(try b.cursor() == feed.stallPoint, "non-vacuous: the straggler is B's next first row")
+
+        let otherReport = await armAnotherRound(on: b, server: server, transport: transport, atCall: 3)
         _ = try? await b.pull(batchSize: 20)
-        #expect(otherReport.value?.stalled == true && otherReport.value?.newCursor == stallPoint,
-                "non-vacuous: the other writer committed the cursor at the stall and cleared the stage")
+        #expect(otherReport.value?.stalled == true && otherReport.value?.newCursor == feed.stallPoint,
+                "non-vacuous: the other writer's save stalled at its first row — the cursor unmoved — and cleared the stage")
         let missing = try await rowsMissingAtOrBelowCursor(b, server: server)
         #expect(missing.isEmpty,
                 "B's committed cursor never passes a row B does not hold — \(missing.count) missing, e.g. \(missing.prefix(2))")
 
-        // The straggler heals (its block reaches the server): both devices converge, nothing lost.
-        let blockTable = try #require(SyncSchema.table(named: "block"))
-        let blockRow = try #require(try await a.db.read { try SyncRow.fetch($0, table: blockTable, rowID: blockID) })
-        var lateColumns = blockRow.columns
-        lateColumns["id"] = .text(lateBlockID)
-        lateColumns["default_variant_id"] = .null
-        lateColumns["last_container_id"] = .null
-        let lateBlock = try SyncTestKeys.sealedForWire(
-            SyncRow(table: "block", rowID: lateBlockID, columns: lateColumns, syncVersion: 0))
-        _ = try await server.push(
-            [lateBlock], activeKeyID: SyncTestKeys.corpusKeyID,
-            keyProof: server.mintProof(rpc: "sync_push"))
+        try await healTheStraggler(a, server: server, blockID: feed.blockID)
         try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump(), "converged: nothing lost under the interleaving")
+    }
+
+    // MARK: Ladder round 2 — R2-6: the belt's refusal is followed at once by a healing round
+
+    /// THE PIN (R2-6; red on the tip: the belt's refusal ended the trigger's work with its engine words on the sync
+    /// row until something else triggered). The N2 interleaving, scheduled: ONE trigger, the round refused by the
+    /// one-writer belt, then one follow-up round that re-plans from the committed cursor and ends clean (stalled
+    /// honestly at the straggler) — the row never sits on the belt's text.
+    @Test func aRoundTheOneWriterBeltRefusesIsFollowedAtOnceByAHealingRound() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, seed: 2)
+        let feed = try await stragglerFeed(a, server: server)
+        let otherReport = await armAnotherRound(on: b, server: server, transport: transport, atCall: 3)
+        let scheduler = SyncScheduler(engine: b.engine(batchSize: 20))
+
+        try await b.withAsync { _ in
+            await scheduler.trigger()
+        }
+        await scheduler.awaitIdle()
+
+        #expect(otherReport.value?.stalled == true && otherReport.value?.newCursor == feed.stallPoint,
+                "non-vacuous: the other writer committed under the scheduled round")
+        let status = await scheduler.status
+        #expect(status.roundsCompleted == 2, "the belt's refusal is followed at once by one healing round")
+        #expect(status.lastError == nil, "the healing round leaves no belt words on the row")
+        #expect(try b.cursor() == feed.stallPoint, "the healing round re-planned from the committed cursor")
+        let missing = try await rowsMissingAtOrBelowCursor(b, server: server)
+        #expect(missing.isEmpty)
+    }
+
+    /// GUARD (R2-6's bound; red on the tip for another reason — there nothing refuses, so the raided round commits
+    /// what it holds; teeth: the scheduler following every belt refusal). Another writer clears B's stage before each
+    /// round's second window, three times: the belt refuses round 1, its ONE follow-up is refused too, and the
+    /// scheduler then waits for the next trigger — a follow-up the belt refuses never requests another (no loop).
+    @Test func theBeltsFollowUpRoundRunsOnceNeverALoop() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, seed: 2)
+        try seedCorpus(a, posts: 4, blocksPerPost: 5)
+        try await a.push()
+        #expect(await server.headSeq > 40, "non-vacuous: more than two 20-row windows")
+
+        let db = b.db
+        await transport.armWhileEachPull(times: 3, where: { $0 > 0 }) {
+            try await db.write { try PullStage.clear($0) }
+        }
+        let scheduler = SyncScheduler(engine: b.engine(batchSize: 20))
+        try await b.withAsync { _ in
+            await scheduler.trigger()
+        }
+        await scheduler.awaitIdle()
+
+        let status = await scheduler.status
+        #expect(status.roundsCompleted == 2, "one follow-up after the belt's refusal — and only one")
+        #expect(status.lastError != nil, "the second refusal stands until the next trigger")
+        #expect(try b.cursor() == 0, "nothing committed under the raids")
+        let missing = try await rowsMissingAtOrBelowCursor(b, server: server)
+        #expect(missing.isEmpty)
     }
 }
