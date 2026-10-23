@@ -700,6 +700,21 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   if this tester is THE backfilled-'standard'-vault tester (marker 14's deploy backfilled exactly one), the set-up arm
   would be a finding — her answer pending. 0.10's release also live-tests the appcast road (her Air updates 9168→9172
   via Sparkle).
+- **R-494-8 (2026-10-23, the tester trace — her words verbatim, the server's facts beside them):** her first word:
+  "yes! this is the one tester that had set up sync"; her correction minutes later: "no, you're not right: the one
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  completed enrollment (the old world pushes nothing un-enrolled), so the set-up arm he met today is HONEST and
+  safe to proceed; nonzero means rows sealed under a key no vault wraps — a serious finding, stop. The tester was
+  told to Cancel; `createVault` refuses over an existing row (409 `vaultExists`), so no road from the sheet can
+  overwrite anything. Her step-5 go the same message: "just do the Step 5 now, I'll edit them later. it's fine for
+  them to be up right now" — the two site pages drafted new at her word. Her note: the tester is in Standard, so
+  the ⌃⌘L typed-unlock test doesn't apply (the lock door rides Castle's gate row; Standard's quiet road would
+  reopen silently) — the reveal-eye check and the words-road passphrase reset are the Standard-side tools.
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
