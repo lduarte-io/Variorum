@@ -205,13 +205,25 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
   `TouchIDUnlockSyncKeysTests.swift`. **The harness on the fixed tree: `✔ Test run with 4 tests in 1 suite passed`
   (`--filter TouchIDUnlockSyncKeysTests` — pins 2, 3, 4, 5) and the whole harness `✔ Test run with 385 tests in 65 suites
   passed`** (381 baseline + this unit's 4; 0 failures). No revert is in flight.
-- Piece 4 — the behavioral reverts: IN-PROGRESS — **REVERTS STARTING on the committed tree `96455fb2c`**; each applied
-  alone, restored by `git checkout -- <the one file>` and verified by `git diff --exit-code` before the next: R1
-  (`CommonSteps.swift` — the arm back to `holdInSession(nil, …)`) → pin 1; R2 (`ProtectionOpenRoad.swift` — the pre-fix
-  press: the `loadSyncKeysForTheSession` call removed) → pins 2, 3; R3 (same file — the TWO-PROMPT load: the riding read
-  replaced by the context-less `readSyncKeys(accountID:itemClass: .touchid)`) → pin 3 alone; R4 (same file — a HOSTAGE
-  load: a failed/absent read refuses the unlock) → pin 5; R5 (same file — the press NOT ended: the `defer` removed) →
-  pins 3 + 5's ended legs; R6 (`NewRoadSyncKeyProvider.swift` — the provider reading the Touch ID item) → pin 4.
+- Piece 4 — the behavioral reverts: DONE — **no revert is in flight** (each restored by `git checkout --` of its one file,
+  `git diff --exit-code` clean after every one). Run on the committed tree `96455fb2c` (core: `swift test --filter
+  SyncKeysSessionHoldTests`; app: the harness, `--filter TouchIDUnlockSyncKeysTests`):
+  - **R1** (`CommonSteps.swift` — the arm back to `holdInSession(nil, …)`): `✘ Test run with 3 tests in 1 suite failed …
+    with 2 issues` — pin 1's two arms ✘ (`fixture.world.session[account] == item`, `laptop.world.session[account] ==
+    item`); its guard ✔.
+  - **R2** (`ProtectionOpenRoad.swift` — the pre-fix press, the load call removed): `✘ … 4 tests … with 7 issues` — pin 2
+    ✘×3 (session nil; the provider refused), pin 3 ✘×3 (no riding read; nothing loaded), pin 5 ✘×1 (only its
+    non-vacuity leg "the read was tried" — the never-hostage legs pass, as on the old tree), pin 4 ✔.
+  - **R3** (same file — the TWO-PROMPT load: the riding read replaced by the context-less `readSyncKeys(accountID:
+    itemClass: .touchid)`): `✘ … with 5 issues` — **pin 2 ✔ (the keys load either way) and pin 3 ✘×3** (no ride; the
+    ridden press not the handed one; `touchIDReads == freshSyncPresses` — a fresh-context read, i.e. a second prompt);
+    pin 5 ✘×2 (its scripted failure lives on the riding road), pin 4 ✔. Pin 3 is what catches a second prompt.
+  - **R4** (same file — a HOSTAGE load: no keys loaded ⇒ the press refuses): `✘ … with 2 issues` — pin 5 ✘ (the failing
+    leg's press did not open: "the Touch ID press opens the library" + the helper's throw); pins 2, 3, 4 ✔.
+  - **R5** (same file — the press never ended: the `defer` removed): `✘ … with 4 issues` — pin 3 ✘ (`handed
+    .isInvalidated`) and pin 5 ✘×3 (every leg's "the press ended"); pins 2, 4 ✔.
+  - **R6** (`NewRoadSyncKeyProvider.swift` — the provider also reading the Touch ID item): `✘ … with 1 issue` — pin 4 ✘
+    ("an error was expected but none was thrown": the provider read the item); pins 2, 3, 5 ✔.
 - Piece 5 — evidence (core protection suites debug + release; the harness; build-for-testing Mac + iOS): NOT-STARTED.
 - Piece 6 — the close (this record final; the run table's row 1): NOT-STARTED.
 
