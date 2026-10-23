@@ -16,7 +16,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 | 0 | Kickoff: preflight read whole; Linear current (VX-483 joined as member, High, In Progress); main merged into the branch (`9d69c026f`); this record | DONE (this commit) |
 | 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end); fork F-M1-1 RESOLVED — ruled (i), BUILT `164304e91` ("F-M1-1 BUILT" under THE RULING; R7 red, evidence green) |
 | 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | DONE (`52a233742` M2, `f825ed8e7` + `dbb4666cb` M3; pins revert-verified RM2-1..5, RM3-1..5; harness 40/8 + M1 harness 388/67 + release compile + build-for-testing Mac + iOS green — "M2 RECORD"/"M3 RECORD" at the end); PROVISIONALs P-VX486-1/-2 in OPEN ITEMS |
-| 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | NOT-STARTED |
+| 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | IN-PROGRESS — Mac run 1 at `fb080c7d1`: `✘ Test run with 5117 tests in 897 suites failed … 18 issues (including 14 known issues)` — 4 real reds, ALL the VX-489 class (M4 below), NONE from the members; VX-489 fixed, its three suites re-run `✔ 23 tests in 3 suites passed`; the phone suite next |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | NOT-STARTED |
 | 5 | THE LIVE REHEARSAL (stage window; her Touch ID presses; the acceptance gate) | NOT-STARTED |
 | 6 | Merge (PR, merge commit), tickets Done, in-flight row retired | NOT-STARTED |
@@ -101,6 +101,23 @@ says why; it must never silently run against production). The existing walk swit
 host (`projectOverrideForThisLaunch(productionHost:)`) — reuse its read, never a second env parse. Release builds:
 byte-unchanged, the fence absolute.
 **PINS:** the fence holds with no env; lifts with the throwaway env; refuses the production ref (fail-loud).
+
+### M4 — VX-489 (joined at the stage batch, 2026-10-22; the orchestrator's own hand — no custody, no editor seam): the 0.10 bump's four stale version reds
+
+**Found by the stage batch's full Mac run** (the only 4 real reds; none from M1–M3): main's `b59c68592` bumped
+MARKETING_VERSION to 0.10 AFTER VX-329's closing run, so (1) `VersionSchemeTests.theMarketingVersionIsTheFriendsBetasLine`
+expected the `0.9.` prefix; (2) its stamp-phase pin filtered pbxproj lines by `MARKETING_VERSION = 0.9.` (found 0);
+(3) `SupportDraftTests.theRunningAppsVersionsAreTheBundlesOwn` expected `0.9.`; (4) `WhatsNewTests
+.theRunningVersionCarriesItsNotesInTheBundle` found no `ReleaseNotes-0.10.md` in the bundle. **THE FIX (the
+orchestrator, Fable):** the three pins rewritten to the ruled pre-1.0 line (her 2026-10-22 release word: 0.10, "i
+don't want 1.0 until public launch" — the prefix widens to `0.`, the stamp filter to `MARKETING_VERSION = 0.`, the
+comments carrying the amendment; the mobile target wears 1.0, so the filter still isolates the Mac target's two
+configurations); the approved `ReleaseNotes-0.10.md` bundled into the WhatsNew synchronized group **minus its two
+drafting-header lines** (the `# Variorum 0.10` title and the "*Drafted at VX-329 for her rewrite…*" meta line — the
+0.9.8 bundled precedent starts with content; every content line byte-faithful to her approved draft; the repo-root
+draft stays as it was). Red-on-old: the full run's four ✘ ARE the red (recorded in row 3); the three suites re-ran
+green (`✔ Test run with 23 tests in 3 suites passed`). The What's New auto-show for 0.10 now has its notes — the
+release's own gate (`ReleaseNotes.swift`: "a release REFUSES without the file").
 
 ## Session plan (the cast — CLAUDE.md's standing default; one agent at a time, fresh per batch)
 
