@@ -59,7 +59,7 @@ done
 # The stamp comes whole or not at all: a version without its build number (or the reverse) is a
 # half-stamped bundle that Sparkle would compare wrongly.
 if [ -n "$STAMP_VERSION" ] || [ -n "$STAMP_BUILD" ]; then
-  [[ "$STAMP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "REFUSED: --version must be X.Y.Z (got '${STAMP_VERSION}')" >&2; exit 2; }
+  [[ "$STAMP_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || { echo "REFUSED: --version must be X.Y or X.Y.Z (got '${STAMP_VERSION}')" >&2; exit 2; }
   [[ "$STAMP_BUILD" =~ ^[1-9][0-9]*$ ]] || { echo "REFUSED: --build must be a positive integer (got '${STAMP_BUILD}')" >&2; exit 2; }
 fi
 STAMP_SETTINGS=()

@@ -34,7 +34,7 @@ header() { grep -i "^$1:" "$2" | tail -1 | cut -d' ' -f2- | tr -d '\r'; }
 case "$KIND" in
   dmg)
     NAME="$(basename "$LOCAL")"
-    [[ "$NAME" =~ ^Variorum-[0-9]+\.[0-9]+\.[0-9]+\.dmg$ ]] || { echo "the DMG must be named Variorum-X.Y.Z.dmg (got ${NAME})" >&2; exit 2; }
+    [[ "$NAME" =~ ^Variorum-[0-9]+\.[0-9]+(\.[0-9]+)?\.dmg$ ]] || { echo "the DMG must be named Variorum-X.Y[.Z].dmg (got ${NAME})" >&2; exit 2; }
     URL="${DMG_HOST_PREFIX}${NAME}"
     echo "== ${URL}"
     CODE="$(curl -sS -L -D "${WORK}/h" -o "${WORK}/remote.dmg" -w '%{http_code}' "$URL" || echo 000)"

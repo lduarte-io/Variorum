@@ -124,7 +124,7 @@ esac
 
 [ -n "$APP" ] && [ -n "$VERSION" ] && [ -n "$OUT" ] || usage
 [ -d "$APP" ] || refuse "no such app: ${APP}"
-[[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || refuse "--version must be X.Y.Z (got '${VERSION}')"
+[[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || refuse "--version must be X.Y or X.Y.Z (got '${VERSION}')"
 mkdir -p "$OUT"; OUT="$(cd "$OUT" && pwd)"
 DMG="${OUT}/Variorum-${VERSION}.dmg"
 [ ! -e "$DMG" ] || refuse "${DMG} already exists (every DMG is built fresh)"

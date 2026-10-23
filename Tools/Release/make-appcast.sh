@@ -84,8 +84,8 @@ refuse() { echo "REFUSED: $*" >&2; exit 3; }
 [[ "$BUILD" =~ ^[1-9][0-9]*$ ]] || refuse "--build must be a positive integer (got '${BUILD}')"
 case "$MODE" in
   release)
-    [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || refuse "--version must be X.Y.Z (got '${VERSION}')"
-    [[ "$VERSION" =~ ^0\.0\. ]] && refuse "0.0.x is the WALK range; a release never carries it"
+    [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || refuse "--version must be X.Y or X.Y.Z (got '${VERSION}')"
+    [[ "$VERSION" =~ ^0\.0(\.|$) ]] && refuse "0.0.x is the WALK range; a release never carries it"
     [ -n "$FEED" ] || FEED="${RELEASES}/feed"
     [ -n "$NOTES" ] || refuse "a release REQUIRES --notes (the version's ReleaseNotes-<version>.md — What's New and the appcast read the one source)"
     PREFIX="$RELEASE_PREFIX" ;;
