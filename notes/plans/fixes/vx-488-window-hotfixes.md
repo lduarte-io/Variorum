@@ -14,7 +14,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight read whole; Linear current (VX-483 joined as member, High, In Progress); main merged into the branch (`9d69c026f`); this record | DONE (this commit) |
-| 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end) — FORK F-M1-1 raised, NOT BUILT, the architect's to rule; the app suites are the stage batch's (listed there) |
+| 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end); F-M1-1 RULED (i) — BUILD IN-PROGRESS ("F-M1-1 BUILT" under THE RULING) |
 | 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | NOT-STARTED — the briefs are M2/M3 below |
 | 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | NOT-STARTED |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | NOT-STARTED |
@@ -341,3 +341,23 @@ PRODUCTION composition path (the planted world shares one leaf set and cannot se
 composition-built system survive into the next system the same composition builds (red on the per-system mint), plus
 a guard that a key-change path's explicit clear still clears through the shared leaf. The implementer builds it; the
 ladder re-reads it.
+
+### F-M1-1 BUILT (implementer session A, after THE RULING)
+- Piece F0 — the composition pin committed BEFORE the fix: DONE (this commit).
+  `App/Variorum/VariorumTests/Protection/OneSyncKeysLeafTests.swift` — `OneSyncKeysLeafCompositionTests` (source read,
+  the VX-423 pin's idiom and helpers): the product constructs `KeychainSyncKeysLeaf(` once, in `AppBootstrap.swift`;
+  `ProtectionSystem(` once, in `ProtectionSystem.swift` (`live`); the bootstrap → `RoadInputs.live` → `ProtectionSystem
+  .live` → the system each hand `syncKeys: syncKeys`. **RED on the pre-fix tree** (the harness, `--filter
+  OneSyncKeysLeaf`): `✘ Test run with 1 test in 1 suite failed … with 4 issues` — the mint found in
+  `ProtectionSystem.swift` (the init's per-system default), and none of the three hand-offs present; the one-construction
+  line ✔ (true on both sides).
+- Piece F1 — the fix + the behavioral pin + the clear guard: NOT-STARTED — the design: the bootstrap's production init mints
+  `KeychainSyncKeysLeaf(scope: variant.rawValue)` ONCE (`AppBootstrap.syncKeys`, beside `auth`), hands it to `RoadInputs
+  .live(variant:auth:syncKeys:)` (required) → `ProtectionSystem.live(variant:session:syncKeys:)` (required) →
+  `ProtectionSystem.init(… syncKeys:)` — made REQUIRED and non-optional, its `?? KeychainSyncKeysLeaf(scope:)` default
+  deleted, so no construction anywhere can silently mint its own (the compiler refuses a missed site); the test bootstrap
+  takes its harness system's leaf; the four test-side `ProtectionSystem(` sites pass their own (two gain an explicit
+  `KeychainSyncKeysLeaf(scope:)` — byte-identical behavior: a fresh one per call, as the default made).
+- Piece F2 — the behavioral revert (the per-system mint restored): NOT-STARTED.
+- Piece F3 — evidence (the protection set both configurations, the harness, build-for-testing Mac + iOS): NOT-STARTED.
+
