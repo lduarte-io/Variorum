@@ -1,11 +1,12 @@
 import Foundation
 import GRDB
 
-// Phase 13x, U2 row 8 — THE FOUR LOCAL-ONLY TABLES, RECREATED (corner
+// Phase 13x, U2 row 8 — THE LOCAL-ONLY TABLES, RECREATED (corner
 // 14.13 + pre-13x ledger 22, the recorded consequence on
 // `StorePlaintextExport`): the export copies the WHOLE schema — the
-// outbox triggers included — and then drops the registry's four local
-// tables, so a re-opened export cannot take a single write until they
+// outbox triggers included — and then drops the registry's local-only
+// tables (`SyncSchema.localOnlyTables` — four when this was written, six
+// since v1_32), so a re-opened export cannot take a single write until they
 // exist again (every synced-table INSERT/UPDATE fires a trigger that
 // names `sync_outbox`, and SQLite refuses the statement whole). The
 // adoption door's plaintext road runs this BEFORE any open, so no
@@ -67,7 +68,7 @@ public enum LocalMachineryRecreation {
         public var description: String { "LocalMachineryRecreation: \(reason)" }
     }
 
-    /// Recreate whichever of the four tables are missing, inside the
+    /// Recreate whichever of the registry's local-only tables are missing, inside the
     /// PLAINTEXT store at `url` (a landed export — the door runs this
     /// before the store is ever opened through `openStore`). Returns the
     /// names created, sorted; an already-whole store returns []. Never

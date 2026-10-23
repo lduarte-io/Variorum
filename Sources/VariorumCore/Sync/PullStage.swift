@@ -161,7 +161,8 @@ enum PullStage {
         guard let value = try String.fetchOne(
             db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [headerKey])
         else { return nil }
-        // An unreadable header is a stage nobody can vouch for: treated as absent, so `resumePoint` discards it.
+        // An unreadable header is a stage nobody can vouch for: treated as absent, so `plan` discards it (a header
+        // from before the stage named its format reads as unreadable too — F1).
         return try? JSONDecoder().decode(Header.self, from: Data(value.utf8))
     }
 

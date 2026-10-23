@@ -54,9 +54,11 @@ public struct SyncEngine: Sendable {
     /// VX-494 (D1): rows per pull window — its own size since the push chunk
     /// stopped sizing it. The server's changefeed re-sorts every row past the
     /// cursor on each call, so a window costs about the same whatever its
-    /// size and the call count is what a first catch-up pays: 2,000 cut her
-    /// ~108k-row catch-up from ~550 calls to ~55 (the record's D1 server
-    /// check: well inside the 8 s statement timeout). The pull APPLY covers
+    /// size and the call count is what a first catch-up pays. Measured: at
+    /// 200 rows her ~108k-row first catch-up took ~550 calls (11 min 36 s);
+    /// at 2,000 the record's live proof downloaded a ~110k-row feed in 56
+    /// windows (~70 s), each call well inside the 8 s statement timeout (the
+    /// record's D1 server check). The pull APPLY covers
     /// everything staged, so window size never affects convergence — the
     /// soak randomizes it to prove that.
     public var pullWindowSize: Int
@@ -515,7 +517,9 @@ public struct SyncEngine: Sendable {
             while true {
                 // VX-494 (D3): a retired round (a lock's teardown, a chain
                 // replacement) stops between windows instead of downloading the
-                // rest of the feed in the background; what it fetched is staged.
+                // rest of the feed in the background. The windows it COMPLETED
+                // are staged; the one in flight is dropped (its stage write
+                // meets the cancellation too) and is fetched again next round.
                 try Task.checkCancellation()
                 // Phase 13j: the device id rides only a window whose `since` is
                 // this device's COMMITTED cursor — the server's device_cursor
