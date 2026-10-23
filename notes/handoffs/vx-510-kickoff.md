@@ -65,8 +65,11 @@ acceptance is SEVERAL fresh accounts proven end-to-end with server-side verifica
    Test accounts use plainly-test emails, are recorded in the run's record, and their cleanup (the account-deletion
    road — itself worth exercising once) is part of the run.
 4. **Riders and neighbors:** VX-503 (the Standard join's Touch ID prompt — same seam, trace it if the window is
-   open); VX-508 is NOT this run's (a one-statement production act at her word after tester A's join — the ticket has
-   the exact shape); VX-502/504/505 stay with VX-500.
+   open); VX-502/504/505 stay with VX-500. **VX-508 is NOT this run's build work, but it IS this run's watch:** the
+   *[removed for publication]*
+   SURFACE VX-508's one-statement act to her for her word — `update key_vault set master_wrapped_by_apple_held =
+   null, apple_key_id = null where user_id = <hers>` is the whole act, run by her `!` hand, rule 22 satisfied by the
+   join itself. Check for her join with `Tools/prod-read.sh` at natural moments; don't let it pass unnoticed.
 
 ## MACHINERY
 
