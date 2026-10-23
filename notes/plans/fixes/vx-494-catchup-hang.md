@@ -761,7 +761,20 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   quoted rule checked verbatim against CastleRules; the agent's open items for her edit pass are in the pages'
   source comments (the update-check question, noindex, the AI section, the Previous-Libraries-in-Castle entry;
   no Supabase retention number — the docs name none for sign-in events).
-- **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
+- **R-494-11 (2026-10-23, the sitting's escalation — her words verbatim):** "I have two people who signed up for sync
+  and NEITHER of them had sync work properly. is this a release delaying kind of event? do we need other types of
+  *[removed for publication]*
+  what the fuck happened there? he HAD a passphrase for the old account in castle. he DID sign up for sync. why is
+  NOTHING pushed?" — NEW FACT from her: tester B's old account was in (old-)CASTLE with an enrollment passphrase, her
+  certainty. Her ruling on the pages: questions for her live "as a comment or in the docs somewhere… if it's just on
+  the internet… it's getting scraped and saved. so remove that" — DONE (every HTML comment moved to never-rendered
+  *[removed for publication]*
+  DELETED AND RE-CREATED — the only story fitting both his memory (castle passphrase, synced) and the server (his
+  login's created_at is 2026-10-13; deletion removes vault + rows + login together, so everything he remembers would
+  have died with the predecessor) — discriminators: when he FIRST signed up (before Oct 13 ⇒ proven) and whether he
+  ever deleted/started over; (a) a silent server-side enrollment failure Oct 13–14 (nothing remains to prove it);
+  (c) memory conflation. The optional forensic road: his old library in Previous Libraries, opened via Look inside,
+  shows its account binding (uid) and outbox — distinguishes (b) from (c) decisively.
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
   0 MAJOR · 2 MINOR · 3 NIT**, R3-1's shield independently re-proved by revert on a scratch copy — the findings and
