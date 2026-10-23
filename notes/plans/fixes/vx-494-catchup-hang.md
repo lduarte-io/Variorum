@@ -17,8 +17,8 @@ say `Part of VX-494`; NO trailers.
 | 1 | The evidence re-read (the morning's unified log + read-only server probes) — THE EVIDENCE below | DONE (this commit) |
 | 2 | Reproduction at scale (headless fake-server scale test; then the throwaway live, her sign-in) | IN-PROGRESS — the stage window is OPEN (claim `vx-494`, 03:48 MDT, 240 min): throwaway user A RESET to virgin (the §8 precedent — the 21 data tables, `device_cursor`, `purged_row`, `key_vault`, the `kp:` secret; entitlement kept; verified 0/0/0, entitlement 1; ref-guarded); the dev slot's 9 top-level files ASIDE by `mv` into `Variorum-dev-aside-vx494/` beside the slot (same inodes); the walk build (`DerivedData/vx494`, the branch tip) launched with the throwaway env mapped to `VARIORUM_WALK_*`, verified in-process by `ps eww` (2 vars, the throwaway ref, no production ref) — `A4 FENCE (VX-483): LIFTED`, fresh library `1eb1d88c` CREATED in Standard (silent custody). Waiting on HER sign-in as A + the set-up. RESTORE (owed at the window's end): sign the walk session OUT (O-B2), quit, remove the walk library's files + its Backups subfolder, `mv` the 9 back, plain relaunch (rule 21's notice once) — **THE OVERNIGHT ROAD PROVEN (04:30–04:36, her present):** the test app relaunched on the throwaway (`ps eww` checked: the throwaway ref, no production ref); her sign-in as A held; Settings ▸ Protection ▸ Turn on sync = the SET-UP arm ("Your account starts in Standard, like this library"), its three fields typed by the fenced helper (`~/.variorum/bin/type-throwaway-passphrase` — the throwaway passphrase twice, then the TEST library's twelve words, minted at its first look and kept 600 beside the passphrase); the act landed (`turnOnSync — library 1eb1d88c now names account <account-uuid>, standard`); after a relaunch the round ran unattended — the server shows A's `kp:` enrollment and device `90013cc3`'s cursor row (10:35:21 UTC), the row **"Synced 4:35 AM"**. OBSERVATION (a closeout ticket, Low): right after the Standard set-up the row stayed "Sync locked" until the relaunch — no round ran on the act's own (the Castle set-up's act-side round did run at the VX-488 rehearsal) |
 | 3 | The mechanism named (trace) | DONE — H1 CONFIRMED by her real crossing (HER EXPERIMENT'S RESULT): the first catch-up commits when left alone (11.6 min download + 4.3 min save); every morning failure was an interruption of an all-or-nothing round |
-| 4 | Fix + red-on-old pin | IN-PROGRESS — the pins committed BEFORE any fix (`b5ff84236`; RED on the pre-fix tree: `✘ Test run with 5 tests in 1 suite failed … with 7 issues` — D2 round 2's `since` was 0; D1 `pullCalls == 2` failed on ten 200-row windows; D3 `pulls == 1` and `cursor == 0` failed — the retired round downloaded the whole feed AND COMMITTED; the two GUARDS by design). The schema `f6658017b` (v1_32 — migration/schema suites 55/9 green); D1+D2 `c1583de0b`; D3 `c33f18f09` (also `Part of VX-493`). **GREEN on the fixed tree:** `✔ Test run with 5 tests in 1 suite passed`; the core suite debug `✔ Test run with 3313 tests in 434 suites passed` (the one red outside it: `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` 18.97 s vs its 15 s bound, run beside the walk app — the known MCP load-flake family; PENDING its solo re-run); release PENDING. **D3's second half DROPPED with its reason:** `SyncSession.stop()` clearing the published flag is unreachable on screen — `SyncRowFace.face` returns the sync-off/signed-out face on `!isConfigured` BEFORE it reads `isSyncing` (`SyncStatusViews.swift:127–133`), and `isConfigured` is `scheduler != nil` (`SyncSession.swift:45`), which `stop()` nils — so a stopped session can never show "Syncing…" (and the lock road replaces the whole services object besides: `VariorumApp.swift:289–290`). VX-493's stranded-flag claim is thereby REFUTED in code; its real defect (the background download) is D3. **THE BEHAVIORAL REVERTS (named here BEFORE any runs; each on the committed tip, one file, restored by `git checkout --` + `git diff --exit-code`):** RV1 — `SyncEngine.init`'s `pullWindowSize` default back to 200 (D1 pin must go red); RV2 — `pullRound` ignores the plan's `.resume` (always fetch from the cursor) (D2 pin red); RV3 — `PullStage.plan` drops the device-id match (the device GUARD red); RV4 — the apply's `PullStage.clear` removed (the stall GUARD + D2's empty-stage line red); RV5 — `SyncScheduler.retire()` no longer cancels (D3 pin red); RV6 — `pullRound`'s `Task.checkCancellation()` removed, retire's cancel kept (D3 pin's fate recorded either way — the transport's own cancellation may carry it) |
-| 5 | Ladder | NOT-STARTED |
+| 4 | Fix + red-on-old pin | DONE — D1+D2 `c1583de0b`, D3 `c33f18f09`, the schema `f6658017b`; pins red-on-old (`b5ff84236`) + six reverts (RV6 hollow, recorded); THE LIVE PROOF passed (05:07); the R1 fixes (a fresh implementer) `5f983faa7`…`8ec29c300` — see THE BEHAVIORAL REVERTS, THE LIVE PROOF and LADDER R1 FIXES below |
+| 5 | Ladder | IN-PROGRESS — r1 (`vx-494-ladder-round-1.md`): 1 MAJOR + 5 MINOR + 4 NIT, fixed by a fresh implementer; r2 (`vx-494-ladder-round-2.md`): 1 MAJOR (R2-1) + 3 MINOR + 2 NIT, ⇒ r3 (the cap); the R2 fixes go to a fresh implementer (LADDER R2 FIXES — THE BRIEF) |
 | 6 | Closing runs, PR, merge | NOT-STARTED |
 | 7 | Release build + A1 + install; her crossing retry | NOT-STARTED |
 
@@ -111,6 +111,38 @@ round 3, the cap.** Dispositions:
   in D2, the stage does NOT merge tonight: the merge carries D1 + D3 (D1 alone brings her corpus's first catch-up to
   ~70 s of download + ~4–5 min of save — inside Castle's 10-minute idle lock), D2 reverts off the branch, and the stage
   goes back to her as a design question with the ladder's findings. A clean round 3 merges all three.
+
+## LADDER R2 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/SyncSpec.md` WHOLE (incl. §12's 13j
+entry — the purge ledger and horizon); `notes/plans/phase-13j-purge-memo.md` §2 and §4 (the ledger and the horizon);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (THE FIX DESIGN, both rounds' FINAL CALLS, the R1 fixes' LIVE
+STATUS); `vx-494-ladder-round-1.md` and `vx-494-ladder-round-2.md` WHOLE; the code: `Sync/PullStage.swift`,
+`Sync/SyncEngine.swift` (`pullRound`), `Sync/SyncScheduler.swift`, `Sync/PurgeJanitor.swift` (`reconcileLedger` and
+every writer of `last_purge_seq`), and `Tests/VariorumCoreTests/ResumableCatchUpTests.swift` + its support files. The
+round-2 reviewer's probe — reuse its scenes as your pins — is
+`/private/tmp/claude-501/-<home>-dev-variorum/c34bb0c9-4f3f-47f5-964c-43a1eb555b91/scratchpad/probe/Tests/VariorumCoreTests/ZZReviewerR2ProbeTests.swift`
+(a scratch copy of the package; read it, never build there; never commit it).
+
+**Your scope — exactly ROUND 2's FINAL CALLS' implementer items:** R2-1 (fix (2): the header records `last_purge_seq`
+read in the stage write's transaction; `plan` resumes only while it is unchanged), R2-2 (continuity: `stage` refuses
+unless (no header and `windowSince == base`) or `header.seq == windowSince`; the apply refuses unless the header exists
+with `seq == fetchCursor`; the cursor check stays), R2-6 (the scheduler requests one follow-up round on
+`PullStage.CursorMovedUnderRound`). Each bug-class item with its pin RED on the tip `b37c47c7c`'s code BEFORE its fix
+(R2-1 and R2-2: the reviewer's scenes; R2-6: the follow-up round runs). A header from before your change (no scan point)
+must be discarded, never resumed — say how your decode guarantees it. **Not yours:** R2-3 (hers), R2-4/R2-5 (the
+orchestrator's). A design fork STOPS and comes back as a proposal.
+
+**The discipline, the evidence, the limits — exactly LADDER R1 FIXES — THE BRIEF's** (below): pin before fix, the
+behavioral reverts named in your LIVE STATUS before any runs, commit per piece + push each, PENDING on every unverified
+claim, foreground waits only, no subagents, headless only plus ONE `build-for-testing` (`DerivedData/vx494-r2fix`) if
+any `App/` file changes, no stage, no app, no store, no server; the closing evidence = `ResumableCatchUpTests`, the sync
+sweep, the core suite debug + release (the known MCP timing flake named, never fixed). Commits say `Part of VX-494`; NO
+trailers of any kind.
+
+### LADDER R2 FIXES — LIVE STATUS (the implementer owns this section)
+
+- (empty — the implementer writes it from its first commit)
 
 ## LADDER R1 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
 
