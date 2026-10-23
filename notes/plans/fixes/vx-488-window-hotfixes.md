@@ -14,7 +14,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight read whole; Linear current (VX-483 joined as member, High, In Progress); main merged into the branch (`9d69c026f`); this record | DONE (this commit) |
-| 1 | M1 — VX-487 (implementer session A) | NOT-STARTED — the brief is M1 below |
+| 1 | M1 — VX-487 (implementer session A) | IN-PROGRESS — the live status is "M1 RECORD" at the end of this file; ONE FORK raised (F-M1-1, not built) |
 | 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | NOT-STARTED — the briefs are M2/M3 below |
 | 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | NOT-STARTED |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | NOT-STARTED |
@@ -156,3 +156,74 @@ slot whole (mv back, same inodes; rule 21's notice once at the next plain launch
   vault read at unlock); (iii) a dedicated "unlock sync" door on the locked row.
 - **M2 — the locked row's new words are PROVISIONAL, hers** (drafted in the M2 record at build time).
 - **M2 — the Account…-does-nothing disposition** (written at build time; fix only if trivial).
+
+## M1 RECORD (implementer session A — Opus, xhigh)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** F-M1-1 below — the act-side hold surviving the act's own
+REOPEN — is a FORK for the architect, NOT BUILT (it needs a seam the brief does not name). No `xcodebuild test`, no stage,
+no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not built (OPEN ITEMS above).
+
+### LIVE STATUS (per piece; PENDING = unverified)
+- Piece R — this record skeleton + the preflight read whole (CLAUDE.md + canon, this file, the kickoff, the resiliency
+  protocol, CastleRules WHOLE, SyncSpec WHOLE, the named code, the planted test worlds): DONE (this commit).
+- Piece 0 — the headless harness (not durable — this session's scratchpad `m1-harness`; the VX-329 U3 recipe pointed at
+  this worktree): IN-PROGRESS — baseline on the pre-fix tree PENDING.
+- Piece 1 — the pins that compile on the pre-fix tree (pin 1 core; pin 2 + pin 4's guard, app/planted), committed RED
+  before any fix: NOT-STARTED.
+- Piece 2 — fix (a): NOT-STARTED — the settled design below.
+- Piece 3 — fix (b) + its seams + pins 3 and 5: NOT-STARTED — the settled design below.
+- Piece 4 — the behavioral reverts (named below, each run on a committed tree): NOT-STARTED.
+- Piece 5 — evidence (core protection suites debug + release; the harness; build-for-testing Mac + iOS): NOT-STARTED.
+- Piece 6 — the close (this record final; the run table's row 1): NOT-STARTED.
+
+### THE DESIGN (as built — the brief's seams; the one fork is F-M1-1)
+- **(a)** `CommonSteps.holdSyncKeys`'s castle + Touch ID arm ends `holdInSession(held, …)` (was `nil`): the act just
+  handled the keys; the Touch ID item is still written exactly as before and the silent item still goes.
+- **(b)** ONE PRESS, BOTH GATED READS. Two app-level protocols beside the Keychain leaves (the core's `CustodyLeaf` /
+  `SyncKeysLeaf` untouched — LocalAuthentication stays out of the core): a custody leaf whose Touch ID read HANDS ON the
+  `LAContext` that read evaluated (taken ONCE — nil after, nil when the read did not open), and a sync-keys leaf that READS
+  ITS TOUCH ID ITEM RIDING a press already evaluated (the context passed through `kSecUseAuthenticationContext`, with
+  `interactionNotAllowed` set so the second read can NEVER show UI — see the Apple-facts note). `pressTouchID` takes the
+  press right after the custody read (whatever the open does next), and after `.opened` of a library whose RECORD names an
+  account (the same truth `NewRoadSyncKeyProvider.currentKeys` reads) reads that account's Touch ID sync-keys item riding
+  the press and holds it in session memory; the press is invalidated at the end of `pressTouchID` on every path. A
+  failed, absent or throwing read is LOGGED and the library opens all the same (never hostage); an unbound library reads
+  nothing. Typed and quiet roads untouched ((c)).
+- **Apple facts (the repo's `notes/plans/vx-266/second-opinion-apple-facts.md` §11 + one read-only lookup this session):**
+  SecItem.h — "If the specified context has been previously authenticated, the operation will succeed without asking user
+  for authentication" [Doc, high]; DTS (forum 655966) — a context "gets authenticated the first time you use it, and
+  subsequent uses can reuse that authentication" [DTS]. LAContext.h — `interactionNotAllowed` with
+  `kSecUseAuthenticationContext` "has the same effect as … kSecUseNoAuthenticationUI … fail with
+  errSecInteractionNotAllowed instead of displaying the authentication UI" [Doc]. NOT FOUND anywhere: a statement about
+  `interactionNotAllowed` on an ALREADY-authenticated context (the docs speak only of suppressing UI). A counter-report
+  (forum 812733, `.userPresence`, iOS 17) saw a second prompt per `kSecMatchLimitOne` read on one context; an iOS 26.1+
+  hang report (forum 814261) on a second key access close after a Face ID prompt. **FOR THE REHEARSAL:** one prompt is
+  guaranteed by construction; if after her one Touch ID press the row still says locked and the protection log line
+  `road: the Touch ID unlock's sync-keys read …` names `-25308` (errSecInteractionNotAllowed), the OS refused the reuse
+  under the flag — the alternative (drop the flag, accept a possible second prompt) is HERS/the architect's, not built.
+  VM-8 (the phone, Face ID) should re-check the same line.
+
+### F-M1-1 — FORK (STOPPED, NOT BUILT): the act-side hold dies at the act's own REOPEN in the app
+- **Mechanism (traced in code):** every RE-KEYING act on the new road — a crossing (Use Castle · Use Standard · Replace
+  All Keys: `AppBootstrap.crossOnNewRoad` :1070), a join across postures and every follow (`accountActOnNewRoad` :1144,
+  `request.shown.rekeys`) — runs through `reopenAround` (:1120), which ends `beginOpening(unlockedKey:)` (:1132) →
+  `roadInputs.compose()` (:233) → `RoadInputs.live`'s `makeSystem` (`ProtectionOpenRoad.swift` :659) →
+  `ProtectionSystem.live` → `ProtectionSystem.init` mints a FRESH `KeychainSyncKeysLeaf(scope:)` (`ProtectionSystem.swift`
+  :63), whose session memory is an instance dictionary (`KeychainSyncKeysLeaf.swift` :30) — EMPTY. The reopened session
+  (`ProtectionRoadSession(system: ctx.system, …)`, `ProtectionOpenRoad.swift` :549) is what `newRoadSyncKeys.attach` hands
+  the engine (`AppBootstrap.swift` :331). So (a)'s hold — and the existing Always-ask arm's, and the follow's — reaches
+  the engine ONLY for acts that do NOT reopen (turning sync on in Castle, a same-posture join: U1's acts on the open
+  session; the key doors' `holdSyncKeysForTheSession`). HER PATH (Start fresh → JOIN her Castle account from a Standard
+  library = a join across postures) reopens: with (a)+(b) built, sync stays locked after the join until the next Touch ID
+  moment (a relaunch, or a lock + unlock). Tonight's rehearsal (quit → relaunch → Touch ID) and her retry (relaunch →
+  Touch ID) both go through (b), so this does not block the gate — but her AIR crossing (Start fresh → join) will say
+  "Sync locked" right after the join until she locks/relaunches and presses Touch ID.
+- **Why the planted tests never saw it:** `PlantedRoad.system()` shares ONE planted sync-keys leaf across every
+  composition (`ProtectionOpenRoadPlantedTests.swift` :36–41), so session memory survives a planted "reopen".
+- **Options (the architect rules; none built):** (i) the bootstrap composes every system of the process over ONE
+  `KeychainSyncKeysLeaf` per scope (`RoadInputs.live` holds it, `ProtectionSystem.live(variant:session:syncKeys:)` — the
+  VX-423 one-refresh-authority shape); "gone at a relock" still holds through `ProtectionRoadLock.dropSessionMemory`, "gone
+  at a crash" by the process. Smallest and most spec-defensible (rule 15's custody unchanged; P-VX307-U1-3's design
+  reached). (ii) `reopenAround` carries the account's held keys from the old session's leaf into the reopened one (a
+  hand-off at the one seam; narrower lifetime, more ad hoc). (iii) accept: re-keying acts leave sync locked until the
+  next Touch ID moment, said by M2's row (the record's (c)-adjacent residue).
