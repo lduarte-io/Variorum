@@ -2,8 +2,10 @@
 
 **STATUS: CLOSED 2026-10-23 — MERGED (PR #185, merge `44226636b`) and INSTALLED on the Pro (0.10 (9162)); the fix built and live-proven on the throwaway at her corpus's scale; THE LADDER CLOSED at
 its cap (three fresh `opus-reviewer` rounds: r1 1 MAJOR, r2 1 MAJOR, r3 1 MAJOR — each fixed by a fresh implementer, the
-final round's fixes checked line by line by the orchestrator); the closing Mac + phone runs next, then the closeout, the
-PR merge and the Pro install.** Branch `vx-494-catchup-hang`, worktree `~/dev/variorum-vx-494`, the Pro. **The cast
+final round's fixes checked line by line by the orchestrator); the closing Mac + phone runs, the closeout ledgers, the PR
+merge and the Pro install all DONE (LIVE STATUS rows 6–7). A post-merge FABLE cold review at her word (2026-10-23 morning,
+the window session) returned 0 BLOCKER · 0 MAJOR · 2 MINOR · 3 NIT and independently re-proved R3-1's shield —
+`notes/plans/fixes/vx-494-fable-cold-review.md` carries the findings and dispositions.** Branch `vx-494-catchup-hang`, worktree `~/dev/variorum-vx-494`, the Pro. **The cast
 (R-494-1, her waiver of the Fable rule for `Sync/`):** Opus orchestrates and writes the `Sync/` fix; a fresh
 `opus-reviewer` runs every ladder round; ladder fixes go to a fresh `opus-implementer` per round (normal
 /architect-phase discipline, her word ~04:45). The session moved Fable → Opus 5.5 at her word ~03:40 ("fable kept

@@ -115,8 +115,8 @@ rules this night added to `.claude/settings.local.json` (the helper, `cliclick`,
   (9162)** (step 2 above). The dev slot was restored whole at 06:03 (your dev library opened quietly with the
   October-20 hold standing). The throwaway still holds test user A's generated 110k-row book and a Standard vault under
   the throwaway passphrase — yours to delete with the project.
-- **The dev slot:** PENDING(restored whole — the walk library removed, your 9 dev files back by `mv`, the plain
-  relaunch's notice once — or, if a step needed you, exactly what remains).
+- **The dev slot:** RESTORED WHOLE at 06:03 (the walk libraries and their backups removed, your 9 dev files back by
+  `mv` — same inodes, the plain relaunch's rule-21 notice once; the October-20 hold banner standing). Nothing remains.
 
 ## APPENDIX A — the Air install prompt (paste-ready FOR HER, for a Claude session ON the Air)
 
@@ -126,7 +126,7 @@ explicit say-so. The marker-14 mirror deploy is DONE; the Pro session handles ev
 Air's /Applications refresh, nothing more.
 
 Repo ~/dev/variorum, branch main: git pull --ff-only and verify the tip CONTAINS BOTH the VX-488 merge (e63602bac)
-and the VX-494 merge (PENDING-SHA) — `git merge-base --is-ancestor <sha> HEAD` for each; refuse to build from
+and the VX-494 merge (44226636b) — `git merge-base --is-ancestor <sha> HEAD` for each; refuse to build from
 anything older. Variorum is QUIT on this Mac and must stay quit (pgrep -fl 'Variorum.app/Contents/MacOS' prints
 nothing; if an instance appears, STOP and tell her — never quit or kill it yourself). The A1 safety copy is ALREADY
 taken (Backups/safety-copies/variorum-vx329-air-a1-20261022T2330Z) plus her Desktop copy — do NOT touch the store,
@@ -152,7 +152,7 @@ do not launch the app.
 
 ```
 /architect-phase vm-8 — the phone's Castle catch-up. The Macs crossed to 0.10 (VX-329 PR #183, the VX-488 window
-hotfixes PR #184, and the VX-494 first-catch-up fix PR #<PENDING>; marker 14 deployed); my phone's build deliberately
+hotfixes PR #184, and the VX-494 first-catch-up fix PR #185; marker 14 deployed); my phone's build deliberately
 refuses to sync until this lands — speed matters. Workspace: a main-based worktree (~/dev/variorum-vm-8); VM-5
 retired the mobile branch, my phone runs main-built installs. Read first, in full: notes/MobileSoul.md (PL-47..PL-51
 — PL-51 is this run's charter), the VM-8 ticket + its comments, notes/CastleRules.md WHOLE, notes/SurfaceContracts.md
