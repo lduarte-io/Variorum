@@ -479,8 +479,14 @@ PROVISIONAL and HERS (OPEN ITEMS).
 THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the round landing against the throwaway).
 
 ### LIVE STATUS (per piece; PENDING = unverified)
-- Piece 0 — the harness (shared with M2's): NOT-STARTED.
-- Piece 1 — the fix + its pins (three arms + the composition): NOT-STARTED. The settled design (below).
+- Piece 0 — the harness (shared with M2's — its Piece 0): DONE.
+- Piece 0b — the pins that compile on the pre-fix tree, committed BEFORE the fix: DONE (this commit).
+  `App/Variorum/VariorumTests/SyncWalkFenceTests.swift` on the pre-fix tree (the same run as M2's): ARM 1
+  `withNoWalkSwitchTheDevStoreNeverSyncs` ✔ (a GUARD by design — the production composition in this process's world, no
+  walk switch: `.dev` never syncs, `.real` may; green on both sides); `theDerivationReadsTheLaunchsLiftOnlyInDebug` ✘
+  (no `#if DEBUG` arm before the assignment — one undivided line); `theRetiredCredentialSweepGuardsOnTheRealStoreNeverTheLift`
+  ✘×2 (the guard reads `sync.allowsSync`).
+- Piece 1 — the fix + the new-seam pins (the lift's three arms, pure): NOT-STARTED. The settled design (below).
 - Piece 2 — the behavioral reverts (named here BEFORE they run): NOT-STARTED.
 - Piece 3 — evidence: NOT-STARTED.
 
