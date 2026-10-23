@@ -217,8 +217,11 @@ enum PullStage {
     static func rows(_ db: Database) throws -> [SyncPulledRow]? {
         let decoder = JSONDecoder()
         var rows: [SyncPulledRow] = []
-        for payload in try String.fetchAll(
-            db, sql: "SELECT payload FROM \(SyncPullStageSchema.table) ORDER BY server_seq") {
+        // Ladder R3, R3-5: each payload is decoded as the cursor reads it, so the stage's JSON (~79 MB at the live
+        // proof's ~110k rows) is never held whole beside the decoded batch — the phone's memory (VM-8).
+        let payloads = try String.fetchCursor(
+            db, sql: "SELECT payload FROM \(SyncPullStageSchema.table) ORDER BY server_seq")
+        while let payload = try payloads.next() {
             guard let row = try? decoder.decode(SyncPulledRow.self, from: Data(payload.utf8)) else { return nil }
             rows.append(row)
         }
