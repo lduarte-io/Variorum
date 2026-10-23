@@ -14,7 +14,7 @@ say `Part of VX-494`; NO trailers.
 | 0 | Kickoff: preflight read whole; worktree + branch; in-flight row on main; VX-494 In Progress | DONE |
 | 1 | The evidence re-read (the morning's unified log + read-only server probes) — THE EVIDENCE below | DONE (this commit) |
 | 2 | Reproduction at scale (headless fake-server scale test; then the throwaway live, her sign-in) | IN-PROGRESS — the stage window is OPEN (claim `vx-494`, 03:48 MDT, 240 min): throwaway user A RESET to virgin (the §8 precedent — the 21 data tables, `device_cursor`, `purged_row`, `key_vault`, the `kp:` secret; entitlement kept; verified 0/0/0, entitlement 1; ref-guarded); the dev slot's 9 top-level files ASIDE by `mv` into `Variorum-dev-aside-vx494/` beside the slot (same inodes); the walk build (`DerivedData/vx494`, the branch tip) launched with the throwaway env mapped to `VARIORUM_WALK_*`, verified in-process by `ps eww` (2 vars, the throwaway ref, no production ref) — `A4 FENCE (VX-483): LIFTED`, fresh library `1eb1d88c` CREATED in Standard (silent custody). Waiting on HER sign-in as A + the set-up. RESTORE (owed at the window's end): sign the walk session OUT (O-B2), quit, remove the walk library's files + its Backups subfolder, `mv` the 9 back, plain relaunch (rule 21's notice once) |
-| 3 | The mechanism named (trace) | PENDING — H1 below is the leading reading, not yet proven by reproduction |
+| 3 | The mechanism named (trace) | DONE — H1 CONFIRMED by her real crossing (HER EXPERIMENT'S RESULT): the first catch-up commits when left alone (11.6 min download + 4.3 min save); every morning failure was an interruption of an all-or-nothing round |
 | 4 | Fix + red-on-old pin | NOT-STARTED |
 | 5 | Ladder | NOT-STARTED |
 | 6 | Closing runs, PR, merge | NOT-STARTED |
@@ -61,6 +61,29 @@ which is why the same build synced clean there.
 
 **OPEN QUESTION Q1 (the reproduction answers it):** left alone, does the one apply transaction over ~108k rows commit,
 and how long does it hold the writer? Nobody has observed it. If it does not commit, there is a second mechanism.
+
+## HER EXPERIMENT'S RESULT — Q1 ANSWERED: THE CROSSING LANDED (2026-10-23, her real app, 0.10 build 9093)
+
+Left alone (the idle lock Never, the app open, the Mac held awake), the first catch-up on her real corpus COMMITTED:
+- **The download:** her Touch ID unlock 03:56:21 (sync keys loaded) → the empty end-of-feed window at **04:07:57**
+  — **11 min 36 s**, ~33 requests/min early rising to ~180/min at the end (the per-call cost falling as the cursor
+  advanced), every request 200.
+- **The save (the one apply transaction):** 04:07:57 → ~04:12:15 — **~4 min 20 s at ~100% of one core**, the store's
+  WAL growing steadily to 87 MiB (sampled every ~20 s: 50 → 57 → 61 → 71 → 75 → 77 → 79 → 85 → 87), RSS ~280 MB, no
+  network; the Library showed "Nothing matches" and the row "Syncing…" throughout (her screenshot, 04:09) — nothing
+  is visible until the one commit.
+- **The proof of commit:** at 04:12:16–18 ~20 small successful requests (the push, the janitor, a follow-up round),
+  then quiet at 0% CPU; the server's `device_cursor` for her Pro (`7e7609fa…`) reads **`last_seq` 229159, `seen_at`
+  10:12:17 UTC** — a later round reporting the committed cursor (229159 = her tenant's head, `commit_point`'s max).
+- **Nothing uploaded:** no row of her tenant on any table sits above 229159 — the fresh library had nothing left to
+  push after the merge (its starter furniture met her copies). Read-only probes only; nothing written to production.
+
+**What it settles:** there is NO second mechanism — H1 is the whole story. A from-zero catch-up of her corpus needs
+~16 uninterrupted minutes (11.6 downloading + 4.3 saving), all silent, all-or-nothing — longer than Castle's default
+10-minute idle lock, so with the default it could never land, and every quit restarted it from zero. The save alone
+also holds the store's writer ~4 minutes (~420 rows/s): a lock or quit DURING it would cost the whole download again
+under today's code. D2 below removes the re-download; the save's own speed (per-row FK introspection, the search
+index's triggers, the per-row bookkeeping) is a measured target for the headless scale test, recorded as D4.
 
 ## THE FIX DESIGN (PROPOSED — built after her experiment's result; every product-visible edge marked)
 
