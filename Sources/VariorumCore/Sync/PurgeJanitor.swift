@@ -208,9 +208,9 @@ public struct PurgeJanitor: Sendable {
                     // 'purged'-refused).
                     let family = try PurgeFamily.expand(db, roots: [root])
                     try PurgeFamily.deleteLocal(db, family: family, stamp: self.nowStamp())
-                    let scan = try Self.stateValue(db, "last_purge_seq")
+                    let scan = try Self.ledgerScanPoint(db)
                     if grantedSeq > scan {
-                        try Self.setStateValue(db, "last_purge_seq", grantedSeq)
+                        try Self.setStateValue(db, Self.ledgerScanPointKey, grantedSeq)
                     }
                     return family.rows.count
                 }
@@ -275,7 +275,7 @@ public struct PurgeJanitor: Sendable {
         // standalone scheduler entry is the one that must never be naked.
         let (keyID, signer) = try await preflight()
         let (scanPoint, acknowledgedFloor) = try await database.read { db in
-            (try Self.stateValue(db, "last_purge_seq"),
+            (try Self.ledgerScanPoint(db),
              try Self.stateValue(db, "purge_floor_acknowledged"))
         }
         let page = try await signer.call(rpc: "sync_purge_ledger") { proof in
@@ -300,7 +300,7 @@ public struct PurgeJanitor: Sendable {
                 count = family.rows.count
                 try PurgeFamily.deleteLocal(db, family: family, stamp: stamp)
             }
-            try Self.setStateValue(db, "last_purge_seq", maxSeq)
+            try Self.setStateValue(db, Self.ledgerScanPointKey, maxSeq)
             return count
         }
     }
@@ -812,14 +812,25 @@ public struct PurgeJanitor: Sendable {
         }
         try await database.write { db in
             try Self.setStateValue(db, "purge_floor_acknowledged", page.floor)
-            let scan = try Self.stateValue(db, "last_purge_seq")
+            let scan = try Self.ledgerScanPoint(db)
             if page.floor > scan {
-                try Self.setStateValue(db, "last_purge_seq", page.floor)
+                try Self.setStateValue(db, Self.ledgerScanPointKey, page.floor)
             }
         }
     }
 
     // MARK: - Local state helpers
+
+    /// THE LEDGER SCAN POINT's one name: how far this device has reconciled the server's purged-ids ledger (the
+    /// memo's §2). Every ledger advance moves it — the pre-round reconciliation, the sweep's own purges, the
+    /// returner's reload — and it only ever grows. `PullStage` keys a stage's identity on it (VX-494 ladder R2,
+    /// R2-1) through this name and `ledgerScanPoint(_:)`, never a copy of either (ladder R3, R3-4).
+    static let ledgerScanPointKey = "last_purge_seq"
+
+    /// The scan point as every reader reads it — an absent row is 0 (`stateValue`'s rule).
+    static func ledgerScanPoint(_ db: Database) throws -> Int64 {
+        try stateValue(db, ledgerScanPointKey)
+    }
 
     private static func stateValue(_ db: Database, _ key: String) throws -> Int64 {
         try String.fetchOne(

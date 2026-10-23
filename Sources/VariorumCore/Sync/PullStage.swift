@@ -67,7 +67,8 @@ enum PullStage {
         /// F1 (1): the stage format and the lockstep marker of the build that wrote it.
         var format: Int
         var lockstep: Int
-        /// R2-1: the purge ledger's scan point the stage was fetched under. NON-optional on purpose: a header written
+        /// R2-1: the purge ledger's scan point the stage was fetched under (`PurgeJanitor.ledgerScanPoint`, read
+        /// through the janitor's own name and reader — ladder R3, R3-4). NON-optional on purpose: a header written
         /// before the stage named it lacks the key, so its synthesized decode throws, `readHeader` reads it as
         /// unreadable, and `plan` discards the stage — never resumed.
         var ledgerScanPoint: Int64
@@ -78,17 +79,6 @@ enum PullStage {
                 && format == PullStage.format && lockstep == SyncSchema.lockstepVersion
                 && self.ledgerScanPoint == ledgerScanPoint
         }
-    }
-
-    /// R2-1 — the purge ledger's scan point: `PurgeJanitor`'s `last_purge_seq`, an absent row read as 0 exactly as
-    /// the janitor reads it. Every ledger advance moves it (the pre-round reconciliation, the sweep's own purges, the
-    /// returner's reload), and it only ever grows.
-    static let ledgerScanPointKey = "last_purge_seq"
-
-    static func ledgerScanPoint(_ db: Database) throws -> Int64 {
-        try String.fetchOne(
-            db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [ledgerScanPointKey])
-            .flatMap(Int64.init) ?? 0
     }
 
     /// Ladder R1, N2 — THE ONE-WRITER BELT's refusal: the committed cursor moved while this round was downloading
@@ -141,7 +131,8 @@ enum PullStage {
         let header = try readHeader(db)
         if let header,
            header.belongs(
-               base: base, keyID: keyID, deviceID: deviceID, ledgerScanPoint: try ledgerScanPoint(db)),
+               base: base, keyID: keyID, deviceID: deviceID,
+               ledgerScanPoint: try PurgeJanitor.ledgerScanPoint(db)),
            header.seq > base {
             return .resume(from: header.seq)
         }
@@ -179,7 +170,7 @@ enum PullStage {
         _ db: Database, _ window: [EncodedRow], base: Int64, keyID: String, deviceID: String,
         from windowSince: Int64, through seq: Int64
     ) throws {
-        let scanPoint = try ledgerScanPoint(db)  // R2-1: read in this write's own transaction
+        let scanPoint = try PurgeJanitor.ledgerScanPoint(db)  // R2-1: read in this write's own transaction
         switch try headerRow(db) {
         case .absent:
             guard windowSince == base, try !hasStagedRows(db) else { throw StageMovedUnderRound() }
@@ -214,7 +205,8 @@ enum PullStage {
     ) throws {
         guard case .readable(let header) = try headerRow(db),
               header.belongs(
-                  base: base, keyID: keyID, deviceID: deviceID, ledgerScanPoint: try ledgerScanPoint(db)),
+                  base: base, keyID: keyID, deviceID: deviceID,
+                  ledgerScanPoint: try PurgeJanitor.ledgerScanPoint(db)),
               header.seq == reach
         else { throw StageMovedUnderRound() }
     }
