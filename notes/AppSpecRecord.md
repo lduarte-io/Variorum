@@ -729,3 +729,44 @@ MOBILE PARITY: `notes/MobileSoul.md` PL-51. HERS AT THE WINDOW: the marker-14 de
 pg_temp belt), both Macs' installs, her rounds, the release 0.10, the delta brief to the site agent, the
 throwaway's deletion. Next: VX-470 leads the next run; VX-212 phase 6 right after the merge at her call; VM-8 on
 the phone.
+
+## 2026-10-23 — VX-494 (the 0.10 window's blocker: the large-corpus first catch-up; PR #185, merge 44226636b)
+
+**The effort (the full record is `notes/plans/fixes/vx-494-catchup-hang.md` — THE EVIDENCE, HER EXPERIMENT'S RESULT,
+THE FIX DESIGN, the live proof, the three ladder rounds' FINAL CALLS and fix records; the ladder
+`notes/plans/fixes/vx-494-ladder-round-1.md` / `-round-2.md` / `-round-3.md`).** Run under `/architect-phase` overnight,
+kickoff to merge in one night; the session moved Fable → Opus 5.5 at her word ~03:40 ("fable kept hitting the
+safeguards"), and her rulings set the cast — **R-494-1** "yeah go with opus - i think fable will almost certainly just
+hit a bunch of safeguards" (Opus writes `Sync/`, a fresh `opus-reviewer` per round), **R-494-2** the scope ("we can fix
+1-3 tonight and then i'll do the other two once the castle switch is fully done" — VX-495 the server query and VX-496
+the progress line minted for after), **R-494-3** the night ("I want everything to continue forward because I am now
+going to sleep"), and her "use normal /architect-phase discipline".
+
+**What was true:** there was no hang. The morning's server reading ("one pull call, then nothing") was the 13j rule's
+blind spot — the device cursor is stamped only by a round's first window. The app's own log showed every round paging
+her whole feed (~108k rows, ~550 calls of 200 rows, ~12 minutes) and being cut off before its one save: the 10-minute
+Castle idle lock at 02:55:16 (~50 s before the head), then two quits. **Left alone, her Pro's crossing landed at 04:12**
+(11 min 36 s of download, ~4 min 20 s of save).
+
+**What shipped (SyncSpec §3/§5, AppSpec §7 — the contract lines in place):** **D1** — the pull window its own size,
+2,000 rows (the server's served query seq-scans and sorts every eligible row per call, so page size barely moves a
+call's cost: 200 rows 2.9 s, 2,000 rows 1.5 s at `since = 0` on her data, under the 8 s statement timeout); **D2** —
+the download staged in the local-only `sync_pull_stage` (v1_32) so an interrupted round resumes, the stage's identity
+the committed cursor + corpus key + device + stage format + lockstep marker + purge-ledger scan point, kept contiguous,
+an undecodable row discarding it; **D3** — retiring a chain cancels its download (never its save — ladder R3). **The
+live proof** on the throwaway at her scale (~110k generated rows): the whole download in 56 windows / ~70 s; a
+`kill -9` DURING THE SAVE, then a relaunch that re-downloaded nothing, saved from the stage and committed at the head.
+
+**The ladder (three fresh `opus-reviewer` rounds, the cap):** r1 1 MAJOR (F1 — a stage wedge on a drifted or
+undecodable row) + 5 MINOR + 4 NIT; r2 1 MAJOR (R2-1 — a staged row escaped the purge ledger and could resurrect a
+purged note) + 3 MINOR + 2 NIT; r3 1 MAJOR (R3-1 — D3's cancel reached the save, so a lock would have discarded
+minutes of work) + 1 MINOR + 3 NIT. Each round's fixes by a fresh `opus-implementer` with red-on-old pins and
+behavioral reverts; the final round's checked line by line by the orchestrator. VX-493's stranded-flag claim REFUTED
+in code (the row reads `isConfigured` first; a lock replaces the services) — its real defect was D3's.
+
+**Born:** VX-495 (the server query, High) · VX-496 (the progress line, High) · VX-497 (the save's duration, Medium) ·
+VX-498 (the Standard set-up's stale "Sync locked", Low). **Hers (QUESTIONS #239):** local-only migrations vs. plain-text
+exports (F6); does a resuming device count as "seen" (R2-3); the stage's disk slack (O-2: 79 → 150 MB); the Standard
+join's Touch ID prompt (O-1); VX-492/493's closures; Pre-launch on 495–497; the belt's words; whether a lock should wait
+for a save in flight (R3-1); VX-498. MOBILE PARITY: the phone inherits all three through the shared engine — VM-8's
+acceptance measures its first catch-up (its save is the number to watch). canon-size 125,087 / 150,000.

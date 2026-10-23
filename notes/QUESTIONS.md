@@ -3521,3 +3521,31 @@ gets her face instead of the keychain's quiet heal — accepted as flagged; requ
 absence would wedge the real hand-swap case) · **the VX-465 counts wording** (earlier device-ID eras' pairs LIST
 under a library but never COUNT as this Mac's — should the counts' per-era meaning say itself? A Low Wording
 ticket carries it). Status: PENDING her read; everything above ships in 0.10 as built.
+
+#239 — **THE VX-494 BUNDLE (the binding record is `notes/plans/fixes/vx-494-catchup-hang.md` — HER RULINGS R-494-1…3,
+the three ladder rounds' FINAL CALLS, THE LIVE PROOF's observations).** Each yours; nothing below was built past what
+the ladder confirmed. **(a) F6 — local-only migrations and plain-text exports:** v1_32 (the pull stage, local-only —
+the export drops the table) makes every plain-text export written by 0.10 (9093) un-importable by the fixed build,
+because T-8's bring-in requires `applied == known` (P-VX309-U1b-7, PROVISIONAL). Should LOCAL-ONLY migrations count
+toward "this build's export"? (Reach today: exports made on your Pro since the 9093 install.) **(b) R2-3 — the purge
+horizon's "seen":** a resumed round reports no device cursor (the 13j rule — only a committed cursor is ever
+reported), so a device that only ever resumes and never completes stops refreshing `seen_at` and leaves the purge
+horizon after 60 days; R2-1's fix discards the stage the moment any purge lands, so the residue is narrow. Does an
+actively resuming device count as "seen"? **(c) O-2 — the stage's disk slack:** a fresh device's first catch-up leaves
+free pages about the size of its library (the proof: 79 MB → 150 MB), and its backups carry them until growth reuses
+them (no VACUUM anywhere; VACUUM can renumber rows behind the search index). Accept for 0.10 and ticket a compaction
+design, or hold the Air until it exists? **(d) O-1 — the Standard join's Touch ID prompt:** joining in Standard raised
+a system prompt ("Variorum Dev is trying to Unlock your Variorum library"); cancelling it, the join still completed
+(and the library reopened quietly). Intended — and what does the prompt guard? **(e) VX-492 / VX-493:** VX-492 (the
+idle lock during a first catch-up) — with the download resumable and ~70 s long, close as resolved by VX-494, or hold
+the lock while a first catch-up runs? VX-493 (a lock strands "Syncing…") — RE-TRACED: the row cannot strand (a lock
+replaces the services; the face reads `isConfigured` first); the real defect, the retired round downloading on in the
+background, is VX-494's D3 — close as fixed-by-VX-494? **(f) Pre-launch** on VX-495 (the server query), VX-496 (the
+progress line), VX-497 (the save's duration). **(g) The belt's words:** if the one-writer belt ever refuses a round
+(`CursorMovedUnderRound` / `StageMovedUnderRound`), the sync row shows the error's text until the follow-up round heals
+it (one non-looping follow-up, R2-6) — keep it internal-sounding, or word it? **(h) R3-1 — a lock during a first
+catch-up's SAVE:** the save now runs shielded from a retire, so a Castle lock that lands during it waits for the save
+(minutes) before the lobby — exactly as before this branch (the lock waits on the store's writer; the P-VX308-U4-2
+precedent). Keep, or should a lock pre-empt the save (it rolls back and redoes at the next unlock — no re-download, the
+stage survives)? **(i) VX-498** (filed from the walk, Low): after turning on sync in Standard, the row kept "Sync
+locked" until a relaunch. Status: OPEN — hers at the window's sitting.
