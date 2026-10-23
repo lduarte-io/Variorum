@@ -14,7 +14,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight read whole; Linear current (VX-483 joined as member, High, In Progress); main merged into the branch (`9d69c026f`); this record | DONE (this commit) |
-| 1 | M1 — VX-487 (implementer session A) | IN-PROGRESS — the live status is "M1 RECORD" at the end of this file; ONE FORK raised (F-M1-1, not built) |
+| 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end) — FORK F-M1-1 raised, NOT BUILT, the architect's to rule; the app suites are the stage batch's (listed there) |
 | 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | NOT-STARTED — the briefs are M2/M3 below |
 | 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | NOT-STARTED |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | NOT-STARTED |
@@ -224,8 +224,55 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
     .isInvalidated`) and pin 5 ✘×3 (every leg's "the press ended"); pins 2, 4 ✔.
   - **R6** (`NewRoadSyncKeyProvider.swift` — the provider also reading the Touch ID item): `✘ … with 1 issue` — pin 4 ✘
     ("an error was expected but none was thrown": the provider read the item); pins 2, 3, 5 ✔.
-- Piece 5 — evidence (core protection suites debug + release; the harness; build-for-testing Mac + iOS): NOT-STARTED.
-- Piece 6 — the close (this record final; the run table's row 1): NOT-STARTED.
+- Piece 5 — evidence: DONE (the final tree = `96455fb2c`'s product files; every run foreground, in sequence):
+  - THE CORE — the protection + auth/account set (every suite type under `Tests/VariorumCoreTests/Protection` +
+    `AccountBindingGateTests`, `AccountLifecycleTests`, `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`,
+    `SupabaseTransportSessionTests`; one `--filter`, 101 suite names): debug **`✔ Test run with 531 tests in 101 suites
+    passed`**; release (`swift test -c release`, the same filter) **`✔ Test run with 507 tests in 97 suites passed`**; 0
+    `skipped:` lines either; pin 1's suite ran green in BOTH. (The 24-test / 4-suite gap is the DEBUG-only suites, as at
+    VX-329 U3.)
+  - THE HARNESS (debug only — the app's protection suites name DEBUG walk machinery): **`✔ Test run with 385 tests in 65
+    suites passed`** (baseline 381/64 + this unit's 4).
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx488-m1
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `-scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath App/Variorum/DerivedData/vx488-m1-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`**
+    — the new `TouchIDPressContext.swift` compiled in both; no warning in any file this unit touched (both logs grepped).
+- Piece 6 — the close: DONE (this commit).
+
+**THE PINS (all five dispositioned):**
+1. FIXED — pin 1 `SyncKeysSessionHoldTests` (core): red on the pre-fix tree and under R1; green after (a), debug + release.
+2. FIXED — pin 2 `TouchIDUnlockSyncKeysTests.pin2_…` (planted): red on the pre-fix tree and under R2; green after (b).
+3. FIXED — pin 3 `…pin3_onePressNeverTwoPrompts_…`: red under R2, R3 (the two-prompt load — pin 2 stays green there, so
+   pin 3 alone catches a second prompt) and R5 (the press not ended). It needs the new seam to compile, so its red is
+   the behavioral reverts', not the pre-fix tree's.
+4. NOT "ALREADY PINNED" — the brief's claim did not hold: no test anywhere named `NewRoadSyncKeyProvider` (searched
+   `App/Variorum/VariorumTests`, `VariorumMobileTests`, `Tests/`). Written here as a GUARD (green on both sides by design —
+   the provider is unchanged): `…pin4_theProviderReadsSessionThenSilentAndNeverTheTouchIDItem`; its teeth shown by R6.
+5. FIXED — pin 5 `…pin5_aFailingOrAbsentSyncKeysReadNeverFailsTheUnlock`: a guard by nature (the pre-fix press reads
+   nothing, so it cannot fail one); its teeth shown by R4 (a hostage load) and R5; its "the read was tried" leg keeps the
+   never-hostage claim non-vacuous (red under R2).
+
+**PROVISIONALs:** none — no product behavior was decided: the brief ruled the load (Touch ID unlock, bound library,
+never hostage) and the one prompt; the typed roads are untouched ((c), her OPEN ITEM).
+
+**OBSERVATIONS (routed, not fixed here):**
+- O-1 (pre-existing, unchanged): an act IN FLIGHT at a Touch ID unlock resumes in the open's settle, BEFORE the load —
+  and its `holdSyncKeys` / `syncMaterial` read the Touch ID sync-keys item CONTEXT-LESS (each a prompt of its own on the
+  real leaf). So a crash mid-act followed by a Touch ID unlock can still prompt twice. Rare (an act in flight); the
+  executor's leaves are core-protocol, so riding the press there is a core seam change — the architect's call whether it
+  is worth one.
+- O-2 (for the rehearsal): the protection log says what the load did, one line per press —
+  `road: the Touch ID unlock loaded the account's sync keys for the session (sync key xxxxxxxx)` on success; else `…
+  found no Touch ID item …`, `… with no press to ride …`, or `… sync-keys read failed — <the keychain status> …`.
+
+**THE MAC-SUITE LIST (the orchestrator's stage batch — compiled here, the planted ones run headless):**
+`TouchIDUnlockSyncKeysTests` (NEW, harness-green), `RoadLockTests`, `RoadRearmTests`, `ProtectionLobbyModelTests`,
+`RoadKeyDoorRoadTests`, `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests` (harness-green — they drive the
+press or the planted leaves whose seams changed), plus the Mac-target suites over the same seams `ProtectionCrossingRouteTests`,
+`ProtectionRoadRouteTests`, `ProtectionSystemCompositionTests`, `ProtectionFactsGathererTests`, `ProtectionRule27FaceTests`,
+`PreDesignFaceTests`, `PreDesignStoreRefusalTests`, `CopyDoorsQuietProbeTests`, and the REAL-keychain suites over the two
+leaves (throwaway scopes) `KeychainLeavesTests`, `ProtectionKeychainFamilyTests`; the phone's `MobileProtectionRoadTests`
+and `MobileProtectionTests` (they name the leaves — compiled in the iOS build-for-testing).
 
 ### THE DESIGN (as built — the brief's seams; the one fork is F-M1-1)
 - **(a)** `CommonSteps.holdSyncKeys`'s castle + Touch ID arm ends `holdInSession(held, …)` (was `nil`): the act just
