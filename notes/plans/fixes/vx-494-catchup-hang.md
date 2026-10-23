@@ -715,6 +715,19 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   them to be up right now" — the two site pages drafted new at her word. Her note: the tester is in Standard, so
   the ⌃⌘L typed-unlock test doesn't apply (the lock door rides Castle's gate row; Standard's quiet road would
   reopen silently) — the reveal-eye check and the words-road passphrase reset are the Standard-side tools.
+  *[removed for publication]*
+  *[removed for publication]*
+  AND never pushed: the set-up arm he met is HONEST (truly his first enrollment), nothing of his exists on the
+  server to lose, and NO product finding stands — the arm, the vault read, and `createVault`'s 409 guard all
+  behaved per design. The remaining item is tester-local (what his Set-a-passphrase door saved vs. what he types);
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  synced comes back when you sign in" holds VACUOUSLY for her: she enrolled the vault on 0.9.8 but no round ever
+  pushed her rows (why is unknown — an empty library, or no round before marker 14 cut 0.9.8 off). The heads-up
+  *[removed for publication]*
+  (Copy full text) before or after Start fresh (the aside in Previous Libraries stays whole); signing in brings
+  back nothing for her.
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
