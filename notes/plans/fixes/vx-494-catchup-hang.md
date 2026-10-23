@@ -168,7 +168,42 @@ trailers.
 
 ### LADDER R3 FIXES — LIVE STATUS (the implementer owns this section)
 
-- (empty — the implementer writes it from its first commit)
+**NOT DONE HERE, by the brief:** R3-2 (the orchestrator's — the STATUS header, LIVE STATUS rows 2/4, the "Sync locked
+until a relaunch" observation's ticket); the record's THE FIX DESIGN D3 line and the handoff's VX-492 line (the
+orchestrator's text — with fix (a) both read true again: a retire costs no download and never the save); her question
+#239 (bundled by the orchestrator). No stage, no app launch, no walk, no `xcodebuild test`, no store or server contact.
+**IN PROGRESS — no revert is in flight.**
+
+Session: a fresh `opus-implementer` (Opus 5.5), 2026-10-23, worktree `~/dev/variorum-vx-494`, headless only. Read in
+full before any code: CLAUDE.md + canon, SyncSpec, the resiliency protocol, this file, `vx-494-ladder-round-3.md`,
+`PullStage.swift`, `SyncEngine.swift` (`pullRound`, the apply plumbing), `SyncScheduler.swift`, `PurgeJanitor.swift`
+(`stateValue` and every reader/writer of `last_purge_seq`: the sweep's own-purge advance, `reconcileLedger`,
+`reonboardFromAccount`), `ResumableCatchUpTests` + its support (`SyncTestHarness`, `FaultInjectingTransport`,
+`GatedSpyTransport`, `ProductionRound`), the round-3 reviewer's probe. Checked myself, not taken from the round: GRDB 7's
+async `SerializedDatabase.execute` (the checkout) runs `Task.checkCancellation()` on entry and its `onCancel` calls
+`db.cancel` (the connection interrupted — the write in flight rolls back); `AppDatabase.applyingRemote` (async) is
+`currentWriter().write`; `StoreBinding.lock()` drops the pool reference, then checkpoints through a synchronous
+`writeWithoutTransaction` on the OUTGOING writer before `close()` — so it queues behind a write already in flight.
+
+**The design, R3-1 fix (a) as the final call states it:** the save (`pullRound`'s one apply transaction) runs in an
+unstructured `Task` the round awaits for its value — the task inherits the round's task-locals (the dependencies) but
+never its cancellation — through ONE named helper beside `applyingRemoteWithDeferredFKs`, so the shield is one line to
+read and one line to revert. Untouched: the between-window `Task.checkCancellation()`, the in-flight network cancel,
+D3's pin, the stage writes (a cancelled window write still drops only that window). Deliberately NOT shielded: the
+empty-window dedupe pass (a short repair-only transaction at head — cancelled, it rolls back with its deferral marker
+standing and re-runs next round; nothing is lost and it is not the long phase) and the push's chunk transactions (the
+round-3 clean bill's lost-ack class).
+
+| # | Item | Plan | Status |
+|---|---|---|---|
+| R3-0 | This status | — | DONE (this commit) |
+| R3-P | The R3-1 pin, committed before the fix | `ResumableCatchUpTests` gains `aRetireDuringTheSaveLetsTheSaveCommit` — the round-3 reviewer's probe scene: A's 12 × 10 corpus pushed; B's round through a `SyncScheduler` (40-row windows); a TEMP trigger on B's connection fires on the first `block` row the SAVE writes (apply mode only) and calls a SQL function that retires the scheduler and waits until the retire is delivered — the lock landing mid-save, deterministically. Expect: the hook fired (non-vacuous), B's cursor == head, the stage empty, one round, not syncing; then production quiescence ⇒ dumps equal. Expected on the tip's product code (`fed71e05b` = HEAD's `Sources/`): RED (`cursor == 0`, the whole download staged — the save rolled back) | NOT-STARTED |
+| R3-1 | Fix (a): the save shielded | `SyncEngine.applyingRemoteShieldedFromCancellation` (an unstructured `Task { try await self.applyingRemoteWithDeferredFKs(body) }.value`); `pullRound`'s apply calls it; the D3 docs brought to what D3 now does (`retire()`'s doc, the engine's between-window comment, `PullStage`'s ONE WRITER line, `SyncSession.stop()`'s doc — an `App/` doc line, so the one `build-for-testing` at R3-E) | NOT-STARTED |
+| R3-3 | NIT: "exactly" → each row once | `PullStage.swift`'s doc and the comment above the batch read in `pullRound`: "each row once, at its newest staged seq — what a fresh round would fetch" | NOT-STARTED |
+| R3-4 | NIT: one shared name/reader | `PurgeJanitor` gains internal `static let ledgerScanPointKey = "last_purge_seq"` + `static func ledgerScanPoint(_:)` (its own `stateValue` rule, absent ⇒ 0); the janitor's own reads and writes use them; `PullStage`'s copies deleted and its three callers read `PurgeJanitor.ledgerScanPoint`. The literal then appears once in `Sources/`. The header's JSON field `ledgerScanPoint` is untouched (a rename would be a format change). No behavior change — the R2-1 pins are its evidence | NOT-STARTED |
+| R3-5 | NIT: decode through a cursor | `PullStage.rows` iterates `String.fetchCursor` and decodes each payload as it reads (same order, same nil-on-undecodable, same thrown database errors). No behavior change — the F1 (2) pin and the suite are its evidence | NOT-STARTED |
+| R3-R | The behavioral revert | Named here BEFORE it runs, at a committed pre-revert tip: **RV-R3a** (R3-1) the helper's body made `try await applyingRemoteWithDeferredFKs(body)` — the shield removed (`SyncEngine.swift`) → predicted ✘ `aRetireDuringTheSaveLetsTheSaveCommit` only; D3's `retiringASchedulerStopsItsInFlightDownload` stays ✔. One file; `swift test --filter ResumableCatchUpTests`; restore by `git checkout --`; `git diff --exit-code` clean | NOT-STARTED |
+| R3-E | Final evidence | On the final tree: `ResumableCatchUpTests`; the sync sweep (R1's filter); core debug + release (the known MCP timing flake named, never fixed); the one `build-for-testing` (`DerivedData/vx494-r3fix`) | NOT-STARTED |
 
 ## LADDER R2 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
 
