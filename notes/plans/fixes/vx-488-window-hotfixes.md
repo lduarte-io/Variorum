@@ -449,12 +449,23 @@ PROVISIONAL and HERS (OPEN ITEMS).
   `onlyTheLockedFaceMintsTheProtectionDoor`). **The harness on the fixed tree: `--filter SyncLockedRowTests` `✔ Test run
   with 6 tests in 1 suite passed`** (Piece 1's two now green + the four). The whole-harness and build-for-testing runs are
   Piece 4's (PENDING).
-- Piece 3 — the behavioral reverts: IN-PROGRESS — named BEFORE they run, on the committed tree `f825ed8e7` (each one
+- Piece 3 — the behavioral reverts: DONE — named BEFORE they ran (`e7a0970b6`), on the committed tree `f825ed8e7` (each one
   file, restored by `git checkout --` + `git diff --exit-code`; the harness, `--filter "SyncLockedRowTests|
   SyncWalkFenceTests"`): **RM2-1** the locked face's door back to `Account…` → `.openAccount(.account)`; **RM2-2** the
   line back to "Sync locked — enter your encryption passphrase"; **RM2-3** `ProtectionPaneDoor.settings` a no-op;
   **RM2-4** the Protection door minted whatever `canOpenProtection` says (P-2 broken); **RM2-5** the Protection door
-  also on the replaced-keys face. Results PENDING (filled as each runs).
+  also on the replaced-keys face. **DONE — no revert is in flight** (every restore `git diff --exit-code` clean; each run
+  `Test run with 13 tests in 2 suites`):
+  - **RM2-1** `✘ … with 4 issues` — `theLockedRowNeverOffersTheAccountSheet` ✘×2, `theLockedRowsOneDoorIsTheProtectionPane`
+    ✘, `withNoProtectionPaneTheLockedRowSaysTheSentenceAlone` ✘ (the pre-fix door, exactly).
+  - **RM2-2** `✘ … with 3 issues` — `theLockedLineSpeaksTheRoadsWordsNeverThePassphrase` ✘×3 (the words, "passphrase",
+    "encryption").
+  - **RM2-3** `✘ … with 3 issues` — `theProtectionDoorAsksForTheProtectionPane` ✘×3 (no ask; nothing to adopt; no fresh
+    ask on the second press).
+  - **RM2-4** `✘ … with 1 issue` — `withNoProtectionPaneTheLockedRowSaysTheSentenceAlone` ✘ (a door the phone could not
+    act on).
+  - **RM2-5** `✘ … with 3 issues` — `onlyTheLockedFaceMintsTheProtectionDoor` ✘×3 (the replaced-keys face minted it, in
+    the sweep ×2 and the exact-doors leg).
 - Piece 4 — evidence (headless suites, build-for-testing both targets): NOT-STARTED.
 
 ### THE DESIGN (settled before the build — within the brief's named latitude; see the seam note)
@@ -528,11 +539,24 @@ THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the r
   "SyncWalkFenceTests|SyncLockedRowTests|ProtectionWalkProjectTests"` `✔ Test run with 16 tests in 3 suites passed`**
   (Piece 0b's two red pins now green; the existing walk-project source pin — one `#if DEBUG` fence in `ProjectConfig` —
   still green).
-- Piece 2 — the behavioral reverts: IN-PROGRESS — named BEFORE they run, on `f825ed8e7` (same protocol and filter as
+- Piece 2 — the behavioral reverts: DONE — named BEFORE they ran (`e7a0970b6`), on `f825ed8e7` (RM3-4's re-run on
+  `dbb4666cb`) (same protocol and filter as
   M2's): **RM3-1** `AppServices.allowsSync(storeVariant:walkLift:)` → `storeVariant == .real` (no lift); **RM3-2** the
   refusal removed (every walk project lifts); **RM3-3** the ref matched by EXACT HOST only (the existing switch's
   comparison); **RM3-4** the DEBUG derivation arm back to `allowsSync: storeVariant == .real` (the lift never read);
-  **RM3-5** the sweep's guard back to `sync.allowsSync`. Results PENDING.
+  **RM3-5** the sweep's guard back to `sync.allowsSync`. **DONE — no revert is in flight** (every restore clean; each
+  run `Test run with 13 tests in 2 suites`):
+  - **RM3-1** `✘ … with 1 issue` — `aWalkProjectThatIsNotProductionLiftsTheFence` ✘ (`allowsSync(.dev, lifted) == true`).
+  - **RM3-2** `✘ … with 20 issues` — `theProductionRefIsRefusedAndTheFenceStands` ✘ (all six production shapes ×3 legs +
+    the two fail-closed legs).
+  - **RM3-3** (the ref by EXACT HOST only) `✘ … with 14 issues` — the same pin ✘ on the four shapes an exact-host
+    comparison misses (×3 legs) + both fail-closed legs; the exact production URL and the same-host path still refuse
+    under it — which is what the ref-anywhere rule adds over the existing switch's host comparison.
+  - **RM3-4** FIRST RUN `✔ … passed` — **HOLLOW**: the source pin's first form (`debugArm.contains("ProjectConfig
+    .walkSyncFenceLift")`) matched the DEBUG arm's own COMMENT with the read reverted. Tightened to the code expression
+    (`dbb4666cb`, committed before the re-run); **RE-RUN `✘ … with 2 issues`** — `theDerivationReadsTheLaunchsLiftOnlyInDebug`
+    ✘×2 (the code expression absent; the DEBUG arm reading `storeVariant == .real`).
+  - **RM3-5** `✘ … with 2 issues` — `theRetiredCredentialSweepGuardsOnTheRealStoreNeverTheLift` ✘×2.
 - Piece 3 — evidence: NOT-STARTED.
 
 ### THE DESIGN (settled before the build)
