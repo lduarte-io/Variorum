@@ -465,7 +465,7 @@ ladder re-reads it.
   - **F2:** the load's no-item line reads "found no readable Touch ID item"; the decode idiom unchanged.
   - **F3:** the guard splits — no press to ride vs a sync-keys leaf that cannot ride one (each its own line).
   - **F4:** no code (VX-490).
-- **A RESIDUE FOR THE REVIEWER (flagged, NOT built — outside the two ruled clears):** THE FINAL CALLS call Make this my
+- **A RESIDUE FOR THE REVIEWER (flagged here first; since RULED IN and BUILT — "THE THIRD CLEAR" below):** THE FINAL CALLS call Make this my
   library "the one act every adopt road runs". One adopt road does NOT run it: **the plain-text bring-in with a library
   open** (`AppBootstrap.bringInPlaintextExport` :715 → `ProtectionCopyDoors.landPlaintextExport` — the open library steps
   aside WHOLE and a NEW library is CREATED on the creation road, no make-mine act). There an open library bound to X
@@ -488,7 +488,7 @@ ladder re-reads it.
   both; the harness **`✔ Test run with 388 tests in 67 suites passed`**; `build-for-testing` Mac (`-scheme Variorum`,
   `DerivedData/vx488-m1`) **`** TEST BUILD SUCCEEDED **`** and iOS (`-scheme VariorumMobile`, `DerivedData/vx488-m1-ios`)
   **`** TEST BUILD SUCCEEDED **`** — no error, no warning in a touched file. F4: no code (VX-490). The plain-text bring-in
-  residue above waits on the reviewer's call.
+  residue above was ruled in and is built (THE THIRD CLEAR, below).
 
 #### THE THIRD CLEAR (the plain-text bring-in — RULED IN as part of F1 by the orchestrator's adjudication)
 - **Premise note:** THE FINAL CALLS took Make this my library to be "the one act every adopt road runs"; the plain-text
@@ -513,11 +513,20 @@ ladder re-reads it.
   **RED on this tree** (the harness, `--filter SessionHoldBringIn`): `✘ Test run with 1 test in 1 suite failed … with 1
   issue` — `world.keys.sessionSyncKeys(accountID: Account.account) == nil` only (the copy landed, the new library names no
   account, the refused landing kept the hold — all ✔).
-- Piece T1 — the drop: DONE (this commit). `landPlaintextExport`, right after `result.created` is set: `if let outgoing {
+- Piece T1 — the drop: DONE (`3af9ed5f8`). `landPlaintextExport`, right after `result.created` is set: `if let outgoing {
   ProtectionRoadLock.dropSessionMemory(outgoing) }`. The harness `--filter "SessionHoldBringIn|PlaintextExportBringInRoad|
   WordsLedgerCarryRoad"` (the pin + every other caller's suite): **`✔ Test run with 11 tests in 3 suites passed`**.
-- Piece T2 — the revert: NOT-STARTED — named before it runs: **R10** (`ProtectionCopyDoors.swift` — the drop removed), on
-  the committed tree, restored by `git checkout --`, `git diff --exit-code` after. Piece T3 — evidence: NOT-STARTED.
+- Piece T2 — the revert: DONE — **no revert is in flight**. **R10** (on `3af9ed5f8`, `ProtectionCopyDoors.swift` — the drop
+  removed; restored by `git checkout --`, `git diff --exit-code` clean): the harness `--filter SessionHoldBringIn` `✘ Test
+  run with 1 test in 1 suite failed … with 1 issue` — `world.keys.sessionSyncKeys(accountID: Account.account) == nil` only.
+- Piece T3 — evidence: DONE (the final tree = `3af9ed5f8`'s product files; foreground, in sequence): the harness **`✔ Test
+  run with 389 tests in 68 suites passed`** (388/67 + this pin's suite); the core protection + auth/account set (+ the R1
+  suite; the core is untouched by this piece — the confirmation) debug **`✔ Test run with 533 tests in 102 suites
+  passed`**, release (`swift test -c release`) **`✔ Test run with 509 tests in 98 suites passed`**, 0 skipped either;
+  `build-for-testing` Mac (`-scheme Variorum`, `DerivedData/vx488-m1`) **`** TEST BUILD SUCCEEDED **`** and iOS (`-scheme
+  VariorumMobile`, `DerivedData/vx488-m1-ios`) **`** TEST BUILD SUCCEEDED **`** — no error, no warning in a touched file.
+  THE STAGE BATCH gains `SessionHoldBringInTests` (harness-green) and `PlaintextExportBringInRouteTests` (the bootstrap's
+  bring-in road — its one changed line, the argument).
 
 ## M2 RECORD (implementer session B — Opus, xhigh) — VX-486
 
