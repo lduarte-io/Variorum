@@ -41,7 +41,8 @@ import OSLog
 ///    onto an EMPTY stage from the round's base, or onto a stage of the round's identity whose reach is exactly where
 ///    the window starts; and the apply saves only a stage of the round's identity reaching exactly its fetch cursor
 ///    (`StageMovedUnderRound`). So the stage always holds one unbroken download from its base to its reach.
-/// Each refusal writes nothing and keeps whatever stage stands; the next round re-plans from the committed cursor.
+/// Each refusal writes nothing and keeps whatever stage stands; the next round re-plans from the committed cursor,
+/// and the scheduler runs it at once (R2-6 — `isOneWriterRefusal`).
 /// Writes here touch only local-only tables (no outbox trigger fires), so they run as plain writes.
 enum PullStage {
     static let headerKey = "pull_stage"
@@ -109,6 +110,12 @@ enum PullStage {
             "another sync round changed this round's download while it was running; "
                 + "the next round starts from the committed cursor"
         }
+    }
+
+    /// Ladder R2, R2-6: the one-writer belt's two refusals. Both heal on the very next round (it re-plans from the
+    /// committed cursor), so `SyncScheduler` runs that round at once instead of leaving these words on the sync row.
+    static func isOneWriterRefusal(_ error: any Error) -> Bool {
+        error is CursorMovedUnderRound || error is StageMovedUnderRound
     }
 
     /// A stage this round fetched itself, from its committed cursor, that still will not decode — impossible while

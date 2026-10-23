@@ -112,6 +112,11 @@ public actor SyncScheduler {
     private var loopTask: Task<Void, Never>?
     /// Set once by `retire()`; a retired scheduler never starts a round.
     private var retired = false
+    /// VX-494 ladder R2, R2-6: the next round was requested by the one-writer
+    /// belt's refusal. A refusal in THAT round requests no other — the belt's
+    /// follow-up runs once, never a loop; a second refusal waits for the
+    /// next trigger like any failed round.
+    private var nextRoundIsBeltFollowUp = false
     private var idleWaiters: [CheckedContinuation<Void, Never>] = []
     private var statusContinuations: [Int: AsyncStream<Status>.Continuation] = [:]
     private var nextContinuationKey = 0
@@ -157,6 +162,7 @@ public actor SyncScheduler {
     public func retire() {
         retired = true
         followUpRequested = false
+        nextRoundIsBeltFollowUp = false
         loopTask?.cancel()
     }
 
@@ -182,6 +188,8 @@ public actor SyncScheduler {
     }
 
     private func runOneRound() async {
+        let isBeltFollowUp = nextRoundIsBeltFollowUp
+        nextRoundIsBeltFollowUp = false
         status.isSyncing = true
         publishStatus()
         // 13j ladder B (B2): the LEDGER RECONCILIATION runs BEFORE the
@@ -273,6 +281,16 @@ public actor SyncScheduler {
             // retries. Never a reason to touch state.
             status.lastError = String(describing: error)
             status.lastErrorIsOffline = Self.isOfflineError(error)
+            // VX-494 ladder R2, R2-6: the one-writer belt's refusal is
+            // self-healing by design — the next round re-plans from the
+            // committed cursor — so it runs at once rather than leaving the
+            // belt's words on the sync row until something else triggers.
+            // Once: a follow-up the belt refuses again waits like any other
+            // failed round. A retired scheduler never starts a round.
+            if PullStage.isOneWriterRefusal(error), !retired, !isBeltFollowUp {
+                followUpRequested = true
+                nextRoundIsBeltFollowUp = true
+            }
         }
         status.pendingPushCount = (try? await outboxCount()) ?? status.pendingPushCount
         status.isSyncing = false
