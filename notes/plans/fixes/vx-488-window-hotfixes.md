@@ -433,6 +433,41 @@ ladder re-reads it.
 - **PROVISIONALs:** none (the ruling decided the shape; nothing product-visible beyond (a)'s intent delivered).
 
 
+### LADDER R1 FIXES (implementer session A — F1 + F2 + F3 as THE FINAL CALLS confirmed them; F4 deferred, VX-490)
+- Piece L0 — the F1 pins committed BEFORE the fix: DONE (this commit). `SyncKeysSessionHoldTests.swift` gains
+  `SyncKeysSessionHoldAcrossAdoptTests`: `makeThisMyLibraryDropsTheOutgoingAccountsSessionHold` (the SWAP road — a
+  synced Castle library adopts a copy, Always ask and Touch ID legs; the outgoing account's hold must be gone) and
+  `theUnboundForgetClearsSessionBesideTheItems` (a leave crashed just past its unbinding, its plan gone — the
+  finish-from-record's `forgetUnboundSyncKeys` must clear session beside the items; the hold is planted after the
+  relaunch, since a real crash already empties session memory). **RED on the pre-fix tree** (`swift test --filter
+  SyncKeysSessionHold`): `✘ Test run with 5 tests in 2 suites failed … with 3 issues` — the swap pin ✘ ×2 (both gates:
+  `mine.world.session[account] == nil`), the forget pin ✘ ×1 (its last line only — the crash landed past the unbinding
+  and the leave finished from its record, both `#require`d); pin 1's three ✔.
+- Piece L1 — the fixes: NOT-STARTED — the design, with ONE PREMISE CORRECTION to THE FINAL CALLS' clear 1:
+  - **Clear 1 sits in the swap step itself (`ActContext.makeMineSwap`), not in `forgetOtherLibraries`.** The ruling
+    places it in the after-commit "where `outgoing` is the acting context's `library.record?.account` (the old record,
+    still in hand at that step)" — but by `forgetOtherLibraries` the OLD record is NOT in hand: `makeMineSwap` has just
+    replaced `library.record` with the new one (`Copies.swift` :201–202, `account: nil`). The one place the outgoing
+    record and the landed commit are both in hand is the swap step: read `library.record?.account` before the record is
+    replaced, drop its hold right after the swap lands. Same act (both adopt programs run `makeMineSwap`), same one-line
+    leaf call, same semantics the ruling gives (direct drop, covers Always ask, idempotent on a resume — a resume past the
+    swap unlocks the NEW library, whose record names no account; one before it holds an empty session after the crash).
+    The empty-slot landing starts from `record: nil` — nothing outgoing, nothing dropped.
+  - **Clear 2:** `forgetUnboundSyncKeys` adds `holdInSession(nil, accountID: item.accountID)` beside the item deletion
+    (PlanRunner :546's idiom).
+  - **F2:** the load's no-item line reads "found no readable Touch ID item"; the decode idiom unchanged.
+  - **F3:** the guard splits — no press to ride vs a sync-keys leaf that cannot ride one (each its own line).
+  - **F4:** no code (VX-490).
+- **A RESIDUE FOR THE REVIEWER (flagged, NOT built — outside the two ruled clears):** THE FINAL CALLS call Make this my
+  library "the one act every adopt road runs". One adopt road does NOT run it: **the plain-text bring-in with a library
+  open** (`AppBootstrap.bringInPlaintextExport` :715 → `ProtectionCopyDoors.landPlaintextExport` — the open library steps
+  aside WHOLE and a NEW library is CREATED on the creation road, no make-mine act). There an open library bound to X
+  leaves `session[X]` held after the landing, exactly F1's mechanism. The one-line shape, if ruled: in
+  `bringInPlaintextExport`, once the landing created its library, `if let open { ProtectionRoadLock.dropSessionMemory(open)
+  }` (the outgoing session's record names X). The other creation roads hold nothing to drop (Start fresh over a
+  pre-design store and a face's Start a New Library never had a new-road library open in the process).
+- Piece L2 — the behavioral reverts: NOT-STARTED. Piece L3 — evidence: NOT-STARTED.
+
 ## M2 RECORD (implementer session B — Opus, xhigh) — VX-486
 
 **NOT DONE BY THIS SESSION (first, as the contract asks):** no `xcodebuild test`, no stage, no app launch, no dev/real-store

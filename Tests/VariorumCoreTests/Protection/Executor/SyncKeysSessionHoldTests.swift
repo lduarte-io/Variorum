@@ -71,3 +71,60 @@ struct SyncKeysSessionHoldTests {
         #expect(standard.world.session[other] == nil, "Standard holds nothing in session")
     }
 }
+
+/// VX-488 ladder round 1, F1 (`notes/plans/fixes/vx-488-ladder-round-1.md` — THE FINAL CALLS): with the process's ONE
+/// sync-keys leaf (F-M1-1), an account's session hold must leave with the library that earned it. MAKE THIS MY LIBRARY
+/// (every adopt road's act — the swap) lands a record naming NO account, so it drops the OUTGOING record's account hold
+/// (clear 1 — the load-bearing one: under Always ask session memory is the only custody, with no keychain item to iterate);
+/// and the account family's finish-from-record step that forgets every unbound account's ITEMS forgets their session
+/// holds beside them (clear 2 — `PlanRunner`'s rollback idiom). RED on the pre-fix tree: neither touched session memory.
+@Suite("VX-488 R1 F1 — an adopt drops the outgoing account's session hold; the unbound forget clears session too")
+struct SyncKeysSessionHoldAcrossAdoptTests {
+    /// A synced library adopts a copy (rule 17 — a NEW library, no account): the hold for the account the outgoing record
+    /// named goes. Always ask (session memory is the only custody) and Touch ID (the unlock's load held it) alike.
+    @Test func makeThisMyLibraryDropsTheOutgoingAccountsSessionHold() async throws {
+        for gate in [GateStyle.alwaysAsk, .touchID] {
+            let mine = try EX(.castle, synced: true, gate: gate)
+            let account = try #require(mine.account)
+            let held = try #require(mine.material)
+            mine.world.session[account] = held  // Always ask: the fixture's own; Touch ID: what the unlock's load holds
+            let theirs = try EX(.castle, gate: .alwaysAsk)
+            let (copy, catalog) = try plantCopy(
+                mine, libraryID: theirs.libraryID, key: theirs.key, keyFile: try #require(theirs.world.liveKeyFile),
+                record: theirs.liveRecord)
+            let executor = mine.executor()
+            var library = try mine.unlocked(executor)
+            _ = try await executor.makeThisMyLibrary(
+                &library, copy: copy, in: catalog, copySecrets: theirs.typed, currentPair: mine.typed)
+            #expect(mine.liveRecord?.account == nil, "\(gate): the adopted library names no account (rule 17)")
+            #expect(mine.world.session[account] == nil,
+                    "\(gate): the outgoing account's session hold left with the library that earned it")
+            expectSettled(mine, library)
+        }
+    }
+
+    /// The account family's finish-from-record (a leave whose plan is gone, past its unbinding): `forgetUnboundSyncKeys`
+    /// forgets the unbound account's session hold beside its items. (A real crash empties session memory; the hold is
+    /// planted after the relaunch so the step's own clear is what the assertion sees.)
+    @Test func theUnboundForgetClearsSessionBesideTheItems() async throws {
+        let fixture = try EX(.castle, synced: true, gate: .alwaysAsk)
+        let account = try #require(fixture.account)
+        fixture.world.crashAfterWrites = 4  // the begin's three writes, then the leave's unbinding record write
+        let e1 = fixture.executor()
+        var l1 = try fixture.unlocked(e1)
+        await #expect(throws: SimulatedCrash.self) { _ = try await e1.leaveAccount(.stopSyncingHere, &l1) }
+        try #require(fixture.liveRecord?.account == nil, "the crash landed just past the record's unbinding")
+        fixture.world.relaunch()
+        fixture.world.plan = nil
+        fixture.world.session[account] = try #require(fixture.material)
+        let e2 = fixture.executor()
+        var l2 = try fixture.unlocked(e2)
+        let settled = try await e2.settle(&l2, typed: fixture.typed)
+        guard case .finishedFromRecord = settled else {
+            Issue.record("the leave finishes from its record: \(settled)")
+            return
+        }
+        #expect(fixture.world.session[account] == nil, "the unbound account's session hold forgotten with its items")
+        expectSettled(fixture, l2)
+    }
+}
