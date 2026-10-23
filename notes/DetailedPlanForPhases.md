@@ -12,7 +12,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| **VX-488 — Run: the 0.10 window hotfixes** (mid-window at her word, before the release publishes: VX-487 Castle+TouchID sync keys · VX-486 the locked-sync row's door; the record `notes/plans/fixes/vx-488-window-hotfixes.md`; custody — Fable's hands + a fresh cold review) | VX-488 · `vx-488-window-hotfixes` | `~/dev/variorum-vx-488` · Pro | Fix + pin per member; her window holds for it. |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
