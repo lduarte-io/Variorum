@@ -115,6 +115,61 @@ round 3, the cap.** Dispositions:
   ~70 s of download + ~4–5 min of save — inside Castle's 10-minute idle lock), D2 reverts off the branch, and the stage
   goes back to her as a design question with the ladder's findings. A clean round 3 merges all three.
 
+## LADDER ROUND 3 — THE FINAL CALLS (the orchestrator, 2026-10-23 ~07:25; ROUND 3 IS THE CAP — no round 4 reads
+these fixes, so the orchestrator checks them line by line against each finding)
+
+The round's record is `vx-494-ladder-round-3.md` (a fresh `opus-reviewer`, REVIEW_PROMPT verbatim: 0 BLOCKER, 1 MAJOR,
+1 MINOR, 3 NIT — **the MAJOR is in D3, not D2: the stage came through clean**; the R2 fixes verified, RV-R2a re-run red
+on its own pin; its runs `ResumableCatchUpTests` 17/17, the sweep 359/80 green). The architect's note's fallback does
+NOT trigger (it named a D2 MAJOR) — and the reviewer showed it would be the worst combination for R3-1. Dispositions:
+
+- **R3-1 [MAJOR] — CONFIRMED (probe-proven on a scratch copy whose `Sources/` match the tip: a retire DURING THE SAVE —
+  tip `cursor=0 head=375 staged=375 lastError=CancellationError()`; the pre-D3 control `cursor=375`): D3's cancel
+  reaches the save.** `retire()`'s `loopTask?.cancel()` cancels the round's task, and the apply is one GRDB write that
+  GRDB 7 interrupts on cancellation — the save (~4.3 min on her Pro, ~7 in the live proof) rolls back. Before D3 the lock
+  road (`MacWillLock` → stop → retire, then `binding.lock()`) waited on the writer and the save LANDED. With D2 the next
+  round no longer re-downloads, but it redoes the whole save — and under Castle a Mac left alone sleeps and locks: the
+  "never lands unattended" class this ticket exists to end. The record's D3 line ("with D2, a cancelled round loses
+  nothing") and the handoff's VX-492 line ("a lock now costs a pause, not the download") were false for the save.
+  **FIX (a), the implementer — D3 made exactly what it meant to be:** the APPLY runs shielded from the round's
+  cancellation (an unstructured `Task` awaited for its value — task-locals, i.e. the dependencies, ride it; cancellation
+  does not), so a retire stops the DOWNLOAD between windows and never the save; the lock then waits on the writer exactly
+  as before D3 (unchanged behavior — the P-VX308-U4-2 precedent: a lock waits for work in flight). **Fix (b) DECLINED**
+  (keeping the save cancellable and correcting the prose) — it keeps the class the ticket exists to end. PIN: the
+  reviewer's probe (`ZZReviewerR3ProbeTests` in the session scratchpad's `probe-r3`) as a `ResumableCatchUpTests` case,
+  red on the tip, green on (a); D3's own pin (a retire mid-DOWNLOAD) must stay green. **Her question, bundled (#239):**
+  a Castle lock arriving during a first catch-up's save waits for the save (minutes) before the lobby — as it did before
+  this branch; keep, or should a lock pre-empt the save (and redo it at the next unlock)?
+- **R3-2 [MINOR] — CONFIRMED (the orchestrator):** the STATUS header and LIVE STATUS rows 2/4 brought current; the
+  Standard set-up's "Sync locked until a relaunch" observation dispositioned as a ticket (minted at closeout).
+- **R3-3 [NIT] — ACCEPTED (the implementer):** "exactly what the in-memory fetch held" → "each row once, at its newest
+  staged seq — what a fresh round would fetch" (`PullStage.swift` and the comment above the batch read).
+- **R3-4 [NIT] — ACCEPTED (the implementer):** `PullStage` reads the janitor's scan point through ONE shared name/reader
+  (no second literal of `"last_purge_seq"`).
+- **R3-5 [NIT] — ACCEPTED (the implementer):** `PullStage.rows` decodes row by row through a cursor (`String.fetchCursor`)
+  instead of loading every payload as text first — the phone's memory (VM-8).
+
+## LADDER R3 FIXES — THE BRIEF (a fresh `opus-implementer`; the final round's fixes — the orchestrator checks them line
+by line against R3-1, R3-3, R3-4, R3-5)
+
+**Read first, in full, yourself:** CLAUDE.md + canon; `notes/SyncSpec.md` WHOLE; `notes/SessionResiliencyProtocol.md`;
+this file WHOLE (every round's FINAL CALLS; the R1 and R2 fixes' LIVE STATUS); `vx-494-ladder-round-3.md` WHOLE; the
+code: `Sync/SyncEngine.swift` (`pullRound`'s apply), `Sync/SyncScheduler.swift` (`retire`), `Sync/PullStage.swift`,
+`Sync/PurgeJanitor.swift` (the scan-point reader), and `ResumableCatchUpTests.swift` + support. The round-3 reviewer's
+probe — reuse its scene as the R3-1 pin — is
+`/private/tmp/claude-501/-<home>-dev-variorum/c34bb0c9-4f3f-47f5-964c-43a1eb555b91/scratchpad/probe-r3/Tests/VariorumCoreTests/ZZReviewerR3ProbeTests.swift`
+(read it; never build or commit there).
+
+**Scope — exactly ROUND 3's FINAL CALLS' implementer items:** R3-1 fix (a) with its pin RED on the tip `fed71e05b`'s code
+first (the save survives a retire during it; D3's download pin stays green); R3-3, R3-4, R3-5. One behavioral revert
+for R3-1 (the shield removed ⇒ its pin red), named before it runs. A design fork STOPS and comes back as a proposal.
+**The discipline, the evidence, the limits — exactly LADDER R1 FIXES — THE BRIEF's.** Commits say `Part of VX-494`; NO
+trailers.
+
+### LADDER R3 FIXES — LIVE STATUS (the implementer owns this section)
+
+- (empty — the implementer writes it from its first commit)
+
 ## LADDER R2 FIXES — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
 
 **Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/SyncSpec.md` WHOLE (incl. §12's 13j
