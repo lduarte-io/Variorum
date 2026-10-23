@@ -4,6 +4,10 @@ import Foundation
 /// server's current version) plus the `server_seq` stamped when the server
 /// last accepted a change to it. `server_seq` is the ONLY ordering authority
 /// in the protocol (SyncSpec §9).
+///
+/// Persisted on disk by the pull stage (`sync_pull_stage.payload`, VX-494) —
+/// any change to this type's Codable shape or meaning must bump
+/// `PullStage.format`.
 public struct SyncPulledRow: Equatable, Sendable, Codable {
     public let row: SyncRow
     public let serverSeq: Int64

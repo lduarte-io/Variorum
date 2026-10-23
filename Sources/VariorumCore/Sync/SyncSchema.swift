@@ -502,6 +502,10 @@ public enum SyncSchema {
 /// come back as `.integer` after a JSON round trip; column affinity
 /// normalizes it on write, so DB state — the thing convergence compares —
 /// is unaffected.
+///
+/// Persisted on disk by the pull stage (`sync_pull_stage.payload`, VX-494) —
+/// any change to this type's Codable shape or meaning must bump
+/// `PullStage.format`.
 public enum SyncValue: Equatable, Sendable, Codable {
     case null
     case integer(Int64)
@@ -813,6 +817,10 @@ extension SyncError: CustomStringConvertible {
 /// the PK column, excluding `sync_version` which rides separately — on push
 /// it is the CAS base, on pull the server-current version). JSON-encodable
 /// for the wire.
+///
+/// Persisted on disk by the pull stage (`sync_pull_stage.payload`, VX-494) —
+/// any change to this type's Codable shape or meaning must bump
+/// `PullStage.format`.
 public struct SyncRow: Equatable, Sendable, Codable {
     public let table: String
     public let rowID: String

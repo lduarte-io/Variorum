@@ -55,10 +55,12 @@ public struct SyncEngine: Sendable {
     /// stopped sizing it. The server's changefeed re-sorts every row past the
     /// cursor on each call, so a window costs about the same whatever its
     /// size and the call count is what a first catch-up pays. Measured: at
-    /// 200 rows her ~108k-row first catch-up took ~550 calls (11 min 36 s);
-    /// at 2,000 the record's live proof downloaded a ~110k-row feed in 56
-    /// windows (~70 s), each call well inside the 8 s statement timeout (the
-    /// record's D1 server check). The pull APPLY covers
+    /// 200 rows her ~108k-row first catch-up took ~550 calls (11 min 36 s,
+    /// her production server); at 2,000 the record's live proof downloaded a
+    /// ~110k-row feed in 56 windows (~70 s — on the throwaway's lighter
+    /// per-call cost; her server's ~1.5–3 s/call puts the same 56 windows
+    /// nearer 1–2 minutes), each call well inside the 8 s statement timeout
+    /// (the record's D1 server check). The pull APPLY covers
     /// everything staged, so window size never affects convergence — the
     /// soak randomizes it to prove that.
     public var pullWindowSize: Int
