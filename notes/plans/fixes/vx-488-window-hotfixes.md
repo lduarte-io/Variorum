@@ -166,10 +166,24 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
 ### LIVE STATUS (per piece; PENDING = unverified)
 - Piece R — this record skeleton + the preflight read whole (CLAUDE.md + canon, this file, the kickoff, the resiliency
   protocol, CastleRules WHOLE, SyncSpec WHOLE, the named code, the planted test worlds): DONE (this commit).
-- Piece 0 — the headless harness (not durable — this session's scratchpad `m1-harness`; the VX-329 U3 recipe pointed at
-  this worktree): IN-PROGRESS — baseline on the pre-fix tree PENDING.
-- Piece 1 — the pins that compile on the pre-fix tree (pin 1 core; pin 2 + pin 4's guard, app/planted), committed RED
-  before any fix: NOT-STARTED.
+- Piece 0 — the headless harness: DONE (not durable — this session's scratchpad `m1-harness`; the VX-329 U3 recipe
+  re-pointed at this worktree: tools 6.2, macOS 26, the app target's concurrency settings on `Variorum`, the test target
+  WITHOUT default `MainActor`; `Variorum` symlinks every `Shared/Protection/*.swift` but `ProtectionBackupHook.swift`, plus
+  `Shared/AuthSession.swift`, `KeychainCustody.swift`, `LibraryOpenCopy.swift`, `WordsCopyDoor.swift`, `Features/WhatsNew/
+  WhatsNewLedger.swift` and the recipe's one stub file; the test target symlinks the U3 harness's 61 files re-pointed here
+  MINUS `KeychainOffMainTests` (it touches the login keychain — not this unit's) plus the `RoadWorldError` stub).
+  **HARNESS BASELINE on the pre-fix tree (`0b6acf703`): `✔ Test run with 381 tests in 64 suites passed`** (0 failures).
+- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE any fix: DONE (this commit).
+  `Tests/VariorumCoreTests/Protection/Executor/SyncKeysSessionHoldTests.swift` (pin 1) — **RED on the pre-fix tree**
+  (`swift test --filter SyncKeysSessionHoldTests`): `✘ Test run with 3 tests in 1 suite failed … with 2 issues` —
+  `useCastleWithTouchIDHoldsTheNewKeysInSessionBesideTheItem` ✘ (`fixture.world.session[account] == item`) and
+  `joiningACastleAccountWithTouchIDHoldsTheAccountsKeysInSession` ✘ (`laptop.world.session[account] == item`); the guard
+  `theOtherArmsAreUnchanged` ✔ (Always ask holds in session, Standard holds nothing — by design both sides).
+  `App/Variorum/VariorumTests/Protection/TouchIDUnlockSyncKeysTests.swift` (pin 2 + pin 4) — **RED on the pre-fix tree**
+  (the harness, `--filter TouchIDUnlockSyncKeysTests`): `✘ Test run with 2 tests in 1 suite failed … with 3 issues` —
+  `pin2_theTouchIDUnlockLoadsTheAccountsKeysForTheEngine` ✘ ×3 (session memory nil after the press; the provider's
+  `currentKeys()` refused — the corpus key id nil against the item's and the vault's); the world's own setup (turn sync on,
+  synced Use Castle with Touch ID, the lobby's Touch ID button) raised NO issue. `pin4_…` ✔ (a guard by design).
 - Piece 2 — fix (a): NOT-STARTED — the settled design below.
 - Piece 3 — fix (b) + its seams + pins 3 and 5: NOT-STARTED — the settled design below.
 - Piece 4 — the behavioral reverts (named below, each run on a committed tree): NOT-STARTED.
