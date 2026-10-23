@@ -33,6 +33,11 @@ actor FaultInjectingTransport: SyncTransport {
     /// dying partway through a long first catch-up.
     private var failPullAtCall: Int?
     private var pullsSinceArm = 0
+    /// VX-494 (ladder R1, N2): run a hook when the Nth pull call arrives,
+    /// BEFORE the server answers it — another writer landing on the store
+    /// while a round is still fetching.
+    private var whilePullHook: (call: Int, hook: @Sendable () async throws -> Void)?
+    private var pullsSinceHookArm = 0
     /// VX-494: every pull call's `since`, in order — where each download
     /// window started, so a test can tell a resume from a restart.
     private(set) var pullSinces: [Int64] = []
@@ -60,6 +65,13 @@ actor FaultInjectingTransport: SyncTransport {
     func armFailPull(atCall call: Int) {
         failPullAtCall = call
         pullsSinceArm = 0
+    }
+    /// VX-494 (ladder R1, N2): the Nth pull call from now (1-based) first
+    /// runs `hook`, once, then is answered normally. The hook must not call
+    /// back into this transport.
+    func armWhilePull(atCall call: Int, _ hook: @escaping @Sendable () async throws -> Void) {
+        whilePullHook = (call, hook)
+        pullsSinceHookArm = 0
     }
 
     // MARK: SyncTransport
@@ -121,6 +133,13 @@ actor FaultInjectingTransport: SyncTransport {
             if pullsSinceArm == call {
                 failPullAtCall = nil
                 throw InjectedNetworkFault()
+            }
+        }
+        if let armed = whilePullHook {
+            pullsSinceHookArm += 1
+            if pullsSinceHookArm == armed.call {
+                whilePullHook = nil
+                try await armed.hook()
             }
         }
         if replayNextPull, !lastPullWindow.isEmpty {
