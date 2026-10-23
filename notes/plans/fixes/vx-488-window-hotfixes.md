@@ -15,7 +15,7 @@ whole diff (custody — no waiver). Commits say `Part of VX-nnn` per member; NO 
 |---|---|---|
 | 0 | Kickoff: preflight read whole; Linear current (VX-483 joined as member, High, In Progress); main merged into the branch (`9d69c026f`); this record | DONE (this commit) |
 | 1 | M1 — VX-487 (implementer session A) | DONE (`82376db6a` (a), `96455fb2c` (b); pins revert-verified; headless + build-for-testing green — "M1 RECORD" at the end); fork F-M1-1 RESOLVED — ruled (i), BUILT `164304e91` ("F-M1-1 BUILT" under THE RULING; R7 red, evidence green) |
-| 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | IN-PROGRESS — the record skeletons + settled designs ("M2 RECORD", "M3 RECORD" at the end); next: the harness, the pre-fix pins |
+| 2 | M2+M3 — VX-486 + VX-483 (implementer session B) | DONE (`52a233742` M2, `f825ed8e7` + `dbb4666cb` M3; pins revert-verified RM2-1..5, RM3-1..5; harness 40/8 + M1 harness 388/67 + release compile + build-for-testing Mac + iOS green — "M2 RECORD"/"M3 RECORD" at the end); PROVISIONALs P-VX486-1/-2 in OPEN ITEMS |
 | 3 | The orchestrator's stage batch (full Mac suite + phone suite over the run diff) | NOT-STARTED |
 | 4 | The ladder (fresh fable-reviewer, whole run diff; rounds per the standing rules) | NOT-STARTED |
 | 5 | THE LIVE REHEARSAL (stage window; her Touch ID presses; the acceptance gate) | NOT-STARTED |
@@ -154,8 +154,14 @@ slot whole (mv back, same inodes; rule 21's notice once at the next plain launch
   act heals it (M2's door lands in Settings ▸ Protection where both live); (ii) the typed unlock derives the
   account's keys from the vault with the secret just typed (the `holdSyncKeysForTheSession` precedent — needs a
   vault read at unlock); (iii) a dedicated "unlock sync" door on the locked row.
-- **M2 — the locked row's new words are PROVISIONAL, hers** (drafted in the M2 record at build time).
-- **M2 — the Account…-does-nothing disposition** (written at build time; fix only if trivial).
+- **M2 — the locked row's new words are PROVISIONAL, hers** (the M2 record's THE WORDS): BUILT P-VX486-2 "Sync locked —
+  this Mac hasn't unlocked your account's sync keys" (the phone: "this iPhone"); the ALTERNATIVE "Sync locked — unlock
+  with Touch ID to sync again" (the lobby's own words; her posture's road, false under Always ask). The door's label
+  P-VX486-1 "Protection…" (the pane's name in the row's `Account…` idiom).
+- **M2 — the Account…-does-nothing disposition** (the M2 record): SUSPECTED the window's own sheet modality (the row's
+  Account sheet is its own `.sheet`, not the one presenter); no fix; the locked row no longer offers `Account…`.
+- **M2 — the seam note** (the M2 record's THE DESIGN): a neutral `requestProtectionPane()` beside the crossing's (which
+  delegates), and the press also opens the Settings window — the MCP twin's shape; the architect may re-rule.
 
 ## M1 RECORD (implementer session A — Opus, xhigh)
 
@@ -466,7 +472,24 @@ PROVISIONAL and HERS (OPEN ITEMS).
     act on).
   - **RM2-5** `✘ … with 3 issues` — `onlyTheLockedFaceMintsTheProtectionDoor` ✘×3 (the replaced-keys face minted it, in
     the sweep ×2 and the exact-doors leg).
-- Piece 4 — evidence (headless suites, build-for-testing both targets): NOT-STARTED.
+- Piece 4 — evidence: DONE (the final tree = `dbb4666cb`'s product files; foreground, in sequence; shared with M3):
+  - THE HARNESS (`m2m3-h`, debug) whole: `✘ Test run with 43 tests in 8 suites failed … with 4 issues` — exactly the
+    baseline's three harness-PATH artifacts (Piece 0; they run in the Mac target); with those three skipped (`--skip`):
+    **`✔ Test run with 40 tests in 8 suites passed`** — `SyncLockedRowTests` 6, `SyncWalkFenceTests` 7,
+    `SyncStalledRowTests`, `TierAndOnboardingTests` (3 suites), `Phase9cAuthWiringTests` (incl. the dev-store sweep
+    pins `startOnTheDevStoreNeverRunsTheSweep`, `aDevStoreSignInAfterWiringNeverRunsTheSweep`,
+    `devStoreSessionsStayFencedEvenWhenSignedIn`, `aRealStoreSignInSweepsOffTheMainThread` — green on the new guard),
+    `ProtectionWalkProjectTests` (its one-fence source pin over the edited `ProjectConfig`); no `skipped:` line.
+  - THE M1 HARNESS (session A's `m1-harness`, which symlinks the edited `ProtectionWalkSwitch.swift`), rebuilt on this
+    tree: **`✔ Test run with 388 tests in 67 suites passed`** (session A's F3 count, unchanged).
+  - RELEASE COMPILE (headless, the harness's app sources — `swift build -c release --target Variorum`): **`Build
+    complete!`** — `AppServices`' and `ProjectConfig`'s Release arms compile with `ProtectionWalkSwitch` absent (no
+    DEBUG-only symbol reaches Release).
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx488-m2m3
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `-scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath App/Variorum/DerivedData/vx488-m2m3-ios build-for-testing`: **`** TEST BUILD SUCCEEDED
+    **`** — no error, and no warning in any file this session touched (both logs grepped).
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched by this session).
 
 ### THE DESIGN (settled before the build — within the brief's named latitude; see the seam note)
 - **The face:** `SyncRowFace.Door.Act` gains `.openProtection` (Settings ▸ Protection through the pane request). The
@@ -514,6 +537,27 @@ PROVISIONAL and HERS (OPEN ITEMS).
   offers `Account…` at all, so this symptom's trigger is gone where she met it. If the rehearsal shows a different shape
   (e.g., the Settings window's Account sheet up while the main window's row is pressed), it is a ticket for her.
 
+### THE PINS (all dispositioned) — M2
+1. FIXED — `theLockedLineSpeaksTheRoadsWordsNeverThePassphrase` (the presented-state pin): red on the pre-fix tree and under
+   RM2-2.
+2. FIXED — `theLockedRowNeverOffersTheAccountSheet` (the door-act pin's compile-on-old half): red on the pre-fix tree and
+   under RM2-1.
+3. FIXED — `theLockedRowsOneDoorIsTheProtectionPane` (the door-act pin: `[Protection… → .openProtection]`): red under
+   RM2-1 (new seam — its red is the revert's).
+4. FIXED — `withNoProtectionPaneTheLockedRowSaysTheSentenceAlone` (P-2, the phone's arm): red under RM2-1 and RM2-4.
+5. FIXED — `theProtectionDoorAsksForTheProtectionPane` (the injected door's act IS the pane ask; the crossing's ask
+   unchanged): red under RM2-3.
+6. GUARD — `onlyTheLockedFaceMintsTheProtectionDoor` (the replaced-keys and mismatch rows keep `Account…`): teeth shown by
+   RM2-5.
+- NOT PINNED HEADLESS (said plainly): the row's press itself (`perform(.openProtection)` → the ask + `openSettings()`) is
+  view code — the rehearsal walks it (below).
+
+### FOR THE REHEARSAL (VX-486's row in the same window)
+- After M1 the Touch ID unlock HEALS the locked state, so the row may never show it on the main path. The locked row
+  appears after a TYPED unlock in Castle + Touch ID (M1 (c)'s residue): relaunch → type at the lobby (HER hands — the
+  traps forbid driven typing of the dev pair) → the row reads the new line with `Protection…` → the press opens Settings
+  at Protection, both with Settings closed and with it open on another pane.
+
 ## M3 RECORD (implementer session B — Opus, xhigh) — VX-483
 
 **NOT DONE BY THIS SESSION:** no `xcodebuild test`, no stage, no app launch, no env-set run — the lift is proven LIVE in
@@ -557,7 +601,8 @@ THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the r
     (`dbb4666cb`, committed before the re-run); **RE-RUN `✘ … with 2 issues`** — `theDerivationReadsTheLaunchsLiftOnlyInDebug`
     ✘×2 (the code expression absent; the DEBUG arm reading `storeVariant == .real`).
   - **RM3-5** `✘ … with 2 issues` — `theRetiredCredentialSweepGuardsOnTheRealStoreNeverTheLift` ✘×2.
-- Piece 3 — evidence: NOT-STARTED.
+- Piece 3 — evidence: DONE — M2's Piece 4 (one shared run): the harness 40/8 green (+ the three path artifacts), the M1
+  harness 388/67, the release compile, build-for-testing Mac + iOS green.
 
 ### THE DESIGN (settled before the build)
 - **The decision, pure, DEBUG-only** (`ProtectionWalkSwitch`, beside the walk project it reads — the file is `#if DEBUG`
@@ -574,3 +619,47 @@ THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the r
   fence's own seam … IS `storeVariant == .real`"); under a lift that equality breaks, and a lifted dev session would
   reach the INSTALLED build's login-keychain items — the round-2 N1 class. Its guard becomes `storeVariant == .real`
   (semantically identical in Release, where `allowsSync ≡ storeVariant == .real`).
+
+### THE PINS (all dispositioned) — M3
+1. GUARD — `withNoWalkSwitchTheDevStoreNeverSyncs` (ARM 1 through the production composition, this process's world): green
+   on both sides by design.
+2. FIXED — `theDerivationReadsTheLaunchsLiftOnlyInDebug` (source — the DEBUG arm's code expression; Release's line
+   byte-unchanged): red on the pre-fix tree; HOLLOW in its first form under RM3-4 (matched its own comment) — tightened
+   (`dbb4666cb`), then red under RM3-4.
+3. FIXED — `theRetiredCredentialSweepGuardsOnTheRealStoreNeverTheLift` (source): red on the pre-fix tree and under RM3-5.
+4. FIXED — `noWalkProjectHoldsTheFence` (ARM 1, pure): a guard of the decision's `.none`.
+5. FIXED — `aWalkProjectThatIsNotProductionLiftsTheFence` (ARM 2): red under RM3-1.
+6. FIXED — `theProductionRefIsRefusedAndTheFenceStands` (ARM 3, fail-loud, fail-closed): red under RM3-2 and RM3-3.
+7. GUARD — `thisLaunchsDecisionWithNoWalkSwitchIsNone` (the launch's one value in this process).
+- NOT PINNED HEADLESS (said plainly): the log lines (one per launch, host only) and the live lift — THE LIVE REHEARSAL
+  proves both: after `ps eww <pid>` shows the walk switch, the protection log carries `WALK SWITCH (…): … a walk project's,
+  not the production mirror` and `A4 FENCE (VX-483): LIFTED for this launch — the dev store may sync against the walk
+  project at <the throwaway's host> …`; the row leaves "Sync off (dev store)" for the signed-out face; after the join the
+  first round lands against the throwaway.
+
+### OBSERVATIONS (routed, not fixed here)
+- O-B1 (pre-existing, unchanged): a walk switch with only ONE of its two variables set resolves to nothing — the
+  production coordinates stand for the sign-in (the Debug app then signs in against PRODUCTION, which the account fence
+  forbids by convention) and the fence holds silently (the lift reads the resolved project, never the environment).
+  Detecting the half-set switch would need a second environment read — not built; the rehearsal's `ps eww` check covers
+  it.
+- O-B2 (for the rehearsal's restore): a lifted launch signs the DEV scope's auth item into the throwaway's user; the next
+  plain Debug launch (no switch) points that token at production (a refused refresh — signed out; the fence holds). Sign
+  out before restoring the dev slot to leave the posture as found.
+- O-B3 (VM-8): the phone's locked row is now doorless (no Protection screen yet) — it loses the `Account…` door it showed
+  in that state; VM-8 injects the phone's `ProtectionPaneDoor` when its Protection screen lands.
+
+### THE STAGE BATCH (the orchestrator's — this session ran none of it)
+Mac target: `SyncLockedRowTests`, `SyncWalkFenceTests` (NEW, harness-green), `SyncStalledRowTests`, `SyncOutOfDateFaceTests`
+(the face's signature grew a defaulted argument), `TierAndOnboardingTests`, `Phase9cAuthWiringTests` (ALL of it — incl.
+the three source pins the harness cannot read: `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut`,
+`thePasteInIsFullyRetiredInTheSharedSources`, `theBecomeActiveHookRunsOneSyncRound`), `Phase8ServicesTests` (the A4
+fence's own pins), `ProtectionWalkProjectTests`, `ProtectionWalkSwitchTests`, `ProtectionCrossingRouteTests` (the
+crossing's pane ask now delegates), `MCPAsksWaitTests` (the `adopts` rule), `DataSafetyFacesTests`,
+`LibraryPortabilityDoorTests`. Phone: `MobileStructuralTests` (the no-redirect "Mac" sweep and the two-register sweep walk
+`Shared/` — the new literals interpolate the device's name and the log lines name no Mac), `MobileEmptyStoreTests`.
+
+### PROVISIONALs (bundled in OPEN ITEMS) and canon
+- P-VX486-1 (the door's label "Protection…") and P-VX486-2 (the locked line) — hers. No canon line changes in this session:
+  the row's locked words are not in AppSpec or SurfaceContracts today; a contract line lands when she rules them (the
+  closeout's call).
