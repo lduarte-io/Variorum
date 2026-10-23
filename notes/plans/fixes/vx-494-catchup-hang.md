@@ -765,8 +765,10 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   and NEITHER of them had sync work properly. is this a release delaying kind of event? do we need other types of
   *[removed for publication]*
   what the fuck happened there? he HAD a passphrase for the old account in castle. he DID sign up for sync. why is
-  NOTHING pushed?" — NEW FACT from her: tester B's old account was in (old-)CASTLE with an enrollment passphrase, her
-  certainty. Her ruling on the pages: questions for her live "as a comment or in the docs somewhere… if it's just on
+  NOTHING pushed?" — her correction minutes later, superseding this entry's castle reading: "it wasn't a castle
+  passphrase on the old account. he set up sync, which forces you to set up a passphrase. he also CLICKED start fresh
+  *[removed for publication]*
+  Start fresh on 0.10 — consistent with the two-libraries reconstruction.) Her ruling on the pages: questions for her live "as a comment or in the docs somewhere… if it's just on
   the internet… it's getting scraped and saved. so remove that" — DONE (every HTML comment moved to never-rendered
   *[removed for publication]*
   DELETED AND RE-CREATED — the only story fitting both his memory (castle passphrase, synced) and the server (his
@@ -775,6 +777,16 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   ever deleted/started over; (a) a silent server-side enrollment failure Oct 13–14 (nothing remains to prove it);
   (c) memory conflation. The optional forensic road: his old library in Previous Libraries, opened via Look inside,
   shows its account binding (uid) and outbox — distinguishes (b) from (c) decisively.
+- **R-494-12 (2026-10-23, the sitting's re-ruling — VM-8 DEFERRED, the first-run failures are NEXT; her words
+  verbatim):** "agh. forget about mobile, figuring out this exact issue will be the next thing that we do, because I
+  have two testers that set up sync while in standard and both of them failed to sync completely and we didn't catch
+  that, so this is obviously the biggest issue right now." — The window's step 7 changes at her word: the VM-8
+  kickoff stays written in the handoff for later; the next effort is a RUN on the first-run sync seam — the trace
+  FIRST (the whole path: the set-up act's own failure modes incl. a vault write that fails while the UI reads
+  *[removed for publication]*
+  pins: VX-498 + VX-507, VX-509 as the evidence vehicle, VX-506 riding. Her phone stays down until VM-8 runs after —
+  her accepted cost, her call.
+- **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
   `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
   0 MAJOR · 2 MINOR · 3 NIT**, R3-1's shield independently re-proved by revert on a scratch copy — the findings and
