@@ -183,8 +183,12 @@ final class SyncSession {
         await scheduler.awaitIdle()
     }
 
-    /// Teardown only (no new chain follows; an in-flight round finishes on
-    /// its own). Chain REPLACEMENT goes through `configure`, which drains.
+    /// Teardown only (no new chain follows). Retiring CANCELS an in-flight
+    /// round (VX-494 D3): its download stops between pull windows, the
+    /// windows it completed staged for the next round, while a save already
+    /// running finishes (ladder R3, R3-1 — a lock then waits for it on the
+    /// writer); nothing here awaits it. Chain REPLACEMENT goes through
+    /// `configure`, which drains.
     /// Retiring closes the stale-trigger door here too.
     func stop() {
         stopObservations()

@@ -108,8 +108,15 @@ public actor SyncScheduler {
     private let janitor: PurgeJanitor?
     private var running = false
     private var followUpRequested = false
+    /// VX-494 (D3): the running loop, so `retire()` can cancel its round.
+    private var loopTask: Task<Void, Never>?
     /// Set once by `retire()`; a retired scheduler never starts a round.
     private var retired = false
+    /// VX-494 ladder R2, R2-6: the next round was requested by the one-writer
+    /// belt's refusal. A refusal in THAT round requests no other — the belt's
+    /// follow-up runs once, never a loop; a second refusal waits for the
+    /// next trigger like any failed round.
+    private var nextRoundIsBeltFollowUp = false
     private var idleWaiters: [CheckedContinuation<Void, Never>] = []
     private var statusContinuations: [Int: AsyncStream<Status>.Continuation] = [:]
     private var nextContinuationKey = 0
@@ -133,18 +140,38 @@ public actor SyncScheduler {
             return
         }
         running = true
-        Task { await self.runLoop() }
+        loopTask = Task { await self.runLoop() }
     }
 
-    /// Retires this scheduler permanently: no NEW round can ever start
-    /// (the current one, if any, finishes and `awaitIdle` observes it).
+    /// Retires this scheduler permanently: no NEW round can ever start,
+    /// and the current one, if any, is CANCELLED (below — VX-494 D3: its
+    /// download stops, a save already running finishes); `awaitIdle`
+    /// observes it end.
     /// The session layer retires a chain BEFORE draining and replacing it —
     /// a trigger Task that captured the old scheduler before the swap must
     /// not be able to revive the retired chain after the drain (Phase 8
     /// review round 2; the follow-up flag is cleared for the same reason).
+    ///
+    /// VX-494 (D3): retiring also CANCELS the round in flight. Before, it ran
+    /// on in the background — after a lock it kept downloading the whole feed
+    /// until its save failed on the closed library (her first crossing round
+    /// did exactly that, ~50 s past the lock). The engine stops between pull
+    /// windows; a cancelled network call throws like a dropped connection,
+    /// the offline class every round half already survives (outbox intact,
+    /// cursor unmoved, the windows it COMPLETED staged — the one in flight is
+    /// dropped and fetched again by the next round).
+    ///
+    /// The cancel never reaches the SAVE (ladder R3, R3-1): the pull's one
+    /// apply transaction runs shielded from it
+    /// (`SyncEngine.applyingRemoteShieldedFromCancellation`), so a retire that
+    /// lands during the save lets it commit — and a lock that follows waits
+    /// for it on the writer, exactly as before D3. Cancelled, the save would
+    /// roll back and the next round would redo the whole of it.
     public func retire() {
         retired = true
         followUpRequested = false
+        nextRoundIsBeltFollowUp = false
+        loopTask?.cancel()
     }
 
     /// Suspends until no round is running and no follow-up is pending —
@@ -162,12 +189,15 @@ public actor SyncScheduler {
             await runOneRound()
         } while followUpRequested
         running = false
+        loopTask = nil
         let waiters = idleWaiters
         idleWaiters.removeAll()
         for waiter in waiters { waiter.resume() }
     }
 
     private func runOneRound() async {
+        let isBeltFollowUp = nextRoundIsBeltFollowUp
+        nextRoundIsBeltFollowUp = false
         status.isSyncing = true
         publishStatus()
         // 13j ladder B (B2): the LEDGER RECONCILIATION runs BEFORE the
@@ -259,6 +289,16 @@ public actor SyncScheduler {
             // retries. Never a reason to touch state.
             status.lastError = String(describing: error)
             status.lastErrorIsOffline = Self.isOfflineError(error)
+            // VX-494 ladder R2, R2-6: the one-writer belt's refusal is
+            // self-healing by design — the next round re-plans from the
+            // committed cursor — so it runs at once rather than leaving the
+            // belt's words on the sync row until something else triggers.
+            // Once: a follow-up the belt refuses again waits like any other
+            // failed round. A retired scheduler never starts a round.
+            if PullStage.isOneWriterRefusal(error), !retired, !isBeltFollowUp {
+                followUpRequested = true
+                nextRoundIsBeltFollowUp = true
+            }
         }
         status.pendingPushCount = (try? await outboxCount()) ?? status.pendingPushCount
         status.isSyncing = false

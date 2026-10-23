@@ -1044,6 +1044,13 @@ extension AppDatabase {
         migrator.registerMigration("v1_31_protection_record") { db in
             try db.execute(sql: ProtectionRecordSchema.ddl)
         }
+        // VX-494 (D2): the pull stage — a first catch-up's downloaded windows, held so an interrupted round
+        // resumes instead of restarting. LOCAL-ONLY by registration (`SyncSchema.localOnlyTables`): no
+        // `sync_version`, no outbox trigger, never a payload or a mirror; the plaintext export drops it;
+        // `LocalMachineryRecreation` re-creates it empty. NOT a SyncSpec §12 lockstep event; the marker stays 14.
+        migrator.registerMigration("v1_32_sync_pull_stage") { db in
+            try db.execute(sql: SyncPullStageSchema.ddl)
+        }
         return migrator
     }
 }

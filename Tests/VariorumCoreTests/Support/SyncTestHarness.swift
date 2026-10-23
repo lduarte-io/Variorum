@@ -144,9 +144,13 @@ final class SyncClient {
 
     // MARK: Engine
 
+    /// VX-494: the harness keeps ONE size for both directions (`pullWindowSize: batchSize`) so every scenario's
+    /// window count — the soaks randomize it — is exactly what it was before the pull window got its own size;
+    /// the production default is pinned by `ResumableCatchUpTests`.
     func engine(batchSize: Int = 200, maxPushIterations: Int = 5) -> SyncEngine {
         SyncEngine(
-            transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations,
+            transport: transport, batchSize: batchSize, pullWindowSize: batchSize,
+            maxPushIterations: maxPushIterations,
             keyProvider: ClientIdentityKeyProvider(inner: keyProvider, deviceID: deviceID),
             sampleLibraryFacts: (sampleLibraryFacts.map { [$0] } ?? []) + additionalSampleLibraryFacts,
             furnitureFacts: furnitureFacts,

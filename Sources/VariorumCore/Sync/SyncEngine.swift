@@ -48,10 +48,20 @@ public struct SyncEngine: Sendable {
     /// designed pre-enrollment state; batch 3's enrollment flow installs
     /// the Keychain-backed provider).
     public let keyProvider: any SyncKeyProviding
-    /// Rows per push batch / pull window (transport granularity; the pull
-    /// APPLY transaction always covers everything fetched, so window size
-    /// never affects convergence — the soak randomizes it to prove that).
+    /// Rows per push chunk (transport granularity). The abuse guard's
+    /// per-call cap is ten of these (`AbuseGuardTests` pins the relation).
     public var batchSize: Int
+    /// VX-494 (D1): rows per pull window — its own size since the push chunk
+    /// stopped sizing it. The server's changefeed re-sorts every row past the
+    /// cursor on each call, so a window costs about the same whatever its
+    /// size and the call count is what a first catch-up pays. Measured: at
+    /// 200 rows her ~108k-row first catch-up took ~550 calls (11 min 36 s);
+    /// at 2,000 the record's live proof downloaded a ~110k-row feed in 56
+    /// windows (~70 s), each call well inside the 8 s statement timeout (the
+    /// record's D1 server check). The pull APPLY covers
+    /// everything staged, so window size never affects convergence — the
+    /// soak randomizes it to prove that.
+    public var pullWindowSize: Int
     /// One `push()` call re-pushes rejected-and-merged rows at most this
     /// many times; anything still dirty stays in the outbox for the next
     /// call. Bounded by design — retry/backoff hardening is Phase 12.
@@ -81,7 +91,8 @@ public struct SyncEngine: Sendable {
     public let accountBinding: SyncAccountBinding?
 
     public init(
-        transport: any SyncTransport, batchSize: Int = 200, maxPushIterations: Int = 5,
+        transport: any SyncTransport, batchSize: Int = 200, pullWindowSize: Int = 2_000,
+        maxPushIterations: Int = 5,
         keyProvider: any SyncKeyProviding = UnenrolledKeyProvider(),
         sampleLibraryFacts: [SampleLibraryDedupeFacts] = [],
         furnitureFacts: SeededFurnitureDedupeFacts? = nil,
@@ -89,6 +100,7 @@ public struct SyncEngine: Sendable {
     ) {
         self.transport = transport
         self.batchSize = batchSize
+        self.pullWindowSize = pullWindowSize
         self.maxPushIterations = maxPushIterations
         self.keyProvider = keyProvider
         self.sampleLibraryFacts = sampleLibraryFacts
@@ -437,8 +449,9 @@ public struct SyncEngine: Sendable {
         }
     }
 
-    /// Fetches the changefeed to head, then applies **everything in one
-    /// `applyingRemote` transaction** with `PRAGMA defer_foreign_keys = ON`
+    /// Fetches the changefeed to head — each window staged as it arrives, so
+    /// an interrupted round resumes (VX-494) — then applies **everything
+    /// staged in one `applyingRemote` transaction** with `PRAGMA defer_foreign_keys = ON`
     /// set inside it (multi-row operations arrive as row sets; deferred FKs
     /// make the batch atomic-consistent at commit). Locally-clean rows are
     /// written verbatim with their server `sync_version`; locally-dirty rows
@@ -473,36 +486,89 @@ public struct SyncEngine: Sendable {
             transport: transport, material: crypto.keys.keyProof,
             activeKeyID: crypto.keys.corpusKeyID)
         let since = try await database.read { try cursor($0) }
-        var pulled: [SyncPulledRow] = []
+        // Phase 14c: the held key id rides the pull half too — both round
+        // halves are fenced (THE DESIGN 2).
+        let keyID = crypto.keys.corpusKeyID
+        // VX-494 (D2): THE STAGE. Each window lands in `sync_pull_stage` as it
+        // arrives, so a round interrupted before its apply (a lock, a quit, a
+        // dropped connection) resumes the download here instead of starting
+        // again from the cursor — her ~108k-row first catch-up was ~12
+        // minutes of download that every interruption threw away. A stage
+        // resumes only for this round's own identity (`PullStage.plan`).
         var fetchCursor = since
+        let plan = try await database.read {
+            try PullStage.plan($0, base: since, keyID: keyID, deviceID: deviceID)
+        }
+        switch plan {
+        case .resume(let reach):
+            fetchCursor = reach
+        case .fresh:
+            break
+        case .discardThenFresh:
+            try await database.write { try PullStage.clear($0) }
+        }
+        // Ladder R1, F1 (2): only a stage an EARLIER round left can fail to
+        // decode (this round's own windows were encoded by this build a
+        // moment ago) — so one discard-and-refetch from the committed cursor,
+        // then never again this round.
+        var mayRefetch = plan != .fresh && plan != .discardThenFresh
+        var pulled: [SyncPulledRow]
         while true {
-            // Phase 14c: the held key id rides the pull half too — both
-            // round halves are fenced (THE DESIGN 2).
-            //
-            // Phase 13j: the device id rides the FIRST window only, where
-            // `since` is this device's COMMITTED cursor — the server's
-            // device_cursor upsert is what makes the purge horizon
-            // computable. Mid-round windows pass nil: their `since` values
-            // are uncommitted fetch positions, and recording one would
-            // over-report what this device has integrated if the apply
-            // below never commits.
-            let keyID = crypto.keys.corpusKeyID
-            let windowSince = fetchCursor
-            let windowDevice = fetchCursor == since ? deviceID : nil
-            let window = try await signer.call(rpc: "sync_pull") { proof in
-                try await self.transport.pull(
-                    since: windowSince, limit: self.batchSize, activeKeyID: keyID,
-                    keyProof: proof, deviceID: windowDevice)
+            while true {
+                // VX-494 (D3): a retired round (a lock's teardown, a chain
+                // replacement) stops between windows instead of downloading the
+                // rest of the feed in the background. The windows it COMPLETED
+                // are staged; the one in flight is dropped (its stage write
+                // meets the cancellation too) and is fetched again next round.
+                // Only the download: the save below is shielded (ladder R3, R3-1).
+                try Task.checkCancellation()
+                // Phase 13j: the device id rides only a window whose `since` is
+                // this device's COMMITTED cursor — the server's device_cursor
+                // upsert is what makes the purge horizon computable. Any other
+                // window (mid-round, or a resumed round's first) passes nil: its
+                // `since` is an uncommitted fetch position, and recording one
+                // would over-report what this device has integrated if the apply
+                // below never commits.
+                let windowSince = fetchCursor
+                let windowDevice = fetchCursor == since ? deviceID : nil
+                let window = try await signer.call(rpc: "sync_pull") { proof in
+                    try await self.transport.pull(
+                        since: windowSince, limit: self.pullWindowSize, activeKeyID: keyID,
+                        keyProof: proof, deviceID: windowDevice)
+                }
+                guard !window.isEmpty else { break }
+                // THE SEAM, pull half (Phase 14b): every arriving row is opened
+                // BEFORE it is written anywhere — a decrypt refusal (plaintext-in-
+                // encrypted-column, tamper, wrong key) throws here, with the
+                // cursor unmoved and this window unstaged. Everything downstream
+                // (the stage, straggler guard, merge, repairs, apply) is
+                // plaintext-only and byte-untouched.
+                let opened = try window.map(crypto.decryptFromWire)
+                let windowEnd = window.last!.serverSeq
+                let staged = try PullStage.encode(opened)  // off the writer (R1, N3)
+                try await database.write { db in
+                    try PullStage.stage(
+                        db, staged, base: since, keyID: keyID, deviceID: deviceID,
+                        from: windowSince, through: windowEnd)
+                }
+                fetchCursor = windowEnd
             }
-            guard !window.isEmpty else { break }
-            // THE SEAM, pull half (Phase 14b): every arriving row is opened
-            // BEFORE the apply transaction exists — a decrypt refusal
-            // (plaintext-in-encrypted-column, tamper, wrong key) throws
-            // here, with the cursor unmoved and nothing written. Everything
-            // downstream (straggler guard, merge, repairs, apply) is
-            // plaintext-only and byte-untouched.
-            pulled.append(contentsOf: try window.map(crypto.decryptFromWire))
-            fetchCursor = window.last!.serverSeq
+            // The batch: every staged row in `server_seq` order — each row
+            // once, at its newest staged seq: what a fresh round from the base
+            // would fetch — now including windows an earlier, interrupted round
+            // already downloaded.
+            if let rows = try await database.read({ try PullStage.rows($0) }) {
+                pulled = rows
+                break
+            }
+            // F1 (2): a staged row nobody can read is a stage nobody can vouch
+            // for — discarded like an unreadable header, never resumed again.
+            try await database.write { try PullStage.clear($0) }
+            guard mayRefetch else { throw PullStage.UndecodableStage() }
+            PullStage.log.error(
+                "pull stage: a staged row would not decode; the stage was discarded and the download starts again from the committed cursor \(since, privacy: .public)")
+            mayRefetch = false
+            fetchCursor = since
         }
         var emptyReport = PullReport()
         emptyReport.newCursor = since
@@ -530,7 +596,25 @@ public struct SyncEngine: Sendable {
         }
 
         let batch = pulled
-        return try await applyingRemoteWithDeferredFKs { db in
+        let reach = fetchCursor
+        // Ladder R3, R3-1: the save runs to its end once it starts — a retire
+        // (D3) stops the download above, never this transaction.
+        return try await applyingRemoteShieldedFromCancellation { db in
+            // Ladder R1, N2 — THE ONE-WRITER BELT (`PullStage`'s doc): the
+            // stage extends the cursor this round started from; if another
+            // round committed under this one, saving now could move the
+            // cursor past rows nobody applied. Refuse before any write — the
+            // stage stays, the next round re-plans from the new cursor.
+            let committed = try cursor(db)
+            guard committed == since else {
+                throw PullStage.CursorMovedUnderRound(roundBase: since, committed: committed)
+            }
+            // Ladder R2, R2-2 — the belt's CONTINUITY half: another round can
+            // empty or replace the stage without moving the cursor, so the
+            // value check alone cannot see it. Save only this round's own
+            // stage — its identity, reaching exactly this round's fetch cursor.
+            try PullStage.verifyRoundsStage(
+                db, base: since, keyID: keyID, deviceID: deviceID, reach: reach)
             var report = PullReport()
             // Straggler guard, to a FIXPOINT: rows apply in seq order up to
             // the first row whose FK closure is satisfiable neither locally
@@ -592,6 +676,12 @@ public struct SyncEngine: Sendable {
             report.repairs = try runPostApplyRepairs(db, touched: touched) + touched.inlineRepairs
             let newCursor = stopIndex > 0 ? batch[stopIndex - 1].serverSeq : since
             try setCursor(db, newCursor)
+            // VX-494 (D2): the stage leaves with the commit that moves the
+            // cursor — a stall included, so the next round fetches from the
+            // stall point exactly as before the stage existed (rows past the
+            // stall are re-fetched, never kept beside a cursor they outran).
+            // A rollback keeps it: the next round resumes, not restarts.
+            try PullStage.clear(db)
             report.newCursor = newCursor
             report.stalled = stopIndex < batch.count
             if stopIndex < batch.count {
@@ -673,6 +763,8 @@ public struct SyncEngine: Sendable {
             }
             try db.execute(sql: "DELETE FROM sync_row_seq")
             try db.execute(sql: "DELETE FROM sync_state WHERE key = 'last_server_seq'")
+            // VX-494 (D2): a stage extends the cursor just cleared — gone with it.
+            try PullStage.clear(db)
         }
     }
 
@@ -744,6 +836,20 @@ public struct SyncEngine: Sendable {
             try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
             return try body(db)
         }
+    }
+
+    /// VX-494 ladder R3, R3-1 — THE SAVE, SHIELDED from the round's cancellation. A retired round (a lock's
+    /// teardown, a chain replacement — D3) stops its DOWNLOAD between windows, but never its SAVE: GRDB turns a
+    /// task's cancellation into an interrupt of the write in flight, which rolls it back, and the save is the long
+    /// phase of a first catch-up (~4 min on her ~108k rows) — cancelled, the next round would redo it whole, and a
+    /// Mac that locks while left alone would never land it. So the save runs in an unstructured task this round
+    /// awaits: it inherits the round's task-locals (the dependencies), never its cancellation. A lock that lands
+    /// during it waits for it on the writer (`StoreBinding.lock()` checkpoints on the outgoing writer before it
+    /// closes) — the behavior before D3, and P-VX308-U4-2's precedent (a lock asked while an act runs waits for it).
+    func applyingRemoteShieldedFromCancellation<T: Sendable>(
+        _ body: @escaping @Sendable (Database) throws -> T
+    ) async throws -> T {
+        try await Task { try await self.applyingRemoteWithDeferredFKs(body) }.value
     }
 
     /// All row IDs arriving in this batch, by table — a forward-referenced

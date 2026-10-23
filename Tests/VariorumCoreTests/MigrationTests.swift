@@ -46,6 +46,9 @@ struct MigrationTests {
         // VX-306 U1a (A JUSTIFIED EDIT, the ritual): v1_31's protection
         // record — LOCAL-ONLY by registration (`SyncSchema.localOnlyTables`).
         "protection_record",
+        // VX-494 (A JUSTIFIED EDIT, the ritual): v1_32's pull stage —
+        // LOCAL-ONLY by registration, no index (its key is the row's PK).
+        "sync_pull_stage",
     ]
 
     static let expectedIndexes: Set<String> = [
