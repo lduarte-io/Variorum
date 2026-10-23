@@ -426,7 +426,7 @@ PROVISIONAL and HERS (OPEN ITEMS).
 ### LIVE STATUS (per piece; PENDING = unverified)
 - Piece R — this record skeleton + the preflight read whole (CLAUDE.md + canon, this file whole incl. the M1 RECORD, the
   kickoff, the resiliency protocol, CastleRules WHOLE, SurfaceContracts whole — "The app" and "Doors to the outside", the
-  named code; the ticket's text read once, read-only): DONE (this commit).
+  named code; the ticket's text read once, read-only): DONE (`3726a1c89`).
 - Piece 0 — the headless harness: DONE (not durable — this session's scratchpad `m2m3-h`; the M1 recipe: tools 6.2,
   macOS 26, the app target's concurrency settings on `Variorum`, the test target without default `MainActor`). Shared/
   compiled whole FAILS (the real `AppSession`'s macOS arm composes the editor's routers — Mac-app files), so `Variorum` =
@@ -441,12 +441,12 @@ PROVISIONAL and HERS (OPEN ITEMS).
   source pins that read `#filePath` without resolving symlinks (`theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut`,
   `thePasteInIsFullyRetiredInTheSharedSources`, `theBecomeActiveHookRunsOneSyncRound` — they find no sources beside the
   symlink); they run in the Mac target (the stage batch). Every other test green.
-- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE the fix: DONE (this commit).
+- Piece 1 — the pins that compile on the pre-fix tree, committed BEFORE the fix: DONE (`cad1c101e`).
   `App/Variorum/VariorumTests/SyncLockedRowTests.swift` — **RED on the pre-fix tree** (the harness, `--filter
   "SyncLockedRowTests|SyncWalkFenceTests"`): `theLockedLineSpeaksTheRoadsWordsNeverThePassphrase` ✘×3 (the words; "passphrase";
   "encryption") and `theLockedRowNeverOffersTheAccountSheet` ✘×2 (the `.openAccount(.account)` act; the `Account…`
   label) — `✘ Test run with 5 tests in 2 suites failed … with 8 issues` (M3's three in the same run, its record).
-- Piece 2 — the fix + the new-seam pins: DONE (this commit). `Shared/ProtectionController.swift` (the neutral
+- Piece 2 — the fix + the new-seam pins: DONE (`52a233742`). `Shared/ProtectionController.swift` (the neutral
   `requestProtectionPane()`; the crossing's method delegates), `Shared/SyncStatusViews.swift` (`.openProtection`,
   `canOpenProtection`, `openProtectionLabel`, `ProtectionPaneDoor` + its environment key, the row's press, the line),
   `Variorum/VariorumApp.swift` (the main window injects `ProtectionPaneDoor.settings(bootstrap.protection)`). Four
@@ -565,13 +565,13 @@ THE LIVE REHEARSAL (the walk switch verified in-process via `ps eww`, then the r
 
 ### LIVE STATUS (per piece; PENDING = unverified)
 - Piece 0 — the harness (shared with M2's — its Piece 0): DONE.
-- Piece 0b — the pins that compile on the pre-fix tree, committed BEFORE the fix: DONE (this commit).
+- Piece 0b — the pins that compile on the pre-fix tree, committed BEFORE the fix: DONE (`aff573e5d`).
   `App/Variorum/VariorumTests/SyncWalkFenceTests.swift` on the pre-fix tree (the same run as M2's): ARM 1
   `withNoWalkSwitchTheDevStoreNeverSyncs` ✔ (a GUARD by design — the production composition in this process's world, no
   walk switch: `.dev` never syncs, `.real` may; green on both sides); `theDerivationReadsTheLaunchsLiftOnlyInDebug` ✘
   (no `#if DEBUG` arm before the assignment — one undivided line); `theRetiredCredentialSweepGuardsOnTheRealStoreNeverTheLift`
   ✘×2 (the guard reads `sync.allowsSync`).
-- Piece 1 — the fix + the new-seam pins: DONE (this commit). `Shared/Protection/ProtectionWalkSwitch.swift`
+- Piece 1 — the fix + the new-seam pins: DONE (`f825ed8e7`). `Shared/Protection/ProtectionWalkSwitch.swift`
   (`SyncFenceLift`, the pure `syncFenceLift(walkProject:productionHost:)`, the logged `syncFenceLiftForThisLaunch`),
   `Shared/ProjectConfig.swift` (`walkProject` internal; `walkSyncFenceLift` — the launch's one decision — inside its one
   `#if DEBUG` fence), `Shared/AppServices.swift` (the DEBUG/Release arms of the derivation; the pure DEBUG
