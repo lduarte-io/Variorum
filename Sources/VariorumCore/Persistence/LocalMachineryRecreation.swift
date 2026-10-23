@@ -57,6 +57,9 @@ public enum LocalMachineryRecreation {
         // so it cannot drift; re-created EMPTY (an export carries no record — rule 26: a library with no
         // record is not handled on the new road).
         ProtectionRecordSchema.table: ProtectionRecordSchema.ddl,
+        // VX-494 (v1_32): the pull stage — the ONE shared value, re-created EMPTY (an export carries no download
+        // in progress; the landed library's first round fetches from its cursor).
+        SyncPullStageSchema.table: SyncPullStageSchema.ddl,
     ]
 
     public struct RecreationError: Error, CustomStringConvertible, Equatable {
