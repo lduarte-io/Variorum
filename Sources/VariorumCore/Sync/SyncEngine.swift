@@ -589,6 +589,15 @@ public struct SyncEngine: Sendable {
 
         let batch = pulled
         return try await applyingRemoteWithDeferredFKs { db in
+            // Ladder R1, N2 — THE ONE-WRITER BELT (`PullStage`'s doc): the
+            // stage extends the cursor this round started from; if another
+            // round committed under this one, saving now could move the
+            // cursor past rows nobody applied. Refuse before any write — the
+            // stage stays, the next round re-plans from the new cursor.
+            let committed = try cursor(db)
+            guard committed == since else {
+                throw PullStage.CursorMovedUnderRound(roundBase: since, committed: committed)
+            }
             var report = PullReport()
             // Straggler guard, to a FIXPOINT: rows apply in seq order up to
             // the first row whose FK closure is satisfiable neither locally

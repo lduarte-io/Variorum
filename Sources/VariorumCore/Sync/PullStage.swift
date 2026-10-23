@@ -21,8 +21,13 @@ import OSLog
 /// in the transaction that moves the cursor, whether that apply reaches the head or stalls.
 ///
 /// ONE WRITER: the stage assumes one round at a time per store — the scheduler's serialization (`SyncScheduler`
-/// is the only production caller of `pull()`); a retired chain is cancelled (VX-494 D3) and drained before a
-/// replacement starts (`SyncSession.configure`), and a lock closes the retired chain's pool outright.
+/// is the only production caller of `pull()`); a retired chain is cancelled (VX-494 D3) and, when
+/// `SyncSession.configure` finds it, drained before the replacement starts; a lock closes the retired chain's pool
+/// outright. The one road with no drain is `stop()` then `configure()` (a sign-out then a sign-in): `stop()` retires
+/// the chain in an unstructured task and forgets it, so a new round could in principle overlap the old round's last
+/// write. THE BELT (ladder R1, N2): the apply refuses when the committed cursor is no longer the one its stage
+/// extends (`CursorMovedUnderRound`) — nothing written, the stage kept; the next round re-plans and its base check
+/// discards a stage whose base moved.
 /// Writes here touch only local-only tables (no outbox trigger fires), so they run as plain writes.
 enum PullStage {
     static let headerKey = "pull_stage"
@@ -45,6 +50,18 @@ enum PullStage {
         /// F1 (1): the stage format and the lockstep marker of the build that wrote it.
         var format: Int
         var lockstep: Int
+    }
+
+    /// Ladder R1, N2 — THE ONE-WRITER BELT's refusal: the committed cursor moved while this round was downloading
+    /// (another round on this store committed), so this round's stage no longer extends it and saving it could
+    /// commit the cursor past rows nobody applied. Nothing is written; the next round starts from the new cursor.
+    struct CursorMovedUnderRound: Error, CustomStringConvertible {
+        let roundBase: Int64
+        let committed: Int64
+        var description: String {
+            "another sync round committed while this one was downloading (cursor \(roundBase) → \(committed)); "
+                + "the next round starts from the new cursor"
+        }
     }
 
     /// A stage this round fetched itself, from its committed cursor, that still will not decode — impossible while
