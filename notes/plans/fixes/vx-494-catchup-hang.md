@@ -649,6 +649,43 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   Castle & sync, High; project 18a); both related to VX-494, Pre-launch left for her call. "1-3" = D1 (bigger
   pages), D2 (resumable download), D3 (the stranded "Syncing…", VX-493's mechanism).
 
+- **R-494-4 (2026-10-23, the window sitting — her #239 answers and the follow-up shape; her words verbatim-faithful):**
+  **(a)** "I don't really fully understand what the issue is here. You can make a ticket for it, but why does it matter
+  pre launch? someone's exports can't be imported because the build is different? why is that not a big deal?" —
+  **VX-502** minted (Improvement, Confirmed, Import & export, Medium); her Pre-launch call PENDING the sitting's
+  explanation. **(b)** "I don't know what 'seen' and 'integrated' mean in this context. This whole question doesn't make
+  sense to me. but I think it's fine for a device that later comples to discard its stage and re-download fresh ??" —
+  KEEP AS-IS: the 13j rule stands, R2-1's discard-then-redownload is the accepted consequence; no code. **(c)** "yeah,
+  you can make a ticket for this, it's fine I guess (the issue is the app starts holding more room than it needs?)" —
+  O-2 ACCEPTED for 0.10; **VX-504** (the compaction design, Low). **(d)** "yes, ticket that, we should investigate it"
+  — **VX-503** (O-1's trace, Medium). **(e)** "Ok, close both." — VX-492 Done (resolved by VX-494), VX-493 Done
+  (fixed-by-VX-494, re-traced). **(f)** "Agreed, mark VX-495 pre-launch." · VX-496: "yes, pre launch. mark it as such."
+  · VX-497: "We can defer this until the phone is done I suppose, make a note IN the phone prompt that when the build
+  is done, I'll sign in, and this ticket can be investigated. I want the mobile ticket kept up to date with information
+  so that session is fully able to help me with getting my phone back online." And the window's tail: "at the very end
+  of this stage when the release is done and everything is out and settled and flipped and closed, I want the closeout
+  to give me the mobile session prompt so that I can get that done next." **(g)** "yeah, ticket that, it can ride the
+  same fix sweep as VX-496 and them. maybe make an umbrella ticket for the followup of this phase for me so it's
+  easier to keep track of? if they can all run together, do that." — **VX-505** (the belt's words, Wording, Low) and
+  **VX-500 "Run: the 0.10 window follow-ups"** (Umbrella, after VM-8) holding VX-495/496/497/498/501/502/503/504/505
+  as sub-issues. **(h)** "Agreed." — the shield stays: a lock during a first catch-up's save waits for the save.
+  **(i)** "fine." — VX-498 stands as filed. **M1 (c)** (the VX-488 carry-over): "we absolutely need to fix this, high
+  priority, doing it next. how is a user that isn't using touchid even supposed to get sync to get going again at ALL?
+  what does 'some act' mean? absolutely pre launch, maybe the same fix window as the others (after the phone), but is
+  htere any remediation for it? and yes, I think a typed unlock should hold sync keys in session until lock, I don't
+  see why" — **VX-501** (Bug, Confirmed, Castle & sync, High, Pre-launch, under VX-500); the ruled direction: a typed
+  unlock holds the account's sync keys in session until lock. The sitting's answer on remediation until then: switch
+  the gate to Touch ID, or sign out of sync and back in (the join loads the keys), or any key door. **P-VX486-1/-2:**
+  "fine on provisional wording." — the provisional lines stand.
+- **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
+  worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh
+  `fable-reviewer` ran REVIEW_PROMPT verbatim over the whole merge diff (`44226636b^1..44226636b`): **0 BLOCKER ·
+  0 MAJOR · 2 MINOR · 3 NIT**, R3-1's shield independently re-proved by revert on a scratch copy — the findings and
+  dispositions are `notes/plans/fixes/vx-494-fable-cold-review.md`. FB-2/FB-3 landed as record fixes (`15e10ab26`);
+  FB-1/FB-4 as one doc-only commit on main at her word ("that's file, you can make one tiny doc only commit on main
+  now" — `3d84e2ac6`); FB-5 rides the next MobileSoul touch. The window's steps 4–5 (the release publish, the site
+  delta) were gated on this review and the gate is OPEN.
+
 - **R-494-3 (2026-10-23 ~04:40) — the cold review, the cast, the night:** "make sure that you run a cold review on
   your own work since you're doing this work directly. also, this is what I knwo from the rest of the run. should you
   be the orchestrator for the rest of it? does it need Fable for any points of it? I want everything to continue
@@ -663,5 +700,5 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   prompts and checklist land in the morning handoff.
 
 ## OPEN ITEMS
-- VX-492 (the idle lock fires mid-catch-up) and VX-493 (a lock mid-round strands the in-flight flag) are now
-  in-mechanism: re-check both against the fix before closing either.
+- ~~VX-492 and VX-493~~ — both CLOSED at her word (R-494-4 (e), 2026-10-23): VX-492 resolved by VX-494, VX-493
+  fixed-by-VX-494 (re-traced). The window's remaining follow-ups live under **VX-500** (the umbrella, after VM-8).

@@ -162,7 +162,9 @@ fix is core/shared — the phone INHERITS it, and this run's acceptance must pro
 Face ID gate — the same class the Mac just fixed), notes/plans/fixes/vx-494-catchup-hang.md (the phone's first pull
 is the same ~108k-row catch-up: it inherits the 2,000-row windows and the resumable stage; iOS suspends background
 apps, so a resumed download across an app switch is the phone's acceptance case — and the save still runs minutes
-at full CPU, so the phone's save time is a number to measure and report), and MobileStructuralTests'
+at full CPU, so the phone's save time is a number to measure and report — VX-497 is deferred to this run at my word:
+once the build is on my phone I'll sign in and VX-497's investigation runs against the measured save; keep the VM-8
+ticket current as you go so it can always get my phone back online), and MobileStructuralTests'
 MobileNoRedirectSweepTests exemption list (every `why` names which face makes it reachable). The scope: the phone's
 road faces — the Protection screen, the crossings (Face ID gate choice), the account doors + join, the words-card
 band (VM-23), and HER PRE-DESIGN FACE with Start fresh (the shared fact and whole set-aside already compile for iOS —
