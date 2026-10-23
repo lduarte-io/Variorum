@@ -156,6 +156,19 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   Castle & sync, High; project 18a); both related to VX-494, Pre-launch left for her call. "1-3" = D1 (bigger
   pages), D2 (resumable download), D3 (the stranded "Syncing…", VX-493's mechanism).
 
+- **R-494-3 (2026-10-23 ~04:40) — the cold review, the cast, the night:** "make sure that you run a cold review on
+  your own work since you're doing this work directly. also, this is what I knwo from the rest of the run. should you
+  be the orchestrator for the rest of it? does it need Fable for any points of it? I want everything to continue
+  forward because I am now going to sleep." (She pasted the window's remaining steps 1–7: her Pro acceptance; the
+  fix's closing mechanics through merge and the rebuilt Pro install; the Air prompt + her Air crossing; the release
+  publish; the site delta; the window close-out on main; VM-8 last.) **As ruled and answered:** this session stays the
+  orchestrator to the end of step 2; the cold review is a FRESH `opus-reviewer` running `notes/REVIEW_PROMPT.md`
+  verbatim over the whole diff (never this session's own read — R-494-1 covers the Fable waiver, so no step needs
+  Fable); the night runs step 2 to its end — the ladder, the live throwaway proof, the closing runs, the PR merge,
+  and the Pro install behind a fresh A1 ONLY if every gate is green (the previous 9093 bundle kept aside for a
+  rollback, since v1_32 migrates her store on first open). Steps 3–7 are hers or follow hers: their paste-ready
+  prompts and checklist land in the morning handoff.
+
 ## OPEN ITEMS
 - VX-492 (the idle lock fires mid-catch-up) and VX-493 (a lock mid-round strands the in-flight flag) are now
   in-mechanism: re-check both against the fix before closing either.
