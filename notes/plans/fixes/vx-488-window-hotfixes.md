@@ -205,7 +205,13 @@ no app launch, no dev/real-store touch (the run's traps). (c) is recorded, not b
   `TouchIDUnlockSyncKeysTests.swift`. **The harness on the fixed tree: `✔ Test run with 4 tests in 1 suite passed`
   (`--filter TouchIDUnlockSyncKeysTests` — pins 2, 3, 4, 5) and the whole harness `✔ Test run with 385 tests in 65 suites
   passed`** (381 baseline + this unit's 4; 0 failures). No revert is in flight.
-- Piece 4 — the behavioral reverts (named below, each run on a committed tree): NOT-STARTED.
+- Piece 4 — the behavioral reverts: IN-PROGRESS — **REVERTS STARTING on the committed tree `96455fb2c`**; each applied
+  alone, restored by `git checkout -- <the one file>` and verified by `git diff --exit-code` before the next: R1
+  (`CommonSteps.swift` — the arm back to `holdInSession(nil, …)`) → pin 1; R2 (`ProtectionOpenRoad.swift` — the pre-fix
+  press: the `loadSyncKeysForTheSession` call removed) → pins 2, 3; R3 (same file — the TWO-PROMPT load: the riding read
+  replaced by the context-less `readSyncKeys(accountID:itemClass: .touchid)`) → pin 3 alone; R4 (same file — a HOSTAGE
+  load: a failed/absent read refuses the unlock) → pin 5; R5 (same file — the press NOT ended: the `defer` removed) →
+  pins 3 + 5's ended legs; R6 (`NewRoadSyncKeyProvider.swift` — the provider reading the Touch ID item) → pin 4.
 - Piece 5 — evidence (core protection suites debug + release; the harness; build-for-testing Mac + iOS): NOT-STARTED.
 - Piece 6 — the close (this record final; the run table's row 1): NOT-STARTED.
 
