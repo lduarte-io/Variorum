@@ -219,9 +219,12 @@ press() {  # <label> [role] — an accessibility press addressed to OUR pid, aft
   $BIN/vis-ax $PID "$1" ${2:--} press >/dev/null || stop "no control labelled '$1' on screen"
   log "pressed '$1'"
 }
-focus() {  # <label> — click the field labelled <label> (its centre), so the helper types into it
+focus() {  # <label> [role] — click the field labelled <label> (its centre), so the helper types into it.
+  # The role defaults to AXTextField (the first live run: a bare label match found a HEADING whose text equals the
+  # words field's placeholder, the click landed on prose, and the words went into the still-focused Again field —
+  # the confirm's button then sat disabled and AXPress on it "succeeded" as a no-op).
   author; activate
-  local f; f=($($BIN/vis-ax $PID "$1" 2>/dev/null)) || stop "no field labelled '$1' on screen"
+  local f; f=($($BIN/vis-ax $PID "$1" ${2:-AXTextField} 2>/dev/null)) || stop "no field labelled '$1' on screen"
   cliclick c:$(( ${f[1]%.*} + ${f[3]%.*} / 2 )),$(( ${f[2]%.*} + ${f[4]%.*} / 2 )); sleep $GAP
 }
 secret() {  # <field> — the helper types it (it re-checks the road, the frontmost build and the allowlist itself)
@@ -308,7 +311,7 @@ step P7 "THE SHEET confirms the first round (VX-507), the row reads Synced with 
 if ! waitfor "Synced. Your library is on your account now." 180; then
   capture sheet
   waitfor "Sync hasn't run yet" 1 && stop "the sheet says the first round is blocked (its line is in the capture)"
-  stop "the sheet never confirmed the first round"
+  stop "the sheet never confirmed the first round — check the confirm sheet: a still-standing sheet with a disabled button means a field is empty or mistyped (capture every window, not the first)"
 fi
 capture synced-sheet
 press "Done" AXButton

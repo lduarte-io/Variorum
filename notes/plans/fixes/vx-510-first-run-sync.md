@@ -244,7 +244,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | DONE — round 1 (0B·0M·3m·2n) → L1 + O-L1-1 → round 2 (0B·0M·1m·1n, every round-1 fix SOUND, the harness independently re-run 524/90) → F-R2-1/-2 fixed by the orchestrator, the reviewer's final check 2/2 SOUND; the merge gates are row 10's batch + the re-walk |
-| 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | **THE CLOSING STAGE BATCH GREEN (2026-10-24, the successor; a detached checkout at `b3c79a191`, stage claim `vx-510`):** the CORE package whole (debug, headless) green with `MCPHarnessTimeLimitTests` run ISOLATED green ×2 — its 15 s wall-clock bound reproducibly fails under the full-parallel run (18.9–19.3 s; an untouched pre-existing test; → **VX-532**, Low, Test-only); the WHOLE MAC TARGET `✔ Test run with 5221 tests in 915 suites passed after 2250.101 seconds with 14 known issues` `** TEST SUCCEEDED **` — the real-keychain arm `aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` RAN and passed (a finger enrolled; the only skips the standing opt-in suites: the capture harness, the singleton-window oracles, the Apple-key round-trip); the PHONE on the iPhone 17 Pro simulator `✔ 62 tests in 7 suites passed` + `✔ 47 tests in 15 suites passed with 2 known issues`, zero skips — **a batch lesson recorded:** the handoff's phone list named FILES (`MobileProtectionTests`, `MobileTutorialWalkTests`) whose `@Suite` types are named differently, so the first `-only-testing` pass silently matched nothing for them; the suite TYPES were enumerated and run (15 more suites). The re-walk, closeout and PR remain. |
+| 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | **THE CLOSING STAGE BATCH GREEN (2026-10-24, the successor; a detached checkout at `b3c79a191`, stage claim `vx-510`):** the CORE package whole (debug, headless) green with `MCPHarnessTimeLimitTests` run ISOLATED green ×2 — its 15 s wall-clock bound reproducibly fails under the full-parallel run (18.9–19.3 s; an untouched pre-existing test; → **VX-532**, Low, Test-only); the WHOLE MAC TARGET `✔ Test run with 5221 tests in 915 suites passed after 2250.101 seconds with 14 known issues` `** TEST SUCCEEDED **` — the real-keychain arm `aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` RAN and passed (a finger enrolled; the only skips the standing opt-in suites: the capture harness, the singleton-window oracles, the Apple-key round-trip); the PHONE on the iPhone 17 Pro simulator `✔ 62 tests in 7 suites passed` + `✔ 47 tests in 15 suites passed with 2 known issues`, zero skips — **a batch lesson recorded:** the handoff's phone list named FILES (`MobileProtectionTests`, `MobileTutorialWalkTests`) whose `@Suite` types are named differently, so the first `-only-testing` pass silently matched nothing for them; the suite TYPES were enumerated and run (15 more suites). The re-walk: the del leg DONE LIVE on the final build (THE SUCCESSOR'S RE-WALK below); the Castle leg + restore + closeout remain. |
 
 ## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
 
@@ -3090,6 +3090,82 @@ testing proportionate for a +9-line view-only change. No NEW-ISSUE; neither comm
 **THE LADDER IS CLOSED: round 1 (0B·0M·3m·2n) → L1 + O-L1-1 → round 2 (0B·0M·1m·1n, every fix SOUND) → F-R2-1/-2
 fixed and confirmed. The only things between this tree and the merge are F-R1-2's gates: the closing stage batch and
 the independent re-walk.**
+
+## THE SUCCESSOR'S RE-WALK (2026-10-24, the successor orchestrator — IN PROGRESS at the model cutover; stage claim `vx-510` HELD)
+
+**Done, with evidence (the walk evidence folder: `~/dev/variorum-vx-510-stage/App/Variorum/DerivedData/first-run-walk/`):**
+- **The pre-step:** the deleted `del` account RE-MINTED through the app's own Create Account sheet on the prod test road
+  (fresh library `6c51f3d0`; the sheet driven by AX presses + the typing helper; the confirmation notice shown), then
+  *[removed for publication]*
+- **VX-509's scripted walk, FIRST LIVE RUN (`run-20261024T105945Z-del`):** P1–P6 ran clean after two committed tool
+  fixes (`389312534` — vis-ax matches `AXPlaceholderValue`; P4's landing probe is the sheet's own "Sign out").
+  **P7 stopped, correctly, and the stop found a real walk-tool bug:** `focus "Your twelve words"` matched a HEADING
+  whose text equals the field's placeholder — the click landed on prose, the words landed in the still-focused Again
+  field, and the confirm's disabled button answered AXPress as a no-op. Recovered BY HAND (the Again field cleared and
+  retyped; the words field focused BY ROLE — her live hint: "this is the same sheet that needed the accessibility click
+  *[removed for publication]*
+  the VX-511 mark fired; THE SHEET CONFIRMED "Synced. Your library is on your account now."; the row "Synced ‹time›";
+  SAME PID (no relaunch). Server, read by the successor: vault standard rev 1 · `kp:` 1 · 1 cursor · 3 settings —
+  VX-498 + VX-507 + VX-511 + the key-proof enrollment LIVE ON THE FINAL BUILD.** The script then gained the role-filter
+  fix + the honest stop message (this commit).
+- **A privacy slip, recorded:** ONE ad-hoc FULL-SCREEN capture (taken to find a window the walk's one-window capture
+  missed) caught personal content beside the app; DELETED at once, said to her, her word: "it's fine - not a problem."
+  **The standing rule from it: walk captures are WINDOW- or REGION-scoped, never full-screen** (the script already
+  captures by window id; the rule binds the orchestrator's ad-hoc captures too). The script's capture() one-window
+  blindness (it shoots the FIRST window while the act lives in Settings) is the successor's small fix or a recorded
+  tool residue.
+- **Two live findings filed mid-walk from HER hands (her real Air, during this window):** **VX-533** (a missed Touch ID
+  prompt at the lobby can't be re-triggered; her open question — was the button visible-but-dead or gone?) and her
+  no-sync-keys state = VX-501's class (workaround given: lock, unlock by Touch ID — VX-487's half already in 0.10).
+- **OBSERVATION O-RW-1 (unverified — the successor verifies before any ticket):** after Sign out → Sign in (castle)
+  with the Settings window LEFT OPEN, the Protection pane shows NO account/Sync section (settings2–5 captures) though
+  the same pane showed it before the sign-out and unit C's fresh-opened panes always had it. Suspected: the pane's
+  account section doesn't recompose on an auth change while open. VERIFY FIRST: close and reopen Settings (or the
+  row's Protection… door); if the section appears, it is a recompose gap worth one ticket; if not, trace before naming.
+
+**THE MACHINE STATE AT THE CUTOVER (verify, don't trust):**
+- App RUNNING: pid 49433, the walk build (`~/dev/variorum-vx-510-stage/App/Variorum/DerivedData/vx510walk/...`), road
+  ARMED, fresh library in the slot, SIGNED IN AS `castle`, Settings window open on Protection (resized tall), NO act in
+  flight. The castle-leg evidence folder: `castle-leg-111112Z` beside the del run.
+- The slot's aside folders (all under `…/Application Support/`): `Variorum-dev-aside-vx510walk2` = THE DEV STORE's nine
+  files (inodes 191598614–20, 194722803/4 — restore must match); `…-pre` = the pre-step library; `…-del` = the del
+  walk's library `6c51f3d0`. The walk checkout `~/dev/variorum-vx-510-stage` sits at `389312534` (plus this commit's
+  tools after a checkout advance).
+- Accounts: `del` = standard rev 1 (fresh, synced once); `castle` = UNTOUCHED by the re-walk so far (standard, rev 15,
+  current passphrase = the env file's PASSPHRASE, words = C3's); `std` untouched (rev 3, PASSPHRASE2).
+- The stage claim `vx-510` renewed 240 min at ~05:00 MDT.
+
+**WHAT REMAINS OF THE RE-WALK (the successor's steps, in order):**
+1. The Castle leg on `castle` (the handoff's step 5): FIRST close/reopen Settings (O-RW-1's check) → "Sync this
+   library…" → the account's passphrase (the helper's `passphrase` field) → the join lands + round confirms → Use
+   Castle… (Always ask; both secrets by the helper) → ⌃⌘L → **VX-527's live presses at the lobby: the words-door TEXT,
+   the gap after the chevron, the row's top band — each opens the disclosure** → typed unlock (passphrase) → the log's
+   `the typed unlock loaded the account's sync keys for the session` (VX-501) → a note typed → the row "Synced" with no
+   key act + the server's container count up → the check door (VX-513): the account's passphrase → "…opens this library
+   and your account." → Use Standard… (both secrets) → Change passphrase… (current → the env's PASSPHRASE2) → **NO
+   Touch ID sheet at any point on the Standard side (VX-517; a region capture ~4 s after each press)** → prod rev
+   moves. THE ENV NOTE: after that door the castle account's current passphrase is PASSPHRASE2 — record it in this
+   file and the handoff (the file already holds both values; nothing is written to it).
+2. Sign the walk session OUT; quit at zero instances; remove the walk libraries' slot files and their `Backups/<id>`
+   folders BY THE KEY FILES' `library` ids (the three aside folders' libraries + any the leg makes); `mv` the dev
+   store's nine files back; INODES CHECKED against the list above; one plain relaunch (no road env; `ps eww`) → the
+   swap notice → "Sync off (dev store)" → quit; `Tools/stage release --who vx-510`; remove `~/dev/variorum-vx-510-stage`
+   (git worktree remove --force; it carries the env symlink and DerivedData).
+3. **CLOSEOUT (CLAUDE.md's ritual + the cutover handoff's step 6):** the canon deltas in the two-file shape
+   (SurfaceContracts' protection bullet: the first-round-on-every-account-act + the sheet's round line · the not-yet
+   row · the join door's label · the typed unlock loading the sync keys · the words card retiring on a landed act ·
+   the check door · VX-517's forgets-BY-NAME beside the Standard-never-reads-Touch-ID line (F-R1-3 (b)) · VX-527's
+   whole-label press target; CLAUDE.md's Environment gains the prod-test-road fence-exception line where the dev fence
+   is stated); the dated entry + narrative to `notes/AppSpecRecord.md`; `Tools/canon-size` in the handoff; the master
+   plan's closeout paragraph + the in-flight row retired; the QUESTIONS bundle (P-VX510-1…3, A1…A4, B1-1, B1-2, B2-1,
+   B3-1, B3-2, D-B8 (c)'s reading, F-B4-1's residue, + F-R1-3 (a)'s CastleRules rule-2 wording-faithfulness item);
+   ticket triage (close the members VX-498/501/503/506/507/509/511/513/517/527 + VX-510 at the merge; the filed set
+   grouped by priority in the handoff; VX-532/VX-533 stay open; VX-529 THE NEXT RUN — its kickoff is
+   `notes/handoffs/vx-529-kickoff.md`, committed at this sweep); `Tools/vx sync` on main; the MOBILE PARITY line (the
+   phone's not-yet row line — a `notes/MobileSoul.md` row); her handoff `notes/handoffs/vx-510-handoff.md` (drafted at
+   this sweep with PENDING slots — her six closeout calls + the drafted release notes); the PR `VX-510: …` (merge
+   commit; the attribution footer per CLAUDE.md: NONE); the STATUS banner of THIS FILE flipped to CLOSED; branch +
+   worktree cleanup; build-debris tidy (every `DerivedData/vx510*` folder, the walk evidence after the merge).
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
