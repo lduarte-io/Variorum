@@ -520,7 +520,14 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     (`wordsOpenThisLibrary`). Green: 93 tests (the refusal, pair, follow, key-door and crossing suites).
     VERIFIED BY REVERT: both throw sites put back to `wordsDoNotOpen` ⇒ the same 3 rows red; restored ⇒ green. DONE
     (`1c724e53c` pins, `35ec32e85` fix).
-  - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). NOT-STARTED.
+  - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). DONE (this commit) —
+    `KeyFile.landingTheAccountsPassphraseLock(_:key:master:)` (`Model/KeyFileRelock.swift`): the master must reach this
+    key through the master lock (the file is the account's — an unsynced file refuses `noSuchWrap(.master)`); LANDS
+    the account's current passphrase only where NO lock exists — an existing lock (the account's, or a stale one
+    owing the catch-up) is returned unchanged; no copy refreshed, no lock dropped. `E6HealPrimitiveTests` (3): lands
+    where missing and touches nothing else (byte-equal but the lock), idempotent; never replaces a lock there; refuses
+    another master, a master-less file, another key. NO CONSUMER (grep: only its own definition) — the vault-road
+    open and the key doors are unit 2's to wire; never the check door.
   - P7-4 — the full core suite; the report. NOT-STARTED.
 **Findings before any code (traced in this session; each says what it changes):**
 - **F-1 — `FollowKind` gaining a case breaks four EXHAUSTIVE app-side switches** (`ProtectionAccountActs.swift`

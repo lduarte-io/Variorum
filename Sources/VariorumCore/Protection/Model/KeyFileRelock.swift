@@ -58,3 +58,24 @@ extension KeyFile {
         return next
     }
 }
+
+extension KeyFile {
+    /// **VX-529 — THE E6 HEAL'S PRIMITIVE** (PROVISIONAL P-VX529-4 — the run record's E6 sweep; NO consumer yet: the
+    /// typed-passphrase moments that would call it — the vault-road open, the key doors — are unit 2's to wire, and never
+    /// the check door, whose contract is that checking changes nothing). A synced library with NO passphrase lock of its
+    /// own (joined by the words, or R-529-5's words arm) LANDS the account's current passphrase as its lock. Narrower than
+    /// `relockedToTheAccountsPair` on purpose: it lands where MISSING only — an existing lock (the account's, or a stale
+    /// one that owes the catch-up) is returned unchanged — and refreshes no copy and drops no lock.
+    ///   - `passphrase`: the account's current passphrase, derived under the VAULT's descriptor and verified against the
+    ///     vault by the caller.
+    ///   - `master`: the account's master, in hand — VERIFIED here to reach this file's key through its master lock (the
+    ///     file is the account's; an unsynced file has no master lock and refuses).
+    public func landingTheAccountsPassphraseLock(
+        _ passphrase: PassphraseKey, key: StoreKey, master: SymmetricKey
+    ) throws -> KeyFile {
+        guard KeyFingerprint.of(key) == fingerprint else { throw KeyFileError.keyIsNotThisFilesKey }
+        _ = try open(master: master)
+        guard self.passphrase == nil else { return self }
+        return try settingPassphrase(passphrase, for: key)
+    }
+}

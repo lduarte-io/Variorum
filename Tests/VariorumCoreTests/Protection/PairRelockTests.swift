@@ -195,3 +195,44 @@ struct PairRelockTests {
         #expect(lag.file.droppingWords().opensWithTheWords, "the master's copy keeps the words' road")
     }
 }
+
+/// P-VX529-4 (PROVISIONAL), the E6 heal's primitive — pinned with no consumer (unit 2 wires it).
+@Suite("VX-529 P7-3 — the E6 heal: a passphrase lock landed where none exists, nothing else touched")
+struct E6HealPrimitiveTests {
+    @Test func itLandsTheAccountsPassphraseWhereNoLockExists() throws {
+        let lag = try LaggingFile()
+        let e6 = lag.file.droppingPassphrase()
+        let healed = try e6.landingTheAccountsPassphraseLock(lag.newP, key: lag.key, master: lag.world.master)
+        #expect(healed.passphrase?.kdf == lag.newP.kdf)
+        #expect(try healed.open(passphrase: .passphrase(lag.newPassphrase), floor: PF.floor) == lag.key)
+        var rest = healed
+        rest.passphrase = nil
+        #expect(rest == e6, "the heal touched more than the passphrase lock")
+        #expect(try healed.landingTheAccountsPassphraseLock(lag.newP, key: lag.key, master: lag.world.master) == healed,
+                "landing twice changed it")
+    }
+
+    /// Land-where-missing ONLY: a lock already there — the account's, or a stale one that owes the catch-up — is never
+    /// replaced here (that is the catch-up's and the key doors' business).
+    @Test func itNeverReplacesALockThatIsThere() throws {
+        let lag = try LaggingFile()
+        #expect(try lag.file.landingTheAccountsPassphraseLock(lag.newP, key: lag.key, master: lag.world.master) == lag.file)
+    }
+
+    /// The file must be the account's: the master must reach its key through its master lock; an unsynced file (no
+    /// master lock) and another key refuse.
+    @Test func itRefusesAFileThatIsNotTheAccounts() throws {
+        let lag = try LaggingFile()
+        let e6 = lag.file.droppingPassphrase()
+        #expect(throws: KeyFileError.doesNotOpen(.master)) {
+            _ = try e6.landingTheAccountsPassphraseLock(lag.newP, key: lag.key, master: SymmetricKey(size: .bits256))
+        }
+        let local = try lag.world.castleFile(lag.key, synced: false).droppingPassphrase()
+        #expect(throws: KeyFileError.noSuchWrap(.master)) {
+            _ = try local.landingTheAccountsPassphraseLock(lag.newP, key: lag.key, master: lag.world.master)
+        }
+        #expect(throws: KeyFileError.keyIsNotThisFilesKey) {
+            _ = try e6.landingTheAccountsPassphraseLock(lag.newP, key: lag.older, master: lag.world.master)
+        }
+    }
+}
