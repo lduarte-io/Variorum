@@ -76,9 +76,14 @@ extension ProtectionExecutor {
         // road the words keep once the copy is the account's. Else this file is not under the account's master: no pair
         // to catch up to here — follow first.
         guard (try? file.open(master: keys.masterKey)) != nil else { throw ExecutorRefusal.accountMoved }
+        // S-3 (and R-arch-3): the plan records NO passphrase descriptor. A no-re-key act is always past its commit
+        // point, so `PlanRunner.resume`'s generic check — the lobby's passphrase derived under the plan's descriptor,
+        // thrown when it opens no lock under it or no vault — would strand the open whenever the lobby took the OLD
+        // passphrase (in this build, and in every older one, which has no clause to drop it). With none recorded the
+        // generic resume derives nothing; the act's own step derives what was typed under the FRESH vault's descriptor
+        // and holds it only while it opens the vault (`accountsCurrentPassphrase`).
         let parameters = ActParameters(
             gate: library.section.settings.gateStyle, synced: true, accountID: account,
-            passphraseKDF: secrets.passphrase?.kdf,
             typedSecret: secrets.passphrase != nil ? "passphrase" : (secrets.words != nil ? "words" : nil),
             follow: FollowProgram.pairChangedName, newKind: record.mode)
         return try await perform(
@@ -104,6 +109,21 @@ extension ProtectionExecutor {
 }
 
 extension ActContext {
+    /// The account's CURRENT passphrase in hand for the catch-up: the press's (derived under the vault's descriptor and
+    /// verified at the door), else the one typed at this resume's lobby, derived under the FRESH vault's descriptor —
+    /// either held only while it opens the vault as it stands (E4: a passphrase moved again since is no secret of this
+    /// act's; S-3: neither is the OLD one a lobby took). nil: none in hand.
+    func accountsCurrentPassphrase(_ snapshot: VaultSnapshot) -> PassphraseKey? {
+        func opens(_ passphrase: PassphraseKey) -> Bool {
+            passphrase.kdf == snapshot.vault.kdf
+                && VaultModel.master(of: snapshot.vault, passphrase: passphrase, words: nil) != nil
+        }
+        if let pressed = secrets.passphrase, opens(pressed) { return pressed }
+        guard let text = typedPassphrase, (try? snapshot.vault.kdf.validateFloor(floor)) != nil,
+              let typed = try? PassphraseKey.derive(text, kdf: snapshot.vault.kdf), opens(typed) else { return nil }
+        return typed
+    }
+
     /// The account's keys in hand for the catch-up's steps: the door's (this press — read once); else from the
     /// secrets in hand (a resume: typed at the lobby — VX-503's secrets-first); else what this device holds, prompt-free
     /// first, the Touch ID class last and only in Castle (VX-517). Each counts only as the vault's current keys.
@@ -113,7 +133,8 @@ extension ActContext {
             return held
         }
         if let held = current(material) { return held }
-        if let master = VaultModel.master(of: snapshot.vault, passphrase: secrets.passphrase, words: secrets.words),
+        if let master = VaultModel.master(
+               of: snapshot.vault, passphrase: accountsCurrentPassphrase(snapshot), words: secrets.words),
            let keys = try? snapshot.vault.keys(master: master) {
             material = keys
             return keys
@@ -176,13 +197,12 @@ extension ActContext {
         }
         var passphrase: PassphraseKey?
         if passphraseMoved {
-            guard let typed = secrets.passphrase, typed.kdf == snapshot.vault.kdf,
-                  VaultModel.master(of: snapshot.vault, passphrase: typed, words: nil) != nil else {
+            guard let current = accountsCurrentPassphrase(snapshot) else {
                 throw ActRollback(refusal: resuming
                     ? .secretsRequired(act)
                     : .passphraseChangedElsewhere(device: snapshot.vault.updatedByDevice, day: snapshot.updatedAt))
             }
-            passphrase = typed
+            passphrase = current
         }
         guard let keys = try pairKeysInHand(snapshot) else {
             throw ActRollback(refusal: resuming ? .secretsRequired(act) : .secretMissing)

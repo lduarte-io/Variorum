@@ -379,7 +379,13 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     RED on P6b's tree — 14 crash points where `the settle threw .passphraseDoesNotOpen` (the plan records the vault's
     descriptor, so `PlanRunner.resume` derives the old passphrase under it and, the act being always past its commit
     point, throws out of the settle — before the re-lock from the vault check, after it from the lock check).
-    Remains: the fix, green, the revert.
+    THE FIX COMMITTED (this commit) — BY THE PLAN'S SHAPE, not a `PlanRunner` clause (a deliberate refinement of the
+    ruling's S-3 wording, same end): the pair plan records NO passphrase descriptor, so the generic resume derives no
+    passphrase it could throw on; `ActContext.typedPassphrase` (in memory, the act's span — `typedWords`' twin) carries
+    what the lobby typed, and the step's `accountsCurrentPassphrase` derives it under the FRESH vault's descriptor and
+    holds it only while it opens the vault (the press's verified passphrase first). WHY THE SHAPE: R-arch-3 — an older
+    build resuming this plan has no drop clause; only a plan with no descriptor keeps ITS generic check from stranding
+    the open too (P6d). Green: 85 tests (the pair suites, `FollowTests`, the key-door suites). Remains: the revert.
   - P6d — R-arch-3: the downgrade-resume trace and the plan's shape (its pin red-first if the shape moves). NOT-STARTED.
   - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
     red-first. NOT-STARTED.

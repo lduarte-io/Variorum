@@ -110,6 +110,10 @@ public final class ActContext {
     /// The words as typed, for the act's span only (a resume opens the new
     /// key's file by the words road).
     var typedWords: [String]?
+    /// The passphrase as typed (at the press, or at a resume's lobby), for the
+    /// act's span only, never stored — VX-529's pair catch-up derives it
+    /// itself under the FRESH vault's descriptor, its plan carrying none (S-3).
+    var typedPassphrase: String?
     var toKey: StoreKey?
     /// Make this my library: the copy's key, held from the press for the act's
     /// span — never stored (a resume before the swap rolls back without it).
@@ -131,6 +135,7 @@ public final class ActContext {
         self.plan = plan
         self.secrets = secrets
         self.typedWords = typed?.words
+        self.typedPassphrase = typed?.passphrase
         self.toKey = toKey
         if library.fingerprint == plan.fromFingerprint { self.heldFromKey = library.key }
         self.resuming = resuming
