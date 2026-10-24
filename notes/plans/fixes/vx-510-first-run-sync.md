@@ -598,8 +598,58 @@ first draft of each built).
   - **(C)** accept the asymmetry: re-keying acts close at `.made` as today; their round runs through the rebuild and the row
     says it (and the follow's Done stays the durable notice). Cheapest; VX-507's letter then holds for the open-session doors
     only — hers to accept.
-- **Piece 7** — evidence on the final tree (the harness whole; build-for-testing Mac + iOS) and THE MAC-SUITE LIST: NOT
-  STARTED.
+- **Piece 7** — EVIDENCE: DONE (the final tree = `c405f7a09`'s product files; foreground, in sequence):
+  - THE HARNESS whole (debug; the four new suites symlinked in): `✘ Test run with 452 tests in 79 suites failed … with 4
+    issues` — exactly the baseline's three harness-PATH artifacts (Piece 0); with those three `--skip`ped: **`✔ Test run
+    with 449 tests in 79 suites passed`** (426/75 + this unit's 23 tests in 4 suites); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-a
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `xcodebuild -scheme VariorumMobile -destination
+    'generic/platform=iOS Simulator' -derivedDataPath App/Variorum/DerivedData/vx510-a-ios build-for-testing`: **`** TEST
+    BUILD SUCCEEDED **`** — zero errors, and no warning in any file this unit touched (both logs grepped). (The Mac-only
+    files — `VariorumApp.swift`, `RoadAccountSheet.swift` — and the phone's `VariorumMobileApp.swift` compile here; their
+    PENDINGs above are discharged.)
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched — no `Sync/` line).
+  - **Machinery honesty:** the orchestrator committed to this branch IN THIS WORKTREE while the unit ran (`864604283`,
+    `0043d2bf3`, `0c0019741`, `43cd52b1f`, `9d092a1f2` — its own record sections and `Tools/`); this session staged
+    explicit paths only, re-read the record before each edit, and never touched those files.
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW (harness-green): `FirstRoundAfterTheActTests`, `FirstRoundConfirmTests`, `FirstRoundRoadTests`, `NotOnYetWordsTests`.
+  - `AppBootstrap` (`attach`): `AppBootstrapOffMainTests`, `LibraryHandOffTests`, `OneRefreshAuthorityTests`,
+    `Phase9cAuthWiringTests` (its three source pins run only here), `QuickEntryLaunchFocusTests`, `SettingsLockCloseTests`,
+    `WhatsNewWaitsAfterAdoptionTests`, and in `Protection/`: `CopyListingFacesSurfaceTests`, `EmptySlotDoorsSurfaceTests`,
+    `EmptySlotMakeMineRouteTests`, `ExportNoticeByLibraryTests`, `FollowDoneNoticeTests`, `HoldBannerAccountTests`,
+    `LookInsideCopyDoorTests`, `MakeMineRouteTests`, `OneSyncKeysLeafTests`, `OtherLibrariesDeleteRouteTests`,
+    `PlaintextExportBringInRouteTests`, `PreDesignLandingsRouteTests`, `PreDesignStartFreshRouteTests`,
+    `PreviousLibrariesArcTests`, `ProtectionCrossingRouteTests`, `ProtectionFacesRouteTests`, `ProtectionRoadRouteTests`,
+    `ReadmeStartHerePlanTests`, `RoadAccountSurfaceTests`, `RoadIdleDialRouteTests`, `RoadJoinFollowSurfaceTests`,
+    `RoadKeyDoorSurfaceTests`, `RoadLockRouteTests`, `SetPassphraseRowRereadRouteTests`, `WordsBandSurfaceTests`,
+    `WordsConcealedClipboardTests`, `WordsLedgerCarryRouteTests`.
+  - `AppServices` / `SyncSession`: `KeychainOffMainTests`, `SyncWalkFenceTests`, `TierAndOnboardingTests`,
+    `LibraryPortabilityDoorTests`, `Phase8ServicesTests`, `SampleLibraryDedupeFactsTests`.
+  - `SyncStatusViews` (the row's one presentation source, `.notOnYet`): `SyncLockedRowTests`, `SyncOutOfDateFaceTests`,
+    `SyncStalledRowTests`, `TierAndOnboardingTests`.
+  - `RoadAccountModel` / `RoadAccountFaces`: `PassphraseFloorRoadTests`, `ProtectionPaneWaveTests`, `RoadAccountModelTests`,
+    `RoadJoinFollowModelTests`, `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`, `RoadAccountFacesTests`,
+    `RoadJoinFollowFacesTests`.
+  - `RoadAccountSheet.swift` (source pins + hosted): `WordsFieldsConcealTests`, `SettingsAccountSearchTests`,
+    `SettingsAccountSurfaceTests`, `TravellingDotsIndicatorTests` (+ the surface suites above).
+  - `VariorumApp.swift` (source pins): `MCPAsksWaitTests` (+ `Phase9cAuthWiringTests`, `HoldBannerAccountTests`,
+    `EmptySlotDoorsSurfaceTests`, `OneRefreshAuthorityTests`, `WhatsNewWaitsAfterAdoptionTests` above).
+  - `ProtectionWords` (new constants only; the string-pinning suites): `ProtectionWordsPlanTests`,
+    `ProtectionWordsVX307Tests`, `RoadAccountWordsTests`, `RoadJoinFollowWordsTests`, `RoadKeyDoorWordsTests`,
+    `U2WordsTests`, `LibraryWordsCardTests`, `WordsBandTests`, `WordsLedgerCarryRoadTests`. (Every `Protection/` suite reads
+    `ProtectionWords` — the simplest honest batch is the whole `VariorumTests/Protection` folder plus the top-level suites
+    named above.)
+  - THE PHONE (`VariorumMobileTests` — `AppServices`/`SyncSession`/`AppBootstrap`, and `VariorumMobileApp.swift`'s one line):
+    `MobileEmptyStoreTests`, `MobilePerfWalkTests`, `MobileQuickNoteReadFailureTests`, `MobileStarterJournalTests`.
+  **THE WALK (unit A's rows, for the stage — use-shaped, not this session's):** on the DEV-store Debug build under the walk's
+  lift: (1) signed in, an unjoined library — the row reads "Sync isn't on for this library yet" with Protection…; (2) Turn on
+  sync (set-up) — the sheet stays, "Syncing your library with your account…", then "Synced. Your library is on your account
+  now."; the row reads "Synced ‹time›" with NO relaunch; (3) Done while a long round runs closes the sheet, the row finishes
+  it; (4) a second library over the same account — the door reads "Sync this library…", the join's words moment, then the
+  round phase and "Synced. Your account's writing is in this library now."; (5) a blocked round (offline) — "Sync hasn't run
+  yet: Waiting to sync (offline)." Both voices where the sheet has a face.
 
 ## THE FIX DESIGN — UNIT B (VX-509 · D-ROAD · VX-501 · the VX-503 rider; the architect's design, built by implementer session B after unit A closes)
 
