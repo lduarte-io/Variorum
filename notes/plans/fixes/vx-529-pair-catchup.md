@@ -344,7 +344,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   before keeps its day's (E7, rules 4–5) and the new secrets reach older keys through the history, the rule-22
   refusals, idempotence (AES key wrap is deterministic — a resume re-running the write lands the same bytes), the
   dropper. Green with every key-file suite (59 tests).
-- P5 — scope 2, THE FORK PROPOSAL written here, then REPORT BACK. NOT-STARTED.
+- P5 — scope 2, THE FORK PROPOSAL. DONE (this commit) — below, under THE FORK; REPORTED BACK. P6 waits on the ruling.
 - P6 — scope 2, THE ACT'S PROGRAM — only after the architect's ruling lands in this record. BLOCKED (the fork).
 
 **Findings before any code (traced in this session; each says what it changes):**
@@ -388,6 +388,59 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
 - **F-8 — the app routes an account act by `spec.rekeys`** (`RoadAccountModel.swift:509-516`): a re-keying act closes
   the pool and reopens; one that changes no key runs on the open session. The third kind's door says `rekeys: false`,
   so the app's existing road already runs it on the open session (unit 2's to confirm).
+
+#### UNIT 1 — THE FORK: the act's program shape (the implementer's PROPOSAL — RULING PENDING, the architect's)
+
+**What both shapes share (built the same either way):** the public entry is the core's `follow(_:kind:typed:gate:)` —
+the door the app already calls with the assessment's kind (P-VX529-1: one door). For `.pairChanged` it re-reads the
+vault and re-derives the moved halves FROM THAT READ (`AssessRules.pairFollow(liveKeyFile, vault.reading)`; nil ⇒
+`nothingToDo`; posture or sync key moved ⇒ `accountMoved` — E2/E4), then, all before `perform` (reads only, nothing
+begun): the passphrase half requires `typed.passphrase` (else `secretMissing`), derived under the VAULT's descriptor and
+verified there (wrong ⇒ P1's `refusalForAPassphraseTheVaultRefuses`: the old one names the change, garbage the plain
+refusal); the master from that passphrase, else — words only — custody/session (the Touch ID class only in Castle,
+VX-517; secrets first, VX-503), else `secretMissing` (F-7, the face asks the passphrase); the master verified to open the
+live key file's master lock (rule 22). The act: `toKey: nil` (no new key — `toFingerprint` nil, so the plan machinery reads
+it as "re-keys nothing": `pastCommitPoint` true, the plan-less settle finishes it), steps `["pickUpKeys", "relock",
+"memory"]` — `pickUpKeys` as built (the fresh read, the keys secrets-first, `holdSyncKeys` per posture, the followed row
+key stamped — the same key, idempotent); `relock`: LANDED already (`pairFollow == nil` on the live file against the
+act's fresh read) ⇒ nothing, no secret needed; else the passphrase half with no passphrase in hand (a resume) or one that
+no longer opens the fresh vault (E4: it moved again) ⇒ `ActRollback` (rule 20's old state; the follow is owed again);
+else one `writeLiveKeyFile(relockedToTheAccountsPair(…))`; `memory` ⇒ `rememberNewKey` (rule 1's mirror follows). No
+backup step (the key doors' precedent: a re-lock is no key change; the scheduled backup carries the new pair — S-2).
+**And one clause in `PlanRunner.resume`, needed under BOTH shapes** (F-U1a-1's twin): a no-re-key act is always past its
+commit point, so a passphrase typed at the lobby that opens no lock under the plan's descriptor throws
+`passphraseDoesNotOpen` OUT OF THE SETTLE (`PlanRunner.swift:423`) — the stuck-act class — once the re-lock has landed and
+the lobby took the OLD passphrase; for the pair act that passphrase is dropped instead (the step then finishes if landed,
+else rolls back).
+
+**SHAPE A — RECOMMENDED: a no-re-key arm INSIDE `FollowProgram`.** The act in flight is `.follow` (raw value `"follow"`,
+unchanged); `ActParameters.follow = "pairChanged"` (the existing free-form string); `FollowProgram.kind` learns the name
+(its default arm reads unknown names as `keysReplaced` — that must not stay the pair act's road); `steps` branches to the
+three above; `finishingSteps` tells the pair kind with no plan by its act in flight naming NO `toFingerprint` (every other
+follow re-keys) ⇒ `["memory"]`; the posture-moved resume guard in `run` applies as it stands (`newKind` = the record's
+mode). For it: **nothing stored changes, to the letter of R-510-20** — no new `ProtectionAct` value in the record's act in
+flight or the plan; one door, one act family ("Follow your account…" for every way the account moved); the app's settled-
+follow reading (`RoadSettledFollow.kind`) already treats it as a follow Done (unit 2 tells the kind by the nil
+`toFingerprint`); `pickUpKeys`/`holdSyncKeys` give the per-posture custody unchanged; the scenario world's `.follow`
+action and `settleWorld`'s auto-follow exercise it under every promise with zero harness change (F-3). Against it:
+`FollowProgram` gains a branch sharing nothing with `LibraryRekey`; a build older than this one resuming a pair plan
+would throw `nothingToDo` on `relock` (a downgrade mid-act — a corner of the same size under B).
+
+**SHAPE B — a sibling re-lock program on the key doors' plan machinery** (`["keyFile", "memory"]`, `resumeCannotFinish`'s
+roll-back idiom). It needs its own act: either a NEW `ProtectionAct` case — a new value of what `ProtectionVocabulary.swift`
+calls "a stored FORMAT" (the record's act in flight, the plan), which I read as outside R-510-20 ("we aren't changing
+anything stored anywhere"); an older build would fail to decode this Mac's sealed section while it is in flight — or an
+existing act's value (`.changePassphrase` / `.regenerateWords`), whose resume rules (`passphraseIsNew`, F-U1a-1's
+replaced-lock drop) and the app's Done wording key on the act and would misread it. The plan-less registry
+(`program(for: act)`) takes no parameters, so B cannot share `.follow` without a parameter-aware registry. For it: the
+re-lock sits with rule 6's other re-locks. Against it: the stored-vocabulary question; the app's settled-follow reading
+and the scenario world's follow action would each need a route.
+
+**Sub-decisions riding the ruling (my defaults in brackets, each PROVISIONAL until ruled):** S-1 words-only with no master
+in hand ⇒ [refuse `secretMissing`; the door also ACCEPTS an optional typed passphrase there] (F-7, proposed E14) · S-2 a
+fresh backup at the end ⇒ [no — the key doors' precedent] · S-3 the resume drop clause above ⇒ [yes, pair act only] ·
+S-4 F-9's forgotten-new-passphrase trap ⇒ [(c) as built; (a)/(b) are hers to weigh] · S-5 F-4's two sibling seams
+(`regenerateWords`, `doorSecrets`) take P1's helper ⇒ [not in this unit unless ruled — one line each].
 
 ## Machinery
 
