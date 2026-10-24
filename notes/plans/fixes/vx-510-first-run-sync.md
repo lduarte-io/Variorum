@@ -1680,6 +1680,24 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   push, a restore, a join from a restored copy, a join from a fresh library (the testers' road); the key doors (Change
   passphrase, New words) re-lock the account (vault revisions 1→2→3); three device cursors; zero duplicates. Deferred to LEG
   C by design: a typed secret against an older backup (Standard's quiet road answers first on its own Mac).
+- **LEG D (21:03–21:10) — ACCOUNT DELETION:** quit; the joined library `413fb3bd`'s files aside (`…-aside-vx510-walkL2/`);
+  relaunched (pid 66160, the road ARMED) → a fresh library **`2aa0214f`** (key `895bf4eb`, device `dd81f8f0`); Settings ▸
+  Protection ▸ Sign out… ("Sign out of this Mac? This Mac stays signed out of sync until you sign in again…") → Sign Out →
+  "Sign in to turn on sync." · Sign in… → the Account sheet over Settings → Create an account… → `del`'s email + password
+  *[removed for publication]*
+  (03:06:42Z) → signed in as del → the words look blind (Copy + stash, the helper's twelve-word check) → I've written them
+  down → Close → Protection ▸ **"Turn on sync…"** (the SET-UP arm — distinct from the join's "Sync this library…", correct
+  for an account with no vault) → del's passphrase twice + words → `road: turnOnSync — library 2aa0214f now names account
+  *[removed for publication]*
+  before: vault 1 · `kp:` 1 · cursor 1 · settings 3 · budget 1 · auth user 1. → the main window's Account… → Delete
+  Account… — the form: "Your account, its sync copy on our server, and its keys are deleted. Nothing on this Mac or your
+  other devices is touched…", the password + "DELETE MY ACCOUNT" → Delete Account (21:10:00) → log `road: deleteAccountHere
+  — library 2aa0214f now names no account … the account was deleted — this library no longer names it (rule 16's local
+  leave)` → signed out, the Account sheet back at sign-in. **prod after: auth user 0 · vault 0 · `kp:` 0 · cursors 0 ·
+  settings 0 · budget 0 · entitlement 0 — the account and every row of it GONE.** **LEG D: PASS.** OBSERVATION W-7 (wording/
+  logic, ticketed at the close): the deletion form tells this FREE test account "This account has an active hosted-sync plan
+  — cancel it first." (the entitlement read answers "active" for an open-sync account with no purchase), so every free
+  user is told to cancel a plan they never bought.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
