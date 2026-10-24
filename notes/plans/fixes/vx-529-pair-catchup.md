@@ -911,8 +911,17 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   `--filter PairPreflightAndGateTests`): `✘ Test run with 1 test in 1 suite failed … with 1 issue` —
   `theFollowsPreflightNamesAWordsChangeElsewhere` at `old == .refused(named)`: the preflight said `"Those twelve words
   don't open this library."` where the core's own act (asserted in the same test, green) says `"Your twelve words were
-  changed on Studio Mac on January 13."`; the nobody's-words guard and nothing-written green. What remains: the fix, the
-  gate's face (a design row — its face test lands with it).
+  changed on Studio Mac on January 13."`; the nobody's-words guard and nothing-written green. THE FIX COMMITTED (this
+  commit): `accountSecretRefusal`'s words arm — on a follow, words the vault refuses that open THIS library's current key
+  through its own key file ⇒ `wordsChangedElsewhere(device:day:)` (the core's `wordsOpenThisLibrary` predicate, restated);
+  else the plain refusal. THE GATE (a design row, R-529-3): `RoadKeyDoorFaces.derive` — `.refused(.followOwed)` while the
+  owed follow is the pair kind ⇒ `ProtectionWords.followFirstToCatchUp(kind, device:day:)` (the follow's notice + "Follow
+  your account to catch this Mac up first."); every other follow keeps the generic line (guarded). Its face test:
+  `theKeyDoorsGateSaysThePairChangeAndPointsAtTheFollow` (all three key doors; the Castle-entry guard). **GREEN** (the
+  harness, `--filter "PairPreflightAndGateTests|ProtectionJoinFollowRoadTests|RoadKeyDoorRoadTests|RoadKeyDoorsModelTests|
+  ProtectionAccountRoadTests|RoadKeyDoorWordsTests"`): `✔ Test run with 44 tests in 6 suites passed`. THE REVERT (named
+  before it runs; one line on this commit, the harness `--filter PairPreflightAndGateTests`, restored by `git checkout --`):
+  RV-P3-1 `ProtectionAccountActs.swift` — the words arm's `follows` clause removed. PENDING (next commit).
 - U2-P4 — scope 4: the check door's fourth answer gains the pointer line in the catch-up state; its E6 variant (R-529-6);
   the door still writes nothing. NOT-STARTED.
 - U2-P5 — scope 7 (core): the E6 heal wired — `regenerateWords`' key-file step lands a missing passphrase lock with the

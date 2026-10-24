@@ -187,7 +187,10 @@ nonisolated enum ProtectionAccountRoad {
     /// The typed secret against the account's vault (a READ): what the core's own checks would refuse, said in the act's
     /// words — a join types one of the account's secrets, either or both, each that is typed opening the vault (rule 14);
     /// the follow types one — the passphrase when it is typed, else the words — and an old passphrase whose lock is not
-    /// the vault's any more names the change (VX-113). nil: it opens.
+    /// the vault's any more names the change (VX-113); VX-529 unit 2 (scope 5): so do the follow's OLD twelve words, which
+    /// open this library through its own key file but not the account's vault (the core's P7-2 split,
+    /// `refusalForWordsTheVaultRefusesAtTheFollow`, mirrored — the preflight never pre-empts it with a false sentence).
+    /// nil: it opens.
     static func accountSecretRefusal(
         _ request: RoadAccountRequest, snapshot: VaultSnapshot?, library: UnlockedLibrary, floor: PassphraseKDF.Floor
     ) -> String? {
@@ -214,7 +217,13 @@ nonisolated enum ProtectionAccountRoad {
         }
         if let words = typed.words {
             guard let key = try? WordsKey.derive(words), VaultModel.master(of: vault, passphrase: nil, words: key) != nil
-            else { return said(.wordsDoNotOpen) }
+            else {
+                if follows, let file = library.keyFile, file.fingerprint == library.fingerprint,
+                   (try? file.open(.words(words), floor: floor)) == library.key {
+                    return said(.wordsChangedElsewhere(device: vault.updatedByDevice, day: snapshot.updatedAt))
+                }
+                return said(.wordsDoNotOpen)
+            }
         }
         return nil
     }

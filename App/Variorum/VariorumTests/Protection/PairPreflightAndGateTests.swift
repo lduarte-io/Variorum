@@ -99,4 +99,44 @@ struct PairPreflightAndGateTests {
         #expect(RoadAccountFaces.actRefusalSentence(try #require(thrown), unfinished: false) == named,
                 "the preflight's sentence IS the act's")
     }
+
+    /// Another device re-made the account's PASSPHRASE (a key door there: the vault's passphrase lock under a new
+    /// descriptor, nothing else moved) — the planted vault written the way `VaultModel` writes it.
+    static func passphraseChangedElsewhere(_ world: World, to passphrase: String, device: String = "Studio Mac") throws {
+        let snapshot = try #require(world.vault.snapshot(Account.account))
+        let master = try #require(snapshot.vault.master(
+            passphrase: try PassphraseKey.derive(Account.passphrase, kdf: snapshot.vault.kdf), words: nil))
+        let fresh = try PassphraseKey.derive(passphrase, kdf: FastIDsLeaf().mintPassphraseKDF())
+        var account = try #require(world.vault.accounts[Account.account])
+        account.vault = try VaultModel.rewrappingPassphrase(snapshot.vault, master: master, passphrase: fresh, device: device)
+        account.revision += 1
+        account.updatedAt = (account.updatedAt ?? Date()).addingTimeInterval(3600)
+        world.vault.accounts[Account.account] = account
+    }
+
+    /// THE GATE (R-529-3 — a design row; its face test): with the pair catch-up owed, the passphrase key doors refuse in
+    /// their place with the pair's own sentence — what changed, on which device and day — and the road (the follow); the
+    /// generic "Your account changed on another device. Follow it first." stays every other follow's.
+    @Test func theKeyDoorsGateSaysThePairChangeAndPointsAtTheFollow() async throws {
+        let world = try await Self.joinedWorld()
+        try Self.passphraseChangedElsewhere(world, to: "a passphrase made elsewhere")
+        let read = try await Account.read(world.session, Account.signedIn)
+        let faces = try #require(ProtectionKeyDoorRoad.faces(read))
+        let reading = try #require(read.facts.vault)
+        let said = ProtectionWords.followFirstToCatchUp(
+            .pairChanged(passphrase: true, words: false), device: "Studio Mac",
+            day: reading.updatedAt.map { ProtectionWords.day($0) })
+        #expect(said.hasPrefix(ProtectionWords.followNotice(
+            .pairChanged(passphrase: true, words: false), device: "Studio Mac",
+            day: reading.updatedAt.map { ProtectionWords.day($0) })))
+        for door in [RoadKeyDoor.changePassphrase, .newWords, .resetForgottenPassphrase] {
+            #expect(faces.face(door) == .refused(said), "\(door): \(faces.face(door))")
+        }
+        // Every other follow keeps the generic gate (a guard): the account entered Castle elsewhere.
+        var moved = try await Self.joinedWorld()
+        moved.accountKeys = try moved.vault.enterCastleElsewhere(
+            Account.account, held: moved.accountKeys, passphrase: Account.passphrase, words: Self.accountWords)
+        let other = try #require(ProtectionKeyDoorRoad.faces(try await Account.read(moved.session, Account.signedIn)))
+        #expect(other.face(.changePassphrase) == .refused(ProtectionWords.doorRefusedFollowOwed))
+    }
 }

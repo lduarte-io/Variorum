@@ -924,6 +924,13 @@ nonisolated enum ProtectionWords {
     /// VX-309 U2 — VX-457 (her "I agree with B"): the Done above stands in the account section as a durable notice until
     /// this one button (the export notice's idiom — `exportNoticeOK`).
     static let followDoneOK = "OK"
+    /// VX-529 unit 2 (scope 5, R-529-3) — a key door's refusal while the account's PAIR changed elsewhere: what changed (the
+    /// follow's own notice — the half, the device, the day), then the road. PROVISIONAL (P-VX529-3's class).
+    static func followFirstToCatchUp(_ kind: FollowKind, device: String?, day: String?) -> String {
+        followNotice(kind, device: device, day: day) + " " + followFirstToCatchUpRoad
+    }
+    /// PROVISIONAL (P-VX529-3's class).
+    static let followFirstToCatchUpRoad = "Follow your account to catch this \(ProtectionCopy.deviceName) up first."
 
     // MARK: - VX-510 — THE ACT'S FIRST ROUND (VX-507) AND THE JOIN'S DOOR (VX-506)
     //
