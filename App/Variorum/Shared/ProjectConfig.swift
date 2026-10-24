@@ -60,9 +60,10 @@ nonisolated enum ProjectConfig {
     static let walkSyncFenceLift = ProtectionWalkSwitch.syncFenceLiftForThisLaunch(
         walkProject: walkProject, productionHost: productionProjectURL.host)
     /// VX-510 D-B3 — the prod test road (R-510-1/-6), decided ONCE: `VARIORUM_PROD_TEST_ROAD=1` with NO walk project (the
-    /// two roads are exclusive — the walk project above, never a second parse) and the allowlist file at the real home
-    /// (mode 600, every entry plainly-test) ⇒ armed; asked but anything amiss ⇒ refused, said once. The coordinates stay
-    /// production's (no walk project); the account fence's protection is the allowlist, admitted per account at connect.
+    /// two roads are exclusive — the walk project above, never a second parse) and the allowlist the launcher HANDS as
+    /// `VARIORUM_PRODTEST_EMAILS` (F-B1-1 (B): the sandbox cannot read the file; every entry plainly-test) ⇒ armed; asked
+    /// but anything amiss ⇒ refused, said once. The coordinates stay production's (no walk project); the account fence's
+    /// protection is the allowlist, admitted per account at connect.
     static let prodTestRoad = ProtectionWalkSwitch.prodTestRoadForThisLaunch(walkProject: walkProject)
     #else
     static let variorumProjectURL = productionProjectURL

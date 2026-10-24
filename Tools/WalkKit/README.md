@@ -329,8 +329,9 @@ state (`NSEvent.modifierFlags` the class property) and for driving other apps.
 ## The scripted first-run walk (VX-509 — VX-510 unit B1, D-B2)
 
 `Tools/WalkKit/first-run-walk.sh <std|castle|del> [--app <Debug Variorum.app>] [--dry-run] | --self-test` drives the
-DEV-store Debug build on the PROD TEST ROAD (`VARIORUM_PROD_TEST_ROAD=1` + `~/.variorum/prod-test-accounts.env` — her
-rulings R-510-1/-6) for ONE named test account: sign in → the words' look (stashed, never read) → Turn on sync → the
+DEV-store Debug build on the PROD TEST ROAD (`VARIORUM_PROD_TEST_ROAD=1` + the allowlist — her rulings R-510-1/-6; the
+script reads `~/.variorum/prod-test-accounts.env` outside the sandbox and hands its one key to the launch as
+`VARIORUM_PRODTEST_EMAILS`, F-B1-1 (B)) for ONE named test account: sign in → the words' look (stashed, never read) → Turn on sync → the
 sheet's "Synced." → the row's "Synced ‹time›" with no relaunch → the server checks through `Tools/prod-read.sh`. It
 refuses (exit 5, nothing launched) unless every guard in its header holds — the allowlist (mode 600, marked, the account
 listed), no walk project, a Debug build outside `/Applications`, zero instances, the stage held, the dev slot set aside,

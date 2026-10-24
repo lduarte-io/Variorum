@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Tools/WalkKit/first-run-walk.sh — VX-509's SCRIPTED FIRST-RUN WALK (VX-510 unit B1, D-B2; the run record
 # notes/plans/fixes/vx-510-first-run-sync.md). The DEV-store Debug build on the PROD TEST ROAD (her rulings R-510-1/-6 —
-# `VARIORUM_PROD_TEST_ROAD=1` + the allowlist), ONE named test account, through: launch → the road armed → sign in → the
+# `VARIORUM_PROD_TEST_ROAD=1` + the allowlist this script hands it), ONE named test account, through: launch → the road armed → sign in → the
 # twelve words' look (stashed, never read) → Settings ▸ Protection ▸ Turn on sync… → THE SHEET'S "Synced." (VX-507) → the
 # row's "Synced ‹time›" with NO relaunch (VX-498) → the server checks through Tools/prod-read.sh (the vault row · the
 # `kp:` secret · a device cursor · data rows). The release checklist row (Tools/Release/release.sh's HANDOFF) names it beside
@@ -32,9 +32,11 @@
 # Exit: 0 the walk PASSED (or the dry run's guards held) · 4 STOPPED at a step (its capture and reason printed; the app is
 # left running for the walker to look — quit it by identity) · 5 refused (a guard; nothing launched).
 #
-# F-B1-1 (the run record — the architect's fork, open): the sandboxed Debug app cannot read ~/.variorum, so until it is ruled
-# the app logs "PROD TEST ROAD (VX-510): REFUSED — the allowlist file can't be read" and this walk STOPS at P2. Under its
-# option (B) the launch below also hands the one key: add `--env VARIORUM_PRODTEST_EMAILS="$LIST"` to the `open` line.
+# F-B1-1 (B), RULED (the run record): the sandboxed Debug app cannot read ~/.variorum, so THIS SCRIPT — outside the sandbox —
+# reads the allowlist file (G2's checks: a regular file, mode 600, every entry 'vxtest') and HANDS its one key to the launch
+# as `--env VARIORUM_PRODTEST_EMAILS=<the list>` beside the road's switch; the app reads only that value and keeps every guard
+# of its own (exactly `1` asks, a walk project refuses, an empty list refuses, every entry marked, the admission per account
+# at connect). The emails are no secret (they show in `ps eww`); the secrets beside them in the file are never handed.
 #
 # Written by implementer session B1 and dry-checked for its guards only — NEVER run against production by that session;
 # its first live run is unit C's (LEG S's S4–S7), where the GUI steps' labels meet the real window for the first time.
@@ -59,6 +61,7 @@ refuse() { print -u2 "first-run-walk REFUSES: $*"; exit 5 }
 
 # --- G1 + G2, pure over a file (the self-test feeds it fixtures) ----------------------------------------------------
 # guard_allowlist <file> <account> → 0, or prints the refusal and returns 1. Values never printed.
+# allowlist_value <file> → the file's one key (the list the launch is handed), read in a subshell; the other keys never.
 guard_allowlist() {
   local file=$1 account=$2
   case $account in std|castle|del) ;; *) print -r -- "unknown account '$account' (std | castle | del)"; return 1 ;; esac
@@ -76,6 +79,7 @@ guard_allowlist() {
   [[ " $list " == *" $email "* ]] || { print -r -- "the $account account's email is not on the allowlist"; return 1 }
   return 0
 }
+allowlist_value() { (set -a; source $1 2>/dev/null; set +a; print -r -- "${VARIORUM_PRODTEST_EMAILS:-}") }
 
 # --- --self-test: the allowlist guard's teeth, over fixtures only ----------------------------------------------------
 if [[ ${1:-} == --self-test ]]; then
@@ -83,7 +87,8 @@ if [[ ${1:-} == --self-test ]]; then
   trap 'rm -rf $T' EXIT
   ok='VARIORUM_PRODTEST_EMAILS="a+vxtest-std@x.test b+vxtest-castle@x.test"
 VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test"
-VARIORUM_PRODTEST_CASTLE_EMAIL="b+vxtest-castle@x.test"'
+VARIORUM_PRODTEST_CASTLE_EMAIL="b+vxtest-castle@x.test"
+VARIORUM_PRODTEST_STD_PASSWORD="notasecret-vxtest0"'
   fixture() { print -r -- "$2" > $T/$1; chmod ${3:-600} $T/$1 }
   fixture good "$ok"
   fixture open "$ok" 644
@@ -112,6 +117,10 @@ VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test"'
   expect "the account not listed" unlisted std refuse
   expect "a link to a good file" link std refuse
   expect "no file" absent std refuse
+  handed=$(allowlist_value $T/good)   # the value the launch is handed (fixture emails — fake, printable)
+  if [[ $handed == "a+vxtest-std@x.test b+vxtest-castle@x.test" ]]; then print -r -- "SELF-TEST the handed value: the list key alone  ok"
+  else print -r -- "SELF-TEST the handed value: '$handed'  FAIL"; fails=$((fails + 1)); fi
+  [[ $handed != *notasecret* ]] || { print -r -- "SELF-TEST the handed value carries another key  FAIL"; fails=$((fails + 1)) }
   (( fails == 0 )) && { print "SELF-TEST: every guard fired as expected"; exit 0 }
   print "SELF-TEST: $fails case(s) wrong"; exit 1
 fi
@@ -162,8 +171,8 @@ grants=$(perl -e 'alarm shift; exec @ARGV' 15 $BIN/vis-tcc com.apple.systemevent
 RUN=$WORK/run-$(date -u +%Y%m%dT%H%M%SZ)-$ACCOUNT
 if [[ -n $DRY ]]; then
   print "first-run-walk DRY RUN — every guard holds for '$ACCOUNT'. The plan (nothing launched):"
-  print "  P1 launch $APP with VARIORUM_PROD_TEST_ROAD=1 (open -n --env; stderr → $RUN/app.log)"
-  print "  P2 ps eww: the road's switch present, no walk project · the log: 'PROD TEST ROAD (VX-510): ARMED'"
+  print "  P1 launch $APP with VARIORUM_PROD_TEST_ROAD=1 + the handed VARIORUM_PRODTEST_EMAILS (open -n --env; stderr → $RUN/app.log)"
+  print "  P2 ps eww: the road's switch and the handed list present, no walk project · the log: 'PROD TEST ROAD (VX-510): ARMED'"
   print "  P3 prod read: the account exists and is confirmed (auth.users by email → its id)"
   print "  P4 sign in (the row's Sign in… → Email/Password typed by type-prod-test-secret)"
   print "  P5 the row: 'Sync isn't on for this library yet' · Settings ▸ Protection ▸ Record your twelve words… → Copy → stash"
@@ -205,9 +214,13 @@ waitfor() {  # <label> <seconds> — until a control or text with that label is 
 }
 prodread() { $REPO/Tools/prod-read.sh "$1" }
 
-step P1 "launch the Debug build on the prod test road"
+step P1 "launch the Debug build on the prod test road (the allowlist handed — F-B1-1 (B))"
 author
-open -n --env VARIORUM_PROD_TEST_ROAD=1 --env OS_ACTIVITY_DT_MODE=YES --stderr $RUN/app.log $APP
+LIST=$(allowlist_value $ALLOW)   # G2 checked this file; never printed
+[[ -n ${LIST// /} ]] || stop "the allowlist's list is empty"
+open -n --env VARIORUM_PROD_TEST_ROAD=1 --env VARIORUM_PRODTEST_EMAILS="$LIST" --env OS_ACTIVITY_DT_MODE=YES \
+  --stderr $RUN/app.log $APP
+unset LIST
 for i in {1..40}; do PID=$(pgrep -f "$APP/Contents/MacOS" | head -1); [[ -n $PID ]] && break; sleep 0.5; done
 [[ -n $PID ]] || stop "the Debug build did not start"
 log "pid $PID"
@@ -215,6 +228,7 @@ log "pid $PID"
 step P2 "the road: the process's environment and the app's own line"
 envline=$(ps eww -p $PID)
 [[ $envline == *"VARIORUM_PROD_TEST_ROAD=1"* ]] || stop "the launched process does not carry VARIORUM_PROD_TEST_ROAD=1"
+[[ $envline == *"VARIORUM_PRODTEST_EMAILS="* ]] || stop "the launched process does not carry the handed allowlist"
 [[ $envline != *"VARIORUM_WALK_PROJECT_URL="* ]] || stop "the launched process carries a walk project"
 unset envline   # never printed
 for i in {1..60}; do grep -q "PROD TEST ROAD (VX-510): " $RUN/app.log 2>/dev/null && break; sleep 1; done

@@ -1210,7 +1210,65 @@ kind.
 
 ### UNIT B2 — LIVE STATUS (the implementer owns this section)
 
-*(NOT STARTED — spawned after unit B1 closes.)*
+**NOT DONE BY THIS SESSION (first, as the contract asks):** *(in progress — kept current; the close states it whole.)* No
+`xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact (the run's traps). The
+walk script's `--env` hand-off (F-B1-1) is dry-checked only — its first live proof is unit C's P2 (the process's `ps eww`
+and the app's own `ARMED` line).
+
+*Implementer session B2 — Opus 5.5, xhigh. Pre-fix tree = `b07c2833f` (unit B1's product files). Every claim not yet run is
+PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+  `notes/SyncSpec.md` §3 (read whole); `notes/SurfaceContracts.md`'s protection bullet whole; `notes/SessionResiliencyProtocol.md`;
+  this file WHOLE; vx-488's M1 RECORD WHOLE + OPEN ITEMS M1 (c); vx-494's R-494-4; the walk switch's road, `ProjectConfig`,
+  `ProdTestRoadTests`, `Tools/WalkKit/first-run-walk.sh`: DONE (the code for D-B4/D-B6/D-B5 is read as each piece starts).
+- **Piece 0** — the harness: DONE (not durable — this session's scratchpad `vx510b2-harness`, unit B1's copied whole but its
+  build products; runner `b2/test.sh <log> <filter|ALL>` under a watchdog, `b2/revert.sh` for the reverts). **BASELINE on the
+  pre-fix tree (`b07c2833f`), the three harness-PATH artifacts `--skip`ped (unit A's Piece 0): `✔ Test run with 477 tests in
+  82 suites passed`** — exactly B1's close.
+- **Piece F — F-B1-1 (B), RULED (Part of VX-510): DONE (this commit — ITS HASH IS IN THE NEXT LINE'S FLIP; the orchestrator
+  builds the live walk from it).** `Shared/Protection/ProtectionWalkSwitch.swift`: the app reads the allowlist from the launch
+  environment's `VARIORUM_PRODTEST_EMAILS` (the file's one key's shape — space-separated; one pair of surrounding quotes
+  dropped), never a file — `AllowlistRead`, `readAllowlist`, `realHome`, `prodTestAllowlistPath` and the file parse DELETED;
+  `prodTestRoad(switchValue:walkProject:allowlist:)`'s input is the handed value (nil = not handed), read only when asked;
+  refusals now `walkProjectToo` · `allowlistNotHanded` (new) · `allowlistEmpty` · `unmarkedEntry` (the file's missing /
+  unreadable / not-600 refusals left with the file); `prodTestRoadForThisLaunch(walkProject:environment:)` (the environment
+  injectable, defaulting to the process's). Every in-app guard kept and unchanged: exactly `1` asks, a walk project refuses
+  first, empty refuses, every entry carries `vxtest`, the admission per account at connect (`AppServices` untouched).
+  `Shared/ProjectConfig.swift`: its comment. `Tools/WalkKit/first-run-walk.sh`: P1 reads the file's one key in a subshell
+  (`allowlist_value` — after G2's checks: a regular file, mode 600, every entry marked, the account listed) and launches with
+  `--env VARIORUM_PRODTEST_EMAILS="$LIST"` beside the switch (never printed; the emails are no secret — `ps eww` shows them;
+  the secrets beside them are never handed); P2 also checks the process carries the handed list; the header's F-B1-1 note
+  states the ruled shape; `--self-test` gains the handed-value case (the list key alone, never another key). `README.md`'s
+  sentence. Pins (`ProdTestRoadTests`, every file-reading pin now the env form): `withNoSwitchTheFenceHoldsAndNothingIsRead`,
+  `theSwitchWithAWalkProjectRefuses`, `eachAllowlistFaultRefusesAndTheFenceStands` (nil · empty · blank · `""` · an unmarked
+  entry beside a marked one · alone · a her-shaped bare address beside a test one), `theSwitchAndAHandedMarkedListArmTheRoad`,
+  `theHandedListIsParsedAsTheFilesOneKey`, **NEW** `theLaunchReadsTheHandedListFromItsEnvironment` (the launch's own reading:
+  armed on the switch + the list; the switch alone refuses as nothing handed — no file read in its place; a list without the
+  switch asks nothing; an unmarked handed entry refuses), **NEW** `theRoadReadsNoFile` (guard, code only: the road's section
+  names no file API), **NEW** `aHerShapedAddressIsNeverAdmitted` (an armed list of plus-addresses admits neither the bare inbox
+  address nor a case, plus or suffix variant; the bare address handed refuses the road outright); `aReleaseBuildCompilesNothing
+  OfTheRoad` also names `VARIORUM_PRODTEST`. The new pins need the new seam to compile — their red is the reverts' below.
+  **The harness, `--filter "ProdTestRoadTests|SyncWalkFenceTests|ProtectionWalkSwitchTests|ProtectionWalkProjectTests|
+  SyncLockedRowTests"`: `✔ Test run with 34 tests in 5 suites passed`**; no warning in a touched file. The walk script:
+  `zsh -n` clean; `--self-test` → every case as expected, `SELF-TEST: every guard fired as expected` exit 0.
+  **THE REVERTS (named BEFORE any run; each one file — `ProtectionWalkSwitch.swift` — on the committed tree, the harness
+  `--filter ProdTestRoadTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** PENDING —
+  - **RF-1** the launch's reading hands the rule nothing (`allowlist: { nil }`) [`theLaunchReadsTheHandedListFromItsEnvironment`].
+  - **RF-2** the marker check removed [`eachAllowlistFaultRefusesAndTheFenceStands`, `aHerShapedAddressIsNeverAdmitted` (the
+    outright refusal), `theLaunchReadsTheHandedListFromItsEnvironment` (the unmarked leg)].
+  - **RF-3** a list not handed reads as an empty one (`allowlist() ?? ""`) [`eachAllowlistFaultRefusesAndTheFenceStands` (nil),
+    `theLaunchReadsTheHandedListFromItsEnvironment` (the switch alone)].
+  - **RF-4** the empty guard removed (an empty list arms) [`eachAllowlistFaultRefusesAndTheFenceStands`].
+  - **RF-5** the quote drop removed [`theHandedListIsParsedAsTheFilesOneKey`, `eachAllowlistFaultRefusesAndTheFenceStands` (`""`)].
+  - **RF-6** the admission matches loosely (an entry containing the address, or the address containing an entry)
+    [`aHerShapedAddressIsNeverAdmitted`].
+  (The walk script's `--env` line has no headless revert — nothing may launch here; unit C's P2 proves it live.)
+- **Piece 1 — D-B4 (VX-501):** NOT STARTED.
+- **Piece 2 — D-B6 (VX-511):** NOT STARTED.
+- **Piece 3 — D-B5 (VX-503, the trace):** NOT STARTED.
+- **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
+  `build-for-testing` into `DerivedData/vx510-b2` / `vx510-b2-ios`) and THE MAC-SUITE LIST:** NOT STARTED.
 
 ## UNIT B3 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B2 closes)
 

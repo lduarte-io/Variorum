@@ -193,27 +193,20 @@ nonisolated enum ProtectionWalkSwitch {
         return lift
     }
 
-    // MARK: - VX-510 D-B3 — THE PROD TEST ROAD (R-510-1, R-510-6: "Env flag + allowlist")
+    // MARK: - VX-510 D-B3 — THE PROD TEST ROAD (R-510-1, R-510-6: "Env flag + allowlist"; F-B1-1 (B), ruled)
 
     /// `VARIORUM_PROD_TEST_ROAD=1`: a DEBUG launch asking for the named, narrow exception to the A4 fence — the DEV store may
-    /// sync with PRODUCTION, and only while an account the local allowlist names is signed in (her rulings R-510-1/-6: "a
-    /// named road for named test accounts; never delete the fence that keeps every other walk off prod"). Release: absent.
+    /// sync with PRODUCTION, and only while an account the allowlist names is signed in (her rulings R-510-1/-6: "a named
+    /// road for named test accounts; never delete the fence that keeps every other walk off prod"). Release: absent.
     static let prodTestRoadKey = "VARIORUM_PROD_TEST_ROAD"
-    /// The allowlist (R-510-6): this file under the user's REAL home, mode 600, its one key a space-separated list of test
-    /// emails, every one carrying the plainly-test marker. The same file `Tools/prod-confirm-test-user.sh` and the typing
-    /// helpers read; the secrets beside the one key are never parsed, kept or logged here.
-    static let prodTestAllowlistPath = ".variorum/prod-test-accounts.env"
+    /// The allowlist, HANDED BY THE LAUNCH (F-B1-1 (B), ruled): the sandboxed Debug app cannot read `~/.variorum/` (both
+    /// configurations share one sandboxed entitlements file), so the walk launcher (`Tools/WalkKit/first-run-walk.sh`,
+    /// outside the sandbox) reads the ONE source of truth — `~/.variorum/prod-test-accounts.env`, mode 600, every entry
+    /// plainly-test — and hands that file's one key to the launch under the same name: a space-separated list of test
+    /// emails. The app reads only this value — never a file — and keeps every guard of its own: exactly `1` asks, a walk
+    /// project refuses, an empty list refuses, every entry carries the marker, and the admission is per account at connect.
     static let prodTestEmailsKey = "VARIORUM_PRODTEST_EMAILS"
     static let prodTestMarker = "vxtest"
-
-    /// What the launch found at the allowlist's path (read only when the road's switch is on).
-    enum AllowlistRead: Equatable, Sendable {
-        case missing
-        /// Present, but it could not be read (a permission — the App Sandbox denies a home path outside the container
-        /// unless the build grants it; the unit B1 record's FORK).
-        case unreadable
-        case present(mode: Int, contents: String)
-    }
 
     /// The listed test accounts, case-folded.
     struct ProdTestAllowlist: Equatable, Sendable {
@@ -230,9 +223,7 @@ nonisolated enum ProtectionWalkSwitch {
     /// Why an asked-for road did not arm (the launch says it once — never an email).
     enum ProdTestRoadRefusal: String, Equatable, Sendable {
         case walkProjectToo = "a walk project is set too — the two roads are exclusive"
-        case allowlistMissing = "the allowlist file is missing"
-        case allowlistUnreadable = "the allowlist file can't be read"
-        case allowlistNotPrivate = "the allowlist file is not mode 600"
+        case allowlistNotHanded = "the launch handed no allowlist (VARIORUM_PRODTEST_EMAILS)"
         case allowlistEmpty = "the allowlist names no account"
         case unmarkedEntry = "an allowlist entry is not a plainly-test address"
     }
@@ -254,71 +245,39 @@ nonisolated enum ProtectionWalkSwitch {
 
     /// The road's rule, pure. `switchValue`: the launch's `VARIORUM_PROD_TEST_ROAD` (exactly `1` asks); `walkProject`:
     /// `ProjectConfig`'s OWN resolved walk project (a walk project and the road are exclusive — the walk's coordinates are a
-    /// throwaway's, the road's production's); `allowlist`: the file's read, made ONLY when the road was asked.
+    /// throwaway's, the road's production's); `allowlist`: the launch's handed `VARIORUM_PRODTEST_EMAILS` (nil = not
+    /// handed), read ONLY when the road was asked.
     static func prodTestRoad(
-        switchValue: String?, walkProject: WalkProject?, allowlist: () -> AllowlistRead
+        switchValue: String?, walkProject: WalkProject?, allowlist: () -> String?
     ) -> ProdTestRoad {
         guard switchValue?.trimmingCharacters(in: .whitespacesAndNewlines) == "1" else { return .none }
         guard walkProject == nil else { return .refused(.walkProjectToo) }
-        switch allowlist() {
-        case .missing:
-            return .refused(.allowlistMissing)
-        case .unreadable:
-            return .refused(.allowlistUnreadable)
-        case .present(let mode, let contents):
-            guard mode == 0o600 else { return .refused(.allowlistNotPrivate) }
-            let emails = allowlistEmails(contents)
-            guard !emails.isEmpty else { return .refused(.allowlistEmpty) }
-            guard emails.allSatisfy({ $0.contains(prodTestMarker) }) else { return .refused(.unmarkedEntry) }
-            return .armed(ProdTestAllowlist(emails: Set(emails)))
+        guard let handed = allowlist() else { return .refused(.allowlistNotHanded) }
+        let emails = allowlistEmails(handed)
+        guard !emails.isEmpty else { return .refused(.allowlistEmpty) }
+        guard emails.allSatisfy({ $0.contains(prodTestMarker) }) else { return .refused(.unmarkedEntry) }
+        return .armed(ProdTestAllowlist(emails: Set(emails)))
+    }
+
+    /// The handed list's entries — the file's one key's shape: whitespace-split, case-folded; one pair of surrounding quotes
+    /// is dropped (a launcher that passed the file's quoted form), nothing else is interpreted.
+    static func allowlistEmails(_ handed: String) -> [String] {
+        var value = handed.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let quote = value.first, quote == "\"" || quote == "'", value.count >= 2, value.last == quote {
+            value = String(value.dropFirst().dropLast())
         }
-    }
-
-    /// The allowlist's one key, parsed from the shell-sourceable file (`KEY="a b c"`, `export` optional, quotes optional;
-    /// comments and every other key skipped unread): its entries, whitespace-split, case-folded. A key given twice: the
-    /// last wins, as the shell's `source` does.
-    static func allowlistEmails(_ contents: String) -> [String] {
-        var found: [String] = []
-        for rawLine in contents.split(whereSeparator: \.isNewline) {
-            var line = rawLine.trimmingCharacters(in: .whitespaces)
-            if line.hasPrefix("export ") { line = String(line.dropFirst("export ".count)).trimmingCharacters(in: .whitespaces) }
-            guard line.hasPrefix(prodTestEmailsKey + "=") else { continue }
-            var value = String(line.dropFirst(prodTestEmailsKey.count + 1)).trimmingCharacters(in: .whitespaces)
-            if let quote = value.first, quote == "\"" || quote == "'", value.count >= 2, value.last == quote {
-                value = String(value.dropFirst().dropLast())
-            }
-            found = value.split(whereSeparator: \.isWhitespace).map { $0.lowercased() }
-        }
-        return found
-    }
-
-    /// The file at `path`, read: missing, unreadable, or its permission bits and text. A non-regular file (a link, a folder)
-    /// reads as unreadable — never followed.
-    static func readAllowlist(atPath path: String) -> AllowlistRead {
-        var info = stat()
-        guard lstat(path, &info) == 0 else { return errno == ENOENT ? .missing : .unreadable }
-        guard info.st_mode & S_IFMT == S_IFREG else { return .unreadable }
-        guard let data = FileManager.default.contents(atPath: path), let text = String(data: data, encoding: .utf8)
-        else { return .unreadable }
-        return .present(mode: Int(info.st_mode & 0o777), contents: text)
-    }
-
-    /// The user's REAL home (the account database's — under the App Sandbox `NSHomeDirectory()` is the container's).
-    static var realHome: String? {
-        guard let entry = getpwuid(getuid()), let home = entry.pointee.pw_dir else { return nil }
-        return String(cString: home)
+        return value.split(whereSeparator: \.isWhitespace).map { $0.lowercased() }
     }
 
     /// The launch's one road (`ProjectConfig.prodTestRoad` calls it once, at first use): the rule over THIS process's
-    /// environment and the allowlist at the real home, said once in the protection log — armed (how many accounts, never
-    /// which) or refused (why). Nothing is said when the road was not asked.
-    static func prodTestRoadForThisLaunch(walkProject: WalkProject?) -> ProdTestRoad {
+    /// environment — the switch and the handed allowlist, never a file — said once in the protection log: armed (how many
+    /// accounts, never which) or refused (why). Nothing is said when the road was not asked.
+    static func prodTestRoadForThisLaunch(
+        walkProject: WalkProject?, environment: [String: String] = ProcessInfo.processInfo.environment
+    ) -> ProdTestRoad {
         let road = prodTestRoad(
-            switchValue: ProcessInfo.processInfo.environment[prodTestRoadKey], walkProject: walkProject,
-            allowlist: {
-                guard let home = realHome else { return .unreadable }
-                return readAllowlist(atPath: (home as NSString).appendingPathComponent(prodTestAllowlistPath))
-            })
+            switchValue: environment[prodTestRoadKey], walkProject: walkProject,
+            allowlist: { environment[prodTestEmailsKey] })
         switch road {
         case .none:
             break
