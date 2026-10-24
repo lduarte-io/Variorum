@@ -582,6 +582,16 @@ nonisolated enum ProtectionWords {
         case (nil, nil): return "Your passphrase was changed on another device."
         }
     }
+    /// VX-529 — VX-113's twin for the twelve words: words that still open this library but were replaced on another
+    /// device (`ExecutorRefusal.wordsChangedElsewhere`). PROVISIONAL (P-VX529-3's class — drafted, her wordings pass).
+    static func wordsChangedElsewhere(device: String?, day: String?) -> String {
+        switch (device, day) {
+        case let (device?, day?): return "Your twelve words were changed on \(device) on \(day)."
+        case let (device?, nil): return "Your twelve words were changed on \(device)."
+        case let (nil, day?): return "Your twelve words were changed on \(day)."
+        case (nil, nil): return "Your twelve words were changed on another device."
+        }
+    }
 
     /// The doors' refusals (a door that can't act now says why in its place; "not this posture's door" renders nothing).
     static let doorRefusedOtherAccount = "Another account is signed in on this \(ProtectionCopy.deviceName). Sign in to "

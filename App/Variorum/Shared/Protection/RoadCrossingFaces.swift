@@ -291,6 +291,9 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         case .secretMissing?, .wordsMustBeTyped?, .secretsRequired?: return ProtectionWords.crossingSecretsMissing
         case .passphraseChangedElsewhere(let device, let day)?:
             return ProtectionWords.passphraseChangedElsewhere(device: device, day: day.map { ProtectionWords.day($0) })
+        // VX-529 — VX-113's words twin (PROVISIONAL sentence).
+        case .wordsChangedElsewhere(let device, let day)?:
+            return ProtectionWords.wordsChangedElsewhere(device: device, day: day.map { ProtectionWords.day($0) })
         case .actInFlight?: return ProtectionWords.copyDoorBusy
         case .needsFreshVault?, .vaultOutOfReach?: return ProtectionWords.doorRefusedNeedsVault
         case .accountMoved?: return ProtectionWords.doorRefusedFollowOwed

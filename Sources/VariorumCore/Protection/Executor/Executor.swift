@@ -140,6 +140,11 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     case wordsMustBeTyped
     /// VX-113: the passphrase typed was changed elsewhere — the change named.
     case passphraseChangedElsewhere(device: String?, day: Date?)
+    /// VX-529 — VX-113's twin for the twelve words: the words typed still open
+    /// this library but the account's words were changed elsewhere — named
+    /// (the follow's words arms; the doors around the follow say "follow it
+    /// first" instead — `accountMoved`).
+    case wordsChangedElsewhere(device: String?, day: Date?)
     case wrongMode(ProtectionMode)
     case notSynced
     case noAccountSignedIn

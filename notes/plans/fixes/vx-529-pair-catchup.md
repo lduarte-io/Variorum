@@ -486,7 +486,9 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   - P7-0 — `ExecutorRefusal.wordsChangedElsewhere(device:day:)` (VX-113's words twin), its drafted sentence in
     `ProtectionWords` (P-VX529-3's class, PROVISIONAL — her pass) and the two act-refusal faces' arms beside VX-113's
     (every app switch over `ExecutorRefusal` has a `default:` arm, so nothing else breaks); unused by the core until
-    P7-2. NOT-STARTED.
+    P7-2. DONE (this commit) — `Executor.swift`; `ProtectionWords.wordsChangedElsewhere(device:day:)` ("Your twelve words
+    were changed on ‹device› on ‹day›.", the VX-113 sentence's four-arm form); `RoadCrossingFaces` /
+    `RoadAccountFaces` `actRefusalSentence` arms. Core builds; the app arms' compile PENDING (your xcodebuild).
   - P7-1 — THE WORDS ARM: the account's CURRENT words typed when the passphrase half moved ⇒ the stale passphrase lock
     DROPS (`relockedToTheAccountsPair`'s passphrase-lock change becomes keep / re-make / drop); the door's requirement for
     the passphrase-moved case becomes `.oneSecret` (either of the account's two). Red pins first. NOT-STARTED.

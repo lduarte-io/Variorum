@@ -453,6 +453,9 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
         // day the vault's row says — the wire's `updated_at`, `AccountVaultClient.day`).
         case .passphraseChangedElsewhere(let device, let day)?:
             return ProtectionWords.passphraseChangedElsewhere(device: device, day: day.map { ProtectionWords.day($0) })
+        // VX-529 — VX-113's words twin: the old twelve words after a words change elsewhere (PROVISIONAL sentence).
+        case .wordsChangedElsewhere(let device, let day)?:
+            return ProtectionWords.wordsChangedElsewhere(device: device, day: day.map { ProtectionWords.day($0) })
         case .actInFlight?: return ProtectionWords.copyDoorBusy
         case .needsFreshVault?, .vaultOutOfReach?: return ProtectionWords.doorRefusedNeedsVault
         case .accountMoved?: return ProtectionWords.doorRefusedFollowOwed
