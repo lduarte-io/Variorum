@@ -91,6 +91,22 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   Settings ▸ New Words stays the deliberate door. Linear: parented under VX-510.
 - **R-510-15 — VX-513, the read-only check: "Yes, in this run (Recommended)"** → IN THIS RUN (unit B3, D-B7, its own
   small session after B2 — a new face). Linear: parented under VX-510.
+- **R-510-16 — VX-517 (2026-10-23 ~21:50): "I lean towards joining this run. Do you agree or disagree? Do you need me to
+  do touchid at any moment to help?"** → the orchestrator AGREED (the remainder of VX-503's class; rule 16 untrue for the
+  Touch ID class; the run holds the custody slot and the Fable review) → IN THIS RUN as **unit B4** (D-B8 below), parented
+  under VX-510; her Touch ID for the live proof at a window she picks (signalled by the ambient, R-510-18).
+*[removed for publication]*
+  she's available. It might not be during a run."** → noted on VX-508; the run's VX-508 watch ENDS.
+- **VX-521, her thoughts: "if you show them, how can the account coexist with those two? someone who clicks replace and
+  writes down the 12 words but closes the app before confirming theyve written them down might be quite confused.
+  thoughts?"** → the orchestrator agreed (one live set per account; holding the change until the acknowledgement makes
+  her confusing case real); recommended keeping today's behavior and closing VX-521 at her word (ticket comment).
+- **VX-527, her hand (the Pro's own trackpad): "click on use your twelve words first only works on the little arrow - I
+  used the pro's own trackpad. the words don't open it." + "the click affordance is very small"** → VX-527 CONFIRMED
+  (retitled, Backlog); offered to her as a rider (no answer yet — default: a later run).
+- **R-510-18 — her signal: "just let me know when I'm needed - if you want to send an obvious signal, put up one of the
+  orchestrator's decorations (the koi fish style ones) when you need me and i'm sure to see it and come over."** → memory
+  `signal-her-with-the-ambient`; this run raises `Tools/ambient on --allow-claimant vx-510` when blocked on her hands.
 
 ## HER AIR REPORT (2026-10-23 evening, after the 0.10 update — her words verbatim, each item traced and dispositioned)
 
@@ -195,7 +211,8 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | UNIT B1 DONE (`2576629c7`…`31b8e2636`; `FirstRunDrillTests` every arm + the negatives; `Tools/WalkKit/first-run-walk.sh` + release.sh's step-0 gate row; harness 477/82 green; 18 reverts red as named; re-run by the orchestrator 48/6 green); the Mac stage batch PENDING (the closing run) |
 | 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | DONE — unit B1 (D-B3) + unit B2's F-B1-1 (`4a5ef39e3`: the list rides `VARIORUM_PRODTEST_EMAILS` in the launch env); ARMED and used live through unit C (three accounts) |
 | 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | UNIT B2 DONE (`4a5ef39e3`…`f4af7e368`; harness 502/85 green; reverts RF-1…6, RD4-1…8, RD6-1…5, RD5-1…2 red as named; Mac + iOS build-for-testing green; claims spot-checked by the orchestrator); VX-501 + VX-511 GREEN LIVE on production (unit C C2/C4); VX-503 fixed (`226cf7c20`); T-B5-2 → **VX-517** (Needs Lillian); the Mac stage batch PENDING (the closing run) |
-| 6c | VX-513 (the read-only check-your-secrets door) | IN FLIGHT — unit B3 (D-B7); its live walk on the synced arm follows on the held walk setup |
+| 6c | VX-513 (the read-only check-your-secrets door) | UNIT B3 DONE (`73dc65dab`…`2e3d335d8`; harness 519/89 green; RC-1…16 red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 65/9 green; P-VX510-B3-2 ruled (b) provisionally); the live walk on the synced arm NEXT (the orchestrator, on the held setup); the Mac stage batch PENDING (the closing run) |
+| 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 — D-B8 + the brief written; spawning; the live proof needs her Touch ID (the ambient signals) |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | LEGS S · D · C PASS (unit C — THE RECORD): three fresh accounts (std, del, castle) set up with no relaunch, server-verified; both postures; key changes; backups; typed secrets; a second library's join in each posture; Delete Account; Use Standard. Unit C's close (cleanup + dev store back) after B3's walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | NOT STARTED |
@@ -1846,6 +1863,64 @@ not yet run is PENDING.*
   was changed on ‹device› on ‹day›."; the new passphrase → "…doesn't open this library, but it opens your account."
   (P-VX510-B3-2); (6) locked behind the lobby (Castle ⌃⌘L) — no Settings pane, no door.
 
+**THE ARCHITECT ON B3 (2026-10-23, verified):** B3's claims spot-checked — commits `73dc65dab`…`2e3d335d8`, no `Sources/`
+line, every touched file in the app's protection layer; the orchestrator re-ran the run's new pin suites in B3's harness
+(`vx510b3-harness`): `✔ Test run with 65 tests in 9 suites passed` (SecretCheck · TypedUnlockSyncKeys ·
+WordsCardAfterAccountAct · TypedSecretNeverPresses · FirstRunDrill · ProdTestRoad). **P-VX510-B3-2 ruled (b), PROVISIONAL**
+(the fourth answer "…doesn't open this library, but it opens your account." — D-B7's "honest split" read whole: a secret
+that IS the account's current one must never be told it opens nothing); the words (P-VX510-B3-1) hers. The Mac-hosted
+suites (`SecretCheckSurfaceTests`, the extended `TravellingDotsIndicatorTests`, …) ride the closing stage batch.
+
+## D-B8 — VX-517 (R-510-16), the Touch ID sync-keys class forgotten (unit B4; the architect's design)
+
+The trace is B2's T-B5-2/T-B5-4 (UNIT B2 — LIVE STATUS, Piece 3) — read it whole. The design takes B2's options **(a) +
+(c)**, not (b):
+- **(a) — forgets delete BOTH classes BY NAME for the account,** never by listing: the leaves' `forgetSyncKeys(of:)` and
+  `forgetUnboundSyncKeys`, the plan runner's rollback sweep, and `holdSyncKeys`' drops (`drop(.touchid)` on a move to
+  Standard; the silent drop on a move to Castle + Touch ID) each delete the named item of each class for every account
+  they mean, whether or not a listing saw it. The delete is idempotent (`ProtectionKeychain.delete` accepts not-found) and
+  an ACL'd item's delete never prompts (`writeSyncKeys(.touchid)` already relies on it). `forgetUnboundSyncKeys` — "every
+  account but the bound one" — needs the accounts it should forget: name its source (the custody record's past accounts,
+  the leaf's listing ∪ the act's known accounts) in your record; if no honest source exists for an account the Mac has
+  never listed, say so as a FORK and stop rather than guess.
+- **(c) — a STANDARD library never reads the Touch ID class:** `holdSyncKeysForTheSession` (KeyDoors.swift) and every
+  other reader consult the library's posture first; Standard files silently (rule 15), so its only reads are the silent
+  item, session memory and the vault derivation. (B2's `material(for:)` vault-first fix stays as it is.)
+- **Why not (b) alone:** wiring `touchIDCandidates` keeps the forgets dependent on a candidate set being complete —
+  exactly the class of blindness that hid this; (a) makes the forget total by construction. Wiring (b) as well is allowed
+  if it falls out naturally (the leaf's own comment asks for it), never as the fix.
+- **Pins (red on the old tree):** a PRODUCTION-SHAPED planted leaf — its listing BLIND to a Touch ID item with no silent
+  sibling, exactly as `KeychainSyncKeysLeaf.syncKeyItems()` behaves — never the all-seeing planted leaf (which is why no
+  test ever saw this). Arms: a Castle + Touch ID library's leave forgets its Touch ID item; Use Standard on a synced Castle
+  + Touch ID library leaves no Touch ID item and raises no Touch ID read; a later key door on that (now Standard) library
+  reads no Touch ID; the rollback sweep removes a Touch ID-only item; `forgetUnboundSyncKeys` removes a stale Touch ID item
+  of another account; a Castle + Touch ID library's own reads still work (no regression); zero prompts counted on every
+  Standard arm (the `touchIDReads` counter B2's `TypedSecretNeverPressesTests` uses).
+- **The real keychain:** if `KeychainLeavesTests` / `ProtectionKeychainFamilyTests` (real-keychain, Mac-hosted) need a
+  new arm, write it and list it for the closing stage batch — you can't run it.
+- **Custody code:** the whole diff gets the Fable cold review at the ladder. No `Sources/VariorumCore/Sync/` line; a seam
+  that needs one is a FORK.
+
+## UNIT B4 — THE BRIEF (a fresh `opus-implementer`, one session; spawned after unit B3 closed)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE (rules 15–16 and the
+custody rules are your charter's ground); `notes/SurfaceContracts.md`'s protection bullet whole;
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B8 is your charter; UNIT B2 — LIVE STATUS Piece 3 is the trace;
+units A/B1/B2/B3 LIVE STATUS for the harness recipe and the seams); the code: `Shared/Protection/KeychainSyncKeysLeaf.swift`,
+`KeychainCustodyLeaf.swift`, `ProtectionKeychain.swift`, `ProtectionSystem.swift`, `AppBootstrap.swift`, and the road's
+`CommonSteps.swift`, `AccountActs.swift`, `PlanRunner.swift`, `KeyDoors.swift` (find them under `App/Variorum/Shared/`).
+
+**Your scope — exactly D-B8:** the forgets, the drops, the Standard read guard, their pins. Not yours: everything else;
+canon, Linear, `notes/QUESTIONS.md`. A seam needing a core-package change or any `Sync/` line is a FORK: stop and propose.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's**, with `build-for-testing` into
+`DerivedData/vx510-b4` / `vx510-b4-ios`; build your harness as `vx510b4-harness` from B3's (`vx510b3-harness` — it links
+every file the run added). Commits say `Part of VX-517`; NO trailers of any kind.
+
+### UNIT B4 — LIVE STATUS (the implementer owns this section)
+
+*(NOT STARTED.)*
+
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
 **Machinery:** a held `Tools/stage` claim (renewed per leg); the walk Debug build of the FINAL tree into
@@ -2093,6 +2168,24 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   inside it), while an AXPress opened it at once — real-mouse behavior unverified.
 - **Held for B3's walk (the orchestrator's call):** the stage, the walk build and library `223c4e7e` (synced to `castle`,
   Standard) stay up so VX-513's check door can be walked on its synced arm the moment B3 lands; unit C's close follows that.
+- **The walk's observations FILED (2026-10-23, the orchestrator; every row `related` to VX-510):** W-7 → **VX-518** (Medium,
+  v1 release readiness) · W-2 → **VX-519** (Medium, v1 release readiness) · W-3 + W-9 → **VX-520** (Medium, Castle & backups)
+  · W-4 → **VX-521** (Medium, Needs Lillian — her thoughts above; keep-and-close recommended) · W-5 → **VX-522** (Low,
+  Wording, 18a) · W-6 → **VX-523** (Low, 18a) · W-8 → **VX-524** (Medium, Suspected, Castle & backups) · W-10 → **VX-525**
+  (Low, Castle & backups — B3's check sheet already clears its answer on retyping; Look inside's own sheet is the ticket) ·
+  W-11 + W-12 → **VX-526** (Low, Wording, 18a — its first half is P-VX510-A4, already in her bundle) · W-13 → **VX-527**
+  (Medium, CONFIRMED by her hand) · W-1 → **VX-528** (Low, Exploration, Needs Lillian — is per-Mac seeding intended?). With
+  **VX-517** (B2's T-B5-2 — now a member, R-510-16) the run has filed VX-511…VX-528 less VX-514 (canceled). Pre-launch is
+  her call on each; none set.
+- **VX-527's hand check (21:55):** the Castle library `159caa3f` swapped back into the slot (`223c4e7e` →
+  `…-aside-vx510-walkL5/`), relaunched (pid 82162) to its lobby; the session stopped driving; her trackpad → only the arrow
+  opens it. Quit at the lobby (nothing unlocked); `159caa3f` back to `…-aside-vx510-walkL4/`, `223c4e7e` back in the slot,
+  walkL5 removed.
+- **Machinery (shared worktree):** B3 and the orchestrator shared `~/dev/variorum-vx-510`; the harness caught two Edit
+  races on this file and the orchestrator held its record edits in its scratchpad until B3 closed — nothing lost. Rule from
+  here: the orchestrator edits this file only with `git status` clean, and commits at once.
+*[removed for publication]*
+  at her word (R-510-17).
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
@@ -2140,3 +2233,13 @@ no live proof. Ranked by launch risk. The rows marked ▶ ride THIS run (units B
   **P-VX510-A3** not configured reads the row's "Sync is off" (on a fenced dev store the row says "Sync off (dev
   store)" — a Debug-only mismatch, accepted) · **P-VX510-A4** the join's sheet TITLE and button still say "Turn on
   sync" (the design changed the door only) · the not-yet row wears the quiet caption style, not the warning style.
+- **Unit B's word and timing items (PROVISIONAL, hers):** **P-VX510-B1-1** the follow's line "Synced. This library is up
+  to date with your account again." · **P-VX510-B1-2** the road's refusal line · **P-VX510-B2-1** VX-501's vault read
+  bounded at 10 s (alternatives: shorter, or no wait plus a round when the load lands) · **P-VX510-B3-1** the check door's
+  words (lead "Type your passphrase or your twelve words to check them. Checking changes nothing."; Check · Checking… ·
+  Close; "That passphrase opens this library." / "…opens this library and your account." / "…opens this library, but not
+  your account.") · **P-VX510-B3-2** the fourth answer "…doesn't open this library, but it opens your account." (built (b);
+  the architect ruled it in, provisionally).
+- **Her calls on filed tickets:** VX-521 (keep-and-close recommended) · VX-527 as a rider in this run? (default: no) ·
+  VX-528 (per-Mac seeding intended?) · Pre-launch on any of VX-517…VX-528.
+- **Her hands, later:** the Touch ID window for VX-517's live proof (the ambient goes up).
