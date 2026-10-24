@@ -3556,3 +3556,39 @@ fine I guess"); (d) VX-503 minted ("yes, ticket that, we should investigate it")
 (f) VX-495 and VX-496 Pre-launch ("Agreed… yes, pre launch. mark it as such."), VX-497 deferred to VM-8's measurement
 with the note in the phone prompt; (g) VX-505 minted, riding the sweep; (h) keep the shield ("Agreed."); (i) as filed
 ("fine.") — later raised to High and into VX-510 after the sitting's tester trace.
+
+## VX-510 — Run: the first-run sync failures (2026-10-23/24)
+
+#240 — **THE VX-510 BUNDLE (the binding record is `notes/plans/fixes/vx-510-first-run-sync.md` — HER KICKOFF RULINGS,
+HER SITTING RULINGS R-510-6…21, the units' LIVE STATUS records, THE LADDER rounds 1–2, HER CLOSEOUT ANSWERS R-510-22…29,
+OPEN ITEMS; the handoff `notes/handoffs/vx-510-handoff.md`).** Every PROVISIONAL was built as its first-drafted arm; her
+R-510-26 ("Keep provisional, review later") keeps the whole bundle provisional until her pass. **The words:**
+**P-VX510-1** (VX-507's sheet — progress "Syncing your library with your account…" + "You can close this — sync keeps
+going, and the bar at the bottom of the window says when it's done."; set-up landed "Synced. Your library is on your
+account now."; join landed "Synced. Your account's writing is in this library now."; blocked "Sync hasn't run yet:
+‹the row's own sentence›.") · **P-VX510-2** (VX-506's unjoined row: (a, built) "Sync isn't on for this library yet" with
+Protection… · (b) "This library doesn't sync yet") · **P-VX510-3** (the join arm's door: (a, built) "Sync this
+library…" · (b) her "Sign into sync…" · (c) "Join your account's sync…") · **P-VX510-A1** (the held line names "the
+main window's banner" — the row's "in the banner below" is false from a sheet over Settings) · **P-VX510-A2** (a round
+that ran but stalled at a straggler reads "Sync hasn't run yet: …" — or a third lead) · **P-VX510-A3** (not configured
+reads "Sync is off"; on a fenced dev store "Sync off (dev store)", Debug-only) · **P-VX510-A4** (the join's sheet still
+TITLES itself and its button "Turn on sync" — the door changed, the sheet didn't; VX-526 carries it) · the not-yet row
+in the quiet caption style · **P-VX510-B1-1** (the follow's line "Synced. This library is up to date with your account
+again.") · **P-VX510-B1-2** (the prod test road's refusal "Sync off (dev store) — this account isn't a listed test
+account", Debug-only) · **P-VX510-B3-1** (the check door's words: "Check my passphrase or twelve words…"; lead "Type your
+passphrase or your twelve words to check them. Checking changes nothing."; Check · Checking… · Close; "That passphrase
+opens this library." / "…opens this library and your account." / "…opens this library, but not your account.").
+**The behaviors:** **P-VX510-B2-1** (VX-501's vault read waits at most 10 s, then the library opens without the keys:
+(a, built) · (b) a shorter bound · (c) no wait plus a round when the load lands) · **P-VX510-B3-2** (the check's fourth
+answer "…doesn't open this library, but it opens your account." — the architect ruled it in) · **D-B8 (c)'s reading**
+("a Standard library never reads the Touch ID class" read as: the class is consulted only where the keys can be filed
+there — a library in Castle, or an act taking one into Castle; a crashed join into Castle must be able to finish) ·
+**F-B4-1** (an accepted residue: a Touch ID-only sync-keys item for an account nothing names any more — a lost-plan
+Move, a set-aside library — stays on the Mac, biometry-gated, never read by a Standard library, dropped by name the next
+time any act files that account; a past-accounts registry would change the custody record's shape). **THE ONES MOST
+WANTING YOUR EYE:** **P-VX510-A4 with P-VX510-3** (one answer covers the join's door, title and button) ·
+**P-VX510-B2-1** (the only timing call — how long a slow network may hold an unlock) · **VX-535** (VX-527's extra 4 pt
+reach isn't honoured live; the words and the row they fill do open it — keep the fallback, or make the gap press).
+Already ruled at the closeout sitting and NOT in this bundle: the release (R-510-22), the test accounts (R-510-23),
+VX-521 and VX-528 closed (R-510-24/-25), Pre-launch = VX-529 only (R-510-27), CastleRules rule 2's clause (R-510-28).
+Status: PROVISIONAL at her word (R-510-26), pending her review pass.
