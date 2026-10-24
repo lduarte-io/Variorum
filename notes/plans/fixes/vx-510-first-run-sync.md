@@ -378,9 +378,26 @@ first draft of each built).
   held: the pre-act rounds refused `encryptionKeysUnavailable`, the act landed, the vault written);
   `vx507_theSetUpsSheetStaysAfterTheActLands` ✘ (the confirm went at `.made`); `theJoinArmsDoorHasItsOwnLabel` ✘×4 (both
   postures: the join wore "Turn on sync…").
-- **Piece 2** — D-A1 (VX-498): `FirstRoundOutcome`, `SyncSession.roundNow()`, `AppServices.runFirstRound()`, the
-  `firstRound` road on `RoadAccountModel` wired by `attach`, called on `.made` for set-up / same-posture join / Move,
-  never for a leave or a re-keying act: NOT STARTED.
+- **Piece 2** — D-A1 (VX-498): DONE (`c7f0172c2`; this record flip rode one commit late — the orchestrator's
+  `864604283` rebased in under the edit). `Shared/SyncSession.swift`: `FirstRoundOutcome` (`held` · `notConfigured` ·
+  `ran(SyncScheduler.Status)`) and `roundNow()` — held → `.held`; no scheduler → `.notConfigured`; else the scheduler's
+  EXISTING public `trigger()` + `awaitIdle()` + `status` (no `Sync/` line; coalescing means a round in flight is followed
+  by exactly one more). `Shared/AppServices.swift`: `runFirstRound()` — the resume leaf's shape (reconnect via
+  `connectSyncIfAllowed` when nothing configured, then `roundNow`). `Shared/Protection/RoadAccountFaces.swift`:
+  `RoadAccountDoorOpen.owesFirstRound` (Turn on sync or Move, never re-keying). `Shared/Protection/RoadAccountModel.swift`:
+  `RoadAccountModel.firstRound` (the composition's road, `signOutRoad`'s precedent), handed to the confirm only for a door
+  that owes one; `RoadAccountConfirmModel` starts it AT ONCE on `.made` (before any words moment), never cancels it, and
+  exposes `awaitFirstRound()` (test-visible). `Shared/AppBootstrap.swift`: `attach` wires `firstRound` → `runFirstRound`
+  (weak; a stopped instance answers `.notConfigured`). New suites `VariorumTests/Protection/FirstRoundConfirmTests.swift`
+  (the model's call: set-up / same-posture join / same-posture Move ask ONCE at `.made`; the three leaves, the re-keying
+  joins, Move into Castle and both follows never; refused / changed presses never; no road → nothing) and
+  `VariorumTests/FirstRoundRoadTests.swift` (guards of the new seams: `roundNow` not configured / held runs nothing / one
+  round to its end / waits for the follow-up of a round in flight; `runFirstRound` reconnects a stopped chain then runs,
+  and the dev store's fence answers at once). **The harness, `--filter
+  "FirstRoundConfirmTests|FirstRoundRoadTests|FirstRoundAfterTheActTests"`: `✘ Test run with 10 tests in 3 suites failed …
+  with 1 issue`** — Piece 1's VX-498 pin now GREEN (`vx498_aSetUpRunsItsFirstRoundWithNoRelaunch` ✔); every new pin ✔; the
+  one ✘ is Piece 1's VX-507 pin (`vx507_theSetUpsSheetStaysAfterTheActLands` — the sheet still goes; Piece 3's). The
+  model-level pins' red is shown by Piece 5's reverts (they need the new seam to compile).
 - **Piece 3** — D-A2 (VX-507): the confirm's first-round phase (progress → outcome in the row's own sentence; Done never
   cancels the round; no road → finishes as today): NOT STARTED.
 - **Piece 4** — D-A3 (VX-506): the unjoined row's not-yet face (the record names no account) with the same Protection…
