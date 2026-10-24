@@ -900,7 +900,10 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   `--filter "PairFollowDoneTests|ProtectionJoinFollowRoadTests|RoadAccountModelTests|FollowDoneNoticeTests"`): `✔ Test run
   with 31 tests in 4 suites passed`. THE REVERTS (named before they run; each one line on this commit, the harness
   `--filter PairFollowDoneTests`, restored by `git checkout --`): RV-P2-1 `ProtectionOpenRoad.swift` — the pair arm removed;
-  RV-P2-2 `RoadAccountModel.swift` — `followDone = roads.followDoneOwed()` back. PENDING (next commit).
+  RV-P2-2 `RoadAccountModel.swift` — `followDone = roads.followDoneOwed()` back. **VERIFIED BY REVERT** on `52eb5cc9c`:
+  RV-P2-1 ⇒ `✘ … 2 tests … with 4 issues` (the four settled-kind rows, exactly the pre-fix red); RV-P2-2 ⇒ `✘ … with 1
+  issue` (`model.followDone == nil`); each restored by `git checkout --`, `git diff --exit-code` clean, the suite `✔ 2 tests`
+  green again. DONE (`8e7d425fe` pins, `52eb5cc9c` fix). No revert is in flight.
 - U2-P3 — scope 5: the preflight's words twin (`accountSecretRefusal` says "Those twelve words don't open this library."
   for old words that DO open it after a words change elsewhere — bug-class, the core's P7-2 split mirrored) and the key
   doors' gate refusal in the detected state speaking the pair sentence (R-529-3). NOT-STARTED.
