@@ -2,20 +2,20 @@
 
 ## FOR YOU, IN ORDER
 
-1. **A release?** Your testers need these fixes: tester B needs a clean re-setup on a fixed build; tester A's eventual
-   upgrade-and-join only confirms itself on a build carrying this run — and your own Air hit VX-501's state during this
-   window. The drafted notes are below; your word mints it (never without).
-2. **Keep `std` and `castle` as standing release-drill accounts?** (`del` was deleted by LEG D and re-minted fresh by
-   the re-walk as the standing fresh-account vehicle; its state at close: PENDING.)
-3. **Pre-launch flags** on the run's filed tickets — the set, grouped by priority: PENDING (the closeout's triage).
-4. **VX-521** — recommended: keep today's behavior and close (your own framing: holding the words change until the
-   acknowledgement makes the confusing case real; VX-511 closed the worst road into the look).
-5. **VX-528** — is per-Mac seeding intended (a second library on the same Mac gets no seed content)?
-6. **The PROVISIONAL wording bundle** — QUESTIONS #PENDING (P-VX510-1…3, A1…A4, B1-1, B1-2, B2-1, B3-1, B3-2, plus
-   D-B8 (c)'s reading, F-B4-1's residue, and F-R1-3 (a): CastleRules rule 2's "until it is dismissed" does not yet name
-   VX-511's third retirement road — one clause, yours alone, the Castle design frozen).
-7. **VX-533** (your Air, this window): after the Touch ID prompt timed out, was the "Unlock with Touch ID" button
-   visible but unresponsive, or gone? One word settles which mechanism gets traced.
+1. **A release? — ANSWERED at the cutover sitting (R-510-22): YES, after the merge.** The successor runs the release
+   road once the PR merges; the notes below presented at the publish.
+2. **The test accounts — ANSWERED (R-510-23): keep all three** (del stays as the fresh-account/deletion vehicle).
+3. **Pre-launch flags — ANSWERED (R-510-27): VX-529 only** (flagged on the board; the grouped list still lands at the
+   closeout's triage for reference).
+4. **VX-521 — ANSWERED (R-510-24): closed, behavior kept.**
+5. **VX-528 — ANSWERED (R-510-25): closed, per-Mac seeding stands** (your words in the record; the restore doors serve
+   the bare-second-library case).
+6. **The PROVISIONAL wording bundle — ANSWERED (R-510-26): stays provisional**, filed in QUESTIONS at the closeout for
+   your later pass. **ONE ITEM STILL OPEN, yours: CastleRules rule 2's clause** — your question and the honest answer
+   (a passphrase join adopts words it never shows) plus the draft clause are in the record's HER CLOSEOUT ANSWERS;
+   say yes / edit / leave-as-is.
+7. **VX-533 — ANSWERED in part:** your "apple timeout … gets pale and then disappears" is on the ticket; the remaining
+   trace (does the lobby's button fire a fresh context after the system sheet fades) is the fix run's.
 8. **VX-529 is the next run** — the kickoff is ready: `notes/handoffs/vx-529-kickoff.md` (its design memo comes first,
    per P-5; the boundary is your R-510-20 verbatim).
 

@@ -3167,6 +3167,35 @@ the independent re-walk.**
    commit; the attribution footer per CLAUDE.md: NONE); the STATUS banner of THIS FILE flipped to CLOSED; branch +
    worktree cleanup; build-debris tidy (every `DerivedData/vx510*` folder, the walk evidence after the merge).
 
+## HER CLOSEOUT ANSWERS (2026-10-24, at the cutover sitting — verbatim-faithful; the handoff's PENDING slots close on these)
+
+- **R-510-22 — THE RELEASE: YES, after the merge** ("Yes, release after merge"). 0.10.1 from this run's merge; the
+  drafted notes in `notes/handoffs/vx-510-handoff.md`; the publish per the standing site procedure, presented to her.
+- **R-510-23 — THE TEST ACCOUNTS: keep all three** (std + castle the standing lifecycle pair; del the fresh-account /
+  deletion vehicle, re-minted per drill; secrets stay in `~/.variorum`, mode 600).
+- **R-510-24 — VX-521 CLOSED at her word** (keep today's behavior: shown words are always the live words).
+- **R-510-25 — VX-528 CLOSED at her word, per-Mac seeding stands:** "i'd lean towards keep it - if someone makes a
+  backup their library and they've already seen the tutorial they should be able to delete it i feel. unless you think
+  there's a really compelling scenario. and they can always restore it if they really miss it." The orchestrator found
+  no compelling counter (the bare-second-library case is served by the classics' restore doors).
+- **R-510-26 — THE WORDING BUNDLE stays PROVISIONAL** ("Keep provisional, review later"): the bundle files in
+  `notes/QUESTIONS.md` at the closeout as planned; no re-ask until her pass.
+- **R-510-27 — PRE-LAUNCH: VX-529 ONLY** ("VX-529 only") — flagged on the board; no other filed ticket gates launch.
+- **VX-533, her distinguishing fact:** "it looks like an apple timeout it's weird. it gets pale and then disappears,
+  doesn't seem controlled by variorum" — the SYSTEM sheet's own fade; the ticket's trace question updated (does the
+  lobby's button still fire a FRESH context after the system sheet times out).
+- **CastleRules rule 2 (F-R1-3 (a)) — HER QUESTION BACK, pending her word on the clause:** "should the words be marked
+  recorded? is there any way for them to setup, join, or move without showing the words? or no? i want the document to
+  remain true." The honest answer (given to her at the sitting): the SET-UP and a words-typed join/Move require TYPING
+  the twelve words, so she holds them; **a join or Move by PASSPHRASE adopts the account's words WITHOUT showing them**
+  (the live S15 notice names whose words they are, not the words) — D-B6's recorded consideration, and exactly why her
+  R-510-14 ruling kept Settings ▸ New Words as the deliberate road. So the truthful clause must say the card retires
+  because the library's words ARE the account's (rule 7) and a look there would mint fresh words and replace the
+  account's — never that she "recorded" them. Draft offered: appending to rule 2 — "Once the library syncs, its pair is
+  the account's (rule 7), so the card retires at a landed set-up, join or move: a look there would mint fresh words and
+  replace the account's; fresh words live behind the deliberate new-words door." HER WORD decides the clause (or leaves
+  rule 2 as is, SurfaceContracts alone carrying the third road).
+
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
 Drafted by the orchestrator 2026-10-23 from the repo's records, the code and read-only production facts. **Covered** =
