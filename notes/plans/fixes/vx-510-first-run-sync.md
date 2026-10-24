@@ -2858,11 +2858,15 @@ finding FIRST (the cross-model flow — a dispute returns to the reviewer for th
 
 ### UNIT L1 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING until the close — the Mac-target runs of every suite in
-THE MAC-SUITE LIST (compiled by build-for-testing only; they run in the closing stage batch); no walk (no face changed
-beyond one sheet line's words in a race arm). No `xcodebuild test`, no stage, no app launch, no store/server/production
-contact, no subagents. No line in `Sources/VariorumCore/Sync/` (the seam below is app-side: a protocol over the scheduler's
-EXISTING public API, conformed on the app's side).
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **the Mac-target runs** — every Mac-only suite in THE MAC-SUITE
+LIST (Piece 6) compiled (Mac + iOS build-for-testing green) but RUNS only in the closing stage batch, PENDING; **no walk**
+(no face changed but one sheet line in a race arm — the re-walk's live first-run legs cover the sheet; the race itself is not
+producible live on demand); **`first-run-walk.sh`'s P3 re-check** is exercised only through its shared function (P3 runs
+live, never here); **O-L1-1** (the sibling `Tools/prod-confirm-test-user.sh`'s line-wise guard — the same hole) is RECORDED,
+NOT FIXED (outside this unit; the orchestrator's ticket candidate). No `xcodebuild test`, no stage, no app launch, no
+store/server/production contact, no subagents; no canon, Linear or `notes/QUESTIONS.md` (no new words drafted — the belt reuses
+`firstRoundProgress`, the refusal `checkSecretsLead`). No line in `Sources/VariorumCore/Sync/` (the seam is app-side: a
+protocol over the scheduler's EXISTING public API, conformed on the app's side).
 
 *Implementer session L1 — Opus 5.5, xhigh. Pre-fix tree = `ca1ec1381`. Every claim not yet run is PENDING.*
 
@@ -2988,8 +2992,41 @@ EXISTING public API, conformed on the app's side).
     expected refuse  FAIL`.
   - **RL-7** `--self-test`: `SELF-TEST: 1 case(s) wrong`, exit 1 — "a newline in the address" alone FAILs (the line-wise grep
     passes the value's plain first line; the quote and the uppercase still refuse) — the sharpening has its own teeth.
-- **Piece 6** — evidence (the harness whole, Mac + iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`, THE
-  MAC-SUITE LIST): NOT-STARTED.
+- **Piece 6** — EVIDENCE: DONE (the final tree = `1271f317f`'s product files; foreground, in sequence):
+  - THE HARNESS whole (debug, the three harness-PATH artifacts `--skip`ped): **`✔ Test run with 524 tests in 90 suites
+    passed`** (the baseline's 521/90 + this unit's 3 new tests; the F-R1-4 assertion rides an existing one); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+    <home>/dev/variorum-vx-510/App/Variorum/DerivedData/vx510-l1 build-for-testing` (run from `App/Variorum`):
+    **`** TEST BUILD SUCCEEDED **`**, 0 errors; `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath …/DerivedData/vx510-l1-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`**, 0 errors —
+    no warning in any file this unit touched (both logs grepped); no stray nested DerivedData folder.
+  - `Tools/WalkKit/first-run-walk.sh`: `zsh -n` clean; `--self-test` every case ok, exit 0 (Piece 4); nothing launched.
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched).
+  **THE MAC-SUITE LIST (for the closing stage batch — every suite exercising a file this unit changed; "harness" = also green
+  headless here, "Mac" = Mac-target only):**
+  - CHANGED: `FirstRoundRoadTests` (harness; +2), `FirstRoundConfirmTests` (harness; +1), `SecretCheckRoadTests` (harness; one
+    assertion).
+  - `SyncSession` (`roundNow` → `runRound`, `FirstRoundScheduling` + the conformance): `FirstRoundAfterTheActTests`,
+    `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests`, `ProdTestRoadTests`, `SyncWalkFenceTests`, `HoldBannerAccountTests`,
+    `OneRefreshAuthorityTests`, `TierAndOnboardingTests` (harness) · `Phase9cAuthWiringTests` (harness, but its three source pins
+    run only in the Mac target) · `Phase8ServicesTests`, `LibraryPortabilityDoorTests`, `SampleLibraryDedupeFactsTests` (Mac).
+  - `RoadAccountModel` (`firstRoundLine`): `FirstRoundAfterTheActTests`, `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests`,
+    `RoadAccountModelTests`, `RoadJoinFollowModelTests`, `PassphraseFloorRoadTests`, `FollowDoneNoticeTests` (a source pin over
+    the file) (harness) · `RoadAccountSurfaceTests`, `RoadJoinFollowSurfaceTests` (Mac — the hosted sheet).
+  - `ProtectionSecretCheck`: `SecretCheckModelTests`, `SecretCheckCompositionTests` (a source pin over the file) (harness) ·
+    `SecretCheckSurfaceTests` (Mac — hosted).
+  - THE PHONE (`VariorumMobileTests`): `MobileStarterJournalTests` (composes `SyncSession`), `MobileEmptyStoreTests` (the row) —
+    `Shared/` compiles for the phone (the iOS build-for-testing above).
+  - The simplest honest batch remains the whole `VariorumTests/Protection` folder + the top-level suites named above (the run's
+    closing batch already plans it).
+  **THE WALK (this unit's rows, for the re-walk — use-shaped, not this session's):** none new — the sheet's first-round line
+  is the re-walk's existing LEG S/D check ("Synced. …" after Turn on sync / the join); the race arm cannot be produced live
+  on demand (its pins are the scripted scheduler's). `first-run-walk.sh std` on the final build exercises G2's plain check on
+  the real allowlist (and P3's re-check) — the re-walk's own run.
+  **UNIT L1 CLOSED** — F-R1-1 FIXED (pins `aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm`,
+  `runRoundReAwaitsAStatusThatStillReadsSyncing`, `runRoundsSettleIsBounded`; reverts RL-1…RL-4) · F-R1-4 FIXED (the guard
+  assertion; RL-5) · F-R1-5 FIXED (the self-test's three malformed cases; RL-6, RL-7) · O-L1-1 recorded for the orchestrator.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
