@@ -279,7 +279,9 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 **NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
 face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. No revert is in flight.
+`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P6e): `KeyDoors.swift` and `EnterCastle.swift` checked out at
+`478c3bc28` (the pre-fix lines); the fix is committed at HEAD — restore with `git checkout HEAD -- Sources/VariorumCore/
+Protection/Executor/Acts/KeyDoors.swift Sources/VariorumCore/Protection/Executor/Acts/EnterCastle.swift`.**
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
@@ -424,7 +426,13 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     pre-fix tree, all 9 in-class rows with today's refusal — New words (both postures) and the crossing + Replace All
     Keys (both postures) with the OLD passphrase: `passphraseDoesNotOpen` (6); Replace All Keys with the OLD words
     after a words change elsewhere: `wordsDoNotOpen` (2); Reset by the OLD words, Castle Always ask, no keys held:
-    `secretsRequired(.changePassphrase)` (1); their opens-neither companions green. Remains: the fix, green, revert.
+    `secretsRequired(.changePassphrase)` (1); their opens-neither companions green. THE FIX COMMITTED (this commit):
+    P1's `refusalForAPassphraseTheVaultRefuses` at `regenerateWords`' synced arm and `doorSecrets`' passphrase arm; a
+    words twin `refusalForWordsTheVaultRefuses` (`KeyDoors.swift` — the typed words open THIS library, its own lock or
+    its copy through its master lock ⇒ `accountMoved`, else `wordsDoNotOpen`) at `doorSecrets`' words arm; and
+    `holdSyncKeysForTheSession`'s no-master arm says `accountMoved` when WORDS reached it (Reset's road verified them
+    against this library first). Green: 183 tests (the pair, follow, key-door, crossing, file-less-words, session-hold,
+    U2 and fixed-scenario suites; 5 known issues — P2's 4 controls and P6d's residual). Remains: the revert, the table.
   - P6f — the full core suite green; the report back. NOT-STARTED.
 - **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
   passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'

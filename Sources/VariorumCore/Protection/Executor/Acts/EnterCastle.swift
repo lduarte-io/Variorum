@@ -97,13 +97,15 @@ extension ProtectionExecutor {
             try vault.vault.kdf.validateFloor(configuration.floor)
             let passphrase = try PassphraseKey.derive(text, kdf: vault.vault.kdf)
             guard VaultModel.master(of: vault.vault, passphrase: passphrase, words: nil) != nil else {
-                throw ExecutorRefusal.passphraseDoesNotOpen
+                // VX-529 P6e (F-4): the old passphrase after a change elsewhere names the change (P1's split).
+                throw refusalForAPassphraseTheVaultRefuses(text, library, vault: vault)
             }
             secrets.passphrase = passphrase
             guard let words = typed.words else { throw ExecutorRefusal.secretMissing }
             let wordsKey = try WordsKey.derive(words)
             guard VaultModel.master(of: vault.vault, passphrase: nil, words: wordsKey) != nil else {
-                throw ExecutorRefusal.wordsDoNotOpen
+                // VX-529 P6e: the words twin — the old words after a words change elsewhere point at the follow.
+                throw refusalForWordsTheVaultRefuses(words, library)
             }
             secrets.words = wordsKey
             parameters.doorRevision = vault.revision

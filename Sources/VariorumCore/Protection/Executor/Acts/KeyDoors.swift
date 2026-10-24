@@ -239,6 +239,20 @@ extension ProtectionExecutor {
         return .passphraseDoesNotOpen
     }
 
+    /// **VX-529 P6e — THE CLASS'S WORDS TWIN**: typed twelve words the account's vault refuses. Ones that still open
+    /// THIS library (its own words lock, or its master's words copy through its master lock) are the account's words as
+    /// this library last knew them — re-made on another device since: the follow is owed first (`accountMoved` — "Your
+    /// account changed on another device. Follow it first."; no refusal names a words change, and none is minted here —
+    /// the follow's own words arm keeps its refusal, the sweep table says why). Ones that open neither keep the plain
+    /// refusal. READS only.
+    func refusalForWordsTheVaultRefuses(_ typed: [String], _ library: UnlockedLibrary) -> ExecutorRefusal {
+        if let file = library.keyFile, file.fingerprint == library.fingerprint,
+           (try? file.open(.words(typed), floor: configuration.floor)) == library.key {
+            return .accountMoved
+        }
+        return .wordsDoNotOpen
+    }
+
     /// **Reset a forgotten passphrase** — Castle: Touch ID on an enrolled
     /// device or the words; Standard: a plain confirm.
     public func resetPassphrase(
@@ -288,6 +302,10 @@ extension ProtectionExecutor {
         }
         if let held = leaves.syncKeys.sessionSyncKeys(accountID: account), held.rowKeyID == vault.rowKeyID { return }
         guard let master = VaultModel.master(of: vault.vault, passphrase: passphrase, words: words) else {
+            // VX-529 P6e — the class's words twin: the words reaching here were verified against THIS library (Reset's
+            // words road — Change's passphrase was verified against the vault, so it never lands here); the vault refusing
+            // them means the account's words changed on another device since — the follow is owed first.
+            if words != nil { throw ExecutorRefusal.accountMoved }
             throw ExecutorRefusal.secretsRequired(.changePassphrase)
         }
         leaves.syncKeys.holdInSession(try vault.vault.keys(master: master), accountID: account)
@@ -330,7 +348,7 @@ extension ProtectionExecutor {
             try vault.vault.kdf.validateFloor(configuration.floor)
             current = try PassphraseKey.derive(passphrase, kdf: vault.vault.kdf)
             guard VaultModel.master(of: vault.vault, passphrase: current, words: nil) != nil else {
-                throw ExecutorRefusal.passphraseDoesNotOpen
+                throw refusalForAPassphraseTheVaultRefuses(passphrase, library, vault: vault)  // VX-529 P6e (F-4)
             }
         } else {
             current = try verifiedPassphrase(passphrase, against: library.keyFile)
