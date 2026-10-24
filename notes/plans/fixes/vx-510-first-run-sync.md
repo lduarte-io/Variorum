@@ -75,6 +75,14 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   few bounces are a high bounce RATE (providers pause senders on it) — her real users' confirmation emails would
   pay. These deliver harmlessly to her inbox (plainly-test, filterable), and `Tools/prod-confirm-test-user.sh`
   confirms them, so she never clicks.
+- **R-510-11 — VX-501 JOINS THE RUN: "Join this run (Recommended)"** (asked because the Castle lifecycle leg locks
+  and unlocks under Always ask, where a typed unlock loads no sync keys). Built in unit B to her ruled direction
+  (R-494-4: "a typed unlock should hold sync keys in session until lock"; the ticket names the existing shape —
+  `KeyDoors.holdSyncKeysForTheSession` derives the master from a typed secret), pinned red-on-old, then proven
+  live in unit C's Castle leg. Linear: parented under VX-510.
+- **R-510-12 — the allow rules: "You add them"** → the orchestrator added exactly the five lines named in THE
+  TEST-ACCOUNT ROAD below to `~/dev/variorum/.claude/settings.local.json` (19 → 24 rules, JSON validated; nothing
+  else changed).
 
 ## THE TEST-ACCOUNT ROAD — the tools (built by the orchestrator, 2026-10-23; environment acts per R-510-7/-8)
 
@@ -93,7 +101,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 - `~/.variorum/bin/stash-prod-test-words <account>` (mode 700, LOCAL): after the words look's own Copy, writes the
   twelve words from the clipboard to `~/.variorum/prod-test-words-<account>` (mode 600) and clears the clipboard —
   never printed; the same frontmost/env guard; refuses anything but exactly twelve lowercase words.
-- **The allow rules proposed to her (R-510-3)** — for `.claude/settings.local.json`, in the prod-read rule's form:
+- **The allow rules (R-510-3; ADDED by the orchestrator at R-510-12)** — in `.claude/settings.local.json`, the prod-read rule's form:
   `Bash(Tools/prod-confirm-test-user.sh *)`, `Bash(<home>/dev/variorum/Tools/prod-confirm-test-user.sh *)`,
   `Bash(<home>/dev/variorum-vx-510/Tools/prod-confirm-test-user.sh *)`,
   `Bash(<home>/.variorum/bin/type-prod-test-secret *)`,
