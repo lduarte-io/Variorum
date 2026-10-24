@@ -279,7 +279,9 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 **NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
 face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. No revert is in flight.
+`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P1): `KeyDoors.swift`'s `changePassphrase` throw line back to the
+plain refusal; the fix is committed at `1ccdd5b27` — restore with `git checkout -- Sources/VariorumCore/Protection/
+Executor/Acts/KeyDoors.swift` (read `git diff` to see what is reverted).**
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
