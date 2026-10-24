@@ -2970,7 +2970,24 @@ EXISTING public API, conformed on the app's side).
   - **RL-7** (F-R1-5, the whole-value match) `Tools/WalkKit/first-run-walk.sh`: `plain_address` as the sibling's line-wise
     `printf '%s' "$1" | grep -Eq "$PLAIN_ADDRESS"` [the self-test's "a newline in the address" FAIL alone — the quote and the
     uppercase still refuse].
-  RESULTS: PENDING (reverts start after this commit; none in flight yet).
+  **RESULTS — DONE, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN FLIGHT** (the committed
+  tree `c859bceae`; the runner `l1/revert.sh` in the session scratchpad — the tree checked clean first, the edit applied by a
+  one-target script, the filtered run, `git checkout --`, `git diff --exit-code`):
+  - **RL-1** `--filter FirstRoundConfirmTests`: `✘ Test run with 11 tests in 1 suite failed … with 12 issues` —
+    `aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm` ✘×12 (every other test in the suite green).
+  - **RL-2** `--filter FirstRoundRoadTests`: `✘ … 7 tests in 1 suite failed … with 6 issues` —
+    `runRoundReAwaitsAStatusThatStillReadsSyncing` ✘×4 (`!status.isSyncing`, the success stamp, `idleWaits == 2`, `reads ==
+    2`), `runRoundsSettleIsBounded` ✘×2 (one wait, one read).
+  - **RL-3** (same): `✘ … with 3 issues` — `runRoundsSettleIsBounded` ✘×3 (`status.isSyncing` false and 51 waits / reads past
+    the bound — returned, no hang).
+  - **RL-4** (same): `✘ … with 2 issues` — `runRoundReAwaitsAStatusThatStillReadsSyncing` ✘ and `runRoundsSettleIsBounded` ✘
+    (`triggers == 1` each).
+  - **RL-5** `--filter SecretCheckRoadTests`: `✘ … 7 tests in 1 suite failed … with 1 issue` —
+    `rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync` ✘ (`nothing == .refused(ProtectionWords.checkSecretsLead)`).
+  - **RL-6** `--self-test`: `SELF-TEST: 3 case(s) wrong`, exit 1 — the quote, the uppercase and the newline each `accept —
+    expected refuse  FAIL`.
+  - **RL-7** `--self-test`: `SELF-TEST: 1 case(s) wrong`, exit 1 — "a newline in the address" alone FAILs (the line-wise grep
+    passes the value's plain first line; the quote and the uppercase still refuse) — the sharpening has its own teeth.
 - **Piece 6** — evidence (the harness whole, Mac + iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`, THE
   MAC-SUITE LIST): NOT-STARTED.
 
