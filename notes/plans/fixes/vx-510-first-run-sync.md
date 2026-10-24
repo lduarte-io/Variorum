@@ -243,7 +243,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
-| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 DONE (0B · 0M · 3m · 2n); UNIT L1 DONE (`5b72d7a3a`…`97922b2a2` — AGREE ×3, pins red-on-old, RL-1…7 red as named, harness 524/90, both build-for-testing green) + O-L1-1 FIXED by the orchestrator (the confirm script's whole-value check); ROUND 2 IN FLIGHT (a fresh reviewer re-reviews the fixes) |
+| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 DONE (0B·0M·3m·2n) → UNIT L1 DONE + O-L1-1 fixed → ROUND 2 DONE (0B·0M·1m·1n; every round-1 fix SOUND; the L1 harness independently re-run 524/90) → F-R2-1/-2 FIXED by the orchestrator; the reviewer's final line-by-line check PENDING |
 | 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | NOT STARTED |
 
 ## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
@@ -3052,6 +3052,35 @@ protocol over the scheduler's EXISTING public API, conformed on the app's side).
   **UNIT L1 CLOSED** — F-R1-1 FIXED (pins `aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm`,
   `runRoundReAwaitsAStatusThatStillReadsSyncing`, `runRoundsSettleIsBounded`; reverts RL-1…RL-4) · F-R1-4 FIXED (the guard
   assertion; RL-5) · F-R1-5 FIXED (the self-test's three malformed cases; RL-6, RL-7) · O-L1-1 recorded for the orchestrator.
+
+## THE LADDER — ROUND 2 (2026-10-24; a fresh `fable-reviewer` re-reviewing round 1's fixes — unit L1 `5b72d7a3a`…`97922b2a2` + the orchestrator's O-L1-1 fix `829f70019`)
+
+**0 BLOCKER · 0 MAJOR · 1 MINOR · 1 NIT; every round-1 fix judged SOUND** (F-R1-1 both halves re-traced in the old code
+with the no-spin claim verified against the scheduler's source; F-R1-4/-5 and O-L1-1 exercised by the reviewer itself —
+the four refusal paths re-run, the self-tests and `zsh -n` run, the line-wise-vs-whole-value mechanism reproduced in a
+scratch shell; the whole L1 harness independently re-run **524/90 green**; no `Sources/` line in the fix range; no
+pre-existing pin weakened; nothing newly broken). The new findings, each with the ORCHESTRATOR'S DISPOSITION — both
+fixed BY THE ORCHESTRATOR (the architect's small-fix lane; no new BLOCKER/MAJOR, so no round 3 — the final round's
+fixes get the reviewer's line-by-line check below):
+
+- **F-R2-1 [MINOR] — O-L1-1's fix had no standing pin** (the script sits behind an auto-allow rule, so its guards ARE
+  the fence; a regression to the line-wise form would be caught by nothing offline). **FIXED (`78a5884f1`):** the guard
+  refactored into ONE function the real road and a new `--self-test` share; the self-test runs six fixtures over a TEMP
+  allowlist (never her file; the curl unreachable from the arm): a listed plain address accepts; the multi-line
+  plain-first-line value (O-L1-1's shape), a trailing newline, uppercase, plain-but-unlisted and markerless each
+  refuse. **Red-on-old by behavioral revert, with a lesson:** the plain check alone reverted to line-wise stayed GREEN —
+  the whole-string membership belt catches the multi-line value by itself (defense in depth, shown working); the honest
+  revert is the FULL pre-O-L1-1 shape (both checks line-wise/grep -F), which went RED exactly as the class predicts
+  (`SELF-TEST: 2 case(s) wrong`, the multi-line and trailing-newline fixtures accepted; exit 1), restored
+  `git diff --exit-code` clean, green again.
+- **F-R2-2 [NIT] — the past-the-bound face was bare** (a settle past the bound freezes the progress words in `.done`
+  with no dots and no close note — honest but road-less). **FIXED (`b3c79a191`):** the close note renders beneath a
+  frozen progress line in the sheet's `.done` arm (the one-presentation-source line compared to
+  `ProtectionWords.firstRoundProgress`), so the rare face still says sync keeps going and the row finishes the story;
+  Mac build-for-testing green incremental; no pin owed (the reviewer's call), words P-VX510-1-adjacent, hers.
+
+**THE REVIEWER'S FINAL LINE-BY-LINE CHECK of these two fixes:** PENDING (asked of the round-2 reviewer in its own
+session — the final round's fixes are checked against each finding before the closing batch).
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
