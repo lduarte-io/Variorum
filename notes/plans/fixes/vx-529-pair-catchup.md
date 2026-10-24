@@ -291,7 +291,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
 `KeyFileTests`/`U4LaggingPairScenarios`, the scenario world's follow/key-door actions (`Alphabet.swift`).
 
 **The pieces (flip per commit; unverified claims PENDING):**
-- P0 — this LIVE STATUS. DONE (this commit).
+- P0 — this LIVE STATUS. DONE (`25c7adca4`).
 - P1 — scope 3, THE REFUSAL SPLIT at `changePassphrase`'s vault-verify arm. DONE (`4fd6d904f` pin, `1ccdd5b27` fix) — the red pin
   (`Executor/PairRefusalSplitTests.swift`): RED on the pre-fix tree, both postures, for the repro's exact reason —
   `expected .passphraseChangedElsewhere(device: "Mac A", day: …) but .passphraseDoesNotOpen was thrown`; its two
@@ -301,7 +301,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   (F-4's siblings untouched). Green with its neighbours (42 tests: the key-door, follow and session-hold suites).
   VERIFIED BY REVERT: the one `throw` line back to the plain refusal ⇒ the pin RED again (both postures, the same
   `passphraseDoesNotOpen`); restored by `git checkout` ⇒ 3/3 green.
-- P2 — scope 4, THE INVARIANT PINS (fact 1's guard). DONE (this commit) — `Executor/PairInvariantPinsTests.swift`: one
+- P2 — scope 4, THE INVARIANT PINS (fact 1's guard). DONE (`577b0898e`) — `Executor/PairInvariantPinsTests.swift`: one
   existing-behavior pin per synced road that writes a passphrase lock or the master's words copy — set up sync (both
   postures); the join in the same posture by the passphrase and by the words (E6's state: the library's own lock
   dropped); the join into Castle (by either secret) and out of it; Move; the follow into Castle (by either secret), out
@@ -311,7 +311,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   recovery wrap, and the road leaves the lock it should. 24 cases green on the tree as it stands (the trace in F-list
   confirmed: every synced setter derives under, or writes, the vault's descriptor; the copy is always the fresh read's).
   Plus a NEGATIVE CONTROL (`withKnownIssue`): a lock planted under another descriptor and a stale copy are each caught.
-- P3 — scope 1, DETECTION. DONE (`98a183538` pin, this commit the fix) — RED first (`AssessPairRedPins`, behavior-level,
+- P3 — scope 1, DETECTION. DONE (`98a183538` pin, `c909ee285` fix, `eab973d13` the revert's record) — RED first (`AssessPairRedPins`, behavior-level,
   compiling on the old tree: no follow owed, no follow door, Change passphrase / New words open — both postures, a
   passphrase and words changed elsewhere), now green. Built: `FollowKind.pairChanged(passphrase:words:)`
   (`Assessment.swift`); the pure reading `AssessRules.pairFollow(keyFile, reading)` — the passphrase lock's
@@ -332,7 +332,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   failure elsewhere, `VariorumMCPTests`' `MCPHarnessTimeLimitTests` wall-clock bound (19 s against 15 s under the
   full parallel run) — 3/3 green alone in 2 s; no protection code in it. VERIFIED BY REVERT: the `acts` pair arm
   disabled ⇒ `AssessPairRedPins` RED again (the same 12 issues as on the old tree); restored ⇒ 12/12 green.
-- P4 — scope 2, THE ACT'S PURE PIECES. DONE (this commit) — `KeyFile.droppingWords()` (a value setter beside
+- P4 — scope 2, THE ACT'S PURE PIECES. DONE (`b7f6ab499`) — `KeyFile.droppingWords()` (a value setter beside
   `droppingApple`; no shape change) and `KeyFile.relockedToTheAccountsPair(key:master:accountsWordsCopy:
   accountsPassphrase:dropsOwnWordsLock:)` (`Model/KeyFileRelock.swift`): rule 22 FIRST (the master in hand must open
   this key through the master lock — else `doesNotOpen(.master)` / `noSuchWrap(.master)`, nothing returned); the
@@ -344,7 +344,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   before keeps its day's (E7, rules 4–5) and the new secrets reach older keys through the history, the rule-22
   refusals, idempotence (AES key wrap is deterministic — a resume re-running the write lands the same bytes), the
   dropper. Green with every key-file suite (59 tests).
-- P5 — scope 2, THE FORK PROPOSAL. DONE (this commit) — below, under THE FORK; REPORTED BACK. P6 waits on the ruling.
+- P5 — scope 2, THE FORK PROPOSAL. DONE (`3f3c9944d`) — below, under THE FORK; REPORTED BACK. P6 waits on the ruling.
 - P6 — scope 2, THE ACT'S PROGRAM — only after the architect's ruling lands in this record. BLOCKED (the fork).
 - **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
   passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'
