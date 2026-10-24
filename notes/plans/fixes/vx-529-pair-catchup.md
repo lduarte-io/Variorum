@@ -447,6 +447,38 @@ fresh backup at the end ⇒ [no — the key doors' precedent] · S-3 the resume 
 S-4 F-9's forgotten-new-passphrase trap ⇒ [(c) as built; (a)/(b) are hers to weigh] · S-5 F-4's two sibling seams
 (`regenerateWords`, `doorSecrets`) take P1's helper ⇒ [not in this unit unless ruled — one line each].
 
+## UNIT 1 — THE ARCHITECT'S RULING ON THE FORK (2026-10-24, after verifying P1–P5: the commits spot-checked, the five
+suites re-run green by the orchestrator's own hand — 40 tests, the 4 known issues P2's negative controls; zero
+`Sync/` lines confirmed by diff)
+
+- **THE SHAPE: A** — the no-re-key arm inside `FollowProgram`, exactly as proposed: one door for every way the
+  account moved (P-VX529-1), no new stored `ProtectionAct` value (R-510-20's letter — an older build must never meet
+  an act value it cannot decode), `ActParameters.follow = "pairChanged"` on the existing free-form field, `toKey`
+  nil, steps `["pickUpKeys", "relock", "memory"]`, relock idempotent (skips when `pairFollow == nil` on the fresh
+  read), rolls back on a missing secret or a vault moved again (E4).
+- **S-1 ACCEPTED** (a words-only catch-up with no master in hand refuses `secretMissing`; the face asks for a secret
+  — E14 below). **S-2 ACCEPTED conditionally:** no backup step, PROVIDED it matches the key doors' own re-lock
+  behavior — verify what `changePassphrase` does about backups and state the answer in LIVE STATUS; if the key doors
+  back up after a re-lock, the catch-up does too. **S-3 ACCEPTED** (the PlanRunner resume drop clause), with its own
+  red-on-old pin — a typed lobby passphrase that opens no lock under the in-flight plan's descriptor is dropped, not
+  thrown, so the act never strands the open. **S-4 stands** (F-9 is HERS — bundled at this sitting, build (c)
+  as-built meanwhile). **S-5 OVERRULED IN PART — F-4's two sibling seams are IN SCOPE for P6:** `regenerateWords`'
+  synced arm and `doorSecrets` (EnterCastle.swift:99) take P1's helper, each with a red-on-old table pin; and the
+  CLASS gets the sweep-table discipline — enumerate EVERY `VaultModel.master(...) != nil else throw` site, verdict
+  each FIXED or provably out of the class (the join's account-naming refusal, VX-464's, is expected out), the table
+  in LIVE STATUS.
+- **R-arch-3 — the downgrade-resume check (named for the ladder too):** a pairChanged plan interrupted mid-act and
+  resumed by an OLDER build would read `follow = "pairChanged"` as `.keysReplaced` (FollowProgram.kind's default) —
+  trace what that resume would actually do (`finishingSteps`, `retireOldCustody` against an unchanged fingerprint,
+  a nil `toKey`) and either show it harmless by mechanism or shape the plan so it is (never a stored-format change);
+  state the mechanism in LIVE STATUS. A downgrade mid-act is extreme but the record must say why it is safe.
+- **E13 accepted** (a half-finished own passphrase change reads as a pair change on the same device — true and
+  honestly worded; the device named is this one; her wordings pass sees it). **E14 accepted** (Castle Always-ask
+  unlocked by the OLD words holds no master: the words-only catch-up types one account secret there — R-510-20's
+  "type both where you must"; the core refuses `secretMissing`, unit 2's face asks). **F-1's mechanical app arms
+  accepted** (they mint no sentence; the orchestrator's xcodebuild verifies the compile; unit 2 replaces them).
+  **F-8 and `RoadSettledFollow.kind`** noted for unit 2's brief.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
