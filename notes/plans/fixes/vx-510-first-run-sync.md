@@ -83,6 +83,33 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 - **R-510-12 — the allow rules: "You add them"** → the orchestrator added exactly the five lines named in THE
   TEST-ACCOUNT ROAD below to `~/dev/variorum/.claude/settings.local.json` (19 → 24 rules, JSON validated; nothing
   else changed).
+- **R-510-13 — the words: "your word choices are fine for now and we'll keep moving forward provisionally."** →
+  P-VX510-1…3 and P-VX510-A1…A4 (+ the not-yet row's quiet style) STAND as built, provisional; no re-ask until the
+  closeout's canon pass.
+
+## HER AIR REPORT (2026-10-23 evening, after the 0.10 update — her words verbatim, each item traced and dispositioned)
+
+1. **"I tried running the variorum mcp reconnection on my macbook air post update and my variorum mcp connection is
+   refusing with: Failed to connect to Variorum -32000. re-set up? unexpected or normal?"** — EXPECTED by construction:
+   the MCP on-switch and every client binding live in the library's LOCAL-ONLY grants tables (`MCPSwitch.server`
+   reads OFF with no row — `Sources/VariorumCore/Queries/MCPGrantQueries.swift`), and the crossing's Start fresh made
+   a new library; the shim's -32000 is its "MCP server is not running" refusal (`MCPShim.refusalMessage(.notRunning)`).
+   Remedy: Settings ▸ MCP ▸ Enable, then re-run each client's setup. The silence is a gap → **VX-512** (Improvement,
+   Confirmed, MCP, Medium).
+2. **"I also do have a 12 words popup banner which is weird since i had 12 words before this migration already"** — a
+   REAL FINDING: the band card's ledger is marked recorded by the look, Make this my library's carry and the empty-slot
+   landing, never by a JOIN; the card's look mints fresh words through rule 6's act, which on a synced library re-wraps
+   the ACCOUNT's vault lock — so pressing the card would silently replace her account's recovery words. → **VX-511**
+   (Bug, Confirmed, Castle & sync, High). Her safe move now: ✕ (or Later), never the card.
+3. **"I also no longer seen an option in settings to test your passphrase / 12 words to make sure you have them
+   right. Should I reset my 12 words?"** — the new road has no read-only check (the key doors only change secrets) →
+   **VX-513** (Feature, Castle & sync, Medium). Answer: do NOT reset — her words should still be the account's (a join
+   adopts the account's pair, rule 7). The read-only check today: Settings ▸ Data Safety ▸ Back up now, then Look inside
+   that backup and type the twelve words (rule 17 — Look inside writes nothing; `LookInsideModel` reads twelve valid
+   words as the words).
+4. **Seen in her screenshot (not asked):** two seeded Sherlock books on Welcome, both owned — server-side, both
+   created_at 1892-10-14, updated 10-07 (13 members) and 10-18 (14 members), so on every device and older than 0.10
+   → **VX-514** (Bug, Suspected, Books, Low).
 
 ## THE TEST-ACCOUNT ROAD — the tools (built by the orchestrator, 2026-10-23; environment acts per R-510-7/-8)
 
