@@ -1345,6 +1345,15 @@ the dev library quiet, "Sync off (dev store)" → quit; release the stage. **The
 `castle` are PROPOSED to stay as the standing release-drill accounts (her R-510-2: "maybe we need two dev
 accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
 
+## UNIT C — THE RECORD (the orchestrator, live; stage claim `vx-510`; every step logged as it happens)
+
+- **Setup (2026-10-23 ~20:30–20:36 MDT):** the walk's Debug build at B2's F-B1-1 commit `4a5ef39e3`, built from the
+  DETACHED clean checkout `~/dev/variorum-vx-510-stage` into its `App/Variorum/DerivedData/vx510` (`** BUILD SUCCEEDED
+  **`) — never the shared worktree, where B2 is editing. Grants: Accessibility ✔ and Screen Recording ✔ for this
+  terminal. Zero Variorum instances. **The dev slot's 9 top-level files aside by `mv`** into the sibling
+  `…/Application Support/Variorum-dev-aside-vx510/` — inodes 191598614–191598620, 193537660/193537661, identical
+  after the move; `Backups/` and `Previous Libraries/` stay in the slot.
+
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
 Drafted by the orchestrator 2026-10-23 from the repo's records, the code and read-only production facts. **Covered** =
