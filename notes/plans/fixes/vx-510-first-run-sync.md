@@ -2330,8 +2330,35 @@ store, server or production contact; no subagents.
   (the same check over the phone's arm, `.buttonStyle(.plain)`, `if showsWords { wordsField }`). **RED on the pre-fix tree
   (`swift test` in the scratch package): `✘ Test run with 2 tests in 1 suite failed after 0.002 seconds with 1 issue`** —
   the one ✘ `the Mac's words door: the label sits in no Button — a bare label (the chevron alone presses)`; the guard ✔.
-- **Piece 2** — the fix (StoreLockView's disclosure arm): NOT-STARTED.
-- **Piece 3** — green + the behavioural revert: NOT-STARTED. No revert is in flight.
+- **Piece 2** — the fix: DONE (this commit). `App/Variorum/Variorum/StoreLockView.swift`'s `case .disclosure:` arm keeps
+  the `DisclosureGroup` (its chevron, spacing and unfolding untouched) and makes its LABEL a `.plain` Button whose action
+  is `withAnimation { showsWords.toggle() }` (the chevron's own press animates the same binding); the label `Text` keeps
+  its look byte for byte and fills the row (`.frame(maxWidth: .infinity, alignment: .leading)`), and its hit shape reaches
+  `wordsDoorRowSpacing` (4 pt, a named static) past it on every side and is taken back (`.padding(4)
+  .contentShape(Rectangle()) .padding(-4)` — layout-neutral), so the 4 pt gap after the chevron and the row's 4 pt top and
+  bottom bands press too. **THE IDIOM PICK, by a geometry oracle** (offscreen, scratchpad `vx510b5-probe`: a scratch
+  `swiftc` binary hosting each variant in an `NSHostingView` inside a borderless window NEVER ordered in, positioned
+  off-display, activation `.prohibited`, `cacheDisplay` → PNG, per-pixel compare; the lobby's real values — the
+  terminal voice's `small` = system 11.5 monospaced, `muted` #8B9088, the arm's 340 width, the field's 6 pt top; no app,
+  no store, nothing on screen):
+  - the system chevron is NOT an SF Symbol: a scan over `chevron.right` at 8–14 pt × nine weights × four grey styles ×
+    two image scales never matched it (best ≈ 77 differing pixels at @2x in the chevron alone; its stroke is ≈ 1.5 pt at a
+    flat ≈ 0.21 alpha, 5 × 8 pt) — **a Button REPLACING the DisclosureGroup cannot stay byte-faithful** (the brief's
+    fork), so the Button is the label;
+  - the system row, measured: the chevron's control (its `_FocusRingView`) 40…47.5 × 70.5…79.5 pt, the label's frame
+    51.5…376 × 68…82 pt, the row 40…380 × 64…86 (22 pt) — the dead zones a bare Button label would leave are the 4 pt gap
+    and the row's 4 pt bands, hence the 4 pt reach;
+  - **today vs the fix, exactly as written: `0 differing pixels of 191520 (840x228)` closed and `0 differing pixels of
+    288960 (840x344)` open, in LIGHT and in DARK** (the plain label, the row-filling label and the reaching label each 0).
+  - **A PRESS ORACLE WAS TRIED AND IS INCONCLUSIVE:** clicks delivered by `NSWindow.sendEvent` to the unordered window
+    (also with a window subclass reporting itself key) toggled nothing in ANY variant — today's chevron included, the
+    control case — so offscreen delivery never reached SwiftUI; no press claim rests on it. **PENDING the live press**
+    (the successor's re-walk): a real click on the words' own text opens the field; a click in the gap after the chevron
+    and in the row's top band opens it too (the reach — SwiftUI honouring a hit shape beyond the label's reported frame is
+    the one unverified assumption; if it is not honoured the door degrades to the chevron + the row-wide words, still the
+    fix); the chevron still opens it; the label's press animates as the chevron's does.
+- **Piece 3** — green + the behavioural revert: IN-PROGRESS. **GREEN on the fix** (`swift test` in the scratch package):
+  **`✔ Test run with 2 tests in 1 suite passed after 0.001 seconds`**. The revert: NOT-STARTED; no revert is in flight.
 - **Piece 4** — Mac + iOS build-for-testing; THE MAC-SUITE LIST: NOT-STARTED.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
