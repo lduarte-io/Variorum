@@ -388,7 +388,8 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     the open too (P6d). Green: 85 tests (the pair suites, `FollowTests`, the key-door suites). VERIFIED BY REVERT: the
     descriptor put back in the plan ⇒ the pin RED again (the same 14 `the settle threw .passphraseDoesNotOpen`);
     restored ⇒ the pair suites 12/12 green.
-  - P6d — R-arch-3: the downgrade-resume trace and the plan's shape. IN-PROGRESS — THE TRACE (an older build = any
+  - P6d — R-arch-3: the downgrade-resume trace and the plan's shape. DONE (`d90cb57d8` pin, this commit the shape) —
+    THE TRACE (an older build = any
     build before VX-529 on this road, 0.10 / 0.10.1; its `FollowProgram`, `PlanRunner.resume` and `CommonSteps` are
     this branch's non-pair paths byte for byte — `git diff main` adds only the pair arm, `perform`'s `material` and
     `ActContext.typedPassphrase`): it reads `follow = "pairChanged"` as `.keysReplaced` and resumes a NAMED plan by its
@@ -402,7 +403,22 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     the file is in) — harmless; a nil `toKey` is never reached (no step it runs needs one). THE PIN COMMITTED
     (`PairCatchUpOlderBuildTests`: crash after every write, the plan's `follow` cleared — the older build's reading —
     then resumed; every settle must land): RED on the ruled shape — 12 crash points, all three postures, `an older
-    build's settle threw .nothingToDo`. Remains: the plan shaped so it is harmless, green.
+    build's settle threw .nothingToDo`. THE SHAPE (this commit): the re-lock FOLDS into `pickUpKeys` — the plan is
+    `["pickUpKeys", "memory"]`, both names every build of this road knows; this build's `pickUpKeys` for the pair
+    kind is `pickUpThePair` (a fresh read; posture/key ⇒ roll back; LANDED ⇒ the keys held where in hand, nothing
+    re-locked; else the passphrase/keys checks, the keys held, the key stamped, ONE key-file write). THE MECHANISM, an
+    older build: a named plan ⇒ its `pickUpKeys` (the same keys held, the same key stamped) then `memory`, the act ending
+    with the key file in whichever whole state the crash left (the old locks or the re-lock — rule 20's two; that build
+    has no detection, so the old state owes nothing there, and the next new build detects it again); no plan ⇒ its
+    `memory`/`retireOldCustody` (returns, the key unchanged)/`backup` — harmless; a nil `toKey` reached by nothing;
+    the plan carries no passphrase descriptor (S-3), so its generic resume derives nothing to throw on. GREEN: the pin
+    settles every crash point in all three postures; 86 tests across the pair, follow and key-door suites. THE STATED
+    RESIDUAL (pinned as a known issue, `theResidualCastleAlwaysAsk…`): Castle Always ask, an older build, `pickUpKeys`
+    interrupted, a lobby that took only a passphrase — that build derives none and its session is empty, so its own
+    `pickUpKeys` throws `secretsRequired` out of its settle (the library open, doors refusing at that open); data-safe
+    (the key never changed, every road opens the library), healed at the first open whose lobby takes the words, or the
+    upgrade — that build's own follows resumed without a usable secret behave the same. A stored-format change could
+    close it; the ruling forbids one, and nothing else reaches into an older build.
   - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
     red-first. NOT-STARTED.
   - P6f — the full core suite green; the report back. NOT-STARTED.

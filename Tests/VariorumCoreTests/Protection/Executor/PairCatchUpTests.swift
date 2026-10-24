@@ -387,4 +387,30 @@ struct PairCatchUpOlderBuildTests {
             #expect(settled.key == k0, "\(context) an older build re-keyed the library")
         }
     }
+
+    /// THE STATED RESIDUAL (R-arch-3, in the run record): Castle Always ask, an older build, the act interrupted before its
+    /// `pickUpKeys` finished, and a lobby that took only a passphrase — that build derives none (the plan carries no
+    /// descriptor) and its session is empty, so ITS OWN `pickUpKeys` cannot reach the account's keys: `secretsRequired`
+    /// out of its settle, the act in flight at that open (the library open, every door refusing). Data-safe — the key never
+    /// changed, every road opens the library — and it heals at the first open whose lobby takes the twelve words (or the
+    /// next upgrade): the same as that build's own follows resumed without a usable secret.
+    @Test func theResidualCastleAlwaysAskWithOnlyAPassphraseAtTheLobbyHealsAtTheWords() async throws {
+        let made = try await pairMovedElsewhere(.castle, gate: .alwaysAsk)
+        let air = made.air, k0 = made.air.key
+        air.world.crashAfterWrites = 3  // after the plan's first write: `pickUpKeys` not done
+        do {
+            let executor = air.executor()
+            var library = try air.unlocked(executor)
+            _ = try await executor.follow(
+                &library, kind: .pairChanged(passphrase: true, words: false), typed: TypedSecrets(passphrase: made.newPassphrase))
+            Issue.record("no crash")
+        } catch is SimulatedCrash {}
+        try Self.readAsAnOlderBuildWould(air)
+        await withKnownIssue("an older build's settle needs a usable secret it can derive — the words") {
+            _ = try await air.relaunchAndSettle(TypedSecrets(passphrase: air.passphrase))
+        }
+        let (_, settled, _) = try await air.relaunchAndSettle(TypedSecrets(words: air.words))
+        expectSettled(air, settled, "healed at the words")
+        #expect(settled.key == k0)
+    }
 }

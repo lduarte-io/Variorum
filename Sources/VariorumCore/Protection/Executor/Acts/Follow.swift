@@ -17,6 +17,9 @@ import Foundation
 //     key; rule 5's sentence, and the notice.
 //   - KEYS REPLACED, same posture: a device that lagged through an entry into
 //     Castle catches up — one secret, the new master; the history grows.
+//   - THE PAIR CHANGED, same posture and sync key (VX-529): a RE-LOCK, never a
+//     re-key — its own entry checks and steps (`PairCatchUp.swift`) on this
+//     act's plan, with no new key.
 // A follower's new key file is locked under the secret it typed (if any) and
 // under the new master, with that master's twelve-words copy beside it (old
 // design §3.5a — so both secrets open it: the words through the copy, the

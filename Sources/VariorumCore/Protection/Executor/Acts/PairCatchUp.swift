@@ -17,17 +17,28 @@ import Foundation
 //     (rule 1's mirror). No backup step: the key doors take none after a re-lock (S-2, verified — the run record's P6a).
 // Every step is idempotent and a crash at any write leaves the old state or the new one (rule 20): the re-lock is ONE
 // key-file write, and a step finding it landed (`AssessRules.pairFollow` nil against its fresh read) does nothing more.
+//
+// THE PLAN'S SHAPE (R-arch-3 — the architect's ruling asked that an OLDER build resuming this plan be harmless): two
+// steps, `pickUpKeys` and `memory`, both names every build of this road knows. A build before VX-529 reads
+// `follow = "pairChanged"` as `.keysReplaced` and resumes a named plan by its step names: its `pickUpKeys` holds the
+// account's (unchanged) keys the account's way and stamps the same key — harmless; its `memory` is harmless; the act ends
+// with the key file in whichever whole state the crash left it (the old locks, or the re-lock — rule 20's two). A third
+// step under a name such a build doesn't know would throw `nothingToDo` out of its settle and leave the act in flight at
+// every open until the next upgrade (pinned: `PairCatchUpOlderBuildTests`, red on the three-step shape). So the re-lock
+// is the second half of THIS build's `pickUpKeys` for the pair kind — the account's change picked up, which for this kind
+// IS the pair. The plan records no passphrase descriptor (S-3 — the same reasoning: an older build has no clause to drop
+// an old passphrase its generic resume would derive under it).
 
 enum PairCatchUp {
-    /// The act's steps (the architect's ruling).
-    static let steps = ["pickUpKeys", "relock", "memory"]
+    /// The act's steps — the architect's three (`pickUpKeys`, `relock`, `memory`) with the re-lock folded into
+    /// `pickUpKeys` so every name is one an older build runs harmlessly (R-arch-3).
+    static let steps = ["pickUpKeys", "memory"]
     /// With no plan to trust, the act in flight naming no new key: what this Mac remembers, nothing else.
     static let finishingSteps = ["memory"]
 
     static func run(_ step: String, _ ctx: ActContext) async throws {
         switch step {
-        case "pickUpKeys": try await ctx.pickUpThePairsKeys()
-        case "relock": try await ctx.relockToTheAccountsPair()
+        case "pickUpKeys": try await ctx.pickUpThePair()
         case "memory": try ctx.rememberNewKey()
         default: throw ExecutorRefusal.nothingToDo
         }
@@ -164,34 +175,31 @@ extension ActContext {
         }
     }
 
-    /// **Step 1 — the account's keys**, from a fresh read: the account must still be in this library's posture under the
-    /// sync key it follows (else it moved on — this follow rolls back, the one now owed runs instead); the keys held per
-    /// posture; the followed sync key stamped (the same key — idempotent).
-    func pickUpThePairsKeys() async throws {
+    /// **The act's working step (`pickUpKeys`) — the account's change picked up, which for this kind is the PAIR**, from
+    /// a fresh read: the account must still be in this library's posture under the sync key it follows (else it moved on
+    /// — this follow rolls back and the one now owed runs instead). LANDED already (a resume after the write: the file
+    /// carries the vault's pair) ⇒ the keys held where in hand, nothing re-locked, and the act finishes. Else the
+    /// passphrase half needs the account's current passphrase in hand (the press's, or the resume lobby's — opening the
+    /// vault as it stands: E4, it moved again since the door ⇒ the act rolls back naming the change; S-3, the OLD one ⇒
+    /// no secret of this act's), the master must reach this key (rule 22, the re-lock's own check), and a missing secret
+    /// at a resume rolls back too — the old state. Then the keys held per posture, the followed key stamped (the same
+    /// key), and ONE key-file write.
+    func pickUpThePair() async throws {
         let snapshot = try await freshRead()
         let record = try requireRecord()
         guard snapshot.mode == record.mode, snapshot.rowKeyID == record.accountRowKeyID else {
             throw ActRollback(refusal: .accountMoved)
         }
-        guard let keys = try pairKeysInHand(snapshot) else {
-            throw ActRollback(refusal: resuming ? .secretsRequired(act) : .secretMissing)
-        }
-        try holdThePairsKeys(keys, castle: snapshot.mode == .castle)
-        try stampFollowed(keys.rowKeyID)
-    }
-
-    /// **Step 2 — the re-lock** (one key-file write): landed already ⇒ nothing. Else the passphrase half needs the
-    /// account's current passphrase in hand — the press's, or a resume's typed at the lobby — opening the vault as it
-    /// stands (E4: it moved again since the door ⇒ the act rolls back, naming the change); the master must reach this
-    /// key (rule 22, checked by the re-lock itself). A missing secret at a resume rolls back too — the old state.
-    func relockToTheAccountsPair() async throws {
-        guard let account = accountID else { throw ExecutorRefusal.notSynced }
-        let snapshot: VaultSnapshot
-        if let read = executor.freshVaults[account] { snapshot = read } else { snapshot = try await freshRead() }
         guard let file = library.keyFile, file.fingerprint == library.fingerprint else {
             throw ActRollback(refusal: .noLiveKeyFile)
         }
+        let keys = try pairKeysInHand(snapshot)
+        let castle = snapshot.mode == .castle
         guard case .pairChanged(let passphraseMoved, let wordsMoved)? = AssessRules.pairFollow(file, snapshot.reading) else {
+            if let keys {
+                try holdThePairsKeys(keys, castle: castle)
+                try stampFollowed(keys.rowKeyID)
+            }
             log("the key file already carries the account's pair — nothing to re-lock")
             return
         }
@@ -204,9 +212,7 @@ extension ActContext {
             }
             passphrase = current
         }
-        guard let keys = try pairKeysInHand(snapshot) else {
-            throw ActRollback(refusal: resuming ? .secretsRequired(act) : .secretMissing)
-        }
+        guard let keys else { throw ActRollback(refusal: resuming ? .secretsRequired(act) : .secretMissing) }
         let relocked: KeyFile
         do {
             relocked = try file.relockedToTheAccountsPair(
@@ -216,6 +222,8 @@ extension ActContext {
             log("the account's master does not reach this key file (\(error)) — rolls back, nothing written")
             throw ActRollback(refusal: .accountMoved)
         }
+        try holdThePairsKeys(keys, castle: castle)
+        try stampFollowed(keys.rowKeyID)
         try executor.writeLiveKeyFile(relocked, &library)
         let halves = [passphraseMoved ? "passphrase" : nil, wordsMoved ? "words" : nil].compactMap { $0 }
         log("re-locked to the account's pair (\(halves.joined(separator: " and "))) — the key unchanged "
