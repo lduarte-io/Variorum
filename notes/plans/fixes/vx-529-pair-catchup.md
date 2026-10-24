@@ -702,12 +702,32 @@ unit 2 or her bundle, none built autonomously beyond the ruled sentence:**
   "checking changes nothing"). This is R-529-5's own "re-made next time a passphrase is typed here" applied to the
   whole class; flagged provisional because join-born E6 predates this run.
 - **The lobby's E6 sentence (unit 2):** the key file is readable pre-unlock, so a typed passphrase against a file
-  with NO passphrase lock can say so instead of the misleading "doesn't open this library" — draft: *"This library
-  doesn't have a passphrase lock of its own — it opens with your twelve words."* (offline face; online the vault road
-  simply opens it).
+  with NO passphrase lock can say so instead of the misleading "doesn't open this library" — THE ARCHITECT'S FIRST
+  DRAFT ("This library doesn't have a passphrase lock of its own — it opens with your twelve words.") is
+  SUPERSEDED BY R-529-6 below: her direction, the why and the road, not the mechanism.
 - **The check door's E6 wording (her bundle):** the fourth answer's E6 variant could explain rather than just refuse.
 - **The join's words moment (her bundle):** when a join by words lands E6, one line saying the same window.
 - **The guide:** one E6 line for the protection chapter — rides VX-379 (already open, Pre-launch).
+
+## R-529-6 — THE E6 FACE SAYS THE WHY AND THE ROAD, AND THE STATE IS SURFACED UNTIL RESOLVED (2026-10-24, her words verbatim)
+
+*"also, I don't really like this phrasing about this library doesn't have a passphrase lock because it doesn't tell
+you why or how to solve it. I feel like it's unclear. maybe 'your account's passphrase hasn't been entered on this
+computer yet, please do so'. I honestly feel like maybe it should be a recurrent notification until it's done - maybe
+make a ticket for that? thoughts? I do think we should make it clear it's not the 'ideal' state for users and
+encourage them to resolve it. they can still change their passphrase if they forgot it."*
+
+- **The sentence direction (binding on every E6 face this run writes):** say WHY and the ROAD, never the mechanism —
+  her draft's shape: *"Your account's passphrase hasn't been typed on this Mac yet — type it here to use it on this
+  Mac."* (built provisional in P-VX529-3's class, her wording pass polishes; "lock" talk is out).
+- **The recurrent surfacing: TICKETED (VX-538)** — the E6 state surfaced as not-ideal, recurring until resolved, in
+  the band card's one home (the calm-first rules: a dismissible card above the quick entry, never a popup, never a
+  second bar), rule 3's cadence as the pattern; the generalized heal (P-VX529-4) is what retires it automatically —
+  the card ends the moment a typed passphrase lands the lock. The card also says the forgot-road plainly: Reset
+  forgotten passphrase works in this state (no follow is owed in plain E6 — the gate is not in the way), and setting
+  one you know lands the local lock in the same act. Since the card is a standing sentence about the passphrase,
+  its clause is DRAFTED FOR HER beside CastleRules rule 3 at closeout (the rules change only at her word — this ask
+  is her word; the clause text still goes to her verbatim before it enters the rules).
 
 ## Machinery
 
