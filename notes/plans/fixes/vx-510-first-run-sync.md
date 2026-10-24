@@ -107,6 +107,14 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 - **R-510-18 — her signal: "just let me know when I'm needed - if you want to send an obvious signal, put up one of the
   orchestrator's decorations (the koi fish style ones) when you need me and i'm sure to see it and come over."** → memory
   `signal-her-with-the-ambient`; this run raises `Tools/ambient on --allow-claimant vx-510` when blocked on her hands.
+- **Her questions (~22:30): "you can do the offline check if you want / if you think it's important. I can turn the wifi
+  back on and I'm next to the pro anyway. also, if a secret opens your account but not the library, shouldn't the library
+  follow? if you type the secret? what's the issue? do you think VX-527 should be a rider on this run ? you can leave it
+  for later if you want"** → the offline row WALKED (unit C record); the follow question REPRODUCED live as a real gap →
+  **VX-529** (High, Confirmed, Needs Lillian — join-this-run + the catch-up's shape offered to her: a "Follow your
+  account…" catch-up once the library is open, the lobby naming the account's new passphrase, the check door's fourth
+  answer carrying the same door, the key door's wrong refusal replaced by VX-113's sentence); **VX-527 → a RIDER** (the
+  orchestrator's call at her delegation; parented under VX-510; a small unit after B4).
 
 ## HER AIR REPORT (2026-10-23 evening, after the 0.10 update — her words verbatim, each item traced and dispositioned)
 
@@ -211,8 +219,9 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | UNIT B1 DONE (`2576629c7`…`31b8e2636`; `FirstRunDrillTests` every arm + the negatives; `Tools/WalkKit/first-run-walk.sh` + release.sh's step-0 gate row; harness 477/82 green; 18 reverts red as named; re-run by the orchestrator 48/6 green); the Mac stage batch PENDING (the closing run) |
 | 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | DONE — unit B1 (D-B3) + unit B2's F-B1-1 (`4a5ef39e3`: the list rides `VARIORUM_PRODTEST_EMAILS` in the launch env); ARMED and used live through unit C (three accounts) |
 | 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | UNIT B2 DONE (`4a5ef39e3`…`f4af7e368`; harness 502/85 green; reverts RF-1…6, RD4-1…8, RD6-1…5, RD5-1…2 red as named; Mac + iOS build-for-testing green; claims spot-checked by the orchestrator); VX-501 + VX-511 GREEN LIVE on production (unit C C2/C4); VX-503 fixed (`226cf7c20`); T-B5-2 → **VX-517** (Needs Lillian); the Mac stage batch PENDING (the closing run) |
-| 6c | VX-513 (the read-only check-your-secrets door) | UNIT B3 DONE (`73dc65dab`…`2e3d335d8`; harness 519/89 green; RC-1…16 red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 65/9 green; P-VX510-B3-2 ruled (b) provisionally); the live walk on the synced arm NEXT (the orchestrator, on the held setup); the Mac stage batch PENDING (the closing run) |
-| 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 — D-B8 + the brief written; spawning; the live proof needs her Touch ID (the ambient signals) |
+| 6c | VX-513 (the read-only check-your-secrets door) | UNIT B3 DONE (`73dc65dab`…`2e3d335d8`; harness 519/89 green; RC-1…16 red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 65/9 green; P-VX510-B3-2 ruled (b) provisionally); **GREEN LIVE** (rows 1–5, offline included; nothing written); the Mac stage batch PENDING (the closing run) |
+| 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 DONE (`5416bcaca`…`fe42afe4f`; harness 521/90; core protection 546/103 re-run by the orchestrator; RE-0…13 red as named; Mac + iOS build-for-testing green); F-B4-1 accepted as residue; O-B4-1 → VX-530; the live proof (red + green legs, her Touch ID) NEXT |
+| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere — HER CALL) | VX-527: a small unit after the Touch ID walk · VX-529: Needs Lillian (join + shape offered) |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | LEGS S · D · C PASS (unit C — THE RECORD): three fresh accounts (std, del, castle) set up with no relaunch, server-verified; both postures; key changes; backups; typed secrets; a second library's join in each posture; Delete Account; Use Standard. Unit C's close (cleanup + dev store back) after B3's walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | NOT STARTED |
@@ -2211,6 +2220,21 @@ edits). Every claim not yet run is PENDING.*
   - After the walk: the `castle` account stays the standing release-drill account per unit C's proposal; its posture at the end
     (Standard after W2/W4) is recorded in unit C's record.
 
+**THE ARCHITECT ON B4 (2026-10-23, verified):** commits `5416bcaca`…`fe42afe4f`; no `Sources/VariorumCore/Sync/` line; the
+orchestrator re-ran B4's core protection set through its own runner (`scratchpad/b4/core-test.sh orch-verify PROT`): **`✔ Test
+run with 546 tests in 103 suites passed`**. Rulings: **(c)'s reading ACCEPTED** — "Castle" means the library is in Castle OR
+the act is taking it into Castle (a mode-only rule strands a crashed join-into-Castle in flight, rule 20; RE-12 pins it);
+**F-B4-1 ACCEPTED as a recorded residue, not a fork to build** — a Touch ID-only item for an account neither bound, signed
+in nor named by an act stays on the Mac (a lost-plan Move; a set-aside library), biometry-gated, never read by a Standard
+library after (c), dropped by name the next time any act files that account; a past-accounts registry would change the
+custody record's shape (a fork) for a residue that can't reach her; **O-B4-1 → VX-530** (a Castle + Touch ID key door asks
+Touch ID twice; Suspected — the walk's W1 guard will show it); **O-B4-2 noted** (a plan-less rollback skips the taken-keys
+sweep — harmless after (c)). **The walk adapted to the state the VX-529 repro left** (the account is CASTLE rev 6 under
+PASSPHRASE; `223c4e7e` Castle Always ask): the pre-fix build (`DerivedData/vx510`, `2e3d335d8`) runs the RED leg — Use
+Standard → Use Castle (Touch ID) → Use Standard → Change passphrase (a sheet = red; she presses Cancel) — then the post-fix
+build (`DerivedData/vx510-b4walk`, `fe42afe4f`) runs B4's W2/W3 (no sheet on the Standard side, even with the red leg's
+stale item present) and the W1 guard (Castle + Touch ID reads still work).
+
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
 **Machinery:** a held `Tools/stage` claim (renewed per leg); the walk Debug build of the FINAL tree into
@@ -2476,6 +2500,43 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   here: the orchestrator edits this file only with `git status` clean, and commits at once.
 *[removed for publication]*
   at her word (R-510-17).
+- **VX-513'S WALK (22:19–22:35; the walk build REBUILT at B3's tip `2e3d335d8`; stage renewed 240 min; pid 93437 on
+  `223c4e7e` — synced to `castle`, Standard; prod vault rev 4):**
+  - row 1 PASS — "Check my passphrase or twelve words…" stands in its own group right after the words section.
+  - the sheet: "Check my passphrase or twelve words" / "Type your passphrase or your twelve words to check them. Checking
+    changes nothing." / one concealed field "Passphrase or twelve words" with the eye / Close · Check.
+  - row 3 PASS (synced) — the account's current passphrase → **"That passphrase opens this library and your account."**; log
+    `road: a secret check (read-only, nothing written) — the library: opens; the account: opens`.
+  - row 2 PASS — ⌘A + a wrong secret (std's passphrase): the answer line CLEARED on the edit (the sheet shrank 204 → 177 pt
+    before Check) → **"That passphrase doesn't open this library."** (warning-styled); log does not open / does not open.
+  - the words → **"Those twelve words open this library and your account."**
+  - **NOTHING WRITTEN:** `variorum-library-keys.json` mtime 1792813051, size 1231, before AND after; prod vault rev 4,
+    `updated_at` 03:37:31Z (C5's act) — unmoved; the log holds exactly the check lines.
+  - row 4 PASS (offline, at her offer, 22:35) — one scripted command: `networksetup -setairportpower en0 off` (en0 the only
+    active route), Check with the current passphrase, capture, Wi-Fi on under a trap → **"That passphrase opens this
+    library." + "Variorum couldn't reach your account just now. Try again in a moment."**; log `— the library: opens; the
+    account: not checked`. (The shell's curl probe is sandbox-blocked — not a network verdict.)
+  - row 5 PASS (via the VX-529 repro below) — the account's NEW passphrase on the lagging library → **"That passphrase doesn't
+    open this library, but it opens your account."** (P-VX510-B3-2 live). Row 6 (no door behind the lobby) — Settings is
+    unreachable behind the lobby; the composition pin covers it.
+  - **VX-513 GREEN LIVE.**
+- **THE CHANGED-ELSEWHERE REPRO (22:36–22:46, prod, castle account; her question) → VX-529:** helpers `scratchpad/swap-lib.sh`
+  (slot ↔ an aside folder, refuses with an instance up) + `launch-walk.sh`. On `223c4e7e`: Use Castle (Always ask) → prod
+  **rev 5 castle** (`useCastle … under 3f7560b2`). Swap → `159caa3f` opens on passphrase2 (after the swap's "This is a
+  different library than the one this Mac last had open" notice — a walk artifact) → "Your account's keys changed on Lillian's
+  MacBook Pro on October 23." + Follow your account… → `follow: done #1 under e33d54b8`. Swap → `223c4e7e` (passphrase2) →
+  Change passphrase passphrase2 → PASSPHRASE → prod **rev 6**. Swap → `159caa3f`'s lobby: **the account's NEW passphrase →
+  "That passphrase doesn't open this library."** (no VX-113 sentence) · **the OLD one opens it** → `the typed secret opens the
+  library but not the account's vault (changed elsewhere?) — nothing loaded; a follow or a key door loads them` · the row
+  "…Mac hasn't unlocked your account's sync keys" · Settings ▸ Sync offers **NO follow** (only the stale "…keys changed on
+  another device, and this Mac caught up.") · **Change passphrase old → new refuses "That passphrase doesn't open this
+  library."** (`changePassphrase did not land — passphraseDoesNotOpen` — WRONG: the old one does open it) · **the twelve words
+  (unchanged) → `the typed unlock loaded the account's sync keys`** (a per-session workaround) · the check door's fourth
+  answer (above). Diagnosis: the follow covers posture changes and key replacements only; nothing makes a second device take a
+  PAIR changed elsewhere (rule 7 is silent on it); in Castle the lagging device can't sync on its passphrase; in Standard it
+  syncs on the quiet roads with a silently stale passphrase. W-12's "before today" is rule 7's own sentence (VX-526 comment).
+  **STATE AFTER THE REPRO:** the account's passphrase = **PASSPHRASE** (rev 6, castle); `223c4e7e` under PASSPHRASE (Castle,
+  Always ask, `3f7560b2`) — back in the slot; `159caa3f` STALE under passphrase2 (`…-aside-vx510-walkL4/`); the words unchanged.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
@@ -2533,3 +2594,6 @@ no live proof. Ranked by launch risk. The rows marked ▶ ride THIS run (units B
 - **Her calls on filed tickets:** VX-521 (keep-and-close recommended) · VX-527 as a rider in this run? (default: no) ·
   VX-528 (per-Mac seeding intended?) · Pre-launch on any of VX-517…VX-528.
 - **Her hands, later:** the Touch ID window for VX-517's live proof (the ambient goes up).
+- **VX-529 — her call:** join this run with the offered shape (a catch-up follow once open · the lobby naming the account's
+  new passphrase · the check door's fourth answer carrying the door · VX-113's sentence on the key door's refusal), another
+  shape, or a later run.
