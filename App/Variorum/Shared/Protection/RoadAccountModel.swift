@@ -258,7 +258,7 @@ final class RoadAccountConfirmModel: Identifiable {
     /// blocks it in the sync row's own words (`firstRoundLine`).
     var roundLine: String? {
         guard case .done(let outcome)? = round else { return nil }
-        return Self.firstRoundLine(outcome, joins: door.joinsAnAccount)
+        return Self.firstRoundLine(outcome, joins: door.joinsAnAccount, follows: door.door == .follow)
     }
 
     /// The round's error as the row shows it under its error face (`ErrorCauseNote`'s text) — the sheet shows the same
@@ -272,8 +272,9 @@ final class RoadAccountConfirmModel: Identifiable {
     /// success line; anything else — "Sync hasn't run yet: ‹the sync row's own sentence›." (ONE presentation source:
     /// `SyncStatusRow.line(for:lastSuccessAt:)`, which the row renders too). Held has no row face of its own: the row's
     /// held refusal, said for a sheet that stands over Settings (PROVISIONAL P-VX510-A1). Not configured is the row's
-    /// signed-in, no-chain face ("Sync is off" — a failed owner adoption, F-5).
-    static func firstRoundLine(_ outcome: FirstRoundOutcome, joins: Bool) -> String {
+    /// signed-in, no-chain face ("Sync is off" — a failed owner adoption, F-5). VX-510 D-B0: the follow's clean round says
+    /// its own line (`follows` — PROVISIONAL P-VX510-B1-1); the follow's Done stays the section's durable notice (VX-457).
+    static func firstRoundLine(_ outcome: FirstRoundOutcome, joins: Bool, follows: Bool = false) -> String {
         switch outcome {
         case .held:
             return ProtectionWords.firstRoundBlocked(ProtectionWords.firstRoundHeld)
@@ -282,6 +283,7 @@ final class RoadAccountConfirmModel: Identifiable {
         case .ran(let status):
             let face = rowFace(status)
             guard face.kind != .idle else {
+                if follows { return ProtectionWords.firstRoundFollowLanded }
                 return joins ? ProtectionWords.firstRoundJoinLanded : ProtectionWords.firstRoundSetUpLanded
             }
             return ProtectionWords.firstRoundBlocked(SyncStatusRow.line(for: face.kind, lastSuccessAt: status.lastSuccessAt))
@@ -414,7 +416,21 @@ final class RoadAccountModel {
     /// the moment an act that changes sync's standing on the open session lands (`RoadAccountDoorOpen.owesFirstRound`). nil
     /// (the phone until VM-8, a test world without one): the confirm finishes exactly as before (P-2).
     @ObservationIgnored var firstRound: (@MainActor () async -> FirstRoundOutcome)?
+    /// **VX-510 D-B0 — a RE-KEYING act's first round** (F-6 (A), ruled; wired by `AppBootstrap.attach(services:)` beside
+    /// `firstRound`). A re-keying act lands through the reopen, whose teardown releases the open session's services; its
+    /// `.made` comes back before the reopen's fresh services are composed. So the press takes the bootstrap's services
+    /// generation, and at `.made` the round waits for services attached after it (the reopen's — bounded) and asks THEM.
+    /// nil (the phone until VM-8, a test world without one): a re-keying act's confirm finishes as before (P-2).
+    @ObservationIgnored var firstRoundAfterReopen: FirstRoundAfterReopen?
     @ObservationIgnored private var reads = 0
+
+    /// VX-510 D-B0 — the composition root's road for a re-keying act's first round.
+    struct FirstRoundAfterReopen {
+        /// The services generation NOW — taken at the press, before the reopen's teardown releases the services.
+        let generation: @MainActor () -> Int
+        /// At `.made`: the services attached after `generation` (the reopen's fresh ones), asked for one round to its end.
+        let round: @MainActor (Int) async -> FirstRoundOutcome
+    }
     @ObservationIgnored private var landedRead = 0
 
     init(roads: RoadAccountRoads, presenter: ProtectionSheetPresenter = ProtectionSheetPresenter()) {
@@ -481,10 +497,24 @@ final class RoadAccountModel {
                 await roads.landed()
             }
         }
-        // VX-510 D-A1: the first round, for an act whose landing changes sync's standing on the open session.
-        let firstRound = open.owesFirstRound ? self.firstRound : nil
+        // VX-510 D-A1 + D-B0: the first round, for an act whose landing changes sync's standing — on the open session
+        // through its services (D-A1), or, a re-keying act, through the reopen's fresh services (D-B0). Which road is the
+        // PRESSED door's (a door re-shown CHANGED may change its plan); the generation is taken at that press. No road for
+        // the door (the phone until VM-8, a test world without one): no round — the confirm finishes as before (P-2).
+        let openSession = self.firstRound
+        let reopen = self.firstRoundAfterReopen
+        var pressed: (rekeys: Bool, generation: Int)?
+        let act: (RoadAccountRequest) async -> RoadAccountPress = { request in
+            pressed = (request.shown.rekeys, reopen?.generation() ?? 0)
+            return await roads.press(request)
+        }
+        let hasRoad = open.rekeys ? reopen != nil : openSession != nil
+        let firstRound: (() async -> FirstRoundOutcome)? = open.owesFirstRound && hasRoad ? {
+            guard let pressed, pressed.rekeys else { return await openSession?() ?? .notConfigured }
+            return await reopen?.round(pressed.generation) ?? .notConfigured
+        } : nil
         let confirm = RoadAccountConfirmModel(
-            door: open, act: { request in await roads.press(request) }, copyWords: roads.copyWords,
+            door: open, act: act, copyWords: roads.copyWords,
             firstRound: firstRound, landed: land,
             finished: { [weak self] press in
                 if let id { presenter.dismiss(id) }

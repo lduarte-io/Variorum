@@ -145,12 +145,16 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
     /// reopens — the crossings' seam (R-U2-2); else on the open session.
     var rekeys: Bool { spec.rekeys }
 
-    /// **VX-510 D-A1 — a first round is owed the moment this act lands** (VX-498): its landing changes sync's standing on
-    /// the OPEN session — turning sync on (the set-up, a join in the same posture) and Move in the same posture. Never a
-    /// leave (sync stops there), and never a re-keying act: that one lands through the reopen, whose fresh services run
-    /// their own round at their start (the run record's F-6 — its confirmation is the architect's fork).
+    /// **VX-510 D-A1 + D-B0 — a first round is owed the moment this act lands** (VX-498 · VX-507): its landing changes
+    /// sync's standing — turning sync on (the set-up, a join), Move, and the follow. Never a leave (sync stops there). An
+    /// act on the OPEN session asks the open session's services (D-A1); a RE-KEYING act (a join or Move across postures,
+    /// every follow) lands through the reopen and asks the reopen's FRESH services once they are attached (D-B0 — F-6 (A),
+    /// ruled).
     var owesFirstRound: Bool {
-        (door == .turnOnSync || door == .moveToSignedInAccount) && !rekeys
+        switch door {
+        case .turnOnSync, .moveToSignedInAccount, .follow: return true
+        case .stopSyncingHere, .deleteAccountHere, .thisMacOnly: return false
+        }
     }
 
     /// VX-510 D-A2 — the act JOINS an account that already syncs (a join, Move) rather than handing the library's pair up

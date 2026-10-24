@@ -41,6 +41,29 @@ final class PlantedFirstRound {
     }
 }
 
+/// VX-510 unit B1 (D-B0): the composition's RE-KEYING road, planted — the services generation (moved on by `attach()`, as
+/// the reopen's attach does during the press) and every round asked, with the generation it was asked with.
+@MainActor
+final class PlantedReopenRound {
+    private(set) var generation: Int
+    private(set) var asks: [Int] = []
+    var outcome: FirstRoundOutcome = .ran(PlantedFirstRound.clean)
+
+    init(generation: Int = 0) { self.generation = generation }
+
+    /// The reopen attached fresh services.
+    func attach() { generation += 1 }
+
+    var road: RoadAccountModel.FirstRoundAfterReopen {
+        RoadAccountModel.FirstRoundAfterReopen(
+            generation: { [self] in generation },
+            round: { [self] asked in
+                asks.append(asked)
+                return outcome
+            })
+    }
+}
+
 /// A first-round road that parks until `release()` — the round provably running while the sheet stands.
 @MainActor
 final class GatedFirstRound {
@@ -93,10 +116,13 @@ struct FirstRoundConfirmTests {
     /// …with any road, returning the section, its planted roads and the confirm.
     private func press(
         _ door: RoadAccountDoor, _ open: RoadAccountDoorOpen, press: RoadAccountPress = .made(receipt: "landed"),
-        road: (@MainActor () async -> FirstRoundOutcome)?, words typedWords: String? = nil
+        road: (@MainActor () async -> FirstRoundOutcome)?, reopen: PlantedReopenRound? = nil,
+        words typedWords: String? = nil
     ) async throws -> (model: RoadAccountModel, planted: PlantedAccountRoads, confirm: RoadAccountConfirmModel) {
         let planted = PlantedAccountRoads()
         planted.press = press
+        // D-B0: a re-keying act's reopen attaches fresh services DURING the press (the generation moves on).
+        planted.onPress = { request in if request.shown.rekeys { reopen?.attach() } }
         var faces = PlantedAccountRoads.faces(turnOnSync: .hidden)
         switch door {
         case .turnOnSync: faces = PlantedAccountRoads.faces(turnOnSync: .open(open))
@@ -114,6 +140,7 @@ struct FirstRoundConfirmTests {
         planted.faces = faces
         let model = RoadAccountModel(roads: planted.roads)
         model.firstRound = road
+        model.firstRoundAfterReopen = reopen?.road
         await model.refresh()
         model.open(door)
         let confirm = try #require(model.confirm, "\(door)'s confirm opens")
@@ -152,13 +179,36 @@ struct FirstRoundConfirmTests {
         }
     }
 
-    /// A LEAVE never asks (sync stops); a RE-KEYING act never asks (the reopen's fresh services run their own round —
-    /// F-6); with no road nothing is asked and the confirm finishes as before.
-    @Test func aLeaveOrAReKeyingActNeverAsks() async throws {
+    /// A LEAVE never asks (sync stops), whichever roads are wired; with no road nothing is asked and the confirm finishes as
+    /// before. (VX-510 unit B1, D-B0 — FLIPPED DELIBERATELY: unit A's form also asserted a RE-KEYING act never asks; F-6 (A)
+    /// ruled that it does, through the reopen's fresh services — `aReKeyingActAsksTheReopenRoadWithThePressGeneration`.)
+    @Test func aLeaveNeverAsks() async throws {
         let doors: [(RoadAccountDoor, RoadAccountDoorOpen)] = [
             (.stopSyncingHere, PlantedAccountRoads.leave(.stopSyncingHere)),
             (.deleteAccountHere, PlantedAccountRoads.leave(.deleteAccountHere)),
             (.thisMacOnly, PlantedAccountRoads.leave(.thisMacOnly)),
+        ]
+        for (door, open) in doors {
+            #expect(!open.owesFirstRound, "\(door) owes none")
+            let round = PlantedFirstRound()
+            let reopen = PlantedReopenRound()
+            let confirm = try await press(door, open, road: round.road, reopen: reopen).confirm
+            #expect(await confirm.awaitFirstRound() == nil, "\(door): no round started")
+            #expect(round.asks == 0 && reopen.asks.isEmpty, "\(door): never asked")
+        }
+        // No road at all: the set-up lands and nothing is asked.
+        let confirm = try await press(.turnOnSync, PlantedAccountRoads.setUp(), round: nil)
+        #expect(await confirm.awaitFirstRound() == nil)
+    }
+
+    /// **VX-510 unit B1, D-B0 (F-6 (A), ruled) — A RE-KEYING ACT ASKS THE REOPEN'S ROAD** (a new seam's pin — red by the
+    /// record's reverts): a join entering or leaving Castle, Move entering it, and both follows each owe a first round; the
+    /// press takes the services generation BEFORE the act (whose reopen attaches fresh services — the planted press bumps the
+    /// generation, as that attach does), and at `.made` the round goes to the REOPEN road with the PRESS's generation — never
+    /// to the open session's road, whose services the reopen released. With no reopen road wired (the phone until VM-8) a
+    /// re-keying act starts no round (P-2).
+    @Test func aReKeyingActAsksTheReopenRoadWithThePressGeneration() async throws {
+        let doors: [(RoadAccountDoor, RoadAccountDoorOpen)] = [
             (.turnOnSync, PlantedJoin.join(.entersCastle)),
             (.turnOnSync, PlantedJoin.join(.leavesCastle)),
             (.moveToSignedInAccount, Self.move(.entersCastle)),
@@ -166,15 +216,38 @@ struct FirstRoundConfirmTests {
             (.follow, PlantedJoin.follow(.intoStandard)),
         ]
         for (door, open) in doors {
-            #expect(!open.owesFirstRound, "\(door) \(String(describing: open.spec.join)) owes none")
-            let round = PlantedFirstRound()
-            let confirm = try await press(door, open, round: round)
-            #expect(await confirm.awaitFirstRound() == nil, "\(door): no round started")
-            #expect(round.asks == 0, "\(door): never asked")
+            #expect(open.owesFirstRound && open.rekeys, "\(door) \(String(describing: open.spec.join)) owes one, re-keying")
+            let openSession = PlantedFirstRound()
+            let reopen = PlantedReopenRound(generation: 7)
+            let (_, planted, confirm) = try await press(door, open, road: openSession.road, reopen: reopen)
+            #expect(planted.requests.count == 1)
+            #expect(await confirm.awaitFirstRound() == .ran(PlantedFirstRound.clean), "\(door): the round's outcome")
+            #expect(reopen.asks == [7], "\(door): the reopen road, asked once with the generation taken at the press")
+            #expect(openSession.asks == 0, "\(door): never the open session's road (its services were released)")
         }
-        // No road at all: the set-up lands and nothing is asked.
-        let confirm = try await press(.turnOnSync, PlantedAccountRoads.setUp(), round: nil)
-        #expect(await confirm.awaitFirstRound() == nil)
+        // No reopen road: a re-keying act starts no round, even with the open session's road wired.
+        let openSession = PlantedFirstRound()
+        let confirm = try await press(.turnOnSync, PlantedJoin.join(.entersCastle), road: openSession.road).confirm
+        #expect(await confirm.awaitFirstRound() == nil && openSession.asks == 0)
+    }
+
+    /// D-B0 — THE PRESSED DOOR CHOOSES THE ROAD: a same-posture join re-shown CHANGED into one that enters Castle (the
+    /// account entered Castle elsewhere meanwhile — VX-108) is pressed again, and its round goes to the reopen road; the
+    /// open session's road is never asked.
+    @Test func aDoorReShownAsReKeyingTakesTheReopenRoad() async throws {
+        let openSession = PlantedFirstRound()
+        let reopen = PlantedReopenRound(generation: 3)
+        let (model, planted, confirm) = try await press(
+            .turnOnSync, PlantedJoin.join(.sameMode), press: .changed(PlantedJoin.join(.entersCastle)),
+            road: openSession.road, reopen: reopen)
+        #expect(confirm.refusal == ProtectionWords.crossingDoorChanged && confirm.round == nil)
+        planted.press = .made(receipt: "joined")
+        confirm.gate = .alwaysAsk
+        await confirm.submit(passphrase: "the account's passphrase")
+        #expect(planted.requests.count == 2 && planted.requests.last?.shown.rekeys == true)
+        #expect(await confirm.awaitFirstRound() == .ran(PlantedFirstRound.clean))
+        #expect(reopen.asks == [3] && openSession.asks == 0, "the pressed door's road")
+        #expect(model.confirm === confirm, "the sheet stays for the round")
     }
 
     /// A refused press, or one whose door CHANGED (VX-108), lands nothing — and asks for no round.

@@ -228,6 +228,14 @@ final class AppServices {
     /// into sync, run the idempotent owner adoption when signed in, then
     /// the sweep and the backup clock.
     func start() async {
+        // VX-510 D-B0: a first round asked while this runs waits for it (`runFirstRound`).
+        starting = true
+        defer {
+            starting = false
+            let waiters = startWaiters
+            startWaiters = []
+            for waiter in waiters { waiter.resume() }
+        }
         await auth.setOnChange { [weak self] tokens in
             Task { @MainActor [weak self] in
                 await self?.variorumSignInChanged(tokens)
@@ -432,9 +440,17 @@ final class AppServices {
     /// (`connectSyncIfAllowed` — the owner adoption, the configure, its trigger), then ONE round runs to its end and its
     /// outcome comes back (`SyncSession.roundNow` — held, not configured, or what the round left on the status).
     func runFirstRound() async -> FirstRoundOutcome {
+        // VX-510 D-B0: a RE-KEYING act asks the reopen's FRESH services, which the composition root attaches just BEFORE
+        // their `start()` — so a round asked while that start runs waits for it, and rides the chain it composes; reaching
+        // for the chain first would compose it twice (the start's own configure retiring this round's scheduler mid-round).
+        if starting { await withCheckedContinuation { startWaiters.append($0) } }
         if !sync.isConfigured { await connectSyncIfAllowed() }
         return await sync.roundNow()
     }
+
+    /// VX-510 D-B0 — `start()` is in flight (its waiters resume when it returns).
+    private var starting = false
+    private var startWaiters: [CheckedContinuation<Void, Never>] = []
 
     /// Step 4's backfill, at sign-in and at every signed-in launch:
     /// idempotent (NULL owners only), and self-healing for rows that

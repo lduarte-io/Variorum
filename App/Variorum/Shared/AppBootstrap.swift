@@ -1060,13 +1060,60 @@ final class AppBootstrap {
     /// protection half (`accountDeletedOnNewRoad` — P-VX308-U1-F1); the account section's *Sign out…* signs out through the
     /// services' one session; and (VX-498) an account act that lands on the open session runs its FIRST ROUND through the
     /// services (`runFirstRound` — the round the deleted road's enrollment hook used to start; a stopped instance answers
-    /// "not configured"). (The phone wires its deletion hook inline: it renders no account section until VM-8, P-2.)
+    /// "not configured"); and (D-B0) a RE-KEYING act's first round waits for the reopen's fresh services, then asks them
+    /// (`firstRoundAfterReopen` — the services generation below). (The phone wires its deletion hook inline: it renders no
+    /// account section until VM-8, P-2.)
     func attach(services: AppServices) {
         services.afterAccountDeleted = { [weak self] account in
             await self?.accountDeletedOnNewRoad(account)
         }
         roadAccount?.signOutRoad = { [weak services] in await services?.signOutVariorum() }
         roadAccount?.firstRound = { [weak services] in await services?.runFirstRound() ?? .notConfigured }
+        // VX-510 D-B0 (F-6 (A), ruled): a RE-KEYING act's first round — the generation taken at its press, then the
+        // reopen's FRESH services (attached after that generation) asked for the round (`awaitAttachedServices`).
+        roadAccount?.firstRoundAfterReopen = RoadAccountModel.FirstRoundAfterReopen(
+            generation: { [weak self] in self?.servicesGeneration ?? 0 },
+            round: { [weak self] generation in
+                guard let fresh = await self?.awaitAttachedServices(newerThan: generation) else { return .notConfigured }
+                return await fresh.runFirstRound()
+            })
+        servicesGeneration += 1
+        attachedServices = services
+        for (id, waiter) in attachWaiters where servicesGeneration > waiter.newerThan {
+            attachWaiters[id] = nil
+            waiter.timeout.cancel()
+            waiter.continuation.resume(returning: services)
+        }
+    }
+
+    /// **VX-510 D-B0 — THE SERVICES GENERATION** (F-6 (A), ruled by the architect: unit A's Piece 6 trace). A re-keying
+    /// account act (a join or Move across postures, every follow) runs through the one reopening seam: its teardown STOPS
+    /// AND RELEASES the services, the act runs, the library reopens — and its `.made` comes back after the reopen settled
+    /// but BEFORE the reopened ready arm composes fresh services (`VariorumApp`'s `.task`: compose, attach, start). So the
+    /// act's sheet takes this generation at its PRESS and, at `.made`, waits for services attached AFTER it — the reopen's —
+    /// and asks THEM for the round. Bumped by every `attach`.
+    @ObservationIgnored private(set) var servicesGeneration = 0
+    /// The newest services attached (weak: a stopped instance is let go by the composition root).
+    @ObservationIgnored private weak var attachedServices: AppServices?
+    /// Waiters for a newer attach, each with its bound's timer (cancelled when an attach answers it).
+    @ObservationIgnored private var attachWaiters:
+        [UUID: (newerThan: Int, continuation: CheckedContinuation<AppServices?, Never>, timeout: Task<Void, Never>)] = [:]
+
+    /// **VX-510 D-B0** — the services attached AFTER `generation`: at once when they already are, else the next attach;
+    /// nil when none comes within `bound` (a closed main window composes no services — the round is then "not configured",
+    /// never a wait forever). Production's bound is 30 s.
+    func awaitAttachedServices(newerThan generation: Int, within bound: Duration = .seconds(30)) async -> AppServices? {
+        if servicesGeneration > generation, let attachedServices { return attachedServices }
+        let id = UUID()
+        return await withCheckedContinuation { continuation in
+            // The timer holds the bootstrap until it fires or an attach cancels it, so no waiter is ever left unanswered.
+            let timeout = Task { @MainActor in
+                try? await Task.sleep(for: bound)
+                guard !Task.isCancelled, let waiter = self.attachWaiters.removeValue(forKey: id) else { return }
+                waiter.continuation.resume(returning: nil)
+            }
+            attachWaiters[id] = (generation, continuation, timeout)
+        }
     }
 
     /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for

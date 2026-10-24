@@ -925,6 +925,9 @@ nonisolated enum ProtectionWords {
     /// P-VX510-1 — the round came back clean: the set-up handed the library up; a join (or Move) brought the account in.
     static let firstRoundSetUpLanded = "Synced. Your library is on your account now."
     static let firstRoundJoinLanded = "Synced. Your account's writing is in this library now."
+    /// VX-510 D-B0 — the FOLLOW's clean first round, beside its durable Done (VX-457). PROVISIONAL P-VX510-B1-1, the
+    /// implementer's draft (unit B1's record), hers to reword.
+    static let firstRoundFollowLanded = "Synced. This library is up to date with your account again."
     /// P-VX510-1 — what blocks it, in the sync row's own sentence.
     static func firstRoundBlocked(_ rowSentence: String) -> String { "Sync hasn't run yet: \(rowSentence)." }
     /// P-VX510-A1 — held: the row's held refusal (`LibraryOpenCopy.syncNowHeldRefusal` — "…in the banner below") said from
