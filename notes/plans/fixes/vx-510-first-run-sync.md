@@ -578,6 +578,52 @@ first draft of each built).
   presence, during the re-lock under the account's pair), what a cancel skips, and whether a cancel leaves residue.
   A traced fix lands with its pin; an untraced one is recorded, not guessed.
 
+## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
+
+**Machinery:** a held `Tools/stage` claim (renewed per leg); the walk Debug build of the FINAL tree into
+`App/Variorum/DerivedData/vx510` (never the standard path); the dev slot's top-level files aside by `mv` (all of
+them; same inodes) BEFORE the first launch; every launch with `VARIORUM_PROD_TEST_ROAD=1` and NO walk project,
+`ps eww <pid>`-verified before any credential; every secret typed by `type-prod-test-secret`, every words look
+stashed by `stash-prod-test-words` (never read, never echoed); every server check by `Tools/prod-read.sh` (by the
+account's uid, read once from `auth.users` by email); every step captured (window-region screenshots in a
+gitignored folder, deleted at the merge). A step that fails STOPS the leg: the failure is recorded here with its
+evidence before anything else happens. Her finger is needed only if a Touch ID leg is chosen (Always ask is the
+default posture for the Castle account, so the drill needs no finger).
+
+**LEG S — the Standard account (`std`):**
+S1 a fresh library L1 on the empty slot (Standard) · S2 the Account sheet's sign-up (email + password) → the
+confirmation notice · S3 `Tools/prod-confirm-test-user.sh` → confirmed · S4 sign in → the row reads VX-506's
+not-yet face (capture) · S5 the band card's words look → Copy → stash · S6 Settings ▸ Protection ▸ Turn on sync (the
+set-up arm: a new passphrase twice, the words) → **the sheet confirms its first round and the row reads "Synced
+‹time›" with NO relaunch** (VX-498 + VX-507) · S7 prod reads: the vault row (mode standard), the `kp:` secret, one
+device cursor, the seeded rows · S8 write a note "VX-510 S8" → its row on the server · S9 Back up now → pair B1 ·
+S10 Change passphrase (the key door; synced re-wrap) → the vault's `updated_at` moves · S11 Back up now → B2 ·
+S12 Look inside B1 with the OLD passphrase, then with the CURRENT one (rules 4/5 — both open) · S13 New words (the
+key door) → Look inside B1 with the NEW words (rule 4) · S14 Restore from Backup B1 (Make this my library) → held →
+Resume Sync → it enrolls as a Mac new to the library → rows merge, "VX-510 S8" present · S15 a second library L2
+(the slot's library steps aside) → JOIN the account by the typed passphrase → the first round downloads → "VX-510
+S8" arrives with NO relaunch; a second device cursor on the server.
+
+**LEG C — the Castle account (`castle`):**
+C1 a fresh library L3 → sign-up / confirm / sign in → stash the words → Use Castle on the library (both secrets,
+Always ask) → Turn on sync → the set-up arm in Castle → first round confirmed in the sheet, no relaunch; prod read:
+vault mode castle · C2 Lock (⌃⌘L) → the lobby → a TYPED unlock → **the row reaches "Synced" with no key act**
+(VX-501) · C3 Back up → Change passphrase → Back up → Look inside the older backup with old and current secrets →
+New words → the older backup opens with the new words · C4 a second library (Standard) JOINS the Castle account
+(the re-keying join — the reopen) → rows arrive, the follow's posture Castle · C5 Use Standard (leave Castle, both
+secrets) → prod read: mode standard; the second library follows out (rule 12's quiet follow + notice).
+
+**LEG D — deletion (`del`):** D1 sign-up / confirm / sign in → set-up → Synced → prod reads show rows · D2 the
+Account sheet's Delete Account (the password) → prod reads: the auth user, the vault, every data row and cursor GONE;
+the library stops naming the account (rule 16's local leave).
+
+**The close:** sign every walk session OUT (no test token left in the dev scope — the account fence's posture); quit
+at zero instances; remove the walk libraries' slot files and their `Backups/<id>` folders (listed first, each this
+drill's); `mv` the dev files back (same inodes); one plain relaunch (no env; `ps eww` = 0) → rule 21's notice once →
+the dev library quiet, "Sync off (dev store)" → quit; release the stage. **The standing accounts:** `std` and
+`castle` are PROPOSED to stay as the standing release-drill accounts (her R-510-2: "maybe we need two dev
+accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
+
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
 Drafted by the orchestrator 2026-10-23 from the repo's records, the code and read-only production facts. **Covered** =
