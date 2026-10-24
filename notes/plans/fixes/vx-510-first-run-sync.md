@@ -2364,7 +2364,29 @@ store, server or production contact; no subagents.
   seconds with 1 issue`** — the one ✘ `the Mac's words door: the label sits in no Button — a bare label (the chevron alone
   presses)`, the phone's guard ✔; restored by `git checkout -- App/Variorum/Variorum/StoreLockView.swift` →
   **`git diff --exit-code` = 0**, the pin green again (2/2). **No revert is in flight.**
-- **Piece 4** — Mac + iOS build-for-testing; THE MAC-SUITE LIST: NOT-STARTED.
+- **Piece 4** — Mac + iOS build-for-testing; THE MAC-SUITE LIST: DONE (this commit), on the final tree `e0b047f77`:
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b5
+    build-for-testing` → **`** TEST BUILD SUCCEEDED **`**, 0 `error:` lines, 0 warnings in a touched file
+    (`StoreLockView`, the new pin); the pin compiled into the bundle (`VariorumTests.build/…/LobbyWordsDoorPressTargetTests.o`).
+  - `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+    App/Variorum/DerivedData/vx510-b5-ios build-for-testing` → **`** TEST BUILD SUCCEEDED **`**, 0 `error:` lines, 0
+    warnings in a touched file (nor in `MobileRoadFaces`, untouched).
+  - Machinery: the first Mac run was launched from `App/Variorum` with the relative path, so its derived data landed in a
+    stray `App/Variorum/App/Variorum/DerivedData/vx510-b5` (gitignored, created by that run alone); removed, and both
+    runs above used the absolute path.
+  - **THE MAC-SUITE LIST** (the closing stage batch's `-only-testing:VariorumTests/<type>`; confirmed by grep): the new
+    pin **`LobbyWordsDoorPressTargetTests`**; the suites reading `StoreLockView.swift`: **`CopyRegisterPinTests`**,
+    **`TravellingDotsIndicatorTests`**, **`EmptySlotDoorsSurfaceTests`**, **`WordsFieldsConcealTests`**,
+    **`ProtectionWordsVX307Tests`**, **`RoadLockViewNamesPinTests`**, and **`PreDesignFaceTests`** (it reads `RoadLockView`
+    through `RoadLockViewNamesPinTests.roadLockViewCode()` — not on the brief's list, found by the grep); plus the brief's
+    **`ProtectionRoadRouteTests`** and **`RoadCreationFaceTests`** (they do not read the file — they drive the lobby's
+    model, `face.wordsRoad`, which this unit did not touch). `MobileTravellingDotsTests` names `StoreLockView` only in a
+    comment (not a reader); no phone file changed, so no phone suite is owed beyond the iOS build above.
+- **UNIT B5 CLOSED (2026-10-24).** Commits: `d122f9bbc` (pin RED) · `01c5f0f33` (the fix) · `ee11210db` (revert
+  announced) · `e0b047f77` (revert red, restored clean) · this record commit. PENDING beyond this session: the Mac-target
+  run of THE MAC-SUITE LIST (the closing stage batch) and the live press on the final build (the re-walk: the words' text,
+  the gap after the chevron, the row's top band, the chevron — each opens the field; the label's press animates as the
+  chevron's).
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
