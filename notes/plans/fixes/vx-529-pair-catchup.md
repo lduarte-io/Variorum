@@ -478,6 +478,22 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   ticketed flake VX-353 / VX-532, no protection code in it. Zero lines in `Sources/VariorumCore/Sync/`. The app's
   compile (F-1's four arms) PENDING the orchestrator's first `xcodebuild`.
 
+- P7 — R-529-5's words arm (the coordinator's brief after P6, on her ratify at `e0fb54c7d`). IN-PROGRESS. Checked first:
+  nothing in R-529-5's letter fights the code built (stop-and-report not triggered). ONE FACTUAL CORRECTION to the brief's
+  premise for P7-3: `relockedToTheAccountsPair` already LANDS a passphrase lock where none exists (`settingPassphrase`
+  sets or replaces) — P7-3 still ships the heal as its own narrower primitive (land-where-missing ONLY: no copy refresh,
+  no lock dropped), so unit 2's consumers cannot reach the catch-up's wider transform by accident. Sub-pieces:
+  - P7-0 — `ExecutorRefusal.wordsChangedElsewhere(device:day:)` (VX-113's words twin), its drafted sentence in
+    `ProtectionWords` (P-VX529-3's class, PROVISIONAL — her pass) and the two act-refusal faces' arms beside VX-113's
+    (every app switch over `ExecutorRefusal` has a `default:` arm, so nothing else breaks); unused by the core until
+    P7-2. NOT-STARTED.
+  - P7-1 — THE WORDS ARM: the account's CURRENT words typed when the passphrase half moved ⇒ the stale passphrase lock
+    DROPS (`relockedToTheAccountsPair`'s passphrase-lock change becomes keep / re-make / drop); the door's requirement for
+    the passphrase-moved case becomes `.oneSecret` (either of the account's two). Red pins first. NOT-STARTED.
+  - P7-2 — F-10's refusal at the follow's own words arm and the pair door's (sweep rows 8–9). Red pins first.
+    NOT-STARTED.
+  - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). NOT-STARTED.
+  - P7-4 — the full core suite; the report. NOT-STARTED.
 **Findings before any code (traced in this session; each says what it changes):**
 - **F-1 — `FollowKind` gaining a case breaks four EXHAUSTIVE app-side switches** (`ProtectionAccountActs.swift`
   `FollowDoneMark.name`; `ProtectionWords.swift` `followNotice` / `followAsk` / `followDone`), and this unit verifies
