@@ -765,6 +765,89 @@ encourage them to resolve it. they can still change their passphrase if they for
   its clause is DRAFTED FOR HER beside CastleRules rule 3 at closeout (the rules change only at her word — this ask
   is her word; the clause text still goes to her verbatim before it enters the rules).
 
+## UNIT 1 — CLOSED (2026-10-24, the architect's verification)
+
+P1–P7 all landed and verified: the diffs read line-by-line (the `PassphraseLockChange` enum, the heal primitive's
+deliberate narrowness, the F-10 helper, the words arm's rollback-not-trade rule); the pair suites re-run by the
+orchestrator's own hand at every seam — finally **70 tests in 16 suites green** (5 known: P2's negative controls +
+P6d's residual); zero `Sync/` lines by diff; the Mac app builds clean against the finished core (the orchestrator's
+xcodebuild on the P7 tree, exit 0 — F-1's arms and P7-0's face arms compile). The implementer's premise correction
+accepted (`settingPassphrase` already lands-or-replaces; the heal primitive stays narrower on purpose, pinned). One
+protocol slip, honestly flagged and accepted as recorded: P7-2's revert-in-flight line went into the pushed P7-2
+bullet rather than the banner — named and pushed before the revert began, so the protocol's substance held. The core
+contract unit 2 builds on: the pair door takes EITHER current secret (`.oneSecret`); a words-arm landing leaves E6
+(no lock, nothing owed); the heal primitive `KeyFile.landingTheAccountsPassphraseLock` awaits its unit-2 consumers.
+
+## UNIT 2 — THE BRIEF (a FRESH `opus-implementer`, one session; THE FACES — everything the author sees)
+
+**Read first, in full, yourself (never delegated):** CLAUDE.md and its auto-loaded canon;
+`notes/SessionResiliencyProtocol.md`; `notes/CastleRules.md` WHOLE; `notes/SyncSpec.md` WHOLE; SurfaceContracts'
+protection bullet; **THIS FILE WHOLE** — the design §3 is your contract, with THE RULINGS, R-529-5 (ratified, the
+window sentence), R-529-6 (her face direction: the WHY and the ROAD, never the mechanism), the E6 sweep, both
+architect rulings and unit 1's LIVE STATUS; the VX-510 record's ENVIRONMENT TRAPS section
+(`notes/plans/fixes/vx-510-first-run-sync.md`). The code: `Sources/VariorumCore/Protection/Executor/Acts/PairCatchUp.swift`
+whole (the core contract), `Assess/Assess.swift`'s pair arms, `Model/KeyFileRelock.swift`; app-side
+`App/Variorum/Shared/Protection/` — `RoadAccountModel.swift`, `RoadAccountFaces.swift`, `ProtectionAccountActs.swift`
+(the preflight, `RoadSettledFollow`), `ProtectionOpenRoad.swift` (the typed-unlock seam at :540-580, the bounded
+vault read), `ProtectionLobbyModel.swift` + `ProtectionLobbyFace.swift`, `ProtectionSecretCheck.swift`,
+`ProtectionWords.swift`, and the Mac lobby's view (`StoreLockView`).
+
+**The scope (one acceptance unit — the run's own faces; the riders are UNIT 3's, not yours):**
+1. **The follow sheet's pair kind:** the sentence naming the half, device and day (the passphrase half reuses
+   `passphraseChangedElsewhere`; the words half P7-0's twin; both halves name both); the one-secret ask live
+   (passphrase or words — the door already says `.oneSecret`); on the words arm, R-529-5's window sentence ("Until
+   you type your account's passphrase on this Mac, copies made here open with your twelve words.") and the Reset
+   chain line; the second-road quiet line (design §3, P-VX529-2); the first round at once with the sheet staying
+   (the P-VX510-1 account-act convention — the catch-up changes sync's standing in Castle); the quiet words-only
+   follow's durable notice (R-529-2/E8: the words recorded before ‹day› no longer open this library; older backups
+   keep them).
+2. **`RoadSettledFollow.kind`** tells a settled pair follow apart (its act in flight names no new key), and the STALE
+   done-line ("…and this Mac caught up.") never renders while a pair follow is OWED (the repro's stale line).
+3. **The lobby — R-529-1's vault road (the most sensitive piece; smallest possible diff):** a typed passphrase that
+   fails every local road, signed in and online, earns ONE bounded vault read (the VX-501 bounded-read pattern at
+   `ProtectionOpenRoad`); derived under the VAULT's descriptor, opening the vault's master, the master opening the
+   key file's master lock ⇒ THE LIBRARY OPENS, and the catch-up (or, on a plain-E6 file, the heal) lands in the same
+   act with the typed secret in hand, a durable notice saying what happened. Offline or signed out: today's refusal,
+   byte-identical. Detected but not landed (the read worked, the secret refused): the honest sentence naming device
+   and day plus the road line. R-529-6 binds every E6 sentence: the why and the road ("Your account's passphrase
+   hasn't been typed on this Mac yet — type it here to use it on this Mac." — the class, provisional). GUARDRAILS:
+   nothing written before the open succeeds and the act runs its plan; a failed road leaves every byte as it was;
+   no Touch ID behavior changes; the one-presenter and words-clipboard rules stand.
+4. **The check door:** the fourth answer gains the pointer line ("You can catch this Mac up in Settings ▸
+   Protection.") only when the state is the catch-up's; the E6 variant's wording per R-529-6; the door still WRITES
+   NOTHING — its contract is literal.
+5. **The preflight and gate faces:** `accountSecretRefusal` names a words change (P7's pending note); the key doors'
+   gate refusal in the detected state speaks the pair sentence pointing at the follow (R-529-3).
+6. **F-1's four app arms** become the pair kind's real sentences (followNotice / followAsk / followDone /
+   `FollowDoneMark`).
+7. **The E6 heal's wiring (P-VX529-4, provisional):** the vault-road open and the SYNCED key doors land a missing
+   passphrase lock via `KeyFile.landingTheAccountsPassphraseLock` whenever a typed passphrase verified against the
+   vault is in hand; NEVER the check door.
+**Out of scope:** the riders (VX-526/522/523/533/530/538 — unit 3's), the band card (VX-538, her word pending),
+anything in `Sources/VariorumCore/Sync/` (zero lines; stop-and-report), any schema or stored-shape change, mobile
+faces (the parity row is the closeout's).
+
+**The discipline:** exactly unit 1's — pins red-on-old committed before fixes, reverts named then run, commit per
+piece + push, LIVE STATUS (UNIT 2) from the first commit, PENDING on every unverified claim, "Part of VX-529", NO
+trailers. Headless core suites plus ONE Mac and ONE iOS `build-for-testing` into `DerivedData/vx529-u2*`; NO
+`xcodebuild test` (the Mac-target suite runs ride the closing stage batch), no stage, no app launch, no
+store/server/production contact, no subagents. Every new sentence sentence-case, PROVISIONAL (P-VX529-3's class),
+LISTED in one place in your LIVE STATUS for her wording bundle. Model/view-model state-transition tests are the
+evidence for every face (the lobby model's roads, the sheet's states, `RoadSettledFollow`); UI-only glue may land
+with the walk as its evidence (the orchestrator's acceptance walk follows your close).
+
+### UNIT 2 — LIVE STATUS (the implementer owns this section)
+
+*(not started)*
+
+## UNIT 3 — THE RIDERS (planned; after unit 2)
+
+VX-526 (the join sheet's title/button + W-12's wording) · VX-522 (the hold banner's conditional) · VX-523 (the
+words-adoption notice's condition) · VX-533 (the lobby's missed Touch ID prompt re-trigger — the lobby is open) ·
+VX-530 (TRACE-FIRST: the double Touch ID on a Castle key door — fix only on a confirmed benign ordering, else report)
+· VX-538 (the recurring E6 band card — RIDES ONLY AT HER WORD, offered). Pin-before-fix PER MEMBER; the brief is
+written after unit 2 closes.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
