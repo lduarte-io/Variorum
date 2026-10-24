@@ -279,9 +279,7 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 **NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
 face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P6e): `KeyDoors.swift` and `EnterCastle.swift` checked out at
-`478c3bc28` (the pre-fix lines); the fix is committed at HEAD — restore with `git checkout HEAD -- Sources/VariorumCore/
-Protection/Executor/Acts/KeyDoors.swift Sources/VariorumCore/Protection/Executor/Acts/EnterCastle.swift`.**
+`~/dev/variorum-vx-529`. No revert is in flight.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
@@ -421,8 +419,8 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     (the key never changed, every road opens the library), healed at the first open whose lobby takes the words, or the
     upgrade — that build's own follows resumed without a usable secret behave the same. A stored-format change could
     close it; the ruling forbids one, and nothing else reaches into an older build.
-  - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site. IN-PROGRESS —
-    the table pins COMMITTED (`PairRefusalSiblingSeamTests` in `Executor/PairRefusalSplitTests.swift`): RED on the
+  - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site. DONE
+    (`478c3bc28` pins, `1ce5187d2` fix) — the table pins (`PairRefusalSiblingSeamTests` in `Executor/PairRefusalSplitTests.swift`): RED on the
     pre-fix tree, all 9 in-class rows with today's refusal — New words (both postures) and the crossing + Replace All
     Keys (both postures) with the OLD passphrase: `passphraseDoesNotOpen` (6); Replace All Keys with the OLD words
     after a words change elsewhere: `wordsDoNotOpen` (2); Reset by the OLD words, Castle Always ask, no keys held:
@@ -432,7 +430,34 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     its copy through its master lock ⇒ `accountMoved`, else `wordsDoNotOpen`) at `doorSecrets`' words arm; and
     `holdSyncKeysForTheSession`'s no-master arm says `accountMoved` when WORDS reached it (Reset's road verified them
     against this library first). Green: 183 tests (the pair, follow, key-door, crossing, file-less-words, session-hold,
-    U2 and fixed-scenario suites; 5 known issues — P2's 4 controls and P6d's residual). Remains: the revert, the table.
+    U2 and fixed-scenario suites; 5 known issues — P2's 4 controls and P6d's residual). VERIFIED BY REVERT: both files
+    at `478c3bc28`'s lines ⇒ the same 9 rows red; restored ⇒ green. THE SWEEP TABLE (every `VaultModel.master(…)` /
+    `vault.master(…)` site in `Sources/VariorumCore/Protection/` — the throw-on-nil ones verdicted; the class: a typed
+    secret that still opens THIS library but not the account's vault, refused with a sentence saying it doesn't open
+    this library, or asking for something else):
+
+    | # | Site (function) | Typed | Before | Verdict |
+    |---|---|---|---|---|
+    | 1 | `KeyDoors.swift` `changePassphrase` | the current passphrase | `passphraseDoesNotOpen` | FIXED — P1 `1ccdd5b27` |
+    | 2 | `KeyDoors.swift` `regenerateWords`, synced arm | the current passphrase | `passphraseDoesNotOpen` | FIXED — P6e `1ce5187d2` |
+    | 3 | `EnterCastle.swift` `doorSecrets`, passphrase (Use Castle · Use Standard · Replace All Keys) | passphrase | `passphraseDoesNotOpen` | FIXED — P6e |
+    | 4 | `EnterCastle.swift` `doorSecrets`, words | words | `wordsDoNotOpen` | FIXED — P6e (words twin ⇒ `accountMoved`, "Follow it first.") |
+    | 5 | `KeyDoors.swift` `holdSyncKeysForTheSession` (Reset by the words, no keys held) | words, verified against the library | `secretsRequired` | FIXED — P6e (words ⇒ `accountMoved`; no secret keeps `secretsRequired`) |
+    | 6 | `PairCatchUp.swift` `followThePair`, passphrase | passphrase | — (new) | FIXED by construction (P1's helper) |
+    | 7 | `Follow.swift` `follow`, passphrase | passphrase | VX-113's `passphraseChangedElsewhere` on the descriptor alone | OUT — already names the change (best-effort, F-5) |
+    | 8 | `Follow.swift` `follow`, words | words | `wordsDoNotOpen` | IN THE CLASS, NOT FIXED — F-10 |
+    | 9 | `PairCatchUp.swift` `followThePair`, words | words | `wordsDoNotOpen` | IN THE CLASS, NOT FIXED — F-10 |
+    | 10 | `AccountActs.swift` `join` (enroll · Move), passphrase | the account's passphrase | `passphraseDoesNotOpen`, rendered "…your account" (VX-464) | OUT — the secret is the ACCOUNT's, and the face names the account |
+    | 11 | `AccountActs.swift` `join`, words | the account's words | `wordsDoNotOpen`, rendered "…your account" | OUT — the same |
+    | 12 | `CommonSteps.swift` `enterCastleWrite` (in the act) | the press's passphrase | `ActRollback(.accountMoved)` ⇒ "Follow it first." | OUT — already honest |
+    | 13 | `PlanRunner.swift` `resume`'s synced check | a resume's passphrase | `passphraseDoesNotOpen` out of the settle | OUT of the door class (no door says it; the open logs "could not settle"); the pair plan never arms it (S-3); the key doors' own rule is F-U1a-1 |
+    | 14 | `KeyDoors.swift` `mintKeyFile` (in the act) | the act's own new words | `needsFreshVault` | OUT — act-internal, no typed secret judged |
+    | 15 | `KeyDoors.swift` the vault step's landed check and the words-copy refresh guard; `CommonSteps.swift` `material`; `AccountActs.swift` `wordsAreTheAccountsAlready`'s input; `VaultModel.master` itself | — | not throw sites | OUT |
+
+    App sites (read for the table; no app line changed here): `ProtectionAccountActs.swift` `accountSecretRefusal`
+    (the account road's preflight, mirroring rows 7/10/11 — and row 8's words twin, F-10's); `ProtectionSecretCheck`
+    (the check door's four honest answers, P-VX510-B3-2) OUT; `ProtectionOpenRoad.swift`'s typed-unlock seam (it logs
+    and loads nothing — no refusal) OUT.
   - P6f — the full core suite green; the report back. NOT-STARTED.
 - **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
   passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'
@@ -478,6 +503,12 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   online — fact 3, R-529-1's road); (b) Reset forgotten passphrase is exempt from the PAIR kind's gate (it re-makes
   the passphrase on both locks anyway — the passphrase half lands as its side effect; a words half still owed after
   is the quiet one); (c) leave it — the other device is the road. Built as the memo says (c); an author-shaped call.
+- **F-10 — the class's words twin INSIDE THE FOLLOW (sweep rows 8 and 9), for her wording pass / unit 2:** old
+  words typed at a follow (a posture or key follow whose words also changed elsewhere; the pair door's E14 ask)
+  still say "Those twelve words don't open this library." — false when they open it. The doors around it now say
+  "Your account changed on another device. Follow it first.", which inside the follow itself would be circular, and
+  no refusal names a words change elsewhere; an honest one needs a new refusal and its sentence (VX-113's twin —
+  e.g. "Your account's twelve words were changed on ‹device› on ‹day›."), which this unit does not mint.
 - **F-8 — the app routes an account act by `spec.rekeys`** (`RoadAccountModel.swift:509-516`): a re-keying act closes
   the pool and reopens; one that changes no key runs on the open session. The third kind's door says `rekeys: false`,
   so the app's existing road already runs it on the open session (unit 2's to confirm).
