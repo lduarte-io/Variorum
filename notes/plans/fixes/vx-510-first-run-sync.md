@@ -530,6 +530,32 @@ first draft of each built).
 - **Piece 7** — evidence on the final tree (the harness whole; build-for-testing Mac + iOS) and THE MAC-SUITE LIST: NOT
   STARTED.
 
+## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
+
+Drafted by the orchestrator 2026-10-23 from the repo's records, the code and read-only production facts. **Covered** =
+a standing automated or per-release check exists; **once** = proven live a single time, nothing standing; **never** =
+no live proof. Ranked by launch risk. The rows marked ▶ ride THIS run (units B/C); the rest are proposals.
+
+| # | Seam | Evidence today | Gap / risk | What would prove it |
+|---|---|---|---|---|
+| ▶1 | **First run: sign-up → set-up → first round** | never (both testers failed; VX-498 a VX-329 regression) | the whole of this run | VX-509's drill pins + unit C live on prod (3 accounts) |
+| ▶2 | **A second device joins an account** | once per window (her Air, the throwaway walks) | the join's round rode an accidental become-active (T-1) | unit C: a second library joins each test account; rows read back |
+| ▶3 | **Backup → restore → key change → older backup opens** (rules 4/5/6/17) | headless core lifecycle proofs (VX-378 U3); never live on prod | the floor's promise has never run against the real vault + real keychain | unit C, both postures |
+| ▶4 | **Castle typed unlock keeps syncing** (VX-501) | never (known red) | Always-ask Castle stops syncing after any lock | unit B fix + unit C's Castle leg |
+| ▶5 | **Account deletion** | headless only | the server purge + the protection half never driven end to end on prod | unit C deletes the `del` account; prod reads show zero rows, no vault |
+| 6 | **The abuse guard after the 500k pool** (`sync_push`'s 50k/24h regime, `VARIORUM_WRITE_QUOTA`) | never live; her account reads lifetime 152,484 after ONE month (2026-09-24 → today) | she meets the daily regime in ~2–3 months; nobody has seen the app's face for the refusal, or a 10k-note import after the pool (refused for days by the stated corner) | a drill on the throwaway with the pool pre-filled by SQL; the app's row read live; then 13t re-prices (her call) |
+| 7 | **The changefeed's 8 s statement timeout** (VX-495, Pre-launch) | measured: her ~108k-row first window costs 1.5–3 s | an account ~3–4× hers can never complete a first catch-up | VX-495's server query, then a scale drill at 4× on the throwaway |
+| 8 | **Sparkle updates** | once (her Air 9168→9172 at the 0.10 publish); `verify-appcast`/`verify-published` check the feed | no drill of update-from-previous on a clean Mac per release; a lockstep-bump release reaching a user mid-window never watched | a per-release update drill on the Air (her say-so machine rule) from the last published build |
+| 9 | **Email-link flows** (sign-up confirmation, password reset, branded links) | once (14d) | this run confirms test users by PAT, so the link itself stays unproven; a reset-by-email never driven | one account per release through the real link (her inbox) |
+| 10 | **Two devices editing at once on the real wire** (S5 conflict-as-variant, repairs) | covered by the fake-server convergence suites; never live by design | PL/pgSQL behaviour the fake cannot reach (the 42702/42501 class was found only live) | a two-Mac drill (Pro + Air) on a test account: the same take edited offline on both, then reconnected |
+| 11 | **Castle across two devices** (rules 10/12 — the follow in and out) | the vx-307 crossing walks on the dev store; her own single crossing on prod | the follow on a SECOND device against prod never watched | unit C's Castle account + a second library following |
+| 12 | **The Apple road across Macs** (rule 8 — iCloud Keychain reaching her other Mac; rule 11's deletion reaching every device) | never deliberately | the quiet road's cross-Mac behaviour is Apple's, but rule 11's sweep claim is ours | a two-Mac observation on one Apple ID with a Standard test library |
+| 13 | **Backups in an iCloud Drive folder** (dataless/evicted files) | headless temp-dir tests | a picked folder in iCloud Drive can hold placeholders; restore reading a not-downloaded pair untested | one restore from an evicted iCloud Drive pair |
+| 14 | **The phone** (Face ID riding the press, background push at suspension, iOS file protection) | marker-13-refused since 10-22 (VM-8 deferred) | every phone live seam is unproven on 0.10 | VM-8, then the same first-run + lifecycle drill on the device |
+| 15 | **Token refresh over days; two processes** (VX-481) | unit tests with fake transports | a rotating refresh token racing between the app and a second process | a soak with the MCP shim connected across a token expiry |
+| 16 | **Developer ID entitlements / keychain access groups** | **covered** — `Tools/Release/verify-export.sh` (section D) checks the groups every release | — | — |
+| 17 | **Large-corpus save** (VX-497) | once at 110k rows (VX-494's live proof) | the writer held ~4–7 min; the phone's memory | VX-497 / VM-8 |
+
 ## OPEN ITEMS (bundled for her; kept current)
 
 - **THE KICKOFF SITTING BUNDLE (piece 3)** — asked at kickoff: D-ROAD's exact shape and the permissions it needs;
