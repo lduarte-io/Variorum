@@ -6,8 +6,10 @@ The charter is `notes/handoffs/vx-510-kickoff.md` (read whole); the window's tra
 `notes/plans/fixes/vx-488-window-hotfixes.md`. Members: VX-498 (the set-up act's silent no-round — the mechanism) ·
 VX-507 (the act confirms its first round) · VX-506 (the pre-join wording, riding) · VX-509 (the standing first-run
 *[removed for publication]*
-one-statement act surfaced to her the moment it lands). Cast: Fable orchestrates and cold-reviews
-(`fable-reviewer` — the diff is custody-adjacent Shared/ protection code), Opus implements, one at a time.
+one-statement act surfaced to her the moment it lands). Cast (R-510-5): Opus orchestrates (the session moved off
+Fable at her word), Opus implements, one at a time; the ladder tries a fresh `fable-reviewer` first and runs on
+`opus-reviewer`s if it stalls on safeguards. Three units (R-510-9): A the fixes, B the drill + the prod road, C the
+two-posture lifecycle drill live on production.
 Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 
 ## HER KICKOFF RULINGS (2026-10-23, the kickoff message — verbatim-faithful; recorded before any work)
@@ -45,6 +47,29 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   instead (the R-494-1 precedent). No line of this run is planned inside `Sources/VariorumCore/Sync/` (the fix
   rides the scheduler's existing public API from `Shared/`); if one becomes necessary it is flagged here first.
 
+## HER SITTING RULINGS (2026-10-23, the kickoff bundle — four questions; her answers verbatim where she wrote them)
+
+- **R-510-6 — D-ROAD's shape: "Env flag + allowlist"** (the recommended option, chosen). Debug-only. A launch with
+  `VARIORUM_PROD_TEST_ROAD=1` AND a local allowlist file `~/.variorum/prod-test-accounts.env` naming the test
+  emails lets the DEV store sync with PRODUCTION only while signed into a listed account; any other account (hers
+  included) keeps the fence and the row says why; Release builds byte-unchanged. Pinned: the fence holds with no
+  flag; refuses an unlisted account. Built in unit B.
+- **R-510-7 — the test accounts' confirmation: "can you confirm them in the dashboard via the PAT? i want you to
+  be as capable as possible"** → the PAT road, as a NARROW named script per R-510-3 (the `Tools/prod-read.sh`
+  shape): `Tools/prod-confirm-test-user.sh '<email>'` confirms ONE unconfirmed auth user whose email is on the
+  allowlist file and carries the plainly-test marker, nothing else (the one statement, ref-pinned); its allow rule
+  proposed to her. The orchestrator writes it (an environment act).
+- **R-510-8 — the secrets: "Helper reads a file"** (the recommended option, chosen). A typing helper modelled on
+  `type-throwaway-passphrase` reads `~/.variorum/prod-test-accounts.env` (walk-build-only guard; values never
+  echoed, never committed); the orchestrator generates random values into the file without printing them; one
+  narrow allow rule for the helper, proposed to her.
+- **R-510-9 — the full two-posture lifecycle drill: "this run, I'll do a compact mid round if we need"** → IN THIS
+  RUN, as unit C — her explicit split ruling over the two-units guidance (PhaseSizingGuidance §3: a third unit is a
+  split ruled at the sitting — ruled: kept in one run); she will compact this orchestrator's context mid-run if
+  needed. The drill: for a Standard and a Castle test account on production — sign up, set up, first round, a
+  second library joins, back up, restore a backup, change keys (passphrase, new words; the Castle crossings),
+  open the older backup again with the new secrets (rule 4/5's floor), every leg verified in the app AND server-side.
+
 ## THE CHARTER (the kickoff file's, binding)
 
 1. **THE TRACE, first and whole** — (a) the CURRENT 0.10 set-up/join acts end-to-end: the act → `SyncSession`/
@@ -73,7 +98,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 0 | Kickoff: preflight read whole (the kickoff file, vx-494 WHOLE, vx-488, CLAUDE.md + canon, SyncSpec WHOLE, CastleRules WHOLE, SurfaceContracts, the resiliency protocol, the master plan, TICKETS, QUESTIONS tail); worktree + branch; in-flight row on main; VX-510 In Progress with members parented; this record with her kickoff rulings | DONE (this commit) |
 *[removed for publication]*
 *[removed for publication]*
-| 3 | The kickoff sitting bundle answered (D-ROAD shape; lifecycle drill in-run or chartered; the acceptance's account set) | NOT STARTED — bundled after the trace |
+| 3 | The kickoff sitting bundle answered (D-ROAD shape; lifecycle drill in-run or chartered; the acceptance's account set) | DONE — R-510-6…9 (env flag + allowlist; the PAT confirmation script; the typing helper over a generated file; the lifecycle drill IN this run as unit C) |
 | 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | NOT STARTED |
 | 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | NOT STARTED |
 | 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | NOT STARTED — shape proposed at the sitting bundle |
