@@ -320,9 +320,24 @@ first draft of each built).
   `Phase9cAuthWiringTests`, `ProtectionOpenRoadPlantedTests` (`PlantedRoad`), `ProtectionRoadTestSupport` (`RoadWorld`),
   `ProtectionAccountRoadTests`, `ProtectionAccountSupport`, `RoadAccountModelTests`, `RoadJoinFollowSurfaceTests` (the
   bootstrap-over-planted-road template), `TouchIDUnlockSyncKeysTests`, `Phase8ServicesTests`' transports): DONE (this commit).
-- **Piece 0** — the headless harness (scratchpad `vx510a-harness`, not durable; the M1 + M2 recipes merged and widened to
-  `AppBootstrap` + `AppServices` + `SyncSession` over a slim `AppSession` stub) and its BASELINE on the pre-fix tree:
-  NOT STARTED.
+- **Piece 0** — the headless harness: DONE (not durable — this session's scratchpad `vx510a-harness`; rebuild from this
+  recipe). vx-488 M1's `Package.swift` re-pointed here (tools 6.2, macOS 26, the app target's concurrency settings on
+  `Variorum`, the test target WITHOUT default `MainActor`; the core by path, swift-dependencies, the sqlcipher GRDB fork).
+  `Variorum` symlinks EVERY `Shared/Protection/*.swift` (now including `ProtectionBackupHook.swift`), plus `Shared/`'s
+  `AppBootstrap`, `AppServices`, `SyncSession`, `SyncStatusViews`, `ProtectionController`, `AuthSession`, `AuthViews`,
+  `KeychainCustody`, `LibraryOpenCopy`, `WordsCopyDoor`, the REAL `ProjectConfig`, `TierViews`, `ErrorPresentation`,
+  `IdleCommitScheduler`, `StoreBackup`, `OperationsRunner`, `DeviceName`, `BackupDestination`, `BackupLog`,
+  `MarkdownInsurance`, `BookNameCopy`, `ExportWriter`, `StoreLocation`, `LibraryHandOff`, `RestoreHoldModel`, `WingState`,
+  `Theme/*`, `SampleLibrary/*` minus `SeededBookRestore`, and `Features/WhatsNew/WhatsNewLedger.swift`, and ONE stub file
+  (a slim `AppSession` — database, variant, runner, `StatusCenter`, `WingState`, `syncConfigured`, `sweepLocalPurge` — and
+  a no-op `CopyForAI`). The tests symlink vx-488 M1's 61 suites re-pointed here plus M2's `Phase9cAuthWiringTests`,
+  `SyncLockedRowTests`, `SyncStalledRowTests`, `SyncWalkFenceTests`, `TierAndOnboardingTests`, and one stub file
+  (`RoadWorld.RoadWorldError`; `AppTestKeyProvider` and `SeededGenerator` byte-copied). **BASELINE on the pre-fix tree
+  (`33c169f76` = `54b7b71df`'s product files): `✘ Test run with 429 tests in 75 suites failed … with 4 issues`** — exactly
+  M2's three harness-PATH artifacts (`thePasteInIsFullyRetiredInTheSharedSources`,
+  `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut`, `theBecomeActiveHookRunsOneSyncRound` read `#filePath` beside
+  the symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 426 tests in 75 suites
+  passed`**.
 - **Piece 1** — THE SEAM, behavior-neutral (D-A1's "glue moves out of view code"): `AppBootstrap.attach(services:)` carries
   today's services-held roads (the account section's `signOutRoad`, the deletion hook) out of `VariorumApp`'s `.task`;
   plus the pins that compile on that tree, committed RED (VX-498: a set-up through the attach glue runs no round without a
