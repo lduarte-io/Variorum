@@ -2313,7 +2313,26 @@ every suite reading a file you changed (the StoreLockView readers: `CopyRegister
 
 ### UNIT B5 — LIVE STATUS (the implementer owns this section)
 
-*(skeleton — the implementer writes from its first commit)*
+**NOT DONE by this session (by the brief):** the Mac-target run of the suites (the closing stage batch's), the live press
+on the label's own text on the final build (the successor's re-walk's). No `xcodebuild test`, no stage, no app launch, no
+store, server or production contact; no subagents.
+
+- **Piece 0** — the harness: DONE (not durable — this session's scratchpad `vx510b5-pin`: a minimal SwiftPM package,
+  `swift-tools-version: 6.2`, macOS 26, ONE test target `PinTests` holding only the symlinked pin file; no app import, no
+  dependency; `swift test` from the package folder).
+- **Piece 1** — the pin, committed RED on the pre-fix tree: DONE (this commit). NEW
+  `App/Variorum/VariorumTests/Protection/LobbyWordsDoorPressTargetTests.swift` (suite "VX-510 D-B9 — the lobby's words door
+  is one press target (source)"; CODE lines, `#filePath`'s symlinks resolved, Foundation + Testing only):
+  `theMacsWordsDoorLabelSitsInsideAPressTargetTogglingTheWordsRoad` (in `roads`'s `case .disclosure:` arm, the nearest
+  `Button {` before `Text(ProtectionWords.wordsDoor)` must toggle `showsWords` in its action and hold the label inside its
+  `} label: {` closure by brace depth — the MECHANISM, either idiom passes; plus the look kept: small/muted/one line, the
+  340 width, the field unfolding beneath on the same state) and the GUARD `thePhonesWordsDoorKeepsItsWholeLabelButton`
+  (the same check over the phone's arm, `.buttonStyle(.plain)`, `if showsWords { wordsField }`). **RED on the pre-fix tree
+  (`swift test` in the scratch package): `✘ Test run with 2 tests in 1 suite failed after 0.002 seconds with 1 issue`** —
+  the one ✘ `the Mac's words door: the label sits in no Button — a bare label (the chevron alone presses)`; the guard ✔.
+- **Piece 2** — the fix (StoreLockView's disclosure arm): NOT-STARTED.
+- **Piece 3** — green + the behavioural revert: NOT-STARTED. No revert is in flight.
+- **Piece 4** — Mac + iOS build-for-testing; THE MAC-SUITE LIST: NOT-STARTED.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
