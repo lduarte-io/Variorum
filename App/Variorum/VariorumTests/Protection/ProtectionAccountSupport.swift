@@ -123,7 +123,18 @@ nonisolated final class PlantedSyncKeysLeaf: SyncKeysLeaf, TouchIDPressRiding, @
 
     struct RidingReadFailed: Error {}
 
-    func syncKeyItems() throws -> [SyncKeysItemFact] { lock.withLock { Array(items.keys) } }
+    /// VX-517 (D-B8): the PRODUCTION leaf's listing — `KeychainSyncKeysLeaf.syncKeyItems()` with no candidates wired
+    /// (production wires none) is BLIND to a Touch ID item with no silent sibling. On, this leaf lists exactly that; off
+    /// (every earlier suite), every item.
+    var listsLikeProduction = false
+
+    func syncKeyItems() throws -> [SyncKeysItemFact] {
+        lock.withLock {
+            guard listsLikeProduction else { return Array(items.keys) }
+            let silentAccounts = Set(items.keys.filter { $0.itemClass == .silent }.map(\.accountID))
+            return items.keys.filter { $0.itemClass == .silent || silentAccounts.contains($0.accountID) }
+        }
+    }
     func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? {
         lock.withLock {
             if itemClass == .touchid { touchIDReads += 1 }

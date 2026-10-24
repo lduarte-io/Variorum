@@ -1940,8 +1940,69 @@ edits). Every claim not yet run is PENDING.*
   `Copies` (make-mine's hold), `Leaves`, `Executor.readVault`, `Assess`'s one sync-keys fault, `Names`; the test worlds
   (`ExecutorWorld`, `ExecutorFixtures`, the scenario `World`'s keychain leaves, the app's `PlantedSyncKeysLeaf`,
   `ThrowawayScope`), `KeychainLeavesTests`, B2's `TypedSecretNeverPressesTests`: DONE (this commit).
-- **Piece 0** — the harness + baselines: NOT STARTED.
-- **Piece 1** — the pins, committed RED on the pre-fix tree: NOT STARTED.
+- **Piece 0** — the harness + baselines: DONE (not durable — this session's scratchpad `vx510b4-harness`, B3's
+  `vx510b3-harness` copied whole but its build products, the SwiftPM checkouts carried, the build fresh — `Build complete!`;
+  runners `b4/test.sh <log> <filter|ALL> [watchdog]` (the harness), `b4/core-test.sh <log> <filter|PROT> [watchdog]
+  [release]` (the core package from the worktree root; `PROT` = B2's protection set — every suite under
+  `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`, `AccountLifecycleTests`, `AuthRLSDDLTests`,
+  `KeyVaultClientTests`, `SupabaseTransportTests`, `SupabaseTransportSessionTests`, extracted to one `--filter`), `b4/revert.sh`
+  for the reverts). **BASELINES on the pre-fix tree:** the harness, the three harness-PATH artifacts `--skip`ped (unit A's
+  Piece 0): **`✔ Test run with 519 tests in 89 suites passed`** — exactly B3's close; the core `PROT` set (debug): **`✔ Test
+  run with 533 tests in 102 suites passed`** — exactly B2's close.
+- **Piece 1** — the pins, committed RED on the pre-fix tree: DONE (this commit).
+  - **Test-world fidelity first (test code only; behavior-neutral on this tree, shown):** `ExecutorWorld` (core) gains
+    `syncKeysListingLikeProduction` (the production leaf's listing — `KeychainSyncKeysLeaf.syncKeyItems()` with no candidates
+    wired lists the silent items plus a Touch ID item ONLY where its account has a silent sibling) and `syncKeysTouchIDReads`
+    (every Touch ID sync-keys read — a prompt on the real leaf wherever the item stands); its `deleteSyncKeys` and the scenario
+    `World`'s now log a write ONLY when an item was removed ("a delete of nothing is no write" — the real delete accepts
+    not-found and changes nothing; the same world's Apple, memory and plan deletes already model it). Today's code deletes only
+    listed (existing) items, so no existing write log moves: **the core `PROT` set on the pre-fix product tree WITH these
+    changes: `✔ Test run with 533 tests in 102 suites passed`.** The app's `PlantedSyncKeysLeaf` gains `listsLikeProduction`
+    (the same listing; off everywhere else).
+  - **The core pins — NEW `Tests/VariorumCoreTests/Protection/Executor/TouchIDSyncKeysForgottenTests.swift`** (12 tests,
+    production listing ON in every one): (a) `vx517_aCastleTouchIDLibrarysLeaveForgetsItsTouchIDItem` (×3 leaves) ·
+    `vx517_useStandardOnASyncedCastleTouchIDLibraryLeavesNoTouchIDItem` (+ zero Touch ID reads — B2's guard leg) ·
+    `vx517_aKeyDoorAfterUseStandardReadsNoTouchID` · `vx517_theQuietFollowOutReadsItsTouchIDItemThenLeavesNone` (its
+    "read its Touch ID item" leg a GUARD on (c)) · `vx517_aStandardJoinLeavesNoStaleTouchIDItem` (T-B5-4's residue) ·
+    `vx517_aCastleAlwaysAskFilingLeavesNoStaleTouchIDItem` · `vx517_theRollbackSweepRemovesATouchIDOnlyItem` (×2: plan gone ·
+    plan kept, vault out of reach — a Standard library joining a Castle account crashed right after filing the keys in a Touch
+    ID item) · `vx517_theFinishingForgetRemovesTheLeftAccountsTouchIDItem` (a Castle + Touch ID leave crashed after the record
+    let the account go, plan gone → finished from the record); (c) `vx517_aStandardKeyDoorWithAStaleTouchIDItemReadsNoneAndLands`
+    (×2: Change, Reset) · `vx517_aStandardSetUpsFinishReadsNoTouchIDAndBinds` (crashed right after the silent filing, plan
+    gone); GUARDS `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` · `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling`
+    (the reading below — a join into Castle crashed after its Touch ID filing, resumed with nothing typed). **RED on the pre-fix
+    tree** (`b4/core-test.sh p1-core-red TouchIDSyncKeysForgottenTests`): **`✘ Test run with 12 tests in 1 suite failed with 19
+    issues`** — every `vx517_` pin ✘ on its claimed leg, no precondition failed: the leaves ✘×6 (the Touch ID item stayed, ×3),
+    Use Standard ✘ (the item stayed), the key door after it ✘ (Touch ID read — the count moved), the follow out ✘ (the item
+    stayed), the Standard join ✘ (the stale item stayed), the Always-ask filing ✘ (the stale item stayed), the rollback ✘×2 (the
+    picked-up item survived both rollbacks), the finishing forget ✘×2, **the Standard key doors ✘×2 with `Caught error:
+    .accountMoved` — THE MECHANISM IS WORSE THAN A PROMPT: the custody fallback took the stale Touch ID item's keys ahead of the
+    silent item's, saw them not the vault's, and the door rolled back as "the account moved"** (a Touch ID press that SUCCEEDED
+    broke the act; a cancelled one would have let the silent item serve), **the set-up's finish ✘×2: it read the stale item first,
+    bound NOTHING** — the library left unbound over the vault it had just made; the two guards ✔ (by design).
+  - **The road pins — NEW `App/Variorum/VariorumTests/Protection/TouchIDSyncKeysForgottenRoadTests.swift`** (through the app's
+    doors, the walk's shape, over VX-487's synced Castle + Touch ID world with `listsLikeProduction` ON):
+    `vx517_useStandardThenChangePassphraseNeverTouchesTheTouchIDClass` (Use Standard through `ProtectionCrossings.cross`, then
+    Change passphrase through `ProtectionKeyDoorRoad.press`) · `vx517_eachLeaveOfACastleTouchIDLibraryForgetsItsTouchIDItem`
+    (×3 doors through `ProtectionAccountRoad.press`). **RED on the pre-fix tree** (the harness, `--filter
+    TouchIDSyncKeysForgottenRoadTests`): **`✘ Test run with 2 tests in 1 suite failed with 8 issues`** — each leave ✘×2 (the item
+    stayed; the account still held), Use Standard ✘ (the item stayed) and the key door ✘ (`touchIDReads` moved — two reads,
+    each a prompt on the real leaf).
+  - **The real-keychain arm (Mac-hosted only — written, NOT RUN here; the closing stage batch's):** `KeychainLeavesTests
+    .aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` (a throwaway scope, enabled where a finger is enrolled): a Touch ID
+    sync-keys item with no silent sibling — the production listing does not see it, a candidates-named probe does (never
+    pressed); deleted BY NAME it is gone (no prompt); released twice and the absent class released are fine; deleted by name in
+    `defer` too (the scope's purge lists, so it could not). PENDING its run.
+  - **THE READING (D-B8 (c), recorded — mine, from the design's words and rule 15):** "a STANDARD library never reads the Touch
+    ID class" is read as: the Touch ID class is consulted only where the account's keys can be filed there — **a library in
+    Castle, or an act taking one into Castle (its own Castle-way filing before its swap: a join into a Castle account, a follow
+    into Castle, Use Castle)**; a library that is AND STAYS Standard files silently and never reads it. Why not the record's mode
+    alone: a join into Castle with Touch ID files the account's keys in the Touch ID item at its first step and drops the silent
+    one, while the library is still Standard until its swap; a crash there resumed with nothing typed (the library opens by its
+    quiet road) can reach the keys ONLY through that item — by the mode alone the resume could never finish (the act in flight
+    for good — rule 20); the guard `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` pins it. Consequence, said
+    plainly: during such a crossing the castle-way idempotency read in `holdSyncKeys` may still meet a stale Touch ID item of the
+    SAME account (one prompt, on a crossing into Castle she chose Touch ID for) — not a Standard read; untouched.
 - **Piece 2** — D-B8 (a), the forgets and drops BY NAME: NOT STARTED.
 - **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: NOT STARTED.
 - **Piece 4** — the behavioral reverts (named before any run): NOT STARTED.

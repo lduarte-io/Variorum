@@ -964,7 +964,10 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("sync+ \(itemClass.rawValue)")
     }
 
+    /// VX-517 (D-B8): a delete of NOTHING is no write — the real delete accepts not-found and changes nothing
+    /// (`ProtectionKeychain.delete`), and the forgets and drops delete BY NAME whether or not an item stands.
     func deleteSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
+        guard device.keychain.local[KName.syncKeys(scope, accountID, itemClass)] != nil else { return }
         try world.deleting(device, "sync- \(itemClass.rawValue)") {
             device.keychain.local[KName.syncKeys(scope, accountID, itemClass)] = nil
         }

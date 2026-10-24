@@ -189,6 +189,14 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     var copyEvents: [String] = []
     /// Every Touch ID item READ — each one a press (VX-306 ladder round 1, m2: a face's automatic probe presses none).
     var touchIDPresses = 0
+    /// VX-517 (D-B8): every read of the sync keys' TOUCH ID class — on the real leaf each one mints its own `LAContext`, a
+    /// prompt wherever the item stands (`KeychainSyncKeysLeaf.readSyncKeys`).
+    var syncKeysTouchIDReads = 0
+    /// VX-517 (D-B8): the PRODUCTION leaf's listing — `KeychainSyncKeysLeaf.syncKeyItems()` with no candidates wired (production
+    /// wires none) is BLIND to a Touch ID item with no silent sibling: the listing skips an item that would need
+    /// authentication, and the by-name probe asks only for the accounts its silent items name. On, this world lists exactly
+    /// that; off (every earlier suite), every item.
+    var syncKeysListingLikeProduction = false
 
     init(icloud: ICloudKeychain = ICloudKeychain(), server: ExecutorVault = ExecutorVault()) {
         self.icloud = icloud
@@ -239,9 +247,14 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
 
     // MARK: - Sync keys
 
-    func syncKeyItems() throws -> [SyncKeysItemFact] { Array(syncItems.keys) }
+    func syncKeyItems() throws -> [SyncKeysItemFact] {
+        guard syncKeysListingLikeProduction else { return Array(syncItems.keys) }
+        let silentAccounts = Set(syncItems.keys.filter { $0.itemClass == .silent }.map(\.accountID))
+        return syncItems.keys.filter { $0.itemClass == .silent || silentAccounts.contains($0.accountID) }
+    }
 
     func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? {
+        if itemClass == .touchid { syncKeysTouchIDReads += 1 }
         if itemClass == .touchid, !(bio.hardware && bio.enrolled && bio.transient == nil) { return nil }
         return syncItems[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)]
     }
@@ -251,8 +264,10 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         try wrote(.syncKeys(itemClass))
     }
 
+    /// VX-517 (D-B8): a delete of NOTHING is no write — the real delete accepts not-found and changes nothing
+    /// (`ProtectionKeychain.delete`), and the forgets and drops delete BY NAME whether or not an item stands.
     func deleteSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
-        syncItems[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = nil
+        guard syncItems.removeValue(forKey: SyncKeysItemFact(accountID: accountID, itemClass: itemClass)) != nil else { return }
         try wrote(.syncKeysDelete(itemClass))
     }
 
