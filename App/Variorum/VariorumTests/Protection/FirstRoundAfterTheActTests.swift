@@ -328,4 +328,39 @@ struct FirstRoundAfterTheActTests {
             #expect(world.bootstrap.roadAccount?.confirm == nil)
         }
     }
+
+    /// The row, as composed from this world's facts: the status the services' rounds leave and the record fact the
+    /// bootstrap's standing faces keep (what `VariorumApp` injects).
+    private static func rowFace(_ world: FirstRoundWorld, _ services: AppServices) -> SyncRowFace {
+        SyncRowFace.face(
+            allowsSync: services.sync.allowsSync, isConfigured: services.sync.isConfigured,
+            signedIn: services.account.variorum != nil, isSyncing: services.sync.status.isSyncing,
+            lastError: services.sync.status.lastError, lastErrorIsOffline: services.sync.status.lastErrorIsOffline,
+            stalled: services.sync.status.pullStalled, canOpenProtection: true,
+            libraryJoined: world.bootstrap.roadStanding?.syncsWithAnAccount)
+    }
+
+    /// **VX-506 — END TO END:** before the library joins, its rounds refuse for keys and the row says the not-yet (never
+    /// "locked"); the act lands, the bootstrap re-reads the record fact at the landing, and the row follows the round that
+    /// runs — "Synced …", with no relaunch.
+    @Test func vx506_theRowSaysNotOnYetUntilTheLibraryJoins() async throws {
+        try await FirstRoundWorld.run { world in
+            let services = try await world.composeServices()
+            try await world.settlePreActRounds(services)
+            #expect(world.bootstrap.roadStanding?.syncsWithAnAccount == false, "the record names no account yet")
+            let before = Self.rowFace(world, services)
+            #expect(before.kind == .notOnYet, "\(before.kind)")
+            #expect(SyncStatusRow.line(for: before.kind, lastSuccessAt: nil) == SyncStatusRow.notOnYetLabel)
+
+            let confirm = try await world.turnOnSync()
+            _ = await confirm.awaitFirstRound()
+            await FirstRoundWorld.settle(seconds: 5) {
+                world.bootstrap.roadStanding?.syncsWithAnAccount == true && services.sync.status.lastSuccessAt != nil
+            }
+            #expect(world.bootstrap.roadStanding?.syncsWithAnAccount == true, "the landing re-read the record fact")
+            let after = Self.rowFace(world, services)
+            #expect(after.kind == .idle, "\(after.kind)")
+            #expect(SyncStatusRow.line(for: after.kind, lastSuccessAt: services.sync.status.lastSuccessAt).hasPrefix("Synced "))
+        }
+    }
 }

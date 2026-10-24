@@ -186,6 +186,10 @@ struct VariorumApp: App {
                     // Protection — the bootstrap's one pane ask (the
                     // crossings' own road), adopted by the Settings window.
                     .environment(\.protectionPaneDoor, ProtectionPaneDoor.settings(bootstrap.protection))
+                    // VX-510 D-A3 (VX-506): whether the OPEN library has joined an account — the sync row's keys refusal
+                    // over a library that has not reads a not-yet, never "locked" (the record's fact, re-read when an
+                    // account act lands — the hold banner's own read, below).
+                    .environment(\.librarySyncsWithAnAccount, bootstrap.roadStanding?.syncsWithAnAccount)
                     .task {
                         // 13x U2 row 7: the hold's projection — fresh per
                         // ready (this task re-runs after every adoption's

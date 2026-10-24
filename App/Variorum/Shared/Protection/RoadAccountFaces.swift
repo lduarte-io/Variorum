@@ -305,6 +305,9 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
                     // VX-308 U2 — the account already has its vault: THE JOIN (enter / leave Castle, or the same posture).
                     var join = joinDoor(.turnOnSync, spec, library: mode, gate: gateChoice, copyName: copyName)
                     join.accountEmail = email
+                    // VX-510 D-A3 (VX-506): the account is already on — the join's door says so in its own words, never
+                    // the set-up arm's "Turn on sync…" (PROVISIONAL P-VX510-3 (a), hers).
+                    join.label = ProtectionWords.joinSyncDoor
                     turnOnSync = .open(join)
                 }
             }

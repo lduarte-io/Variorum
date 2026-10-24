@@ -461,9 +461,63 @@ first draft of each built).
   sentence · (b) a third lead for "ran but incomplete". P-VX510-A3 — not configured reads the row's signed-in no-chain line
   ("Sync is off") — true for F-5's failed owner adoption; on a DEV store without the walk's lift the row says "Sync off (dev
   store)" (Debug-only drift, accepted).
-- **Piece 4** — D-A3 (VX-506): the unjoined row's not-yet face (the record names no account) with the same Protection…
-  door; the join arm's own door label: NOT STARTED.
-- **Piece 5** — the behavioral reverts (named here BEFORE any runs): NOT STARTED. No revert is in flight.
+- **Piece 4** — D-A3 (VX-506): DONE (this commit). `Shared/SyncStatusViews.swift`: `SyncRowFace.Kind.notOnYet`;
+  `face(…, libraryJoined: Bool? = nil)` splits ONLY the keys refusal — `false` (the open library's record names no account)
+  → `.notOnYet` with the locked face's own door (Protection… where the pane exists, the sentence alone where it doesn't —
+  P-2); `true`/`nil` → the shipped `.keysLocked`, unchanged; `SyncStatusRow.notOnYetLabel` = "Sync isn't on for this library
+  yet" (P-VX510-2 (a), PROVISIONAL, hers) in the quiet caption (the sync-off register — a not-yet, never the warning a lock
+  wears; PROVISIONAL, the styling mine), the engine's refusal in the hover; the environment value
+  `librarySyncsWithAnAccount` (nil default) read by the row. `Variorum/VariorumApp.swift` and
+  `VariorumMobile/VariorumMobileApp.swift` (both app files — compile at Piece 7, PENDING) inject
+  `bootstrap.roadStanding?.syncsWithAnAccount` — the record fact the hold banner already reads, re-read at every account
+  landing (VX-473). The phone included: its row said "Sync locked — this iPhone…" over an unjoined library too; it reads the
+  not-yet line alone (no door — VM-8). `Shared/Protection/RoadAccountFaces.swift`: the localOnly JOIN arm's door wears
+  `ProtectionWords.joinSyncDoor` = "Sync this library…" (P-VX510-3 (a), PROVISIONAL, hers); the set-up arm keeps "Turn on
+  sync…"; Move keeps its own; the confirm's TITLE and BUTTON stay "Turn on sync" (the design names the door only — an open
+  edge for her, P-VX510-A4 below). Pins (`NotOnYetWordsTests` +): `theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`,
+  `theJoinedLockedRowIsUnchanged`, `onlyTheKeysRefusalSplits`, `bothRootsInjectTheLibrarysRecordFact` (source pins, symlinks
+  resolved); `FirstRoundAfterTheActTests` + `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` (end to end: not-yet before the
+  act, the record fact re-read at the landing, "Synced …" after the round). **The harness, `--filter "NotOnYetWordsTests|
+  FirstRoundAfterTheActTests|SyncLockedRowTests|SyncStalledRowTests|RoadAccountFacesTests|RoadJoinFollowFacesTests|
+  RoadAccountWordsTests|RoadJoinFollowWordsTests|ProtectionAccountRoadTests|ProtectionJoinFollowRoadTests"`: `✔ Test run with
+  74 tests in 10 suites passed`** — Piece 1's VX-506 door pin now GREEN; the VX-486 suite unchanged and green.
+  **P-VX510-A4 (hers):** the join's confirm still titles itself and its button "Turn on sync" — (a, built) door only, as the
+  design says · (b) the join's title and button follow the door's words.
+- **Piece 5** — THE BEHAVIORAL REVERTS, named BEFORE any runs (this commit; the committed tree is this commit's). Each is ONE
+  file, applied in the worktree, the harness run with the named filter, then restored by `git checkout -- <file>` and
+  `git diff --exit-code` clean before the next; no pre-revert copies (the committed tree IS the copy). Expected red in
+  brackets:
+  - **RA-1** (VX-498, the composition) `Shared/AppBootstrap.swift`: `attach` stops wiring `firstRound` (the one line) — the
+    regression's own shape [`vx498_aSetUpRunsItsFirstRoundWithNoRelaunch`, the three `vx507_` end-to-end pins,
+    `vx506_theRowSaysNotOnYetUntilTheLibraryJoins`].
+  - **RA-2** (VX-498, the gate) `Shared/Protection/RoadAccountFaces.swift`: `owesFirstRound` answers true for every door
+    [`aLeaveOrAReKeyingActNeverAsks`].
+  - **RA-3** (VX-498, the reconnect) `Shared/AppServices.swift`: `runFirstRound` drops the reconnect
+    [`runFirstRoundReconnectsAnUnconfiguredChainThenRuns`].
+  - **RA-4** (VX-498, the wait) `Shared/SyncSession.swift`: `roundNow` reads the status right after the trigger, no
+    `awaitIdle` [`roundNowRunsOneRoundToItsEndAndReturnsItsStatus`, `roundNowWaitsForTheFollowUpOfARoundInFlight`].
+  - **RA-5** (VX-498, the hold) `Shared/SyncSession.swift`: `roundNow` ignores `roundsHeld`
+    [`roundNowUnderTheRestoreHoldSaysHeldAndRunsNothing`].
+  - **RA-6** (VX-507, the sheet stays) `Shared/Protection/RoadAccountModel.swift`: with a round started and no words moment,
+    the confirm finishes at `.made` as before [`vx507_theSetUpsSheetStaysAfterTheActLands`,
+    `theSheetStaysShowingTheRoundsProgressThenItsOutcome`, `vx507_theSheetSaysTheSetUpsFirstRoundLanded`].
+  - **RA-7** (VX-507, Done never cancels) `RoadAccountModel.swift`: `done()` cancels the round's task
+    [`doneClosesTheSheetAndNeverCancelsTheRound`].
+  - **RA-8** (VX-507, after the moment) `RoadAccountModel.swift`: `closeMoment()` finishes even with a round standing
+    [`theRoundPhaseFollowsTheWordsMoment`].
+  - **RA-9** (VX-507, the row's own words) `RoadAccountModel.swift`: the blocked line says the engine's raw error, not the
+    row's sentence [`eachOutcomeSaysTheRowsOwnSentence`].
+  - **RA-10** (VX-507, a dismissal is Done) `RoadAccountModel.swift`: `cancel()` in the round phase finishes as "she left"
+    (`nil`) [`doneClosesTheSheetAndNeverCancelsTheRound`].
+  - **RA-11** (VX-506, the split) `Shared/SyncStatusViews.swift`: the keys face ignores `libraryJoined`
+    [`theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins`].
+  - **RA-12** (VX-506, the line) `Shared/SyncStatusViews.swift`: the not-yet face's line is the locked label
+    [`theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins`].
+  - **RA-13** (VX-506, the injection) `Variorum/VariorumApp.swift`: the environment injection removed
+    [`bothRootsInjectTheLibrarysRecordFact`].
+  - **RA-14** (VX-506, the door) `Shared/Protection/RoadAccountFaces.swift`: the join arm's label line removed
+    [`theJoinArmsDoorHasItsOwnLabel`].
+  Results: PENDING (not started — no revert is in flight).
 - **Piece 6** — F-6, the fork: the trace and the proposal (not built): NOT STARTED.
 - **Piece 7** — evidence on the final tree (the harness whole; build-for-testing Mac + iOS) and THE MAC-SUITE LIST: NOT
   STARTED.
