@@ -419,8 +419,12 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     (the key never changed, every road opens the library), healed at the first open whose lobby takes the words, or the
     upgrade — that build's own follows resumed without a usable secret behave the same. A stored-format change could
     close it; the ruling forbids one, and nothing else reaches into an older build.
-  - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
-    red-first. NOT-STARTED.
+  - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site. IN-PROGRESS —
+    the table pins COMMITTED (`PairRefusalSiblingSeamTests` in `Executor/PairRefusalSplitTests.swift`): RED on the
+    pre-fix tree, all 9 in-class rows with today's refusal — New words (both postures) and the crossing + Replace All
+    Keys (both postures) with the OLD passphrase: `passphraseDoesNotOpen` (6); Replace All Keys with the OLD words
+    after a words change elsewhere: `wordsDoNotOpen` (2); Reset by the OLD words, Castle Always ask, no keys held:
+    `secretsRequired(.changePassphrase)` (1); their opens-neither companions green. Remains: the fix, green, revert.
   - P6f — the full core suite green; the report back. NOT-STARTED.
 - **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
   passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'

@@ -75,3 +75,91 @@ struct PairRefusalSplitTests {
         }
     }
 }
+
+/// THE CLASS'S OTHER SEAMS (the architect's ruling, S-5 overruled in part; the sweep table in the run record's P6e): a
+/// typed secret that still opens THIS library but no longer the account's vault, refused with a sentence saying it doesn't
+/// open this library. RED ON THE PRE-FIX TREE, row by row. The passphrase rows take P1's split
+/// (`passphraseChangedElsewhere`, the vault's last writer and day); the words rows — no refusal names a words change, and
+/// none is minted here — take the existing `accountMoved` ("Your account changed on another device. Follow it first."),
+/// true and pointing at the act owed, at the doors that are not the follow itself.
+@Suite("VX-529 P6e — the false-refusal class at its sibling seams: New words, the crossings, Replace All Keys, Reset")
+struct PairRefusalSiblingSeamTests {
+    static func expectRefused(
+        _ air: EX, _ refusal: ExecutorRefusal, _ row: String, sourceLocation: SourceLocation = #_sourceLocation,
+        _ press: (ProtectionExecutor, inout UnlockedLibrary) async throws -> Void
+    ) async throws {
+        let executor = air.executor()
+        var library = try air.unlocked(executor)
+        air.world.writes = []
+        do {
+            try await press(executor, &library)
+            Issue.record("\(row): it landed", sourceLocation: sourceLocation)
+        } catch let error as ExecutorRefusal {
+            #expect(error == refusal, "\(row): \(error)", sourceLocation: sourceLocation)
+        }
+        #expect(air.world.writes.isEmpty, "\(row): the refused door wrote \(air.world.writeLog())", sourceLocation: sourceLocation)
+        #expect(library.section.actInFlight == nil, sourceLocation: sourceLocation)
+    }
+
+    /// F-4's first seam: New words' synced arm verifies the current passphrase against the vault.
+    @Test(arguments: ProtectionMode.allCases)
+    func newWordsWithTheOldPassphraseNamesTheChange(_ mode: ProtectionMode) async throws {
+        let (mac, air, _, _) = try await pairMovedElsewhere(mode, gate: mode == .castle ? .alwaysAsk : nil)
+        let vault = try pairVault(mac)
+        let changed = ExecutorRefusal.passphraseChangedElsewhere(device: "Mac A", day: vault.updatedAt)
+        try await Self.expectRefused(air, changed, "New words, \(mode), the old passphrase") { executor, library in
+            _ = try await executor.regenerateWords(&library, passphrase: air.passphrase, newWords: try PF.words())
+        }
+        try await Self.expectRefused(air, .passphraseDoesNotOpen, "New words, \(mode), neither") { executor, library in
+            _ = try await executor.regenerateWords(&library, passphrase: "not any passphrase of hers", newWords: try PF.words())
+        }
+    }
+
+    /// F-4's second seam: `doorSecrets`' synced arm (Use Castle, Use Standard, Replace All Keys).
+    @Test(arguments: ProtectionMode.allCases)
+    func theCrossingsAndReplaceAllKeysWithTheOldPassphraseNameTheChange(_ mode: ProtectionMode) async throws {
+        let (mac, air, _, _) = try await pairMovedElsewhere(mode, gate: mode == .castle ? .alwaysAsk : nil)
+        let vault = try pairVault(mac)
+        let changed = ExecutorRefusal.passphraseChangedElsewhere(device: "Mac A", day: vault.updatedAt)
+        let old = TypedSecrets(passphrase: air.passphrase, words: air.words)
+        try await Self.expectRefused(air, changed, "the crossing, \(mode), the old passphrase") { executor, library in
+            if mode == .standard {
+                _ = try await executor.useCastle(&library, typed: old, gate: .alwaysAsk)
+            } else {
+                _ = try await executor.useStandard(&library, typed: old)
+            }
+        }
+        try await Self.expectRefused(air, changed, "Replace All Keys, \(mode), the old passphrase") { executor, library in
+            _ = try await executor.replaceAllKeys(&library, typed: old)
+        }
+        try await Self.expectRefused(air, .passphraseDoesNotOpen, "Replace All Keys, \(mode), neither") { executor, library in
+            _ = try await executor.replaceAllKeys(&library, typed: TypedSecrets(passphrase: "not any passphrase of hers", words: air.words))
+        }
+    }
+
+    /// The words twin at `doorSecrets`: the account's words re-made elsewhere; the OLD words (they open this library —
+    /// its own lock) typed beside the account's passphrase.
+    @Test(arguments: ProtectionMode.allCases)
+    func theCrossingsWithTheOldWordsPointAtTheFollow(_ mode: ProtectionMode) async throws {
+        let (_, air, _, _) = try await pairMovedElsewhere(
+            mode, gate: mode == .castle ? .alwaysAsk : nil, passphrase: false, words: true)
+        #expect(try air.world.liveFormat3?.open(.words(air.words), floor: PF.floor) == air.key, "the fixture")
+        let typed = TypedSecrets(passphrase: air.passphrase, words: air.words)
+        try await Self.expectRefused(air, .accountMoved, "Replace All Keys, \(mode), the old words") { executor, library in
+            _ = try await executor.replaceAllKeys(&library, typed: typed)
+        }
+        try await Self.expectRefused(air, .wordsDoNotOpen, "Replace All Keys, \(mode), words of nobody's") { executor, library in
+            _ = try await executor.replaceAllKeys(&library, typed: TypedSecrets(passphrase: air.passphrase, words: try PF.words()))
+        }
+    }
+
+    /// The words twin at Reset forgotten passphrase (Castle, by the words — `holdSyncKeysForTheSession`): no keys held
+    /// (Always ask, unlocked by the OLD words), the old words verified against this library, the vault refusing them.
+    @Test func resetByTheOldWordsPointsAtTheFollow() async throws {
+        let (_, air, _, _) = try await pairMovedElsewhere(.castle, gate: .alwaysAsk, passphrase: false, words: true)
+        air.world.session = [:]
+        try await Self.expectRefused(air, .accountMoved, "Reset, Castle, the old words") { executor, library in
+            _ = try await executor.resetPassphrase(&library, authorization: .words(air.words), new: "a passphrase chosen today")
+        }
+    }
+}
