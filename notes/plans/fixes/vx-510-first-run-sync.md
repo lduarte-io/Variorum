@@ -1811,6 +1811,36 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
 - **B2's T-B5-2 → VX-517 (filed 2026-10-23, Needs Lillian):** the sync-keys leaf's Touch ID candidates are unwired
   (`AppBootstrap.swift:183`, the default `{ [] }`; the custody leaf's are wired at `ProtectionSystem.swift:60` — verified by
   the orchestrator), so the Touch ID class is never forgotten (rule 16). Join-or-separate is hers.
+- **C4 (21:30–21:36) — a SECOND library joins the Castle account (the re-keying join, F-6) + VX-511 LIVE.** Quit (zero
+  instances); `159caa3f` aside (`…-aside-vx510-walkL4/`); relaunch (pid 78401) → a fresh Standard library **`223c4e7e`**
+  (key `7cde213b`), still signed in as `castle` (the dev-scoped session), the words card AND the passphrase card showing.
+  Protection ▸ **"Sync this library…"** (VX-506's door — the account has a vault) → the sheet ("Your account already syncs.
+  Type its passphrase or its twelve words once — your library's own passphrase and twelve words are replaced by your
+  account's. … Your account is in Castle, so this library goes into Castle too." + the Castle promise text + On this Mac)
+  → **Always ask** + the account's CURRENT passphrase → `enroll: done #1 under 508a5859 · road: turnOnSync — library
+  *[removed for publication]*
+  *[removed for publication]*
+  twelve words. Your previous twelve words still open backups you made before today. …") → OK → **`road: an account act
+  landed — the library holds the account's words; the words card's offer retires (VX-511)`** → the F-6 sheet waited for the
+  reopened services and said **"Synced. Your account's writing is in this library now."** → prod **2 cursors**; the Library
+  shows both Castle notes; the row "Synced 9:32 PM"; **the Bookcase's cards band EMPTY** (the words card and the passphrase
+  card both retired — VX-511 GREEN live; red live on the pre-fix build at S-leg). **Relaunch** (pid 78965) → the Castle
+  lobby → the TWELVE WORDS typed → `road: the typed unlock loaded the account's sync keys for the session (sync key
+  e1deb44d)` (VX-501's words arm) → the band STILL EMPTY (the mark persisted) → a note from this second library → **prod 3
+  containers, rows 16**, the row "Synced 9:35 PM".
+- **C5 (21:37–21:38) — Use Standard (the account leaves Castle).** Protection ▸ **Use Standard…** (the sheet: "Leaving Castle
+  hands everything to Standard: your library gets a new key, with a fresh Apple road and this Mac's on-device road back.
+  Your library and all your backups will open through your Apple account and this Mac again; if you want Castle-era writing
+  to stay Castle-protected, don't leave." — passphrase AND words asked) → `leave_castle: swapped — the library is under
+  79e33327 … road: useStandard — library 223c4e7e now standard under 79e33327` → **prod vault mode standard, revision 4** →
+  a note after the change → **prod 4 containers**, the row "Synced 9:38 PM". ("Replace All Keys…" seen, not exercised.)
+- **LEG C PASS.** Observations: **W-11** the join door reads "Sync this library…" while its sheet's title and button still
+  say "Turn on sync"; **W-12** the words notice's "backups you made before today" — backups made EARLIER TODAY, before the
+  join, open with the previous words too (it means "before now"); **W-13 (Suspected, her hand)** the lobby's "Use your twelve
+  words instead" disclosure did not open on three synthetic clicks across its label (AX geometry 487,547 240×14; the clicks
+  inside it), while an AXPress opened it at once — real-mouse behavior unverified.
+- **Held for B3's walk (the orchestrator's call):** the stage, the walk build and library `223c4e7e` (synced to `castle`,
+  Standard) stay up so VX-513's check door can be walked on its synced arm the moment B3 lands; unit C's close follows that.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
