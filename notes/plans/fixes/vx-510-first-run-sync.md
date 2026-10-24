@@ -178,8 +178,8 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 *[removed for publication]*
 | 3 | The kickoff sitting bundle answered (D-ROAD shape; lifecycle drill in-run or chartered; the acceptance's account set) | DONE — R-510-6…9 (env flag + allowlist; the PAT confirmation script; the typing helper over a generated file; the lifecycle drill IN this run as unit C) |
 | 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | UNIT A DONE (`33c169f76`…`92bd0740a`; harness 449/79 green; 14 reverts red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 37/6 green); F-6 RULED (A) → unit B1; **the stage batch at `92bd0740a`** (a detached clean checkout `~/dev/variorum-vx-510-stage`, stage claim `vx-510`, the WHOLE Mac target): `✔ Test run with 5141 tests in 902 suites passed after 2188.113 seconds with 14 known issues`, `** TEST SUCCEEDED **` (VX-494's closing 5118/898 + unit A's 23 tests in 4 suites, exactly); stage released |
-| 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | NOT STARTED — unit B1 (D-B1, D-B2) |
-| 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | NOT STARTED — unit B1 (D-B3); the tools + allow rules DONE (THE TEST-ACCOUNT ROAD) |
+| 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | UNIT B1 DONE (`2576629c7`…`31b8e2636`; `FirstRunDrillTests` every arm + the negatives; `Tools/WalkKit/first-run-walk.sh` + release.sh's step-0 gate row; harness 477/82 green; 18 reverts red as named; re-run by the orchestrator 48/6 green); the Mac stage batch PENDING (the closing run) |
+| 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | UNIT B1 BUILT (D-B3, DEBUG-only, Release byte-unchanged) — but cannot arm in the sandbox: F-B1-1 RULED (B) → unit B2's first piece; the tools + allow rules DONE (THE TEST-ACCOUNT ROAD) |
 | 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | NOT STARTED — unit B2 (D-B4, D-B6, D-B5) |
 | 6c | VX-513 (the read-only check-your-secrets door) | NOT STARTED — unit B3 (D-B7) |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | NOT STARTED |
@@ -711,6 +711,32 @@ first draft of each built).
   needs first); **B2** = D-B4 + D-B5 (VX-501's custody seam, the VX-503 trace). Still one ruled unit of the run.
 - **Her word bundle gains unit A's items** (OPEN ITEMS): P-VX510-A1…A4 and the not-yet row's quiet style.
 
+## UNIT B1 — THE ORCHESTRATOR'S VERIFICATION AND RULINGS (2026-10-23, after implementer session B1 closed)
+
+- **Verified, not trusted:** the commit chain `2576629c7 … 31b8e2636` read; the product diff read for the seams
+  (`AppServices`' DEBUG fence derivation — Release's line byte-unchanged —, `prodTestRoadAdmits` at every connect over
+  `auth.currentEmail`, the `start()`-in-flight wait in `runFirstRound`, the services generation in `AppBootstrap`); no
+  `Sources/` line. **Re-run by the orchestrator** in B1's harness (`--filter "FirstRunDrill|FirstRoundAfterTheReopen|
+  ProdTestRoad|FirstRoundAfterTheAct|FirstRoundConfirm|SyncWalkFence"`): `✔ Test run with 48 tests in 6 suites passed`.
+  Two pin changes were DELIBERATE and are sound: `SyncWalkFenceTests`' derivation pin follows the code it pins;
+  unit A's `aLeaveOrAReKeyingActNeverAsks` → `aLeaveNeverAsks` follows F-6 (A).
+- **F-B1-1 — RULED (B), by the architect under the mandate:** the sandboxed Debug app cannot read `~/.variorum/` (the
+  shared `Variorum.entitlements` sandboxes both configurations), so the road could never arm. **(B): the walk launcher
+  — outside the sandbox — reads the allowlist file (mode 600, every entry `vxtest`), and hands the emails to the
+  launch as `VARIORUM_PRODTEST_EMAILS`; the app reads that value instead of the file and keeps every in-app guard (the
+  road's `1`, exclusive with a walk project, every entry carrying `vxtest`, admission per signed-in account at every
+  connect).** Reasons: her R-510-6 is kept in substance — the allowlist FILE stays the one source of truth and the only
+  thing the tools read; the protection that matters lives in the app and is unchanged (her account carries no `vxtest`
+  marker, so no launch environment can ever admit it); (A) would widen the Debug build's sandbox (and the test host's)
+  with a home-relative read exception and a second entitlements file to keep in step; (C) moves her ruled path and every
+  tool reading it. Built as unit B2's FIRST piece (unit C waits on it); the walk script's header already names the line.
+- **PROVISIONAL words from B1, hers (R-510-13's posture):** P-VX510-B1-1 the follow's success line "Synced. This library
+  is up to date with your account again." · P-VX510-B1-2 the road's refusal "Sync off (dev store) — this account isn't a
+  listed test account".
+- **Unit C may start on B2's F-B1-1 commit:** the orchestrator builds the walk from a detached checkout at that commit
+  (never the shared worktree — B2's uncommitted edits must not leak into it) and runs LEG S and LEG D while B2 builds
+  VX-501/VX-511 headless; LEG C (Castle) waits for VX-501.
+
 ## THE FIX DESIGN — UNIT B (VX-509 · D-ROAD · VX-501 · the VX-503 rider; the architect's design, built by implementer sessions B1 then B2 after unit A closed)
 
 - **D-B0 — F-6 (A), RULED: a re-keying act's first round after the reopen.** Exactly unit A's proposal (A) in its
@@ -1157,7 +1183,16 @@ KeychainSyncKeysLeaf.swift`, `Shared/Protection/NewRoadSyncKeyProvider.swift`, `
 (`VaultModel.master`, `vault.keys(master:)`), and for D-B5 the join's plan (`Executor` `enroll` and the steps it runs —
 every keychain read on that road) plus `KeychainCustodyLeaf.swift`.
 
-**Your scope — exactly D-B4, D-B6 and D-B5:** VX-501's typed-unlock load (never hostage; no second KDF; the secret never
+**FIRST, before anything else — F-B1-1 (B) as ruled in UNIT B1 — THE ORCHESTRATOR'S VERIFICATION AND RULINGS** (unit C
+waits on it): the app reads the allowlist from `VARIORUM_PRODTEST_EMAILS` (space-separated, the file's own shape)
+instead of the file — every in-app guard kept (the road's `1`; refused with a walk project; empty refused; every entry
+carrying `vxtest`; the admission per account at connect) — and `Tools/WalkKit/first-run-walk.sh` reads the file (mode
+600, outside the sandbox) and passes the value at launch. Its pins updated (each file-reading pin becomes the env
+form; a pin that an entry without the marker refuses; a pin that her-shaped address can never be admitted), its
+reverts named and run, its own commit pushed AT ONCE, its hash written in your LIVE STATUS — the orchestrator builds
+the live walk from that commit while you continue. Commits for it say `Part of VX-510`.
+
+**Then your scope — exactly D-B4, D-B6 and D-B5:** VX-501's typed-unlock load (never hostage; no second KDF; the secret never
 retained past the load; Standard and unbound libraries read nothing) with its pins red-on-old; VX-511's card retirement at
 a landed account act (D-B6, its pins red-on-old; read `WordsBand.swift`, `ProtectionCopyDoors.swift`'s VX-444 carry and
 mark, and the bootstrap's `accountRoads().landed` / `accountActOnNewRoad`); and the VX-503 trace —
