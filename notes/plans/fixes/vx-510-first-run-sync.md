@@ -2098,7 +2098,35 @@ edits). Every claim not yet run is PENDING.*
     `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` — the resume cannot finish].
   - **RE-13** `CommonSteps.swift`: the over-reach — the Touch ID class never read [the guards `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem`,
     the follow out's read leg, `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling`].
-  **RESULTS — PENDING (runs start after this commit).**
+  **RESULTS — DONE on `a5f1736a8`, every one RED as named, every restore `git diff --exit-code` clean ("RESTORED CLEAN · TREE
+  CLEAN" after each); NO REVERT IS IN FLIGHT** (green first on the same tree: core `--filter TouchIDSyncKeysForgottenTests` `✔
+  Test run with 13 tests in 1 suite passed`; harness `--filter TouchIDSyncKeysForgottenRoadTests` `✔ … 2 tests … passed`):
+  - **RE-0** (the four pre-fix files): `✘ Test run with 13 tests in 1 suite failed with 21 issues` — every `vx517_` pin ✘ as in
+    Piece 1b, and `vx517_theRollbackSweepRemovesATouchIDOnlyItem` ✘ on all three roads (`planGone`, `vaultOutOfReach`,
+    `signedOutAtTheOpen` — the leg added in Piece 4: its red-on-old) on "the keys the act picked up go with it".
+  - **RE-1**: core `✘ … with 6 issues` — the leaves ✘×6 (×3 cases); harness `✘ … 2 tests … with 6 issues` — the road's leaves ✘×6.
+  - **RE-2**: core `✘ … with 2 issues` — the finishing forget ✘×2.
+  - **RE-3**: core `✘ … with 11 issues` — the leaves ✘×6, the finishing forget ✘×2, the rollback ✘×3 (every road); harness
+    `✘ … with 6 issues` — the road's leaves ✘×6.
+  - **RE-4**: core `✘ … with 3 issues` — the finishing forget ✘×2, the rollback ✘ on `planGone` only (the other two roads name
+    the account through the plan — as designed).
+  - **RE-5**: core `✘ … with 1 issue` — the rollback ✘ on `signedOutAtTheOpen` only (the plan alone names the account there).
+  - **RE-6**: core `✘ … with 4 issues` — the Standard join ✘, the Always-ask filing ✘, the follow out ✘ (its no-item leg; its read
+    leg green), Use Standard ✘; harness `✘ … with 1 issue` — Use Standard's no-item leg ✘ (the key door's no-read leg stayed
+    green: the stale item stands but (c) reads it no more — the two fixes are independent, as designed).
+  - **RE-7**: core `✘ … with 3 issues` — the rollback ✘ on every road.
+  - **RE-8**: core `✘ … with 1 issue` — the rolled-back follow into Castle ✘ (the Touch ID filing stayed).
+  - **RE-9**: core `✘ … with 3 issues` — the Standard key doors ✘×2 (`Caught error: .accountMoved` — the stale keys shadowing the
+    silent ones again), the key door after Use Standard ✘ (a read); harness `✘ … with 1 issue` — the key door's no-read leg ✘.
+  - **RE-10**: core `✘ … with 2 issues` — the set-up's finish ✘×2 (a read; nothing bound).
+  - **RE-11**: core `✘ … with 3 issues` — the Standard key doors ✘×2 (`syncKeysTouchIDReads == 0` — they still land: the session
+    hold reads the stale item, sees it is not the vault's and moves on to the silent one), the key door after Use Standard ✘;
+    harness `✘ … with 1 issue` — the key door's no-read leg ✘.
+  - **RE-12**: core `✘ … with 1 issue` — `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` ✘ with `Caught error:
+    .secretsRequired(enroll)` — by the record's mode alone the resume cannot reach the act's own Touch ID filing and the act
+    stays in flight: THE READING's reason, shown.
+  - **RE-13**: core `✘ … with 3 issues` — `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` ✘ (`.accountMoved`), the
+    follow out ✘ (`.secretsRequired(follow)`), the resumed act into Castle ✘ (`.secretsRequired(enroll)`) — the guards have teeth.
 - **Piece 5** — evidence (harness whole, the core protection set debug + release, Mac + iOS build-for-testing, THE MAC-SUITE
   LIST, THE WALK): NOT STARTED.
 
