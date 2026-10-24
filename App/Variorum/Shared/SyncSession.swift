@@ -37,6 +37,17 @@ import GRDB // AsyncValueObservation iteration (member import visibility)
 import Observation
 import VariorumCore
 
+/// **VX-510 D-A1 — what an account act's first round came to** (`SyncSession.roundNow`, through
+/// `AppServices.runFirstRound`): the act's sheet confirms it or says what blocks it, in the sync row's own words (VX-507).
+nonisolated enum FirstRoundOutcome: Equatable, Sendable {
+    /// The restore hold stands: no round runs before the one Resume press (13x row 7).
+    case held
+    /// No chain to run a round with — the A4 fence, a signed-out session, a failed owner adoption (F-5).
+    case notConfigured
+    /// The round ran; the scheduler's status as it left it.
+    case ran(SyncScheduler.Status)
+}
+
 @MainActor
 @Observable
 final class SyncSession {
@@ -171,6 +182,21 @@ final class SyncSession {
         guard roundsHeld?() != true else { return }
         guard let scheduler else { return }
         Task { await scheduler.trigger() }
+    }
+
+    /// **VX-510 D-A1 — ONE ROUND, RUN TO ITS END, AND WHAT IT CAME TO** (an account act's first round — VX-498/VX-507).
+    /// Held like every other road (13x row 7): under the restore hold nothing runs (`.held`). No chain to run one with —
+    /// the A4 fence, a signed-out session, a failed owner adoption (the run record's F-5) — says so (`.notConfigured`)
+    /// rather than waiting forever. Otherwise the scheduler's EXISTING public API (no `Sync/` line): a trigger (coalescing —
+    /// a round already in flight is followed by exactly one more, which reads the keys as they stand now), then the wait
+    /// for idle, then the scheduler's own status as the round left it. Nothing here cancels a round: a caller that stops
+    /// waiting leaves it running.
+    func roundNow() async -> FirstRoundOutcome {
+        guard roundsHeld?() != true else { return .held }
+        guard let scheduler else { return .notConfigured }
+        await scheduler.trigger()
+        await scheduler.awaitIdle()
+        return .ran(await scheduler.status)
     }
 
     /// Waits for in-flight rounds — the iOS background transition uses this

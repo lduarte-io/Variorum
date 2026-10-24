@@ -145,6 +145,14 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
     /// reopens — the crossings' seam (R-U2-2); else on the open session.
     var rekeys: Bool { spec.rekeys }
 
+    /// **VX-510 D-A1 — a first round is owed the moment this act lands** (VX-498): its landing changes sync's standing on
+    /// the OPEN session — turning sync on (the set-up, a join in the same posture) and Move in the same posture. Never a
+    /// leave (sync stops there), and never a re-keying act: that one lands through the reopen, whose fresh services run
+    /// their own round at their start (the run record's F-6 — its confirmation is the architect's fork).
+    var owesFirstRound: Bool {
+        (door == .turnOnSync || door == .moveToSignedInAccount) && !rekeys
+    }
+
     /// The receipt once the act landed: the follow's Done (VX-107 — its other-device sentence), a join's (the posture said
     /// where it changed), else the door's.
     var receipt: String {

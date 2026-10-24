@@ -84,10 +84,17 @@ final class RoadAccountConfirmModel: Identifiable {
     @ObservationIgnored private let finished: (RoadAccountPress?) -> Void
     @ObservationIgnored private let copyWords: ([String]) -> Void
     @ObservationIgnored private var landedPress: RoadAccountPress?
+    /// VX-510 D-A1 — the composition's first-round road, handed in only for an act that owes one
+    /// (`RoadAccountDoorOpen.owesFirstRound`); nil: none here (a leave, a re-keying act, the phone until VM-8, a test world
+    /// without one — the confirm finishes exactly as before).
+    @ObservationIgnored private let firstRound: (() async -> FirstRoundOutcome)?
+    /// The round the landing started (never cancelled from here — closing the sheet leaves it running).
+    @ObservationIgnored private var roundTask: Task<FirstRoundOutcome, Never>?
 
     init(
         door: RoadAccountDoorOpen, act: @escaping (RoadAccountRequest) async -> RoadAccountPress,
         copyWords: @escaping ([String]) -> Void = { _ in },
+        firstRound: (() async -> FirstRoundOutcome)? = nil,
         landed: ((RoadAccountPress) -> Void)? = nil,
         finished: @escaping (RoadAccountPress?) -> Void
     ) {
@@ -95,8 +102,15 @@ final class RoadAccountConfirmModel: Identifiable {
         gate = door.gate?.preselected ?? .alwaysAsk
         self.act = act
         self.copyWords = copyWords
+        self.firstRound = firstRound
         self.landed = landed
         self.finished = finished
+    }
+
+    /// TEST-VISIBLE: the first round the landing started, awaited to its outcome (nil: none was started). Production never
+    /// awaits it — the sheet observes the phase.
+    func awaitFirstRound() async -> FirstRoundOutcome? {
+        await roundTask?.value
     }
 
     var title: String { door.door.title }
@@ -165,6 +179,11 @@ final class RoadAccountConfirmModel: Identifiable {
         busy = false
         switch press {
         case .made(_, let wordsReplaced):
+            // VX-510 D-A1 (VX-498): the act landed on the open session — its first round starts AT ONCE (while any words
+            // moment is read), never waiting on the sheet.
+            if let firstRound, roundTask == nil {
+                roundTask = Task { await firstRound() }
+            }
             guard wordsReplaced, door.spec.join != nil, door.spec.join != .setsUpInLibrarysMode else {
                 finished(press)
                 return
@@ -304,6 +323,11 @@ final class RoadAccountModel {
     /// The composition root's — the app's sign-out (its own session; rule 16: signing out never changes the record). nil:
     /// *Sign out…* is not rendered (P-2).
     @ObservationIgnored var signOutRoad: (@MainActor () async -> Void)?
+    /// **VX-510 D-A1 — the composition root's first-round road** (`signOutRoad`'s precedent; wired by
+    /// `AppBootstrap.attach(services:)` to `AppServices.runFirstRound`): one round run to its end and what it came to, asked
+    /// the moment an act that changes sync's standing on the open session lands (`RoadAccountDoorOpen.owesFirstRound`). nil
+    /// (the phone until VM-8, a test world without one): the confirm finishes exactly as before (P-2).
+    @ObservationIgnored var firstRound: (@MainActor () async -> FirstRoundOutcome)?
     @ObservationIgnored private var reads = 0
     @ObservationIgnored private var landedRead = 0
 
@@ -371,8 +395,11 @@ final class RoadAccountModel {
                 await roads.landed()
             }
         }
+        // VX-510 D-A1: the first round, for an act whose landing changes sync's standing on the open session.
+        let firstRound = open.owesFirstRound ? self.firstRound : nil
         let confirm = RoadAccountConfirmModel(
-            door: open, act: { request in await roads.press(request) }, copyWords: roads.copyWords, landed: land,
+            door: open, act: { request in await roads.press(request) }, copyWords: roads.copyWords,
+            firstRound: firstRound, landed: land,
             finished: { [weak self] press in
                 if let id { presenter.dismiss(id) }
                 if let press {

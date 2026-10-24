@@ -1056,14 +1056,17 @@ final class AppBootstrap {
     /// test drives exactly what ships: bootstrap + services + a fake server, end to end). The app's services die at each
     /// lock and every reopen composes fresh ones (`VariorumApp`'s `.task`), while the account section's model and this
     /// bootstrap live on — so each services instance is attached here as it is made, and the faces' roads follow the newest
-    /// one (captured weakly: a stopped instance answers nothing). Today's roads: the Account sheet's Delete Account runs the
+    /// one (captured weakly: a stopped instance answers nothing). The roads: the Account sheet's Delete Account runs the
     /// protection half (`accountDeletedOnNewRoad` — P-VX308-U1-F1); the account section's *Sign out…* signs out through the
-    /// services' one session. (The phone wires its deletion hook inline: it renders no account section until VM-8, P-2.)
+    /// services' one session; and (VX-498) an account act that lands on the open session runs its FIRST ROUND through the
+    /// services (`runFirstRound` — the round the deleted road's enrollment hook used to start; a stopped instance answers
+    /// "not configured"). (The phone wires its deletion hook inline: it renders no account section until VM-8, P-2.)
     func attach(services: AppServices) {
         services.afterAccountDeleted = { [weak self] account in
             await self?.accountDeletedOnNewRoad(account)
         }
         roadAccount?.signOutRoad = { [weak services] in await services?.signOutVariorum() }
+        roadAccount?.firstRound = { [weak services] in await services?.runFirstRound() ?? .notConfigured }
     }
 
     /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for

@@ -425,6 +425,17 @@ final class AppServices {
         }
     }
 
+    /// **VX-510 D-A1 — THE ROUND AFTER AN ACCOUNT ACT** (VX-498: on 0.10 nothing started a round after Turn on sync landed
+    /// on the open session, so the row kept the pre-act "Sync locked" until something else triggered one; VX-329 U1 deleted
+    /// the old road's post-enrollment hook). The composition root hands this to the account section as its `firstRound`
+    /// road (`AppBootstrap.attach(services:)`). The resume leaf's shape: a chain nothing configured is reconnected first
+    /// (`connectSyncIfAllowed` — the owner adoption, the configure, its trigger), then ONE round runs to its end and its
+    /// outcome comes back (`SyncSession.roundNow` — held, not configured, or what the round left on the status).
+    func runFirstRound() async -> FirstRoundOutcome {
+        if !sync.isConfigured { await connectSyncIfAllowed() }
+        return await sync.roundNow()
+    }
+
     /// Step 4's backfill, at sign-in and at every signed-in launch:
     /// idempotent (NULL owners only), and self-healing for rows that
     /// arrived unowned from a not-yet-updated device. Failure surfaces on
