@@ -1923,10 +1923,15 @@ every file the run added). Commits say `Part of VX-517`; NO trailers of any kind
 
 ### UNIT B4 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** *(kept current per piece — PENDING until the close.)* No
-`xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact, no real-keychain run
-(the run's traps) — the real-keychain and Mac-hosted suites run in the orchestrator's closing stage batch. No line in
-`Sources/VariorumCore/Sync/`; no change to the custody record's shape or to any keychain item's name.
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **THE WALK** — VX-517's live proof on the DEV-store Debug build
+with her Touch ID (THE WALK below — the orchestrator's stage; nothing here was launched); **the real-keychain arm**
+`KeychainLeavesTests.aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` and **every Mac-hosted / phone suite** in THE
+MAC-SUITE LIST — compiled (Mac + iOS build-for-testing green), RUN ONLY in the closing stage batch, PENDING; **F-B4-1** (a
+Touch ID-only item of an account nothing names stays out of reach) — a FORK, recorded with options, NOT BUILT;
+**`notes/QUESTIONS.md`** — not mine (no product word was drafted: this unit has no face). No `xcodebuild test`, no stage, no
+app launch, no dev/real-store touch, no server or production contact, no real-keychain run. No line in
+`Sources/VariorumCore/Sync/`; no change to the custody record's shape or to any keychain item's name (the only app-layer
+product line is one doc comment in `KeychainSyncKeysLeaf`).
 
 *Implementer session B4 — Opus 5.5, xhigh. Pre-fix tree = `9652b493a` (unit B3's product files, `2e3d335d8`, + record
 edits). Every claim not yet run is PENDING.*
@@ -2127,8 +2132,80 @@ edits). Every claim not yet run is PENDING.*
     stays in flight: THE READING's reason, shown.
   - **RE-13**: core `✘ … with 3 issues` — `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` ✘ (`.accountMoved`), the
     follow out ✘ (`.secretsRequired(follow)`), the resumed act into Castle ✘ (`.secretsRequired(enroll)`) — the guards have teeth.
-- **Piece 5** — evidence (harness whole, the core protection set debug + release, Mac + iOS build-for-testing, THE MAC-SUITE
-  LIST, THE WALK): NOT STARTED.
+- **Piece 5** — EVIDENCE: DONE (the final tree = this commit's product files; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's road suite symlinked in), the three harness-PATH artifacts `--skip`ped: **`✔ Test run
+    with 521 tests in 90 suites passed`** (B3's 519/89 + this unit's 2 tests in 1 suite); no `signal` line. (After it, ONE
+    test-only edit — the road suite's Use Standard arm now asserts the door's preflight `== .ready`, using the `shown` it read,
+    which the Mac build had flagged as an unused value — re-verified: `--filter TouchIDSyncKeysForgottenRoadTests` `✔ Test run
+    with 2 tests in 1 suite passed`, no warning for the file.)
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - THE CORE (`Sources/` touched — `AccountActs`, `CommonSteps`, `KeyDoors`, `PlanRunner`), the `PROT` set + this unit's suite:
+    debug **`✔ Test run with 546 tests in 103 suites passed`** (B2's 533/102 + 13 in 1); release (`swift build -c release
+    --build-tests -Xswiftc -enable-testing`, then `swift test -c release --skip-build`, the same filter) **`✔ Test run with 522
+    tests in 99 suites passed`** (B2's 509/98 + 13 in 1); 0 failures, no `skipped:` line.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx510-b4 build-for-testing` (from
+    `App/Variorum` — the folder `App/Variorum/DerivedData/vx510-b4`): **`** TEST BUILD SUCCEEDED **`**; after the test-only edit
+    above, again (incremental — the file recompiled): **`** TEST BUILD SUCCEEDED **`**, no warning in it. `xcodebuild -scheme
+    VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vx510-b4-ios build-for-testing`:
+    **`** TEST BUILD SUCCEEDED **`**. Zero errors; the one warning in a touched file is PRE-EXISTING and on a line not touched
+    (`KeyDoors.swift` `keyDoorParameters`' `var parameters` never mutated — line 357 on the pre-fix tree, the harness's first build
+    shows it). The Mac-only `KeychainLeavesTests` arm compiles here; its run is the stage's.
+  - **Machinery honesty:** nobody else committed to this branch while the unit ran (every `git pull --rebase` was a no-op); every
+    commit staged explicit paths.
+  **THE MAC-SUITE LIST (for the closing stage batch — every suite exercising a file this unit changed):**
+  - NEW: `TouchIDSyncKeysForgottenRoadTests` (harness-green; Mac-hosted run PENDING); the core's `TouchIDSyncKeysForgottenTests`
+    (headless, green — no Mac run needed).
+  - THE REAL KEYCHAIN (throwaway scopes; needs a Touch ID finger enrolled on the stage Mac, else the arm SKIPS — read the
+    `skipped:` lines): `KeychainLeavesTests` (its new arm `aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` — the by-name
+    delete of a Touch ID-only item on the real leaf, never pressed), `ProtectionKeychainFamilyTests` (the leaves' tripwire over
+    `deleteSyncKeys`).
+  - CHANGED test support: `ProtectionAccountSupport` (`PlantedSyncKeysLeaf.listsLikeProduction`, default off — every suite that
+    plants an account).
+  - The core's acts (`AccountActs` — the forgets, set-up's finish; `CommonSteps` — `holdSyncKeys`, `syncMaterial`; `KeyDoors` —
+    the session hold; `PlanRunner` — the rollback) reach every planted-road suite: **the simplest honest batch is the whole
+    `VariorumTests/Protection` folder** (incl. `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`,
+    `ProtectionCrossingRoadTests`, `RoadKeyDoorRoadTests`, `TouchIDUnlockSyncKeysTests`, `TypedUnlockSyncKeysTests`,
+    `TypedSecretNeverPressesTests`, `RoadRestoreHoldGateTests`, `ProtectionPaneWaveTests`, `FirstRunDrillTests`, the first-round
+    suites, `WordsCardAfterAccountActTests`, `SecretCheck*`, `KeychainLeavesTests`, `ProtectionKeychainFamilyTests`) **+ the
+    top-level `AppBootstrapOffMainTests`, `LibraryHandOffTests`, `LibraryPortabilityDoorTests`, `SettingsLockCloseTests`** (they
+    drive the planted road outside the folder).
+  - `KeychainSyncKeysLeaf` (one doc comment): `KeychainLeavesTests`, `OneSyncKeysLeafTests`, `ProtectionSystemCompositionTests`.
+  - THE PHONE (`VariorumMobileTests` — the core's acts through the shared road): `MobileProtectionRoadTests`,
+    `MobileProtectionTests`, `MobileEmptyStoreTests`, `MobileStructuralTests`, `MobileTutorialWalkTests`, `MobilePerfWalkTests`.
+  **THE WALK (VX-517's live proof — use-shaped; the orchestrator's stage; her Touch ID; one capture per row):** the walk build
+  rebuilt from THIS UNIT'S FINAL COMMIT (unit C's `~/dev/variorum-vx-510-stage` checkout, re-pointed); the prod test road armed;
+  the `castle` test account (left STANDARD by C5, vault revision 4) and its synced library `223c4e7e` in the slot. **What can be
+  seen and what cannot, said first:** no tool reaches the data-protection keychain, and the sync-keys leaf's Touch ID read writes
+  NO log line (only the CUSTODY leaf's press logs `road: a Touch ID press — the system prompt (leaf …)`), so the live evidence for
+  the sync-keys class is THE SYSTEM TOUCH ID SHEET ON SCREEN ("Variorum Dev is trying to Unlock your Variorum library") — present
+  or absent — caught by a window-region capture ~3 s after each press (the sheet waits, so a capture cannot miss it). The item's
+  deletion itself is the real-keychain arm's (stage batch) and the pins'.
+  - **W0 — set up (no press expected):** Settings ▸ Protection ▸ Use Castle… — both secrets by `type-prod-test-secret castle`,
+    gate **Touch ID** → the act lands (log `road: useCastle — library 223c4e7e now castle`; `enter_castle: … done`), the account
+    enters Castle (prod read: `key_vault.mode` castle, revision 5). Writing a Touch ID item never prompts; if a sheet DOES show
+    here, she presses (it is a Castle crossing she chose Touch ID for — the recorded castle-way read, Piece 1's reading) and the row
+    notes it.
+  - **W1 — Castle's own reads still work (the guard) — HER PRESSES:** ⌃⌘L → the lobby → **Touch ID (press #1)** → opens; log `road:
+    the Touch ID unlock loaded the account's sync keys for the session (sync key …)`; the row "Synced ‹time›". Then Settings ▸
+    Protection ▸ Change passphrase… (current + new by the helper) → **expect UP TO TWO sheets (presses #2, #3)** — O-B4-1, the
+    Castle key door's pre-existing double read, NOT this unit's — → the receipt, log `road: changePassphrase — the current key
+    re-locked (…), the account's lock with it`.
+  - **W2 — Use Standard leaves the Touch ID class behind — EXPECT NO SHEET:** Settings ▸ Protection ▸ Use Standard… (passphrase +
+    words by the helper) → **FIXED = no system Touch ID sheet at any point** (capture), the act lands (log `road: useStandard —
+    library 223c4e7e now standard under …`), prod `key_vault.mode` standard. A sheet here = RED: she presses CANCEL (never her
+    finger) and the row records it.
+  - **W3 — a key door on the now-Standard library — EXPECT NO SHEET (the live symptom):** Settings ▸ Protection ▸ Change
+    passphrase… (current + new by the helper) → **FIXED = no system Touch ID sheet** (capture), the receipt, the vault revision
+    moves. BEFORE this unit: the Castle-era item stood after W2 and this door read it TWICE — two sheets on a Standard library (and
+    with keys that were not the account's current ones, the door refused as "the account moved"). Reset forgotten passphrase…
+    (Standard's plain confirm) the same: no sheet.
+  - **W4 (optional, the leave) — EXPECT NO SHEET:** W0 again (Use Castle, Touch ID) → Settings ▸ Protection ▸ Stop syncing here →
+    the receipt (log `road: stopSyncingHere — library … now names no account`) → Use Standard (local; both secrets) → Sync this
+    library… (the join, the account's passphrase) → "Synced. …" → Change passphrase… → **no sheet at any step**. (The leave's
+    forget itself is invisible here — the pins and the real-keychain arm prove it; this row proves the class never reaches her
+    on the road after.)
+  - After the walk: the `castle` account stays the standing release-drill account per unit C's proposal; its posture at the end
+    (Standard after W2/W4) is recorded in unit C's record.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 

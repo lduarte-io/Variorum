@@ -48,6 +48,8 @@ struct TouchIDSyncKeysForgottenRoadTests {
         let shown = try #require(faces.useStandard.openDoor, "\(faces.useStandard)")
         let typed = TypedSecrets(passphrase: Account.passphrase, words: world.words)
         world.session.executor.configuration.session = Account.signedIn
+        #expect(ProtectionCrossings.preflight(
+            world.session, door: .useStandard, shown: shown, typed: typed, exportSwitch: exports.road, read: read) == .ready)
         let reads = world.keys.touchIDReads
         let crossed = await ProtectionCrossings.cross(
             world.session, door: .useStandard, typed: typed, gate: .alwaysAsk, exportSwitch: exports.road)
