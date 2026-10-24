@@ -243,7 +243,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
-| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 IN FLIGHT (spawned 2026-10-24 by the successor; B5 in the diff) |
+| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 DONE (0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT — THE LADDER — ROUND 1 below); UNIT L1 (the fixes F-R1-1/-4/-5) IN FLIGHT; round 2 re-reviews the fixes |
 | 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | NOT STARTED |
 
 ## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
@@ -2798,6 +2798,67 @@ closeout must not lose: VX-529 is a REAL first-run-class gap deliberately deferr
 run should follow soon, since a Castle passphrase change on one device still silently strands the others), and the
 MAP's rows 8–9 (Sparkle update-from-previous; the real confirmation-email link) are the two remaining launch seams
 with NO live proof at all.
+
+## THE LADDER — ROUND 1 (2026-10-24; a fresh `fable-reviewer`, REVIEW_PROMPT verbatim, zero framing, over `git diff main...vx-510-first-run-sync` — 95 commits, 58 files; the reviewer read the run record, the charter, the handoff, SyncSpec, CastleRules and SurfaceContracts' protection bullet whole, verified the no-`Sync/` and no-trailer claims independently, re-ran the core's new suite headless 13/13 + a 143-test protection sample green)
+
+**0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT**, plus the sanity check's two open items adjudicated. Findings verbatim-faithful,
+each with the ORCHESTRATOR'S DISPOSITION:
+
+- **F-R1-1 [MINOR] — `firstRoundLine`'s missing syncing arm.** `RoadAccountModel.firstRoundLine` over an outcome whose
+  status froze with `isSyncing == true` renders the self-contradicting "Sync hasn't run yet: Syncing…." permanently on
+  the sheet (the outcome is frozen in `.done`; the sheet never re-reads). Reachability: a narrow race —
+  `SyncSession.roundNow()` reads `scheduler.status` after `awaitIdle()`, and a fresh trigger (the outbox settle, a
+  become-active) can start a new round in the actor-hop gap (SPECULATIVE live; the SENTENCE is deterministically
+  pinnable at the model level — `firstRoundLine(.ran(syncing))` returns the contradiction today).
+  **DISPOSITION: CONFIRMED — fix in this ladder (unit L1).** The architect's direction: fix the OUTCOME seam —
+  `roundNow()` re-awaits while the read status says syncing (bounded; coalescing settles it) — and the model belt —
+  `firstRoundLine` maps a `.syncing` face to the running-progress words, never the blocked form. Red-on-old on the
+  sentence (the model pin: today's contradiction), a `roundNow` pin (a status that reads syncing once then settles ⇒
+  the returned outcome is settled), reverts per the discipline.
+- **F-R1-2 [MINOR] — the Mac-hosted pin half has never executed** (compile-verified only since unit A; the real-keychain
+  `KeychainLeavesTests` arm — the live proof of D-B8's Apple-facts premise — included; VX-527's hit-shape reach is the
+  B5 record's own named unverified assumption). **DISPOSITION: ACCEPTED AS A GATE, procedural** — exactly the handoff's
+  rows 9–10: the closing stage batch (a Touch ID finger enrolled so the keychain arm doesn't skip; the `skipped:` lines
+  read) and the re-walk's live press on the words door's own text are MERGE GATES, not follow-ups. No code change.
+- **F-R1-3 [MINOR] — closeout text obligations.** (a) CastleRules rule 2's "until it is dismissed" does not name
+  VX-511's third retirement road (a landed account act) — a WORDING-FAITHFULNESS item for HER bundle (the Castle design
+  is frozen; never an autonomous edit); (b) the SurfaceContracts delta must carry VX-517's forgets-BY-NAME beside the
+  Standard-never-reads-Touch-ID line. **DISPOSITION: ACCEPTED — both fold into the closeout's canon pass; (a) joins her
+  bundle.**
+- **F-R1-4 [NIT] — `ProtectionSecretCheck.check`'s empty-text answer shape** (`.doesNotOpen` instead of a refusal;
+  unreachable through the sheet — `canSubmit` refuses empty). **DISPOSITION: CONFIRMED, fold into L1** (one arm; no pin
+  owed per the reviewer — no user-reachable red; a guard assertion may ride the existing suite).
+- **F-R1-5 [NIT] — `first-run-walk.sh` P3 splices the email into its SELECT without the sibling script's plain-shape
+  regex** (capped twice over: her own mode-600 file after G2, and prod-read.sh's SELECT-only guard). **DISPOSITION:
+  CONFIRMED, fold into L1** (the regex copied into G2; `--self-test` gains the malformed-address case; `zsh -n` clean).
+- **The sanity check's items, adjudicated by the reviewer:** the `material(for:)` Argon2id concern DISMISSED WITH THE
+  MECHANISM (the act's passphrase is a pre-derived `PassphraseKey` — one Argon2id per act at `PlanRunner.derive`;
+  `VaultModel.master` is a pure AES unwrap gated on the descriptor; the derive branch still fills the `material` cache)
+  — recorded, not fixed, per the hallucination guard; the 6 device cursors BY DESIGN (13j's horizon), recorded.
+
+**The clean bill** (the reviewer's, abridged; the load-bearing lines): the attach/generation seam race-free;
+`FirstRunDrillTests` a genuine end-to-end gate; the prod test road defense-in-depth verified end to end; VX-501's load
+never-hostage with a sound bounded race; the VX-503/VX-517 core changes preserving key identity with the by-name
+forgets honestly bounded (F-B4-1's residue reasoning sound); VX-513 genuinely read-only across every arm; the
+SyncStatusRow refactor render-identical; no word-level tracking, no corpus-proportional cost, S1–S5/P1–P3 untouched;
+CastleRules 4/5/7/9/15/16/20/21 honored.
+
+### UNIT L1 — THE LADDER'S FIX SESSION (a fresh `opus-implementer`; F-R1-1 + F-R1-4 + F-R1-5)
+
+**Read first:** this section (the findings above are the charter — F-R1-1's direction is the architect's), the code:
+`Shared/SyncSession.swift` (`roundNow`), `Shared/Protection/RoadAccountModel.swift` (`firstRoundLine`,
+`roundCameBack`), `Shared/Protection/ProtectionSecretCheck.swift` (the empty-text guard),
+`Tools/WalkKit/first-run-walk.sh` (G2 + P3), and the suites `FirstRoundConfirmTests`
+(`eachOutcomeSaysTheRowsOwnSentence` — no syncing arm today), `FirstRoundRoadTests`, `SecretCheckRoadTests`. The
+discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's (pins red-on-old; reverts named then run; the
+harness per units A–B4's recipe; ONE Mac + ONE iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`; no
+`xcodebuild test`, no stage, no launch, no store/server/production contact). The implementer states agree/dispute per
+finding FIRST (the cross-model flow — a dispute returns to the reviewer for the final call before any fix). Commits say
+`Part of VX-510`; NO trailers.
+
+### UNIT L1 — LIVE STATUS (the implementer owns this section)
+
+*(skeleton — the implementer writes from its first commit)*
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
