@@ -2006,7 +2006,37 @@ edits). Every claim not yet run is PENDING.*
     for good — rule 20); the guard `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` pins it. Consequence, said
     plainly: during such a crossing the castle-way idempotency read in `holdSyncKeys` may still meet a stale Touch ID item of the
     SAME account (one prompt, on a crossing into Castle she chose Touch ID for) — not a Standard read; untouched.
-- **Piece 2** — D-B8 (a), the forgets and drops BY NAME: NOT STARTED.
+- **Piece 2** — D-B8 (a), the forgets and drops BY NAME: DONE (this commit; core only — no app-layer line, no `Sync/` line, no
+  name or record-shape change). `Sources/VariorumCore/Protection/Executor/Acts/AccountActs.swift`: two executor helpers —
+  `forgetSyncKeys(ofAccount:)` (every class's item deleted BY NAME, the session hold cleared; a class with no item is nothing
+  to delete — the real delete accepts not-found, an ACL'd item's delete never prompts) and `unboundSyncKeyAccounts(bound:named:)`
+  (the accounts the listing names ∪ the accounts known BY NAME the listing may not see — this session's sign-in and the act's
+  own: the account it ran on, joined, left — minus the bound one, sorted); `ActContext.forgetSyncKeys(of:)` (the leaves' and
+  Move's `forgetOldSyncKeys`) and `forgetUnboundSyncKeys()` (the account family's finishing step) now ride them.
+  `CommonSteps.swift` `holdSyncKeys`: the drops delete by name (no listing — it was taken BEFORE the write and was blind).
+  `PlanRunner.swift` `rollBack`: the unbound sweep rides the helpers (its separate sign-in session clear folded in — the
+  sign-in is among the accounts forgotten); the bound account's taken-keys sweep reads the silent item and deletes the Touch ID
+  item (library back in Standard) BY NAME. **THE SOURCE `forgetUnboundSyncKeys` NEEDS (D-B8's ask), named:** the leaf's listing
+  ∪ the sign-in ∪ the act's own accounts. In its one caller — the finish from the record with the plan gone — the act's
+  parameters carry only the bound account, so in practice the listing ∪ the sign-in: a LEAVE's account is the sign-in (signed
+  in as it; the leave refuses another account), so its Touch ID item is now forgotten; the record keeps no account it named
+  before (rule 21's four things — a past-accounts list would change the custody record's shape, a FORK by the brief's terms),
+  so ONE case stays out of reach — **F-B4-1 (below)**. **The harness, `--filter TouchIDSyncKeysForgottenRoadTests`: `✘ … 2
+  tests … with 1 issue`** — the leaves GREEN; only the key door's no-read leg (c) left. **The core, `--filter
+  TouchIDSyncKeysForgottenTests`: `✘ Test run with 13 tests in 1 suite failed with 5 issues`** — every (a) pin GREEN; left red,
+  exactly (c)'s three: the Standard key doors ✘×2 (`.accountMoved`), the key door after Use Standard ✘ (a Touch ID read — the
+  item is gone now, the read is still made), the set-up's finish ✘×2.
+  - **F-B4-1 — A FORK, RECORDED, NOT BUILT (the architect's / hers):** a Touch ID-only sync-keys item of an account that is
+    neither the bound one, nor signed in, nor named by the act stays on this Mac — reachable only after (a) when some act
+    names that account again. The two roads to it: a MOVE (signed in as the NEW account) from a Castle + Touch ID library whose
+    plan is lost after its record write (the finish knows only the new account), and a library set aside with its items — a
+    `mv` of the dev slot, or Make this my library / Start fresh, whose Previous Library keeps its roads by design. No honest
+    source names that account here (no record or memory keeps past accounts; the production listing cannot see the item; the
+    keychain's attributes-only listing of an ACL'd item fails or skips by design). Options: (a) accept and record — the item is
+    biometry-gated and device-only (no quiet road — rule 9), never read by a Standard library after (c), and dropped by name the
+    next time any act files that account's keys; **(b)** a local, non-secret registry of the accounts this Mac filed sync keys
+    for (a new keychain item or defaults key — a new name or shape: a FORK by the brief); (c) a Castle-exit / leave-time sweep
+    that probes by name every account the vault or the session ever named — needs (b)'s registry anyway. RECOMMENDED (a).
 - **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: NOT STARTED.
 - **Piece 4** — the behavioral reverts (named before any run): NOT STARTED.
 - **Piece 5** — evidence (harness whole, the core protection set debug + release, Mac + iOS build-for-testing, THE MAC-SUITE

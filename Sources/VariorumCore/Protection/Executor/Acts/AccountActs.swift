@@ -220,23 +220,20 @@ extension ActContext {
     }
 
     /// This Mac stops using the old account: its sync keys forgotten (every
-    /// class, and session memory).
+    /// class, BY NAME — VX-517 — and session memory).
     func forgetSyncKeys(of account: String?) throws {
         guard let account else { return }
-        for item in try leaves.syncKeys.syncKeyItems() where item.accountID == account {
-            try leaves.syncKeys.deleteSyncKeys(accountID: account, itemClass: item.itemClass)
-        }
-        leaves.syncKeys.holdInSession(nil, accountID: account)
+        try executor.forgetSyncKeys(ofAccount: account)
     }
 
     /// With no plan: every sync-keys item for an account the record no longer
     /// names goes — and its session hold beside it (VX-488 R1 F1: the
-    /// rollback's idiom, `PlanRunner`'s unbound sweep).
+    /// rollback's idiom, `PlanRunner`'s unbound sweep). VX-517: by name, over
+    /// the accounts the listing names and those known by name.
     func forgetUnboundSyncKeys() throws {
-        let bound = library.record?.account
-        for item in try leaves.syncKeys.syncKeyItems() where item.accountID != bound {
-            try leaves.syncKeys.deleteSyncKeys(accountID: item.accountID, itemClass: item.itemClass)
-            leaves.syncKeys.holdInSession(nil, accountID: item.accountID)
+        let named = [parameters.accountID, parameters.targetAccount, parameters.forgetsAccount]
+        for account in try executor.unboundSyncKeyAccounts(bound: library.record?.account, named: named) {
+            try executor.forgetSyncKeys(ofAccount: account)
         }
     }
 
@@ -259,6 +256,37 @@ extension ActContext {
 }
 
 extension ProtectionExecutor {
+    /// **VX-517 (D-B8 (a)) — this Mac forgets an account's sync keys BY
+    /// NAME**: every class's item deleted and its session hold cleared — never
+    /// read off the listing, which on the production leaf is BLIND to a Touch
+    /// ID item with no silent sibling (`KeychainSyncKeysLeaf.syncKeyItems()`
+    /// skips an item that would need authentication, and probes by name only
+    /// for the accounts its silent items name): a forget read from it left a
+    /// Castle + Touch ID library's item standing for good (rule 16). A class
+    /// with no item is nothing to delete (the real delete accepts not-found),
+    /// and an ACL'd item's delete never prompts.
+    func forgetSyncKeys(ofAccount account: String) throws {
+        for itemClass in ProtectionNames.CustodyClass.allCases {
+            try leaves.syncKeys.deleteSyncKeys(accountID: account, itemClass: itemClass)
+        }
+        leaves.syncKeys.holdInSession(nil, accountID: account)
+    }
+
+    /// **The accounts whose sync keys may stand on this Mac besides `bound`**
+    /// (VX-517): every account the listing names, and the accounts known BY
+    /// NAME that it may not see (a Touch ID-only item) — this session's
+    /// sign-in, and `named` (the act's own: the account it ran on, joined or
+    /// left). No record keeps an account a library named before (rule 21's four
+    /// things), so a Touch ID-only item of an account none of these names stays
+    /// out of reach — never read by a Standard library (rule 15's silent
+    /// filing), and dropped by name the next time an act files that account's
+    /// keys.
+    func unboundSyncKeyAccounts(bound: String?, named: [String?]) throws -> [String] {
+        var accounts = Set(try leaves.syncKeys.syncKeyItems().map(\.accountID))
+        accounts.formUnion(([configuration.session.accountID] + named).compactMap { $0 })
+        return accounts.filter { $0 != bound }.sorted()
+    }
+
     /// **Set up sync** — the first device of an account (no vault yet): the
     /// account takes the library's mode.
     public func setUpSync(_ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {

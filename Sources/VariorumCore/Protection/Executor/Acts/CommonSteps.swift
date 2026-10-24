@@ -339,11 +339,13 @@ extension ActContext {
     /// item: "Sync locked" for good.
     func holdSyncKeys(_ held: AccountKeys, castleWay: Bool) throws {
         guard let account = accountID else { return }
-        let items = try leaves.syncKeys.syncKeyItems()
+        // VX-517 (D-B8 (a)): the other class goes BY NAME. A listing taken here
+        // — before the write below — is blind on the production leaf to a Touch
+        // ID item with no silent sibling, so a drop read from it never dropped
+        // that item (Use Standard, the follow out, a Standard join over a stale
+        // one). A class with no item is nothing to delete.
         func drop(_ itemClass: ProtectionNames.CustodyClass) throws {
-            if items.contains(SyncKeysItemFact(accountID: account, itemClass: itemClass)) {
-                try leaves.syncKeys.deleteSyncKeys(accountID: account, itemClass: itemClass)
-            }
+            try leaves.syncKeys.deleteSyncKeys(accountID: account, itemClass: itemClass)
         }
         if castleWay {
             let gate = parameters.gate ?? library.section.settings.gateStyle
