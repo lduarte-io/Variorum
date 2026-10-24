@@ -37,6 +37,13 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   me the map." → A deliverable of this run: THE MAP — every seam where the product meets the real world (live
   Postgres, the real keychain, Touch ID, Sparkle, the DMG, the real filesystem, the MCP socket…), what evidence
   each has today, and what it lacks; propose-only, hers to slot.
+- **R-510-5 — THE CAST, re-ruled mid-trace (2026-10-23, her words):** "I keep hitting safeguards on Fable - keep
+  going. Try to do a Fable cold review at the end but if that cold review stalls out due to safeguards, do the
+  ladder with Opus instead." → The session moved Fable → Opus 5.5 at her `/model`; this session (Opus) stays the
+  orchestrator; implementers stay `opus-implementer`. THE LADDER: round 1 is tried with a fresh `fable-reviewer`
+  (REVIEW_PROMPT verbatim); if that reviewer stalls on safeguards, the ladder runs with fresh `opus-reviewer`s
+  instead (the R-494-1 precedent). No line of this run is planned inside `Sources/VariorumCore/Sync/` (the fix
+  rides the scheduler's existing public API from `Shared/`); if one becomes necessary it is flagged here first.
 
 ## THE CHARTER (the kickoff file's, binding)
 
@@ -64,8 +71,8 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight read whole (the kickoff file, vx-494 WHOLE, vx-488, CLAUDE.md + canon, SyncSpec WHOLE, CastleRules WHOLE, SurfaceContracts, the resiliency protocol, the master plan, TICKETS, QUESTIONS tail); worktree + branch; in-flight row on main; VX-510 In Progress with members parented; this record with her kickoff rulings | DONE (this commit) |
-| 1 | THE TRACE (a) — the current set-up/join acts end-to-end (the act→scheduler seam; the act's own failure modes) | NOT STARTED |
-| 2 | THE TRACE (b) — the archaeology: the old road's enrollment act as tester B ran it on Oct 13 | NOT STARTED |
+*[removed for publication]*
+*[removed for publication]*
 | 3 | The kickoff sitting bundle answered (D-ROAD shape; lifecycle drill in-run or chartered; the acceptance's account set) | NOT STARTED — bundled after the trace |
 | 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | NOT STARTED |
 | 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | NOT STARTED |
@@ -97,15 +104,217 @@ dev-store touch; headless + `build-for-testing` only; checkpoint commits per pie
 in the same commit, PENDING on every unverified claim; foreground waits only (poll, never `tail -f`, never end a
 turn waiting).
 
-## THE TRACE (piece 1 — findings land here before any fix session sees them)
+## THE TRACE (piece 1 — the orchestrator's own read, 2026-10-23; findings land here before any fix session sees them)
 
-*(to be written by the orchestrator's trace, next)*
+### T-1 — VX-498's MECHANISM (CONFIRMED in code, a REGRESSION from the release switch)
 
-## THE ARCHAEOLOGY (piece 2)
+**On 0.10, nothing starts a sync round after an account act that lands on the open session.** The chain:
 
-*(to be written)*
+1. Sign-in → `AppServices.variorumSignInChanged` → `connectSyncIfAllowed` (`App/Variorum/Shared/AppServices.swift:396`)
+   → `sync.configure(…)` + `sync.triggerSync()`. The outbox observation (`SyncSession.swift:154`) also fires once at
+   configure (a fresh library's seed rows sit in the outbox) → a settle trigger 3 s later. Both rounds run BEFORE
+   the set-up: `NewRoadSyncKeyProvider.currentKeys()` (`Shared/Protection/NewRoadSyncKeyProvider.swift:41`) throws
+   `notEnrolled` (the record names no account) → the engine refuses `encryptionKeysUnavailable` → the row's status
+   becomes "Sync locked". **Correct so far — the library has not joined.**
+2. Settings ▸ Protection ▸ Turn on sync → `RoadAccountModel.open` → `RoadAccountConfirmModel.submit` →
+   `roads.press` → `AppBootstrap.accountRoads().press` (`AppBootstrap.swift:991`) → (not re-keying)
+   `ProtectionAccountRoad.press` → `perform` → `executor.setUpSync` (or `enroll` for a same-posture join)
+   (`ProtectionAccountActs.swift:261–266`). The act lands: the vault written, the record names the account, the
+   keys held (Standard: the silent item). `session.library = library` updates the ATTACHED session object, so
+   the provider would now find keys **if asked**.
+3. After the act: the confirm's `land` → `RoadAccountModel.refresh()` + `roads.landed()` → the bootstrap's
+   `landed:` closure (`AppBootstrap.swift:1006–1012`): `roadCrossings.refresh`, `roadStanding.rereadPassphrase`,
+   `rereadAccountBinding`, `roadKeyDoors.refresh`. **Faces only. Nothing reaches `AppServices`/`SyncSession`.**
+   The bootstrap does not hold the services (they are composed per open in `VariorumApp`'s `.task`, which wires
+   only `signOutRoad`, `afterAccountDeleted`, the backup hook and the restore hold's gates onto them).
+4. The row's status changes only when a round completes (`SyncSession.status` ← `scheduler.statusUpdates()`), so
+   it keeps saying "Sync locked" until something triggers a round. The Mac's trigger roads, exhaustively
+   (`grep triggerSync|resumeSync|connectSyncIfAllowed` over `App/`): launch/sign-in (`connectSyncIfAllowed`), the
+   outbox settle (a LOCAL WRITE — typing), `NSApplication.didBecomeActiveNotification` (`VariorumApp.swift:367`),
+   the row's Sync now press (`SyncStatusViews.swift:596`), the restore hold's Resume. **The act is none of them.**
+   Settings is a window of the same app, so returning to the main window is not a become-active either.
+
+**The regression, by commit:** on 0.9.8 the old road's enrollment landing healed this by design —
+`EncryptionSession.adoptEnrolledMaterial` called `onKeysChanged?()`, which `AppServices.start()` wired to
+`sync.triggerSync()` ("Enrollment/setup landing keys heals the engine's keys-refusal immediately (Phase 14b): one
+round, through the ordinary trigger" — `git show 58515fe9c:App/Variorum/Shared/AppServices.swift`, ~line 247).
+**VX-329 U1 (`f2306a535`, 2026-10-22) deleted the encryption session with today's road and never rewired an
+equivalent on the new road's account acts.** So every 0.10 user's Standard set-up sits locked until they type,
+*[removed for publication]*
+
+**Why the JOIN and the Castle set-up APPEARED to work (SUSPECTED, recorded — not load-bearing for the fix):** both
+observed cases raised a SYSTEM authentication prompt mid-act — the Standard join's Touch ID prompt (VX-503, the
+vx-494 walk's O-1) and the Castle set-up's Touch ID gate (the vx-488 rehearsal) — and a system prompt taking focus
+then returning it is a `didBecomeActive`, which triggers a round. The plain Standard set-up raises no system prompt,
+so no accidental become-active and no round. The fix below makes the round deterministic either way.
+
+### T-2 — the act's own failure modes (can the vault write fail while the UI reads success?)
+
+- **F-1 (CLEAN):** `perform` reports `.made` only when the core act returned (`acted != nil`) or the slot opens under
+  the NEW key past a swap (`landedWhole: false` — a re-keying act; the next open's settle finishes it and says its
+  Done). A thrown act whose slot still opens under the old key reports `.refused(sentence)` and the sheet shows the
+  sentence. So on 0.10 a set-up whose vault write FAILED never reads as success in the sheet.
+- **F-2 (the silent gap — VX-507's class):** "success" today means *the vault exists and the keys are held*; it
+  never means *a round ran*. With T-1, a successful act is followed by NO round, and even with a round, its outcome
+  (offline, lockstep refusal, the account-binding gate, a server refusal) reaches only the quiet row — never the
+  sheet that said "done". This is the whole of VX-507.
+- **F-3 (the pre-join words — VX-506's class):** before the act, the row reads "Sync locked — this Mac hasn't
+  unlocked your account's sync keys" for a library that has NOT joined (and, for a vaultless account, keys that do
+  not exist) — the line asserts a lock where there is only a not-yet; and Settings' door reads "Turn on sync" over
+  the JOIN arm for an account that already syncs. Her words: "should that not be sign into sync instead of turn on?";
+  "sync shouldn't seem like you're restarting it."
+*[removed for publication]*
+  it writes nothing and nothing afterward says sync is not on except the row (F-3's words). The fix for the
+  walk-away class is F-3's honest row plus VX-507's sheet: the row must say "not on yet" (with its door) until a
+  round has actually landed.
+- **F-5 (owner adoption — a second silent gate, pre-existing):** `connectSyncIfAllowed` returns early when
+  `runOwnerAdoption()` fails; the only trace is `account.lastError` (rendered on the Account sheet only). The chain
+  stays uncomposed until sign-out/in or a relaunch, and every later trigger is a no-op (`scheduler == nil`). Not
+  observed in the field; recorded for VX-507's design: the first-round confirmation must report "not configured"
+  honestly rather than wait forever.
+- **F-6 (re-keying acts):** a join across postures and every follow run through `accountActOnNewRoad` → the reopen
+  → fresh services → `start()` → `connectSyncIfAllowed` → a trigger. So those DO get a round, through the rebuild.
+  VX-507's confirmation for them must survive the reopen (the sheet's model is rebuilt with the bootstrap's open) —
+  an implementer fork, below.
+
+### T-3 — the production facts (read-only, `Tools/prod-read.sh`, 2026-10-23)
+
+Per-account footprint (vault · key-proof enrollment secret `kp:<uid>` · challenges · write-budget · tenant-seq ·
+*[removed for publication]*
+*[removed for publication]*
+2026-10-22 20:31, last password sign-in 20:32:58, vault 20:39:21 standard, proof hash set) 1 · **0** · 0 · 0 · 0 · 0
+*[removed for publication]*
+*[removed for publication]*
+never held anything.
+
+## THE ARCHAEOLOGY (piece 2 — the deleted code as the testers ran it; it explains, only the current code is fixed)
+
+*[removed for publication]*
+(`SyncEnrollmentModel` + `SyncEnrollmentView`, deleted at VX-329 U1) ran FOUR screens: Screen 1 explain → **Screen 2
+the passphrase, which SET the library's passphrase on the spot** (`submitPassphrase` → `tie.setPassphrase(typed)`,
+a local key-file write) → Screen 3 the twelve words through `WordsCeremony` (shown, "written down", then CONFIRMED
+BY EXACT RE-ENTRY of all twelve) → only then `create()` → `encryption.setUp` → **the vault's server write** →
+Screen 4 done. **THE SILENT WINDOW, FOUND:** everything a user would call "setting up sync" — choosing the
+encryption passphrase — landed at Screen 2, while the account enrollment waited behind the twelve-word ceremony.
+Closing the sheet (or failing the re-entry, or the Standard arm's iCloud-Keychain refusal at `create`) anywhere
+after Screen 2 left a library WITH a passphrase and an account with NO vault; afterwards the row read **"Sync
+locked — enter your encryption passphrase"** (0.9.4's `SyncStatusViews.lockedLabel`) — to a person who had just
+chosen one, an invitation to believe it was set up and merely locked. This fits every fact: his memory ("he set up
+sync, which forces you to set up a passphrase"), the server (no vault, no `kp:`, no cursor — not one round), and his
+later "That passphrase doesn't open this library" (the library DID have a passphrase). It cannot be proven now (no
+logs survive) — it is the one story the code and the server both allow without a failure nobody saw. The current
+road has no such split: the set-up types both secrets on one sheet and the act is one plan (rule 20).
+
+*[removed for publication]*
+old road's set-up DID wire an immediate round (`adoptEnrolledMaterial` → `onKeysChanged` → `triggerSync`), and
+0.9.8's `connectSyncIfAllowed` composed the chain at sign-in without waiting for enrollment. Yet no round reached
+the key-proof step (T-3). The stories the code still allows: (A1) the chain never composed at her sign-in (F-5's
+owner-adoption gate — its message lives only on the Account sheet), so the post-set-up trigger was a no-op and no
+relaunch came before the deploy cut 0.9.8 off; (A2) the triggered round refused locally before the wire (the custody
+save refused — "sync will ask again next launch" — or the lockstep read failed offline); (A3) the app quit or the Mac
+slept before the round began, and no launch came before the deploy. The server cannot separate them. Her 0.10 road
+is a JOIN (her vault exists) — under T-1 a same-posture join on 0.10 also lands with no round unless a system prompt
+bounces focus. **Either way, VX-507 is the cure for the class:** the act's sheet confirms the first round or says
+what blocks it, so silence becomes impossible on every build from this one.
+
+## THE FIX DESIGN — UNIT A (VX-498 · VX-507 · VX-506; the architect's design, built by implementer session A)
+
+- **D-A1 — the round after the act (VX-498).** `RoadAccountModel` gains a composition-root road beside
+  `signOutRoad` (its precedent): `firstRound: (@MainActor () async -> FirstRoundOutcome)?`, wired where the services
+  are composed (`VariorumApp`'s `.task`, beside `signOutRoad`) to `AppServices.runFirstRound()`. That method
+  reconnects the chain when nothing configured it (the `resumeSync` shape) and then runs ONE round to its end:
+  `SyncSession.roundNow()` = (held → `.held`; not configured → `.notConfigured`; else `scheduler.trigger()` +
+  `awaitIdle()` + the scheduler's `status` read after idle) — the scheduler's EXISTING public API, no `Sync/` line
+  (its coalescing means a round already in flight is followed by one more, which sees the new keys). It is called
+  for every account door whose landing changes sync's standing on the open session: Turn on sync (both arms) and
+  Move. Leaves call nothing. The composition glue moves out of view code into ONE testable function on the
+  bootstrap (e.g. `AppBootstrap.attach(services:)` — the services-held roads: `signOutRoad`, `firstRound`, the
+  deletion hook) so the drill can drive bootstrap + services + a fake server end to end.
+- **D-A2 — the act's sheet confirms its first round (VX-507).** On `.made` for those doors the confirm model starts
+  the first round at once and the sheet does not close on its own: after the words moment where one is owed, it
+  shows the round's progress and then its outcome — a success line, or what blocks it in the row's own words (one
+  presentation source: the status row's sentence for that status — offline, lockstep, keys, the account gate, a
+  server refusal, held, not configured). One door, Done, always available ("you can close this — sync keeps going,
+  and the bar at the bottom says when it's done"), so a long first catch-up never holds the sheet hostage. With no
+  road (the phone until VM-8, a test world without one) the sheet finishes exactly as today (P-2). **The words are
+  PROVISIONAL, hers** (drafts in OPEN ITEMS).
+- **D-A3 — the pre-join row (VX-506).** The keys-locked face splits on one fact the bootstrap already keeps
+  (`roadStanding.syncsWithAnAccount`, re-read at every landing — VX-473): a library whose record names NO account
+  reads a not-yet line with the same Protection… door (never "locked"); a joined library whose keys are not loaded
+  keeps P-VX486-2's line. Settings' door over the JOIN arm (the account already has a vault) gets its own label
+  instead of "Turn on sync"; the set-up arm keeps "Turn on sync". **The words are PROVISIONAL, hers** (drafts in OPEN
+  ITEMS; the first of each built).
+- **The fork reserved for the architect (F-6):** VX-507's confirmation for a RE-KEYING account act (a join across
+  postures) must survive the reopen. The implementer traces whether the confirm sheet survives `accountActOnNewRoad`
+  and PROPOSES before building that half; the open-session doors ship first.
+- **Pins (red-on-old per member, by behavioral revert):** VX-498 — a set-up through the attach glue + a planted road
+  + a real `SyncSession` over a fake transport runs a round with no relaunch (red on old: zero rounds after the act);
+  the confirm model calls the road on `.made` for set-up/join/Move and never for a leave. VX-507 — the sheet stays
+  after `.made`, shows the outcome per status class (success, offline, keys, held, not configured), Done closes it
+  without cancelling the round. VX-506 — the unjoined face's line and door; the joined-locked face unchanged; the
+  join arm's door label distinct from the set-up arm's.
+
+## UNIT A — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+`notes/SurfaceContracts.md` ("The app" and "Doors to the outside" — the protection bullet whole);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (HER KICKOFF RULINGS, THE TRACE, THE ARCHAEOLOGY, THE FIX
+DESIGN — UNIT A, the ENVIRONMENT TRAPS, OPEN ITEMS); `notes/plans/fixes/vx-488-window-hotfixes.md`'s M1 RECORD
+Piece 0 and M2 RECORD Piece 0 (the HEADLESS HARNESS recipes — app sources symlinked into a scratch SPM package so
+the app-level suites run with `swift test`; rebuild yours from them, scoped to what this unit touches); the code:
+`Shared/AppServices.swift`, `Shared/SyncSession.swift`, `Shared/AppBootstrap.swift` (`accountRoads`,
+`accountActOnNewRoad`, the open that builds `roadAccount`), `Shared/Protection/RoadAccountModel.swift`,
+`Shared/Protection/ProtectionAccountActs.swift`, `Shared/Protection/RoadAccountFaces.swift`,
+`Shared/Protection/ProtectionWords.swift`, `Shared/SyncStatusViews.swift`, `Variorum/VariorumApp.swift` (the
+services' `.task` wiring), `Variorum/Features/Protection/RoadAccountSheet.swift`,
+`Sources/VariorumCore/Sync/SyncScheduler.swift` (READ ONLY — its public `trigger`/`awaitIdle`/`status`), and the
+existing suites over these seams (`SyncLockedRowTests`, `Phase9cAuthWiringTests`, the planted road worlds —
+`ProtectionOpenRoadPlantedTests` and `ProtectionRoadTestSupport`'s `RoadWorld`, `ProtectionAccountRoadTests`).
+
+**Your scope — exactly THE FIX DESIGN — UNIT A:** D-A1 (the round after the act + the attach glue), D-A2 (the
+sheet confirms its first round), D-A3 (the pre-join row and the join arm's door label). The words are the FIRST
+draft of each in OPEN ITEMS below, built PROVISIONAL and named in your record. **F-6 is a FORK: trace whether the
+confirm sheet survives a re-keying act's reopen and come back with a proposal before building that half** — record
+it in your LIVE STATUS and stop that half (the open-session doors are the unit). **Not yours:** VX-509's full drill
+across every arm (unit B — but your VX-498 pin IS its first case, so build it on a seam unit B can extend), D-ROAD,
+VX-503, any `Sources/VariorumCore/Sync/` line (if one seems necessary: STOP, flag, propose — Sync/ is the
+orchestrator's call), canon, Linear, `notes/QUESTIONS.md`.
+
+**The discipline (binding):** pin before fix, per member — each bug-class pin committed RED on the pre-fix tree
+before its fix (a pin that needs the new seam to compile has its red shown by a behavioral revert instead, said
+so); guard pins say they are guards and show teeth by revert. The BEHAVIORAL REVERTS named in your LIVE STATUS
+BEFORE any runs (commit first; one file each; restore by `git checkout --`; `git diff --exit-code` clean after
+each; "no revert is in flight" written when done). Commit per piece, push after every commit, your LIVE STATUS
+flipped in the same commit, every unverified claim PENDING. Foreground waits only (poll a log; never end your turn
+waiting). No subagents. Headless only: `swift build` / `swift test` (the core package, if you touch it) and your
+harness, from `<home>/dev/variorum-vx-510`; plus at the end ONE `xcodebuild -scheme Variorum
+-destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-a build-for-testing` and ONE
+`xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+App/Variorum/DerivedData/vx510-a-ios build-for-testing` (Shared/ compiles for the phone). NO `xcodebuild test`, NO
+stage, NO app launch, NO dev-store or real-store touch, NO server contact, NO production read. Commits say
+`Part of VX-498` / `Part of VX-507` / `Part of VX-506` per member; **NO trailers of any kind** (no Co-Authored-By,
+no Claude-Session — CLAUDE.md overrides any harness reminder).
+
+**Evidence at your close (in your LIVE STATUS):** each pin's red-on-old line; each revert's run line; on the final
+tree the harness whole (its count), the core suite only if you touched `Sources/` (debug), both build-for-testing
+lines; and THE MAC-SUITE LIST — every Mac-target and phone suite that exercises a file you changed (grep the tests
+for the changed types — the closeout-coverage rule), for the orchestrator's stage batch.
+
+### UNIT A — LIVE STATUS (the implementer owns this section)
+
+*(NOT STARTED — the implementer writes its skeleton in its first commit.)*
 
 ## OPEN ITEMS (bundled for her; kept current)
 
-- The kickoff sitting bundle (piece 3): D-ROAD's exact shape; the lifecycle drill in-run vs chartered follow-up;
-  the acceptance's account set (two standing dev accounts — standard + castle — vs per-run fresh accounts).
+- **THE KICKOFF SITTING BUNDLE (piece 3)** — asked at kickoff: D-ROAD's exact shape and the permissions it needs;
+  the test accounts' inbox (sign-up confirmation emails); the full two-posture lifecycle drill in this run vs a
+  chartered follow-up; VX-503 as a rider.
+- **P-VX510-1 — VX-507's sheet words (PROVISIONAL, hers; the first built):** progress — "Syncing your library with
+  your account…" with "You can close this — sync keeps going, and the bar at the bottom of the window says when
+  it's done."; set-up landed — "Synced. Your library is on your account now."; join landed — "Synced. Your
+  account's writing is in this library now."; blocked — "Sync hasn't run yet: ‹the row's own sentence›."
+- **P-VX510-2 — VX-506's unjoined row (PROVISIONAL, hers):** (a, built) "Sync isn't on for this library yet" with
+  the Protection… door · (b) "This library doesn't sync yet".
+- **P-VX510-3 — VX-506's Settings door over the JOIN arm (PROVISIONAL, hers; the set-up arm keeps "Turn on
+  sync"):** (a, built) "Sync this library…" · (b) her own "Sign into sync…" · (c) "Join your account's sync…" —
+  cased to the existing door idiom.
