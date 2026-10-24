@@ -2941,7 +2941,16 @@ EXISTING public API, conformed on the app's side).
   vault read or log). **The harness, `--filter "SecretCheckRoadTests|SecretCheckModelTests|SecretCheckCompositionTests|
   RoadKeyDoorRoadTests|RoadKeyDoorsModelTests"`: `✔ Test run with 31 tests in 6 suites passed`** — Piece 1's guard assertion
   GREEN inside the zero-writes span; the composition guard (`theCheckRoadNamesNoWriterAndNoKeychainRead`) green.
-- **Piece 4** — F-R1-5 fix (G2 + P3's `plain_address`; `zsh -n`; the self-test): NOT-STARTED.
+- **Piece 4** — F-R1-5 fix: DONE (this commit). `Tools/WalkKit/first-run-walk.sh`: `PLAIN_ADDRESS` = the sibling's regex
+  `^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$`, `plain_address` = zsh's whole-value `[[ $1 =~ $PLAIN_ADDRESS ]]`; G2 refuses an
+  account email that is not plain (after the marker check, before the listed check — "the std account's email is not a plain
+  address (…)"); P3 re-checks the address it re-reads from the file at the splice (`stop` — the file changed since G2);
+  the header's G2 line and `Tools/WalkKit/README.md`'s sentence say it. `--self-test` + one ACCEPT guard fixture
+  (`someone08+vxtest-std@gmail.com` — digits and a plus-address, the test accounts' shape: the regex does not over-refuse;
+  green both sides by design). **`zsh -n` clean; `--self-test`: every case ok — the three malformed addresses `refuse (the
+  std account's email is not a plain address …)  ok`, the shaped one `accept  ok`, the nine existing cases and the handed
+  value ok — `SELF-TEST: every guard fired as expected`, exit 0**; the no-argument and `bogus` refusals unchanged (exit 5,
+  before any file read). Nothing launched; P3's re-check is exercised only through the shared function (P3 runs live).
 - **Piece 5** — the behavioral reverts, named before any runs: NOT-STARTED.
 - **Piece 6** — evidence (the harness whole, Mac + iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`, THE
   MAC-SUITE LIST): NOT-STARTED.

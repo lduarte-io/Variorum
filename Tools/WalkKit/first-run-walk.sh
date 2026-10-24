@@ -13,8 +13,9 @@
 # It REFUSES (exit 5 — nothing launched, nothing read from production, nothing typed) unless EVERY guard holds, in order:
 #   G1  the account is one the allowlist names: std · castle · del
 #   G2  the allowlist ~/.variorum/prod-test-accounts.env: a regular file (never a link), mode 600, every listed email
-#       carrying 'vxtest', this account's email listed — the guard Tools/prod-confirm-test-user.sh and the typing helper
-#       keep (values are read in a subshell and never printed)
+#       carrying 'vxtest', this account's email PLAIN (Tools/prod-confirm-test-user.sh's shape, matched against the whole
+#       value — P3 splices it into a SELECT; the ladder's F-R1-5) and listed — the guard Tools/prod-confirm-test-user.sh and
+#       the typing helper keep (values are read in a subshell and never printed)
 #   G3  no walk project in this environment (VARIORUM_WALK_PROJECT_URL / VARIORUM_WALK_ANON_KEY): the two roads are
 #       exclusive (the app refuses the road with a walk project too)
 #   G4  the app is a DEBUG build — bundle io.lduarte.Variorum.debug, a …/Debug/Variorum.app path — and never under
@@ -60,6 +61,11 @@ GAP=2.6   # >= 2.5 s between guarded acts: a synthetic act resets HIDIdleTime (W
 refuse() { print -u2 "first-run-walk REFUSES: $*"; exit 5 }
 
 # --- G1 + G2, pure over a file (the self-test feeds it fixtures) ----------------------------------------------------
+# plain_address <address> → 0 for a PLAIN address: Tools/prod-confirm-test-user.sh's shape (lowercase letters, digits,
+# . _ + - and one @, a dotted lowercase domain), matched against the WHOLE value with zsh's =~ — never a line-wise grep,
+# which passes a value whose FIRST line is plain (the ladder's F-R1-5: P3 splices the address into its SELECT).
+PLAIN_ADDRESS='^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$'
+plain_address() { [[ $1 =~ $PLAIN_ADDRESS ]] }
 # guard_allowlist <file> <account> → 0, or prints the refusal and returns 1. Values never printed.
 # allowlist_value <file> → the file's one key (the list the launch is handed), read in a subshell; the other keys never.
 guard_allowlist() {
@@ -76,6 +82,7 @@ guard_allowlist() {
   done
   [[ -n $email ]] || { print -r -- "no email for '$account' in the allowlist"; return 1 }
   [[ $email == *vxtest* ]] || { print -r -- "the $account account's email carries no 'vxtest' marker"; return 1 }
+  plain_address "$email" || { print -r -- "the $account account's email is not a plain address (lowercase letters, digits, . _ + -, one @)"; return 1 }
   [[ " $list " == *" $email "* ]] || { print -r -- "the $account account's email is not on the allowlist"; return 1 }
   return 0
 }
@@ -107,6 +114,8 @@ VARIORUM_PRODTEST_STD_EMAIL="A+vxtest-std@X.test"'
 '\''vxtest"
 VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test
 '\''vxtest"'
+  fixture shaped 'VARIORUM_PRODTEST_EMAILS="someone08+vxtest-std@gmail.com"
+VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
   ln -s $T/good $T/link
   fails=0
   expect() {  # <label> <file> <account> <accept|refuse>
@@ -129,6 +138,7 @@ VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test
   expect "a quote in the address" quoted std refuse
   expect "an uppercase address" upper std refuse
   expect "a newline in the address" newline std refuse
+  expect "a plus-address with digits (the test accounts' shape)" shaped std accept
   handed=$(allowlist_value $T/good)   # the value the launch is handed (fixture emails — fake, printable)
   if [[ $handed == "a+vxtest-std@x.test b+vxtest-castle@x.test" ]]; then print -r -- "SELF-TEST the handed value: the list key alone  ok"
   else print -r -- "SELF-TEST the handed value: '$handed'  FAIL"; fails=$((fails + 1)); fi
@@ -253,6 +263,8 @@ sleep 3; capture launched
 
 step P3 "the account on production (exists, confirmed) — its id, read once"
 EMAIL=$(set -a; source $ALLOW; set +a; eval "print -r -- \"\${VARIORUM_PRODTEST_${(U)ACCOUNT}_EMAIL}\"")
+# Re-checked at the splice (the file is re-read here — G2's check is of an earlier read).
+plain_address "$EMAIL" || { unset EMAIL; stop "the '$ACCOUNT' account's email is not a plain address (the allowlist changed since G2?)" }
 user=$(prodread "select id, email_confirmed_at is not null as confirmed from auth.users where email = '$EMAIL'")
 unset EMAIL
 UID_=$(print -r -- $user | grep -o '"id":"[0-9a-f-]*"' | head -1 | cut -d'"' -f4)
