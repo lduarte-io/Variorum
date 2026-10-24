@@ -279,9 +279,7 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 **NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
 face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P6c): the pair plan's `passphraseKDF` put back in `PairCatchUp.swift`;
-the fix is committed at `6b48999c0` — restore with `git checkout -- Sources/VariorumCore/Protection/Executor/Acts/
-PairCatchUp.swift`.**
+`~/dev/variorum-vx-529`. No revert is in flight.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
@@ -376,7 +374,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     as the pair kind ⇒ `["memory"]`. F-2's guard RETIRED (`follow` dispatches the third kind to `followThePair`). The
     plan records `passphraseKDF` (the ruled shape as built — P6c revisits it). Green: 59 tests across the five pair
     suites and `FollowTests` (the crash harness in all three postures and plan-gone included).
-  - P6c — S-3: the stranded-open pin. IN-PROGRESS — the pin COMMITTED (`PairCatchUpStrandedOpenTests`: the crash after
+  - P6c — S-3: the stranded-open pin. DONE (`0eab9a8cd` pin, `6b48999c0` fix) — the pin (`PairCatchUpStrandedOpenTests`: the crash after
     every write, Standard and Castle Always ask, the relaunch's lobby typing the OLD passphrase, roll-back allowed):
     RED on P6b's tree — 14 crash points where `the settle threw .passphraseDoesNotOpen` (the plan records the vault's
     descriptor, so `PlanRunner.resume` derives the old passphrase under it and, the act being always past its commit
@@ -387,7 +385,9 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     what the lobby typed, and the step's `accountsCurrentPassphrase` derives it under the FRESH vault's descriptor and
     holds it only while it opens the vault (the press's verified passphrase first). WHY THE SHAPE: R-arch-3 — an older
     build resuming this plan has no drop clause; only a plan with no descriptor keeps ITS generic check from stranding
-    the open too (P6d). Green: 85 tests (the pair suites, `FollowTests`, the key-door suites). Remains: the revert.
+    the open too (P6d). Green: 85 tests (the pair suites, `FollowTests`, the key-door suites). VERIFIED BY REVERT: the
+    descriptor put back in the plan ⇒ the pin RED again (the same 14 `the settle threw .passphraseDoesNotOpen`);
+    restored ⇒ the pair suites 12/12 green.
   - P6d — R-arch-3: the downgrade-resume trace and the plan's shape (its pin red-first if the shape moves). NOT-STARTED.
   - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
     red-first. NOT-STARTED.
