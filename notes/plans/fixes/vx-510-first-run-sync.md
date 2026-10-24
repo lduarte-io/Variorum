@@ -302,7 +302,42 @@ for the changed types — the closeout-coverage rule), for the orchestrator's st
 
 ### UNIT A — LIVE STATUS (the implementer owns this section)
 
-*(NOT STARTED — the implementer writes its skeleton in its first commit.)*
+**NOT DONE BY THIS SESSION (first, as the contract asks):** F-6 — VX-507's confirmation for a RE-KEYING account act
+(a join across postures) surviving the act's reopen — is a FORK for the architect: traced and PROPOSED below (Piece 6),
+NOT BUILT. No `xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact (the
+run's traps); the Mac-target suites this unit touches run in the orchestrator's stage batch (THE MAC-SUITE LIST at the
+close). No line in `Sources/VariorumCore/Sync/`. The words are PROVISIONAL and HERS (OPEN ITEMS, P-VX510-1..3 — the
+first draft of each built).
+
+*Implementer session A — Opus 5.5, xhigh. Pre-fix tree = `54b7b71df`. Every claim not yet run is PENDING.*
+
+- **Piece R** — this skeleton + the preflight read whole, myself (CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md`
+  WHOLE; `notes/SurfaceContracts.md` "The app" and "Doors to the outside" whole; `notes/SessionResiliencyProtocol.md`; this
+  file WHOLE; vx-488's M1 RECORD and M2 RECORD Piece 0 (the harness recipes); the named code — `AppServices`,
+  `SyncSession`, `AppBootstrap` whole, `RoadAccountModel`, `ProtectionAccountActs`, `RoadAccountFaces`, `ProtectionWords`
+  whole, `SyncStatusViews`, `VariorumApp`, `RoadAccountSheet`, `SyncScheduler` (read only), `NewRoadSyncKeyProvider`,
+  `ProtectionOpenFaces`' standing model, the phone's composition root; the suites `SyncLockedRowTests`,
+  `Phase9cAuthWiringTests`, `ProtectionOpenRoadPlantedTests` (`PlantedRoad`), `ProtectionRoadTestSupport` (`RoadWorld`),
+  `ProtectionAccountRoadTests`, `ProtectionAccountSupport`, `RoadAccountModelTests`, `RoadJoinFollowSurfaceTests` (the
+  bootstrap-over-planted-road template), `TouchIDUnlockSyncKeysTests`, `Phase8ServicesTests`' transports): DONE (this commit).
+- **Piece 0** — the headless harness (scratchpad `vx510a-harness`, not durable; the M1 + M2 recipes merged and widened to
+  `AppBootstrap` + `AppServices` + `SyncSession` over a slim `AppSession` stub) and its BASELINE on the pre-fix tree:
+  NOT STARTED.
+- **Piece 1** — THE SEAM, behavior-neutral (D-A1's "glue moves out of view code"): `AppBootstrap.attach(services:)` carries
+  today's services-held roads (the account section's `signOutRoad`, the deletion hook) out of `VariorumApp`'s `.task`;
+  plus the pins that compile on that tree, committed RED (VX-498: a set-up through the attach glue runs no round without a
+  relaunch; VX-507: the sheet goes at `.made`; VX-506: the join arm's door wears the set-up arm's label): NOT STARTED.
+- **Piece 2** — D-A1 (VX-498): `FirstRoundOutcome`, `SyncSession.roundNow()`, `AppServices.runFirstRound()`, the
+  `firstRound` road on `RoadAccountModel` wired by `attach`, called on `.made` for set-up / same-posture join / Move,
+  never for a leave or a re-keying act: NOT STARTED.
+- **Piece 3** — D-A2 (VX-507): the confirm's first-round phase (progress → outcome in the row's own sentence; Done never
+  cancels the round; no road → finishes as today): NOT STARTED.
+- **Piece 4** — D-A3 (VX-506): the unjoined row's not-yet face (the record names no account) with the same Protection…
+  door; the join arm's own door label: NOT STARTED.
+- **Piece 5** — the behavioral reverts (named here BEFORE any runs): NOT STARTED. No revert is in flight.
+- **Piece 6** — F-6, the fork: the trace and the proposal (not built): NOT STARTED.
+- **Piece 7** — evidence on the final tree (the harness whole; build-for-testing Mac + iOS) and THE MAC-SUITE LIST: NOT
+  STARTED.
 
 ## OPEN ITEMS (bundled for her; kept current)
 
