@@ -279,8 +279,7 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 **NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
 face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P3): `Assess.swift`'s pair arm in `acts` disabled; the fix is committed
-at `c909ee285` — restore with `git checkout -- Sources/VariorumCore/Protection/Assess/Assess.swift`.**
+`~/dev/variorum-vx-529`. No revert is in flight.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
@@ -331,7 +330,8 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   read); both-present legs (E6, no copy, a half-read reading); another key's file in the live place; the pure
   reading's table. THE FULL CORE SUITE after it: 3372 tests passed (4 known issues — P2's negative control); one
   failure elsewhere, `VariorumMCPTests`' `MCPHarnessTimeLimitTests` wall-clock bound (19 s against 15 s under the
-  full parallel run) — 3/3 green alone in 2 s; no protection code in it.
+  full parallel run) — 3/3 green alone in 2 s; no protection code in it. VERIFIED BY REVERT: the `acts` pair arm
+  disabled ⇒ `AssessPairRedPins` RED again (the same 12 issues as on the old tree); restored ⇒ 12/12 green.
 - P4 — scope 2, THE ACT'S PURE PIECES (fork-independent): the key file's words-lock dropper (a value setter) and the
   re-lock transform + its landed predicate, unit-tested. NOT-STARTED.
 - P5 — scope 2, THE FORK PROPOSAL written here, then REPORT BACK. NOT-STARTED.
