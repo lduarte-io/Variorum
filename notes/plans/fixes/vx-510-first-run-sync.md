@@ -124,6 +124,20 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
    the same sheet from anywhere (WHERE: a note · a book · a wing; one standing row per client × place since VX-393, so a
    second wing is a second row). Shared with AI's own Change… REPLACES. The labelling is the gap → **VX-515**
    (Improvement, Confirmed, MCP, Medium).
+6. **"it keeps just changing what is shown though - it doesn't show both & I can see that the other one is revoked
+   when I grant that one. file a ticket for it - this needs to be fixed but definitely not in this run. there also needs
+   to be a way to see everything you've granted, following that more will be granted… Just let me know if you add that
+   to VX-515."** — **The orchestrator's item-5 reading was WRONG in practice** (it read only the sheet's opening —
+   `replacing: []`): a second wing grant REVOKES the first. Not the schema (`uq_mcp_grant_standing_place` is per client ×
+   scope kind × scope id — `MCPGrantSchema.swift:263`); untraced, suspected in the grant road's upgrade-in-place.
+   → **VX-516** (Bug, Confirmed, MCP, High; NOT this run, her word). Her "see everything granted" ask ADDED to VX-515
+   (now two asks: a visible add door + one place listing every grant).
+7. **"would it be better for the debug app to be less sandboxed? I just want the testing to catch any real issues."** —
+   ANSWERED: no — the Release app is sandboxed, so a Debug app with a wider sandbox would test a different app and hide
+   exactly the failures worth catching (the keychain access groups, file reach, the MCP socket's container path all live
+   inside the sandbox). The closer Debug stays to Release, the more a walk proves; that is why F-B1-1 was ruled (B) — the
+   test machinery reaches around the sandbox from outside, the app's own sandbox stays identical to Release's.
+8. **"I'm off the pro, so go ahead with the walk"** — the stage is the walk's (claim `vx-510`).
 
 ## THE TEST-ACCOUNT ROAD — the tools (built by the orchestrator, 2026-10-23; environment acts per R-510-7/-8)
 
