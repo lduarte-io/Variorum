@@ -1052,6 +1052,20 @@ final class AppBootstrap {
             landed: { [weak self] in await self?.roadAccount?.refresh() })
     }
 
+    /// **VX-510 D-A1 — THE SERVICES-HELD ROADS, wired in ONE place** (the composition glue moved out of view code, so a
+    /// test drives exactly what ships: bootstrap + services + a fake server, end to end). The app's services die at each
+    /// lock and every reopen composes fresh ones (`VariorumApp`'s `.task`), while the account section's model and this
+    /// bootstrap live on — so each services instance is attached here as it is made, and the faces' roads follow the newest
+    /// one (captured weakly: a stopped instance answers nothing). Today's roads: the Account sheet's Delete Account runs the
+    /// protection half (`accountDeletedOnNewRoad` — P-VX308-U1-F1); the account section's *Sign out…* signs out through the
+    /// services' one session. (The phone wires its deletion hook inline: it renders no account section until VM-8, P-2.)
+    func attach(services: AppServices) {
+        services.afterAccountDeleted = { [weak self] account in
+            await self?.accountDeletedOnNewRoad(account)
+        }
+        roadAccount?.signOutRoad = { [weak services] in await services?.signOutVariorum() }
+    }
+
     /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for
     /// `accountID` (the composition root wires `AppServices.afterAccountDeleted` to this on the new road): the protection
     /// half runs when the open library names that account — the record stops naming it, this Mac forgets its sync keys

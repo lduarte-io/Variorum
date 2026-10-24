@@ -246,11 +246,9 @@ struct VariorumApp: App {
                         services = fresh
                         // VX-308 U1 (P-VX308-U1-F1): the Account sheet's Delete Account also runs the protection
                         // half (the open library stops naming the deleted account — rule 16's local leave); and the
-                        // account section's *Sign out…* signs out through this one session.
-                        fresh.afterAccountDeleted = { account in
-                            await bootstrap.accountDeletedOnNewRoad(account)
-                        }
-                        bootstrap.roadAccount?.signOutRoad = { [weak fresh] in await fresh?.signOutVariorum() }
+                        // account section's *Sign out…* signs out through this one session. VX-510 D-A1: the
+                        // services-held roads are wired in ONE bootstrap function, so a test drives what ships.
+                        bootstrap.attach(services: fresh)
                         // VX-306 U1b → VX-329 U1: the backup clock's writer is the open library's pair road (rule
                         // 5's pair — the library + its key file), per services instance (every reopen rebuilds them).
                         ProtectionBackupHook.attach(to: fresh.backup, session: bootstrap.roadSession)

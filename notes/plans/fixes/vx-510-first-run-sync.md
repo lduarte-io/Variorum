@@ -338,10 +338,21 @@ first draft of each built).
   `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut`, `theBecomeActiveHookRunsOneSyncRound` read `#filePath` beside
   the symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 426 tests in 75 suites
   passed`**.
-- **Piece 1** — THE SEAM, behavior-neutral (D-A1's "glue moves out of view code"): `AppBootstrap.attach(services:)` carries
-  today's services-held roads (the account section's `signOutRoad`, the deletion hook) out of `VariorumApp`'s `.task`;
-  plus the pins that compile on that tree, committed RED (VX-498: a set-up through the attach glue runs no round without a
-  relaunch; VX-507: the sheet goes at `.made`; VX-506: the join arm's door wears the set-up arm's label): NOT STARTED.
+- **Piece 1** — THE SEAM, behavior-neutral (D-A1's "glue moves out of view code") + the pins that compile on it, committed
+  RED: DONE (this commit). `Shared/AppBootstrap.swift` gains `attach(services:)` — today's two services-held roads exactly
+  (the deletion hook → `accountDeletedOnNewRoad`, the account section's `signOutRoad` → `signOutVariorum`), captured weakly;
+  `Variorum/VariorumApp.swift`'s `.task` calls it in their place (Mac-only file — compiles at Piece 7's build-for-testing,
+  PENDING). The phone's composition is untouched (it wires its deletion hook inline; it renders no account section until
+  VM-8 — P-2). New suites: `VariorumTests/Protection/FirstRoundAfterTheActTests.swift` (`FirstRoundServer` — a dumb
+  accepting fake; `FirstRoundWorld` — a library created on the planted road with its words in hand, the bootstrap opened on
+  it quietly, signed in as the planted account, the REAL `AppServices`/`SyncSession` composed as `VariorumApp` composes them
+  and attached through `attach`; THE SEAM unit B's drill extends) and `VariorumTests/Protection/NotOnYetWordsTests.swift`.
+  **RED on this tree** (the harness, `--filter "FirstRoundAfterTheActTests|NotOnYetWordsTests"`): `✘ Test run with 3 tests
+  in 2 suites failed … with 9 issues` — `vx498_aSetUpRunsItsFirstRoundWithNoRelaunch` ✘×4 (after the act: no round —
+  `roundsCompleted > roundsBefore`, `lastError == nil`, `lastSuccessAt != nil`, `server.pulls > 0`; its preconditions all
+  held: the pre-act rounds refused `encryptionKeysUnavailable`, the act landed, the vault written);
+  `vx507_theSetUpsSheetStaysAfterTheActLands` ✘ (the confirm went at `.made`); `theJoinArmsDoorHasItsOwnLabel` ✘×4 (both
+  postures: the join wore "Turn on sync…").
 - **Piece 2** — D-A1 (VX-498): `FirstRoundOutcome`, `SyncSession.roundNow()`, `AppServices.runFirstRound()`, the
   `firstRound` road on `RoadAccountModel` wired by `attach`, called on `.made` for set-up / same-posture join / Move,
   never for a leave or a re-keying act: NOT STARTED.
