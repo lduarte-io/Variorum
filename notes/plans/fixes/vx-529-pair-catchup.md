@@ -351,8 +351,15 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     (`ProtectionKeyDoorActs.press`) and its account road (`ProtectionAccountActs.perform`) start none after the act
     either. So the catch-up takes none (the ruling's condition met). DONE (this commit).
   - P6b — the act in the RULED shape (`follow`'s third-kind entry checks; `FollowProgram`'s no-re-key arm, steps
-    `pickUpKeys`/`relock`/`memory`, `toKey` nil; F-2's guard removed, its pin flipped to the entry checks): red pins
-    first. NOT-STARTED.
+    `pickUpKeys`/`relock`/`memory`, `toKey` nil; F-2's guard removed, its pin flipped to the entry checks).
+    IN-PROGRESS — the red pins COMMITTED (`Executor/PairCatchUpTests.swift`, replacing the guard's suite): each half and
+    both in all three postures (Standard, Castle Touch ID, Castle Always ask) — the key, record and history unchanged,
+    `pairFollow` nil after, no vault/custody/Apple/staged/backup write, the mirror following, the keys held per
+    posture; E7's backup untouched; the second press `nothingToDo`; the entry checks (nothing moved; nothing typed /
+    words only for the passphrase half; the old passphrase ⇒ the change named; garbage ⇒ the plain refusal; E14's
+    `secretMissing` then the account's passphrase landing it; the posture moved ⇒ `accountMoved`), each with nothing
+    written; the crash after every write, three postures, and with the plan gone. RED on the guard's tree — every act
+    test `nothingToDo` (22 issues); the nothing-moved row green on both sides by nature. Remains: the act, green.
   - P6c — S-3: the stranded-open pin, red on P6b's tree, then the fix. NOT-STARTED.
   - P6d — R-arch-3: the downgrade-resume trace and the plan's shape (its pin red-first if the shape moves). NOT-STARTED.
   - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
