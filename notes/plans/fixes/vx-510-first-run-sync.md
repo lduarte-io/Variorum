@@ -2151,7 +2151,11 @@ edits). Every claim not yet run is PENDING.*
     (`KeyDoors.swift` `keyDoorParameters`' `var parameters` never mutated — line 357 on the pre-fix tree, the harness's first build
     shows it). The Mac-only `KeychainLeavesTests` arm compiles here; its run is the stage's.
   - **Machinery honesty:** nobody else committed to this branch while the unit ran (every `git pull --rebase` was a no-op); every
-    commit staged explicit paths.
+    commit staged explicit paths. **A consequence of (a), said plainly for the reviewer:** the rollback's and the finishing
+    forget's sweeps already deleted every LISTED item of an account other than the bound one (VX-378 U4's census class (J), "this
+    Mac holds the sync keys of the account its library names, and only those"); by name they now reach the Touch ID class of the
+    accounts they know too — e.g. a Previous Library's account that is also the sign-in loses its Touch ID item exactly as it
+    already lost its silent one. No rule changes; the class the rule always meant is now reached.
   **THE MAC-SUITE LIST (for the closing stage batch — every suite exercising a file this unit changed):**
   - NEW: `TouchIDSyncKeysForgottenRoadTests` (harness-green; Mac-hosted run PENDING); the core's `TouchIDSyncKeysForgottenTests`
     (headless, green — no Mac run needed).
@@ -2182,7 +2186,7 @@ edits). Every claim not yet run is PENDING.*
   deletion itself is the real-keychain arm's (stage batch) and the pins'.
   - **W0 — set up (no press expected):** Settings ▸ Protection ▸ Use Castle… — both secrets by `type-prod-test-secret castle`,
     gate **Touch ID** → the act lands (log `road: useCastle — library 223c4e7e now castle`; `enter_castle: … done`), the account
-    enters Castle (prod read: `key_vault.mode` castle, revision 5). Writing a Touch ID item never prompts; if a sheet DOES show
+    enters Castle (prod read: `key_vault.mode` castle, its revision up by one). Writing a Touch ID item never prompts; if a sheet DOES show
     here, she presses (it is a Castle crossing she chose Touch ID for — the recorded castle-way read, Piece 1's reading) and the row
     notes it.
   - **W1 — Castle's own reads still work (the guard) — HER PRESSES:** ⌃⌘L → the lobby → **Touch ID (press #1)** → opens; log `road:
