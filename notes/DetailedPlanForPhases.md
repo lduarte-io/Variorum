@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-529 — the catch-up for a pair changed elsewhere** (`/architect-phase`, kicked off 2026-10-24; the design memo first at her R-510-19/-20; the record `notes/plans/fixes/vx-529-pair-catchup.md`; surfaces: Settings ▸ Protection, the lobby, the key doors, the check door, custody/`Sync/`-adjacent — HOLDS the custody slot) | VX-529 · `vx-529-pair-catchup` | `~/dev/variorum-vx-529` · the Pro | Design memo + her rulings, then the build. |
 
 ### Latest closeout
 
