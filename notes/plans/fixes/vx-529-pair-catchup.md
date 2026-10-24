@@ -838,7 +838,105 @@ with the walk as its evidence (the orchestrator's acceptance walk follows your c
 
 ### UNIT 2 — LIVE STATUS (the implementer owns this section)
 
-*(not started)*
+**NOT DONE IN THIS UNIT (so far — kept current):** everything below marked NOT-STARTED; the riders (unit 3's — VX-538
+included, her word); mobile faces (the shared brains compile for the phone; its faces are the closeout's parity row). Zero
+`Sources/VariorumCore/Sync/` lines (by design — none needed). No revert is in flight. Session: a fresh `opus-implementer`,
+2026-10-24, worktree `~/dev/variorum-vx-529`. (The orchestrator's `eb0757ab1` landed in this worktree during my read —
+UNIT 3's section only, committed and pushed; nothing uncommitted, so I continued.)
+
+**Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
+`notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts whole (the protection bullet); this file whole; the VX-510
+record's ENVIRONMENT TRAPS. Code: `PairCatchUp.swift`, `Assess.swift`, `Assessment.swift`, `KeyFileRelock.swift`,
+`KeyFile.swift`, `KeyDoors.swift`, `Follow.swift`, `Executor.swift`, `PlanRunner.swift`, `CommonSteps.swift` (the vault
+reads, `holdSyncKeys`), `ProtectionRecord.swift`, `Facts.swift`; app-side `ProtectionAccountActs.swift`,
+`RoadAccountFaces.swift`, `RoadAccountModel.swift`, `ProtectionOpenRoad.swift`, `ProtectionLobbyModel.swift`,
+`ProtectionLobbyFace.swift`, `ProtectionSecretCheck.swift`, `ProtectionWords.swift`, `ProtectionKeyDoorActs.swift`,
+`RoadKeyDoorFaces.swift`, `ProtectionOpenFaces.swift` (`RoadStandingModel.make`), `AppBootstrap.swift` (the account,
+key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.swift`; the planted worlds
+(`ProtectionAccountSupport`, `ProtectionOpenRoadPlantedTests`, `TypedUnlockSyncKeysTests`, `ProtectionJoinFollowRoadTests`).
+
+**The pieces (flip per commit; unverified claims PENDING):**
+- U2-P0 — this LIVE STATUS, the plan and the findings before code. DONE (this commit).
+- U2-H — the headless harness (the VX-510 recipe: app sources symlinked into a scratch SwiftPM package so the app-level
+  pins run with `swift test`, red-on-old included). NOT-STARTED.
+- U2-P1 — scope 6 + scope 1's words: the pair kind's real sentences (`followNotice` / `followAsk` / `followDone` /
+  `FollowDoneMark`), the follow sheet's pair-kind confirm (the half, device and day; the one-secret ask; the second-road
+  line, P-VX529-2), the durable notice for the pair kinds (R-529-2/E8's words-only line; R-529-5's words arm with its window
+  and Reset-chain lines), the open-session follow's Done made DURABLE (VX-457 — today only the reopen seam marks it; the
+  pair follow runs on the open session, F-8), E14's face (a words-only catch-up with no master in hand asks one secret).
+  NOT-STARTED.
+- U2-P2 — scope 2: `RoadSettledFollow.kind` tells a settled pair follow apart (its act in flight names no new key) —
+  bug-class (today it reads `.keysReplaced` and the durable Done says the keys changed) — and the stale done-line never
+  renders while a follow is owed (the repro's line) — bug-class. Pins red-on-old first. NOT-STARTED.
+- U2-P3 — scope 5: the preflight's words twin (`accountSecretRefusal` says "Those twelve words don't open this library."
+  for old words that DO open it after a words change elsewhere — bug-class, the core's P7-2 split mirrored) and the key
+  doors' gate refusal in the detected state speaking the pair sentence (R-529-3). NOT-STARTED.
+- U2-P4 — scope 4: the check door's fourth answer gains the pointer line in the catch-up state; its E6 variant (R-529-6);
+  the door still writes nothing. NOT-STARTED.
+- U2-P5 — scope 7 (core): the E6 heal wired — `regenerateWords`' key-file step lands a missing passphrase lock with the
+  account's passphrase it verified against the vault (inside its plan); a public, unplanned single-write heal for the
+  lobby's vault road (`landingTheAccountsPassphraseLock` through the existing key-file road; the mirror follows — the
+  `landAppleWrap` repair's precedent for a one-write lock addition). Headless core pins. NOT-STARTED.
+- U2-P6 — scope 3: THE LOBBY'S VAULT ROAD (below, THE DESIGN AS BUILT). The pure decision in the core
+  (`VaultRoad` — headless pins), the app's composition in `ProtectionOpenRoad.openTyped`'s `.noneOpens` arm, the lobby
+  face's E6 arm. Pins red-on-old for the silent refusal where the sentence is owed. NOT-STARTED.
+- U2-P7 — the close: the harness whole, the core protection suites, ONE Mac + ONE iOS `build-for-testing`
+  (`DerivedData/vx529-u2*`), the Mac-suite list for the stage batch. NOT-STARTED.
+
+**THE LOBBY'S VAULT ROAD — the design as it will be built (scope 3; R-529-1; the guardrails literal):**
+- WHERE: only `ProtectionOpenRoad.openTyped`'s `.noneOpens` arm, only for a PASSPHRASE (the brief's letter — see F-U2-3),
+  only on a writing road (`ctx.writes` — a hosted test run reads nothing, `aReadOnlyRoadReadsNothing`), only while signed in
+  (`ctx.session.accountID`). Everything before that arm — the quiet roads, the local typed roads, Touch ID — is untouched.
+- ONE bounded vault read of the signed-in account (`boundedVaultRead`, VX-501's race, the same `typedUnlockVaultBound`).
+  Offline, a timeout, no vault, signed out, read-only: today's refusal, byte-identical, nothing written.
+- THE DECISION IS THE CORE'S, pure (`VaultRoad.answer` — new, `Executor/`): the typed passphrase derived under the VAULT's
+  descriptor (its floor first); its master from the vault; that master tried on every key file this Mac holds for the
+  slot (the live one first) — the first whose master lock opens is the key. Else, read from the live key file against the
+  same reading: same account proven by the master's twelve-words copy being the vault's recovery wrap byte for byte (a pre-
+  unlock binding with no secret — another account's vault never makes this Mac say "your passphrase was changed"), then
+  passphrase lock under another descriptor ⇒ the change named (device and day); no passphrase lock (E6) ⇒ "That passphrase
+  doesn't open this account." (VX-464's sentence — the only passphrase road in E6 is the account's); anything else ⇒ today's.
+- THE OPEN: the key goes through the ordinary `open(ctx, candidates:typed:)` (the slot verifies it; the settle and repairs
+  as at every open). NOTHING is written before that unlock succeeds; a key that does not open the slot ⇒ today's refusal.
+- THE ACT, in the same press with the typed secret in hand (never a quiet road): with the session's one-act lock, a pair
+  follow owed against the read (`AssessRules.pairFollow`) ⇒ the core's `follow(.pairChanged…)` (unit 1's act — its own
+  fresh read re-verifies, E4); then, a synced file still without a passphrase lock ⇒ the heal (P-VX529-4). A failure of
+  either leaves the library OPEN (never hostage — the follow stays owed in Settings), logged. Then the typed unlock's
+  sync-keys load as today (VX-501). The durable notice: the account section's (VX-457's mark — `FollowDoneMark`), written
+  by `RoadStandingModel.make` from the open's report, as a settled follow's is.
+- The face: the lobby offers the passphrase field over a SYNCED key file with no passphrase lock (E6) while someone is
+  signed in, with R-529-6's line ("Your account's passphrase hasn't been typed on this Mac yet — type it here to use it on
+  this Mac.") — PROVISIONAL P-VX529-U2-1 (below). No Touch ID line, button or ask changes; the one presenter and the words
+  clipboard are untouched.
+
+**Findings before any code (traced in this session; each says what it changes):**
+- **F-U2-1 — the open-session follow's Done is NOT durable today.** VX-457 marks a follow's Done only on the re-keying
+  reopen seam (`AppBootstrap.accountActOnNewRoad`) and at a settle (`RoadStandingModel.make`); every follow before VX-529
+  re-keyed. The pair follow runs on the OPEN session (`rekeys: false`, unit 1's F-8 confirmed: `RoadAccountModel.open` →
+  `ProtectionAccountRoad.press`), whose `.made` carries `shown.receipt` — spoken ONCE on the status seam, so `receipt_style`
+  off hides the catch-up's Done and a quit loses it. SurfaceContracts: "a follow's Done is a durable notice until OK
+  (VX-457)". Changed in U2-P1: the open-session press of a follow marks the durable notice and speaks no receipt (the seam's
+  own rule, `ProtectionAccountRoad.owed`, applied there too).
+- **F-U2-2 — the lobby shows NO passphrase field over a plain-E6 file** (`ProtectionLobbyFace.derive`: the passphrase field
+  only when a held key file carries a passphrase lock), so R-529-1's vault road, R-529-5's "meanwhile the account's
+  passphrase opens it online through the vault road" and R-529-6's "type it here" are unreachable in E6 unless the face
+  offers it. PROVISIONAL **P-VX529-U2-1** (built (a)): (a) the field over a synced E6 file while signed in, with R-529-6's
+  line; (b) the field only, no line; (c) no change (E6 opens by the words; the heal reaches it only through the key doors).
+- **F-U2-3 — the lobby's vault road takes the PASSPHRASE only** (the brief's and R-529-1's letter). The words twin is real:
+  after a words change elsewhere, a lagging Castle Always-ask library's NEW words open nothing locally (the stale copy, the
+  old own words lock), though they would open it through the vault the same way. Not built; for the bundle.
+- **F-U2-4 — a pre-unlock binding exists for one half only.** Before unlock this Mac cannot read which account the library
+  is bound to (the record is inside it). "Same account" is proven by the live file's master words copy equalling the vault's
+  recovery wrap — true when only the passphrase moved (and in E6), false when the words moved too. So with BOTH halves
+  moved, a passphrase that opens neither the library nor the account gets today's plain refusal (honest, never the named
+  change for another account's vault). A typed account-current passphrase still OPENS (the master lock proves it).
+- **F-U2-5 — `theSettledFollowIsReadFromDurableFacts`'s fixture carries no `toFingerprint`** (an `ActInFlight` built with
+  the default nil), which every real non-pair follow has (each mints its new key at its press). Telling the pair kind by its
+  nil `toFingerprint` (unit 1's own `FollowProgram.finishingSteps` reading) flips that pin's `.keysReplaced` row; the
+  fixture is corrected (a new key named) and the pair row added — FLIPPED DELIBERATELY, said in the test.
+
+**NEW SENTENCES (every one PROVISIONAL, P-VX529-3's class, sentence case — for her wording bundle):** *(filled as they
+land)*
 
 ## UNIT 3 — THE RIDERS (planned; after unit 2)
 
