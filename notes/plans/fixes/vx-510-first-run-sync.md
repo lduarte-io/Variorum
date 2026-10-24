@@ -1592,7 +1592,34 @@ record), and its pins (including the zero-writes pin across every arm). A seam t
 
 ### UNIT B3 — LIVE STATUS (the implementer owns this section)
 
-*(NOT STARTED — spawned after unit B2 closes.)*
+**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — written at the close. No `xcodebuild test`, no stage,
+no app launch, no dev/real-store touch, no server or production contact (the run's traps); the Mac-target suites this unit
+touches run in the orchestrator's stage batch (THE MAC-SUITE LIST at the close). No line in `Sources/`.
+
+*Implementer session B3 — Opus 5.5, xhigh. Pre-fix tree = `6acf5771f` (unit B2's product files, `f4af7e368`). Every claim
+not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+  `notes/SurfaceContracts.md`'s protection bullet whole (the key doors, VX-211's floor, VX-463's concealed field, VX-464's
+  refusal naming); `notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B7; units A/B1/B2's LIVE STATUS; unit C's record
+  through C5 — its W-10, a refusal line left standing after the field is retyped, is folded into this unit's sheet); the
+  code: `RoadKeyDoorsModel`, `RoadKeyDoorFaces`, `ProtectionKeyDoorActs`, `LookInsideModel` (+ `MakeMineModel.copySecrets`,
+  the one-field reading), `ProtectionOpenRoad` (`typedCandidatesAndKeys`, `boundedVaultRead`, VX-501's load), `ProtectionWords`,
+  `ProtectionSheetPresenter`, `ProtectionOpenFaces` (`RoadStandingModel`, the pane wave), the bootstrap's `keyDoorRoads` and
+  `finish`, the Mac pane (`ProtectionPane`, `RoadKeyDoorSheet`, `WordsLookSection`, the presenter's host in
+  `RoadAccountSheet`), the core's `VaultModel` / `AccountVault.master` / `PassphraseKey` / `WordsKey` / `KeyFile.open` /
+  `Executor.readVault` (its `freshVaults` cache — the check never goes through it) / `Follow`'s VX-113 test; the suites
+  `RoadKeyDoorsModelTests`, `RoadKeyDoorRoadTests`, `RoadKeyDoorSurfaceTests`, `LookInsideRoadTests` (the write-nothing
+  proof idiom), `ProtectionAccountSupport`, `ProtectionTestSupport`: DONE (this commit).
+- **Piece 0** — the harness (B2's `vx510b2-harness` copied whole but its build products to this session's scratchpad
+  `vx510b3-harness`; runner `b3/test.sh`, `b3/revert.sh`) and its baseline: PENDING.
+- **Piece 1** — the composition pins that compile on the pre-fix tree, committed RED: NOT STARTED.
+- **Piece 2** — the read-only check road (`ProtectionSecretCheck`), its outcome and words, its road pins: NOT STARTED.
+- **Piece 3** — the door and its sheet (faces, model, the one presenter, the bootstrap's road, the Mac section and sheet),
+  their pins: NOT STARTED.
+- **Piece 4** — the behavioral reverts, named before any run: NOT STARTED.
+- **Piece 5** — evidence (the harness whole, the release compile, Mac + iOS build-for-testing) and THE MAC-SUITE LIST: NOT
+  STARTED.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
