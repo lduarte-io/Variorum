@@ -282,7 +282,8 @@ riders; F-9 (hers); F-10 (needs a new refusal and its sentence); the app's compi
 Zero `Sync/` lines.** The act's program LANDED on the architect's ruling (P6) — Shape A, with two plan-shape refinements
 the ruling's R-arch-3 asked for (S-3 by the plan carrying no descriptor; the re-lock folded into `pickUpKeys`), each
 stated with its mechanism under P6c/P6d. Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. No revert is in flight.
+`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P7-1): the pair door's either-secret line and the door spec put back in
+`PairCatchUp.swift` / `Assess.swift`; the fix is committed at `e49321c61` — restore with `git checkout HEAD -- <both>`.**
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
