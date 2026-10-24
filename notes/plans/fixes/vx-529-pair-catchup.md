@@ -332,8 +332,18 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   failure elsewhere, `VariorumMCPTests`' `MCPHarnessTimeLimitTests` wall-clock bound (19 s against 15 s under the
   full parallel run) — 3/3 green alone in 2 s; no protection code in it. VERIFIED BY REVERT: the `acts` pair arm
   disabled ⇒ `AssessPairRedPins` RED again (the same 12 issues as on the old tree); restored ⇒ 12/12 green.
-- P4 — scope 2, THE ACT'S PURE PIECES (fork-independent): the key file's words-lock dropper (a value setter) and the
-  re-lock transform + its landed predicate, unit-tested. NOT-STARTED.
+- P4 — scope 2, THE ACT'S PURE PIECES. DONE (this commit) — `KeyFile.droppingWords()` (a value setter beside
+  `droppingApple`; no shape change) and `KeyFile.relockedToTheAccountsPair(key:master:accountsWordsCopy:
+  accountsPassphrase:dropsOwnWordsLock:)` (`Model/KeyFileRelock.swift`): rule 22 FIRST (the master in hand must open
+  this key through the master lock — else `doesNotOpen(.master)` / `noSuchWrap(.master)`, nothing returned); the
+  passphrase lock re-made only when a passphrase is given; the copy refreshed byte for byte; the own words lock
+  dropped when asked; `opensWithTheWords` checked last (rule 2). The LANDED predicate needs no new function: one key
+  file write carries the whole re-lock, so landed ⇔ `AssessRules.pairFollow(file, freshReading) == nil`.
+  `PairRelockTests` (7 tests): each half, both (E5), nothing but the locks moved (fingerprint, epoch, history, the
+  master lock's bytes, the Apple wrap), the old secrets stop opening the live file (rule 7, E8) while a backup frozen
+  before keeps its day's (E7, rules 4–5) and the new secrets reach older keys through the history, the rule-22
+  refusals, idempotence (AES key wrap is deterministic — a resume re-running the write lands the same bytes), the
+  dropper. Green with every key-file suite (59 tests).
 - P5 — scope 2, THE FORK PROPOSAL written here, then REPORT BACK. NOT-STARTED.
 - P6 — scope 2, THE ACT'S PROGRAM — only after the architect's ruling lands in this record. BLOCKED (the fork).
 
