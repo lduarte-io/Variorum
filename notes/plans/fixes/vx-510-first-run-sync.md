@@ -611,7 +611,7 @@ first draft of each built).
     PENDINGs above are discharged.)
   - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched — no `Sync/` line).
   - **Machinery honesty:** the orchestrator committed to this branch IN THIS WORKTREE while the unit ran (`864604283`,
-    `0043d2bf3`, `0c0019741`, `43cd52b1f`, `9d092a1f2` — its own record sections and `Tools/`); this session staged
+    `0043d2bf3`, `0c0019741`, `7e51c517e`, `2a1410377`, `43cd52b1f`, `9d092a1f2` — its own record sections and `Tools/`); this session staged
     explicit paths only, re-read the record before each edit, and never touched those files.
   **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
   - NEW (harness-green): `FirstRoundAfterTheActTests`, `FirstRoundConfirmTests`, `FirstRoundRoadTests`, `NotOnYetWordsTests`.
