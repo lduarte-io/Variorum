@@ -38,16 +38,16 @@ struct TouchIDSyncKeysForgottenTests {
     /// The write after which `act` must crash, read off a dry run's write log by `index`; then a fresh fixture, the act
     /// crashing exactly there (the write lands, then the process dies). Returns the crashed fixture.
     static func crashed(
-        _ make: () throws -> EX, at index: ([String]) -> Int?,
+        _ make: () async throws -> EX, at index: ([String]) -> Int?,
         act: (EX, ProtectionExecutor, inout UnlockedLibrary) async throws -> Void
     ) async throws -> EX {
-        let dry = try make()
+        let dry = try await make()
         let dryExecutor = dry.executor()
         var dryLibrary = try dry.unlocked(dryExecutor)
         try await act(dry, dryExecutor, &dryLibrary)
         let log = dry.world.writeLog()
         let crashAt = try #require(index(log), "the dry run's log: \(log)")
-        let fixture = try make()
+        let fixture = try await make()
         fixture.world.crashAfterWrites = crashAt + 1
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
@@ -200,6 +200,40 @@ struct TouchIDSyncKeysForgottenTests {
         #expect(laptop.world.syncItems.isEmpty, "the keys the act picked up go with it — the Touch ID item included")
         #expect(laptop.world.session[account] == nil)
         expectSettled(laptop, library)
+    }
+
+    /// THE ROLLBACK'S SECOND SWEEP — the bound account's keys the act TOOK: a Standard library FOLLOWING its account into
+    /// Castle (Touch ID chosen) filed the account's new keys in a Touch ID item (its silent item dropped), stamped the key it
+    /// took, then crashed; the next open's resume cannot reach the vault and rolls back. The library is Standard again, so
+    /// the Touch ID item is the act's Castle-way filing and goes. RED on the pre-fix tree: the sweep found it through the
+    /// blind listing only, and it stayed.
+    @Test func vx517_aRolledBackFollowIntoCastleLeavesNoTouchIDItem() async throws {
+        var account = ""
+        let phone = try await Self.crashed({
+            let mac = try EX(.standard, synced: true)
+            let phone = try EX(.standard, synced: true, joining: mac)
+            let macExecutor = mac.executor()
+            var macLibrary = try mac.unlocked(macExecutor)
+            _ = try await macExecutor.useCastle(&macLibrary, typed: mac.typed, gate: .touchID)
+            phone.world.syncKeysListingLikeProduction = true
+            account = try #require(phone.account)
+            return phone
+        }, at: { log in
+            // The act's stamp of the key it took — the plan written right after its Castle-way filing dropped the silent item.
+            guard let dropped = log.firstIndex(of: "sync- silent") else { return nil }
+            return log[(dropped + 1)...].firstIndex(of: "plan")
+        }, act: { fixture, executor, library in
+            _ = try await executor.follow(&library, kind: .intoCastle, typed: TypedSecrets(passphrase: fixture.passphrase),
+                                          gate: .touchID)
+        })
+        #expect(Self.item(phone, account, .touchid) != nil, "precondition: the act filed the new keys in a Touch ID item")
+        #expect(phone.liveRecord?.mode == .standard, "precondition: crashed before the swap")
+        phone.world.server.reachable = false
+        let (outcome, library, _) = try await phone.relaunchAndSettle(TypedSecrets.none)
+        #expect(outcome == .rolledBack(.follow), "\(outcome)")
+        #expect(phone.liveRecord?.mode == .standard && phone.liveRecord?.account == account, "the old state")
+        #expect(Self.item(phone, account, .touchid) == nil, "the act's Castle-way filing goes with the rollback")
+        expectSettled(phone, library)
     }
 
     /// THE FINISHING FORGET (`forgetUnboundSyncKeys`) removes the Touch ID item of the account the record no longer names: a

@@ -1959,20 +1959,23 @@ edits). Every claim not yet run is PENDING.*
     listed (existing) items, so no existing write log moves: **the core `PROT` set on the pre-fix product tree WITH these
     changes: `✔ Test run with 533 tests in 102 suites passed`.** The app's `PlantedSyncKeysLeaf` gains `listsLikeProduction`
     (the same listing; off everywhere else).
-  - **The core pins — NEW `Tests/VariorumCoreTests/Protection/Executor/TouchIDSyncKeysForgottenTests.swift`** (12 tests,
+  - **The core pins — NEW `Tests/VariorumCoreTests/Protection/Executor/TouchIDSyncKeysForgottenTests.swift`** (13 tests,
     production listing ON in every one): (a) `vx517_aCastleTouchIDLibrarysLeaveForgetsItsTouchIDItem` (×3 leaves) ·
     `vx517_useStandardOnASyncedCastleTouchIDLibraryLeavesNoTouchIDItem` (+ zero Touch ID reads — B2's guard leg) ·
     `vx517_aKeyDoorAfterUseStandardReadsNoTouchID` · `vx517_theQuietFollowOutReadsItsTouchIDItemThenLeavesNone` (its
     "read its Touch ID item" leg a GUARD on (c)) · `vx517_aStandardJoinLeavesNoStaleTouchIDItem` (T-B5-4's residue) ·
     `vx517_aCastleAlwaysAskFilingLeavesNoStaleTouchIDItem` · `vx517_theRollbackSweepRemovesATouchIDOnlyItem` (×2: plan gone ·
     plan kept, vault out of reach — a Standard library joining a Castle account crashed right after filing the keys in a Touch
-    ID item) · `vx517_theFinishingForgetRemovesTheLeftAccountsTouchIDItem` (a Castle + Touch ID leave crashed after the record
+    ID item) · `vx517_aRolledBackFollowIntoCastleLeavesNoTouchIDItem` (Piece 1b, `this commit` — the rollback's SECOND sweep,
+    the bound account's taken keys: a Standard library following into Castle crashed after its Touch ID filing and its stamp,
+    resumed with the vault out of reach) · `vx517_theFinishingForgetRemovesTheLeftAccountsTouchIDItem` (a Castle + Touch ID leave crashed after the record
     let the account go, plan gone → finished from the record); (c) `vx517_aStandardKeyDoorWithAStaleTouchIDItemReadsNoneAndLands`
     (×2: Change, Reset) · `vx517_aStandardSetUpsFinishReadsNoTouchIDAndBinds` (crashed right after the silent filing, plan
     gone); GUARDS `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` · `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling`
     (the reading below — a join into Castle crashed after its Touch ID filing, resumed with nothing typed). **RED on the pre-fix
-    tree** (`b4/core-test.sh p1-core-red TouchIDSyncKeysForgottenTests`): **`✘ Test run with 12 tests in 1 suite failed with 19
-    issues`** — every `vx517_` pin ✘ on its claimed leg, no precondition failed: the leaves ✘×6 (the Touch ID item stayed, ×3),
+    tree** (`b4/core-test.sh p1-core-red TouchIDSyncKeysForgottenTests`; with Piece 1b's pin, `p1b-core-red`): **`✘ Test run
+    with 13 tests in 1 suite failed with 20 issues`** — every `vx517_` pin ✘ on its claimed leg, no precondition failed (1b's pin
+    ✘ on "the act's Castle-way filing goes with the rollback"): the leaves ✘×6 (the Touch ID item stayed, ×3),
     Use Standard ✘ (the item stayed), the key door after it ✘ (Touch ID read — the count moved), the follow out ✘ (the item
     stayed), the Standard join ✘ (the stale item stayed), the Always-ask filing ✘ (the stale item stayed), the rollback ✘×2 (the
     picked-up item survived both rollbacks), the finishing forget ✘×2, **the Standard key doors ✘×2 with `Caught error:
