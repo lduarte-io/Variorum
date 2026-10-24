@@ -2945,7 +2945,8 @@ EXISTING public API, conformed on the app's side).
   `^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$`, `plain_address` = zsh's whole-value `[[ $1 =~ $PLAIN_ADDRESS ]]`; G2 refuses an
   account email that is not plain (after the marker check, before the listed check — "the std account's email is not a plain
   address (…)"); P3 re-checks the address it re-reads from the file at the splice (`stop` — the file changed since G2);
-  the header's G2 line and `Tools/WalkKit/README.md`'s sentence say it. `--self-test` + one ACCEPT guard fixture
+  the header's G2 line and `Tools/WalkKit/README.md`'s sentence say it (the README line rode one commit late — its edit missed
+  `dc5cbe982`; landed in the next). `--self-test` + one ACCEPT guard fixture
   (`someone08+vxtest-std@gmail.com` — digits and a plus-address, the test accounts' shape: the regex does not over-refuse;
   green both sides by design). **`zsh -n` clean; `--self-test`: every case ok — the three malformed addresses `refuse (the
   std account's email is not a plain address …)  ok`, the shaped one `accept  ok`, the nine existing cases and the handed

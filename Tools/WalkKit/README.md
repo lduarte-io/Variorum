@@ -333,7 +333,7 @@ DEV-store Debug build on the PROD TEST ROAD (`VARIORUM_PROD_TEST_ROAD=1` + the a
 script reads `~/.variorum/prod-test-accounts.env` outside the sandbox and hands its one key to the launch as
 `VARIORUM_PRODTEST_EMAILS`, F-B1-1 (B)) for ONE named test account: sign in → the words' look (stashed, never read) → Turn on sync → the
 sheet's "Synced." → the row's "Synced ‹time›" with no relaunch → the server checks through `Tools/prod-read.sh`. It
-refuses (exit 5, nothing launched) unless every guard in its header holds — the allowlist (mode 600, marked, the account
-listed), no walk project, a Debug build outside `/Applications`, zero instances, the stage held, the dev slot set aside,
+refuses (exit 5, nothing launched) unless every guard in its header holds — the allowlist (mode 600, marked, the account's
+address plain — matched whole, since it is spliced into a SELECT — and listed), no walk project, a Debug build outside `/Applications`, zero instances, the stage held, the dev slot set aside,
 the road's tools, the GUI grants. `--self-test` shows the allowlist guard's refusals over fixtures. The release checklist
 row (`Tools/Release/release.sh`'s HANDOFF, step 0) names it beside the headless gate `FirstRunDrillTests`.
