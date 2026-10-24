@@ -1226,8 +1226,8 @@ PENDING.*
   build products; runner `b2/test.sh <log> <filter|ALL>` under a watchdog, `b2/revert.sh` for the reverts). **BASELINE on the
   pre-fix tree (`b07c2833f`), the three harness-PATH artifacts `--skip`ped (unit A's Piece 0): `✔ Test run with 477 tests in
   82 suites passed`** — exactly B1's close.
-- **Piece F — F-B1-1 (B), RULED (Part of VX-510): DONE (this commit — ITS HASH IS IN THE NEXT LINE'S FLIP; the orchestrator
-  builds the live walk from it).** `Shared/Protection/ProtectionWalkSwitch.swift`: the app reads the allowlist from the launch
+- **Piece F — F-B1-1 (B), RULED (Part of VX-510): DONE — `4a5ef39e3` (pushed at once; THE COMMIT THE ORCHESTRATOR BUILDS
+  THE LIVE WALK FROM).** `Shared/Protection/ProtectionWalkSwitch.swift`: the app reads the allowlist from the launch
   environment's `VARIORUM_PRODTEST_EMAILS` (the file's one key's shape — space-separated; one pair of surrounding quotes
   dropped), never a file — `AllowlistRead`, `readAllowlist`, `realHome`, `prodTestAllowlistPath` and the file parse DELETED;
   `prodTestRoad(switchValue:walkProject:allowlist:)`'s input is the handed value (nil = not handed), read only when asked;
@@ -1253,16 +1253,24 @@ PENDING.*
   SyncLockedRowTests"`: `✔ Test run with 34 tests in 5 suites passed`**; no warning in a touched file. The walk script:
   `zsh -n` clean; `--self-test` → every case as expected, `SELF-TEST: every guard fired as expected` exit 0.
   **THE REVERTS (named BEFORE any run; each one file — `ProtectionWalkSwitch.swift` — on the committed tree, the harness
-  `--filter ProdTestRoadTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** PENDING —
+  `--filter ProdTestRoadTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** **DONE on
+  `4a5ef39e3` — every one RED as named, every restore clean; NO REVERT IS IN FLIGHT** (results in brackets after each):
   - **RF-1** the launch's reading hands the rule nothing (`allowlist: { nil }`) [`theLaunchReadsTheHandedListFromItsEnvironment`].
+    → `✘ Test run with 14 tests in 1 suite failed with 3 issues` — `theLaunchReadsTheHandedListFromItsEnvironment` ✘×2 (the
+    armed leg read `.refused(.allowlistNotHanded)`; the unmarked leg likewise), and `theRoadReadsNoFile` ✘ (its own teeth
+    line: the handed read gone from the code).
   - **RF-2** the marker check removed [`eachAllowlistFaultRefusesAndTheFenceStands`, `aHerShapedAddressIsNeverAdmitted` (the
-    outright refusal), `theLaunchReadsTheHandedListFromItsEnvironment` (the unmarked leg)].
+    outright refusal), `theLaunchReadsTheHandedListFromItsEnvironment` (the unmarked leg)]. → `✘ … 14 tests … with 11
+    issues` — `eachAllowlistFaultRefusesAndTheFenceStands` ✘×9, `theLaunchReadsTheHandedListFromItsEnvironment` ✘,
+    `aHerShapedAddressIsNeverAdmitted` ✘ (the bare address armed the road).
   - **RF-3** a list not handed reads as an empty one (`allowlist() ?? ""`) [`eachAllowlistFaultRefusesAndTheFenceStands` (nil),
-    `theLaunchReadsTheHandedListFromItsEnvironment` (the switch alone)].
-  - **RF-4** the empty guard removed (an empty list arms) [`eachAllowlistFaultRefusesAndTheFenceStands`].
+    `theLaunchReadsTheHandedListFromItsEnvironment` (the switch alone)]. → `✘ … with 2 issues` — each of the two ✘.
+  - **RF-4** the empty guard removed (an empty list arms) [`eachAllowlistFaultRefusesAndTheFenceStands`]. → `✘ … with 9
+    issues` — that pin ✘×9 (the empty, blank and `""` lists armed an empty allowlist).
   - **RF-5** the quote drop removed [`theHandedListIsParsedAsTheFilesOneKey`, `eachAllowlistFaultRefusesAndTheFenceStands` (`""`)].
+    → `✘ … with 3 issues` — `theHandedListIsParsedAsTheFilesOneKey` ✘×2, `eachAllowlistFaultRefusesAndTheFenceStands` ✘.
   - **RF-6** the admission matches loosely (an entry containing the address, or the address containing an entry)
-    [`aHerShapedAddressIsNeverAdmitted`].
+    [`aHerShapedAddressIsNeverAdmitted`]. → `✘ … with 8 issues` — that pin ✘×8 (the bare and fragment addresses admitted).
   (The walk script's `--env` line has no headless revert — nothing may launch here; unit C's P2 proves it live.)
 - **Piece 1 — D-B4 (VX-501):** NOT STARTED.
 - **Piece 2 — D-B6 (VX-511):** NOT STARTED.
