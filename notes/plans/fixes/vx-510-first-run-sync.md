@@ -2936,7 +2936,11 @@ EXISTING public API, conformed on the app's side).
   three F-R1-1 pins GREEN; the drill, the act/reopen worlds and the row suites unchanged and green (the real scheduler's
   path through `roundNow` → `runRound` — `roundNowRunsOneRoundToItsEndAndReturnsItsStatus`,
   `roundNowWaitsForTheFollowUpOfARoundInFlight` — green). No warning in a touched file.
-- **Piece 3** — F-R1-4 fix (one arm): NOT-STARTED.
+- **Piece 3** — F-R1-4 fix: DONE (this commit). `Shared/Protection/ProtectionSecretCheck.swift`: the empty-text guard answers
+  `.refused(ProtectionWords.checkSecretsLead)` (one arm; the sheet's own ask — no new words; still before any key-file read,
+  vault read or log). **The harness, `--filter "SecretCheckRoadTests|SecretCheckModelTests|SecretCheckCompositionTests|
+  RoadKeyDoorRoadTests|RoadKeyDoorsModelTests"`: `✔ Test run with 31 tests in 6 suites passed`** — Piece 1's guard assertion
+  GREEN inside the zero-writes span; the composition guard (`theCheckRoadNamesNoWriterAndNoKeychainRead`) green.
 - **Piece 4** — F-R1-5 fix (G2 + P3's `plain_address`; `zsh -n`; the self-test): NOT-STARTED.
 - **Piece 5** — the behavioral reverts, named before any runs: NOT-STARTED.
 - **Piece 6** — evidence (the harness whole, Mac + iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`, THE

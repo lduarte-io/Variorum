@@ -95,7 +95,9 @@ nonisolated enum ProtectionSecretCheck {
         _ session: ProtectionRoadSession, typed text: String, signIn: SessionFact, within bound: Duration = vaultBound
     ) async -> SecretCheckOutcome {
         let library = session.library
-        guard !text.isEmpty else { return .doesNotOpen(.passphrase, opensAccount: false) }
+        // Nothing typed is nothing checked (the ladder's F-R1-4): the sheet's own ask, never "that passphrase doesn't open"
+        // (unreachable through the sheet — its `canSubmit` refuses an empty field).
+        guard !text.isEmpty else { return .refused(ProtectionWords.checkSecretsLead) }
         // The library's own locks: the live key file of the key the library is open under (the door stands only then).
         guard let keyFile = library.keyFile, keyFile.fingerprint == library.fingerprint else {
             ProtectionOpenRoad.log("road: a secret check found no key file of the open key beside the library — nothing checked")
