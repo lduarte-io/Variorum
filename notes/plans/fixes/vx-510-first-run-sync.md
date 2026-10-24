@@ -1611,9 +1611,23 @@ not yet run is PENDING.*
   `Executor.readVault` (its `freshVaults` cache — the check never goes through it) / `Follow`'s VX-113 test; the suites
   `RoadKeyDoorsModelTests`, `RoadKeyDoorRoadTests`, `RoadKeyDoorSurfaceTests`, `LookInsideRoadTests` (the write-nothing
   proof idiom), `ProtectionAccountSupport`, `ProtectionTestSupport`: DONE (this commit).
-- **Piece 0** — the harness (B2's `vx510b2-harness` copied whole but its build products to this session's scratchpad
-  `vx510b3-harness`; runner `b3/test.sh`, `b3/revert.sh`) and its baseline: PENDING.
-- **Piece 1** — the composition pins that compile on the pre-fix tree, committed RED: NOT STARTED.
+- **Piece 0** — the harness: DONE (not durable — B2's `vx510b2-harness` copied whole but its build products to this
+  session's scratchpad `vx510b3-harness`, the SwiftPM checkouts carried, the build fresh — `Build complete!`; runner
+  `b3/test.sh <log> <filter|ALL> [watchdog]`, `b3/revert.sh <name> <file> <filter>` for the reverts; each new suite or source
+  file symlinked in as it lands). **BASELINE on the pre-fix tree, the three harness-PATH artifacts `--skip`ped (unit A's Piece
+  0): `✔ Test run with 502 tests in 85 suites passed`** — exactly B2's close.
+- **Piece 1** — the composition pins that compile on the pre-fix tree, committed RED: DONE (`b3fd67000`; this record flip
+  rode one commit late — the edit missed the commit). New suite `VariorumTests/Protection/SecretCheckCompositionTests.swift`
+  (source pins on CODE lines, `#filePath`'s symlinks resolved so they run in the harness):
+  `thePaneRendersTheCheckDoorAfterTheWordsSection` (`RoadSecretCheckSection(model: keyDoors)` after the words section; still
+  one presenter host), `thePresentersHostCarriesTheCheckSheet` (`case checkSecrets(RoadSecretCheckModel)` on the presenter,
+  its sheet on the host), `theBootstrapWiresTheCheckRoadOnTheOpenSession` (`keyDoorRoads()`'s `check:` — ready only, the open
+  session, detached, the sign-in now), and the GUARD `theCheckRoadNamesNoWriterAndNoKeychainRead` (the road's code names no
+  writer of any home, never the executor — whose vault read fills `freshVaults` —, never the act lock, a ledger or a defaults
+  domain, no custody or sync-keys read — a Touch ID read prompts, VX-503 —, no static state). **RED on the pre-fix tree**
+  (the harness, `--filter SecretCheckCompositionTests`): `✘ Test run with 4 tests in 1 suite failed with 5 issues` — each of
+  the four ✘ (no section on the pane; no case on the presenter nor the host ×2; no `check:` road; the road's file does not
+  exist). The behavioural pins need the new seam to compile — their red is Piece 4's reverts.
 - **Piece 2** — the read-only check road (`ProtectionSecretCheck`), its outcome and words, its road pins: NOT STARTED.
 - **Piece 3** — the door and its sheet (faces, model, the one presenter, the bootstrap's road, the Mac section and sheet),
   their pins: NOT STARTED.
