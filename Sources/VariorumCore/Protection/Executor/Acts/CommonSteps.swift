@@ -386,18 +386,29 @@ extension ActContext {
         return snapshot
     }
 
-    /// The keys for the vault as read: custody's when they are its current
-    /// sync key under its master, else from the vault with the secrets in hand.
+    /// The keys for the vault as read: from the vault with the secrets in hand
+    /// when they open it — else custody's, when they are its current sync key
+    /// under its master.
+    ///
+    /// VX-503 (VX-510 D-B5 — the run record's T-B5-1…4): the secrets FIRST.
+    /// Custody's read came first before, and its Touch ID class is a PROMPT on
+    /// the real leaf — a join holding the very passphrase that opens the vault
+    /// raised Touch ID over a stale item another library left, for keys the
+    /// derivation gives byte for byte (both are the vault's current sync key
+    /// under its master; the derivation reads every earlier key from the vault
+    /// itself). Custody still serves where no secret in hand opens the vault:
+    /// the quiet follow out of Castle (nothing typed) and the key doors (their
+    /// secrets are the NEW ones).
     func material(for snapshot: VaultSnapshot) throws -> AccountKeys {
+        if let master = VaultModel.master(of: snapshot.vault, passphrase: secrets.passphrase, words: secrets.words) {
+            let derived = try snapshot.vault.keys(master: master)
+            material = derived
+            return derived
+        }
         if let held = try syncMaterial(), held.rowKeyID == snapshot.rowKeyID, snapshot.vault.isMaster(held.masterKey) {
             return held
         }
-        guard let master = VaultModel.master(of: snapshot.vault, passphrase: secrets.passphrase, words: secrets.words) else {
-            throw ExecutorRefusal.secretsRequired(act)
-        }
-        let derived = try snapshot.vault.keys(master: master)
-        material = derived
-        return derived
+        throw ExecutorRefusal.secretsRequired(act)
     }
 
     /// **Use Castle's one vault write** (rules 11, 15) — the account's own
