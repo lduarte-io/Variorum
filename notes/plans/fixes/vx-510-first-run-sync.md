@@ -1038,9 +1038,40 @@ unit B2's brief). Every claim not yet run is PENDING.*
     fence [`aReleaseBuildCompilesNothingOfTheRoad`].
   - **RB-18** (D-B3, the call site) `Shared/AppServices.swift`: the DEBUG derivation back to the walk-lift-only call
     [`theDerivationReadsTheLaunchsLiftOnlyInDebug`, `armedAndListedComposesTheChain`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
-  RESULTS: PENDING — **REVERTS STARTING** (the committed tree `235a13aad` IS the pre-revert copy; each restore is `git checkout
-  -- <file>` then `git diff --exit-code`; if this line still stands after a death, read `git diff` against HEAD to see what is
-  reverted).
+  **RESULTS — DONE, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN FLIGHT** (the committed
+  tree `a59972d3c`; the runner `b1/revert.sh` in the session scratchpad, each run filtered):
+  - **RB-1** `--filter "FirstRoundAfterTheReopenTests|FirstRunDrillTests"`: `✘ Test run with 14 tests in 2 suites failed with 6
+    issues` — `vx507_aReKeyingJoinConfirmsItsFirstRoundOnTheReopensFreshServices` ✘×2, `theServicesGenerationAnswers…` ✘,
+    `arm7_theReKeyingJoinRunsItsFirstRoundThroughTheReopen` ✘×3.
+  - **RB-2** (+ `FirstRoundConfirmTests`): `✘ … 24 tests in 3 suites failed with 14 issues` — `aDoorReShownAsReKeyingTakesTheReopenRoad`
+    ✘, `aReKeyingActAsksTheReopenRoadWithThePressGeneration` ✘×10, the end-to-end pin ✘ (**its outcome `.done(.notConfigured)`
+    — the released services: the false "Sync hasn't run yet: Sync is off.", exactly the named failure; it also proves the
+    world lets the old instance go**), `arm7_…` ✘×2.
+  - **RB-3** `--filter FirstRoundAfterTheReopenTests`: `✘ … 3 tests in 1 suite failed with 3 issues` —
+    `theServicesGenerationAnswers…` ✘×2 and the end-to-end pin ✘.
+  - **RB-4** `--filter FirstRunDrillTests`: `✘ … 11 tests in 1 suite failed with 23 issues` — arm1–arm6 and all four negatives
+    ✘ (no round phase); `arm7_…` green (the re-keying road is wired separately — as designed).
+  - **RB-5** (three suites): `✘ … 24 tests in 3 suites failed with 25 issues` — `aReKeyingActAsks…` ✘×20, the end-to-end pin
+    ✘×2, `arm7_…` ✘×3.
+  - **RB-6** `--filter FirstRoundAfterTheReopenTests`: `✘ … 3 tests in 1 suite failed with 6 issues` —
+    `aFirstRoundAskedWhileStartRunsRidesTheStartsChain` ✘×2 (two chains; `CancellationError()`) AND the end-to-end pin ✘×4:
+    **without the wait the reopen's first round is cancelled by the start's second configure and the sheet says "Sync hasn't
+    run yet: Sync error." — the race is real on the shipped path, not hygiene**.
+  - **RB-7** `--filter FirstRoundConfirmTests`: `✘ … 10 tests in 1 suite failed with 3 issues` — `eachOutcomeSaysTheRowsOwnSentence`
+    ✘, `aReKeyingActAsks…` ✘×2 (the two follows).
+  - **RB-8** `--filter "ProdTestRoadTests|SyncWalkFenceTests"`: `✘ … 19 tests in 2 suites failed with 7 issues` —
+    `theSwitchAndAPrivateMarkedListArmTheRoad` ✘, `armedAndListedComposesTheChain` ✘×3, `armedAndUnlisted…` ✘×3.
+  - **RB-9** (same): `✘ … with 3 issues` — `armedAndUnlistedComposesNothingAndTheRowSaysWhy` ✘×3 (a chain composed).
+  - **RB-10** (same): `✘ … with 6 issues` — `theAdmissionIsPerAccount` ✘×3, `armedAndUnlisted…` ✘×3.
+  - **RB-11** (same): `✘ … with 2 issues` — `theSwitchWithAWalkProjectRefuses` ✘×2.
+  - **RB-12** (same): `✘ … with 6 issues` — `eachAllowlistFaultRefusesAndTheFenceStands` ✘×6 (644 and 640 armed).
+  - **RB-13** (same): `✘ … with 3 issues` — `eachAllowlistFaultRefusesAndTheFenceStands` ✘×3 (the unmarked entry armed).
+  - **RB-14** (same): `✘ … with 1 issue` — `theReadReportsTheFilesModeAndNeverFollowsALink` ✘ (the link followed).
+  - **RB-15** (same): `✘ … with 15 issues` — `withNoSwitchTheFenceHoldsAndNothingIsRead` ✘×15.
+  - **RB-16** (same): `✘ … with 1 issue` — `theRowConsultsTheRoadsRefusalFirst` ✘.
+  - **RB-17** (same): `✘ … with 2 issues` — `aReleaseBuildCompilesNothingOfTheRoad` ✘×2.
+  - **RB-18** (same): `✘ … with 7 issues` — `theDerivationReadsTheLaunchsLiftOnlyInDebug` ✘, `armedAndListed…` ✘×3,
+    `armedAndUnlisted…` ✘×3.
 - **Piece 7** — evidence on the final tree: the harness whole, the release compile, ONE Mac + ONE iOS build-for-testing
   (`DerivedData/vx510-b1`, `vx510-b1-ios`), THE MAC-SUITE LIST. NOT STARTED.
 
