@@ -1286,7 +1286,8 @@ PENDING.*
   - **RF-6** the admission matches loosely (an entry containing the address, or the address containing an entry)
     [`aHerShapedAddressIsNeverAdmitted`]. → `✘ … with 8 issues` — that pin ✘×8 (the bare and fragment addresses admitted).
   (The walk script's `--env` line has no headless revert — nothing may launch here; unit C's P2 proves it live.)
-- **Piece 1 — D-B4 (VX-501, Part of VX-501):** IN PROGRESS — 1a and 1b DONE; 1c (the reverts) named, running next.
+- **Piece 1 — D-B4 (VX-501, Part of VX-501): DONE** — 1a `6313178e7` (red pins) · 1b `b12ee17d2` (the fix) · 1c `8fb5f7b2f`
+  (one pin leg tightened) + this commit (the revert results).
   - **1a — the pins that compile on the pre-fix tree, committed RED before the fix: DONE (this commit).** Read first:
     `ProtectionOpenRoad` whole (`openTyped`, `typedCandidates`, `pressTouchID`, `loadSyncKeysForTheSession`),
     `NewRoadSyncKeyProvider`, `WireVaultLeaf`, `ProtectionRoadLock.dropSessionMemory`, the core's `KeyDoors`
@@ -1309,7 +1310,7 @@ PENDING.*
     ID pin ✘×2, and the "the read was tried" legs of offline / not-the-vault / moved ✘ each (their never-hostage legs pass
     on both sides, as pin 5's did at VX-487); every world's preconditions held (no issue in the setups); the three guards ✔
     (by design on both sides — their teeth are the reverts').
-  - **1b — THE FIX: DONE (this commit).** `Shared/Protection/ProtectionOpenRoad.swift`: `openTyped` (now
+  - **1b — THE FIX: DONE (`b12ee17d2`).** `Shared/Protection/ProtectionOpenRoad.swift`: `openTyped` (now
     `openTyped(_:secret:syncKeysWithin:)`, the bound defaulted) calls the new **`loadSyncKeysAfterTypedUnlock`** on
     `.opened`, after the open and before the app's open goes on (off the main actor — the lobby's press is detached).
     The load: a read-only road (a hosted test run), an unbound library or a STANDARD one (the silent item serves — the
@@ -1341,18 +1342,29 @@ PENDING.*
     `✔ Test run with 64 tests in 7 suites passed`** (before the last three pins); `--filter TypedUnlockSyncKeysTests` on
     this commit: **`✔ Test run with 13 tests in 1 suite passed`** — 1a's six red pins GREEN; no warning in a touched file.
   - **1c — THE REVERTS (named BEFORE any run; each one line of `ProtectionOpenRoad.swift` on this commit, the harness
-    `--filter TypedUnlockSyncKeysTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** PENDING —
+    `--filter TypedUnlockSyncKeysTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** **DONE —
+    every one RED as named, every restore clean; NO REVERT IS IN FLIGHT** (RD4-2…8 on `b12ee17d2`; RD4-1 first there,
+    then again on `8fb5f7b2f` — see its line). Results after each:
     - **RD4-1** `openTyped` no longer calls the load (the pre-fix press) [the three `vx501_` pins; the "tried" legs of
-      offline / not-the-vault / moved; the bound pin's "the read was made"].
-    - **RD4-2** the Castle gate removed [`aStandardLibraryLoadsNothingAndReadsNoVault` (its silent-item-gone leg)].
-    - **RD4-3** the signed-in gate always passes [`signedOutReadsNothing`].
-    - **RD4-4** the follows check always passes (a moved account's keys held) [`anAccountThatMovedLoadsNothing`].
+      offline / not-the-vault / moved; the bound pin's "the read was made"]. → on `b12ee17d2`: `✘ Test run with 13 tests in
+      1 suite failed with 10 issues` — the passphrase pin ✘×3, the words ✘×2, the Touch ID ✘×2, offline / not-the-vault /
+      moved ✘ each — but the bound pin STAYED GREEN: its "the read was made" leg was HOLLOW (`calls.contains` counted the
+      world's setup reads). Tightened to count this unlock's fetch (`8fb5f7b2f`, test only) and RD4-1 re-run there: `✘ … 13
+      tests … with 11 issues` — the same ten plus the bound pin ✘ ("the read was made").
+    - **RD4-2** the Castle gate removed [`aStandardLibraryLoadsNothingAndReadsNoVault` (its silent-item-gone leg)]. → `✘ …
+      with 2 issues` — that pin ✘×2 (the vault read, the keys held — only once the silent item was gone: with it, the
+      already-held check stops the read, which is why the leg exists).
+    - **RD4-3** the signed-in gate always passes [`signedOutReadsNothing`]. → `✘ … with 3 issues` — that pin ✘×3.
+    - **RD4-4** the follows check always passes (a moved account's keys held) [`anAccountThatMovedLoadsNothing`]. → `✘ …
+      with 1 issue` — that pin ✘ (the moved keys held).
     - **RD4-5** the bound removed (the read awaited to its end) [`aVaultReadPastTheBoundLeavesTheUnlockOnTimeAndALateAnswer
-      IsDropped`].
-    - **RD4-6** the read-only gate removed [`aReadOnlyRoadReadsNothing`].
-    - **RD4-7** the already-held short-circuit never matches [`keysAlreadyHeldReadNoVault`].
+      IsDropped`]. → `✘ … with 3 issues` — that pin ✘×3 (the unlock waited the read's 2 s; the late keys held).
+    - **RD4-6** the read-only gate removed [`aReadOnlyRoadReadsNothing`]. → `✘ … with 1 issue` — that pin ✘.
+    - **RD4-7** the already-held short-circuit never matches [`keysAlreadyHeldReadNoVault`]. → `✘ … with 1 issue` — that pin
+      ✘ (a vault read with the keys already held).
     - **RD4-8** the already-held check reads the TOUCH ID item (the core door's order — a prompt) [`vx501_aTypedUnlockUnder
-      TouchIDLoadsThemWithNoPress`, `theTypedLoadNeverDerivesThePassphrase`].
+      TouchIDLoadsThemWithNoPress`, `theTypedLoadNeverDerivesThePassphrase`]. → `✘ … with 4 issues` — the Touch ID pin ✘×3
+      (a Touch ID read; the item's keys seen as "already loaded", so nothing put in session) and the guard ✘.
     (Not pinned, said plainly: the reuse of a vault the settle already read — planting an act in flight resumed by a typed
     unlock is a world of its own; the branch is the design's one-read rule, read by the reviewer.)
 - **Piece 2 — D-B6 (VX-511):** NOT STARTED.
