@@ -1435,6 +1435,38 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   terminal. Zero Variorum instances. **The dev slot's 9 top-level files aside by `mv`** into the sibling
   `…/Application Support/Variorum-dev-aside-vx510/` — inodes 191598614–191598620, 193537660/193537661, identical
   after the move; `Backups/` and `Previous Libraries/` stay in the slot.
+- **S1 (20:37)** — launched `open -n --env VARIORUM_PROD_TEST_ROAD=1 --env VARIORUM_PRODTEST_EMAILS=<the file's list>`
+  (pid 57831); `ps eww`: both keys present, NO walk project. **The app's own line: "PROD TEST ROAD (VX-510): ARMED for
+  this launch — the dev store may sync with PRODUCTION while one of the 3 listed test account(s) is signed in"** — F-B1-1
+  (B) live. A fresh library `6fa0c827` (key `1aad910b`, device `737b3ed0`), Standard, signed out; the band card offers the
+  words and the passphrase. OBSERVATION W-1: the fresh store got NO seeded content ("sample library … alreadySeeded" — the
+  seeders' marks are this Mac's defaults, not the library's), so the drill's library holds only settings; on a stranger's
+  first Mac it seeds as designed.
+- **S2 (20:40)** — the Account sheet's Create an account…: the email and the password twice typed by
+  `type-prod-test-secret std` (the form's own "At least 12 characters"); Create Account → **"Check your email for a
+  confirmation link, then sign in here…"** (the confirmation road, as designed).
+*[removed for publication]*
+  unconfirmed; `Tools/prod-confirm-test-user.sh` (run from the branch worktree, the gitignored `.env.supabase.local`
+  linked from main) → `email_confirmed_at` 02:41:54Z.
+- **S4 (20:42)** — Back to sign in → email + password by the helper → **signed in**; the Account sheet: "Hosted sync is
+  active on this account."; **the main window's row: "Sync isn't on for this library yet" with Protection… (VX-506's
+  not-yet face, LIVE on a real account).**
+- **S5 (20:43)** — the band card's look → Copy → `stash-prod-test-words std` ("stashed std's twelve words (12) … clipboard
+  cleared") → "I've written them down" → "These words won't be shown again." → Close. **Machinery honesty:** the
+  orchestrator looked at a downscaled layout capture to find the Copy button, and the words were still legible in it — so
+  this disposable test library's words were seen once by the session; never written anywhere, never typed by hand (the
+  helper types them from the stash), the capture deleted at once; LEG S's S13 replaces them anyway.
+- **S6 (20:46:18)** — the row's **Protection… opened Settings AT the Protection pane** (VX-486 live); Sync: "This library
+  doesn't sync." · Turn on sync… → the SET-UP arm ("Your library's passphrase and twelve words become the account's. Nothing
+  is replaced. … Your account starts in Standard, like this library. This library has no passphrase yet. Choose one…") → a
+  new passphrase twice + the words, all three by the helper (concealed — VX-463's eye) → Turn on sync → log
+  *[removed for publication]*
+  RELAUNCH, THE SHEET: "Synced. Your library is on your account now." with Done** (VX-498 + VX-507 LIVE ON PRODUCTION).
+- **S7 (20:47)** — **prod reads by the uid:** `key_vault` mode **standard**, created 02:46:19Z (the press), proof hash set;
+  *[removed for publication]*
+  1** (last_seq 0 — the round's start, the 13j rule); **rows pushed 3** (the three `setting` rows; `sync_write_budget`
+  lifetime 3); containers 0 (W-1). Done → **the main window's row: "Synced 8:46 PM"** — no relaunch. OBSERVATION W-2 (chrome,
+  cosmetic): at the dev window's sidebar width the row's two buttons truncate to "Sync…" and "Accou…".
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
