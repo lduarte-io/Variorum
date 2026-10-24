@@ -101,6 +101,10 @@ final class FirstRoundWorld {
     let server = FirstRoundServer()
     let auth: AuthSession
     private(set) var services: AppServices?
+    /// VX-510 unit B1 (D-B0): every services instance this world composed, in order (a reopen composes a fresh one).
+    private(set) var composed: [AppServices] = []
+    /// VX-510 unit B1 (D-B0): the `.ready` arm's compose after a reopen, in flight (`reopensComposeFreshServices`).
+    private var readyWatch: Task<Void, Never>?
 
     private static let authConfiguration = AuthConfiguration(
         projectURL: URL(string: "https://vx510-first-round.invalid")!, apiKey: "publishable")
@@ -161,9 +165,34 @@ final class FirstRoundWorld {
             boundAccountRead: { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys.boundAccount },
             legacyCleanup: {})
         self.services = services
+        composed.append(services)
         bootstrap.attach(services: services)
         await services.start()
         return services
+    }
+
+    /// **VX-510 unit B1 (D-B0) — the composition root's lifecycle across a REOPEN, as `VariorumApp` runs it.** A re-keying
+    /// act (a join across postures, Move across postures, every follow — and the crossings) closes the library around its
+    /// act and reopens it: the lock's teardown (`bootstrap.onWillLock` — production's `macWillLock { services?.stop();
+    /// services = nil }`) STOPS the services and lets them go, and when the reopened `.ready` arm renders, its `.task`
+    /// composes FRESH services over the new session and attaches them (`composeServices` — attach, then start). The world's
+    /// `onReady` is a watch armed at the teardown: it waits for a ready session that is not the one that closed, then
+    /// composes. Call once, before the act.
+    func reopensComposeFreshServices() {
+        bootstrap.onWillLock = { [weak self] in
+            guard let self else { return }
+            let closing = self.readySession
+            self.services?.stop()
+            self.services = nil
+            self.readyWatch = Task { @MainActor [weak self] in
+                await Self.settle(seconds: 20) {
+                    guard let self, let session = self.readySession else { return false }
+                    return session !== closing
+                }
+                guard let self, let session = self.readySession, session !== closing else { return }
+                _ = try? await self.composeServices()
+            }
+        }
     }
 
     /// The pre-act rounds settled: the sign-in's trigger (and, when the fresh library's outbox holds rows, the settle
@@ -196,7 +225,9 @@ final class FirstRoundWorld {
     /// locals, and a test process exiting under a task still releasing that pool crashes SQLCipher's shutdown (seen once in
     /// the harness, the suite running last: `sqlcipher_extra_shutdown` racing `DatabasePool.deinit`).
     func quiesce() async {
+        await readyWatch?.value
         if let confirm = bootstrap.roadAccount?.confirm { _ = await confirm.awaitFirstRound() }
+        for composed in composed { composed.stop() }
         services?.stop()
         try? await Task.sleep(for: .milliseconds(200))
     }

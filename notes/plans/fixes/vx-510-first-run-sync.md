@@ -783,11 +783,22 @@ unit B2's brief). Every claim not yet run is PENDING.*
   supports (`ProtectionAccountSupport`, `PlantedRoad`, `PlantedJoin`, `PlantedAccountRoads`, `Crossing`,
   `RoadJoinFollowSurfaceTests`' reopening seam, `TouchIDUnlockSyncKeysTests`' world, `SyncWalkFenceTests`,
   `EntitlementsTests`): DONE (this commit).
-- **Piece 0** — the harness: unit A's copied to this session's scratchpad `vx510b1-harness` (same recipe — unit A's Piece 0;
-  the checkouts carried, the build fresh). PENDING its first build.
-- **Piece 1** — D-B0's end-to-end pin over the first-round world (a re-keying join through the reopen; the world gains the
-  `onWillLock` stop + an `onReady` compose-and-attach, as `VariorumApp`'s `.task`), committed RED on the pre-fix tree.
-  NOT STARTED.
+- **Piece 0** — the harness: DONE (not durable — this session's scratchpad `vx510b1-harness`, unit A's copied whole: its
+  `Package.swift`, both stub files, every symlink; the SwiftPM checkouts carried, the build fresh — `Build complete!`; each
+  new suite is symlinked in as it lands). Runner: `b1/test.sh <log> <filter>` (build, then the filtered run under a 300 s
+  watchdog).
+- **Piece 1** — D-B0's end-to-end pin, committed RED on the pre-fix tree: DONE (this commit). Unit A's `FirstRoundWorld`
+  EXTENDED (never forked): `reopensComposeFreshServices()` — the composition root's lifecycle across a reopen, as
+  `VariorumApp` runs it (the `onWillLock` teardown stops and releases the services; an `onReady` watch composes FRESH
+  services over the reopened session and attaches them — attach, then start); `composed` (every instance, in order);
+  `quiesce` awaits the watch and stops every instance. New suite `VariorumTests/Protection/FirstRoundAfterTheReopenTests.swift`:
+  `vx507_aReKeyingJoinConfirmsItsFirstRoundOnTheReopensFreshServices` (a Standard library joins an account that syncs in
+  CASTLE — the join enters Castle, re-keys, runs through the reopen). **RED on the pre-fix tree** (the harness, `--filter
+  "FirstRoundAfterTheReopenTests|FirstRoundAfterTheActTests"`): `✘ Test run with 6 tests in 2 suites failed with 2 issues`
+  — `vx507_aReKeyingJoinConfirmsItsFirstRoundOnTheReopensFreshServices` ✘×2 (`account.confirm === confirm` — the sheet went
+  with the words moment; "a first round runs for the re-keying join" — none started); its preconditions all held (the door
+  `.entersCastle` and re-keying, no refusal, the reopen in Castle, the record naming the account); unit A's five world pins
+  green under the extended world.
 - **Piece 2** — D-B0 (F-6 (A), ruled): the bootstrap's services generation, `awaitAttachedServices(newerThan:)` (bounded),
   the re-keying road (`firstRoundAfterReopen`, the generation taken at the press), `owesFirstRound` widened (re-keying joins,
   Move, the follow), the follow's round line (PROVISIONAL). NOT STARTED.
