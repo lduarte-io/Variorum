@@ -163,3 +163,50 @@ struct PairRefusalSiblingSeamTests {
         }
     }
 }
+
+/// F-10 (sweep rows 8–9), on R-529-5's brief: the class's words twin INSIDE THE FOLLOW. Old words typed at a follow —
+/// they open THIS library (its own lock) but the account's words were changed elsewhere — said "Those twelve words don't
+/// open this library." Now `wordsChangedElsewhere(device:day:)` (VX-113's twin, the vault's last writer and day); words
+/// that open neither keep the plain refusal. RED ON THE PRE-FIX TREE.
+@Suite("VX-529 P7-2 — the follow's words arms name a words change elsewhere")
+struct PairFollowWordsRefusalTests {
+    /// Row 8 — a posture follow whose words also changed elsewhere: the Mac re-made the words, then entered Castle.
+    @Test func theFollowIntoCastleWithTheOldWordsNamesTheChange() async throws {
+        let mac = try EX(.standard, synced: true)
+        let air = try EX(.standard, synced: true, joining: mac)
+        let macExecutor = mac.executor()
+        var macLibrary = try mac.unlocked(macExecutor)
+        let fresh = try PF.words()
+        _ = try await macExecutor.regenerateWords(&macLibrary, passphrase: mac.passphrase, newWords: fresh)
+        _ = try await macExecutor.useCastle(&macLibrary, typed: TypedSecrets(passphrase: mac.passphrase, words: fresh), gate: .alwaysAsk)
+        let vault = try pairVault(mac)
+        #expect(try air.world.liveFormat3?.open(.words(air.words), floor: PF.floor) == air.key, "the fixture")
+        try await PairRefusalSiblingSeamTests.expectRefused(
+            air, .wordsChangedElsewhere(device: "Mac A", day: vault.updatedAt), "the follow into Castle, the old words"
+        ) { executor, library in
+            _ = try await executor.follow(&library, kind: .intoCastle, typed: TypedSecrets(words: air.words))
+        }
+        try await PairRefusalSiblingSeamTests.expectRefused(air, .wordsDoNotOpen, "the follow into Castle, nobody's words") {
+            executor, library in
+            _ = try await executor.follow(&library, kind: .intoCastle, typed: TypedSecrets(words: try PF.words()))
+        }
+    }
+
+    /// Row 9 — the pair catch-up's own door: both halves moved; the OLD words typed (the E14 / words-arm ask).
+    @Test(arguments: ProtectionMode.allCases)
+    func thePairDoorWithTheOldWordsNamesTheChange(_ mode: ProtectionMode) async throws {
+        let (mac, air, _, _) = try await pairMovedElsewhere(
+            mode, gate: mode == .castle ? .alwaysAsk : nil, passphrase: true, words: true)
+        let vault = try pairVault(mac)
+        try await PairRefusalSiblingSeamTests.expectRefused(
+            air, .wordsChangedElsewhere(device: "Mac A", day: vault.updatedAt), "the pair door, \(mode), the old words"
+        ) { executor, library in
+            _ = try await executor.follow(&library, kind: .pairChanged(passphrase: true, words: true), typed: TypedSecrets(words: air.words))
+        }
+        try await PairRefusalSiblingSeamTests.expectRefused(air, .wordsDoNotOpen, "the pair door, \(mode), nobody's words") {
+            executor, library in
+            _ = try await executor.follow(
+                &library, kind: .pairChanged(passphrase: true, words: true), typed: TypedSecrets(words: try PF.words()))
+        }
+    }
+}

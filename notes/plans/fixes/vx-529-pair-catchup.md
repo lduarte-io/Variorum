@@ -510,8 +510,10 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     premise). Green: 96 tests (pair, follow, key-door suites) + `PairRelockTests` 9/9. VERIFIED BY REVERT: the door's
     either-secret line and the spec put back ⇒ the same 11 issues red; restored ⇒ green. DONE (`577c69d03` pins,
     `e49321c61` fix).
-  - P7-2 — F-10's refusal at the follow's own words arm and the pair door's (sweep rows 8–9). Red pins first.
-    NOT-STARTED.
+  - P7-2 — F-10's refusal at the follow's own words arm and the pair door's (sweep rows 8–9). IN-PROGRESS — the red
+    pins COMMITTED (`PairFollowWordsRefusalTests`): RED on the pre-fix tree — the follow into Castle with the OLD words
+    after the Mac re-made the words and entered Castle, and the pair door (both postures) with the OLD words after both
+    halves moved: `wordsDoNotOpen` (3); the nobody's-words companions green. Remains: the fix, green, the revert.
   - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). NOT-STARTED.
   - P7-4 — the full core suite; the report. NOT-STARTED.
 **Findings before any code (traced in this session; each says what it changes):**
