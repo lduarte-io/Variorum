@@ -3238,7 +3238,22 @@ scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-sc
   env file's **PASSPHRASE2** (`VARIORUM_PRODTEST_CASTLE_PASSPHRASE2`; the file unchanged — it holds both); its words are
   C3's (`~/.variorum/prod-test-words-castle`, unchanged). End state on prod: **standard, vault rev 18, 7 cursors, 5 live
   containers**. Tool residue: the worktree's `Tools/WalkKit/guard.sh` calls a compiled `wl2` that is absent there (its
-  on-this-Space check silently passes; the author checks still run) — a line for the triage.
+  on-this-Space check silently passes; the author checks still run) — a line for the triage. A standing log pattern,
+  recorded not chased: SQLCipher's "hmac check failed for pgno=1" lines follow each landing's re-read on the act's own
+  thread (746 in this launch, 154 in the del run's) — the copy listings trial-opening the dev slot's many older walk
+  libraries' backups; nothing refused, nothing surfaced.
+- **THE RESTORE (06:17–06:21) — CLEAN.** Signed OUT (Settings ▸ Protection ▸ Sign out… → "Sign out of this Mac?" →
+  Sign Out; the row "Signed out") → ⌘Q → ZERO instances. The re-walk's three libraries mapped by their key files'
+  `library` ids — `edf04751` (the slot), `7fee09b0` (`…-pre`), `6c51f3d0` (`…-del`) — and REMOVED with their
+  `Backups/<id>` folders (14 files, every one stamped today 04:53–06:15, listed before removal); untouched: the dev
+  store's `Backups/e11e5233`, every older `Backups/` entry, `RESTORE.md`, `safety-copies/`, the three older Previous
+  Libraries entries (Oct 7, 18, 20 — no new one was made). **The dev store's nine files moved back by `mv` — EVERY INODE
+  AS RECORDED** (191598614–191598620, 194722803/194722804); the empty aside folder removed. One PLAIN relaunch (pid
+  56345, `ps eww` — zero `VARIORUM_` keys) → rule 21's "This is a different library than the one this Mac last had open"
+  → OK → **"Sync off (dev store)"**, its own words card and its pre-existing restore-hold banner ("…as of October 20,
+  2026…") exactly as unit C's close left them → ⌘Q → zero instances → **`Tools/stage release` — STAGE FREE (06:21).**
+  The stage checkout `~/dev/variorum-vx-510-stage` (the walk build + the evidence folder) stays until the post-merge
+  build-debris tidy, which deletes it with every `DerivedData/vx510*` folder.
 
 ## HER CLOSEOUT ANSWERS (2026-10-24, at the cutover sitting — verbatim-faithful; the handoff's PENDING slots close on these)
 
