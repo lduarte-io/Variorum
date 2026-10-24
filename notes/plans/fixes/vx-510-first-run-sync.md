@@ -3189,6 +3189,56 @@ scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-sc
   SIGNED-IN arm: "This library doesn't sync." · **Sync this library…** · **Sign out…**. So the open pane's Sync section
   does not re-read on an auth change; a reopen reads it fresh. (The cutover's "NO account/Sync section" was the same
   staleness seen above the fold of a short window.) → a ticket at the triage (Bug, Confirmed, Castle & sync).
+- **THE JOIN (06:08) — PASS.** Sync this library… → the sheet ("Your account already syncs… Your account is in Standard,
+  like this library.") → the account's passphrase by the helper → Turn on sync (the first press REFUSED by the author
+  check — her brief click, said in-session; HID idle then read 24 s and climbing, her app absent; retried once at her
+  "you can keep going") → `enroll: done #1 under dfe542ab · road: turnOnSync — library edf04751 now names account
+  *[removed for publication]*
+  *[removed for publication]*
+  account's writing is in this library now."** → Done → the row **"Synced 6:08 AM"**, SAME PID 49433 (started 05:11).
+  prod: cursors 6 → 7, vault rev 15 unchanged (a same-posture join changes no account lock).
+- **USE CASTLE (06:09) — PASS.** Always ask chosen; passphrase + words by the helper → `enter_castle: … the account
+  entered Castle (sync key d5db1253) … retired 1 own Apple key(s) … done #2 under bdc1d753 · road: useCastle — library
+  edf04751 now castle under bdc1d753` → prod **castle rev 16**; the row "Synced 6:09 AM".
+- **⌃⌘L (06:10)** → `road: locked — the library closed behind the lobby (VX-445)` → the lobby ("Open your library…
+  Touch ID isn't set up for this library."; the words disclosure closed, `v=0`).
+- **VX-527 — THE LIVE PRESSES (06:10–06:11; REAL cliclick clicks; the state read from the disclosure's AX value; the row
+  geometry from a 10×-zoomed region capture: the chevron glyph x≈511.8–516.3, the words' first glyph x≈522, the AX row
+  487–849 × 543–565):** **the words' own text (620,554) → OPENS** (`v=1`, the words field "Your twelve words, separated
+  by spaces" beneath) and a second click on the text closes it · **the empty row right of the words (800,554) → OPENS**
+  (the label fills the row) · **the chevron (514,554) → OPENS**, and closes · **the 4 pt gap after the chevron (519,554)
+  → does NOT open** · **the row's 4 pt top band (620,545) → does NOT open.** So her complaint ("the words don't open it";
+  "the click affordance is very small") is FIXED LIVE; B5's one named unverified assumption — SwiftUI honouring the
+  `.padding(4).contentShape(Rectangle()).padding(-4)` reach past the label's reported frame — is NOT honoured, and the
+  door is B5's stated fallback ("the chevron + the row-wide words, still the fix"). Recorded, not changed (no product
+  line after the ladder): a small ticket at the triage (the dead reach lines, or a reach that presses). The label's
+  press animation not observed (no capture can time it).
+- **VX-501 — THE TYPED UNLOCK (06:12) — PASS.** The passphrase at the lobby by the helper → Open → `road: opened —
+  library edf04751 key bdc1d753 …` → **`road: the typed unlock loaded the account's sync keys for the session (sync key
+  d5db1253)`** — the NEW Castle sync key → the row **"Synced 6:12 AM"** with no key act → a note through the quick entry
+  ("VX-510 third orchestrator castle leg note after the typed unlock", ⏎ — it opened in Write as "2026-10-24") → prod
+  **live containers 4 → 5**, the newest stamped 12:12:48Z.
+- **VX-513 — THE CHECK DOOR IN CASTLE (06:14) — PASS.** (Settings had closed at the lock — SettingsLockCloseTests' rule —
+  and reopened by ⌘,.) "Check my passphrase or twelve words…" → the account's passphrase → **"That passphrase opens
+  this library and your account."**; log `road: a secret check (read-only, nothing written) — the library: opens; the
+  account: opens`; prod vault rev 16 and its `updated_at` UNMOVED (12:09:42Z — Use Castle's own stamp).
+- **VX-517 — THE STANDARD SIDE (06:15–06:16) — PASS.** The evidence per press: every on-screen window's OWNER name listed
+  each second for 4–5 s after the press (`owners`, scratch — names and bounds only, never a title or a pixel; any system
+  authentication sheet would list under its own process) + a region capture inside Variorum's bounds (her Notes window
+  stands behind Variorum — the region never reaches it). **Use Standard…** (passphrase + words by the helper) → NO
+  foreign window at any second → `leave_castle: … the account left Castle … minted a fresh own Apple key … done #3 under
+  d803ea1f · road: useStandard — library edf04751 now standard under d803ea1f` → prod **standard rev 17**. **Change
+  passphrase…** (current = PASSPHRASE, new + again = PASSPHRASE2, all by the helper) → NO foreign window at any second;
+  the act took 0.38 s (a Touch ID sheet would have held it) → `change_passphrase: done #4 under d803ea1f · road:
+  changePassphrase — the current key re-locked (d803ea1f), the account's lock with it` → prod **standard rev 18**.
+  **Said plainly:** this leg chose Always ask, so no Touch ID sync-keys item for this account existed on this Mac — it
+  proves the final build's Standard road raises nothing; the STALE-item case was unit C's green leg (`fe42afe4f`, the
+  same `CommonSteps`/`KeyDoors`/`AccountActs`/`PlanRunner` code as the tip) and the real-keychain arm in the closing batch.
+- **THE CASTLE LEG: GREEN.** **THE ENV NOTE (the handoff's ask):** the `castle` account's CURRENT passphrase is now the
+  env file's **PASSPHRASE2** (`VARIORUM_PRODTEST_CASTLE_PASSPHRASE2`; the file unchanged — it holds both); its words are
+  C3's (`~/.variorum/prod-test-words-castle`, unchanged). End state on prod: **standard, vault rev 18, 7 cursors, 5 live
+  containers**. Tool residue: the worktree's `Tools/WalkKit/guard.sh` calls a compiled `wl2` that is absent there (its
+  on-this-Space check silently passes; the author checks still run) — a line for the triage.
 
 ## HER CLOSEOUT ANSWERS (2026-10-24, at the cutover sitting — verbatim-faithful; the handoff's PENDING slots close on these)
 
