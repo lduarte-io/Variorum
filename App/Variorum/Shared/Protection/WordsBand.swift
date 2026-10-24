@@ -349,6 +349,18 @@ final class WordsBandModel {
         ProtectionOpenRoad.log("road: rule 2's look closed — the words card's offer retires")
     }
 
+    /// **VX-510 D-B6 — VX-511 (R-510-14):** an account act landed with this library holding the account's pair (Turn on
+    /// sync — set-up or join — or Move; `RoadAccountDoor.landingRecordsTheWords`): the words she holds are the account's —
+    /// the bootstrap has recorded them in the ledger (`accountActHoldsTheWords`, the one writer, which knows the library the
+    /// act landed) — so the card's words row retires now: its look would mint new words and replace the account's. The
+    /// reminder's half is untouched.
+    func accountHoldsTheWords() {
+        guard !libraryID.isEmpty else { return }
+        offersWords = false
+        ProtectionOpenRoad.log("road: an account act landed — the library holds the account's words; the words card's offer "
+            + "retires (VX-511)")
+    }
+
     /// A look for another home (the tour's last card, Settings ▸ Protection) over the same roads: recording there
     /// retires this card's offer too.
     func makeLook(

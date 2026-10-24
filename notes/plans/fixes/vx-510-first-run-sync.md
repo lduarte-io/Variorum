@@ -1367,7 +1367,7 @@ PENDING.*
       (a Touch ID read; the item's keys seen as "already loaded", so nothing put in session) and the guard ✘.
     (Not pinned, said plainly: the reuse of a vault the settle already read — planting an act in flight resumed by a typed
     unlock is a world of its own; the branch is the design's one-read rule, read by the reviewer.)
-- **Piece 2 — D-B6 (VX-511, Part of VX-511):** IN PROGRESS.
+- **Piece 2 — D-B6 (VX-511, Part of VX-511):** IN PROGRESS — 2a, 2b DONE; 2c (the reverts) named, running next.
   - **2a — the pins, committed RED before the fix: DONE (this commit).** Read first: `WordsBand.swift` whole (the ledger
     `WordsCardLedger` — `variorum.calmAsks.words.<libraryID>.*`; the band's `offersWords`, set at init from the ledger and
     retired by `later` / `dismiss` / `wordsRecorded`), `ProtectionCopyDoors`' VX-444 carry (Make this my library) and the
@@ -1385,6 +1385,29 @@ PENDING.*
     WordsCardAfterAccountActTests`): `✘ Test run with 7 tests in 1 suite failed with 10 issues` — each of the five landings
     ✘×2 (the ledger not recorded · the card still offering); every precondition held (nothing recorded, the card offering,
     the act landed, the reopen built the card anew); the two guards ✔ (by design — the reverts show their teeth).
+  - **2b — THE FIX: DONE (this commit).** `Shared/Protection/RoadAccountFaces.swift`: `RoadAccountDoor.landingRecordsTheWords`
+    (Turn on sync — the set-up and the join, either posture — and Move; never the leaves, never the follow).
+    `Shared/AppBootstrap.swift`: `accountRoads().press` keeps the press's answer and, on `.made` through such a door, calls
+    the new `accountActHoldsTheWords(actedOn:)` — THE ONE WRITER: the library is read from the session the act ran on, AFTER
+    the act (its record carried forward in place; a re-keying act's reopen opens that same slot library — the VX-457 mark's
+    idiom), so even a reopen that settled anywhere but ready finds it marked; it records `WordsCardLedger(defaults: the
+    calm-asks defaults).record(libraryID)` and, when the open library is that one, retires the live card
+    (`roadStanding?.band?.accountHoldsTheWords()` — a re-keying act's reopen built its card from the unmarked ledger before
+    the press returned). `Shared/Protection/WordsBand.swift`: `WordsBandModel.accountHoldsTheWords()` — the offer retires
+    (`offersWords = false`, one log line); the reminder's half untouched; the ledger is the bootstrap's write. A refused act
+    marks nothing. **The harness, `--filter "WordsCardAfterAccountActTests|WordsBandTests|WordsBandSurfaceTests|
+    WordsLedgerCarryRoadTests|LibraryWordsCardTests|RoadAccountModelTests|RoadJoinFollowModelTests|FirstRunDrillTests|
+    RoadAccountFacesTests"`: `✔ Test run with 59 tests in 7 suites passed`** (before the one-writer split); `--filter
+    WordsCardAfterAccountActTests` on this commit: **`✔ Test run with 7 tests in 1 suite passed`** — 2a's five red pins
+    GREEN; no warning in a touched file. (Not pinned, said plainly: the reopen-not-ready edge — the ledger marked with no
+    ready card to retire; planting a re-keying reopen that settles in a lobby is a world of its own.)
+  - **2c — THE REVERTS (named BEFORE any run; one file each on this commit, the harness `--filter
+    WordsCardAfterAccountActTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** PENDING —
+    - **RD6-1** `AppBootstrap.swift`: the press never marks (the pre-fix press) [the five landing pins, both legs].
+    - **RD6-2** `AppBootstrap.swift`: the ledger is written but the live card is not retired [the five pins' card leg].
+    - **RD6-3** `AppBootstrap.swift`: the card is retired but the ledger is not written [the five pins' ledger leg].
+    - **RD6-4** `RoadAccountFaces.swift`: every door's landing records the words [`aLeaveMarksNothing`].
+    - **RD6-5** `AppBootstrap.swift`: the mark on any press answer, not only `.made` [`aRefusedActMarksNothing`].
 - **Piece 3 — D-B5 (VX-503, the trace):** NOT STARTED.
 - **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
   `build-for-testing` into `DerivedData/vx510-b2` / `vx510-b2-ios`) and THE MAC-SUITE LIST:** NOT STARTED.

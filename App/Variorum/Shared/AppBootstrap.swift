@@ -995,11 +995,17 @@ final class AppBootstrap {
                 }
                 // VX-308 U2 (R-U2-2): an act that re-keys (a join across postures, every follow) runs through the one
                 // reopening seam; the rest on the open session.
-                if request.shown.rekeys { return await self.accountActOnNewRoad(request) }
-                return await Task.detached(priority: .userInitiated) {
-                    await ProtectionAccountRoad.press(
-                        session, request: request, signIn: signInNow(), exportSwitch: exports)
-                }.value
+                let press: RoadAccountPress
+                if request.shown.rekeys {
+                    press = await self.accountActOnNewRoad(request)
+                } else {
+                    press = await Task.detached(priority: .userInitiated) {
+                        await ProtectionAccountRoad.press(
+                            session, request: request, signIn: signInNow(), exportSwitch: exports)
+                    }.value
+                }
+                if case .made = press, request.door.landingRecordsTheWords { self.accountActHoldsTheWords(actedOn: session) }
+                return press
             },
             // VX-309 U1c — VX-454: an account act can set a passphrase on the OPEN session (turning sync on with a new one,
             // a join adopting the account's pair) — the set row and rule 3's reminder re-read, and the key doors with them
@@ -1024,6 +1030,20 @@ final class AppBootstrap {
                 guard let self, let libraryID = self.roadSession?.library.record?.libraryID else { return }
                 FollowDoneMark.set(libraryID, nil, in: self.reminderLedger.defaults)
             })
+    }
+
+    /// **VX-510 D-B6 — VX-511 (R-510-14, her "Join retires the card"):** an account act that LANDED with the library holding
+    /// the account's pair (`RoadAccountDoor.landingRecordsTheWords` — set-up, join, Move) marks that library's words recorded
+    /// in the band card's ledger (this Mac's calm-asks defaults — the card's own) and retires the live card's offer: its look
+    /// would mint new words and, synced, replace the account's. The library is the one the act landed — read from the session
+    /// it ran on, AFTER the act (the act carries its record forward in place; a re-keying act's reopen opens the same slot's
+    /// library — the VX-457 mark's idiom), so a reopen that settled anywhere but ready still finds it marked; the card is
+    /// retired when the open library is that one (a re-keying act's reopen has already built its card from the unmarked
+    /// ledger by the time the press returns). A refused act marks nothing; the leaves and the follow never reach here.
+    private func accountActHoldsTheWords(actedOn session: ProtectionRoadSession) {
+        guard let libraryID = session.library.record?.libraryID, !libraryID.isEmpty else { return }
+        WordsCardLedger(defaults: reminderLedger.defaults).record(libraryID)
+        if roadSession?.library.record?.libraryID == libraryID { roadStanding?.band?.accountHoldsTheWords() }
     }
 
     /// VX-308 U3 — the key doors' roads on the new road. Each reads the CURRENT session at its call (a reopen replaces it);

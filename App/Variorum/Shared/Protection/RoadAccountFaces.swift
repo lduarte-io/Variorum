@@ -64,6 +64,18 @@ nonisolated enum RoadAccountDoor: String, CaseIterable, Sendable, Identifiable, 
         }
     }
 
+    /// **VX-510 D-B6 — VX-511 (R-510-14):** a landed act through this door leaves the library holding the ACCOUNT's pair —
+    /// Turn on sync's set-up hands the library's pair up (rule 7; its twelve words typed at the confirm — rule 14's moment),
+    /// its join and Move adopt the account's (rule 7) — so the band card's words are recorded for the library: its look would
+    /// mint new words and, synced, replace the account's. The leaves change no secret (rule 16) and the follow types one
+    /// secret of a pair the library already holds; neither marks. Settings ▸ New Words stays the deliberate door.
+    var landingRecordsTheWords: Bool {
+        switch self {
+        case .turnOnSync, .moveToSignedInAccount: return true
+        case .stopSyncingHere, .deleteAccountHere, .thisMacOnly, .follow: return false
+        }
+    }
+
     var doorLabel: String {
         switch self {
         case .turnOnSync: return ProtectionWords.turnOnSyncDoor
