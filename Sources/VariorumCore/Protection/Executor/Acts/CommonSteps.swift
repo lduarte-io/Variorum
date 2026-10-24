@@ -310,12 +310,24 @@ extension ActContext {
 
     // MARK: - The account (the `Sync/` half, MODELLED — phase 3 wires it)
 
-    /// The account's sync keys in hand: this act's, custody's (either class),
+    /// **VX-517 (D-B8 (c)) — where this act may find the account's keys in
+    /// the TOUCH ID class:** a library in Castle, or an act taking one INTO
+    /// Castle (its own Castle-way filing lives there before its swap — a join
+    /// into a Castle account, a follow into Castle, Use Castle). A library that
+    /// is and stays Standard files them silently (rule 15) and never reads that
+    /// class: a Touch ID read is a prompt on the real leaf, and an item there is
+    /// another library's leftover, whose keys must never shadow the silent
+    /// item's (they did: the key doors refused as "the account moved", a
+    /// set-up's finish bound nothing).
+    var syncKeysMayBeInTouchID: Bool { library.record?.mode == .castle || parameters.newKind == .castle }
+
+    /// The account's sync keys in hand: this act's, custody's (the Touch ID
+    /// class only where `syncKeysMayBeInTouchID`, then the silent class),
     /// session memory.
     func syncMaterial() throws -> AccountKeys? {
         if let material { return material }
         guard let account = accountID else { return nil }
-        for itemClass in [ProtectionNames.CustodyClass.touchid, .silent] {
+        for itemClass in ProtectionExecutor.syncKeysClasses(touchID: syncKeysMayBeInTouchID) {
             if let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass) {
                 material = held
                 return held
@@ -476,6 +488,11 @@ extension ActContext {
 }
 
 extension ProtectionExecutor {
+    /// The custody classes a sync-keys read consults, in order (VX-517 (c)):
+    /// the Touch ID class first only where the account's keys can be filed
+    /// there; the silent class always.
+    static func syncKeysClasses(touchID: Bool) -> [ProtectionNames.CustodyClass] { touchID ? [.touchid, .silent] : [.silent] }
+
     /// Note a vault this executor wrote as its freshest read.
     func noteFresh(_ snapshot: VaultSnapshot) {
         freshVaults[snapshot.accountID] = snapshot

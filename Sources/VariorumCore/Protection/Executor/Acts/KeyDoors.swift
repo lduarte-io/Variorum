@@ -213,7 +213,8 @@ extension ProtectionExecutor {
             guard VaultModel.master(of: vault.vault, passphrase: typed, words: nil) != nil else {
                 throw ExecutorRefusal.passphraseDoesNotOpen
             }
-            try holdSyncKeysForTheSession(account: account, vault: vault, passphrase: typed, words: nil)
+            try holdSyncKeysForTheSession(
+                account: account, vault: vault, passphrase: typed, words: nil, castle: library.record?.mode == .castle)
         } else {
             _ = try verifiedPassphrase(current, against: library.keyFile)
         }
@@ -241,7 +242,8 @@ extension ProtectionExecutor {
         if case .words(let typed) = authorization { words = try WordsKey.derive(typed) }
         let parameters = try await keyDoorParameters(library)
         if let account = parameters.accountID, let vault = freshVaults[account] {
-            try holdSyncKeysForTheSession(account: account, vault: vault, passphrase: nil, words: words)
+            try holdSyncKeysForTheSession(
+                account: account, vault: vault, passphrase: nil, words: words, castle: library.record?.mode == .castle)
         }
         return try await keyDoor(.resetPassphrase, &library, newPassphrase: new, words: words, parameters: parameters)
     }
@@ -254,8 +256,15 @@ extension ProtectionExecutor {
     /// needs (it began, then refused inside its plan, leaving the act in flight
     /// with nothing able to finish it — VX-305 U4, found by the scenario
     /// world). Nothing is written to disk; a relock drops them.
-    func holdSyncKeysForTheSession(account: String, vault: VaultSnapshot, passphrase: PassphraseKey?, words: WordsKey?) throws {
-        for itemClass in [ProtectionNames.CustodyClass.touchid, .silent] {
+    ///
+    /// VX-517 (D-B8 (c)): `castle` — the library's posture. A Standard
+    /// library files the keys silently (rule 15) and never reads the Touch ID
+    /// class: a read there is a prompt on the real leaf, for an item another
+    /// library left.
+    func holdSyncKeysForTheSession(
+        account: String, vault: VaultSnapshot, passphrase: PassphraseKey?, words: WordsKey?, castle: Bool
+    ) throws {
+        for itemClass in Self.syncKeysClasses(touchID: castle) {
             if let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass),
                held.rowKeyID == vault.rowKeyID { return }
         }

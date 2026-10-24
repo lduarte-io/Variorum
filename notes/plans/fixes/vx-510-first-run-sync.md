@@ -2037,7 +2037,34 @@ edits). Every claim not yet run is PENDING.*
     next time any act files that account's keys; **(b)** a local, non-secret registry of the accounts this Mac filed sync keys
     for (a new keychain item or defaults key — a new name or shape: a FORK by the brief); (c) a Castle-exit / leave-time sweep
     that probes by name every account the vault or the session ever named — needs (b)'s registry anyway. RECOMMENDED (a).
-- **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: NOT STARTED.
+- **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: DONE (this commit; core only). `CommonSteps.swift`:
+  `ActContext.syncKeysMayBeInTouchID` (the record's mode is Castle, OR the act's target posture `parameters.newKind` is — THE
+  READING in Piece 1) and `ProtectionExecutor.syncKeysClasses(touchID:)` (`[.touchid, .silent]` or `[.silent]`);
+  `syncMaterial()` reads by it (the custody fallback of `material(for:)` and `newLocks`). `AccountActs.swift`
+  `bindIfVaultIsOurs` (set-up's finish from the record) reads by it. `KeyDoors.swift` `holdSyncKeysForTheSession` gains
+  `castle:` (the library's posture — its two callers, Change and Reset, pass `library.record?.mode == .castle`). Every other
+  sync-keys reader was traced and needs nothing: the engine's provider and VX-501's typed load read session + silent only (the
+  load also only under Castle); the Touch ID unlock's ride runs only after a Touch ID custody press (a Castle key);
+  `holdSyncKeys`' castle-way idempotency read runs only on Castle-way filings (the account Castle ⇒ the act's target Castle);
+  the rollback reads the silent class only; B3's check reads no keychain. **The core, `--filter TouchIDSyncKeysForgottenTests`:
+  `✔ Test run with 13 tests in 1 suite passed`** — every pin GREEN, the two guards still green; **the harness, `--filter
+  TouchIDSyncKeysForgottenRoadTests`: `✔ Test run with 2 tests in 1 suite passed`**; **the core `PROT` set (debug, now with the
+  new suite): `✔ Test run with 546 tests in 103 suites passed`** (533/102 + 13 in 1); the harness's account/custody suites
+  (`TouchIDSyncKeysForgottenRoadTests|TypedSecretNeverPressesTests|TypedUnlockSyncKeysTests|TouchIDUnlockSyncKeysTests|
+  ProtectionAccountRoadTests|ProtectionJoinFollowRoadTests|ProtectionCrossingRoadTests|RoadKeyDoorRoadTests|FirstRunDrillTests|
+  WordsCardAfterAccountActTests|SecretCheckRoadTests|OneSyncKeysLeafTests|RoadLockTests|RoadRestoreHoldGateTests`): `✔ Test run
+  with 104 tests in 16 suites passed`.
+  - **OBSERVATION O-B4-1 (Castle, NOT this unit's — a ticket candidate for the orchestrator):** on a CASTLE + Touch ID library
+    the key doors still press TWICE for the sync keys — `holdSyncKeysForTheSession` reads the Touch ID item (and, finding the
+    current keys, holds nothing in session), then the act's vault step's `syncMaterial()` reads it again — and `syncMaterial()`
+    reads the Touch ID item BEFORE session memory, so even with VX-487's unlock having loaded the session, a Castle key door
+    prompts. (c) is scoped to Standard by the design; untouched. The guard `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem`
+    pins that Castle's reads still work, not their count.
+  - **OBSERVATION O-B4-2 (a residue outside D-B8's sites, recorded):** a plan-LESS rollback (`settle`'s no-plan, pre-commit
+    road) passes no parameters, so the bound account's taken-keys sweep cannot know what the act took and is skipped entirely —
+    a follow into Castle with Touch ID rolled back that way leaves its Touch ID filing on the (Standard again) library. After
+    (c) a Standard library never reads it; the next Castle-way filing for that account replaces it (`writeSyncKeys(.touchid)`
+    deletes first). Not changed (the sweep's `taken` guard is VX-378 U4's design, census class (J)).
 - **Piece 4** — the behavioral reverts (named before any run): NOT STARTED.
 - **Piece 5** — evidence (harness whole, the core protection set debug + release, Mac + iOS build-for-testing, THE MAC-SUITE
   LIST, THE WALK): NOT STARTED.

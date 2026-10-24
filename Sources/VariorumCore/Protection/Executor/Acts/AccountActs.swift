@@ -240,7 +240,8 @@ extension ActContext {
     func bindIfVaultIsOurs() async throws {
         guard library.record?.account == nil, let account = executor.configuration.session.accountID,
               let snapshot = try? await executor.readVault(accountID: account),
-              let held = try ([.touchid, .silent] as [ProtectionNames.CustodyClass]).lazy
+              // VX-517 (c): the Touch ID class only in Castle — a Standard set-up filed silently.
+              let held = try ProtectionExecutor.syncKeysClasses(touchID: syncKeysMayBeInTouchID).lazy
                 .compactMap({ try self.leaves.syncKeys.readSyncKeys(accountID: account, itemClass: $0) }).first
                 ?? leaves.syncKeys.sessionSyncKeys(accountID: account),
               held.rowKeyID == snapshot.rowKeyID
