@@ -278,7 +278,7 @@ waitfor "Email" 20 || stop "the Account sheet did not open"
 focus "Email"; secret email
 focus "Password"; secret password
 press "Sign In" AXButton
-waitfor "Sign out…" 60 || waitfor "Signed in" 5 || { capture signin; stop "the sign-in did not land" }
+waitfor "Sign out" 60 || { capture signin; stop "the sign-in did not land" }  # the sheet's own door (no ellipsis — Settings' spelling differs); found at the first live run
 capture signed-in
 press "Close" AXButton
 
