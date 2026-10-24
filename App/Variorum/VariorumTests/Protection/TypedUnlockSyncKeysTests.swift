@@ -193,6 +193,49 @@ struct TypedUnlockSyncKeysTests {
         #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil, "nothing loaded — the follow loads them")
     }
 
+    /// A SLOW SERVER never holds the unlock: the vault read waits at most its bound, the library opens on time, nothing
+    /// loaded — and the read that answers LATER (this planted one ignores cancellation, the worst case) is discarded, so no
+    /// hold lands after the open moved on (a lock in between would otherwise leave keys in memory past it). New seam (the
+    /// bound) — its red is the reverts'.
+    @Test func aVaultReadPastTheBoundLeavesTheUnlockOnTimeAndALateAnswerIsDropped() async throws {
+        let world = try await Self.castleAlwaysAskSynced()
+        TouchIDUnlockSyncKeysTests.relaunched(world)
+        world.vault.fetchDelay = .seconds(2)
+        let clock = ContinuousClock()
+        let started = clock.now
+        guard case .opened(let opened) = await ProtectionOpenRoad.openTyped(
+            world.road.context(), secret: .passphrase(Account.passphrase), syncKeysWithin: .milliseconds(200))
+        else {
+            Issue.record("the typed secret opens the library")
+            return
+        }
+        let took = clock.now - started
+        #expect(took < .milliseconds(1500), "the unlock waited \(took) — never the slow read's 2 s")
+        #expect(opened.library.record?.mode == .castle, "the library opens")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil, "nothing loaded in time")
+        try await Task.sleep(for: .milliseconds(2500))
+        #expect(world.vault.calls.contains("fetch \(Account.account)"), "the read was made, and answered late")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil, "the late answer was dropped — no hold")
+    }
+
+    /// THE PASSPHRASE IS NEVER DERIVED A SECOND TIME for the load (the design's "no second KDF"): the load's code — line
+    /// comments stripped — names no passphrase derivation; the open's derived keys are what it uses (a guard of the shape).
+    @Test func theTypedLoadNeverDerivesThePassphrase() throws {
+        let root = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let file = try String(contentsOf: root.appendingPathComponent("Shared/Protection/ProtectionOpenRoad.swift"), encoding: .utf8)
+        let start = try #require(file.range(of: "static func loadSyncKeysAfterTypedUnlock("))
+        let end = try #require(file.range(of: "enum BoundedVaultRead", range: start.upperBound..<file.endIndex))
+        let code = file[start.lowerBound..<end.lowerBound].components(separatedBy: "\n")
+            .map { $0.components(separatedBy: "//").first ?? "" }.joined(separator: "\n")
+        for derivation in ["PassphraseKey.derive", "PassphraseKDF.deriveKey", "deriveKey(", ".passphrase(typed"] {
+            #expect(!code.contains(derivation), "the load names \(derivation)")
+        }
+        #expect(code.contains("snapshot.vault.master(passphrase: $0, words: nil)"), "the stripper's teeth: the reuse is code")
+        #expect(code.contains("readSyncKeys(accountID: account, itemClass: .silent)") && !code.contains(".touchid"),
+                "the load reads the silent item only — never the Touch ID item (a prompt)")
+    }
+
     // MARK: - Guards (green on both sides by design)
 
     /// STANDARD loads nothing and reads no vault — its silent item serves the engine (the design's own pin).
@@ -216,6 +259,12 @@ struct TypedUnlockSyncKeysTests {
         #expect(vault.calls.count == fetches, "Standard reads no vault at a typed unlock")
         #expect(keys.sessionSyncKeys(accountID: Account.account) == nil, "nothing loaded — the silent item serves")
         #expect(Self.engineKeyID(opened) != nil, "the engine reads the silent item")
+        // The rule is the posture's, not the item's: with the silent item gone (a keychain reset), Standard still reads no
+        // vault at a typed unlock — the design's "Standard ⇒ nothing loaded".
+        keys.items[SyncKeysItemFact(accountID: Account.account, itemClass: .silent)] = nil
+        _ = try await Self.typedUnlock(world, .passphrase(Account.passphrase))
+        #expect(vault.calls.count == fetches, "Standard reads no vault, its silent item there or not")
+        #expect(keys.sessionSyncKeys(accountID: Account.account) == nil)
     }
 
     /// AN UNBOUND Castle library reads nothing — no vault, no keys.
@@ -231,6 +280,35 @@ struct TypedUnlockSyncKeysTests {
         let opened = try await Self.typedUnlock(world, .passphrase(Crossing.passphrase))
         #expect(opened.library.record?.mode == .castle && opened.library.record?.account == nil)
         #expect(vault.calls.count == fetches && keys.session.isEmpty, "an unbound library reads nothing")
+    }
+
+    /// KEYS ALREADY HELD (an act's resume at the open loaded them, or the hold outlived nothing it should): the load reads
+    /// no vault — the session memory serves.
+    @Test func keysAlreadyHeldReadNoVault() async throws {
+        let world = try await Self.castleAlwaysAskSynced()
+        let keys = try Self.accountsKeys(world)
+        world.keys.holdInSession(keys, accountID: Account.account)
+        let before = world.vault.calls.count
+        let opened = try await Self.typedUnlock(world, .passphrase(Account.passphrase))
+        #expect(world.vault.calls.count == before, "already held: nothing read")
+        #expect(Self.engineKeyID(opened) == keys.rowKeyID)
+    }
+
+    /// A READ-ONLY ROAD (a hosted test run — the test host is the dev-store app) reads nothing: the open is read-only, and
+    /// so is the load.
+    @Test func aReadOnlyRoadReadsNothing() async throws {
+        let world = try await Self.castleAlwaysAskSynced()
+        TouchIDUnlockSyncKeysTests.relaunched(world)
+        let before = world.vault.calls.count
+        guard case .opened(let opened) = await ProtectionOpenRoad.openTyped(
+            world.road.context(writes: false), secret: .passphrase(Account.passphrase))
+        else {
+            Issue.record("the read-only road opens the library")
+            return
+        }
+        #expect(!opened.writes)
+        #expect(world.vault.calls.count == before && world.keys.sessionSyncKeys(accountID: Account.account) == nil,
+                "a read-only road reads nothing and loads nothing")
     }
 
     /// SIGNED OUT (or into another account): the vault is the account's, so nothing is read and nothing loaded; the library

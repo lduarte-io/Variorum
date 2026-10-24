@@ -1286,7 +1286,7 @@ PENDING.*
   - **RF-6** the admission matches loosely (an entry containing the address, or the address containing an entry)
     [`aHerShapedAddressIsNeverAdmitted`]. → `✘ … with 8 issues` — that pin ✘×8 (the bare and fragment addresses admitted).
   (The walk script's `--env` line has no headless revert — nothing may launch here; unit C's P2 proves it live.)
-- **Piece 1 — D-B4 (VX-501, Part of VX-501):** IN PROGRESS.
+- **Piece 1 — D-B4 (VX-501, Part of VX-501):** IN PROGRESS — 1a and 1b DONE; 1c (the reverts) named, running next.
   - **1a — the pins that compile on the pre-fix tree, committed RED before the fix: DONE (this commit).** Read first:
     `ProtectionOpenRoad` whole (`openTyped`, `typedCandidates`, `pressTouchID`, `loadSyncKeysForTheSession`),
     `NewRoadSyncKeyProvider`, `WireVaultLeaf`, `ProtectionRoadLock.dropSessionMemory`, the core's `KeyDoors`
@@ -1309,6 +1309,52 @@ PENDING.*
     ID pin ✘×2, and the "the read was tried" legs of offline / not-the-vault / moved ✘ each (their never-hostage legs pass
     on both sides, as pin 5's did at VX-487); every world's preconditions held (no issue in the setups); the three guards ✔
     (by design on both sides — their teeth are the reverts').
+  - **1b — THE FIX: DONE (this commit).** `Shared/Protection/ProtectionOpenRoad.swift`: `openTyped` (now
+    `openTyped(_:secret:syncKeysWithin:)`, the bound defaulted) calls the new **`loadSyncKeysAfterTypedUnlock`** on
+    `.opened`, after the open and before the app's open goes on (off the main actor — the lobby's press is detached).
+    The load: a read-only road (a hosted test run), an unbound library or a STANDARD one (the silent item serves — the
+    design's own pin) reads nothing; keys already in session (or a silent item) that this library follows ⇒ nothing read;
+    signed out or into another account ⇒ nothing read; the vault = the one this session's executor already read (an act's
+    resume at the settle — the design's "where one was already made"), else ONE read through the vault leaf, BOUNDED
+    (`boundedVaultRead` — the read races a timer, the first answer wins, the loser is cancelled and a late answer dropped:
+    no hold can land after the open moved on); the master from the typed secret against the vault — the passphrase's key
+    is the one the OPEN derived (`typedCandidatesAndKeys` now hands back the derived `PassphraseKey`s, one per descriptor;
+    the account's lock carries the vault's descriptor — `joinKeyFile` — so no second Argon2id), the words' wrap key derived
+    once (BIP-39's seed; the open's own key-file derivations are the core's, untouched); `keys(master:)`; held in session
+    ONLY when they are the keys this library FOLLOWS (`record.accountRowKeyID` — what the Touch ID item would hold; a moved
+    account leaves the follow to load them); never a Touch ID read (no prompt), nothing written to disk, the secret gone
+    with the call. Every refusal is one protection-log line; the library opens all the same. `typedCandidates` keeps its
+    signature (a wrapper). `NewRoadSyncKeyProvider.swift`: its header names the typed load (comment only). No core line:
+    `holdSyncKeysForTheSession` is internal to the core, so the app makes its two public calls itself — no LocalAuthentication
+    and no network read enters the core; no `Sync/` line. **PROVISIONAL P-VX510-B2-1 (the architect's / hers — timing, not
+    words):** the vault bound is 10 s — (a, built) the unlock waits at most 10 s for the vault, then opens without the keys
+    (the row says locked as before; a later answer dropped) · (b) a shorter bound (e.g. 3 s — a slow but working network
+    then loses the load more often) · (c) no wait at all: the load runs after the open and a round is asked when it lands
+    (needs a lock-race guard and the services' round road from the lobby — more machinery).
+    Pins added (new seam — red by the reverts below): `aVaultReadPastTheBoundLeavesTheUnlockOnTimeAndALateAnswerIsDropped`
+    (a planted fetch that answers after 2 s and IGNORES cancellation — `PlantedVaultLeaf.fetchDelay`, test support: the
+    unlock returns inside 1.5 s, nothing loaded, and after the late answer still nothing held), `theTypedLoadNeverDerivesThe
+    Passphrase` (guard, code only: the load names no passphrase derivation and no Touch ID read); guards `keysAlreadyHeld
+    ReadNoVault`, `aReadOnlyRoadReadsNothing`; the Standard guard extended (its silent item removed: still no vault read —
+    the posture's rule, not the item's). **The harness, `--filter "TypedUnlockSyncKeysTests|TouchIDUnlockSyncKeysTests|
+    ProtectionAccountRoadTests|ProtectionJoinFollowRoadTests|ProtectionLobbyModelTests|ProtectionOpenRoadPlantedTests"`:
+    `✔ Test run with 64 tests in 7 suites passed`** (before the last three pins); `--filter TypedUnlockSyncKeysTests` on
+    this commit: **`✔ Test run with 13 tests in 1 suite passed`** — 1a's six red pins GREEN; no warning in a touched file.
+  - **1c — THE REVERTS (named BEFORE any run; each one line of `ProtectionOpenRoad.swift` on this commit, the harness
+    `--filter TypedUnlockSyncKeysTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** PENDING —
+    - **RD4-1** `openTyped` no longer calls the load (the pre-fix press) [the three `vx501_` pins; the "tried" legs of
+      offline / not-the-vault / moved; the bound pin's "the read was made"].
+    - **RD4-2** the Castle gate removed [`aStandardLibraryLoadsNothingAndReadsNoVault` (its silent-item-gone leg)].
+    - **RD4-3** the signed-in gate always passes [`signedOutReadsNothing`].
+    - **RD4-4** the follows check always passes (a moved account's keys held) [`anAccountThatMovedLoadsNothing`].
+    - **RD4-5** the bound removed (the read awaited to its end) [`aVaultReadPastTheBoundLeavesTheUnlockOnTimeAndALateAnswer
+      IsDropped`].
+    - **RD4-6** the read-only gate removed [`aReadOnlyRoadReadsNothing`].
+    - **RD4-7** the already-held short-circuit never matches [`keysAlreadyHeldReadNoVault`].
+    - **RD4-8** the already-held check reads the TOUCH ID item (the core door's order — a prompt) [`vx501_aTypedUnlockUnder
+      TouchIDLoadsThemWithNoPress`, `theTypedLoadNeverDerivesThePassphrase`].
+    (Not pinned, said plainly: the reuse of a vault the settle already read — planting an act in flight resumed by a typed
+    unlock is a world of its own; the branch is the design's one-read rule, read by the reviewer.)
 - **Piece 2 — D-B6 (VX-511):** NOT STARTED.
 - **Piece 3 — D-B5 (VX-503, the trace):** NOT STARTED.
 - **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS

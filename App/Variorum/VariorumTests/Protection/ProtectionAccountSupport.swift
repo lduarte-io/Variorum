@@ -32,6 +32,9 @@ nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
 
     var accounts: [String: Account] = [:]
     var reachable = true
+    /// VX-501 (D-B4): a fetch that answers only after this long — and IGNORES cancellation (the slow server a bound must
+    /// not wait for; the worst case: a read that still answers after its caller gave up). nil: at once (every earlier suite).
+    var fetchDelay: Duration?
     var clock = Date(timeIntervalSinceReferenceDate: 790_000_000)
     /// Every call, in order — `fetch <id>`, `create <id>`, `update <id>`.
     private(set) var calls: [String] = []
@@ -41,7 +44,10 @@ nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
     }
 
     func fetchVault(accountID: String) async throws -> VaultSnapshot? {
-        try lock.withLock {
+        if let fetchDelay {
+            await Task.detached { try? await Task.sleep(for: fetchDelay) }.value
+        }
+        return try lock.withLock {
             calls.append("fetch \(accountID)")
             guard reachable else { throw VaultRefusal.unreachable }
             return snapshot(accountID)
