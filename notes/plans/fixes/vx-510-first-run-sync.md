@@ -1785,6 +1785,32 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   loaded the account's sync keys for the session (sync key e1deb44d)`** → a second note filed ("…after the typed unlock") →
   **prod: 2 containers · rows 12** — a round with the account's keys ran after a typed unlock, with NO key act — and the row
   **"Synced 9:18 PM"**. Before VX-501 this posture stayed "Sync locked" until a key door (her M1 (c) report).
+- **C3 (21:19–21:28) — the key changes and the backup floor IN CASTLE (no quiet road; every look typed).** Back Up Now →
+  B1c `backup pair: written under 5638db0a` (21:19:15). **Change passphrase** (the sheet: "This library syncs with your
+  account, so your account's passphrase changes with it, on every device.") → `road: changePassphrase — the current key
+  re-locked (5638db0a), the account's lock with it` → prod vault **rev 2**. Back Up Now → B2c (21:20:13). **Record your
+  twelve words** in Castle asks the passphrase INLINE ("This library syncs with your account, so new words also replace your
+  account's twelve words, on every device. Enter your passphrase to see your twelve words.") → the changed passphrase typed →
+  `regenerate_words: done #5 … rule 2's look — fresh words lock the key file; the key unchanged` → prod vault **rev 3**, mode
+  castle. The words copied + stashed BLIND — the button row found by AX positions and a 36-pt strip capture, the words
+  never captured ("Copy · I've written them down", then "Copied… · These words won't be shown again. · Go back · Close").
+  Data Safety lists SIX rows (9:12 ×2 pre-Castle under `a2c73b2c`, 9:15, 9:16, 9:19, 9:20 — the folder holds 5 pairs:
+  `031225-a2c73b2c`, `031519`, `031625`, `031915`, `032013`) while its header says "5 copies" → **W-8**. The looks:
+  - the 9:19 copy (B1c, before BOTH key changes) → "This copy doesn't open by itself on this Mac. Enter its passphrase or
+    twelve words." → **a wrong secret (std's passphrase) refuses**: "That doesn't open this copy. Enter the copy's own
+    passphrase or twelve words." → **its own (original) passphrase opens it**: `road itsOwnSecrets — read-only, nothing
+    written` (both notes listed) → **the CURRENT passphrase opens it**: `road currentSecretsThroughTheHistory` → **the
+    CURRENT words open it**: same road.
+  - a 9:12 copy — made BEFORE the library had a passphrase and BEFORE Castle, under the old key `a2c73b2c` whose Apple item
+    the crossing retired → doesn't open by itself either (rule: the crossing Castle-protects the backups) → **the CURRENT
+    passphrase opens it** through the history (empty, as it was at 9:12).
+  The S12 gap (Standard's looks went the quiet road) is CLOSED here: every typed-secret arm met live.
+  Observations: **W-3 again** (the look lists notes dated 2026-10-24 — UTC — where the app says 2026-10-23); **W-9** the look
+  names the notes "Untitled" where the app titles them "2026-10-23"; **W-10** the error line from a failed try stays on
+  screen after the field is retyped (the sheet grows and its Open button moves under the pointer).
+- **B2's T-B5-2 → VX-517 (filed 2026-10-23, Needs Lillian):** the sync-keys leaf's Touch ID candidates are unwired
+  (`AppBootstrap.swift:183`, the default `{ [] }`; the custody leaf's are wired at `ProtectionSystem.swift:60` — verified by
+  the orchestrator), so the Touch ID class is never forgotten (rule 16). Join-or-separate is hers.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
