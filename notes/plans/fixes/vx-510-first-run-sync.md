@@ -3199,6 +3199,14 @@ the independent re-walk.**
   the drafted clause landed in CastleRules rule 2 verbatim with the header's dated amendment line (this commit); the
   consistency reading confirmed at the sitting (rule 2 keeps "nothing stores the words"; rule 7 carries the why; rule 6
   stays the one road to fresh words). F-R1-3 (a) CLOSES with it.
+- **R-510-29 — THE SECOND CUTOVER, her ruling at the sitting's close (verbatim):** "honestly - you're already at 737k
+  tokens. i'll start the followup in a new session with a new orchestrator that's opus for the rest of it. if documents
+  are all up to date good, if not fix them, and give me a kickoff prompt now. i'm going to sleep, so it should run
+  everything through provisionally including just releasing the change." → A FRESH OPUS SESSION finishes the run
+  (the Fable orchestrator's safeguards stalled three times on the GUI driving; the ladder, the batch and the del leg
+  are done). THE RELEASE IS AUTHORIZED in advance (with R-510-22) — on GREEN gates only: a red Castle leg or a red
+  release gate HOLDS the release, and the morning summary says why. Overnight etiquette: she sleeps — no sounds, no
+  ambient; everything bundled for the morning. The successor's kickoff: `notes/plans/fixes/vx-510-successor2-handoff.md`.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
