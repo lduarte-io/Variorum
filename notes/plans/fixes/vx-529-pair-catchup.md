@@ -278,7 +278,8 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 ### UNIT 1 — LIVE STATUS (the implementer owns this section)
 
 **NOT DONE IN THIS UNIT: every face and sentence (unit 2's — F-1's four app arms are mechanical placeholders); the
-riders; F-9 (hers); F-10 (needs a new refusal and its sentence); the app's compile (the orchestrator's xcodebuild).
+riders; F-9 (hers — answered by R-529-5's words arm, P7); the E6 heal's WIRING (unit 2's — P7-3 ships the primitive
+only); the app's compile (the orchestrator's xcodebuild).
 Zero `Sync/` lines.** The act's program LANDED on the architect's ruling (P6) — Shape A, with two plan-shape refinements
 the ruling's R-arch-3 asked for (S-3 by the plan carrying no descriptor; the re-lock folded into `pickUpKeys`), each
 stated with its mechanism under P6c/P6d. Session: a fresh `opus-implementer`, 2026-10-24, worktree
@@ -478,7 +479,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   ticketed flake VX-353 / VX-532, no protection code in it. Zero lines in `Sources/VariorumCore/Sync/`. The app's
   compile (F-1's four arms) PENDING the orchestrator's first `xcodebuild`.
 
-- P7 — R-529-5's words arm (the coordinator's brief after P6, on her ratify at `e0fb54c7d`). IN-PROGRESS. Checked first:
+- P7 — R-529-5's words arm (the coordinator's brief after P6, on her ratify at `e0fb54c7d`). DONE. Checked first:
   nothing in R-529-5's letter fights the code built (stop-and-report not triggered). ONE FACTUAL CORRECTION to the brief's
   premise for P7-3: `relockedToTheAccountsPair` already LANDS a passphrase lock where none exists (`settingPassphrase`
   sets or replaces) — P7-3 still ships the heal as its own narrower primitive (land-where-missing ONLY: no copy refresh,
@@ -528,7 +529,13 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     where missing and touches nothing else (byte-equal but the lock), idempotent; never replaces a lock there; refuses
     another master, a master-less file, another key. NO CONSUMER (grep: only its own definition) — the vault-road
     open and the key doors are unit 2's to wire; never the check door.
-  - P7-4 — the full core suite; the report. NOT-STARTED.
+  - P7-4 — the full core suite; the report. DONE — plus the words arm through the scenario world (`2b0294dba`,
+    `PairCatchUpWordsArmScenarios`: three postures, the words moved too or not — owed, landed by the follow with
+    today's words, the stale passphrase lock dropped, nothing owed after, every promise kept before and after a
+    settle). THE FULL CORE SUITE at `2b0294dba`: VariorumCoreTests **3409 tests passed** (5 known issues: P2's 4
+    negative controls + P6d's pinned residual); the one failure the ticketed MCP wall-clock flake (VX-353 / VX-532).
+    Zero `Sync/` lines; no trailers. The app's new lines (P7-0's sentence and two face arms) compile PENDING your
+    xcodebuild.
 **Findings before any code (traced in this session; each says what it changes):**
 - **F-1 — `FollowKind` gaining a case breaks four EXHAUSTIVE app-side switches** (`ProtectionAccountActs.swift`
   `FollowDoneMark.name`; `ProtectionWords.swift` `followNotice` / `followAsk` / `followDone`), and this unit verifies
