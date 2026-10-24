@@ -1552,6 +1552,29 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   again." → Close. **prod: the vault revision 2 → 3, updated 02:52:56Z — the moment SHOW was pressed.** OBSERVATION W-4
   (feeds VX-511): the look's mint re-wraps the ACCOUNT's words lock when the words are SHOWN, before "I've written them
   down" — so on a joined library the band card's look replaces the account's words even if she closes it unrecorded.
+- **S14 (20:56:21) — RESTORE:** Data Safety ▸ B1 (8:48 PM) ▸ Make this my library… — the confirm: "This copy becomes a new
+  library — in Standard, under your current twelve words and passphrase — with a fresh key of its own. Your current
+  library steps aside whole into Previous Libraries… The new library doesn't sync with your account until you turn on sync
+  for it in Settings ▸ Protection." → the current words + passphrase by the helper → log `road: made a copy this Mac's
+  library — library dfe2ad68 key 2e677513; the previous one in Previous Libraries; held` → opened, device `ae835950`. The
+  words card did NOT return (VX-444's ledger carry, live). The hold banner: "This is your library as of October 23, 2026.
+  Sync is waiting until you press Resume. To keep something from this backup, duplicate it first — duplicates stay." →
+  Resume Sync → the banner goes and the row reads **"Sync isn't on for this library yet"** (honest: the copy names no
+  account). **OBSERVATION W-5 (wording, ticketed at the close):** on a restored library that names NO account the hold
+  banner still promises "Sync is waiting until you press Resume … duplicates stay" — no sync follows the press; the
+  confirm's own sentence ("doesn't sync … until you turn on sync") is the true one.
+- **S15 (20:58:14) — A JOIN from the restored library:** Protection ▸ Sync: "This library doesn't sync." · **"Sync this
+  library…"** (VX-506's join-arm door, LIVE) → the join sheet (its title still "Turn on sync" — P-VX510-A4): "Your account
+  already syncs. Type its passphrase or its twelve words once…" → the account's passphrase by the helper → `enroll: begun #6
+  *[removed for publication]*
+  system Touch ID prompt** (VX-503 did not reproduce on this Mac's Standard join) → the words notice (passphrase typed):
+  *[removed for publication]*
+  made before today…" → OK → **the sheet: "Synced. Your account's writing is in this library now."** — no relaunch.
+  **prod: device cursors 2 · live containers 1 (no duplicate — the copy's rows merged by id) · live blocks 1 · rows 8 ·
+  vault revision 3 (a same-posture join changes no account lock).** OBSERVATION W-6 (ticketed at the close): the words
+  notice SPOKE although the restored library's words already were the account's (the copy was made under the current pair
+  — VX-456/VX-462's quiet arm missed for a restored copy, probably because the fresh key's lock is compared rather than
+  the words), so "your previous twelve words" is untrue here.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
