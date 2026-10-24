@@ -1038,7 +1038,9 @@ unit B2's brief). Every claim not yet run is PENDING.*
     fence [`aReleaseBuildCompilesNothingOfTheRoad`].
   - **RB-18** (D-B3, the call site) `Shared/AppServices.swift`: the DEBUG derivation back to the walk-lift-only call
     [`theDerivationReadsTheLaunchsLiftOnlyInDebug`, `armedAndListedComposesTheChain`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
-  RESULTS: PENDING (no revert has run; none is in flight).
+  RESULTS: PENDING — **REVERTS STARTING** (the committed tree `235a13aad` IS the pre-revert copy; each restore is `git checkout
+  -- <file>` then `git diff --exit-code`; if this line still stands after a death, read `git diff` against HEAD to see what is
+  reverted).
 - **Piece 7** — evidence on the final tree: the harness whole, the release compile, ONE Mac + ONE iOS build-for-testing
   (`DerivedData/vx510-b1`, `vx510-b1-ios`), THE MAC-SUITE LIST. NOT STARTED.
 
