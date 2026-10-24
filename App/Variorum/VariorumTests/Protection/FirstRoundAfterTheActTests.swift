@@ -120,8 +120,10 @@ final class FirstRoundWorld {
     let server = FirstRoundServer()
     let auth: AuthSession
     private(set) var services: AppServices?
-    /// VX-510 unit B1 (D-B0): every services instance this world composed, in order (a reopen composes a fresh one).
-    private(set) var composed: [AppServices] = []
+    /// VX-510 unit B1 (D-B0): how many services instances this world composed (a reopen composes a fresh one). A count, never
+    /// the instances: production lets a stopped instance go at the teardown, and the bootstrap's roads hold them weakly — a
+    /// world that kept them alive would let a road reach a released instance that production could never reach.
+    private(set) var composedCount = 0
     /// VX-510 unit B1 (D-B0): the `.ready` arm's compose after a reopen, in flight (`reopensComposeFreshServices`).
     private var readyWatch: Task<Void, Never>?
     /// VX-510 unit B1 (D-B1 — the drill's account-gate arm): the account the SERVICES' session is signed in to (the road's
@@ -216,7 +218,7 @@ final class FirstRoundWorld {
             boundAccountRead: { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys.boundAccount },
             legacyCleanup: {})
         self.services = services
-        composed.append(services)
+        composedCount += 1
         bootstrap.attach(services: services)
         // (`VariorumApp` wires the restore hold's gates here, BEFORE the start — the drill's held arm.)
         beforeStart?(services)
@@ -280,7 +282,6 @@ final class FirstRoundWorld {
     func quiesce() async {
         await readyWatch?.value
         if let confirm = bootstrap.roadAccount?.confirm { _ = await confirm.awaitFirstRound() }
-        for composed in composed { composed.stop() }
         services?.stop()
         try? await Task.sleep(for: .milliseconds(200))
     }

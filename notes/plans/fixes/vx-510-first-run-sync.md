@@ -992,7 +992,53 @@ unit B2's brief). Every claim not yet run is PENDING.*
   read the exit status after a `local` assignment (always 0), so every case read "accept"; the self-test caught it (it FAILs
   loudly rather than passing hollow), fixed before this commit. The G5/G6 refusals are shown at Piece 7 against the
   build-for-testing's Debug app (PENDING).
-- **Piece 6** — the behavioral reverts, named here BEFORE any runs. NOT STARTED.
+- **Piece 6** — THE BEHAVIORAL REVERTS, named BEFORE any runs (this commit; the committed tree IS the pre-revert copy). First, a
+  WORLD FIDELITY FIX found while naming them (test code, this commit): the world kept every services instance it composed
+  (`composed`, strong) — production lets a stopped instance go at the teardown and the bootstrap's roads hold them weakly, so
+  a revert whose road reached the RELEASED services would have reached a still-alive one here and passed hollow; now a count
+  (`composedCount`), and the reopen pins keep no reference to the open session's services. Plus the follow's line pinned
+  (`eachOutcomeSaysTheRowsOwnSentence` + the follow arm; `aReKeyingActAsksTheReopenRoadWithThePressGeneration` asserts each
+  door's success line). Re-run on this tree: `--filter "FirstRunDrillTests|FirstRoundAfterTheReopenTests|
+  FirstRoundAfterTheActTests|FirstRoundRoadTests|FirstRoundConfirmTests|ProdTestRoadTests|SyncWalkFenceTests"` **`✔ Test run
+  with 53 tests in 7 suites passed`**. Each revert is ONE file, applied in the worktree, the harness run with the named filter
+  (`b1/revert.sh` — build, the run under a 300 s watchdog, `git checkout --`, `git diff --exit-code`), expected red in
+  brackets:
+  - **RB-1** (D-B0, the wiring) `Shared/AppBootstrap.swift`: `attach` stops wiring `firstRoundAfterReopen` [the D-B0
+    end-to-end pin, `arm7_…`, `theServicesGenerationAnswersTheNextAttachOrNothingWithinTheBound`].
+  - **RB-2** (D-B0, THE NAMED ONE — "the road answering at `.made` without waiting ⇒ the false 'Sync is off'")
+    `Shared/Protection/RoadAccountModel.swift`: the first-round closure asks the OPEN SESSION's road for a re-keying press too
+    [the D-B0 end-to-end pin ("Sync hasn't run yet: Sync is off."), `arm7_…`, `aReKeyingActAsksTheReopenRoadWithThePressGeneration`,
+    `aDoorReShownAsReKeyingTakesTheReopenRoad`].
+  - **RB-3** (D-B0, the wait) `Shared/AppBootstrap.swift`: `awaitAttachedServices` answers at once with whatever is attached
+    [`theServicesGenerationAnswersTheNextAttachOrNothingWithinTheBound`].
+  - **RB-4** (D-B1 / unit A's composition) `Shared/AppBootstrap.swift`: `attach` stops wiring `firstRound` [every
+    open-session arm of `FirstRunDrillTests` — arm1–arm6 and the four negatives].
+  - **RB-5** (D-B0, the gate) `Shared/Protection/RoadAccountFaces.swift`: `owesFirstRound` back to unit A's form (open-session
+    Turn on sync / Move only) [the D-B0 end-to-end pin, `arm7_…`, `aReKeyingActAsksTheReopenRoadWithThePressGeneration`].
+  - **RB-6** (D-B0, the start race) `Shared/AppServices.swift`: `runFirstRound` drops the in-flight start's wait
+    [`aFirstRoundAskedWhileStartRunsRidesTheStartsChain`].
+  - **RB-7** (D-B0, the follow's line) `Shared/Protection/RoadAccountModel.swift`: `firstRoundLine` drops its follow arm
+    [`eachOutcomeSaysTheRowsOwnSentence`, `aReKeyingActAsksTheReopenRoadWithThePressGeneration` (the follows)].
+  - **RB-8** (D-B3, the derivation) `Shared/AppServices.swift`: `allowsSync`'s dev arm ignores the road [`theSwitchAndAPrivate
+    MarkedListArmTheRoad`, `armedAndListedComposesTheChain`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  - **RB-9** (D-B3, the admission's door) `Shared/AppServices.swift`: `connectSyncIfAllowed` loses its DEBUG admission block
+    [`armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  - **RB-10** (D-B3, the admission's rule) `Shared/AppServices.swift`: `prodTestRoadAdmits` admits every account
+    [`theAdmissionIsPerAccount`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  - **RB-11** (D-B3, the exclusion) `Shared/Protection/ProtectionWalkSwitch.swift`: the rule ignores a resolved walk project
+    [`theSwitchWithAWalkProjectRefuses`].
+  - **RB-12** (D-B3, the mode) `ProtectionWalkSwitch.swift`: the mode-600 check removed [`eachAllowlistFaultRefusesAndTheFenceStands`].
+  - **RB-13** (D-B3, the marker) `ProtectionWalkSwitch.swift`: the `vxtest` check removed [`eachAllowlistFaultRefusesAndTheFenceStands`].
+  - **RB-14** (D-B3, links) `ProtectionWalkSwitch.swift`: `readAllowlist` follows a link (`stat`, not `lstat`)
+    [`theReadReportsTheFilesModeAndNeverFollowsALink`].
+  - **RB-15** (D-B3, the switch) `ProtectionWalkSwitch.swift`: any non-empty switch value asks [`withNoSwitchTheFenceHoldsAndNothingIsRead`].
+  - **RB-16** (D-B3, the row) `Shared/SyncStatusViews.swift`: the row's face stops consulting the road's refusal
+    [`theRowConsultsTheRoadsRefusalFirst`].
+  - **RB-17** (D-B3, Release) `Shared/AppServices.swift`: the sign-out's `notOnTheProdTestRoad` reset leaves its `#if DEBUG`
+    fence [`aReleaseBuildCompilesNothingOfTheRoad`].
+  - **RB-18** (D-B3, the call site) `Shared/AppServices.swift`: the DEBUG derivation back to the walk-lift-only call
+    [`theDerivationReadsTheLaunchsLiftOnlyInDebug`, `armedAndListedComposesTheChain`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  RESULTS: PENDING (no revert has run; none is in flight).
 - **Piece 7** — evidence on the final tree: the harness whole, the release compile, ONE Mac + ONE iOS build-for-testing
   (`DerivedData/vx510-b1`, `vx510-b1-ios`), THE MAC-SUITE LIST. NOT STARTED.
 

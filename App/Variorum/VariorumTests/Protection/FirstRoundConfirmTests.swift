@@ -224,6 +224,9 @@ struct FirstRoundConfirmTests {
             #expect(await confirm.awaitFirstRound() == .ran(PlantedFirstRound.clean), "\(door): the round's outcome")
             #expect(reopen.asks == [7], "\(door): the reopen road, asked once with the generation taken at the press")
             #expect(openSession.asks == 0, "\(door): never the open session's road (its services were released)")
+            // The success line: the follow's own (PROVISIONAL P-VX510-B1-1); a join's or Move's the join line.
+            let expected = door == .follow ? ProtectionWords.firstRoundFollowLanded : ProtectionWords.firstRoundJoinLanded
+            #expect(confirm.roundLine == expected, "\(door): \(String(describing: confirm.roundLine))")
         }
         // No reopen road: a re-keying act starts no round, even with the open session's road wired.
         let openSession = PlantedFirstRound()
@@ -359,6 +362,12 @@ struct FirstRoundConfirmTests {
         }
         #expect(line(ran(nil)) == "Synced. Your library is on your account now.")
         #expect(line(ran(nil), joins: true) == "Synced. Your account's writing is in this library now.")
+        // VX-510 unit B1 (D-B0): the follow's clean round (PROVISIONAL P-VX510-B1-1).
+        #expect(RoadAccountConfirmModel.firstRoundLine(ran(nil), joins: false, follows: true)
+            == "Synced. This library is up to date with your account again.")
+        #expect(RoadAccountConfirmModel.firstRoundLine(
+            ran(String(describing: URLError(.notConnectedToInternet)), offline: true), joins: false, follows: true)
+            == "Sync hasn't run yet: Waiting to sync (offline).", "a blocked follow says the row's sentence like any")
         let offline = String(describing: URLError(.notConnectedToInternet))
         #expect(line(ran(offline, offline: true)) == "Sync hasn't run yet: Waiting to sync (offline).")
         #expect(line(ran(String(describing: SyncError.encryptionKeysUnavailable))) == blocked(.keysLocked))

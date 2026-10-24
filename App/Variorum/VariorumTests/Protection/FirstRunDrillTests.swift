@@ -114,7 +114,7 @@ struct FirstRunDrillTests {
                 expecting: .setsUpInLibrarysMode)
             try await Self.expectFirstRound(
                 world, confirm, line: ProtectionWords.firstRoundSetUpLanded, row: .idle, rowLine: Self.syncedLine(services))
-            #expect(world.composed.count == 1, "no relaunch — the same services ran the round")
+            #expect(world.composedCount == 1, "no relaunch — the same services ran the round")
             #expect(world.vault.snapshot(Account.account)?.vault.mode == .standard)
             #expect(await world.server.pulls > 0, "the round reached the server")
         }
@@ -131,7 +131,7 @@ struct FirstRunDrillTests {
             let confirm = try await Self.press(world, passphrase: Account.passphrase, expecting: .sameMode)
             try await Self.expectFirstRound(
                 world, confirm, line: ProtectionWords.firstRoundJoinLanded, row: .idle, rowLine: Self.syncedLine(services))
-            #expect(world.composed.count == 1, "no relaunch, no reopen")
+            #expect(world.composedCount == 1, "no relaunch, no reopen")
             #expect(world.bootstrap.roadSession?.library.record?.account == Account.account)
         }
     }
@@ -215,7 +215,7 @@ struct FirstRunDrillTests {
             try await Self.expectFirstRound(
                 world, confirm, line: ProtectionWords.firstRoundJoinLanded, row: .idle, rowLine: Self.syncedLine(services))
             #expect(world.bootstrap.roadSession?.library.record?.account == Account.account, "moved to the account signed in")
-            #expect(world.composed.count == 1)
+            #expect(world.composedCount == 1)
         }
     }
 
@@ -225,14 +225,13 @@ struct FirstRunDrillTests {
     @Test func arm7_theReKeyingJoinRunsItsFirstRoundThroughTheReopen() async throws {
         try await FirstRoundWorld.run { world in
             world.reopensComposeFreshServices()
-            let before = try await world.composeServices()
-            try await world.settlePreActRounds(before)
+            try await world.settlePreActRounds(try await world.composeServices())
             try world.vault.plant(
                 accountID: Account.account, passphrase: Account.passphrase, words: Self.accountWords, mode: .castle)
             let confirm = try await Self.press(
                 world, passphrase: Account.passphrase, gate: .alwaysAsk, expecting: .entersCastle)
             try await Self.expectFirstRound(world, confirm, line: ProtectionWords.firstRoundJoinLanded, row: .idle)
-            #expect(world.services !== before, "the reopen's fresh services ran it")
+            #expect(world.composedCount == 2, "the reopen's fresh services ran it")
             #expect(world.bootstrap.roadSession?.library.record?.mode == .castle)
         }
     }
