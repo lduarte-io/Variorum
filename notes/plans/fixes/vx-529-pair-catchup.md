@@ -346,6 +346,11 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   dropper. Green with every key-file suite (59 tests).
 - P5 — scope 2, THE FORK PROPOSAL. DONE (this commit) — below, under THE FORK; REPORTED BACK. P6 waits on the ruling.
 - P6 — scope 2, THE ACT'S PROGRAM — only after the architect's ruling lands in this record. BLOCKED (the fork).
+- **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
+  passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'
+  `MCPHarnessTimeLimitTests` wall-clock bound under the full parallel run (19.1 s against 15 s; 3/3 green alone) — the
+  ticketed flake VX-353 / VX-532, no protection code in it. Zero lines in `Sources/VariorumCore/Sync/`. The app's
+  compile (F-1's four arms) PENDING the orchestrator's first `xcodebuild`.
 
 **Findings before any code (traced in this session; each says what it changes):**
 - **F-1 — `FollowKind` gaining a case breaks four EXHAUSTIVE app-side switches** (`ProtectionAccountActs.swift`
