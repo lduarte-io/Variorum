@@ -768,6 +768,38 @@ LIST for every file you changed.
 
 *(NOT STARTED — the implementer writes its skeleton in its first commit.)*
 
+## UNIT B2 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B1 closes)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE (rules 7, 9, 14, 15
+and 20 are this unit's ground); `notes/SyncSpec.md` §3 (the key provider, the custody record, the vault road);
+`notes/SurfaceContracts.md`'s protection bullet whole; `notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B4 and
+D-B5 are your charter; THE TRACE; units A and B1's LIVE STATUS for the seams and harness they built);
+`notes/plans/fixes/vx-488-window-hotfixes.md`'s M1 RECORD WHOLE (VX-487 (b) — `loadSyncKeysForTheSession`, the Touch ID
+unlock's session load you are building the typed twin of; its never-hostage pins; OPEN ITEMS M1 (c) — this ticket's
+origin) and the vx-494 record's R-494-4 (her ruled direction, verbatim); the code: `Shared/Protection/ProtectionOpenRoad.swift`
+(the lobby's typed roads, `typedCandidates`, `pressTouchID`, `loadSyncKeysForTheSession`), `Shared/Protection/
+KeychainSyncKeysLeaf.swift`, `Shared/Protection/NewRoadSyncKeyProvider.swift`, `Shared/Protection/WireVaultLeaf.swift`,
+`Sources/VariorumCore/Protection/Executor/Acts/KeyDoors.swift` (`holdSyncKeysForTheSession`), the vault model
+(`VaultModel.master`, `vault.keys(master:)`), and for D-B5 the join's plan (`Executor` `enroll` and the steps it runs —
+every keychain read on that road) plus `KeychainCustodyLeaf.swift`.
+
+**Your scope — exactly D-B4 and D-B5:** VX-501's typed-unlock load (never hostage; no second KDF; the secret never
+retained past the load; Standard and unbound libraries read nothing) with its pins red-on-old; and the VX-503 trace —
+which read raises the system Touch ID prompt during a Standard join, what a cancel skips, whether it leaves residue —
+recorded with file:line evidence, a fix ONLY if traced (with its pin), else recorded for the orchestrator. **A seam that
+would put LocalAuthentication or a network read into the core package, or any line in `Sources/VariorumCore/Sync/`, is
+a FORK: stop and propose.** Not yours: everything else; canon, Linear, `notes/QUESTIONS.md`.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's**, with `build-for-testing` into
+`DerivedData/vx510-b2` / `vx510-b2-ios`, plus the core package's protection set debug AND release if you touch
+`Sources/` (the vx-488 M1 filter: every suite under `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`,
+`AccountLifecycleTests`, `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`,
+`SupabaseTransportSessionTests`). Commits say `Part of VX-501` / `Part of VX-503`; NO trailers of any kind.
+
+### UNIT B2 — LIVE STATUS (the implementer owns this section)
+
+*(NOT STARTED — spawned after unit B1 closes.)*
+
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
 **Machinery:** a held `Tools/stage` claim (renewed per leg); the walk Debug build of the FINAL tree into
