@@ -348,12 +348,12 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   refusals, idempotence (AES key wrap is deterministic — a resume re-running the write lands the same bytes), the
   dropper. Green with every key-file suite (59 tests).
 - P5 — scope 2, THE FORK PROPOSAL. DONE (`3f3c9944d`) — below, under THE FORK; REPORTED BACK. P6 waits on the ruling.
-- P6 — scope 2, THE ACT'S PROGRAM, on the architect's ruling (`59e8b4ca1`: Shape A). DONE but P6f's final run; sub-pieces:
+- P6 — scope 2, THE ACT'S PROGRAM, on the architect's ruling (`59e8b4ca1`: Shape A). DONE; sub-pieces:
   - P6a — S-2 VERIFIED: the key doors take NO backup after a re-lock — `KeyDoorProgram`'s steps are `vault`?/`keyFile`/
     `memory` and its plan-less finish `memory` alone (`KeyDoors.swift:25-29`); the app's key-door road
     (`ProtectionKeyDoorActs.press`) and its account road (`ProtectionAccountActs.perform`) start none after the act
     either. So the catch-up takes none (the ruling's condition met). DONE (this commit).
-  - P6b — the act in the RULED shape (`follow`'s third-kind entry checks; `FollowProgram`'s no-re-key arm, steps
+  - P6b — the act in the RULED shape (reshaped at P6c/P6d — read those for the plan as it stands) (`follow`'s third-kind entry checks; `FollowProgram`'s no-re-key arm, steps
     `pickUpKeys`/`relock`/`memory`, `toKey` nil; F-2's guard removed, its pin flipped to the entry checks).
     DONE (`a4e3f3f1e` pins; this commit the act) — the red pins COMMITTED (`Executor/PairCatchUpTests.swift`, replacing the guard's suite): each half and
     both in all three postures (Standard, Castle Touch ID, Castle Always ask) — the key, record and history unchanged,
@@ -461,14 +461,17 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     (the account road's preflight, mirroring rows 7/10/11 — and row 8's words twin, F-10's); `ProtectionSecretCheck`
     (the check door's four honest answers, P-VX510-B3-2) OUT; `ProtectionOpenRoad.swift`'s typed-unlock seam (it logs
     and loads nothing — no refusal) OUT.
-  - P6f — the full core suite and the report. IN-PROGRESS — the full core suite at `148f326f5`: VariorumCoreTests
+  - P6f — the full core suite and the report. DONE — the full core suite at `148f326f5`: VariorumCoreTests
     **3396 tests passed** (5 known issues: P2's 4 negative controls + P6d's pinned residual); the one failure the
     ticketed MCP wall-clock flake (VX-353 / VX-532). Then THE SCENARIO WORLD'S OWN PASS (this commit,
     `Scenario/PairCatchUpScenarios.swift`): her other Mac re-makes the passphrase, the words, or both; this Mac owes
     exactly `.pairChanged(…)` once the vault is read, presses the follow typing today's passphrase, owes nothing
     after, and today's passphrase and words both open the caught-up live library — `expectPromisesKept` before and
-    after a settle; Castle Always ask, Castle Touch ID and Standard × the three halves: green. Remains: the final full
-    run on the finished tree.
+    after a settle; Castle Always ask, Castle Touch ID and Standard × the three halves: green. THE FINAL FULL RUN on the
+    finished tree (`b8470202d`): VariorumCoreTests **3397 tests passed** (5 known issues: P2's 4 negative controls +
+    P6d's pinned residual); the one failure `VariorumMCPTests`' `MCPHarnessTimeLimitTests` wall-clock bound (19.0 s
+    against 15 s under the full parallel run) — the ticketed flake VX-353 / VX-532, no protection code in it. Zero
+    `Sync/` lines (by diff); no commit trailers. DONE.
 - **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
   passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'
   `MCPHarnessTimeLimitTests` wall-clock bound under the full parallel run (19.1 s against 15 s; 3/3 green alone) — the
