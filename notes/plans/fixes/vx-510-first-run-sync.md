@@ -560,7 +560,44 @@ first draft of each built).
     ✘×3, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` ✘.
   - **RA-13** `--filter NotOnYetWordsTests`: `✘ … 5 tests … with 1 issue` — `bothRootsInjectTheLibrarysRecordFact` ✘.
   - **RA-14** (same): `✘ … 5 tests … with 4 issues` — `theJoinArmsDoorHasItsOwnLabel` ✘×4 (both postures).
-- **Piece 6** — F-6, the fork: the trace and the proposal (not built): NOT STARTED.
+- **Piece 6** — F-6, THE FORK: TRACED and PROPOSED — NOT BUILT (this commit). The open-session doors are the unit and ship;
+  a re-keying act (a join across postures; Move across postures; every follow) keeps today's close at `.made`
+  (`owesFirstRound` false — pinned in `aLeaveOrAReKeyingActNeverAsks`), and its round still comes through the rebuild.
+  **THE TRACE** (code read whole, then a TRANSIENT harness probe — never committed, removed after its run — over
+  `FirstRoundWorld` with `onWillLock` mimicking production's stop, a Castle vault planted so the join entered Castle):
+  1. The press: `AppBootstrap.accountRoads().press` → `request.shown.rekeys` → `accountActOnNewRoad` (AppBootstrap.swift:998,
+     :1175) → preflight (reads) → `reopenAround` (:1151): `await onWillLock?()` (:1155 — production's
+     `macWillLock { services?.stop(); services = nil }`, VariorumApp.swift:286/:293: THE SERVICES STOP AND ARE RELEASED) →
+     `state = .opening` → the act off the main actor → `beginOpening(unlockedKey:)` + `awaitOpen()` (:1163) → `finish(.ready)`.
+  2. **The confirm SURVIVES the reopen.** It lives in the bootstrap-owned presenter beside `roadAccount` (made once,
+     :367); only a non-ready settle drops the presenter's sheet (:333 — `libraryClosed`). While Settings' pane is down
+     (`SettingsSceneContent`'s `.opening` arm, :65/:140) its sheet host goes and the host's dismissal calls the confirm's
+     `cancel()` (ProtectionSheetPresenter.swift:134), which the act's `busy` guard refuses (RoadAccountModel.swift:302);
+     the returning pane re-presents the same model. Probe: `the confirm survives the reopen=true`, `presenter sheet id ==
+     confirm id: true`, the words moment standing after it (`notShown`).
+  3. **`.made` comes back AFTER the reopen settled** (probe: `state ready=true sawOpening=true onWillLock ran=1`, a new road
+     session in Castle) — but **the services that would run a round do not exist yet**: the old ones were stopped and released
+     by the teardown (probe: `the old services' chain configured=false`), and the new ones are composed by the main window's
+     `.task` (VariorumApp.swift:219 `guard services == nil` → `AppServices(…)` → `bootstrap.attach(services: fresh)` :255 →
+     `fresh.start()`), which runs only when SwiftUI re-renders the new `.ready` arm — after the press returned. So asking
+     `roadAccount.firstRound` at `.made` would reach the released instance (weak → nil → `.notConfigured` — a false "Sync is
+     off"), never the round the reopen's fresh services start on their own (`start()` → `connectSyncIfAllowed` → a trigger).
+  **THE PROPOSAL (the architect's call):**
+  - **(A — RECOMMENDED) the confirm waits for the reopen's services, then asks.** `AppBootstrap` keeps a services
+    generation: `attach(services:)` bumps it and resumes waiters; a new `awaitAttachedServices(newerThan:)` (bounded — e.g. 30
+    s, then `nil` → `.notConfigured`, since a closed main window never composes services) is the re-keying act's road:
+    `roadAccount.firstRound` stays for the open session; a second road `firstRoundAfterReopen` takes the generation
+    BEFORE the press and, at `.made`, awaits the next attach and asks THAT instance's `runFirstRound()` (which coalesces with
+    its start's own round). The sheet already survives the reopen (2), so D-A2's phase shows unchanged; `owesFirstRound`
+    widens to re-keying joins and Move (the follow too — its Done is VX-457's durable notice; the round line would sit beside
+    it). Cost: one small bootstrap seam + the model choosing the road by `rekeys`; pins on `FirstRoundWorld` extended with
+    an `onReady` hook that composes and attaches fresh services as `VariorumApp`'s `.task` does. No `Sync/` line.
+  - **(B)** the bootstrap composes the services itself at each ready (out of `VariorumApp`'s `.task` — the backup hook, the
+    hold's gates, `onWillLock`, the launch furniture), so `reopenAround` can hand the reopened instance to the act's result.
+    Cleaner ownership, but a composition-root move on BOTH platforms — architect-scale, not this unit.
+  - **(C)** accept the asymmetry: re-keying acts close at `.made` as today; their round runs through the rebuild and the row
+    says it (and the follow's Done stays the durable notice). Cheapest; VX-507's letter then holds for the open-session doors
+    only — hers to accept.
 - **Piece 7** — evidence on the final tree (the harness whole; build-for-testing Mac + iOS) and THE MAC-SUITE LIST: NOT
   STARTED.
 
