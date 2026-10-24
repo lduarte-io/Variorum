@@ -2065,7 +2065,40 @@ edits). Every claim not yet run is PENDING.*
     a follow into Castle with Touch ID rolled back that way leaves its Touch ID filing on the (Standard again) library. After
     (c) a Standard library never reads it; the next Castle-way filing for that account replaces it (`writeSyncKeys(.touchid)`
     deletes first). Not changed (the sweep's `taken` guard is VX-378 U4's design, census class (J)).
-- **Piece 4** — the behavioral reverts (named before any run): NOT STARTED.
+- **Piece 4** — THE BEHAVIORAL REVERTS, named BEFORE any run (this commit; the committed tree IS the pre-revert copy — no
+  copies kept). Also in this commit, before them: the rollback pin's third road `signedOutAtTheOpen` (`RollbackRoad`: the plan
+  stands, signed OUT at the open — only the plan names the account; the `named` source's own pin), green on this tree (`--filter
+  TouchIDSyncKeysForgottenTests` `✔ Test run with 13 tests in 1 suite passed`); and ONE comment in the production leaf
+  (`KeychainSyncKeysLeaf.touchIDCandidates`' doc said "VX-308's sync setup wires the bound account here" — it never did: now
+  "production wires none … why every forget and drop deletes BY NAME"; no code). Each revert below is ONE edit in ONE file
+  (`b4/rv/<name>.old` → `.new`, applied exactly once by `b4/revert.sh <name> <file> <core filter> [harness filter]`), the named
+  suites run, restored by `git checkout --`, `git diff --exit-code` clean after each. Core filter `TouchIDSyncKeysForgottenTests`,
+  harness filter `TouchIDSyncKeysForgottenRoadTests` where named. Expected red in brackets:
+  - **RE-0** (the red-on-old of the leg added after the fix — the WHOLE fix reverted, four files at once by `git show
+    9652b493a:<file>`, restored by `git checkout --` on the four): `AccountActs.swift`, `CommonSteps.swift`, `KeyDoors.swift`,
+    `PlanRunner.swift` at the pre-fix tree [`vx517_theRollbackSweepRemovesATouchIDOnlyItem` ×3 roads incl. `signedOutAtTheOpen`,
+    and every other `vx517_` pin as in Piece 1].
+  - **RE-1** `AccountActs.swift`: the leaves' `forgetSyncKeys(of:)` walks the listing again [the leaves ×3; harness: the leaves ×3].
+  - **RE-2** `AccountActs.swift`: `forgetUnboundSyncKeys` walks the listing again [the finishing forget].
+  - **RE-3** `AccountActs.swift`: the by-name helper deletes only the classes the listing shows [the leaves ×3, the finishing
+    forget, the rollback ×3; harness: the leaves ×3].
+  - **RE-4** `AccountActs.swift`: the known accounts lose the sign-in [the finishing forget; the rollback's `planGone`].
+  - **RE-5** `AccountActs.swift`: the known accounts lose the act's own (`named`) [the rollback's `signedOutAtTheOpen`].
+  - **RE-6** `CommonSteps.swift`: `holdSyncKeys`' drops read the listing taken before the write again [Use Standard, the follow
+    out's no-item leg, the Standard join, the Always-ask filing; harness: Use Standard's no-item leg].
+  - **RE-7** `PlanRunner.swift`: the rollback's unbound sweep walks the listing again (+ its sign-in session clear) [the rollback ×3].
+  - **RE-8** `PlanRunner.swift`: the taken-keys sweep deletes the Touch ID item only when the listing shows it [the rolled-back
+    follow into Castle].
+  - **RE-9** `CommonSteps.swift`: `syncMaterial()` reads the Touch ID class always [the Standard key doors ×2 (`.accountMoved`
+    again), the key door after Use Standard (a read); harness: the key door's no-read leg].
+  - **RE-10** `AccountActs.swift`: the set-up's finish reads the Touch ID class always [the set-up's finish ×2].
+  - **RE-11** `KeyDoors.swift`: the key doors' session hold reads the Touch ID class always [the Standard key doors ×2 (a read),
+    the key door after Use Standard; harness: the key door's no-read leg].
+  - **RE-12** `CommonSteps.swift`: THE READING reverted to the record's mode alone (the act's target posture dropped) [the guard
+    `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` — the resume cannot finish].
+  - **RE-13** `CommonSteps.swift`: the over-reach — the Touch ID class never read [the guards `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem`,
+    the follow out's read leg, `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling`].
+  **RESULTS — PENDING (runs start after this commit).**
 - **Piece 5** — evidence (harness whole, the core protection set debug + release, Mac + iOS build-for-testing, THE MAC-SUITE
   LIST, THE WALK): NOT STARTED.
 

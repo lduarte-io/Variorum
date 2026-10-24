@@ -174,12 +174,23 @@ struct TouchIDSyncKeysForgottenTests {
         expectSettled(laptop, library)
     }
 
+    /// How the next open comes to roll the crashed act back.
+    enum RollbackRoad: String, CaseIterable, Sendable {
+        /// The plan is gone: the sweep knows the act's account only by the sign-in.
+        case planGone
+        /// The plan stands, the vault is out of reach: the act's own account is in its plan.
+        case vaultOutOfReach
+        /// The plan stands, signed OUT at the open (the vault out of reach by the sign-in): only the plan names the account.
+        case signedOutAtTheOpen
+    }
+
     /// THE ROLLBACK SWEEP removes a Touch ID-only item: a Standard library joining a CASTLE account (Touch ID chosen) filed
     /// the account's keys in a Touch ID item before its swap, then crashed; the next open rolls the act back — with its plan
-    /// gone, and with its plan but the vault out of reach. RED on the pre-fix tree: the sweep walked the blind listing and
-    /// the picked-up Touch ID item survived the rollback.
-    @Test(arguments: [true, false])
-    func vx517_theRollbackSweepRemovesATouchIDOnlyItem(planGone: Bool) async throws {
+    /// gone; with its plan but the vault out of reach; with its plan, signed out. RED on the pre-fix tree: the sweep walked
+    /// the blind listing and the picked-up Touch ID item survived the rollback (the signed-out road was added with Piece 4,
+    /// its red shown by restoring the pre-fix product files — the record's RE-0).
+    @Test(arguments: RollbackRoad.allCases)
+    func vx517_theRollbackSweepRemovesATouchIDOnlyItem(_ road: RollbackRoad) async throws {
         let mac = try EX(.castle, synced: true, gate: .touchID)
         let account = try #require(mac.account)
         let laptop = try await Self.crashed({
@@ -193,8 +204,12 @@ struct TouchIDSyncKeysForgottenTests {
         })
         #expect(Self.item(laptop, account, .touchid) != nil, "precondition: the act filed the keys in a Touch ID item")
         #expect(laptop.liveRecord?.account == nil, "precondition: crashed before the swap")
-        if !planGone { laptop.world.server.reachable = false }
-        let (outcome, library, _) = try await laptop.relaunchAndSettle(TypedSecrets.none, dropPlan: planGone)
+        switch road {
+        case .planGone: break
+        case .vaultOutOfReach: laptop.world.server.reachable = false
+        case .signedOutAtTheOpen: laptop.account = nil
+        }
+        let (outcome, library, _) = try await laptop.relaunchAndSettle(TypedSecrets.none, dropPlan: road == .planGone)
         #expect(outcome == .rolledBack(.enroll), "\(outcome)")
         #expect(laptop.liveRecord?.account == nil && laptop.liveRecord?.mode == .standard, "the old state")
         #expect(laptop.world.syncItems.isEmpty, "the keys the act picked up go with it — the Touch ID item included")
