@@ -140,7 +140,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | NOT STARTED |
 | 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | NOT STARTED — shape proposed at the sitting bundle |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | NOT STARTED |
-| 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | NOT STARTED |
+| 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | NOT STARTED |
 | 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | NOT STARTED |
 
@@ -529,6 +529,54 @@ first draft of each built).
 - **Piece 6** — F-6, the fork: the trace and the proposal (not built): NOT STARTED.
 - **Piece 7** — evidence on the final tree (the harness whole; build-for-testing Mac + iOS) and THE MAC-SUITE LIST: NOT
   STARTED.
+
+## THE FIX DESIGN — UNIT B (VX-509 · D-ROAD · VX-501 · the VX-503 rider; the architect's design, built by implementer session B after unit A closes)
+
+- **D-B1 — VX-509, the standing first-run drill (pins).** Extend unit A's end-to-end seam (the bootstrap's attach
+  glue + the planted road + a real `SyncSession` over a fake transport) into a suite that runs EVERY first-run arm
+  to its first round with no relaunch and asserts the row's state: Standard set-up; Standard join (same posture);
+  Castle set-up (Always ask; and Touch ID with the planted press); Castle join; Move in the same posture; the
+  re-keying join through the reopen (per unit A's F-6 ruling); and the negative arms — offline, held (restore hold),
+  not configured (owner adoption refused), the account-binding gate — each saying its blocker on the sheet and the
+  row. The suite is named so a release checklist can cite it (`FirstRunDrillTests` or the implementer's
+  equivalent), and its header says it is the standing gate VX-509 asked for.
+- **D-B2 — VX-509, the scripted first-run walk.** A walk script under `Tools/` (the WalkKit idiom) that drives the
+  Debug build on the prod test road through sign-in → Turn on sync → the sheet's "Synced" → `Tools/prod-read.sh`
+  server checks (vault row · `kp:` secret · device cursor · data rows) for a named test account, refusing to run
+  unless the road's guards hold; plus ONE row in the release checklist (find the release road's checklist —
+  `Tools/Release/` and `notes/` — and add the step where the publish checks live). Unit C runs it live.
+- **D-B3 — D-ROAD (R-510-1/-6), DEBUG-ONLY, Release byte-unchanged.** Beside the walk lift
+  (`ProtectionWalkSwitch.SyncFenceLift` / `ProjectConfig.walkSyncFenceLift`): a launch decision `ProdTestRoad` read
+  ONCE — `.none` (no `VARIORUM_PROD_TEST_ROAD=1`) · `.armed(allowlist)` (the env set, NO walk project resolved, the
+  allowlist file `~/.variorum/prod-test-accounts.env` present at mode 600 with a non-empty `VARIORUM_PRODTEST_EMAILS`
+  whose every entry carries `vxtest`) · `.refused(reason)` (env set but a walk project too — the two roads are
+  exclusive; or the file missing / wrong mode / empty / an entry without the marker) — logged once, emails never
+  logged. `AppServices.allowsSync` (DEBUG arm) admits a dev store when the walk lift lifts OR the road is armed. The
+  ADMISSION is per account, at `connectSyncIfAllowed`: while the dev store syncs only by the road, the chain composes
+  only if the signed-in account's email is on the allowlist; otherwise no chain, and the row says why (a refusal
+  face, words PROVISIONAL — never "Sync off (dev store)" alone, never silent). Her account can never pass (not
+  listed); a sign-out/in re-runs the admission. The retired-credential sweep stays gated on the store variant. The
+  sign-in coordinates are production's (no walk project) — the account fence's protection is the allowlist.
+  Pins: no env ⇒ fence; env + walk project ⇒ refused; file missing / mode / empty / unmarked entry ⇒ refused each;
+  env + file ⇒ armed; armed + listed account ⇒ the chain composes; armed + unlisted ⇒ no chain + the refusal face;
+  Release's derivation byte-unchanged (source pin, the M3 idiom — a pin on CODE, never a comment).
+- **D-B4 — VX-501 (R-510-11), the typed Castle unlock holds the account's sync keys.** After a TYPED unlock (the
+  passphrase or the words at the lobby) OPENS a library whose record names an account, the road loads the account's
+  sync keys into session memory — the typed twin of VX-487 (b)'s `loadSyncKeysForTheSession`, built on the core's
+  existing derivation (`KeyDoors.holdSyncKeysForTheSession`: master from the typed secret against the account's vault
+  snapshot, then `vault.keys(master:)`). Off the main actor, after the open; the vault read is the lobby's ONE
+  authenticated read where one was already made, else one fresh read; the typed secret's derived key is reused, never
+  re-derived (no second KDF) and never retained past the load. NEVER HOSTAGE: offline, a refused read, or a secret
+  that opens the library but not the vault ⇒ the library opens, the load is logged, the row says locked as today.
+  Applies under Always ask AND Touch ID (a typed unlock under Touch ID loads too). Pins: Always-ask typed unlock ⇒
+  session holds the keys and the provider's `currentKeys()` succeeds (red on old); words-typed the same; offline
+  vault ⇒ the unlock still opens (never hostage); Standard ⇒ nothing loaded (its silent item serves); an unbound
+  library ⇒ nothing read.
+- **D-B5 — the VX-503 rider (trace first, fix only if traced).** The Standard JOIN raised a SYSTEM Touch ID prompt
+  ("Variorum Dev is trying to Unlock your Variorum library") and waited; cancelled, the join still completed. Trace
+  which keychain read in the join's plan raises it (suspected: a read of an on-device item whose ACL demands user
+  presence, during the re-lock under the account's pair), what a cancel skips, and whether a cancel leaves residue.
+  A traced fix lands with its pin; an untraced one is recorded, not guessed.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
