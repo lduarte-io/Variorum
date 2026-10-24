@@ -336,3 +336,55 @@ struct PairCatchUpStrandedOpenTests {
             resumeMayRollBack: true)
     }
 }
+
+/// R-arch-3 (the architect's ruling): a pair plan interrupted mid-act and resumed by an OLDER build. A build before
+/// VX-529 reads `follow = "pairChanged"` as `.keysReplaced` (`FollowProgram.kind`'s default arm) and resumes the plan by
+/// its step names: a name it doesn't know throws `nothingToDo` out of its settle — the act left in flight at every open
+/// until the next upgrade. THE STAND-IN: the plan's `follow` name cleared — exactly that reading — then this build
+/// resumes it; this build's non-pair `FollowProgram` paths, `PlanRunner.resume` and `CommonSteps` are the older build's
+/// byte for byte (`git diff main` adds only the pair arm, `perform`'s `material`, and `ActContext.typedPassphrase`), so
+/// the resume runs the older build's steps. Every crash point must settle — the old state or the new, never in flight.
+@Suite("VX-529 R-arch-3 — an older build resuming a pair plan runs only steps it runs harmlessly")
+struct PairCatchUpOlderBuildTests {
+    static func readAsAnOlderBuildWould(_ fixture: EX) throws {
+        guard let sealed = fixture.world.plan, let id = fixture.liveRecord?.libraryID else { return }
+        var plan = try sealed.open(purpose: .plan, libraryID: id, key: fixture.key)
+        plan.parameters?.follow = nil
+        fixture.world.plan = try plan.sealed(under: fixture.key)
+    }
+
+    @Test(arguments: pairPostures)
+    func everyStepAnOlderBuildWouldResumeIsHarmless(_ mode: ProtectionMode, _ gate: GateStyle?) async throws {
+        func press(_ air: EX, _ newPassphrase: String?) async throws {
+            let executor = air.executor()
+            var library = try air.unlocked(executor)
+            _ = try await executor.follow(
+                &library, kind: .pairChanged(passphrase: true, words: false), typed: TypedSecrets(passphrase: newPassphrase))
+        }
+        let clean = try await pairMovedElsewhere(mode, gate: gate)
+        try await press(clean.air, clean.newPassphrase)
+        let count = clean.air.world.writes.count
+        #expect(count > 3)
+        for crashAt in 1...count {
+            let made = try await pairMovedElsewhere(mode, gate: gate)
+            let air = made.air, k0 = made.air.key
+            air.world.crashAfterWrites = crashAt
+            do {
+                try await press(air, made.newPassphrase)
+                Issue.record("write \(crashAt): no crash")
+            } catch is SimulatedCrash {}
+            let context = "crash after write \(crashAt) (\(clean.air.world.writes[crashAt - 1])):"
+            try Self.readAsAnOlderBuildWould(air)
+            let settled: UnlockedLibrary
+            do {
+                // The lobby: the account's current passphrase, and the (unchanged) words for Always ask's road.
+                (_, settled, _) = try await air.relaunchAndSettle(TypedSecrets(passphrase: made.newPassphrase, words: air.words))
+            } catch {
+                Issue.record("\(context) an older build's settle threw \(error) — the act would stay in flight")
+                continue
+            }
+            expectSettled(air, settled, context)
+            #expect(settled.key == k0, "\(context) an older build re-keyed the library")
+        }
+    }
+}

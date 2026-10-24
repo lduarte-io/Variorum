@@ -388,7 +388,21 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     the open too (P6d). Green: 85 tests (the pair suites, `FollowTests`, the key-door suites). VERIFIED BY REVERT: the
     descriptor put back in the plan ⇒ the pin RED again (the same 14 `the settle threw .passphraseDoesNotOpen`);
     restored ⇒ the pair suites 12/12 green.
-  - P6d — R-arch-3: the downgrade-resume trace and the plan's shape (its pin red-first if the shape moves). NOT-STARTED.
+  - P6d — R-arch-3: the downgrade-resume trace and the plan's shape. IN-PROGRESS — THE TRACE (an older build = any
+    build before VX-529 on this road, 0.10 / 0.10.1; its `FollowProgram`, `PlanRunner.resume` and `CommonSteps` are
+    this branch's non-pair paths byte for byte — `git diff main` adds only the pair arm, `perform`'s `material` and
+    `ActContext.typedPassphrase`): it reads `follow = "pairChanged"` as `.keysReplaced` and resumes a NAMED plan by its
+    step names — `pickUpKeys` harmless (the same keys held the same way, the same key stamped; out of reach ⇒ a
+    harmless roll back; no usable secret ⇒ `secretsRequired` out of its settle — see the residual below); `memory`
+    harmless; **`relock` a name it doesn't know ⇒ `default: throw .nothingToDo` out of its settle — the app's open
+    catches it ("could not settle now", `ProtectionOpenRoad.swift:753-759`), the library opens, the act stays in
+    flight and every door refuses `actInFlight` at every open until she upgrades: NOT harmless.** With no plan to
+    trust it finishes from the record: `afterCommit(.keysReplaced)` = `memory` (harmless), `retireOldCustody` (returns
+    at once — `current == plan.fromFingerprint`, the key unchanged), `backup` (a fresh pair of whichever valid state
+    the file is in) — harmless; a nil `toKey` is never reached (no step it runs needs one). THE PIN COMMITTED
+    (`PairCatchUpOlderBuildTests`: crash after every write, the plan's `follow` cleared — the older build's reading —
+    then resumed; every settle must land): RED on the ruled shape — 12 crash points, all three postures, `an older
+    build's settle threw .nothingToDo`. Remains: the plan shaped so it is harmless, green.
   - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
     red-first. NOT-STARTED.
   - P6f — the full core suite green; the report back. NOT-STARTED.
