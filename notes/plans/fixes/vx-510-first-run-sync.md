@@ -1417,7 +1417,8 @@ PENDING.*
     - **RD6-5** `AppBootstrap.swift`: the mark on any press answer, not only `.made` [`aRefusedActMarksNothing`]. → `✘ …
       with 2 issues` — that guard ✘×2.
 - **Piece 3 — D-B5 (VX-503, Part of VX-503): THE TRACE DONE (this commit — code read, file:line; no keychain, no launch);
-  the fix of the traced read IN PROGRESS (3b — 3b-1, 3b-2 DONE; 3b-3 the reverts named, running next).** The observation (vx-494 O-1): a Standard library JOINING a Standard
+  the fix of the traced read DONE (3b-1 `58c4eb98c` red pins · 3b-2 `226cf7c20` the fix · 3b-3 the reverts, this
+  commit).** The observation (vx-494 O-1): a Standard library JOINING a Standard
   account raised the system prompt "Variorum Dev is trying to Unlock your Variorum library. Touch ID to continue…", waited,
   was cancelled, and the join completed.
   - **T-B5-1 — WHICH READ:** the prompt's words are `KeychainCustodyLeaf.pressReason` ("Unlock your Variorum library",
@@ -1483,7 +1484,7 @@ PENDING.*
     `touchIDReads == presses` (the join and Use Standard landed; the preflight ready); the guard ✔. (The Use Standard pin's
     FIRST draft opened its door through `Crossing.press`, whose read is signed out — it failed on its precondition, not its
     claim; redrawn on the world's own signed-in read, then red on the claim.)
-  - **3b-2 — THE FIX: DONE (this commit).** `Sources/VariorumCore/Protection/Executor/Acts/CommonSteps.swift` — ONE function,
+  - **3b-2 — THE FIX: DONE (`226cf7c20`).** `Sources/VariorumCore/Protection/Executor/Acts/CommonSteps.swift` — ONE function,
     `ActContext.material(for:)`: the vault with the secrets in hand FIRST (`VaultModel.master` → `keys(master:)` — no
     keychain read), custody's keys only when no secret in hand opens the vault (still checked current under the vault's
     master), else `secretsRequired` as before. Same keys either way (both the vault's current sync key under its master;
@@ -1498,10 +1499,12 @@ PENDING.*
     protection set (debug + release) is Piece 4's.
   - **3b-3 — THE REVERTS (named BEFORE any run; `CommonSteps.swift` on this commit, the harness `--filter
     "TypedSecretNeverPressesTests|RoadKeyDoorRoadTests"`, restored by `git checkout --`, `git diff --exit-code` clean after
-    each):** PENDING —
-    - **RD5-1** `material(for:)` back to custody first (the pre-fix order) [both `vx503_` pins].
+    each):** **DONE on `226cf7c20` — both RED as named, both restores clean; NO REVERT IS IN FLIGHT:**
+    - **RD5-1** `material(for:)` back to custody first (the pre-fix order) [both `vx503_` pins]. → `✘ Test run with 14
+      tests in 2 suites failed with 2 issues` — both `vx503_` pins ✘ (a Touch ID read each); the key doors' suite green.
     - **RD5-2** the custody fallback removed (the typed secret or nothing) [`theCustodyFallbackStandsWhenNoTypedSecretOpens
-      TheVault`, and the key doors' road suite].
+      TheVault`, and the key doors' road suite]. → `✘ … with 5 issues` — the guard ✘ and `RoadKeyDoorRoadTests
+      .syncedChangeChangesTheAccountsPassphraseWithIt` ✘×4 (the key door's vault step found no keys).
 - **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
   `build-for-testing` into `DerivedData/vx510-b2` / `vx510-b2-ios`) and THE MAC-SUITE LIST:** NOT STARTED.
 
