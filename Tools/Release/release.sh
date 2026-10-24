@@ -320,6 +320,10 @@ if [ "$MODE" = release ]; then
 VARIORUM ${VERSION} (build ${BUILD}) — READY TO PUBLISH. SHE carries it to the site repo, whose agent runs
 its notes/variorum-releases.md. THE SITE'S PUBLISH-AND-LEAVE ORDER (binding — the site-side report):
 
+  0. BEFORE ANY OF IT — THE FIRST-RUN GATE (VX-509): the headless drill FirstRunDrillTests green on this commit,
+     AND the scripted first-run walk PASSED on the prod test road with a Debug build of this commit, for a test
+     account (the stage held, the dev slot aside — its own guards refuse otherwise; it prints PASSED):
+     Tools/WalkKit/first-run-walk.sh std
   1. THE DMG FIRST:  ${FEED}/${DMG_NAME}
                      ${DMG_BYTES} bytes · sha256 ${DMG_SHA}
      → ${DMG_HOST_PREFIX}${DMG_NAME}   (the name EXACTLY; IMMUTABLE once the appcast references it)

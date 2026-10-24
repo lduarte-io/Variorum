@@ -959,8 +959,39 @@ unit B2's brief). Every claim not yet run is PENDING.*
     the rule's input. **(C)** the allowlist moves into the Debug container (readable without a grant) — moves her ruled path,
     and every tool that reads it, into a folder a dev-slot reset handles. The walk script (D-B2) is written for the current
     design and says which line changes under (B).
-- **Piece 5** — D-B2 (VX-509): the scripted first-run walk under `Tools/` + one release-checklist row; guard dry-runs.
-  NOT STARTED.
+- **Piece 5** — D-B2 (VX-509): DONE — written and guard-dry-checked only, NEVER run (this commit). `Tools/WalkKit/first-run-walk.sh
+  <std|castle|del> [--app …] [--dry-run] | --self-test` (zsh, the WalkKit/VisualWalk idioms — `guard.sh --author` before
+  every GUI act, acts ≥ 2.6 s apart, presses by ACCESSIBILITY LABEL through VisualWalk's `vis-ax` addressed to OUR pid,
+  captures by window id, quit by identity left to the walker): **nine guards, in order, each a refusal (exit 5, nothing
+  launched, nothing read from production, nothing typed)** — G1 the account (std · castle · del); G2 the allowlist (a regular
+  file never a link, mode 600, every entry `vxtest`, this account listed — read in a subshell, never printed); G3 no walk
+  project in the environment; G4 a Debug build (bundle `io.lduarte.Variorum.debug`, a `…/Debug/Variorum.app` path) never under
+  `/Applications`; G5 zero Variorum instances (by path); G6 the stage HELD; G7 the dev slot set aside (no `variorum.sqlite`
+  — the `mv` is the walker's, never the script's); G8 `Tools/prod-read.sh` + `.env.supabase.local` present, the typing and
+  stash helpers at mode 700, cliclick; G9 the GUI grants (VisualWalk's `vis-tcc` — checked, never prompted). Then the live
+  phases (unit C's): P1 launch (`open -n --env VARIORUM_PROD_TEST_ROAD=1 --env OS_ACTIVITY_DT_MODE=YES --stderr`), P2 `ps
+  eww` (the switch present, no walk project — never printed) + the app's own "PROD TEST ROAD (VX-510): ARMED" line (a
+  REFUSED line stops it — F-B1-1 stops it HERE until ruled), P3 the account on production (exists, confirmed — its id read
+  once), P4 sign in (the helper types email/password), P5 the row's not-yet line + Settings ▸ Protection ▸ Record your twelve
+  words… → Copy → `stash-prod-test-words`, P6 Turn on sync… (the helper types the new passphrase twice and the words), P7 THE
+  SHEET's "Synced. Your library is on your account now." (≤ 180 s; a "Sync hasn't run yet" line stops it with the capture) →
+  Done → the row "Synced" → the same pid (no relaunch), P8 the server by the account's id: `key_vault` (mode + proof),
+  `vault.secrets` `kp:<id>`, `device_cursor`, `container` rows (counts only). The GUI labels are the code's own constants
+  (`ProtectionWords`, `AuthViews`) but have never met the real window: **its first live run is unit C's** (expect label
+  adjustments there). **THE RELEASE-CHECKLIST ROW** — the publish checks live in `Tools/Release/release.sh`'s HANDOFF
+  (release mode), so its step **0 — THE FIRST-RUN GATE (VX-509)**: `FirstRunDrillTests` green on this commit AND
+  `Tools/WalkKit/first-run-walk.sh std` PASSED on a Debug build of this commit, before the DMG moves (printed text only — no
+  release behaviour changes; `bash -n` clean; no test pins that text). `Tools/WalkKit/README.md` gains a short section.
+  **THE GUARD DRY-RUNS (this session; nothing launched):** no args → `REFUSES: usage: …` exit 5 · `bogus` → `REFUSES: G1/G2 —
+  unknown account 'bogus'` exit 5 · `VARIORUM_WALK_PROJECT_URL=… std` → `REFUSES: G3 — a walk project is set …` exit 5 ·
+  `std --app /Applications/Variorum.app` → `REFUSES: G4 — … is under /Applications: her app is never launched by a walk` exit
+  5 · `std --app /nonexistent/Debug/Variorum.app` and `std` (no `vx510` build yet) → `REFUSES: G4 — no Debug build at …` exit 5
+  · `--self-test` → nine fixture cases, every one as expected (good std/castle accepted; unknown account, mode 644, an
+  unmarked entry, an empty list, the account unlisted, a link, no file — each refused with its reason) `SELF-TEST: every guard
+  fired as expected` exit 0. **Machinery honesty:** the self-test's FIRST run reported 7 of 9 cases wrong — its own harness
+  read the exit status after a `local` assignment (always 0), so every case read "accept"; the self-test caught it (it FAILs
+  loudly rather than passing hollow), fixed before this commit. The G5/G6 refusals are shown at Piece 7 against the
+  build-for-testing's Debug app (PENDING).
 - **Piece 6** — the behavioral reverts, named here BEFORE any runs. NOT STARTED.
 - **Piece 7** — evidence on the final tree: the harness whole, the release compile, ONE Mac + ONE iOS build-for-testing
   (`DerivedData/vx510-b1`, `vx510-b1-ios`), THE MAC-SUITE LIST. NOT STARTED.

@@ -325,3 +325,14 @@ state (`NSEvent.modifierFlags` the class property) and for driving other apps.
 - **Quiet receipts fade in ~6 s** — capture at once after the act; a `walk-cap` taken 7 s later catches them mid-fade.
 - **`defaults read io.lduarte.Variorum.debug appearanceChoice`** before a walk and restore it after: another session's walk
   may have left `dark`.
+
+## The scripted first-run walk (VX-509 — VX-510 unit B1, D-B2)
+
+`Tools/WalkKit/first-run-walk.sh <std|castle|del> [--app <Debug Variorum.app>] [--dry-run] | --self-test` drives the
+DEV-store Debug build on the PROD TEST ROAD (`VARIORUM_PROD_TEST_ROAD=1` + `~/.variorum/prod-test-accounts.env` — her
+rulings R-510-1/-6) for ONE named test account: sign in → the words' look (stashed, never read) → Turn on sync → the
+sheet's "Synced." → the row's "Synced ‹time›" with no relaunch → the server checks through `Tools/prod-read.sh`. It
+refuses (exit 5, nothing launched) unless every guard in its header holds — the allowlist (mode 600, marked, the account
+listed), no walk project, a Debug build outside `/Applications`, zero instances, the stage held, the dev slot set aside,
+the road's tools, the GUI grants. `--self-test` shows the allowlist guard's refusals over fixtures. The release checklist
+row (`Tools/Release/release.sh`'s HANDOFF, step 0) names it beside the headless gate `FirstRunDrillTests`.
