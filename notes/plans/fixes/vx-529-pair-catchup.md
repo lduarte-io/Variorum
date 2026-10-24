@@ -491,7 +491,11 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     `RoadAccountFaces` `actRefusalSentence` arms. Core builds; the app arms' compile PENDING (your xcodebuild).
   - P7-1 — THE WORDS ARM: the account's CURRENT words typed when the passphrase half moved ⇒ the stale passphrase lock
     DROPS (`relockedToTheAccountsPair`'s passphrase-lock change becomes keep / re-make / drop); the door's requirement for
-    the passphrase-moved case becomes `.oneSecret` (either of the account's two). Red pins first. NOT-STARTED.
+    the passphrase-moved case becomes `.oneSecret` (either of the account's two). IN-PROGRESS — the red pins COMMITTED
+    (`PairCatchUpWordsArmTests`; `AssessPairKindTests`' door row now `.oneSecret`; the entry row that expected
+    `secretMissing` for the words removed — the ruling makes that road land): RED on the pre-P7-1 tree — the words arm
+    `secretMissing` in all three postures, alone and for both halves, and under the crash harness; the door
+    `.currentPassphrase`. The passphrase-press-resumed-by-the-words row green on both sides by nature (a guard).
   - P7-2 — F-10's refusal at the follow's own words arm and the pair door's (sweep rows 8–9). Red pins first.
     NOT-STARTED.
   - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). NOT-STARTED.

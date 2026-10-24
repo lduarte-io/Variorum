@@ -224,7 +224,6 @@ struct PairCatchUpEntryTests {
         let (mac, air, _, _) = try await pairMovedElsewhere(.castle, gate: .alwaysAsk)
         let vault = try pairVault(mac)
         try await Self.refused(air, .secretMissing, halves: (true, false), typed: .none)
-        try await Self.refused(air, .secretMissing, halves: (true, false), typed: TypedSecrets(words: air.words))
         try await Self.refused(
             air, .passphraseChangedElsewhere(device: "Mac A", day: vault.updatedAt), halves: (true, false),
             typed: TypedSecrets(passphrase: air.passphrase))
@@ -412,5 +411,94 @@ struct PairCatchUpOlderBuildTests {
         let (_, settled, _) = try await air.relaunchAndSettle(TypedSecrets(words: air.words))
         expectSettled(air, settled, "healed at the words")
         #expect(settled.key == k0)
+    }
+}
+
+
+/// R-529-5 (her ratify): the catch-up accepts EITHER of the account's CURRENT secrets. Where the passphrase moved and the
+/// account's current WORDS are typed — the forgot-the-new-passphrase road — the stale passphrase lock DROPS: the old
+/// passphrase stops opening this library at once (the passphrase change arriving here); the words open it; the lock is
+/// re-made the next time a passphrase is typed here (E6's window, P-VX529-4 — unit 2's consumers).
+@Suite("VX-529 R-529-5 — the words arm: the account's current words catch the passphrase half up by dropping the stale lock")
+struct PairCatchUpWordsArmTests {
+    @Test(arguments: pairPostures)
+    func theAccountsWordsDropTheStalePassphraseLock(_ mode: ProtectionMode, _ gate: GateStyle?) async throws {
+        let (_, air, newPassphrase, _) = try await pairMovedElsewhere(mode, gate: gate)
+        let before = try pairBefore(air)
+        let executor = air.executor()
+        var library = try air.unlocked(executor)
+        // Only the passphrase moved: the words this library knows ARE the account's current words.
+        _ = try await executor.follow(&library, kind: .pairChanged(passphrase: true, words: false), typed: TypedSecrets(words: air.words))
+        try expectCaughtUp(air, library, before: before)
+        let live = try #require(air.world.liveFormat3)
+        #expect(live.passphrase == nil, "the stale passphrase lock stays")
+        #expect((try? live.open(passphrase: .passphrase(air.passphrase), floor: PF.floor)) == nil,
+                "the old passphrase still opens the live library")
+        #expect((try? live.open(passphrase: .passphrase(try #require(newPassphrase)), floor: PF.floor)) == nil,
+                "E6: no passphrase lock of its own until one is typed here")
+        #expect(try live.open(.words(air.words), floor: PF.floor) == air.key, "the account's words open it")
+        #expect(live.words == before.file.words, "the words did not move — their lock stays")
+        try expectTheKeysHeld(air)
+    }
+
+    /// E5 by the words: both halves moved; the account's NEW words typed — both stale locks drop, the copy is the vault's.
+    @Test(arguments: pairPostures)
+    func bothHalvesByTheAccountsNewWords(_ mode: ProtectionMode, _ gate: GateStyle?) async throws {
+        let (_, air, _, newWords) = try await pairMovedElsewhere(mode, gate: gate, passphrase: true, words: true)
+        let before = try pairBefore(air)
+        let executor = air.executor()
+        var library = try air.unlocked(executor)
+        _ = try await executor.follow(
+            &library, kind: .pairChanged(passphrase: true, words: true), typed: TypedSecrets(words: try #require(newWords)))
+        try expectCaughtUp(air, library, before: before)
+        let live = try #require(air.world.liveFormat3)
+        #expect(live.passphrase == nil && live.words == nil, "a stale lock stays")
+        #expect(try live.open(.words(try #require(newWords)), floor: PF.floor) == air.key)
+        for old in [ProtectionSecret.passphrase(air.passphrase), .words(air.words)] {
+            #expect((try? live.open(old, floor: PF.floor)) == nil)
+        }
+    }
+
+    /// Rule 20 for the words arm: a crash after every write, the relaunch's lobby typing the words — the act finishes.
+    @Test(arguments: pairPostures)
+    func aCrashAfterEveryWriteFinishesByTheWords(_ mode: ProtectionMode, _ gate: GateStyle?) async throws {
+        var k0: StoreKey!
+        try await CrashHarness.everywhere(
+            {
+                let made = try await pairMovedElsewhere(mode, gate: gate)
+                k0 = made.air.key
+                return made.air
+            },
+            act: { fixture, executor, library in
+                _ = try await executor.follow(
+                    &library, kind: .pairChanged(passphrase: true, words: false), typed: TypedSecrets(words: fixture.words))
+            },
+            finished: { fixture, library in library.key == k0 && PairCatchUpCrashTests.caughtUp(fixture) },
+            neverHappened: { fixture, library in library.key == k0 && !PairCatchUpCrashTests.caughtUp(fixture) },
+            typed: { fixture in TypedSecrets(words: fixture.words) })
+    }
+
+    /// A press by the PASSPHRASE resumed by a lobby that took only the words: the words arm is not the press's choice —
+    /// the act rolls back (the old state) or, landed, finishes; it never strands the open, and never trades the press's
+    /// re-made lock for a dropped one.
+    @Test func aPassphrasePressResumedByTheWordsRollsBackOrFinishes() async throws {
+        var newPassphrase: String?
+        var k0: StoreKey!
+        try await CrashHarness.everywhere(
+            {
+                let made = try await pairMovedElsewhere(.standard)
+                newPassphrase = made.newPassphrase
+                k0 = made.air.key
+                return made.air
+            },
+            act: { _, executor, library in
+                _ = try await executor.follow(
+                    &library, kind: .pairChanged(passphrase: true, words: false), typed: TypedSecrets(passphrase: newPassphrase))
+            },
+            finished: { fixture, library in
+                library.key == k0 && PairCatchUpCrashTests.caughtUp(fixture) && fixture.world.liveFormat3?.passphrase != nil
+            },
+            neverHappened: { fixture, library in library.key == k0 && !PairCatchUpCrashTests.caughtUp(fixture) },
+            typed: { fixture in TypedSecrets(words: fixture.words) }, resumeMayRollBack: true)
     }
 }

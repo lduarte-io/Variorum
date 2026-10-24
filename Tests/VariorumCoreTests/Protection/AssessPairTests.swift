@@ -99,14 +99,15 @@ struct AssessPairKindTests {
         #expect(try both.assessed().acts.filter { if case .follow = $0 { return true } else { return false } }.count == 1)
     }
 
-    /// Design §2: the catch-up re-locks, never re-keys — no new key, no Apple key retired, no rule-5 sentence; it types the
-    /// account's current passphrase where that moved, nothing where only the words did (R-529-2).
+    /// Design §2: the catch-up re-locks, never re-keys — no new key, no Apple key retired, no rule-5 sentence. Where the
+    /// passphrase moved it types ONE of the account's current secrets (R-529-5: the passphrase re-makes the lock, the
+    /// words drop the stale one); nothing where only the words did (R-529-2).
     @Test(arguments: ProtectionMode.allCases)
     func theFollowDoorReLocksAndTypesExactlyTheHalfThatMoved(_ mode: ProtectionMode) throws {
         var passphrase = try pairWorld(mode).0
         passphraseMovedElsewhere(&passphrase)
         let typed = try #require(try passphrase.assessed().door(.followNow).spec)
-        #expect(typed == DoorSpec(requires: .currentPassphrase, synced: true))
+        #expect(typed == DoorSpec(requires: .oneSecret, synced: true))
         #expect(!typed.rekeys && typed.retiresOwnAppleKeys.isEmpty && typed.words.isEmpty)
         var words = try pairWorld(mode).0
         try wordsMovedElsewhere(&words)
