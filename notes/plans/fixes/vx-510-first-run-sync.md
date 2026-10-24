@@ -239,7 +239,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | UNIT B2 DONE (`4a5ef39e3`…`f4af7e368`; harness 502/85 green; reverts RF-1…6, RD4-1…8, RD6-1…5, RD5-1…2 red as named; Mac + iOS build-for-testing green; claims spot-checked by the orchestrator); VX-501 + VX-511 GREEN LIVE on production (unit C C2/C4); VX-503 fixed (`226cf7c20`); T-B5-2 → **VX-517** (Needs Lillian); the Mac stage batch PENDING (the closing run) |
 | 6c | VX-513 (the read-only check-your-secrets door) | UNIT B3 DONE (`73dc65dab`…`2e3d335d8`; harness 519/89 green; RC-1…16 red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 65/9 green; P-VX510-B3-2 ruled (b) provisionally); **GREEN LIVE** (rows 1–5, offline included; nothing written); the Mac stage batch PENDING (the closing run) |
 | 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 DONE (`5416bcaca`…`fe42afe4f`; harness 521/90; core protection 546/103 re-run by the orchestrator; RE-0…13 red as named; Mac + iOS build-for-testing green); F-B4-1 accepted as residue; O-B4-1 → VX-530; **GREEN LIVE** (red leg on the pre-fix build: two Touch ID sheets on a Standard key door; green leg on the post-fix build: none; the Castle guard intact; VX-530 seen live) |
-| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere) | VX-527: the SUCCESSOR's first unit (pin first) · VX-529: ITS OWN RUN, NEXT (R-510-19/20) |
+| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere) | VX-527: UNIT B5 IN FLIGHT under the successor (D-B9 + the brief, this commit) · VX-529: ITS OWN RUN, NEXT (R-510-19/20) |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
@@ -2253,6 +2253,67 @@ PASSPHRASE; `223c4e7e` Castle Always ask): the pre-fix build (`DerivedData/vx510
 Standard → Use Castle (Touch ID) → Use Standard → Change passphrase (a sheet = red; she presses Cancel) — then the post-fix
 build (`DerivedData/vx510-b4walk`, `fe42afe4f`) runs B4's W2/W3 (no sheet on the Standard side, even with the red leg's
 stale item present) and the W1 guard (Castle + Touch ID reads still work).
+
+## D-B9 — VX-527 (the rider; the SUCCESSOR architect's design, 2026-10-24)
+
+Her hand on the Pro's own trackpad (W-13 → VX-527, Confirmed): the lobby's "Use your twelve words instead" opens only
+from the little chevron — "the click affordance is very small". THE MECHANISM (read at this kickoff): the Mac's
+`StoreLockView` disclosure arm renders the door as a bare `DisclosureGroup` label (`Text(ProtectionWords.wordsDoor)`,
+StoreLockView.swift:259) — a macOS DisclosureGroup's label is not a control, so only the chevron presses (exactly
+W-13's shape: AXPress opened it at once, three synthetic clicks across the label's own geometry did not). The PHONE
+already wraps the same label in a whole-label `.plain` Button (MobileRoadFaces.swift:133–141) and has no bug.
+
+- **The fix (Mac only):** the whole door — chevron and label together — is ONE press target toggling the words road:
+  the phone's Button idiom with the Mac's look kept byte-faithful (the small/muted one-line label, maxWidth 340, the
+  words field unfolding beneath as today), a leading chevron that turns with the state, and a `.contentShape` covering
+  the row so the gap between glyph and words presses too. Whether that is a Button replacing the `DisclosureGroup` or
+  a Button AS its label is the implementer's pick — the pin binds the MECHANISM (the label inside a press target),
+  never the idiom.
+- **Pins (red on old):** a SOURCE pin in the `RoadLockViewNamesPinTests` idiom, SELF-CONTAINED (file reads only, no
+  app import, so it runs in a minimal scratch package): the disclosure arm's `ProtectionWords.wordsDoor` label sits
+  inside a press target that toggles the words road — red while the label is a bare `DisclosureGroup` label — plus the
+  GUARD that the phone's arm keeps its whole-label Button. Red shown on the pre-fix tree; a behavioral revert (the
+  label back to the bare DisclosureGroup label) re-reds it after the fix.
+- **Evidence:** the pin headless in the scratch package; Mac + iOS build-for-testing; the Mac-target run rides the
+  closing stage batch; the live press — a real click on the label's own text on the final build — is the successor's
+  re-walk's.
+
+## UNIT B5 — THE BRIEF (a fresh `opus-implementer`, one SMALL session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/SurfaceContracts.md`'s protection bullet;
+`notes/SessionResiliencyProtocol.md`; this file's D-B9 (your charter), UNIT C's W-13 row and the VX-527 hand check,
+and ENVIRONMENT TRAPS; the code: `App/Variorum/Variorum/StoreLockView.swift` WHOLE,
+`App/Variorum/VariorumMobile/Features/Protection/MobileRoadFaces.swift` (the disclosure arm — READ ONLY, the guard's
+subject), `App/Variorum/Shared/Protection/ProtectionWords.swift` (the constants — read only), and
+`App/Variorum/VariorumTests/Protection/RoadLockViewNamesPinTests.swift` (the source-pin idiom your pin follows).
+
+**Your scope — exactly D-B9:** the Mac fix and the pins, nothing else. **Not yours:** the phone's code (guard-pinned
+only, never changed), `ProtectionWords` (the label's words are ruled and stand), any other file, canon, Linear,
+`notes/QUESTIONS.md`. A look that cannot stay byte-faithful (the chevron, the spacing) is a FORK: stop and propose.
+
+**The discipline (binding, UNIT A's):** the pin committed RED on the pre-fix tree first (run it in a minimal scratch
+SPM package in your scratchpad — Testing + the one symlinked pin file; the pin reads the repo's sources through
+`#filePath` with symlinks resolved, B3's idiom); then the fix; then the pin green; then ONE behavioral revert (the
+disclosure arm back to the bare-label shape, one file) shown red and restored `git diff --exit-code` clean, "no revert
+is in flight" written. Commit per piece, push each, your LIVE STATUS flipped in the same commit, PENDING on every
+unverified claim. Foreground waits only; no subagents. Headless only, plus at the end ONE
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b5
+build-for-testing` and ONE `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+-derivedDataPath App/Variorum/DerivedData/vx510-b5-ios build-for-testing`, zero errors, no warning in a touched file
+(grep the logs). NO `xcodebuild test`, NO stage, NO app launch, NO dev/real-store touch, NO server or production
+contact. Commits say `Part of VX-527`; **NO trailers of any kind.** The orchestrator may commit record sections to
+this branch while you run: stage explicit paths only, re-read the record before each edit, never touch sections you
+do not own.
+
+**Evidence at your close (in your LIVE STATUS):** the pin's red line on the pre-fix tree; the green line on the fix;
+the revert's red line and clean restore; both build-for-testing lines; THE MAC-SUITE LIST — your new pin suite plus
+every suite reading a file you changed (the StoreLockView readers: `CopyRegisterPinTests`,
+`TravellingDotsIndicatorTests`, `EmptySlotDoorsSurfaceTests`, `WordsFieldsConcealTests`, `ProtectionWordsVX307Tests`,
+`RoadLockViewNamesPinTests`, `ProtectionRoadRouteTests`, `RoadCreationFaceTests` — confirm by grep).
+
+### UNIT B5 — LIVE STATUS (the implementer owns this section)
+
+*(skeleton — the implementer writes from its first commit)*
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
