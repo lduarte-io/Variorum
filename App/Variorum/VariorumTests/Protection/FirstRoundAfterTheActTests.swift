@@ -288,7 +288,12 @@ struct FirstRoundAfterTheActTests {
             try await world.settlePreActRounds(services)
             await world.server.hold()
             let confirm = try await world.turnOnSync()
-            #expect(confirm.round == .running, "the round runs while the sheet stands")
+            guard confirm.round == .running else {
+                // (Never wait at the server for a round nothing started — a revert of the road must fail, not hang.)
+                Issue.record("the round runs while the sheet stands: \(String(describing: confirm.round))")
+                await world.server.open()
+                return
+            }
             await world.server.awaitParked()  // the first round is at the server
             confirm.done()
             #expect(world.bootstrap.roadAccount?.confirm == nil, "Done closed the sheet")
