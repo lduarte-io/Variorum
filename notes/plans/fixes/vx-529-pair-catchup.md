@@ -311,11 +311,26 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   recovery wrap, and the road leaves the lock it should. 24 cases green on the tree as it stands (the trace in F-list
   confirmed: every synced setter derives under, or writes, the vault's descriptor; the copy is always the fresh read's).
   Plus a NEGATIVE CONTROL (`withKnownIssue`): a lock planted under another descriptor and a stale copy are each caught.
-- P3 — scope 1, DETECTION. IN-PROGRESS — the red pin COMMITTED (`AssessPairTests.swift`, suite `AssessPairRedPins`,
-  behavior-level so it compiles on the old tree): RED on the pre-detection tree, both postures, every assertion — no
-  follow owed, no follow door, Change passphrase / New words OPEN, for a passphrase and for words changed elsewhere;
-  its guard row (nothing moved ⇒ nothing owed, doors open) green. Remains: `FollowKind.pairChanged`, the pure pair
-  reading, the acts arm, the follow door's spec, F-2's guard, F-1's compile arms; the kind-level tables; green.
+- P3 — scope 1, DETECTION. DONE (`98a183538` pin, this commit the fix) — RED first (`AssessPairRedPins`, behavior-level,
+  compiling on the old tree: no follow owed, no follow door, Change passphrase / New words open — both postures, a
+  passphrase and words changed elsewhere), now green. Built: `FollowKind.pairChanged(passphrase:words:)`
+  (`Assessment.swift`); the pure reading `AssessRules.pairFollow(keyFile, reading)` — the passphrase lock's
+  descriptor against `VaultReading.kdf`, the master's words copy against `VaultReading.recoveryWrap`, both-present
+  legs only — over `currentKeyFile` (the live file only when it is the current key's); `acts`' same-posture arm
+  appends it AFTER the `keysReplaced` test (E2: posture and key follows outrank it), `typesOneSecret` = the passphrase
+  moved; the follow door's spec for the third kind: `DoorSpec(requires: passphrase ? .currentPassphrase : .none,
+  synced: true)` — `rekeys: false`, no Apple key retired, no words; the `followOwed` gate unchanged. F-2's guard: the
+  core's `follow` refuses `.pairChanged` `nothingToDo` before anything (pinned, `PairCatchUpGuardTests`: nothing
+  written, no plan, no act in flight, the key and file unchanged); `FollowProgram.name` → `"pairChanged"`,
+  `afterCommit(.pairChanged)` → `["memory"]` (unreachable until P6). F-1's four app arms landed (the mark's name;
+  the three wording functions fold `.pairChanged` into `.keysReplaced`'s existing sentences, each commented UNIT 2's)
+  — THEIR COMPILING IS PENDING (headless only; the orchestrator's first `xcodebuild` will say). The kind-level tables
+  (`AssessPairKindTests`): which half moved and E5's both; the door's spec; every key and mode door `followOwed`
+  (and two of three leaves, as for every follow — see F-9); E2; E3; E1 (signed out, unread, another account's
+  read); both-present legs (E6, no copy, a half-read reading); another key's file in the live place; the pure
+  reading's table. THE FULL CORE SUITE after it: 3372 tests passed (4 known issues — P2's negative control); one
+  failure elsewhere, `VariorumMCPTests`' `MCPHarnessTimeLimitTests` wall-clock bound (19 s against 15 s under the
+  full parallel run) — 3/3 green alone in 2 s; no protection code in it.
 - P4 — scope 2, THE ACT'S PURE PIECES (fork-independent): the key file's words-lock dropper (a value setter) and the
   re-lock transform + its landed predicate, unit-tested. NOT-STARTED.
 - P5 — scope 2, THE FORK PROPOSAL written here, then REPORT BACK. NOT-STARTED.
@@ -350,6 +365,15 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   lobby — VX-501/VX-487) hold it; a Castle Always-ask library unlocked by its OLD words holds none (the typed unlock's
   vault read cannot open the vault with them). There the quiet act refuses `secretMissing` and the face asks the
   passphrase — PROVISIONAL, PROPOSED as edge E14, unit 2's face.
+- **F-9 — a trap the gate leaves, for the architect (not changed): with the pair follow owed, `followOwed` refuses EVERY
+  key door — Reset forgotten passphrase included — and Stop syncing here / This Mac only, while the passphrase half's
+  catch-up takes only the account's current passphrase (design §2). A person on the lagging device who does not
+  remember the passphrase set elsewhere has no door here but deleting the account (rule 3: "either one can reset
+  the other"). Options: (a) the passphrase half also accepts the account's twelve words — dropping the stale
+  passphrase lock rather than re-making it (E6's state; the account's passphrase then opens through the vault
+  online — fact 3, R-529-1's road); (b) Reset forgotten passphrase is exempt from the PAIR kind's gate (it re-makes
+  the passphrase on both locks anyway — the passphrase half lands as its side effect; a words half still owed after
+  is the quiet one); (c) leave it — the other device is the road. Built as the memo says (c); an author-shaped call.
 - **F-8 — the app routes an account act by `spec.rekeys`** (`RoadAccountModel.swift:509-516`): a re-keying act closes
   the pool and reopens; one that changes no key runs on the open session. The third kind's door says `rekeys: false`,
   so the app's existing road already runs it on the open session (unit 2's to confirm).

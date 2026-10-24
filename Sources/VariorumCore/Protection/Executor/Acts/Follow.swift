@@ -41,6 +41,7 @@ struct FollowProgram: ActProgram {
         case .intoCastle: return "intoCastle"
         case .intoStandard: return "intoStandard"
         case .keysReplaced: return "keysReplaced"
+        case .pairChanged: return "pairChanged"
         }
     }
 
@@ -48,6 +49,9 @@ struct FollowProgram: ActProgram {
         switch kind {
         case .intoCastle: return ["memory", "retireOldCustody", "exportOff", "retireOwnAppleKeys", "backup"]
         case .intoStandard, .keysReplaced: return ["memory", "retireOldCustody", "backup"]
+        // VX-529: a re-lock (no new key — nothing to retire, no swap): what this Mac remembers follows the re-locked
+        // file. UNREACHABLE until the act's program lands (`follow` refuses the third kind first — F-2).
+        case .pairChanged: return ["memory"]
         }
     }
 
@@ -150,6 +154,14 @@ extension ProtectionExecutor {
     ) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let account = record.account else { throw ExecutorRefusal.notSynced }
+        if case .pairChanged = kind {
+            // VX-529 unit 1 (the run record's F-2): the pair catch-up's program
+            // is not built yet — its shape is the architect's ruling — so the
+            // third kind refuses BEFORE anything begins. Never let it reach the
+            // plan below: `FollowProgram.kind` reads a name it doesn't know as
+            // `keysReplaced`, and that would RE-KEY the library.
+            throw ExecutorRefusal.nothingToDo
+        }
         try requireSignedIn(as: account)
         guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
         var secrets = ActSecrets()

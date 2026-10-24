@@ -85,6 +85,9 @@ nonisolated enum FollowDoneMark {
         case .intoCastle: return "intoCastle"
         case .intoStandard: return "intoStandard"
         case .keysReplaced: return "keysReplaced"
+        // VX-529 unit 1 (the run record's F-1): the core's third kind, named so this compiles; `owed` below does not read
+        // it back yet (read as none) — UNIT 2 (the faces) reads it back with its own Done.
+        case .pairChanged: return "pairChanged"
         }
     }
 

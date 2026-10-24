@@ -877,14 +877,17 @@ nonisolated enum ProtectionWords {
         switch kind {
         case .intoCastle: return "Your account entered Castle \(at)."
         case .intoStandard: return "Your account left Castle \(at)."
-        case .keysReplaced: return "Your account's keys changed \(at)."
+        // VX-529 unit 1 (F-1): the core's third kind folds into the existing sentence so this compiles — no sentence
+        // minted here; UNIT 2 (the faces) gives it the run record's drafted pair sentence.
+        case .keysReplaced, .pairChanged: return "Your account's keys changed \(at)."
         }
     }
     /// What following asks — rule 10's "each typing a secret once" (and rule 15's catch-up); rule 12's "quietly" out.
     static func followAsk(_ kind: FollowKind) -> String {
         switch kind {
         case .intoCastle: return "Type your passphrase or your twelve words once to follow it here."
-        case .keysReplaced: return "Type your passphrase or your twelve words once to catch up."
+        // VX-529 unit 1 (F-1): the third kind folds in so this compiles — UNIT 2 words its own ask.
+        case .keysReplaced, .pairChanged: return "Type your passphrase or your twelve words once to catch up."
         case .intoStandard: return "This \(ProtectionCopy.deviceName) follows it out without asking you for anything."
         }
     }
@@ -903,7 +906,8 @@ nonisolated enum ProtectionWords {
             return "Your account entered Castle on another device, and this \(ProtectionCopy.deviceName) followed it."
         case .intoStandard:
             return "Your account left Castle on another device, and this \(ProtectionCopy.deviceName) followed it out."
-        case .keysReplaced:
+        // VX-529 unit 1 (F-1): the third kind folds in so this compiles — UNIT 2 words its own Done.
+        case .keysReplaced, .pairChanged:
             return "Your account's keys changed on another device, and this \(ProtectionCopy.deviceName) caught up."
         }
     }

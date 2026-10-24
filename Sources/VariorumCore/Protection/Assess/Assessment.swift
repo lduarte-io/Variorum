@@ -273,6 +273,13 @@ public enum FollowKind: Equatable, Sendable {
     case intoCastle
     case intoStandard
     case keysReplaced
+    /// VX-529 — THE ACCOUNT'S PAIR CHANGED ELSEWHERE, in the same posture under the same sync key: its passphrase (the
+    /// vault's lock under another descriptor than this library's) or its twelve words (the vault's recovery wrap other
+    /// than this key file's copy of it) were re-made on another device, and this library still holds the pair as it last
+    /// knew it — rule 7's one pair, broken on this device until it catches up. `passphrase` / `words`: which half moved
+    /// (`AssessRules.pairFollow`). The catch-up RE-LOCKS this library's key and never re-keys it (rule 6): the account's
+    /// master, sync keys and this library's key are all unchanged (`notes/plans/fixes/vx-529-pair-catchup.md`, §1–2).
+    case pairChanged(passphrase: Bool, words: Bool)
 }
 
 /// An act owed — a press, a notice, or an act the executor runs on a plan.
@@ -281,7 +288,10 @@ public enum OwedAct: Equatable, Sendable {
     /// and catching up on a sync key replaced while this device lagged, it
     /// types one secret (rules 10, 12); out of Castle it is quiet — the device
     /// already holds the account's keys (rule 12: "other devices follow out
-    /// quietly, with a notice").
+    /// quietly, with a notice"). The account's pair changed elsewhere
+    /// (VX-529): it types the account's current passphrase where the
+    /// passphrase moved, and nothing where only the words did (R-529-2: the
+    /// words ride the vault's own copy).
     case follow(FollowKind, typesOneSecret: Bool)
     /// A Castle key with an Apple wrap — re-keyed.
     case rekeyForFault

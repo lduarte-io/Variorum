@@ -458,6 +458,12 @@ public enum AssessRules {
                 // — one secret catches it up.
                 if unlocked.record.accountRowKeyID != reading.rowKeyID {
                     acts.append(.follow(.keysReplaced, typesOneSecret: true))
+                } else if let pair = pairFollow(currentKeyFile(facts, unlocked), reading),
+                          case .pairChanged(let passphrase, _) = pair {
+                    // VX-529: same posture, same sync key — the account's PAIR
+                    // moved elsewhere (a key door on another device). The posture
+                    // and key follows above outrank it: they adopt the pair anyway.
+                    acts.append(.follow(pair, typesOneSecret: passphrase))
                 }
             }
         }
@@ -477,6 +483,29 @@ public enum AssessRules {
         if touchID.rearmQuestion { acts.append(.touchIDRearmQuestion) }
         acts += passphraseAsks(facts, unlocked, current: current, faults: faults)
         return acts
+    }
+
+    /// The live key file when it is the CURRENT key's (another key's file in
+    /// the live place is its own fault, never read for the account's pair).
+    static func currentKeyFile(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> KeyFile? {
+        liveKeyFile(facts, unlocked).flatMap { $0.fingerprint == unlocked.currentFingerprint ? $0 : nil }
+    }
+
+    /// **VX-529 — WHICH HALF OF THE ACCOUNT'S PAIR MOVED ELSEWHERE** (`notes/plans/fixes/vx-529-pair-catchup.md`,
+    /// design §1), read from the key file of the library's current key against a FRESH vault reading — the two
+    /// comparisons fact 1 rests on, and nothing stored for it:
+    ///   - the passphrase lock's KDF descriptor against the vault's (one descriptor names one passphrase — a new
+    ///     passphrase always takes a fresh one; every synced road writes the vault's — the scope-4 pins,
+    ///     `PairInvariantPinsTests`; VX-113's own comparison, `Follow.swift`);
+    ///   - the master's twelve-words copy against the vault's recovery wrap (§3.5a: copied byte for byte).
+    /// Both-present legs only: a file with no passphrase lock (joined by the words — edge E6) or no words copy, or a
+    /// reading without that half, says nothing of it. nil: nothing moved. A value — `assess` decides with it; the
+    /// executor's act reads it too.
+    public static func pairFollow(_ keyFile: KeyFile?, _ reading: VaultReading) -> FollowKind? {
+        guard let keyFile else { return nil }
+        let passphrase = keyFile.passphrase.flatMap { lock in reading.kdf.map { $0 != lock.kdf } } ?? false
+        let words = keyFile.masterWordsCopy.flatMap { copy in reading.recoveryWrap.map { $0 != copy } } ?? false
+        return passphrase || words ? .pairChanged(passphrase: passphrase, words: words) : nil
     }
 
     /// A key file of the library's current key in one of rule 19's folders (a
@@ -602,6 +631,14 @@ public enum AssessRules {
         doors[.followNow] = {
             guard let follow = acts.first(where: { if case .follow = $0 { return true } else { return false } }),
                   case .follow(let kind, let typed) = follow else { return .refused(.nothingToDo) }
+            if case .pairChanged(let passphrase, _) = kind {
+                // VX-529 (design §2): the catch-up RE-LOCKS, never re-keys (rule
+                // 6) — no new key, no Apple key retired, no rule-5 sentence. It
+                // types exactly the half that moved and can only be typed: the
+                // account's CURRENT passphrase where it moved; nothing where only
+                // the words did (R-529-2 — they ride the vault's own copy).
+                return .open(DoorSpec(requires: passphrase ? .currentPassphrase : .none, synced: true))
+            }
             let leaves = kind == .intoStandard
             return .open(DoorSpec(requires: typed ? .oneSecret : .none, rekeys: true,
                                   retiresOwnAppleKeys: kind == .intoCastle ? ownKeysToRetire(facts, unlocked, guards: guards) : [],
