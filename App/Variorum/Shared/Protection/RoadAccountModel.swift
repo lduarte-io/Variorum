@@ -274,6 +274,8 @@ final class RoadAccountConfirmModel: Identifiable {
     /// held refusal, said for a sheet that stands over Settings (PROVISIONAL P-VX510-A1). Not configured is the row's
     /// signed-in, no-chain face ("Sync is off" — a failed owner adoption, F-5). VX-510 D-B0: the follow's clean round says
     /// its own line (`follows` — PROVISIONAL P-VX510-B1-1); the follow's Done stays the section's durable notice (VX-457).
+    /// The ladder's F-R1-1 (the belt beside `SyncSession.runRound`'s settle): a status still reading SYNCING is a round
+    /// still running — the running-progress words, never "Sync hasn't run yet: Syncing…".
     static func firstRoundLine(_ outcome: FirstRoundOutcome, joins: Bool, follows: Bool = false) -> String {
         switch outcome {
         case .held:
@@ -282,6 +284,7 @@ final class RoadAccountConfirmModel: Identifiable {
             return ProtectionWords.firstRoundBlocked(SyncStatusRow.line(for: .syncOff, lastSuccessAt: nil))
         case .ran(let status):
             let face = rowFace(status)
+            if face.kind == .syncing { return ProtectionWords.firstRoundProgress }
             guard face.kind != .idle else {
                 if follows { return ProtectionWords.firstRoundFollowLanded }
                 return joins ? ProtectionWords.firstRoundJoinLanded : ProtectionWords.firstRoundSetUpLanded

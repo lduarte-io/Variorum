@@ -2925,7 +2925,17 @@ EXISTING public API, conformed on the app's side).
     in the three suites green. **`first-run-walk.sh --self-test`: `SELF-TEST: 3 case(s) wrong`, exit 1** — "a quote in the
     address", "an uppercase address", "a newline in the address" each `accept — expected refuse  FAIL`; the nine existing cases
     and the handed value ok. `zsh -n` clean. No warning in a touched file (the build log's 8 are in untouched files).
-- **Piece 2** — F-R1-1 fix (the outcome seam's bounded re-await + the model belt): NOT-STARTED.
+- **Piece 2** — F-R1-1 fix: DONE (this commit). **The outcome seam** (`Shared/SyncSession.swift`): `runRound(on:)` — the
+  trigger once, then up to `firstRoundSettleWaits` (3) waits for idle, each followed by a status read; a read that is not
+  syncing ends it; past the bound, what it read (never a second trigger; a syncing read implies a running loop, so each
+  re-await is that round's end — never a spin). **The model belt** (`Shared/Protection/RoadAccountModel.swift`):
+  `firstRoundLine` maps a `.syncing` face to `ProtectionWords.firstRoundProgress` ("Syncing your library with your account…"
+  — the existing running words, no new string) before the idle/blocked split. **The harness, `--filter
+  "FirstRoundConfirmTests|FirstRoundRoadTests|FirstRoundAfterTheActTests|FirstRoundAfterTheReopenTests|FirstRunDrillTests|
+  SyncLockedRowTests|SyncStalledRowTests|NotOnYetWordsTests"`: `✔ Test run with 50 tests in 8 suites passed`** — Piece 1's
+  three F-R1-1 pins GREEN; the drill, the act/reopen worlds and the row suites unchanged and green (the real scheduler's
+  path through `roundNow` → `runRound` — `roundNowRunsOneRoundToItsEndAndReturnsItsStatus`,
+  `roundNowWaitsForTheFollowUpOfARoundInFlight` — green). No warning in a touched file.
 - **Piece 3** — F-R1-4 fix (one arm): NOT-STARTED.
 - **Piece 4** — F-R1-5 fix (G2 + P3's `plain_address`; `zsh -n`; the self-test): NOT-STARTED.
 - **Piece 5** — the behavioral reverts, named before any runs: NOT-STARTED.

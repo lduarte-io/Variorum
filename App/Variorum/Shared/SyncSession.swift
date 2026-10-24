@@ -203,8 +203,8 @@ final class SyncSession {
     /// the A4 fence, a signed-out session, a failed owner adoption (the run record's F-5) — says so (`.notConfigured`)
     /// rather than waiting forever. Otherwise the scheduler's EXISTING public API (no `Sync/` line): a trigger (coalescing —
     /// a round already in flight is followed by exactly one more, which reads the keys as they stand now), then the wait
-    /// for idle, then the scheduler's own status as the round left it. Nothing here cancels a round: a caller that stops
-    /// waiting leaves it running.
+    /// for idle, then the scheduler's own status as the round left it — SETTLED (`runRound(on:)`, the ladder's F-R1-1).
+    /// Nothing here cancels a round: a caller that stops waiting leaves it running.
     func roundNow() async -> FirstRoundOutcome {
         guard roundsHeld?() != true else { return .held }
         guard let scheduler else { return .notConfigured }
@@ -214,11 +214,21 @@ final class SyncSession {
     /// How many waits for idle a first round's settle may take (the ladder's F-R1-1).
     static let firstRoundSettleWaits = 3
 
-    /// `roundNow`'s round on `scheduler`: the trigger, the wait for idle, the status as the round left it.
+    /// `roundNow`'s round on `scheduler` — **THE SETTLE (the ladder's F-R1-1)**: the trigger, the wait for idle, then the
+    /// status, read in an actor hop of its own — so a trigger serviced in that gap (the outbox settle's, the become-active
+    /// hook's, Sync now) may already have started a fresh round the read sees RUNNING. That status is not the outcome:
+    /// wait for idle again (a status reading syncing means a loop is running, so the wait is that round's end, never a
+    /// spin) and read again — at most `firstRoundSettleWaits` waits; coalescing settles it, and past the bound the sheet
+    /// says the round is still running. Never a second trigger: the re-await waits for the round already running.
     static func runRound(on scheduler: some FirstRoundScheduling) async -> SyncScheduler.Status {
         await scheduler.trigger()
-        await scheduler.awaitIdle()
-        return await scheduler.status
+        var status = SyncScheduler.Status()
+        for _ in 0..<firstRoundSettleWaits {
+            await scheduler.awaitIdle()
+            status = await scheduler.status
+            guard status.isSyncing else { break }
+        }
+        return status
     }
 
     /// Waits for in-flight rounds — the iOS background transition uses this
