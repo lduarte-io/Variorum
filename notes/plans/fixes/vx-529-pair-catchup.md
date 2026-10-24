@@ -311,8 +311,11 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   recovery wrap, and the road leaves the lock it should. 24 cases green on the tree as it stands (the trace in F-list
   confirmed: every synced setter derives under, or writes, the vault's descriptor; the copy is always the fresh read's).
   Plus a NEGATIVE CONTROL (`withKnownIssue`): a lock planted under another descriptor and a stale copy are each caught.
-- P3 — scope 1, DETECTION: a behavior-level red pin first (compiles on the old tree), then `FollowKind.pairChanged`,
-  the pure pair reading, the acts arm, the follow door's spec for the third kind. NOT-STARTED.
+- P3 — scope 1, DETECTION. IN-PROGRESS — the red pin COMMITTED (`AssessPairTests.swift`, suite `AssessPairRedPins`,
+  behavior-level so it compiles on the old tree): RED on the pre-detection tree, both postures, every assertion — no
+  follow owed, no follow door, Change passphrase / New words OPEN, for a passphrase and for words changed elsewhere;
+  its guard row (nothing moved ⇒ nothing owed, doors open) green. Remains: `FollowKind.pairChanged`, the pure pair
+  reading, the acts arm, the follow door's spec, F-2's guard, F-1's compile arms; the kind-level tables; green.
 - P4 — scope 2, THE ACT'S PURE PIECES (fork-independent): the key file's words-lock dropper (a value setter) and the
   re-lock transform + its landed predicate, unit-tested. NOT-STARTED.
 - P5 — scope 2, THE FORK PROPOSAL written here, then REPORT BACK. NOT-STARTED.
