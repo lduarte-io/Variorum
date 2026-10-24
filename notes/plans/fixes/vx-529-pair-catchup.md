@@ -906,7 +906,13 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   green again. DONE (`8e7d425fe` pins, `52eb5cc9c` fix). No revert is in flight.
 - U2-P3 — scope 5: the preflight's words twin (`accountSecretRefusal` says "Those twelve words don't open this library."
   for old words that DO open it after a words change elsewhere — bug-class, the core's P7-2 split mirrored) and the key
-  doors' gate refusal in the detected state speaking the pair sentence (R-529-3). NOT-STARTED.
+  doors' gate refusal in the detected state speaking the pair sentence (R-529-3). IN-PROGRESS — the red pin COMMITTED
+  (this commit, `VariorumTests/Protection/PairPreflightAndGateTests.swift`): **RED on the pre-fix tree** (the harness,
+  `--filter PairPreflightAndGateTests`): `✘ Test run with 1 test in 1 suite failed … with 1 issue` —
+  `theFollowsPreflightNamesAWordsChangeElsewhere` at `old == .refused(named)`: the preflight said `"Those twelve words
+  don't open this library."` where the core's own act (asserted in the same test, green) says `"Your twelve words were
+  changed on Studio Mac on January 13."`; the nobody's-words guard and nothing-written green. What remains: the fix, the
+  gate's face (a design row — its face test lands with it).
 - U2-P4 — scope 4: the check door's fourth answer gains the pointer line in the catch-up state; its E6 variant (R-529-6);
   the door still writes nothing. NOT-STARTED.
 - U2-P5 — scope 7 (core): the E6 heal wired — `regenerateWords`' key-file step lands a missing passphrase lock with the
