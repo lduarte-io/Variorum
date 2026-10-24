@@ -2952,7 +2952,25 @@ EXISTING public API, conformed on the app's side).
   std account's email is not a plain address …)  ok`, the shaped one `accept  ok`, the nine existing cases and the handed
   value ok — `SELF-TEST: every guard fired as expected`, exit 0**; the no-argument and `bogus` refusals unchanged (exit 5,
   before any file read). Nothing launched; P3's re-check is exercised only through the shared function (P3 runs live).
-- **Piece 5** — the behavioral reverts, named before any runs: NOT-STARTED.
+- **Piece 5** — THE BEHAVIORAL REVERTS, named BEFORE any runs (this commit; the committed tree IS the pre-revert copy). Each is
+  ONE file, applied in the worktree, run, then restored by `git checkout -- <file>` with `git diff --exit-code` clean before
+  the next. Expected red in brackets:
+  - **RL-1** (F-R1-1, the belt) `Shared/Protection/RoadAccountModel.swift`: `firstRoundLine`'s `.syncing` line removed
+    [`aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm`].
+  - **RL-2** (F-R1-1, the settle) `Shared/SyncSession.swift`: `runRound` stops after its first read (the loop's guard becomes
+    an unconditional `break`) [`runRoundReAwaitsAStatusThatStillReadsSyncing`, `runRoundsSettleIsBounded`].
+  - **RL-3** (F-R1-1, the bound) `Shared/SyncSession.swift`: the loop unbounded (until a read is not syncing)
+    [`runRoundsSettleIsBounded` — the script settles at its 51st read, so no hang: 51 waits, a settled status].
+  - **RL-4** (F-R1-1, one trigger) `Shared/SyncSession.swift`: the trigger moved inside the loop (a re-trigger per wait)
+    [`runRoundReAwaitsAStatusThatStillReadsSyncing` (2 triggers), `runRoundsSettleIsBounded` (3)].
+  - **RL-5** (F-R1-4) `Shared/Protection/ProtectionSecretCheck.swift`: the empty arm back to `.doesNotOpen(.passphrase,
+    opensAccount: false)` [`rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync`].
+  - **RL-6** (F-R1-5, the guard) `Tools/WalkKit/first-run-walk.sh`: G2's `plain_address` line removed [the self-test's three
+    malformed cases FAIL].
+  - **RL-7** (F-R1-5, the whole-value match) `Tools/WalkKit/first-run-walk.sh`: `plain_address` as the sibling's line-wise
+    `printf '%s' "$1" | grep -Eq "$PLAIN_ADDRESS"` [the self-test's "a newline in the address" FAIL alone — the quote and the
+    uppercase still refuse].
+  RESULTS: PENDING (reverts start after this commit; none in flight yet).
 - **Piece 6** — evidence (the harness whole, Mac + iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`, THE
   MAC-SUITE LIST): NOT-STARTED.
 
