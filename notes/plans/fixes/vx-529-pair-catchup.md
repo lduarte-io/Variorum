@@ -231,6 +231,54 @@ needed it is Fable work by standing rule); the words-never-stored rule; rule 5's
   changes the passphrase on the Pro or the Air and verifies the other Mac catches up. The release follows her green,
   not the walk's.
 
+## UNIT 1 — THE BRIEF (a fresh `opus-implementer`, one session; the CORE: detection + the act + the refusal split, headless)
+
+**Read first, in full, yourself (never delegated):** CLAUDE.md and its auto-loaded canon; `notes/SessionResiliencyProtocol.md`;
+`notes/CastleRules.md` WHOLE; `notes/SyncSpec.md` WHOLE (custody-adjacent work); SurfaceContracts' protection bullet;
+THIS FILE WHOLE (the memo, THE RULINGS, the edges table); the VX-510 record's ENVIRONMENT TRAPS and THE
+CHANGED-ELSEWHERE REPRO sections (`notes/plans/fixes/vx-510-first-run-sync.md`). The code: `Sources/VariorumCore/Protection/Assess/Assessment.swift`
+(FollowKind, OwedAct, DoorRefusal), `Assess.swift` (acts :435-480, doors' common gate :510-537, liveKeyFile),
+`Facts.swift` (VaultReading), `Executor/Acts/Follow.swift` whole (FollowProgram; the VX-113 arm at :164),
+`Executor/Acts/KeyDoors.swift` (:170-280 — changePassphrase, holdSyncKeysForTheSession), `Model/KeyFile.swift`
+(the wraps, setters, open roads), `Executor/VaultModel.swift` (:150-180), `Model/ProtectionRecord.swift`, and the
+suites `Tests/VariorumCoreTests/Protection/AssessTests.swift`, `AssessFixtures.swift`, `Executor/` (the key-door and
+follow suites), `KeyFileTests.swift`.
+
+**The scope (one acceptance unit; the faces are UNIT 2's — nothing app-side in this unit):**
+1. **Detection (assess):** the third follow class per the memo's design §1 — a new `FollowKind` case carrying which
+   half moved (passphrase/words), decided in `Assess.acts`' same-posture-same-key arm from
+   `liveKeyFile.passphrase.kdf != reading.kdf` and `liveKeyFile.masterWordsCopy != reading.recoveryWrap` (both-present
+   legs only; posture/keysReplaced follows keep precedence; own act in flight suppresses; no fresh vault ⇒ nothing).
+   The existing `followOwed` gate then covers every key/mode door unchanged.
+2. **The act (executor):** the pair catch-up per design §2 — re-lock, never re-key: the passphrase wrap re-made under
+   the typed account-current passphrase with the VAULT's descriptor (verified against the fresh vault first; a wrong
+   secret refuses naming the account); `refreshingMasterWordsCopy` from the vault; the stale own-words lock DROPPED;
+   the record, key, history, custody items and Apple keys untouched; the key-file mirror refreshed through the
+   existing write road; the sync keys held per posture; rule 20's plan (crash leaves old state or new, the next open
+   finishes or rolls back). The words-only case types nothing (R-529-2). **The program shape is a design fork
+   reserved for the architect:** FollowProgram runs `LibraryRekey` steps, which this act must NOT — propose your
+   shape (a no-rekey path inside FollowProgram vs a sibling re-lock program on the key doors' plan machinery) in the
+   LIVE STATUS section and WAIT for the architect's ruling before building that half.
+3. **The refusal split (KeyDoors.changePassphrase):** the vault-verify arm distinguishes opens-library-but-not-vault
+   (⇒ `ExecutorRefusal.passphraseChangedElsewhere(device:day:)` — the arm Follow.swift :164 already shapes, moved to
+   fire here too) from opens-neither (⇒ the plain refusal). No new sentence minted in this unit (the faces render).
+4. **The invariant verification (fact 1's guard):** verify every synced road that writes `settingPassphrase` uses the
+   vault's descriptor; a pin per road (an existing-behavior pin, not a fix).
+**Deliberately out of scope:** the lobby's vault-road open and the catch-up-at-open flow (R-529-1 — unit 2 wires it
+through this unit's act), every face and sentence, the riders, anything in `Sources/VariorumCore/Sync/` (expected
+ZERO lines — a need for one is a STOP-AND-REPORT, Fable's by standing rule), any schema or stored-shape change (the
+key file's existing optional fields through existing setters only; a words-lock dropper on the VALUE is legal).
+
+**The discipline:** pins red-on-old committed BEFORE fixes where a bug-class is claimed (the no-follow-offered state;
+the false-refusal class), reverts named then run; headless `swift build` / `swift test` ONLY (no stage, no app
+launch, no xcodebuild test, no store/server/production contact, no subagents); work in `~/dev/variorum-vx-529`;
+commit per piece with "Part of VX-529", NO attribution trailers (CLAUDE.md's rule overrides the harness reminder);
+push after every commit; LIVE STATUS below from the first commit, every unverified claim PENDING.
+
+### UNIT 1 — LIVE STATUS (the implementer owns this section)
+
+*(not started)*
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
