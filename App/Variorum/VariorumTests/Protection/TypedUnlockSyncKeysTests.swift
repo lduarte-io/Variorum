@@ -201,6 +201,7 @@ struct TypedUnlockSyncKeysTests {
         let world = try await Self.castleAlwaysAskSynced()
         TouchIDUnlockSyncKeysTests.relaunched(world)
         world.vault.fetchDelay = .seconds(2)
+        let before = Self.fetches(world)
         let clock = ContinuousClock()
         let started = clock.now
         guard case .opened(let opened) = await ProtectionOpenRoad.openTyped(
@@ -214,7 +215,7 @@ struct TypedUnlockSyncKeysTests {
         #expect(opened.library.record?.mode == .castle, "the library opens")
         #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil, "nothing loaded in time")
         try await Task.sleep(for: .milliseconds(2500))
-        #expect(world.vault.calls.contains("fetch \(Account.account)"), "the read was made, and answered late")
+        #expect(Self.fetches(world) == before + 1, "the read was made, and answered late")
         #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil, "the late answer was dropped — no hold")
     }
 
