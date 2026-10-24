@@ -1698,6 +1698,28 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   logic, ticketed at the close): the deletion form tells this FREE test account "This account has an active hosted-sync plan
   — cancel it first." (the entitlement read answers "active" for an open-sync account with no purchase), so every free
   user is told to cancel a plan they never bought.
+- **LEG C setup (21:11–21:12):** the walk build REBUILT at B2's tip **`e829e8d08`** (VX-501 + VX-511 + VX-503 in; from the
+  detached checkout; `** BUILD SUCCEEDED **`); the stage renewed (240 min); the deleted account's library `2aa0214f` aside
+  (`…-aside-vx510-walkL3/`); relaunched (pid 71389, the road ARMED) → a fresh library **`159caa3f`** (key `a2c73b2c`,
+  device `3a62193d`), signed out.
+*[removed for publication]*
+  → the PAT script confirms (03:13:06Z) → signed in → the words look blind (Copy + stash, twelve-word check) → Protection ▸
+  **Use Castle…** — its sheet ("Castle is one promise: no quiet road through Apple, ever, on any device of the account… The
+  libraries in Previous Libraries keep their own quiet roads on this Mac — Castle protects the library you have open…") on
+  a library with NO passphrase asks one ("This library has no passphrase yet. Choose one — Castle needs it.") + the words;
+  **Always ask** chosen ("No copy of the key stays on this Mac; you type every time.") → `enter_castle: swapped … retired 1
+  own Apple key(s) … done #2 under 5638db0a · road: useCastle — library 159caa3f now castle` (21:15:20) → Turn on sync… →
+  the set-up arm IN CASTLE ("Your account starts in Castle, like this library.") → passphrase + words → `road: turnOnSync —
+  *[removed for publication]*
+  account now."** — the THIRD fresh account, the Castle posture, no relaunch. **prod: vault mode castle, revision 1 · `kp:`
+  1 · cursor 1 · rows 3.** The row "Synced 9:16 PM".
+- **C2 (21:17–21:18) — VX-501 LIVE: a TYPED Castle unlock keeps syncing.** A note filed ("VX-510 C2 castle note before the
+  lock") → prod 1 container. **⌃⌘L** → `road: locked — the library closed behind the lobby (VX-445)` → the lobby: "Open
+  your library — Enter your passphrase or your twelve words to open your library. Touch ID isn't set up for this library."
+  → the passphrase TYPED (the helper) → Open → `road: opened — library 159caa3f …` (21:17:49) → **`road: the typed unlock
+  loaded the account's sync keys for the session (sync key e1deb44d)`** → a second note filed ("…after the typed unlock") →
+  **prod: 2 containers · rows 12** — a round with the account's keys ran after a typed unlock, with NO key act — and the row
+  **"Synced 9:18 PM"**. Before VX-501 this posture stayed "Sync locked" until a key door (her M1 (c) report).
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
