@@ -352,14 +352,28 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     either. So the catch-up takes none (the ruling's condition met). DONE (this commit).
   - P6b — the act in the RULED shape (`follow`'s third-kind entry checks; `FollowProgram`'s no-re-key arm, steps
     `pickUpKeys`/`relock`/`memory`, `toKey` nil; F-2's guard removed, its pin flipped to the entry checks).
-    IN-PROGRESS — the red pins COMMITTED (`Executor/PairCatchUpTests.swift`, replacing the guard's suite): each half and
+    DONE (`a4e3f3f1e` pins; this commit the act) — the red pins COMMITTED (`Executor/PairCatchUpTests.swift`, replacing the guard's suite): each half and
     both in all three postures (Standard, Castle Touch ID, Castle Always ask) — the key, record and history unchanged,
     `pairFollow` nil after, no vault/custody/Apple/staged/backup write, the mirror following, the keys held per
     posture; E7's backup untouched; the second press `nothingToDo`; the entry checks (nothing moved; nothing typed /
     words only for the passphrase half; the old passphrase ⇒ the change named; garbage ⇒ the plain refusal; E14's
     `secretMissing` then the account's passphrase landing it; the posture moved ⇒ `accountMoved`), each with nothing
     written; the crash after every write, three postures, and with the plan gone. RED on the guard's tree — every act
-    test `nothingToDo` (22 issues); the nothing-moved row green on both sides by nature. Remains: the act, green.
+    test `nothingToDo` (22 issues); the nothing-moved row green on both sides by nature. THE ACT COMMITTED (this
+    commit): `Executor/Acts/PairCatchUp.swift` — `followThePair` (the door: a fresh read; posture or sync key moved ⇒
+    `accountMoved`; the halves re-derived from that read, none ⇒ `nothingToDo`; the passphrase half requires the
+    account's current passphrase, verified, P1's split on a wrong one; typed words verified; the keys from the secrets,
+    else session, else the silent item, else — Castle only, last — the Touch ID item (E14: none ⇒ `secretMissing`);
+    the master must open the key file's master lock, else `accountMoved`), `perform(…, material:)` carrying the
+    door's keys in memory so the press reads custody once; steps `pickUpKeys` (fresh read, posture/key check ⇒
+    `ActRollback(.accountMoved)`, keys held per posture — Standard's silent item via `holdSyncKeys`, Castle's session —
+    the followed key stamped), `relock` (landed ⇒ nothing; the passphrase half's passphrase must open the fresh vault,
+    else `ActRollback` — E4 names the change at the press, `secretsRequired` at a resume; one
+    `writeLiveKeyFile(relockedToTheAccountsPair(…))`), `memory`. `FollowProgram`: `pairChangedName`, `isPairCatchUp`,
+    `kind` learns the name, `steps`/`run` branch to `PairCatchUp`, `finishingSteps` reads a follow naming no new key
+    as the pair kind ⇒ `["memory"]`. F-2's guard RETIRED (`follow` dispatches the third kind to `followThePair`). The
+    plan records `passphraseKDF` (the ruled shape as built — P6c revisits it). Green: 59 tests across the five pair
+    suites and `FollowTests` (the crash harness in all three postures and plan-gone included).
   - P6c — S-3: the stranded-open pin, red on P6b's tree, then the fix. NOT-STARTED.
   - P6d — R-arch-3: the downgrade-resume trace and the plan's shape (its pin red-first if the shape moves). NOT-STARTED.
   - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins

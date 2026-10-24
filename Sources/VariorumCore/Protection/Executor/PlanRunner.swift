@@ -198,9 +198,12 @@ extension ProtectionExecutor {
 
     /// **Begin and run an act.** `toKey`: the new library key a re-key mints
     /// at its press (named in the act in flight from the first write).
+    /// `material`: the account's sync keys the door already holds in hand
+    /// (VX-529's pair catch-up: read once at the door — a Touch ID read is a
+    /// press — never stored; a resume finds its own).
     func perform(
         _ program: any ActProgram, parameters: ActParameters, secrets: ActSecrets, typed: TypedSecrets? = nil,
-        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, library: inout UnlockedLibrary
+        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, material: AccountKeys? = nil, library: inout UnlockedLibrary
     ) async throws -> ActOutcome {
         guard library.record != nil else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
@@ -226,6 +229,7 @@ extension ProtectionExecutor {
             executor: self, library: library, plan: plan, secrets: secrets, typed: typed, toKey: toKey,
             resuming: false)
         ctx.copyKey = copyKey
+        if let material { ctx.material = material }
         defer { library = ctx.library }
         do {
             try await drive(program, ctx)

@@ -28,10 +28,19 @@ import Foundation
 struct FollowProgram: ActProgram {
     let act = ProtectionAct.follow
 
+    /// VX-529 — the pair catch-up's name in the plan's existing free-form `follow` field: the act in flight stays
+    /// `.follow`, so no new stored act value exists for any build to meet (the architect's ruling, Shape A; R-510-20).
+    static let pairChangedName = "pairChanged"
+
+    /// VX-529: this plan is the follow's third kind — a RE-LOCK, never a re-key (`PairCatchUp`).
+    static func isPairCatchUp(_ parameters: ActParameters) -> Bool { parameters.follow == pairChangedName }
+
     static func kind(_ parameters: ActParameters) -> FollowKind {
         switch parameters.follow {
         case "intoCastle": return .intoCastle
         case "intoStandard": return .intoStandard
+        // VX-529: the halves that moved are read from the vault at the act's own step — never stored in the plan.
+        case Self.pairChangedName: return .pairChanged(passphrase: false, words: false)
         default: return .keysReplaced
         }
     }
@@ -41,7 +50,7 @@ struct FollowProgram: ActProgram {
         case .intoCastle: return "intoCastle"
         case .intoStandard: return "intoStandard"
         case .keysReplaced: return "keysReplaced"
-        case .pairChanged: return "pairChanged"
+        case .pairChanged: return pairChangedName
         }
     }
 
@@ -50,12 +59,13 @@ struct FollowProgram: ActProgram {
         case .intoCastle: return ["memory", "retireOldCustody", "exportOff", "retireOwnAppleKeys", "backup"]
         case .intoStandard, .keysReplaced: return ["memory", "retireOldCustody", "backup"]
         // VX-529: a re-lock (no new key — nothing to retire, no swap): what this Mac remembers follows the re-locked
-        // file. UNREACHABLE until the act's program lands (`follow` refuses the third kind first — F-2).
-        case .pairChanged: return ["memory"]
+        // file (the pair catch-up's own steps are `PairCatchUp`'s).
+        case .pairChanged: return PairCatchUp.finishingSteps
         }
     }
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
+        if Self.isPairCatchUp(parameters) { return PairCatchUp.steps }
         let kind = Self.kind(parameters)
         return ["pickUpKeys"] + LibraryRekey.steps(guards, mintsOwnAppleKey: kind == .intoStandard) + Self.afterCommit(kind)
     }
@@ -65,6 +75,9 @@ struct FollowProgram: ActProgram {
     /// With no plan: the kind read from the act in flight — the library's mode
     /// when the act began against the record's now.
     func finishingSteps(_ library: UnlockedLibrary) -> [String] {
+        // VX-529: a follow whose act in flight names NO new key re-keys nothing — the pair catch-up (every other kind
+        // mints one at its press): its finish is what this Mac remembers, nothing else.
+        if let inFlight = library.section.actInFlight, inFlight.toFingerprint == nil { return PairCatchUp.finishingSteps }
         guard let fromKind = library.section.actInFlight?.fromKind, let toKind = library.record?.mode
         else { return Self.afterCommit(.keysReplaced) }
         switch (fromKind, toKind) {
@@ -75,6 +88,10 @@ struct FollowProgram: ActProgram {
     }
 
     func run(_ step: String, _ ctx: ActContext) async throws {
+        if Self.isPairCatchUp(ctx.parameters) {
+            try await PairCatchUp.run(step, ctx)
+            return
+        }
         let kind = Self.kind(ctx.parameters)
         let newKind = try ctx.parameters.newKind ?? ctx.requireRecord().mode
         // One posture per account (rule 20 too): a follow RESUMED after the
@@ -155,12 +172,10 @@ extension ProtectionExecutor {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let account = record.account else { throw ExecutorRefusal.notSynced }
         if case .pairChanged = kind {
-            // VX-529 unit 1 (the run record's F-2): the pair catch-up's program
-            // is not built yet — its shape is the architect's ruling — so the
-            // third kind refuses BEFORE anything begins. Never let it reach the
-            // plan below: `FollowProgram.kind` reads a name it doesn't know as
-            // `keysReplaced`, and that would RE-KEY the library.
-            throw ExecutorRefusal.nothingToDo
+            // VX-529 — the follow's third kind: a re-lock to the account's pair,
+            // its own entry checks and steps (`PairCatchUp.swift`). (F-2's guard,
+            // which refused it before its program existed, is retired.)
+            return try await followThePair(&library, typed: typed)
         }
         try requireSignedIn(as: account)
         guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
