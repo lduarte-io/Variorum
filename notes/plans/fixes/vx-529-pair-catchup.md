@@ -282,8 +282,7 @@ riders; F-9 (hers); F-10 (needs a new refusal and its sentence); the app's compi
 Zero `Sync/` lines.** The act's program LANDED on the architect's ruling (P6) — Shape A, with two plan-shape refinements
 the ruling's R-arch-3 asked for (S-3 by the plan carrying no descriptor; the re-lock folded into `pickUpKeys`), each
 stated with its mechanism under P6c/P6d. Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P7-1): the pair door's either-secret line and the door spec put back in
-`PairCatchUp.swift` / `Assess.swift`; the fix is committed at `e49321c61` — restore with `git checkout HEAD -- <both>`.**
+`~/dev/variorum-vx-529`. No revert is in flight.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
@@ -490,7 +489,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     P7-2. DONE (this commit) — `Executor.swift`; `ProtectionWords.wordsChangedElsewhere(device:day:)` ("Your twelve words
     were changed on ‹device› on ‹day›.", the VX-113 sentence's four-arm form); `RoadCrossingFaces` /
     `RoadAccountFaces` `actRefusalSentence` arms. Core builds; the app arms' compile PENDING (your xcodebuild).
-  - P7-1 — THE WORDS ARM: the account's CURRENT words typed when the passphrase half moved ⇒ the stale passphrase lock
+  - P7-1 — THE WORDS ARM (DONE): the account's CURRENT words typed when the passphrase half moved ⇒ the stale passphrase lock
     DROPS (`relockedToTheAccountsPair`'s passphrase-lock change becomes keep / re-make / drop); the door's requirement for
     the passphrase-moved case becomes `.oneSecret` (either of the account's two). IN-PROGRESS — the red pins COMMITTED
     (`PairCatchUpWordsArmTests`; `AssessPairKindTests`' door row now `.oneSecret`; the entry row that expected
@@ -508,7 +507,9 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     lands it (its face is unit 2's; `RoadDoorAsk.of(.oneSecret)` is the follow's existing passphrase-or-words ask).
     After the words arm the file is E6's state (no passphrase lock; `pairFollow` nil — nothing owed); the heal is
     P7-3's. Value pins: `.drop` takes only the passphrase lock; `.remake` lands one where none was (the corrected
-    premise). Green: 96 tests (pair, follow, key-door suites) + `PairRelockTests` 9/9. Remains: the revert.
+    premise). Green: 96 tests (pair, follow, key-door suites) + `PairRelockTests` 9/9. VERIFIED BY REVERT: the door's
+    either-secret line and the spec put back ⇒ the same 11 issues red; restored ⇒ green. DONE (`577c69d03` pins,
+    `e49321c61` fix).
   - P7-2 — F-10's refusal at the follow's own words arm and the pair door's (sweep rows 8–9). Red pins first.
     NOT-STARTED.
   - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). NOT-STARTED.
