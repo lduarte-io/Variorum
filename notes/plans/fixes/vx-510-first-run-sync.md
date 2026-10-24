@@ -1416,7 +1416,61 @@ PENDING.*
       issues` — that guard ✘×2.
     - **RD6-5** `AppBootstrap.swift`: the mark on any press answer, not only `.made` [`aRefusedActMarksNothing`]. → `✘ …
       with 2 issues` — that guard ✘×2.
-- **Piece 3 — D-B5 (VX-503, the trace):** NOT STARTED.
+- **Piece 3 — D-B5 (VX-503, Part of VX-503): THE TRACE DONE (this commit — code read, file:line; no keychain, no launch);
+  the fix of the traced read IN PROGRESS (3b).** The observation (vx-494 O-1): a Standard library JOINING a Standard
+  account raised the system prompt "Variorum Dev is trying to Unlock your Variorum library. Touch ID to continue…", waited,
+  was cancelled, and the join completed.
+  - **T-B5-1 — WHICH READ:** the prompt's words are `KeychainCustodyLeaf.pressReason` ("Unlock your Variorum library",
+    KeychainCustodyLeaf.swift:39), set on a FRESH `LAContext` by exactly two reads: the custody Touch ID read
+    (`readTouchID`, :156–157 — a join never calls it: the plan runner's custody Touch ID read is a re-keying RESUME's,
+    `reachNewKey`, PlanRunner.swift:464–473) and the context-less sync-keys Touch ID read (`KeychainSyncKeysLeaf
+    .readSyncKeys(accountID:itemClass: .touchid)`, KeychainSyncKeysLeaf.swift:61–71). A same-posture join runs
+    `pickUpJoinKeys` FIRST (AccountActs.swift:47, :82) → `pickUpKeys` (Follow.swift:124–129) → `material(for:)`
+    (CommonSteps.swift:391) → `syncMaterial()` (:315–326), which reads the account's **TOUCH ID item before anything else**
+    (:318–319) — even though the act already holds the typed secret that opens the vault (`join` verified it, AccountActs
+    .swift:316–330). On the real leaf that read prompts IFF a Touch ID sync-keys item for that ACCOUNT exists in the scope
+    (`exists` probes and listings never prompt — ProtectionKeychain.swift:86–98, :134–148).
+  - **T-B5-2 — WHY AN ITEM WAS THERE (a fresh Standard library):** sync-keys items are keyed by SCOPE + ACCOUNT, never by
+    library (`ProtectionNames.syncKeysAccount`), so a Touch ID item written by an EARLIER Castle + Touch ID library synced to
+    the same account on this Mac outlives it: the production leaf's listing is BLIND to a Touch ID item with no silent
+    sibling — `syncKeyItems()` probes Touch ID only for accounts in `touchIDCandidates ∪` the listed (silent) items
+    (KeychainSyncKeysLeaf.swift:45–58), and production never wires the candidates (`AppBootstrap.init` mints
+    `KeychainSyncKeysLeaf(scope:)` with the default `{ [] }`, AppBootstrap.swift:183 — the leaf's own comment, :30–31, says
+    "VX-308's sync setup wires the bound account here"; it never did) — and in the Castle + Touch ID state the silent item is
+    dropped (CommonSteps.swift:362). So every forget that walks the listing misses it: the leaves' `forgetSyncKeys(of:)` and
+    `forgetUnboundSyncKeys` (AccountActs.swift:224–241), the rollback's sweep (PlanRunner.swift:544–547), and `holdSyncKeys`'
+    `drop(.touchid)` on a move to Standard (CommonSteps.swift:342–347, :367 — the listing taken BEFORE the silent write).
+    The walks add one more road: the dev slot is set aside by `mv`, the keychain untouched. The vx-494 walk's Mac had run
+    the vx-488 rehearsal's Castle + Touch ID libraries synced to the throwaway accounts hours earlier — **the exact item on
+    that Mac is UNVERIFIED** (no command-line tool reaches the data-protection keychain); the mechanism is the one road the
+    code allows to that prompt at that step.
+  - **T-B5-3 — WHAT A CANCEL SKIPS: nothing the join needs.** `errSecUserCanceled` → `readSyncKeys` answers nil
+    (KeychainSyncKeysLeaf.swift:73–77) → the silent item → session memory → nil → `material(for:)` derives the keys from the
+    vault with the typed secret (CommonSteps.swift:395–400). Had she pressed, the item's keys would be used only when they are
+    the vault's current sync key under its master (:392) — the very keys the derivation gives. The prompt bought nothing.
+  - **T-B5-4 — RESIDUE: the cancel leaves none of its own; the STALE ITEM SURVIVES THE JOIN.** Standard's `holdSyncKeys`
+    (CommonSteps.swift:363–368) writes the silent item and calls `drop(.touchid)`, but `drop` consults the listing taken at
+    :342, before that write — no silent sibling then, so the Touch ID item was not listed and is not dropped. The NEXT
+    listing does see it (the sibling exists now), so a later act's `holdSyncKeys` drops it — but every road reading the Touch
+    ID class FIRST prompts again before that: the key doors' `holdSyncKeysForTheSession` (KeyDoors.swift:258–261) — Change
+    passphrase / New Words on the joined Standard library would raise the same prompt. **The same blindness reaches
+    production with no walk:** Use Standard on a synced Castle + Touch ID library (`leaveCastleWrite` → `material(for:)`
+    reads the Touch ID item — a prompt though both secrets were typed — then `holdSyncKeys(castleWay: false)` leaves the item,
+    CommonSteps.swift:447–461), and every LEAVE of a Castle + Touch ID library (its only item is the Touch ID one — the
+    leaves' forget never lists it).
+  - **THE FIX, scoped to the traced read (3b, below):** the act stops reading custody when the TYPED secret already opens
+    the vault — `material(for:)` derives from the vault first, custody only when no typed secret reaches the master (the
+    quiet follow out of Castle; the key doors, whose secrets are the NEW ones). Same keys, no keychain read, no prompt: the
+    observed Standard join, Use Standard's press, and Use Castle's resume all stop prompting. **RECORDED, NOT BUILT — a
+    finding for the orchestrator (a ticket candidate, custody code):** T-B5-2's listing blindness (the leaves and the drops
+    never delete a Touch ID-only item — rule 16's "this Mac forgets its sync keys" untrue for the Touch ID class; the Touch ID
+    read on a STANDARD library in `holdSyncKeysForTheSession`). Options: (a) the forgets and `holdSyncKeys`' drops delete
+    BOTH classes BY NAME for the account (the real delete is idempotent — `ProtectionKeychain.delete` accepts not-found;
+    deleting an ACL'd item never prompts — `writeSyncKeys(.touchid)` already does it, KeychainSyncKeysLeaf.swift:104–105);
+    (b) wire the production leaf's `touchIDCandidates` (the bound account + the act's forgets) as the leaf's comment
+    intended; (c) never read the Touch ID class while the library is STANDARD (Standard files silently — rule 15). Its pins
+    need a planted leaf whose listing is production-shaped (the planted leaf lists every item, which is why no planted test
+    ever saw this).
 - **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
   `build-for-testing` into `DerivedData/vx510-b2` / `vx510-b2-ios`) and THE MAC-SUITE LIST:** NOT STARTED.
 
