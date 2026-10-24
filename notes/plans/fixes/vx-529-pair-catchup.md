@@ -277,8 +277,11 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 ### UNIT 1 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
-face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
+**NOT DONE IN THIS UNIT: every face and sentence (unit 2's — F-1's four app arms are mechanical placeholders); the
+riders; F-9 (hers); F-10 (needs a new refusal and its sentence); the app's compile (the orchestrator's xcodebuild).
+Zero `Sync/` lines.** The act's program LANDED on the architect's ruling (P6) — Shape A, with two plan-shape refinements
+the ruling's R-arch-3 asked for (S-3 by the plan carrying no descriptor; the re-lock folded into `pickUpKeys`), each
+stated with its mechanism under P6c/P6d. Session: a fresh `opus-implementer`, 2026-10-24, worktree
 `~/dev/variorum-vx-529`. No revert is in flight.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
@@ -345,7 +348,7 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   refusals, idempotence (AES key wrap is deterministic — a resume re-running the write lands the same bytes), the
   dropper. Green with every key-file suite (59 tests).
 - P5 — scope 2, THE FORK PROPOSAL. DONE (`3f3c9944d`) — below, under THE FORK; REPORTED BACK. P6 waits on the ruling.
-- P6 — scope 2, THE ACT'S PROGRAM, on the architect's ruling (`59e8b4ca1`: Shape A). IN-PROGRESS, sub-pieces:
+- P6 — scope 2, THE ACT'S PROGRAM, on the architect's ruling (`59e8b4ca1`: Shape A). DONE but P6f's final run; sub-pieces:
   - P6a — S-2 VERIFIED: the key doors take NO backup after a re-lock — `KeyDoorProgram`'s steps are `vault`?/`keyFile`/
     `memory` and its plan-less finish `memory` alone (`KeyDoors.swift:25-29`); the app's key-door road
     (`ProtectionKeyDoorActs.press`) and its account road (`ProtectionAccountActs.perform`) start none after the act
@@ -458,7 +461,14 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     (the account road's preflight, mirroring rows 7/10/11 — and row 8's words twin, F-10's); `ProtectionSecretCheck`
     (the check door's four honest answers, P-VX510-B3-2) OUT; `ProtectionOpenRoad.swift`'s typed-unlock seam (it logs
     and loads nothing — no refusal) OUT.
-  - P6f — the full core suite green; the report back. NOT-STARTED.
+  - P6f — the full core suite and the report. IN-PROGRESS — the full core suite at `148f326f5`: VariorumCoreTests
+    **3396 tests passed** (5 known issues: P2's 4 negative controls + P6d's pinned residual); the one failure the
+    ticketed MCP wall-clock flake (VX-353 / VX-532). Then THE SCENARIO WORLD'S OWN PASS (this commit,
+    `Scenario/PairCatchUpScenarios.swift`): her other Mac re-makes the passphrase, the words, or both; this Mac owes
+    exactly `.pairChanged(…)` once the vault is read, presses the follow typing today's passphrase, owes nothing
+    after, and today's passphrase and words both open the caught-up live library — `expectPromisesKept` before and
+    after a settle; Castle Always ask, Castle Touch ID and Standard × the three halves: green. Remains: the final full
+    run on the finished tree.
 - **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
   passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'
   `MCPHarnessTimeLimitTests` wall-clock bound under the full parallel run (19.1 s against 15 s; 3/3 green alone) — the
