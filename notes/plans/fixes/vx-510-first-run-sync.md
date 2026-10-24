@@ -1224,10 +1224,15 @@ kind.
 
 ### UNIT B2 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** *(in progress — kept current; the close states it whole.)* No
-`xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact (the run's traps). The
-walk script's `--env` hand-off (F-B1-1) is dry-checked only — its first live proof is unit C's P2 (the process's `ps eww`
-and the app's own `ARMED` line).
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **T-B5-2's listing blindness — RECORDED, NOT BUILT** (a finding
+for the orchestrator, custody code, a ticket candidate: the production sync-keys leaf never lists a Touch ID-only item, so the
+leaves and `holdSyncKeys`' drops never delete it — the source of the stale item behind VX-503; Piece 3's options (a)–(c)); the
+VX-503 fix built is the traced READ only (the join no longer presses for it). No `xcodebuild test`, no stage, no app launch,
+no dev/real-store touch, no server or production contact (the run's traps) — the Mac-target suites this unit touches run in
+the orchestrator's stage batch (THE MAC-SUITE LIST, Piece 4). Two branches are unpinned, said in their pieces: VX-501's reuse
+of a vault the settle already read, and VX-511's reopen-not-ready mark. The walk script's `--env` hand-off (F-B1-1) is
+dry-checked only here — its live proof is unit C's (the orchestrator's walk ran on `4a5ef39e3`). No line in
+`Sources/VariorumCore/Sync/`. PROVISIONAL, the architect's/hers: P-VX510-B2-1 (VX-501's 10 s vault bound).
 
 *Implementer session B2 — Opus 5.5, xhigh. Pre-fix tree = `b07c2833f` (unit B1's product files). Every claim not yet run is
 PENDING.*
@@ -1505,8 +1510,68 @@ PENDING.*
     - **RD5-2** the custody fallback removed (the typed secret or nothing) [`theCustodyFallbackStandsWhenNoTypedSecretOpens
       TheVault`, and the key doors' road suite]. → `✘ … with 5 issues` — the guard ✘ and `RoadKeyDoorRoadTests
       .syncedChangeChangesTheAccountsPassphraseWithIt` ✘×4 (the key door's vault step found no keys).
-- **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
-  `build-for-testing` into `DerivedData/vx510-b2` / `vx510-b2-ios`) and THE MAC-SUITE LIST:** NOT STARTED.
+- **Piece 4 — EVIDENCE: DONE** (the final tree = `e829e8d08`'s product files; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's three new suites symlinked in): `✘ Test run with 505 tests in 85 suites failed with
+    4 issues` — exactly the three harness-PATH artifacts (`theBecomeActiveHookRunsOneSyncRound`,
+    `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut` ×2, `thePasteInIsFullyRetiredInTheSharedSources` — they read
+    `#filePath` beside the symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 502 tests in
+    85 suites passed`** (B1's 477/82 + this unit's 23 tests in 3 new suites + 2 more in `ProdTestRoadTests`); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - THE CORE (`Sources/` touched — `CommonSteps.swift`): the protection + auth/account set (every suite under
+    `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`, `AccountLifecycleTests`, `AuthRLSDDLTests`,
+    `KeyVaultClientTests`, `SupabaseTransportTests`, `SupabaseTransportSessionTests`; one `--filter`, 102 suite names — the
+    first extraction missed `AccountVaultWireTests` (`@Suite struct` on one line), re-run with it): debug **`✔ Test run with
+    533 tests in 102 suites passed`**; release (`swift build -c release --build-tests -Xswiftc -enable-testing`, then `swift
+    test -c release --skip-build`, the same filter) **`✔ Test run with 509 tests in 98 suites passed`** — both exactly vx-488
+    M1's close counts; 0 failures, 0 `skipped:` lines.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b2
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath App/Variorum/DerivedData/vx510-b2-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`** —
+    zero errors, no warning in any file this unit touched (both logs grepped).
+  - THE WALK SCRIPT (F-B1-1): `--self-test` → every case as expected incl. the handed value; `std --app
+    App/Variorum/DerivedData/vx510-b2/Build/Products/Debug/Variorum.app --dry-run` → G1–G4 held, then `REFUSES: G5 — a Variorum
+    instance is running` (the orchestrator's unit C walk build, from its stage checkout — left alone) exit 5: nothing launched.
+  - **Machinery honesty:** the orchestrator committed to this branch while the unit ran (unit C's records — `532ad1376`,
+    `e630c1015`, `39952dff5`, `97334e232`, `936ef3c3f` and others); this session staged explicit paths only, re-read the
+    record before each edit, and never touched those sections. Two `git pull --rebase` calls made BEFORE a commit refused
+    over this session's own unstaged edits ("Please commit or stash them") — each commit then pulled and pushed after
+    itself; nothing was lost or reordered (verified `HEAD == origin` each time).
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW (harness-green): `TypedUnlockSyncKeysTests` (VX-501), `WordsCardAfterAccountActTests` (VX-511),
+    `TypedSecretNeverPressesTests` (VX-503).
+  - CHANGED (harness-green): `ProdTestRoadTests` (F-B1-1 — the env form + three new pins), `ProtectionAccountSupport`
+    (`PlantedVaultLeaf.fetchDelay`; every suite that plants an account — below).
+  - `ProtectionWalkSwitch` / `ProjectConfig` (F-B1-1): `ProtectionWalkSwitchTests`, `ProtectionWalkProjectTests`,
+    `SyncWalkFenceTests`, `ProtectionCrossingRouteTests`, `RoadRearmTests`.
+  - `ProtectionOpenRoad` (VX-501 — `openTyped`, `typedCandidatesAndKeys`, the load): `ProtectionLobbyModelTests`,
+    `ProtectionOpenRoadPlantedTests`, `TouchIDUnlockSyncKeysTests`, `RoadLockTests`, `RoadLockRouteTests`, `RoadRearmTests`,
+    `NoKeyFileDoorTests`, `OneRefreshAuthorityTests`, `OneSyncKeysLeafTests`, `PreDesignFaceTests`, `PreDesignStartFreshRouteTests`,
+    `PreDesignStoreRefusalTests`, `PreviousLibrariesArcTests`, `ProtectionNoticeFaceTests`, `ProtectionOfferFaceTests`,
+    `ProtectionReminderRoadTests`, `ProtectionRestoreReceiptTests`, `ProtectionRule27FaceTests`, `ProtectionWordsVX307Tests`,
+    `SetPassphraseRowRereadTests`, `SetPassphraseRowRereadRouteTests`, `ProtectionCrossingRoadTests`.
+  - `AppBootstrap` / `RoadAccountFaces` / `WordsBand` (VX-511): `FirstRoundConfirmTests`, `FirstRunDrillTests`,
+    `FirstRoundAfterTheActTests`, `FirstRoundAfterTheReopenTests`, `RoadAccountFacesTests`, `RoadAccountModelTests`,
+    `RoadAccountSurfaceTests`, `RoadJoinFollowFacesTests`, `RoadJoinFollowModelTests`, `RoadJoinFollowSurfaceTests`,
+    `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`, `WordsBandTests`, `WordsBandSurfaceTests`,
+    `WordsLedgerCarryRoadTests`, `WordsLedgerCarryRouteTests`, `RoadKeyDoorSurfaceTests`, `AppBootstrapOffMainTests`,
+    `SettingsLockCloseTests`, `HoldBannerAccountTests`.
+  - `CommonSteps.material(for:)` (VX-503 — every act that picks up or re-wraps the account's keys): `RoadKeyDoorRoadTests`,
+    `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`, `ProtectionCrossingRoadTests`, `TouchIDUnlockSyncKeysTests`,
+    `RoadRestoreHoldGateTests`, `ProtectionPaneWaveTests`, `NotOnYetWordsTests`, the first-round suites above, and the
+    REAL-keychain suites over the leaves (throwaway scopes) `KeychainLeavesTests`, `ProtectionKeychainFamilyTests`.
+  - The simplest honest batch: the whole `VariorumTests/Protection` folder + `ProdTestRoadTests`, `SyncWalkFenceTests`,
+    `AppBootstrapOffMainTests`, `SettingsLockCloseTests`, `OneRefreshAuthorityTests`.
+  - THE PHONE (`VariorumMobileTests` — `ProtectionOpenRoad`, `AppBootstrap`, the core's acts): `MobileProtectionRoadTests`,
+    `MobileProtectionTests`, `MobileStructuralTests`, `MobileEmptyStoreTests`.
+  **THE WALK (this unit's rows, for the stage — use-shaped; unit C has already shown VX-501 live, `936ef3c3f`):** (1) F-B1-1:
+  the walk launch carries `VARIORUM_PRODTEST_EMAILS` (`ps eww`) and the app logs `PROD TEST ROAD (VX-510): ARMED`; (2) VX-501:
+  a Castle (Always ask) library synced, ⌃⌘L, the passphrase typed at the lobby → the protection log's `the typed unlock loaded
+  the account's sync keys for the session`, the row reaches "Synced ‹time›" with no key act; the twelve words the same;
+  offline at the unlock → the library opens, the row says locked; (3) VX-511: after Turn on sync (set-up, then a join on a
+  second library) and after Move, the card above the quick entry offers no words for that library; a relaunch keeps it so;
+  (4) VX-503: on a Mac whose scope holds a Touch ID sync-keys item for an account (a Castle + Touch ID library synced to it,
+  then left), a Standard library joining that account raises NO Touch ID prompt; Use Standard on a synced Castle + Touch ID
+  library raises none for the sync keys. Both voices where the card and the row have a face.
 
 ## UNIT B3 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B2 closes)
 
