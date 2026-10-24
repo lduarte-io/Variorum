@@ -555,6 +555,46 @@ suites re-run green by the orchestrator's own hand — 40 tests, the 4 known iss
   accepted** (they mint no sentence; the orchestrator's xcodebuild verifies the compile; unit 2 replaces them).
   **F-8 and `RoadSettledFollow.kind`** noted for unit 2's brief.
 
+## F-9 — HER SECURITY QUESTION AND THE ANALYSIS (2026-10-24, at the F-9 sitting; her words verbatim)
+
+**Her answer to the F-9 question (not a pick — a question back):** "do you think it's a problem at all that you
+changed your passphrase elsewhere and the old one lets you change it? What if you changed it because someone learned
+your passphrase? i feel like it might be weakening the value of changing your passphrase - does rotate keys cover
+that road ??" (Same sitting: **VX-530 rides TRACE-FIRST** — her pick, parented under VX-529.)
+
+**The analysis (the architect's, traced against the rules and the code):**
+
+1. **The old passphrase opening the lagging device is physics, not a door this run adds** — an offline file cannot
+   be reached by a change made elsewhere, the same truth as rule 5's floor ("a backup opens with the passphrase and
+   words you had when you made it"). Today that stale lock lives FOREVER on a lagging Standard device (no door
+   retires it); the catch-up is the FIRST road that retires the old passphrase there. As designed, the catch-up
+   STRENGTHENS the change's value; the old passphrase authorizes nothing account-side (the gate refuses every key
+   door; the catch-up demands a CURRENT account secret).
+2. **"Someone learned your passphrase," by what they hold:** nothing else ⇒ nothing (sign-in is the account
+   password, a different secret; the vault demands the new passphrase at once). An old backup too ⇒ rule 5's stated
+   floor (old secrets open old copies, forever — rules 13, 25 territory). One of your signed-in STANDARD devices too
+   ⇒ they never needed the passphrase (rule 8's quiet roads open it); the answer to device compromise is Castle (or
+   signing the device out), never the passphrase change — and a passphrase change deliberately does not evict a
+   signed-in Standard device from sync (custody holds the sync keys; the Standard trust model).
+3. **Her instinct was RIGHT about the F-9 (b) option, which is WITHDRAWN:** exempting Reset forgotten passphrase
+   from the gate would let old-passphrase + a lagging Standard device REWRITE the account's pair (plain confirm +
+   custody's quietly-held master) in exactly the state where the owner may have just changed the passphrase to lock
+   someone out. The gate stays whole; no Reset exemption.
+4. **"Does rotate keys cover that road?"** Replace All Keys replaces THE LIBRARY'S KEY ONLY — never the account's
+   sync key ("it changes only when the account enters Castle", rule 15; P-VX378-U2-1's recorded reading, restated in
+   `ReplaceAllKeys.swift`'s header). So: a learned passphrase (no material) is covered by the passphrase change
+   itself; a feared KEY extraction (they held your device or files while the old pair stood) is covered by USE
+   CASTLE — the one act that mints a new sync key, kills the Apple roads account-wide and makes every device re-type
+   a secret. Replace All Keys covers a leaked library key file, not a leaked passphrase.
+5. **The REVISED F-9 proposal — R-529-5, pending her ratify: the follow accepts EITHER of the account's CURRENT
+   secrets** (rule 14's own grammar: "joining the account from a new device always types one of them"). With the
+   current passphrase, the full re-lock as designed. With the current WORDS (the forgot-the-new-passphrase road),
+   the stale passphrase lock is DROPPED — the old passphrase stops opening this library at once, which is the
+   passphrase change ARRIVING here — the words copy refreshes, the sync keys load; the passphrase lock returns when
+   a passphrase is next typed here (meanwhile the account's passphrase opens it online through the vault road,
+   R-529-1, and Reset — un-gated once the pair converged — sets a known one). An attacker who merely learned the OLD
+   passphrase holds neither current secret and can do nothing but read the local copy they already physically hold.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
