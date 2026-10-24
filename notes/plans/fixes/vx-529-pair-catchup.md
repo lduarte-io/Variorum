@@ -279,7 +279,8 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 **NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
 face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. No revert is in flight.
+`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P3): `Assess.swift`'s pair arm in `acts` disabled; the fix is committed
+at `c909ee285` — restore with `git checkout -- Sources/VariorumCore/Protection/Assess/Assess.swift`.**
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
