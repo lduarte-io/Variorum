@@ -830,9 +830,15 @@ LIST for every file you changed.
 
 ### UNIT B1 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** *(kept current — PENDING until the close)*. No `xcodebuild
-test`, no stage, no app launch, no dev/real-store touch, no server or production contact; the walk script (D-B2) is
-written and guard-dry-checked only, never run. No line in `Sources/VariorumCore/Sync/`. D-B4/D-B5 are unit B2's.
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **F-B1-1 — the prod test road cannot ARM on the Mac yet**: the
+sandboxed Debug app cannot read `~/.variorum/prod-test-accounts.env`, so a live launch with the switch refuses
+("the allowlist file can't be read") until the architect rules the fork (Piece 4: (A) a Debug-only entitlement · (B) the
+launcher hands the emails · (C) move the file) — STOPPED, NOT BUILT; **unit C cannot run on the road until it is ruled and
+built**. No `xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact; the walk
+script (D-B2) is written and guard-dry-checked only, never run — its GUI labels have never met the real window. The
+Mac-target suites run in the orchestrator's stage batch (THE MAC-SUITE LIST, Piece 7). No line in
+`Sources/VariorumCore/Sync/`. D-B4/D-B5 are unit B2's. Words PROVISIONAL, hers: P-VX510-B1-1 (the follow's line),
+P-VX510-B1-2 (the road's refusal line).
 
 *Implementer session B1 — Opus 5.5, xhigh. Pre-fix tree = `68835a08c` (unit A's product files; `c1f3cdaf0` adds only
 unit B2's brief). Every claim not yet run is PENDING.*
@@ -1079,8 +1085,62 @@ unit B2's brief). Every claim not yet run is PENDING.*
   - **RB-17** (same): `✘ … with 2 issues` — `aReleaseBuildCompilesNothingOfTheRoad` ✘×2.
   - **RB-18** (same): `✘ … with 7 issues` — `theDerivationReadsTheLaunchsLiftOnlyInDebug` ✘, `armedAndListed…` ✘×3,
     `armedAndUnlisted…` ✘×3.
-- **Piece 7** — evidence on the final tree: the harness whole, the release compile, ONE Mac + ONE iOS build-for-testing
-  (`DerivedData/vx510-b1`, `vx510-b1-ios`), THE MAC-SUITE LIST. NOT STARTED.
+- **Piece 7** — EVIDENCE: DONE (the final tree = this commit's product files; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's three new suites symlinked in): `✘ Test run with 480 tests in 82 suites failed with
+    4 issues` — exactly unit A's three harness-PATH artifacts (`theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut` ×2,
+    `thePasteInIsFullyRetiredInTheSharedSources`, `theBecomeActiveHookRunsOneSyncRound` — they read `#filePath` beside the
+    symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 477 tests in 82 suites passed`**
+    (unit A's 449/79 + this unit's 28 tests in 3 new suites and 2 more in `FirstRoundConfirmTests`); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`** — the road
+    compiles out whole (the exhaustive row switches without their DEBUG case).
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b1
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**, zero errors; ONE warning in a file this unit touched —
+    `FirstRoundAfterTheReopenTests.swift:114` (an unnecessary `try` before a non-throwing `withDependencies`) — fixed in this
+    commit AFTER that build (one token, test-only; re-verified in the harness: `--filter FirstRoundAfterTheReopenTests` `✔
+    Test run with 3 tests in 1 suite passed`, no warning for the file — said plainly: the Mac target has not re-compiled
+    the fixed line). `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+    App/Variorum/DerivedData/vx510-b1-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`**, zero errors, no warning in a
+    touched file.
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched — no `Sync/` line).
+  - THE WALK SCRIPT against the built Debug app (read-only guards; nothing launched): `Tools/WalkKit/first-run-walk.sh std
+    --app App/Variorum/DerivedData/vx510-b1/Build/Products/Debug/Variorum.app --dry-run` → G1–G5 held (the account listed, no
+    walk project, the build `io.lduarte.Variorum.debug` outside `/Applications`, zero Variorum instances) → `REFUSES: G6 — the
+    stage is not held (STAGE FREE); claim it first …` exit 5. (G5's refusal path is VisualWalk's own `pgrep` idiom — not
+    exercised: no instance was running and none may be started here; G7–G9 sit behind G6.)
+  - **Machinery honesty:** the orchestrator committed to this branch IN THIS WORKTREE while the unit ran (`c1f3cdaf0`,
+    `ee50eb8a6`, `07c22ac8f`, `677cc46c0` — its own record sections); this session staged explicit paths only, re-read the
+    record before each edit, and never touched those sections. One record flip rode a commit late (Piece 2 — said there).
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW (harness-green): `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests` (VX-509's standing gate), `ProdTestRoadTests`.
+  - CHANGED (harness-green): `FirstRoundAfterTheActTests` (the world), `FirstRoundConfirmTests` (the flipped pin + the new
+    ones), `RoadAccountModelTests` (`PlantedAccountRoads.onPress`), `SyncWalkFenceTests` (the derivation pin, updated).
+  - `AppServices` (the start-wait, the fence dependency, the derivation, the admission, `AccountState`): `FirstRoundRoadTests`,
+    `OneRefreshAuthorityTests`, `Phase9cAuthWiringTests` (ALL — its three source pins run only there), `TierAndOnboardingTests`,
+    `Phase8ServicesTests`, `KeychainOffMainTests`, `LibraryPortabilityDoorTests`, `SampleLibraryDedupeFactsTests`.
+  - `AppBootstrap` (`attach`, the generation): `AppBootstrapOffMainTests`, `SettingsLockCloseTests`, `LibraryHandOffTests`,
+    `QuickEntryLaunchFocusTests`, `WhatsNewWaitsAfterAdoptionTests`, `RoadAccountSurfaceTests`, `RoadJoinFollowSurfaceTests`,
+    `RoadKeyDoorSurfaceTests`, `RoadLockRouteTests`, `SetPassphraseRowRereadRouteTests` (+ unit A's whole `Protection/` list).
+  - `RoadAccountModel` / `RoadAccountFaces` / `ProtectionWords`: `FollowDoneNoticeTests`, `ProtectionPaneWaveTests`,
+    `PassphraseFloorRoadTests`, `RoadJoinFollowModelTests`, `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`,
+    `RoadAccountFacesTests`, `RoadJoinFollowFacesTests`, `RoadAccountWordsTests`, `RoadJoinFollowWordsTests`,
+    `ProtectionWordsPlanTests`, `ProtectionWordsVX307Tests`, `U2WordsTests`.
+  - `SyncStatusViews` (the DEBUG kind, the refusal face, the row's `face`): `SyncLockedRowTests`, `SyncStalledRowTests`,
+    `SyncOutOfDateFaceTests`, `NotOnYetWordsTests`, `TierAndOnboardingTests`.
+  - `ProtectionWalkSwitch` / `ProjectConfig`: `ProtectionWalkSwitchTests`, `ProtectionWalkProjectTests`, `ProtectionCrossingRouteTests`,
+    `RoadRearmTests`, `OneSyncKeysLeafTests`, `EntitlementsTests` (the Debug host's entitlements — untouched here, but F-B1-1's
+    option (A) would change them).
+  - The simplest honest batch: the whole `VariorumTests/Protection` folder + every top-level suite named above.
+  - THE PHONE (`VariorumMobileTests` — `AppServices`/`SyncSession`/`AppBootstrap`/`SyncStatusRow`, and the `Shared/` sweeps over
+    the new literals): `MobileEmptyStoreTests`, `MobileStructuralTests`, `MobilePerfWalkTests`, `MobileQuickNoteReadFailureTests`,
+    `MobileStarterJournalTests`.
+  **THE WALK (this unit's rows, for the stage — use-shaped, not this session's):** (1) a re-keying join (a Standard library
+  joining a Castle account — the throwaway road or, once F-B1-1 is ruled, the prod test road): the sheet survives the reopen,
+  then "Syncing your library with your account…" → "Synced. Your account's writing is in this library now."; the row
+  "Synced ‹time›", no relaunch; (2) a follow (the account entered Castle on another device): the sheet's round line beside
+  the section's durable Done; (3) the prod test road with an UNLISTED account signed in: the row reads "Sync off (dev store)
+  — this account isn't a listed test account" with Account…; signing in as a listed account composes the chain (the road's
+  log line ARMED first); (4) `Tools/WalkKit/first-run-walk.sh std` end to end (unit C's LEG S S4–S7). Both voices where the
+  sheet and the row have a face.
 
 ## UNIT B2 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B1 closes)
 
