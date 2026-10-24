@@ -1641,6 +1641,23 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   notice SPOKE although the restored library's words already were the account's (the copy was made under the current pair
   — VX-456/VX-462's quiet arm missed for a restored copy, probably because the fresh key's lock is compared rather than
   the words), so "your previous twelve words" is untrue here.
+*[removed for publication]*
+  passphrase). The walk instance quit (its round sheet's Done first — a sheet up held ⌘Q); the walk library `dfe2ad68`'s 5
+  slot files aside into `Variorum-dev-aside-vx510-walkL1/`; relaunched on the road (pid 65130, the road ARMED) → a fresh
+  library **`413fb3bd`** (key `725fafc4`, device `7d96b569`), still signed in as std (the dev scope's session) → **the row:
+  "Sync isn't on for this library yet" with Protection…** — the exact moment both testers met "Sync locked" on 0.10 →
+  Protection ▸ "Sync this library…" → the account's passphrase by the helper → `enroll: done #1 under 725fafc4 · road:
+  *[removed for publication]*
+  the fresh library's words were replaced) → OK → **"Synced. Your account's writing is in this library now."** — NO
+  relaunch → Done → **the Library shows "VX-510 S8 written on the std test account · edited today 8:48 PM" — the first
+  library's note, downloaded into the fresh one**; the row "Synced 9:01 PM". **prod: device cursors 3 · live containers
+  1.** **VX-511 LIVE RED on this pre-fix build (B2 builds the fix):** after the join the Bookcase's band card still reads
+  "Your library is encrypted — click here to record the twelve words that are its key." — her Air report, exactly (its
+  passphrase half retired, the library now holding the account's passphrase). The re-walk on B2's build owes its green.
+- **LEG S: PASS** — every first-run leg live on production with no relaunch: sign-up, set-up, the first round, a note's
+  push, a restore, a join from a restored copy, a join from a fresh library (the testers' road); the key doors (Change
+  passphrase, New words) re-lock the account (vault revisions 1→2→3); three device cursors; zero duplicates. Deferred to LEG
+  C by design: a typed secret against an older backup (Standard's quiet road answers first on its own Mac).
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
