@@ -306,3 +306,33 @@ struct PairCatchUpCrashTests {
             dropPlan: true, typed: { _ in TypedSecrets(passphrase: newPassphrase) })
     }
 }
+
+/// S-3 (the architect's ruling): a resume whose lobby took the OLD passphrase — the library opened by a quiet road, its
+/// words, or (before the re-lock) that old lock — must never strand the open. A no-re-key act is always past its commit
+/// point, so a passphrase that opens no lock under the plan's descriptor, or opens no vault under it, was thrown OUT OF
+/// THE SETTLE (`PlanRunner.resume`) — the act left in flight, every door refused. Never a third state: the old one
+/// (rolled back — the old passphrase is no secret of this act's) or the new one (landed).
+@Suite("VX-529 S-3 — a resume whose lobby typed the old passphrase never strands the open")
+struct PairCatchUpStrandedOpenTests {
+    @Test(arguments: [(ProtectionMode.standard, GateStyle?.none), (.castle, .alwaysAsk)])
+    func theOldPassphraseAtTheLobbyRollsBackOrFinishesNeverStrands(_ mode: ProtectionMode, _ gate: GateStyle?) async throws {
+        var newPassphrase: String?
+        var k0: StoreKey!
+        try await CrashHarness.everywhere(
+            {
+                let made = try await pairMovedElsewhere(mode, gate: gate)
+                newPassphrase = made.newPassphrase
+                k0 = made.air.key
+                return made.air
+            },
+            act: { _, executor, library in
+                _ = try await executor.follow(
+                    &library, kind: .pairChanged(passphrase: true, words: false), typed: TypedSecrets(passphrase: newPassphrase))
+            },
+            finished: { fixture, library in library.key == k0 && PairCatchUpCrashTests.caughtUp(fixture) },
+            neverHappened: { fixture, library in library.key == k0 && !PairCatchUpCrashTests.caughtUp(fixture) },
+            // The lobby: the OLD passphrase (and, for Always ask's road once the lock is re-made, the unchanged words).
+            typed: { fixture in TypedSecrets(passphrase: fixture.passphrase, words: mode == .castle ? fixture.words : nil) },
+            resumeMayRollBack: true)
+    }
+}

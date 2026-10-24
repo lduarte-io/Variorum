@@ -374,7 +374,12 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     as the pair kind ⇒ `["memory"]`. F-2's guard RETIRED (`follow` dispatches the third kind to `followThePair`). The
     plan records `passphraseKDF` (the ruled shape as built — P6c revisits it). Green: 59 tests across the five pair
     suites and `FollowTests` (the crash harness in all three postures and plan-gone included).
-  - P6c — S-3: the stranded-open pin, red on P6b's tree, then the fix. NOT-STARTED.
+  - P6c — S-3: the stranded-open pin. IN-PROGRESS — the pin COMMITTED (`PairCatchUpStrandedOpenTests`: the crash after
+    every write, Standard and Castle Always ask, the relaunch's lobby typing the OLD passphrase, roll-back allowed):
+    RED on P6b's tree — 14 crash points where `the settle threw .passphraseDoesNotOpen` (the plan records the vault's
+    descriptor, so `PlanRunner.resume` derives the old passphrase under it and, the act being always past its commit
+    point, throws out of the settle — before the re-lock from the vault check, after it from the lock check).
+    Remains: the fix, green, the revert.
   - P6d — R-arch-3: the downgrade-resume trace and the plan's shape (its pin red-first if the shape moves). NOT-STARTED.
   - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
     red-first. NOT-STARTED.
