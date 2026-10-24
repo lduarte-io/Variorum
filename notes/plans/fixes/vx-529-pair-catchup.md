@@ -301,8 +301,16 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   (F-4's siblings untouched). Green with its neighbours (42 tests: the key-door, follow and session-hold suites).
   VERIFIED BY REVERT: the one `throw` line back to the plain refusal ⇒ the pin RED again (both postures, the same
   `passphraseDoesNotOpen`); restored by `git checkout` ⇒ 3/3 green.
-- P2 — scope 4, THE INVARIANT PINS (fact 1's guard): one existing-behavior pin per synced road that writes a passphrase
-  lock or the master's words copy. NOT-STARTED.
+- P2 — scope 4, THE INVARIANT PINS (fact 1's guard). DONE (this commit) — `Executor/PairInvariantPinsTests.swift`: one
+  existing-behavior pin per synced road that writes a passphrase lock or the master's words copy — set up sync (both
+  postures); the join in the same posture by the passphrase and by the words (E6's state: the library's own lock
+  dropped); the join into Castle (by either secret) and out of it; Move; the follow into Castle (by either secret), out
+  of Castle (quiet), and catching up on replaced keys; Use Castle and Use Standard synced; Replace All Keys, Change
+  passphrase, Reset forgotten passphrase and New words (both postures each); New words minting the gone-everywhere file
+  (both). After each: any passphrase lock is under the VAULT's descriptor, the master's words copy IS the vault's
+  recovery wrap, and the road leaves the lock it should. 24 cases green on the tree as it stands (the trace in F-list
+  confirmed: every synced setter derives under, or writes, the vault's descriptor; the copy is always the fresh read's).
+  Plus a NEGATIVE CONTROL (`withKnownIssue`): a lock planted under another descriptor and a stale copy are each caught.
 - P3 — scope 1, DETECTION: a behavior-level red pin first (compiles on the old tree), then `FollowKind.pairChanged`,
   the pure pair reading, the acts arm, the follow door's spec for the third kind. NOT-STARTED.
 - P4 — scope 2, THE ACT'S PURE PIECES (fork-independent): the key file's words-lock dropper (a value setter) and the
