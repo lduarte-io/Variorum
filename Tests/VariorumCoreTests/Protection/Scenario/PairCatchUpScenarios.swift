@@ -42,3 +42,33 @@ struct PairCatchUpScenarios {
         }
     }
 }
+
+/// R-529-5's words arm in the scenario world: the passphrase moved on her other Mac; this Mac follows by her CURRENT
+/// words — the stale passphrase lock drops (E6's window: today's passphrase opens it through the vault road only, until a
+/// passphrase is typed here), today's words open it, every promise held.
+@Suite("VX-529 R-529-5 — the words arm in the scenario world, every promise checked")
+struct PairCatchUpWordsArmScenarios {
+    @Test(arguments: [(ProtectionMode.castle, GateStyle.alwaysAsk), (.castle, .touchID), (.standard, .touchID)])
+    func herOtherMacChangesThePassphraseAndThisMacFollowsByTheWords(_ mode: ProtectionMode, _ gate: GateStyle) async throws {
+        for words in [false, true] {
+            let (world, account) = try await syncedWorld(mode, devices: ["macA", "macB"], gate: gate)
+            var changes: [Action] = [.launch("macA"), .launch("macB")]
+            if words { changes.append(.regenerateWords("macA")) }
+            changes.append(.changePassphrase("macA"))
+            await world.done(changes)
+            let context = "\(mode) \(gate) words moved too: \(words)"
+            _ = try await world.macB.executor?.readVault(accountID: account)
+            #expect(world.owedFollow(world.macB) == .pairChanged(passphrase: true, words: words), "\(context)")
+            await world.done([.follow("macB", .words)])
+            #expect(world.owedFollow(world.macB) == nil, "\(context): still owed after the catch-up")
+            let today = world.known(account)
+            let live = try #require(world.liveKeyFile(world.macB))
+            #expect(live.passphrase == nil, "\(context): the stale passphrase lock stayed")
+            #expect((try? live.open(.words(try #require(today.words)), floor: PF.floor)) != nil,
+                    "\(context): today's words don't open the caught-up library")
+            expectPromisesKept(world, context)
+            await world.done([.settle])
+            expectPromisesKept(world, "\(context), settled")
+        }
+    }
+}
