@@ -117,6 +117,13 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
    → **VX-514** (Bug, Suspected, Books, Low) — **CLOSED at her word, not a bug:** "you don't need to worry about the
    sherlock holmes double book. that's because i had edited one of them before we did the deduplication things. it's
    not a bug but i will delete one of them." (The dedupe kept both by design — an edited copy is never retired.)
+5. **"how am I supposed to be able to grant multiple wings to claude code? I don't see the option to add another one
+   here and when I added it, it was in the old MCP pane"** (her screenshot: Shared with AI, one PlanetLillian wing grant
+   with Change… · Revoke) — WORKS, but hidden: the Clients tab's per-client "Change…" opens the grant sheet FRESH
+   (`MCPGrantOpening(client:, approving: false)`, `replacing: []` — `MCPPane.clientRow`; nothing replaced), and ⌥⌘A opens
+   the same sheet from anywhere (WHERE: a note · a book · a wing; one standing row per client × place since VX-393, so a
+   second wing is a second row). Shared with AI's own Change… REPLACES. The labelling is the gap → **VX-515**
+   (Improvement, Confirmed, MCP, Medium).
 
 ## THE TEST-ACCOUNT ROAD — the tools (built by the orchestrator, 2026-10-23; environment acts per R-510-7/-8)
 
