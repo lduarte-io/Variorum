@@ -292,7 +292,10 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
 
 **The pieces (flip per commit; unverified claims PENDING):**
 - P0 — this LIVE STATUS. DONE (this commit).
-- P1 — scope 3, THE REFUSAL SPLIT at `changePassphrase`'s vault-verify arm: red pin first, then the fix. NOT-STARTED.
+- P1 — scope 3, THE REFUSAL SPLIT at `changePassphrase`'s vault-verify arm. IN-PROGRESS — the red pin COMMITTED
+  (`Executor/PairRefusalSplitTests.swift`): RED on the pre-fix tree, both postures, for the repro's exact reason —
+  `expected .passphraseChangedElsewhere(device: "Mac A", day: …) but .passphraseDoesNotOpen was thrown`; its two
+  companions (opens-neither; nothing changed elsewhere) green. Remains: the fix, green, the behavioral revert.
 - P2 — scope 4, THE INVARIANT PINS (fact 1's guard): one existing-behavior pin per synced road that writes a passphrase
   lock or the master's words copy. NOT-STARTED.
 - P3 — scope 1, DETECTION: a behavior-level red pin first (compiles on the old tree), then `FollowKind.pairChanged`,
