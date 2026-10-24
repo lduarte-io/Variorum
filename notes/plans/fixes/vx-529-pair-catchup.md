@@ -651,6 +651,42 @@ that road ??" (Same sitting: **VX-530 rides TRACE-FIRST** — her pick, parented
    R-529-1, and Reset — un-gated once the pair converged — sets a known one). An attacker who merely learned the OLD
    passphrase holds neither current secret and can do nothing but read the local copy they already physically hold.
 
+## R-529-5 — RATIFIED, WITH THE SENTENCE (2026-10-24, the same sitting; her words verbatim)
+
+Her ratify, after two clarifying rounds recorded here: *"Ratify, with the sentence. It's a good point that this
+state is reachable in other ways - maybe make sure that that's clearly expressed everywhere it needs to be. It does
+still open any version of your library with your passphrase (just backups might not accept it, for the E6 corner
+described). Do you think that there's anywhere else we need to update because of E6? Ratified with the sentence
+either way"* — and, the round before, her backup question verbatim: *"but then their library isn't rekeyed under the
+new passphrase, right? so any backups they made wouldn't open with the passphrase that is their accounts passphrase
+at that time? isn't this a problem if either the 12 words or the passphrase changes and we don't make them type the
+follow?"* (answered: no pair change ever re-keys — rule 6; the quiet words-change case has no gap — the passphrase
+lock stays intact and the new words ride the master copy into every later backup; the words-ARM window is real,
+bounded, and is E6's existing class, which a words-REJOIN reaches identically; the floor holds — the words open every
+copy; the window closes at the first typed passphrase).
+
+**THE RULING:** the catch-up accepts EITHER of the account's CURRENT secrets. The passphrase arm: the full re-lock.
+The WORDS arm: the stale passphrase lock DROPS (the old passphrase stops opening this library at once); the sheet
+says the window plainly (draft, P-VX529-3's class: *"Until you type your account's passphrase on this Mac, copies
+made here open with your twelve words."*) and points at the Reset chain (*follow with your words, then set a
+passphrase you know with Reset forgotten passphrase*); the lock is re-made at the next typed-passphrase moment. The
+gate stays whole; no Reset exemption (F-9's analysis).
+
+**THE E6 SWEEP (her ask: "anywhere else we need to update because of E6?") — the architect's candidates, each for
+unit 2 or her bundle, none built autonomously beyond the ruled sentence:**
+- **The heal, generalized (PROVISIONAL P-VX529-4):** ANY synced library missing its passphrase lock (join-by-words
+  born, or the words arm's window) re-makes it at any moment a typed passphrase verifies against the vault — the
+  vault-road open (R-529-1's act has the secret in hand) and the key doors. NEVER the check door (its ruled contract:
+  "checking changes nothing"). This is R-529-5's own "re-made next time a passphrase is typed here" applied to the
+  whole class; flagged provisional because join-born E6 predates this run.
+- **The lobby's E6 sentence (unit 2):** the key file is readable pre-unlock, so a typed passphrase against a file
+  with NO passphrase lock can say so instead of the misleading "doesn't open this library" — draft: *"This library
+  doesn't have a passphrase lock of its own — it opens with your twelve words."* (offline face; online the vault road
+  simply opens it).
+- **The check door's E6 wording (her bundle):** the fourth answer's E6 variant could explain rather than just refuse.
+- **The join's words moment (her bundle):** when a join by words lands E6, one line saying the same window.
+- **The guide:** one E6 line for the protection chapter — rides VX-379 (already open, Pre-launch).
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
