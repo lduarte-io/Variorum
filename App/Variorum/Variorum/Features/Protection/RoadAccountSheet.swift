@@ -242,6 +242,15 @@ struct RoadAccountConfirmSheet: View {
                 Text(line)
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
+                // VX-510 ladder round 2, F-R2-2: a settle past the bound freezes the PROGRESS words as the outcome
+                // (F-R1-1's honest rare face) — the close note stays with them, so that face still says the road
+                // forward (the sync row finishes the story).
+                if line == ProtectionWords.firstRoundProgress {
+                    Text(ProtectionWords.firstRoundCloseNote)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             if let cause = model.roundErrorCause {
                 ErrorCauseNote(error: cause)
