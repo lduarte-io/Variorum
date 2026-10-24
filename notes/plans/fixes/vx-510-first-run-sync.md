@@ -1923,7 +1923,30 @@ every file the run added). Commits say `Part of VX-517`; NO trailers of any kind
 
 ### UNIT B4 — LIVE STATUS (the implementer owns this section)
 
-*(NOT STARTED.)*
+**NOT DONE BY THIS SESSION (first, as the contract asks):** *(kept current per piece — PENDING until the close.)* No
+`xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact, no real-keychain run
+(the run's traps) — the real-keychain and Mac-hosted suites run in the orchestrator's closing stage batch. No line in
+`Sources/VariorumCore/Sync/`; no change to the custody record's shape or to any keychain item's name.
+
+*Implementer session B4 — Opus 5.5, xhigh. Pre-fix tree = `9652b493a` (unit B3's product files, `2e3d335d8`, + record
+edits). Every claim not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE (rules
+  15–16, 9, 11–12, 20); `notes/SurfaceContracts.md`'s protection bullet whole; `notes/SessionResiliencyProtocol.md`; this file
+  WHOLE (D-B8 is the charter; UNIT B2 — LIVE STATUS Piece 3, T-B5-1…4, the trace; units A/B1/B2/B3 LIVE STATUS for the harness
+  recipe and seams); the code: `KeychainSyncKeysLeaf`, `KeychainCustodyLeaf`, `ProtectionKeychain`, `ProtectionSystem`,
+  `AppBootstrap` (the leaf's mint, :183), `NewRoadSyncKeyProvider`, `ProtectionOpenRoad`'s two loads, `ProtectionFactsGatherer`'s
+  sync-keys fact; the core's `CommonSteps`, `AccountActs`, `KeyDoors`, `PlanRunner`, `Follow`, `LeaveCastle`, `EnterCastle`,
+  `Copies` (make-mine's hold), `Leaves`, `Executor.readVault`, `Assess`'s one sync-keys fault, `Names`; the test worlds
+  (`ExecutorWorld`, `ExecutorFixtures`, the scenario `World`'s keychain leaves, the app's `PlantedSyncKeysLeaf`,
+  `ThrowawayScope`), `KeychainLeavesTests`, B2's `TypedSecretNeverPressesTests`: DONE (this commit).
+- **Piece 0** — the harness + baselines: NOT STARTED.
+- **Piece 1** — the pins, committed RED on the pre-fix tree: NOT STARTED.
+- **Piece 2** — D-B8 (a), the forgets and drops BY NAME: NOT STARTED.
+- **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: NOT STARTED.
+- **Piece 4** — the behavioral reverts (named before any run): NOT STARTED.
+- **Piece 5** — evidence (harness whole, the core protection set debug + release, Mac + iOS build-for-testing, THE MAC-SUITE
+  LIST, THE WALK): NOT STARTED.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
