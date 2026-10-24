@@ -2858,7 +2858,57 @@ finding FIRST (the cross-model flow — a dispute returns to the reviewer for th
 
 ### UNIT L1 — LIVE STATUS (the implementer owns this section)
 
-*(skeleton — the implementer writes from its first commit)*
+**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING until the close — the Mac-target runs of every suite in
+THE MAC-SUITE LIST (compiled by build-for-testing only; they run in the closing stage batch); no walk (no face changed
+beyond one sheet line's words in a race arm). No `xcodebuild test`, no stage, no app launch, no store/server/production
+contact, no subagents. No line in `Sources/VariorumCore/Sync/` (the seam below is app-side: a protocol over the scheduler's
+EXISTING public API, conformed on the app's side).
+
+*Implementer session L1 — Opus 5.5, xhigh. Pre-fix tree = `ca1ec1381`. Every claim not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md`;
+  this file's HER RULINGS, THE TRACE, UNIT A — THE BRIEF, units A/B1/B2/B3/B4 LIVE STATUS (the harness recipe), ENVIRONMENT
+  TRAPS, THE SANITY CHECK, THE LADDER — ROUND 1 and this unit's brief; the code (`SyncSession` whole, `SyncScheduler` read
+  only — `trigger`/`awaitIdle`/`status`/`runLoop`/`runOneRound`, `RoadAccountModel` whole, `SyncStatusViews`' face + line,
+  `RoadAccountSheet`'s round face, `ProtectionSecretCheck` whole, `RoadSecretCheckModel`, `first-run-walk.sh` whole,
+  `prod-confirm-test-user.sh`); the suites `FirstRoundConfirmTests`, `FirstRoundRoadTests`, `SecretCheckRoadTests`: DONE (this
+  commit).
+- **AGREE / DISPUTE (stated before any fix — the cross-model flow):**
+  - **F-R1-1 — AGREE.** Traced: `firstRoundLine(.ran(s))` with `s.isSyncing` → `rowFace(s)` → `SyncRowFace.face(…isSyncing:
+    true…)` returns `.syncing` before any error arm (configured, signed in) → not `.idle` → `firstRoundBlocked(SyncStatusRow.line
+    (for: .syncing))` = "Sync hasn't run yet: Syncing…." — deterministic at the model. Reachability: `roundNow` reads
+    `scheduler.status` in a SEPARATE actor hop after `awaitIdle()` resumes it; the idle waiters resume inside `runLoop` after
+    `running = false`, so a `trigger()` serviced in that gap (the settle's `Task { await scheduler.trigger() }`, the
+    become-active hook, Sync now) starts a fresh loop whose `runOneRound` sets `isSyncing = true` — read by `roundNow` when its
+    status hop is serviced after the new loop's first job (e.g. the main actor busy when the waiter resumed). Narrow, real, and
+    frozen: `roundCameBack` sets `.done` once and the sheet never re-reads. MINOR stands. A re-await is never a spin: a status
+    reading syncing implies `running` (isSyncing is set only inside `runOneRound`, inside the loop), so `awaitIdle` waits for
+    that loop's end.
+  - **F-R1-4 — AGREE.** `check(…, typed: "")` answers `.doesNotOpen(.passphrase, opensAccount: false)` — "That passphrase
+    doesn't open this library." about nothing typed; unreachable through the sheet (`canSubmit` refuses empty). The refusal
+    built: `.refused(ProtectionWords.checkSecretsLead)` — the sheet's own ask ("Type your passphrase or your twelve words to
+    check them. …", already in her P-VX510-B3-1 bundle — no new words).
+  - **F-R1-5 — AGREE, with one sharpening found while tracing.** P3 splices the account's email (re-read from the file) into
+    its SELECT with no shape check. The sibling's form (`printf '%s' "$EMAIL" | grep -Eq '^…$'`) is LINE-WISE: a value with
+    a newline passes when its first line is plain (probed in scratch: `a+vxtest-std@x.test\n'; select 1; --` → grep PASS; zsh's
+    native `[[ $e =~ $re ]]` → refuse). So G2 takes the sibling's REGEX with zsh's whole-string match (one function,
+    `plain_address`, also re-checked at P3's splice — the file is re-read there); `--self-test` gains the malformed-address
+    cases (a quote, uppercase, a newline). **O-L1-1 (an observation, NOT mine — the sibling is outside this unit):**
+    `Tools/prod-confirm-test-user.sh`'s own guard has the same line-wise hole, and its allowlist check (`grep -Fq " $EMAIL "`)
+    reads a multi-line pattern as several patterns — a crafted multi-line argument would pass both and splice its second line
+    into the UPDATE. A ticket candidate for the orchestrator (the same one-function fix).
+- **Piece 0** — the harness: PENDING (B4's `vx510b4-harness` survived in its session's scratchpad — copied whole but its build
+  products to this session's `vx510l1-harness`, the SwiftPM checkouts carried; 90 source symlinks, 84 test files).
+- **Piece 1** — the pins, committed RED: NOT-STARTED — F-R1-1's model pin (compiles on the old tree); THE SEAM, behavior-neutral
+  (`FirstRoundScheduling` — the scheduler's existing `trigger`/`awaitIdle`/`status`, conformed app-side — and
+  `SyncSession.runRound(on:)` doing exactly today's trigger → idle → one read; `roundNow` calls it) + the settle pins over a
+  scripted scheduler (red on that neutral seam); F-R1-4's guard assertion; F-R1-5's self-test cases.
+- **Piece 2** — F-R1-1 fix (the outcome seam's bounded re-await + the model belt): NOT-STARTED.
+- **Piece 3** — F-R1-4 fix (one arm): NOT-STARTED.
+- **Piece 4** — F-R1-5 fix (G2 + P3's `plain_address`; `zsh -n`; the self-test): NOT-STARTED.
+- **Piece 5** — the behavioral reverts, named before any runs: NOT-STARTED.
+- **Piece 6** — evidence (the harness whole, Mac + iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`, THE
+  MAC-SUITE LIST): NOT-STARTED.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
