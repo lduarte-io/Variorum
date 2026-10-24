@@ -153,6 +153,16 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
         (door == .turnOnSync || door == .moveToSignedInAccount) && !rekeys
     }
 
+    /// VX-510 D-A2 — the act JOINS an account that already syncs (a join, Move) rather than handing the library's pair up
+    /// (the set-up): the first round's success line says which.
+    var joinsAnAccount: Bool {
+        switch door {
+        case .moveToSignedInAccount: return true
+        case .turnOnSync: return spec.join.map { $0 != .setsUpInLibrarysMode } ?? false
+        case .stopSyncingHere, .deleteAccountHere, .thisMacOnly, .follow: return false
+        }
+    }
+
     /// The receipt once the act landed: the follow's Done (VX-107 — its other-device sentence), a join's (the posture said
     /// where it changed), else the door's.
     var receipt: String {

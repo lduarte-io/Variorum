@@ -427,8 +427,40 @@ first draft of each built).
   with 1 issue`** — Piece 1's VX-498 pin now GREEN (`vx498_aSetUpRunsItsFirstRoundWithNoRelaunch` ✔); every new pin ✔; the
   one ✘ is Piece 1's VX-507 pin (`vx507_theSetUpsSheetStaysAfterTheActLands` — the sheet still goes; Piece 3's). The
   model-level pins' red is shown by Piece 5's reverts (they need the new seam to compile).
-- **Piece 3** — D-A2 (VX-507): the confirm's first-round phase (progress → outcome in the row's own sentence; Done never
-  cancels the round; no road → finishes as today): NOT STARTED.
+- **Piece 3** — D-A2 (VX-507): DONE (this commit). `Shared/Protection/RoadAccountModel.swift`: the confirm's
+  `round: FirstRoundPhase?` (`running` → `done(outcome)`), set the moment an act that owes a first round lands; with a round
+  the sheet no longer goes at `.made` (the act's receipt and the pane's re-read land then, once) — nor when the words moment
+  closes (it turns to the round); `done()` (the one door, always open; never cancels the round; `cancel()` — a window
+  closing under the round phase — is Done, the act's landing, never "she left"); `roundLine` / `roundErrorCause`; the pure
+  `firstRoundLine(_:joins:)` (P-VX510-1's words; the blocked line = "Sync hasn't run yet: ‹`SyncStatusRow.line`›.") and
+  `rowFace(_:)` (the row's own classification). `RoadAccountFaces.swift`: `RoadAccountDoorOpen.joinsAnAccount` (join or Move
+  → the join's success line). `ProtectionWords.swift`: the VX-510 section (P-VX510-1's lines; `firstRoundHeld`; `joinSyncDoor`
+  for Piece 4). `Shared/SyncStatusViews.swift`: **ONE PRESENTATION SOURCE** — `SyncStatusRow.line(for:lastSuccessAt:)` returns
+  each face's line, and the row now renders every line from it (render-identical: the same strings, the same styles —
+  `lastSyncLabel` folded into its idle arm). `Variorum/Features/Protection/RoadAccountSheet.swift` (Mac-only — compiles at
+  Piece 7, PENDING): the round phase face (dots + progress + the close note; then the line, an error face's
+  `ErrorCauseNote` beneath as the row shows it; Done as the default action); `interactiveDismissDisabled` unchanged (a
+  pinned string), so a dismissal in the round phase IS Done. Pins (new seam — red by Piece 5's reverts):
+  `FirstRoundConfirmTests` + `theSheetStaysShowingTheRoundsProgressThenItsOutcome`, `doneClosesTheSheetAndNeverCancelsTheRound`
+  (incl. the host's dismissal), `theRoundPhaseFollowsTheWordsMoment`, `withNoRoadTheSheetGoesAtTheLandingAsBefore`,
+  `eachOutcomeSaysTheRowsOwnSentence` (success set-up/join, offline, keys, account gate, lockstep, replaced keys, a server
+  refusal + its cause, stalled, held, not configured); `FirstRoundAfterTheActTests` + `vx507_doneClosesTheSheetAndTheRoundGoesOn`
+  (the round PARKED at the server, Done, the sheet gone, then the round lands — end to end) and
+  `vx507_theSheetSaysTheSetUpsFirstRoundLanded`. **The harness, `--filter "FirstRoundConfirmTests|FirstRoundRoadTests|
+  FirstRoundAfterTheActTests|RoadAccountModelTests|RoadJoinFollowModelTests|SyncLockedRowTests|SyncStalledRowTests"`: `✔ Test
+  run with 39 tests in 7 suites passed`** — Piece 1's VX-507 pin now GREEN. **Machinery (recorded, not product):** one run of
+  that filter exited SIGSEGV AFTER every test passed (1 of 5 runs; the crash report: `sqlcipher_extra_shutdown` at `exit()`
+  racing a finishing task's task-local `DependencyValues` releasing the test library's `DatabasePool` — the suite ran last and
+  its confirm's round was still unwinding). The new worlds now quiesce before their dependencies go (`FirstRoundWorld.quiesce`
+  — await a standing confirm's round, stop the services, a 200 ms unwind; `FirstRoundRoadTests` the same grace); three
+  reruns clean. **PROVISIONAL edges (hers, for the bundle):** P-VX510-A1 — held has no row face, and the row's held refusal
+  says "…in the banner below", false from a sheet over Settings: built (a) "Sync is waiting since the restore — press Resume
+  Sync in the main window's banner" (the hold copy's own `restoreHoldRefusal` idiom) · (b) the row's sentence verbatim.
+  P-VX510-A2 — a STALLED first round (clean, but the pull held at a straggler) reads the blocked form ("Sync hasn't run yet:
+  Sync incomplete — some changes haven't arrived yet.") though a round did run: (a, built) the blocked form, the row's
+  sentence · (b) a third lead for "ran but incomplete". P-VX510-A3 — not configured reads the row's signed-in no-chain line
+  ("Sync is off") — true for F-5's failed owner adoption; on a DEV store without the walk's lift the row says "Sync off (dev
+  store)" (Debug-only drift, accepted).
 - **Piece 4** — D-A3 (VX-506): the unjoined row's not-yet face (the record names no account) with the same Protection…
   door; the join arm's own door label: NOT STARTED.
 - **Piece 5** — the behavioral reverts (named here BEFORE any runs): NOT STARTED. No revert is in flight.

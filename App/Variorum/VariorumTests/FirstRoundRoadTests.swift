@@ -80,6 +80,9 @@ struct FirstRoundRoadTests {
             $0.ownerIdentity = OwnerIdentity { "owner-510" }
         } operation: { @MainActor in
             try await body(db)
+            // Every retired chain's cancelled tasks hold `db` in their task locals: a moment to unwind before the process
+            // could exit under one (`FirstRoundWorld.quiesce`'s reason).
+            try? await Task.sleep(for: .milliseconds(200))
         }
     }
 

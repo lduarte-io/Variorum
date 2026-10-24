@@ -76,6 +76,11 @@ final class RoadAccountConfirmModel: Identifiable {
     var gate: GateStyle
     /// VX-308 U2 — the words moment standing after a join (nil: none).
     private(set) var moment: RoadJoinWordsMoment?
+    /// **VX-510 D-A2 — the act's FIRST ROUND, confirmed in its own sheet (VX-507)**: set the moment an act that owes one
+    /// lands (`running`), its outcome when the round comes back (`done`). The sheet shows it once any words moment has
+    /// closed, and stays until her Done — which never cancels the round. nil: no first round here (none owed, no road —
+    /// the confirm finishes exactly as before).
+    private(set) var round: FirstRoundPhase?
 
     @ObservationIgnored private let act: (RoadAccountRequest) async -> RoadAccountPress
     /// VX-308 U2 — the act LANDED while the sheet stays for the words moment (its receipt, the pane's re-read).
@@ -135,7 +140,7 @@ final class RoadAccountConfirmModel: Identifiable {
     }
 
     func submit(passphrase: String = "", again: String = "", words wordsText: String = "") async {
-        guard moment == nil, canSubmit(passphrase: passphrase, again: again, words: wordsText) else { return }
+        guard moment == nil, round == nil, canSubmit(passphrase: passphrase, again: again, words: wordsText) else { return }
         var typedWords: [String]?
         // VX-308 U2: one secret (rule 14) — the words, when typed, checked for shape like any.
         let oneSecretWords = door.ask == .oneSecret && !WordsInput.words(from: wordsText).isEmpty
@@ -180,12 +185,23 @@ final class RoadAccountConfirmModel: Identifiable {
         switch press {
         case .made(_, let wordsReplaced):
             // VX-510 D-A1 (VX-498): the act landed on the open session — its first round starts AT ONCE (while any words
-            // moment is read), never waiting on the sheet.
+            // moment is read), never waiting on the sheet; D-A2 (VX-507): the sheet stays to confirm it.
             if let firstRound, roundTask == nil {
-                roundTask = Task { await firstRound() }
+                round = .running
+                roundTask = Task { [weak self] in
+                    let outcome = await firstRound()
+                    self?.roundCameBack(outcome)
+                    return outcome
+                }
             }
             guard wordsReplaced, door.spec.join != nil, door.spec.join != .setsUpInLibrarysMode else {
-                finished(press)
+                guard round != nil else {
+                    finished(press)
+                    return
+                }
+                // The act landed: its receipt and the pane's re-read now; the sheet stays for the round (Done closes it).
+                landedPress = press
+                landed?(press)
                 return
             }
             // RULE 7's moment (R-U2-5): the act landed — its receipt and the pane's re-read now; the sheet stays.
@@ -215,23 +231,93 @@ final class RoadAccountConfirmModel: Identifiable {
         await look.open()
     }
 
-    /// The moment closed (past the look's warning, or the notice's OK): the words forgotten with the look; the sheet goes.
+    /// The moment closed (past the look's warning, or the notice's OK): the words forgotten with the look; the sheet goes —
+    /// or, with a first round standing (VX-510 D-A2), the sheet turns to it and stays until her Done.
     func closeMoment() {
         guard moment != nil else { return }
         moment = nil
+        guard round == nil else { return }
         finished(landedPress)
     }
 
+    /// The round came back (the sheet may already be closed — the outcome is then the status row's alone).
+    private func roundCameBack(_ outcome: FirstRoundOutcome) {
+        guard round != nil else { return }
+        round = .done(outcome)
+    }
+
+    /// **VX-510 D-A2 — Done**, the round phase's one door, always available: the sheet goes and the act's landing is
+    /// finished; the round is NOT cancelled — it keeps going, and the sync row says when it is done (a long first catch-up
+    /// never holds the sheet hostage).
+    func done() {
+        guard round != nil, moment == nil else { return }
+        finished(landedPress)
+    }
+
+    /// What the round phase says once its outcome came back (nil while it runs, or with no round): a success line, or what
+    /// blocks it in the sync row's own words (`firstRoundLine`).
+    var roundLine: String? {
+        guard case .done(let outcome)? = round else { return nil }
+        return Self.firstRoundLine(outcome, joins: door.joinsAnAccount)
+    }
+
+    /// The round's error as the row shows it under its error face (`ErrorCauseNote`'s text) — the sheet shows the same
+    /// note beneath the line; nil for every other outcome.
+    var roundErrorCause: String? {
+        guard case .done(.ran(let status))? = round, let error = status.lastError else { return nil }
+        return Self.rowFace(status).kind == .error ? error : nil
+    }
+
+    /// **VX-510 D-A2 — the outcome, in words (P-VX510-1, PROVISIONAL, hers)**: a clean round — the set-up's or the join's
+    /// success line; anything else — "Sync hasn't run yet: ‹the sync row's own sentence›." (ONE presentation source:
+    /// `SyncStatusRow.line(for:lastSuccessAt:)`, which the row renders too). Held has no row face of its own: the row's
+    /// held refusal, said for a sheet that stands over Settings (PROVISIONAL P-VX510-A1). Not configured is the row's
+    /// signed-in, no-chain face ("Sync is off" — a failed owner adoption, F-5).
+    static func firstRoundLine(_ outcome: FirstRoundOutcome, joins: Bool) -> String {
+        switch outcome {
+        case .held:
+            return ProtectionWords.firstRoundBlocked(ProtectionWords.firstRoundHeld)
+        case .notConfigured:
+            return ProtectionWords.firstRoundBlocked(SyncStatusRow.line(for: .syncOff, lastSuccessAt: nil))
+        case .ran(let status):
+            let face = rowFace(status)
+            guard face.kind != .idle else {
+                return joins ? ProtectionWords.firstRoundJoinLanded : ProtectionWords.firstRoundSetUpLanded
+            }
+            return ProtectionWords.firstRoundBlocked(SyncStatusRow.line(for: face.kind, lastSuccessAt: status.lastSuccessAt))
+        }
+    }
+
+    /// The sync row's face for a round's status — the row's own classification (configured, signed in: the act just
+    /// joined the library to the account signed in).
+    static func rowFace(_ status: SyncScheduler.Status) -> SyncRowFace {
+        SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true, isSyncing: status.isSyncing,
+            lastError: status.lastError, lastErrorIsOffline: status.lastErrorIsOffline, stalled: status.pullStalled)
+    }
+
     /// The confirm's way out — nothing written. (With the moment standing the act already landed: its way out is the
-    /// moment's close — a window closing under it closes it.)
+    /// moment's close — a window closing under it closes it. With the first round standing: Done — the round goes on.)
     func cancel() {
         guard !busy else { return }
         if moment != nil {
             closeMoment()
             return
         }
+        if round != nil {
+            done()
+            return
+        }
         finished(nil)
     }
+}
+
+/// **VX-510 D-A2** — an account act's first round as its sheet shows it.
+enum FirstRoundPhase: Equatable {
+    /// The round is running (her Done is open throughout — sync keeps going).
+    case running
+    /// It came back — confirmed, or what blocks it.
+    case done(FirstRoundOutcome)
 }
 
 // MARK: - The sign-out confirm

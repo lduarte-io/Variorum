@@ -143,6 +143,9 @@ struct RoadAccountConfirmSheet: View {
                 .font(.title3.weight(.semibold))
             if let moment = model.moment {
                 wordsMoment(moment)
+            } else if let round = model.round {
+                // VX-510 D-A2 (VX-507): the act landed — the sheet confirms its first round, or says what blocks it.
+                firstRound(round)
             } else {
                 confirm
             }
@@ -213,6 +216,42 @@ struct RoadAccountConfirmSheet: View {
                 Spacer()
                 Button(ProtectionWords.joinWordsMomentOK) { model.closeMoment() }
             }
+        }
+    }
+
+    /// VX-510 D-A2 — THE FIRST ROUND (VX-507): while it runs, the progress and why closing is fine; when it comes back, the
+    /// success line or what blocks it in the sync row's own words (an error face's cause note beneath, as the row shows it).
+    /// Done — the one door, open throughout — closes the sheet and never cancels the round. Words PROVISIONAL, hers
+    /// (P-VX510-1).
+    @ViewBuilder
+    private func firstRound(_ round: FirstRoundPhase) -> some View {
+        switch round {
+        case .running:
+            HStack(spacing: 8) {
+                TravellingDotsIndicator(ink: .secondary)
+                Text(ProtectionWords.firstRoundProgress)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(ProtectionWords.firstRoundCloseNote)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        case .done:
+            if let line = model.roundLine {
+                Text(line)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if let cause = model.roundErrorCause {
+                ErrorCauseNote(error: cause)
+                    .font(.caption)
+            }
+        }
+        HStack {
+            Spacer()
+            Button(ProtectionWords.firstRoundDone) { model.done() }
+                .keyboardShortcut(.defaultAction)
         }
     }
 

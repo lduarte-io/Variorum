@@ -911,6 +911,31 @@ nonisolated enum ProtectionWords {
     /// this one button (the export notice's idiom — `exportNoticeOK`).
     static let followDoneOK = "OK"
 
+    // MARK: - VX-510 — THE ACT'S FIRST ROUND (VX-507) AND THE JOIN'S DOOR (VX-506)
+    //
+    // PROVISIONAL, HERS — the run record's OPEN ITEMS (`notes/plans/fixes/vx-510-first-run-sync.md`), the first draft of
+    // each built: P-VX510-1 (the sheet's first round), P-VX510-3 (a) (the join arm's door). The held line is the
+    // implementer's fitting of the shipped hold idiom to a sheet over Settings (PROVISIONAL P-VX510-A1, the record's
+    // LIVE STATUS).
+
+    /// P-VX510-1 — the first round running (the sheet stays; Done is open throughout).
+    static let firstRoundProgress = "Syncing your library with your account\u{2026}"
+    static let firstRoundCloseNote = "You can close this \u{2014} sync keeps going, and the bar at the bottom of the "
+        + "window says when it's done."
+    /// P-VX510-1 — the round came back clean: the set-up handed the library up; a join (or Move) brought the account in.
+    static let firstRoundSetUpLanded = "Synced. Your library is on your account now."
+    static let firstRoundJoinLanded = "Synced. Your account's writing is in this library now."
+    /// P-VX510-1 — what blocks it, in the sync row's own sentence.
+    static func firstRoundBlocked(_ rowSentence: String) -> String { "Sync hasn't run yet: \(rowSentence)." }
+    /// P-VX510-A1 — held: the row's held refusal (`LibraryOpenCopy.syncNowHeldRefusal` — "…in the banner below") said from
+    /// a sheet over Settings, so the banner is the main window's (the hold copy's own idiom, `restoreHoldRefusal`).
+    static let firstRoundHeld = "Sync is waiting since the restore \u{2014} press Resume Sync in the main window's banner"
+    /// The round phase's one door.
+    static let firstRoundDone = "Done"
+    /// P-VX510-3 (a) — Settings ▸ Protection's door over the JOIN arm (the account already syncs); the set-up arm keeps
+    /// `turnOnSyncDoor`.
+    static let joinSyncDoor = "Sync this library\u{2026}"
+
     // MARK: - VX-308 U3 — THE KEY DOORS, VX-447, F-U2-3 (rules 2, 3, 6, 7, 27; the plan's §5c)
     //
     // VX-263's ONE line is the plan's (§2's ledger and §5c: *your current secrets open everything you've made of this

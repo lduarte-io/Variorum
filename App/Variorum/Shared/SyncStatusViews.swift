@@ -503,69 +503,89 @@ struct SyncStatusRow: View {
     /// container changes nothing).
     @ViewBuilder
     private func rowLabel(for kind: SyncRowFace.Kind) -> some View {
+        // VX-510 D-A2: every line is `line(for:)`'s — the one presentation source the account act's first-round sheet
+        // says too.
+        let line = Self.line(for: kind, lastSuccessAt: sync.status.lastSuccessAt)
         switch kind {
-        case .devStore:
-            Text("Sync off (dev store)")
-                .pageCaption(pageStyle)
-        case .signedOut:
-            Text("Signed out")
-                .pageCaption(pageStyle)
-        case .syncOff:
-            Text("Sync is off")
+        case .devStore, .signedOut, .syncOff:
+            Text(line)
                 .pageCaption(pageStyle)
         case .syncing:
             // CF-15: the indicator rides BESIDE the label; the doors stay.
             ProgressView().controlSize(.small)
-            Text("Syncing…")
+            Text(line)
         case .offline:
-            Text(Self.offlineLabel)
+            Text(line)
                 .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
             pendingNote
         case .keysLocked:
             // Phase 14b (L9): nothing is lost while paused; the outbox
             // keeps everything.
-            Text(Self.lockedLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .keysReplaced:
-            Text(Self.keysReplacedLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .accountMismatch:
             // VX-314 (PROVISIONAL words): paused, naming the fix; the
             // engine's full sentence rides the hover.
-            Text(Self.accountMismatchLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .notEntitled:
             // Phase 14c (L7): SECONDARY styling, deliberately — the same
             // quiet voice as signed-out/offline, never the error red or
             // the keys orange (reads as normal).
-            Text(HostedSyncTier.rowLabel)
+            Text(line)
                 .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .stalled:
             // Row 12 (17d P31): warning-styled, never the error red — the
             // round itself was clean; what's honest is that new changes
             // are held up.
-            Text(Self.stalledLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
             pendingNote
         case .appOutOfDate:
             // R-13r-13: calm — the quiet caption (the notEntitled register),
             // never the error red or the keys orange. The engine's own
             // sentence rides the hover, as every paused state's does.
-            Text(SyncRowFace.appOutOfDateLabel)
+            Text(line)
                 .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .error:
-            Text("Sync error")
+            Text(line)
                 .pageCaptionError(pageStyle)
         case .idle:
-            Text(lastSyncLabel)
+            Text(line)
                 .pageCaption(pageStyle)
             pendingNote
+        }
+    }
+
+    /// **VX-510 D-A2 — THE ROW'S LINE, in words: ONE presentation source.** The row renders exactly this for each face,
+    /// and an account act's first-round sheet says it for what blocks the round (never re-typed there). `lastSuccessAt`
+    /// is the idle line's stamp.
+    static func line(for kind: SyncRowFace.Kind, lastSuccessAt: Date?) -> String {
+        switch kind {
+        case .devStore: return "Sync off (dev store)"
+        case .signedOut: return "Signed out"
+        case .syncOff: return "Sync is off"
+        case .syncing: return "Syncing\u{2026}"
+        case .offline: return offlineLabel
+        case .keysLocked: return lockedLabel
+        case .keysReplaced: return keysReplacedLabel
+        case .accountMismatch: return accountMismatchLabel
+        case .notEntitled: return HostedSyncTier.rowLabel
+        case .stalled: return stalledLabel
+        case .appOutOfDate: return SyncRowFace.appOutOfDateLabel
+        case .error: return "Sync error"
+        case .idle:
+            guard let lastSuccessAt else { return "Not synced yet" }
+            return "Synced \(lastSuccessAt.formatted(date: .omitted, time: .shortened))"
         }
     }
 
@@ -628,11 +648,6 @@ struct SyncStatusRow: View {
     /// different account than the signed-in one; the door beside it opens
     /// the Account tab (sign in, or the Move road).
     static let accountMismatchLabel = "Sync paused — this library belongs to a different account"
-
-    private var lastSyncLabel: String {
-        guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }
-        return "Synced \(last.formatted(date: .omitted, time: .shortened))"
-    }
 
     /// The offline presentation's one string (Step A0's row letter),
     /// exposed for the presented-state pin.

@@ -6,6 +6,11 @@
 //      the same posture, Move in the same posture — ask the composition's first-round road ONCE, at `.made`. A leave never
 //      asks (sync stops there); a re-keying act never asks (it lands through the reopen, whose fresh services run their
 //      own round — F-6); a refused or changed press never asks. With no road (the phone until VM-8) nothing is asked.
+//    - VX-507 (D-A2): the sheet does not close on its own at `.made` — after any words moment it shows the round's progress,
+//      then its outcome: a success line, or what blocks it in the SYNC ROW's own sentence (one presentation source,
+//      `SyncStatusRow.line(for:lastSuccessAt:)`), per status class. Done — always open — closes it and never cancels the
+//      round; a window closing under it is Done. With no road the sheet finishes exactly as before. Words PROVISIONAL, hers
+//      (P-VX510-1).
 //
 
 import Foundation
@@ -36,6 +41,32 @@ final class PlantedFirstRound {
     }
 }
 
+/// A first-round road that parks until `release()` — the round provably running while the sheet stands.
+@MainActor
+final class GatedFirstRound {
+    private(set) var asks = 0
+    private var waiter: CheckedContinuation<Void, Never>?
+    /// Whether the asking task was cancelled when the round came back (Done must never cancel it).
+    private(set) var cancelledAtResume: Bool?
+    var outcome: FirstRoundOutcome = .ran(PlantedFirstRound.clean)
+
+    var road: @MainActor () async -> FirstRoundOutcome {
+        { [self] in
+            asks += 1
+            await withCheckedContinuation { waiter = $0 }
+            cancelledAtResume = Task.isCancelled
+            return outcome
+        }
+    }
+
+    /// Waits for the round to be asked and parked, then lets it come back.
+    func release() async {
+        for _ in 0..<10_000 where waiter == nil { await Task.yield() }
+        waiter?.resume()
+        waiter = nil
+    }
+}
+
 @Suite("VX-510 unit A — the account confirm's first round (planted roads)")
 @MainActor
 struct FirstRoundConfirmTests {
@@ -56,6 +87,14 @@ struct FirstRoundConfirmTests {
         _ door: RoadAccountDoor, _ open: RoadAccountDoorOpen, press: RoadAccountPress = .made(receipt: "landed"),
         round: PlantedFirstRound?
     ) async throws -> RoadAccountConfirmModel {
+        try await self.press(door, open, press: press, road: round?.road).confirm
+    }
+
+    /// …with any road, returning the section, its planted roads and the confirm.
+    private func press(
+        _ door: RoadAccountDoor, _ open: RoadAccountDoorOpen, press: RoadAccountPress = .made(receipt: "landed"),
+        road: (@MainActor () async -> FirstRoundOutcome)?, words typedWords: String? = nil
+    ) async throws -> (model: RoadAccountModel, planted: PlantedAccountRoads, confirm: RoadAccountConfirmModel) {
         let planted = PlantedAccountRoads()
         planted.press = press
         var faces = PlantedAccountRoads.faces(turnOnSync: .hidden)
@@ -74,7 +113,7 @@ struct FirstRoundConfirmTests {
         }
         planted.faces = faces
         let model = RoadAccountModel(roads: planted.roads)
-        model.firstRound = round?.road
+        model.firstRound = road
         await model.refresh()
         model.open(door)
         let confirm = try #require(model.confirm, "\(door)'s confirm opens")
@@ -82,14 +121,18 @@ struct FirstRoundConfirmTests {
         case .passphraseAndWords:
             await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         case .oneSecret:
-            await confirm.submit(passphrase: "the account's passphrase")
+            if let typedWords {
+                await confirm.submit(words: typedWords)
+            } else {
+                await confirm.submit(passphrase: "the account's passphrase")
+            }
         case .passphrase:
             await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase")
         case .nothing:
             await confirm.submit()
         }
         #expect(planted.requests.count == 1, "\(door) pressed once")
-        return confirm
+        return (model, planted, confirm)
     }
 
     /// **VX-498, THE MODEL'S CALL** — the set-up, a same-posture join and a same-posture Move each ask the first-round
@@ -141,5 +184,135 @@ struct FirstRoundConfirmTests {
             let confirm = try await self.press(.turnOnSync, PlantedAccountRoads.setUp(), press: press, round: round)
             #expect(await confirm.awaitFirstRound() == nil && round.asks == 0, "\(press)")
         }
+    }
+
+    // MARK: - VX-507 (D-A2): the sheet confirms its first round
+
+    /// **VX-507 — THE SHEET STAYS** at `.made`, showing the round's progress while it runs (Done open throughout), then its
+    /// outcome; the act's receipt is spoken ONCE, at the landing — Done says nothing more.
+    @Test func theSheetStaysShowingTheRoundsProgressThenItsOutcome() async throws {
+        let gated = GatedFirstRound()
+        let (model, planted, confirm) = try await press(.turnOnSync, PlantedAccountRoads.setUp(), road: gated.road)
+        #expect(model.confirm === confirm, "the sheet stays after the act landed")
+        #expect(confirm.round == .running && confirm.roundLine == nil, "the progress while the round runs")
+        #expect(planted.spoken == ["landed"], "the act's receipt, spoken at the landing")
+        await gated.release()
+        #expect(await confirm.awaitFirstRound() == .ran(PlantedFirstRound.clean))
+        #expect(confirm.round == .done(.ran(PlantedFirstRound.clean)))
+        #expect(confirm.roundLine == ProtectionWords.firstRoundSetUpLanded)
+        #expect(model.confirm === confirm, "the outcome stands until Done")
+        confirm.done()
+        #expect(model.confirm == nil, "Done closes it")
+        for _ in 0..<10_000 where planted.landings == 0 { await Task.yield() }
+        #expect(planted.spoken == ["landed"] && planted.landings == 1, "landed once — Done speaks nothing more")
+    }
+
+    /// **VX-507 — DONE NEVER CANCELS THE ROUND**: Done while the round runs closes the sheet at once; the round comes back
+    /// afterwards, never cancelled; a window closing under the round phase (the host's dismissal → `cancel`) is Done —
+    /// the act's landing, never "she left".
+    @Test func doneClosesTheSheetAndNeverCancelsTheRound() async throws {
+        let gated = GatedFirstRound()
+        let (model, _, confirm) = try await press(.turnOnSync, PlantedAccountRoads.setUp(), road: gated.road)
+        #expect(confirm.round == .running)
+        confirm.done()
+        #expect(model.confirm == nil, "Done closed the sheet while the round ran")
+        await gated.release()
+        #expect(await confirm.awaitFirstRound() == .ran(PlantedFirstRound.clean), "the round came back")
+        #expect(gated.cancelledAtResume == false, "never cancelled")
+
+        var finished: [RoadAccountPress?] = []
+        let closing = GatedFirstRound()
+        let hosted = RoadAccountConfirmModel(
+            door: PlantedAccountRoads.setUp(), act: { _ in .made(receipt: "landed") }, firstRound: closing.road,
+            finished: { finished.append($0) })
+        await hosted.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
+        #expect(hosted.round == .running && finished.isEmpty)
+        hosted.cancel()
+        #expect(finished == [.made(receipt: "landed")], "a window closing under the round is Done — the act landed")
+        await closing.release()
+        #expect(await hosted.awaitFirstRound() != nil && closing.cancelledAtResume == false)
+    }
+
+    /// **VX-507 — after the WORDS MOMENT**: a join whose words were replaced shows rule 7's moment first (the round already
+    /// running beneath it); closing the moment turns the sheet to the round — it no longer goes with the moment.
+    @Test func theRoundPhaseFollowsTheWordsMoment() async throws {
+        let gated = GatedFirstRound()
+        let (model, _, confirm) = try await press(
+            .turnOnSync, PlantedJoin.join(.sameMode), press: .made(receipt: "joined", wordsReplaced: true),
+            road: gated.road)
+        guard case .notShown? = confirm.moment else {
+            Issue.record("the passphrase-typed join's moment stands first")
+            return
+        }
+        #expect(confirm.round == .running, "the round started at the landing, beneath the moment")
+        confirm.done()
+        #expect(model.confirm === confirm, "Done waits for the moment — never past her words")
+        confirm.closeMoment()
+        #expect(model.confirm === confirm && confirm.moment == nil && confirm.round != nil, "the sheet turns to the round")
+        await gated.release()
+        _ = await confirm.awaitFirstRound()
+        #expect(confirm.roundLine == ProtectionWords.firstRoundJoinLanded, "a join's success line")
+        confirm.done()
+        #expect(model.confirm == nil)
+    }
+
+    /// With NO road (the phone until VM-8; a test world without one) the sheet finishes exactly as before: gone at `.made`.
+    @Test func withNoRoadTheSheetGoesAtTheLandingAsBefore() async throws {
+        let (model, planted, confirm) = try await press(.turnOnSync, PlantedAccountRoads.setUp(), road: nil)
+        #expect(model.confirm == nil && confirm.round == nil, "no round phase")
+        for _ in 0..<10_000 where planted.landings == 0 { await Task.yield() }
+        #expect(planted.spoken == ["landed"] && planted.landings == 1)
+    }
+
+    /// **VX-507 — THE OUTCOME PER STATUS CLASS, in the sync row's own words** (one presentation source): a clean round is the
+    /// set-up's or the join's success line; offline, the keys, the account gate, the lockstep, replaced keys, a server
+    /// refusal (its cause beneath, as the row shows it), a stalled pull, held and not configured each read
+    /// "Sync hasn't run yet: ‹the row's sentence›." (P-VX510-1; held P-VX510-A1).
+    @Test func eachOutcomeSaysTheRowsOwnSentence() async throws {
+        func ran(_ error: String?, offline: Bool = false, stalled: Bool = false, success: Bool = false) -> FirstRoundOutcome {
+            var status = SyncScheduler.Status()
+            status.lastError = error
+            status.lastErrorIsOffline = offline
+            status.pullStalled = stalled
+            status.roundsCompleted = 1
+            if success || error == nil { status.lastSuccessAt = Date(timeIntervalSince1970: 1_782_864_000) }
+            return .ran(status)
+        }
+        func line(_ outcome: FirstRoundOutcome, joins: Bool = false) -> String {
+            RoadAccountConfirmModel.firstRoundLine(outcome, joins: joins)
+        }
+        func blocked(_ kind: SyncRowFace.Kind) -> String {
+            "Sync hasn't run yet: " + SyncStatusRow.line(for: kind, lastSuccessAt: nil) + "."
+        }
+        #expect(line(ran(nil)) == "Synced. Your library is on your account now.")
+        #expect(line(ran(nil), joins: true) == "Synced. Your account's writing is in this library now.")
+        let offline = String(describing: URLError(.notConnectedToInternet))
+        #expect(line(ran(offline, offline: true)) == "Sync hasn't run yet: Waiting to sync (offline).")
+        #expect(line(ran(String(describing: SyncError.encryptionKeysUnavailable))) == blocked(.keysLocked))
+        #expect(line(ran(String(describing: SyncError.encryptionKeysUnavailable)))
+            == "Sync hasn't run yet: Sync locked \u{2014} this \(ProtectionCopy.deviceName) hasn't unlocked your account's sync keys.")
+        #expect(line(ran(String(describing: SyncError.accountMismatch(bound: "a", signedIn: "b")))) == blocked(.accountMismatch))
+        #expect(line(ran(String(describing: SyncError.schemaLockstepMismatch(client: 12, server: 13))))
+            == blocked(.appOutOfDate))
+        #expect(line(ran(String(describing: SyncError.encryptionKeysReplaced))) == blocked(.keysReplaced))
+        #expect(line(ran("HTTP 500 — the server refused")) == "Sync hasn't run yet: Sync error.")
+        #expect(line(ran(nil, stalled: true)) == blocked(.stalled))
+        #expect(line(.held)
+            == "Sync hasn't run yet: Sync is waiting since the restore \u{2014} press Resume Sync in the main window's banner.")
+        #expect(line(.notConfigured) == "Sync hasn't run yet: Sync is off.")
+
+        // A server refusal's cause stands beneath the line, as the row shows it under its error face; no other class has one.
+        let refused = RoadAccountConfirmModel(
+            door: PlantedAccountRoads.setUp(), act: { _ in .made(receipt: nil) },
+            firstRound: { ran("HTTP 500 — the server refused") }, finished: { _ in })
+        await refused.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
+        _ = await refused.awaitFirstRound()
+        #expect(refused.roundErrorCause == "HTTP 500 — the server refused")
+        let locked = RoadAccountConfirmModel(
+            door: PlantedAccountRoads.setUp(), act: { _ in .made(receipt: nil) },
+            firstRound: { ran(String(describing: SyncError.encryptionKeysUnavailable)) }, finished: { _ in })
+        await locked.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
+        _ = await locked.awaitFirstRound()
+        #expect(locked.roundErrorCause == nil, "the locked face carries its cause in its line")
     }
 }

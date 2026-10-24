@@ -33,6 +33,37 @@ actor FirstRoundServer: SyncTransport {
     private(set) var pushes = 0
     private(set) var enrollments = 0
     private var seq: Int64 = 0
+    /// Held: the next pulls park at the gate until `open()` — a round provably in flight at the server.
+    private var held = false
+    private var gateWaiters: [CheckedContinuation<Void, Never>] = []
+    private var arrivalWaiters: [CheckedContinuation<Void, Never>] = []
+    private var parked = false
+
+    func hold() { held = true }
+
+    func open() {
+        held = false
+        let waiters = gateWaiters
+        gateWaiters.removeAll()
+        for waiter in waiters { waiter.resume() }
+    }
+
+    func awaitParked() async {
+        if parked { return }
+        await withCheckedContinuation { arrivalWaiters.append($0) }
+    }
+
+    private func pass() async {
+        guard held else { return }
+        parked = true
+        await withCheckedContinuation { continuation in
+            gateWaiters.append(continuation)
+            let arrivals = arrivalWaiters
+            arrivalWaiters.removeAll()
+            for arrival in arrivals { arrival.resume() }
+        }
+        parked = false
+    }
 
     func fetchChallenges(_ count: Int) async throws -> [String] {
         (0..<max(count, 1)).map { _ in Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString() }
@@ -49,6 +80,7 @@ actor FirstRoundServer: SyncTransport {
         -> [SyncPulledRow]
     {
         pulls += 1
+        await pass()
         return []
     }
     func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
@@ -159,6 +191,16 @@ final class FirstRoundWorld {
         return confirm
     }
 
+    /// The world's end, quiet: a first round a standing confirm started is awaited, the services stop, and the retired
+    /// chain's cancelled tasks are given a moment to unwind — every one of them holds the open library's pool in its task
+    /// locals, and a test process exiting under a task still releasing that pool crashes SQLCipher's shutdown (seen once in
+    /// the harness, the suite running last: `sqlcipher_extra_shutdown` racing `DatabasePool.deinit`).
+    func quiesce() async {
+        if let confirm = bootstrap.roadAccount?.confirm { _ = await confirm.awaitFirstRound() }
+        services?.stop()
+        try? await Task.sleep(for: .milliseconds(200))
+    }
+
     /// Polls `condition` on the main actor for at most `seconds`.
     static func settle(seconds: Double, until condition: @MainActor () async -> Bool) async {
         let deadline = Date().addingTimeInterval(seconds)
@@ -185,7 +227,7 @@ final class FirstRoundWorld {
                 $0.database = database
             } operation: { @MainActor in
                 try await body(world)
-                world.services?.stop()
+                await world.quiesce()
             }
         }
     }
@@ -235,6 +277,55 @@ struct FirstRoundAfterTheActTests {
             #expect(world.bootstrap.roadSession?.library.record?.account == FirstRoundWorld.Account.account, "the act landed")
             #expect(confirm.refusal == nil)
             #expect(world.bootstrap.roadAccount?.confirm === confirm, "the sheet stays to confirm its first round")
+        }
+    }
+
+    /// **VX-507 — DONE NEVER CANCELS THE ROUND** (a new seam's pin — red by the record's revert): the round provably in
+    /// flight at the server, her Done closes the sheet, and the round goes on to land — the sync row then reads it.
+    @Test func vx507_doneClosesTheSheetAndTheRoundGoesOn() async throws {
+        try await FirstRoundWorld.run { world in
+            let services = try await world.composeServices()
+            try await world.settlePreActRounds(services)
+            await world.server.hold()
+            let confirm = try await world.turnOnSync()
+            #expect(confirm.round == .running, "the round runs while the sheet stands")
+            await world.server.awaitParked()  // the first round is at the server
+            confirm.done()
+            #expect(world.bootstrap.roadAccount?.confirm == nil, "Done closed the sheet")
+            #expect(services.sync.status.lastSuccessAt == nil, "…while the round was still in flight")
+            await world.server.open()
+            guard case .ran(let status)? = await confirm.awaitFirstRound() else {
+                Issue.record("the round the landing started came back")
+                return
+            }
+            #expect(status.lastError == nil && status.lastSuccessAt != nil, "it came back clean, after Done")
+            await FirstRoundWorld.settle(seconds: 5) {
+                services.sync.status.lastSuccessAt != nil && !services.sync.status.isSyncing
+            }
+            #expect(services.sync.status.lastSuccessAt != nil && services.sync.status.lastError == nil,
+                    "the round went on and landed — Done never cancelled it")
+            #expect(await world.server.pulls > 0)
+        }
+    }
+
+    /// **VX-507 — THE OUTCOME IN THE SHEET, end to end**: the round comes back clean and the set-up's success line stands
+    /// in the sheet until Done (P-VX510-1, PROVISIONAL, hers).
+    @Test func vx507_theSheetSaysTheSetUpsFirstRoundLanded() async throws {
+        try await FirstRoundWorld.run { world in
+            let services = try await world.composeServices()
+            try await world.settlePreActRounds(services)
+            let confirm = try await world.turnOnSync()
+            guard case .ran(let status)? = await confirm.awaitFirstRound() else {
+                Issue.record("the round ran")
+                return
+            }
+            #expect(status.lastError == nil && status.lastSuccessAt != nil)
+            #expect(confirm.round == .done(.ran(status)))
+            #expect(confirm.roundLine == ProtectionWords.firstRoundSetUpLanded)
+            #expect(confirm.roundLine == "Synced. Your library is on your account now.")
+            #expect(world.bootstrap.roadAccount?.confirm === confirm, "the sheet stands until Done")
+            confirm.done()
+            #expect(world.bootstrap.roadAccount?.confirm == nil)
         }
     }
 }
