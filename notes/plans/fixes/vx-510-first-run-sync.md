@@ -3167,6 +3167,29 @@ the independent re-walk.**
    commit; the attribution footer per CLAUDE.md: NONE); the STATUS banner of THIS FILE flipped to CLOSED; branch +
    worktree cleanup; build-debris tidy (every `DerivedData/vx510*` folder, the walk evidence after the merge).
 
+## THE THIRD ORCHESTRATOR'S CASTLE LEG (2026-10-24 from 06:02 MDT — an Opus session at R-510-29; she slept, then said at 06:0x: "it's just you controlling the stage - you're running alone and i'm off the pro so go for it. the dev store is live but my store isn't")
+
+**The machine state, VERIFIED (not trusted) before any act:** the stage HELD by `vx-510` (renewed 240 min at 06:05);
+ONE Variorum instance — pid 49433 at the stage checkout's `vx510walk` build, its environment carrying
+`VARIORUM_PROD_TEST_ROAD=1` + the handed list and NO walk project (`ps eww`); her `/Applications` app absent. The stage
+checkout sits at `389312534`; the PRODUCT code is byte-unchanged from the closing batch's `b3c79a191` to the branch tip
+(`git diff --stat b3c79a191..HEAD -- . ':!notes'` names only `Tools/VisualWalk/helpers/vis-ax.swift` and
+`Tools/WalkKit/first-run-walk.sh`), so the running build IS the final product. The dev store's nine files in
+`Variorum-dev-aside-vx510walk2` carry EXACTLY the recorded inodes (191598614–191598620, 194722803/194722804); the slot
+holds the fresh walk library `edf04751`; `-pre` and `-del` hold the pre-step and del-leg libraries. Production
+(`Tools/prod-read.sh`): castle standard rev 15 · 6 cursors · 4 live containers; del standard rev 1 · 1 cursor; std
+standard rev 3 · 3 cursors · 1 container — every number as the record says. Driving: the walk script's own helpers
+(author check before every act, AXPress addressed to the pid, `type-prod-test-secret castle` for every secret) plus a
+scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-scoped captures, never full-screen).
+
+- **O-RW-1 — CONFIRMED, a recompose gap (06:06):** with Settings left open across the earlier sign-out → sign-in, the
+  pane's Sync section still read its SIGNED-OUT arm ("This library doesn't sync." · "Sign in to turn on sync." ·
+  Sign in…) while the main window's row read the signed-in not-yet face ("Sync isn't on for this library yet" ·
+  Protection…). Settings closed (its close button), reopened by the row's Protection… door → the section reads the
+  SIGNED-IN arm: "This library doesn't sync." · **Sync this library…** · **Sign out…**. So the open pane's Sync section
+  does not re-read on an auth change; a reopen reads it fresh. (The cutover's "NO account/Sync section" was the same
+  staleness seen above the fold of a short window.) → a ticket at the triage (Bug, Confirmed, Castle & sync).
+
 ## HER CLOSEOUT ANSWERS (2026-10-24, at the cutover sitting — verbatim-faithful; the handoff's PENDING slots close on these)
 
 - **R-510-22 — THE RELEASE: YES, after the merge** ("Yes, release after merge"). 0.10.1 from this run's merge; the
