@@ -38,8 +38,16 @@ actor FirstRoundServer: SyncTransport {
     private var gateWaiters: [CheckedContinuation<Void, Never>] = []
     private var arrivalWaiters: [CheckedContinuation<Void, Never>] = []
     private var parked = false
+    /// VX-510 unit B1 (D-B1 — the drill's offline arm): every data call refuses as the network being down.
+    private var offline = false
 
     func hold() { held = true }
+
+    func goOffline() { offline = true }
+
+    private func reachable() throws {
+        if offline { throw URLError(.notConnectedToInternet) }
+    }
 
     func open() {
         held = false
@@ -66,10 +74,17 @@ actor FirstRoundServer: SyncTransport {
     }
 
     func fetchChallenges(_ count: Int) async throws -> [String] {
-        (0..<max(count, 1)).map { _ in Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString() }
+        try reachable()
+        return (0..<max(count, 1)).map { _ in
+            Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString()
+        }
     }
-    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws { enrollments += 1 }
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try reachable()
+        enrollments += 1
+    }
     func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
+        try reachable()
         pushes += 1
         return batch.map { row in
             seq += 1
@@ -79,11 +94,15 @@ actor FirstRoundServer: SyncTransport {
     func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws
         -> [SyncPulledRow]
     {
+        try reachable()
         pulls += 1
         await pass()
         return []
     }
-    func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
+    func schemaVersion() async throws -> Int {
+        try reachable()
+        return SyncSchema.lockstepVersion
+    }
 }
 
 /// VX-510's end-to-end world: a library created on the planted road (its twelve words in hand — the Mac's bootstrap drops a
@@ -105,6 +124,30 @@ final class FirstRoundWorld {
     private(set) var composed: [AppServices] = []
     /// VX-510 unit B1 (D-B0): the `.ready` arm's compose after a reopen, in flight (`reopensComposeFreshServices`).
     private var readyWatch: Task<Void, Never>?
+    /// VX-510 unit B1 (D-B1 — the drill's account-gate arm): the account the SERVICES' session is signed in to (the road's
+    /// sign-in is the planted account's, always). Production reads one session for both; the gate arm sets them apart.
+    var servicesSignIn = Account.account
+
+    /// VX-510 unit B1 (D-B1): the reopened ready arm's services compose settled (nothing in flight after a reopen).
+    func awaitReadyCompose() async {
+        await readyWatch?.value
+    }
+
+    /// **VX-510 unit B1 (D-B1) — Use Castle through the bootstrap's crossing** (rule 11: both secrets — the library's words
+    /// and a NEW passphrase — `gate` the choice): the door as the pane reads it, the press through the one reopening seam
+    /// (the services stopped and let go, the library re-keyed and reopened in Castle), then the reopen's ready arm composes
+    /// fresh services (`reopensComposeFreshServices` must be armed).
+    func useCastle(gate: GateStyle) async throws {
+        let roads = bootstrap.crossingRoads()
+        let faces = try #require(await roads.read(), "the pane reads the crossings")
+        let shown = try #require(faces.useCastle.openDoor, "\(faces.useCastle)")
+        let press = await roads.cross(RoadCrossingRequest(
+            door: .useCastle, shown: shown, typed: TypedSecrets(words: words, newPassphrase: Crossing.passphrase),
+            gate: gate))
+        #expect(press == .made(exportTurnedOff: false), "\(press)")
+        #expect(bootstrap.roadSession?.library.record?.mode == .castle, "in Castle")
+        await awaitReadyCompose()
+    }
 
     private static let authConfiguration = AuthConfiguration(
         projectURL: URL(string: "https://vx510-first-round.invalid")!, apiKey: "publishable")
@@ -127,11 +170,19 @@ final class FirstRoundWorld {
             http: { _ in throw AuthSessionError.malformedResponse("no network in this test") })
     }
 
-    /// The world, its bootstrap READY on the library (call inside `run`).
-    static func make() async throws -> FirstRoundWorld {
+    /// What a world's library carries before the bootstrap first opens it (VX-510 unit B1, the drill): the planted road, its
+    /// vault, the library's session as the road created it, and its twelve words.
+    typealias Preparation = @MainActor (PlantedRoad, PlantedVaultLeaf, ProtectionRoadSession, [String]) async throws -> Void
+
+    /// The world, its bootstrap READY on the library (call inside `run`). `biometry`: this Mac's (a finger enrolled —
+    /// `.ready` — for the Touch ID arms; set before the road's system is composed). `prepare`: acts on the library before
+    /// the bootstrap first opens it (the drill's Move arm binds it to another account there).
+    static func make(biometry: BiometryFacts = .none, prepare: Preparation? = nil) async throws -> FirstRoundWorld {
         let (road, vault, keys) = Account.road()
         road.session = Account.signedIn
-        let (_, words) = try await road.created()
+        road.biometry = biometry
+        let (created, words) = try await road.created()
+        try await prepare?(road, vault, created, words)
         let world = FirstRoundWorld(road: road, vault: vault, keys: keys, words: words)
         await world.bootstrap.awaitOpen()
         if case .opening = world.bootstrap.state { await world.bootstrap.awaitOpen() }
@@ -152,11 +203,11 @@ final class FirstRoundWorld {
     /// through the ONE composition function, then started (the sign-in's chain: owner adoption, configure, a trigger).
     /// The real store's variant — the A4 fence lets only the real store pair with a server (`Phase9cAuthWiringTests`'
     /// precedent); the server here is the fake.
-    func composeServices() async throws -> AppServices {
+    func composeServices(beforeStart: ((AppServices) -> Void)? = nil) async throws -> AppServices {
         let session = try #require(readySession)
         await auth.adopt(AuthTokens(
             accessToken: "access", refreshToken: "refresh", expiresAt: Date().addingTimeInterval(3600),
-            userID: Account.account, email: Account.email))
+            userID: servicesSignIn, email: Account.email))
         let server = server
         let services = AppServices(
             session: session, storeVariant: .real, backupEnabled: false, auth: auth,
@@ -167,6 +218,8 @@ final class FirstRoundWorld {
         self.services = services
         composed.append(services)
         bootstrap.attach(services: services)
+        // (`VariorumApp` wires the restore hold's gates here, BEFORE the start — the drill's held arm.)
+        beforeStart?(services)
         await services.start()
         return services
     }
@@ -244,15 +297,19 @@ final class FirstRoundWorld {
     /// The dependencies the world runs under: the clock and ids the bootstrap's `.ready` arm reads, the owner identity the
     /// sign-in's adoption stamps (the planted account), and — once the library is open — its database as the ambient one
     /// the engine's rounds read (`AppDatabase.install` is production's; a test bootstrap skips it).
-    static func run(_ body: @MainActor (FirstRoundWorld) async throws -> Void) async throws {
-        let owner = Account.account
+    /// `owner` (VX-510 unit B1, the drill's not-configured arm): the identity the sign-in's owner adoption stamps — nil
+    /// makes the adoption refuse (`noOwnerIdentity`), so the chain never composes (the run record's F-5).
+    static func run(
+        owner: String? = Account.account, biometry: BiometryFacts = .none, prepare: Preparation? = nil,
+        _ body: @MainActor (FirstRoundWorld) async throws -> Void
+    ) async throws {
         try await withDependencies {
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.uuid = .incrementing
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 510))
             $0.ownerIdentity = OwnerIdentity { owner }
         } operation: { @MainActor in
-            let world = try await make()
+            let world = try await make(biometry: biometry, prepare: prepare)
             let database = try #require(world.readySession).database
             try await withDependencies {
                 $0.database = database

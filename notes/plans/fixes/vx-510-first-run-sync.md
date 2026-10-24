@@ -879,8 +879,27 @@ unit B2's brief). Every claim not yet run is PENDING.*
   (what happens during a press; nil everywhere else). **The harness, `--filter "FirstRoundAfterTheReopenTests|
   FirstRoundAfterTheActTests|FirstRoundRoadTests|FirstRoundConfirmTests|RoadAccountModelTests|RoadJoinFollowModelTests"`:
   `✔ Test run with 37 tests in 6 suites passed`** — Piece 1's pin GREEN.
-- **Piece 3** — D-B1 (VX-509): the standing first-run drill over unit A's world, every arm to its first round with no
-  relaunch, the row and the sheet asserted per arm. NOT STARTED.
+- **Piece 3** — D-B1 (VX-509): DONE (this commit). New suite `VariorumTests/Protection/FirstRunDrillTests.swift` — **THE
+  STANDING GATE VX-509 asked for, named for the release checklist** (its header says so): every arm runs to its first round
+  with NO RELAUNCH and asserts what she sees — the sheet stays, the round runs to its end, the sheet's line, the sync row's
+  face (+ its line), Done closes it. Arms: `arm1_theStandardSetUpRunsItsFirstRound` (row not-on-yet before) ·
+  `arm2_theStandardJoinRunsItsFirstRound` · `arm3_theCastleSetUpUnderAlwaysAskRunsItsFirstRound` (Use Castle through the
+  bootstrap's crossing — its reopen composes fresh services — then the set-up in Castle) ·
+  `arm4_theCastleSetUpUnderTouchIDRunsItsFirstRound` (a finger enrolled, the planted press; the keys filed in the Touch ID
+  item) · `arm5_theCastleJoinRunsItsFirstRound` (same posture, open session) · `arm6_moveRunsItsFirstRound` (bound to
+  another account before this Mac's open; Move, same posture) · `arm7_theReKeyingJoinRunsItsFirstRoundThroughTheReopen`
+  (D-B0) — and the negatives, each saying its blocker on the sheet AND the row: `negative_offlineSaysWaitingOnTheSheetAndTheRow`
+  (sheet "Sync hasn't run yet: Waiting to sync (offline)." · row offline) · `negative_heldSaysWaitingSinceTheRestore` (sheet
+  the held line · row "Not synced yet" — **said plainly: under the hold the row itself has no held face; the hold's sentence
+  is the banner's (`RestoreHoldBar`)**) · `negative_notConfiguredSaysSyncIsOff` (the owner adoption refused — F-5; sheet and
+  row "Sync is off") · `negative_theAccountGateSaysPaused` (sheet and row the paused line). Unit A's world EXTENDED (never
+  forked): `run`/`make` take `owner:` (nil ⇒ the adoption refuses), `biometry:` and `prepare:` (acts on the library before the
+  bootstrap opens it); `composeServices(beforeStart:)` (the hold's gates wired before the start, as `VariorumApp` does);
+  `servicesSignIn` (the gate arm); `useCastle(gate:)` (through the bootstrap's crossing roads); `awaitReadyCompose()`;
+  `FirstRoundServer.goOffline()`. **The harness, `--filter "FirstRunDrillTests"`: `✔ Test run with 11 tests in 1 suite
+  passed`**; with every first-round suite (`FirstRunDrillTests|FirstRoundAfterTheReopenTests|FirstRoundAfterTheActTests|
+  FirstRoundRoadTests|FirstRoundConfirmTests|NotOnYetWordsTests`): **`✔ Test run with 39 tests in 6 suites passed`**. A
+  standing gate — guards, green by design on this tree; its teeth are Piece 6's reverts (RB-1/RB-2 below turn its arms red).
 - **Piece 4** — D-B3 (D-ROAD): the DEBUG-only prod test road — the launch decision, the derivation, the per-account
   admission at connect, the row's refusal face, the pins. NOT STARTED.
 - **Piece 5** — D-B2 (VX-509): the scripted first-run walk under `Tools/` + one release-checklist row; guard dry-runs.
