@@ -845,8 +845,9 @@ with the walk as its evidence (the orchestrator's acceptance walk follows your c
 VX-526 (the join sheet's title/button + W-12's wording) · VX-522 (the hold banner's conditional) · VX-523 (the
 words-adoption notice's condition) · VX-533 (the lobby's missed Touch ID prompt re-trigger — the lobby is open) ·
 VX-530 (TRACE-FIRST: the double Touch ID on a Castle key door — fix only on a confirmed benign ordering, else report)
-· VX-538 (the recurring E6 band card — RIDES ONLY AT HER WORD, offered). Pin-before-fix PER MEMBER; the brief is
-written after unit 2 closes.
+· VX-538 (the recurring E6 band card — RIDES, her word 2026-10-24: "yeah that's fine for 538's band card to ride
+there too"; its CastleRules rule-3-adjacent clause still goes to her verbatim at closeout before it enters the
+rules, per R-529-6). Pin-before-fix PER MEMBER; the brief is written after unit 2 closes.
 
 ## Machinery
 
