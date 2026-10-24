@@ -279,9 +279,7 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 **NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
 face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`. **A REVERT IS IN FLIGHT (P1): `KeyDoors.swift`'s `changePassphrase` throw line back to the
-plain refusal; the fix is committed at `1ccdd5b27` — restore with `git checkout -- Sources/VariorumCore/Protection/
-Executor/Acts/KeyDoors.swift` (read `git diff` to see what is reverted).**
+`~/dev/variorum-vx-529`. No revert is in flight.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
@@ -294,14 +292,15 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
 
 **The pieces (flip per commit; unverified claims PENDING):**
 - P0 — this LIVE STATUS. DONE (this commit).
-- P1 — scope 3, THE REFUSAL SPLIT at `changePassphrase`'s vault-verify arm. IN-PROGRESS — the red pin COMMITTED
+- P1 — scope 3, THE REFUSAL SPLIT at `changePassphrase`'s vault-verify arm. DONE (`4fd6d904f` pin, `1ccdd5b27` fix) — the red pin
   (`Executor/PairRefusalSplitTests.swift`): RED on the pre-fix tree, both postures, for the repro's exact reason —
   `expected .passphraseChangedElsewhere(device: "Mac A", day: …) but .passphraseDoesNotOpen was thrown`; its two
   companions (opens-neither; nothing changed elsewhere) green. THE FIX COMMITTED: `refusalForAPassphraseTheVaultRefuses`
   (`KeyDoors.swift`) — opens this library's own lock under a descriptor the vault no longer carries ⇒
   `passphraseChangedElsewhere(device:day:)`, else `passphraseDoesNotOpen` — thrown at `changePassphrase`'s arm only
   (F-4's siblings untouched). Green with its neighbours (42 tests: the key-door, follow and session-hold suites).
-  Remains: the behavioral revert (the one `throw` line back to the plain refusal), then restore.
+  VERIFIED BY REVERT: the one `throw` line back to the plain refusal ⇒ the pin RED again (both postures, the same
+  `passphraseDoesNotOpen`); restored by `git checkout` ⇒ 3/3 green.
 - P2 — scope 4, THE INVARIANT PINS (fact 1's guard): one existing-behavior pin per synced road that writes a passphrase
   lock or the master's words copy. NOT-STARTED.
 - P3 — scope 1, DETECTION: a behavior-level red pin first (compiles on the old tree), then `FollowKind.pairChanged`,
