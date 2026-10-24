@@ -25,7 +25,9 @@
 //  composes. (VX-483 — the one exception, DEBUG walk machinery only: a
 //  launch whose walk switch resolved to a project that is NOT the
 //  production mirror lifts the fence for that launch; a production ref
-//  refuses. Release: absolute.)
+//  refuses. VX-510 D-B3 — the second, the prod test road: armed by its
+//  switch and the allowlist, the dev store may sync with production only
+//  while a listed test account is signed in. Release: absolute.)
 //
 //  Triggers wired HERE (both platforms): after local writes settle (the
 //  outbox observation, debounced). Platform files add their own: foreground/

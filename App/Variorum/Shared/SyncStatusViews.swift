@@ -79,6 +79,11 @@ nonisolated struct SyncRowFace: Equatable {
         /// but "Synced <time>" would be saying "fine" while nothing new
         /// can come in. Same doors as idle; an honest line instead.
         case stalled
+        #if DEBUG
+        /// VX-510 D-B3 — the prod test road refused the signed-in account (it is not a listed test account): no chain,
+        /// and the row says why — never "Sync off (dev store)" alone, never silent. DEBUG walk machinery only.
+        case notOnTheProdTestRoad
+        #endif
     }
 
     struct Door: Equatable, Identifiable {
@@ -319,6 +324,16 @@ nonisolated struct SyncRowFace: Equatable {
     /// `Account…` idiom. PROVISIONAL (P-VX486-1), hers to reword.
     static let openProtectionLabel = "\(ProtectionCopy.protectionPaneTitle)\u{2026}"
 
+    #if DEBUG
+    /// **VX-510 D-B3 — the prod test road's refusal face** (pure, pinned): when the road refused the signed-in account at
+    /// connect (`AccountState.notOnTheProdTestRoad`), the row says so — its door the Account sheet, where she signs out or
+    /// in as a listed test account; nil otherwise (the row's ordinary face).
+    static func prodTestRoadRefusal(refused: Bool) -> SyncRowFace? {
+        guard refused else { return nil }
+        return SyncRowFace(kind: .notOnTheProdTestRoad, doors: [Door(label: "Account…", act: .openAccount(.account))])
+    }
+    #endif
+
     /// The row's line (calm: the quiet caption, never the error red).
     static let appOutOfDateLabel = "Sync paused \u{2014} this version of Variorum needs an update"
 
@@ -418,7 +433,11 @@ struct SyncStatusRow: View {
     private var sync: SyncSession { services.sync }
 
     private var face: SyncRowFace {
-        SyncRowFace.face(
+        #if DEBUG
+        // VX-510 D-B3: the prod test road refused the signed-in account — the row says why, before anything else.
+        if let refusal = SyncRowFace.prodTestRoadRefusal(refused: services.account.notOnTheProdTestRoad) { return refusal }
+        #endif
+        return SyncRowFace.face(
             allowsSync: sync.allowsSync,
             isConfigured: sync.isConfigured,
             signedIn: services.account.variorum != nil,
@@ -597,6 +616,12 @@ struct SyncStatusRow: View {
             Text(line)
                 .pageCaption(pageStyle)
             pendingNote
+        #if DEBUG
+        case .notOnTheProdTestRoad:
+            // VX-510 D-B3: a refusal, warning-styled (the paused register) — the walker must not miss it.
+            Text(line)
+                .pageCaptionWarning(pageStyle)
+        #endif
         }
     }
 
@@ -621,6 +646,9 @@ struct SyncStatusRow: View {
         case .idle:
             guard let lastSuccessAt else { return "Not synced yet" }
             return "Synced \(lastSuccessAt.formatted(date: .omitted, time: .shortened))"
+        #if DEBUG
+        case .notOnTheProdTestRoad: return notOnTheProdTestRoadLabel
+        #endif
         }
     }
 
@@ -676,6 +704,12 @@ struct SyncStatusRow: View {
     /// VX-510 D-A3 (VX-506) — the unjoined library's line: the keys refusal over a library whose record names no account
     /// is a not-yet, never a lock. PROVISIONAL (P-VX510-2 (a)), hers to reword.
     static let notOnYetLabel = "Sync isn't on for this library yet"
+
+    #if DEBUG
+    /// VX-510 D-B3 — the prod test road's refusal line (the dev store syncs with production only for a listed test
+    /// account). PROVISIONAL P-VX510-B1-2, the implementer's draft, hers to reword.
+    static let notOnTheProdTestRoadLabel = "Sync off (dev store) \u{2014} this account isn't a listed test account"
+    #endif
 
     /// CF-16's row line: the replaced-keys presentation of the engine's
     /// payload-crypto refusal (wording derived from the ruled surface

@@ -902,8 +902,63 @@ unit B2's brief). Every claim not yet run is PENDING.*
   passed`**; with every first-round suite (`FirstRunDrillTests|FirstRoundAfterTheReopenTests|FirstRoundAfterTheActTests|
   FirstRoundRoadTests|FirstRoundConfirmTests|NotOnYetWordsTests`): **`✔ Test run with 39 tests in 6 suites passed`**. A
   standing gate — guards, green by design on this tree; its teeth are Piece 6's reverts (RB-1/RB-2 below turn its arms red).
-- **Piece 4** — D-B3 (D-ROAD): the DEBUG-only prod test road — the launch decision, the derivation, the per-account
-  admission at connect, the row's refusal face, the pins. NOT STARTED.
+- **Piece 4** — D-B3 (D-ROAD): DONE as designed, EXCEPT ONE FORK — STOPPED, NOT BUILT (F-B1-1 below) (this commit). Every
+  line is DEBUG-only. `Shared/Protection/ProtectionWalkSwitch.swift` (`#if DEBUG` whole): the road beside the walk lift —
+  `prodTestRoadKey` (`VARIORUM_PROD_TEST_ROAD`), `prodTestAllowlistPath` (`.variorum/prod-test-accounts.env` under the REAL
+  home — `realHome` via `getpwuid`, never the sandbox container's), `prodTestEmailsKey`, `prodTestMarker` (`vxtest`);
+  `AllowlistRead` (missing · unreadable · present(mode, text)); `ProdTestAllowlist.admits` (exact, case-folded; no email is
+  never listed); `ProdTestRoadRefusal` (walk project too · missing · unreadable · not 600 · empty · unmarked entry);
+  `ProdTestRoad` (none · armed · refused); the pure rule `prodTestRoad(switchValue:walkProject:allowlist:)` (exactly `1` asks;
+  the allowlist read ONLY when asked, AFTER the walk-project exclusion); `allowlistEmails` (the one key, parsed as the shell
+  sources it — the secrets beside it are never entries, never kept, never logged); `readAllowlist(atPath:)` (`lstat` — a link
+  is never followed; the mode bits; the text); `prodTestRoadForThisLaunch` (logged once — armed with HOW MANY accounts, or
+  refused and why; never an email). `Shared/ProjectConfig.swift` (its DEBUG fence): `prodTestRoad`, decided once from the
+  walk project already resolved (never a second parse). `Shared/AppServices.swift`: `DevSyncFence` (the launch's two
+  exceptions — the walk lift and the road — as ONE value; `thisLaunch` = `ProjectConfig`'s two decisions) behind a
+  DEBUG-only dependency `\.devSyncFence` (live and test value: the launch's own — a test process carries no switch; a pin
+  injects its own — the project's injection idiom, so `AppServices` reads no environment of its own, still pinned); the DEBUG
+  derivation `allowsSync(storeVariant:walkLift:prodTestRoad:)` (a dev store syncs under the lift OR the armed road); the
+  pure admission `prodTestRoadAdmits(storeVariant:fence:email:)` — while the dev store syncs ONLY by the road, only a listed
+  account; `connectSyncIfAllowed` runs it at EVERY connect (launch, sign-in, resume, first round, the deletion's reconnect —
+  one door) against `auth.currentEmail`, records `AccountState.notOnTheProdTestRoad` and composes nothing for an unlisted
+  account (one log line, no email); a sign-out clears it. The Release arm's line byte-unchanged; the retired-credential sweep
+  still gated on the store variant (its pin untouched). `Shared/SyncStatusViews.swift`: `SyncRowFace.Kind.notOnTheProdTestRoad`,
+  the pure `SyncRowFace.prodTestRoadRefusal(refused:)` (its door Account…), consulted FIRST by the row's face; the line
+  `SyncStatusRow.notOnTheProdTestRoadLabel` = "Sync off (dev store) — this account isn't a listed test account"
+  (**PROVISIONAL P-VX510-B1-2**, my draft, hers), warning-styled. `Shared/SyncSession.swift`: its A4 header comment names the
+  second exception (no code). Pins (new suite `VariorumTests/ProdTestRoadTests.swift`, 12 tests — new seams, teeth by Piece
+  6's reverts): `withNoSwitchTheFenceHoldsAndNothingIsRead` · `theSwitchWithAWalkProjectRefuses` ·
+  `eachAllowlistFaultRefusesAndTheFenceStands` (missing · unreadable · 644 · 640 · empty · no key · an unmarked entry) ·
+  `theSwitchAndAPrivateMarkedListArmTheRoad` · `theAllowlistsOneKeyIsParsedAndNothingElse` ·
+  `theReadReportsTheFilesModeAndNeverFollowsALink` (real temp files) · `thisLaunchsRoadWithNoSwitchIsNone` (guard) ·
+  `theAdmissionIsPerAccount` · `armedAndListedComposesTheChain` (the DEV store's real services, the fence injected) ·
+  `armedAndUnlistedComposesNothingAndTheRowSaysWhy` (no chain, the refusal face + line, a first round "not configured", then
+  a sign-in as a LISTED account re-runs the admission and composes) · `theRowConsultsTheRoadsRefusalFirst` (source, code) ·
+  `aReleaseBuildCompilesNothingOfTheRoad` (source: the text a Release build compiles — every `#if DEBUG` arm dropped, line
+  comments stripped — names no road identifier in the four files; the stripper's own teeth: it keeps Release's derivation
+  line). **`SyncWalkFenceTests.theDerivationReadsTheLaunchsLiftOnlyInDebug` UPDATED DELIBERATELY** (the code it pins changed:
+  the DEBUG arm reads both exceptions from the launch's fence; the fence's live value is `ProjectConfig`'s two decisions;
+  Release's line asserted byte-unchanged as before) — red on the pre-fix tree in its new form. **The harness, `--filter
+  "ProdTestRoadTests|SyncWalkFenceTests|SyncLockedRowTests|SyncStalledRowTests|ProtectionWalkSwitchTests|
+  ProtectionWalkProjectTests"`: `✔ Test run with 34 tests in 6 suites passed`.**
+  - **F-B1-1 — THE FORK (STOPPED, NOT BUILT): the sandboxed Debug app cannot read the ruled allowlist path.** Both Mac
+    configurations are App-Sandboxed (`ENABLE_APP_SANDBOX = YES`, one shared `Variorum.entitlements`), and the sandbox
+    denies a read outside the container — `~/.variorum/prod-test-accounts.env` included (the container is the sandbox's
+    home: `BackupDestination.displayPath`'s own note). So as built, a live launch with the switch reads `.unreadable` and the
+    road REFUSES, fail-closed and said once ("the allowlist file can't be read") — **the road cannot arm on the Mac until the
+    architect rules** (PENDING the live walk to observe; headless, the read is proven over temp files, unsandboxed). Options:
+    **(A — recommended for literalness)** a Debug-only entitlements file — the shared file plus
+    `com.apple.security.temporary-exception.files.home-relative-path.read-only` = `/.variorum/prod-test-accounts.env` — named
+    by the DEBUG configuration's `CODE_SIGN_ENTITLEMENTS` only: the app reads the ruled file in place, exactly D-B3; Release's
+    entitlements and signature untouched. Cost: a project-file edit, a second entitlements file kept in lockstep with the
+    shared one (an `EntitlementsTests` pin can hold them equal but for the one key), a one-file read exception in the Debug
+    build (the test host included). **(B — lightest)** the LAUNCHER hands the one key: the walk script (outside the sandbox)
+    checks the file (mode 600, every entry marked — it already does, D-B2) and launches with `VARIORUM_PRODTEST_EMAILS` beside
+    the switch; the app's rule reads that value instead of the file (the marker check stays in the app; the mode check moves
+    to the launcher). No entitlement, no project change; the emails (never a secret) show in `ps eww`. A one-function swap of
+    the rule's input. **(C)** the allowlist moves into the Debug container (readable without a grant) — moves her ruled path,
+    and every tool that reads it, into a folder a dev-slot reset handles. The walk script (D-B2) is written for the current
+    design and says which line changes under (B).
 - **Piece 5** — D-B2 (VX-509): the scripted first-run walk under `Tools/` + one release-checklist row; guard dry-runs.
   NOT STARTED.
 - **Piece 6** — the behavioral reverts, named here BEFORE any runs. NOT STARTED.
