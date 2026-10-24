@@ -1286,7 +1286,29 @@ PENDING.*
   - **RF-6** the admission matches loosely (an entry containing the address, or the address containing an entry)
     [`aHerShapedAddressIsNeverAdmitted`]. → `✘ … with 8 issues` — that pin ✘×8 (the bare and fragment addresses admitted).
   (The walk script's `--env` line has no headless revert — nothing may launch here; unit C's P2 proves it live.)
-- **Piece 1 — D-B4 (VX-501):** NOT STARTED.
+- **Piece 1 — D-B4 (VX-501, Part of VX-501):** IN PROGRESS.
+  - **1a — the pins that compile on the pre-fix tree, committed RED before the fix: DONE (this commit).** Read first:
+    `ProtectionOpenRoad` whole (`openTyped`, `typedCandidates`, `pressTouchID`, `loadSyncKeysForTheSession`),
+    `NewRoadSyncKeyProvider`, `WireVaultLeaf`, `ProtectionRoadLock.dropSessionMemory`, the core's `KeyDoors`
+    (`holdSyncKeysForTheSession` — `internal` to the core, so the app cannot call it; its two derivation calls are the
+    public `AccountVault.master(passphrase:words:)` and `keys(master:)`), `Executor` (`readVault`, `freshVaults`, `unlock`),
+    `VaultModel`, `Secrets`, `KeyFile` (open roads; the master's words copy), `AccountActs.joinKeyFile` (the typed
+    passphrase's lock IS the account's — "its descriptor the vault's" — so the lobby's derived key opens the vault's
+    passphrase wrap with NO second Argon2id), the bootstrap's lobby roads and `lockOnNewRoad` (the lock stops the services
+    and drops session memory; the unlock's ready composes fresh services whose first round reads the provider). New suite
+    `VariorumTests/Protection/TypedUnlockSyncKeysTests.swift` (planted — `ProtectionAccountSupport`'s vault + sync keys; the
+    Always-ask world `castleAlwaysAskSynced`, VX-487's Touch ID world reused): `vx501_aTypedPassphraseUnlockUnderAlwaysAsk
+    LoadsTheAccountsKeys` (session holds the vault's keys, the provider reads them, ONE vault read, nothing written to the
+    keychain), `vx501_theTwelveWordsTypedLoadThemToo`, `vx501_aTypedUnlockUnderTouchIDLoadsThemWithNoPress` (no Touch ID
+    custody read, no sync-keys Touch ID read, no ride), `offlineTheTypedUnlockStillOpensAndLoadsNothing`,
+    `aSecretThatOpensTheLibraryButNotTheVaultLoadsNothing` (the passphrase changed elsewhere), `anAccountThatMovedLoadsNothing`
+    (the account's sync key replaced since this library followed); GUARDS `aStandardLibraryLoadsNothingAndReadsNoVault`,
+    `anUnboundCastleLibraryReadsNothing`, `signedOutReadsNothing` (signed out, and signed into another account). **RED on
+    the pre-fix tree** (the harness, `--filter TypedUnlockSyncKeysTests`): `✘ Test run with 9 tests in 1 suite failed with 10
+    issues` — the passphrase pin ✘×3 (session nil · the provider read nothing · no vault read), the words pin ✘×2, the Touch
+    ID pin ✘×2, and the "the read was tried" legs of offline / not-the-vault / moved ✘ each (their never-hostage legs pass
+    on both sides, as pin 5's did at VX-487); every world's preconditions held (no issue in the setups); the three guards ✔
+    (by design on both sides — their teeth are the reverts').
 - **Piece 2 — D-B6 (VX-511):** NOT STARTED.
 - **Piece 3 — D-B5 (VX-503, the trace):** NOT STARTED.
 - **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
