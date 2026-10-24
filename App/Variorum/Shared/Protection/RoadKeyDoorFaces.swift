@@ -109,6 +109,11 @@ nonisolated struct RoadKeyDoorFaces: Equatable, Sendable {
     let changePassphrase: RoadKeyDoorFace
     let newWords: RoadKeyDoorFace
     let resetForgottenPassphrase: RoadKeyDoorFace
+    /// VX-510 D-B7 — VX-513: the READ-ONLY CHECK door ("Check my passphrase or twelve words…") stands — the live key file of
+    /// the key the library is open under is beside it (the check reads its locks; in rule 27's state there is nothing to
+    /// check the library against, so the door is not rendered — P-2). Reads only, so no synced refusal ever stands in its
+    /// place: an account that can't be checked now is said by the check itself. false: a hand-made face (no door).
+    var checkStands = false
 
     func face(_ door: RoadKeyDoor) -> RoadKeyDoorFace {
         switch door {
@@ -162,6 +167,6 @@ nonisolated struct RoadKeyDoorFaces: Equatable, Sendable {
         }
         return RoadKeyDoorFaces(
             changePassphrase: face(.changePassphrase), newWords: face(.newWords),
-            resetForgottenPassphrase: face(.resetForgottenPassphrase))
+            resetForgottenPassphrase: face(.resetForgottenPassphrase), checkStands: keyFileStands)
     }
 }

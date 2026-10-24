@@ -63,6 +63,8 @@ struct WordsFieldsConcealTests {
     static let wordsLabels = [
         "ProtectionWords.wordsPlaceholder", "ProtectionWords.makeMineWordsField", "ProtectionWords.crossingWordsField",
         "ProtectionWords.joinWordsField", "ProtectionWords.followWordsField", "ProtectionWords.resetPassphraseWordsField",
+        // VX-510 D-B7 — VX-513: the read-only check's one field takes the passphrase OR the twelve words.
+        "ProtectionWords.checkSecretsField",
     ]
 
     @Test func noWordsFieldIsAPlainTextField() throws {
@@ -89,6 +91,7 @@ struct WordsFieldsConcealTests {
             ("Variorum/Features/Protection/RoadAccountSheet.swift", "ProtectionWords.followWordsField"),
             ("Variorum/Features/Protection/RoadAccountSheet.swift", "ProtectionWords.crossingWordsField"),
             ("Variorum/Features/Protection/RoadKeyDoorSheet.swift", "ProtectionWords.resetPassphraseWordsField"),
+            ("Variorum/Features/Protection/RoadSecretCheckSheet.swift", "ProtectionWords.checkSecretsField"),
         ]
         for site in sites {
             let text = try Self.code(Self.appRoot.appendingPathComponent(site.file))

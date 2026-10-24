@@ -27,7 +27,9 @@ var visited = 0
 while !queue.isEmpty, visited < 20000 {
     let e = queue.removeFirst(); visited += 1
     let role = attr(e, kAXRoleAttribute) as? String ?? ""
-    let names = [attr(e, kAXTitleAttribute), attr(e, kAXDescriptionAttribute),
+    // VX-510 (the walk's first live run): a SwiftUI text field exposes its placeholder as AXPlaceholderValue and
+    // often no title — the walk's field probes address fields by that placeholder.
+    let names = [attr(e, kAXTitleAttribute), attr(e, kAXDescriptionAttribute), attr(e, "AXPlaceholderValue" as String),
                  role == "AXStaticText" ? attr(e, kAXValueAttribute) : nil]
         .compactMap { $0 as? String }.map { $0.lowercased() }
     if names.contains(where: { $0 == label || (prefix && $0.hasPrefix(label)) }),

@@ -193,6 +193,105 @@ nonisolated enum ProtectionWalkSwitch {
         return lift
     }
 
+    // MARK: - VX-510 D-B3 — THE PROD TEST ROAD (R-510-1, R-510-6: "Env flag + allowlist"; F-B1-1 (B), ruled)
+
+    /// `VARIORUM_PROD_TEST_ROAD=1`: a DEBUG launch asking for the named, narrow exception to the A4 fence — the DEV store may
+    /// sync with PRODUCTION, and only while an account the allowlist names is signed in (her rulings R-510-1/-6: "a named
+    /// road for named test accounts; never delete the fence that keeps every other walk off prod"). Release: absent.
+    static let prodTestRoadKey = "VARIORUM_PROD_TEST_ROAD"
+    /// The allowlist, HANDED BY THE LAUNCH (F-B1-1 (B), ruled): the sandboxed Debug app cannot read `~/.variorum/` (both
+    /// configurations share one sandboxed entitlements file), so the walk launcher (`Tools/WalkKit/first-run-walk.sh`,
+    /// outside the sandbox) reads the ONE source of truth — `~/.variorum/prod-test-accounts.env`, mode 600, every entry
+    /// plainly-test — and hands that file's one key to the launch under the same name: a space-separated list of test
+    /// emails. The app reads only this value — never a file — and keeps every guard of its own: exactly `1` asks, a walk
+    /// project refuses, an empty list refuses, every entry carries the marker, and the admission is per account at connect.
+    static let prodTestEmailsKey = "VARIORUM_PRODTEST_EMAILS"
+    static let prodTestMarker = "vxtest"
+
+    /// The listed test accounts, case-folded.
+    struct ProdTestAllowlist: Equatable, Sendable {
+        let emails: Set<String>
+
+        /// Whether `email` (the signed-in account's) is listed — exactly, case-folded; no email is never listed.
+        func admits(_ email: String?) -> Bool {
+            guard let email = email?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(), !email.isEmpty
+            else { return false }
+            return emails.contains(email)
+        }
+    }
+
+    /// Why an asked-for road did not arm (the launch says it once — never an email).
+    enum ProdTestRoadRefusal: String, Equatable, Sendable {
+        case walkProjectToo = "a walk project is set too — the two roads are exclusive"
+        case allowlistNotHanded = "the launch handed no allowlist (VARIORUM_PRODTEST_EMAILS)"
+        case allowlistEmpty = "the allowlist names no account"
+        case unmarkedEntry = "an allowlist entry is not a plainly-test address"
+    }
+
+    /// THIS launch's prod test road.
+    enum ProdTestRoad: Equatable, Sendable {
+        /// Not asked (no `VARIORUM_PROD_TEST_ROAD=1`): the fence stands, nothing read.
+        case none
+        /// Asked and armed: the dev store may sync with production while a listed account is signed in.
+        case armed(ProdTestAllowlist)
+        /// Asked and refused, fail-loud: the fence stands, and the launch says why.
+        case refused(ProdTestRoadRefusal)
+
+        var isArmed: Bool {
+            if case .armed = self { return true }
+            return false
+        }
+    }
+
+    /// The road's rule, pure. `switchValue`: the launch's `VARIORUM_PROD_TEST_ROAD` (exactly `1` asks); `walkProject`:
+    /// `ProjectConfig`'s OWN resolved walk project (a walk project and the road are exclusive — the walk's coordinates are a
+    /// throwaway's, the road's production's); `allowlist`: the launch's handed `VARIORUM_PRODTEST_EMAILS` (nil = not
+    /// handed), read ONLY when the road was asked.
+    static func prodTestRoad(
+        switchValue: String?, walkProject: WalkProject?, allowlist: () -> String?
+    ) -> ProdTestRoad {
+        guard switchValue?.trimmingCharacters(in: .whitespacesAndNewlines) == "1" else { return .none }
+        guard walkProject == nil else { return .refused(.walkProjectToo) }
+        guard let handed = allowlist() else { return .refused(.allowlistNotHanded) }
+        let emails = allowlistEmails(handed)
+        guard !emails.isEmpty else { return .refused(.allowlistEmpty) }
+        guard emails.allSatisfy({ $0.contains(prodTestMarker) }) else { return .refused(.unmarkedEntry) }
+        return .armed(ProdTestAllowlist(emails: Set(emails)))
+    }
+
+    /// The handed list's entries — the file's one key's shape: whitespace-split, case-folded; one pair of surrounding quotes
+    /// is dropped (a launcher that passed the file's quoted form), nothing else is interpreted.
+    static func allowlistEmails(_ handed: String) -> [String] {
+        var value = handed.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let quote = value.first, quote == "\"" || quote == "'", value.count >= 2, value.last == quote {
+            value = String(value.dropFirst().dropLast())
+        }
+        return value.split(whereSeparator: \.isWhitespace).map { $0.lowercased() }
+    }
+
+    /// The launch's one road (`ProjectConfig.prodTestRoad` calls it once, at first use): the rule over THIS process's
+    /// environment — the switch and the handed allowlist, never a file — said once in the protection log: armed (how many
+    /// accounts, never which) or refused (why). Nothing is said when the road was not asked.
+    static func prodTestRoadForThisLaunch(
+        walkProject: WalkProject?, environment: [String: String] = ProcessInfo.processInfo.environment
+    ) -> ProdTestRoad {
+        let road = prodTestRoad(
+            switchValue: environment[prodTestRoadKey], walkProject: walkProject,
+            allowlist: { environment[prodTestEmailsKey] })
+        switch road {
+        case .none:
+            break
+        case .armed(let list):
+            ProtectionOpenRoad.log(
+                "PROD TEST ROAD (VX-510): ARMED for this launch — the dev store may sync with PRODUCTION while one of the "
+                    + "\(list.emails.count) listed test account(s) is signed in; any other account keeps the fence")
+        case .refused(let why):
+            ProtectionOpenRoad.log(
+                "PROD TEST ROAD (VX-510): REFUSED — \(why.rawValue); the dev store's sync fence stands")
+        }
+        return road
+    }
+
     /// Forget `roads` through the production leaves — the dev scope's silent items; this library's Apple keys.
     static func forget(_ roads: Set<Road>, _ system: ProtectionSystem) {
         if roads.contains(.silent) {

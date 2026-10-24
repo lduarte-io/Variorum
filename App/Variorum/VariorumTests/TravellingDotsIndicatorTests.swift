@@ -91,6 +91,8 @@ struct TravellingDotsIndicatorTests {
             "Variorum/Features/Protection/RoadAccountSheet.swift",
             // VX-308 U3: the key doors' confirm and the passphrase's section.
             "Variorum/Features/Protection/RoadKeyDoorSheet.swift",
+            // VX-510 D-B7 (VX-513): the read-only check's sheet and its door.
+            "Variorum/Features/Protection/RoadSecretCheckSheet.swift",
             // VX-307 U2b: the card above the quick entry, the look, the tour's two asks, the Settings section.
             "Variorum/Features/Protection/WordsBandCard.swift",
             "VariorumMobile/Features/Protection/MobileRoadFaces.swift",

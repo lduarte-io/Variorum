@@ -64,6 +64,18 @@ nonisolated enum RoadAccountDoor: String, CaseIterable, Sendable, Identifiable, 
         }
     }
 
+    /// **VX-510 D-B6 — VX-511 (R-510-14):** a landed act through this door leaves the library holding the ACCOUNT's pair —
+    /// Turn on sync's set-up hands the library's pair up (rule 7; its twelve words typed at the confirm — rule 14's moment),
+    /// its join and Move adopt the account's (rule 7) — so the band card's words are recorded for the library: its look would
+    /// mint new words and, synced, replace the account's. The leaves change no secret (rule 16) and the follow types one
+    /// secret of a pair the library already holds; neither marks. Settings ▸ New Words stays the deliberate door.
+    var landingRecordsTheWords: Bool {
+        switch self {
+        case .turnOnSync, .moveToSignedInAccount: return true
+        case .stopSyncingHere, .deleteAccountHere, .thisMacOnly, .follow: return false
+        }
+    }
+
     var doorLabel: String {
         switch self {
         case .turnOnSync: return ProtectionWords.turnOnSyncDoor
@@ -144,6 +156,28 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
     /// The act re-keys the library (a join that crosses postures, every follow): it runs with the app's pool closed and
     /// reopens — the crossings' seam (R-U2-2); else on the open session.
     var rekeys: Bool { spec.rekeys }
+
+    /// **VX-510 D-A1 + D-B0 — a first round is owed the moment this act lands** (VX-498 · VX-507): its landing changes
+    /// sync's standing — turning sync on (the set-up, a join), Move, and the follow. Never a leave (sync stops there). An
+    /// act on the OPEN session asks the open session's services (D-A1); a RE-KEYING act (a join or Move across postures,
+    /// every follow) lands through the reopen and asks the reopen's FRESH services once they are attached (D-B0 — F-6 (A),
+    /// ruled).
+    var owesFirstRound: Bool {
+        switch door {
+        case .turnOnSync, .moveToSignedInAccount, .follow: return true
+        case .stopSyncingHere, .deleteAccountHere, .thisMacOnly: return false
+        }
+    }
+
+    /// VX-510 D-A2 — the act JOINS an account that already syncs (a join, Move) rather than handing the library's pair up
+    /// (the set-up): the first round's success line says which.
+    var joinsAnAccount: Bool {
+        switch door {
+        case .moveToSignedInAccount: return true
+        case .turnOnSync: return spec.join.map { $0 != .setsUpInLibrarysMode } ?? false
+        case .stopSyncingHere, .deleteAccountHere, .thisMacOnly, .follow: return false
+        }
+    }
 
     /// The receipt once the act landed: the follow's Done (VX-107 — its other-device sentence), a join's (the posture said
     /// where it changed), else the door's.
@@ -287,6 +321,9 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
                     // VX-308 U2 — the account already has its vault: THE JOIN (enter / leave Castle, or the same posture).
                     var join = joinDoor(.turnOnSync, spec, library: mode, gate: gateChoice, copyName: copyName)
                     join.accountEmail = email
+                    // VX-510 D-A3 (VX-506): the account is already on — the join's door says so in its own words, never
+                    // the set-up arm's "Turn on sync…" (PROVISIONAL P-VX510-3 (a), hers).
+                    join.label = ProtectionWords.joinSyncDoor
                     turnOnSync = .open(join)
                 }
             }

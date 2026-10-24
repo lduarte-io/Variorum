@@ -357,8 +357,13 @@ nonisolated enum ProtectionOpenRoad {
 
     // MARK: - The lobby's presses
 
-    /// A typed secret on every key file this Mac holds for the library — each key verified against the slot.
-    static func openTyped(_ ctx: RoadContext, secret: ProtectionSecret) async -> RoadAttempt {
+    /// A typed secret on every key file this Mac holds for the library — each key verified against the slot. VX-501: a
+    /// library it opens that is bound to an account in Castle loads that account's sync keys for the session from the vault
+    /// with the secret just typed (`loadSyncKeysAfterTypedUnlock` — the passphrase's derived key reused, never re-derived),
+    /// waiting at most `syncKeysWithin` for the vault before the open goes on.
+    static func openTyped(
+        _ ctx: RoadContext, secret: ProtectionSecret, syncKeysWithin bound: Duration = typedUnlockVaultBound
+    ) async -> RoadAttempt {
         if case .words(let words) = secret {
             do {
                 try RecoveryPhrase.validate(words)
@@ -369,15 +374,19 @@ nonisolated enum ProtectionOpenRoad {
             }
         }
         let files = heldKeyFiles(ctx, facts: (try? ctx.system.facts(session: ctx.session)))
-        let candidates = typedCandidates(secret, files: files, floor: ctx.system.floor)
+        let typedRoad = typedCandidatesAndKeys(secret, files: files, floor: ctx.system.floor)
         var typed = TypedSecrets.none
         switch secret {
         case .passphrase(let passphrase): typed = TypedSecrets(passphrase: passphrase)
         case .words(let words): typed = TypedSecrets(words: words)
         case .passphraseKey: break
         }
-        switch await open(ctx, candidates: candidates, typed: typed) {
-        case .opened(let session): return .opened(session)
+        switch await open(ctx, candidates: typedRoad.keys, typed: typed) {
+        case .opened(let session):
+            // VX-501: the typed twin of the Touch ID load — off the main actor (the lobby's press is detached), after the
+            // open, before the app's open goes on (bounded; never hostage).
+            await loadSyncKeysAfterTypedUnlock(session, signIn: ctx.session, typed: typedRoad.unlock, within: bound)
+            return .opened(session)
         case .recordMissing: return .recordMissing
         case .unreadableLiveKeyFile: return .refused(ProtectionWords.liveKeyFileUnreadable)
         case .failed(let error):
@@ -441,7 +450,7 @@ nonisolated enum ProtectionOpenRoad {
     /// riding the same press — never a second prompt — and holds the keys in session memory (gone at a relock or a
     /// crash). NEVER HOSTAGE: no press to ride, no item, or a read that fails is said in the log and the library opens all
     /// the same; the row says locked until an act or the next Touch ID unlock loads them. An unbound library reads
-    /// nothing. (The typed roads load nothing — the run record's OPEN ITEMS, her call.)
+    /// nothing. (The typed roads' twin is `loadSyncKeysAfterTypedUnlock` — VX-501.)
     static func loadSyncKeysForTheSession(_ session: ProtectionRoadSession, riding press: TouchIDPressContext?) {
         guard let account = session.library.record?.account else { return }
         guard let press, !press.isInvalidated else {
@@ -466,6 +475,158 @@ nonisolated enum ProtectionOpenRoad {
         } catch {
             log("road: the Touch ID unlock's sync-keys read failed — \(String(describing: error)); the library opens, "
                 + "its sync keys stay unloaded")
+        }
+    }
+
+    /// What a typed unlock's secret leaves in hand for the sync-keys load: the passphrase's DERIVED keys (one per descriptor
+    /// the open derived under — the Argon2id already paid, never paid twice), or the words. Never stored; gone with the call.
+    enum TypedUnlockSecret: Sendable, CustomStringConvertible {
+        case passphrase([PassphraseKey])
+        case words([String])
+        case nothing
+
+        var description: String { "TypedUnlockSecret(redacted)" }
+    }
+
+    /// How long a typed unlock waits for the account's vault before the open goes on without the sync keys (VX-501 —
+    /// never hostage: a slow or unreachable server costs the unlock at most this, and a read that answers later is
+    /// discarded, so no hold can land after the open moved on). PROVISIONAL P-VX510-B2-1 (the record's unit B2).
+    static let typedUnlockVaultBound: Duration = .seconds(10)
+
+    /// **VX-510 D-B4 — VX-501: THE TYPED CASTLE UNLOCK LOADS THE ACCOUNT'S SYNC KEYS FOR THE SESSION** (her R-494-4: "a typed
+    /// unlock should hold sync keys in session until lock"; R-510-11). The typed twin of VX-487 (b)'s Touch ID load: under
+    /// Castle the engine's provider reads session memory and the silent item only (P-VX307-U1-3) — Castle keeps no silent
+    /// item (rule 9) and Always ask no item at all — so a library opened by its passphrase or its words now derives the
+    /// account's keys from the VAULT with the secret just typed (the key doors' own derivation, `holdSyncKeysForTheSession`'s
+    /// two calls: the master from the typed secret against the vault, then `keys(master:)`) and holds them in session memory
+    /// (gone at a relock — `ProtectionRoadLock.dropSessionMemory` — or a crash). The passphrase's key is the one the open
+    /// derived (the account's lock carries the vault's descriptor — `joinKeyFile`), never derived again; the words' wrap key
+    /// is derived once here (the BIP-39 seed, the open's own derivations being the core's). The vault: the one this session
+    /// already read (an act's resume at the settle), else ONE read, bounded (`typedUnlockVaultBound`). Only keys this library
+    /// FOLLOWS are held (the record's `accountRowKeyID` — exactly what the Touch ID item would hold; an account that moved
+    /// since leaves the follow to load them). NEVER HOSTAGE: no account, Standard (its silent item serves — nothing read),
+    /// signed out or into another account, offline, a slow server, a secret that opens the library but not the vault, a moved
+    /// account — each is said in the log and the library opens all the same; the row says locked as before. A read-only road
+    /// (a hosted test run) reads nothing. No Touch ID item is read (a prompt), nothing is written to disk.
+    static func loadSyncKeysAfterTypedUnlock(
+        _ session: ProtectionRoadSession, signIn: SessionFact, typed: TypedUnlockSecret,
+        within bound: Duration = typedUnlockVaultBound
+    ) async {
+        guard session.writes, let record = session.library.record, let account = record.account else { return }
+        guard record.mode == .castle else { return }
+        let leaf = session.system.leaves.syncKeys
+        if let held = leaf.sessionSyncKeys(accountID: account)
+            ?? ((try? leaf.readSyncKeys(accountID: account, itemClass: .silent)) ?? nil),
+           held.rowKeyID == record.accountRowKeyID {
+            log("road: the typed unlock found the account's sync keys already loaded — nothing read")
+            return
+        }
+        guard signIn.accountID == account else {
+            log("road: the typed unlock opened a synced library while signed out or into another account — its sync keys "
+                + "stay unloaded (nothing read)")
+            return
+        }
+        let snapshot: VaultSnapshot
+        if let fresh = session.executor.freshVaults[account] {
+            snapshot = fresh
+        } else {
+            switch await boundedVaultRead(session.system.leaves.vault, accountID: account, within: bound) {
+            case .read(let read?):
+                snapshot = read
+            case .read(nil):
+                log("road: the typed unlock found no vault for the library's account — nothing loaded")
+                return
+            case .failed(let error):
+                log("road: the typed unlock's vault read failed — \(String(describing: error)); the library opens, its "
+                    + "sync keys stay unloaded")
+                return
+            case .timedOut:
+                log("road: the typed unlock's vault read took longer than \(bound) — the library opens, its sync keys stay "
+                    + "unloaded (a later answer is discarded)")
+                return
+            }
+        }
+        let master: SymmetricKey?
+        switch typed {
+        case .passphrase(let derived):
+            master = derived.first { $0.kdf == snapshot.vault.kdf }
+                .flatMap { snapshot.vault.master(passphrase: $0, words: nil) }
+        case .words(let words):
+            master = (try? WordsKey.derive(words)).flatMap { snapshot.vault.master(passphrase: nil, words: $0) }
+        case .nothing:
+            master = nil
+        }
+        guard let master else {
+            log("road: the typed secret opens the library but not the account's vault (changed elsewhere?) — nothing "
+                + "loaded; a follow or a key door loads them")
+            return
+        }
+        guard let keys = try? snapshot.vault.keys(master: master) else {
+            log("road: the typed unlock reached a master that is not the vault's — nothing loaded")
+            return
+        }
+        guard keys.rowKeyID == record.accountRowKeyID else {
+            log("road: the account's sync key moved since this library followed — nothing loaded; the follow loads them")
+            return
+        }
+        leaf.holdInSession(keys, accountID: account)
+        log("road: the typed unlock loaded the account's sync keys for the session (sync key \(keys.rowKeyID.prefix(8)))")
+    }
+
+    /// One vault read, answered within `bound` or not at all: the first of the read and the timer wins; the loser is
+    /// cancelled and its answer, should one still come, is dropped (the caller holds nothing it did not get in time).
+    enum BoundedVaultRead: Sendable {
+        case read(VaultSnapshot?)
+        case failed(any Error)
+        case timedOut
+    }
+
+    static func boundedVaultRead(_ leaf: any VaultLeaf, accountID: String, within bound: Duration) async -> BoundedVaultRead {
+        nonisolated(unsafe) let leaf = leaf
+        return await withCheckedContinuation { continuation in
+            let race = BoundedRace(continuation)
+            race.add(Task {
+                do {
+                    race.finish(.read(try await leaf.fetchVault(accountID: accountID)))
+                } catch {
+                    race.finish(.failed(error))
+                }
+            })
+            race.add(Task {
+                try? await Task.sleep(for: bound)
+                race.finish(.timedOut)
+            })
+        }
+    }
+
+    /// The race's one answer: the first `finish` resumes the caller and cancels every racer; later ones do nothing.
+    private final class BoundedRace: @unchecked Sendable {
+        private let lock = NSLock()
+        private var continuation: CheckedContinuation<BoundedVaultRead, Never>?
+        private var racers: [Task<Void, Never>] = []
+
+        init(_ continuation: CheckedContinuation<BoundedVaultRead, Never>) { self.continuation = continuation }
+
+        func add(_ racer: Task<Void, Never>) {
+            let answered = lock.withLock { () -> Bool in
+                guard continuation != nil else { return true }
+                racers.append(racer)
+                return false
+            }
+            if answered { racer.cancel() }
+        }
+
+        func finish(_ answer: BoundedVaultRead) {
+            let (waiting, losers) = lock.withLock { () -> (CheckedContinuation<BoundedVaultRead, Never>?, [Task<Void, Never>]) in
+                defer {
+                    continuation = nil
+                    racers = []
+                }
+                return (continuation, racers)
+            }
+            guard let waiting else { return }
+            losers.forEach { $0.cancel() }
+            waiting.resume(returning: answer)
         }
     }
 
@@ -506,11 +667,19 @@ nonisolated enum ProtectionOpenRoad {
 
     /// A typed secret on every file — the passphrase derived ONCE per descriptor (the floor checked first).
     static func typedCandidates(_ secret: ProtectionSecret, files: [KeyFile], floor: PassphraseKDF.Floor) -> [StoreKey] {
+        typedCandidatesAndKeys(secret, files: files, floor: floor).keys
+    }
+
+    /// `typedCandidates`, with what the derivation left in hand for the sync-keys load (VX-501): the passphrase's derived
+    /// keys, one per descriptor — so the load never derives a second time — or the words.
+    static func typedCandidatesAndKeys(
+        _ secret: ProtectionSecret, files: [KeyFile], floor: PassphraseKDF.Floor
+    ) -> (keys: [StoreKey], unlock: TypedUnlockSecret) {
         var keys: [StoreKey] = []
         func add(_ key: StoreKey?) { if let key, !keys.contains(key) { keys.append(key) } }
         switch secret {
         case .passphrase(let typed):
-            guard !typed.isEmpty else { return [] }
+            guard !typed.isEmpty else { return ([], .nothing) }
             var derived: [PassphraseKey] = []
             for file in files {
                 guard let kdf = file.passphrase?.kdf else { continue }
@@ -525,10 +694,14 @@ nonisolated enum ProtectionOpenRoad {
                 }
                 add(try? file.open(.passphraseKey(key), floor: floor))
             }
-        case .words, .passphraseKey:
+            return (keys, .passphrase(derived))
+        case .words(let words):
             for file in files { add(try? file.open(secret, floor: floor)) }
+            return (keys, .words(words))
+        case .passphraseKey(let derived):
+            for file in files { add(try? file.open(secret, floor: floor)) }
+            return (keys, .passphrase([derived]))
         }
-        return keys
     }
 
     /// Every candidate expanded through the history of each file whose current key it is (rule 4).

@@ -66,6 +66,11 @@ final class AccountState {
     /// a NOTICE, never an error (the confirmation-email road is a normal
     /// outcome, not a failure). Cleared on sign-in and on the next act.
     var lastNotice: String?
+    #if DEBUG
+    /// VX-510 D-B3 — the prod test road refused the signed-in account at the last connect (no chain composed); the sync row
+    /// says why. DEBUG walk machinery only.
+    var notOnTheProdTestRoad = false
+    #endif
 
     /// The confirmation-required outcome's words (pinned). Worded to stay
     /// TRUE under GoTrue's enumeration prevention: an already-registered
@@ -187,10 +192,18 @@ final class AppServices {
         // decision (`ProjectConfig.walkSyncFenceLift` — from the walk project
         // every transport and the sign-in already read) lets a DEV store
         // sync against a walk project that is not the production mirror; a
-        // production ref refuses and the fence stands.
+        // production ref refuses and the fence stands. VX-510 D-B3 — THE PROD
+        // TEST ROAD (R-510-1/-6): the launch's second exception — armed, the DEV
+        // store may sync with PRODUCTION, and only while a listed test account
+        // is signed in (the admission is per account, at every connect). Both
+        // arrive as ONE value, the launch's own (`DevSyncFence.thisLaunch` —
+        // `ProjectConfig`'s two decisions, each read once); a pin injects its own.
+        @Dependency(\.devSyncFence) var launchFence
+        devFence = launchFence
         sync = SyncSession(
             database: session.database,
-            allowsSync: Self.allowsSync(storeVariant: storeVariant, walkLift: ProjectConfig.walkSyncFenceLift))
+            allowsSync: Self.allowsSync(
+                storeVariant: storeVariant, walkLift: launchFence.walkLift, prodTestRoad: launchFence.prodTestRoad))
         #else
         sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
         #endif
@@ -228,6 +241,14 @@ final class AppServices {
     /// into sync, run the idempotent owner adoption when signed in, then
     /// the sweep and the backup clock.
     func start() async {
+        // VX-510 D-B0: a first round asked while this runs waits for it (`runFirstRound`).
+        starting = true
+        defer {
+            starting = false
+            let waiters = startWaiters
+            startWaiters = []
+            for waiter in waiters { waiter.resume() }
+        }
         await auth.setOnChange { [weak self] tokens in
             Task { @MainActor [weak self] in
                 await self?.variorumSignInChanged(tokens)
@@ -286,14 +307,32 @@ final class AppServices {
     #if DEBUG
     /// VX-483 — THE A4 FENCE's derivation in a DEBUG build, pure (pinned): the REAL store may always pair with the one
     /// mirror; a DEV store only under the walk's lift (a walk project that is not the production mirror — never a
-    /// refused one). Release derives `storeVariant == .real` inline, unchanged.
+    /// refused one) or (VX-510 D-B3) the prod test road ARMED — whose admission is then per account, at connect
+    /// (`prodTestRoadAdmits`). Release derives `storeVariant == .real` inline, unchanged.
     nonisolated static func allowsSync(
-        storeVariant: AppDatabase.StoreVariant, walkLift: ProtectionWalkSwitch.SyncFenceLift
+        storeVariant: AppDatabase.StoreVariant, walkLift: ProtectionWalkSwitch.SyncFenceLift,
+        prodTestRoad: ProtectionWalkSwitch.ProdTestRoad = .none
     ) -> Bool {
         switch storeVariant {
         case .real: return true
-        case .dev: return walkLift.lifts
+        case .dev: return walkLift.lifts || prodTestRoad.isArmed
         }
+    }
+
+    /// VX-510 D-B3 — the launch's two DEBUG exceptions to the A4 fence, as these services were composed with them.
+    private let devFence: DevSyncFence
+
+    /// **VX-510 D-B3 — THE PROD TEST ROAD'S ADMISSION, pure (pinned).** While the dev store syncs ONLY by the road (a dev
+    /// store, no walk lift, the road armed), a chain composes only for a signed-in account the allowlist names — her own
+    /// can never pass (it is not listed, and every listed address carries the plainly-test marker). Every other case admits:
+    /// the real store, and a dev store under the walk's lift (whose fence is `allowsSync`'s own).
+    nonisolated static func prodTestRoadAdmits(
+        storeVariant: AppDatabase.StoreVariant, fence: DevSyncFence, email: String?
+    ) -> Bool {
+        guard storeVariant == .dev, !fence.walkLift.lifts, case .armed(let allowlist) = fence.prodTestRoad else {
+            return true
+        }
+        return allowlist.admits(email)
     }
     #endif
 
@@ -381,6 +420,9 @@ final class AppServices {
             await connectSyncIfAllowed()
         } else {
             account.variorum = nil
+            #if DEBUG
+            account.notOnTheProdTestRoad = false  // VX-510 D-B3: no one signed in, nothing refused
+            #endif
             sync.stop()
         }
     }
@@ -395,6 +437,17 @@ final class AppServices {
     /// the engine itself takes (stall, never guess).
     private func connectSyncIfAllowed() async {
         guard sync.allowsSync else { return }
+        #if DEBUG
+        // VX-510 D-B3 — the prod test road's admission, per account, at EVERY connect (a sign-out/in re-runs it): under the
+        // road an account the allowlist does not name composes no chain, and the sync row says why.
+        let admitted = Self.prodTestRoadAdmits(storeVariant: storeVariant, fence: devFence, email: await auth.currentEmail)
+        account.notOnTheProdTestRoad = !admitted
+        guard admitted else {
+            ProtectionOpenRoad.log(
+                "PROD TEST ROAD (VX-510): the signed-in account is not a listed test account — no sync chain composed")
+            return
+        }
+        #endif
         guard await runOwnerAdoption() else { return }
         // VX-314: the account-binding gate — wired only where a bound-account
         // read exists (the road's composition — every root since VX-329 U1);
@@ -424,6 +477,25 @@ final class AppServices {
             await connectSyncIfAllowed()
         }
     }
+
+    /// **VX-510 D-A1 — THE ROUND AFTER AN ACCOUNT ACT** (VX-498: on 0.10 nothing started a round after Turn on sync landed
+    /// on the open session, so the row kept the pre-act "Sync locked" until something else triggered one; VX-329 U1 deleted
+    /// the old road's post-enrollment hook). The composition root hands this to the account section as its `firstRound`
+    /// road (`AppBootstrap.attach(services:)`). The resume leaf's shape: a chain nothing configured is reconnected first
+    /// (`connectSyncIfAllowed` — the owner adoption, the configure, its trigger), then ONE round runs to its end and its
+    /// outcome comes back (`SyncSession.roundNow` — held, not configured, or what the round left on the status).
+    func runFirstRound() async -> FirstRoundOutcome {
+        // VX-510 D-B0: a RE-KEYING act asks the reopen's FRESH services, which the composition root attaches just BEFORE
+        // their `start()` — so a round asked while that start runs waits for it, and rides the chain it composes; reaching
+        // for the chain first would compose it twice (the start's own configure retiring this round's scheduler mid-round).
+        if starting { await withCheckedContinuation { startWaiters.append($0) } }
+        if !sync.isConfigured { await connectSyncIfAllowed() }
+        return await sync.roundNow()
+    }
+
+    /// VX-510 D-B0 — `start()` is in flight (its waiters resume when it returns).
+    private var starting = false
+    private var startWaiters: [CheckedContinuation<Void, Never>] = []
 
     /// Step 4's backfill, at sign-in and at every signed-in launch:
     /// idempotent (NULL owners only), and self-healing for rows that
@@ -531,3 +603,34 @@ final class AppServices {
         }
     }
 }
+
+#if DEBUG
+/// **VX-510 D-B3 — THE A4 FENCE'S TWO DEBUG EXCEPTIONS, as one value** (walk machinery; zero Release bytes): the walk's lift
+/// (VX-483 — a walk project that is not the production mirror) and the prod test road (R-510-1/-6 — production, for listed
+/// test accounts only). `AppServices` reads it once, at composition, through the dependency below: the launch's own in every
+/// composition (`thisLaunch` — `ProjectConfig`'s two decisions, each made once per process from the environment it already
+/// read); a pin injects its own.
+nonisolated struct DevSyncFence: Equatable, Sendable {
+    var walkLift: ProtectionWalkSwitch.SyncFenceLift
+    var prodTestRoad: ProtectionWalkSwitch.ProdTestRoad
+
+    /// THIS launch's fence (a test process launches with neither switch: both `.none` — the fence holds).
+    static var thisLaunch: DevSyncFence {
+        DevSyncFence(walkLift: ProjectConfig.walkSyncFenceLift, prodTestRoad: ProjectConfig.prodTestRoad)
+    }
+}
+
+nonisolated private enum DevSyncFenceKey: DependencyKey {
+    static var liveValue: DevSyncFence { .thisLaunch }
+    /// The launch's own here too — a test process carries no switch, so the fence holds unless a pin injects its own.
+    static var testValue: DevSyncFence { .thisLaunch }
+}
+
+nonisolated extension DependencyValues {
+    /// VX-510 D-B3 — the launch's two DEBUG exceptions to the A4 fence (`DevSyncFence`).
+    var devSyncFence: DevSyncFence {
+        get { self[DevSyncFenceKey.self] }
+        set { self[DevSyncFenceKey.self] = newValue }
+    }
+}
+#endif

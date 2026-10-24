@@ -16,6 +16,8 @@
 //  record's own (rule 23), read from the attached session. VX-487: that design is BUILT now on both sides — a Castle act
 //  with Touch ID holds the keys in session beside the item (`CommonSteps.holdSyncKeys`), and the Touch ID unlock loads
 //  them in the same press (`ProtectionOpenRoad.loadSyncKeysForTheSession`); before it, Castle + Touch ID never synced.
+//  VX-501 (VX-510 D-B4): and a TYPED Castle unlock loads them from the vault with the secret just typed
+//  (`ProtectionOpenRoad.loadSyncKeysAfterTypedUnlock`); before it, Always-ask Castle never synced after a lock.
 //
 //  VX-329 U1 — THE RELEASE SWITCH: the road reaches every store now, so this provider is the engine's live key seam
 //  (it was structural and dormant while the new road reached only the dev store, whose `SyncSession` never configures).

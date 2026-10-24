@@ -119,4 +119,34 @@ struct KeychainLeavesTests {
         #expect(leaf.sessionSyncKeys(accountID: account) == nil)
         #expect(throwaway.accounts(ProtectionNames.syncKeysService).isEmpty, "nothing written for the session")
     }
+
+    /// VX-517 (D-B8): a Touch ID sync-keys item with NO silent sibling — the production leaf (no candidates wired) does not
+    /// LIST it, which is why every forget and drop now deletes BY NAME: deleted by name it is gone, and never pressed (an
+    /// ACL'd item's delete needs no authentication — `writeSyncKeys(.touchid)` relies on it); released twice, and the
+    /// absent class released, is fine. The scope's purge lists, so this item is deleted by name in `defer` too. Enabled
+    /// where a finger is enrolled (a `.biometryCurrentSet` item needs one).
+    @Test(.enabled(if: LAEnvironmentBiometryLeaf().biometry().enrolled, "needs a Touch ID finger enrolled on this Mac"))
+    func aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName() throws {
+        let throwaway = ThrowawayScope()
+        let leaf = KeychainSyncKeysLeaf(scope: throwaway.scope)
+        let account = UUID().uuidString.lowercased()
+        let name = leaf.account(account, .touchid)
+        defer {
+            try? ProtectionKeychain.delete(service: KeychainSyncKeysLeaf.service, account: name, residence: .deviceOnly)
+            throwaway.purge()
+        }
+        let keys = AccountKeys(
+            master: Data(repeating: 7, count: 32), rowKeyID: UUID().uuidString.lowercased(),
+            rowKey: Data(repeating: 8, count: 32))
+        try leaf.writeSyncKeys(keys, accountID: account, itemClass: .touchid)
+        #expect(try ProtectionKeychain.exists(service: KeychainSyncKeysLeaf.service, account: name, residence: .deviceOnly))
+        #expect(try leaf.syncKeyItems().isEmpty, "the production listing is blind to a Touch ID item with no silent sibling")
+        #expect(try KeychainSyncKeysLeaf(scope: throwaway.scope, touchIDCandidates: { [account] }).syncKeyItems()
+            == [SyncKeysItemFact(accountID: account, itemClass: .touchid)], "named, the probe finds it — never pressed")
+        try leaf.deleteSyncKeys(accountID: account, itemClass: .touchid)
+        #expect(!(try ProtectionKeychain.exists(service: KeychainSyncKeysLeaf.service, account: name, residence: .deviceOnly)),
+                "deleted by name, never pressed — gone")
+        try leaf.deleteSyncKeys(accountID: account, itemClass: .touchid)  // released twice is fine
+        try leaf.deleteSyncKeys(accountID: account, itemClass: .silent)  // the absent class is fine
+    }
 }

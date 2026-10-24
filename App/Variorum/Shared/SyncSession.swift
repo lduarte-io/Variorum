@@ -25,7 +25,9 @@
 //  composes. (VX-483 — the one exception, DEBUG walk machinery only: a
 //  launch whose walk switch resolved to a project that is NOT the
 //  production mirror lifts the fence for that launch; a production ref
-//  refuses. Release: absolute.)
+//  refuses. VX-510 D-B3 — the second, the prod test road: armed by its
+//  switch and the allowlist, the dev store may sync with production only
+//  while a listed test account is signed in. Release: absolute.)
 //
 //  Triggers wired HERE (both platforms): after local writes settle (the
 //  outbox observation, debounced). Platform files add their own: foreground/
@@ -36,6 +38,29 @@ import Foundation
 import GRDB // AsyncValueObservation iteration (member import visibility)
 import Observation
 import VariorumCore
+
+/// **VX-510 D-A1 — what an account act's first round came to** (`SyncSession.roundNow`, through
+/// `AppServices.runFirstRound`): the act's sheet confirms it or says what blocks it, in the sync row's own words (VX-507).
+nonisolated enum FirstRoundOutcome: Equatable, Sendable {
+    /// The restore hold stands: no round runs before the one Resume press (13x row 7).
+    case held
+    /// No chain to run a round with — the A4 fence, a signed-out session, a failed owner adoption (F-5).
+    case notConfigured
+    /// The round ran; the scheduler's status as it left it.
+    case ran(SyncScheduler.Status)
+}
+
+/// **VX-510 ladder F-R1-1 — the scheduler surface a first round runs on**: `SyncScheduler`'s own public API (the trigger,
+/// the wait for idle, the status), named on the app's side — no `Sync/` line — so `SyncSession.runRound(on:)` is pinnable
+/// over a scripted scheduler: the gap it settles (a round another trigger started between the idle and the status read)
+/// cannot be produced on demand by the real one.
+nonisolated protocol FirstRoundScheduling: Actor {
+    func trigger()
+    func awaitIdle() async
+    var status: SyncScheduler.Status { get }
+}
+
+extension SyncScheduler: FirstRoundScheduling {}
 
 @MainActor
 @Observable
@@ -171,6 +196,39 @@ final class SyncSession {
         guard roundsHeld?() != true else { return }
         guard let scheduler else { return }
         Task { await scheduler.trigger() }
+    }
+
+    /// **VX-510 D-A1 — ONE ROUND, RUN TO ITS END, AND WHAT IT CAME TO** (an account act's first round — VX-498/VX-507).
+    /// Held like every other road (13x row 7): under the restore hold nothing runs (`.held`). No chain to run one with —
+    /// the A4 fence, a signed-out session, a failed owner adoption (the run record's F-5) — says so (`.notConfigured`)
+    /// rather than waiting forever. Otherwise the scheduler's EXISTING public API (no `Sync/` line): a trigger (coalescing —
+    /// a round already in flight is followed by exactly one more, which reads the keys as they stand now), then the wait
+    /// for idle, then the scheduler's own status as the round left it — SETTLED (`runRound(on:)`, the ladder's F-R1-1).
+    /// Nothing here cancels a round: a caller that stops waiting leaves it running.
+    func roundNow() async -> FirstRoundOutcome {
+        guard roundsHeld?() != true else { return .held }
+        guard let scheduler else { return .notConfigured }
+        return .ran(await Self.runRound(on: scheduler))
+    }
+
+    /// How many waits for idle a first round's settle may take (the ladder's F-R1-1).
+    static let firstRoundSettleWaits = 3
+
+    /// `roundNow`'s round on `scheduler` — **THE SETTLE (the ladder's F-R1-1)**: the trigger, the wait for idle, then the
+    /// status, read in an actor hop of its own — so a trigger serviced in that gap (the outbox settle's, the become-active
+    /// hook's, Sync now) may already have started a fresh round the read sees RUNNING. That status is not the outcome:
+    /// wait for idle again (a status reading syncing means a loop is running, so the wait is that round's end, never a
+    /// spin) and read again — at most `firstRoundSettleWaits` waits; coalescing settles it, and past the bound the sheet
+    /// says the round is still running. Never a second trigger: the re-await waits for the round already running.
+    static func runRound(on scheduler: some FirstRoundScheduling) async -> SyncScheduler.Status {
+        await scheduler.trigger()
+        var status = SyncScheduler.Status()
+        for _ in 0..<firstRoundSettleWaits {
+            await scheduler.awaitIdle()
+            status = await scheduler.status
+            guard status.isSyncing else { break }
+        }
+        return status
     }
 
     /// Waits for in-flight rounds — the iOS background transition uses this

@@ -28,7 +28,9 @@ nonisolated final class KeychainSyncKeysLeaf: SyncKeysLeaf, TouchIDPressRiding, 
 
     let scope: String
     /// The account ids whose Touch ID item the listing probes for by name (the listing skips an item that
-    /// would need authentication — `ProtectionKeychain`); VX-308's sync setup wires the bound account here.
+    /// would need authentication — `ProtectionKeychain`). Production wires none, so the listing is BLIND to a
+    /// Touch ID item with no silent sibling — why every forget and drop deletes BY NAME and never reads this
+    /// listing (VX-517, the VX-510 run record's D-B8).
     private let touchIDCandidates: @Sendable () -> Set<String>
     private let lock = NSLock()
     private var session: [String: AccountKeys] = [:]

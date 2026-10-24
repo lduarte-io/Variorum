@@ -1,0 +1,3413 @@
+# VX-510 — Run: the first-run sync failures
+
+**STATUS: CLOSED 2026-10-24 — merged by PR #186 (a merge commit); the closeout is THE CLOSEOUT section below, her
+handoff `notes/handoffs/vx-510-handoff.md`; VX-529 is the next run (`notes/handoffs/vx-529-kickoff.md`). (Kickoff
+2026-10-23.) Branch `vx-510-first-run-sync`, worktree `~/dev/variorum-vx-510`, the Pro — both removed after the merge.
+The charter is `notes/handoffs/vx-510-kickoff.md` (read whole); the window's trace is
+`notes/plans/fixes/vx-494-catchup-hang.md` (R-494-4…13); the sync-keys seam beside this one is
+`notes/plans/fixes/vx-488-window-hotfixes.md`. Members: VX-498 (the set-up act's silent no-round — the mechanism) ·
+VX-507 (the act confirms its first round) · VX-506 (the pre-join wording, riding) · VX-509 (the standing first-run
+*[removed for publication]*
+one-statement act surfaced to her the moment it lands). Cast (R-510-5): Opus orchestrates (the session moved off
+Fable at her word), Opus implements, one at a time; the ladder tries a fresh `fable-reviewer` first and runs on
+`opus-reviewer`s if it stalls on safeguards. Three units (R-510-9): A the fixes, B the drill + the prod road, C the
+two-posture lifecycle drill live on production.
+Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
+
+## HER KICKOFF RULINGS (2026-10-23, the kickoff message — verbatim-faithful; recorded before any work)
+
+- **R-510-1 — THE PROD ROAD, ruled (the kickoff file's fork is DECIDED):** "The kickoff file talks about choosing
+  between three roads for the live accounts — I'm ruling it now: make a deliberate, narrow exception so dev test
+  accounts can reach production (a named road for named test accounts; never delete the fence that keeps every
+  other walk off prod), because otherwise how will we ever know if something actually works in prod or not?"
+  → The acceptance's fresh accounts run against PRODUCTION through a named, narrow exception: the fence stays for
+  everything else; the exception admits only named test accounts. The exact seam is a design item below (D-ROAD).
+- **R-510-2 — TWO TEST ACCOUNTS, RIGOROUS LIFECYCLE:** "maybe we need two dev accounts, one standard and one
+  castle, and we need to go through RIGOROUS testing for both: signing up, syncing, making a backup, restoring a
+  backup, changing keys, trying the backup again, etc." And: "You can also bring those testing items to me — maybe
+  it's worth doing them now, as part of this. I don't know. I want to release soon and I NEED to know that
+  everywhere where the rubber meets the road is alright."
+  → Bundled as a kickoff-sitting decision below (THE SITTING BUNDLE): the first-run acceptance (several fresh
+  accounts, set-up + join, both postures) lands in THIS run per the charter; whether the FULL lifecycle drill
+  (backup → restore → key change → backup again, both postures) runs inside this run or as its own chartered
+  follow-up is her call — the kickoff prompt's own words: "if the full two-posture lifecycle drill outgrows this
+  run, charter it as its own written follow-up — but the first-run trace, fix, and live proof land in THIS run
+  either way."
+- **R-510-3 — PERMISSIONS:** "I do NOT CARE what I need to add to your permissions — propose narrow rules like
+  prod-read and I'll add them." → Any new road this run needs is proposed to her as a narrow named rule
+  (the `Tools/prod-read.sh` precedent), never worked around.
+- **R-510-4 — THE UNDER-TESTED-SEAMS SWEEP:** "we NEED real testing on every area where the rubber meets the road
+  because I want to launch soon. As part of this, sweep for what else is under-tested at the live seams and bring
+  me the map." → A deliverable of this run: THE MAP — every seam where the product meets the real world (live
+  Postgres, the real keychain, Touch ID, Sparkle, the DMG, the real filesystem, the MCP socket…), what evidence
+  each has today, and what it lacks; propose-only, hers to slot.
+- **R-510-5 — THE CAST, re-ruled mid-trace (2026-10-23, her words):** "I keep hitting safeguards on Fable - keep
+  going. Try to do a Fable cold review at the end but if that cold review stalls out due to safeguards, do the
+  ladder with Opus instead." → The session moved Fable → Opus 5.5 at her `/model`; this session (Opus) stays the
+  orchestrator; implementers stay `opus-implementer`. THE LADDER: round 1 is tried with a fresh `fable-reviewer`
+  (REVIEW_PROMPT verbatim); if that reviewer stalls on safeguards, the ladder runs with fresh `opus-reviewer`s
+  instead (the R-494-1 precedent). No line of this run is planned inside `Sources/VariorumCore/Sync/` (the fix
+  rides the scheduler's existing public API from `Shared/`); if one becomes necessary it is flagged here first.
+
+## HER SITTING RULINGS (2026-10-23, the kickoff bundle — four questions; her answers verbatim where she wrote them)
+
+- **R-510-6 — D-ROAD's shape: "Env flag + allowlist"** (the recommended option, chosen). Debug-only. A launch with
+  `VARIORUM_PROD_TEST_ROAD=1` AND a local allowlist file `~/.variorum/prod-test-accounts.env` naming the test
+  emails lets the DEV store sync with PRODUCTION only while signed into a listed account; any other account (hers
+  included) keeps the fence and the row says why; Release builds byte-unchanged. Pinned: the fence holds with no
+  flag; refuses an unlisted account. Built in unit B.
+- **R-510-7 — the test accounts' confirmation: "can you confirm them in the dashboard via the PAT? i want you to
+  be as capable as possible"** → the PAT road, as a NARROW named script per R-510-3 (the `Tools/prod-read.sh`
+  shape): `Tools/prod-confirm-test-user.sh '<email>'` confirms ONE unconfirmed auth user whose email is on the
+  allowlist file and carries the plainly-test marker, nothing else (the one statement, ref-pinned); its allow rule
+  proposed to her. The orchestrator writes it (an environment act).
+- **R-510-8 — the secrets: "Helper reads a file"** (the recommended option, chosen). A typing helper modelled on
+  `type-throwaway-passphrase` reads `~/.variorum/prod-test-accounts.env` (walk-build-only guard; values never
+  echoed, never committed); the orchestrator generates random values into the file without printing them; one
+  narrow allow rule for the helper, proposed to her.
+- **R-510-9 — the full two-posture lifecycle drill: "this run, I'll do a compact mid round if we need"** → IN THIS
+  RUN, as unit C — her explicit split ruling over the two-units guidance (PhaseSizingGuidance §3: a third unit is a
+  split ruled at the sitting — ruled: kept in one run); she will compact this orchestrator's context mid-run if
+  needed. The drill: for a Standard and a Castle test account on production — sign up, set up, first round, a
+  second library joins, back up, restore a backup, change keys (passphrase, new words; the Castle crossings),
+  open the older backup again with the new secrets (rule 4/5's floor), every leg verified in the app AND server-side.
+- **R-510-10 — the address shape, delegated: "you can pick the address shape."** → PICKED: plus-addresses on her
+  *[removed for publication]*
+  confirmation email; a made-up or reserved domain bounces at her auth mail provider, and at her low send volume a
+  few bounces are a high bounce RATE (providers pause senders on it) — her real users' confirmation emails would
+  pay. These deliver harmlessly to her inbox (plainly-test, filterable), and `Tools/prod-confirm-test-user.sh`
+  confirms them, so she never clicks.
+- **R-510-11 — VX-501 JOINS THE RUN: "Join this run (Recommended)"** (asked because the Castle lifecycle leg locks
+  and unlocks under Always ask, where a typed unlock loads no sync keys). Built in unit B to her ruled direction
+  (R-494-4: "a typed unlock should hold sync keys in session until lock"; the ticket names the existing shape —
+  `KeyDoors.holdSyncKeysForTheSession` derives the master from a typed secret), pinned red-on-old, then proven
+  live in unit C's Castle leg. Linear: parented under VX-510.
+- **R-510-12 — the allow rules: "You add them"** → the orchestrator added exactly the five lines named in THE
+  TEST-ACCOUNT ROAD below to `~/dev/variorum/.claude/settings.local.json` (19 → 24 rules, JSON validated; nothing
+  else changed).
+- **R-510-13 — the words: "your word choices are fine for now and we'll keep moving forward provisionally."** →
+  P-VX510-1…3 and P-VX510-A1…A4 (+ the not-yet row's quiet style) STAND as built, provisional; no re-ask until the
+  closeout's canon pass.
+- **R-510-14 — VX-511, the words card after a join: "Join retires the card (Recommended)"** → IN THIS RUN (unit B2,
+  D-B6): an account act that lands with the library holding the account's pair marks the library's words recorded;
+  Settings ▸ New Words stays the deliberate door. Linear: parented under VX-510.
+- **R-510-15 — VX-513, the read-only check: "Yes, in this run (Recommended)"** → IN THIS RUN (unit B3, D-B7, its own
+  small session after B2 — a new face). Linear: parented under VX-510.
+- **R-510-16 — VX-517 (2026-10-23 ~21:50): "I lean towards joining this run. Do you agree or disagree? Do you need me to
+  do touchid at any moment to help?"** → the orchestrator AGREED (the remainder of VX-503's class; rule 16 untrue for the
+  Touch ID class; the run holds the custody slot and the Fable review) → IN THIS RUN as **unit B4** (D-B8 below), parented
+  under VX-510; her Touch ID for the live proof at a window she picks (signalled by the ambient, R-510-18).
+*[removed for publication]*
+  she's available. It might not be during a run."** → noted on VX-508; the run's VX-508 watch ENDS.
+- **VX-521, her thoughts: "if you show them, how can the account coexist with those two? someone who clicks replace and
+  writes down the 12 words but closes the app before confirming theyve written them down might be quite confused.
+  thoughts?"** → the orchestrator agreed (one live set per account; holding the change until the acknowledgement makes
+  her confusing case real); recommended keeping today's behavior and closing VX-521 at her word (ticket comment).
+- **VX-527, her hand (the Pro's own trackpad): "click on use your twelve words first only works on the little arrow - I
+  used the pro's own trackpad. the words don't open it." + "the click affordance is very small"** → VX-527 CONFIRMED
+  (retitled, Backlog); offered to her as a rider (no answer yet — default: a later run).
+- **R-510-18 — her signal: "just let me know when I'm needed - if you want to send an obvious signal, put up one of the
+  orchestrator's decorations (the koi fish style ones) when you need me and i'm sure to see it and come over."** → memory
+  `signal-her-with-the-ambient`; this run raises `Tools/ambient on --allow-claimant vx-510` when blocked on her hands.
+- **Her questions (~22:30): "you can do the offline check if you want / if you think it's important. I can turn the wifi
+  back on and I'm next to the pro anyway. also, if a secret opens your account but not the library, shouldn't the library
+  follow? if you type the secret? what's the issue? do you think VX-527 should be a rider on this run ? you can leave it
+  for later if you want"** → the offline row WALKED (unit C record); the follow question REPRODUCED live as a real gap →
+  **VX-529** (High, Confirmed, Needs Lillian — join-this-run + the catch-up's shape offered to her: a "Follow your
+  account…" catch-up once the library is open, the lobby naming the account's new passphrase, the check door's fourth
+  answer carrying the same door, the key door's wrong refusal replaced by VX-113's sentence); **VX-527 → a RIDER** (the
+  orchestrator's call at her delegation; parented under VX-510; a small unit after B4).
+- **R-510-19 — her answers (2026-10-24 ~00:15): "cancel it: cancelled, it closed. catch up: by both places, you mean type
+  the old and type the new? and how is new passphrase opens everythin geven an option given what you've said? VX-529: its
+  own run, next. cutover: tes, that plan."** → **VX-529 = ITS OWN RUN, NEXT** (its shape decided at that run's kickoff
+  with a design memo, P-5); **THE CUTOVER PLAN RATIFIED** — this session finishes VX-517's live proof with her, closes unit
+  C, hands off; the successor orchestrator runs the VX-527 rider, the ladder (Fable first, Opus on stall) over the whole
+  run diff, the full Mac + phone batches, an independent re-walk of the first-run legs on the final build (re-reading the
+  server rows), closeout, PR (`notes/plans/fixes/vx-510-orchestrator-handoff.md`).
+- **R-510-20 — VX-529's boundary (00:4x): "ok - no - we are NOT changing the castle rules at all. literally not even close
+  to being an option. we DIED to get that design to the point it is in - we aren't changing anything stored anywhere. so if
+  you need to type both secrets, that's fine, we just need to present that to users in a way that makes sense. because if
+  you had sync, you could move that library aside and let sync fill it in with your account passphrase, right? like you
+  COULD get a new library with the new passphrase there."** → the store-each-library's-key option WITHDRAWN (memory
+  `castle-design-is-frozen`); the catch-up types both secrets; her set-aside-and-rejoin road confirmed as a real second road
+  (caveat: unsynced writing stays in the set-aside library); both on VX-529 for its kickoff.
+- **R-510-21 — the ambient (on VX-531): "it doesn't have to hide my cursor if that's what's causing the problem. also, the
+  coordinator is insie dmux too - tmux is in the ghostty window. and it can come up without taking focus. showing the
+  cursor is fine."** → VX-531's shape ruled (up without focus, cursor visible, when activation is declined); the session's
+  first explanation corrected on the ticket (which app is frontmost on the Pro at launch decides it, not tmux).
+
+## HER AIR REPORT (2026-10-23 evening, after the 0.10 update — her words verbatim, each item traced and dispositioned)
+
+1. **"I tried running the variorum mcp reconnection on my macbook air post update and my variorum mcp connection is
+   refusing with: Failed to connect to Variorum -32000. re-set up? unexpected or normal?"** — EXPECTED by construction:
+   the MCP on-switch and every client binding live in the library's LOCAL-ONLY grants tables (`MCPSwitch.server`
+   reads OFF with no row — `Sources/VariorumCore/Queries/MCPGrantQueries.swift`), and the crossing's Start fresh made
+   a new library; the shim's -32000 is its "MCP server is not running" refusal (`MCPShim.refusalMessage(.notRunning)`).
+   Remedy: Settings ▸ MCP ▸ Enable, then re-run each client's setup. The silence is a gap → **VX-512** (Improvement,
+   Confirmed, MCP, Medium).
+2. **"I also do have a 12 words popup banner which is weird since i had 12 words before this migration already"** — a
+   REAL FINDING: the band card's ledger is marked recorded by the look, Make this my library's carry and the empty-slot
+   landing, never by a JOIN; the card's look mints fresh words through rule 6's act, which on a synced library re-wraps
+   the ACCOUNT's vault lock — so pressing the card would silently replace her account's recovery words. → **VX-511**
+   (Bug, Confirmed, Castle & sync, High). Her safe move now: ✕ (or Later), never the card.
+3. **"I also no longer seen an option in settings to test your passphrase / 12 words to make sure you have them
+   right. Should I reset my 12 words?"** — the new road has no read-only check (the key doors only change secrets) →
+   **VX-513** (Feature, Castle & sync, Medium). Answer: do NOT reset — her words should still be the account's (a join
+   adopts the account's pair, rule 7). The read-only check today: Settings ▸ Data Safety ▸ Back up now, then Look inside
+   that backup and type the twelve words (rule 17 — Look inside writes nothing; `LookInsideModel` reads twelve valid
+   words as the words).
+4. **Seen in her screenshot (not asked):** two seeded Sherlock books on Welcome, both owned — server-side, both
+   created_at 1892-10-14, updated 10-07 (13 members) and 10-18 (14 members), so on every device and older than 0.10
+   → **VX-514** (Bug, Suspected, Books, Low) — **CLOSED at her word, not a bug:** "you don't need to worry about the
+   sherlock holmes double book. that's because i had edited one of them before we did the deduplication things. it's
+   not a bug but i will delete one of them." (The dedupe kept both by design — an edited copy is never retired.)
+5. **"how am I supposed to be able to grant multiple wings to claude code? I don't see the option to add another one
+   here and when I added it, it was in the old MCP pane"** (her screenshot: Shared with AI, one PlanetLillian wing grant
+   with Change… · Revoke) — WORKS, but hidden: the Clients tab's per-client "Change…" opens the grant sheet FRESH
+   (`MCPGrantOpening(client:, approving: false)`, `replacing: []` — `MCPPane.clientRow`; nothing replaced), and ⌥⌘A opens
+   the same sheet from anywhere (WHERE: a note · a book · a wing; one standing row per client × place since VX-393, so a
+   second wing is a second row). Shared with AI's own Change… REPLACES. The labelling is the gap → **VX-515**
+   (Improvement, Confirmed, MCP, Medium).
+6. **"it keeps just changing what is shown though - it doesn't show both & I can see that the other one is revoked
+   when I grant that one. file a ticket for it - this needs to be fixed but definitely not in this run. there also needs
+   to be a way to see everything you've granted, following that more will be granted… Just let me know if you add that
+   to VX-515."** — **The orchestrator's item-5 reading was WRONG in practice** (it read only the sheet's opening —
+   `replacing: []`): a second wing grant REVOKES the first. Not the schema (`uq_mcp_grant_standing_place` is per client ×
+   scope kind × scope id — `MCPGrantSchema.swift:263`); untraced, suspected in the grant road's upgrade-in-place.
+   → **VX-516** (Bug, Confirmed, MCP, High; NOT this run, her word). Her "see everything granted" ask ADDED to VX-515
+   (now two asks: a visible add door + one place listing every grant).
+7. **"would it be better for the debug app to be less sandboxed? I just want the testing to catch any real issues."** —
+   ANSWERED: no — the Release app is sandboxed, so a Debug app with a wider sandbox would test a different app and hide
+   exactly the failures worth catching (the keychain access groups, file reach, the MCP socket's container path all live
+   inside the sandbox). The closer Debug stays to Release, the more a walk proves; that is why F-B1-1 was ruled (B) — the
+   test machinery reaches around the sandbox from outside, the app's own sandbox stays identical to Release's.
+8. **"I'm off the pro, so go ahead with the walk"** — the stage is the walk's (claim `vx-510`).
+
+## THE TEST-ACCOUNT ROAD — the tools (built by the orchestrator, 2026-10-23; environment acts per R-510-7/-8)
+
+- `Tools/prod-confirm-test-user.sh '<email>'` (committed `0043d2bf3`, this branch): the ONE UPDATE of
+  `auth.users.email_confirmed_at` on a still-unconfirmed row whose email is on the allowlist and carries `vxtest`;
+  plain-address guard (the email is spliced into SQL); ref-pinned to production. Its three refusals exercised
+  offline (no marker · not listed · an injection-shaped string) — each refused before any network call.
+- `~/.variorum/prod-test-accounts.env` (mode 600, LOCAL, never committed): the allowlist `VARIORUM_PRODTEST_EMAILS`
+  + per account (`STD`, `CASTLE`, `DEL`) the email, a random 24-character sign-in password and a random
+  28-character library passphrase (alphanumeric — System Events keystrokes them faithfully). Generated by a script;
+  no value was ever printed.
+- `~/.variorum/bin/type-prod-test-secret <account> <field>` (mode 700, LOCAL): types `email | password | passphrase
+  | words` into the focused field — refuses unless the source is mode 600, the account's email is listed and carries
+  `vxtest`, the frontmost app is the Debug build, and that process carries `VARIORUM_PROD_TEST_ROAD=1` and NO walk
+  project (the two roads are exclusive). The `type-throwaway-passphrase` shape.
+- `~/.variorum/bin/stash-prod-test-words <account>` (mode 700, LOCAL): after the words look's own Copy, writes the
+  twelve words from the clipboard to `~/.variorum/prod-test-words-<account>` (mode 600) and clears the clipboard —
+  never printed; the same frontmost/env guard; refuses anything but exactly twelve lowercase words.
+- **The allow rules (R-510-3; ADDED by the orchestrator at R-510-12)** — in `.claude/settings.local.json`, the prod-read rule's form:
+  `Bash(Tools/prod-confirm-test-user.sh *)`, `Bash(<home>/dev/variorum/Tools/prod-confirm-test-user.sh *)`,
+  `Bash(<home>/dev/variorum-vx-510/Tools/prod-confirm-test-user.sh *)`,
+  `Bash(<home>/.variorum/bin/type-prod-test-secret *)`,
+  `Bash(<home>/.variorum/bin/stash-prod-test-words *)`.
+
+## THE CHARTER (the kickoff file's, binding)
+
+1. **THE TRACE, first and whole** — (a) the CURRENT 0.10 set-up/join acts end-to-end: the act → `SyncSession`/
+   scheduler seam (does the Standard set-up act trigger the first round? does anything re-evaluate the row's last
+   refusal after the act?), AND the act's own failure modes (can the vault write fail or be cancelled while the UI
+   *[removed for publication]*
+   *[removed for publication]*
+   archaeology explains; only the current code gets fixed. Findings land HERE before any fix session sees them.
+2. **The fixes, pin-before-fix per member:** VX-498 (red-on-old by behavioral revert), VX-507 (the act confirms
+   its first round in its own sheet, or says what blocks it), VX-506 (the pre-join wording — her line: "sync
+   shouldn't seem like you're restarting it"), VX-509 (the standing drill, built AS the run's evidence vehicle).
+3. **THE ACCEPTANCE (hers, use-shaped):** SEVERAL fresh accounts made and proven END-TO-END — sign-up → set-up
+   (and at least one JOIN from a second library) → the first round lands → the row reads "Synced ‹time›" WITHOUT
+   a relaunch — each verified SERVER-SIDE by `Tools/prod-read.sh` (the vault row, the data rows, the device
+   cursor). Per R-510-1 this runs on PRODUCTION through the named test-account road. Test accounts use
+   plainly-test emails, are recorded here, and their cleanup (the account-deletion road — itself worth exercising
+   once) is part of the run.
+4. **Riders and neighbors:** VX-503 (the Standard join's Touch ID prompt — same seam, trace it if the window is
+   *[removed for publication]*
+   `Tools/prod-read.sh` at natural moments; the moment it lands, surface the one-statement act for her `!` hand.
+
+## LIVE STATUS (flip per piece, same commit; unverified claims marked PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Kickoff: preflight read whole (the kickoff file, vx-494 WHOLE, vx-488, CLAUDE.md + canon, SyncSpec WHOLE, CastleRules WHOLE, SurfaceContracts, the resiliency protocol, the master plan, TICKETS, QUESTIONS tail); worktree + branch; in-flight row on main; VX-510 In Progress with members parented; this record with her kickoff rulings | DONE (this commit) |
+*[removed for publication]*
+*[removed for publication]*
+| 3 | The kickoff sitting bundle answered (D-ROAD shape; lifecycle drill in-run or chartered; the acceptance's account set) | DONE — R-510-6…9 (env flag + allowlist; the PAT confirmation script; the typing helper over a generated file; the lifecycle drill IN this run as unit C) |
+| 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | UNIT A DONE (`33c169f76`…`92bd0740a`; harness 449/79 green; 14 reverts red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 37/6 green); F-6 RULED (A) → unit B1; **the stage batch at `92bd0740a`** (a detached clean checkout `~/dev/variorum-vx-510-stage`, stage claim `vx-510`, the WHOLE Mac target): `✔ Test run with 5141 tests in 902 suites passed after 2188.113 seconds with 14 known issues`, `** TEST SUCCEEDED **` (VX-494's closing 5118/898 + unit A's 23 tests in 4 suites, exactly); stage released |
+| 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | UNIT B1 DONE (`2576629c7`…`31b8e2636`; `FirstRunDrillTests` every arm + the negatives; `Tools/WalkKit/first-run-walk.sh` + release.sh's step-0 gate row; harness 477/82 green; 18 reverts red as named; re-run by the orchestrator 48/6 green); the Mac stage batch PENDING (the closing run) |
+| 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | DONE — unit B1 (D-B3) + unit B2's F-B1-1 (`4a5ef39e3`: the list rides `VARIORUM_PRODTEST_EMAILS` in the launch env); ARMED and used live through unit C (three accounts) |
+| 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | UNIT B2 DONE (`4a5ef39e3`…`f4af7e368`; harness 502/85 green; reverts RF-1…6, RD4-1…8, RD6-1…5, RD5-1…2 red as named; Mac + iOS build-for-testing green; claims spot-checked by the orchestrator); VX-501 + VX-511 GREEN LIVE on production (unit C C2/C4); VX-503 fixed (`226cf7c20`); T-B5-2 → **VX-517** (Needs Lillian); the Mac stage batch PENDING (the closing run) |
+| 6c | VX-513 (the read-only check-your-secrets door) | UNIT B3 DONE (`73dc65dab`…`2e3d335d8`; harness 519/89 green; RC-1…16 red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 65/9 green; P-VX510-B3-2 ruled (b) provisionally); **GREEN LIVE** (rows 1–5, offline included; nothing written); the Mac stage batch PENDING (the closing run) |
+| 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 DONE (`5416bcaca`…`fe42afe4f`; harness 521/90; core protection 546/103 re-run by the orchestrator; RE-0…13 red as named; Mac + iOS build-for-testing green); F-B4-1 accepted as residue; O-B4-1 → VX-530; **GREEN LIVE** (red leg on the pre-fix build: two Touch ID sheets on a Standard key door; green leg on the post-fix build: none; the Castle guard intact; VX-530 seen live) |
+| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere) | VX-527: UNIT B5 DONE (`d122f9bbc`…`8df5966ec`; the pin red-on-old, the revert verified, Mac + iOS build-for-testing green; the Mac-target pin run rides the closing stage batch, the live press the re-walk) · VX-529: ITS OWN RUN, NEXT (R-510-19/20) |
+| 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
+| 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
+| 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
+| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | DONE — round 1 (0B·0M·3m·2n) → L1 + O-L1-1 → round 2 (0B·0M·1m·1n, every round-1 fix SOUND, the harness independently re-run 524/90) → F-R2-1/-2 fixed by the orchestrator, the reviewer's final check 2/2 SOUND; the merge gates are row 10's batch + the re-walk |
+| 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | **THE CLOSING STAGE BATCH GREEN (2026-10-24, the successor; a detached checkout at `b3c79a191`, stage claim `vx-510`):** the CORE package whole (debug, headless) green with `MCPHarnessTimeLimitTests` run ISOLATED green ×2 — its 15 s wall-clock bound reproducibly fails under the full-parallel run (18.9–19.3 s; an untouched pre-existing test; → **VX-532**, Low, Test-only); the WHOLE MAC TARGET `✔ Test run with 5221 tests in 915 suites passed after 2250.101 seconds with 14 known issues` `** TEST SUCCEEDED **` — the real-keychain arm `aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` RAN and passed (a finger enrolled; the only skips the standing opt-in suites: the capture harness, the singleton-window oracles, the Apple-key round-trip); the PHONE on the iPhone 17 Pro simulator `✔ 62 tests in 7 suites passed` + `✔ 47 tests in 15 suites passed with 2 known issues`, zero skips — **a batch lesson recorded:** the handoff's phone list named FILES (`MobileProtectionTests`, `MobileTutorialWalkTests`) whose `@Suite` types are named differently, so the first `-only-testing` pass silently matched nothing for them; the suite TYPES were enumerated and run (15 more suites). The re-walk: the del leg DONE LIVE on the final build (THE SUCCESSOR'S RE-WALK below); **the Castle leg GREEN + the restore CLEAN (THE THIRD ORCHESTRATOR'S CASTLE LEG) + THE CLOSEOUT DONE (its section); PR #186, a merge commit** |
+
+## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
+
+Instance checks `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store instances by
+STORE, never quit/kill; no Release builds or /Applications refreshes while one lives. EVERY `xcodebuild test` run
+and anything touching the screen or a shared store holds a `Tools/stage` claim. Headless `swift build`/`swift
+test` is stage-free. zsh `pipestatus`; NEVER a custom build configuration. Backups WAL-safe, UTC names, into
+`Backups/safety-copies/` (A1). Walks on the DEV slot only; the throwaway env `ps eww`-verified before any
+credential (MAP THE NAMES — the env file's keys are `VARIORUM_THROWAWAY_*`, the walk switch wants
+`VARIORUM_WALK_*`); the dev Castle pair `~/.variorum/dev-castle.env`; the throwaway's users
+`~/.variorum/dev-vault-throwaway.env`; her helpers `~/.variorum/bin/type-throwaway-passphrase` (+ credential
+files), walk-build-only by their own guard; values never echoed, never committed, NEVER typed into driven UI.
+The walk's Debug build lives at `App/Variorum/DerivedData/vx510` (never the standard path). The REAL dev slot is
+the DEBUG container (`~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/
+Variorum-dev/`). The dev slot's files go aside by `mv`, ALL top-level files; restore whole before release;
+sign the walk session OUT before restoring (O-B2). cliclick cannot press Touch ID; SwiftUI onSubmit needs System
+Events `key code 36`. **Production is read-only except at her hand:** `Tools/prod-read.sh` for SELECTs
+*[removed for publication]*
+Debug app NEVER signs into her real account. Implementers: no subagents, no stage, no Debug launches, no
+dev-store touch; headless + `build-for-testing` only; checkpoint commits per piece, push each, LIVE STATUS flips
+in the same commit, PENDING on every unverified claim; foreground waits only (poll, never `tail -f`, never end a
+turn waiting).
+
+## THE TRACE (piece 1 — the orchestrator's own read, 2026-10-23; findings land here before any fix session sees them)
+
+### T-1 — VX-498's MECHANISM (CONFIRMED in code, a REGRESSION from the release switch)
+
+**On 0.10, nothing starts a sync round after an account act that lands on the open session.** The chain:
+
+1. Sign-in → `AppServices.variorumSignInChanged` → `connectSyncIfAllowed` (`App/Variorum/Shared/AppServices.swift:396`)
+   → `sync.configure(…)` + `sync.triggerSync()`. The outbox observation (`SyncSession.swift:154`) also fires once at
+   configure (a fresh library's seed rows sit in the outbox) → a settle trigger 3 s later. Both rounds run BEFORE
+   the set-up: `NewRoadSyncKeyProvider.currentKeys()` (`Shared/Protection/NewRoadSyncKeyProvider.swift:41`) throws
+   `notEnrolled` (the record names no account) → the engine refuses `encryptionKeysUnavailable` → the row's status
+   becomes "Sync locked". **Correct so far — the library has not joined.**
+2. Settings ▸ Protection ▸ Turn on sync → `RoadAccountModel.open` → `RoadAccountConfirmModel.submit` →
+   `roads.press` → `AppBootstrap.accountRoads().press` (`AppBootstrap.swift:991`) → (not re-keying)
+   `ProtectionAccountRoad.press` → `perform` → `executor.setUpSync` (or `enroll` for a same-posture join)
+   (`ProtectionAccountActs.swift:261–266`). The act lands: the vault written, the record names the account, the
+   keys held (Standard: the silent item). `session.library = library` updates the ATTACHED session object, so
+   the provider would now find keys **if asked**.
+3. After the act: the confirm's `land` → `RoadAccountModel.refresh()` + `roads.landed()` → the bootstrap's
+   `landed:` closure (`AppBootstrap.swift:1006–1012`): `roadCrossings.refresh`, `roadStanding.rereadPassphrase`,
+   `rereadAccountBinding`, `roadKeyDoors.refresh`. **Faces only. Nothing reaches `AppServices`/`SyncSession`.**
+   The bootstrap does not hold the services (they are composed per open in `VariorumApp`'s `.task`, which wires
+   only `signOutRoad`, `afterAccountDeleted`, the backup hook and the restore hold's gates onto them).
+4. The row's status changes only when a round completes (`SyncSession.status` ← `scheduler.statusUpdates()`), so
+   it keeps saying "Sync locked" until something triggers a round. The Mac's trigger roads, exhaustively
+   (`grep triggerSync|resumeSync|connectSyncIfAllowed` over `App/`): launch/sign-in (`connectSyncIfAllowed`), the
+   outbox settle (a LOCAL WRITE — typing), `NSApplication.didBecomeActiveNotification` (`VariorumApp.swift:367`),
+   the row's Sync now press (`SyncStatusViews.swift:596`), the restore hold's Resume. **The act is none of them.**
+   Settings is a window of the same app, so returning to the main window is not a become-active either.
+
+**The regression, by commit:** on 0.9.8 the old road's enrollment landing healed this by design —
+`EncryptionSession.adoptEnrolledMaterial` called `onKeysChanged?()`, which `AppServices.start()` wired to
+`sync.triggerSync()` ("Enrollment/setup landing keys heals the engine's keys-refusal immediately (Phase 14b): one
+round, through the ordinary trigger" — `git show 58515fe9c:App/Variorum/Shared/AppServices.swift`, ~line 247).
+**VX-329 U1 (`f2306a535`, 2026-10-22) deleted the encryption session with today's road and never rewired an
+equivalent on the new road's account acts.** So every 0.10 user's Standard set-up sits locked until they type,
+*[removed for publication]*
+
+**Why the JOIN and the Castle set-up APPEARED to work (SUSPECTED, recorded — not load-bearing for the fix):** both
+observed cases raised a SYSTEM authentication prompt mid-act — the Standard join's Touch ID prompt (VX-503, the
+vx-494 walk's O-1) and the Castle set-up's Touch ID gate (the vx-488 rehearsal) — and a system prompt taking focus
+then returning it is a `didBecomeActive`, which triggers a round. The plain Standard set-up raises no system prompt,
+so no accidental become-active and no round. The fix below makes the round deterministic either way.
+
+### T-2 — the act's own failure modes (can the vault write fail while the UI reads success?)
+
+- **F-1 (CLEAN):** `perform` reports `.made` only when the core act returned (`acted != nil`) or the slot opens under
+  the NEW key past a swap (`landedWhole: false` — a re-keying act; the next open's settle finishes it and says its
+  Done). A thrown act whose slot still opens under the old key reports `.refused(sentence)` and the sheet shows the
+  sentence. So on 0.10 a set-up whose vault write FAILED never reads as success in the sheet.
+- **F-2 (the silent gap — VX-507's class):** "success" today means *the vault exists and the keys are held*; it
+  never means *a round ran*. With T-1, a successful act is followed by NO round, and even with a round, its outcome
+  (offline, lockstep refusal, the account-binding gate, a server refusal) reaches only the quiet row — never the
+  sheet that said "done". This is the whole of VX-507.
+- **F-3 (the pre-join words — VX-506's class):** before the act, the row reads "Sync locked — this Mac hasn't
+  unlocked your account's sync keys" for a library that has NOT joined (and, for a vaultless account, keys that do
+  not exist) — the line asserts a lock where there is only a not-yet; and Settings' door reads "Turn on sync" over
+  the JOIN arm for an account that already syncs. Her words: "should that not be sign into sync instead of turn on?";
+  "sync shouldn't seem like you're restarting it."
+*[removed for publication]*
+  it writes nothing and nothing afterward says sync is not on except the row (F-3's words). The fix for the
+  walk-away class is F-3's honest row plus VX-507's sheet: the row must say "not on yet" (with its door) until a
+  round has actually landed.
+- **F-5 (owner adoption — a second silent gate, pre-existing):** `connectSyncIfAllowed` returns early when
+  `runOwnerAdoption()` fails; the only trace is `account.lastError` (rendered on the Account sheet only). The chain
+  stays uncomposed until sign-out/in or a relaunch, and every later trigger is a no-op (`scheduler == nil`). Not
+  observed in the field; recorded for VX-507's design: the first-round confirmation must report "not configured"
+  honestly rather than wait forever.
+- **F-6 (re-keying acts):** a join across postures and every follow run through `accountActOnNewRoad` → the reopen
+  → fresh services → `start()` → `connectSyncIfAllowed` → a trigger. So those DO get a round, through the rebuild.
+  VX-507's confirmation for them must survive the reopen (the sheet's model is rebuilt with the bootstrap's open) —
+  an implementer fork, below.
+
+### T-3 — the production facts (read-only, `Tools/prod-read.sh`, 2026-10-23)
+
+Per-account footprint (vault · key-proof enrollment secret `kp:<uid>` · challenges · write-budget · tenant-seq ·
+*[removed for publication]*
+*[removed for publication]*
+2026-10-22 20:31, last password sign-in 20:32:58, vault 20:39:21 standard, proof hash set) 1 · **0** · 0 · 0 · 0 · 0
+*[removed for publication]*
+*[removed for publication]*
+never held anything.
+
+## THE ARCHAEOLOGY (piece 2 — the deleted code as the testers ran it; it explains, only the current code is fixed)
+
+*[removed for publication]*
+(`SyncEnrollmentModel` + `SyncEnrollmentView`, deleted at VX-329 U1) ran FOUR screens: Screen 1 explain → **Screen 2
+the passphrase, which SET the library's passphrase on the spot** (`submitPassphrase` → `tie.setPassphrase(typed)`,
+a local key-file write) → Screen 3 the twelve words through `WordsCeremony` (shown, "written down", then CONFIRMED
+BY EXACT RE-ENTRY of all twelve) → only then `create()` → `encryption.setUp` → **the vault's server write** →
+Screen 4 done. **THE SILENT WINDOW, FOUND:** everything a user would call "setting up sync" — choosing the
+encryption passphrase — landed at Screen 2, while the account enrollment waited behind the twelve-word ceremony.
+Closing the sheet (or failing the re-entry, or the Standard arm's iCloud-Keychain refusal at `create`) anywhere
+after Screen 2 left a library WITH a passphrase and an account with NO vault; afterwards the row read **"Sync
+locked — enter your encryption passphrase"** (0.9.4's `SyncStatusViews.lockedLabel`) — to a person who had just
+chosen one, an invitation to believe it was set up and merely locked. This fits every fact: his memory ("he set up
+sync, which forces you to set up a passphrase"), the server (no vault, no `kp:`, no cursor — not one round), and his
+later "That passphrase doesn't open this library" (the library DID have a passphrase). It cannot be proven now (no
+logs survive) — it is the one story the code and the server both allow without a failure nobody saw. The current
+road has no such split: the set-up types both secrets on one sheet and the act is one plan (rule 20).
+
+*[removed for publication]*
+old road's set-up DID wire an immediate round (`adoptEnrolledMaterial` → `onKeysChanged` → `triggerSync`), and
+0.9.8's `connectSyncIfAllowed` composed the chain at sign-in without waiting for enrollment. Yet no round reached
+the key-proof step (T-3). The stories the code still allows: (A1) the chain never composed at her sign-in (F-5's
+owner-adoption gate — its message lives only on the Account sheet), so the post-set-up trigger was a no-op and no
+relaunch came before the deploy cut 0.9.8 off; (A2) the triggered round refused locally before the wire (the custody
+save refused — "sync will ask again next launch" — or the lockstep read failed offline); (A3) the app quit or the Mac
+slept before the round began, and no launch came before the deploy. The server cannot separate them. Her 0.10 road
+is a JOIN (her vault exists) — under T-1 a same-posture join on 0.10 also lands with no round unless a system prompt
+bounces focus. **Either way, VX-507 is the cure for the class:** the act's sheet confirms the first round or says
+what blocks it, so silence becomes impossible on every build from this one.
+
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+= 14:31 MDT, the vault 20:39Z = 14:39 MDT; the deploy that evening.) So her zero-rounds state is WHOLLY the 0.9.8-era
+question (A1–A3 above), and the T-1 mechanism matters for her FORWARD road only: her eventual 0.10 upgrade is a join
+*[removed for publication]*
+Screen-2 window: "Should I just set the passphrase to the same I used before? I don't think I have 12 words saved
+anywhere" — a COMPLETED 0.9.4 enrollment walked him through the words ceremony with exact re-entry, so holding a
+passphrase while never having seen twelve words is precisely the closed-after-Screen-2 state; her reading: "that
+*[removed for publication]*
+reading above is now independently supported, not merely unexcluded.
+
+## THE FIX DESIGN — UNIT A (VX-498 · VX-507 · VX-506; the architect's design, built by implementer session A)
+
+- **D-A1 — the round after the act (VX-498).** `RoadAccountModel` gains a composition-root road beside
+  `signOutRoad` (its precedent): `firstRound: (@MainActor () async -> FirstRoundOutcome)?`, wired where the services
+  are composed (`VariorumApp`'s `.task`, beside `signOutRoad`) to `AppServices.runFirstRound()`. That method
+  reconnects the chain when nothing configured it (the `resumeSync` shape) and then runs ONE round to its end:
+  `SyncSession.roundNow()` = (held → `.held`; not configured → `.notConfigured`; else `scheduler.trigger()` +
+  `awaitIdle()` + the scheduler's `status` read after idle) — the scheduler's EXISTING public API, no `Sync/` line
+  (its coalescing means a round already in flight is followed by one more, which sees the new keys). It is called
+  for every account door whose landing changes sync's standing on the open session: Turn on sync (both arms) and
+  Move. Leaves call nothing. The composition glue moves out of view code into ONE testable function on the
+  bootstrap (e.g. `AppBootstrap.attach(services:)` — the services-held roads: `signOutRoad`, `firstRound`, the
+  deletion hook) so the drill can drive bootstrap + services + a fake server end to end.
+- **D-A2 — the act's sheet confirms its first round (VX-507).** On `.made` for those doors the confirm model starts
+  the first round at once and the sheet does not close on its own: after the words moment where one is owed, it
+  shows the round's progress and then its outcome — a success line, or what blocks it in the row's own words (one
+  presentation source: the status row's sentence for that status — offline, lockstep, keys, the account gate, a
+  server refusal, held, not configured). One door, Done, always available ("you can close this — sync keeps going,
+  and the bar at the bottom says when it's done"), so a long first catch-up never holds the sheet hostage. With no
+  road (the phone until VM-8, a test world without one) the sheet finishes exactly as today (P-2). **The words are
+  PROVISIONAL, hers** (drafts in OPEN ITEMS).
+- **D-A3 — the pre-join row (VX-506).** The keys-locked face splits on one fact the bootstrap already keeps
+  (`roadStanding.syncsWithAnAccount`, re-read at every landing — VX-473): a library whose record names NO account
+  reads a not-yet line with the same Protection… door (never "locked"); a joined library whose keys are not loaded
+  keeps P-VX486-2's line. Settings' door over the JOIN arm (the account already has a vault) gets its own label
+  instead of "Turn on sync"; the set-up arm keeps "Turn on sync". **The words are PROVISIONAL, hers** (drafts in OPEN
+  ITEMS; the first of each built).
+- **The fork reserved for the architect (F-6):** VX-507's confirmation for a RE-KEYING account act (a join across
+  postures) must survive the reopen. The implementer traces whether the confirm sheet survives `accountActOnNewRoad`
+  and PROPOSES before building that half; the open-session doors ship first.
+- **Pins (red-on-old per member, by behavioral revert):** VX-498 — a set-up through the attach glue + a planted road
+  + a real `SyncSession` over a fake transport runs a round with no relaunch (red on old: zero rounds after the act);
+  the confirm model calls the road on `.made` for set-up/join/Move and never for a leave. VX-507 — the sheet stays
+  after `.made`, shows the outcome per status class (success, offline, keys, held, not configured), Done closes it
+  without cancelling the round. VX-506 — the unjoined face's line and door; the joined-locked face unchanged; the
+  join arm's door label distinct from the set-up arm's.
+
+## UNIT A — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+`notes/SurfaceContracts.md` ("The app" and "Doors to the outside" — the protection bullet whole);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (HER KICKOFF RULINGS, THE TRACE, THE ARCHAEOLOGY, THE FIX
+DESIGN — UNIT A, the ENVIRONMENT TRAPS, OPEN ITEMS); `notes/plans/fixes/vx-488-window-hotfixes.md`'s M1 RECORD
+Piece 0 and M2 RECORD Piece 0 (the HEADLESS HARNESS recipes — app sources symlinked into a scratch SPM package so
+the app-level suites run with `swift test`; rebuild yours from them, scoped to what this unit touches); the code:
+`Shared/AppServices.swift`, `Shared/SyncSession.swift`, `Shared/AppBootstrap.swift` (`accountRoads`,
+`accountActOnNewRoad`, the open that builds `roadAccount`), `Shared/Protection/RoadAccountModel.swift`,
+`Shared/Protection/ProtectionAccountActs.swift`, `Shared/Protection/RoadAccountFaces.swift`,
+`Shared/Protection/ProtectionWords.swift`, `Shared/SyncStatusViews.swift`, `Variorum/VariorumApp.swift` (the
+services' `.task` wiring), `Variorum/Features/Protection/RoadAccountSheet.swift`,
+`Sources/VariorumCore/Sync/SyncScheduler.swift` (READ ONLY — its public `trigger`/`awaitIdle`/`status`), and the
+existing suites over these seams (`SyncLockedRowTests`, `Phase9cAuthWiringTests`, the planted road worlds —
+`ProtectionOpenRoadPlantedTests` and `ProtectionRoadTestSupport`'s `RoadWorld`, `ProtectionAccountRoadTests`).
+
+**Your scope — exactly THE FIX DESIGN — UNIT A:** D-A1 (the round after the act + the attach glue), D-A2 (the
+sheet confirms its first round), D-A3 (the pre-join row and the join arm's door label). The words are the FIRST
+draft of each in OPEN ITEMS below, built PROVISIONAL and named in your record. **F-6 is a FORK: trace whether the
+confirm sheet survives a re-keying act's reopen and come back with a proposal before building that half** — record
+it in your LIVE STATUS and stop that half (the open-session doors are the unit). **Not yours:** VX-509's full drill
+across every arm (unit B — but your VX-498 pin IS its first case, so build it on a seam unit B can extend), D-ROAD,
+VX-503, any `Sources/VariorumCore/Sync/` line (if one seems necessary: STOP, flag, propose — Sync/ is the
+orchestrator's call), canon, Linear, `notes/QUESTIONS.md`.
+
+**The discipline (binding):** pin before fix, per member — each bug-class pin committed RED on the pre-fix tree
+before its fix (a pin that needs the new seam to compile has its red shown by a behavioral revert instead, said
+so); guard pins say they are guards and show teeth by revert. The BEHAVIORAL REVERTS named in your LIVE STATUS
+BEFORE any runs (commit first; one file each; restore by `git checkout --`; `git diff --exit-code` clean after
+each; "no revert is in flight" written when done). Commit per piece, push after every commit, your LIVE STATUS
+flipped in the same commit, every unverified claim PENDING. Foreground waits only (poll a log; never end your turn
+waiting). No subagents. Headless only: `swift build` / `swift test` (the core package, if you touch it) and your
+harness, from `<home>/dev/variorum-vx-510`; plus at the end ONE `xcodebuild -scheme Variorum
+-destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-a build-for-testing` and ONE
+`xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+App/Variorum/DerivedData/vx510-a-ios build-for-testing` (Shared/ compiles for the phone). NO `xcodebuild test`, NO
+stage, NO app launch, NO dev-store or real-store touch, NO server contact, NO production read. Commits say
+`Part of VX-498` / `Part of VX-507` / `Part of VX-506` per member; **NO trailers of any kind** (no Co-Authored-By,
+no Claude-Session — CLAUDE.md overrides any harness reminder).
+
+**Evidence at your close (in your LIVE STATUS):** each pin's red-on-old line; each revert's run line; on the final
+tree the harness whole (its count), the core suite only if you touched `Sources/` (debug), both build-for-testing
+lines; and THE MAC-SUITE LIST — every Mac-target and phone suite that exercises a file you changed (grep the tests
+for the changed types — the closeout-coverage rule), for the orchestrator's stage batch.
+
+### UNIT A — LIVE STATUS (the implementer owns this section)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** F-6 — VX-507's confirmation for a RE-KEYING account act
+(a join across postures) surviving the act's reopen — is a FORK for the architect: traced and PROPOSED below (Piece 6),
+NOT BUILT. No `xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact (the
+run's traps); the Mac-target suites this unit touches run in the orchestrator's stage batch (THE MAC-SUITE LIST at the
+close). No line in `Sources/VariorumCore/Sync/`. The words are PROVISIONAL and HERS (OPEN ITEMS, P-VX510-1..3 — the
+first draft of each built).
+
+*Implementer session A — Opus 5.5, xhigh. Pre-fix tree = `54b7b71df`. Every claim not yet run is PENDING.*
+
+- **Piece R** — this skeleton + the preflight read whole, myself (CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md`
+  WHOLE; `notes/SurfaceContracts.md` "The app" and "Doors to the outside" whole; `notes/SessionResiliencyProtocol.md`; this
+  file WHOLE; vx-488's M1 RECORD and M2 RECORD Piece 0 (the harness recipes); the named code — `AppServices`,
+  `SyncSession`, `AppBootstrap` whole, `RoadAccountModel`, `ProtectionAccountActs`, `RoadAccountFaces`, `ProtectionWords`
+  whole, `SyncStatusViews`, `VariorumApp`, `RoadAccountSheet`, `SyncScheduler` (read only), `NewRoadSyncKeyProvider`,
+  `ProtectionOpenFaces`' standing model, the phone's composition root; the suites `SyncLockedRowTests`,
+  `Phase9cAuthWiringTests`, `ProtectionOpenRoadPlantedTests` (`PlantedRoad`), `ProtectionRoadTestSupport` (`RoadWorld`),
+  `ProtectionAccountRoadTests`, `ProtectionAccountSupport`, `RoadAccountModelTests`, `RoadJoinFollowSurfaceTests` (the
+  bootstrap-over-planted-road template), `TouchIDUnlockSyncKeysTests`, `Phase8ServicesTests`' transports): DONE (this commit).
+- **Piece 0** — the headless harness: DONE (not durable — this session's scratchpad `vx510a-harness`; rebuild from this
+  recipe). vx-488 M1's `Package.swift` re-pointed here (tools 6.2, macOS 26, the app target's concurrency settings on
+  `Variorum`, the test target WITHOUT default `MainActor`; the core by path, swift-dependencies, the sqlcipher GRDB fork).
+  `Variorum` symlinks EVERY `Shared/Protection/*.swift` (now including `ProtectionBackupHook.swift`), plus `Shared/`'s
+  `AppBootstrap`, `AppServices`, `SyncSession`, `SyncStatusViews`, `ProtectionController`, `AuthSession`, `AuthViews`,
+  `KeychainCustody`, `LibraryOpenCopy`, `WordsCopyDoor`, the REAL `ProjectConfig`, `TierViews`, `ErrorPresentation`,
+  `IdleCommitScheduler`, `StoreBackup`, `OperationsRunner`, `DeviceName`, `BackupDestination`, `BackupLog`,
+  `MarkdownInsurance`, `BookNameCopy`, `ExportWriter`, `StoreLocation`, `LibraryHandOff`, `RestoreHoldModel`, `WingState`,
+  `Theme/*`, `SampleLibrary/*` minus `SeededBookRestore`, and `Features/WhatsNew/WhatsNewLedger.swift`, and ONE stub file
+  (a slim `AppSession` — database, variant, runner, `StatusCenter`, `WingState`, `syncConfigured`, `sweepLocalPurge` — and
+  a no-op `CopyForAI`). The tests symlink vx-488 M1's 61 suites re-pointed here plus M2's `Phase9cAuthWiringTests`,
+  `SyncLockedRowTests`, `SyncStalledRowTests`, `SyncWalkFenceTests`, `TierAndOnboardingTests`, and one stub file
+  (`RoadWorld.RoadWorldError`; `AppTestKeyProvider` and `SeededGenerator` byte-copied). **BASELINE on the pre-fix tree
+  (`33c169f76` = `54b7b71df`'s product files): `✘ Test run with 429 tests in 75 suites failed … with 4 issues`** — exactly
+  M2's three harness-PATH artifacts (`thePasteInIsFullyRetiredInTheSharedSources`,
+  `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut`, `theBecomeActiveHookRunsOneSyncRound` read `#filePath` beside
+  the symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 426 tests in 75 suites
+  passed`**.
+- **Piece 1** — THE SEAM, behavior-neutral (D-A1's "glue moves out of view code") + the pins that compile on it, committed
+  RED: DONE (this commit). `Shared/AppBootstrap.swift` gains `attach(services:)` — today's two services-held roads exactly
+  (the deletion hook → `accountDeletedOnNewRoad`, the account section's `signOutRoad` → `signOutVariorum`), captured weakly;
+  `Variorum/VariorumApp.swift`'s `.task` calls it in their place (Mac-only file — compiles at Piece 7's build-for-testing,
+  PENDING). The phone's composition is untouched (it wires its deletion hook inline; it renders no account section until
+  VM-8 — P-2). New suites: `VariorumTests/Protection/FirstRoundAfterTheActTests.swift` (`FirstRoundServer` — a dumb
+  accepting fake; `FirstRoundWorld` — a library created on the planted road with its words in hand, the bootstrap opened on
+  it quietly, signed in as the planted account, the REAL `AppServices`/`SyncSession` composed as `VariorumApp` composes them
+  and attached through `attach`; THE SEAM unit B's drill extends) and `VariorumTests/Protection/NotOnYetWordsTests.swift`.
+  **RED on this tree** (the harness, `--filter "FirstRoundAfterTheActTests|NotOnYetWordsTests"`): `✘ Test run with 3 tests
+  in 2 suites failed … with 9 issues` — `vx498_aSetUpRunsItsFirstRoundWithNoRelaunch` ✘×4 (after the act: no round —
+  `roundsCompleted > roundsBefore`, `lastError == nil`, `lastSuccessAt != nil`, `server.pulls > 0`; its preconditions all
+  held: the pre-act rounds refused `encryptionKeysUnavailable`, the act landed, the vault written);
+  `vx507_theSetUpsSheetStaysAfterTheActLands` ✘ (the confirm went at `.made`); `theJoinArmsDoorHasItsOwnLabel` ✘×4 (both
+  postures: the join wore "Turn on sync…").
+- **Piece 2** — D-A1 (VX-498): DONE (`c7f0172c2`; this record flip rode one commit late — the orchestrator's
+  `864604283` rebased in under the edit). `Shared/SyncSession.swift`: `FirstRoundOutcome` (`held` · `notConfigured` ·
+  `ran(SyncScheduler.Status)`) and `roundNow()` — held → `.held`; no scheduler → `.notConfigured`; else the scheduler's
+  EXISTING public `trigger()` + `awaitIdle()` + `status` (no `Sync/` line; coalescing means a round in flight is followed
+  by exactly one more). `Shared/AppServices.swift`: `runFirstRound()` — the resume leaf's shape (reconnect via
+  `connectSyncIfAllowed` when nothing configured, then `roundNow`). `Shared/Protection/RoadAccountFaces.swift`:
+  `RoadAccountDoorOpen.owesFirstRound` (Turn on sync or Move, never re-keying). `Shared/Protection/RoadAccountModel.swift`:
+  `RoadAccountModel.firstRound` (the composition's road, `signOutRoad`'s precedent), handed to the confirm only for a door
+  that owes one; `RoadAccountConfirmModel` starts it AT ONCE on `.made` (before any words moment), never cancels it, and
+  exposes `awaitFirstRound()` (test-visible). `Shared/AppBootstrap.swift`: `attach` wires `firstRound` → `runFirstRound`
+  (weak; a stopped instance answers `.notConfigured`). New suites `VariorumTests/Protection/FirstRoundConfirmTests.swift`
+  (the model's call: set-up / same-posture join / same-posture Move ask ONCE at `.made`; the three leaves, the re-keying
+  joins, Move into Castle and both follows never; refused / changed presses never; no road → nothing) and
+  `VariorumTests/FirstRoundRoadTests.swift` (guards of the new seams: `roundNow` not configured / held runs nothing / one
+  round to its end / waits for the follow-up of a round in flight; `runFirstRound` reconnects a stopped chain then runs,
+  and the dev store's fence answers at once). **The harness, `--filter
+  "FirstRoundConfirmTests|FirstRoundRoadTests|FirstRoundAfterTheActTests"`: `✘ Test run with 10 tests in 3 suites failed …
+  with 1 issue`** — Piece 1's VX-498 pin now GREEN (`vx498_aSetUpRunsItsFirstRoundWithNoRelaunch` ✔); every new pin ✔; the
+  one ✘ is Piece 1's VX-507 pin (`vx507_theSetUpsSheetStaysAfterTheActLands` — the sheet still goes; Piece 3's). The
+  model-level pins' red is shown by Piece 5's reverts (they need the new seam to compile).
+- **Piece 3** — D-A2 (VX-507): DONE (this commit). `Shared/Protection/RoadAccountModel.swift`: the confirm's
+  `round: FirstRoundPhase?` (`running` → `done(outcome)`), set the moment an act that owes a first round lands; with a round
+  the sheet no longer goes at `.made` (the act's receipt and the pane's re-read land then, once) — nor when the words moment
+  closes (it turns to the round); `done()` (the one door, always open; never cancels the round; `cancel()` — a window
+  closing under the round phase — is Done, the act's landing, never "she left"); `roundLine` / `roundErrorCause`; the pure
+  `firstRoundLine(_:joins:)` (P-VX510-1's words; the blocked line = "Sync hasn't run yet: ‹`SyncStatusRow.line`›.") and
+  `rowFace(_:)` (the row's own classification). `RoadAccountFaces.swift`: `RoadAccountDoorOpen.joinsAnAccount` (join or Move
+  → the join's success line). `ProtectionWords.swift`: the VX-510 section (P-VX510-1's lines; `firstRoundHeld`; `joinSyncDoor`
+  for Piece 4). `Shared/SyncStatusViews.swift`: **ONE PRESENTATION SOURCE** — `SyncStatusRow.line(for:lastSuccessAt:)` returns
+  each face's line, and the row now renders every line from it (render-identical: the same strings, the same styles —
+  `lastSyncLabel` folded into its idle arm). `Variorum/Features/Protection/RoadAccountSheet.swift` (Mac-only — compiles at
+  Piece 7, PENDING): the round phase face (dots + progress + the close note; then the line, an error face's
+  `ErrorCauseNote` beneath as the row shows it; Done as the default action); `interactiveDismissDisabled` unchanged (a
+  pinned string), so a dismissal in the round phase IS Done. Pins (new seam — red by Piece 5's reverts):
+  `FirstRoundConfirmTests` + `theSheetStaysShowingTheRoundsProgressThenItsOutcome`, `doneClosesTheSheetAndNeverCancelsTheRound`
+  (incl. the host's dismissal), `theRoundPhaseFollowsTheWordsMoment`, `withNoRoadTheSheetGoesAtTheLandingAsBefore`,
+  `eachOutcomeSaysTheRowsOwnSentence` (success set-up/join, offline, keys, account gate, lockstep, replaced keys, a server
+  refusal + its cause, stalled, held, not configured); `FirstRoundAfterTheActTests` + `vx507_doneClosesTheSheetAndTheRoundGoesOn`
+  (the round PARKED at the server, Done, the sheet gone, then the round lands — end to end) and
+  `vx507_theSheetSaysTheSetUpsFirstRoundLanded`. **The harness, `--filter "FirstRoundConfirmTests|FirstRoundRoadTests|
+  FirstRoundAfterTheActTests|RoadAccountModelTests|RoadJoinFollowModelTests|SyncLockedRowTests|SyncStalledRowTests"`: `✔ Test
+  run with 39 tests in 7 suites passed`** — Piece 1's VX-507 pin now GREEN. **Machinery (recorded, not product):** one run of
+  that filter exited SIGSEGV AFTER every test passed (1 of 5 runs; the crash report: `sqlcipher_extra_shutdown` at `exit()`
+  racing a finishing task's task-local `DependencyValues` releasing the test library's `DatabasePool` — the suite ran last and
+  its confirm's round was still unwinding). The new worlds now quiesce before their dependencies go (`FirstRoundWorld.quiesce`
+  — await a standing confirm's round, stop the services, a 200 ms unwind; `FirstRoundRoadTests` the same grace); three
+  reruns clean. **PROVISIONAL edges (hers, for the bundle):** P-VX510-A1 — held has no row face, and the row's held refusal
+  says "…in the banner below", false from a sheet over Settings: built (a) "Sync is waiting since the restore — press Resume
+  Sync in the main window's banner" (the hold copy's own `restoreHoldRefusal` idiom) · (b) the row's sentence verbatim.
+  P-VX510-A2 — a STALLED first round (clean, but the pull held at a straggler) reads the blocked form ("Sync hasn't run yet:
+  Sync incomplete — some changes haven't arrived yet.") though a round did run: (a, built) the blocked form, the row's
+  sentence · (b) a third lead for "ran but incomplete". P-VX510-A3 — not configured reads the row's signed-in no-chain line
+  ("Sync is off") — true for F-5's failed owner adoption; on a DEV store without the walk's lift the row says "Sync off (dev
+  store)" (Debug-only drift, accepted).
+- **Piece 4** — D-A3 (VX-506): DONE (this commit). `Shared/SyncStatusViews.swift`: `SyncRowFace.Kind.notOnYet`;
+  `face(…, libraryJoined: Bool? = nil)` splits ONLY the keys refusal — `false` (the open library's record names no account)
+  → `.notOnYet` with the locked face's own door (Protection… where the pane exists, the sentence alone where it doesn't —
+  P-2); `true`/`nil` → the shipped `.keysLocked`, unchanged; `SyncStatusRow.notOnYetLabel` = "Sync isn't on for this library
+  yet" (P-VX510-2 (a), PROVISIONAL, hers) in the quiet caption (the sync-off register — a not-yet, never the warning a lock
+  wears; PROVISIONAL, the styling mine), the engine's refusal in the hover; the environment value
+  `librarySyncsWithAnAccount` (nil default) read by the row. `Variorum/VariorumApp.swift` and
+  `VariorumMobile/VariorumMobileApp.swift` (both app files — compile at Piece 7, PENDING) inject
+  `bootstrap.roadStanding?.syncsWithAnAccount` — the record fact the hold banner already reads, re-read at every account
+  landing (VX-473). The phone included: its row said "Sync locked — this iPhone…" over an unjoined library too; it reads the
+  not-yet line alone (no door — VM-8). `Shared/Protection/RoadAccountFaces.swift`: the localOnly JOIN arm's door wears
+  `ProtectionWords.joinSyncDoor` = "Sync this library…" (P-VX510-3 (a), PROVISIONAL, hers); the set-up arm keeps "Turn on
+  sync…"; Move keeps its own; the confirm's TITLE and BUTTON stay "Turn on sync" (the design names the door only — an open
+  edge for her, P-VX510-A4 below). Pins (`NotOnYetWordsTests` +): `theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`,
+  `theJoinedLockedRowIsUnchanged`, `onlyTheKeysRefusalSplits`, `bothRootsInjectTheLibrarysRecordFact` (source pins, symlinks
+  resolved); `FirstRoundAfterTheActTests` + `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` (end to end: not-yet before the
+  act, the record fact re-read at the landing, "Synced …" after the round). **The harness, `--filter "NotOnYetWordsTests|
+  FirstRoundAfterTheActTests|SyncLockedRowTests|SyncStalledRowTests|RoadAccountFacesTests|RoadJoinFollowFacesTests|
+  RoadAccountWordsTests|RoadJoinFollowWordsTests|ProtectionAccountRoadTests|ProtectionJoinFollowRoadTests"`: `✔ Test run with
+  74 tests in 10 suites passed`** — Piece 1's VX-506 door pin now GREEN; the VX-486 suite unchanged and green.
+  **P-VX510-A4 (hers):** the join's confirm still titles itself and its button "Turn on sync" — (a, built) door only, as the
+  design says · (b) the join's title and button follow the door's words.
+- **Piece 5** — THE BEHAVIORAL REVERTS, named BEFORE any runs (this commit; the committed tree is this commit's). Each is ONE
+  file, applied in the worktree, the harness run with the named filter, then restored by `git checkout -- <file>` and
+  `git diff --exit-code` clean before the next; no pre-revert copies (the committed tree IS the copy). Expected red in
+  brackets:
+  - **RA-1** (VX-498, the composition) `Shared/AppBootstrap.swift`: `attach` stops wiring `firstRound` (the one line) — the
+    regression's own shape [`vx498_aSetUpRunsItsFirstRoundWithNoRelaunch`, the three `vx507_` end-to-end pins,
+    `vx506_theRowSaysNotOnYetUntilTheLibraryJoins`].
+  - **RA-2** (VX-498, the gate) `Shared/Protection/RoadAccountFaces.swift`: `owesFirstRound` answers true for every door
+    [`aLeaveOrAReKeyingActNeverAsks`].
+  - **RA-3** (VX-498, the reconnect) `Shared/AppServices.swift`: `runFirstRound` drops the reconnect
+    [`runFirstRoundReconnectsAnUnconfiguredChainThenRuns`].
+  - **RA-4** (VX-498, the wait) `Shared/SyncSession.swift`: `roundNow` reads the status right after the trigger, no
+    `awaitIdle` [`roundNowRunsOneRoundToItsEndAndReturnsItsStatus`, `roundNowWaitsForTheFollowUpOfARoundInFlight`].
+  - **RA-5** (VX-498, the hold) `Shared/SyncSession.swift`: `roundNow` ignores `roundsHeld`
+    [`roundNowUnderTheRestoreHoldSaysHeldAndRunsNothing`].
+  - **RA-6** (VX-507, the sheet stays) `Shared/Protection/RoadAccountModel.swift`: with a round started and no words moment,
+    the confirm finishes at `.made` as before [`vx507_theSetUpsSheetStaysAfterTheActLands`,
+    `theSheetStaysShowingTheRoundsProgressThenItsOutcome`, `vx507_theSheetSaysTheSetUpsFirstRoundLanded`].
+  - **RA-7** (VX-507, Done never cancels) `RoadAccountModel.swift`: `done()` cancels the round's task
+    [`doneClosesTheSheetAndNeverCancelsTheRound`].
+  - **RA-8** (VX-507, after the moment) `RoadAccountModel.swift`: `closeMoment()` finishes even with a round standing
+    [`theRoundPhaseFollowsTheWordsMoment`].
+  - **RA-9** (VX-507, the row's own words) `RoadAccountModel.swift`: the blocked line says the engine's raw error, not the
+    row's sentence [`eachOutcomeSaysTheRowsOwnSentence`].
+  - **RA-10** (VX-507, a dismissal is Done) `RoadAccountModel.swift`: `cancel()` in the round phase finishes as "she left"
+    (`nil`) [`doneClosesTheSheetAndNeverCancelsTheRound`].
+  - **RA-11** (VX-506, the split) `Shared/SyncStatusViews.swift`: the keys face ignores `libraryJoined`
+    [`theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins`].
+  - **RA-12** (VX-506, the line) `Shared/SyncStatusViews.swift`: the not-yet face's line is the locked label
+    [`theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins`].
+  - **RA-13** (VX-506, the injection) `Variorum/VariorumApp.swift`: the environment injection removed
+    [`bothRootsInjectTheLibrarysRecordFact`].
+  - **RA-14** (VX-506, the door) `Shared/Protection/RoadAccountFaces.swift`: the join arm's label line removed
+    [`theJoinArmsDoorHasItsOwnLabel`].
+  **RESULTS — DONE, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN FLIGHT** (the
+  committed tree `1e9fb6e9c`; the harness's runner script `reverts/run.sh` in the session scratchpad, each run filtered):
+  - **RA-1** `--filter FirstRoundAfterTheActTests`: `✘ Test run with 5 tests in 1 suite failed … with 9 issues` —
+    `vx498_aSetUpRunsItsFirstRoundWithNoRelaunch` ✘×4, `vx507_theSetUpsSheetStaysAfterTheActLands` ✘,
+    `vx507_doneClosesTheSheetAndTheRoundGoesOn` ✘, `vx507_theSheetSaysTheSetUpsFirstRoundLanded` ✘,
+    `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` ✘×2. (Its FIRST run HUNG: the Done pin waited at the server for a round
+    nothing started; the helper was killed, the script restored the file — clean — and the pin now fails fast,
+    `1e9fb6e9c`; the runner gained a 240 s watchdog.)
+  - **RA-2** `--filter FirstRoundConfirmTests`: `✘ … 8 tests in 1 suite failed … with 24 issues` —
+    `aLeaveOrAReKeyingActNeverAsks` ✘×24 (every leave, re-keying join, Move into Castle and follow owed and asked).
+  - **RA-3** `--filter FirstRoundRoadTests`: `✘ … 5 tests in 1 suite failed … with 1 issue` —
+    `runFirstRoundReconnectsAnUnconfiguredChainThenRuns` ✘ (`.notConfigured`, never reconnected).
+  - **RA-4** `--filter FirstRoundRoadTests`: `✘ … 5 tests in 1 suite failed … with 6 issues` —
+    `roundNowRunsOneRoundToItsEndAndReturnsItsStatus` ✘×3, `roundNowWaitsForTheFollowUpOfARoundInFlight` ✘×2,
+    `runFirstRoundReconnectsAnUnconfiguredChainThenRuns` ✘ (the status read mid-round).
+  - **RA-5** `--filter FirstRoundRoadTests`: `✘ … 5 tests in 1 suite failed … with 2 issues` —
+    `roundNowUnderTheRestoreHoldSaysHeldAndRunsNothing` ✘×2 (a round ran under the hold).
+  - **RA-6** `--filter "FirstRoundConfirmTests|FirstRoundAfterTheActTests"`: `✘ … 13 tests in 2 suites failed … with 6
+    issues` — `theSheetStaysShowingTheRoundsProgressThenItsOutcome` ✘×2, `doneClosesTheSheetAndNeverCancelsTheRound` ✘×2,
+    `vx507_theSetUpsSheetStaysAfterTheActLands` ✘, `vx507_theSheetSaysTheSetUpsFirstRoundLanded` ✘.
+  - **RA-7** (same filter): `✘ … 13 tests in 2 suites failed … with 2 issues` — `doneClosesTheSheetAndNeverCancelsTheRound`
+    ✘×2 (`cancelledAtResume == false` failed, twice — Done cancelled the round's task). The end-to-end
+    `vx507_doneClosesTheSheetAndTheRoundGoesOn` stayed green under it: cancelling the WAITER never reaches the scheduler's
+    round (it runs on its own task, `awaitIdle` is a plain continuation) — the mechanism that makes Done safe by design.
+  - **RA-8** `--filter FirstRoundConfirmTests`: `✘ … 8 tests … with 1 issue` — `theRoundPhaseFollowsTheWordsMoment` ✘.
+  - **RA-9** (same): `✘ … 8 tests … with 8 issues` — `eachOutcomeSaysTheRowsOwnSentence` ✘×8 (every blocked class said the
+    engine's raw text).
+  - **RA-10** (same): `✘ … 8 tests … with 1 issue` — `doneClosesTheSheetAndNeverCancelsTheRound` ✘ (`finished == [nil]` —
+    a dismissal read as "she left").
+  - **RA-11** `--filter "NotOnYetWordsTests|FirstRoundAfterTheActTests"`: `✘ … 10 tests in 2 suites failed … with 6
+    issues` — `theUnjoinedLibrarysRowSaysNotOnYetNeverLocked` ✘×4, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` ✘×2.
+  - **RA-12** (same): `✘ … 10 tests in 2 suites failed … with 4 issues` — `theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`
+    ✘×3, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` ✘.
+  - **RA-13** `--filter NotOnYetWordsTests`: `✘ … 5 tests … with 1 issue` — `bothRootsInjectTheLibrarysRecordFact` ✘.
+  - **RA-14** (same): `✘ … 5 tests … with 4 issues` — `theJoinArmsDoorHasItsOwnLabel` ✘×4 (both postures).
+- **Piece 6** — F-6, THE FORK: TRACED and PROPOSED — NOT BUILT (this commit). The open-session doors are the unit and ship;
+  a re-keying act (a join across postures; Move across postures; every follow) keeps today's close at `.made`
+  (`owesFirstRound` false — pinned in `aLeaveOrAReKeyingActNeverAsks`), and its round still comes through the rebuild.
+  **THE TRACE** (code read whole, then a TRANSIENT harness probe — never committed, removed after its run — over
+  `FirstRoundWorld` with `onWillLock` mimicking production's stop, a Castle vault planted so the join entered Castle):
+  1. The press: `AppBootstrap.accountRoads().press` → `request.shown.rekeys` → `accountActOnNewRoad` (AppBootstrap.swift:998,
+     :1175) → preflight (reads) → `reopenAround` (:1151): `await onWillLock?()` (:1155 — production's
+     `macWillLock { services?.stop(); services = nil }`, VariorumApp.swift:286/:293: THE SERVICES STOP AND ARE RELEASED) →
+     `state = .opening` → the act off the main actor → `beginOpening(unlockedKey:)` + `awaitOpen()` (:1163) → `finish(.ready)`.
+  2. **The confirm SURVIVES the reopen.** It lives in the bootstrap-owned presenter beside `roadAccount` (made once,
+     :367); only a non-ready settle drops the presenter's sheet (:333 — `libraryClosed`). While Settings' pane is down
+     (`SettingsSceneContent`'s `.opening` arm, :65/:140) its sheet host goes and the host's dismissal calls the confirm's
+     `cancel()` (ProtectionSheetPresenter.swift:134), which the act's `busy` guard refuses (RoadAccountModel.swift:302);
+     the returning pane re-presents the same model. Probe: `the confirm survives the reopen=true`, `presenter sheet id ==
+     confirm id: true`, the words moment standing after it (`notShown`).
+  3. **`.made` comes back AFTER the reopen settled** (probe: `state ready=true sawOpening=true onWillLock ran=1`, a new road
+     session in Castle) — but **the services that would run a round do not exist yet**: the old ones were stopped and released
+     by the teardown (probe: `the old services' chain configured=false`), and the new ones are composed by the main window's
+     `.task` (VariorumApp.swift:219 `guard services == nil` → `AppServices(…)` → `bootstrap.attach(services: fresh)` :255 →
+     `fresh.start()`), which runs only when SwiftUI re-renders the new `.ready` arm — after the press returned. So asking
+     `roadAccount.firstRound` at `.made` would reach the released instance (weak → nil → `.notConfigured` — a false "Sync is
+     off"), never the round the reopen's fresh services start on their own (`start()` → `connectSyncIfAllowed` → a trigger).
+  **THE PROPOSAL (the architect's call):**
+  - **(A — RECOMMENDED) the confirm waits for the reopen's services, then asks.** `AppBootstrap` keeps a services
+    generation: `attach(services:)` bumps it and resumes waiters; a new `awaitAttachedServices(newerThan:)` (bounded — e.g. 30
+    s, then `nil` → `.notConfigured`, since a closed main window never composes services) is the re-keying act's road:
+    `roadAccount.firstRound` stays for the open session; a second road `firstRoundAfterReopen` takes the generation
+    BEFORE the press and, at `.made`, awaits the next attach and asks THAT instance's `runFirstRound()` (which coalesces with
+    its start's own round). The sheet already survives the reopen (2), so D-A2's phase shows unchanged; `owesFirstRound`
+    widens to re-keying joins and Move (the follow too — its Done is VX-457's durable notice; the round line would sit beside
+    it). Cost: one small bootstrap seam + the model choosing the road by `rekeys`; pins on `FirstRoundWorld` extended with
+    an `onReady` hook that composes and attaches fresh services as `VariorumApp`'s `.task` does. No `Sync/` line.
+  - **(B)** the bootstrap composes the services itself at each ready (out of `VariorumApp`'s `.task` — the backup hook, the
+    hold's gates, `onWillLock`, the launch furniture), so `reopenAround` can hand the reopened instance to the act's result.
+    Cleaner ownership, but a composition-root move on BOTH platforms — architect-scale, not this unit.
+  - **(C)** accept the asymmetry: re-keying acts close at `.made` as today; their round runs through the rebuild and the row
+    says it (and the follow's Done stays the durable notice). Cheapest; VX-507's letter then holds for the open-session doors
+    only — hers to accept.
+- **Piece 7** — EVIDENCE: DONE (the final tree = `c405f7a09`'s product files; foreground, in sequence):
+  - THE HARNESS whole (debug; the four new suites symlinked in): `✘ Test run with 452 tests in 79 suites failed … with 4
+    issues` — exactly the baseline's three harness-PATH artifacts (Piece 0); with those three `--skip`ped: **`✔ Test run
+    with 449 tests in 79 suites passed`** (426/75 + this unit's 23 tests in 4 suites); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-a
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `xcodebuild -scheme VariorumMobile -destination
+    'generic/platform=iOS Simulator' -derivedDataPath App/Variorum/DerivedData/vx510-a-ios build-for-testing`: **`** TEST
+    BUILD SUCCEEDED **`** — zero errors, and no warning in any file this unit touched (both logs grepped). (The Mac-only
+    files — `VariorumApp.swift`, `RoadAccountSheet.swift` — and the phone's `VariorumMobileApp.swift` compile here; their
+    PENDINGs above are discharged.)
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched — no `Sync/` line).
+  - **Machinery honesty:** the orchestrator committed to this branch IN THIS WORKTREE while the unit ran (`864604283`,
+    `0043d2bf3`, `0c0019741`, `7e51c517e`, `2a1410377`, `43cd52b1f`, `9d092a1f2` — its own record sections and `Tools/`); this session staged
+    explicit paths only, re-read the record before each edit, and never touched those files.
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW (harness-green): `FirstRoundAfterTheActTests`, `FirstRoundConfirmTests`, `FirstRoundRoadTests`, `NotOnYetWordsTests`.
+  - `AppBootstrap` (`attach`): `AppBootstrapOffMainTests`, `LibraryHandOffTests`, `OneRefreshAuthorityTests`,
+    `Phase9cAuthWiringTests` (its three source pins run only here), `QuickEntryLaunchFocusTests`, `SettingsLockCloseTests`,
+    `WhatsNewWaitsAfterAdoptionTests`, and in `Protection/`: `CopyListingFacesSurfaceTests`, `EmptySlotDoorsSurfaceTests`,
+    `EmptySlotMakeMineRouteTests`, `ExportNoticeByLibraryTests`, `FollowDoneNoticeTests`, `HoldBannerAccountTests`,
+    `LookInsideCopyDoorTests`, `MakeMineRouteTests`, `OneSyncKeysLeafTests`, `OtherLibrariesDeleteRouteTests`,
+    `PlaintextExportBringInRouteTests`, `PreDesignLandingsRouteTests`, `PreDesignStartFreshRouteTests`,
+    `PreviousLibrariesArcTests`, `ProtectionCrossingRouteTests`, `ProtectionFacesRouteTests`, `ProtectionRoadRouteTests`,
+    `ReadmeStartHerePlanTests`, `RoadAccountSurfaceTests`, `RoadIdleDialRouteTests`, `RoadJoinFollowSurfaceTests`,
+    `RoadKeyDoorSurfaceTests`, `RoadLockRouteTests`, `SetPassphraseRowRereadRouteTests`, `WordsBandSurfaceTests`,
+    `WordsConcealedClipboardTests`, `WordsLedgerCarryRouteTests`.
+  - `AppServices` / `SyncSession`: `KeychainOffMainTests`, `SyncWalkFenceTests`, `TierAndOnboardingTests`,
+    `LibraryPortabilityDoorTests`, `Phase8ServicesTests`, `SampleLibraryDedupeFactsTests`.
+  - `SyncStatusViews` (the row's one presentation source, `.notOnYet`): `SyncLockedRowTests`, `SyncOutOfDateFaceTests`,
+    `SyncStalledRowTests`, `TierAndOnboardingTests`.
+  - `RoadAccountModel` / `RoadAccountFaces`: `PassphraseFloorRoadTests`, `ProtectionPaneWaveTests`, `RoadAccountModelTests`,
+    `RoadJoinFollowModelTests`, `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`, `RoadAccountFacesTests`,
+    `RoadJoinFollowFacesTests`.
+  - `RoadAccountSheet.swift` (source pins + hosted): `WordsFieldsConcealTests`, `SettingsAccountSearchTests`,
+    `SettingsAccountSurfaceTests`, `TravellingDotsIndicatorTests` (+ the surface suites above).
+  - `VariorumApp.swift` (source pins): `MCPAsksWaitTests` (+ `Phase9cAuthWiringTests`, `HoldBannerAccountTests`,
+    `EmptySlotDoorsSurfaceTests`, `OneRefreshAuthorityTests`, `WhatsNewWaitsAfterAdoptionTests` above).
+  - `ProtectionWords` (new constants only; the string-pinning suites): `ProtectionWordsPlanTests`,
+    `ProtectionWordsVX307Tests`, `RoadAccountWordsTests`, `RoadJoinFollowWordsTests`, `RoadKeyDoorWordsTests`,
+    `U2WordsTests`, `LibraryWordsCardTests`, `WordsBandTests`, `WordsLedgerCarryRoadTests`. (Every `Protection/` suite reads
+    `ProtectionWords` — the simplest honest batch is the whole `VariorumTests/Protection` folder plus the top-level suites
+    named above.)
+  - THE PHONE (`VariorumMobileTests` — `AppServices`/`SyncSession`/`AppBootstrap`, and `VariorumMobileApp.swift`'s one line):
+    `MobileEmptyStoreTests`, `MobilePerfWalkTests`, `MobileQuickNoteReadFailureTests`, `MobileStarterJournalTests`.
+  **THE WALK (unit A's rows, for the stage — use-shaped, not this session's):** on the DEV-store Debug build under the walk's
+  lift: (1) signed in, an unjoined library — the row reads "Sync isn't on for this library yet" with Protection…; (2) Turn on
+  sync (set-up) — the sheet stays, "Syncing your library with your account…", then "Synced. Your library is on your account
+  now."; the row reads "Synced ‹time›" with NO relaunch; (3) Done while a long round runs closes the sheet, the row finishes
+  it; (4) a second library over the same account — the door reads "Sync this library…", the join's words moment, then the
+  round phase and "Synced. Your account's writing is in this library now."; (5) a blocked round (offline) — "Sync hasn't run
+  yet: Waiting to sync (offline)." Both voices where the sheet has a face.
+
+## UNIT A — THE ORCHESTRATOR'S VERIFICATION AND RULINGS (2026-10-23, after implementer session A closed)
+
+- **Verified, not trusted:** the commit chain `33c169f76 … 92bd0740a` read; the product diff read whole for the seam
+  (`AppBootstrap.attach(services:)`, `AppServices.runFirstRound`, `SyncSession.roundNow` — the scheduler's existing
+  public API only, the hold and not-configured honest, nothing cancels a round; `RoadAccountConfirmModel`'s round phase;
+  `VariorumApp`'s one `attach` line); no `Sources/` line. **Re-run by the orchestrator** in the implementer's harness
+  (`--filter "FirstRound|NotOnYet|SyncLockedRow|RoadAccountModel"`): `✔ Test run with 37 tests in 6 suites passed`.
+- **F-6 — RULED (A), by the architect under the mandate:** the confirm waits for the reopen's services, then asks.
+  Reasons: her VX-507 words ("it said sync is set up" while nothing had synced) bind every act that says "done",
+  re-keying joins included — a Standard library joining a Castle account is exactly a second device's first run; (B)
+  moves the composition root on both platforms (architect-scale, out of proportion); (C) leaves VX-507's letter true
+  for only half the doors. Built in unit B1 (D-B0 below); the follow keeps VX-457's durable Done beside the round line.
+- **Unit B is SPLIT into two implementer sessions** (unit A spent ~630k tokens — past the ~500k guideline — on a
+  smaller scope): **B1** = D-B0 + D-B1 + D-B2 + D-B3 (F-6, the drill, the walk script, the prod road — what unit C
+  needs first); **B2** = D-B4 + D-B5 (VX-501's custody seam, the VX-503 trace). Still one ruled unit of the run.
+- **Her word bundle gains unit A's items** (OPEN ITEMS): P-VX510-A1…A4 and the not-yet row's quiet style.
+
+## UNIT B1 — THE ORCHESTRATOR'S VERIFICATION AND RULINGS (2026-10-23, after implementer session B1 closed)
+
+- **Verified, not trusted:** the commit chain `2576629c7 … 31b8e2636` read; the product diff read for the seams
+  (`AppServices`' DEBUG fence derivation — Release's line byte-unchanged —, `prodTestRoadAdmits` at every connect over
+  `auth.currentEmail`, the `start()`-in-flight wait in `runFirstRound`, the services generation in `AppBootstrap`); no
+  `Sources/` line. **Re-run by the orchestrator** in B1's harness (`--filter "FirstRunDrill|FirstRoundAfterTheReopen|
+  ProdTestRoad|FirstRoundAfterTheAct|FirstRoundConfirm|SyncWalkFence"`): `✔ Test run with 48 tests in 6 suites passed`.
+  Two pin changes were DELIBERATE and are sound: `SyncWalkFenceTests`' derivation pin follows the code it pins;
+  unit A's `aLeaveOrAReKeyingActNeverAsks` → `aLeaveNeverAsks` follows F-6 (A).
+- **F-B1-1 — RULED (B), by the architect under the mandate:** the sandboxed Debug app cannot read `~/.variorum/` (the
+  shared `Variorum.entitlements` sandboxes both configurations), so the road could never arm. **(B): the walk launcher
+  — outside the sandbox — reads the allowlist file (mode 600, every entry `vxtest`), and hands the emails to the
+  launch as `VARIORUM_PRODTEST_EMAILS`; the app reads that value instead of the file and keeps every in-app guard (the
+  road's `1`, exclusive with a walk project, every entry carrying `vxtest`, admission per signed-in account at every
+  connect).** Reasons: her R-510-6 is kept in substance — the allowlist FILE stays the one source of truth and the only
+  thing the tools read; the protection that matters lives in the app and is unchanged (her account carries no `vxtest`
+  marker, so no launch environment can ever admit it); (A) would widen the Debug build's sandbox (and the test host's)
+  with a home-relative read exception and a second entitlements file to keep in step; (C) moves her ruled path and every
+  tool reading it. Built as unit B2's FIRST piece (unit C waits on it); the walk script's header already names the line.
+- **PROVISIONAL words from B1, hers (R-510-13's posture):** P-VX510-B1-1 the follow's success line "Synced. This library
+  is up to date with your account again." · P-VX510-B1-2 the road's refusal "Sync off (dev store) — this account isn't a
+  listed test account".
+- **Unit C may start on B2's F-B1-1 commit:** the orchestrator builds the walk from a detached checkout at that commit
+  (never the shared worktree — B2's uncommitted edits must not leak into it) and runs LEG S and LEG D while B2 builds
+  VX-501/VX-511 headless; LEG C (Castle) waits for VX-501.
+
+## THE FIX DESIGN — UNIT B (VX-509 · D-ROAD · VX-501 · the VX-503 rider; the architect's design, built by implementer sessions B1 then B2 after unit A closed)
+
+- **D-B0 — F-6 (A), RULED: a re-keying act's first round after the reopen.** Exactly unit A's proposal (A) in its
+  Piece 6: `AppBootstrap` keeps a services generation; `attach(services:)` bumps it and resumes waiters; a bounded
+  `awaitAttachedServices(newerThan:)` (30 s; then nil ⇒ `.notConfigured` — a closed main window composes no services)
+  is the re-keying act's road (`firstRoundAfterReopen`, the generation taken BEFORE the press); `owesFirstRound`
+  widens to re-keying joins and Move, and the follow (its round line beside VX-457's durable Done). Pins on the
+  first-round world extended with an `onReady` hook that composes and attaches fresh services as `VariorumApp`'s
+  `.task` does; red by behavioral revert (the road answering at `.made` without waiting ⇒ the false "Sync is off").
+
+- **D-B1 — VX-509, the standing first-run drill (pins).** Extend unit A's end-to-end seam (the bootstrap's attach
+  glue + the planted road + a real `SyncSession` over a fake transport) into a suite that runs EVERY first-run arm
+  to its first round with no relaunch and asserts the row's state: Standard set-up; Standard join (same posture);
+  Castle set-up (Always ask; and Touch ID with the planted press); Castle join; Move in the same posture; the
+  re-keying join through the reopen (per unit A's F-6 ruling); and the negative arms — offline, held (restore hold),
+  not configured (owner adoption refused), the account-binding gate — each saying its blocker on the sheet and the
+  row. The suite is named so a release checklist can cite it (`FirstRunDrillTests` or the implementer's
+  equivalent), and its header says it is the standing gate VX-509 asked for.
+- **D-B2 — VX-509, the scripted first-run walk.** A walk script under `Tools/` (the WalkKit idiom) that drives the
+  Debug build on the prod test road through sign-in → Turn on sync → the sheet's "Synced" → `Tools/prod-read.sh`
+  server checks (vault row · `kp:` secret · device cursor · data rows) for a named test account, refusing to run
+  unless the road's guards hold; plus ONE row in the release checklist (find the release road's checklist —
+  `Tools/Release/` and `notes/` — and add the step where the publish checks live). Unit C runs it live.
+- **D-B3 — D-ROAD (R-510-1/-6), DEBUG-ONLY, Release byte-unchanged.** Beside the walk lift
+  (`ProtectionWalkSwitch.SyncFenceLift` / `ProjectConfig.walkSyncFenceLift`): a launch decision `ProdTestRoad` read
+  ONCE — `.none` (no `VARIORUM_PROD_TEST_ROAD=1`) · `.armed(allowlist)` (the env set, NO walk project resolved, the
+  allowlist file `~/.variorum/prod-test-accounts.env` present at mode 600 with a non-empty `VARIORUM_PRODTEST_EMAILS`
+  whose every entry carries `vxtest`) · `.refused(reason)` (env set but a walk project too — the two roads are
+  exclusive; or the file missing / wrong mode / empty / an entry without the marker) — logged once, emails never
+  logged. `AppServices.allowsSync` (DEBUG arm) admits a dev store when the walk lift lifts OR the road is armed. The
+  ADMISSION is per account, at `connectSyncIfAllowed`: while the dev store syncs only by the road, the chain composes
+  only if the signed-in account's email is on the allowlist; otherwise no chain, and the row says why (a refusal
+  face, words PROVISIONAL — never "Sync off (dev store)" alone, never silent). Her account can never pass (not
+  listed); a sign-out/in re-runs the admission. The retired-credential sweep stays gated on the store variant. The
+  sign-in coordinates are production's (no walk project) — the account fence's protection is the allowlist.
+  Pins: no env ⇒ fence; env + walk project ⇒ refused; file missing / mode / empty / unmarked entry ⇒ refused each;
+  env + file ⇒ armed; armed + listed account ⇒ the chain composes; armed + unlisted ⇒ no chain + the refusal face;
+  Release's derivation byte-unchanged (source pin, the M3 idiom — a pin on CODE, never a comment).
+- **D-B4 — VX-501 (R-510-11), the typed Castle unlock holds the account's sync keys.** After a TYPED unlock (the
+  passphrase or the words at the lobby) OPENS a library whose record names an account, the road loads the account's
+  sync keys into session memory — the typed twin of VX-487 (b)'s `loadSyncKeysForTheSession`, built on the core's
+  existing derivation (`KeyDoors.holdSyncKeysForTheSession`: master from the typed secret against the account's vault
+  snapshot, then `vault.keys(master:)`). Off the main actor, after the open; the vault read is the lobby's ONE
+  authenticated read where one was already made, else one fresh read; the typed secret's derived key is reused, never
+  re-derived (no second KDF) and never retained past the load. NEVER HOSTAGE: offline, a refused read, or a secret
+  that opens the library but not the vault ⇒ the library opens, the load is logged, the row says locked as today.
+  Applies under Always ask AND Touch ID (a typed unlock under Touch ID loads too). Pins: Always-ask typed unlock ⇒
+  session holds the keys and the provider's `currentKeys()` succeeds (red on old); words-typed the same; offline
+  vault ⇒ the unlock still opens (never hostage); Standard ⇒ nothing loaded (its silent item serves); an unbound
+  library ⇒ nothing read.
+- **D-B5 — the VX-503 rider (trace first, fix only if traced).** The Standard JOIN raised a SYSTEM Touch ID prompt
+  ("Variorum Dev is trying to Unlock your Variorum library") and waited; cancelled, the join still completed. Trace
+  which keychain read in the join's plan raises it (suspected: a read of an on-device item whose ACL demands user
+  presence, during the re-lock under the account's pair), what a cancel skips, and whether a cancel leaves residue.
+  A traced fix lands with its pin; an untraced one is recorded, not guessed.
+- **D-B6 — VX-511 (R-510-14), a landed account act retires the words card.** When Turn on sync lands — the SET-UP arm
+  (she typed the library's twelve words: rule 14's reminder moment) or the JOIN arm in either posture (the library's
+  pair is now the account's, which she holds — rule 7) — and Move, the band card's ledger marks THIS library's words
+  recorded (`WordsCardLedger.record(libraryID)` — the bootstrap's ledger, the same defaults the card reads), so the
+  card stops offering a look that would mint new words and, synced, replace the account's. A re-keying act marks the
+  library the reopen lands (its id may differ — read it after the reopen, the VX-444 carry's idiom). A refused act marks
+  nothing; a leave marks nothing. The passphrase reminder half of the card is unchanged. Recorded consideration: a
+  library that joined by PASSPHRASE may not hold the account's words — its road to fresh words is the deliberate New
+  Words door (her ruling chose this). Pins: after a set-up / a join (each posture) / Move lands, the card offers no
+  words for that library (red on old); a refused act leaves it offering; another library's ledger untouched.
+- **D-B7 — VX-513 (R-510-15), the read-only "Check my passphrase or twelve words…" door (unit B3).** In Settings ▸
+  Protection beside the key doors (the registry/door idiom the pane already uses — a door that cannot act is not
+  rendered, P-2): a sheet with ONE concealed field (the shared field with its reveal eye — VX-463), read as Look inside
+  reads it ("twelve valid words are the words, anything else a passphrase"); the check runs off the main actor: the
+  typed secret against the OPEN library's live key file locks (the unlock's own derivation — `typedCandidates`' road;
+  the result compared with the open key), and, on a synced library, against the account's vault snapshot
+  (`VaultModel.master` non-nil); it SAYS one of: these open your library (and your account) · these open your library
+  but not your account (an honest split — e.g. changed elsewhere, VX-113's class) · these don't open your library. It
+  WRITES NOTHING — no key file, no keychain item, no vault, no ledger, no session hold — and keeps no secret past the
+  check. Refusals in the existing words (the floor's KDF validation, the words' checksum sentence). Words PROVISIONAL.
+  Pins: right passphrase / right words / wrong each; the synced split arm; a planted world's write counters zero across
+  every arm; the door hidden where no library is open.
+
+## UNIT B1 — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+`notes/SurfaceContracts.md` ("The app" and "Doors to the outside" — the protection bullet whole);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (her rulings R-510-1…12, THE TRACE, THE FIX DESIGN — UNIT A, UNIT
+A's LIVE STATUS whole — its Piece 0 harness recipe and its Piece 6 F-6 trace are your starting points — UNIT A — THE
+ORCHESTRATOR'S VERIFICATION AND RULINGS, THE FIX DESIGN — UNIT B, THE TEST-ACCOUNT ROAD, UNIT C's script, ENVIRONMENT
+TRAPS, OPEN ITEMS); `notes/plans/fixes/vx-488-window-hotfixes.md`'s M3 RECORD (the walk lift — `SyncFenceLift`, its
+pins, the HOLLOW-pin lesson RM3-4: a source pin matches CODE, never a comment); the code unit A changed (its diff
+`54b7b71df..92bd0740a`), `Shared/Protection/ProtectionWalkSwitch.swift`, `Shared/ProjectConfig.swift`,
+`Shared/AppServices.swift`, `Shared/AppBootstrap.swift` (`accountActOnNewRoad`, `reopenAround`, `attach`),
+`Tools/WalkKit/` (the walk idiom), `Tools/Release/` (the release road — find where its checklist lives), and the tests
+unit A added (`FirstRoundAfterTheActTests`, `FirstRoundConfirmTests`, `FirstRoundRoadTests`, `NotOnYetWordsTests`).
+The harness unit A built is at
+`/private/tmp/claude-501/-<home>-dev-variorum/e4cb0455-71b1-400e-8366-273031288432/scratchpad/vx510a-harness`
+— reuse it (copy it to your own scratch folder first) or rebuild from its Piece 0 recipe.
+
+**Your scope — exactly D-B0, D-B1, D-B2 and D-B3 in THE FIX DESIGN — UNIT B:** F-6 (A) as ruled; the standing
+first-run drill across every arm (built on unit A's seam, extending its world rather than forking a second one); the
+scripted first-run walk under `Tools/` plus its one release-checklist row; the prod test road (DEBUG-only, Release
+byte-unchanged, admission per account). Words a face needs (the road's refusal line, a re-keying act's round line)
+are drafted PROVISIONAL and named in your record. **Not yours:** D-B4 (VX-501) and D-B5 (VX-503) — unit B2's; any
+`Sources/VariorumCore/Sync/` line (STOP, flag, propose); the live walk itself (the orchestrator's unit C — your walk
+script is written and dry-checked for its guards only, never run against production); canon, Linear,
+`notes/QUESTIONS.md`. A design fork STOPS and comes back as a proposal.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's** (pin before fix per member, red-on-old;
+behavioral reverts named in your record before any runs, each restored and `git diff --exit-code` clean, "no revert is
+in flight" written; commit per piece, push each, your LIVE STATUS flipped in the same commit, PENDING on every
+unverified claim; foreground waits only; no subagents; headless only plus ONE Mac and ONE iOS `build-for-testing` at the
+end into `DerivedData/vx510-b1` / `vx510-b1-ios`; NO `xcodebuild test`, NO stage, NO app launch, NO store, server or
+production contact). Commits say `Part of VX-509` / `Part of VX-507` (D-B0) / `Part of VX-510` (D-B3, the road);
+**NO trailers of any kind.** The orchestrator may commit record sections to this branch in this worktree while you
+work: stage explicit paths only, re-read the record before each edit of it, and never touch sections you do not own.
+
+**Evidence at your close:** each pin's red line; each revert's run line; the harness whole on the final tree; the two
+build-for-testing lines; the walk script's guard dry-runs (each refusal shown, nothing launched); and THE MAC-SUITE
+LIST for every file you changed.
+
+### UNIT B1 — LIVE STATUS (the implementer owns this section)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **F-B1-1 — the prod test road cannot ARM on the Mac yet**: the
+sandboxed Debug app cannot read `~/.variorum/prod-test-accounts.env`, so a live launch with the switch refuses
+("the allowlist file can't be read") until the architect rules the fork (Piece 4: (A) a Debug-only entitlement · (B) the
+launcher hands the emails · (C) move the file) — STOPPED, NOT BUILT; **unit C cannot run on the road until it is ruled and
+built**. No `xcodebuild test`, no stage, no app launch, no dev/real-store touch, no server or production contact; the walk
+script (D-B2) is written and guard-dry-checked only, never run — its GUI labels have never met the real window. The
+Mac-target suites run in the orchestrator's stage batch (THE MAC-SUITE LIST, Piece 7). No line in
+`Sources/VariorumCore/Sync/`. D-B4/D-B5 are unit B2's. Words PROVISIONAL, hers: P-VX510-B1-1 (the follow's line),
+P-VX510-B1-2 (the road's refusal line).
+
+*Implementer session B1 — Opus 5.5, xhigh. Pre-fix tree = `68835a08c` (unit A's product files; `c1f3cdaf0` adds only
+unit B2's brief). Every claim not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+  `notes/SurfaceContracts.md` ("The app", "Doors to the outside" whole); `notes/SessionResiliencyProtocol.md`;
+  `notes/SyncSpec.md` WHOLE (the road changes sync's admission — no `Sync/` line); this file WHOLE; vx-488's M3 RECORD
+  (+ the M3 member text); unit A's product diff `54b7b71df..92bd0740a` whole; `ProtectionWalkSwitch`, `ProjectConfig`,
+  `AppServices`, `SyncSession`, `AppBootstrap` (whole), `RoadAccountModel`, `RoadAccountFaces`, `SyncStatusViews` (the face),
+  `VariorumApp`'s services `.task`; `Tools/WalkKit/` (README + the three scripts); `Tools/Release/release.sh` (the
+  publish-and-leave HANDOFF); `Tools/prod-read.sh`, `Tools/prod-confirm-test-user.sh`; the suites unit A added + their
+  supports (`ProtectionAccountSupport`, `PlantedRoad`, `PlantedJoin`, `PlantedAccountRoads`, `Crossing`,
+  `RoadJoinFollowSurfaceTests`' reopening seam, `TouchIDUnlockSyncKeysTests`' world, `SyncWalkFenceTests`,
+  `EntitlementsTests`): DONE (this commit).
+- **Piece 0** — the harness: DONE (not durable — this session's scratchpad `vx510b1-harness`, unit A's copied whole: its
+  `Package.swift`, both stub files, every symlink; the SwiftPM checkouts carried, the build fresh — `Build complete!`; each
+  new suite is symlinked in as it lands). Runner: `b1/test.sh <log> <filter>` (build, then the filtered run under a 300 s
+  watchdog).
+- **Piece 1** — D-B0's end-to-end pin, committed RED on the pre-fix tree: DONE (this commit). Unit A's `FirstRoundWorld`
+  EXTENDED (never forked): `reopensComposeFreshServices()` — the composition root's lifecycle across a reopen, as
+  `VariorumApp` runs it (the `onWillLock` teardown stops and releases the services; an `onReady` watch composes FRESH
+  services over the reopened session and attaches them — attach, then start); `composed` (every instance, in order);
+  `quiesce` awaits the watch and stops every instance. New suite `VariorumTests/Protection/FirstRoundAfterTheReopenTests.swift`:
+  `vx507_aReKeyingJoinConfirmsItsFirstRoundOnTheReopensFreshServices` (a Standard library joins an account that syncs in
+  CASTLE — the join enters Castle, re-keys, runs through the reopen). **RED on the pre-fix tree** (the harness, `--filter
+  "FirstRoundAfterTheReopenTests|FirstRoundAfterTheActTests"`): `✘ Test run with 6 tests in 2 suites failed with 2 issues`
+  — `vx507_aReKeyingJoinConfirmsItsFirstRoundOnTheReopensFreshServices` ✘×2 (`account.confirm === confirm` — the sheet went
+  with the words moment; "a first round runs for the re-keying join" — none started); its preconditions all held (the door
+  `.entersCastle` and re-keying, no refusal, the reopen in Castle, the record naming the account); unit A's five world pins
+  green under the extended world.
+- **Piece 2** — D-B0 (F-6 (A), ruled): DONE (`bab4692e5`; this record flip rode one commit late — the orchestrator's
+  `ee50eb8a6` landed under the edit). `Shared/AppBootstrap.swift`: the services generation (`servicesGeneration`, bumped by
+  every `attach`, which also answers the waiters); `awaitAttachedServices(newerThan:within:)` — at once when newer services
+  are attached, else the next attach's instance, nil past the bound (30 s in production; the timer holds the bootstrap until
+  it fires or an attach cancels it, so no waiter is left unanswered); `attach` wires the re-keying road
+  `roadAccount.firstRoundAfterReopen` (the generation now; at `.made` the services attached after it, asked
+  `runFirstRound()`). `Shared/Protection/RoadAccountModel.swift`: `RoadAccountModel.FirstRoundAfterReopen` + the property;
+  `open(_:)` — the PRESSED door chooses the road (a door re-shown CHANGED may change its plan): the act closure records
+  `(request.shown.rekeys, generation)` at the press, the first-round closure asks the reopen road with that generation or the
+  open session's road; no road for the door ⇒ no round (P-2 kept). `Shared/Protection/RoadAccountFaces.swift`:
+  `owesFirstRound` widened to every Turn on sync, Move and the follow (leaves never). `RoadAccountConfirmModel.firstRoundLine`
+  gains `follows:` — the follow's clean round says `ProtectionWords.firstRoundFollowLanded` = "Synced. This library is up to
+  date with your account again." (**PROVISIONAL P-VX510-B1-1**, my draft, hers; the follow's Done stays VX-457's durable
+  notice). `Shared/AppServices.swift`: `runFirstRound` WAITS while `start()` is in flight (the reopen's services are attached
+  just BEFORE their start — reaching for the chain first composed it twice, the start's configure retiring the round's
+  scheduler mid-round; found in the trace, pinned). Pins (new seams — red by Piece 6's reverts): `FirstRoundConfirmTests` —
+  **`aLeaveOrAReKeyingActNeverAsks` FLIPPED DELIBERATELY** to `aLeaveNeverAsks` (leaves only — F-6 (A) ruled the re-keying
+  half the other way), `aReKeyingActAsksTheReopenRoadWithThePressGeneration` (join into/out of Castle, Move into Castle, both
+  follows: the reopen road asked once with the generation taken BEFORE the planted press moved it on — the reopen's attach —
+  never the open session's road; no reopen road ⇒ no round), `aDoorReShownAsReKeyingTakesTheReopenRoad`;
+  `FirstRoundAfterTheReopenTests` + `theServicesGenerationAnswersTheNextAttachOrNothingWithinTheBound`,
+  `aFirstRoundAskedWhileStartRunsRidesTheStartsChain` (the chain composed once). Test support: `PlantedAccountRoads.onPress`
+  (what happens during a press; nil everywhere else). **The harness, `--filter "FirstRoundAfterTheReopenTests|
+  FirstRoundAfterTheActTests|FirstRoundRoadTests|FirstRoundConfirmTests|RoadAccountModelTests|RoadJoinFollowModelTests"`:
+  `✔ Test run with 37 tests in 6 suites passed`** — Piece 1's pin GREEN.
+- **Piece 3** — D-B1 (VX-509): DONE (this commit). New suite `VariorumTests/Protection/FirstRunDrillTests.swift` — **THE
+  STANDING GATE VX-509 asked for, named for the release checklist** (its header says so): every arm runs to its first round
+  with NO RELAUNCH and asserts what she sees — the sheet stays, the round runs to its end, the sheet's line, the sync row's
+  face (+ its line), Done closes it. Arms: `arm1_theStandardSetUpRunsItsFirstRound` (row not-on-yet before) ·
+  `arm2_theStandardJoinRunsItsFirstRound` · `arm3_theCastleSetUpUnderAlwaysAskRunsItsFirstRound` (Use Castle through the
+  bootstrap's crossing — its reopen composes fresh services — then the set-up in Castle) ·
+  `arm4_theCastleSetUpUnderTouchIDRunsItsFirstRound` (a finger enrolled, the planted press; the keys filed in the Touch ID
+  item) · `arm5_theCastleJoinRunsItsFirstRound` (same posture, open session) · `arm6_moveRunsItsFirstRound` (bound to
+  another account before this Mac's open; Move, same posture) · `arm7_theReKeyingJoinRunsItsFirstRoundThroughTheReopen`
+  (D-B0) — and the negatives, each saying its blocker on the sheet AND the row: `negative_offlineSaysWaitingOnTheSheetAndTheRow`
+  (sheet "Sync hasn't run yet: Waiting to sync (offline)." · row offline) · `negative_heldSaysWaitingSinceTheRestore` (sheet
+  the held line · row "Not synced yet" — **said plainly: under the hold the row itself has no held face; the hold's sentence
+  is the banner's (`RestoreHoldBar`)**) · `negative_notConfiguredSaysSyncIsOff` (the owner adoption refused — F-5; sheet and
+  row "Sync is off") · `negative_theAccountGateSaysPaused` (sheet and row the paused line). Unit A's world EXTENDED (never
+  forked): `run`/`make` take `owner:` (nil ⇒ the adoption refuses), `biometry:` and `prepare:` (acts on the library before the
+  bootstrap opens it); `composeServices(beforeStart:)` (the hold's gates wired before the start, as `VariorumApp` does);
+  `servicesSignIn` (the gate arm); `useCastle(gate:)` (through the bootstrap's crossing roads); `awaitReadyCompose()`;
+  `FirstRoundServer.goOffline()`. **The harness, `--filter "FirstRunDrillTests"`: `✔ Test run with 11 tests in 1 suite
+  passed`**; with every first-round suite (`FirstRunDrillTests|FirstRoundAfterTheReopenTests|FirstRoundAfterTheActTests|
+  FirstRoundRoadTests|FirstRoundConfirmTests|NotOnYetWordsTests`): **`✔ Test run with 39 tests in 6 suites passed`**. A
+  standing gate — guards, green by design on this tree; its teeth are Piece 6's reverts (RB-1/RB-2 below turn its arms red).
+- **Piece 4** — D-B3 (D-ROAD): DONE as designed, EXCEPT ONE FORK — STOPPED, NOT BUILT (F-B1-1 below) (this commit). Every
+  line is DEBUG-only. `Shared/Protection/ProtectionWalkSwitch.swift` (`#if DEBUG` whole): the road beside the walk lift —
+  `prodTestRoadKey` (`VARIORUM_PROD_TEST_ROAD`), `prodTestAllowlistPath` (`.variorum/prod-test-accounts.env` under the REAL
+  home — `realHome` via `getpwuid`, never the sandbox container's), `prodTestEmailsKey`, `prodTestMarker` (`vxtest`);
+  `AllowlistRead` (missing · unreadable · present(mode, text)); `ProdTestAllowlist.admits` (exact, case-folded; no email is
+  never listed); `ProdTestRoadRefusal` (walk project too · missing · unreadable · not 600 · empty · unmarked entry);
+  `ProdTestRoad` (none · armed · refused); the pure rule `prodTestRoad(switchValue:walkProject:allowlist:)` (exactly `1` asks;
+  the allowlist read ONLY when asked, AFTER the walk-project exclusion); `allowlistEmails` (the one key, parsed as the shell
+  sources it — the secrets beside it are never entries, never kept, never logged); `readAllowlist(atPath:)` (`lstat` — a link
+  is never followed; the mode bits; the text); `prodTestRoadForThisLaunch` (logged once — armed with HOW MANY accounts, or
+  refused and why; never an email). `Shared/ProjectConfig.swift` (its DEBUG fence): `prodTestRoad`, decided once from the
+  walk project already resolved (never a second parse). `Shared/AppServices.swift`: `DevSyncFence` (the launch's two
+  exceptions — the walk lift and the road — as ONE value; `thisLaunch` = `ProjectConfig`'s two decisions) behind a
+  DEBUG-only dependency `\.devSyncFence` (live and test value: the launch's own — a test process carries no switch; a pin
+  injects its own — the project's injection idiom, so `AppServices` reads no environment of its own, still pinned); the DEBUG
+  derivation `allowsSync(storeVariant:walkLift:prodTestRoad:)` (a dev store syncs under the lift OR the armed road); the
+  pure admission `prodTestRoadAdmits(storeVariant:fence:email:)` — while the dev store syncs ONLY by the road, only a listed
+  account; `connectSyncIfAllowed` runs it at EVERY connect (launch, sign-in, resume, first round, the deletion's reconnect —
+  one door) against `auth.currentEmail`, records `AccountState.notOnTheProdTestRoad` and composes nothing for an unlisted
+  account (one log line, no email); a sign-out clears it. The Release arm's line byte-unchanged; the retired-credential sweep
+  still gated on the store variant (its pin untouched). `Shared/SyncStatusViews.swift`: `SyncRowFace.Kind.notOnTheProdTestRoad`,
+  the pure `SyncRowFace.prodTestRoadRefusal(refused:)` (its door Account…), consulted FIRST by the row's face; the line
+  `SyncStatusRow.notOnTheProdTestRoadLabel` = "Sync off (dev store) — this account isn't a listed test account"
+  (**PROVISIONAL P-VX510-B1-2**, my draft, hers), warning-styled. `Shared/SyncSession.swift`: its A4 header comment names the
+  second exception (no code). Pins (new suite `VariorumTests/ProdTestRoadTests.swift`, 12 tests — new seams, teeth by Piece
+  6's reverts): `withNoSwitchTheFenceHoldsAndNothingIsRead` · `theSwitchWithAWalkProjectRefuses` ·
+  `eachAllowlistFaultRefusesAndTheFenceStands` (missing · unreadable · 644 · 640 · empty · no key · an unmarked entry) ·
+  `theSwitchAndAPrivateMarkedListArmTheRoad` · `theAllowlistsOneKeyIsParsedAndNothingElse` ·
+  `theReadReportsTheFilesModeAndNeverFollowsALink` (real temp files) · `thisLaunchsRoadWithNoSwitchIsNone` (guard) ·
+  `theAdmissionIsPerAccount` · `armedAndListedComposesTheChain` (the DEV store's real services, the fence injected) ·
+  `armedAndUnlistedComposesNothingAndTheRowSaysWhy` (no chain, the refusal face + line, a first round "not configured", then
+  a sign-in as a LISTED account re-runs the admission and composes) · `theRowConsultsTheRoadsRefusalFirst` (source, code) ·
+  `aReleaseBuildCompilesNothingOfTheRoad` (source: the text a Release build compiles — every `#if DEBUG` arm dropped, line
+  comments stripped — names no road identifier in the four files; the stripper's own teeth: it keeps Release's derivation
+  line). **`SyncWalkFenceTests.theDerivationReadsTheLaunchsLiftOnlyInDebug` UPDATED DELIBERATELY** (the code it pins changed:
+  the DEBUG arm reads both exceptions from the launch's fence; the fence's live value is `ProjectConfig`'s two decisions;
+  Release's line asserted byte-unchanged as before) — red on the pre-fix tree in its new form. **The harness, `--filter
+  "ProdTestRoadTests|SyncWalkFenceTests|SyncLockedRowTests|SyncStalledRowTests|ProtectionWalkSwitchTests|
+  ProtectionWalkProjectTests"`: `✔ Test run with 34 tests in 6 suites passed`.**
+  - **F-B1-1 — THE FORK (STOPPED, NOT BUILT): the sandboxed Debug app cannot read the ruled allowlist path.** Both Mac
+    configurations are App-Sandboxed (`ENABLE_APP_SANDBOX = YES`, one shared `Variorum.entitlements`), and the sandbox
+    denies a read outside the container — `~/.variorum/prod-test-accounts.env` included (the container is the sandbox's
+    home: `BackupDestination.displayPath`'s own note). So as built, a live launch with the switch reads `.unreadable` and the
+    road REFUSES, fail-closed and said once ("the allowlist file can't be read") — **the road cannot arm on the Mac until the
+    architect rules** (PENDING the live walk to observe; headless, the read is proven over temp files, unsandboxed). Options:
+    **(A — recommended for literalness)** a Debug-only entitlements file — the shared file plus
+    `com.apple.security.temporary-exception.files.home-relative-path.read-only` = `/.variorum/prod-test-accounts.env` — named
+    by the DEBUG configuration's `CODE_SIGN_ENTITLEMENTS` only: the app reads the ruled file in place, exactly D-B3; Release's
+    entitlements and signature untouched. Cost: a project-file edit, a second entitlements file kept in lockstep with the
+    shared one (an `EntitlementsTests` pin can hold them equal but for the one key), a one-file read exception in the Debug
+    build (the test host included). **(B — lightest)** the LAUNCHER hands the one key: the walk script (outside the sandbox)
+    checks the file (mode 600, every entry marked — it already does, D-B2) and launches with `VARIORUM_PRODTEST_EMAILS` beside
+    the switch; the app's rule reads that value instead of the file (the marker check stays in the app; the mode check moves
+    to the launcher). No entitlement, no project change; the emails (never a secret) show in `ps eww`. A one-function swap of
+    the rule's input. **(C)** the allowlist moves into the Debug container (readable without a grant) — moves her ruled path,
+    and every tool that reads it, into a folder a dev-slot reset handles. The walk script (D-B2) is written for the current
+    design and says which line changes under (B).
+- **Piece 5** — D-B2 (VX-509): DONE — written and guard-dry-checked only, NEVER run (this commit). `Tools/WalkKit/first-run-walk.sh
+  <std|castle|del> [--app …] [--dry-run] | --self-test` (zsh, the WalkKit/VisualWalk idioms — `guard.sh --author` before
+  every GUI act, acts ≥ 2.6 s apart, presses by ACCESSIBILITY LABEL through VisualWalk's `vis-ax` addressed to OUR pid,
+  captures by window id, quit by identity left to the walker): **nine guards, in order, each a refusal (exit 5, nothing
+  launched, nothing read from production, nothing typed)** — G1 the account (std · castle · del); G2 the allowlist (a regular
+  file never a link, mode 600, every entry `vxtest`, this account listed — read in a subshell, never printed); G3 no walk
+  project in the environment; G4 a Debug build (bundle `io.lduarte.Variorum.debug`, a `…/Debug/Variorum.app` path) never under
+  `/Applications`; G5 zero Variorum instances (by path); G6 the stage HELD; G7 the dev slot set aside (no `variorum.sqlite`
+  — the `mv` is the walker's, never the script's); G8 `Tools/prod-read.sh` + `.env.supabase.local` present, the typing and
+  stash helpers at mode 700, cliclick; G9 the GUI grants (VisualWalk's `vis-tcc` — checked, never prompted). Then the live
+  phases (unit C's): P1 launch (`open -n --env VARIORUM_PROD_TEST_ROAD=1 --env OS_ACTIVITY_DT_MODE=YES --stderr`), P2 `ps
+  eww` (the switch present, no walk project — never printed) + the app's own "PROD TEST ROAD (VX-510): ARMED" line (a
+  REFUSED line stops it — F-B1-1 stops it HERE until ruled), P3 the account on production (exists, confirmed — its id read
+  once), P4 sign in (the helper types email/password), P5 the row's not-yet line + Settings ▸ Protection ▸ Record your twelve
+  words… → Copy → `stash-prod-test-words`, P6 Turn on sync… (the helper types the new passphrase twice and the words), P7 THE
+  SHEET's "Synced. Your library is on your account now." (≤ 180 s; a "Sync hasn't run yet" line stops it with the capture) →
+  Done → the row "Synced" → the same pid (no relaunch), P8 the server by the account's id: `key_vault` (mode + proof),
+  `vault.secrets` `kp:<id>`, `device_cursor`, `container` rows (counts only). The GUI labels are the code's own constants
+  (`ProtectionWords`, `AuthViews`) but have never met the real window: **its first live run is unit C's** (expect label
+  adjustments there). **THE RELEASE-CHECKLIST ROW** — the publish checks live in `Tools/Release/release.sh`'s HANDOFF
+  (release mode), so its step **0 — THE FIRST-RUN GATE (VX-509)**: `FirstRunDrillTests` green on this commit AND
+  `Tools/WalkKit/first-run-walk.sh std` PASSED on a Debug build of this commit, before the DMG moves (printed text only — no
+  release behaviour changes; `bash -n` clean; no test pins that text). `Tools/WalkKit/README.md` gains a short section.
+  **THE GUARD DRY-RUNS (this session; nothing launched):** no args → `REFUSES: usage: …` exit 5 · `bogus` → `REFUSES: G1/G2 —
+  unknown account 'bogus'` exit 5 · `VARIORUM_WALK_PROJECT_URL=… std` → `REFUSES: G3 — a walk project is set …` exit 5 ·
+  `std --app /Applications/Variorum.app` → `REFUSES: G4 — … is under /Applications: her app is never launched by a walk` exit
+  5 · `std --app /nonexistent/Debug/Variorum.app` and `std` (no `vx510` build yet) → `REFUSES: G4 — no Debug build at …` exit 5
+  · `--self-test` → nine fixture cases, every one as expected (good std/castle accepted; unknown account, mode 644, an
+  unmarked entry, an empty list, the account unlisted, a link, no file — each refused with its reason) `SELF-TEST: every guard
+  fired as expected` exit 0. **Machinery honesty:** the self-test's FIRST run reported 7 of 9 cases wrong — its own harness
+  read the exit status after a `local` assignment (always 0), so every case read "accept"; the self-test caught it (it FAILs
+  loudly rather than passing hollow), fixed before this commit. The G5/G6 refusals are shown at Piece 7 against the
+  build-for-testing's Debug app (PENDING).
+- **Piece 6** — THE BEHAVIORAL REVERTS, named BEFORE any runs (this commit; the committed tree IS the pre-revert copy). First, a
+  WORLD FIDELITY FIX found while naming them (test code, this commit): the world kept every services instance it composed
+  (`composed`, strong) — production lets a stopped instance go at the teardown and the bootstrap's roads hold them weakly, so
+  a revert whose road reached the RELEASED services would have reached a still-alive one here and passed hollow; now a count
+  (`composedCount`), and the reopen pins keep no reference to the open session's services. Plus the follow's line pinned
+  (`eachOutcomeSaysTheRowsOwnSentence` + the follow arm; `aReKeyingActAsksTheReopenRoadWithThePressGeneration` asserts each
+  door's success line). Re-run on this tree: `--filter "FirstRunDrillTests|FirstRoundAfterTheReopenTests|
+  FirstRoundAfterTheActTests|FirstRoundRoadTests|FirstRoundConfirmTests|ProdTestRoadTests|SyncWalkFenceTests"` **`✔ Test run
+  with 53 tests in 7 suites passed`**. Each revert is ONE file, applied in the worktree, the harness run with the named filter
+  (`b1/revert.sh` — build, the run under a 300 s watchdog, `git checkout --`, `git diff --exit-code`), expected red in
+  brackets:
+  - **RB-1** (D-B0, the wiring) `Shared/AppBootstrap.swift`: `attach` stops wiring `firstRoundAfterReopen` [the D-B0
+    end-to-end pin, `arm7_…`, `theServicesGenerationAnswersTheNextAttachOrNothingWithinTheBound`].
+  - **RB-2** (D-B0, THE NAMED ONE — "the road answering at `.made` without waiting ⇒ the false 'Sync is off'")
+    `Shared/Protection/RoadAccountModel.swift`: the first-round closure asks the OPEN SESSION's road for a re-keying press too
+    [the D-B0 end-to-end pin ("Sync hasn't run yet: Sync is off."), `arm7_…`, `aReKeyingActAsksTheReopenRoadWithThePressGeneration`,
+    `aDoorReShownAsReKeyingTakesTheReopenRoad`].
+  - **RB-3** (D-B0, the wait) `Shared/AppBootstrap.swift`: `awaitAttachedServices` answers at once with whatever is attached
+    [`theServicesGenerationAnswersTheNextAttachOrNothingWithinTheBound`].
+  - **RB-4** (D-B1 / unit A's composition) `Shared/AppBootstrap.swift`: `attach` stops wiring `firstRound` [every
+    open-session arm of `FirstRunDrillTests` — arm1–arm6 and the four negatives].
+  - **RB-5** (D-B0, the gate) `Shared/Protection/RoadAccountFaces.swift`: `owesFirstRound` back to unit A's form (open-session
+    Turn on sync / Move only) [the D-B0 end-to-end pin, `arm7_…`, `aReKeyingActAsksTheReopenRoadWithThePressGeneration`].
+  - **RB-6** (D-B0, the start race) `Shared/AppServices.swift`: `runFirstRound` drops the in-flight start's wait
+    [`aFirstRoundAskedWhileStartRunsRidesTheStartsChain`].
+  - **RB-7** (D-B0, the follow's line) `Shared/Protection/RoadAccountModel.swift`: `firstRoundLine` drops its follow arm
+    [`eachOutcomeSaysTheRowsOwnSentence`, `aReKeyingActAsksTheReopenRoadWithThePressGeneration` (the follows)].
+  - **RB-8** (D-B3, the derivation) `Shared/AppServices.swift`: `allowsSync`'s dev arm ignores the road [`theSwitchAndAPrivate
+    MarkedListArmTheRoad`, `armedAndListedComposesTheChain`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  - **RB-9** (D-B3, the admission's door) `Shared/AppServices.swift`: `connectSyncIfAllowed` loses its DEBUG admission block
+    [`armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  - **RB-10** (D-B3, the admission's rule) `Shared/AppServices.swift`: `prodTestRoadAdmits` admits every account
+    [`theAdmissionIsPerAccount`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  - **RB-11** (D-B3, the exclusion) `Shared/Protection/ProtectionWalkSwitch.swift`: the rule ignores a resolved walk project
+    [`theSwitchWithAWalkProjectRefuses`].
+  - **RB-12** (D-B3, the mode) `ProtectionWalkSwitch.swift`: the mode-600 check removed [`eachAllowlistFaultRefusesAndTheFenceStands`].
+  - **RB-13** (D-B3, the marker) `ProtectionWalkSwitch.swift`: the `vxtest` check removed [`eachAllowlistFaultRefusesAndTheFenceStands`].
+  - **RB-14** (D-B3, links) `ProtectionWalkSwitch.swift`: `readAllowlist` follows a link (`stat`, not `lstat`)
+    [`theReadReportsTheFilesModeAndNeverFollowsALink`].
+  - **RB-15** (D-B3, the switch) `ProtectionWalkSwitch.swift`: any non-empty switch value asks [`withNoSwitchTheFenceHoldsAndNothingIsRead`].
+  - **RB-16** (D-B3, the row) `Shared/SyncStatusViews.swift`: the row's face stops consulting the road's refusal
+    [`theRowConsultsTheRoadsRefusalFirst`].
+  - **RB-17** (D-B3, Release) `Shared/AppServices.swift`: the sign-out's `notOnTheProdTestRoad` reset leaves its `#if DEBUG`
+    fence [`aReleaseBuildCompilesNothingOfTheRoad`].
+  - **RB-18** (D-B3, the call site) `Shared/AppServices.swift`: the DEBUG derivation back to the walk-lift-only call
+    [`theDerivationReadsTheLaunchsLiftOnlyInDebug`, `armedAndListedComposesTheChain`, `armedAndUnlistedComposesNothingAndTheRowSaysWhy`].
+  **RESULTS — DONE, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN FLIGHT** (the committed
+  tree `a59972d3c`; the runner `b1/revert.sh` in the session scratchpad, each run filtered):
+  - **RB-1** `--filter "FirstRoundAfterTheReopenTests|FirstRunDrillTests"`: `✘ Test run with 14 tests in 2 suites failed with 6
+    issues` — `vx507_aReKeyingJoinConfirmsItsFirstRoundOnTheReopensFreshServices` ✘×2, `theServicesGenerationAnswers…` ✘,
+    `arm7_theReKeyingJoinRunsItsFirstRoundThroughTheReopen` ✘×3.
+  - **RB-2** (+ `FirstRoundConfirmTests`): `✘ … 24 tests in 3 suites failed with 14 issues` — `aDoorReShownAsReKeyingTakesTheReopenRoad`
+    ✘, `aReKeyingActAsksTheReopenRoadWithThePressGeneration` ✘×10, the end-to-end pin ✘ (**its outcome `.done(.notConfigured)`
+    — the released services: the false "Sync hasn't run yet: Sync is off.", exactly the named failure; it also proves the
+    world lets the old instance go**), `arm7_…` ✘×2.
+  - **RB-3** `--filter FirstRoundAfterTheReopenTests`: `✘ … 3 tests in 1 suite failed with 3 issues` —
+    `theServicesGenerationAnswers…` ✘×2 and the end-to-end pin ✘.
+  - **RB-4** `--filter FirstRunDrillTests`: `✘ … 11 tests in 1 suite failed with 23 issues` — arm1–arm6 and all four negatives
+    ✘ (no round phase); `arm7_…` green (the re-keying road is wired separately — as designed).
+  - **RB-5** (three suites): `✘ … 24 tests in 3 suites failed with 25 issues` — `aReKeyingActAsks…` ✘×20, the end-to-end pin
+    ✘×2, `arm7_…` ✘×3.
+  - **RB-6** `--filter FirstRoundAfterTheReopenTests`: `✘ … 3 tests in 1 suite failed with 6 issues` —
+    `aFirstRoundAskedWhileStartRunsRidesTheStartsChain` ✘×2 (two chains; `CancellationError()`) AND the end-to-end pin ✘×4:
+    **without the wait the reopen's first round is cancelled by the start's second configure and the sheet says "Sync hasn't
+    run yet: Sync error." — the race is real on the shipped path, not hygiene**.
+  - **RB-7** `--filter FirstRoundConfirmTests`: `✘ … 10 tests in 1 suite failed with 3 issues` — `eachOutcomeSaysTheRowsOwnSentence`
+    ✘, `aReKeyingActAsks…` ✘×2 (the two follows).
+  - **RB-8** `--filter "ProdTestRoadTests|SyncWalkFenceTests"`: `✘ … 19 tests in 2 suites failed with 7 issues` —
+    `theSwitchAndAPrivateMarkedListArmTheRoad` ✘, `armedAndListedComposesTheChain` ✘×3, `armedAndUnlisted…` ✘×3.
+  - **RB-9** (same): `✘ … with 3 issues` — `armedAndUnlistedComposesNothingAndTheRowSaysWhy` ✘×3 (a chain composed).
+  - **RB-10** (same): `✘ … with 6 issues` — `theAdmissionIsPerAccount` ✘×3, `armedAndUnlisted…` ✘×3.
+  - **RB-11** (same): `✘ … with 2 issues` — `theSwitchWithAWalkProjectRefuses` ✘×2.
+  - **RB-12** (same): `✘ … with 6 issues` — `eachAllowlistFaultRefusesAndTheFenceStands` ✘×6 (644 and 640 armed).
+  - **RB-13** (same): `✘ … with 3 issues` — `eachAllowlistFaultRefusesAndTheFenceStands` ✘×3 (the unmarked entry armed).
+  - **RB-14** (same): `✘ … with 1 issue` — `theReadReportsTheFilesModeAndNeverFollowsALink` ✘ (the link followed).
+  - **RB-15** (same): `✘ … with 15 issues` — `withNoSwitchTheFenceHoldsAndNothingIsRead` ✘×15.
+  - **RB-16** (same): `✘ … with 1 issue` — `theRowConsultsTheRoadsRefusalFirst` ✘.
+  - **RB-17** (same): `✘ … with 2 issues` — `aReleaseBuildCompilesNothingOfTheRoad` ✘×2.
+  - **RB-18** (same): `✘ … with 7 issues` — `theDerivationReadsTheLaunchsLiftOnlyInDebug` ✘, `armedAndListed…` ✘×3,
+    `armedAndUnlisted…` ✘×3.
+- **Piece 7** — EVIDENCE: DONE (the final tree = this commit's product files; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's three new suites symlinked in): `✘ Test run with 480 tests in 82 suites failed with
+    4 issues` — exactly unit A's three harness-PATH artifacts (`theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut` ×2,
+    `thePasteInIsFullyRetiredInTheSharedSources`, `theBecomeActiveHookRunsOneSyncRound` — they read `#filePath` beside the
+    symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 477 tests in 82 suites passed`**
+    (unit A's 449/79 + this unit's 28 tests in 3 new suites and 2 more in `FirstRoundConfirmTests`); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`** — the road
+    compiles out whole (the exhaustive row switches without their DEBUG case).
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b1
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**, zero errors; ONE warning in a file this unit touched —
+    `FirstRoundAfterTheReopenTests.swift:114` (an unnecessary `try` before a non-throwing `withDependencies`) — fixed in this
+    commit AFTER that build (one token, test-only; re-verified in the harness: `--filter FirstRoundAfterTheReopenTests` `✔
+    Test run with 3 tests in 1 suite passed`, no warning for the file — said plainly: the Mac target has not re-compiled
+    the fixed line). `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+    App/Variorum/DerivedData/vx510-b1-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`**, zero errors, no warning in a
+    touched file.
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched — no `Sync/` line).
+  - THE WALK SCRIPT against the built Debug app (read-only guards; nothing launched): `Tools/WalkKit/first-run-walk.sh std
+    --app App/Variorum/DerivedData/vx510-b1/Build/Products/Debug/Variorum.app --dry-run` → G1–G5 held (the account listed, no
+    walk project, the build `io.lduarte.Variorum.debug` outside `/Applications`, zero Variorum instances) → `REFUSES: G6 — the
+    stage is not held (STAGE FREE); claim it first …` exit 5. (G5's refusal path is VisualWalk's own `pgrep` idiom — not
+    exercised: no instance was running and none may be started here; G7–G9 sit behind G6.)
+  - **Machinery honesty:** the orchestrator committed to this branch IN THIS WORKTREE while the unit ran (`c1f3cdaf0`,
+    `ee50eb8a6`, `07c22ac8f`, `677cc46c0` — its own record sections); this session staged explicit paths only, re-read the
+    record before each edit, and never touched those sections. One record flip rode a commit late (Piece 2 — said there).
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW (harness-green): `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests` (VX-509's standing gate), `ProdTestRoadTests`.
+  - CHANGED (harness-green): `FirstRoundAfterTheActTests` (the world), `FirstRoundConfirmTests` (the flipped pin + the new
+    ones), `RoadAccountModelTests` (`PlantedAccountRoads.onPress`), `SyncWalkFenceTests` (the derivation pin, updated).
+  - `AppServices` (the start-wait, the fence dependency, the derivation, the admission, `AccountState`): `FirstRoundRoadTests`,
+    `OneRefreshAuthorityTests`, `Phase9cAuthWiringTests` (ALL — its three source pins run only there), `TierAndOnboardingTests`,
+    `Phase8ServicesTests`, `KeychainOffMainTests`, `LibraryPortabilityDoorTests`, `SampleLibraryDedupeFactsTests`.
+  - `AppBootstrap` (`attach`, the generation): `AppBootstrapOffMainTests`, `SettingsLockCloseTests`, `LibraryHandOffTests`,
+    `QuickEntryLaunchFocusTests`, `WhatsNewWaitsAfterAdoptionTests`, `RoadAccountSurfaceTests`, `RoadJoinFollowSurfaceTests`,
+    `RoadKeyDoorSurfaceTests`, `RoadLockRouteTests`, `SetPassphraseRowRereadRouteTests` (+ unit A's whole `Protection/` list).
+  - `RoadAccountModel` / `RoadAccountFaces` / `ProtectionWords`: `FollowDoneNoticeTests`, `ProtectionPaneWaveTests`,
+    `PassphraseFloorRoadTests`, `RoadJoinFollowModelTests`, `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`,
+    `RoadAccountFacesTests`, `RoadJoinFollowFacesTests`, `RoadAccountWordsTests`, `RoadJoinFollowWordsTests`,
+    `ProtectionWordsPlanTests`, `ProtectionWordsVX307Tests`, `U2WordsTests`.
+  - `SyncStatusViews` (the DEBUG kind, the refusal face, the row's `face`): `SyncLockedRowTests`, `SyncStalledRowTests`,
+    `SyncOutOfDateFaceTests`, `NotOnYetWordsTests`, `TierAndOnboardingTests`.
+  - `ProtectionWalkSwitch` / `ProjectConfig`: `ProtectionWalkSwitchTests`, `ProtectionWalkProjectTests`, `ProtectionCrossingRouteTests`,
+    `RoadRearmTests`, `OneSyncKeysLeafTests`, `EntitlementsTests` (the Debug host's entitlements — untouched here, but F-B1-1's
+    option (A) would change them).
+  - The simplest honest batch: the whole `VariorumTests/Protection` folder + every top-level suite named above.
+  - THE PHONE (`VariorumMobileTests` — `AppServices`/`SyncSession`/`AppBootstrap`/`SyncStatusRow`, and the `Shared/` sweeps over
+    the new literals): `MobileEmptyStoreTests`, `MobileStructuralTests`, `MobilePerfWalkTests`, `MobileQuickNoteReadFailureTests`,
+    `MobileStarterJournalTests`.
+  **THE WALK (this unit's rows, for the stage — use-shaped, not this session's):** (1) a re-keying join (a Standard library
+  joining a Castle account — the throwaway road or, once F-B1-1 is ruled, the prod test road): the sheet survives the reopen,
+  then "Syncing your library with your account…" → "Synced. Your account's writing is in this library now."; the row
+  "Synced ‹time›", no relaunch; (2) a follow (the account entered Castle on another device): the sheet's round line beside
+  the section's durable Done; (3) the prod test road with an UNLISTED account signed in: the row reads "Sync off (dev store)
+  — this account isn't a listed test account" with Account…; signing in as a listed account composes the chain (the road's
+  log line ARMED first); (4) `Tools/WalkKit/first-run-walk.sh std` end to end (unit C's LEG S S4–S7). Both voices where the
+  sheet and the row have a face.
+
+## UNIT B2 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B1 closes)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE (rules 7, 9, 14, 15
+and 20 are this unit's ground); `notes/SyncSpec.md` §3 (the key provider, the custody record, the vault road);
+`notes/SurfaceContracts.md`'s protection bullet whole; `notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B4 and
+D-B5 are your charter; THE TRACE; units A and B1's LIVE STATUS for the seams and harness they built);
+`notes/plans/fixes/vx-488-window-hotfixes.md`'s M1 RECORD WHOLE (VX-487 (b) — `loadSyncKeysForTheSession`, the Touch ID
+unlock's session load you are building the typed twin of; its never-hostage pins; OPEN ITEMS M1 (c) — this ticket's
+origin) and the vx-494 record's R-494-4 (her ruled direction, verbatim); the code: `Shared/Protection/ProtectionOpenRoad.swift`
+(the lobby's typed roads, `typedCandidates`, `pressTouchID`, `loadSyncKeysForTheSession`), `Shared/Protection/
+KeychainSyncKeysLeaf.swift`, `Shared/Protection/NewRoadSyncKeyProvider.swift`, `Shared/Protection/WireVaultLeaf.swift`,
+`Sources/VariorumCore/Protection/Executor/Acts/KeyDoors.swift` (`holdSyncKeysForTheSession`), the vault model
+(`VaultModel.master`, `vault.keys(master:)`), and for D-B5 the join's plan (`Executor` `enroll` and the steps it runs —
+every keychain read on that road) plus `KeychainCustodyLeaf.swift`.
+
+**FIRST, before anything else — F-B1-1 (B) as ruled in UNIT B1 — THE ORCHESTRATOR'S VERIFICATION AND RULINGS** (unit C
+waits on it): the app reads the allowlist from `VARIORUM_PRODTEST_EMAILS` (space-separated, the file's own shape)
+instead of the file — every in-app guard kept (the road's `1`; refused with a walk project; empty refused; every entry
+carrying `vxtest`; the admission per account at connect) — and `Tools/WalkKit/first-run-walk.sh` reads the file (mode
+600, outside the sandbox) and passes the value at launch. Its pins updated (each file-reading pin becomes the env
+form; a pin that an entry without the marker refuses; a pin that her-shaped address can never be admitted), its
+reverts named and run, its own commit pushed AT ONCE, its hash written in your LIVE STATUS — the orchestrator builds
+the live walk from that commit while you continue. Commits for it say `Part of VX-510`.
+
+**Then your scope — exactly D-B4, D-B6 and D-B5:** VX-501's typed-unlock load (never hostage; no second KDF; the secret never
+retained past the load; Standard and unbound libraries read nothing) with its pins red-on-old; VX-511's card retirement at
+a landed account act (D-B6, its pins red-on-old; read `WordsBand.swift`, `ProtectionCopyDoors.swift`'s VX-444 carry and
+mark, and the bootstrap's `accountRoads().landed` / `accountActOnNewRoad`); and the VX-503 trace —
+which read raises the system Touch ID prompt during a Standard join, what a cancel skips, whether it leaves residue —
+recorded with file:line evidence, a fix ONLY if traced (with its pin), else recorded for the orchestrator. **A seam that
+would put LocalAuthentication or a network read into the core package, or any line in `Sources/VariorumCore/Sync/`, is
+a FORK: stop and propose.** Not yours: everything else; canon, Linear, `notes/QUESTIONS.md`.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's**, with `build-for-testing` into
+`DerivedData/vx510-b2` / `vx510-b2-ios`, plus the core package's protection set debug AND release if you touch
+`Sources/` (the vx-488 M1 filter: every suite under `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`,
+`AccountLifecycleTests`, `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`,
+`SupabaseTransportSessionTests`). Commits say `Part of VX-501` / `Part of VX-511` / `Part of VX-503`; NO trailers of any
+kind.
+
+### UNIT B2 — LIVE STATUS (the implementer owns this section)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **T-B5-2's listing blindness — RECORDED, NOT BUILT** (a finding
+for the orchestrator, custody code, a ticket candidate: the production sync-keys leaf never lists a Touch ID-only item, so the
+leaves and `holdSyncKeys`' drops never delete it — the source of the stale item behind VX-503; Piece 3's options (a)–(c)); the
+VX-503 fix built is the traced READ only (the join no longer presses for it). No `xcodebuild test`, no stage, no app launch,
+no dev/real-store touch, no server or production contact (the run's traps) — the Mac-target suites this unit touches run in
+the orchestrator's stage batch (THE MAC-SUITE LIST, Piece 4). Two branches are unpinned, said in their pieces: VX-501's reuse
+of a vault the settle already read, and VX-511's reopen-not-ready mark. The walk script's `--env` hand-off (F-B1-1) is
+dry-checked only here — its live proof is unit C's (the orchestrator's walk ran on `4a5ef39e3`). No line in
+`Sources/VariorumCore/Sync/`. PROVISIONAL, the architect's/hers: P-VX510-B2-1 (VX-501's 10 s vault bound).
+
+*Implementer session B2 — Opus 5.5, xhigh. Pre-fix tree = `b07c2833f` (unit B1's product files). Every claim not yet run is
+PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+  `notes/SyncSpec.md` §3 (read whole); `notes/SurfaceContracts.md`'s protection bullet whole; `notes/SessionResiliencyProtocol.md`;
+  this file WHOLE; vx-488's M1 RECORD WHOLE + OPEN ITEMS M1 (c); vx-494's R-494-4; the walk switch's road, `ProjectConfig`,
+  `ProdTestRoadTests`, `Tools/WalkKit/first-run-walk.sh`: DONE (the code for D-B4/D-B6/D-B5 is read as each piece starts).
+- **Piece 0** — the harness: DONE (not durable — this session's scratchpad `vx510b2-harness`, unit B1's copied whole but its
+  build products; runner `b2/test.sh <log> <filter|ALL>` under a watchdog, `b2/revert.sh` for the reverts). **BASELINE on the
+  pre-fix tree (`b07c2833f`), the three harness-PATH artifacts `--skip`ped (unit A's Piece 0): `✔ Test run with 477 tests in
+  82 suites passed`** — exactly B1's close.
+- **Piece F — F-B1-1 (B), RULED (Part of VX-510): DONE — `4a5ef39e3` (pushed at once; THE COMMIT THE ORCHESTRATOR BUILDS
+  THE LIVE WALK FROM).** `Shared/Protection/ProtectionWalkSwitch.swift`: the app reads the allowlist from the launch
+  environment's `VARIORUM_PRODTEST_EMAILS` (the file's one key's shape — space-separated; one pair of surrounding quotes
+  dropped), never a file — `AllowlistRead`, `readAllowlist`, `realHome`, `prodTestAllowlistPath` and the file parse DELETED;
+  `prodTestRoad(switchValue:walkProject:allowlist:)`'s input is the handed value (nil = not handed), read only when asked;
+  refusals now `walkProjectToo` · `allowlistNotHanded` (new) · `allowlistEmpty` · `unmarkedEntry` (the file's missing /
+  unreadable / not-600 refusals left with the file); `prodTestRoadForThisLaunch(walkProject:environment:)` (the environment
+  injectable, defaulting to the process's). Every in-app guard kept and unchanged: exactly `1` asks, a walk project refuses
+  first, empty refuses, every entry carries `vxtest`, the admission per account at connect (`AppServices` untouched).
+  `Shared/ProjectConfig.swift`: its comment. `Tools/WalkKit/first-run-walk.sh`: P1 reads the file's one key in a subshell
+  (`allowlist_value` — after G2's checks: a regular file, mode 600, every entry marked, the account listed) and launches with
+  `--env VARIORUM_PRODTEST_EMAILS="$LIST"` beside the switch (never printed; the emails are no secret — `ps eww` shows them;
+  the secrets beside them are never handed); P2 also checks the process carries the handed list; the header's F-B1-1 note
+  states the ruled shape; `--self-test` gains the handed-value case (the list key alone, never another key). `README.md`'s
+  sentence. Pins (`ProdTestRoadTests`, every file-reading pin now the env form): `withNoSwitchTheFenceHoldsAndNothingIsRead`,
+  `theSwitchWithAWalkProjectRefuses`, `eachAllowlistFaultRefusesAndTheFenceStands` (nil · empty · blank · `""` · an unmarked
+  entry beside a marked one · alone · a her-shaped bare address beside a test one), `theSwitchAndAHandedMarkedListArmTheRoad`,
+  `theHandedListIsParsedAsTheFilesOneKey`, **NEW** `theLaunchReadsTheHandedListFromItsEnvironment` (the launch's own reading:
+  armed on the switch + the list; the switch alone refuses as nothing handed — no file read in its place; a list without the
+  switch asks nothing; an unmarked handed entry refuses), **NEW** `theRoadReadsNoFile` (guard, code only: the road's section
+  names no file API), **NEW** `aHerShapedAddressIsNeverAdmitted` (an armed list of plus-addresses admits neither the bare inbox
+  address nor a case, plus or suffix variant; the bare address handed refuses the road outright); `aReleaseBuildCompilesNothing
+  OfTheRoad` also names `VARIORUM_PRODTEST`. The new pins need the new seam to compile — their red is the reverts' below.
+  **The harness, `--filter "ProdTestRoadTests|SyncWalkFenceTests|ProtectionWalkSwitchTests|ProtectionWalkProjectTests|
+  SyncLockedRowTests"`: `✔ Test run with 34 tests in 5 suites passed`**; no warning in a touched file. The walk script:
+  `zsh -n` clean; `--self-test` → every case as expected, `SELF-TEST: every guard fired as expected` exit 0.
+  **THE REVERTS (named BEFORE any run; each one file — `ProtectionWalkSwitch.swift` — on the committed tree, the harness
+  `--filter ProdTestRoadTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** **DONE on
+  `4a5ef39e3` — every one RED as named, every restore clean; NO REVERT IS IN FLIGHT** (results in brackets after each):
+  - **RF-1** the launch's reading hands the rule nothing (`allowlist: { nil }`) [`theLaunchReadsTheHandedListFromItsEnvironment`].
+    → `✘ Test run with 14 tests in 1 suite failed with 3 issues` — `theLaunchReadsTheHandedListFromItsEnvironment` ✘×2 (the
+    armed leg read `.refused(.allowlistNotHanded)`; the unmarked leg likewise), and `theRoadReadsNoFile` ✘ (its own teeth
+    line: the handed read gone from the code).
+  - **RF-2** the marker check removed [`eachAllowlistFaultRefusesAndTheFenceStands`, `aHerShapedAddressIsNeverAdmitted` (the
+    outright refusal), `theLaunchReadsTheHandedListFromItsEnvironment` (the unmarked leg)]. → `✘ … 14 tests … with 11
+    issues` — `eachAllowlistFaultRefusesAndTheFenceStands` ✘×9, `theLaunchReadsTheHandedListFromItsEnvironment` ✘,
+    `aHerShapedAddressIsNeverAdmitted` ✘ (the bare address armed the road).
+  - **RF-3** a list not handed reads as an empty one (`allowlist() ?? ""`) [`eachAllowlistFaultRefusesAndTheFenceStands` (nil),
+    `theLaunchReadsTheHandedListFromItsEnvironment` (the switch alone)]. → `✘ … with 2 issues` — each of the two ✘.
+  - **RF-4** the empty guard removed (an empty list arms) [`eachAllowlistFaultRefusesAndTheFenceStands`]. → `✘ … with 9
+    issues` — that pin ✘×9 (the empty, blank and `""` lists armed an empty allowlist).
+  - **RF-5** the quote drop removed [`theHandedListIsParsedAsTheFilesOneKey`, `eachAllowlistFaultRefusesAndTheFenceStands` (`""`)].
+    → `✘ … with 3 issues` — `theHandedListIsParsedAsTheFilesOneKey` ✘×2, `eachAllowlistFaultRefusesAndTheFenceStands` ✘.
+  - **RF-6** the admission matches loosely (an entry containing the address, or the address containing an entry)
+    [`aHerShapedAddressIsNeverAdmitted`]. → `✘ … with 8 issues` — that pin ✘×8 (the bare and fragment addresses admitted).
+  (The walk script's `--env` line has no headless revert — nothing may launch here; unit C's P2 proves it live.)
+- **Piece 1 — D-B4 (VX-501, Part of VX-501): DONE** — 1a `6313178e7` (red pins) · 1b `b12ee17d2` (the fix) · 1c `8fb5f7b2f`
+  (one pin leg tightened) + this commit (the revert results).
+  - **1a — the pins that compile on the pre-fix tree, committed RED before the fix: DONE (this commit).** Read first:
+    `ProtectionOpenRoad` whole (`openTyped`, `typedCandidates`, `pressTouchID`, `loadSyncKeysForTheSession`),
+    `NewRoadSyncKeyProvider`, `WireVaultLeaf`, `ProtectionRoadLock.dropSessionMemory`, the core's `KeyDoors`
+    (`holdSyncKeysForTheSession` — `internal` to the core, so the app cannot call it; its two derivation calls are the
+    public `AccountVault.master(passphrase:words:)` and `keys(master:)`), `Executor` (`readVault`, `freshVaults`, `unlock`),
+    `VaultModel`, `Secrets`, `KeyFile` (open roads; the master's words copy), `AccountActs.joinKeyFile` (the typed
+    passphrase's lock IS the account's — "its descriptor the vault's" — so the lobby's derived key opens the vault's
+    passphrase wrap with NO second Argon2id), the bootstrap's lobby roads and `lockOnNewRoad` (the lock stops the services
+    and drops session memory; the unlock's ready composes fresh services whose first round reads the provider). New suite
+    `VariorumTests/Protection/TypedUnlockSyncKeysTests.swift` (planted — `ProtectionAccountSupport`'s vault + sync keys; the
+    Always-ask world `castleAlwaysAskSynced`, VX-487's Touch ID world reused): `vx501_aTypedPassphraseUnlockUnderAlwaysAsk
+    LoadsTheAccountsKeys` (session holds the vault's keys, the provider reads them, ONE vault read, nothing written to the
+    keychain), `vx501_theTwelveWordsTypedLoadThemToo`, `vx501_aTypedUnlockUnderTouchIDLoadsThemWithNoPress` (no Touch ID
+    custody read, no sync-keys Touch ID read, no ride), `offlineTheTypedUnlockStillOpensAndLoadsNothing`,
+    `aSecretThatOpensTheLibraryButNotTheVaultLoadsNothing` (the passphrase changed elsewhere), `anAccountThatMovedLoadsNothing`
+    (the account's sync key replaced since this library followed); GUARDS `aStandardLibraryLoadsNothingAndReadsNoVault`,
+    `anUnboundCastleLibraryReadsNothing`, `signedOutReadsNothing` (signed out, and signed into another account). **RED on
+    the pre-fix tree** (the harness, `--filter TypedUnlockSyncKeysTests`): `✘ Test run with 9 tests in 1 suite failed with 10
+    issues` — the passphrase pin ✘×3 (session nil · the provider read nothing · no vault read), the words pin ✘×2, the Touch
+    ID pin ✘×2, and the "the read was tried" legs of offline / not-the-vault / moved ✘ each (their never-hostage legs pass
+    on both sides, as pin 5's did at VX-487); every world's preconditions held (no issue in the setups); the three guards ✔
+    (by design on both sides — their teeth are the reverts').
+  - **1b — THE FIX: DONE (`b12ee17d2`).** `Shared/Protection/ProtectionOpenRoad.swift`: `openTyped` (now
+    `openTyped(_:secret:syncKeysWithin:)`, the bound defaulted) calls the new **`loadSyncKeysAfterTypedUnlock`** on
+    `.opened`, after the open and before the app's open goes on (off the main actor — the lobby's press is detached).
+    The load: a read-only road (a hosted test run), an unbound library or a STANDARD one (the silent item serves — the
+    design's own pin) reads nothing; keys already in session (or a silent item) that this library follows ⇒ nothing read;
+    signed out or into another account ⇒ nothing read; the vault = the one this session's executor already read (an act's
+    resume at the settle — the design's "where one was already made"), else ONE read through the vault leaf, BOUNDED
+    (`boundedVaultRead` — the read races a timer, the first answer wins, the loser is cancelled and a late answer dropped:
+    no hold can land after the open moved on); the master from the typed secret against the vault — the passphrase's key
+    is the one the OPEN derived (`typedCandidatesAndKeys` now hands back the derived `PassphraseKey`s, one per descriptor;
+    the account's lock carries the vault's descriptor — `joinKeyFile` — so no second Argon2id), the words' wrap key derived
+    once (BIP-39's seed; the open's own key-file derivations are the core's, untouched); `keys(master:)`; held in session
+    ONLY when they are the keys this library FOLLOWS (`record.accountRowKeyID` — what the Touch ID item would hold; a moved
+    account leaves the follow to load them); never a Touch ID read (no prompt), nothing written to disk, the secret gone
+    with the call. Every refusal is one protection-log line; the library opens all the same. `typedCandidates` keeps its
+    signature (a wrapper). `NewRoadSyncKeyProvider.swift`: its header names the typed load (comment only). No core line:
+    `holdSyncKeysForTheSession` is internal to the core, so the app makes its two public calls itself — no LocalAuthentication
+    and no network read enters the core; no `Sync/` line. **PROVISIONAL P-VX510-B2-1 (the architect's / hers — timing, not
+    words):** the vault bound is 10 s — (a, built) the unlock waits at most 10 s for the vault, then opens without the keys
+    (the row says locked as before; a later answer dropped) · (b) a shorter bound (e.g. 3 s — a slow but working network
+    then loses the load more often) · (c) no wait at all: the load runs after the open and a round is asked when it lands
+    (needs a lock-race guard and the services' round road from the lobby — more machinery).
+    Pins added (new seam — red by the reverts below): `aVaultReadPastTheBoundLeavesTheUnlockOnTimeAndALateAnswerIsDropped`
+    (a planted fetch that answers after 2 s and IGNORES cancellation — `PlantedVaultLeaf.fetchDelay`, test support: the
+    unlock returns inside 1.5 s, nothing loaded, and after the late answer still nothing held), `theTypedLoadNeverDerivesThe
+    Passphrase` (guard, code only: the load names no passphrase derivation and no Touch ID read); guards `keysAlreadyHeld
+    ReadNoVault`, `aReadOnlyRoadReadsNothing`; the Standard guard extended (its silent item removed: still no vault read —
+    the posture's rule, not the item's). **The harness, `--filter "TypedUnlockSyncKeysTests|TouchIDUnlockSyncKeysTests|
+    ProtectionAccountRoadTests|ProtectionJoinFollowRoadTests|ProtectionLobbyModelTests|ProtectionOpenRoadPlantedTests"`:
+    `✔ Test run with 64 tests in 7 suites passed`** (before the last three pins); `--filter TypedUnlockSyncKeysTests` on
+    this commit: **`✔ Test run with 13 tests in 1 suite passed`** — 1a's six red pins GREEN; no warning in a touched file.
+  - **1c — THE REVERTS (named BEFORE any run; each one line of `ProtectionOpenRoad.swift` on this commit, the harness
+    `--filter TypedUnlockSyncKeysTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** **DONE —
+    every one RED as named, every restore clean; NO REVERT IS IN FLIGHT** (RD4-2…8 on `b12ee17d2`; RD4-1 first there,
+    then again on `8fb5f7b2f` — see its line). Results after each:
+    - **RD4-1** `openTyped` no longer calls the load (the pre-fix press) [the three `vx501_` pins; the "tried" legs of
+      offline / not-the-vault / moved; the bound pin's "the read was made"]. → on `b12ee17d2`: `✘ Test run with 13 tests in
+      1 suite failed with 10 issues` — the passphrase pin ✘×3, the words ✘×2, the Touch ID ✘×2, offline / not-the-vault /
+      moved ✘ each — but the bound pin STAYED GREEN: its "the read was made" leg was HOLLOW (`calls.contains` counted the
+      world's setup reads). Tightened to count this unlock's fetch (`8fb5f7b2f`, test only) and RD4-1 re-run there: `✘ … 13
+      tests … with 11 issues` — the same ten plus the bound pin ✘ ("the read was made").
+    - **RD4-2** the Castle gate removed [`aStandardLibraryLoadsNothingAndReadsNoVault` (its silent-item-gone leg)]. → `✘ …
+      with 2 issues` — that pin ✘×2 (the vault read, the keys held — only once the silent item was gone: with it, the
+      already-held check stops the read, which is why the leg exists).
+    - **RD4-3** the signed-in gate always passes [`signedOutReadsNothing`]. → `✘ … with 3 issues` — that pin ✘×3.
+    - **RD4-4** the follows check always passes (a moved account's keys held) [`anAccountThatMovedLoadsNothing`]. → `✘ …
+      with 1 issue` — that pin ✘ (the moved keys held).
+    - **RD4-5** the bound removed (the read awaited to its end) [`aVaultReadPastTheBoundLeavesTheUnlockOnTimeAndALateAnswer
+      IsDropped`]. → `✘ … with 3 issues` — that pin ✘×3 (the unlock waited the read's 2 s; the late keys held).
+    - **RD4-6** the read-only gate removed [`aReadOnlyRoadReadsNothing`]. → `✘ … with 1 issue` — that pin ✘.
+    - **RD4-7** the already-held short-circuit never matches [`keysAlreadyHeldReadNoVault`]. → `✘ … with 1 issue` — that pin
+      ✘ (a vault read with the keys already held).
+    - **RD4-8** the already-held check reads the TOUCH ID item (the core door's order — a prompt) [`vx501_aTypedUnlockUnder
+      TouchIDLoadsThemWithNoPress`, `theTypedLoadNeverDerivesThePassphrase`]. → `✘ … with 4 issues` — the Touch ID pin ✘×3
+      (a Touch ID read; the item's keys seen as "already loaded", so nothing put in session) and the guard ✘.
+    (Not pinned, said plainly: the reuse of a vault the settle already read — planting an act in flight resumed by a typed
+    unlock is a world of its own; the branch is the design's one-read rule, read by the reviewer.)
+- **Piece 2 — D-B6 (VX-511, Part of VX-511): DONE** — 2a `2275ad009` (red pins) · 2b `e0c3064a8` (the fix) · 2c this commit
+  (the revert results).
+  - **2a — the pins, committed RED before the fix: DONE (this commit).** Read first: `WordsBand.swift` whole (the ledger
+    `WordsCardLedger` — `variorum.calmAsks.words.<libraryID>.*`; the band's `offersWords`, set at init from the ledger and
+    retired by `later` / `dismiss` / `wordsRecorded`), `ProtectionCopyDoors`' VX-444 carry (Make this my library) and the
+    empty-slot landing's mark, `ProtectionOpenFaces`' `RoadStandingModel.make` (the band built at every ready from the
+    ledger), the bootstrap's `accountRoads()` (`press` — the open-session acts, and `accountActOnNewRoad` for a re-keying
+    one through `reopenAround`, which awaits the reopen's ready — and `landed`, which re-reads faces only and knows no door).
+    THE MECHANISM (traced): no account act ever writes the ledger, and the band computed at the ready keeps offering; a
+    re-keying act's reopen rebuilds the band from the same unmarked ledger. New suite
+    `VariorumTests/Protection/WordsCardAfterAccountActTests.swift` (the bootstrap over the planted road — unit A's
+    `FirstRoundWorld`, no services; B1's `FirstRunDrillTests.press`): `vx511_theSetUpRetiresTheCard` (+ another library's
+    ledger untouched), `vx511_aStandardJoinRetiresTheCard`, `vx511_aCastleJoinRetiresTheCard`,
+    `vx511_aReKeyingJoinRetiresTheReopenedLibrarysCard` (the card the REOPEN built, the library the reopen landed),
+    `vx511_moveRetiresTheCard`; GUARDS `aRefusedActMarksNothing` (a join with a wrong passphrase), `aLeaveMarksNothing` (Stop
+    syncing here on a library bound before the open). **RED on the pre-fix tree** (the harness, `--filter
+    WordsCardAfterAccountActTests`): `✘ Test run with 7 tests in 1 suite failed with 10 issues` — each of the five landings
+    ✘×2 (the ledger not recorded · the card still offering); every precondition held (nothing recorded, the card offering,
+    the act landed, the reopen built the card anew); the two guards ✔ (by design — the reverts show their teeth).
+  - **2b — THE FIX: DONE (`e0c3064a8`).** `Shared/Protection/RoadAccountFaces.swift`: `RoadAccountDoor.landingRecordsTheWords`
+    (Turn on sync — the set-up and the join, either posture — and Move; never the leaves, never the follow).
+    `Shared/AppBootstrap.swift`: `accountRoads().press` keeps the press's answer and, on `.made` through such a door, calls
+    the new `accountActHoldsTheWords(actedOn:)` — THE ONE WRITER: the library is read from the session the act ran on, AFTER
+    the act (its record carried forward in place; a re-keying act's reopen opens that same slot library — the VX-457 mark's
+    idiom), so even a reopen that settled anywhere but ready finds it marked; it records `WordsCardLedger(defaults: the
+    calm-asks defaults).record(libraryID)` and, when the open library is that one, retires the live card
+    (`roadStanding?.band?.accountHoldsTheWords()` — a re-keying act's reopen built its card from the unmarked ledger before
+    the press returned). `Shared/Protection/WordsBand.swift`: `WordsBandModel.accountHoldsTheWords()` — the offer retires
+    (`offersWords = false`, one log line); the reminder's half untouched; the ledger is the bootstrap's write. A refused act
+    marks nothing. **The harness, `--filter "WordsCardAfterAccountActTests|WordsBandTests|WordsBandSurfaceTests|
+    WordsLedgerCarryRoadTests|LibraryWordsCardTests|RoadAccountModelTests|RoadJoinFollowModelTests|FirstRunDrillTests|
+    RoadAccountFacesTests"`: `✔ Test run with 59 tests in 7 suites passed`** (before the one-writer split); `--filter
+    WordsCardAfterAccountActTests` on this commit: **`✔ Test run with 7 tests in 1 suite passed`** — 2a's five red pins
+    GREEN; no warning in a touched file. (Not pinned, said plainly: the reopen-not-ready edge — the ledger marked with no
+    ready card to retire; planting a re-keying reopen that settles in a lobby is a world of its own.)
+  - **2c — THE REVERTS (named BEFORE any run; one file each on this commit, the harness `--filter
+    WordsCardAfterAccountActTests`, restored by `git checkout --`, `git diff --exit-code` clean after each):** **DONE on
+    `e0c3064a8` — every one RED as named, every restore clean; NO REVERT IS IN FLIGHT:**
+    - **RD6-1** `AppBootstrap.swift`: the press never marks (the pre-fix press) [the five landing pins, both legs]. → `✘ Test
+      run with 7 tests in 1 suite failed with 10 issues` — each of the five ✘×2.
+    - **RD6-2** `AppBootstrap.swift`: the ledger is written but the live card is not retired [the five pins' card leg]. →
+      `✘ … with 5 issues` — each of the five ✘ (the card still offering — the re-keying join's too: its reopen built the card
+      from the unmarked ledger).
+    - **RD6-3** `AppBootstrap.swift`: the card is retired but the ledger is not written [the five pins' ledger leg]. → `✘ …
+      with 5 issues` — each of the five ✘ (the ledger unrecorded: a later open's card would offer again).
+    - **RD6-4** `RoadAccountFaces.swift`: every door's landing records the words [`aLeaveMarksNothing`]. → `✘ … with 2
+      issues` — that guard ✘×2.
+    - **RD6-5** `AppBootstrap.swift`: the mark on any press answer, not only `.made` [`aRefusedActMarksNothing`]. → `✘ …
+      with 2 issues` — that guard ✘×2.
+- **Piece 3 — D-B5 (VX-503, Part of VX-503): THE TRACE DONE (this commit — code read, file:line; no keychain, no launch);
+  the fix of the traced read DONE (3b-1 `58c4eb98c` red pins · 3b-2 `226cf7c20` the fix · 3b-3 the reverts, this
+  commit).** The observation (vx-494 O-1): a Standard library JOINING a Standard
+  account raised the system prompt "Variorum Dev is trying to Unlock your Variorum library. Touch ID to continue…", waited,
+  was cancelled, and the join completed.
+  - **T-B5-1 — WHICH READ:** the prompt's words are `KeychainCustodyLeaf.pressReason` ("Unlock your Variorum library",
+    KeychainCustodyLeaf.swift:39), set on a FRESH `LAContext` by exactly two reads: the custody Touch ID read
+    (`readTouchID`, :156–157 — a join never calls it: the plan runner's custody Touch ID read is a re-keying RESUME's,
+    `reachNewKey`, PlanRunner.swift:464–473) and the context-less sync-keys Touch ID read (`KeychainSyncKeysLeaf
+    .readSyncKeys(accountID:itemClass: .touchid)`, KeychainSyncKeysLeaf.swift:61–71). A same-posture join runs
+    `pickUpJoinKeys` FIRST (AccountActs.swift:47, :82) → `pickUpKeys` (Follow.swift:124–129) → `material(for:)`
+    (CommonSteps.swift:391) → `syncMaterial()` (:315–326), which reads the account's **TOUCH ID item before anything else**
+    (:318–319) — even though the act already holds the typed secret that opens the vault (`join` verified it, AccountActs
+    .swift:316–330). On the real leaf that read prompts IFF a Touch ID sync-keys item for that ACCOUNT exists in the scope
+    (`exists` probes and listings never prompt — ProtectionKeychain.swift:86–98, :134–148).
+  - **T-B5-2 — WHY AN ITEM WAS THERE (a fresh Standard library):** sync-keys items are keyed by SCOPE + ACCOUNT, never by
+    library (`ProtectionNames.syncKeysAccount`), so a Touch ID item written by an EARLIER Castle + Touch ID library synced to
+    the same account on this Mac outlives it: the production leaf's listing is BLIND to a Touch ID item with no silent
+    sibling — `syncKeyItems()` probes Touch ID only for accounts in `touchIDCandidates ∪` the listed (silent) items
+    (KeychainSyncKeysLeaf.swift:45–58), and production never wires the candidates (`AppBootstrap.init` mints
+    `KeychainSyncKeysLeaf(scope:)` with the default `{ [] }`, AppBootstrap.swift:183 — the leaf's own comment, :30–31, says
+    "VX-308's sync setup wires the bound account here"; it never did) — and in the Castle + Touch ID state the silent item is
+    dropped (CommonSteps.swift:362). So every forget that walks the listing misses it: the leaves' `forgetSyncKeys(of:)` and
+    `forgetUnboundSyncKeys` (AccountActs.swift:224–241), the rollback's sweep (PlanRunner.swift:544–547), and `holdSyncKeys`'
+    `drop(.touchid)` on a move to Standard (CommonSteps.swift:342–347, :367 — the listing taken BEFORE the silent write).
+    The walks add one more road: the dev slot is set aside by `mv`, the keychain untouched. The vx-494 walk's Mac had run
+    the vx-488 rehearsal's Castle + Touch ID libraries synced to the throwaway accounts hours earlier — **the exact item on
+    that Mac is UNVERIFIED** (no command-line tool reaches the data-protection keychain); the mechanism is the one road the
+    code allows to that prompt at that step.
+  - **T-B5-3 — WHAT A CANCEL SKIPS: nothing the join needs.** `errSecUserCanceled` → `readSyncKeys` answers nil
+    (KeychainSyncKeysLeaf.swift:73–77) → the silent item → session memory → nil → `material(for:)` derives the keys from the
+    vault with the typed secret (CommonSteps.swift:395–400). Had she pressed, the item's keys would be used only when they are
+    the vault's current sync key under its master (:392) — the very keys the derivation gives. The prompt bought nothing.
+  - **T-B5-4 — RESIDUE: the cancel leaves none of its own; the STALE ITEM SURVIVES THE JOIN.** Standard's `holdSyncKeys`
+    (CommonSteps.swift:363–368) writes the silent item and calls `drop(.touchid)`, but `drop` consults the listing taken at
+    :342, before that write — no silent sibling then, so the Touch ID item was not listed and is not dropped. The NEXT
+    listing does see it (the sibling exists now), so a later act's `holdSyncKeys` drops it — but every road reading the Touch
+    ID class FIRST prompts again before that: the key doors' `holdSyncKeysForTheSession` (KeyDoors.swift:258–261) — Change
+    passphrase / New Words on the joined Standard library would raise the same prompt. **The same blindness reaches
+    production with no walk:** Use Standard on a synced Castle + Touch ID library (`leaveCastleWrite` → `material(for:)`
+    reads the Touch ID item — a prompt though both secrets were typed — then `holdSyncKeys(castleWay: false)` leaves the item,
+    CommonSteps.swift:447–461), and every LEAVE of a Castle + Touch ID library (its only item is the Touch ID one — the
+    leaves' forget never lists it).
+  - **THE FIX, scoped to the traced read (3b, below):** the act stops reading custody when the TYPED secret already opens
+    the vault — `material(for:)` derives from the vault first, custody only when no typed secret reaches the master (the
+    quiet follow out of Castle; the key doors, whose secrets are the NEW ones). Same keys, no keychain read, no prompt: the
+    observed Standard join, Use Standard's press, and Use Castle's resume all stop prompting. **RECORDED, NOT BUILT — a
+    finding for the orchestrator (a ticket candidate, custody code):** T-B5-2's listing blindness (the leaves and the drops
+    never delete a Touch ID-only item — rule 16's "this Mac forgets its sync keys" untrue for the Touch ID class; the Touch ID
+    read on a STANDARD library in `holdSyncKeysForTheSession`). Options: (a) the forgets and `holdSyncKeys`' drops delete
+    BOTH classes BY NAME for the account (the real delete is idempotent — `ProtectionKeychain.delete` accepts not-found;
+    deleting an ACL'd item never prompts — `writeSyncKeys(.touchid)` already does it, KeychainSyncKeysLeaf.swift:104–105);
+    (b) wire the production leaf's `touchIDCandidates` (the bound account + the act's forgets) as the leaf's comment
+    intended; (c) never read the Touch ID class while the library is STANDARD (Standard files silently — rule 15). Its pins
+    need a planted leaf whose listing is production-shaped (the planted leaf lists every item, which is why no planted test
+    ever saw this).
+  - **3b-1 — the pins, committed RED before the fix: DONE (this commit).** New suite
+    `VariorumTests/Protection/TypedSecretNeverPressesTests.swift` (planted — `PlantedSyncKeysLeaf.touchIDReads` counts every
+    context-less Touch ID read, each a prompt on the real leaf): `vx503_aStandardJoinWithAStaleTouchIDItemNeverPresses` (the
+    observation's road: a fresh Standard library joins a Standard account by its passphrase with a stale Touch ID item
+    standing — no Touch ID read; the vault's own keys filed silently), `vx503_useStandardWithBothSecretsTypedNeverPresses
+    ForTheSyncKeys` (synced Castle + Touch ID → Use Standard, both secrets typed — no Touch ID sync-keys read); GUARD
+    `theCustodyFallbackStandsWhenNoTypedSecretOpensTheVault` (Change passphrase — the key door's secrets are the NEW ones —
+    still finds the held keys and re-wraps the account's lock). **RED on the pre-fix tree** (the harness, `--filter
+    TypedSecretNeverPressesTests`): `✘ Test run with 3 tests in 1 suite failed with 2 issues` — each road ✘ exactly on
+    `touchIDReads == presses` (the join and Use Standard landed; the preflight ready); the guard ✔. (The Use Standard pin's
+    FIRST draft opened its door through `Crossing.press`, whose read is signed out — it failed on its precondition, not its
+    claim; redrawn on the world's own signed-in read, then red on the claim.)
+  - **3b-2 — THE FIX: DONE (`226cf7c20`).** `Sources/VariorumCore/Protection/Executor/Acts/CommonSteps.swift` — ONE function,
+    `ActContext.material(for:)`: the vault with the secrets in hand FIRST (`VaultModel.master` → `keys(master:)` — no
+    keychain read), custody's keys only when no secret in hand opens the vault (still checked current under the vault's
+    master), else `secretsRequired` as before. Same keys either way (both the vault's current sync key under its master;
+    the derivation reads every earlier key from the vault itself); every caller traced: the joins and Move
+    (`pickUpKeys`), the follow, Use Castle's write and resume, Use Standard's write, set-up's `newLocks` (the new passphrase
+    under the vault's own descriptor — the same keys as the act's cache), the key doors' vault step (their secrets are the
+    NEW ones — the fallback serves, as before; Reset by the words and New Words by the current passphrase now derive — the
+    same keys). No LocalAuthentication, no network read, no `Sync/` line enters the core. **The harness, `--filter
+    "TypedSecretNeverPressesTests|TypedUnlockSyncKeysTests|TouchIDUnlockSyncKeysTests|ProtectionAccountRoadTests|
+    ProtectionJoinFollowRoadTests|ProtectionCrossingRoadTests|RoadKeyDoorRoadTests|FirstRunDrillTests|
+    WordsCardAfterAccountActTests"`: `✔ Test run with 84 tests in 10 suites passed`** — 3b-1's two red pins GREEN. The core
+    protection set (debug + release) is Piece 4's.
+  - **3b-3 — THE REVERTS (named BEFORE any run; `CommonSteps.swift` on this commit, the harness `--filter
+    "TypedSecretNeverPressesTests|RoadKeyDoorRoadTests"`, restored by `git checkout --`, `git diff --exit-code` clean after
+    each):** **DONE on `226cf7c20` — both RED as named, both restores clean; NO REVERT IS IN FLIGHT:**
+    - **RD5-1** `material(for:)` back to custody first (the pre-fix order) [both `vx503_` pins]. → `✘ Test run with 14
+      tests in 2 suites failed with 2 issues` — both `vx503_` pins ✘ (a Touch ID read each); the key doors' suite green.
+    - **RD5-2** the custody fallback removed (the typed secret or nothing) [`theCustodyFallbackStandsWhenNoTypedSecretOpens
+      TheVault`, and the key doors' road suite]. → `✘ … with 5 issues` — the guard ✘ and `RoadKeyDoorRoadTests
+      .syncedChangeChangesTheAccountsPassphraseWithIt` ✘×4 (the key door's vault step found no keys).
+- **Piece 4 — EVIDENCE: DONE** (the final tree = `e829e8d08`'s product files; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's three new suites symlinked in): `✘ Test run with 505 tests in 85 suites failed with
+    4 issues` — exactly the three harness-PATH artifacts (`theBecomeActiveHookRunsOneSyncRound`,
+    `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut` ×2, `thePasteInIsFullyRetiredInTheSharedSources` — they read
+    `#filePath` beside the symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 502 tests in
+    85 suites passed`** (B1's 477/82 + this unit's 23 tests in 3 new suites + 2 more in `ProdTestRoadTests`); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - THE CORE (`Sources/` touched — `CommonSteps.swift`): the protection + auth/account set (every suite under
+    `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`, `AccountLifecycleTests`, `AuthRLSDDLTests`,
+    `KeyVaultClientTests`, `SupabaseTransportTests`, `SupabaseTransportSessionTests`; one `--filter`, 102 suite names — the
+    first extraction missed `AccountVaultWireTests` (`@Suite struct` on one line), re-run with it): debug **`✔ Test run with
+    533 tests in 102 suites passed`**; release (`swift build -c release --build-tests -Xswiftc -enable-testing`, then `swift
+    test -c release --skip-build`, the same filter) **`✔ Test run with 509 tests in 98 suites passed`** — both exactly vx-488
+    M1's close counts; 0 failures, 0 `skipped:` lines.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b2
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath App/Variorum/DerivedData/vx510-b2-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`** —
+    zero errors, no warning in any file this unit touched (both logs grepped).
+  - THE WALK SCRIPT (F-B1-1): `--self-test` → every case as expected incl. the handed value; `std --app
+    App/Variorum/DerivedData/vx510-b2/Build/Products/Debug/Variorum.app --dry-run` → G1–G4 held, then `REFUSES: G5 — a Variorum
+    instance is running` (the orchestrator's unit C walk build, from its stage checkout — left alone) exit 5: nothing launched.
+  - **Machinery honesty:** the orchestrator committed to this branch while the unit ran (unit C's records — `532ad1376`,
+    `e630c1015`, `39952dff5`, `97334e232`, `936ef3c3f` and others); this session staged explicit paths only, re-read the
+    record before each edit, and never touched those sections. Two `git pull --rebase` calls made BEFORE a commit refused
+    over this session's own unstaged edits ("Please commit or stash them") — each commit then pulled and pushed after
+    itself; nothing was lost or reordered (verified `HEAD == origin` each time).
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW (harness-green): `TypedUnlockSyncKeysTests` (VX-501), `WordsCardAfterAccountActTests` (VX-511),
+    `TypedSecretNeverPressesTests` (VX-503).
+  - CHANGED (harness-green): `ProdTestRoadTests` (F-B1-1 — the env form + three new pins), `ProtectionAccountSupport`
+    (`PlantedVaultLeaf.fetchDelay`; every suite that plants an account — below).
+  - `ProtectionWalkSwitch` / `ProjectConfig` (F-B1-1): `ProtectionWalkSwitchTests`, `ProtectionWalkProjectTests`,
+    `SyncWalkFenceTests`, `ProtectionCrossingRouteTests`, `RoadRearmTests`.
+  - `ProtectionOpenRoad` (VX-501 — `openTyped`, `typedCandidatesAndKeys`, the load): `ProtectionLobbyModelTests`,
+    `ProtectionOpenRoadPlantedTests`, `TouchIDUnlockSyncKeysTests`, `RoadLockTests`, `RoadLockRouteTests`, `RoadRearmTests`,
+    `NoKeyFileDoorTests`, `OneRefreshAuthorityTests`, `OneSyncKeysLeafTests`, `PreDesignFaceTests`, `PreDesignStartFreshRouteTests`,
+    `PreDesignStoreRefusalTests`, `PreviousLibrariesArcTests`, `ProtectionNoticeFaceTests`, `ProtectionOfferFaceTests`,
+    `ProtectionReminderRoadTests`, `ProtectionRestoreReceiptTests`, `ProtectionRule27FaceTests`, `ProtectionWordsVX307Tests`,
+    `SetPassphraseRowRereadTests`, `SetPassphraseRowRereadRouteTests`, `ProtectionCrossingRoadTests`.
+  - `AppBootstrap` / `RoadAccountFaces` / `WordsBand` (VX-511): `FirstRoundConfirmTests`, `FirstRunDrillTests`,
+    `FirstRoundAfterTheActTests`, `FirstRoundAfterTheReopenTests`, `RoadAccountFacesTests`, `RoadAccountModelTests`,
+    `RoadAccountSurfaceTests`, `RoadJoinFollowFacesTests`, `RoadJoinFollowModelTests`, `RoadJoinFollowSurfaceTests`,
+    `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`, `WordsBandTests`, `WordsBandSurfaceTests`,
+    `WordsLedgerCarryRoadTests`, `WordsLedgerCarryRouteTests`, `RoadKeyDoorSurfaceTests`, `AppBootstrapOffMainTests`,
+    `SettingsLockCloseTests`, `HoldBannerAccountTests`.
+  - `CommonSteps.material(for:)` (VX-503 — every act that picks up or re-wraps the account's keys): `RoadKeyDoorRoadTests`,
+    `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`, `ProtectionCrossingRoadTests`, `TouchIDUnlockSyncKeysTests`,
+    `RoadRestoreHoldGateTests`, `ProtectionPaneWaveTests`, `NotOnYetWordsTests`, the first-round suites above, and the
+    REAL-keychain suites over the leaves (throwaway scopes) `KeychainLeavesTests`, `ProtectionKeychainFamilyTests`.
+  - The simplest honest batch: the whole `VariorumTests/Protection` folder + `ProdTestRoadTests`, `SyncWalkFenceTests`,
+    `AppBootstrapOffMainTests`, `SettingsLockCloseTests`, `OneRefreshAuthorityTests`.
+  - THE PHONE (`VariorumMobileTests` — `ProtectionOpenRoad`, `AppBootstrap`, the core's acts): `MobileProtectionRoadTests`,
+    `MobileProtectionTests`, `MobileStructuralTests`, `MobileEmptyStoreTests`.
+  **THE WALK (this unit's rows, for the stage — use-shaped; unit C has already shown VX-501 live, `936ef3c3f`):** (1) F-B1-1:
+  the walk launch carries `VARIORUM_PRODTEST_EMAILS` (`ps eww`) and the app logs `PROD TEST ROAD (VX-510): ARMED`; (2) VX-501:
+  a Castle (Always ask) library synced, ⌃⌘L, the passphrase typed at the lobby → the protection log's `the typed unlock loaded
+  the account's sync keys for the session`, the row reaches "Synced ‹time›" with no key act; the twelve words the same;
+  offline at the unlock → the library opens, the row says locked; (3) VX-511: after Turn on sync (set-up, then a join on a
+  second library) and after Move, the card above the quick entry offers no words for that library; a relaunch keeps it so;
+  (4) VX-503: on a Mac whose scope holds a Touch ID sync-keys item for an account (a Castle + Touch ID library synced to it,
+  then left), a Standard library joining that account raises NO Touch ID prompt; Use Standard on a synced Castle + Touch ID
+  library raises none for the sync keys. Both voices where the card and the row have a face.
+
+## UNIT B3 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B2 closes)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE; `notes/SurfaceContracts.md`'s
+protection bullet whole (the key doors, VX-211's floor, VX-463's concealed field, VX-464's refusal naming);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B7 is your charter; units A/B1/B2's LIVE STATUS for the harness
+and seams); the code: `Shared/Protection/RoadKeyDoorsModel.swift`, `RoadKeyDoorFaces.swift`, `ProtectionKeyDoorActs.swift`
+(the key doors' road — your door sits beside them), `LookInsideModel.swift` (the one-field secret reading),
+`ProtectionOpenRoad.swift` (`typedCandidates`), `ProtectionWords.swift`, the Mac pane that renders the key doors
+(`Variorum/Features/Protection/`), and the core's `VaultModel` / `PassphraseKey` / `WordsKey`.
+
+**Your scope — exactly D-B7:** the door, its sheet model, the read-only check road, its words (PROVISIONAL, named in your
+record), and its pins (including the zero-writes pin across every arm). A seam that needs a core-package change, or any
+`Sync/` line, is a FORK: stop and propose. Not yours: everything else; canon, Linear, `notes/QUESTIONS.md`.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's**, with `build-for-testing` into
+`DerivedData/vx510-b3` / `vx510-b3-ios`. Commits say `Part of VX-513`; NO trailers of any kind.
+
+### UNIT B3 — LIVE STATUS (the implementer owns this section)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **THE WALK** — the door's use-shaped acceptance on the DEV-store
+Debug build (THE WALK below — the orchestrator's stage; nothing here was launched); **the Mac-target runs** — the hosted
+`SecretCheckSurfaceTests` and every Mac-only suite in THE MAC-SUITE LIST compiled (build-for-testing green) but RAN only in the
+orchestrator's stage batch, PENDING; **`notes/QUESTIONS.md`** — P-VX510-B3-1 (the words) and P-VX510-B3-2 (the fourth arm) are
+recorded below for the orchestrator's bundle, not filed (not mine). No phone face: the phone renders no key-door section yet
+(P-2) — nothing mobile-visible beyond `Shared/` compiling for it (iOS build-for-testing green). No `xcodebuild test`, no stage,
+no app launch, no dev/real-store touch, no server or production contact. No line in `Sources/`; no fork met.
+
+*Implementer session B3 — Opus 5.5, xhigh. Pre-fix tree = `6acf5771f` (unit B2's product files, `f4af7e368`). Every claim
+not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+  `notes/SurfaceContracts.md`'s protection bullet whole (the key doors, VX-211's floor, VX-463's concealed field, VX-464's
+  refusal naming); `notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B7; units A/B1/B2's LIVE STATUS; unit C's record
+  through C5 — its W-10, a refusal line left standing after the field is retyped, is folded into this unit's sheet); the
+  code: `RoadKeyDoorsModel`, `RoadKeyDoorFaces`, `ProtectionKeyDoorActs`, `LookInsideModel` (+ `MakeMineModel.copySecrets`,
+  the one-field reading), `ProtectionOpenRoad` (`typedCandidatesAndKeys`, `boundedVaultRead`, VX-501's load), `ProtectionWords`,
+  `ProtectionSheetPresenter`, `ProtectionOpenFaces` (`RoadStandingModel`, the pane wave), the bootstrap's `keyDoorRoads` and
+  `finish`, the Mac pane (`ProtectionPane`, `RoadKeyDoorSheet`, `WordsLookSection`, the presenter's host in
+  `RoadAccountSheet`), the core's `VaultModel` / `AccountVault.master` / `PassphraseKey` / `WordsKey` / `KeyFile.open` /
+  `Executor.readVault` (its `freshVaults` cache — the check never goes through it) / `Follow`'s VX-113 test; the suites
+  `RoadKeyDoorsModelTests`, `RoadKeyDoorRoadTests`, `RoadKeyDoorSurfaceTests`, `LookInsideRoadTests` (the write-nothing
+  proof idiom), `ProtectionAccountSupport`, `ProtectionTestSupport`: DONE (this commit).
+- **Piece 0** — the harness: DONE (not durable — B2's `vx510b2-harness` copied whole but its build products to this
+  session's scratchpad `vx510b3-harness`, the SwiftPM checkouts carried, the build fresh — `Build complete!`; runner
+  `b3/test.sh <log> <filter|ALL> [watchdog]`, `b3/revert.sh <name> <file> <filter>` for the reverts; each new suite or source
+  file symlinked in as it lands). **BASELINE on the pre-fix tree, the three harness-PATH artifacts `--skip`ped (unit A's Piece
+  0): `✔ Test run with 502 tests in 85 suites passed`** — exactly B2's close.
+- **Piece 1** — the composition pins that compile on the pre-fix tree, committed RED: DONE (`b3fd67000`; this record flip
+  rode one commit late — the edit missed the commit). New suite `VariorumTests/Protection/SecretCheckCompositionTests.swift`
+  (source pins on CODE lines, `#filePath`'s symlinks resolved so they run in the harness):
+  `thePaneRendersTheCheckDoorAfterTheWordsSection` (`RoadSecretCheckSection(model: keyDoors)` after the words section; still
+  one presenter host), `thePresentersHostCarriesTheCheckSheet` (`case checkSecrets(RoadSecretCheckModel)` on the presenter,
+  its sheet on the host), `theBootstrapWiresTheCheckRoadOnTheOpenSession` (`keyDoorRoads()`'s `check:` — ready only, the open
+  session, detached, the sign-in now), and the GUARD `theCheckRoadNamesNoWriterAndNoKeychainRead` (the road's code names no
+  writer of any home, never the executor — whose vault read fills `freshVaults` —, never the act lock, a ledger or a defaults
+  domain, no custody or sync-keys read — a Touch ID read prompts, VX-503 —, no static state). **RED on the pre-fix tree**
+  (the harness, `--filter SecretCheckCompositionTests`): `✘ Test run with 4 tests in 1 suite failed with 5 issues` — each of
+  the four ✘ (no section on the pane; no case on the presenter nor the host ×2; no `check:` road; the road's file does not
+  exist). The behavioural pins need the new seam to compile — their red is Piece 4's reverts.
+- **Piece 2** — the read-only check road, its outcome and words, the door's standing, the road pins: DONE (this commit).
+  NEW `Shared/Protection/ProtectionSecretCheck.swift`: `SecretCheckOutcome` (pure — `opens(kind, account:)` with the account's
+  half `notSynced · opens · doesNotOpen(changedElsewhere:) · unchecked(why)`; `doesNotOpen(kind, opensAccount:)`;
+  `refused(sentence)`; its `lines` and `warns`) and `ProtectionSecretCheck.check(_:typed:signIn:within:)` — the typed text read
+  as Look inside reads it (`MakeMineModel.copySecrets`); the open library's in-hand live key file of the open key (else
+  `refused(crossingDoorClosed)` — the door is not rendered then); the unlock's own derivation
+  (`ProtectionOpenRoad.typedCandidatesAndKeys` — the KDF floor first, one derivation per descriptor) compared with the open key;
+  twelve tokens that are not the words and open nothing say the words' own sentence (`ProtectionOpenRoad.sentence(for:)` —
+  the count / an unknown word / the checksum); a library naming no account stops there; synced: signed out / another account
+  → unchecked in the pane's sentences (no vault read), else ONE vault read THROUGH THE LEAF, bounded (`boundedVaultRead`,
+  10 s — B2's P-VX510-B2-1 value; never the executor's `readVault`, which fills `freshVaults`), the master by the typed secret
+  (the library check's derived passphrase key reused when its descriptor is the vault's, else derived once under the vault's
+  after its floor; the words' wrap key), `AccountVault.master` non-nil → opens; a passphrase that opens the library but not
+  the vault, its descriptor no longer the vault's → VX-113's `passphraseChangedElsewhere` (Follow's own test); one protection-
+  log line per check, never the secret. No keychain read, no write, no act lock, no stored state. `ProtectionWords.swift`: the
+  D-B7 section (the door's label is the design's; every other line **PROVISIONAL P-VX510-B3-1**, below).
+  `RoadKeyDoorFaces.swift`: `checkStands` (the live key file of the open key beside it — the read's own `keyFileStands`; a
+  hand-made face defaults to false). Pins — new suite `VariorumTests/Protection/SecretCheckRoadTests.swift` (planted road +
+  vault + sync keys; `SecretCheckPlant.untouched` = every keychain leaf's items, the memory items, the Apple stamps, the
+  container's every byte, the vault's snapshot, the sync keys' items AND session memory, the executor's `freshVaults`, the
+  record and key file in hand; `writeLogs` = custody/memory/Apple writes + every non-fetch vault call):
+  `rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync` (right passphrase / right words open; wrong each → the lobby's
+  sentences; no vault read), `twelveTokensThatAreNotTheWordsSayTheWordsOwnSentence` (unknown word, broken checksum, another
+  count, a passphrase-less library), `syncedTheRightSecretsOpenTheLibraryAndTheAccount` (one fresh fetch per check),
+  `theHonestSplitWhenTheAccountsSecretsChangedElsewhere` (the old passphrase → the split + VX-113's sentence; the account's
+  new passphrase → the account-not-library arm; the words' split the same, no device named), `theAccountUncheckedSaysWhy
+  AndTheLibrarysHalfStands` (offline; signed out and another account with NO fetch; a server slower than the bound — back
+  inside 1.5 s, the late answer dropped), `inCastleTheCheckReadsTheSameAndWritesNothing` (Always ask; no custody read, no
+  sync-keys Touch ID read), `withNoKeyFileOfTheOpenKeyNothingIsChecked` (rule 27's state: the door not standing, a check
+  refusing; the door standing beside the key file) — **every arm asserts zero writes and every home untouched.** **The
+  harness, `--filter "SecretCheckRoadTests|RoadKeyDoorRoadTests|RoadKeyDoorsModelTests|ProtectionWordsPlanTests|
+  ProtectionWordsVX307Tests|RoadKeyDoorWordsTests|U2WordsTests"`: `✔ Test run with 47 tests in 7 suites passed`**; no warning
+  in a touched file. (Machinery: the last pin's first run failed on its own world — a destructured road let go, its temp slot
+  deleted under the read; fixed by keeping the road, test-only.) New seam — the pins' red is Piece 4's reverts.
+  - **PROVISIONAL P-VX510-B3-1 (the words — hers):** the door "Check my passphrase or twelve words…" (D-B7's own) · title
+    "Check my passphrase or twelve words" · lead "Type your passphrase or your twelve words to check them. Checking changes
+    nothing." · field "Passphrase or twelve words" · button "Check" · "Checking…" · "Close" · the results in the lobby's idiom:
+    "That passphrase opens this library." / "Those twelve words open this library." · "…open(s) this library and your account."
+    · "…open(s) this library, but not your account." (+ VX-113's "Your passphrase was changed on ‹device› on ‹day›." when the
+    descriptor moved) · the not-opening lines are the lobby's own · the account-unchecked reasons the pane's own.
+  - **PROVISIONAL P-VX510-B3-2 (a fourth arm — the architect's/hers):** D-B7 names three answers; on a SYNCED library a secret
+    can also open the ACCOUNT but not this library (the account's passphrase or words changed on another device and this
+    library's own locks still carry the old pair — rule 7's one pair drifted). (a) the design's three literally — "That
+    passphrase doesn't open this library." though it is her account's current one (she might then reset this library's
+    passphrase, re-wrapping the account's lock again); **(b, built)** check the vault in that case too and say "That passphrase
+    doesn't open this library, but it opens your account." (the not-opening line otherwise). Cost of (b): a vault read (and at
+    most one Argon2id) on a wrong secret.
+  - **Recorded readings (mine, from the design's words):** the vault is read FRESH at every check (never a snapshot the session
+    already holds — a check is about the account's secret NOW); an absent vault reads as unreachable (the pane maps
+    `needsFreshVault` to the same sentence); a vault descriptor below the KDF floor opens to no passphrase (no cheap KDF, ever
+    — the library side's own reading); twelve tokens that fail the words' validation and open nothing as a passphrase say the
+    words' sentence — the reading stays Look inside's ("twelve valid words are the words").
+- **Piece 3** — the door and its sheet: DONE (this commit). `Shared/Protection/RoadKeyDoorsModel.swift`:
+  `RoadKeyDoorRoads.check` (optional — nil, no door: P-2); `RoadSecretCheckModel` (the sheet's brain — `busy`, `outcome`;
+  `submit` untrimmed; `edited()` drops what was said the moment the field changes and a check still running then lands
+  nothing — **unit C's W-10 folded in**; `close()` always — a check reads only, so the host's dismissal is Close even
+  mid-check; the typed text never held — it lives in the sheet's field); `RoadKeyDoorsModel.offersCheck` (a check road AND
+  the read's `checkStands`), `checkSheet`, `openCheck(on:)` (through THE ONE PRESENTER; nothing re-read, nothing said at the
+  close). `ProtectionSheetPresenter.swift`: `case checkSecrets(RoadSecretCheckModel)` (its id; its cancel = Close).
+  `Shared/AppBootstrap.swift` `keyDoorRoads()`: `check:` — the OPEN session (ready only, else `crossingDoorClosed`), the
+  sign-in now, `Task.detached` → `ProtectionSecretCheck.check` (no act lock, no receipt, no landing). Mac (compile at Piece 5's
+  build-for-testing, PENDING): NEW `Variorum/Features/Protection/RoadSecretCheckSheet.swift` — `RoadSecretCheckSection` (the
+  one door, rendered only where `offersCheck`) and `RoadSecretCheckSheet` (title, lead, ONE `PeekableSecretField` — VX-463's
+  concealed field with its eye —, the lines said — the first in the alarm voice when it warns —, Close, Check; `onChange`
+  → `edited()`); `ProtectionPane.swift` renders the section AFTER the words section (the set row → the key doors → the words
+  section order kept; one presenter host); `RoadAccountSheet.swift`'s host carries the case. `WordsFieldsConcealTests` gains
+  the check's field (its label in the words-field list; its site among the concealed fields). Pins: NEW
+  `VariorumTests/Protection/SecretCheckModelTests.swift` — suite "the door and sheet": `theDoorStandsOnlyWhereItCanAct` (no
+  faces / not standing / no road → no door, nothing presented; standing → the sheet on Settings; one sheet at a time both
+  ways), `theSheetChecksWhatWasTypedAndSaysWhatTheCheckSaid` (untrimmed; the lines; Close → gone, no receipt, no landing, no
+  re-read), `retypingClearsWhatWasSaidAndALateAnswerLandsNothing` (W-10; a parked check + an edit → dropped; the host's
+  dismissal mid-check closes, the late answer dropped), `theSheetKeepsNoSecret` (a `Mirror` walk over the sheet finds nothing
+  of the typed text); suite "through AppBootstrap" (`FirstRoundWorld`, no services): `theOpenLibrarysCheckRunsOnTheOpenSession
+  AndWritesNothing` (the door stands; words open / a wrong passphrase doesn't; Turn on sync; then the passphrase and the words
+  open library AND account; keychain write logs, non-fetch vault calls and the library's calm-asks ledger keys unchanged; the
+  executor's `freshVaults` unchanged), `withNoLibraryOpenTheDoorIsGone` (behind the lobby: no faces, no door, nothing
+  presented; the road refuses). NEW `VariorumTests/Protection/SecretCheckSurfaceTests.swift` (Mac only, hosted — compiles at
+  Piece 5, runs in the stage batch): the section standing and not; the sheet empty and saying each kind of answer. **The
+  harness, `--filter "SecretCheck|RoadKeyDoorRoadTests|RoadKeyDoorsModelTests|WordsFieldsConcealTests|
+  ProtectionSheetPresenterTests|ProtectionPaneWaveTests"`: `✔ Test run with 43 tests in 9 suites passed`** — Piece 1's four
+  composition pins GREEN; no warning in a touched file. (Machinery: the bootstrap pin's first run asserted EXACTLY two fetches
+  for two checks and saw more — the set-up's landing re-reads the pane's sections on their own tasks, each a fetch; now `≥`,
+  the road suite pinning exactly one per check.)
+- **Piece 4** — THE BEHAVIORAL REVERTS, named BEFORE any run (this commit; the committed tree IS the pre-revert copy — no
+  copies kept). Each is ONE edit in ONE file (`b3/rv/<name>.old` → `.new`, applied exactly once by `b3/revert.sh`), the
+  harness run with `--filter SecretCheck` (the four D-B7 suites: road, composition, model, bootstrap), restored by `git
+  checkout --` and `git diff --exit-code` clean after each. Expected red in brackets:
+  - **RC-1** (the vault read through the EXECUTOR — it fills `freshVaults`) `ProtectionSecretCheck.swift`: the account's half
+    reads by `session.executor.readVault` [`theCheckRoadNamesNoWriterAndNoKeychainRead`; the split pin's untouched cache —
+    the changed vault lands in `freshVaults`; any arm whose executor is not signed in as the account].
+  - **RC-2** (the words never read as words) `ProtectionSecretCheck.swift`: the reading ignores twelve valid words [every
+    right-words arm — unsynced, synced, the split, Castle, through the bootstrap].
+  - **RC-3** (the library half never checked) `ProtectionSecretCheck.swift`: `opensLibrary` always true [every wrong-secret
+    arm; the account-not-library arm].
+  - **RC-4** (the account half never verified) `ProtectionSecretCheck.swift`: any vault read says opens [the split arms; a
+    wrong passphrase on a synced library].
+  - **RC-5** (VX-113's naming) `ProtectionSecretCheck.swift`: the changed-elsewhere branch never taken [the passphrase split].
+  - **RC-6** (the sign-in gate) `ProtectionSecretCheck.swift`: another account signed in still reads the vault [the unchecked
+    pin — the other-account leg and its no-fetch count].
+  - **RC-7** (the bound) `ProtectionSecretCheck.swift`: the vault read waits 60 s [the unchecked pin's slow-server leg].
+  - **RC-8** (the words' own sentence) `ProtectionSecretCheck.swift`: the twelve-token refusal removed [the twelve-tokens pin].
+  - **RC-16** (a keychain read — a prompt) `ProtectionSecretCheck.swift`: the account's half first reads the sync keys' Touch
+    ID item [`theCheckRoadNamesNoWriterAndNoKeychainRead`; the Castle pin's no-Touch-ID-read leg].
+  - **RC-9** (W-10) `RoadKeyDoorsModel.swift`: `edited()` does nothing [`retypingClearsWhatWasSaidAndALateAnswerLandsNothing`].
+  - **RC-10** (the late answer) `RoadKeyDoorsModel.swift`: `submit` lands its answer whatever changed meanwhile [the same pin's
+    parked leg].
+  - **RC-11** (the door's gate) `RoadKeyDoorsModel.swift`: `offersCheck` ignores the read's `checkStands` [`theDoorStandsOnly
+    WhereItCanAct`; `withNoLibraryOpenTheDoorIsGone`].
+  - **RC-14** (Close mid-check) `RoadKeyDoorsModel.swift`: `close()` refuses while a check runs [the retyping pin's host-
+    dismissal leg].
+  - **RC-15** (keeps no secret) `RoadKeyDoorsModel.swift`: the sheet keeps the last text it checked [`theSheetKeepsNoSecret`].
+  - **RC-12** (the door's standing) `RoadKeyDoorFaces.swift`: `checkStands` always true [`withNoKeyFileOfTheOpenKeyNothingIsChecked`].
+  - **RC-13** (the open session only) `AppBootstrap.swift`: the check road drops its ready guard [`withNoLibraryOpenTheDoorIsGone`
+    — behind the lobby the retired session still answers; `theBootstrapWiresTheCheckRoadOnTheOpenSession`].
+  **RESULTS — DONE on `25bc90a9f`, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN
+  FLIGHT** (green first on the same tree: `--filter SecretCheck` `✔ Test run with 17 tests in 4 suites passed`; each red run
+  below is `--filter SecretCheck`, 17 tests in 4 suites):
+  - **RC-1** `✘ … failed with 5 issues` — `theCheckRoadNamesNoWriterAndNoKeychainRead` ✘×2 ("executor", "readVault("), the
+    split's untouched ✘ (the changed vault landed in `freshVaults`), and the unchecked pin's slow-server leg ✘×2 (the
+    executor's read has no bound — it waited the 2 s). (The arms whose vault is unchanged stayed green: the executor's re-read
+    stores the snapshot it already held — why the composition guard exists.)
+  - **RC-2** `✘ … with 15 issues` — every right-words arm: unsynced ✘×4 (+ the wrong words read as a passphrase), the
+    twelve-tokens pin's "however spaced" ✘, synced ✘×2, the split ✘×5, through the bootstrap ✘×2, Castle ✘.
+  - **RC-3** `✘ … with 16 issues` — every wrong-secret arm (unsynced ✘×4, the twelve-tokens pin ✘×4 — the shape refusal never
+    reached —, synced ✘, the bootstrap ✘, the account-not-library arms ✘×4, signed out ✘, Castle ✘).
+  - **RC-4** `✘ … with 6 issues` — a wrong passphrase on a synced library ✘ (said opens the account), the split's library-but-
+    not-account arms ✘×4, Castle's wrong passphrase ✘ (the account-not-library arm stayed green, as it must).
+  - **RC-5** `✘ … with 2 issues` — the passphrase split ✘×2 (VX-113's sentence missing).
+  - **RC-6** `✘ … with 2 issues` — the other-account leg ✘ (read and said opens) and its no-fetch count ✘.
+  - **RC-7** `✘ … with 2 issues` — the slow-server leg ✘×2 (waited past 1.5 s; said opens).
+  - **RC-8** `✘ … with 2 issues` — the unknown word ✘ and the broken checksum ✘ (read as a passphrase that opens nothing).
+  - **RC-16** `✘ … with 2 issues` — `theCheckRoadNamesNoWriterAndNoKeychainRead` ✘ ("readSyncKeys") and the Castle pin's
+    no-keychain-read leg ✘ (a Touch ID read — a prompt on the real leaf).
+  - **RC-9** `✘ … with 2 issues` — `retypingClearsWhatWasSaidAndALateAnswerLandsNothing` ✘×2 (the line stood after the edit;
+    the parked check's late answer landed).
+  - **RC-10** `✘ … with 1 issue` — the same pin's parked leg ✘ (the late answer landed).
+  - **RC-11** `✘ … with 5 issues` — `theDoorStandsOnlyWhereItCanAct` ✘×3 (no faces / not standing → a door, and a sheet) and
+    `withNoLibraryOpenTheDoorIsGone` ✘×2 (behind the lobby a door, and a sheet presented).
+  - **RC-14** `✘ … with 2 issues` — the host-dismissal-mid-check leg ✘×2 (the sheet stayed).
+  - **RC-15** `✘ … with 1 issue` — `theSheetKeepsNoSecret` ✘ (the Mirror walk found the typed text).
+  - **RC-12** `✘ … with 1 issue` — `withNoKeyFileOfTheOpenKeyNothingIsChecked` ✘ (rule 27's state said the door stands).
+  - **RC-13** `✘ … with 2 issues` — `theBootstrapWiresTheCheckRoadOnTheOpenSession` ✘ and `withNoLibraryOpenTheDoorIsGone` ✘
+    (behind the lobby the retired session still answered "opens").
+- **Piece 5** — EVIDENCE: DONE (the final tree = this commit's product files; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's four new suites symlinked in, the new source file too): `✘ Test run with 522 tests in
+    89 suites failed with 4 issues` — exactly the three harness-PATH artifacts (`theBecomeActiveHookRunsOneSyncRound`,
+    `thePasteInIsFullyRetiredInTheSharedSources`, `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut` ×2 — they read
+    `#filePath` beside the symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 519 tests in
+    89 suites passed`** (B2's 502/85 + this unit's 17 tests in 4 new suites); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx510-b3 build-for-testing` (from
+    `App/Variorum`): **`** TEST BUILD SUCCEEDED **`** — and AGAIN after the last test-only edit below (one array entry in
+    `TravellingDotsIndicatorTests`), incremental: **`** TEST BUILD SUCCEEDED **`**; `xcodebuild -scheme VariorumMobile
+    -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vx510-b3-ios build-for-testing`: **`** TEST
+    BUILD SUCCEEDED **`** — zero errors, no warning in any file this unit touched (all three logs grepped). The Mac-only files
+    (`RoadSecretCheckSheet.swift`, `ProtectionPane.swift`, `RoadAccountSheet.swift`, `SecretCheckSurfaceTests.swift`) compile
+    here; Piece 3's PENDING on them is discharged.
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched — no `Sync/` line).
+  - **Coverage added to two existing Mac pins (test-only, deliberate):** `WordsFieldsConcealTests` — the check's field joins
+    the twelve-words labels and its site the concealed fields (harness-green); `TravellingDotsIndicatorTests` — the check's
+    sheet joins the protection surfaces that name no system spinner and carry the indicator (Mac-only — compiled; runs in the
+    stage batch, PENDING).
+  - **Machinery honesty:** the first Mac build-for-testing was started from `App/Variorum` with `-derivedDataPath
+    App/Variorum/DerivedData/vx510-b3`, which resolved to a stray `App/Variorum/App/Variorum/DerivedData/vx510-b3` (gitignored);
+    that build was stopped by its own command line (`pkill -f` on its derived-data path — no other process touched), the stray
+    folder (this session's alone, verified to hold only that) removed, and the build re-run at `App/Variorum/DerivedData/
+    vx510-b3`. The orchestrator committed to this branch while the unit ran (`6acf5771f` and others — its own record sections);
+    this session staged explicit paths only and re-read the record before each edit. Piece 1's record flip rode one commit late
+    (said there).
+  - **Precedent, recorded (no change made):** today's road had a read-only check of its own (Phase 13l Act 5, ledger row 18 —
+    her ask of 2026-08-19, "a place where people can verify that they still have their passcode or passphrase right without
+    having to reset something else, like a sanity check"; QUESTIONS #75 ratified its shape; deleted with today's road at VX-329
+    U1, `f2306a535`). D-B7 keeps its contract — the REAL unwrap is the verification (no stored comparand anywhere), it writes
+    nothing, and "couldn't ask" is never said as "that isn't it" (the account's `unchecked` half) — and #75(e)'s reading: the
+    door is not declared in the capability registry (the protection surface lives in `Shared/`; no key door is declared).
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW: `SecretCheckRoadTests`, `SecretCheckCompositionTests`, `SecretCheckModelTests` + `SecretCheckBootstrapTests` (one
+    file), all harness-green; `SecretCheckSurfaceTests` (Mac only, hosted — compiled, PENDING its run).
+  - CHANGED: `WordsFieldsConcealTests` (harness-green), `TravellingDotsIndicatorTests` (Mac only, PENDING).
+  - `RoadKeyDoorsModel` / `RoadKeyDoorRoads` / `RoadKeyDoorFaces` (`checkStands`): `RoadKeyDoorsModelTests`, `RoadKeyDoorRoadTests`,
+    `RoadKeyDoorSurfaceTests` (its composition pin reads the pane and the host), `PassphraseFloorRoadTests`,
+    `ProtectionPaneWaveTests`, `SetPassphraseRowRereadRouteTests`.
+  - `ProtectionSheetPresenter` (the new case): `ProtectionSheetPresenterTests`, `RoadAccountModelTests`, `RoadJoinFollowModelTests`,
+    `RoadCrossingModelTests`, `RoadAccountSurfaceTests`, `RoadCrossingSurfaceTests`, `RoadJoinFollowSurfaceTests`,
+    `SettingsAccountSurfaceTests`.
+  - `AppBootstrap` (`keyDoorRoads()`'s `check:`): unit A's bootstrap list — `AppBootstrapOffMainTests`, `SettingsLockCloseTests`,
+    `OneRefreshAuthorityTests`, `Phase9cAuthWiringTests`, `LibraryHandOffTests`, `QuickEntryLaunchFocusTests`,
+    `WhatsNewWaitsAfterAdoptionTests`, `FirstRoundAfterTheActTests`, `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests`,
+    `WordsCardAfterAccountActTests`, `RoadLockRouteTests`, `HoldBannerAccountTests`.
+  - `ProtectionWords` (new constants only) — the string-pinning and sweeping suites: `ProtectionWordsPlanTests`,
+    `ProtectionWordsVX307Tests`, `RoadKeyDoorWordsTests`, `RoadAccountWordsTests`, `RoadJoinFollowWordsTests`, `U2WordsTests`,
+    `CopyRegisterPinTests` (Mac only — the two-register rule over every literal; the new lines name no forbidden word, checked
+    by hand), `Phase13pCopySweepTests`, `PreDesignFaceTests`.
+  - `ProtectionPane.swift` / `RoadAccountSheet.swift` (source pins + hosted): `ProtectionPaneRoadRowTests`, `CopyRegisterPinTests`,
+    `SyncLockedRowTests`, `RoadKeyDoorSurfaceTests`, `RoadAccountSurfaceTests`, `RoadCrossingSurfaceTests`,
+    `TravellingDotsIndicatorTests`, `SettingsAccountSurfaceTests`.
+  - The simplest honest batch: the whole `VariorumTests/Protection` folder + `CopyRegisterPinTests`, `Phase13pCopySweepTests`,
+    `TravellingDotsIndicatorTests`, `SyncLockedRowTests`, `AppBootstrapOffMainTests`, `SettingsLockCloseTests`,
+    `OneRefreshAuthorityTests`, `Phase9cAuthWiringTests`.
+  - THE PHONE (`VariorumMobileTests` — `Shared/`'s presenter, bootstrap and words compile there; no face): `MobileProtectionRoadTests`,
+    `MobileStructuralTests` (its two-register twin), `MobileRefusalTableTests`.
+  **THE WALK (this unit's rows, for the stage — use-shaped; both voices where the sheet has a face):** on the DEV-store Debug
+  build, Settings ▸ Protection: (1) the door "Check my passphrase or twelve words…" stands after the words section; its sheet
+  — title, lead, one concealed field with its eye, Close, Check; (2) an UNSYNCED library: the right passphrase → "That
+  passphrase opens this library."; the right words → "Those twelve words open this library."; a wrong one → the lobby's
+  sentence; retyping clears the line (W-10); the protection log's `road: a secret check (read-only, nothing written)` and
+  NOTHING else written (no key-file mtime change; the vault revision unmoved); (3) a SYNCED library (unit C's standing `std`
+  or `castle` account, on the prod test road): the account's passphrase → "…opens this library and your account." with ONE
+  vault read, the vault revision unchanged server-side; the words the same; (4) offline (Wi-Fi off) on the synced library →
+  "That passphrase opens this library." + "Variorum couldn't reach your account just now. Try again in a moment."; (5) (if a
+  second library is at hand) the account's passphrase changed on the other → the first says the split with "Your passphrase
+  was changed on ‹device› on ‹day›."; the new passphrase → "…doesn't open this library, but it opens your account."
+  (P-VX510-B3-2); (6) locked behind the lobby (Castle ⌃⌘L) — no Settings pane, no door.
+
+**THE ARCHITECT ON B3 (2026-10-23, verified):** B3's claims spot-checked — commits `73dc65dab`…`2e3d335d8`, no `Sources/`
+line, every touched file in the app's protection layer; the orchestrator re-ran the run's new pin suites in B3's harness
+(`vx510b3-harness`): `✔ Test run with 65 tests in 9 suites passed` (SecretCheck · TypedUnlockSyncKeys ·
+WordsCardAfterAccountAct · TypedSecretNeverPresses · FirstRunDrill · ProdTestRoad). **P-VX510-B3-2 ruled (b), PROVISIONAL**
+(the fourth answer "…doesn't open this library, but it opens your account." — D-B7's "honest split" read whole: a secret
+that IS the account's current one must never be told it opens nothing); the words (P-VX510-B3-1) hers. The Mac-hosted
+suites (`SecretCheckSurfaceTests`, the extended `TravellingDotsIndicatorTests`, …) ride the closing stage batch.
+
+## D-B8 — VX-517 (R-510-16), the Touch ID sync-keys class forgotten (unit B4; the architect's design)
+
+The trace is B2's T-B5-2/T-B5-4 (UNIT B2 — LIVE STATUS, Piece 3) — read it whole. The design takes B2's options **(a) +
+(c)**, not (b):
+- **(a) — forgets delete BOTH classes BY NAME for the account,** never by listing: the leaves' `forgetSyncKeys(of:)` and
+  `forgetUnboundSyncKeys`, the plan runner's rollback sweep, and `holdSyncKeys`' drops (`drop(.touchid)` on a move to
+  Standard; the silent drop on a move to Castle + Touch ID) each delete the named item of each class for every account
+  they mean, whether or not a listing saw it. The delete is idempotent (`ProtectionKeychain.delete` accepts not-found) and
+  an ACL'd item's delete never prompts (`writeSyncKeys(.touchid)` already relies on it). `forgetUnboundSyncKeys` — "every
+  account but the bound one" — needs the accounts it should forget: name its source (the custody record's past accounts,
+  the leaf's listing ∪ the act's known accounts) in your record; if no honest source exists for an account the Mac has
+  never listed, say so as a FORK and stop rather than guess.
+- **(c) — a STANDARD library never reads the Touch ID class:** `holdSyncKeysForTheSession` (KeyDoors.swift) and every
+  other reader consult the library's posture first; Standard files silently (rule 15), so its only reads are the silent
+  item, session memory and the vault derivation. (B2's `material(for:)` vault-first fix stays as it is.)
+- **Why not (b) alone:** wiring `touchIDCandidates` keeps the forgets dependent on a candidate set being complete —
+  exactly the class of blindness that hid this; (a) makes the forget total by construction. Wiring (b) as well is allowed
+  if it falls out naturally (the leaf's own comment asks for it), never as the fix.
+- **Pins (red on the old tree):** a PRODUCTION-SHAPED planted leaf — its listing BLIND to a Touch ID item with no silent
+  sibling, exactly as `KeychainSyncKeysLeaf.syncKeyItems()` behaves — never the all-seeing planted leaf (which is why no
+  test ever saw this). Arms: a Castle + Touch ID library's leave forgets its Touch ID item; Use Standard on a synced Castle
+  + Touch ID library leaves no Touch ID item and raises no Touch ID read; a later key door on that (now Standard) library
+  reads no Touch ID; the rollback sweep removes a Touch ID-only item; `forgetUnboundSyncKeys` removes a stale Touch ID item
+  of another account; a Castle + Touch ID library's own reads still work (no regression); zero prompts counted on every
+  Standard arm (the `touchIDReads` counter B2's `TypedSecretNeverPressesTests` uses).
+- **The real keychain:** if `KeychainLeavesTests` / `ProtectionKeychainFamilyTests` (real-keychain, Mac-hosted) need a
+  new arm, write it and list it for the closing stage batch — you can't run it.
+- **Custody code:** the whole diff gets the Fable cold review at the ladder. No `Sources/VariorumCore/Sync/` line; a seam
+  that needs one is a FORK.
+
+## UNIT B4 — THE BRIEF (a fresh `opus-implementer`, one session; spawned after unit B3 closed)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE (rules 15–16 and the
+custody rules are your charter's ground); `notes/SurfaceContracts.md`'s protection bullet whole;
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B8 is your charter; UNIT B2 — LIVE STATUS Piece 3 is the trace;
+units A/B1/B2/B3 LIVE STATUS for the harness recipe and the seams); the code: `Shared/Protection/KeychainSyncKeysLeaf.swift`,
+`KeychainCustodyLeaf.swift`, `ProtectionKeychain.swift`, `ProtectionSystem.swift` (under `App/Variorum/Shared/Protection/`),
+`App/Variorum/Shared/AppBootstrap.swift`, and the executor's `CommonSteps.swift`, `AccountActs.swift`, `KeyDoors.swift`
+(`Sources/VariorumCore/Protection/Executor/Acts/`) and `PlanRunner.swift` (`Sources/VariorumCore/Protection/Executor/`).
+
+**Your scope — exactly D-B8:** the forgets, the drops, the Standard read guard, their pins. The executor lives in the CORE
+package, so changes under `Sources/VariorumCore/Protection/` ARE in scope (B2's `material(for:)` fix set the precedent);
+the core's pins run headless (`swift test --filter …` from the worktree root, stage-free) beside your app-layer harness.
+Not yours: everything else; canon, Linear, `notes/QUESTIONS.md`. Any `Sources/VariorumCore/Sync/` line, or a change to
+the custody record's shape or the keychain items' NAMES, is a FORK: stop and propose.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's**, with `build-for-testing` into
+`DerivedData/vx510-b4` / `vx510-b4-ios`; build your harness as `vx510b4-harness` from B3's (`vx510b3-harness` — it links
+every file the run added). Commits say `Part of VX-517`; NO trailers of any kind.
+
+### UNIT B4 — LIVE STATUS (the implementer owns this section)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **THE WALK** — VX-517's live proof on the DEV-store Debug build
+with her Touch ID (THE WALK below — the orchestrator's stage; nothing here was launched); **the real-keychain arm**
+`KeychainLeavesTests.aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` and **every Mac-hosted / phone suite** in THE
+MAC-SUITE LIST — compiled (Mac + iOS build-for-testing green), RUN ONLY in the closing stage batch, PENDING; **F-B4-1** (a
+Touch ID-only item of an account nothing names stays out of reach) — a FORK, recorded with options, NOT BUILT;
+**`notes/QUESTIONS.md`** — not mine (no product word was drafted: this unit has no face). No `xcodebuild test`, no stage, no
+app launch, no dev/real-store touch, no server or production contact, no real-keychain run. No line in
+`Sources/VariorumCore/Sync/`; no change to the custody record's shape or to any keychain item's name (the only app-layer
+product line is one doc comment in `KeychainSyncKeysLeaf`).
+
+*Implementer session B4 — Opus 5.5, xhigh. Pre-fix tree = `9652b493a` (unit B3's product files, `2e3d335d8`, + record
+edits). Every claim not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE (rules
+  15–16, 9, 11–12, 20); `notes/SurfaceContracts.md`'s protection bullet whole; `notes/SessionResiliencyProtocol.md`; this file
+  WHOLE (D-B8 is the charter; UNIT B2 — LIVE STATUS Piece 3, T-B5-1…4, the trace; units A/B1/B2/B3 LIVE STATUS for the harness
+  recipe and seams); the code: `KeychainSyncKeysLeaf`, `KeychainCustodyLeaf`, `ProtectionKeychain`, `ProtectionSystem`,
+  `AppBootstrap` (the leaf's mint, :183), `NewRoadSyncKeyProvider`, `ProtectionOpenRoad`'s two loads, `ProtectionFactsGatherer`'s
+  sync-keys fact; the core's `CommonSteps`, `AccountActs`, `KeyDoors`, `PlanRunner`, `Follow`, `LeaveCastle`, `EnterCastle`,
+  `Copies` (make-mine's hold), `Leaves`, `Executor.readVault`, `Assess`'s one sync-keys fault, `Names`; the test worlds
+  (`ExecutorWorld`, `ExecutorFixtures`, the scenario `World`'s keychain leaves, the app's `PlantedSyncKeysLeaf`,
+  `ThrowawayScope`), `KeychainLeavesTests`, B2's `TypedSecretNeverPressesTests`: DONE (`5416bcaca`).
+- **Piece 0** — the harness + baselines: DONE (not durable — this session's scratchpad `vx510b4-harness`, B3's
+  `vx510b3-harness` copied whole but its build products, the SwiftPM checkouts carried, the build fresh — `Build complete!`;
+  runners `b4/test.sh <log> <filter|ALL> [watchdog]` (the harness), `b4/core-test.sh <log> <filter|PROT> [watchdog]
+  [release]` (the core package from the worktree root; `PROT` = B2's protection set — every suite under
+  `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`, `AccountLifecycleTests`, `AuthRLSDDLTests`,
+  `KeyVaultClientTests`, `SupabaseTransportTests`, `SupabaseTransportSessionTests`, extracted to one `--filter`), `b4/revert.sh`
+  for the reverts). **BASELINES on the pre-fix tree:** the harness, the three harness-PATH artifacts `--skip`ped (unit A's
+  Piece 0): **`✔ Test run with 519 tests in 89 suites passed`** — exactly B3's close; the core `PROT` set (debug): **`✔ Test
+  run with 533 tests in 102 suites passed`** — exactly B2's close.
+- **Piece 1** — the pins, committed RED on the pre-fix tree: DONE (`b914aaa0b`; Piece 1b `e4ab614ee`).
+  - **Test-world fidelity first (test code only; behavior-neutral on this tree, shown):** `ExecutorWorld` (core) gains
+    `syncKeysListingLikeProduction` (the production leaf's listing — `KeychainSyncKeysLeaf.syncKeyItems()` with no candidates
+    wired lists the silent items plus a Touch ID item ONLY where its account has a silent sibling) and `syncKeysTouchIDReads`
+    (every Touch ID sync-keys read — a prompt on the real leaf wherever the item stands); its `deleteSyncKeys` and the scenario
+    `World`'s now log a write ONLY when an item was removed ("a delete of nothing is no write" — the real delete accepts
+    not-found and changes nothing; the same world's Apple, memory and plan deletes already model it). Today's code deletes only
+    listed (existing) items, so no existing write log moves: **the core `PROT` set on the pre-fix product tree WITH these
+    changes: `✔ Test run with 533 tests in 102 suites passed`.** The app's `PlantedSyncKeysLeaf` gains `listsLikeProduction`
+    (the same listing; off everywhere else).
+  - **The core pins — NEW `Tests/VariorumCoreTests/Protection/Executor/TouchIDSyncKeysForgottenTests.swift`** (13 tests,
+    production listing ON in every one): (a) `vx517_aCastleTouchIDLibrarysLeaveForgetsItsTouchIDItem` (×3 leaves) ·
+    `vx517_useStandardOnASyncedCastleTouchIDLibraryLeavesNoTouchIDItem` (+ zero Touch ID reads — B2's guard leg) ·
+    `vx517_aKeyDoorAfterUseStandardReadsNoTouchID` · `vx517_theQuietFollowOutReadsItsTouchIDItemThenLeavesNone` (its
+    "read its Touch ID item" leg a GUARD on (c)) · `vx517_aStandardJoinLeavesNoStaleTouchIDItem` (T-B5-4's residue) ·
+    `vx517_aCastleAlwaysAskFilingLeavesNoStaleTouchIDItem` · `vx517_theRollbackSweepRemovesATouchIDOnlyItem` (×2: plan gone ·
+    plan kept, vault out of reach — a Standard library joining a Castle account crashed right after filing the keys in a Touch
+    ID item) · `vx517_aRolledBackFollowIntoCastleLeavesNoTouchIDItem` (Piece 1b, `e4ab614ee` — the rollback's SECOND sweep,
+    the bound account's taken keys: a Standard library following into Castle crashed after its Touch ID filing and its stamp,
+    resumed with the vault out of reach) · `vx517_theFinishingForgetRemovesTheLeftAccountsTouchIDItem` (a Castle + Touch ID leave crashed after the record
+    let the account go, plan gone → finished from the record); (c) `vx517_aStandardKeyDoorWithAStaleTouchIDItemReadsNoneAndLands`
+    (×2: Change, Reset) · `vx517_aStandardSetUpsFinishReadsNoTouchIDAndBinds` (crashed right after the silent filing, plan
+    gone); GUARDS `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` · `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling`
+    (the reading below — a join into Castle crashed after its Touch ID filing, resumed with nothing typed). **RED on the pre-fix
+    tree** (`b4/core-test.sh p1-core-red TouchIDSyncKeysForgottenTests`; with Piece 1b's pin, `p1b-core-red`): **`✘ Test run
+    with 13 tests in 1 suite failed with 20 issues`** — every `vx517_` pin ✘ on its claimed leg, no precondition failed (1b's pin
+    ✘ on "the act's Castle-way filing goes with the rollback"): the leaves ✘×6 (the Touch ID item stayed, ×3),
+    Use Standard ✘ (the item stayed), the key door after it ✘ (Touch ID read — the count moved), the follow out ✘ (the item
+    stayed), the Standard join ✘ (the stale item stayed), the Always-ask filing ✘ (the stale item stayed), the rollback ✘×2 (the
+    picked-up item survived both rollbacks), the finishing forget ✘×2, **the Standard key doors ✘×2 with `Caught error:
+    .accountMoved` — THE MECHANISM IS WORSE THAN A PROMPT: the custody fallback took the stale Touch ID item's keys ahead of the
+    silent item's, saw them not the vault's, and the door rolled back as "the account moved"** (a Touch ID press that SUCCEEDED
+    broke the act; a cancelled one would have let the silent item serve), **the set-up's finish ✘×2: it read the stale item first,
+    bound NOTHING** — the library left unbound over the vault it had just made; the two guards ✔ (by design).
+  - **The road pins — NEW `App/Variorum/VariorumTests/Protection/TouchIDSyncKeysForgottenRoadTests.swift`** (through the app's
+    doors, the walk's shape, over VX-487's synced Castle + Touch ID world with `listsLikeProduction` ON):
+    `vx517_useStandardThenChangePassphraseNeverTouchesTheTouchIDClass` (Use Standard through `ProtectionCrossings.cross`, then
+    Change passphrase through `ProtectionKeyDoorRoad.press`) · `vx517_eachLeaveOfACastleTouchIDLibraryForgetsItsTouchIDItem`
+    (×3 doors through `ProtectionAccountRoad.press`). **RED on the pre-fix tree** (the harness, `--filter
+    TouchIDSyncKeysForgottenRoadTests`): **`✘ Test run with 2 tests in 1 suite failed with 8 issues`** — each leave ✘×2 (the item
+    stayed; the account still held), Use Standard ✘ (the item stayed) and the key door ✘ (`touchIDReads` moved — two reads,
+    each a prompt on the real leaf).
+  - **The real-keychain arm (Mac-hosted only — written, NOT RUN here; the closing stage batch's):** `KeychainLeavesTests
+    .aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` (a throwaway scope, enabled where a finger is enrolled): a Touch ID
+    sync-keys item with no silent sibling — the production listing does not see it, a candidates-named probe does (never
+    pressed); deleted BY NAME it is gone (no prompt); released twice and the absent class released are fine; deleted by name in
+    `defer` too (the scope's purge lists, so it could not). PENDING its run.
+  - **THE READING (D-B8 (c), recorded — mine, from the design's words and rule 15):** "a STANDARD library never reads the Touch
+    ID class" is read as: the Touch ID class is consulted only where the account's keys can be filed there — **a library in
+    Castle, or an act taking one into Castle (its own Castle-way filing before its swap: a join into a Castle account, a follow
+    into Castle, Use Castle)**; a library that is AND STAYS Standard files silently and never reads it. Why not the record's mode
+    alone: a join into Castle with Touch ID files the account's keys in the Touch ID item at its first step and drops the silent
+    one, while the library is still Standard until its swap; a crash there resumed with nothing typed (the library opens by its
+    quiet road) can reach the keys ONLY through that item — by the mode alone the resume could never finish (the act in flight
+    for good — rule 20); the guard `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` pins it. Consequence, said
+    plainly: during such a crossing the castle-way idempotency read in `holdSyncKeys` may still meet a stale Touch ID item of the
+    SAME account (one prompt, on a crossing into Castle she chose Touch ID for) — not a Standard read; untouched.
+- **Piece 2** — D-B8 (a), the forgets and drops BY NAME: DONE (`6d8ee72e5`; core only — no app-layer line, no `Sync/` line, no
+  name or record-shape change). `Sources/VariorumCore/Protection/Executor/Acts/AccountActs.swift`: two executor helpers —
+  `forgetSyncKeys(ofAccount:)` (every class's item deleted BY NAME, the session hold cleared; a class with no item is nothing
+  to delete — the real delete accepts not-found, an ACL'd item's delete never prompts) and `unboundSyncKeyAccounts(bound:named:)`
+  (the accounts the listing names ∪ the accounts known BY NAME the listing may not see — this session's sign-in and the act's
+  own: the account it ran on, joined, left — minus the bound one, sorted); `ActContext.forgetSyncKeys(of:)` (the leaves' and
+  Move's `forgetOldSyncKeys`) and `forgetUnboundSyncKeys()` (the account family's finishing step) now ride them.
+  `CommonSteps.swift` `holdSyncKeys`: the drops delete by name (no listing — it was taken BEFORE the write and was blind).
+  `PlanRunner.swift` `rollBack`: the unbound sweep rides the helpers (its separate sign-in session clear folded in — the
+  sign-in is among the accounts forgotten); the bound account's taken-keys sweep reads the silent item and deletes the Touch ID
+  item (library back in Standard) BY NAME. **THE SOURCE `forgetUnboundSyncKeys` NEEDS (D-B8's ask), named:** the leaf's listing
+  ∪ the sign-in ∪ the act's own accounts. In its one caller — the finish from the record with the plan gone — the act's
+  parameters carry only the bound account, so in practice the listing ∪ the sign-in: a LEAVE's account is the sign-in (signed
+  in as it; the leave refuses another account), so its Touch ID item is now forgotten; the record keeps no account it named
+  before (rule 21's four things — a past-accounts list would change the custody record's shape, a FORK by the brief's terms),
+  so ONE case stays out of reach — **F-B4-1 (below)**. **The harness, `--filter TouchIDSyncKeysForgottenRoadTests`: `✘ … 2
+  tests … with 1 issue`** — the leaves GREEN; only the key door's no-read leg (c) left. **The core, `--filter
+  TouchIDSyncKeysForgottenTests`: `✘ Test run with 13 tests in 1 suite failed with 5 issues`** — every (a) pin GREEN; left red,
+  exactly (c)'s three: the Standard key doors ✘×2 (`.accountMoved`), the key door after Use Standard ✘ (a Touch ID read — the
+  item is gone now, the read is still made), the set-up's finish ✘×2.
+  - **F-B4-1 — A FORK, RECORDED, NOT BUILT (the architect's / hers):** a Touch ID-only sync-keys item of an account that is
+    neither the bound one, nor signed in, nor named by the act stays on this Mac — reachable only after (a) when some act
+    names that account again. The two roads to it: a MOVE (signed in as the NEW account) from a Castle + Touch ID library whose
+    plan is lost after its record write (the finish knows only the new account), and a library set aside with its items — a
+    `mv` of the dev slot, or Make this my library / Start fresh, whose Previous Library keeps its roads by design. No honest
+    source names that account here (no record or memory keeps past accounts; the production listing cannot see the item; the
+    keychain's attributes-only listing of an ACL'd item fails or skips by design). Options: (a) accept and record — the item is
+    biometry-gated and device-only (no quiet road — rule 9), never read by a Standard library after (c), and dropped by name the
+    next time any act files that account's keys; **(b)** a local, non-secret registry of the accounts this Mac filed sync keys
+    for (a new keychain item or defaults key — a new name or shape: a FORK by the brief); (c) a Castle-exit / leave-time sweep
+    that probes by name every account the vault or the session ever named — needs (b)'s registry anyway. RECOMMENDED (a).
+- **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: DONE (`7e24d4bd1`; core only). `CommonSteps.swift`:
+  `ActContext.syncKeysMayBeInTouchID` (the record's mode is Castle, OR the act's target posture `parameters.newKind` is — THE
+  READING in Piece 1) and `ProtectionExecutor.syncKeysClasses(touchID:)` (`[.touchid, .silent]` or `[.silent]`);
+  `syncMaterial()` reads by it (the custody fallback of `material(for:)` and `newLocks`). `AccountActs.swift`
+  `bindIfVaultIsOurs` (set-up's finish from the record) reads by it. `KeyDoors.swift` `holdSyncKeysForTheSession` gains
+  `castle:` (the library's posture — its two callers, Change and Reset, pass `library.record?.mode == .castle`). Every other
+  sync-keys reader was traced and needs nothing: the engine's provider and VX-501's typed load read session + silent only (the
+  load also only under Castle); the Touch ID unlock's ride runs only after a Touch ID custody press (a Castle key);
+  `holdSyncKeys`' castle-way idempotency read runs only on Castle-way filings (the account Castle ⇒ the act's target Castle);
+  the rollback reads the silent class only; B3's check reads no keychain. **The core, `--filter TouchIDSyncKeysForgottenTests`:
+  `✔ Test run with 13 tests in 1 suite passed`** — every pin GREEN, the two guards still green; **the harness, `--filter
+  TouchIDSyncKeysForgottenRoadTests`: `✔ Test run with 2 tests in 1 suite passed`**; **the core `PROT` set (debug, now with the
+  new suite): `✔ Test run with 546 tests in 103 suites passed`** (533/102 + 13 in 1); the harness's account/custody suites
+  (`TouchIDSyncKeysForgottenRoadTests|TypedSecretNeverPressesTests|TypedUnlockSyncKeysTests|TouchIDUnlockSyncKeysTests|
+  ProtectionAccountRoadTests|ProtectionJoinFollowRoadTests|ProtectionCrossingRoadTests|RoadKeyDoorRoadTests|FirstRunDrillTests|
+  WordsCardAfterAccountActTests|SecretCheckRoadTests|OneSyncKeysLeafTests|RoadLockTests|RoadRestoreHoldGateTests`): `✔ Test run
+  with 104 tests in 16 suites passed`.
+  - **OBSERVATION O-B4-1 (Castle, NOT this unit's — a ticket candidate for the orchestrator):** on a CASTLE + Touch ID library
+    the key doors still press TWICE for the sync keys — `holdSyncKeysForTheSession` reads the Touch ID item (and, finding the
+    current keys, holds nothing in session), then the act's vault step's `syncMaterial()` reads it again — and `syncMaterial()`
+    reads the Touch ID item BEFORE session memory, so even with VX-487's unlock having loaded the session, a Castle key door
+    prompts. (c) is scoped to Standard by the design; untouched. The guard `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem`
+    pins that Castle's reads still work, not their count.
+  - **OBSERVATION O-B4-2 (a residue outside D-B8's sites, recorded):** a plan-LESS rollback (`settle`'s no-plan, pre-commit
+    road) passes no parameters, so the bound account's taken-keys sweep cannot know what the act took and is skipped entirely —
+    a follow into Castle with Touch ID rolled back that way leaves its Touch ID filing on the (Standard again) library. After
+    (c) a Standard library never reads it; the next Castle-way filing for that account replaces it (`writeSyncKeys(.touchid)`
+    deletes first). Not changed (the sweep's `taken` guard is VX-378 U4's design, census class (J)).
+- **Piece 4** — THE BEHAVIORAL REVERTS, named BEFORE any run (`a5f1736a8`; results `cd1057917`; the committed tree IS the pre-revert copy — no
+  copies kept). Also in `a5f1736a8`, before them: the rollback pin's third road `signedOutAtTheOpen` (`RollbackRoad`: the plan
+  stands, signed OUT at the open — only the plan names the account; the `named` source's own pin), green on this tree (`--filter
+  TouchIDSyncKeysForgottenTests` `✔ Test run with 13 tests in 1 suite passed`); and ONE comment in the production leaf
+  (`KeychainSyncKeysLeaf.touchIDCandidates`' doc said "VX-308's sync setup wires the bound account here" — it never did: now
+  "production wires none … why every forget and drop deletes BY NAME"; no code). Each revert below is ONE edit in ONE file
+  (`b4/rv/<name>.old` → `.new`, applied exactly once by `b4/revert.sh <name> <file> <core filter> [harness filter]`), the named
+  suites run, restored by `git checkout --`, `git diff --exit-code` clean after each. Core filter `TouchIDSyncKeysForgottenTests`,
+  harness filter `TouchIDSyncKeysForgottenRoadTests` where named. Expected red in brackets:
+  - **RE-0** (the red-on-old of the leg added after the fix — the WHOLE fix reverted, four files at once by `git show
+    9652b493a:<file>`, restored by `git checkout --` on the four): `AccountActs.swift`, `CommonSteps.swift`, `KeyDoors.swift`,
+    `PlanRunner.swift` at the pre-fix tree [`vx517_theRollbackSweepRemovesATouchIDOnlyItem` ×3 roads incl. `signedOutAtTheOpen`,
+    and every other `vx517_` pin as in Piece 1].
+  - **RE-1** `AccountActs.swift`: the leaves' `forgetSyncKeys(of:)` walks the listing again [the leaves ×3; harness: the leaves ×3].
+  - **RE-2** `AccountActs.swift`: `forgetUnboundSyncKeys` walks the listing again [the finishing forget].
+  - **RE-3** `AccountActs.swift`: the by-name helper deletes only the classes the listing shows [the leaves ×3, the finishing
+    forget, the rollback ×3; harness: the leaves ×3].
+  - **RE-4** `AccountActs.swift`: the known accounts lose the sign-in [the finishing forget; the rollback's `planGone`].
+  - **RE-5** `AccountActs.swift`: the known accounts lose the act's own (`named`) [the rollback's `signedOutAtTheOpen`].
+  - **RE-6** `CommonSteps.swift`: `holdSyncKeys`' drops read the listing taken before the write again [Use Standard, the follow
+    out's no-item leg, the Standard join, the Always-ask filing; harness: Use Standard's no-item leg].
+  - **RE-7** `PlanRunner.swift`: the rollback's unbound sweep walks the listing again (+ its sign-in session clear) [the rollback ×3].
+  - **RE-8** `PlanRunner.swift`: the taken-keys sweep deletes the Touch ID item only when the listing shows it [the rolled-back
+    follow into Castle].
+  - **RE-9** `CommonSteps.swift`: `syncMaterial()` reads the Touch ID class always [the Standard key doors ×2 (`.accountMoved`
+    again), the key door after Use Standard (a read); harness: the key door's no-read leg].
+  - **RE-10** `AccountActs.swift`: the set-up's finish reads the Touch ID class always [the set-up's finish ×2].
+  - **RE-11** `KeyDoors.swift`: the key doors' session hold reads the Touch ID class always [the Standard key doors ×2 (a read),
+    the key door after Use Standard; harness: the key door's no-read leg].
+  - **RE-12** `CommonSteps.swift`: THE READING reverted to the record's mode alone (the act's target posture dropped) [the guard
+    `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` — the resume cannot finish].
+  - **RE-13** `CommonSteps.swift`: the over-reach — the Touch ID class never read [the guards `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem`,
+    the follow out's read leg, `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling`].
+  **RESULTS — DONE on `a5f1736a8`, every one RED as named, every restore `git diff --exit-code` clean ("RESTORED CLEAN · TREE
+  CLEAN" after each); NO REVERT IS IN FLIGHT** (green first on the same tree: core `--filter TouchIDSyncKeysForgottenTests` `✔
+  Test run with 13 tests in 1 suite passed`; harness `--filter TouchIDSyncKeysForgottenRoadTests` `✔ … 2 tests … passed`):
+  - **RE-0** (the four pre-fix files): `✘ Test run with 13 tests in 1 suite failed with 21 issues` — every `vx517_` pin ✘ as in
+    Piece 1b, and `vx517_theRollbackSweepRemovesATouchIDOnlyItem` ✘ on all three roads (`planGone`, `vaultOutOfReach`,
+    `signedOutAtTheOpen` — the leg added in Piece 4: its red-on-old) on "the keys the act picked up go with it".
+  - **RE-1**: core `✘ … with 6 issues` — the leaves ✘×6 (×3 cases); harness `✘ … 2 tests … with 6 issues` — the road's leaves ✘×6.
+  - **RE-2**: core `✘ … with 2 issues` — the finishing forget ✘×2.
+  - **RE-3**: core `✘ … with 11 issues` — the leaves ✘×6, the finishing forget ✘×2, the rollback ✘×3 (every road); harness
+    `✘ … with 6 issues` — the road's leaves ✘×6.
+  - **RE-4**: core `✘ … with 3 issues` — the finishing forget ✘×2, the rollback ✘ on `planGone` only (the other two roads name
+    the account through the plan — as designed).
+  - **RE-5**: core `✘ … with 1 issue` — the rollback ✘ on `signedOutAtTheOpen` only (the plan alone names the account there).
+  - **RE-6**: core `✘ … with 4 issues` — the Standard join ✘, the Always-ask filing ✘, the follow out ✘ (its no-item leg; its read
+    leg green), Use Standard ✘; harness `✘ … with 1 issue` — Use Standard's no-item leg ✘ (the key door's no-read leg stayed
+    green: the stale item stands but (c) reads it no more — the two fixes are independent, as designed).
+  - **RE-7**: core `✘ … with 3 issues` — the rollback ✘ on every road.
+  - **RE-8**: core `✘ … with 1 issue` — the rolled-back follow into Castle ✘ (the Touch ID filing stayed).
+  - **RE-9**: core `✘ … with 3 issues` — the Standard key doors ✘×2 (`Caught error: .accountMoved` — the stale keys shadowing the
+    silent ones again), the key door after Use Standard ✘ (a read); harness `✘ … with 1 issue` — the key door's no-read leg ✘.
+  - **RE-10**: core `✘ … with 2 issues` — the set-up's finish ✘×2 (a read; nothing bound).
+  - **RE-11**: core `✘ … with 3 issues` — the Standard key doors ✘×2 (`syncKeysTouchIDReads == 0` — they still land: the session
+    hold reads the stale item, sees it is not the vault's and moves on to the silent one), the key door after Use Standard ✘;
+    harness `✘ … with 1 issue` — the key door's no-read leg ✘.
+  - **RE-12**: core `✘ … with 1 issue` — `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` ✘ with `Caught error:
+    .secretsRequired(enroll)` — by the record's mode alone the resume cannot reach the act's own Touch ID filing and the act
+    stays in flight: THE READING's reason, shown.
+  - **RE-13**: core `✘ … with 3 issues` — `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` ✘ (`.accountMoved`), the
+    follow out ✘ (`.secretsRequired(follow)`), the resumed act into Castle ✘ (`.secretsRequired(enroll)`) — the guards have teeth.
+- **Piece 5** — EVIDENCE: DONE (`1aeba029b`; the final tree = its product files, unchanged since; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's road suite symlinked in), the three harness-PATH artifacts `--skip`ped: **`✔ Test run
+    with 521 tests in 90 suites passed`** (B3's 519/89 + this unit's 2 tests in 1 suite); no `signal` line. (After it, ONE
+    test-only edit — the road suite's Use Standard arm now asserts the door's preflight `== .ready`, using the `shown` it read,
+    which the Mac build had flagged as an unused value — re-verified: `--filter TouchIDSyncKeysForgottenRoadTests` `✔ Test run
+    with 2 tests in 1 suite passed`, no warning for the file.)
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - THE CORE (`Sources/` touched — `AccountActs`, `CommonSteps`, `KeyDoors`, `PlanRunner`), the `PROT` set + this unit's suite:
+    debug **`✔ Test run with 546 tests in 103 suites passed`** (B2's 533/102 + 13 in 1); release (`swift build -c release
+    --build-tests -Xswiftc -enable-testing`, then `swift test -c release --skip-build`, the same filter) **`✔ Test run with 522
+    tests in 99 suites passed`** (B2's 509/98 + 13 in 1); 0 failures, no `skipped:` line.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx510-b4 build-for-testing` (from
+    `App/Variorum` — the folder `App/Variorum/DerivedData/vx510-b4`): **`** TEST BUILD SUCCEEDED **`**; after the test-only edit
+    above, again (incremental — the file recompiled): **`** TEST BUILD SUCCEEDED **`**, no warning in it. `xcodebuild -scheme
+    VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vx510-b4-ios build-for-testing`:
+    **`** TEST BUILD SUCCEEDED **`**. Zero errors; the one warning in a touched file is PRE-EXISTING and on a line not touched
+    (`KeyDoors.swift` `keyDoorParameters`' `var parameters` never mutated — line 357 on the pre-fix tree, the harness's first build
+    shows it). The Mac-only `KeychainLeavesTests` arm compiles here; its run is the stage's.
+  - **Machinery honesty:** nobody else committed to this branch while the unit ran (every `git pull --rebase` was a no-op); every
+    commit staged explicit paths. **A consequence of (a), said plainly for the reviewer:** the rollback's and the finishing
+    forget's sweeps already deleted every LISTED item of an account other than the bound one (VX-378 U4's census class (J), "this
+    Mac holds the sync keys of the account its library names, and only those"); by name they now reach the Touch ID class of the
+    accounts they know too — e.g. a Previous Library's account that is also the sign-in loses its Touch ID item exactly as it
+    already lost its silent one. No rule changes; the class the rule always meant is now reached.
+  **THE MAC-SUITE LIST (for the closing stage batch — every suite exercising a file this unit changed):**
+  - NEW: `TouchIDSyncKeysForgottenRoadTests` (harness-green; Mac-hosted run PENDING); the core's `TouchIDSyncKeysForgottenTests`
+    (headless, green — no Mac run needed).
+  - THE REAL KEYCHAIN (throwaway scopes; needs a Touch ID finger enrolled on the stage Mac, else the arm SKIPS — read the
+    `skipped:` lines): `KeychainLeavesTests` (its new arm `aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` — the by-name
+    delete of a Touch ID-only item on the real leaf, never pressed), `ProtectionKeychainFamilyTests` (the leaves' tripwire over
+    `deleteSyncKeys`).
+  - CHANGED test support: `ProtectionAccountSupport` (`PlantedSyncKeysLeaf.listsLikeProduction`, default off — every suite that
+    plants an account).
+  - The core's acts (`AccountActs` — the forgets, set-up's finish; `CommonSteps` — `holdSyncKeys`, `syncMaterial`; `KeyDoors` —
+    the session hold; `PlanRunner` — the rollback) reach every planted-road suite: **the simplest honest batch is the whole
+    `VariorumTests/Protection` folder** (incl. `ProtectionAccountRoadTests`, `ProtectionJoinFollowRoadTests`,
+    `ProtectionCrossingRoadTests`, `RoadKeyDoorRoadTests`, `TouchIDUnlockSyncKeysTests`, `TypedUnlockSyncKeysTests`,
+    `TypedSecretNeverPressesTests`, `RoadRestoreHoldGateTests`, `ProtectionPaneWaveTests`, `FirstRunDrillTests`, the first-round
+    suites, `WordsCardAfterAccountActTests`, `SecretCheck*`, `KeychainLeavesTests`, `ProtectionKeychainFamilyTests`) **+ the
+    top-level `AppBootstrapOffMainTests`, `LibraryHandOffTests`, `LibraryPortabilityDoorTests`, `SettingsLockCloseTests`** (they
+    drive the planted road outside the folder).
+  - `KeychainSyncKeysLeaf` (one doc comment): `KeychainLeavesTests`, `OneSyncKeysLeafTests`, `ProtectionSystemCompositionTests`.
+  - THE PHONE (`VariorumMobileTests` — the core's acts through the shared road): `MobileProtectionRoadTests`,
+    `MobileProtectionTests`, `MobileEmptyStoreTests`, `MobileStructuralTests`, `MobileTutorialWalkTests`, `MobilePerfWalkTests`.
+  **THE WALK (VX-517's live proof — use-shaped; the orchestrator's stage; her Touch ID; one capture per row):** the walk build
+  rebuilt from THIS UNIT'S FINAL COMMIT (unit C's `~/dev/variorum-vx-510-stage` checkout, re-pointed); the prod test road armed;
+  the `castle` test account (left STANDARD by C5, vault revision 4) and its synced library `223c4e7e` in the slot. **What can be
+  seen and what cannot, said first:** no tool reaches the data-protection keychain, and the sync-keys leaf's Touch ID read writes
+  NO log line (only the CUSTODY leaf's press logs `road: a Touch ID press — the system prompt (leaf …)`), so the live evidence for
+  the sync-keys class is THE SYSTEM TOUCH ID SHEET ON SCREEN ("Variorum Dev is trying to Unlock your Variorum library") — present
+  or absent — caught by a window-region capture ~3 s after each press (the sheet waits, so a capture cannot miss it). The item's
+  deletion itself is the real-keychain arm's (stage batch) and the pins'.
+  - **W0 — set up (no press expected):** Settings ▸ Protection ▸ Use Castle… — both secrets by `type-prod-test-secret castle`,
+    gate **Touch ID** → the act lands (log `road: useCastle — library 223c4e7e now castle`; `enter_castle: … done`), the account
+    enters Castle (prod read: `key_vault.mode` castle, its revision up by one). Writing a Touch ID item never prompts; if a sheet DOES show
+    here, she presses (it is a Castle crossing she chose Touch ID for — the recorded castle-way read, Piece 1's reading) and the row
+    notes it.
+  - **W1 — Castle's own reads still work (the guard) — HER PRESSES:** ⌃⌘L → the lobby → **Touch ID (press #1)** → opens; log `road:
+    the Touch ID unlock loaded the account's sync keys for the session (sync key …)`; the row "Synced ‹time›". Then Settings ▸
+    Protection ▸ Change passphrase… (current + new by the helper) → **expect UP TO TWO sheets (presses #2, #3)** — O-B4-1, the
+    Castle key door's pre-existing double read, NOT this unit's — → the receipt, log `road: changePassphrase — the current key
+    re-locked (…), the account's lock with it`.
+  - **W2 — Use Standard leaves the Touch ID class behind — EXPECT NO SHEET:** Settings ▸ Protection ▸ Use Standard… (passphrase +
+    words by the helper) → **FIXED = no system Touch ID sheet at any point** (capture), the act lands (log `road: useStandard —
+    library 223c4e7e now standard under …`), prod `key_vault.mode` standard. A sheet here = RED: she presses CANCEL (never her
+    finger) and the row records it.
+  - **W3 — a key door on the now-Standard library — EXPECT NO SHEET (the live symptom):** Settings ▸ Protection ▸ Change
+    passphrase… (current + new by the helper) → **FIXED = no system Touch ID sheet** (capture), the receipt, the vault revision
+    moves. BEFORE this unit: the Castle-era item stood after W2 and this door read it TWICE — two sheets on a Standard library (and
+    with keys that were not the account's current ones, the door refused as "the account moved"). Reset forgotten passphrase…
+    (Standard's plain confirm) the same: no sheet.
+  - **W4 (optional, the leave) — EXPECT NO SHEET:** W0 again (Use Castle, Touch ID) → Settings ▸ Protection ▸ Stop syncing here →
+    the receipt (log `road: stopSyncingHere — library … now names no account`) → Use Standard (local; both secrets) → Sync this
+    library… (the join, the account's passphrase) → "Synced. …" → Change passphrase… → **no sheet at any step**. (The leave's
+    forget itself is invisible here — the pins and the real-keychain arm prove it; this row proves the class never reaches her
+    on the road after.)
+  - After the walk: the `castle` account stays the standing release-drill account per unit C's proposal; its posture at the end
+    (Standard after W2/W4) is recorded in unit C's record.
+
+**THE ARCHITECT ON B4 (2026-10-23, verified):** commits `5416bcaca`…`fe42afe4f`; no `Sources/VariorumCore/Sync/` line; the
+orchestrator re-ran B4's core protection set through its own runner (`scratchpad/b4/core-test.sh orch-verify PROT`): **`✔ Test
+run with 546 tests in 103 suites passed`**. Rulings: **(c)'s reading ACCEPTED** — "Castle" means the library is in Castle OR
+the act is taking it into Castle (a mode-only rule strands a crashed join-into-Castle in flight, rule 20; RE-12 pins it);
+**F-B4-1 ACCEPTED as a recorded residue, not a fork to build** — a Touch ID-only item for an account neither bound, signed
+in nor named by an act stays on the Mac (a lost-plan Move; a set-aside library), biometry-gated, never read by a Standard
+library after (c), dropped by name the next time any act files that account; a past-accounts registry would change the
+custody record's shape (a fork) for a residue that can't reach her; **O-B4-1 → VX-530** (a Castle + Touch ID key door asks
+Touch ID twice; Suspected — the walk's W1 guard will show it); **O-B4-2 noted** (a plan-less rollback skips the taken-keys
+sweep — harmless after (c)). **The walk adapted to the state the VX-529 repro left** (the account is CASTLE rev 6 under
+PASSPHRASE; `223c4e7e` Castle Always ask): the pre-fix build (`DerivedData/vx510`, `2e3d335d8`) runs the RED leg — Use
+Standard → Use Castle (Touch ID) → Use Standard → Change passphrase (a sheet = red; she presses Cancel) — then the post-fix
+build (`DerivedData/vx510-b4walk`, `fe42afe4f`) runs B4's W2/W3 (no sheet on the Standard side, even with the red leg's
+stale item present) and the W1 guard (Castle + Touch ID reads still work).
+
+## D-B9 — VX-527 (the rider; the SUCCESSOR architect's design, 2026-10-24)
+
+Her hand on the Pro's own trackpad (W-13 → VX-527, Confirmed): the lobby's "Use your twelve words instead" opens only
+from the little chevron — "the click affordance is very small". THE MECHANISM (read at this kickoff): the Mac's
+`StoreLockView` disclosure arm renders the door as a bare `DisclosureGroup` label (`Text(ProtectionWords.wordsDoor)`,
+StoreLockView.swift:259) — a macOS DisclosureGroup's label is not a control, so only the chevron presses (exactly
+W-13's shape: AXPress opened it at once, three synthetic clicks across the label's own geometry did not). The PHONE
+already wraps the same label in a whole-label `.plain` Button (MobileRoadFaces.swift:133–141) and has no bug.
+
+- **The fix (Mac only):** the whole door — chevron and label together — is ONE press target toggling the words road:
+  the phone's Button idiom with the Mac's look kept byte-faithful (the small/muted one-line label, maxWidth 340, the
+  words field unfolding beneath as today), a leading chevron that turns with the state, and a `.contentShape` covering
+  the row so the gap between glyph and words presses too. Whether that is a Button replacing the `DisclosureGroup` or
+  a Button AS its label is the implementer's pick — the pin binds the MECHANISM (the label inside a press target),
+  never the idiom.
+- **Pins (red on old):** a SOURCE pin in the `RoadLockViewNamesPinTests` idiom, SELF-CONTAINED (file reads only, no
+  app import, so it runs in a minimal scratch package): the disclosure arm's `ProtectionWords.wordsDoor` label sits
+  inside a press target that toggles the words road — red while the label is a bare `DisclosureGroup` label — plus the
+  GUARD that the phone's arm keeps its whole-label Button. Red shown on the pre-fix tree; a behavioral revert (the
+  label back to the bare DisclosureGroup label) re-reds it after the fix.
+- **Evidence:** the pin headless in the scratch package; Mac + iOS build-for-testing; the Mac-target run rides the
+  closing stage batch; the live press — a real click on the label's own text on the final build — is the successor's
+  re-walk's.
+
+## UNIT B5 — THE BRIEF (a fresh `opus-implementer`, one SMALL session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/SurfaceContracts.md`'s protection bullet;
+`notes/SessionResiliencyProtocol.md`; this file's D-B9 (your charter), UNIT C's W-13 row and the VX-527 hand check,
+and ENVIRONMENT TRAPS; the code: `App/Variorum/Variorum/StoreLockView.swift` WHOLE,
+`App/Variorum/VariorumMobile/Features/Protection/MobileRoadFaces.swift` (the disclosure arm — READ ONLY, the guard's
+subject), `App/Variorum/Shared/Protection/ProtectionWords.swift` (the constants — read only), and
+`App/Variorum/VariorumTests/Protection/RoadLockViewNamesPinTests.swift` (the source-pin idiom your pin follows).
+
+**Your scope — exactly D-B9:** the Mac fix and the pins, nothing else. **Not yours:** the phone's code (guard-pinned
+only, never changed), `ProtectionWords` (the label's words are ruled and stand), any other file, canon, Linear,
+`notes/QUESTIONS.md`. A look that cannot stay byte-faithful (the chevron, the spacing) is a FORK: stop and propose.
+
+**The discipline (binding, UNIT A's):** the pin committed RED on the pre-fix tree first (run it in a minimal scratch
+SPM package in your scratchpad — Testing + the one symlinked pin file; the pin reads the repo's sources through
+`#filePath` with symlinks resolved, B3's idiom); then the fix; then the pin green; then ONE behavioral revert (the
+disclosure arm back to the bare-label shape, one file) shown red and restored `git diff --exit-code` clean, "no revert
+is in flight" written. Commit per piece, push each, your LIVE STATUS flipped in the same commit, PENDING on every
+unverified claim. Foreground waits only; no subagents. Headless only, plus at the end ONE
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b5
+build-for-testing` and ONE `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+-derivedDataPath App/Variorum/DerivedData/vx510-b5-ios build-for-testing`, zero errors, no warning in a touched file
+(grep the logs). NO `xcodebuild test`, NO stage, NO app launch, NO dev/real-store touch, NO server or production
+contact. Commits say `Part of VX-527`; **NO trailers of any kind.** The orchestrator may commit record sections to
+this branch while you run: stage explicit paths only, re-read the record before each edit, never touch sections you
+do not own.
+
+**Evidence at your close (in your LIVE STATUS):** the pin's red line on the pre-fix tree; the green line on the fix;
+the revert's red line and clean restore; both build-for-testing lines; THE MAC-SUITE LIST — your new pin suite plus
+every suite reading a file you changed (the StoreLockView readers: `CopyRegisterPinTests`,
+`TravellingDotsIndicatorTests`, `EmptySlotDoorsSurfaceTests`, `WordsFieldsConcealTests`, `ProtectionWordsVX307Tests`,
+`RoadLockViewNamesPinTests`, `ProtectionRoadRouteTests`, `RoadCreationFaceTests` — confirm by grep).
+
+### UNIT B5 — LIVE STATUS (the implementer owns this section)
+
+**NOT DONE by this session (by the brief):** the Mac-target run of the suites (the closing stage batch's), the live press
+on the label's own text on the final build (the successor's re-walk's). No `xcodebuild test`, no stage, no app launch, no
+store, server or production contact; no subagents.
+
+- **Piece 0** — the harness: DONE (not durable — this session's scratchpad `vx510b5-pin`: a minimal SwiftPM package,
+  `swift-tools-version: 6.2`, macOS 26, ONE test target `PinTests` holding only the symlinked pin file; no app import, no
+  dependency; `swift test` from the package folder).
+- **Piece 1** — the pin, committed RED on the pre-fix tree: DONE (this commit). NEW
+  `App/Variorum/VariorumTests/Protection/LobbyWordsDoorPressTargetTests.swift` (suite "VX-510 D-B9 — the lobby's words door
+  is one press target (source)"; CODE lines, `#filePath`'s symlinks resolved, Foundation + Testing only):
+  `theMacsWordsDoorLabelSitsInsideAPressTargetTogglingTheWordsRoad` (in `roads`'s `case .disclosure:` arm, the nearest
+  `Button {` before `Text(ProtectionWords.wordsDoor)` must toggle `showsWords` in its action and hold the label inside its
+  `} label: {` closure by brace depth — the MECHANISM, either idiom passes; plus the look kept: small/muted/one line, the
+  340 width, the field unfolding beneath on the same state) and the GUARD `thePhonesWordsDoorKeepsItsWholeLabelButton`
+  (the same check over the phone's arm, `.buttonStyle(.plain)`, `if showsWords { wordsField }`). **RED on the pre-fix tree
+  (`swift test` in the scratch package): `✘ Test run with 2 tests in 1 suite failed after 0.002 seconds with 1 issue`** —
+  the one ✘ `the Mac's words door: the label sits in no Button — a bare label (the chevron alone presses)`; the guard ✔.
+- **Piece 2** — the fix: DONE (this commit). `App/Variorum/Variorum/StoreLockView.swift`'s `case .disclosure:` arm keeps
+  the `DisclosureGroup` (its chevron, spacing and unfolding untouched) and makes its LABEL a `.plain` Button whose action
+  is `withAnimation { showsWords.toggle() }` (the chevron's own press animates the same binding); the label `Text` keeps
+  its look byte for byte and fills the row (`.frame(maxWidth: .infinity, alignment: .leading)`), and its hit shape reaches
+  `wordsDoorRowSpacing` (4 pt, a named static) past it on every side and is taken back (`.padding(4)
+  .contentShape(Rectangle()) .padding(-4)` — layout-neutral), so the 4 pt gap after the chevron and the row's 4 pt top and
+  bottom bands press too. **THE IDIOM PICK, by a geometry oracle** (offscreen, scratchpad `vx510b5-probe`: a scratch
+  `swiftc` binary hosting each variant in an `NSHostingView` inside a borderless window NEVER ordered in, positioned
+  off-display, activation `.prohibited`, `cacheDisplay` → PNG, per-pixel compare; the lobby's real values — the
+  terminal voice's `small` = system 11.5 monospaced, `muted` #8B9088, the arm's 340 width, the field's 6 pt top; no app,
+  no store, nothing on screen):
+  - the system chevron is NOT an SF Symbol: a scan over `chevron.right` at 8–14 pt × nine weights × four grey styles ×
+    two image scales never matched it (best ≈ 77 differing pixels at @2x in the chevron alone; its stroke is ≈ 1.5 pt at a
+    flat ≈ 0.21 alpha, 5 × 8 pt) — **a Button REPLACING the DisclosureGroup cannot stay byte-faithful** (the brief's
+    fork), so the Button is the label;
+  - the system row, measured: the chevron's control (its `_FocusRingView`) 40…47.5 × 70.5…79.5 pt, the label's frame
+    51.5…376 × 68…82 pt, the row 40…380 × 64…86 (22 pt) — the dead zones a bare Button label would leave are the 4 pt gap
+    and the row's 4 pt bands, hence the 4 pt reach;
+  - **today vs the fix, exactly as written: `0 differing pixels of 191520 (840x228)` closed and `0 differing pixels of
+    288960 (840x344)` open, in LIGHT and in DARK** (the plain label, the row-filling label and the reaching label each 0).
+  - **A PRESS ORACLE WAS TRIED AND IS INCONCLUSIVE:** clicks delivered by `NSWindow.sendEvent` to the unordered window
+    (also with a window subclass reporting itself key) toggled nothing in ANY variant — today's chevron included, the
+    control case — so offscreen delivery never reached SwiftUI; no press claim rests on it. **PENDING the live press**
+    (the successor's re-walk): a real click on the words' own text opens the field; a click in the gap after the chevron
+    and in the row's top band opens it too (the reach — SwiftUI honouring a hit shape beyond the label's reported frame is
+    the one unverified assumption; if it is not honoured the door degrades to the chevron + the row-wide words, still the
+    fix); the chevron still opens it; the label's press animates as the chevron's does.
+- **Piece 3** — green + the behavioural revert: DONE (this commit). **GREEN on the fix** (`swift test` in the scratch
+  package): **`✔ Test run with 2 tests in 1 suite passed after 0.001 seconds`**. **REVERT R-1** (announced in
+  `ee11210db` before it ran; the pre-revert state `01c5f0f33`): the disclosure arm's label back to the bare `Text`
+  DisclosureGroup label (`StoreLockView.swift` alone, 4+/13−) → **`✘ Test run with 2 tests in 1 suite failed after 0.001
+  seconds with 1 issue`** — the one ✘ `the Mac's words door: the label sits in no Button — a bare label (the chevron alone
+  presses)`, the phone's guard ✔; restored by `git checkout -- App/Variorum/Variorum/StoreLockView.swift` →
+  **`git diff --exit-code` = 0**, the pin green again (2/2). **No revert is in flight.**
+- **Piece 4** — Mac + iOS build-for-testing; THE MAC-SUITE LIST: DONE (this commit), on the final tree `e0b047f77`:
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx510-b5
+    build-for-testing` → **`** TEST BUILD SUCCEEDED **`**, 0 `error:` lines, 0 warnings in a touched file
+    (`StoreLockView`, the new pin); the pin compiled into the bundle (`VariorumTests.build/…/LobbyWordsDoorPressTargetTests.o`).
+  - `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+    App/Variorum/DerivedData/vx510-b5-ios build-for-testing` → **`** TEST BUILD SUCCEEDED **`**, 0 `error:` lines, 0
+    warnings in a touched file (nor in `MobileRoadFaces`, untouched).
+  - Machinery: the first Mac run was launched from `App/Variorum` with the relative path, so its derived data landed in a
+    stray `App/Variorum/App/Variorum/DerivedData/vx510-b5` (gitignored, created by that run alone); removed, and both
+    runs above used the absolute path.
+  - **THE MAC-SUITE LIST** (the closing stage batch's `-only-testing:VariorumTests/<type>`; confirmed by grep): the new
+    pin **`LobbyWordsDoorPressTargetTests`**; the suites reading `StoreLockView.swift`: **`CopyRegisterPinTests`**,
+    **`TravellingDotsIndicatorTests`**, **`EmptySlotDoorsSurfaceTests`**, **`WordsFieldsConcealTests`**,
+    **`ProtectionWordsVX307Tests`**, **`RoadLockViewNamesPinTests`**, and **`PreDesignFaceTests`** (it reads `RoadLockView`
+    through `RoadLockViewNamesPinTests.roadLockViewCode()` — not on the brief's list, found by the grep); plus the brief's
+    **`ProtectionRoadRouteTests`** and **`RoadCreationFaceTests`** (they do not read the file — they drive the lobby's
+    model, `face.wordsRoad`, which this unit did not touch). `MobileTravellingDotsTests` names `StoreLockView` only in a
+    comment (not a reader); no phone file changed, so no phone suite is owed beyond the iOS build above.
+- **UNIT B5 CLOSED (2026-10-24).** Commits: `d122f9bbc` (pin RED) · `01c5f0f33` (the fix) · `ee11210db` (revert
+  announced) · `e0b047f77` (revert red, restored clean) · this record commit. PENDING beyond this session: the Mac-target
+  run of THE MAC-SUITE LIST (the closing stage batch) and the live press on the final build (the re-walk: the words' text,
+  the gap after the chevron, the row's top band, the chevron — each opens the field; the label's press animates as the
+  chevron's).
+
+## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
+
+**Machinery:** a held `Tools/stage` claim (renewed per leg); the walk Debug build of the FINAL tree into
+`App/Variorum/DerivedData/vx510` (never the standard path); the dev slot's top-level files aside by `mv` (all of
+them; same inodes) BEFORE the first launch; every launch with `VARIORUM_PROD_TEST_ROAD=1` and NO walk project,
+`ps eww <pid>`-verified before any credential; every secret typed by `type-prod-test-secret`, every words look
+stashed by `stash-prod-test-words` (never read, never echoed); every server check by `Tools/prod-read.sh` (by the
+account's uid, read once from `auth.users` by email); every step captured (window-region screenshots in a
+gitignored folder, deleted at the merge). A step that fails STOPS the leg: the failure is recorded here with its
+evidence before anything else happens. Her finger is needed only if a Touch ID leg is chosen (Always ask is the
+default posture for the Castle account, so the drill needs no finger).
+
+**LEG S — the Standard account (`std`):**
+S1 a fresh library L1 on the empty slot (Standard) · S2 the Account sheet's sign-up (email + password) → the
+confirmation notice · S3 `Tools/prod-confirm-test-user.sh` → confirmed · S4 sign in → the row reads VX-506's
+not-yet face (capture) · S5 the band card's words look → Copy → stash · S6 Settings ▸ Protection ▸ Turn on sync (the
+set-up arm: a new passphrase twice, the words) → **the sheet confirms its first round and the row reads "Synced
+‹time›" with NO relaunch** (VX-498 + VX-507) · S7 prod reads: the vault row (mode standard), the `kp:` secret, one
+device cursor, the seeded rows · S8 write a note "VX-510 S8" → its row on the server · S9 Back up now → pair B1 ·
+S10 Change passphrase (the key door; synced re-wrap) → the vault's `updated_at` moves · S11 Back up now → B2 ·
+S12 Look inside B1 with the OLD passphrase, then with the CURRENT one (rules 4/5 — both open) · S13 New words (the
+key door) → Look inside B1 with the NEW words (rule 4) · S14 Restore from Backup B1 (Make this my library) → held →
+Resume Sync → it enrolls as a Mac new to the library → rows merge, "VX-510 S8" present · S15 a second library L2
+(the slot's library steps aside) → JOIN the account by the typed passphrase → the first round downloads → "VX-510
+S8" arrives with NO relaunch; a second device cursor on the server.
+
+**LEG C — the Castle account (`castle`):**
+C1 a fresh library L3 → sign-up / confirm / sign in → stash the words → Use Castle on the library (both secrets,
+Always ask) → Turn on sync → the set-up arm in Castle → first round confirmed in the sheet, no relaunch; prod read:
+vault mode castle · C2 Lock (⌃⌘L) → the lobby → a TYPED unlock → **the row reaches "Synced" with no key act**
+(VX-501) · C3 Back up → Change passphrase → Back up → Look inside the older backup with old and current secrets →
+New words → the older backup opens with the new words · C4 a second library (Standard) JOINS the Castle account
+(the re-keying join — the reopen) → rows arrive, the follow's posture Castle · C5 Use Standard (leave Castle, both
+secrets) → prod read: mode standard; the second library follows out (rule 12's quiet follow + notice).
+
+**LEG D — deletion (`del`):** D1 sign-up / confirm / sign in → set-up → Synced → prod reads show rows · D2 the
+Account sheet's Delete Account (the password) → prod reads: the auth user, the vault, every data row and cursor GONE;
+the library stops naming the account (rule 16's local leave).
+
+**The close:** sign every walk session OUT (no test token left in the dev scope — the account fence's posture); quit
+at zero instances; remove the walk libraries' slot files and their `Backups/<id>` folders (listed first, each this
+drill's); `mv` the dev files back (same inodes); one plain relaunch (no env; `ps eww` = 0) → rule 21's notice once →
+the dev library quiet, "Sync off (dev store)" → quit; release the stage. **The standing accounts:** `std` and
+`castle` are PROPOSED to stay as the standing release-drill accounts (her R-510-2: "maybe we need two dev
+accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
+
+## UNIT C — THE RECORD (the orchestrator, live; stage claim `vx-510`; every step logged as it happens)
+
+- **Setup (2026-10-23 ~20:30–20:36 MDT):** the walk's Debug build at B2's F-B1-1 commit `4a5ef39e3`, built from the
+  DETACHED clean checkout `~/dev/variorum-vx-510-stage` into its `App/Variorum/DerivedData/vx510` (`** BUILD SUCCEEDED
+  **`) — never the shared worktree, where B2 is editing. Grants: Accessibility ✔ and Screen Recording ✔ for this
+  terminal. Zero Variorum instances. **The dev slot's 9 top-level files aside by `mv`** into the sibling
+  `…/Application Support/Variorum-dev-aside-vx510/` — inodes 191598614–191598620, 193537660/193537661, identical
+  after the move; `Backups/` and `Previous Libraries/` stay in the slot.
+- **S1 (20:37)** — launched `open -n --env VARIORUM_PROD_TEST_ROAD=1 --env VARIORUM_PRODTEST_EMAILS=<the file's list>`
+  (pid 57831); `ps eww`: both keys present, NO walk project. **The app's own line: "PROD TEST ROAD (VX-510): ARMED for
+  this launch — the dev store may sync with PRODUCTION while one of the 3 listed test account(s) is signed in"** — F-B1-1
+  (B) live. A fresh library `6fa0c827` (key `1aad910b`, device `737b3ed0`), Standard, signed out; the band card offers the
+  words and the passphrase. OBSERVATION W-1: the fresh store got NO seeded content ("sample library … alreadySeeded" — the
+  seeders' marks are this Mac's defaults, not the library's), so the drill's library holds only settings; on a stranger's
+  first Mac it seeds as designed.
+- **S2 (20:40)** — the Account sheet's Create an account…: the email and the password twice typed by
+  `type-prod-test-secret std` (the form's own "At least 12 characters"); Create Account → **"Check your email for a
+  confirmation link, then sign in here…"** (the confirmation road, as designed).
+*[removed for publication]*
+  unconfirmed; `Tools/prod-confirm-test-user.sh` (run from the branch worktree, the gitignored `.env.supabase.local`
+  linked from main) → `email_confirmed_at` 02:41:54Z.
+- **S4 (20:42)** — Back to sign in → email + password by the helper → **signed in**; the Account sheet: "Hosted sync is
+  active on this account."; **the main window's row: "Sync isn't on for this library yet" with Protection… (VX-506's
+  not-yet face, LIVE on a real account).**
+- **S5 (20:43)** — the band card's look → Copy → `stash-prod-test-words std` ("stashed std's twelve words (12) … clipboard
+  cleared") → "I've written them down" → "These words won't be shown again." → Close. **Machinery honesty:** the
+  orchestrator looked at a downscaled layout capture to find the Copy button, and the words were still legible in it — so
+  this disposable test library's words were seen once by the session; never written anywhere, never typed by hand (the
+  helper types them from the stash), the capture deleted at once; LEG S's S13 replaces them anyway.
+- **S6 (20:46:18)** — the row's **Protection… opened Settings AT the Protection pane** (VX-486 live); Sync: "This library
+  doesn't sync." · Turn on sync… → the SET-UP arm ("Your library's passphrase and twelve words become the account's. Nothing
+  is replaced. … Your account starts in Standard, like this library. This library has no passphrase yet. Choose one…") → a
+  new passphrase twice + the words, all three by the helper (concealed — VX-463's eye) → Turn on sync → log
+  *[removed for publication]*
+  RELAUNCH, THE SHEET: "Synced. Your library is on your account now." with Done** (VX-498 + VX-507 LIVE ON PRODUCTION).
+- **S7 (20:47)** — **prod reads by the uid:** `key_vault` mode **standard**, created 02:46:19Z (the press), proof hash set;
+  *[removed for publication]*
+  1** (last_seq 0 — the round's start, the 13j rule); **rows pushed 3** (the three `setting` rows; `sync_write_budget`
+  lifetime 3); containers 0 (W-1). Done → **the main window's row: "Synced 8:46 PM"** — no relaunch. OBSERVATION W-2 (chrome,
+  cosmetic): at the dev window's sidebar width the row's two buttons truncate to "Sync…" and "Accou…".
+- **S8 (20:48:09)** — a note filed through the quick entry ("VX-510 S8 written on the std test account", ⏎) → 12 s later
+  **prod: 1 container · 1 block · lifetime 7 rows** — the settle-triggered round pushed it; the row "Synced 8:48 PM".
+- **S9 (20:48:53)** — Settings ▸ Data Safety (already "2 copies", the newest 8:46 PM — the set-up act's own backup) ▸ Back
+  Up Now… → `backup pair: written under 1aad910b` — **B1** (holds the S8 note).
+- **S10 (20:49:49)** — Protection ▸ Change passphrase… (its sheet: "This library syncs with your account, so your
+  account's passphrase changes with it, on every device.") → current + new twice by the helper → log `road:
+  changePassphrase — the current key re-locked (1aad910b), the account's lock with it` → **prod: the vault revision 1 → 2,
+  updated 02:49:51Z.**
+- **S11 (20:50:12)** — Back Up Now… → **B2**. The Restore list leads with this library's three rows (8:50 · 8:48 · 8:46 PM)
+  carrying Look inside + Make this my library and NO Delete (rule 19 — never the open library's), then the older libraries'.
+- **S12 (20:51) — HONEST LIMIT, by design:** Look inside on B1 opened WITHOUT asking any secret — the quiet road (rule 5:
+  "or — on this Mac — by its quiet road while it still holds that backup's key"; Standard keeps the silent custody, and
+  rule 6's passphrase change never changed the key `1aad910b`). So a TYPED secret against an older backup cannot be
+  exercised on a Standard library on its own Mac: that leg moves to LEG C (Castle + Always ask — no quiet road). The facts
+  sheet: "This is a copy from October 23…", 0 books, 1 note. **OBSERVATION W-3 (a small bug, ticketed at the close):** Look
+  inside dates that note **2026-10-24** — the UTC day — while the app itself titles the same note **2026-10-23** (written
+  20:48 MDT).
+- **S13 (20:52:55)** — Protection ▸ Record your twelve words… on the SYNCED library: the look says "This library syncs with
+  your account, so new words also replace your account's twelve words, on every device. Enter your passphrase to see your
+  twelve words." → the current passphrase by the helper → Show my twelve words → (the words located and copied WITHOUT the
+  session viewing them: the new buttons found by the accessibility tree's positions after a small scroll) → Copy →
+  `stash-prod-test-words std` (the NEW words replace the stash) → I've written them down → "These words won't be shown
+  again." → Close. **prod: the vault revision 2 → 3, updated 02:52:56Z — the moment SHOW was pressed.** OBSERVATION W-4
+  (feeds VX-511): the look's mint re-wraps the ACCOUNT's words lock when the words are SHOWN, before "I've written them
+  down" — so on a joined library the band card's look replaces the account's words even if she closes it unrecorded.
+- **S14 (20:56:21) — RESTORE:** Data Safety ▸ B1 (8:48 PM) ▸ Make this my library… — the confirm: "This copy becomes a new
+  library — in Standard, under your current twelve words and passphrase — with a fresh key of its own. Your current
+  library steps aside whole into Previous Libraries… The new library doesn't sync with your account until you turn on sync
+  for it in Settings ▸ Protection." → the current words + passphrase by the helper → log `road: made a copy this Mac's
+  library — library dfe2ad68 key 2e677513; the previous one in Previous Libraries; held` → opened, device `ae835950`. The
+  words card did NOT return (VX-444's ledger carry, live). The hold banner: "This is your library as of October 23, 2026.
+  Sync is waiting until you press Resume. To keep something from this backup, duplicate it first — duplicates stay." →
+  Resume Sync → the banner goes and the row reads **"Sync isn't on for this library yet"** (honest: the copy names no
+  account). **OBSERVATION W-5 (wording, ticketed at the close):** on a restored library that names NO account the hold
+  banner still promises "Sync is waiting until you press Resume … duplicates stay" — no sync follows the press; the
+  confirm's own sentence ("doesn't sync … until you turn on sync") is the true one.
+- **S15 (20:58:14) — A JOIN from the restored library:** Protection ▸ Sync: "This library doesn't sync." · **"Sync this
+  library…"** (VX-506's join-arm door, LIVE) → the join sheet (its title still "Turn on sync" — P-VX510-A4): "Your account
+  already syncs. Type its passphrase or its twelve words once…" → the account's passphrase by the helper → `enroll: begun #6
+  *[removed for publication]*
+  system Touch ID prompt** (VX-503 did not reproduce on this Mac's Standard join) → the words notice (passphrase typed):
+  *[removed for publication]*
+  made before today…" → OK → **the sheet: "Synced. Your account's writing is in this library now."** — no relaunch.
+  **prod: device cursors 2 · live containers 1 (no duplicate — the copy's rows merged by id) · live blocks 1 · rows 8 ·
+  vault revision 3 (a same-posture join changes no account lock).** OBSERVATION W-6 (ticketed at the close): the words
+  notice SPOKE although the restored library's words already were the account's (the copy was made under the current pair
+  — VX-456/VX-462's quiet arm missed for a restored copy, probably because the fresh key's lock is compared rather than
+  the words), so "your previous twelve words" is untrue here.
+*[removed for publication]*
+  passphrase). The walk instance quit (its round sheet's Done first — a sheet up held ⌘Q); the walk library `dfe2ad68`'s 5
+  slot files aside into `Variorum-dev-aside-vx510-walkL1/`; relaunched on the road (pid 65130, the road ARMED) → a fresh
+  library **`413fb3bd`** (key `725fafc4`, device `7d96b569`), still signed in as std (the dev scope's session) → **the row:
+  "Sync isn't on for this library yet" with Protection…** — the exact moment both testers met "Sync locked" on 0.10 →
+  Protection ▸ "Sync this library…" → the account's passphrase by the helper → `enroll: done #1 under 725fafc4 · road:
+  *[removed for publication]*
+  the fresh library's words were replaced) → OK → **"Synced. Your account's writing is in this library now."** — NO
+  relaunch → Done → **the Library shows "VX-510 S8 written on the std test account · edited today 8:48 PM" — the first
+  library's note, downloaded into the fresh one**; the row "Synced 9:01 PM". **prod: device cursors 3 · live containers
+  1.** **VX-511 LIVE RED on this pre-fix build (B2 builds the fix):** after the join the Bookcase's band card still reads
+  "Your library is encrypted — click here to record the twelve words that are its key." — her Air report, exactly (its
+  passphrase half retired, the library now holding the account's passphrase). The re-walk on B2's build owes its green.
+- **LEG S: PASS** — every first-run leg live on production with no relaunch: sign-up, set-up, the first round, a note's
+  push, a restore, a join from a restored copy, a join from a fresh library (the testers' road); the key doors (Change
+  passphrase, New words) re-lock the account (vault revisions 1→2→3); three device cursors; zero duplicates. Deferred to LEG
+  C by design: a typed secret against an older backup (Standard's quiet road answers first on its own Mac).
+- **LEG D (21:03–21:10) — ACCOUNT DELETION:** quit; the joined library `413fb3bd`'s files aside (`…-aside-vx510-walkL2/`);
+  relaunched (pid 66160, the road ARMED) → a fresh library **`2aa0214f`** (key `895bf4eb`, device `dd81f8f0`); Settings ▸
+  Protection ▸ Sign out… ("Sign out of this Mac? This Mac stays signed out of sync until you sign in again…") → Sign Out →
+  "Sign in to turn on sync." · Sign in… → the Account sheet over Settings → Create an account… → `del`'s email + password
+  *[removed for publication]*
+  (03:06:42Z) → signed in as del → the words look blind (Copy + stash, the helper's twelve-word check) → I've written them
+  down → Close → Protection ▸ **"Turn on sync…"** (the SET-UP arm — distinct from the join's "Sync this library…", correct
+  for an account with no vault) → del's passphrase twice + words → `road: turnOnSync — library 2aa0214f now names account
+  *[removed for publication]*
+  before: vault 1 · `kp:` 1 · cursor 1 · settings 3 · budget 1 · auth user 1. → the main window's Account… → Delete
+  Account… — the form: "Your account, its sync copy on our server, and its keys are deleted. Nothing on this Mac or your
+  other devices is touched…", the password + "DELETE MY ACCOUNT" → Delete Account (21:10:00) → log `road: deleteAccountHere
+  — library 2aa0214f now names no account … the account was deleted — this library no longer names it (rule 16's local
+  leave)` → signed out, the Account sheet back at sign-in. **prod after: auth user 0 · vault 0 · `kp:` 0 · cursors 0 ·
+  settings 0 · budget 0 · entitlement 0 — the account and every row of it GONE.** **LEG D: PASS.** OBSERVATION W-7 (wording/
+  logic, ticketed at the close): the deletion form tells this FREE test account "This account has an active hosted-sync plan
+  — cancel it first." (the entitlement read answers "active" for an open-sync account with no purchase), so every free
+  user is told to cancel a plan they never bought.
+- **LEG C setup (21:11–21:12):** the walk build REBUILT at B2's tip **`e829e8d08`** (VX-501 + VX-511 + VX-503 in; from the
+  detached checkout; `** BUILD SUCCEEDED **`); the stage renewed (240 min); the deleted account's library `2aa0214f` aside
+  (`…-aside-vx510-walkL3/`); relaunched (pid 71389, the road ARMED) → a fresh library **`159caa3f`** (key `a2c73b2c`,
+  device `3a62193d`), signed out.
+*[removed for publication]*
+  → the PAT script confirms (03:13:06Z) → signed in → the words look blind (Copy + stash, twelve-word check) → Protection ▸
+  **Use Castle…** — its sheet ("Castle is one promise: no quiet road through Apple, ever, on any device of the account… The
+  libraries in Previous Libraries keep their own quiet roads on this Mac — Castle protects the library you have open…") on
+  a library with NO passphrase asks one ("This library has no passphrase yet. Choose one — Castle needs it.") + the words;
+  **Always ask** chosen ("No copy of the key stays on this Mac; you type every time.") → `enter_castle: swapped … retired 1
+  own Apple key(s) … done #2 under 5638db0a · road: useCastle — library 159caa3f now castle` (21:15:20) → Turn on sync… →
+  the set-up arm IN CASTLE ("Your account starts in Castle, like this library.") → passphrase + words → `road: turnOnSync —
+  *[removed for publication]*
+  account now."** — the THIRD fresh account, the Castle posture, no relaunch. **prod: vault mode castle, revision 1 · `kp:`
+  1 · cursor 1 · rows 3.** The row "Synced 9:16 PM".
+- **C2 (21:17–21:18) — VX-501 LIVE: a TYPED Castle unlock keeps syncing.** A note filed ("VX-510 C2 castle note before the
+  lock") → prod 1 container. **⌃⌘L** → `road: locked — the library closed behind the lobby (VX-445)` → the lobby: "Open
+  your library — Enter your passphrase or your twelve words to open your library. Touch ID isn't set up for this library."
+  → the passphrase TYPED (the helper) → Open → `road: opened — library 159caa3f …` (21:17:49) → **`road: the typed unlock
+  loaded the account's sync keys for the session (sync key e1deb44d)`** → a second note filed ("…after the typed unlock") →
+  **prod: 2 containers · rows 12** — a round with the account's keys ran after a typed unlock, with NO key act — and the row
+  **"Synced 9:18 PM"**. Before VX-501 this posture stayed "Sync locked" until a key door (her M1 (c) report).
+- **C3 (21:19–21:28) — the key changes and the backup floor IN CASTLE (no quiet road; every look typed).** Back Up Now →
+  B1c `backup pair: written under 5638db0a` (21:19:15). **Change passphrase** (the sheet: "This library syncs with your
+  account, so your account's passphrase changes with it, on every device.") → `road: changePassphrase — the current key
+  re-locked (5638db0a), the account's lock with it` → prod vault **rev 2**. Back Up Now → B2c (21:20:13). **Record your
+  twelve words** in Castle asks the passphrase INLINE ("This library syncs with your account, so new words also replace your
+  account's twelve words, on every device. Enter your passphrase to see your twelve words.") → the changed passphrase typed →
+  `regenerate_words: done #5 … rule 2's look — fresh words lock the key file; the key unchanged` → prod vault **rev 3**, mode
+  castle. The words copied + stashed BLIND — the button row found by AX positions and a 36-pt strip capture, the words
+  never captured ("Copy · I've written them down", then "Copied… · These words won't be shown again. · Go back · Close").
+  Data Safety lists SIX rows (9:12 ×2 pre-Castle under `a2c73b2c`, 9:15, 9:16, 9:19, 9:20 — the folder holds 5 pairs:
+  `031225-a2c73b2c`, `031519`, `031625`, `031915`, `032013`) while its header says "5 copies" → **W-8**. The looks:
+  - the 9:19 copy (B1c, before BOTH key changes) → "This copy doesn't open by itself on this Mac. Enter its passphrase or
+    twelve words." → **a wrong secret (std's passphrase) refuses**: "That doesn't open this copy. Enter the copy's own
+    passphrase or twelve words." → **its own (original) passphrase opens it**: `road itsOwnSecrets — read-only, nothing
+    written` (both notes listed) → **the CURRENT passphrase opens it**: `road currentSecretsThroughTheHistory` → **the
+    CURRENT words open it**: same road.
+  - a 9:12 copy — made BEFORE the library had a passphrase and BEFORE Castle, under the old key `a2c73b2c` whose Apple item
+    the crossing retired → doesn't open by itself either (rule: the crossing Castle-protects the backups) → **the CURRENT
+    passphrase opens it** through the history (empty, as it was at 9:12).
+  The S12 gap (Standard's looks went the quiet road) is CLOSED here: every typed-secret arm met live.
+  Observations: **W-3 again** (the look lists notes dated 2026-10-24 — UTC — where the app says 2026-10-23); **W-9** the look
+  names the notes "Untitled" where the app titles them "2026-10-23"; **W-10** the error line from a failed try stays on
+  screen after the field is retyped (the sheet grows and its Open button moves under the pointer).
+- **B2's T-B5-2 → VX-517 (filed 2026-10-23, Needs Lillian):** the sync-keys leaf's Touch ID candidates are unwired
+  (`AppBootstrap.swift:183`, the default `{ [] }`; the custody leaf's are wired at `ProtectionSystem.swift:60` — verified by
+  the orchestrator), so the Touch ID class is never forgotten (rule 16). Join-or-separate is hers.
+- **C4 (21:30–21:36) — a SECOND library joins the Castle account (the re-keying join, F-6) + VX-511 LIVE.** Quit (zero
+  instances); `159caa3f` aside (`…-aside-vx510-walkL4/`); relaunch (pid 78401) → a fresh Standard library **`223c4e7e`**
+  (key `7cde213b`), still signed in as `castle` (the dev-scoped session), the words card AND the passphrase card showing.
+  Protection ▸ **"Sync this library…"** (VX-506's door — the account has a vault) → the sheet ("Your account already syncs.
+  Type its passphrase or its twelve words once — your library's own passphrase and twelve words are replaced by your
+  account's. … Your account is in Castle, so this library goes into Castle too." + the Castle promise text + On this Mac)
+  → **Always ask** + the account's CURRENT passphrase → `enroll: done #1 under 508a5859 · road: turnOnSync — library
+  *[removed for publication]*
+  *[removed for publication]*
+  twelve words. Your previous twelve words still open backups you made before today. …") → OK → **`road: an account act
+  landed — the library holds the account's words; the words card's offer retires (VX-511)`** → the F-6 sheet waited for the
+  reopened services and said **"Synced. Your account's writing is in this library now."** → prod **2 cursors**; the Library
+  shows both Castle notes; the row "Synced 9:32 PM"; **the Bookcase's cards band EMPTY** (the words card and the passphrase
+  card both retired — VX-511 GREEN live; red live on the pre-fix build at S-leg). **Relaunch** (pid 78965) → the Castle
+  lobby → the TWELVE WORDS typed → `road: the typed unlock loaded the account's sync keys for the session (sync key
+  e1deb44d)` (VX-501's words arm) → the band STILL EMPTY (the mark persisted) → a note from this second library → **prod 3
+  containers, rows 16**, the row "Synced 9:35 PM".
+- **C5 (21:37–21:38) — Use Standard (the account leaves Castle).** Protection ▸ **Use Standard…** (the sheet: "Leaving Castle
+  hands everything to Standard: your library gets a new key, with a fresh Apple road and this Mac's on-device road back.
+  Your library and all your backups will open through your Apple account and this Mac again; if you want Castle-era writing
+  to stay Castle-protected, don't leave." — passphrase AND words asked) → `leave_castle: swapped — the library is under
+  79e33327 … road: useStandard — library 223c4e7e now standard under 79e33327` → **prod vault mode standard, revision 4** →
+  a note after the change → **prod 4 containers**, the row "Synced 9:38 PM". ("Replace All Keys…" seen, not exercised.)
+- **LEG C PASS.** Observations: **W-11** the join door reads "Sync this library…" while its sheet's title and button still
+  say "Turn on sync"; **W-12** the words notice's "backups you made before today" — backups made EARLIER TODAY, before the
+  join, open with the previous words too (it means "before now"); **W-13 (Suspected, her hand)** the lobby's "Use your twelve
+  words instead" disclosure did not open on three synthetic clicks across its label (AX geometry 487,547 240×14; the clicks
+  inside it), while an AXPress opened it at once — real-mouse behavior unverified.
+- **Held for B3's walk (the orchestrator's call):** the stage, the walk build and library `223c4e7e` (synced to `castle`,
+  Standard) stay up so VX-513's check door can be walked on its synced arm the moment B3 lands; unit C's close follows that.
+- **The walk's observations FILED (2026-10-23, the orchestrator; every row `related` to VX-510):** W-7 → **VX-518** (Medium,
+  v1 release readiness) · W-2 → **VX-519** (Medium, v1 release readiness) · W-3 + W-9 → **VX-520** (Medium, Castle & backups)
+  · W-4 → **VX-521** (Medium, Needs Lillian — her thoughts above; keep-and-close recommended) · W-5 → **VX-522** (Low,
+  Wording, 18a) · W-6 → **VX-523** (Low, 18a) · W-8 → **VX-524** (Medium, Suspected, Castle & backups) · W-10 → **VX-525**
+  (Low, Castle & backups — B3's check sheet already clears its answer on retyping; Look inside's own sheet is the ticket) ·
+  W-11 + W-12 → **VX-526** (Low, Wording, 18a — its first half is P-VX510-A4, already in her bundle) · W-13 → **VX-527**
+  (Medium, CONFIRMED by her hand) · W-1 → **VX-528** (Low, Exploration, Needs Lillian — is per-Mac seeding intended?). With
+  **VX-517** (B2's T-B5-2 — now a member, R-510-16) the run has filed VX-511…VX-528 less VX-514 (canceled). Pre-launch is
+  her call on each; none set.
+- **VX-527's hand check (21:55):** the Castle library `159caa3f` swapped back into the slot (`223c4e7e` →
+  `…-aside-vx510-walkL5/`), relaunched (pid 82162) to its lobby; the session stopped driving; her trackpad → only the arrow
+  opens it. Quit at the lobby (nothing unlocked); `159caa3f` back to `…-aside-vx510-walkL4/`, `223c4e7e` back in the slot,
+  walkL5 removed.
+- **Machinery (shared worktree):** B3 and the orchestrator shared `~/dev/variorum-vx-510`; the harness caught two Edit
+  races on this file and the orchestrator held its record edits in its scratchpad until B3 closed — nothing lost. Rule from
+  here: the orchestrator edits this file only with `git status` clean, and commits at once.
+*[removed for publication]*
+  at her word (R-510-17).
+- **VX-513'S WALK (22:19–22:35; the walk build REBUILT at B3's tip `2e3d335d8`; stage renewed 240 min; pid 93437 on
+  `223c4e7e` — synced to `castle`, Standard; prod vault rev 4):**
+  - row 1 PASS — "Check my passphrase or twelve words…" stands in its own group right after the words section.
+  - the sheet: "Check my passphrase or twelve words" / "Type your passphrase or your twelve words to check them. Checking
+    changes nothing." / one concealed field "Passphrase or twelve words" with the eye / Close · Check.
+  - row 3 PASS (synced) — the account's current passphrase → **"That passphrase opens this library and your account."**; log
+    `road: a secret check (read-only, nothing written) — the library: opens; the account: opens`.
+  - row 2 PASS — ⌘A + a wrong secret (std's passphrase): the answer line CLEARED on the edit (the sheet shrank 204 → 177 pt
+    before Check) → **"That passphrase doesn't open this library."** (warning-styled); log does not open / does not open.
+  - the words → **"Those twelve words open this library and your account."**
+  - **NOTHING WRITTEN:** `variorum-library-keys.json` mtime 1792813051, size 1231, before AND after; prod vault rev 4,
+    `updated_at` 03:37:31Z (C5's act) — unmoved; the log holds exactly the check lines.
+  - row 4 PASS (offline, at her offer, 22:35) — one scripted command: `networksetup -setairportpower en0 off` (en0 the only
+    active route), Check with the current passphrase, capture, Wi-Fi on under a trap → **"That passphrase opens this
+    library." + "Variorum couldn't reach your account just now. Try again in a moment."**; log `— the library: opens; the
+    account: not checked`. (The shell's curl probe is sandbox-blocked — not a network verdict.)
+  - row 5 PASS (via the VX-529 repro below) — the account's NEW passphrase on the lagging library → **"That passphrase doesn't
+    open this library, but it opens your account."** (P-VX510-B3-2 live). Row 6 (no door behind the lobby) — Settings is
+    unreachable behind the lobby; the composition pin covers it.
+  - **VX-513 GREEN LIVE.**
+- **THE CHANGED-ELSEWHERE REPRO (22:36–22:46, prod, castle account; her question) → VX-529:** helpers `scratchpad/swap-lib.sh`
+  (slot ↔ an aside folder, refuses with an instance up) + `launch-walk.sh`. On `223c4e7e`: Use Castle (Always ask) → prod
+  **rev 5 castle** (`useCastle … under 3f7560b2`). Swap → `159caa3f` opens on passphrase2 (after the swap's "This is a
+  different library than the one this Mac last had open" notice — a walk artifact) → "Your account's keys changed on Lillian's
+  MacBook Pro on October 23." + Follow your account… → `follow: done #1 under e33d54b8`. Swap → `223c4e7e` (passphrase2) →
+  Change passphrase passphrase2 → PASSPHRASE → prod **rev 6**. Swap → `159caa3f`'s lobby: **the account's NEW passphrase →
+  "That passphrase doesn't open this library."** (no VX-113 sentence) · **the OLD one opens it** → `the typed secret opens the
+  library but not the account's vault (changed elsewhere?) — nothing loaded; a follow or a key door loads them` · the row
+  "…Mac hasn't unlocked your account's sync keys" · Settings ▸ Sync offers **NO follow** (only the stale "…keys changed on
+  another device, and this Mac caught up.") · **Change passphrase old → new refuses "That passphrase doesn't open this
+  library."** (`changePassphrase did not land — passphraseDoesNotOpen` — WRONG: the old one does open it) · **the twelve words
+  (unchanged) → `the typed unlock loaded the account's sync keys`** (a per-session workaround) · the check door's fourth
+  answer (above). Diagnosis: the follow covers posture changes and key replacements only; nothing makes a second device take a
+  PAIR changed elsewhere (rule 7 is silent on it); in Castle the lagging device can't sync on its passphrase; in Standard it
+  syncs on the quiet roads with a silently stale passphrase. W-12's "before today" is rule 7's own sentence (VX-526 comment).
+  **STATE AFTER THE REPRO:** the account's passphrase = **PASSPHRASE** (rev 6, castle); `223c4e7e` under PASSPHRASE (Castle,
+  Always ask, `3f7560b2`) — back in the slot; `159caa3f` STALE under passphrase2 (`…-aside-vx510-walkL4/`); the words unchanged.
+- **VX-517'S LIVE PROOF (23:27–01:24, her Touch ID; two builds; the system sheet captured by screen region 4 s after each
+  press — no tool reads the data-protection keychain):**
+  - **RED LEG — the PRE-fix build (`DerivedData/vx510` at `2e3d335d8`, pid 10100):** lobby → PASSPHRASE → open → Use
+    Standard (both typed) → prod **rev 7 standard** → Use Castle with **Touch ID** (her press of the button) → **no sheet**
+    (a write never prompts) → `useCastle … under c3a696eb` · `custody … touchid 1`, prod **rev 8 castle** → Use Standard
+    (both typed) → **no sheet** (B2's vault-first) → prod **rev 9 standard** → **Change passphrase on the now-STANDARD
+    library → THE SYSTEM SHEET "Variorum Dev is trying to Unlock your Variorum library. Touch ID to continue with Variorum
+    Dev." — RED** → her finger on the first sheet (by mistake: "oh no - I used my finger" / "I didn't use my finger on the
+    second prompt - I used my finger only on the first one") → `change_passphrase: begun #4` → **a SECOND sheet** → her
+    Cancel → `change_passphrase: done #4` (00:16:11), prod **rev 10 standard**. **Two Touch ID sheets on a Standard
+    library's key door — RED CONFIRMED LIVE** (the leftover item read first, T-B5-4; B4 predicted exactly two).
+  - **GREEN LEG — the POST-fix build (`DerivedData/vx510-b4walk` at `fe42afe4f`, pid 12841):** quiet Standard open →
+    **Change passphrase on Standard with the red leg's leftover item STILL present → NO sheet**, done in 2 s, prod **rev 11**
+    (fix (c)) → Use Castle (Touch ID, both typed) → **a sheet** (expected — B4's W0: entering Castle may read the class; the
+    leftover item from the red leg) → her finger → `enter_castle: done #6 … useCastle … under 0ae270dd` · `touchid 1`, prod
+    **rev 12 castle** → **W1 guard:** ⌃⌘L → the lobby's own Touch ID sheet → her finger → **`road: the Touch ID unlock loaded
+    the account's sync keys for the session (sync key 32b827f5)`** (Castle + Touch ID reads intact) → Change passphrase in
+    Castle → **TWO sheets, both her finger — VX-530 CONFIRMED LIVE** (the double prompt is real) → `change_passphrase: done
+    #7`, prod **rev 13**; then `road: locked` (the 10-minute idle lock — Touch ID presses aren't input) → the lobby's sheet
+    Cancelled by the session, the passphrase typed → `the typed unlock loaded the account's sync keys` → **Use Standard (both
+    typed) → NO sheet** → `leave_castle: done #8 … useStandard … under 89148f78`, prod **rev 14 standard** → **Change
+    passphrase on Standard → NO sheet**, done in 2 s, prod **rev 15**.
+  - **VX-517 GREEN LIVE.** End state of the `castle` account: **Standard, vault rev 15, passphrase PASSPHRASE, the words the
+    C3 set** (`~/.variorum/prod-test-words-castle`).
+- **UNIT C — CLOSED (01:24–01:29):** the walk session SIGNED OUT (Account ▸ Sign out → "Sign out of this Mac?" → Sign Out —
+    the dev scope's session gone, the row "Signed out"); quit (zero instances). The six walk libraries mapped by their key
+    files' `library` id and REMOVED with their `Backups/<id>` folders: `223c4e7e` (the slot), `dfe2ad68` (walkL1), `413fb3bd`
+    (walkL2), `2aa0214f` (walkL3), `159caa3f` (walkL4), `6fa0c827` (`Previous Libraries/2026-10-24-025624`, from S-leg's
+    restore). Untouched: the three older Previous Libraries entries (Oct 7, 18, 20), every other `Backups/` entry (the dev
+    store's `e11e5233` among them), `RESTORE.md`, `safety-copies/`. **The dev store's nine files moved back — every inode as
+    recorded at the aside** (191598614–191598620, 193537660/193537661). One plain relaunch (the post-fix walk build, NO prod
+    road env — `ps eww` confirmed) → the swap notice → **library `e11e5233`, "Sync off (dev store)"**, its own pre-existing
+    restore-hold banner ("…as of October 20, 2026…") and words card as before → quit (zero instances). **Stage RELEASED**
+    ("STAGE FREE"); the walk checkout `~/dev/variorum-vx-510-stage` removed (`git worktree remove`). Residue, accepted: the
+    walk libraries' Apple-keychain items in the dev scope (custody items keyed by key fingerprint; the dev scope holds many
+    from earlier walks — none reach a real store); the `std` and `castle` prod test accounts STAY as standing release-drill
+    accounts (PROPOSED — her call at closeout; their secrets in `~/.variorum/prod-test-accounts.env`, the words in
+    `~/.variorum/prod-test-words-{std,castle}`).
+
+## THE SUCCESSOR'S SANITY CHECK (2026-10-24, the successor orchestrator — her ask at the cutover)
+
+Her ask at the cutover kickoff (2026-10-24, verbatim): "consider the work that has been done with an OPEN mind, as an
+evaluator. don't just look for specific technical flaws - look at what the prompt was for the phase and consider if it
+was well executed enough. don't just trace the fix / test - was that test the right test? etc. we need a major sanity
+check because this has been a really long, complex, hotfix followup to the castle migration."
+
+## Method
+The successor read the preflight whole (the handoff, this record whole, SyncSpec, CastleRules, SurfaceContracts,
+the charter `notes/handoffs/vx-510-kickoff.md`), then read THE WHOLE PRODUCT DIFF itself (main...HEAD, every
+non-test file), and re-read the production rows independently (below). The ladder's cold review runs separately;
+this section is the charter-vs-execution judgment.
+
+## Charter vs. delivered
+1. THE TRACE — delivered and sound. T-1's mechanism (VX-329 U1 deleted the old road's post-enrollment round hook) is
+   the right level of trace: by commit, with the exhaustive trigger-roads enumeration that makes "the act is none of
+   *[removed for publication]*
+   before the vault write) is honest about what cannot be proven ("no logs survive — it is the one story the code and
+   the server both allow").
+2. THE FIXES — all four members built, each with revert-verified red-on-old pins; the fix DESIGNS match the code as
+   shipped (verified against the diff, not the record's claims). The composition glue genuinely moved out of view code
+   (`AppBootstrap.attach(services:)`), which is what makes `FirstRunDrillTests` an honest end-to-end gate rather than
+   a unit test wearing an integration test's name.
+3. THE ACCEPTANCE — exceeded the letter: three fresh accounts (std, castle, del), both postures, sign-up → set-up →
+   join → restore-join → fresh-library join (the testers' exact road), deletion, every leg server-verified. The
+   successor re-read the server independently: std = standard rev 3 · kp 1 · 3 cursors · 1 live container; castle =
+   standard rev 15 · kp 1; del = no auth row, nothing left. All exactly as the record claims.
+4. R-510-4's MAP — delivered, 17 seams, propose-only. It is the right artifact: it names what unit C did NOT prove
+   (the real confirmation-email link, Sparkle update-from-previous, two-device live editing) instead of letting the
+   run's green imply them.
+
+## "Was that test the right test?" — the evaluator's answers
+- The drill (FirstRunDrillTests) runs over a FAKE server, so it can never catch the PL/pgSQL class — but the release
+  gate (release.sh step 0) deliberately pairs it with the LIVE scripted walk, so the standing evidence is layered:
+  drill = regression gate, walk = live proof. That is the right shape, and it is the shape her R-510-2/R-510-4 asked
+  for.
+- The run's best epistemic catch is test-world fidelity: B4 found that the all-seeing planted keychain leaf had HIDDEN
+  the VX-517 class for months, and answered it by building a production-shaped listing (`listsLikeProduction`) before
+  pinning. The same class of lesson was applied twice more (B1's world kept services alive that production releases —
+  fixed before the reverts; B4's "a delete of nothing is no write"). This is exactly the discipline her question asks
+  after, applied where it mattered.
+- The pins pin MECHANISMS, not idioms (e.g. D-B9), and the reverts were behavioral with named expected reds — the
+  record's revert tables read as genuine teeth, and two reverts exposed real latent races (RB-6's start-race; RD4-1's
+  hollow leg, tightened and re-run).
+- The honest gaps are RECORDED, not hidden: VX-501's settle-vault-reuse branch and VX-511's reopen-not-ready edge are
+  unpinned and say so; F-B4-1 is an accepted residue with its reasoning; the three harness-PATH artifacts are named at
+  every run.
+
+## What the successor found reading the diff cold (for the ladder's attention, not pre-judged)
+- `CommonSteps.material(for:)` (VX-503's fix) no longer consults the act's `material` cache before deriving: the typed-
+  secret arm runs first and pays a fresh Argon2id on every call. If any act calls it more than once, that is a second
+  KDF (seconds-class, memory-hard) the pre-fix order did not pay. Candidate MINOR — the ladder should judge call
+  counts per act (O-B4-1/VX-530 is the adjacent Castle double-read).
+- The castle test account carries 6 device cursors after the walks: each posture crossing's enroll minted one. By
+  design (13j's 60-day horizon retires them); recorded so nobody reads the count as a bug later.
+- Everything else read as designed; the prod test road's guard set (Debug-only compile-out, exact-match allowlist,
+  marker per entry, per-account admission at every connect, exclusivity with the walk project) is defense-in-depth
+  done properly, and the one deliberate exposure (emails in `ps eww`) is named and is not a secret.
+
+## Judgment
+The run executed its charter fully and at the right altitude: the mechanism was traced before any fix, the acceptance
+ran where the rubber meets the road (production, three accounts, both postures), scope grew only at her explicit
+rulings (R-510-11/-14/-15/-16), and the discipline held under growth. The run's real residual risks are the three the
+handoff already names — no cold review yet, no whole-target suite run since unit A, self-reported walk claims — and
+they are exactly the successor's work items (the ladder, the stage batch, the independent re-walk). Two things the
+closeout must not lose: VX-529 is a REAL first-run-class gap deliberately deferred at her word (R-510-19/-20 — its
+run should follow soon, since a Castle passphrase change on one device still silently strands the others), and the
+MAP's rows 8–9 (Sparkle update-from-previous; the real confirmation-email link) are the two remaining launch seams
+with NO live proof at all.
+
+## THE LADDER — ROUND 1 (2026-10-24; a fresh `fable-reviewer`, REVIEW_PROMPT verbatim, zero framing, over `git diff main...vx-510-first-run-sync` — 95 commits, 58 files; the reviewer read the run record, the charter, the handoff, SyncSpec, CastleRules and SurfaceContracts' protection bullet whole, verified the no-`Sync/` and no-trailer claims independently, re-ran the core's new suite headless 13/13 + a 143-test protection sample green)
+
+**0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT**, plus the sanity check's two open items adjudicated. Findings verbatim-faithful,
+each with the ORCHESTRATOR'S DISPOSITION:
+
+- **F-R1-1 [MINOR] — `firstRoundLine`'s missing syncing arm.** `RoadAccountModel.firstRoundLine` over an outcome whose
+  status froze with `isSyncing == true` renders the self-contradicting "Sync hasn't run yet: Syncing…." permanently on
+  the sheet (the outcome is frozen in `.done`; the sheet never re-reads). Reachability: a narrow race —
+  `SyncSession.roundNow()` reads `scheduler.status` after `awaitIdle()`, and a fresh trigger (the outbox settle, a
+  become-active) can start a new round in the actor-hop gap (SPECULATIVE live; the SENTENCE is deterministically
+  pinnable at the model level — `firstRoundLine(.ran(syncing))` returns the contradiction today).
+  **DISPOSITION: CONFIRMED — fix in this ladder (unit L1).** The architect's direction: fix the OUTCOME seam —
+  `roundNow()` re-awaits while the read status says syncing (bounded; coalescing settles it) — and the model belt —
+  `firstRoundLine` maps a `.syncing` face to the running-progress words, never the blocked form. Red-on-old on the
+  sentence (the model pin: today's contradiction), a `roundNow` pin (a status that reads syncing once then settles ⇒
+  the returned outcome is settled), reverts per the discipline.
+- **F-R1-2 [MINOR] — the Mac-hosted pin half has never executed** (compile-verified only since unit A; the real-keychain
+  `KeychainLeavesTests` arm — the live proof of D-B8's Apple-facts premise — included; VX-527's hit-shape reach is the
+  B5 record's own named unverified assumption). **DISPOSITION: ACCEPTED AS A GATE, procedural** — exactly the handoff's
+  rows 9–10: the closing stage batch (a Touch ID finger enrolled so the keychain arm doesn't skip; the `skipped:` lines
+  read) and the re-walk's live press on the words door's own text are MERGE GATES, not follow-ups. No code change.
+- **F-R1-3 [MINOR] — closeout text obligations.** (a) CastleRules rule 2's "until it is dismissed" does not name
+  VX-511's third retirement road (a landed account act) — a WORDING-FAITHFULNESS item for HER bundle (the Castle design
+  is frozen; never an autonomous edit); (b) the SurfaceContracts delta must carry VX-517's forgets-BY-NAME beside the
+  Standard-never-reads-Touch-ID line. **DISPOSITION: ACCEPTED — both fold into the closeout's canon pass; (a) joins her
+  bundle.**
+- **F-R1-4 [NIT] — `ProtectionSecretCheck.check`'s empty-text answer shape** (`.doesNotOpen` instead of a refusal;
+  unreachable through the sheet — `canSubmit` refuses empty). **DISPOSITION: CONFIRMED, fold into L1** (one arm; no pin
+  owed per the reviewer — no user-reachable red; a guard assertion may ride the existing suite).
+- **F-R1-5 [NIT] — `first-run-walk.sh` P3 splices the email into its SELECT without the sibling script's plain-shape
+  regex** (capped twice over: her own mode-600 file after G2, and prod-read.sh's SELECT-only guard). **DISPOSITION:
+  CONFIRMED, fold into L1** (the regex copied into G2; `--self-test` gains the malformed-address case; `zsh -n` clean).
+- **The sanity check's items, adjudicated by the reviewer:** the `material(for:)` Argon2id concern DISMISSED WITH THE
+  MECHANISM (the act's passphrase is a pre-derived `PassphraseKey` — one Argon2id per act at `PlanRunner.derive`;
+  `VaultModel.master` is a pure AES unwrap gated on the descriptor; the derive branch still fills the `material` cache)
+  — recorded, not fixed, per the hallucination guard; the 6 device cursors BY DESIGN (13j's horizon), recorded.
+
+**The clean bill** (the reviewer's, abridged; the load-bearing lines): the attach/generation seam race-free;
+`FirstRunDrillTests` a genuine end-to-end gate; the prod test road defense-in-depth verified end to end; VX-501's load
+never-hostage with a sound bounded race; the VX-503/VX-517 core changes preserving key identity with the by-name
+forgets honestly bounded (F-B4-1's residue reasoning sound); VX-513 genuinely read-only across every arm; the
+SyncStatusRow refactor render-identical; no word-level tracking, no corpus-proportional cost, S1–S5/P1–P3 untouched;
+CastleRules 4/5/7/9/15/16/20/21 honored.
+
+**O-L1-1 (found by unit L1; the orchestrator's disposition: CONFIRMED and FIXED BY THE ORCHESTRATOR, an environment
+act on its own script — the same F-R1-5 class):** `Tools/prod-confirm-test-user.sh`'s plain-shape check was a
+line-wise `grep -Eq` and its allowlist membership a `grep -Fq` with the argument as the pattern — both pass a
+multi-line argument whose FIRST line is plain/listed while a second line reaches the SQL splice, and the script sits
+behind an auto-allow rule, so its guards ARE the fence. Fixed exactly as L1 fixed the sibling: the whole-value zsh
+`=~` plain check (`PLAIN_ADDRESS`, the walk script's own) and a zsh whole-string membership check. Verified offline
+(`zsh -n` clean; four crafted arguments each REFUSED exit 2 before any network act: a multi-line value with a quoted
+second line, an uppercase value, a plain-shaped unlisted address, a markerless address). **Red-on-old deliberately NOT
+demonstrated live** — on the old code the crafted argument would have EXECUTED its injected SQL against production;
+the class's red is L1's sibling self-test reds (RL-6/RL-7) plus the code trace, recorded here instead (the
+hallucination guard's letter is served by the sibling's pin — one mechanism, two scripts). The live green is the
+re-walk's own use of the script on the fresh account.
+
+### UNIT L1 — THE LADDER'S FIX SESSION (a fresh `opus-implementer`; F-R1-1 + F-R1-4 + F-R1-5)
+
+**Read first:** this section (the findings above are the charter — F-R1-1's direction is the architect's), the code:
+`Shared/SyncSession.swift` (`roundNow`), `Shared/Protection/RoadAccountModel.swift` (`firstRoundLine`,
+`roundCameBack`), `Shared/Protection/ProtectionSecretCheck.swift` (the empty-text guard),
+`Tools/WalkKit/first-run-walk.sh` (G2 + P3), and the suites `FirstRoundConfirmTests`
+(`eachOutcomeSaysTheRowsOwnSentence` — no syncing arm today), `FirstRoundRoadTests`, `SecretCheckRoadTests`. The
+discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's (pins red-on-old; reverts named then run; the
+harness per units A–B4's recipe; ONE Mac + ONE iOS build-for-testing into `DerivedData/vx510-l1` / `vx510-l1-ios`; no
+`xcodebuild test`, no stage, no launch, no store/server/production contact). The implementer states agree/dispute per
+finding FIRST (the cross-model flow — a dispute returns to the reviewer for the final call before any fix). Commits say
+`Part of VX-510`; NO trailers.
+
+### UNIT L1 — LIVE STATUS (the implementer owns this section)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **the Mac-target runs** — every Mac-only suite in THE MAC-SUITE
+LIST (Piece 6) compiled (Mac + iOS build-for-testing green) but RUNS only in the closing stage batch, PENDING; **no walk**
+(no face changed but one sheet line in a race arm — the re-walk's live first-run legs cover the sheet; the race itself is not
+producible live on demand); **`first-run-walk.sh`'s P3 re-check** is exercised only through its shared function (P3 runs
+live, never here); **O-L1-1** (the sibling `Tools/prod-confirm-test-user.sh`'s line-wise guard — the same hole) is RECORDED,
+NOT FIXED (outside this unit; the orchestrator's ticket candidate). No `xcodebuild test`, no stage, no app launch, no
+store/server/production contact, no subagents; no canon, Linear or `notes/QUESTIONS.md` (no new words drafted — the belt reuses
+`firstRoundProgress`, the refusal `checkSecretsLead`). No line in `Sources/VariorumCore/Sync/` (the seam is app-side: a
+protocol over the scheduler's EXISTING public API, conformed on the app's side).
+
+*Implementer session L1 — Opus 5.5, xhigh. Pre-fix tree = `ca1ec1381`. Every claim not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md`;
+  this file's HER RULINGS, THE TRACE, UNIT A — THE BRIEF, units A/B1/B2/B3/B4 LIVE STATUS (the harness recipe), ENVIRONMENT
+  TRAPS, THE SANITY CHECK, THE LADDER — ROUND 1 and this unit's brief; the code (`SyncSession` whole, `SyncScheduler` read
+  only — `trigger`/`awaitIdle`/`status`/`runLoop`/`runOneRound`, `RoadAccountModel` whole, `SyncStatusViews`' face + line,
+  `RoadAccountSheet`'s round face, `ProtectionSecretCheck` whole, `RoadSecretCheckModel`, `first-run-walk.sh` whole,
+  `prod-confirm-test-user.sh`); the suites `FirstRoundConfirmTests`, `FirstRoundRoadTests`, `SecretCheckRoadTests`: DONE (this
+  commit).
+- **AGREE / DISPUTE (stated before any fix — the cross-model flow):**
+  - **F-R1-1 — AGREE.** Traced: `firstRoundLine(.ran(s))` with `s.isSyncing` → `rowFace(s)` → `SyncRowFace.face(…isSyncing:
+    true…)` returns `.syncing` before any error arm (configured, signed in) → not `.idle` → `firstRoundBlocked(SyncStatusRow.line
+    (for: .syncing))` = "Sync hasn't run yet: Syncing…." — deterministic at the model. Reachability: `roundNow` reads
+    `scheduler.status` in a SEPARATE actor hop after `awaitIdle()` resumes it; the idle waiters resume inside `runLoop` after
+    `running = false`, so a `trigger()` serviced in that gap (the settle's `Task { await scheduler.trigger() }`, the
+    become-active hook, Sync now) starts a fresh loop whose `runOneRound` sets `isSyncing = true` — read by `roundNow` when its
+    status hop is serviced after the new loop's first job (e.g. the main actor busy when the waiter resumed). Narrow, real, and
+    frozen: `roundCameBack` sets `.done` once and the sheet never re-reads. MINOR stands. A re-await is never a spin: a status
+    reading syncing implies `running` (isSyncing is set only inside `runOneRound`, inside the loop), so `awaitIdle` waits for
+    that loop's end.
+  - **F-R1-4 — AGREE.** `check(…, typed: "")` answers `.doesNotOpen(.passphrase, opensAccount: false)` — "That passphrase
+    doesn't open this library." about nothing typed; unreachable through the sheet (`canSubmit` refuses empty). The refusal
+    built: `.refused(ProtectionWords.checkSecretsLead)` — the sheet's own ask ("Type your passphrase or your twelve words to
+    check them. …", already in her P-VX510-B3-1 bundle — no new words).
+  - **F-R1-5 — AGREE, with one sharpening found while tracing.** P3 splices the account's email (re-read from the file) into
+    its SELECT with no shape check. The sibling's form (`printf '%s' "$EMAIL" | grep -Eq '^…$'`) is LINE-WISE: a value with
+    a newline passes when its first line is plain (probed in scratch: `a+vxtest-std@x.test\n'; select 1; --` → grep PASS; zsh's
+    native `[[ $e =~ $re ]]` → refuse). So G2 takes the sibling's REGEX with zsh's whole-string match (one function,
+    `plain_address`, also re-checked at P3's splice — the file is re-read there); `--self-test` gains the malformed-address
+    cases (a quote, uppercase, a newline). **O-L1-1 (an observation, NOT mine — the sibling is outside this unit):**
+    `Tools/prod-confirm-test-user.sh`'s own guard has the same line-wise hole, and its allowlist check (`grep -Fq " $EMAIL "`)
+    reads a multi-line pattern as several patterns — a crafted multi-line argument would pass both and splice its second line
+    into the UPDATE. A ticket candidate for the orchestrator (the same one-function fix).
+- **Piece 0** — the harness: DONE (not durable — B4's `vx510b4-harness` survived in its session's scratchpad; copied whole but
+  its build products to this session's scratchpad `vx510l1-harness`, the SwiftPM checkouts and artifacts carried; 90 source
+  symlinks + 1 stub, 83 test symlinks + 1 stub — unit A's Piece 0 recipe as B4 left it; runner `l1/test.sh <log> <filter|ALL>
+  [watchdog]` — build, then the run with the three harness-PATH artifacts `--skip`ped). **BASELINE on the pre-fix tree
+  (`ca1ec1381`): `✔ Test run with 521 tests in 90 suites passed`** — exactly B4's close.
+- **Piece 1** — the pins, committed RED: DONE (this commit).
+  - **THE SEAM, behavior-neutral** (`Shared/SyncSession.swift`): `FirstRoundScheduling` (a `nonisolated` Actor protocol naming
+    the scheduler's EXISTING public `trigger()` / `awaitIdle()` / `status`; `extension SyncScheduler: FirstRoundScheduling {}`
+    declared app-side — no `Sync/` line) and `SyncSession.runRound(on:)` doing exactly today's three steps (trigger → idle →
+    ONE read); `roundNow` = its two guards + `.ran(runRound(on: scheduler))`; `firstRoundSettleWaits = 3` named (the bound
+    Piece 2's loop uses).
+  - **Pins:** `FirstRoundConfirmTests.aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm` (the model — compiles on the old
+    tree: every door's line over a syncing status, a stale offline / server error under it, and through the confirm: the
+    sheet's `roundLine`, no cause note); `FirstRoundRoadTests.runRoundReAwaitsAStatusThatStillReadsSyncing` +
+    `runRoundsSettleIsBounded` over `ScriptedFirstRoundScheduler` (its first N status reads say syncing — the gap produced
+    exactly; counts triggers, waits, reads); `SecretCheckRoadTests.rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync`
+    + F-R1-4's guard assertion (nothing typed ⇒ `.refused(checkSecretsLead)`, warning; inside the zero-writes span);
+    `first-run-walk.sh --self-test` + three malformed-address fixtures (a quote · uppercase · a newline — each listed and
+    marked, so only a shape check refuses them).
+  - **RED on this tree** (the harness, `--filter "FirstRoundConfirmTests|FirstRoundRoadTests|SecretCheckRoadTests"`):
+    **`✘ Test run with 25 tests in 3 suites failed … with 19 issues`** — `aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm`
+    ✘×12 (`line → "Sync hasn't run yet: Syncing…."` — today's contradiction, for the set-up, the join and the follow; the stale
+    errors; the confirm's `roundLine`), `runRoundReAwaitsAStatusThatStillReadsSyncing` ✘×4 (`status.isSyncing → true` — the
+    gap's round returned as the outcome; one wait, one read), `runRoundsSettleIsBounded` ✘×2 (one wait, one read — no settle),
+    `rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync` ✘×1 (the empty text answered `.doesNotOpen`); every other test
+    in the three suites green. **`first-run-walk.sh --self-test`: `SELF-TEST: 3 case(s) wrong`, exit 1** — "a quote in the
+    address", "an uppercase address", "a newline in the address" each `accept — expected refuse  FAIL`; the nine existing cases
+    and the handed value ok. `zsh -n` clean. No warning in a touched file (the build log's 8 are in untouched files).
+- **Piece 2** — F-R1-1 fix: DONE (this commit). **The outcome seam** (`Shared/SyncSession.swift`): `runRound(on:)` — the
+  trigger once, then up to `firstRoundSettleWaits` (3) waits for idle, each followed by a status read; a read that is not
+  syncing ends it; past the bound, what it read (never a second trigger; a syncing read implies a running loop, so each
+  re-await is that round's end — never a spin). **The model belt** (`Shared/Protection/RoadAccountModel.swift`):
+  `firstRoundLine` maps a `.syncing` face to `ProtectionWords.firstRoundProgress` ("Syncing your library with your account…"
+  — the existing running words, no new string) before the idle/blocked split. **The harness, `--filter
+  "FirstRoundConfirmTests|FirstRoundRoadTests|FirstRoundAfterTheActTests|FirstRoundAfterTheReopenTests|FirstRunDrillTests|
+  SyncLockedRowTests|SyncStalledRowTests|NotOnYetWordsTests"`: `✔ Test run with 50 tests in 8 suites passed`** — Piece 1's
+  three F-R1-1 pins GREEN; the drill, the act/reopen worlds and the row suites unchanged and green (the real scheduler's
+  path through `roundNow` → `runRound` — `roundNowRunsOneRoundToItsEndAndReturnsItsStatus`,
+  `roundNowWaitsForTheFollowUpOfARoundInFlight` — green). No warning in a touched file.
+- **Piece 3** — F-R1-4 fix: DONE (this commit). `Shared/Protection/ProtectionSecretCheck.swift`: the empty-text guard answers
+  `.refused(ProtectionWords.checkSecretsLead)` (one arm; the sheet's own ask — no new words; still before any key-file read,
+  vault read or log). **The harness, `--filter "SecretCheckRoadTests|SecretCheckModelTests|SecretCheckCompositionTests|
+  RoadKeyDoorRoadTests|RoadKeyDoorsModelTests"`: `✔ Test run with 31 tests in 6 suites passed`** — Piece 1's guard assertion
+  GREEN inside the zero-writes span; the composition guard (`theCheckRoadNamesNoWriterAndNoKeychainRead`) green.
+- **Piece 4** — F-R1-5 fix: DONE (this commit). `Tools/WalkKit/first-run-walk.sh`: `PLAIN_ADDRESS` = the sibling's regex
+  `^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$`, `plain_address` = zsh's whole-value `[[ $1 =~ $PLAIN_ADDRESS ]]`; G2 refuses an
+  account email that is not plain (after the marker check, before the listed check — "the std account's email is not a plain
+  address (…)"); P3 re-checks the address it re-reads from the file at the splice (`stop` — the file changed since G2);
+  the header's G2 line and `Tools/WalkKit/README.md`'s sentence say it (the README line rode one commit late — its edit missed
+  `dc5cbe982`; landed in the next). `--self-test` + one ACCEPT guard fixture
+  (`someone08+vxtest-std@gmail.com` — digits and a plus-address, the test accounts' shape: the regex does not over-refuse;
+  green both sides by design). **`zsh -n` clean; `--self-test`: every case ok — the three malformed addresses `refuse (the
+  std account's email is not a plain address …)  ok`, the shaped one `accept  ok`, the nine existing cases and the handed
+  value ok — `SELF-TEST: every guard fired as expected`, exit 0**; the no-argument and `bogus` refusals unchanged (exit 5,
+  before any file read). Nothing launched; P3's re-check is exercised only through the shared function (P3 runs live).
+- **Piece 5** — THE BEHAVIORAL REVERTS, named BEFORE any runs (this commit; the committed tree IS the pre-revert copy). Each is
+  ONE file, applied in the worktree, run, then restored by `git checkout -- <file>` with `git diff --exit-code` clean before
+  the next. Expected red in brackets:
+  - **RL-1** (F-R1-1, the belt) `Shared/Protection/RoadAccountModel.swift`: `firstRoundLine`'s `.syncing` line removed
+    [`aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm`].
+  - **RL-2** (F-R1-1, the settle) `Shared/SyncSession.swift`: `runRound` stops after its first read (the loop's guard becomes
+    an unconditional `break`) [`runRoundReAwaitsAStatusThatStillReadsSyncing`, `runRoundsSettleIsBounded`].
+  - **RL-3** (F-R1-1, the bound) `Shared/SyncSession.swift`: the loop unbounded (until a read is not syncing)
+    [`runRoundsSettleIsBounded` — the script settles at its 51st read, so no hang: 51 waits, a settled status].
+  - **RL-4** (F-R1-1, one trigger) `Shared/SyncSession.swift`: the trigger moved inside the loop (a re-trigger per wait)
+    [`runRoundReAwaitsAStatusThatStillReadsSyncing` (2 triggers), `runRoundsSettleIsBounded` (3)].
+  - **RL-5** (F-R1-4) `Shared/Protection/ProtectionSecretCheck.swift`: the empty arm back to `.doesNotOpen(.passphrase,
+    opensAccount: false)` [`rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync`].
+  - **RL-6** (F-R1-5, the guard) `Tools/WalkKit/first-run-walk.sh`: G2's `plain_address` line removed [the self-test's three
+    malformed cases FAIL].
+  - **RL-7** (F-R1-5, the whole-value match) `Tools/WalkKit/first-run-walk.sh`: `plain_address` as the sibling's line-wise
+    `printf '%s' "$1" | grep -Eq "$PLAIN_ADDRESS"` [the self-test's "a newline in the address" FAIL alone — the quote and the
+    uppercase still refuse].
+  **RESULTS — DONE, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN FLIGHT** (the committed
+  tree `c859bceae`; the runner `l1/revert.sh` in the session scratchpad — the tree checked clean first, the edit applied by a
+  one-target script, the filtered run, `git checkout --`, `git diff --exit-code`):
+  - **RL-1** `--filter FirstRoundConfirmTests`: `✘ Test run with 11 tests in 1 suite failed … with 12 issues` —
+    `aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm` ✘×12 (every other test in the suite green).
+  - **RL-2** `--filter FirstRoundRoadTests`: `✘ … 7 tests in 1 suite failed … with 6 issues` —
+    `runRoundReAwaitsAStatusThatStillReadsSyncing` ✘×4 (`!status.isSyncing`, the success stamp, `idleWaits == 2`, `reads ==
+    2`), `runRoundsSettleIsBounded` ✘×2 (one wait, one read).
+  - **RL-3** (same): `✘ … with 3 issues` — `runRoundsSettleIsBounded` ✘×3 (`status.isSyncing` false and 51 waits / reads past
+    the bound — returned, no hang).
+  - **RL-4** (same): `✘ … with 2 issues` — `runRoundReAwaitsAStatusThatStillReadsSyncing` ✘ and `runRoundsSettleIsBounded` ✘
+    (`triggers == 1` each).
+  - **RL-5** `--filter SecretCheckRoadTests`: `✘ … 7 tests in 1 suite failed … with 1 issue` —
+    `rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync` ✘ (`nothing == .refused(ProtectionWords.checkSecretsLead)`).
+  - **RL-6** `--self-test`: `SELF-TEST: 3 case(s) wrong`, exit 1 — the quote, the uppercase and the newline each `accept —
+    expected refuse  FAIL`.
+  - **RL-7** `--self-test`: `SELF-TEST: 1 case(s) wrong`, exit 1 — "a newline in the address" alone FAILs (the line-wise grep
+    passes the value's plain first line; the quote and the uppercase still refuse) — the sharpening has its own teeth.
+- **Piece 6** — EVIDENCE: DONE (the final tree = `1271f317f`'s product files; foreground, in sequence):
+  - THE HARNESS whole (debug, the three harness-PATH artifacts `--skip`ped): **`✔ Test run with 524 tests in 90 suites
+    passed`** (the baseline's 521/90 + this unit's 3 new tests; the F-R1-4 assertion rides an existing one); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+    <home>/dev/variorum-vx-510/App/Variorum/DerivedData/vx510-l1 build-for-testing` (run from `App/Variorum`):
+    **`** TEST BUILD SUCCEEDED **`**, 0 errors; `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath …/DerivedData/vx510-l1-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`**, 0 errors —
+    no warning in any file this unit touched (both logs grepped); no stray nested DerivedData folder.
+  - `Tools/WalkKit/first-run-walk.sh`: `zsh -n` clean; `--self-test` every case ok, exit 0 (Piece 4); nothing launched.
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched).
+  **THE MAC-SUITE LIST (for the closing stage batch — every suite exercising a file this unit changed; "harness" = also green
+  headless here, "Mac" = Mac-target only):**
+  - CHANGED: `FirstRoundRoadTests` (harness; +2), `FirstRoundConfirmTests` (harness; +1), `SecretCheckRoadTests` (harness; one
+    assertion).
+  - `SyncSession` (`roundNow` → `runRound`, `FirstRoundScheduling` + the conformance): `FirstRoundAfterTheActTests`,
+    `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests`, `ProdTestRoadTests`, `SyncWalkFenceTests`, `HoldBannerAccountTests`,
+    `OneRefreshAuthorityTests`, `TierAndOnboardingTests` (harness) · `Phase9cAuthWiringTests` (harness, but its three source pins
+    run only in the Mac target) · `Phase8ServicesTests`, `LibraryPortabilityDoorTests`, `SampleLibraryDedupeFactsTests` (Mac).
+  - `RoadAccountModel` (`firstRoundLine`): `FirstRoundAfterTheActTests`, `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests`,
+    `RoadAccountModelTests`, `RoadJoinFollowModelTests`, `PassphraseFloorRoadTests`, `FollowDoneNoticeTests` (a source pin over
+    the file) (harness) · `RoadAccountSurfaceTests`, `RoadJoinFollowSurfaceTests` (Mac — the hosted sheet).
+  - `ProtectionSecretCheck`: `SecretCheckModelTests`, `SecretCheckCompositionTests` (a source pin over the file) (harness) ·
+    `SecretCheckSurfaceTests` (Mac — hosted).
+  - THE PHONE (`VariorumMobileTests`): `MobileStarterJournalTests` (composes `SyncSession`), `MobileEmptyStoreTests` (the row) —
+    `Shared/` compiles for the phone (the iOS build-for-testing above).
+  - The simplest honest batch remains the whole `VariorumTests/Protection` folder + the top-level suites named above (the run's
+    closing batch already plans it).
+  **THE WALK (this unit's rows, for the re-walk — use-shaped, not this session's):** none new — the sheet's first-round line
+  is the re-walk's existing LEG S/D check ("Synced. …" after Turn on sync / the join); the race arm cannot be produced live
+  on demand (its pins are the scripted scheduler's). `first-run-walk.sh std` on the final build exercises G2's plain check on
+  the real allowlist (and P3's re-check) — the re-walk's own run.
+  **UNIT L1 CLOSED** — F-R1-1 FIXED (pins `aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm`,
+  `runRoundReAwaitsAStatusThatStillReadsSyncing`, `runRoundsSettleIsBounded`; reverts RL-1…RL-4) · F-R1-4 FIXED (the guard
+  assertion; RL-5) · F-R1-5 FIXED (the self-test's three malformed cases; RL-6, RL-7) · O-L1-1 recorded for the orchestrator.
+
+## THE LADDER — ROUND 2 (2026-10-24; a fresh `fable-reviewer` re-reviewing round 1's fixes — unit L1 `5b72d7a3a`…`97922b2a2` + the orchestrator's O-L1-1 fix `829f70019`)
+
+**0 BLOCKER · 0 MAJOR · 1 MINOR · 1 NIT; every round-1 fix judged SOUND** (F-R1-1 both halves re-traced in the old code
+with the no-spin claim verified against the scheduler's source; F-R1-4/-5 and O-L1-1 exercised by the reviewer itself —
+the four refusal paths re-run, the self-tests and `zsh -n` run, the line-wise-vs-whole-value mechanism reproduced in a
+scratch shell; the whole L1 harness independently re-run **524/90 green**; no `Sources/` line in the fix range; no
+pre-existing pin weakened; nothing newly broken). The new findings, each with the ORCHESTRATOR'S DISPOSITION — both
+fixed BY THE ORCHESTRATOR (the architect's small-fix lane; no new BLOCKER/MAJOR, so no round 3 — the final round's
+fixes get the reviewer's line-by-line check below):
+
+- **F-R2-1 [MINOR] — O-L1-1's fix had no standing pin** (the script sits behind an auto-allow rule, so its guards ARE
+  the fence; a regression to the line-wise form would be caught by nothing offline). **FIXED (`78a5884f1`):** the guard
+  refactored into ONE function the real road and a new `--self-test` share; the self-test runs six fixtures over a TEMP
+  allowlist (never her file; the curl unreachable from the arm): a listed plain address accepts; the multi-line
+  plain-first-line value (O-L1-1's shape), a trailing newline, uppercase, plain-but-unlisted and markerless each
+  refuse. **Red-on-old by behavioral revert, with a lesson:** the plain check alone reverted to line-wise stayed GREEN —
+  the whole-string membership belt catches the multi-line value by itself (defense in depth, shown working); the honest
+  revert is the FULL pre-O-L1-1 shape (both checks line-wise/grep -F), which went RED exactly as the class predicts
+  (`SELF-TEST: 2 case(s) wrong`, the multi-line and trailing-newline fixtures accepted; exit 1), restored
+  `git diff --exit-code` clean, green again.
+- **F-R2-2 [NIT] — the past-the-bound face was bare** (a settle past the bound freezes the progress words in `.done`
+  with no dots and no close note — honest but road-less). **FIXED (`b3c79a191`):** the close note renders beneath a
+  frozen progress line in the sheet's `.done` arm (the one-presentation-source line compared to
+  `ProtectionWords.firstRoundProgress`), so the rare face still says sync keeps going and the row finishes the story;
+  Mac build-for-testing green incremental; no pin owed (the reviewer's call), words P-VX510-1-adjacent, hers.
+
+**THE REVIEWER'S FINAL LINE-BY-LINE CHECK of these two fixes: 2/2 SOUND (2026-10-24).** F-R2-1: the self-test run by
+the reviewer itself (green; the real road byte-identical; refusals before any network act); the narrow-revert-green
+judged to STRENGTHEN the claim — the honest signature of two overlapping whole-value checks, either of which alone
+still closes the injection hole; the pin targets the class and goes red on exactly the pre-O-L1-1 shape. (Optional,
+not owed: one fixture listing a malformed value whole in the temp allowlist would pin the plain check in isolation —
+a future pass's one-liner.) F-R2-2: the constant-comparison idiom judged correct against the one presentation source
+(the note shows precisely on the syncing face, and would still belong with those words if ever reused); build-for-
+testing proportionate for a +9-line view-only change. No NEW-ISSUE; neither commit adds to the merge-gate list.
+**THE LADDER IS CLOSED: round 1 (0B·0M·3m·2n) → L1 + O-L1-1 → round 2 (0B·0M·1m·1n, every fix SOUND) → F-R2-1/-2
+fixed and confirmed. The only things between this tree and the merge are F-R1-2's gates: the closing stage batch and
+the independent re-walk.**
+
+## THE SUCCESSOR'S RE-WALK (2026-10-24, the successor orchestrator — IN PROGRESS at the model cutover; stage claim `vx-510` HELD)
+
+**Done, with evidence (the walk evidence folder: `~/dev/variorum-vx-510-stage/App/Variorum/DerivedData/first-run-walk/`):**
+- **The pre-step:** the deleted `del` account RE-MINTED through the app's own Create Account sheet on the prod test road
+  (fresh library `6c51f3d0`; the sheet driven by AX presses + the typing helper; the confirmation notice shown), then
+  *[removed for publication]*
+- **VX-509's scripted walk, FIRST LIVE RUN (`run-20261024T105945Z-del`):** P1–P6 ran clean after two committed tool
+  fixes (`389312534` — vis-ax matches `AXPlaceholderValue`; P4's landing probe is the sheet's own "Sign out").
+  **P7 stopped, correctly, and the stop found a real walk-tool bug:** `focus "Your twelve words"` matched a HEADING
+  whose text equals the field's placeholder — the click landed on prose, the words landed in the still-focused Again
+  field, and the confirm's disabled button answered AXPress as a no-op. Recovered BY HAND (the Again field cleared and
+  retyped; the words field focused BY ROLE — her live hint: "this is the same sheet that needed the accessibility click
+  *[removed for publication]*
+  the VX-511 mark fired; THE SHEET CONFIRMED "Synced. Your library is on your account now."; the row "Synced ‹time›";
+  SAME PID (no relaunch). Server, read by the successor: vault standard rev 1 · `kp:` 1 · 1 cursor · 3 settings —
+  VX-498 + VX-507 + VX-511 + the key-proof enrollment LIVE ON THE FINAL BUILD.** The script then gained the role-filter
+  fix + the honest stop message (this commit).
+- **A privacy slip, recorded:** ONE ad-hoc FULL-SCREEN capture (taken to find a window the walk's one-window capture
+  missed) caught personal content beside the app; DELETED at once, said to her, her word: "it's fine - not a problem."
+  **The standing rule from it: walk captures are WINDOW- or REGION-scoped, never full-screen** (the script already
+  captures by window id; the rule binds the orchestrator's ad-hoc captures too). The script's capture() one-window
+  blindness (it shoots the FIRST window while the act lives in Settings) is the successor's small fix or a recorded
+  tool residue.
+- **Two live findings filed mid-walk from HER hands (her real Air, during this window):** **VX-533** (a missed Touch ID
+  prompt at the lobby can't be re-triggered; her open question — was the button visible-but-dead or gone?) and her
+  no-sync-keys state = VX-501's class (workaround given: lock, unlock by Touch ID — VX-487's half already in 0.10).
+- **OBSERVATION O-RW-1 (unverified — the successor verifies before any ticket):** after Sign out → Sign in (castle)
+  with the Settings window LEFT OPEN, the Protection pane shows NO account/Sync section (settings2–5 captures) though
+  the same pane showed it before the sign-out and unit C's fresh-opened panes always had it. Suspected: the pane's
+  account section doesn't recompose on an auth change while open. VERIFY FIRST: close and reopen Settings (or the
+  row's Protection… door); if the section appears, it is a recompose gap worth one ticket; if not, trace before naming.
+
+**THE MACHINE STATE AT THE CUTOVER (verify, don't trust):**
+- App RUNNING: pid 49433, the walk build (`~/dev/variorum-vx-510-stage/App/Variorum/DerivedData/vx510walk/...`), road
+  ARMED, fresh library in the slot, SIGNED IN AS `castle`, Settings window open on Protection (resized tall), NO act in
+  flight. The castle-leg evidence folder: `castle-leg-111112Z` beside the del run.
+- The slot's aside folders (all under `…/Application Support/`): `Variorum-dev-aside-vx510walk2` = THE DEV STORE's nine
+  files (inodes 191598614–20, 194722803/4 — restore must match); `…-pre` = the pre-step library; `…-del` = the del
+  walk's library `6c51f3d0`. The walk checkout `~/dev/variorum-vx-510-stage` sits at `389312534` (plus this commit's
+  tools after a checkout advance).
+- Accounts: `del` = standard rev 1 (fresh, synced once); `castle` = UNTOUCHED by the re-walk so far (standard, rev 15,
+  current passphrase = the env file's PASSPHRASE, words = C3's); `std` untouched (rev 3, PASSPHRASE2).
+- The stage claim `vx-510` renewed 240 min at ~05:00 MDT.
+
+**WHAT REMAINS OF THE RE-WALK (the successor's steps, in order):**
+1. The Castle leg on `castle` (the handoff's step 5): FIRST close/reopen Settings (O-RW-1's check) → "Sync this
+   library…" → the account's passphrase (the helper's `passphrase` field) → the join lands + round confirms → Use
+   Castle… (Always ask; both secrets by the helper) → ⌃⌘L → **VX-527's live presses at the lobby: the words-door TEXT,
+   the gap after the chevron, the row's top band — each opens the disclosure** → typed unlock (passphrase) → the log's
+   `the typed unlock loaded the account's sync keys for the session` (VX-501) → a note typed → the row "Synced" with no
+   key act + the server's container count up → the check door (VX-513): the account's passphrase → "…opens this library
+   and your account." → Use Standard… (both secrets) → Change passphrase… (current → the env's PASSPHRASE2) → **NO
+   Touch ID sheet at any point on the Standard side (VX-517; a region capture ~4 s after each press)** → prod rev
+   moves. THE ENV NOTE: after that door the castle account's current passphrase is PASSPHRASE2 — record it in this
+   file and the handoff (the file already holds both values; nothing is written to it).
+2. Sign the walk session OUT; quit at zero instances; remove the walk libraries' slot files and their `Backups/<id>`
+   folders BY THE KEY FILES' `library` ids (the three aside folders' libraries + any the leg makes); `mv` the dev
+   store's nine files back; INODES CHECKED against the list above; one plain relaunch (no road env; `ps eww`) → the
+   swap notice → "Sync off (dev store)" → quit; `Tools/stage release --who vx-510`; remove `~/dev/variorum-vx-510-stage`
+   (git worktree remove --force; it carries the env symlink and DerivedData).
+3. **CLOSEOUT (CLAUDE.md's ritual + the cutover handoff's step 6):** the canon deltas in the two-file shape
+   (SurfaceContracts' protection bullet: the first-round-on-every-account-act + the sheet's round line · the not-yet
+   row · the join door's label · the typed unlock loading the sync keys · the words card retiring on a landed act ·
+   the check door · VX-517's forgets-BY-NAME beside the Standard-never-reads-Touch-ID line (F-R1-3 (b)) · VX-527's
+   whole-label press target; CLAUDE.md's Environment gains the prod-test-road fence-exception line where the dev fence
+   is stated); the dated entry + narrative to `notes/AppSpecRecord.md`; `Tools/canon-size` in the handoff; the master
+   plan's closeout paragraph + the in-flight row retired; the QUESTIONS bundle (P-VX510-1…3, A1…A4, B1-1, B1-2, B2-1,
+   B3-1, B3-2, D-B8 (c)'s reading, F-B4-1's residue, + F-R1-3 (a)'s CastleRules rule-2 wording-faithfulness item);
+   ticket triage (close the members VX-498/501/503/506/507/509/511/513/517/527 + VX-510 at the merge; the filed set
+   grouped by priority in the handoff; VX-532/VX-533 stay open; VX-529 THE NEXT RUN — its kickoff is
+   `notes/handoffs/vx-529-kickoff.md`, committed at this sweep); `Tools/vx sync` on main; the MOBILE PARITY line (the
+   phone's not-yet row line — a `notes/MobileSoul.md` row); her handoff `notes/handoffs/vx-510-handoff.md` (drafted at
+   this sweep with PENDING slots — her six closeout calls + the drafted release notes); the PR `VX-510: …` (merge
+   commit; the attribution footer per CLAUDE.md: NONE); the STATUS banner of THIS FILE flipped to CLOSED; branch +
+   worktree cleanup; build-debris tidy (every `DerivedData/vx510*` folder, the walk evidence after the merge).
+
+## THE THIRD ORCHESTRATOR'S CASTLE LEG (2026-10-24 from 06:02 MDT — an Opus session at R-510-29; she slept, then said at 06:0x: "it's just you controlling the stage - you're running alone and i'm off the pro so go for it. the dev store is live but my store isn't")
+
+**The machine state, VERIFIED (not trusted) before any act:** the stage HELD by `vx-510` (renewed 240 min at 06:05);
+ONE Variorum instance — pid 49433 at the stage checkout's `vx510walk` build, its environment carrying
+`VARIORUM_PROD_TEST_ROAD=1` + the handed list and NO walk project (`ps eww`); her `/Applications` app absent. The stage
+checkout sits at `389312534`; the PRODUCT code is byte-unchanged from the closing batch's `b3c79a191` to the branch tip
+(`git diff --stat b3c79a191..HEAD -- . ':!notes'` names only `Tools/VisualWalk/helpers/vis-ax.swift` and
+`Tools/WalkKit/first-run-walk.sh`), so the running build IS the final product. The dev store's nine files in
+`Variorum-dev-aside-vx510walk2` carry EXACTLY the recorded inodes (191598614–191598620, 194722803/194722804); the slot
+holds the fresh walk library `edf04751`; `-pre` and `-del` hold the pre-step and del-leg libraries. Production
+(`Tools/prod-read.sh`): castle standard rev 15 · 6 cursors · 4 live containers; del standard rev 1 · 1 cursor; std
+standard rev 3 · 3 cursors · 1 container — every number as the record says. Driving: the walk script's own helpers
+(author check before every act, AXPress addressed to the pid, `type-prod-test-secret castle` for every secret) plus a
+scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-scoped captures, never full-screen).
+
+- **O-RW-1 — CONFIRMED, a recompose gap (06:06):** with Settings left open across the earlier sign-out → sign-in, the
+  pane's Sync section still read its SIGNED-OUT arm ("This library doesn't sync." · "Sign in to turn on sync." ·
+  Sign in…) while the main window's row read the signed-in not-yet face ("Sync isn't on for this library yet" ·
+  Protection…). Settings closed (its close button), reopened by the row's Protection… door → the section reads the
+  SIGNED-IN arm: "This library doesn't sync." · **Sync this library…** · **Sign out…**. So the open pane's Sync section
+  does not re-read on an auth change; a reopen reads it fresh. (The cutover's "NO account/Sync section" was the same
+  staleness seen above the fold of a short window.) → a ticket at the triage (Bug, Confirmed, Castle & sync).
+- **THE JOIN (06:08) — PASS.** Sync this library… → the sheet ("Your account already syncs… Your account is in Standard,
+  like this library.") → the account's passphrase by the helper → Turn on sync (the first press REFUSED by the author
+  check — her brief click, said in-session; HID idle then read 24 s and climbing, her app absent; retried once at her
+  "you can keep going") → `enroll: done #1 under dfe542ab · road: turnOnSync — library edf04751 now names account
+  *[removed for publication]*
+  *[removed for publication]*
+  account's writing is in this library now."** → Done → the row **"Synced 6:08 AM"**, SAME PID 49433 (started 05:11).
+  prod: cursors 6 → 7, vault rev 15 unchanged (a same-posture join changes no account lock).
+- **USE CASTLE (06:09) — PASS.** Always ask chosen; passphrase + words by the helper → `enter_castle: … the account
+  entered Castle (sync key d5db1253) … retired 1 own Apple key(s) … done #2 under bdc1d753 · road: useCastle — library
+  edf04751 now castle under bdc1d753` → prod **castle rev 16**; the row "Synced 6:09 AM".
+- **⌃⌘L (06:10)** → `road: locked — the library closed behind the lobby (VX-445)` → the lobby ("Open your library…
+  Touch ID isn't set up for this library."; the words disclosure closed, `v=0`).
+- **VX-527 — THE LIVE PRESSES (06:10–06:11; REAL cliclick clicks; the state read from the disclosure's AX value; the row
+  geometry from a 10×-zoomed region capture: the chevron glyph x≈511.8–516.3, the words' first glyph x≈522, the AX row
+  487–849 × 543–565):** **the words' own text (620,554) → OPENS** (`v=1`, the words field "Your twelve words, separated
+  by spaces" beneath) and a second click on the text closes it · **the empty row right of the words (800,554) → OPENS**
+  (the label fills the row) · **the chevron (514,554) → OPENS**, and closes · **the 4 pt gap after the chevron (519,554)
+  → does NOT open** · **the row's 4 pt top band (620,545) → does NOT open.** So her complaint ("the words don't open it";
+  "the click affordance is very small") is FIXED LIVE; B5's one named unverified assumption — SwiftUI honouring the
+  `.padding(4).contentShape(Rectangle()).padding(-4)` reach past the label's reported frame — is NOT honoured, and the
+  door is B5's stated fallback ("the chevron + the row-wide words, still the fix"). Recorded, not changed (no product
+  line after the ladder): a small ticket at the triage (the dead reach lines, or a reach that presses). The label's
+  press animation not observed (no capture can time it).
+- **VX-501 — THE TYPED UNLOCK (06:12) — PASS.** The passphrase at the lobby by the helper → Open → `road: opened —
+  library edf04751 key bdc1d753 …` → **`road: the typed unlock loaded the account's sync keys for the session (sync key
+  d5db1253)`** — the NEW Castle sync key → the row **"Synced 6:12 AM"** with no key act → a note through the quick entry
+  ("VX-510 third orchestrator castle leg note after the typed unlock", ⏎ — it opened in Write as "2026-10-24") → prod
+  **live containers 4 → 5**, the newest stamped 12:12:48Z.
+- **VX-513 — THE CHECK DOOR IN CASTLE (06:14) — PASS.** (Settings had closed at the lock — SettingsLockCloseTests' rule —
+  and reopened by ⌘,.) "Check my passphrase or twelve words…" → the account's passphrase → **"That passphrase opens
+  this library and your account."**; log `road: a secret check (read-only, nothing written) — the library: opens; the
+  account: opens`; prod vault rev 16 and its `updated_at` UNMOVED (12:09:42Z — Use Castle's own stamp).
+- **VX-517 — THE STANDARD SIDE (06:15–06:16) — PASS.** The evidence per press: every on-screen window's OWNER name listed
+  each second for 4–5 s after the press (`owners`, scratch — names and bounds only, never a title or a pixel; any system
+  authentication sheet would list under its own process) + a region capture inside Variorum's bounds (her Notes window
+  stands behind Variorum — the region never reaches it). **Use Standard…** (passphrase + words by the helper) → NO
+  foreign window at any second → `leave_castle: … the account left Castle … minted a fresh own Apple key … done #3 under
+  d803ea1f · road: useStandard — library edf04751 now standard under d803ea1f` → prod **standard rev 17**. **Change
+  passphrase…** (current = PASSPHRASE, new + again = PASSPHRASE2, all by the helper) → NO foreign window at any second;
+  the act took 0.38 s (a Touch ID sheet would have held it) → `change_passphrase: done #4 under d803ea1f · road:
+  changePassphrase — the current key re-locked (d803ea1f), the account's lock with it` → prod **standard rev 18**.
+  **Said plainly:** this leg chose Always ask, so no Touch ID sync-keys item for this account existed on this Mac — it
+  proves the final build's Standard road raises nothing; the STALE-item case was unit C's green leg (`fe42afe4f`, the
+  same `CommonSteps`/`KeyDoors`/`AccountActs`/`PlanRunner` code as the tip) and the real-keychain arm in the closing batch.
+- **THE CASTLE LEG: GREEN.** **THE ENV NOTE (the handoff's ask):** the `castle` account's CURRENT passphrase is now the
+  env file's **PASSPHRASE2** (`VARIORUM_PRODTEST_CASTLE_PASSPHRASE2`; the file unchanged — it holds both); its words are
+  C3's (`~/.variorum/prod-test-words-castle`, unchanged). End state on prod: **standard, vault rev 18, 7 cursors, 5 live
+  containers**. Tool residue: the worktree's `Tools/WalkKit/guard.sh` calls a compiled `wl2` that is absent there (its
+  on-this-Space check silently passes; the author checks still run) — a line for the triage. A standing log pattern,
+  recorded not chased: SQLCipher's "hmac check failed for pgno=1" lines follow each landing's re-read on the act's own
+  thread (746 in this launch, 154 in the del run's) — the copy listings trial-opening the dev slot's many older walk
+  libraries' backups; nothing refused, nothing surfaced.
+- **THE RESTORE (06:17–06:21) — CLEAN.** Signed OUT (Settings ▸ Protection ▸ Sign out… → "Sign out of this Mac?" →
+  Sign Out; the row "Signed out") → ⌘Q → ZERO instances. The re-walk's three libraries mapped by their key files'
+  `library` ids — `edf04751` (the slot), `7fee09b0` (`…-pre`), `6c51f3d0` (`…-del`) — and REMOVED with their
+  `Backups/<id>` folders (14 files, every one stamped today 04:53–06:15, listed before removal); untouched: the dev
+  store's `Backups/e11e5233`, every older `Backups/` entry, `RESTORE.md`, `safety-copies/`, the three older Previous
+  Libraries entries (Oct 7, 18, 20 — no new one was made). **The dev store's nine files moved back by `mv` — EVERY INODE
+  AS RECORDED** (191598614–191598620, 194722803/194722804); the empty aside folder removed. One PLAIN relaunch (pid
+  56345, `ps eww` — zero `VARIORUM_` keys) → rule 21's "This is a different library than the one this Mac last had open"
+  → OK → **"Sync off (dev store)"**, its own words card and its pre-existing restore-hold banner ("…as of October 20,
+  2026…") exactly as unit C's close left them → ⌘Q → zero instances → **`Tools/stage release` — STAGE FREE (06:21).**
+  The stage checkout `~/dev/variorum-vx-510-stage` (the walk build + the evidence folder) stays until the post-merge
+  build-debris tidy, which deletes it with every `DerivedData/vx510*` folder.
+
+## THE CLOSEOUT (2026-10-24, the third orchestrator — CLAUDE.md's ritual)
+
+- **The gates, all green:** the ladder (two rounds, 0 BLOCKER · 0 MAJOR, every fix confirmed); the closing stage batch
+  (row 10); the del leg live on the final build (the successor); the Castle leg live on the final build + the clean
+  restore (above). **The version gate for 0.10.1** (`25f547f01` — the Mac target's `MARKETING_VERSION` 0.10 → 0.10.1, two
+  lines, and `ReleaseNotes-0.10.1.md` = the handoff's drafted notes verbatim, one line per bullet): the five suites that
+  read the version or the notes (`VersionSchemeTests`, `WhatsNewTests` — its `theRunningVersionCarriesItsNotesInTheBundle`
+  — `SupportDraftTests`, `WhatsNewWaitsAfterAdoptionTests`, `WhatsNewWaitsCompositionTests`) on the Mac target under a
+  held stage claim (incremental over L1's derived data): **`✔ Test run with 26 tests in 5 suites passed`**,
+  `** TEST SUCCEEDED **`, no `skipped:` line; zero instances after.
+- **The canon deltas (the two-file shape — contract lines in place, one pointer each; the narrative is
+  `notes/AppSpecRecord.md`'s dated entry):** SurfaceContracts' protection bullet — the first round after every account
+  act that changes sync's standing and the sheet that shows it (VX-498/VX-507), the not-yet row (VX-506), the join's
+  door "Sync this library…", the words card retiring at a landed set-up/join/Move (VX-511 — CastleRules rule 2 already
+  carries R-510-28's clause), the typed unlock loading the account's sync keys (VX-501 — the "loads nothing until"
+  sentence replaced), vault-first key derivation (VX-503), Standard-never-reads-Touch-ID + forgets by name (VX-517 —
+  F-R1-3 (b)), the check door (VX-513), the lobby's words door (VX-527). CLAUDE.md's Environment gains the prod test
+  road's line beside the walks rule. AppSpec, OverallModel, SyncSpec: no line changes (no `Sync/` line, no schema, no
+  operation). **`Tools/canon-size`: 125,663 / 150,000** (headroom 24,337; was 125,087).
+- **QUESTIONS #240** — the provisional bundle (P-VX510-1…3, A1…A4, B1-1, B1-2, B2-1, B3-1, B3-2, D-B8 (c)'s reading,
+  F-B4-1), PROVISIONAL at her R-510-26.
+- **MOBILE PARITY:** `notes/MobileSoul.md` **PL-58** — the phone's row reads the not-yet line over an unjoined library;
+  everything else rides shared code behavior-neutral until VM-8's doors.
+- **The tickets:** the members VX-498 · VX-501 · VX-503 · VX-506 · VX-507 · VX-509 · VX-511 · VX-513 · VX-517 · VX-527 and
+  the run ticket VX-510 close with the merge (VX-498/VX-503/VX-517's evidence moved Suspected → Confirmed — each traced
+  and shown live). Filed tonight: **VX-534** (O-RW-1) · **VX-535** (VX-527's dead reach) · **VX-536** (`guard.sh`'s
+  absent `wl2`) · **VX-537** (the walk script's join arm + every-window capture). VX-532/VX-533 gained their projects.
+  The run's filed set, grouped by priority, is in her handoff.
+- **THE RULINGS RECONCILED** (each ruling the run built, re-read against what shipped — "every", "all" first):
+  R-510-1 ("never delete the fence that keeps every other walk off prod") — kept: the fence stands for every launch
+  without the switch, and the road admits only listed `vxtest` accounts (`aHerShapedAddressIsNeverAdmitted`) ✔ ·
+  R-510-2's lifecycle ("signing up, syncing, making a backup, restoring a backup, changing keys, trying the backup
+  again… for both") — met for both postures on production (unit C: S2–S15, C1–C5) with ONE honest gap: a RESTORE was
+  walked only in Standard (S14); in Castle the backups were made and opened by Look inside with old, current and new
+  secrets (C3), never restored through Make this my library — recorded, not hidden (the restore road is posture-blind
+  code, the floor's typed arms were the Castle-specific part) · R-510-4's map — delivered (THE MAP, 17 seams) ✔ ·
+  VX-507's letter ("an act that says done" confirms its first round) — every account act that changes sync's standing,
+  re-keying joins included (F-6 (A)); the key doors don't change sync's standing and run none ✔ · R-510-14 ("Join
+  retires the card") — set-up, join in either posture, and Move ✔ · R-510-16/VX-517 ("forgotten") — every forget and
+  drop by name; the one residue F-B4-1 accepted with its reasoning ✔ · R-510-27 (Pre-launch: VX-529 only) — on the
+  board ✔.
+- **THE RELEASE ROAD's step 0, read for THIS release (the successor2 handoff's step 3):** release.sh's step 0 asks
+  `FirstRunDrillTests` green on this commit AND `Tools/WalkKit/first-run-walk.sh std` PASSED on a Debug build of it. The
+  drill ran green in the closing stage batch on the final product tree (`b3c79a191`; the product code is unchanged to
+  the tip — only `Tools/`, notes, the version and the notes file since); the scripted walk's SET-UP arm needs a VAULTLESS
+  account and all three standing accounts now hold vaults, so its letter is met by today's live fresh-account first run
+  on the final build (the re-walk's del leg: the sheet confirmed, no relaunch, server-verified) plus the Castle leg's
+  join. → **VX-537** (a join arm or a scripted fresh-account pre-step).
+- **After the merge (main is hers — recorded in memory and the morning summary, folded into the next closeout):** the
+  0.10.1 release road from main, the `/Applications` refresh behind a fresh A1 at a zero-instance window, the worktree,
+  branch and build-debris tidy.
+
+## HER CLOSEOUT ANSWERS (2026-10-24, at the cutover sitting — verbatim-faithful; the handoff's PENDING slots close on these)
+
+- **R-510-22 — THE RELEASE: YES, after the merge** ("Yes, release after merge"). 0.10.1 from this run's merge; the
+  drafted notes in `notes/handoffs/vx-510-handoff.md`; the publish per the standing site procedure, presented to her.
+- **R-510-23 — THE TEST ACCOUNTS: keep all three** (std + castle the standing lifecycle pair; del the fresh-account /
+  deletion vehicle, re-minted per drill; secrets stay in `~/.variorum`, mode 600).
+- **R-510-24 — VX-521 CLOSED at her word** (keep today's behavior: shown words are always the live words).
+- **R-510-25 — VX-528 CLOSED at her word, per-Mac seeding stands:** "i'd lean towards keep it - if someone makes a
+  backup their library and they've already seen the tutorial they should be able to delete it i feel. unless you think
+  there's a really compelling scenario. and they can always restore it if they really miss it." The orchestrator found
+  no compelling counter (the bare-second-library case is served by the classics' restore doors).
+- **R-510-26 — THE WORDING BUNDLE stays PROVISIONAL** ("Keep provisional, review later"): the bundle files in
+  `notes/QUESTIONS.md` at the closeout as planned; no re-ask until her pass.
+- **R-510-27 — PRE-LAUNCH: VX-529 ONLY** ("VX-529 only") — flagged on the board; no other filed ticket gates launch.
+- **VX-533, her distinguishing fact:** "it looks like an apple timeout it's weird. it gets pale and then disappears,
+  doesn't seem controlled by variorum" — the SYSTEM sheet's own fade; the ticket's trace question updated (does the
+  lobby's button still fire a FRESH context after the system sheet times out).
+- **CastleRules rule 2 (F-R1-3 (a)) — HER QUESTION BACK, pending her word on the clause:** "should the words be marked
+  recorded? is there any way for them to setup, join, or move without showing the words? or no? i want the document to
+  remain true." The honest answer (given to her at the sitting): the SET-UP and a words-typed join/Move require TYPING
+  the twelve words, so she holds them; **a join or Move by PASSPHRASE adopts the account's words WITHOUT showing them**
+  (the live S15 notice names whose words they are, not the words) — D-B6's recorded consideration, and exactly why her
+  R-510-14 ruling kept Settings ▸ New Words as the deliberate road. So the truthful clause must say the card retires
+  because the library's words ARE the account's (rule 7) and a look there would mint fresh words and replace the
+  account's — never that she "recorded" them. Draft offered: appending to rule 2 — "Once the library syncs, its pair is
+  the account's (rule 7), so the card retires at a landed set-up, join or move: a look there would mint fresh words and
+  replace the account's; fresh words live behind the deliberate new-words door." HER WORD decides the clause (or leaves
+  rule 2 as is, SurfaceContracts alone carrying the third road).
+- **R-510-28 — THE RULE-2 CLAUSE RATIFIED (her words: "yes. I think that makes it logically consistent, right?"):**
+  the drafted clause landed in CastleRules rule 2 verbatim with the header's dated amendment line (this commit); the
+  consistency reading confirmed at the sitting (rule 2 keeps "nothing stores the words"; rule 7 carries the why; rule 6
+  stays the one road to fresh words). F-R1-3 (a) CLOSES with it.
+- **R-510-29 — THE SECOND CUTOVER, her ruling at the sitting's close (verbatim):** "honestly - you're already at 737k
+  tokens. i'll start the followup in a new session with a new orchestrator that's opus for the rest of it. if documents
+  are all up to date good, if not fix them, and give me a kickoff prompt now. i'm going to sleep, so it should run
+  everything through provisionally including just releasing the change." → A FRESH OPUS SESSION finishes the run
+  (the Fable orchestrator's safeguards stalled three times on the GUI driving; the ladder, the batch and the del leg
+  are done). THE RELEASE IS AUTHORIZED in advance (with R-510-22) — on GREEN gates only: a red Castle leg or a red
+  release gate HOLDS the release, and the morning summary says why. Overnight etiquette: she sleeps — no sounds, no
+  ambient; everything bundled for the morning. The successor's kickoff: `notes/plans/fixes/vx-510-successor2-handoff.md`.
+
+## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
+
+Drafted by the orchestrator 2026-10-23 from the repo's records, the code and read-only production facts. **Covered** =
+a standing automated or per-release check exists; **once** = proven live a single time, nothing standing; **never** =
+no live proof. Ranked by launch risk. The rows marked ▶ ride THIS run (units B/C); the rest are proposals.
+
+| # | Seam | Evidence today | Gap / risk | What would prove it |
+|---|---|---|---|---|
+| ▶1 | **First run: sign-up → set-up → first round** | never (both testers failed; VX-498 a VX-329 regression) | the whole of this run | VX-509's drill pins + unit C live on prod (3 accounts) |
+| ▶2 | **A second device joins an account** | once per window (her Air, the throwaway walks) | the join's round rode an accidental become-active (T-1) | unit C: a second library joins each test account; rows read back |
+| ▶3 | **Backup → restore → key change → older backup opens** (rules 4/5/6/17) | headless core lifecycle proofs (VX-378 U3); never live on prod | the floor's promise has never run against the real vault + real keychain | unit C, both postures |
+| ▶4 | **Castle typed unlock keeps syncing** (VX-501) | never (known red) | Always-ask Castle stops syncing after any lock | unit B fix + unit C's Castle leg |
+| ▶5 | **Account deletion** | headless only | the server purge + the protection half never driven end to end on prod | unit C deletes the `del` account; prod reads show zero rows, no vault |
+| 6 | **The abuse guard after the 500k pool** (`sync_push`'s 50k/24h regime, `VARIORUM_WRITE_QUOTA`) | never live; her account reads lifetime 152,484 after ONE month (2026-09-24 → today) | she meets the daily regime in ~2–3 months; nobody has seen the app's face for the refusal, or a 10k-note import after the pool (refused for days by the stated corner) | a drill on the throwaway with the pool pre-filled by SQL; the app's row read live; then 13t re-prices (her call) |
+| 7 | **The changefeed's 8 s statement timeout** (VX-495, Pre-launch) | measured: her ~108k-row first window costs 1.5–3 s | an account ~3–4× hers can never complete a first catch-up | VX-495's server query, then a scale drill at 4× on the throwaway |
+| 8 | **Sparkle updates** | once (her Air 9168→9172 at the 0.10 publish); `verify-appcast`/`verify-published` check the feed | no drill of update-from-previous on a clean Mac per release; a lockstep-bump release reaching a user mid-window never watched | a per-release update drill on the Air (her say-so machine rule) from the last published build |
+| 9 | **Email-link flows** (sign-up confirmation, password reset, branded links) | once (14d) | this run confirms test users by PAT, so the link itself stays unproven; a reset-by-email never driven | one account per release through the real link (her inbox) |
+| 10 | **Two devices editing at once on the real wire** (S5 conflict-as-variant, repairs) | covered by the fake-server convergence suites; never live by design | PL/pgSQL behaviour the fake cannot reach (the 42702/42501 class was found only live) | a two-Mac drill (Pro + Air) on a test account: the same take edited offline on both, then reconnected |
+| 11 | **Castle across two devices** (rules 10/12 — the follow in and out) | the vx-307 crossing walks on the dev store; her own single crossing on prod | the follow on a SECOND device against prod never watched | unit C's Castle account + a second library following |
+| 12 | **The Apple road across Macs** (rule 8 — iCloud Keychain reaching her other Mac; rule 11's deletion reaching every device) | never deliberately | the quiet road's cross-Mac behaviour is Apple's, but rule 11's sweep claim is ours | a two-Mac observation on one Apple ID with a Standard test library |
+| 13 | **Backups in an iCloud Drive folder** (dataless/evicted files) | headless temp-dir tests | a picked folder in iCloud Drive can hold placeholders; restore reading a not-downloaded pair untested | one restore from an evicted iCloud Drive pair |
+| 14 | **The phone** (Face ID riding the press, background push at suspension, iOS file protection) | marker-13-refused since 10-22 (VM-8 deferred) | every phone live seam is unproven on 0.10 | VM-8, then the same first-run + lifecycle drill on the device |
+| 15 | **Token refresh over days; two processes** (VX-481) | unit tests with fake transports | a rotating refresh token racing between the app and a second process | a soak with the MCP shim connected across a token expiry |
+| 16 | **Developer ID entitlements / keychain access groups** | **covered** — `Tools/Release/verify-export.sh` (section D) checks the groups every release | — | — |
+| 17 | **Large-corpus save** (VX-497) | once at 110k rows (VX-494's live proof) | the writer held ~4–7 min; the phone's memory | VX-497 / VM-8 |
+
+## OPEN ITEMS (bundled for her; kept current)
+
+- **THE KICKOFF SITTING BUNDLE (piece 3)** — asked at kickoff: D-ROAD's exact shape and the permissions it needs;
+  the test accounts' inbox (sign-up confirmation emails); the full two-posture lifecycle drill in this run vs a
+  chartered follow-up; VX-503 as a rider.
+- **P-VX510-1 — VX-507's sheet words (PROVISIONAL, hers; the first built):** progress — "Syncing your library with
+  your account…" with "You can close this — sync keeps going, and the bar at the bottom of the window says when
+  it's done."; set-up landed — "Synced. Your library is on your account now."; join landed — "Synced. Your
+  account's writing is in this library now."; blocked — "Sync hasn't run yet: ‹the row's own sentence›."
+- **P-VX510-2 — VX-506's unjoined row (PROVISIONAL, hers):** (a, built) "Sync isn't on for this library yet" with
+  the Protection… door · (b) "This library doesn't sync yet".
+- **P-VX510-3 — VX-506's Settings door over the JOIN arm (PROVISIONAL, hers; the set-up arm keeps "Turn on
+  sync"):** (a, built) "Sync this library…" · (b) her own "Sign into sync…" · (c) "Join your account's sync…" —
+  cased to the existing door idiom.
+- **Unit A's word items (PROVISIONAL, hers — the record's Piece 3/4):** **P-VX510-A1** the held line reads "…press
+  Resume Sync in the main window's banner" (the row's "in the banner below" is wrong from a sheet over Settings) ·
+  **P-VX510-A2** a round that ran but stalled at a straggler still reads "Sync hasn't run yet: …" — a third lead? ·
+  **P-VX510-A3** not configured reads the row's "Sync is off" (on a fenced dev store the row says "Sync off (dev
+  store)" — a Debug-only mismatch, accepted) · **P-VX510-A4** the join's sheet TITLE and button still say "Turn on
+  sync" (the design changed the door only) · the not-yet row wears the quiet caption style, not the warning style.
+- **Unit B's word and timing items (PROVISIONAL, hers):** **P-VX510-B1-1** the follow's line "Synced. This library is up
+  to date with your account again." · **P-VX510-B1-2** the road's refusal line · **P-VX510-B2-1** VX-501's vault read
+  bounded at 10 s (alternatives: shorter, or no wait plus a round when the load lands) · **P-VX510-B3-1** the check door's
+  words (lead "Type your passphrase or your twelve words to check them. Checking changes nothing."; Check · Checking… ·
+  Close; "That passphrase opens this library." / "…opens this library and your account." / "…opens this library, but not
+  your account.") · **P-VX510-B3-2** the fourth answer "…doesn't open this library, but it opens your account." (built (b);
+  the architect ruled it in, provisionally).
+- **Her calls on filed tickets:** VX-521 (keep-and-close recommended) · VX-527 as a rider in this run? (default: no) ·
+  VX-528 (per-Mac seeding intended?) · Pre-launch on any of VX-517…VX-528.
+- ~~Her hands, later: the Touch ID window for VX-517's live proof~~ — DONE 2026-10-24 00:39–01:21.
+- ~~VX-529 — her call~~ — RULED: its own run, next (R-510-19); the boundary R-510-20 (no rule or storage change; both
+  secrets typed; the set-aside-and-rejoin road as the second road).
+- **For her at closeout:** keep the `std` and `castle` prod test accounts as standing release-drill accounts? · Pre-launch
+  on VX-517…VX-531 · VX-521 (keep-and-close recommended) · VX-528 (per-Mac seeding intended?) · the PROVISIONAL word
+  bundle (P-VX510-1…3, A1…A4, B1-1, B1-2, B2-1, B3-1, B3-2).

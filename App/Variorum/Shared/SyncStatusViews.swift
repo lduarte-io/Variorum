@@ -60,6 +60,10 @@ nonisolated struct SyncRowFace: Equatable {
     enum Kind: Equatable {
         case devStore, signedOut, syncOff, syncing, offline
         case keysLocked, keysReplaced, notEntitled, error, idle
+        /// VX-510 D-A3 (VX-506): the keys refusal over a library whose record names NO account — it has not joined, so
+        /// there is nothing locked, only a not-yet (her line: "sync shouldn't seem like you're restarting it"). The calm
+        /// quiet voice; the locked face's own door (Settings ▸ Protection, where Turn on sync stands).
+        case notOnYet
         /// VX-314: the signed-in account is not this library's — the engine
         /// refuses rounds (outbox intact, cursor unmoved). Calm paused
         /// voice; the door reaches the Account tab, where sign-in and the
@@ -75,6 +79,11 @@ nonisolated struct SyncRowFace: Equatable {
         /// but "Synced <time>" would be saying "fine" while nothing new
         /// can come in. Same doors as idle; an honest line instead.
         case stalled
+        #if DEBUG
+        /// VX-510 D-B3 — the prod test road refused the signed-in account (it is not a listed test account): no chain,
+        /// and the row says why — never "Sync off (dev store)" alone, never silent. DEBUG walk machinery only.
+        case notOnTheProdTestRoad
+        #endif
     }
 
     struct Door: Equatable, Identifiable {
@@ -110,6 +119,11 @@ nonisolated struct SyncRowFace: Equatable {
     /// syncing row is mid-answer). `canOpenProtection` (VX-486) is the
     /// `canCheckForUpdates` idiom: true only where a Protection pane door
     /// was injected (P-2).
+    ///
+    /// `libraryJoined` (VX-510 D-A3 — VX-506): whether the OPEN library's record names an account (the bootstrap's
+    /// `RoadStandingModel.syncsWithAnAccount`, re-read at every account landing — VX-473). It splits ONLY the keys refusal:
+    /// false — the library has not joined, so the row says a not-yet, never "locked"; true or nil (not known — a
+    /// composition that injects no fact, every existing pin) — the shipped locked face, unchanged.
     static func face(
         allowsSync: Bool,
         isConfigured: Bool,
@@ -119,7 +133,8 @@ nonisolated struct SyncRowFace: Equatable {
         lastErrorIsOffline: Bool,
         stalled: Bool = false,
         canCheckForUpdates: Bool = false,
-        canOpenProtection: Bool = false
+        canOpenProtection: Bool = false,
+        libraryJoined: Bool? = nil
     ) -> SyncRowFace {
         // The A4 fence: a dev-store session never syncs — no sign-in door
         // either (the one mirror belongs to the real store; signing in
@@ -155,8 +170,9 @@ nonisolated struct SyncRowFace: Equatable {
                 // live (a Touch ID unlock or a key-door act loads the keys —
                 // VX-487), and only where that pane exists (P-2): with no
                 // door the row says the sentence alone, as `.appOutOfDate`.
+                // VX-510 D-A3 (VX-506): a library that has not joined is not locked — the not-yet face, the same door.
                 return SyncRowFace(
-                    kind: .keysLocked,
+                    kind: libraryJoined == false ? .notOnYet : .keysLocked,
                     doors: canOpenProtection
                         ? [Door(label: Self.openProtectionLabel, act: .openProtection)]
                         : [])
@@ -308,6 +324,16 @@ nonisolated struct SyncRowFace: Equatable {
     /// `Account…` idiom. PROVISIONAL (P-VX486-1), hers to reword.
     static let openProtectionLabel = "\(ProtectionCopy.protectionPaneTitle)\u{2026}"
 
+    #if DEBUG
+    /// **VX-510 D-B3 — the prod test road's refusal face** (pure, pinned): when the road refused the signed-in account at
+    /// connect (`AccountState.notOnTheProdTestRoad`), the row says so — its door the Account sheet, where she signs out or
+    /// in as a listed test account; nil otherwise (the row's ordinary face).
+    static func prodTestRoadRefusal(refused: Bool) -> SyncRowFace? {
+        guard refused else { return nil }
+        return SyncRowFace(kind: .notOnTheProdTestRoad, doors: [Door(label: "Account…", act: .openAccount(.account))])
+    }
+    #endif
+
     /// The row's line (calm: the quiet caption, never the error red).
     static let appOutOfDateLabel = "Sync paused \u{2014} this version of Variorum needs an update"
 
@@ -363,6 +389,20 @@ extension EnvironmentValues {
     }
 }
 
+/// VX-510 D-A3 (VX-506): whether the OPEN library's record names an account — the bootstrap's
+/// `RoadStandingModel.syncsWithAnAccount`, injected by each platform's root beside its library (observable, re-read when an
+/// account act lands). nil (not known — no injection): the row keeps the shipped locked face.
+private struct LibrarySyncsWithAnAccountKey: EnvironmentKey {
+    static let defaultValue: Bool? = nil
+}
+
+extension EnvironmentValues {
+    var librarySyncsWithAnAccount: Bool? {
+        get { self[LibrarySyncsWithAnAccountKey.self] }
+        set { self[LibrarySyncsWithAnAccountKey.self] = newValue }
+    }
+}
+
 /// One row: signed-in + configured → last sync / pending / error;
 /// signed out → the sign-in door.
 struct SyncStatusRow: View {
@@ -379,6 +419,8 @@ struct SyncStatusRow: View {
     /// pane exists (the Mac's main window); nil everywhere else, and then
     /// the locked row renders no door.
     @Environment(\.protectionPaneDoor) private var protectionPaneDoor
+    /// VX-510 D-A3: the open library's record names an account (nil: not known — the shipped locked face).
+    @Environment(\.librarySyncsWithAnAccount) private var libraryJoined
     #if os(macOS)
     /// VX-486: the Protection door brings the Settings window up beside
     /// its pane ask (the ask alone only re-points a window already open).
@@ -391,7 +433,11 @@ struct SyncStatusRow: View {
     private var sync: SyncSession { services.sync }
 
     private var face: SyncRowFace {
-        SyncRowFace.face(
+        #if DEBUG
+        // VX-510 D-B3: the prod test road refused the signed-in account — the row says why, before anything else.
+        if let refusal = SyncRowFace.prodTestRoadRefusal(refused: services.account.notOnTheProdTestRoad) { return refusal }
+        #endif
+        return SyncRowFace.face(
             allowsSync: sync.allowsSync,
             isConfigured: sync.isConfigured,
             signedIn: services.account.variorum != nil,
@@ -400,7 +446,8 @@ struct SyncStatusRow: View {
             lastErrorIsOffline: sync.status.lastErrorIsOffline,
             stalled: sync.status.pullStalled,
             canCheckForUpdates: checkForUpdatesDoor != nil,
-            canOpenProtection: protectionPaneDoor != nil)
+            canOpenProtection: protectionPaneDoor != nil,
+            libraryJoined: libraryJoined)
     }
 
     var body: some View {
@@ -503,69 +550,105 @@ struct SyncStatusRow: View {
     /// container changes nothing).
     @ViewBuilder
     private func rowLabel(for kind: SyncRowFace.Kind) -> some View {
+        // VX-510 D-A2: every line is `line(for:)`'s — the one presentation source the account act's first-round sheet
+        // says too.
+        let line = Self.line(for: kind, lastSuccessAt: sync.status.lastSuccessAt)
         switch kind {
-        case .devStore:
-            Text("Sync off (dev store)")
-                .pageCaption(pageStyle)
-        case .signedOut:
-            Text("Signed out")
-                .pageCaption(pageStyle)
-        case .syncOff:
-            Text("Sync is off")
+        case .devStore, .signedOut, .syncOff:
+            Text(line)
                 .pageCaption(pageStyle)
         case .syncing:
             // CF-15: the indicator rides BESIDE the label; the doors stay.
             ProgressView().controlSize(.small)
-            Text("Syncing…")
+            Text(line)
         case .offline:
-            Text(Self.offlineLabel)
+            Text(line)
                 .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
             pendingNote
         case .keysLocked:
             // Phase 14b (L9): nothing is lost while paused; the outbox
             // keeps everything.
-            Text(Self.lockedLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
+        case .notOnYet:
+            // VX-510 D-A3 (VX-506): a not-yet, never a lock — the quiet caption (the sync-off register), the engine's
+            // refusal in the hover as every paused state's.
+            Text(line)
+                .pageCaption(pageStyle)
+                .help(sync.status.lastError ?? "")
         case .keysReplaced:
-            Text(Self.keysReplacedLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .accountMismatch:
             // VX-314 (PROVISIONAL words): paused, naming the fix; the
             // engine's full sentence rides the hover.
-            Text(Self.accountMismatchLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .notEntitled:
             // Phase 14c (L7): SECONDARY styling, deliberately — the same
             // quiet voice as signed-out/offline, never the error red or
             // the keys orange (reads as normal).
-            Text(HostedSyncTier.rowLabel)
+            Text(line)
                 .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .stalled:
             // Row 12 (17d P31): warning-styled, never the error red — the
             // round itself was clean; what's honest is that new changes
             // are held up.
-            Text(Self.stalledLabel)
+            Text(line)
                 .pageCaptionWarning(pageStyle)
             pendingNote
         case .appOutOfDate:
             // R-13r-13: calm — the quiet caption (the notEntitled register),
             // never the error red or the keys orange. The engine's own
             // sentence rides the hover, as every paused state's does.
-            Text(SyncRowFace.appOutOfDateLabel)
+            Text(line)
                 .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
         case .error:
-            Text("Sync error")
+            Text(line)
                 .pageCaptionError(pageStyle)
         case .idle:
-            Text(lastSyncLabel)
+            Text(line)
                 .pageCaption(pageStyle)
             pendingNote
+        #if DEBUG
+        case .notOnTheProdTestRoad:
+            // VX-510 D-B3: a refusal, warning-styled (the paused register) — the walker must not miss it.
+            Text(line)
+                .pageCaptionWarning(pageStyle)
+        #endif
+        }
+    }
+
+    /// **VX-510 D-A2 — THE ROW'S LINE, in words: ONE presentation source.** The row renders exactly this for each face,
+    /// and an account act's first-round sheet says it for what blocks the round (never re-typed there). `lastSuccessAt`
+    /// is the idle line's stamp.
+    static func line(for kind: SyncRowFace.Kind, lastSuccessAt: Date?) -> String {
+        switch kind {
+        case .devStore: return "Sync off (dev store)"
+        case .signedOut: return "Signed out"
+        case .syncOff: return "Sync is off"
+        case .syncing: return "Syncing\u{2026}"
+        case .offline: return offlineLabel
+        case .keysLocked: return lockedLabel
+        case .notOnYet: return notOnYetLabel
+        case .keysReplaced: return keysReplacedLabel
+        case .accountMismatch: return accountMismatchLabel
+        case .notEntitled: return HostedSyncTier.rowLabel
+        case .stalled: return stalledLabel
+        case .appOutOfDate: return SyncRowFace.appOutOfDateLabel
+        case .error: return "Sync error"
+        case .idle:
+            guard let lastSuccessAt else { return "Not synced yet" }
+            return "Synced \(lastSuccessAt.formatted(date: .omitted, time: .shortened))"
+        #if DEBUG
+        case .notOnTheProdTestRoad: return notOnTheProdTestRoadLabel
+        #endif
         }
     }
 
@@ -618,6 +701,16 @@ struct SyncStatusRow: View {
     /// PROVISIONAL (P-VX486-2), hers to reword.
     static let lockedLabel = "Sync locked — this \(ProtectionCopy.deviceName) hasn't unlocked your account's sync keys"
 
+    /// VX-510 D-A3 (VX-506) — the unjoined library's line: the keys refusal over a library whose record names no account
+    /// is a not-yet, never a lock. PROVISIONAL (P-VX510-2 (a)), hers to reword.
+    static let notOnYetLabel = "Sync isn't on for this library yet"
+
+    #if DEBUG
+    /// VX-510 D-B3 — the prod test road's refusal line (the dev store syncs with production only for a listed test
+    /// account). PROVISIONAL P-VX510-B1-2, the implementer's draft, hers to reword.
+    static let notOnTheProdTestRoadLabel = "Sync off (dev store) \u{2014} this account isn't a listed test account"
+    #endif
+
     /// CF-16's row line: the replaced-keys presentation of the engine's
     /// payload-crypto refusal (wording derived from the ruled surface
     /// copy; the door beside it opens the Encryption tab, whose headline
@@ -628,11 +721,6 @@ struct SyncStatusRow: View {
     /// different account than the signed-in one; the door beside it opens
     /// the Account tab (sign in, or the Move road).
     static let accountMismatchLabel = "Sync paused — this library belongs to a different account"
-
-    private var lastSyncLabel: String {
-        guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }
-        return "Synced \(last.formatted(date: .omitted, time: .shortened))"
-    }
 
     /// The offline presentation's one string (Step A0's row letter),
     /// exposed for the presented-state pin.

@@ -799,3 +799,49 @@ do… this is obviously the biggest issue right now"** — VX-510 ("Run: the fir
 VX-507, VX-509, VX-506) runs next under a fresh orchestrator with several live accounts as the acceptance and
 read-only production verification; VM-8 deferred behind it, its kickoff standing in the handoff's Appendix B.
 canon-size 125,087 / 150,000.
+
+## 2026-10-24 — VX-510 (Run: the first-run sync failures; PR #186)
+
+**The effort (the full record is `notes/plans/fixes/vx-510-first-run-sync.md` — her rulings R-510-1…29, THE TRACE and
+THE ARCHAEOLOGY, the units' records A · B1–B5 · L1, unit C's live drill on production, THE MAP, the ladder, the
+re-walks, THE CLOSEOUT; her handoff `notes/handoffs/vx-510-handoff.md`).** Run under `/architect-phase` from her
+2026-10-23 kickoff to a 2026-10-24 morning merge, across three orchestrators: the session moved Fable → Opus at
+R-510-5 ("I keep hitting safeguards on Fable - keep going"); a successor ran the sanity check she asked for ("consider
+the work that has been done with an OPEN mind, as an evaluator… was that test the right test?"), the ladder, the closing
+stage batch and the first re-walk leg; a third (Opus, R-510-29: "it should run everything through provisionally
+including just releasing the change") walked the Castle leg, restored the dev store and closed. Implementers were fresh
+`opus-implementer`s, one per unit; the ladder ran on fresh `fable-reviewer`s.
+
+**What was true.** On 0.10 no account act started a sync round: VX-329 U1 (`f2306a535`) deleted the old road's
+post-enrollment round hook and never rewired it, so a Standard set-up sat at "Sync locked" until the user typed,
+switched apps, pressed Sync now or relaunched — joins and Castle set-ups only seemed fine because a system Touch ID
+*[removed for publication]*
+vault only after the twelve-word re-entry, so closing the sheet left a passphrase and no vault (his "I don't think I
+*[removed for publication]*
+
+**What shipped (SurfaceContracts' protection bullet and CLAUDE.md's Environment — the contract lines in place):**
+the first round after every account act that changes sync's standing, the re-keying ones on the reopen's fresh
+services (F-6 (A)), and the act's sheet staying to show it (VX-498/VX-507); the not-yet row and the join's door
+(VX-506); `FirstRunDrillTests` + `Tools/WalkKit/first-run-walk.sh` + release.sh's step 0 (VX-509); the prod test road —
+Debug-only, a handed allowlist of `vxtest` accounts, her R-510-1/-6; the typed Castle unlock loading the sync keys
+(VX-501, her R-494-4 direction); the words card retiring at a landed set-up/join/Move (VX-511 — R-510-14, and CastleRules
+rule 2's clause at R-510-28); vault-first key derivation so the Standard join never presses Touch ID (VX-503); the
+read-only check door (VX-513, R-510-15); Standard-never-reads-Touch-ID + forgets by name (VX-517, R-510-16 — F-B4-1
+accepted as residue); the lobby's words door as one press target (VX-527 — the words and their row open it; the 4 pt
+reach past the label is not honoured live, VX-535). No `Sync/` line; core changes only in `Protection/`.
+
+**The acceptance, live on PRODUCTION through the named road:** three fresh accounts (std, castle, del) — sign-up,
+set-up, the first round with no relaunch, joins from a restored copy and from a fresh library (the testers' road), key
+changes, older backups opened with old/current/new secrets in Castle, the account deletion leaving zero rows — every leg
+read back server-side; on the final build, a re-minted fresh account's first run end to end, then the Castle leg (join,
+Use Castle, the typed unlock, the check door, the Standard side with no auth window). **The ladder:** r1 0 BLOCKER ·
+0 MAJOR · 3 MINOR · 2 NIT → unit L1 + O-L1-1 (a line-wise guard in the prod-confirm script — the same class as F-R1-5) →
+r2 0 · 0 · 1 · 1, every fix SOUND, the final two checked 2/2. **The closing stage batch:** the core whole green (VX-532's
+timing test isolated ×2), the whole Mac target 5221/915 with the real-keychain Touch ID arm RUN, the phone 62/7 + 47/15.
+
+**Her closeout answers:** release 0.10.1 after the merge (R-510-22); keep all three test accounts (R-510-23); VX-521 and
+VX-528 closed (R-510-24/-25); the wording bundle stays provisional (R-510-26 — QUESTIONS #240); Pre-launch = VX-529 only
+(R-510-27); CastleRules rule 2's clause (R-510-28: "yes. I think that makes it logically consistent, right?"). **Born:**
+VX-511…VX-537 (VX-514 canceled; VX-521/VX-528 closed at her word) — VX-529 (a pair changed on one device strands the
+others; High, Pre-launch) is THE NEXT RUN at her R-510-19/-20 (no rule or storage change: "we are NOT changing the
+castle rules at all"). MOBILE PARITY: PL-58. canon-size 125,663 / 150,000.

@@ -253,17 +253,36 @@ struct RoadLockView: View {
         case .field:
             wordsField
         case .disclosure:
+            // VX-510 D-B9 (VX-527, her hand: "the words don't open it"): a macOS DisclosureGroup's label is not a control —
+            // only its chevron presses — so the label is a Button toggling the same road, as the phone's whole-label door
+            // is. The words fill the row and their hit shape reaches over the system row's own spacing (the gap after the
+            // chevron, the row's top and bottom), so the chevron and the words are one press target; the chevron, the
+            // spacing and the unfolding stay the system's own (pixel-identical, measured offscreen — the run record).
             DisclosureGroup(isExpanded: $showsWords) {
                 wordsField.padding(.top, 6)
             } label: {
-                Text(ProtectionWords.wordsDoor)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
+                Button {
+                    withAnimation { showsWords.toggle() }
+                } label: {
+                    Text(ProtectionWords.wordsDoor)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(Self.wordsDoorRowSpacing)
+                        .contentShape(Rectangle())
+                        .padding(-Self.wordsDoorRowSpacing)
+                }
+                .buttonStyle(.plain)
             }
             .frame(maxWidth: 340)
         }
     }
+
+    /// VX-510 D-B9 — the system disclosure row's spacing around its label (chevron → label, and the row's top and bottom
+    /// margins), measured offscreen on macOS 27: the words door's hit shape reaches this far past the label so the gap
+    /// between the chevron and the words presses too. Layout-neutral (the padding is taken back), so nothing moves.
+    private static let wordsDoorRowSpacing: CGFloat = 4
 
     private var wordsField: some View {
         VStack(spacing: 8) {

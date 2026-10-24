@@ -24,6 +24,8 @@ final class PlantedAccountRoads {
     private(set) var requests: [RoadAccountRequest] = []
     private(set) var landings = 0
     private(set) var spoken: [String] = []
+    /// VX-510 unit B1 (D-B0): what happens DURING the press (a re-keying act's reopen attaches fresh services) — nil: nothing.
+    var onPress: (@MainActor (RoadAccountRequest) -> Void)?
 
     var roads: RoadAccountRoads {
         RoadAccountRoads(
@@ -33,6 +35,7 @@ final class PlantedAccountRoads {
             },
             press: { [self] request in
                 requests.append(request)
+                onPress?(request)
                 return press
             },
             landed: { [self] in landings += 1 },

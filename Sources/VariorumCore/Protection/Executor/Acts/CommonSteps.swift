@@ -310,12 +310,24 @@ extension ActContext {
 
     // MARK: - The account (the `Sync/` half, MODELLED — phase 3 wires it)
 
-    /// The account's sync keys in hand: this act's, custody's (either class),
+    /// **VX-517 (D-B8 (c)) — where this act may find the account's keys in
+    /// the TOUCH ID class:** a library in Castle, or an act taking one INTO
+    /// Castle (its own Castle-way filing lives there before its swap — a join
+    /// into a Castle account, a follow into Castle, Use Castle). A library that
+    /// is and stays Standard files them silently (rule 15) and never reads that
+    /// class: a Touch ID read is a prompt on the real leaf, and an item there is
+    /// another library's leftover, whose keys must never shadow the silent
+    /// item's (they did: the key doors refused as "the account moved", a
+    /// set-up's finish bound nothing).
+    var syncKeysMayBeInTouchID: Bool { library.record?.mode == .castle || parameters.newKind == .castle }
+
+    /// The account's sync keys in hand: this act's, custody's (the Touch ID
+    /// class only where `syncKeysMayBeInTouchID`, then the silent class),
     /// session memory.
     func syncMaterial() throws -> AccountKeys? {
         if let material { return material }
         guard let account = accountID else { return nil }
-        for itemClass in [ProtectionNames.CustodyClass.touchid, .silent] {
+        for itemClass in ProtectionExecutor.syncKeysClasses(touchID: syncKeysMayBeInTouchID) {
             if let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass) {
                 material = held
                 return held
@@ -339,11 +351,13 @@ extension ActContext {
     /// item: "Sync locked" for good.
     func holdSyncKeys(_ held: AccountKeys, castleWay: Bool) throws {
         guard let account = accountID else { return }
-        let items = try leaves.syncKeys.syncKeyItems()
+        // VX-517 (D-B8 (a)): the other class goes BY NAME. A listing taken here
+        // — before the write below — is blind on the production leaf to a Touch
+        // ID item with no silent sibling, so a drop read from it never dropped
+        // that item (Use Standard, the follow out, a Standard join over a stale
+        // one). A class with no item is nothing to delete.
         func drop(_ itemClass: ProtectionNames.CustodyClass) throws {
-            if items.contains(SyncKeysItemFact(accountID: account, itemClass: itemClass)) {
-                try leaves.syncKeys.deleteSyncKeys(accountID: account, itemClass: itemClass)
-            }
+            try leaves.syncKeys.deleteSyncKeys(accountID: account, itemClass: itemClass)
         }
         if castleWay {
             let gate = parameters.gate ?? library.section.settings.gateStyle
@@ -386,18 +400,29 @@ extension ActContext {
         return snapshot
     }
 
-    /// The keys for the vault as read: custody's when they are its current
-    /// sync key under its master, else from the vault with the secrets in hand.
+    /// The keys for the vault as read: from the vault with the secrets in hand
+    /// when they open it — else custody's, when they are its current sync key
+    /// under its master.
+    ///
+    /// VX-503 (VX-510 D-B5 — the run record's T-B5-1…4): the secrets FIRST.
+    /// Custody's read came first before, and its Touch ID class is a PROMPT on
+    /// the real leaf — a join holding the very passphrase that opens the vault
+    /// raised Touch ID over a stale item another library left, for keys the
+    /// derivation gives byte for byte (both are the vault's current sync key
+    /// under its master; the derivation reads every earlier key from the vault
+    /// itself). Custody still serves where no secret in hand opens the vault:
+    /// the quiet follow out of Castle (nothing typed) and the key doors (their
+    /// secrets are the NEW ones).
     func material(for snapshot: VaultSnapshot) throws -> AccountKeys {
+        if let master = VaultModel.master(of: snapshot.vault, passphrase: secrets.passphrase, words: secrets.words) {
+            let derived = try snapshot.vault.keys(master: master)
+            material = derived
+            return derived
+        }
         if let held = try syncMaterial(), held.rowKeyID == snapshot.rowKeyID, snapshot.vault.isMaster(held.masterKey) {
             return held
         }
-        guard let master = VaultModel.master(of: snapshot.vault, passphrase: secrets.passphrase, words: secrets.words) else {
-            throw ExecutorRefusal.secretsRequired(act)
-        }
-        let derived = try snapshot.vault.keys(master: master)
-        material = derived
-        return derived
+        throw ExecutorRefusal.secretsRequired(act)
     }
 
     /// **Use Castle's one vault write** (rules 11, 15) — the account's own
@@ -463,6 +488,11 @@ extension ActContext {
 }
 
 extension ProtectionExecutor {
+    /// The custody classes a sync-keys read consults, in order (VX-517 (c)):
+    /// the Touch ID class first only where the account's keys can be filed
+    /// there; the silent class always.
+    static func syncKeysClasses(touchID: Bool) -> [ProtectionNames.CustodyClass] { touchID ? [.touchid, .silent] : [.silent] }
+
     /// Note a vault this executor wrote as its freshest read.
     func noteFresh(_ snapshot: VaultSnapshot) {
         freshVaults[snapshot.accountID] = snapshot

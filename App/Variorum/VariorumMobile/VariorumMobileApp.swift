@@ -71,6 +71,10 @@ struct VariorumMobileApp: App {
                     // presented sheets, so the words are covered wherever
                     // they render.
                     .redacted(reason: SnapshotPrivacy.redactionReasons(for: scenePhase))
+                    // VX-510 D-A3 (VX-506): whether the OPEN library has joined an account — the sync row's keys refusal
+                    // over a library that has not reads a not-yet, never "locked" (the sentence alone here: the phone's
+                    // Protection screen is VM-8's).
+                    .environment(\.librarySyncsWithAnAccount, bootstrap.roadStanding?.syncsWithAnAccount)
                     // VX-306 U3: rule 27 after a quiet open — §7c (3)'s sentence, a sheet once per open.
                     .sheet(isPresented: Binding(
                         get: { roadRule27Owed },

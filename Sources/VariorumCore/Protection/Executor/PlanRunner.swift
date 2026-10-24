@@ -540,13 +540,13 @@ extension ProtectionExecutor {
         // that crosses postures, a Move), undone: this Mac holds the sync keys
         // of the account its library names, and only those — the keys it picked
         // up go with it (rule 20: the old state; census class (J), VX-378 U4).
+        // VX-517 (D-B8 (a)): BY NAME — over the accounts the listing names and
+        // those known by name (the sign-in — whose session hold this clears too
+        // — and the act's own), every class; the listing alone never saw the
+        // Touch ID item a join into Castle files before its swap.
         let bound = library.record?.account
-        for item in try leaves.syncKeys.syncKeyItems() where item.accountID != bound {
-            try leaves.syncKeys.deleteSyncKeys(accountID: item.accountID, itemClass: item.itemClass)
-            leaves.syncKeys.holdInSession(nil, accountID: item.accountID)
-        }
-        if let signedIn = configuration.session.accountID, signedIn != bound {
-            leaves.syncKeys.holdInSession(nil, accountID: signedIn)
+        for account in try unboundSyncKeyAccounts(bound: bound, named: [parameters?.accountID, parameters?.targetAccount]) {
+            try forgetSyncKeys(ofAccount: account)
         }
         // …and the bound account's keys this act TOOK — a sync key the record,
         // rolled back, doesn't follow (Use Castle's one vault write landed, or a
@@ -557,15 +557,15 @@ extension ProtectionExecutor {
         // taken key (read — they open without a press); a Touch ID item while
         // the library is back in Standard (Standard files the keys silently, so
         // that item is the act's Castle-way filing).
+        // VX-517: each class BY NAME (the listing never saw a Touch ID item whose
+        // silent sibling the act's Castle-way filing had dropped).
         if let bound, let taken = parameters?.newRowKeyID ?? parameters?.followedRowKeyID,
            library.record?.accountRowKeyID != taken {
-            for item in try leaves.syncKeys.syncKeyItems() where item.accountID == bound {
-                let theAct: Bool
-                switch item.itemClass {
-                case .silent: theAct = (try leaves.syncKeys.readSyncKeys(accountID: bound, itemClass: .silent))?.rowKeyID == taken
-                case .touchid: theAct = library.record?.mode == .standard
-                }
-                if theAct { try leaves.syncKeys.deleteSyncKeys(accountID: bound, itemClass: item.itemClass) }
+            if (try leaves.syncKeys.readSyncKeys(accountID: bound, itemClass: .silent))?.rowKeyID == taken {
+                try leaves.syncKeys.deleteSyncKeys(accountID: bound, itemClass: .silent)
+            }
+            if library.record?.mode == .standard {
+                try leaves.syncKeys.deleteSyncKeys(accountID: bound, itemClass: .touchid)
             }
             if leaves.syncKeys.sessionSyncKeys(accountID: bound)?.rowKeyID == taken {
                 leaves.syncKeys.holdInSession(nil, accountID: bound)

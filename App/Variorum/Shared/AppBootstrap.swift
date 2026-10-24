@@ -995,11 +995,17 @@ final class AppBootstrap {
                 }
                 // VX-308 U2 (R-U2-2): an act that re-keys (a join across postures, every follow) runs through the one
                 // reopening seam; the rest on the open session.
-                if request.shown.rekeys { return await self.accountActOnNewRoad(request) }
-                return await Task.detached(priority: .userInitiated) {
-                    await ProtectionAccountRoad.press(
-                        session, request: request, signIn: signInNow(), exportSwitch: exports)
-                }.value
+                let press: RoadAccountPress
+                if request.shown.rekeys {
+                    press = await self.accountActOnNewRoad(request)
+                } else {
+                    press = await Task.detached(priority: .userInitiated) {
+                        await ProtectionAccountRoad.press(
+                            session, request: request, signIn: signInNow(), exportSwitch: exports)
+                    }.value
+                }
+                if case .made = press, request.door.landingRecordsTheWords { self.accountActHoldsTheWords(actedOn: session) }
+                return press
             },
             // VX-309 U1c — VX-454: an account act can set a passphrase on the OPEN session (turning sync on with a new one,
             // a join adopting the account's pair) — the set row and rule 3's reminder re-read, and the key doors with them
@@ -1026,6 +1032,20 @@ final class AppBootstrap {
             })
     }
 
+    /// **VX-510 D-B6 — VX-511 (R-510-14, her "Join retires the card"):** an account act that LANDED with the library holding
+    /// the account's pair (`RoadAccountDoor.landingRecordsTheWords` — set-up, join, Move) marks that library's words recorded
+    /// in the band card's ledger (this Mac's calm-asks defaults — the card's own) and retires the live card's offer: its look
+    /// would mint new words and, synced, replace the account's. The library is the one the act landed — read from the session
+    /// it ran on, AFTER the act (the act carries its record forward in place; a re-keying act's reopen opens the same slot's
+    /// library — the VX-457 mark's idiom), so a reopen that settled anywhere but ready still finds it marked; the card is
+    /// retired when the open library is that one (a re-keying act's reopen has already built its card from the unmarked
+    /// ledger by the time the press returns). A refused act marks nothing; the leaves and the follow never reach here.
+    private func accountActHoldsTheWords(actedOn session: ProtectionRoadSession) {
+        guard let libraryID = session.library.record?.libraryID, !libraryID.isEmpty else { return }
+        WordsCardLedger(defaults: reminderLedger.defaults).record(libraryID)
+        if roadSession?.library.record?.libraryID == libraryID { roadStanding?.band?.accountHoldsTheWords() }
+    }
+
     /// VX-308 U3 — the key doors' roads on the new road. Each reads the CURRENT session at its call (a reopen replaces it);
     /// the press runs on the OPEN session (the key doors re-lock the current key and never swap it — no reopening seam);
     /// a landed act speaks its receipt on the status seam and re-reads the account section (a synced passphrase change is
@@ -1049,7 +1069,81 @@ final class AppBootstrap {
                 }.value
             },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
-            landed: { [weak self] in await self?.roadAccount?.refresh() })
+            landed: { [weak self] in await self?.roadAccount?.refresh() },
+            // VX-510 D-B7 — VX-513: the read-only check, on the OPEN session (ready only), as signed in NOW, off the main
+            // actor (the passphrase's derivation and the vault read). It writes nothing — no act lock, no receipt, no landing.
+            check: { [weak self] typed in
+                guard let self, case .ready = self.state, let session = self.roadSession else {
+                    return .refused(ProtectionWords.crossingDoorClosed)
+                }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionSecretCheck.check(session, typed: typed, signIn: signInNow())
+                }.value
+            })
+    }
+
+    /// **VX-510 D-A1 — THE SERVICES-HELD ROADS, wired in ONE place** (the composition glue moved out of view code, so a
+    /// test drives exactly what ships: bootstrap + services + a fake server, end to end). The app's services die at each
+    /// lock and every reopen composes fresh ones (`VariorumApp`'s `.task`), while the account section's model and this
+    /// bootstrap live on — so each services instance is attached here as it is made, and the faces' roads follow the newest
+    /// one (captured weakly: a stopped instance answers nothing). The roads: the Account sheet's Delete Account runs the
+    /// protection half (`accountDeletedOnNewRoad` — P-VX308-U1-F1); the account section's *Sign out…* signs out through the
+    /// services' one session; and (VX-498) an account act that lands on the open session runs its FIRST ROUND through the
+    /// services (`runFirstRound` — the round the deleted road's enrollment hook used to start; a stopped instance answers
+    /// "not configured"); and (D-B0) a RE-KEYING act's first round waits for the reopen's fresh services, then asks them
+    /// (`firstRoundAfterReopen` — the services generation below). (The phone wires its deletion hook inline: it renders no
+    /// account section until VM-8, P-2.)
+    func attach(services: AppServices) {
+        services.afterAccountDeleted = { [weak self] account in
+            await self?.accountDeletedOnNewRoad(account)
+        }
+        roadAccount?.signOutRoad = { [weak services] in await services?.signOutVariorum() }
+        roadAccount?.firstRound = { [weak services] in await services?.runFirstRound() ?? .notConfigured }
+        // VX-510 D-B0 (F-6 (A), ruled): a RE-KEYING act's first round — the generation taken at its press, then the
+        // reopen's FRESH services (attached after that generation) asked for the round (`awaitAttachedServices`).
+        roadAccount?.firstRoundAfterReopen = RoadAccountModel.FirstRoundAfterReopen(
+            generation: { [weak self] in self?.servicesGeneration ?? 0 },
+            round: { [weak self] generation in
+                guard let fresh = await self?.awaitAttachedServices(newerThan: generation) else { return .notConfigured }
+                return await fresh.runFirstRound()
+            })
+        servicesGeneration += 1
+        attachedServices = services
+        for (id, waiter) in attachWaiters where servicesGeneration > waiter.newerThan {
+            attachWaiters[id] = nil
+            waiter.timeout.cancel()
+            waiter.continuation.resume(returning: services)
+        }
+    }
+
+    /// **VX-510 D-B0 — THE SERVICES GENERATION** (F-6 (A), ruled by the architect: unit A's Piece 6 trace). A re-keying
+    /// account act (a join or Move across postures, every follow) runs through the one reopening seam: its teardown STOPS
+    /// AND RELEASES the services, the act runs, the library reopens — and its `.made` comes back after the reopen settled
+    /// but BEFORE the reopened ready arm composes fresh services (`VariorumApp`'s `.task`: compose, attach, start). So the
+    /// act's sheet takes this generation at its PRESS and, at `.made`, waits for services attached AFTER it — the reopen's —
+    /// and asks THEM for the round. Bumped by every `attach`.
+    @ObservationIgnored private(set) var servicesGeneration = 0
+    /// The newest services attached (weak: a stopped instance is let go by the composition root).
+    @ObservationIgnored private weak var attachedServices: AppServices?
+    /// Waiters for a newer attach, each with its bound's timer (cancelled when an attach answers it).
+    @ObservationIgnored private var attachWaiters:
+        [UUID: (newerThan: Int, continuation: CheckedContinuation<AppServices?, Never>, timeout: Task<Void, Never>)] = [:]
+
+    /// **VX-510 D-B0** — the services attached AFTER `generation`: at once when they already are, else the next attach;
+    /// nil when none comes within `bound` (a closed main window composes no services — the round is then "not configured",
+    /// never a wait forever). Production's bound is 30 s.
+    func awaitAttachedServices(newerThan generation: Int, within bound: Duration = .seconds(30)) async -> AppServices? {
+        if servicesGeneration > generation, let attachedServices { return attachedServices }
+        let id = UUID()
+        return await withCheckedContinuation { continuation in
+            // The timer holds the bootstrap until it fires or an attach cancels it, so no waiter is ever left unanswered.
+            let timeout = Task { @MainActor in
+                try? await Task.sleep(for: bound)
+                guard !Task.isCancelled, let waiter = self.attachWaiters.removeValue(forKey: id) else { return }
+                waiter.continuation.resume(returning: nil)
+            }
+            attachWaiters[id] = (generation, continuation, timeout)
+        }
     }
 
     /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for
