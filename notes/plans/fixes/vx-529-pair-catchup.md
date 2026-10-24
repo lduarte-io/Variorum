@@ -158,7 +158,34 @@ protocol and `Sources/VariorumCore/Sync/` (expected zero lines — the act is pr
 needed it is Fable work by standing rule); the words-never-stored rule; rule 5's backup floor; the one-pair rule
 (this run makes it TRUE on lagging devices, which is the whole point).
 
-## RULINGS NEEDED (the sitting's questions — nothing below is built until ruled)
+## THE RULINGS (2026-10-24, her sitting — via the question tool; answers verbatim-faithful)
+
+- **R-529-1 — the lobby OPENS THROUGH THE VAULT** (ruling 1, her pick: "Open through the vault (Recommended)") —
+  after her clarifying questions, answered before the pick: the online step is the one authenticated vault read
+  fetching wrapped blobs (the typed passphrase never leaves the Mac); the open itself writes nothing and the
+  catch-up re-wraps the key file in the same act, so the network is needed exactly once; the library key and store
+  are never re-encrypted; unsynced libraries cannot be in this state at all (no elsewhere, no vault, no master
+  wrap). Her words at the clarification: "Have we considered the implications of using the vault master? will that
+  even rewrap the library? because for people without sync, opening the library online can't happen right? i guess
+  this only an issue for people with sync though. I think that option 1 can probably make sense but how is it
+  happening online?"
+- **R-529-2 — the words-only change is QUIET with a durable notice** (ruling 3, her pick: the recommended arm).
+- **R-529-3 — Change passphrase REFUSES, pointing at the follow** (ruling 4, her pick: the recommended arm).
+- **R-529-4 — RIDERS: VX-526 · VX-522 · VX-523 · VX-533** (ruling 7, her picks; VX-530 not taken — her note, verbatim:
+  "ade 522 and 523 wording intl? and is being asked twice a sign of a worse, more signicant vug?" — read as "are 522
+  and 523 wording only?" and "is being asked twice a sign of a worse, more significant bug?"; answered in the sitting
+  reply: VX-522 is a conditional-sentence fix (Wording-labeled), VX-523 is a small condition bug in the same notice
+  family (when it speaks, not what it says); VX-530's visible half is a custody-read-before-secrets ordering at the
+  session-hold seam (`KeyDoors.holdSyncKeysForTheSession` reads the Touch ID class before trying the typed secret it
+  was handed — the VX-503 class one seam over), no evidence of a custody-integrity issue; offered as a TRACE-FIRST
+  rider, her call pending).
+- **PROVISIONAL, defaulted un-objected (the standing rule; QUESTIONS at closeout):** **P-VX529-1** (ruling 2: the
+  standing "Follow your account…" door serves the pair kind — one door for every way the account moved) ·
+  **P-VX529-2** (ruling 5: the second road's line lives in the follow sheet only; the lobby stays calm) ·
+  **P-VX529-3** (ruling 6: every drafted sentence built as drafted, provisional for her pass — the R-510-26
+  precedent).
+
+## The rulings as asked (kept for the record — the questions the sitting answered)
 
 - **RULING 1 — the lobby's reach.** (a) Say-and-point: the honest sentence at a failed typed attempt; open with the
   old secret or the words; catch up in Settings. (b) The vault road: the account's current passphrase also OPENS the
