@@ -1592,9 +1592,13 @@ record), and its pins (including the zero-writes pin across every arm). A seam t
 
 ### UNIT B3 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — written at the close. No `xcodebuild test`, no stage,
-no app launch, no dev/real-store touch, no server or production contact (the run's traps); the Mac-target suites this unit
-touches run in the orchestrator's stage batch (THE MAC-SUITE LIST at the close). No line in `Sources/`.
+**NOT DONE BY THIS SESSION (first, as the contract asks):** **THE WALK** — the door's use-shaped acceptance on the DEV-store
+Debug build (THE WALK below — the orchestrator's stage; nothing here was launched); **the Mac-target runs** — the hosted
+`SecretCheckSurfaceTests` and every Mac-only suite in THE MAC-SUITE LIST compiled (build-for-testing green) but RAN only in the
+orchestrator's stage batch, PENDING; **`notes/QUESTIONS.md`** — P-VX510-B3-1 (the words) and P-VX510-B3-2 (the fourth arm) are
+recorded below for the orchestrator's bundle, not filed (not mine). No phone face: the phone renders no key-door section yet
+(P-2) — nothing mobile-visible beyond `Shared/` compiling for it (iOS build-for-testing green). No `xcodebuild test`, no stage,
+no app launch, no dev/real-store touch, no server or production contact. No line in `Sources/`; no fork met.
 
 *Implementer session B3 — Opus 5.5, xhigh. Pre-fix tree = `6acf5771f` (unit B2's product files, `f4af7e368`). Every claim
 not yet run is PENDING.*
@@ -1771,8 +1775,76 @@ not yet run is PENDING.*
   - **RC-12** `✘ … with 1 issue` — `withNoKeyFileOfTheOpenKeyNothingIsChecked` ✘ (rule 27's state said the door stands).
   - **RC-13** `✘ … with 2 issues` — `theBootstrapWiresTheCheckRoadOnTheOpenSession` ✘ and `withNoLibraryOpenTheDoorIsGone` ✘
     (behind the lobby the retired session still answered "opens").
-- **Piece 5** — evidence (the harness whole, the release compile, Mac + iOS build-for-testing) and THE MAC-SUITE LIST: NOT
-  STARTED.
+- **Piece 5** — EVIDENCE: DONE (the final tree = this commit's product files; foreground, in sequence):
+  - THE HARNESS whole (debug; this unit's four new suites symlinked in, the new source file too): `✘ Test run with 522 tests in
+    89 suites failed with 4 issues` — exactly the three harness-PATH artifacts (`theBecomeActiveHookRunsOneSyncRound`,
+    `thePasteInIsFullyRetiredInTheSharedSources`, `theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut` ×2 — they read
+    `#filePath` beside the symlink; they run in the Mac target); with those three `--skip`ped: **`✔ Test run with 519 tests in
+    89 suites passed`** (B2's 502/85 + this unit's 17 tests in 4 new suites); no `signal` line.
+  - RELEASE COMPILE (the harness's app sources, `swift build -c release --target Variorum`): **`Build complete!`**.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx510-b3 build-for-testing` (from
+    `App/Variorum`): **`** TEST BUILD SUCCEEDED **`** — and AGAIN after the last test-only edit below (one array entry in
+    `TravellingDotsIndicatorTests`), incremental: **`** TEST BUILD SUCCEEDED **`**; `xcodebuild -scheme VariorumMobile
+    -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vx510-b3-ios build-for-testing`: **`** TEST
+    BUILD SUCCEEDED **`** — zero errors, no warning in any file this unit touched (all three logs grepped). The Mac-only files
+    (`RoadSecretCheckSheet.swift`, `ProtectionPane.swift`, `RoadAccountSheet.swift`, `SecretCheckSurfaceTests.swift`) compile
+    here; Piece 3's PENDING on them is discharged.
+  - Not run (no file touched): the core package (`Sources/` and `Tests/` untouched — no `Sync/` line).
+  - **Coverage added to two existing Mac pins (test-only, deliberate):** `WordsFieldsConcealTests` — the check's field joins
+    the twelve-words labels and its site the concealed fields (harness-green); `TravellingDotsIndicatorTests` — the check's
+    sheet joins the protection surfaces that name no system spinner and carry the indicator (Mac-only — compiled; runs in the
+    stage batch, PENDING).
+  - **Machinery honesty:** the first Mac build-for-testing was started from `App/Variorum` with `-derivedDataPath
+    App/Variorum/DerivedData/vx510-b3`, which resolved to a stray `App/Variorum/App/Variorum/DerivedData/vx510-b3` (gitignored);
+    that build was stopped by its own command line (`pkill -f` on its derived-data path — no other process touched), the stray
+    folder (this session's alone, verified to hold only that) removed, and the build re-run at `App/Variorum/DerivedData/
+    vx510-b3`. The orchestrator committed to this branch while the unit ran (`6acf5771f` and others — its own record sections);
+    this session staged explicit paths only and re-read the record before each edit. Piece 1's record flip rode one commit late
+    (said there).
+  - **Precedent, recorded (no change made):** today's road had a read-only check of its own (Phase 13l Act 5, ledger row 18 —
+    her ask of 2026-08-19, "a place where people can verify that they still have their passcode or passphrase right without
+    having to reset something else, like a sanity check"; QUESTIONS #75 ratified its shape; deleted with today's road at VX-329
+    U1, `f2306a535`). D-B7 keeps its contract — the REAL unwrap is the verification (no stored comparand anywhere), it writes
+    nothing, and "couldn't ask" is never said as "that isn't it" (the account's `unchecked` half) — and #75(e)'s reading: the
+    door is not declared in the capability registry (the protection surface lives in `Shared/`; no key door is declared).
+  **THE MAC-SUITE LIST (for the orchestrator's stage batch — every suite exercising a file this unit changed):**
+  - NEW: `SecretCheckRoadTests`, `SecretCheckCompositionTests`, `SecretCheckModelTests` + `SecretCheckBootstrapTests` (one
+    file), all harness-green; `SecretCheckSurfaceTests` (Mac only, hosted — compiled, PENDING its run).
+  - CHANGED: `WordsFieldsConcealTests` (harness-green), `TravellingDotsIndicatorTests` (Mac only, PENDING).
+  - `RoadKeyDoorsModel` / `RoadKeyDoorRoads` / `RoadKeyDoorFaces` (`checkStands`): `RoadKeyDoorsModelTests`, `RoadKeyDoorRoadTests`,
+    `RoadKeyDoorSurfaceTests` (its composition pin reads the pane and the host), `PassphraseFloorRoadTests`,
+    `ProtectionPaneWaveTests`, `SetPassphraseRowRereadRouteTests`.
+  - `ProtectionSheetPresenter` (the new case): `ProtectionSheetPresenterTests`, `RoadAccountModelTests`, `RoadJoinFollowModelTests`,
+    `RoadCrossingModelTests`, `RoadAccountSurfaceTests`, `RoadCrossingSurfaceTests`, `RoadJoinFollowSurfaceTests`,
+    `SettingsAccountSurfaceTests`.
+  - `AppBootstrap` (`keyDoorRoads()`'s `check:`): unit A's bootstrap list — `AppBootstrapOffMainTests`, `SettingsLockCloseTests`,
+    `OneRefreshAuthorityTests`, `Phase9cAuthWiringTests`, `LibraryHandOffTests`, `QuickEntryLaunchFocusTests`,
+    `WhatsNewWaitsAfterAdoptionTests`, `FirstRoundAfterTheActTests`, `FirstRoundAfterTheReopenTests`, `FirstRunDrillTests`,
+    `WordsCardAfterAccountActTests`, `RoadLockRouteTests`, `HoldBannerAccountTests`.
+  - `ProtectionWords` (new constants only) — the string-pinning and sweeping suites: `ProtectionWordsPlanTests`,
+    `ProtectionWordsVX307Tests`, `RoadKeyDoorWordsTests`, `RoadAccountWordsTests`, `RoadJoinFollowWordsTests`, `U2WordsTests`,
+    `CopyRegisterPinTests` (Mac only — the two-register rule over every literal; the new lines name no forbidden word, checked
+    by hand), `Phase13pCopySweepTests`, `PreDesignFaceTests`.
+  - `ProtectionPane.swift` / `RoadAccountSheet.swift` (source pins + hosted): `ProtectionPaneRoadRowTests`, `CopyRegisterPinTests`,
+    `SyncLockedRowTests`, `RoadKeyDoorSurfaceTests`, `RoadAccountSurfaceTests`, `RoadCrossingSurfaceTests`,
+    `TravellingDotsIndicatorTests`, `SettingsAccountSurfaceTests`.
+  - The simplest honest batch: the whole `VariorumTests/Protection` folder + `CopyRegisterPinTests`, `Phase13pCopySweepTests`,
+    `TravellingDotsIndicatorTests`, `SyncLockedRowTests`, `AppBootstrapOffMainTests`, `SettingsLockCloseTests`,
+    `OneRefreshAuthorityTests`, `Phase9cAuthWiringTests`.
+  - THE PHONE (`VariorumMobileTests` — `Shared/`'s presenter, bootstrap and words compile there; no face): `MobileProtectionRoadTests`,
+    `MobileStructuralTests` (its two-register twin), `MobileRefusalTableTests`.
+  **THE WALK (this unit's rows, for the stage — use-shaped; both voices where the sheet has a face):** on the DEV-store Debug
+  build, Settings ▸ Protection: (1) the door "Check my passphrase or twelve words…" stands after the words section; its sheet
+  — title, lead, one concealed field with its eye, Close, Check; (2) an UNSYNCED library: the right passphrase → "That
+  passphrase opens this library."; the right words → "Those twelve words open this library."; a wrong one → the lobby's
+  sentence; retyping clears the line (W-10); the protection log's `road: a secret check (read-only, nothing written)` and
+  NOTHING else written (no key-file mtime change; the vault revision unmoved); (3) a SYNCED library (unit C's standing `std`
+  or `castle` account, on the prod test road): the account's passphrase → "…opens this library and your account." with ONE
+  vault read, the vault revision unchanged server-side; the words the same; (4) offline (Wi-Fi off) on the synced library →
+  "That passphrase opens this library." + "Variorum couldn't reach your account just now. Try again in a moment."; (5) (if a
+  second library is at hand) the account's passphrase changed on the other → the first says the split with "Your passphrase
+  was changed on ‹device› on ‹day›."; the new passphrase → "…doesn't open this library, but it opens your account."
+  (P-VX510-B3-2); (6) locked behind the lobby (Castle ⌃⌘L) — no Settings pane, no door.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
