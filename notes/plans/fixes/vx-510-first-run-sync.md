@@ -525,7 +525,41 @@ first draft of each built).
     [`bothRootsInjectTheLibrarysRecordFact`].
   - **RA-14** (VX-506, the door) `Shared/Protection/RoadAccountFaces.swift`: the join arm's label line removed
     [`theJoinArmsDoorHasItsOwnLabel`].
-  Results: PENDING (not started — no revert is in flight).
+  **RESULTS — DONE, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN FLIGHT** (the
+  committed tree `1e9fb6e9c`; the harness's runner script `reverts/run.sh` in the session scratchpad, each run filtered):
+  - **RA-1** `--filter FirstRoundAfterTheActTests`: `✘ Test run with 5 tests in 1 suite failed … with 9 issues` —
+    `vx498_aSetUpRunsItsFirstRoundWithNoRelaunch` ✘×4, `vx507_theSetUpsSheetStaysAfterTheActLands` ✘,
+    `vx507_doneClosesTheSheetAndTheRoundGoesOn` ✘, `vx507_theSheetSaysTheSetUpsFirstRoundLanded` ✘,
+    `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` ✘×2. (Its FIRST run HUNG: the Done pin waited at the server for a round
+    nothing started; the helper was killed, the script restored the file — clean — and the pin now fails fast,
+    `1e9fb6e9c`; the runner gained a 240 s watchdog.)
+  - **RA-2** `--filter FirstRoundConfirmTests`: `✘ … 8 tests in 1 suite failed … with 24 issues` —
+    `aLeaveOrAReKeyingActNeverAsks` ✘×24 (every leave, re-keying join, Move into Castle and follow owed and asked).
+  - **RA-3** `--filter FirstRoundRoadTests`: `✘ … 5 tests in 1 suite failed … with 1 issue` —
+    `runFirstRoundReconnectsAnUnconfiguredChainThenRuns` ✘ (`.notConfigured`, never reconnected).
+  - **RA-4** `--filter FirstRoundRoadTests`: `✘ … 5 tests in 1 suite failed … with 6 issues` —
+    `roundNowRunsOneRoundToItsEndAndReturnsItsStatus` ✘×3, `roundNowWaitsForTheFollowUpOfARoundInFlight` ✘×2,
+    `runFirstRoundReconnectsAnUnconfiguredChainThenRuns` ✘ (the status read mid-round).
+  - **RA-5** `--filter FirstRoundRoadTests`: `✘ … 5 tests in 1 suite failed … with 2 issues` —
+    `roundNowUnderTheRestoreHoldSaysHeldAndRunsNothing` ✘×2 (a round ran under the hold).
+  - **RA-6** `--filter "FirstRoundConfirmTests|FirstRoundAfterTheActTests"`: `✘ … 13 tests in 2 suites failed … with 6
+    issues` — `theSheetStaysShowingTheRoundsProgressThenItsOutcome` ✘×2, `doneClosesTheSheetAndNeverCancelsTheRound` ✘×2,
+    `vx507_theSetUpsSheetStaysAfterTheActLands` ✘, `vx507_theSheetSaysTheSetUpsFirstRoundLanded` ✘.
+  - **RA-7** (same filter): `✘ … 13 tests in 2 suites failed … with 2 issues` — `doneClosesTheSheetAndNeverCancelsTheRound`
+    ✘×2 (`cancelledAtResume == false` failed, twice — Done cancelled the round's task). The end-to-end
+    `vx507_doneClosesTheSheetAndTheRoundGoesOn` stayed green under it: cancelling the WAITER never reaches the scheduler's
+    round (it runs on its own task, `awaitIdle` is a plain continuation) — the mechanism that makes Done safe by design.
+  - **RA-8** `--filter FirstRoundConfirmTests`: `✘ … 8 tests … with 1 issue` — `theRoundPhaseFollowsTheWordsMoment` ✘.
+  - **RA-9** (same): `✘ … 8 tests … with 8 issues` — `eachOutcomeSaysTheRowsOwnSentence` ✘×8 (every blocked class said the
+    engine's raw text).
+  - **RA-10** (same): `✘ … 8 tests … with 1 issue` — `doneClosesTheSheetAndNeverCancelsTheRound` ✘ (`finished == [nil]` —
+    a dismissal read as "she left").
+  - **RA-11** `--filter "NotOnYetWordsTests|FirstRoundAfterTheActTests"`: `✘ … 10 tests in 2 suites failed … with 6
+    issues` — `theUnjoinedLibrarysRowSaysNotOnYetNeverLocked` ✘×4, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` ✘×2.
+  - **RA-12** (same): `✘ … 10 tests in 2 suites failed … with 4 issues` — `theUnjoinedLibrarysRowSaysNotOnYetNeverLocked`
+    ✘×3, `vx506_theRowSaysNotOnYetUntilTheLibraryJoins` ✘.
+  - **RA-13** `--filter NotOnYetWordsTests`: `✘ … 5 tests … with 1 issue` — `bothRootsInjectTheLibrarysRecordFact` ✘.
+  - **RA-14** (same): `✘ … 5 tests … with 4 issues` — `theJoinArmsDoorHasItsOwnLabel` ✘×4 (both postures).
 - **Piece 6** — F-6, the fork: the trace and the proposal (not built): NOT STARTED.
 - **Piece 7** — evidence on the final tree (the harness whole; build-for-testing Mac + iOS) and THE MAC-SUITE LIST: NOT
   STARTED.
