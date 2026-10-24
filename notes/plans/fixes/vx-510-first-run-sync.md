@@ -1907,11 +1907,15 @@ The trace is B2's T-B5-2/T-B5-4 (UNIT B2 — LIVE STATUS, Piece 3) — read it w
 custody rules are your charter's ground); `notes/SurfaceContracts.md`'s protection bullet whole;
 `notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B8 is your charter; UNIT B2 — LIVE STATUS Piece 3 is the trace;
 units A/B1/B2/B3 LIVE STATUS for the harness recipe and the seams); the code: `Shared/Protection/KeychainSyncKeysLeaf.swift`,
-`KeychainCustodyLeaf.swift`, `ProtectionKeychain.swift`, `ProtectionSystem.swift`, `AppBootstrap.swift`, and the road's
-`CommonSteps.swift`, `AccountActs.swift`, `PlanRunner.swift`, `KeyDoors.swift` (find them under `App/Variorum/Shared/`).
+`KeychainCustodyLeaf.swift`, `ProtectionKeychain.swift`, `ProtectionSystem.swift` (under `App/Variorum/Shared/Protection/`),
+`App/Variorum/Shared/AppBootstrap.swift`, and the executor's `CommonSteps.swift`, `AccountActs.swift`, `KeyDoors.swift`
+(`Sources/VariorumCore/Protection/Executor/Acts/`) and `PlanRunner.swift` (`Sources/VariorumCore/Protection/Executor/`).
 
-**Your scope — exactly D-B8:** the forgets, the drops, the Standard read guard, their pins. Not yours: everything else;
-canon, Linear, `notes/QUESTIONS.md`. A seam needing a core-package change or any `Sync/` line is a FORK: stop and propose.
+**Your scope — exactly D-B8:** the forgets, the drops, the Standard read guard, their pins. The executor lives in the CORE
+package, so changes under `Sources/VariorumCore/Protection/` ARE in scope (B2's `material(for:)` fix set the precedent);
+the core's pins run headless (`swift test --filter …` from the worktree root, stage-free) beside your app-layer harness.
+Not yours: everything else; canon, Linear, `notes/QUESTIONS.md`. Any `Sources/VariorumCore/Sync/` line, or a change to
+the custody record's shape or the keychain items' NAMES, is a FORK: stop and propose.
 
 **The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's**, with `build-for-testing` into
 `DerivedData/vx510-b4` / `vx510-b4-ios`; build your harness as `vx510b4-harness` from B3's (`vx510b3-harness` — it links
