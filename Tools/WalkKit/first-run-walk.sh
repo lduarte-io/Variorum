@@ -98,6 +98,15 @@ VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test"'
 VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test"'
   fixture unlisted 'VARIORUM_PRODTEST_EMAILS="b+vxtest-castle@x.test"
 VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test"'
+  # The ladder's F-R1-5: addresses that are listed and marked but not PLAIN (P3 splices the address into its SELECT).
+  fixture quoted 'VARIORUM_PRODTEST_EMAILS="a+vxtest-std'\''x@x.test"
+VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std'\''x@x.test"'
+  fixture upper 'VARIORUM_PRODTEST_EMAILS="A+vxtest-std@X.test"
+VARIORUM_PRODTEST_STD_EMAIL="A+vxtest-std@X.test"'
+  fixture newline 'VARIORUM_PRODTEST_EMAILS="a+vxtest-std@x.test
+'\''vxtest"
+VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test
+'\''vxtest"'
   ln -s $T/good $T/link
   fails=0
   expect() {  # <label> <file> <account> <accept|refuse>
@@ -117,6 +126,9 @@ VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test"'
   expect "the account not listed" unlisted std refuse
   expect "a link to a good file" link std refuse
   expect "no file" absent std refuse
+  expect "a quote in the address" quoted std refuse
+  expect "an uppercase address" upper std refuse
+  expect "a newline in the address" newline std refuse
   handed=$(allowlist_value $T/good)   # the value the launch is handed (fixture emails — fake, printable)
   if [[ $handed == "a+vxtest-std@x.test b+vxtest-castle@x.test" ]]; then print -r -- "SELF-TEST the handed value: the list key alone  ok"
   else print -r -- "SELF-TEST the handed value: '$handed'  FAIL"; fails=$((fails + 1)); fi

@@ -2897,12 +2897,34 @@ EXISTING public API, conformed on the app's side).
     `Tools/prod-confirm-test-user.sh`'s own guard has the same line-wise hole, and its allowlist check (`grep -Fq " $EMAIL "`)
     reads a multi-line pattern as several patterns — a crafted multi-line argument would pass both and splice its second line
     into the UPDATE. A ticket candidate for the orchestrator (the same one-function fix).
-- **Piece 0** — the harness: PENDING (B4's `vx510b4-harness` survived in its session's scratchpad — copied whole but its build
-  products to this session's `vx510l1-harness`, the SwiftPM checkouts carried; 90 source symlinks, 84 test files).
-- **Piece 1** — the pins, committed RED: NOT-STARTED — F-R1-1's model pin (compiles on the old tree); THE SEAM, behavior-neutral
-  (`FirstRoundScheduling` — the scheduler's existing `trigger`/`awaitIdle`/`status`, conformed app-side — and
-  `SyncSession.runRound(on:)` doing exactly today's trigger → idle → one read; `roundNow` calls it) + the settle pins over a
-  scripted scheduler (red on that neutral seam); F-R1-4's guard assertion; F-R1-5's self-test cases.
+- **Piece 0** — the harness: DONE (not durable — B4's `vx510b4-harness` survived in its session's scratchpad; copied whole but
+  its build products to this session's scratchpad `vx510l1-harness`, the SwiftPM checkouts and artifacts carried; 90 source
+  symlinks + 1 stub, 83 test symlinks + 1 stub — unit A's Piece 0 recipe as B4 left it; runner `l1/test.sh <log> <filter|ALL>
+  [watchdog]` — build, then the run with the three harness-PATH artifacts `--skip`ped). **BASELINE on the pre-fix tree
+  (`ca1ec1381`): `✔ Test run with 521 tests in 90 suites passed`** — exactly B4's close.
+- **Piece 1** — the pins, committed RED: DONE (this commit).
+  - **THE SEAM, behavior-neutral** (`Shared/SyncSession.swift`): `FirstRoundScheduling` (a `nonisolated` Actor protocol naming
+    the scheduler's EXISTING public `trigger()` / `awaitIdle()` / `status`; `extension SyncScheduler: FirstRoundScheduling {}`
+    declared app-side — no `Sync/` line) and `SyncSession.runRound(on:)` doing exactly today's three steps (trigger → idle →
+    ONE read); `roundNow` = its two guards + `.ran(runRound(on: scheduler))`; `firstRoundSettleWaits = 3` named (the bound
+    Piece 2's loop uses).
+  - **Pins:** `FirstRoundConfirmTests.aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm` (the model — compiles on the old
+    tree: every door's line over a syncing status, a stale offline / server error under it, and through the confirm: the
+    sheet's `roundLine`, no cause note); `FirstRoundRoadTests.runRoundReAwaitsAStatusThatStillReadsSyncing` +
+    `runRoundsSettleIsBounded` over `ScriptedFirstRoundScheduler` (its first N status reads say syncing — the gap produced
+    exactly; counts triggers, waits, reads); `SecretCheckRoadTests.rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync`
+    + F-R1-4's guard assertion (nothing typed ⇒ `.refused(checkSecretsLead)`, warning; inside the zero-writes span);
+    `first-run-walk.sh --self-test` + three malformed-address fixtures (a quote · uppercase · a newline — each listed and
+    marked, so only a shape check refuses them).
+  - **RED on this tree** (the harness, `--filter "FirstRoundConfirmTests|FirstRoundRoadTests|SecretCheckRoadTests"`):
+    **`✘ Test run with 25 tests in 3 suites failed … with 19 issues`** — `aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm`
+    ✘×12 (`line → "Sync hasn't run yet: Syncing…."` — today's contradiction, for the set-up, the join and the follow; the stale
+    errors; the confirm's `roundLine`), `runRoundReAwaitsAStatusThatStillReadsSyncing` ✘×4 (`status.isSyncing → true` — the
+    gap's round returned as the outcome; one wait, one read), `runRoundsSettleIsBounded` ✘×2 (one wait, one read — no settle),
+    `rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync` ✘×1 (the empty text answered `.doesNotOpen`); every other test
+    in the three suites green. **`first-run-walk.sh --self-test`: `SELF-TEST: 3 case(s) wrong`, exit 1** — "a quote in the
+    address", "an uppercase address", "a newline in the address" each `accept — expected refuse  FAIL`; the nine existing cases
+    and the handed value ok. `zsh -n` clean. No warning in a touched file (the build log's 8 are in untouched files).
 - **Piece 2** — F-R1-1 fix (the outcome seam's bounded re-await + the model belt): NOT-STARTED.
 - **Piece 3** — F-R1-4 fix (one arm): NOT-STARTED.
 - **Piece 4** — F-R1-5 fix (G2 + P3's `plain_address`; `zsh -n`; the self-test): NOT-STARTED.

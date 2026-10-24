@@ -11,6 +11,8 @@
 //      `SyncStatusRow.line(for:lastSuccessAt:)`), per status class. Done — always open — closes it and never cancels the
 //      round; a window closing under it is Done. With no road the sheet finishes exactly as before. Words PROVISIONAL, hers
 //      (P-VX510-1).
+//    - VX-510 ladder F-R1-1 (unit L1): an outcome still reading syncing says the progress words, never the blocked form
+//      (committed RED on the pre-fix tree).
 //
 
 import Foundation
@@ -396,5 +398,36 @@ struct FirstRoundConfirmTests {
         await locked.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         _ = await locked.awaitFirstRound()
         #expect(locked.roundErrorCause == nil, "the locked face carries its cause in its line")
+    }
+
+    /// VX-510 ladder F-R1-1 — an outcome whose status still reads SYNCING (a round another trigger started past the settle's
+    /// bound) says the round's running-progress words, never the blocked form ("Sync hasn't run yet: Syncing…." — the
+    /// self-contradiction the round-1 reviewer found), for every door's line; a stale error under the running round changes
+    /// nothing (the row's own precedence — syncing first); through the confirm, the sheet's line and no cause note.
+    @Test func aStillSyncingOutcomeSaysTheProgressNeverTheBlockedForm() async throws {
+        var syncing = SyncScheduler.Status()
+        syncing.isSyncing = true
+        syncing.roundsCompleted = 1
+        for (joins, follows) in [(false, false), (true, false), (false, true)] {
+            let line = RoadAccountConfirmModel.firstRoundLine(.ran(syncing), joins: joins, follows: follows)
+            #expect(line == ProtectionWords.firstRoundProgress, "joins \(joins), follows \(follows)")
+            #expect(line == "Syncing your library with your account\u{2026}")
+            #expect(!line.hasPrefix("Sync hasn't run yet"))
+        }
+        var staleError = syncing
+        staleError.lastError = String(describing: URLError(.notConnectedToInternet))
+        staleError.lastErrorIsOffline = true
+        #expect(RoadAccountConfirmModel.firstRoundLine(.ran(staleError), joins: false) == ProtectionWords.firstRoundProgress)
+        staleError.lastError = "HTTP 500 — the server refused"
+        staleError.lastErrorIsOffline = false
+        #expect(RoadAccountConfirmModel.firstRoundLine(.ran(staleError), joins: true) == ProtectionWords.firstRoundProgress)
+
+        let confirm = RoadAccountConfirmModel(
+            door: PlantedAccountRoads.setUp(), act: { _ in .made(receipt: nil) },
+            firstRound: { .ran(staleError) }, finished: { _ in })
+        await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
+        _ = await confirm.awaitFirstRound()
+        #expect(confirm.roundLine == ProtectionWords.firstRoundProgress)
+        #expect(confirm.roundErrorCause == nil, "a running round shows no cause note")
     }
 }

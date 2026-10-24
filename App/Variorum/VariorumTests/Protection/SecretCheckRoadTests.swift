@@ -150,6 +150,10 @@ struct SecretCheckRoadTests {
         let wrongWords = await Self.check(session, try RecoveryPhrase.generate().joined(separator: " "), Account.signedIn)
         #expect(wrongWords == .doesNotOpen(.words, opensAccount: false))
         #expect(wrongWords.lines == [ProtectionWords.wordsDoNotOpen])
+        // VX-510 ladder F-R1-4 (a guard — unreachable through the sheet, whose `canSubmit` refuses an empty field): nothing
+        // typed is nothing checked — a refusal in the sheet's own ask, never "That passphrase doesn't open this library."
+        let nothing = await Self.check(session, "", Account.signedIn)
+        #expect(nothing == .refused(ProtectionWords.checkSecretsLead) && nothing.warns)
 
         #expect(Plant.fetches(vault) == 0, "a library that doesn't sync reads no vault")
         #expect(Plant.writeLogs(road, vault: vault) == logs, "no keychain write, no memory write, no Apple key, no vault write")

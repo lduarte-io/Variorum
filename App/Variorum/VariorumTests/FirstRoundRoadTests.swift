@@ -4,7 +4,8 @@
 //  round run to its end on the scheduler's EXISTING public API — trigger, wait for idle, read the status — no `Sync/`
 //  line) and `AppServices.runFirstRound()` (the resume leaf's shape: a chain nothing configured is reconnected first). In
 //  memory, a fake server, no network; also runs headless in the implementer's SwiftPM harness. Guards of new seams (no old
-//  side exists to be red on); their teeth are shown by the record's behavioral reverts.
+//  side exists to be red on); their teeth are shown by the record's behavioral reverts. VX-510 ladder F-R1-1 (unit L1): the
+//  settle's two pins over a scripted scheduler (`runRound(on:)` — committed RED on the behavior-neutral seam).
 //
 
 import Dependencies
@@ -63,6 +64,33 @@ actor FirstRoundGateServer: SyncTransport {
         return []
     }
     func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
+}
+
+/// VX-510 ladder F-R1-1 — a SCRIPTED scheduler: its first `syncingReads` status reads say a round is running (another
+/// trigger's, started in the gap between the idle and the read — the real scheduler cannot be made to land one there on
+/// demand), every later read a clean round. Counts what `SyncSession.runRound(on:)` asked of it.
+actor ScriptedFirstRoundScheduler: FirstRoundScheduling {
+    private var syncingReads: Int
+    private(set) var triggers = 0
+    private(set) var idleWaits = 0
+    private(set) var reads = 0
+
+    init(syncingReads: Int) { self.syncingReads = syncingReads }
+
+    func trigger() { triggers += 1 }
+    func awaitIdle() async { idleWaits += 1 }
+    var status: SyncScheduler.Status {
+        reads += 1
+        var status = SyncScheduler.Status()
+        status.roundsCompleted = reads
+        if syncingReads > 0 {
+            syncingReads -= 1
+            status.isSyncing = true
+        } else {
+            status.lastSuccessAt = Date(timeIntervalSince1970: 1_782_864_000)
+        }
+        return status
+    }
 }
 
 @MainActor
@@ -147,6 +175,32 @@ struct FirstRoundRoadTests {
             #expect(await gate.pulls == 2)
             session.stop()
         }
+    }
+
+    /// VX-510 ladder F-R1-1 — THE SETTLE: a status read right after the idle that still says a round is running (another
+    /// trigger started one in the gap) is not the outcome — the round waits for idle again and reads again, and returns
+    /// the SETTLED status. It never asks for another round (one trigger): the re-await waits for the round already running.
+    @Test func runRoundReAwaitsAStatusThatStillReadsSyncing() async {
+        let scheduler = ScriptedFirstRoundScheduler(syncingReads: 1)
+        let status = await SyncSession.runRound(on: scheduler)
+        #expect(!status.isSyncing, "the outcome is the settled status, never the round the gap started")
+        #expect(status.lastSuccessAt != nil && status.lastError == nil)
+        #expect(await scheduler.triggers == 1, "one trigger — the re-await never asks for another round")
+        #expect(await scheduler.idleWaits == 2, "waited for idle again")
+        #expect(await scheduler.reads == 2, "read again")
+    }
+
+    /// The settle is BOUNDED (`SyncSession.firstRoundSettleWaits`): a scheduler that keeps reading syncing — a trigger
+    /// landing in every gap — returns after the bound with what it read (the sheet then says the round is still running),
+    /// never a wait without end.
+    @Test func runRoundsSettleIsBounded() async {
+        let scheduler = ScriptedFirstRoundScheduler(syncingReads: 50)
+        let status = await SyncSession.runRound(on: scheduler)
+        #expect(status.isSyncing, "past the bound: what it read")
+        #expect(await scheduler.idleWaits == SyncSession.firstRoundSettleWaits)
+        #expect(await scheduler.reads == SyncSession.firstRoundSettleWaits)
+        #expect(await scheduler.triggers == 1)
+        #expect(SyncSession.firstRoundSettleWaits > 1, "a bound that allows a re-await at all")
     }
 
     /// `runFirstRound` reconnects a chain nothing configured (the resume leaf's shape — a stopped chain, signed in), then

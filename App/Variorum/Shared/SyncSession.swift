@@ -50,6 +50,18 @@ nonisolated enum FirstRoundOutcome: Equatable, Sendable {
     case ran(SyncScheduler.Status)
 }
 
+/// **VX-510 ladder F-R1-1 — the scheduler surface a first round runs on**: `SyncScheduler`'s own public API (the trigger,
+/// the wait for idle, the status), named on the app's side — no `Sync/` line — so `SyncSession.runRound(on:)` is pinnable
+/// over a scripted scheduler: the gap it settles (a round another trigger started between the idle and the status read)
+/// cannot be produced on demand by the real one.
+nonisolated protocol FirstRoundScheduling: Actor {
+    func trigger()
+    func awaitIdle() async
+    var status: SyncScheduler.Status { get }
+}
+
+extension SyncScheduler: FirstRoundScheduling {}
+
 @MainActor
 @Observable
 final class SyncSession {
@@ -196,9 +208,17 @@ final class SyncSession {
     func roundNow() async -> FirstRoundOutcome {
         guard roundsHeld?() != true else { return .held }
         guard let scheduler else { return .notConfigured }
+        return .ran(await Self.runRound(on: scheduler))
+    }
+
+    /// How many waits for idle a first round's settle may take (the ladder's F-R1-1).
+    static let firstRoundSettleWaits = 3
+
+    /// `roundNow`'s round on `scheduler`: the trigger, the wait for idle, the status as the round left it.
+    static func runRound(on scheduler: some FirstRoundScheduling) async -> SyncScheduler.Status {
         await scheduler.trigger()
         await scheduler.awaitIdle()
-        return .ran(await scheduler.status)
+        return await scheduler.status
     }
 
     /// Waits for in-flight rounds — the iOS background transition uses this
