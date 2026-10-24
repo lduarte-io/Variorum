@@ -41,6 +41,11 @@ struct ProtectionPane: View {
             if let roadStanding, roadStanding.band != nil {
                 WordsLookSection(standing: roadStanding, keyDoors: roadStanding.keyDoors)
             }
+            // VX-510 D-B7 — VX-513: the read-only check, beside the key doors — *Check my passphrase or twelve words…*
+            // (rendered only where it can act: the live key file of the open key beside the library). It writes nothing.
+            if let keyDoors = roadStanding?.keyDoors {
+                RoadSecretCheckSection(model: keyDoors)
+            }
             // VX-307 U2a: the crossings — the posture, Use Castle / Use Standard / Replace All Keys as `assess` says them,
             // rule 11's notice, the gate-style row.
             if let crossings = roadStanding?.crossings {

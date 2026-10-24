@@ -1680,8 +1680,37 @@ not yet run is PENDING.*
     `needsFreshVault` to the same sentence); a vault descriptor below the KDF floor opens to no passphrase (no cheap KDF, ever
     — the library side's own reading); twelve tokens that fail the words' validation and open nothing as a passphrase say the
     words' sentence — the reading stays Look inside's ("twelve valid words are the words").
-- **Piece 3** — the door and its sheet (the model, the one presenter, the bootstrap's road, the Mac section and sheet), their
-  pins: NOT STARTED.
+- **Piece 3** — the door and its sheet: DONE (this commit). `Shared/Protection/RoadKeyDoorsModel.swift`:
+  `RoadKeyDoorRoads.check` (optional — nil, no door: P-2); `RoadSecretCheckModel` (the sheet's brain — `busy`, `outcome`;
+  `submit` untrimmed; `edited()` drops what was said the moment the field changes and a check still running then lands
+  nothing — **unit C's W-10 folded in**; `close()` always — a check reads only, so the host's dismissal is Close even
+  mid-check; the typed text never held — it lives in the sheet's field); `RoadKeyDoorsModel.offersCheck` (a check road AND
+  the read's `checkStands`), `checkSheet`, `openCheck(on:)` (through THE ONE PRESENTER; nothing re-read, nothing said at the
+  close). `ProtectionSheetPresenter.swift`: `case checkSecrets(RoadSecretCheckModel)` (its id; its cancel = Close).
+  `Shared/AppBootstrap.swift` `keyDoorRoads()`: `check:` — the OPEN session (ready only, else `crossingDoorClosed`), the
+  sign-in now, `Task.detached` → `ProtectionSecretCheck.check` (no act lock, no receipt, no landing). Mac (compile at Piece 5's
+  build-for-testing, PENDING): NEW `Variorum/Features/Protection/RoadSecretCheckSheet.swift` — `RoadSecretCheckSection` (the
+  one door, rendered only where `offersCheck`) and `RoadSecretCheckSheet` (title, lead, ONE `PeekableSecretField` — VX-463's
+  concealed field with its eye —, the lines said — the first in the alarm voice when it warns —, Close, Check; `onChange`
+  → `edited()`); `ProtectionPane.swift` renders the section AFTER the words section (the set row → the key doors → the words
+  section order kept; one presenter host); `RoadAccountSheet.swift`'s host carries the case. `WordsFieldsConcealTests` gains
+  the check's field (its label in the words-field list; its site among the concealed fields). Pins: NEW
+  `VariorumTests/Protection/SecretCheckModelTests.swift` — suite "the door and sheet": `theDoorStandsOnlyWhereItCanAct` (no
+  faces / not standing / no road → no door, nothing presented; standing → the sheet on Settings; one sheet at a time both
+  ways), `theSheetChecksWhatWasTypedAndSaysWhatTheCheckSaid` (untrimmed; the lines; Close → gone, no receipt, no landing, no
+  re-read), `retypingClearsWhatWasSaidAndALateAnswerLandsNothing` (W-10; a parked check + an edit → dropped; the host's
+  dismissal mid-check closes, the late answer dropped), `theSheetKeepsNoSecret` (a `Mirror` walk over the sheet finds nothing
+  of the typed text); suite "through AppBootstrap" (`FirstRoundWorld`, no services): `theOpenLibrarysCheckRunsOnTheOpenSession
+  AndWritesNothing` (the door stands; words open / a wrong passphrase doesn't; Turn on sync; then the passphrase and the words
+  open library AND account; keychain write logs, non-fetch vault calls and the library's calm-asks ledger keys unchanged; the
+  executor's `freshVaults` unchanged), `withNoLibraryOpenTheDoorIsGone` (behind the lobby: no faces, no door, nothing
+  presented; the road refuses). NEW `VariorumTests/Protection/SecretCheckSurfaceTests.swift` (Mac only, hosted — compiles at
+  Piece 5, runs in the stage batch): the section standing and not; the sheet empty and saying each kind of answer. **The
+  harness, `--filter "SecretCheck|RoadKeyDoorRoadTests|RoadKeyDoorsModelTests|WordsFieldsConcealTests|
+  ProtectionSheetPresenterTests|ProtectionPaneWaveTests"`: `✔ Test run with 43 tests in 9 suites passed`** — Piece 1's four
+  composition pins GREEN; no warning in a touched file. (Machinery: the bootstrap pin's first run asserted EXACTLY two fetches
+  for two checks and saw more — the set-up's landing re-reads the pane's sections on their own tasks, each a fetch; now `≥`,
+  the road suite pinning exactly one per check.)
 - **Piece 4** — the behavioral reverts, named before any run: NOT STARTED.
 - **Piece 5** — evidence (the harness whole, the release compile, Mac + iOS build-for-testing) and THE MAC-SUITE LIST: NOT
   STARTED.

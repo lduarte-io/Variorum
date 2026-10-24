@@ -64,6 +64,8 @@ final class ProtectionSheetPresenter {
         case signIn(ProtectionSignInRequest)
         /// VX-308 U3 — a key door's confirm (Change passphrase, Reset forgotten passphrase).
         case keyDoor(RoadKeyDoorConfirmModel)
+        /// VX-510 D-B7 — VX-513, the read-only check ("Check my passphrase or twelve words…").
+        case checkSecrets(RoadSecretCheckModel)
 
         var id: UUID {
             switch self {
@@ -73,10 +75,12 @@ final class ProtectionSheetPresenter {
             case .signOut(let model): return model.id
             case .signIn(let request): return request.id
             case .keyDoor(let model): return model.id
+            case .checkSecrets(let model): return model.id
             }
         }
 
-        /// Her way out of the sheet — the model's own Cancel (a running act keeps its sheet).
+        /// Her way out of the sheet — the model's own Cancel (a running act keeps its sheet; a check reads only, so its
+        /// sheet always goes).
         func cancel() {
             switch self {
             case .crossing(let model): model.cancel()
@@ -85,6 +89,7 @@ final class ProtectionSheetPresenter {
             case .signOut(let model): model.cancel()
             case .signIn: break
             case .keyDoor(let model): model.cancel()
+            case .checkSecrets(let model): model.cancel()
             }
         }
     }

@@ -1069,7 +1069,17 @@ final class AppBootstrap {
                 }.value
             },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
-            landed: { [weak self] in await self?.roadAccount?.refresh() })
+            landed: { [weak self] in await self?.roadAccount?.refresh() },
+            // VX-510 D-B7 — VX-513: the read-only check, on the OPEN session (ready only), as signed in NOW, off the main
+            // actor (the passphrase's derivation and the vault read). It writes nothing — no act lock, no receipt, no landing.
+            check: { [weak self] typed in
+                guard let self, case .ready = self.state, let session = self.roadSession else {
+                    return .refused(ProtectionWords.crossingDoorClosed)
+                }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionSecretCheck.check(session, typed: typed, signIn: signInNow())
+                }.value
+            })
     }
 
     /// **VX-510 D-A1 — THE SERVICES-HELD ROADS, wired in ONE place** (the composition glue moved out of view code, so a

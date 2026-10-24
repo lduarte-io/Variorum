@@ -16,6 +16,9 @@
 //      the road is asked anything; the road re-reads the door (VX-108) — a door that changed is RE-SHOWN, never acted on.
 //    New Words has no confirm: its door is the Settings words section's look (U2b's `WordsLookModel`), the faces only
 //    saying whether it stands and its refusal in its place.
+//    - VX-510 D-B7 — `RoadSecretCheckModel`: the READ-ONLY CHECK's sheet (VX-513 — "Check my passphrase or twelve words…"),
+//      its door `offersCheck` / `openCheck` beside the key doors, its road `RoadKeyDoorRoads.check`
+//      (`ProtectionSecretCheck`). It writes nothing.
 //
 
 import Foundation
@@ -32,6 +35,72 @@ struct RoadKeyDoorRoads {
     var receipt: @MainActor (String) -> Void = { _ in }
     /// An act landed: the rest of the pane re-reads (rule 3's set row, the words section).
     var landed: @MainActor () async -> Void = {}
+    /// VX-510 D-B7 — VX-513: THE READ-ONLY CHECK on the open library (`ProtectionSecretCheck.check` — the bootstrap's, off the
+    /// main actor; a test's, planted). nil: no check road here — its door is not rendered (P-2).
+    var check: (@MainActor (String) async -> SecretCheckOutcome)? = nil
+}
+
+// MARK: - VX-510 D-B7 — the read-only check's sheet
+
+/// **VX-513 — "Check my passphrase or twelve words…"** (D-B7, her R-510-15): ONE concealed field (the shared field with its
+/// reveal eye — VX-463), its text checked through the check road, read as Look inside reads it; the sheet says what the
+/// check said (`SecretCheckOutcome.lines`). It writes nothing and keeps nothing: the typed text lives in the sheet's field
+/// alone (never in this model), and what was said is dropped the moment the field changes (unit C's W-10: a line left
+/// standing beside a retyped field is a line about something no longer typed) — a check still running when it changes lands
+/// nothing. Close is always open (nothing to cancel — the check reads only).
+@MainActor
+@Observable
+final class RoadSecretCheckModel: Identifiable {
+    let id = UUID()
+    private(set) var busy = false
+    /// What the last check said (nil: nothing checked yet, or the field changed since).
+    private(set) var outcome: SecretCheckOutcome?
+
+    @ObservationIgnored private let check: (String) async -> SecretCheckOutcome
+    @ObservationIgnored private let finished: () -> Void
+    /// Bumped by every check and every edit: a check's answer lands only while it is still the newest thing.
+    @ObservationIgnored private var generation = 0
+    @ObservationIgnored private(set) var closed = false
+
+    init(check: @escaping (String) async -> SecretCheckOutcome, finished: @escaping () -> Void) {
+        self.check = check
+        self.finished = finished
+    }
+
+    /// The main button: something typed, no check running, the sheet still up.
+    func canSubmit(_ typed: String) -> Bool { !busy && !closed && !typed.isEmpty }
+
+    /// The check — untrimmed (a passphrase may begin or end with a space); the answer said unless the field changed (or the
+    /// sheet closed) while it ran.
+    func submit(_ typed: String) async {
+        guard canSubmit(typed) else { return }
+        busy = true
+        outcome = nil
+        generation += 1
+        let mine = generation
+        let said = await check(typed)
+        busy = false
+        guard !closed, mine == generation else { return }
+        outcome = said
+    }
+
+    /// The field changed: what was said no longer describes what is typed.
+    func edited() {
+        generation += 1
+        outcome = nil
+    }
+
+    /// *Close* — the sheet goes; what was said goes with it.
+    func close() {
+        guard !closed else { return }
+        closed = true
+        generation += 1
+        outcome = nil
+        finished()
+    }
+
+    /// The host's dismissal is Close (a check reads only — nothing to keep the sheet up for).
+    func cancel() { close() }
 }
 
 // MARK: - One passphrase door's confirm
@@ -213,5 +282,30 @@ final class RoadKeyDoorsModel {
             })
         id = confirm.id
         presenter.present(.keyDoor(confirm), on: host)
+    }
+
+    // MARK: VX-510 D-B7 — VX-513, the read-only check's door
+
+    /// The door stands: the pane's read says the live key file of the open key is beside the library, and a check road
+    /// exists (P-2 — a door that cannot act is not rendered; no library open → no faces → no door).
+    var offersCheck: Bool { roads.check != nil && faces?.checkStands == true }
+
+    /// The check's sheet standing (through the presenter).
+    var checkSheet: RoadSecretCheckModel? {
+        if case .checkSecrets(let model)? = presenter.sheet { return model }
+        return nil
+    }
+
+    /// The door's press: its sheet on `host` (nothing while another protection sheet stands — one at a time). Nothing is
+    /// re-read when it closes: the check changed nothing.
+    func openCheck(on host: ProtectionSheetHost = .settings) {
+        guard presenter.sheet == nil, offersCheck, let check = roads.check else { return }
+        let presenter = presenter
+        var id: UUID?
+        let sheet = RoadSecretCheckModel(
+            check: { typed in await check(typed) },
+            finished: { if let id { presenter.dismiss(id) } })
+        id = sheet.id
+        presenter.present(.checkSecrets(sheet), on: host)
     }
 }

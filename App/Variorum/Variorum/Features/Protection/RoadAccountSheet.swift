@@ -424,6 +424,9 @@ struct ProtectionSheetsHost: ViewModifier {
             case .keyDoor(let model):
                 // VX-308 U3 — a key door's confirm (Change passphrase, Reset forgotten passphrase).
                 RoadKeyDoorSheet(model: model)
+            case .checkSecrets(let model):
+                // VX-510 D-B7 — VX-513, the read-only check (it writes nothing).
+                RoadSecretCheckSheet(model: model)
             case .signIn:
                 if let services {
                     AccountView(services: services, initialTab: .account)
