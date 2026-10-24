@@ -241,16 +241,30 @@ extension ProtectionExecutor {
 
     /// **VX-529 P6e — THE CLASS'S WORDS TWIN**: typed twelve words the account's vault refuses. Ones that still open
     /// THIS library (its own words lock, or its master's words copy through its master lock) are the account's words as
-    /// this library last knew them — re-made on another device since: the follow is owed first (`accountMoved` — "Your
-    /// account changed on another device. Follow it first."; no refusal names a words change, and none is minted here —
-    /// the follow's own words arm keeps its refusal, the sweep table says why). Ones that open neither keep the plain
-    /// refusal. READS only.
+    /// this library last knew them — re-made on another device since: at a door around the follow, the follow is owed
+    /// first (`accountMoved` — "Your account changed on another device. Follow it first."); at the follow itself
+    /// (`refusalForWordsTheVaultRefusesAtTheFollow`), the change named. Ones that open neither keep the plain refusal.
+    /// READS only.
     func refusalForWordsTheVaultRefuses(_ typed: [String], _ library: UnlockedLibrary) -> ExecutorRefusal {
-        if let file = library.keyFile, file.fingerprint == library.fingerprint,
-           (try? file.open(.words(typed), floor: configuration.floor)) == library.key {
-            return .accountMoved
-        }
-        return .wordsDoNotOpen
+        wordsOpenThisLibrary(typed, library) ? .accountMoved : .wordsDoNotOpen
+    }
+
+    /// **VX-529 P7-2 — F-10, at the follow's own words arms** (the follow, the pair catch-up's door): "follow it first"
+    /// would be circular there, so old words that open this library but no longer the account's vault NAME the change —
+    /// `wordsChangedElsewhere`, VX-113's twin (the vault's last writer and its day). Words opening neither: the plain
+    /// refusal. READS only.
+    func refusalForWordsTheVaultRefusesAtTheFollow(
+        _ typed: [String], _ library: UnlockedLibrary, vault: VaultSnapshot
+    ) -> ExecutorRefusal {
+        guard wordsOpenThisLibrary(typed, library) else { return .wordsDoNotOpen }
+        return .wordsChangedElsewhere(device: vault.vault.updatedByDevice, day: vault.updatedAt)
+    }
+
+    /// The typed words open the library's CURRENT key through this library's own key file (its words lock, or the
+    /// master's words copy through its master lock).
+    func wordsOpenThisLibrary(_ typed: [String], _ library: UnlockedLibrary) -> Bool {
+        guard let file = library.keyFile, file.fingerprint == library.fingerprint else { return false }
+        return (try? file.open(.words(typed), floor: configuration.floor)) == library.key
     }
 
     /// **Reset a forgotten passphrase** — Castle: Touch ID on an enrolled

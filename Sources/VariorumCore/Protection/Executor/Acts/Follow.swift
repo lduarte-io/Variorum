@@ -201,7 +201,8 @@ extension ProtectionExecutor {
         } else if let words = typed.words {
             let wordsKey = try WordsKey.derive(words)
             guard VaultModel.master(of: vault.vault, passphrase: nil, words: wordsKey) != nil else {
-                throw ExecutorRefusal.wordsDoNotOpen
+                // VX-529 P7-2 (F-10): the old words after a words change elsewhere — named (VX-113's twin).
+                throw refusalForWordsTheVaultRefusesAtTheFollow(words, library, vault: vault)
             }
             secrets.words = wordsKey
             typedSecret = "words"

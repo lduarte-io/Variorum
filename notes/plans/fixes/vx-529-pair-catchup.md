@@ -448,8 +448,8 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     | 5 | `KeyDoors.swift` `holdSyncKeysForTheSession` (Reset by the words, no keys held) | words, verified against the library | `secretsRequired` | FIXED — P6e (words ⇒ `accountMoved`; no secret keeps `secretsRequired`) |
     | 6 | `PairCatchUp.swift` `followThePair`, passphrase | passphrase | — (new) | FIXED by construction (P1's helper) |
     | 7 | `Follow.swift` `follow`, passphrase | passphrase | VX-113's `passphraseChangedElsewhere` on the descriptor alone | OUT — already names the change (best-effort, F-5) |
-    | 8 | `Follow.swift` `follow`, words | words | `wordsDoNotOpen` | IN THE CLASS, NOT FIXED — F-10 |
-    | 9 | `PairCatchUp.swift` `followThePair`, words | words | `wordsDoNotOpen` | IN THE CLASS, NOT FIXED — F-10 |
+    | 8 | `Follow.swift` `follow`, words | words | `wordsDoNotOpen` | FIXED — P7-2 (`wordsChangedElsewhere`, F-10's refusal) |
+    | 9 | `PairCatchUp.swift` `followThePair`, words | words | `wordsDoNotOpen` | FIXED — P7-2 (`wordsChangedElsewhere`) |
     | 10 | `AccountActs.swift` `join` (enroll · Move), passphrase | the account's passphrase | `passphraseDoesNotOpen`, rendered "…your account" (VX-464) | OUT — the secret is the ACCOUNT's, and the face names the account |
     | 11 | `AccountActs.swift` `join`, words | the account's words | `wordsDoNotOpen`, rendered "…your account" | OUT — the same |
     | 12 | `CommonSteps.swift` `enterCastleWrite` (in the act) | the press's passphrase | `ActRollback(.accountMoved)` ⇒ "Follow it first." | OUT — already honest |
@@ -513,7 +513,14 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   - P7-2 — F-10's refusal at the follow's own words arm and the pair door's (sweep rows 8–9). IN-PROGRESS — the red
     pins COMMITTED (`PairFollowWordsRefusalTests`): RED on the pre-fix tree — the follow into Castle with the OLD words
     after the Mac re-made the words and entered Castle, and the pair door (both postures) with the OLD words after both
-    halves moved: `wordsDoNotOpen` (3); the nobody's-words companions green. Remains: the fix, green, the revert.
+    halves moved: `wordsDoNotOpen` (3); the nobody's-words companions green. THE FIX COMMITTED (this commit):
+    `refusalForWordsTheVaultRefusesAtTheFollow` (`KeyDoors.swift` — the typed words open this library through its own
+    key file ⇒ `wordsChangedElsewhere(device:day:)`, the vault's last writer and day; else `wordsDoNotOpen`) at
+    `Follow.swift`'s words arm and `followThePair`'s; P6e's door helper shares the one predicate
+    (`wordsOpenThisLibrary`). Green: 93 tests (the refusal, pair, follow, key-door and crossing suites).
+    A REVERT IS IN FLIGHT: both throw sites put back to `wordsDoNotOpen`; restore with `git checkout HEAD --
+    Sources/VariorumCore/Protection/Executor/Acts/Follow.swift Sources/VariorumCore/Protection/Executor/Acts/
+    PairCatchUp.swift`.
   - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). NOT-STARTED.
   - P7-4 — the full core suite; the report. NOT-STARTED.
 **Findings before any code (traced in this session; each says what it changes):**
