@@ -921,7 +921,10 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   harness, `--filter "PairPreflightAndGateTests|ProtectionJoinFollowRoadTests|RoadKeyDoorRoadTests|RoadKeyDoorsModelTests|
   ProtectionAccountRoadTests|RoadKeyDoorWordsTests"`): `✔ Test run with 44 tests in 6 suites passed`. THE REVERT (named
   before it runs; one line on this commit, the harness `--filter PairPreflightAndGateTests`, restored by `git checkout --`):
-  RV-P3-1 `ProtectionAccountActs.swift` — the words arm's `follows` clause removed. PENDING (next commit).
+  RV-P3-1 `ProtectionAccountActs.swift` — the words arm's `follows` clause removed. **VERIFIED BY REVERT** on `6d6c1ab6c`:
+  `✘ Test run with 2 tests … with 1 issue` (`old == .refused(named)` — exactly the pre-fix red; the gate's test green
+  through it); restored by `git checkout --`, `git diff --exit-code` clean, `✔ 2 tests` green again. DONE (`d6a587914` pin,
+  `6d6c1ab6c` fix). No revert is in flight.
 - U2-P4 — scope 4: the check door's fourth answer gains the pointer line in the catch-up state; its E6 variant (R-529-6);
   the door still writes nothing. NOT-STARTED.
 - U2-P5 — scope 7 (core): the E6 heal wired — `regenerateWords`' key-file step lands a missing passphrase lock with the
