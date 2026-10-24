@@ -243,7 +243,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
-| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 DONE (0B·0M·3m·2n) → UNIT L1 DONE + O-L1-1 fixed → ROUND 2 DONE (0B·0M·1m·1n; every round-1 fix SOUND; the L1 harness independently re-run 524/90) → F-R2-1/-2 FIXED by the orchestrator; the reviewer's final line-by-line check PENDING |
+| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | DONE — round 1 (0B·0M·3m·2n) → L1 + O-L1-1 → round 2 (0B·0M·1m·1n, every round-1 fix SOUND, the harness independently re-run 524/90) → F-R2-1/-2 fixed by the orchestrator, the reviewer's final check 2/2 SOUND; the merge gates are row 10's batch + the re-walk |
 | 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | NOT STARTED |
 
 ## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
@@ -3079,8 +3079,17 @@ fixes get the reviewer's line-by-line check below):
   `ProtectionWords.firstRoundProgress`), so the rare face still says sync keeps going and the row finishes the story;
   Mac build-for-testing green incremental; no pin owed (the reviewer's call), words P-VX510-1-adjacent, hers.
 
-**THE REVIEWER'S FINAL LINE-BY-LINE CHECK of these two fixes:** PENDING (asked of the round-2 reviewer in its own
-session — the final round's fixes are checked against each finding before the closing batch).
+**THE REVIEWER'S FINAL LINE-BY-LINE CHECK of these two fixes: 2/2 SOUND (2026-10-24).** F-R2-1: the self-test run by
+the reviewer itself (green; the real road byte-identical; refusals before any network act); the narrow-revert-green
+judged to STRENGTHEN the claim — the honest signature of two overlapping whole-value checks, either of which alone
+still closes the injection hole; the pin targets the class and goes red on exactly the pre-O-L1-1 shape. (Optional,
+not owed: one fixture listing a malformed value whole in the temp allowlist would pin the plain check in isolation —
+a future pass's one-liner.) F-R2-2: the constant-comparison idiom judged correct against the one presentation source
+(the note shows precisely on the syncing face, and would still belong with those words if ever reused); build-for-
+testing proportionate for a +9-line view-only change. No NEW-ISSUE; neither commit adds to the merge-gate list.
+**THE LADDER IS CLOSED: round 1 (0B·0M·3m·2n) → L1 + O-L1-1 → round 2 (0B·0M·1m·1n, every fix SOUND) → F-R2-1/-2
+fixed and confirmed. The only things between this tree and the merge are F-R1-2's gates: the closing stage batch and
+the independent re-walk.**
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
