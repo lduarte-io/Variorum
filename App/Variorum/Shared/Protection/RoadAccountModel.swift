@@ -474,7 +474,10 @@ final class RoadAccountModel {
         guard read > landedRead else { return }
         landedRead = read
         faces = fresh
-        followDone = roads.followDoneOwed()
+        // VX-529 unit 2 (scope 2 — the VX-510 repro's stale line): a follow's Done says this Mac caught up, which is false
+        // while a follow is OWED — it never stands beside the follow door. The mark itself stays (her OK is its only clear;
+        // the follow that lands next writes its own — the newest Done is the true one).
+        followDone = fresh?.follow.openDoor != nil ? nil : roads.followDoneOwed()
     }
 
     /// VX-309 U2 — VX-457: the follow's Done's *OK* — the mark clears; the notice goes.

@@ -893,7 +893,14 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   PairFollowDoneTests`): `✘ Test run with 2 tests in 1 suite failed … with 5 issues` — `aSettledFollowNamingNoNewKeyIs
   ThePairCatchUp` ✘×4 (resumed and finished-from-record, both postures: `.keysReplaced` where the pair kind is owed; its
   re-keying guards green), `theDoneLineNeverStandsBesideAnOwedFollow` ✘×1 (`model.followDone == nil` — the stale
-  `.keysReplaced` beside an owed follow). What remains: the fix (P1's notice type lands with it).
+  `.keysReplaced` beside an owed follow). THE FIX COMMITTED (this commit): `RoadSettledFollow.kind` — an act in flight
+  naming no new key ⇒ `.pairChanged(passphrase: false, words: false)` (the halves no durable fact holds); `RoadAccountModel
+  .land` — no follow Done while the faces carry an open follow door (the mark untouched). F-U2-5's fixture corrected
+  (`theSettledFollowIsReadFromDurableFacts` — a new key named; every assertion unchanged). **GREEN** (the harness,
+  `--filter "PairFollowDoneTests|ProtectionJoinFollowRoadTests|RoadAccountModelTests|FollowDoneNoticeTests"`): `✔ Test run
+  with 31 tests in 4 suites passed`. THE REVERTS (named before they run; each one line on this commit, the harness
+  `--filter PairFollowDoneTests`, restored by `git checkout --`): RV-P2-1 `ProtectionOpenRoad.swift` — the pair arm removed;
+  RV-P2-2 `RoadAccountModel.swift` — `followDone = roads.followDoneOwed()` back. PENDING (next commit).
 - U2-P3 — scope 5: the preflight's words twin (`accountSecretRefusal` says "Those twelve words don't open this library."
   for old words that DO open it after a words change elsewhere — bug-class, the core's P7-2 split mirrored) and the key
   doors' gate refusal in the detected state speaking the pair sentence (R-529-3). NOT-STARTED.

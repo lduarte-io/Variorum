@@ -445,8 +445,11 @@ struct ProtectionJoinFollowRoadTests {
 
     /// The durable reading itself (pure): a settle that finished a follow names its kind from the act in flight's
     /// `fromKind` and the record's mode after; nothing for another act, a roll back, or nothing in flight.
+    /// VX-529 unit 2 — FIXTURE CORRECTED DELIBERATELY (the run record's F-U2-5): a re-keying follow's act in flight names
+    /// its new key (minted at its press); the fixture used to leave it nil, which is now the PAIR catch-up's own mark
+    /// (`PairFollowDoneTests` pins that arm). Every assertion below is unchanged.
     @Test func theSettledFollowIsReadFromDurableFacts() {
-        let follow = ActInFlight(sequence: 3, act: .follow, fromKind: .castle, startedAt: Date())
+        let follow = ActInFlight(sequence: 3, act: .follow, toFingerprint: "new-key", fromKind: .castle, startedAt: Date())
         let quiet = ActOutcome(act: .follow, fingerprint: "f")  // a resume that ran no notice-bearing step
         #expect(RoadSettledFollow.kind(.resumed(quiet), inFlight: follow, modeAfter: .standard) == .intoStandard)
         #expect(RoadSettledFollow.kind(.finishedFromRecord(quiet), inFlight: follow, modeAfter: .castle) == .keysReplaced)

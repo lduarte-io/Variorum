@@ -87,8 +87,12 @@ nonisolated enum RoadSettledFollow {
         case .resumed(let finished), .finishedFromRecord(let finished): outcome = finished
         case .nothingInFlight, .rolledBack: return nil
         }
-        guard outcome.act == .follow, let inFlight, inFlight.act == .follow, let from = inFlight.fromKind,
-              let to = modeAfter else { return nil }
+        guard outcome.act == .follow, let inFlight, inFlight.act == .follow else { return nil }
+        // VX-529 unit 2 (scope 2): a follow whose act in flight names NO new key is the PAIR catch-up — every other follow
+        // mints its new key at its press (the core's own reading, `FollowProgram.finishingSteps`). Its halves are no durable
+        // fact (the plan carries none — S-3), so the halves-unknown form; never "the keys changed".
+        if inFlight.toFingerprint == nil { return .pairChanged(passphrase: false, words: false) }
+        guard let from = inFlight.fromKind, let to = modeAfter else { return nil }
         switch (from, to) {
         case (.standard, .castle): return .intoCastle
         case (.castle, .standard): return .intoStandard
