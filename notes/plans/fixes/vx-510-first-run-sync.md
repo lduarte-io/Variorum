@@ -239,11 +239,11 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | UNIT B2 DONE (`4a5ef39e3`…`f4af7e368`; harness 502/85 green; reverts RF-1…6, RD4-1…8, RD6-1…5, RD5-1…2 red as named; Mac + iOS build-for-testing green; claims spot-checked by the orchestrator); VX-501 + VX-511 GREEN LIVE on production (unit C C2/C4); VX-503 fixed (`226cf7c20`); T-B5-2 → **VX-517** (Needs Lillian); the Mac stage batch PENDING (the closing run) |
 | 6c | VX-513 (the read-only check-your-secrets door) | UNIT B3 DONE (`73dc65dab`…`2e3d335d8`; harness 519/89 green; RC-1…16 red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 65/9 green; P-VX510-B3-2 ruled (b) provisionally); **GREEN LIVE** (rows 1–5, offline included; nothing written); the Mac stage batch PENDING (the closing run) |
 | 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 DONE (`5416bcaca`…`fe42afe4f`; harness 521/90; core protection 546/103 re-run by the orchestrator; RE-0…13 red as named; Mac + iOS build-for-testing green); F-B4-1 accepted as residue; O-B4-1 → VX-530; **GREEN LIVE** (red leg on the pre-fix build: two Touch ID sheets on a Standard key door; green leg on the post-fix build: none; the Castle guard intact; VX-530 seen live) |
-| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere) | VX-527: UNIT B5 IN FLIGHT under the successor (D-B9 + the brief, this commit) · VX-529: ITS OWN RUN, NEXT (R-510-19/20) |
+| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere) | VX-527: UNIT B5 DONE (`d122f9bbc`…`8df5966ec`; the pin red-on-old, the revert verified, Mac + iOS build-for-testing green; the Mac-target pin run rides the closing stage batch, the live press the re-walk) · VX-529: ITS OWN RUN, NEXT (R-510-19/20) |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
-| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | NOT STARTED |
+| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 IN FLIGHT (spawned 2026-10-24 by the successor; B5 in the diff) |
 | 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | NOT STARTED |
 
 ## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
@@ -2728,6 +2728,76 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
     from earlier walks — none reach a real store); the `std` and `castle` prod test accounts STAY as standing release-drill
     accounts (PROPOSED — her call at closeout; their secrets in `~/.variorum/prod-test-accounts.env`, the words in
     `~/.variorum/prod-test-words-{std,castle}`).
+
+## THE SUCCESSOR'S SANITY CHECK (2026-10-24, the successor orchestrator — her ask at the cutover)
+
+Her ask at the cutover kickoff (2026-10-24, verbatim): "consider the work that has been done with an OPEN mind, as an
+evaluator. don't just look for specific technical flaws - look at what the prompt was for the phase and consider if it
+was well executed enough. don't just trace the fix / test - was that test the right test? etc. we need a major sanity
+check because this has been a really long, complex, hotfix followup to the castle migration."
+
+## Method
+The successor read the preflight whole (the handoff, this record whole, SyncSpec, CastleRules, SurfaceContracts,
+the charter `notes/handoffs/vx-510-kickoff.md`), then read THE WHOLE PRODUCT DIFF itself (main...HEAD, every
+non-test file), and re-read the production rows independently (below). The ladder's cold review runs separately;
+this section is the charter-vs-execution judgment.
+
+## Charter vs. delivered
+1. THE TRACE — delivered and sound. T-1's mechanism (VX-329 U1 deleted the old road's post-enrollment round hook) is
+   the right level of trace: by commit, with the exhaustive trigger-roads enumeration that makes "the act is none of
+   *[removed for publication]*
+   before the vault write) is honest about what cannot be proven ("no logs survive — it is the one story the code and
+   the server both allow").
+2. THE FIXES — all four members built, each with revert-verified red-on-old pins; the fix DESIGNS match the code as
+   shipped (verified against the diff, not the record's claims). The composition glue genuinely moved out of view code
+   (`AppBootstrap.attach(services:)`), which is what makes `FirstRunDrillTests` an honest end-to-end gate rather than
+   a unit test wearing an integration test's name.
+3. THE ACCEPTANCE — exceeded the letter: three fresh accounts (std, castle, del), both postures, sign-up → set-up →
+   join → restore-join → fresh-library join (the testers' exact road), deletion, every leg server-verified. The
+   successor re-read the server independently: std = standard rev 3 · kp 1 · 3 cursors · 1 live container; castle =
+   standard rev 15 · kp 1; del = no auth row, nothing left. All exactly as the record claims.
+4. R-510-4's MAP — delivered, 17 seams, propose-only. It is the right artifact: it names what unit C did NOT prove
+   (the real confirmation-email link, Sparkle update-from-previous, two-device live editing) instead of letting the
+   run's green imply them.
+
+## "Was that test the right test?" — the evaluator's answers
+- The drill (FirstRunDrillTests) runs over a FAKE server, so it can never catch the PL/pgSQL class — but the release
+  gate (release.sh step 0) deliberately pairs it with the LIVE scripted walk, so the standing evidence is layered:
+  drill = regression gate, walk = live proof. That is the right shape, and it is the shape her R-510-2/R-510-4 asked
+  for.
+- The run's best epistemic catch is test-world fidelity: B4 found that the all-seeing planted keychain leaf had HIDDEN
+  the VX-517 class for months, and answered it by building a production-shaped listing (`listsLikeProduction`) before
+  pinning. The same class of lesson was applied twice more (B1's world kept services alive that production releases —
+  fixed before the reverts; B4's "a delete of nothing is no write"). This is exactly the discipline her question asks
+  after, applied where it mattered.
+- The pins pin MECHANISMS, not idioms (e.g. D-B9), and the reverts were behavioral with named expected reds — the
+  record's revert tables read as genuine teeth, and two reverts exposed real latent races (RB-6's start-race; RD4-1's
+  hollow leg, tightened and re-run).
+- The honest gaps are RECORDED, not hidden: VX-501's settle-vault-reuse branch and VX-511's reopen-not-ready edge are
+  unpinned and say so; F-B4-1 is an accepted residue with its reasoning; the three harness-PATH artifacts are named at
+  every run.
+
+## What the successor found reading the diff cold (for the ladder's attention, not pre-judged)
+- `CommonSteps.material(for:)` (VX-503's fix) no longer consults the act's `material` cache before deriving: the typed-
+  secret arm runs first and pays a fresh Argon2id on every call. If any act calls it more than once, that is a second
+  KDF (seconds-class, memory-hard) the pre-fix order did not pay. Candidate MINOR — the ladder should judge call
+  counts per act (O-B4-1/VX-530 is the adjacent Castle double-read).
+- The castle test account carries 6 device cursors after the walks: each posture crossing's enroll minted one. By
+  design (13j's 60-day horizon retires them); recorded so nobody reads the count as a bug later.
+- Everything else read as designed; the prod test road's guard set (Debug-only compile-out, exact-match allowlist,
+  marker per entry, per-account admission at every connect, exclusivity with the walk project) is defense-in-depth
+  done properly, and the one deliberate exposure (emails in `ps eww`) is named and is not a secret.
+
+## Judgment
+The run executed its charter fully and at the right altitude: the mechanism was traced before any fix, the acceptance
+ran where the rubber meets the road (production, three accounts, both postures), scope grew only at her explicit
+rulings (R-510-11/-14/-15/-16), and the discipline held under growth. The run's real residual risks are the three the
+handoff already names — no cold review yet, no whole-target suite run since unit A, self-reported walk claims — and
+they are exactly the successor's work items (the ladder, the stage batch, the independent re-walk). Two things the
+closeout must not lose: VX-529 is a REAL first-run-class gap deliberately deferred at her word (R-510-19/-20 — its
+run should follow soon, since a Castle passphrase change on one device still silently strands the others), and the
+MAP's rows 8–9 (Sparkle update-from-previous; the real confirmation-email link) are the two remaining launch seams
+with NO live proof at all.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
