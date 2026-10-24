@@ -2358,7 +2358,10 @@ store, server or production contact; no subagents.
     the one unverified assumption; if it is not honoured the door degrades to the chevron + the row-wide words, still the
     fix); the chevron still opens it; the label's press animates as the chevron's does.
 - **Piece 3** — green + the behavioural revert: IN-PROGRESS. **GREEN on the fix** (`swift test` in the scratch package):
-  **`✔ Test run with 2 tests in 1 suite passed after 0.001 seconds`**. The revert: NOT-STARTED; no revert is in flight.
+  **`✔ Test run with 2 tests in 1 suite passed after 0.001 seconds`**. **REVERT R-1 STARTING** (after this commit): the
+  disclosure arm's label back to the bare `Text` DisclosureGroup label in `StoreLockView.swift` alone; the pre-revert
+  state is commit `01c5f0f33` (pushed), so the restore is `git checkout -- App/Variorum/Variorum/StoreLockView.swift` and
+  `git diff --exit-code`. If this line is the last word, the tree may be mid-revert: read `git diff` against HEAD.
 - **Piece 4** — Mac + iOS build-for-testing; THE MAC-SUITE LIST: NOT-STARTED.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
