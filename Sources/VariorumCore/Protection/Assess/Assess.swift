@@ -633,11 +633,12 @@ public enum AssessRules {
                   case .follow(let kind, let typed) = follow else { return .refused(.nothingToDo) }
             if case .pairChanged(let passphrase, _) = kind {
                 // VX-529 (design §2): the catch-up RE-LOCKS, never re-keys (rule
-                // 6) — no new key, no Apple key retired, no rule-5 sentence. It
-                // types exactly the half that moved and can only be typed: the
-                // account's CURRENT passphrase where it moved; nothing where only
-                // the words did (R-529-2 — they ride the vault's own copy).
-                return .open(DoorSpec(requires: passphrase ? .currentPassphrase : .none, synced: true))
+                // 6) — no new key, no Apple key retired, no rule-5 sentence. Where
+                // the passphrase moved it types ONE of the account's current
+                // secrets (R-529-5: the passphrase re-makes the lock, the words
+                // drop the stale one); nothing where only the words did (R-529-2
+                // — they ride the vault's own copy).
+                return .open(DoorSpec(requires: passphrase ? .oneSecret : .none, synced: true))
             }
             let leaves = kind == .intoStandard
             return .open(DoorSpec(requires: typed ? .oneSecret : .none, rekeys: true,

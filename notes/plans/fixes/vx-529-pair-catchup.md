@@ -495,7 +495,19 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
     (`PairCatchUpWordsArmTests`; `AssessPairKindTests`' door row now `.oneSecret`; the entry row that expected
     `secretMissing` for the words removed — the ruling makes that road land): RED on the pre-P7-1 tree — the words arm
     `secretMissing` in all three postures, alone and for both halves, and under the crash harness; the door
-    `.currentPassphrase`. The passphrase-press-resumed-by-the-words row green on both sides by nature (a guard).
+    `.currentPassphrase`. The passphrase-press-resumed-by-the-words row green on both sides by nature (a guard). THE
+    FIX COMMITTED (this commit): `KeyFile.droppingPassphrase()` (a value setter beside `droppingWords`);
+    `PassphraseLockChange` (keep · remake · drop) replacing the re-lock's optional passphrase — rule 22's master check
+    still first, `opensWithTheWords` still last; the door takes either current secret (`secretMissing` only when the
+    passphrase moved and nothing was typed); the step re-makes the lock when the account's current passphrase is in
+    hand, DROPS it when the PRESS chose the words and they open the fresh vault (a passphrase press resumed by a
+    lobby's words alone rolls back — it never trades the press's re-made lock for a dropped one), else rolls back —
+    E4 at the press names the change by the secret pressed (`wordsChangedElsewhere` for the words arm). THE DOOR'S
+    REQUIREMENT for the passphrase-moved case: `.oneSecret` — truthful: either of the account's two current secrets
+    lands it (its face is unit 2's; `RoadDoorAsk.of(.oneSecret)` is the follow's existing passphrase-or-words ask).
+    After the words arm the file is E6's state (no passphrase lock; `pairFollow` nil — nothing owed); the heal is
+    P7-3's. Value pins: `.drop` takes only the passphrase lock; `.remake` lands one where none was (the corrected
+    premise). Green: 96 tests (pair, follow, key-door suites) + `PairRelockTests` 9/9. Remains: the revert.
   - P7-2 — F-10's refusal at the follow's own words arm and the pair door's (sweep rows 8–9). Red pins first.
     NOT-STARTED.
   - P7-3 — the E6 heal's KeyFile primitive (P-VX529-4, PROVISIONAL; NOT wired — unit 2's). NOT-STARTED.

@@ -63,7 +63,7 @@ struct PairRelockTests {
         let lag = try LaggingFile()
         let relocked = try lag.file.relockedToTheAccountsPair(
             key: lag.key, master: lag.world.master, accountsWordsCopy: try lag.world.masterWordsCopy,
-            accountsPassphrase: lag.newP, dropsOwnWordsLock: false)
+            passphraseLock: .remake(lag.newP), dropsOwnWordsLock: false)
         expectNothingButTheLocksMoved(lag.file, relocked)
         #expect(relocked.passphrase?.kdf == lag.newP.kdf, "fact 1: the lock under the vault's descriptor")
         #expect(try relocked.open(passphrase: .passphrase(lag.newPassphrase), floor: PF.floor) == lag.key)
@@ -77,7 +77,7 @@ struct PairRelockTests {
     @Test func theWordsHalfTakesTheVaultsCopyAndDropsTheStaleOwnLock() throws {
         let lag = try LaggingFile()
         let relocked = try lag.file.relockedToTheAccountsPair(
-            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, accountsPassphrase: nil,
+            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, passphraseLock: .keep,
             dropsOwnWordsLock: true)
         expectNothingButTheLocksMoved(lag.file, relocked)
         #expect(relocked.masterWordsCopy == lag.newCopy, "§3.5a: the vault's recovery wrap, byte for byte")
@@ -93,7 +93,7 @@ struct PairRelockTests {
     @Test func bothHalvesAtOnce() throws {
         let lag = try LaggingFile()
         let relocked = try lag.file.relockedToTheAccountsPair(
-            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, accountsPassphrase: lag.newP,
+            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, passphraseLock: .remake(lag.newP),
             dropsOwnWordsLock: true)
         expectNothingButTheLocksMoved(lag.file, relocked)
         #expect(try relocked.open(passphrase: .passphrase(lag.newPassphrase), floor: PF.floor) == lag.key)
@@ -110,7 +110,7 @@ struct PairRelockTests {
         let lag = try LaggingFile()
         let backup = lag.file  // a copy frozen before the re-lock (the act rewrites no backup — E7)
         let relocked = try lag.file.relockedToTheAccountsPair(
-            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, accountsPassphrase: lag.newP,
+            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, passphraseLock: .remake(lag.newP),
             dropsOwnWordsLock: true)
         for secret in [ProtectionSecret.passphrase(lag.newPassphrase), .words(lag.newWords)] {
             let current = try relocked.open(secret, floor: PF.floor)
@@ -127,18 +127,18 @@ struct PairRelockTests {
         let lag = try LaggingFile()
         #expect(throws: KeyFileError.doesNotOpen(.master)) {
             _ = try lag.file.relockedToTheAccountsPair(
-                key: lag.key, master: SymmetricKey(size: .bits256), accountsWordsCopy: lag.newCopy, accountsPassphrase: nil,
+                key: lag.key, master: SymmetricKey(size: .bits256), accountsWordsCopy: lag.newCopy, passphraseLock: .keep,
                 dropsOwnWordsLock: true)
         }
         let local = try lag.world.castleFile(lag.key, synced: false)
         #expect(throws: KeyFileError.noSuchWrap(.master)) {
             _ = try local.relockedToTheAccountsPair(
-                key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, accountsPassphrase: nil,
+                key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, passphraseLock: .keep,
                 dropsOwnWordsLock: true)
         }
         #expect(throws: KeyFileError.keyIsNotThisFilesKey) {
             _ = try lag.file.relockedToTheAccountsPair(
-                key: lag.older, master: lag.world.master, accountsWordsCopy: lag.newCopy, accountsPassphrase: nil,
+                key: lag.older, master: lag.world.master, accountsWordsCopy: lag.newCopy, passphraseLock: .keep,
                 dropsOwnWordsLock: false)
         }
     }
@@ -147,12 +147,43 @@ struct PairRelockTests {
     @Test func reLockingTwiceIsReLockingOnce() throws {
         let lag = try LaggingFile()
         let once = try lag.file.relockedToTheAccountsPair(
-            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, accountsPassphrase: lag.newP,
+            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, passphraseLock: .remake(lag.newP),
             dropsOwnWordsLock: true)
         let twice = try once.relockedToTheAccountsPair(
-            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, accountsPassphrase: lag.newP,
+            key: lag.key, master: lag.world.master, accountsWordsCopy: lag.newCopy, passphraseLock: .remake(lag.newP),
             dropsOwnWordsLock: true)
         #expect(twice == once)
+    }
+
+    /// R-529-5's words arm at the value level: `.drop` takes ONLY the passphrase lock — the master lock's bytes, the
+    /// history, the Apple wrap untouched; the words open it through the account's copy; rule 22's check still first.
+    @Test func theWordsArmDropsOnlyTheStalePassphraseLock() throws {
+        let lag = try LaggingFile()
+        let relocked = try lag.file.relockedToTheAccountsPair(
+            key: lag.key, master: lag.world.master, accountsWordsCopy: try lag.world.masterWordsCopy, passphraseLock: .drop,
+            dropsOwnWordsLock: false)
+        expectNothingButTheLocksMoved(lag.file, relocked)
+        #expect(relocked.passphrase == nil && relocked.words == lag.file.words)
+        #expect((try? relocked.open(passphrase: .passphrase(lag.world.passphrase), floor: PF.floor)) == nil)
+        #expect(try relocked.open(.words(lag.world.words), floor: PF.floor) == lag.key)
+        #expect(throws: KeyFileError.doesNotOpen(.master)) {
+            _ = try lag.file.relockedToTheAccountsPair(
+                key: lag.key, master: SymmetricKey(size: .bits256), accountsWordsCopy: lag.newCopy, passphraseLock: .drop,
+                dropsOwnWordsLock: false)
+        }
+        #expect(lag.file.droppingPassphrase().passphrase == nil && lag.file.droppingPassphrase().words == lag.file.words)
+    }
+
+    /// The brief's P7-3 premise, corrected and pinned: `.remake` LANDS a passphrase lock where none exists (the setter
+    /// sets or replaces) — E6's state re-locked by a typed current passphrase.
+    @Test func reMakeLandsALockWhereNoneExists() throws {
+        let lag = try LaggingFile()
+        let e6 = lag.file.droppingPassphrase()
+        let healed = try e6.relockedToTheAccountsPair(
+            key: lag.key, master: lag.world.master, accountsWordsCopy: try lag.world.masterWordsCopy,
+            passphraseLock: .remake(lag.newP), dropsOwnWordsLock: false)
+        #expect(healed.passphrase?.kdf == lag.newP.kdf)
+        #expect(try healed.open(passphrase: .passphrase(lag.newPassphrase), floor: PF.floor) == lag.key)
     }
 
     /// The value setter (a dropper on the VALUE — no shape change): only the own words lock goes.

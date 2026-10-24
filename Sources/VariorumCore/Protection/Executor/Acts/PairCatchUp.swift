@@ -7,8 +7,9 @@ import Foundation
 // and this library's key are all unchanged, and this library's key file still carries the pair as it last knew it. The
 // catch-up RE-LOCKS the current key and never re-keys it (rule 6's verb; rule 7: one pair at a time):
 //   - the door (`followThePair`) re-reads the vault and re-derives the halves that moved FROM THAT READ; the passphrase
-//     half types the account's current passphrase, verified against the vault (the old one names the change — P1's
-//     split); the words half types nothing (R-529-2) — the master comes from what this device already holds, prompt-
+//     half types EITHER of the account's current secrets (R-529-5): the passphrase, verified against the vault (the old
+//     one names the change — P1's split), re-makes the lock; the words drop the stale one; the words half types nothing
+//     (R-529-2) — the master comes from what this device already holds, prompt-
 //     free first (S-1/E14: none in hand ⇒ `secretMissing`); the master must reach this key through the key file's
 //     master lock (rule 22's precondition);
 //   - the act runs as `.follow` with `toKey` nil (no new key: no custody item, no staged file, no swap, no Apple key,
@@ -67,9 +68,6 @@ extension ProtectionExecutor {
                 throw refusalForAPassphraseTheVaultRefuses(text, library, vault: vault)
             }
             secrets.passphrase = passphrase
-        } else if passphraseMoved {
-            // The passphrase lock can be re-made only by the passphrase (design §2): the words cannot stand in for it.
-            throw ExecutorRefusal.secretMissing
         }
         if let words = typed.words {
             let wordsKey = try WordsKey.derive(words)
@@ -78,6 +76,10 @@ extension ProtectionExecutor {
             }
             secrets.words = wordsKey
         }
+        // R-529-5: the passphrase half takes EITHER of the account's current secrets (rule 14's grammar) — the
+        // passphrase re-makes the lock; the words drop the stale one (the old passphrase stops opening this library at
+        // once). Nothing typed refuses.
+        if passphraseMoved, secrets.isEmpty { throw ExecutorRefusal.secretMissing }
         // S-1 / E14: the account's master — from the secrets typed, else what this device holds.
         guard let keys = try pairKeysAtTheDoor(account: account, vault: vault, secrets: secrets,
                                                castle: record.mode == .castle) else {
@@ -203,21 +205,29 @@ extension ActContext {
             log("the key file already carries the account's pair — nothing to re-lock")
             return
         }
-        var passphrase: PassphraseKey?
+        var passphraseLock = PassphraseLockChange.keep
         if passphraseMoved {
-            guard let current = accountsCurrentPassphrase(snapshot) else {
+            let pressedTheWords = parameters.typedSecret == "words"
+            if let current = accountsCurrentPassphrase(snapshot) {
+                passphraseLock = .remake(current)
+            } else if pressedTheWords, accountsCurrentWordsInHand(snapshot) {
+                // R-529-5's words arm — the PRESS chose the words (a passphrase press resumed by a lobby's words alone
+                // rolls back below rather than trade the re-made lock it chose for a dropped one).
+                passphraseLock = .drop
+            } else {
+                let device = snapshot.vault.updatedByDevice, day = snapshot.updatedAt
                 throw ActRollback(refusal: resuming
                     ? .secretsRequired(act)
-                    : .passphraseChangedElsewhere(device: snapshot.vault.updatedByDevice, day: snapshot.updatedAt))
+                    : pressedTheWords ? .wordsChangedElsewhere(device: device, day: day)
+                                      : .passphraseChangedElsewhere(device: device, day: day))
             }
-            passphrase = current
         }
         guard let keys else { throw ActRollback(refusal: resuming ? .secretsRequired(act) : .secretMissing) }
         let relocked: KeyFile
         do {
             relocked = try file.relockedToTheAccountsPair(
                 key: library.key, master: keys.masterKey, accountsWordsCopy: snapshot.vault.masterByWords,
-                accountsPassphrase: passphrase, dropsOwnWordsLock: wordsMoved)
+                passphraseLock: passphraseLock, dropsOwnWordsLock: wordsMoved)
         } catch let error as KeyFileError {
             log("the account's master does not reach this key file (\(error)) — rolls back, nothing written")
             throw ActRollback(refusal: .accountMoved)
@@ -226,7 +236,16 @@ extension ActContext {
         try stampFollowed(keys.rowKeyID)
         try executor.writeLiveKeyFile(relocked, &library)
         let halves = [passphraseMoved ? "passphrase" : nil, wordsMoved ? "words" : nil].compactMap { $0 }
-        log("re-locked to the account's pair (\(halves.joined(separator: " and "))) — the key unchanged "
+        let dropped = { if case .drop = passphraseLock { return " — by the words: the stale passphrase lock dropped" }
+                        return "" }()
+        log("re-locked to the account's pair (\(halves.joined(separator: " and ")))\(dropped) — the key unchanged "
             + "(\(Self.fp8(library.fingerprint)))")
+    }
+
+    /// R-529-5's words arm: the account's CURRENT words in hand (the press's, verified at the door; or a resume lobby's)
+    /// — they open the vault as it stands.
+    func accountsCurrentWordsInHand(_ snapshot: VaultSnapshot) -> Bool {
+        guard let words = secrets.words else { return false }
+        return VaultModel.master(of: snapshot.vault, passphrase: nil, words: words) != nil
     }
 }
