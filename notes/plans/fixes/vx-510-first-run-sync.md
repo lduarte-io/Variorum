@@ -114,7 +114,9 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
    words as the words).
 4. **Seen in her screenshot (not asked):** two seeded Sherlock books on Welcome, both owned — server-side, both
    created_at 1892-10-14, updated 10-07 (13 members) and 10-18 (14 members), so on every device and older than 0.10
-   → **VX-514** (Bug, Suspected, Books, Low).
+   → **VX-514** (Bug, Suspected, Books, Low) — **CLOSED at her word, not a bug:** "you don't need to worry about the
+   sherlock holmes double book. that's because i had edited one of them before we did the deduplication things. it's
+   not a bug but i will delete one of them." (The dedupe kept both by design — an edited copy is never retired.)
 
 ## THE TEST-ACCOUNT ROAD — the tools (built by the orchestrator, 2026-10-23; environment acts per R-510-7/-8)
 
