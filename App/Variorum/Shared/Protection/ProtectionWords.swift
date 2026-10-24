@@ -939,6 +939,45 @@ nonisolated enum ProtectionWords {
     /// `turnOnSyncDoor`.
     static let joinSyncDoor = "Sync this library\u{2026}"
 
+    // MARK: - VX-510 D-B7 — THE READ-ONLY CHECK (VX-513, her R-510-15)
+    //
+    // The door's name is the design's own (D-B7, the run record). Every other line here is PROVISIONAL P-VX510-B3-1 — the
+    // implementer's draft (the record's unit B3), in the lobby's refusal idiom ("That passphrase doesn't open this library."),
+    // sentence case, hers to reword. The "doesn't open" lines are the lobby's own (`passphraseDoesNotOpen`, `wordsDoNotOpen`);
+    // the account's "couldn't be checked" reasons are the pane's (`doorRefusedSignedOut`, `doorRefusedOtherAccount`,
+    // `doorRefusedNeedsVault`); a passphrase changed elsewhere is VX-113's (`passphraseChangedElsewhere`).
+
+    /// Settings ▸ Protection's door, beside the key doors (D-B7's label).
+    static let checkSecretsDoor = "Check my passphrase or twelve words\u{2026}"
+    static let checkSecretsTitle = "Check my passphrase or twelve words"
+    static let checkSecretsLead = "Type your passphrase or your twelve words to check them. Checking changes nothing."
+    static let checkSecretsField = "Passphrase or twelve words"
+    static let checkSecretsButton = "Check"
+    static let checkSecretsWorking = "Checking\u{2026}"
+    static let checkSecretsClose = "Close"
+    /// They open the library (it doesn't sync — or its account could not be checked, said beneath).
+    static func checkSecretsOpensLibrary(_ kind: SecretCheckOutcome.Kind) -> String {
+        kind == .words ? "Those twelve words open this library." : "That passphrase opens this library."
+    }
+    /// They open the library and its account (rules 7, 14 — synced, the pair is the account's).
+    static func checkSecretsOpensLibraryAndAccount(_ kind: SecretCheckOutcome.Kind) -> String {
+        kind == .words
+            ? "Those twelve words open this library and your account."
+            : "That passphrase opens this library and your account."
+    }
+    /// The honest split: the library's, not the account's (changed elsewhere — VX-113's class).
+    static func checkSecretsOpensLibraryNotAccount(_ kind: SecretCheckOutcome.Kind) -> String {
+        kind == .words
+            ? "Those twelve words open this library, but not your account."
+            : "That passphrase opens this library, but not your account."
+    }
+    /// The account's, not this library's (PROVISIONAL P-VX510-B3-2 — the arm the design's three did not name).
+    static func checkSecretsOpensAccountNotLibrary(_ kind: SecretCheckOutcome.Kind) -> String {
+        kind == .words
+            ? "Those twelve words don't open this library, but they open your account."
+            : "That passphrase doesn't open this library, but it opens your account."
+    }
+
     // MARK: - VX-308 U3 — THE KEY DOORS, VX-447, F-U2-3 (rules 2, 3, 6, 7, 27; the plan's §5c)
     //
     // VX-263's ONE line is the plan's (§2's ledger and §5c: *your current secrets open everything you've made of this

@@ -1628,9 +1628,60 @@ not yet run is PENDING.*
   (the harness, `--filter SecretCheckCompositionTests`): `✘ Test run with 4 tests in 1 suite failed with 5 issues` — each of
   the four ✘ (no section on the pane; no case on the presenter nor the host ×2; no `check:` road; the road's file does not
   exist). The behavioural pins need the new seam to compile — their red is Piece 4's reverts.
-- **Piece 2** — the read-only check road (`ProtectionSecretCheck`), its outcome and words, its road pins: NOT STARTED.
-- **Piece 3** — the door and its sheet (faces, model, the one presenter, the bootstrap's road, the Mac section and sheet),
-  their pins: NOT STARTED.
+- **Piece 2** — the read-only check road, its outcome and words, the door's standing, the road pins: DONE (this commit).
+  NEW `Shared/Protection/ProtectionSecretCheck.swift`: `SecretCheckOutcome` (pure — `opens(kind, account:)` with the account's
+  half `notSynced · opens · doesNotOpen(changedElsewhere:) · unchecked(why)`; `doesNotOpen(kind, opensAccount:)`;
+  `refused(sentence)`; its `lines` and `warns`) and `ProtectionSecretCheck.check(_:typed:signIn:within:)` — the typed text read
+  as Look inside reads it (`MakeMineModel.copySecrets`); the open library's in-hand live key file of the open key (else
+  `refused(crossingDoorClosed)` — the door is not rendered then); the unlock's own derivation
+  (`ProtectionOpenRoad.typedCandidatesAndKeys` — the KDF floor first, one derivation per descriptor) compared with the open key;
+  twelve tokens that are not the words and open nothing say the words' own sentence (`ProtectionOpenRoad.sentence(for:)` —
+  the count / an unknown word / the checksum); a library naming no account stops there; synced: signed out / another account
+  → unchecked in the pane's sentences (no vault read), else ONE vault read THROUGH THE LEAF, bounded (`boundedVaultRead`,
+  10 s — B2's P-VX510-B2-1 value; never the executor's `readVault`, which fills `freshVaults`), the master by the typed secret
+  (the library check's derived passphrase key reused when its descriptor is the vault's, else derived once under the vault's
+  after its floor; the words' wrap key), `AccountVault.master` non-nil → opens; a passphrase that opens the library but not
+  the vault, its descriptor no longer the vault's → VX-113's `passphraseChangedElsewhere` (Follow's own test); one protection-
+  log line per check, never the secret. No keychain read, no write, no act lock, no stored state. `ProtectionWords.swift`: the
+  D-B7 section (the door's label is the design's; every other line **PROVISIONAL P-VX510-B3-1**, below).
+  `RoadKeyDoorFaces.swift`: `checkStands` (the live key file of the open key beside it — the read's own `keyFileStands`; a
+  hand-made face defaults to false). Pins — new suite `VariorumTests/Protection/SecretCheckRoadTests.swift` (planted road +
+  vault + sync keys; `SecretCheckPlant.untouched` = every keychain leaf's items, the memory items, the Apple stamps, the
+  container's every byte, the vault's snapshot, the sync keys' items AND session memory, the executor's `freshVaults`, the
+  record and key file in hand; `writeLogs` = custody/memory/Apple writes + every non-fetch vault call):
+  `rightAndWrongPassphraseAndWordsOnALibraryThatDoesntSync` (right passphrase / right words open; wrong each → the lobby's
+  sentences; no vault read), `twelveTokensThatAreNotTheWordsSayTheWordsOwnSentence` (unknown word, broken checksum, another
+  count, a passphrase-less library), `syncedTheRightSecretsOpenTheLibraryAndTheAccount` (one fresh fetch per check),
+  `theHonestSplitWhenTheAccountsSecretsChangedElsewhere` (the old passphrase → the split + VX-113's sentence; the account's
+  new passphrase → the account-not-library arm; the words' split the same, no device named), `theAccountUncheckedSaysWhy
+  AndTheLibrarysHalfStands` (offline; signed out and another account with NO fetch; a server slower than the bound — back
+  inside 1.5 s, the late answer dropped), `inCastleTheCheckReadsTheSameAndWritesNothing` (Always ask; no custody read, no
+  sync-keys Touch ID read), `withNoKeyFileOfTheOpenKeyNothingIsChecked` (rule 27's state: the door not standing, a check
+  refusing; the door standing beside the key file) — **every arm asserts zero writes and every home untouched.** **The
+  harness, `--filter "SecretCheckRoadTests|RoadKeyDoorRoadTests|RoadKeyDoorsModelTests|ProtectionWordsPlanTests|
+  ProtectionWordsVX307Tests|RoadKeyDoorWordsTests|U2WordsTests"`: `✔ Test run with 47 tests in 7 suites passed`**; no warning
+  in a touched file. (Machinery: the last pin's first run failed on its own world — a destructured road let go, its temp slot
+  deleted under the read; fixed by keeping the road, test-only.) New seam — the pins' red is Piece 4's reverts.
+  - **PROVISIONAL P-VX510-B3-1 (the words — hers):** the door "Check my passphrase or twelve words…" (D-B7's own) · title
+    "Check my passphrase or twelve words" · lead "Type your passphrase or your twelve words to check them. Checking changes
+    nothing." · field "Passphrase or twelve words" · button "Check" · "Checking…" · "Close" · the results in the lobby's idiom:
+    "That passphrase opens this library." / "Those twelve words open this library." · "…open(s) this library and your account."
+    · "…open(s) this library, but not your account." (+ VX-113's "Your passphrase was changed on ‹device› on ‹day›." when the
+    descriptor moved) · the not-opening lines are the lobby's own · the account-unchecked reasons the pane's own.
+  - **PROVISIONAL P-VX510-B3-2 (a fourth arm — the architect's/hers):** D-B7 names three answers; on a SYNCED library a secret
+    can also open the ACCOUNT but not this library (the account's passphrase or words changed on another device and this
+    library's own locks still carry the old pair — rule 7's one pair drifted). (a) the design's three literally — "That
+    passphrase doesn't open this library." though it is her account's current one (she might then reset this library's
+    passphrase, re-wrapping the account's lock again); **(b, built)** check the vault in that case too and say "That passphrase
+    doesn't open this library, but it opens your account." (the not-opening line otherwise). Cost of (b): a vault read (and at
+    most one Argon2id) on a wrong secret.
+  - **Recorded readings (mine, from the design's words):** the vault is read FRESH at every check (never a snapshot the session
+    already holds — a check is about the account's secret NOW); an absent vault reads as unreachable (the pane maps
+    `needsFreshVault` to the same sentence); a vault descriptor below the KDF floor opens to no passphrase (no cheap KDF, ever
+    — the library side's own reading); twelve tokens that fail the words' validation and open nothing as a passphrase say the
+    words' sentence — the reading stays Look inside's ("twelve valid words are the words").
+- **Piece 3** — the door and its sheet (the model, the one presenter, the bootstrap's road, the Mac section and sheet), their
+  pins: NOT STARTED.
 - **Piece 4** — the behavioral reverts, named before any run: NOT STARTED.
 - **Piece 5** — evidence (the harness whole, the release compile, Mac + iOS build-for-testing) and THE MAC-SUITE LIST: NOT
   STARTED.
