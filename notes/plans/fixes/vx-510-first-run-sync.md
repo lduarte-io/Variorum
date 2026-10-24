@@ -826,9 +826,31 @@ unit B2's brief). Every claim not yet run is PENDING.*
   with the words moment; "a first round runs for the re-keying join" — none started); its preconditions all held (the door
   `.entersCastle` and re-keying, no refusal, the reopen in Castle, the record naming the account); unit A's five world pins
   green under the extended world.
-- **Piece 2** — D-B0 (F-6 (A), ruled): the bootstrap's services generation, `awaitAttachedServices(newerThan:)` (bounded),
-  the re-keying road (`firstRoundAfterReopen`, the generation taken at the press), `owesFirstRound` widened (re-keying joins,
-  Move, the follow), the follow's round line (PROVISIONAL). NOT STARTED.
+- **Piece 2** — D-B0 (F-6 (A), ruled): DONE (`bab4692e5`; this record flip rode one commit late — the orchestrator's
+  `ee50eb8a6` landed under the edit). `Shared/AppBootstrap.swift`: the services generation (`servicesGeneration`, bumped by
+  every `attach`, which also answers the waiters); `awaitAttachedServices(newerThan:within:)` — at once when newer services
+  are attached, else the next attach's instance, nil past the bound (30 s in production; the timer holds the bootstrap until
+  it fires or an attach cancels it, so no waiter is left unanswered); `attach` wires the re-keying road
+  `roadAccount.firstRoundAfterReopen` (the generation now; at `.made` the services attached after it, asked
+  `runFirstRound()`). `Shared/Protection/RoadAccountModel.swift`: `RoadAccountModel.FirstRoundAfterReopen` + the property;
+  `open(_:)` — the PRESSED door chooses the road (a door re-shown CHANGED may change its plan): the act closure records
+  `(request.shown.rekeys, generation)` at the press, the first-round closure asks the reopen road with that generation or the
+  open session's road; no road for the door ⇒ no round (P-2 kept). `Shared/Protection/RoadAccountFaces.swift`:
+  `owesFirstRound` widened to every Turn on sync, Move and the follow (leaves never). `RoadAccountConfirmModel.firstRoundLine`
+  gains `follows:` — the follow's clean round says `ProtectionWords.firstRoundFollowLanded` = "Synced. This library is up to
+  date with your account again." (**PROVISIONAL P-VX510-B1-1**, my draft, hers; the follow's Done stays VX-457's durable
+  notice). `Shared/AppServices.swift`: `runFirstRound` WAITS while `start()` is in flight (the reopen's services are attached
+  just BEFORE their start — reaching for the chain first composed it twice, the start's configure retiring the round's
+  scheduler mid-round; found in the trace, pinned). Pins (new seams — red by Piece 6's reverts): `FirstRoundConfirmTests` —
+  **`aLeaveOrAReKeyingActNeverAsks` FLIPPED DELIBERATELY** to `aLeaveNeverAsks` (leaves only — F-6 (A) ruled the re-keying
+  half the other way), `aReKeyingActAsksTheReopenRoadWithThePressGeneration` (join into/out of Castle, Move into Castle, both
+  follows: the reopen road asked once with the generation taken BEFORE the planted press moved it on — the reopen's attach —
+  never the open session's road; no reopen road ⇒ no round), `aDoorReShownAsReKeyingTakesTheReopenRoad`;
+  `FirstRoundAfterTheReopenTests` + `theServicesGenerationAnswersTheNextAttachOrNothingWithinTheBound`,
+  `aFirstRoundAskedWhileStartRunsRidesTheStartsChain` (the chain composed once). Test support: `PlantedAccountRoads.onPress`
+  (what happens during a press; nil everywhere else). **The harness, `--filter "FirstRoundAfterTheReopenTests|
+  FirstRoundAfterTheActTests|FirstRoundRoadTests|FirstRoundConfirmTests|RoadAccountModelTests|RoadJoinFollowModelTests"`:
+  `✔ Test run with 37 tests in 6 suites passed`** — Piece 1's pin GREEN.
 - **Piece 3** — D-B1 (VX-509): the standing first-run drill over unit A's world, every arm to its first round with no
   relaunch, the row and the sheet asserted per arm. NOT STARTED.
 - **Piece 4** — D-B3 (D-ROAD): the DEBUG-only prod test road — the launch decision, the derivation, the per-account
