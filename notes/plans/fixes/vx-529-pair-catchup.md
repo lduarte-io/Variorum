@@ -888,7 +888,12 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   NOT-STARTED.
 - U2-P2 — scope 2: `RoadSettledFollow.kind` tells a settled pair follow apart (its act in flight names no new key) —
   bug-class (today it reads `.keysReplaced` and the durable Done says the keys changed) — and the stale done-line never
-  renders while a follow is owed (the repro's line) — bug-class. Pins red-on-old first. NOT-STARTED.
+  renders while a follow is owed (the repro's line) — bug-class. IN-PROGRESS — the red pins COMMITTED (this commit,
+  `VariorumTests/Protection/PairFollowDoneTests.swift`): **RED on the pre-fix tree** (the harness, `--filter
+  PairFollowDoneTests`): `✘ Test run with 2 tests in 1 suite failed … with 5 issues` — `aSettledFollowNamingNoNewKeyIs
+  ThePairCatchUp` ✘×4 (resumed and finished-from-record, both postures: `.keysReplaced` where the pair kind is owed; its
+  re-keying guards green), `theDoneLineNeverStandsBesideAnOwedFollow` ✘×1 (`model.followDone == nil` — the stale
+  `.keysReplaced` beside an owed follow). What remains: the fix (P1's notice type lands with it).
 - U2-P3 — scope 5: the preflight's words twin (`accountSecretRefusal` says "Those twelve words don't open this library."
   for old words that DO open it after a words change elsewhere — bug-class, the core's P7-2 split mirrored) and the key
   doors' gate refusal in the detected state speaking the pair sentence (R-529-3). NOT-STARTED.
