@@ -766,7 +766,40 @@ LIST for every file you changed.
 
 ### UNIT B1 — LIVE STATUS (the implementer owns this section)
 
-*(NOT STARTED — the implementer writes its skeleton in its first commit.)*
+**NOT DONE BY THIS SESSION (first, as the contract asks):** *(kept current — PENDING until the close)*. No `xcodebuild
+test`, no stage, no app launch, no dev/real-store touch, no server or production contact; the walk script (D-B2) is
+written and guard-dry-checked only, never run. No line in `Sources/VariorumCore/Sync/`. D-B4/D-B5 are unit B2's.
+
+*Implementer session B1 — Opus 5.5, xhigh. Pre-fix tree = `68835a08c` (unit A's product files; `c1f3cdaf0` adds only
+unit B2's brief). Every claim not yet run is PENDING.*
+
+- **Piece R** — the preflight read whole, myself: CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+  `notes/SurfaceContracts.md` ("The app", "Doors to the outside" whole); `notes/SessionResiliencyProtocol.md`;
+  `notes/SyncSpec.md` WHOLE (the road changes sync's admission — no `Sync/` line); this file WHOLE; vx-488's M3 RECORD
+  (+ the M3 member text); unit A's product diff `54b7b71df..92bd0740a` whole; `ProtectionWalkSwitch`, `ProjectConfig`,
+  `AppServices`, `SyncSession`, `AppBootstrap` (whole), `RoadAccountModel`, `RoadAccountFaces`, `SyncStatusViews` (the face),
+  `VariorumApp`'s services `.task`; `Tools/WalkKit/` (README + the three scripts); `Tools/Release/release.sh` (the
+  publish-and-leave HANDOFF); `Tools/prod-read.sh`, `Tools/prod-confirm-test-user.sh`; the suites unit A added + their
+  supports (`ProtectionAccountSupport`, `PlantedRoad`, `PlantedJoin`, `PlantedAccountRoads`, `Crossing`,
+  `RoadJoinFollowSurfaceTests`' reopening seam, `TouchIDUnlockSyncKeysTests`' world, `SyncWalkFenceTests`,
+  `EntitlementsTests`): DONE (this commit).
+- **Piece 0** — the harness: unit A's copied to this session's scratchpad `vx510b1-harness` (same recipe — unit A's Piece 0;
+  the checkouts carried, the build fresh). PENDING its first build.
+- **Piece 1** — D-B0's end-to-end pin over the first-round world (a re-keying join through the reopen; the world gains the
+  `onWillLock` stop + an `onReady` compose-and-attach, as `VariorumApp`'s `.task`), committed RED on the pre-fix tree.
+  NOT STARTED.
+- **Piece 2** — D-B0 (F-6 (A), ruled): the bootstrap's services generation, `awaitAttachedServices(newerThan:)` (bounded),
+  the re-keying road (`firstRoundAfterReopen`, the generation taken at the press), `owesFirstRound` widened (re-keying joins,
+  Move, the follow), the follow's round line (PROVISIONAL). NOT STARTED.
+- **Piece 3** — D-B1 (VX-509): the standing first-run drill over unit A's world, every arm to its first round with no
+  relaunch, the row and the sheet asserted per arm. NOT STARTED.
+- **Piece 4** — D-B3 (D-ROAD): the DEBUG-only prod test road — the launch decision, the derivation, the per-account
+  admission at connect, the row's refusal face, the pins. NOT STARTED.
+- **Piece 5** — D-B2 (VX-509): the scripted first-run walk under `Tools/` + one release-checklist row; guard dry-runs.
+  NOT STARTED.
+- **Piece 6** — the behavioral reverts, named here BEFORE any runs. NOT STARTED.
+- **Piece 7** — evidence on the final tree: the harness whole, the release compile, ONE Mac + ONE iOS build-for-testing
+  (`DerivedData/vx510-b1`, `vx510-b1-ios`), THE MAC-SUITE LIST. NOT STARTED.
 
 ## UNIT B2 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B1 closes)
 
