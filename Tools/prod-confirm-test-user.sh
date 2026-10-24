@@ -17,13 +17,19 @@ case "$EMAIL" in
   *vxtest*) ;;
   *) echo "REFUSED: not a plainly-test address (no 'vxtest' marker)" >&2; exit 2 ;;
 esac
-if ! printf '%s' "$EMAIL" | grep -Eq '^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$'; then
+# O-L1-1 (VX-510 unit L1 — the ladder's F-R1-5 class, fixed here by the orchestrator): the shape is matched against
+# the WHOLE value with zsh's =~ — never a line-wise grep, which passes a value whose first line is plain while a
+# second line reaches the SQL splice below. first-run-walk.sh's plain_address is the same check.
+PLAIN_ADDRESS='^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$'
+if [[ ! "$EMAIL" =~ $PLAIN_ADDRESS ]]; then
   echo "REFUSED: the address must be plain lowercase (letters, digits, . _ + -, one @)" >&2; exit 2
 fi
 [ -f "$ALLOW_FILE" ] || { echo "REFUSED: no allowlist at $ALLOW_FILE" >&2; exit 2; }
 [ "$(stat -f %Lp "$ALLOW_FILE")" = "600" ] || { echo "REFUSED: the allowlist must be mode 600" >&2; exit 2; }
 ALLOWED="$(set -a; source "$ALLOW_FILE"; set +a; print -r -- "${VARIORUM_PRODTEST_EMAILS:-}")"
-if ! print -r -- " $ALLOWED " | grep -Fq " $EMAIL "; then
+# Membership by zsh's own whole-string substring — EMAIL is single-line by the check above; grep -F with a multi-line
+# pattern treats each line as its own pattern (the same class).
+if [[ " $ALLOWED " != *" $EMAIL "* ]]; then
   echo "REFUSED: $EMAIL is not on the allowlist" >&2; exit 2
 fi
 

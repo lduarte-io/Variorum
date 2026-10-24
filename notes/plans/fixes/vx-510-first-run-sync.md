@@ -243,7 +243,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
-| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 DONE (0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT — THE LADDER — ROUND 1 below); UNIT L1 (the fixes F-R1-1/-4/-5) IN FLIGHT; round 2 re-reviews the fixes |
+| 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | ROUND 1 DONE (0B · 0M · 3m · 2n); UNIT L1 DONE (`5b72d7a3a`…`97922b2a2` — AGREE ×3, pins red-on-old, RL-1…7 red as named, harness 524/90, both build-for-testing green) + O-L1-1 FIXED by the orchestrator (the confirm script's whole-value check); ROUND 2 IN FLIGHT (a fresh reviewer re-reviews the fixes) |
 | 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | NOT STARTED |
 
 ## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
@@ -380,6 +380,18 @@ slept before the round began, and no launch came before the deploy. The server c
 is a JOIN (her vault exists) — under T-1 a same-posture join on 0.10 also lands with no round unless a system prompt
 bounces focus. **Either way, VX-507 is the cure for the class:** the act's sheet confirms the first round or says
 what blocks it, so silence becomes impossible on every build from this one.
+
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+= 14:31 MDT, the vault 20:39Z = 14:39 MDT; the deploy that evening.) So her zero-rounds state is WHOLLY the 0.9.8-era
+question (A1–A3 above), and the T-1 mechanism matters for her FORWARD road only: her eventual 0.10 upgrade is a join
+*[removed for publication]*
+Screen-2 window: "Should I just set the passphrase to the same I used before? I don't think I have 12 words saved
+anywhere" — a COMPLETED 0.9.4 enrollment walked him through the words ceremony with exact re-entry, so holding a
+passphrase while never having seen twelve words is precisely the closed-after-Screen-2 state; her reading: "that
+*[removed for publication]*
+reading above is now independently supported, not merely unexcluded.
 
 ## THE FIX DESIGN — UNIT A (VX-498 · VX-507 · VX-506; the architect's design, built by implementer session A)
 
@@ -2842,6 +2854,19 @@ never-hostage with a sound bounded race; the VX-503/VX-517 core changes preservi
 forgets honestly bounded (F-B4-1's residue reasoning sound); VX-513 genuinely read-only across every arm; the
 SyncStatusRow refactor render-identical; no word-level tracking, no corpus-proportional cost, S1–S5/P1–P3 untouched;
 CastleRules 4/5/7/9/15/16/20/21 honored.
+
+**O-L1-1 (found by unit L1; the orchestrator's disposition: CONFIRMED and FIXED BY THE ORCHESTRATOR, an environment
+act on its own script — the same F-R1-5 class):** `Tools/prod-confirm-test-user.sh`'s plain-shape check was a
+line-wise `grep -Eq` and its allowlist membership a `grep -Fq` with the argument as the pattern — both pass a
+multi-line argument whose FIRST line is plain/listed while a second line reaches the SQL splice, and the script sits
+behind an auto-allow rule, so its guards ARE the fence. Fixed exactly as L1 fixed the sibling: the whole-value zsh
+`=~` plain check (`PLAIN_ADDRESS`, the walk script's own) and a zsh whole-string membership check. Verified offline
+(`zsh -n` clean; four crafted arguments each REFUSED exit 2 before any network act: a multi-line value with a quoted
+second line, an uppercase value, a plain-shaped unlisted address, a markerless address). **Red-on-old deliberately NOT
+demonstrated live** — on the old code the crafted argument would have EXECUTED its injected SQL against production;
+the class's red is L1's sibling self-test reds (RL-6/RL-7) plus the code trace, recorded here instead (the
+hallucination guard's letter is served by the sibling's pin — one mechanism, two scripts). The live green is the
+re-walk's own use of the script on the fresh account.
 
 ### UNIT L1 — THE LADDER'S FIX SESSION (a fresh `opus-implementer`; F-R1-1 + F-R1-4 + F-R1-5)
 
