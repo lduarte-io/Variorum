@@ -211,7 +211,7 @@ extension ProtectionExecutor {
             try vault.vault.kdf.validateFloor(configuration.floor)
             let typed = try PassphraseKey.derive(current, kdf: vault.vault.kdf)
             guard VaultModel.master(of: vault.vault, passphrase: typed, words: nil) != nil else {
-                throw ExecutorRefusal.passphraseDoesNotOpen
+                throw refusalForAPassphraseTheVaultRefuses(current, library, vault: vault)
             }
             try holdSyncKeysForTheSession(
                 account: account, vault: vault, passphrase: typed, words: nil, castle: library.record?.mode == .castle)
@@ -219,6 +219,24 @@ extension ProtectionExecutor {
             _ = try verifiedPassphrase(current, against: library.keyFile)
         }
         return try await keyDoor(.changePassphrase, &library, newPassphrase: new, words: nil, parameters: parameters)
+    }
+
+    /// **VX-529 — THE REFUSAL SPLIT** (`notes/plans/fixes/vx-529-pair-catchup.md`, scope 3; the VX-510 repro's false
+    /// "That passphrase doesn't open this library."): a typed passphrase the account's vault refuses, named for what it
+    /// is. One that still opens THIS library's own passphrase lock, under a descriptor the vault no longer carries, is
+    /// the passphrase as this library last knew the account's — changed elsewhere since (rule 7's one pair; VX-113's
+    /// refusal, naming the vault's last writer and its day — the arm `Follow.swift` shapes). One that opens neither is
+    /// the plain refusal. The descriptor must differ: one descriptor names one passphrase, so a lock under the vault's
+    /// own descriptor that opens while the vault refuses is no change elsewhere. READS only.
+    func refusalForAPassphraseTheVaultRefuses(
+        _ typed: String, _ library: UnlockedLibrary, vault: VaultSnapshot
+    ) -> ExecutorRefusal {
+        if let file = library.keyFile, file.fingerprint == library.fingerprint,
+           let lock = file.passphrase, lock.kdf != vault.vault.kdf,
+           (try? verifiedPassphrase(typed, against: file)) != nil {
+            return .passphraseChangedElsewhere(device: vault.vault.updatedByDevice, day: vault.updatedAt)
+        }
+        return .passphraseDoesNotOpen
     }
 
     /// **Reset a forgotten passphrase** — Castle: Touch ID on an enrolled
