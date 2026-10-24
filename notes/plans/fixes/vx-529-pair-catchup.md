@@ -277,7 +277,63 @@ push after every commit; LIVE STATUS below from the first commit, every unverifi
 
 ### UNIT 1 — LIVE STATUS (the implementer owns this section)
 
-*(not started)*
+**NOT DONE IN THIS UNIT (so far): the act's program (scope 2's fork half) — WAITING on the architect's ruling below; no
+face, no sentence, no rider, zero `Sync/` lines.** Session: a fresh `opus-implementer`, 2026-10-24, worktree
+`~/dev/variorum-vx-529`. No revert is in flight.
+
+**Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
+`notes/CastleRules.md`; `notes/SyncSpec.md`; SurfaceContracts' protection bullet; this file whole; the VX-510 record's
+ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Assess.swift`, `Facts.swift`, `Follow.swift`,
+`KeyDoors.swift`, `KeyFile.swift`, `KeyFileCrossings.swift`, `VaultModel.swift`, `ProtectionRecord.swift`,
+`ProtectionVocabulary.swift`, `DeviceSection.swift`, `Plan.swift`, `PlanRunner.swift`, `CommonSteps.swift`,
+`Executor.swift`, `AccountActs.swift`, `EnterCastle.swift`, `LeaveCastle.swift`, `ReplaceAllKeys.swift`; the suites
+`AssessFixtures`/`AssessTests`/`ExecutorWorld`/`ExecutorFixtures`/`FollowTests`/`AccountActTests`/`CrashHarness`/
+`KeyFileTests`/`U4LaggingPairScenarios`, the scenario world's follow/key-door actions (`Alphabet.swift`).
+
+**The pieces (flip per commit; unverified claims PENDING):**
+- P0 — this LIVE STATUS. DONE (this commit).
+- P1 — scope 3, THE REFUSAL SPLIT at `changePassphrase`'s vault-verify arm: red pin first, then the fix. NOT-STARTED.
+- P2 — scope 4, THE INVARIANT PINS (fact 1's guard): one existing-behavior pin per synced road that writes a passphrase
+  lock or the master's words copy. NOT-STARTED.
+- P3 — scope 1, DETECTION: a behavior-level red pin first (compiles on the old tree), then `FollowKind.pairChanged`,
+  the pure pair reading, the acts arm, the follow door's spec for the third kind. NOT-STARTED.
+- P4 — scope 2, THE ACT'S PURE PIECES (fork-independent): the key file's words-lock dropper (a value setter) and the
+  re-lock transform + its landed predicate, unit-tested. NOT-STARTED.
+- P5 — scope 2, THE FORK PROPOSAL written here, then REPORT BACK. NOT-STARTED.
+- P6 — scope 2, THE ACT'S PROGRAM — only after the architect's ruling lands in this record. BLOCKED (the fork).
+
+**Findings before any code (traced in this session; each says what it changes):**
+- **F-1 — `FollowKind` gaining a case breaks four EXHAUSTIVE app-side switches** (`ProtectionAccountActs.swift`
+  `FollowDoneMark.name`; `ProtectionWords.swift` `followNotice` / `followAsk` / `followDone`), and this unit verifies
+  headless only. PROVISIONAL (the architect may reverse it): the four MECHANICAL compile arms land with P3 and mint NO
+  sentence — `.pairChanged` folds into `.keysReplaced`'s existing words; the mark's stored name is `"pairChanged"`, not
+  read back by `owed` (reads as none) — every one marked UNIT 2's to replace. Their compiling is PENDING (no
+  `xcodebuild` in this unit).
+- **F-2 — a pre-fork guard is required:** `FollowProgram.kind` reads any unknown `follow` name as `.keysReplaced`, so
+  `follow(kind: .pairChanged)` before the act exists would RE-KEY the library. Until P6, the core's `follow` refuses
+  the third kind `nothingToDo` (nothing begun).
+- **F-3 — the scenario world presses every owed follow** (`SWorld.settleWorld`, `Alphabet.swift`), so once P6 lands the
+  act gets the generator's random coverage under every promise; before it, the refusal of F-2 is a harmless refusal.
+- **F-4 — the same false-refusal class sits at two sibling seams** the brief does not name: `regenerateWords`' synced
+  arm (`KeyDoors.swift:314`) and `doorSecrets`' synced arm (`EnterCastle.swift:99` — Use Castle / Use Standard / Replace
+  All Keys). In the detected state `assess`'s `followOwed` gate closes them; at a press racing a change elsewhere they
+  still say "doesn't open this library". NOT changed here (one surface — the brief names `changePassphrase`); offered.
+- **F-5 — `Follow.swift:164` names the change on the descriptor alone** (best-effort: garbage typed after a change
+  elsewhere also reads "changed elsewhere"); the brief's split at the key door requires the typed passphrase to OPEN
+  the library too. The follow's arm is left as it is (no behavior change outside the brief).
+- **F-6 — the MAJOR-1 residue reads as a pair change on the device itself:** a Change passphrase whose vault write
+  landed and whose key-file step rolled back (`KeyDoorProgram.resumeCannotFinish`) leaves the key file's lock under
+  the old descriptor beside the vault's new one — detection then owes this device the passphrase half's catch-up, with
+  this device named as the changer. A TRUE state, honestly said; PROPOSED as edge E13 (the table is the architect's).
+- **F-7 — the words-only catch-up needs the account's MASTER in hand** to verify the refreshed copy reaches the key
+  file's master wrap before the stale own-words lock goes (rule 22: "a key is deleted only after its replacement has
+  been verified"). Custody's silent class (Standard), the session (a Touch ID unlock or a typed passphrase at the
+  lobby — VX-501/VX-487) hold it; a Castle Always-ask library unlocked by its OLD words holds none (the typed unlock's
+  vault read cannot open the vault with them). There the quiet act refuses `secretMissing` and the face asks the
+  passphrase — PROVISIONAL, PROPOSED as edge E14, unit 2's face.
+- **F-8 — the app routes an account act by `spec.rekeys`** (`RoadAccountModel.swift:509-516`): a re-keying act closes
+  the pool and reopens; one that changes no key runs on the open session. The third kind's door says `rekeys: false`,
+  so the app's existing road already runs it on the open session (unit 2's to confirm).
 
 ## Machinery
 
