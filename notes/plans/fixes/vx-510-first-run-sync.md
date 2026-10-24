@@ -136,9 +136,10 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 *[removed for publication]*
 *[removed for publication]*
 | 3 | The kickoff sitting bundle answered (D-ROAD shape; lifecycle drill in-run or chartered; the acceptance's account set) | DONE — R-510-6…9 (env flag + allowlist; the PAT confirmation script; the typing helper over a generated file; the lifecycle drill IN this run as unit C) |
-| 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | NOT STARTED |
-| 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | NOT STARTED |
-| 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | NOT STARTED — shape proposed at the sitting bundle |
+| 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | UNIT A DONE (`33c169f76`…`92bd0740a`; harness 449/79 green; 14 reverts red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 37/6 green); F-6 RULED (A) → unit B1; the Mac-target stage batch PENDING |
+| 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | NOT STARTED — unit B1 (D-B1, D-B2) |
+| 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | NOT STARTED — unit B1 (D-B3); the tools + allow rules DONE (THE TEST-ACCOUNT ROAD) |
+| 6b | VX-501 (typed Castle unlock loads the sync keys) + the VX-503 trace | NOT STARTED — unit B2 (D-B4, D-B5) |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | NOT STARTED |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | NOT STARTED |
@@ -651,7 +652,32 @@ first draft of each built).
   round phase and "Synced. Your account's writing is in this library now."; (5) a blocked round (offline) — "Sync hasn't run
   yet: Waiting to sync (offline)." Both voices where the sheet has a face.
 
-## THE FIX DESIGN — UNIT B (VX-509 · D-ROAD · VX-501 · the VX-503 rider; the architect's design, built by implementer session B after unit A closes)
+## UNIT A — THE ORCHESTRATOR'S VERIFICATION AND RULINGS (2026-10-23, after implementer session A closed)
+
+- **Verified, not trusted:** the commit chain `33c169f76 … 92bd0740a` read; the product diff read whole for the seam
+  (`AppBootstrap.attach(services:)`, `AppServices.runFirstRound`, `SyncSession.roundNow` — the scheduler's existing
+  public API only, the hold and not-configured honest, nothing cancels a round; `RoadAccountConfirmModel`'s round phase;
+  `VariorumApp`'s one `attach` line); no `Sources/` line. **Re-run by the orchestrator** in the implementer's harness
+  (`--filter "FirstRound|NotOnYet|SyncLockedRow|RoadAccountModel"`): `✔ Test run with 37 tests in 6 suites passed`.
+- **F-6 — RULED (A), by the architect under the mandate:** the confirm waits for the reopen's services, then asks.
+  Reasons: her VX-507 words ("it said sync is set up" while nothing had synced) bind every act that says "done",
+  re-keying joins included — a Standard library joining a Castle account is exactly a second device's first run; (B)
+  moves the composition root on both platforms (architect-scale, out of proportion); (C) leaves VX-507's letter true
+  for only half the doors. Built in unit B1 (D-B0 below); the follow keeps VX-457's durable Done beside the round line.
+- **Unit B is SPLIT into two implementer sessions** (unit A spent ~630k tokens — past the ~500k guideline — on a
+  smaller scope): **B1** = D-B0 + D-B1 + D-B2 + D-B3 (F-6, the drill, the walk script, the prod road — what unit C
+  needs first); **B2** = D-B4 + D-B5 (VX-501's custody seam, the VX-503 trace). Still one ruled unit of the run.
+- **Her word bundle gains unit A's items** (OPEN ITEMS): P-VX510-A1…A4 and the not-yet row's quiet style.
+
+## THE FIX DESIGN — UNIT B (VX-509 · D-ROAD · VX-501 · the VX-503 rider; the architect's design, built by implementer sessions B1 then B2 after unit A closed)
+
+- **D-B0 — F-6 (A), RULED: a re-keying act's first round after the reopen.** Exactly unit A's proposal (A) in its
+  Piece 6: `AppBootstrap` keeps a services generation; `attach(services:)` bumps it and resumes waiters; a bounded
+  `awaitAttachedServices(newerThan:)` (30 s; then nil ⇒ `.notConfigured` — a closed main window composes no services)
+  is the re-keying act's road (`firstRoundAfterReopen`, the generation taken BEFORE the press); `owesFirstRound`
+  widens to re-keying joins and Move, and the follow (its round line beside VX-457's durable Done). Pins on the
+  first-round world extended with an `onReady` hook that composes and attaches fresh services as `VariorumApp`'s
+  `.task` does; red by behavioral revert (the road answering at `.made` without waiting ⇒ the false "Sync is off").
 
 - **D-B1 — VX-509, the standing first-run drill (pins).** Extend unit A's end-to-end seam (the bootstrap's attach
   glue + the planted road + a real `SyncSession` over a fake transport) into a suite that runs EVERY first-run arm
@@ -698,6 +724,49 @@ first draft of each built).
   which keychain read in the join's plan raises it (suspected: a read of an on-device item whose ACL demands user
   presence, during the re-lock under the account's pair), what a cancel skips, and whether a cancel leaves residue.
   A traced fix lands with its pin; an untraced one is recorded, not guessed.
+
+## UNIT B1 — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE;
+`notes/SurfaceContracts.md` ("The app" and "Doors to the outside" — the protection bullet whole);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (her rulings R-510-1…12, THE TRACE, THE FIX DESIGN — UNIT A, UNIT
+A's LIVE STATUS whole — its Piece 0 harness recipe and its Piece 6 F-6 trace are your starting points — UNIT A — THE
+ORCHESTRATOR'S VERIFICATION AND RULINGS, THE FIX DESIGN — UNIT B, THE TEST-ACCOUNT ROAD, UNIT C's script, ENVIRONMENT
+TRAPS, OPEN ITEMS); `notes/plans/fixes/vx-488-window-hotfixes.md`'s M3 RECORD (the walk lift — `SyncFenceLift`, its
+pins, the HOLLOW-pin lesson RM3-4: a source pin matches CODE, never a comment); the code unit A changed (its diff
+`54b7b71df..92bd0740a`), `Shared/Protection/ProtectionWalkSwitch.swift`, `Shared/ProjectConfig.swift`,
+`Shared/AppServices.swift`, `Shared/AppBootstrap.swift` (`accountActOnNewRoad`, `reopenAround`, `attach`),
+`Tools/WalkKit/` (the walk idiom), `Tools/Release/` (the release road — find where its checklist lives), and the tests
+unit A added (`FirstRoundAfterTheActTests`, `FirstRoundConfirmTests`, `FirstRoundRoadTests`, `NotOnYetWordsTests`).
+The harness unit A built is at
+`/private/tmp/claude-501/-<home>-dev-variorum/e4cb0455-71b1-400e-8366-273031288432/scratchpad/vx510a-harness`
+— reuse it (copy it to your own scratch folder first) or rebuild from its Piece 0 recipe.
+
+**Your scope — exactly D-B0, D-B1, D-B2 and D-B3 in THE FIX DESIGN — UNIT B:** F-6 (A) as ruled; the standing
+first-run drill across every arm (built on unit A's seam, extending its world rather than forking a second one); the
+scripted first-run walk under `Tools/` plus its one release-checklist row; the prod test road (DEBUG-only, Release
+byte-unchanged, admission per account). Words a face needs (the road's refusal line, a re-keying act's round line)
+are drafted PROVISIONAL and named in your record. **Not yours:** D-B4 (VX-501) and D-B5 (VX-503) — unit B2's; any
+`Sources/VariorumCore/Sync/` line (STOP, flag, propose); the live walk itself (the orchestrator's unit C — your walk
+script is written and dry-checked for its guards only, never run against production); canon, Linear,
+`notes/QUESTIONS.md`. A design fork STOPS and comes back as a proposal.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's** (pin before fix per member, red-on-old;
+behavioral reverts named in your record before any runs, each restored and `git diff --exit-code` clean, "no revert is
+in flight" written; commit per piece, push each, your LIVE STATUS flipped in the same commit, PENDING on every
+unverified claim; foreground waits only; no subagents; headless only plus ONE Mac and ONE iOS `build-for-testing` at the
+end into `DerivedData/vx510-b1` / `vx510-b1-ios`; NO `xcodebuild test`, NO stage, NO app launch, NO store, server or
+production contact). Commits say `Part of VX-509` / `Part of VX-507` (D-B0) / `Part of VX-510` (D-B3, the road);
+**NO trailers of any kind.** The orchestrator may commit record sections to this branch in this worktree while you
+work: stage explicit paths only, re-read the record before each edit of it, and never touch sections you do not own.
+
+**Evidence at your close:** each pin's red line; each revert's run line; the harness whole on the final tree; the two
+build-for-testing lines; the walk script's guard dry-runs (each refusal shown, nothing launched); and THE MAC-SUITE
+LIST for every file you changed.
+
+### UNIT B1 — LIVE STATUS (the implementer owns this section)
+
+*(NOT STARTED — the implementer writes its skeleton in its first commit.)*
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
@@ -785,3 +854,9 @@ no live proof. Ranked by launch risk. The rows marked ▶ ride THIS run (units B
 - **P-VX510-3 — VX-506's Settings door over the JOIN arm (PROVISIONAL, hers; the set-up arm keeps "Turn on
   sync"):** (a, built) "Sync this library…" · (b) her own "Sign into sync…" · (c) "Join your account's sync…" —
   cased to the existing door idiom.
+- **Unit A's word items (PROVISIONAL, hers — the record's Piece 3/4):** **P-VX510-A1** the held line reads "…press
+  Resume Sync in the main window's banner" (the row's "in the banner below" is wrong from a sheet over Settings) ·
+  **P-VX510-A2** a round that ran but stalled at a straggler still reads "Sync hasn't run yet: …" — a third lead? ·
+  **P-VX510-A3** not configured reads the row's "Sync is off" (on a fenced dev store the row says "Sync off (dev
+  store)" — a Debug-only mismatch, accepted) · **P-VX510-A4** the join's sheet TITLE and button still say "Turn on
+  sync" (the design changed the door only) · the not-yet row wears the quiet caption style, not the warning style.
