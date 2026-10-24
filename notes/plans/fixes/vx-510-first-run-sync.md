@@ -1711,7 +1711,38 @@ not yet run is PENDING.*
   composition pins GREEN; no warning in a touched file. (Machinery: the bootstrap pin's first run asserted EXACTLY two fetches
   for two checks and saw more — the set-up's landing re-reads the pane's sections on their own tasks, each a fetch; now `≥`,
   the road suite pinning exactly one per check.)
-- **Piece 4** — the behavioral reverts, named before any run: NOT STARTED.
+- **Piece 4** — THE BEHAVIORAL REVERTS, named BEFORE any run (this commit; the committed tree IS the pre-revert copy — no
+  copies kept). Each is ONE edit in ONE file (`b3/rv/<name>.old` → `.new`, applied exactly once by `b3/revert.sh`), the
+  harness run with `--filter SecretCheck` (the four D-B7 suites: road, composition, model, bootstrap), restored by `git
+  checkout --` and `git diff --exit-code` clean after each. Expected red in brackets:
+  - **RC-1** (the vault read through the EXECUTOR — it fills `freshVaults`) `ProtectionSecretCheck.swift`: the account's half
+    reads by `session.executor.readVault` [`theCheckRoadNamesNoWriterAndNoKeychainRead`; the split pin's untouched cache —
+    the changed vault lands in `freshVaults`; any arm whose executor is not signed in as the account].
+  - **RC-2** (the words never read as words) `ProtectionSecretCheck.swift`: the reading ignores twelve valid words [every
+    right-words arm — unsynced, synced, the split, Castle, through the bootstrap].
+  - **RC-3** (the library half never checked) `ProtectionSecretCheck.swift`: `opensLibrary` always true [every wrong-secret
+    arm; the account-not-library arm].
+  - **RC-4** (the account half never verified) `ProtectionSecretCheck.swift`: any vault read says opens [the split arms; a
+    wrong passphrase on a synced library].
+  - **RC-5** (VX-113's naming) `ProtectionSecretCheck.swift`: the changed-elsewhere branch never taken [the passphrase split].
+  - **RC-6** (the sign-in gate) `ProtectionSecretCheck.swift`: another account signed in still reads the vault [the unchecked
+    pin — the other-account leg and its no-fetch count].
+  - **RC-7** (the bound) `ProtectionSecretCheck.swift`: the vault read waits 60 s [the unchecked pin's slow-server leg].
+  - **RC-8** (the words' own sentence) `ProtectionSecretCheck.swift`: the twelve-token refusal removed [the twelve-tokens pin].
+  - **RC-16** (a keychain read — a prompt) `ProtectionSecretCheck.swift`: the account's half first reads the sync keys' Touch
+    ID item [`theCheckRoadNamesNoWriterAndNoKeychainRead`; the Castle pin's no-Touch-ID-read leg].
+  - **RC-9** (W-10) `RoadKeyDoorsModel.swift`: `edited()` does nothing [`retypingClearsWhatWasSaidAndALateAnswerLandsNothing`].
+  - **RC-10** (the late answer) `RoadKeyDoorsModel.swift`: `submit` lands its answer whatever changed meanwhile [the same pin's
+    parked leg].
+  - **RC-11** (the door's gate) `RoadKeyDoorsModel.swift`: `offersCheck` ignores the read's `checkStands` [`theDoorStandsOnly
+    WhereItCanAct`; `withNoLibraryOpenTheDoorIsGone`].
+  - **RC-14** (Close mid-check) `RoadKeyDoorsModel.swift`: `close()` refuses while a check runs [the retyping pin's host-
+    dismissal leg].
+  - **RC-15** (keeps no secret) `RoadKeyDoorsModel.swift`: the sheet keeps the last text it checked [`theSheetKeepsNoSecret`].
+  - **RC-12** (the door's standing) `RoadKeyDoorFaces.swift`: `checkStands` always true [`withNoKeyFileOfTheOpenKeyNothingIsChecked`].
+  - **RC-13** (the open session only) `AppBootstrap.swift`: the check road drops its ready guard [`withNoLibraryOpenTheDoorIsGone`
+    — behind the lobby the retired session still answers; `theBootstrapWiresTheCheckRoadOnTheOpenSession`].
+  RESULTS: PENDING (each run's line lands here; "no revert is in flight" written when done).
 - **Piece 5** — evidence (the harness whole, the release compile, Mac + iOS build-for-testing) and THE MAC-SUITE LIST: NOT
   STARTED.
 
