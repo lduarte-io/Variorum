@@ -86,6 +86,11 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 - **R-510-13 — the words: "your word choices are fine for now and we'll keep moving forward provisionally."** →
   P-VX510-1…3 and P-VX510-A1…A4 (+ the not-yet row's quiet style) STAND as built, provisional; no re-ask until the
   closeout's canon pass.
+- **R-510-14 — VX-511, the words card after a join: "Join retires the card (Recommended)"** → IN THIS RUN (unit B2,
+  D-B6): an account act that lands with the library holding the account's pair marks the library's words recorded;
+  Settings ▸ New Words stays the deliberate door. Linear: parented under VX-510.
+- **R-510-15 — VX-513, the read-only check: "Yes, in this run (Recommended)"** → IN THIS RUN (unit B3, D-B7, its own
+  small session after B2 — a new face). Linear: parented under VX-510.
 
 ## HER AIR REPORT (2026-10-23 evening, after the 0.10 update — her words verbatim, each item traced and dispositioned)
 
@@ -166,7 +171,8 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | UNIT A DONE (`33c169f76`…`92bd0740a`; harness 449/79 green; 14 reverts red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 37/6 green); F-6 RULED (A) → unit B1; the Mac-target stage batch PENDING |
 | 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | NOT STARTED — unit B1 (D-B1, D-B2) |
 | 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | NOT STARTED — unit B1 (D-B3); the tools + allow rules DONE (THE TEST-ACCOUNT ROAD) |
-| 6b | VX-501 (typed Castle unlock loads the sync keys) + the VX-503 trace | NOT STARTED — unit B2 (D-B4, D-B5) |
+| 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | NOT STARTED — unit B2 (D-B4, D-B6, D-B5) |
+| 6c | VX-513 (the read-only check-your-secrets door) | NOT STARTED — unit B3 (D-B7) |
 | 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | NOT STARTED |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | NOT STARTED |
@@ -751,6 +757,28 @@ first draft of each built).
   which keychain read in the join's plan raises it (suspected: a read of an on-device item whose ACL demands user
   presence, during the re-lock under the account's pair), what a cancel skips, and whether a cancel leaves residue.
   A traced fix lands with its pin; an untraced one is recorded, not guessed.
+- **D-B6 — VX-511 (R-510-14), a landed account act retires the words card.** When Turn on sync lands — the SET-UP arm
+  (she typed the library's twelve words: rule 14's reminder moment) or the JOIN arm in either posture (the library's
+  pair is now the account's, which she holds — rule 7) — and Move, the band card's ledger marks THIS library's words
+  recorded (`WordsCardLedger.record(libraryID)` — the bootstrap's ledger, the same defaults the card reads), so the
+  card stops offering a look that would mint new words and, synced, replace the account's. A re-keying act marks the
+  library the reopen lands (its id may differ — read it after the reopen, the VX-444 carry's idiom). A refused act marks
+  nothing; a leave marks nothing. The passphrase reminder half of the card is unchanged. Recorded consideration: a
+  library that joined by PASSPHRASE may not hold the account's words — its road to fresh words is the deliberate New
+  Words door (her ruling chose this). Pins: after a set-up / a join (each posture) / Move lands, the card offers no
+  words for that library (red on old); a refused act leaves it offering; another library's ledger untouched.
+- **D-B7 — VX-513 (R-510-15), the read-only "Check my passphrase or twelve words…" door (unit B3).** In Settings ▸
+  Protection beside the key doors (the registry/door idiom the pane already uses — a door that cannot act is not
+  rendered, P-2): a sheet with ONE concealed field (the shared field with its reveal eye — VX-463), read as Look inside
+  reads it ("twelve valid words are the words, anything else a passphrase"); the check runs off the main actor: the
+  typed secret against the OPEN library's live key file locks (the unlock's own derivation — `typedCandidates`' road;
+  the result compared with the open key), and, on a synced library, against the account's vault snapshot
+  (`VaultModel.master` non-nil); it SAYS one of: these open your library (and your account) · these open your library
+  but not your account (an honest split — e.g. changed elsewhere, VX-113's class) · these don't open your library. It
+  WRITES NOTHING — no key file, no keychain item, no vault, no ledger, no session hold — and keeps no secret past the
+  check. Refusals in the existing words (the floor's KDF validation, the words' checksum sentence). Words PROVISIONAL.
+  Pins: right passphrase / right words / wrong each; the synced split arm; a planted world's write counters zero across
+  every arm; the door hidden where no library is open.
 
 ## UNIT B1 — THE BRIEF (a fresh `opus-implementer`, one session; written before it spawns)
 
@@ -876,8 +904,10 @@ KeychainSyncKeysLeaf.swift`, `Shared/Protection/NewRoadSyncKeyProvider.swift`, `
 (`VaultModel.master`, `vault.keys(master:)`), and for D-B5 the join's plan (`Executor` `enroll` and the steps it runs —
 every keychain read on that road) plus `KeychainCustodyLeaf.swift`.
 
-**Your scope — exactly D-B4 and D-B5:** VX-501's typed-unlock load (never hostage; no second KDF; the secret never
-retained past the load; Standard and unbound libraries read nothing) with its pins red-on-old; and the VX-503 trace —
+**Your scope — exactly D-B4, D-B6 and D-B5:** VX-501's typed-unlock load (never hostage; no second KDF; the secret never
+retained past the load; Standard and unbound libraries read nothing) with its pins red-on-old; VX-511's card retirement at
+a landed account act (D-B6, its pins red-on-old; read `WordsBand.swift`, `ProtectionCopyDoors.swift`'s VX-444 carry and
+mark, and the bootstrap's `accountRoads().landed` / `accountActOnNewRoad`); and the VX-503 trace —
 which read raises the system Touch ID prompt during a Standard join, what a cancel skips, whether it leaves residue —
 recorded with file:line evidence, a fix ONLY if traced (with its pin), else recorded for the orchestrator. **A seam that
 would put LocalAuthentication or a network read into the core package, or any line in `Sources/VariorumCore/Sync/`, is
@@ -887,11 +917,33 @@ a FORK: stop and propose.** Not yours: everything else; canon, Linear, `notes/QU
 `DerivedData/vx510-b2` / `vx510-b2-ios`, plus the core package's protection set debug AND release if you touch
 `Sources/` (the vx-488 M1 filter: every suite under `Tests/VariorumCoreTests/Protection` + `AccountBindingGateTests`,
 `AccountLifecycleTests`, `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`,
-`SupabaseTransportSessionTests`). Commits say `Part of VX-501` / `Part of VX-503`; NO trailers of any kind.
+`SupabaseTransportSessionTests`). Commits say `Part of VX-501` / `Part of VX-511` / `Part of VX-503`; NO trailers of any
+kind.
 
 ### UNIT B2 — LIVE STATUS (the implementer owns this section)
 
 *(NOT STARTED — spawned after unit B1 closes.)*
+
+## UNIT B3 — THE BRIEF (a fresh `opus-implementer`, one session; spawned only after unit B2 closes)
+
+**Read first, in full, yourself:** CLAUDE.md + its auto-loaded canon; `notes/CastleRules.md` WHOLE; `notes/SurfaceContracts.md`'s
+protection bullet whole (the key doors, VX-211's floor, VX-463's concealed field, VX-464's refusal naming);
+`notes/SessionResiliencyProtocol.md`; this file WHOLE (D-B7 is your charter; units A/B1/B2's LIVE STATUS for the harness
+and seams); the code: `Shared/Protection/RoadKeyDoorsModel.swift`, `RoadKeyDoorFaces.swift`, `ProtectionKeyDoorActs.swift`
+(the key doors' road — your door sits beside them), `LookInsideModel.swift` (the one-field secret reading),
+`ProtectionOpenRoad.swift` (`typedCandidates`), `ProtectionWords.swift`, the Mac pane that renders the key doors
+(`Variorum/Features/Protection/`), and the core's `VaultModel` / `PassphraseKey` / `WordsKey`.
+
+**Your scope — exactly D-B7:** the door, its sheet model, the read-only check road, its words (PROVISIONAL, named in your
+record), and its pins (including the zero-writes pin across every arm). A seam that needs a core-package change, or any
+`Sync/` line, is a FORK: stop and propose. Not yours: everything else; canon, Linear, `notes/QUESTIONS.md`.
+
+**The discipline, the evidence, the limits — exactly UNIT A — THE BRIEF's**, with `build-for-testing` into
+`DerivedData/vx510-b3` / `vx510-b3-ios`. Commits say `Part of VX-513`; NO trailers of any kind.
+
+### UNIT B3 — LIVE STATUS (the implementer owns this section)
+
+*(NOT STARTED — spawned after unit B2 closes.)*
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
 
