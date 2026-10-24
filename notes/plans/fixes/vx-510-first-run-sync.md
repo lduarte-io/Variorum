@@ -1367,7 +1367,24 @@ PENDING.*
       (a Touch ID read; the item's keys seen as "already loaded", so nothing put in session) and the guard ✘.
     (Not pinned, said plainly: the reuse of a vault the settle already read — planting an act in flight resumed by a typed
     unlock is a world of its own; the branch is the design's one-read rule, read by the reviewer.)
-- **Piece 2 — D-B6 (VX-511):** NOT STARTED.
+- **Piece 2 — D-B6 (VX-511, Part of VX-511):** IN PROGRESS.
+  - **2a — the pins, committed RED before the fix: DONE (this commit).** Read first: `WordsBand.swift` whole (the ledger
+    `WordsCardLedger` — `variorum.calmAsks.words.<libraryID>.*`; the band's `offersWords`, set at init from the ledger and
+    retired by `later` / `dismiss` / `wordsRecorded`), `ProtectionCopyDoors`' VX-444 carry (Make this my library) and the
+    empty-slot landing's mark, `ProtectionOpenFaces`' `RoadStandingModel.make` (the band built at every ready from the
+    ledger), the bootstrap's `accountRoads()` (`press` — the open-session acts, and `accountActOnNewRoad` for a re-keying
+    one through `reopenAround`, which awaits the reopen's ready — and `landed`, which re-reads faces only and knows no door).
+    THE MECHANISM (traced): no account act ever writes the ledger, and the band computed at the ready keeps offering; a
+    re-keying act's reopen rebuilds the band from the same unmarked ledger. New suite
+    `VariorumTests/Protection/WordsCardAfterAccountActTests.swift` (the bootstrap over the planted road — unit A's
+    `FirstRoundWorld`, no services; B1's `FirstRunDrillTests.press`): `vx511_theSetUpRetiresTheCard` (+ another library's
+    ledger untouched), `vx511_aStandardJoinRetiresTheCard`, `vx511_aCastleJoinRetiresTheCard`,
+    `vx511_aReKeyingJoinRetiresTheReopenedLibrarysCard` (the card the REOPEN built, the library the reopen landed),
+    `vx511_moveRetiresTheCard`; GUARDS `aRefusedActMarksNothing` (a join with a wrong passphrase), `aLeaveMarksNothing` (Stop
+    syncing here on a library bound before the open). **RED on the pre-fix tree** (the harness, `--filter
+    WordsCardAfterAccountActTests`): `✘ Test run with 7 tests in 1 suite failed with 10 issues` — each of the five landings
+    ✘×2 (the ledger not recorded · the card still offering); every precondition held (nothing recorded, the card offering,
+    the act landed, the reopen built the card anew); the two guards ✔ (by design — the reverts show their teeth).
 - **Piece 3 — D-B5 (VX-503, the trace):** NOT STARTED.
 - **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
   `build-for-testing` into `DerivedData/vx510-b2` / `vx510-b2-ios`) and THE MAC-SUITE LIST:** NOT STARTED.
