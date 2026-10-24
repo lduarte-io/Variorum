@@ -13,7 +13,10 @@ P-VX378-O2-2. Amended at her sitting on VX-306's bundle (2026-10-18 afternoon �
 FIRST SCREEN ("opening the app for the first time [is] a calm moment where the user can just type"; "i dont want the lobby
 at start"), the card above the quick entry is the one home for the words and for rule 3's reminder, the tutorial's last
 card shows the words beside its passphrase ask, and nothing ever stores the words. (Built at VX-412, with VX-307;
-the lifecycle page regenerates from its fixture.)**
+the lifecycle page regenerates from its fixture.) Amended at her cutover sitting on VX-510's bundle (2026-10-24, her
+"yes" on the drafted clause — R-510-28 in `notes/plans/fixes/vx-510-first-run-sync.md`): rule 2 names the card's third
+retirement — a landed account act — by rule 7's pair adoption, never as a recording (a passphrase join adopts words it
+never shows; built at VX-511).**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -45,8 +48,10 @@ open it. Everything else is a convenience.**
    Settings) or at the tutorial's last card. Nothing stores the words, so the first look mints the words the user
    records (rule 6's act — the key unchanged); the card says "write these down now" and warns before it closes that
    they will not be shown again. Until they are recorded, this Mac's quiet roads (rule 8) are the library's only
-   opener here, which is why the card stays. They open the library for as long as they are its words. There is no
-   such thing as a library with no secret.
+   opener here, which is why the card stays. Once the library syncs, its pair is the account's (rule 7), so the card
+   retires at a landed set-up, join or move: a look there would mint fresh words and replace the account's; fresh
+   words live behind the deliberate new-words door. They open the library for as long as they are its words. There is
+   no such thing as a library with no secret.
 3. **Every library is asked for a passphrase.** The tutorial's last card asks, and shows the twelve words beside the
    ask (rule 2). Until a passphrase exists, the app says so now and then — in the same card above the quick entry that
    offers the words, the one home for both asks; never a second bar, never a popup — ("your library is only secured

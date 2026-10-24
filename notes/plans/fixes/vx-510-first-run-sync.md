@@ -3195,6 +3195,10 @@ the independent re-walk.**
   the account's (rule 7), so the card retires at a landed set-up, join or move: a look there would mint fresh words and
   replace the account's; fresh words live behind the deliberate new-words door." HER WORD decides the clause (or leaves
   rule 2 as is, SurfaceContracts alone carrying the third road).
+- **R-510-28 — THE RULE-2 CLAUSE RATIFIED (her words: "yes. I think that makes it logically consistent, right?"):**
+  the drafted clause landed in CastleRules rule 2 verbatim with the header's dated amendment line (this commit); the
+  consistency reading confirmed at the sitting (rule 2 keeps "nothing stores the words"; rule 7 carries the why; rule 6
+  stays the one road to fresh words). F-R1-3 (a) CLOSES with it.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
