@@ -1496,6 +1496,31 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   1** (last_seq 0 — the round's start, the 13j rule); **rows pushed 3** (the three `setting` rows; `sync_write_budget`
   lifetime 3); containers 0 (W-1). Done → **the main window's row: "Synced 8:46 PM"** — no relaunch. OBSERVATION W-2 (chrome,
   cosmetic): at the dev window's sidebar width the row's two buttons truncate to "Sync…" and "Accou…".
+- **S8 (20:48:09)** — a note filed through the quick entry ("VX-510 S8 written on the std test account", ⏎) → 12 s later
+  **prod: 1 container · 1 block · lifetime 7 rows** — the settle-triggered round pushed it; the row "Synced 8:48 PM".
+- **S9 (20:48:53)** — Settings ▸ Data Safety (already "2 copies", the newest 8:46 PM — the set-up act's own backup) ▸ Back
+  Up Now… → `backup pair: written under 1aad910b` — **B1** (holds the S8 note).
+- **S10 (20:49:49)** — Protection ▸ Change passphrase… (its sheet: "This library syncs with your account, so your
+  account's passphrase changes with it, on every device.") → current + new twice by the helper → log `road:
+  changePassphrase — the current key re-locked (1aad910b), the account's lock with it` → **prod: the vault revision 1 → 2,
+  updated 02:49:51Z.**
+- **S11 (20:50:12)** — Back Up Now… → **B2**. The Restore list leads with this library's three rows (8:50 · 8:48 · 8:46 PM)
+  carrying Look inside + Make this my library and NO Delete (rule 19 — never the open library's), then the older libraries'.
+- **S12 (20:51) — HONEST LIMIT, by design:** Look inside on B1 opened WITHOUT asking any secret — the quiet road (rule 5:
+  "or — on this Mac — by its quiet road while it still holds that backup's key"; Standard keeps the silent custody, and
+  rule 6's passphrase change never changed the key `1aad910b`). So a TYPED secret against an older backup cannot be
+  exercised on a Standard library on its own Mac: that leg moves to LEG C (Castle + Always ask — no quiet road). The facts
+  sheet: "This is a copy from October 23…", 0 books, 1 note. **OBSERVATION W-3 (a small bug, ticketed at the close):** Look
+  inside dates that note **2026-10-24** — the UTC day — while the app itself titles the same note **2026-10-23** (written
+  20:48 MDT).
+- **S13 (20:52:55)** — Protection ▸ Record your twelve words… on the SYNCED library: the look says "This library syncs with
+  your account, so new words also replace your account's twelve words, on every device. Enter your passphrase to see your
+  twelve words." → the current passphrase by the helper → Show my twelve words → (the words located and copied WITHOUT the
+  session viewing them: the new buttons found by the accessibility tree's positions after a small scroll) → Copy →
+  `stash-prod-test-words std` (the NEW words replace the stash) → I've written them down → "These words won't be shown
+  again." → Close. **prod: the vault revision 2 → 3, updated 02:52:56Z — the moment SHOW was pressed.** OBSERVATION W-4
+  (feeds VX-511): the look's mint re-wraps the ACCOUNT's words lock when the words are SHOWN, before "I've written them
+  down" — so on a joined library the band card's look replaces the account's words even if she closes it unrecorded.
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
