@@ -1944,7 +1944,7 @@ edits). Every claim not yet run is PENDING.*
   sync-keys fact; the core's `CommonSteps`, `AccountActs`, `KeyDoors`, `PlanRunner`, `Follow`, `LeaveCastle`, `EnterCastle`,
   `Copies` (make-mine's hold), `Leaves`, `Executor.readVault`, `Assess`'s one sync-keys fault, `Names`; the test worlds
   (`ExecutorWorld`, `ExecutorFixtures`, the scenario `World`'s keychain leaves, the app's `PlantedSyncKeysLeaf`,
-  `ThrowawayScope`), `KeychainLeavesTests`, B2's `TypedSecretNeverPressesTests`: DONE (this commit).
+  `ThrowawayScope`), `KeychainLeavesTests`, B2's `TypedSecretNeverPressesTests`: DONE (`5416bcaca`).
 - **Piece 0** — the harness + baselines: DONE (not durable — this session's scratchpad `vx510b4-harness`, B3's
   `vx510b3-harness` copied whole but its build products, the SwiftPM checkouts carried, the build fresh — `Build complete!`;
   runners `b4/test.sh <log> <filter|ALL> [watchdog]` (the harness), `b4/core-test.sh <log> <filter|PROT> [watchdog]
@@ -1954,7 +1954,7 @@ edits). Every claim not yet run is PENDING.*
   for the reverts). **BASELINES on the pre-fix tree:** the harness, the three harness-PATH artifacts `--skip`ped (unit A's
   Piece 0): **`✔ Test run with 519 tests in 89 suites passed`** — exactly B3's close; the core `PROT` set (debug): **`✔ Test
   run with 533 tests in 102 suites passed`** — exactly B2's close.
-- **Piece 1** — the pins, committed RED on the pre-fix tree: DONE (this commit).
+- **Piece 1** — the pins, committed RED on the pre-fix tree: DONE (`b914aaa0b`; Piece 1b `e4ab614ee`).
   - **Test-world fidelity first (test code only; behavior-neutral on this tree, shown):** `ExecutorWorld` (core) gains
     `syncKeysListingLikeProduction` (the production leaf's listing — `KeychainSyncKeysLeaf.syncKeyItems()` with no candidates
     wired lists the silent items plus a Touch ID item ONLY where its account has a silent sibling) and `syncKeysTouchIDReads`
@@ -1971,7 +1971,7 @@ edits). Every claim not yet run is PENDING.*
     "read its Touch ID item" leg a GUARD on (c)) · `vx517_aStandardJoinLeavesNoStaleTouchIDItem` (T-B5-4's residue) ·
     `vx517_aCastleAlwaysAskFilingLeavesNoStaleTouchIDItem` · `vx517_theRollbackSweepRemovesATouchIDOnlyItem` (×2: plan gone ·
     plan kept, vault out of reach — a Standard library joining a Castle account crashed right after filing the keys in a Touch
-    ID item) · `vx517_aRolledBackFollowIntoCastleLeavesNoTouchIDItem` (Piece 1b, `this commit` — the rollback's SECOND sweep,
+    ID item) · `vx517_aRolledBackFollowIntoCastleLeavesNoTouchIDItem` (Piece 1b, `e4ab614ee` — the rollback's SECOND sweep,
     the bound account's taken keys: a Standard library following into Castle crashed after its Touch ID filing and its stamp,
     resumed with the vault out of reach) · `vx517_theFinishingForgetRemovesTheLeftAccountsTouchIDItem` (a Castle + Touch ID leave crashed after the record
     let the account go, plan gone → finished from the record); (c) `vx517_aStandardKeyDoorWithAStaleTouchIDItemReadsNoneAndLands`
@@ -2011,7 +2011,7 @@ edits). Every claim not yet run is PENDING.*
     for good — rule 20); the guard `anActIntoCastleResumedWithNothingTypedReadsItsOwnTouchIDFiling` pins it. Consequence, said
     plainly: during such a crossing the castle-way idempotency read in `holdSyncKeys` may still meet a stale Touch ID item of the
     SAME account (one prompt, on a crossing into Castle she chose Touch ID for) — not a Standard read; untouched.
-- **Piece 2** — D-B8 (a), the forgets and drops BY NAME: DONE (this commit; core only — no app-layer line, no `Sync/` line, no
+- **Piece 2** — D-B8 (a), the forgets and drops BY NAME: DONE (`6d8ee72e5`; core only — no app-layer line, no `Sync/` line, no
   name or record-shape change). `Sources/VariorumCore/Protection/Executor/Acts/AccountActs.swift`: two executor helpers —
   `forgetSyncKeys(ofAccount:)` (every class's item deleted BY NAME, the session hold cleared; a class with no item is nothing
   to delete — the real delete accepts not-found, an ACL'd item's delete never prompts) and `unboundSyncKeyAccounts(bound:named:)`
@@ -2042,7 +2042,7 @@ edits). Every claim not yet run is PENDING.*
     next time any act files that account's keys; **(b)** a local, non-secret registry of the accounts this Mac filed sync keys
     for (a new keychain item or defaults key — a new name or shape: a FORK by the brief); (c) a Castle-exit / leave-time sweep
     that probes by name every account the vault or the session ever named — needs (b)'s registry anyway. RECOMMENDED (a).
-- **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: DONE (this commit; core only). `CommonSteps.swift`:
+- **Piece 3** — D-B8 (c), a Standard library never reads the Touch ID class: DONE (`7e24d4bd1`; core only). `CommonSteps.swift`:
   `ActContext.syncKeysMayBeInTouchID` (the record's mode is Castle, OR the act's target posture `parameters.newKind` is — THE
   READING in Piece 1) and `ProtectionExecutor.syncKeysClasses(touchID:)` (`[.touchid, .silent]` or `[.silent]`);
   `syncMaterial()` reads by it (the custody fallback of `material(for:)` and `newLocks`). `AccountActs.swift`
@@ -2070,8 +2070,8 @@ edits). Every claim not yet run is PENDING.*
     a follow into Castle with Touch ID rolled back that way leaves its Touch ID filing on the (Standard again) library. After
     (c) a Standard library never reads it; the next Castle-way filing for that account replaces it (`writeSyncKeys(.touchid)`
     deletes first). Not changed (the sweep's `taken` guard is VX-378 U4's design, census class (J)).
-- **Piece 4** — THE BEHAVIORAL REVERTS, named BEFORE any run (this commit; the committed tree IS the pre-revert copy — no
-  copies kept). Also in this commit, before them: the rollback pin's third road `signedOutAtTheOpen` (`RollbackRoad`: the plan
+- **Piece 4** — THE BEHAVIORAL REVERTS, named BEFORE any run (`a5f1736a8`; results `cd1057917`; the committed tree IS the pre-revert copy — no
+  copies kept). Also in `a5f1736a8`, before them: the rollback pin's third road `signedOutAtTheOpen` (`RollbackRoad`: the plan
   stands, signed OUT at the open — only the plan names the account; the `named` source's own pin), green on this tree (`--filter
   TouchIDSyncKeysForgottenTests` `✔ Test run with 13 tests in 1 suite passed`); and ONE comment in the production leaf
   (`KeychainSyncKeysLeaf.touchIDCandidates`' doc said "VX-308's sync setup wires the bound account here" — it never did: now
@@ -2132,7 +2132,7 @@ edits). Every claim not yet run is PENDING.*
     stays in flight: THE READING's reason, shown.
   - **RE-13**: core `✘ … with 3 issues` — `aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` ✘ (`.accountMoved`), the
     follow out ✘ (`.secretsRequired(follow)`), the resumed act into Castle ✘ (`.secretsRequired(enroll)`) — the guards have teeth.
-- **Piece 5** — EVIDENCE: DONE (the final tree = this commit's product files; foreground, in sequence):
+- **Piece 5** — EVIDENCE: DONE (`1aeba029b`; the final tree = its product files, unchanged since; foreground, in sequence):
   - THE HARNESS whole (debug; this unit's road suite symlinked in), the three harness-PATH artifacts `--skip`ped: **`✔ Test run
     with 521 tests in 90 suites passed`** (B3's 519/89 + this unit's 2 tests in 1 suite); no `signal` line. (After it, ONE
     test-only edit — the road suite's Use Standard arm now asserts the door's preflight `== .ready`, using the `shown` it read,
