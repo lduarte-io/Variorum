@@ -1471,6 +1471,18 @@ PENDING.*
     intended; (c) never read the Touch ID class while the library is STANDARD (Standard files silently — rule 15). Its pins
     need a planted leaf whose listing is production-shaped (the planted leaf lists every item, which is why no planted test
     ever saw this).
+  - **3b-1 — the pins, committed RED before the fix: DONE (this commit).** New suite
+    `VariorumTests/Protection/TypedSecretNeverPressesTests.swift` (planted — `PlantedSyncKeysLeaf.touchIDReads` counts every
+    context-less Touch ID read, each a prompt on the real leaf): `vx503_aStandardJoinWithAStaleTouchIDItemNeverPresses` (the
+    observation's road: a fresh Standard library joins a Standard account by its passphrase with a stale Touch ID item
+    standing — no Touch ID read; the vault's own keys filed silently), `vx503_useStandardWithBothSecretsTypedNeverPresses
+    ForTheSyncKeys` (synced Castle + Touch ID → Use Standard, both secrets typed — no Touch ID sync-keys read); GUARD
+    `theCustodyFallbackStandsWhenNoTypedSecretOpensTheVault` (Change passphrase — the key door's secrets are the NEW ones —
+    still finds the held keys and re-wraps the account's lock). **RED on the pre-fix tree** (the harness, `--filter
+    TypedSecretNeverPressesTests`): `✘ Test run with 3 tests in 1 suite failed with 2 issues` — each road ✘ exactly on
+    `touchIDReads == presses` (the join and Use Standard landed; the preflight ready); the guard ✔. (The Use Standard pin's
+    FIRST draft opened its door through `Crossing.press`, whose read is signed out — it failed on its precondition, not its
+    claim; redrawn on the world's own signed-in read, then red on the claim.)
 - **Piece 4 — evidence (the harness whole; the core protection set debug + release if `Sources/` is touched; the Mac + iOS
   `build-for-testing` into `DerivedData/vx510-b2` / `vx510-b2-ios`) and THE MAC-SUITE LIST:** NOT STARTED.
 
