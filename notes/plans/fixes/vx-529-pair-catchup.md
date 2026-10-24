@@ -857,8 +857,29 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
 
 **The pieces (flip per commit; unverified claims PENDING):**
 - U2-P0 — this LIVE STATUS, the plan and the findings before code. DONE (this commit).
-- U2-H — the headless harness (the VX-510 recipe: app sources symlinked into a scratch SwiftPM package so the app-level
-  pins run with `swift test`, red-on-old included). NOT-STARTED.
+- U2-H — the headless harness: DONE (not durable — this session's scratchpad `u2-harness`; the VX-510 unit A recipe
+  rebuilt: tools 6.2, macOS 26, the app target's settings on `Variorum` — Swift 6, default `MainActor`, approachable
+  concurrency, member import visibility, `DEBUG` — the test target without default `MainActor`; the core by path,
+  swift-dependencies, the sqlcipher GRDB fork). `Variorum` symlinks every `Shared/Protection/*.swift`, `Shared/`'s
+  `AppBootstrap`, `AppServices`, `SyncSession`, `SyncStatusViews`, `ProtectionController`, `AuthSession`, `AuthViews`,
+  `KeychainCustody`, `LibraryOpenCopy`, `WordsCopyDoor`, `ProjectConfig`, `TierViews`, `ErrorPresentation`,
+  `IdleCommitScheduler`, `StoreBackup`, `OperationsRunner`, `DeviceName`, `BackupDestination`, `BackupLog`,
+  `MarkdownInsurance`, `BookNameCopy`, `ExportWriter`, `StoreLocation`, `LibraryHandOff`, `RestoreHoldModel`, `WingState`,
+  `PeekableSecretField`, `TravellingDotsIndicator`, `Theme/*`, `SampleLibrary/*` minus `SeededBookRestore`,
+  `Features/WhatsNew/WhatsNewLedger.swift`, and ONE stub file (a slim `AppSession` + `StatusCenter`, a no-op `CopyForAI`).
+  The tests: `VariorumTests/Protection/*.swift` MINUS the Mac-view suites that cannot compile without the Mac app
+  (`DataSafetyRoadCounts`, `RoadLockViewNamesPin`, `VX379PaneRows`, `WordsBandSurface`, `ReadmeStartHerePlan`,
+  `RoadAccountSurface`, `PreDesignFace`, `LookInsideCopyDoor`, `OneSyncKeysLeaf`, `SecretCheckSurface`,
+  `TutorialNewRoadChapter`, `ProtectionKeychainFamily`, `RoadCrossingSurface`, `RoadIdleDialRoute`,
+  `RoadJoinFollowSurface`, `RoadKeyDoorSurface`) and MINUS every suite that writes the REAL login keychain under a
+  throwaway scope (`RoadWorld`'s: `EmptySlotMakeMineRoute`, `ICloudAppleKeysLeaf`, `KeychainLeaves`, `MakeMineRoute`,
+  `PreDesignLandingsRoute`, `PlaintextExportBringInRoute`, `PreDesignStartFreshRoute`, `ProtectionBackupHook`,
+  `ProtectionCrossingRoute`, `ProtectionFacesRoute`, `ProtectionFactsGatherer`, `ProtectionRoadRoute`,
+  `ProtectionSystemComposition`, and `LockWorld`'s `RoadLockRoute`, `WordsLedgerCarryRoute`, `OtherLibrariesDeleteRoute`)
+  — the planted worlds only; plus `AppTestKeyProvider` and `SeededGenerator` byte-copied. **BASELINE on the pre-fix tree
+  (`b6b805ab7`): `✘ Test run with 460 tests in 84 suites failed … with 5 issues`** — all five harness-PATH artifacts
+  (source pins reading `#filePath` beside a symlink: `CopyListingFacesSurfaceTests` ×2, `EmptySlotDoorsSurfaceTests` ×2,
+  `ProtectionRoadSwitchTests` ×1 — they run in the Mac target). Every other test green.
 - U2-P1 — scope 6 + scope 1's words: the pair kind's real sentences (`followNotice` / `followAsk` / `followDone` /
   `FollowDoneMark`), the follow sheet's pair-kind confirm (the half, device and day; the one-secret ask; the second-road
   line, P-VX529-2), the durable notice for the pair kinds (R-529-2/E8's words-only line; R-529-5's words arm with its window
