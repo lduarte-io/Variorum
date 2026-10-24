@@ -2357,11 +2357,13 @@ store, server or production contact; no subagents.
     and in the row's top band opens it too (the reach — SwiftUI honouring a hit shape beyond the label's reported frame is
     the one unverified assumption; if it is not honoured the door degrades to the chevron + the row-wide words, still the
     fix); the chevron still opens it; the label's press animates as the chevron's does.
-- **Piece 3** — green + the behavioural revert: IN-PROGRESS. **GREEN on the fix** (`swift test` in the scratch package):
-  **`✔ Test run with 2 tests in 1 suite passed after 0.001 seconds`**. **REVERT R-1 STARTING** (after this commit): the
-  disclosure arm's label back to the bare `Text` DisclosureGroup label in `StoreLockView.swift` alone; the pre-revert
-  state is commit `01c5f0f33` (pushed), so the restore is `git checkout -- App/Variorum/Variorum/StoreLockView.swift` and
-  `git diff --exit-code`. If this line is the last word, the tree may be mid-revert: read `git diff` against HEAD.
+- **Piece 3** — green + the behavioural revert: DONE (this commit). **GREEN on the fix** (`swift test` in the scratch
+  package): **`✔ Test run with 2 tests in 1 suite passed after 0.001 seconds`**. **REVERT R-1** (announced in
+  `ee11210db` before it ran; the pre-revert state `01c5f0f33`): the disclosure arm's label back to the bare `Text`
+  DisclosureGroup label (`StoreLockView.swift` alone, 4+/13−) → **`✘ Test run with 2 tests in 1 suite failed after 0.001
+  seconds with 1 issue`** — the one ✘ `the Mac's words door: the label sits in no Button — a bare label (the chevron alone
+  presses)`, the phone's guard ✔; restored by `git checkout -- App/Variorum/Variorum/StoreLockView.swift` →
+  **`git diff --exit-code` = 0**, the pin green again (2/2). **No revert is in flight.**
 - **Piece 4** — Mac + iOS build-for-testing; THE MAC-SUITE LIST: NOT-STARTED.
 
 ## UNIT C — THE LIVE LIFECYCLE DRILL ON PRODUCTION (the orchestrator's walk; the script of record, written before it runs)
