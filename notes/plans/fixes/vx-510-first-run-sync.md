@@ -1,6 +1,8 @@
 # VX-510 — Run: the first-run sync failures
 
-**STATUS: OPEN (kickoff 2026-10-23). Branch `vx-510-first-run-sync`, worktree `~/dev/variorum-vx-510`, the Pro.
+**STATUS: CLOSED 2026-10-24 — merged by PR #186 (a merge commit); the closeout is THE CLOSEOUT section below, her
+handoff `notes/handoffs/vx-510-handoff.md`; VX-529 is the next run (`notes/handoffs/vx-529-kickoff.md`). (Kickoff
+2026-10-23.) Branch `vx-510-first-run-sync`, worktree `~/dev/variorum-vx-510`, the Pro — both removed after the merge.
 The charter is `notes/handoffs/vx-510-kickoff.md` (read whole); the window's trace is
 `notes/plans/fixes/vx-494-catchup-hang.md` (R-494-4…13); the sync-keys seam beside this one is
 `notes/plans/fixes/vx-488-window-hotfixes.md`. Members: VX-498 (the set-up act's silent no-round — the mechanism) ·
@@ -244,7 +246,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | DONE — round 1 (0B·0M·3m·2n) → L1 + O-L1-1 → round 2 (0B·0M·1m·1n, every round-1 fix SOUND, the harness independently re-run 524/90) → F-R2-1/-2 fixed by the orchestrator, the reviewer's final check 2/2 SOUND; the merge gates are row 10's batch + the re-walk |
-| 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | **THE CLOSING STAGE BATCH GREEN (2026-10-24, the successor; a detached checkout at `b3c79a191`, stage claim `vx-510`):** the CORE package whole (debug, headless) green with `MCPHarnessTimeLimitTests` run ISOLATED green ×2 — its 15 s wall-clock bound reproducibly fails under the full-parallel run (18.9–19.3 s; an untouched pre-existing test; → **VX-532**, Low, Test-only); the WHOLE MAC TARGET `✔ Test run with 5221 tests in 915 suites passed after 2250.101 seconds with 14 known issues` `** TEST SUCCEEDED **` — the real-keychain arm `aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` RAN and passed (a finger enrolled; the only skips the standing opt-in suites: the capture harness, the singleton-window oracles, the Apple-key round-trip); the PHONE on the iPhone 17 Pro simulator `✔ 62 tests in 7 suites passed` + `✔ 47 tests in 15 suites passed with 2 known issues`, zero skips — **a batch lesson recorded:** the handoff's phone list named FILES (`MobileProtectionTests`, `MobileTutorialWalkTests`) whose `@Suite` types are named differently, so the first `-only-testing` pass silently matched nothing for them; the suite TYPES were enumerated and run (15 more suites). The re-walk: the del leg DONE LIVE on the final build (THE SUCCESSOR'S RE-WALK below); the Castle leg + restore + closeout remain. |
+| 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | **THE CLOSING STAGE BATCH GREEN (2026-10-24, the successor; a detached checkout at `b3c79a191`, stage claim `vx-510`):** the CORE package whole (debug, headless) green with `MCPHarnessTimeLimitTests` run ISOLATED green ×2 — its 15 s wall-clock bound reproducibly fails under the full-parallel run (18.9–19.3 s; an untouched pre-existing test; → **VX-532**, Low, Test-only); the WHOLE MAC TARGET `✔ Test run with 5221 tests in 915 suites passed after 2250.101 seconds with 14 known issues` `** TEST SUCCEEDED **` — the real-keychain arm `aTouchIDOnlySyncKeysItemIsUnlistedAndForgottenByName` RAN and passed (a finger enrolled; the only skips the standing opt-in suites: the capture harness, the singleton-window oracles, the Apple-key round-trip); the PHONE on the iPhone 17 Pro simulator `✔ 62 tests in 7 suites passed` + `✔ 47 tests in 15 suites passed with 2 known issues`, zero skips — **a batch lesson recorded:** the handoff's phone list named FILES (`MobileProtectionTests`, `MobileTutorialWalkTests`) whose `@Suite` types are named differently, so the first `-only-testing` pass silently matched nothing for them; the suite TYPES were enumerated and run (15 more suites). The re-walk: the del leg DONE LIVE on the final build (THE SUCCESSOR'S RE-WALK below); **the Castle leg GREEN + the restore CLEAN (THE THIRD ORCHESTRATOR'S CASTLE LEG) + THE CLOSEOUT DONE (its section); PR #186, a merge commit** |
 
 ## ENVIRONMENT TRAPS (binding on every session of this run — the vx-494/vx-488 traps, with this run's deltas)
 
@@ -3254,6 +3256,58 @@ scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-sc
   2026…") exactly as unit C's close left them → ⌘Q → zero instances → **`Tools/stage release` — STAGE FREE (06:21).**
   The stage checkout `~/dev/variorum-vx-510-stage` (the walk build + the evidence folder) stays until the post-merge
   build-debris tidy, which deletes it with every `DerivedData/vx510*` folder.
+
+## THE CLOSEOUT (2026-10-24, the third orchestrator — CLAUDE.md's ritual)
+
+- **The gates, all green:** the ladder (two rounds, 0 BLOCKER · 0 MAJOR, every fix confirmed); the closing stage batch
+  (row 10); the del leg live on the final build (the successor); the Castle leg live on the final build + the clean
+  restore (above). **The version gate for 0.10.1** (`25f547f01` — the Mac target's `MARKETING_VERSION` 0.10 → 0.10.1, two
+  lines, and `ReleaseNotes-0.10.1.md` = the handoff's drafted notes verbatim, one line per bullet): the five suites that
+  read the version or the notes (`VersionSchemeTests`, `WhatsNewTests` — its `theRunningVersionCarriesItsNotesInTheBundle`
+  — `SupportDraftTests`, `WhatsNewWaitsAfterAdoptionTests`, `WhatsNewWaitsCompositionTests`) on the Mac target under a
+  held stage claim (incremental over L1's derived data): **`✔ Test run with 26 tests in 5 suites passed`**,
+  `** TEST SUCCEEDED **`, no `skipped:` line; zero instances after.
+- **The canon deltas (the two-file shape — contract lines in place, one pointer each; the narrative is
+  `notes/AppSpecRecord.md`'s dated entry):** SurfaceContracts' protection bullet — the first round after every account
+  act that changes sync's standing and the sheet that shows it (VX-498/VX-507), the not-yet row (VX-506), the join's
+  door "Sync this library…", the words card retiring at a landed set-up/join/Move (VX-511 — CastleRules rule 2 already
+  carries R-510-28's clause), the typed unlock loading the account's sync keys (VX-501 — the "loads nothing until"
+  sentence replaced), vault-first key derivation (VX-503), Standard-never-reads-Touch-ID + forgets by name (VX-517 —
+  F-R1-3 (b)), the check door (VX-513), the lobby's words door (VX-527). CLAUDE.md's Environment gains the prod test
+  road's line beside the walks rule. AppSpec, OverallModel, SyncSpec: no line changes (no `Sync/` line, no schema, no
+  operation). **`Tools/canon-size`: 125,663 / 150,000** (headroom 24,337; was 125,087).
+- **QUESTIONS #240** — the provisional bundle (P-VX510-1…3, A1…A4, B1-1, B1-2, B2-1, B3-1, B3-2, D-B8 (c)'s reading,
+  F-B4-1), PROVISIONAL at her R-510-26.
+- **MOBILE PARITY:** `notes/MobileSoul.md` **PL-58** — the phone's row reads the not-yet line over an unjoined library;
+  everything else rides shared code behavior-neutral until VM-8's doors.
+- **The tickets:** the members VX-498 · VX-501 · VX-503 · VX-506 · VX-507 · VX-509 · VX-511 · VX-513 · VX-517 · VX-527 and
+  the run ticket VX-510 close with the merge (VX-498/VX-503/VX-517's evidence moved Suspected → Confirmed — each traced
+  and shown live). Filed tonight: **VX-534** (O-RW-1) · **VX-535** (VX-527's dead reach) · **VX-536** (`guard.sh`'s
+  absent `wl2`) · **VX-537** (the walk script's join arm + every-window capture). VX-532/VX-533 gained their projects.
+  The run's filed set, grouped by priority, is in her handoff.
+- **THE RULINGS RECONCILED** (each ruling the run built, re-read against what shipped — "every", "all" first):
+  R-510-1 ("never delete the fence that keeps every other walk off prod") — kept: the fence stands for every launch
+  without the switch, and the road admits only listed `vxtest` accounts (`aHerShapedAddressIsNeverAdmitted`) ✔ ·
+  R-510-2's lifecycle ("signing up, syncing, making a backup, restoring a backup, changing keys, trying the backup
+  again… for both") — met for both postures on production (unit C: S2–S15, C1–C5) with ONE honest gap: a RESTORE was
+  walked only in Standard (S14); in Castle the backups were made and opened by Look inside with old, current and new
+  secrets (C3), never restored through Make this my library — recorded, not hidden (the restore road is posture-blind
+  code, the floor's typed arms were the Castle-specific part) · R-510-4's map — delivered (THE MAP, 17 seams) ✔ ·
+  VX-507's letter ("an act that says done" confirms its first round) — every account act that changes sync's standing,
+  re-keying joins included (F-6 (A)); the key doors don't change sync's standing and run none ✔ · R-510-14 ("Join
+  retires the card") — set-up, join in either posture, and Move ✔ · R-510-16/VX-517 ("forgotten") — every forget and
+  drop by name; the one residue F-B4-1 accepted with its reasoning ✔ · R-510-27 (Pre-launch: VX-529 only) — on the
+  board ✔.
+- **THE RELEASE ROAD's step 0, read for THIS release (the successor2 handoff's step 3):** release.sh's step 0 asks
+  `FirstRunDrillTests` green on this commit AND `Tools/WalkKit/first-run-walk.sh std` PASSED on a Debug build of it. The
+  drill ran green in the closing stage batch on the final product tree (`b3c79a191`; the product code is unchanged to
+  the tip — only `Tools/`, notes, the version and the notes file since); the scripted walk's SET-UP arm needs a VAULTLESS
+  account and all three standing accounts now hold vaults, so its letter is met by today's live fresh-account first run
+  on the final build (the re-walk's del leg: the sheet confirmed, no relaunch, server-verified) plus the Castle leg's
+  join. → **VX-537** (a join arm or a scripted fresh-account pre-step).
+- **After the merge (main is hers — recorded in memory and the morning summary, folded into the next closeout):** the
+  0.10.1 release road from main, the `/Applications` refresh behind a fresh A1 at a zero-instance window, the worktree,
+  branch and build-debris tidy.
 
 ## HER CLOSEOUT ANSWERS (2026-10-24, at the cutover sitting — verbatim-faithful; the handoff's PENDING slots close on these)
 
