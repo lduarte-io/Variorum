@@ -345,7 +345,19 @@ ENVIRONMENT TRAPS + THE CHANGED-ELSEWHERE REPRO. Code: `Assessment.swift`, `Asse
   refusals, idempotence (AES key wrap is deterministic — a resume re-running the write lands the same bytes), the
   dropper. Green with every key-file suite (59 tests).
 - P5 — scope 2, THE FORK PROPOSAL. DONE (`3f3c9944d`) — below, under THE FORK; REPORTED BACK. P6 waits on the ruling.
-- P6 — scope 2, THE ACT'S PROGRAM — only after the architect's ruling lands in this record. BLOCKED (the fork).
+- P6 — scope 2, THE ACT'S PROGRAM, on the architect's ruling (`59e8b4ca1`: Shape A). IN-PROGRESS, sub-pieces:
+  - P6a — S-2 VERIFIED: the key doors take NO backup after a re-lock — `KeyDoorProgram`'s steps are `vault`?/`keyFile`/
+    `memory` and its plan-less finish `memory` alone (`KeyDoors.swift:25-29`); the app's key-door road
+    (`ProtectionKeyDoorActs.press`) and its account road (`ProtectionAccountActs.perform`) start none after the act
+    either. So the catch-up takes none (the ruling's condition met). DONE (this commit).
+  - P6b — the act in the RULED shape (`follow`'s third-kind entry checks; `FollowProgram`'s no-re-key arm, steps
+    `pickUpKeys`/`relock`/`memory`, `toKey` nil; F-2's guard removed, its pin flipped to the entry checks): red pins
+    first. NOT-STARTED.
+  - P6c — S-3: the stranded-open pin, red on P6b's tree, then the fix. NOT-STARTED.
+  - P6d — R-arch-3: the downgrade-resume trace and the plan's shape (its pin red-first if the shape moves). NOT-STARTED.
+  - P6e — S-5 overruled in part: F-4's two seams + the sweep table over every vault-verify throw site, table pins
+    red-first. NOT-STARTED.
+  - P6f — the full core suite green; the report back. NOT-STARTED.
 - **THE SESSION'S END STATE (pre-fork, `3f3c9944d`):** the full core suite `swift test` — VariorumCoreTests **3379 tests
   passed** (4 known issues: P2's negative control, by design); the one failure is `VariorumMCPTests`'
   `MCPHarnessTimeLimitTests` wall-clock bound under the full parallel run (19.1 s against 15 s; 3/3 green alone) — the
