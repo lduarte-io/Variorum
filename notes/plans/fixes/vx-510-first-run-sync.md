@@ -1742,7 +1742,35 @@ not yet run is PENDING.*
   - **RC-12** (the door's standing) `RoadKeyDoorFaces.swift`: `checkStands` always true [`withNoKeyFileOfTheOpenKeyNothingIsChecked`].
   - **RC-13** (the open session only) `AppBootstrap.swift`: the check road drops its ready guard [`withNoLibraryOpenTheDoorIsGone`
     — behind the lobby the retired session still answers; `theBootstrapWiresTheCheckRoadOnTheOpenSession`].
-  RESULTS: PENDING (each run's line lands here; "no revert is in flight" written when done).
+  **RESULTS — DONE on `25bc90a9f`, every one RED as named, every restore `git diff --exit-code` clean; NO REVERT IS IN
+  FLIGHT** (green first on the same tree: `--filter SecretCheck` `✔ Test run with 17 tests in 4 suites passed`; each red run
+  below is `--filter SecretCheck`, 17 tests in 4 suites):
+  - **RC-1** `✘ … failed with 5 issues` — `theCheckRoadNamesNoWriterAndNoKeychainRead` ✘×2 ("executor", "readVault("), the
+    split's untouched ✘ (the changed vault landed in `freshVaults`), and the unchecked pin's slow-server leg ✘×2 (the
+    executor's read has no bound — it waited the 2 s). (The arms whose vault is unchanged stayed green: the executor's re-read
+    stores the snapshot it already held — why the composition guard exists.)
+  - **RC-2** `✘ … with 15 issues` — every right-words arm: unsynced ✘×4 (+ the wrong words read as a passphrase), the
+    twelve-tokens pin's "however spaced" ✘, synced ✘×2, the split ✘×5, through the bootstrap ✘×2, Castle ✘.
+  - **RC-3** `✘ … with 16 issues` — every wrong-secret arm (unsynced ✘×4, the twelve-tokens pin ✘×4 — the shape refusal never
+    reached —, synced ✘, the bootstrap ✘, the account-not-library arms ✘×4, signed out ✘, Castle ✘).
+  - **RC-4** `✘ … with 6 issues` — a wrong passphrase on a synced library ✘ (said opens the account), the split's library-but-
+    not-account arms ✘×4, Castle's wrong passphrase ✘ (the account-not-library arm stayed green, as it must).
+  - **RC-5** `✘ … with 2 issues` — the passphrase split ✘×2 (VX-113's sentence missing).
+  - **RC-6** `✘ … with 2 issues` — the other-account leg ✘ (read and said opens) and its no-fetch count ✘.
+  - **RC-7** `✘ … with 2 issues` — the slow-server leg ✘×2 (waited past 1.5 s; said opens).
+  - **RC-8** `✘ … with 2 issues` — the unknown word ✘ and the broken checksum ✘ (read as a passphrase that opens nothing).
+  - **RC-16** `✘ … with 2 issues` — `theCheckRoadNamesNoWriterAndNoKeychainRead` ✘ ("readSyncKeys") and the Castle pin's
+    no-keychain-read leg ✘ (a Touch ID read — a prompt on the real leaf).
+  - **RC-9** `✘ … with 2 issues` — `retypingClearsWhatWasSaidAndALateAnswerLandsNothing` ✘×2 (the line stood after the edit;
+    the parked check's late answer landed).
+  - **RC-10** `✘ … with 1 issue` — the same pin's parked leg ✘ (the late answer landed).
+  - **RC-11** `✘ … with 5 issues` — `theDoorStandsOnlyWhereItCanAct` ✘×3 (no faces / not standing → a door, and a sheet) and
+    `withNoLibraryOpenTheDoorIsGone` ✘×2 (behind the lobby a door, and a sheet presented).
+  - **RC-14** `✘ … with 2 issues` — the host-dismissal-mid-check leg ✘×2 (the sheet stayed).
+  - **RC-15** `✘ … with 1 issue` — `theSheetKeepsNoSecret` ✘ (the Mirror walk found the typed text).
+  - **RC-12** `✘ … with 1 issue` — `withNoKeyFileOfTheOpenKeyNothingIsChecked` ✘ (rule 27's state said the door stands).
+  - **RC-13** `✘ … with 2 issues` — `theBootstrapWiresTheCheckRoadOnTheOpenSession` ✘ and `withNoLibraryOpenTheDoorIsGone` ✘
+    (behind the lobby the retired session still answered "opens").
 - **Piece 5** — evidence (the harness whole, the release compile, Mac + iOS build-for-testing) and THE MAC-SUITE LIST: NOT
   STARTED.
 
