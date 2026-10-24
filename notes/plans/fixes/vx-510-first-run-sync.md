@@ -115,6 +115,24 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   account…" catch-up once the library is open, the lobby naming the account's new passphrase, the check door's fourth
   answer carrying the same door, the key door's wrong refusal replaced by VX-113's sentence); **VX-527 → a RIDER** (the
   orchestrator's call at her delegation; parented under VX-510; a small unit after B4).
+- **R-510-19 — her answers (2026-10-24 ~00:15): "cancel it: cancelled, it closed. catch up: by both places, you mean type
+  the old and type the new? and how is new passphrase opens everythin geven an option given what you've said? VX-529: its
+  own run, next. cutover: tes, that plan."** → **VX-529 = ITS OWN RUN, NEXT** (its shape decided at that run's kickoff
+  with a design memo, P-5); **THE CUTOVER PLAN RATIFIED** — this session finishes VX-517's live proof with her, closes unit
+  C, hands off; the successor orchestrator runs the VX-527 rider, the ladder (Fable first, Opus on stall) over the whole
+  run diff, the full Mac + phone batches, an independent re-walk of the first-run legs on the final build (re-reading the
+  server rows), closeout, PR (`notes/plans/fixes/vx-510-orchestrator-handoff.md`).
+- **R-510-20 — VX-529's boundary (00:4x): "ok - no - we are NOT changing the castle rules at all. literally not even close
+  to being an option. we DIED to get that design to the point it is in - we aren't changing anything stored anywhere. so if
+  you need to type both secrets, that's fine, we just need to present that to users in a way that makes sense. because if
+  you had sync, you could move that library aside and let sync fill it in with your account passphrase, right? like you
+  COULD get a new library with the new passphrase there."** → the store-each-library's-key option WITHDRAWN (memory
+  `castle-design-is-frozen`); the catch-up types both secrets; her set-aside-and-rejoin road confirmed as a real second road
+  (caveat: unsynced writing stays in the set-aside library); both on VX-529 for its kickoff.
+- **R-510-21 — the ambient (on VX-531): "it doesn't have to hide my cursor if that's what's causing the problem. also, the
+  coordinator is insie dmux too - tmux is in the ghostty window. and it can come up without taking focus. showing the
+  cursor is fine."** → VX-531's shape ruled (up without focus, cursor visible, when activation is declined); the session's
+  first explanation corrected on the ticket (which app is frontmost on the Pro at launch decides it, not tmux).
 
 ## HER AIR REPORT (2026-10-23 evening, after the 0.10 update — her words verbatim, each item traced and dispositioned)
 
@@ -220,9 +238,10 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | 6 | D-ROAD — the named prod test-account road (the fence exception per R-510-1), with its pins | DONE — unit B1 (D-B3) + unit B2's F-B1-1 (`4a5ef39e3`: the list rides `VARIORUM_PRODTEST_EMAILS` in the launch env); ARMED and used live through unit C (three accounts) |
 | 6b | VX-501 (typed Castle unlock loads the sync keys) + VX-511 (a join retires the words card) + the VX-503 trace | UNIT B2 DONE (`4a5ef39e3`…`f4af7e368`; harness 502/85 green; reverts RF-1…6, RD4-1…8, RD6-1…5, RD5-1…2 red as named; Mac + iOS build-for-testing green; claims spot-checked by the orchestrator); VX-501 + VX-511 GREEN LIVE on production (unit C C2/C4); VX-503 fixed (`226cf7c20`); T-B5-2 → **VX-517** (Needs Lillian); the Mac stage batch PENDING (the closing run) |
 | 6c | VX-513 (the read-only check-your-secrets door) | UNIT B3 DONE (`73dc65dab`…`2e3d335d8`; harness 519/89 green; RC-1…16 red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 65/9 green; P-VX510-B3-2 ruled (b) provisionally); **GREEN LIVE** (rows 1–5, offline included; nothing written); the Mac stage batch PENDING (the closing run) |
-| 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 DONE (`5416bcaca`…`fe42afe4f`; harness 521/90; core protection 546/103 re-run by the orchestrator; RE-0…13 red as named; Mac + iOS build-for-testing green); F-B4-1 accepted as residue; O-B4-1 → VX-530; the live proof (red + green legs, her Touch ID) NEXT |
-| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere — HER CALL) | VX-527: a small unit after the Touch ID walk · VX-529: Needs Lillian (join + shape offered) |
-| 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | LEGS S · D · C PASS (unit C — THE RECORD): three fresh accounts (std, del, castle) set up with no relaunch, server-verified; both postures; key changes; backups; typed secrets; a second library's join in each posture; Delete Account; Use Standard. Unit C's close (cleanup + dev store back) after B3's walk |
+| 6d | VX-517 (R-510-16 — the Touch ID sync-keys class forgotten) | UNIT B4 DONE (`5416bcaca`…`fe42afe4f`; harness 521/90; core protection 546/103 re-run by the orchestrator; RE-0…13 red as named; Mac + iOS build-for-testing green); F-B4-1 accepted as residue; O-B4-1 → VX-530; **GREEN LIVE** (red leg on the pre-fix build: two Touch ID sheets on a Standard key door; green leg on the post-fix build: none; the Castle guard intact; VX-530 seen live) |
+| 6e | VX-527 (rider — the lobby's words disclosure's click target) · VX-529 (the catch-up for a pair changed elsewhere) | VX-527: the SUCCESSOR's first unit (pin first) · VX-529: ITS OWN RUN, NEXT (R-510-19/20) |
+| 7 | THE ACCEPTANCE — several fresh accounts end-to-end on production, server-verified | DONE — LEGS S · D · C PASS + VX-513 and VX-517 green live + the VX-529 repro; **UNIT C CLOSED** (signed out; walk libraries removed; dev store back, inodes matched; stage released) |
+| 7b | **THE CUTOVER** (R-510-19) | this session's handoff `notes/plans/fixes/vx-510-orchestrator-handoff.md` (a paste-ready kickoff at its top); the successor owns rows 9–10 + VX-527 + the independent re-walk |
 | 8 | THE MAP — the under-tested live seams (R-510-4), propose-only | DONE (drafted — THE MAP below; 17 seams; hers to slot) |
 | 9 | The ladder (fresh `fable-reviewer`, whole run diff), dispositions, fixes | NOT STARTED |
 | 10 | Closing runs (suites covering every changed source), PR, merge, closeout ledgers, handoff | NOT STARTED |
@@ -2537,6 +2556,44 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   syncs on the quiet roads with a silently stale passphrase. W-12's "before today" is rule 7's own sentence (VX-526 comment).
   **STATE AFTER THE REPRO:** the account's passphrase = **PASSPHRASE** (rev 6, castle); `223c4e7e` under PASSPHRASE (Castle,
   Always ask, `3f7560b2`) — back in the slot; `159caa3f` STALE under passphrase2 (`…-aside-vx510-walkL4/`); the words unchanged.
+- **VX-517'S LIVE PROOF (23:27–01:24, her Touch ID; two builds; the system sheet captured by screen region 4 s after each
+  press — no tool reads the data-protection keychain):**
+  - **RED LEG — the PRE-fix build (`DerivedData/vx510` at `2e3d335d8`, pid 10100):** lobby → PASSPHRASE → open → Use
+    Standard (both typed) → prod **rev 7 standard** → Use Castle with **Touch ID** (her press of the button) → **no sheet**
+    (a write never prompts) → `useCastle … under c3a696eb` · `custody … touchid 1`, prod **rev 8 castle** → Use Standard
+    (both typed) → **no sheet** (B2's vault-first) → prod **rev 9 standard** → **Change passphrase on the now-STANDARD
+    library → THE SYSTEM SHEET "Variorum Dev is trying to Unlock your Variorum library. Touch ID to continue with Variorum
+    Dev." — RED** → her finger on the first sheet (by mistake: "oh no - I used my finger" / "I didn't use my finger on the
+    second prompt - I used my finger only on the first one") → `change_passphrase: begun #4` → **a SECOND sheet** → her
+    Cancel → `change_passphrase: done #4` (00:16:11), prod **rev 10 standard**. **Two Touch ID sheets on a Standard
+    library's key door — RED CONFIRMED LIVE** (the leftover item read first, T-B5-4; B4 predicted exactly two).
+  - **GREEN LEG — the POST-fix build (`DerivedData/vx510-b4walk` at `fe42afe4f`, pid 12841):** quiet Standard open →
+    **Change passphrase on Standard with the red leg's leftover item STILL present → NO sheet**, done in 2 s, prod **rev 11**
+    (fix (c)) → Use Castle (Touch ID, both typed) → **a sheet** (expected — B4's W0: entering Castle may read the class; the
+    leftover item from the red leg) → her finger → `enter_castle: done #6 … useCastle … under 0ae270dd` · `touchid 1`, prod
+    **rev 12 castle** → **W1 guard:** ⌃⌘L → the lobby's own Touch ID sheet → her finger → **`road: the Touch ID unlock loaded
+    the account's sync keys for the session (sync key 32b827f5)`** (Castle + Touch ID reads intact) → Change passphrase in
+    Castle → **TWO sheets, both her finger — VX-530 CONFIRMED LIVE** (the double prompt is real) → `change_passphrase: done
+    #7`, prod **rev 13**; then `road: locked` (the 10-minute idle lock — Touch ID presses aren't input) → the lobby's sheet
+    Cancelled by the session, the passphrase typed → `the typed unlock loaded the account's sync keys` → **Use Standard (both
+    typed) → NO sheet** → `leave_castle: done #8 … useStandard … under 89148f78`, prod **rev 14 standard** → **Change
+    passphrase on Standard → NO sheet**, done in 2 s, prod **rev 15**.
+  - **VX-517 GREEN LIVE.** End state of the `castle` account: **Standard, vault rev 15, passphrase PASSPHRASE, the words the
+    C3 set** (`~/.variorum/prod-test-words-castle`).
+- **UNIT C — CLOSED (01:24–01:29):** the walk session SIGNED OUT (Account ▸ Sign out → "Sign out of this Mac?" → Sign Out —
+    the dev scope's session gone, the row "Signed out"); quit (zero instances). The six walk libraries mapped by their key
+    files' `library` id and REMOVED with their `Backups/<id>` folders: `223c4e7e` (the slot), `dfe2ad68` (walkL1), `413fb3bd`
+    (walkL2), `2aa0214f` (walkL3), `159caa3f` (walkL4), `6fa0c827` (`Previous Libraries/2026-10-24-025624`, from S-leg's
+    restore). Untouched: the three older Previous Libraries entries (Oct 7, 18, 20), every other `Backups/` entry (the dev
+    store's `e11e5233` among them), `RESTORE.md`, `safety-copies/`. **The dev store's nine files moved back — every inode as
+    recorded at the aside** (191598614–191598620, 193537660/193537661). One plain relaunch (the post-fix walk build, NO prod
+    road env — `ps eww` confirmed) → the swap notice → **library `e11e5233`, "Sync off (dev store)"**, its own pre-existing
+    restore-hold banner ("…as of October 20, 2026…") and words card as before → quit (zero instances). **Stage RELEASED**
+    ("STAGE FREE"); the walk checkout `~/dev/variorum-vx-510-stage` removed (`git worktree remove`). Residue, accepted: the
+    walk libraries' Apple-keychain items in the dev scope (custody items keyed by key fingerprint; the dev scope holds many
+    from earlier walks — none reach a real store); the `std` and `castle` prod test accounts STAY as standing release-drill
+    accounts (PROPOSED — her call at closeout; their secrets in `~/.variorum/prod-test-accounts.env`, the words in
+    `~/.variorum/prod-test-words-{std,castle}`).
 
 ## THE MAP — where the product meets the real world, and what proves each seam today (R-510-4; propose-only, hers to slot)
 
@@ -2593,7 +2650,9 @@ no live proof. Ranked by launch risk. The rows marked ▶ ride THIS run (units B
   the architect ruled it in, provisionally).
 - **Her calls on filed tickets:** VX-521 (keep-and-close recommended) · VX-527 as a rider in this run? (default: no) ·
   VX-528 (per-Mac seeding intended?) · Pre-launch on any of VX-517…VX-528.
-- **Her hands, later:** the Touch ID window for VX-517's live proof (the ambient goes up).
-- **VX-529 — her call:** join this run with the offered shape (a catch-up follow once open · the lobby naming the account's
-  new passphrase · the check door's fourth answer carrying the door · VX-113's sentence on the key door's refusal), another
-  shape, or a later run.
+- ~~Her hands, later: the Touch ID window for VX-517's live proof~~ — DONE 2026-10-24 00:39–01:21.
+- ~~VX-529 — her call~~ — RULED: its own run, next (R-510-19); the boundary R-510-20 (no rule or storage change; both
+  secrets typed; the set-aside-and-rejoin road as the second road).
+- **For her at closeout:** keep the `std` and `castle` prod test accounts as standing release-drill accounts? · Pre-launch
+  on VX-517…VX-531 · VX-521 (keep-and-close recommended) · VX-528 (per-Mac seeding intended?) · the PROVISIONAL word
+  bundle (P-VX510-1…3, A1…A4, B1-1, B1-2, B2-1, B3-1, B3-2).
