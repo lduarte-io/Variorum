@@ -1866,8 +1866,11 @@ fresh reviewer; VX-523 closes with the run on her ruling.
 
 ### L2 — LIVE STATUS (the implementer owns this section)
 
-**IN PROGRESS — the core fix committed (`dacc7bf63`) and VERIFIED BY REVERT (RV-L2-1, L2-P4); the app's bounded read next
-(L2-P3).** No revert is in flight. Zero `Sources/VariorumCore/Sync/`
+**IN PROGRESS — the core fix committed (`dacc7bf63`) and VERIFIED BY REVERT (RV-L2-1); the app's bounded read committed
+(`05829dc27`); RV-L2-2 IN FLIGHT** (named before it starts: `ProtectionCopyDoors.makeMine`'s core call made to pass the default
+door read instead of the app's — `accountsVault: .taken(accountsVault)` removed, the read itself kept; the run the harness's
+`--filter MakeMineProofFieldsRoadTests`; the restore `git checkout -- App/Variorum/Shared/Protection/ProtectionCopyDoors.swift`
+onto the committed fix). Zero `Sources/VariorumCore/Sync/`
 lines (none needed — the act is protection-local). Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
 
