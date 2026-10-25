@@ -973,7 +973,11 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   E6HealPrimitiveTests|PairInvariantPinsTests|NewWordsResumeTests|FileLessWordsTests|KeyDoorResumeTests|PairCatchUp|
   PairRefusalSplitTests"`): `✔ Test run with 73 tests in 17 suites passed … with 5 known issues` (P2's 4 controls + P6d's
   residual). THE REVERT (named before it runs; the key doors' wiring's red — written before its pin, said so): RV-P5-1
-  `KeyDoors.swift` — the heal clause removed, `--filter E6HealWiringTests`. PENDING (next commit).
+  `KeyDoors.swift` — the heal clause removed, `--filter E6HealWiringTests`. **VERIFIED BY REVERT** on `d4c1bdd54`: `✘ Test
+  run with 5 tests in 1 suite failed … with 6 issues` — `newWordsLandsTheMissingPassphraseLock` ✘ in both postures (no lock
+  under the vault's descriptor, the account's passphrase not opening it, fact 1's `passphraseLock: true` guard); the
+  lobby heal's four tests green through it; restored by `git checkout --`, `git diff --exit-code` clean, `✔ 5 tests` green
+  again. DONE (`d4c1bdd54`). No revert is in flight.
 - U2-P6 — scope 3: THE LOBBY'S VAULT ROAD (below, THE DESIGN AS BUILT). The pure decision in the core
   (`VaultRoad` — headless pins), the app's composition in `ProtectionOpenRoad.openTyped`'s `.noneOpens` arm, the lobby
   face's E6 arm. Pins red-on-old for the silent refusal where the sentence is owed. NOT-STARTED.
