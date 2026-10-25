@@ -1081,8 +1081,81 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   nil `toFingerprint` (unit 1's own `FollowProgram.finishingSteps` reading) flips that pin's `.keysReplaced` row; the
   fixture is corrected (a new key named) and the pair row added — FLIPPED DELIBERATELY, said in the test.
 
-**NEW SENTENCES (every one PROVISIONAL, P-VX529-3's class, sentence case — for her wording bundle):** *(filled as they
-land)*
+**Findings during the build (each says what it changes or why not):**
+- **F-U2-6 — the E6 heal's reach.** It lands at the lobby's vault road (a lobby asks only in Castle, or in Standard once
+  its quiet roads failed) and at New words. A Standard E6 library whose quiet roads work has no typed-passphrase moment
+  but New words — the check door's E6 line says "the next time your library asks for it here", which in Standard may be
+  never. VX-538's recurring card (unit 3, her word) is the natural home for a field that lands it. Not built here.
+- **F-U2-7 — every wrong passphrase at a signed-in lobby now costs ONE bounded vault read** (≤ the 10 s bound, offline
+  fails fast) before its refusal — the price of saying the owed sentence (R-529-1); today's was instant. For the
+  reviewer.
+- **F-U2-8 — the vault road's catch-up runs unit 1's act inside the lobby press**, and that act reads the vault itself
+  (its door's read and its step's — E4, by design) without the decision read's bound — as every synced act's resume at a
+  lobby settle already does. A server that answered the bounded read and then stalls could hold "Opening your library…"
+  up to the transport's own timeout. Residual, stated; the alternative (a deferred act on the open session once the app
+  has opened, the typed secret held in memory until then) is for the reviewer's judgment.
+- **F-U2-9 — a PRE-EXISTING wall-clock flake, not this unit's:** `ProtectionPairRetentionTests`
+  (`pairsPastFourteenDailiesAndFourWeekliesArePrunedInThePickedFolder` ×2, `anotherMacsAndAnotherLibrarysCopiesSurvive
+  EveryPrune` ×1 — 17 pairs where 18 are expected) failed in the harness at 2026-10-25 00:20 UTC (Sunday — the week
+  boundary; the tests read `Date()`), green at the baseline run 23:40 UTC Saturday. No file they exercise is in this
+  unit's diff (`FileBackupsLeaf`, `ProtectionBackupPair` untouched). A ticket for the orchestrator.
+- **F-U2-10 — the check door's THIRD answer** (the old passphrase: "opens this library, but not your account" + VX-113's
+  named change) could carry the same pointer in the catch-up's state; the brief names the fourth only. Not built.
+
+**PROVISIONAL CALLS (the plan's PROVISIONAL rule; options for the closeout's QUESTIONS entry — the shared ledger is the
+merging session's):**
+- **P-VX529-U2-1** — the E6 lobby (F-U2-2): (a) BUILT — the passphrase field over a synced key file with no passphrase lock
+  while signed in, with R-529-6's line; (b) the field, no line; (c) no change.
+- **P-VX529-U2-2** — the stale done-line is hidden while ANY follow is owed (the brief says a pair follow): (a) BUILT — any
+  (a Done's "caught up" is false while any follow is owed); (b) the pair kind only.
+- **P-VX529-U2-3** — the pair Done says what the old secrets open now, the passphrase half too (E8 named the words): (a)
+  BUILT; (b) the half alone, no second sentence.
+- **P-VX529-U2-4** — E14's face asks one secret by READING the facts (session memory, the silent item, Castle's listed
+  Touch ID item — the core door's own order) rather than after the core refuses: (a) BUILT; (b) optional fields on every
+  words-only door.
+- **P-VX529-U2-5** — the lobby's heal is an unplanned one-write re-lock (the `landAppleWrap` repair's precedent; a crash
+  leaves the old file or the new; a stale mirror is the next open's `refreshMemory`): (a) BUILT; (b) a planned act (needs
+  a stored act value — R-510-20 forbids one; or riding the follow's plan — it is no follow).
+
+**NEW SENTENCES (every one PROVISIONAL, P-VX529-3's class, sentence case — for her wording bundle; ‹device› ‹day› are
+the vault's last writer and day, "Mac" the platform's noun — "iPhone" on the phone):**
+1. The follow's notice, the pair kind (`followNotice`): "Your account's passphrase was changed on ‹device› on ‹day›." ·
+   "Your account's twelve words were changed on ‹device› on ‹day›." · "Your account's passphrase and twelve words were
+   changed on ‹device› on ‹day›." · (a settle's halves-unknown form) "Your account's passphrase or twelve words were
+   changed on ‹device› on ‹day›."
+2. The follow's ask (`followAsk`): passphrase moved — "Type your account's current passphrase or your twelve words once to
+   catch up." · words only — "This Mac catches up without asking you for anything."
+3. E14 (`pairNeedsASecret`): "This Mac needs your passphrase or your twelve words once to catch up."
+4. The second road (`pairSecondRoad` — the design §3 draft verbatim): "You can also set this library aside and re-join
+   your account: a fresh library fills from sync under your account's current secrets. Writing that never synced stays in
+   the set-aside copy."
+5. The words arm's window (`pairWordsWindow` — her ratified draft verbatim): "Until you type your account's passphrase on
+   this Mac, copies made here open with your twelve words."
+6. The Reset chain (`pairResetChain`): "If you don't know your account's passphrase, set one you do with Reset forgotten
+   passphrase."
+7. The pair Done (`followDone`, the durable notice): passphrase — "Your account's passphrase was changed on another
+   device, and this Mac caught up. Your previous passphrase no longer opens this library; backups you made with it still
+   do." · words (E8) — "Your account's twelve words were changed on another device, and this Mac caught up. The twelve
+   words you had before no longer open this library; backups you made with them still do." · both — "Your account's
+   passphrase and twelve words were changed on another device, and this Mac caught up. Your previous passphrase and twelve
+   words no longer open this library; backups you made with them still do." · halves unknown — "Your account's passphrase
+   or twelve words were changed on another device, and this Mac caught up."
+8. The words arm's Done (`followDoneNotice(.caughtUpByTheWords)`): "Your account's passphrase [and twelve words] was
+   [were] changed on another device, and this Mac caught up with your twelve words." + 5 + 6.
+9. The heal's Done (`passphraseLandedNotice`): "Your account's passphrase opens this library on this Mac now."
+10. The key doors' gate (`followFirstToCatchUp` = 1 + `followFirstToCatchUpRoad`): "… Follow your account to catch this
+    Mac up first."
+11. The lobby, the change read (`lobbyPassphraseChangedElsewhere` = the bare refusal + 1 + `lobbyPairRoad`): "That
+    passphrase doesn't open this library. Your account's passphrase was changed on ‹device› on ‹day›. Your account's
+    current passphrase, the one before it, or your twelve words open it."
+12. The lobby, E6 (`lobbyAccountPassphraseNotTypedHere` — her R-529-6 draft's shape verbatim): "Your account's passphrase
+    hasn't been typed on this Mac yet — type it here to use it on this Mac."
+13. The check door's pointer (`checkSecretsCatchUpPointer` — the design §3 draft verbatim): "You can catch this Mac up in
+    Settings ▸ Protection."
+14. The check door, E6 (`checkSecretsAccountPassphraseNotTypedHere`): "That passphrase opens your account, but it hasn't
+    been typed on this Mac yet. Type it the next time your library asks for it here, and it opens this library too."
+REUSED, not new: "That passphrase doesn't open this account." (VX-464's — the E6 lobby's wrong passphrase); "Your twelve
+words were changed on ‹device› on ‹day›." (P7-0's — the follow's preflight now says it).
 
 ## UNIT 3 — THE RIDERS (planned; after unit 2)
 
