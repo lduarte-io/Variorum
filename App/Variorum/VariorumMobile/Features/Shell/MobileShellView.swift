@@ -143,6 +143,10 @@ struct MobileShellView: View {
     /// carrying the star door, the Mac StarDoor discipline).
     @State private var starsModel: MobileStarsModel
     @State private var settingsPresented = false
+    /// VM-8 unit 2 — F-U2-E (PROVISIONAL P-VM8-8): the open library's protection receipts on the phone — the faces'
+    /// `speak` door, shown by the Protection screen (one shell per open: a re-keying act's receipt owed to its reopen is
+    /// spoken into the shell that re-pushes the screen).
+    @State private var protectionReceipts = MobileProtectionReceipts()
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
     // Stage 0 TK2 spike auto-run (KEPT — the executable §5 form).
@@ -266,6 +270,10 @@ struct MobileShellView: View {
         // change).
         .onAppear { adoptProtectionRequest() }
         .onChange(of: bootstrap?.protection.settingsRequest) { _, _ in adoptProtectionRequest() }
+        // VM-8 unit 2 — F-U2-E: the open library's faces speak their receipts into this shell's holder (the owed ones at
+        // once — `RoadStandingModel.speak`'s own rule).
+        .onAppear { attachProtectionReceipts() }
+        .onChange(of: bootstrap?.roadStanding.map { ObjectIdentifier($0) }) { _, _ in attachProtectionReceipts() }
         .task { await starsModel.start() }
         // R27b's starter Journal used to be seeded from HERE, concurrently
         // with the task that composes AppServices — which is what the
@@ -475,7 +483,19 @@ struct MobileShellView: View {
             // VM-8 unit 1: the bootstrap's standing faces (kept across every reopen with the presenter and the account
             // section's model); the services for the Account sheet.
             MobileProtectionScreen(standing: bootstrap?.roadStanding, services: services, tokens: tokens)
+                // VM-8 unit 2 — F-U2-E: the receipts the open library's faces spoke (P-VM8-8).
+                .environment(protectionReceipts)
         }
+    }
+
+    /// **VM-8 unit 2 — F-U2-E (PROVISIONAL P-VM8-8): THE PROTECTION RECEIPTS' PHONE HOME.** The open library's faces speak
+    /// through `RoadStandingModel.speak` (the Mac's ready window hands it the status seam); the phone hands it this shell's
+    /// holder, which the Protection screen shows. Setting it speaks the receipts the open owes at once (rule 1's restore
+    /// receipt, the key-file offer's, a crossing's or a re-keying account act's owed to its reopen).
+    private func attachProtectionReceipts() {
+        guard let standing = bootstrap?.roadStanding else { return }
+        let receipts = protectionReceipts
+        standing.speak = { text in receipts.say(text) }
     }
 
     /// **VM-8 unit 1 — F-U1-3: SETTINGS ASKED BACK TO PROTECTION** (VX-206's road, the Mac's `AppSettingsView

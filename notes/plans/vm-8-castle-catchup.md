@@ -653,13 +653,29 @@ signed out.**
 **THE PLAN (pieces; flipped per commit):**
 1. The posture + crossings: the posture line, Use Castle… (both secrets, a new passphrase twice where none, the gate choice
    at the press), its signed-out road, Replace All Keys… (synced only), the gate-style row in Castle; Use Standard never.
-   NOT-STARTED.
+   IN-PROGRESS — CODE COMPILING (this commit; phone `build-for-testing` EXIT 0, no warning in a touched file): NEW
+   `VariorumMobile/Features/Protection/MobileProtectionDoors.swift` — `MobileRoadCrossingsSection` (the pure `rows(_:)`:
+   Use Castle + Replace All Keys only, the `saysRuleTwelve` belt, identical refusals once; the gate-style row),
+   `MobileRoadCrossingConfirmSheet`, `MobileRoadSignedOutCastleSheet`, `MobileGateChoice` (unit 1's account confirm now
+   renders the same one — byte-same faces); shared `RoadDoorOpen.saysRuleTwelve` (pure; the Mac never reads it). Pins PENDING.
 2. The key doors + the setter: *Set a passphrase…* (`SetPassphraseModel`, the phone's sheet), Change passphrase…, Reset
    forgotten passphrase… (Standard's plain confirm; Castle's words or *Reset with Face ID*), New words through the look (the
-   phone panel's asking phase), the hint twin under every new-passphrase field (F-U2-C), VX-542 once (F-U2-D). NOT-STARTED.
-3. The check door over `ProtectionSecretCheck`. NOT-STARTED.
+   phone panel's asking phase), the hint twin under every new-passphrase field (F-U2-C), VX-542 once (F-U2-D). IN-PROGRESS —
+   CODE COMPILING (this commit): `MobilePassphraseSection` (the pure `rows(_:)` — a pair gate says the road once),
+   `MobileSetPassphraseSheet`, `MobileRoadKeyDoorConfirmSheet`, `MobileWordsSection` (the look held by the screen, its way
+   back hidden while it holds words), `MobileWordsLookPanel`'s asking phase, `MobilePassphraseHintLine` (under the set
+   sheet's, a crossing's, Turn on sync's and the key doors' new passphrase — F-U2-C's fix in unit 1's account confirm);
+   shared `RoadKeyDoorFaces.pairGate` (set by `derive` when every key door is refused by a PAIR follow owed; the Mac never
+   reads it). Pins PENDING.
+3. The check door over `ProtectionSecretCheck`. IN-PROGRESS — CODE COMPILING (this commit): `MobileRoadSecretCheckDoor` +
+   `MobileRoadSecretCheckSheet`. Pins PENDING.
 4. The follow/pair on the phone, pinned (F-U2-B). NOT-STARTED.
-5. The receipts' home (F-U2-E, P-VM8-8). NOT-STARTED.
+5. The receipts' home (F-U2-E, P-VM8-8). IN-PROGRESS — CODE COMPILING (this commit): `MobileProtectionReceipts` (the newest
+   three said; cleared when the screen leaves), the shell's `attachProtectionReceipts()` (`roadStanding.speak` on appear and
+   at every new open's faces), the screen's muted line under its title (the holder through the environment on the
+   `.protection` destination). Pins PENDING.
+   The one presenter's phone host now hosts `.crossing`, `.signedOutCastle`, `.keyDoor`, `.checkSecrets` (unit 1's
+   "no door opens these" hole closed).
 6. Posture pins through the phone's own bootstrap: VX-530 (a Castle + Face ID key door reads the Touch ID sync-keys item at
    most once) and VX-517 (a leave forgets the Touch ID class by name under a production-like listing). NOT-STARTED.
 7. Evidence: behavioral reverts named before they run; the unit suites + the sweeps; the whole phone target. NOT-STARTED.

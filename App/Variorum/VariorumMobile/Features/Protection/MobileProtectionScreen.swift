@@ -36,13 +36,49 @@ struct MobileProtectionScreen: View {
     let services: AppServices?
     let tokens: VoiceTokens
 
+    /// VM-8 unit 2 — F-U2-E (PROVISIONAL P-VM8-8): the receipts the open library's faces spoke on the phone (the shell's
+    /// holder; nil — a host with no shell — says none).
+    @Environment(MobileProtectionReceipts.self) private var receipts: MobileProtectionReceipts?
+    /// VM-8 unit 2: the set-passphrase sheet (the screen's own — never the one presenter's, the Mac pane's precedent).
+    @State private var setSheet: SetPassphraseModel?
+    /// VM-8 unit 2: New words' look, held here so the screen keeps its way back while it holds words (the Mac's "a host
+    /// keeps its other doors back meanwhile — closing them would put the words away without the warning").
+    @State private var wordsLook: WordsLookModel?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text(tokens.path([ProtectionCopy.protectionPaneTitle]))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
+                // F-U2-E (P-VM8-8): what the protection acts said — one muted line, under the title.
+                if let receipts, !receipts.lines.isEmpty {
+                    VStack(alignment: .leading, spacing: 2) {
+                        ForEach(Array(receipts.lines.enumerated()), id: \.offset) { _, line in
+                            Text(line)
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                if let standing {
+                    // VM-8 unit 2 — the Mac pane's order: the passphrase (the set row or the key doors), the words, the check,
+                    // the crossings, then the account.
+                    MobilePassphraseSection(standing: standing, tokens: tokens, setSheet: $setSheet)
+                    if standing.band != nil {
+                        MobileWordsSection(standing: standing, tokens: tokens, look: $wordsLook)
+                    }
+                    if let keyDoors = standing.keyDoors {
+                        MobileRoadSecretCheckDoor(model: keyDoors, tokens: tokens)
+                    }
+                    if let crossings = standing.crossings {
+                        Divider().overlay(tokens.line)
+                        MobileRoadCrossingsSection(model: crossings, tokens: tokens)
+                    }
+                }
                 if let account = standing?.account {
+                    Divider().overlay(tokens.line)
                     MobileRoadAccountSection(model: account, tokens: tokens)
                 }
             }
@@ -52,9 +88,19 @@ struct MobileProtectionScreen: View {
         }
         .background(tokens.room.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+        // New words' look holds the words on screen: no way back until her close (past the look's warning).
+        .navigationBarBackButtonHidden(wordsLook?.holdsWords == true)
         // The section's faces re-read at each appearance (an act's reopen rebuilds this screen) — the pane's one read.
         .task { await standing?.refreshPane() }
+        .onDisappear { receipts?.screenLeft() }
         .modifier(MobileProtectionSheetsHost(presenter: standing?.sheets, services: services, tokens: tokens))
+        .background {
+            // The set-passphrase sheet rides its own anchor (one `.sheet` per view — the presenter's host is the screen's).
+            Color.clear.sheet(item: $setSheet) { model in
+                MobileSetPassphraseSheet(model: model, tokens: tokens)
+                    .presentationDetents([.large])
+            }
+        }
     }
 }
 
@@ -187,10 +233,15 @@ struct MobileProtectionSheetsHost: ViewModifier {
                 } else {
                     MobileProtectionSheetNotHere(presenter: presenter, tokens: tokens, sentence: ProtectionWords.signInUnavailable)
                 }
-            case .crossing, .signedOutCastle, .keyDoor, .checkSecrets:
-                // No door on this screen opens these in unit 1 (the crossings, the key doors and the check are unit 2's) —
-                // a composition hole, said in the log and closed as the host's dismissal.
-                MobileProtectionSheetNotHere(presenter: presenter, tokens: tokens, sentence: nil)
+            // VM-8 unit 2: the crossings' confirm, the signed-out road's screen, a key door's confirm, the check.
+            case .crossing(let model):
+                MobileRoadCrossingConfirmSheet(model: model, tokens: tokens)
+            case .signedOutCastle(let model):
+                MobileRoadSignedOutCastleSheet(model: model, tokens: tokens)
+            case .keyDoor(let model):
+                MobileRoadKeyDoorConfirmSheet(model: model, tokens: tokens)
+            case .checkSecrets(let model):
+                MobileRoadSecretCheckSheet(model: model, tokens: tokens)
             }
         }
     }
@@ -280,7 +331,9 @@ struct MobileRoadAccountConfirmSheet: View {
                 }
             }
         }
-        if let gate = model.door.gate { gateChoice(gate) }
+        if let gate = model.door.gate {
+            MobileGateChoice(gate: gate, selection: $model.gate, busy: model.busy, tokens: tokens)
+        }
         fields
         if let refusal = model.refusal {
             Text(refusal)
@@ -305,55 +358,6 @@ struct MobileRoadAccountConfirmSheet: View {
         .padding(.top, 4)
     }
 
-    /// Into Castle (a join that enters it, the follow into it): Face ID or Always ask — the crossings' own choice, the
-    /// phone's biometry named by the shared words (`ProtectionCopy.biometryName`).
-    private func gateChoice(_ gate: RoadGateChoice) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(tokens.chromeLabel(ProtectionWords.gateHeading))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-            if gate.touchIDAvailable {
-                gateRow(.touchID, ProtectionWords.gateTouchID)
-                gateRow(.alwaysAsk, ProtectionWords.gateAlwaysAsk)
-            } else {
-                Text(ProtectionWords.gateAlwaysAsk)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.ink)
-                Text(ProtectionWords.touchIDNotSetUpOnThisMac)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Text(model.gate == .touchID && gate.touchIDAvailable
-                 ? ProtectionWords.gateTouchIDLine : ProtectionWords.gateAlwaysAskLine)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    /// One gate choice (the voice rows' idiom — the selected one in ink with its mark).
-    private func gateRow(_ style: GateStyle, _ label: String) -> some View {
-        let selected = model.gate == style
-        return Button {
-            model.gate = style
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: selected ? "largecircle.fill.circle" : "circle")
-                    .foregroundStyle(selected ? tokens.accent : tokens.muted)
-                Text(label)
-                    .font(tokens.body)
-                    .foregroundStyle(selected ? tokens.ink : tokens.muted)
-                Spacer()
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-        .accessibilityAddTraits(selected ? .isSelected : [])
-        .disabled(model.busy)
-    }
-
     /// Exactly the fields the door's ask names (turning sync on: both; a leave and the follow out: none; a join, Move and
     /// the follow: ONE secret — rule 14 — either field).
     @ViewBuilder
@@ -376,6 +380,8 @@ struct MobileRoadAccountConfirmSheet: View {
                     .foregroundStyle(tokens.muted)
                     .fixedSize(horizontal: false, vertical: true)
                 styled(PeekableSecretField(label: ProtectionWords.crossingNewPassphraseField, text: $passphrase))
+                // VM-8 unit 2 — F-U2-C (VX-211): the quiet strength hint beneath a passphrase being SET.
+                MobilePassphraseHintLine(passphrase: passphrase, tokens: tokens)
                 styled(PeekableSecretField(label: ProtectionWords.crossingNewPassphraseAgain, text: $again))
             } else {
                 styled(PeekableSecretField(label: ProtectionWords.crossingPassphraseField, text: $passphrase))
@@ -389,16 +395,7 @@ struct MobileRoadAccountConfirmSheet: View {
 
     /// The lobby's field idiom (`MobileRoadLockView`): a quiet card around the shared concealing field.
     private func styled(_ field: PeekableSecretField) -> some View {
-        field
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .font(tokens.body)
-            .foregroundStyle(tokens.ink)
-            .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(tokens.card)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1)))
+        field.mobileSecretFieldChrome(tokens)
     }
 
     /// RULE 7's WORDS MOMENT (VX-308 U2, R-U2-5): the words she typed, shown once over the one look under her sentence;
@@ -487,11 +484,18 @@ struct MobileWordsLookPanel: View {
     @Bindable var look: WordsLookModel
     let tokens: VoiceTokens
 
+    @State private var passphrase = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             switch look.phase {
-            case .closed, .asking:
+            case .closed:
                 EmptyView()
+            case .asking:
+                // VM-8 unit 2 — New words through the look (rule 6: new words ask the passphrase where one exists; F-U2-3:
+                // a synced library hears first that new words replace the account's — her *Show my twelve words* the yes).
+                // The join's moment never asks (its look is the typed words).
+                asking
             case .minting:
                 HStack(spacing: 8) {
                     TravellingDotsIndicator(ink: tokens.muted)
@@ -530,6 +534,37 @@ struct MobileWordsLookPanel: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    private var asking: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if look.saysAccountWords {
+                Text(ProtectionWords.wordsLookReplacesAccountWords)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(ProtectionWords.wordsLookAsk)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            PeekableSecretField(label: ProtectionWords.wordsLookPassphraseField, text: $passphrase, onSubmit: submit)
+                .mobileSecretFieldChrome(tokens)
+            HStack(spacing: 16) {
+                MobileRoadButton(title: ProtectionWords.wordsLookCancel, tokens: tokens) {
+                    passphrase = ""
+                    look.cancel()
+                }
+                MobileRoadButton(title: ProtectionWords.wordsLookShow, tokens: tokens) { submit() }
+                    .disabled(passphrase.isEmpty)
+            }
+        }
+    }
+
+    private func submit() {
+        let typed = passphrase
+        passphrase = ""
+        Task { await look.submit(passphrase: typed) }
     }
 
     private var columns: some View {

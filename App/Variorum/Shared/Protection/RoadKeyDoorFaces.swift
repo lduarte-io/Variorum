@@ -114,6 +114,11 @@ nonisolated struct RoadKeyDoorFaces: Equatable, Sendable {
     /// check the library against, so the door is not rendered — P-2). Reads only, so no synced refusal ever stands in its
     /// place: an account that can't be checked now is said by the check itself. false: a hand-made face (no door).
     var checkStands = false
+    /// **VM-8 unit 2 — F-U2-D (the phone's VX-542 shape, PROVISIONAL P-VM8-9):** every key door is refused because the
+    /// account's PAIR changed elsewhere (`followFirstToCatchUp` — the follow's notice + its road, in each door's place). The
+    /// phone says the pair sentence once, beside the follow door, and the road once for the locked doors; the Mac never
+    /// reads this (its rendering unchanged). false: a hand-made face, or any other state.
+    var pairGate = false
 
     func face(_ door: RoadKeyDoor) -> RoadKeyDoorFace {
         switch door {
@@ -175,8 +180,12 @@ nonisolated struct RoadKeyDoorFaces: Equatable, Sendable {
                 }
             }
         }
+        let gated = pairOwed != nil && RoadKeyDoor.allCases.allSatisfy { door in
+            guard case .refused(.followOwed)? = assessment.doors[door.door] else { return false }
+            return true
+        }
         return RoadKeyDoorFaces(
             changePassphrase: face(.changePassphrase), newWords: face(.newWords),
-            resetForgottenPassphrase: face(.resetForgottenPassphrase), checkStands: keyFileStands)
+            resetForgottenPassphrase: face(.resetForgottenPassphrase), checkStands: keyFileStands, pairGate: gated)
     }
 }

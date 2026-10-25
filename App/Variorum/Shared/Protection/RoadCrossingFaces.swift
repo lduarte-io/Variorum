@@ -129,6 +129,12 @@ nonisolated struct RoadDoorOpen: Equatable, Sendable {
     let synced: Bool
     /// The spec as `assess` gave it — the press compares the door it re-reads with this one (VX-108).
     let spec: DoorSpec
+
+    /// **VM-8 unit 2 — F-U2-G (the F-U1-1 (A) pattern, ruled):** the confirm says HER rule-12 leave sentence
+    /// (`Words.ruleFive` — Use Standard's). Its text names the Mac (CastleRules' own words) and its phone wording is hers
+    /// (F-PH-2), so the phone's crossings section renders no such door; the Mac renders every door as before (it never
+    /// reads this).
+    var saysRuleTwelve: Bool { spec.words.contains(.ruleFive) }
 }
 
 /// One door as the pane renders it.
