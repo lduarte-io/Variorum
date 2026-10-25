@@ -1797,7 +1797,15 @@ road), `ProtectionRoadActs.swift` (`setFirstPassphrase`); the suite `LobbyVaultR
   passphrase, and the ACCOUNT's own passphrase (which opens the vault's master — still nothing to open with it), each make
   ZERO vault fetches (today one each), refused `passphraseDoesNotOpen` byte for byte, nothing written; and THE GATE'S OTHER
   SIDE — a synced library, nothing changed elsewhere, a wrong passphrase: ONE fetch (the read stays where it can prove
-  something) and the same refusal byte for byte. NOT-STARTED.
+  something) and the same refusal byte for byte. DONE (this commit) — `anUnsyncedLibraryMakesNoVaultRead` +
+  `aSyncedLibraryKeepsItsOneReadAndTheSameRefusal` (world `unsyncedWhileSignedIn`: `road.created()`, rule 3's first
+  passphrase through `setFirstPassphrase`, the account's vault planted, the quiet roads emptied; precondition asserted — a
+  passphrase lock, no master lock, no account). **RED on the tree as it stands** (`c7dd3d591`'s code; the harness, `--filter
+  LobbyVaultRoadTests`): `✘ Test run with 11 tests in 1 suite failed after 2.698 seconds with 2 issues.` — exactly the two
+  fetch counts: a wrong passphrase `Self.fetches(world) → 1` / `fetches → 0`; the account's passphrase `→ 2` / `→ 1` (one
+  read per press). Green through it, as they must stay: both refusals `== ProtectionWords.passphraseDoesNotOpen` (today's
+  bytes), nothing written, the own passphrase still opening locally (a guard), the synced side's one fetch and same
+  refusal, and the suite's nine standing tests.
 - L1-P2 — THE GATE in `openThroughTheVault` (the live read hoisted above the read). NOT-STARTED.
 - L1-P3 — THE REVERT, named before it runs: RV-L1-1 `ProtectionOpenRoad.swift` — the gate's guard removed (the hoisted read
   kept), the harness `--filter LobbyVaultRoadTests` [expect exactly the unsynced row's fetch counts red; every byte-identity

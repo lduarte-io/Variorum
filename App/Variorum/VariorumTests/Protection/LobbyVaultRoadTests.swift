@@ -10,6 +10,10 @@
 //      opens neither while the change was readable — the sentence owed was never said.
 //    - THE GUARDRAILS (green on both sides — guards): offline, signed out, another account, a read-only road — today's
 //      refusal byte for byte, nothing written.
+//    - THE LADDER, ROUND 1 — F-R1-1 (fix session L1): the read only where it can prove something. Over a library none of
+//      whose held key files carries a master lock (it never synced), no vault-road answer can be anything but today's
+//      refusal, so the lobby makes no read at all (RED on the pre-fix tree at the fetch counts); a synced library keeps its
+//      one read; the refusal is today's, byte for byte, on both sides of the gate.
 //
 
 import CryptoKit
@@ -181,6 +185,74 @@ struct LobbyVaultRoadTests {
             return
         }
         #expect(sentence == ProtectionWords.passphraseDoesNotOpen && world.vault.calls.count == fetches)
+    }
+
+    // MARK: - F-R1-1 (the ladder's round 1, fix session L1): the read only where it can prove something
+
+    static let ownPassphrase = "a passphrase only this library knows"
+
+    /// An UNSYNCED library — its own passphrase lock (rule 3's first passphrase, set here), NO master lock (it never joined
+    /// an account) — whose quiet roads failed (the lobby asks), on a Mac signed in to an account whose vault exists.
+    static func unsyncedWhileSignedIn() async throws -> World {
+        let (road, vault, keys) = Account.road()
+        road.session = Account.signedIn
+        let (session, words) = try await road.created()
+        #expect(await ProtectionOpenRoad.setFirstPassphrase(session: session, new: Self.ownPassphrase) == .set)
+        _ = try vault.plant(
+            accountID: Account.account, passphrase: Account.passphrase, words: try RecoveryPhrase.generate(), mode: .standard)
+        let live = try #require(session.library.keyFile)
+        #expect(live.passphrase != nil && live.master == nil && session.library.record?.account == nil,
+                "precondition: unsynced — a passphrase lock of its own, no master lock, no account")
+        road.custody.items = [:]
+        road.apple.keys = [:]
+        return World(road: road, vault: vault, keys: keys, session: session, words: words)
+    }
+
+    /// AN UNSYNCED LIBRARY MAKES NO VAULT READ: none of its held key files carries a master lock, so no answer of the vault
+    /// road's can be anything but today's refusal — neither for a wrong passphrase nor for the ACCOUNT's own (which opens
+    /// the vault's master, with nothing here for that master to open). RED on the pre-fix tree at the fetch counts (one
+    /// read per press, up to the bound per typo); the refusal is today's, byte for byte, on both trees; nothing written.
+    @Test func anUnsyncedLibraryMakesNoVaultRead() async throws {
+        let world = try await Self.unsyncedWhileSignedIn()
+        let before = try Plant.containerBytes(world.road)
+        for typed in ["not anyone's passphrase", Account.passphrase] {
+            let fetches = Self.fetches(world)
+            guard case .refused(let sentence) = await ProtectionOpenRoad.openTyped(
+                world.road.context(), secret: .passphrase(typed))
+            else {
+                Issue.record("\(typed == Account.passphrase ? "the account's passphrase" : "a wrong passphrase"): refused")
+                return
+            }
+            #expect(sentence == ProtectionWords.passphraseDoesNotOpen, "today's refusal, byte for byte")
+            #expect(Self.fetches(world) == fetches,
+                    "\(typed == Account.passphrase ? "the account's passphrase" : "a wrong passphrase"): no vault read")
+        }
+        #expect(try Plant.containerBytes(world.road) == before, "nothing written")
+        guard case .opened = await ProtectionOpenRoad.openTyped(world.road.context(), secret: .passphrase(Self.ownPassphrase))
+        else {
+            Issue.record("a guard: the library's own passphrase still opens it locally")
+            return
+        }
+    }
+
+    /// THE GATE'S OTHER SIDE: a SYNCED library (a master lock), nothing changed elsewhere, a wrong passphrase — the read
+    /// stays (ONE fetch: this is where an owed sentence can be proven), and the refusal is the same bytes as the gated
+    /// side's. A guard — green on both trees.
+    @Test func aSyncedLibraryKeepsItsOneReadAndTheSameRefusal() async throws {
+        let world = try await TypedUnlockSyncKeysTests.castleAlwaysAskSynced()
+        TouchIDUnlockSyncKeysTests.relaunched(world)
+        #expect(world.session.library.keyFile?.master != nil, "precondition: synced — a master lock")
+        let before = try Plant.containerBytes(world.road)
+        let fetches = Self.fetches(world)
+        guard case .refused(let sentence) = await ProtectionOpenRoad.openTyped(
+            world.road.context(), secret: .passphrase("not anyone's passphrase"))
+        else {
+            Issue.record("refused")
+            return
+        }
+        #expect(sentence == ProtectionWords.passphraseDoesNotOpen, "today's refusal, byte for byte")
+        #expect(Self.fetches(world) == fetches + 1, "ONE bounded read — where it can prove something")
+        #expect(try Plant.containerBytes(world.road) == before, "nothing written")
     }
 
     // MARK: - The design rows (their tests — landed with the road)
