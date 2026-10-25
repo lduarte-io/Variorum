@@ -221,6 +221,26 @@ public struct KeyFile: Codable, Equatable, Sendable {
         return next
     }
 
+    /// The library's own words lock dropped — VX-529: a STALE one, after the account's twelve words were re-made on
+    /// another device (rule 7's one pair: the old words stop opening the live library; they still open the backups made
+    /// with them, rules 4–5). The words then open the file through the master's twelve-words copy alone — the caller's
+    /// rule: never without that copy beside a master lock (`opensWithTheWords`; `relockedToTheAccountsPair` checks it).
+    public func droppingWords() -> KeyFile {
+        var next = self
+        next.words = nil
+        return next
+    }
+
+    /// The passphrase lock dropped — VX-529, R-529-5's words arm: the account's passphrase was changed on another device
+    /// and the account's current WORDS caught this library up, so the stale lock goes (the old passphrase stops opening the
+    /// live library at once; it still opens the backups made with it, rules 4–5). The caller's rule: never without the
+    /// words' road (`opensWithTheWords`; `relockedToTheAccountsPair` checks it).
+    public func droppingPassphrase() -> KeyFile {
+        var next = self
+        next.passphrase = nil
+        return next
+    }
+
     // MARK: - Opening the current key (every road verifies itself)
 
     private func verified(_ key: StoreKey?, _ road: KeyFileRoad) throws -> StoreKey {

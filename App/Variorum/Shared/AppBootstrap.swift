@@ -995,7 +995,7 @@ final class AppBootstrap {
                 }
                 // VX-308 U2 (R-U2-2): an act that re-keys (a join across postures, every follow) runs through the one
                 // reopening seam; the rest on the open session.
-                let press: RoadAccountPress
+                var press: RoadAccountPress
                 if request.shown.rekeys {
                     press = await self.accountActOnNewRoad(request)
                 } else {
@@ -1003,6 +1003,13 @@ final class AppBootstrap {
                         await ProtectionAccountRoad.press(
                             session, request: request, signIn: signInNow(), exportSwitch: exports)
                     }.value
+                    // VX-529 unit 2 (F-U2-1): a follow on the OPEN session (the pair catch-up) owes its Done DURABLY, as
+                    // the reopen seam's does (VX-457) — the mark, by the library the act ran on, and no receipt.
+                    let landing = ProtectionAccountRoad.openSessionLanding(press, request: request)
+                    if let notice = landing.followDone, let libraryID = session.library.record?.libraryID {
+                        FollowDoneMark.set(libraryID, notice: notice, in: self.reminderLedger.defaults)
+                    }
+                    press = landing.press
                 }
                 if case .made = press, request.door.landingRecordsTheWords { self.accountActHoldsTheWords(actedOn: session) }
                 return press
@@ -1022,9 +1029,10 @@ final class AppBootstrap {
             copyWords: { Self.copyWords($0) },
             // VX-309 U2 — VX-457: the follow's Done as the section's durable notice — the OPEN library's mark, in the
             // calm-asks ledger's defaults (a test bootstrap's own suite), read at every landing and cleared at its OK.
-            followDoneOwed: { [weak self] in
+            // VX-529 unit 2: the whole notice (a follow's Done, R-529-5's words arm, the lobby's heal).
+            followDoneNoticeOwed: { [weak self] in
                 guard let self, let libraryID = self.roadSession?.library.record?.libraryID else { return nil }
-                return FollowDoneMark.owed(libraryID, in: self.reminderLedger.defaults)
+                return FollowDoneMark.notice(libraryID, in: self.reminderLedger.defaults)
             },
             dismissFollowDone: { [weak self] in
                 guard let self, let libraryID = self.roadSession?.library.record?.libraryID else { return }
@@ -1069,7 +1077,11 @@ final class AppBootstrap {
                 }.value
             },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
-            landed: { [weak self] in await self?.roadAccount?.refresh() },
+            landed: { [weak self] in
+                await self?.roadAccount?.refresh()
+                // VX-538: Change and Reset land a passphrase lock — the band card's E6 row reads its state again.
+                self?.roadStanding?.rereadPassphrase()
+            },
             // VX-510 D-B7 — VX-513: the read-only check, on the OPEN session (ready only), as signed in NOW, off the main
             // actor (the passphrase's derivation and the vault read). It writes nothing — no act lock, no receipt, no landing.
             check: { [weak self] typed in
@@ -1279,8 +1291,8 @@ final class AppBootstrap {
                 // VX-309 U2 — VX-457: a follow that landed whole owes its Done DURABLY (the account section's notice
                 // until her OK — `FollowDoneMark`), never a receipt; any other act's receipt rides to the reopen as before.
                 let owed = ProtectionAccountRoad.owed(after: done, request: request)
-                if let kind = owed.followDone, let libraryID = session.library.record?.libraryID {
-                    FollowDoneMark.set(libraryID, kind, in: followDoneLedger.defaults)
+                if let notice = owed.followDone, let libraryID = session.library.record?.libraryID {
+                    FollowDoneMark.set(libraryID, notice: notice, in: followDoneLedger.defaults)
                 }
                 return (.made(receipt: nil, wordsReplaced: wordsReplaced), done.reopenKey, owed.receipts)
             case .refused, .changed:

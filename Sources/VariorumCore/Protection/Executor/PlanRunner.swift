@@ -110,10 +110,20 @@ public final class ActContext {
     /// The words as typed, for the act's span only (a resume opens the new
     /// key's file by the words road).
     var typedWords: [String]?
+    /// The passphrase as typed (at the press, or at a resume's lobby), for the
+    /// act's span only, never stored — VX-529's pair catch-up derives it
+    /// itself under the FRESH vault's descriptor, its plan carrying none (S-3).
+    var typedPassphrase: String?
     var toKey: StoreKey?
     /// Make this my library: the copy's key, held from the press for the act's
     /// span — never stored (a resume before the swap rolls back without it).
     var copyKey: StoreKey?
+    /// Make this my library (VX-523, R-529-7): the door's proof that the
+    /// current pair's words are the signed-in account's — the join's two
+    /// fields for the new key file. Held from the press for the act's span,
+    /// never stored: the key-file step runs only at the press (a resume before
+    /// the stage holds no copy key and rolls back).
+    var pairProof: AccountPairProof?
     /// The outgoing key, held from the begin for the act's span.
     var heldFromKey: StoreKey?
     /// The account's sync keys in hand (custody, session memory, or the vault).
@@ -131,6 +141,7 @@ public final class ActContext {
         self.plan = plan
         self.secrets = secrets
         self.typedWords = typed?.words
+        self.typedPassphrase = typed?.passphrase
         self.toKey = toKey
         if library.fingerprint == plan.fromFingerprint { self.heldFromKey = library.key }
         self.resuming = resuming
@@ -198,9 +209,14 @@ extension ProtectionExecutor {
 
     /// **Begin and run an act.** `toKey`: the new library key a re-key mints
     /// at its press (named in the act in flight from the first write).
+    /// `material`: the account's sync keys the door already holds in hand
+    /// (VX-529's pair catch-up: read once at the door — a Touch ID read is a
+    /// press — never stored; a resume finds its own). `pairProof`: Make this
+    /// my library's proof fields (VX-523 — `ActContext.pairProof`).
     func perform(
         _ program: any ActProgram, parameters: ActParameters, secrets: ActSecrets, typed: TypedSecrets? = nil,
-        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, library: inout UnlockedLibrary
+        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, material: AccountKeys? = nil,
+        pairProof: AccountPairProof? = nil, library: inout UnlockedLibrary
     ) async throws -> ActOutcome {
         guard library.record != nil else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
@@ -226,6 +242,8 @@ extension ProtectionExecutor {
             executor: self, library: library, plan: plan, secrets: secrets, typed: typed, toKey: toKey,
             resuming: false)
         ctx.copyKey = copyKey
+        ctx.pairProof = pairProof
+        if let material { ctx.material = material }
         defer { library = ctx.library }
         do {
             try await drive(program, ctx)

@@ -79,30 +79,85 @@ nonisolated enum AccountPreflight: Equatable, Sendable {
 nonisolated enum FollowDoneMark {
     static func key(_ libraryID: String) -> String { "variorum.calmAsks.followDone.\(libraryID).kind" }
 
-    /// The kind as stored (a plain name — `FollowKind` carries no raw value in the core).
+    /// The kind as stored (a plain name — `FollowKind` carries no raw value in the core). VX-529 unit 2: the pair kind by
+    /// its halves (`pairChanged` alone — unit 1's name — is the halves-unknown form a settle reads).
     static func name(_ kind: FollowKind) -> String {
         switch kind {
         case .intoCastle: return "intoCastle"
         case .intoStandard: return "intoStandard"
         case .keysReplaced: return "keysReplaced"
+        case .pairChanged(true, false): return "pairChanged.passphrase"
+        case .pairChanged(false, true): return "pairChanged.words"
+        case .pairChanged(true, true): return "pairChanged.both"
+        case .pairChanged(false, false): return "pairChanged"
         }
     }
 
-    /// The Done owed for `libraryID` (nil: none, or a name this build doesn't know — read as none).
-    static func owed(_ libraryID: String, in defaults: UserDefaults) -> FollowKind? {
+    /// VX-529 unit 2 — the notice as stored: a follow's kind by `name`, R-529-5's words arm, P-VX529-4's heal.
+    static func name(_ notice: FollowDoneNotice) -> String {
+        switch notice {
+        case .followed(let kind): return name(kind)
+        case .caughtUpByTheWords(let wordsToo): return wordsToo ? "pairChanged.both.byTheWords" : "pairChanged.byTheWords"
+        case .passphraseLanded: return "passphraseLanded"
+        }
+    }
+
+    /// VX-529 unit 2 — the notice owed for `libraryID` (nil: none, or a name this build doesn't know — read as none).
+    static func notice(_ libraryID: String, in defaults: UserDefaults) -> FollowDoneNotice? {
         switch defaults.string(forKey: key(libraryID)) {
-        case "intoCastle": return .intoCastle
-        case "intoStandard": return .intoStandard
-        case "keysReplaced": return .keysReplaced
+        case "intoCastle": return .followed(.intoCastle)
+        case "intoStandard": return .followed(.intoStandard)
+        case "keysReplaced": return .followed(.keysReplaced)
+        case "pairChanged": return .followed(.pairChanged(passphrase: false, words: false))
+        case "pairChanged.passphrase": return .followed(.pairChanged(passphrase: true, words: false))
+        case "pairChanged.words": return .followed(.pairChanged(passphrase: false, words: true))
+        case "pairChanged.both": return .followed(.pairChanged(passphrase: true, words: true))
+        case "pairChanged.byTheWords": return .caughtUpByTheWords(wordsToo: false)
+        case "pairChanged.both.byTheWords": return .caughtUpByTheWords(wordsToo: true)
+        case "passphraseLanded": return .passphraseLanded
         default: return nil
+        }
+    }
+
+    /// The Done owed for `libraryID` as a follow's kind (nil: none, a name this build doesn't know, or VX-529's heal — no
+    /// follow). R-529-5's words arm reads as the pair kind whose passphrase moved.
+    static func owed(_ libraryID: String, in defaults: UserDefaults) -> FollowKind? {
+        switch notice(libraryID, in: defaults) {
+        case .followed(let kind)?: return kind
+        case .caughtUpByTheWords(let wordsToo)?: return .pairChanged(passphrase: true, words: wordsToo)
+        case .passphraseLanded?, nil: return nil
         }
     }
 
     /// The mark written (a later follow's kind replaces an earlier one still unread — the newest Done is the true one)
     /// or, nil, cleared.
     static func set(_ libraryID: String, _ kind: FollowKind?, in defaults: UserDefaults) {
-        if let kind { defaults.set(name(kind), forKey: key(libraryID)) } else { defaults.removeObject(forKey: key(libraryID)) }
+        set(libraryID, notice: kind.map { .followed($0) }, in: defaults)
     }
+
+    /// VX-529 unit 2 — the notice written (the newest replaces an unread one) or, nil, cleared.
+    static func set(_ libraryID: String, notice: FollowDoneNotice?, in defaults: UserDefaults) {
+        if let notice {
+            defaults.set(name(notice), forKey: key(libraryID))
+        } else {
+            defaults.removeObject(forKey: key(libraryID))
+        }
+    }
+}
+
+/// **VX-529 unit 2 — WHAT THE ACCOUNT SECTION'S DURABLE NOTICE SAYS** (VX-457's mark, by library): a follow's Done by its
+/// kind (the pair kind by its halves); R-529-5's words arm — the account's passphrase moved elsewhere and this Mac caught up
+/// by the twelve words, so the stale passphrase lock dropped and the window is said; P-VX529-4's heal — the account's
+/// passphrase typed here now opens this library (the lobby's vault road). A local UI ledger value, never a stored shape of
+/// the Castle design: a name an older build doesn't know reads as none.
+nonisolated enum FollowDoneNotice: Equatable, Sendable {
+    case followed(FollowKind)
+    case caughtUpByTheWords(wordsToo: Bool)
+    case passphraseLanded
+
+    static let intoCastle = FollowDoneNotice.followed(.intoCastle)
+    static let intoStandard = FollowDoneNotice.followed(.intoStandard)
+    static let keysReplaced = FollowDoneNotice.followed(.keysReplaced)
 }
 
 nonisolated enum ProtectionAccountRoad {
@@ -110,10 +165,31 @@ nonisolated enum ProtectionAccountRoad {
     /// that landed WHOLE owes its Done DURABLY (`followDone` — the pane's notice until OK), never a receipt; any other act
     /// that landed whole owes its receipt to the reopen, as before; an act that stopped past its swap owes nothing here
     /// (the next open's settle finishes it and the open marks the Done — VX-107's road).
-    static func owed(after result: AccountActResult, request: RoadAccountRequest) -> (receipts: [String], followDone: FollowKind?) {
+    static func owed(after result: AccountActResult, request: RoadAccountRequest) -> (receipts: [String], followDone: FollowDoneNotice?) {
         guard case .made(let receipt, _) = result.press, result.landedWhole else { return ([], nil) }
-        if let kind = request.shown.follow { return ([], kind) }
+        if let notice = followDoneNotice(for: request) { return ([], notice) }
         return ([receipt].compactMap { $0 }, nil)
+    }
+
+    /// **VX-529 unit 2 — the durable notice a landed follow owes** (nil: the door is no follow): its kind; R-529-5's words
+    /// arm where the pair's passphrase moved and only the twelve words were typed (the stale passphrase lock dropped — the
+    /// window said). The core's act chose the arm the same way (`typedSecret` — the passphrase when typed, else the words).
+    static func followDoneNotice(for request: RoadAccountRequest) -> FollowDoneNotice? {
+        guard let kind = request.shown.follow else { return nil }
+        if case .pairChanged(true, let wordsToo) = kind, request.typed.passphrase == nil, request.typed.words != nil {
+            return .caughtUpByTheWords(wordsToo: wordsToo)
+        }
+        return .followed(kind)
+    }
+
+    /// **VX-529 unit 2 (the run record's F-U2-1) — an OPEN-SESSION press's landing, by the seam's own rule**: a follow on the
+    /// open session (the pair catch-up — `rekeys: false`) owes its Done DURABLY and no receipt, exactly as a re-keying
+    /// follow does through the reopen (VX-457 — `owed(after:request:)`); every other act keeps its receipt. On the open
+    /// session a `.made` is a whole landing (no swap to stop past).
+    static func openSessionLanding(_ press: RoadAccountPress, request: RoadAccountRequest)
+        -> (press: RoadAccountPress, followDone: FollowDoneNotice?) {
+        guard case .made(_, let wordsReplaced) = press, let notice = followDoneNotice(for: request) else { return (press, nil) }
+        return (.made(receipt: nil, wordsReplaced: wordsReplaced), notice)
     }
 
     /// **The press on the OPEN session** — every check first (all reads), then the act; one act at a time on the session.
@@ -184,7 +260,10 @@ nonisolated enum ProtectionAccountRoad {
     /// The typed secret against the account's vault (a READ): what the core's own checks would refuse, said in the act's
     /// words — a join types one of the account's secrets, either or both, each that is typed opening the vault (rule 14);
     /// the follow types one — the passphrase when it is typed, else the words — and an old passphrase whose lock is not
-    /// the vault's any more names the change (VX-113). nil: it opens.
+    /// the vault's any more names the change (VX-113); VX-529 unit 2 (scope 5): so do the follow's OLD twelve words, which
+    /// open this library through its own key file but not the account's vault (the core's P7-2 split,
+    /// `refusalForWordsTheVaultRefusesAtTheFollow`, mirrored — the preflight never pre-empts it with a false sentence).
+    /// nil: it opens.
     static func accountSecretRefusal(
         _ request: RoadAccountRequest, snapshot: VaultSnapshot?, library: UnlockedLibrary, floor: PassphraseKDF.Floor
     ) -> String? {
@@ -211,7 +290,13 @@ nonisolated enum ProtectionAccountRoad {
         }
         if let words = typed.words {
             guard let key = try? WordsKey.derive(words), VaultModel.master(of: vault, passphrase: nil, words: key) != nil
-            else { return said(.wordsDoNotOpen) }
+            else {
+                if follows, let file = library.keyFile, file.fingerprint == library.fingerprint,
+                   (try? file.open(.words(words), floor: floor)) == library.key {
+                    return said(.wordsChangedElsewhere(device: vault.updatedByDevice, day: snapshot.updatedAt))
+                }
+                return said(.wordsDoNotOpen)
+            }
         }
         return nil
     }
@@ -383,14 +468,38 @@ nonisolated enum ProtectionPaneRead {
 
     /// The account section's faces from one read (`copyName`: rule 25's list at a join into Castle).
     static func accountFaces(
-        _ read: ProtectionPaneFacts, copyName: (String) -> String? = { _ in nil }
+        _ read: ProtectionPaneFacts, copyName: (String) -> String? = { _ in nil },
+        accountKeysInHand: () -> Bool = { true }
     ) -> RoadAccountFaces? {
-        RoadAccountFaces.derive(read.facts, assess(read.facts), vault: read.vault, copyName: copyName)
+        RoadAccountFaces.derive(
+            read.facts, assess(read.facts), vault: read.vault, copyName: copyName, accountKeysInHand: accountKeysInHand)
     }
 
     /// The account section's faces from one read over `session` (rule 25's copies named by the session's places).
     static func accountFaces(_ read: ProtectionPaneFacts, session: ProtectionRoadSession) -> RoadAccountFaces? {
-        accountFaces(read, copyName: ProtectionCrossings.copyName(session, catalog: read.facts.catalog))
+        accountFaces(
+            read, copyName: ProtectionCrossings.copyName(session, catalog: read.facts.catalog),
+            accountKeysInHand: { accountKeysInHand(read, session: session) })
+    }
+
+    /// **VX-529 unit 2 — E14 (the architect's ruling): this Mac holds the account's CURRENT keys** — the words-only pair
+    /// catch-up's master comes from them (it types nothing — R-529-2). The order and the classes are the core door's
+    /// (`ProtectionExecutor.pairKeysAtTheDoor`): session memory, then the silent item (both read without a prompt), then —
+    /// Castle only, VX-517 — a Touch ID item the listing names (never read here: a read is a press; the door's own press
+    /// reads it). Each counts only as the vault's current sync key under its master. With none, the door asks one secret
+    /// (a Castle Always-ask library opened by its old words holds none). true when nothing can be judged (no account, no
+    /// vault read).
+    static func accountKeysInHand(_ read: ProtectionPaneFacts, session: ProtectionRoadSession) -> Bool {
+        guard let account = session.library.record?.account, let snapshot = read.snapshot, snapshot.accountID == account
+        else { return true }
+        func current(_ held: AccountKeys?) -> Bool {
+            held.map { $0.rowKeyID == snapshot.rowKeyID && snapshot.vault.isMaster($0.masterKey) } ?? false
+        }
+        let leaf = session.system.leaves.syncKeys
+        if current(leaf.sessionSyncKeys(accountID: account)) { return true }
+        if current((try? leaf.readSyncKeys(accountID: account, itemClass: .silent)) ?? nil) { return true }
+        return session.library.record?.mode == .castle
+            && read.facts.syncKeys.contains(SyncKeysItemFact(accountID: account, itemClass: .touchid))
     }
 
     /// **VX-308 ladder round 1, MINOR-2 — ONE READ, THREE SECTIONS** (R-2's letter: the sections derive from ONE

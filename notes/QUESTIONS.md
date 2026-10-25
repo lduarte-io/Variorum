@@ -3592,3 +3592,28 @@ reach isn't honoured live; the words and the row they fill do open it — keep t
 Already ruled at the closeout sitting and NOT in this bundle: the release (R-510-22), the test accounts (R-510-23),
 VX-521 and VX-528 closed (R-510-24/-25), Pre-launch = VX-529 only (R-510-27), CastleRules rule 2's clause (R-510-28).
 Status: PROVISIONAL at her word (R-510-26), pending her review pass.
+
+## VX-529 — the catch-up for a pair changed elsewhere (2026-10-24/25)
+
+#241 — **THE VX-529 BUNDLE (the binding record is `notes/plans/fixes/vx-529-pair-catchup.md` — THE RULINGS, R-529-5/-6/-7/-8,
+the units' LIVE STATUS records, THE LADDER rounds 1–2, the live proof, her two-Mac test; the handoff
+`notes/handoffs/vx-529-handoff.md`).** Every PROVISIONAL was built as its first-drafted arm, reviewable at her pass.
+**The two RULE CLAUSES, drafted for her ratify — NEVER written into `notes/CastleRules.md` (the rules change only at her
+word):** (1) **rule 7's italic sentence** ending *"…the old ones still open backups made with them"* in place of *"…the
+old ones still open backups you made before today"* (P-VX529-U3-1 — rule 5's floor in rule 7's voice; the app's
+shown-words arm stays rule 7's verbatim text, pinned, until she rules); (2) **a rule-3-adjacent clause for VX-538's card**
+(the record's THE CASTLERULES CLAUSE — her "until it's done": the card recurs from the third launch and a week after
+each dismissal until a passphrase is typed here, with no "don't show again"). **The structural provisionals:**
+P-VX529-1 (the pair kind lives in the one "Follow your account…" door) · P-VX529-2 (the second road's line in the follow
+sheet only) · P-VX529-3 (every drafted sentence built as drafted) · P-VX529-4 (the generalized E6 heal — any typed
+passphrase verified against the vault lands a missing lock; never the check door) · P-VX529-U2-1 (the E6 lobby passphrase
+field, synced + signed in only — confirmed under R-529-6's letter) · P-VX529-U2-2…5 (the stale done-line hidden while
+any follow is owed; the pair Done says what the old secrets open; E14's one-secret ask read from the facts; the lobby
+heal an unplanned one-write re-lock) · P-VX529-U3-2 (the account-less hold banner's sentence) · P-VX529-U3-3…6 (the
+card's home, cadence, signed-out silence, and its door's word "Use it here") · P-VX529-L2-1 (the typed WORDS are the
+restore's proof, not the passphrase). **The residues and one timing call:** F-U2-7 (a wrong passphrase at a signed-in
+lobby pays one bounded vault read, up to the 10 s bound, before its refusal — her timing call beside P-VX510-B2-1);
+F-L2-3 (the pre-join window's recurring E6 lobby line on a restored copy — a face question; the heal deliberately never
+lands on a held library, rule 17); VX-533's Air-log check (next missed Touch ID prompt: "road: the Touch ID read failed"
+in the log means the fix caught her exact case). **The face notes she asked kept marked** (W-D1w-1/-2, W-D1-1, W-D3-1,
+F-R1-2) are ticketed as VX-541/542/543 for a later run. Status: PROVISIONAL, pending her review pass.

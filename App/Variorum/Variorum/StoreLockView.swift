@@ -158,6 +158,9 @@ struct RoadLockView: View {
             noKeyFileDoors
         } else {
             sentence(face.keychainUnreadable ? ProtectionWords.keychainUnreadable : face.lead)
+            // VX-529 unit 2 — E6 (R-529-6: the why and the road): the account's passphrase hasn't been typed here yet; the
+            // field below takes it (the lobby's vault road).
+            if let line = face.accountPassphraseLine { sentence(line) }
             roads
         }
     }

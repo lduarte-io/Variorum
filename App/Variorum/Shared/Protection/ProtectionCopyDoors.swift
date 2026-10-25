@@ -283,15 +283,21 @@ nonisolated enum ProtectionCopyDoors {
     /// that never prompts) instead of opening the copy a second time (VX-307 U2c — one Touch ID press, never two).
     /// VX-309 U1c — VX-444: `wordsLedger` (the band card's ledger — the bootstrap's; nil: none) carries the outgoing
     /// library's words marks onto the new library's id once the copy IS the library (rule 17: under the current pair).
+    /// VX-529 L2 — VX-523 (her R-529-7): signed in, ONE read of the account's vault answered within `bound` (VX-501's race,
+    /// the standing bound) — READ before anything moves, handed to the core act as the caller's read
+    /// (`AccountsVaultRead.taken`), which writes the join's two proof fields only where the current pair's words open it.
+    /// Offline, a slow server, no vault, signed out: nil — today's key file, byte for byte.
     static func makeMine(
         _ session: ProtectionRoadSession, copy: CatalogCopy, catalog: Catalog, row: CopyDoorRow,
-        opened: LookedInside, currentPair: TypedSecrets, wordsLedger: WordsCardLedger? = nil
+        opened: LookedInside, currentPair: TypedSecrets, wordsLedger: WordsCardLedger? = nil,
+        vaultWithin bound: Duration = ProtectionOpenRoad.typedUnlockVaultBound
     ) async -> MakeMineResult {
         let slot = session.system.places.slot
         let oldKey = session.key
         let outgoingID = session.library.record?.libraryID
         let marker = LibraryRestoreHold.markerURL(besideStore: slot)
         let standing = try? Data(contentsOf: marker)
+        let accountsVault = await proofVaultRead(session, within: bound)
         // THE RESTORE HOLD, before anything moves (13x F1 R1-M2's order — a failed write refuses with nothing moved).
         do {
             try LibraryRestoreHold.set(besideStore: slot, asOf: row.asOf, now: Date())
@@ -302,7 +308,8 @@ nonisolated enum ProtectionCopyDoors {
         var library = session.library
         do {
             _ = try await session.executor.makeThisMyLibrary(
-                &library, opened: opened, copy: copy, in: catalog, currentPair: currentPair)
+                &library, opened: opened, copy: copy, in: catalog, currentPair: currentPair,
+                accountsVault: .taken(accountsVault))
         } catch {
             session.library = library
             if ProtectionLibraryFiles.opens(slot, key: oldKey) {
@@ -324,6 +331,25 @@ nonisolated enum ProtectionCopyDoors {
             "road: made a copy this Mac's library — library \(String((library.record?.libraryID ?? "none").prefix(8))) "
                 + "key \(KeyFingerprint.short(library.fingerprint)); the previous one in Previous Libraries; held")
         return MakeMineResult(outcome: .made, reopenKey: library.key)
+    }
+
+    /// VX-523 — Make this my library's ONE read of the signed-in account's vault (as the executor is signed in), answered
+    /// within `bound` or not at all (`ProtectionOpenRoad.boundedVaultRead` — a later answer is dropped). nil: a read-only
+    /// road (a hosted test run reads nothing), signed out, no vault, a failure, the bound passed.
+    static func proofVaultRead(_ session: ProtectionRoadSession, within bound: Duration) async -> VaultSnapshot? {
+        guard session.writes, let account = session.executor.configuration.session.accountID else { return nil }
+        switch await ProtectionOpenRoad.boundedVaultRead(session.system.leaves.vault, accountID: account, within: bound) {
+        case .read(let snapshot):
+            if snapshot == nil { ProtectionOpenRoad.log("road: Make this my library found no vault for the signed-in account") }
+            return snapshot
+        case .failed(let error):
+            ProtectionOpenRoad.log("road: Make this my library's vault read failed — \(String(describing: error)); "
+                + "today's key file")
+            return nil
+        case .timedOut:
+            ProtectionOpenRoad.log("road: Make this my library's vault read took longer than \(bound) — today's key file")
+            return nil
+        }
     }
 
     /// The hold put back as it stood before the door (removed when none stood).

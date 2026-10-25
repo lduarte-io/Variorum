@@ -110,6 +110,51 @@ nonisolated extension ProtectionOpenRoad {
         library.record?.passphraseSet == true || library.keyFile?.passphrase != nil
     }
 
+    /// **VX-529 unit 3 — VX-538: EDGE E6, read from the open library NOW** (never a flag): the record names an account and
+    /// the live key file of the current key — a synced one (its master lock) — carries NO passphrase lock of its own (born
+    /// of a join by the twelve words, or the catch-up's words arm). The band card's E6 row stands only while this is true.
+    static func accountPassphraseNotTypedHere(_ library: UnlockedLibrary) -> Bool {
+        guard library.record?.account != nil, let live = library.keyFile, live.fingerprint == library.fingerprint else {
+            return false
+        }
+        return live.passphrase == nil && live.master != nil
+    }
+
+    /// **VX-538 — the E6 row's press**: the account's passphrase typed at the card, landed as this library's own lock
+    /// through the E6 heal (`landTheAccountsPassphraseLock` — verified against the account's vault under its own descriptor,
+    /// one key-file write, the mirror after; never a re-key, never a vault write), on the session's one-act lock, as signed
+    /// in NOW. Signed in as the library's account, the vault is read FRESH for the press (one read — the session's may be
+    /// hours old); otherwise the heal's own sign-in refusal speaks. Refusals in the account's words (a wrong passphrase is
+    /// VX-464's "That passphrase doesn't open this account." — in E6 the only passphrase is the account's). Nothing is
+    /// written on any refusal.
+    static func landAccountPassphrase(
+        session: ProtectionRoadSession, passphrase: String, signIn: SessionFact? = nil
+    ) async -> AccountPassphraseLanding {
+        guard session.writes else { return .refused(ProtectionWords.crossingFailed) }
+        guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
+        defer { session.endAct() }
+        if let signIn { session.executor.configuration.session = signIn }
+        var library = session.library
+        guard let account = library.record?.account else { return .refused(ProtectionWords.crossingDoorClosed) }
+        do {
+            var fresh: VaultSnapshot?
+            if session.executor.configuration.session.accountID == account {
+                fresh = try await session.executor.readVault(accountID: account)
+                guard fresh != nil else { return .refused(ProtectionWords.doorRefusedNeedsVault) }
+            }
+            let landed = try await session.executor.landTheAccountsPassphraseLock(
+                &library, passphrase: passphrase, vault: fresh)
+            session.library = library
+            log("road: the account-passphrase card — " + (landed
+                ? "the account's passphrase is this library's own lock now (VX-538)" : "a lock already stood; nothing to land"))
+            return landed ? .landed : .nothingToLand
+        } catch {
+            session.library = library
+            log("road: the account-passphrase card landed nothing — \(String(describing: error))")
+            return .refused(RoadAccountFaces.actRefusalSentence(error, unfinished: false, secretIsTheAccounts: true))
+        }
+    }
+
     /// VX-308 U3 (R-U3-4) — whether a LOOK asks the passphrase: rule 3's fact as the core states it NOW
     /// (`ProtectionRecord.passphraseExists` — a passphrase lock on the live key file of the library's key, or the
     /// account's). The record's stamp is that same fact as of its last write, so the two agree everywhere but VX-447's

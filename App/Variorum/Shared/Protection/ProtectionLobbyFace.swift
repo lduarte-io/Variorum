@@ -68,6 +68,11 @@ nonisolated struct ProtectionLobbyFace: Equatable, Sendable {
     /// automatic ask stands down). The road fields keep their derivation: the phone renders them until VM-8 builds its
     /// face (F-U4-3).
     var preDesignStore = false
+    /// VX-529 unit 2 — EDGE E6 BEFORE UNLOCK (PROVISIONAL P-VX529-U2-1 (a)): the key file beside the library is a SYNCED one
+    /// (its master lock with the master's twelve-words copy) with NO passphrase lock of its own, and someone is signed in —
+    /// the lobby's vault road can take the account's passphrase (R-529-1; R-529-5's "meanwhile the account's passphrase
+    /// opens it online through the vault road"), so the passphrase field stands and R-529-6's line says why and the road.
+    var accountPassphraseNotTypedHere = false
 
     /// The face for the lobby's facts, the last press and this Mac's biometry after it.
     static func derive(
@@ -100,19 +105,31 @@ nonisolated struct ProtectionLobbyFace: Equatable, Sendable {
             case nil: line = nil
             }
         }
+        // VX-529 unit 2 — E6 (P-VX529-U2-1 (a)): a synced key file with no passphrase lock, someone signed in — the vault
+        // road takes the account's passphrase, so the field stands.
+        let live = facts.catalog.liveKeyFile?.document
+        let e6 = roads.vaultRoad && live?.passphrase == nil && live?.master != nil && live?.masterWordsCopy != nil
+        if e6 { typed.insert(.passphrase) }
         let passphrase = typed.contains(.passphrase)
         let words: WordsRoad = typed.contains(.words) ? (passphrase ? .disclosure : .field) : .none
         let nothing = roads.noKeyFileAnywhere
+        let preDesign = AssessRules.launch(facts) == .preDesignStore
         return ProtectionLobbyFace(
             touchIDButton: touchID.button, touchIDLine: line, autoAsk: touchID.autoAsk, pressSays: touchID.pressSays,
             passphraseField: nothing == nil && passphrase, wordsRoad: nothing == nil ? words : .none,
             keychainUnreadable: false, liveKeyFileUnreadable: standing.liveKeyFileUnreadable,
-            noKeyFileAnywhere: nothing, preDesignStore: AssessRules.launch(facts) == .preDesignStore)
+            noKeyFileAnywhere: nothing, preDesignStore: preDesign,
+            accountPassphraseNotTypedHere: e6 && nothing == nil && !preDesign)
     }
 
     /// The lead line over the typed field.
     var lead: String {
         ProtectionWords.lobbyLead(passphrase: passphraseField, words: wordsRoad != .none)
+    }
+
+    /// VX-529 unit 2 — R-529-6's line beneath the lead in E6 (nil: not E6).
+    var accountPassphraseLine: String? {
+        accountPassphraseNotTypedHere ? ProtectionWords.lobbyAccountPassphraseNotTypedHere : nil
     }
 
     /// The Touch ID line's words.

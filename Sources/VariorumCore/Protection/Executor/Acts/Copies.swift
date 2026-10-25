@@ -56,9 +56,35 @@ public enum CopyRoad: Equatable, Sendable {
     case quietRoad(QuietRoad)
 }
 
+/// VX-523 (her R-529-7: "(A) in this run") — where Make this my library's door
+/// finds the account's vault for the join's two proof fields.
+public enum AccountsVaultRead: Sendable {
+    /// The door reads the signed-in account's vault itself — ONE read; out of
+    /// reach (offline, no vault, signed out) ⇒ no proof. A core caller's road.
+    case inTheDoor
+    /// The caller's own read — the app's ONE bounded read (VX-501's race, the
+    /// standing bound): verified, never trusted. nil — the read failed, timed
+    /// out or found no vault — is no proof, and never a fallback to an older
+    /// read: an offline press writes today's file.
+    case taken(VaultSnapshot?)
+}
+
+/// VX-523 — the door's proof that the current pair's twelve words are the
+/// signed-in account's (`ProtectionExecutor.accountPairProof`): the account's
+/// master, reached by those words through the vault's recovery wrap, and that
+/// wrap byte for byte — the join's two fields (`settingMaster(_:wordsCopy:)`).
+/// Secret: never stored, never logged.
+struct AccountPairProof: Sendable, CustomStringConvertible {
+    let master: SymmetricKey
+    let wordsCopy: Data
+
+    var description: String { "AccountPairProof(redacted)" }
+}
+
 /// MAKE THIS MY LIBRARY (rule 17). On a plan (rule 20): the new key's custody
 /// item; Standard, a fresh own Apple key; the NEW library's key file (no past —
-/// a fresh key, under the current pair) in the live place, the outgoing one held
+/// a fresh key, under the current pair; VX-523: with the join's two proof
+/// fields when the door proved them) in the live place, the outgoing one held
 /// by the plan and the mirror; the copy re-encrypted under the new key into the
 /// staged file; the new record (a fresh library ID, the posture of now, this
 /// device's new section carrying the act) into it; the new library's memory
@@ -123,17 +149,28 @@ extension ActContext {
 
     /// The new library's key file: a fresh key with no past, locked under the
     /// current pair (the passphrase when there is one, the words always) and,
-    /// Standard, the fresh own Apple key. Never the account's master: the new
-    /// library carries no sync identity.
+    /// Standard, the fresh own Apple key. It binds no account (the record names
+    /// none — P-VX378-U2-4 (a)). VX-523 (R-529-7): where the door PROVED the
+    /// current pair's words are the signed-in account's (`pairProof`), the words
+    /// lock is the join's own two fields instead — the master lock with the
+    /// master's twelve-words copy, and no own words lock beside it (VX-462: the
+    /// copy IS the words' road) — so a later join's one quiet rule
+    /// (`wordsAreTheAccountsAlready`) proves the match. The same one write; no
+    /// proof, today's file byte for byte.
     func makeMineKeyFile(kind: ProtectionMode) throws {
         let key = try requireToKey()
         if let live = library.keyFile, live.fingerprint == Self.fp(key) { return }
         let (libraryID, _) = try makeMineIdentity()
         let apple = kind == .standard ? try ownAppleKey() : nil
-        let locks = try newLocks(passphrase: secrets.passphrase != nil, words: true, master: false, apple: apple)
+        var locks = try newLocks(passphrase: secrets.passphrase != nil, words: pairProof == nil, master: false, apple: apple)
+        if let pairProof {
+            locks.master = pairProof.master
+            locks.masterWordsCopy = pairProof.wordsCopy
+        }
         let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
         try executor.writeLiveKeyFile(file, &library)
-        log("the new library's key file written (\(Self.fp8(file.fingerprint)))")
+        log("the new library's key file written (\(Self.fp8(file.fingerprint)))"
+            + (pairProof == nil ? "" : " — with the join's two proof fields (VX-523: the pair proven the account's)"))
     }
 
     /// The copy re-encrypted under the new key into the staged file.
@@ -428,12 +465,15 @@ extension ProtectionExecutor {
     /// words, verified, which lock the new library ("under your current pair").
     /// The copy becomes a NEW library in the posture this device is in now; the
     /// library in the live place steps aside whole into Previous Libraries. It
-    /// carries no sync identity (PROVISIONAL P-VX378-U2-4).
+    /// binds no account (PROVISIONAL P-VX378-U2-4). `accountsVault` (VX-523,
+    /// R-529-7): where the door reads the signed-in account's vault for the
+    /// join's two proof fields — written only when the current pair's words
+    /// open it (`accountPairProof`), nothing otherwise.
     public func makeThisMyLibrary(
         _ library: inout UnlockedLibrary, copy: CatalogCopy, in catalog: Catalog, copySecrets: TypedSecrets = .none,
-        currentPair: TypedSecrets
+        currentPair: TypedSecrets, accountsVault: AccountsVaultRead = .inTheDoor
     ) async throws -> ActOutcome {
-        try await makeThisMyLibrary(&library, copy: copy, currentPair: currentPair) {
+        try await makeThisMyLibrary(&library, copy: copy, currentPair: currentPair, accountsVault: accountsVault) {
             // Her confirmed press — the copy's own quiet roads, Touch ID's included (m2).
             try self.openCopy(copy, in: catalog, typed: copySecrets, quietRoads: .includingTouchID).0
         }
@@ -447,12 +487,12 @@ extension ProtectionExecutor {
     /// against the copy's own file (`copyKeyOpens`, a read that never prompts).
     /// So her one confirmed press reads a Touch ID item at most once. A key that
     /// no longer opens the copy (it changed between) refuses `copyDoesNotOpen`;
-    /// nothing else differs from the secrets form.
+    /// nothing else differs from the secrets form (`accountsVault` included).
     public func makeThisMyLibrary(
         _ library: inout UnlockedLibrary, opened: LookedInside, copy: CatalogCopy, in catalog: Catalog,
-        currentPair: TypedSecrets
+        currentPair: TypedSecrets, accountsVault: AccountsVaultRead = .inTheDoor
     ) async throws -> ActOutcome {
-        try await makeThisMyLibrary(&library, copy: copy, currentPair: currentPair) {
+        try await makeThisMyLibrary(&library, copy: copy, currentPair: currentPair, accountsVault: accountsVault) {
             guard opened.copyID == copy.id, self.copyKeyOpens(opened.key, copy: copy) else {
                 throw ExecutorRefusal.copyDoesNotOpen
             }
@@ -463,10 +503,11 @@ extension ProtectionExecutor {
     /// The act's one body — `copyKey` answers the copy's key (the secrets
     /// form opens it; the opened form re-verifies the look's), read where the
     /// secrets form always read it: after the record, in-flight and vault
-    /// guards, before the current pair is verified.
+    /// guards, before the current pair is verified. The proof fields' read
+    /// (VX-523) comes after every refusal: a refused press costs no read.
     private func makeThisMyLibrary(
         _ library: inout UnlockedLibrary, copy: CatalogCopy, currentPair: TypedSecrets,
-        copyKey readCopyKey: () throws -> StoreKey
+        accountsVault: AccountsVaultRead, copyKey readCopyKey: () throws -> StoreKey
     ) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
@@ -482,7 +523,10 @@ extension ProtectionExecutor {
         if library.keyFile?.passphrase != nil {
             secrets.passphrase = try verifiedPassphrase(currentPair.passphrase, against: library.keyFile)
         }
-        secrets.words = try verifiedWords(currentPair.words, against: library.keyFile)
+        let words = try verifiedWords(currentPair.words, against: library.keyFile)
+        secrets.words = words
+        // VX-523 (R-529-7): the join's two proof fields, when provable — reads only, nothing begun.
+        let pairProof = await accountPairProof(words: words, from: accountsVault)
         let gate = library.section.settings.gateStyle
         var parameters = ActParameters(
             gate: gate, passphraseKDF: secrets.passphrase?.kdf, newKind: record.mode, copyID: copy.id)
@@ -491,7 +535,42 @@ extension ProtectionExecutor {
         let program = MakeMineProgram()
         let toKey = leaves.ids.mintLibraryKey()
         return try await perform(program, parameters: parameters, secrets: secrets, typed: currentPair, toKey: toKey,
-                                 copyKey: copyKey, library: &library)
+                                 copyKey: copyKey, pairProof: pairProof, library: &library)
+    }
+
+    /// **VX-523 (her R-529-7, "(A) in this run") — the proof that the current pair's twelve words are the signed-in
+    /// account's**, so Make this my library's new key file can carry the join's two fields and a later join's one quiet
+    /// rule (`wordsAreTheAccountsAlready`) can prove the match. READS only, trusting no read: the vault — the caller's
+    /// (`.taken`) or ONE read here (`.inTheDoor`) — must be the account this session is signed into; the words typed at
+    /// the door (already verified against this library) must open ITS master through its recovery wrap; that master
+    /// must pass the vault's key proof. The WORDS are the proof (PROVISIONAL P-VX529-L2-1): the copy written is exactly
+    /// their road, so the current pair keeps opening the new library (rule 17) whatever the passphrase did elsewhere.
+    /// nil — signed out, the vault out of reach or absent, another account's read, words the vault refuses (the
+    /// account's words were re-made since this Mac knew them, or this pair was never the account's) — and the act writes
+    /// today's file, byte for byte.
+    func accountPairProof(words: WordsKey, from read: AccountsVaultRead) async -> AccountPairProof? {
+        guard let account = configuration.session.accountID else { return nil }
+        let snapshot: VaultSnapshot?
+        switch read {
+        case .inTheDoor:
+            do {
+                snapshot = try await readVault(accountID: account)
+            } catch {
+                log("make mine: the account's vault is out of reach — no proof fields, today's key file (\(error))")
+                return nil
+            }
+        case .taken(let given):
+            snapshot = given
+        }
+        guard let snapshot, snapshot.accountID == account else {
+            log("make mine: no vault of the signed-in account in hand — no proof fields, today's key file")
+            return nil
+        }
+        guard let master = snapshot.vault.master(passphrase: nil, words: words), snapshot.vault.isMaster(master) else {
+            log("make mine: the current words don't open the account's vault — no proof fields, today's key file")
+            return nil
+        }
+        return AccountPairProof(master: master, wordsCopy: snapshot.vault.masterByWords)
     }
 
     /// **Make this my library into the EMPTY SLOT** (VX-309 U1b — T-5; rule 17 with no library open). `typed`: what she

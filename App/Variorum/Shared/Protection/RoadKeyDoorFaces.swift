@@ -134,8 +134,18 @@ nonisolated struct RoadKeyDoorFaces: Equatable, Sendable {
             keyFile: keyFileStands ? live : nil, account: unlocked.record.account)
         let touchIDHere = facts.biometry.hardware && facts.biometry.enrolled
             && facts.custody.contains(CustodyItemFact(fingerprint: unlocked.currentFingerprint, itemClass: .touchid))
+        // VX-529 unit 2 (scope 5, R-529-3): the follow owed is the PAIR catch-up — the gate says what changed and points at
+        // the follow (never the generic line, and never the false "doesn't open this library" — unit 1's P1 split).
+        let pairOwed = assessment.acts.lazy.compactMap { act -> FollowKind? in
+            if case .follow(let kind, _) = act, case .pairChanged = kind { return kind }
+            return nil
+        }.first
         func face(_ door: RoadKeyDoor) -> RoadKeyDoorFace {
             switch assessment.doors[door.door] ?? .refused(.nothingToDo) {
+            case .refused(.followOwed) where pairOwed != nil:
+                return .refused(ProtectionWords.followFirstToCatchUp(
+                    pairOwed ?? .pairChanged(passphrase: false, words: false), device: facts.vault?.updatedByDevice,
+                    day: facts.vault?.updatedAt.map { ProtectionWords.day($0) }))
             case .refused(let refusal):
                 return RoadCrossingFaces.refusalSentence(refusal).map(RoadKeyDoorFace.refused) ?? .hidden
             case .open(let spec):

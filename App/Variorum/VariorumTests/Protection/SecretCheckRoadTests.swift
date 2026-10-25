@@ -219,9 +219,12 @@ struct SecretCheckRoadTests {
         let old = await Self.check(session, Account.passphrase, Account.signedIn)
         #expect(old == .opens(.passphrase, account: .doesNotOpen(changedElsewhere: named)))
         #expect(old.lines == ["That passphrase opens this library, but not your account.", named] && old.warns)
+        // VX-529 unit 2 (scope 4) — FLIPPED DELIBERATELY: in the catch-up's state (the account's pair changed elsewhere,
+        // this library unfollowed) the fourth answer gains the road's pointer.
         let new = await Self.check(session, "the account's new passphrase", Account.signedIn)
-        #expect(new == .doesNotOpen(.passphrase, opensAccount: true))
-        #expect(new.lines == ["That passphrase doesn't open this library, but it opens your account."] && new.warns)
+        #expect(new == .doesNotOpen(.passphrase, opensAccount: true, because: .catchUpOwed))
+        #expect(new.lines == ["That passphrase doesn't open this library, but it opens your account.",
+                              ProtectionWords.checkSecretsCatchUpPointer] && new.warns)
         #expect(await Self.check(session, words.joined(separator: " "), Account.signedIn) == .opens(.words, account: .opens),
                 "the words still open both")
 
@@ -231,8 +234,9 @@ struct SecretCheckRoadTests {
         #expect(oldWords == .opens(.words, account: .doesNotOpen(changedElsewhere: nil)))
         #expect(oldWords.lines == ["Those twelve words open this library, but not your account."])
         let freshWords = await Self.check(session, newWords.joined(separator: " "), Account.signedIn)
-        #expect(freshWords == .doesNotOpen(.words, opensAccount: true))
-        #expect(freshWords.lines == ["Those twelve words don't open this library, but they open your account."])
+        #expect(freshWords == .doesNotOpen(.words, opensAccount: true, because: .catchUpOwed))  // VX-529 — FLIPPED DELIBERATELY
+        #expect(freshWords.lines == ["Those twelve words don't open this library, but they open your account.",
+                                     ProtectionWords.checkSecretsCatchUpPointer])
 
         #expect(Plant.writeLogs(road, vault: vault) == logs)
         var after = try Plant.untouched(road, session, vault: vault, keys: keys)

@@ -93,6 +93,14 @@ struct KeyDoorProgram: ActProgram {
                    let master = VaultModel.master(of: vault.vault, passphrase: nil, words: words),
                    (try? file.open(master: master)) != nil {
                     file = file.refreshingMasterWordsCopy(vault.vault.masterByWords)
+                    // VX-529 unit 2 — P-VX529-4's heal, inside this act's plan (the same one key-file write): a synced
+                    // library with NO passphrase lock of its own (E6) lands the account's passphrase this door verified
+                    // against the vault (the press's — derived under the vault's descriptor; a resume's, typed at its
+                    // lobby, the plan's descriptor being that one). An existing lock is never replaced here.
+                    if let passphrase = ctx.secrets.passphrase, passphrase.kdf == vault.vault.kdf,
+                       VaultModel.master(of: vault.vault, passphrase: passphrase, words: nil) != nil {
+                        file = try file.landingTheAccountsPassphraseLock(passphrase, key: ctx.library.key, master: master)
+                    }
                 }
             }
             try ctx.executor.writeLiveKeyFile(file, &ctx.library)
@@ -207,18 +215,67 @@ extension ProtectionExecutor {
     /// one on a fresh descriptor.
     public func changePassphrase(_ library: inout UnlockedLibrary, current: String, new: String) async throws -> ActOutcome {
         let parameters = try await keyDoorParameters(library)
+        var keys: AccountKeys?
         if let account = parameters.accountID, let vault = freshVaults[account] {
             try vault.vault.kdf.validateFloor(configuration.floor)
             let typed = try PassphraseKey.derive(current, kdf: vault.vault.kdf)
             guard VaultModel.master(of: vault.vault, passphrase: typed, words: nil) != nil else {
-                throw ExecutorRefusal.passphraseDoesNotOpen
+                throw refusalForAPassphraseTheVaultRefuses(current, library, vault: vault)
             }
-            try holdSyncKeysForTheSession(
+            keys = try holdSyncKeysForTheSession(
                 account: account, vault: vault, passphrase: typed, words: nil, castle: library.record?.mode == .castle)
         } else {
             _ = try verifiedPassphrase(current, against: library.keyFile)
         }
-        return try await keyDoor(.changePassphrase, &library, newPassphrase: new, words: nil, parameters: parameters)
+        // VX-530: the door's keys ride into the act (read once at the door, never stored; a resume finds its own).
+        return try await keyDoor(
+            .changePassphrase, &library, newPassphrase: new, words: nil, parameters: parameters, material: keys)
+    }
+
+    /// **VX-529 — THE REFUSAL SPLIT** (`notes/plans/fixes/vx-529-pair-catchup.md`, scope 3; the VX-510 repro's false
+    /// "That passphrase doesn't open this library."): a typed passphrase the account's vault refuses, named for what it
+    /// is. One that still opens THIS library's own passphrase lock, under a descriptor the vault no longer carries, is
+    /// the passphrase as this library last knew the account's — changed elsewhere since (rule 7's one pair; VX-113's
+    /// refusal, naming the vault's last writer and its day — the arm `Follow.swift` shapes). One that opens neither is
+    /// the plain refusal. The descriptor must differ: one descriptor names one passphrase, so a lock under the vault's
+    /// own descriptor that opens while the vault refuses is no change elsewhere. READS only.
+    func refusalForAPassphraseTheVaultRefuses(
+        _ typed: String, _ library: UnlockedLibrary, vault: VaultSnapshot
+    ) -> ExecutorRefusal {
+        if let file = library.keyFile, file.fingerprint == library.fingerprint,
+           let lock = file.passphrase, lock.kdf != vault.vault.kdf,
+           (try? verifiedPassphrase(typed, against: file)) != nil {
+            return .passphraseChangedElsewhere(device: vault.vault.updatedByDevice, day: vault.updatedAt)
+        }
+        return .passphraseDoesNotOpen
+    }
+
+    /// **VX-529 P6e — THE CLASS'S WORDS TWIN**: typed twelve words the account's vault refuses. Ones that still open
+    /// THIS library (its own words lock, or its master's words copy through its master lock) are the account's words as
+    /// this library last knew them — re-made on another device since: at a door around the follow, the follow is owed
+    /// first (`accountMoved` — "Your account changed on another device. Follow it first."); at the follow itself
+    /// (`refusalForWordsTheVaultRefusesAtTheFollow`), the change named. Ones that open neither keep the plain refusal.
+    /// READS only.
+    func refusalForWordsTheVaultRefuses(_ typed: [String], _ library: UnlockedLibrary) -> ExecutorRefusal {
+        wordsOpenThisLibrary(typed, library) ? .accountMoved : .wordsDoNotOpen
+    }
+
+    /// **VX-529 P7-2 — F-10, at the follow's own words arms** (the follow, the pair catch-up's door): "follow it first"
+    /// would be circular there, so old words that open this library but no longer the account's vault NAME the change —
+    /// `wordsChangedElsewhere`, VX-113's twin (the vault's last writer and its day). Words opening neither: the plain
+    /// refusal. READS only.
+    func refusalForWordsTheVaultRefusesAtTheFollow(
+        _ typed: [String], _ library: UnlockedLibrary, vault: VaultSnapshot
+    ) -> ExecutorRefusal {
+        guard wordsOpenThisLibrary(typed, library) else { return .wordsDoNotOpen }
+        return .wordsChangedElsewhere(device: vault.vault.updatedByDevice, day: vault.updatedAt)
+    }
+
+    /// The typed words open the library's CURRENT key through this library's own key file (its words lock, or the
+    /// master's words copy through its master lock).
+    func wordsOpenThisLibrary(_ typed: [String], _ library: UnlockedLibrary) -> Bool {
+        guard let file = library.keyFile, file.fingerprint == library.fingerprint else { return false }
+        return (try? file.open(.words(typed), floor: configuration.floor)) == library.key
     }
 
     /// **Reset a forgotten passphrase** — Castle: Touch ID on an enrolled
@@ -241,11 +298,14 @@ extension ProtectionExecutor {
         var words: WordsKey?
         if case .words(let typed) = authorization { words = try WordsKey.derive(typed) }
         let parameters = try await keyDoorParameters(library)
+        var keys: AccountKeys?
         if let account = parameters.accountID, let vault = freshVaults[account] {
-            try holdSyncKeysForTheSession(
+            keys = try holdSyncKeysForTheSession(
                 account: account, vault: vault, passphrase: nil, words: words, castle: library.record?.mode == .castle)
         }
-        return try await keyDoor(.resetPassphrase, &library, newPassphrase: new, words: words, parameters: parameters)
+        // VX-530: the door's keys ride into the act (read once at the door, never stored; a resume finds its own).
+        return try await keyDoor(
+            .resetPassphrase, &library, newPassphrase: new, words: words, parameters: parameters, material: keys)
     }
 
     /// A synced key door re-wraps the vault under the account's master, which
@@ -261,18 +321,52 @@ extension ProtectionExecutor {
     /// library files the keys silently (rule 15) and never reads the Touch ID
     /// class: a read there is a prompt on the real leaf, for an item another
     /// library left.
+    ///
+    /// VX-529 unit 3 — VX-530 (the run record's trace): in CASTLE the door
+    /// read the account's Touch ID item FIRST — before the secret it was
+    /// handed and before session memory — and handed nothing on, so the act's
+    /// vault step read the same item again: two sheets for one act. Now, in
+    /// Castle: the secrets in hand first (they derive the very keys from the
+    /// vault — VX-503's reason), then session memory, then the silent class,
+    /// and the Touch ID class LAST and once (`pairKeysAtTheDoor`'s order). The
+    /// keys found come back to the door, which carries them into its act
+    /// (`perform(…, material:)`), so the act reads no item again. Standard's
+    /// order is unchanged (its one read is the silent class — no prompt).
+    @discardableResult
     func holdSyncKeysForTheSession(
         account: String, vault: VaultSnapshot, passphrase: PassphraseKey?, words: WordsKey?, castle: Bool
-    ) throws {
-        for itemClass in Self.syncKeysClasses(touchID: castle) {
-            if let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass),
-               held.rowKeyID == vault.rowKeyID { return }
+    ) throws -> AccountKeys {
+        func current(_ held: AccountKeys?) -> AccountKeys? { held?.rowKeyID == vault.rowKeyID ? held : nil }
+        if castle {
+            if let master = VaultModel.master(of: vault.vault, passphrase: passphrase, words: words) {
+                let keys = try vault.vault.keys(master: master)
+                leaves.syncKeys.holdInSession(keys, accountID: account)
+                return keys
+            }
+            if let held = current(leaves.syncKeys.sessionSyncKeys(accountID: account)) { return held }
+            for itemClass in [ProtectionNames.CustodyClass.silent, .touchid] {
+                if let held = current(try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass)) {
+                    return held
+                }
+            }
+        } else {
+            for itemClass in Self.syncKeysClasses(touchID: false) {
+                if let held = current(try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass)) {
+                    return held
+                }
+            }
+            if let held = current(leaves.syncKeys.sessionSyncKeys(accountID: account)) { return held }
         }
-        if let held = leaves.syncKeys.sessionSyncKeys(accountID: account), held.rowKeyID == vault.rowKeyID { return }
         guard let master = VaultModel.master(of: vault.vault, passphrase: passphrase, words: words) else {
+            // VX-529 P6e — the class's words twin: the words reaching here were verified against THIS library (Reset's
+            // words road — Change's passphrase was verified against the vault, so it never lands here); the vault refusing
+            // them means the account's words changed on another device since — the follow is owed first.
+            if words != nil { throw ExecutorRefusal.accountMoved }
             throw ExecutorRefusal.secretsRequired(.changePassphrase)
         }
-        leaves.syncKeys.holdInSession(try vault.vault.keys(master: master), accountID: account)
+        let keys = try vault.vault.keys(master: master)
+        leaves.syncKeys.holdInSession(keys, accountID: account)
+        return keys
     }
 
     /// **New words** — asking the passphrase.
@@ -312,7 +406,7 @@ extension ProtectionExecutor {
             try vault.vault.kdf.validateFloor(configuration.floor)
             current = try PassphraseKey.derive(passphrase, kdf: vault.vault.kdf)
             guard VaultModel.master(of: vault.vault, passphrase: current, words: nil) != nil else {
-                throw ExecutorRefusal.passphraseDoesNotOpen
+                throw refusalForAPassphraseTheVaultRefuses(passphrase, library, vault: vault)  // VX-529 P6e (F-4)
             }
         } else {
             current = try verifiedPassphrase(passphrase, against: library.keyFile)
@@ -379,7 +473,7 @@ extension ProtectionExecutor {
 
     func keyDoor(
         _ act: ProtectionAct, _ library: inout UnlockedLibrary, newPassphrase: String, words: WordsKey?,
-        parameters: ActParameters
+        parameters: ActParameters, material: AccountKeys? = nil
     ) async throws -> ActOutcome {
         var parameters = parameters
         let fresh = try freshPassphrase(newPassphrase)
@@ -387,6 +481,6 @@ extension ProtectionExecutor {
         parameters.passphraseIsNew = true
         return try await perform(
             KeyDoorProgram(act: act), parameters: parameters, secrets: ActSecrets(passphrase: fresh, words: words),
-            typed: TypedSecrets(newPassphrase: newPassphrase), library: &library)
+            typed: TypedSecrets(newPassphrase: newPassphrase), material: material, library: &library)
     }
 }

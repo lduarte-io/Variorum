@@ -339,13 +339,17 @@ struct TouchIDSyncKeysForgottenTests {
 
     /// GUARD (green on both sides): a CASTLE + Touch ID library's key door still finds the account's keys in its Touch ID
     /// item (custody serves — the door's secrets are the NEW ones).
+    /// VX-529 unit 3 — VX-530: FLIPPED DELIBERATELY from Change passphrase to Reset by Touch ID. Change no longer reads the
+    /// item at all — its typed CURRENT passphrase opens the vault and derives the keys first (`KeyDoorTouchIDReadsTests`,
+    /// the counting pin); Reset by Touch ID with nothing in hand is the door where the Touch ID item is the only source, so
+    /// the guard's intent (Castle still finds its keys there) is pinned on it.
     @Test func aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem() async throws {
         let fixture = try EX(.castle, synced: true, gate: .touchID)
         let account = try #require(fixture.account)
         fixture.world.syncKeysListingLikeProduction = true
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
-        _ = try await executor.changePassphrase(&library, current: fixture.passphrase, new: "a castle passphrase anew")
+        _ = try await executor.resetPassphrase(&library, authorization: .touchID, new: "a castle passphrase anew")
         #expect(fixture.world.syncKeysTouchIDReads > 0, "Castle reads its Touch ID item")
         let vault = try #require(fixture.world.server.snapshot(account))
         #expect(vault.vault.master(

@@ -47,6 +47,9 @@ struct RoadAccountRoads {
     /// every landing of the section, so `receipt_style` off and a quit lose nothing. (A test's roads that never follow keep
     /// the default: none.)
     var followDoneOwed: @MainActor () -> FollowKind? = { nil }
+    /// VX-529 unit 2 — the durable notice owed, whole (`FollowDoneNotice`: a follow's Done, R-529-5's words arm, the heal);
+    /// nil (a test's roads that only follow): `followDoneOwed`'s kind is read.
+    var followDoneNoticeOwed: (@MainActor () -> FollowDoneNotice?)? = nil
     /// VX-309 U2 — VX-457: the notice's *OK* — the open library's mark clears (nothing else changes).
     var dismissFollowDone: @MainActor () -> Void = {}
 }
@@ -81,6 +84,9 @@ final class RoadAccountConfirmModel: Identifiable {
     /// closed, and stays until her Done — which never cancels the round. nil: no first round here (none owed, no road —
     /// the confirm finishes exactly as before).
     private(set) var round: FirstRoundPhase?
+    /// VX-529 unit 2 — what the landed sheet says beside its round (R-529-5's words arm: the window and the Reset chain);
+    /// empty for every other landing.
+    private(set) var landedLines: [String] = []
 
     @ObservationIgnored private let act: (RoadAccountRequest) async -> RoadAccountPress
     /// VX-308 U2 — the act LANDED while the sheet stays for the words moment (its receipt, the pane's re-read).
@@ -118,8 +124,8 @@ final class RoadAccountConfirmModel: Identifiable {
         await roundTask?.value
     }
 
-    var title: String { door.door.title }
-    var button: String { door.door.button }
+    var title: String { door.title }
+    var button: String { door.button }
     /// The passphrase field is a NEW passphrase typed twice (none set yet — rule 3).
     var asksNewPassphrase: Bool { door.newPassphrase }
 
@@ -179,11 +185,16 @@ final class RoadAccountConfirmModel: Identifiable {
         }
         busy = true
         refusal = nil
-        let press = await act(RoadAccountRequest(
-            door: door.door, shown: door, typed: typed, gate: door.gate == nil ? nil : gate))
+        let request = RoadAccountRequest(door: door.door, shown: door, typed: typed, gate: door.gate == nil ? nil : gate)
+        let press = await act(request)
         busy = false
         switch press {
         case .made(_, let wordsReplaced):
+            // VX-529 unit 2 (R-529-5): the pair catch-up landed by the twelve words — the sheet says the window plainly and
+            // the Reset chain beside its round.
+            if case .caughtUpByTheWords? = ProtectionAccountRoad.followDoneNotice(for: request) {
+                landedLines = [ProtectionWords.pairWordsWindow, ProtectionWords.pairResetChain]
+            }
             // VX-510 D-A1 (VX-498): the act landed on the open session — its first round starts AT ONCE (while any words
             // moment is read), never waiting on the sheet; D-A2 (VX-507): the sheet stays to confirm it.
             if let firstRound, roundTask == nil {
@@ -406,8 +417,8 @@ final class RoadAccountModel {
     /// The faces as `assess` last said them (nil until read, or with no library open on the new road).
     private(set) var faces: RoadAccountFaces?
     /// VX-309 U2 — VX-457: the follow's Done standing in the section until her OK (its truth is the durable mark, re-read at
-    /// every landing — never this process's memory alone).
-    private(set) var followDone: FollowKind?
+    /// every landing — never this process's memory alone). VX-529 unit 2: the whole notice (`FollowDoneNotice`).
+    private(set) var followDone: FollowDoneNotice?
 
     @ObservationIgnored let roads: RoadAccountRoads
     @ObservationIgnored let presenter: ProtectionSheetPresenter
@@ -474,7 +485,11 @@ final class RoadAccountModel {
         guard read > landedRead else { return }
         landedRead = read
         faces = fresh
-        followDone = roads.followDoneOwed()
+        // VX-529 unit 2 (scope 2 — the VX-510 repro's stale line): a follow's Done says this Mac caught up, which is false
+        // while a follow is OWED — it never stands beside the follow door. The mark itself stays (her OK is its only clear;
+        // the follow that lands next writes its own — the newest Done is the true one).
+        followDone = fresh?.follow.openDoor != nil
+            ? nil : (roads.followDoneNoticeOwed.map { $0() } ?? roads.followDoneOwed().map(FollowDoneNotice.followed))
     }
 
     /// VX-309 U2 — VX-457: the follow's Done's *OK* — the mark clears; the notice goes.

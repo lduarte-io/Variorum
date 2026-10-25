@@ -51,6 +51,11 @@ struct WordsBandCard: View {
                     Divider().overlay(tokens.line)
                 }
                 if let showing = band.reminder.showing { reminderPart(showing) }
+                // VX-529 unit 3 — VX-538: the E6 row (her R-529-6), the band's third ask in the same one home.
+                if band.showsAccountPassphrase, let row = band.accountPassphrase {
+                    if wordsRow || band.showsReminder { Divider().overlay(tokens.line) }
+                    AccountPassphraseRow(row: row, tokens: tokens)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -139,6 +144,80 @@ struct WordsBandCard: View {
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens))
             }
+        }
+    }
+}
+
+// MARK: - VX-529 unit 3 — VX-538: the E6 row (her R-529-6 — the why and the road, recurring until it's done)
+
+/// The band card's E6 row: the why and the road, the forgot-road, the account's passphrase typed right here (its one
+/// door lands it as the library's own lock — the E6 heal), *Later* and the ✕. The brain is `AccountPassphraseCardModel`
+/// (`Shared/Protection/WordsBand.swift`); the row goes when the STATE no longer reads E6.
+struct AccountPassphraseRow: View {
+    @Bindable var row: AccountPassphraseCardModel
+    let tokens: VoiceTokens
+
+    @State private var passphrase = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Image(systemName: "lock")
+                    .foregroundStyle(tokens.muted)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(ProtectionWords.accountPassphraseCardLine)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(ProtectionWords.accountPassphraseCardForgot)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                Button(ProtectionWords.wordsCardLater) { row.later() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens))
+                    .disabled(row.busy)
+                Button {
+                    row.dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(tokens.muted)
+                        .frame(width: 18, height: 18)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(row.busy)
+                .help(ProtectionWords.wordsCardDismiss)
+                .accessibilityLabel(ProtectionWords.wordsCardDismiss)
+            }
+            HStack(spacing: 10) {
+                PeekableSecretField(label: ProtectionWords.joinPassphraseField, text: $passphrase, onSubmit: submit)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 300)
+                Button(ProtectionWords.accountPassphraseCardDoor) { submit() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                    .disabled(passphrase.isEmpty || row.busy)
+                if row.busy { TravellingDotsIndicator(ink: tokens.muted) }
+            }
+            .padding(.leading, 26)
+            if let message = row.message {
+                Text(message)
+                    .font(tokens.small)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, 26)
+            }
+        }
+    }
+
+    private func submit() {
+        let typed = passphrase
+        guard !typed.isEmpty, !row.busy else { return }
+        Task {
+            await row.submit(passphrase: typed)
+            if row.message == nil { passphrase = "" }
         }
     }
 }

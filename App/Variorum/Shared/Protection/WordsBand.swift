@@ -87,6 +87,8 @@ nonisolated struct WordsCardLedger: @unchecked Sendable {
 nonisolated final class WordsCardSnoozes: @unchecked Sendable {
     /// The app's one set (a test makes its own).
     static let process = WordsCardSnoozes()
+    /// VX-538 — the E6 row's own set (its *Later* never hides the words row, nor theirs it).
+    static let accountPassphraseProcess = WordsCardSnoozes()
 
     private let lock = NSLock()
     private var snoozed: Set<String> = []
@@ -243,6 +245,143 @@ final class WordsLookModel {
     }
 }
 
+// MARK: - VX-529 unit 3 — VX-538: the E6 row (her R-529-6 — the why and the road, recurring until it's done)
+
+/// The E6 row's cadence — RULE 3's PATTERN with no *Don't show again* (her "until it's done"; PROVISIONAL P-VX529-U3-4):
+/// due from the library's third launch on this Mac (rule 3's first showing, its launch counter shared), and again a week
+/// (rule 3's gap) after the last ✕. Nothing retires the schedule; only the state does (`AccountPassphraseCardModel.showing`).
+nonisolated enum AccountPassphraseCardRules {
+    static func due(launches: Int, lastDismissedAt: Date?, now: Date) -> Bool {
+        guard launches >= PassphraseReminderRules.firstLaunch else { return false }
+        guard let last = lastDismissedAt else { return true }
+        return now.timeIntervalSince(last) >= PassphraseReminderRules.returnGap
+    }
+}
+
+/// The E6 row's ledger — LOCAL, per library, in this Mac's defaults beside the reminder's keys
+/// (`variorum.calmAsks.accountPassphrase.<libraryID>.*`): the moment of the last ✕. Never a secret, never the state.
+nonisolated struct AccountPassphraseCardLedger: @unchecked Sendable {
+    let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
+
+    enum Key {
+        static func dismissedAt(_ libraryID: String) -> String {
+            "variorum.calmAsks.accountPassphrase.\(libraryID).dismissedAt"
+        }
+    }
+
+    func dismissedAt(_ libraryID: String) -> Date? {
+        (defaults.object(forKey: Key.dismissedAt(libraryID)) as? Double).map { Date(timeIntervalSince1970: $0) }
+    }
+
+    func dismiss(_ libraryID: String, at date: Date) {
+        defaults.set(date.timeIntervalSince1970, forKey: Key.dismissedAt(libraryID))
+    }
+}
+
+/// What the E6 row's press did.
+nonisolated enum AccountPassphraseLanding: Equatable, Sendable {
+    /// The account's passphrase is this library's own lock now (the E6 heal landed).
+    case landed
+    /// A lock already stood (nothing to land — the state already resolved).
+    case nothingToLand
+    /// Nothing written — the sentence says why.
+    case refused(String)
+}
+
+/// **THE E6 ROW** — the band card's third ask: a SYNCED library whose live key file carries NO passphrase lock of its own
+/// (born of a join by the twelve words, or the catch-up's words arm) is told so — the why and the road, and the forgot-road
+/// (Reset forgotten passphrase works there: no follow is owed in plain E6) — and takes the account's passphrase right
+/// here, landing it as the library's own lock through the E6 heal (P-VX529-4 — never a re-key). It stands only while the
+/// STATE reads E6 (`owes`, read at every look — never a flag), so whatever lands a passphrase lock retires it: this press,
+/// the lobby's vault road, New words, Reset, Change, the catch-up. Recurring on rule 3's pattern with no *Don't show
+/// again*: *Later* hides it until the next launch; ✕ for a week. PROVISIONAL (P-VX529-U3-3…6).
+@MainActor
+@Observable
+final class AccountPassphraseCardModel {
+    private(set) var busy = false
+    /// Why the last press landed nothing (nil: nothing to say).
+    private(set) var message: String?
+    /// Hidden for this process (*Later*, or the ✕).
+    private(set) var hidden = false
+    /// Bumped at every re-read moment, so Observation hears a state the session holds.
+    private var rereads = 0
+
+    @ObservationIgnored private let libraryID: String
+    @ObservationIgnored private let writes: Bool
+    @ObservationIgnored private let ledger: AccountPassphraseCardLedger
+    @ObservationIgnored private let snoozes: WordsCardSnoozes
+    @ObservationIgnored private let launches: () -> Int
+    @ObservationIgnored private let now: () -> Date
+    @ObservationIgnored private let owes: () -> Bool
+    @ObservationIgnored private let land: (String) async -> AccountPassphraseLanding
+    @ObservationIgnored private let speak: (String) -> Void
+
+    init(
+        libraryID: String, writes: Bool, ledger: AccountPassphraseCardLedger,
+        snoozes: WordsCardSnoozes = .accountPassphraseProcess, launches: @escaping () -> Int,
+        now: @escaping () -> Date = { Date() }, owes: @escaping () -> Bool,
+        land: @escaping (String) async -> AccountPassphraseLanding, speak: @escaping (String) -> Void = { _ in }
+    ) {
+        self.libraryID = libraryID
+        self.writes = writes
+        self.ledger = ledger
+        self.snoozes = snoozes
+        self.launches = launches
+        self.now = now
+        self.owes = owes
+        self.land = land
+        self.speak = speak
+    }
+
+    /// The row is on screen: a writing road, the STATE reads E6 now, not hidden or snoozed, and the cadence due.
+    var showing: Bool {
+        _ = rereads
+        guard writes, !libraryID.isEmpty, !hidden, !snoozes.isSnoozed(libraryID), owes() else { return false }
+        return AccountPassphraseCardRules.due(
+            launches: launches(), lastDismissedAt: ledger.dismissedAt(libraryID), now: now())
+    }
+
+    /// A moment that may have landed a passphrase lock (an act's landing, the pane's appearance): read the state again.
+    func reread() { rereads += 1 }
+
+    /// *Later* — hidden until the next launch (this process's snooze; nothing written).
+    func later() {
+        guard showing, !busy else { return }
+        snoozes.snooze(libraryID)
+        hidden = true
+        ProtectionOpenRoad.log("road: the account-passphrase card snoozed to the next launch (VX-538)")
+    }
+
+    /// The ✕ — hidden for a week (rule 3's gap; the moment in this Mac's ledger). It comes back until it's done.
+    func dismiss() {
+        guard showing, !busy else { return }
+        ledger.dismiss(libraryID, at: now())
+        hidden = true
+        ProtectionOpenRoad.log("road: the account-passphrase card dismissed for a week (VX-538)")
+    }
+
+    /// The press: the account's passphrase, typed here (never trimmed — a passphrase may begin or end with a space),
+    /// landed as this library's own lock — or the sentence saying why not. The state retires the row.
+    func submit(passphrase: String) async {
+        guard showing, !busy, !passphrase.isEmpty else { return }
+        busy = true
+        message = nil
+        let outcome = await land(passphrase)
+        busy = false
+        switch outcome {
+        case .landed:
+            speak(ProtectionWords.passphraseLandedNotice)
+        case .nothingToLand:
+            break
+        case .refused(let sentence):
+            message = sentence
+        }
+        reread()
+    }
+}
+
 // MARK: - The band card
 
 /// The card above the quick entry: the words' offer (until recorded or dismissed; snoozed to the next launch) and
@@ -254,6 +393,8 @@ final class WordsBandModel {
     private(set) var offersWords: Bool
     let look: WordsLookModel
     let reminder: PassphraseReminderModel
+    /// VX-538 — the E6 row (nil: no such row composed — a test's hand-made band, a read-only road).
+    let accountPassphrase: AccountPassphraseCardModel?
 
     @ObservationIgnored private let libraryID: String
     @ObservationIgnored private let writes: Bool
@@ -276,9 +417,11 @@ final class WordsBandModel {
         passphraseExists: @escaping () -> Bool,
         replacesAccountWords: @escaping () -> Bool = { false },
         mint: @escaping (String?) async -> WordsMintOutcome,
-        copy: @escaping ([String]) -> Void
+        copy: @escaping ([String]) -> Void,
+        accountPassphrase: AccountPassphraseCardModel? = nil
     ) {
         self.libraryID = libraryID
+        self.accountPassphrase = accountPassphrase
         self.replacesAccountWords = replacesAccountWords
         self.writes = writes
         self.ledger = ledger
@@ -319,8 +462,11 @@ final class WordsBandModel {
     /// The reminder's row is showing (rule 3's cadence or one of its always-moments).
     var showsReminder: Bool { reminder.showing != nil }
 
-    /// The card is on screen: the words offered or a look in progress, or the reminder.
-    var visible: Bool { offersWords || look.phase != .closed || showsReminder }
+    /// VX-538 — the E6 row is on screen (the state reads E6 and its cadence is due).
+    var showsAccountPassphrase: Bool { accountPassphrase?.showing == true }
+
+    /// The card is on screen: the words offered or a look in progress, or the reminder, or the E6 row.
+    var visible: Bool { offersWords || look.phase != .closed || showsReminder || showsAccountPassphrase }
 
     /// *Later* — the card waits for the next launch (this process's snooze; nothing written).
     func later() {
