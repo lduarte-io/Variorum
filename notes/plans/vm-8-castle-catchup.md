@@ -775,6 +775,22 @@ signed out.**
      (`88f9c4d84`) and **RED on the pre-fix tree** (`✘ Test run with 6 tests in 1 suite failed … with 1 issue` — exactly
      `heard.keyDoorReads > before`); THE FIX (this commit): the set sheet's close runs the screen's one read
      (`standing.refreshPane()`); **GREEN** (`✔ Test run with 6 tests in 1 suite passed`).
+   - **LEG D continued (the fixed walk build reinstalled over the same library, `7484d1129`'s tree):** D10 the screen
+     re-entered — Change passphrase… and Reset forgotten passphrase… stand → **D11–D13 CHANGE** (VX-263's line first, in ink;
+     current + new twice; landed: "Your passphrase is changed." on the quiet line) → **D14–D15 RESET, Standard's plain
+     confirm** ("This iPhone holds your library's key, so you can choose a new passphrase without the old one."; landed:
+     "Your passphrase is reset.") → **D16–D18 THE CHECK** (one concealed field; the OLD passphrase: "That passphrase doesn't
+     open this library." in the alarm ink; the current one: "That passphrase opens this library.") → **D19–D22 NEW WORDS
+     THROUGH THE LOOK** (the passphrase asked — "Enter your passphrase to see your twelve words."; the words shown once,
+     NO Copy door, the screen's way back HIDDEN while they show; the warning "These words won't be shown again." · go back ·
+     close; the way back returns) — captures redacted → D23 the check: the new words "Those twelve words open this
+     library." → **D24 USE CASTLE's confirm in the phone's words** (rule 9's promise in ink, what entering does, Previous
+     Libraries' line naming this iPhone, Castle's floor naming Face ID — NO Data Safety pointer, NO export line (F-U2-A); the
+     gate rows Face ID (preselected) · Always ask with "This iPhone keeps the new key behind Face ID."; both secrets' fields)
+     → both typed → **D26 CASTLE, through the reopen**: the screen re-pushed, **the crossing's receipt owed to the reopen
+     said on the new screen's quiet line — "You're in Castle now." (P-VM8-8 LIVE across a reopen)**; "You're in Castle." with
+     NO Use Standard door (F-U2-G LIVE) and no Replace All Keys (a local library); the gate-style row "Face ID opens your
+     library on this iPhone." · *use always ask*.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
