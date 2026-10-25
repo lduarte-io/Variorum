@@ -2051,9 +2051,9 @@ written through `settingMaster` inside `locking`, the existing setter):**
 Verified: the diff read (the `AccountsVaultRead` two-case shape with no fallback to an older read; `accountPairProof`'s
 three checks; the fields riding the ONE existing key-file write; the app's one bounded read passed `.taken`); the
 suites re-run by the orchestrator's own hand (29 tests in 7 suites green, the held row flipped among them); zero
-`Sync/`/`Server/`/`CastleRules.md` lines by diff; the Mac app's full build on the L2 tree is RUNNING at this writing
-— its exit is PENDING and this line flips when it lands (the orchestrator wrote "exit 0" here prematurely and
-corrected it in the next commit; the record stays honest). The findings, DISPOSED:
+`Sync/`/`Server/`/`CastleRules.md` lines by diff; the Mac app's full build on the L2 tree LANDED exit 0 (flipped from
+PENDING at its notification; the orchestrator first wrote the claim prematurely, retracted it the same minute, and
+flips it now on the real exit — the correction history is in the commits). The findings, DISPOSED:
 - **P-VX529-L2-1 (the typed WORDS are the proof, not the passphrase) — ACCEPTED AS BUILT, provisional, HER BUNDLE:**
   the join's notice is about the WORDS being replaced; when only the passphrase changed, no words were replaced and
   the quiet is truthful. The alternative (require the passphrase too) is recorded beside it for her pass.
