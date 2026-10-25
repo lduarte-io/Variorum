@@ -1,8 +1,9 @@
 # VX-529 — the catch-up for a pair changed elsewhere
 
 **STATUS: CLOSED 2026-10-25 — build, ladder, closing batch, the live proof on production and HER TWO-MAC TEST all
-passed; merged to main by PR and released as 0.10.2 at her word (R-529-8). THE CLOSEOUT section (near the end) carries
-the gates, the rulings reconciled and the born tickets.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
+passed; merged to main by PR #187 and RELEASED as 0.10.2 (build 9462) at her word (R-529-8). THE CLOSEOUT section
+(near the end) carries the gates, the rulings reconciled and the born tickets; THE RELEASE section after it, the
+publish and the install.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
 section) is the built contract. Branch `vx-529-pair-catchup`, worktree `~/dev/variorum-vx-529`, the custody slot held
 (the in-flight table). The kickoff is `notes/handoffs/vx-529-kickoff.md`; the repro is the VX-510 record's THE
 CHANGED-ELSEWHERE REPRO (`notes/plans/fixes/vx-510-first-run-sync.md`). *(The header's original "nothing below is
@@ -2582,6 +2583,61 @@ anything unexpected:
 - **MOBILE PARITY:** PL-59 (written mid-run at her word, trued at this closeout); the mobile handoff carries a dated
   pointer at its SUCCESSOR HANDOFF.
 - **Next:** the mobile catch-up (VM-8) — her stated next run; its context is the mobile handoff + PL-58/PL-59.
+
+## THE RELEASE — 0.10.2 (2026-10-25, 03:43–03:56 MDT, the Opus orchestrator; R-529-8 executed)
+
+**Her words (verbatim):** *"ok yes, i approve the release, i approve the release notes. let's get this out there"* —
+and, after it shipped: *"ok yes make sure the release is on the run record and master plan."*
+
+- **The window:** after PR #187's merge (`44c63afd1`), main clean and level with origin; she quit Variorum on the Pro
+  at the koi's signal ("ok yes i see the koi! it was great at getting my attention. i have closed my variorum."); zero
+  instances confirmed (`ps … | grep '[V]ariorum.app/Contents/MacOS'` empty). The auto-mode classifier ALLOWED
+  `release.sh` at her in-session word (the VX-510 precedent).
+- **`Tools/Release/release.sh --version 0.10.2` — EXIT 0, build 9462** (`git rev-list --count` of `44c63afd1`):
+  0 preflight (zero instances, the name unpublished) · 1–2 the stamp + the clean archive + the Developer ID export,
+  `verify-export` **57/57** · 3 the app notarized + stapled, **58/58** · 4 the DMG window `PASS` · 5 the DMG signed ·
+  6 the DMG notarized + stapled + Gatekeeper-accepted · 7 the app INSIDE the final DMG **58/58** · 8 the dSYMs kept ·
+  9 the appcast, `verify-appcast` **PASS** (build 9462 strictly highest over 9172/9311, `0.10.2`, the enclosure
+  `https://dl.stargazing.tech/variorum/Variorum-0.10.2.dmg` 30,752,663 bytes, the EdDSA signature verifies under the
+  baked key, the description her notes verbatim as Sparkle markdown). The DMG's sha256 is
+  `307e3b283b0f38303447e3d379ec064b1a989a808c79002f3d0821cc97205644`. The durable records: `~/Library/Developer/Variorum/Releases/0.10.2/` (`RELEASE-INFO.txt`, the notary
+  logs, the verify readings, the dSYMs, and the run's whole log `release-0.10.2.log`).
+- **THE STEP-0 FIRST-RUN GATE (VX-509), read for THIS release exactly as VX-510 read it for 0.10.1:**
+  `FirstRunDrillTests` **11/11 passed** in this run's closing stage batch (read from its result bundle, by node
+  identifier), on a product tree identical to the release's — `git diff 0236095bf 44c63afd1` outside `notes/` is
+  exactly `MARKETING_VERSION 0.10.1 → 0.10.2` (two lines) and the new `ReleaseNotes-0.10.2.md`; the same holds from
+  the live proof's walk build (`5c7ab46b1`). The scripted walk's set-up arm (`first-run-walk.sh std`) cannot run while
+  every standing test account holds a vault (→ **VX-537**); standing in: D0's `first-run-walk.sh castle` on the prod
+  test road (G1–G8, P1–P5 passed, P6 stopping correctly at the join arm), the joins completed by hand with their
+  rounds confirmed server-side, and her two-Mac test on her real account.
+- **THE PUBLISH, DMG FIRST (the site runbook `stargazing-tech/notes/variorum-releases.md`):** the cache-busted
+  preflight answered **404** → `wrangler r2 object put variorum-downloads/variorum/Variorum-0.10.2.dmg` (Upload
+  complete) → `verify-published.sh dmg` **PASS** (HTTP 200, `application/x-apple-diskimage`, `max-age=31536000,
+  immutable`, the published bytes IDENTICAL) → ONLY THEN the appcast copied to `public/variorum/appcast.xml` and
+  `src/data/variorum.json` bumped to 0.10.2 → `npm run build && npm run deploy` (version `ccd47341`, first try) →
+  `verify-published.sh appcast` **PASS** (`no-cache, must-revalidate`, the live feed BYTE-IDENTICAL, the newest
+  enclosure live) → the beta page reads 0.10.2 → the site commit **`217f0a8`**, pushed. The feed was never ahead of
+  its DMG.
+- **The Pro's `/Applications` refresh (the zero-instance window held):** A1 safety copy
+  **`Backups/safety-copies/variorum-a1-0.10.2-install-2026-10-25T095439Z`** (the five store files, sha256 byte-identical
+  to the live ones) → the notarized, stapled release app (the export the DMG wraps) installed by `ditto` → `codesign
+  --verify --deep --strict` valid · `spctl` **accepted, source=Notarized Developer ID** · `stapler validate` worked ·
+  `0.10.2 (9462)` · the binary `cmp`-identical to the release build. The replaced copy (9439, the branch's test build)
+  went to the Trash. Not launched (hers to open). **The Air** crosses by Sparkle's own offer (it runs 9440, the
+  branch's local build).
+- **The A1 prune, her keep-only-the-newest rule (2026-10-13):** the nine older real-store safety copies moved to the
+  Trash, recoverable until she empties it (≈860 MB: `variorum-a1-vx529-install-2026-10-25T075213Z`,
+  `variorum-vx329-stage-20261022T115834Z`, `variorum-vx329-window-20261022T2345Z`,
+  `variorum-vx488-a1-20261023T083711Z`, `variorum-vx494-a1-20261023T150419Z`,
+  `variorum-vx494-release-a1-20261023T212822Z`, `variorum-vx510-a1-20261024T123256Z`,
+  `variorum-vx510-release-a1-20261024T183305Z`, `vx348-refresh-20261018T193150Z`); the newest stands alone.
+- **The tidy:** the run's worktree removed (22 GB of build products, incl. the 9311 rollback copy — superseded by
+  the published 0.10.1 DMG) and the branch `vx-529-pair-catchup` deleted local + origin; `/tmp/vx539check` (VX-539's
+  main-side build output) removed; the release's working folder unregistered from Launch Services and removed (its
+  durable records stay under `~/Library/Developer/Variorum/Releases/0.10.2/`). No walk set-aside folders remained.
+  Linear: VX-529 carries the release comment.
+- **This section rides a small doc PR** (`vx-529-release-record`) at her word, since main takes no direct push from a
+  build session.
 
 ## Machinery
 

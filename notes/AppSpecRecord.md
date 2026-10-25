@@ -887,3 +887,7 @@ sync keys online; Touch ID intact; new words made on the Air were caught up quie
 **Her calls:** R-529-1…7 at the sittings; R-529-8 — merge and release 0.10.2 ("let's get this merged & get a release
 minted"; the notes approved verbatim); VX-544 and VX-542 later. **Born:** VX-538 (rode), VX-539, VX-540, VX-541, VX-542,
 VX-543, VX-544. MOBILE PARITY: PL-59.
+
+**The release:** 0.10.2 (build 9462) shipped 2026-10-25 at her word — published to stargazing.tech (the DMG first,
+then the appcast and the page, every verify PASS) and installed on the Pro behind a fresh A1; the run record's THE
+RELEASE section.
