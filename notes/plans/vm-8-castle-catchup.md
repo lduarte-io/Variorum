@@ -730,6 +730,25 @@ signed out.**
      - batch C: `✘ Test run with 8 tests in 2 suites failed … with 3 issues` — RED exactly `aPairChangedElsewhere…`
        (`doors.faces?.pairGate == true`, and the screen's two counts); the hand-made pair-gate pin green (it builds its own
        fact).
+   - **THE PHONE TARGET WHOLE on the pinned simulator at `af91fea73`'s product tree** (`-only-testing: VariorumMobileTests`,
+     stage claim `vm8-u2`): `✘ Test run with 840 tests in 136 suites failed after 467.203 seconds with 6 issues (including 4
+     known issues)` — EXACTLY unit 1's close plus this unit's 21 tests / 6 suites (819/130 + 21/6): the four DECLARED known
+     issues (`MobileTrashTests` `anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` ×2,
+     `MobileTutorialWalkTests` `theFannedDivideLessonLandsTheDuplicateShape` ×2) and the ONE pre-existing red suite,
+     `MobileMarkdownCaretTests` (VX-296's `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`, 2 issues — VM-24,
+     red on unit 1's pre-fix tree; no editor-seam line in this diff). Zero skipped (only the AppIntents metadata tool's
+     "skipped" lines). `MobileNoRedirectSweepTests` and `MobileCopyRegisterSweepTests` green — no exemption widened, the
+     `herRuleTwelve` literal untouched and still unreachable on the phone (Use Standard and the rule-12 account arms render
+     nothing — F-U2-G, F-U1-1 (A)).
+   - **Builds:** phone `build-for-testing` EXIT 0; **Mac `build-for-testing` EXIT 0** (`DerivedData/vm8u2-mac`; the two
+     shared facts compile on the Mac, the Mac's rendering byte-identical — neither is read by a Mac face).
+   - **THE MAC-SUITE LIST (the orchestrator's stage batch — the dev store's Mac slot is off-limits to this session):**
+     `WordsFieldsConcealTests` (three phone sites added — source), `TravellingDotsIndicatorTests` (the phone's new surface
+     added — source), `RoadKeyDoorsModelTests` + `RoadKeyDoorSurfaceTests` + `RoadKeyDoorRoadTests` + `PairPreflightAndGateTests`
+     (`RoadKeyDoorFaces` gained `pairGate` — a defaulted stored field the derive sets), `RoadCrossingFacesTests` +
+     `RoadCrossingSurfaceTests` + `ProtectionCrossingRoadTests` (`RoadDoorOpen.saysRuleTwelve` — a computed property),
+     `ProtectionWordsVX307Tests` and `LobbyWordsDoorPressTargetTests` (source pins reading phone files — `MobileRoadFaces.swift`
+     untouched).
 8. The walk on the pinned simulator. NOT-STARTED.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
