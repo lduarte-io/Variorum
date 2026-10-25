@@ -359,8 +359,9 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   load expectations]. **RAN: `✘ Test run with 1 test in 1 suite failed … with 2 issues`** — exactly the two (nothing in
   session memory; the engine's seam refuses); restored `git diff --exit-code` clean — **no revert in flight.** VX-501's
   typed-unlock load FIRES on the phone's posture. The LIVE check rides piece 4's Castle leg.
-- **Piece 4 — the simulator walk + the measured save:** LEG A (the throwaway's ~110k-row corpus — the SCALE leg) DONE;
-  LEG A2 (a kill MID-download) and LEG B (Castle + Face ID on the prod test road) NOT-STARTED.
+- **Piece 4 — the simulator walk + the measured save:** DONE — LEG A (scale + the app switch + the stage resume), LEG B
+  (Castle + Face ID on the prod test road, the re-keying join through the reopen, VX-487/VX-501 live), LEG A2 (a kill
+  MID-download — the partial-stage resume). Every leg below; captures `notes/plans/vm-8-u1-screens/` (gitignored).
   - **The walk's machinery (recorded):** Xcode 27 has NO Simulator.app — the simulator is hosted in Device Hub
     (`com.apple.dt.Devices`), so the helper's frontmost guard accepts that host too (recorded in its header; otherwise the
     ruled guards exactly). Captures are `xcrun simctl io <pin> screenshot` ONLY (the simulator's screen, never the host
@@ -408,6 +409,41 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
     this iPhone hasn't unlocked your account's sync keys"** (B15 — RV-6's red, LIVE on the phone, unintended). The Debug
     app was rebuilt from the clean tree (`-configuration Debug`, the dylib 05:48 local) and the typed unlock is re-walked
     below. Lesson for the brief: build the walk app with `-configuration Debug` and install from its own products.
+  - **LEG B — PASS (11:42–11:50 UTC; the clean Debug build from 11:49; launched on the PROD TEST ROAD —
+    `VARIORUM_PROD_TEST_ROAD=1` + the allowlist handed, NO walk project, `ps eww` checked; the `castle` vxtest account;
+    Face ID ENROLLED on the simulator):** a fresh library (B01 — the words card, redacted) → Settings (B02) → Protection
+    → the Account sheet (B03) → signed in as the castle test account by the helper (B04) → close → "sync this library…"
+    (B05) → **THE JOIN INTO CASTLE in the phone's words** (B06): the join's lead, rule 7's first sentence, "Your account
+    is in Castle, so this library goes into Castle too.", rule 9's promise, Use Castle's lead, the Previous Libraries
+    line ("…on this iPhone…"), the floor naming Face ID — **NO Data Safety pointer (P-VM8-4)** — the gate rows **Face ID
+    (preselected) · Always ask** with **"This iPhone keeps the new key behind Face ID." (P-VM8-3)** → the account's
+    passphrase by the helper (B07) → *sync this library* at 11:44:38 → **the re-keying act through the reopen**
+    (`enroll: … swapped — the library is under 9b1c04fa`, `retired 1 own Apple key(s)`, `turnOnSync — … castle`, `road:
+    opened … custody silent 0 touchid 1` — the Face ID item made at the press) → **F-U1-3 LIVE: the shell adopted the
+    reopen's ask and the presenter's sheet came back on the re-pushed Protection screen** with rule 7's moment (B08a/B08
+    — within 3 s) → OK → the round phase (B09) → **"Synced. Your account's writing is in this library now."** (B10 — a
+    re-keying act's first round through the reopen's FRESH services: D-B0's generation, on the phone) → Done → the
+    section "This library syncs with your account." · *stop syncing here…* · *delete the account from this iphone…* ·
+    *sign out…* (B11). Server (read-only `Tools/prod-read.sh`): the phone's device `a40aefcd…` at `last_seq` 28 = the
+    account's head beside the Macs' devices; the vault untouched (Castle, its last writer her MacBook Pro — a join adopts
+    the account's pair locally, rule 7).
+    - **The Face ID unlock (VX-487 on the phone, live):** relaunch → the lobby's one automatic ask → the simulator
+      approved it → `road: the Touch ID unlock loaded the account's sync keys for the session (sync key c6e40f99)` →
+      Settings "Synced 5:46 AM" (B12–B13).
+    - **The TYPED unlock (VX-501 on the phone, live):** Face ID UNENROLLED → relaunch → the Castle lobby ("Enter your
+      passphrase or your twelve words…", "Face ID isn't set up on this iPhone.") (B14/B16) → the passphrase by the helper
+      → *open* (11:49:41) → `road: the typed unlock loaded the account's sync keys for the session (sync key c6e40f99)`
+      → Settings **"Synced 5:49 AM"** (B18). (On the RV-6 build at 11:46:57 the same press read "Sync locked" — B15: the
+      red and the green of VX-501 both seen live on the phone.)
+    - **A wart seen (taste — bundled, P-VM8-7):** while the row reads keys-locked / not-on-yet, the sync row's own
+      *protection…* door (VX-486's, injected per the brief) sits directly above the standing *protection…* row — two
+      doors, one name, one screen (B15). Built as the brief says; options in her bundle.
+  - **LEG A2 — PASS (11:50–11:59 UTC, the clean Debug build, the throwaway again, a fresh library):** sign in A → *sync
+    this library…* → the passphrase → the join (11:51:35) → **KILLED MID-DOWNLOAD** at 11:52:19 (the stage 29.6 MB, **23
+    data windows** in) → relaunch 11:52:30 → **32 data windows** (05:52:33–05:53:02 local — only the REMAINING ones; 23 +
+    32 = the feed's ~55, nothing fetched twice) → the save from 11:53:04 → the commit at ~11:59:26: **the save ≈ 6 min
+    22 s** (the second sample; peak RSS ≈ 458 MB) → server: the new device `bfb075f7…` at `last_seq` **110,424** =
+    head (A2-04).
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
