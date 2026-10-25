@@ -2545,6 +2545,12 @@ anything unexpected:
   (E8/VX-457) verbatim in her screenshot: *"Your account's twelve words were changed on another device, and this Mac
   caught up. The twelve words you had before no longer open this library; backups you made with them still do."*
   with OK. R-529-2 on her real hardware, the direction reversed (the Air changed, the Pro followed).
+- **Step 15 (Pro): the check door with her NEW words → "Those twelve words open this library and your account."**
+  (her screenshot) — her new recovery words verified on both Macs.
+- **HER TWO-MAC TEST: CLOSED, PASSED (2026-10-25 03:30 MDT).** Both halves of the pair and both directions covered on
+  her real Macs and account: the passphrase (Pro changed → the Air caught up at its lock screen, R-529-1) and the
+  words (Air changed → the Pro caught up quietly, R-529-2). The reverse passphrase direction runs the same code —
+  not repeated. The release gate she set at kickoff is MET; R-529-8 (merge and mint) proceeds.
 
 ## Machinery
 
