@@ -1756,8 +1756,9 @@ commit + push per piece, LIVE STATUS under this section, no trailers.
 ### L1 — LIVE STATUS (the implementer owns this section)
 
 **NOT DONE IN THIS SESSION:** everything but F-R1-1 (the charter's one finding); the Mac-target run of
-`LobbyVaultRoadTests` (the closing stage batch — it runs here in unit 2's headless harness only); every walk. No revert
-is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-25, worktree
+`LobbyVaultRoadTests` (the closing stage batch — it runs here in unit 2's headless harness only); every walk. **A REVERT
+IS IN FLIGHT: RV-L1-1** (L1-P3 — `ProtectionOpenRoad.swift` only, over the committed fix `facffef48`; restore = `git
+checkout -- App/Variorum/Shared/Protection/ProtectionOpenRoad.swift`). Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
