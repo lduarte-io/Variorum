@@ -1,8 +1,9 @@
 # VX-529 — the catch-up for a pair changed elsewhere
 
-**STATUS: OPEN — BUILD COMPLETE, LADDER CLOSED, CLOSING BATCH GREEN, LIVE PROOF ON PRODUCTION PASSED (D0–D7, 2026-10-24 night, an Opus orchestrator after Fable's safeguards stopped the walk). Remaining: HER TWO-MAC TEST, then the closeout. (Earlier line kept:) THE BUILD PHASE COMPLETE (units 1–3 CLOSED) AND THE LADDER CLOSED (round 1: 0B·0M·1m·2n → fix
-sessions L1 and L2, both verified; round 2: every fix SOUND, 0B·0M·0m·2 record-hygiene NITs, both fixed). Remaining:
-the closing stage batch, the live proof, HER two-Mac test, the closeout.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
+**STATUS: OPEN — BUILD COMPLETE (units 1–3 + ladder fix sessions L1/L2), THE LADDER CLOSED (r1 0B·0M·1m·2n → r2
+every fix SOUND), THE CLOSING STAGE BATCH GREEN (Mac 5231/5265 — the 2 failures proven VX-539 on main; phone
+808/126), THE LIVE PROOF ON PRODUCTION PASSED (D0–D7, 2026-10-24 night, an Opus orchestrator after Fable's safeguards
+stopped the walk). Remaining: HER TWO-MAC TEST (the release gate), then the closeout.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
 section) is the built contract. Branch `vx-529-pair-catchup`, worktree `~/dev/variorum-vx-529`, the custody slot held
 (the in-flight table). The kickoff is `notes/handoffs/vx-529-kickoff.md`; the repro is the VX-510 record's THE
 CHANGED-ELSEWHERE REPRO (`notes/plans/fixes/vx-510-first-run-sync.md`). *(The header's original "nothing below is
