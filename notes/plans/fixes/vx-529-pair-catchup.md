@@ -2323,6 +2323,34 @@ library now."** (P-VX510-1 live).
 - Rule 21's "This is a different library than the one this Mac last had open" notice greeted every swap (the walk
   artifact; it blocked ⌃⌘L until OK — expected modal behavior).
 
+**D3 — THE WORDS ARM, THE FORGOT ROAD (R-529-5, ratified) — PASS (22:59–23:03):**
+- On L_B (Castle): Change passphrase `passphrase2` → `passphrase` → **vault castle, rev 23**. Swap to L_A — its
+  lobby; **"Use your twelve words instead" opened from its label** (VX-527 live) → the account's words →
+  `road: opened` + `the typed unlock loaded the account's sync keys`.
+- The follow sheet's passphrase variant; **ONLY the words typed** → `follow: begun #1 0b6b92bb → none` ·
+  **`follow: re-locked to the account's pair (passphrase) — by the words: the stale passphrase lock dropped — the
+  key unchanged (0b6b92bb)`** · `done #1`. The Done face, verbatim: *"Synced. This library is up to date with your
+  account again."* · **her ratified window sentence** *"Until you type your account's passphrase on this Mac, copies
+  made here open with your twelve words."* · the Reset chain *"If you don't know your account's passphrase, set one
+  you do with Reset forgotten passphrase."*
+- The check door in E6: the OLD passphrase → `does not open; does not open` (the stale lock gone at once — the
+  change ARRIVED here) · the account's CURRENT passphrase → `does not open; opens` with R-529-6's E6 answer:
+  *"That passphrase opens your account, but it hasn't been typed on this Mac yet. Type it the next time your library
+  asks for it here, and it opens this library too."* — the why and the road, never the mechanism.
+- **Face note W-D3-1 (her bundle):** the E6 answer renders in the REFUSAL colour (red); E6 is the not-ideal state
+  her R-529-6 named, not an error — a calmer tone may suit it.
+
+**D4 — VX-538'S CARD AND THE HEAL — PASS (23:03–23:05):**
+- In E6 (L_A's fifth launch of the night), **the card stood in the band's one home above the quick entry**:
+  *"Your account's passphrase hasn't been typed on this Mac yet — type it once and it opens this library here too."*
+  · *"If you don't know it, set one you do with Reset forgotten passphrase."* · a field · "Use it here" · Later · ✕
+  (no don't-show-again — her "until it's done").
+- The account's passphrase in the card → **`heal: the account's passphrase landed as this library's own lock (E6 —
+  P-VX529-4); the key unchanged (0b6b92bb)`** · `road: the account-passphrase card — … this library's own lock now
+  (VX-538)` → **the card RETIRED itself** (gone from the band, read from the state).
+- ⌃⌘L → the account's passphrase at the lobby → `road: opened` + the sync keys — **no vault-road line: the healed
+  lock opens LOCALLY**.
+
 **STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
 (fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
 held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
