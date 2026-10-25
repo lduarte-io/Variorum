@@ -1407,8 +1407,21 @@ needs them. Not durable, never committed.
   press road over planted leaves; the planted read throwing is the twin of the unnamed status): **RED on the pre-fix tree**
   (the harness, `--filter LobbyTouchIDReaskTests`): `✘ Test run with 3 tests in 1 suite failed … with 4 issues` — after the
   automatic ask's read threw, the button GONE; the re-press reached no road (`pressesRun == 2`), read nothing, opened
-  nothing. Guards green: a press finding the item gone still drops it; every read mints its own `LAContext` (source). The
-  fix: NOT-STARTED.
+  nothing. Guards green: a press finding the item gone still drops it; every read mints its own `LAContext` (source). THE FIX
+  COMMITTED (this commit — the smallest diff, ONE function): `ProtectionOpenRoad.pressTouchID` remembers that its read
+  THREW, and then answers `.touchIDNotOpened(press: .cancelled, …, itemGone: false)` — the press did not complete, nothing
+  changed, the button stands (THIS press's outcome, never a stale `lastPress`). Nothing else moves: the leaf, every keychain
+  read and its error mapping, the probe-found-nothing road (still the one that drops the button), the walk switch's planted
+  failure (no throw — unaffected), the copy doors' and the executor's Touch ID reads (they never reach this function); the
+  unit-2 guardrails hold (no write before an open; a failed press writes nothing — pinned; no other Touch ID path changes).
+  No new sentence (a cancelled press says nothing; the standing button is the road). **GREEN** (the harness, `--filter
+  "LobbyTouchIDReaskTests|TouchIDUnlockSyncKeysTests|ProtectionLobbyModelTests|RoadLockTests|ProtectionOpenRoadPlantedTests|
+  LobbyVaultRoadTests|TypedUnlockSyncKeysTests"`): `✔ Test run with 59 tests in 8 suites passed`; with `RoadRearmTests`: `✔ 8
+  tests in 2 suites`. `ProtectionCrossingRouteTests.minor3_…` (a real-keychain suite, not in the harness) presses the walk
+  switch's planted failure — it returns without a throw, so its `!gone` row is untouched by this change by reading; its run
+  PENDING the stage batch. THE REVERT (named before it runs; one edit on this commit, `--filter LobbyTouchIDReaskTests`,
+  restored by `git checkout --`): RV-533-1 `ProtectionOpenRoad.swift` — the `if readThrew, key == nil { return … }` block
+  removed [expect the four issues]. PENDING.
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 

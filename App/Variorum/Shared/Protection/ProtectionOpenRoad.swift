@@ -538,6 +538,7 @@ nonisolated enum ProtectionOpenRoad {
         }
         var key: StoreKey?
         var evaluated: TouchIDPressContext?
+        var readThrew = false
         do {
             if let handing = custody as? TouchIDPressHanding {
                 (key, evaluated) = try handing.readTouchIDCustody(fingerprint: item.fingerprint)
@@ -547,10 +548,17 @@ nonisolated enum ProtectionOpenRoad {
         } catch {
             log("road: the Touch ID read failed — \(String(describing: error))")
             key = nil
+            readThrew = true
         }
         // VX-487 (b): the press ends with this call, whatever the open does next.
         defer { evaluated?.invalidate() }
         let press = (custody as? KeychainCustodyLeaf)?.lastPress
+        // VX-529 unit 3 — VX-533: a read that THREW ended without reading an item that IS there (the probe found it; a
+        // status the leaf's arms don't name — the system sheet's own ending among the candidates). The press did not
+        // complete and nothing changed: the button stands, and her re-press asks afresh (every read its own context).
+        if readThrew, key == nil {
+            return .touchIDNotOpened(press: .cancelled, biometry: ctx.system.leaves.biometry.biometry(), itemGone: false)
+        }
         guard let key else {
             // No key, no recorded press: the item was not there to press (the probe found none).
             let gone = press == nil
