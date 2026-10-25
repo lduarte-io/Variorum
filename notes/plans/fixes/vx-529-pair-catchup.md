@@ -2503,6 +2503,9 @@ anything unexpected:
   VX-501, 0.10.1) — offline that read fails, the library opens all the same (never hostage, as ruled), the keys stay
   unloaded. **Predicted gap (VX-501's, pre-existing): nothing retries that read when the network returns**, so sync
   would stay locked for the session until another online unlock. Step 9 tests the prediction before any ticket.
+- **Step 9 (Air): Wi-Fi back on, a minute's wait → STILL "Sync locked"** (her screenshot) — the prediction CONFIRMED.
+  **Ticketed: VX-544** (Bug, Confirmed, Castle & sync, Medium; pre-existing VX-501 behavior; Pre-launch her call):
+  an offline typed unlock leaves Castle sync locked for the session, with no retry on reconnect.
 
 ## Machinery
 
