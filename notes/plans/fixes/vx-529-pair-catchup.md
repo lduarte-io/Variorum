@@ -2525,6 +2525,14 @@ anything unexpected:
   account with the catch-up landing in the same unlock; the new passphrase opening locally offline; the everyday
   typed road loading the sync keys online; Touch ID intact. One pre-existing gap filed (VX-544); one face issue
   confirmed worse on real hardware (VX-542).
+- **HER CALLS AFTER THE CORE TEST (2026-10-25 ~03:20 MDT, verbatim):** *"vx-544: we'll do this later. let's get this
+  merged & get a release minted. vx-542: honestly, also can be done later. this is a rare situation for someone to be
+  in. it should be fixed but won't be fixed right now. i guess i can do catching up with my twelve words ?? do you
+  think it's important to test based on what the passphrase swap found? i can do the rest of hte testing i can keep
+  moving through things step by step."* → **R-529-8: MERGE AND MINT A RELEASE** (her release word, in session — the
+  bump and the notes land on the branch before the merge; the notes go to her for approval before the run, her
+  standing rule) · VX-544 and VX-542 stay Backlog for a later run (not Pre-launch) · the twelve-words leg offered as
+  optional confirmation (the architect's read below), hers to run step by step.
 
 ## Machinery
 
