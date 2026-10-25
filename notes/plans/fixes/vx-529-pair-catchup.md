@@ -2124,6 +2124,47 @@ the closing stage batch, the live proof, and HER TWO-MAC TEST.**
 - **The phone suites** (`VariorumMobile`, iPhone 17 Pro simulator, DerivedData `vx529-phone`): PENDING at this
   writing — the result line flips here when the run lands.
 
+## THE LIVE PROOF — THE SCRIPT OF RECORD (written before it runs, the unit C pattern; the orchestrator's walk under
+## the held stage; the prod test road ONLY — `VARIORUM_PROD_TEST_ROAD=1` + the allowlist from
+## `~/.variorum/prod-test-accounts.env`, secrets typed only by the `~/.variorum/bin` helpers; window/region captures
+## only; the `castle` account — entering state per VX-510's close: Standard, passphrase PASSPHRASE2, words the C3 set)
+
+- **D0 — machinery:** the dev store's nine files aside WHOLE (`…-aside-vx529-drill/`, inodes recorded); a Debug walk
+  build from this worktree (`DerivedData/vx529-walk`); `Tools/prod-confirm-test-user.sh` on the account; a fresh
+  library L_A joined to `castle` (the account's rows pull); then L_A aside, a second fresh library L_B joined (the
+  two-device stand-in, the VX-510 swap technique); prod-read confirms the vault's entering rev.
+- **D1 — the everyday leg (Standard):** on L_B, Change passphrase PASSPHRASE2 → PASSPHRASE3 (rev moves). Swap to
+  L_A: the detection owes the follow (Settings ▸ Protection speaks the pair sentence naming device and day; the
+  stale "…caught up." line absent); sync still runs (Standard); Change passphrase on L_A refuses with the pair
+  sentence, never the false one; the follow types PASSPHRASE3 → the round confirms in the sheet; the check door:
+  PASSPHRASE3 "…opens this library and your account.", PASSPHRASE2 gets the honest split; the lobby after ⌃⌘L:
+  PASSPHRASE2 opens nothing, PASSPHRASE3 opens.
+- **D2 — the vault road (Castle):** L_B Use Castle (Always ask; both secrets). Swap to L_A → the posture follow
+  (intoCastle, one secret — the standing regression leg). Both in Castle. On L_B, Change passphrase PASSPHRASE3 →
+  PASSPHRASE4. Swap to L_A, ⌃⌘L: at the lobby type PASSPHRASE4 (the NEW one) → R-529-1 live: the library OPENS
+  through the vault, the catch-up lands in the same press, the durable notice says so, the sync keys load (the log's
+  road lines); ⌃⌘L again, PASSPHRASE4 again → opens LOCALLY (the re-lock landed; the vault road not consulted —
+  the log says the local road).
+- **D3 — the words arm (the forgot road):** on L_B, Change passphrase PASSPHRASE4 → PASSPHRASE5. Swap to L_A, open
+  with the words (C3); the follow door's words arm: nothing but the words typed → the stale lock DROPS, the window
+  sentence and the Reset chain show, the durable notice; the lobby then refuses PASSPHRASE4 (dead) and E6's line
+  shows for a typed passphrase that is not the account's.
+- **D4 — E6's card and the heal:** in L_A's E6 state, three launches → the VX-538 card shows with the why, the road
+  and the forgot-road; at the lobby type PASSPHRASE5 (the account's current) → the HEAL lands the lock (the "opens
+  this library on this Mac now" notice), the card retires on the state; ⌃⌘L, PASSPHRASE5 → opens locally.
+- **D5 — the restored-copy quiet join (L2 live):** on L_A (converged), Back up now; Make this my library from that
+  backup (signed in, online) → the proof fields land; Resume Sync → the join STAYS QUIET about the words (no
+  words-replaced notice — the L2 fix live); the round confirms.
+- **D6 — the loop closed:** swap to L_B (now lagging PASSPHRASE5 if D3/D4 moved the vault from L_A's side — else
+  skip): the follow lands by the passphrase; both libraries converged; prod-read: the vault rev trail matches the
+  legs, no stray writes.
+- **D7 — restore:** sign the walk session out; quit at zero instances; the walk libraries' slot files and
+  `Backups/<id>` folders removed BY the key files' ids; the dev store's nine files back, INODES CHECKED; one plain
+  relaunch reads "Sync off (dev store)"; `Tools/stage release --who vx-529`; the account left at its ending state,
+  RECORDED HERE for the next drill (the passphrase env note).
+- **Evidence per leg:** the protection log's road lines, window-scoped captures into the gitignored walk folder,
+  prod-read rev checks. A leg that misbehaves STOPS the drill — record, trace, never improvise past a surprise.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
