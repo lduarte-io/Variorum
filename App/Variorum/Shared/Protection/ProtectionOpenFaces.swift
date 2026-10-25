@@ -391,6 +391,12 @@ final class RoadStandingModel {
             FollowDoneMark.set(libraryID, followed, in: ledger.defaults)
             ProtectionOpenRoad.log("road: the follow's Done owed as the account section's notice (VX-457)")
         }
+        // VX-529 unit 2 — the lobby's vault road landed the pair catch-up or the E6 heal in its press: the same durable
+        // notice (the newest Done is the true one — it follows any settled follow's).
+        if let landed = session.report.lobbyNotice, !libraryID.isEmpty {
+            FollowDoneMark.set(libraryID, notice: landed, in: ledger.defaults)
+            ProtectionOpenRoad.log("road: the vault road's landing owed as the account section's notice")
+        }
         let reminder = PassphraseReminderModel(
             libraryID: libraryID, moment: session.writes ? faces.passphraseMoment : nil, ledger: ledger,
             facts: {

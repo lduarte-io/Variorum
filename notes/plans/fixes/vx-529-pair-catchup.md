@@ -988,7 +988,30 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   Change` ✘×2 (the bare `"That passphrase doesn't open this library."` where the change was readable). The five
   guardrails GREEN on the pre-fix tree, as they must stay: offline byte-identical + nothing written; a slow server costs
   the bound then today's refusal; signed out / another account read nothing; a read-only road reads nothing; the old
-  passphrase still opens locally with the follow owed. What remains: the core decision, the composition, the E6 face.
+  passphrase still opens locally with the follow owed. THE ROAD COMMITTED (this commit): NEW core
+  `Executor/VaultRoad.swift` — `VaultRoad.answer(_:vault:files:live:floor:)` (pure; the design above, `VaultRoadAnswer`:
+  `.opens(key, derived:)` · `.passphraseChangedElsewhere(device:day:)` · `.notTheAccountsPassphrase` · `.nothingToSay`) with
+  `Tests/VariorumCoreTests/Protection/Executor/VaultRoadTests.swift` (5: the road both postures; the change named; E6's two
+  answers; nothing proven nothing said — another account's vault, both halves moved (the account-current passphrase still
+  OPENS), an unsynced file, nothing moved, the production floor; a new master reaching nothing) — `✔ 5 tests` headless.
+  App: `ProtectionOpenRoad.openTyped`'s `.noneOpens` arm calls `openThroughTheVault` (ONE bounded read, writing road and
+  signed in only; nil keeps today's refusal) → the key through the ordinary `open` → `catchUpThroughTheVault` (the one-act
+  lock; the pair follow, then the E6 heal over the read in hand; failures logged, the library open; `RoadOpenReport
+  .lobbyNotice`; the typed unlock's sync-keys load over the read in hand — `loadSyncKeysAfterTypedUnlock` gains an optional
+  `vault:`, nil as before); `RoadStandingModel.make` marks `lobbyNotice` as the durable notice; `ProtectionWords
+  .lobbyPassphraseChangedElsewhere` + `lobbyPairRoad` + `lobbyAccountPassphraseNotTypedHere` (R-529-6's draft);
+  `ProtectionLobbyFace` — E6 (P-VX529-U2-1 (a)): the passphrase field and `accountPassphraseLine` over a synced key file with
+  no passphrase lock while signed in; the Mac lobby renders the line under the lead. Design-row tests added to
+  `LobbyVaultRoadTests`: the named sentence exactly, the landing's durable notice through `RoadStandingModel.make`, ONE
+  bounded read before the open (`fetches == before + 3`: the decision's, then the act's own two — E4), no Touch ID read;
+  E6 by birth (a fresh library joined by the words): the face's field and line (signed out: the words alone), a wrong
+  passphrase "doesn't open this account" with nothing written, the account's passphrase opening through the vault with
+  the lock landed under the vault's descriptor (`lobbyNotice == .passphraseLanded`, the line retired after). **GREEN**
+  (the harness, `--filter "LobbyVaultRoadTests|TypedUnlockSyncKeysTests|TouchIDUnlockSyncKeysTests|ProtectionOpenRoad
+  PlantedTests|ProtectionLobbyModelTests|RoadLockTests|FollowDoneNoticeTests|PairFollow|PairPreflight"`): `✔ Test run with
+  75 tests in 12 suites passed` (VX-501's `theTypedLoadNeverDerivesThePassphrase` source pin among them — the vault road
+  derives nothing; the core does). THE REVERT (named before it runs): RV-P6-1 `ProtectionOpenRoad.swift` — the `.noneOpens`
+  arm's vault-road call removed, `--filter LobbyVaultRoadTests`. PENDING (next commit).
 - U2-P7 — the close: the harness whole, the core protection suites, ONE Mac + ONE iOS `build-for-testing`
   (`DerivedData/vx529-u2*`), the Mac-suite list for the stage batch. NOT-STARTED.
 

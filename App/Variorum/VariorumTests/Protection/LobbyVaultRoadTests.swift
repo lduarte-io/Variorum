@@ -183,6 +183,107 @@ struct LobbyVaultRoadTests {
         #expect(sentence == ProtectionWords.passphraseDoesNotOpen && world.vault.calls.count == fetches)
     }
 
+    // MARK: - The design rows (their tests — landed with the road)
+
+    /// THE NAMED SENTENCE, exactly; and the catch-up's DURABLE notice (VX-457's mark) written by the open's faces from what
+    /// the vault road landed; ONE bounded read before the open (the act's own reads after it are its plan's — E4); no
+    /// Touch ID read anywhere on the road (a read is a prompt).
+    @Test func theRoadSaysWhatItReadAndItsLandingIsTheSectionsNotice() async throws {
+        let world = try await Self.laggingCastle()
+        let snapshot = try #require(world.vault.snapshot(Account.account))
+        guard case .refused(let sentence) = await ProtectionOpenRoad.openTyped(
+            world.road.context(), secret: .passphrase("not anyone's passphrase"))
+        else {
+            Issue.record("refused")
+            return
+        }
+        #expect(sentence == ProtectionWords.lobbyPassphraseChangedElsewhere(
+            device: "Studio Mac", day: snapshot.updatedAt.map { ProtectionWords.day($0) }))
+        let custodyPresses = world.road.custody.reads.filter { $0 == .touchid }.count
+        let syncPresses = world.keys.touchIDReads
+        let before = Self.fetches(world)
+        guard case .opened(let opened) = await ProtectionOpenRoad.openTyped(
+            world.road.context(), secret: .passphrase(Self.changedPassphrase))
+        else {
+            Issue.record("opened")
+            return
+        }
+        #expect(opened.report.lobbyNotice == .followed(.pairChanged(passphrase: true, words: false)))
+        #expect(Self.fetches(world) == before + 3, "ONE bounded read decides; the act's own two (its door, its step) follow")
+        #expect(world.road.custody.reads.filter { $0 == .touchid }.count == custodyPresses && world.keys.touchIDReads
+                == syncPresses, "no Touch ID read — no prompt")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) != nil, "the account's keys held for the session")
+        let defaults = try FollowDoneNoticeTests.scratch("vx529-u2-lobby")
+        _ = RoadStandingModel.make(opened, ledger: PassphraseReminderLedger(defaults: defaults))
+        let libraryID = try #require(opened.library.record?.libraryID)
+        #expect(FollowDoneMark.notice(libraryID, in: defaults) == .followed(.pairChanged(passphrase: true, words: false)),
+                "the section's durable notice")
+    }
+
+    /// E6 — A SYNCED LIBRARY WITH NO PASSPHRASE LOCK OF ITS OWN (joined by the twelve words): signed in, the lobby offers
+    /// the passphrase field with R-529-6's line (the why and the road); the account's passphrase opens it through the
+    /// vault and the heal lands the lock (under the vault's descriptor — nothing else moved, the key unchanged), said as the
+    /// section's notice; any other passphrase is "not this account's", nothing written; signed out, no field, no line.
+    /// A library created here (no passphrase yet) JOINED an account that already syncs by its twelve words — E6 by birth
+    /// (no passphrase lock of its own; the account's master with its words copy) — and its quiet roads failed later (the
+    /// lobby asks).
+    static func e6Joined() async throws -> World {
+        let (road, vault, keys) = Account.road()
+        road.session = Account.signedIn
+        let (session, _) = try await road.created()
+        let accountWords = try RecoveryPhrase.generate()
+        try vault.plant(accountID: Account.account, passphrase: Account.passphrase, words: accountWords, mode: .standard)
+        let join = try #require(ProtectionPaneRead.accountFaces(try await Account.read(session, Account.signedIn))?
+            .turnOnSync.openDoor)
+        let joined = await ProtectionAccountRoad.press(
+            session, request: RoadAccountRequest(door: .turnOnSync, shown: join, typed: TypedSecrets(words: accountWords)),
+            signIn: Account.signedIn, exportSwitch: nil)
+        #expect(joined == .made(receipt: ProtectionWords.joinedReceipt(.sameMode, moved: false), wordsReplaced: true))
+        let live = try #require(session.library.keyFile)
+        #expect(live.passphrase == nil && live.master != nil && live.masterWordsCopy != nil, "precondition: E6")
+        road.custody.items = [:]
+        road.apple.keys = [:]
+        keys.holdInSession(nil, accountID: Account.account)
+        return World(road: road, vault: vault, keys: keys, session: session, words: accountWords)
+    }
+
+    @Test func e6_theAccountsPassphraseOpensThroughTheVaultAndTheLockLands() async throws {
+        let world = try await Self.e6Joined()
+        let session = world.session
+        let face = ProtectionLobbyFace.derive(ProtectionOpenRoad.lobbyFacts(world.road.context()))
+        #expect(face.passphraseField && face.wordsRoad == .disclosure, "the vault road's field, the words beside it")
+        #expect(face.accountPassphraseLine == ProtectionWords.lobbyAccountPassphraseNotTypedHere)
+        world.road.session = .signedOut
+        let signedOut = ProtectionLobbyFace.derive(ProtectionOpenRoad.lobbyFacts(world.road.context()))
+        #expect(!signedOut.passphraseField && signedOut.wordsRoad == .field && signedOut.accountPassphraseLine == nil,
+                "signed out: the words alone, as today")
+        world.road.session = Account.signedIn
+        let before = try Plant.containerBytes(world.road)
+        guard case .refused(let wrong) = await ProtectionOpenRoad.openTyped(
+            world.road.context(), secret: .passphrase("not the account's"))
+        else {
+            Issue.record("refused")
+            return
+        }
+        #expect(wrong == ProtectionWords.passphraseDoesNotOpenAccount)
+        #expect(try Plant.containerBytes(world.road) == before, "nothing written")
+        guard case .opened(let opened) = await ProtectionOpenRoad.openTyped(
+            world.road.context(), secret: .passphrase(Account.passphrase))
+        else {
+            Issue.record("the account's passphrase opens an E6 library through the vault")
+            return
+        }
+        #expect(opened.key == session.key)
+        let live = try #require(opened.library.keyFile)
+        let vault = try #require(world.vault.snapshot(Account.account))
+        #expect(live.passphrase?.kdf == vault.vault.kdf, "the lock landed under the vault's descriptor")
+        #expect((try? live.open(.passphrase(Account.passphrase), floor: .relaxedForTests)) == session.key)
+        #expect(opened.report.lobbyNotice == .passphraseLanded)
+        #expect(TypedUnlockSyncKeysTests.engineKeyID(opened) != nil, "the engine reads the account's keys (Standard: silent)")
+        #expect(ProtectionLobbyFace.derive(ProtectionOpenRoad.lobbyFacts(world.road.context())).accountPassphraseLine == nil,
+                "the line retires the moment the lock landed")
+    }
+
     /// THE OLD PASSPHRASE STILL OPENS LOCALLY (the vault road is never reached — no read beyond today's sync-keys load),
     /// and the follow stays owed in Settings (a guard: the local roads are untouched).
     @Test func theOldPassphraseStillOpensLocally() async throws {

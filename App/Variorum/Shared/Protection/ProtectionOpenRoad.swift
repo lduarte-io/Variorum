@@ -72,6 +72,9 @@ nonisolated struct RoadOpenReport: Sendable {
     /// read from durable facts only (`RoadSettledFollow.kind`), so the open says the follow's Done with its other-device
     /// sentence however many crashes came between the press and this open. nil: no follow settled here.
     var settledFollow: FollowKind?
+    /// VX-529 unit 2 — what the lobby's vault road landed in its press (the pair catch-up, or the E6 heal) — the account
+    /// section's DURABLE notice, marked by `RoadStandingModel.make` like a settled follow's. nil: nothing landed there.
+    var lobbyNotice: FollowDoneNotice?
 }
 
 /// VX-308 U2 — VX-107: THE FOLLOW A SETTLE FINISHED, by kind, from DURABLE facts — the act in flight as the unlock read it
@@ -398,8 +401,127 @@ nonisolated enum ProtectionOpenRoad {
             return .refused(ProtectionWords.somethingWentWrong)
         case .noneOpens:
             if case .words = secret { return .refused(ProtectionWords.wordsDoNotOpen) }
+            // VX-529 unit 2 — R-529-1: every local road refused the typed passphrase; signed in, it earns ONE bounded
+            // vault read (`openThroughTheVault`). nil: nothing the read proves — today's refusal, byte for byte.
+            if case .passphrase(let text) = secret,
+               let attempt = await openThroughTheVault(ctx, passphrase: text, files: files, within: bound) {
+                return attempt
+            }
             return .refused(ProtectionWords.passphraseDoesNotOpen)
         }
+    }
+
+    /// **VX-529 unit 2 — R-529-1 (her pick: "Open through the vault"): THE LOBBY'S VAULT ROAD** (`notes/plans/fixes/
+    /// vx-529-pair-catchup.md`, scope 3 and its guardrails). Reached only from `openTyped`, only for a PASSPHRASE that every
+    /// local road refused, only on a writing road (a hosted test run reads nothing) and only while someone is signed in:
+    /// ONE bounded read of the signed-in account's vault (VX-501's race, the same bound), then the core's pure decision
+    /// (`VaultRoad.answer` — the passphrase under the VAULT's descriptor opening its master, the master opening a held key
+    /// file's master lock). The key it finds goes through the ORDINARY open (the slot verifies it; the settle and the repairs
+    /// as at every open) — nothing is written before that unlock; then the catch-up lands with the typed secret in hand
+    /// (`catchUpThroughTheVault`). Where it opens nothing it says only what the read proves (the account's passphrase changed
+    /// elsewhere, named; E6's "not the account's"); nil — offline, a slow server, no vault, no proof, or a key the slot
+    /// refuses — keeps today's refusal byte for byte, every byte as it was.
+    static func openThroughTheVault(
+        _ ctx: RoadContext, passphrase text: String, files: [KeyFile], within bound: Duration
+    ) async -> RoadAttempt? {
+        guard ctx.writes, let account = ctx.session.accountID else { return nil }
+        let snapshot: VaultSnapshot
+        switch await boundedVaultRead(ctx.system.leaves.vault, accountID: account, within: bound) {
+        case .read(let read?):
+            snapshot = read
+        case .read(nil):
+            log("road: the vault road found no vault for the signed-in account — today's refusal")
+            return nil
+        case .failed(let error):
+            log("road: the vault road's read failed — \(String(describing: error)); today's refusal, nothing written")
+            return nil
+        case .timedOut:
+            log("road: the vault road's read took longer than \(bound) — today's refusal, nothing written")
+            return nil
+        }
+        let live = (try? ctx.system.leaves.keyFiles.readLiveKeyFile()) ?? nil
+        switch VaultRoad.answer(text, vault: snapshot, files: files, live: live, floor: ctx.system.floor) {
+        case .nothingToSay:
+            log("road: the vault road proves nothing for this passphrase — today's refusal")
+            return nil
+        case .notTheAccountsPassphrase:
+            return .refused(ProtectionWords.passphraseDoesNotOpenAccount)
+        case .passphraseChangedElsewhere(let device, let day):
+            return .refused(ProtectionWords.lobbyPassphraseChangedElsewhere(
+                device: device, day: day.map { ProtectionWords.day($0) }))
+        case .opens(let key, let derived):
+            switch await open(ctx, candidates: [key], typed: TypedSecrets(passphrase: text)) {
+            case .opened(let session):
+                log("road: the account's passphrase opened the library through the vault (R-529-1)")
+                await catchUpThroughTheVault(
+                    session, account: account, passphrase: text, derived: derived, vault: snapshot, signIn: ctx.session,
+                    within: bound)
+                return .opened(session)
+            case .recordMissing:
+                return .recordMissing
+            case .unreadableLiveKeyFile:
+                return .refused(ProtectionWords.liveKeyFileUnreadable)
+            case .noneOpens:
+                log("road: the vault road's key does not open the library in the slot — today's refusal")
+                return nil
+            case .failed(let error):
+                log("road: the vault road's open failed — \(String(describing: error))")
+                return .refused(ProtectionWords.somethingWentWrong)
+            }
+        }
+    }
+
+    /// **VX-529 unit 2 — the vault road's catch-up, in the same press, with the typed secret in hand** (never a quiet road):
+    /// on the session's one-act lock, a pair follow owed against the vault just read ⇒ the core's pair catch-up (unit 1's act
+    /// — its own fresh read re-verifies, E4); then a synced file still without a passphrase lock (E6) ⇒ the heal
+    /// (P-VX529-4, `landTheAccountsPassphraseLock` over the read in hand). Either failing leaves the library OPEN — never
+    /// hostage; the follow stays owed in Settings — and is said in the log. What landed is the account section's DURABLE
+    /// notice (VX-457's mark, written by `RoadStandingModel.make` from `RoadOpenReport.lobbyNotice`). Then the sync keys
+    /// load as at every typed unlock (VX-501) — over the read in hand (the catch-up held them already where it ran).
+    static func catchUpThroughTheVault(
+        _ session: ProtectionRoadSession, account: String, passphrase text: String, derived: PassphraseKey,
+        vault snapshot: VaultSnapshot, signIn: SessionFact, within bound: Duration
+    ) async {
+        guard session.writes, session.library.record?.account == account else {
+            log("road: the vault road opened a library that doesn't name the signed-in account — no catch-up")
+            return
+        }
+        guard session.beginAct() else { return }
+        let executor = session.executor
+        var library = session.library
+        var notice: FollowDoneNotice?
+        let current = library.keyFile.flatMap { $0.fingerprint == library.fingerprint ? $0 : nil }
+        if let pair = AssessRules.pairFollow(current, snapshot.reading) {
+            do {
+                _ = try await executor.follow(&library, kind: pair, typed: TypedSecrets(passphrase: text))
+                notice = .followed(pair)
+                log("road: the vault road's catch-up landed — the key file re-locked to the account's pair")
+            } catch {
+                log("road: the vault road opened the library; its catch-up did not land — \(String(describing: error)); "
+                    + "the follow stays owed")
+            }
+            session.library = library
+        }
+        if library.record?.account != nil, library.keyFile?.passphrase == nil {
+            do {
+                if try await executor.landTheAccountsPassphraseLock(
+                    &library, passphrase: text, vault: executor.freshVaults[account] ?? snapshot) {
+                    notice = notice ?? .passphraseLanded
+                }
+            } catch {
+                log("road: the vault road opened the library; the heal did not land — \(String(describing: error))")
+            }
+            session.library = library
+        }
+        session.endAct()
+        if let notice {
+            var report = session.report
+            report.lobbyNotice = notice
+            session.report = report
+        }
+        await loadSyncKeysAfterTypedUnlock(
+            session, signIn: signIn, typed: .passphrase([derived]), within: bound,
+            vault: executor.freshVaults[account] ?? snapshot)
     }
 
     /// THE PRESS (VX-310): the Touch ID item for the current key (the live key file's), else the first one this
@@ -512,9 +634,11 @@ nonisolated enum ProtectionOpenRoad {
     /// signed out or into another account, offline, a slow server, a secret that opens the library but not the vault, a moved
     /// account — each is said in the log and the library opens all the same; the row says locked as before. A read-only road
     /// (a hosted test run) reads nothing. No Touch ID item is read (a prompt), nothing is written to disk.
+    /// VX-529 unit 2 — `vault`: a read the caller holds from this same press (the lobby's vault road — its one bounded read);
+    /// nil: as before.
     static func loadSyncKeysAfterTypedUnlock(
         _ session: ProtectionRoadSession, signIn: SessionFact, typed: TypedUnlockSecret,
-        within bound: Duration = typedUnlockVaultBound
+        within bound: Duration = typedUnlockVaultBound, vault given: VaultSnapshot? = nil
     ) async {
         guard session.writes, let record = session.library.record, let account = record.account else { return }
         guard record.mode == .castle else { return }
@@ -531,7 +655,7 @@ nonisolated enum ProtectionOpenRoad {
             return
         }
         let snapshot: VaultSnapshot
-        if let fresh = session.executor.freshVaults[account] {
+        if let fresh = given ?? session.executor.freshVaults[account] {
             snapshot = fresh
         } else {
             switch await boundedVaultRead(session.system.leaves.vault, accountID: account, within: bound) {

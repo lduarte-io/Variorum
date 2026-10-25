@@ -435,6 +435,20 @@ nonisolated enum ProtectionWords {
         "\u{201C}\(word)\u{201D} isn't one of the words Variorum uses — check its spelling."
     }
     static let wordsChecksum = "One of the twelve words is off. Compare them with what you wrote down."
+    /// VX-529 unit 2 — the lobby's vault road read the account's change (R-529-1; the run record's design §3 sentence as
+    /// the vault road makes it true: the account's current passphrase opens it too, online): the bare refusal, then what
+    /// changed — the device and the day — then the road. PROVISIONAL (P-VX529-3's class).
+    static func lobbyPassphraseChangedElsewhere(device: String?, day: String?) -> String {
+        passphraseDoesNotOpen + " "
+            + followNotice(.pairChanged(passphrase: true, words: false), device: device, day: day) + " " + lobbyPairRoad
+    }
+    /// PROVISIONAL (P-VX529-3's class).
+    static let lobbyPairRoad = "Your account's current passphrase, the one before it, or your twelve words open it."
+    /// VX-529 unit 2 — R-529-6 (her direction, binding on every E6 face: the why and the road, never the mechanism; her
+    /// draft's shape, verbatim): the lobby over a synced library with no passphrase lock of its own, while signed in — the
+    /// passphrase field the vault road takes stands beside it. PROVISIONAL (P-VX529-3's class; P-VX529-U2-1 (a)).
+    static let lobbyAccountPassphraseNotTypedHere = "Your account's passphrase hasn't been typed on this "
+        + "\(ProtectionCopy.deviceName) yet \u{2014} type it here to use it on this \(ProtectionCopy.deviceName)."
     /// P-VX306-U1a-2: a file sits in the live place that this build can't read as a key file (its face is U2's).
     static let liveKeyFileUnreadable = "The key file beside your library can't be read, so Variorum can't open the "
         + "library with it."
