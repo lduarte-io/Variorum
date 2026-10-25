@@ -2121,8 +2121,10 @@ the closing stage batch, the live proof, and HER TWO-MAC TEST.**
   *[removed for publication]*
     vault standard rev 1 · `kp:` ENROLLED · 1 device cursor · 3 containers / 16 blocks / 16 variants, newest write
     2026-10-24 21:02Z — the first-run fix working in the field; one release stands (0.10.1, build 9311, 2026-10-24).
-- **The phone suites** (`VariorumMobile`, iPhone 17 Pro simulator, DerivedData `vx529-phone`): PENDING at this
-  writing — the result line flips here when the run lands.
+- **The phone suites** (`VariorumMobile`, iPhone 17 Pro simulator OS 26.2, DerivedData `vx529-phone`): **808 tests
+  in 126 suites PASSED, 4 known issues** (~7 min; the whole mobile target — wider than VX-510's two filtered
+  bundles). The first attempt exited 70 on an ambiguous destination name (two iPhone 17 simulators across OS 26.2
+  and 27.0); pinned by device id and clean.
 
 ## THE LIVE PROOF — THE SCRIPT OF RECORD (written before it runs, the unit C pattern; the orchestrator's walk under
 ## the held stage; the prod test road ONLY — `VARIORUM_PROD_TEST_ROAD=1` + the allowlist from
