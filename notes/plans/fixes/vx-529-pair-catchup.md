@@ -2301,6 +2301,28 @@ library now."** (P-VX510-1 live).
 - **Face note W-D1-1 (her bundle):** the third answer (opens this library, not the account, changed elsewhere) carries
   no catch-up pointer, though a follow is owed in exactly that state; the fourth answer does. One pointer for both.
 
+**D2 — THE VAULT ROAD IN CASTLE (R-529-1, her pick) — PASS (22:53–22:59):**
+- On L_B: Use Castle (Always ask; both secrets typed; the confirm's VX-469 Previous-Libraries line live) →
+  `enter_castle: retired 1 own Apple key(s)` · `done #2 under c122b713` · `road: useCastle — library 1a1e7a0d now
+  castle` → **server vault castle, rev 21**.
+- Swap to L_A: **E2 live** — the account moved posture AND pair, and the POSTURE follow outranked: *"Your account
+  entered Castle on Lillian's MacBook Pro on October 24."* + rule 10's sentence → Always ask + `passphrase` →
+  `follow: done #1 under 0b6b92bb` · `road: follow — … castle under 0b6b92bb`.
+- On L_A (Castle): Change passphrase `passphrase` → `passphrase2` → `change_passphrase: done #2` → **vault castle,
+  rev 22**. (No Touch ID anywhere — Always ask; VX-530's prompt-free order held on this Castle key door.)
+- Swap to L_B — **Castle Always ask: the lobby at launch.** Typed the account's NEW passphrase, which L_B's own lock
+  had never seen. The log, in order: **`road: the account's passphrase opened the library through the vault
+  (R-529-1)`** · `follow: begun #1 c122b713 → none` · **`follow: re-locked to the account's pair (passphrase) — the
+  key unchanged (c122b713)`** · `done #1` · **`road: the vault road's catch-up landed — the key file re-locked to
+  the account's pair`** · `road: the typed unlock found the account's sync keys already loaded — nothing read`. The
+  library opened and read **"Synced 10:58 PM"** (Castle sync running on the catch-up's keys). One typing; everything
+  converged.
+- **The network needed exactly once:** ⌃⌘L (`road: locked … (VX-445)`) → the same passphrase at the lobby →
+  `road: opened` + `the typed unlock loaded the account's sync keys` — **no vault-road line: it opened LOCALLY**
+  through the re-locked passphrase lock.
+- Rule 21's "This is a different library than the one this Mac last had open" notice greeted every swap (the walk
+  artifact; it blocked ⌃⌘L until OK — expected modal behavior).
+
 **STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
 (fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
 held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
