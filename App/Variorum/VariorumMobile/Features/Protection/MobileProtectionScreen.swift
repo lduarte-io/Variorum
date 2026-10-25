@@ -77,9 +77,18 @@ struct MobileProtectionScreen: View {
                         MobileRoadCrossingsSection(model: crossings, tokens: tokens)
                     }
                 }
+                // Ladder round 1's MINOR-1 (P-VM8-9 (a-unified)): a door the follow locks above says nothing in its place —
+                // the account section says the follow-owed refusal once, in the follow's place.
+                let followOwedAbove = MobileFollowOwed.locks(standing?.keyDoors?.faces)
+                    || MobileFollowOwed.locks(standing?.crossings?.faces)
                 if let account = standing?.account {
                     Divider().overlay(tokens.line)
-                    MobileRoadAccountSection(model: account, tokens: tokens)
+                    MobileRoadAccountSection(model: account, tokens: tokens, followOwedElsewhere: followOwedAbove)
+                }
+                if followOwedAbove, standing?.account?.faces == nil {
+                    // The belt: the account section has not read yet (or there is none) — the one saying stands at its
+                    // place, so a door the follow locks is never left unexplained.
+                    MobileProtectionChrome.caption(MobileFollowOwed.saying, tokens)
                 }
             }
             .padding(.horizontal, 20)
@@ -109,6 +118,9 @@ struct MobileProtectionScreen: View {
 struct MobileRoadAccountSection: View {
     @Bindable var model: RoadAccountModel
     let tokens: VoiceTokens
+    /// Ladder round 1's MINOR-1 (P-VM8-9 (a-unified)): a section above holds a door the follow locks (the screen's reading);
+    /// this section says the follow-owed refusal once for them all, in the follow's place.
+    var followOwedElsewhere = false
 
     var body: some View {
         if let faces = model.faces {
@@ -124,8 +136,9 @@ struct MobileRoadAccountSection: View {
                         door(ProtectionWords.followDoneOK) { model.followDoneOK() }
                     }
                 }
-                // VX-308 U2 (R-U2-1): the follow first — the account moved on another device; its notice beside its door.
-                doorRow(.follow, faces.follow)
+                // VX-308 U2 (R-U2-1): the follow first — the account moved on another device; its notice beside its door,
+                // and the follow-owed refusal said ONCE for every door it locks (here or above).
+                followRow(faces.follow, saysFollowOwed: followOwedElsewhere || MobileFollowOwed.locks(faces))
                 ForEach(RoadAccountDoor.allCases.filter { $0 != .follow }) { door in
                     doorRow(door, faces.face(door))
                 }
@@ -159,12 +172,33 @@ struct MobileRoadAccountSection: View {
         if faces.vaultUnreachable { caption(ProtectionWords.doorRefusedNeedsVault) }
     }
 
+    /// THE FOLLOW'S PLACE (ladder round 1's MINOR-1 — P-VM8-9 (a-unified)): where the follow door renders, its notice, the
+    /// one follow-owed saying (when a door is locked by it), its door; where it does not — hidden, or the follow out of
+    /// Castle held for her phone wording (F-U1-1 (A), P-VM8-10) — the one saying alone, so the locked doors keep their one
+    /// truth-teller.
+    @ViewBuilder
+    private func followRow(_ face: RoadAccountDoorFace, saysFollowOwed: Bool) -> some View {
+        if case .open(let open) = face, !open.saysRuleTwelve {
+            VStack(alignment: .leading, spacing: 6) {
+                if let notice = open.notice { line(notice, ink: tokens.ink) }
+                if saysFollowOwed { caption(MobileFollowOwed.saying) }
+                self.door(open.doorLabel) { model.open(.follow) }
+            }
+        } else {
+            if saysFollowOwed { caption(MobileFollowOwed.saying) }
+            doorRow(.follow, face)
+        }
+    }
+
     /// One door as `assess` says it — hidden renders nothing (P-2); refused / not yet says its sentence in its place; open
-    /// renders its notice and its door. F-U1-1 (A): an open arm saying her rule-12 sentence renders NOTHING here.
+    /// renders its notice and its door. F-U1-1 (A): an open arm saying her rule-12 sentence renders NOTHING here. A door the
+    /// follow locks says nothing in its place — the follow's place says it once (`followRow`).
     @ViewBuilder
     private func doorRow(_ door: RoadAccountDoor, _ face: RoadAccountDoorFace) -> some View {
         switch face {
         case .hidden:
+            EmptyView()
+        case .refused(MobileFollowOwed.saying):
             EmptyView()
         case .refused(let sentence), .notYet(let sentence):
             caption(sentence)

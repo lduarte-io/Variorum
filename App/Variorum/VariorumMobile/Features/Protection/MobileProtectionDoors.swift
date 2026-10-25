@@ -11,8 +11,11 @@
 //    - THE PASSPHRASE: *Set a passphrase…* while none exists (the shared setter — the 12-character floor its only refusal,
 //      VX-211's quiet hint under the field); Change passphrase… and Reset forgotten passphrase… as `assess` says them
 //      (Standard's plain confirm; Castle's words, or *Reset with Face ID* where this iPhone has its item), each saying
-//      VX-263's one line; while the account's PAIR changed elsewhere the locked doors say the follow's road ONCE (the pair
-//      sentence stands beside the follow door — F-U2-D, PROVISIONAL P-VM8-9; the Mac's VX-542 repetition not copied).
+//      VX-263's one line; a door the follow locks renders nothing here (the pair gate's and the generic one's alike).
+//    - THE OWED FOLLOW, SAID ONCE (`MobileFollowOwed` — F-U2-D, PROVISIONAL P-VM8-9 (a-unified), ladder round 1's
+//      MINOR-1): the follow-owed refusal is said once on the whole screen, in the account section's follow place — beside
+//      the follow door's notice, or alone there where the follow out of Castle is held (P-VM8-10); the pair's sentence is
+//      the follow door's notice, once. The Mac's VX-542 repetition is not copied.
 //    - THE TWELVE WORDS: New words through the one look (it mints and shows once; asks the passphrase where one exists; a
 //      synced library hears first that new words replace the account's) — no Copy door (the phone has no words clipboard).
 //    - THE CHECK: *Check my passphrase or twelve words…* — one typed secret, read only; it writes nothing (VX-513).
@@ -206,6 +209,41 @@ final class MobileProtectionReceipts {
     }
 }
 
+// MARK: - The owed follow, said once (VM-8 ladder round 1, MINOR-1 — PROVISIONAL P-VM8-9 (a-unified))
+
+/// **The owed follow's refusal, said ONCE on the screen.** While the account changed on another device, `assess` locks
+/// every key door, the crossings (its gate runs before the posture's own check) and the leaves that write the account
+/// (`.followOwed`), and the shared faces give each the same sentence in its place — VX-542's repetition, four times on one
+/// phone screen. The phone says it once, in ONE place: the account section's follow place — beside the follow door's
+/// notice where that door renders, alone there where it does not (P-VM8-10: the follow out of Castle is held for her phone
+/// wording, and the dead end keeps its one truth-teller). Every section renders nothing for a door the follow locks; a door
+/// refused for any other reason keeps its row. The sentence is the shared faces' own (`doorRefusedFollowOwed` — no new
+/// words); the pair gate's per-door sentence (`followFirstToCatchUp` — the pair's notice + the road) collapses into it, the
+/// pair's notice standing beside its door. Pure readings of the shared faces — nothing here decides.
+enum MobileFollowOwed {
+    /// The one saying.
+    static let saying = ProtectionWords.doorRefusedFollowOwed
+
+    /// The key doors are locked by the follow: the pair gate (each door's sentence names the pair — the shared fact), or
+    /// any door saying the follow-owed refusal.
+    static func locks(_ faces: RoadKeyDoorFaces?) -> Bool {
+        guard let faces else { return false }
+        return faces.pairGate || RoadKeyDoor.allCases.contains { faces.face($0) == .refused(saying) }
+    }
+
+    /// A crossing the phone renders is locked by the follow.
+    static func locks(_ faces: RoadCrossingFaces?) -> Bool {
+        guard let faces else { return false }
+        return MobileRoadCrossingsSection.phoneDoors.contains { faces.face($0) == .refused(saying) }
+    }
+
+    /// An account door is locked by the follow (the leaves that write the account — `assess`'s `.followOwed`).
+    static func locks(_ faces: RoadAccountFaces?) -> Bool {
+        guard let faces else { return false }
+        return RoadAccountDoor.allCases.contains { faces.face($0) == .refused(saying) }
+    }
+}
+
 // MARK: - The passphrase (Set a passphrase…, Change, Reset — VX-306 U2, VX-308 U3)
 
 struct MobilePassphraseSection: View {
@@ -220,15 +258,17 @@ struct MobilePassphraseSection: View {
         case refused(String)
     }
 
-    /// The passphrase doors' rows — the pure reading the section renders (P-VM8-9: a pair gate says the follow's road once,
-    /// never a per-door copy of the pair sentence).
+    /// The passphrase doors' rows — the pure reading the section renders. A door the follow locks contributes NO row (the
+    /// pair gate's doors and the follow-owed refusal alike — the screen says it once, in the follow's place: P-VM8-9
+    /// (a-unified)); any other refusal keeps its row, identical ones once.
     static func rows(_ faces: RoadKeyDoorFaces) -> [Row] {
-        if faces.pairGate { return [.refused(ProtectionWords.followFirstToCatchUpRoad)] }
+        if faces.pairGate { return [] }
         var rows: [Row] = []
         for door in [RoadKeyDoor.changePassphrase, .resetForgottenPassphrase] {
             switch faces.face(door) {
             case .hidden: continue
             case .open: rows.append(.open(door))
+            case .refused(MobileFollowOwed.saying): continue
             case .refused(let sentence): if !rows.contains(.refused(sentence)) { rows.append(.refused(sentence)) }
             }
         }
@@ -401,8 +441,8 @@ struct MobileWordsSection: View {
             MobileProtectionChrome.caption(ProtectionWords.wordsSectionLine, tokens)
             if let look, look.phase != .closed {
                 MobileWordsLookPanel(look: look, tokens: tokens)
-            } else if faces?.pairGate == true {
-                // P-VM8-9: the locked doors' road is said once, in the passphrase section above.
+            } else if faces?.pairGate == true || faces?.newWords == .refused(MobileFollowOwed.saying) {
+                // P-VM8-9 (a-unified): New words locked by the follow — the screen says it once, in the follow's place.
                 EmptyView()
             } else if case .refused(let sentence)? = faces?.newWords {
                 MobileProtectionChrome.caption(sentence, tokens)
@@ -507,7 +547,8 @@ struct MobileRoadCrossingsSection: View {
         case refused(String)
     }
 
-    /// The pure reading the section renders.
+    /// The pure reading the section renders. A door the follow locks contributes no row (the screen says it once, in the
+    /// follow's place — P-VM8-9 (a-unified)).
     static func rows(_ faces: RoadCrossingFaces) -> [Row] {
         var rows: [Row] = []
         for door in phoneDoors {
@@ -517,6 +558,7 @@ struct MobileRoadCrossingsSection: View {
             case .open(let open) where open.saysRuleTwelve: continue
             case .open: rows.append(.open(door))
             case .signedOutRoad: rows.append(.signedOutRoad(door))
+            case .refused(MobileFollowOwed.saying): continue
             case .refused(let sentence): if !rows.contains(.refused(sentence)) { rows.append(.refused(sentence)) }
             }
         }
