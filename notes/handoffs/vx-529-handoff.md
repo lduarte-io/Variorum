@@ -57,8 +57,8 @@ PAIR CATCH-UP; **canon-size 125,663 / 150,000**.
 ## EVIDENCE AT A GLANCE
 
 - The ladder: round 1 `0B·0M·1m·2n` → fix sessions L1 + L2 → round 2 `0B·0M·0m·2n`, every fix SOUND; no round 3.
-- The closing stage batch: the Mac target `5231 / 5265` (the 2 failures are VX-539's week-boundary flake, proven on
-  main); the phone `808 / 126`. The 0.10.2 version gate: `26 tests in 5 suites passed`.
+- The closing stage batch: the Mac target ran 5265 tests, 5231 passed (the 2 failures are VX-539's week-boundary
+  flake, proven on main; the rest skipped by design or expected); the phone 808 tests in 126 suites, all passed. The 0.10.2 version gate: `26 tests in 5 suites passed`.
 - The live proof on production (the `castle` test account): D0–D7 all pass, the dev store restored exactly (every
   inode matched). Two incidents traced, proven harmless, recorded with standing rules (I-D0-1, I-D0-2).
 - Your two-Mac test on your real Macs and account: the Pro changed the passphrase → the Air's lock screen took the new
