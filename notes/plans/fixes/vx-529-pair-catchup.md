@@ -1945,12 +1945,12 @@ written through `settingMaster` inside `locking`, the existing setter):**
   deliberate press. For the reviewer.
 
 **The pieces (flip per commit; unverified claims PENDING):**
-- L2-P0 — this LIVE STATUS, the trace and the design. DONE (this commit).
+- L2-P0 — this LIVE STATUS, the trace and the design. DONE (`e848e96e9`).
 - L2-P1 — THE PINS, red-on-old where the bug is claimed (core, `RestoredCopyJoinWordsMomentTests.swift`): the held row flipped
   (F-L2-1); the shape on a synced signed-in Mac; offline ⇒ today's file + the later join speaks; the words changed elsewhere ⇒
   nothing + speaks; the passphrase alone changed ⇒ written + quiet (F-L2-2); the crash after every write ⇒ the new library WITH the
   fields or the old state, never a third; no new write (the act's write log equals the offline run's, kind by kind); a fixed
-  scenario through the scenario world (promises kept, the rejoin quiet, then Use Castle). DONE (this commit) — the file's shared
+  scenario through the scenario world (promises kept, the rejoin quiet, then Use Castle). DONE (`aaa2f7c63`) — the file's shared
   setup `RestoredCopyWorld` (the account on one Mac, a laptop that joined by the passphrase, its own backup planted; Standard,
   Castle Touch ID, Castle Always ask) and two new suites, `RestoredCopyProofFieldsTests` and `RestoredCopyProofFieldsScenarios`.
   **RED on the pre-fix tree** (`5dca7f06f`'s code; `swift test --filter RestoredCopy`): `✘ Test run with 10 tests in 3 suites
@@ -1983,12 +1983,12 @@ written through `settingMaster` inside `locking`, the existing setter):**
   red while the core reads unbounded in the door). DONE — THE PIN COMMITTED (`a6cd12f77`,
   `VariorumTests/Protection/MakeMineProofFieldsRoadTests.swift`, symlinked into unit 2's harness; the planted road: a Standard
   library turned on to sync, signed in, one backup of itself; the preflight then `ProtectionCopyDoors.makeMine`). The one
-  production line in this commit is a defaulted, UNUSED `vaultWithin:` parameter on `makeMine` (no behavior — the pin's seam, the
+  production line in `a6cd12f77` is a defaulted, UNUSED `vaultWithin:` parameter on `makeMine` (no behavior — the pin's seam, the
   lobby suite's precedent), so the pin compiles on the pre-fix behavior. **RED on the tree as it stands** (the harness, `--filter
   MakeMineProofFieldsRoadTests`): `✘ Test run with 3 tests in 1 suite failed after 4.873 seconds with 2 issues.` — exactly the slow
   row: `clock.now - started < .milliseconds(1500)` (the core's own door read waited for the 2 s answer) and `isTodays` (it wrote the
   fields from that late answer). Green on both sides, as they must stay: online — ONE read, the fields written (the core's door read
-  served it before the app's read existed); offline — today's file. THE FIX COMMITTED (`a6cd12f77` the pin; this commit the read;
+  served it before the app's read existed); offline — today's file. THE FIX COMMITTED (`a6cd12f77` the pin; `05829dc27` the read;
   its revert RV-L2-2 verified — L2-P4): `ProtectionCopyDoors.makeMine` makes `proofVaultRead(session, within: bound)` — a writing road, the
   executor's signed-in account, ONE `ProtectionOpenRoad.boundedVaultRead` (VX-501's race; a late answer dropped; each ending
   logged) — BEFORE the restore hold (nothing moves while it waits; the hold-then-act order untouched), and hands it to the core as
@@ -2011,7 +2011,7 @@ written through `settingMaster` inside `locking`, the existing setter):**
   ONE-read count (2 fetches: the app's read made and NOT handed in, the core's own door read on top — the count is what proves the
   act uses the app's read rather than a second one); offline green through it; restored by `git checkout --`, `git diff
   --exit-code` clean, `✔ Test run with 3 tests in 1 suite passed after 3.075 seconds.`
-- L2-P5 — THE CLOSE. DONE (this commit), on the finished product tree (`332679b41`; this commit touches no code):
+- L2-P5 — THE CLOSE. DONE (`79052d0b2`), on the finished product tree (`332679b41`; the close's commits touch no code):
   - THE CORE SUITE whole (`swift test`, debug, headless): VariorumCoreTests **`Test run with 3435 tests in 457 suites passed after
     206.223 seconds with 5 known issues.`** (P2's 4 negative controls + P6d's pinned residual — VX-523's held row is no longer one:
     6 → 5; 3426 → 3435, this session's 9 new tests); the one failure the ticketed MCP wall-clock flake
