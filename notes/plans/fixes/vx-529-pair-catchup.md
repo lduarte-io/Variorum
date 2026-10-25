@@ -1985,7 +1985,17 @@ written through `settingMaster` inside `locking`, the existing setter):**
   MakeMineProofFieldsRoadTests`): `✘ Test run with 3 tests in 1 suite failed after 4.873 seconds with 2 issues.` — exactly the slow
   row: `clock.now - started < .milliseconds(1500)` (the core's own door read waited for the 2 s answer) and `isTodays` (it wrote the
   fields from that late answer). Green on both sides, as they must stay: online — ONE read, the fields written (the core's door read
-  served it before the app's read existed); offline — today's file.
+  served it before the app's read existed); offline — today's file. THE FIX COMMITTED (`a6cd12f77` the pin; this commit the read;
+  its revert RV-L2-2 PENDING): `ProtectionCopyDoors.makeMine` makes `proofVaultRead(session, within: bound)` — a writing road, the
+  executor's signed-in account, ONE `ProtectionOpenRoad.boundedVaultRead` (VX-501's race; a late answer dropped; each ending
+  logged) — BEFORE the restore hold (nothing moves while it waits; the hold-then-act order untouched), and hands it to the core as
+  `accountsVault: .taken(read)`. `AppBootstrap` untouched. **GREEN** (the harness, `--filter MakeMineProofFieldsRoadTests`): `✔ Test
+  run with 3 tests in 1 suite passed after 2.932 seconds.` The neighbours (`--filter "MakeMineRoadTests|PickedCopyRoadTests|
+  PreviousLibrariesArcTests|WordsLedgerCarryRoadTests|CopyDoors|MakeMineProofFieldsRoadTests|ProtectionCopyCountsTests|HoldBanner|
+  RestoreHold|LobbyVaultRoadTests|TypedUnlockSyncKeysTests|ProtectionOpenRoadPlantedTests"`): `✔ Test run with 82 tests in 17
+  suites passed after 4.887 seconds.`; (`--filter "LookInsideRoadTests|ProtectionRestoreReceiptTests|RoadRestoreHoldGateTests|
+  ProtectionJoinFollowRoadTests|RoadAccountModelTests|FirstRoundConfirmTests"`): `✔ Test run with 45 tests in 6 suites passed after
+  0.637 seconds.`
 - L2-P4 — THE REVERTS, each named here before it runs. RV-L2-1 DONE: named in the banner first (`1f6492aed`); `Copies.swift`'s
   `makeMineKeyFile` made to ignore the proof (`newLocks(words: true)`, the master clause disabled), `swift test --filter
   RestoredCopy` ⇒ `✘ Test run with 11 tests in 3 suites failed after 0.577 seconds with 48 issues.` — exactly the pre-fix red (the
