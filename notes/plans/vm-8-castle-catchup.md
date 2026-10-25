@@ -566,7 +566,7 @@ signed out.**
 
 | # | item | owner | status |
 |---|---|---|---|
-| 1 | Unit 1 — the phone syncs again (pieces 1–5 above) | implementer U1 | BUILD CLOSED on the simulator (tip `11c4f2054`); the Mac stage batch runs now (orchestrator); the device install HELD for her |
+| 1 | Unit 1 — the phone syncs again (pieces 1–5 above) | implementer U1 | CLOSED on the simulator (tip `11c4f2054`). **The Mac stage batch RAN (orchestrator, 2026-10-25): 625 tests / 132 suites, 4 declared skips, ONE red suite — `ProtectionPairRetentionTests` (3 issues), PROVEN RED ON MAIN the same day → pre-existing, filed VX-546; everything VM-8 touches green, the Mac's ruled sentences byte-identical by pin.** The device install HELD for her |
 | 2 | Unit 2 — crossings (entering), key doors, follows (in/pair), check door, receipts' home — the UNIT 2 BRIEF above; leave-direction arms HELD for F-PH-2 | implementer U2 | BRIEF WRITTEN — spawns after the Mac batch |
 | 3 | Unit 3 — the cards + the pocket guide | at her split call | NOT STARTED |
 | 4 | Old-scope reconciliation tickets | orchestrator | table drafted; tickets at the sitting |
