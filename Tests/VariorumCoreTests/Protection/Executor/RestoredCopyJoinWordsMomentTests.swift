@@ -68,10 +68,16 @@ struct RestoredCopyWorld {
             oldID: try #require(library.record?.libraryID), outgoingFile: synced)
     }
 
-    /// The press — the secrets form, its door's read of the vault its own (`.inTheDoor`, the default).
-    mutating func makeMine() async throws -> ActOutcome {
-        try await executor.makeThisMyLibrary(
-            &library, copy: copy, in: catalog, copySecrets: copySecrets, currentPair: currentPair)
+    /// The press — the secrets form, its door's read of the vault its own unless `accountsVault` says otherwise
+    /// (`.inTheDoor`, the default — the call the pins red on the old tree make, unchanged).
+    mutating func makeMine(_ accountsVault: AccountsVaultRead? = nil) async throws -> ActOutcome {
+        guard let accountsVault else {
+            return try await executor.makeThisMyLibrary(
+                &library, copy: copy, in: catalog, copySecrets: copySecrets, currentPair: currentPair)
+        }
+        return try await executor.makeThisMyLibrary(
+            &library, copy: copy, in: catalog, copySecrets: copySecrets, currentPair: currentPair,
+            accountsVault: accountsVault)
     }
 
     /// The vault as the server holds it now.
@@ -118,7 +124,10 @@ struct RestoredCopyWorld {
         let wrap = try #require(outgoingFile.passphrase)
         var locks = NewKeyLocks(
             passphrase: try PassphraseKey.derive(mac.passphrase, kdf: wrap.kdf), words: try WordsKey.derive(mac.words))
-        if let apple = live.apple { locks.apple = try #require(laptop.world.icloud.keys[apple.keyID]) }
+        if let apple = live.apple {
+            let material: AppleKeyMaterial? = laptop.world.icloud.keys[apple.keyID]
+            locks.apple = try #require(material, "the own Apple key the new file names")
+        }
         return try KeyFile.building(libraryID: live.libraryID, key: key, epoch: 1, locks: locks)
     }
 }
@@ -261,6 +270,46 @@ struct RestoredCopyProofFieldsTests {
             let joined = try await world.executor.enroll(&world.library, typed: TypedSecrets(passphrase: newPassphrase))
             #expect(!replaced(joined), "\(mode): no words were replaced — quiet")
         }
+    }
+
+    /// DESIGN ROW (with the fix — the `.taken` road is new): THE CALLER'S READ IS VERIFIED, NEVER TRUSTED, and never
+    /// replaced. `.taken(nil)` (the app's bounded read failed or timed out) writes today's file even with the vault in reach
+    /// and this session's own read in hand — no fallback; another account's read writes today's file; the account's own
+    /// read lands the fields with the server gone (the caller's read is the one used); signed out (Castle — a Standard
+    /// library bound to an account refuses a signed-out press at decision 35 before this), today's file whatever is handed.
+    @Test func theCallersReadIsVerifiedNeverTrustedNeverReplaced() async throws {
+        for (mode, gate) in [(ProtectionMode.standard, GateStyle?.none), (.castle, .alwaysAsk)] {
+            var none = try await RestoredCopyWorld.make(mode, gate: gate)
+            _ = try await none.makeMine(.taken(nil))
+            let nothing = try #require(none.laptop.world.liveFormat3)
+            #expect(nothing == (try none.todaysFile(nothing, key: none.library.key)), "\(mode): .taken(nil) — today's file")
+
+            var stranger = try await RestoredCopyWorld.make(mode, gate: gate)
+            let other = try EX(mode, synced: true, gate: gate)
+            let otherAccount = try #require(other.account)
+            let othersRead = try #require(other.world.server.snapshot(otherAccount))
+            _ = try await stranger.makeMine(.taken(othersRead))
+            let refused = try #require(stranger.laptop.world.liveFormat3)
+            #expect(refused == (try stranger.todaysFile(refused, key: stranger.library.key)), "\(mode): another account's read")
+            // …and another account's vault handed under THIS account's name: the words open nothing in it.
+            var forged = try await RestoredCopyWorld.make(mode, gate: gate)
+            _ = try await forged.makeMine(.taken(VaultSnapshot(accountID: forged.account, revision: 1, vault: othersRead.vault)))
+            let unproven = try #require(forged.laptop.world.liveFormat3)
+            #expect(unproven == (try forged.todaysFile(unproven, key: forged.library.key)), "\(mode): a vault the words don't open")
+
+            var given = try await RestoredCopyWorld.make(mode, gate: gate)
+            let read = try #require(given.mac.world.server.snapshot(given.account))
+            given.mac.world.server.reachable = false
+            _ = try await given.makeMine(.taken(read))
+            #expect(given.carriesTheProof(given.laptop.world.liveFormat3, master: try given.accountsMaster()),
+                    "\(mode): the caller's read, verified, lands the fields")
+        }
+        var signedOut = try await RestoredCopyWorld.make(.castle, gate: .alwaysAsk)
+        let read = try #require(signedOut.mac.world.server.snapshot(signedOut.account))
+        signedOut.executor.configuration.session = .signedOut
+        _ = try await signedOut.makeMine(.taken(read))
+        let live = try #require(signedOut.laptop.world.liveFormat3)
+        #expect(live == (try signedOut.todaysFile(live, key: signedOut.library.key)), "signed out — today's file")
     }
 
     /// GUARD (green on both sides by nature) — NO NEW WRITE, NO NEW STEP: the press that carries the proof writes exactly

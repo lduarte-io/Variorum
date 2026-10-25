@@ -1957,7 +1957,24 @@ written through `settingMaster` inside `locking`, the existing setter):**
   and every step GREEN on the old tree). **GREEN on the pre-fix tree, by nature (guards the fix must keep):** the words-arm quiet
   row, offline ⇒ today's file byte for byte + the moment speaks, the words changed elsewhere ⇒ today's file + speaks, no new write
   (the proven run's write log equals the offline run's, kind by kind).
-- L2-P2 — THE CORE FIX (`Copies.swift`, `PlanRunner.perform`'s `pairProof:`, `ActContext.pairProof`) + the `.taken` pins. NOT-STARTED.
+- L2-P2 — THE CORE FIX (`Copies.swift`, `PlanRunner.perform`'s `pairProof:`, `ActContext.pairProof`) + the `.taken` pins.
+  DONE (this commit; its revert is L2-P4's RV-L2-1, PENDING) — `Executor/Acts/Copies.swift`: `AccountsVaultRead`
+  (`.inTheDoor` · `.taken(VaultSnapshot?)`); `AccountPairProof` (the master + the wrap, redacted, never stored); both public
+  `makeThisMyLibrary` forms take `accountsVault:` (default `.inTheDoor`) into the one body, which — after every refusal — asks
+  `accountPairProof(words:from:)` (signed in; the vault the session's account's; the typed words open ITS master by the recovery
+  wrap; `isMaster`; else nil, logged) and hands the proof to `perform(…, pairProof:)`; `makeMineKeyFile` with a proof builds
+  `newLocks(words: false)` + the master and its copy (the join's VX-462 shape) in the same one write, without one today's
+  locks exactly. `Executor/PlanRunner.swift`: `ActContext.pairProof` (the `copyKey` precedent) and `perform`'s defaulted
+  `pairProof:` (every other caller unchanged). Nothing stored changes shape; zero `Sync/` lines. The `.taken` design row added
+  (`theCallersReadIsVerifiedNeverTrustedNeverReplaced` — `.taken(nil)` writes today's file with the vault in reach and this
+  session's read in hand; another account's read, and another account's vault under this account's name, today's file; the
+  account's own read lands the fields with the server gone; signed out (Castle), today's file). **GREEN** (`swift test --filter
+  RestoredCopy`): `✔ Test run with 11 tests in 3 suites passed after 0.578 seconds.` — the held pin among them, the crash
+  harness and both scenario-world passes (every promise kept). The neighbours (`--filter "U2MakeMine|U2LookInside|
+  SyncKeysSessionHold|EmptySlotMakeMine|JoinWordsMoment|ExactWrites|U2CrashHarness|CopyAct|RestoredCopy|Lifecycle|FixedScenarios|
+  AccountScenarios|PairCatchUpScenarios|U4LaggingPair|OtherLibrarysCopiesDelete|U4KeyFileOffer"`): `✔ Test run with 107 tests in
+  29 suites passed after 3.789 seconds.` (the lifecycle walk's makeMine check — `live?.master == nil` — untouched: its Mac is
+  signed out at stages 9–10, so its door reads nothing).
 - L2-P3 — THE APP'S BOUNDED READ (`ProtectionCopyDoors.makeMine`) + its harness pin (a slow server: the bound holds, today's file —
   red while the core reads unbounded in the door). NOT-STARTED.
 - L2-P4 — THE REVERTS, each named here before it runs. NOT-STARTED.

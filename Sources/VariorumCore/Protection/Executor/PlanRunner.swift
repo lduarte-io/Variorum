@@ -118,6 +118,12 @@ public final class ActContext {
     /// Make this my library: the copy's key, held from the press for the act's
     /// span — never stored (a resume before the swap rolls back without it).
     var copyKey: StoreKey?
+    /// Make this my library (VX-523, R-529-7): the door's proof that the
+    /// current pair's words are the signed-in account's — the join's two
+    /// fields for the new key file. Held from the press for the act's span,
+    /// never stored: the key-file step runs only at the press (a resume before
+    /// the stage holds no copy key and rolls back).
+    var pairProof: AccountPairProof?
     /// The outgoing key, held from the begin for the act's span.
     var heldFromKey: StoreKey?
     /// The account's sync keys in hand (custody, session memory, or the vault).
@@ -205,10 +211,12 @@ extension ProtectionExecutor {
     /// at its press (named in the act in flight from the first write).
     /// `material`: the account's sync keys the door already holds in hand
     /// (VX-529's pair catch-up: read once at the door — a Touch ID read is a
-    /// press — never stored; a resume finds its own).
+    /// press — never stored; a resume finds its own). `pairProof`: Make this
+    /// my library's proof fields (VX-523 — `ActContext.pairProof`).
     func perform(
         _ program: any ActProgram, parameters: ActParameters, secrets: ActSecrets, typed: TypedSecrets? = nil,
-        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, material: AccountKeys? = nil, library: inout UnlockedLibrary
+        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, material: AccountKeys? = nil,
+        pairProof: AccountPairProof? = nil, library: inout UnlockedLibrary
     ) async throws -> ActOutcome {
         guard library.record != nil else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
@@ -234,6 +242,7 @@ extension ProtectionExecutor {
             executor: self, library: library, plan: plan, secrets: secrets, typed: typed, toKey: toKey,
             resuming: false)
         ctx.copyKey = copyKey
+        ctx.pairProof = pairProof
         if let material { ctx.material = material }
         defer { library = ctx.library }
         do {
