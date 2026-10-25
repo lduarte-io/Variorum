@@ -2351,6 +2351,22 @@ library now."** (P-VX510-1 live).
 - ⌃⌘L → the account's passphrase at the lobby → `road: opened` + the sync keys — **no vault-road line: the healed
   lock opens LOCALLY**.
 
+**D5 — THE RESTORED-COPY QUIET JOIN (VX-523 under R-529-7, L2 live) — PASS (23:05–23:08):**
+- On L_A (Castle, converged): Data Safety ▸ Back Up Now… → `backup pair: written under 0b6b92bb`. The restore list
+  showed rows more than once (beside-library and picked-folder copies — VX-524's known ticket, not this run's).
+- Make this my library on the 11:05 row (the copy's field empty, our own pair opening it; the CURRENT pair typed —
+  words + passphrase — per the Castle sheet's *"under your current twelve words and passphrase"*) →
+  `make_mine: begun #2 0b6b92bb → d206d577` · **`make_mine: the new library's key file written (d206d577) — with
+  the join's two proof fields (VX-523: the pair proven the account's)`** · `swapped` · `done #2` · `road: made a
+  copy this Mac's library — library ac57d5c2 …; the previous one in Previous Libraries; held`.
+- Protection ▸ "Sync this library…" → the account's passphrase → `enroll: done #3` · `road: turnOnSync — library
+  *[removed for publication]*
+  moment** (D0's join of L_A stopped on that moment until OK; here the proof let the join see the words already
+  match). The round's line, honest about the hold: *"Sync hasn't run yet: Sync is waiting since the restore —
+  press Resume Sync in the main window's banner."* (P-VX510-A1's wording live).
+- Resume Sync → **"Synced 11:08 PM"**; server vault castle rev 23 (unmoved — restore and join write no vault row).
+- **D6 not needed:** L_B made the last change itself (rev 23), so it was current; the loop closed by construction.
+
 **STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
 (fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
 held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
