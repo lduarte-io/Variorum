@@ -1946,7 +1946,17 @@ written through `settingMaster` inside `locking`, the existing setter):**
   (F-L2-1); the shape on a synced signed-in Mac; offline ⇒ today's file + the later join speaks; the words changed elsewhere ⇒
   nothing + speaks; the passphrase alone changed ⇒ written + quiet (F-L2-2); the crash after every write ⇒ the new library WITH the
   fields or the old state, never a third; no new write (the act's write log equals the offline run's, kind by kind); a fixed
-  scenario through the scenario world (promises kept, the rejoin quiet, then Use Castle). NOT-STARTED.
+  scenario through the scenario world (promises kept, the rejoin quiet, then Use Castle). DONE (this commit) — the file's shared
+  setup `RestoredCopyWorld` (the account on one Mac, a laptop that joined by the passphrase, its own backup planted; Standard,
+  Castle Touch ID, Castle Always ask) and two new suites, `RestoredCopyProofFieldsTests` and `RestoredCopyProofFieldsScenarios`.
+  **RED on the pre-fix tree** (`5dca7f06f`'s code; `swift test --filter RestoredCopy`): `✘ Test run with 10 tests in 3 suites
+  failed after 0.554 seconds with 46 issues.` — exactly the claimed rows: the held pin `!replaced(joined)` (1); the shape
+  `carriesTheProof` + the quiet join, ×3 postures (6); the passphrase-alone row's proof + quiet ×2 (4); the crash harness — the
+  clean run not `finished` and every crash point "neither" (32: Standard and Castle Touch ID — Always ask left out, the harness's
+  lobby tries the live key file only; said in the test); the two scenarios' field assertions (2 + 1 — their `expectPromisesKept`
+  and every step GREEN on the old tree). **GREEN on the pre-fix tree, by nature (guards the fix must keep):** the words-arm quiet
+  row, offline ⇒ today's file byte for byte + the moment speaks, the words changed elsewhere ⇒ today's file + speaks, no new write
+  (the proven run's write log equals the offline run's, kind by kind).
 - L2-P2 — THE CORE FIX (`Copies.swift`, `PlanRunner.perform`'s `pairProof:`, `ActContext.pairProof`) + the `.taken` pins. NOT-STARTED.
 - L2-P3 — THE APP'S BOUNDED READ (`ProtectionCopyDoors.makeMine`) + its harness pin (a slow server: the bound holds, today's file —
   red while the core reads unbounded in the door). NOT-STARTED.
