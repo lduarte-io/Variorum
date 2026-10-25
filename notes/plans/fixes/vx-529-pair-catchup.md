@@ -1429,7 +1429,39 @@ needs them. Not durable, never committed.
   since you set it up — unlock with the passphrase." with the button standing — a misleading line after a mere timeout; the
   leaf's mapping is shared by every Touch ID read, so changing it is outside this rider's smallest diff. No revert is in
   flight.
-- **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
+- **VX-530 — the double Touch ID.** IN-PROGRESS — THE TRACE (written and committed BEFORE any pin or fix; every read named
+  by file:line; "prompt" = a context-less Touch ID read on the production leaf, `KeychainSyncKeysLeaf.readSyncKeys(.touchid)`
+  minting its own `LAContext` at :66 — a sheet of its own):
+  - **CHANGE PASSPHRASE** (Castle + Touch ID, synced). App: `ProtectionKeyDoorRoad.press` reads no keychain for Change.
+    Core `changePassphrase` (`KeyDoors.swift:216`): `keyDoorParameters` reads the vault (no keychain); the typed CURRENT
+    passphrase is derived under the vault's descriptor and verified there — it OPENS the account's master. Then
+    `holdSyncKeysForTheSession(…, passphrase: typed, castle: true)` (:318) loops `syncKeysClasses(touchID: true)` =
+    [.touchid, .silent] and reads **the account's Touch ID sync-keys item FIRST (:322) — PROMPT 1** — before the typed
+    passphrase it was handed (which derives the same keys from the vault, byte for byte — VX-503's reason) and before
+    session memory (which a Touch ID unlock — VX-487 (b) — or a typed unlock — VX-501 — already loaded); finding the current
+    keys it RETURNS, holding nothing and handing nothing on. `keyDoor` → `perform(KeyDoorProgram, secrets: the NEW
+    passphrase)` carries no keys. The act's `vault` step (:37) → `ctx.material(for:)` (`CommonSteps.swift:416`): the NEW
+    passphrase does not open the vault → `syncMaterial()` (:327): `material` nil → the same loop, **the same item read
+    again (:331) — PROMPT 2** — before session memory (:336). Nothing writes the item between the two reads (the door
+    writes nothing; `vault` is the act's first step). **Exactly redundant reads of one item** (the account's
+    `SyncKeysItemFact(account, .touchid)`), for the same keys, both avoidable.
+  - **RESET FORGOTTEN PASSPHRASE by the words** (Castle): `verifiedWords` against this library (no keychain); the door's
+    `holdSyncKeysForTheSession(…, words:, castle: true)` reads the item first — **PROMPT 1**, before the typed words that
+    open the vault; the act's secrets carry the WORDS, so its `material(for:)` derives from them — no second read. One
+    prompt, redundant with the words in hand.
+  - **RESET by Touch ID** (Castle): the app's `pressTouchID` (`ProtectionKeyDoorActs.swift:125`) reads the LIBRARY KEY'S
+    custody Touch ID item — **PROMPT 1, the ruled presence confirm** (design §3.9: "today's road's presence confirm kept";
+    a DIFFERENT item; not a redundant read — untouched); the core's `.touchID` arm lists custody (no prompt); the door's
+    hold reads the sync-keys item — **PROMPT 2**; the act (new passphrase only, no words) re-reads it in `syncMaterial` —
+    **PROMPT 3**. Prompts 2 and 3 are exactly redundant reads of one item.
+  - **NEW WORDS** (synced): the current passphrase is verified against the vault and rides the act's secrets, so the vault
+    step derives from it — no sync-keys read at all (not in the class).
+  - **VERDICT: THE MECHANISM IS EXACTLY REDUNDANT READS OF THE SAME ITEM** — the brief's condition for a fix is met. No
+    custody-integrity signal: the item is read, never written, by these doors. THE FIX (to be built after the red pin, the
+    brief's shape, `pairKeysAtTheDoor` the worked example): the door's hold takes the secrets FIRST, then session memory,
+    then the silent item, then — Castle only, LAST and once — the Touch ID item, and HANDS the keys it found to the act
+    (`perform(…, material:)` — unit 1's carry), so the act's `syncMaterial` returns them without a read. Standard's path
+    unchanged (its one read is the silent class — no prompt; outside this rider). NOT-STARTED: the pin, the fix.
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 
 **NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
