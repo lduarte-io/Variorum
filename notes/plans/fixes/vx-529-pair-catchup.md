@@ -1288,7 +1288,7 @@ ENVIRONMENT TRAPS, W-5/W-6/W-11/W-12 (LEG S, LEG C) and O-B4-1 (UNIT B4); each m
 needs them. Not durable, never committed.
 
 **Members (strictly sequential; flip per commit; unverified claims PENDING):**
-- **VX-526 — the join sheet's words.** IN-PROGRESS — THE TRACE: the sheet's title and button are `RoadAccountConfirmModel
+- **VX-526 — the join sheet's words.** DONE — THE TRACE: the sheet's title and button are `RoadAccountConfirmModel
   .title`/`.button` = `door.door.title`/`.button` — the `RoadAccountDoor` enum's per-door words, so `.turnOnSync` says
   `turnOnSyncTitle`/`turnOnSyncButton` ("Turn on sync") on BOTH arms; VX-506 renamed only the join arm's door (the
   `RoadAccountDoorOpen.label` override in `RoadAccountFaces.derive`). W-12's sentence is `ProtectionWords.joinWordsNotShown`
@@ -1320,7 +1320,21 @@ needs them. Not durable, never committed.
   arms as they were. **THE DRAFTED RULE-7 WORDING (for her closeout ratify; never written into CastleRules here):** rule 7's
   italic sentence ending "*…the old ones still open backups made with them*" in place of "*…the old ones still open backups
   you made before today*" — rule 5's floor in rule 7's voice.
-- **VX-522 — the hold banner's promise.** NOT-STARTED.
+- **VX-522 — the hold banner's promise.** IN-PROGRESS — THE TRACE (the brief's premise CORRECTED — VX-473's condition does
+  NOT miss this path): the root renders `RestoreHoldBar(hasAccount: bootstrap.roadStanding?.syncsWithAnAccount ?? true)`
+  (`VariorumApp.swift:354`); `RoadStandingModel.make` reads `syncsWithAnAccount` from `session.library.record?.account != nil`
+  — false for Make this my library's new library (the copy carries no sync identity) — so the root takes
+  `LibraryOpenCopy.holdBanner`'s `hasAccount: false` arm, and the walk's W-5 text IS that arm verbatim ("…Sync is waiting until
+  you press Resume. To keep something from this backup, duplicate it first — duplicates stay."). THE DEFECT IS THE ARM'S OWN
+  WORDS: Resume's `onResume` (`AppServices.resumeSync`) triggers a round that refuses (no account in the record —
+  `NewRoadSyncKeyProvider`'s `notEnrolled`), the row then reads "Sync isn't on for this library yet" (the walk saw it), so no
+  sync is waiting and no catch-up can remove anything the duplicate advice guards against. When a later join binds the
+  library, the landing's `rereadAccountBinding` flips the banner to the account arm (VX-473, pinned), whose clauses are true
+  then. THE RED PIN COMMITTED (`a5743dbcc` — that commit carried the pin only; this record line landed one commit later, by
+  a missed edit — said so): `VariorumTests/Protection/HoldBannerNoAccountWordsTests.swift`, **RED on the pre-fix tree** (the
+  harness, `--filter HoldBannerNoAccountWordsTests`): `✘ Test run with 2 tests in 1 suite failed … with 6 issues` — "Sync is
+  waiting", the duplicate advice, and no "doesn't sync" (both as-of forms ×3); the account arm's guard green. The fix:
+  NOT-STARTED.
 - **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
 - **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
