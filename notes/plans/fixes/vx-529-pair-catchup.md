@@ -1670,6 +1670,43 @@ session traces the exact doors and her wording pass rules the sentences):
   the master), no pair and no current key; a fresh account adds nothing to that beyond scrubbing old ciphertext off
   the server, which their captured copies already bypassed.
 
+## UNIT 3 — CLOSED (2026-10-25, the architect's verification and dispositions). THE BUILD PHASE IS COMPLETE.
+
+Five of six members verified: the diffs read (the VX-530 fix is exactly the ruled shape — the typed secret deriving
+the keys first, session, the silent class, the Touch ID class last and once, the keys riding into the act on unit
+1's `material:` pattern, Standard untouched; the VX-533 fix is one function — an unhandled keychain status at the
+press now counts as cancelled so the button stands, no keychain mapping changed; VX-538's card reads the state and
+retires by it); the suites re-run by the orchestrator's own hand (84 tests in 32 suites green over the key-door and
+catch-up seams); zero `Sync/`, zero `Server/`, zero `notes/CastleRules.md` lines by diff over the whole unit. The
+worktree race (the orchestrator's `270b58394` landing mid-unit) was handled correctly on both sides and is recorded
+in LIVE STATUS. Dispositions:
+- **VX-523 — RETURNED UN-FIXED, correctly: TO HER BUNDLE.** The implementer's trace overturned the brief's premise
+  (the quiet rule RUNS; it answers false because Make this my library writes its own words lock and no master copy —
+  no file comparison can prove the words are the account's). The fix is a change to WHAT A CUSTODY ACT WRITES
+  (P-VX378-U2-4 option (b) territory — hers): (A) Make this my library writes the master lock + words copy the way a
+  join does · (B) leave it (the notice over-speaks; every sentence true) · (C) rejected (a looser test goes quiet
+  when the words really were replaced). The red row is HELD as a known issue in
+  `RestoredCopyJoinWordsMomentTests`; VX-523 flips to Needs Lillian and does NOT close with this run unless she
+  rules (A) or (B) at the closeout sitting.
+- **VX-533 — fixed for the traced mechanism; ONE external fact for HER AIR:** which keychain status Apple's own
+  sheet timeout returns is unverifiable headless. HER CHECKLIST ITEM: next missed prompt on the Air, the protection
+  log's line — "road: the Touch ID read failed — …" appears ONLY in the fixed case; `errSecAuthFailed` instead means
+  the misleading "Touch ID changed since you set it up" line stands (recorded, unchanged — a wording follow-up if
+  her log says so).
+- **VX-530's prompt-count table** (2→0 on Change; 2→1 and 2→0 on Reset's arms; 1→0 on Reset-by-words) and the
+  DELIBERATELY FLIPPED VX-517 guard (Change → Reset, said in the test) are NAMED FOR THE LADDER, as are unit 2's
+  three changed tests and VX-538's key-door landing re-read side effect.
+- **Rule 7's own "before today" flaw** (the same as W-12's): P-VX529-U3-1's drafted rule-7 wording joins her closeout
+  bundle — the rules change only at her word.
+
+**WHAT REMAINS (the run's tail, in order):** the LADDER (round 1 spawns from this close — a fresh `fable-reviewer`,
+REVIEW_PROMPT verbatim, zero framing, over `git diff main...vx-529-pair-catchup`); the CLOSING STAGE BATCH (the
+Mac-target suites per units 2–3's lists — a held stage claim, zero-instance); the LIVE PROOF on the prod test
+accounts (the VX-510 repro's legs as the acceptance script, Castle and Standard, passphrase and words, E6 and the
+heal); HER TWO-MAC TEST with the build installed on both behind A1 (the release gate, her kickoff word); the
+CLOSEOUT (canon deltas in the two-file shape, the QUESTIONS bundle — the P-VX529 family, VX-523's options, F-U2-7's
+bound, the rule-7 and rule-3-adjacent clauses — the tickets triaged, MobileSoul PL-59 trued, the handoff).
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
