@@ -1866,8 +1866,11 @@ fresh reviewer; VX-523 closes with the run on her ruling.
 
 ### L2 — LIVE STATUS (the implementer owns this section)
 
-**IN PROGRESS — the core fix (`dacc7bf63`) and the app's bounded read (`05829dc27`) committed, each VERIFIED BY REVERT
-(RV-L2-1, RV-L2-2 — L2-P4); the close next (L2-P5).** No revert is in flight. Zero `Sources/VariorumCore/Sync/`
+**VX-523 FIXED under R-529-7 (pins red-on-old, both halves revert-verified). NOT DONE IN THIS SESSION:** the Mac and iOS
+COMPILE of the one app file changed (`ProtectionCopyDoors.swift` — compiled in unit 2's harness under the app's settings; no
+`xcodebuild` here — the orchestrator's); every Mac-target and phone suite RUN (the closing stage batch — the list under L2-P5);
+every walk; the empty-slot landing (F-L2-5, not in the charter); the faces F-L2-3 names (her bundle); the QUESTIONS entry for
+P-VX529-L2-1 (the merging session's ledger). No revert is in flight. Zero `Sources/VariorumCore/Sync/`
 lines (none needed — the act is protection-local). Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
 
@@ -2008,8 +2011,40 @@ written through `settingMaster` inside `locking`, the existing setter):**
   ONE-read count (2 fetches: the app's read made and NOT handed in, the core's own door read on top — the count is what proves the
   act uses the app's read rather than a second one); offline green through it; restored by `git checkout --`, `git diff
   --exit-code` clean, `✔ Test run with 3 tests in 1 suite passed after 3.075 seconds.`
-- L2-P5 — THE CLOSE: the core suite whole (headless), the harness's copy-door and neighbour suites, zero `Sync/` lines, no
-  trailers. NOT-STARTED.
+- L2-P5 — THE CLOSE. DONE (this commit), on the finished product tree (`332679b41`; this commit touches no code):
+  - THE CORE SUITE whole (`swift test`, debug, headless): VariorumCoreTests **`Test run with 3435 tests in 457 suites passed after
+    206.223 seconds with 5 known issues.`** (P2's 4 negative controls + P6d's pinned residual — VX-523's held row is no longer one:
+    6 → 5; 3426 → 3435, this session's 9 new tests); the one failure the ticketed MCP wall-clock flake
+    `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (18.9 s against 15 s — VX-353 /
+    VX-532) in VariorumMCPTests; no protection code in it.
+  - THE HARNESS whole (debug; `MakeMineProofFieldsRoadTests` symlinked in): `✘ Test run with 504 tests in 95 suites failed after
+    47.120 seconds with 8 issues.` — exactly the standing eight: the five harness-PATH artifacts (`CopyListingFacesSurfaceTests` ×2,
+    `EmptySlotDoorsSurfaceTests` ×2, `ProtectionRoadSwitchTests` ×1 — source pins reading `#filePath` beside a symlink) and VX-539's
+    week-boundary flake (`ProtectionPairRetentionTests` ×3). Every other test green (499 + L1's 2 + this session's 3).
+  - Zero `Sources/VariorumCore/Sync/`, `Server/`, `Persistence/` and `notes/CastleRules.md` lines (`git diff --stat main...HEAD --`
+    each: empty); no stored shape (the two key-file fields exist and are written by the existing `settingMaster` inside `locking`;
+    `ActContext.pairProof` and `AccountsVaultRead` are in-memory values); no trailer on any commit (`5dca7f06f..HEAD`: 0). L2's
+    whole diff: `Copies.swift` (+109/−), `PlanRunner.swift` (+13/−), `ProtectionCopyDoors.swift` (+30/−), the two test files and this
+    record.
+  - **THE MAC-SUITE LIST for the stage batch:** NEW — `MakeMineProofFieldsRoadTests` (harness-green); exercising the changed
+    `ProtectionCopyDoors.makeMine`, harness-green — `MakeMineRoadTests`, `PickedCopyRoadTests`, `PreviousLibrariesArcTests`,
+    `WordsLedgerCarryRoadTests`, `LookInsideRoadTests`, `CopyDoors*`, `RoadRestoreHoldGateTests`, `ProtectionRestoreReceiptTests`;
+    Mac-ONLY (runs PENDING the stage batch) — `MakeMineRouteTests`, `WordsLedgerCarryRouteTests`, `OtherLibrariesDeleteRouteTests`,
+    `PreDesignLandingsRouteTests`, `WhatsNewWaitsAfterAdoptionTests` (their road is `RoadWorld`'s, signed out — the door reads
+    nothing there, by reading); the PHONE — `MobileNoRedirectSweepTests` (the three new log literals name no Mac — scanned) and
+    `MobileProtectionRoadTests`. The core's new suites ran in the core suite above.
+  - **For the next round (stated, not changes):** the proof is the WORDS (P-VX529-L2-1 (a)); the door's read runs whenever the
+    executor is signed in (F-L2-6 — no sound pre-read gate); the app reads BEFORE the restore hold, so a slow network costs up to
+    the bound with nothing moved; the in-door read (`.inTheDoor`, a core caller's default) is unbounded, as every core act's own
+    read is, and no app road uses it; `readVault` there records a fresh read this session (`freshVaults`), true of it.
+
+**PROVISIONAL CALLS (for the closeout's QUESTIONS entry):**
+- **P-VX529-L2-1** — the proof's secret (F-L2-2): (a) BUILT — the current pair's typed WORDS opening the vault's master (the copy
+  is their road; a passphrase changed elsewhere with the words unchanged still writes the fields and the later join is quiet,
+  truthfully); (b) also require the typed passphrase to open the vault (that state writes nothing; the later join over-speaks,
+  truthfully).
+
+**NEW SENTENCES:** none (three log lines only, in the app's road log; no face changed).
 
 ## Machinery
 
