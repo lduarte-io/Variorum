@@ -981,8 +981,14 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
      [`everyCopiedDeclarationIsTheMacsByteForByte`, naming `TempSlot`] · **RV-L1-3** MINOR-1's production files ←
      `2243a26aa` (`MobileProtectionDoors.swift`, `MobileProtectionScreen.swift`) [the five MINOR-1 pins, as RUN A] ·
      **RV-L1-4** `MobileSettingsView.swift` ← `2243a26aa` [`noServicesNoProtectionRow`, `settingsOpensTheScreenOnly…`].
-     GREEN expected: every other test of the sixteen suites. RESULTS PENDING — **REVERTS STARTING NOW (the tip committed at
-     this record's commit; nothing to copy — the restore is `git checkout HEAD`).**
+     GREEN expected: every other test of the sixteen suites.
+     **RESULTS — DONE, every one RED as named; restored (`git checkout HEAD --` the five files; `git diff --exit-code` and
+     `git diff --cached --exit-code` clean); NO REVERT IS IN FLIGHT.** `✘ Test run with 47 tests in 16 suites failed after
+     67.491 seconds with 28 issues` — RED exactly: RV-L1-1 `theLobbySaysTheE6LineBeneathItsLead` (the line absent) and unit
+     1's two pre-design pins (by design); RV-L1-2 `everyCopiedDeclarationIsTheMacsByteForByte` ("line 1 of the declaration
+     — the copy: … removed at deinit! · the Mac's: …" — `TempSlot` named); RV-L1-3 the five MINOR-1 pins (2 · 2 · 4 · 4 · 3
+     times, as RUN A); RV-L1-4 `noServicesNoProtectionRow` and `settingsOpensTheScreenOnlyWhereItCanAct`; GREEN every other
+     test (36), the sweeps included.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
