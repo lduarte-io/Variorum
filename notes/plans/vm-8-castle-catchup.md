@@ -715,7 +715,21 @@ signed out.**
        `MobileShellView.swift`: `attachProtectionReceipts`'s `speak` line removed [`theShellHandsTheFacesItsHolder`].
      - batch C — **RV-U2-E** `Shared/Protection/RoadKeyDoorFaces.swift`: the derive passes `pairGate: false`
        [`aPairChangedElsewhere…` (the derive half — `pairGate == true`) and its screen half].
-     PENDING — runs next.
+     **RESULTS — DONE, every one RED as named, each batch restored (`git diff --exit-code HEAD` clean); NO REVERT IS IN
+     FLIGHT.**
+     - batch A: `✘ Test run with 21 tests in 6 suites failed after 41.312 seconds with 56 issues` — RED exactly
+       `useCastleSpeaksThePhonesWords…`, `useStandardNeverRenders…`, `theGateRowAsks…`, `theSignedOutRoad…`,
+       `theSetterSaysTheHint…`, **`theAccountConfirmsNewPassphraseSaysTheHint` (F-U2-C — the pre-fix account confirm said no
+       hint)**, `theKeyDoorsSayTheirLine…`, `aPairGateSaysThePairSentenceOnce`, `newWordsAsks…`, `theCheckReadsOneSecret…`,
+       `theScreenSaysWhatTheFacesSpoke`, `theShellHandsTheFacesItsHolder`, `aPairChangedElsewhere…`; GREEN the follow suite's
+       four, `thePhoneSchedulesNoExport`, `noKeyFileNoCheckDoor`, the two VX-530/VX-517 guards.
+     - batch B: `✘ Test run with 21 tests in 6 suites failed after 40.926 seconds with 9 issues` — RED exactly
+       `aPairGateSaysThePairSentenceOnce` ("it was said 3 times" — the follow's notice, the passphrase section, the words
+       section: VX-542's repetition), `aPairChangedElsewhere…` (its screen half), `useStandardNeverRendersAndReplaceAllKeysStands`
+       (Use Standard rendered), `theShellHandsTheFacesItsHolder`; every other test green.
+     - batch C: `✘ Test run with 8 tests in 2 suites failed … with 3 issues` — RED exactly `aPairChangedElsewhere…`
+       (`doors.faces?.pairGate == true`, and the screen's two counts); the hand-made pair-gate pin green (it builds its own
+       fact).
 8. The walk on the pinned simulator. NOT-STARTED.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
