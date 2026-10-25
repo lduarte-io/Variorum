@@ -359,7 +359,46 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   load expectations]. **RAN: `✘ Test run with 1 test in 1 suite failed … with 2 issues`** — exactly the two (nothing in
   session memory; the engine's seam refuses); restored `git diff --exit-code` clean — **no revert in flight.** VX-501's
   typed-unlock load FIRES on the phone's posture. The LIVE check rides piece 4's Castle leg.
-- **Piece 4 — the simulator walk + the measured save:** NOT-STARTED.
+- **Piece 4 — the simulator walk + the measured save:** LEG A (the throwaway's ~110k-row corpus — the SCALE leg) DONE;
+  LEG A2 (a kill MID-download) and LEG B (Castle + Face ID on the prod test road) NOT-STARTED.
+  - **The walk's machinery (recorded):** Xcode 27 has NO Simulator.app — the simulator is hosted in Device Hub
+    (`com.apple.dt.Devices`), so the helper's frontmost guard accepts that host too (recorded in its header; otherwise the
+    ruled guards exactly). Captures are `xcrun simctl io <pin> screenshot` ONLY (the simulator's screen, never the host
+    screen — a full-screen probe capture showed her own windows and was deleted at once); taps are `cliclick` at host
+    points mapped from phone points (the screen calibrated by template match inside Device Hub's window). The words card's
+    capture is redacted (a throwaway simulator library's words). Captures: `notes/plans/vm-8-u1-screens/` (gitignored).
+    `~/.variorum/bin/type-sim-secret` (mode 700, never committed): `--check` passed before every typing; values never
+    printed.
+  - **LEG A — PASS (2026-10-25 11:28–11:41 UTC, stage claim `vm8-u1`, the phone Debug build of `d6eba3b38` on the pin,
+    launched with the throwaway walk lift — `ps eww` showed the throwaway ref, no production ref):** a planted pre-design
+    store (a 256 KB opaque `variorum.sqlite` + an older key-file NAME `variorum-keys.json`, never read) → **her face**
+    (A01: her lead, her body, *start fresh…* alone, no Open Library) → *Start fresh…* → **her confirm** (A02: her line,
+    Cancel · Start fresh) → **set aside whole** into `Previous Libraries/2026-10-25-112950/` (both files, bytes
+    untouched) → **the words card** (A03, redacted) → the shelf (A04) → Settings: the sync row "Signed out" + *sign in…*
+    and the new *protection…* row (A05) → **the Protection screen**: "This library doesn't sync." · "Sign in to turn on
+    sync." · *sign in…* (A06) → the Account sheet (A07) → throwaway user A signed in by the helper (A09) → close → **the
+    JOIN door** "sync this library…" + *sign out…* (A10) → the join confirm (sameMode — "Your account is in Standard,
+    like this library.", one secret) (A11) → the passphrase by the helper → **rule 7's moment, the words not shown**
+    (A12, the account named) → OK → **the first round STAYS** — "Syncing your library with your account…", the phone's
+    close note (P-VM8-5), Done (A13).
+  - **THE DOWNLOAD:** 2,000-row windows, ~80 calls (each a ~200 KB window), the stage growing ~5 MB / 5 s.
+  - **THE APP SWITCH (the acceptance case):** at 11:32:34 the phone switched to the Settings app mid-download (~30% in).
+    The download KEPT GOING inside the background grant ("Variorum flush before suspension"); iOS called the grant's
+    expiration handler at 11:33:03 and the download reached the feed's end at 11:33:07 (the empty window); **iOS then
+    SUSPENDED the app (state `Ss`, 0% CPU from 11:33:12) with the whole feed staged (store 78.9 MB) and the save NOT
+    committed.**
+  - **THE KILL + THE RESUME FROM THE STAGE (VX-494's hard case, live on the phone):** the suspended app was terminated
+    (11:34:01 — a crash's shape) and relaunched (11:34:03): the Standard library opened quietly; **six small calls and
+    ZERO data windows** (05:34:05.26–.69 local), then the save straight from the stage at ~100% of one core.
+  - **THE MEASURED SAVE (VX-497's number):** **≈ 6 min 25 s** — 11:34:05 → the commit at ~11:40:30 UTC (the store
+    79.3 MB → 150.3 MB, WAL to ~150 MB, CPU 97–100% of one core throughout, then ~12 small follow-up calls at 05:40:34);
+    **peak RSS ≈ 457 MB** (447 MB in the download run). Ground: the iOS 26.2 SIMULATOR on the M3 Pro (the Pro's CPU, not
+    the phone's), the throwaway's 1,200 notes × 30 paragraphs (~110k feed rows, 1.08M words). Her Mac's own save on her
+    real corpus was ~4 min 20 s (VX-494); VX-494's throwaway walk ~7 min on a shared CPU. **The device number on her
+    corpus stays the device moment's (HER HANDS).**
+  - **THE PROOF OF COMMIT (server, read-only):** the phone's device `aa227b13…` reports `last_seq` **110,424** at
+    11:40:34 UTC — exactly throwaway A's head (VX-494's own L2 reads the same). The shelf: "vx-494 scale corpus · 1200
+    notes" (A16).
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
