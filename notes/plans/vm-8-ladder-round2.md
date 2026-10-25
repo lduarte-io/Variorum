@@ -225,3 +225,29 @@ place, and the phone meets it in the follow's place. My call for this ladder is 
     `MobilePlantedProtectionParityTests` ×1, plus `noServicesNoProtectionRow` in an existing suite).
   - 847/139 = 840/136 + W-U2-1's pin + 6 tests in 3 suites.
   - The not-done lines come first in L1's section, and no revert is in flight.
+
+---
+
+## THE ORCHESTRATOR'S DISPOSITIONS (round 2, 2026-10-25 — the ladder CLOSES: no new BLOCKER/MAJOR, no round 3)
+
+- **MINOR-1 verdict ACCEPTED: STANDS** — L1's shape is the ladder's final word on the follow-locked doors; the
+  Mac-vs-phone divergence stays HER taste question in the bundle beside P-VM8-9 (the reviewer's reasoning — neither
+  platform ever showed a refused key door's LABEL — is recorded as the premise).
+- **R2-MINOR-1 — FIXED BY THE ORCHESTRATOR** (the final-round rule: a final round's fixes get the orchestrator's
+  line-by-line check; here the orchestrator was also the author, so the pin discipline carried the proof): the pin
+  committed FIRST and run RED on the pre-fix tree (2 issues, exactly the flipped :662 assertions), the one-rule fix
+  (a fully follow-locked words section renders nothing, heading and lead included; an open look keeps the section),
+  GREEN after over the eight touched suites (29 tests / 8 suites). R2-NIT-2's two comments trued in the same seam.
+- **R2-NIT-1 (the follow place says the change twice) — TO HER BUNDLE** beside P-VM8-9: where the follow door and its
+  specific notice render, the generic "Your account changed on another device. Follow it first." is redundant beside
+  it; the no-new-words fix shape (the notice as the one saying where it renders; the generic sentence only where no
+  notice does) is ready at her nod. Not churned tonight — the state is unreachable on her account before her sitting.
+- **R2-NIT-3 (leftover (a) closed for a different reason) — RECORD-ONLY**, the reviewer's corrected mechanism stands
+  above as the record.
+- **R2-NIT-4 (dispositions not all in repo) — DONE NOW by the orchestrator:** VM-25/VM-26 named in the record's
+  old-scope table and bundle; NIT-6's hours-waiting line added beside P-VM8-8; bundle item 9(b) updated to
+  (a-unified); the VM-24 and VX-542 Linear comments noted in the record.
+
+**THE LADDER'S TALLY:** round 1 — 0 BLOCKER · 1 MAJOR · 3 MINOR · 6 NIT → dispositions + L1 (all fixes red-on-old,
+reverts verified) → round 2 — 0 BLOCKER · 0 MAJOR · 1 MINOR · 4 NIT, MINOR-1 verdict STANDS → the round-2 MINOR fixed
+pin-first by the orchestrator, the NITs dispositioned above. CLOSED 2026-10-25.
