@@ -139,8 +139,9 @@ struct MobileKeyDoorPostureTests {
     /// descriptor — `VaultModel`'s own write, the Mac's `PairPreflightAndGateTests` plant). The phone's own reads: the key
     /// doors are locked by the pair catch-up (`RoadKeyDoorFaces.pairGate` — the shared derive), the account section offers
     /// "Follow your account…" with the pair's notice; and the REAL screen over the bootstrap's own standing says the pair
-    /// sentence ONCE (beside the follow door) and the follow's road ONCE (for the locked doors). Before the change: no gate
-    /// (a guard). RED by its reverts (the derive's fact; the phone's pair-gate arms).
+    /// sentence ONCE (beside the follow door) and the follow-owed refusal ONCE for every door it locks (ladder L1 — P-VM8-9
+    /// (a-unified); unit 2 said the key doors' road once and the generic sentence twice more). Before the change: no gate
+    /// (a guard). RED by its reverts (the derive's fact; the phone's pair-gate arms) and on the pre-L1 tree.
     @Test func aPairChangedElsewhereLocksTheKeyDoorsAndTheScreenSaysItOnce() async throws {
         try await withDependencies {
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
@@ -203,8 +204,13 @@ struct MobileKeyDoorPostureTests {
                 #expect(labels.filter { $0.contains(pairSentence) }.count == 1,
                         "the pair sentence once — labels were \(labels)")
                 #expect(labels.contains(ProtectionWords.followDoor), "beside the follow door")
-                #expect(labels.filter { $0 == ProtectionWords.followFirstToCatchUpRoad }.count == 1,
-                        "the locked doors' road, once")
+                // VM-8 ladder L1 (round 1's MINOR-1 — P-VM8-9 (a-unified)): the follow-owed refusal ONCE on the screen
+                // (the crossings and *Stop syncing here* lock with the key doors), in the follow's place; the key doors' own
+                // road collapses into it.
+                let said = U2Faces.count(ProtectionWords.doorRefusedFollowOwed, in: labels)
+                #expect(said == 1, "the follow-owed refusal once — it was said \(said) times: \(labels)")
+                #expect(!labels.contains(ProtectionWords.followFirstToCatchUpRoad), "no second pointer — labels were \(labels)")
+                U2Faces.expectTheOneSayingBesideTheFollow(labels, notice: pairSentence)
                 #expect(!labels.contains(ProtectionWords.changePassphraseDoor), "Change passphrase… is locked")
             }
         }

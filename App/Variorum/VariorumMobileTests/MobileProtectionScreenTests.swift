@@ -14,6 +14,7 @@
 //      no words clipboard road); the composition (`attach(services:)` before `start()`, the reopen's ask adopted once).
 //
 
+import Dependencies
 import Foundation
 import SwiftUI
 import Testing
@@ -94,6 +95,69 @@ struct MobilePreDesignFaceTests {
             #expect(labels.contains(ProtectionWords.lobbyTitle), "labels were \(labels)")
             #expect(labels.contains(ProtectionWords.openButton), "the typed road stands")
             #expect(!labels.contains(ProtectionWords.preDesignStartFreshDoor))
+        }
+    }
+}
+
+// MARK: - Ladder round 1's MINOR-2 — the E6 line on the phone's lobby
+
+@Suite("VM-8 ladder L1 — the phone lobby's E6 line (R-529-6: the why and the road), mounted")
+@MainActor
+struct MobileLobbyE6LineTests {
+    /// **MINOR-2 — the pin unit 1's face fix never had (a bug-class face fix; red on `fd56f2279`'s `MobileRoadFaces.swift`,
+    /// which rendered the field without its why):** a library that syncs but whose account's passphrase was never typed on
+    /// this iPhone — a fresh library JOINED a Castle account by its twelve words, Always ask, so no passphrase lock of its
+    /// own (E6 by birth) — locks; signed in, the lobby's vault road takes the account's passphrase, so the passphrase field
+    /// stands and the shared face's line says why and the road, beneath the lead. Through the PHONE'S OWN bootstrap over
+    /// planted leaves (`MobilePlantedProtection.swift`), the lobby the phone actually mounts.
+    @Test func theLobbySaysTheE6LineBeneathItsLead() async throws {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            let world = MobileTypedUnlockSyncKeysTests.World()
+            let accountsWords = try RecoveryPhrase.generate()
+            _ = try world.vault.plant(
+                accountID: MobileTypedUnlockSyncKeysTests.account, passphrase: MobileTypedUnlockSyncKeysTests.passphrase,
+                words: accountsWords, mode: .castle)
+            let bootstrap = AppBootstrap(testStoreURL: world.slot.places.slot, protectionRoad: world.harness())
+            await bootstrap.awaitOpen()
+            guard case .newLibraryWords(let card) = bootstrap.state else {
+                Issue.record("a fresh slot creates a library and shows the phone's words card — \(bootstrap.state)")
+                return
+            }
+            card.iveWrittenThemDown()
+            await bootstrap.awaitOpen()
+            let section = try #require(bootstrap.roadAccount, "the account section — \(bootstrap.state)")
+            await section.refresh()
+            _ = try #require(section.faces?.turnOnSync.openDoor, "the join arm stands — \(String(describing: section.faces))")
+            section.open(.turnOnSync)
+            let join = try #require(section.confirm, "the join's confirm on the presenter")
+            join.gate = .alwaysAsk
+            await join.submit(words: accountsWords.joined(separator: " "))
+            await bootstrap.awaitOpen()
+            #expect(join.refusal == nil, "the join by the twelve words landed — \(join.refusal ?? "")")
+            join.closeMoment()
+            #expect(bootstrap.roadSession?.library.record?.account == MobileTypedUnlockSyncKeysTests.account)
+
+            await bootstrap.lock()
+            guard case .roadLobby(let lobby) = bootstrap.state else {
+                Issue.record("Castle under Always ask locks into the road's lobby — \(bootstrap.state)")
+                return
+            }
+            #expect(lobby.face.accountPassphraseLine == ProtectionWords.lobbyAccountPassphraseNotTypedHere,
+                    "precondition: E6 — \(lobby.face)")
+            await withHostedSurface(MobileRoadLockView(lobby: lobby, tokens: MobilePreDesignFaceTests.tokens)) { surface in
+                await surface.settle(30)
+                let labels = surface.visibleLabels
+                #expect(labels.contains(ProtectionWords.lobbyAccountPassphraseNotTypedHere),
+                        "the E6 line — its why and its road — labels were \(labels)")
+                #expect(labels.contains(lobby.face.lead), "beneath the lead")
+                if let lead = labels.firstIndex(of: lobby.face.lead),
+                   let line = labels.firstIndex(of: ProtectionWords.lobbyAccountPassphraseNotTypedHere) {
+                    #expect(lead < line, "the line beneath the lead — labels were \(labels)")
+                }
+            }
         }
     }
 }
@@ -322,14 +386,55 @@ struct MobileProtectionCompositionTests {
     }
 
     /// The Settings row and the sync row's *Protection…* door (VX-486's, given its phone home) both open the screen, and
-    /// only where it can act (the shell's road AND an account section on the open library — P-2).
+    /// only where it can act (the shell's road, the app's services — ladder L1's NIT-2 — AND an account section on the open
+    /// library — P-2).
     @Test func settingsOpensTheScreenOnlyWhereItCanAct() throws {
         let settings = try Self.code("VariorumMobile/Features/Shell/MobileSettingsView.swift")
-        #expect(settings.contains("guard let onOpenProtection, bootstrap?.roadStanding?.account != nil else { return nil }"))
+        #expect(settings.contains(
+            "guard let onOpenProtection, services != nil, bootstrap?.roadStanding?.account != nil else { return nil }"))
         #expect(settings.contains(".environment(\\.protectionPaneDoor, protectionDoor.map { open in ProtectionPaneDoor { open() } })"))
         #expect(settings.contains("if let protectionDoor {"))
         let shell = try Self.code("VariorumMobile/Features/Shell/MobileShellView.swift")
         #expect(shell.contains("onOpenProtection: { openProtection() }"))
         #expect(shell.contains("leavingShelf { shelfPath.append(MobileRoute.protection) }"))
+    }
+
+    /// **Ladder round 1's NIT-2 — RED ON THE PRE-L1 TREE:** before the app's services are composed (the `.ready` arm's
+    /// `.task` makes them; the sync row says *Starting…* meanwhile), Settings rendered *Protection…* on the account section
+    /// alone — and the screen's *Sign in…* then had no Account sheet to present (only the Mac's "in this window" sentence).
+    /// Now the row stands only beside services (P-2: a door that cannot act is not rendered). Mounted for real over the
+    /// PHONE'S OWN bootstrap (a fresh library open on the road — its account section made) with no services.
+    @Test func noServicesNoProtectionRow() async {
+        await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            let world = MobileTypedUnlockSyncKeysTests.World()
+            let bootstrap = AppBootstrap(testStoreURL: world.slot.places.slot, protectionRoad: world.harness())
+            await bootstrap.awaitOpen()
+            guard case .newLibraryWords(let card) = bootstrap.state else {
+                Issue.record("a fresh slot creates a library — \(bootstrap.state)")
+                return
+            }
+            card.iveWrittenThemDown()
+            await bootstrap.awaitOpen()
+            guard case .ready(let session) = bootstrap.state else {
+                Issue.record("the library opens — \(bootstrap.state)")
+                return
+            }
+            #expect(bootstrap.roadStanding?.account != nil, "precondition: the account section stands")
+            let store = U2Faces.Defaults()
+            let settings = MobileSettingsView(
+                session: session, router: MobileShellRouter(defaults: store.defaults), services: nil,
+                bootstrap: bootstrap, onOpenProtection: {})
+            await withHostedSurface(settings) { surface in
+                await surface.settle(30)
+                let labels = surface.visibleLabels
+                #expect(labels.contains { $0.lowercased() == "starting\u{2026}" },
+                        "the sync row's own not-yet, beside it — labels were \(labels)")
+                #expect(!labels.contains(SyncRowFace.openProtectionLabel),
+                        "no Protection… row while no services exist — labels were \(labels)")
+            }
+        }
     }
 }

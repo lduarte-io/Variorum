@@ -15,7 +15,9 @@
 //      tree — it said none);
 //    - the check door (VX-513 — reads one secret, says the answer, writes nothing);
 //    - the follow and THE PAIR on the phone (F-U2-B — unit 1's section renders the shared faces; pinned here);
-//    - the receipts' home (F-U2-E, P-VM8-8).
+//    - the receipts' home (F-U2-E, P-VM8-8);
+//    - ladder L1 (round 1's MINOR-1 — P-VM8-9 (a-unified)): the owed follow's refusal ONCE per screen, every kind — in
+//      the follow's place, beside its notice, or alone there where the follow out of Castle is held (P-VM8-10).
 //
 
 import Foundation
@@ -195,6 +197,57 @@ enum U2Faces {
         RoadAccountFaces(
             situation: situation, turnOnSync: .hidden, stopSyncingHere: .hidden, deleteAccountHere: .hidden,
             thisMacOnly: .hidden, move: .hidden, signOut: true, signIn: false, vaultUnreachable: false, follow: follow)
+    }
+
+    // VM-8 ladder L1 (round 1's MINOR-1): the faces while a follow is owed — `assess` refuses every key door, the crossings
+    // (its gate runs before the posture's own check) and *Stop syncing here* `.followOwed`, each saying the same sentence in
+    // its place (the shared derives — `RoadKeyDoorFaces`, `RoadCrossingFaces.refusalSentence`, `RoadAccountFaces.leaf`).
+
+    /// The key doors locked by an ordinary follow (every kind but the pair — whose gate says `followFirstToCatchUp`).
+    static func followLockedKeyDoors() -> RoadKeyDoorFaces {
+        let locked = RoadKeyDoorFace.refused(ProtectionWords.doorRefusedFollowOwed)
+        return keyDoors(change: locked, newWords: locked, reset: locked)
+    }
+
+    /// The crossings locked by the follow (Castle: Use Standard too — the phone never renders it; the gate row stands).
+    static func followLockedCrossings(_ mode: ProtectionMode) -> RoadCrossingFaces {
+        let locked = RoadDoorFace.refused(ProtectionWords.doorRefusedFollowOwed)
+        return RoadCrossingFaces(
+            mode: mode, useCastle: locked, useStandard: mode == .castle ? locked : .hidden, replaceAllKeys: locked,
+            gateRow: mode == .castle ? RoadGateRow(current: .alwaysAsk, touchIDAvailable: true) : nil)
+    }
+
+    /// In sync, a follow owed: *Stop syncing here* locked by it, *Delete the account from this iPhone…* open (rule 16's
+    /// local leave writes nothing on the account), *Sign out…*.
+    static func followLockedAccount(follow: RoadAccountDoorFace) -> RoadAccountFaces {
+        let deleteHere = RoadAccountDoorOpen(
+            door: .deleteAccountHere, ask: .nothing, newPassphrase: false,
+            sentences: RoadAccountFaces.leaveSentences(.deleteAccountHere), spec: DoorSpec(requires: .none, synced: true))
+        return RoadAccountFaces(
+            situation: .inSync(email: nil), turnOnSync: .hidden,
+            stopSyncingHere: .refused(ProtectionWords.doorRefusedFollowOwed), deleteAccountHere: .open(deleteHere),
+            thisMacOnly: .hidden, move: .hidden, signOut: true, signIn: false, vaultUnreachable: false, follow: follow)
+    }
+
+    /// How many visible labels say exactly `text` (a helper, not an inline closure: Xcode 27's SIL mis-typed a second
+    /// `filter` closure beside a capturing one in the posture suite — "function type mismatch").
+    static func count(_ text: String, in labels: [String]) -> Int {
+        labels.reduce(0) { $1 == text ? $0 + 1 : $0 }
+    }
+
+    /// The one saying stands in the follow's place: after the follow door's notice, before its door.
+    static func expectTheOneSayingBesideTheFollow(
+        _ labels: [String], notice: String, sourceLocation: SourceLocation = #_sourceLocation
+    ) {
+        let saying = labels.firstIndex(of: ProtectionWords.doorRefusedFollowOwed)
+        let said = labels.firstIndex(of: notice)
+        let door = labels.firstIndex(of: ProtectionWords.followDoor)
+        guard let saying, let said, let door else {
+            Issue.record("the notice, the saying and the door all stand — labels were \(labels)", sourceLocation: sourceLocation)
+            return
+        }
+        #expect(said < saying && saying < door, "notice, the one saying, the door — labels were \(labels)",
+                sourceLocation: sourceLocation)
     }
 
     /// The screen as the shell's `.protection` destination mounts it (inside a stack; the receipts' holder through the
@@ -500,10 +553,13 @@ struct MobileProtectionPassphraseTests {
         }
     }
 
-    /// **F-U2-D (PROVISIONAL P-VM8-9) — VX-542's repetition NOT copied:** while the account's PAIR changed elsewhere every
-    /// key door is locked by the follow; the phone says the pair sentence ONCE — the follow door's notice, beside its door —
-    /// and the follow's road ONCE for the locked doors (never a copy of the pair sentence per door). RED by its revert (the
-    /// pair-gate arms removed: the pair sentence said three times).
+    /// **F-U2-D (PROVISIONAL P-VM8-9, now (a-unified) — ladder round 1's MINOR-1) — VX-542's repetition NOT copied:**
+    /// while the account's PAIR changed elsewhere every key door is locked by the follow, and the crossings and *Stop
+    /// syncing here* with it; the phone says the pair sentence ONCE — the follow door's notice, beside its door — and the
+    /// follow-owed refusal ONCE for the whole screen, in that place (never a copy of the pair sentence per door, never the
+    /// key doors' own road beside the generic sentence: "the per-section short pointer collapses to the one saying"). RED by
+    /// its unit-2 revert (the pair-gate arms removed: the pair sentence said three times) and on the pre-L1 tree (the generic
+    /// sentence said twice — the crossings and the leave — and the road once more).
     @Test func aPairGateSaysThePairSentenceOnce() async throws {
         let kind = FollowKind.pairChanged(passphrase: true, words: false)
         let gate = ProtectionWords.followFirstToCatchUp(kind, device: "Studio Mac", day: "January 13")
@@ -515,8 +571,9 @@ struct MobileProtectionPassphraseTests {
         let store = U2Faces.Defaults()
         let standing = await U2Faces.standing(
             store, heard: U2Faces.Heard(), presenter: ProtectionSheetPresenter(),
+            crossings: U2Faces.followLockedCrossings(.standard),
             keyDoors: U2Faces.keyDoors(change: .refused(gate), newWords: .refused(gate), reset: .refused(gate), pairGate: true),
-            account: U2Faces.account(follow: .open(follow)))
+            account: U2Faces.followLockedAccount(follow: .open(follow)))
         await withHostedSurface(U2Faces.Screen(standing: standing)) { surface in
             await surface.settle(30)
             let labels = surface.visibleLabels
@@ -524,8 +581,11 @@ struct MobileProtectionPassphraseTests {
             #expect(saysThePair.count == 1, "the pair sentence once — it was said \(saysThePair.count) times: \(labels)")
             #expect(labels.contains(pairSentence), "…as the follow door's notice")
             #expect(labels.contains(ProtectionWords.followDoor), "the follow door beside it")
-            #expect(labels.filter { $0 == ProtectionWords.followFirstToCatchUpRoad }.count == 1,
-                    "the locked doors' road, once")
+            let generic = U2Faces.count(ProtectionWords.doorRefusedFollowOwed, in: labels)
+            #expect(generic == 1, "the follow-owed refusal once on the screen — it was said \(generic) times: \(labels)")
+            #expect(!labels.contains(ProtectionWords.followFirstToCatchUpRoad),
+                    "the key doors' own road collapses into the one saying — labels were \(labels)")
+            U2Faces.expectTheOneSayingBesideTheFollow(labels, notice: pairSentence)
             #expect(!labels.contains(ProtectionWords.changePassphraseDoor)
                     && !labels.contains(ProtectionWords.resetPassphraseDoor)
                     && !labels.contains(ProtectionWords.wordsSectionDoor), "no locked door renders as a door")
@@ -560,6 +620,111 @@ struct MobileProtectionPassphraseTests {
             #expect(labels.contains(ProtectionWords.wordsLookWrittenDown))
             #expect(!labels.contains(ProtectionWords.wordsLookCopy), "no Copy door on the phone")
         }
+    }
+}
+
+// MARK: - The owed follow, said once (ladder round 1's MINOR-1 — PROVISIONAL P-VM8-9 (a-unified))
+
+@Suite("VM-8 ladder L1 — the owed follow's refusal, once per screen (mounted)")
+@MainActor
+struct MobileProtectionFollowOwedOnceTests {
+    static let vault = VaultReading(accountID: "acct", mode: .castle, rowKeyID: "k", updatedByDevice: "Studio Mac")
+
+    /// **MINOR-1, THE GENERIC KIND (a key replacement elsewhere — the follow door renders):** every door the follow locks
+    /// (Change, Reset, New words, Use Castle, Replace All Keys, *Stop syncing here*) renders nothing, and the screen says the
+    /// follow-owed refusal ONCE — in the follow's place, between its notice and its door; a door the follow does not lock
+    /// keeps its row (*Delete the account from this iPhone…*). RED on the pre-L1 tree: said 4 times (the passphrase, the
+    /// words, the crossings and the Sync section — round 1's probe).
+    @Test func anOwedFollowSaysItsRefusalOncePerScreen() async throws {
+        let follow = RoadAccountFaces.followDoor(
+            .keysReplaced, DoorSpec(requires: .oneSecret, rekeys: true, synced: true), vault: Self.vault, exportOn: false,
+            gate: U2Faces.faceID)
+        let notice = try #require(follow.notice)
+        let store = U2Faces.Defaults()
+        let standing = await U2Faces.standing(
+            store, heard: U2Faces.Heard(), presenter: ProtectionSheetPresenter(),
+            crossings: U2Faces.followLockedCrossings(.castle), keyDoors: U2Faces.followLockedKeyDoors(),
+            account: U2Faces.followLockedAccount(follow: .open(follow)))
+        await withHostedSurface(U2Faces.Screen(standing: standing)) { surface in
+            await surface.settle(30)
+            let labels = surface.visibleLabels
+            let said = U2Faces.count(ProtectionWords.doorRefusedFollowOwed, in: labels)
+            #expect(said == 1, "the follow-owed refusal once on the screen — it was said \(said) times: \(labels)")
+            #expect(U2Faces.count(notice, in: labels) == 1, "the follow door's notice, once")
+            U2Faces.expectTheOneSayingBesideTheFollow(labels, notice: notice)
+            for locked in [ProtectionWords.changePassphraseDoor, ProtectionWords.resetPassphraseDoor,
+                           ProtectionWords.wordsSectionDoor, ProtectionWords.useCastleDoor,
+                           ProtectionWords.replaceAllKeysDoor, ProtectionWords.stopSyncingHereDoor] {
+                #expect(!labels.contains(locked), "\(locked) is locked by the follow — not rendered")
+            }
+            #expect(labels.contains(ProtectionWords.deleteAccountHereDoor), "a door the follow doesn't lock keeps its row")
+            #expect(labels.contains(ProtectionWords.postureLine(.castle)), "the sections keep their own lines")
+            #expect(labels.contains(ProtectionWords.wordsSectionLine))
+        }
+    }
+
+    /// **MINOR-1, P-VM8-10's DEAD END (the follow OUT of Castle, held for her phone wording — F-PH-2):** the follow door
+    /// and its notice render nothing (F-U1-1 (A)), yet the state keeps its ONE truth-teller: the follow-owed refusal is
+    /// said exactly once, in the follow's place — never four times, never zero. And when the account section has no faces
+    /// yet, the screen still says it once, at the section's place (the belt). RED on the pre-L1 tree: 4 times, then 3.
+    @Test func theHeldFollowOutStillSaysItOnce() async throws {
+        let out = RoadAccountFaces.followDoor(
+            .intoStandard, DoorSpec(requires: .none, rekeys: true, synced: true, words: [.ruleFive]), vault: Self.vault,
+            exportOn: false, gate: U2Faces.faceID)
+        #expect(out.saysRuleTwelve, "precondition: the follow out says her rule-12 sentence")
+        let heldNotice = try #require(out.notice)
+        let store = U2Faces.Defaults()
+        let standing = await U2Faces.standing(
+            store, heard: U2Faces.Heard(), presenter: ProtectionSheetPresenter(),
+            crossings: U2Faces.followLockedCrossings(.castle), keyDoors: U2Faces.followLockedKeyDoors(),
+            account: U2Faces.followLockedAccount(follow: .open(out)))
+        await withHostedSurface(U2Faces.Screen(standing: standing)) { surface in
+            await surface.settle(30)
+            let labels = surface.visibleLabels
+            let said = U2Faces.count(ProtectionWords.doorRefusedFollowOwed, in: labels)
+            #expect(said >= 1, "the dead end keeps its truth-teller — labels were \(labels)")
+            #expect(said == 1, "…said once — it was said \(said) times: \(labels)")
+            #expect(!labels.contains(ProtectionWords.followDoor), "the held follow out renders no door (F-U1-1 (A))")
+            #expect(!labels.contains(ProtectionWords.leaveSentence), "her rule-12 sentence is never said here")
+            #expect(!labels.contains(heldNotice), "nor the held arm's notice")
+            let situation = labels.firstIndex(of: ProtectionWords.accountInSync)
+            let saying = labels.firstIndex(of: ProtectionWords.doorRefusedFollowOwed)
+            if let situation, let saying {
+                #expect(situation < saying, "said in the Sync section, the follow's place — labels were \(labels)")
+            }
+        }
+        // The belt: key doors and crossings locked, the account section not read yet.
+        let unread = await U2Faces.standing(
+            store, heard: U2Faces.Heard(), presenter: ProtectionSheetPresenter(),
+            crossings: U2Faces.followLockedCrossings(.castle), keyDoors: U2Faces.followLockedKeyDoors())
+        await withHostedSurface(U2Faces.Screen(standing: unread)) { surface in
+            await surface.settle(30)
+            let labels = surface.visibleLabels
+            let said = U2Faces.count(ProtectionWords.doorRefusedFollowOwed, in: labels)
+            #expect(said == 1, "once even before the account section reads — it was said \(said) times: \(labels)")
+        }
+    }
+
+    /// The sections' pure readings: a door the follow locks contributes NO row (the one saying is the screen's); a door
+    /// refused for any other reason keeps its row, identical refusals once per section as before (P-VM8-9's rule). RED on
+    /// the pre-L1 tree for the follow-locked half (each section said the refusal itself).
+    @Test func aLockedDoorKeepsItsRowUnlessTheFollowLocksIt() {
+        #expect(MobilePassphraseSection.rows(U2Faces.followLockedKeyDoors()).isEmpty, "the follow's lock: no row")
+        #expect(MobileRoadCrossingsSection.rows(U2Faces.followLockedCrossings(.castle)).isEmpty)
+        #expect(MobileRoadCrossingsSection.rows(U2Faces.followLockedCrossings(.standard)).isEmpty)
+        let pair = ProtectionWords.followFirstToCatchUp(
+            .pairChanged(passphrase: true, words: false), device: "Studio Mac", day: nil)
+        #expect(MobilePassphraseSection.rows(U2Faces.keyDoors(
+            change: .refused(pair), newWords: .refused(pair), reset: .refused(pair), pairGate: true)).isEmpty,
+            "the pair gate: no row either")
+        // Another reason keeps its row (a guard — green on both sides).
+        let vault = ProtectionWords.doorRefusedNeedsVault
+        #expect(MobilePassphraseSection.rows(U2Faces.keyDoors(change: .refused(vault), reset: .refused(vault)))
+                == [.refused(vault)])
+        let unreachable = RoadCrossingFaces(
+            mode: .castle, useCastle: .hidden, useStandard: .hidden, replaceAllKeys: .refused(vault),
+            gateRow: RoadGateRow(current: .alwaysAsk, touchIDAvailable: true))
+        #expect(MobileRoadCrossingsSection.rows(unreachable) == [.refused(vault)])
     }
 }
 
