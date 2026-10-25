@@ -216,6 +216,7 @@ private struct MobileProtectionSheetNotHere: View {
             }
         }
         .padding(22)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .presentationDetents([.medium])
         .background(tokens.room.ignoresSafeArea())
         .onAppear {
@@ -584,7 +585,9 @@ struct MobileRoadSignOutSheet: View {
             }
         }
         .padding(22)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        // The voice's room fills the whole sheet (the walk's C05: a natural-height card left the system's grey above and
+        // below it at the medium detent).
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .presentationDetents([.medium])
         .background(tokens.room.ignoresSafeArea())
         .interactiveDismissDisabled(model.busy)

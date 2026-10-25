@@ -444,6 +444,13 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
     32 = the feed's ~55, nothing fetched twice) → the save from 11:53:04 → the commit at ~11:59:26: **the save ≈ 6 min
     22 s** (the second sample; peak RSS ≈ 458 MB) → server: the new device `bfb075f7…` at `last_seq` **110,424** =
     head (A2-04).
+  - **LEG C — the leaves and sign-out (12:12–12:16 UTC, the clean build, the throwaway library still in sync):** the
+    in-sync section (C01) → *delete the account from this iphone…*'s confirm in the phone's words — rule 16's two
+    sentences and **"…choose Account… in Settings' sync row, then Delete Account." (P-VM8-6)** (C02) → cancel →
+    *stop syncing here…* → its confirm (C03) → *stop syncing* → **"This library doesn't sync." · *sync this library…*
+    (signing back in is a join) · *sign out…*** (C04) → *sign out…* → the confirm (C05) → signed out (C06). A cosmetic
+    found there: the medium-detent sign-out sheet left the system grey above and below its card (C05) — fixed (the room
+    fills the sheet), re-walked after a fresh sign-in (C07–C08), signed out again (C09: the simulator rests signed out).
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
