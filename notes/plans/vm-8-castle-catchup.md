@@ -160,8 +160,13 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
 2. **F-PH-1 (wording, HERS):** the core model sentences the phone renders that name the Mac — rule 21's notice
    (`LibraryNotice.differentLibraryWords`, her CastleRules sentence verbatim) and the key-file offer
    (`KeyFileOffer.keychainHoldsOne`). Her phone wording or her "leave them".
-3. **F-PH-2 (wording, HERS):** her rule-12 leave sentence's phone wording — the sweep exemption (`herRuleTwelve` in
-   `MobileNoRedirectSweepTests`) retires when a phone leave face lands (unit 2's crossing/follow-out).
+3. **F-PH-2 (wording, HERS — now carries ROUND 1's MAJOR-1 as its first consequence):** her rule-12 leave sentence's
+   phone wording — the sweep exemption (`herRuleTwelve`) retires when a phone leave face lands. **Until it lands, a
+   phone whose account LEFT Castle elsewhere (or where a Move would leave Castle) meets a recorded dead end
+   (P-VM8-10): the key and mode doors refuse naming the follow, the follow-out/Move doors are not rendered (their
+   confirms say your rule-12 sentence), and the road is the Mac that made the change.** Your wording unlocks: Use
+   Standard, the follow out of Castle, the Castle-leaving join/Move — all built-ready behind it (the shared faces
+   render them the moment the arms un-hold).
 4. **The riders, her call each:** VM-15 (Pre-launch — a sibling phone that hasn't followed into Castle, and its iCloud
    device backup, stays Apple-openable; the same surface) · VM-16 (the phone's undo door mis-speaks a quiet press —
    App shell; only if the run has room).
@@ -194,6 +199,10 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   road; the standing lobby's own precedent).
 - **P-VM8-2** — the phone's Protection screen is Settings ▸ Protection (the Mac's information architecture, the
   phone's navigation); unit 1 mounts only the Sync/account section; a door that cannot act is not rendered (P-2).
+- **P-VM8-10 (round 1, MAJOR-1's arbitration)** — while the leave-direction arms are held for F-PH-2, the
+  follow-owed refusals and the another-account situation line stand AS the shared faces say them (detect and SAY —
+  hiding them would hide that the account changed; rendering the held doors would invent her words): a recorded
+  temporary dead end, read once per screen after MINOR-1's fix, flipping when F-PH-2 lands.
 - **P-VM8-3** (F-U1-2 (a), ruled (B)) — the gate line on the phone: "This iPhone keeps the new key behind Face ID."
   (`ProtectionWords.gateTouchIDLine`'s phone arm; the Mac's "…behind your fingerprint." byte-identical).
 - **P-VM8-4** (F-U1-2 (b), ruled (B)) — `Words.exportAPlainCopyFirst` is NOT said on the phone (no Data Safety, no
@@ -883,7 +892,7 @@ untouched.
 | 3 | Unit 3 — the cards + the pocket guide | at her split call | NOT STARTED |
 | 4 | Old-scope reconciliation tickets | orchestrator | table drafted; tickets at the sitting |
 | 5 | Her sitting bundle | orchestrator | OPEN — grows |
-| 6 | The ladder (fresh Opus reviewer per round, REVIEW_PROMPT verbatim, whole-run diff) | after the build | NOT STARTED |
+| 6 | The ladder (fresh Opus reviewer per round, REVIEW_PROMPT verbatim, whole-run diff) | orchestrator | **ROUND 1 DONE** (`notes/plans/vm-8-ladder-round1.md` + dispositions): 0 BLOCKER · 1 MAJOR · 3 MINOR · 6 NIT — MAJOR-1 stands as built (P-VM8-10, F-PH-2's consequence); the fix session L1 runs MINOR-1/-2 + NIT-1/-2/-5-guard/-6-comment; MINOR-3 → VM tickets. Round 2 re-reviews the fixes |
 | 7 | The device install + her live round + the measured save (VX-497) | HER MORNING | HELD |
 | 8 | Closeout (canon two-file shape; PL ledger row; master plan; handoff; tickets triaged) | orchestrator | NOT STARTED |
 
