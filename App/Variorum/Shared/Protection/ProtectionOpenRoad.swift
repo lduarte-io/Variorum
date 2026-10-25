@@ -420,11 +420,19 @@ nonisolated enum ProtectionOpenRoad {
     /// as at every open) — nothing is written before that unlock; then the catch-up lands with the typed secret in hand
     /// (`catchUpThroughTheVault`). Where it opens nothing it says only what the read proves (the account's passphrase changed
     /// elsewhere, named; E6's "not the account's"); nil — offline, a slow server, no vault, no proof, or a key the slot
-    /// refuses — keeps today's refusal byte for byte, every byte as it was.
+    /// refuses — keeps today's refusal byte for byte, every byte as it was. The ladder's F-R1-1: no read at all over a
+    /// library none of whose held key files carries a master lock — every answer but `.nothingToSay` reaches through one.
     static func openThroughTheVault(
         _ ctx: RoadContext, passphrase text: String, files: [KeyFile], within bound: Duration
     ) async -> RoadAttempt? {
         guard ctx.writes, let account = ctx.session.accountID else { return nil }
+        // F-R1-1: `VaultRoad.answer` opens only through a held file's master lock and names a change only behind the live
+        // file's — so where no file here carries one (a library that never synced), the read could prove nothing.
+        let live = (try? ctx.system.leaves.keyFiles.readLiveKeyFile()) ?? nil
+        guard files.contains(where: { $0.master != nil }) || live?.master != nil else {
+            log("road: no key file here carries a master lock — the vault road reads nothing; today's refusal")
+            return nil
+        }
         let snapshot: VaultSnapshot
         switch await boundedVaultRead(ctx.system.leaves.vault, accountID: account, within: bound) {
         case .read(let read?):
@@ -439,7 +447,6 @@ nonisolated enum ProtectionOpenRoad {
             log("road: the vault road's read took longer than \(bound) — today's refusal, nothing written")
             return nil
         }
-        let live = (try? ctx.system.leaves.keyFiles.readLiveKeyFile()) ?? nil
         switch VaultRoad.answer(text, vault: snapshot, files: files, live: live, floor: ctx.system.floor) {
         case .nothingToSay:
             log("road: the vault road proves nothing for this passphrase — today's refusal")

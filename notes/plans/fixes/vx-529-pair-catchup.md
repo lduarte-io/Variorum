@@ -1806,7 +1806,13 @@ road), `ProtectionRoadActs.swift` (`setFirstPassphrase`); the suite `LobbyVaultR
   read per press). Green through it, as they must stay: both refusals `== ProtectionWords.passphraseDoesNotOpen` (today's
   bytes), nothing written, the own passphrase still opening locally (a guard), the synced side's one fetch and same
   refusal, and the suite's nine standing tests.
-- L1-P2 — THE GATE in `openThroughTheVault` (the live read hoisted above the read). NOT-STARTED.
+- L1-P2 — THE GATE in `openThroughTheVault` (the live read hoisted above the read). DONE (this commit) —
+  `ProtectionOpenRoad.swift`: after the writes/signed-in guard, `live` is read once and
+  `guard files.contains(where: { $0.master != nil }) || live?.master != nil else { log(…); return nil }` — nil is
+  `openTyped`'s existing "today's refusal" road (:410), so the refusal is the same bytes by construction; the later live
+  read removed (the hoisted value goes to `VaultRoad.answer`); one doc-comment line. Nothing else moved (no core line, no
+  sentence, no other road). **GREEN** (the harness, `--filter LobbyVaultRoadTests`): `✔ Test run with 11 tests in 1 suite
+  passed after 2.668 seconds.` The neighbour suites PENDING (L1-P4).
 - L1-P3 — THE REVERT, named before it runs: RV-L1-1 `ProtectionOpenRoad.swift` — the gate's guard removed (the hoisted read
   kept), the harness `--filter LobbyVaultRoadTests` [expect exactly the unsynced row's fetch counts red; every byte-identity
   assertion and the synced side green]; restored by `git checkout --` on the committed fix. NOT-STARTED.
