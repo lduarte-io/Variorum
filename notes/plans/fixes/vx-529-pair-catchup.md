@@ -1275,8 +1275,9 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-526 and VX-522 DONE; every other member NOT-STARTED. No revert is in
-flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
+**NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-523 NOT FIXED — traced, its red pin held as a known
+issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526 and VX-522 DONE;
+every other member NOT-STARTED. No revert is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
 `~/dev/variorum-vx-529`.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
@@ -1351,7 +1352,37 @@ needs them. Not durable, never committed.
   library (VX-473's re-read already flips it), a visibility change rather than words; (c) the restore confirm's own sentence
   ("…doesn't sync with your account until you turn on sync for it in Settings ▸ Protection") — it names an account a Mac with
   none doesn't have (round 4's NIT). The door's label "Resume Sync" is unchanged under (a) — a label change is hers.
-- **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
+- **VX-523 — the words-adoption notice's condition.** TRACED — NOT FIXED (STOP-AND-REPORT for this member; returned to the
+  orchestrator). THE TRACE (the brief's premise CORRECTED — the stays-quiet rule is NOT skipped on this path): a join from
+  the restored copy is `ProtectionExecutor.join` (`AccountActs.swift:325`), which computes `wordsReplaced = !sameWords` with
+  `sameWords = ownLockOpens || wordsAreTheAccountsAlready(liveFile, vault:, master:)` — the one VX-456/VX-462 rule IS
+  evaluated. By the PASSPHRASE (the walk's S15): `ownLockOpens` is false (no words typed), and the rule answers false at its
+  FIRST clause (`file.words == nil`) — because Make this my library's new key file (`makeMineKeyFile`, `Copies.swift:128`,
+  `newLocks(passphrase:…, words: true, master: false)`) carries an OWN words lock built from the current pair and no master
+  lock or master's words copy (by design: "Never the account's master: the new library carries no sync identity",
+  P-VX378-U2-4 (a)). The rule's proof is wrap identity (the copy byte-equal to the vault's recovery wrap); an own words lock
+  wraps the LIBRARY key under the words and the vault's wrap wraps the MASTER under them, so no comparison of the two can
+  prove the same words without the words (AES key wrap — nothing to compare without the key). So nothing in the files the
+  restore writes can prove sameness, and the moment speaks. By the WORDS it stays quiet (they open the own lock — the rule's
+  other arm). P-VX378-U2-4 (a)'s own text ("…since it already holds the current pair, which is the account's when the device
+  was synced, no words are replaced") is the behavior expected; the code cannot see it. THE RED PIN COMMITTED (this commit,
+  `Tests/VariorumCoreTests/Protection/Executor/RestoredCopyJoinWordsMomentTests.swift` — headless core): **RED on the tree as
+  it stands** (`swift test --filter RestoredCopyJoinWordsMomentTests`): `✘ Test run with 2 tests in 1 suite failed … with 1
+  issue` — `aRestoredCopyJoiningByThePassphraseHearsNoReplacement` at `!replaced(joined)` (a synced laptop joined by the
+  passphrase, its own backup made its library under the account's pair, re-joined by the passphrase); the words-arm guard
+  green. HELD AS A KNOWN ISSUE (`withKnownIssue`, said in the test) so the suite stays green and a fix must flip it: `✔ Test run
+  with 13 tests in 3 suites passed … with 1 known issue` (with `JoinWordsMoment*`). WHY NOT FIXED (the options, for the
+  orchestrator and her): **(A)** Make this my library on a device whose outgoing library is SYNCED (its words road the
+  master's copy — VX-462's shape) writes the new key file in that shape too: the master recovered from the typed words and
+  the outgoing file's copy, `settingMaster(master, wordsCopy: outgoingCopy)`, NO own words lock; the one rule then decides at
+  the join (quiet while the account's words are unchanged; speaks after a change elsewhere — the copy is stale). This
+  CHANGES WHAT A CUSTODY ACT WRITES — a new opener (the account's master; in Standard the silent sync-keys item holds it) on a
+  library that binds no account — which is P-VX378-U2-4's option (b) territory ("the master and its words copy added"),
+  hers, and not a rider's call. **(B)** leave it: the moment over-speaks with true sentences (the "previous" words are the
+  same words; P-VX309-U2-1's honest-limit class) — no change. **(C)** a looser proof (the restored file's passphrase lock
+  under the vault's own descriptor ⇒ "the pair was the account's") — REJECTED: unsound; a words change elsewhere before the
+  restore (a lagging device restoring with its stale words) or after it leaves that descriptor equal and would go QUIET over a
+  real replacement. Nothing built; no product line changed.
 - **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
