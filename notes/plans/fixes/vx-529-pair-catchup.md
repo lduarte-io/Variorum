@@ -1866,10 +1866,8 @@ fresh reviewer; VX-523 closes with the run on her ruling.
 
 ### L2 — LIVE STATUS (the implementer owns this section)
 
-**IN PROGRESS — the core fix committed (`dacc7bf63`); RV-L2-1 IN FLIGHT** (named before it starts: `Copies.swift`'s
-`makeMineKeyFile` made to ignore the proof — `newLocks(words: true)`, no master — the fix's one write clause; the run `swift test
---filter RestoredCopy`; the restore `git checkout -- Sources/VariorumCore/Protection/Executor/Acts/Copies.swift` onto the
-committed fix). Zero `Sources/VariorumCore/Sync/`
+**IN PROGRESS — the core fix committed (`dacc7bf63`) and VERIFIED BY REVERT (RV-L2-1, L2-P4); the app's bounded read next
+(L2-P3).** No revert is in flight. Zero `Sources/VariorumCore/Sync/`
 lines (none needed — the act is protection-local). Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
 
@@ -1980,7 +1978,12 @@ written through `settingMaster` inside `locking`, the existing setter):**
   signed out at stages 9–10, so its door reads nothing).
 - L2-P3 — THE APP'S BOUNDED READ (`ProtectionCopyDoors.makeMine`) + its harness pin (a slow server: the bound holds, today's file —
   red while the core reads unbounded in the door). NOT-STARTED.
-- L2-P4 — THE REVERTS, each named here before it runs. NOT-STARTED.
+- L2-P4 — THE REVERTS, each named here before it runs. RV-L2-1 DONE: named in the banner first (`1f6492aed`); `Copies.swift`'s
+  `makeMineKeyFile` made to ignore the proof (`newLocks(words: true)`, the master clause disabled), `swift test --filter
+  RestoredCopy` ⇒ `✘ Test run with 11 tests in 3 suites failed after 0.577 seconds with 48 issues.` — exactly the pre-fix red (the
+  held pin 1, the shape 6, the passphrase-alone row 4, the crash harness 32, the scenarios 2 + 1 = 46) plus the `.taken` row's
+  two given-read landings (2); the four guards green through it; restored by `git checkout --`, `git diff --exit-code` clean, `✔ Test
+  run with 11 tests in 3 suites passed after 0.547 seconds.` RV-L2-2 (the app's) NOT-STARTED.
 - L2-P5 — THE CLOSE: the core suite whole (headless), the harness's copy-door and neighbour suites, zero `Sync/` lines, no
   trailers. NOT-STARTED.
 
