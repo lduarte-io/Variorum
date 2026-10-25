@@ -2403,10 +2403,70 @@ Castle library through the vault and catches it up in one press, the old passphr
 E6's card and heal behave as ruled, and the restored copy's join is quiet. Two incidents (I-D0-1/-2) traced,
 cleared and recorded with standing rules. The face notes W-D1w-1/-2, W-D1-1, W-D3-1 join her wording bundle.
 
-**STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
-(fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
-held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
-second half (join L_B), then D1 onward per the script and its deviation.**
+*(The machine state as recorded at the cutover, 22:40 MDT — SUPERSEDED by D0's second half through D7 above:)* one
+instance, 40395, on the slot holding L_B = library `1a1e7a0d` (fresh, not yet joined); L_A aside (joined,
+`5f9da1cc`); the dev store aside (verified); the stage held; the `castle` account Standard, rev 18, passphrase
+`passphrase2`.
+
+## HER TWO-MAC TEST — THE INSTALLS, AND HER CALLS AT THE HAND-OVER (2026-10-25, the Opus orchestrator)
+
+**Her words (verbatim):** *"is VX-510 needed for anything? I think it was kept for some other bug walk or something
+but I feel like we don't need it anymore probably. I think it's fine on the wording notes - I'd leave them marked
+somewhere for if i wan to go over them, and if you think it's worth fixing just tell me now and we can ticket the
+ones worth fixing. go ahead and install the new build here on the pro and give me a prompt to carry to the air"*
+
+- **The Pro install — DONE (07:52–07:54 UTC):** the stage claimed; zero instances; **A1 safety copy
+  `Backups/safety-copies/variorum-a1-vx529-install-2026-10-25T075213Z`** (the five store files, sha256 byte-identical
+  to the live ones); build 9311 kept for a one-copy rollback at `App/Variorum/DerivedData/vx529-rollback-9311/`;
+  **Release 0.10.1 (9439) from the branch installed at `/Applications`** — codesign `--deep --strict` valid, the
+  binary identical to the fresh build; the stage released. Not launched (hers to open).
+- **A guard lesson (the I-D0-1 class, other side):** the install's first attempt REFUSED on a phantom instance — the
+  path-grep guard matched the shell's own command line, which carried the binary's path for the checksum. Nothing
+  was touched. **Standing rule: an instance guard inside a command that names the app's path uses `pgrep -x
+  Variorum`** (exact process name — a shell can never match it).
+- **The Air needs its own build:** the Pro build's embedded profile licenses ONLY the Pro (one device id), so this
+  exact app would hit the 13x signing wall on the Air. The Air builds locally (its own profile; `air-local-builds`).
+  The prompt below carries the whole road.
+- **VX-510's picked-folder leftovers — moved to the Trash (recoverable):** the eight folders the VX-510 record names
+  (`159caa3f`, `223c4e7e`, `2aa0214f`, `413fb3bd`, `6fa0c827`, `6c51f3d0`, `edf04751`, `7fee09b0`) went to
+  `~/.Trash/variorum-vx510-walk-backups-<stamp>/`. Left in place (other efforts' or unnamed): `19693f71`,
+  `55ab261a`, `6f1ee6b1` (VX-329), `d5b935bb` (VX-488), `86a82b4f` (the dev store's earlier identity), `e11e5233`
+  (the dev store's current backups). Note: `~/Documents` is iCloud-synced (`air-store-backup-layout`), so the Trash
+  move applies on both Macs.
+- **The wording notes — kept marked here and in her closeout bundle; the three worth fixing TICKETED (Low, Wording,
+  parented under VX-529):** **VX-541** (the check door: the old-passphrase answer's missing catch-up pointer + the
+  error-red E6 answer — W-D1-1 + W-D3-1) · **VX-542** (the gate's pair sentence repeating per locked door + the
+  crossing row's old generic line — W-D1w-1 + W-D1w-2) · **VX-543** (the lobby's "the one before it" — F-R1-2).
+
+### THE AIR PROMPT (paste-ready, for a Claude session on the Air — her say-so is the Air's stage permission)
+
+```
+On the Air, install the VX-529 test build so Lillian can run the two-Mac passphrase test. Her say-so authorizes
+this (she will quit Variorum herself). Read ~/dev/variorum/CLAUDE.md first. Steps, in order — stop and ask her at
+anything unexpected:
+1. cd ~/dev/variorum; `git status` must be clean (if not, stop and ask). `git fetch origin && git switch
+   vx-529-pair-catchup && git pull --ff-only`. Claim the Air's own stage: `Tools/stage claim --who vx529-air
+   --reason "install the VX-529 test build" --minutes 60`.
+2. Build Release locally (the Pro's build won't run here — its profile licenses only the Pro):
+   cd App/Variorum && xcodebuild -scheme Variorum -configuration Release -destination 'platform=macOS'
+   -derivedDataPath DerivedData/vx529-release -allowProvisioningUpdates CODE_SIGN_STYLE=Automatic
+   *[removed for publication]*
+3. Ask her to quit Variorum on the Air. NEVER quit or kill it yourself. Confirm with `pgrep -x Variorum` printing
+   nothing (use exactly this check — a grep for the app's path can match your own shell).
+4. A1 safety copy of the Air's real store: from ~/Library/Containers/io.lduarte.Variorum/Data/Library/Application
+   Support/Variorum/ copy variorum.sqlite, variorum.sqlite-wal, variorum.sqlite-shm, variorum-library-keys.json,
+   variorum-library-lived-here (cp -p, together) into Backups/safety-copies/variorum-a1-vx529-install-<UTC stamp>/
+   and verify each copy's sha256 matches the original. If any file is missing or the folder can't be read, stop
+   and tell her (the container can refuse reads — her hands then).
+5. Keep the current app for rollback: `ditto /Applications/Variorum.app ~/dev/variorum/App/Variorum/DerivedData/
+   vx529-rollback/Variorum.app`. Re-check `pgrep -x Variorum` is empty, then `rm -rf /Applications/Variorum.app &&
+   ditto App/Variorum/DerivedData/vx529-release/Build/Products/Release/Variorum.app /Applications/Variorum.app`.
+6. Verify: `codesign --verify --deep --strict /Applications/Variorum.app`, the version (0.10.1 + the build number),
+   and that the installed binary's sha256 matches the build's. Release the stage. Do NOT launch it — she opens it.
+7. Tell her: installed (version/build), the A1 copy's folder name, the rollback location. Write nothing to the repo.
+8. AFTER she says her test is done (not before): honor her Air rule (keep only the install + the newest backup) —
+   remove the safety copy, the rollback copy and DerivedData/vx529-release; `git switch main && git pull`.
+```
 
 ## Machinery
 
