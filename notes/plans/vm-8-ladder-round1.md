@@ -270,3 +270,15 @@ Small: the comments say "ONE muted line", but the screen renders up to three (`k
 **The fix session (L1): MINOR-1, MINOR-2, NIT-1 (comments), NIT-2, NIT-5's guard, NIT-6's comment — each behavior fix
 with a red-on-old pin verified by behavioral revert; zero new product words; the phone suites + the sweeps green at the
 tip. Round 2 (a fresh Opus reviewer) re-reviews the fixes.**
+
+## THE ORCHESTRATOR'S NOTE ON L1's MINOR-1 READING (2026-10-25, before round 2)
+
+L1's shape DEVIATES from the disposition's letter — "locked doors keep their rows" became "every door the follow locks
+renders nothing in its own section; the one sentence sits in the account section's follow place" (a door refused for
+any OTHER reason keeps its row). Weighed against the spec: the Mac's ruled shape (R-529-3) renders the locked doors
+REFUSING, naming the change — L1's phone shape is a platform divergence, but one in the decision grammar's first tool
+(same brain, phone-native face), it maximally honors her "don't copy the repetition" kickoff line, and nothing is
+lost (the one sentence names the change; the doors return when the follow lands). ACCEPTED PROVISIONALLY as
+P-VM8-9 (a-unified)'s letter, with the shape question — locked doors hidden vs. rows kept with a short pointer —
+added to HER BUNDLE beside P-VM8-9. ROUND 2 is explicitly asked to judge this reading: if hiding the key doors whole
+while a follow is owed reads as a defect on the small screen (where did Change passphrase go?), say so as a finding.
