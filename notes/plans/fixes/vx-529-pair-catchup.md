@@ -2512,6 +2512,19 @@ anything unexpected:
   never re-derived) opens the vault for the sync keys — which proves on real hardware that the catch-up wrote the
   new lock under the VAULT's descriptor (fact 1's invariant; a mismatch would open the library but leave sync
   locked). It is also VX-544's remedy (an online unlock).
+- **Step 11 (Air): Touch ID** — her words: "i logged in with touch id with wifi - sync worked. then i turned wifi off
+  and logged in with touchid and sync just spun but it didn't show locked." Correct by design: the Touch ID unlock
+  loads the account's sync keys from this Mac's Touch ID item in the same press (VX-487) — no network needed — so
+  offline the keys are present and the round simply can't reach the server; the typed road needs the vault for the
+  keys, hence VX-544's asymmetry (the ticket's sharpening). Touch ID still opens the Air after a passphrase changed
+  elsewhere (the key it guards was never replaced — rule 6). (Her three attached images were the same 3:13 shot —
+  the offline spinner's face is unseen; whether an offline round should say "offline" rather than spin is the sync
+  row's progress class, VX-496/VX-76's, not this run's.)
+- **THE CORE TWO-MAC TEST: PASSED on her real Macs and real account (Castle + Touch ID):** the change on one Mac; the
+  other kept syncing; detection on a running device; the lock screen opening by the NEW passphrase through the
+  account with the catch-up landing in the same unlock; the new passphrase opening locally offline; the everyday
+  typed road loading the sync keys online; Touch ID intact. One pre-existing gap filed (VX-544); one face issue
+  confirmed worse on real hardware (VX-542).
 
 ## Machinery
 
