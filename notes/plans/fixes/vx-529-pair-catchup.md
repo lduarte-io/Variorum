@@ -1977,7 +1977,15 @@ written through `settingMaster` inside `locking`, the existing setter):**
   29 suites passed after 3.789 seconds.` (the lifecycle walk's makeMine check — `live?.master == nil` — untouched: its Mac is
   signed out at stages 9–10, so its door reads nothing).
 - L2-P3 — THE APP'S BOUNDED READ (`ProtectionCopyDoors.makeMine`) + its harness pin (a slow server: the bound holds, today's file —
-  red while the core reads unbounded in the door). NOT-STARTED.
+  red while the core reads unbounded in the door). IN-PROGRESS — THE PIN COMMITTED (this commit,
+  `VariorumTests/Protection/MakeMineProofFieldsRoadTests.swift`, symlinked into unit 2's harness; the planted road: a Standard
+  library turned on to sync, signed in, one backup of itself; the preflight then `ProtectionCopyDoors.makeMine`). The one
+  production line in this commit is a defaulted, UNUSED `vaultWithin:` parameter on `makeMine` (no behavior — the pin's seam, the
+  lobby suite's precedent), so the pin compiles on the pre-fix behavior. **RED on the tree as it stands** (the harness, `--filter
+  MakeMineProofFieldsRoadTests`): `✘ Test run with 3 tests in 1 suite failed after 4.873 seconds with 2 issues.` — exactly the slow
+  row: `clock.now - started < .milliseconds(1500)` (the core's own door read waited for the 2 s answer) and `isTodays` (it wrote the
+  fields from that late answer). Green on both sides, as they must stay: online — ONE read, the fields written (the core's door read
+  served it before the app's read existed); offline — today's file.
 - L2-P4 — THE REVERTS, each named here before it runs. RV-L2-1 DONE: named in the banner first (`1f6492aed`); `Copies.swift`'s
   `makeMineKeyFile` made to ignore the proof (`newLocks(words: true)`, the master clause disabled), `swift test --filter
   RestoredCopy` ⇒ `✘ Test run with 11 tests in 3 suites failed after 0.577 seconds with 48 issues.` — exactly the pre-fix red (the

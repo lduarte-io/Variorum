@@ -285,7 +285,8 @@ nonisolated enum ProtectionCopyDoors {
     /// library's words marks onto the new library's id once the copy IS the library (rule 17: under the current pair).
     static func makeMine(
         _ session: ProtectionRoadSession, copy: CatalogCopy, catalog: Catalog, row: CopyDoorRow,
-        opened: LookedInside, currentPair: TypedSecrets, wordsLedger: WordsCardLedger? = nil
+        opened: LookedInside, currentPair: TypedSecrets, wordsLedger: WordsCardLedger? = nil,
+        vaultWithin bound: Duration = ProtectionOpenRoad.typedUnlockVaultBound
     ) async -> MakeMineResult {
         let slot = session.system.places.slot
         let oldKey = session.key
