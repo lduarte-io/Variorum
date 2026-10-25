@@ -2533,6 +2533,18 @@ anything unexpected:
   bump and the notes land on the branch before the merge; the notes go to her for approval before the run, her
   standing rule) · VX-544 and VX-542 stay Backlog for a later run (not Pre-launch) · the twelve-words leg offered as
   optional confirmation (the architect's read below), hers to run step by step.
+- **The words leg became her own choice, the quiet one (R-529-2) instead:** unsure her old words still worked ("i
+  don't even know if my previous 12 words still work"), she was warned that "Record your twelve words…" MINTS new
+  words (Variorum never stores them) and chose: *"i honestly just want to make new 12 words right now so i'm going to
+  do that on the air."*
+- **Step 12 (Air): New words made and written down** (the deliberate new-words door; its every-device warning
+  read).
+- **Step 13 (Pro): detection** — *"Your account's twelve words were changed on Lillian's MacBook Air on October 25."*
+  + Follow your account… (her screenshot; VX-542's generic line once beneath it).
+- **Step 14 (Pro): the quiet words-only catch-up LANDED** — her words "ok all looks good"; the durable notice
+  (E8/VX-457) verbatim in her screenshot: *"Your account's twelve words were changed on another device, and this Mac
+  caught up. The twelve words you had before no longer open this library; backups you made with them still do."*
+  with OK. R-529-2 on her real hardware, the direction reversed (the Air changed, the Pro followed).
 
 ## Machinery
 
