@@ -883,6 +883,46 @@ none; `firstRoundHeld`'s "main window's banner"); the Mac pane's keystone line (
 no phone home (not chartered); **for VX-542:** the phone says the pair sentence once (P-VM8-9) — the Mac's repetition is
 untouched.
 
+### L1 — THE LADDER FIX SESSION (round 1's confirmed fixes; the implementer owns this subsection; every unverified claim PENDING)
+
+**NOT DONE BY THIS SESSION (first):** everything round 1's dispositions did NOT send to the fix session — MAJOR-1 (stands
+as built, P-VM8-10), MINOR-3 (tickets — the orchestrator's), NIT-3 · NIT-4 · NIT-5's indentation/chrome/ink items (record
+only), NIT-6's bundle line (the orchestrator's); the `herRuleTwelve` exemption's reason stays BYTE-UNTOUCHED (ruled); no
+Mac-target `xcodebuild test`; canon, QUESTIONS, Linear — the orchestrator's. **No revert is in flight.**
+
+*Implementer L1 — Opus 5.5, xhigh. Pre-fix tree = `2243a26aa` (round 1's dispositions folded in). Stage claims as `vm8-l1`;
+*[removed for publication]*
+record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole (a Castle face changes), the code named.*
+
+**THE PLAN (pieces; flipped per commit):**
+1. **MINOR-1 — the owed follow's refusal ONCE PER SCREEN (P-VM8-9 → (a-unified)).** NOT-STARTED. The shape, read from the
+   disposition word by word: the one saying is the shared faces' own `.followOwed` sentence (`ProtectionWords
+   .doorRefusedFollowOwed` — no new words), said exactly once on the screen in EVERY follow kind, the pair included; it
+   stands in the account section's follow place — beside the follow door's notice where that door renders (notice, the
+   saying, the door), alone in that place where it does not (P-VM8-10's held follow out of Castle keeps its one
+   truth-teller); every section renders NOTHING for a door the follow locks (the key doors' generic sentence and the pair
+   gate's, New words, the crossings, the account leaves) — "the per-section short pointer collapses to the one saying"
+   (so `followFirstToCatchUpRoad` is no longer said on the phone); "locked doors keep their rows" read as: a door refused
+   for any OTHER reason keeps its refusal row as before, open doors keep theirs. Belt: when the account section has no
+   faces yet, the screen says the one saying at its place. Pins (hosted `MobileProtectionScreen` counts, red on the pre-fix
+   tree): the generic kind (`.keysReplaced`) 4 → 1, the pair 2 → 1 (the road 1 → 0), the held follow out ≥ 1 and == 1;
+   the posture suite's end-to-end pair pin moves the same way.
+2. **MINOR-2 — the phone lobby's E6 line, pinned.** NOT-STARTED. A hosted `MobileRoadLockView` over the phone bootstrap's
+   own lobby in E6 (a fresh library joins a Castle account by its twelve words under Always ask — no passphrase lock of
+   its own, signed in — then locks); red on `fd56f2279`'s copy of `MobileRoadFaces.swift`. No production change.
+3. **NIT-2 — Settings' *Protection…* row only while `services` exist** (the sync row's *Starting…* beside it — P-2); the
+   dead `sentence == nil` arm of `MobileProtectionSheetNotHere` removed. NOT-STARTED. Pin: hosted `MobileSettingsView` with
+   no services over a bootstrap whose library has its account section → no row (red on the pre-fix tree); the source pin
+   `settingsOpensTheScreenOnlyWhereItCanAct` follows the guard.
+4. **NIT-1 — stale comments trued (COMMENTS ONLY).** NOT-STARTED.
+5. **NIT-5's guard — the copied planted support can't drift.** NOT-STARTED. One test: every top-level declaration in
+   `MobilePlantedProtection.swift` (its doc comment + body) is byte-identical to the same-named declaration in the Mac's
+   `VariorumTests/Protection/ProtectionTestSupport.swift` / `ProtectionAccountSupport.swift` (the file headers and the
+   `@testable import` differ by design and are not compared). Non-hollow by a one-byte drift, named before it runs.
+6. **NIT-6's comment — "one muted line" trued to the stacking truth (up to three).** NOT-STARTED.
+7. **Evidence:** pins red on the pre-fix tree (MINOR-1, NIT-2) / by behavioral revert (MINOR-2, NIT-5's drift); the
+   changed suites + `MobileNoRedirectSweepTests` + `MobileCopyRegisterSweepTests` green at the tip. PENDING.
+
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
 | # | item | owner | status |
