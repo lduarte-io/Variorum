@@ -72,8 +72,8 @@ struct VariorumMobileApp: App {
                     // they render.
                     .redacted(reason: SnapshotPrivacy.redactionReasons(for: scenePhase))
                     // VX-510 D-A3 (VX-506): whether the OPEN library has joined an account — the sync row's keys refusal
-                    // over a library that has not reads a not-yet, never "locked" (the sentence alone here: the phone's
-                    // Protection screen is VM-8's).
+                    // over a library that has not reads a not-yet, never "locked" (VM-8 unit 1: its *Protection…* door is
+                    // the phone's Settings ▸ Protection screen).
                     .environment(\.librarySyncsWithAnAccount, bootstrap.roadStanding?.syncsWithAnAccount)
                     // VX-306 U3: rule 27 after a quiet open — §7c (3)'s sentence, a sheet once per open.
                     .sheet(isPresented: Binding(
@@ -106,11 +106,15 @@ struct VariorumMobileApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
-                        // VX-308 U1 (P-VX308-U1-F1): the Account sheet's Delete Account also runs the protection half
-                        // (the open library stops naming the deleted account — rule 16's local leave).
-                        fresh.afterAccountDeleted = { account in
-                            await bootstrap.accountDeletedOnNewRoad(account)
-                        }
+                        // VM-8 unit 1 — THE SERVICES-HELD ROADS, wired in the bootstrap's ONE function (VX-510 D-A1, the
+                        // Mac's composition): the Account sheet's Delete Account runs the protection half (rule 16's local
+                        // leave — P-VX308-U1-F1); the account section's *Sign out…* signs out through this one session; an
+                        // account act that lands on the open session runs its FIRST ROUND through these services
+                        // (VX-498/VX-507); and a RE-KEYING act's round waits for the reopen's fresh services (D-B0 — the
+                        // services generation this call bumps). BEFORE `start()`, so a re-keying act's round rides the
+                        // chain the start composes. (Until VM-8 the phone wired only the deletion hook, inline — it had no
+                        // account section.)
+                        bootstrap.attach(services: fresh)
                         // Phase 13p ladder R1-M2: the phone's lock road
                         // used to skip the ruled teardown entirely —
                         // `onWillLock` was wired ONLY on the Mac, so Lock

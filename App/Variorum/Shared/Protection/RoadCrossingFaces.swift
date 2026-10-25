@@ -264,7 +264,10 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         switch words {
         case .ruleFive: return ProtectionWords.leaveSentence
         case .floorSentence: return ProtectionWords.castleFloor
-        case .exportAPlainCopyFirst: return ProtectionWords.exportAPlainCopyFirst
+        // VM-8 unit 1 — F-U1-2 (b), RULED (B): the phone has no Data Safety and no plain-copy road at all (PL-13), so the
+        // sentence would name a road that doesn't exist there — not said on the phone (the `.sameEmailDifferentAccount`
+        // idiom below). PROVISIONAL P-VM8-4 (whether the phone gets its own advisory is hers).
+        case .exportAPlainCopyFirst: return ProtectionRoad.isMac ? ProtectionWords.exportAPlainCopyFirst : nil
         case .scheduledExportTurnsOff: return ProtectionWords.scheduledExportTurnsOff
         case .copiesUnderAKeyThisMacCantDelete: return ProtectionWords.copiesUnderAKeyThisMacCantDelete
         case .sameEmailDifferentAccount: return nil

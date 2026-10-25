@@ -46,6 +46,10 @@ enum MobileRoute: Hashable {
     /// pushed over it. The phone covers and stands its editor down, which is
     /// the honest answer to a Mac side panel it cannot have.
     case versions(String)
+    /// **Settings ▸ Protection** (VM-8 unit 1, PROVISIONAL P-VM8-2): the phone's Protection screen, pushed on the shelf's
+    /// stack — Settings is the shelf's own door (the pocket guide's precedent) — and pushed again after an act's reopen
+    /// (F-U1-3: the shell adopts `ProtectionController.settingsRequest`).
+    case protection
 }
 
 /// A ROOT SURFACE — and, since batch 10, a position in the swipe band.
@@ -258,6 +262,10 @@ struct MobileShellView: View {
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
         }
+        // VM-8 unit 1 — F-U1-3: a reopen's ask for Protection, adopted once (a fresh shell on appear; a standing one on
+        // change).
+        .onAppear { adoptProtectionRequest() }
+        .onChange(of: bootstrap?.protection.settingsRequest) { _, _ in adoptProtectionRequest() }
         .task { await starsModel.start() }
         // R27b's starter Journal used to be seeded from HERE, concurrently
         // with the task that composes AppServices — which is what the
@@ -282,6 +290,7 @@ struct MobileShellView: View {
         return MobileSettingsView(
             session: session, router: router, services: services,
             bootstrap: bootstrap,
+            onOpenProtection: { openProtection() },
             onOpenTutorialBook: { bookID in
                 settingsPresented = false
                 shelfPath.append(MobileRoute.book(bookID))
@@ -289,7 +298,8 @@ struct MobileShellView: View {
         #else
         return MobileSettingsView(
             session: session, router: router, services: services,
-            bootstrap: bootstrap)
+            bootstrap: bootstrap,
+            onOpenProtection: { openProtection() })
         #endif
     }
 
@@ -461,7 +471,40 @@ struct MobileShellView: View {
             // screen's whole lifetime is one visit (the read is the note's
             // own version count — never corpus-shaped).
             MobileVersionsScreen(session: session, postID: postID, tokens: tokens)
+        case .protection:
+            // VM-8 unit 1: the bootstrap's standing faces (kept across every reopen with the presenter and the account
+            // section's model); the services for the Account sheet.
+            MobileProtectionScreen(standing: bootstrap?.roadStanding, services: services, tokens: tokens)
         }
+    }
+
+    /// **VM-8 unit 1 — F-U1-3: SETTINGS ASKED BACK TO PROTECTION** (VX-206's road, the Mac's `AppSettingsView
+    /// .adoptProtectionRequest` idiom). A re-keying act from the Protection screen — her join into her Castle account —
+    /// reopens the library: the `.ready` tree goes down (this shell and the pushed screen with it) and comes back fresh,
+    /// while the act's confirm (its words moment, its first round) lives on in the bootstrap's presenter. The reopen asks
+    /// for Protection back (`requestProtectionPaneForRoadCrossing`); this shell adopts each ask ONCE (the controller's
+    /// counter and its "adopted" mark both live on the controller, which outlives the shell) and pushes the screen again on
+    /// the shelf's stack, where the standing sheet presents again.
+    private func adoptProtectionRequest() {
+        guard let protection = bootstrap?.protection, Self.adoptsProtectionRequest(protection) else { return }
+        settingsPresented = false
+        if tab != .shelf { selectPage(.shelf) }
+        shelfPath = NavigationPath([MobileRoute.protection])
+    }
+
+    /// The adoption rule, pinnable: an ask newer than the last adopted one is adopted ONCE (and marked so); every other
+    /// read adopts nothing.
+    static func adoptsProtectionRequest(_ protection: ProtectionController) -> Bool {
+        guard protection.settingsRequest > protection.settingsRequestAdopted else { return false }
+        protection.settingsRequestAdopted = protection.settingsRequest
+        return true
+    }
+
+    /// VM-8 unit 1 — Settings' *Protection…* door (and the sync row's): Settings goes, the screen is pushed on the
+    /// shelf's stack (leaving the shelf files the quick-note box first — A5-8).
+    private func openProtection() {
+        settingsPresented = false
+        leavingShelf { shelfPath.append(MobileRoute.protection) }
     }
 
     /// A5-8 — LEAVING MINTS AND CLEARS. Every road OFF the shelf root

@@ -563,7 +563,11 @@ nonisolated enum ProtectionWords {
     static let gateHeading = "On this \(ProtectionCopy.deviceName)"
     static let gateTouchID = ProtectionCopy.biometryName
     static let gateAlwaysAsk = "Always ask"
-    static let gateTouchIDLine = "This \(ProtectionCopy.deviceName) keeps the new key behind your fingerprint."
+    /// VM-8 unit 1 — F-U1-2 (a), RULED (B): a fingerprint is Touch ID's word, so the phone's line names its own biometry
+    /// (the `rearmQuestion` precedent below; the Mac's text byte-identical). PROVISIONAL P-VM8-3, hers.
+    static let gateTouchIDLine: String = ProtectionRoad.isMac
+        ? "This \(ProtectionCopy.deviceName) keeps the new key behind your fingerprint."
+        : "This \(ProtectionCopy.deviceName) keeps the new key behind \(ProtectionCopy.biometryName)."
     static let gateAlwaysAskLine = "No copy of the key stays on this \(ProtectionCopy.deviceName); you type every time."
 
     /// RULE 12 — her leave-screen sentence, verbatim (`Words.ruleFive`, on every road into Standard).
@@ -791,8 +795,13 @@ nonisolated enum ProtectionWords {
     static let deleteHereTitle = "Delete the account from this \(ProtectionCopy.deviceName)"
     static let deleteHereLead = "This \(ProtectionCopy.deviceName) forgets the account and its sync keys. The account "
         + "itself isn't deleted."
-    static let deleteHerePointer = "To delete the account itself, and everything it keeps on the server, choose "
-        + "Account\u{2026} in the sidebar's sync row, then Delete Account."
+    /// VM-8 unit 1 — F-U1-2 (d), RULED (B): the phone has no sidebar — its sync row lives in Settings (the Mac's text
+    /// byte-identical). PROVISIONAL P-VM8-6, hers.
+    static let deleteHerePointer: String = ProtectionRoad.isMac
+        ? "To delete the account itself, and everything it keeps on the server, choose "
+            + "Account\u{2026} in the sidebar's sync row, then Delete Account."
+        : "To delete the account itself, and everything it keeps on the server, choose "
+            + "Account\u{2026} in Settings' sync row, then Delete Account."
     static let deleteHereButton = "Delete from this \(ProtectionCopy.deviceName)"
     static let deleteHereReceipt = "This \(ProtectionCopy.deviceName) doesn't use that account any more."
 
@@ -1030,8 +1039,11 @@ nonisolated enum ProtectionWords {
 
     /// P-VX510-1 — the first round running (the sheet stays; Done is open throughout).
     static let firstRoundProgress = "Syncing your library with your account\u{2026}"
-    static let firstRoundCloseNote = "You can close this \u{2014} sync keeps going, and the bar at the bottom of the "
-        + "window says when it's done."
+    /// VM-8 unit 1 — F-U1-2 (c), RULED (B): the phone has no bar at the bottom of a window — its sync row lives in Settings
+    /// (the Mac's text byte-identical). PROVISIONAL P-VM8-5, hers.
+    static let firstRoundCloseNote: String = ProtectionRoad.isMac
+        ? "You can close this \u{2014} sync keeps going, and the bar at the bottom of the window says when it's done."
+        : "You can close this \u{2014} sync keeps going, and Settings says when it's done."
     /// P-VX510-1 — the round came back clean: the set-up handed the library up; a join (or Move) brought the account in.
     static let firstRoundSetUpLanded = "Synced. Your library is on your account now."
     static let firstRoundJoinLanded = "Synced. Your account's writing is in this library now."

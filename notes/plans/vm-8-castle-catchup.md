@@ -293,8 +293,36 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
     own account can never pass — the standing fence); a `--check` dry-run that verifies every guard and types nothing;
     typing only under the held stage claim. The helper's path, guard list and deletion offer land in this record and
     in her handoff (hers to keep or delete at closeout, the vx-494 precedent).
-- **Piece 1 — the pre-design face on the phone lobby:** NOT-STARTED.
-- **Piece 2 — the phone's Protection screen (the account section), `attach(services:)`, the row's door:** NOT-STARTED.
+- **Piece 1 — the pre-design face on the phone lobby:** CODE DONE (this commit; the pins COMPILED — phone
+  `build-for-testing` EXIT 0; their RUN and red-on-old PENDING the stage). `MobileRoadLockView` (`VariorumMobile/
+  Features/Protection/MobileRoadFaces.swift`): on `face.preDesignStore` HER face only — the lock glyph, her lead as the
+  heading (no lobby title — P-VX329-U4-1), her body, *Start fresh…* (only where `offersStartFresh` — P-2) opening an
+  `.alert` with her confirm line, *Start fresh* / *Cancel*, the shared act on the yes; the busy line the dots alone; NO
+  *Open Library…* (PROVISIONAL P-VM8-1). Every other slot renders the standing lobby exactly as before (moved whole into
+  `standingLobby`), plus — the same surface, shared ruled copy, no new words — the E6 line beneath the lead
+  (`face.accountPassphraseLine`, P-VX529-U2-1; the Mac's `RoadLockView` said it, the phone rendered the field without its
+  why). Pins: `MobilePreDesignFaceTests` (hosted — `MobileSurfaceDriver`): her words + Start fresh alone; the confirm
+  first, the act on the yes; a guard for the standing lobby.
+- **Piece 2 — the phone's Protection screen (the account section), `attach(services:)`, the row's door:** CODE DONE
+  (this commit; COMPILED, runs PENDING). NEW `VariorumMobile/Features/Protection/MobileProtectionScreen.swift`: the screen
+  (pushed `MobileRoute.protection` on the shelf's stack — the settings-sheet grammar), the account section over the
+  bootstrap's `RoadAccountModel` (situation, the follow's durable Done, the follow door where offered, every account door
+  as `assess` says it, *Sign in…* / *Sign out…*), F-U1-1 (A) — `RoadAccountDoorOpen.saysRuleTwelve` (shared, pure:
+  `spec.words.contains(.ruleFive)`) arms render nothing; the presenter's phone host (`.settings`): the account confirm
+  (exactly the door's fields through `PeekableSecretField`, the Face ID / Always ask gate rows, rule 7's words moment —
+  `MobileWordsLookPanel`, NO Copy door (the phone has no words clipboard road — P-2), the first-round phase with Done),
+  the sign-out confirm, the Account sheet (the phone's page style). F-U1-2 (B) in SHARED words behind
+  `ProtectionRoad.isMac`, the Mac byte-identical: `gateTouchIDLine` (P-VM8-3, riding `biometryName`),
+  `RoadCrossingFaces.sentence(.exportAPlainCopyFirst)` → nil on the phone (P-VM8-4), `firstRoundCloseNote` (P-VM8-5),
+  `deleteHerePointer` (P-VM8-6). `MobileSettingsView`: the *Protection…* row (the sync row's own door name, P-VX486-1)
+  and the sync row's `.openProtection` door injected (`protectionPaneDoor`) — both only where the screen can act (the
+  shell's road AND an account section). `MobileShellView`: the route, `openProtection()`, and F-U1-3's adoption
+  (`adoptsProtectionRequest` — once per ask; on appear and on change; pushes the screen). `VariorumMobileApp`:
+  `bootstrap.attach(services: fresh)` BEFORE `start()` (replacing the inline deletion hook). `WordsFieldsConcealTests`
+  (Mac target) gains the phone confirm's three words-field sites. Pins: `MobileProtectionAccountSectionTests` (hosted:
+  the join arm's door and confirm in the phone's words; the rule-12 arms render nothing; the first round stays with the
+  phone's close note then its outcome, Done once; the words moment with no Copy) and `MobileProtectionCompositionTests`
+  (attach before start; the ask adopted once; the shell's adoption and push; Settings' gating).
 - **Piece 3 — VX-501 on the phone's posture:** NOT-STARTED.
 - **Piece 4 — the simulator walk + the measured save:** NOT-STARTED.
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.

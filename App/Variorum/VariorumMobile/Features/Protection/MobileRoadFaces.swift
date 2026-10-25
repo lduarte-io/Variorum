@@ -36,6 +36,8 @@ struct MobileRoadLockView: View {
     @State private var passphrase = ""
     @State private var wordsText = ""
     @State private var showsWords = false
+    /// VM-8 unit 1 — *Start fresh…* asks her confirm first (her line, the vx-329 plan's §6d; the Mac's `RoadLockView`).
+    @State private var confirmsStartFresh = false
 
     private var face: ProtectionLobbyFace { lobby.face }
 
@@ -45,6 +47,72 @@ struct MobileRoadLockView: View {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 30, weight: .light))
                     .foregroundStyle(tokens.muted)
+                if face.preDesignStore {
+                    // VM-8 unit 1 (F-U4-2) — RULE 26 before unlock: a store from before this design (its key files' names
+                    // alone say so). HER face, her words only — the lead heading the card (no lobby title — P-VX329-U4-1),
+                    // her body, *Start fresh…* with her confirm first. NO *Open Library…* on the phone: it has no picker road
+                    // (the standing lobby's precedent — PROVISIONAL P-VM8-1).
+                    preDesignFace
+                } else {
+                    standingLobby
+                }
+                if face.liveKeyFileUnreadable { alarm(ProtectionWords.liveKeyFileUnreadable) }
+                if let message = lobby.message { alarm(message) }
+                if lobby.busy {
+                    HStack(spacing: 6) {
+                        TravellingDotsIndicator(ink: tokens.muted)
+                        // Under her pre-design face nothing is opening (Start fresh… is running): the dots alone, no words
+                        // beyond hers (the Mac's own rule).
+                        if !face.preDesignStore {
+                            Text(tokens.chromeLabel(ProtectionWords.opening))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.muted)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 28)
+            .padding(.vertical, 48)
+            .frame(maxWidth: .infinity)
+        }
+        .background(tokens.room.ignoresSafeArea())
+        // VM-8 unit 1 — *Start fresh…*'s confirm: her line (the vx-329 plan's §6d); the act runs only on its yes.
+        .alert(ProtectionWords.preDesignStartFreshConfirm, isPresented: $confirmsStartFresh) {
+            Button(ProtectionWords.preDesignStartFreshButton) {
+                Task { await lobby.startFresh() }
+            }
+            Button(ProtectionWords.accountCancel, role: .cancel) {}
+        }
+        .task { await lobby.autoAskIfDue(appIsActive: scenePhase == .active) }
+        .onChange(of: scenePhase) { _, phase in
+            // VX-310's second bug, the phone's twin: the roads are re-read when she comes back to the app.
+            guard phase == .active else { return }
+            Task {
+                await lobby.refresh()
+                await lobby.autoAskIfDue(appIsActive: true)
+            }
+        }
+    }
+
+    /// VM-8 unit 1 — her pre-design face (the Mac's `RoadLockView` branch, the phone's room): her lead, her body, and
+    /// *Start fresh…* only where it can act (P-2 — `offersStartFresh`: the fact AND a wired act).
+    @ViewBuilder
+    private var preDesignFace: some View {
+        Text(ProtectionWords.preDesignLead)
+            .font(tokens.title)
+            .foregroundStyle(tokens.ink)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+        sentence(ProtectionWords.preDesignBody)
+        if lobby.offersStartFresh {
+            MobileRoadButton(title: ProtectionWords.preDesignStartFreshDoor, tokens: tokens) { confirmsStartFresh = true }
+                .disabled(lobby.busy)
+        }
+    }
+
+    /// The lobby as it stands for every slot but a pre-design one (unchanged from VX-306 U3).
+    @ViewBuilder
+    private var standingLobby: some View {
                 Text(tokens.chromeLabel(ProtectionWords.lobbyTitle))
                     .font(tokens.title)
                     .foregroundStyle(tokens.ink)
@@ -67,33 +135,11 @@ struct MobileRoadLockView: View {
                     }
                 } else {
                     sentence(face.keychainUnreadable ? ProtectionWords.keychainUnreadable : face.lead)
+                    // VX-529 unit 2 — E6 (R-529-6: the why and the road): the shared lobby face's line beneath the lead
+                    // (the Mac's `RoadLockView` says it; the phone rendered the field without its why until VM-8).
+                    if let line = face.accountPassphraseLine { sentence(line) }
                     roads
                 }
-                if face.liveKeyFileUnreadable { alarm(ProtectionWords.liveKeyFileUnreadable) }
-                if let message = lobby.message { alarm(message) }
-                if lobby.busy {
-                    HStack(spacing: 6) {
-                        TravellingDotsIndicator(ink: tokens.muted)
-                        Text(tokens.chromeLabel(ProtectionWords.opening))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                    }
-                }
-            }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 48)
-            .frame(maxWidth: .infinity)
-        }
-        .background(tokens.room.ignoresSafeArea())
-        .task { await lobby.autoAskIfDue(appIsActive: scenePhase == .active) }
-        .onChange(of: scenePhase) { _, phase in
-            // VX-310's second bug, the phone's twin: the roads are re-read when she comes back to the app.
-            guard phase == .active else { return }
-            Task {
-                await lobby.refresh()
-                await lobby.autoAskIfDue(appIsActive: true)
-            }
-        }
     }
 
     @ViewBuilder

@@ -163,6 +163,12 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
     /// reopens — the crossings' seam (R-U2-2); else on the open session.
     var rekeys: Bool { spec.rekeys }
 
+    /// **VM-8 unit 1 — F-U1-1, RULED (A):** the confirm says HER rule-12 leave sentence (`Words.ruleFive` — the join that
+    /// leaves Castle, Move out of Castle, the follow out of Castle). Its text names the Mac (CastleRules' own words), and its
+    /// phone wording is hers (F-PH-2), so the phone's unit-1 account section does not render these arms (nothing in their
+    /// place — the phone had no road there before); the Mac renders every arm as before.
+    var saysRuleTwelve: Bool { spec.words.contains(.ruleFive) }
+
     /// **VX-510 D-A1 + D-B0 — a first round is owed the moment this act lands** (VX-498 · VX-507): its landing changes
     /// sync's standing — turning sync on (the set-up, a join), Move, and the follow. Never a leave (sync stops there). An
     /// act on the OPEN session asks the open session's services (D-A1); a RE-KEYING act (a join or Move across postures,
