@@ -1,9 +1,12 @@
 # VX-529 — the catch-up for a pair changed elsewhere
 
-**STATUS: OPEN — the design memo, written before any build (P-5, her R-510-19). Nothing below is built; the
-RULINGS NEEDED section is what the sitting decides.** Branch `vx-529-pair-catchup`, worktree `~/dev/variorum-vx-529`,
-the custody slot held (the in-flight table). The kickoff is `notes/handoffs/vx-529-kickoff.md`; the repro is the
-VX-510 record's THE CHANGED-ELSEWHERE REPRO (`notes/plans/fixes/vx-510-first-run-sync.md`).
+**STATUS: OPEN — THE BUILD PHASE COMPLETE (units 1–3 CLOSED), THE LADDER RUNNING (round 1 recorded below; its one
+MINOR in fix session L1). Remaining: the ladder's close, the closing stage batch, the live proof, HER two-Mac test,
+the closeout.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
+section) is the built contract. Branch `vx-529-pair-catchup`, worktree `~/dev/variorum-vx-529`, the custody slot held
+(the in-flight table). The kickoff is `notes/handoffs/vx-529-kickoff.md`; the repro is the VX-510 record's THE
+CHANGED-ELSEWHERE REPRO (`notes/plans/fixes/vx-510-first-run-sync.md`). *(The header's original "nothing below is
+built" line stood stale through the build phase — the round-1 reviewer's NIT; trued 2026-10-25.)*
 
 ## Her mandate (verbatim, binding)
 
@@ -1706,6 +1709,53 @@ accounts (the VX-510 repro's legs as the acceptance script, Castle and Standard,
 heal); HER TWO-MAC TEST with the build installed on both behind A1 (the release gate, her kickoff word); the
 CLOSEOUT (canon deltas in the two-file shape, the QUESTIONS bundle — the P-VX529 family, VX-523's options, F-U2-7's
 bound, the rule-7 and rule-3-adjacent clauses — the tickets triaged, MobileSoul PL-59 trued, the handoff).
+
+## THE LADDER — ROUND 1 (2026-10-25; a fresh `fable-reviewer`, REVIEW_PROMPT verbatim, zero framing, over
+`git diff main...vx-529-pair-catchup`; the reviewer read this record whole, SyncSpec and CastleRules in full, the
+SurfaceContracts bullets, and re-ran the 21 VX-529 core suites itself — 100 tests green, 6 known, exactly the
+record's set)
+
+**0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT.** Findings verbatim-faithful, each with the ORCHESTRATOR'S DISPOSITION:
+
+- **F-R1-1 [MINOR] — the vault road's read runs where it can prove nothing.** `openThroughTheVault` makes its bounded
+  network read on EVERY wrong passphrase at a signed-in writing lobby, including over a library whose held key files
+  carry NO master lock (an unsynced library) — where `VaultRoad.answer`'s only possible outcome is `.nothingToSay`:
+  up to the 10 s bound per typo, buying nothing (F-U2-7's accepted residual covers only the synced case, where the
+  read can buy the owed sentence). Proposed fix: gate the read on any held key file carrying a master lock
+  (`files.contains { $0.master != nil } || live?.master != nil`), refusals byte-identical otherwise; the pin a
+  fetch-count test in `LobbyVaultRoadTests` (unsynced + signed in + wrong passphrase ⇒ 0 vault fetches; today 1).
+  **DISPOSITION: CONFIRMED — fix session L1** (a fresh implementer; agree/dispute first per the cross-model flow;
+  red-on-old pin, revert-verified).
+- **F-R1-2 [NIT] — sentence 11's twice-lagged flaw.** "…the one before it…" is wrong when the passphrase changed
+  twice+ while this device lagged (the local lock holds an OLDER one, not "the one before" the current); the honest
+  meaning is "the one this library last knew". **DISPOSITION: TO HER BUNDLE, flagged beside sentence 11** (wording
+  class, provisional already; no code, no pin).
+- **F-R1-3 [NIT] — the record's STATUS header stood stale** ("nothing below is built" through the whole build phase).
+  **DISPOSITION: TRUED the same day** (the header now states the run's real position; the truing note rides it).
+
+**The reviewer's dispositions of everything the record named for it, all accepted as its final calls:** F-U2-8
+weighed and accepted as recorded (the exposure class pre-exists at every synced settle; the deferred-act alternative
+buys a rare transport-bounded stall at the cost of a held-secret window and new machinery); VX-530's prompt table and
+the flipped VX-517 guard verified sound; unit 2's three changed tests and VX-526's flipped words test each justified
+and matching a ruling; VX-538's key-door landing re-read judged correct behavior (a previously latent gap); VX-523's
+return judged the right call; VX-533's honest residual and discriminator endorsed. **The clean bill** (abridged; the
+full text is the reviewer's report): detection's false-positive premise pinned across all 24 roads; the act a true
+re-lock with zero server/custody/Apple/staged/backup writes, crash-walked in three postures, R-510-20 honored to the
+letter (no stored shape anywhere — `typedSecret` pre-existing); the words arm's drop-not-trade; the refusal splits'
+honest seams; the vault road's same-account proof before any named change; the E6 heal's lands-where-missing-only;
+the faces' durable Done and suppressed stale line; discipline verified (zero Sync/Server/CastleRules lines, no
+trailers on 92 commits, pins before fixes by commit order).
+
+### THE LADDER — L1 (a fresh `opus-implementer`; F-R1-1 only)
+
+The finding above is the charter, verbatim. Agree/dispute FIRST (a dispute returns to the reviewer for the final
+call); then the pin red-on-old in `LobbyVaultRoadTests`' harness, the gate, the revert verification, the refusals
+byte-identical either side of the gate (pinned). Discipline exactly the units': headless only, zero `Sync/`,
+commit + push per piece, LIVE STATUS under this section, no trailers.
+
+### L1 — LIVE STATUS (the implementer owns this section)
+
+*(not started)*
 
 ## Machinery
 
