@@ -225,3 +225,48 @@ Small: the comments say "ONE muted line", but the screen renders up to three (`k
   source-text pins as guards, honestly.
 - **Ledger honesty:** unit 3 is NOT STARTED, the device install is HELD for her, and the not-done lines are first in
   each LIVE STATUS.
+
+---
+
+## THE ORCHESTRATOR'S DISPOSITIONS (round 1, 2026-10-25 — same-model round, arbitrated against the spec; repo-first before the fix session)
+
+- **MAJOR-1 — CONFIRMED as a real gap; the INTERIM stands as built (arbitrated), the consequence to HER (F-PH-2).**
+  P-2's letter is about doors: the key doors render and deliver the operations layer's REAL refusal — that part is
+  conformant. The offense is the named remedy (the follow-out door, the Move door) being held for her rule-12 wording.
+  The alternatives: hiding the refusals hides the FACT that the account changed (CastleRules' posture is detect and
+  SAY, never silence), and rendering the doors would invent her words. So: **the dead end stands, recorded as
+  P-VM8-10** — a temporary state while F-PH-2 is hers (the road exists on the Mac that made the change; the state is
+  unreachable on her own account before her sitting, and the device install is also held for it). MINOR-1's fix makes
+  the state read ONCE, cleanly, instead of four times. The consequence is named in HER BUNDLE under F-PH-2 (now its
+  first line) and joins the QUESTIONS bundle at the closeout. NO pin freezing either direction (the state flips at her
+  sitting; a pin on a days-long interim is churn — the round file records the probe's observations as the evidence).
+- **MINOR-1 — CONFIRMED, FIX (the fix session):** the follow-owed refusal (every kind, the pair included) reads ONCE
+  PER SCREEN — the follow door's notice where that door renders, and still exactly once when it does not (MAJOR-1's
+  state keeps its truth-teller). Locked doors keep their rows; the per-section short pointer collapses to the one
+  saying. Red-on-old pin = the probe's count (4 → 1 generic; 2 → 1 pair). This is her kickoff's own line ("don't copy
+  the repetition") applied whole; P-VM8-9 extends to (a-unified), in her bundle. Note the Mac's repetition on VX-542
+  (the once-per-screen option, this fix as the phone's precedent).
+- **MINOR-2 — CONFIRMED, FIX:** the E6 lobby line's hosted pin (`MobileRoadLockView` in the E6 state), red on
+  `fd56f2279`'s copy of the file, green at the tip. A bug-class face fix without a pin violates the standing guard.
+- **MINOR-3 — CONFIRMED, TICKETS (the orchestrator mints now, offered in her bundle):** F-U2-F (the phone's Castle
+  On-this-iPhone section: no idle-lock dial, no Lock Library Now — the mechanism exists, the faces don't) and the
+  keystone line's phone home. Both off the critical path; hers to fold into unit 3 or leave ticketed.
+- **NIT-1 — FIX (comments only):** the stale comments trued (`SyncStatusViews.swift:104, 369`,
+  `ProtectionSheetPresenter.swift:3`, `RoadKeyDoorFaces.swift:3`, `MobileProtectionScreen.swift:5-17`, the record's
+  list). **The `herRuleTwelve` exemption reason stays BYTE-UNTOUCHED** (my standing ruling; its "until VM-8" is still
+  true today — the leave faces are not built; re-worded only at the closeout if the arms still wait, under my eye).
+- **NIT-2 — CONFIRMED, FIX:** the Protection row renders only when `services` exist (the sync row's "Starting…"
+  pattern — P-2: a door that cannot act is not rendered); the dead nil-sentence arm removed. Hosted pin if cheap.
+- **NIT-3 — RECORD-ONLY:** matches the Mac's shape; both roads re-type the words. A later polish ticket if she wants
+  one — her bundle's taste flags carry it.
+- **NIT-4 — RECORD-ONLY:** one extra bounded read on an explicit Cancel; not corpus-scaled, not per-keystroke. Narrowing
+  it is churn tonight.
+- **NIT-5 — ONE FIX + record:** add the byte-parity guard (a test diffing `MobilePlantedProtection.swift` against the
+  Mac's source support file, so the 300-line copy can never drift silently). The indentation, chrome-reuse and ink
+  items are record-only tidiness.
+- **NIT-6 — BUNDLE + comment fix:** the hours-waiting receipt consequence is named beside her P-VM8-8 (A)/(B) choice;
+  the "one muted line" comment trued to the stacking truth (up to three).
+
+**The fix session (L1): MINOR-1, MINOR-2, NIT-1 (comments), NIT-2, NIT-5's guard, NIT-6's comment — each behavior fix
+with a red-on-old pin verified by behavioral revert; zero new product words; the phone suites + the sweeps green at the
+tip. Round 2 (a fresh Opus reviewer) re-reviews the fixes.**
