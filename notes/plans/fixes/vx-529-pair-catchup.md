@@ -838,8 +838,11 @@ with the walk as its evidence (the orchestrator's acceptance walk follows your c
 
 ### UNIT 2 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE IN THIS UNIT (so far — kept current):** everything below marked NOT-STARTED; the riders (unit 3's — VX-538
-included, her word); mobile faces (the shared brains compile for the phone; its faces are the closeout's parity row). Zero
+**NOT DONE IN THIS UNIT:** the riders (unit 3's — VX-538 included, her word); mobile FACES (the shared brains compile for
+the phone and its lobby inherits the E6 field and the vault road — the parity row is the closeout's); the Mac-only suites'
+RUNS and every Mac-target run of this unit's suites (the closing stage batch — list under U2-P7); the acceptance walk (the
+orchestrator's); the vault road's WORDS twin (F-U2-3) and the third check answer's pointer (F-U2-10) — not in the brief;
+the QUESTIONS entry for P-VX529-U2-1..5 (the merging session's ledger). Every piece U2-P0…P7 DONE. Zero
 `Sources/VariorumCore/Sync/` lines (by design — none needed). No revert is in flight. Session: a fresh `opus-implementer`,
 2026-10-24, worktree `~/dev/variorum-vx-529`. (The orchestrator's `eb0757ab1` landed in this worktree during my read —
 UNIT 3's section only, committed and pushed; nothing uncommitted, so I continued.)
@@ -1026,8 +1029,38 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   sentence ×2) plus the design rows that ride the road (the named sentence; the landing; E6's account sentence and its
   open); the five guardrails green through it; restored by `git checkout --`, `git diff --exit-code` clean, `✔ 9 tests`
   green again. DONE (`9f15baf0b` pins, `f073ee6b6` road). No revert is in flight.
-- U2-P7 — the close: the harness whole, the core protection suites, ONE Mac + ONE iOS `build-for-testing`
-  (`DerivedData/vx529-u2*`), the Mac-suite list for the stage batch. NOT-STARTED.
+- U2-P7 — the close: DONE (this commit). On the final product tree (`49d7ff537`; the record commits after it touch no
+  code):
+  - THE HARNESS whole (debug; this unit's five new suites symlinked in): `✘ Test run with 484 tests in 90 suites failed …
+    with 8 issues` — the baseline's five harness-PATH artifacts (`CopyListingFacesSurfaceTests` ×2,
+    `EmptySlotDoorsSurfaceTests` ×2, `ProtectionRoadSwitchTests` ×1) plus F-U2-9's pre-existing week-boundary flake
+    (`ProtectionPairRetentionTests` ×3 — 2026-10-25 00:20 UTC; nothing it exercises is in this diff). Every other test green
+    (460 at baseline + 24 new).
+  - THE CORE SUITE whole (`swift test`, debug, headless): VariorumCoreTests **`Test run with 3419 tests in 453 suites passed
+    … with 5 known issues`** (P2's 4 negative controls + P6d's pinned residual); the one failure the ticketed MCP wall-clock
+    flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (VX-353 / VX-532) in
+    VariorumMCPTests; no protection code in it.
+  - **Mac `build-for-testing`** (`-derivedDataPath App/Variorum/DerivedData/vx529-u2`): `** TEST BUILD SUCCEEDED **`, exit 0;
+    no warning in a touched file. **iOS `build-for-testing`** (`VariorumMobile`, `generic/platform=iOS Simulator`,
+    `DerivedData/vx529-u2-ios`): `** TEST BUILD SUCCEEDED **`, exit 0.
+  - Zero `Sources/VariorumCore/Sync/` lines (by `git diff --stat 9b8ac6745..HEAD -- Sources/VariorumCore/Sync`: empty); no
+    schema, no stored shape (the key file's existing setters only; `FollowDoneMark`'s new names are a local UI ledger value
+    an older build reads as none); no trailer on any commit.
+  - **THE MAC-SUITE LIST for the stage batch** (every Mac-target and phone suite exercising a changed file — run by SUITE
+    TYPE): NEW — `PairFollowDoneTests`, `PairPreflightAndGateTests`, `PairFollowFacesTests`, `PairFollowDoneDurableTests`,
+    `LobbyVaultRoadTests`, `PairCheckDoorTests` (all harness-green); CHANGED — `ProtectionJoinFollowRoadTests`,
+    `FollowDoneNoticeTests`, `SecretCheckRoadTests` (harness-green; their source pins read `#filePath` resolved, so they
+    ran); exercising changed types, harness-green — `RoadAccountModelTests`, `RoadAccountFacesTests`,
+    `RoadJoinFollowFacesTests`, `RoadJoinFollowModelTests`, `RoadJoinFollowWordsTests`, `TypedUnlockSyncKeysTests`,
+    `TouchIDUnlockSyncKeysTests`, `ProtectionOpenRoadPlantedTests`, `ProtectionLobbyModelTests`, `RoadLockTests`,
+    `RoadKeyDoorRoadTests`, `RoadKeyDoorsModelTests`, `RoadKeyDoorWordsTests`, `ProtectionAccountRoadTests`,
+    `FirstRoundConfirmTests`, `FirstRoundAfterTheActTests`, `SecretCheckModelTests`, `SecretCheckCompositionTests`; Mac-ONLY
+    (compiled, their runs PENDING the stage batch) — `RoadJoinFollowSurfaceTests` (the section's notice — `followDone`'s new
+    type), `RoadAccountSurfaceTests` (`RoadAccountSheet`), `SecretCheckSurfaceTests` (`SecretCheckOutcome`),
+    `RoadLockViewNamesPinTests` (`StoreLockView`), `RoadKeyDoorSurfaceTests` (the key-door faces); the PHONE —
+    `MobileProtectionRoadTests` (the shared lobby face) and `MobileNoRedirectSweepTests` (in `MobileStructuralTests.swift` —
+    every Shared literal; no new literal names the Mac — scanned). The core's new suites (`VaultRoadTests`,
+    `E6HealWiringTests`) ran in the core suite above.
 
 **THE LOBBY'S VAULT ROAD — the design as it will be built (scope 3; R-529-1; the guardrails literal):**
 - WHERE: only `ProtectionOpenRoad.openTyped`'s `.noneOpens` arm, only for a PASSPHRASE (the brief's letter — see F-U2-3),
