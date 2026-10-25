@@ -399,6 +399,15 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   - **THE PROOF OF COMMIT (server, read-only):** the phone's device `aa227b13…` reports `last_seq` **110,424** at
     11:40:34 UTC — exactly throwaway A's head (VX-494's own L2 reads the same). The shelf: "vx-494 scale corpus · 1200
     notes" (A16).
+  - **MACHINERY FAULT, FOUND AND SAID (2026-10-25 11:47 UTC):** the walk's app was installed from
+    `DerivedData/vm8u1-ios/Build/Products/Debug-iphonesimulator/` — but the "walk build" (`xcodebuild build` with no
+    `-configuration`) had written RELEASE products, so the Debug app installed was the one the RV-6 revert run built:
+    the committed tree EXCEPT `openTyped`'s one VX-501 load call. Everything LEG A walked (the pre-design face, Start
+    fresh, the Standard join, the first round, the switch, the kill, the resume, the save) and LEG B up to the Face ID
+    unlock never reaches that line, so they stand; the TYPED unlock at 11:46:57 met the revert and read **"Sync locked —
+    this iPhone hasn't unlocked your account's sync keys"** (B15 — RV-6's red, LIVE on the phone, unintended). The Debug
+    app was rebuilt from the clean tree (`-configuration Debug`, the dylib 05:48 local) and the typed unlock is re-walked
+    below. Lesson for the brief: build the walk app with `-configuration Debug` and install from its own products.
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
