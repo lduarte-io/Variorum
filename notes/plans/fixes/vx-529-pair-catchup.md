@@ -1866,11 +1866,8 @@ fresh reviewer; VX-523 closes with the run on her ruling.
 
 ### L2 — LIVE STATUS (the implementer owns this section)
 
-**IN PROGRESS — the core fix committed (`dacc7bf63`) and VERIFIED BY REVERT (RV-L2-1); the app's bounded read committed
-(`05829dc27`); RV-L2-2 IN FLIGHT** (named before it starts: `ProtectionCopyDoors.makeMine`'s core call made to pass the default
-door read instead of the app's — `accountsVault: .taken(accountsVault)` removed, the read itself kept; the run the harness's
-`--filter MakeMineProofFieldsRoadTests`; the restore `git checkout -- App/Variorum/Shared/Protection/ProtectionCopyDoors.swift`
-onto the committed fix). Zero `Sources/VariorumCore/Sync/`
+**IN PROGRESS — the core fix (`dacc7bf63`) and the app's bounded read (`05829dc27`) committed, each VERIFIED BY REVERT
+(RV-L2-1, RV-L2-2 — L2-P4); the close next (L2-P5).** No revert is in flight. Zero `Sources/VariorumCore/Sync/`
 lines (none needed — the act is protection-local). Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
 
@@ -1962,7 +1959,7 @@ written through `settingMaster` inside `locking`, the existing setter):**
   row, offline ⇒ today's file byte for byte + the moment speaks, the words changed elsewhere ⇒ today's file + speaks, no new write
   (the proven run's write log equals the offline run's, kind by kind).
 - L2-P2 — THE CORE FIX (`Copies.swift`, `PlanRunner.perform`'s `pairProof:`, `ActContext.pairProof`) + the `.taken` pins.
-  DONE (this commit; its revert is L2-P4's RV-L2-1, PENDING) — `Executor/Acts/Copies.swift`: `AccountsVaultRead`
+  DONE (`dacc7bf63`; its revert L2-P4's RV-L2-1, verified) — `Executor/Acts/Copies.swift`: `AccountsVaultRead`
   (`.inTheDoor` · `.taken(VaultSnapshot?)`); `AccountPairProof` (the master + the wrap, redacted, never stored); both public
   `makeThisMyLibrary` forms take `accountsVault:` (default `.inTheDoor`) into the one body, which — after every refusal — asks
   `accountPairProof(words:from:)` (signed in; the vault the session's account's; the typed words open ITS master by the recovery
@@ -1980,7 +1977,7 @@ written through `settingMaster` inside `locking`, the existing setter):**
   29 suites passed after 3.789 seconds.` (the lifecycle walk's makeMine check — `live?.master == nil` — untouched: its Mac is
   signed out at stages 9–10, so its door reads nothing).
 - L2-P3 — THE APP'S BOUNDED READ (`ProtectionCopyDoors.makeMine`) + its harness pin (a slow server: the bound holds, today's file —
-  red while the core reads unbounded in the door). IN-PROGRESS — THE PIN COMMITTED (this commit,
+  red while the core reads unbounded in the door). DONE — THE PIN COMMITTED (`a6cd12f77`,
   `VariorumTests/Protection/MakeMineProofFieldsRoadTests.swift`, symlinked into unit 2's harness; the planted road: a Standard
   library turned on to sync, signed in, one backup of itself; the preflight then `ProtectionCopyDoors.makeMine`). The one
   production line in this commit is a defaulted, UNUSED `vaultWithin:` parameter on `makeMine` (no behavior — the pin's seam, the
@@ -1989,7 +1986,7 @@ written through `settingMaster` inside `locking`, the existing setter):**
   row: `clock.now - started < .milliseconds(1500)` (the core's own door read waited for the 2 s answer) and `isTodays` (it wrote the
   fields from that late answer). Green on both sides, as they must stay: online — ONE read, the fields written (the core's door read
   served it before the app's read existed); offline — today's file. THE FIX COMMITTED (`a6cd12f77` the pin; this commit the read;
-  its revert RV-L2-2 PENDING): `ProtectionCopyDoors.makeMine` makes `proofVaultRead(session, within: bound)` — a writing road, the
+  its revert RV-L2-2 verified — L2-P4): `ProtectionCopyDoors.makeMine` makes `proofVaultRead(session, within: bound)` — a writing road, the
   executor's signed-in account, ONE `ProtectionOpenRoad.boundedVaultRead` (VX-501's race; a late answer dropped; each ending
   logged) — BEFORE the restore hold (nothing moves while it waits; the hold-then-act order untouched), and hands it to the core as
   `accountsVault: .taken(read)`. `AppBootstrap` untouched. **GREEN** (the harness, `--filter MakeMineProofFieldsRoadTests`): `✔ Test
@@ -2004,7 +2001,13 @@ written through `settingMaster` inside `locking`, the existing setter):**
   RestoredCopy` ⇒ `✘ Test run with 11 tests in 3 suites failed after 0.577 seconds with 48 issues.` — exactly the pre-fix red (the
   held pin 1, the shape 6, the passphrase-alone row 4, the crash harness 32, the scenarios 2 + 1 = 46) plus the `.taken` row's
   two given-read landings (2); the four guards green through it; restored by `git checkout --`, `git diff --exit-code` clean, `✔ Test
-  run with 11 tests in 3 suites passed after 0.547 seconds.` RV-L2-2 (the app's) NOT-STARTED.
+  run with 11 tests in 3 suites passed after 0.547 seconds.` RV-L2-2 DONE: named in the banner first (`e0763c144`);
+  `ProtectionCopyDoors.makeMine`'s core call made to pass nothing (the core's default door read) with the app's read still made,
+  the harness `--filter MakeMineProofFieldsRoadTests` ⇒ `✘ Test run with 3 tests in 1 suite failed after 5.089 seconds with 3
+  issues.` — the slow row's two (exactly the pre-fix red: past the bound, the fields from the late answer) and the online row's
+  ONE-read count (2 fetches: the app's read made and NOT handed in, the core's own door read on top — the count is what proves the
+  act uses the app's read rather than a second one); offline green through it; restored by `git checkout --`, `git diff
+  --exit-code` clean, `✔ Test run with 3 tests in 1 suite passed after 3.075 seconds.`
 - L2-P5 — THE CLOSE: the core suite whole (headless), the harness's copy-door and neighbour suites, zero `Sync/` lines, no
   trailers. NOT-STARTED.
 
