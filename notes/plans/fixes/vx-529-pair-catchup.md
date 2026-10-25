@@ -2506,6 +2506,12 @@ anything unexpected:
 - **Step 9 (Air): Wi-Fi back on, a minute's wait → STILL "Sync locked"** (her screenshot) — the prediction CONFIRMED.
   **Ticketed: VX-544** (Bug, Confirmed, Castle & sync, Medium; pre-existing VX-501 behavior; Pre-launch her call):
   an offline typed unlock leaves Castle sync locked for the session, with no retry on reconnect.
+- **Step 10 (Air, Wi-Fi on): ⌃⌘L → Touch ID cancelled → the NEW passphrase typed → "Synced 3:13 AM"** (her
+  screenshot; her order — she asked to test the typed road before Touch ID, the better order). The everyday road
+  after a catch-up works end to end: the passphrase opens the re-locked library LOCALLY and its derived key (reused,
+  never re-derived) opens the vault for the sync keys — which proves on real hardware that the catch-up wrote the
+  new lock under the VAULT's descriptor (fact 1's invariant; a mismatch would open the library but leave sync
+  locked). It is also VX-544's remedy (an online unlock).
 
 ## Machinery
 
