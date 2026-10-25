@@ -1467,7 +1467,25 @@ needs them. Not durable, never committed.
     in 1 suite failed … with 4 issues` — Change passphrase **2 reads** (expected 0); Reset by Touch ID, nothing in hand,
     **2** (expected 1); Reset by Touch ID with session memory loaded, **2** (expected 0); Reset by the words, **1** (expected
     0) — the trace's counts exactly; the stale-session guard green. Each row also asserts the act LANDED (the vault and the
-    key file open under the new passphrase; the item read, never written; `expectSettled`). The fix: NOT-STARTED.
+    key file open under the new passphrase; the item read, never written; `expectSettled`). THE FIX COMMITTED (this commit,
+    `Executor/Acts/KeyDoors.swift` only): `holdSyncKeysForTheSession` returns the keys it found (`@discardableResult`) and,
+    in CASTLE, takes the secrets in hand FIRST (derived from the vault, held in session as its derive arm always did), then
+    session memory, then the silent class, then the Touch ID class LAST and once — each counted only as the vault's current
+    sync key (the same rowKeyID test as before); Standard's order unchanged. `changePassphrase` and `resetPassphrase` carry
+    the keys into the act (`keyDoor(…, material:)` → `perform(…, material:)` — unit 1's carry), so the vault step's
+    `syncMaterial` returns them with no read; a resume has no carry and finds its own, as before. The app's Reset presence
+    confirm (the library's custody item — design §3.9) is untouched. `TouchIDSyncKeysForgottenTests
+    .aCastleTouchIDKeyDoorStillFindsItsKeysInItsTouchIDItem` FLIPPED DELIBERATELY from Change to Reset by Touch ID (Change no
+    longer reads the item at all; the guard's intent — Castle still finds its keys there — pinned where the item is the only
+    source; said in the test). **GREEN** (`swift test --filter "KeyDoorTouchIDReadsTests|TouchIDSyncKeysForgottenTests|KeyDoor|
+    PairRefusal|SyncKeysSessionHold|FileLessWords|NewWordsResume|U2LaggingPair|PairCatchUp|PairInvariantPins|E6Heal|
+    JoinWordsMoment|RestoredCopy"`): `✔ Test run with 127 tests in 32 suites passed … with 6 known issues` (P2's 4 controls,
+    P6d's residual, VX-523's held row). THE REVERTS (named before they run; each one edit on this commit, `--filter
+    KeyDoorTouchIDReadsTests`, restored by `git checkout --`, `git diff --exit-code` clean after each): RV-530-1 — the Castle
+    reorder disabled (Castle takes Standard's loop with the Touch ID class first, the carry kept) [expect 3 issues: Change 1
+    read, Reset-with-session 1, words 1; Reset with nothing in hand 1 = green]; RV-530-2 — the carry removed (`keyDoor`
+    passes no `material`, the reorder kept) [expect 3 issues: Change 1, Reset-nothing-in-hand 2, Reset-with-session 1; words
+    green]. PENDING.
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 
 **NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
