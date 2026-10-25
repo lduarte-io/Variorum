@@ -953,7 +953,17 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   through it); restored by `git checkout --`, `git diff --exit-code` clean, `✔ 2 tests` green again. DONE (`d6a587914` pin,
   `6d6c1ab6c` fix). No revert is in flight.
 - U2-P4 — scope 4: the check door's fourth answer gains the pointer line in the catch-up state; its E6 variant (R-529-6);
-  the door still writes nothing. NOT-STARTED.
+  the door still writes nothing. DONE (this commit) — a design row (its tests, no red-on-old). `SecretCheckOutcome
+  .doesNotOpen` gains `because: AccountOnly? = nil` (`.catchUpOwed` · `.notTypedHereYet` — existing constructions compile
+  unchanged); `ProtectionSecretCheck.check` reads why from the vault it already read (`checkAccount` returns it beside
+  the half — a READ: `AssessRules.pairFollow` on the live key file; E6 a passphrase over a synced file with no lock);
+  `ProtectionWords.checkSecretsCatchUpPointer` (the design §3 draft verbatim) and `checkSecretsAccountPassphraseNot
+  TypedHere`. `SecretCheckRoadTests.theHonestSplitWhenTheAccountsSecretsChangedElsewhere` FLIPPED DELIBERATELY (the fourth
+  answer's two arms carry `.catchUpOwed` and the pointer — said in the test). NEW `PairCheckDoorTests`: E6 — the account's
+  passphrase says why, NOTHING written (every leaf's log, every item, every byte; the lock never lands — never the
+  check's), a nobody's passphrase the plain refusal, the words open both; the pointer only in the catch-up's state.
+  **GREEN** (the harness, `--filter "PairCheckDoorTests|SecretCheck"`): `✔ Test run with 19 tests in 5 suites passed`
+  (`SecretCheckCompositionTests`' source pins among them).
 - U2-P5 — scope 7 (core): the E6 heal wired — `regenerateWords`' key-file step lands a missing passphrase lock with the
   account's passphrase it verified against the vault (inside its plan); a public, unplanned single-write heal for the
   lobby's vault road (`landingTheAccountsPassphraseLock` through the existing key-file road; the mirror follows — the

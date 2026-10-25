@@ -1078,6 +1078,15 @@ nonisolated enum ProtectionWords {
             ? "Those twelve words don't open this library, but they open your account."
             : "That passphrase doesn't open this library, but it opens your account."
     }
+    /// VX-529 unit 2 (scope 4) — the fourth answer's pointer in the catch-up's state, the run record's design §3 draft
+    /// verbatim. PROVISIONAL (P-VX529-3's class).
+    static let checkSecretsCatchUpPointer = "You can catch this \(ProtectionCopy.deviceName) up in Settings \u{25B8} "
+        + "Protection."
+    /// VX-529 unit 2 (scope 4) — the fourth answer's E6 variant (R-529-6: the why and the road, never the mechanism): the
+    /// account's passphrase over a library with no passphrase lock of its own. PROVISIONAL (P-VX529-3's class).
+    static let checkSecretsAccountPassphraseNotTypedHere = "That passphrase opens your account, but it hasn't been typed "
+        + "on this \(ProtectionCopy.deviceName) yet. Type it the next time your library asks for it here, and it opens "
+        + "this library too."
 
     // MARK: - VX-308 U3 — THE KEY DOORS, VX-447, F-U2-3 (rules 2, 3, 6, 7, 27; the plan's §5c)
     //

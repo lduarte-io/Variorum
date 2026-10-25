@@ -47,10 +47,18 @@ nonisolated enum SecretCheckOutcome: Equatable, Sendable {
         case unchecked(String)
     }
 
+    /// VX-529 unit 2 (scope 4) — why the ACCOUNT's secret doesn't open this library, where the read says (nil: it doesn't).
+    enum AccountOnly: Equatable, Sendable {
+        /// The account's pair changed on another device and this library hasn't caught up — the follow is the road.
+        case catchUpOwed
+        /// E6: this library has no passphrase lock of its own — the account's passphrase hasn't been typed on this Mac.
+        case notTypedHereYet
+    }
+
     /// The typed secret opens the open library.
     case opens(Kind, account: Account)
-    /// It does not; `opensAccount`: synced, and it opens the account's vault instead.
-    case doesNotOpen(Kind, opensAccount: Bool)
+    /// It does not; `opensAccount`: synced, and it opens the account's vault instead — `because`, where the read says why.
+    case doesNotOpen(Kind, opensAccount: Bool, because: AccountOnly? = nil)
     /// Nothing was checked — why (the words' own sentence for twelve words that are not the words; a door no longer open).
     case refused(String)
 
@@ -65,11 +73,16 @@ nonisolated enum SecretCheckOutcome: Equatable, Sendable {
             return [ProtectionWords.checkSecretsOpensLibraryNotAccount(kind)] + [changedElsewhere].compactMap { $0 }
         case .opens(let kind, .unchecked(let why)):
             return [ProtectionWords.checkSecretsOpensLibrary(kind), why]
-        case .doesNotOpen(let kind, opensAccount: true):
+        // VX-529 unit 2 (scope 4): the fourth answer gains the road's pointer in the catch-up's state; E6 its own line.
+        case .doesNotOpen(let kind, opensAccount: true, because: .catchUpOwed?):
+            return [ProtectionWords.checkSecretsOpensAccountNotLibrary(kind), ProtectionWords.checkSecretsCatchUpPointer]
+        case .doesNotOpen(_, opensAccount: true, because: .notTypedHereYet?):
+            return [ProtectionWords.checkSecretsAccountPassphraseNotTypedHere]
+        case .doesNotOpen(let kind, opensAccount: true, because: nil):
             return [ProtectionWords.checkSecretsOpensAccountNotLibrary(kind)]
-        case .doesNotOpen(.passphrase, opensAccount: false):
+        case .doesNotOpen(.passphrase, opensAccount: false, _):
             return [ProtectionWords.passphraseDoesNotOpen]
-        case .doesNotOpen(.words, opensAccount: false):
+        case .doesNotOpen(.words, opensAccount: false, _):
             return [ProtectionWords.wordsDoNotOpen]
         case .refused(let sentence):
             return [sentence]
@@ -126,13 +139,23 @@ nonisolated enum ProtectionSecretCheck {
             log(library: opensLibrary, account: "none (the library doesn't sync)")
             return opensLibrary ? .opens(kind, account: .notSynced) : .doesNotOpen(kind, opensAccount: false)
         }
-        let accountHalf = await checkAccount(
+        let (half, snapshot) = await checkAccount(
             account, session: session, signIn: signIn, text: text, kind: kind, derived: derived.unlock,
             libraryPassphraseKDF: keyFile.passphrase?.kdf, within: bound)
-        switch accountHalf {
+        switch half {
         case .opens:
             log(library: opensLibrary, account: "opens")
-            return opensLibrary ? .opens(kind, account: .opens) : .doesNotOpen(kind, opensAccount: true)
+            guard !opensLibrary else { return .opens(kind, account: .opens) }
+            // VX-529 unit 2 (scope 4) — the account's secret, not this library's: why, where the read says. A READ — the
+            // same comparisons `assess` makes (`AssessRules.pairFollow`); nothing written, nothing healed here (checking
+            // changes nothing).
+            var because: SecretCheckOutcome.AccountOnly?
+            if let snapshot, AssessRules.pairFollow(keyFile, snapshot.reading) != nil {
+                because = .catchUpOwed
+            } else if kind == .passphrase, keyFile.passphrase == nil, keyFile.master != nil {
+                because = .notTypedHereYet
+            }
+            return .doesNotOpen(kind, opensAccount: true, because: because)
         case .doesNotOpen(let changedElsewhere):
             log(library: opensLibrary, account: changedElsewhere == nil ? "does not open" : "does not open (changed elsewhere)")
             // VX-113's sentence names a change of the LIBRARY's passphrase elsewhere — said only where it opened the library.
@@ -149,27 +172,38 @@ nonisolated enum ProtectionSecretCheck {
 
     /// The account's half: signed in as the library's account, one bounded vault read through the leaf, the master by the
     /// typed secret.
+    /// VX-529 unit 2: the vault as this check read it rides beside the answer (nil: none read).
     static func checkAccount(
         _ account: String, session: ProtectionRoadSession, signIn: SessionFact, text: String,
         kind: SecretCheckOutcome.Kind, derived: ProtectionOpenRoad.TypedUnlockSecret,
         libraryPassphraseKDF: PassphraseKDF.Descriptor?, within bound: Duration
-    ) async -> SecretCheckOutcome.Account {
-        guard let signedIn = signIn.accountID else { return .unchecked(ProtectionWords.doorRefusedSignedOut) }
-        guard signedIn == account else { return .unchecked(ProtectionWords.doorRefusedOtherAccount) }
+    ) async -> (SecretCheckOutcome.Account, VaultSnapshot?) {
+        guard let signedIn = signIn.accountID else { return (.unchecked(ProtectionWords.doorRefusedSignedOut), nil) }
+        guard signedIn == account else { return (.unchecked(ProtectionWords.doorRefusedOtherAccount), nil) }
         let snapshot: VaultSnapshot
         switch await ProtectionOpenRoad.boundedVaultRead(session.system.leaves.vault, accountID: account, within: bound) {
         case .read(let read?):
             snapshot = read
         case .read(nil), .failed, .timedOut:
-            return .unchecked(ProtectionWords.doorRefusedNeedsVault)
+            return (.unchecked(ProtectionWords.doorRefusedNeedsVault), nil)
         }
+        return (accountHalf(snapshot, text: text, kind: kind, derived: derived, libraryPassphraseKDF: libraryPassphraseKDF,
+                            floor: session.system.floor), snapshot)
+    }
+
+    /// The account's half from the vault read (the master by the typed secret).
+    static func accountHalf(
+        _ snapshot: VaultSnapshot, text: String, kind: SecretCheckOutcome.Kind,
+        derived: ProtectionOpenRoad.TypedUnlockSecret, libraryPassphraseKDF: PassphraseKDF.Descriptor?,
+        floor: PassphraseKDF.Floor
+    ) -> SecretCheckOutcome.Account {
         let vault = snapshot.vault
         let master: SymmetricKey?
         switch (kind, derived) {
         case (.passphrase, .passphrase(let keys)):
             if let reused = keys.first(where: { $0.kdf == vault.kdf }) {
                 master = vault.master(passphrase: reused, words: nil)
-            } else if (try? vault.kdf.validateFloor(session.system.floor)) != nil,
+            } else if (try? vault.kdf.validateFloor(floor)) != nil,
                       let fresh = try? PassphraseKey.derive(text, kdf: vault.kdf) {
                 master = vault.master(passphrase: fresh, words: nil)
             } else {
