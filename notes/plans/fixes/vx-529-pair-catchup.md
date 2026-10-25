@@ -957,7 +957,23 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
 - U2-P5 — scope 7 (core): the E6 heal wired — `regenerateWords`' key-file step lands a missing passphrase lock with the
   account's passphrase it verified against the vault (inside its plan); a public, unplanned single-write heal for the
   lobby's vault road (`landingTheAccountsPassphraseLock` through the existing key-file road; the mirror follows — the
-  `landAppleWrap` repair's precedent for a one-write lock addition). Headless core pins. NOT-STARTED.
+  `landAppleWrap` repair's precedent for a one-write lock addition). Headless core pins. IN-PROGRESS — BUILT (this
+  commit): NEW `Executor/Acts/PassphraseLockHeal.swift` — `ProtectionExecutor.landTheAccountsPassphraseLock(_:passphrase:
+  vault:)`: refuses (nothing written) an unsynced library, an act in flight, no live key file of the current key, another
+  account's vault, the account moved (posture or sync key), a passphrase the vault refuses (P1's split), a master that
+  doesn't reach this key; a standing lock is never replaced (returns false); else ONE key-file write
+  (`landingTheAccountsPassphraseLock`) then the mirror (`writeMemory`). `vault:` takes the caller's read (the lobby's one
+  bounded read — verified, never trusted: its master must open this key file's master lock); nil reads this session's,
+  else once. `KeyDoors.swift` (New words' key-file step, synced arm, beside the copy refresh): a missing lock lands with
+  the passphrase the door verified against the vault (inside the act's plan, its one write). Tests:
+  `Tests/VariorumCoreTests/Protection/Executor/E6HealWiringTests.swift` — the heal lands under the vault's descriptor, the
+  file byte-equal but the lock, the mirror follows, writes exactly `[keyFile, memory]`, idempotent (both postures); the
+  caller's read (the vault unreachable after it); a standing lock never replaced; the refusals each write nothing; New
+  words on E6 lands the lock (both postures, fact 1's guard green). **GREEN** (`swift test --filter "E6HealWiringTests|
+  E6HealPrimitiveTests|PairInvariantPinsTests|NewWordsResumeTests|FileLessWordsTests|KeyDoorResumeTests|PairCatchUp|
+  PairRefusalSplitTests"`): `✔ Test run with 73 tests in 17 suites passed … with 5 known issues` (P2's 4 controls + P6d's
+  residual). THE REVERT (named before it runs; the key doors' wiring's red — written before its pin, said so): RV-P5-1
+  `KeyDoors.swift` — the heal clause removed, `--filter E6HealWiringTests`. PENDING (next commit).
 - U2-P6 — scope 3: THE LOBBY'S VAULT ROAD (below, THE DESIGN AS BUILT). The pure decision in the core
   (`VaultRoad` — headless pins), the app's composition in `ProtectionOpenRoad.openTyped`'s `.noneOpens` arm, the lobby
   face's E6 arm. Pins red-on-old for the silent refusal where the sentence is owed. NOT-STARTED.

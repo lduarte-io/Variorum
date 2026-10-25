@@ -93,6 +93,14 @@ struct KeyDoorProgram: ActProgram {
                    let master = VaultModel.master(of: vault.vault, passphrase: nil, words: words),
                    (try? file.open(master: master)) != nil {
                     file = file.refreshingMasterWordsCopy(vault.vault.masterByWords)
+                    // VX-529 unit 2 — P-VX529-4's heal, inside this act's plan (the same one key-file write): a synced
+                    // library with NO passphrase lock of its own (E6) lands the account's passphrase this door verified
+                    // against the vault (the press's — derived under the vault's descriptor; a resume's, typed at its
+                    // lobby, the plan's descriptor being that one). An existing lock is never replaced here.
+                    if let passphrase = ctx.secrets.passphrase, passphrase.kdf == vault.vault.kdf,
+                       VaultModel.master(of: vault.vault, passphrase: passphrase, words: nil) != nil {
+                        file = try file.landingTheAccountsPassphraseLock(passphrase, key: ctx.library.key, master: master)
+                    }
                 }
             }
             try ctx.executor.writeLiveKeyFile(file, &ctx.library)
