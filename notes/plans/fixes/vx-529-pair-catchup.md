@@ -980,7 +980,15 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   again. DONE (`d4c1bdd54`). No revert is in flight.
 - U2-P6 — scope 3: THE LOBBY'S VAULT ROAD (below, THE DESIGN AS BUILT). The pure decision in the core
   (`VaultRoad` — headless pins), the app's composition in `ProtectionOpenRoad.openTyped`'s `.noneOpens` arm, the lobby
-  face's E6 arm. Pins red-on-old for the silent refusal where the sentence is owed. NOT-STARTED.
+  face's E6 arm. Pins red-on-old for the silent refusal where the sentence is owed. IN-PROGRESS — the red pins COMMITTED
+  (this commit, `VariorumTests/Protection/LobbyVaultRoadTests.swift`): **RED on the pre-fix tree** (the harness, `--filter
+  LobbyVaultRoadTests`): `✘ Test run with 7 tests in 1 suite failed … with 4 issues` —
+  `theAccountsCurrentPassphraseOpensThroughTheVaultAndCatchesUp` ✘ in BOTH postures (Castle Always ask, Standard with its
+  quiet roads gone: the account's current passphrase refused — the VX-510 repro), `aPassphraseThatOpensNeitherNamesThe
+  Change` ✘×2 (the bare `"That passphrase doesn't open this library."` where the change was readable). The five
+  guardrails GREEN on the pre-fix tree, as they must stay: offline byte-identical + nothing written; a slow server costs
+  the bound then today's refusal; signed out / another account read nothing; a read-only road reads nothing; the old
+  passphrase still opens locally with the follow owed. What remains: the core decision, the composition, the E6 face.
 - U2-P7 — the close: the harness whole, the core protection suites, ONE Mac + ONE iOS `build-for-testing`
   (`DerivedData/vx529-u2*`), the Mac-suite list for the stage batch. NOT-STARTED.
 
