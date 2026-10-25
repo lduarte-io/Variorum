@@ -100,8 +100,8 @@ nonisolated struct SyncRowFace: Equatable {
             /// open-at-pane road (`ProtectionController.settingsRequest`,
             /// injected as `protectionPaneDoor`) — where the road's doors
             /// live. Minted only when the face was told a door can act
-            /// there (P-2: the Mac's main window; never the phone, whose
-            /// Protection screen is VM-8's).
+            /// there (P-2: the Mac's main window; the phone's Settings,
+            /// whose door pushes its Protection screen — VM-8).
             case openProtection
         }
         var label: String
@@ -366,7 +366,8 @@ extension EnvironmentValues {
 
 /// VX-486: the locked row's door to Settings ▸ Protection, handed to the row from where the pane request lives (the
 /// `CheckForUpdatesDoor` precedent). The Mac's main window injects it from the bootstrap's one `ProtectionController`
-/// (`settings(_:)`); the phone injects none (its Protection screen is VM-8's), and nil ⇒ the row renders no door (P-2).
+/// (`settings(_:)`); the phone's Settings injects the shell's push of its Protection screen, only where that screen can
+/// act (VM-8 unit 1); nil ⇒ the row renders no door (P-2).
 /// The ask re-points a Settings window; the row's press brings the window up beside it (`openSettings()`, the Mac's
 /// environment action — ⌥⌘,'s own two lines: `mcp.requestSettings(); openSettings()`).
 struct ProtectionPaneDoor {

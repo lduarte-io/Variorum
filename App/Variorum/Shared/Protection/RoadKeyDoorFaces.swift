@@ -1,6 +1,6 @@
 //
 //  RoadKeyDoorFaces.swift
-//  Variorum (shared: Mac + Mobile — the phone's key doors are later; the brain is one)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen renders the key doors too, VM-8; the brain is one)
 //
 //  VX-308 U3 piece 5 — THE KEY DOORS' FACES, as PURE values read from `assess` over THE PANE'S ONE READ (`notes/plans/
 //  vx-308-accounts-key-doors.md` §5c; the contract `notes/CastleRules.md` rules 3, 6, 7; the core's three doors as built,
@@ -116,8 +116,9 @@ nonisolated struct RoadKeyDoorFaces: Equatable, Sendable {
     var checkStands = false
     /// **VM-8 unit 2 — F-U2-D (the phone's VX-542 shape, PROVISIONAL P-VM8-9):** every key door is refused because the
     /// account's PAIR changed elsewhere (`followFirstToCatchUp` — the follow's notice + its road, in each door's place). The
-    /// phone says the pair sentence once, beside the follow door, and the road once for the locked doors; the Mac never
-    /// reads this (its rendering unchanged). false: a hand-made face, or any other state.
+    /// phone says the pair sentence once, as the follow door's notice, and the follow-owed refusal once for the whole
+    /// screen (VM-8 ladder L1 — P-VM8-9 (a-unified)); the Mac never reads this (its rendering unchanged). false: a
+    /// hand-made face, or any other state.
     var pairGate = false
 
     func face(_ door: RoadKeyDoor) -> RoadKeyDoorFace {

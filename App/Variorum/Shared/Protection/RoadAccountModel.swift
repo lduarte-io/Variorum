@@ -1,6 +1,7 @@
 //
 //  RoadAccountModel.swift
-//  Variorum (shared: Mac + Mobile — the phone's account faces are later; the brain is one)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen renders the account faces too, VM-8; the brain is
+//  one)
 //
 //  VX-308 U1 piece 5 — THE ACCOUNT SECTION'S BRAIN on the new road (`notes/plans/vx-308-accounts-key-doors.md` §5a and
 //  its U1 ARBITRATION). Every act is an injected road (the bootstrap's — the pane's one read, the press on the open
@@ -96,8 +97,8 @@ final class RoadAccountConfirmModel: Identifiable {
     @ObservationIgnored private let copyWords: ([String]) -> Void
     @ObservationIgnored private var landedPress: RoadAccountPress?
     /// VX-510 D-A1 — the composition's first-round road, handed in only for an act that owes one
-    /// (`RoadAccountDoorOpen.owesFirstRound`); nil: none here (a leave, a re-keying act, the phone until VM-8, a test world
-    /// without one — the confirm finishes exactly as before).
+    /// (`RoadAccountDoorOpen.owesFirstRound`); nil: none here (a leave, a re-keying act, a test world without one — the
+    /// confirm finishes exactly as before).
     @ObservationIgnored private let firstRound: (() async -> FirstRoundOutcome)?
     /// The round the landing started (never cancelled from here — closing the sheet leaves it running).
     @ObservationIgnored private var roundTask: Task<FirstRoundOutcome, Never>?
@@ -428,13 +429,15 @@ final class RoadAccountModel {
     /// **VX-510 D-A1 — the composition root's first-round road** (`signOutRoad`'s precedent; wired by
     /// `AppBootstrap.attach(services:)` to `AppServices.runFirstRound`): one round run to its end and what it came to, asked
     /// the moment an act that changes sync's standing on the open session lands (`RoadAccountDoorOpen.owesFirstRound`). nil
-    /// (the phone until VM-8, a test world without one): the confirm finishes exactly as before (P-2).
+    /// (a test world without one — the phone wires it through `attach(services:)` since VM-8): the confirm finishes
+    /// exactly as before (P-2).
     @ObservationIgnored var firstRound: (@MainActor () async -> FirstRoundOutcome)?
     /// **VX-510 D-B0 — a RE-KEYING act's first round** (F-6 (A), ruled; wired by `AppBootstrap.attach(services:)` beside
     /// `firstRound`). A re-keying act lands through the reopen, whose teardown releases the open session's services; its
     /// `.made` comes back before the reopen's fresh services are composed. So the press takes the bootstrap's services
     /// generation, and at `.made` the round waits for services attached after it (the reopen's — bounded) and asks THEM.
-    /// nil (the phone until VM-8, a test world without one): a re-keying act's confirm finishes as before (P-2).
+    /// nil (a test world without one — the phone wires it through `attach(services:)` since VM-8): a re-keying act's
+    /// confirm finishes as before (P-2).
     @ObservationIgnored var firstRoundAfterReopen: FirstRoundAfterReopen?
     @ObservationIgnored private var reads = 0
 
@@ -518,7 +521,7 @@ final class RoadAccountModel {
         // VX-510 D-A1 + D-B0: the first round, for an act whose landing changes sync's standing — on the open session
         // through its services (D-A1), or, a re-keying act, through the reopen's fresh services (D-B0). Which road is the
         // PRESSED door's (a door re-shown CHANGED may change its plan); the generation is taken at that press. No road for
-        // the door (the phone until VM-8, a test world without one): no round — the confirm finishes as before (P-2).
+        // the door (a test world without one): no round — the confirm finishes as before (P-2).
         let openSession = self.firstRound
         let reopen = self.firstRoundAfterReopen
         var pressed: (rekeys: Bool, generation: Int)?

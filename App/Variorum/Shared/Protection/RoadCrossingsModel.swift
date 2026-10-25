@@ -1,6 +1,7 @@
 //
 //  RoadCrossingsModel.swift
-//  Variorum (shared: Mac + Mobile — the phone's crossing faces are later; the brain is one)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen renders the crossings, entering only, VM-8; the brain
+//  is one)
 //
 //  VX-307 U2a — THE CROSSINGS' BRAIN on the new road (`notes/plans/vx-307-castle-crossings.md` §5c). Every act is an
 //  injected road (the bootstrap's — the preflight, the app's pool closed, the core's act, the reopen; a test's,

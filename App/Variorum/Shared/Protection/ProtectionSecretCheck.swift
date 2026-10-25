@@ -1,6 +1,7 @@
 //
 //  ProtectionSecretCheck.swift
-//  Variorum (shared: Mac + Mobile — the Mac's door this unit; the phone's key doors are later, the brain is one)
+//  Variorum (shared: Mac + Mobile — the Mac's pane and the phone's Protection screen, VM-8, both open it; the brain
+//  is one)
 //
 //  VX-510 D-B7 — VX-513, THE READ-ONLY CHECK (her R-510-15, "Yes, in this run"; her Air report: "I also no longer seen an
 //  option in settings to test your passphrase / 12 words to make sure you have them right"). One typed secret, read as Look

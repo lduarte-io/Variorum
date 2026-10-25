@@ -1,6 +1,7 @@
 //
 //  RoadAccountFaces.swift
-//  Variorum (shared: Mac + Mobile — the phone's account faces are later; the brain is one)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen renders the account faces too, VM-8; the brain is
+//  one)
 //
 //  VX-308 U1 piece 3 — THE ACCOUNT SECTION'S FACES, as PURE values read from `assess` (`notes/plans/vx-308-accounts-key-
 //  doors.md` §5a and its U1 ARBITRATION; the contract `notes/CastleRules.md` rules 7, 14, 16). No rule of its own: the

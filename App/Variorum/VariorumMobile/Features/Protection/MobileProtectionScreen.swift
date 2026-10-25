@@ -2,23 +2,30 @@
 //  MobileProtectionScreen.swift
 //  VariorumMobile
 //
-//  VM-8 unit 1 — THE PHONE'S PROTECTION SCREEN, minimal unit-1 form (PROVISIONAL P-VM8-2; the run record
-//  `notes/plans/vm-8-castle-catchup.md`, THE UNITS ▸ UNIT 1 piece 2). Settings ▸ Protection — the Mac's information
-//  architecture, the phone's navigation (a room pushed on the shelf's stack, the settings-sheet grammar) — carrying ONLY
-//  the Sync/account section this unit: the faces are the SHARED values `assess` reads (`RoadAccountFaces`, the brain
-//  `RoadAccountModel`, the one presenter `ProtectionSheetPresenter` — all the bootstrap's, kept across every reopen),
-//  rendered in the phone's voice. Nothing here decides; every door renders only where it can act (P-2):
+//  VM-8 — THE PHONE'S PROTECTION SCREEN (PROVISIONAL P-VM8-2; the run record `notes/plans/vm-8-castle-catchup.md`,
+//  THE UNITS ▸ UNITS 1 and 2). Settings ▸ Protection — the Mac's information architecture, the phone's navigation (a
+//  room pushed on the shelf's stack, the settings-sheet grammar) — in the Mac pane's order: the passphrase, the twelve
+//  words, the check, the crossings (entering only), then the Sync/account section (unit 1's; the other sections are
+//  unit 2's, in `MobileProtectionDoors.swift`). The faces are the SHARED values `assess` reads (`RoadAccountFaces`,
+//  `RoadKeyDoorFaces`, `RoadCrossingFaces`, their brains and the one presenter `ProtectionSheetPresenter` — all the
+//  bootstrap's, kept across every reopen), rendered in the phone's voice. Nothing here decides; every door renders only
+//  where it can act (P-2):
 //
 //    - the situation in words; the follow's durable Done (VX-457) with its OK; the follow door only where `assess`
 //      offers it; Turn on sync both arms (the set-up's "Turn on sync…", the JOIN's "Sync this library…" — P-VX510-3);
 //      the three local leaves; Move; *Sign in…* (the app's Account sheet) and *Sign out…* (today's shipped confirm).
-//    - F-U1-1, RULED (A): an arm whose confirm says HER rule-12 leave sentence (`RoadAccountDoorOpen.saysRuleTwelve` —
-//      the Castle-leaving join, Move and the follow out of Castle) is NOT rendered here: its words name the Mac and their
-//      phone wording is hers (F-PH-2). Unit 2 builds them.
+//    - F-U1-1, RULED (A) — and F-U2-G beside it for the crossings: an arm whose confirm says HER rule-12 leave sentence
+//      (`saysRuleTwelve` — the Castle-leaving join, Move out of Castle, the follow out of Castle, Use Standard) is NOT
+//      rendered: its words name the Mac and their phone wording is hers (F-PH-2). VM-8 HOLDS every one of them until
+//      she words them; meanwhile the follow-owed state is P-VM8-10's recorded dead end.
+//    - THE OWED FOLLOW, SAID ONCE (ladder round 1's MINOR-1 — P-VM8-9 (a-unified)): a door the follow locks says
+//      nothing in its place; the follow-owed refusal is said once, in this section's follow place.
+//    - THE RECEIPTS (F-U2-E, PROVISIONAL P-VM8-8): the newest few the protection acts said, muted, under the title.
 //    - THE SHEETS, through the one presenter on its `.settings` host (the phone has one host — this screen): an account
 //      door's confirm (exactly the door's fields, the Face ID gate choice into Castle, rule 7's words moment, and the
 //      FIRST ROUND that stays to confirm — P-VX510-1's shape, its line the sync row's own sentence, Done always open and
-//      never cancelling the round), the sign-out confirm, the Account sheet.
+//      never cancelling the round), the sign-out confirm, the Account sheet; unit 2's crossing, signed-out,
+//      key-door and check sheets.
 //    - F-U1-3: a RE-KEYING act (her phone's join — a Standard library into her Castle account) reopens the library, so
 //      the `.ready` tree — this screen with it — goes down under the confirm. The confirm lives on in the presenter; the
 //      shell adopts `ProtectionController.settingsRequest` (VX-206's road, which the reopen asks) and pushes this screen
