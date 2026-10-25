@@ -1492,7 +1492,33 @@ needs them. Not durable, never committed.
     presence confirm stays its own sheet on the LIBRARY's custody item (a different item; design §3.9) — so Reset by Touch
     ID with nothing in hand shows two sheets on two items (the confirm, then the account's keys once); riding the confirm's
     press for the sync-keys read (VX-487 (b)'s riding road) would make it one — a design call beyond the brief's shape.
-- **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
+- **VX-538 — the recurring E6 band card.** IN-PROGRESS — THE STATE AND THE DESIGN AS IT WILL BE BUILT (her R-529-6; the
+  brief's shape; every call below PROVISIONAL and listed as P-VX529-U3-3…6):
+  - **THE STATE, READ — never a flag:** the open library's record names an account AND its live key file (of the current
+    key) carries NO passphrase lock (E6 — born of a join by the words, or the catch-up's words arm). A synced library's
+    record already says "a passphrase exists" (`ProtectionRecord.passphraseExists` — the account's), so rule 3's reminder is
+    silent there and nothing surfaced E6 at all (F-U2-6: a Standard E6 library whose quiet roads work never meets a lobby).
+  - **THE HOME:** a third row in the band card above the quick entry (`WordsBandModel` — the one home; never a popup, never a
+    second bar), its own small model (`AccountPassphraseCardModel`, `Shared/Protection/WordsBand.swift`), the band's
+    `visible` widened to it. It says the why and the road, and the forgot-road (the brief's two sentences), and takes the
+    passphrase right there: one field (the join's own label, "Your account's passphrase") and one door, which runs the E6
+    heal unit 2 built (`ProtectionExecutor.landTheAccountsPassphraseLock` — the typed passphrase verified against the
+    account's vault under the vault's own descriptor, one key-file write, the mirror after; never a re-key) through a new
+    app road on the session's one-act lock (`ProtectionOpenRoad.landAccountPassphrase`, the sign-in NOW adopted, its
+    refusals in the account's own words — a wrong passphrase is VX-464's "That passphrase doesn't open this account."). A
+    landing speaks unit 2's heal sentence as a receipt ("Your account's passphrase opens this library on this Mac now.").
+  - **THE CADENCE (rule 3's pattern, no don't-show-again — her "until it's done"):** due from the library's THIRD launch on
+    this Mac (rule 3's launch counter, shared); *Later* hides it until the next launch (the band's snooze); the ✕ hides it
+    for a WEEK (rule 3's gap — a local ledger beside the reminder's keys, `variorum.calmAsks.accountPassphrase.<id>.*`);
+    nothing ever retires the schedule.
+  - **THE RETIREMENT, by the state:** the row stands only while the state reads E6 — every render reads it, and the
+    landings that can end it re-read (the card's own press; an account act's landing and a key door's — `RoadStandingModel
+    .rereadPassphrase`, which the key doors' landing now calls too). So the heal (here, the lobby, New words), Reset forgotten
+    passphrase, Change passphrase or the catch-up each retire it with no flag of its own.
+  THE RED PIN COMMITTED (this commit, `VariorumTests/Protection/E6BandCardTests.swift` — compiling on the pre-fix tree):
+  **RED** (the harness, `--filter E6BandCardTests`): `✘ Test run with 2 tests in 1 suite failed … with 1 issue` — an open E6
+  library at its third launch: `band.visible` false (nothing surfaces E6); the guard (a synced library WITH its lock hears
+  nothing) green. The build: NOT-STARTED.
 
 **NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
 1. VX-526 — the join sheet's title and button (`joinSyncTitle`, `joinSyncButton`): "Sync this library" · "Sync this library"
