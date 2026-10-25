@@ -16,7 +16,12 @@ card shows the words beside its passphrase ask, and nothing ever stores the word
 the lifecycle page regenerates from its fixture.) Amended at her cutover sitting on VX-510's bundle (2026-10-24, her
 "yes" on the drafted clause — R-510-28 in `notes/plans/fixes/vx-510-first-run-sync.md`): rule 2 names the card's third
 retirement — a landed account act — by rule 7's pair adoption, never as a recording (a passphrase join adopts words it
-never shows; built at VX-511).**
+never shows; built at VX-511). Amended at her answers to VX-529's bundle (2026-10-25, "I agree" on both drafted clauses —
+QUESTIONS #241, the record `notes/plans/fixes/vx-529-pair-catchup.md`): rule 3 names a synced library whose account
+passphrase was never typed here, told in the same card until it is (built at VX-538). Her rule-7 change is RATIFIED but
+not yet written here: rule 7's adoption sentence will end "the old ones still open backups made with them" (rule 5's
+floor, in place of "before today"), and it lands at VX-545 together with the app's sentence, because a test pins the
+app's words to this rule's text.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -58,7 +63,11 @@ open it. Everything else is a convenience.**
    through iCloud Keychain right now — please add a passphrase and keep your twelve words to ensure continued access"):
    at the third launch, then weekly twice, then with a "don't show again"; and always right before the first backup and
    at the first launch after a quiet road has failed. The passphrase is a convenience over the words; either one can
-   reset the other.
+   reset the other. A library that syncs, but whose account's passphrase was never typed on this device — it joined by
+   the twelve words, or caught up with them — is told so in the same card: your account's passphrase hasn't been typed
+   on this Mac yet; type it once and it opens this library here too, and if you don't know it, Reset forgotten
+   passphrase sets one you do. It comes back from the third launch, and a week after each time it is put away, until a
+   passphrase is typed here — there is no 'don't show again'.
 4. **The key file carries every earlier key the library has had**, sealed under the current one, and **every key change
    carries that list forward — no exceptions.** A backup always opens with the passphrase and words you had when you
    made it. Every key change also carries the earlier keys forward, so your current ones open older backups of the same
