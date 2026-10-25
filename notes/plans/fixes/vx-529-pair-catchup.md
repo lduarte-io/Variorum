@@ -1813,7 +1813,7 @@ road), `ProtectionRoadActs.swift` (`setFirstPassphrase`); the suite `LobbyVaultR
   `openTyped`'s existing "today's refusal" road (:410), so the refusal is the same bytes by construction; the later live
   read removed (the hoisted value goes to `VaultRoad.answer`); one doc-comment line. Nothing else moved (no core line, no
   sentence, no other road). **GREEN** (the harness, `--filter LobbyVaultRoadTests`): `✔ Test run with 11 tests in 1 suite
-  passed after 2.668 seconds.` The neighbour suites PENDING (L1-P4).
+  passed after 2.668 seconds.` The neighbour suites: green (L1-P4).
 - L1-P3 — THE REVERT, named before it runs: RV-L1-1 `ProtectionOpenRoad.swift` — the gate's guard removed (the hoisted read
   kept), the harness `--filter LobbyVaultRoadTests` [expect exactly the unsynced row's fetch counts red; every byte-identity
   assertion and the synced side green]; restored by `git checkout --` on the committed fix. **VERIFIED BY REVERT** on
@@ -1822,7 +1822,20 @@ road), `ProtectionRoadActs.swift` (`setFirstPassphrase`); the suite `LobbyVaultR
   `→ 2` / `→ 1`), every byte-identity assertion, nothing-written and the synced side green through it; restored by `git
   checkout --`, `git diff --exit-code` clean, `✔ Test run with 11 tests in 1 suite passed after 2.736 seconds.` DONE.
 - L1-P4 — the close: the suites the fix touches green in the harness (the lobby, typed-unlock, Touch ID-unlock, planted-road
-  and lobby-model suites) and `VaultRoadTests` in the core. NOT-STARTED.
+  and lobby-model suites) and `VaultRoadTests` in the core. DONE (`6f683e590` carried only the banner line, by a missed
+  edit — this bullet landed one commit later; said so) — THE HARNESS (`--filter "LobbyVaultRoadTests|
+  TypedUnlockSyncKeysTests|TouchIDUnlockSyncKeysTests|ProtectionOpenRoadPlantedTests|ProtectionLobbyModelTests|RoadLockTests|
+  LobbyTouchIDReaskTests|E6BandCardTests|PairCheckDoorTests|PairFollow|RoadRearmTests"`, on the fixed tree): `✔ Test run with
+  86 tests in 14 suites passed after 4.408 seconds.` THE CORE (`swift test --filter VaultRoadTests`; no core line changed):
+  `✔ Test run with 5 tests in 1 suite passed`. Zero `Sources/VariorumCore/Sync/` lines (`git diff --stat main...HEAD --
+  Sources/VariorumCore/Sync` empty); L1's whole diff is `ProtectionOpenRoad.swift` (+10/−1), `LobbyVaultRoadTests.swift`
+  (+72) and this record; no trailer on any L1 commit. The Mac-target run of `LobbyVaultRoadTests` rides the closing stage
+  batch (already on unit 2's list). Stated for the next round (not changes): the gate reads "no held key file carries a
+  master lock", not "the record names no account" (the record is inside the locked library) — so a library that stopped
+  syncing while this Mac still holds an older synced key file (a catalogued backup's, a mirror's) keeps its one read, which
+  is right (that file's master lock is a real road); and the live key file is now read before the network read rather than
+  after it — the same value (nothing writes the live file while the lobby's press is in flight), handed to
+  `VaultRoad.answer` unchanged.
 
 ## Machinery
 
