@@ -1530,6 +1530,48 @@ needs them. Not durable, never committed.
    is your library as of ‹day›. This library doesn't sync, so Resume changes nothing in it." (was "…Sync is waiting until you
    press Resume. To keep something from this backup, duplicate it first — duplicates stay."; P-VX529-U3-2).
 
+## THE PHONE — what mobile must know from this run (2026-10-25, at her word: "I want to make sure that the phone
+## knows everything that has been done / is up to date on what is needed"; the ledger row is `notes/MobileSoul.md`
+## PL-59, written mid-run and trued at closeout; the mobile handoff carries a dated pointer)
+
+- **The state is the phone's too:** a pair changed on any device strands the phone identically (Castle: its stale
+  passphrase loads no sync keys; Standard: it syncs with a silently stale pair).
+- **Inherited through shared core at the phone's next build:** the detection (`AssessRules.pairFollow`), the pair
+  follow act (rule 6's re-lock, the older-build-safe two-step plan — which also protects a stale PHONE build resuming
+  a plan), R-529-5's either-current-secret arm and the E6 drop, the changed-elsewhere refusal splits and sentences
+  (`ProtectionWords`, device names via `ProtectionCopy.deviceName`), `VaultRoad.answer`, the E6 heal primitive and
+  its act.
+- **VERIFY on the device, never assume:** the SHARED lobby road now carries the E6 passphrase field and the vault
+  road (unit 2) — the phone's lobby may already behave; a device walk decides live vs latent.
+- **The phone OWES (the mobile catch-up):** the pair follow's face (lands with VM-8's account section — PL-58), the
+  durable notices' rendering, the check door (PL-58's standing owe), VX-538's recurring E6 card on the phone's card
+  home, the key doors' changed-elsewhere refusal faces, and the pocket guide's compromise-recovery page (the Mac
+  guide's is VX-379's; the pocket guide is its own).
+- **Nothing refuses:** zero schema, marker untouched; every stored change is key-file values through existing
+  setters.
+
+## THE COMPROMISE-RECOVERY RECIPE — hers, to VX-379 (2026-10-25; her words verbatim)
+
+*"and if you want safety after a sync key leak and you were in castle already, do you go standard and then enter
+castle again? I think we should tell the users this clearly somehow. add the compromise recovery guide to the field
+guide, under VX-379"* — VX-379's ticket updated the same day; the DRAFT below is the content direction (VX-379's
+session traces the exact doors and her wording pass rules the sentences):
+
+- **If you think someone has your secrets or your keys — three moves, in this order:** (1) change your ACCOUNT
+  PASSWORD (the sign-in secret — it puts every session out of reach); (2) change your PASSPHRASE and make NEW WORDS
+  (the key doors; your other devices catch up by the follow); (3) USE CASTLE — entering mints a new sync key and a
+  new master, so everything you write from now on is sealed under keys nobody's old copy holds, and every device
+  types a secret once. Want to stay in Standard? Use Standard afterward — leaving changes no key, so the rotation
+  keeps.
+- **Already in Castle?** Use Standard, then Use Castle again — re-entering mints the new keys (verified in the act:
+  every entry mints a fresh master and sync key). The brief Standard window re-makes this Mac's quiet roads and
+  re-entering deletes them again on every device (rule 11); do the two crossings together, in one sitting.
+- **The honest limit:** writing an attacker already copied stays readable to them with the keys they took — rotation
+  protects everything from now on, never the past.
+- **Why a new account is not needed:** after the three moves the attacker holds no session, no proof (it moves with
+  the master), no pair and no current key; a fresh account adds nothing to that beyond scrubbing old ciphertext off
+  the server, which their captured copies already bypassed.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;

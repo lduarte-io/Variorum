@@ -534,6 +534,15 @@ that were promised a home and never got one):
 
 # SUCCESSOR HANDOFF — written 2026-08-23, FOR A MOBILE SESSION THAT RESUMES **AFTER 13l AND 13u**
 
+> **⚠️ ADDENDUM 2026-10-25 (written at VX-529, at her word — "I want to make sure that the phone knows everything
+> that has been done / is up to date on what is needed"): READ THE PROTECTION PARITY ROWS BEFORE §0.** Everything
+> protection-shaped that landed since this handoff was written is in `notes/MobileSoul.md`'s ledger — **PL-58**
+> (VX-510: the first-run sync failures — the not-yet row is live on the phone; the account section's first-round
+> sheet, the check door and a live device first run are OWED under VM-8) and **PL-59** (VX-529: the pair-changed
+> catch-up — what the phone inherits through shared code, what it must VERIFY on the device, and the faces it owes;
+> the run record is `notes/plans/fixes/vx-529-pair-catchup.md`, THE PHONE section). The phone cannot sync against
+> marker 14 until its VM-8 build installs (her accepted word). Nothing below supersedes those rows — they are newer.
+
 > **⚠️ THE RESUME TRIGGER MOVED, same day this was written.** It first
 > read *"after 13l"*. **Her ruling: `13l → 13u → mobile catch-up → 13p`**
 > — *"I think I'd rather do the mac phases in order so that the shared
