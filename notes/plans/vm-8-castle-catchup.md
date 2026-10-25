@@ -338,7 +338,14 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
     [`theReopensAskIsAdoptedOnceAndPushesTheScreen`].
   - GUARDS (green on both sides by design): `everyOtherSlotKeepsTheStandingLobby`, `theWordsMomentShowsTheTypedWords…`
     (P-2's no-Copy — a new face, no pre-fix twin), `settingsOpensTheScreenOnlyWhereItCanAct` (source).
-  RESULTS: PENDING. **Reverts NOT yet started** (this commit announces them).
+  **RESULTS — DONE, every one RED as named, each batch restored `git diff --exit-code` clean; NO REVERT IS IN FLIGHT.**
+  - batch A: `✘ Test run with 10 tests in 3 suites failed after 15.545 seconds with 17 issues` — RED exactly
+    `herFaceSaysHerWordsAndOffersStartFreshAlone` (×4: no lead, no body, no door, the lobby title), `startFreshAsks…` (×5:
+    no door to press, no confirm, nothing ran), `theJoinArms…` (×2: "…behind your fingerprint."), `theFirstRoundSheet…`
+    (×2: "…the bar at the bottom of the window…"), `theRuleTwelveArms…` (×3: the leaving join, Move and the follow out
+    all rendered), `thePhonesRootAttaches…` (×1: no `attach`); GREEN the guards and batch B's two.
+  - batch B: `✘ Test run with 10 tests in 3 suites failed after 14.290 seconds with 2 issues` — RED exactly
+    `theJoinArms…` (the Data Safety pointer said) and `theReopensAsk…` (the ask adopted twice); every other test green.
 - **Piece 3 — VX-501 on the phone's posture:** NOT-STARTED.
 - **Piece 4 — the simulator walk + the measured save:** NOT-STARTED.
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
