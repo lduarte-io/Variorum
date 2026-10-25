@@ -1288,7 +1288,17 @@ ENVIRONMENT TRAPS, W-5/W-6/W-11/W-12 (LEG S, LEG C) and O-B4-1 (UNIT B4); each m
 needs them. Not durable, never committed.
 
 **Members (strictly sequential; flip per commit; unverified claims PENDING):**
-- **VX-526 — the join sheet's words.** NOT-STARTED.
+- **VX-526 — the join sheet's words.** IN-PROGRESS — THE TRACE: the sheet's title and button are `RoadAccountConfirmModel
+  .title`/`.button` = `door.door.title`/`.button` — the `RoadAccountDoor` enum's per-door words, so `.turnOnSync` says
+  `turnOnSyncTitle`/`turnOnSyncButton` ("Turn on sync") on BOTH arms; VX-506 renamed only the join arm's door (the
+  `RoadAccountDoorOpen.label` override in `RoadAccountFaces.derive`). W-12's sentence is `ProtectionWords.joinWordsNotShown`
+  (the passphrase-typed words moment — her #236 draft, PROVISIONAL), "…still open backups you made before today."; the
+  shown-words arm says `joinWordsSentence`, rule 7's sentence VERBATIM (pinned byte-equal to CastleRules by
+  `RoadAccountWordsTests`/`RoadJoinFollowWordsTests` — the rules are frozen to every hand but hers; see P-VX529-U3-1).
+  THE RED PIN COMMITTED (this commit, `VariorumTests/Protection/JoinSheetWordsTests.swift`): **RED on the pre-fix tree**
+  (the harness, `--filter JoinSheetWordsTests`): `✘ Test run with 3 tests in 1 suite failed … with 10 issues` — the join
+  sheet's title and button "Turn on sync" (both postures ×3), the notice "before today" and no floor (both emails ×2);
+  `moveKeepsItsOwnSheet` green (a guard, by nature). The fix: NOT-STARTED.
 - **VX-522 — the hold banner's promise.** NOT-STARTED.
 - **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
 - **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
