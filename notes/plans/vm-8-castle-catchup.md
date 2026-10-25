@@ -171,6 +171,14 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
    Previous Libraries, recoverable, but say it before Start fresh); the devicectl install; her sign-in and join; the
    measured save on her corpus → VX-497's shape and Pre-launch call.
 7. **PROVISIONALS built overnight** — every P-VM8-N below, reviewable at her pass.
+8. **Unit 1's taste flags (implementer U1; seen on the simulator walk, built as the brief says, none invented):**
+   (a) P-VM8-7 — the sync row's own *protection…* door (VX-486's, injected per the brief) and the standing *protection…*
+   row sit one above the other while sync reads locked / not-yet (B15); (b) the Terminal voice lowercases every phone
+   chrome label, so the shared door names read "delete the account from this iphone…" and the gate heading "on this
+   iphone" (B11, B06) — the standing phone rule (the lobby's own "unlock with face id"), hers to keep or carve a
+   proper-noun exception; (c) the phone speaks NO protection receipts — `roadStanding.speak` has no phone home, so the
+   join's "Sync is on, and you're in Castle now…" is unsaid there (the first-round sheet says the outcome) — unit 2's,
+   with the open receipts PL-51 left unspoken.
 
 ## PROVISIONALS (the running list)
 
@@ -178,6 +186,20 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   road; the standing lobby's own precedent).
 - **P-VM8-2** — the phone's Protection screen is Settings ▸ Protection (the Mac's information architecture, the
   phone's navigation); unit 1 mounts only the Sync/account section; a door that cannot act is not rendered (P-2).
+- **P-VM8-3** (F-U1-2 (a), ruled (B)) — the gate line on the phone: "This iPhone keeps the new key behind Face ID."
+  (`ProtectionWords.gateTouchIDLine`'s phone arm; the Mac's "…behind your fingerprint." byte-identical).
+- **P-VM8-4** (F-U1-2 (b), ruled (B)) — `Words.exportAPlainCopyFirst` is NOT said on the phone (no Data Safety, no
+  plain-copy road there — PL-13); whether the phone gets its own advisory is hers.
+- **P-VM8-5** (F-U1-2 (c), ruled (B)) — the first-round close note on the phone: "You can close this — sync keeps going,
+  and Settings says when it's done." (the Mac's "…the bar at the bottom of the window…" byte-identical).
+- **P-VM8-6** (F-U1-2 (d), ruled (B)) — the third leave's pointer on the phone: "To delete the account itself, and
+  everything it keeps on the server, choose Account… in Settings' sync row, then Delete Account." (the Mac's "…in the
+  sidebar's sync row…" byte-identical).
+- **P-VM8-7** (taste, the walk's B15) — while sync reads keys-locked / not-yet, the sync row's injected *protection…*
+  door and the standing *protection…* row stand together: (a, built) both, as the brief says · (b) the standing row
+  hides while the row offers its own door · (c) the standing row moves out of the Sync section.
+- **F-U1-1 (A), ruled — NOT a sentence, a door rule:** the phone's unit-1 section renders neither rule-12 arm (the
+  Castle-leaving join / Move, the follow out of Castle); F-PH-2 is hers.
 
 ## ENVIRONMENT TRAPS (every brief carries these verbatim)
 
