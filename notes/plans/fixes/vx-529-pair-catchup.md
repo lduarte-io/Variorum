@@ -1275,10 +1275,15 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-523 NOT FIXED — traced, its red pin held as a known
-issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526, VX-522, VX-533, VX-530 and VX-538 DONE;
-the close (the suites whole, the two build-for-testing) NOT-STARTED. No revert is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
-`~/dev/variorum-vx-529`.
+**NOT DONE IN THIS UNIT:** **VX-523 NOT FIXED** — traced (the brief's premise corrected: the quiet rule IS evaluated; Make
+this my library's key file can't satisfy it), its red pin held as a known issue, RETURNED to the orchestrator (the fix
+changes what a custody act writes — options (A)/(B)/(C) in its block); VX-533's external fact (which status the system
+sheet's own timeout returns) UNVERIFIED — the fix covers the thrown class, her Air's log tells; the Mac-target and phone
+suite RUNS (the stage batch — the list under THE CLOSE); every walk; the QUESTIONS entry for P-VX529-U3-1…6 (the merging
+session's ledger); the CastleRules clause (DRAFTED below for her — never written into the rules); mobile faces (VX-538's
+card on the phone — the parity row). Every other member DONE: VX-526, VX-522, VX-533, VX-530, VX-538. No revert is in
+flight. Zero `Sources/VariorumCore/Sync/` lines (by diff); no schema, no stored shape. Session: a fresh `opus-implementer`,
+2026-10-24, worktree `~/dev/variorum-vx-529`.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
 `notes/CastleRules.md` whole; SurfaceContracts' protection and portability bullets; this file whole; the VX-510 record's
@@ -1570,6 +1575,40 @@ stage only my own paths, and re-read the record before every edit from here on.
   until a passphrase is typed here — there is no 'don't show again'."* (Rule 3's own text is silent there: a synced library's
   passphrase exists — the account's — so its reminder never shows; the clause names the deliberate delta, her "until it's
   done".)
+
+**THE CLOSE (on the finished product tree, `723cbf276`; the record commits after it touch no code):**
+- **THE CORE SUITE whole** (`swift test`, debug, headless): VariorumCoreTests **`Test run with 3426 tests in 455 suites passed
+  … with 6 known issues`** (P2's 4 negative controls, P6d's pinned residual, VX-523's held row); the one failure the ticketed
+  MCP wall-clock flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (VX-353 /
+  VX-532) in VariorumMCPTests; no protection code in it.
+- **THE HARNESS whole** (debug; this unit's four new suites symlinked in): `✘ Test run with 499 tests in 94 suites failed …
+  with 8 issues` — exactly unit 2's standing eight: the five harness-PATH artifacts (`CopyListingFacesSurfaceTests` ×2,
+  `EmptySlotDoorsSurfaceTests` ×2, `ProtectionRoadSwitchTests` ×1 — source pins reading `#filePath` beside a symlink; they
+  run in the Mac target) and F-U2-9's week-boundary flake (`ProtectionPairRetentionTests` ×3 — VX-539). Every other test green
+  (484 + this unit's 15).
+- **Mac `build-for-testing`** (`-derivedDataPath App/Variorum/DerivedData/vx529-u3`): `** TEST BUILD SUCCEEDED **` — the Mac
+  face `AccountPassphraseRow` compiles (VX-538's PENDING flipped). No warning in a touched line (one pre-existing in
+  `KeyDoors.swift`'s untouched `keyDoorParameters` — `var parameters` never mutated). **iOS `build-for-testing`**
+  (`VariorumMobile`, `generic/platform=iOS Simulator`, `DerivedData/vx529-u3-ios`): `** TEST BUILD SUCCEEDED **`.
+- Zero `Sources/VariorumCore/Sync/` lines (`git diff --stat 11e1c0d53..HEAD -- Sources/VariorumCore/Sync`: empty); no schema
+  (`Persistence/`, `Server/` untouched), no stored shape (the E6 card's ledger is a local calm-asks defaults key; every key-file
+  change is unit 2's heal through the existing setters); no trailer on any commit (checked over `11e1c0d53..HEAD`).
+- **THE MAC-SUITE LIST for the stage batch** (every Mac-target suite exercising a changed file; harness-green ones say so): NEW
+  — `JoinSheetWordsTests`, `HoldBannerNoAccountWordsTests`, `LobbyTouchIDReaskTests`, `E6BandCardTests` (all harness-green);
+  CHANGED — `RoadJoinFollowWordsTests` (harness-green; FLIPPED DELIBERATELY, VX-526); exercising changed types,
+  harness-green — `RoadAccountModelTests`, `RoadAccountFacesTests`, `RoadAccountWordsTests`, `NotOnYetWordsTests`,
+  `FirstRoundConfirmTests`, `FirstRoundAfterTheActTests`, `ProtectionJoinFollowRoadTests`, `PairFollowFacesTests`,
+  `HoldBannerAccountFactTests`, `HoldBannerAccountCompositionTests`, `RoadRestoreHoldGateTests`, `TouchIDUnlockSyncKeysTests`,
+  `ProtectionLobbyModelTests`, `RoadLockTests`, `RoadRearmTests`, `ProtectionOpenRoadPlantedTests`, `LobbyVaultRoadTests`,
+  `TypedUnlockSyncKeysTests`, `WordsBandTests`, `PassphraseReminder*`, `SetPassphraseRowRereadTests`, `RoadKeyDoor*`,
+  `PairCheckDoorTests`; Mac-ONLY (compiled, runs PENDING the stage batch) — `LibraryPortabilityDoorTests` (the hold banner's
+  no-account arm: no "account", a "Resume" — true of the new text by reading), `ProtectionCrossingRouteTests` (the walk
+  switch's planted failure — no throw, untouched by VX-533's change by reading; a real-keychain suite), `WordsBandSurfaceTests`
+  (the card's source pins — the E6 row adds no popup, alert or shortcut), `RoadAccountSurfaceTests` (the account sheet's
+  title/button now read through `RoadAccountDoorOpen`), `RoadJoinFollowSurfaceTests`; the PHONE — `MobileNoRedirectSweepTests`
+  (every Shared literal — the three new E6 sentences name the platform through `ProtectionCopy.deviceName`) and
+  `MobileProtectionRoadTests`. The core's new and changed suites (`KeyDoorTouchIDReadsTests`, `RestoredCopyJoinWordsMoment
+  Tests`, `TouchIDSyncKeysForgottenTests`) ran in the core suite above.
 
 **NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
 1. VX-526 — the join sheet's title and button (`joinSyncTitle`, `joinSyncButton`): "Sync this library" · "Sync this library"
