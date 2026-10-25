@@ -1383,7 +1383,32 @@ needs them. Not durable, never committed.
   under the vault's own descriptor ⇒ "the pair was the account's") — REJECTED: unsound; a words change elsewhere before the
   restore (a lagging device restoring with its stale words) or after it leaves that descriptor equal and would go QUIET over a
   real replacement. Nothing built; no product line changed.
-- **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
+- **VX-533 — the lobby's missed Touch ID prompt.** IN-PROGRESS — THE TRACE (written before any fix): **(b) "a re-press lands
+  on a dead context" is RULED OUT by code** — every press reads through a FRESH `LAContext` minted inside the read
+  (`KeychainCustodyLeaf.readTouchID`, `let context = LAContext()` at :156); the only context handed out
+  (`TouchIDPressContext`) is returned on a read that OPENED its item and invalidated in `pressTouchID`'s `defer`. The
+  automatic ask (`autoAskIfDue` → `pressTouchID`) and the button press are the same function, the same road, a new context
+  each. **(a) "the button disappears" is REAL on one class of press ending:** the face's button is `itemExists && usable`
+  (`AssessRules.touchID`), and the model drops the Touch ID item from its facts only when a press reports `itemGone`
+  (`ProtectionLobbyModel.pressTouchID`, `.touchIDNotOpened(…, itemGone: true)`). `ProtectionOpenRoad.pressTouchID`
+  (:532) infers `gone = press == nil` — "no press recorded ⇒ the probe found no item" — but a press whose keychain read
+  THREW leaves exactly that too: `readTouchID`'s arms name errSecUserCanceled (⇒ `.cancelled`) and errSecAuthFailed /
+  errSecInteractionNotAllowed (⇒ `.failedOnExistingItem` or `.transient`); ANY OTHER status makes `ProtectionKeychain.readData`
+  throw, the arms don't match, `setLastPress` never runs, and on a fresh lobby `lastPress` is nil — so the road says the item
+  is gone, the button falls (the line becomes "Touch ID isn't set up for this library") over an item the existence probe
+  had found an instant before, and nothing brings it back but a become-active `refresh()` (which re-lists it) or a relaunch
+  or a lock — her workaround. **THE EXTERNAL FACT, UNVERIFIED:** which status `SecItemCopyMatching` answers when the SYSTEM
+  sheet fades on its own (no Apple documentation found; a forum report shows unmapped statuses such as errSecNotAvailable do
+  reach this call). If it is errSecUserCanceled the button already stood after her timeout; if errSecAuthFailed it stood but
+  the line said "Touch ID changed since you set it up — unlock with the passphrase." (which would also send her to the
+  passphrase); if any other status, this is her mechanism exactly. THE DISTINGUISHING EVIDENCE (her Air, at her hand): the
+  protection log line "road: the Touch ID read failed — …" (`pressTouchID`'s catch) is written ONLY on the thrown arm.
+  THE RED PIN COMMITTED (this commit, `VariorumTests/Protection/LobbyTouchIDReaskTests.swift` — the model wired to the REAL
+  press road over planted leaves; the planted read throwing is the twin of the unnamed status): **RED on the pre-fix tree**
+  (the harness, `--filter LobbyTouchIDReaskTests`): `✘ Test run with 3 tests in 1 suite failed … with 4 issues` — after the
+  automatic ask's read threw, the button GONE; the re-press reached no road (`pressesRun == 2`), read nothing, opened
+  nothing. Guards green: a press finding the item gone still drops it; every read mints its own `LAContext` (source). The
+  fix: NOT-STARTED.
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 
