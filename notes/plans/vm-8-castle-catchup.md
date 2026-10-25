@@ -231,6 +231,44 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   pass.
 - **No commit trailers** (her rule, overrides the harness reminder). Push `origin` after every commit.
 
+## UNIT 2 BRIEF (the orchestrator, 2026-10-25 — PROVISIONAL sizing under the overnight latitude; her split
+ratification stands in the bundle; the ladder reviews the whole run's diff either way)
+
+**The unit:** the phone's Protection screen grows the faces the kickoff charters, MINUS every leave-direction arm —
+one implementer session, acceptance = the doors walked on the pinned simulator + the suites green.
+
+1. **The posture section and the crossings, entering only:** Use Castle… with both secrets typed, the gate choice
+   (Face ID made at the press / Always ask) and the standing gate-style row, the export-off notice as a durable mark
+   (reconciled at every ready; only OK or Turn it back on clears it — rendered with P-VM8-4's nil in mind: the
+   phone HAS rule 11's export-off notice only if a scheduled export exists there — verify in code; if the phone has no
+   scheduled export, the notice never fires and nothing renders), the Face ID re-arm question (the shared interlude
+   already renders it). **Use Standard… does NOT land in this unit** — its confirm says her rule-12 sentence (F-PH-2,
+   hers; the door is NOT rendered on the phone yet, exactly as unit 1's account section holds its two arms).
+2. **The key doors:** Change passphrase, Reset forgotten passphrase (Castle by Face ID or the words; Standard the
+   plain confirm), New Words through the look, Replace All Keys — over the shared `RoadKeyDoorsModel`/`RoadKeyDoorFaces`,
+   each saying VX-263's one line, the synced doors re-wrapping the account's lock in the same act (rule 7), the
+   changed-elsewhere refusals naming the device and day (VX-113/PL-59) and pointing at the follow (R-529-3). VX-530's
+   at-most-one-Touch-ID-read and VX-517's by-name forgets are core — verify on the phone posture, don't re-trace.
+   **The phone's passphrase setter:** the shared `SetPassphraseModel` — the 12-character floor as its only refusal plus
+   the quiet strength hint (VX-211) — rendered phone-side.
+3. **The follow, the in/into arms + the pair:** `assess`'s followNow door with its notice (the vault's last writer and
+   day); one secret in or into Castle; THE PAIR follow (VX-529 — "Follow your account…", either current secret, typed
+   words dropping the stale passphrase lock with the sheet saying so and the Reset chain — R-529-5), the durable Done
+   (VX-457; the stale done-line hidden while a follow is owed — P-VX529-U2-2). **The follow OUT of Castle does NOT
+   land** (rule 12's sentence — F-PH-2). VX-542's repetition is NOT copied (the pair sentence once, beside the doors).
+4. **The check door:** "Check my passphrase or twelve words…" over the shared `ProtectionSecretCheck` — reads one typed
+   secret, WRITES NOTHING, the four answers (VX-513's sentences), naming a change elsewhere and pointing at the
+   catch-up where owed.
+5. **Protection receipts' phone home:** give `roadStanding.speak` a phone rendering (unit 1's flag (c)) — the join's
+   and the acts' receipts land somewhere honest (the phone's one status seam; a quiet line in Settings/Protection is
+   the natural home — PROVISIONAL, flag the shape). The two open receipts re-worded at VX-329 (P-VX329-PH-1) become
+   SPOKEN — confirm their wording is the device-neutral re-worded pair, no new words.
+6. **Evidence:** pins red-on-old per behavior fix; the unit suites + `MobileNoRedirectSweepTests` green (no exemption
+   widened — the leave arms stay unreachable); a simulator walk of every new door (the prod test road's `castle` and
+   `std` accounts as fits; key-door acts against TEST accounts only); captures gitignored. The same hard limits as
+   unit 1 (the record's ENVIRONMENT TRAPS + the F-U1-4 helper's guards). Zero `Sync/` lines; stop-and-report if one
+   seems needed.
+
 ## UNIT 1 BRIEF FACTS (checked at kickoff, 2026-10-25)
 
 - The stage read FREE at kickoff; claim it for every simulator run anyway (other sessions may wake).
@@ -528,8 +566,8 @@ signed out.**
 
 | # | item | owner | status |
 |---|---|---|---|
-| 1 | Unit 1 — the phone syncs again (pieces 1–5 above) | implementer U1 | IN FLIGHT |
-| 2 | Unit 2 — crossings, key doors, follows, check door | after unit 1 | NOT STARTED |
+| 1 | Unit 1 — the phone syncs again (pieces 1–5 above) | implementer U1 | BUILD CLOSED on the simulator (tip `11c4f2054`); the Mac stage batch runs now (orchestrator); the device install HELD for her |
+| 2 | Unit 2 — crossings (entering), key doors, follows (in/pair), check door, receipts' home — the UNIT 2 BRIEF above; leave-direction arms HELD for F-PH-2 | implementer U2 | BRIEF WRITTEN — spawns after the Mac batch |
 | 3 | Unit 3 — the cards + the pocket guide | at her split call | NOT STARTED |
 | 4 | Old-scope reconciliation tickets | orchestrator | table drafted; tickets at the sitting |
 | 5 | Her sitting bundle | orchestrator | OPEN — grows |
