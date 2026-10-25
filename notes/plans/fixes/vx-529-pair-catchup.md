@@ -2274,6 +2274,33 @@ library now."** (P-VX510-1 live).
 - Not seen in this leg: E8's durable words notice ("the words you recorded before ‹day› no longer open this
   library") outside the sheet — to be read in the account section below the pane before the leg's record closes.
 
+- **E8's durable notice, read in the account section (D1w's last check):** *"Your account's twelve words were changed
+  on another device, and this Mac caught up. The twelve words you had before no longer open this library; backups you
+  made with them still do."* with OK (VX-457's durable-until-OK) — PASS.
+
+**D1 — THE EVERYDAY LEG (Standard; roles MIRRORED to save a swap — the libraries are symmetric) — PASS
+(22:49–22:53):**
+- On L_A: Change passphrase (`passphrase2` → `passphrase`; the sheet's synced line live: *"This library syncs with
+  your account, so your account's passphrase changes with it, on every device."*) → `change_passphrase: done #2` →
+  **server vault rev 19 → 20**. L_A quit on one pid-addressed request; swap under the rules; L_B opened
+  (`library 1a1e7a0d key 96046712`).
+- Settings ▸ Protection on L_B: the gate's passphrase variant — *"Your account's passphrase was changed on Lillian's
+  MacBook Pro on October 24. Follow your account to catch this Mac up first."* **The repro's false refusal is
+  structurally gone:** Change passphrase is gated, so "That passphrase doesn't open this library" for the old one
+  can no longer be said.
+- **The check door, BEFORE the catch-up:** the OLD passphrase → *"That passphrase opens this library, but not your
+  account."* + *"Your passphrase was changed on Lillian's MacBook Pro on October 24."* (log: `the library: opens;
+  the account: does not open (changed elsewhere)`) · the NEW passphrase → *"That passphrase doesn't open this
+  library, but it opens your account."* + *"You can catch this Mac up in Settings ▸ Protection."* (log: `does not
+  open; opens`).
+- The follow sheet's passphrase variant: *"Type your account's current passphrase or your twelve words once to catch
+  up."* (R-529-5's either-secret ask) + the second road · the new passphrase → `follow: begun #1 96046712 → none` ·
+  **`re-locked to the account's pair (passphrase) — the key unchanged (96046712)`** · `done #1`.
+- **The check door, AFTER:** the new passphrase → `opens; opens`; **the OLD passphrase → `does not open; does not
+  open`** — the stale lock RETIRED (before VX-529 it lived forever on a lagging Standard device).
+- **Face note W-D1-1 (her bundle):** the third answer (opens this library, not the account, changed elsewhere) carries
+  no catch-up pointer, though a follow is owed in exactly that state; the fourth answer does. One pointer for both.
+
 **STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
 (fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
 held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
