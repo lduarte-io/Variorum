@@ -1837,6 +1837,37 @@ road), `ProtectionRoadActs.swift` (`setFirstPassphrase`); the suite `LobbyVaultR
   after it — the same value (nothing writes the live file while the lobby's press is in flight), handed to
   `VaultRoad.answer` unchanged.
 
+## R-529-7 — VX-523 RULED: (A) IN THIS RUN (2026-10-25, her pick at the sitting, after her implications questions)
+
+Her questions, verbatim, from the sitting: *"hmmmm. so it over speaks because it can't be SURE that it's the
+accounts. but wording seems like the less significant part of this change - what does it really mean and what are the
+implications of the ault writing the master wrap and its words copy ?? writing that where? what are the deeper
+implications of this? I feel like this might have more implications"* — answered before the pick (the implications
+analysis is the sitting reply, summarized: the two fields live in the key file beside the library, the same two the
+JOIN writes at Resume anyway, so the end state is identical and only the held window changes; no new opener class; no
+vault/server/custody write; the act gains one opportunistic bounded network read — offline or unprovable writes
+nothing, today's file exactly; the notice's quietness becomes connectivity-dependent — the one real cost). **Her
+pick: "(A) in this run (Recommended)".**
+
+### THE LADDER — L2 (a fresh `opus-implementer`; the VX-523 fix under R-529-7)
+
+**The charter:** Make this my library, when the session is signed in and the account's vault is readable within the
+standing bound, ALSO writes the join's two proof fields into the new library's key file — the master wrap and the
+words copy — exactly as a join writes them (`KeyFileCrossings`' shape), deriving from the copy's typed secret against
+the vault; where the read is unavailable or the typed secret does not open the vault, it writes NOTHING and the file
+is today's byte for byte. The join's quiet rule then proves the match and stays quiet (the held red row in
+`RestoredCopyJoinWordsMomentTests` flips green — that is the pin, already red on today's tree). Edges to pin: the
+offline restore (today's file, the notice still speaks — truthfully), the pair-changed-since-backup restore (the
+secret fails the vault, nothing written, the notice speaks — truthfully), and the act's crash points (the fields ride
+the act's existing planned key-file write — no new step). Read first: THIS FILE's VX-523 sections (unit 3's return,
+R-529-7 above), `ProtectionCopyDoors.swift` / `CopyDoorsModel.swift` (the act), `KeyFileCrossings.swift` (the join's
+shape), `AccountActs.swift`'s join arm, and the held test. Discipline exactly L1's; the fix re-checked by round 2's
+fresh reviewer; VX-523 closes with the run on her ruling.
+
+### L2 — LIVE STATUS (the implementer owns this section)
+
+*(not started)*
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
