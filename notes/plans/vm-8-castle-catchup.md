@@ -346,7 +346,17 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
     all rendered), `thePhonesRootAttaches…` (×1: no `attach`); GREEN the guards and batch B's two.
   - batch B: `✘ Test run with 10 tests in 3 suites failed after 14.290 seconds with 2 issues` — RED exactly
     `theJoinArms…` (the Data Safety pointer said) and `theReopensAsk…` (the ask adopted twice); every other test green.
-- **Piece 3 — VX-501 on the phone's posture:** NOT-STARTED.
+- **Piece 3 — VX-501 on the phone's posture:** PIN GREEN (this commit), red-on-old PENDING. No phone pin covered it (the
+  mechanism is shared and Mac-pinned — `TypedUnlockSyncKeysTests`; not re-traced). NEW `MobileTypedUnlockSyncKeysTests`
+  over NEW `MobilePlantedProtection.swift` (the Mac support's planted leaves COPIED VERBATIM — the two test bundles are
+  separate modules): her phone's whole road through the PHONE'S OWN compiled bootstrap — a fresh library (the phone's
+  words card), signed in to an account whose vault is in Castle, the JOIN ("Sync this library…", `.entersCastle`,
+  re-keying through the reopen) with Always ask and the account's passphrase → Castle under the account, rule 7's
+  notShown moment, the reopen's Protection ask; then a LOCK (the lobby, session memory dropped); then the TYPED UNLOCK →
+  the account's keys in session memory, the engine's seam reads them. `✔ Test run with 1 test in 1 suite passed`.
+  **RV-6, named before it runs:** `Shared/Protection/ProtectionOpenRoad.swift` — `openTyped`'s one
+  `loadSyncKeysAfterTypedUnlock` call removed [`herPhonesJoinIntoCastleThenATypedUnlockLoadsTheSyncKeys` — the two
+  load expectations]. Not yet run.
 - **Piece 4 — the simulator walk + the measured save:** NOT-STARTED.
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
 
