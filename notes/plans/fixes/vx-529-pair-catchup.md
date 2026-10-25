@@ -1276,8 +1276,8 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
 **NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-523 NOT FIXED — traced, its red pin held as a known
-issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526, VX-522 and VX-533 DONE;
-every other member NOT-STARTED. No revert is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
+issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526, VX-522, VX-533 and VX-530 DONE;
+VX-538 NOT-STARTED. No revert is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
 `~/dev/variorum-vx-529`.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
@@ -1429,7 +1429,7 @@ needs them. Not durable, never committed.
   since you set it up — unlock with the passphrase." with the button standing — a misleading line after a mere timeout; the
   leaf's mapping is shared by every Touch ID read, so changing it is outside this rider's smallest diff. No revert is in
   flight.
-- **VX-530 — the double Touch ID.** IN-PROGRESS — THE TRACE (written and committed BEFORE any pin or fix; every read named
+- **VX-530 — the double Touch ID.** DONE — THE TRACE (written and committed BEFORE any pin or fix; every read named
   by file:line; "prompt" = a context-less Touch ID read on the production leaf, `KeychainSyncKeysLeaf.readSyncKeys(.touchid)`
   minting its own `LAContext` at :66 — a sheet of its own):
   - **CHANGE PASSPHRASE** (Castle + Touch ID, synced). App: `ProtectionKeyDoorRoad.press` reads no keychain for Change.
@@ -1485,7 +1485,13 @@ needs them. Not durable, never committed.
     reorder disabled (Castle takes Standard's loop with the Touch ID class first, the carry kept) [expect 3 issues: Change 1
     read, Reset-with-session 1, words 1; Reset with nothing in hand 1 = green]; RV-530-2 — the carry removed (`keyDoor`
     passes no `material`, the reorder kept) [expect 3 issues: Change 1, Reset-nothing-in-hand 2, Reset-with-session 1; words
-    green]. PENDING.
+    green]. **VERIFIED BY REVERT** on `8014c63c7`: RV-530-1 ⇒ `✘ … 5 tests … with 3 issues` (Change 1, Reset-with-session 1,
+    words 1 — exactly as named); RV-530-2 ⇒ `✘ … with 3 issues` (Change 1, Reset-nothing-in-hand 2, Reset-with-session 1 —
+    exactly as named); each restored by `git checkout --`, `git diff --exit-code` clean, `✔ 5 tests` green again. **DONE**
+    (`c8a25d94f` trace, `49eac5049` pin, `8014c63c7` fix). No revert is in flight. Not changed, recorded: the Reset's ruled
+    presence confirm stays its own sheet on the LIBRARY's custody item (a different item; design §3.9) — so Reset by Touch
+    ID with nothing in hand shows two sheets on two items (the confirm, then the account's keys once); riding the confirm's
+    press for the sync-keys read (VX-487 (b)'s riding road) would make it one — a design call beyond the brief's shape.
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 
 **NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
