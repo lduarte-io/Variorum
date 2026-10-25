@@ -209,6 +209,16 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   pass.
 - **No commit trailers** (her rule, overrides the harness reminder). Push `origin` after every commit.
 
+## UNIT 1 BRIEF FACTS (checked at kickoff, 2026-10-25)
+
+- The stage read FREE at kickoff; claim it for every simulator run anyway (other sessions may wake).
+*[removed for publication]*
+  iPhone 17 Pro; deployment target iOS 26; the id, never the name, in every destination).
+- The throwaway road's credentials still stand on the Pro (`~/.variorum/dev-vault-throwaway.env`,
+  `dev-vault-throwaway-passphrase`, `dev-vault-throwaway-words`) — the ~110k-row corpus for VX-494's test user A is
+  likely intact; VERIFY with a read before planning the scale walk on it. The prod test accounts stand
+  (`~/.variorum/prod-test-accounts.env`, `prod-test-words-castle` / `-std` / `-del`).
+
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
 | # | item | owner | status |
