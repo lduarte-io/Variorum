@@ -1288,6 +1288,13 @@ ENVIRONMENT TRAPS, W-5/W-6/W-11/W-12 (LEG S, LEG C) and O-B4-1 (UNIT B4); each m
 `Shared/` sources symlinked into a scratch SPM package) reused in place; new suites/sources are symlinked in as each member
 needs them. Not durable, never committed.
 
+**Machinery (honesty):** during VX-538's pin commit the worktree moved under me — `notes/MobileSoul.md` and
+`notes/plans/mobile-round-2-orchestrator-handoff.md` changed on disk (files I never touched), then the orchestrator's
+`270b58394` (THE PHONE section, PL-59, the mobile addendum, the compromise-recovery recipe — "mid-run at her word") landed on
+top of my `f378f6b5e` and was pushed while my own push raced it (refused on a ref lock; nothing lost — the remote carries
+both). Read as the orchestrator writing deliberately in this worktree, not a twin implementer: I touched none of its files,
+stage only my own paths, and re-read the record before every edit from here on.
+
 **Members (strictly sequential; flip per commit; unverified claims PENDING):**
 - **VX-526 — the join sheet's words.** DONE — THE TRACE: the sheet's title and button are `RoadAccountConfirmModel
   .title`/`.button` = `door.door.title`/`.button` — the `RoadAccountDoor` enum's per-door words, so `.turnOnSync` says
