@@ -94,12 +94,15 @@ struct RoadJoinFollowWordsTests {
         // wrong way round). The middle clause keeps its sentence and drops only its conditional lead-in (the F-U2-1
         // arbitration: with VX-456 the moment fires only on a real replacement, so the previous-words fact is said
         // plainly, un-hedged, exactly when it is true).
+        // VX-529 unit 3 — VX-526 (W-12): FLIPPED DELIBERATELY — the middle sentence says rule 5's floor ("…backups made
+        // with them"), never "before today" (a backup made earlier today, before the join, opens with them too).
+        // PROVISIONAL, hers; `JoinSheetWordsTests` is its red-on-old pin.
         #expect(ProtectionWords.joinWordsNotShown("lillian@example.test")
             == "Your twelve words are lillian@example.test's twelve words. Your previous twelve words still open backups "
-            + "you made before today. If you don't have your account's words written down, you can make new ones at any time.")
+            + "made with them. If you don't have your account's words written down, you can make new ones at any time.")
         #expect(ProtectionWords.joinWordsNotShown(nil)
-            == "Your twelve words are your account's twelve words. Your previous twelve words still open backups you made "
-            + "before today. If you don't have your account's words written down, you can make new ones at any time.")
+            == "Your twelve words are your account's twelve words. Your previous twelve words still open backups made "
+            + "with them. If you don't have your account's words written down, you can make new ones at any time.")
         #expect(!ProtectionWords.joinWordsNotShown(nil).contains("here they are"), "the passphrase-typed moment shows nothing")
         #expect(!ProtectionWords.joinWordsNotShown(nil).contains("first time signing in"), "the conditional lead-in dropped")
         #expect(ProtectionWords.moveDoor("y@example.test") == "Move this library to y@example.test\u{2026}")

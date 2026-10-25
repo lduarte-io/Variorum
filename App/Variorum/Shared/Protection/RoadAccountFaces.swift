@@ -153,6 +153,12 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
     /// The door's name as rendered.
     var doorLabel: String { label ?? door.doorLabel }
 
+    /// VX-529 unit 3 — VX-526 (W-11): the sheet's title and its one button follow the door's own name — Turn on sync's
+    /// JOIN arm (the account already syncs) says the join's words, the door VX-506 named; every other door keeps its own.
+    var title: String { isTheJoinArm ? ProtectionWords.joinSyncTitle : door.title }
+    var button: String { isTheJoinArm ? ProtectionWords.joinSyncButton : door.button }
+    private var isTheJoinArm: Bool { door == .turnOnSync && joinsAnAccount }
+
     /// The act re-keys the library (a join that crosses postures, every follow): it runs with the app's pool closed and
     /// reopens — the crossings' seam (R-U2-2); else on the open session.
     var rekeys: Bool { spec.rekeys }

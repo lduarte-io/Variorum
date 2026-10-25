@@ -873,10 +873,13 @@ nonisolated enum ProtectionWords {
     /// F-U2-1 arbitration): with VX-456 the moment fires only on a real replacement, so the previous-words fact "applies
     /// unconditionally" — it is said plainly, un-hedged, exactly when it is true. PROVISIONAL (her bundle carries both
     /// texts beside her note). `email`: the account signed in at the join (nil, not known — "your account's", P-VX309-U2-2).
+    /// VX-529 unit 3 — VX-526 (the VX-510 walk's W-12): the middle sentence says the honest floor, rule 5's — the previous
+    /// words open the backups made WITH them — never "before today" (a backup made earlier today, before the join, opens
+    /// with them too). PROVISIONAL, hers (the bundle carries the earlier text beside it).
     static func joinWordsNotShown(_ email: String?) -> String {
         "Your twelve words are \(email.map { "\($0)'s" } ?? "your account's") twelve words. Your previous twelve words "
-            + "still open backups you made before today. If you don't have your account's words written down, you can "
-            + "make new ones at any time."
+            + "still open backups made with them. If you don't have your account's words written down, you can make new "
+            + "ones at any time."
     }
     static let joinWordsMomentOK = "OK"
 
@@ -1039,6 +1042,10 @@ nonisolated enum ProtectionWords {
     /// P-VX510-3 (a) — Settings ▸ Protection's door over the JOIN arm (the account already syncs); the set-up arm keeps
     /// `turnOnSyncDoor`.
     static let joinSyncDoor = "Sync this library\u{2026}"
+    /// VX-529 unit 3 — VX-526 (the VX-510 walk's W-11; P-VX510-A4 (b)): the sheet that door opens is titled, and its button
+    /// named, by the door's own words — never the set-up arm's "Turn on sync". PROVISIONAL, hers.
+    static let joinSyncTitle = "Sync this library"
+    static let joinSyncButton = "Sync this library"
 
     // MARK: - VX-510 D-B7 — THE READ-ONLY CHECK (VX-513, her R-510-15)
     //

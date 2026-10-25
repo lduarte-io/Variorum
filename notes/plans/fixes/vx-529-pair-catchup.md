@@ -1298,7 +1298,18 @@ needs them. Not durable, never committed.
   THE RED PIN COMMITTED (this commit, `VariorumTests/Protection/JoinSheetWordsTests.swift`): **RED on the pre-fix tree**
   (the harness, `--filter JoinSheetWordsTests`): `✘ Test run with 3 tests in 1 suite failed … with 10 issues` — the join
   sheet's title and button "Turn on sync" (both postures ×3), the notice "before today" and no floor (both emails ×2);
-  `moveKeepsItsOwnSheet` green (a guard, by nature). The fix: NOT-STARTED.
+  `moveKeepsItsOwnSheet` green (a guard, by nature). THE FIX COMMITTED (this commit): `RoadAccountDoorOpen.title`/`.button`
+  (`RoadAccountFaces.swift` — Turn on sync's JOIN arm, `joinsAnAccount`, says `ProtectionWords.joinSyncTitle`/`joinSyncButton`
+  = "Sync this library"; every other door its own) read by `RoadAccountConfirmModel.title`/`.button`; `joinWordsNotShown`'s
+  middle sentence "Your previous twelve words still open backups made with them." (rule 5's floor). `RoadJoinFollowWordsTests
+  .theJoinReadsAsDrafted` FLIPPED DELIBERATELY to the new text (said in the test). **GREEN** (the harness, `--filter
+  "JoinSheetWordsTests|RoadJoinFollowWordsTests|RoadAccountWordsTests|RoadAccountModelTests|RoadAccountFacesTests|
+  NotOnYetWordsTests|FirstRoundConfirmTests|FirstRoundAfterTheActTests|ProtectionJoinFollowRoadTests|PairFollowFacesTests"`):
+  `✔ Test run with 95 tests in 13 suites passed`. THE REVERTS (named before they run; each one edit on this commit, the
+  harness `--filter JoinSheetWordsTests`, restored by `git checkout --`, `git diff --exit-code` clean after each): RV-526-1
+  `RoadAccountModel.swift` — `title`/`button` back to `door.door.title`/`.button` [expect the six title/button issues];
+  RV-526-2 `ProtectionWords.swift` — the middle sentence back to "…backups you made before today." [expect the four words
+  issues]. PENDING.
 - **VX-522 — the hold banner's promise.** NOT-STARTED.
 - **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
 - **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).

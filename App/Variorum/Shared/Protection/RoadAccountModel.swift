@@ -124,8 +124,8 @@ final class RoadAccountConfirmModel: Identifiable {
         await roundTask?.value
     }
 
-    var title: String { door.door.title }
-    var button: String { door.door.button }
+    var title: String { door.title }
+    var button: String { door.button }
     /// The passphrase field is a NEW passphrase typed twice (none set yet — rule 3).
     var asksNewPassphrase: Bool { door.newPassphrase }
 
