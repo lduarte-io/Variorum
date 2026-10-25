@@ -262,9 +262,11 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
     /// The faces for the open library: `facts` as the pane's one read gathered them (the current sign-in, the fresh vault
     /// reading), `assessment` = `assess(facts)`, `vault` what the read found; `copyName` names a catalogued copy (rule 25's
     /// list at a join into Castle — nil when it is no longer catalogued).
+    /// VX-529 unit 2 — `accountKeysInHand`: whether this Mac holds the account's CURRENT keys (E14 — read only when a
+    /// words-only pair catch-up is owed; true when nothing can say otherwise).
     static func derive(
         _ facts: ProtectionFacts, _ assessment: Assessment, vault: VaultReadState,
-        copyName: (String) -> String? = { _ in nil }
+        copyName: (String) -> String? = { _ in nil }, accountKeysInHand: () -> Bool = { true }
     ) -> RoadAccountFaces? {
         guard let unlocked = facts.unlocked, let mode = assessment.mode.mode else { return nil }
         var email: String?
@@ -337,8 +339,13 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
                    if case .follow(let kind, _) = act { return kind }
                    return nil
                }).first {
+                // VX-529 unit 2 — E14: the words-only catch-up types nothing (R-529-2) while this Mac holds the account's
+                // keys; with none in hand (a Castle Always-ask library opened by its old words) it asks one secret.
+                var asksASecret = false
+                if case .pairChanged(false, true) = kind, spec.requires == .none { asksASecret = !accountKeysInHand() }
                 follow = .open(followDoor(
-                    kind, spec, vault: facts.vault, exportOn: unlocked.thisMac.settings.scheduledExport, gate: gateChoice))
+                    kind, spec, vault: facts.vault, exportOn: unlocked.thisMac.settings.scheduledExport, gate: gateChoice,
+                    asksASecret: asksASecret))
             }
         case .signedOut:
             thisMacOnly = leaf(.thisMacOnly)
@@ -408,8 +415,12 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
     /// Castle, rule 10's "said plainly" and the gate choice (the follow's own default — Touch ID where a finger is here,
     /// else Always ask); out of Castle, rule 12's leave sentence (the spec's `ruleFive`), nothing typed; what it asks;
     /// into Castle with this Mac's scheduled export on, rule 11's turning-off sentence (the follow's own `exportOff` step).
+    /// VX-529 unit 2 — the PAIR kind: its notice names the half, the device and the day; its ask is one of the account's
+    /// current secrets where the passphrase moved and nothing where only the words did (`asksASecret` — E14 — one secret
+    /// when this Mac holds no account keys for the words to ride); the second road said beside it (P-VX529-2).
     static func followDoor(
-        _ kind: FollowKind, _ spec: DoorSpec, vault: VaultReading?, exportOn: Bool, gate: RoadGateChoice
+        _ kind: FollowKind, _ spec: DoorSpec, vault: VaultReading?, exportOn: Bool, gate: RoadGateChoice,
+        asksASecret: Bool = false
     ) -> RoadAccountDoorOpen {
         let notice = ProtectionWords.followNotice(
             kind, device: vault?.updatedByDevice, day: vault?.updatedAt.map { ProtectionWords.day($0) })
@@ -418,11 +429,13 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
         for words in spec.words {
             if let sentence = RoadCrossingFaces.sentence(words) { sentences.append(sentence) }
         }
-        sentences.append(ProtectionWords.followAsk(kind))
+        sentences.append(asksASecret ? ProtectionWords.pairNeedsASecret : ProtectionWords.followAsk(kind))
         if kind == .intoCastle, exportOn { sentences.append(ProtectionWords.scheduledExportTurnsOff) }
+        // VX-529 unit 2 — the second road, said beside the pair catch-up only (her R-510-20; P-VX529-2).
+        if case .pairChanged = kind { sentences.append(ProtectionWords.pairSecondRoad) }
         return RoadAccountDoorOpen(
-            door: .follow, ask: RoadDoorAsk.of(spec.requires), newPassphrase: false, sentences: sentences, spec: spec,
-            gate: kind == .intoCastle ? gate : nil, follow: kind, notice: notice)
+            door: .follow, ask: asksASecret ? .oneSecret : RoadDoorAsk.of(spec.requires), newPassphrase: false,
+            sentences: sentences, spec: spec, gate: kind == .intoCastle ? gate : nil, follow: kind, notice: notice)
     }
 
     /// A leave's confirm: what it does here, rule 16's two sentences; the third leave's one pointer last.

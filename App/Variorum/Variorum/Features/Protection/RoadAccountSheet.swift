@@ -34,7 +34,8 @@ struct RoadAccountSection: View {
                 // `receipt_style` off and a quit no longer lose it.
                 if let followed = model.followDone {
                     HStack(alignment: .firstTextBaseline) {
-                        Text(ProtectionWords.followDone(followed))
+                        // VX-529 unit 2: the whole notice (a follow's Done; R-529-5's words arm; the lobby's heal).
+                        Text(ProtectionWords.followDoneNotice(followed))
                             .font(.callout)
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer()
@@ -256,6 +257,14 @@ struct RoadAccountConfirmSheet: View {
                 ErrorCauseNote(error: cause)
                     .font(.caption)
             }
+        }
+        // VX-529 unit 2 (R-529-5): the pair catch-up landed by the twelve words — the window and the Reset chain, said
+        // beside the round whatever it came to.
+        ForEach(Array(model.landedLines.enumerated()), id: \.offset) { _, line in
+            Text(line)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         HStack {
             Spacer()

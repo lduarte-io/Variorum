@@ -129,8 +129,11 @@ struct FollowDoneNoticeTests {
         #expect(naming == ["ProtectionAccountActs.swift", "ProtectionOpenFaces.swift", "RoadAccountModel.swift",
                           "AppBootstrap.swift"], "\(naming)")
         let bootstrap = try String(contentsOf: app.appendingPathComponent("Shared/AppBootstrap.swift"), encoding: .utf8)
+        // VX-529 unit 2 — WIDENED DELIBERATELY: the section reads the whole notice now (`FollowDoneMark.notice` — a follow's
+        // Done, R-529-5's words arm, the lobby's heal); the rule this pins (only the new road's arms name the mark) stands.
         for line in bootstrap.components(separatedBy: "\n") where line.contains("FollowDoneMark.") {
-            #expect(line.contains("FollowDoneMark.set(libraryID") || line.contains("FollowDoneMark.owed(libraryID"), "\(line)")
+            #expect(line.contains("FollowDoneMark.set(libraryID") || line.contains("FollowDoneMark.owed(libraryID")
+                        || line.contains("FollowDoneMark.notice(libraryID"), "\(line)")
         }
         let accountActs = bootstrap.components(separatedBy: "func accountActOnNewRoad(").last ?? ""
         // VX-329 U1: one road — the press arm sits behind the open road's own guard (its `newRoad` half left with the fork).

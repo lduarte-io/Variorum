@@ -885,7 +885,31 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   line, P-VX529-2), the durable notice for the pair kinds (R-529-2/E8's words-only line; R-529-5's words arm with its window
   and Reset-chain lines), the open-session follow's Done made DURABLE (VX-457 — today only the reopen seam marks it; the
   pair follow runs on the open session, F-8), E14's face (a words-only catch-up with no master in hand asks one secret).
-  NOT-STARTED.
+  IN-PROGRESS — BUILT (this commit): `ProtectionWords` — the pair kind's `followNotice` (the half named — `pairHalves`),
+  `followAsk` (passphrase moved: "…your account's current passphrase or your twelve words…"; words only: "…catches up
+  without asking you for anything."), `followDone` (the half, then what the old secrets open now — E8), the new
+  `followDoneNotice`, `pairSecondRoad`, `pairNeedsASecret`, `pairWordsWindow`, `pairResetChain`,
+  `passphraseLandedNotice`; `FollowDoneNotice` (app-side: a follow's kind · R-529-5's words arm · the heal) with
+  `FollowDoneMark` names for the pair halves, the words arm and the heal (`notice`/`set(notice:)`; `owed` kept, mapping
+  the words arm to the passphrase-moved pair kind and the heal to none; a later build's name reads none);
+  `RoadAccountFaces.followDoor` — the pair's second road (P-VX529-2) and E14 (`asksASecret` — the door's ask `.oneSecret`
+  with `pairNeedsASecret` when this Mac holds no CURRENT account keys: `ProtectionPaneRead.accountKeysInHand` — session
+  memory, the silent item, Castle's listed Touch ID item, the core door's own order; read only when a words-only pair is
+  owed); `ProtectionAccountRoad.followDoneNotice(for:)` + `openSessionLanding` (F-U2-1 — the open session's follow owes its
+  Done durably and no receipt, by the seam's own rule) wired in `AppBootstrap.accountRoads().press`; the reopen seam marks
+  the notice too; the section reads the whole notice (`followDoneNoticeOwed`); the Mac section renders
+  `followDoneNotice`; `RoadAccountConfirmModel.landedLines` (the words arm's window + Reset chain beside the round) and the
+  Mac sheet renders them. The first round with the sheet staying was already wired (`owesFirstRound`, the open-session
+  road — unit 1's F-8 confirmed). `FollowDoneNoticeTests.onlyTheNewRoadNamesTheMark` WIDENED DELIBERATELY (the bootstrap
+  may read `FollowDoneMark.notice(libraryID`; its rule — only the new road names the mark — stands). Tests:
+  `PairFollowFacesTests` (the sheet's three arms incl. E14 pressed to landing; the mark's every notice; the notice's
+  words; no shouting; the open-session landing rule; the words arm's sheet) and `PairFollowDoneDurableTests` (F-U2-1 end
+  to end — the bootstrap, real services, a fake server). **GREEN** (the harness, `--filter "PairFollowFacesTests|
+  PairFollowDoneTests|PairPreflightAndGateTests|FollowDoneNoticeTests|RoadJoinFollow|ProtectionJoinFollowRoadTests|
+  RoadAccountModelTests|RoadAccountFacesTests|FirstRoundConfirmTests"`): `✔ Test run with 83 tests in 11 suites passed`;
+  `--filter PairFollowDoneDurableTests`: `✔ 1 test`. THE REVERT (named before it runs; F-U2-1's red, its fix having been
+  written before its pin — said so): RV-P1-1 `AppBootstrap.swift` — the open-session landing block removed (the press as
+  before), the harness `--filter PairFollowDoneDurableTests`. PENDING (next commit).
 - U2-P2 — scope 2: `RoadSettledFollow.kind` tells a settled pair follow apart (its act in flight names no new key) —
   bug-class (today it reads `.keysReplaced` and the durable Done says the keys changed) — and the stale done-line never
   renders while a follow is owed (the repro's line) — bug-class. IN-PROGRESS — the red pins COMMITTED (this commit,

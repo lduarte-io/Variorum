@@ -887,20 +887,51 @@ nonisolated enum ProtectionWords {
         switch kind {
         case .intoCastle: return "Your account entered Castle \(at)."
         case .intoStandard: return "Your account left Castle \(at)."
-        // VX-529 unit 1 (F-1): the core's third kind folds into the existing sentence so this compiles — no sentence
-        // minted here; UNIT 2 (the faces) gives it the run record's drafted pair sentence.
-        case .keysReplaced, .pairChanged: return "Your account's keys changed \(at)."
+        case .keysReplaced: return "Your account's keys changed \(at)."
+        // VX-529 unit 2 — the PAIR kind, the half named (the run record's design §3 sentence, VX-113's family:
+        // "Your account's passphrase was changed on ‹device› on ‹day›."; the words its twin; both name both).
+        // PROVISIONAL (P-VX529-3's class).
+        case .pairChanged(let passphrase, let words): return "Your account's \(pairHalves(passphrase, words)) \(at)."
+        }
+    }
+    /// The pair kind's halves as a sentence names them ("passphrase was changed" · "twelve words were changed" · both ·
+    /// either, where no durable fact says which — a settled catch-up).
+    static func pairHalves(_ passphrase: Bool, _ words: Bool) -> String {
+        switch (passphrase, words) {
+        case (true, false): return "passphrase was changed"
+        case (false, true): return "twelve words were changed"
+        case (true, true): return "passphrase and twelve words were changed"
+        case (false, false): return "passphrase or twelve words were changed"
         }
     }
     /// What following asks — rule 10's "each typing a secret once" (and rule 15's catch-up); rule 12's "quietly" out.
     static func followAsk(_ kind: FollowKind) -> String {
         switch kind {
         case .intoCastle: return "Type your passphrase or your twelve words once to follow it here."
-        // VX-529 unit 1 (F-1): the third kind folds in so this compiles — UNIT 2 words its own ask.
-        case .keysReplaced, .pairChanged: return "Type your passphrase or your twelve words once to catch up."
+        case .keysReplaced: return "Type your passphrase or your twelve words once to catch up."
         case .intoStandard: return "This \(ProtectionCopy.deviceName) follows it out without asking you for anything."
+        // VX-529 unit 2 — the pair kind: where the passphrase moved, ONE of the account's CURRENT secrets (R-529-5); where
+        // only the words did, nothing (R-529-2 — they ride the vault's own copy). PROVISIONAL (P-VX529-3's class).
+        case .pairChanged(false, true):
+            return "This \(ProtectionCopy.deviceName) catches up without asking you for anything."
+        case .pairChanged:
+            return "Type your account's current passphrase or your twelve words once to catch up."
         }
     }
+    /// VX-529 unit 2 — the second road, said beside the pair catch-up (her R-510-20; P-VX529-2: the follow sheet only),
+    /// the run record's design §3 draft verbatim. PROVISIONAL (P-VX529-3's class).
+    static let pairSecondRoad = "You can also set this library aside and re-join your account: a fresh library fills "
+        + "from sync under your account's current secrets. Writing that never synced stays in the set-aside copy."
+    /// VX-529 unit 2 — E14 (the architect's ruling): a words-only catch-up with no account master in hand on this Mac (a
+    /// Castle Always-ask library opened by its old words) asks one of the account's secrets. PROVISIONAL.
+    static let pairNeedsASecret = "This \(ProtectionCopy.deviceName) needs your passphrase or your twelve words once to "
+        + "catch up."
+    /// VX-529 unit 2 — R-529-5's words arm, the window said plainly (her ratified draft, verbatim). PROVISIONAL.
+    static let pairWordsWindow = "Until you type your account's passphrase on this \(ProtectionCopy.deviceName), copies "
+        + "made here open with your twelve words."
+    /// VX-529 unit 2 — R-529-5's Reset chain (follow with the words, then set a passphrase you know). PROVISIONAL.
+    static let pairResetChain = "If you don't know your account's passphrase, set one you do with Reset forgotten "
+        + "passphrase."
     /// Rule 10's "accepted and said plainly": until a device follows into Castle, it reads what it already has.
     static let followUntilThen = "Until this \(ProtectionCopy.deviceName) follows, it can still read what it already has "
         + "\u{2014} its own copy of your library \u{2014} through its own quiet road."
@@ -916,11 +947,46 @@ nonisolated enum ProtectionWords {
             return "Your account entered Castle on another device, and this \(ProtectionCopy.deviceName) followed it."
         case .intoStandard:
             return "Your account left Castle on another device, and this \(ProtectionCopy.deviceName) followed it out."
-        // VX-529 unit 1 (F-1): the third kind folds in so this compiles — UNIT 2 words its own Done.
-        case .keysReplaced, .pairChanged:
+        case .keysReplaced:
             return "Your account's keys changed on another device, and this \(ProtectionCopy.deviceName) caught up."
+        // VX-529 unit 2 — the PAIR catch-up's Done: the half named, then what the old secrets open now (rule 7's one pair;
+        // rules 4–5's floor — E8: the words recorded before no longer open this library, the backups made with them do).
+        // PROVISIONAL (P-VX529-3's class).
+        case .pairChanged(let passphrase, let words):
+            let caughtUp = "Your account's \(pairHalves(passphrase, words)) on another device, and this "
+                + "\(ProtectionCopy.deviceName) caught up."
+            switch (passphrase, words) {
+            case (true, false):
+                return caughtUp + " Your previous passphrase no longer opens this library; backups you made with it still do."
+            case (false, true):
+                return caughtUp + " The twelve words you had before no longer open this library; backups you made with "
+                    + "them still do."
+            case (true, true):
+                return caughtUp + " Your previous passphrase and twelve words no longer open this library; backups you made "
+                    + "with them still do."
+            case (false, false):
+                return caughtUp
+            }
         }
     }
+    /// VX-529 unit 2 — the account section's DURABLE notice (VX-457's mark) as it reads: a follow's Done, R-529-5's words
+    /// arm (the window and the Reset chain said), or P-VX529-4's heal. PROVISIONAL where new (P-VX529-3's class).
+    static func followDoneNotice(_ notice: FollowDoneNotice) -> String {
+        switch notice {
+        case .followed(let kind):
+            return followDone(kind)
+        case .caughtUpByTheWords(let wordsToo):
+            let halves = pairHalves(true, wordsToo)
+            return "Your account's \(halves) on another device, and this \(ProtectionCopy.deviceName) caught up with your "
+                + "twelve words. " + pairWordsWindow + " " + pairResetChain
+        case .passphraseLanded:
+            return passphraseLandedNotice
+        }
+    }
+    /// VX-529 unit 2 — P-VX529-4's heal, said once it landed (the lobby's vault road): the account's passphrase typed here
+    /// now opens this library on this device too. PROVISIONAL.
+    static let passphraseLandedNotice = "Your account's passphrase opens this library on this "
+        + "\(ProtectionCopy.deviceName) now."
     /// VX-309 U2 — VX-457 (her "I agree with B"): the Done above stands in the account section as a durable notice until
     /// this one button (the export notice's idiom — `exportNoticeOK`).
     static let followDoneOK = "OK"
