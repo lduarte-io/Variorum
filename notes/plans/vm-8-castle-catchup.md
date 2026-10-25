@@ -562,12 +562,115 @@ signed out.**
   - **Known, not met:** VX-544 (every unlock walked was online). VX-542's repetition not copied (no key doors on the phone
     in unit 1; the follow's notice renders once beside its door).
 
+## UNIT 2 — LIVE STATUS (the implementer owns this section; every unverified claim PENDING)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — written at the close. **No revert is in flight.**
+
+*Implementer U2 — Opus 5.5, xhigh. Pre-fix tree = `33c596def` (unit 1 closed + the Mac stage batch). Stage claims as
+`vm8-u2`. Worktree `~/dev/variorum-vm-8`.*
+
+- **Piece R — preflight, read whole myself:** CLAUDE.md + its canon; this record whole (the UNIT 2 BRIEF, the charter,
+  the traps, unit 1's brief facts, the forks and rulings, UNIT 1 — LIVE STATUS); `notes/handoffs/vm-8-kickoff.md`;
+  `notes/CastleRules.md` whole; `notes/SurfaceContracts.md` (Doors — the protection bullet); `notes/MobileSoul.md` §1–§5 +
+  PL-58/PL-59 (and PL-51/PL-42/PL-22's receipt lines); `notes/SessionResiliencyProtocol.md` whole; the vx-529 record (THE
+  DESIGN, THE RULINGS, R-529-5/-6, unit 2's brief + LIVE STATUS + its new-sentences list, THE PHONE); the vx-510 record (D-B7,
+  unit B3's brief and record head); `notes/plans/vx-308-accounts-key-doors.md` (§5a–§5c, U3's readings and pieces);
+  `notes/plans/vx-307-castle-crossings.md` (§2 U2, §5c, the U2a record); vx-329's phone fix leg (P-VX329-PH-1's six
+  sentences). The code: `MobileProtectionScreen.swift`, `MobileRoadFaces.swift`, `MobileSettingsView.swift`,
+  `MobileShellView.swift`, `VariorumMobileApp.swift`; `Shared/Protection/{RoadCrossingsModel, RoadCrossingFaces,
+  RoadKeyDoorsModel, RoadKeyDoorFaces, SetPassphraseModel, ProtectionSecretCheck, ProtectionWords, ProtectionSheetPresenter,
+  RoadAccountFaces, RoadAccountModel, ProtectionOpenFaces (RoadStandingModel), WordsBand (WordsLookModel),
+  ProtectionCrossingActs}.swift`, `Shared/AppBootstrap.swift` (the crossing, key-door and account roads, the reopening seam,
+  the export switch), `Shared/MarkdownInsurance.swift`; the Mac's `ProtectionPane`, `RoadCrossingSheet`, `RoadKeyDoorSheet`,
+  `RoadSecretCheckSheet`, `SetPassphraseSheet` (+ `PassphraseHintLine`), `WordsBandCard` (`WordsLookSection`,
+  `WordsLookPanel`), `RoadAccountSheet` (the signed-out screen, the host); the phone tests (`MobilePlantedProtection`,
+  `MobileProtectionScreenTests`, `MobileTypedUnlockSyncKeysTests`, the sweep in `MobileStructuralTests`); the core's
+  `KeyDoorTouchIDReadsTests` (VX-530) and the Mac's `TouchIDSyncKeysForgottenRoadTests` (VX-517), `ReplaceAllKeys.swift`.
+  DONE (this commit).
+
+**THE FINDINGS BEFORE CODE (traced in code; each says what it changes):**
+- **F-U2-A — RULE 11's EXPORT-OFF NOTICE CANNOT FIRE ON THE PHONE → nothing rendered (the brief's verify, done).** The
+  phone has NO scheduled export: `MarkdownInsurance` is "wired on the Mac, like StoreBackup" (its header); no file under
+  `VariorumMobile/` names `MarkdownInsurance`, `StoreBackup` or `ExportWriter`; the phone composes `AppServices(backupEnabled:
+  false)`. The bootstrap's switch reads `MarkdownInsurance.isEnabled(in: .standard)` — the phone's own sandboxed defaults key
+  `variorum.backup.markdownInsurance.enabled`, which nothing on the phone ever writes — so `scheduledExport` is always false
+  there: `assess` never says `.scheduledExportTurnsOff`, the core's `turnExportOff` never owes the notice, and
+  `ProtectionCrossings.reconcileExport` never marks one. The phone's crossings section renders NO export notice (P-2 — a face
+  that can never stand is not built).
+- **F-U2-B — most of item 3 (the follow in/into + THE PAIR) ALREADY RENDERS through unit 1's account section** (the shared
+  faces carry it): the follow door with its notice for every kind but the rule-12 one (`intoStandard` — F-U1-1 (A)); its
+  confirm says `followDoor`'s sentences (the pair's half/device/day notice, `followAsk` / E14's `pairNeedsASecret`, the second
+  road `pairSecondRoad`) with the one-secret ask (either current secret — R-529-5) or nothing (the quiet words-only kind —
+  R-529-2); into Castle the gate choice; the round phase says `landedLines` (R-529-5's window + the Reset chain); the durable
+  Done (VX-457) with its OK; the stale done-line hidden while a follow is owed (P-VX529-U2-2 — shared `RoadAccountModel.land`).
+  Unit 2 PINS these on the phone (hosted) rather than rebuilding them; the gap is VX-542's repetition once the key doors
+  land (F-U2-D).
+- **F-U2-C — BUG-CLASS: the phone's new-passphrase fields say no strength hint (VX-211).** The contract: "Every new-road
+  passphrase setter keeps the 12-character floor as its only refusal and adds one quiet strength hint". The Mac's
+  `PassphraseHintLine` is Mac-target code; unit 1's account confirm (Turn on sync's set-up arm — a NEW passphrase typed twice
+  where none exists) renders the floor (shared) but NO hint. Unit 2 adds the phone's twin over the shared
+  `NewPassphraseRule.hint` and renders it under EVERY phone field that sets a passphrase (the set sheet, a crossing's new
+  one, Turn on sync's new one, the key doors' new one). Pin red-on-old on the account confirm.
+- **F-U2-D — VX-542 ON THE PHONE (the brief: "the pair sentence once, beside the doors").** With the key doors on the phone,
+  a PAIR follow owed would say the pair sentence once per locked key door (Change, Reset, New words — each
+  `followFirstToCatchUp` = the follow's notice + its road line) besides the follow door's own notice. **Built (PROVISIONAL
+  P-VM8-9):** the pair sentence is said ONCE — as the follow door's notice, beside its door (unit 1's section); the locked key
+  doors carry ONE line for the section, the road alone (`ProtectionWords.followFirstToCatchUpRoad` — existing words); every
+  other refusal line on the phone's screen is said once per section where doors share it (identical sentences dedupe). The
+  crossings' generic `doorRefusedFollowOwed` (VX-542's second half — the Mac's wording) is said once, unchanged. The phone
+  knows the key doors' gate is the pair's through ONE pure shared fact added beside the faces (`RoadKeyDoorFaces.pairGate`,
+  default false — the Mac never reads it; its rendering byte-identical). Alternative (b): the full `followFirstToCatchUp`
+  once at the key doors too (the pair sentence twice on the screen). Noted for VX-542.
+- **F-U2-E — THE RECEIPTS' PHONE HOME (item 5; built PROVISIONAL P-VM8-8, flagged).** The phone has no status seam (no
+  toast, no `StatusCenter`); its idiom is "a landed act's own words, in the muted slot of the surface where the door fired"
+  (the Library's, the Trash's, the Archive's receipt lines; D2's one home per message). Every protection act the phone can
+  press fires on the Protection screen, so its home is plainly that screen: **(A, built)** the shell composition sets
+  `roadStanding.speak` (rebuilt with each open, so a re-keying act's receipt owed to the reopen is spoken into the re-pushed
+  screen — F-U1-3's road), a phone-side holder keeps what was said, and the screen shows it as ONE muted line under its
+  title; acts on the screen speak at once; receipts owed by an open (rule 1's restore receipt, the key-file offer's — the two
+  re-worded P-VX329-PH-1 sentences, device-neutral already: "…this iPhone's keychain." / "…This iPhone's sealed copy was put
+  back.") wait there until the screen next shows; leaving the screen clears what it showed. (B) a shell-wide muted line at
+  the foot of every room (the Mac bottom bar's analogue — a new phone idiom). Hers at the bundle.
+- **F-U2-F — NOT IN THE BRIEF, NOT RENDERED: the idle dial + Lock Library Now (VX-451).** On the Mac they sit in Castle's "On
+  this Mac" section beside the gate-style row; the phone's relock coordinator reads the same sealed minutes
+  (`MobileRelockCoordinator` → `roadRelockPolicy`), so they could act there. The brief charters the gate-style row only →
+  for the orchestrator (a ticket or a later unit).
+- **F-U2-G — USE STANDARD RENDERS NOTHING ON THE PHONE, IN ANY STATE** (open: her rule-12 sentence — F-PH-2, the ruled
+  F-U1-1 pattern; refused: a refusal for a door the phone never offers is no road). A belt beside it: any open crossing whose
+  spec says rule five renders nothing (`RoadDoorOpen.saysRuleTwelve` — pure, shared, the Mac never reads it). Use Castle's
+  SIGNED-OUT road (`.signedOutRoad` — This Mac Only, then Use Castle's own confirm) IS Use Castle's door → rendered.
+- **F-U2-H — WORDING FLAGS for her bundle (rendered as shared, none invented):** two crossing leads promise backups on a
+  phone that keeps none — `useCastleLead` ("…so your backups are Castle-protected along with your library.", already said on
+  the phone by unit 1's join into Castle) and `replaceAllKeysLead` ("…so your backups still open."); `firstRoundHeld` names
+  "the main window's banner" (unreachable on the phone — it has no restore hold).
+- **F-U2-I — THE WALK'S REACH (for the record's honesty):** a PAIR-CHANGED state needs a second device acting on a test
+  account (the Macs' dev-store slot is off-limits) → the pair faces are pinned hosted, not walked; a SYNCED key-door act
+  changes the test account's pair (the `~/.variorum` helpers' stored secrets would go stale, and every Mac on that account
+  would then owe the follow) → the key doors are ACTED on a LOCAL simulator library; the synced arms are walked as far as
+  they write nothing to the account (the check door; the synced confirms opened and cancelled) plus Replace All Keys (a local
+  re-key — `ReplaceAllKeysProgram` writes no vault).
+
+**THE PLAN (pieces; flipped per commit):**
+1. The posture + crossings: the posture line, Use Castle… (both secrets, a new passphrase twice where none, the gate choice
+   at the press), its signed-out road, Replace All Keys… (synced only), the gate-style row in Castle; Use Standard never.
+   NOT-STARTED.
+2. The key doors + the setter: *Set a passphrase…* (`SetPassphraseModel`, the phone's sheet), Change passphrase…, Reset
+   forgotten passphrase… (Standard's plain confirm; Castle's words or *Reset with Face ID*), New words through the look (the
+   phone panel's asking phase), the hint twin under every new-passphrase field (F-U2-C), VX-542 once (F-U2-D). NOT-STARTED.
+3. The check door over `ProtectionSecretCheck`. NOT-STARTED.
+4. The follow/pair on the phone, pinned (F-U2-B). NOT-STARTED.
+5. The receipts' home (F-U2-E, P-VM8-8). NOT-STARTED.
+6. Posture pins through the phone's own bootstrap: VX-530 (a Castle + Face ID key door reads the Touch ID sync-keys item at
+   most once) and VX-517 (a leave forgets the Touch ID class by name under a production-like listing). NOT-STARTED.
+7. Evidence: behavioral reverts named before they run; the unit suites + the sweeps; the whole phone target. NOT-STARTED.
+8. The walk on the pinned simulator. NOT-STARTED.
+
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
 | # | item | owner | status |
 |---|---|---|---|
 | 1 | Unit 1 — the phone syncs again (pieces 1–5 above) | implementer U1 | CLOSED on the simulator (tip `11c4f2054`). **The Mac stage batch RAN (orchestrator, 2026-10-25): 625 tests / 132 suites, 4 declared skips, ONE red suite — `ProtectionPairRetentionTests` (3 issues), PROVEN RED ON MAIN the same day → pre-existing, filed VX-546; everything VM-8 touches green, the Mac's ruled sentences byte-identical by pin.** The device install HELD for her |
-| 2 | Unit 2 — crossings (entering), key doors, follows (in/pair), check door, receipts' home — the UNIT 2 BRIEF above; leave-direction arms HELD for F-PH-2 | implementer U2 | BRIEF WRITTEN — spawns after the Mac batch |
+| 2 | Unit 2 — crossings (entering), key doors, follows (in/pair), check door, receipts' home — the UNIT 2 BRIEF above; leave-direction arms HELD for F-PH-2 | implementer U2 | IN PROGRESS — UNIT 2 — LIVE STATUS above |
 | 3 | Unit 3 — the cards + the pocket guide | at her split call | NOT STARTED |
 | 4 | Old-scope reconciliation tickets | orchestrator | table drafted; tickets at the sitting |
 | 5 | Her sitting bundle | orchestrator | OPEN — grows |
