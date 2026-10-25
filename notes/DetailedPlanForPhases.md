@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VM-8 — the phone's Castle catch-up** (`/architect-phase vm-8`, kicked off 2026-10-25 overnight at her word; the kickoff `notes/handoffs/vm-8-kickoff.md`; the plan `notes/plans/vm-8-castle-catchup.md`). Surfaces: the phone's protection/account faces + `Shared/` protection wiring — **HOLDS THE CUSTODY SLOT** (VX-500 and VX-212 wait for this merge). | VM-8 · `vm-8-protection-recovery-faces` | `~/dev/variorum-vm-8` · the Pro | Unit 1 (the phone syncs again) in flight; the device install and the sitting bundle wait on her. |
 
 ### Latest closeout
 
