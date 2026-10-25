@@ -167,6 +167,9 @@ do not launch the app.
 
 ## APPENDIX B — the VM-8 kickoff prompt (paste-ready FOR HER, after the whole window closes)
 
+> **SUPERSEDED 2026-10-25 by `notes/handoffs/vm-8-kickoff.md`** (VX-510 and VX-529 landed shared protection code
+> and phone obligations after this was written; the new file folds them in). Kept below as written.
+
 ```
 /architect-phase vm-8 — the phone's Castle catch-up. The Macs crossed to 0.10 (VX-329 PR #183, the VX-488 window
 hotfixes PR #184, and the VX-494 first-catch-up fix PR #185; marker 14 deployed); my phone's build deliberately
