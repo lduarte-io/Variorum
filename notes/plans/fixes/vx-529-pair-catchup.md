@@ -1276,8 +1276,8 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
 **NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-523 NOT FIXED — traced, its red pin held as a known
-issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526, VX-522, VX-533 and VX-530 DONE;
-VX-538 NOT-STARTED. No revert is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
+issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526, VX-522, VX-533, VX-530 and VX-538 DONE;
+the close (the suites whole, the two build-for-testing) NOT-STARTED. No revert is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
 `~/dev/variorum-vx-529`.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
@@ -1499,8 +1499,8 @@ stage only my own paths, and re-read the record before every edit from here on.
     presence confirm stays its own sheet on the LIBRARY's custody item (a different item; design §3.9) — so Reset by Touch
     ID with nothing in hand shows two sheets on two items (the confirm, then the account's keys once); riding the confirm's
     press for the sync-keys read (VX-487 (b)'s riding road) would make it one — a design call beyond the brief's shape.
-- **VX-538 — the recurring E6 band card.** IN-PROGRESS — THE STATE AND THE DESIGN AS IT WILL BE BUILT (her R-529-6; the
-  brief's shape; every call below PROVISIONAL and listed as P-VX529-U3-3…6):
+- **VX-538 — the recurring E6 band card.** DONE (the Mac face's compile PENDING the close's build-for-testing) — THE STATE
+  AND THE DESIGN AS BUILT (her R-529-6; the brief's shape; every call below PROVISIONAL and listed as P-VX529-U3-3…6):
   - **THE STATE, READ — never a flag:** the open library's record names an account AND its live key file (of the current
     key) carries NO passphrase lock (E6 — born of a join by the words, or the catch-up's words arm). A synced library's
     record already says "a passphrase exists" (`ProtectionRecord.passphraseExists` — the account's), so rule 3's reminder is
@@ -1550,7 +1550,10 @@ stage only my own paths, and re-read the record before every edit from here on.
   PENDING the stage batch. THE REVERTS (named before they run; each one edit on this commit, `--filter E6BandCardTests`,
   restored by `git checkout --`): RV-538-1 `WordsBand.swift` — `visible` loses `|| showsAccountPassphrase` [expect the pin red
   (`band.visible`), the guard green]; RV-538-2 `ProtectionRoadActs.swift` — the state reads `account != nil` alone (the lock
-  check dropped — a flag in all but name) [expect the retire rows red and the with-lock guard red]. PENDING.
+  check dropped — a flag in all but name) [expect the retire rows red and the with-lock guard red]. **VERIFIED BY REVERT** on
+  `354c12dc3`: RV-538-1 ⇒ `✘ Test run with 7 tests in 1 suite failed … with 1 issue` (exactly the pin, `band.visible`);
+  RV-538-2 ⇒ `✘ … with 3 issues` (the press's retirement, Reset's retirement, the with-lock guard — exactly as named); each
+  restored by `git checkout --`, `git diff --exit-code` clean, `✔ 7 tests` green again. No revert is in flight.
   **P-VX529-U3-3 (the home and the road):** (a) BUILT — a third row in the band card, the passphrase typed right there and
   landed by the E6 heal; (b) the row's door opens Settings ▸ Protection's key doors (no field on the card); (c) a sentence only
   (the lobby, New words and Reset as the roads). **P-VX529-U3-4 (the cadence):** (a) BUILT — rule 3's first launch and week,
