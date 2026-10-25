@@ -2244,6 +2244,36 @@ words alone leaves L_A lagging the words half, which is **R-529-2's quiet words-
 inserted before D1.** The script's defect (P5 should skip the stash when the account already holds a vault) is a
 walk-tool fix for this run's closeout.
 
+**D0 SECOND HALF — L_B JOINED (22:42):** L_B's instance (40395) was already signed in (the dev scope's session);
+"Sync this library…" → `passphrase2` → `enroll: done #1 under 96046712` · `road: turnOnSync — library 1a1e7a0d now
+*[removed for publication]*
+library now."** (P-VX510-1 live).
+
+**D1w — THE QUIET WORDS-ONLY CATCH-UP (R-529-2) — PASS (22:43–22:48):**
+- On L_B, "Record your twelve words…" (the deliberate new-words door on a synced library; its inline warning live:
+  *"This library syncs with your account, so new words also replace your account's twelve words, on every device."*)
+  → `passphrase2` → `regenerate_words: done #2` → Copy → `stash-prod-test-words castle` (the drill's known words set
+  restored — I-D0-2's remedy) → **server vault rev 18 → 19, `updated_by_device` "Lillian's MacBook Pro"**.
+- L_B quit on ONE pid-addressed request (clean; O-D0-2 was that one instance's, not the build's). Swap under the
+  standing rules (zero instances verified in the same step); **L_A re-opened clean after I-D0-1's SIGTERM**
+  (`road: opened — library 5f9da1cc key c7e1a4bf`; the swap notice the walk artifact) and read **"Synced 10:44 PM"**
+  (Standard keeps syncing through a pair change — the bug's quiet half, now visible).
+- Settings ▸ Protection on L_A: **"Follow your account…" OFFERED**; the key doors GATED, each speaking *"Your
+  account's twelve words were changed on Lillian's MacBook Pro on October 24. Follow your account to catch this Mac
+  up first."* (R-529-3 live, the words variant). The follow sheet: the pair sentence · **"This Mac catches up without
+  asking you for anything."** (R-529-2's quiet arm) · the second road's line verbatim (P-VX529-2) · Follow.
+- The log: `follow: begun #1 c7e1a4bf → none` · **`follow: re-locked to the account's pair (words) — the key
+  unchanged (c7e1a4bf)`** · `done #1` — a re-lock, never a re-key. The sheet: **"Synced. This library is up to date
+  with your account again."** The gate lifted (the key doors back, the pair sentences gone).
+- **The check door, the account's NEW words: `the library: opens; the account: opens`** — the key file carries the
+  account's words copy.
+- **Face notes for her wording bundle (W-D1w-1/-2):** (1) the gate's pair sentence renders once PER gated door —
+  three identical lines down the pane; one line above the gated doors would read better. (2) The crossing row under
+  "Protection" still speaks the older generic "Your account changed on another device. Follow it first." while the
+  key doors speak the pair sentence — one sentence for one state. Neither changes behavior; both are faces.
+- Not seen in this leg: E8's durable words notice ("the words you recorded before ‹day› no longer open this
+  library") outside the sheet — to be read in the account section below the pane before the leg's record closes.
+
 **STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
 (fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
 held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
