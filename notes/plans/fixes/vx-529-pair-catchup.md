@@ -2495,6 +2495,14 @@ anything unexpected:
 - **Step 7 (Air, Settings ▸ Protection): THE CATCH-UP LANDED IN THE SAME UNLOCK** — her screenshot: Change passphrase
   and Reset forgotten passphrase back, no pair sentence, no Follow button; her words: "looks good now! sync still
   looks good too". One typing at the lock screen converged the Air — R-529-1's whole promise, on her own hardware.
+- **Step 8 (Air): Wi-Fi OFF → ⌃⌘L → Touch ID cancelled → the NEW passphrase → OPENED** — the re-lock is local; the
+  Air holds the new passphrase without the account. **Then the row read "Sync locked — this Mac hasn't unlocked your
+  account's sync keys"** (her screenshot), which it hadn't online. Traced, not a VX-529 defect: in Castle the
+  engine's keys come from session memory only (`NewRoadSyncKeyProvider` — session, then the silent item, never the
+  Touch ID item); a TYPED unlock fills session memory by ONE bounded vault read (`loadSyncKeysAfterTypedUnlock`,
+  VX-501, 0.10.1) — offline that read fails, the library opens all the same (never hostage, as ruled), the keys stay
+  unloaded. **Predicted gap (VX-501's, pre-existing): nothing retries that read when the network returns**, so sync
+  would stay locked for the session until another online unlock. Step 9 tests the prediction before any ticket.
 
 ## Machinery
 
