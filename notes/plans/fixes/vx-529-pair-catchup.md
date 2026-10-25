@@ -2046,6 +2046,30 @@ written through `settingMaster` inside `locking`, the existing setter):**
 
 **NEW SENTENCES:** none (three log lines only, in the app's road log; no face changed).
 
+## L2 — THE ARCHITECT'S VERIFICATION AND DISPOSITIONS (2026-10-25)
+
+Verified: the diff read (the `AccountsVaultRead` two-case shape with no fallback to an older read; `accountPairProof`'s
+three checks; the fields riding the ONE existing key-file write; the app's one bounded read passed `.taken`); the
+suites re-run by the orchestrator's own hand (29 tests in 7 suites green, the held row flipped among them); zero
+`Sync/`/`Server/`/`CastleRules.md` lines by diff; the Mac app's full build run by the orchestrator on the L2 tree
+(exit 0 — the one changed app file compiles; flipped from PENDING at this line). The findings, DISPOSED:
+- **P-VX529-L2-1 (the typed WORDS are the proof, not the passphrase) — ACCEPTED AS BUILT, provisional, HER BUNDLE:**
+  the join's notice is about the WORDS being replaced; when only the passphrase changed, no words were replaced and
+  the quiet is truthful. The alternative (require the passphrase too) is recorded beside it for her pass.
+- **F-L2-3 (the pre-join window: a restored copy of an E6 library shows R-529-6's lobby line at every lobby until the
+  join — the typed passphrase opens it through the vault but no lock lands while held) — TO ROUND 2'S ATTENTION AND
+  HER BUNDLE:** it is an interaction of two new pieces (the proof fields and the heal's consumers under the restore
+  hold); the reviewer weighs whether the heal should land on a held library or the face should say the join is the
+  road.
+- **F-L2-4 (a local New words during the window leaves the master's copy) — RECORDED, the existing left-library
+  class.** **F-L2-5 (the empty-slot landing untouched) — RECORDED, outside the charter** (that landing types the
+  copy's own secret with no account context; its join speaks as today). **F-L2-6 (the read runs whenever signed in;
+  no sound gate exists for the W-6 shape; a slow network can cost the bound before the act) — ACCEPTED RESIDUAL:** a
+  deliberate confirmed door pays one bounded read, unlike F-R1-1's per-typo path.
+- **F-L2-1 (the held suite's setup line flipped to the any-road open — said in the test) and the crash-pin
+  Castle-Always-ask gap (the harness lobby tries only the live file, the app's also tries the mirror — said in the
+  test) — NAMED FOR ROUND 2**, the latter also for the stage batch's Mac-target run and the live proof's Castle leg.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
