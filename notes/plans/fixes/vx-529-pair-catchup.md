@@ -1275,7 +1275,7 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE IN THIS UNIT (so far — this line is kept current):** every member NOT-STARTED; nothing built. No revert is in
+**NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-526 DONE; every other member NOT-STARTED. No revert is in
 flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
 `~/dev/variorum-vx-529`.
 
@@ -1309,14 +1309,29 @@ needs them. Not durable, never committed.
   harness `--filter JoinSheetWordsTests`, restored by `git checkout --`, `git diff --exit-code` clean after each): RV-526-1
   `RoadAccountModel.swift` — `title`/`button` back to `door.door.title`/`.button` [expect the six title/button issues];
   RV-526-2 `ProtectionWords.swift` — the middle sentence back to "…backups you made before today." [expect the four words
-  issues]. PENDING.
+  issues]. **VERIFIED BY REVERT** on `44d456b01`: RV-526-1 ⇒ `✘ … 3 tests … with 6 issues` (exactly the title/button rows,
+  both postures); RV-526-2 ⇒ `✘ … with 4 issues` (exactly the words rows); each restored by `git checkout --`, `git diff
+  --exit-code` clean, `✔ 3 tests` green again. **DONE** (`3e4714fb9` pin, `44d456b01` fix). No revert is in flight.
+  **P-VX529-U3-1 (PROVISIONAL — the shown-words arm):** the words moment where the WORDS were typed says
+  `joinWordsSentence`, rule 7's own italic sentence verbatim ("…the old ones still open backups you made before today"),
+  pinned byte-equal to the rules file — the same imprecision, but the rules are hers alone. (a) BUILT: that arm stays
+  verbatim; the rule-7 amendment is DRAFTED for her below (the app's text follows the rules the moment she rules); (b) change
+  the app's arm now and relax the pin (the app would say other words than her rule — not without her word); (c) leave both
+  arms as they were. **THE DRAFTED RULE-7 WORDING (for her closeout ratify; never written into CastleRules here):** rule 7's
+  italic sentence ending "*…the old ones still open backups made with them*" in place of "*…the old ones still open backups
+  you made before today*" — rule 5's floor in rule 7's voice.
 - **VX-522 — the hold banner's promise.** NOT-STARTED.
 - **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
 - **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 
-**NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):** none yet.
+**NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
+1. VX-526 — the join sheet's title and button (`joinSyncTitle`, `joinSyncButton`): "Sync this library" · "Sync this library"
+   (the door VX-506 named, "Sync this library…"; the set-up arm keeps "Turn on sync").
+2. VX-526 — the passphrase-typed words moment's middle sentence (`joinWordsNotShown`): "Your previous twelve words still
+   open backups made with them." (was "…still open backups you made before today."). The rule-7 twin for her ratify is under
+   P-VX529-U3-1.
 
 ## Machinery
 
