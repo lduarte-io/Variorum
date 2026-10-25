@@ -1067,3 +1067,16 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
   VX-529 record's THE PHONE section, the vx-329 phone flags F-U4-2/F-U4-3/F-PH-1/F-PH-2, the sweep exemption list);
   charter verified in code (the section above); worktree + branch + in-flight row + Linear In Progress done. Unit 1
   implementer spawning next.
+
+## THE OVERNIGHT SEAM (the orchestrator, 2026-10-25 — the build phase's close)
+
+- **The whole phone target at the FINAL tip (`54e867074`): 847 tests / 139 suites PASSED, 4 declared known issues,
+  zero unexpected reds** (the caret suite green this run too — VM-24's state-dependence note). Stage claimed and
+  released (`vm8-orch-final`).
+- **PR #191 OPEN** — the morning's review surface; it merges only after her device moment and sitting (merge commit,
+  never squash).
+- What waits on her: the MORNING CHECKLIST atop this file. What waits on the merge moment (the merging session, on
+  latest main): QUESTIONS #242 (the bundle), AppSpecRecord's dated entry, SurfaceContracts' phone lines, MobileSoul
+  PL-60, the master plan's paragraph + in-flight row retirement, `Tools/canon-size`, the handoff
+  (`notes/handoffs/vm-8-handoff.md`), the tickets' triage sweep, the worktree/branch removal, the helper's
+  keep-or-delete (hers).
