@@ -1,6 +1,6 @@
 # VX-529 — the catch-up for a pair changed elsewhere
 
-**STATUS: OPEN — THE BUILD PHASE COMPLETE (units 1–3 CLOSED) AND THE LADDER CLOSED (round 1: 0B·0M·1m·2n → fix
+**STATUS: OPEN — BUILD COMPLETE, LADDER CLOSED, CLOSING BATCH GREEN, LIVE PROOF ON PRODUCTION PASSED (D0–D7, 2026-10-24 night, an Opus orchestrator after Fable's safeguards stopped the walk). Remaining: HER TWO-MAC TEST, then the closeout. (Earlier line kept:) THE BUILD PHASE COMPLETE (units 1–3 CLOSED) AND THE LADDER CLOSED (round 1: 0B·0M·1m·2n → fix
 sessions L1 and L2, both verified; round 2: every fix SOUND, 0B·0M·0m·2 record-hygiene NITs, both fixed). Remaining:
 the closing stage batch, the live proof, HER two-Mac test, the closeout.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
 section) is the built contract. Branch `vx-529-pair-catchup`, worktree `~/dev/variorum-vx-529`, the custody slot held
@@ -2366,6 +2366,41 @@ library now."** (P-VX510-1 live).
   press Resume Sync in the main window's banner."* (P-VX510-A1's wording live).
 - Resume Sync → **"Synced 11:08 PM"**; server vault castle rev 23 (unmoved — restore and join write no vault row).
 - **D6 not needed:** L_B made the last change itself (rev 23), so it was current; the loop closed by construction.
+
+**D7 — THE RESTORE — CLEAN (23:08–23:16):**
+- Signed the walk session OUT (Account ▸ Sign out → "Sign out of this Mac?" → Sign Out; the sidebar then offered
+  "Sign in…"). **A walk-tool fact learned:** the SwiftUI alert ignores synthetic clicks AND synthetic Return; it
+  answered only an accessibility press of the button whose label rides `AXDescription` (not `AXTitle`) — the
+  `vis-ax` helper matches titles, so a scratch helper pressed it by description within the alert's own window
+  bounds. (The 18k fact "SwiftUI controls answer AXPress" extends to alerts; a `vis-ax` description match is a
+  one-line tool improvement for the closeout.)
+- Quit at zero instances (pid-addressed; verified). Removed, each verified by its key file's `library` id first:
+  the slot's `ac57d5c2` files · the L_B aside (`1a1e7a0d`) · the empty L_A aside · `Previous Libraries/
+  2026-10-25-050710` (`5f9da1cc`, made by D5's Make this my library) · `Backups/5f9da1cc`, `Backups/1a1e7a0d`,
+  `Backups/ac57d5c2` · and the picked-folder copies **`~/Documents/Variorum/Backups/5f9da1cc` and `…/1a1e7a0d`**.
+  Untouched: the three older Previous Libraries entries (Oct 8, 18, 20), every other `Backups/` entry.
+- **The dev store's nine files moved back — `ls -i` diffed against the recorded inodes: IDENTICAL.** One plain
+  relaunch (no road env — confirmed) → the swap notice → **"Sync off (dev store)"**, library `e11e5233`, its words
+  card as before — **and its pre-existing restore-hold banner now reads VX-522's fixed sentence: *"This is your
+  library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it."*** (VX-510 recorded
+  this same banner's old sync promise — the rider's fix seen live on a real store state.) Quit; zero instances;
+  **`STAGE RELEASED`**.
+- **The account's ending state (for the next drill):** `castle` = **Castle**, vault rev **23**, current passphrase
+  = the env's `passphrase` (PASSPHRASE), words = the set stashed 22:43 in `~/.variorum/prod-test-words-castle`
+  (I-D0-2's remedy). Device cursors accumulate from walk libraries (accepted — 13j's horizon retires them).
+- **RESIDUE FOR HER CALL (not this run's to delete):** the dev build's picked folder `~/Documents/Variorum/Backups/`
+  still holds folders from **VX-510's walk libraries** (`159caa3f`, `223c4e7e`, `2aa0214f`, `413fb3bd`, `6fa0c827`,
+  `6c51f3d0`, `edf04751`, and likely `7fee09b0`, `d5b935bb`, `55ab261a`, `19693f71`, `6f1ee6b1` — dates Oct 22–24),
+  which VX-510's cleanup missed because it removed only the container's `Backups/<id>`. They are throwaway test
+  libraries' backups; removing them is a one-line act at her word. The walk cleanup steps should name the picked
+  folder from now on.
+
+**THE LIVE PROOF — CLOSED: D0–D5 PASS (D6 closed by construction), D7 clean.** Every leg that failed in the VX-510
+repro now passes on production: the follow is offered for a pair change (both halves), the key doors refuse
+honestly with the change named, the check door splits truthfully, the account's new passphrase opens a lagging
+Castle library through the vault and catches it up in one press, the old passphrase retires, the words arm and
+E6's card and heal behave as ruled, and the restored copy's join is quiet. Two incidents (I-D0-1/-2) traced,
+cleared and recorded with standing rules. The face notes W-D1w-1/-2, W-D1-1, W-D3-1 join her wording bundle.
 
 **STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
 (fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
