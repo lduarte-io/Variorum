@@ -1190,14 +1190,92 @@ the vault's last writer and day, "Mac" the platform's noun — "iPhone" on the p
 REUSED, not new: "That passphrase doesn't open this account." (VX-464's — the E6 lobby's wrong passphrase); "Your twelve
 words were changed on ‹device› on ‹day›." (P7-0's — the follow's preflight now says it).
 
-## UNIT 3 — THE RIDERS (planned; after unit 2)
+## UNIT 2 — CLOSED (2026-10-25, the architect's verification and dispositions)
 
-VX-526 (the join sheet's title/button + W-12's wording) · VX-522 (the hold banner's conditional) · VX-523 (the
-words-adoption notice's condition) · VX-533 (the lobby's missed Touch ID prompt re-trigger — the lobby is open) ·
-VX-530 (TRACE-FIRST: the double Touch ID on a Castle key door — fix only on a confirmed benign ordering, else report)
-· VX-538 (the recurring E6 band card — RIDES, her word 2026-10-24: "yeah that's fine for 538's band card to ride
-there too"; its CastleRules rule-3-adjacent clause still goes to her verbatim at closeout before it enters the
-rules, per R-529-6). Pin-before-fix PER MEMBER; the brief is written after unit 2 closes.
+All seven scope items landed and verified: the vault-road diff read line by line (the pure `VaultRoad.answer`, the
+one bounded read, nil ⇒ today's refusal byte for byte, the open verified against the slot before anything lands, the
+never-hostage catch-up on the session's one-act lock, and the proven-the-account's guard — the master-words copy
+matching the vault's wrap before any change is NAMED, so a foreign library never hears another account's story); the
+core suites re-run by the orchestrator's own hand (97 tests in 28 suites green over the new pieces); zero `Sync/`
+lines by diff; the Mac app's full build on the finished tree run by the orchestrator (exit 0, PENDING flipped at this
+line). The implementer's surprises, DISPOSED:
+- **P-VX529-U2-1 (the E6 lobby passphrase field, synced + signed-in only) — CONFIRMED under R-529-6's letter** (her
+  words ask for exactly this: "…hasn't been entered on this computer yet, please do so" — the ask implies the field);
+  provisional for her pass like every face.
+- **F-U2-7 (a wrong passphrase at a signed-in lobby now costs one bounded vault read, up to the 10 s bound on a slow
+  network, before its refusal) — ACCEPTED as a residual, and ADDED TO HER BUNDLE** beside P-VX510-B2-1 (her one
+  flagged timing call): the refusal-path read shares the unlock's bound; a shorter bound for the refusal path is a
+  candidate she may want.
+- **F-U2-8 (unit 1's act, run inside the lobby press, does its own reads without the decision read's bound — a server
+  that answers then stalls can hold "Opening your library…" to the transport timeout) — RECORDED for the ladder**,
+  with the implementer's written alternative (defer the act to after the open) standing for the reviewer to weigh.
+- **F-U2-6 (the heal reaches only libraries that show a lobby; a quiet-road Standard E6 library needs VX-538's card)
+  — CONFIRMS VX-538's design**; noted on its ticket's scope in unit 3's brief below.
+- **F-U2-9 (the pre-existing `ProtectionPairRetentionTests` week-boundary flake, `Date()` instead of the injected
+  clock) — TICKETED: VX-539** (Bug, Test-only, Tests & tooling, Low).
+- **The three deliberately changed tests** (the fixture naming no new key, the mark test's new allowance, the
+  honest-split pointer expectation) — each noted in-test; NAMED HERE FOR THE LADDER'S ATTENTION.
+The Mac-only suites and Mac-target runs remain PENDING THE CLOSING STAGE BATCH (U2-P7's list), as briefed.
+
+## UNIT 3 — THE BRIEF (a FRESH `opus-implementer`, one session; THE RIDERS — six members, pin-before-fix PER MEMBER)
+
+**Read first, in full, yourself:** CLAUDE.md and its auto-loaded canon; `notes/SessionResiliencyProtocol.md`;
+`notes/CastleRules.md` WHOLE; SurfaceContracts' protection bullet; **THIS FILE WHOLE** (the rulings and both units'
+LIVE STATUS are your ground truth; R-529-6 and the R-529-5 section carry VX-538's design); the VX-510 record's
+ENVIRONMENT TRAPS section. Per member, the ticket's own description on the board snapshot
+(`~/dev/variorum/notes/TICKETS.md`, by absolute path) is part of the brief — VX-533's carries its trace question and
+her verbatim report. The code per member, found by trace (the join sheet and its words notice, the hold banner's
+model, the lobby's Touch ID press road, `KeyDoors.holdSyncKeysForTheSession`, the band-card machinery —
+`LibraryWordsCardModel.swift` / `WordsBand.swift` — and unit 2's new seams).
+
+**The members (strictly sequential; each lands with its own red-on-old pin verified by revert, its own commits saying
+`Part of VX-<member>`, and its own LIVE STATUS block under UNIT 3):**
+1. **VX-526 — the join sheet's words.** The sheet a "Sync this library…" door opens still TITLES itself and its
+   button "Turn on sync" (P-VX510-A4); align both to the door's own name. And W-12's notice says "backups you made
+   before today" — imprecise (rule 7's own sentence; backups made earlier the same day, before the join, open with
+   the previous words too): re-draft to the honest floor (the class: "your old words still open backups made with
+   them"), PROVISIONAL for her bundle.
+2. **VX-522 — the hold banner's promise.** An account-less restore still shows the catch-up clause on Resume
+   (VX-473 built the condition — trace why this path misses it); pin red, fix, the banner speaks sync only when the
+   landed library's record names an account.
+3. **VX-523 — the words-adoption notice's condition.** A join from a restored copy whose words already match the
+   account's still shows the words-replaced notice; VX-456/VX-462's stays-quiet rule is missing on that path — trace,
+   pin red, fix through the same rule, never a second copy of it.
+4. **VX-533 — the lobby's missed Touch ID prompt.** TRACE FIRST per the ticket: after the SYSTEM sheet times out
+   (her report: "it looks like an apple timeout… gets pale and then disappears"), does the lobby's own "Unlock with
+   Touch ID" button still stand, and does a re-press mint a FRESH LAContext (a dead context's press would no-op)?
+   Fix to the trace: the button must stand and a re-press must genuinely re-ask; model-level pin. The lobby is the
+   most sensitive face — smallest diff, unit 2's guardrails bind here too.
+5. **VX-530 — the double Touch ID, TRACE-FIRST (her pick; fix ONLY on a confirmed benign ordering, else REPORT).**
+   The suspected shape: `holdSyncKeysForTheSession` reads the Touch ID custody class BEFORE trying the typed secrets
+   it was handed and the session (the VX-503 secrets-first class, one seam over), and the act's vault step reads
+   again. Trace both prompts to their reads. If and only if the mechanism is exactly redundant reads of the same
+   item: fix to secrets/session first, the Touch ID class last and ONCE per act (unit 1's `material:` carry is the
+   worked example), with a counting-leaf pin (red on two reads, green on one). Anything else comes back to the
+   orchestrator un-fixed.
+6. **VX-538 — the recurring E6 band card (R-529-6, her design; F-U2-6 is its reason: a quiet-road Standard E6
+   library sees no lobby, so the card is its one surface).** On the band-card machinery (the one home above the
+   quick entry — never a popup, never a second bar; the calm rules: ✕ and snooze): shown while the open library is
+   SYNCED and its live key file carries NO passphrase lock; it says the why and the road (R-529-6's direction:
+   "Your account's passphrase hasn't been typed on this Mac yet — type it once and it opens this library here too."
+   — the class, PROVISIONAL) and the forgot-road ("If you don't know it, set one you do with Reset forgotten
+   passphrase." — Reset works in this state, the gate is not in the way); recurring on rule 3's cadence PATTERN but
+   WITHOUT a don't-show-again (her "until it's done" — the deliberate delta from rule 3, PROVISIONAL, flagged in
+   her bundle); it RETIRES ITSELF the moment a passphrase lock lands (the heal, a key door, the catch-up — read the
+   state, never a flag). DRAFT the CastleRules rule-3-adjacent clause into your LIVE STATUS for her closeout ratify —
+   NEVER write CastleRules itself (author-only; the rules are frozen to every hand but hers).
+**Out of scope:** everything else — the ladder follows this unit; no `Sync/` lines; no schema or stored-shape
+change; no CastleRules edit; mobile faces (the parity row is the closeout's).
+
+**The discipline:** units 1–2's, verbatim — pins red-first by member, reverts named then run, commit + push per
+piece, UNIT 3 — LIVE STATUS from the first commit with one block per member, PENDING on unverified claims, NO
+trailers; headless core suites + ONE Mac and ONE iOS `build-for-testing` into `DerivedData/vx529-u3*`; no
+`xcodebuild test`, no stage, no app launch, no store/server/production contact, no subagents; every new sentence
+sentence-case, PROVISIONAL, consolidated in one list for her bundle.
+
+### UNIT 3 — LIVE STATUS (the implementer owns this section)
+
+*(not started)*
 
 ## Machinery
 
