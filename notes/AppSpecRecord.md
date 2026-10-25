@@ -845,3 +845,45 @@ VX-528 closed (R-510-24/-25); the wording bundle stays provisional (R-510-26 —
 VX-511…VX-537 (VX-514 canceled; VX-521/VX-528 closed at her word) — VX-529 (a pair changed on one device strands the
 others; High, Pre-launch) is THE NEXT RUN at her R-510-19/-20 (no rule or storage change: "we are NOT changing the
 castle rules at all"). MOBILE PARITY: PL-58. canon-size 125,663 / 150,000.
+
+## 2026-10-25 — VX-529 (the catch-up for a pair changed elsewhere; PR at the merge)
+
+**The effort (the full record is `notes/plans/fixes/vx-529-pair-catchup.md` — the design memo, her rulings R-529-1…8,
+the units 1–3 and ladder fix sessions L1/L2, the ladder, the closing stage batch, the live proof on production, her
+two-Mac test; her handoff `notes/handoffs/vx-529-handoff.md`).** Run under `/architect-phase` from her 2026-10-24 kickoff
+(the boundary R-510-20: "we are NOT changing the castle rules at all… we aren't changing anything stored anywhere") to a
+2026-10-25 merge and release. A Fable orchestrator ran the memo, the sittings, the units and the ladder; Fable's
+safeguards stopped the live walk twice (`[cyber]`), and at her `/model` an Opus orchestrator took over the same session
+for the walk, her test and the closeout. Implementers were fresh `opus-implementer`s, one per unit; the ladder ran on
+fresh `fable-reviewer`s.
+
+**What was true.** A passphrase or new words made on one device left every other device on the old pair: rule 7 says a
+synced device holds the account's pair, but the follow covered only posture changes and key replacements, so a lagging
+Castle device couldn't sync on its passphrase, a lagging Standard device synced with a silently stale one, and the key
+doors refused the old passphrase with the false "doesn't open this library" (the VX-510 repro on production).
+
+**What shipped (SurfaceContracts' protection bullet — the contract line in place):** quiet detection from the key
+file's own locks against a fresh vault read (fact 1's invariant pinned across all 24 synced roads — no stored field);
+the pair follow as the follow's third kind — a re-lock, never a re-key, no server write, an older-build-safe two-step
+plan; either current secret catches up (R-529-5, the forgot road — typed words drop the stale passphrase lock); a
+words-only change catches up with nothing typed (R-529-2); the key doors refuse naming the change and point at the
+follow (R-529-3); the lobby's vault road — the account's current passphrase opens a lagging library through the vault
+and lands the catch-up in the same press (R-529-1, her pick after her "how is it happening online?" questions); the E6
+heal and VX-538's recurring band card (R-529-6 — the why and the road, her "until it's done"); the check door's
+pointer; Make this my library's proof fields so a restored copy's join stays quiet (R-529-7, VX-523). Riders VX-526,
+VX-522, VX-523, VX-530 (trace-first: exactly redundant Touch ID reads), VX-533, VX-538. Zero `Sync/`, `Server/` or
+`notes/CastleRules.md` lines; no schema; no stored-shape change.
+
+**The acceptance.** The ladder: r1 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT → L1 (the futile vault read gated) and L2
+(VX-523 under R-529-7) → r2 every fix SOUND, 0 · 0 · 0 · 2 record NITs. The closing stage batch: the Mac target 5231 of
+5265 (the 2 failures proven VX-539 on main), the phone 808/126. **Live on production** (the `castle` test account, D0–D7):
+the quiet words catch-up, the everyday passphrase catch-up with the old passphrase retired, the vault road in Castle
+(one typing, then a local open after ⌃⌘L), the words arm and E6's card and heal, the restored copy's quiet join, and a
+clean restore of the dev store by its recorded inodes. **Her two-Mac test, her real Macs and account (Castle + Touch
+ID):** the Pro changed the passphrase; the Air kept syncing, noticed while running, and its lock screen opened by the
+NEW passphrase with the catch-up landing in the same unlock; the new passphrase then opened it offline and loaded the
+sync keys online; Touch ID intact; new words made on the Air were caught up quietly on the Pro and verified there.
+
+**Her calls:** R-529-1…7 at the sittings; R-529-8 — merge and release 0.10.2 ("let's get this merged & get a release
+minted"; the notes approved verbatim); VX-544 and VX-542 later. **Born:** VX-538 (rode), VX-539, VX-540, VX-541, VX-542,
+VX-543, VX-544. MOBILE PARITY: PL-59.
