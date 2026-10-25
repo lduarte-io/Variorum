@@ -2232,6 +2232,18 @@ transcript's own commands, then cleared):**
   returns. Unproven, so not ticketed yet: the next walk quit reads `app.log` around the press, and a repeat earns a
   ticket.
 
+**I-D0-2 — THE WALK SCRIPT'S P5 OVERWROTE THE ACCOUNT'S WORDS STASH (found by the Opus orchestrator at 22:42,
+before D0's second half):** `first-run-walk.sh`'s P5 records a fresh library's own words and stashes them into
+`~/.variorum/prod-test-words-castle` (mtime 22:13, no backup kept). That is right for the script's SET-UP arm, where
+the library's words BECOME the account's, but on an account that already holds a vault the join adopts the
+account's words and supersedes the library's. **The stash now holds L_A's discarded pre-join words, and the C3 set
+VX-510 recorded is no longer on disk.** The account stays fully reachable by its passphrase. **The remedy, which
+adds coverage:** after L_B joins, L_B's New words door mints fresh ACCOUNT words, stashed through
+`stash-prod-test-words` from the app's own Copy, so the drill holds a known words set again. That change to the
+words alone leaves L_A lagging the words half, which is **R-529-2's quiet words-only catch-up — a new leg D1w,
+inserted before D1.** The script's defect (P5 should skip the stash when the account already holds a vault) is a
+walk-tool fix for this run's closeout.
+
 **STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
 (fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
 held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
