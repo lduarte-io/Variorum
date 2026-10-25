@@ -1866,7 +1866,10 @@ fresh reviewer; VX-523 closes with the run on her ruling.
 
 ### L2 — LIVE STATUS (the implementer owns this section)
 
-**IN PROGRESS — nothing built yet; this section first (L2-P0).** No revert is in flight. Zero `Sources/VariorumCore/Sync/`
+**IN PROGRESS — the core fix committed (`dacc7bf63`); RV-L2-1 IN FLIGHT** (named before it starts: `Copies.swift`'s
+`makeMineKeyFile` made to ignore the proof — `newLocks(words: true)`, no master — the fix's one write clause; the run `swift test
+--filter RestoredCopy`; the restore `git checkout -- Sources/VariorumCore/Protection/Executor/Acts/Copies.swift` onto the
+committed fix). Zero `Sources/VariorumCore/Sync/`
 lines (none needed — the act is protection-local). Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
 
