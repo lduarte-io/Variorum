@@ -76,10 +76,12 @@ struct MobileSettingsView: View {
         .resolve(voice: router.voice, dark: scheme == .dark)
     }
 
-    /// VM-8 unit 1: the Protection screen's door where it can act — the shell gave the road AND a library is open on the
-    /// protection road with its account section (P-2: no screen to open, no door).
+    /// VM-8 unit 1: the Protection screen's door where it can act — the shell gave the road, the app's services exist (the
+    /// sync row says *Starting…* until they do — ladder round 1's NIT-2: the screen's *Sign in…* has no Account sheet to
+    /// present before them), AND a library is open on the protection road with its account section (P-2: no screen that
+    /// can act, no door).
     private var protectionDoor: (() -> Void)? {
-        guard let onOpenProtection, bootstrap?.roadStanding?.account != nil else { return nil }
+        guard let onOpenProtection, services != nil, bootstrap?.roadStanding?.account != nil else { return nil }
         return onOpenProtection
     }
 

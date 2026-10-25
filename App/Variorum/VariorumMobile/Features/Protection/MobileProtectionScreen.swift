@@ -265,7 +265,7 @@ struct MobileProtectionSheetsHost: ViewModifier {
                     AccountView(services: services, initialTab: .account)
                         .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
                 } else {
-                    MobileProtectionSheetNotHere(presenter: presenter, tokens: tokens, sentence: ProtectionWords.signInUnavailable)
+                    MobileProtectionSheetNotHere(presenter: presenter, tokens: tokens)
                 }
             // VM-8 unit 2: the crossings' confirm, the signed-out road's screen, a key door's confirm, the check.
             case .crossing(let model):
@@ -281,34 +281,28 @@ struct MobileProtectionSheetsHost: ViewModifier {
     }
 }
 
-/// A sheet this screen cannot host (never reached by a door here): the host's dismissal at once, or — the sign-in sheet
-/// with no services, the Mac's NIT-1 face — its one true sentence with Close.
+/// The sign-in sheet with no services to sign in through (the Mac's NIT-1 face): its one true sentence with Close. Settings
+/// opens this screen only beside services (ladder round 1's NIT-2), so this stands only where a reopen re-pushes the screen
+/// before its fresh services are composed. (The auto-closing arm for a sheet the host had no case for is gone: the host
+/// maps every `ProtectionSheetPresenter.Sheet` case.)
 private struct MobileProtectionSheetNotHere: View {
     let presenter: ProtectionSheetPresenter?
     let tokens: VoiceTokens
-    let sentence: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if let sentence {
-                Text(sentence)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-                MobileRoadButton(title: ProtectionWords.signInUnavailableClose, tokens: tokens) {
-                    presenter?.hostDismissed(.settings)
-                }
+            Text(ProtectionWords.signInUnavailable)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            MobileRoadButton(title: ProtectionWords.signInUnavailableClose, tokens: tokens) {
+                presenter?.hostDismissed(.settings)
             }
         }
         .padding(22)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .presentationDetents([.medium])
         .background(tokens.room.ignoresSafeArea())
-        .onAppear {
-            guard sentence == nil else { return }
-            ProtectionOpenRoad.log("road: the phone's Protection screen was asked for a sheet it has no door for — closed")
-            presenter?.hostDismissed(.settings)
-        }
     }
 }
 
