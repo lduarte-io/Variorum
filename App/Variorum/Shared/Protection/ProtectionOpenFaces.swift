@@ -426,10 +426,24 @@ final class RoadStandingModel {
             if case .minted = outcome { standing.model?.mintLanded() }
             return outcome
         }
+        // VX-529 unit 3 — VX-538: the E6 row (her R-529-6), read from the open library at every look; its press lands the
+        // account's passphrase through the E6 heal, off the main actor, as signed in NOW; a landing speaks its receipt.
+        let accountPassphrase = AccountPassphraseCardModel(
+            libraryID: libraryID, writes: session.writes,
+            ledger: AccountPassphraseCardLedger(defaults: ledger.defaults),
+            launches: { ledger.read(libraryID).launches },
+            owes: { ProtectionOpenRoad.accountPassphraseNotTypedHere(session.library) },
+            land: { passphrase in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionOpenRoad.landAccountPassphrase(
+                        session: session, passphrase: passphrase, signIn: signInNow?())
+                }.value
+            },
+            speak: { standing.model?.speak?($0) })
         let band = WordsBandModel(
             libraryID: libraryID, writes: session.writes, ledger: WordsCardLedger(defaults: ledger.defaults),
             snoozes: snoozes, reminder: reminder, passphraseExists: lookAsks, replacesAccountWords: synced, mint: mint,
-            copy: copyWords)
+            copy: copyWords, accountPassphrase: accountPassphrase)
         let model = RoadStandingModel(
             faces: faces, reminder: reminder,
             setPassphrase: { passphrase in
@@ -522,6 +536,8 @@ final class RoadStandingModel {
     /// turning sync on (a new passphrase, typed twice), a join adopting the account's pair — so the pane's appearance and an
     /// account act's landing call this. Only ever retires: a passphrase never goes away under an open library.
     func rereadPassphrase() {
+        // VX-538: the E6 row reads its state again (a key door, the catch-up or a join may have landed a passphrase lock).
+        band?.accountPassphrase?.reread()
         guard passphraseExists() else { return }
         if offersSetPassphrase { ProtectionOpenRoad.log("road: a passphrase exists now — the set row and rule 3's reminder retire") }
         offersSetPassphrase = false

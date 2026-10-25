@@ -1525,7 +1525,48 @@ stage only my own paths, and re-read the record before every edit from here on.
   THE RED PIN COMMITTED (this commit, `VariorumTests/Protection/E6BandCardTests.swift` — compiling on the pre-fix tree):
   **RED** (the harness, `--filter E6BandCardTests`): `✘ Test run with 2 tests in 1 suite failed … with 1 issue` — an open E6
   library at its third launch: `band.visible` false (nothing surfaces E6); the guard (a synced library WITH its lock hears
-  nothing) green. The build: NOT-STARTED.
+  nothing) green (`f378f6b5e`). THE BUILD COMMITTED (this commit): `WordsBand.swift` — `AccountPassphraseCardRules.due`
+  (rule 3's first launch and week, never retired), `AccountPassphraseCardLedger` (the ✕'s moment, local), `AccountPassphrase
+  Landing`, `AccountPassphraseCardModel` (`showing` = a writing road ∧ not hidden ∧ not snoozed ∧ `owes()` — THE STATE, read at
+  every look — ∧ due; `later` · `dismiss` · `submit` · `reread`), `WordsCardSnoozes.accountPassphraseProcess` (its own snooze
+  set), `WordsBandModel.accountPassphrase` + `showsAccountPassphrase`, `visible` widened; `ProtectionRoadActs.swift` —
+  `accountPassphraseNotTypedHere(_:)` (the state: an account named, the live key file of the current key synced — its master
+  lock — with no passphrase lock) and `landAccountPassphrase(session:passphrase:signIn:)` (the session's one-act lock, the
+  sign-in NOW, ONE fresh vault read when signed in as the account, then unit 2's heal; refusals by
+  `RoadAccountFaces.actRefusalSentence(…, secretIsTheAccounts: true)`); `ProtectionOpenFaces.swift` — `RoadStandingModel.make`
+  composes the row (launches from rule 3's shared counter, the press off the main actor, the receipt through `speak`) and
+  `rereadPassphrase` re-reads it; `AppBootstrap.keyDoorRoads().landed` now calls `rereadPassphrase` too (Change and Reset land
+  a lock — and the set row/rule 3's reminder were never re-read there: a latent retire, harmless); `ProtectionWords` — the
+  row's three sentences; the Mac face `AccountPassphraseRow` in `WordsBandCard.swift` (the line, the forgot-road, *Later*, ✕,
+  the field — the join's "Your account's passphrase" label — and the door; no popup, no alert, no keyboard shortcut — the
+  card's surface pins). Design-row tests added to `E6BandCardTests` (7 in all): the row's words and no shouting; the press
+  landing the lock under the VAULT's descriptor with the key unchanged and NO vault write, the receipt, the row retired by the
+  state; a wrong passphrase (VX-464's account sentence), offline and signed out — nothing written, the row standing; Reset
+  forgotten passphrase (Standard's plain confirm, no follow owed in plain E6) retiring it through the re-read; the cadence (not
+  before the third launch, *Later* to the next launch, ✕ for a week, back after, never retired; a read-only road shows nothing).
+  **GREEN** (the harness, `--filter "E6BandCardTests|WordsBandTests|PassphraseReminder|WordsCard|SetPassphraseRowReread|
+  HoldBannerAccount|RoadKeyDoor|LobbyVaultRoad|PairCheckDoor|ProtectionOpenRoadPlanted|RoadStanding"`): `✔ Test run with 86
+  tests in 15 suites passed`. The Mac face's compile PENDING the build-for-testing; `WordsBandSurfaceTests` (Mac target)
+  PENDING the stage batch. THE REVERTS (named before they run; each one edit on this commit, `--filter E6BandCardTests`,
+  restored by `git checkout --`): RV-538-1 `WordsBand.swift` — `visible` loses `|| showsAccountPassphrase` [expect the pin red
+  (`band.visible`), the guard green]; RV-538-2 `ProtectionRoadActs.swift` — the state reads `account != nil` alone (the lock
+  check dropped — a flag in all but name) [expect the retire rows red and the with-lock guard red]. PENDING.
+  **P-VX529-U3-3 (the home and the road):** (a) BUILT — a third row in the band card, the passphrase typed right there and
+  landed by the E6 heal; (b) the row's door opens Settings ▸ Protection's key doors (no field on the card); (c) a sentence only
+  (the lobby, New words and Reset as the roads). **P-VX529-U3-4 (the cadence):** (a) BUILT — rule 3's first launch and week,
+  *Later* to the next launch, ✕ for a week, never retired; (b) every launch until done (no week); (c) rule 3's schedule exactly
+  (third launch, weekly twice) with no don't-show-again, weekly forever after. **P-VX529-U3-5 (signed out):** (a) BUILT — the row
+  shows whoever is signed in (the state is the library's) and the press says what blocks it; (b) hide it while no one is
+  signed in as the library's account. **P-VX529-U3-6 (the door's word):** "Use it here" (a) BUILT; (b) "Save"; (c) "Open with
+  it".
+  **THE CASTLERULES CLAUSE — DRAFTED FOR HER (rule-3-adjacent; never written into the rules here — they change only at her
+  word, and this text goes to her verbatim first):** *"A library that syncs, but whose account's passphrase was never typed on
+  this device — it joined by the twelve words, or caught up with them — is told so in the same card: your account's
+  passphrase hasn't been typed on this Mac yet; type it once and it opens this library here too, and if you don't know it,
+  Reset forgotten passphrase sets one you do. It comes back from the third launch, and a week after each time it is put away,
+  until a passphrase is typed here — there is no 'don't show again'."* (Rule 3's own text is silent there: a synced library's
+  passphrase exists — the account's — so its reminder never shows; the clause names the deliberate delta, her "until it's
+  done".)
 
 **NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
 1. VX-526 — the join sheet's title and button (`joinSyncTitle`, `joinSyncButton`): "Sync this library" · "Sync this library"
@@ -1536,6 +1577,14 @@ stage only my own paths, and re-read the record before every edit from here on.
 3. VX-522 — the hold banner over a library that names no account (`LibraryOpenCopy.holdBanner`, `hasAccount: false`): "This
    is your library as of ‹day›. This library doesn't sync, so Resume changes nothing in it." (was "…Sync is waiting until you
    press Resume. To keep something from this backup, duplicate it first — duplicates stay."; P-VX529-U3-2).
+4. VX-538 — the band card's E6 row (`accountPassphraseCardLine` — the brief's draft verbatim): "Your account's passphrase
+   hasn't been typed on this Mac yet — type it once and it opens this library here too."
+5. VX-538 — its forgot-road (`accountPassphraseCardForgot` — the brief's draft verbatim): "If you don't know it, set one you
+   do with Reset forgotten passphrase."
+6. VX-538 — its door (`accountPassphraseCardDoor` — the implementer's, P-VX529-U3-6): "Use it here".
+   REUSED, not new: "Your account's passphrase" (the join's field label), "Later" and "Dismiss" (the words row's), "That
+   passphrase doesn't open this account." (VX-464's), "Your account's passphrase opens this library on this Mac now." (unit
+   2's heal notice, spoken here as the receipt).
 
 ## THE PHONE — what mobile must know from this run (2026-10-25, at her word: "I want to make sure that the phone
 ## knows everything that has been done / is up to date on what is needed"; the ledger row is `notes/MobileSoul.md`

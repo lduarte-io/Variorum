@@ -60,7 +60,8 @@ struct E6BandCardTests {
     /// **THE PIN (red on old).** An open E6 library at its third launch: the band card is ON SCREEN — the one home says the
     /// state is not the ideal one.
     @Test func anE6LibraryHearsTheBandCardAtItsThirdLaunch() async throws {
-        let (_, _, session, _) = try await Self.e6Open()
+        let (road, _, session, _) = try await Self.e6Open()
+        defer { withExtendedLifetime(road) {} }
         let store = ThrowawayDefaults()
         defer { store.purge() }
         let standing = RoadStandingModel.make(session, ledger: try Self.ledgerAtTheThirdLaunch(session, store))
@@ -69,10 +70,142 @@ struct E6BandCardTests {
         #expect(band.visible, "E6 surfaces in the band — the why and the road")
     }
 
+    // MARK: - The design rows (her R-529-6; PROVISIONAL P-VX529-U3-3…6)
+
+    /// THE ROW says the why and the road, and the forgot-road — sentence case, no shouting.
+    @Test func theRowSaysTheWhyTheRoadAndTheForgotRoad() async throws {
+        let (road, _, session, _) = try await Self.e6Open()
+        defer { withExtendedLifetime(road) {} }
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(session, ledger: try Self.ledgerAtTheThirdLaunch(session, store))
+        let row = try #require(standing.band?.accountPassphrase)
+        #expect(row.showing && standing.band?.showsAccountPassphrase == true)
+        #expect(ProtectionWords.accountPassphraseCardLine == "Your account's passphrase hasn't been typed on this "
+            + "\(ProtectionCopy.deviceName) yet \u{2014} type it once and it opens this library here too.")
+        #expect(ProtectionWords.accountPassphraseCardForgot
+            == "If you don't know it, set one you do with Reset forgotten passphrase.")
+        for line in [ProtectionWords.accountPassphraseCardLine, ProtectionWords.accountPassphraseCardForgot,
+                     ProtectionWords.accountPassphraseCardDoor] {
+            let shouting = line.split(whereSeparator: { !$0.isLetter }).filter { $0.count > 1 && $0 == $0.uppercased() }
+            #expect(shouting.isEmpty, "\(line)")
+        }
+    }
+
+    /// THE PRESS: the account's passphrase typed at the card lands as the library's own lock — under the VAULT's own
+    /// descriptor (rule 7's one pair), the key unchanged, NO vault write — the receipt speaks, and the row retires by the
+    /// state alone (the band empties).
+    @Test func theAccountsPassphraseLandsTheLockAndTheRowRetires() async throws {
+        let (road, vault, session, _) = try await Self.e6Open()
+        defer { withExtendedLifetime(road) {} }
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(session, ledger: try Self.ledgerAtTheThirdLaunch(session, store))
+        var spoken: [String] = []
+        standing.speak = { spoken.append($0) }
+        let row = try #require(standing.band?.accountPassphrase)
+        let keyBefore = session.library.key
+        let updatesBefore = vault.calls.filter { $0.hasPrefix("update") }.count
+        await row.submit(passphrase: Account.passphrase)
+        #expect(row.message == nil)
+        let live = try #require(session.library.keyFile)
+        let kdf = try #require(vault.snapshot(Account.account)?.vault.kdf)
+        #expect(live.passphrase?.kdf == kdf, "the lock under the vault's own descriptor")
+        #expect(try live.open(passphrase: .passphrase(Account.passphrase), floor: .relaxedForTests) == keyBefore,
+                "the account's passphrase opens this library now; the key unchanged")
+        #expect(vault.calls.filter { $0.hasPrefix("update") }.count == updatesBefore, "no vault write")
+        #expect(spoken == [ProtectionWords.passphraseLandedNotice])
+        #expect(!row.showing && standing.band?.visible == false, "retired by the state")
+    }
+
+    /// A WRONG passphrase: the account's sentence (VX-464's — in E6 the only passphrase is the account's), nothing
+    /// written, the row stands. Offline: the account couldn't be reached, nothing written. Signed out: said, nothing
+    /// written.
+    @Test func aRefusedPressWritesNothingAndTheRowStands() async throws {
+        let (road, vault, session, _) = try await Self.e6Open()
+        defer { withExtendedLifetime(road) {} }
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(session, ledger: try Self.ledgerAtTheThirdLaunch(session, store))
+        let row = try #require(standing.band?.accountPassphrase)
+        let fileBefore = session.library.keyFile
+        await row.submit(passphrase: "not the account's passphrase at all")
+        #expect(row.message == ProtectionWords.passphraseDoesNotOpenAccount)
+        #expect(session.library.keyFile == fileBefore && row.showing)
+        vault.reachable = false
+        await row.submit(passphrase: Account.passphrase)
+        #expect(row.message == ProtectionWords.doorRefusedNeedsVault, "\(String(describing: row.message))")
+        #expect(session.library.keyFile == fileBefore && row.showing)
+        vault.reachable = true
+        road.session = .signedOut
+        session.executor.configuration.session = .signedOut
+        await row.submit(passphrase: Account.passphrase)
+        #expect(row.message != nil && session.library.keyFile == fileBefore && row.showing, "signed out: said")
+    }
+
+    /// RETIRED BY THE STATE FROM ANOTHER ROAD: Reset forgotten passphrase (Standard's plain confirm — it works in plain E6,
+    /// no follow is owed) sets one she knows on both locks; the landing's re-read retires the row — no flag of its own.
+    @Test func resetForgottenPassphraseRetiresTheRow() async throws {
+        let (road, _, session, _) = try await Self.e6Open()
+        defer { withExtendedLifetime(road) {} }
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(session, ledger: try Self.ledgerAtTheThirdLaunch(session, store))
+        let row = try #require(standing.band?.accountPassphrase)
+        #expect(row.showing)
+        var library = session.library
+        _ = try await session.executor.resetPassphrase(
+            &library, authorization: .plainConfirm, new: "a passphrase she knows and chose")
+        session.library = library
+        standing.rereadPassphrase()
+        #expect(!row.showing, "a passphrase lock landed — the state, not a flag")
+    }
+
+    /// THE CADENCE (rule 3's pattern, no don't-show-again): not before the third launch; *Later* hides it to the next
+    /// launch; the ✕ for a week; back after it; never retired.
+    @Test func theCadenceRecursUntilItsDone() {
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let ledger = AccountPassphraseCardLedger(defaults: store.defaults)
+        var launches = 2
+        var clock = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        func row(_ snoozes: WordsCardSnoozes) -> AccountPassphraseCardModel {
+            AccountPassphraseCardModel(
+                libraryID: "lib-e6", writes: true, ledger: ledger, snoozes: snoozes, launches: { launches },
+                now: { clock }, owes: { true }, land: { _ in .landed })
+        }
+        #expect(!row(WordsCardSnoozes()).showing, "the second launch: not yet")
+        launches = 3
+        let third = WordsCardSnoozes()
+        let first = row(third)
+        #expect(first.showing, "rule 3's first showing: the third launch")
+        first.later()
+        #expect(!first.showing && !row(third).showing, "Later: hidden for this launch")
+        #expect(row(WordsCardSnoozes()).showing, "the next launch: back")
+        let fourth = row(WordsCardSnoozes())
+        fourth.dismiss()
+        #expect(!fourth.showing)
+        clock += 6 * 24 * 3600
+        #expect(!row(WordsCardSnoozes()).showing, "dismissed: hidden for a week")
+        clock += 2 * 24 * 3600
+        #expect(row(WordsCardSnoozes()).showing, "a week on: back — until it's done")
+        for _ in 0..<5 {
+            let again = row(WordsCardSnoozes())
+            again.dismiss()
+            clock += 8 * 24 * 3600
+        }
+        #expect(row(WordsCardSnoozes()).showing, "no don't-show-again: it recurs")
+        let readOnly = AccountPassphraseCardModel(
+            libraryID: "lib-e6", writes: false, ledger: ledger, launches: { launches }, now: { clock }, owes: { true },
+            land: { _ in .landed })
+        #expect(!readOnly.showing, "a read-only road shows nothing")
+    }
+
     /// A guard (green on both sides): a synced library WITH its passphrase lock (it typed the account's passphrase) hears
     /// nothing — no E6, no card.
     @Test func aSyncedLibraryWithItsPassphraseLockHearsNothing() async throws {
         let (road, _, _) = Account.road()
+        defer { withExtendedLifetime(road) {} }
         road.session = Account.signedIn
         let (session, words) = try await road.created()
         let turnOn = try #require(ProtectionPaneRead.accountFaces(try await Account.read(session, Account.signedIn))?

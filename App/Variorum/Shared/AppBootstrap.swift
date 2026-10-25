@@ -1077,7 +1077,11 @@ final class AppBootstrap {
                 }.value
             },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
-            landed: { [weak self] in await self?.roadAccount?.refresh() },
+            landed: { [weak self] in
+                await self?.roadAccount?.refresh()
+                // VX-538: Change and Reset land a passphrase lock — the band card's E6 row reads its state again.
+                self?.roadStanding?.rereadPassphrase()
+            },
             // VX-510 D-B7 — VX-513: the read-only check, on the OPEN session (ready only), as signed in NOW, off the main
             // actor (the passphrase's derivation and the vault read). It writes nothing — no act lock, no receipt, no landing.
             check: { [weak self] typed in

@@ -449,6 +449,12 @@ nonisolated enum ProtectionWords {
     /// passphrase field the vault road takes stands beside it. PROVISIONAL (P-VX529-3's class; P-VX529-U2-1 (a)).
     static let lobbyAccountPassphraseNotTypedHere = "Your account's passphrase hasn't been typed on this "
         + "\(ProtectionCopy.deviceName) yet \u{2014} type it here to use it on this \(ProtectionCopy.deviceName)."
+    /// VX-529 unit 3 — VX-538: THE BAND CARD'S E6 ROW (her R-529-6: the why and the road, recurring until it's done). The
+    /// line and the forgot-road are the run brief's drafts verbatim; the door is the implementer's. PROVISIONAL, hers.
+    static let accountPassphraseCardLine = "Your account's passphrase hasn't been typed on this "
+        + "\(ProtectionCopy.deviceName) yet \u{2014} type it once and it opens this library here too."
+    static let accountPassphraseCardForgot = "If you don't know it, set one you do with Reset forgotten passphrase."
+    static let accountPassphraseCardDoor = "Use it here"
     /// P-VX306-U1a-2: a file sits in the live place that this build can't read as a key file (its face is U2's).
     static let liveKeyFileUnreadable = "The key file beside your library can't be read, so Variorum can't open the "
         + "library with it."
