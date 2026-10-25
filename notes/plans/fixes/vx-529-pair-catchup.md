@@ -1866,7 +1866,93 @@ fresh reviewer; VX-523 closes with the run on her ruling.
 
 ### L2 — LIVE STATUS (the implementer owns this section)
 
-*(not started)*
+**IN PROGRESS — nothing built yet; this section first (L2-P0).** No revert is in flight. Zero `Sources/VariorumCore/Sync/`
+lines (none needed — the act is protection-local). Session: a fresh `opus-implementer`, 2026-10-25, worktree
+`~/dev/variorum-vx-529`.
+
+**Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
+`notes/CastleRules.md` whole (rule 17 the door touched; rules 2, 7, 16, 20, 22); this file whole. Code: `Executor/Acts/Copies.swift`
+whole (MakeMineProgram, `makeMineKeyFile`, both public `makeThisMyLibrary` forms and the private body), `Model/KeyFileCrossings.swift`
+(`NewKeyLocks`, `building`, `locking`), `Executor/Acts/AccountActs.swift` (`join`, `joinKeyFile`, `wordsAreTheAccountsAlready`),
+`Executor/Acts/CommonSteps.swift` whole (`newLocks`, `material`, `syncMaterial`), `Executor/PlanRunner.swift` whole (`perform`,
+`ActContext`, `resume`, `rollBack`), `Executor/Executor.swift` (`readVault`, `freshVaults`), `Executor/VaultModel.swift` whole,
+`Model/KeyFile.swift` whole, `Model/KeyFileRelock.swift`, `Executor/Acts/PassphraseLockHeal.swift`, `KeyDoors.swift` (New words,
+`mintKeyFile`), `Assess.swift` (`acts`, `pairFollow`, `doors`); app-side `ProtectionCopyDoors.swift` (preflight, `makeMine`),
+`AppBootstrap.makeThisMyLibrary`, `ProtectionOpenRoad.swift` (`boundedVaultRead`, `typedUnlockVaultBound`, the vault road),
+`ProtectionLobbyFace.swift` (E6), `ProtectionRoadActs.swift`, `ProtectionSecretCheck.swift`; the held test, `JoinWordsMomentTests`,
+`U2CopyDoorTests`, `SyncKeysSessionHoldTests`, `CrashHarness`, `ExecutorFixtures`, `ExecutorWorld`, the scenario world's makeMine
+and promises (`Alphabet.swift`, `World.swift`, `Promises.swift`), the lifecycle walk's copy stages and check, and the app suites
+`MakeMineRoadTests`, `ProtectionAccountSupport`, `TypedUnlockSyncKeysTests`.
+
+**THE TRACE (mine; unit 3's AGREED, the held row confirmed red):** `swift test --filter RestoredCopyJoinWordsMomentTests` on
+`5dca7f06f`: `Test run with 2 tests in 1 suite passed … with 1 known issue` — the known issue at
+`RestoredCopyJoinWordsMomentTests.swift:61` (`!replaced(joined)`), the words guard green. Mechanism: `join` (`AccountActs.swift`)
+sets `wordsReplaced = !sameWords`; with the passphrase typed `ownLockOpens` is false and `wordsAreTheAccountsAlready` answers false at
+its first clause (`file.words == nil`) because `makeMineKeyFile` (`Copies.swift:128`) builds `newLocks(passphrase:, words: true,
+master: false)` — an OWN words lock, no master lock, no copy. The rule's proof is wrap identity, so nothing in that file can prove
+the words are the account's. R-529-7's fix: write the join's two proof fields where provable.
+
+**THE DESIGN AS IT WILL BE BUILT (R-529-7's charter; nothing stored changes shape — `KeyFile.master` / `masterWordsCopy` exist,
+written through `settingMaster` inside `locking`, the existing setter):**
+- **The proof (core, the act's door, reads only, after the current pair is verified — a refusal costs no read):** the signed-in
+  account's vault (`configuration.session.accountID`), and the current pair's typed WORDS opening ITS master through the vault's
+  recovery wrap (`AccountVault.master(words:)`), the key proof verified (`isMaster`). Then the proof is that master and that wrap,
+  byte for byte. Anything else — signed out, the vault out of reach or absent, another account's read, words the vault refuses —
+  is NO proof: the act writes today's file, byte for byte.
+- **Where the read comes from:** a new parameter on both public `makeThisMyLibrary` forms, `accountsVault: AccountsVaultRead =
+  .inTheDoor` — `.inTheDoor` (a core caller: ONE `readVault` in the door, out of reach ⇒ none) or `.taken(VaultSnapshot?)` (the
+  caller's own read — verified, never trusted; nil ⇒ none, never a fallback to an older read, so an offline press writes nothing).
+- **The write:** the proof rides `perform(…, pairProof:)` into a new in-memory `ActContext.pairProof` (the `copyKey` precedent —
+  never stored; a resume before the stage rolls back without it, as without the copy key) and the act's EXISTING one key-file write
+  (`makeMineKeyFile`): with a proof, the locks are the passphrase (as today), NO own words lock, the master lock with the copy — the
+  join's own shape (VX-462: "where the master's twelve-words copy is written … no own words lock is kept beside it"), the Apple lock
+  (Standard) as today. No new step, no new write, no vault/custody/sync-keys write; the record binds no account (P-VX378-U2-4 (a)).
+- **The app (the standing bound):** `ProtectionCopyDoors.makeMine` makes ONE `boundedVaultRead` (VX-501's race,
+  `typedUnlockVaultBound`) of the executor's signed-in account, writing road only, just before the core act, and passes
+  `.taken(read)`; a failure or a timeout passes `.taken(nil)` (today's file). `AppBootstrap` untouched.
+
+**Findings before any code (each says what it changes):**
+- **F-L2-1 — the held suite's SETUP asserts the restored file opens by its OWN words lock** (`restored.open(words:)`, line 48); the
+  fix removes that lock by design (the join's shape), so the setup line flips to the any-road open (`open(.words(…))` — the words
+  still open it, through the master's copy). FLIPPED DELIBERATELY, said in the test; the pin's own assertion is unchanged but for
+  losing `withKnownIssue`.
+- **F-L2-2 — PROVISIONAL P-VX529-L2-1, the proof's secret:** the WORDS are the proof (the copy is exactly the typed words' road;
+  rule 17's "under your current pair" needs the current words to keep opening the new library). Built (a): the words alone — so a
+  PASSPHRASE changed elsewhere with the words unchanged still writes the fields, and a later join stays quiet (truthful: the words
+  were not replaced); (b) also require the typed passphrase (when there is one) to open the vault — then that state writes nothing
+  and the later join over-speaks (truthful sentences, P-VX309-U2-1's class). (a) is sound either way (the master is reached by the
+  very words the file keeps) and is the more truthful moment; the charter's "the typed secret does not open the vault" read as the
+  proof's secret.
+- **F-L2-3 — the held window's faces read the file as a synced one (stated, not changed):** an unbound restored copy now carries
+  the account's master lock and copy. Where the outgoing library had NO passphrase lock (E6 — joined by the words), the Castle lobby
+  (pre-unlock, the record unreadable) reads the file as E6 and offers the passphrase field with R-529-6's line, and the vault road
+  opens it with the account's passphrase — but lands no lock there (`catchUpThroughTheVault` refuses an unbound record), so the line
+  recurs until the join. The check door and the VX-538 card read the record (no account ⇒ silent). A face's call — for her bundle.
+- **F-L2-4 — New words in the held window (pre-existing class, stated):** a local New words re-makes an own words lock and leaves the
+  master's copy (`KeyDoorProgram`'s key-file step refreshes the copy only when synced), so the account's words keep opening the
+  unbound restored copy beside the new ones until a join — exactly the left-library class (rule 16's leave keeps every lock;
+  `wordsAreTheAccountsAlready`'s own docstring names it). Not widened here.
+- **F-L2-5 — the empty-slot landing (`makeThisMyLibraryInTheEmptySlot`) is NOT touched** (no library open, no current pair; the
+  charter names Make this my library's own act). Its later join keeps today's moment.
+- **F-L2-6 — the read happens with the app's pool closed** (`makeMine` runs after the teardown, as the act always has): on a slow
+  network a signed-in press waits up to the bound before the act; offline fails fast. F-U2-7's bound question (her bundle) covers it.
+  The read is not gated on the outgoing library being synced: no pre-read filter is sound (the W-6 shape itself — an unbound restored
+  copy holding the account's pair with NO master lock — is exactly what a master-lock gate would skip); one bounded read on a rare,
+  deliberate press. For the reviewer.
+
+**The pieces (flip per commit; unverified claims PENDING):**
+- L2-P0 — this LIVE STATUS, the trace and the design. DONE (this commit).
+- L2-P1 — THE PINS, red-on-old where the bug is claimed (core, `RestoredCopyJoinWordsMomentTests.swift`): the held row flipped
+  (F-L2-1); the shape on a synced signed-in Mac; offline ⇒ today's file + the later join speaks; the words changed elsewhere ⇒
+  nothing + speaks; the passphrase alone changed ⇒ written + quiet (F-L2-2); the crash after every write ⇒ the new library WITH the
+  fields or the old state, never a third; no new write (the act's write log equals the offline run's, kind by kind); a fixed
+  scenario through the scenario world (promises kept, the rejoin quiet, then Use Castle). NOT-STARTED.
+- L2-P2 — THE CORE FIX (`Copies.swift`, `PlanRunner.perform`'s `pairProof:`, `ActContext.pairProof`) + the `.taken` pins. NOT-STARTED.
+- L2-P3 — THE APP'S BOUNDED READ (`ProtectionCopyDoors.makeMine`) + its harness pin (a slow server: the bound holds, today's file —
+  red while the core reads unbounded in the door). NOT-STARTED.
+- L2-P4 — THE REVERTS, each named here before it runs. NOT-STARTED.
+- L2-P5 — THE CLOSE: the core suite whole (headless), the harness's copy-door and neighbour suites, zero `Sync/` lines, no
+  trailers. NOT-STARTED.
 
 ## Machinery
 
