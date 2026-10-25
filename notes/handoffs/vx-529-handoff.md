@@ -2,10 +2,10 @@
 
 ## FOR YOU, IN ORDER
 
-1. **0.10.2 — the release runs right after this merge, at your word** ("i approve the release, i approve the release
-   notes"). The build needs Variorum closed on the Pro for a few minutes; the session asks for that as one step. The
-   outcome (the DMG, the appcast, the site) is in the session's closing message, and the next closeout folds it into
-   the records.
+1. **0.10.2 is released (build 9462)** at your word ("i approve the release, i approve the release notes"). It's on
+   stargazing.tech (the download, the update feed and the page all checked) and installed on the Pro behind a fresh
+   safety copy. The Air will offer the update itself. The nine older safety copies of your library are in the Trash —
+   empty it whenever you like. The record's THE RELEASE section has the details.
 2. **The Air's cleanup** — if you haven't pasted step 16's prompt into the Air's session yet, it's in the run record
    under HER TWO-MAC TEST. Nothing on the Air is owed otherwise; it already runs the fix (build 9440).
 3. **QUESTIONS #241, whenever you want.** It's the run's provisional bundle: the wording notes you said to leave marked
