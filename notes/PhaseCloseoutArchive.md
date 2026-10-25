@@ -8,6 +8,10 @@
 
 ## The pointer thread (superseded "Current phase" pointers)
 
+## Rolled at the VX-529 closeout (2026-10-25) — VX-510's closeout paragraph, verbatim
+
+*[removed for publication]*
+
 ## Rolled at the VX-510 closeout (2026-10-24) — the 0.10 window's closeout paragraph, verbatim
 
 *[removed for publication]*
