@@ -2468,6 +2468,27 @@ anything unexpected:
    remove the safety copy, the rollback copy and DerivedData/vx529-release; `git switch main && git pull`.
 ```
 
+### HER TWO-MAC TEST — THE RECORD (2026-10-25 from ~02:20 MDT; her real store, her account in Castle; one step at a
+### time at her ask: "i'm going to need things very step by step and easy to follow")
+
+- **The Air installed** by its own session from the prompt above: **0.10.1 (9440)** (one notes-only commit past the
+  Pro's 9439 — product code identical, verified by diff), A1 `variorum-a1-vx529-install-20261025T081854Z`, 9311
+  kept for rollback. Her word at the hand-over: the VX-510 leftovers deleted for good ("you can delete that stuff
+  then") — done.
+- **Step 1 (Pro):** opened normally; the row read "Synced ‹time›" after its round. **Step 2 (Air):** the same.
+- **Step 3 (Pro): Change passphrase — landed.** Her report: a mistyped current passphrase got "That passphrase doesn't
+  open this library." (the plain refusal — opens neither, correct); the right one went through.
+- **Step 4 (Air, still open since before the change): a new note synced to the Pro** — a passphrase change leaves the
+  sealing keys alone and the running Air holds them.
+- **Step 5 (Air, Settings ▸ Protection, nothing pressed) — DETECTION ON A RUNNING DEVICE, LIVE:** the Sync section
+  reads *"Your account's passphrase was changed on Lillian's MacBook Pro on October 25."* with **Follow your
+  account…**; the key doors gated with the pair sentence. (The open question — whether an app already running at the
+  change notices without a relaunch — answered YES.) **Her finding, verbatim: "there's lots of duplicated text"** —
+  her screenshots (`~/Desktop/vx529-air-screenshots/`) show the pair sentence 3× (Your passphrase ×2, Your twelve
+  words ×1) and "Your account changed on another device. Follow it first." 4× (Protection's crossing rows ×3, the
+  Sync section ×1) — VX-542's class, worse on a real Castle + Touch ID library than the drill showed; the ticket
+  gains the count.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
