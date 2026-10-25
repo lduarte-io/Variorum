@@ -25,8 +25,7 @@
 //      STANDARD NEVER RENDERS (its confirm says her rule-12 sentence — F-PH-2, hers; F-U2-G). Rule 11's export-off notice
 //      renders nothing: the phone has no scheduled export, so it can never stand (F-U2-A).
 //    - THE RECEIPTS' HOME (F-U2-E, PROVISIONAL P-VM8-8): `MobileProtectionReceipts` — what `RoadStandingModel.speak` says
-//      on the phone, shown muted under the screen's title: the newest few said (up to three, one line each), never a
-//      single line.
+//      on the phone, shown muted under the screen's title: the newest said, one line each, up to three at once.
 //
 
 import SwiftUI
@@ -437,27 +436,32 @@ struct MobileWordsSection: View {
 
     var body: some View {
         let faces = standing.keyDoors?.faces
-        VStack(alignment: .leading, spacing: 10) {
-            MobileProtectionChrome.heading(ProtectionWords.wordsSectionTitle, tokens)
-            MobileProtectionChrome.caption(ProtectionWords.wordsSectionLine, tokens)
-            if let look, look.phase != .closed {
-                MobileWordsLookPanel(look: look, tokens: tokens)
-            } else if faces?.pairGate == true || faces?.newWords == .refused(MobileFollowOwed.saying) {
-                // P-VM8-9 (a-unified): New words locked by the follow — the screen says it once, in the follow's place.
-                EmptyView()
-            } else if case .refused(let sentence)? = faces?.newWords {
-                MobileProtectionChrome.caption(sentence, tokens)
-            } else if faces?.newWords != .hidden {
-                MobileProtectionChrome.door(ProtectionWords.wordsSectionDoor, tokens) {
-                    // A fresh look per press (it reads, at its making, whether words were recorded before).
-                    let fresh = standing.makeWordsLook()
-                    look = fresh
-                    Task { await fresh.open() }
+        // R2-MINOR-1 (the ladder's round 2): a section whose EVERY door the follow locks renders NOTHING — heading
+        // and lead included, never a "Your twelve words" lead over a doorless hole; the one saying lives in the
+        // follow's place (P-VM8-9 (a-unified)). An OPEN look keeps the section whole (the author is mid-words; the
+        // screen never tears her words away).
+        let followLocked = faces?.pairGate == true || faces?.newWords == .refused(MobileFollowOwed.saying)
+        let lookOpen = look.map { $0.phase != .closed } ?? false
+        if lookOpen || !followLocked {
+            VStack(alignment: .leading, spacing: 10) {
+                MobileProtectionChrome.heading(ProtectionWords.wordsSectionTitle, tokens)
+                MobileProtectionChrome.caption(ProtectionWords.wordsSectionLine, tokens)
+                if let look, look.phase != .closed {
+                    MobileWordsLookPanel(look: look, tokens: tokens)
+                } else if case .refused(let sentence)? = faces?.newWords {
+                    MobileProtectionChrome.caption(sentence, tokens)
+                } else if faces?.newWords != .hidden {
+                    MobileProtectionChrome.door(ProtectionWords.wordsSectionDoor, tokens) {
+                        // A fresh look per press (it reads, at its making, whether words were recorded before).
+                        let fresh = standing.makeWordsLook()
+                        look = fresh
+                        Task { await fresh.open() }
+                    }
+                    .disabled(standing.keyDoors?.presenter.sheet != nil)
+                    // VX-263's one line — the key door says it (rule 6: "the doors say so in one sentence").
+                    MobileProtectionChrome.caption(ProtectionWords.keyDoorsLine, tokens)
+                    if let message = look?.message { MobileProtectionChrome.alarm(message, tokens) }
                 }
-                .disabled(standing.keyDoors?.presenter.sheet != nil)
-                // VX-263's one line — the key door says it (rule 6: "the doors say so in one sentence").
-                MobileProtectionChrome.caption(ProtectionWords.keyDoorsLine, tokens)
-                if let message = look?.message { MobileProtectionChrome.alarm(message, tokens) }
             }
         }
     }

@@ -17,7 +17,8 @@
 //    - F-U1-1, RULED (A) — and F-U2-G beside it for the crossings: an arm whose confirm says HER rule-12 leave sentence
 //      (`saysRuleTwelve` — the Castle-leaving join, Move out of Castle, the follow out of Castle, Use Standard) is NOT
 //      rendered: its words name the Mac and their phone wording is hers (F-PH-2). VM-8 HOLDS every one of them until
-//      she words them; meanwhile the follow-owed state is P-VM8-10's recorded dead end.
+//      she words them; meanwhile the follow OUT of Castle (and a Move that would leave Castle) is P-VM8-10's recorded
+//      dead end — the other follow kinds render their door and are no dead end at all.
 //    - THE OWED FOLLOW, SAID ONCE (ladder round 1's MINOR-1 — P-VM8-9 (a-unified)): a door the follow locks says
 //      nothing in its place; the follow-owed refusal is said once, in this section's follow place.
 //    - THE RECEIPTS (F-U2-E, PROVISIONAL P-VM8-8): the newest few the protection acts said, muted, under the title.
