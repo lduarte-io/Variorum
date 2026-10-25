@@ -2101,6 +2101,29 @@ key-file fields pre-existing, written through the existing setter — R-510-20 t
 record honesty held through the premature-claim correction. **The only things between this tree and the merge are
 the closing stage batch, the live proof, and HER TWO-MAC TEST.**
 
+## THE CLOSING STAGE BATCH (2026-10-24 evening MDT, the orchestrator; stage claim `vx-529`, 240 min; zero instances
+## confirmed before the run; she off the Pro at her word)
+
+- **The Mac target, WHOLE** (`xcodebuild -scheme Variorum -destination 'platform=macOS' test`, DerivedData
+  `vx529-stage`): **5265 tests — 5231 passed · 2 failed · 28 skipped · 4 expected failures** (~37 min).
+  - **The 2 failures are VX-539, PROVEN pre-existing:** all in `ProtectionPairRetentionTests`, and the SAME suite
+    with the SAME three expectation lines fails on MAIN (the shipped tree) run by the orchestrator in the same
+    window (`/tmp/vx539check`) — the suite reads the real clock and this is the week boundary (Sat ~04:00 UTC),
+    exactly the ticket's mechanism. Not this run's regression; nothing in the diff touches what it exercises
+    (round 2 verified).
+  - **The 28 skips, read per the protocol:** 27 are the standing gated capture/trace and window-geometry suites
+    (by design); the 28th is the OPT-IN Apple-keys round-trip (`VARIORUM_APPLE_KEY_ROUND_TRIP=1` — it writes
+    throwaway synchronizable items to the real iCloud Keychain). **Deliberately not opted in:** this run's diff has
+    zero lines in the Apple-keys leaf, so the changed-source rule does not reach it (VX-510 ran it because ITS diff's
+    premise needed it). The sync-keys custody suites — the leaves VX-530's fix DOES touch — ran (not in the skip
+    list).
+  - The 4 expected failures are the recorded known-issue rows. The ticketed MCP wall-clock flake did not fire.
+  *[removed for publication]*
+    vault standard rev 1 · `kp:` ENROLLED · 1 device cursor · 3 containers / 16 blocks / 16 variants, newest write
+    2026-10-24 21:02Z — the first-run fix working in the field; one release stands (0.10.1, build 9311, 2026-10-24).
+- **The phone suites** (`VariorumMobile`, iPhone 17 Pro simulator, DerivedData `vx529-phone`): PENDING at this
+  writing — the result line flips here when the run lands.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;
