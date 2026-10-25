@@ -659,7 +659,13 @@ struct MobileProtectionFollowOwedOnceTests {
             }
             #expect(labels.contains(ProtectionWords.deleteAccountHereDoor), "a door the follow doesn't lock keeps its row")
             #expect(labels.contains(ProtectionWords.postureLine(.castle)), "the sections keep their own lines")
-            #expect(labels.contains(ProtectionWords.wordsSectionLine))
+            // R2-MINOR-1 (the ladder's round 2): a section whose EVERY door the follow locks renders NOTHING —
+            // heading and lead included, never a "Your twelve words" lead over a doorless hole (the one saying
+            // lives in the follow's place, P-VM8-9 (a-unified)).
+            #expect(!labels.contains(ProtectionWords.wordsSectionLine),
+                    "a fully follow-locked words section renders nothing — its lead included")
+            #expect(!labels.contains(ProtectionWords.wordsSectionTitle),
+                    "…and its heading")
         }
     }
 
