@@ -2488,6 +2488,10 @@ anything unexpected:
   words ×1) and "Your account changed on another device. Follow it first." 4× (Protection's crossing rows ×3, the
   Sync section ×1) — VX-542's class, worse on a real Castle + Touch ID library than the drill showed; the ticket
   gains the count.
+- **Step 6 (Air): ⌃⌘L with the follow NOT pressed; the Touch ID ask cancelled; her NEW passphrase typed at the lock
+  screen → IT OPENED.** Her words: "i didn't click "follow". i locked it. i used my new passphrase - and it worked!"
+  — **R-529-1 live on her real Air**: the lagging library, whose own lock held only the old passphrase, opened by the
+  account's new one through the vault. Whether the catch-up landed in the same press is Step 7's check.
 
 ## Machinery
 
