@@ -1461,7 +1461,13 @@ needs them. Not durable, never committed.
     brief's shape, `pairKeysAtTheDoor` the worked example): the door's hold takes the secrets FIRST, then session memory,
     then the silent item, then — Castle only, LAST and once — the Touch ID item, and HANDS the keys it found to the act
     (`perform(…, material:)` — unit 1's carry), so the act's `syncMaterial` returns them without a read. Standard's path
-    unchanged (its one read is the silent class — no prompt; outside this rider). NOT-STARTED: the pin, the fix.
+    unchanged (its one read is the silent class — no prompt; outside this rider). THE COUNTING-LEAF PIN COMMITTED (this
+    commit, `Tests/VariorumCoreTests/Protection/Executor/KeyDoorTouchIDReadsTests.swift` — the world's `syncKeysTouchIDReads`,
+    VX-517's counter): **RED on the pre-fix tree** (`swift test --filter KeyDoorTouchIDReadsTests`): `✘ Test run with 5 tests
+    in 1 suite failed … with 4 issues` — Change passphrase **2 reads** (expected 0); Reset by Touch ID, nothing in hand,
+    **2** (expected 1); Reset by Touch ID with session memory loaded, **2** (expected 0); Reset by the words, **1** (expected
+    0) — the trace's counts exactly; the stale-session guard green. Each row also asserts the act LANDED (the vault and the
+    key file open under the new passphrase; the item read, never written; `expectSettled`). The fix: NOT-STARTED.
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 
 **NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):**
