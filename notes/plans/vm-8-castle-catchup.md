@@ -220,9 +220,16 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   this stacking truth) — (what `RoadStandingModel.speak` says — acts on the screen at once, an open's owed receipts
   waiting until the screen shows, leaving the screen clears it; `receipt_style` has no phone consumer yet) · (B) a
   shell-wide muted line at every room's foot.
-- **P-VM8-9** (unit 2, F-U2-D — a FACE) — VX-542 on the phone: (a, built) the pair sentence ONCE (the follow door's notice),
-  the locked key doors' road ONCE ("Follow your account to catch this iPhone up first."), identical refusals said once per
-  section · (b) the full gate sentence once at the key doors too (the pair sentence twice on the screen).
+- **P-VM8-9** (unit 2, F-U2-D — a FACE; EXTENDED to (a-unified) at ladder round 1's MINOR-1) — VX-542 on the phone:
+  **(a-unified, built — L1 `67924b29a`)** the follow-owed refusal said ONCE PER SCREEN in every follow kind, the pair
+  included: the shared `doorRefusedFollowOwed` (no new words) once, in the account section's follow place — beside the
+  follow door's notice where that door renders (notice, the saying, the door), alone there where it does not (P-VM8-10's
+  held follow out keeps its one truth-teller); every door the follow locks says nothing in its own place; the pair
+  sentence once, as the follow door's notice; the key doors' road ("Follow your account to catch this iPhone up first.")
+  no longer said on the phone; a door refused for any other reason keeps its row · (a, unit 2's build — SUPERSEDED by
+  a-unified) the pair sentence once, the locked key doors' road once, identical refusals once per SECTION (the generic
+  sentence up to four times on one screen — round 1's probe) · (b) the full gate sentence once at the key doors too (the
+  pair sentence twice on the screen).
 - **F-U1-1 (A), ruled — NOT a sentence, a door rule:** the phone's unit-1 section renders neither rule-12 arm (the
   Castle-leaving join / Move, the follow out of Castle); F-PH-2 is hers.
 
@@ -886,17 +893,26 @@ untouched.
 
 ### L1 — THE LADDER FIX SESSION (round 1's confirmed fixes; the implementer owns this subsection; every unverified claim PENDING)
 
+**L1 CLOSED by the implementer — every confirmed fix landed, every pin red as named, the tip green.**
+
 **NOT DONE BY THIS SESSION (first):** everything round 1's dispositions did NOT send to the fix session — MAJOR-1 (stands
 as built, P-VM8-10), MINOR-3 (tickets — the orchestrator's), NIT-3 · NIT-4 · NIT-5's indentation/chrome/ink items (record
-only), NIT-6's bundle line (the orchestrator's); the `herRuleTwelve` exemption's reason stays BYTE-UNTOUCHED (ruled); no
-Mac-target `xcodebuild test`; canon, QUESTIONS, Linear — the orchestrator's. **No revert is in flight.**
+only), NIT-6's bundle line (the hours-waiting receipt — the orchestrator's); the `herRuleTwelve` exemption's reason stays
+BYTE-UNTOUCHED (ruled); no Mac-target `xcodebuild test` (a Mac `build-for-testing` only — the Shared edits are comments);
+the VX-542 note (the phone's once-per-screen as the Mac's precedent) is a Linear write — the orchestrator's; canon,
+QUESTIONS, her bundle's P-VM8-9 line (the record's PROVISIONALS entry is trued to (a-unified) — the bundle item 9 (b)
+still reads unit 2's (a)) — the orchestrator's. One residue said, not widened: NIT-2's sign-in sentence sheet
+(`signInUnavailable`, the Mac's "in this window") stays reachable where a re-keying act's reopen re-pushes the screen
+before the fresh services are composed (F-U1-3's road; the shell's push is not Settings' row) — a moment, the account
+signed in by then on every re-keying road walked, so *Sign in…* is not offered there; for round 2's eye. **No revert is
+in flight; the stage is released; the pinned simulator is shut down.**
 
 *Implementer L1 — Opus 5.5, xhigh. Pre-fix tree = `2243a26aa` (round 1's dispositions folded in). Stage claims as `vm8-l1`;
 *[removed for publication]*
 record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole (a Castle face changes), the code named.*
 
 **THE PLAN (pieces; flipped per commit):**
-1. **MINOR-1 — the owed follow's refusal ONCE PER SCREEN (P-VM8-9 → (a-unified)).** CODE DONE. The shape, read from the
+1. **MINOR-1 — the owed follow's refusal ONCE PER SCREEN (P-VM8-9 → (a-unified)).** DONE — FIXED with its pins. The shape, read from the
    disposition word by word: the one saying is the shared faces' own `.followOwed` sentence (`ProtectionWords
    .doorRefusedFollowOwed` — no new words), said exactly once on the screen in EVERY follow kind, the pair included; it
    stands in the account section's follow place — beside the follow door's notice where that door renders (notice, the
@@ -917,21 +933,23 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
    FollowLocksIt` — the pure rows, another reason's row kept as a guard); UPDATED `aPairGateSaysThePairSentenceOnce` (now
    with the crossings and *Stop syncing here* locked: the pair sentence once, the generic once, the road never) and the
    posture suite's `aPairChangedElsewhereLocksTheKeyDoorsAndTheScreenSaysItOnce` (the same, end to end through the real
-   derive). **RED ON THE PRE-FIX TREE (RUN A, below) exactly as named.** Green at the tip PENDING (RUN B).
-2. **MINOR-2 — the phone lobby's E6 line, pinned.** PIN DONE. A hosted `MobileRoadLockView` over the phone bootstrap's
+   derive). **RED ON THE PRE-FIX TREE (RUN A, below) exactly as named; red again by RV-L1-3 (RUN C); GREEN at the tip
+   (RUN B).**
+2. **MINOR-2 — the phone lobby's E6 line, pinned.** DONE — the missing pin landed (no production change). A hosted `MobileRoadLockView` over the phone bootstrap's
    own lobby in E6 (a fresh library joins a Castle account by its twelve words under Always ask — no passphrase lock of
    its own, signed in — then locks); red on `fd56f2279`'s copy of `MobileRoadFaces.swift`. No production change.
    **PIN `5c5ed06e6`** — NEW `MobileLobbyE6LineTests.theLobbySaysTheE6LineBeneathItsLead` (the E6 precondition asserted on
    the bootstrap's own lobby face). GREEN on the tip's tree (RUN A — the E6 rendering exists there); its red, by behavioral
-   revert (RV-L1-1), PENDING (RUN C).
+   revert (RV-L1-1), RED as named (RUN C).
 3. **NIT-2 — Settings' *Protection…* row only while `services` exist** (the sync row's *Starting…* beside it — P-2); the
-   dead `sentence == nil` arm of `MobileProtectionSheetNotHere` removed. CODE DONE. Pin: hosted `MobileSettingsView` with
+   dead `sentence == nil` arm of `MobileProtectionSheetNotHere` removed. DONE — FIXED with its pin. Pin: hosted `MobileSettingsView` with
    no services over a bootstrap whose library has its account section → no row (red on the pre-fix tree); the source pin
    `settingsOpensTheScreenOnlyWhereItCanAct` follows the guard. **PINS `5c5ed06e6`; FIX `bbc4c2c08`** (the guard gains
    `services != nil`; `MobileProtectionSheetNotHere`'s `sentence: String?` and its auto-closing `onAppear` arm gone — its
    one sentence stays, reachable only where a reopen re-pushes the screen before fresh services: recorded, not widened).
    NEW `MobileProtectionCompositionTests.noServicesNoProtectionRow` (hosted `MobileSettingsView`, no services, over the
-   phone bootstrap's own open library) + the source pin's new guard string. **RED ON THE PRE-FIX TREE (RUN A).**
+   phone bootstrap's own open library) + the source pin's new guard string. **RED ON THE PRE-FIX TREE (RUN A) and by
+   RV-L1-4 (RUN C); GREEN at the tip (RUN B).**
 4. **NIT-1 — stale comments trued (COMMENTS ONLY).** DONE `b267a6818` — every changed line a comment (checked by diff):
    the round's list (`SyncStatusViews.swift` ×2, `ProtectionSheetPresenter.swift:3`, `RoadKeyDoorFaces.swift:3` + the
    `pairGate` doc's (a-unified) truth, `RoadKeyDoorsModel.swift:3`, `ProtectionSecretCheck.swift:3`,
@@ -940,19 +958,19 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
    `RoadCrossingsModel.swift:3`, `AppBootstrap.attach`'s "the phone wires its deletion hook inline … until VM-8"). The
    `herRuleTwelve` exemption untouched; `CopyDoorsModel.swift:3` and `ProtectionCopy.swift:13` left (still true: the phone
    has no copy doors; the guide's rewrite is unit 3's).
-5. **NIT-5's guard — the copied planted support can't drift.** PIN DONE. One test: every top-level declaration in
+5. **NIT-5's guard — the copied planted support can't drift.** DONE. One test: every top-level declaration in
    `MobilePlantedProtection.swift` (its doc comment + body) is byte-identical to the same-named declaration in the Mac's
    `VariorumTests/Protection/ProtectionTestSupport.swift` / `ProtectionAccountSupport.swift` (the file headers and the
    `@testable import` differ by design and are not compared). Non-hollow by a one-byte drift, named before it runs.
    **PIN `5c5ed06e6`** — NEW `MobilePlantedProtectionParityTests.everyCopiedDeclarationIsTheMacsByteForByte` (8
    declarations: `TempSlot`, `InMemoryAppleKeysLeaf`, `PlantedCustodyLeaf`, `PlantedMemoryLeaf`, `FixedBiometryLeaf`,
    `FastIDsLeaf` from `ProtectionTestSupport.swift`; `PlantedVaultLeaf`, `PlantedSyncKeysLeaf` from
-   `ProtectionAccountSupport.swift`). GREEN (RUN A); its drift red PENDING (RUN C, RV-L1-2).
+   `ProtectionAccountSupport.swift`). GREEN (RUNS A, B); RED by its one-byte drift naming `TempSlot` (RUN C, RV-L1-2).
 6. **NIT-6's comment — "one muted line" trued to the stacking truth (up to three).** DONE `6b30fb801` (comments only:
    the doors file's header and `MobileProtectionReceipts`' doc, the screen's line, the receipts pin's doc; the record's
    P-VM8-8 entry trued with them).
 7. **Evidence:** pins red on the pre-fix tree (MINOR-1, NIT-2) / by behavioral revert (MINOR-2, NIT-5's drift); the
-   changed suites + `MobileNoRedirectSweepTests` + `MobileCopyRegisterSweepTests` green at the tip. PENDING.
+   changed suites + `MobileNoRedirectSweepTests` + `MobileCopyRegisterSweepTests` green at the tip. DONE:
    - **RUN A — THE PINS ON THE PRE-FIX PRODUCTION TREE** (`5c5ed06e6`'s tree; stage claim `vm8-l1`; the pinned simulator;
      `DerivedData/vm8u2-ios` reused; `-only-testing` the six suites the pins live in): `✘ Test run with 18 tests in 6
      suites failed after 25.254 seconds with 17 issues` — RED exactly as named: `aPairGateSaysThePairSentenceOnce`
@@ -989,6 +1007,18 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
      — the copy: … removed at deinit! · the Mac's: …" — `TempSlot` named); RV-L1-3 the five MINOR-1 pins (2 · 2 · 4 · 4 · 3
      times, as RUN A); RV-L1-4 `noServicesNoProtectionRow` and `settingsOpensTheScreenOnlyWhereItCanAct`; GREEN every other
      test (36), the sweeps included.
+   - **RUN D — THE WHOLE PHONE TARGET at the tip's product tree** (`-only-testing: VariorumMobileTests`, stage claim
+     `vm8-l1`): `Test run with 847 tests in 139 suites passed after 476.144 seconds with 4 known issues` — exactly unit
+     2's close (840/136) + W-U2-1's pin (1) + L1's 6 tests / 3 suites; the four DECLARED known issues (`MobileTrashTests`
+     `anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` ×2, `MobileTutorialWalkTests`
+     `theFannedDivideLessonLandsTheDuplicateShape` ×2); zero skipped. **`MobileMarkdownCaretTests` (VM-24) PASSED in this
+     run** (red in units 1 and 2's whole-target runs) — untouched by L1 (no editor-seam line); its red is state-dependent,
+     still VM-24's to trace.
+   - **Mac `build-for-testing` EXIT 0** (`DerivedData/vm8u2-mac`) — the Shared edits are comments only (every changed line
+     checked to be `//`/`///` by diff), the Mac's rendering untouched.
+   - **THE L1 COMMITS:** `a2c1c8dc5` (record opens) · `5c5ed06e6` (the pins) · `67924b29a` (MINOR-1) · `bbc4c2c08`
+     (NIT-2) · `b267a6818` (NIT-1) · `6b30fb801` (NIT-6) · the record commits after. Zero `Sources/` lines; zero new
+     product words (MINOR-1 reuses `doorRefusedFollowOwed`; NIT-2 removes a log line and an arm, adds no sentence).
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
@@ -999,7 +1029,7 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
 | 3 | Unit 3 — the cards + the pocket guide | at her split call | NOT STARTED |
 | 4 | Old-scope reconciliation tickets | orchestrator | table drafted; tickets at the sitting |
 | 5 | Her sitting bundle | orchestrator | OPEN — grows |
-| 6 | The ladder (fresh Opus reviewer per round, REVIEW_PROMPT verbatim, whole-run diff) | orchestrator | **ROUND 1 DONE** (`notes/plans/vm-8-ladder-round1.md` + dispositions): 0 BLOCKER · 1 MAJOR · 3 MINOR · 6 NIT — MAJOR-1 stands as built (P-VM8-10, F-PH-2's consequence); the fix session L1 runs MINOR-1/-2 + NIT-1/-2/-5-guard/-6-comment; MINOR-3 → VM tickets. Round 2 re-reviews the fixes |
+| 6 | The ladder (fresh Opus reviewer per round, REVIEW_PROMPT verbatim, whole-run diff) | orchestrator | **ROUND 1 DONE** (`notes/plans/vm-8-ladder-round1.md` + dispositions): 0 BLOCKER · 1 MAJOR · 3 MINOR · 6 NIT — MAJOR-1 stands as built (P-VM8-10, F-PH-2's consequence); the fix session L1 runs MINOR-1/-2 + NIT-1/-2/-5-guard/-6-comment; MINOR-3 → VM tickets. **L1 CLOSED by the implementer** (UNIT 2 — LIVE STATUS ▸ L1: every fix landed, every pin red as named, 47/16 + the whole phone target 847/139 green at the tip). Round 2 re-reviews the fixes |
 | 7 | The device install + her live round + the measured save (VX-497) | HER MORNING | HELD |
 | 8 | Closeout (canon two-file shape; PL ledger row; master plan; handoff; tickets triaged) | orchestrator | NOT STARTED |
 
