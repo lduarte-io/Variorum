@@ -1011,7 +1011,11 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   PlantedTests|ProtectionLobbyModelTests|RoadLockTests|FollowDoneNoticeTests|PairFollow|PairPreflight"`): `✔ Test run with
   75 tests in 12 suites passed` (VX-501's `theTypedLoadNeverDerivesThePassphrase` source pin among them — the vault road
   derives nothing; the core does). THE REVERT (named before it runs): RV-P6-1 `ProtectionOpenRoad.swift` — the `.noneOpens`
-  arm's vault-road call removed, `--filter LobbyVaultRoadTests`. PENDING (next commit).
+  arm's vault-road call removed, `--filter LobbyVaultRoadTests`. **VERIFIED BY REVERT** on `f073ee6b6`: `✘ Test run with 9
+  tests in 1 suite failed … with 8 issues` — exactly the pre-fix four (the road refused in both postures; the bare
+  sentence ×2) plus the design rows that ride the road (the named sentence; the landing; E6's account sentence and its
+  open); the five guardrails green through it; restored by `git checkout --`, `git diff --exit-code` clean, `✔ 9 tests`
+  green again. DONE (`9f15baf0b` pins, `f073ee6b6` road). No revert is in flight.
 - U2-P7 — the close: the harness whole, the core protection suites, ONE Mac + ONE iOS `build-for-testing`
   (`DerivedData/vx529-u2*`), the Mac-suite list for the stage batch. NOT-STARTED.
 
