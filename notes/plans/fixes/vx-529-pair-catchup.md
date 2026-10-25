@@ -1275,7 +1275,7 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-526 DONE; every other member NOT-STARTED. No revert is in
+**NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-526 and VX-522 DONE; every other member NOT-STARTED. No revert is in
 flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
 `~/dev/variorum-vx-529`.
 
@@ -1320,7 +1320,7 @@ needs them. Not durable, never committed.
   arms as they were. **THE DRAFTED RULE-7 WORDING (for her closeout ratify; never written into CastleRules here):** rule 7's
   italic sentence ending "*…the old ones still open backups made with them*" in place of "*…the old ones still open backups
   you made before today*" — rule 5's floor in rule 7's voice.
-- **VX-522 — the hold banner's promise.** IN-PROGRESS — THE TRACE (the brief's premise CORRECTED — VX-473's condition does
+- **VX-522 — the hold banner's promise.** DONE — THE TRACE (the brief's premise CORRECTED — VX-473's condition does
   NOT miss this path): the root renders `RestoreHoldBar(hasAccount: bootstrap.roadStanding?.syncsWithAnAccount ?? true)`
   (`VariorumApp.swift:354`); `RoadStandingModel.make` reads `syncsWithAnAccount` from `session.library.record?.account != nil`
   — false for Make this my library's new library (the copy carries no sync identity) — so the root takes
@@ -1342,7 +1342,15 @@ needs them. Not durable, never committed.
   "account" and a "Resume" in the arm — both true of the new text by reading; its run PENDING the stage batch. THE REVERT
   (named before it runs; one edit on this commit, `--filter HoldBannerNoAccountWordsTests`, restored by `git checkout --`):
   RV-522-1 `LibraryOpenCopy.swift` — the arm's sentence back to "Sync is waiting until you press Resume. To keep something
-  from this backup, duplicate it first — duplicates stay." [expect the six issues]. PENDING.
+  from this backup, duplicate it first — duplicates stay." [expect the six issues]. **VERIFIED BY REVERT** on `7a805a7c7`:
+  RV-522-1 ⇒ `✘ Test run with 2 tests in 1 suite failed … with 6 issues` (exactly the pre-fix red); restored by `git
+  checkout --`, `git diff --exit-code` clean, `✔ 2 tests` green again. **DONE** (`a5743dbcc` pin, `7a805a7c7` fix). No
+  revert is in flight. **P-VX529-U3-2 (PROVISIONAL — the no-account banner):** (a) BUILT: the banner stands (the hold is
+  still the gate a later join's first round meets — `firstRoundHeld`) with the true fact and what its door does; (b) no
+  banner while the library names no account — the hold stands silently and the banner appears the moment a join binds the
+  library (VX-473's re-read already flips it), a visibility change rather than words; (c) the restore confirm's own sentence
+  ("…doesn't sync with your account until you turn on sync for it in Settings ▸ Protection") — it names an account a Mac with
+  none doesn't have (round 4's NIT). The door's label "Resume Sync" is unchanged under (a) — a label change is hers.
 - **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
 - **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
@@ -1354,6 +1362,9 @@ needs them. Not durable, never committed.
 2. VX-526 — the passphrase-typed words moment's middle sentence (`joinWordsNotShown`): "Your previous twelve words still
    open backups made with them." (was "…still open backups you made before today."). The rule-7 twin for her ratify is under
    P-VX529-U3-1.
+3. VX-522 — the hold banner over a library that names no account (`LibraryOpenCopy.holdBanner`, `hasAccount: false`): "This
+   is your library as of ‹day›. This library doesn't sync, so Resume changes nothing in it." (was "…Sync is waiting until you
+   press Resume. To keep something from this backup, duplicate it first — duplicates stay."; P-VX529-U3-2).
 
 ## Machinery
 
