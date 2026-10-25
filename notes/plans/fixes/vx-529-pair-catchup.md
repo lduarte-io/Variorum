@@ -1275,7 +1275,27 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
-*(not started)*
+**NOT DONE IN THIS UNIT (so far — this line is kept current):** every member NOT-STARTED; nothing built. No revert is in
+flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
+`~/dev/variorum-vx-529`.
+
+**Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
+`notes/CastleRules.md` whole; SurfaceContracts' protection and portability bullets; this file whole; the VX-510 record's
+ENVIRONMENT TRAPS, W-5/W-6/W-11/W-12 (LEG S, LEG C) and O-B4-1 (UNIT B4); each member's Linear description (read-only).
+
+**The harness:** unit 2's headless harness (`u2-harness` in this session's scratchpad — the VX-510 unit A recipe, the app's
+`Shared/` sources symlinked into a scratch SPM package) reused in place; new suites/sources are symlinked in as each member
+needs them. Not durable, never committed.
+
+**Members (strictly sequential; flip per commit; unverified claims PENDING):**
+- **VX-526 — the join sheet's words.** NOT-STARTED.
+- **VX-522 — the hold banner's promise.** NOT-STARTED.
+- **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
+- **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
+- **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
+- **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
+
+**NEW SENTENCES (every one PROVISIONAL, sentence case — for her wording bundle):** none yet.
 
 ## Machinery
 
