@@ -1755,7 +1755,8 @@ commit + push per piece, LIVE STATUS under this section, no trailers.
 
 ### L1 — LIVE STATUS (the implementer owns this section)
 
-**NOT DONE IN THIS SESSION:** everything but F-R1-1 (the charter's one finding); the Mac-target run of
+**F-R1-1 FIXED (agreed; pin red-on-old `79b3d23e6`, gate `facffef48`, revert-verified). NOT DONE IN THIS SESSION:**
+everything but F-R1-1 (the charter's one finding); the Mac-target run of
 `LobbyVaultRoadTests` (the closing stage batch — it runs here in unit 2's headless harness only); every walk. No revert
 is in flight (RV-L1-1 ran and was restored — L1-P3). Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
