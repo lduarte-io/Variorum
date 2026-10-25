@@ -896,7 +896,7 @@ Mac-target `xcodebuild test`; canon, QUESTIONS, Linear — the orchestrator's. *
 record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole (a Castle face changes), the code named.*
 
 **THE PLAN (pieces; flipped per commit):**
-1. **MINOR-1 — the owed follow's refusal ONCE PER SCREEN (P-VM8-9 → (a-unified)).** NOT-STARTED. The shape, read from the
+1. **MINOR-1 — the owed follow's refusal ONCE PER SCREEN (P-VM8-9 → (a-unified)).** CODE DONE. The shape, read from the
    disposition word by word: the one saying is the shared faces' own `.followOwed` sentence (`ProtectionWords
    .doorRefusedFollowOwed` — no new words), said exactly once on the screen in EVERY follow kind, the pair included; it
    stands in the account section's follow place — beside the follow door's notice where that door renders (notice, the
@@ -908,21 +908,62 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
    faces yet, the screen says the one saying at its place. Pins (hosted `MobileProtectionScreen` counts, red on the pre-fix
    tree): the generic kind (`.keysReplaced`) 4 → 1, the pair 2 → 1 (the road 1 → 0), the held follow out ≥ 1 and == 1;
    the posture suite's end-to-end pair pin moves the same way.
-2. **MINOR-2 — the phone lobby's E6 line, pinned.** NOT-STARTED. A hosted `MobileRoadLockView` over the phone bootstrap's
+   **PINS `5c5ed06e6` (committed first, compiled on the pre-fix production tree); FIX `67924b29a`** — `MobileFollowOwed`
+   (`MobileProtectionDoors.swift`: pure readings of the shared faces — the pair gate, or a door saying the follow-owed
+   sentence); the passphrase / words / crossings rows drop a door the follow locks; `MobileRoadAccountSection`'s
+   `followRow` says the one saying in the follow's place (`followOwedElsewhere` from the screen); the screen's belt.
+   Pins: NEW `MobileProtectionFollowOwedOnceTests` (`anOwedFollowSaysItsRefusalOncePerScreen` — the generic kind;
+   `theHeldFollowOutStillSaysItOnce` — P-VM8-10's dead end + the unread-account belt; `aLockedDoorKeepsItsRowUnlessThe
+   FollowLocksIt` — the pure rows, another reason's row kept as a guard); UPDATED `aPairGateSaysThePairSentenceOnce` (now
+   with the crossings and *Stop syncing here* locked: the pair sentence once, the generic once, the road never) and the
+   posture suite's `aPairChangedElsewhereLocksTheKeyDoorsAndTheScreenSaysItOnce` (the same, end to end through the real
+   derive). **RED ON THE PRE-FIX TREE (RUN A, below) exactly as named.** Green at the tip PENDING (RUN B).
+2. **MINOR-2 — the phone lobby's E6 line, pinned.** PIN DONE. A hosted `MobileRoadLockView` over the phone bootstrap's
    own lobby in E6 (a fresh library joins a Castle account by its twelve words under Always ask — no passphrase lock of
    its own, signed in — then locks); red on `fd56f2279`'s copy of `MobileRoadFaces.swift`. No production change.
+   **PIN `5c5ed06e6`** — NEW `MobileLobbyE6LineTests.theLobbySaysTheE6LineBeneathItsLead` (the E6 precondition asserted on
+   the bootstrap's own lobby face). GREEN on the tip's tree (RUN A — the E6 rendering exists there); its red, by behavioral
+   revert (RV-L1-1), PENDING (RUN C).
 3. **NIT-2 — Settings' *Protection…* row only while `services` exist** (the sync row's *Starting…* beside it — P-2); the
-   dead `sentence == nil` arm of `MobileProtectionSheetNotHere` removed. NOT-STARTED. Pin: hosted `MobileSettingsView` with
+   dead `sentence == nil` arm of `MobileProtectionSheetNotHere` removed. CODE DONE. Pin: hosted `MobileSettingsView` with
    no services over a bootstrap whose library has its account section → no row (red on the pre-fix tree); the source pin
-   `settingsOpensTheScreenOnlyWhereItCanAct` follows the guard.
-4. **NIT-1 — stale comments trued (COMMENTS ONLY).** NOT-STARTED.
-5. **NIT-5's guard — the copied planted support can't drift.** NOT-STARTED. One test: every top-level declaration in
+   `settingsOpensTheScreenOnlyWhereItCanAct` follows the guard. **PINS `5c5ed06e6`; FIX `bbc4c2c08`** (the guard gains
+   `services != nil`; `MobileProtectionSheetNotHere`'s `sentence: String?` and its auto-closing `onAppear` arm gone — its
+   one sentence stays, reachable only where a reopen re-pushes the screen before fresh services: recorded, not widened).
+   NEW `MobileProtectionCompositionTests.noServicesNoProtectionRow` (hosted `MobileSettingsView`, no services, over the
+   phone bootstrap's own open library) + the source pin's new guard string. **RED ON THE PRE-FIX TREE (RUN A).**
+4. **NIT-1 — stale comments trued (COMMENTS ONLY).** DONE `b267a6818` — every changed line a comment (checked by diff):
+   the round's list (`SyncStatusViews.swift` ×2, `ProtectionSheetPresenter.swift:3`, `RoadKeyDoorFaces.swift:3` + the
+   `pairGate` doc's (a-unified) truth, `RoadKeyDoorsModel.swift:3`, `ProtectionSecretCheck.swift:3`,
+   `ProtectionLobbyFace.swift:68`, `RoadAccountModel.swift` 99/431/437/521, `MobileProtectionScreen.swift`'s header) and the
+   same class found beside them (`RoadAccountFaces.swift:3`, `RoadAccountModel.swift:3`, `RoadCrossingFaces.swift:3`,
+   `RoadCrossingsModel.swift:3`, `AppBootstrap.attach`'s "the phone wires its deletion hook inline … until VM-8"). The
+   `herRuleTwelve` exemption untouched; `CopyDoorsModel.swift:3` and `ProtectionCopy.swift:13` left (still true: the phone
+   has no copy doors; the guide's rewrite is unit 3's).
+5. **NIT-5's guard — the copied planted support can't drift.** PIN DONE. One test: every top-level declaration in
    `MobilePlantedProtection.swift` (its doc comment + body) is byte-identical to the same-named declaration in the Mac's
    `VariorumTests/Protection/ProtectionTestSupport.swift` / `ProtectionAccountSupport.swift` (the file headers and the
    `@testable import` differ by design and are not compared). Non-hollow by a one-byte drift, named before it runs.
-6. **NIT-6's comment — "one muted line" trued to the stacking truth (up to three).** NOT-STARTED.
+   **PIN `5c5ed06e6`** — NEW `MobilePlantedProtectionParityTests.everyCopiedDeclarationIsTheMacsByteForByte` (8
+   declarations: `TempSlot`, `InMemoryAppleKeysLeaf`, `PlantedCustodyLeaf`, `PlantedMemoryLeaf`, `FixedBiometryLeaf`,
+   `FastIDsLeaf` from `ProtectionTestSupport.swift`; `PlantedVaultLeaf`, `PlantedSyncKeysLeaf` from
+   `ProtectionAccountSupport.swift`). GREEN (RUN A); its drift red PENDING (RUN C, RV-L1-2).
+6. **NIT-6's comment — "one muted line" trued to the stacking truth (up to three).** DONE `6b30fb801` (comments only:
+   the doors file's header and `MobileProtectionReceipts`' doc, the screen's line, the receipts pin's doc; the record's
+   P-VM8-8 entry trued with them).
 7. **Evidence:** pins red on the pre-fix tree (MINOR-1, NIT-2) / by behavioral revert (MINOR-2, NIT-5's drift); the
    changed suites + `MobileNoRedirectSweepTests` + `MobileCopyRegisterSweepTests` green at the tip. PENDING.
+   - **RUN A — THE PINS ON THE PRE-FIX PRODUCTION TREE** (`5c5ed06e6`'s tree; stage claim `vm8-l1`; the pinned simulator;
+     `DerivedData/vm8u2-ios` reused; `-only-testing` the six suites the pins live in): `✘ Test run with 18 tests in 6
+     suites failed after 25.254 seconds with 17 issues` — RED exactly as named: `aPairGateSaysThePairSentenceOnce`
+     (the generic sentence said 2 times; the road said; so not beside the follow), the posture suite's
+     `aPairChangedElsewhere…` (end to end: 2 times; the road said), `anOwedFollowSaysItsRefusalOncePerScreen` (4 times —
+     round 1's probe exactly), `theHeldFollowOutStillSaysItOnce` (4 times, not in the Sync section; the belt: 3 times),
+     `aLockedDoorKeepsItsRowUnlessTheFollowLocksIt` (each section said it itself — 4 issues; the guard half green),
+     `settingsOpensTheScreenOnlyWhereItCanAct` (the old guard), `noServicesNoProtectionRow` (*Protection…* rendered with
+     no services); GREEN: `theLobbySaysTheE6LineBeneathItsLead`, `everyCopiedDeclarationIsTheMacsByteForByte`, and every
+     other test of those suites. (A machinery note: Xcode 27's compiler rejected a second inline `filter` closure beside a
+     capturing one in the posture suite — "function type mismatch", a SIL fault; the counts ride `U2Faces.count`.)
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
