@@ -219,6 +219,27 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   likely intact; VERIFY with a read before planning the scale walk on it. The prod test accounts stand
   (`~/.variorum/prod-test-accounts.env`, `prod-test-words-castle` / `-std` / `-del`).
 
+## UNIT 1 — LIVE STATUS (the implementer owns this section; every unverified claim PENDING)
+
+**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — filled at the close. No revert is in flight.
+
+*Implementer U1 — Opus 5.5, xhigh. Pre-fix tree = `fd56f2279`. Stage claims as `vm8-u1`.*
+
+- **Piece R — preflight, read whole myself:** CLAUDE.md + its canon; this record whole; `notes/handoffs/vm-8-kickoff.md`;
+  `notes/CastleRules.md` whole; `notes/SurfaceContracts.md` (Doors); `notes/MobileSoul.md` §1–§5 + PL-57/58/59;
+  `notes/SessionResiliencyProtocol.md`; the vx-510 record (rulings, trace, unit A/B designs and the first-round seam,
+  F-6/D-B0, the test-account road, OPEN ITEMS), the vx-529 record's THE PHONE section, vx-494's live proof + fix design,
+  the vx-329 phone flags (F-PH-1/2, F-U4-2/3); the code seams the brief names. DONE (this commit).
+- **Ground check (read-only, 2026-10-25):** the throwaway project ANSWERS and test user A's corpus STANDS — 1,200
+  containers · 36,000 blocks · 36,000 placements · 1 vault (the VX-494 plant, ~110k rows). The prod test accounts file
+  *[removed for publication]*
+  exists. Stage FREE.
+- **Piece 1 — the pre-design face on the phone lobby:** NOT-STARTED.
+- **Piece 2 — the phone's Protection screen (the account section), `attach(services:)`, the row's door:** NOT-STARTED.
+- **Piece 3 — VX-501 on the phone's posture:** NOT-STARTED.
+- **Piece 4 — the simulator walk + the measured save:** NOT-STARTED.
+- **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
+
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
 | # | item | owner | status |
