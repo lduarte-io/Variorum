@@ -243,7 +243,14 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
 
 ## UNIT 1 — LIVE STATUS (the implementer owns this section; every unverified claim PENDING)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — filled at the close. No revert is in flight.
+**NOT DONE BY THIS SESSION (first, as the contract asks):** (1) NO Mac-target `xcodebuild test` run — the brief keeps
+the dev store's Mac slot off-limits and the Mac test host IS the dev-store app; the shared files changed compile on the
+Mac (`build-for-testing` EXIT 0 at `4deb629cc`'s tree, `DerivedData/vm8u1-mac`) and THE MAC-SUITE LIST below is the
+orchestrator's stage batch (PENDING). (2) The DEVICE install and her live round — HER MORNING by the brief (ledger row
+7). (3) The phone's protection receipts (no `speak` home on the phone — her bundle 8(c), unit 2's). (4) The
+pre-existing red `MobileMarkdownCaretTests` (VX-296, editor seam) is NOT this unit's: red on the PRE-FIX tree on the same
+simulator — recorded, not touched. **No revert is in flight; the stage is released; the simulator is shut down and
+signed out.**
 
 *Implementer U1 — Opus 5.5, xhigh. Pre-fix tree = `fd56f2279`. Stage claims as `vm8-u1`.*
 
@@ -473,7 +480,49 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
     (signing back in is a join) · *sign out…*** (C04) → *sign out…* → the confirm (C05) → signed out (C06). A cosmetic
     found there: the medium-detent sign-out sheet left the system grey above and below its card (C05) — fixed (the room
     fills the sheet), re-walked after a fresh sign-in (C07–C08), signed out again (C09: the simulator rests signed out).
-- **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
+- **Piece 5 — evidence:** DONE.
+  - **Pins, red-on-old by behavioral revert (each named before it ran, each restored clean):** RV-1…RV-5 (pieces 1–2,
+    batches A/B above) and RV-6 (piece 3) — every named pin RED as named; guards green on both sides by design.
+  - **THE PHONE TARGET WHOLE on the pinned simulator at the final tip `227ce0ca3`'s product tree (`-only-testing:
+    VariorumMobileTests`, stage claim `vm8-u1`):** `✘ Test run with 819 tests in 130 suites failed after 420.635 seconds
+    with 6 issues (including 4 known issues)` — the four DECLARED known issues (`MobileTrashTests`
+    `anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` ×2, `MobileTutorialWalkTests`
+    `theFannedDivideLessonLandsTheDuplicateShape` ×2 — the standing ones) and ONE red suite, **`MobileMarkdownCaretTests`
+    ("VX-296 — the caret-aware face", `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` — `desyncRecoveryCount
+    == 0`, 2 issues), PRE-EXISTING: the same suite ran RED on the PRE-FIX tree (`fd56f2279`, `git archive`d into the
+    scratchpad, its own DerivedData) on the same simulator** — not this unit's (no editor-seam line in this diff); the
+    orchestrator's to ticket (it may be the simulator's keyboard state after a host-keyboard walk, or VM-19's test-posture
+    class — untraced). Zero skipped (the two "skipped" log lines are the AppIntents metadata tool's). The unit's own six
+    suites at the tip: `✔ Test run with 18 tests in 6 suites passed` (`MobilePreDesignFaceTests`,
+    `MobileProtectionAccountSectionTests`, `MobileProtectionCompositionTests`, `MobileTypedUnlockSyncKeysTests`,
+    `MobileNoRedirectSweepTests`, `MobileProtectionRoadTests`). `MobileNoRedirectSweepTests` green — no exemption
+    widened, the `herRuleTwelve` literal untouched and still unreachable on the phone (F-U1-1 (A)).
+  - **Builds:** phone `build-for-testing` EXIT 0 (generic iOS Simulator); Mac `build-for-testing` EXIT 0 (the shared
+    words' Mac arms byte-identical by construction — `ProtectionRoad.isMac`).
+  - **THE MAC-SUITE LIST (the orchestrator's stage batch — every Mac suite reading a shared file this unit changed):**
+    `ProtectionWords` (`gateTouchIDLine`, `firstRoundCloseNote`, `deleteHerePointer` became `ProtectionRoad.isMac`
+    ternaries): `RoadCrossingWordsTests`, `RoadAccountWordsTests`, `RoadJoinFollowWordsTests`, `ProtectionWordsPlanTests`,
+    `ProtectionWordsVX307Tests`, `U2WordsTests`, `FirstRoundConfirmTests`, `FirstRoundAfterTheActTests`,
+    `RoadAccountSurfaceTests`, `RoadCrossingSurfaceTests`-family (the whole `VariorumTests/Protection` folder is the honest
+    batch, as VX-510 unit A said); `RoadCrossingFaces.sentence` (the phone-nil arm): `RoadCrossingFacesTests`,
+    `RoadJoinFollowFacesTests`, `ProtectionCrossingRoadTests`; `RoadAccountFaces.saysRuleTwelve` (new, read only by the
+    phone): `RoadAccountFacesTests`; `WordsFieldsConcealTests` (three phone sites added — source); the source pins that
+    read phone files: `NotOnYetWordsTests`, `OneRefreshAuthorityTests`, `ProtectionWordsVX307Tests`,
+    `LobbyWordsDoorPressTargetTests`, `TravellingDotsIndicatorTests`, `WordsFieldsConcealTests`.
+  - **The walk:** pieces 4's LEGS A · A2 · B · C above; 50 captures in `notes/plans/vm-8-u1-screens/` (gitignored; the
+    two words cards redacted; the host screen never captured).
+  - **The local helper (F-U1-4 — hers to keep or delete at closeout):** `~/.variorum/bin/type-sim-secret` (mode 700,
+    never committed; `--check` types nothing). Guards: the source file exists at mode 600; the frontmost app is the
+    simulator's host (Simulator, or Xcode 27's Device Hub — there is no Simulator.app in Xcode 27); exactly ONE booted
+    *[removed for publication]*
+    needs the throwaway ref in that process's environment and NO production ref (reads only the throwaway files); the
+    prod road needs `VARIORUM_PROD_TEST_ROAD=1`, NO walk project, and the account's email on the allowlist with `vxtest`
+    (reads only the allowlist file and the stashed words). Values never printed.
+  - **Server residue (test accounts only):** throwaway A gained two simulator devices (`aa227b13…`, `bfb075f7…`, both at
+    head); the prod `castle` vxtest account gained the simulator's device `a40aefcd…` (at head 28) — each a device cursor
+    that now holds that account's purge horizon until it ages out or is cleaned (the VX-510 test-device precedent).
+  - **Known, not met:** VX-544 (every unlock walked was online). VX-542's repetition not copied (no key doors on the phone
+    in unit 1; the follow's notice renders once beside its door).
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
