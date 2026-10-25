@@ -180,6 +180,14 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
    join's "Sync is on, and you're in Castle now…" is unsaid there (the first-round sheet says the outcome) — unit 2's,
    with the open receipts PL-51 left unspoken.
 
+9. **Unit 2's taste flags (implementer U2; seen on the walk, built as the brief says):** (a) P-VM8-8 — the receipts'
+   home: the screen's quiet line keeps the newest three said since the screen last showed (E's "Your library has a new
+   key…" sat beside "This library doesn't sync on this iPhone any more." — D15/E17); (b) P-VM8-9 — the pair sentence once;
+   (c) F-U2-H — "your backups" in Use Castle's and Replace All Keys' leads on a phone that keeps no backups (shared ruled
+   copy, said as is); (d) the posture line stands alone in Castle on a local library ("You're in Castle." with no door
+   beneath — Use Standard being hers, F-PH-2); (e) Terminal's lowercase "on this iphone" (the gate heading — unit 1's flag
+   (b), again).
+
 ## PROVISIONALS (the running list)
 
 - **P-VM8-1** — the phone's pre-design face renders Start fresh… only (no Open Library door: the phone has no picker
@@ -198,6 +206,13 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
 - **P-VM8-7** (taste, the walk's B15) — while sync reads keys-locked / not-yet, the sync row's injected *protection…*
   door and the standing *protection…* row stand together: (a, built) both, as the brief says · (b) the standing row
   hides while the row offers its own door · (c) the standing row moves out of the Sync section.
+- **P-VM8-8** (unit 2, F-U2-E — a FACE, flagged) — the protection receipts' phone home: (A, built) the Protection screen's
+  one muted line under its title (what `RoadStandingModel.speak` says — acts on the screen at once, an open's owed receipts
+  waiting until the screen shows, leaving the screen clears it; `receipt_style` has no phone consumer yet) · (B) a
+  shell-wide muted line at every room's foot.
+- **P-VM8-9** (unit 2, F-U2-D — a FACE) — VX-542 on the phone: (a, built) the pair sentence ONCE (the follow door's notice),
+  the locked key doors' road ONCE ("Follow your account to catch this iPhone up first."), identical refusals said once per
+  section · (b) the full gate sentence once at the key doors too (the pair sentence twice on the screen).
 - **F-U1-1 (A), ruled — NOT a sentence, a door rule:** the phone's unit-1 section renders neither rule-12 arm (the
   Castle-leaving join / Move, the follow out of Castle); F-PH-2 is hers.
 
@@ -564,8 +579,17 @@ signed out.**
 
 ## UNIT 2 — LIVE STATUS (the implementer owns this section; every unverified claim PENDING)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — written at the close. **No revert is in flight**
-(reverts named in piece 7 below; none applied yet).
+**NOT DONE BY THIS SESSION (first, as the contract asks):** (1) **NO Mac-target `xcodebuild test`** — the dev store's Mac
+slot is off-limits to this session (the Mac test host IS the dev-store app); Mac `build-for-testing` is green and THE
+MAC-SUITE LIST (piece 7) is the orchestrator's stage batch, PENDING. (2) **The PAIR-CHANGED state was NOT walked live** —
+it needs a second device acting on a test account (the Macs' dev-store slot is off-limits); its faces are pinned hosted AND
+end to end through the phone's own bootstrap with the real screen (F-U2-I). (3) **No synced key-door ACT** (Change, Reset,
+New words on the test account would change its pair and stale the `~/.variorum` helpers' secrets) — the acts were walked
+on a LOCAL library, the synced confirms opened and cancelled (F-U2-I). (4) **The open receipts (P-VX329-PH-1) were not met
+live** (no key-file repair or offer arose on the walk) — pinned hosted (`theScreenSaysWhatTheFacesSpoke`). (5) **Not
+chartered, not rendered:** Use Standard (F-PH-2), the idle dial and Lock Library Now (F-U2-F), the Mac pane's keystone line.
+(6) Canon, QUESTIONS, Linear, the MobileSoul row — the orchestrator's. **No revert is in flight; the stage is released; the
+simulator is shut down and signed out.**
 
 *Implementer U2 — Opus 5.5, xhigh. Pre-fix tree = `33c596def` (unit 1 closed + the Mac stage batch). Stage claims as
 `vm8-u2`. Worktree `~/dev/variorum-vm-8`.*
@@ -749,7 +773,8 @@ signed out.**
      `RoadCrossingSurfaceTests` + `ProtectionCrossingRoadTests` (`RoadDoorOpen.saysRuleTwelve` — a computed property),
      `ProtectionWordsVX307Tests` and `LobbyWordsDoorPressTargetTests` (source pins reading phone files — `MobileRoadFaces.swift`
      untouched).
-8. The walk on the pinned simulator. IN-PROGRESS (LEG D — a LOCAL library; captures `notes/plans/vm-8-u2-screens/`).
+8. The walk on the pinned simulator. DONE (LEG D — a LOCAL library; LEG E — the prod test road; both voices; captures
+   `notes/plans/vm-8-u2-screens/`).
    - **The walk's machinery:** Device Hub hosts the pinned simulator (window 1100×800 at (314,175)); the simulator's screen
      calibrated inside it by template match of a `simctl io` screenshot against a window-only capture of Device Hub
      (score 0.995): host point = (835 + 0.2465·sx, 256 + 0.2465·sy) for simulator pixels (sx, sy). Taps by `cliclick` at
@@ -791,13 +816,70 @@ signed out.**
      said on the new screen's quiet line — "You're in Castle now." (P-VM8-8 LIVE across a reopen)**; "You're in Castle." with
      NO Use Standard door (F-U2-G LIVE) and no Replace All Keys (a local library); the gate-style row "Face ID opens your
      library on this iPhone." · *use always ask*.
+   - **LEG D, the rest:** **D27–D29 THE GATE-STYLE ROW** — *use always ask* at once ("Always ask: no copy of the key stays on
+     this iPhone, and you type every time." · *use face id…*), *use face id…* asking the passphrase first, then Face ID back
+     on (the log: `this Mac's gate is always_ask now` → `touch_id now` — log lines, never a face) → **D30–D32 RESET IN CASTLE**
+     — the words field, or *reset with face id* where the item stands ("Confirm it's you with your twelve words or Face ID,
+     then choose a new passphrase."); Reset with Face ID LANDED ("Your passphrase is reset."; the log: `a Touch ID press — the
+     system prompt` then `resetForgottenPassphrase — the current key re-locked`). Machinery note: the simulator's keychain
+     answers a biometry-protected read without presenting a Face ID sheet, so D31 shows no prompt — the press is the log's
+     → **D33–D35 THE FACE ID RE-ARM (VX-310, the shared interlude)** — relaunched with the DEBUG walk switch
+     `VARIORUM_WALK_TOUCHID=fail`: the lobby's automatic Face ID press fails on the existing item ("Face ID changed since
+     you set it up — unlock with the passphrase."), the passphrase opens, the re-arm card asks "Face ID can't open Variorum
+     on this iPhone any more. Set it up again?" (the phone's sentence — no finger line) · *always ask instead* · *set it up
+     again* → yes: `the Touch ID re-arm answered yes — a new item at this press`.
+   - **LEG E — the synced arms, the PROD TEST ROAD (07:47–07:52 local; `VARIORUM_PROD_TEST_ROAD=1` + the allowlist handed
+     from `~/.variorum/prod-test-accounts.env` (mode 600, never printed), NO walk project; the `castle` vxtest account; every
+     secret typed by `~/.variorum/bin/type-sim-secret`, its `--check` passed first):** E00 the Castle library opens by Face ID
+     → sign in (E02–E04) → **E05 the JOIN in the same posture ("sync this library…" — the account in Castle like this
+     library)** → E06 its confirm (one secret) → the account's passphrase → E07 rule 7's moment (passphrase typed — the words
+     not shown) → E08 "Synced. Your account's writing is in this library now." · Done → **E09 IN SYNC — the join's receipt said
+     on the screen's quiet line: "Sync is on. Your library uses your account's passphrase and twelve words now." (unit 1's
+     flag (c) — the join's receipt was unsaid on the phone — RESOLVED by P-VM8-8)**; Replace All Keys… now stands; Use
+     Standard does NOT (F-U2-G — synced Castle) → **E10 Change passphrase's synced confirm** (VX-263's line + "This library
+     syncs with your account, so your account's passphrase changes with it, on every device.") — CANCELLED (F-U2-I) → **E11
+     THE CHECK, synced: the account's passphrase — "That passphrase opens this library and your account."** → **E12–E13
+     REPLACE ALL KEYS** (its lead; both secrets by the helper; a LOCAL re-key — `ReplaceAllKeysProgram` writes no vault —
+     through the reopen; its receipt said on the re-pushed screen: "Your library has a new key. Your passphrase and twelve
+     words still open it.") → **E14 New words on a synced library: "This library syncs with your account, so new words also
+     replace your account's twelve words, on every device." said BEFORE the ask** — CANCELLED, nothing minted (F-U2-I) →
+     E16–E17 *stop syncing here* (rule 16's confirm; "This library doesn't sync on this iPhone any more.") → E18–E19 *sign
+     out* — the simulator rests SIGNED OUT.
+   - **BOTH VOICES:** LEG D/E in Terminal; **S00–S02 Study** (Settings → Protection in Castle: the passphrase doors, the words,
+     the check, the posture, "On this iPhone" (Study keeps the proper nouns), the gate row; Change's confirm) — then the voice
+     returned to Terminal.
+   - **Server residue (test accounts only):** the prod `castle` vxtest account gained one more simulator device cursor (the
+     E05 join's first round) — the VX-510 test-device precedent; nothing else written to the account (no key door, no
+     crossing wrote its vault).
+   - **Captures:** 59 in `notes/plans/vm-8-u2-screens/` (gitignored; D00/D20/D21 words cards redacted in the file; simulator
+     screenshots only, never the host screen). The walk-local words were held in a mode-600 scratchpad file for the walk and
+     deleted after; the walk-local passphrases were throwaway values for a throwaway simulator library.
+   - **Known, not met:** VX-544 (every unlock walked was online).
+9. **UNIT 2 — CLOSED by the implementer** (the tip after this record commit). **THE UNIT SUITES AT THE TIP (`c787ce955`'s
+   product tree, stage claim `vm8-u2`): `✔ Test run with 41 tests in 13 suites passed after 58.671 seconds`** (the six new
+   suites + unit 1's six + the copy register sweep; 0 skipped). The whole phone target ran at `af91fea73` (840/136, exactly
+   unit 1's close + this unit's then 21/6); since then only W-U2-1's fix + pin (`MobileProtectionDoors.swift`, the
+   passphrase suite) — green in the run above.
+
+**PROVISIONALS THIS UNIT (her bundle, below — every one built as drafted):** **P-VM8-8** (F-U2-E, the receipts' phone home —
+(A) the Protection screen's quiet line, built; (B) a shell-wide line) · **P-VM8-9** (F-U2-D, VX-542 on the phone — (a) the
+pair sentence once beside the follow door, the locked key doors' road once, identical refusals once per section, built;
+(b) the full gate sentence once at the key doors too). No new product sentence was written: every line the unit renders is
+shared ruled or drafted copy.
+
+**FINDINGS FOR THE ORCHESTRATOR (not built here):** F-U2-F (the idle dial + Lock Library Now — not chartered); **W-U2-1's
+Mac twin SUSPECTED, by reading only** (the Mac pane's *Set a passphrase…* sheet close re-reads no section, so Change and
+Reset may stay absent there until the pane appears again — unverified); F-U2-H (the "backups" wording on a phone that keeps
+none; `firstRoundHeld`'s "main window's banner"); the Mac pane's keystone line ("While Variorum is open and unlocked…") has
+no phone home (not chartered); **for VX-542:** the phone says the pair sentence once (P-VM8-9) — the Mac's repetition is
+untouched.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
 | # | item | owner | status |
 |---|---|---|---|
 | 1 | Unit 1 — the phone syncs again (pieces 1–5 above) | implementer U1 | CLOSED on the simulator (tip `11c4f2054`). **The Mac stage batch RAN (orchestrator, 2026-10-25): 625 tests / 132 suites, 4 declared skips, ONE red suite — `ProtectionPairRetentionTests` (3 issues), PROVEN RED ON MAIN the same day → pre-existing, filed VX-546; everything VM-8 touches green, the Mac's ruled sentences byte-identical by pin.** The device install HELD for her |
-| 2 | Unit 2 — crossings (entering), key doors, follows (in/pair), check door, receipts' home — the UNIT 2 BRIEF above; leave-direction arms HELD for F-PH-2 | implementer U2 | IN PROGRESS — UNIT 2 — LIVE STATUS above |
+| 2 | Unit 2 — crossings (entering), key doors, follows (in/pair), check door, receipts' home — the UNIT 2 BRIEF above; leave-direction arms HELD for F-PH-2 | implementer U2 | CLOSED by the implementer (UNIT 2 — LIVE STATUS above: 41/13 green at the tip, the whole phone target 840/136 as unit 1's close, every revert red as named, W-U2-1 found and fixed on the walk, LEGS D · E · Study walked); the Mac stage batch PENDING the orchestrator |
 | 3 | Unit 3 — the cards + the pocket guide | at her split call | NOT STARTED |
 | 4 | Old-scope reconciliation tickets | orchestrator | table drafted; tickets at the sitting |
 | 5 | Her sitting bundle | orchestrator | OPEN — grows |
