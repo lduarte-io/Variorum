@@ -1,7 +1,22 @@
 # VM-8 — the phone's Castle catch-up (the run record)
 
-**STATUS: OPEN — kicked off 2026-10-25 overnight (her word: full orchestrator slot, overnight protocol, provisional
-judgments, pause only where her hands are truly needed). Unit 1 in flight.**
+**STATUS: OPEN — the overnight build is DONE (2026-10-25): units 1+2 closed and Mac-gated, the ladder CLOSED (r1
+0·1·3·6 → L1 → r2 0·0·1·4, the round-2 MINOR fixed pin-first). WAITING ON HER MORNING: the device install and the
+sitting. Unit 3 (cards + guide) deliberately NOT built — her split call.**
+
+## HER MORNING CHECKLIST (the sitting; everything else is done or waiting on these)
+
+1. **The sitting bundle below** (HER SITTING BUNDLE): the scope split (units 2/3 — unit 3 unbuilt, your call), F-PH-1 ·
+   F-PH-2 wording (F-PH-2 now unlocks four held faces and closes P-VM8-10's dead end), the riders VM-15/VM-16, the
+   ticket offers (VM-25 · VM-26 + the old-scope table), the P-VM8 provisionals and taste flags (items 7–10).
+2. **Your phone, before anything:** does its OLD library hold writing from after 2026-10-22? It lives only there (the
+   old build couldn't push). Start fresh sets the library aside WHOLE into Previous Libraries either way — but say the
+   word knowingly.
+3. **The device install** (your hands or your say-so at the Pro, phone connected/on wifi): build + `xcrun devicectl
+   device install app` from the worktree — then your sign-in, the join under your Castle account (Face ID gate), the
+   first catch-up, and **the save's number on your real corpus** (the simulator read ~6 min 25 s at ~110k rows; the
+   number decides VX-497's shape and Pre-launch call).
+4. **After your GO:** the closeout (canon deltas, QUESTIONS #242, PL-60, the master plan, the handoff, the merge).
 
 **The one sentence:** the Macs run 0.10.2 against marker 14; her phone runs a pre-0.10 build that refuses marker 14 by
 design and has no new-road account faces — this run gets her phone pulling her library whole under her account's Castle
@@ -170,7 +185,9 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
 4. **The riders, her call each:** VM-15 (Pre-launch — a sibling phone that hasn't followed into Castle, and its iCloud
    device backup, stays Apple-openable; the same surface) · VM-16 (the phone's undo door mis-speaks a quiet press —
    App shell; only if the run has room).
-5. **The old-scope tickets** (table above) — offered, never silently dropped.
+5. **The old-scope and found-gap tickets, offered:** the table above, plus **VM-25** (the phone's Castle On-this-iPhone
+   section: no idle-lock dial, no Lock Library Now — F-U2-F, round 1 MINOR-3) and **VM-26** (the keystone line's phone
+   home) — fold into a later unit or leave ticketed, your call.
 6. **The device moment (HER HANDS):** which lobby arm her phone actually meets; whether the phone's OLD library holds
    unsynced writing (anything written on the phone since 2026-10-22 lives only there — the set-aside keeps it whole in
    Previous Libraries, recoverable, but say it before Start fresh); the devicectl install; her sign-in and join; the
@@ -187,11 +204,21 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
 
 9. **Unit 2's taste flags (implementer U2; seen on the walk, built as the brief says):** (a) P-VM8-8 — the receipts'
    home: the screen's quiet line keeps the newest three said since the screen last showed (E's "Your library has a new
-   key…" sat beside "This library doesn't sync on this iPhone any more." — D15/E17); (b) P-VM8-9 — the pair sentence once;
-   (c) F-U2-H — "your backups" in Use Castle's and Replace All Keys' leads on a phone that keeps no backups (shared ruled
-   copy, said as is); (d) the posture line stands alone in Castle on a local library ("You're in Castle." with no door
-   beneath — Use Standard being hers, F-PH-2); (e) Terminal's lowercase "on this iphone" (the gate heading — unit 1's flag
-   (b), again).
+   key…" sat beside "This library doesn't sync on this iPhone any more." — D15/E17); **the round-2 note beside your
+   (A) screen-line / (B) shell-line choice: a receipt an OPEN owes (rule 1's restore receipt) can wait in the holder
+   for hours until you next open the screen**; (b) P-VM8-9, **(a-unified) since L1** — the follow-owed refusal once
+   per screen, every kind; **two questions beside it: (i) the follow-locked doors are HIDDEN whole on the phone
+   (round 2's verdict: the right phone shape) where the Mac renders them refusing in place (R-529-3) — keep the
+   divergence or align, yours; (ii) round 2's R2-NIT-1 — where the follow door's specific notice renders ("Your
+   account's passphrase was changed on ‹device›."), the generic "Your account changed on another device. Follow it
+   first." reads twice-told beside it; the no-new-words fix (the notice as the one saying where it renders) is ready
+   at your nod**; (c) F-U2-H — "your backups" in Use Castle's and Replace All Keys' leads on a phone that keeps no
+   backups (shared ruled copy, said as is); (d) the posture line stands alone in Castle on a local library ("You're in
+   Castle." with no door beneath — Use Standard being hers, F-PH-2); (e) Terminal's lowercase "on this iphone" (the
+   gate heading — unit 1's flag (b), again).
+10. **The run's Linear notes already posted (for your read):** VM-24 gained L1's state-dependence evidence (the caret
+   test passed in L1's whole-target run on the same simulator); VX-542 gained the phone's once-per-screen precedent
+   with its pin names.
 
 ## PROVISIONALS (the running list)
 
@@ -1029,7 +1056,7 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
 | 3 | Unit 3 — the cards + the pocket guide | at her split call | NOT STARTED |
 | 4 | Old-scope reconciliation tickets | orchestrator | table drafted; tickets at the sitting |
 | 5 | Her sitting bundle | orchestrator | OPEN — grows |
-| 6 | The ladder (fresh Opus reviewer per round, REVIEW_PROMPT verbatim, whole-run diff) | orchestrator | **ROUND 1 DONE** (`notes/plans/vm-8-ladder-round1.md` + dispositions): 0 BLOCKER · 1 MAJOR · 3 MINOR · 6 NIT — MAJOR-1 stands as built (P-VM8-10, F-PH-2's consequence); the fix session L1 runs MINOR-1/-2 + NIT-1/-2/-5-guard/-6-comment; MINOR-3 → VM tickets. **L1 CLOSED by the implementer** (UNIT 2 — LIVE STATUS ▸ L1: every fix landed, every pin red as named, 47/16 + the whole phone target 847/139 green at the tip). Round 2 re-reviews the fixes |
+| 6 | The ladder (fresh Opus reviewer per round, REVIEW_PROMPT verbatim, whole-run diff) | orchestrator | **ROUND 1 DONE** (`notes/plans/vm-8-ladder-round1.md` + dispositions): 0 BLOCKER · 1 MAJOR · 3 MINOR · 6 NIT — MAJOR-1 stands as built (P-VM8-10, F-PH-2's consequence); the fix session L1 runs MINOR-1/-2 + NIT-1/-2/-5-guard/-6-comment; MINOR-3 → VM tickets. **L1 CLOSED by the implementer** (UNIT 2 — LIVE STATUS ▸ L1: every fix landed, every pin red as named, 47/16 + the whole phone target 847/139 green at the tip). **ROUND 2 DONE** (`notes/plans/vm-8-ladder-round2.md` + dispositions): 0 BLOCKER · 0 MAJOR · 1 MINOR · 4 NIT, the MINOR-1 reading verdict STANDS; R2-MINOR-1 fixed PIN-FIRST by the orchestrator (red 2 issues on the pre-fix tree, green 29/8 after); R2-NIT-1 to her bundle; NIT-4's repo gaps closed. **THE LADDER IS CLOSED (2026-10-25) — no round 3 earned** |
 | 7 | The device install + her live round + the measured save (VX-497) | HER MORNING | HELD |
 | 8 | Closeout (canon two-file shape; PL ledger row; master plan; handoff; tickets triaged) | orchestrator | NOT STARTED |
 
