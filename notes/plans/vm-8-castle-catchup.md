@@ -356,7 +356,9 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   the account's keys in session memory, the engine's seam reads them. `✔ Test run with 1 test in 1 suite passed`.
   **RV-6, named before it runs:** `Shared/Protection/ProtectionOpenRoad.swift` — `openTyped`'s one
   `loadSyncKeysAfterTypedUnlock` call removed [`herPhonesJoinIntoCastleThenATypedUnlockLoadsTheSyncKeys` — the two
-  load expectations]. Not yet run.
+  load expectations]. **RAN: `✘ Test run with 1 test in 1 suite failed … with 2 issues`** — exactly the two (nothing in
+  session memory; the engine's seam refuses); restored `git diff --exit-code` clean — **no revert in flight.** VX-501's
+  typed-unlock load FIRES on the phone's posture. The LIVE check rides piece 4's Castle leg.
 - **Piece 4 — the simulator walk + the measured save:** NOT-STARTED.
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
 
