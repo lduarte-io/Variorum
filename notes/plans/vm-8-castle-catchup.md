@@ -749,7 +749,32 @@ signed out.**
      `RoadCrossingSurfaceTests` + `ProtectionCrossingRoadTests` (`RoadDoorOpen.saysRuleTwelve` — a computed property),
      `ProtectionWordsVX307Tests` and `LobbyWordsDoorPressTargetTests` (source pins reading phone files — `MobileRoadFaces.swift`
      untouched).
-8. The walk on the pinned simulator. NOT-STARTED.
+8. The walk on the pinned simulator. IN-PROGRESS (LEG D — a LOCAL library; captures `notes/plans/vm-8-u2-screens/`).
+   - **The walk's machinery:** Device Hub hosts the pinned simulator (window 1100×800 at (314,175)); the simulator's screen
+     calibrated inside it by template match of a `simctl io` screenshot against a window-only capture of Device Hub
+     (score 0.995): host point = (835 + 0.2465·sx, 256 + 0.2465·sy) for simulator pixels (sx, sy). Taps by `cliclick` at
+     those points after Device Hub is activated by bundle id and verified frontmost (her app absent — checked each tap);
+     walk-local values typed by System Events keystroke; test-account secrets only by `~/.variorum/bin/type-sim-secret`.
+     Captures are `simctl io` screenshots only (never the host screen); words cards redacted in the file.
+   - **Setup:** the pin booted; its keychain reset (`simctl keychain reset` — the simulator's own; unit 1 left it signed
+     out); the app uninstalled and the WALK build installed (`xcodebuild build -configuration Debug`, `DerivedData/vm8u2-walk`
+     at `890423798`'s product tree); Face ID enrolled (BiometricKit's enrollment notification).
+   - **LEG D so far:** D00 the creation's words card (redacted) → D01 the shelf → D02 Settings → **D03 the Protection screen
+     on a fresh LOCAL library** ("your passphrase · set a passphrase…", "your twelve words" + its line + "record your twelve
+     words…" + VX-263's line naming "this iPhone", "check my passphrase or twelve words…", "You're in Standard." · "use
+     castle…" — Use Standard and Replace All Keys absent, the sync section) → D04 the setter's sheet → **D05 VX-211's hint
+     LIVE under the field as typed** ("Repeated characters are easy to guess — a phrase of a few different words is
+     stronger.") → **D06 the floor: "Your passphrase needs at least 12 characters."** → D07 a long varied phrase (no hint) →
+     **D08 SET — the receipt said on the screen's quiet line (P-VM8-8 LIVE): "Passphrase set. Your twelve words still open
+     the library too."** — and a defect of this unit's own face found there:
+   - **W-U2-1 — BUG-CLASS (this unit's face), FIXED:** after the set landed the set row retired but Change passphrase… and
+     Reset forgotten passphrase… did not appear — the key doors were read at the screen's appearance (no passphrase then)
+     and nothing re-read them after the set (the Mac's pane has the same shape — its set sheet's close re-reads no
+     section; SUSPECTED there by reading, NOT verified — for the orchestrator). Pin
+     `aPassphraseSetReReadsThePassphrasesDoors` (hosted: the set lands, the key doors' road read again) COMMITTED FIRST
+     (`88f9c4d84`) and **RED on the pre-fix tree** (`✘ Test run with 6 tests in 1 suite failed … with 1 issue` — exactly
+     `heard.keyDoorReads > before`); THE FIX (this commit): the set sheet's close runs the screen's one read
+     (`standing.refreshPane()`); **GREEN** (`✔ Test run with 6 tests in 1 suite passed`).
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 

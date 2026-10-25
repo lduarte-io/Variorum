@@ -243,7 +243,12 @@ struct MobilePassphraseSection: View {
                 MobileProtectionChrome.heading(ProtectionWords.passphraseSectionTitle, tokens)
                 if standing.offersSetPassphrase {
                     MobileProtectionChrome.door(ProtectionWords.reminderSetDoor, tokens) {
-                        setSheet = standing.makeSetPassphraseSheet { setSheet = nil }
+                        setSheet = standing.makeSetPassphraseSheet {
+                            setSheet = nil
+                            // W-U2-1 (the walk's D08): the screen's doors read again — a passphrase set lets Change and
+                            // Reset stand where the set row retires (the pane's one read; nothing else re-reads them).
+                            Task { await standing.refreshPane() }
+                        }
                     }
                     .disabled(keyDoors?.presenter.sheet != nil)
                 }

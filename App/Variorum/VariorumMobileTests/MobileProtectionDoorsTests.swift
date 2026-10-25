@@ -425,7 +425,7 @@ struct MobileProtectionPassphraseTests {
         let standing = await U2Faces.standing(
             store, heard: heard, presenter: ProtectionSheetPresenter(), passphraseExists: false,
             keyDoors: U2Faces.keyDoors(change: .hidden, reset: .hidden))
-        try await withHostedSurface(U2Faces.Screen(standing: standing)) { surface in
+        await withHostedSurface(U2Faces.Screen(standing: standing)) { surface in
             await surface.settle(30)
             #expect(surface.activate(ProtectionWords.reminderSetDoor))
             await surface.settle(40)
@@ -436,7 +436,6 @@ struct MobileProtectionPassphraseTests {
             #expect(surface.activate(ProtectionWords.setPassphraseButton))
             await surface.settle(40)
             #expect(heard.sets == ["walk lantern harbor seven"], "the passphrase set")
-            _ = try #require(Optional(before))
             #expect(heard.keyDoorReads > before, "the key doors read again after the set — Change and Reset can stand")
         }
     }
