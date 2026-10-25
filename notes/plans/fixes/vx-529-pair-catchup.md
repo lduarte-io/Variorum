@@ -1,8 +1,8 @@
 # VX-529 — the catch-up for a pair changed elsewhere
 
-**STATUS: OPEN — THE BUILD PHASE COMPLETE (units 1–3 CLOSED), THE LADDER RUNNING (round 1 recorded below; its one
-MINOR in fix session L1). Remaining: the ladder's close, the closing stage batch, the live proof, HER two-Mac test,
-the closeout.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
+**STATUS: OPEN — THE BUILD PHASE COMPLETE (units 1–3 CLOSED) AND THE LADDER CLOSED (round 1: 0B·0M·1m·2n → fix
+sessions L1 and L2, both verified; round 2: every fix SOUND, 0B·0M·0m·2 record-hygiene NITs, both fixed). Remaining:
+the closing stage batch, the live proof, HER two-Mac test, the closeout.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
 section) is the built contract. Branch `vx-529-pair-catchup`, worktree `~/dev/variorum-vx-529`, the custody slot held
 (the in-flight table). The kickoff is `notes/handoffs/vx-529-kickoff.md`; the repro is the VX-510 record's THE
 CHANGED-ELSEWHERE REPRO (`notes/plans/fixes/vx-510-first-run-sync.md`). *(The header's original "nothing below is
@@ -1183,7 +1183,9 @@ the vault's last writer and day, "Mac" the platform's noun — "iPhone" on the p
     Mac up first."
 11. The lobby, the change read (`lobbyPassphraseChangedElsewhere` = the bare refusal + 1 + `lobbyPairRoad`): "That
     passphrase doesn't open this library. Your account's passphrase was changed on ‹device› on ‹day›. Your account's
-    current passphrase, the one before it, or your twelve words open it."
+    current passphrase, the one before it, or your twelve words open it." *(F-R1-2's flag: "the one before it" is
+    wrong when the passphrase changed twice+ while this device lagged — the local lock holds an OLDER one; the honest
+    meaning is "the one this library last knew". For her wording pass.)*
 12. The lobby, E6 (`lobbyAccountPassphraseNotTypedHere` — her R-529-6 draft's shape verbatim): "Your account's passphrase
     hasn't been typed on this Mac yet — type it here to use it on this Mac."
 13. The check door's pointer (`checkSecretsCatchUpPointer` — the design §3 draft verbatim): "You can catch this Mac up in
@@ -1277,6 +1279,9 @@ trailers; headless core suites + ONE Mac and ONE iOS `build-for-testing` into `D
 sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
+
+> *(Read forward: VX-523 was later RULED (A)-in-this-run at R-529-7 and FIXED in ladder session L2 — this banner's
+> "NOT FIXED" was true when written and is superseded below; the round-2 reviewer's F-R2-2 asked for this pointer.)*
 
 **NOT DONE IN THIS UNIT:** **VX-523 NOT FIXED** — traced (the brief's premise corrected: the quiet rule IS evaluated; Make
 this my library's key file can't satisfy it), its red pin held as a known issue, RETURNED to the orchestrator (the fix
@@ -2070,6 +2075,31 @@ flips it now on the real exit — the correction history is in the commits). The
 - **F-L2-1 (the held suite's setup line flipped to the any-road open — said in the test) and the crash-pin
   Castle-Always-ask gap (the harness lobby tries only the live file, the app's also tries the mirror — said in the
   test) — NAMED FOR ROUND 2**, the latter also for the stage batch's Mac-target run and the live proof's Castle leg.
+
+## THE LADDER — ROUND 2 (2026-10-25; a fresh `fable-reviewer` over `c7dd3d591..HEAD` — the L1 and L2 fix sessions —
+with the whole-branch diff for context; the record read whole, SyncSpec and CastleRules in full; its own runs:
+the RestoredCopy/VaultRoad suites 16/4 green and the FULL core suite 3435/457 green with exactly the record's 5
+known issues)
+
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT — EVERY ROUND-1 FIX AND THE L2 FIX JUDGED SOUND. THE LADDER IS CLOSED**
+(no new BLOCKER/MAJOR, so no round 3; the two NITs are record-hygiene edits, both the orchestrator's, both FIXED in
+this commit):
+- **F-R2-1 [NIT]** — F-R1-2's twice-lagged flag was only in the ladder section, not beside sentence 11 in the
+  consolidated list a closeout would assemble her bundle from. **FIXED:** the bracketed flag now rides sentence 11.
+- **F-R2-2 [NIT]** — the trued header named L1 but not L2, and unit 3's banner still opened "VX-523 NOT FIXED" with
+  no forward pointer. **FIXED:** the read-forward note atop unit 3's LIVE STATUS and the header's ladder-closed line.
+**The reviewer's load-bearing verdicts, accepted as final:** F-R1-1's gate is exactly the union of
+`VaultRoad.answer`'s preconditions and can never starve a synced library (the join always writes a master lock);
+L2's resume safety holds (a nil proof on resume can never overwrite a proof file — the stage/fingerprint guards);
+no false detection downstream (the unbound record reads nothing; the restored copy's lock reuses the vault's
+descriptor so the lobby names no false change post-restore); **F-L2-3's call: the heal should NOT land on a held or
+unbound library** (rule 17 — the copy binds no account; the join is the one road that lands account locks), so the
+recurring E6 lobby line until the join is a FACE-WORDING question for her bundle, as disposed; P-VX529-L2-1 (a)
+sound (words-as-proof keeps rule 17's "under your current pair" literal). Clean bill: the frozen boundary verified
+over the whole range (zero `Sync/`/`Server/`/`Persistence/`/CastleRules lines; every new type in-memory; the two
+key-file fields pre-existing, written through the existing setter — R-510-20 to the letter); secrets never logged;
+record honesty held through the premature-claim correction. **The only things between this tree and the merge are
+the closing stage batch, the live proof, and HER TWO-MAC TEST.**
 
 ## Machinery
 
