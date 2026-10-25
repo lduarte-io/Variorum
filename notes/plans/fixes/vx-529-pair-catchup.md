@@ -1276,7 +1276,7 @@ sentence-case, PROVISIONAL, consolidated in one list for her bundle.
 ### UNIT 3 — LIVE STATUS (the implementer owns this section)
 
 **NOT DONE IN THIS UNIT (so far — this line is kept current):** VX-523 NOT FIXED — traced, its red pin held as a known
-issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526 and VX-522 DONE;
+issue, RETURNED to the orchestrator (the fix is a custody act's design choice — its block below); VX-526, VX-522 and VX-533 DONE;
 every other member NOT-STARTED. No revert is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-24, worktree
 `~/dev/variorum-vx-529`.
 
@@ -1383,7 +1383,7 @@ needs them. Not durable, never committed.
   under the vault's own descriptor ⇒ "the pair was the account's") — REJECTED: unsound; a words change elsewhere before the
   restore (a lagging device restoring with its stale words) or after it leaves that descriptor equal and would go QUIET over a
   real replacement. Nothing built; no product line changed.
-- **VX-533 — the lobby's missed Touch ID prompt.** IN-PROGRESS — THE TRACE (written before any fix): **(b) "a re-press lands
+- **VX-533 — the lobby's missed Touch ID prompt.** DONE — THE TRACE (written before any fix): **(b) "a re-press lands
   on a dead context" is RULED OUT by code** — every press reads through a FRESH `LAContext` minted inside the read
   (`KeychainCustodyLeaf.readTouchID`, `let context = LAContext()` at :156); the only context handed out
   (`TouchIDPressContext`) is returned on a read that OPENED its item and invalidated in `pressTouchID`'s `defer`. The
@@ -1421,7 +1421,14 @@ needs them. Not durable, never committed.
   switch's planted failure — it returns without a throw, so its `!gone` row is untouched by this change by reading; its run
   PENDING the stage batch. THE REVERT (named before it runs; one edit on this commit, `--filter LobbyTouchIDReaskTests`,
   restored by `git checkout --`): RV-533-1 `ProtectionOpenRoad.swift` — the `if readThrew, key == nil { return … }` block
-  removed [expect the four issues]. PENDING.
+  removed [expect the four issues]. **VERIFIED BY REVERT** on `8e9408d46`: RV-533-1 ⇒ `✘ Test run with 3 tests in 1 suite failed
+  … with 4 issues` (exactly the pre-fix red); restored by `git checkout --`, `git diff --exit-code` clean, `✔ 3 tests` green
+  again. **DONE** (`ce5a6d7bc` pin, `8e9408d46` fix) — FOR THE THROWN CLASS; whether her Air's timeout IS that class is the
+  unverified external fact above (the log line tells). Residual, NOT changed (recorded for her/the ladder): if the system
+  sheet's own ending answers errSecAuthFailed, the leaf maps it to `.failedOnExistingItem` and the lobby says "Touch ID changed
+  since you set it up — unlock with the passphrase." with the button standing — a misleading line after a mere timeout; the
+  leaf's mapping is shared by every Touch ID read, so changing it is outside this rider's smallest diff. No revert is in
+  flight.
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).
 - **VX-538 — the recurring E6 band card.** NOT-STARTED (the CastleRules clause DRAFTED here only).
 
