@@ -97,6 +97,8 @@ struct TravellingDotsIndicatorTests {
             "Variorum/Features/Protection/WordsBandCard.swift",
             "VariorumMobile/Features/Protection/MobileRoadFaces.swift",
             "VariorumMobile/Features/Protection/MobileLibraryMissingView.swift",
+            // VM-8 unit 2: the phone's Protection screen's crossings, key doors, check and setter sheets.
+            "VariorumMobile/Features/Protection/MobileProtectionDoors.swift",
         ]
         // The Protection pane's busy rows were today's ceremonies (deleted with today's road at VX-329 U1); the road's
         // sections open sheets that carry the indicator, so the pane itself renders none — it still names no spinner.

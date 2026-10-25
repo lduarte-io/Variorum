@@ -96,6 +96,10 @@ struct WordsFieldsConcealTests {
             ("VariorumMobile/Features/Protection/MobileProtectionScreen.swift", "ProtectionWords.joinWordsField"),
             ("VariorumMobile/Features/Protection/MobileProtectionScreen.swift", "ProtectionWords.followWordsField"),
             ("VariorumMobile/Features/Protection/MobileProtectionScreen.swift", "ProtectionWords.crossingWordsField"),
+            // VM-8 unit 2: the phone's crossing confirm, Castle's forgot road, the read-only check.
+            ("VariorumMobile/Features/Protection/MobileProtectionDoors.swift", "ProtectionWords.crossingWordsField"),
+            ("VariorumMobile/Features/Protection/MobileProtectionDoors.swift", "ProtectionWords.resetPassphraseWordsField"),
+            ("VariorumMobile/Features/Protection/MobileProtectionDoors.swift", "ProtectionWords.checkSecretsField"),
         ]
         for site in sites {
             let text = try Self.code(Self.appRoot.appendingPathComponent(site.file))
