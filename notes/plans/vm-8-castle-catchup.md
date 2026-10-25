@@ -323,6 +323,22 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   the join arm's door and confirm in the phone's words; the rule-12 arms render nothing; the first round stays with the
   phone's close note then its outcome, Done once; the words moment with no Copy) and `MobileProtectionCompositionTests`
   (attach before start; the ask adopted once; the shell's adoption and push; Settings' gating).
+- **Pieces 1+2 — GREEN on the pinned simulator** (stage claim `vm8-u1`; `-only-testing` the three new suites):
+  `✔ Test run with 10 tests in 3 suites passed after 14.239 seconds` (0 skipped).
+- **THE BEHAVIORAL REVERTS, named BEFORE any runs** (the committed tree is the copy: each file restored by `git checkout
+  -- <file>`, `git diff --exit-code` clean after each batch; two batches, each revert's red disjoint from its batch's
+  others). Expected red in brackets:
+  - batch A — **RV-1** `MobileRoadFaces.swift` ← `fd56f2279` (the pre-fix face) [`herFaceSaysHerWordsAndOffersStartFreshAlone`,
+    `startFreshAsksHerConfirmThenActsOnTheYes`; the guard green] · **RV-2** `MobileProtectionScreen.swift`: the
+    `saysRuleTwelve` arm removed [`theRuleTwelveArmsRenderNothing`] · **RV-3a** `ProtectionWords.swift` ← `fd56f2279`
+    [`theJoinArmsDoorAndConfirmSpeakThePhonesWords` (the fingerprint line), `theFirstRoundSheetStays…` (the window bar)] ·
+    **RV-4** `VariorumMobileApp.swift` ← `fd56f2279` [`thePhonesRootAttachesItsServicesBeforeStart`].
+  - batch B — **RV-3b** `RoadCrossingFaces.swift` ← `fd56f2279` [`theJoinArmsDoorAndConfirmSpeakThePhonesWords` (Data
+    Safety)] · **RV-5** `MobileShellView.swift`: `adoptsProtectionRequest` stops marking the ask adopted
+    [`theReopensAskIsAdoptedOnceAndPushesTheScreen`].
+  - GUARDS (green on both sides by design): `everyOtherSlotKeepsTheStandingLobby`, `theWordsMomentShowsTheTypedWords…`
+    (P-2's no-Copy — a new face, no pre-fix twin), `settingsOpensTheScreenOnlyWhereItCanAct` (source).
+  RESULTS: PENDING. **Reverts NOT yet started** (this commit announces them).
 - **Piece 3 — VX-501 on the phone's posture:** NOT-STARTED.
 - **Piece 4 — the simulator walk + the measured save:** NOT-STARTED.
 - **Piece 5 — evidence (pins red-on-old, the phone suites):** NOT-STARTED.
