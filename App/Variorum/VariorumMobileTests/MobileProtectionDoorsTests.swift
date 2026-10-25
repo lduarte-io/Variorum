@@ -49,6 +49,7 @@ enum U2Faces {
         var sets: [String] = []
         var mints: [String?] = []
         var leaves = 0
+        var keyDoorReads = 0
     }
 
     /// The open library's faces with the bootstrap's models — every one on `presenter`.
@@ -106,7 +107,10 @@ enum U2Faces {
         if let keyDoors {
             let model = RoadKeyDoorsModel(
                 roads: RoadKeyDoorRoads(
-                    read: { keyDoors },
+                    read: {
+                        heard.keyDoorReads += 1
+                        return keyDoors
+                    },
                     press: { request in
                         heard.keyDoors.append(request)
                         return .made(ProtectionWords.changePassphraseReceipt)
@@ -409,6 +413,31 @@ struct MobileProtectionPassphraseTests {
             await surface.settle(30)
             #expect(surface.visibleLabels.contains(ProtectionCopy.passphraseTooShort), "the floor, said")
             #expect(heard.sets.isEmpty, "nothing set under the floor")
+        }
+    }
+
+    /// **W-U2-1 — BUG-CLASS (found on the walk, D08), RED ON THE PRE-FIX TREE:** *Set a passphrase…* landed, the set row
+    /// retired — and the passphrase's doors (Change, Reset) did not appear until the screen was entered again: nothing
+    /// re-read the key doors after the set. The sheet's close re-reads the screen's sections (the pane's one read).
+    @Test func aPassphraseSetReReadsThePassphrasesDoors() async throws {
+        let store = U2Faces.Defaults()
+        let heard = U2Faces.Heard()
+        let standing = await U2Faces.standing(
+            store, heard: heard, presenter: ProtectionSheetPresenter(), passphraseExists: false,
+            keyDoors: U2Faces.keyDoors(change: .hidden, reset: .hidden))
+        try await withHostedSurface(U2Faces.Screen(standing: standing)) { surface in
+            await surface.settle(30)
+            #expect(surface.activate(ProtectionWords.reminderSetDoor))
+            await surface.settle(40)
+            #expect(U2Faces.type("walk lantern harbor seven", into: ProtectionWords.setPassphraseField, on: surface))
+            #expect(U2Faces.type("walk lantern harbor seven", into: ProtectionWords.setPassphraseAgain, on: surface))
+            await surface.settle(20)
+            let before = heard.keyDoorReads
+            #expect(surface.activate(ProtectionWords.setPassphraseButton))
+            await surface.settle(40)
+            #expect(heard.sets == ["walk lantern harbor seven"], "the passphrase set")
+            _ = try #require(Optional(before))
+            #expect(heard.keyDoorReads > before, "the key doors read again after the set — Change and Reset can stand")
         }
     }
 
