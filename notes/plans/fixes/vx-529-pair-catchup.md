@@ -1755,7 +1755,55 @@ commit + push per piece, LIVE STATUS under this section, no trailers.
 
 ### L1 — LIVE STATUS (the implementer owns this section)
 
-*(not started)*
+**NOT DONE IN THIS SESSION:** everything but F-R1-1 (the charter's one finding); the Mac-target run of
+`LobbyVaultRoadTests` (the closing stage batch — it runs here in unit 2's headless harness only); every walk. No revert
+is in flight. Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-25, worktree
+`~/dev/variorum-vx-529`.
+
+**Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
+this file whole; the code — `ProtectionOpenRoad.swift` (`openTyped`, `openThroughTheVault`, `catchUpThroughTheVault`,
+`boundedVaultRead`, `heldKeyFiles`), `Executor/VaultRoad.swift` whole, `Model/KeyFile.swift` (the locks and every open
+road), `ProtectionRoadActs.swift` (`setFirstPassphrase`); the suite `LobbyVaultRoadTests` whole and its planted worlds
+(`TypedUnlockSyncKeysTests.castleAlwaysAskSynced`, `TouchIDUnlockSyncKeysTests.World`, `PlantedAccount`,
+`PlantedVaultLeaf.plant`, `PlantedRoad.created`).
+
+**F-R1-1 — AGREE.** My own trace (inputs → the futile read):
+1. `openTyped` (`ProtectionOpenRoad.swift:371-412`): every local road refused a typed PASSPHRASE ⇒ the `.noneOpens` arm
+   calls `openThroughTheVault(ctx, passphrase:, files:, within: bound)` (:406-407), `files` = `heldKeyFiles` (:773-786 —
+   the live key file first, then each remembered library's mirror, then the catalog's key files).
+2. `openThroughTheVault` (:424-472) guards only `ctx.writes` and a signed-in account (:427), then makes the network read
+   (`boundedVaultRead`, :429 — up to `typedUnlockVaultBound`, 10 s, :628), and only AFTER it reads `live` (:442) and asks
+   `VaultRoad.answer` (:443).
+3. `VaultRoad.answer` (`VaultRoad.swift:53-72`) can say something other than `.nothingToSay` only through a MASTER lock:
+   `.opens` comes only from `file.open(master:)` over `files` (:59-61), and `KeyFile.open(master:)` throws
+   `noSuchWrap(.master)` when `master == nil` (`KeyFile.swift:265-268`); `.notTheAccountsPassphrase` and
+   `.passphraseChangedElsewhere` sit behind the guard `live.master != nil` (:64). A master lock is the account's master's
+   wrap of the library key (`settingMaster`, written only on the account roads — `AccountActs.swift:200`,
+   `KeyFileCrossings.swift:72`), so an unsynced library's held files carry none.
+4. So over a library none of whose held key files carries a master lock, EVERY input yields `.nothingToSay` ⇒ nil (:444-446)
+   ⇒ `openTyped` returns `.refused(ProtectionWords.passphraseDoesNotOpen)` (:410) — the very refusal it returns without the
+   read. The read buys nothing, costs up to the bound per typo (the lobby's "Opening…" waits on it), and asks the signed-in
+   account's server about a library that names no account. Reachable: a lobby over an unsynced library (a never-synced
+   Standard library whose quiet roads failed, a Make-this-my-library copy) on a Mac signed in to an account.
+5. The proposed gate — `files.contains { $0.master != nil } || live?.master != nil`, evaluated BEFORE the read — is exactly
+   the precondition of every non-nil answer, so nothing else changes by construction. `live` is read once, hoisted above the
+   read, and the same value goes to the answer (`live` ∈ `files` whenever it reads — `heldKeyFiles` adds it first — so its
+   clause is belt and braces, kept as the reviewer wrote it).
+
+**The pieces (flip per commit; unverified claims PENDING):**
+- L1-P0 — this LIVE STATUS, the agree and the trace. DONE (this commit).
+- L1-P1 — THE PIN, red on the tree as it stands (`LobbyVaultRoadTests`, unit 2's harness): an unsynced library (its own
+  passphrase lock, no master lock), its quiet roads gone, the Mac signed in to an account whose vault is planted ⇒ a wrong
+  passphrase, and the ACCOUNT's own passphrase (which opens the vault's master — still nothing to open with it), each make
+  ZERO vault fetches (today one each), refused `passphraseDoesNotOpen` byte for byte, nothing written; and THE GATE'S OTHER
+  SIDE — a synced library, nothing changed elsewhere, a wrong passphrase: ONE fetch (the read stays where it can prove
+  something) and the same refusal byte for byte. NOT-STARTED.
+- L1-P2 — THE GATE in `openThroughTheVault` (the live read hoisted above the read). NOT-STARTED.
+- L1-P3 — THE REVERT, named before it runs: RV-L1-1 `ProtectionOpenRoad.swift` — the gate's guard removed (the hoisted read
+  kept), the harness `--filter LobbyVaultRoadTests` [expect exactly the unsynced row's fetch counts red; every byte-identity
+  assertion and the synced side green]; restored by `git checkout --` on the committed fix. NOT-STARTED.
+- L1-P4 — the close: the suites the fix touches green in the harness (the lobby, typed-unlock, Touch ID-unlock, planted-road
+  and lobby-model suites) and `VaultRoadTests` in the core. NOT-STARTED.
 
 ## Machinery
 
