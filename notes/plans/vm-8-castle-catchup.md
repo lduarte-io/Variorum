@@ -146,13 +146,13 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
 
 | item | reconciliation (verify in code before ticketing) | disposition |
 |---|---|---|
-| "How Protection Works" explainer over `ProtectionShapes` | today's-road brain; the rebuild's honest equivalent is the pocket guide's protection chapter (unit 3) | folds into unit 3; no separate explainer |
+| "How Protection Works" explainer over `ProtectionShapes` | VERIFIED 2026-10-25: `ProtectionShapes` exists nowhere in the tree (left with today's road); the rebuild's honest equivalent is the pocket guide's protection chapter (unit 3) | folds into unit 3; no separate explainer |
 | the live-checklist lead + unchosen-state indicator | today's-road faces (deleted at VX-329 U1) | retired by the rebuild — record, no ticket |
 | T1 count-and-dates verify (PL-18) | pre-rebuild backup-verify design; the phone keeps no backups (rule: store re-derivable from the mirror) | retired — record, no ticket |
 | the sample-library restore door (PL-17) | still owed (the Jekyll sweep exemption retires when it builds); off the critical path | own VM ticket, offered to her |
 | the PL-13 residue (sync-status partly shipped; plaintext export awaits a document-picker road) | sync-status ships with unit 1's section; the export road is its own design | own VM ticket (export), offered |
 | note-level multi-select | App shell, not protection | own VM ticket, offered |
-| the Apple re-link door (#139(f)) | the Mac's re-link is rule 8's lobby normal path on the new road; the phone's quiet roads are its own keychain — verify whether any phone face is owed at all | reconcile in-run; likely record-only |
+| the Apple re-link door (#139(f)) | VERIFIED 2026-10-25: no re-link exists anywhere on the new road (the 17m door left with today's road); CastleRules' considered-and-not-pursued ledger retired re-link as rule 8's lobby normal path | RETIRED by the rebuild — record, no ticket |
 
 ## HER SITTING BUNDLE (grows as the run goes; nothing here is built without her)
 
@@ -268,6 +268,31 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
     device is the booted one, the phone Debug app's host process carries the road's launch env (the throwaway ref and no
     production ref; or `VARIORUM_PROD_TEST_ROAD=1` with no walk project, the account listed and `vxtest`-marked), values
     never printed. An environment act (her R-510-8 shape) — asked, not assumed.
+- **THE ORCHESTRATOR'S RULINGS ON THE FORKS (2026-10-25, repo-first before the forked halves build):**
+  - **F-U1-1 → (A), RULED.** Unit 1's phone section renders NEITHER rule-12 arm (the Castle-leaving join, the follow
+    out of Castle) — nothing in their place, never a disabled stub (P-2's letter: the phone had no road there before).
+    Every other door renders from the shared faces. The `herRuleTwelve` sweep exemption stays byte-untouched. **F-PH-2
+    moves to the TOP of her sitting bundle**; unit 2 builds both arms to her phone wording. Her critical path
+    (`.entersCastle`) is unaffected.
+  - **F-U1-2 → (B), RULED.** Phone variants behind `ProtectionRoad.isMac` (the `rearmQuestion` precedent); the Mac's
+    sentences and their pins stay BYTE-IDENTICAL. The four drafted sentences stand AS DRAFTED — PROVISIONAL
+    P-VM8-3…P-VM8-6, her bundle — with one mechanic's precision: where an existing interpolation seam already carries
+    the platform fact (`ProtectionCopy.deviceName`, the biometry word), ride it rather than hard-coding, words
+    unchanged. (b)'s nil answer is accepted: the phone has no export road (PL-13), and a sentence naming a nonexistent
+    road is the no-redirect doctrine's exact red flag; whether the phone gets its own advisory sentence is hers
+    (bundled with P-VM8-4).
+  - **F-U1-3 — accepted as built** (composition, the designed `settingsRequest` road). Note for the closeout's parity
+    row: PL-47's "VX-206 — the phone never mounts a Protection pane; the asks are inert there by construction" line is
+    SUPERSEDED by this build — the phone now mounts one and adopts the request road.
+  - **F-U1-4 → APPROVED, with the constraints binding:** `~/.variorum/bin/type-sim-secret` in the R-510 helper shape —
+    mode 700, never committed, values never printed, echoed or logged (read from the `~/.variorum` files directly);
+    HARD guards exactly as proposed (Simulator frontmost; the booted device IS the pin
+    *[removed for publication]*
+    throwaway ref with no production ref, or `VARIORUM_PROD_TEST_ROAD=1` with no walk project and a listed,
+    `vxtest`-marked account); the throwaway road reads only the throwaway files, the prod road only the allowlist (her
+    own account can never pass — the standing fence); a `--check` dry-run that verifies every guard and types nothing;
+    typing only under the held stage claim. The helper's path, guard list and deletion offer land in this record and
+    in her handoff (hers to keep or delete at closeout, the vx-494 precedent).
 - **Piece 1 — the pre-design face on the phone lobby:** NOT-STARTED.
 - **Piece 2 — the phone's Protection screen (the account section), `attach(services:)`, the row's door:** NOT-STARTED.
 - **Piece 3 — VX-501 on the phone's posture:** NOT-STARTED.
