@@ -58,7 +58,8 @@ struct MobileProtectionScreen: View {
                 Text(tokens.path([ProtectionCopy.protectionPaneTitle]))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
-                // F-U2-E (P-VM8-8): what the protection acts said — one muted line, under the title.
+                // F-U2-E (P-VM8-8): what the protection acts said — muted, under the title: up to three lines (the
+                // holder keeps the newest three), oldest first.
                 if let receipts, !receipts.lines.isEmpty {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(Array(receipts.lines.enumerated()), id: \.offset) { _, line in

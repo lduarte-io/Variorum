@@ -25,7 +25,8 @@
 //      STANDARD NEVER RENDERS (its confirm says her rule-12 sentence — F-PH-2, hers; F-U2-G). Rule 11's export-off notice
 //      renders nothing: the phone has no scheduled export, so it can never stand (F-U2-A).
 //    - THE RECEIPTS' HOME (F-U2-E, PROVISIONAL P-VM8-8): `MobileProtectionReceipts` — what `RoadStandingModel.speak` says
-//      on the phone, shown as the screen's one muted line.
+//      on the phone, shown muted under the screen's title: the newest few said (up to three, one line each), never a
+//      single line.
 //
 
 import SwiftUI
@@ -186,10 +187,10 @@ struct MobileGateChoice: View {
 /// idiom is a landed act's own words in the muted slot of the surface where the door fired — and every protection door the
 /// phone can press fires on the Protection screen. So the shell composition hands the open library's faces this holder as
 /// their receipt door (rebuilt with each open: a re-keying act's receipt owed to the reopen is spoken into the shell that
-/// re-pushes the screen); the screen shows what was said as ONE muted line under its title; receipts owed by an OPEN (rule
-/// 1's restore receipt, the key-file offer's — P-VX329-PH-1's two sentences) wait here until the screen next shows; leaving
-/// the screen clears what it showed. `receipt_style` has no phone consumer yet (PL-22's owed face call) — the line always
-/// shows.
+/// re-pushes the screen); the screen shows what was said muted under its title — the newest `kept` (three), one line
+/// each, oldest first; receipts owed by an OPEN (rule 1's restore receipt, the key-file offer's — P-VX329-PH-1's two
+/// sentences) wait here until the screen next shows; leaving the screen clears what it showed. `receipt_style` has no
+/// phone consumer yet (PL-22's owed face call) — the lines always show.
 @MainActor
 @Observable
 final class MobileProtectionReceipts {

@@ -216,7 +216,8 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   door and the standing *protection…* row stand together: (a, built) both, as the brief says · (b) the standing row
   hides while the row offers its own door · (c) the standing row moves out of the Sync section.
 - **P-VM8-8** (unit 2, F-U2-E — a FACE, flagged) — the protection receipts' phone home: (A, built) the Protection screen's
-  one muted line under its title (what `RoadStandingModel.speak` says — acts on the screen at once, an open's owed receipts
+  muted lines under its title — up to three, the newest said, one line each (round 1's NIT-6 trued "one muted line" to
+  this stacking truth) — (what `RoadStandingModel.speak` says — acts on the screen at once, an open's owed receipts
   waiting until the screen shows, leaving the screen clears it; `receipt_style` has no phone consumer yet) · (B) a
   shell-wide muted line at every room's foot.
 - **P-VM8-9** (unit 2, F-U2-D — a FACE) — VX-542 on the phone: (a, built) the pair sentence ONCE (the follow door's notice),

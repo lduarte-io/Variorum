@@ -901,8 +901,9 @@ struct MobileProtectionFollowTests {
 @MainActor
 struct MobileProtectionReceiptsTests {
     /// What the open library's faces SPEAK lands in the shell's holder — the receipts an open owes at once (rule 1's
-    /// restore receipt, P-VX329-PH-1's device-neutral sentence) — and the screen shows it as one muted line under its
-    /// title; leaving the screen clears it. RED on the pre-unit-2 tree: the phone set no `speak` — nothing was said.
+    /// restore receipt, P-VX329-PH-1's device-neutral sentence) — and the screen shows it muted under its title (the
+    /// newest three, one line each); leaving the screen clears it. RED on the pre-unit-2 tree: the phone set no
+    /// `speak` — nothing was said.
     @Test func theScreenSaysWhatTheFacesSpoke() async throws {
         let store = U2Faces.Defaults()
         let reminder = PassphraseReminderModel(
