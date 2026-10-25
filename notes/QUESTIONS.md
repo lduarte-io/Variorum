@@ -3616,4 +3616,14 @@ lobby pays one bounded vault read, up to the 10 s bound, before its refusal — 
 F-L2-3 (the pre-join window's recurring E6 lobby line on a restored copy — a face question; the heal deliberately never
 lands on a held library, rule 17); VX-533's Air-log check (next missed Touch ID prompt: "road: the Touch ID read failed"
 in the log means the fix caught her exact case). **The face notes she asked kept marked** (W-D1w-1/-2, W-D1-1, W-D3-1,
-F-R1-2) are ticketed as VX-541/542/543 for a later run. Status: PROVISIONAL, pending her review pass.
+F-R1-2) are ticketed as VX-541/542/543 for a later run. **ANSWERED 2026-10-25 (her words verbatim):** *"1. rule 7 wording: yes, I agree
+with your change. 1 (a rule beside rule 3): I agree. #2: these phrasings are fine unless /until I go through the wording. and i
+agree iwth making the missing passpphrase lock. not sure on the set this library aside and rejoin road is mentioned only inside
+that sheet is all about - if it's a discoveryability issue you think is real, file a ticket for it, if not, it's alright. 3a:
+yeah i guess that's fine. 3B: yeah that's fine. 3C: i'll look for that later."* → the rule-3 clause WRITTEN into
+`notes/CastleRules.md` (+ the status banner); the rule-7 change RATIFIED and lands at **VX-545** in lockstep with the app's
+sentence and the lifecycle page (`RoadAccountWordsTests.rule7sSentencesAreHersVerbatim` pins the app's words to the rule's
+text, so the two move together); every sentence stands as built until her wording pass; P-VX529-4 (the E6 heal) RATIFIED; P-VX529-2 stands with
+NO ticket — the second road re-joins under the account's current secrets, so anyone who can take it can take the follow,
+which keeps unsynced writing; it is never the only road, so the follow sheet is the right home; F-U2-7's bound and F-L2-3's
+line ACCEPTED; VX-533's log check hers, later.

@@ -2639,6 +2639,22 @@ and, after it shipped: *"ok yes make sure the release is on the run record and m
 - **This section rides a small doc PR** (`vx-529-release-record`) at her word, since main takes no direct push from a
   build session.
 
+## HER ANSWERS TO THE BUNDLE (2026-10-25, after the release — QUESTIONS #241; her words verbatim there)
+
+- **The rule-3 clause for VX-538's card** ("I agree") — WRITTEN into `notes/CastleRules.md` with the status banner's
+  amendment line (PR on main).
+- **Rule 7** ("yes, I agree with your change") — RATIFIED, not yet written: `RoadAccountWordsTests.rule7sSentencesAreHersVerbatim`
+  pins the app's shown-words sentence to rule 7's italic text, so the rule and the app move together at **VX-545**
+  (Low, Wording — with two doc comments and the lifecycle page's fixture; the Castle wording run after VM-8, since the
+  shared protection copy is VM-8's ground). Writing the rule alone would have turned main red.
+- **The sentences:** "these phrasings are fine unless /until I go through the wording" — they stand as built.
+- **P-VX529-4, the E6 heal:** "i agree iwth making the missing passpphrase lock" — RATIFIED.
+- **P-VX529-2, the second road's placement:** her ask was a ticket only if the discoverability problem is real. It isn't:
+  the second road re-joins under the account's current secrets, so anyone who could take it can take the follow (which
+  keeps unsynced writing); it is never the only road. No ticket.
+- **F-U2-7** (the wrong-passphrase wait, up to the 10 s bound): "yeah i guess that's fine". **F-L2-3** (the restored
+  copy's lobby line until its join): "yeah that's fine". **VX-533's log check:** "i'll look for that later" — hers.
+
 ## Machinery
 
 The standing cast (Fable orchestrates and cold-reviews; Opus implements, fresh per unit); pin-before-fix per member;

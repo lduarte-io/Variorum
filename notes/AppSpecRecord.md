@@ -891,3 +891,10 @@ VX-543, VX-544. MOBILE PARITY: PL-59.
 **The release:** 0.10.2 (build 9462) shipped 2026-10-25 at her word — published to stargazing.tech (the DMG first,
 then the appcast and the page, every verify PASS) and installed on the Pro behind a fresh A1; the run record's THE
 RELEASE section.
+
+**Her answers to the bundle (2026-10-25, QUESTIONS #241 — her words there):** both drafted CastleRules clauses ratified —
+rule 3's synced-library-with-no-typed-passphrase card (VX-538's) written now; rule 7's "…backups made with them" lands at
+VX-545 with the app's sentence (a test pins the two together);
+the sentences stand as built until her wording pass; the E6 heal (P-VX529-4) ratified; the second road's placement
+stands (never the only road — no ticket); the wrong-passphrase wait bound and the restored copy's lobby line
+accepted. Born: VX-545 (the app's rule-7 sentence and the lifecycle page follow the rule).
