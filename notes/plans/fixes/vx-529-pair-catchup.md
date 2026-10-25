@@ -1333,8 +1333,16 @@ needs them. Not durable, never committed.
   then. THE RED PIN COMMITTED (`a5743dbcc` — that commit carried the pin only; this record line landed one commit later, by
   a missed edit — said so): `VariorumTests/Protection/HoldBannerNoAccountWordsTests.swift`, **RED on the pre-fix tree** (the
   harness, `--filter HoldBannerNoAccountWordsTests`): `✘ Test run with 2 tests in 1 suite failed … with 6 issues` — "Sync is
-  waiting", the duplicate advice, and no "doesn't sync" (both as-of forms ×3); the account arm's guard green. The fix:
-  NOT-STARTED.
+  waiting", the duplicate advice, and no "doesn't sync" (both as-of forms ×3); the account arm's guard green. THE FIX
+  COMMITTED (this commit): `LibraryOpenCopy.holdBanner`'s `hasAccount: false` arm = the lead + "This library doesn't sync,
+  so Resume changes nothing in it." (PROVISIONAL P-VX529-U3-2 below); the account arm, the condition and the root untouched.
+  **GREEN** (the harness, `--filter "HoldBannerNoAccountWordsTests|HoldBannerAccountFactTests|
+  HoldBannerAccountCompositionTests|RoadRestoreHoldGateTests|RestoreHold"`): `✔ Test run with 9 tests in 4 suites passed`.
+  `LibraryPortabilityDoorTests.theHoldBannerNamesNoAccountWhereNoneExists` (Mac target, not in the harness) asserts no
+  "account" and a "Resume" in the arm — both true of the new text by reading; its run PENDING the stage batch. THE REVERT
+  (named before it runs; one edit on this commit, `--filter HoldBannerNoAccountWordsTests`, restored by `git checkout --`):
+  RV-522-1 `LibraryOpenCopy.swift` — the arm's sentence back to "Sync is waiting until you press Resume. To keep something
+  from this backup, duplicate it first — duplicates stay." [expect the six issues]. PENDING.
 - **VX-523 — the words-adoption notice's condition.** NOT-STARTED.
 - **VX-533 — the lobby's missed Touch ID prompt.** NOT-STARTED (trace first).
 - **VX-530 — the double Touch ID.** NOT-STARTED (trace first; fix only on exactly redundant reads of one item).

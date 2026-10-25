@@ -50,13 +50,17 @@ nonisolated enum LibraryOpenCopy {
     /// `hasAccount` false (round 4's NIT): with no account there is nothing
     /// to catch up WITH — Resume only clears the hold (P-U2-2), and the
     /// sentence must not name an account that does not exist.
+    /// VX-529 unit 3 — VX-522 (the VX-510 walk's W-5): nor promise a sync —
+    /// the library's record names no account, so Resume's round refuses and
+    /// nothing can come back or leave; the duplicate advice guards against a
+    /// catch-up that cannot happen. The banner says the true fact and what
+    /// the door does; a join that binds the library flips it to the account
+    /// arm (VX-473's re-read). PROVISIONAL, hers.
     static func holdBanner(asOfDay: String?, hasAccount: Bool = true) -> String {
         let lead = asOfDay.map { "This is your library as of \($0). " }
             ?? "This library was just restored from a copy. "
         guard hasAccount else {
-            return lead
-                + "Sync is waiting until you press Resume. To keep something from this "
-                + "backup, duplicate it first — duplicates stay."
+            return lead + "This library doesn't sync, so Resume changes nothing in it."
         }
         return lead
             + "Sync is waiting — Resume to catch up with your account. Notes you deleted "
