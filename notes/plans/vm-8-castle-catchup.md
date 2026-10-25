@@ -964,6 +964,25 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
      no services); GREEN: `theLobbySaysTheE6LineBeneathItsLead`, `everyCopiedDeclarationIsTheMacsByteForByte`, and every
      other test of those suites. (A machinery note: Xcode 27's compiler rejected a second inline `filter` closure beside a
      capturing one in the posture suite — "function type mismatch", a SIL fault; the counts ride `U2Faces.count`.)
+   - **RUN B — GREEN AT THE TIP** (`6b30fb801`'s product tree; stage claim `vm8-l1`; `-only-testing` the sixteen suites —
+     unit 2's six (`MobileProtectionCrossingsTests`, `…PassphraseTests`, `…CheckTests`, `…FollowTests`, `…ReceiptsTests`,
+     `MobileKeyDoorPostureTests`), unit 1's six (`MobilePreDesignFaceTests`, `MobileProtectionAccountSectionTests`,
+     `MobileProtectionCompositionTests`, `MobileTypedUnlockSyncKeysTests`, `MobileNoRedirectSweepTests`,
+     `MobileProtectionRoadTests`), `MobileCopyRegisterSweepTests`, and L1's three new suites): `✔ Test run with 47 tests in
+     16 suites passed after 66.022 seconds` — exactly unit 2's close (41/13) plus L1's 6 tests / 3 suites (0 skipped — the
+     two "skipped" log lines are the AppIntents metadata tool's). Both sweeps green: no exemption widened, the
+     `herRuleTwelve` literal untouched and unreachable.
+   - **RUN C — THE BEHAVIORAL REVERTS, named BEFORE they run** (the committed tip is the copy: each file restored by `git
+     checkout HEAD -- <file>`, `git diff --exit-code` clean after; ONE batch, each revert's red disjoint). Expected red in
+     brackets: **RV-L1-1** `VariorumMobile/Features/Protection/MobileRoadFaces.swift` ← `fd56f2279` (the pre-unit-1 lobby —
+     no E6 line) [`theLobbySaysTheE6LineBeneathItsLead`; also unit 1's own `herFaceSaysHerWordsAndOffersStartFreshAlone` /
+     `startFreshAsksHerConfirmThenActsOnTheYes` — the same file's pre-design face, red by design] · **RV-L1-2** a one-byte
+     drift in `MobilePlantedProtection.swift` (`TempSlot`'s doc comment: "removed at deinit." → "removed at deinit!")
+     [`everyCopiedDeclarationIsTheMacsByteForByte`, naming `TempSlot`] · **RV-L1-3** MINOR-1's production files ←
+     `2243a26aa` (`MobileProtectionDoors.swift`, `MobileProtectionScreen.swift`) [the five MINOR-1 pins, as RUN A] ·
+     **RV-L1-4** `MobileSettingsView.swift` ← `2243a26aa` [`noServicesNoProtectionRow`, `settingsOpensTheScreenOnly…`].
+     GREEN expected: every other test of the sixteen suites. RESULTS PENDING — **REVERTS STARTING NOW (the tip committed at
+     this record's commit; nothing to copy — the restore is `git checkout HEAD`).**
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
 
