@@ -234,6 +234,40 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
   containers · 36,000 blocks · 36,000 placements · 1 vault (the VX-494 plant, ~110k rows). The prod test accounts file
   *[removed for publication]*
   exists. Stage FREE.
+- **THE FORKS (traced in code before building; proposals ASKED of the orchestrator, one message, this commit):**
+  - **F-U1-1 — STOP-AND-FLAG (F-PH-2 reached):** the shared account faces put HER rule-12 leave sentence
+    (`ProtectionWords.leaveSentence` — "…your Apple account and this Mac again…", the `herRuleTwelve` sweep exemption)
+    in exactly two account confirms: the JOIN that LEAVES Castle (`joinSpec(.leavesCastle)` → `Words.ruleFive`) and the
+    FOLLOW OUT of Castle (`followNow` with `.intoStandard` → `.ruleFive`). Rendering the section generically on the phone
+    makes that exempted sentence reachable. Proposal **(A, recommended)**: unit 1's phone section does NOT render those
+    two arms (nothing in their place — the phone had no road there before either); every other door renders from the
+    shared faces; F-PH-2 moves to the top of her bundle (unit 2 builds both arms with her phone wording). (B) render her
+    sentence as is and re-word the exemption's `why` — refused by the brief (never widen). (C) interpolate the device into
+    her sentence — invents her words. Her critical path is the OTHER join arm (a fresh Standard library joining her Castle
+    account — `.entersCastle`), which says no rule-12 sentence.
+  - **F-U1-2 — four SHARED sentences are false or a redirect on the phone** (none names the Mac, so the sweep cannot see
+    them), three on her critical path: (a) `gateTouchIDLine` "This iPhone keeps the new key behind your fingerprint." (the
+    Face ID gate); (b) `exportAPlainCopyFirst` "…export one first from Settings ▸ Data Safety." (the join into Castle — the
+    phone has no Data Safety and no plain-copy road at all, PL-13's residue); (c) `firstRoundCloseNote` "…the bar at the
+    bottom of the window says when it's done." (the first-round sheet — the phone's sync row lives in Settings); (d)
+    `deleteHerePointer` "…choose Account… in the sidebar's sync row…" (the third leave — the phone has no sidebar).
+    Proposal **(B, recommended)**: phone variants behind `ProtectionRoad.isMac` (the shipped `rearmQuestion` precedent —
+    the Mac byte-identical), drafted PROVISIONAL P-VM8-3…6: (a) "This iPhone keeps the new key behind Face ID." (b) not
+    said on the phone (`RoadCrossingFaces.sentence` answers nil there — the `.sameEmailDifferentAccount` idiom; no road
+    exists to point at) (c) "You can close this — sync keeps going, and Settings says when it's done." (d) "…choose
+    Account… in Settings' sync row, then Delete Account." (A) render the Mac text and bundle each — a false sentence on
+    her phone at the device moment.
+  - **F-U1-3 — the reopen (composition, not product — built, not asked):** her join is RE-KEYING (Standard → Castle), so
+    `reopenAround` tears the `.ready` tree down — the phone's Settings sheet and the screen hosting the confirm go with
+    it, while the confirm (its words moment, its first round) lives on in the presenter (which then refuses every other
+    sheet). The phone adopts `ProtectionController.settingsRequest` (VX-206's road — `reopenAround` already asks it) and
+    re-presents Settings at Protection, which re-presents the presenter's sheet.
+  - **F-U1-4 — typing secrets into the SIMULATOR:** both `~/.variorum/bin` helpers refuse unless the frontmost app is the
+    MAC Debug build (by design). Proposal: one more local helper, `~/.variorum/bin/type-sim-secret <road> <field>` (mode
+    700, never committed), the same shape and guards made simulator-true — the frontmost app is Simulator, the pinned
+    device is the booted one, the phone Debug app's host process carries the road's launch env (the throwaway ref and no
+    production ref; or `VARIORUM_PROD_TEST_ROAD=1` with no walk project, the account listed and `vxtest`-marked), values
+    never printed. An environment act (her R-510-8 shape) — asked, not assumed.
 - **Piece 1 — the pre-design face on the phone lobby:** NOT-STARTED.
 - **Piece 2 — the phone's Protection screen (the account section), `attach(services:)`, the row's door:** NOT-STARTED.
 - **Piece 3 — VX-501 on the phone's posture:** NOT-STARTED.
