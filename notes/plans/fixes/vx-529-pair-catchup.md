@@ -1,9 +1,8 @@
 # VX-529 — the catch-up for a pair changed elsewhere
 
-**STATUS: OPEN — BUILD COMPLETE (units 1–3 + ladder fix sessions L1/L2), THE LADDER CLOSED (r1 0B·0M·1m·2n → r2
-every fix SOUND), THE CLOSING STAGE BATCH GREEN (Mac 5231/5265 — the 2 failures proven VX-539 on main; phone
-808/126), THE LIVE PROOF ON PRODUCTION PASSED (D0–D7, 2026-10-24 night, an Opus orchestrator after Fable's safeguards
-stopped the walk). Remaining: HER TWO-MAC TEST (the release gate), then the closeout.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
+**STATUS: CLOSED 2026-10-25 — build, ladder, closing batch, the live proof on production and HER TWO-MAC TEST all
+passed; merged to main by PR and released as 0.10.2 at her word (R-529-8). THE CLOSEOUT section (near the end) carries
+the gates, the rulings reconciled and the born tickets.** The rulings are THE RULINGS + R-529-5/-6 and the architect-ruling sections; the design memo (next
 section) is the built contract. Branch `vx-529-pair-catchup`, worktree `~/dev/variorum-vx-529`, the custody slot held
 (the in-flight table). The kickoff is `notes/handoffs/vx-529-kickoff.md`; the repro is the VX-510 record's THE
 CHANGED-ELSEWHERE REPRO (`notes/plans/fixes/vx-510-first-run-sync.md`). *(The header's original "nothing below is
@@ -2551,6 +2550,38 @@ anything unexpected:
   her real Macs and account: the passphrase (Pro changed → the Air caught up at its lock screen, R-529-1) and the
   words (Air changed → the Pro caught up quietly, R-529-2). The reverse passphrase direction runs the same code —
   not repeated. The release gate she set at kickoff is MET; R-529-8 (merge and mint) proceeds.
+
+## THE CLOSEOUT (2026-10-25, the Opus orchestrator — CLAUDE.md's ritual)
+
+- **The gates, all green:** the ladder (two rounds: r1 0B·0M·1m·2n → L1 + L2 → r2 every fix SOUND); the closing stage
+  batch (Mac 5231/5265, the 2 failures proven VX-539 on main; phone 808/126); the live proof on production (D0–D7); her
+  two-Mac test on her real Macs and account (passed, both halves, both directions); **the 0.10.2 version gate** — the
+  five suites that read the version or the notes (`VersionSchemeTests`, `WhatsNewTests`, `SupportDraftTests`,
+  `WhatsNewWaitsAfterAdoptionTests`, `WhatsNewWaitsCompositionTests`) on the Mac target under a held stage claim:
+  **`✔ Test run with 26 tests in 5 suites passed`**, `** TEST SUCCEEDED **`, no `skipped:` line.
+- **The canon deltas (two-file shape):** SurfaceContracts' protection bullet gains THE PAIR CATCH-UP (one contract
+  passage, one pointer to this record); AppSpecRecord gains the dated entry; no AppSpec line changes (the protection acts
+  are not §9 operations; §12 already defers to SurfaceContracts); **CastleRules UNTOUCHED** (R-510-20) — the two rule
+  clauses are drafted for her ratify in QUESTIONS #241. `Tools/canon-size`: **125,663 / 150,000** (unchanged — the
+  delta sits in an explicit-read file).
+- **THE RULINGS RECONCILED (each re-read against what shipped):** R-529-1 — shipped; live on production (D2) and on her
+  real Air (step 6, the catch-up in the same unlock); L1 narrowed the read to libraries that can benefit. R-529-2 —
+  shipped; D1w and her steps 12–14 (the Air changed, the Pro followed with nothing typed). R-529-3 — shipped; the
+  repetition she saw is VX-542 (later, her word). R-529-4 — every rider shipped (VX-523 by R-529-7). R-529-5 —
+  shipped; live on production (D3); not walked on her real hardware (her choice of the words-change leg instead —
+  recorded, not owed). **R-529-6 ("make sure that that's clearly expressed everywhere it needs to be") — the remainder
+  TICKETED at this reconciliation:** the lobby's E6 line, the check door's E6 answer and VX-538's card shipped; the
+  join's words-moment E6 line joined VX-541, the guide's E6 line joined VX-379. R-529-7 — shipped; D5. R-529-8 —
+  executed (the bump, her approved notes verbatim, the merge, the release).
+- **Tickets:** VX-529 and its riders VX-526 · VX-522 · VX-523 · VX-530 · VX-533 · VX-538 close with the merge.
+  **Born and triaged** (CLAUDE.md's labels): **Medium** — VX-544 (an offline typed unlock leaves Castle sync locked;
+  pre-existing VX-501 behavior; later, her word). **Low** — VX-539 (the retention suite's week-boundary flake, Test-only),
+  VX-540 (the post-launch in-Castle rotation design sitting, Exploration), VX-541 (the check door's faces + the join's
+  E6 line), VX-542 (the follow-owed pane's repetition — worse on real hardware; later, her word), VX-543 (the lobby's
+  "the one before it").
+- **MOBILE PARITY:** PL-59 (written mid-run at her word, trued at this closeout); the mobile handoff carries a dated
+  pointer at its SUCCESSOR HANDOFF.
+- **Next:** the mobile catch-up (VM-8) — her stated next run; its context is the mobile handoff + PL-58/PL-59.
 
 ## Machinery
 
