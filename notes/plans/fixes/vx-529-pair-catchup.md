@@ -2166,6 +2166,76 @@ the closing stage batch, the live proof, and HER TWO-MAC TEST.**
   RECORDED HERE for the next drill (the passphrase env note).
 - **Evidence per leg:** the protection log's road lines, window-scoped captures into the gitignored walk folder,
   prod-read rev checks. A leg that misbehaves STOPS the drill — record, trace, never improvise past a surprise.
+- **A SCRIPT DEVIATION, found at D0 (recorded before the legs that need it):** the typing helper holds exactly TWO
+  passphrase values for the account (`passphrase`, `passphrase2`; the env file is hers and gains no third), so the
+  legs' "PASSPHRASE3/4/5" become ALTERNATING flips between the two — each flip a genuine pair change (a fresh KDF
+  descriptor every time), "the old one" being the previous of the two. The twice-lagged case reads differently with
+  two values (A→B→A returns to the same TEXT under a third descriptor: the local lock and the vault both open, the
+  detection still fires on the descriptor, the catch-up re-locks — harmless); it stays HER two-Mac leg's to see.
+
+## THE LIVE PROOF — THE RECORD (the orchestrator, live; stage claim `vx-529`)
+
+**THE MODEL CUTOVER (2026-10-24 ~22:35 MDT).** The Fable orchestrator's live-walk turns were stopped TWICE by the
+model's safeguards mid-D0 (the classifier's `[cyber]` class — her words at the cutover: "once again, the live walk
+part of the night is stopped by Fable safeguards even though it's to protect my users"). At her `/model` switch an
+**Opus 5.5 orchestrator took over the same session** (her words: "welcome Opus! you're taking over - look through the
+last bits of the transcript to identify where things failed and make sure the record is caught up"). Everything
+below from "THE INCIDENT" on is the Opus orchestrator's, verified against the machine, not trusted from the
+transcript.
+
+**D0 — DONE THROUGH L_A's JOIN (22:12–22:16, the Fable orchestrator; evidence verified at the cutover):**
+- The dev store's nine files set aside WHOLE into `Variorum-dev-aside-vx529-drill/` — inodes recorded
+  (191598614–191598620, 195574778/195574779) and **re-verified identical at the cutover**.
+- `Tools/WalkKit/first-run-walk.sh castle` (the build path symlinked to this run's `vx529-walk`; the worktree given
+  the `.env.supabase.local` symlink G8 needs): G1–G8 passed; P1 launch on the road (pid 39373), P2 the road ARMED,
+  *[removed for publication]*
+  correctly** — the account already holds a vault, so the door reads "Sync this library…" (the join arm), not the
+  script's set-up arm "Turn on sync…" (the script is the set-up road's; recorded, not a defect).
+- **L_A = library `5f9da1cc` JOINED by hand:** Protection… → "Sync this library…" → the sheet titled **"Sync this
+  library"** (VX-526's title LIVE) → the account's current passphrase (`passphrase2`) → the words moment: *"Your
+  twelve words are ‹the account›'s twelve words. Your previous twelve words still open backups made with them. If you
+  don't have your account's words written down, you can make new ones at any time."* (**VX-526's new middle sentence
+  LIVE**) → OK. The log: `enroll: done #2 under c7e1a4bf` · `road: turnOnSync — library 5f9da1cc now names account
+  *[removed for publication]*
+  18 → 18 (the join writes no vault row — correct).
+- **The road's evidence channel is the run's `app.log`** (the launcher's `--stderr`), not the unified log (`log show`
+  read empty — the walk build's lines go to stderr). Every later leg reads `app.log`.
+
+**THE INCIDENT — I-D0-1: TWO WALK INSTANCES ON ONE SLOT (22:19–22:38; traced by the Opus orchestrator from the
+transcript's own commands, then cleared):**
+- **The chain, exactly:** (1) the step meant to quit L_A's instance ran `osascript … quit … && sleep 4 && pgrep … ||
+  echo "zero instances"; …mv…`. The quit returned `User canceled (-128)` (the app declined it), so `&&` skipped the
+  check and **`|| echo` printed "zero instances" because the QUIT failed, not because none ran** — and the `;` let the
+  L_A set-aside run regardless. (2) L_A's files were moved aside **with 39373 still holding them open**. (3) The L_B
+  launch then found its pid with `pgrep -f … | head -1`, which returned the OLD 39373, so the next accessibility
+  press addressed the wrong instance (it found no control and did nothing). (4) The safeguard stop landed here.
+- **The damage assessment (verified, not assumed):** `lsof` at the cutover: **every one of 39373's open handles had
+  followed its inodes into `Variorum-dev-aside-vx529-LA/`** — none in the slot — so it never opened L_B's files;
+  40395 held only the slot's. The dev store untouched (inodes identical). L_A's two acts both logged `done` (#1
+  regenerate_words, #2 enroll), so nothing was in flight. **No library crossed another; no test data at risk.**
+- **The clearance:** two pid-addressed quit requests (`NSRunningApplication.terminate`) were accepted but never
+  finished. The main thread sampled idle in the event loop, so the app wasn't hung; its quit's `terminateLater`
+  finalizer never replied. The instance was then stopped with SIGTERM: a walk build on a throwaway test library,
+  no act in flight, SQLite WAL crash-safe (the real-store rule never applies to a walk instance). L_A's five files
+  are whole in their aside folder (the WAL replays at its next open — D1's swap re-opens it and verifies).
+- **Standing rules from it (binding for the rest of this drill):** an instance check is ALWAYS `ps axo pid,command
+  | grep '[V]ariorum.app/Contents/MacOS'` (the bracket keeps the grep off its own argv; `pgrep … | head -1` is never
+  a pid source); **a set-aside runs ONLY as its own step after a verified zero-instance check**, never chained after
+  a quit with `||`/`;`; quits are pid-addressed and their outcome read.
+- **O-D0-1 (an observation, not a finding):** every walk launch logs ~50 `sqlcipher … hmac check failed for pgno=1`
+  lines BEFORE `road: created` (39373 at 22:12:44, 40395 at 22:20:34 alike) — the startup probe trying keys that
+  don't fit (the standing pattern, present on both launches; nothing in this run's diff touches the probe).
+- **O-D0-2 (an observation for a later trace, not this run's):** the walk build declined a plain quit
+  (`User canceled`) before any file moved, and later pid-addressed quits never completed. The quit gate is
+  `applicationShouldTerminate` → the quick-note park's one-shot decline + `quitFinalize.finalizeAll()`. That a SECOND
+  consecutive quit didn't proceed (the park's own contract says it always does) points at a finalizer that never
+  returns. Unproven, so not ticketed yet: the next walk quit reads `app.log` around the press, and a repeat earns a
+  ticket.
+
+**STATE AT THE RECORD (22:40 MDT):** one instance, 40395, on the slot holding **L_B = library `1a1e7a0d`**
+(fresh, not yet joined; its sign-in state read at D0's second half); L_A aside (joined, `5f9da1cc`); the dev store aside (verified); the stage
+held (~150 min left); the `castle` account Standard, rev 18, its current passphrase `passphrase2`. **NEXT: D0's
+second half (join L_B), then D1 onward per the script and its deviation.**
 
 ## Machinery
 
