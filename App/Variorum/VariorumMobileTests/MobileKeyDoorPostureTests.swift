@@ -17,6 +17,7 @@
 
 import Dependencies
 import Foundation
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import VariorumMobile
@@ -130,6 +131,82 @@ struct MobileKeyDoorPostureTests {
             #expect(resetting.refusal == nil, "Reset by Face ID landed — \(resetting.refusal ?? "")")
             #expect(world.keys.touchIDReads - beforeReset == 1, "once per act — never twice")
             #expect(world.touchIDSyncKeys != nil, "the item read, never forgotten by a key door")
+        }
+    }
+
+    /// **THE PAIR CHANGED ELSEWHERE, end to end on the phone (F-U2-D, PROVISIONAL P-VM8-9):** a Standard library joined to
+    /// an account in Standard; another device re-makes the account's PASSPHRASE (the vault's passphrase lock under a new
+    /// descriptor — `VaultModel`'s own write, the Mac's `PairPreflightAndGateTests` plant). The phone's own reads: the key
+    /// doors are locked by the pair catch-up (`RoadKeyDoorFaces.pairGate` — the shared derive), the account section offers
+    /// "Follow your account…" with the pair's notice; and the REAL screen over the bootstrap's own standing says the pair
+    /// sentence ONCE (beside the follow door) and the follow's road ONCE (for the locked doors). Before the change: no gate
+    /// (a guard). RED by its reverts (the derive's fact; the phone's pair-gate arms).
+    @Test func aPairChangedElsewhereLocksTheKeyDoorsAndTheScreenSaysItOnce() async throws {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            let world = World()
+            _ = try world.vault.plant(
+                accountID: Self.account, passphrase: Self.passphrase, words: try RecoveryPhrase.generate(), mode: .standard)
+            let bootstrap = AppBootstrap(testStoreURL: world.slot.places.slot, protectionRoad: world.harness())
+            await bootstrap.awaitOpen()
+            guard case .newLibraryWords(let card) = bootstrap.state else {
+                Issue.record("a fresh slot creates a library — \(bootstrap.state)")
+                return
+            }
+            card.iveWrittenThemDown()
+            await bootstrap.awaitOpen()
+            let section = try #require(bootstrap.roadAccount)
+            await section.refresh()
+            section.open(.turnOnSync)
+            let join = try #require(section.confirm, "the join (the same posture) on the presenter")
+            await join.submit(passphrase: Self.passphrase)
+            await bootstrap.awaitOpen()
+            #expect(join.refusal == nil, "the join landed — \(join.refusal ?? "")")
+            join.closeMoment()
+            join.done()
+            #expect(bootstrap.roadSession?.library.record?.account == Self.account)
+            let doors = try #require(bootstrap.roadKeyDoors)
+            await doors.refresh()
+            #expect(doors.faces?.pairGate == false, "a guard: nothing moved yet — no gate")
+
+            // Another device re-makes the account's passphrase.
+            let snapshot = try #require(world.vault.snapshot(Self.account))
+            let master = try #require(snapshot.vault.master(
+                passphrase: try PassphraseKey.derive(Self.passphrase, kdf: snapshot.vault.kdf), words: nil))
+            let elsewhere = try PassphraseKey.derive("a passphrase made elsewhere", kdf: FastIDsLeaf().mintPassphraseKDF())
+            var row = try #require(world.vault.accounts[Self.account])
+            row.vault = try VaultModel.rewrappingPassphrase(
+                snapshot.vault, master: master, passphrase: elsewhere, device: "Studio Mac")
+            row.revision += 1
+            row.updatedAt = (row.updatedAt ?? Date()).addingTimeInterval(3600)
+            world.vault.accounts[Self.account] = row
+
+            await doors.refresh()
+            await section.refresh()
+            #expect(doors.faces?.pairGate == true,
+                    "every key door locked by the pair catch-up — \(String(describing: doors.faces))")
+            let follow = try #require(section.faces?.follow.openDoor, "the follow door stands")
+            #expect(follow.follow == .pairChanged(passphrase: true, words: false))
+            let pairSentence = try #require(follow.notice)
+            #expect(pairSentence.contains("Studio Mac"), "the device named")
+
+            let standing = try #require(bootstrap.roadStanding)
+            let screen = NavigationStack {
+                MobileProtectionScreen(standing: standing, services: nil, tokens: U2Faces.tokens)
+                    .environment(MobileProtectionReceipts())
+            }
+            await withHostedSurface(screen) { surface in
+                await surface.settle(60)
+                let labels = surface.visibleLabels
+                #expect(labels.filter { $0.contains(pairSentence) }.count == 1,
+                        "the pair sentence once — labels were \(labels)")
+                #expect(labels.contains(ProtectionWords.followDoor), "beside the follow door")
+                #expect(labels.filter { $0 == ProtectionWords.followFirstToCatchUpRoad }.count == 1,
+                        "the locked doors' road, once")
+                #expect(!labels.contains(ProtectionWords.changePassphraseDoor), "Change passphrase… is locked")
+            }
         }
     }
 

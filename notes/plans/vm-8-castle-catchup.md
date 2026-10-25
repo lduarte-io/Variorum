@@ -564,7 +564,8 @@ signed out.**
 
 ## UNIT 2 — LIVE STATUS (the implementer owns this section; every unverified claim PENDING)
 
-**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — written at the close. **No revert is in flight.**
+**NOT DONE BY THIS SESSION (first, as the contract asks):** PENDING — written at the close. **No revert is in flight**
+(reverts named in piece 7 below; none applied yet).
 
 *Implementer U2 — Opus 5.5, xhigh. Pre-fix tree = `33c596def` (unit 1 closed + the Mac stage batch). Stage claims as
 `vm8-u2`. Worktree `~/dev/variorum-vm-8`.*
@@ -669,7 +670,12 @@ signed out.**
    reads it). Pins PENDING.
 3. The check door over `ProtectionSecretCheck`. IN-PROGRESS — CODE COMPILING (this commit): `MobileRoadSecretCheckDoor` +
    `MobileRoadSecretCheckSheet`. Pins PENDING.
-4. The follow/pair on the phone, pinned (F-U2-B). NOT-STARTED.
+4. The follow/pair on the phone, pinned (F-U2-B). DONE (pins) — `MobileProtectionFollowTests` (the pair follow names the
+   half and device beside its door, its confirm takes either secret and says the second road, no gate; the quiet words-only
+   catch-up types nothing — "This iPhone catches up without asking you for anything."; R-529-5's words arm says the window
+   and the Reset chain beside its round; the durable Done stands with OK and never beside an owed follow). These pin unit
+   1's rendering of shared faces — GREEN ON BOTH SIDES of unit 2 by design (no unit-2 line serves them; their mechanisms
+   are VX-529's, red-on-old in its record).
 5. The receipts' home (F-U2-E, P-VM8-8). IN-PROGRESS — CODE COMPILING (this commit): `MobileProtectionReceipts` (the newest
    three said; cleared when the screen leaves), the shell's `attachProtectionReceipts()` (`roadStanding.speak` on appear and
    at every new open's faces), the screen's muted line under its title (the holder through the environment on the
@@ -677,8 +683,39 @@ signed out.**
    The one presenter's phone host now hosts `.crossing`, `.signedOutCastle`, `.keyDoor`, `.checkSecrets` (unit 1's
    "no door opens these" hole closed).
 6. Posture pins through the phone's own bootstrap: VX-530 (a Castle + Face ID key door reads the Touch ID sync-keys item at
-   most once) and VX-517 (a leave forgets the Touch ID class by name under a production-like listing). NOT-STARTED.
-7. Evidence: behavioral reverts named before they run; the unit suites + the sweeps; the whole phone target. NOT-STARTED.
+   most once) and VX-517 (a leave forgets the Touch ID class by name under a production-like listing). DONE —
+   `MobileKeyDoorPostureTests` (the join into a Castle account with FACE ID chosen at the press, the custody item and the
+   Touch ID sync-keys item made, session memory emptied: Change passphrase reads the item 0 times, Reset with Face ID
+   exactly once; *Stop syncing here* under a listing blind to the item forgets it by name) — GUARDS, green (VX-530's and
+   VX-517's mechanisms are core, red-on-old in their records) — plus THE PAIR CHANGED ELSEWHERE END TO END
+   (`aPairChangedElsewhereLocksTheKeyDoorsAndTheScreenSaysItOnce`: a Standard join, then another device re-makes the
+   account's passphrase in the planted vault — `VaultModel.rewrappingPassphrase`, the Mac's plant — the phone's own reads
+   say `pairGate` and the pair follow, and the REAL screen over the bootstrap's own standing says the pair sentence once
+   and the road once).
+7. Evidence: behavioral reverts named before they run; the unit suites + the sweeps; the whole phone target. IN-PROGRESS.
+   - **GREEN on the pinned simulator** (stage claim `vm8-u2`; `-only-testing` the six new suites + unit 1's six + the copy
+     register sweep): `✔ Test run with 39 tests in 13 suites passed after 55.080 seconds` (0 skipped — the two "skipped"
+     log lines are the AppIntents metadata tool's); then the posture suite with its third test: `✔ Test run with 3 tests in
+     1 suite passed`. The typing helper (`U2Faces.type` — `UITextInput.insertText` into the real `UITextField` SwiftUI
+     renders) drives the hint, the floor, the look's ask and the check for real.
+   - **THE BEHAVIORAL REVERTS, named BEFORE any runs** (the committed tree is the copy: each file restored by `git checkout
+     -- <file>`, `git diff --exit-code` clean after each batch; each batch's reds disjoint). Expected red in brackets:
+     - batch A — **RV-U2-A** `VariorumMobile/Features/Protection/MobileProtectionScreen.swift` ← `33c596def` (THE PRE-UNIT-2
+       SCREEN, whole: no passphrase/words/check/crossings sections, the host's four cases closed, no receipts line, no hint
+       in the account confirm, no look ask) [`useCastleSpeaksThePhonesWords…`, `useStandardNeverRenders…` (Replace All Keys
+       absent), `theGateRowAsks…`, `theSignedOutRoad…`, `theSetterSaysTheHint…`, `theAccountConfirmsNewPassphraseSaysTheHint`
+       (F-U2-C's bug-class red), `theKeyDoorsSayTheirLine…`, `aPairGateSaysThePairSentenceOnce` (the road absent),
+       `newWordsAsks…`, `theCheckReadsOneSecret…`, `theScreenSaysWhatTheFacesSpoke`, `theShellHandsTheFacesItsHolder` (the
+       screen's clear), `aPairChangedElsewhere…` (the screen half); GREEN: the follow suite, the export fact, the
+       no-check-door guard, the two VX-530/VX-517 guards, unit 1's suites, the sweeps].
+     - batch B — **RV-U2-B** `MobileProtectionDoors.swift`: P-VM8-9's pair-gate arms removed (`rows` ignores `pairGate`; the
+       words section's arm gone) [`aPairGateSaysThePairSentenceOnce` (the pair sentence said 3 times), the posture suite's
+       `aPairChangedElsewhere…` (the screen half)] · **RV-U2-C** the same file: `phoneDoors` = every crossing and the
+       `saysRuleTwelve` belt removed [`useStandardNeverRendersAndReplaceAllKeysStands`] · **RV-U2-D**
+       `MobileShellView.swift`: `attachProtectionReceipts`'s `speak` line removed [`theShellHandsTheFacesItsHolder`].
+     - batch C — **RV-U2-E** `Shared/Protection/RoadKeyDoorFaces.swift`: the derive passes `pairGate: false`
+       [`aPairChangedElsewhere…` (the derive half — `pairGate == true`) and its screen half].
+     PENDING — runs next.
 8. The walk on the pinned simulator. NOT-STARTED.
 
 ## THE LEDGER (numbered; every row owned; updated repo-first)
