@@ -1756,9 +1756,8 @@ commit + push per piece, LIVE STATUS under this section, no trailers.
 ### L1 — LIVE STATUS (the implementer owns this section)
 
 **NOT DONE IN THIS SESSION:** everything but F-R1-1 (the charter's one finding); the Mac-target run of
-`LobbyVaultRoadTests` (the closing stage batch — it runs here in unit 2's headless harness only); every walk. **A REVERT
-IS IN FLIGHT: RV-L1-1** (L1-P3 — `ProtectionOpenRoad.swift` only, over the committed fix `facffef48`; restore = `git
-checkout -- App/Variorum/Shared/Protection/ProtectionOpenRoad.swift`). Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-25, worktree
+`LobbyVaultRoadTests` (the closing stage batch — it runs here in unit 2's headless harness only); every walk. No revert
+is in flight (RV-L1-1 ran and was restored — L1-P3). Zero `Sources/VariorumCore/Sync/` lines. Session: a fresh `opus-implementer`, 2026-10-25, worktree
 `~/dev/variorum-vx-529`.
 
 **Read first (all read in full, in this session):** CLAUDE.md + the loaded canon; `notes/SessionResiliencyProtocol.md`;
@@ -1816,7 +1815,11 @@ road), `ProtectionRoadActs.swift` (`setFirstPassphrase`); the suite `LobbyVaultR
   passed after 2.668 seconds.` The neighbour suites PENDING (L1-P4).
 - L1-P3 — THE REVERT, named before it runs: RV-L1-1 `ProtectionOpenRoad.swift` — the gate's guard removed (the hoisted read
   kept), the harness `--filter LobbyVaultRoadTests` [expect exactly the unsynced row's fetch counts red; every byte-identity
-  assertion and the synced side green]; restored by `git checkout --` on the committed fix. NOT-STARTED.
+  assertion and the synced side green]; restored by `git checkout --` on the committed fix. **VERIFIED BY REVERT** on
+  `facffef48` (announced in the banner first, `59974fbed`): RV-L1-1 ⇒ `✘ Test run with 11 tests in 1 suite failed after
+  2.687 seconds with 2 issues.` — exactly the pre-fix red (a wrong passphrase `→ 1` / `→ 0`; the account's passphrase
+  `→ 2` / `→ 1`), every byte-identity assertion, nothing-written and the synced side green through it; restored by `git
+  checkout --`, `git diff --exit-code` clean, `✔ Test run with 11 tests in 1 suite passed after 2.736 seconds.` DONE.
 - L1-P4 — the close: the suites the fix touches green in the harness (the lobby, typed-unlock, Touch ID-unlock, planted-road
   and lobby-model suites) and `VaultRoadTests` in the core. NOT-STARTED.
 
