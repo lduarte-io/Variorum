@@ -2492,6 +2492,9 @@ anything unexpected:
   screen → IT OPENED.** Her words: "i didn't click "follow". i locked it. i used my new passphrase - and it worked!"
   — **R-529-1 live on her real Air**: the lagging library, whose own lock held only the old passphrase, opened by the
   account's new one through the vault. Whether the catch-up landed in the same press is Step 7's check.
+- **Step 7 (Air, Settings ▸ Protection): THE CATCH-UP LANDED IN THE SAME UNLOCK** — her screenshot: Change passphrase
+  and Reset forgotten passphrase back, no pair sentence, no Follow button; her words: "looks good now! sync still
+  looks good too". One typing at the lock screen converged the Air — R-529-1's whole promise, on her own hardware.
 
 ## Machinery
 
