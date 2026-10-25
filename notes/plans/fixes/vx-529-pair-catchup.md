@@ -909,7 +909,10 @@ key-door and lobby roads), the Mac `StoreLockView.swift` and `RoadAccountSheet.s
   RoadAccountModelTests|RoadAccountFacesTests|FirstRoundConfirmTests"`): `✔ Test run with 83 tests in 11 suites passed`;
   `--filter PairFollowDoneDurableTests`: `✔ 1 test`. THE REVERT (named before it runs; F-U2-1's red, its fix having been
   written before its pin — said so): RV-P1-1 `AppBootstrap.swift` — the open-session landing block removed (the press as
-  before), the harness `--filter PairFollowDoneDurableTests`. PENDING (next commit).
+  before), the harness `--filter PairFollowDoneDurableTests`. **VERIFIED BY REVERT** on `389f3bdb9`: `✘ Test run with 1
+  test … with 2 issues` — no mark (`FollowDoneMark.owed(libraryID…) == .pairChanged(passphrase: true, words: false)`) and
+  no notice in the section (`account.followDone != nil`); restored by `git checkout --`, `git diff --exit-code` clean, `✔ 1
+  test` green again. DONE (`389f3bdb9`). No revert is in flight.
 - U2-P2 — scope 2: `RoadSettledFollow.kind` tells a settled pair follow apart (its act in flight names no new key) —
   bug-class (today it reads `.keysReplaced` and the durable Done says the keys changed) — and the stale done-line never
   renders while a follow is owed (the repro's line) — bug-class. IN-PROGRESS — the red pins COMMITTED (this commit,
