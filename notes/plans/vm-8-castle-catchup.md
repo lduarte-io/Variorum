@@ -194,8 +194,9 @@ proceeds PROVISIONALLY if the night allows, reviewable whole at the ladder.
    measured save on her corpus → VX-497's shape and Pre-launch call.
 7. **PROVISIONALS built overnight** — every P-VM8-N below, reviewable at her pass.
 8. **Unit 1's taste flags (implementer U1; seen on the simulator walk, built as the brief says, none invented):**
-   (a) P-VM8-7 — the sync row's own *protection…* door (VX-486's, injected per the brief) and the standing *protection…*
-   row sit one above the other while sync reads locked / not-yet (B15); (b) the Terminal voice lowercases every phone
+   (a) P-VM8-7 — RE-CLASSED A BUG AT HER WORD (2026-10-26, live on her phone at the device moment: "file the double
+   protections as a bug not a taste call") — **VM-27 filed**; the sync row's own *protection…* door and the standing
+   *protection…* row sit one above the other while sync reads locked / not-yet (B15, her screenshot); (b) the Terminal voice lowercases every phone
    chrome label, so the shared door names read "delete the account from this iphone…" and the gate heading "on this
    iphone" (B11, B06) — the standing phone rule (the lobby's own "unlock with face id"), hers to keep or carve a
    proper-noun exception; (c) the phone speaks NO protection receipts — `roadStanding.speak` has no phone home, so the
