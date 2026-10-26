@@ -1,6 +1,6 @@
 //
 //  ProtectionSheetPresenter.swift
-//  Variorum (shared: Mac + Mobile — the phone's protection faces present through it when they land)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen presents through it on its `.settings` host, VM-8)
 //
 //  VX-308 U1 piece 2 — THE ONE PRESENTER for the new road's protection sheets (VX-239 + VX-243's rule, carried onto the
 //  new road; `notes/plans/vx-308-accounts-key-doors.md` §5a, the U1 ARBITRATION's R-6). OWNED BY THE BOOTSTRAP beside the

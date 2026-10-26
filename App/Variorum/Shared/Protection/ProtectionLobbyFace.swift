@@ -65,8 +65,8 @@ nonisolated struct ProtectionLobbyFace: Equatable, Sendable {
     /// VX-329 U4 — RULE 26 before unlock: the slot holds a store from before this design (`LaunchVerdict
     /// .preDesignStore` — an older Variorum's key file beside it by name, none of this design's). The Mac's face is HER
     /// pre-design face (the plan's §6d) in place of every road below; no road is ever pressed for it (the model's
-    /// automatic ask stands down). The road fields keep their derivation: the phone renders them until VM-8 builds its
-    /// face (F-U4-3).
+    /// automatic ask stands down). The road fields keep their derivation (F-U4-3); the phone renders her face too since
+    /// VM-8 unit 1 (`MobileRoadLockView`).
     var preDesignStore = false
     /// VX-529 unit 2 — EDGE E6 BEFORE UNLOCK (PROVISIONAL P-VX529-U2-1 (a)): the key file beside the library is a SYNCED one
     /// (its master lock with the master's twelve-words copy) with NO passphrase lock of its own, and someone is signed in —

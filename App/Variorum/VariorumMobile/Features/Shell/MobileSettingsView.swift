@@ -29,6 +29,10 @@ struct MobileSettingsView: View {
     /// and the acknowledgments the encryption obliges (R13p-11). Optional
     /// like `services`: the sheet says nothing about what it does not have.
     var bootstrap: AppBootstrap? = nil
+    /// VM-8 unit 1 (PROVISIONAL P-VM8-2): the shell's door to the phone's Protection screen — dismisses Settings and
+    /// pushes the screen (the settings-sheet grammar, the pocket guide's precedent). nil ⇒ neither the row nor the sync
+    /// row's *Protection…* door renders (P-2).
+    var onOpenProtection: (() -> Void)? = nil
     #if DEBUG
     /// FIX-B4 (Stage B ladder round 1, NIT 2 — fire-and-DO): the shell's
     /// door for "Open the pocket guide" — dismisses Settings and
@@ -70,6 +74,15 @@ struct MobileSettingsView: View {
 
     private var tokens: VoiceTokens {
         .resolve(voice: router.voice, dark: scheme == .dark)
+    }
+
+    /// VM-8 unit 1: the Protection screen's door where it can act — the shell gave the road, the app's services exist (the
+    /// sync row says *Starting…* until they do — ladder round 1's NIT-2: the screen's *Sign in…* has no Account sheet to
+    /// present before them), AND a library is open on the protection road with its account section (P-2: no screen that
+    /// can act, no door).
+    private var protectionDoor: (() -> Void)? {
+        guard let onOpenProtection, services != nil, bootstrap?.roadStanding?.account != nil else { return nil }
+        return onOpenProtection
     }
 
     var body: some View {
@@ -120,6 +133,9 @@ struct MobileSettingsView: View {
                 // own — the old 14+6 composition is the nil arm's).
                 SyncStatusRow(services: services)
                     .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
+                    // VM-8 unit 1 (VX-486's door, the phone's home): the keys-locked and not-on-yet rows' *Protection…*
+                    // door opens the phone's Protection screen — only where that screen can act (P-2).
+                    .environment(\.protectionPaneDoor, protectionDoor.map { open in ProtectionPaneDoor { open() } })
                     .padding(.horizontal, 20)
             } else {
                 Text(tokens.chromeLabel("Starting…"))
@@ -128,12 +144,28 @@ struct MobileSettingsView: View {
                     .padding(.horizontal, 20)
             }
 
+            // VM-8 unit 1 (PROVISIONAL P-VM8-2): Settings ▸ Protection — the phone's screen over the shared protection
+            // brains (unit 1: the Sync/account section). The row's name is the sync row's own door name (P-VX486-1).
+            if let protectionDoor {
+                Button {
+                    protectionDoor()
+                } label: {
+                    Text(tokens.chromeLabel(SyncRowFace.openProtectionLabel))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+                .accessibilityLabel(SyncRowFace.openProtectionLabel)
+            }
+
             Divider()
                 .overlay(tokens.line)
                 .padding(.vertical, 14)
 
             // (13p Batch 4's PROTECTION door — the phone's posture screen over today's protection brain — was today's
-            // road and left with it at VX-329 U1; the phone's protection road faces beyond the lobby are VM-8's.)
+            // road and left with it at VX-329 U1; VM-8 unit 1's Protection row stands above, in the Sync section.)
             // R13p-11's attribution obligation reaches the phone too — it
             // ships the same SQLCipher, so it owes the same notice. Same
             // words as the Mac's pane (`AcknowledgmentsCopy`, Shared).

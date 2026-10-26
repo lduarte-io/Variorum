@@ -1,6 +1,7 @@
 //
 //  RoadCrossingFaces.swift
-//  Variorum (shared: Mac + Mobile — the phone's crossing faces are later; the brain is one)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen renders the crossings, entering only, VM-8; the brain
+//  is one)
 //
 //  VX-307 U2a — THE CROSSINGS' FACES, as PURE values read from `assess` (`notes/plans/vx-307-castle-crossings.md`
 //  §5c; the contract `notes/CastleRules.md` rules 9, 11, 12, 25 and Replace All Keys' P-VX378-U2-1). No rule of its own:
@@ -129,6 +130,12 @@ nonisolated struct RoadDoorOpen: Equatable, Sendable {
     let synced: Bool
     /// The spec as `assess` gave it — the press compares the door it re-reads with this one (VX-108).
     let spec: DoorSpec
+
+    /// **VM-8 unit 2 — F-U2-G (the F-U1-1 (A) pattern, ruled):** the confirm says HER rule-12 leave sentence
+    /// (`Words.ruleFive` — Use Standard's). Its text names the Mac (CastleRules' own words) and its phone wording is hers
+    /// (F-PH-2), so the phone's crossings section renders no such door; the Mac renders every door as before (it never
+    /// reads this).
+    var saysRuleTwelve: Bool { spec.words.contains(.ruleFive) }
 }
 
 /// One door as the pane renders it.
@@ -264,7 +271,10 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         switch words {
         case .ruleFive: return ProtectionWords.leaveSentence
         case .floorSentence: return ProtectionWords.castleFloor
-        case .exportAPlainCopyFirst: return ProtectionWords.exportAPlainCopyFirst
+        // VM-8 unit 1 — F-U1-2 (b), RULED (B): the phone has no Data Safety and no plain-copy road at all (PL-13), so the
+        // sentence would name a road that doesn't exist there — not said on the phone (the `.sameEmailDifferentAccount`
+        // idiom below). PROVISIONAL P-VM8-4 (whether the phone gets its own advisory is hers).
+        case .exportAPlainCopyFirst: return ProtectionRoad.isMac ? ProtectionWords.exportAPlainCopyFirst : nil
         case .scheduledExportTurnsOff: return ProtectionWords.scheduledExportTurnsOff
         case .copiesUnderAKeyThisMacCantDelete: return ProtectionWords.copiesUnderAKeyThisMacCantDelete
         case .sameEmailDifferentAccount: return nil

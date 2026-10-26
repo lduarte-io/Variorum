@@ -1,6 +1,7 @@
 //
 //  RoadAccountFaces.swift
-//  Variorum (shared: Mac + Mobile — the phone's account faces are later; the brain is one)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen renders the account faces too, VM-8; the brain is
+//  one)
 //
 //  VX-308 U1 piece 3 — THE ACCOUNT SECTION'S FACES, as PURE values read from `assess` (`notes/plans/vx-308-accounts-key-
 //  doors.md` §5a and its U1 ARBITRATION; the contract `notes/CastleRules.md` rules 7, 14, 16). No rule of its own: the
@@ -162,6 +163,12 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
     /// The act re-keys the library (a join that crosses postures, every follow): it runs with the app's pool closed and
     /// reopens — the crossings' seam (R-U2-2); else on the open session.
     var rekeys: Bool { spec.rekeys }
+
+    /// **VM-8 unit 1 — F-U1-1, RULED (A):** the confirm says HER rule-12 leave sentence (`Words.ruleFive` — the join that
+    /// leaves Castle, Move out of Castle, the follow out of Castle). Its text names the Mac (CastleRules' own words), and its
+    /// phone wording is hers (F-PH-2), so the phone's unit-1 account section does not render these arms (nothing in their
+    /// place — the phone had no road there before); the Mac renders every arm as before.
+    var saysRuleTwelve: Bool { spec.words.contains(.ruleFive) }
 
     /// **VX-510 D-A1 + D-B0 — a first round is owed the moment this act lands** (VX-498 · VX-507): its landing changes
     /// sync's standing — turning sync on (the set-up, a join), Move, and the follow. Never a leave (sync stops there). An

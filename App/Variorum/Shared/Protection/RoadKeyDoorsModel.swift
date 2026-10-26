@@ -1,6 +1,6 @@
 //
 //  RoadKeyDoorsModel.swift
-//  Variorum (shared: Mac + Mobile — the phone's key doors are later; the brain is one)
+//  Variorum (shared: Mac + Mobile — the phone's Protection screen renders the key doors too, VM-8; the brain is one)
 //
 //  VX-308 U3 piece 5 — THE KEY DOORS' BRAIN on the new road (`notes/plans/vx-308-accounts-key-doors.md` §5c). Every act is
 //  an injected road (the bootstrap's — the pane's one read, the press on the open session; a test's, planted), so the

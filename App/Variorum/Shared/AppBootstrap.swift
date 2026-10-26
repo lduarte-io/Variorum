@@ -1103,8 +1103,8 @@ final class AppBootstrap {
     /// services' one session; and (VX-498) an account act that lands on the open session runs its FIRST ROUND through the
     /// services (`runFirstRound` — the round the deleted road's enrollment hook used to start; a stopped instance answers
     /// "not configured"); and (D-B0) a RE-KEYING act's first round waits for the reopen's fresh services, then asks them
-    /// (`firstRoundAfterReopen` — the services generation below). (The phone wires its deletion hook inline: it renders no
-    /// account section until VM-8, P-2.)
+    /// (`firstRoundAfterReopen` — the services generation below). (The phone attaches its services here too, before
+    /// `start()`, since VM-8 unit 1 renders its account section.)
     func attach(services: AppServices) {
         services.afterAccountDeleted = { [weak self] account in
             await self?.accountDeletedOnNewRoad(account)
