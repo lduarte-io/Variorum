@@ -1,8 +1,8 @@
 # VM-8 — the phone's Castle catch-up (the run record)
 
-**STATUS: OPEN — the overnight build is DONE (2026-10-25): units 1+2 closed and Mac-gated, the ladder CLOSED (r1
-0·1·3·6 → L1 → r2 0·0·1·4, the round-2 MINOR fixed pin-first). WAITING ON HER MORNING: the device install and the
-sitting. Unit 3 (cards + guide) deliberately NOT built — her split call.**
+**STATUS: CLOSED 2026-10-26 — the acceptance MET on her phone (the library whole under Castle + Face ID, two-way
+sync her-proven, the resume live, the save ≈ 4–5 min), the sitting held, PR #191 merged. The ladder: r1 0·1·3·6 → L1
+→ r2 0·0·1·4, closed. Unit 3 → VM-28 (Pre-launch for mobile's launch, her word).**
 
 ## HER MORNING CHECKLIST (the sitting; everything else is done or waiting on these)
 
@@ -1099,3 +1099,33 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
   phase sentence would make the silent minutes legible (the VX-494 silence class, now on the phone's sheet).
 - Remaining acceptance by her eye: the library whole (browse), the gate round (Face ID / always ask), the two-way note
   proof. PENDING her word.
+
+
+## THE SITTING + THE CLOSE (2026-10-26, her hands and words — the run's acceptance and rulings)
+
+**THE ACCEPTANCE MET (PL-51's bar):** her iPhone 17 Pro pulled her library whole under her account's Castle mode —
+"library looks good - faceid is looking good, and the post from my phone showed up just fine on my computer.
+everything looks good!" The resume case passed live (her app-switch, longer than the grant: "looks like it went back
+to syncing"); "Synced" at ≈ 6 minutes total ("it probably took about 6 minutes") — the save ≈ 4–5 min on her corpus.
+
+**HER RULINGS, verbatim-faithful:**
+- **Unit 3:** "mint an umbrella ticket for this and you can mark it as before mobile's launch, but tbh we're kinda far
+  from releasing mobile so we won't do it right now" → **VM-28** (Umbrella · Pre-launch, meaning MOBILE's launch ·
+  Castle & sync), carrying VM-23, VX-538's phone card, the guide chapters, and the kickoff riders F-PH-1/F-PH-2 + the
+  "saving…" sheet sentence.
+- **The riders:** "none, make note of all of them but only i use the phone app rn" → VM-15, VM-16, VM-27 stay open,
+  none taken; her reason recorded.
+- **VX-497:** "honestly i don't think we'll fix it right now but don't close it" → open, un-fixed, NOT Pre-launch; the
+  number and the candidate "saving…" shape posted to the ticket.
+- **The old scope:** "Mint all three" → **VM-29** (sample-restore door) · **VM-30** (plaintext export road) · **VM-31**
+  (note multi-select).
+- **F-PH-1/F-PH-2:** deferred to VM-28's kickoff (her pick of the recommended arm) — the held leave-direction arms and
+  P-VM8-10's recorded dead end stand until then.
+- **The provisionals and taste flags:** "Stand as built until my wording pass" (her standing pattern).
+- **Live at the device moment:** P-VM8-7 re-classed a BUG at her word → **VM-27**; the words-card surprise ("did it
+  change my 12 words?", no Copy, no join-replaces-them sentence) recorded onto VM-28/VM-23.
+
+**RULINGS RECONCILED (the closeout's re-read):** F-U1-1 (A) built, its held arms now owned by VM-28; F-U1-2 (B) built
+as drafted; F-U1-4's helper built to the ruled guards (hers to keep or delete — the handoff); P-VM8-10 stands, owned
+by VM-28; the ladder's every finding dispositioned in its round file; her four sitting rulings executed above. No
+unowned remainder.
