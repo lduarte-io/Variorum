@@ -3627,3 +3627,21 @@ text, so the two move together); every sentence stands as built until her wordin
 NO ticket — the second road re-joins under the account's current secrets, so anyone who can take it can take the follow,
 which keeps unsynced writing; it is never the only road, so the follow sheet is the right home; F-U2-7's bound and F-L2-3's
 line ACCEPTED; VX-533's log check hers, later.
+
+#242 — **THE VM-8 BUNDLE (the binding record is `notes/plans/vm-8-castle-catchup.md` — HER SITTING BUNDLE, THE SITTING
++ THE CLOSE; the ladder rounds beside it), ANSWERED AT THE SITTING 2026-10-26, her words verbatim in the record.** The
+run's asks and her rulings: **unit 3** (the words band VM-23, VX-538's phone card, the pocket-guide chapters) → *"mint
+an umbrella ticket for this and you can mark it as before mobile's launch, but tbh we're kinda far from releasing
+mobile so we won't do it right now"* → **VM-28**, Pre-launch meaning MOBILE's launch; **the riders** VM-15/VM-16/VM-27
+→ *"none, make note of all of them but only i use the phone app rn"*; **VX-497** (her phone's first-catch-up save ≈
+4–5 min, measured at the device moment) → *"honestly i don't think we'll fix it right now but don't close it"* — open,
+not Pre-launch; **the old scope** → *"Mint all three"* (VM-29/30/31); **F-PH-1/F-PH-2** (the Mac-naming interlude
+sentences; her rule-12 leave sentence's phone wording, which unlocks the four held leave-direction faces and closes
+P-VM8-10's recorded dead end) → deferred to VM-28's kickoff; **the provisionals and taste flags** (P-VM8-1…10 — the
+four phone sentence variants, the receipts' screen line with its hours-waiting note, the once-per-screen follow
+refusal with follow-locked sections hidden whole where the Mac renders refusing doors (R-529-3's divergence), the
+twice-told follow notice R2-NIT-1, Terminal's lowercase "iphone", "your backups" in the Castle leads on a backup-less
+phone, the posture line standing doorless on a local library) → *"Stand as built until my wording pass."* **Re-classed
+live at the device moment:** P-VM8-7 (the two stacked Protection… rows) → a BUG at her word → **VM-27**. **Her live
+findings recorded:** the creation words card surprised her ("did it change m y 12 words?" — no; the join replaces
+them) and has no Copy — both onto VM-28/VM-23.

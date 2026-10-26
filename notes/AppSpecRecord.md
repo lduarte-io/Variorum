@@ -898,3 +898,21 @@ VX-545 with the app's sentence (a test pins the two together);
 the sentences stand as built until her wording pass; the E6 heal (P-VX529-4) ratified; the second road's placement
 stands (never the only road — no ticket); the wrong-passphrase wait bound and the restored copy's lobby line
 accepted. Born: VX-545 (the app's rule-7 sentence and the lifecycle page follow the rule).
+
+---
+
+**2026-10-26 — VM-8, the phone's Castle catch-up (PR #191, merge `319aa684d`; the record
+`notes/plans/vm-8-castle-catchup.md`; QUESTIONS #242; the parity row PL-60).** §12 Doors ▸ Library protection: the
+phone's sentence in `notes/SurfaceContracts.md` changed in place — the phone now carries, over the same shared faces,
+its pre-design face with Start fresh (no Open Library door exists there), the Settings ▸ Protection screen with the
+account section (the join "Sync this library…", the words moment, the first-round sheet that stays), the entering
+crossings with the Face ID gate choice, the key doors and the passphrase setter, the follow's in/into and pair arms
+(the follow-owed refusal once per screen, follow-locked sections hidden whole — a ruled-at-ladder phone divergence
+from the Mac's R-529-3 in-place refusals, hers to keep or align), the check door and a quiet receipts line; every
+leave-direction arm is deliberately unrendered pending her rule-12 phone wording (F-PH-2 → VM-28, Pre-launch for
+mobile's launch), and rule 11's export-off notice never fires on the phone (no scheduled export exists there). The
+acceptance was her own device moment: her iPhone 17 Pro pulled her library whole under Castle + Face ID, the staged
+catch-up resumed live across a suspend, and the save measured ≈ 4–5 minutes on her corpus (VX-497 stays open at her
+word). The run's rulings, her sitting words verbatim, the ladder's three files and the born tickets (VM-24…VM-31,
+VX-546, VX-547) are the record's; nothing in CastleRules changed (her frozen-design word held: zero `Sync/`,
+`Server/`, `Persistence/`, `CastleRules` lines).
