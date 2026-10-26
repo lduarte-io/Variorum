@@ -1081,3 +1081,21 @@ record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole
   PL-60, the master plan's paragraph + in-flight row retirement, `Tools/canon-size`, the handoff
   (`notes/handoffs/vm-8-handoff.md`), the tickets' triage sweep, the worktree/branch removal, the helper's
   keep-or-delete (hers).
+
+## THE DEVICE MOMENT (2026-10-26, her hands, live — the run's acceptance)
+
+- The Release build (`54e867074`'s tree) installed on her iPhone 17 Pro by `devicectl` (the signed product verified).
+- **The arm check:** her phone met the PRE-DESIGN FACE exactly as predicted (her old library set aside whole at Start
+  fresh; no unsynced writing — her deliberate word: "i purposefully didn't put anything on my phone").
+- **Her two live reports, both answered and recorded:** (1) the fresh library's words card surprised her ("did it
+  change my 12 words?" — no: the new library's own pair, replaced at the join; the card should SAY so, and it has no
+  Copy — both to VM-23's bundle item); (2) the double *Protection…* rows — **re-classed a BUG at her word, VM-27**.
+- **The sign-in was already standing** (the keychain session survived the reinstall), so the road was the JOIN direct.
+- **The resume case PASSED LIVE:** she app-switched away well past the grant mid-download, came back to it syncing —
+  resumed, never restarted.
+- **THE NUMBER (VX-497's):** "Synced" at ≈ 6 minutes total from the join press on her real corpus — the save ≈ 4–5
+  minutes on the iPhone 17 Pro (the download leg ≈ 1–2 min on wifi). Her Pre-launch call on VX-497 at the sitting.
+- **A new bundle line (hers to word):** the first-round sheet doesn't mark the download→save boundary — a "saving…"
+  phase sentence would make the silent minutes legible (the VX-494 silence class, now on the phone's sheet).
+- Remaining acceptance by her eye: the library whole (browse), the gate round (Face ID / always ask), the two-way note
+  proof. PENDING her word.
