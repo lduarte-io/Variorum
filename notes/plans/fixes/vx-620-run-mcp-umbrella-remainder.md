@@ -209,3 +209,66 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 ## SITTING / RULING RECORD (anything she says mid-run lands here verbatim, same turn)
 
 *(empty so far)*
+
+---
+
+## BATCH 1 RECORD
+
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
+claim (the orchestrator's) — the Mac pins are written and COMPILED (`build-for-testing` into a FRESH
+`DerivedData/b1`), their RUN PENDING the orchestrator's stage window; no canon edit (MCPSpec's replacing lines are
+DRAFTED below, the two-file rule); `MCPSession.instructions` untouched unless the record below says otherwise; nothing
+in `Sync/`, `Server/`, custody, the synced schema or the editor seam.
+
+*Implementer: `opus-implementer` №1 (xhigh), fresh session, 2026-10-27. Read in its own context before any code:
+CLAUDE.md + its canon, this plan IN FULL, `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · The
+Bookcase and books · Doors to the outside), `notes/SessionResiliencyProtocol.md`, the VX-548 record's BATCH 3 BRIEF /
+HER SITTING / BATCH 3 RECORD / THE DELIBERATE FLIPS / MB-16·17·19·22 / the L1 + round-2 ladder entries, QUESTIONS
+#243 (MB-16/MB-17 still PROVISIONAL — followed), the VX-596 and VX-609 ticket bodies (read-only), and the code
+anchors the brief names. No subagent.*
+
+### LIVE STATUS (per piece — flipped in the same commit as each piece)
+
+- **No behavioural revert is in flight.**
+- **0 · Preflight + this record:** DONE (this commit).
+- **1 · Pins first (red on the pre-fix tree):** NOT-STARTED — VX-609's ask-answer road and the star-rule mint, wire
+  level, run on the pre-fix tree before any fix.
+- **2 · The mint flow (RB-1):** NOT-STARTED — settled design below (THE DESIGN, item 1).
+- **3 · `setStarredForClient` (core op + exact-row undo):** NOT-STARTED.
+- **4 · `set_starred` on the wire (catalog, decisions, answers, Activity):** NOT-STARTED.
+- **5 · The faces + the seven wording points + the deliberate flips:** NOT-STARTED.
+- **6 · Suites + Mac `build-for-testing` (fresh `DerivedData/b1`):** NOT-STARTED.
+
+### THE DESIGN (settled before code; each PROVISIONAL item is bundled)
+
+1. **The mint flow on a star-rule gathering (RB-1, PROVISIONAL).** The trace (`newPostInGathering` ·
+   `Operations.mintNoteEntry`'s gathering arm · `GatheringMint.outcome`): her door plans with the star allowed, so an
+   any-of group takes its FIRST satisfiable option — `★ OR #a` stars and does not tag. Flipping the wire's planner to
+   `starrable: true` outright would therefore change VX-549's RATIFIED, pinned behaviour on every rule a tag could
+   already satisfy (`MCPGatheringGrantServerTests.aStarOrATagRuleTakesTheTagOnTheWire` flips: the wire would star where
+   it tags today), and every such mint would put a cap-exempt star in her Starred list. The build takes the narrower
+   road: **the wire plans as VX-549 built it (the star forbidden — tags wherever tags can satisfy), and ONLY where that
+   plan is `.blocked(.needsStar)` — exactly the rules VX-549 refused — does it plan with the star (her door's plan,
+   `starrable: true`)**: born starred through the ONE star write, cap-exempt (`newPostInGathering`'s arm, mirrored),
+   the star written right after the rule's tags (her door's order), intake hearing it. The `needsStar` refusal retires
+   from the wire. Options for her: (a) her door's planner outright (`★ OR #a` stars on the wire too); **(b) as built —
+   tags first, the star only where a star is the only way in**; (c) keep refusing, reworded to point at `set_starred`.
+2. **`set_starred` (EDIT).** `note_id` XOR `book_id`, `starred` (boolean, required). A note decided at EDIT through the
+   one `decide` (note · book · gathering · wing grants; the fence wins); a book at EDIT through `decide(book:)`; a
+   GATHERING id the client can read answers the existing gathering sentence (P-VX196-2's posture — read, never changed
+   through this door; the sentence now names starring among the author's acts — PROVISIONAL, bundled); anything else
+   unreachable the ONE not-shared shape. The act is `Operations.setStarredForClient` — the caller's guard FIRST inside
+   the act's transaction, then her `writeStar` (the union star, the cap 15, the self-heal, intake on a note's star; un-star
+   a non-event). A star already as asked writes nothing: `changed: false`, no undo entry, no receipt, the landed Activity
+   line (VX-362's shape). ONE client-named undo entry per landed act — her door registers none; the MCP road wraps it
+   (`move_note_to_wing`'s precedent). Each half is compare-and-set on the STAR (writes only while the target still reads
+   the value the act — or the last half — left: starred or not, by the union), quiet otherwise (VX-276), and puts the
+   star back AT THE PLACE IN THE STARRED LIST it was taken from (so an un-star's undo returns the row where it stood, not
+   at the end). The replays are not applying acts (`apply_tag`'s replay doctrine — an exact revival seats nothing); a
+   replay that would star past the cap refuses in her words and keeps its entry (resolvable: un-star one, then ⌥⌘Z).
+3. **The faces (the seven points — the table lands at the end).** The grant sheet stops shaping a star-rule gathering
+   (all four rungs); its why line is reworded into a heads-up shown only at write new or edit on such a gathering ("a
+   new note a client writes here is starred"); the picker's "read and suggest only" footing retires; the gathering
+   write-new rung sentence (the sheet's HOW MUCH line AND the ask's lead — one function) says the star; the guide's
+   gathering card gains the star clause and lesson 3's Edit card names starring; `MCPSession.instructions` untouched
+   (2,988 — nothing in it is false as built); MCPSpec drafted only.
