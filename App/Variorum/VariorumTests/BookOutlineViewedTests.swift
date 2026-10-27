@@ -302,6 +302,40 @@ struct BookOutlineViewedTests {
     /// note's EXISTENCE alone): entering the band it named (s1, e2), a row
     /// spanning −370…−270, and the chapter mark jumped from the trailing
     /// headings back to chapter one.
+    /// **The TRACE WALK's measured fact (2026-10-27) — travel is the
+    /// REACHABLE maximum.** At the true bottom the raw offset stops at
+    /// exactly content − container while a bottom inset (the app's bottom
+    /// bar, 40 pt) reports in the geometry without becoming scrollable room
+    /// on macOS. The inset-extended travel left the end clamp 40 pt out of
+    /// reach forever (walk 4's dead clamp: gap pinned at 40 > the 8-pt band).
+    ///
+    /// RED ON OLD (recipe J: restore `+ insetBottom` in the travel line):
+    /// the gap lines read 40, never 0.
+    @Test func theTravelIsTheReachableMaximumNeverTheInsetExtendedOne() {
+        // The walked book's own numbers, verbatim from the trace.
+        let atBottom = OutlineScrollFacts(
+            rawOffset: 1983, contentHeight: 2792, containerHeight: 809,
+            insetTop: 0, insetBottom: 40)
+        #expect(atBottom.travel == 1983, "travel is the reachable maximum (\(atBottom.travel))")
+        #expect(atBottom.travel - atBottom.offset == 0,
+                "the bottom's gap is zero (\(atBottom.travel - atBottom.offset))")
+        #expect(BookOutlineViewed.isAtTheBottom(BookOutlineViewed.Scroll(
+            viewport: 809, offset: atBottom.offset, travel: atBottom.travel)),
+                "the clamp fires at the walked bottom")
+        // Mid-scroll the gap is honest distance-to-the-bottom.
+        let mid = OutlineScrollFacts(
+            rawOffset: 1880, contentHeight: 2792, containerHeight: 809,
+            insetTop: 0, insetBottom: 40)
+        #expect(mid.travel - mid.offset == 103, "mid-scroll gap (\(mid.travel - mid.offset))")
+        // A top inset still normalizes the offset and extends the reachable
+        // travel by exactly itself (at rest the raw offset is −top).
+        let rested = OutlineScrollFacts(
+            rawOffset: -10, contentHeight: 2792, containerHeight: 809,
+            insetTop: 10, insetBottom: 40)
+        #expect(rested.offset == 0, "a top inset normalizes to zero at rest")
+        #expect(rested.travel == 1993, "a top inset extends the reachable travel (\(rested.travel))")
+    }
+
     @Test func aLastNoteOffThePageKeepsTheEdgeRuleAtTheBottom() {
         typealias Scroll = BookOutlineViewed.Scroll
         // Chapter one holds the only notes; fifteen empty chapters follow.

@@ -3150,25 +3150,29 @@ nonisolated struct OutlineScrollFacts: Equatable, Sendable {
     }
 
     init(_ geometry: ScrollGeometry) {
-        let insets = geometry.contentInsets
-        contentHeight = geometry.contentSize.height
-        offset = geometry.contentOffset.y + insets.top
-        travel = max(
-            geometry.contentSize.height + insets.top + insets.bottom
-                - geometry.containerSize.height,
-            0)
-        #if DEBUG
-        // VX562TRACE — throwaway walk instrumentation (the walk-4 dead clamp's
-        // measurement; REMOVED once the mechanism is recorded).
-        if geometry.contentOffset.y
-            > geometry.contentSize.height - geometry.containerSize.height - 120 {
-            NSLog(
-                "VX562TRACE rawOffset=%.1f content=%.1f container=%.1f insetTop=%.1f insetBottom=%.1f derivedOffset=%.1f derivedTravel=%.1f gap=%.1f",
-                geometry.contentOffset.y, geometry.contentSize.height,
-                geometry.containerSize.height, insets.top, insets.bottom,
-                offset, travel, travel - offset)
-        }
-        #endif
+        self.init(
+            rawOffset: geometry.contentOffset.y,
+            contentHeight: geometry.contentSize.height,
+            containerHeight: geometry.containerSize.height,
+            insetTop: geometry.contentInsets.top,
+            insetBottom: geometry.contentInsets.bottom)
+    }
+
+    /// The TRACE WALK's measured fact (2026-10-27, the record's §TRACE WALK):
+    /// at the page's true bottom the RAW offset stops at exactly
+    /// content − container (1983 = 2792 − 809 on the walked book) while the
+    /// 40-pt bottom inset — the app's bottom bar — reports in
+    /// `ScrollGeometry.contentInsets` without ever becoming scrollable room
+    /// on macOS. So `travel` is the REACHABLE maximum of the derived offset,
+    /// and `insetBottom` deliberately plays no part (it is a parameter so the
+    /// geometry init hands over the whole fact set and the revert recipe is
+    /// one edit). The inset-extended travel left the end clamp 40 pt out of
+    /// reach forever — walk 4's dead clamp.
+    init(rawOffset: CGFloat, contentHeight: CGFloat, containerHeight: CGFloat,
+         insetTop: CGFloat, insetBottom: CGFloat) {
+        self.contentHeight = contentHeight
+        offset = rawOffset + insetTop
+        travel = max(contentHeight - containerHeight + insetTop, 0)
     }
 }
 
