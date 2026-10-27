@@ -192,6 +192,25 @@ You are the implementer for VX-562 in the worktree `~/dev/variorum-vx-562` (bran
 - **P-562-5 (new PROVISIONAL, built):** "note N of M" counts the note's place on the PAGE (column order — chapters first, unfiled last), so the number climbs as she scrolls. The note box's `whereLine` hands the MEMBERSHIP index, so in a book whose chapter order differs from its membership order the box and the pin can name different numbers for the same note (they agree whenever the two orders agree — Sherlock, imports, any book built chapter by chapter).
 - **Harness exposure:** `herScrollAfterALandingReturnsTheFollowerToTheRule` (batch 1's `herOwnScrollMovesTheFollowerWithNoLanding`, renamed and extended by the continuation) drives the page by a programmatic clip scroll (the `LibraryInfiniteScrollTests` road; the U8 fact forbids only a synthesized wheel and a `.scrollPosition`-bound scroll — the Outline's is neither); its premise is a `#require` that says so if this host will not move it. The new pins read the shared oracles keyed by `.incrementing` ids, the suite's standing exposure to a concurrently mounting suite (VX-97's neighbourhood).
 
+## SUITE RUNS (the orchestrator's, under stage claim `vx-562-tests`, coordinator GO 2026-10-27 14:08)
+
+- **Run 1 — the batch's own four suites (`DerivedData/vx562-suiterun1.log`):** ✅ "Test run with 47 tests in 4 suites passed after 42.380 seconds" — zero skipped (the one "skipped" grep hit is a test's own name). The pins' print lines are honest: FREEZE sampled 21 travelling turns with zero strays; F-1's premises held (`gave up at top=519.0 after 14 hops, 4061 ms`) and the pair stayed the clicked target through the give-up; SCROLL's rule-vs-pair comparisons agree at each step.
+- **Run 2 — the 56-suite regression set (`DerivedData/vx562-regression.log`):** IN FLIGHT (background; executed counts land here at its exit).
+
+## WALK RUNBOOK (ledger 3 — an OPUS walker under the orchestrator's `vx-562-walk` claim; simulated input is never Fable's)
+
+The app is THIS BRANCH's Debug build: `~/dev/variorum-vx-562/App/Variorum/DerivedData/vx562/Build/Products/Debug/Variorum.app` (dev store `io.lduarte.Variorum.debug`; library e11e5233, HELD since 10-20, signed out, Study — NEVER press Resume; the walk adds NOTHING to the store and removes nothing, so there is no cleanup line). Captures to the gitignored `App/Variorum/DerivedData/vx562-walk/`. Steps:
+
+1. Instance checks (strict forms), then `open -n` the branch Debug app; pid by PATH; dismiss a What's New sheet if one shows; leave the held banner alone.
+2. Open the seeded sherlock book — Outline mode. Capture at rest: the pinned line above the page (counts only — the position segment empty at the very top), the counts no longer in the scrolling title block.
+3. Scroll down slowly through two stories (real wheel via cliclick — the U8 fact is the TEST HOST's, not the real app's). Capture ×3: the navigator's note highlight walking the stories as they cross the page top; the chapter wash; the pin's "note N of M · ‹chapter›" climbing.
+4. Navigator click on a far story: the highlight and the pin move AT THE CLICK (the adoption), the landing arrives, nothing flickers through intermediate rows. Capture before/at/after.
+5. The F-1 road: click one of the LAST 3–4 stories (cards collapsed state). The highlight moves at once to the clicked story and STANDS on it through the ~4-s watchdog give-up — no flip to the top row at the end. Film this one (`screencapture -v`).
+6. The unpinnable half (R-562-A's release): after that click, HAND-scroll a little with the target still on screen — the highlight hands back to whatever row the rule names (the follow resumes). This is the one behavior no pin covers (the user scroll phase is unreachable in the test host) — the walk is its evidence.
+7. Her core ask: click INTO a story's prose (the caret lands, the note goes live), then scroll far away without typing — the highlight follows the view, never the caret's note.
+8. Mode round-trip: Outline → Index → Outline; the pin and highlight come back sane; leaving Outline cleared the pair (no stale wash).
+9. Quit the dev instance BY IDENTITY (`pgrep -lf "MacOS/Variorum$"`, kill only the vx562-path pid); re-check zero instances. Type nothing in any editor at any point.
+
 ## MORNING BUNDLE (for her — PROVISIONALs, riders, taste calls; grows as the run proceeds)
 
 - **Riders offered (cheapest while this code is open; none seated without your word):** VX-96 (Low — this exact surface: hold the pre-mount arm for the landing's lifetime) · VX-616 (Low — "+ new chapter" on a gathering's navigator foot, a door that can never act) · VX-563 (Medium — a keyboard way to navigate the in-note book view; adjacent to the follower). Say the word and any of them seats as a member.
