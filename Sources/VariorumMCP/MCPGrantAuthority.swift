@@ -67,21 +67,31 @@ struct MCPGrantAuthority: Sendable {
             target: .book(facts), rung: rung, consumes: consumes)
     }
 
-    /// 13n-c VX-273: a GATHERING's decision — always READ, never consuming,
-    /// wing-level reach only (`MCPGrantRule.decideGathering`); a missing one
-    /// answers as any missing target. Never raises an ask: a gathering is no
-    /// grant's scope, so no answer could mint one.
-    static func decide(_ standing: Standing, gathering facts: MCPGrantRule.BookFacts?) -> MCPGrantRule.Decision {
+    /// A GATHERING's decision as a place (`MCPGrantRule.decideGathering`); a
+    /// missing one answers as any missing target. 13n-c VX-273 made it READ
+    /// facts under wing-level reach only; **VX-549 (her sitting 2026-10-27,
+    /// RATIFIED) makes it a grant scope:** its own grant or its wing's, at the
+    /// grant's rung — READ for the read tools (the default, non-consuming),
+    /// WRITE NEW for a note written into it (`create_note` / `import_document`,
+    /// consuming), where an ask may now be raised on it (an answer can mint a
+    /// gathering grant).
+    static func decide(
+        _ standing: Standing, gathering facts: MCPGrantRule.BookFacts?, rung: MCPGrantRule.Rung = .read,
+        consumes: Bool = false
+    ) -> MCPGrantRule.Decision {
         guard let facts else { return missingTarget(standing) }
         return MCPGrantRule.decideGathering(
-            client: standing.state, grants: standing.grants, openBook: standing.openBook, gathering: facts)
+            client: standing.state, grants: standing.grants, openBook: standing.openBook, gathering: facts,
+            rung: rung, consumes: consumes)
     }
 
     /// **A book id READ** (13n-c VX-273): the tools that read a place by its
     /// book id — `list_notes`, `search`, `show_in_app` — take a BOOK (its own
-    /// grant's road, unchanged) or a GATHERING (read facts under wing-level
-    /// reach). Every write tool keeps reading `mcpBookFacts` alone, so a
-    /// gathering stays what it is: no grant's scope, no write's target.
+    /// grant's road, unchanged) or a GATHERING (`decideGathering` — since
+    /// VX-549 its own grant too). The write tools read `mcpBookFacts` alone,
+    /// except the two that write a NEW note INTO a place (`create_note`,
+    /// `import_document`'s one document — `MCPWriteTools.into`'s
+    /// `admitsGathering`), which VX-549 lets name a gathering.
     enum ReadPlace {
         case book(MCPGrantRule.BookFacts?)
         case gathering(MCPGrantRule.BookFacts)
@@ -233,8 +243,10 @@ struct MCPAsking: Sendable {
             return MCPReadTools.Outcome(text: "Not allowed.", isError: true)
         }
         var asked = false
+        // A fenced BOOK or GATHERING (VX-549) never raises an ask: no grant
+        // can name one.
         if case .ask = decision, standing.state == .approved, let ask, let onAsk,
-           !(ask.scopeKind == .book && ask.fence != nil) {
+           !((ask.scopeKind == .book || ask.scopeKind == .gathering) && ask.fence != nil) {
             onAsk(ask)
             asked = true
         }

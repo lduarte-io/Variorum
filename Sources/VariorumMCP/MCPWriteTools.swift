@@ -453,7 +453,10 @@ struct MCPWriteTools: Sendable {
             // `section_id` names; inside, every id that isn't a live chapter of
             // THAT book speaks the one sentence its siblings speak
             // (`MCPWireRefusalCopy`) — hidden is never told from missing.
-            return try into(place, job: job, clientName: clientName) { destination in
+            // VX-549: a book id may name a GATHERING here — the note lands
+            // bookless in its wing wearing what its rule needs (`into`'s
+            // `admitsGathering`).
+            return try into(place, job: job, clientName: clientName, admitsGathering: true) { destination in
                 let minted: Operations.DocumentImport = switch payload {
                 case .text(let text):
                     try ops.createNote(
@@ -467,7 +470,7 @@ struct MCPWriteTools: Sendable {
                 return try noteAnswer(minted, act: .note, clientName: clientName, sectionID: sectionID)
             }
         case .importNote(let named, let place):
-            return try into(place, job: job, clientName: clientName) { destination in
+            return try into(place, job: job, clientName: clientName, admitsGathering: true) { destination in
                 let minted = try ops.importNote(named, in: destination, undoLabel: label(.importNote))
                 return try noteAnswer(minted, act: .importNote, clientName: clientName)
             }
@@ -684,17 +687,26 @@ struct MCPWriteTools: Sendable {
         }
     }
 
-    /// A note minted into a book or a wing.
+    /// A note minted into a book or a wing — and, with `admitsGathering`
+    /// (VX-549: `create_note` and `import_document`'s one document only — never
+    /// `create_section` or `set_book_rule`, whose acts are a BOOK's), into a
+    /// GATHERING named by its id in `book_id` (`intoGathering`).
     func into(
-        _ place: Place, job: Job, clientName: String, spendsAfter: Bool = true,
+        _ place: Place, job: Job, clientName: String, spendsAfter: Bool = true, admitsGathering: Bool = false,
         _ act: (Operations.MCPNoteDestination) throws -> Act
     ) throws -> Result<Landed, Refused> {
         switch place {
         case .book(let bookID):
-            let (standing, facts, name) = try database.read { db in
-                (try MCPGrantAuthority.standing(db, clientName: clientName),
-                 try Queries.mcpBookFacts(db, readingID: bookID),
-                 try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar))
+            let (standing, facts, name, gathering) = try database.read { db in
+                let facts = try Queries.mcpBookFacts(db, readingID: bookID)
+                return (try MCPGrantAuthority.standing(db, clientName: clientName), facts,
+                        try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar),
+                        facts == nil && admitsGathering
+                            ? try Queries.mcpGatheringFacts(db, readingID: bookID) : nil)
+            }
+            if let gathering {
+                return try intoGathering(
+                    gathering, name: name, standing: standing, job: job, clientName: clientName, act)
             }
             let decision = MCPGrantAuthority.decide(standing, book: facts, rung: .writeNew, consumes: true)
             guard case .allow(let grantID, let consumesOnce) = decision else {
@@ -710,6 +722,41 @@ struct MCPWriteTools: Sendable {
             }
         case .wing(let wingID):
             return try inWing(wingID, job: job, clientName: clientName) { try act(.wing(wingID)) }
+        }
+    }
+
+    /// **A new note written INTO a gathering** (VX-549 — her sitting
+    /// 2026-10-27, RATIFIED: "write_new mints the note bookless in the wing and
+    /// applies the rule's tags so it assembles in"). The PLACE is decided at
+    /// write new (`decideGathering` — its own grant or its wing's; a once grant
+    /// spent by the landed write, AF-7); anything refused answers exactly as a
+    /// book id does (`MCPRefusalCopy`'s `.book` noun — the client sent
+    /// `book_id`, and a hidden gathering must read as a missing id), raising
+    /// the just-in-time ask ON THE GATHERING where it exists unfenced (her
+    /// answer can now mint a gathering grant). A refused row is logged as the
+    /// book id the client sent (`list_my_activity` never tells a hidden
+    /// gathering from a missing id); a landed one names the gathering. The act
+    /// then plans inside its own transaction (`Operations.mintNoteEntry`'s
+    /// gathering arm) and a rule only a star could satisfy refuses in her
+    /// door's words through the ONE chain (`MCPWireRefusalCopy`) — never the
+    /// not-shared shape.
+    private func intoGathering(
+        _ facts: MCPGrantRule.BookFacts, name: String?, standing: MCPGrantAuthority.Standing, job: Job,
+        clientName: String, _ act: (Operations.MCPNoteDestination) throws -> Act
+    ) throws -> Result<Landed, Refused> {
+        let decision = MCPGrantAuthority.decide(standing, gathering: facts, rung: .writeNew, consumes: true)
+        guard case .allow(let grantID, let consumesOnce) = decision else {
+            try log(clientName, job.tool, "book", facts.id, name, allowed: false)
+            let ask = facts.fence == nil
+                ? MCPAsk(clientName: clientName, scopeKind: .gathering, scopeID: facts.id, title: name ?? "",
+                         rung: .writeNew, fence: nil)
+                : nil
+            return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
+                .refusal(decision, .book, standing: standing, ask: ask)))
+        }
+        return try land(job, clientName: clientName, kind: "gathering", id: facts.id, title: name,
+                        spending: consumesOnce ? [grantID].compactMap { $0 } : []) {
+            try act(.gathering(facts.id))
         }
     }
 

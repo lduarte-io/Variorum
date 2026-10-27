@@ -127,10 +127,16 @@ extension Operations {
     }
 
     /// Where a minted note lands: inside a book (a member at its end, in the
-    /// book's wing) or bookless in a wing (the Pool of that wing).
+    /// book's wing) or bookless in a wing (the Pool of that wing) — or, since
+    /// VX-549, INTO A GATHERING: bookless in the gathering's wing, wearing the
+    /// tags its rule needs so it assembles in (her sitting 2026-10-27: "write_new
+    /// mints the note bookless in the wing and applies the rule's tags so it
+    /// assembles in" — her own door `newPostInGathering`'s shape, never a star:
+    /// starring is not on the wire).
     public enum MCPNoteDestination: Equatable, Sendable {
         case book(String)
         case wing(String)
+        case gathering(String)
     }
 
     // MARK: - SUGGEST: a take at the fan's end
@@ -554,6 +560,7 @@ extension Operations {
             let wing: String
             var bookID: String?
             var outflow: [String] = []
+            var gathering: (reading: Reading, term: RuleTerm?, plan: GatheringMint.Plan)?
             switch destination() {
             case .book(let id):
                 let book = try liveReading(db, id)
@@ -573,10 +580,40 @@ extension Operations {
                 if let sectionID { throw OperationError.sectionNotFound(id: sectionID) }
                 try requireLiveWing(db, id)
                 wing = id
+            case .gathering(let id):
+                // VX-549 — her door's refuse-before-mint (`newPostInGathering`):
+                // the ONE planner decides what the note must wear, here with the
+                // star forbidden (`starrable: false` — not on the wire), BEFORE
+                // anything is minted; its refusal is her door's own sentence
+                // (`GatheringMint.Blocker.reason` — "Its rule needs a starred
+                // note, and only the author can star one." where a star is the
+                // gap). A gathering holds no chapters.
+                let reading = try liveReading(db, id)
+                guard reading.kind == .gathering else {
+                    throw OperationError.wrongReadingKind(id: id, expected: .gathering)
+                }
+                if let sectionID { throw OperationError.sectionNotFound(id: sectionID) }
+                switch try Queries.gatheringMintOutcome(db, reading: reading, starrable: false) {
+                case .blocked(let blocker):
+                    throw OperationError.smartFilterUnsatisfiable(readingID: id, reason: blocker.reason)
+                case .plan(let plan):
+                    gathering = (reading, RuleGrammar.decode(reading.querySpec), plan)
+                }
+                wing = try Queries.wingIsLive(db, id: reading.wingId) ? reading.wingId : ""
+                outflow = gathering?.plan.tagIDs ?? []
             }
             let now = date.now
             let minted = try mintDocument(db, named, wingId: wing, now: now, keepingBlankTakes: keepingBlankTakes)
             try finish(db, minted)
+            if let gathering {
+                // The rule's tags, each through the ONE application road (so
+                // every living book hears the act, as when she tags) — before
+                // the document's own header tags, the book arm's order.
+                for tagID in gathering.plan.tagIDs {
+                    _ = try liveTag(db, tagID)
+                    try insertPostTag(db, tagID: tagID, postID: minted.post.id, now: now)
+                }
+            }
             if let bookID {
                 // The hand-add's ONE choke point (its capacity and ownership
                 // gates, its outflow) — BEFORE the header's tags, so this
@@ -590,6 +627,20 @@ extension Operations {
             }
             let header = try applyDocumentTags(
                 db, named.document.tagPaths, to: minted.post.id, wingId: wing, now: now)
+            if let gathering {
+                // The belt (her door's): the assembly's own predicate decides
+                // "the gathering shows it" — the planner only proposes, and a
+                // header tag can break a NOT. A note the rule would not assemble
+                // unwinds the whole mint (never a stray note).
+                var stars = Queries.StarContext()
+                guard try matchesRule(
+                    db, postID: minted.post.id, term: gathering.term, wingID: gathering.reading.wingId,
+                    starredNoteIDs: try stars.ids(db, for: gathering.term))
+                else {
+                    throw OperationError.smartFilterUnsatisfiable(
+                        readingID: gathering.reading.id, reason: GatheringMint.unmatchedReason)
+                }
+            }
             let worn = try mintedNoteTags(db, postID: minted.post.id, header: header.map(\.id), outflow: outflow)
             return DocumentImport(
                 post: minted.post, blockIDs: minted.blockIDs, alternateCount: minted.alternateCount,

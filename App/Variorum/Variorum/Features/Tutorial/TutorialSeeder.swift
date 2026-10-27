@@ -2662,8 +2662,11 @@ enum TutorialSeeder {
             + "knows what each one does and may suggest one when it would help, "
             + "but only you can do it.",
 
+            // VX-549 (VX-548 batch 3 — PROVISIONAL words, her copy pass): a
+            // gathering joins the places (her sitting 2026-10-27).
             "Each grant also says where: one note; one book, with its notes now and "
-            + "any added to it later; or a whole wing and everything in it, except "
+            + "any added to it later; one gathering, with the notes its rule gathers "
+            + "now; or a whole wing and everything in it, except "
             // W-UX-17: the exceptions named where they are pointed at.
             + "what always asks: your daily Journal's entries and anything Private "
             + "(the next lesson). And for "
@@ -2671,8 +2674,13 @@ enum TutorialSeeder {
             + "change); until it disconnects, which ends when the client goes away "
             + "(offered while it's connected); or always, until you revoke it.",
 
-            "A wing grant also lets a client read that wing's gatherings; a "
-            + "gathering is never shared on its own. And a client can move a note "
+            // VX-549 — the supersession of VX-273's facts-only rule (her
+            // sitting 2026-10-27, RATIFIED: "this is the feature, routing work
+            // to an agent by each tag"). PROVISIONAL words, her copy pass.
+            "A gathering grant follows your tags: a note is in reach the moment "
+            + "it wears what the gathering's rule asks for, and out of reach when it "
+            + "stops. With write new, a client can add a note to the gathering, and "
+            + "the note wears the tags the rule needs. And a client can move a note "
             + "to another wing only with edit where the note is and write new in "
             + "the wing it goes to: the note leaves its books there, its tags come "
             + "along, and \u{2325}\u{2318}Z brings it back.",

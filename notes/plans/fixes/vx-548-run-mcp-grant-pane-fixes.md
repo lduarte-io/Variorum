@@ -1026,8 +1026,22 @@ build-for-testing` into `DerivedData/b3` only — no `xcodebuild test`, no GUI, 
   (`MCPGatheringReachRuleTests.theTable`/`itAgreesWithDecideGatheringEverywhere`,
   `MCPGatheringReachTests.aWingGrantIconsTheWingsGatheringsAndNamesTheWing` — the rung is the grant's, not "read
   whatever its rung"; R-VX185-1 kept) · `MCPGrantRuleTests.theBoundaryHoldsOverEveryGrantShape` extended to the new
-  scope (a justified edit). Core MCP/gathering suites 492/82 green (`core-mcp-1.log`). Behavioural revert: PENDING.
-- **3 · The wire:** NOT-STARTED.
+  scope (a justified edit). Core MCP/gathering suites 492/82 green (`core-mcp-1.log`). BEHAVIOURAL REVERT RUN
+  (`decide-revert-red.log`; the facts derivation a no-op + `decideGathering` without the gathering's own grant): 6 of 7
+  decide pins red, 18 issues (the op pin green — the revert left the op); restored by `git checkout --`, green again.
+- **3 · The wire:** IN-PROGRESS (WIP commit — the wire compiles headless; the Mac app's exhaustive switches are taught
+  in piece 4) — `MCPGrantAuthority.decide(gathering:rung:consumes:)`; no ask on a fenced gathering; `list_books`'
+  prefilter takes gathering grants; `list_notes()` candidates take each granted gathering's assembly; `search`'s reached
+  scopes take standing gathering grants; `create_note` / `import_document` (one document) take a gathering's id in
+  `book_id` (`into(…, admitsGathering: true)` → `intoGathering`: decided at write new on the place; refused rows
+  logged as the BOOK id sent; the ask raised ON the gathering) → `Operations.MCPNoteDestination.gathering` (her door's
+  refuse-before-mint planner with `starrable: false`, the rule's tags through `insertPostTag`, the belt, ONE undo);
+  `MCPWireRefusalCopy` words `smartFilterUnsatisfiable` as her door's own sentence; `everyScope`, `list_books`,
+  `create_note`, `import_document` list under a gathering grant; descriptions + `MCPSession.instructions` (2,988 ≤
+  3,000 — PENDING the count) name the gathering; the guide's two cards (PROVISIONAL copy). FLIPPED DELIBERATELY:
+  `MCPWingReachServerTests.aGatheringStaysNoGrantsScopeAndNoWritesTarget` → `aGatheringIsAGrantScopeAndANewNotesTargetButNoBookStill`,
+  `MCPAdviceServerTests`' VX-273 clause, `TutorialMCPChapterTests`' fourth-card pins (Mac, compiled later). NEXT: the
+  wire's state-transition pins (`MCPGatheringGrantServerTests`).
 - **4 · The faces:** NOT-STARTED.
 - **5 · Suites + Mac build-for-testing:** NOT-STARTED.
 

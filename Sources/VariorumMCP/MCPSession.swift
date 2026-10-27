@@ -192,7 +192,7 @@ final class MCPSession: @unchecked Sendable {
         suggest (add takes and comments beside their text, save lenses), \
         write new (new notes, books, chapters, tags, versions; blocks added at a note's end), \
         edit (most of what the author can do at the keyboard: edit, choose and commit takes; \
-        divide, merge, move, delete; rename, archive). Each names a note, a book or a wing \
+        divide, merge, move, delete; rename, archive). Each names a note, a book, a gathering or a wing \
         (list_wings lists yours), for once, \
         until you disconnect, or always; they may also open the whole library to reading (the open \
         book). A once grant is one act: a read grant's first read of a note's text, a higher grant's \
@@ -200,8 +200,8 @@ final class MCPSession: @unchecked Sendable {
         open, sessions opened later included; it ends when the last one closes or Variorum's server \
         stops, and reconnecting does not restore it.
         search covers standing grants only; read a once grant's note by id.
-        A wing grant also reads that wing's gatherings (list_books lists them, kind gathering); \
-        none is ever granted alone. move_note_to_wing needs edit on the note and write new on the \
+        A gathering grant reaches the notes its rule gathers now; create_note into one applies its \
+        tags. move_note_to_wing needs edit on the note and write new on the \
         wing it goes to.
         Ids are live: after any divide or merge, theirs or yours, read again.
         read_note speaks the Variorum document format; when its header starts with \
