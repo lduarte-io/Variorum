@@ -99,4 +99,28 @@ HAPPEN — nothing in this section below this line exists yet.)*
 - **F-3 [NIT] — AGREE.** Given the set-equality `#expect` (and every caller striking known identifiers), the count
   `#expect` adds nothing. Deleted.
 
-**What landed:** PENDING (hashes and evidence below as each piece lands).
+**What landed (headless; every claim below run, the Mac suites excepted):**
+
+- `91429974f` — the positions above; the round-1 fixes table opened in unit A's LIVE STATUS.
+- `0e14d7bf8` — **F-2**: `ProtectionCopyDoors.readPlaintextExport`'s doc now says a newer export never plans or gets
+  the newer words there (the classifier's `.newerSchema` comes first → `.refused(.unreadableCopy)`; the pick,
+  `PickedCopy.classify`, refuses it in `LibraryOpenCopy.newerSchemaRefusal`'s words; the `schemaNewer` catch answers
+  only a file changing between the function's two staged reads). **F-3**: the redundant count `#expect` deleted.
+- `074c73023` — **F-1**: `PlaintextExportImportTests.anExportOfTheOldestExportEraStillReadsWhole` — a file migrated
+  `upTo: "v1_31_protection_record"` (`oldestExportEra`, FROZEN), seeded by raw SQL in that era's columns (a wing; a note
+  in it with two takes — the chosen and a labeled alternate — and a tag; a book with a chapter, the note membered under
+  it; a snippet group with a scrap), `StorePlaintextExport.localOnlyTables` dropped as the writer drops them; asserts the
+  file is of the era, then that the plan holds exactly that content and imports (1 note · 1 book · 1 snippet group · 1
+  wing). Comment pointers: the head of `Migrations.swift` (three lines above `v1_1`) and the gate's standing-duty
+  comment.
+- `4f4a98cce` — the R1-c probe announced; then RUN UNCOMMITTED and RESTORED: a temporary `v1_33_probe` (`ALTER TABLE
+  container ADD COLUMN probe TEXT NOT NULL DEFAULT ''`) + the reader's notes query naming `probe` → `✘ Test
+  anExportOfTheOldestExportEraStillReadsWhole() … Caught error: SQLite error 1: no such column: probe` with pins 1–3 and
+  both standing tests ✔ (`✘ Test run with 6 tests in 1 suite failed … with 1 issue`) — the traced degradation, invisible
+  to pins 1–2, caught by the era pin. Restored (`git checkout --`, `git diff --exit-code` clean).
+- **Evidence on the final tree** (`4f4a98cce`'s code = `074c73023`): `swift build` → `Build complete!` ·
+  `--filter PlaintextExportImportTests` → `✔ Test run with 6 tests in 1 suite passed` · the adjacent filter → `✔ Test
+  run with 61 tests in 7 suites passed`. Beyond the pin, the doc clause and the deleted expect the round's diff is
+  COMMENT-ONLY (the two pointers), so the unit close's whole-suite runs stand.
+- **PENDING (the orchestrator's, unchanged):** `PlaintextExportBringInRoadTests` and `U2WordsTests` under a stage
+  claim — the gating condition above.
