@@ -453,7 +453,10 @@ orchestrator's). Batch 1's code and record untouched.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.**
+- **A BEHAVIOURAL REVERT IS IN FLIGHT (VX-358), over the committed `4d3f3f3d1`:** `StoredText.spellingDiffers`'s body
+  forced to `false` and `\(spellingSentence)` dropped from the two descriptions (`MCPToolCatalog.swift`); restore =
+  `git checkout -- Sources/VariorumCore/Domain/StoredText.swift Sources/VariorumMCP/MCPToolCatalog.swift` (both
+  committed — safe). If this line still stands, check `git diff` first.
 - **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (this commit) — core
   `Operations.addNoteToBookForClient` → `MCPBookAdd {membership, tagIDs, tagPaths}` (the same body and ONE undo entry;
   `addNoteToBook` keeps its signature and returns `.membership`), the tags composed INSIDE the act's transaction by
