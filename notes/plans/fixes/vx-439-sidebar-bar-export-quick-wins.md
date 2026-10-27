@@ -577,7 +577,11 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     literal (+ `onDone: wingActDone`, annotated). RED ON OLD expected under named revert **R-D**
     (`scratchpad/l1/reverts/r-d.patch` — the generation out of both keys, the pre-fix reads exactly): both new pins
     red (the reads never re-run; the keys lack it) — PENDING the stage window. build-for-testing GREEN.
-  - m-5 (`NoteExportMenuGateTests` disabled, named): NOT-STARTED
+  - m-5 (`NoteExportMenuGateTests` disabled, named): DONE (this commit) — hygiene, no bug pin (the disposition's own
+    words): the suite's trait list gains `.disabled("never executed — the VX-604 host-crash class; re-enabled by the
+    VX-603/604 work")`, and its doc says why (never executed; its one run crashed the host before its first line; kept
+    for VX-603/604). The stage window's evidence: the suite reads SKIPPED, never run (the `skipped:` line — Swift
+    Testing counts skipped tests in "Test run with N tests"). build-for-testing GREEN.
   - m-7 (CONDITIONAL — pin first; guard only if red on current code): NOT-STARTED
   - m-4 (the honesty half: the settings pins' capture claim): NOT-STARTED
   - n-2 (the export write failure names its reason): NOT-STARTED

@@ -222,8 +222,18 @@ private func pumpRunLoop() {
 /// real shell, opens a note the shell's own road, and reads that gate (and
 /// two siblings: ⌘⇧S Save a Version — `noteScoped` too, another File group —
 /// and Export Block, the same File group) exactly as the menu reads it.
+///
+/// **DISABLED, named (the VX-439 ladder's m-5):** this probe has NEVER
+/// executed — its one stage run crashed the test host before its first line
+/// (the host's launch-time `@Dependency(\.date)` report recursing through
+/// XCTest ↔ Swift Testing interop; the run record's "B1 W-439-1 timebox"), and
+/// it was then excluded by hand. An unmarked, never-green suite whose failure
+/// mode is a host crash must not meet the next full run unannounced; it stays
+/// in the tree for the VX-603/604 work to re-enable.
 @MainActor
-@Suite("W-439-1 — Export Note… is available with a note open in Write", .serialized)
+@Suite(
+    "W-439-1 — Export Note… is available with a note open in Write", .serialized,
+    .disabled("never executed — the VX-604 host-crash class; re-enabled by the VX-603/604 work"))
 struct NoteExportMenuGateTests {
     @Test func theMenusGateReadsTheOpenNoteInWrite() async throws {
         let db = try AppDatabase.inMemory()
