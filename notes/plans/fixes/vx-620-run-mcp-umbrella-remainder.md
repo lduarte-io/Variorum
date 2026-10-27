@@ -1279,3 +1279,142 @@ asks to write new in “PlanetLillian”") beside its grant row below — is an 
 **Red-on-old:** the duplicate shape's red-on-old is VX-393's own (`MCPOneGrantPerPlaceTests` — red before
 `98c88a686`); these probe pins are green on this tree by design (the probe found no mechanism to pin red). Not
 re-run on a pre-VX-393 tree (the record cites VX-393's).
+
+### VX-566 — `import_document` takes `section_id` (the build)
+
+**The trace (inputs → wrong output), red on the pre-fix tree:** `import_document {document, book_id, section_id}` →
+`parseImport` never read `section_id` (the schema didn't declare it either) → `.importNote(named, place:)` →
+`ops.importNote` → `mintNoteEntry(section: nil)` → the note joined the book at its end UNSECTIONED and the call answered
+success with no echo — the client's chapter silently dropped (her agent's 49 follow-up `file_note_in_chapter` calls).
+A bad chapter could not refuse (it was never read); `section_id` without `book_id` landed bookless in the wing; the
+book form imported past it.
+
+**The build — `create_note`'s exact shape (VX-252), no new road:** the parse refuses `section_id` without `book_id` in
+`create_note`'s own sentence (`sectionWithoutBookWords`, before any decision); the job carries it; `into` decides the
+BOOK first (an unreachable book answers the one not-shared shape whatever `section_id` names — the guard pinned);
+inside, `Operations.importNote(_:in:section:undoLabel:)` hands it to `mintNoteEntry`, whose chapter check
+(`liveSection` + `readingId == book`, BEFORE the mint; a wing or a gathering holds no chapter — `sectionNotFound`) and
+whose filing (the pointer set on the membership the hand-add wrote, same transaction, the one
+`registerMintedContainerEntry` entry) are `create_note`'s byte for byte; the answer echoes `section_id`
+(`noteAnswer(…, sectionID:)` — absent when not given, so every other answer is byte-unchanged; batch 1's `starred` key
+untouched). Every id that isn't a live chapter of that book — nothing, a deleted chapter, a readable book's, a hidden
+book's, any chapter under a gathering's id — answers "section_id isn't a chapter of this book (list_notes or
+create_section gives chapter ids)." byte-identical across `import_document`, `create_note` and `add_note_to_book`
+(pinned all three, each id).
+
+**The BOOK form — REFUSES `section_id` (the brief's probe: expected no honest meaning; confirmed).** A whole book's
+chapters are `book.chapters` (each a new `reading_section` the act mints), and the book is new, so no existing chapter
+of it can be named; filing the whole book's notes under one chapter of ANOTHER book is not an import of a book. The
+wire's argument discipline for an argument meaningful in one form only is to REFUSE in words: `book_id` with a book
+already refuses ("A book imports into a wing: pass wing_id, not book_id."), `create_note`'s `section_id` without
+`book_id` refuses, `text` with `blocks` refuses. Ignoring would answer success with nothing filed where the client asked
+— VX-566's own failure. The refusal is at the parse, after the `book_id` check: "section_id goes with document and
+book_id: a book brings its own chapters in book.chapters." (PROVISIONAL words, RB-5). (Undeclared arguments in general
+are VX-606's question — `section_id` is declared on this tool, so its meaning per form is this tool's to say.)
+
+### VX-567 — the whole-book import answers per-take sha256s (the build; PROVISIONAL RB-4)
+
+**FOR HER EYE FIRST — this flips a RATIFIED call.** P-VX252-1 ("a whole book imported at once answers only its book,
+note and chapter ids") and P-VX254-2 ("… importing a whole book answer[s] no fingerprints") were RATIFIED as built at
+her 2026-10-15 sitting (QUESTIONS #227, batches 2 and 5 — VX-366 closed as decided). VX-567 (Confirmed Improvement,
+filed from her agent's report: "verifying a batch means reading every note back — the agent fell back to importing one
+note at a time") asks the opposite; she seated it in VX-548 and then in this run ("VX-566 + VX-567 (the import_document
+pair). My rulings are on the tickets."), and the brief flips the call DELIBERATELY. Built, and flagged as a superseded
+ratification — RB-4 asks her to confirm the flip in words, or to keep "ids only" (then the flip reverts: one commit).
+
+**The trace (inputs → wrong output), red on the pre-fix tree:** `import_document {book, wing_id}` →
+`ops.importBook` minted every note (`mintDocument` returns each note's blocks with every take's stored text —
+VX-252's core half) and returned only `BookImport {reading, sectionIDs, postIDs}` → the wire answered `book_id`,
+`note_ids`, `chapter_ids`; the minted takes' ids and texts were dropped at the op's return, so a client could prove its
+words only by reading every note back.
+
+**The build:** `BookImport.notes: [MintedNote]` — NEW public `MintedNote {postID, blockIDs, blocks:
+[MintedBlockTakes]}`, appended at each seat from `mintDocument`'s own return (never a second read), parallel to
+`postIDs`; her File ▸ Import… and the Bookcase drop read none of it (no face changed). The wire answers `notes` — per
+note, in `note_ids`' order, VX-252's record exactly: `note_id`, `block_ids`, `blocks` (per block `block_id`,
+`shown_take_id`, every take in fan order as `{take_id, label?, sha256}`) through `MCPMintedBlocks.records`, the one
+encoder — no text. `book_id`, `note_ids`, `chapter_ids` stay. No per-note `tag_ids`/`section_id` (the brief's list —
+an option in RB-4). The description's "(no sha256 — check a book's notes with read_note)" is retired for the record's
+sentence.
+
+**The answer's size, honestly (why no paging is owed):** the answer is ∝ the write itself — one fixed-size record per
+take the act minted (~150 characters with its digest and ids; ~430 per two-take block with its `block_ids` entry) —
+so it is never larger in order than the rows the act wrote, and it is linear in the request the client sent (every
+take whose digest it reads back is text the client itself sent; the inbound cap, 16 MiB after admission, bounds the
+request). For prose the answer is SMALLER than the request; for a degenerate book of one-word paragraphs it can be
+tens of times larger, as the one-document form's and `create_note`'s answers already can (VX-252 answered them whole,
+unpaged). Paging would need a finished act's records kept server-side for later cursor reads — no write on the door
+keeps such state (every write answers once, whole). Her bilingual book (3,843 blocks × two takes) would answer ≈1.7M
+characters — the order of the text it sent; a client host that spills a large result (Claude Code past ~43–51k
+characters, measured at VX-336 U7) still receives it whole, and a client that wants inline answers imports in smaller
+books or one document at a time (VX-370 is the open ticket on other clients' output caps).
+
+### VX-619 — the lock/quit docs (her C pick; docs only)
+
+**The facts the sentences state:** a lock ends every connection by design — A-8 (the lock road stops the server: the
+door's `macLockTeardown` → `stopServer`; each connection's end line "‹client› was disconnected when the library locked
+or closed", VX-394), and the server starts again at the next unlock while the client stays disconnected
+(`MCPConnectionEnd.libraryClosed`'s doc); a quit ends the process and with it every socket. The clients' roads back
+(the read-only Sonnet lookup, 2026-10-27, cited): Claude Code interactive marks an exited stdio server failed and does
+NOT reconnect it — "select **Reconnect** from the server's menu in `/mcp`" (code.claude.com/docs/en/mcp, "Stdio
+servers that exit or fail to start"); `claude -p` and the Agent SDK restart it on the next tool call; Codex CLI's
+`/mcp` only lists (quit and relaunch it); Claude Desktop and Cursor restart with the app. So "any client reconnects
+when you restart it" holds for every client named, and Claude Code's in-session road is /mcp ▸ Reconnect.
+
+**The instructions — provider-neutral, and THE TRADE.** The ticket's "(Claude Code: /mcp)" cannot go into
+`MCPSession.instructions`: O-4 (her 2026-10-11 ruling — "outside of the provider setup, claude / claude code isn't
+hardwired anywhere since people may use different providers") and its source net `MCPProviderNeutralityTests` forbid a
+provider's name outside the setup's fence; a model inside Claude Code knows its own /mcp. So the advice's OPENING says
+it: "…on the author's Mac, open only while Variorum runs unlocked: locking or quitting it ends every connection, by
+design, so reconnect once it's back." (+98 characters). The trade, chosen as the least load-bearing words whose loss
+makes no claim false: (1) the sentence "move_note_to_wing needs edit on the note and write new on the wing it goes to."
+(−80) — the ONE sentence in the advice that is a tool description's copy (the tool's own description says "Needs edit
+on the note and write new on the wing it goes to." word for word, and the tool is listed only to a client holding
+edit, so any client that can call it reads it); (2) show_in_app's sentence ends "asks to see something" for "asks you
+to show them something" (−10; its pinned clause "Never call show_in_app unless the author asks" unchanged, R-13nb-23's
+meaning intact). **Count: 2,988 → 2,994 / 3,000** (measured over the literal's decoded text, the method re-checked
+against the record's 2,988 baseline; `theAdviceIsBoundedAsStated` green). Six characters of headroom remain.
+
+**The guide — where, and why there.** One addition (two short sentences) at the end of lesson 2's setup card
+("connecting a client"), INSIDE its `O-4 SETUP COPY` fence: "Locking Variorum or quitting it ends every client's
+connection, by design. Once it's open again, reconnect the client: in Claude Code, choose Reconnect for it in /mcp; any
+client reconnects when you restart it." Why lesson 2, not lesson 1 (where the brief guessed "the door's conduct is
+taught"): it names Claude Code's road, which O-4 allows only inside the provider setup's fence (lesson 2's setup card
+holds the guide's one fence; lesson 1's pin forbids "claude" outright); and reconnecting is connecting — the lesson
+that teaches the setup command teaches how to bring the client back. Lesson 1 still says "It works only while Variorum
+is open" (true; unchanged). The chapter stays seven lessons. **Existing libraries hear it only through Help ▸ Restore
+Field Guide… (standing) — the real store's re-seed rides her window (closeout note).**
+
+### PINS (red-on-old evidence)
+
+- **VX-565 (probe — green by design; no mechanism to pin red):** headless `MCPPlaceTwiceProbeTests` (5) · Mac
+  `MCPPlaceTwiceFacesTests` (3, RUN PENDING). The duplicate shape's red-on-old is VX-393's (`MCPOneGrantPerPlaceTests`).
+- **VX-566:** `MCPImportSectionServerTests` (5, wire) — RED ON THE PRE-FIX TREE, committed red at `6721d651c`
+  (`vx566-red-on-old.log`: 5/5 failed, 27 issues), GREEN after (`vx566-green.log`):
+  `oneDocumentFilesUnderItsChapterInTheSameCallAndTheSameUndo` ·
+  `everySectionIDThatIsntALiveChapterOfTheBookAnswersTheOneSentenceAndMintsNothing` (with the unreachable-book guard) ·
+  `sectionIDWithoutABookIsRefusedAtTheParseInCreateNotesWords` · `aWholeBookRefusesASectionIDItsChaptersComeFromTheBook`
+  · `theCatalogDeclaresSectionIDAndSaysBothForms`. Core `MCPMintedBlocksActsTests.anImportedDocumentFilesUnderItsChapterAsCreateNoteDoes`
+  (new API's state transitions; green by construction).
+- **VX-567:** `MCPBookImportRecordsServerTests` (2, wire) — RED ON THE PRE-FIX TREE, committed red at `8d34b3f34`
+  (`vx567-red-on-old.log`: 2/2 failed, 4 issues — no `notes`, "no sha256" in the description), GREEN after
+  (`vx567-green.log`): `aWholeBookAnswersEveryNotesRecordsWithEachTakesDigest` (three notes across a chapter and the
+  unfiled list, labelled and unlabelled alternates; every record == `read_note with_ids`, every digest the test's own
+  CryptoKit SHA-256 of the sent words, no text key) · `theDescriptionSaysTheBookFormsRecords`. Core
+  `MCPMintedBlocksActsTests.aBookImportsNotesAreWhatEachSeatMinted` (each record the fan rows and stored texts).
+- **VX-619:** headless `MCPAdviceServerTests.theAdviceSaysALockOrQuitEndsEveryConnectionAndReconnectingWorks` (the
+  sentence, then stop → every connection gone → start → a reconnect served under its always grant) — red on old by
+  construction (the sentence absent); Mac `TutorialMCPChapterTests.lessonTwoConnectingAClient` (the guide's sentence,
+  its client by label, the advice's parity line, a lock's end a named Activity end) — RUN PENDING.
+
+### THE DELIBERATE FLIP (VX-567 — superseding P-VX252-1 / P-VX254-2's RATIFIED "ids only", PROVISIONAL RB-4)
+
+| Pin | Was | Now |
+|---|---|---|
+| `MCPMintedAnswerServerTests.importDocumentAnswersTheSameRecordsForOneDocumentAndABookKeepsItsAnswer` → renamed `…AndABookAnswersItsNotesToo` (F-2's guard) | `Set(json(whole).keys) == ["book_id", "note_ids", "chapter_ids"]` | `== ["book_id", "note_ids", "chapter_ids", "notes"]` (the records' truth in `MCPBookImportRecordsServerTests`) |
+
+**Justified edits (each cites its ticket):** `MCPAdviceServerTests.everyToolTheAdviceNamesIsDeclared` (the names set
+drops move_note_to_wing — VX-619's trade) and `theAdviceSaysTheSameFactsTheGuideTeaches` (the move sentence's two lines
+→ the trade's premise: absent from the advice, present in the tool's description); `TutorialMCPChapterTests.lessonTwoConnectingAClient`
+(+ VX-619's sentence); header comments re-said in `MCPMintedAnswerServerTests` and `MCPWriteDigestServerTests` (the
+F-254-4 exception retired).
