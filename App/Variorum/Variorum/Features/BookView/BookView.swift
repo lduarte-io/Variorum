@@ -1545,12 +1545,75 @@ struct BookView: View {
         /// the next row below can take it (without that last clause the
         /// holder's own receding top would out-rank every candidate forever).
         var topRow: (id: String, top: CGFloat)?
+        /// **VX-562 — where every row last said its top was**, the viewed
+        /// pair's one input (`BookOutlineViewed.pair`). Written per report in
+        /// O(1); read once per run-loop turn. Every row of the column reports
+        /// (none de-realizes — a far row is a placeholder at a known height),
+        /// so the map is the column's own geometry; a row the column no
+        /// longer has is never read (the rule walks the CURRENT rows). Emptied
+        /// when the Outline leaves, so a return never reads the old page.
+        var rowTops: [String: CGFloat] = [:]
+        /// One derivation per run-loop turn: set when a turn's derivation is
+        /// queued, cleared when it runs.
+        var viewedTurnQueued = false
         #if DEBUG
         /// Realized row heights, for the trace's "who grew" line.
         var rowHeights: [String: CGFloat] = [:]
         #endif
     }
     @State private var landingBox = OutlineLandingBox()
+
+    /// **VX-562 — the viewed pair's derivation, at most once per run-loop
+    /// turn.** A scroll reports every row every frame, so the report path
+    /// stays O(1) (a dictionary write and this flag) and the O(rows) scan
+    /// runs once per turn, after the turn's reports have all landed.
+    ///
+    /// Static, over the four references it needs and nothing else: the queued
+    /// hop and the landing's `onFinish` hold these, never a copy of the view —
+    /// a closure the landing keeps that captured the view would hold the
+    /// view's own state boxes (and so the landing itself) in a cycle.
+    fileprivate func queueViewedPair() {
+        Self.queueViewedPair(
+            box: landingBox, landing: landing, model: model, structure: structure)
+    }
+
+    private static func queueViewedPair(
+        box: OutlineLandingBox, landing: LandingAuthority,
+        model: BookViewModel, structure: BookStructureModel
+    ) {
+        guard !box.viewedTurnQueued else { return }
+        box.viewedTurnQueued = true
+        DispatchQueue.main.async {
+            box.viewedTurnQueued = false
+            deriveViewedPair(box: box, landing: landing, model: model, structure: structure)
+        }
+    }
+
+    /// **What the page is showing, published as a CHANGE** (the slot's own
+    /// equality gate). Two conditions hold it still:
+    /// - **the Outline only** — a report racing a mode switch never speaks
+    ///   for another mode's page;
+    /// - **FROZEN while a landing travels** (`landing.isPending`): a
+    ///   programmatic travel — a navigator click, a chapter landing, a width
+    ///   change's re-land — moves the column through rows she never chose to
+    ///   look at while it settles, and the highlight must not flicker through
+    ///   them. The landing's END delivers the settled pair (`landOutline`
+    ///   wires `onFinish` here), and her own scroll ends a landing at once
+    ///   (`userTookOver`), which unfreezes it.
+    private static func deriveViewedPair(
+        box: OutlineLandingBox, landing: LandingAuthority,
+        model: BookViewModel, structure: BookStructureModel
+    ) {
+        guard structure.mode == .outline, !landing.isPending else { return }
+        let rows = outlineRows(structure: structure, entries: model.entries)
+        model.noteOutlineViewed(BookOutlineViewed.pair(rows: rows, tops: box.rowTops))
+    }
+
+    /// The Outline left: its page is gone, so is what it was showing.
+    private func forgetViewedPair() {
+        landingBox.rowTops = [:]
+        model.noteOutlineViewed(.none)
+    }
 
     /// **THE ONE LANDING AUTHORITY** (13u2b UNIT 2 — `Surface/LandingAuthority.swift`).
     /// The aim/hold/quiet/hop discipline that grew here at row 53 lives there
@@ -1608,6 +1671,14 @@ struct BookView: View {
         #if DEBUG
         landingBox.rowHeights = [:]
         #endif
+        // VX-562: the landing's END delivers the pair its travel froze — once,
+        // with the authority already idle (`finish` calls this last). Weak on
+        // the landing: it is the closure's own holder.
+        let box = landingBox, model = model, structure = structure, authority = landing
+        authority.onFinish = { [weak authority] _, _ in
+            guard let authority else { return }
+            Self.deriveViewedPair(box: box, landing: authority, model: model, structure: structure)
+        }
         landing.land(
             anchorID,
             // Built on every landing rather than only in DEBUG since this
@@ -1636,6 +1707,10 @@ struct BookView: View {
                   top < landingBox.topRow?.top ?? .greatestFiniteMagnitude {
             landingBox.topRow = (anchorID, top)
         }
+        // VX-562: and where EVERY row is, for the viewed pair — O(1) here; the
+        // derivation runs once for the turn's reports (`queueViewedPair`).
+        landingBox.rowTops[anchorID] = top
+        queueViewedPair()
         #if DEBUG
         BookOutlineGeometry.recordAnchor(anchorID, top: top, height: height, owner: oracleOwner)
         if landing.isPending {
@@ -2009,7 +2084,13 @@ struct BookView: View {
             // note could not be revealed: row 47). The navigator's note-row
             // click focuses AND reveals, so the arrival is unfolded by her
             // own act, never by the reveal.
-            .onAppear { landOutlineReveal(proxy) }
+            .onAppear {
+                landOutlineReveal(proxy)
+                // VX-562: the first post-layout pass derives what the page
+                // shows even where no row reports (an empty book) — the
+                // rows' own first reports queue the same turn's derivation.
+                queueViewedPair()
+            }
             // Ladder R2-12 (the flow's and the Index's own line, brought here at
             // 18l-b U4 — the health review's §1.3 item 4): a pending landing dies
             // WITH the Outline. The authority is `BookView`'s `@State`, so a mode
@@ -2018,15 +2099,33 @@ struct BookView: View {
             // the dead proxy until the watchdog filed `gave up`) — a landing, and
             // a signpost line, for a surface already gone. Silent by the
             // authority's own rule. Pinned: `OutlineLandingTeardownTests`.
-            .onDisappear { landing.end() }
+            .onDisappear {
+                landing.end()
+                // VX-562: the page leaves, and with it what it was showing.
+                forgetViewedPair()
+            }
             .onChange(of: model.pendingReveal) { _, _ in landOutlineReveal(proxy) }
             .onChange(of: model.pendingChapterReveal) { _, _ in landOutlineReveal(proxy) }
             // Row 73 (the correction round, batch G): a reveal that arrived
             // BEFORE the entries (an ascent into a not-yet-mounted book —
             // the Library panel's outline row, the membership chip's link)
             // stays parked, and the entries' arrival lands it.
-            .onChange(of: model.entries.map(\.postID)) { _, _ in landOutlineReveal(proxy) }
-            .onChange(of: structure.sections.map(\.id)) { _, _ in landOutlineReveal(proxy) }
+            //
+            // VX-562: the same two moments change the ROWS the viewed pair
+            // is read through (a note leaving, a chapter added) — re-derived
+            // even when no row's top moves.
+            .onChange(of: model.entries.map(\.postID)) { _, _ in
+                landOutlineReveal(proxy)
+                queueViewedPair()
+            }
+            .onChange(of: structure.sections.map(\.id)) { _, _ in
+                landOutlineReveal(proxy)
+                queueViewedPair()
+            }
+            // VX-562: an expansion or a collapse is the third axis (the rows'
+            // heights move — their reports queue it too; this is the
+            // guarantee, not the usual road).
+            .onChange(of: model.expandedPosts) { _, _ in queueViewedPair() }
             // **13u2b UNIT 1 — A WIDTH CHANGE KEEPS HER PLACE.** The trace
             // measured it directly: after a settled landing, a width change
             // alone silently relocated the page mid-story. It has to — every
@@ -2259,9 +2358,18 @@ struct BookView: View {
     /// Outline's flat row list (`BookOutlineRows`): chapters from the
     /// structure model where they govern, else the tag-path grammar.
     private var outlineRows: [BookOutlineRows.Row] {
+        Self.outlineRows(structure: structure, entries: model.entries)
+    }
+
+    /// The same list over the two models alone (VX-562: the viewed pair's
+    /// derivation runs from a queued hop and a landing's finish, which hold
+    /// the models, never the view).
+    private static func outlineRows(
+        structure: BookStructureModel, entries: [Queries.ReadingEntry]
+    ) -> [BookOutlineRows.Row] {
         structure.chaptersActive
-            ? BookOutlineRows.rows(grouped: structure.grouped(entries: model.entries))
-            : BookOutlineRows.rows(flat: model.entries)
+            ? BookOutlineRows.rows(grouped: structure.grouped(entries: entries))
+            : BookOutlineRows.rows(flat: entries)
     }
 
     /// Row 53: the rows split at every expanded note (`BookOutlineRows.Segment`).

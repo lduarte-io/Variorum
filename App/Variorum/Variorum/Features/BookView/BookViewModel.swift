@@ -1285,6 +1285,33 @@ final class BookViewModel {
     func consumeChapterReveal() {
         pendingChapterReveal = nil
     }
+
+    // MARK: - VX-562 — what the Outline's page is SHOWING (the viewed pair)
+
+    /// **The chapter and the note the Outline's viewport is showing** — her
+    /// ruling: the navigator's highlight *"just follows what your view is"*,
+    /// never the caret. Derived by the Outline from the geometry its rows
+    /// already report (`BookOutlineViewed`'s rule, coalesced to one
+    /// derivation per run-loop turn, frozen while a landing travels) and
+    /// written ONLY through `noteOutlineViewed`; read by the navigator's marks
+    /// and the Outline's pinned line. `.none` whenever the Outline is not
+    /// showing, the title block holds the page, or the book is empty.
+    ///
+    /// **A report, never a decision, and it reaches nothing else** — not the
+    /// focus (`focus` seeds the caret and mounts the live editor: the welded
+    /// authority this must never touch), not `pendingReveal`, not a landing's
+    /// aim. Observed, because the marks and the pin draw it; written only on
+    /// a CHANGE, so a scroll that stays inside one note re-renders nothing.
+    private(set) var viewedOutlinePair = BookOutlineViewed.Pair.none
+
+    /// The Outline's report of what its page is showing. Equality-gated
+    /// against the slot ITSELF (the sink's own state, never a reporter's
+    /// cache of what it last sent), so a report always lands on what the
+    /// readers actually see.
+    func noteOutlineViewed(_ pair: BookOutlineViewed.Pair) {
+        guard pair != viewedOutlinePair else { return }
+        viewedOutlinePair = pair
+    }
 }
 
 #if DEBUG
