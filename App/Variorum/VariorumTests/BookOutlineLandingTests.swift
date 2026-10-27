@@ -1335,17 +1335,23 @@ extension BookOutlineLandingTests {
 
     /// **Her ruling, end to end:** *"it just follows what your view is"* —
     /// the caret is ignored. A long story is LIVE (the caret is in it); a
-    /// reveal that does not move the caret takes the page to a far note; at
-    /// the landing's end the navigator marks THAT note and washes its
-    /// chapter, the caret's note wears no mark, the book's focus is exactly
-    /// what it was (the follower never writes it), and the pinned line says
-    /// where the page is. The pinned line itself stands still while the page
-    /// travels thousands of points — it is a sibling of the scroll, never in
-    /// it — and the follower lets go when the Outline leaves.
+    /// reveal that does not move the caret takes the page to a far note.
+    /// **R-562-A (FOLLOW): the follower adopts the landing's TARGET at the
+    /// click** — the pair, the navigator's mark and the pinned line say the
+    /// target while the page is still travelling (the Outline's one-second
+    /// hold keeps the landing's end many turns away), exactly when the old
+    /// focus mark moved. At the landing's end the navigator still marks THAT
+    /// note and washes its chapter, the caret's note wears no mark, the
+    /// book's focus is exactly what it was (the follower never writes it),
+    /// and the pinned line says where the page is. The pinned line itself
+    /// stands still while the page travels thousands of points — it is a
+    /// sibling of the scroll, never in it — and the follower lets go when the
+    /// Outline leaves.
     ///
     /// New capability — born with the code (no red-on-old by nature); on the
     /// pre-change tree the navigator marked the FOCUSED story and no pinned
-    /// line existed.
+    /// line existed. The at-the-click half is red on batch 1's freeze-only
+    /// follower (which held the page she left until the landing's end).
     @Test func theNavigatorFollowsWhatThePageShowsNeverTheCaret() async throws {
         try await withLandingBook(posts: 24, longAt: [4], chapters: true) { session, db, readingID, postIDs, sectionIDs in
             let model = BookViewModel(session: session, readingID: readingID)
@@ -1388,7 +1394,29 @@ extension BookOutlineLandingTests {
             // The page travels to note 10 — a reveal, which moves no caret.
             let target = postIDs[10]
             let anchor = BookOutlineRows.Row.noteAnchor(target)
+            let adopted = BookOutlineViewed.Pair(sectionID: sectionIDs[3], postID: target)
+            let targetLine = counts + " \u{B7} note 11 of 24 \u{B7} chapter 3"
             model.requestReveal(target)
+
+            // R-562-A: from the CLICK on, the target — before the landing ends.
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.trace.contains("\(anchor) LAND")
+            }, maxTurns: 20)
+            try #require(BookOutlineGeometry.trace.contains("\(anchor) LAND"), "the landing started")
+            #expect(model.viewedOutlinePair == adopted,
+                    "the follower adopted the target at the click: \(model.viewedOutlinePair)")
+            await settle(window, hosting, watchdog: watchdog, until: {
+                (BookOutlineGeometry.navigatorNoteMarks[target] == true
+                    && BookOutlineGeometry.outlinePinLines[readingID] == targetLine)
+                    || landingEnded(anchor)
+            }, maxTurns: 20)
+            #expect(!landingEnded(anchor),
+                    "the mark and the pin moved while the page was still travelling — at the click")
+            #expect(BookOutlineGeometry.navigatorNoteMarks[target] == true,
+                    "the navigator marks the target at the click")
+            #expect(BookOutlineGeometry.outlinePinLines[readingID] == targetLine,
+                    "and the pinned line names it: \(String(describing: BookOutlineGeometry.outlinePinLines[readingID]))")
+
             await settle(window, hosting, watchdog: watchdog, until: {
                 landingEnded(anchor)
             }, maxTurns: 200)
@@ -1400,8 +1428,7 @@ extension BookOutlineLandingTests {
             let top = try #require(anchorTop(anchor), "the target note realized")
             #expect(abs(top) <= 4, "the page is at note 10, not \(top) pt away")
 
-            #expect(model.viewedOutlinePair
-                    == BookOutlineViewed.Pair(sectionID: sectionIDs[3], postID: target),
+            #expect(model.viewedOutlinePair == adopted,
                     "the page shows chapter 3's note 10: \(model.viewedOutlinePair)")
             #expect(model.focusedPostID == story, "the follower never wrote the book's focus")
             #expect(BookOutlineGeometry.navigatorNoteMarks[target] == true,
@@ -1412,8 +1439,7 @@ extension BookOutlineLandingTests {
                     "its chapter wears the quieter wash")
             #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[1]] == false,
                     "the caret's chapter does not")
-            #expect(BookOutlineGeometry.outlinePinLines[readingID]
-                    == counts + " \u{B7} note 11 of 24 \u{B7} chapter 3",
+            #expect(BookOutlineGeometry.outlinePinLines[readingID] == targetLine,
                     "the pinned line says where the page is: \(String(describing: BookOutlineGeometry.outlinePinLines[readingID]))")
 
             // The pinned line never moved with the page.
@@ -1440,16 +1466,20 @@ extension BookOutlineLandingTests {
         }
     }
 
-    /// **THE FREEZE** (the record's §DESIGN piece 1): while a landing travels
-    /// — a navigator click, a chapter landing — the follower does not move,
-    /// so the highlight never flickers through rows she did not choose to
-    /// look at; the landing's END delivers where the page settled. Sampled
-    /// EVERY turn from the request to the landing's `DONE`, which the
-    /// Outline's one-second minimum hold keeps many turns away.
+    /// **THE FREEZE, on the adopted target** (the record's §DESIGN piece 1 as
+    /// R-562-A rules it): from the click, the follower IS the landing's
+    /// target, and it holds that target through the whole travel — never an
+    /// intermediate row the page passes, never the page she left — so the
+    /// highlight never flickers; the pinned line names the target through
+    /// the travel too (one slot, both faces). Sampled EVERY turn from the
+    /// request to the landing's `DONE`, which the Outline's one-second
+    /// minimum hold keeps many turns away; before the landing has started
+    /// (its `LAND` line), the page she left stands.
     ///
-    /// New capability. Its teeth: without the freeze the pair moves to the
-    /// target on the first reports after the jump — turns before `DONE`.
-    @Test func aLandingHoldsTheFollowerStillUntilItEnds() async throws {
+    /// New capability. Its teeth: without the freeze the pair walks through
+    /// the rows the jump passes; without the adoption (batch 1's freeze
+    /// alone) it holds the page she LEFT until `DONE` — both strays.
+    @Test func aLandingHoldsItsTargetFromTheClickUntilItEnds() async throws {
         try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, sectionIDs in
             let model = BookViewModel(session: session, readingID: readingID)
             await model.adopt(try await db.read { [readingID] in
@@ -1487,9 +1517,13 @@ extension BookOutlineLandingTests {
             // The second travel, to note 13, sampled every turn until it ends.
             let second = postIDs[13]
             let secondAnchor = BookOutlineRows.Row.noteAnchor(second)
+            let target = BookOutlineViewed.Pair(sectionID: sectionIDs[4], postID: second)
+            let targetLine = "book \u{B7} 10 chapters \u{B7} 30 notes \u{B7} note 14 of 30 \u{B7} chapter 4"
             model.requestReveal(second)
-            var heldTurns = 0
-            var movedEarly: [String] = []
+            var beforeStart = 0
+            var travelling = 0
+            var strays: [String] = []
+            var pinSaidTarget = false
             var ended = false
             for _ in 0..<240 {
                 await settle(window, hosting, watchdog: watchdog, until: { true }, maxTurns: 1)
@@ -1497,40 +1531,57 @@ extension BookOutlineLandingTests {
                     ended = true
                     break
                 }
-                heldTurns += 1
-                if model.viewedOutlinePair != held {
-                    movedEarly.append("turn \(heldTurns): \(model.viewedOutlinePair)")
+                let pair = model.viewedOutlinePair
+                if BookOutlineGeometry.trace.contains("\(secondAnchor) LAND") {
+                    travelling += 1
+                    if pair != target { strays.append("travelling, turn \(travelling): \(pair)") }
+                    if BookOutlineGeometry.outlinePinLines[readingID] == targetLine { pinSaidTarget = true }
+                } else {
+                    beforeStart += 1
+                    if pair != held { strays.append("before the landing, turn \(beforeStart): \(pair)") }
                 }
             }
-            print("VX-562 FREEZE: held \(heldTurns) turns; moved early: \(movedEarly)",
+            print("VX-562 FREEZE: \(beforeStart) turns before LAND, \(travelling) travelling; strays: \(strays)",
                   BookOutlineGeometry.trace.suffix(4))
             #expect(ended, "the second landing ended")
-            #expect(heldTurns > 1, "the landing held for sampled turns (its one-second hold)")
-            #expect(movedEarly.isEmpty,
-                    "the follower held still while the landing travelled: \(movedEarly)")
+            #expect(travelling > 1, "the landing travelled for sampled turns (its one-second hold)")
+            #expect(strays.isEmpty,
+                    "from the click to the landing's end the follower held the TARGET — no intermediate row, never the page she left: \(strays)")
+            #expect(pinSaidTarget, "the pinned line named the target while the page travelled — one slot, both faces")
 
-            // The landing's end delivered where the page settled.
+            // At the landing's end the target stands (it is on the page).
             await settle(window, hosting, watchdog: watchdog, until: {
-                model.viewedOutlinePair.postID == second
+                BookOutlineGeometry.outlinePinLines[readingID] == targetLine
             }, maxTurns: 10)
-            #expect(model.viewedOutlinePair
-                    == BookOutlineViewed.Pair(sectionID: sectionIDs[4], postID: second),
+            #expect(model.viewedOutlinePair == target,
                     "at the landing's end: chapter 4's note 13 — \(model.viewedOutlinePair)")
-            #expect(BookOutlineGeometry.outlinePinLines[readingID]
-                    == "book \u{B7} 10 chapters \u{B7} 30 notes \u{B7} note 14 of 30 \u{B7} chapter 4",
+            #expect(BookOutlineGeometry.outlinePinLines[readingID] == targetLine,
                     "\(String(describing: BookOutlineGeometry.outlinePinLines[readingID]))")
         }
     }
 
-    /// **Her own scroll — no landing at all — moves the follower** (the
-    /// ruling's everyday road: the highlight follows as you scroll). The page
-    /// is moved the way the Library's infinite-scroll pin moves its list (a
-    /// programmatic clip scroll — never a synthesized wheel, which does not
-    /// move a SwiftUI scroll in this host: TEXTKIT2 §3, 18l-c U8), and the
-    /// follower is checked against THE RULE over the geometry oracle's own
-    /// tops — then scrolled further and checked to have moved forward.
-    @Test func herOwnScrollMovesTheFollowerWithNoLanding() async throws {
-        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+    /// **Her scroll moves the follower — and after a landing it returns the
+    /// follower to the rule** (her everyday road, and R-562-A's SCROLL). The
+    /// page is moved the way the Library's infinite-scroll pin moves its list
+    /// (a programmatic clip scroll — never a synthesized wheel, which does
+    /// not move a SwiftUI scroll in this host: TEXTKIT2 §3, 18l-c U8), and
+    /// the follower is checked against THE RULE over the geometry oracle's
+    /// own tops, three times:
+    /// 1. with no landing at all, the follower IS the rule;
+    /// 2. a landing then makes its target the follower's, and once it has
+    ///    ended the target STANDS (on the page, no scroll);
+    /// 3. a scroll after it carries the target off the page, and the rule
+    ///    resumes — a later note, the navigator's mark moved off the target.
+    ///
+    /// What this host can and cannot drive: the ruling's release on her
+    /// scroll rides the user scroll PHASE (`.interacting` →
+    /// `outlineUserScrolled`), which only a real hand on the page produces —
+    /// the clip scroll here produces none, so step 3 proves the release's
+    /// geometric half ("a derivation that finds the adopted row off-screen
+    /// resumes the rule by itself"). The phase half is the walk's: a hand
+    /// scroll that keeps the target on the page.
+    @Test func herScrollAfterALandingReturnsTheFollowerToTheRule() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, sectionIDs in
             let model = BookViewModel(session: session, readingID: readingID)
             await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
@@ -1563,6 +1614,7 @@ extension BookOutlineLandingTests {
                 return clip.bounds.origin.y - before
             }
 
+            // 1 — no landing at all: the follower is the rule.
             let moved = try await scrollDown(by: 1_200)
             try #require(moved > 1_000, "the harness premise: the page moved (\(moved) pt)")
             let once = model.viewedOutlinePair
@@ -1575,15 +1627,144 @@ extension BookOutlineLandingTests {
                         "and the navigator marks it")
             }
 
+            // 2 — a landing: its target is the follower's, and it STANDS once
+            // the landing has ended (on the page, no scroll).
+            let target = postIDs[13]
+            let anchor = BookOutlineRows.Row.noteAnchor(target)
+            let adopted = BookOutlineViewed.Pair(sectionID: sectionIDs[4], postID: target)
+            model.requestReveal(target)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                landingEnded(anchor)
+            }, maxTurns: 200)
+            try #require(landingEnded(anchor), "the landing ended")
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 8)
+            print("VX-562 SCROLL 2 (landed): pair=\(model.viewedOutlinePair)",
+                  BookOutlineGeometry.trace.suffix(2), scrollFacts(hosting))
+            #expect(model.viewedOutlinePair == adopted,
+                    "after the landing the target stands: \(model.viewedOutlinePair)")
+
+            // 3 — a scroll after it: the target leaves the page, the rule resumes.
             let movedAgain = try await scrollDown(by: 900)
             try #require(movedAgain > 700, "the page moved again (\(movedAgain) pt)")
-            let twice = model.viewedOutlinePair
-            print("VX-562 SCROLL 2: moved \(movedAgain) pair=\(twice)")
-            let firstPlace = once.postID.flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
-            let secondPlace = twice.postID.flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
-            #expect(secondPlace > firstPlace,
-                    "further down the page, a later note: \(firstPlace) → \(secondPlace)")
-            #expect(twice == BookOutlineViewed.pair(rows: rows, tops: BookOutlineGeometry.anchorTops))
+            let gone = try #require(anchorTop(anchor), "the target still reports")
+            try #require(gone < -300, "the premise: the target scrolled wholly off the page's top (\(gone))")
+            let after = model.viewedOutlinePair
+            let ruledAfter = BookOutlineViewed.pair(rows: rows, tops: BookOutlineGeometry.anchorTops)
+            print("VX-562 SCROLL 3: moved \(movedAgain) pair=\(after) rule=\(ruledAfter)")
+            #expect(after != adopted, "the target left the page: no longer the follower's")
+            #expect(after == ruledAfter, "the follower is the rule again")
+            let targetPlace = BookOutlineViewed.noteOrdinal(of: target, in: rows) ?? 0
+            let afterPlace = after.postID.flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
+            #expect(afterPlace > targetPlace,
+                    "further down the page, a later note: \(targetPlace) → \(afterPlace)")
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.navigatorNoteMarks[target] == false
+            }, maxTurns: 10)
+            #expect(BookOutlineGeometry.navigatorNoteMarks[target] == false,
+                    "the navigator's mark left the target")
+            if let shown = after.postID {
+                #expect(BookOutlineGeometry.navigatorNoteMarks[shown] == true,
+                        "and marks the note the page shows")
+            }
+        }
+    }
+
+    /// **R-562-A's F-1 — a landing on a target in the book's LAST
+    /// screenful ends on its TARGET, never the top row.** Such a row cannot
+    /// reach the top (the column's foot — the window line, "+ new note in
+    /// this book", the padding — follows it), so its landing corrects into a
+    /// page that cannot move until the four-second watchdog gives up, and the
+    /// rule over the settled page would name the row that IS at the top. The
+    /// ruling: the clicked target is what she is viewing — adopted at the
+    /// click, held through the whole (pre-existing, invisible) correction
+    /// spin, and standing after it while it is on the page and she has not
+    /// scrolled.
+    ///
+    /// Red on batch 1's follower (freeze, then the rule at the end): it held
+    /// the page she left for the four seconds and then marked the top row.
+    /// Its premises are `#require`s that SAY so if the geometry does not
+    /// make the F-1 shape (the target at the top would be the ordinary case).
+    @Test func aLandingOnTheLastScreenfulEndsOnItsTargetNeverTheTopRow() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, sectionIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.resetNavigator()
+            BookOutlineGeometry.forgetOutlinePins()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: {
+                anchorTop(BookOutlineRows.Row.noteAnchor(postIDs[0])) != nil
+            })
+            let rows = BookOutlineRows.rows(grouped: structure.grouped(entries: model.entries))
+
+            // The book's last note — a card in the last screenful.
+            let last = postIDs[29]
+            let anchor = BookOutlineRows.Row.noteAnchor(last)
+            let target = BookOutlineViewed.Pair(sectionID: sectionIDs[9], postID: last)
+            let targetLine = "book \u{B7} 10 chapters \u{B7} 30 notes \u{B7} note 30 of 30 \u{B7} chapter 9"
+            model.requestReveal(last)
+            var travelling = 0
+            var strays: [String] = []
+            var ended = false
+            for _ in 0..<320 {
+                await settle(window, hosting, watchdog: watchdog, until: { true }, maxTurns: 1)
+                if landingEnded(anchor) {
+                    ended = true
+                    break
+                }
+                if BookOutlineGeometry.trace.contains("\(anchor) LAND") {
+                    travelling += 1
+                    if model.viewedOutlinePair != target {
+                        strays.append("travelling, turn \(travelling): \(model.viewedOutlinePair)")
+                    }
+                }
+            }
+            let done = BookOutlineGeometry.trace.last { $0.hasPrefix("\(anchor) DONE:") } ?? "no DONE"
+            print("VX-562 F-1: \(travelling) travelling turns; \(done)", scrollFacts(hosting),
+                  "pair=\(model.viewedOutlinePair)")
+            #expect(ended, "the landing ended (the watchdog's give-up, in the F-1 shape)")
+            #expect(strays.isEmpty, "the target from the click to the landing's end: \(strays)")
+
+            // The premises that make this F-1: the target never reached the
+            // top, and the rule over the settled page names another row.
+            let top = try #require(anchorTop(anchor), "the target reports")
+            try #require(top > BookOutlineViewed.probe,
+                         "the premise: the last screenful — the target stops \(top) pt down the page")
+            let ruled = BookOutlineViewed.pair(rows: rows, tops: BookOutlineGeometry.anchorTops)
+            try #require(ruled != target, "the premise: the rule names the top row (\(ruled))")
+
+            // The ruling: the target, never the top row — in the slot, the
+            // navigator and the pinned line.
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.outlinePinLines[readingID] == targetLine
+            }, maxTurns: 10)
+            #expect(model.viewedOutlinePair == target,
+                    "the landing ended on its target, not on the top row \(ruled): \(model.viewedOutlinePair)")
+            #expect(BookOutlineGeometry.navigatorNoteMarks[last] == true, "the navigator marks the target")
+            #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[9]] == true,
+                    "and washes its chapter")
+            if let topNote = ruled.postID {
+                #expect(BookOutlineGeometry.navigatorNoteMarks[topNote] == false,
+                        "the row at the top is not marked")
+            }
+            #expect(BookOutlineGeometry.outlinePinLines[readingID] == targetLine,
+                    "the pinned line names the target: \(String(describing: BookOutlineGeometry.outlinePinLines[readingID]))")
+
+            // And it STANDS: on the page, no scroll, turns later.
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 12)
+            #expect(model.viewedOutlinePair == target,
+                    "the target stands while it is on the page and she has not scrolled")
         }
     }
 }
