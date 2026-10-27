@@ -238,7 +238,14 @@ anchors the brief names. No subagent.*
   (`scratchpad/b1-logs/pins-red-on-old.log`): 11 tests / 1 suite, 3 red with 6 issues — every red leg the refusal
   "Its rule needs a starred note, and only the author can star one." (VX-609's retry after her answered Once among
   them: the P-2 dead door, reproduced); the 8 others green. The pins are committed RED; the fix follows.
-- **2 · The mint flow (RB-1):** NOT-STARTED — settled design below (THE DESIGN, item 1).
+- **2 · The mint flow (RB-1):** DONE (this commit) — `GatheringMint.starringOnlyWhereNeeded` (pure; the
+  star-forbidden walk first, her door's walk only on `.blocked(.needsStar)`) + `Queries.gatheringWireMintOutcome`;
+  `mintNoteEntry`'s gathering arm plans through it and writes the star right after the rule's tags through
+  `writeStar(…, enforcingCap: false)` (her door's arm); `DocumentImport.starred` → the answer's additive
+  `starred: true` (absent otherwise). `Blocker.needsStar.reason` reworded to the bare fact ("Its rule needs a starred
+  note." — no door speaks it now). GREEN (`scratchpad/b1-logs/mint-green.log`): the wire suite 11/1 (the three pins
+  red at `5c88eee55` now green) + the core 42/5 (`GatheringTagsSatisfyTests` with the new wire table + the flipped
+  reason pin, `GatheringMintTests`, `CollectSetsTheStarTests`).
 - **3 · `setStarredForClient` (core op + exact-row undo):** NOT-STARTED.
 - **4 · `set_starred` on the wire (catalog, decisions, answers, Activity):** NOT-STARTED.
 - **5 · The faces + the seven wording points + the deliberate flips:** NOT-STARTED.

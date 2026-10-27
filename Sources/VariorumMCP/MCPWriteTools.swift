@@ -924,10 +924,19 @@ struct MCPWriteTools: Sendable {
             "tags": minted.tagPaths, "blocks": MCPMintedBlocks.records(minted.blocks),
         ]
         if let sectionID { answer["section_id"] = sectionID }
+        // VX-596 (RB-1, PROVISIONAL): a note born starred into a gathering says
+        // so — the star is one of the author's, the client never asked for it by
+        // name. Absent otherwise, so every other answer stays byte-unchanged
+        // (VX-357's `null_characters_removed` shape).
+        if minted.starred { answer[Self.starredMintKey] = true }
         return (answer,
                 MCPWriteReceipt(clientName: clientName, act: act, targetID: minted.post.id, targetTitle: title,
                                 show: .note(noteID: minted.post.id, blockID: nil, select: nil)))
     }
+
+    /// VX-596: the answer key a born-starred mint carries (read by the
+    /// descriptions, never retyped).
+    static let starredMintKey = "starred"
 
     /// VX-252 (D2): `create_note`'s `section_id` without a book to be a chapter of.
     static let sectionWithoutBookWords =

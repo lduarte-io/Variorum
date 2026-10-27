@@ -131,8 +131,9 @@ extension Operations {
     /// VX-549, INTO A GATHERING: bookless in the gathering's wing, wearing the
     /// tags its rule needs so it assembles in (her sitting 2026-10-27: "write_new
     /// mints the note bookless in the wing and applies the rule's tags so it
-    /// assembles in" — her own door `newPostInGathering`'s shape, never a star:
-    /// starring is not on the wire).
+    /// assembles in" — her own door `newPostInGathering`'s shape) and, since
+    /// VX-596 put the star on the wire, born STARRED where only a star gets it
+    /// in (`Queries.gatheringWireMintOutcome` — RB-1, PROVISIONAL).
     public enum MCPNoteDestination: Equatable, Sendable {
         case book(String)
         case wing(String)
@@ -582,18 +583,19 @@ extension Operations {
                 wing = id
             case .gathering(let id):
                 // VX-549 — her door's refuse-before-mint (`newPostInGathering`):
-                // the ONE planner decides what the note must wear, here with the
-                // star forbidden (`starrable: false` — not on the wire), BEFORE
+                // the ONE planner decides what the note must wear BEFORE
                 // anything is minted; its refusal is her door's own sentence
-                // (`GatheringMint.Blocker.reason` — "Its rule needs a starred
-                // note, and only the author can star one." where a star is the
-                // gap). A gathering holds no chapters.
+                // (`GatheringMint.Blocker.reason`). VX-596 (RB-1, PROVISIONAL):
+                // tags first, as VX-549 built it, and the STAR only where the
+                // rule needs one (`gatheringWireMintOutcome`) — the refusal
+                // VX-549 spoke there ("…only the author can star one.") is
+                // retired: the note is born starred. A gathering holds no chapters.
                 let reading = try liveReading(db, id)
                 guard reading.kind == .gathering else {
                     throw OperationError.wrongReadingKind(id: id, expected: .gathering)
                 }
                 if let sectionID { throw OperationError.sectionNotFound(id: sectionID) }
-                switch try Queries.gatheringMintOutcome(db, reading: reading, starrable: false) {
+                switch try Queries.gatheringWireMintOutcome(db, reading: reading) {
                 case .blocked(let blocker):
                     throw OperationError.smartFilterUnsatisfiable(readingID: id, reason: blocker.reason)
                 case .plan(let plan):
@@ -612,6 +614,13 @@ extension Operations {
                 for tagID in gathering.plan.tagIDs {
                     _ = try liveTag(db, tagID)
                     try insertPostTag(db, tagID: tagID, postID: minted.post.id, now: now)
+                }
+                // VX-596 — the star the rule needs, right after its tags (her
+                // door's order, `newPostInGathering`): the ONE star write, so
+                // intake hears it as when she stars; CAP-EXEMPT, her door's arm
+                // exactly (P-13id-U2-1 — "a mint must never fail on a star").
+                if gathering.plan.star {
+                    try writeStar(db, .post(minted.post.id), starred: true, enforcingCap: false)
                 }
             }
             if let bookID {
@@ -644,7 +653,8 @@ extension Operations {
             let worn = try mintedNoteTags(db, postID: minted.post.id, header: header.map(\.id), outflow: outflow)
             return DocumentImport(
                 post: minted.post, blockIDs: minted.blockIDs, alternateCount: minted.alternateCount,
-                tagIDs: worn.map(\.id), tagPaths: worn.map(\.path), blocks: minted.blocks)
+                tagIDs: worn.map(\.id), tagPaths: worn.map(\.path), blocks: minted.blocks,
+                starred: gathering?.plan.star ?? false)
         }
         let postID = result.post.id
         registerMintedContainerEntry(label: undoLabel, postID)

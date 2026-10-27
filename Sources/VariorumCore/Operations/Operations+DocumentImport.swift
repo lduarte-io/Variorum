@@ -69,6 +69,11 @@ extension Operations {
         /// with, in document order — what the act minted, said back so a caller
         /// never reads the note again to learn an id the write itself made.
         public let blocks: [MintedBlockTakes]
+        /// **VX-596 — the act STARRED the note** (RB-1, PROVISIONAL): a note
+        /// the MCP door minted into a gathering whose rule only a star satisfies
+        /// is born starred (`mintNoteEntry`'s gathering arm). False for every
+        /// other mint.
+        public var starred: Bool = false
     }
 
     /// **One minted block, as the act minted it** (VX-252 — the run record's
