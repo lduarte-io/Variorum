@@ -314,7 +314,14 @@ Sonnet for external facts.
    type-prod-test-secret: mode 700, reads only dev-castle.env at 600,
    frontmost-must-be-the-Debug-build-by-exact-path, never prints a value, a --check mode that types nothing; a
    no-values comment line added to dev-castle.env naming it. Yours to keep or delete (the walk-machinery-kept
-   precedent suggests keep). *(Flip this line when the helper exists and --check has run.)*
+   precedent suggests keep). *(FLIPPED: the helper EXISTS — built in phase 1, --check green twice on the real
+   file, headless, nothing typed; its guards include the lane check (a prod-test-road launch refuses dev-pair
+   typing), the frontmost-Debug-by-exact-path check re-verified at type time, and stdin delivery so the value
+   never enters argv or any environment.)*
+3. **A security observation on your existing helper, no action taken (walk ruling 4):**
+   `type-prod-test-secret` (R-510-8) passes the secret in osascript's ARGV — briefly visible to same-user `ps`.
+   The new dev helper uses the stdin form instead. Patching yours to match is ~6 lines, same checks — but it is
+   your ratified tool and the walk depended on it tonight, so nothing was changed. Want it patched?
 
 ## THE LEDGER (numbered rows; every row owned)
 
