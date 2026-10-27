@@ -1058,3 +1058,23 @@ on-screen window holding the dialog's stale pixels; not present on re-list.
   Opus reviewer for this run knowing VX-441 was a member; the touches change no storage/layout/identity code. Round 2
   stays Opus per her word; the two lines are NAMED in the morning bundle so she can order a Fable pass if she wants
   one.
+
+## THE EVIDENCE SLICE (the orchestrator, under claim vx-439-l1-verify after the L1 suites; captures `walk-shots-vx439/50–58`)
+
+GREEN, seen live on the L1 tree: **M-2** — the toolbar wears "in Home" beside its New Note button from launch, on
+every surface (capture 50). **VX-569** — a fresh ⌘N note's title field, clicked, OFFERS the date; Tab accepted it and
+⏎ filed it as the stored title (captures 51/52) — her exact 10-21 gesture end-to-end. **The star family** — Star from
+the row menu seats the note in a new Starred sidebar section while the Open row stays (the duplication her ask names,
+correct with the setting off); the menu's word flips to Unstar; Unstar returns everything (captures 53/56/57).
+**VX-589** — the setting exists as its own SEARCHABLE row: "Hide starred notes from Open — A starred note shows in
+Starred only, not in the Open list too. It is still open; unstar it and its row comes back. This Mac only." · General
+(capture 54) — the row, its honest sentence and its pane label in one frame. **The delete roads** spoke their receipts
+and the cleanup returned the store to its as-found state.
+
+NOT-REACHED, final: the Settings scene's INTERIOR takes no synthetic clicks (three roads tried across two walks — a
+WALK-DRIVER limitation to note in the walk lessons, not a product fault; the search field accepts typed text, which is
+how capture 54 exists). The live toggle flip therefore rests on its pins + revA's red; the General pane's 7-row glance
+is hers (one Settings visit, bundle). VX-425's Move-confirm ask needs a second wing and rests on its mounted pin.
+
+Dev store left: unlocked, hold banner standing, Study, walk content deleted via the app's doors, Open empty, ONE
+walk-added prefs key (a dead note's remembered-block entry) removed post-quit; the usual bookkeeping keys only.
