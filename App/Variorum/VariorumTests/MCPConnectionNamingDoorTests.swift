@@ -77,7 +77,14 @@ private nonisolated func openSilently(_ directory: URL) throws -> Int32 {
 private nonisolated func nameItself(_ fd: Int32, as name: String, key: String) {
     var bytes = MCPPreamble.line(key: key)
     bytes.append(Data((#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"# + "\n").utf8))
-    _ = MCPShim.writeAll(fd, bytes)
+    bytes.withUnsafeBytes { raw in
+        var offset = 0
+        while offset < raw.count {
+            let written = Darwin.write(fd, raw.baseAddress! + offset, raw.count - offset)
+            guard written > 0 else { return }
+            offset += written
+        }
+    }
     _ = MCPShim.readFirstLine(fd, limit: 1 << 20)
 }
 

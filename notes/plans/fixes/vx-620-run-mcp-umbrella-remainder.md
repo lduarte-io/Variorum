@@ -597,4 +597,8 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
   offered while it is false; the pane's tab is clamped to the offered set (her pick otherwise remembered as before);
   the Settings search does not name the open-book row while the face hides (the account-row precedent,
   `wholeIndex(accountSection:)`); no new words.
-- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b2`):** NOT-STARTED.
+- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b2`):** IN-PROGRESS — Mac `build-for-testing` into the
+  FRESH `DerivedData/b2` (absent before, never a clone): **TEST BUILD SUCCEEDED** (`scratchpad/b2-logs/mac-bft2.log`;
+  the first attempt, `mac-bft1.log`, failed on ONE line of the new door pin — `MCPShim.writeAll` is package-internal;
+  it now writes with the `Darwin.write` loop `MCPConnectionEndDoorTests` uses). No warning on a touched line (the one
+  in a touched file, `AppSettingsView.swift:1270`, is 2026-07-18's). The whole headless suite: PENDING.
