@@ -274,12 +274,14 @@ struct OpenListRowDrop: ViewModifier {
 /// would carry one was never offered a real drag — U2b/U2c). Together they cover
 /// the row and reach the list's side margins (`reach`), which were dead room.
 ///
-/// **Live only while THIS list's own drag is in flight** (`state.dragging`, set
-/// when the drag begins, cleared at its session's end or its drop): at rest the
-/// halves take no hits, so every door of the row — the click, the ✕, the
-/// right-click, the title's hover scroll, the drag itself — is exactly as it
-/// was; and a drag that began elsewhere (another window's list, a file) never
-/// meets them.
+/// **Live only while THIS list's own drag is in flight** —
+/// `state.dragInFlight(among:)`: a drag began here (`state.dragging`, set when
+/// the drag begins, cleared at its session's end or its drop) AND its row is
+/// still drawn (the VX-439 ladder's m-7 — a row gone mid-drag stands the halves
+/// down even if its session's end never arrives): at rest the halves take no
+/// hits, so every door of the row — the click, the ✕, the right-click, the
+/// title's hover scroll, the drag itself — is exactly as it was; and a drag
+/// that began elsewhere (another window's list, a file) never meets them.
 struct OpenListRowHalves: View {
     let state: OpenListDragState
     let noteID: String

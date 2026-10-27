@@ -5,7 +5,10 @@
 **STATUS: OPEN — kickoff 2026-10-27, overnight run (architect-phase).** As of L1 (2026-10-27 morning): both batches
 built and stage-verified; walks part 1 + 2 done; ladder round 1 done and its L1 fixes built, pushed and headless-green
 on the tree merged with VX-548 (`2b33e8bb6`); the fix-verify window GREEN (1,562 tests / 267 suites, 0 failures;
-every revert red exactly as named) — PENDING the coordinator's evidence slice, then round 2.
+every revert red exactly as named); the evidence slice ran (THE EVIDENCE SLICE — what it reached; what it could not is
+hers, bundle 24); ladder round 2 DONE (`vx-439-ladder-round2.md` — 0 BLOCKER · 0 MAJOR, no round 3, all ten L1 fixes
+hold) and its final items (R2, LIVE STATUS) built and pushed — PENDING one final verify slice and the orchestrator's
+line-by-line check, then her morning (**bundle item 19 gates the PR**).
 
 ---
 
@@ -487,7 +490,9 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     is the stage's revert cycle (R-T: the `.onKeyPress(.tab)` block removed). build-for-testing GREEN.
 - Ladder: ROUND 1 DONE (`opus-reviewer`; findings `vx-439-ladder-round1.md` — 3 MAJOR · 7 MINOR · 5 NIT, no BLOCKER;
   the orchestrator's dispositions in the Ledger); its fixes are L1, below; round 2 (a FRESH `opus-reviewer` over the
-  L1 fixes, per her kickoff word — the editor-seam file touches named in the bundle) NOT-STARTED.
+  L1 fixes, per her kickoff word) DONE — `vx-439-ladder-round2.md`: 0 BLOCKER · 0 MAJOR · 3 MINOR · 4 NIT, no round 3,
+  all ten L1 fixes HOLD; its final items are R2 below (the orchestrator line-checks them; the editor-file touches are
+  bundle 23).
 - **L1 — THE ROUND-1 FIX SESSION** (`opus-implementer`, fresh, 2026-10-27; scope = the Ledger's "LADDER ROUND 1
   DISPOSITIONS", nothing else). **BUILT + STAGE-VERIFIED — every item dispositioned below; every red-on-old run
   as named.** **NO REVERT IN FLIGHT.**
@@ -724,9 +729,11 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     checked by eye) and what it rests on; M-2's look captured in Study only, Terminal riding bundle 24. The two settings
     pins' comments (`SettingsShapeTests`, `DiagnosticsPaneTests`) re-pointed from "owed to the evidence slice" (which
     could not reach the pane) to her look — bundle item 24.
-- Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`) and part 2 DONE (06:11–06:28) — the WALK
-  PART 1 / WALK PART 2 sections below; the POST-FIX EVIDENCE SLICE (m-4's live legs + M-2's look) is owed in the
-  fix-verify window — NOT-STARTED.
+- Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`), part 2 DONE (06:11–06:28), and the POST-FIX
+  EVIDENCE SLICE DONE (under claim `vx-439-l1-verify` after the L1 suites; `744b27ade`) — M-2's toolbar label (Study),
+  VX-569's title-Tab, the star family and VX-589's searchable row seen live; the Settings interior, VX-589's live
+  toggle, VX-425's Rename… and Move-confirm alerts NOT REACHED (what each rests on is in THE EVIDENCE SLICE; the
+  Settings look is hers, bundle 24).
 
 ## THE MORNING BUNDLE (held for her — grows as the night runs)
 
@@ -912,7 +919,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 - 2026-10-27 HER LIVE RULING (in-session) on VX-568: "oh. i'm talking about the cursor itself - yeah, it is what mac os uses probably, it's just what the cursor looks like in the new note line. it's a subtle issue - just remove it from this run and leave it parked for later for my reconsideration at a later point. doesn't need to be this run." VX-568 is OUT of this run (no churn probe, no knob work — none was started; nothing instrumented); Linear Parked with the trace (the orchestrator's). R-439-F568 is retired with it.
 - 2026-10-27 B1 STAGE LEG (03:15–03:28 MDT, `vx-439-b1-suites`): the prepared command first packed all 152 suites into ONE `-only-testing:` flag (zsh does not word-split an unquoted variable — the coordinator caught it); rebuilt as one flag per suite. Run 1: 821 tests / 152 suites, 1 failing test (`ExportFacesTests.bulkExportGestureWritesTheWholeLibrary`, VX-126's missed app-side byte pin — fixed deliberately, `36b98b750`, 6/6). VX-332 red-on-old: a crude revert (every mount on the counted raise) also broke the launch cell, so a FAITHFUL revert (VX-326's one-shot road) was run — launch green, navigation-back red (3 issues), restored green. Tree clean, no instances, released.
 
-## WALK PART 1 (the orchestrator, 2026-10-27 03:30–03:52 MDT, claim vx-439-b1-walk; captures `walk-shots-vx439/`, gitignored)
+## WALK PART 1 (the orchestrator, 2026-10-27 03:30–03:52 MDT, claim vx-439-b1-walk; captures `walk-shots-vx439/` — ~~gitignored~~ CORRECTED at R2 (R2-n4): COMMITTED by record commits `e8594fec8`/`aed5708c1` (the ignore pattern missed the folder), untracked + ignored only at `080e15a08`; the history question is bundle 19)
 
 Dev store as found: an ACCOUNT-LESS RESTORED library held as of Oct 20 (VX-522's banner sentence), EMPTY (no books, no
 notes), Study voice, dark. The hold banner, the words band card, and every sync/Castle/key door UNTOUCHED (the
@@ -1046,7 +1053,7 @@ captures Terminal where visual).
   structural redo after a confirmed destructive undo doesn't re-apply in `DestructiveUndoWarningTests.redoNeverAsks`
   (red on main `dd469951e`)". Instances: both strict `pgrep` forms EMPTY after. Tree clean at `cc8cb7a32` before this record.
 
-## WALK PART 2 (the orchestrator, 2026-10-27 06:11–06:28 MDT per the STAGE LOG — claimed 06:11:05, ONE +15 renew at 06:21:43, released 06:28:22; this header first said "06:10–07:20, two renews", the orchestrator's wrong clock, corrected at the coordinator's log check; captures `walk-shots-vx439/`, gitignored until the debris sweep)
+## WALK PART 2 (the orchestrator, 2026-10-27 06:11–06:28 MDT per the STAGE LOG — claimed 06:11:05, ONE +15 renew at 06:21:43, released 06:28:22; this header first said "06:10–07:20, two renews", the orchestrator's wrong clock, corrected at the coordinator's log check; captures `walk-shots-vx439/` — ~~gitignored until the debris sweep~~ CORRECTED at R2 (R2-n4): COMMITTED by `e8594fec8`/`aed5708c1`, untracked + ignored only at `080e15a08`; the history question is bundle 19)
 
 On the stage-verified tree (Debug rebuild of `728456d1f`). Dev store as found and as left: unlocked, the Oct-20 hold
 banner STANDING and untouched, Study voice, MCP off; VX-548's Trash content untouched; prefs diff zero added/removed
@@ -1115,7 +1122,10 @@ on-screen window holding the dialog's stale pixels; not present on re-list.
   **m-6 ACCEPTED AS CLOSEOUT WORK:** the canon sweep list (SurfaceContracts' tour line and keyboard family; MCPSpec's
   one Help-label sentence — applying VX-602's ruled rename exactly, one pointer; the Open-list row menu + hide-starred
   filter lines; Export Note + bulk export as document-format clients) joins the closeout's canon deltas, each a
-  contract line + pointer, nothing beyond the rulings.
+  contract line + pointer, nothing beyond the rulings. [ADDED at R2 (the ladder's R2-n3), appended: VX-552 — if the
+  closeout gives the wing label a contract line (SurfaceContracts §The app, or the wing switcher's "the app's one wing
+  follows the focused pane's note" line), it names all THREE current-wing mint doors that wear it: the Bookcase band's
+  quick entry, the Library bar's quick entry, and the window toolbar's New Note (PROVISIONAL, bundle 18).]
   **m-7 SPECULATIVE — conditional:** L1 writes the pin FIRST (dragging latched + the dragged row gone ⇒ the halves
   must not be hit-testable); red ⇒ the cheap guard lands; green-on-old ⇒ RECORD-ONLY per the hallucination guard, and
   the finding is noted hollow.
