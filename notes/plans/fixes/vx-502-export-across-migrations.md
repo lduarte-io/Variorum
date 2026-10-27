@@ -300,7 +300,7 @@ Sonnet for external facts.
 claim not marked DONE with its evidence is PENDING. A fresh session with only the repo finishes the unit from this
 table.*
 
-**REVERT STATE: no revert in flight.** RV-A1 and RV-A2 ran and were each restored from `e56920846`; the round-1 R1-c scratch probe ran and was restored from `074c73023` (`git checkout --` both files; `git diff --exit-code` clean).
+**REVERT STATE: THE R2-c FILTERED PROBE IN FLIGHT — OUTSIDE THIS WORKTREE.** It runs in an ISOLATED scratch copy (`git archive 45b43fddf Package.swift Package.resolved Sources Tests Vendor Tools/StringsWorkbook` into the implementer's session scratchpad, its own `.build`), never in `~/dev/variorum-vx-502` — because unit B's walk session is live in this worktree (its untracked `Tools/WalkKit/castle-walk-lib.zsh` and `notes/plans/fixes/vx-502-walk-script.md` appeared at 03:45+) and will build the Debug app from it. Nothing in this worktree is modified by the probe, so there is nothing to restore here. (RV-A1/RV-A2 restored from `e56920846`; the R1-c probe restored from `074c73023` — that window, 03:21:59–03:23:17 MDT, predates the walk session's first file and no build of this worktree exists outside `DerivedData/vx502-unitA`.)
 
 | # | Piece | Status |
 |---|---|---|
