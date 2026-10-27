@@ -213,7 +213,46 @@ the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swif
 | 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | DONE (this commit) — see "D-4 evidence" below |
 | 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | DONE (this commit) — see "D-2 + D-3 evidence" below; READINGS R-U1-3…R-U1-5 flagged for the architect |
 | 6 | D-6 — release.sh HANDOFF step 0 + README | DONE (this commit) — step 0 names the self-resetting, both-arms walk; the WalkKit README carries the walk's new shape, the reset helper, `walk-cap`'s new arguments, the words guard and guard.sh's exit 8 |
-| 7 | Final evidence: both self-tests' case lists, D-7 red-on-old, `zsh -n`, each D-row's acceptance (file:line) | NOT-STARTED |
+| 7 | Final evidence: both self-tests' case lists, D-7 red-on-old, `zsh -n`, each D-row's acceptance (file:line) | DONE (this commit) — see "UNIT 1 CLOSED" below |
+
+**UNIT 1 CLOSED — the script work, headless evidence complete (2026-10-27).** The tip this table describes is the commit
+that carries it (on top of `be0435bed`). Commits, in order: `b090395e4` LIVE STATUS opened · `80eafaa06` D-7 ·
+`9a71189e6` D-1 · `5454a0b09` D-5 · `9935050cf` D-4 · `e2bb002c1` D-2 + D-3 · `be0435bed` D-6 · this flip.
+
+| Row | Acceptance (headless — the live acceptance is UNIT 2's) | Where |
+|---|---|---|
+| D-1 | the reset helper: guards R1–R4 (exit 5, nothing written), the one atomic CTE, the after-read always, exit 0/4/5; `--self-test` **85/85** | `Tools/prod-reset-test-account.sh` — R1 `guard_allowlist` :63 (refusal :391) · R2 :392 · R3 `id_sql` :85 + resolve in `PY_LIB` :115 (refusal :398) · R4 :402 · `counts_sql` :88 · `reset_sql` :103 · `at_rest` :170 · `after_verdict` :180 · `prodwrite` :191 · already-at-rest :408-412 · the write :418 · the verdict :426 · `--self-test` :201 |
+| D-2 | the PRE-STEP after P3 (not at rest → reset; its id = P3's) and THE CLEANUP LEG after the last arm's PASS, behind E1 sign-out + E2 quit; a STOP never resets | `Tools/WalkKit/first-run-walk.sh` — `reset_account` :618 · P3r :647 · `stop()` :479 · E1 :776 · E2 :784 · E3 :787 · G8's helper check :407 |
+| D-3 | `--arm setup\|join\|both` (default both); J1 quit → J2 the walk's own library aside (provenance-proven) → J3 relaunch → J4–J8 the join, cursors +1 with the lock unmoved | `first-run-walk.sh` — `arm_valid` :154 · `turnon_library` :157 · `keyfile_library` :163 · `aside_verdict` :173 · `aside_own_slot` :185 · `join_ready` :204 · `join_verdict` :212 · SLOT_AT_G7 :405 · `quit_walk_app` :605 · `open_protection` :589 · J1 :706 · J2 :709 · J4 :720 · J5 :733 · J6 :738 · J7 :746 · J8 :768 |
+| D-4 | the main window's frame-autosave keys deleted pre-launch (zero instances), its bounds asserted inside a display's visible frame post-launch, before any act | `first-run-walk.sh` — `frame_keys` :132 · `rect_inside` :140 · `frame_reset` :521 · `frame_check` :533 · both run inside `launch_on_road` :541 (P1/J3) |
+| D-5 | every on-screen window of the pid, window-scoped, `<time>-<step>-<label>-w<n>.png`, behind the words guard (fail-closed) | `first-run-walk.sh` `capture()` :469 · `Tools/WalkKit/capture-windows.swift:1-5` (prefix, `--every-layer`) · `Tools/WalkKit/words-guard.swift` (+ `--classify`) |
+| D-6 | the release handoff's step 0 names the self-resetting both-arms walk; no manual reset line owed | `Tools/Release/release.sh:323-330` · `Tools/WalkKit/README.md` (the first-run walk section, the helpers) |
+| D-7 | guard.sh compiles `wl2` or refuses (exit 8); RED ON OLD 6/11 → GREEN 11/11 | `Tools/WalkKit/guard.sh:22-26, 33-35` · `Tools/WalkKit/pins/guard-space-helper.zsh` |
+
+**Evidence, run fresh at the tip:** `zsh -n` clean on `first-run-walk.sh`, `prod-reset-test-account.sh`, `guard.sh`,
+`pins/guard-space-helper.zsh`; `bash -n` clean on `release.sh`; `swiftc` compiles `capture-windows.swift`,
+`words-guard.swift`, `wl2.swift`. **The walk's `--self-test`: 64/64** (G1/G2 × 13 + the handed value × 1 — unchanged —
+plus D-5 × 10, D-4 × 12, D-2/D-3 × 28: every case named in the D-rows' evidence above). **The helper's `--self-test`:
+85/85** (named in "D-1 evidence"). **The D-7 pin: 0 failing of 11; against `b090395e4`'s guard.sh, 6 failing of 11**
+(case 1 verbatim: `GUARD OK (, idle 99s)` with wl2 absent). shellcheck is not installed on this Pro and the scripts are
+zsh (outside its grammar) — `zsh -n` is the syntax gate.
+
+**PENDING (not this unit's — UNIT 2's live acceptance under a held stage):** every GUI label of the join arm and the
+end (J4–J8, E1–E2, `close_settings`, the "Settings…" menu road) meeting the real window for the first time; the reset
+statement's first live run (the pre-step against std's standing vault, then the cleanup); `--dry-run` of both scripts
+(each reads production or needs the stage); the D-1 allow rule for `Tools/prod-reset-test-account.sh` (hers to add,
+or the orchestrator's at her word). The LEDGER's row 3 is the orchestrator's to flip.
+
+**AWAITING THE ARCHITECT'S RULING (each built, each a small change if overruled):** R-U1-1 (the `kp:` secret strict
+inside the atomic statement) · R-U1-2 (the reset fires when NOT AT REST, a superset of "a vault exists") · R-U1-3 (the
+walk renames ONLY a slot folder it proves its own between the arms, else stops naming the `mv`) · R-U1-4 (sign out and
+quit before the cleanup leg) · R-U1-5 (the join arm walks Standard only).
+
+**An observation outside this unit's surface (not touched; a ticket candidate for the triage):**
+`Tools/VisualWalk/pins/guard-order.zsh` reads **7 failing of 9** on this tip, on the pre-change tree (`b090395e4`)
+and on `origin/main` alike — its "author present → no osascript" cases now count the `key up shift` belt that
+`vw_abort` gained at `3723268b6` (18l-c U7), after the pin was last set (`d019f170b`). No file under `Tools/VisualWalk/`
+is in this run's diff.
 
 **D-7 evidence (VX-536).** The traced mechanism: `guard.sh`'s full check ran `win=$("$S"/wl2 $pid)`; `Tools/WalkKit/wl2`
 is gitignored, so a fresh worktree has none; the call printed "no such file" to stderr and left `win` EMPTY, which matched
