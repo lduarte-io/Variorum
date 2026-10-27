@@ -783,6 +783,22 @@ struct OpenListDropDoorTests {
                                          animation: nil))  // …then the drop on c
         #expect(workspace.openNotes.ids == ["b", "a", "c", "d"])
     }
+
+    /// **The halves' liveness (the VX-439 ladder's m-7): this list's drag is in
+    /// flight only while it began here AND its row is still drawn.** A drag
+    /// whose row went away mid-drag (closed in another window, a sync apply)
+    /// stands the halves down even should its session's end never arrive —
+    /// so the rows' doors are never left under live halves (the R-G mechanism:
+    /// a live half eats the ✕'s click).
+    @Test func theDragIsInFlightOnlyWhileItsRowIsDrawn() {
+        let state = OpenListDragState()
+        #expect(!state.dragInFlight(among: ["a", "b"]), "no drag began here")
+        state.began("a")
+        #expect(state.dragInFlight(among: ["a", "b"]), "a's drag, a drawn")
+        #expect(!state.dragInFlight(among: ["b", "c"]), "a's row went away mid-drag: the halves stand down")
+        state.ended()
+        #expect(!state.dragInFlight(among: ["a", "b"]), "the drag is over")
+    }
 }
 
 // MARK: - The chip and the doors, read
@@ -952,8 +968,10 @@ struct OpenListDragFaceTests {
         #expect(halves.contains("OpenListDropDoor.perform(tokens, onto: target, displayed: rows, state: state, workspace: workspace)"),
                 "each half lands through the door with its settle")
         #expect(halves.contains(".padding(.horizontal, -reach)"), "the halves reach into the margins")
-        #expect(halves.contains(".allowsHitTesting(state.dragging != nil)"),
-                "the halves take hits only while this list's own drag is in flight")
+        // (The VX-439 ladder's m-7 — edited in place: "in flight" is the
+        // state's own predicate now, its row still drawn — `dragInFlight`.)
+        #expect(halves.contains(".allowsHitTesting(state.dragInFlight(among: rows ?? workspace.openNotes.shown))"),
+                "the halves take hits only while this list's own drag is in flight, its row still drawn")
     }
 }
 
@@ -1319,6 +1337,29 @@ struct OpenListDragMountTests {
             await column.click(at: CGPoint(x: row.minX + 24, y: row.midY))
             #expect(column.workspace.focusedSelection == .post(column.notes[1]),
                     "a click on the row opened its note: \(String(describing: column.workspace.focusedSelection))")
+        }
+    }
+
+    /// **The VX-439 ladder's m-7 — a drag whose row went away mid-drag leaves no
+    /// live halves behind — RED ON OLD (R-L: the halves live on `dragging != nil`
+    /// alone).** Should a drag's session end never be delivered after its source
+    /// row is removed (closed in another window, a sync apply), `dragging` stays
+    /// latched — and on the old rule every row's halves stayed hit-testable, the
+    /// R-G mechanism exactly (the ✕'s click eaten by a half, which only the row's
+    /// tap answers). Staged: a drag begins on row 1, row 1 closes with no session
+    /// end; a click on the NEW first row's ✕ must close that row.
+    @Test func aDragWhoseRowWentAwayLeavesTheRowsDoorsActing() async throws {
+        try await withColumn(height: 900, openNotes: 4, startOn: nil) { column in
+            let drag = try #require(column.drag)
+            drag.began(column.notes[0])
+            column.workspace.closeNote(column.notes[0])
+            await column.settle()
+            #expect(drag.dragging == column.notes[0], "the premise: the drag is latched — no session end arrived")
+            #expect(column.workspace.openNotes.shown == Array(column.notes.dropFirst()), "the dragged row is gone")
+            let close = try #require(column.firstRowClose, "the new first row's ✕")
+            await column.click(at: CGPoint(x: close.midX, y: close.midY))
+            #expect(column.workspace.openNotes.shown == Array(column.notes.dropFirst(2)),
+                    "the ✕ closed its row — no live half took the click: \(column.workspace.openNotes.shown)")
         }
     }
 

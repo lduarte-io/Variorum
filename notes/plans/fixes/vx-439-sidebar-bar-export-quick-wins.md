@@ -582,7 +582,24 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     VX-603/604 work")`, and its doc says why (never executed; its one run crashed the host before its first line; kept
     for VX-603/604). The stage window's evidence: the suite reads SKIPPED, never run (the `skipped:` line — Swift
     Testing counts skipped tests in "Test run with N tests"). build-for-testing GREEN.
-  - m-7 (CONDITIONAL — pin first; guard only if red on current code): NOT-STARTED
+  - m-7 (CONDITIONAL — pin first; guard only if red on current code): GUARD LANDED (this commit) — the pin RED on the
+    current code BY TRACE, its stage run the confirmation. PIN FIRST, on existing API only (so it runs on the
+    pre-guard tree unchanged): `OpenListDragMountTests.aDragWhoseRowWentAwayLeavesTheRowsDoorsActing` — a drag begins
+    on row 1 (`began`, the payload's own act), row 1 closes with NO session end (`closeNote`), then a click on the new
+    first row's ✕ must close that row. RED ON CURRENT CODE, by trace: nothing but `began` / `ended` (a drop) /
+    `dragSessionUpdated(.ended)` writes `dragging` (grep of every writer), so it stays latched, and the halves'
+    `.allowsHitTesting(state.dragging != nil)` keeps every row's halves live — exactly R-G's condition, whose stage run
+    already MEASURED the consequence (the ✕'s click eaten, the row's tap answering). So the cheap guard landed:
+    `OpenListDragState.dragInFlight(among:)` (began here AND its row still drawn) is the halves' liveness
+    (`rows ?? workspace.openNotes.shown`); the row's own drop under them still lands any drop. PINS: the mounted pin
+    above (red-on-old under named revert **R-L**, `scratchpad/l1/reverts/r-l.patch` — the halves back on `dragging !=
+    nil` alone, the pre-guard code exactly); `OpenListDragTests.theDragIsInFlightOnlyWhileItsRowIsDrawn` (the
+    predicate, pure); DELIBERATE edit of the face pin `eachRowsTwoHalvesAreDropsOnMainsRoadLiveOnlyWhileItsDragIsInFlight`
+    (its `allowsHitTesting` literal, annotated) — red under R-L too. **CONTINGENCY, stated now:** should the mounted pin
+    read GREEN under R-L at the stage (the premise wrong — something clears the latch, or the click reaches the ✕
+    anyway), the finding is HOLLOW: the guard comes out in one commit, the pin stays as a guard, the Ledger says so.
+    What stays SPECULATIVE either way is the reviewer's own question (whether AppKit ever withholds `.ended` after the
+    source row is removed) — the guard makes the answer not matter. build-for-testing GREEN.
   - m-4 (the honesty half: the settings pins' capture claim): NOT-STARTED
   - n-2 (the export write failure names its reason): NOT-STARTED
   - n-4 (LIVE STATUS freshened — the last flip): NOT-STARTED

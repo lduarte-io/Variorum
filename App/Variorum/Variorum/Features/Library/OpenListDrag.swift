@@ -143,6 +143,17 @@ final class OpenListDragState {
         if target != nil { target = nil }
     }
 
+    /// **Whether THIS list's drag is in flight among `rows`** — the row
+    /// halves' liveness (VX-424): a drag began here AND its row is still
+    /// drawn. The VX-439 ladder's m-7: should a drag's session end never be
+    /// delivered after its source row is removed mid-drag (closed in another
+    /// window, a sync apply), `dragging` would stay latched — and the halves
+    /// with it, eating every row's clicks (R-G's mechanism). A gone row
+    /// stands them down; the row's own drop under them still lands a drop.
+    func dragInFlight(among rows: [String]) -> Bool {
+        dragging.map(rows.contains) ?? false
+    }
+
     /// The line's top in the list's viewport — nil where none is drawn.
     func lineTop(rows: [String], rowHeight: CGFloat) -> CGFloat? {
         SidebarLayout.OpenListDrop.lineTop(
@@ -303,7 +314,8 @@ struct OpenListRowHalves: View {
                 #endif
         }
         .padding(.horizontal, -reach)
-        .allowsHitTesting(state.dragging != nil)
+        // The ladder's m-7: in flight = began here AND its row still drawn.
+        .allowsHitTesting(state.dragInFlight(among: rows ?? workspace.openNotes.shown))
         .accessibilityHidden(true)
     }
 
