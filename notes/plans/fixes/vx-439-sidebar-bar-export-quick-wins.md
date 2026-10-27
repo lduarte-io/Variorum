@@ -474,6 +474,21 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     (`blockText: ""` — its offer is the date, the very words it compares; annotated). The red-on-old for the mounted pin
     is the stage's revert cycle (R-T: the `.onKeyPress(.tab)` block removed). build-for-testing GREEN.
 - Ladder: NOT-STARTED
+- **L1 — THE ROUND-1 FIX SESSION** (`opus-implementer`, fresh, 2026-10-27; scope = the Ledger's "LADDER ROUND 1
+  DISPOSITIONS", nothing else). **NO REVERT IN FLIGHT.** Method (the run's own, batch 2's): each fix lands WITH its
+  pin and a NAMED behavioral revert (patch gitignored in `scratchpad/l1/reverts/`); app-side pins are red-on-old
+  verified at the fix-verify stage window (the reverts applied for the run, restored by `git checkout`), and
+  headlessly first wherever a replica is cheap. Items (each flips in its own commit):
+  - M-1 (P1 — `SidebarRowLeads` through `Queries.leadingBlockTexts`): NOT-STARTED
+  - M-2 (the toolbar New Note door's wing label): NOT-STARTED
+  - m-1 (⌘←/⌘→ learn web-view first responders): NOT-STARTED
+  - m-2 (the find readout's match ranges cached per needle × text generation): NOT-STARTED
+  - m-3 (the sidebar row menus' wing listings re-ask after an act): NOT-STARTED
+  - m-5 (`NoteExportMenuGateTests` disabled, named): NOT-STARTED
+  - m-7 (CONDITIONAL — pin first; guard only if red on current code): NOT-STARTED
+  - m-4 (the honesty half: the settings pins' capture claim): NOT-STARTED
+  - n-2 (the export write failure names its reason): NOT-STARTED
+  - n-4 (LIVE STATUS freshened — the last flip): NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
 
 ## THE MORNING BUNDLE (held for her — grows as the night runs)
