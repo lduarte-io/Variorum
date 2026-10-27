@@ -518,7 +518,22 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     old: no item follows the button); the LOOK is the evidence slice's capture (both voices — the orchestrator's).
     Named revert **R-M2** (`scratchpad/l1/reverts/r-m2.patch`). C-552-1's premise corrected in place (LIVE STATUS
     VX-552, the Ledger's C-552-1 — appended, and the suite's header).
-  - m-1 (⌘←/⌘→ learn web-view first responders): NOT-STARTED
+  - m-1 (⌘←/⌘→ learn web-view first responders): DONE (this commit). TRACED (read): `BrowserNavKeyMonitor` consumes
+    ⌘← whenever `PageTurnKeys.textIsFirstResponder` is false — first responder neither `NSText` nor `NSTextField`; the
+    reference panel's URL pane is a plain interactive `WKWebView()` (`ReferencePanel.WebPane`) in the same window, and
+    with a page input focused the first responder is the web view → ⌘← ran `RootView.navigate(.back)` and moved the
+    pane off her note. FIX: the app's ONE "text holds the keyboard" answer also says yes for a first responder that IS
+    or sits INSIDE a `WKWebView` (an ancestor walk — whichever view WebKit makes first responder); whether the page's
+    focus is in an input only the page knows, so a web view holding the keyboard counts (the rule's conservative
+    reading, as a read-only text view counts). NOT a generic `NSTextInputClient` test — SwiftUI's own hosting views
+    may conform, which would silence ⌘← everywhere. The page-turn monitor reads the same answer, so a web view holding
+    the keyboard keeps unmodified ←/→ from turning a leaf too (the reviewer's "can ride the same helper" — one answer,
+    not a fork). PIN `BrowserNavKeysTests.aWebViewHoldingTheKeyboardKeepsCommandArrow` (a real `WKWebView` made first
+    responder in a window with the monitor: the rule says text; ⌘← and ⌘→ deliver nothing; then with nothing in
+    charge ⌘← goes back — non-vacuity). RED ON OLD expected under named revert **R-W**
+    (`scratchpad/l1/reverts/r-w.patch` — the rule back to `NSText || NSTextField`): the rule expectation and
+    "nothing navigated" fail (`[.back, .forward]` delivered) — PENDING the stage window (a window + WebKit; no headless
+    road). build-for-testing GREEN.
   - m-2 (the find readout's match ranges cached per needle × text generation): NOT-STARTED
   - m-3 (the sidebar row menus' wing listings re-ask after an act): NOT-STARTED
   - m-5 (`NoteExportMenuGateTests` disabled, named): NOT-STARTED

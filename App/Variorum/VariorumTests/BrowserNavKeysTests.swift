@@ -23,6 +23,7 @@ import Foundation
 import SwiftUI
 import Testing
 import VariorumCore
+import WebKit
 @testable import Variorum
 
 @MainActor
@@ -176,5 +177,64 @@ struct BrowserNavKeysTests {
         rig.pump(0.05)
         #expect(await rig.poll(timeout: 2) { seen.directions.count >= 2 })
         #expect(seen.directions == [.back, .forward], "⌘← back, ⌘→ forward, ⇧⌘← nothing: \(seen.directions)")
+    }
+
+    // MARK: - A web view holding the keyboard (the VX-439 ladder's m-1)
+
+    private struct WebHost: NSViewRepresentable {
+        let web: WKWebView
+        func makeNSView(context: Context) -> WKWebView { web }
+        func updateNSView(_ view: WKWebView, context: Context) {}
+    }
+
+    private struct WebPaneHost: View {
+        let seen: Seen
+        let web: WKWebView
+
+        var body: some View {
+            VStack {
+                WebHost(web: web).frame(width: 300, height: 120)
+                Text("not text")
+            }
+            .padding(20)
+            .background { BrowserNavKeyMonitor { seen.directions.append($0) } }
+        }
+    }
+
+    /// **A web view holding the keyboard keeps ⌘← / ⌘→ — RED ON OLD (the
+    /// VX-439 ladder's m-1).** The reference panel's URL pane is a plain,
+    /// interactive `WKWebView` in the same window; with an input on the
+    /// referenced page focused (a search box), the window's first responder is
+    /// the WEB VIEW — neither an `NSText` nor an `NSTextField` — so the old rule
+    /// called the keyboard free and ⌘← took the PANE back off her note instead
+    /// of moving the input's caret to its line start. Whether the page's focus
+    /// is in an input only the page knows, so a web view holding the keyboard
+    /// is text holding it (the rule's conservative reading — a read-only text
+    /// view counts too). With nothing in charge, the key still navigates
+    /// (non-vacuity: the monitor is alive in this window).
+    @Test func aWebViewHoldingTheKeyboardKeepsCommandArrow() async throws {
+        let seen = Seen()
+        let web = WKWebView(frame: NSRect(x: 0, y: 0, width: 300, height: 120))
+        let rig = BlocksWorkbenchFaceTests.Rig(WebPaneHost(seen: seen, web: web), width: 420, height: 240)
+        defer { rig.close() }
+        #expect(await rig.poll(timeout: 5) { web.window === rig.window }, "the web view is in the window")
+        rig.window.makeFirstResponder(web)
+        #expect(await rig.poll(timeout: 2) {
+            (rig.window.firstResponder as? NSView)?.isDescendant(of: web) == true
+        }, "the web view holds the keyboard: \(String(describing: rig.window.firstResponder))")
+        #expect(PageTurnKeys.textIsFirstResponder(in: rig.window), "a web view holding the keyboard is text holding it")
+        NSApp.sendEvent(try #require(Self.key(Self.left, "\u{F702}", [.command, .numericPad, .function], window: rig.window)))
+        rig.pump(0.05)
+        NSApp.sendEvent(try #require(Self.key(Self.right, "\u{F703}", [.command, .numericPad, .function], window: rig.window)))
+        rig.pump(0.05)
+        await rig.turn()
+        #expect(seen.directions.isEmpty, "nothing navigated while the web view held the keyboard: \(seen.directions)")
+
+        rig.window.makeFirstResponder(nil)
+        _ = await rig.poll(timeout: 2) { !((rig.window.firstResponder as? NSView)?.isDescendant(of: web) ?? false) }
+        NSApp.sendEvent(try #require(Self.key(Self.left, "\u{F702}", [.command, .numericPad, .function], window: rig.window)))
+        rig.pump(0.05)
+        #expect(await rig.poll(timeout: 2) { seen.directions == [.back] },
+                "with nothing in charge ⌘← goes back: \(seen.directions)")
     }
 }

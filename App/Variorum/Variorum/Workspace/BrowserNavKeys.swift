@@ -18,7 +18,9 @@
 //  consumes it only when it navigates — otherwise the key reaches the text
 //  view exactly as if the monitor were not there. "Text holds the keyboard" is
 //  `PageTurnKeys.textIsFirstResponder` — the one answer the app already gives
-//  (any `NSText`, every field editor, any `NSTextField`).
+//  (any `NSText`, every field editor, any `NSTextField`, and — since the VX-439
+//  ladder's m-1 — a web view holding the keyboard: the reference panel's page
+//  may have an input focused).
 //
 //  A press where the act cannot go (nothing to go back to) SPEAKS the act's
 //  declared refusal — a door that did nothing speaks (AppSpec §12; the

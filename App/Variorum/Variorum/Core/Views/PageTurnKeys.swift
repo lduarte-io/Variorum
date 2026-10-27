@@ -24,6 +24,7 @@
 
 import AppKit
 import SwiftUI
+import WebKit
 
 nonisolated enum PageTurnKeys {
     enum Turn: Equatable {
@@ -51,11 +52,24 @@ nonisolated enum PageTurnKeys {
 
     /// Whether the window's first responder edits text: an `NSText`
     /// (every `NSTextView`, the field editor a SwiftUI `TextField` writes
-    /// through) or an `NSTextField`.
+    /// through) or an `NSTextField` — or a WEB VIEW (the VX-439 ladder's m-1):
+    /// the reference panel's URL pane is an interactive `WKWebView`, and with
+    /// an input on the page focused the window's first responder is the web
+    /// view itself (or a view inside it), which is neither. Whether the page's
+    /// focus sits in an input only the page knows, so a web view holding the
+    /// keyboard counts as text holding it — the conservative reading, as a
+    /// read-only text view counts. (The app's ONE answer: the page-turn keys
+    /// and ⌘←/⌘→'s Back/Forward both read it.)
     @MainActor
     static func textIsFirstResponder(in window: NSWindow?) -> Bool {
         guard let responder = window?.firstResponder else { return false }
-        return responder is NSText || responder is NSTextField
+        if responder is NSText || responder is NSTextField { return true }
+        var view = responder as? NSView
+        while let current = view {
+            if current is WKWebView { return true }
+            view = current.superview
+        }
+        return false
     }
 }
 
