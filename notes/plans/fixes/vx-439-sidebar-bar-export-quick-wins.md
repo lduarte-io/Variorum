@@ -261,9 +261,20 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     names, "tutorial" on one door only; the naming sentences; the old literals gone from menu/palette/registry; the
     guide content deliberately unchanged) + `TourOfferLineTests` DELIBERATE update (the title + sentence) —
     build-for-testing GREEN; the suite GREEN at the stage window (below).
-- Batch 2: IN-PROGRESS — implementer session 2 (`opus-implementer`, fresh, 2026-10-27); preflight read (CLAUDE.md +
-  canon, this record whole, SurfaceContracts whole, the resiliency protocol, TEXTKIT2_NOTES §3–4, the capability model,
-  VX-283's U2b–U2d drag history). No revert in flight. Members in order:
+- Batch 2: BUILT, READY-FOR-STAGE (2026-10-27) — implementer session 2 (`opus-implementer`, fresh); preflight read
+  (CLAUDE.md + canon, this record whole, SurfaceContracts whole, the resiliency protocol, TEXTKIT2_NOTES §3–4, the
+  capability model, VX-283's U2b–U2d drag history). All eight members BUILT and pushed; origin/main (VX-502) merged in at
+  `0a30e8b09` (Ledger "B2 — THE SECOND-MERGER STEP"). Headless at the END on the merged tree: core `swift test` 3,439/457
+  passed (5 known) + 32/4, MCP 383/71 with the VX-353 timing flake re-run green 3/3; `xcodebuild build-for-testing`
+  GREEN (default DerivedData = the fixed tree). **NO REVERT IN FLIGHT** — `git status` clean; the three revert trees are
+  pre-built in `scratchpad/b2/dd-r{o,g,t}` (Ledger "B2 — THE NAMED REVERTS"). THE STAGE RUN (PENDING the relayed claim
+  line): `scratchpad/b2/stage.sh` (gitignored; `zsh -n` clean), run from `App/Variorum`: `chunk1`…`chunk5` — the 495
+  suites of `scratchpad/b2/stage-suites.txt` (every suite in a test file naming a changed type — the grep rule — ∪ all 11
+  of `TutorialWalkTests.swift`'s suites ∪ `ExportFacesTests`, `PlaintextExportBringInRoadTests`, `U2WordsTests` for the
+  merged export seam; `NoteExportMenuGateTests` EXCLUDED — batch 1's crashing probe, untouched), 100 suites per
+  `test-without-building`, each log's "Test run with N tests" line read (VX-604); then `rev_ro`, `rev_rg`, `rev_rt` on
+  their own trees (expected reds named in the Ledger). A shorter fallback if the window is tight: `focused` (197 suites,
+  `scratchpad/b2/stage-suites-focused.txt` — the suites over the changed behaviors). Members in order:
   - VX-424: BUILT (this commit) — PENDING the stage run (the mounted + source-read pins and the R-O/R-G revert cycle).
     INSTRUMENT (`295bf3794`, removed `941728f54`): the rule refuses only DOWN BY ONE; up-drags land on the hovered row's
     top whichever half (Ledger "B2 VX-424 — THE INSTRUMENT"). FIX: each Open row wears `OpenListRowHalves` — an overlay
