@@ -142,6 +142,33 @@ struct NoteExportTests {
         }
     }
 
+    /// **A failed write SAYS WHY — RED ON OLD (the VX-439 ladder's n-2).** The
+    /// refusal carried no reason ("Couldn't write … try another folder"), so a
+    /// full disk, a permission refusal and a vanished folder read the same; it
+    /// now names the system's own reason (the bulk export's road says the error
+    /// too), and still says the note is unchanged.
+    @Test func aFailedWriteNamesItsReason() async throws {
+        try await withExportSession { session in
+            let post = try await fannedNote(session)
+            let nowhere = FileManager.default.temporaryDirectory
+                .appendingPathComponent("vx439-n2-\(UUID().uuidString)", isDirectory: true)
+                .appendingPathComponent("never-made", isDirectory: true)
+                .appendingPathComponent("export.md")
+            // The system's own reason for this very write, asked the same way.
+            var reason = ""
+            do { try Data("x".utf8).write(to: nowhere, options: .atomic) } catch {
+                reason = error.localizedDescription
+            }
+            #expect(!reason.isEmpty, "the premise: the write fails")
+            await NoteExport.export(postID: post.id, session: session) { _ in nowhere }
+            let said = try #require(session.status.spoken)
+            #expect(said.kind == .refusal)
+            #expect(said.text.contains("\u{201C}export.md\u{201D}"), "it names the file: \(said.text)")
+            #expect(said.text.contains(reason), "it names the reason — \(reason) — in: \(said.text)")
+            #expect(said.text.contains("the note is unchanged"), "and the note is unchanged: \(said.text)")
+        }
+    }
+
     @Test func anEmptyNoteRefusesBeforeThePanel() async throws {
         try await withExportSession { session in
             let empty = try await session.runner.run { ops in try ops.createPost(title: nil) }

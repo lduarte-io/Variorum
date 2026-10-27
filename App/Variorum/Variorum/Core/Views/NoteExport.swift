@@ -87,7 +87,8 @@ enum NoteExport {
             try Data(contents.text.utf8).write(to: url, options: .atomic)
             session.status.receipt(exported(fileName: url.lastPathComponent))
         } catch {
-            session.status.refuse(couldNotWrite(fileName: url.lastPathComponent))
+            session.status.refuse(couldNotWrite(
+                fileName: url.lastPathComponent, reason: error.localizedDescription))
         }
     }
 
@@ -103,8 +104,13 @@ enum NoteExport {
     nonisolated static let nothingToExport =
         "Nothing to export \u{2014} this note has no text yet."
 
-    nonisolated static func couldNotWrite(fileName: String) -> String {
-        "Couldn\u{2019}t write \u{201C}\(fileName)\u{201D} \u{2014} the note is unchanged; "
-            + "try another folder."
+    /// A failed write says WHY (the VX-439 ladder's n-2): the system's own
+    /// sentence follows — a full disk, a permission refusal and a vanished
+    /// folder must not read the same.
+    nonisolated static func couldNotWrite(fileName: String, reason: String) -> String {
+        let why = reason.trimmingCharacters(in: .whitespacesAndNewlines)
+        let tail = why.isEmpty ? "" : " " + (".!?".contains(why.last!) ? why : why + ".")
+        return "Couldn\u{2019}t write \u{201C}\(fileName)\u{201D} \u{2014} the note is unchanged; "
+            + "try another folder." + tail
     }
 }

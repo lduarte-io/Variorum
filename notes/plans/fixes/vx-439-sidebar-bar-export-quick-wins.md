@@ -610,7 +610,16 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     top the pane" is reasoning, not a look — it now says so and names the same owed slice. The record's VX-589 line
     made the same claim and is corrected in place. The live evidence itself (VX-589's toggle, a true General capture,
     VX-569's title-Tab, VX-425's three asks) is the orchestrator's evidence slice — not this session's.
-  - n-2 (the export write failure names its reason): NOT-STARTED
+  - n-2 (the export write failure names its reason): DONE (this commit). TRACED (read): `NoteExport.export`'s write
+    `catch` spoke `couldNotWrite(fileName:)` and dropped the error, so a full disk, a permission refusal and a vanished
+    folder read identically. FIX: `couldNotWrite(fileName:reason:)` appends the system's own sentence
+    (`error.localizedDescription`, trimmed, closed with a period if it has none) after the unchanged words ("… the note
+    is unchanged; try another folder. The folder “export.md” doesn’t exist."). PIN
+    `NoteExportTests.aFailedWriteNamesItsReason` (on the door's existing seam: a destination inside a folder that does
+    not exist; the refusal names the file, the system's reason for that very write, and the unchanged note). RED ON
+    OLD, HEADLESS — the pin's assertions over the old and new sentences with the real failing write (scratchpad
+    `l1-n2`, `scratchpad/l1/n2-replica.txt`): old FAIL (no reason), new PASS; the mounted-free app pin itself runs at the
+    stage under named revert **R-N** (`scratchpad/l1/reverts/r-n2.patch`). build-for-testing GREEN.
   - n-4 (LIVE STATUS freshened — the last flip): NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
 
