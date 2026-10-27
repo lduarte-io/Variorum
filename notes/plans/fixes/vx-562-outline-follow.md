@@ -1,6 +1,6 @@
 # VX-562 — Book Outline: the highlight follows your scroll, and the book's nav info pins up top
 
-**STATUS: OPEN — kicked off 2026-10-27 (architect-phase, wave 2; coordinator `oct27coordinator`).**
+**STATUS: CLOSED 2026-10-27 — one day, kickoff to merge: two build passes + three ruling fixes, a three-round ladder (capped, every finding dispositioned), six stage windows, four walks and a trace walk (one honestly blocked, one honestly failed and measured), every bug-class fix revert-verified, the clamp seen firing live. Merged by PR #PENDING.**
 Ticket: VX-562 (single ticket — Improvement · Confirmed · Books · High · Pre-launch; project "v1 release readiness") · Branch: `vx-562-outline-follow` · Worktree: `~/dev/variorum-vx-562` (the Pro).
 
 **Her kickoff words (2026-10-27, verbatim):** *"VX-562 contact oct27coordinator for your walk + staging needs"* — the wave-2 shape: stage traffic through the coordinator only (REQUEST → READY → GO; never self-claim), no `/Applications` refresh and no release without her word, PROVISIONAL-and-continue with every question bundled for her morning.
@@ -117,10 +117,10 @@ Both ledger pieces in one session — the pin consumes the follower's slot, so s
 
 | # | Item | Status |
 |---|---|---|
-| 1 | The follow-highlight: the Outline navigator's highlighted chapter/note follows the viewport as the content scrolls (the view, never the caret) | BUILT THROUGH THREE RULINGS (R-562-A adoption · R-562-C offset release · R-562-D at-bottom clamp + R-562-D′ on-page guard); r1 suites + reverts GREEN/RED as expected (§SUITE RUNS, window tests2); r3 suites + recipes H/H′/I and walk 4 PENDING the combined window |
-| 2 | The pinned nav info: chapters + notes counts fixed at the top while scrolling; the current note # (and chapter) said during scroll | BUILT (one honest total; P-562-7 heading→first-note; walks 2+3 PASS on the pin's behavior); r3 suites PENDING the combined window |
-| 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | TESTS DONE (both runs green, §SUITE RUNS); walk attempt 1 BLOCKED AT PREMISE (§WALK — the held store holds NO book; legs 3–8 not walked; nothing added, banner standing, prefs clean: 0 added/0 removed/3 launch-bookkeeping keys changed, restored nothing). RE-WALK REQUESTED with a content plan: Help ▸ Restore the Sample Library at start; Delete Book + its notes (owned ⇒ the Trash) at end; Bookcase back to "No books yet" confirmed |
-| 4 | The ladder (one round minimum; reviewer per the diff — `opus-reviewer` throughout: no editor seam, no custody, no `Sync/`) | CLOSED AT THE THREE-ROUND CAP (r1 0B·1M·5m·3n → fixed; r2 0B·0M·1m·2n → N1 walk-upgraded, R-562-D; r3 0B·0M·1m·2n → R-562-D′ by the orchestrator; every finding dispositioned in writing) |
+| 1 | The follow-highlight: the Outline navigator's highlighted chapter/note follows the viewport as the content scrolls (the view, never the caret) | DONE — R-562-A/C/D/D′ + the reachable travel; suites 326/60 green; reverts B/C/E/G/H/H′/I/J each red on exactly their named pins; the clamp seen firing live (§CONFIRM WALK) |
+| 2 | The pinned nav info: chapters + notes counts fixed at the top while scrolling; the current note # (and chapter) said during scroll | DONE — one honest total; P-562-7; walks 2/3/4/confirm all pass the pin's behavior |
+| 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | DONE — six windows (tests · walk-blocked · walk2 · tests2 · walk3 · walk4+trace+confirm per §§); the store returned as-found after every one |
+| 4 | The ladder (one round minimum; reviewer per the diff — `opus-reviewer` throughout: no editor seam, no custody, no `Sync/`) | DONE — closed at the three-round cap; post-cap walk findings handled as orchestrator-adjudicated fixes with their own pins and reverts (R-562-D′, the reachable travel) |
 
 ## LIVE STATUS (batch 1 — the implementer's; flipped in the same commit as each piece)
 
@@ -301,6 +301,7 @@ The app is THIS BRANCH's Debug build: `~/dev/variorum-vx-562/App/Variorum/Derive
 
 - **r3 addition (the r3 fix session's, for `notes/QUESTIONS.md` at the merge — the orchestrator numbers it; R-562-D itself is bundled above):**
   - **R-562-D's short-book edge (PROVISIONAL, built (a); re-worded at round 3's R3-2 — the honest shape):** where the clamp applies in a book that barely scrolls. (a) **BUILT:** only a page that can scroll FURTHER than the 8-pt band clamps — a book that fits its page, or moves 8 pt or less, never does, so at rest nothing is viewed in every book. The honest consequence: a book that scrolls less than about its title block (a first-week daily Journal's shape) shows NOTHING viewed until it reaches the bottom, then the last note — there is no in-between stretch for the edge rule to walk; (b) clamp whenever the page sits within 8 pt of its maximum, whatever its travel — a book that fits its page then views its LAST note at rest, with the title block on screen; (c) clamp only once she has scrolled (offset above 0) — a book that moves 1–8 pt clamps on any nudge and never at rest.
+  - **P-562-8 (the confirm walk's one taste knob — as-built the honest 8-pt band):** at the very bottom, a tiny ~12-pt nudge up steps the mark from note 13 back to the top row at once (the walker: "reads as a twitch, not deliberate" — a light trackpad touch could flip it), while a ~70-pt scroll reads deliberate. The alternative recorded: hold the clamp while the page sits within about a row of the bottom (a wider leave-band than the 8-pt enter-band). One constant either way — your call.
 
 ## ENVIRONMENT TRAPS (carried verbatim into every batch brief)
 
@@ -644,3 +645,5 @@ An Opus walker ran under the orchestrator's `vx-562-confirm` claim, from 17:41 t
 - (3) The three bookkeeping prefs above.
 
 **Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I sent `kill -TERM` to pid 4100, path verified with `ps`. At 17:48:08 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing.
+
+**Window vx-562-confirm outcomes (2026-10-27 ~17:35–17:49; stage.log's times govern; claim `vx-562-confirm`):** the full 60-suite run GREEN — "326 tests in 60 suites passed" (`vx562-confirm-full.log`); revert J RED on exactly the measured-fact pin's five lines (`vx562-revJ-run.log`), restored, the suite green 28/1 (`vx562-confirm2-run.log`); the CONFIRM WALK's clamp-live verdict and the P-562-8 taste knob are §CONFIRM WALK's. The run's acceptance evidence is complete.
