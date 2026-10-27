@@ -100,7 +100,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 | 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | **ACCEPTED** (window vx548-b1-walk: Mac suites 141/12 green, zero skips; orchestrator walk green — ORCHESTRATOR ACCEPTANCE, BATCH 1) |
 | 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | BUILT (headless green, red-on-old verified incl. two behavioural reverts; Mac pins compiled into `DerivedData/b2a`) — Mac run + faces walk ride the MID WINDOW after 2b — BATCH 2a RECORD |
 | 2b — the disconnect story | VX-394 | opus-implementer №3 | BUILT (headless green, red-on-old verified 3/6; the sweep table 12 roads — 2 FIXED, 9 PINNED-GREEN, 1 safe; App Nap NOT built; reconnect options for her; Mac pins compiled into `DerivedData/b2b`, run rides the MID WINDOW) — BATCH 2b RECORD |
-| 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | NOT STARTED |
+| 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | IN FLIGHT (spawned while vx548-mid waits behind VX-502's merge-gate window — the orchestrator's re-weigh: the un-run evidence is Mac FACE pins; batch 3 builds on the headless-green decide layer, so the isolation gate yielded to the overnight clock; the windows may fold into one end claim) |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
 
 ---
@@ -278,6 +278,7 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
   an unlock it read true while her client's connection was dead (the Clients row's "last seen …" and Activity's line
   are where it shows). Option: the status line carries the live count ("running · 1 client connected" / "running · no
   client connected"). Not built.
+- **MB-15 (the orchestrator's evidence call, for her eyes):** batch 2b's optional Castle lock GUI leg was SKIPPED — a live Castle walk trips [cyber] on Fable (the standing safeguard), and the Mac pin `everyRoadThatClosesTheLibrarySaysEachConnectionsEndOnceThroughTheProductionTeardown` drives every lock road (crossing · Lock Now · idle · sleep) on a real Castle library through the production teardown factory, which the orchestrator judges sufficient evidence of the lock-road drop lines. If you want the GUI confirmation too it is a 5-second ⌃⌘L on any Castle library (Activity then shows "…locked or closed"), or an Opus-hand walk leg at the next window.
 - (Batch records may append more.)
 
 ## LEDGER
