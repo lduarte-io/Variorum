@@ -530,3 +530,58 @@ An Opus walker ran under the orchestrator's `vx-562-walk4` claim (17:02:58), fro
 *[removed for publication]*
 
 **Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I killed pid 91663 (`kill -TERM`, path verified with `ps`). At 17:16:10 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing.
+
+## TRACE WALK (2026-10-27)
+
+**Verdict: the bottom's geometry is captured, and it confirms walk 4's first hypothesis. At the true bottom the derived travel exceeds the reachable scroll by exactly the bottom inset (40 pt), so `gap` rests at 40 and never falls to the 8-pt at-bottom tolerance.** The page reproduced walk 4's bottom: the pin reads "note 10 of 13 · The Adventure of the Engineer's Thumb" with Noble Bachelor, Beryl Coronet and Copper Beeches fully on the page. Content was removed as planned. The banner stands. Zero instances.
+
+An Opus walker ran under the orchestrator's `vx-562-trace` claim (17:22:31, 15 min), from 17:23 to 17:28:42. The build was the trace build (`DerivedData/vx562/…/Debug/Variorum.app`, binary 17:21:45), launched with `open -n --stderr w5/run.log --stdout w5/run.out`. It ran as pid 99705, verified by path; window 1240×940 at (60,33), id 9415. No What's New sheet appeared. Every act was a click, a wheel or a menu press. I typed nothing into any editor, changed no setting and never pressed Resume. Captures are in `App/Variorum/DerivedData/vx562-walk/w5/` (gitignored); the names below are relative to it.
+
+**As found** (`a0-s.png`, `a1-s.png`, `set0-s.png`, `tags0-s.png`). Both strict forms showed zero instances before launch.
+- Bookcase (Home): "All · starred · + shelf", no Welcome shelf, "No books yet", and the twelve-words offer card (left alone).
+- Library: 1 note, "The walk leaves a stone here: crossings, card,…" (edited Oct 19).
+- Settings ▸ Tags: `walk` only.
+- Settings ▸ General ▸ Appearance: **Dark** (`appearanceChoice=dark`). Theme Study, palette Default.
+
+**What Help ▸ Restore the Sample Library minted** (pressed 17:24:44 by its menu item):
+- The book "the adventures of sherlock holmes": 13 notes, 13 ch, 105,335 words, owned, wearing `#classics #sherlock holmes` (`m/bc-s.png`).
+- The **Welcome** shelf, minted, with the book on it.
+- Two tags, `classics` and `sherlock holmes`.
+- This time the door opened the book in Outline with every card folded (`seed/r6-s.png`). The receipt was caught: *"Restored "the adventures of sherlock holmes" — 12 storys came back. It's on the "Welcome" shelf."* (walk 3's "storys" plural bug again).
+
+**The bottom.** From the folded Outline I took eight `walk-scroll 890 533 4` calls (about 400 pt each) to the true bottom. "+ new note in this book" was on the page and the page was still (`b/b1-s.png`). I sat 2 s, then nudged once more (`walk-scroll 890 533 1`, ten line events, 17:25:46). The page did not move, and the nudge produced **no new trace line**: `OutlineScrollFacts.init` did not run again at the pinned bottom. The still after the nudge is **`b/bottom-s.png`**. The pin reads "book · 13 chapters · 13 notes · note 10 of 13 · The Adventure of the Engineer's Thumb", and the wash is on Engineer's Thumb in the navigator.
+
+**The trace lines, verbatim.** The `log stream` capture (`w5/trace.log`) caught **nothing** beyond its header. Because stderr was redirected by `open --stderr`, NSLog wrote to stderr instead of the unified log. All 7 lines are in `w5/run.log`; this is the whole set, the last four being the descent onto the bottom:
+```
+2026-10-27 17:24:52.507 Variorum[99705:3222466] VX562TRACE rawOffset=0.0 content=141.0 container=809.0 insetTop=0.0 insetBottom=0.0 derivedOffset=0.0 derivedTravel=0.0 gap=0.0
+2026-10-27 17:24:52.514 Variorum[99705:3222466] VX562TRACE rawOffset=0.0 content=141.0 container=809.0 insetTop=0.0 insetBottom=0.0 derivedOffset=0.0 derivedTravel=0.0 gap=0.0
+2026-10-27 17:24:52.525 Variorum[99705:3222466] VX562TRACE rawOffset=0.0 content=141.0 container=809.0 insetTop=0.0 insetBottom=40.0 derivedOffset=0.0 derivedTravel=0.0 gap=0.0
+2026-10-27 17:25:22.252 Variorum[99705:3222466] VX562TRACE rawOffset=1880.0 content=2792.0 container=809.0 insetTop=0.0 insetBottom=40.0 derivedOffset=1880.0 derivedTravel=2023.0 gap=143.0
+2026-10-27 17:25:22.376 Variorum[99705:3222466] VX562TRACE rawOffset=1920.0 content=2792.0 container=809.0 insetTop=0.0 insetBottom=40.0 derivedOffset=1920.0 derivedTravel=2023.0 gap=103.0
+2026-10-27 17:25:22.502 Variorum[99705:3222466] VX562TRACE rawOffset=1960.0 content=2792.0 container=809.0 insetTop=0.0 insetBottom=40.0 derivedOffset=1960.0 derivedTravel=2023.0 gap=63.0
+2026-10-27 17:25:22.627 Variorum[99705:3222466] VX562TRACE rawOffset=1983.0 content=2792.0 container=809.0 insetTop=0.0 insetBottom=40.0 derivedOffset=1983.0 derivedTravel=2023.0 gap=40.0
+```
+- **Reading them (the walker's arithmetic, not a fix).** The scroll stops at rawOffset 1983, which is content − container = 2792 − 809. derivedTravel is 2023, which is that plus insetBottom (1983 + 40). So at the page's true, unmovable bottom, `gap` = 40 > 8, and the at-bottom clamp's precondition can never hold.
+- Either the 40-pt bottom inset is already inside `content`, or the scroll view does not honour it as extra travel. The raw max reached is exactly content − container. insetTop is 0 throughout.
+- The first three lines are the empty pre-load page (content 141); the third is where insetBottom first appears.
+
+**Removal** (17:26–17:28):
+- The book's Bookcase context menu → Delete Book… → the owned-book confirm → "Delete Book and Its 13 Notes" (`m/confirm-s.png`). Receipt: "Deleted "the adventures of sherlock holmes" and its 13 notes — they're in the Trash togeth…" (`m/deleted1-s.png`).
+- The Welcome chip's context menu → Delete Shelf… → "It holds no books…" → Delete Shelf (`m/shelfconfirm-s.png`). Receipt: "Deleted the shelf "Welcome"." (`m/shelfgone-s.png`).
+- Settings ▸ Tags: deleted `classics`, then `sherlock holmes`, each through its trash icon and the "Delete Tag?" confirm (`m/tagconfirm-s.png`, `m/tagconfirm2-s.png`). Settings was returned to General and closed (`m/set-general-final-s.png`).
+
+**Re-check against the as-found list:**
+- Bookcase "All · starred · + shelf · No books yet": matches (`end-banner-s.png`).
+- Library: 1 note, matches (`m/library-final-s.png`).
+- Tags: `walk` only, matches (`m/tags-final-s.png`).
+- Appearance: `dark`, matches.
+- Trash: grew by the book and its 13 notes, as by design; not counted.
+
+*[removed for publication]*
+
+**Residue I did not remove (named):**
+- (1) The 14 new Trash rows. Put back returns the notes without their tags, because the tags are deleted.
+- (2) Tombstones for the Welcome shelf and the two tags (S2).
+- (3) The three bookkeeping prefs above.
+
+**Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I sent `kill -TERM` to pid 99705, path verified with `ps`. At 17:28:42 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing. The `log stream` capture (pid 99670) was stopped at 17:26.
