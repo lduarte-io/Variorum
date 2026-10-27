@@ -1,6 +1,6 @@
 ## Your notes travel as plain files, and the sidebar does more
 
-Export any note as a markdown file with File ▸ Export Note… (⌥⌘S) — exactly what Copy full text gives you. Export Library now writes each note's title and tags into its file, so a whole bulk export re-imports complete. And a plain-text export made today will still import after any future update of Variorum.
+Export any note as a markdown file with File ▸ Export Note… (⌥⌘S) — exactly what Copy full text gives you. Export Library now writes each note's title and tags into its file, so a whole bulk export re-imports complete. And a plain-text export now imports again in later versions of Variorum, across the library format's migrations.
 
 - Right-click a note in the sidebar for Rename, Move or Copy to Wing, Export, Close, and Delete.
 - Untitled notes show their first words in the sidebar instead of a date.
