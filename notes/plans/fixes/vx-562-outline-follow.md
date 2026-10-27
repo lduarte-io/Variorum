@@ -467,3 +467,66 @@ An Opus walker ran under the orchestrator's `vx-562-walk3` claim (15:56:23, 30 m
 **Walk 3 ran 15:56:23–16:15:19 per stage.log (claim `vx-562-walk3`); the record section above is the walker's; the three walk-added prefs keys were deleted after it and the final diff was zero added/removed.**
 - **Recipe I — R-562-D′ (round 3, R3-1).** File `App/Variorum/Variorum/Features/BookView/BookOutlineViewed.swift`, in `rule(rows:page:)`: replace the `isOnScreen(top: page.tops[rows[last].id], height: page.heights[rows[last].id], viewport: page.scroll.viewport)` condition with `page.tops[rows[last].id] != nil  // r3 REVERT I` (the existence-only clamp). Suite: `BookOutlineViewedTests`. **Expected RED:** `aLastNoteOffThePageKeepsTheEdgeRuleAtTheBottom` — the three in-band "the edge rule" lines (the old clamp names (s1, e2) there), the "never the off-page last note" lines, and the chapter-monotonic loop at the band's entry. Everything else green (the normal clamp table's last note is ON the page, so it never consults the difference).
 **Window vx-562-final, the test half (2026-10-27 ~16:47–17:10; stage.log's exact times in the RELEASE line at the window's close):** the full 60-suite run GREEN — "325 tests in 60 suites passed" (`vx562-final-full.log`; the new R3-1 table joined; the 4 knowns the standing IndexTierMetrics pins). REVERTS: **H** (the slide restored, page-adapted) RED on the clamp's pure table + the mounted end pin + the R3-1 table — 122 issues, the above-band loop's long list by design (`vx562-revH-run.log`); **H′** (the clamp off) RED on exactly the three at-bottom pins — the original MAJOR's shape (`vx562-revHp-run.log`); **I** (the existence-only clamp) RED on exactly `aLastNoteOffThePageKeepsTheEdgeRuleAtTheBottom`, 7 issues (`vx562-revI-run.log`). Restored tree green 48/2 (`vx562-final2-run.log`), worktree clean at the tip. R-562-D and R-562-D′ stand REVERT-VERIFIED. At the coordinator's SEAM the stage YIELDED to vx-620's rerun (~15 min); walk 4 returns as a fresh GO (`vx-562-walk4`).
+
+## WALK 4 (the walker's record, 2026-10-27)
+
+**Verdict: FAIL on the headline. The clamp does not fire in the real app.** At the very bottom of the book the highlight and the pin stay on note 10 (Engineer's Thumb), not note 13. This is walk 2's (A), the original MAJOR's shape, and it reproduced twice. The descent itself is honest: the slide is gone, and the highlight tracks the top row with no lead. Leg 2's premise was therefore not met. Legs 3, 4 and 5 PASS. Content was removed as planned. The banner stands. Zero instances.
+
+An Opus walker ran under the orchestrator's `vx-562-walk4` claim (17:02:58), from 17:03:43 to 17:16:10. The build was `DerivedData/vx562/…/Debug/Variorum.app`. Its dylib is stamped 16:57:58, which is final2-bft's finish over the restored tree: `BookOutlineViewed.swift` was restored at 16:57:32, and HEAD differs from the walked tree only by f353ca52f's one SurfaceContracts line. It was launched with `open -n --env OS_ACTIVITY_DT_MODE=YES` and stderr to `w4/run.log`, ran as pid 91663 (verified by path), window 1240×940 at (60,33), id 9288. No What's New sheet appeared. Every act was a click, a wheel or an AX press. I typed nothing into any editor, changed no setting and never pressed Resume. Captures are in `App/Variorum/DerivedData/vx562-walk/w4/` (gitignored); the names below are relative to it.
+
+**As found** (`a/a0-s.png`, `a/a1-s.png`, `a/a2-s.png`, `a/a2b-s.png`, `a/a2c-s.png`, `a/set0.png`, `a/tags0.png`):
+- Bookcase (Home): "All · starred · + shelf", no Welcome shelf, "No books yet", and the twelve-words offer card (left alone).
+- Library: 1 note, "The walk leaves a stone here: crossings, card,…".
+- Trash: the top row is "VX377 walk note" (4:33 PM, newest), then walk 3's 4:09 PM rows. The bottom row is "VX548 Book" (5:23 AM). I did not count it row by row (the AX count timed out), so the expected ~51 is unconfirmed.
+- Settings ▸ Tags: `walk` only.
+- **Settings ▸ General ▸ Appearance: Dark** (`appearanceChoice=dark`). Theme Study, palette Default. macOS stayed Light, and neither was touched.
+
+**What Help ▸ Restore the Sample Library minted** (pressed at 17:06:21 by its menu item; the start-up log reads `alreadySeeded` / `alreadySettled`, run.log:335–337):
+- The book "the adventures of sherlock holmes": 13 notes, 13 chapters, 105,335 words, **owned**, wearing `#classics #sherlock holmes` (`seed/bc1-s.png`).
+- The **Welcome** shelf, minted, with the book on it.
+- Two tags, `classics` and `sherlock holmes`.
+- The receipt was missed again. The Trash surface stayed on screen through the paced seed (`seed/sheet.png`), and this time the door did not navigate to the book. I opened it from the Bookcase, where it came up in Outline with every card folded (session-first open; `seed/open1-s.png`).
+
+**Legs:**
+- **1 — the clamp at the end: FAIL** (film `L1/end.mov`, 44 s; stills `L1/s01…s24`, sheets `L1/sheet1–4.png`, stacked pins `L1/pins.png`).
+  - Setup: from rest with all cards folded, I took 24 WalkKit wheel steps (`walk-scroll 890 533 1`: about 100 pt per step over 1.2 s, about 1.9 s apart with the still).
+  - s01–s19: the pin climbs from "note 1 of 13 · about this text" to "note 10 of 13 · The Adventure of the Engineer's Thumb", exactly one note per two steps. It never skips, never goes back and never runs ahead. The washed row is always the card owning the page's top.
+  - **s20–s24 are the bottom.** The page does not move across five steps, and "+ new note in this book" sits on the page. Noble Bachelor (11), Beryl Coronet (12) and Copper Beeches (13) are fully on the page. The pin and wash stay on **note 10, Engineer's Thumb**, of which only the card's last lines show at the top edge (`L1/s24-s.png`). That is the same bottom as walk 2's (A).
+  - **Repeated** with Blue Carbuncle unfolded (total 23,165 pt), wheeled to the end: the same bottom, note 10 (`L1/x2-s.png`).
+  - **Felt verdict:** all the way down to Engineer's Thumb, the descent reads as "the note I'm viewing". It is calm and keeps the same pace, and it never names a story below the one at the top, so the slide's race is gone. The end does not read right. At the bottom, three whole stories sit on the page and none of them is ever highlighted by scrolling. The highlight stays on a card I can barely see.
+  - **Hypotheses, untested (for the orchestrator).** The mounted end pins go red under H′ in the test host, so the clamp works there and something real-app-specific defeats it. One possibility is that `isAtTheBottom` never holds here: `travel − offset` stays above 8 at the true bottom, for example because `OutlineScrollFacts` counts an inset the page cannot actually reach. This held dev store's banner at the window's foot is one real-app difference from the test host worth ruling out. The other is that the last note's top is missing from `page.tops`, so `isOnScreen` fails. One DEBUG trace of `(offset, travel, viewport, tops[last note])` at the bottom would separate the two.
+- **2 — the 9-pt-up step: PREMISE NOT MET** (`L2/sheet.png`). With no clamp, the bottom already shows note 10. One phased tick (`phased-scroll … -9 1`) moved the page about 75 pt (pixel scrolls are accelerated) and the pin stayed on note 10. No 13 → 10 step could happen, so the felt verdict on that step is still owed.
+- **3 — the post-click release step: PASS** (`L3/sheetA.png`, `L3/sheetB.png`).
+  - I clicked Blue Carbuncle (note 8) in the navigator. From the first frame (0.3 s) the pin and wash were on note 8. The landing logged `target=15 … ms=1017 end=settled top=0` (run.log:405).
+  - Then one wheel step up (about 100 pt), with Blue Carbuncle's heading still on screen about 80 pt down. At 0.6 s and 2 s the pin read "note 7 of 13 · The Man with the Twisted Lip" with the wash on Twisted Lip. The page's top was Twisted Lip's card tail. The highlight stepped UP one note and never went ahead.
+  - **Felt verdict:** sane. It names what is at the top. The story I clicked sits unmarked just below, and that reads as "I scrolled off it", not as a glitch.
+- **4 — Outline → Index → Outline: PASS** (`L4/index-s.png`, `L4/back-s.png`).
+  - **"Modifying state during view update": 2**, both at 17:11:09.267, the Outline → Index departure. The return added **0**.
+  - **"OnScrollGeometryChange … multiple times per frame": 0** across the round trip.
+  - The one OSGC line in the whole session (17:06:47.598) came before any book was open, about 2 s after I left the Trash for the Bookcase after the seed. It is not the Outline's.
+  - The return landed on Blue Carbuncle (`ms=1032 end=settled top=0`, run.log:411): pin note 8, exactly one wash. The caret moved from block 3/214 to block 1/214 (walk 2's observation again).
+  - The "Invalid view geometry" hum: 256 lines.
+- **5 — quick regression: PASS.**
+  - (a) At rest: "book · 13 chapters · 13 notes", no position segment, no mark (`seed/open1-s.png`).
+  - (b) Follow and pin climb: leg 1's s01–s19 (`L1/pins.png`). The pin never dropped to the chapter-only form in 24 stills (no P-562-7 blink).
+  - (c) Caret ignored: I clicked into Blue Carbuncle's prose, and the note box read "editing · 8 of 13 · block 3/214". The click did not move the highlight, which stayed on note 7 with Twisted Lip's tail at the top. Then I wheeled about 3,000 pt up with no typing. The pin read "note 2 of 13 · A Scandal in Bohemia" with the wash on Scandal. Blue Carbuncle was unmarked while the note box still named it (`L5/c0-s.png`, `L5/c2-s.png`).
+
+**Removal** (17:13–17:15):
+- The book's Bookcase context menu → Delete Book… → the owned-book confirm → "Delete Book and Its 13 Notes" (`m/confirm-s.png`). Receipt: "Deleted "the adventures of sherlock holmes" and its 13 notes — they're in the Trash togeth…" (`m/deleted1-s.png`).
+- The Welcome chip's context menu → Delete Shelf… → "It holds no books…" → Delete Shelf. Receipt: "Deleted the shelf "Welcome"." (`m/shelfconfirm-s.png`, `m/shelfgone-s.png`).
+- Settings ▸ Tags: deleted `classics`, then `sherlock holmes`, each through its trash icon and the "Delete Tag?" confirm (`m/tagconfirm.png`, `m/tagconfirm2-s.png`). Settings was returned to General and closed.
+
+**Re-check against the as-found list:**
+- Bookcase "All · starred · + shelf · No books yet": matches (`end-banner-s.png`).
+- Library: 1 note, matches (`m/library-final-s.png`).
+- Tags: `walk` only, matches (`m/tags-final-s.png`).
+- Appearance: `dark`, matches (`m/set-general-final.png`, `defaults read`).
+- Trash: grew by exactly 14 rows stamped 5:13 PM (the book "and 13 notes" plus its 13 notes), above "VX377 walk note" (`m/trash-final-top2-s.png`). That is the expected growth.
+- *Observation, not this diff's:* entering the Trash first shows **"The Trash is empty."** for about 1.5 s before the list loads (`m/trash-final-top-s.png`, then `top2` 3 s later). It reads alarming.
+
+**Residue I did not remove (named):**
+- (1) The 14 new Trash rows. Put back returns the notes WITHOUT their two tags, because the tags are deleted.
+- (2) Tombstones for the Welcome shelf and the two tags (S2).
+*[removed for publication]*
+
+**Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I killed pid 91663 (`kill -TERM`, path verified with `ps`). At 17:16:10 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing.
