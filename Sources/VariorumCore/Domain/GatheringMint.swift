@@ -63,6 +63,12 @@ public enum GatheringMint {
         /// a nested group or legacy term, or another shape a fresh note
         /// can't be made to match by tagging and starring.
         case unreachableTerm
+        /// **VX-549 — the rule needs a STAR, and this door can't give one**
+        /// (`outcome(…, starrable: false)` only — the MCP door's `write new`
+        /// into a gathering: starring is not on the wire, a VX-368 parity item,
+        /// so a rule tagging alone can't satisfy refuses honestly — her sitting
+        /// 2026-10-27). Never met where the star is allowed (her own doors).
+        case needsStar
 
         /// The whole sentence the greyed door's hover says — and the op's
         /// refusal, word for word. ONE home for the words.
@@ -96,6 +102,12 @@ public enum GatheringMint {
                 "Its rule needs a kind of note, which a new note doesn't have."
             case .unreachableTerm:
                 "Its rule can't match a new note."
+            // VX-549 (PROVISIONAL wording, the run record's MORNING BUNDLE —
+            // her register: "Its rule needs #essays, which no longer exists."):
+            // said to a CLIENT, which can read the place — never the not-shared
+            // shape.
+            case .needsStar:
+                "Its rule needs a starred note, and only the author can star one."
             }
         }
     }
@@ -164,13 +176,47 @@ public enum GatheringMint {
     /// never undo it) needs no option. Every other rule — the NOT deferral,
     /// the any-of pick, the final check — reads the note the plan makes:
     /// what it wore, plus what the plan gives it.
+    ///
+    /// **`starrable` (VX-549):** whether this door can STAR the note. Her doors
+    /// can (the default — R-VX214-4, VX-249); the MCP door's `write new` into a
+    /// gathering cannot (starring is not on the wire), so with `false` a star
+    /// is no satisfiable option — an any-of group takes a tag option where it
+    /// has one. A rule this walk then blocks but the SAME walk with the star
+    /// allowed would plan answers `.blocked(.needsStar)` — the one honest why
+    /// (never `.unreachableTerm`, which would hide that a star is the gap):
+    /// "blocked without the star, planned with it" is the whole definition.
     public static func outcome(
         archived: Bool, finished: Bool, rule: RuleGrammar.ReadResult,
         tagIsLive: (String) -> Bool, deadTagPath: (String) -> String? = { _ in nil },
         tagCovers: (_ ruleTag: String, _ wornTag: String) -> Bool = { $0 == $1 },
         noteWears: (_ ruleTag: String) -> Bool = { _ in false },
         noteStarred: Bool = false,
-        noteMeetsLegacy: (RuleTerm) -> Bool? = { _ in nil }
+        noteMeetsLegacy: (RuleTerm) -> Bool? = { _ in nil },
+        starrable: Bool = true
+    ) -> Outcome {
+        let result = walk(
+            archived: archived, finished: finished, rule: rule, tagIsLive: tagIsLive, deadTagPath: deadTagPath,
+            tagCovers: tagCovers, noteWears: noteWears, noteStarred: noteStarred, noteMeetsLegacy: noteMeetsLegacy,
+            starrable: starrable)
+        guard !starrable, case .blocked(let blocker) = result, blocker != .needsStar else { return result }
+        if case .plan = walk(
+            archived: archived, finished: finished, rule: rule, tagIsLive: tagIsLive, deadTagPath: deadTagPath,
+            tagCovers: tagCovers, noteWears: noteWears, noteStarred: noteStarred, noteMeetsLegacy: noteMeetsLegacy,
+            starrable: true) {
+            return .blocked(.needsStar)
+        }
+        return result
+    }
+
+    /// The walk itself (`outcome`'s — see there for the rules).
+    private static func walk(
+        archived: Bool, finished: Bool, rule: RuleGrammar.ReadResult,
+        tagIsLive: (String) -> Bool, deadTagPath: (String) -> String?,
+        tagCovers: (_ ruleTag: String, _ wornTag: String) -> Bool,
+        noteWears: (_ ruleTag: String) -> Bool,
+        noteStarred: Bool,
+        noteMeetsLegacy: (RuleTerm) -> Bool?,
+        starrable: Bool
     ) -> Outcome {
         if archived { return .blocked(.archived) }
         if finished { return .blocked(.finished) }
@@ -208,14 +254,16 @@ public enum GatheringMint {
         }
         flatten(term)
 
-        /// A positive option a mint can take: the star, or a live tag.
+        /// A positive option a mint can take: the star (where this door can
+        /// star — VX-549), or a live tag.
         func satisfiable(_ atom: RuleTerm) -> Bool {
             switch atom {
-            case .star: true
+            case .star: starrable
             case .tag(let id): tagIsLive(id)
             default: false
             }
         }
+
 
         /// **The fresh note against a term — `ruleSQL`'s semantics exactly**,
         /// for the note the plan makes: it wears the planned tags and the
@@ -299,6 +347,9 @@ public enum GatheringMint {
             if alreadyMet(conjunct) { continue }
             switch conjunct {
             case .star:
+                // VX-549: a door that can't star leaves it unmet — the final
+                // check blocks, and `outcome` says whether the star was the gap.
+                guard starrable else { continue }
                 take(.star)
             case .tag(let id):
                 guard tagIsLive(id) else { return .blocked(.deadTag(path: deadTagPath(id))) }
@@ -353,5 +404,44 @@ public enum GatheringMint {
             return .blocked(.unreachableTerm)
         }
         return .plan(Plan(tagIDs: tagIDs, star: star))
+    }
+
+    // MARK: - VX-549: what TAGS alone can do (pure, on the rule grammar)
+
+    /// The planner over the rule ALONE — every tag it names taken as live (the
+    /// deliberate dead term `""` excepted: it matches nothing, forever), the
+    /// gathering open — so the answer is a property of the GRAMMAR, stable
+    /// while her tags come and go. The store-fed outcome (`Queries
+    /// .gatheringMintOutcome`) is the act's authority; this is the faces'.
+    static func grammarOutcome(_ term: RuleTerm, starrable: Bool) -> Outcome {
+        outcome(archived: false, finished: false, rule: .rule(term), tagIsLive: { !$0.isEmpty },
+                starrable: starrable)
+    }
+
+    /// **Can a new note be made to match this rule by TAGS alone?** (VX-549 —
+    /// the MCP door's `write new` into a gathering, where starring is not on
+    /// the wire.) True when the ONE planner, forbidden the star, still makes a
+    /// plan: tag terms are taken, an any-of group takes a tag option, and NOT
+    /// terms count as tag-satisfiable — a fresh note meets `NOT #x` (and
+    /// `NOT ★`) by not wearing it. False for a rule a star alone could satisfy
+    /// AND for one nothing could (`#a AND NOT #a`, legacy terms) — see
+    /// `needsStar` for the first.
+    public static func tagsCanSatisfy(_ term: RuleTerm) -> Bool {
+        if case .plan = grammarOutcome(term, starrable: false) { return true }
+        return false
+    }
+
+    /// **Does this rule need a STAR that only the author can give?** (VX-549 —
+    /// her sitting: "write_new on a rule tagging can't satisfy (star terms)
+    /// refuses honestly and the grant sheet presents such a grant as
+    /// read/suggest-shaped".) True exactly when the planner, forbidden the
+    /// star, blocks where the same planner with the star would plan
+    /// (`.needsStar`): a star conjunct, an any-of group whose only satisfiable
+    /// option is the star, a star the rule's NOTs leave as the only way in. nil
+    /// (no rule) is false — a rule-less gathering assembles empty for every
+    /// door alike.
+    public static func needsStar(_ term: RuleTerm?) -> Bool {
+        guard let term else { return false }
+        return grammarOutcome(term, starrable: false) == .blocked(.needsStar)
     }
 }

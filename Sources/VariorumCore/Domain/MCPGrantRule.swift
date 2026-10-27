@@ -11,7 +11,10 @@ import Foundation
 /// - **Rungs, cumulative:** read < suggest < write new < edit. A grant at a
 ///   rung covers every rung below it.
 /// - **Scopes:** a note · a book (its live member notes, as of now) · a wing
-///   (every note and book in it).
+///   (every note and book in it) · since VX-549 a GATHERING (the notes its
+///   rule ASSEMBLES at read time — the ONE membership function — so its reach
+///   moves with her tagging; her sitting 2026-10-27: "this is the feature,
+///   routing work to an agent by each tag").
 /// - **Durations:** once (consumed by the first content-bearing call it
 ///   authorizes) · while connected (revoked by the server when the client's
 ///   last connection closes, and swept at every server start) · always.
@@ -53,6 +56,10 @@ public enum MCPGrantRule {
 
     public enum ScopeKind: String, CaseIterable, Sendable {
         case note, book, wing
+        /// VX-549 (v1_33): a gathering's `reading.id` — the notes its rule
+        /// assembles now (`NoteFacts.gatheringIDs`), and the gathering itself
+        /// as a place (`decideGathering`).
+        case gathering
     }
 
     public enum Duration: String, CaseIterable, Sendable {
@@ -118,12 +125,23 @@ public enum MCPGrantRule {
         /// The live BOOKS it is a live member of (status 'member').
         public var bookIDs: Set<String>
         public var fence: Fence?
+        /// **VX-549 — the live GATHERINGS whose assembly holds it NOW**, among
+        /// the gatherings a live grant names (`Queries.mcpNoteFacts` asks each
+        /// such gathering's ONE membership function, `gatheringMembership`,
+        /// about exactly the notes being decided — never the corpus). An
+        /// archived, rule-less, malformed or fenced gathering assembles empty,
+        /// so it holds nothing here.
+        public var gatheringIDs: Set<String>
 
-        public init(id: String, wingID: String, bookIDs: Set<String> = [], fence: Fence? = nil) {
+        public init(
+            id: String, wingID: String, bookIDs: Set<String> = [], fence: Fence? = nil,
+            gatheringIDs: Set<String> = []
+        ) {
             self.id = id
             self.wingID = wingID
             self.bookIDs = bookIDs
             self.fence = fence
+            self.gatheringIDs = gatheringIDs
         }
     }
 
@@ -287,20 +305,27 @@ public enum MCPGrantRule {
 
     /// **A GATHERING's reach, and the standing behind it** (VX-185 — her
     /// report: gatherings never wore the shared icon "even when you've shared
-    /// the whole wing"; R-VX185-1: only a wing grant or the open book icons
-    /// one). Read OFF `decideGathering` exactly as `reach` is read off
-    /// `decide` — never a parallel rule: its `.allow(grantID:)` names the wing
-    /// grant (nil = the open book); anything else reaches nothing (a fenced
-    /// gathering, a note or book grant, another wing's grant). The rung is
-    /// READ — `decideGathering`'s one rung: a gathering holds nothing to
-    /// write, whatever the wing grant allows on the notes inside it.
+    /// the whole wing"; R-VX185-1: a note or book grant never icons one). Read
+    /// OFF `decideGathering` exactly as `reach` is read off `decide` — never a
+    /// parallel rule: from the top rung down, the first rung it allows (a
+    /// non-consuming probe — it spends nothing), its `.allow(grantID:)` naming
+    /// the grant (nil = the open book, read only). **VX-549 (her sitting
+    /// 2026-10-27 — the supersession of VX-273's facts-only rule, RATIFIED):**
+    /// a gathering is a place like a book — its OWN grant, or its wing's, at
+    /// that grant's rung (a client may write a new note INTO it, and edit its
+    /// members); before VX-549 this read was always READ ("a gathering holds
+    /// nothing to write").
     public static func reach(grants: [Grant], openBook: Bool, gathering: BookFacts) -> Reach? {
-        guard case .allow(let grantID, _) = decideGathering(
-            client: .approved, grants: grants, openBook: openBook, gathering: gathering)
-        else { return nil }
-        guard let grantID else { return Reach(rung: .read, standing: .openBook) }
-        guard let grant = grants.first(where: { $0.id == grantID }) else { return nil }
-        return Reach(rung: .read, standing: .grant(grant))
+        for rung in Rung.allCases.reversed() {
+            guard case .allow(let grantID, _) = decideGathering(
+                client: .approved, grants: grants, openBook: openBook, gathering: gathering,
+                rung: rung, consumes: false)
+            else { continue }
+            guard let grantID else { return Reach(rung: rung, standing: .openBook) }
+            guard let grant = grants.first(where: { $0.id == grantID }) else { continue }
+            return Reach(rung: rung, standing: .grant(grant))
+        }
+        return nil
     }
 
     /// **ONCE: ONE WRITE MEANS ONE WRITE** (AF-7 AS AMENDED at the U2
@@ -345,20 +370,28 @@ public enum MCPGrantRule {
         return .ask(.notShared, offersAlways: true)
     }
 
-    /// **A GATHERING — read facts under WING-LEVEL reach** (13n-c VX-273, her
-    /// ruling: "granting a wing grants access to everything … unless it's
-    /// deliberately marked private"; gatherings "do NOT become separate grant
-    /// targets"). A gathering is never a grant's scope, so only wing-level
-    /// reach on ITS wing reaches it — `decideWing`'s own READ: a live wing grant
-    /// on that wing at any rung, or the open book. A note or book grant never
-    /// does. Always at READ (a gathering holds nothing to write) and never
-    /// consuming (its facts and its assembly spend no once grant); every MEMBER
-    /// it shows is then decided on its own through `decide`, so the per-note
-    /// fence filters it. A FENCED gathering — a 'daily' marker or a Private
-    /// stamp, which no op mints on one but a stale row could carry — matches
-    /// nothing, the same decision a fenced book gets (the one answer).
+    /// **A GATHERING as a PLACE** — its listing, its assembly (`list_notes`,
+    /// `search`, `show_in_app` by its id) and, since VX-549, a new note
+    /// written INTO it (`create_note` / `import_document` with its id).
+    ///
+    /// History: 13n-c VX-273 (her ruling: "granting a wing grants access to
+    /// everything … unless it's deliberately marked private"; gatherings "do
+    /// NOT become separate grant targets") made a gathering read facts under
+    /// wing-level reach only. **VX-549 SUPERSEDES that facts-only rule (her
+    /// sitting 2026-10-27, RATIFIED — "Gathering joins the grant scopes"):** a
+    /// gathering is reached by a live grant on IT, or on ITS WING (the reach a
+    /// wing grant has on a book in it), at that grant's rung — the least that
+    /// suffices (`best`), a once grant spent exactly as `decide` spends one
+    /// (AF-7) — or by the open book at READ. A note or book grant never reaches
+    /// it (R-VX185-1 stands). Its MEMBERS are decided one by one through
+    /// `decide` (their `NoteFacts.gatheringIDs`), so the per-note fence still
+    /// filters each. A FENCED gathering — a 'daily' marker or a Private stamp,
+    /// which no op mints on one but a stale row could carry — matches nothing,
+    /// the decision a fenced book gets (the one answer). Defaults: READ,
+    /// non-consuming (every pre-VX-549 caller byte-identical).
     public static func decideGathering(
-        client: ClientState?, grants: [Grant], openBook: Bool, gathering: BookFacts
+        client: ClientState?, grants: [Grant], openBook: Bool, gathering: BookFacts,
+        rung: Rung = .read, consumes: Bool = false
     ) -> Decision {
         switch client {
         case .approved: break
@@ -366,8 +399,19 @@ public enum MCPGrantRule {
         case .pending, nil: return .refuse(.clientPending)
         }
         if let fence = gathering.fence { return .ask(.fenced(fence), offersAlways: false) }
-        return decideWing(
-            client: client, grants: grants, openBook: openBook, wingID: gathering.wingID, rung: .read)
+        let reaching = grants.filter { grant in
+            grant.isLive
+                && ((grant.scopeKind == .gathering && grant.scopeID == gathering.id)
+                    || (grant.scopeKind == .wing && grant.scopeID == gathering.wingID))
+        }
+        if let grant = best(reaching.filter { $0.rung >= rung }) {
+            return .allow(grantID: grant.id, consumesOnce: spends(grant, rung: rung, consumes: consumes))
+        }
+        if openBook, rung == .read { return .allow(grantID: nil, consumesOnce: false) }
+        if let highest = reaching.map(\.rung).max() {
+            return .ask(.rungTooLow(granted: highest), offersAlways: true)
+        }
+        return .ask(.notShared, offersAlways: true)
     }
 
     /// Does this grant's SCOPE reach the target? The fence lives here: a
@@ -384,6 +428,8 @@ public enum MCPGrantRule {
             case .note: return grant.scopeID == note.id
             case .book: return note.bookIDs.contains(grant.scopeID)
             case .wing: return grant.scopeID == note.wingID
+            // VX-549: a member of the gathering's assembly NOW (the facts say).
+            case .gathering: return note.gatheringIDs.contains(grant.scopeID)
             }
         case .book(let book):
             guard book.fence == nil else { return false }
@@ -391,6 +437,9 @@ public enum MCPGrantRule {
             case .note: return false
             case .book: return grant.scopeID == book.id
             case .wing: return grant.scopeID == book.wingID
+            // VX-549: a gathering grant reaches its assembled NOTES, never a
+            // book (the note-or-book-never-icons-a-gathering rule's mirror).
+            case .gathering: return false
             }
         }
     }
@@ -400,7 +449,8 @@ public enum MCPGrantRule {
     /// when something else already covers the call), always before while
     /// connected — then, AMONG EQUALS, the LEAST capability that suffices
     /// (AF-9, the U2 ladder's O2): the lowest rung first, the narrowest
-    /// scope second (note < book < wing), the smaller id last as pure
+    /// scope second (note < book < gathering < wing — VX-549: a gathering is a
+    /// rule's subset of one wing), the smaller id last as pure
     /// determinism. F4's amendment made WHICH once grant a write consumes
     /// matter; an id coin-flip could spend a once-write-new grant on a
     /// suggest-level write while a once-suggest grant sat unspent.
@@ -416,7 +466,8 @@ public enum MCPGrantRule {
             switch kind {
             case .note: 0
             case .book: 1
-            case .wing: 2
+            case .gathering: 2
+            case .wing: 3
             }
         }
         return grants.min { lhs, rhs in

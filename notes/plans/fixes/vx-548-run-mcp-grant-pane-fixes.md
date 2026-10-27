@@ -1009,13 +1009,24 @@ build-for-testing` into `DerivedData/b3` only — no `xcodebuild test`, no GUI, 
 
 - **No behavioural revert is in flight.**
 - **Preflight:** DONE (this commit).
-- **1 · Schema (`v1_33_mcp_gathering_grants`, its own commit):** NOT-STARTED — the local-only family's `mcp_grant`
-  rebuilt with `scope_kind` gaining `'gathering'` (SQLite cannot alter a CHECK: v1_18's rebuild road), rows copied
-  verbatim, both indexes re-made identical; no sync, no mirror, no lockstep.
-- **2 · The decide layer:** NOT-STARTED — `ScopeKind.gathering`; `NoteFacts.gatheringIDs` derived in `mcpNoteFacts`
-  through `gatheringMembership` (the ONE membership function) for the gatherings a live grant names; `reaches` /
-  `best` / `decideGathering(rung:consumes:)` / `reach(gathering:)` grown; `GatheringMint` learns `starrable:` and the
-  pure `tagsCanSatisfy`.
+- **1 · Schema (`v1_33_mcp_gathering_grants`, its own commit):** DONE (`b783533c9`) — the local-only family's
+  `mcp_grant` rebuilt with `scope_kind` gaining `'gathering'` (a CHECK cannot be altered — v1_18's road): rows AND rowids
+  copied verbatim, both indexes re-made with their text unchanged; no sync, no mirror, no lockstep (marker 14). Pins
+  `MCPGatheringGrantSchemaTests` (4): RED ON OLD 3 of 4 (`scratchpad/b3-logs/schema-red.log` — the CHECK refused
+  'gathering'; the rows-exact guard green both sides by nature), green after; MigrationTests/MCPGrantSchemaTests green.
+- **2 · The decide layer:** DONE (this commit) — `ScopeKind.gathering`; `NoteFacts.gatheringIDs` derived in
+  `Queries.mcpNoteFacts` through `gatheringMembership` (the ONE membership function) for exactly the gatherings a live
+  grant names, page-driven (`mcpGatheringMembersSQL`); `reaches` (a gathering grant reaches its assembled notes, never
+  a book), `best` (note < book < gathering < wing), `decideGathering(rung:consumes:)` (its own grant or its wing's at the
+  grant's rung — W1, PROVISIONAL MB-16), `reach(gathering:)` read off it at every rung; `insertMCPGrant` names a live
+  unfenced gathering; `mcpScopeTitle` / `mcpGrantInertFence` / `MCPReachPlace.isOwn` learn it; `GatheringMint.outcome`
+  learns `starrable:` + `Blocker.needsStar` ("blocked without the star, planned with it"), and the pure
+  `GatheringMint.tagsCanSatisfy` / `needsStar` on the grammar. Pins: `MCPGatheringGrantDecideTests` (7) ·
+  `GatheringTagsSatisfyTests` (3, the unit table) · the VX-185 rule/face pins FLIPPED DELIBERATELY
+  (`MCPGatheringReachRuleTests.theTable`/`itAgreesWithDecideGatheringEverywhere`,
+  `MCPGatheringReachTests.aWingGrantIconsTheWingsGatheringsAndNamesTheWing` — the rung is the grant's, not "read
+  whatever its rung"; R-VX185-1 kept) · `MCPGrantRuleTests.theBoundaryHoldsOverEveryGrantShape` extended to the new
+  scope (a justified edit). Core MCP/gathering suites 492/82 green (`core-mcp-1.log`). Behavioural revert: PENDING.
 - **3 · The wire:** NOT-STARTED.
 - **4 · The faces:** NOT-STARTED.
 - **5 · Suites + Mac build-for-testing:** NOT-STARTED.

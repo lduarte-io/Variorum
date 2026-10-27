@@ -298,11 +298,16 @@ struct MCPGrantRuleTests {
     @Test func theBoundaryHoldsOverEveryGrantShape() {
         var worlds = 0
         let fences: [Rule.Fence?] = [nil, .journal, .privateMark]
+        // VX-549 (A JUSTIFIED EDIT — the sweep grows with the grammar): the
+        // GATHERING scope joins every grant shape, the target assembled by one
+        // of the two (`gatheringIDs`), so the five invariants hold over it too.
         let scopeIDs: [Rule.ScopeKind: [String]] = [
             .note: ["note-1", "note-2"], .book: ["book-A", "book-B"], .wing: ["", "wing-X"],
+            .gathering: ["gathering-G", "gathering-H"],
         ]
         for fence in fences {
-            let target = Rule.NoteFacts(id: "note-1", wingID: "", bookIDs: ["book-A"], fence: fence)
+            let target = Rule.NoteFacts(
+                id: "note-1", wingID: "", bookIDs: ["book-A"], fence: fence, gatheringIDs: ["gathering-G"])
             for kind in Rule.ScopeKind.allCases {
                 for scope in scopeIDs[kind]! {
                     for gRung in Rule.Rung.allCases {
@@ -329,7 +334,7 @@ struct MCPGrantRuleTests {
                 }
             }
         }
-        #expect(worlds == 3 * 6 * 4 * 3 * 2 * 2 * 2 * 4 * 2)
+        #expect(worlds == 3 * 8 * 4 * 3 * 2 * 2 * 2 * 4 * 2)
     }
 
     private func check(
@@ -345,6 +350,7 @@ struct MCPGrantRuleTests {
             case .note: return g.scopeID == target.id
             case .book: return target.bookIDs.contains(g.scopeID)
             case .wing: return g.scopeID == target.wingID
+            case .gathering: return target.gatheringIDs.contains(g.scopeID)
             }
         }()
         switch d {

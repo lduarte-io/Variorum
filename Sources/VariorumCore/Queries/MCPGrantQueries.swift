@@ -305,6 +305,11 @@ extension Queries {
             (target, fence) = (.book(facts), facts.fence)
         case .wing:
             return nil
+        case .gathering:
+            // VX-549: a gathering grant reaches nothing while its gathering is
+            // fenced (`decideGathering`'s own first clause — the one answer a
+            // fenced book gets); no op fences a gathering, a stale row could.
+            return try mcpGatheringFacts(db, readingID: grant.scopeID)?.fence
         }
         guard let fence, !MCPGrantRule.reaches(grant.ruleGrant, target) else { return nil }
         return fence
@@ -345,7 +350,9 @@ extension Queries {
             return DisplayTitle.note(
                 title: row["title"], entryDate: row["entry_date"], createdAt: row["created_at"],
                 calendar: calendar)
-        case .book:
+        case .book, .gathering:
+            // VX-549: a gathering's name, as the Bookcase shows it (a book and
+            // a gathering are one table — the id names one kind).
             return try String.fetchOne(
                 db, sql: "SELECT name FROM reading WHERE id = ? AND deleted_at IS NULL", arguments: [id])
         case .wing:
@@ -493,15 +500,76 @@ extension Queries {
             let postID: String = row["post_id"]
             facts[postID]?.bookIDs.insert(row["reading_id"])
         }
+        try mcpGatheringMemberships(db, into: &facts)
         return facts
+    }
+
+    /// **VX-549 — which GRANTED gatherings assemble each of these notes NOW**
+    /// (her sitting 2026-10-27, RATIFIED: "reach is resolved by assembling the
+    /// rule at read time"). The gatherings asked are exactly those a LIVE grant
+    /// names (any client's — the facts are the store's, the rule then reads
+    /// only the asking client's grants through `reaches`); each is asked
+    /// through THE ONE membership function its own surfaces assemble by
+    /// (`gatheringMembership` — the wing, the rule, the hide-owned exclusion,
+    /// living unarchived posts), never a parallel evaluation. A gathering that
+    /// assembles EMPTY — archived, rule-less, malformed (the function's nil) —
+    /// or that is FENCED (a stale Private stamp or 'daily' marker; no op mints
+    /// either on a gathering) holds nothing here, so its grant reaches no note.
+    ///
+    /// P1: one read of the live gathering grants (∝ her own grants — a
+    /// handful); per granted gathering, its row, its fence and ONE statement
+    /// over exactly the notes being decided (the page-driven `CROSS JOIN` — the
+    /// id list drives, each note a primary-key seek): ∝ the notes decided × the
+    /// granted gatherings, never the corpus. With no gathering granted, one
+    /// read and nothing else.
+    private static func mcpGatheringMemberships(
+        _ db: Database, into facts: inout [String: MCPGrantRule.NoteFacts]
+    ) throws {
+        guard !facts.isEmpty else { return }
+        let granted = try String.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT scope_id FROM mcp_grant
+                WHERE scope_kind = 'gathering' AND revoked_at IS NULL
+                  AND NOT (duration = 'once' AND consumed_at IS NOT NULL)
+                ORDER BY scope_id
+                """)
+        guard !granted.isEmpty else { return }
+        let json = String(decoding: try JSONEncoder().encode(facts.keys.sorted()), as: UTF8.self)
+        for gatheringID in granted {
+            guard let reading = try Reading.fetchOne(db, key: gatheringID), reading.deletedAt == nil,
+                  reading.kind == .gathering,
+                  try mcpGatheringFacts(db, readingID: gatheringID)?.fence == nil,
+                  let membership = try gatheringMembership(db, reading)
+            else { continue }
+            let members = try String.fetchAll(
+                db, sql: mcpGatheringMembersSQL(membership.conditions),
+                arguments: StatementArguments([json] + membership.arguments))
+            for id in members { facts[id]?.gatheringIDs.insert(gatheringID) }
+        }
+    }
+
+    /// The membership statement over a page of notes (split out so the P1 pin
+    /// reads the shipped text): the id list DRIVES (`CROSS JOIN` keeps
+    /// `json_each` outside — the house's page-driven shape, `smartMembershipSQL`'s
+    /// measured reason), each note a primary-key seek, then the gathering's
+    /// own conditions (`gatheringMembership`). First placeholder: the ids as
+    /// a JSON array; then the conditions' arguments.
+    static func mcpGatheringMembersSQL(_ conditions: [String]) -> String {
+        """
+        SELECT j.value FROM json_each(?) j
+        CROSS JOIN container c ON c.id = j.value
+        WHERE \(conditions.joined(separator: " AND "))
+        """
     }
 
     public static func mcpNoteFacts(_ db: Database, noteID: String) throws -> MCPGrantRule.NoteFacts? {
         try mcpNoteFacts(db, noteIDs: [noteID])[noteID]
     }
 
-    /// A BOOK's facts — live books only (a gathering is not a grant target in
-    /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is THE daily Journal (its
+    /// A BOOK's facts — live books only (a gathering answers through
+    /// `mcpGatheringFacts` — its own scope kind since VX-549, never a book's
+    /// road). Fenced when it is THE daily Journal (its
     /// 'daily' marker — VX-163: a journal-TRAIT book is not) or carries the
     /// Private mark (R-13nb-4).
     public static func mcpBookFacts(_ db: Database, readingID: String) throws -> MCPGrantRule.BookFacts? {
@@ -587,7 +655,7 @@ extension Queries {
     /// not exclude (THE daily Journal and a Private book are never a grant's
     /// scope — the op refuses them, so the sheet never offers them; P-2; a
     /// journal-TRAIT book IS offered since VX-163), by name. Gatherings are
-    /// not grant targets (P-13nb-U1-4; VX-273 keeps them so). Author-scale.
+    /// offered beside them since VX-549 (`mcpGrantableGatherings`). Author-scale.
     ///
     /// **13n-c U2 — the facts it carries, and their cost (P1, said exactly):**
     /// one statement over the library's live books; each book's shown-member

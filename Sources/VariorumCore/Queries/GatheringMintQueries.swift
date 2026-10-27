@@ -15,8 +15,12 @@ extension Queries {
     /// What minting a note inside this gathering would take, or why it can't.
     /// `reading` must be a live GATHERING (the caller's guard — a book's
     /// door is `newPostInReading`'s, never this).
+    ///
+    /// `starrable` (VX-549): `false` for a door that cannot star the note —
+    /// the MCP door's `write new` into a gathering (`GatheringMint.outcome`'s
+    /// own parameter; her doors keep the default).
     public static func gatheringMintOutcome(
-        _ db: Database, reading: Reading
+        _ db: Database, reading: Reading, starrable: Bool = true
     ) throws -> GatheringMint.Outcome {
         let rule = RuleGrammar.read(reading.querySpec)
         var facts = RuleTagFacts()
@@ -25,7 +29,8 @@ extension Queries {
         }
         return GatheringMint.outcome(
             archived: reading.archivedAt != nil, finished: reading.locked, rule: rule,
-            tagIsLive: facts.isLive, deadTagPath: facts.deadPath, tagCovers: facts.covers)
+            tagIsLive: facts.isLive, deadTagPath: facts.deadPath, tagCovers: facts.covers,
+            starrable: starrable)
     }
 
     /// **VX-249 — what collecting THIS existing note into the gathering
