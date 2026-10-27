@@ -60,7 +60,7 @@ nonisolated enum BookOutlineViewed {
 
         /// Nothing viewed — the title block is on screen, the book is empty,
         /// or the Outline is not showing.
-        static let none = Pair()
+        static let nothingViewed = Pair()
     }
 
     /// **How far below the viewport's top edge the probe sits** — the
@@ -102,7 +102,7 @@ nonisolated enum BookOutlineViewed {
         rows: [BookOutlineRows.Row], tops: [String: CGFloat], probe: CGFloat = probe
     ) -> Pair {
         var chapter: String?
-        var viewed = Pair.none
+        var viewed = Pair.nothingViewed
         for row in rows {
             switch row {
             case .chapter(let section): chapter = section.id
@@ -116,7 +116,7 @@ nonisolated enum BookOutlineViewed {
             case .unfiledHeading, .tagHeading:
                 // A group heading that is not a chapter names no chapter and
                 // no note — the page's top is a heading between notes.
-                viewed = .none
+                viewed = .nothingViewed
             case .note(let entry):
                 viewed = Pair(sectionID: chapter, postID: entry.postID)
             }

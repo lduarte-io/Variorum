@@ -1615,7 +1615,7 @@ struct BookView: View {
     /// The Outline left: its page is gone, so is what it was showing.
     private func forgetViewedPair() {
         landingBox.rowTops = [:]
-        model.noteOutlineViewed(.none)
+        model.noteOutlineViewed(.nothingViewed)
     }
 
     /// **THE ONE LANDING AUTHORITY** (13u2b UNIT 2 — `Surface/LandingAuthority.swift`).
@@ -2929,7 +2929,7 @@ private struct OutlinePinnedLine: View {
     /// The viewed pair's words — empty while nothing is viewed.
     private var position: String {
         let pair = model.viewedOutlinePair
-        guard pair != .none else { return "" }
+        guard pair != .nothingViewed else { return "" }
         return BookOutlineViewed.positionLine(
             pair: pair,
             rows: BookView.outlineRows(structure: structure, entries: model.entries),

@@ -54,7 +54,7 @@ struct BookOutlineViewedTests {
             "chapter-s1": 120, "page-a": 170, "page-b": 280, "chapter-s2": 390,
             "page-c": 440, "unfiled": 16_900, "page-d": 16_950,
         ]
-        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == .none)
+        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == .nothingViewed)
     }
 
     /// The case the Outline's own `topRow` rule gets wrong: a story far
@@ -111,14 +111,14 @@ struct BookOutlineViewedTests {
         #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == Pair(postID: "d"))
         tops["unfiled"] = 0
         tops["page-d"] = 50
-        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == .none,
+        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == .nothingViewed,
                 "the unfiled heading at the top: no chapter, no note")
     }
 
     /// A book with no notes has no rows, and nothing is viewed.
     @Test func anEmptyBookViewsNothing() {
-        #expect(BookOutlineViewed.pair(rows: [], tops: [:]) == .none)
-        #expect(BookOutlineViewed.pair(rows: [], tops: ["page-x": -100]) == .none,
+        #expect(BookOutlineViewed.pair(rows: [], tops: [:]) == .nothingViewed)
+        #expect(BookOutlineViewed.pair(rows: [], tops: ["page-x": -100]) == .nothingViewed,
                 "a stale top for a row the column no longer has is never read")
         #expect(BookOutlineViewed.viewedIndex(tops: []) == nil)
     }
@@ -211,7 +211,7 @@ struct BookOutlineViewedTests {
                 "under the in-book filter the place is unknown and omitted (W-3's rule)")
         #expect(say(Pair(sectionID: "s2", postID: "c"), true, false, true)
                 == "note 3 of 4+ \u{B7} chapter two", "a windowed book's count is a floor")
-        #expect(say(.none, true, false, false) == "", "nothing viewed, nothing said")
+        #expect(say(.nothingViewed, true, false, false) == "", "nothing viewed, nothing said")
         #expect(BookPanelCopy.unfiled == "unfiled")
     }
 

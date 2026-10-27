@@ -1294,7 +1294,7 @@ final class BookViewModel {
     /// already report (`BookOutlineViewed`'s rule, coalesced to one
     /// derivation per run-loop turn, frozen while a landing travels) and
     /// written ONLY through `noteOutlineViewed`; read by the navigator's marks
-    /// and the Outline's pinned line. `.none` whenever the Outline is not
+    /// and the Outline's pinned line. `.nothingViewed` whenever the Outline is not
     /// showing, the title block holds the page, or the book is empty.
     ///
     /// **A report, never a decision, and it reaches nothing else** — not the
@@ -1302,7 +1302,7 @@ final class BookViewModel {
     /// authority this must never touch), not `pendingReveal`, not a landing's
     /// aim. Observed, because the marks and the pin draw it; written only on
     /// a CHANGE, so a scroll that stays inside one note re-renders nothing.
-    private(set) var viewedOutlinePair = BookOutlineViewed.Pair.none
+    private(set) var viewedOutlinePair = BookOutlineViewed.Pair.nothingViewed
 
     /// The Outline's report of what its page is showing. Equality-gated
     /// against the slot ITSELF (the sink's own state, never a reporter's
