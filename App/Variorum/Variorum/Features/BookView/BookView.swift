@@ -920,47 +920,20 @@ struct BookView: View {
                     .id("nav-noop")
                 }
                 Spacer(minLength: 4)
-                if structure.reading?.kind == .book {
-                    Button(tokens.chromeLabel("+ new chapter")) {
-                        chapterNameField = ""
-                        newChapterPresented = true
-                    }
-                    .buttonStyle(.borderless)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    // Round 2, MINOR: the recovery door lives HERE too —
-                    // deleting the ONLY chapter leaves no section row to
-                    // hang the context menu off.
-                    if !structure.deletedSections.isEmpty {
-                        Button(tokens.chromeLabel("restore deleted chapter")) {
-                            Task { await structure.restoreLastDeletedChapter() }
-                        }
-                        .buttonStyle(.borderless)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                    }
-                    // Round 3, MINOR: no entry door on a FINISHED book
-                    // (additive — the model's in-closure gate covers the
-                    // concurrent-lock race the hidden button can't).
-                    if Queries.hasJournalTrait(structure.reading?.profile),
-                       structure.reading?.locked != true {
-                        Button(tokens.chromeLabel("+ new entry")) {
-                            mint(.entry, reveal: false)
-                        }
-                        .buttonStyle(.borderless)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                    } else if structure.reading?.kind == .book,
-                              structure.reading?.locked != true {
-                        // Sitting 9 (R62/R75): "it needs to be easy to make
-                        // a post inside of a book" — the non-journal door.
-                        Button(tokens.chromeLabel("+ new note")) {
-                            mint(.note, reveal: false)
-                        }
-                        .buttonStyle(.borderless)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                        .help("A new note born inside this book — no drag needed")
+                if let reading = structure.reading, reading.kind == .book {
+                    // VX-553 (the VX-439 run — her words: "'restore deleted
+                    // chapter' can NOT be in between new note and new chapter
+                    // at the bottom of a book"): the foot's doors in ONE
+                    // order, as data (`BookFootDoors.book`) — the two everyday
+                    // mints side by side, the recovery door after them and set
+                    // apart. Each door's words, act and condition are
+                    // unchanged; only the order and the gap are new.
+                    ForEach(BookFootDoors.book(
+                        journalTrait: Queries.hasJournalTrait(reading.profile),
+                        finished: reading.locked,
+                        hasDeletedChapters: !structure.deletedSections.isEmpty
+                    ), id: \.self) { door in
+                        footDoor(door)
                     }
                 }
                 if structure.reading?.kind == .gathering {
@@ -1296,6 +1269,55 @@ struct BookView: View {
         switchMode(to: .outline)
         model.requestChapterReveal(revealSectionID)
         onRevealSectionConsumed?()
+    }
+
+    // MARK: - VX-553 — the book foot's doors, one per case
+
+    /// One of a BOOK's navigator-foot doors (the order is `BookFootDoors`').
+    @ViewBuilder
+    private func footDoor(_ door: BookFootDoor) -> some View {
+        switch door {
+        case .newChapter:
+            Button(tokens.chromeLabel("+ new chapter")) {
+                chapterNameField = ""
+                newChapterPresented = true
+            }
+            .buttonStyle(.borderless)
+            .font(tokens.small)
+            .foregroundStyle(tokens.accent)
+        case .newEntry:
+            // Round 3, MINOR: no entry door on a FINISHED book (additive —
+            // the model's in-closure gate covers the concurrent-lock race the
+            // hidden button can't; `BookFootDoors` drops it when finished).
+            Button(tokens.chromeLabel("+ new entry")) {
+                mint(.entry, reveal: false)
+            }
+            .buttonStyle(.borderless)
+            .font(tokens.small)
+            .foregroundStyle(tokens.accent)
+        case .newNote:
+            // Sitting 9 (R62/R75): "it needs to be easy to make a post inside
+            // of a book" — the non-journal door.
+            Button(tokens.chromeLabel("+ new note")) {
+                mint(.note, reveal: false)
+            }
+            .buttonStyle(.borderless)
+            .font(tokens.small)
+            .foregroundStyle(tokens.accent)
+            .help("A new note born inside this book — no drag needed")
+        case .restoreChapter:
+            // Round 2, MINOR: the recovery door lives HERE too — deleting the
+            // ONLY chapter leaves no section row to hang the context menu off.
+            // VX-553: after the everyday pair, never between it, with the
+            // gap that says it is a different kind of door.
+            Button(tokens.chromeLabel("restore deleted chapter")) {
+                Task { await structure.restoreLastDeletedChapter() }
+            }
+            .buttonStyle(.borderless)
+            .font(tokens.small)
+            .foregroundStyle(tokens.muted)
+            .padding(.top, BookFootDoors.recoveryGap)
+        }
     }
 
     // MARK: - VX-570 — the book's ONE mint act (the foot's doors and ⌥⌘N)
@@ -3177,3 +3199,35 @@ nonisolated enum BookViewCopy {
     // gathering lesson.)
 }
 
+// MARK: - VX-553 — THE BOOK FOOT'S ORDER (data, so a pin can read it)
+
+/// One door at a BOOK's navigator foot (a gathering's foot is its own:
+/// "+ new chapter" as the bind offer, then the planner's note door).
+nonisolated enum BookFootDoor: Hashable, Sendable {
+    case newChapter, newEntry, newNote, restoreChapter
+}
+
+/// **The book foot's doors, in order** (VX-553, the VX-439 run — A-439-5;
+/// her words: "'restore deleted chapter' can NOT be in between new note and
+/// new chapter at the bottom of a book — that's so annoying, def the wrong
+/// place for it"). The two everyday mints stand side by side — "+ new
+/// chapter", then "+ new entry" on a journal-trait book or "+ new note" on
+/// any other (neither on a FINISHED book, Round 3's rule) — and the recovery
+/// door, drawn only while a deleted chapter waits, comes AFTER them, set
+/// apart by `recoveryGap`. The surface has no overflow or settings door that
+/// holds chapter acts, so "after, set apart" is its existing idiom (the
+/// implementer's pick A-439-5 asked for).
+nonisolated enum BookFootDoors {
+    /// The extra space above the recovery door — the foot's own row gap
+    /// doubled, enough to read as a second group without a rule line.
+    static let recoveryGap: CGFloat = 6
+
+    static func book(
+        journalTrait: Bool, finished: Bool, hasDeletedChapters: Bool
+    ) -> [BookFootDoor] {
+        var doors: [BookFootDoor] = [.newChapter]
+        if !finished { doors.append(journalTrait ? .newEntry : .newNote) }
+        if hasDeletedChapters { doors.append(.restoreChapter) }
+        return doors
+    }
+}

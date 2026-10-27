@@ -182,7 +182,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     behavioral revert (the note files back to `exportPost`) turned the new pin red with 13 issues (no header, tags lost,
     titles from the file name, takes dropped); restored by `git checkout` of the committed file (no revert in flight).
   - VX-554: DONE at her word (2026-10-27, in-session — the Ledger): no code; R-439-F554's disposition stands.
-  - VX-570: DONE (this line's commit) — `.newNoteInBook` "New Note in This Book" ⌥⌘N (book scope; File ▸ beside New
+  - VX-570: DONE (`6da767d65`) — `.newNoteInBook` "New Note in This Book" ⌥⌘N (book scope; File ▸ beside New
     Note, ⌘K; the book foot's and Outline flow's "+ new note"/"+ new entry" declared as its `.surface` renderers at
     last), gated on the new `CapabilityContext.focusedPaneShowsBook` (wired in `RootView.wireWorkspace` to the key
     window's focused selection); `ShellActions.newNoteInThisBook` parks a `ShellRouter.BookMintRequest` (a fresh token
@@ -195,7 +195,13 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     focused book's, a place speaks the note; a book mints a focused member; a gathering mints the planner's tagged note
     and holds nothing; a finished book refuses in the op's words and mints nothing) — build-for-testing GREEN; the
     suite run PENDING the stage window.
-  - VX-553: NOT-STARTED — settled design: the foot's order as data (`BookFootDoors`), restore last and set apart.
+  - VX-553: DONE (this line's commit) — a BOOK's navigator foot renders from ONE ordered table, `BookFootDoors.book
+    (journalTrait:finished:hasDeletedChapters:)`: "+ new chapter", then "+ new entry"/"+ new note" (none on a finished
+    book — Round 3's rule), then "restore deleted chapter" (only while one waits) LAST, set apart by `recoveryGap` (6 pt
+    over the foot's row gap). A-439-5's pick: "after, set apart" — the foot has no overflow/settings door that holds
+    chapter acts. Each door's words, act and condition unchanged (`footDoor(_:)`, one case per door). Design row: pin
+    `BookFootDoorsTests` (2: the order per state; restore never between the mint pair, always last, gap > 0) + the
+    walk's capture (the orchestrator's) — build-for-testing GREEN; the suite run PENDING the stage window.
   - VX-552: NOT-STARTED — settled design: `QuickEntryBar` (both hosts — Bookcase + Library) wears the current wing's name
     as a muted label, from the host's `WingsModel.currentName` (call C-552-1: shown with one wing too — "always").
   - VX-332: NOT-STARTED — settled design: every autofocus mount takes the waiting/never-steal opening road; the one-shot
