@@ -100,7 +100,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 | 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | **ACCEPTED** (window vx548-b1-walk: Mac suites 141/12 green, zero skips; orchestrator walk green — ORCHESTRATOR ACCEPTANCE, BATCH 1) |
 | 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | BUILT (headless green, red-on-old verified incl. two behavioural reverts; Mac pins compiled into `DerivedData/b2a`) — Mac run + faces walk ride the MID WINDOW after 2b — BATCH 2a RECORD |
 | 2b — the disconnect story | VX-394 | opus-implementer №3 | BUILT (headless green, red-on-old verified 3/6; the sweep table 12 roads — 2 FIXED, 9 PINNED-GREEN, 1 safe; App Nap NOT built; reconnect options for her; Mac pins compiled into `DerivedData/b2b`, run rides the MID WINDOW) — BATCH 2b RECORD |
-| 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | IN FLIGHT (spawned while vx548-mid waits behind VX-502's merge-gate window — the orchestrator's re-weigh: the un-run evidence is Mac FACE pins; batch 3 builds on the headless-green decide layer, so the isolation gate yielded to the overnight clock; the windows may fold into one end claim) |
+| 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | BUILT (headless green, red-on-old by construction + two behavioural reverts — decide 6/7, wire 7/9; the VX-273/VX-185 pins flipped deliberately; Mac pins compiled into `DerivedData/b3`, run rides the stage) — BATCH 3 RECORD |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
 
 ---
@@ -279,6 +279,33 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
   are where it shows). Option: the status line carries the live count ("running · 1 client connected" / "running · no
   client connected"). Not built.
 - **MB-15 (the orchestrator's evidence call, for her eyes):** batch 2b's optional Castle lock GUI leg was SKIPPED — a live Castle walk trips [cyber] on Fable (the standing safeguard), and the Mac pin `everyRoadThatClosesTheLibrarySaysEachConnectionsEndOnceThroughTheProductionTeardown` drives every lock road (crossing · Lock Now · idle · sleep) on a real Castle library through the production teardown factory, which the orchestrator judges sufficient evidence of the lock-road drop lines. If you want the GUI confirmation too it is a 5-second ⌃⌘L on any Castle library (Activity then shows "…locked or closed"), or an Opus-hand walk leg at the next window.
+- **MB-16 (PROVISIONAL, batch 3 — VX-549's W1):** a gathering as a PLACE is reached by its own grant OR its WING's
+  grant at that grant's rung (as a book is), so a wing write-new grant may write a new note into a gathering of its wing
+  (no new reach — it could already mint in the wing and tag) and the shared icon on a gathering under a wing grant says
+  the wing grant's rung (VX-185's "read, whatever the wing grant's" flipped). Alternative (b): wing grants keep reading a
+  gathering as facts at READ only; writing into it takes a gathering grant (a wing-grant `create_note` into a gathering
+  then refused with a worded sentence). Ratify or redirect.
+- **MB-17 (PROVISIONAL, batch 3 — MB-10's question answered):** an ask on a gathering keys as its READING (`.book(id)`):
+  the gathering rows' existing glyph marks it, no new `MCPAskTarget` case, no face change. Alternative (b): a
+  `.gathering(id)` target, every gathering face asking with it (more faces, same pixels).
+- **MB-18 (offer, batch 3 — not built):** a gathering's own place doors — Book Settings' "Shared with" row + Share… on a
+  gathering, a gathering row menu's Share with AI… — are not built ("expand no other road"); the grant sheet's WHERE (and
+  Change… / Share another place…) is its road. Say the word and they ride (the P-1 registry's `.mcpShareBook` family).
+- **MB-19 (copy, her pass — batch 3):** the new words, all PROVISIONAL: the sheet's "A gathering", "“X” — the notes its
+  rule gathers now, as your tags change", the star why ("Its rule needs a starred note, and only you can star one — so a
+  client can read and suggest here, but not write new or edit."), the row footing "read and suggest only", the archived
+  note; the confirm's clause ", including notes its rule gathers later"; the write-new rung sentence; the wire refusal
+  "Its rule needs a starred note, and only the author can star one."; the guide's places card and fourth card;
+  `MCPSession.instructions`' "A gathering grant reaches the notes its rule gathers now; create_note into one applies
+  its tags." (2,988/3,000); the list_books / create_note / import_document description sentences. They join VX-234's
+  copy list.
+- **MB-20 (rider candidates, batch 3 — traced, not built):** `duplicate_note {book_id: <gathering>}` and
+  `add_note_to_book {book_id: <gathering>}` answer the one not-shared shape even to a client that can read the gathering
+  (the VX-273-era posture: the book road, unchanged). Honest options: a worded "a gathering holds no notes — tag the
+  note instead" refusal where the client can read it, or the wire's collect road (R98's apply-what-the-rule-needs on an
+  existing note — `collectPostIntoSmartReading`, without the star). A VX-368 parity item; never seated without her word.
+- **MB-21 (design note, batch 3):** the sheet's gathering rows carry no note count (an assembly per gathering, at sheet
+  open — the books' count is a membership read); the Bookcase's own gathering counts exist if she wants them there.
 - (Batch records may append more.)
 
 ## LEDGER
@@ -290,7 +317,7 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
 | 3 | Batch 1 (VX-516 · VX-515 · VX-512) | opus-implementer №1 | BUILT — `d0e7f1302` core · `965a05521` app; Mac run + walk PENDING (BATCH 1 RECORD, "For the orchestrator") |
 | 4 | Batch 2a (VX-352 · VX-354 · VX-365 · VX-358) | opus-implementer №2 | BUILT — `15f94f154` VX-365 · `4d3f3f3d1` VX-358 · `3e1aaa26f` VX-352 · `e3d46b202` VX-354; Mac run + walk PENDING (BATCH 2a RECORD, "For the orchestrator") |
 | 5 | Batch 2b (VX-394) | opus-implementer №3 | BUILT — `fcf13b569` pins (red) · `bf8fa207d` fixes (green); Mac run + walk PENDING (BATCH 2b RECORD, "For the orchestrator") |
-| 6 | Batch 3 (VX-549) | opus-implementer №4 | NOT STARTED |
+| 6 | Batch 3 (VX-549) | opus-implementer №4 | BUILT — `b783533c9` schema · `0883d80c6` decide · `cc73fc8cf`/`45cb7ee93` wire · `18f46f182`/`1dfc1818f`/`66096499e` faces; Mac run + walk PENDING (BATCH 3 RECORD, "For the orchestrator") |
 | 7 | Orchestrator acceptance walks (stage via coordinator) | orchestrator | NOT STARTED |
 | 8 | The ladder (whole-run diff, fable-reviewer) | orchestrator | NOT STARTED |
 | 9 | Closeout + handoff + QUESTIONS #243 | orchestrator | NOT STARTED |
@@ -989,7 +1016,14 @@ MB-14 (the status line's client count).
 
 ## BATCH 3 RECORD
 
-**NOT DONE BY THIS BATCH (first line, by the rule):** IN PROGRESS — this line is rewritten at the batch's close.
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
+claim (the orchestrator's) — the Mac pins (`MCPGatheringGrantFacesTests` ×6 new; the justified edits and deliberate
+flips listed below) are written and COMPILED (`build-for-testing` into `DerivedData/b3`), their RUN PENDING the
+orchestrator's stage window; NO place doors for a gathering (Book Settings' Shared-with row, a row menu's Share
+with AI… — the grant sheet's WHERE is its road, "expand no other road": MB-18); `duplicate_note` / `add_note_to_book`
+with a gathering's id keep their not-shared answer (MB-20); no canon edit (MCPSpec's superseding lines are DRAFTED
+below for the closeout, not applied); nothing in `Sync/`, `Server/`, custody, the synced schema or the editor seam
+(the migration is the LOCAL-ONLY grants family's).
 
 *Implementer: `opus-implementer` №4 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
 code: CLAUDE.md + its canon, this plan IN FULL (the BATCH 3 BRIEF and HER SITTING), `notes/MCPSpec.md` IN FULL,
@@ -1001,65 +1035,249 @@ the VX-549 ticket body (her sitting, read-only), AppSpec §7's reading/`query_sp
 `Operations/Operations+SmartCollect.swift` (`newPostInGathering` — the human door the wire mirrors),
 `Operations/Operations+MCPGrants.swift`, `Operations/Operations+MCPWrites.swift`, `Persistence/MCPGrantSchema.swift` +
 `Migrations.swift` (v1_24 → v1_32), `VariorumMCP/MCPGrantAuthority.swift`, `MCPReadTools.swift`, `MCPWriteTools.swift`,
-`MCPWriteSupport.swift`, and the VX-273 pins (`MCPWingReachServerTests`, `MCPGatheringReachRuleTests`). Lane: no
-`Sync/`, `Server/`, custody, synced schema or editor seam; headless `swift build`/`swift test` + `xcodebuild
-build-for-testing` into `DerivedData/b3` only — no `xcodebuild test`, no GUI, no stage.*
+`MCPWriteSupport.swift`, `MCPToolCatalog.swift`, `MCPSession.swift`, and the VX-273 / VX-185 pins. Lane: headless
+`swift build`/`swift test` + `xcodebuild build-for-testing` into `DerivedData/b3` only (cloned from `b2b` by APFS
+clone; `b2b` untouched — the build refused to touch paths outside its root). No subagent.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.**
-- **Preflight:** DONE (this commit).
-- **1 · Schema (`v1_33_mcp_gathering_grants`, its own commit):** DONE (`b783533c9`) — the local-only family's
-  `mcp_grant` rebuilt with `scope_kind` gaining `'gathering'` (a CHECK cannot be altered — v1_18's road): rows AND rowids
-  copied verbatim, both indexes re-made with their text unchanged; no sync, no mirror, no lockstep (marker 14). Pins
-  `MCPGatheringGrantSchemaTests` (4): RED ON OLD 3 of 4 (`scratchpad/b3-logs/schema-red.log` — the CHECK refused
-  'gathering'; the rows-exact guard green both sides by nature), green after; MigrationTests/MCPGrantSchemaTests green.
-- **2 · The decide layer:** DONE (this commit) — `ScopeKind.gathering`; `NoteFacts.gatheringIDs` derived in
-  `Queries.mcpNoteFacts` through `gatheringMembership` (the ONE membership function) for exactly the gatherings a live
-  grant names, page-driven (`mcpGatheringMembersSQL`); `reaches` (a gathering grant reaches its assembled notes, never
-  a book), `best` (note < book < gathering < wing), `decideGathering(rung:consumes:)` (its own grant or its wing's at the
-  grant's rung — W1, PROVISIONAL MB-16), `reach(gathering:)` read off it at every rung; `insertMCPGrant` names a live
-  unfenced gathering; `mcpScopeTitle` / `mcpGrantInertFence` / `MCPReachPlace.isOwn` learn it; `GatheringMint.outcome`
-  learns `starrable:` + `Blocker.needsStar` ("blocked without the star, planned with it"), and the pure
-  `GatheringMint.tagsCanSatisfy` / `needsStar` on the grammar. Pins: `MCPGatheringGrantDecideTests` (7) ·
-  `GatheringTagsSatisfyTests` (3, the unit table) · the VX-185 rule/face pins FLIPPED DELIBERATELY
-  (`MCPGatheringReachRuleTests.theTable`/`itAgreesWithDecideGatheringEverywhere`,
-  `MCPGatheringReachTests.aWingGrantIconsTheWingsGatheringsAndNamesTheWing` — the rung is the grant's, not "read
-  whatever its rung"; R-VX185-1 kept) · `MCPGrantRuleTests.theBoundaryHoldsOverEveryGrantShape` extended to the new
-  scope (a justified edit). Core MCP/gathering suites 492/82 green (`core-mcp-1.log`). BEHAVIOURAL REVERT RUN
-  (`decide-revert-red.log`; the facts derivation a no-op + `decideGathering` without the gathering's own grant): 6 of 7
-  decide pins red, 18 issues (the op pin green — the revert left the op); restored by `git checkout --`, green again.
-- **3 · The wire:** DONE (`cc73fc8cf` WIP + `45cb7ee93` pins) — `MCPGrantAuthority.decide(gathering:rung:consumes:)`;
-  no ask on a fenced gathering; `list_books`' prefilter takes gathering grants; `list_notes()` candidates take each
-  granted gathering's assembly; `search`'s reached scopes take standing gathering grants; `create_note` /
-  `import_document` (one document) take a gathering's id in `book_id` (`into(…, admitsGathering: true)` →
-  `intoGathering`: the PLACE decided at write new; refused rows logged as the BOOK id sent; the ask raised ON the
-  gathering) → `Operations.MCPNoteDestination.gathering` (her door's refuse-before-mint planner with `starrable: false`,
-  the rule's tags through `insertPostTag`, the belt, ONE undo); `MCPWireRefusalCopy` words `smartFilterUnsatisfiable`
-  as her door's own sentence; `everyScope`, `list_books`, `create_note`, `import_document` list under a gathering grant;
-  descriptions + `MCPSession.instructions` (2,988 ≤ 3,000, measured) name the gathering; the guide's two cards
-  (PROVISIONAL copy). FLIPPED DELIBERATELY: `MCPWingReachServerTests.aGatheringStaysNoGrantsScopeAndNoWritesTarget` →
-  `aGatheringIsAGrantScopeAndANewNotesTargetButNoBookStill`, `MCPAdviceServerTests`' VX-273 clause,
-  `TutorialMCPChapterTests`' fourth-card pins. Pins `MCPGatheringGrantServerTests` (9) green (`wire-green-1.log`);
+- **No behavioural revert is in flight.** (Two revert runs, each over a committed state and restored by `git
+  checkout --`, `git diff` clean after: the decide layer's over `0883d80c6`, the wire's over `45cb7ee93`.)
+- **Preflight:** DONE (`dd1c3fb6c`).
+- **1 · Schema (`v1_33_mcp_gathering_grants`, its own commit):** DONE (`b783533c9`).
+- **2 · The decide layer:** DONE (`0883d80c6`; the bound-gathering title `1dfc1818f`).
+- **3 · The wire:** DONE (`cc73fc8cf` + `45cb7ee93`).
+- **4 · The faces:** DONE (`18f46f182`; the Mac icon pin's flip `66096499e`).
+- **5 · Suites + Mac build-for-testing:** DONE — counts under "Suites" below. **PENDING:** the Mac pins' run (the stage).
+
+### THE DESIGN, as built (the decisions the brief left to the build)
+
+1. **The schema (v1_33, local-only).** `mcp_grant.scope_kind`'s CHECK gains `'gathering'` (`scope_id` = the
+   gathering's `reading.id`). SQLite cannot alter a CHECK, so the table is REBUILT on v1_18's road: every row copied
+   with its `rowid` (Shared with AI orders one stamp's act by `rowid`; ⌥⌘A's newest-grant tiebreak reads it), the two
+   indexes re-made with their v1_24 / v1_30 text byte-unchanged. Nothing references `mcp_grant` (no FK, no trigger).
+   `uq_mcp_grant_standing_place` keys a place as client × KIND × id, so a gathering is one more place under VX-393's
+   one standing row with no change — proven by test (one standing per client × gathering; a once beside it; another
+   client's; the same id string under another kind).
+2. **The membership — the ONE function, assembled at read.** `MCPGrantRule.NoteFacts` gains `gatheringIDs`: the
+   live gatherings, among those a live grant NAMES (any client's — the facts are the store's; the rule reads only the
+   asking client's grants), whose assembly holds the note NOW. `Queries.mcpNoteFacts` derives it (its one derivation
+   site) by asking each granted gathering's `gatheringMembership` — the very conditions `assembleReading` and the
+   search composer read (wing, rule, hide-owned, living unarchived posts) — over exactly the notes being decided:
+   `mcpGatheringMembersSQL`, page-driven (`json_each` CROSS JOIN, each note a PK seek — plan-pinned). An archived,
+   rule-less or malformed gathering (the function's nil) or a FENCED one (a stale Private stamp / 'daily' marker — no
+   op mints either on a gathering) holds nothing, so its grant reaches no note. P1: one read of the live gathering
+   grants (∝ her grants); per granted gathering its row, its fence, ONE statement over the ids decided; with no
+   gathering granted, one read and nothing else (pinned by statement capture).
+3. **The rule.** `reaches`: a gathering grant reaches a note iff the facts name it (the fence first — a fenced note is
+   reached ONLY by a per-ask note grant, so every fence key wins: the Private MARK, its own or through a Private book;
+   ⌘J entries; the daily Journal's members — all answering the one not-shared shape; a tag named "private" is just a
+   tag — pinned); a gathering grant never reaches a book. `best`: note < book < gathering < wing. **The PLACE**
+   (`decideGathering(rung:consumes:)`, defaults READ / non-consuming so every old caller is byte-identical): its OWN
+   grant or its WING's grant at that grant's rung (the least that suffices, once spent per AF-7), or the open book at
+   READ; a note or book grant never (R-VX185-1 kept); fenced → the one answer. **W1 — PROVISIONAL MB-16:** a wing
+   grant reaches a gathering place at ITS rung, as it reaches a book (so a wing write-new grant may write a new note
+   into a gathering of its wing — no new reach: it could already mint in the wing and tag), flipping VX-185's "read,
+   whatever the wing grant's". `reach(gathering:)` is read off it at every rung.
+4. **write_new (her door's shape, without the star).** `create_note` and `import_document`'s one-document form take a
+   gathering's id in `book_id` (`MCPWriteTools.into(…, admitsGathering: true)` → `intoGathering`; `create_section` and
+   `set_book_rule` keep the book road). The PLACE is decided at write new (consuming); refused, it answers EXACTLY as a
+   book id does (`MCPRefusalCopy`'s `.book` noun — the client sent `book_id`, and a hidden gathering must read as a
+   missing id), its row logged as the BOOK id sent (`list_my_activity` never tells hidden from missing — pinned), the
+   just-in-time ask raised ON the gathering where it exists unfenced. Allowed, the act is
+   `Operations.MCPNoteDestination.gathering` inside `mintNoteEntry`'s ONE transaction: her door's refuse-before-mint
+   (`Queries.gatheringMintOutcome(…, starrable: false)` — the ONE planner, `newPostInGathering`'s), the note minted
+   bookless in the gathering's wing (live-or-Home), the plan's tags through `insertPostTag` (the ONE application road —
+   living books hear them, pinned), then the document's own header tags, then the belt (`matchesRule` — a header tag can
+   break a NOT; a miss unwinds the whole mint), ONE client-named undo (`registerMintedContainerEntry`). The answer is
+   VX-252's shape exactly (`note_id`, `block_ids`, `tag_ids`, `tags`, `blocks` — no key more), `tags` VX-361's listing
+   (header first, then the rule's). Activity logs the landed act on the gathering ("made the note “X”").
+5. **The star (her ruling).** `GatheringMint.outcome` learns `starrable:` (default true — her doors byte-unchanged) and
+   `Blocker.needsStar`, defined as "blocked without the star, PLANNED with it" (a wrapper re-runs the walk with the star
+   allowed), so `(★ OR #a) AND NOT #a` is a star rule while `★ AND NOT ★` is unreachable. With the star forbidden an
+   any-of group takes a TAG option where it has one (`★ OR #a` lands wearing #a on the wire — pinned). The pure
+   functions on the grammar: `GatheringMint.tagsCanSatisfy(term)` (the planner with every tag live, the star
+   forbidden; NOT terms count as tag-satisfiable — a fresh note meets `NOT #x` and `NOT ★`) and `needsStar(term)` —
+   the unit table `GatheringTagsSatisfyTests`. The wire's refusal is her door's sentence through the ONE chain
+   (`MCPWireRefusalCopy` words `smartFilterUnsatisfiable` as its `reason`, R-13n-4's "exactly as they speak to you"):
+   "Its rule needs a starred note, and only the author can star one." — never the not-shared shape, nothing minted, the
+   once grant unspent, no ask (pinned). Every other blocker speaks her door's words too ("Archived — unarchive it to add
+   notes." — pinned).
+6. **The wire's reads.** `list_books`' prefilter takes gathering grants (the gathering lists, counted through the
+   per-note fence); `list_notes(book_id: gathering)` and `search(book_id: …)` already went through `decideGathering`
+   (now its own grant too); `list_notes()` takes each granted gathering's assembly as candidates; `search`'s reached
+   scopes take a standing gathering grant outside the reached wings (a note it assembles is not searched again on its
+   own note grant's scope); `list_wings` is untouched (a gathering grant lists no wing — pinned empty). The catalog:
+   `everyScope` gains `.gathering` (every note-acting tool acts on its members), `list_books` / `create_note` /
+   `import_document` list under it; the book-only acts do not (P-2).
+7. **The faces.** The grant sheet's WHERE: "A note · A book · A gathering · A wing" — the gathering on the same
+   `SearchPicker` (`MCPGrantPicker.gatheringArrangements`: Starred quick, then a–z; each row's footing: a non-Home
+   wing, its shelf, "archived", and "read and suggest only" where its rule needs a star). A star-rule gathering offers
+   read and suggest only (`MCPGrantPicker.offeredRungs(needsStar:)`), with `MCPPaneCopy.starRuleWhy` under HOW MUCH;
+   an archived one says it gathers nothing until unarchived. Spec, confirmed place, receipt place, prefill
+   (`MCPGrantPrefill.gathering`, `.place(of:)` — ONE switch every Change… road reads), VX-516's keep-or-drop rule on
+   the new kind (pinned). The shared icon: a directly granted gathering through the grown `decideGathering`
+   (`mcpBookReaches` — rows drawn only, nothing read with no approved client, unchanged gates), its own grant named as
+   no "through"; member note rows through the one `decide`, the why naming the gathering (core-pinned). Core read for
+   the sheet: `Queries.mcpGrantableGatherings` (live, unfenced; `needsStar`, `archived`; no note count — that would be
+   an assembly). **The ask's key (MB-10's question) — PROVISIONAL MB-17:** an ask on a gathering keys as its READING,
+   `.book(id)` (`MCPAskQueue.target`) — the key every reading row's glyph already asks with (the Bookcase's and
+   Library's gathering rows, the Book Panel's gatherings line) — so no new `MCPAskTarget` case and no face change;
+   `askStanding`, `durations(for:)` (a fenced gathering offers nothing) and the ask copy (title, reach line, fenced
+   lead, receipt) learn it. Copy for the kind chip, the write-new rung sentence ("it can also make new notes in it,
+   wearing the tags its rule needs, and apply tags" — the W-UX-14 truth pin extended to the new scope), the live-reach
+   clause (", including notes its rule gathers later"), the inert detail, Activity's fallback noun. The field guide's
+   two cards (lesson 3's places card and its fourth card) and `MCPSession.instructions` name the gathering grant
+   (PROVISIONAL copy, MB-19). **`MCPSession.instructions` = 2,988 characters (measured), ≤ 3,000** — the delta fit
+   inside the sentences this change owns (no trim of anyone else's).
+8. **A bound gathering** (bound into a book — `convertSmartReadingToCurated`): its grant reaches nothing (a gathering
+   grant never reaches a book; the facts read the kind) and its place reads gone (`mcpScopeTitle(.gathering)` checks the
+   kind) — pinned; the un-bind brings it back.
+
+### THE DELIBERATE FLIPS (VX-273's facts-only rule, superseded — her sitting 2026-10-27, RATIFIED; each cites it in its comment)
+
+| Pin | Was | Now |
+|---|---|---|
+| `MCPWingReachServerTests.aGatheringStaysNoGrantsScopeAndNoWritesTarget` (wire) → renamed `aGatheringIsAGrantScopeAndANewNotesTargetButNoBookStill` | no grant may name a gathering; `create_note` into one under a wing EDIT grant answered "as a book that isn't there" | a grant NAMES it (its own kind — the book road still refuses its id); `create_note` into it LANDS wearing the rule's tag (W1, MB-16); `add_note_to_book` on it still answers as no book |
+| `MCPAdviceServerTests` (the advice's tool names + facts) | "A wing grant also reads that wing's gatherings … none is ever granted alone"; names `list_books`; "a note, a book or a wing" | "A gathering grant reaches the notes its rule gathers now; create_note into one applies its tags."; names `create_note`; "a note, a book, a gathering or a wing" |
+| `TutorialMCPChapterTests` (Mac, compiled) | the fourth card "a gathering is never shared on its own: no grant may name one" (truth leg `#expect(throws:)`) | the card teaches the gathering grant; truth: a grant NAMES it and "follows your tags" (tag in → reached, untag → out) |
+| `MCPGatheringReachRuleTests.theTable` / `.itAgreesWithDecideGatheringEverywhere` (core) | a gathering's reach is READ "whatever its rung" | the grant's rung (own or wing); the agreement grid read at every rung, the pool grown with gathering grants (8,192 worlds) |
+| `MCPGatheringReachTests.aWingGrantIconsTheWingsGatheringsAndNamesTheWing` (core) | the icon's rung `.read` under a wing edit / write-new grant | the wing grant's rung (`.edit`, `.writeNew`) |
+| `MCPGatheringIconTests` (Mac, compiled) | the popover says "(read)" / "read · always" under a wing edit grant | the wing grant's rung's words |
+
+Justified edits (not flips — the sweep or the scope set grows): `MCPGrantRuleTests.theBoundaryHoldsOverEveryGrantShape`
+(the gathering scope joins every grant shape; 3·8·… worlds) · `MCPAskAndReceiptTests` (the W-UX-14 truth pin's scope
+loops + `.gathering`) · `MCPWireRefusalSweepTests` (`smartFilterUnsatisfiable` now reachable and worded: 33→32 unspoken,
+75→76 walked) · `MCPShareFacesTests` (messages only: the gathering's place doors are unbuilt, MB-18 — the
+assertions hold as they were).
+
+### PINS (red-on-old evidence)
+
+- **Schema** `Tests/VariorumCoreTests/MCPGatheringGrantSchemaTests.swift` (4): `aStoreBeforeTheGatheringPlaceKeepsEveryGrantRowExactly`
+  (rows + rowids + both indexes' text exact across v1_33; FK check clean) · `theFamilyStaysLocalOnlyAndTheMarkerStays` ·
+  `theCheckAdmitsAGatheringAndStillRefusesAnythingElse` · `theStandingPlaceIndexHoldsAGatheringAsOnePlaceUnchanged`.
+  RED ON OLD (`scratchpad/b3-logs/schema-red.log`, the migration's registration reverted): 3 of 4, the CHECK refusing
+  'gathering'; the rows-exact guard green both sides by nature.
+- **Decide** `Tests/VariorumCoreTests/MCPGatheringGrantDecideTests.swift` (9): `aGatheringGrantReachesItsAssemblyAndMovesWithHerTagging`
+  · `theFactsAgreeWithTheAssemblyNoteForNote` (the ONE function, across subtree / other-wing twin / ★ rule / hide-owned)
+  · `everyFenceKeyWinsAndTheFenceIsTheMarkNeverATagNamedPrivate` · `aGatheringThatAssemblesEmptyReachesNothingAndADeadOneToo`
+  (archived, rule-less, malformed, fenced, bound, dead) · `theGrantOpNamesAGatheringAndRefusesWhatIsNotOne` (VX-393 on
+  the new kind; inert under a fence) · `thePlaceIsReachedByItsOwnGrantOrItsWingsAtTheRungNeverANoteOrBookGrant` ·
+  `theSheetsOfferIsEveryUnfencedGatheringWithItsStarShape` · `aGrantedGatheringAndItsMembersWearTheMarkThroughTheOneRule`
+  · `theMembershipReadIsPageDrivenAndAbsentWithNoGatheringGrant` (P1: statement capture + query plan). Red on old by
+  construction (no gathering scope); BEHAVIOURAL REVERT RUN (`decide-revert-red.log`: the facts derivation a no-op +
+  `decideGathering` without the gathering's own grant): 6 of the then-7 red, 18 issues; restored, green.
+- **The pure table** `Tests/VariorumCoreTests/GatheringTagsSatisfyTests.swift` (3): `theTable` (22 rules × tags-can-satisfy
+  × needs-a-star, never both) · `herDoorsStillStarAndNeverSayNeedsStar` · `theWirePlanTakesATagWhereHerDoorWouldStar`.
+- **Wire** `Tests/VariorumMCPTests/MCPGatheringGrantServerTests.swift` (9): `aGatheringGrantReadsListsAndSearchesItsAssemblyAndNothingElse`
+  · `suggestActsOnAMemberAndANoteOutsideTheRuleAnswersAsMissing` · `editAppliesToMemberNotesThroughTheExistingGuardsAndStopsWhenTheNoteLeaves`
+  · `writeNewMintsBooklessInTheWingWearingTheRulesTagsWithOneClientNamedUndo` · `importDocumentIntoAGatheringWearsTheHeadersTagsThenTheRules`
+  · `aRuleThatNeedsAStarRefusesWriteNewInWordsAndWritesNothing` · `aStarOrATagRuleTakesTheTagOnTheWire` ·
+  `aWriteIntoAGatheringPastTheRungAsksOnItAndAHiddenOneAnswersAsMissing` ·
+  `anArchivedGatheringReachesNothingAndRefusesTheMintInHerWordsAndADeadOneIsGone`. Red on old by construction;
   BEHAVIOURAL REVERT RUN (`wire-revert-red.log`: `intoGathering` bypassed, `list_books`' prefilter without gathering
-  ids, the refusal arm off): 7 of 9 red, 15 issues (suggest/edit green — the decide layer, reverted on its own above);
-  restored, green.
-- **4 · The faces:** DONE (this commit) — the grant sheet's WHERE grows "A gathering" on the same `SearchPicker`
-  (`MCPGrantPicker.gatheringArrangements` — Starred, then a–z; each row's footing: wing, shelf, archived, "read and
-  suggest only"); a star-rule gathering offers read and suggest only with `MCPPaneCopy.starRuleWhy`
-  (`MCPGrantPicker.offeredRungs(needsStar:)`); spec / confirmedPlaces / receipt place / prefill / Change… on its own
-  place (`MCPGrantPrefill.gathering`, `.place(of:)`); the ask road keys a gathering ask as its READING
-  (`MCPAskQueue.target` → `.book(id)` — PROVISIONAL MB-17); `askStanding` / `durations(for:)` learn it; the pane's and
-  ask sheet's distinguishers ride the books' map; copy for the kind chip, rung detail, live-reach clause, inert detail,
-  the ask's reach line and fenced lead, Activity's fallback noun. Core reads for the faces:
-  `Queries.mcpGrantableGatherings` (+ `MCPGrantPlaces.gatherings`, `place(_:)`, `gatheringDistinguishers`). Pins: Mac
-  `MCPGatheringGrantFacesTests` (6, compiled), core `MCPGatheringGrantDecideTests` +2 (the sheet's offer; the icon on a
-  granted gathering and its members' rows) green; justified edits `MCPAskAndReceiptTests` (the truth pin's scope loops
-  + gathering), `MCPWireRefusalSweepTests` (`smartFilterUnsatisfiable` now spoken: 33→32 unspoken, 75→76 walked),
-  `MCPShareFacesTests` (messages only — the place doors stay unbuilt, MB-18). Mac `build-for-testing` into
-  `DerivedData/b3`: TEST BUILD SUCCEEDED (`mac-bft3.log`; the one MCPGrantPicker warning is pre-existing). Mac RUN
-  PENDING (the orchestrator's stage).
-- **5 · Suites + Mac build-for-testing:** NOT-STARTED.
+  ids, the refusal arm off): 7 of 9 red, 15 issues (suggest/edit green — they live on the decide layer, reverted on its
+  own); restored, green.
+- **Mac** `App/Variorum/VariorumTests/MCPGatheringGrantFacesTests.swift` (6, COMPILED, RUN PENDING):
+  `aGatheringPickedIsAGatheringGrantOnItsOwnPlace` · `changeOnAGatheringGrantReplacesOnlyOnItsOwnPlace` ·
+  `aStarRuleGatheringOffersReadAndSuggestOnlyWithTheWhy` · `theGatheringPickerIsStarredThenAToZWithEachRowsFooting` ·
+  `anAskOnAGatheringKeysAsItsReading` · `theWordsAGatheringGrantWears`. Red on old by construction.
+
+### Files touched
+
+Core: `Persistence/MCPGrantSchema.swift` (`v1_33DDL`) · `Persistence/Migrations.swift` (`v1_33_mcp_gathering_grants`) ·
+`Domain/MCPGrantRule.swift` (`ScopeKind.gathering`, `NoteFacts.gatheringIDs`, `reaches`, `best`, `decideGathering`,
+`reach(gathering:)`) · `Domain/GatheringMint.swift` (`starrable:`, `needsStar`, the wrapper, `tagsCanSatisfy`,
+`needsStar(_:)`) · `Queries/GatheringMintQueries.swift` (`starrable:`) · `Queries/MCPGrantQueries.swift`
+(`mcpGatheringMemberships`, `mcpGatheringMembersSQL`, `mcpScopeTitle`, `mcpGrantInertFence`, `MCPGrantableGathering`,
+`mcpGrantableGatherings`) · `Queries/MCPGrantPlaces.swift` (`gatherings`, `place(_:)`, `gatheringDistinguishers`) ·
+`Queries/MCPShareQueries.swift` (`isOwn`, docs) · `Operations/Operations+MCPGrants.swift` (the gathering scope) ·
+`Operations/Operations+MCPWrites.swift` (`MCPNoteDestination.gathering`, the mint's gathering arm). Wire:
+`VariorumMCP/MCPGrantAuthority.swift` · `MCPReadTools.swift` · `MCPWriteTools.swift` (`admitsGathering`,
+`intoGathering`) · `MCPWriteSupport.swift` (the refusal words) · `MCPToolCatalog.swift` (`everyScope`, three tools'
+scopes and descriptions) · `MCPSession.swift` (the instructions). App: `Core/Views/MCPShareRoad.swift` ·
+`Core/Views/MCPSharedIcon.swift` · `Features/MCP/MCPGrantSheet.swift` · `MCPGrantPicker.swift` · `MCPPaneCopy.swift` ·
+`MCPDoor.swift` · `MCPDoor+Share.swift` · `MCPAskQueue.swift` · `MCPAskSheet.swift` · `MCPPane.swift` ·
+`Features/BookView/BookPanelView.swift` + `BookSettingsSheet.swift` (comments) · `Features/Tutorial/TutorialSeeder.swift`
+(the two cards). Tests: the four new files above; edits to `MCPGrantRuleTests`, `MCPGatheringReachRuleTests`,
+`MCPGatheringReachTests`, `MCPWingReachServerTests`, `MCPAdviceServerTests`, and Mac `TutorialMCPChapterTests`,
+`MCPAskAndReceiptTests`, `MCPWireRefusalSweepTests`, `MCPShareFacesTests`, `MCPGatheringIconTests`. Commits:
+`dd1c3fb6c` · `b783533c9` · `0883d80c6` · `cc73fc8cf` · `45cb7ee93` · `18f46f182` · `1dfc1818f` · `66096499e` · this
+record's commit.
+
+### Suites (the end, on the final code `66096499e`)
+
+- **The whole headless run** (`scratchpad/b3-logs/headless-all.log`): VariorumCoreTests **3462 tests / 463 suites
+  passed** (5 known issues, standing) — batch 2b's 3446/460 + this batch's 16/3; StringsWorkbook **32 / 4 passed**;
+  VariorumMCPTests **411 / 75 with ONE issue — the standing VX-532 flake**
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 20.2 s under the
+  full-parallel run; no harness line changed), green ISOLATED ×2 (`harness-isolated-1/2.log`: 3/1, 2.2 s) — batch 2b's
+  402/74 + this batch's 9/1.
+- **Mac:** `build-for-testing` into `DerivedData/b3` — **TEST BUILD SUCCEEDED** (`mac-bft5.log`, the final tree); no
+  warning in a touched file (the `MCPGrantPicker.swift` `durations(connected:)` isolation warning is pre-existing — it
+  stood at :201 in batch 2b's log). **PENDING:** the Mac pins' run (the stage).
+
+### Canon owed at the closeout (DRAFTED for the closeout — not applied; the two-file rule)
+
+- **MCPSpec, the grants sentence:** "per CLIENT × SCOPE (note · book · wing)" → "per CLIENT × SCOPE (note · book ·
+  gathering · wing — v1_33, VX-549)".
+- **MCPSpec, replacing VX-273's clause** ("a wing grant (or the open book) reads its wing's GATHERINGS as facts (listed,
+  assembled, searched, shown — never a grant's scope or a write's target; VX-273)") with: "**A GATHERING IS A GRANT
+  PLACE (VX-549 — her sitting 2026-10-27, superseding VX-273's facts-only rule; the record
+  `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md` BATCH 3):** a gathering grant reaches the notes its rule
+  assembles AT READ TIME, through the ONE membership function — reach moves with her tagging; every fence key wins (the
+  Private MARK, never a tag named "private"; the daily Journal's and ⌘J entries), answering the one not-shared shape; an
+  archived, rule-less or malformed gathering assembles empty, so its grant reaches nothing. The gathering itself is
+  reached by its own grant or its wing's, at that grant's rung (PROVISIONAL MB-16), or the open book at read — never a
+  note or book grant (R-VX185-1). Read, suggest and edit act on its members through the existing guards;
+  `create_note` / `import_document` with its id write a new note bookless in its wing wearing the tags its rule needs
+  (her own gathering door's planner without the star; the ONE application road, so living books hear it; one
+  client-named undo; VX-252's answer with VX-361's tags); a rule only a star could satisfy refuses in her door's words
+  ("Its rule needs a starred note, and only the author can star one."), never the not-shared shape, and the grant sheet
+  offers such a gathering read and suggest only, with the why. An ask on a gathering keys as its reading (PROVISIONAL
+  MB-17). `list_wings` lists no wing for a gathering grant (hidden = missing)."
+- **MCPSpec, the grant road:** "(WHERE = **a note · a book · a wing** on the one sectioned `SearchPicker`; …)" → "(WHERE =
+  **a note · a book · a gathering · a wing** …)".
+- **MCPSpec, the shared icon:** "a wing wears it only under a wing grant or the open book" → add "a gathering under its
+  own grant, its wing's, or the open book".
+- **AppSpec §7, the MCP GRANTS family:** "(v1_24 → v1_30)" → "(v1_24 → v1_33)"; "per-client × per-scope grant rows (the
+  four rungs)" → "+ (note · book · gathering · wing)".
+- **SurfaceContracts, Doors to the outside (the MCP door bullet):** after "Grants are local-only and never synced (§7)."
+  add "A gathering is a grant place whose reach follows her tags (VX-549)."
+- **The dated entry + narrative → `notes/AppSpecRecord.md`** (her sitting's words; the W1 / MB-17 provisionals).
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator): the product is prebuilt at `~/dev/variorum-vx-548/DerivedData/b3` from
+  the final sources (`66096499e`; this record's commit changes no code) — `cd App/Variorum && xcodebuild -scheme Variorum
+  -destination 'platform=macOS' -derivedDataPath ~/dev/variorum-vx-548/DerivedData/b3 test-without-building` with
+  `-only-testing:VariorumTests/<Suite>` for: **the pins** `MCPGatheringGrantFacesTests` (new, 6); **the flips and
+  justified edits** `TutorialMCPChapterTests` · `MCPAskAndReceiptTests` · `MCPWireRefusalSweepTests` ·
+  `MCPShareFacesTests` · `MCPGatheringIconTests`; **the neighbours** `MCPGrantSheetTests` · `MCPGrantRoadsTests` ·
+  `MCPPaneTests` · `MCPPaneTabsTests` · `MCPSharedRowsTests` · `MCPSharedRowsRulesTests` · `MCPSharedIconClickTests` ·
+  `BookPanelMCPMarksTests` · `MCPWingFacesTests` · `MCPAsksWaitTests` · `MCPDoorErgonomicsFacesTests` ·
+  `MCPEditParityFacesTests` · `MCPLibraryParityFacesTests` · `CapabilityRegistryTests` · `TutorialCurrencyTests` ·
+  `ChromeLineLimitTests`. `b3` CONTAINS batches 1/2a/2b too (cloned from `b2b`, rebuilt from this tip), so every list
+  may run from it in one window. State the EXECUTED count (VX-604). Read the `skipped:` lines.
+- **The walk (dev store, both voices, a client approved — the shim driven with the pane-copied key as before):** (1) a
+  tag `parser` and a gathering "parser things" (rule #parser) with two tagged notes, one marked Private; Settings ▸ MCP
+  ▸ Share another place… → WHERE "A gathering" → the picker (Starred, a–z rows with their footing) → pick it → Read,
+  always → Shared with AI shows the row, kind chip "gathering". (2) The Bookcase: the gathering's row wears the shared
+  icon (its own grant — no "through"); open it / a member: the member rows wear the icon, the Private one does not. (3)
+  The client: `list_books` lists it; `read_note` the Private member answers the one not-shared sentence; tag a third
+  note #parser → `read_note` it succeeds. (4) Change the grant to Write new → `create_note {book_id: <gathering>}` →
+  the note lands bookless in the wing, wearing #parser, the gathering shows it; ⌥⌘Z (named after the client) takes it
+  back. (5) A gathering with rule `#parser AND ★`: the sheet offers Read and Suggest only with the one-line why; with a
+  write-new grant made before the rule changed, `create_note` into it answers "Its rule needs a starred note, and only
+  the author can star one." (6) A read-only gathering grant + `create_note` into it → the ask waits ON the gathering's
+  Bookcase row (the reading glyph) and in Waiting; Allow → a gathering grant. Restore: revoke the walk grants, delete the
+  walk gathering/notes/tag, server off.
+
+### MORNING BUNDLE items born here (folded into §MORNING BUNDLE above)
+
+MB-16 (W1 — a gathering place under its wing's grant) · MB-17 (the ask's key) · MB-18 (place doors not built) · MB-19
+(the copy) · MB-20 (two wire roads keep the not-shared answer on a gathering) · MB-21 (no note count on the sheet's
+gathering rows).
 
 ## LADDER RECORD
 
