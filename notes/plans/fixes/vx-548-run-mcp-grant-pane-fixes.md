@@ -728,8 +728,10 @@ orchestrator's). Batch 1's code and record untouched.*
   own; no open fires) · `aGatheringsNameWearsTheIconOnlyThroughItsWingNeverThroughANoteOrBookGrant` (book + note grants:
   the gathering's reach absent, two icons; a wing grant made while mounted lights the gathering's name on the held
   read, three) · `nothingIsReadOrDrawnWhileNoClientIsApproved` (a pending client, the open book ON: nothing held, no
-  mark). The VX-330 sweep pin stays as it was (it never starts the reading hold, so its count stays the note rows').
-  Compiled; RUN PENDING.
+  mark). ~~The VX-330 sweep pin stays as it was (it never starts the reading hold, so its count stays the note
+  rows').~~ **WRONG — CORRECTED by the FIX LEG (2a-F1) below:** an unverified premise (VX-330's harness comment "the test
+  host never fires a view's `.task`"); in the rig the view's `.task` DOES hold the reading reach, so the sweep saw the
+  header's fifth icon. Compiled; RUN PENDING.
 
 ### Files touched
 
@@ -784,6 +786,49 @@ commit.
   pending glyph beside it; "appears in N gatherings ▸" → open → a gathering under a WING grant wears the icon, under a
   book grant only it wears none; the note rows unchanged. (3) VX-365/358 are wire-only and headless-proven; a
   real-client turn is optional (`add_note_to_book` into an outflow book → `tag_ids`/`tags`).
+
+### FIX LEG (2a-F1 · 2a-F2 — the mid window's FINDINGS MID-1 and MID-4; implementer №2 resumed, 2026-10-27)
+
+**NOT DONE BY THE FIX LEG (first line):** no Mac test run, no GUI, no stage — both legs' Mac proof (the edited VX-330
+sweep pin's green; the band's AX help carrying the whole label) RIDES THE FINAL WINDOW. Pulled first (batch 3's
+commits on the tree); nothing of batch 3's touched. The Mac product for the re-run: `DerivedData/b2afix`
+(`build-for-testing` TEST BUILD SUCCEEDED, `scratchpad/b2a-logs/mac-bft-fix.log`; the only warning in a touched file is
+the pre-existing `TakeCardProbeSlot.space` line, now `TakesBoardView.swift:2071`); `b1`/`b2a`/`b2b`/`b3` untouched.
+
+**2a-F1 — FINDING MID-1 (`underABookGrantEveryNotesRowWearsBothMarksTheCollapsedChapterRowIncluded` red on the 2a
+tree). THE TRACE — the red log's own words, not the finding's reading:** the isolated run
+(`mid-bpm-iso1.log`) says **"(icons 5, asks 4)"** — the note rows did NOT lose their marks (four asks, and four of the
+five icons); a FIFTH icon appeared. The only icon the panel can draw outside its note rows is VX-354's header icon
+(`readingMarks(shown.id)`), which draws only when `model.readingReach[book.id]` is non-empty — written by
+`holdReadingReach` alone, and the pin never calls it — so the view's own `.task(id: namedReadings(shown))` FIRED in the
+rig (an `NSPanel` ordered front): VX-330's harness comment "the test host never fires a view's `.task`" — which batch 2a's
+record repeated, unverified — is false here. Under the pin's BOOK grant the header reached its book and wore its icon
+(VX-354 working as ruled); the pin counted every icon in the window and read "never a fifth". **Not a product
+regression; a pin whose premise VX-354 changed.** **THE FIX — a JUSTIFIED EDIT of VX-330's pin (the H pattern; no product
+line changes):** the reading hold started by hand too (so the count never rides on the `.task`); it now expects FIVE
+icons (the four note rows' + the header's) and FOUR asks (no ask waits on the book); the header's icon is the topmost,
+above every table-of-contents row's marks; the remaining four sit on four distinct rows, each sharing its row with its
+note's ask; no chapter heading wears either — VX-330's claim unchanged, VX-354's header counted apart. The pin's doc
+says all of this in place. **Red evidence:** the mid window's run of the unedited pin on `b2b` ("icons 5, asks 4", 3
+issues, `mid-suites.log` + `mid-bpm-iso1.log`). **Green: PENDING — the final window** (`BookPanelMCPMarksTests`, 7 tests,
+from `b2afix`). The four VX-354 pins were green in the mid window and are unchanged.
+
+**2a-F2 — FINDING MID-4 (the whole-label hover may be dead).** **THE TRACE:** `TakeLabelLine` is content INSIDE the choose
+`Button`'s label (`TakeChooseHeader`), and that Button carries its own `.help` (the choose sentence); a Button is met as
+ONE element whose help is the Button's own — the walker's accessibility tree showed exactly that (one button, help = the
+choose sentence, no element carrying the label), so the label's own `.help(label)` was subsumed: dead for an AX reader,
+and not provably raised as a tooltip either (synthetic pointers raise none). **SHADOWED — fixed (PROVISIONAL, under
+MB-4):** the band's ONE `.help` now carries the whole label on its own line, then the band's sentence unchanged — the
+pure `TakeLabelFace.hover(label:act:)` (core); `TakeChooseHeader.chooseHelp` / `chosenHelp` (the old sentences, byte for
+byte) and `bandHelp(isChosen:label:)` (the view's one call); the inner `.help(label)` removed (the line keeps the whole
+label as its accessibility label). A take with no label (or a blank one) hears the band's sentence exactly as before. Why
+this shape: the whole label is hoverable over the WHOLE band (the cut label included) without a second hover region
+inside one button and without displacing the choose sentence; and it is the one help an AX reader meets, so the final
+window can verify it as the walker tried to. **Pins:** core `TakeLabelFaceTests.theBandsOneHoverCarriesTheWholeLabelThenTheActsSentence`
+GREEN (`fix-f2-green.log`: 5/5 + the label-form suite 3/3); Mac `TakeLabelLineTests.theHeadersHoverCarriesTheWholeLabelAndKeepsTheChooseSentence`
+(the exact strings, both states, no-label byte-unchanged) COMPILED, run PENDING. **Red-on-old:** the behavioural revert
+run (below). **Final-window check:** the take card header button's AX help reads "claude-code · english⏎Choose this take
+— …" (and a real hover shows both lines — her 5-second hand-check if the walker's pointer can't raise tooltips).
 
 ## BATCH 2b RECORD
 

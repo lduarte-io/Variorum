@@ -259,9 +259,25 @@ struct BookPanelMCPMarksTests {
 
     /// A chaptered book with every row shape: a collapsed one-note chapter, a
     /// plain heading over two notes, "unfiled" over the open note. A BOOK grant
-    /// reaches all four notes; an ask waits on each. The panel draws exactly
-    /// four icons and four ask glyphs — one per note, each on the one row that
-    /// stands for it (a heading has no note to wear) — so no row shape is left.
+    /// reaches all four notes; an ask waits on each. The table of contents draws
+    /// exactly four icons and four ask glyphs — one per note, each on the one row
+    /// that stands for it (a chapter heading has no note to wear) — so no row
+    /// shape is left.
+    ///
+    /// **A JUSTIFIED EDIT (RUN VX-548 batch 2a's fix leg 2a-F1 — the mid
+    /// window's FINDING MID-1; VX-354, the brief's build).** Since VX-354 the
+    /// panel's HEADER — the shown book's name — wears the book's own shared
+    /// icon whenever an approved client reaches the book; a BOOK grant does. The
+    /// pin as written counted EVERY icon in the window and read "never a fifth",
+    /// so on the 2a tree it saw five — "(icons 5, asks 4)", the mid window's
+    /// isolated run: all four note rows still wore both marks, and the fifth was
+    /// the header's (the view's `.task` holds the reading reach in this rig — the
+    /// harness comment above that says a view's `.task` never fires is not true
+    /// of a window ordered front). The edit splits the count the way the face
+    /// does: the HEADER's one icon (VX-354; no ask waits on the book, so no
+    /// glyph there), on its own row above every table-of-contents row, and the
+    /// four note rows' pairs below it — VX-330's claim unchanged. The reading
+    /// hold is started by hand too, so the count never depends on the `.task`.
     @Test func underABookGrantEveryNotesRowWearsBothMarksTheCollapsedChapterRowIncluded() async throws {
         try await withWorld { session, _ in
             let ops = session.operations
@@ -281,10 +297,17 @@ struct BookPanelMCPMarksTests {
 
             let membership = NoteMembershipModel()
             let model = BookPanelModel(session: session, postID: open.id)
-            let tasks = try await holdThePanel(
+            var tasks = try await holdThePanel(
                 session, open: open, book: book, model: model, membership: membership, notes: 4)
+            // VX-354 (the justified edit): the header's reach, held by hand as
+            // the note rows' is — the count below never rides on the `.task`.
+            tasks.append(Task {
+                await model.holdReadingReach(BookPanelBrain.markedReadings(
+                    shown: book.id, gatherings: [], gatheringsOpen: false))
+            })
             defer { tasks.forEach { $0.cancel() } }
             #expect(try await settle { model.reach.count == 4 }, "the book grant reaches all four rows' notes")
+            #expect(try await settle { model.readingReach[book.id] != nil }, "…and the book itself (VX-354)")
             let lines = BookPanelBrain.lines(model.groups(for: book.id))
             #expect(lines.count == 6 && lines.compactMap(BookPanelBrain.markedNote).count == 4,
                     "six lines — a collapsed chapter, a heading, two notes, unfiled, the open note — four stand for notes")
@@ -300,18 +323,29 @@ struct BookPanelMCPMarksTests {
                     .environment(\.mcpShareRoad, road(answered)),
                 width: 340, height: 600)
             defer { rig.close() }
+            // Four note rows' pairs + the header's one icon (VX-354).
             let drawn = await rig.poll(timeout: 8) {
-                MCPSharedIconProbe.frames(in: rig.window).count == 4
+                MCPSharedIconProbe.frames(in: rig.window).count == 5
                     && MCPAskGlyphProbe.frames(in: rig.window).count == 4
             }
             await rig.poll(timeout: 0.6) { false }
-            #expect(drawn, "four icons and four waiting asks — one per note (icons \(MCPSharedIconProbe.frames(in: rig.window).count), asks \(MCPAskGlyphProbe.frames(in: rig.window).count))")
-            #expect(MCPSharedIconProbe.frames(in: rig.window).count == 4, "never a fifth: a heading wears no icon")
-            #expect(MCPAskGlyphProbe.frames(in: rig.window).count == 4, "never a fifth: a heading wears no ask")
+            #expect(drawn, "four note rows' icons + the header's, and four waiting asks — one per note (icons \(MCPSharedIconProbe.frames(in: rig.window).count), asks \(MCPAskGlyphProbe.frames(in: rig.window).count))")
+            // The header's icon is the topmost, on a row of its own above every
+            // table-of-contents row — and no ask waits on the book, so no glyph.
+            let icons = MCPSharedIconProbe.frames(in: rig.window).sorted { $0.midY > $1.midY }
+            let header = try #require(icons.first, "the header's icon drew")
+            let rowIcons = Array(icons.dropFirst())
+            let asks = MCPAskGlyphProbe.frames(in: rig.window)
+            #expect(rowIcons.count == 4, "never a fifth on the rows: a chapter heading wears no icon")
+            #expect(asks.count == 4, "never a fifth: a heading wears no ask, and none waits on the book")
+            #expect(rowIcons.allSatisfy { header.midY > $0.midY + 4 } && asks.allSatisfy { header.midY > $0.midY + 4 },
+                    "the header's icon sits above every row's marks (\(header) · \(rowIcons) · \(asks))")
             // Each note's two marks share its row: four distinct rows.
-            let iconRows = Set(MCPSharedIconProbe.frames(in: rig.window).map { Int($0.midY.rounded()) })
-            let askRows = Set(MCPAskGlyphProbe.frames(in: rig.window).map { Int($0.midY.rounded()) })
+            let iconRows = Set(rowIcons.map { Int($0.midY.rounded()) })
+            let askRows = Set(asks.map { Int($0.midY.rounded()) })
             #expect(iconRows.count == 4 && askRows.count == 4, "four rows, one pair each")
+            #expect(rowIcons.allSatisfy { icon in asks.contains { abs($0.midY - icon.midY) <= 4 } },
+                    "each note's icon shares its row with that note's ask")
         }
     }
 }
@@ -328,8 +362,9 @@ struct BookPanelMCPMarksTests {
 //  approved; a note- or book-level share never icons a gathering (R-VX185-1).
 //  Red-on-old is by construction: the old panel held no reading reach and drew no mark
 //  beside the header or a gathering's name (and the hold, `holdReadingReach`, is new).
-//  The sweep above stays as it was: it never starts the reading hold, so its count is
-//  the note rows' alone.
+//  The sweep above was edited for it (fix leg 2a-F1, FINDING MID-1 — its own doc says
+//  why): in this rig the view's `.task` DOES hold the reading reach, so under a book
+//  grant the header wears its icon and the sweep counts it apart from the rows'.
 extension BookPanelMCPMarksTests {
     /// The pure decision: the shown book always; the gatherings only while
     /// their line is open; drawing order, each once.
