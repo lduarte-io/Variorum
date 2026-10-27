@@ -7,8 +7,9 @@ import GRDB
 // export — an unencrypted `.sqlite` (`StorePlaintextExport`, `LibraryClassifier.plaintextExport`) — is only ever READ, on a
 // private staged copy (`LibraryClassifier.withStagedRead`). Two halves:
 //
-//   - THE READ (`PlaintextExportReading.read(exportAt:)`, pure past the disk): the export's schema must be THIS build's
-//     (`schemaNotCurrent` otherwise — Copy full text's projection decodes the current rows; PROVISIONAL P-VX309-U1b-7); then
+//   - THE READ (`PlaintextExportReading.read(exportAt:)`, pure past the disk): the export's applied migrations must be a
+//     SUBSET of this build's (`schemaNewer` otherwise — a newer Variorum wrote it; VX-502, her ratified rule 2026-10-27,
+//     supersedes P-VX309-U1b-7; the gate's comment carries the standing feature-detect duty that keeps it safe); then
 //     each living note's text through Copy full text's OWN projection (`Queries.variorumDocumentText` — the title, every
 //     live take, the tags), parsed by `VariorumDocument.parse` (the import road's one reader); its books (members in the
 //     export's `(position, id)` order, filed under their chapters, a dangling chapter read as unfiled), its snippet groups
@@ -96,8 +97,9 @@ public struct PlaintextExportLanding: Equatable, Sendable {
 
 public enum PlaintextExportReading {
     public enum Failure: Error, Equatable, Sendable {
-        /// The export's schema is not this build's (`newer` — a newer Variorum wrote it; else an older one did).
-        case schemaNotCurrent(newer: Bool)
+        /// The export carries migration identifiers this build has never heard of: a newer Variorum wrote it. Under VX-502's
+        /// subset rule this is the ONLY schema refusal — an earlier build's export reads.
+        case schemaNewer
         /// Not a Variorum plaintext export.
         case notAnExport
         /// A note's text could not be read back through the document format (the export's own projection) — named.
@@ -112,9 +114,20 @@ public enum PlaintextExportReading {
     /// The plan, from an open export.
     static func plan(_ db: Database) throws -> PlaintextExportPlan {
         guard try db.tableExists("grdb_migrations"), try db.tableExists("container") else { throw Failure.notAnExport }
+        // THE GATE — VX-502 (her ratified rule, 2026-10-27; supersedes P-VX309-U1b-7): an export whose applied migrations
+        // are a SUBSET of this build's known set is read; one carrying an identifier this build has never heard of was
+        // written by a newer Variorum and refuses. An earlier build's export reads because its physical schema already
+        // holds everything this reader touches (the VX-502 record's D-A2 verification, column by column: the newest column
+        // read is `reading.archived_at`, v1_21; no content-bearing export predates v1_31 — VX-461).
+        // THE STANDING DUTY: any future migration that changes a table this reader touches — here and in everything it
+        // calls (`Queries.variorumDocumentText` with its record decodes, `blockPresentations`, `exportBlocks`) — must add
+        // a feature-detect, the `hasStatus` precedent below: an older export must keep reading. ENFORCED by the era-frozen
+        // pin `PlaintextExportImportTests.anExportOfTheOldestExportEraStillReadsWhole` (a v1_31-era file, the oldest real
+        // export, must plan whole — ladder round 1, F-1). A file whose physical schema predates the reader's needs (never
+        // a real export) throws a database error, which the door's generic catch refuses honestly.
         let applied = try Set(String.fetchAll(db, sql: "SELECT identifier FROM grdb_migrations"))
         let known = Set(AppDatabase.migrator.migrations)
-        guard applied == known else { throw Failure.schemaNotCurrent(newer: !applied.subtracting(known).isEmpty) }
+        guard applied.isSubset(of: known) else { throw Failure.schemaNewer }
 
         var plan = PlaintextExportPlan()
         plan.wings = try Row.fetchAll(

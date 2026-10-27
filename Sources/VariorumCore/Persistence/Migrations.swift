@@ -18,6 +18,10 @@ extension AppDatabase {
         // Migrations are append-only from here on (GRDB runs each once, by
         // name — editing a shipped migration silently skips any store that
         // already ran it; Phase 4 cold-review finding).
+        // VX-502: a migration that changes a table the plaintext export's
+        // reader touches owes that reader a feature-detect so older exports
+        // keep bringing in — `PlaintextExportImportTests.
+        // anExportOfTheOldestExportEraStillReadsWhole` goes red until it has one.
         migrator.registerMigration("v1_1_tray_index") { db in
             // The tray query's access path (Phase 4): the per-post tray
             // resolves tombstoned blocks by `last_container_id`; without
