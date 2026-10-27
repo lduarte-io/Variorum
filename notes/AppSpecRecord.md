@@ -943,3 +943,59 @@ final) 0·0·2·4, every finding dispositioned, the final fixes orchestrator-che
 session; stage and merge order through the night's coordinator (first merger of the export-seam pair — VX-439
 rebases). Born tickets: none. A provisional act for her: `type-dev-castle-secret` (the dev-pair typing road,
 --check-guarded; her bundle item 2).
+
+## 2026-10-27 — VX-548 (Run: MCP grant & pane fixes; PR #193, merge d92c30d21; one overnight run, kickoff to merge)
+
+**Her kickoff words (verbatim):** "overnight protocol: run autonomously, provisional-and-continue, bundle every question
+for my morning. Batches in ticket order, gates first (VX-516/515/512 — VX-516 is Urgent). The VX-394 trace clue and all
+my rulings (VX-549's sitting, VX-126 n/a here) are on the tickets. Stage claims through tonight's coordinator. No
+release without my word. coordinator is oct26coordinator" — and in-session, pre-sleep, ratifying the coordinator's stage
+protocol: "ok yes I like it - makes sense. good luck overnight".
+
+**§12 / MCPSpec — the grant sheet and the pane (VX-516 · VX-515 · VX-512).** Her Air report (2026-10-23) behind the
+Urgent gate: "it keeps just changing what is shown though - it doesn't show both & I can see that the other one is
+revoked when I grant that one"; her urgency (2026-10-26): "allowing multiple grants is one of my highest priorities
+because it's so annoying that only you or planetlillian can be working at one time." The trace: every ADDING road was
+always per-place (VX-393's one mint held); the revoke was the three Change… roads passing `MCPGrantOpening.replacing`
+through WHATEVER place the sheet finally confirmed. The fix is the pure `Domain/MCPGrantChange` (replace only while
+confirmed ⊆ opened) read at the sheet's one confirm; the replaces line now names whose grant, which place, how far, how
+long; a re-picked place flips the title to "Grant access" and revokes nothing (PROVISIONAL MB-1). Her VX-515 words ("how
+am I supposed to be able to grant multiple wings to claude code? … there also needs to be a way to see everything you've
+granted") landed as the two doors (MB-2); the listing was verified already honest — her "doesn't show both" WAS
+VX-516's revoke. VX-512's silence became the pane's one explainer line (MB-3). Contract lines in MCPSpec in place.
+
+**§9 / MCPSpec — the wire answers (VX-365 · VX-358) and the stop roads (VX-394).** `add_note_to_book` answers worn tags
+in VX-361's shape; a canonical no-op re-spelled in another normalization answers `stored_text_normalization_differs:
+true` (MB-5). VX-394's sweep (12 roads × the ruled Activity line): two fixed red-on-old — a QUIT now says nothing every
+time (P-VX394-5; `stopWithTheProcess`), a connection accepted mid-stop is hung up and says why — and a stale start can
+no longer unlink the LIVE host's socket (the one honest "running while dead" mechanism found). App Nap: a traced
+non-build (throttling delays, never closes a connection). Her trace clue ("today's two drops happened when her MacBook
+AIR locked") honored: the lock road is A-8's design; MB-7 is her morning look. Reconnect ergonomics propose-only.
+
+**§12 / MCPSpec — A GATHERING IS A GRANT PLACE (VX-549, superseding VX-273's facts-only rule).** Her sitting
+(2026-10-27) ratified the supersession; her words: "this is the feature, routing work to an agent by each tag." Built
+whole: v1_33 (LOCAL-ONLY grants family, marker stays 14, the table rebuilt rows-and-rowids-verbatim); reach by the
+rule's assembly at read through the ONE membership function; every fence key wins byte-identically (the final drill
+verified the Private member's answer programmatically against a never-existing UUID); `create_note`/`import_document`
+into a gathering mint bookless wearing the rule's tags through the one application road; a star-only rule refuses write
+new in her door's words and the sheet presents read/suggest-shaped with the why; wing grants reach a gathering at the
+grant's own rung (PROVISIONAL MB-16); asks key as the reading (PROVISIONAL MB-17). The faces: the sheet's WHERE grew "A
+gathering"; the shared icon through the grown `decideGathering`.
+
+**The take card and the Book Panel (VX-352 · VX-354, SurfaceContracts).** The pure `TakeLabelFace` splits at the first
+" · ": the label's own words keep their width and the client's name yields ("choose claud… · english", never
+"claude-code · e…", her VX-336 capture reproduced exactly by the behavioural revert); the whole-label hover was found
+SHADOWED by the button's own help (the mid-window walker's AX read) and fixed as the band's one hover. The Book Panel's
+header and gatherings wear the marks through `decide`/`decideGathering`, rows-drawn-only.
+
+**The run's machinery.** Cast: Fable architect; four fresh Opus implementers + an L1 fix session; fable-reviewer ladder,
+two rounds (r1 0·0·2·2 all fixed with evidence; r2 no new BLOCKER/MAJOR — one r2 finding retired an APFS-cloned
+DerivedData as evidence: a clone's stale-file sweep deletes inside its SOURCE dir by absolute paths — the environment
+lesson). Two Opus walkers ran the GUI legs under the orchestrator's claims after a safety classifier stopped the
+orchestrator's own synthetic-input leg (the standing Fable-safeguard remedy, coordinator-ack'd, recorded in the run
+record's sitting section with her ratification). Three stage windows (vx548-b1-walk · vx548-mid · vx548-final), all
+released clean; merge order through the coordinator (VX-502 merged first; origin/main merged into the branch before the
+ladder). The mid window's one red was traced to VX-330's pin colliding with VX-354's ruled header icon (icons 5 — a
+justified pin edit, verified against the red log); the final window's one red was the deliberate note-tool scope-pin
+flip under the ratified supersession. Born tickets: VX-605 · VX-606 · VX-607 · VX-609 · VX-610 · VX-611 · VX-612 ·
+VX-613 (triaged at filing). Her bundle: QUESTIONS #243. The provisionals MB-1…MB-22 stand as built until her pass.
