@@ -444,8 +444,12 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     one vocabulary for the two bars; her "2/15" — PROVISIONAL bundle 16); Ignore Case off honoured (unmeasured,
     PROVISIONAL); Starts With / Full Word / Ends With draw NOTHING rather than a wrong count. P1: the cheap gates first
     (bar up, a non-empty selection) — an empty selection, i.e. every keystroke, reads nothing, not even the pasteboard;
-    the whole-note scan runs only when a selection lands EXACTLY on the finder's words (a find step — itself a
-    whole-note walk). WIRING, chrome only: the selection delegate (`EditorSurfaceDelegate.textViewDidChangeSelection`)
+    the whole-note scan runs only when a selection lands EXACTLY on the finder's words ~~(a find step — itself a
+    whole-note walk)~~ — RETRACTED at L1 (the ladder's m-2): a find step is NOT a whole-note walk (`NSTextFinder`
+    searches forward from the selection to the NEXT match), and as built the readout re-walked the whole note on every
+    step (2.6 ms at 100k words, on main); since L1 the count's walk runs once per (the finder's words, the text's
+    generation) and a step is a binary search over the cached matches (L1 m-2, below). A non-empty selection while the
+    bar is up still reads the find pasteboard once (unchanged; not in the disposition). WIRING, chrome only: the selection delegate (`EditorSurfaceDelegate.textViewDidChangeSelection`)
     calls `refreshFindReadout()` AFTER its unchanged identity work; `TypewriterScrollView` overrides the container's
     `isFindBarVisible` (calls super; reports a change — ⎋/Done change no selection); `EditorViewModel.findReadout`
     (a derived count, never text) + a needle seam a pin injects. ZERO text-storage, layout or identity changes; incremental
@@ -534,7 +538,27 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     (`scratchpad/l1/reverts/r-w.patch` — the rule back to `NSText || NSTextField`): the rule expectation and
     "nothing navigated" fail (`[.back, .forward]` delivered) — PENDING the stage window (a window + WebKit; no headless
     road). build-for-testing GREEN.
-  - m-2 (the find readout's match ranges cached per needle × text generation): NOT-STARTED
+  - m-2 (the find readout's match ranges cached per needle × text generation): DONE (this commit). TRACED (read): each
+    ⌘G selects the next match → `textViewDidChangeSelection` → `refreshFindReadout` → `FindReadout.face` past its gates
+    → `ranges(of:in:)` walked the whole note per step; the record's justification ("a find step — itself a
+    whole-note walk") was false and is RETRACTED in place (VX-441's line above; the file header's P1 paragraph says
+    the same, rewritten). FIX: `FindReadout.MatchCache` (needle × text generation × ranges), held by the editor's model
+    (`findMatchCache`); `face(…, generation:, cache:, scan:)` scans only on a miss and finds the selection's place by
+    binary search (`place(of:in:)` — matches ascend, never overlap); the text's generation `findTextGeneration` bumps
+    in `storageDidEdit` beside N14's `overlayGeometryGeneration` (every storage CHARACTER edit — typing, projections,
+    structural rewrites; an Int, no text read; the delegate filters `.editedCharacters`, so the markdown settle's
+    attribute writes never invalidate it). The uncached `face(barVisible:needle:selection:text:)` stays for one-look
+    callers (the existing pure pins, unchanged). Zero text-storage/layout/identity behavior changed — one counter line
+    in the model's edit report. PINS `FindReadoutTests.aStepReadsTheCachedCountAndOnlyNewWordsOrNewTextRescan` (pure, a
+    counting `scan`: six steps → one scan; a new generation → one more, counting the new match "4 of 4"; new words →
+    one more; a caret scans nothing) and `theEditorScansOncePerTextAndAnEditRecounts` (the real editor: three steps →
+    one scan; typing "the " through the real input path → the next step rescans once and reads "4 of 4"). RED ON OLD,
+    HEADLESS for the pure pin — VERIFIED: a replica (scratchpad `l1-m2-replica`: the REAL `FindReadout.swift` +
+    `TakesFindPlan.swift`, the four pure pins transformed mechanically) — fixed **34 checks / 0 failed**; under named
+    revert **R-C** (the cache bypassed — the pre-m-2 walk per step, `scratchpad/l1/reverts/r-c.patch`) **4 failed,
+    exactly the new pin's scan counts** (6 / 7 / 8 / 8), every word still right (`scratchpad/l1/m2-replica-{new,rc}.txt`).
+    The editor pin's reds are the stage's: under R-C its scan counts; under named revert **R-G** (the generation bump
+    removed, `r-g.patch`) its edit leg (a stale cache: nil, not "4 of 4"; one scan, not two). build-for-testing GREEN.
   - m-3 (the sidebar row menus' wing listings re-ask after an act): NOT-STARTED
   - m-5 (`NoteExportMenuGateTests` disabled, named): NOT-STARTED
   - m-7 (CONDITIONAL — pin first; guard only if red on current code): NOT-STARTED

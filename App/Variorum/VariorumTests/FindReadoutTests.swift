@@ -100,6 +100,105 @@ struct FindReadoutTests {
                 "a stale selection past the text")
     }
 
+    // MARK: - The count's cache (the VX-439 ladder's m-2)
+
+    /// **One scan per needle × text — RED ON OLD (R-C: the cache bypassed).** A
+    /// find step is NOT a whole-note walk — `NSTextFinder` searches forward from
+    /// the selection to the NEXT match — so the readout must not make it one:
+    /// the count's O(n) scan runs when the words or the text change (the text's
+    /// GENERATION, bumped on every character edit), and each step reads the
+    /// cached matches (a binary search). The old readout re-walked the whole
+    /// note on every step (the reviewer measured 2.6 ms at 100k words, per ⌘G,
+    /// on main). The words are exactly as before at every step.
+    @Test func aStepReadsTheCachedCountAndOnlyNewWordsOrNewTextRescan() throws {
+        let text = "the cat and the hat and THE bat"
+        let needle = try #require(Readout.needle(string: "the", options: nil))
+        let matches = Readout.ranges(of: needle, in: text)
+        var cache: FindReadout.MatchCache?
+        var scans = 0
+        let counting: (FindReadout.Needle, String) -> [NSRange] = { needle, text in
+            scans += 1
+            return Readout.ranges(of: needle, in: text)
+        }
+        for _ in 0..<2 {
+            for (index, match) in matches.enumerated() {
+                #expect(Readout.face(
+                    barVisible: true, needle: { needle }, selection: match, text: text,
+                    generation: 7, cache: &cache, scan: counting)
+                    == TakesFindCopy.position(index + 1, of: 3, wrapped: false))
+            }
+        }
+        #expect(scans == 1, "six steps over the same words and text: ONE scan — \(scans)")
+
+        // The text changed (a new generation): the next step scans once more,
+        // and counts what is there now.
+        let edited = text + " and the end"
+        let fourth = try #require(Readout.ranges(of: needle, in: edited).last)
+        #expect(Readout.face(
+            barVisible: true, needle: { needle }, selection: fourth, text: edited,
+            generation: 8, cache: &cache, scan: counting) == "4 of 4")
+        #expect(scans == 2, "an edit rescans once: \(scans)")
+        // New words: one more scan.
+        let cat = try #require(Readout.needle(string: "cat", options: nil))
+        let catAt = try #require(Readout.ranges(of: cat, in: edited).first)
+        #expect(Readout.face(
+            barVisible: true, needle: { cat }, selection: catAt, text: edited,
+            generation: 8, cache: &cache, scan: counting) == "1 of 1")
+        #expect(scans == 3, "new words rescan once: \(scans)")
+        // The gates still come first: a caret (every keystroke) scans nothing.
+        #expect(Readout.face(
+            barVisible: true, needle: { cat }, selection: NSRange(location: 2, length: 0), text: edited,
+            generation: 9, cache: &cache, scan: counting) == nil)
+        #expect(scans == 3, "a keystroke's empty selection never scans")
+    }
+
+    /// **The editor's wiring of the cache — RED ON OLD (R-C), and under R-G
+    /// (the generation never bumped) its edit leg goes stale.** Steps over the
+    /// real editor scan once; TYPING through the real input path bumps the
+    /// text's generation, so the next step rescans and counts the new match.
+    @Test func theEditorScansOncePerTextAndAnEditRecounts() async throws {
+        try await withEditor(seedBlocks: ["the cat and the hat", "and the bat"]) { h in
+            let scrollView = try #require(h.textView.enclosingScrollView as? TypewriterScrollView)
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 700, height: 400),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            scrollView.frame = NSRect(x: 0, y: 0, width: 700, height: 400)
+            window.contentView = NSView(frame: NSRect(x: 0, y: 0, width: 700, height: 400))
+            window.contentView?.addSubview(scrollView)
+            window.makeKeyAndOrderFront(nil)
+            defer { window.orderOut(nil) }
+            pump()
+            window.makeFirstResponder(h.textView)
+            h.model.findReadoutNeedle = { FindReadout.needle(string: "the", options: nil) }
+            var scans = 0
+            h.model.findReadoutScan = { needle, text in
+                scans += 1
+                return FindReadout.ranges(of: needle, in: text)
+            }
+            scrollView.isFindBarVisible = true
+            pump()
+            @MainActor func matches() throws -> [NSRange] {
+                FindReadout.ranges(of: try #require(FindReadout.needle(string: "the", options: nil)), in: h.textView.string)
+            }
+            for (index, match) in try matches().enumerated() {
+                h.textView.setSelectedRange(match)
+                pump()
+                #expect(h.model.findReadout == "\(index + 1) of 3", "\(String(describing: h.model.findReadout))")
+            }
+            #expect(scans == 1, "three steps over one text: one scan — \(scans)")
+
+            h.type("the ", at: 0)
+            pump()
+            let now = try matches()
+            #expect(now.count == 4, "the premise: typing added a match — \(h.textView.string)")
+            h.textView.setSelectedRange(now[3])
+            pump()
+            #expect(h.model.findReadout == "4 of 4", "the edit recounted: \(String(describing: h.model.findReadout))")
+            #expect(scans == 2, "the edit's next step rescanned once: \(scans)")
+        }
+    }
+
     // MARK: - The real editor
 
     /// **The editor follows** — a selection landing on a match (the delegate's

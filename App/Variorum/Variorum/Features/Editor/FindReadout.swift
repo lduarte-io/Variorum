@@ -36,11 +36,17 @@
 //  unmeasured); a matching kind this readout cannot honour exactly (Starts
 //  With · Full Word · Ends With) draws NOTHING rather than a wrong count.
 //
-//  P1: the whole-note count runs only when a selection lands EXACTLY on the
-//  finder's words — a find step (or a hand selection of those very words),
-//  a deliberate act whose own search already walks the note — never on a
-//  keystroke (typing leaves an empty selection, which reads nothing, not even
-//  the pasteboard).
+//  P1: the COUNT needs one walk of the note per (words, text) — that much is
+//  her ask — and gets exactly one: the matches are CACHED against the finder's
+//  words and the text's GENERATION (the editor bumps it on every character
+//  edit), so a find step reads them with a binary search. A find step is NOT
+//  itself a whole-note walk — `NSTextFinder` searches forward from the
+//  selection to the NEXT match — and the readout must not make it one (the
+//  VX-439 ladder's m-2 retracted this paragraph's earlier claim that a step's
+//  own search "already walks the note"; it re-scanned per step, 2.6 ms at 100k
+//  words, on main). The scan runs only past the cheap gates — a selection
+//  landing EXACTLY on the finder's words — and never on a keystroke (typing
+//  leaves an empty selection, which reads nothing, not even the pasteboard).
 //
 
 import AppKit
@@ -94,14 +100,28 @@ nonisolated enum FindReadout {
         return found
     }
 
+    /// **The count's cache** (the VX-439 ladder's m-2): the matches of ONE
+    /// needle in ONE text generation. Held by the caller (the editor's model),
+    /// so the count's walk runs once per (words, text) and a step is a binary
+    /// search over these.
+    struct MatchCache: Sendable {
+        let needle: Needle
+        let generation: Int
+        let ranges: [NSRange]
+    }
+
     /// **What the readout says** — nil (nothing drawn) unless the find bar is
     /// up, a needle is armed, and the selection IS one of its matches; then
     /// that match's place among them, in the Takes bar's words ("2 of 15").
     /// The cheap gates run first: an empty selection (every keystroke) reads
-    /// nothing at all.
+    /// nothing at all. The matches come from `cache` when it holds this needle
+    /// at this text `generation`; otherwise `scan` walks the text once and the
+    /// cache keeps the answer (the tests' counting seam is `scan`).
     @MainActor
     static func face(
-        barVisible: Bool, needle: @MainActor () -> Needle?, selection: NSRange, text: String
+        barVisible: Bool, needle: @MainActor () -> Needle?, selection: NSRange, text: String,
+        generation: Int, cache: inout MatchCache?,
+        scan: (Needle, String) -> [NSRange] = { FindReadout.ranges(of: $0, in: $1) }
     ) -> String? {
         guard barVisible, selection.length > 0, selection.location != NSNotFound else { return nil }
         let haystack = text as NSString
@@ -110,9 +130,38 @@ nonisolated enum FindReadout {
         guard haystack.substring(with: selection)
                 .compare(needle.text, options: needle.options) == .orderedSame
         else { return nil }
-        let matches = ranges(of: needle, in: text)
-        guard let index = matches.firstIndex(of: selection) else { return nil }
+        let matches: [NSRange]
+        if let cached = cache, cached.needle == needle, cached.generation == generation {
+            matches = cached.ranges
+        } else {
+            matches = scan(needle, text)
+            cache = MatchCache(needle: needle, generation: generation, ranges: matches)
+        }
+        guard let index = place(of: selection, in: matches) else { return nil }
         return TakesFindCopy.position(index + 1, of: matches.count, wrapped: false)
+    }
+
+    /// The uncached form — one text, one look (the pure pins' shape).
+    @MainActor
+    static func face(
+        barVisible: Bool, needle: @MainActor () -> Needle?, selection: NSRange, text: String
+    ) -> String? {
+        var cache: MatchCache?
+        return face(
+            barVisible: barVisible, needle: needle, selection: selection, text: text,
+            generation: 0, cache: &cache)
+    }
+
+    /// The selection's place among the matches — a binary search: they are
+    /// left to right and never overlap, so their locations ascend.
+    static func place(of selection: NSRange, in matches: [NSRange]) -> Int? {
+        var low = 0
+        var high = matches.count
+        while low < high {
+            let mid = (low + high) / 2
+            if matches[mid].location < selection.location { low = mid + 1 } else { high = mid }
+        }
+        return low < matches.count && matches[low] == selection ? low : nil
     }
 
     /// The live needle: the find pasteboard's string and options, read only
