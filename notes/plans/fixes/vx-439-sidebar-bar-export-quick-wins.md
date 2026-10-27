@@ -489,7 +489,15 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   L1 fixes, per her kickoff word — the editor-seam file touches named in the bundle) NOT-STARTED.
 - **L1 — THE ROUND-1 FIX SESSION** (`opus-implementer`, fresh, 2026-10-27; scope = the Ledger's "LADDER ROUND 1
   DISPOSITIONS", nothing else). **BUILT — every item dispositioned below; PENDING the fix-verify stage window.**
-  **NO REVERT IN FLIGHT** — the revert pre-build (announced at `bf91cd0ba`) ran and restored: tree **A** (every L1
+  **THE FIX-VERIFY WINDOW, IN PROGRESS** (claim `vx-439-l1-verify`, 07:50:48 MDT, the coordinator's GO, 60 min — the
+  claim is NOT released by this session; the evidence slice follows under it): `fixed1` **585 tests / 89 suites
+  passed**, `fixed2` **492 / 89 passed** (`NoteExportMenuGateTests` read SKIPPED — its suite and its one test, with the
+  disabled reason), `fixed3` **485 / 89 passed** — **1,562 tests in 267 suites, 0 failures**; the only warnings are the
+  test host's launch-time `@Dependency(\.date)` noise (pre-existing). The export trio on `2b33e8bb6`:
+  `ExportFacesTests` 6/6, `PlaintextExportBringInRoadTests` 5/5, `U2WordsTests` 13/13. **REVERT revA STARTING NOW
+  (announced before applying):** tree A's patches applied in the worktree for the run (`stage.sh revA`), restored by
+  `git checkout -- App/` at its end; then revB the same with `r-g`. (Until this flips: the pre-build's line below.)
+  The revert pre-build (announced at `bf91cd0ba`) ran and restored: tree **A** (every L1
   revert patch but `r-g`) built into `scratchpad/l1/dd-revA`, tree **B** (`r-g` alone) into `scratchpad/l1/dd-revB`
   (each an APFS clone of this worktree's DerivedData, `build-for-testing` GREEN), each restored by `git checkout -- App/`,
   `git status`/`git diff` empty after both. **THE SECOND MERGE (the coordinator's addendum — VX-548 merged first):**
