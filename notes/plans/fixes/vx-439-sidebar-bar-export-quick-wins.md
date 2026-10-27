@@ -684,3 +684,16 @@ captures Terminal where visual).
   load average ~10 — the VX-353 load class batch 1 also met), re-run alone **GREEN 3/3**; the skipped lines are the 7
   standing gated measurement/integration skips. The Mac-side export pins (`ExportFacesTests`,
   `PlaintextExportBringInRoadTests`, `U2WordsTests`) ride the b2 stage window on the merged tree.
+- 2026-10-27 **B2 — THE NAMED REVERTS, before any is applied** (patches gitignored in `scratchpad/b2/reverts/`; each applied
+  to the committed tip `39f9e3104`, built with `build-for-testing` into its own DerivedData `scratchpad/b2/dd-r{o,g,t}`
+  — seeded by an APFS clone of this worktree's DerivedData — then restored by `git checkout --` of the committed file,
+  `git diff` empty after; the stage window then runs `test-without-building` per tree):
+  **R-O** (VX-424 — the halves overlay line removed from `openRow`): expect RED exactly
+  `OpenListDragFaceTests.eachRowsTwoHalvesAreDropsOnMainsRoadLiveOnlyWhileItsDragIsInFlight` and
+  `OpenListDragMountTests.theRowsTwoHalvesSplitItAtItsMidlineAndReachTheListsEdges`, every other test of those two suites
+  green. **R-G** (VX-424 — the halves always hit-testable): expect RED exactly the face pin above (its `allowsHitTesting`
+  line) and `OpenListDragMountTests.atRestTheHalvesTakeNoClickSoTheRowsDoorsAct` (the ✕'s click lands on a half, which
+  only the row's tap answers). **R-T** (VX-569 — the `.onKeyPress(.tab)` block removed): expect RED exactly
+  `TitleQuickfillTests.tabTakesTheOfferedFirstLineAndEnterFilesIt` and `aNoteWithNoWordsIsOfferedItsDate` (the old road:
+  Tab moves on, the note stays untitled), the rule/read/guard pins green. (VX-424's pure + door reds — R-H — were run
+  headless by the replica: 402 of 1020 checks.)
