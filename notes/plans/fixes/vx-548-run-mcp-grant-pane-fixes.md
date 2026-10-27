@@ -1483,7 +1483,23 @@ for the closeout, the two-file rule); nothing in `Sync/`, `Server/`, custody, th
   none read by a fenced arm — and `pin-main.swift`, the Mac pin's seven expectations verbatim): `f4-red.log` — "This
   gathering is marked Private now, …" for a `.journal` fence; 2 issues (the sentence; "never called the Private mark"),
   exit 1.
-- The whole headless suite at the end: NOT-STARTED.
+- The whole headless suite at the end: DONE (this commit) — `swift test` on the final L1 tree `70a15edd4`
+  (`scratchpad/l1-logs/headless-all.log`): VariorumCoreTests **3466 tests / 463 suites passed** (5 known issues,
+  standing — the 2a fix leg's 3463 + VX-502's 3 merged in `1ca1a297e`, `PlaintextExportImportTests` 1 → 4; no core line
+  changed by L1); StringsWorkbook **32 / 4 passed**; VariorumMCPTests **412 / 75 with ONE issue — VX-532**
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 20.6 s against its 15 s
+  under the full-parallel run; no harness line changed), re-run ISOLATED green ×2 (`harness-isolated-1/2.log`: 3/1,
+  2.2 s each) — 411 + L1's one seam pin; VX-607 green this run. Mac: `build-for-testing` into `DerivedData/b-l1` TEST
+  BUILD SUCCEEDED (`mac-bft.log`). **PENDING (the final window's):** the Mac run of
+  `MCPGatheringGrantFacesTests` (7 = batch 3's 6 + L1's 1) — `test-without-building` from `DerivedData/b-l1`.
+
+**For round 2's reviewer (what L1 changed, whole):** `Sources/VariorumMCP/MCPWriteTools.swift` (`into` → `intoGathering`
+`spendsAfter:`; the gathering arm's spend) · `App/Variorum/Variorum/Features/MCP/MCPPaneCopy.swift` (`MCPAskCopy.lead`'s
+gathering arms) · `Tests/VariorumMCPTests/MCPGatheringGrantServerTests.swift` (+1 seam pin) ·
+`App/Variorum/VariorumTests/MCPGatheringGrantFacesTests.swift` (+1 pin) · this record (batch 1's canon-owed block, the
+two-flake trap line, the L1 blocks, MB-22). Commits: `c6d90a389` (agree/dispute) · `7b84adcb9` (finding 1) ·
+`d395af01c` (finding 2) · `2adce995d` (finding 3) · `7ca166cc4` (finding 4's pin, red) · `70a15edd4` (finding 4's fix) ·
+this commit (suites).
 
 ## ORCHESTRATOR ACCEPTANCE
 
