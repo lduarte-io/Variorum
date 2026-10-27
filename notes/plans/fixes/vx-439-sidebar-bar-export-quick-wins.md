@@ -484,7 +484,12 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     is the stage's revert cycle (R-T: the `.onKeyPress(.tab)` block removed). build-for-testing GREEN.
 - Ladder: NOT-STARTED
 - **L1 — THE ROUND-1 FIX SESSION** (`opus-implementer`, fresh, 2026-10-27; scope = the Ledger's "LADDER ROUND 1
-  DISPOSITIONS", nothing else). **NO REVERT IN FLIGHT.** Method (the run's own, batch 2's): each fix lands WITH its
+  DISPOSITIONS", nothing else). **REVERT PRE-BUILD STARTING (announced before applying)** — on the committed tip
+  (the merge `2b33e8bb6`; the tip IS the pre-revert copy): tree **A** = every L1 revert patch EXCEPT `r-g.patch` applied
+  → `build-for-testing -derivedDataPath scratchpad/l1/dd-revA` (an APFS clone of this worktree's DerivedData) → restore
+  by `git checkout --` of the touched files; then tree **B** = `r-g.patch` alone → `scratchpad/l1/dd-revB` → restore.
+  If a session dies mid-way: `git diff --stat` shows what is reverted; `git checkout -- App/` restores (nothing
+  uncommitted is ever under it). Method (the run's own, batch 2's): each fix lands WITH its
   pin and a NAMED behavioral revert (patch gitignored in `scratchpad/l1/reverts/`); app-side pins are red-on-old
   verified at the fix-verify stage window (the reverts applied for the run, restored by `git checkout`), and
   headlessly first wherever a replica is cheap. Items (each flips in its own commit):
