@@ -92,6 +92,10 @@ struct HelperView: View {
             // The post-13l polish round (rows 16/23): the pairing IS the
             // lesson — this take's moment, and this note's.
             ("⌘⇧S", "save a version — the whole note as it is, in Versions"),
+            // VX-125 (the VX-439 run): the third grain — the note OUT, as a file.
+            ("\u{2325}\u{2318}S", "export this note as a Markdown file in the Variorum simple "
+                + "format \u{2014} exactly what Copy full text copies, takes and tags included, "
+                + "so File \u{25B8} Import\u{2026} reads it back"),
             ("⌘Z", "text undo (typing only)"),
             ("⌥⌘Z", "structural undo (splits, merges, moves — never text)"),
             ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),
@@ -203,6 +207,10 @@ struct HelperView: View {
             (PostMode.keyLabel(), "note modes: " + PostMode.modeList()),
             ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
             ("⌘N", "new note"),
+            // VX-570 (the VX-439 run): the book's own "+ new note", from the keys.
+            ("\u{2325}\u{2318}N", "new note inside the book you have open \u{2014} the book's own "
+                + "+ new note (an entry in a journal book; in a gathering, a note wearing what its "
+                + "rule asks)"),
             ("⌘J", "today's journal entry"),
             // 13n-c U4 — VX-157 (her ratified chord, VX-157).
             ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
@@ -245,6 +253,10 @@ struct HelperView: View {
             ("⌥⌘[ / ⌥⌘]", "back / forward, in the pane you're in — the "
                 + "\(ContextBarDoors.backGlyph) and \(ContextBarDoors.forwardGlyph) "
                 + "on the context bar are the same two doors"),
+            // VX-560 (A-439-12): the browser's keys for the same two acts —
+            // the registry's `alternateShortcutLabel`s, shown here.
+            ("⌘← / ⌘→", "back / forward too, like a browser — anywhere except while you're typing "
+                + "in text, where they keep going to the start and the end of the line"),
             // The Act 10 correction round (row 15): ⌘⇧I tags the note — the
             // masthead's ＃ opens the same inline field; the fold is gone.
             ("⌘⇧I", "tag this note — the field slides out in the masthead with the cursor "
@@ -581,6 +593,13 @@ struct HelperView: View {
 enum HelperCheatSheet {
     /// The hover cheat sheet (the "?" buttons' tooltip) — the takes family
     /// in one glance; the full map lives in the helper (⌘/).
+    /// **VX-426 (A-439-17) — the bottom bars' "?" door's tooltip**: its NAME
+    /// first (the registry's own words for the helper — "Shortcuts &
+    /// Dictionary (⌘/)"), then the cheat sheet it always showed.
+    static var doorHelp: String {
+        CapabilityRegistry.capability(.helper).menuTitle() + "\n" + summary
+    }
+
     static let summary = """
         ⌘⇧T open/close takes · ⎋ close all
         ⌘T new take · ⌥⌘T blank · ⇧⌥⌘T blank & choose

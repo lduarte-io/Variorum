@@ -81,21 +81,31 @@ struct PostDetailView: View {
     /// someone sweeps it.
     static let scrapsDoorTitle = "Scraps"
 
+    ///
+    /// **VX-426 (the VX-439 run, A-439-17) — each icon's tooltip LEADS with
+    /// its name.** A beta tester: hovering these icons should say what they
+    /// are ("Snippets", "Tray"); "every time I see the 'Snippets' button my
+    /// brain thinks it's a copy/paste tool and becomes fearful to press it".
+    /// So every help here opens with a one-word descriptor and an em dash,
+    /// then says what it opens, as it did. The scraps door's descriptor is
+    /// SNIPPETS — the area's name everywhere she reads it (W8-1); its title
+    /// (and so the tour's and the guide's words) stays "Scraps" (the
+    /// conformance remainder above — the morning bundle carries it).
     static let inspectorDoors: [InspectorDoor] = [
         InspectorDoor(
             panel: .tray(revealBlockID: nil), title: TrayPath.menuLabel,
             symbol: "tray",
-            help: "What this note has set aside: blocks it archived, "
+            help: "Tray \u{2014} what this note has set aside: blocks it archived, "
                 + "everything of its own that is on the \(TrashWindow.days)-day "
                 + "clock, and the originals a divide or a merge kept whole"),
         InspectorDoor(
             panel: .scraps, title: Self.scrapsDoorTitle,
             symbol: "square.on.square.dashed",
-            help: "Show the scraps beside the draft — drag one into the page "
+            help: "Snippets \u{2014} show them beside the draft; drag one into the page "
                 + "(⌥ carries its whole fan)"),
         InspectorDoor(
             panel: .references, title: "References", symbol: "books.vertical",
-            help: "Show the note's references (sources beside the draft)"),
+            help: "References \u{2014} the note's sources, shown beside the draft"),
     ]
 
     /// **13i-d U2 — THE BOOK PANEL's door** (her round-5 design: the panel
@@ -728,6 +738,10 @@ struct PostDetailView: View {
         @State private var displayed: String = DisplayTitle.placeholder
         @State private var editing = false
         @State private var draft = ""
+        /// VX-569: what the open field OFFERS an untitled note — its first
+        /// words, else its date (`TitleQuickfill`); Tab takes it. Read when
+        /// the field opens; nil on a titled note.
+        @State private var offer: String?
         @FocusState private var fieldFocused: Bool
         #if DEBUG
         /// This title's own name in the DEBUG oracle (18k UNIT C4): it owns
@@ -851,8 +865,11 @@ struct PostDetailView: View {
                     // within half a point), so nothing moves either way.
                     // (The same shape the 2026-09-06 round's row 10 named as
                     // the API-free road for the digit prompt.)
+                    // VX-569: the faint words are the OFFER — her first
+                    // line, or (a note with no words) the date — in this
+                    // same place and font; Tab takes them.
                     if draft.isEmpty {
-                        Text(displayed)
+                        Text(offer ?? displayed)
                             .font(tokens.title)
                             .foregroundStyle(tokens.faint)
                             .lineLimit(1)
@@ -870,6 +887,15 @@ struct PostDetailView: View {
                         .multilineTextAlignment(.leading)
                         .focused($fieldFocused)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                        // VX-569 (her 10-20: "maybe just tab to complete it
+                        // and enter"): Tab on an empty field TAKES the offer
+                        // — the field then holds it, ⏎ files it; any other
+                        // Tab (a typed name, nothing offered) is Tab.
+                        .onKeyPress(.tab) {
+                            guard draft.isEmpty, let offer else { return .ignored }
+                            draft = offer
+                            return .handled
+                        }
                         .onSubmit { rename() }
                         .onExitCommand { cancel() }
                         .onChange(of: fieldFocused) { _, focused in
@@ -928,11 +954,25 @@ struct PostDetailView: View {
             // reads as it did.
             draft = title
             editing = true
+            // VX-569: the offer, read once as the field opens (the note's
+            // opening — one bounded read — or its shown date), and adopted only
+            // while the field is still open and still empty.
+            offer = nil
+            guard DisplayTitle.isAbsent(title) else { return }
+            let shown = displayed
+            Task {
+                let opening = (try? await session.database.read { [postID] db in
+                    try TitleQuickfill.opening(db, postID: postID)
+                }) ?? []
+                guard editing, draft.isEmpty else { return }
+                offer = TitleQuickfill.offer(storedTitle: title, openingTexts: opening, shownName: shown)
+            }
         }
 
         private func cancel() {
             editing = false
             draft = title
+            offer = nil
         }
 
         /// What the masthead reads: the STORED title (what the rename field
@@ -980,6 +1020,7 @@ struct PostDetailView: View {
         private func rename() {
             guard editing else { return }
             editing = false
+            offer = nil
             let name = draft.trimmingCharacters(in: .whitespaces)
             guard name != title else { return }
             Task {

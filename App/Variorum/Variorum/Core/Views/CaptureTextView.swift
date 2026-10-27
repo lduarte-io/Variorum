@@ -206,8 +206,9 @@ struct CaptureTextView: NSViewRepresentable {
     /// **The OPENING ask** (VX-326), counted like `focusRequest` but obeying
     /// `CaptureOpeningFocus`: it waits for the box to be in its window, then
     /// takes the caret only if this window's keyboard is free — never
-    /// stealing, never served late. Raised once by a shell opening on the
-    /// Bookcase (`QuickEntryBar`'s opening claim); 0 everywhere else.
+    /// stealing, never served late. Raised by EVERY Bookcase mount of the
+    /// quick entry since VX-332 (her "focus on every return" — VX-326 raised
+    /// it once per shell); 0 everywhere else.
     var openingFocusRequest = 0
     /// Whether the caret is in this box, for the host's own chrome (the
     /// Terminal voice's blinking block cursor stands down when it is).
@@ -284,9 +285,9 @@ struct CaptureTextView: NSViewRepresentable {
         // title chip (`QuickEntryBar`). The Bookcase's `.task` raise reaches
         // `updateNSView` with the box still WINDOWLESS whenever the Bookcase
         // is mounted into a window already showing something (a launch's swap,
-        // a navigation back) — F-FR-1, traced at VX-326 — so `takeFocus` drops
-        // it; a shell's OPENING ask takes the waiting road instead
-        // (`armOpeningFocus`). The main queue is FIFO, so the reports keep
+        // a navigation back) — F-FR-1, traced at VX-326 — so `takeFocus` would
+        // drop it; every Bookcase mount's ask takes the waiting road instead
+        // (`armOpeningFocus` — VX-326 at launch, VX-332 on every return). The main queue is FIFO, so the reports keep
         // their order and the last one delivered is the caret's latest truth.
         view.onCaretChange = { [weak coordinator = context.coordinator] inBox in
             DispatchQueue.main.async {
@@ -294,11 +295,11 @@ struct CaptureTextView: NSViewRepresentable {
             }
         }
         // A request already raised when the box is MADE (the pad's 1) is
-        // served once, on its first arrival. A request raised later (the
-        // Bookcase's `.task` on a later mount, a click on the padding, the
-        // title chip) takes the `takeFocus` road in `updateNSView` (VX-112's
-        // trace: the bar's request is always raised a turn after this, so its
-        // flag is false); a shell's OPENING ask takes `armOpeningFocus` (VX-326).
+        // served once, on its first arrival. A request raised later (a click
+        // on the padding, the title chip) takes the `takeFocus` road in
+        // `updateNSView` (VX-112's trace: the bar's request is always raised a
+        // turn after this, so its flag is false); a Bookcase mount's ask takes
+        // `armOpeningFocus` (VX-326; every mount since VX-332).
         view.wantsInitialFocus = focusRequest > 0
         context.coordinator.lastFocusRequest = focusRequest
         // A box MADE after an opening ask was raised does not inherit it: the

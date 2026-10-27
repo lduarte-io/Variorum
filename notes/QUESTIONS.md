@@ -3669,4 +3669,12 @@ count · **MB-21** the picker's gathering note counts · **MB-10** the Book Pane
 triaged: VX-605 (the Clients row's "last seen" staleness — Confirmed) · VX-606 (read_note accepted an undeclared
 argument) · VX-607 (the second load-flake beside VX-532) · VX-609 (the star-gathering ask offers write-new it can only
 refuse — the P-2 class) · VX-610 (a once-seen Bookcase row-count lag) · VX-611 (the Trash's kind word on a gathering) ·
-VX-612/VX-613 (MB-13's two traced-unobserved server races). **Status: open — her morning.**
+VX-612/VX-613 (MB-13's two traced-unobserved server races). **Status: PARTLY ANSWERED 2026-10-27 (the morning sitting): MB-7 — the Air's library IS in Castle, so the drops are the by-design lock road (mechanism settled; the Activity look moot); reconnect = C, docs only → VX-619 (B ranked above A; available later); Pre-launch from the filed set = VX-605 only (her pick). CORRECTION the same sitting: MB-8's list wrongly offered VX-565/566/567/590 as riders — they were SEATED MEMBERS of VX-548 its kickoff missed (with VX-596); the remainder runs as VX-620 (the record's CORRECTION section). Remaining open: the ratify-or-redirect provisionals (MB-1…MB-6, MB-12, MB-15…MB-17, MB-19/22) and the true offers (MB-11, MB-14, MB-18, MB-20, MB-21, MB-10). Also at the sitting: VX-605 seated into VX-620 at her word; VX-596's wording-to-revisit block written onto the ticket at her ask; and the daily Journal's per-ask fence RE-CONFIRMED standing — her words: "i dont want the daily journal itself to be shareable standing still - Im pleased with that line."**
+
+#244 — **THE VX-439 BUNDLE (the binding record is `notes/plans/fixes/vx-439-sidebar-bar-export-quick-wins.md` — THE
+MORNING BUNDLE items 1–24; the ladder rounds beside it; her answers of 2026-10-27 in the record's Ledger).** ANSWERED
+at her morning pass: the history rewrite ordered and run; the Fable pass declined at her chrome-only criterion; the
+release ordered (0.10.3, one for wave 1). STANDING for her leisure: the A-439/C-call PROVISIONALs (built as ruled);
+VX-602's guide-content tail (three lessons + two sentences still say "tutorial" — re-word + the A1 re-seed in her
+window, or leave); the VX-424 hand check (drag an Open row down one slot); one Settings glance (General's seventh
+row + the toolbar label in Terminal); n-3's two-export-doors taste call; riders VX-373/VX-409.

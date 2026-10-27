@@ -88,6 +88,9 @@ struct EditorCommands: Commands {
     /// rendered).
     static let menuRendered: [CapabilityID] = [
         .newPost, .todaysEntry, .findAnything, .commitTake,
+        // VX-570 (the VX-439 run): ⌥⌘N, beside ⌘N — a note inside the book
+        // the focused pane shows.
+        .newNoteInBook,
         // 13x F1 (R1-MAJOR): the hand-off act's File door.
         .handOffLibrary,
         // The post-13l polish round (rows 16/23): ⌘⇧S, beside ⌘S in the File
@@ -97,6 +100,8 @@ struct EditorCommands: Commands {
         // door — a duplicate is a version you write on.
         .duplicateNoteWithTags, .duplicateNoteWithoutTags,
         .importFiles, .exportLibrary, .exportCaretBlock,
+        // VX-125 (the VX-439 run): Export Note… (⌥⌘S), beside the library's.
+        .exportNote,
         .structuralUndo, .structuralRedo,
         // 13n-b U4: the offer door's keyboard road, beside its veto.
         .showLastAIChange,
@@ -302,6 +307,12 @@ struct EditorCommands: Commands {
         // and the one `performKeyEquivalent` override). It is the platform's
         // own save-as chord, which is exactly what saving a whole moment is.
         case .saveNoteVersion: ("s", [.command, .shift])
+        // VX-125 (the VX-439 run, C-125-1): Export Note… — the ⌥ "deliberate
+        // variant" of ⌘S, her "keyboard shortcut for saving note". THE
+        // COLLISION SWEEP'S RESULT is the registry row's (⌥⌘S is free: this
+        // table's `s` chords are ⌘S, ⌘⇧S and ⌃⌘S; ⇧⌘E, the ruled first
+        // choice, is Extract's).
+        case .exportNote: ("s", [.command, .option])
         case .helper: ("/", .command)
         // 13f batch 3 (W16) minted ⌘[ / ⌘] here, on the stated reason that
         // *"they are the platform's own back/forward idiom"* — which the
@@ -347,6 +358,10 @@ struct EditorCommands: Commands {
         // its neighbour rather than against it: ⌘N makes a note, ⌘⇧N pops
         // the quick-note pad.
         case .quickNote: ("n", [.command, .shift])
+        // VX-570 (the VX-439 run): New Note in This Book. THE COLLISION
+        // SWEEP'S RESULT is the registry row's (⌥⌘N is free: this table's `n`
+        // chords are ⌘N and ⌘⇧N; ⌃⌥⌘N is the quick note's SYSTEM chord).
+        case .newNoteInBook: ("n", [.command, .option])
         // The Act 10 correction round, batch A (row 2). THE COLLISION
         // SWEEP'S RESULT: ⌃⌘S is FREE (see the registry row) — and it is the
         // platform's own Toggle Sidebar chord.
@@ -439,6 +454,13 @@ struct EditorCommands: Commands {
             Button(verb(.newPost)) { creationActions()?.newPost() }
                 .keyboardShortcut("n", modifiers: .command)
                 .disabled(!canReachCreationTarget)
+            // VX-570 (the VX-439 run, A-439-4): a member of the book the KEY
+            // window's focused pane shows, through the book's own foot act —
+            // so it rides `actions` (that window's router), never the
+            // creation router. Grey with no book in the focused pane.
+            Button(verb(.newNoteInBook)) { actions?.newNoteInThisBook() }
+                .keyboardShortcut("n", modifiers: [.command, .option])
+                .disabled(!enabled(.newNoteInBook))
             Button(verb(.todaysEntry)) { creationActions()?.todaysEntry() }
                 .keyboardShortcut("j", modifiers: .command)
                 .disabled(!canReachCreationTarget)
@@ -577,6 +599,13 @@ struct EditorCommands: Commands {
             Divider()
             Button(verb(.exportLibrary)) { actions?.exportLibrary() }
                 .disabled(session == nil)
+            // VX-125 (the VX-439 run, A-439-1): the note on screen as a `.md`
+            // file in the Variorum simple format — Copy full text's text, the
+            // ONE act every door runs (`NoteExport`). Grey with no note in
+            // reach (the registry's `noteScoped`).
+            Button(verb(.exportNote)) { actions?.exportNote() }
+                .keyboardShortcut("s", modifiers: [.command, .option])
+                .disabled(!enabled(.exportNote))
             // Round-1 MINOR-3: the ONE enablement idiom (the registry) —
             // attachment-level; a caret outside any block speaks in
             // ShellActions instead of silently returning.
@@ -1055,7 +1084,9 @@ struct EditorCommands: Commands {
             // the ruling named Open the Tutorial; Restore is the identical
             // class one line below (the batch-7 follow-on discipline:
             // applied with the class, flagged so it can be reversed).
-            Button("Open the Tutorial") { creationActions()?.openTutorial() }
+            // VX-602 (the VX-439 run, C-602-1): the door opens the FIELD
+            // GUIDE — named so, beside "Take the Onboarding Tutorial".
+            Button(HelpMenuCopy.openFieldGuide) { creationActions()?.openTutorial() }
                 .disabled(!canReachCreationTarget)
             // 13s-b U1a, piece 5 (R-13s-6/13 — "they can find it under
             // help"): the tour's standing door, beside the field guide's. Its

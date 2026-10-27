@@ -877,6 +877,9 @@ extension EditorSurfaceDelegate: NSTextViewDelegate {
         // then the caret context reads the surface as she will see it.
         model.settleMarkdownCaret()
         model.updateCaretContext()
+        // VX-441: a find step SELECTS its match — the readout follows it
+        // (chrome only; nothing here touches text, layout or identity).
+        model.refreshFindReadout()
     }
 }
 

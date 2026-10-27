@@ -151,6 +151,16 @@ enum QuickEntryCopy {
     /// always done and what distinguishes it from the pad.
     static let placeholder = "new note — just start typing · ⏎ opens it · ⇧⏎ new paragraph"
 
+    /// **VX-552 (the VX-439 run — her ask: the wing you're in always visible
+    /// beside the New Note door, so a new note's landing place is never a
+    /// surprise).** The quiet line at the box's trailing edge: where what she
+    /// types here will live. Shown with ONE wing too (C-552-1 — her "always").
+    static func wingLabel(_ wingName: String) -> String { "in \(wingName)" }
+    /// Its hover — the whole fact.
+    static func wingHelp(_ wingName: String) -> String {
+        "A note made here lands in the \u{201C}\(wingName)\u{201D} wing \u{2014} \u{2318}L switches wings"
+    }
+
     /// The refusal names the act, hands the reason to the app's ONE
     /// operations vocabulary — never the raw `\(error)` dump this printed
     /// until now — and ends with the half that is load-bearing: her text is
@@ -167,36 +177,33 @@ enum QuickEntryCopy {
     }
 }
 
-/// **VX-326 — a shell's ONE opening ask for the quick entry's caret.** The
-/// shell (`RootView` — one per window, and a fresh one after every unlock)
-/// owns one and hands it to its Bookcase; the FIRST Bookcase bar to mount in
-/// that shell claims it and asks through the capture box's opening road
-/// (`CaptureOpeningFocus`: wait for the window, take only a free keyboard,
-/// never steal). Every later Bookcase mount in the same shell — a navigation
-/// back — finds it spent and keeps the bar's mount raise exactly as it was
-/// (which still drops when it lands before the box is in its window — the
-/// VX-282 record's O-U6-1). A reference so the claim survives the Bookcase's
-/// own re-renders; it holds no state but the one bit.
-@MainActor
-final class QuickEntryOpeningFocus {
-    private(set) var spent = false
-
-    /// True exactly once.
-    func claim() -> Bool {
-        defer { spent = true }
-        return !spent
-    }
-}
-
 struct QuickEntryBar: View {
     let onOpen: (SidebarSelection) -> Void
     /// Batch 9 (R102): the shelf is the terminal home — it opens with the
     /// cursor already in the bar, so "start typing" is literal. Library
     /// leaves focus alone.
+    ///
+    /// **VX-332 (the VX-439 run — her ruling: "YES — focus on every return").**
+    /// EVERY autofocus mount asks, and every ask takes the box's waiting,
+    /// never-stealing road (`CaptureOpeningFocus` — VX-326's opening ask):
+    /// it waits for the box to be in its window, then takes the caret only
+    /// when nothing else in that window holds the keyboard and no sheet is up.
+    /// So a window opening on the Bookcase AND every return to it (a sidebar
+    /// click, ⌥⌘[, a note closed) put the caret here, and a field, a sheet or
+    /// another pane's editor is never robbed (P-U6-2's option (b), R102's
+    /// wording). VX-326's one-shot shell claim (`QuickEntryOpeningFocus`) is
+    /// RETIRED with the ruling: it existed to keep later mounts OFF this road.
     var autofocus = false
-    /// VX-326: the shell's opening ask, when this bar may be the one to
-    /// claim it (the Bookcase's bar, handed the shell's claim); nil elsewhere.
-    var openingFocus: QuickEntryOpeningFocus?
+    /// **VX-332 — the tour holds the window** (the W-U1a-1 lesson: a caret
+    /// left in the quick entry turns the next keystroke into a note). While a
+    /// tour runs, a mount does not ask at all; the tour's own arrival releases
+    /// whatever held the keyboard, and nothing here takes it back.
+    var standsDown = false
+    /// VX-552 (the VX-439 run): the wing a note filed here lands in — the
+    /// host's own `WingsModel.currentName` (the app's one wing, which follows
+    /// the focused note), never a second observation. nil draws no label (a
+    /// host with no wings model — a test, a preview).
+    var wingName: String?
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -211,7 +218,8 @@ struct QuickEntryBar: View {
     /// the shelf wants the caret here, and again whenever she clicks the
     /// box's padding rather than its text.
     @State private var focusRequest = 0
-    /// VX-326: the shell's opening ask, raised at most once (the claim).
+    /// The waiting, never-stealing ask (VX-326's road), raised at every
+    /// autofocus mount since VX-332.
     @State private var openingFocusRequest = 0
     @State private var cursorOn = true
 
@@ -234,11 +242,13 @@ struct QuickEntryBar: View {
         session: AppSession,
         onOpen: @escaping (SidebarSelection) -> Void,
         autofocus: Bool = false,
-        openingFocus: QuickEntryOpeningFocus? = nil
+        standsDown: Bool = false,
+        wingName: String? = nil
     ) {
         self.onOpen = onOpen
         self.autofocus = autofocus
-        self.openingFocus = openingFocus
+        self.standsDown = standsDown
+        self.wingName = wingName
         _box = State(initialValue: QuickEntryModel(session: session))
     }
 
@@ -253,6 +263,7 @@ struct QuickEntryBar: View {
         // the box as the placeholder; typing replaces it.
         @Bindable var box = box
         return VStack(alignment: .leading, spacing: 4) {
+          HStack(alignment: .top, spacing: 10) {
             ZStack(alignment: .topLeading) {
                 if box.text.isEmpty {
                     HStack(spacing: 6) {
@@ -294,6 +305,21 @@ struct QuickEntryBar: View {
                     onFocusChange: { entryFocused = $0 },
                     onFile: { submit() })
             }
+            // VX-552: the wing she is filing into, beside the box she files
+            // in — on the box's first line, at its trailing edge, outside the
+            // text (so her typing never runs under it), visible while she types.
+            if let wingName {
+                Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wingName)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: 180, alignment: .trailing)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, Self.placeholderOrigin.y)
+                    .help(QuickEntryCopy.wingHelp(wingName))
+            }
+          }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .overlay(
@@ -344,17 +370,15 @@ struct QuickEntryBar: View {
         // the Bookcase's foot and the Library's are kept clear alike.
         .statusToastKeepClear()
         .task {
-            guard autofocus else { return }
-            if openingFocus?.claim() == true {
-                // VX-326 — the shell opening on the Bookcase: this ask reaches
-                // the box before SwiftUI has put it in its window (the launch's
-                // swap), so it takes the box's waiting road — decided once the
-                // box is in its window, taking only a free keyboard.
-                openingFocusRequest += 1
-            } else {
-                // A later mount (a navigation back): the raise as it was.
-                focusRequest += 1
-            }
+            // VX-332: every mount asks — through the waiting road, which a
+            // launch's swap and a navigation back both need (the ask reaches
+            // the box before SwiftUI has put it in its window, the VX-282
+            // record's O-U6-1), and which takes only a free keyboard. The
+            // counted `focusRequest` (an explicit ask — the padding tap, the
+            // title chip) is no longer a mount's road: it does not wait, and
+            // it would take the keyboard from whatever held it.
+            guard autofocus, !standsDown else { return }
+            openingFocusRequest += 1
         }
     }
 

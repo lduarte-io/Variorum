@@ -320,6 +320,12 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// pane is SHOWING. A book, a place or a scraps container is not a note
     /// the Open list holds, so the key is honestly grey there.
     var focusedPaneShowsNote = false
+    /// **The focused pane is showing a BOOK** (VX-570, the VX-439 run) — a
+    /// `.reading`, in any book mode — i.e. ⌥⌘N "New Note in This Book" has a
+    /// book to mint into. The `focusedPaneShowsNote` family: a fact about what
+    /// the KEY window's focused pane is SHOWING. A note open in its own pane
+    /// is not a book context (C-570-1 — which of its books would it mean?).
+    var focusedPaneShowsBook = false
     /// **The KEY window's kind** (18o U1 — 17e (12)); nil while no window has
     /// registered. The sidebar toggle's gate — only a FULL window has a
     /// sidebar — lived as a per-view if-statement on its View-menu item while
@@ -419,6 +425,12 @@ nonisolated struct Capability: Identifiable, Sendable {
     /// from the memberwise initializer entirely, and the point of the default
     /// is that ~130 declarations that own no system chord say nothing at all.
     var systemShortcutLabel: String? = nil
+    /// **VX-560 (the VX-439 run, A-439-12) — a second key for the same act**,
+    /// reached by its own door rather than a menu key equivalent ("⌘←" on
+    /// Back — `BrowserNavKeyMonitor`, live only while no text holds the
+    /// keyboard). The MENU keeps showing `shortcutLabel`; this is the
+    /// registry's record of the alternate, and the helper (⌘/) shows it.
+    var alternateShortcutLabel: String? = nil
 
     /// **A door's label with its DECLARED chord appended** — "Copy All Takes
     /// (⌘⇧C)" — and the ONE formatter that composes the two, so a key she
@@ -509,6 +521,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // `.deleteNote`'s is, and so the receipt (`RecoveryCopy
     // .archivedNoteReceipt`) names where the note went.
     case archiveNote
+    // VX-425 (the VX-439 run, A-439-16) — RENAME A NOTE, declared at last: her
+    // ask (2026-10-18) plus a beta tester's — "two-finger click on an Open row
+    // … gets a menu: Rename, Delete note, Close". The Library's row has carried
+    // an undeclared "Rename…" since 9d; the sidebar's note rows are its second
+    // renderer, so the act is declared once and both read its verb.
+    case renameNote
     // 13j batch 6b (J1 — her round-3 rider, verbatim: "have a delete now
     // option WITHIN the trash (not from within the normal note) … but never
     // accidental full delete from within a note, but an option for full
@@ -854,6 +872,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // ALWAYS and greyed with the reason where the act can't land
     // (R-VX214-3), never hidden.
     case newNoteInGathering
+    // VX-570 (the VX-439 run, A-439-4 + C-570-1) — her 10-21 note: "command
+    // for new note within a book". ⌥⌘N mints a member of the book the focused
+    // pane shows, through the SAME act the book's own foot door runs (a note,
+    // an entry on a journal-trait book, the planner's note on a gathering);
+    // the foot's and the Outline flow's "+ new note"/"+ new entry" are its
+    // `.surface` renderers.
+    case newNoteInBook
     // 13i-d U4 — A BOOK'S ARCHIVED LINE (her #169(a)(1) ruling — the 13i-d
     // plan item 9): its two row doors are **Unarchive** (NEW — the archived
     // line is its one declared renderer; the Library's Archived view carries
@@ -896,6 +921,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// format onto the clipboard, for any chat anywhere. Post scope; the two
     /// `note ▾` menus and ⌘K render it. Reads only.
     case copyForAI
+    /// VX-125 (the VX-439 run, A-439-1): Copy full text's text as a `.md`
+    /// FILE — File ▸ Export Note… (⌥⌘S), ⌘K and both `note ▾` menus. Post
+    /// scope; reads only.
+    case exportNote
     case toggleSeams, helper
     case restoreTutorial
     /// pre-13u Act 10 (the tenth wave's ruling — "Restore door - yes,

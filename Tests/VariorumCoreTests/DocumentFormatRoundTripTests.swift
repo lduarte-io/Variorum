@@ -125,4 +125,98 @@ struct DocumentFormatRoundTripTests {
             #expect(try db.fetchInt("SELECT COUNT(*) FROM sync_outbox") == 0)
         }
     }
+
+    // MARK: - VX-126 — the LIBRARY export round-trips whole (her option A)
+
+    /// **Export Library's note files ARE Copy full text's text, and they
+    /// re-import whole** (VX-126, option A ruled 2026-10-27). A library is
+    /// exported, every note file is read back the import door's own way
+    /// (`VariorumDocumentFolder.note` → `importDocument`), and the imported
+    /// note re-exports to the very bytes of its file — so its title, its tags
+    /// and every take rode the file. RED ON OLD: the note files carried no
+    /// header, so the imported note was named by its file ("2026-07-10 o
+    /// ladrão…") and wore no tag. The scraps area's file and the book's view
+    /// keep the plain projection (C-126-1), byte for byte.
+    @Test func aLibraryExportReimportsEveryNoteWithItsTitleTagsAndTakes() throws {
+        try withOperations { ops, db in
+            let fanned = try ops.createPost(title: "o ladrão de raios — ch 1", entryDate: "2026-07-10")
+            let first = try ops.seedBlock(in: fanned.id, text: "Eu não pedi para herdar o observatório.")
+            try take(ops, on: first.block.id, from: first.variant.id,
+                     "Honestly, I never asked for the observatory.", label: "english")
+            try take(ops, on: first.block.id, from: first.variant.id, "Je ne voulais pas.")
+            try ops.seedBlock(in: fanned.id, text: "Cuidar de um observatório dá trabalho.")
+            let percy = try ops.createTag(name: "percy")
+            try ops.applyTag(try ops.createTag(parent: percy.id, name: "pt-en").id, toPost: fanned.id)
+            try ops.applyTag(try ops.createTag(name: "bilingual").id, toPost: fanned.id)
+
+            let plain = try ops.createPost(title: "Kept", entryDate: "2026-07-11")
+            try ops.seedBlock(in: plain.id, text: "Kept body.")
+            let shelved = try ops.createPost(title: "Shelved", entryDate: "2026-07-12")
+            try ops.seedBlock(in: shelved.id, text: "Shelved body.")
+            try ops.applyTag(try ops.createTag(name: "old").id, toPost: shelved.id)
+            try ops.archiveContainer(shelved.id)
+            let unnamed = try ops.createPost(title: nil, entryDate: "2026-07-13")
+            try ops.seedBlock(in: unnamed.id, text: "Dated body.")
+
+            let pool = try ops.createPool(title: "Scraps")
+            let scrap = try ops.seedBlock(in: pool.id, text: "Scrap one.")
+            try take(ops, on: scrap.block.id, from: scrap.variant.id, "Scrap alt.")
+            let reading = try ops.createReading(name: "Shelf", kind: .book)
+            try ops.addPostToReading(fanned.id, to: reading.id)
+
+            let manifest = try db.read { try Queries.bulkExportManifest($0) }
+            let byPath = Dictionary(uniqueKeysWithValues: manifest.map { ($0.relativePath, $0.contents) })
+            let notes: [(path: String, id: String)] = [
+                ("2026-07-10 o ladrão de raios — ch 1.md", fanned.id),
+                ("2026-07-11 Kept.md", plain.id),
+                ("Archived/2026-07-12 Shelved.md", shelved.id),
+                ("2026-07-13.md", unnamed.id),
+            ]
+
+            // (1) Every note file is Copy full text's text, byte for byte.
+            for note in notes {
+                let file = try #require(byPath[note.path], "\(note.path) is exported")
+                #expect(file == (try db.read { try Queries.variorumDocumentText($0, postID: note.id) }),
+                        "\(note.path) is byte-identical to Copy full text")
+            }
+            #expect(byPath["2026-07-11 Kept.md"] == "{t:\"Kept\"}\n\nKept body.",
+                    "fanless: the header over plain Markdown")
+            #expect(byPath["2026-07-13.md"] == "Dated body.",
+                    "a name she never typed rides no title token (IC-11)")
+
+            // (2) …and each re-imports whole: title, tags, takes.
+            for note in notes {
+                let file = try #require(byPath[note.path])
+                let name = String(note.path.split(separator: "/").last ?? "")
+                let imported = try ops.importDocument(
+                    try VariorumDocumentFolder.note(named: name, contents: file))
+                let source = try #require(try db.read { try Container.fetchOne($0, key: note.id) })
+                let sourceTags = try db.read { try Queries.postTags($0, postID: note.id).map(\.path) }
+                let importedTags = try db.read {
+                    try Queries.postTags($0, postID: imported.post.id).map(\.path)
+                }
+                #expect(importedTags == sourceTags, "\(note.path): the tags ride the file")
+                let body = { (id: String) in
+                    try db.read { try Queries.exportPost($0, postID: id, includeVariants: true) }
+                }
+                #expect(try body(imported.post.id) == (try body(note.id)), "\(note.path): every take rides")
+                if DisplayTitle.isAbsent(source.title) {
+                    // The format's recorded limit (IC-11): the importer names
+                    // an untitled note by its file — here, its date.
+                    #expect(imported.post.title == "2026-07-13")
+                } else {
+                    #expect(imported.post.title == source.title, "\(note.path): the title rides the file")
+                    #expect(try db.read { try Queries.variorumDocumentText($0, postID: imported.post.id) } == file,
+                            "\(note.path): the imported note re-exports to its file's bytes")
+                }
+            }
+
+            // (3) C-126-1: the scraps area's file and the book's view are the
+            // plain projections, unchanged.
+            #expect(byPath["Pools/Scraps.md"] == (try db.read { try Queries.exportPost($0, postID: pool.id) }))
+            #expect(byPath["Pools/Scraps.md"] == "Scrap one.")
+            #expect(byPath["Readings/Shelf.md"]
+                    == (try db.read { try Queries.exportReading($0, readingID: reading.id) }))
+        }
+    }
 }

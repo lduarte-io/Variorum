@@ -12,9 +12,13 @@
 //  · the box's opening road — it waits for its window, takes only a free
 //    keyboard, is never served late, and is served once
 //    (`CaptureOpeningFocusBoxTests`);
-//  · the scope — the opening ask is the shell's, once; a navigation back to
-//    the Bookcase keeps the bar's mount raise exactly as it was
-//    (`QuickEntryOpeningScopeTests`).
+//  · the scope — VX-332 (the VX-439 run, her ruling "YES — focus on every
+//    return"): EVERY Bookcase mount asks through the opening road, so a
+//    navigation back puts the caret in the box (RED ON OLD — VX-326 spent a
+//    one-shot shell claim and the later mount's counted raise dropped), and a
+//    running tour's mount stands down (`QuickEntryOpeningScopeTests`). The
+//    one-shot claim (`QuickEntryOpeningFocus`) retired with the ruling, and
+//    its own pin (`theClaimIsTrueExactlyOnce`) with it.
 //
 
 import AppKit
@@ -204,26 +208,46 @@ struct CaptureOpeningFocusBoxTests {
     }
 }
 
-// MARK: - The shell's ONE opening ask (the fix's own pins; GUARDS)
+// MARK: - Every Bookcase mount asks (VX-332 — the VX-439 run)
+
+/// A bare quick-entry bar beside a stand-in field, for the stand-down pins.
+@MainActor
+private func mountBar(
+    session: AppSession, standsDown: Bool
+) async -> (window: NSWindow, field: NSTextField) {
+    let window = NSWindow(
+        contentRect: NSRect(x: 80, y: 80, width: 720, height: 200),
+        styleMask: [.titled], backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    let content = NSView(frame: NSRect(x: 0, y: 0, width: 720, height: 200))
+    let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+    content.addSubview(field)
+    window.contentView = content
+    window.makeKeyAndOrderFront(nil)
+    window.makeFirstResponder(nil)  // AppKit's own pick of the field undone (the rig's harness fact)
+    // The bar arrives AFTER the window is up — a mount into a window already
+    // showing something, the navigation-back shape.
+    let hosting = NSHostingView(rootView: QuickEntryBar(
+        session: session, onOpen: { _ in }, autofocus: true, standsDown: standsDown)
+        .environment(ThemeStore(session: session)))
+    hosting.frame = NSRect(x: 0, y: 40, width: 720, height: 160)
+    content.addSubview(hosting)
+    return (window, field)
+}
 
 @MainActor
-@Suite("VX-326 — the opening ask is the shell's, once; a navigation back keeps the bar's raise as it was",
+@Suite("VX-332 — every Bookcase mount asks for the caret, never stealing, and stands down for a tour",
        .serialized)
 struct QuickEntryOpeningScopeTests {
-    @Test func theClaimIsTrueExactlyOnce() {
-        let claim = QuickEntryOpeningFocus()
-        #expect(!claim.spent)
-        #expect(claim.claim())
-        #expect(claim.spent)
-        #expect(!claim.claim())
-        #expect(!claim.claim())
-    }
-
-    /// The shell opens on the Bookcase (the opening ask served); a navigation
-    /// to the Library and back mounts a new Bookcase bar, which finds the
-    /// claim spent and raises the counted request exactly as before — the
-    /// opening road is not taken again.
-    @Test func aNavigationBackToTheBookcaseKeepsTheBarsRaiseAsItWas() async throws {
+    /// **THE PIN — RED ON OLD.** The shell opens on the Bookcase (the caret in
+    /// its quick entry); a navigation to the Library and back mounts a NEW
+    /// Bookcase bar, and the caret lands in IT — through the waiting road, the
+    /// counted raise untouched. On the old tree the claim was spent, the later
+    /// mount raised the counted request, `takeFocus` met a box not yet in its
+    /// window and dropped it: the window kept the keyboard (the VX-282
+    /// record's O-U6-1 — the ticket's "navigating back to the Bookcase never
+    /// puts the caret in quick entry").
+    @Test func aNavigationBackToTheBookcasePutsTheCaretInItsQuickEntry() async throws {
         try await LaunchFocusRig.world(seed: 329) { session in
             let boot = LaunchFocusBoot()
             let router = ShellRouter()
@@ -235,9 +259,6 @@ struct QuickEntryOpeningScopeTests {
             let first = try #require(LaunchFocusRig.windowedBox(window))
             await LaunchFocusRig.settle(turns: 20) { window.firstResponder === first }
             #expect(window.firstResponder === first, "the shell's opening: the caret in the quick entry")
-            let firstAsks = try #require(first.delegate as? CaptureTextView.Coordinator)
-            #expect(firstAsks.lastOpeningFocusRequest == 1 && firstAsks.lastFocusRequest == 0,
-                    "the opening took the opening road")
 
             // The Library carries a quick-entry bar of its own (no autofocus):
             // its box is told apart by identity.
@@ -256,11 +277,65 @@ struct QuickEntryOpeningScopeTests {
             }
             let second = try #require(LaunchFocusRig.windowedBox(window), "back on the Bookcase")
             #expect(second !== first && second !== libraryBox, "a new Bookcase bar mounted")
-            await LaunchFocusRig.settle(turns: 20)
+            await LaunchFocusRig.settle(turns: 40) { window.firstResponder === second }
             let secondAsks = try #require(second.delegate as? CaptureTextView.Coordinator)
-            #expect(secondAsks.lastOpeningFocusRequest == 0, "the claim was spent — no second opening ask")
-            #expect(secondAsks.lastFocusRequest == 1, "the bar's mount raise, as it was")
-            #expect(!second.openingFocusPending)
+            #expect(secondAsks.lastOpeningFocusRequest == 1, "the return asked, through the waiting road")
+            #expect(secondAsks.lastFocusRequest == 0, "never the counted (stealing) raise")
+            #expect(window.firstResponder === second, "VX-332: back on the Bookcase, the caret is in its quick entry")
+        }
+    }
+
+    /// GUARD (never steal): a mount while another responder holds the
+    /// window's keyboard leaves it there.
+    @Test func aMountNeverTakesTheKeyboardFromAField() async throws {
+        try await LaunchFocusRig.world(seed: 332) { session in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 720, height: 200),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer { LaunchFocusRig.close(window) }
+            let content = NSView(frame: NSRect(x: 0, y: 0, width: 720, height: 200))
+            let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+            content.addSubview(field)
+            window.contentView = content
+            window.makeKeyAndOrderFront(nil)
+            window.makeFirstResponder(field)
+            let holder = window.firstResponder
+            #expect(holder !== window && holder != nil, "non-vacuity: the field holds the keyboard")
+            let hosting = NSHostingView(rootView: QuickEntryBar(
+                session: session, onOpen: { _ in }, autofocus: true)
+                .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 40, width: 720, height: 160)
+            content.addSubview(hosting)
+            await LaunchFocusRig.settle(turns: 100) { LaunchFocusRig.windowedBox(window) != nil }
+            let box = try #require(LaunchFocusRig.windowedBox(window))
+            await LaunchFocusRig.settle(turns: 30)
+            #expect(window.firstResponder === holder, "the field keeps it")
+            #expect(window.firstResponder !== box)
+        }
+    }
+
+    /// **The tour stands the bar down** (the W-U1a-1 lesson): a Bookcase mount
+    /// while a tour runs does not ask — on a FREE keyboard the box stays
+    /// away; the same mount with no tour takes it (non-vacuity).
+    @Test func aMountDuringATourStandsDown() async throws {
+        try await LaunchFocusRig.world(seed: 333) { session in
+            let touring = await mountBar(session: session, standsDown: true)
+            defer { LaunchFocusRig.close(touring.window) }
+            await LaunchFocusRig.settle(turns: 100) { LaunchFocusRig.windowedBox(touring.window) != nil }
+            let quiet = try #require(LaunchFocusRig.windowedBox(touring.window))
+            await LaunchFocusRig.settle(turns: 30)
+            #expect(LaunchFocusRig.keyboardIsFree(touring.window), "nothing took the free keyboard")
+            #expect(touring.window.firstResponder !== quiet, "the tour's bar never asked")
+            let asks = try #require(quiet.delegate as? CaptureTextView.Coordinator)
+            #expect(asks.lastOpeningFocusRequest == 0 && asks.lastFocusRequest == 0)
+
+            let plain = await mountBar(session: session, standsDown: false)
+            defer { LaunchFocusRig.close(plain.window) }
+            await LaunchFocusRig.settle(turns: 100) { LaunchFocusRig.windowedBox(plain.window) != nil }
+            let asking = try #require(LaunchFocusRig.windowedBox(plain.window))
+            await LaunchFocusRig.settle(turns: 40) { plain.window.firstResponder === asking }
+            #expect(plain.window.firstResponder === asking, "with no tour the same mount takes the free keyboard")
         }
     }
 }

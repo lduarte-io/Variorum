@@ -999,3 +999,25 @@ ladder). The mid window's one red was traced to VX-330's pin colliding with VX-3
 justified pin edit, verified against the red log); the final window's one red was the deliberate note-tool scope-pin
 flip under the ratified supersession. Born tickets: VX-605 · VX-606 · VX-607 · VX-609 · VX-610 · VX-611 · VX-612 ·
 VX-613 (triaged at filing). Her bundle: QUESTIONS #243. The provisionals MB-1…MB-22 stand as built until her pass.
+
+
+**2026-10-27 — VX-439 (Run: sidebar, bar & export quick wins; PR #194, merge b3b16f2ba; the record
+`notes/plans/fixes/vx-439-sidebar-bar-export-quick-wins.md`, the ladder files beside it; her overnight kickoff, two
+Opus implementer batches + an Opus two-round ladder at her word, Fable orchestrating).** Her kickoff rulings: VX-332
+yes — "focus on every return" (P-U6-2's option b); VX-126 option A — the bulk export's files byte-identical to Copy
+full text; VX-602's Help-menu words from her CLEAN checklist. Her live rulings mid-run: VX-554 Done as stale ("that
+ticket must've been stale. it can be marked complete"); VX-568 parked out ("it's a subtle issue - just remove it from
+this run"); the morning words — the branch-history rewrite ("rewrite it, just remove the walk screenshots"), the
+Fable pass stood down at her chrome-only criterion ("in that case probably not needed" → "I don't need the fable
+pass"), and the release ordered ("then we can do a release… run the release"). The contract lines changed in place:
+SurfaceContracts' Open list (half-row drops VX-424; the row menu VX-425; first-words rows VX-580; hide-starred
+VX-589), the app (Bookcase focus VX-332; the wing label VX-552 incl. the ladder M-2's toolbar door; the Help names
+VX-602; the keyboard family VX-560/570/125), the note (the find readout VX-441; the title offer VX-569), the doors
+(the export clients VX-125/126); AppSpec §12's keyboard family mirrored; MCPSpec's one Help label renamed. The
+ladder: r1 3 MAJOR · 7 MINOR · 5 NIT (M-1 a measured P1 break in the new sidebar read; M-3 the orchestrator's own
+capture-commit error) → all accepted fixes red-on-old verified → r2 0 BLOCKER · 0 MAJOR, every fix HOLDS (R2-1: the
+gap-throw in `leadingBlockTexts`, SyncSpec §5, fixed core-side) → the final items orchestrator-checked line by line.
+Evidence: 821/152 · 3,057/495 (VX-502's tree; seam trio green) · 1,562/267 + 11 exact revert reds (VX-548's tree) ·
+80/10. Three walks; the dev store restored each time. The history rewrite: `7929147de` → `a3f087842`, tree
+byte-identical, main's signed line intact. Born: VX-603, VX-604, VX-608, VX-614–618 (triaged). Riders VX-373/409
+not taken. canon-size 125,887/150,000 — no crossing. MOBILE PARITY: nothing mobile-visible.

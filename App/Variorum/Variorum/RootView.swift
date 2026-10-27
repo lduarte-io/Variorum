@@ -96,12 +96,10 @@ struct RootView: View {
     /// object rather than a bare `@State` engine so the engine's doors can
     /// hold it weakly — a window closed mid-tour leaves no cycle behind.
     @State private var tourSlot = TourSlot()
-    /// **VX-326 — this shell's ONE opening ask** for the Bookcase quick
-    /// entry's caret (R102: the Bookcase opens with the cursor in the bar). A
-    /// shell opens on the Bookcase — at launch, after every unlock, in a new
-    /// window — and its first Bookcase bar claims this; later Bookcase mounts
-    /// in the same shell find it spent.
-    @State private var bookcaseOpeningFocus = QuickEntryOpeningFocus()
+    // (VX-326's one-shot `bookcaseOpeningFocus` claim RETIRED at VX-332 — the
+    // VX-439 run, her "focus on every return": every Bookcase mount asks
+    // through the quick entry's waiting, never-stealing road, and stands down
+    // while this window's tour runs — `tourRunning` below.)
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -259,7 +257,9 @@ struct RootView: View {
                 // mode truth (the broadcast-derived shadow is retired).
                 postMode: (session.commandRouter.activeMode ?? .takes).rawValue,
                 noteBox: noteBoxView,
-                bottom: statusRows)
+                bottom: statusRows,
+                // VX-425: the note rows' Move/Copy to Wing ▸ doors.
+                wings: wings)
         } detail: {
             paneRow
                 // 13b 1b (AD-14): the ONE status/refusal presentation —
@@ -288,7 +288,27 @@ struct RootView: View {
                         }
                     }
                 }
+                // VX-426 (A-439-17): the one icon-only door here that said
+                // nothing on hover — ⌘N's own words, the sidebar toggle's shape.
+                .help(CapabilityRegistry.capability(.newPost).menuTitle())
             }
+            // VX-552 (the VX-439 ladder's M-2 — PROVISIONAL, her morning look):
+            // her "always visible beside the New Note button" — THIS button, on
+            // every surface, mints into the current wing too, so the wing it
+            // lands in sits beside it: the quick-entry bars' words and hover
+            // (one vocabulary), from the shell's one wing (it follows the focused
+            // note). A label, not a door — so no glass button behind it.
+            ToolbarItem(placement: .navigation) {
+                let tokens = theme.tokens(for: scheme)
+                Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: 160, alignment: .leading)
+                    .help(QuickEntryCopy.wingHelp(wings.currentName))
+            }
+            .sharedBackgroundVisibility(.hidden)
         }
         // 13g L4 (WT-4): *"i don't even konw if we need that empty whitespace
         // that says Variorum at the top - let's try getting rid of it."*
@@ -316,6 +336,14 @@ struct RootView: View {
             WindowKeyReporter(
                 onWindow: { windows.attach($0, to: windowID) },
                 onKey: { windows.noteKey(windowID) })
+        }
+        // VX-560 (A-439-12): ⌘← / ⌘→ are Back and Forward in this window
+        // while no text holds the keyboard (in text they stay line start/end)
+        // — the registry's acts, or their declared refusal spoken.
+        .background {
+            BrowserNavKeyMonitor { direction in
+                Self.navigate(direction, session: session, router: router)
+            }
         }
         .sheet(isPresented: $paletteOpen) {
             CommandPaletteView(
@@ -687,6 +715,12 @@ struct RootView: View {
         session.commandRouter.focusedPaneShowsNote = {
             windows.activeRouter?.workspace.closeNoteTarget != nil
         }
+        // VX-570 (the VX-439 run): ⌥⌘N's gate — is the key window's focused
+        // pane showing a book (any book mode)?
+        session.commandRouter.focusedPaneShowsBook = {
+            if case .reading = windows.activeRouter?.workspace.focusedSelection { return true }
+            return false
+        }
         // 18o U1 (17e (12)): the key window's kind — the sidebar toggle's
         // gate, now a registry fact the View-menu item reads back.
         session.commandRouter.windowKind = { windows.activeWindowKind }
@@ -722,6 +756,25 @@ struct RootView: View {
                 guard let picked else { return }
                 adopt(picked, in: router.workspace.focusedPane)
             })
+    }
+
+    /// **VX-560 — ⌘← / ⌘→'s act** (the `BrowserNavKeyMonitor`'s): the pane's
+    /// Back or Forward — the menu items' own calls — where the registry says
+    /// the act can go, else its declared refusal SPOKEN (a door that did
+    /// nothing speaks; a grey menu item would have swallowed the key). Static
+    /// so a pin drives exactly what the key runs.
+    static func navigate(
+        _ direction: BrowserNavKeys.Direction, session: AppSession, router: ShellRouter
+    ) {
+        let act = direction.capability
+        guard session.commandRouter.isEnabled(act) else {
+            session.status.refuse(CapabilityRegistry.capability(act).unavailableNote)
+            return
+        }
+        switch direction {
+        case .back: router.goBack()
+        case .forward: router.goForward()
+        }
     }
 
     /// The ONE door a destination enters a pane through — so her round-7.3
@@ -1193,7 +1246,8 @@ struct RootView: View {
                 // and rendered by the Bookcase alone ("Bookcase only").
                 offerLine: tourOfferLine,
                 wordsBand: wordsBand,
-                openingFocus: bookcaseOpeningFocus)
+                // VX-332: the Bookcase's quick entry stands down during a tour.
+                tourRunning: tourSlot.engine != nil)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:
@@ -1297,6 +1351,12 @@ struct RootView: View {
                 revealSectionID: router.pendingBookChapter?.bookID == readingID
                     ? router.pendingBookChapter?.sectionID : nil,
                 onRevealSectionConsumed: { router.pendingBookChapter = nil },
+                // VX-570 (the VX-439 run): ⌥⌘N's request, handed to the book it
+                // names in the LIVE (focused) pane only — a second pane on the
+                // same book never mints twice.
+                mintRequest: live && router.bookMintRequest?.bookID == readingID
+                    ? router.bookMintRequest?.token : nil,
+                onMintRequestConsumed: { router.bookMintRequest = nil },
                 // 18d batch 1: the book publishes what its sidebar box shows.
                 onNoteBox: { bookID, report, door in
                     adoptNoteBox(bookID, report, door)
@@ -1479,7 +1539,8 @@ struct RootView: View {
                 { [self] in adopt(.archived, in: router.workspace.focusedPane) }),
             // 13b Stage 2: the old modes-tutorial entrance points at the
             // one tutorial BOOK (find-or-seed, then open — fire-and-DO).
-            ("Open the Tutorial — \(TutorialSeeder.bookName)", { actions.openTutorial() }),
+            // VX-602 (the VX-439 run, C-602-1): the Help menu's twin, named so.
+            (HelpMenuCopy.openFieldGuide, { actions.openTutorial() }),
             ("Settings — Appearance & Tags", { [self] in openSettings() }),
             ("Use Terminal Voice", { [self] in theme.setVoice(.terminal) }),
             ("Use Study Voice", { [self] in theme.setVoice(.study) }),

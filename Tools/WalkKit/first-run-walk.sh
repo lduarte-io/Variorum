@@ -200,7 +200,7 @@ if [[ -n $DRY ]]; then
   print "  P5 the row: 'Sync isn't on for this library yet' · Settings ▸ Protection ▸ Record your twelve words… → Copy → stash"
   print "  P6 Turn on sync… → the new passphrase twice + the words (typed by the helper) → Turn on sync"
   print "  P7 THE SHEET: 'Synced. Your library is on your account now.' (≤ 180 s) → Done · the row 'Synced ‹time›'"
-  print "  P8 prod reads by the account's id: key_vault (mode) · vault.secrets kp:<id> · device_cursor · container rows"
+  print "  P8 prod reads by the account's id: key_vault (mode) · vault.secrets kp:<id> · device_cursor · data rows (setting + container)"
   exit 0
 fi
 
@@ -235,6 +235,16 @@ secret() {  # <field> — the helper types it (it re-checks the road, the frontm
 waitfor() {  # <label> <seconds> — until a control or text with that label is on screen
   local i
   for i in $(seq 1 $2); do $BIN/vis-ax $PID "$1" >/dev/null 2>&1 && return 0; sleep 1; done
+  return 1
+}
+rowreads() {  # <prefix> <seconds> — the main window's footer row, read by VALUE through System Events:
+  # vis-ax cannot reach this one static text (VX-621 — every sibling in the window resolves, this element
+  # never does, on-screen or off), so the row assertion reads it the way that demonstrably works.
+  local i
+  for i in $(seq 1 $2); do
+    osascript -e "tell application \"System Events\" to tell (first application process whose unix id is $PID) to get value of (first static text of group 1 of window \"Variorum Dev\" whose value begins with \"$1\")" >/dev/null 2>&1 && return 0
+    sleep 1
+  done
   return 1
 }
 prodread() { $REPO/Tools/prod-read.sh "$1" }
@@ -315,7 +325,7 @@ if ! waitfor "Synced. Your library is on your account now." 180; then
 fi
 capture synced-sheet
 press "Done" AXButton
-waitfor "Synced" 30 || { capture row; stop "the row does not read Synced" }
+rowreads "Synced" 30 || { capture row; stop "the row does not read Synced" }
 capture synced-row
 pgrep -f "$APP/Contents/MacOS" | grep -qx $PID || stop "the process changed — this was meant to run with no relaunch"
 
@@ -323,12 +333,15 @@ step P8 "the server, by the account's id (Tools/prod-read.sh — SELECTs only)"
 vault=$(prodread "select mode, key_proof_hash is not null as proof from key_vault where user_id = '$UID_'")
 kp=$(prodread "select count(*) as n from vault.secrets where name = 'kp:$UID_'")
 cursors=$(prodread "select count(*) as n from device_cursor where owner_id = '$UID_'")
-rows=$(prodread "select count(*) as n from container where owner_id = '$UID_'")
-log "key_vault: $vault"; log "kp secret: $kp"; log "device cursors: $cursors"; log "containers: $rows"
+# The push evidence is setting + container TOGETHER: an account-bound fresh store defers its seed behind
+# the first clean round (SampleLibraryWelcome's sync gate), so its first push carries setting rows only —
+# the "3 settings" VX-510's own hand-verification read. A seeded store counts containers too. (VX-621)
+rows=$(prodread "select (select count(*) from setting where owner_id = '$UID_') + (select count(*) from container where owner_id = '$UID_') as n")
+log "key_vault: $vault"; log "kp secret: $kp"; log "device cursors: $cursors"; log "data rows (setting + container): $rows"
 [[ $vault == *'"mode":'* && $vault == *'"proof":true'* ]] || stop "no vault row with its proof"
 [[ $kp == *'"n":1'* ]] || stop "no kp: secret — no round ever reached the key-proof enrollment"
-[[ $cursors != *'"n":0'* ]] || stop "no device cursor"
-[[ $rows != *'"n":0'* ]] || stop "no data rows on the server"
+[[ $cursors == *'"n":'[1-9]* ]] || stop "no device cursor"
+[[ $rows == *'"n":'[1-9]* ]] || stop "no data rows on the server"
 
 STEP=done
 log "PASSED — '$ACCOUNT' first run: the sheet confirmed, the row Synced, the server holds the vault, the proof, a cursor and rows"

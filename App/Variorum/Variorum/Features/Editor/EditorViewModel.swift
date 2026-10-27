@@ -125,6 +125,11 @@ final class EditorViewModel {
     /// 9d — word counts for the status bar: the caret block's, and the
     /// selection's when one exists.
     private(set) var caretBlockWordCount: Int?
+    /// **VX-441 — Write's find readout** ("2 of 15"): the selected match's
+    /// place among the note's matches while the find bar is up; nil otherwise
+    /// (`FindReadout` — the derivation; the bottom bar draws it). A derived
+    /// count, never text.
+    private(set) var findReadout: String?
     private(set) var selectionWordCount: Int?
     /// Phase 13 C1 (R11 — word-count prominence): the post's total,
     /// maintained INCREMENTALLY (per-variant cache in the LEDGER; only
@@ -409,8 +414,49 @@ final class EditorViewModel {
     /// All silently edit takes, which is the surprise this act exists to
     /// make deliberate.
     @ObservationIgnored var takesScopeArmed = false
+    /// VX-441: where the find readout reads the finder's words — the find
+    /// pasteboard (NSTextFinder's own channel); a pin hands its own so it
+    /// never writes the machine-global board.
+    @ObservationIgnored var findReadoutNeedle: @MainActor () -> FindReadout.Needle? = {
+        FindReadout.pasteboardNeedle()
+    }
+    /// VX-441 (the VX-439 ladder's m-2): the count's ONE walk of the note — a
+    /// pin hands a counting one.
+    @ObservationIgnored var findReadoutScan: (FindReadout.Needle, String) -> [NSRange] = {
+        FindReadout.ranges(of: $0, in: $1)
+    }
+    /// The count's cache (m-2): the matches of one needle at one text
+    /// generation, so a find step never re-walks the note.
+    @ObservationIgnored private var findMatchCache: FindReadout.MatchCache?
+    /// The text's generation for the find readout's cache — bumped on EVERY
+    /// storage character edit (typing, projections, structural rewrites —
+    /// `storageDidEdit`), so a cached count can never outlive the text it
+    /// counted. An integer; nothing else reads it.
+    @ObservationIgnored private var findTextGeneration = 0
 
     var hasOpenTail: Bool { index.tailLength != nil }
+
+    /// **VX-441 — re-derive the find readout** ("2 of 15"), on every
+    /// selection change (a find step selects its match) and on the bar's own
+    /// opening and closing. The detail editor only — the one with a bar. The
+    /// count's walk of the note runs only past `FindReadout.face`'s cheap gates
+    /// (the bar up, a non-empty selection that IS the finder's words), and then
+    /// once per (words, text generation) — a step reads the cached matches
+    /// (m-2: a find step is not itself a whole-note walk, so the readout must
+    /// not make it one) — never on a keystroke (P1). Writes only when the words
+    /// change.
+    func refreshFindReadout() {
+        let next: String?
+        if let textView, let scrollView {
+            next = FindReadout.face(
+                barVisible: scrollView.isFindBarVisible, needle: findReadoutNeedle,
+                selection: textView.selectedRange(), text: textView.string,
+                generation: findTextGeneration, cache: &findMatchCache, scan: findReadoutScan)
+        } else {
+            next = nil
+        }
+        if findReadout != next { findReadout = next }
+    }
 
     // MARK: - Lifecycle
 
@@ -422,6 +468,11 @@ final class EditorViewModel {
     func attach(textView: EditorTextView, scrollView: NSScrollView?) {
         self.textView = textView
         self.scrollView = scrollView
+        // VX-441: the find bar's opening and closing re-read the readout (a
+        // bar closed by ⎋ or Done changes no selection).
+        (scrollView as? TypewriterScrollView)?.onFindBarVisibilityChange = { [weak self] in
+            self?.refreshFindReadout()
+        }
         // 13u2b UNIT 3: the DETAIL editor answers "where is the carried block
         // on your screen?" when a mode switch asks. The inline book/pool
         // editor does not — it scrolls inside its host's scroll view and owns
@@ -1257,6 +1308,9 @@ final class EditorViewModel {
         // itself waits for the layout pass that consumes the edit
         // (`overlayLayoutDidSettle`), never runs against pre-layout frames.
         overlayGeometryGeneration &+= 1
+        // VX-441 (the VX-439 ladder's m-2): EVERY character edit is a new text
+        // for the find readout's cached count (an integer; no text is read).
+        findTextGeneration &+= 1
         // VX-296: EVERY character edit moves the markdown face's caret claim
         // with the text (the suppressed programmatic writes included — each
         // re-derives its own lines caret-blind) and marks it for the next

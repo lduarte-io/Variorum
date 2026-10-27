@@ -283,6 +283,20 @@ struct ShellActions {
         }
     }
 
+    /// **⌥⌘N — New Note in This Book** (VX-570, the VX-439 run — A-439-4 +
+    /// C-570-1): a REQUEST to the book the focused pane shows, which runs the
+    /// SAME act its own foot door runs (a note, an entry on a journal-trait
+    /// book, the planner's note on a gathering) and speaks that door's
+    /// refusals. No book in the focused pane: the registry's honest note
+    /// (P-2 — the menu is grey there; the palette row speaks).
+    func newNoteInThisBook() {
+        guard case .reading(let bookID) = shell.workspace.focusedSelection else {
+            status.refuse(CapabilityRegistry.capability(.newNoteInBook).unavailableNote)
+            return
+        }
+        shell.bookMintRequest = ShellRouter.BookMintRequest(bookID: bookID, token: UUID())
+    }
+
     func todaysEntry() {
         Task { @MainActor in
             do {
@@ -347,9 +361,7 @@ struct ShellActions {
     /// as long as it is a note (a scraps editor is never a target). With
     /// neither, the registry's honest note speaks (P-2).
     func duplicateNote(tags: Operations.DuplicateTags) {
-        let editing = session.editorRouter.editingOrActive
-        let writingIn = editing?.header?.kind == .post ? editing?.postID : nil
-        guard let postID = router.activePostID ?? writingIn else {
+        guard let postID = noteOnScreen else {
             let id: CapabilityID = tags == .applied
                 ? .duplicateNoteWithTags : .duplicateNoteWithoutTags
             status.refuse(CapabilityRegistry.capability(id).unavailableNote)
@@ -358,6 +370,29 @@ struct ShellActions {
         Task { @MainActor in
             await NoteDuplicate.perform(postID: postID, tags: tags, session: session)
         }
+    }
+
+    /// The note a menu or palette door with no target of its own acts on:
+    /// the mounted detail's note, else the note she is WRITING in (a book's
+    /// inline note — `noteScoped` counts its editor), never a scraps editor.
+    /// One answer for the duplicates and Export Note (VX-125 lifted it out of
+    /// `duplicateNote`, unchanged).
+    private var noteOnScreen: String? {
+        let editing = session.editorRouter.editingOrActive
+        let writingIn = editing?.header?.kind == .post ? editing?.postID : nil
+        return router.activePostID ?? writingIn
+    }
+
+    /// **File ▸ Export Note… and ⌘K's row** (VX-125, the VX-439 run —
+    /// A-439-1): the note on screen as a `.md` file, Copy full text's text
+    /// exactly, through the ONE act every door runs (`NoteExport`). With no
+    /// note in reach the registry's honest note speaks (P-2).
+    func exportNote() {
+        guard let postID = noteOnScreen else {
+            status.refuse(CapabilityRegistry.capability(.exportNote).unavailableNote)
+            return
+        }
+        Task { @MainActor in await NoteExport.export(postID: postID, session: session) }
     }
 
     func exportLibrary() {
@@ -452,7 +487,9 @@ struct ShellActions {
                 status.receipt(WelcomeDoorCopy.tutorialRestored(
                     guide: TutorialSeeder.bookName, shelf: arranged?.welcome.shelf.name))
             } catch {
-                status.refuse("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
+                // VX-602: the door's failure says the door's own name.
+                status.refuse("\(HelpMenuCopy.restoreFieldGuideName) failed: "
+                    + OpsRefusalCopy.message(for: error))
             }
         }
     }
@@ -776,6 +813,8 @@ struct ShellActions {
     /// rows (go-to, settings, voices) stay the shell's own.
     static let paletteActs: [CapabilityID] = [
         .newPost, .todaysEntry, .importFiles, .exportLibrary,
+        // VX-570 (the VX-439 run): New Note in This Book, typeable.
+        .newNoteInBook,
         .commitTake, .structuralUndo, .structuralRedo, .sealPost,
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
@@ -809,6 +848,8 @@ struct ShellActions {
         .saveNoteVersion, .showNoteVersions,
         // 13n-a (R-13n-11): Copy for AI, typeable — the note on screen.
         .copyForAI,
+        // VX-125 (the VX-439 run): Export Note…, typeable — the same note.
+        .exportNote,
         // VX-372 (VX-383 U1 — D-C-2): the two duplicates, typeable — the note
         // on screen, its tags applied or left behind.
         .duplicateNoteWithTags, .duplicateNoteWithoutTags,
@@ -830,6 +871,7 @@ struct ShellActions {
     private func paletteAction(for id: CapabilityID) -> @MainActor () -> Void {
         switch id {
         case .newPost: return { newPost() }
+        case .newNoteInBook: return { newNoteInThisBook() }
         case .todaysEntry: return { todaysEntry() }
         case .importFiles: return { importFiles() }
         case .exportLibrary: return { exportLibrary() }
@@ -861,6 +903,7 @@ struct ShellActions {
         case .saveNoteVersion: return { saveNoteVersion() }
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
         case .copyForAI: return { copyForAI() }
+        case .exportNote: return { exportNote() }
         case .duplicateNoteWithTags: return { duplicateNote(tags: .applied) }
         case .duplicateNoteWithoutTags: return { duplicateNote(tags: .none) }
         case .restoreTutorial: return { restoreTutorial() }

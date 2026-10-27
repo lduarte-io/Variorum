@@ -136,7 +136,8 @@ nonisolated enum FormattingDoor {
         expanded
             ? "Put the formatting row away — bold, italics, sizes, lists, "
                 + "links and the newlines setting"
-            : "Bold, italics, sizes, lists, links — and whether ⏎ makes new "
+            // VX-426 (A-439-17): the "Aa" glyph's tooltip leads with its name.
+            : "Formatting \u{2014} bold, italics, sizes, lists, links, and whether ⏎ makes new "
                 + "blocks. They slide out here; the rest of the bar stays put."
     }
 
