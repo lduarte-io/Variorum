@@ -453,11 +453,8 @@ orchestrator's). Batch 1's code and record untouched.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **A BEHAVIOURAL REVERT IS IN FLIGHT (VX-352), over the committed `3e1aaa26f`:** `TakeLabelFace.allocate`'s body put
-  back to READING ORDER (the yielding part first — one run cut at its tail, the old face); restore = `git checkout --
-  Sources/VariorumCore/Domain/TakeLabelFace.swift` (committed — safe). If this line still stands, check `git diff`
-  first. (VX-358's ran earlier over `4d3f3f3d1` and was restored, `git diff` clean, green again —
-  `vx358-green2.log`.)
+- **No behavioural revert is in flight.** (VX-358's ran over `4d3f3f3d1`, VX-352's over `3e1aaa26f`; each restored
+  by `git checkout --`, `git diff` clean after, green again — `vx358-green2.log`, `vx352-green2.log`.)
 - **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (this commit) — core
   `Operations.addNoteToBookForClient` → `MCPBookAdd {membership, tagIDs, tagPaths}` (the same body and ONE undo entry;
   `addNoteToBook` keeps its signature and returns `.membership`), the tags composed INSIDE the act's transaction by
@@ -492,8 +489,10 @@ orchestrator's). Batch 1's code and record untouched.*
   allocation tables) GREEN; `MCPTakeLabelFormServerTests.theTakeCardSplitsTheLabelWhereThisConventionPutsItsSeparator`
   (the card's separator and legacy word ARE the wire's) GREEN (`vx352-green.log`); Mac `TakeLabelLineTests` (3 — the
   real header swept in Terminal and Study, the placed widths read from the DEBUG `TakeLabelLayoutProbe`) COMPILED
-  (`build-for-testing` green, `mac-bft1.log`), RUN **PENDING** the orchestrator's stage. The behavioural revert run:
-  PENDING (next).
+  (`build-for-testing` green, `mac-bft1.log`), RUN **PENDING** the orchestrator's stage. THE BEHAVIOURAL REVERT RUN
+  (`vx352-revert-red.log`; `allocate` back to reading order — the old face): 3 of 4 failed, 10 issues (the parts table
+  green — the split alone changes no face); its `!= "claude-code · e…"` expectation FAILED, i.e. the reverted
+  arithmetic reproduces her capture exactly; restored → 4/4 green (`vx352-green2.log`).
 - **VX-354 (the Book Panel's header and gatherings wear neither mark):** NOT-STARTED — settled design: the panel's
   model holds the READING reach (`Queries.mcpBookReaches(readingIDs:)` — `decide` for the book, `decideGathering` for a
   gathering, behind `mcpReachStandings`' VX-272 gate) over exactly the readings DRAWN: the shown book always, the
