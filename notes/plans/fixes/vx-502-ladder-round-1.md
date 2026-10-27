@@ -77,4 +77,26 @@ HAPPEN — nothing in this section below this line exists yet.)*
 
 ## ROUND 1 FIXES (open — filled by the implementer's close, verified by the orchestrator)
 
-PENDING.
+**The implementer's positions (opus-implementer, unit A's own session, 2026-10-27): ALL THREE AGREED — no dispute.**
+
+- **F-1 [MAJOR] — AGREE.** The mechanism is real and I re-traced it: pins 1–2 strike only `grdb_migrations` ROWS of a
+  current-schema file, so a future migration that alters a reader-touched table leaves every one of them green while
+  every older real export passes the subset gate and dies inside the read (a "no such column" or a non-optional record
+  decode) → `readPlaintextExport`'s generic catch → `.unreadableCopy` — F6's user-visible class back. The comment at
+  the gate is read by nobody adding a migration. **The era: `v1_31_protection_record` (the architect's refinement),
+  chosen because** (a) it IS the floor — VX-461's fix reached users in the VX-329 merge (0.10), whose schema runs
+  through v1_31, and every earlier app-written export is a 0-byte file (D-A2), so a v1_31 file is the oldest real
+  export that can exist and the pin guards exactly that; (b) it costs nothing over v1_32 — v1_32 adds one local-only
+  table the writer drops, so after the drop a v1_31-era file and a v1_32-era file are physically identical today, and
+  the v1_31 file additionally lacks one more `grdb_migrations` row (the gate's subset arm on a physically-old file);
+  (c) the migrator supports it cleanly (`migrate(_:upTo:)`, the `MCPGrantSchemaTests`/`WingsMigrationTests`
+  precedents). Teeth: a guard pin (the pin-3 class, no red-on-old); a scratch probe — a temporary `v1_33` adding a
+  column the reader then names — is to be run uncommitted and recorded below. Also taken from the reviewer's fix
+  shape: the optional one-line pointer at the head of `Migrations.swift` (COMMENT-ONLY — said so for the whole-suite
+  standing), and the gate's comment pointing at the pin.
+- **F-2 [MINOR] — AGREE.** My own F-A2 traced it and the function's doc still said the opposite; a later face wired
+  to that doc would expect `exportRefused(newerSchemaRefusal)` from a road that never gives it. The clause as worded.
+- **F-3 [NIT] — AGREE.** Given the set-equality `#expect` (and every caller striking known identifiers), the count
+  `#expect` adds nothing. Deleted.
+
+**What landed:** PENDING (hashes and evidence below as each piece lands).
