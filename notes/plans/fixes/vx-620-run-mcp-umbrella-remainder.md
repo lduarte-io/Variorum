@@ -1353,8 +1353,11 @@ stage claim. No subagent.*
   `bookMoveAsk`, one choice in flight) and `WingDestinationSheet` (the switcher's brain + `WingSwitcherKeyCatcher`; the
   two confirms hosted over it); `WingCopy` +3 words (RB-15). `RootView` presents it from the request. Compiled (`b4`);
   RUN + the walk leg PENDING.
-- **4 · The re-ask after any wing act, by construction (VX-425's rule on the new road):** NOT-STARTED — THE DESIGN,
-  item 6.
+- **4 · The re-ask after any wing act, by construction (VX-425's rule on the new road):** DONE (this commit) —
+  `WingsModel.actGeneration` + `wingActLanded()`, called after each landed `move` / `copy` (`WingsModel.swift`) and
+  `moveBook` / `moveContents` (`WingBookMoves.swift`); `SidebarView`'s `noteRowsWingKey` + `openWingsKey` and
+  `noteMenuWingDoors`' task (`NoteMenuWingContext.loadKey` — the note + the signal; both bars) key on it. Compiled
+  (`b4`); RUN PENDING.
 - **5 · Pins + Mac `build-for-testing` (FRESH `DerivedData/b4`) + the whole headless suite:** NOT-STARTED.
 - **6 · The record's close (RB-6's chord sweep, canon owed, the orchestrator's leg), ledger row 6 + the batches
   table:** NOT-STARTED.

@@ -1119,10 +1119,12 @@ struct SidebarView: View {
 
     /// The indicator's read key: the rows shown, the wing she stands in, and
     /// the after-act re-ask (the ladder's m-3 — a move from a row changes
-    /// neither of the others).
+    /// neither of the others). VX-377: + the window's wing-act signal
+    /// (`WingsModel.actGeneration`) — a move from ANY door (⌘K's selector, the
+    /// note ▾ menu, the Library's rows) re-asks it too.
     private var openWingsKey: String {
         workspace.openNotes.shown.joined(separator: ",") + "|" + session.wing.currentID
-            + "|\(wingActGeneration)"
+            + "|\(wingActGeneration)|\(wings?.actGeneration ?? 0)"
     }
 
     /// U1b (F-1): the Open row of the note the pane shows — the highlighted
@@ -1340,9 +1342,11 @@ struct SidebarView: View {
     }
 
     /// The wing read's key: the note rows, the wing she stands in, and the
-    /// after-act re-ask (the ladder's m-3).
+    /// after-act re-ask (the ladder's m-3). VX-377: + the window's wing-act
+    /// signal — a move from ANY door re-asks the rows' doors too.
     private var noteRowsWingKey: String {
         noteRowIDs.joined(separator: ",") + "|" + session.wing.currentID + "|\(wingActGeneration)"
+            + "|\(wings?.actGeneration ?? 0)"
     }
 
     /// **After a wing act from a row, the one-shot wing reads re-ask** (the
