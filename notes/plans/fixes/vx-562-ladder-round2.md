@@ -146,3 +146,10 @@ The two merge-time tickets the dispositions owe (finding 6's Debt/Low restructur
 - **N2, N3 (NIT):** stale docs and stale PENDING lines in the records.
 
 The batch still owes walk 3's use-shaped evidence before ledger rows 1–2 close.
+
+## THE ORCHESTRATOR'S ROUND-2 DISPOSITIONS (same-model ladder; no new BLOCKER/MAJOR ⇒ the ladder CLOSES at two rounds)
+
+- **Part 1 — accepted in full.** Findings 1/2/3/4/8/11 stand VERIFIED FIXED with reverts; 5/7 verified; 6's remainder and 12's carry-loses-the-block are TICKETED AT THE MERGE (owed, tracked in the closeout checklist); 9/10 record-only confirmed, with walk 3 counting the finding-10 warnings.
+- **N1 [MINOR] — AWAIT WALK 3's felt evidence; the bundle and QUESTIONS carry it either way.** The lead is inherent to any sliding probe (it must cross a viewport's extra content over the last viewport of scroll); option (b) trims but cannot remove it. The fix session's bundle line is CORRECTED now (it understated the shape — the lead shows on her own end-scroll too, not only after a click), and N1's numbers + both options land in the bundle. If walk 3 reads the lead as the wrong note at normal speed, N1 rises as a round-3-class finding and the architect rules between (b), a probe eased toward the viewport's reading band, or accept-with-words — on walk evidence, not estimates.
+- **N2 [NIT] — FIX NOW, the orchestrator's own doc-only edits** (the architect mandate's small-fixes-at-adjudication clause; zero behavior: the Pair and BookNavigatorMark doc lines, the click pin's answered order question, the end-of-book pin's revert spelling, the BookView comment, and the `onlyOutlineWashesTheViewedChapter` test renamed to the mark vocabulary). The line-by-line check is the orchestrator's, as the final round's rule provides.
+- **N3 [NIT] — FIX NOW, same hands:** the stale PENDING/ledger lines flipped to the window's outcomes where the record's foot already carries them.
