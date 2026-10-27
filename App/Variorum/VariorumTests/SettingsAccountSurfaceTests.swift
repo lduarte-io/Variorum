@@ -47,7 +47,10 @@ struct SettingsAccountSurfaceTests {
         let features = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("Variorum/Features")
         let view = try String(contentsOf: features.appendingPathComponent("Settings/AppSettingsView.swift"), encoding: .utf8)
-        #expect(view.contains("SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(accountSection: accountSection))"))
+        // VX-590 (A JUSTIFIED EDIT, the ritual — the VX-620 run, batch 2): the index takes a second
+        // window question, the MCP pane's sharing face, beside this one; the account question is
+        // asked exactly as before (the second question's own pin: `MCPSharingFaceTests`).
+        #expect(view.contains("SettingsSearch.wholeIndex(accountSection: accountSection, mcpSharingFace: mcpSharingFace)"))
         #expect(view.contains("accountSection: roadStanding?.account != nil"))
         let section = try String(contentsOf: features.appendingPathComponent("Protection/RoadAccountSheet.swift"),
                                  encoding: .utf8)

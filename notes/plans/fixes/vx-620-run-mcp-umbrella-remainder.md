@@ -585,8 +585,13 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
   VX-180/181's four (`MCPDiscoverProbeServerTests`, `MCPPreInitializeWindowTests`, `MCPShimClosedAppTests`,
   `MCPShimTests`), the setup-key roads (`MCPSetupKeyServerTests`, `MCPSetupKeyTabServerTests`,
   `MCPSetupKeyRebindServerTests`), the two suites that build a session by hand (`MCPServerHostReuseTests`,
-  `MCPReaderAfterCloseTests` — VX-607 green this run). The Mac door pin: IN-PROGRESS.
-- **4 · VX-590 — the sharing face hidden until the library has ever had a client:** NOT-STARTED — the settled design:
+  `MCPReaderAfterCloseTests` — VX-607 green this run). The Mac door pin: WRITTEN (`be4a68456`) —
+  `App/Variorum/VariorumTests/MCPConnectionNamingDoorTests.swift` (2); compile PENDING (piece 5).
+- **4 · VX-590 — the sharing face hidden until the library has ever had a client:** WRITTEN (this commit; compile
+  PENDING, piece 5) — `MCPPane.showsSharingFace`, `MCPPaneTab.offered(sharing:)` / `.shown(_:sharing:approvedCount:)`,
+  the pane's tab row and switch read them at render (her pick kept); `SettingsSearch.settingsEntries/wholeIndex(…,
+  mcpSharingFace:)` + the results pane's question; NEW Mac `MCPSharingFaceTests` (5); JUSTIFIED EDITS in
+  `MCPPaneTabsTests` (2) and `SettingsAccountSurfaceTests` (1). The settled design:
   the store fact is VX-512's own (client rows — pending + approved + denied — exist; monotone: the pending room's
   prune never empties it), PROVISIONAL RB-3; the Shared with AI tab (and the open-book switch it holds) is not
   offered while it is false; the pane's tab is clamped to the offered set (her pick otherwise remembered as before);
