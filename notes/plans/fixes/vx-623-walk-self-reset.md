@@ -207,13 +207,29 @@ the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swif
 
 | Piece | Row | Status |
 |---|---|---|
-| 1 | D-7 — guard.sh compile-or-refuse + its red-on-old pin | NOT-STARTED |
+| 1 | D-7 — guard.sh compile-or-refuse + its red-on-old pin | DONE (this commit) — see "D-7 evidence" below |
 | 2 | D-1 — `Tools/prod-reset-test-account.sh` + `--self-test` (incl. the `account_purge()` drift pin) | NOT-STARTED |
 | 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | NOT-STARTED |
 | 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | NOT-STARTED |
 | 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | NOT-STARTED |
 | 6 | D-6 — release.sh HANDOFF step 0 + README | NOT-STARTED |
 | 7 | Final evidence: both self-tests' case lists, D-7 red-on-old, `zsh -n`, each D-row's acceptance (file:line) | NOT-STARTED |
+
+**D-7 evidence (VX-536).** The traced mechanism: `guard.sh`'s full check ran `win=$("$S"/wl2 $pid)`; `Tools/WalkKit/wl2`
+is gitignored, so a fresh worktree has none; the call printed "no such file" to stderr and left `win` EMPTY, which matched
+no refusal arm (`case "$win" in offscreen)`), so the check printed `GUARD OK (, idle Ns)` on a window it never looked at.
+The fix (`Tools/WalkKit/guard.sh:17-34`): compile `wl2` from `wl2.swift` when absent or older than its source (before the
+frontmost read), REFUSE with exit 8 naming the helper when it cannot be had, and refuse (8) any answer that is neither
+`offscreen` nor `onscreen X Y W H`. The pin `Tools/WalkKit/pins/guard-space-helper.zsh` (headless — the guard copied into
+a temp WalkKit folder per case, pgrep/ioreg/osascript/swiftc PATH-shimmed and checked to shadow before any case):
+- **RED ON OLD** (`zsh Tools/WalkKit/pins/guard-space-helper.zsh` against `b090395e4`'s guard.sh, via
+  `git show b090395e4:Tools/WalkKit/guard.sh > $T/old.sh`): **6 failing of 11** — case 1 read verbatim
+  `FAIL helper absent, no wl2.swift → refuse (8), naming wl2 — exit 0 (want 8) … no such file or directory: …/wk/wl2 |
+  GUARD OK (, idle 99s)`; cases 2–6 the same class (no compile ever attempted; empty/nonsense answers passed).
+- **GREEN ON THE FIX: 0 failing of 11** — the 11 cases: helper absent + no source → 8 · absent + compile fails → 8 ·
+  absent + compiles → compiled, 0 · older than its source → recompiled · answers nothing → 8 · answers nonsense → 8 ·
+  current, on this Space → 0 · offscreen → 6 · a point inside → 0 · a point outside → 7 · `--author` with no helper → 0,
+  nothing compiled.
 
 ## Environment traps (binding; carried into every brief verbatim)
 
