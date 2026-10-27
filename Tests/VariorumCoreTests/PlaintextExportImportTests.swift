@@ -276,4 +276,106 @@ struct PlaintextExportImportTests {
             _ = try PlaintextExportReading.read(exportAt: source.url)
         }
     }
+
+    // MARK: - VX-502 ladder round 1, F-1 — THE ERA-FROZEN PIN (the standing feature-detect duty, mechanized)
+
+    /// The oldest era a content-bearing export can carry. VX-461's fix (the export's journal kept in memory) reached users
+    /// in the VX-329 merge — release 0.10 — whose schema runs through this identifier; every app-written export before it
+    /// is a 0-byte file (the VX-502 record's D-A2). FROZEN: never move it forward.
+    static let oldestExportEra = "v1_31_protection_record"
+
+    /// VX-502 F-1 (ladder round 1) — THE ERA-FROZEN PIN: a file migrated only up to the oldest export era, seeded by raw
+    /// SQL in that era's own columns, with the writer's local-only drop applied — the very shape of a 0.10 export — must
+    /// still plan whole under THIS build's reader, and import. A GUARD pin (the pin-3 class; no red-on-old applies): it
+    /// goes red the moment a future migration changes a table the reader touches — a column `plan()`'s SQL names, a column
+    /// a record decodes non-optionally — without a feature-detect (the `hasStatus` precedent), which pins 1–2 cannot see:
+    /// they strike only `grdb_migrations` rows of a current-schema file. FROZEN: the seed names only the era's columns and
+    /// is never edited to follow a later schema — if this goes red, the READER owes a feature-detect, not this pin an edit.
+    @Test func anExportOfTheOldestExportEraStillReadsWhole() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("vx502-era-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appendingPathComponent("export.sqlite")
+        let queue = try DatabaseQueue(path: url.path)
+        try AppDatabase.migrator.migrate(queue, upTo: Self.oldestExportEra)
+        let t = "2026-10-22T12:00:00.000Z"
+        try queue.write { db in
+            // A wing; a note in it — one block of two takes (the chosen one and a labeled alternate) and a tag.
+            try db.execute(sql: """
+                INSERT INTO wing (id, name, position, created_at, updated_at) VALUES ('W1', 'studio', 'a0', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO container (id, kind, title, wing_id, created_at, updated_at)
+                VALUES ('N1', 'post', 'Era note', 'W1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "INSERT INTO block (id, created_at, updated_at) VALUES ('B1', ?, ?)", arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO variant (id, block_id, working_text, label, fan_position, created_at, updated_at)
+                VALUES ('V1', 'B1', 'The era''s prose.', NULL, 'a0', ?, ?),
+                       ('V2', 'B1', 'Another take.', 'second', 'a1', ?, ?)
+                """, arguments: [t, t, t, t])
+            try db.execute(sql: "UPDATE block SET default_variant_id = 'V1' WHERE id = 'B1'")
+            try db.execute(sql: """
+                INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
+                VALUES ('P1', 'N1', 'B1', 'a0', 'V1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO tag (id, name, path, wing_id, created_at, updated_at) VALUES ('T1', 'sketch', 'sketch', 'W1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "INSERT INTO post_tag (id, tag_id, post_id, created_at) VALUES ('PT1', 'T1', 'N1', ?)",
+                           arguments: [t])
+            // A book in the wing with one chapter, the note membered under it.
+            try db.execute(sql: """
+                INSERT INTO reading (id, name, kind, wing_id, created_at, updated_at) VALUES ('R1', 'Era book', 'book', 'W1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO reading_section (id, reading_id, name, position, created_at, updated_at)
+                VALUES ('S1', 'R1', 'One', 'a0', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO reading_post (id, reading_id, post_id, position, section_id, status, created_at)
+                VALUES ('RP1', 'R1', 'N1', 'a0', 'S1', 'member', ?)
+                """, arguments: [t])
+            // A snippet group with one scrap.
+            try db.execute(sql: """
+                INSERT INTO container (id, kind, title, created_at, updated_at) VALUES ('PL1', 'pool', 'Scraps', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "INSERT INTO block (id, created_at, updated_at) VALUES ('B2', ?, ?)", arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO variant (id, block_id, working_text, fan_position, created_at, updated_at)
+                VALUES ('V3', 'B2', 'A loose line.', 'a0', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "UPDATE block SET default_variant_id = 'V3' WHERE id = 'B2'")
+            try db.execute(sql: """
+                INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
+                VALUES ('P2', 'PL1', 'B2', 'a0', 'V3', ?, ?)
+                """, arguments: [t, t])
+            // The writer's own drop (`StorePlaintextExport`): the local-only tables stay behind.
+            for table in StorePlaintextExport.localOnlyTables.sorted() {
+                try db.execute(sql: "DROP TABLE IF EXISTS \"\(table.replacingOccurrences(of: "\"", with: "\"\""))\"")
+            }
+        }
+        let applied = try queue.read { try String.fetchAll($0, sql: "SELECT identifier FROM grdb_migrations") }
+        try queue.close()
+        let known = AppDatabase.migrator.migrations
+        let era = try #require(known.firstIndex(of: Self.oldestExportEra))
+        #expect(Set(applied) == Set(known[...era]), "the file is of the frozen era")
+
+        let plan = try PlaintextExportReading.read(exportAt: url)
+        #expect(plan.wings == [PlaintextExportPlan.Wing(id: "W1", name: "studio")])
+        #expect(plan.notes.count == 1)
+        let note = try #require(plan.notes.first)
+        #expect(note.id == "N1" && note.wingID == "W1" && !note.archived)
+        #expect(note.document.document.title == "Era note" && note.document.document.tagPaths == ["sketch"])
+        #expect(note.document.document.blocks.map(\.text) == ["The era's prose."])
+        #expect(note.document.document.blocks.first?.alternates
+            == [VariorumDocument.Take(label: "second", text: "Another take.")], "the alternate take rides")
+        #expect(plan.books == [PlaintextExportPlan.Book(
+            name: "Era book", wingID: "W1", archived: false,
+            chapters: [.init(id: "S1", name: "One")], members: [.init(noteID: "N1", chapterID: "S1")])])
+        #expect(plan.pools == [PlaintextExportPlan.Pool(title: "Scraps", archived: false, scraps: ["A loose line."])])
+        let landing = try Self.ops(try AppDatabase.inMemory()) { try $0.importPlaintextExport(plan) }
+        #expect(landing.notes == 1 && landing.books == 1 && landing.snippets == 1 && landing.wings == 1, "and it imports")
+        #expect(landing.membershipsLeftOut == 0 && landing.emptyBooks.isEmpty)
+    }
 }

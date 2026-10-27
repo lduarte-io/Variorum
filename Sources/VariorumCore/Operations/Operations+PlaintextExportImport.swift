@@ -121,9 +121,10 @@ public enum PlaintextExportReading {
         // read is `reading.archived_at`, v1_21; no content-bearing export predates v1_31 — VX-461).
         // THE STANDING DUTY: any future migration that changes a table this reader touches — here and in everything it
         // calls (`Queries.variorumDocumentText` with its record decodes, `blockPresentations`, `exportBlocks`) — must add
-        // a feature-detect, the `hasStatus` precedent below: an older export must keep reading. A file whose physical
-        // schema predates the reader's needs (never a real export) throws a database error, which the door's generic
-        // catch refuses honestly.
+        // a feature-detect, the `hasStatus` precedent below: an older export must keep reading. ENFORCED by the era-frozen
+        // pin `PlaintextExportImportTests.anExportOfTheOldestExportEraStillReadsWhole` (a v1_31-era file, the oldest real
+        // export, must plan whole — ladder round 1, F-1). A file whose physical schema predates the reader's needs (never
+        // a real export) throws a database error, which the door's generic catch refuses honestly.
         let applied = try Set(String.fetchAll(db, sql: "SELECT identifier FROM grdb_migrations"))
         let known = Set(AppDatabase.migrator.migrations)
         guard applied.isSubset(of: known) else { throw Failure.schemaNewer }
