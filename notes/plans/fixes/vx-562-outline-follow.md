@@ -338,3 +338,5 @@ Instance checks use `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` (the 
 - (3) Three app-written local prefs keyed by the now-trashed notes: `currentBlock.E0FE97BD…` and `surfaceSize.outline.015CB8BB…` / `.E0FE97BD…`. There is also the launch bookkeeping: the last-launch stamp and the dev backup log, since every Debug launch takes a dev-store backup. The keys are diffed in `w2/prefs-after-walk2.plist` against a COPY of `prefs-before2.plist`; the original was read only and never written. I left the three keys rather than write to the prefs domain outside the brief. `defaults delete io.lduarte.Variorum.debug <key>` clears them if wanted.
 
 **Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner.png`, `end-state-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero** (both strict forms empty, 14:39:15).
+
+**Window tests2 (2026-10-27 ~15:25): revert B applied** — pre-revert tree clean at 1f23d7855; restore = git checkout -- the one file.
