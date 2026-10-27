@@ -352,6 +352,8 @@ struct AppSettingsView: View {
                     tokens: tokens, query: query,
                     // VX-309 U2 — VX-453: the account section's row only where the Protection pane renders that section.
                     accountSection: roadStanding?.account != nil,
+                    // VX-590: the MCP pane's Shared with AI tab only once the library has had a client.
+                    mcpSharingFace: mcp.map { MCPPane.showsSharingFace($0.snapshot) } ?? true,
                     onOpen: { finding in
                         query = ""
                         // VX-281 U1: the MCP pane is in tabs — a finding whose
@@ -448,10 +450,14 @@ private struct SettingsResultsPane: View {
     let query: String
     /// VX-309 U2 — VX-453: whether the Protection pane renders the account section.
     let accountSection: Bool
+    /// VX-590: whether Settings ▸ MCP shows its sharing face (Shared with AI and the open book inside it).
+    let mcpSharingFace: Bool
     let onOpen: (SettingsFinding) -> Void
 
     private var findings: [SettingsFinding] {
-        SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(accountSection: accountSection))
+        SettingsSearch.findings(
+            matching: query,
+            in: SettingsSearch.wholeIndex(accountSection: accountSection, mcpSharingFace: mcpSharingFace))
     }
 
     var body: some View {

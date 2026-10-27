@@ -347,32 +347,78 @@ struct MCPGatheringGrantServerTests {
         }
     }
 
-    // MARK: - A rule tagging can't satisfy refuses in words — never the not-shared shape
+    // MARK: - A rule only a star satisfies: the note is born starred (VX-596)
 
-    @Test func aRuleThatNeedsAStarRefusesWriteNewInWordsAndWritesNothing() async throws {
+    private func starredNotes(_ h: ServerHarness) throws -> [String] {
+        try h.database.read { try Queries.starredNoteIDs($0) }
+    }
+
+    /// **A DELIBERATE FLIP (VX-596 — her ruling 2026-10-27: "let's add the star
+    /// over the wire, it might as well be included"; VX-549's refusal "stands
+    /// until this lands", its own text).** Was
+    /// `aRuleThatNeedsAStarRefusesWriteNewInWordsAndWritesNothing`: `create_note`
+    /// into `#parser AND ★` answered "Its rule needs a starred note, and only the
+    /// author can star one." and minted nothing. Now the rule's star is the
+    /// wire's to give: the note lands born STARRED (her gathering door's arm —
+    /// the ONE star write, cap-exempt, so a full Starred list never blocks the
+    /// mint), wearing the rule's tags, assembled in, heard by a living book whose
+    /// rule is the star, with ONE client-named undo; the answer says
+    /// `starred: true` (RB-1, PROVISIONAL — absent on every other mint).
+    @Test func aRuleThatNeedsAStarMintsTheNoteStarredWithOneClientNamedUndo() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
             let w = try world(h) { parser, _ in .and([.tag(parser.id), .star]) }
+            let starBook = try h.operations.createReading(
+                name: "starred things", kind: .book, querySpec: try RuleGrammar.encode(.star), wingId: w.wing.id)
+            // Her Starred list is FULL: the born star is cap-exempt (her door's arm).
+            for index in 0..<Operations.starLimit {
+                let filler = try h.operations.createPost(title: "filler \(index)")
+                try h.operations.setStarred(.post(filler.id), starred: true)
+            }
             let connection = try await h.connect(as: "claude-code")
             let once = try #require(try h.approve("claude-code", spec(.writeNew, .gathering, w.gathering.id, .once)))
             h.asks.setValue([])
-            let notesBefore = try containerCount(h)
-            let refused = try await call(connection, "create_note",
-                                         ["book_id": .string(w.gathering.id), "text": .string("a starred idea")])
-            #expect(refused.isError == true)
-            #expect(text(refused) == GatheringMint.Blocker.needsStar.reason)
-            #expect(text(refused) == "Its rule needs a starred note, and only the author can star one.")
-            #expect(text(refused) != MCPRefusalCopy.words(.notShared, .book), "never the not-shared shape")
-            #expect(try containerCount(h) == notesBefore,
-                    "nothing minted — refused before the mint")
-            #expect(try consumedAt(h, once) == nil, "a refused act never spends the once grant")
-            #expect(h.asks.value.isEmpty, "no ask could change it")
-            #expect(h.undoStack.depth == 0)
+
+            let result = try await call(connection, "create_note",
+                                        ["book_id": .string(w.gathering.id), "text": .string("a starred idea")])
+            #expect(result.isError != true, "\(text(result))")
+            let answer = try json(result)
+            #expect(Set(answer.keys) == ["note_id", "block_ids", "tag_ids", "tags", "blocks", "starred"])
+            #expect(answer["starred"] as? Bool == true && answer["tags"] as? [String] == ["parser"])
+            let noteID = try #require(answer["note_id"] as? String)
+            #expect(try starredNotes(h).contains(noteID), "born starred — past a full list (cap-exempt)")
+            #expect(try starredNotes(h).count == Operations.starLimit + 1)
+            #expect(try assembled(h, w.gathering.id).contains(noteID), "the gathering shows it")
+            #expect(try members(h, ofBook: starBook.id).contains(noteID),
+                    "a living book collecting the star heard it, as when the author stars")
+            #expect(try consumedAt(h, once) != nil, "the once grant is one act — spent by it")
+            #expect(h.asks.value.isEmpty)
+
+            // ONE client-named undo takes the note back.
+            #expect(h.undoStack.depth == 1
+                    && h.undoStack.topLabel == Operations.MCPWriteAct.note.undoLabel(client: "claude-code"))
+            #expect(try h.undoStack.undo(with: h.writeOperations) != nil)
+            #expect(try row(h, "SELECT id FROM container WHERE id = ? AND deleted_at IS NULL", [noteID]) == nil)
+            #expect(!(try starredNotes(h).contains(noteID)), "a dead note's star reads as nothing")
+
+            // import_document's one document takes the same road.
+            _ = try h.operations.grantMCPAccess(
+                try h.client("claude-code").id, spec(.writeNew, .gathering, w.gathering.id))
+            let imported = try await call(connection, "import_document", [
+                "book_id": .string(w.gathering.id), "document": .string("{t:\"imported\"}\n\none paragraph"),
+            ])
+            #expect(imported.isError != true, "\(text(imported))")
+            #expect(try json(imported)["starred"] as? Bool == true)
+            #expect(try starredNotes(h).contains(try #require(try json(imported)["note_id"] as? String)))
             await h.hangUp(connection)
         }
     }
 
+    /// RB-1 as built (PROVISIONAL): the wire plans TAGS FIRST, as VX-549 built it,
+    /// and stars only where a star is the only way in — so `★ OR #parser` still
+    /// takes the tag and stars nothing (her door would star), every answer on such
+    /// a rule byte-unchanged (no `starred` key).
     @Test func aStarOrATagRuleTakesTheTagOnTheWire() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -383,7 +429,65 @@ struct MCPGatheringGrantServerTests {
             let result = try await call(connection, "create_note",
                                         ["book_id": .string(w.gathering.id), "text": .string("tagged, not starred")])
             #expect(result.isError != true, "\(text(result))")
-            #expect(try json(result)["tags"] as? [String] == ["parser"], "the tag option, where her door would star")
+            let answer = try json(result)
+            #expect(answer["tags"] as? [String] == ["parser"], "the tag option, where her door would star")
+            #expect(Set(answer.keys) == ["note_id", "block_ids", "tag_ids", "tags", "blocks"], "no starred key")
+            #expect(!(try starredNotes(h).contains(try #require(answer["note_id"] as? String))), "nothing starred")
+            // A star-only rule: the star is the only way in.
+            let starOnly = try h.operations.createReading(
+                name: "only stars", kind: .gathering, querySpec: try RuleGrammar.encode(.star), wingId: w.wing.id)
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.writeNew, .gathering, starOnly.id))
+            let starred = try await call(connection, "create_note",
+                                         ["book_id": .string(starOnly.id), "text": .string("a star, no tag")])
+            #expect(starred.isError != true, "\(text(starred))")
+            let starredAnswer = try json(starred)
+            #expect(starredAnswer["tags"] as? [String] == [] && starredAnswer["starred"] as? Bool == true)
+            // A rule nothing could satisfy still refuses in her door's words.
+            let never = try h.operations.createReading(
+                name: "never", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.and([.tag(w.parser.id), .not(.tag(w.parser.id))])),
+                wingId: w.wing.id)
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.writeNew, .gathering, never.id))
+            let refused = try await call(connection, "create_note",
+                                         ["book_id": .string(never.id), "text": .string("x")])
+            #expect(refused.isError == true && text(refused) == GatheringMint.Blocker.unreachableTerm.reason)
+            await h.hangUp(connection)
+        }
+    }
+
+    /// **VX-609 — the just-in-time ask on a star-rule gathering is no dead door.**
+    /// The VX-548 final walk: a READ grant's `create_note` raised the ask
+    /// offering write new ("it can also make new notes in it…"), her answered
+    /// Once minted the grant — and the retry then refused with the star sentence,
+    /// the grant sitting unspent: a door that could never act (P-2). Now her
+    /// answer's grant is honest: the retry lands, starred. RED ON OLD (the
+    /// retry's refusal).
+    @Test func anAnsweredAskOnAStarRuleGatheringLandsTheNoteNeverADeadDoor() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try world(h) { parser, _ in .and([.tag(parser.id), .star]) }
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.read, .gathering, w.gathering.id))
+            h.asks.setValue([])
+            let past = try await call(connection, "create_note",
+                                      ["book_id": .string(w.gathering.id), "text": .string("an idea")])
+            #expect(past.isError == true
+                    && text(past) == MCPRefusalCopy.words(.rungTooLow(granted: .read), .book, asked: true))
+            let ask = try #require(h.asks.value.first)
+            #expect(ask.scopeKind == .gathering && ask.scopeID == w.gathering.id && ask.rung == .writeNew)
+
+            // Her answer, exactly as the door mints it (`MCPDoor.answer`): the
+            // ask's rung, its target as the scope — Once.
+            let granted = try h.operations.grantMCPAccess(
+                try h.client("claude-code").id,
+                Operations.MCPGrantSpec(rung: ask.rung, scopeKind: ask.scopeKind, scopeID: ask.scopeID, duration: .once))
+            let retry = try await call(connection, "create_note",
+                                       ["book_id": .string(w.gathering.id), "text": .string("an idea")])
+            #expect(retry.isError != true, "her answer's grant acts: \(text(retry))")
+            let noteID = try #require(try json(retry)["note_id"] as? String)
+            #expect(try starredNotes(h).contains(noteID) && (try assembled(h, w.gathering.id).contains(noteID)))
+            #expect(try consumedAt(h, granted) != nil, "the answered Once is spent by the act it allowed")
             await h.hangUp(connection)
         }
     }

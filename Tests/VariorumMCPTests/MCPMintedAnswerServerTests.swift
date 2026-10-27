@@ -17,7 +17,8 @@ import Testing
 // [{take_id, label?}]}`, every take an object in fan order, the shown one included,
 // built from what the act minted (no second read). `block_ids` stays beside it (F-6).
 // `import_document`'s ONE-document form had the same gap and closes the same way;
-// its BOOK form keeps its answer (F-2 — a guard here). And `create_note` takes an
+// its BOOK form kept its answer (F-2 — a guard here, FLIPPED at VX-567: a whole
+// book now answers each note's record too). And `create_note` takes an
 // optional `section_id`: the note is filed under that chapter of the book it joins,
 // in the same call and the same undo; any id that isn't a live chapter of THAT book
 // answers the ONE sentence its siblings speak (F-3 — no oracle), and an unreachable
@@ -136,9 +137,9 @@ struct MCPMintedAnswerServerTests {
         }
     }
 
-    // MARK: - import_document: one document closes the same way; a book keeps its answer
+    // MARK: - import_document: one document closes the same way; a book answers its notes too (VX-567)
 
-    @Test func importDocumentAnswersTheSameRecordsForOneDocumentAndABookKeepsItsAnswer() async throws {
+    @Test func importDocumentAnswersTheSameRecordsForOneDocumentAndABookAnswersItsNotesToo() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -167,8 +168,12 @@ struct MCPMintedAnswerServerTests {
             #expect(BlockRecord.answered(answer) == stored, "one document answers the same records")
             #expect(answer["block_ids"] as? [String] == stored.map(\.blockID))
 
-            // THE GUARD (F-2, green on both sides by design): a whole book keeps
-            // its answer — book, notes, chapters — never ∝ every block it holds.
+            // F-2's guard, FLIPPED DELIBERATELY (VX-567 — the VX-620 run, batch 3,
+            // PROVISIONAL RB-4; it supersedes P-VX252-1 / P-VX254-2's "ids only",
+            // ratified 2026-10-15, on the ticket she seated in her run): a whole
+            // book keeps book, notes and chapters AND answers each note's VX-252
+            // record (`notes` — its truth pinned in `MCPBookImportRecordsServerTests`).
+            // Was: the keys exactly `book_id`, `note_ids`, `chapter_ids`.
             let whole = try await call(connection, "import_document", [
                 "wing_id": .string(""),
                 "book": .object([
@@ -177,7 +182,7 @@ struct MCPMintedAnswerServerTests {
                 ]),
             ])
             #expect(whole.isError != true, "\(text(whole))")
-            #expect(Set(try json(whole).keys) == ["book_id", "note_ids", "chapter_ids"])
+            #expect(Set(try json(whole).keys) == ["book_id", "note_ids", "chapter_ids", "notes"])
             await h.hangUp(connection)
         }
     }

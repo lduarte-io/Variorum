@@ -512,9 +512,18 @@ nonisolated enum SettingsSearch {
     /// VX-309 U2 — VX-453: the settings half (the account section's row only
     /// where the section renders — VX-329: on the one road, wherever a
     /// library is open on it).
-    static func settingsEntries(accountSection: Bool) -> [Entry] {
-        let rows = accountSection
-            ? SettingsCatalog.rows : SettingsCatalog.rows.filter { $0.id != SettingsCatalog.accountRow.id }
+    ///
+    /// VX-590 (the VX-620 run, batch 2): `mcpSharingFace` false — Settings ▸
+    /// MCP shows no Shared with AI tab (the library has never had a client,
+    /// `MCPPane.showsSharingFace`) — leaves out every row that tab holds (the
+    /// rows whose finding lands there, `MCPPaneTab.holding` — the open book),
+    /// so the search never names a row the pane does not show. Default true:
+    /// every row, as before.
+    static func settingsEntries(accountSection: Bool, mcpSharingFace: Bool = true) -> [Entry] {
+        let rows = SettingsCatalog.rows.filter { row in
+            (accountSection || row.id != SettingsCatalog.accountRow.id)
+                && (mcpSharingFace || MCPPaneTab.holding(findingLead: row.title) != .shared)
+        }
         return rows.map { row in
             Entry(
                 finding: SettingsFinding(
@@ -544,8 +553,10 @@ extension SettingsSearch {
     /// VX-309 U2 — VX-453: the whole index for the window — the results pane
     /// asks with the account section's presence, so a search never names the
     /// section where the pane does not render it.
-    @MainActor static func wholeIndex(accountSection: Bool) -> [Entry] {
-        settingsEntries(accountSection: accountSection) + shortcutEntries + dictionaryEntries
+    /// VX-590: and with the MCP pane's sharing face (`settingsEntries`).
+    @MainActor static func wholeIndex(accountSection: Bool, mcpSharingFace: Bool = true) -> [Entry] {
+        settingsEntries(accountSection: accountSection, mcpSharingFace: mcpSharingFace)
+            + shortcutEntries + dictionaryEntries
     }
 
     @MainActor static var shortcutEntries: [Entry] {

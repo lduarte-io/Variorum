@@ -176,6 +176,14 @@ nonisolated enum CapabilityRegistry {
 
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
 
+    /// **VX-377 — the note's Move/Copy to Wing, reached with no row in hand**
+    /// (⌘K): the focused pane shows a note, and another wing exists to go to.
+    /// Read by the target-less door only; the row doors draw by their own
+    /// rule (`WingNoteDoors` — the note's own wing's destinations).
+    private static let noteWingDoor: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        ctx.focusedPaneShowsNote && ctx.wingCount > 1 ? .act : .unavailable
+    }
+
     /// **VX-154 (the VX-282 run) — the verbs that act where she writes are
     /// GREY while Write's take panel is up.** The panel is a sheet over Write
     /// showing ONE block's takes. Cutting, joining or adding blocks lands on
@@ -2170,31 +2178,47 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.unavailableNote,
             availability: always),
+        // VX-377 (the VX-620 run, batch 4 — her "a selector that I can also
+        // operate via keyboard to make it truly fast"): + `.palette`, so ⌘K
+        // reaches Move/Copy to Wing on the FOCUSED note. The row doors still
+        // carry their own row and draw by their own rule (another wing exists
+        // — `WingNoteDoors`); the AVAILABILITY below is the target-less door's
+        // gate (the `.toggleStar` / `.newNoteInBook` split): a pane showing a
+        // note, and another wing to go to. A pane showing a BOOK is the book
+        // move's context, never the note's (C-570-1's reading), so the two
+        // identical "Move to Wing" verbs never list together. ⌘K lists these
+        // rows only where they act (`WingPaletteDoors.lists` — P-2).
         Capability(
             id: .moveNoteToWing, verb: WingCopy.moveToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar],
+            doors: [.contextMenu, .bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
-            availability: always),
+            availability: noteWingDoor),
         Capability(
             id: .copyNoteToWing, verb: WingCopy.copyToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar],
+            doors: [.contextMenu, .bottomBar, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
-            availability: always),
+            availability: noteWingDoor),
         // 13i-d U5b — the book-move half (R-13id-6 item 9). The book door
         // carries its row (the note doors' `.native` precedent) and renders
         // only while another wing exists and never on the daily Journal
         // (`WingBookMoveDoor.drawn` — DATA, P-2); the bulk door carries the
         // current wing and renders only on an ADDITIONAL one.
+        // VX-377: + `.palette` on the FOCUSED book (or gathering) — the
+        // target-less door's gate is a pane showing a book and another wing;
+        // the per-target half (never the daily Journal) is the row door's own
+        // `WingBookMoveDoor.drawn`, which ⌘K's listing reads too.
         Capability(
             id: .moveBookToWing, verb: WingCopy.moveToWingVerb, scope: .book,
-            doors: [.contextMenu],
+            doors: [.contextMenu, .palette],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.bookUnavailableNote,
-            availability: always),
+            availability: { ctx in
+                ctx.focusedPaneShowsBook && ctx.wingCount > 1 ? .act : .unavailable
+            }),
         Capability(
             id: .moveWingContents, verb: WingCopy.moveEverythingVerb, scope: .app,
             doors: [.surface],

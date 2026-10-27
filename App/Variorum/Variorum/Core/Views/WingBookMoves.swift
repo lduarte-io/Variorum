@@ -88,6 +88,7 @@ extension WingsModel {
             let result = try await session.runner.run { ops in
                 try ops.moveReadingToWing(ask.readingID, to: ask.wingID)
             }
+            wingActLanded()  // VX-377: the window's one-shot wing reads re-ask
             session.status.receipt(WingCopy.bookMoved(
                 ask.name, to: ask.wingName, notes: result.notes, isGathering: ask.isGathering))
         } catch {
@@ -129,6 +130,7 @@ extension WingsModel {
             _ = try await session.runner.run { ops in
                 try ops.moveWingContents(from: ask.sourceID, to: ask.wingID)
             }
+            wingActLanded()  // VX-377: the window's one-shot wing reads re-ask
             session.status.receipt(WingCopy.everythingMoved(from: ask.sourceName, to: ask.wingName))
         } catch {
             session.status.refuse(OpsRefusalCopy.message(for: error))

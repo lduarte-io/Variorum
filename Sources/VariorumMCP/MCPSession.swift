@@ -35,6 +35,15 @@ final class MCPSession: @unchecked Sendable {
     private let shows: MCPShowTool
     private let database: AppDatabase
     private let operations: Operations
+    /// **VX-605 — the naming moment is heard** (the VX-620 run, batch 2): called
+    /// once this connection's `initialize` has named it (the host hands it its
+    /// one connections-changed road — `MCPServerHost.onConnectionsChanged`, a
+    /// SIGNAL carrying no decision, P-4). The host signalled only when the
+    /// connection registered — before it had a name — so a client reconnecting
+    /// under its bound key (nothing the grants observation hears) was served
+    /// while the pane's Clients row read "last seen …". Called outside this
+    /// session's lock, on the session's own task; the listener re-reads.
+    private let onNamed: @Sendable () -> Void
     private let lock = NSLock()
     private var name: String?
     /// VX-258: the hash of the key this connection presented while that key
@@ -183,9 +192,22 @@ final class MCPSession: @unchecked Sendable {
     /// linking the public guide at its fixed URL (R-VX184-4 — a build
     /// carrying it ships publicly only after that page is live). Pinned in
     /// `MCPAdviceServerTests`; the count is the pin's to say.
+    ///
+    /// VX-619 (the VX-620 run, batch 3 — her C pick, 2026-10-27, docs only):
+    /// the opening says a lock or a quit ends every connection BY DESIGN (A-8 —
+    /// a locked library serves no one; the server starts again at the unlock,
+    /// while the client stays disconnected) and that the client reconnects once
+    /// Variorum is back — provider-neutral (O-4: no client's own command is named
+    /// here; the guide names Claude Code's inside its setup fence). THE TRADE,
+    /// to stay inside R-VX184-3's 3,000: the sentence "move_note_to_wing needs
+    /// edit on the note and write new on the wing it goes to." is gone — the
+    /// tool's own description says it word for word, and the tool is listed only
+    /// to a client that can call it — and show_in_app's sentence ends "asks to
+    /// see something" (its pinned clause unchanged). 2,988 → 2,994.
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
-        open only while Variorum runs. A new client is a connection request until the author approves \
+        open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, \
+        so reconnect once it's back. A new client is a connection request until the author approves \
         it in Variorum \u{25B8} Settings \u{25B8} MCP. Once approved, list_my_activity is always listed; \
         other tools appear only for what the author has shared (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
@@ -201,8 +223,7 @@ final class MCPSession: @unchecked Sendable {
         stops, and reconnecting does not restore it.
         search covers standing grants only; read a once grant's note by id.
         A gathering grant reaches the notes its rule gathers now; create_note into one applies its \
-        tags. move_note_to_wing needs edit on the note and write new on the \
-        wing it goes to.
+        tags.
         Ids are live: after any divide or merge, theirs or yours, read again.
         read_note speaks the Variorum document format; when its header starts with \
         \(VariorumDocument.versionToken), a "\(VariorumDocument.blockMarker)" line separates the blocks. \
@@ -220,7 +241,7 @@ final class MCPSession: @unchecked Sendable {
         not exist.
         If a call is refused, don't retry around it: tell the author what you need (Variorum may \
         already have asked them). If an answer is lost, list_my_activity shows whether the call landed.
-        Never call show_in_app unless the author asks you to show them something.
+        Never call show_in_app unless the author asks to see something.
         Every change you make is one undo for the author, named after you; commits stay.
         The guide to this door: https://stargazing.tech/variorum/mcp
         """
@@ -234,11 +255,12 @@ final class MCPSession: @unchecked Sendable {
 
     init(
         fd: Int32, database: AppDatabase, operations: Operations, version: String,
-        executor: any MCPWriteExecutor, hooks: MCPHostHooks
+        executor: any MCPWriteExecutor, hooks: MCPHostHooks, onNamed: @escaping @Sendable () -> Void = {}
     ) {
         self.fd = fd
         self.database = database
         self.operations = operations
+        self.onNamed = onNamed
         var reads = MCPReadTools(database: database, operations: operations)
         reads.hooks = hooks
         self.tools = reads
@@ -337,6 +359,12 @@ final class MCPSession: @unchecked Sendable {
                     throw MCPError.serverError(code: MCPShim.refusalCode, message: MCPHandshake.refusal)
                 }
                 self.lock.withLock { self.name = admitted }
+                // VX-605: the connection has named itself — say so on the
+                // host's one road (a waiting setup's connection reads as no
+                // one's until her OK, `clientName`; the re-read then finds
+                // nothing new, and her Allow is heard through the grants
+                // observation as before).
+                self.onNamed()
             }
             await server.waitUntilCompleted()
         } catch {

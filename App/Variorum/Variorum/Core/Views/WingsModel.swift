@@ -33,9 +33,25 @@ final class WingsModel {
     /// `decideWing`'s read. Keyed by wing id, Home `''`. ∝ the wings × the
     /// approved clients; never reads `container`.
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
+    /// **VX-377 (the VX-620 run, batch 4) — every wing act this model LANDED,
+    /// counted** (`move`, `copy`, `moveBook`, `moveContents`): a SIGNAL the
+    /// window's one-shot wing reads key on, so they re-ask after any wing act
+    /// from ANY door in the window — the sidebar's note rows (their doors' wing,
+    /// the Open indicator) and the note ▾ menu's context. VX-425's rule ("the
+    /// wing listings re-ask after any move") held only per door before: each
+    /// renderer's `onDone` re-asked its OWN surface, and ⌘K's selector has no
+    /// surface's `onDone` to call. Never a decision (P-4) — each read asks the
+    /// store again.
+    private(set) var actGeneration = 0
 
     init(session: AppSession) {
         self.session = session
+    }
+
+    /// The four acts' one bump, after their write landed (a refusal changed
+    /// nothing, so it signals nothing).
+    func wingActLanded() {
+        actGeneration &+= 1
     }
 
     /// Held — the `wing` table alone (a handful of rows; nothing else wakes it).
@@ -240,6 +256,7 @@ final class WingsModel {
             let result = try await session.runner.run { ops in
                 try ops.moveNoteToWing(postID, to: wingID)
             }
+            wingActLanded()  // VX-377: the window's one-shot wing reads re-ask
             session.status.receipt(WingCopy.moved(title, to: wingName, left: result.leftBooks.count))
         } catch {
             session.status.refuse(OpsRefusalCopy.message(for: error))
@@ -252,6 +269,7 @@ final class WingsModel {
             _ = try await session.runner.run { ops in
                 try ops.copyNoteToWing(postID, to: wingID)
             }
+            wingActLanded()  // VX-377: the window's one-shot wing reads re-ask
             session.status.receipt(WingCopy.copied(title, to: wingName))
         } catch {
             session.status.refuse(OpsRefusalCopy.message(for: error))
@@ -484,6 +502,20 @@ struct NoteMenuWingContext: Equatable, Sendable {
     static func reloadAdopts(over current: NoteMenuWingContext?, postID: String) -> Bool {
         current?.postID == postID
     }
+
+    /// **VX-377 — the context's LOAD key**: the note, and the window's wing-act
+    /// signal (`WingsModel.actGeneration`). A move of THIS note from any other
+    /// door — ⌘K's selector, a sidebar or Library row — re-loads it, so the
+    /// note ▾ menu never lists the wing the note now lives in (VX-425's rule;
+    /// before, only the bar's own doors' `onDone` re-asked it).
+    struct LoadKey: Equatable, Sendable {
+        let postID: String
+        let wingActs: Int
+    }
+
+    static func loadKey(postID: String, wings: WingsModel?) -> LoadKey {
+        LoadKey(postID: postID, wingActs: wings?.actGeneration ?? 0)
+    }
 }
 
 extension View {
@@ -499,7 +531,8 @@ extension View {
         context: Binding<NoteMenuWingContext?>, ask: Binding<WingsModel.MoveAsk?>
     ) -> some View {
         self
-            .task(id: postID) {
+            // VX-377: keyed on the note AND the window's wing-act signal.
+            .task(id: NoteMenuWingContext.loadKey(postID: postID, wings: wings)) {
                 let loaded = await NoteMenuWingContext.load(session, postID: postID)
                 guard !Task.isCancelled else { return }
                 context.wrappedValue = loaded

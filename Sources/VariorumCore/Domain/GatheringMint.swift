@@ -63,11 +63,14 @@ public enum GatheringMint {
         /// a nested group or legacy term, or another shape a fresh note
         /// can't be made to match by tagging and starring.
         case unreachableTerm
-        /// **VX-549 — the rule needs a STAR, and this door can't give one**
-        /// (`outcome(…, starrable: false)` only — the MCP door's `write new`
-        /// into a gathering: starring is not on the wire, a VX-368 parity item,
-        /// so a rule tagging alone can't satisfy refuses honestly — her sitting
-        /// 2026-10-27). Never met where the star is allowed (her own doors).
+        /// **VX-549 — the rule needs a STAR, and this walk can't give one**
+        /// (`outcome(…, starrable: false)` only). VX-549 built it as the MCP
+        /// door's refusal (starring was not on the wire); since VX-596 put the
+        /// star on the wire (her ruling 2026-10-27, "let's add the star over the
+        /// wire"), no door speaks it — the wire's write new re-plans WITH the
+        /// star where this is the block (`starringOnlyWhereNeeded`), and the
+        /// faces read the fact through `needsStar(_:)`. Never met where the star
+        /// is allowed (her own doors).
         case needsStar
 
         /// The whole sentence the greyed door's hover says — and the op's
@@ -102,12 +105,14 @@ public enum GatheringMint {
                 "Its rule needs a kind of note, which a new note doesn't have."
             case .unreachableTerm:
                 "Its rule can't match a new note."
-            // VX-549 (PROVISIONAL wording, the run record's MORNING BUNDLE —
-            // her register: "Its rule needs #essays, which no longer exists."):
-            // said to a CLIENT, which can read the place — never the not-shared
-            // shape.
+            // VX-596 (the ticket's wording point 3 — RETIRED from every road: the
+            // wire's write new now stars where the rule needs it). VX-549 said
+            // "…, and only the author can star one." — a premise `set_starred`
+            // made false, so the case keeps only the fact (her register: "Its
+            // rule needs #essays, which no longer exists."), never a claim
+            // about who may star. PROVISIONAL words, her copy pass.
             case .needsStar:
-                "Its rule needs a starred note, and only the author can star one."
+                "Its rule needs a starred note."
             }
         }
     }
@@ -177,14 +182,15 @@ public enum GatheringMint {
     /// the any-of pick, the final check — reads the note the plan makes:
     /// what it wore, plus what the plan gives it.
     ///
-    /// **`starrable` (VX-549):** whether this door can STAR the note. Her doors
-    /// can (the default — R-VX214-4, VX-249); the MCP door's `write new` into a
-    /// gathering cannot (starring is not on the wire), so with `false` a star
-    /// is no satisfiable option — an any-of group takes a tag option where it
-    /// has one. A rule this walk then blocks but the SAME walk with the star
+    /// **`starrable` (VX-549):** whether this walk may STAR the note. Her doors
+    /// do (the default — R-VX214-4, VX-249). With `false` a star is no
+    /// satisfiable option — an any-of group takes a tag option where it has
+    /// one. A rule this walk then blocks but the SAME walk with the star
     /// allowed would plan answers `.blocked(.needsStar)` — the one honest why
     /// (never `.unreachableTerm`, which would hide that a star is the gap):
     /// "blocked without the star, planned with it" is the whole definition.
+    /// The MCP door's write new composes the two walks
+    /// (`starringOnlyWhereNeeded` — VX-596).
     public static func outcome(
         archived: Bool, finished: Bool, rule: RuleGrammar.ReadResult,
         tagIsLive: (String) -> Bool, deadTagPath: (String) -> String? = { _ in nil },
@@ -406,6 +412,37 @@ public enum GatheringMint {
         return .plan(Plan(tagIDs: tagIDs, star: star))
     }
 
+    // MARK: - VX-596: the star only where it is the only way in
+
+    /// **The MCP door's write new into a gathering** (VX-596 — her ruling
+    /// 2026-10-27, "let's add the star over the wire, it might as well be
+    /// included"; RB-1, PROVISIONAL — the VX-620 run record's BATCH 1 RECORD).
+    /// The walk with the star FORBIDDEN first — VX-549's plan exactly: tags
+    /// wherever tags can satisfy, an any-of group's TAG option taken where it has
+    /// one — and ONLY where that walk blocks for want of a star
+    /// (`.blocked(.needsStar)`: exactly the rules VX-549 refused) her door's own
+    /// walk with the star allowed, so the note is born starred. `★ OR #a` takes
+    /// #a (her door would star — the first satisfiable option); `#a AND ★` and
+    /// `★` star; every other outcome is the star-forbidden walk's, unchanged.
+    /// Stars are her scarce, visible list (the cap, the Starred section), so a
+    /// client spends one only where nothing else gets the note in.
+    ///
+    /// `walk(starrable)` is the ONE planner over the same facts (a store-fed
+    /// `Queries.gatheringMintOutcome`, or `outcome`) — never a second derivation.
+    public static func starringOnlyWhereNeeded(
+        _ walk: (_ starrable: Bool) throws -> Outcome
+    ) rethrows -> Outcome {
+        let tagsFirst = try walk(false)
+        guard tagsFirst == .blocked(.needsStar) else { return tagsFirst }
+        return try walk(true)
+    }
+
+    /// `starringOnlyWhereNeeded` over the rule ALONE (`grammarOutcome`'s
+    /// facts) — the unit table's seam.
+    static func wireGrammarOutcome(_ term: RuleTerm) -> Outcome {
+        starringOnlyWhereNeeded { grammarOutcome(term, starrable: $0) }
+    }
+
     // MARK: - VX-549: what TAGS alone can do (pure, on the rule grammar)
 
     /// The planner over the rule ALONE — every tag it names taken as live (the
@@ -419,9 +456,11 @@ public enum GatheringMint {
     }
 
     /// **Can a new note be made to match this rule by TAGS alone?** (VX-549 —
-    /// the MCP door's `write new` into a gathering, where starring is not on
-    /// the wire.) True when the ONE planner, forbidden the star, still makes a
-    /// plan: tag terms are taken, an any-of group takes a tag option, and NOT
+    /// built for the MCP door's `write new` into a gathering while starring was
+    /// not on the wire; since VX-596 the wire's first walk is this one, and the
+    /// star rides only where it is false.) True when the ONE planner, forbidden
+    /// the star, still makes a plan: tag terms are taken, an any-of group takes
+    /// a tag option, and NOT
     /// terms count as tag-satisfiable — a fresh note meets `NOT #x` (and
     /// `NOT ★`) by not wearing it. False for a rule a star alone could satisfy
     /// AND for one nothing could (`#a AND NOT #a`, legacy terms) — see
@@ -431,11 +470,13 @@ public enum GatheringMint {
         return false
     }
 
-    /// **Does this rule need a STAR that only the author can give?** (VX-549 —
-    /// her sitting: "write_new on a rule tagging can't satisfy (star terms)
-    /// refuses honestly and the grant sheet presents such a grant as
-    /// read/suggest-shaped".) True exactly when the planner, forbidden the
-    /// star, blocks where the same planner with the star would plan
+    /// **Does this rule need a STAR to take a new note?** (VX-549 — built when
+    /// only the author could star: her sitting's "refuses honestly … presents
+    /// such a grant as read/suggest-shaped". VX-596 retired both — the wire's
+    /// write new stars such a note now — and the grant sheet reads this fact for
+    /// its one heads-up line, `MCPGrantPicker.starHeadsUp`.) True exactly when
+    /// the planner, forbidden the star, blocks where the same planner with the
+    /// star would plan
     /// (`.needsStar`): a star conjunct, an any-of group whose only satisfiable
     /// option is the star, a star the rule's NOTs leave as the only way in. nil
     /// (no rule) is false — a rule-less gathering assembles empty for every
