@@ -277,6 +277,10 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 - **WingPaletteDoorsTests from the rebuilt b4: 10 EXECUTED / 1 red, TWICE** (the repeat a diagnostic) — `theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc` STILL red on 4-F1's fixed rig: `currentEditor()` nil through the 80-turn wait in a settled, shown window (the edited :518, ~9.3 s). 4-F1's settled-window theory was INSUFFICIENT; the prime suspect is the host fact 4-F1 itself cited — test-host windows never become KEY, so field EDITING may be unreachable at this seam. The control stayed unfocused; the other nine green. The red teeth-proof leg was MOOT (the pin red without it) and was not run; no product line was touched (tree clean, coordinator-verified).
 - **The product stands proven by the walk** (the final window: focused without a click, both voices, three times, captured). Routed to batch 4's implementer as **FIX LEG 4-F2** with a decisive brief: trace the two green precedents' exact focus mechanics; make the rig genuinely focus-capable OR re-seat the mounted assertion at the honest pinnable seam (the focus REQUEST + what AppKit reachably shows), the live arrival staying walk-verified evidence (the MB-15 evidence-shape precedent) — one more cycle only. The merge waits on its re-run window.
 
+### THE RERUN-2 PREP (orchestrator, outside the stage — the coordinator's shortening suggestion)
+
+- **REVERT IN FLIGHT (announced before it starts, the resiliency rule):** the teeth-proof's red PRODUCT is pre-built OUTSIDE the window — `WingDestinationSheet.swift`'s `.task { askForTheKeyboard() }` line deleted in the working tree, `build-for-testing` into a FRESH `DerivedData/b4red` (never a clone), then the file restored by `git checkout --` and the tree verified clean. The green product stays the untouched `b4`. The window is then runs only: green (b4) → red single test (b4red) → green suite (b4). Status: PENDING — flipped below when the tree is clean again.
+
 ## SITTING / RULING RECORD (anything she says mid-run lands here verbatim, same turn)
 
 *(empty so far)*
