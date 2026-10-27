@@ -1358,7 +1358,13 @@ stage claim. No subagent.*
   `moveBook` / `moveContents` (`WingBookMoves.swift`); `SidebarView`'s `noteRowsWingKey` + `openWingsKey` and
   `noteMenuWingDoors`' task (`NoteMenuWingContext.loadKey` — the note + the signal; both bars) key on it. Compiled
   (`b4`); RUN PENDING.
-- **5 · Pins + Mac `build-for-testing` (FRESH `DerivedData/b4`) + the whole headless suite:** NOT-STARTED.
+- **5 · Pins + Mac `build-for-testing` (FRESH `DerivedData/b4`) + the whole headless suite:** IN-PROGRESS — the pins
+  are written and COMPILED (this commit): NEW `App/Variorum/VariorumTests/WingPaletteDoorsTests.swift` (8 tests —
+  PINS below); `build-for-testing` into the FRESH `DerivedData/b4` (absent before this batch, never a clone): **TEST
+  BUILD SUCCEEDED** (`scratchpad/b4-logs/mac-bft4.log`; `-bft2/-bft3` were the test file's two isolation fixes; no
+  warning in a touched file — the one in `SidebarView.swift` is :453's, `98924b443c`'s). Remains: `swift build` + the
+  whole headless suite (no core line changed); the final `b4` rebuild from the closing tip. RUN of the Mac pins PENDING
+  the final window.
 - **6 · The record's close (RB-6's chord sweep, canon owed, the orchestrator's leg), ledger row 6 + the batches
   table:** NOT-STARTED.
 
