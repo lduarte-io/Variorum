@@ -261,7 +261,17 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     names, "tutorial" on one door only; the naming sentences; the old literals gone from menu/palette/registry; the
     guide content deliberately unchanged) + `TourOfferLineTests` DELIBERATE update (the title + sentence) —
     build-for-testing GREEN; the suite GREEN at the stage window (below).
-- Batch 2: NOT-STARTED
+- Batch 2: IN-PROGRESS — implementer session 2 (`opus-implementer`, fresh, 2026-10-27); preflight read (CLAUDE.md +
+  canon, this record whole, SurfaceContracts whole, the resiliency protocol, TEXTKIT2_NOTES §3–4, the capability model,
+  VX-283's U2b–U2d drag history). No revert in flight. Members in order:
+  - VX-424: IN-PROGRESS — the instrument (both directions) first, then the red-on-old pins, then the half-row fix.
+  - VX-425: NOT-STARTED
+  - VX-580: NOT-STARTED
+  - VX-589: NOT-STARTED
+  - VX-426: NOT-STARTED
+  - VX-560: NOT-STARTED
+  - VX-441: NOT-STARTED
+  - VX-569: NOT-STARTED
 - Ladder: NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
 
