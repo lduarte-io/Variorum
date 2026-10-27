@@ -539,8 +539,10 @@ orchestrator's). Batch 1's code and record untouched.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.** (VX-358's ran over `4d3f3f3d1`, VX-352's over `3e1aaa26f`; each restored
-  by `git checkout --`, `git diff` clean after, green again — `vx358-green2.log`, `vx352-green2.log`.)
+- **A BEHAVIOURAL REVERT IS IN FLIGHT (fix leg 2a-F2), over the committed `2cee65c55`:** `TakeLabelFace.hover`'s body
+  forced to `return act` (the old band: the act's sentence alone); restore = `git checkout --
+  Sources/VariorumCore/Domain/TakeLabelFace.swift` (committed — safe). If this line still stands, check `git diff`
+  first. (VX-358's ran over `4d3f3f3d1`, VX-352's over `3e1aaa26f`; each restored, `git diff` clean, green again.)
 - **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (`15f94f154`) — core
   `Operations.addNoteToBookForClient` → `MCPBookAdd {membership, tagIDs, tagPaths}` (the same body and ONE undo entry;
   `addNoteToBook` keeps its signature and returns `.membership`), the tags composed INSIDE the act's transaction by
