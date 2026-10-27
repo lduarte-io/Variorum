@@ -32,7 +32,7 @@ The run record (the one running record, read it for everything): `notes/plans/fi
 
 ## Evidence (counts in the record)
 
-Headless at the tip: core 3484/465 · MCP 431/79 · Strings 32/4 (the standing flakes VX-532/607/625 isolated-green where met). The MID WINDOW: 366 executed / 50 suites / 1 red (a pin bug, fixed) + the MCP walk ALL GREEN. The FINAL WINDOW: 470 executed / 66 suites / 1 red (MID620-F1 — adjudicated RIG-side by the walk's focus verdict; the rig fix: PENDING(2-F2 commit), its single-suite re-run PENDING(window)). The ladder closed in ONE round: 0 BLOCKER · 0 MAJOR · 0 MINOR · 4 record-only NITs (`vx-620-ladder-round1.md`), contingent on the final window — met except the single-suite re-run. The two -only-testing traps found and recorded (file names drop silently; verify started names).
+Headless at the tip: core 3484/465 · MCP 431/79 · Strings 32/4 (the standing flakes VX-532/607/625 isolated-green where met). The MID WINDOW: 366 executed / 50 suites / 1 red (a pin bug, fixed) + the MCP walk ALL GREEN. The FINAL WINDOW: 470 executed / 66 suites / 1 red (MID620-F1 — adjudicated RIG-side by the walk's focus verdict; the pin re-seated at the honest seam in fix leg 4-F2 — the arrival ASKS for the keyboard, DEBUG-oracled; the landing is the walk's evidence — and the RERUN-2 window proved it GREEN→RED→GREEN, 10 executed each, the teeth bitten by behavioural revert). The ladder closed in ONE round: 0 BLOCKER · 0 MAJOR · 0 MINOR · 4 record-only NITs (`vx-620-ladder-round1.md`); its final-window contingency is MET (the one red adjudicated rig-side by the walk; the fixes test-side plus one behaviour-identical DEBUG-oracle refactor, line-checked by the orchestrator). THREE -only-testing traps found and recorded: a FILE name drops silently (use suite TYPE names), a single-TEST path can match nothing ("0 tests passed" = no verdict), and started-suite names must be verified against the request (the VX-604 family).
 
 ## Filed tickets (all triaged to the labeling rule)
 
@@ -46,7 +46,7 @@ Nothing mobile-visible: the phone has no MCP door and no ⌘K; `VariorumMobile/`
 
 ## Canon (applied at the merge, the two-file shape)
 
-MCPSpec: the VX-549 paragraph's star clauses replaced as built; the EDIT-rung reach gains set_starred; the pane paragraph gains VX-590's visibility line and VX-605's connected-now clause; VX-252/254's answer clauses extended (VX-566/567). SurfaceContracts: the keyboard family's ⌘K wing doors line + the Open list's cross-door re-ask line. AppSpec: §7's grants-family pointer only if the wording went stale (expect no line). The dated entry + narrative → AppSpecRecord. Canon-size: PENDING(line).
+MCPSpec: the VX-549 paragraph's star clauses replaced as built; the EDIT-rung reach gains set_starred; the pane paragraph gains VX-590's visibility line and VX-605's connected-now clause; VX-252/254's answer clauses extended (VX-566/567). SurfaceContracts: the keyboard family's ⌘K wing doors line + the Open list's cross-door re-ask line. AppSpec: §7's grants-family pointer only if the wording went stale (expect no line). The dated entry + narrative → AppSpecRecord. Canon-size at the closeout: 125,887 / 150,000 (headroom 24,113; AppSpec untouched — no crossing).
 
 ## Next
 
