@@ -74,6 +74,16 @@ final class ShellRouter {
         let sectionID: String
     }
     var pendingBookChapter: BookChapterLanding?
+    /// **VX-570 (the VX-439 run) — ⌥⌘N's request**: mint a member of THIS
+    /// book through its own foot act. The book the focused pane shows takes
+    /// it (only that pane's `BookView` is handed it) and clears it — the
+    /// `pendingBookChapter` shape. A fresh token per press, so a second press
+    /// on the same book is a second request.
+    struct BookMintRequest: Equatable, Sendable {
+        let bookID: String
+        let token: UUID
+    }
+    var bookMintRequest: BookMintRequest?
 
     // MARK: - The shell's CONFIRM (13u4 UNIT S3 — KnownIssues row 67)
 

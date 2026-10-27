@@ -2056,6 +2056,41 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: GatheringNoteDoorCopy.unavailableNote, availability: always),
+        // VX-570 (the VX-439 run — A-439-4 + C-570-1; her 10-21 note:
+        // "command for new note within a book"): ⌥⌘N mints a member of the
+        // book the KEY window's focused pane shows, in any book mode (Index
+        // included), through the ONE act that book's own foot door runs —
+        // "+ new note" (`newPostInReading`), "+ new entry" on a journal-trait
+        // book (`newEntry`), and on a gathering the planner's note
+        // (`.newNoteInGathering`'s act, `newPostInGathering`). Its refusals
+        // are those doors' own, the operations layer's words on the book's
+        // line (a finished book, a full one, a rule a new note can't match).
+        // Doors: the File menu beside New Note (`.menuBar`), ⌘K (`.palette`),
+        // and the book foot's and Outline flow's "+ new note"/"+ new entry"
+        // (`.surface` — `BookView.surfaceCapabilities`; undeclared until now).
+        // Grey wherever the focused pane shows no book (P-2) — a note in its
+        // own pane is not a book context.
+        //
+        // `takesAccess: nil`, EXEMPT from the R118 parity table for
+        // `.openBookAtNote`'s reason, one step over: a BOOK-surface act. Its
+        // context is the book view, which carries no post mode, so no note
+        // mode can be "behind" another here — Write is as grey as Takes.
+        //
+        // **⌥⌘N — THE COLLISION SWEEP (2026-10-27, on `9637e5be2`).**
+        // `EditorCommands.keyEquivalent`'s `n` chords are ⌘N (New Note) and
+        // ⌘⇧N (the quick note); 13b 4D's old ⌥⌘N (New Block Below) moved to
+        // ⌘⇧⏎ at 13d batch 4 and no table, `.keyboardShortcut(` call site or
+        // key override carries it since; the system hot key is ⌃⌥⌘N (Carbon,
+        // a different chord — `noSystemChordShadowsAnInAppOneOrAnother` holds
+        // the pair apart); macOS reserves no ⌥⌘N. It reads as the ⌥
+        // "deliberate variant" of ⌘N: a new note, placed somewhere chosen.
+        Capability(
+            id: .newNoteInBook, verb: "New Note in This Book", scope: .book,
+            doors: [.menuBar, .palette, .surface],
+            shortcutLabel: "\u{2325}\u{2318}N", takesAccess: nil,
+            unavailableNote: "New Note in This Book makes a note inside the book you have open "
+                + "\u{2014} open a book first.",
+            availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable }),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],

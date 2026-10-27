@@ -320,6 +320,12 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// pane is SHOWING. A book, a place or a scraps container is not a note
     /// the Open list holds, so the key is honestly grey there.
     var focusedPaneShowsNote = false
+    /// **The focused pane is showing a BOOK** (VX-570, the VX-439 run) — a
+    /// `.reading`, in any book mode — i.e. ⌥⌘N "New Note in This Book" has a
+    /// book to mint into. The `focusedPaneShowsNote` family: a fact about what
+    /// the KEY window's focused pane is SHOWING. A note open in its own pane
+    /// is not a book context (C-570-1 — which of its books would it mean?).
+    var focusedPaneShowsBook = false
     /// **The KEY window's kind** (18o U1 — 17e (12)); nil while no window has
     /// registered. The sidebar toggle's gate — only a FULL window has a
     /// sidebar — lived as a per-view if-statement on its View-menu item while
@@ -854,6 +860,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // ALWAYS and greyed with the reason where the act can't land
     // (R-VX214-3), never hidden.
     case newNoteInGathering
+    // VX-570 (the VX-439 run, A-439-4 + C-570-1) — her 10-21 note: "command
+    // for new note within a book". ⌥⌘N mints a member of the book the focused
+    // pane shows, through the SAME act the book's own foot door runs (a note,
+    // an entry on a journal-trait book, the planner's note on a gathering);
+    // the foot's and the Outline flow's "+ new note"/"+ new entry" are its
+    // `.surface` renderers.
+    case newNoteInBook
     // 13i-d U4 — A BOOK'S ARCHIVED LINE (her #169(a)(1) ruling — the 13i-d
     // plan item 9): its two row doors are **Unarchive** (NEW — the archived
     // line is its one declared renderer; the Library's Archived view carries

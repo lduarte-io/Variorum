@@ -92,6 +92,10 @@ struct CapabilityRegistryTests {
         // measured exactly that, red, before this line).
         contexts.append(CapabilityContext(mode: nil, focusedPaneShowsNote: true, windowKind: .full))
         contexts.append(CapabilityContext(mode: nil, openNoteCount: 1, windowKind: .full))
+        // VX-570 (the VX-439 run — A JUSTIFIED EDIT, the VX-283 line's class):
+        // ⌥⌘N's gate is what the focused pane SHOWS (a book), never a mode;
+        // without this context it reads `.unavailable` everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: nil, focusedPaneShowsBook: true))
         return contexts
     }
 
@@ -229,6 +233,12 @@ struct CapabilityRegistryTests {
             // (QUESTIONS #128) this declaration gains a real `takesAccess`
             // and leaves this list.
             .moveSelectionToTake,
+            // VX-570 (the VX-439 run — A JUSTIFIED EDIT): `.newNoteInBook`
+            // joins `.openBookAtNote` for that act's reason, one step over — a
+            // BOOK-surface act whose context is the book view, which carries
+            // no post mode. No note mode can be "behind" another here: Write
+            // and Takes are equally grey, and the book's own foot renders it.
+            .newNoteInBook,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {

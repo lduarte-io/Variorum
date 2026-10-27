@@ -687,6 +687,12 @@ struct RootView: View {
         session.commandRouter.focusedPaneShowsNote = {
             windows.activeRouter?.workspace.closeNoteTarget != nil
         }
+        // VX-570 (the VX-439 run): ⌥⌘N's gate — is the key window's focused
+        // pane showing a book (any book mode)?
+        session.commandRouter.focusedPaneShowsBook = {
+            if case .reading = windows.activeRouter?.workspace.focusedSelection { return true }
+            return false
+        }
         // 18o U1 (17e (12)): the key window's kind — the sidebar toggle's
         // gate, now a registry fact the View-menu item reads back.
         session.commandRouter.windowKind = { windows.activeWindowKind }
@@ -1297,6 +1303,12 @@ struct RootView: View {
                 revealSectionID: router.pendingBookChapter?.bookID == readingID
                     ? router.pendingBookChapter?.sectionID : nil,
                 onRevealSectionConsumed: { router.pendingBookChapter = nil },
+                // VX-570 (the VX-439 run): ⌥⌘N's request, handed to the book it
+                // names in the LIVE (focused) pane only — a second pane on the
+                // same book never mints twice.
+                mintRequest: live && router.bookMintRequest?.bookID == readingID
+                    ? router.bookMintRequest?.token : nil,
+                onMintRequestConsumed: { router.bookMintRequest = nil },
                 // 18d batch 1: the book publishes what its sidebar box shows.
                 onNoteBox: { bookID, report, door in
                     adoptNoteBox(bookID, report, door)

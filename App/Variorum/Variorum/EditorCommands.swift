@@ -88,6 +88,9 @@ struct EditorCommands: Commands {
     /// rendered).
     static let menuRendered: [CapabilityID] = [
         .newPost, .todaysEntry, .findAnything, .commitTake,
+        // VX-570 (the VX-439 run): ⌥⌘N, beside ⌘N — a note inside the book
+        // the focused pane shows.
+        .newNoteInBook,
         // 13x F1 (R1-MAJOR): the hand-off act's File door.
         .handOffLibrary,
         // The post-13l polish round (rows 16/23): ⌘⇧S, beside ⌘S in the File
@@ -355,6 +358,10 @@ struct EditorCommands: Commands {
         // its neighbour rather than against it: ⌘N makes a note, ⌘⇧N pops
         // the quick-note pad.
         case .quickNote: ("n", [.command, .shift])
+        // VX-570 (the VX-439 run): New Note in This Book. THE COLLISION
+        // SWEEP'S RESULT is the registry row's (⌥⌘N is free: this table's `n`
+        // chords are ⌘N and ⌘⇧N; ⌃⌥⌘N is the quick note's SYSTEM chord).
+        case .newNoteInBook: ("n", [.command, .option])
         // The Act 10 correction round, batch A (row 2). THE COLLISION
         // SWEEP'S RESULT: ⌃⌘S is FREE (see the registry row) — and it is the
         // platform's own Toggle Sidebar chord.
@@ -447,6 +454,13 @@ struct EditorCommands: Commands {
             Button(verb(.newPost)) { creationActions()?.newPost() }
                 .keyboardShortcut("n", modifiers: .command)
                 .disabled(!canReachCreationTarget)
+            // VX-570 (the VX-439 run, A-439-4): a member of the book the KEY
+            // window's focused pane shows, through the book's own foot act —
+            // so it rides `actions` (that window's router), never the
+            // creation router. Grey with no book in the focused pane.
+            Button(verb(.newNoteInBook)) { actions?.newNoteInThisBook() }
+                .keyboardShortcut("n", modifiers: [.command, .option])
+                .disabled(!enabled(.newNoteInBook))
             Button(verb(.todaysEntry)) { creationActions()?.todaysEntry() }
                 .keyboardShortcut("j", modifiers: .command)
                 .disabled(!canReachCreationTarget)

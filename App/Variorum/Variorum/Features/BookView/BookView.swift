@@ -33,6 +33,10 @@ struct BookView: View {
         // VX-217 — a gathering's "+ new note" (the navigator foot and the
         // Outline flow's end — `GatheringNoteDoor`).
         + [.newNoteInGathering]
+        // VX-570 (the VX-439 run): a book's "+ new note" / "+ new entry" (the
+        // same two places) — ⌥⌘N's act, its `.surface` renderers, declared at
+        // last (they were undeclared since Sitting 9).
+        + [.newNoteInBook]
 
     let session: AppSession
     let readingID: String
@@ -56,6 +60,12 @@ struct BookView: View {
     /// `requestChapterReveal` lands it at the top).
     var revealSectionID: String?
     var onRevealSectionConsumed: (() -> Void)?
+    /// **VX-570 (the VX-439 run) — ⌥⌘N's request** (`ShellRouter.
+    /// BookMintRequest`'s token): the shell hands it to the book in the
+    /// focused pane only; this book takes it once — the SAME act its own foot
+    /// door runs (`footMint(for:)`) — and clears it.
+    var mintRequest: UUID?
+    var onMintRequestConsumed: (() -> Void)?
     /// **18d batch 1 (her U-10): what this book's sidebar note box shows.**
     /// A VALUE and a DOOR, published upward — the sidebar never constructs or
     /// holds this book's model, and `RootView` composes the box from what
@@ -122,6 +132,8 @@ struct BookView: View {
         onRevealConsumed: (() -> Void)? = nil,
         revealSectionID: String? = nil,
         onRevealSectionConsumed: (() -> Void)? = nil,
+        mintRequest: UUID? = nil,
+        onMintRequestConsumed: (() -> Void)? = nil,
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
         onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil
@@ -135,6 +147,8 @@ struct BookView: View {
         self.onRevealConsumed = onRevealConsumed
         self.revealSectionID = revealSectionID
         self.onRevealSectionConsumed = onRevealSectionConsumed
+        self.mintRequest = mintRequest
+        self.onMintRequestConsumed = onMintRequestConsumed
         self.onNoteBox = onNoteBox
         self.onOpenSearchHit = onOpenSearchHit
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
@@ -461,6 +475,10 @@ struct BookView: View {
         .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
         // 13n-b U4: the chapter landing, taken once (open already or opened by it).
         .onChange(of: revealSectionID) { _, _ in takeChapterRequest() }
+        // VX-570 (the VX-439 run): ⌥⌘N's request, taken once — or as soon as
+        // the book's row has arrived to choose the act by.
+        .onChange(of: mintRequest) { _, _ in takeMintRequest() }
+        .onChange(of: structure.reading?.id) { _, _ in takeMintRequest() }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? structure.lastError ?? bookSearch.lastError {
                 Text(error)
@@ -927,11 +945,7 @@ struct BookView: View {
                     if Queries.hasJournalTrait(structure.reading?.profile),
                        structure.reading?.locked != true {
                         Button(tokens.chromeLabel("+ new entry")) {
-                            Task {
-                                if let id = await structure.newEntry() {
-                                    model.focus(id)
-                                }
-                            }
+                            mint(.entry, reveal: false)
                         }
                         .buttonStyle(.borderless)
                         .font(tokens.small)
@@ -941,11 +955,7 @@ struct BookView: View {
                         // Sitting 9 (R62/R75): "it needs to be easy to make
                         // a post inside of a book" — the non-journal door.
                         Button(tokens.chromeLabel("+ new note")) {
-                            Task {
-                                if let id = await structure.newPost() {
-                                    model.focus(id)
-                                }
-                            }
+                            mint(.note, reveal: false)
                         }
                         .buttonStyle(.borderless)
                         .font(tokens.small)
@@ -997,11 +1007,7 @@ struct BookView: View {
                         tokens: tokens, word: GatheringNoteDoorCopy.navigatorWord,
                         face: structure.gatheringMint
                     ) {
-                        Task {
-                            if let id = await structure.newPostInGathering() {
-                                model.focus(id)
-                            }
-                        }
+                        mint(.gathering, reveal: false)
                     }
                 }
                 // (The quiet slot that stood at the navigator's foot here —
@@ -1290,6 +1296,48 @@ struct BookView: View {
         switchMode(to: .outline)
         model.requestChapterReveal(revealSectionID)
         onRevealSectionConsumed?()
+    }
+
+    // MARK: - VX-570 — the book's ONE mint act (the foot's doors and ⌥⌘N)
+
+    /// Which of the foot's three mints a book's OWN door runs — the one rule
+    /// ⌥⌘N asks (C-570-1). A GATHERING's foot door is the planner's
+    /// (`.newNoteInGathering`); a journal-trait BOOK's is "+ new entry"; any
+    /// other book's is "+ new note". Pure, so a pin reads the choice.
+    enum FootMint: Equatable, Sendable { case note, entry, gathering }
+
+    nonisolated static func footMint(for reading: Reading) -> FootMint {
+        if reading.kind == .gathering { return .gathering }
+        return Queries.hasJournalTrait(reading.profile) ? .entry : .note
+    }
+
+    /// **The act behind every mint door this book draws** — the navigator
+    /// foot's, the Outline flow's, and ⌥⌘N's: the structure model's mint (one
+    /// transaction; refusals mint no stray and land on the model's own
+    /// line, the operations layer's words), then the new note focused —
+    /// revealed where the door sits in the flow or the key asked.
+    private func mint(_ kind: FootMint, reveal: Bool) {
+        Task {
+            let id: String?
+            switch kind {
+            case .note: id = await structure.newPost()
+            case .entry: id = await structure.newEntry()
+            case .gathering: id = await structure.newPostInGathering()
+            }
+            guard let id else { return }
+            model.focus(id)
+            if reveal { model.requestReveal(id) }
+        }
+    }
+
+    /// ⌥⌘N's request, taken ONCE: the book's own foot act, revealed. The
+    /// shell hands it only to a book the focused pane already shows; one that
+    /// lands before the book's first observation (no row to choose the act
+    /// by yet) waits, and the row's arrival re-asks.
+    private func takeMintRequest() {
+        guard mintRequest != nil, let reading = structure.reading else { return }
+        onMintRequestConsumed?()
+        mint(Self.footMint(for: reading), reveal: true)
     }
 
     // MARK: - W21 — the mode click-over CARRIES your place
@@ -1826,12 +1874,7 @@ struct BookView: View {
                     if structure.reading?.locked != true {
                         if Queries.hasJournalTrait(structure.reading?.profile) {
                             Button(tokens.chromeLabel("+ new entry")) {
-                                Task {
-                                    if let id = await structure.newEntry() {
-                                        model.focus(id)
-                                        model.requestReveal(id)
-                                    }
-                                }
+                                mint(.entry, reveal: true)
                             }
                             .buttonStyle(.borderless)
                             .font(tokens.small)
@@ -1839,12 +1882,7 @@ struct BookView: View {
                             .padding(.top, 12)
                         } else if structure.reading?.kind == .book {
                             Button(tokens.chromeLabel("+ new note in this book")) {
-                                Task {
-                                    if let id = await structure.newPost() {
-                                        model.focus(id)
-                                        model.requestReveal(id)
-                                    }
-                                }
+                                mint(.note, reveal: true)
                             }
                             .buttonStyle(.borderless)
                             .font(tokens.small)
@@ -1862,12 +1900,7 @@ struct BookView: View {
                             tokens: tokens, word: GatheringNoteDoorCopy.flowWord,
                             face: structure.gatheringMint
                         ) {
-                            Task {
-                                if let id = await structure.newPostInGathering() {
-                                    model.focus(id)
-                                    model.requestReveal(id)
-                                }
-                            }
+                            mint(.gathering, reveal: true)
                         }
                         .padding(.top, 12)
                     }

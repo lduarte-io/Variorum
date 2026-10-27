@@ -283,6 +283,20 @@ struct ShellActions {
         }
     }
 
+    /// **⌥⌘N — New Note in This Book** (VX-570, the VX-439 run — A-439-4 +
+    /// C-570-1): a REQUEST to the book the focused pane shows, which runs the
+    /// SAME act its own foot door runs (a note, an entry on a journal-trait
+    /// book, the planner's note on a gathering) and speaks that door's
+    /// refusals. No book in the focused pane: the registry's honest note
+    /// (P-2 — the menu is grey there; the palette row speaks).
+    func newNoteInThisBook() {
+        guard case .reading(let bookID) = shell.workspace.focusedSelection else {
+            status.refuse(CapabilityRegistry.capability(.newNoteInBook).unavailableNote)
+            return
+        }
+        shell.bookMintRequest = ShellRouter.BookMintRequest(bookID: bookID, token: UUID())
+    }
+
     func todaysEntry() {
         Task { @MainActor in
             do {
@@ -797,6 +811,8 @@ struct ShellActions {
     /// rows (go-to, settings, voices) stay the shell's own.
     static let paletteActs: [CapabilityID] = [
         .newPost, .todaysEntry, .importFiles, .exportLibrary,
+        // VX-570 (the VX-439 run): New Note in This Book, typeable.
+        .newNoteInBook,
         .commitTake, .structuralUndo, .structuralRedo, .sealPost,
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
@@ -853,6 +869,7 @@ struct ShellActions {
     private func paletteAction(for id: CapabilityID) -> @MainActor () -> Void {
         switch id {
         case .newPost: return { newPost() }
+        case .newNoteInBook: return { newNoteInThisBook() }
         case .todaysEntry: return { todaysEntry() }
         case .importFiles: return { importFiles() }
         case .exportLibrary: return { exportLibrary() }

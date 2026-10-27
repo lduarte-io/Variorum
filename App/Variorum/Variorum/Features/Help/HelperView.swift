@@ -207,6 +207,10 @@ struct HelperView: View {
             (PostMode.keyLabel(), "note modes: " + PostMode.modeList()),
             ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
             ("⌘N", "new note"),
+            // VX-570 (the VX-439 run): the book's own "+ new note", from the keys.
+            ("\u{2325}\u{2318}N", "new note inside the book you have open \u{2014} the book's own "
+                + "+ new note (an entry in a journal book; in a gathering, a note wearing what its "
+                + "rule asks)"),
             ("⌘J", "today's journal entry"),
             // 13n-c U4 — VX-157 (her ratified chord, VX-157).
             ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "

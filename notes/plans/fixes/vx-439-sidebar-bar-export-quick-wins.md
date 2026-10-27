@@ -171,29 +171,37 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     unchanged (the two share it). Pins `NoteExportTests` (6: byte-identical to Copy full text + re-import + no row; the
     default name; cancel; empty refusal; archived + sealed export; the declaration/chord/renderers) — build-for-testing
     GREEN; the suite run PENDING the stage window. (The record flip rode one commit late — a stale-read edit miss.)
-  - VX-126: DONE (this line's commit) — `Queries.bulkExportManifest`'s per-NOTE files are `variorumDocumentText` (option
+  - VX-126: DONE (`9637e5be2`) — `Queries.bulkExportManifest`'s per-NOTE files are `variorumDocumentText` (option
     A — Copy full text's text, header + takes-carrying body); `Pools/` + `Readings/` byte-unchanged (C-126-1); the
     insurance export reads the same manifest. DELIBERATE byte-pin updates: `ExportProjectionTests.
     bulkExportManifestIsTotalOverLivePosts` (the two titled files gain `{t:"…"}`), `Phase13SurfaceQueryTests.
     readingAndBulkExportBodiesCarryTheMapping` (the same). New pin `DocumentFormatRoundTripTests.
     aLibraryExportReimportsEveryNoteWithItsTitleTagsAndTakes` (every note file == Copy full text; each re-imports
     through the door's own read with its title, tags and every take, re-exporting to its file's bytes; pools/readings
-    plain). Core 4 suites GREEN headless (whole-package run at batch end PENDING). Red-on-old of the new pin: PENDING —
-    the one-line behavioral revert runs right after this commit (announced here; the committed tree is the restore).
+    plain). Core 4 suites GREEN headless (whole-package run at batch end PENDING). RED ON OLD, verified: the one-line
+    behavioral revert (the note files back to `exportPost`) turned the new pin red with 13 issues (no header, tags lost,
+    titles from the file name, takes dropped); restored by `git checkout` of the committed file (no revert in flight).
   - VX-554: DONE at her word (2026-10-27, in-session — the Ledger): no code; R-439-F554's disposition stands.
-  - VX-570: NOT-STARTED — settled design: `.newNoteInBook` ⌥⌘N (File menu + ⌘K; the book foot's and Outline flow's
-    "+ new note"/"+ new entry" declared as its `.surface` renderers), gated on a new `focusedPaneShowsBook` context fact,
-    delivered to the focused pane's `BookView` as a one-shot request that runs the SAME act its foot door runs (book →
-    `newPostInReading`, journal-trait book → `newEntry`, gathering → `newPostInGathering`); refusals speak the op's words
-    (call C-570-1).
+  - VX-570: DONE (this line's commit) — `.newNoteInBook` "New Note in This Book" ⌥⌘N (book scope; File ▸ beside New
+    Note, ⌘K; the book foot's and Outline flow's "+ new note"/"+ new entry" declared as its `.surface` renderers at
+    last), gated on the new `CapabilityContext.focusedPaneShowsBook` (wired in `RootView.wireWorkspace` to the key
+    window's focused selection); `ShellActions.newNoteInThisBook` parks a `ShellRouter.BookMintRequest` (a fresh token
+    per press) that `RootView` hands to the LIVE pane's `BookView` only; the book takes it once and runs its ONE mint act
+    `mint(_:reveal:)` — which every foot/flow door now calls too — choosing by the pure `BookView.footMint(for:)`
+    (gathering → planner, journal trait → entry, else note; C-570-1); refusals land on the book's own line (the
+    operations layer's words, as the foot's do). R118: a NAMED exemption beside `.openBookAtNote` (a book-surface act,
+    no post mode); the walk's sampled contexts gain the book-focus context (both JUSTIFIED EDITS, commented). Helper row
+    ⌥⌘N. Pins `NewNoteInBookTests` (7: declaration/chord/grey-without-a-book; the foot-act choice; the request is the
+    focused book's, a place speaks the note; a book mints a focused member; a gathering mints the planner's tagged note
+    and holds nothing; a finished book refuses in the op's words and mints nothing) — build-for-testing GREEN; the
+    suite run PENDING the stage window.
   - VX-553: NOT-STARTED — settled design: the foot's order as data (`BookFootDoors`), restore last and set apart.
   - VX-552: NOT-STARTED — settled design: `QuickEntryBar` (both hosts — Bookcase + Library) wears the current wing's name
     as a muted label, from the host's `WingsModel.currentName` (call C-552-1: shown with one wing too — "always").
   - VX-332: NOT-STARTED — settled design: every autofocus mount takes the waiting/never-steal opening road; the one-shot
     `QuickEntryOpeningFocus` claim retires; the bar stands down while a tour runs; `aNavigationBack…KeepsTheBarsRaiseAsItWas`
     updated deliberately (it pins the old behavior); red-on-old pin = a navigation back puts the caret in the box.
-  - VX-568: RULED R-439-F568 — probe focus churn (churn ⇒ the bug, pin, fix); else a SUPPORTED indicator knob only;
-    else record-only → Needs Lillian. Custom caret REFUSED tonight (TEXTKIT2_NOTES §3). Morning bundle 5.
+  - VX-568: PARKED OUT OF THE RUN at her word (2026-10-27) — see Ledger
   - VX-602: NOT-STARTED — settled design: "Restore Field Guide…", "Take the Onboarding Tutorial", and (call C-602-1)
     "Open the Field Guide"; guide CONTENT speaks the old name three times — FLAGGED, not edited (morning bundle 3).
 - Batch 2: NOT-STARTED
@@ -210,12 +218,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
    Tutorial… rebuilds the whole book."), ~1975 (the tags lesson: "That is exactly how Help ▸ Restore Tutorial… finds what
    to replace."). Her call: re-word the three lines + the re-seed in her window, or leave them.
 4. Resolved live — VX-554 Done at her word (the door exists since VX-217; the ticket was stale).
-5. **VX-568 — nothing the app draws fades.** The "fading in and out" is macOS's own caret (`NSTextInsertionIndicator`,
-   which animates rather than hard-blinks), sitting on the placeholder's first letters since VX-326 focused the box at
-   launch — and VX-332 now puts it there on every return. Ruling R-439-F568: we probed for focus churn (a real bug if
-   found), tried only supported knobs, and refused a custom caret overnight (TEXTKIT2_NOTES §3 calls it a TK1-fallback
-   trigger; the workaround rests on a macOS-27-only behavior). If you want the literal hard on/off blink, that custom-caret
-   build is the road — your call with the risk stated. The batch-1 walk has the live Study capture.
+5. Resolved live — VX-568 parked out of the run at her word (the trace is on the ticket).
 6. **C-125-1 — Export Note…'s chord is ⌥⌘S** (⇧⌘E is Extract's; your words were "keyboard shortcut for saving note").
    It sits beside ⌘S-commits — cheap to re-chord if that reads wrong.
 7. **C-126-1 — option A also reaches the scheduled plain-text insurance export** (same manifest): its per-note files gain
@@ -315,3 +318,4 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   **The C-calls are all CONFIRMED** (C-125-1 ⌥⌘S · C-126-1 incl. the insurance export gaining header+takes · C-570-1
   incl. the Write-pane exclusion · C-552-1 · C-602-1), each named in the morning bundle for her veto.
 - 2026-10-27 HER LIVE RULING (in-session): VX-554 Done at her word — 'gathering does have a new note door - that ticket must've been stale. it can be marked complete.' The walk's F-554 evidence duty and bundle item 4's question are retired; R-439-F554's no-code disposition stands. On VX-568 she asked what the issue is (her 10-22 note quoted back to her); R-439-F568 unchanged pending her reply.
+- 2026-10-27 HER LIVE RULING (in-session) on VX-568: "oh. i'm talking about the cursor itself - yeah, it is what mac os uses probably, it's just what the cursor looks like in the new note line. it's a subtle issue - just remove it from this run and leave it parked for later for my reconsideration at a later point. doesn't need to be this run." VX-568 is OUT of this run (no churn probe, no knob work — none was started; nothing instrumented); Linear Parked with the trace (the orchestrator's). R-439-F568 is retired with it.
