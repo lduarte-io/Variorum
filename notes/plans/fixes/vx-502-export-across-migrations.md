@@ -59,10 +59,10 @@ dev-store copy so a merge-gating run can slot in.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight whole; worktree + branch; in-flight row on main; VX-502 In Progress; coordinator announced, slot granted | DONE (this commit) |
-| 1 | Unit A: the subset rule + pins (a fresh opus-implementer, headless) | BUILT AND CLOSED by the implementer (`74cfc1733`…the close commit) — "UNIT A — LIVE STATUS" at this record's end; PENDING: the two Mac suites under a stage claim (the orchestrator) |
-| 2 | The ladder on unit A's diff | NOT STARTED |
-| 3 | Unit B: the Castle-restore walk (an Opus session; stage via the coordinator; dev-castle.env; posture restored after) | NOT STARTED — the goal and legs ruled below (UNIT B); the walk session proposes the concrete plan back before acting |
-| 4 | Closeout: canon deltas (SurfaceContracts Doors line; AppSpecRecord entry; QUESTIONS #239(a) note), canon-size, tickets triaged, handoff, PR, merge serialized with VX-439 | NOT STARTED |
+| 1 | Unit A: the subset rule + pins (a fresh opus-implementer, headless) | BUILT AND CLOSED by the implementer (`74cfc1733`…`272fdda65`), orchestrator-verified (commits, gate diff, faces diff, tree clean) — "UNIT A — LIVE STATUS" at this record's end; PENDING: the two Mac suites under a stage claim (`PlaintextExportBringInRoadTests` — the flipped app pin has NEVER EXECUTED, compiled only — and `U2WordsTests`; the walk window's test batch). Implementer findings adopted: F-A1 (D-A2's premise corrected — VX-461, not vx-309's merge, is why no content-bearing export predates v1_31; the canon delta cites VX-461), F-A2 (a stable newer export refuses at the PICK via `PickedCopy.classify`; the gate's catch covers only the between-reads race), F-A3 (MCP load-flakes only) |
+| 2 | The ladder on unit A's diff | ROUND 1 LANDED (`notes/plans/fixes/vx-502-ladder-round-1.md`, a fresh fable-reviewer: 0 BLOCKER · 1 MAJOR · 1 MINOR · 1 NIT + the already-scheduled gating condition; the architect's positions in the round file). The implementer's agree/dispute PENDING (the cross-model flow); fixes then a fresh round-2 reviewer |
+| 3 | Unit B: the Castle-restore walk (an Opus session; stage via the coordinator; dev-castle.env; posture restored after) | SHAPE SETTLED with the coordinator (THE NEGOTIATED WALK below supersedes the kickoff legs); the walk session NOT YET SPAWNED — it builds the helper, runs --check, proposes the concrete plan back, then READY |
+| 4 | Closeout: canon deltas (SurfaceContracts Doors line citing VX-461; AppSpecRecord entry; QUESTIONS #239(a) note), canon-size, tickets triaged, handoff, PR, merge serialized with VX-439 | NOT STARTED |
 
 ## UNIT A — the subset rule (the architect's design, ruled at kickoff)
 
@@ -159,6 +159,80 @@ evidence of record); `caffeinate` per the resiliency protocol; a leg that cannot
 STOPS and reports — no improvisation around a Castle door. Walk findings against CastleRules go to the morning
 bundle, never to autonomous fixes (the Castle design is frozen — her word 2026-10-24).
 
+## THE NEGOTIATED WALK (settled with oct26coordinator, 2026-10-27 ~02:20–03:25 MDT — SUPERSEDES the kickoff
+legs above; the kickoff section stays as history. The walk session builds to THIS.)
+
+**The as-found library is preserved untouched.** The coordinator's correction: the active dev library is NOT
+`86a82b4f` — the records say VX-309's walk (2026-10-20) left **`e11e5233`** (key 77f4a14d) active: Standard,
+opening quietly, HELD (the Oct-20 restore banner standing, Resume never pressed), signed out; the dev pair
+unchanged since. Efforts since may have moved it again; treat every id as UNVERIFIED until leg 1 reads it. A hold
+is one Resume press from gone, so NO test leg (Castle, sync, key door, backup-under-test) ever runs on the
+as-found library — its hold must survive byte-for-byte.
+
+**The two credential sets never cross (the coordinator's lanes):** the DEV pair (dev-castle.env) touches ONLY the
+as-found library — one live use, leg 1's non-mutating check door; the vxtest ACCOUNT's pair (prod-test files, the
+R-510-8 helper) touches ONLY walk-owned libraries. The join is what makes this work: rule 7 — a join ADOPTS the
+account's pair, so after it every typed secret on the walk library is the account's. dev-castle.env takes NO value
+changes (no PASSPHRASE2 there); the account's passphrase change uses the prod-test env's EXISTING passphrase2
+field. The interpretive note on her kickoff sentence is in the morning bundle.
+
+**The helper (a provisional act, her bundle; the coordinator's conditions):** `~/.variorum/bin/type-dev-castle-secret`,
+byte-patterned on type-prod-test-secret (R-510-8): fields `passphrase | words`; reads ONLY dev-castle.env at mode
+600; itself mode 700; refuses unless the frontmost process is the Debug build BY EXACT PATH (can never type into
+the real app); never a value in argv, stdout, a log, a capture or a transcript; a `--check` mode verifying every
+guard and typing NOTHING (type-sim-secret's shape), run headless BEFORE READY. dev-castle.env gains a comment
+line (no values) naming the helper and its fields, plus a no-values posture note: the library id leg 1 found and
+the id the walk leaves.
+
+**The legs:**
+1. AS-FOUND RECORD: strict-pgrep instance check; launch the branch's Debug build; record the active library id,
+   posture, hold state, sign-in state; verify the env pair opens it via "Check my passphrase or twelve words…"
+   (writes nothing; the helper types). STOP to the coordinator if the pair doesn't open it or it isn't Standard.
+   `defaults export` of the Debug domain BEFORE anything (the prefs baseline).
+2. THE WALK LIBRARY: a copy source made or picked (the walk session proposes — a Back Up Now pair beside the
+   as-found is acceptable, reported; an existing fresh backup preferred), then Make this my library → a NEW
+   library (rule 17: fresh identity, posture of now, CURRENT pair — rule 7 means no fresh words are ever minted);
+   the as-found steps aside WHOLE into the walk's own dated Previous Libraries entry (reported). Resume the walk
+   library's hold (account-less — no round).
+3. THE JOIN: sign into the NAMED vxtest account (in the READY ping) and join by the ACCOUNT's secret
+   (type-prod-test-secret); the walk library adopts the account's pair. If the account is not in Castle, ENTER
+   Castle (both account secrets; the VX-469 line screenshotted).
+4. THE CASTLE BACKUP under pair P1 (the account's current pair); the pair noted by place, never value.
+5. THE PAIR CHANGE: Change passphrase → the prod-test env's passphrase2 (P2); the account's lock re-wraps in the
+   same act (rule 7); prod-test files stay TRUE throughout (passphrase2 is a recorded field).
+6. THE PROBES on the old backup (Look inside, nothing written): opens with P1 (rule 5's floor) AND with P2
+   (rule 6 — same key, re-locked only). Either failing is a FINDING against CastleRules — STOP and record; the
+   Castle design is frozen (her word 2026-10-24), so findings go to the bundle, never to autonomous fixes.
+7. THE RESTORE: Make this my library on the P1-era Castle backup, opened by the OLD pair; fresh identity, posture
+   of now, current pair, lands HELD; the walk library steps aside (walk-owned, cleaned at the end).
+8. UNLOCK END TO END: lock (⌃⌘L), meet the Castle lobby, open with the current secrets.
+9. SYNC END TO END: Resume Sync; the round runs to "Synced" against the account under its CURRENT (P2) pair;
+   content verified both directions (the pre-change note present; a new note pushed and confirmed through the
+   test-road tooling).
+10. THE PAIR RESTORED: Change passphrase BACK (P2 → the env's passphrase) on the restored library, so
+    `~/.variorum/prod-test-accounts.env` and `prod-test-words-<account>` are TRUE at release with ZERO edits (the
+    coordinator checks this at RELEASE). If a failed leg strands P2, the files are updated to truth in the same
+    window (values never printed) and RELEASE says so. Then sign OUT (the resting posture; rule 16 — no key
+    change).
+11. THE HAND-RETURN (the coordinator's conditions, verbatim): the app quit and ZERO instances proven with the
+    strict pgrep forms before any move; whatever occupies the live slot set aside WHOLE and reported, never
+    overwritten or merged into; the stepped-aside as-found set returned whole by a SAME-VOLUME move, no partial
+    copies; then ONE relaunch proves the as-found id active, Standard, unlocked (the quiet road), signed out,
+    the hold banner standing. If it isn't: STOP, KEEP THE CLAIM, tell the coordinator, NO repairs.
+12. CLEANUP, each target READ before removal: the walk-owned libraries' sets, their Previous Libraries entries,
+    their `Backups/<id>` folders and key droppings — keeping only what this record needs as evidence, reported.
+    `86a82b4f`, the 10-08 and 10-18 Previous Libraries entries and the as-found set stay UNTOUCHED. Debug prefs
+    re-exported and DIFFED against leg 1's baseline (`defaults import` merges — walk-added keys get left behind).
+13. RELEASE to the coordinator, one line: the active library id, its posture, opens unlocked, signed out
+    confirmed, the prefs diff clean, no instances, and the prod-test-account state left (files true, or updated
+    and said).
+
+**Stage traffic:** the claim is `vx-502-walk`, already REQUESTED; the window's order is (a) the Mac test batch —
+`-only-testing:VariorumTests/PlaintextExportBringInRoadTests` + `U2WordsTests` + the closeout's changed-source
+suites — (b) the SEAM ping, (c) the legs. READY goes to the coordinator only after the walk session's concrete
+plan is approved by the orchestrator AND the helper's --check has run headless. GO comes only from the
+coordinator with the exact claim line.
+
 ## Environment traps (carried into every brief, verbatim)
 
 Instance checks use the coordinator's strict forms `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"`;
@@ -173,7 +247,21 @@ Sonnet for external facts.
 
 ## THE MORNING BUNDLE (questions held for her; grows as the run finds them)
 
-*(none yet)*
+1. **The walk's credential lanes — an interpretive note, not a blocker (the walk is PLANNED this way; say if you
+   want it otherwise):** your kickoff said "the walk uses ~/.variorum/dev-castle.env exactly". The planned
+   reading: the dev library's own secrets come from that file exactly (and only its check-door leg needs them);
+   the CASTLE TEST LEGS run on walk-owned libraries under a vxtest ACCOUNT's pair through your R-510 helper
+   machinery (the join adopts the account's pair — rule 7), because the active dev library is HELD (VX-309's
+   banner, Resume never pressed) and any Castle/sync act on it would destroy that hold. The dev store's own pair
+   is never changed and nothing new is invented. Flagged because your sentence could be read as "the Castle legs
+   themselves type dev-castle values". *(Flip this line to as-run at the walk's close.)*
+2. **A provisional act, PENDING the walk session: `~/.variorum/bin/type-dev-castle-secret` is to be minted** (the
+   walk needs a typing road for the dev library's secrets and none exists — your R-510-8 helper covers only
+   prod-test accounts; the coordinator confirmed the gap and ruled the conditions). Byte-patterned on
+   type-prod-test-secret: mode 700, reads only dev-castle.env at 600,
+   frontmost-must-be-the-Debug-build-by-exact-path, never prints a value, a --check mode that types nothing; a
+   no-values comment line added to dev-castle.env naming it. Yours to keep or delete (the walk-machinery-kept
+   precedent suggests keep). *(Flip this line when the helper exists and --check has run.)*
 
 ## THE LEDGER (numbered rows; every row owned)
 
