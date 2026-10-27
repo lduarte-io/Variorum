@@ -459,6 +459,6 @@ from the coordinator, relayed). Secrets by field name only.*
 |---|---|---|
 | B0 | Phase 1: preflight read whole; `~/.variorum/bin/type-dev-castle-secret` minted (mode 700; fields `passphrase` → `VARIORUM_DEV_CASTLE_PASSPHRASE`, `words` → `VARIORUM_DEV_NEWROAD_WORDS`; lane guard; stdin road); 12 fixture guard cases + escaping round-trip; `--check` on the real file exit 0 for both fields (frontmost guard deferred to type time); `dev-castle.env` +6 comment lines, value-lines fingerprint unchanged | DONE (outside the repo; the proposal's hand-back) |
 | B1 | THE WALK RULINGS 1–11 (`88fb5ec1b`) applied: B′ leg 2; the seven-persistent-file inode rule at leg 11; the W0 safe copy; E0 before step 0; 8a in; the derived step-0 suite set; VX-604's executed-count rule; the script + the lib (`Tools/WalkKit/castle-walk-lib.zsh`) COMMITTED FIRST | DONE (this commit) |
-| B2 | 2a builds (headless): test products `build-for-testing` → `App/Variorum/DerivedData/vx502-close` (absolute path; started at `88fb5ec1b`, whose code = `776859237`'s — the ladder-close commits are notes only); the walk app `build -configuration Debug` → `App/Variorum/DerivedData/vx502-walk`; `--check` again; W0's prod precheck | IN-PROGRESS — the build lines PENDING |
+*[removed for publication]*
 | B3 | READY (relayed by the orchestrator) → GO → W0 (safe copy, E0, account line) → step 0 (the derived 109-suite set, executed count stated) → SEAM | NOT STARTED |
 | B4 | Legs 1–13 per the script of record | NOT STARTED |
