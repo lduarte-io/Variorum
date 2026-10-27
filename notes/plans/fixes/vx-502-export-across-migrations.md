@@ -294,7 +294,7 @@ Sonnet for external facts.
 claim not marked DONE with its evidence is PENDING. A fresh session with only the repo finishes the unit from this
 table.*
 
-**REVERT STATE: no revert in flight.** RV-A1 and RV-A2 ran and were each restored from `e56920846` (`git checkout --` the gate file; `git diff --exit-code` clean after each).
+**REVERT STATE: THE R1-c SCRATCH PROBE IN FLIGHT** — on `Sources/VariorumCore/Persistence/Migrations.swift` and `Sources/VariorumCore/Operations/Operations+PlaintextExportImport.swift` ONLY, from the committed tree `074c73023` (a temporary `v1_33_probe` migration + the reader's notes query naming `probe`). Restore: `git checkout -- Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operations/Operations+PlaintextExportImport.swift`, verified by `git diff --exit-code`. A successor finding this line: run that restore first. (RV-A1 and RV-A2 ran earlier and were each restored from `e56920846`.)
 
 | # | Piece | Status |
 |---|---|---|
