@@ -746,11 +746,18 @@ and the code anchors below. Lane: headless `swift build`/`swift test` + `xcodebu
 - **Preflight + the road map:** DONE (`20f1400f6`) — every lock trigger converges on `AppBootstrap.lock()` →
   `lockOnNewRoad` → `onWillLock` (production: `macWillLock(…, endingConnections: door.recordLibraryClosing) { …;
   door.detach() }`, `VariorumApp.swift:286`); quit is `applicationWillTerminate` → `door.detach()` alone.
-- **The host's three stop-road findings — pins RED ON OLD:** DONE (this commit, WIP — no fix yet) —
+- **The host's three stop-road findings — pins RED ON OLD:** DONE (`fcf13b569`, WIP) —
   `Tests/VariorumMCPTests/MCPStopRoadsServerTests.swift`: 3 of 6 red, 5 issues, the 3 guards green
   (`scratchpad/b2b-logs/stoproads-red.log`): the quit logged `disconnect_library_closed` (P-VX394-5 says nothing); a
   never-served host's stop unlinked the LIVE host's socket; a connection accepted mid-stop was never hung up and never
-  said its end. **NEXT:** the three fixes in `MCPServerHost`/`MCPSession`, then green.
+  said its end.
+- **…FIXED, green:** DONE (this commit) — `MCPServerHost.halt` (the one stop: its own socket only, removed before its
+  listener closes; the connections listed after the accept loop stops), `stopWithTheProcess` + `MCPSession.forgoEndLine`
+  (the quit says nothing); the door's `quit()` (`applicationWillTerminate`); the lock composition as ONE named factory
+  `macLockTeardown` (`MacWillLock.swift`; `VariorumApp` wires exactly it — behaviour identical). Headless 16/4 green
+  (`stoproads-green.log`: the new 6 + `MCPConnectionEndServerTests` 7 + host-reuse + reader-after-close). Mac pins
+  `App/Variorum/VariorumTests/MCPStopRoadsDoorTests.swift` (3) COMPILED (`build-for-testing` into `DerivedData/b2b`,
+  TEST BUILD SUCCEEDED, `mac-bft2.log`, no warning in a touched file), RUN **PENDING** the orchestrator's stage.
 - **The sweep table (road × end line):** IN-PROGRESS — the table, each cell's pin.
 - **The pane-status honesty trace:** IN-PROGRESS.
 - **App Nap verdict (MB-6):** IN-PROGRESS.

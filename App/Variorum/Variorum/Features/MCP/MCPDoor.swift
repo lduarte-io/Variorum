@@ -359,9 +359,24 @@ final class MCPDoor {
     /// already written those lines, before the store closed —
     /// `recordLibraryClosing`; the host never says one twice).
     func detach() {
+        detach(ending: .libraryClosed)
+    }
+
+    /// **VX-394 (VX-548 batch 2b) — THE APP QUITS** (`applicationWillTerminate`):
+    /// `detach()` with no connection's end said — P-VX394-5, "a QUIT logs
+    /// nothing" (`MCPServerHost.stopWithTheProcess`). The plain detach here
+    /// raced the process's exit with "‹client› was disconnected when the library
+    /// locked or closed" (each connection writes its own end since VX-348's fix
+    /// leg): said on some quits, not on others.
+    func quit() {
+        detach(ending: nil)
+    }
+
+    /// `ending` nil: the app quits — every end forgone (P-VX394-5).
+    private func detach(ending reason: MCPConnectionEnd?) {
         observation?.cancel()
         observation = nil
-        stopServer(ending: .libraryClosed)
+        stopServer(ending: reason)
         adoptionLandingPending = false
         // A closed library's asks die with it (and so does every glyph — and
         // the ask watch, which an empty queue stops).
@@ -442,8 +457,12 @@ final class MCPDoor {
         }
     }
 
-    private func stopServer(ending reason: MCPConnectionEnd) {
-        host?.stop(ending: reason)
+    private func stopServer(ending reason: MCPConnectionEnd?) {
+        if let reason {
+            host?.stop(ending: reason)
+        } else {
+            host?.stopWithTheProcess()
+        }
         host = nil
         starting = false
         connected = []

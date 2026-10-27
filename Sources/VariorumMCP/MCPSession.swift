@@ -90,6 +90,15 @@ final class MCPSession: @unchecked Sendable {
         lock.withLock { endSaid = false }
     }
 
+    /// **The app is quitting** (VX-394 — VX-548 batch 2b; P-VX394-5, "a QUIT
+    /// logs nothing"): this connection ends with the process, and its end is
+    /// said by nobody — claimed here and never written, so neither the
+    /// hang-up's own end (`writeEndLine`) nor a late write says it. A line
+    /// already said (the client left first) stays as it was.
+    func forgoEndLine() {
+        lock.withLock { endSaid = true }
+    }
+
     /// **Write this connection's own end line** (VX-394's fix leg — the U5
     /// batch's red, live-confirmed): once (`claimEndLine`), through the
     /// session's OWN store and operations — so it lands whether or not the
