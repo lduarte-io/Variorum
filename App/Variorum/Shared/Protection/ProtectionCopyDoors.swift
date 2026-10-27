@@ -467,15 +467,17 @@ nonisolated enum ProtectionCopyDoors {
     }
 
     /// THE PREFLIGHT, reads only (before anything moves — with a library open, before the window comes down): the picked
-    /// thing is a plaintext export, and its content plans on a private staged copy (this build's schema only — P-VX309-U1b-7).
+    /// thing is a plaintext export, and its content plans on a private staged copy — this build's schema or an earlier
+    /// one's, a newer build's refusing in the sibling door's words (the subset rule — VX-502 (her ratified rule,
+    /// 2026-10-27; supersedes P-VX309-U1b-7)).
     static func readPlaintextExport(_ url: URL) -> PlaintextExportRead {
         guard case .plaintextExport(let store) = LibraryClassifier.classify(at: url) else {
             return .refused(.unreadableCopy)
         }
         do {
             return .plan(try PlaintextExportReading.read(exportAt: store))
-        } catch PlaintextExportReading.Failure.schemaNotCurrent(let newer) {
-            return .refused(.exportRefused(newer ? LibraryOpenCopy.newerSchemaRefusal : ProtectionWords.exportFromAnEarlierBuild))
+        } catch PlaintextExportReading.Failure.schemaNewer {
+            return .refused(.exportRefused(LibraryOpenCopy.newerSchemaRefusal))
         } catch PlaintextExportReading.Failure.unreadableNote(let title, let line) {
             return .refused(.exportRefused(ProtectionWords.exportNoteUnreadable(title, line: line)))
         } catch {

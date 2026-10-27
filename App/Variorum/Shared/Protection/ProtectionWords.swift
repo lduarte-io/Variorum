@@ -289,10 +289,9 @@ nonisolated enum ProtectionWords {
     }
     static let bringInButton = "Bring it in"
     static let bringInWorking = "Bringing the copy in\u{2026}"
-    /// The export's schema is an earlier build's (this build reads its own only — PROVISIONAL P-VX309-U1b-7) — said in the
-    /// newer build's refusal's own shape (`LibraryOpenCopy.newerSchemaRefusal`).
-    static let exportFromAnEarlierBuild = "This plain-text copy was written by an earlier Variorum than this one, which "
-        + "can't bring it in."
+    // (An earlier build's export is no refusal: it reads — the subset rule, VX-502 (her ratified rule, 2026-10-27;
+    // supersedes P-VX309-U1b-7). A newer build's refuses in `LibraryOpenCopy.newerSchemaRefusal`'s words, the sibling
+    // door's, so no export-only schema sentence stands here.)
     /// A note the document format could not read back (never expected — the export's own projection), named. It refuses
     /// at the preflight, before anything moves.
     static func exportNoteUnreadable(_ title: String, line: Int?) -> String {

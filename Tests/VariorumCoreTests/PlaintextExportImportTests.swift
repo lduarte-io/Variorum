@@ -259,7 +259,7 @@ struct PlaintextExportImportTests {
         let queue = try DatabaseQueue(path: source.url.path, configuration: AppDatabase.configuration(key: nil))
         try queue.write { try $0.execute(sql: "INSERT INTO grdb_migrations (identifier) VALUES ('v9_99_from_the_future')") }
         try queue.close()
-        #expect(throws: PlaintextExportReading.Failure.schemaNotCurrent(newer: true)) {
+        #expect(throws: PlaintextExportReading.Failure.schemaNewer) {
             _ = try PlaintextExportReading.read(exportAt: source.url)
         }
         // Beside a lag: the file now also lacks this build's last identifier.
@@ -271,7 +271,7 @@ struct PlaintextExportImportTests {
         }
         try lagging.close()
         #expect(struck == 1)
-        #expect(throws: PlaintextExportReading.Failure.schemaNotCurrent(newer: true)) {
+        #expect(throws: PlaintextExportReading.Failure.schemaNewer) {
             _ = try PlaintextExportReading.read(exportAt: source.url)
         }
     }
