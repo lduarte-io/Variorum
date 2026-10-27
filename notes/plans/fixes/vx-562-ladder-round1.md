@@ -139,3 +139,23 @@ Ledger rows 1–2 read SUITES GREEN, but the walk (row 3) is BLOCKED at its prem
 - **The navigator's ±6-pt bleed.** The scroll's −6 outset stays inside the navigator's own `.padding(12)` (`BookView.swift:994`), so nothing draws outside the panel.
 - **The DEBUG oracles.** The four new stores are released by owner in `release(owner:)` and forgotten in `resetNavigator`/`forgetOutlinePins`. No oracle code is outside `#if DEBUG`.
 - **Not flagged (ruled or recorded):** the width change re-landing `topRow` and adopting it; an expansion after a landing returning to the rule; P-562-1…5; the pre-existing watchdog spin (ticketed).
+
+## THE ORCHESTRATOR'S DISPOSITIONS (same-model ladder — arbitrated against the spec, repo-first before any fix session reads them; 2026-10-27)
+
+- **1 [MAJOR] — AGREE, FIX NOW under R-562-B below.** The reviewer is right that R-562-A covers landings only: on her OWN scroll the last screenful's notes can never highlight, which collides head-on with her pre-launch sentence ("make the note that you're currently on highlight on the left bar ABSOLUTELY") in exactly the journal-end shape she lives in. Option (b), the sliding probe, is ruled; (a) clamp-at-end fixes only the very bottom; (c) accept-and-document fails her sentence. Red-on-old pin: clip-scroll to the maximum offset, assert the LAST note is the viewed one — RED on this tree. PROVISIONAL for her; a QUESTIONS entry at the merge.
+- **2 [MINOR] — AGREE, FIX NOW under R-562-C below.** The reviewer's own fix shape (release on the adopted row's top moving) is DECLINED for a sturdier equivalent: an above-row async fill can move a row's top without any scroll, while the page's scroll OFFSET moves only when something scrolls the page — so the release keys on the offset, not the row. Red-on-old pin: after a landing, clip-scroll ~400 pt with the target still on screen, assert the rule's pair — RED on this tree (the clip scroll has no phase). The walk's leg 6 stays the real-input evidence either way.
+- **3 [MINOR] — AGREE, FIX NOW.** One honest total feeds BOTH pieces of the pinned line; whatever the 300-note window caps, the line never contradicts itself. Verify the window mechanism at fix time; table-test through the pure composition with injected counts.
+- **4 [MINOR] — AGREE, ADD THE PIN** on the real navigator-click door (focus + reveal in one act). The fix session runs the `isPending`-guard revert and RECORDS which way the pin lands (order-dependence is the fact to capture); round 2 re-checks.
+- **5 [MINOR] — AGREE, FIX.** Delete the `viewedIndex` twin; the monotonicity pin exercises the shipped `pair` directly.
+- **6 [MINOR, architecture] — PARTIAL.** The fix session consolidates the ADOPT/RELEASE DECISION into one headless, table-testable function on the box as part of landing R-562-B/C (that is what makes pins 2 and 4 drivable without SwiftUI ordering); the fuller eight-site restructure of `BookView` is DEFERRED — ticketed at the merge (Debt, Low) per the deferred-work rule.
+- **7 [NIT] — FIX IF TRIVIAL** in the same pass (Outline labels stop re-rendering on focus changes they no longer read); else record here and move on.
+- **8 [NIT] — AWAIT WALK 2's wash-visibility leg** (the store is Study, so the walk answers it directly). Invisible ⇒ fix in this pass with a token-only composition that reads in both voices; visible ⇒ record.
+- **9 [NIT] — RECORD-ONLY** unless the walk shows the 7-pt scroll-bar offset; speculative, no mechanism traced.
+
+### R-562-B (the end-of-book probe — finding 1's fix; PROVISIONAL for her)
+
+The probe slides down the page over the LAST viewport of scroll. While `remaining = docHeight − offset − viewportHeight ≥ viewportHeight`, the probe is the top edge + ε exactly as shipped; inside the last viewport it interpolates linearly from the top edge toward the viewport's bottom as `remaining → 0`, so at full bottom the LAST row is the viewed one and every last-screenful row is reachable on the way down. The rule stays pure (its inputs gain offset, document height and viewport height — all already in the box), stays monotonic (table-pinned: scrolling down never decreases the viewed index; at the maximum offset the viewed note is the last), and R-562-A's adoption sits unchanged on top of it.
+
+### R-562-C (the input-independent release — finding 2's fix)
+
+A standing adoption ALSO releases when the page's scroll offset has moved more than a small threshold — 8 pt, a named pinned constant — from its landing-end value. Any input that actually scrolls the page (phased trackpad, phase-less wheel, keyboard paging, a scroller drag) therefore releases; the `.interacting` phase release stays as the immediate road; settle wobble under the threshold (the F-1 give-up page included) never releases.
