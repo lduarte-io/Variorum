@@ -1015,10 +1015,19 @@ private final class DragColumn {
     /// A click — down, a beat, up — at a point in the hosting view's y-down
     /// (SwiftUI global) space, posted through the app's own event road
     /// (`BlocksWorkbenchFaceTests`' / `MCPSharedIconClickTests`' rig shape).
+    ///
+    /// (Stage-run correction, 2026-10-27: the first cut mapped SwiftUI's
+    /// global space onto the hosting view by its height and landed ONE ROW
+    /// LOW — the titled window's chrome sits between the two. The map is now
+    /// ANCHORED on the list's own AppKit scroll view: its SwiftUI frame (the
+    /// oracle's) and its window frame (AppKit's) name the same rectangle.)
     func click(at point: CGPoint) async {
         window.makeKeyAndOrderFront(nil)
-        let local = hosting.isFlipped ? point : NSPoint(x: point.x, y: hosting.bounds.height - point.y)
-        let inWindow = hosting.convert(local, to: nil)
+        guard let scroll = listScrollView(), let global = list?.scroll else { return }
+        let anchor = scroll.convert(scroll.bounds, to: nil)  // window space, y up
+        let inWindow = NSPoint(
+            x: anchor.minX + (point.x - global.minX),
+            y: anchor.maxY - (point.y - global.minY))
         for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
             if let event = NSEvent.mouseEvent(
                 with: type, location: inWindow, modifierFlags: [],

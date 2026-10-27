@@ -95,10 +95,14 @@ struct BrowserNavKeysTests {
             #expect(session.status.spoken?.text == CapabilityRegistry.capability(.navigateBack).unavailableNote)
             #expect(router.workspace.focusedSelection == .post("a"), "nothing moved")
             router.adopt(.post("b"))
+            // (Stage-run correction, 2026-10-27: the act is the menu items'
+            // own `router.goBack()`, which REQUESTS the landing — the shell
+            // adopts `pendingSelection` into the focused pane — so a bare
+            // router is read at its request, `OpenStripMenuTests`' shape.)
             RootView.navigate(.back, session: session, router: router)
-            #expect(router.workspace.focusedSelection == .post("a"), "⌘← went back")
+            #expect(router.pendingSelection == .post("a"), "⌘← went back")
             RootView.navigate(.forward, session: session, router: router)
-            #expect(router.workspace.focusedSelection == .post("b"), "⌘→ went forward")
+            #expect(router.pendingSelection == .post("b"), "⌘→ went forward")
         }
     }
 
