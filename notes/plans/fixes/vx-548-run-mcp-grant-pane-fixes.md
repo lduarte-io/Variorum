@@ -229,8 +229,13 @@ no `xcodebuild test`, no walk, no stage claim (the orchestrator's).*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.**
-- **VX-516 (Change… on one place, confirmed on ANOTHER, revoked the first):** NOT-STARTED — the settled design: a pure
+- **A BEHAVIOURAL REVERT IS STARTING after this commit** (VX-516's red-on-old): `MCPGrantChange.replacing`'s body
+  reverted to `named` (the pre-fix sheet's pass-through of `opening.replacing`), over this committed tree; restore =
+  `git checkout -- Sources/VariorumCore/Domain/MCPGrantChange.swift`. A successor reading this line with no later flip:
+  run `git diff` — any diff in that file IS the revert; restore it.
+- **VX-516 (Change… on one place, confirmed on ANOTHER, revoked the first):** IN-PROGRESS — core DONE (this commit:
+  `Domain/MCPGrantChange.swift` + `Tests/VariorumCoreTests/MCPGrantChangeTests.swift`, 6 tests green after, with
+  VX-393's 8 — `scratchpad/b1-logs/vx516-green1.log`); red-on-old PENDING; the sheet's wiring next. The settled design: a pure
   Domain decision `MCPGrantChange` (`Sources/VariorumCore/Domain/MCPGrantChange.swift`): replacing is KEPT only while
   the confirmed place(s) ⊆ the opened place(s) (non-empty both), else DROPPED (PROVISIONAL MB-1); the sheet's
   `submit()` (and its title, the receipt's verb, the replaces line) read ONE `effectiveReplacing` through it. Headless
