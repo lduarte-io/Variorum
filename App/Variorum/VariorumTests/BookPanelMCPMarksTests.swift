@@ -315,3 +315,198 @@ struct BookPanelMCPMarksTests {
         }
     }
 }
+
+// MARK: - VX-354 — the readings the panel NAMES wear their marks too
+
+//  RUN VX-548, batch 2a (the run record `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md`,
+//  BATCH 2a RECORD; born as the VX-336 U6b sweep's OUTSIDE rows, its OWED 2): the
+//  panel's HEADER (the shown book's name) and the names its "appears in N gatherings"
+//  line opens wore neither `MCPSharedIcon` nor `MCPAskGlyph`, while every note row
+//  did. They wear the Bookcase row's pair now, the reach read through each kind's ONE
+//  rule (`Queries.mcpBookReaches` — `decide` / `decideGathering`), for the readings
+//  DRAWN only (`BookPanelBrain.markedReadings`), nothing read while no client is
+//  approved; a note- or book-level share never icons a gathering (R-VX185-1).
+//  Red-on-old is by construction: the old panel held no reading reach and drew no mark
+//  beside the header or a gathering's name (and the hold, `holdReadingReach`, is new).
+//  The sweep above stays as it was: it never starts the reading hold, so its count is
+//  the note rows' alone.
+extension BookPanelMCPMarksTests {
+    /// The pure decision: the shown book always; the gatherings only while
+    /// their line is open; drawing order, each once.
+    @Test func thePanelHoldsTheReachOfExactlyTheReadingsItNames() {
+        #expect(BookPanelBrain.markedReadings(shown: "b", gatherings: ["g1", "g2"], gatheringsOpen: false) == ["b"],
+                "a closed gatherings line draws no names, so holds none")
+        #expect(BookPanelBrain.markedReadings(shown: "b", gatherings: ["g1", "g2"], gatheringsOpen: true)
+                == ["b", "g1", "g2"])
+        #expect(BookPanelBrain.markedReadings(shown: nil, gatherings: ["g1"], gatheringsOpen: true) == ["g1"],
+                "a note in no book: its gatherings only")
+        #expect(BookPanelBrain.markedReadings(shown: nil, gatherings: [], gatheringsOpen: true) == [])
+        #expect(BookPanelBrain.markedReadings(shown: "b", gatherings: ["b", "g1"], gatheringsOpen: true) == ["b", "g1"],
+                "each once")
+    }
+
+    /// The shown book's name wears the shared icon (a BOOK grant reaches it)
+    /// and a waiting ask on the book — the Bookcase's order, on the header's
+    /// own row above the table of contents; her press on the glyph answers
+    /// THAT ask, her press on the icon presents its popover, and no open
+    /// fires for either.
+    @Test func theShownBooksNameWearsItsIconAndItsWaitingAskAndEachPressIsItsOwn() async throws {
+        try await withWorld { session, _ in
+            let ops = session.operations
+            let client = try approved(ops, "vx354-header")
+            let open = try note(ops, "the open note")
+            let book = try ops.createReading(name: "the shared book", kind: .book)
+            _ = try ops.addPostToReading(open.id, to: book.id)
+            _ = try ops.grantMCPAccess(client.id, grant(.read, .book, book.id))
+
+            let membership = NoteMembershipModel()
+            let model = BookPanelModel(session: session, postID: open.id)
+            var tasks = try await holdThePanel(
+                session, open: open, book: book, model: model, membership: membership, notes: 1)
+            tasks.append(Task {
+                await model.holdReadingReach(BookPanelBrain.markedReadings(
+                    shown: book.id, gatherings: [], gatheringsOpen: false))
+            })
+            defer { tasks.forEach { $0.cancel() } }
+            #expect(try await settle { model.readingReach[book.id] != nil && model.reach[open.id] != nil },
+                    "the book's reach and its note's landed")
+            #expect(model.readingReach[book.id]?.map(\.clientName) == ["vx354-header"])
+
+            let answered = AnsweredAsks()
+            let (opens, observer) = countOpens()
+            defer { NotificationCenter.default.removeObserver(observer) }
+            let bookAsk = MCPAskFace(
+                id: "ask-vx354-book", target: .book(book.id), clientName: "vx354-header",
+                here: "vx354-header asks to suggest here", named: "vx354-header asks to suggest in a book")
+            let rig = SharedIconRig(
+                BookPanelView(session: session, postID: open.id, membership: membership, model: model)
+                    .environment(\.mcpAskBoard, MCPAskBoard(faces: [bookAsk]))
+                    .environment(\.mcpShareRoad, road(answered)),
+                width: 340, height: 600)
+            defer { rig.close() }
+
+            let drawn = await rig.poll(timeout: 8) {
+                MCPSharedIconProbe.frames(in: rig.window).count == 2
+                    && MCPAskGlyphProbe.frames(in: rig.window).count == 1
+            }
+            await rig.poll(timeout: 0.6) { false }
+            #expect(drawn, "two icons (the header's, the note row's) and the book's one waiting ask (icons \(MCPSharedIconProbe.frames(in: rig.window).count), asks \(MCPAskGlyphProbe.frames(in: rig.window).count))")
+            let icons = MCPSharedIconProbe.frames(in: rig.window).sorted { $0.midY > $1.midY }
+            let header = try #require(icons.first, "the header's icon drew")
+            let glyph = try #require(MCPAskGlyphProbe.frames(in: rig.window).first, "the book's ask drew")
+            #expect(icons.count == 2 && header.midY > icons[1].midY + 4,
+                    "the header's icon sits above the table of contents (\(icons))")
+            #expect(abs(glyph.midY - header.midY) <= 6, "the icon and the waiting ask share the header's row")
+            #expect(header.maxX <= glyph.minX + 1, "the icon comes first, then the ask — the Bookcase's order")
+
+            await rig.click(at: NSPoint(x: glyph.midX, y: glyph.midY))
+            #expect(await rig.poll(timeout: 3) { answered.ids == ["ask-vx354-book"] },
+                    "her press on the header's glyph answers the BOOK's ask (\(answered.ids))")
+            let before = MCPSharedIconProbe.presentations(of: "vx354-header")
+            await rig.click(at: NSPoint(x: header.midX, y: header.midY))
+            #expect(await rig.poll(timeout: 3) { MCPSharedIconProbe.presentations(of: "vx354-header") > before },
+                    "her press on the header's icon presents its popover")
+            await rig.poll(timeout: 0.4) { false }
+            #expect(opens.value == 0, "no open fired for either mark")
+        }
+    }
+
+    /// A gathering's name, once the line is open, wears the shared icon ONLY
+    /// through wing-level reach (R-VX185-1): under a book grant and a note
+    /// grant it wears none — while the header and the note row do — and a
+    /// wing grant made while the panel stands lights it, on the held read.
+    @Test func aGatheringsNameWearsTheIconOnlyThroughItsWingNeverThroughANoteOrBookGrant() async throws {
+        try await withWorld { session, _ in
+            let ops = session.operations
+            let client = try approved(ops, "vx354-gathering")
+            let open = try note(ops, "the open note")
+            let book = try ops.createReading(name: "the book", kind: .book)
+            _ = try ops.addPostToReading(open.id, to: book.id)
+            let tea = try ops.createTag(name: "tea")
+            _ = try ops.applyTag(tea.id, toPost: open.id)
+            let gathering = try ops.createReading(
+                name: "everything tea", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(tea.id)))
+            _ = try ops.grantMCPAccess(client.id, grant(.read, .book, book.id))
+            _ = try ops.grantMCPAccess(client.id, grant(.read, .note, open.id))
+
+            let membership = NoteMembershipModel()
+            let model = BookPanelModel(session: session, postID: open.id)
+            // The panel's held reads by hand (`holdThePanel`'s three, settled on
+            // TWO readings — the book and the gathering).
+            var tasks: [Task<Void, Never>] = [
+                Task { await membership.track(session: session, postID: open.id) },
+                Task { await model.observe(bookID: book.id) },
+            ]
+            #expect(try await settle {
+                model.entryIDs(for: book.id).count == 1 && membership.readings(for: open.id).count == 2
+            }, "the panel's book and its one entry landed, and the note's two readings")
+            tasks.append(Task { await model.holdReach(model.entryIDs(for: book.id)) })
+            #expect(membership.gatherings(for: open.id).map(\.id) == [gathering.id],
+                    "the note shows in the gathering (the fixture)")
+            let named = BookPanelBrain.markedReadings(
+                shown: book.id, gatherings: membership.gatherings(for: open.id).map(\.id), gatheringsOpen: true)
+            #expect(named == [book.id, gathering.id])
+            tasks.append(Task { await model.holdReadingReach(named) })
+            defer { tasks.forEach { $0.cancel() } }
+            #expect(try await settle { model.readingReach[book.id] != nil }, "the book's reach landed")
+            #expect(model.readingReach[gathering.id] == nil,
+                    "a book grant and a note grant never reach a gathering (R-VX185-1)")
+
+            let rig = SharedIconRig(
+                BookPanelView(
+                    session: session, postID: open.id, membership: membership, model: model,
+                    gatheringsOpen: true)
+                    .environment(\.mcpAskBoard, MCPAskBoard())
+                    .environment(\.mcpShareRoad, road(AnsweredAsks())),
+                width: 340, height: 600)
+            defer { rig.close() }
+            let two = await rig.poll(timeout: 8) { MCPSharedIconProbe.frames(in: rig.window).count == 2 }
+            await rig.poll(timeout: 0.6) { false }
+            #expect(two && MCPSharedIconProbe.frames(in: rig.window).count == 2,
+                    "the header and the note row — never the gathering (\(MCPSharedIconProbe.frames(in: rig.window).count) drawn)")
+
+            // A wing grant on its wing: the gathering's name lights, on the held read.
+            _ = try ops.grantMCPAccess(client.id, grant(.read, .wing, ""))
+            #expect(try await settle { model.readingReach[gathering.id] != nil }, "the wing grant reaches the gathering")
+            let three = await rig.poll(timeout: 8) { MCPSharedIconProbe.frames(in: rig.window).count == 3 }
+            #expect(three, "the header, the note row, and now the gathering's name (\(MCPSharedIconProbe.frames(in: rig.window).count) drawn)")
+            let lowest = try #require(MCPSharedIconProbe.frames(in: rig.window).min { $0.midY < $1.midY })
+            let others = MCPSharedIconProbe.frames(in: rig.window).filter { $0 != lowest }
+            #expect(others.allSatisfy { $0.midY > lowest.midY + 4 },
+                    "the new icon is the gathering's — below the table of contents, on the gatherings line")
+            #expect(MCPAskGlyphProbe.frames(in: rig.window).isEmpty, "no ask waits; none is drawn")
+        }
+    }
+
+    /// VX-272's gate at the panel: with no approved client the reading hold
+    /// reads nothing — even with the open book on — and no mark is drawn.
+    @Test func nothingIsReadOrDrawnWhileNoClientIsApproved() async throws {
+        try await withWorld { session, _ in
+            let ops = session.operations
+            _ = try ops.recordMCPContact(name: "vx354-pending", version: "2")
+            try ops.setMCPSwitch(.openBook, on: true)
+            let open = try note(ops, "the open note")
+            let book = try ops.createReading(name: "the book", kind: .book)
+            _ = try ops.addPostToReading(open.id, to: book.id)
+
+            let membership = NoteMembershipModel()
+            let model = BookPanelModel(session: session, postID: open.id)
+            var tasks = try await holdThePanel(
+                session, open: open, book: book, model: model, membership: membership, notes: 1)
+            tasks.append(Task { await model.holdReadingReach([book.id]) })
+            defer { tasks.forEach { $0.cancel() } }
+            try await Task.sleep(for: .milliseconds(500))  // every held read has landed by now
+            #expect(model.readingReach.isEmpty, "no approved client: the read stops at the grants store")
+            #expect(model.reach.isEmpty)
+
+            let rig = SharedIconRig(
+                BookPanelView(session: session, postID: open.id, membership: membership, model: model)
+                    .environment(\.mcpAskBoard, MCPAskBoard())
+                    .environment(\.mcpShareRoad, road(AnsweredAsks())),
+                width: 340, height: 600)
+            defer { rig.close() }
+            await rig.poll(timeout: 1) { false }
+            #expect(MCPSharedIconProbe.frames(in: rig.window).isEmpty, "no mark anywhere")
+        }
+    }
+}

@@ -493,13 +493,19 @@ orchestrator's). Batch 1's code and record untouched.*
   (`vx352-revert-red.log`; `allocate` back to reading order — the old face): 3 of 4 failed, 10 issues (the parts table
   green — the split alone changes no face); its `!= "claude-code · e…"` expectation FAILED, i.e. the reverted
   arithmetic reproduces her capture exactly; restored → 4/4 green (`vx352-green2.log`).
-- **VX-354 (the Book Panel's header and gatherings wear neither mark):** NOT-STARTED — settled design: the panel's
-  model holds the READING reach (`Queries.mcpBookReaches(readingIDs:)` — `decide` for the book, `decideGathering` for a
-  gathering, behind `mcpReachStandings`' VX-272 gate) over exactly the readings DRAWN: the shown book always, the
-  gatherings' names only while "appears in N gatherings" is open (the pure `BookPanelBrain.markedReadings`); the header
-  and each listed gathering wear the Bookcase row's pair — `MCPSharedIcon` then `MCPAskGlyph(.book(id))` (no ask ever
-  targets a gathering — `MCPAskTarget`, VX-273 — so a gathering's glyph draws nothing, exactly as on the Bookcase).
-  Mac pins extend `BookPanelMCPMarksTests` (compiled; RUN PENDING the orchestrator's stage).
+- **VX-354 (the Book Panel's header and gatherings wear neither mark):** DONE (this commit) — `BookPanelModel` holds
+  the READING reach (`readingReach`, `holdReadingReach` — `Queries.mcpBookReaches(readingIDs:)`: `decide` for the book,
+  `decideGathering` for a gathering, behind `mcpReachStandings`' VX-272 gate; never `container`) over exactly the
+  readings DRAWN — the pure `BookPanelBrain.markedReadings`: the shown book always, the gatherings' names only while
+  "appears in N gatherings" is open; `BookPanelView` holds it by `.task(id:)` and the header and each listed gathering
+  wear the Bookcase row's pair through ONE helper, `readingMarks` — `MCPSharedIcon` then `MCPAskGlyph(.book(id))` (no ask
+  ever targets a gathering — `MCPAskTarget`, VX-273 — so a gathering's glyph is the calm no-view, as on the Bookcase).
+  The pins' seam: `BookPanelView(…, gatheringsOpen:)` (default false — the panel still opens collapsed). Mac pins
+  extend `BookPanelMCPMarksTests` (4 — the pure decision; the header's icon + book ask, each press its own, no open; a
+  gathering's icon only through its wing, never a note or book grant, lit live by a wing grant; nothing read or drawn
+  with no approved client even with the open book on) COMPILED (`build-for-testing` green, `mac-bft2.log`, no warning
+  in a touched file), RUN **PENDING** the orchestrator's stage. Red-on-old by construction (the old panel neither held
+  nor drew a reading's reach; `holdReadingReach` is new).
 - **Suites:** PENDING (the headless targeted suites per piece; the whole headless suite and `build-for-testing` at
   the end).
 

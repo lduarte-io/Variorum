@@ -62,10 +62,13 @@ struct BookPanelView: View {
     }
 
     /// The pins' seam (VX-281 ladder R1-5): a model the harness drives by
-    /// hand — the `PoolPostsView` / `LibraryCatalogView` shape.
+    /// hand — the `PoolPostsView` / `LibraryCatalogView` shape. VX-354:
+    /// `gatheringsOpen` — the gatherings line's open state to mount with (a
+    /// pin can't press it in-process; the panel always opens collapsed).
     init(
         session: AppSession, postID: String, membership: NoteMembershipModel,
-        model: BookPanelModel, recentBookIDs: [String] = [], onClose: (() -> Void)? = nil
+        model: BookPanelModel, recentBookIDs: [String] = [], onClose: (() -> Void)? = nil,
+        gatheringsOpen: Bool = false
     ) {
         self.session = session
         self.postID = postID
@@ -73,6 +76,7 @@ struct BookPanelView: View {
         self.recentBookIDs = recentBookIDs
         self.onClose = onClose
         _model = State(initialValue: model)
+        _gatheringsOpen = State(initialValue: gatheringsOpen)
     }
 
     private var tokens: VoiceTokens {
@@ -109,6 +113,19 @@ struct BookPanelView: View {
         .task(id: model.entryIDs(for: shown?.id)) {
             await model.holdReach(model.entryIDs(for: shown?.id))
         }
+        // VX-354: who reaches the readings the panel names — the shown book,
+        // and the gatherings while their names are drawn.
+        .task(id: namedReadings(shown)) {
+            await model.holdReadingReach(namedReadings(shown))
+        }
+    }
+
+    /// VX-354 — the readings whose marks the panel draws now (the pure
+    /// `BookPanelBrain.markedReadings` over what is on screen).
+    private func namedReadings(_ shown: Reading?) -> [String] {
+        BookPanelBrain.markedReadings(
+            shown: shown?.id, gatherings: membership.gatherings(for: postID).map(\.id),
+            gatheringsOpen: gatheringsOpen)
     }
 
     // MARK: - The header (the switcher atop, for a shared note)
@@ -140,6 +157,8 @@ struct BookPanelView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
+            // VX-354: the shown book wears its marks, as its Bookcase row does.
+            if let shown { readingMarks(shown.id) }
             Spacer(minLength: 4)
             if let onClose {
                 Button(BookPanelCopy.close) { onClose() }
@@ -334,6 +353,22 @@ struct BookPanelView: View {
         }
     }
 
+    /// **VX-354 — the two MCP marks a READING the panel names wears** (the
+    /// header's shown book; each listed gathering) — the Bookcase row's pair,
+    /// in its order: VX-268's ONE shared icon, from the reach the model holds
+    /// through each kind's ONE rule (`decide` for a book, `decideGathering`
+    /// for a gathering — a note or book grant never icons a gathering,
+    /// R-VX185-1; nothing read while no client is approved, VX-272), then
+    /// 13n-c U4's waiting ask on it. No ask ever targets a gathering
+    /// (`MCPAskTarget`; a gathering is no grant scope — VX-273), so a
+    /// gathering's glyph is the calm no-view, exactly as on the Bookcase.
+    /// Each mark is its own button: the name's own press never fires for them.
+    @ViewBuilder
+    private func readingMarks(_ readingID: String) -> some View {
+        MCPSharedIcon(reaches: model.readingReach[readingID] ?? [], tokens: tokens)
+        MCPAskGlyph(.book(readingID), tokens: tokens)
+    }
+
     /// The open note's mark — the voice's own selection marker (the
     /// navigator's), in the accent; Study's empty marker leaves the weight
     /// and the ink to say it.
@@ -429,6 +464,9 @@ struct BookPanelView: View {
                             }
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                             .help(BookPanelCopy.openGatheringHelp(gathering.name))
+                            // VX-354: the gathering's marks, right after its
+                            // name (the Bookcase row's seat).
+                            readingMarks(gathering.id)
                             Spacer(minLength: 4)
                             // §20: a gathering holds no membership — its
                             // honest door is the tag the note wears.
