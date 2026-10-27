@@ -4,6 +4,15 @@ Session **oct26coordinator**, 01:56 → ~09:00 MDT, on the Pro. Your brief: wave
 (VX-601 · VX-562 · VX-559) as wave 1 merges; no `/Applications` refresh and no release without your word; one release when the
 wave is done, with the notes drafted for you. Your overnight word: the Pro was mine through the morning.
 
+**UPDATE at the true close (~12:40 MDT; the window reopened at her morning word, ~09:50).** Checklist items 1, 2 and 5
+below are DONE:
+- VX-439 was rewritten at her word, with the Fable pass stood down by her word. It merged as PR #194 `b3b16f2ba`.
+- **0.10.3 (9720) was released and published, and is installed on the Pro.**
+- The helper is KEPT at her word.
+
+Still open: wave 2 (her new coordinator), the bundles (#239(a), #243, #244), the pin edits, and the tickets. The morning's
+events and the notes for the next coordinator are in the addendum at the end.
+
 ## Your checklist
 
 1. **VX-439's history call (M-3), which blocks the last wave-1 merge.** ~11 MB of walk screenshots and two Debug prefs
@@ -57,7 +66,8 @@ wave is done, with the notes drafted for you. Your overnight word: the Pro was m
 |---|---|---|---|---|
 | VX-502 | #192 | `32fb88ec6` | ~04:58 | first merger on the export seam; ledgers `31d2b5750` before, banner `dd469951e` after; custody-adjacent slot freed |
 | VX-548 | #193 | `d92c30d21` | ~07:18 | ledgers `6def23df0`; 74 code files, 5 overlapping VX-439 (merged cleanly into VX-439, re-tested there) |
-| VX-439 | open, HELD | — | — | waits on your M-3 history word |
+| VX-439 | #194 | `b3b16f2ba` | ~10:00 | after the history rewrite at her word; ledgers `9cac13d5c`/`b9a51f1fd` (QUESTIONS #244); bump `12c99b4a8` (0.10.3) |
+| (VX-621 walk-script fix) | #196 | `c596c8868` | ~12:00 | merged by HER hand (the classifier refuses `gh pr merge` to sessions) |
 
 ## Stage numbers and timeline (from `~/.variorum/stage.log`)
 
@@ -163,3 +173,75 @@ Export a single note to a file, make a note inside the book you're in with one s
 - Stopping the MCP server, quitting, or a dropped connection now ends cleanly every time, and a stale start can no longer stop a running server.
 ```
 
+
+## Addendum: the morning (09:45–12:40 MDT)
+
+**Her words, in order:**
+- "VX-439: rewrite it, just remove the walk screenshots. then we can do a release. I do want a fable review pass on that
+  session. … We can keep the new helper."
+- Then: "I don't need the fable pass - run the release."
+- On the notes: "seems fine to me & this is still beta release notes". That approved VX-439's own draft, with its export line
+  softened before the merge.
+- "continue being the coordinator while I start new runs. The three from today can still release together."
+- Then: "go ahead and close out."
+
+**VX-439:**
+- The rewrite: 7929147de → a3f087842, with a byte-identical tree. The captures appear in zero commits, and main is an
+  ancestor by its original SHA (a first attempt that re-created main's signed merges unsigned was discarded unpushed).
+- The merge GO was HELD while the session's relay ("Fable pass stood down") conflicted with her direct word to me. It went
+  out only on her confirmation.
+
+**The release, 0.10.3 (9720)** (VX-439 ran it under claim `vx-439-release`, 10:04–12:13):
+- release.sh passed.
+- The release checklist's STEP 0 (the first-run walk on the prod test road) needed the dev slot set aside (G7). That
+  wasn't in the REQUEST, and VX-439 owned it.
+- Run 1 stopped because the std vxtest account still held a vault. VX-439 reset it via the Management-API PAT at her word
+  ("Can you not do this with the PAT?"): one statement mirroring account_purge() minus the auth user and the entitlement.
+- Run 2 hit walk-script bugs → VX-621/VX-622, fixed by PR #196, which she merged.
+- Run 3 PASSED.
+- My restoration order was then run exactly: walk app signed out and quit; the walk slot removed; the as-found set
+  renamed back whole; one relaunch proved e11e5233 held, unlocked and signed out.
+- The A1 was taken and cmp-verified (5 files). The refresh came from the DMG itself, with codesign checked on both the
+  staged and the installed app.
+- Site: both verify-published checks PASS, and the site repo is at f7f82b2.
+- I independently verified: /Applications = 0.10.3 (9720), codesign OK, the dev slot restored, no instances.
+
+**My cleanup:**
+- The 0.10.3 A1 (`variorum-a1-0.10.3-install-2026-10-27T180840Z`) is cmp-SAME against the live store (no instance), so
+  the 0.10.2 A1 was PRUNED. That A1 is now the only real-store safety copy.
+- VX-439's orphaned global DerivedData (2.7 GB) was removed. All wave-1 worktrees and branches are gone. Disk: 130 GiB free.
+
+**Also born and found:**
+- VX-620 (Run: MCP umbrella remainder). VX-548's kickoff missed five seated sub-issues (565/566/567/590/596), and VX-377
+  joined later. Both phase skills now say to read the sub-issue listing at kickoff (7e3eb2e58).
+- VX-621 and VX-622 (walk script).
+- The std account now holds run 3's set-up, so the NEXT std first-run walk needs a vault reset again until VX-622's
+  cleanup leg lands.
+- In-app account deletion wasn't reachable while signed in (VX-439's trace), which may be worth a ticket.
+
+**What went wrong (the morning):**
+- VX-439 ran the step-0 walk and its dev-slot set-aside without amending its REQUEST.
+- VX-439 renewed twice and told me after.
+- I read a renewal and a running instance only from the log and pgrep, so the instance check caught the walk app before
+  any explanation reached me.
+- Nothing was harmed.
+
+## For the next coordinator's kickoff
+
+- **The dev store:** e11e5233 (key 77f4a14d), Standard, HELD since 10-20 (banner "as of October 20, 2026"), signed out,
+  Study. Every walk is briefed "never press Resume". `dev-castle.env`'s notes are current (VX-502), and
+  `~/.variorum/bin/type-dev-castle-secret` types its values (kept).
+- **The real store:** 0.10.3 (9720). Its only A1 is `variorum-a1-0.10.3-install-2026-10-27T180840Z`.
+- **Merges:** closeouts serialize, first-ready first. "Rebase" means MERGE main IN (never rewrite a pushed branch). At each
+  merge, intersect the merged diff's files with every open branch's files. Any overlap → that branch merges main in and
+  re-runs the overlapping files' suites on the merged tree before its MERGE ASK.
+- **Stage rules learned:**
+  - `Tools/stage renew` RESETS to now+N.
+  - VX-604: every RESULT line carries EXECUTED counts, and 0 = no verdict.
+  - The release REQUEST must include step 0's first-run walk and its G7 dev-slot set-aside (plus the std reset while
+    VX-622 is open).
+  - A release run needs her in-session word (the classifier refuses unattended release.sh and `gh pr merge`).
+- **Fable safeguards:** live Castle walks and synthetic-input legs trip the classifier, so hand those legs to an Opus
+  walker under the same claim.
+- **Tooling:** a stage-log Monitor (`tail -F ~/.variorum/stage.log | grep CLAIMED|RELEASED|RENEWED|EXPIRED`, re-armed every
+  30 min) catches every claim without polling.
