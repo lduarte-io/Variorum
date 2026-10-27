@@ -997,7 +997,10 @@ struct ShelfView: View {
     // MARK: - Quick entry (R3 — the shared bar; Library carries it too)
 
     private var entryBar: some View {
-        QuickEntryBar(session: session, onOpen: onOpen, autofocus: true, openingFocus: openingFocus)
+        // VX-552 (the VX-439 run): the wing a capture here lands in, beside it.
+        QuickEntryBar(
+            session: session, onOpen: onOpen, autofocus: true, openingFocus: openingFocus,
+            wingName: wings?.currentName ?? WingWords.home)
     }
 
     /// The ⌘K hint at the window's foot — and, at its trailing end, the

@@ -151,6 +151,16 @@ enum QuickEntryCopy {
     /// always done and what distinguishes it from the pad.
     static let placeholder = "new note — just start typing · ⏎ opens it · ⇧⏎ new paragraph"
 
+    /// **VX-552 (the VX-439 run — her ask: the wing you're in always visible
+    /// beside the New Note door, so a new note's landing place is never a
+    /// surprise).** The quiet line at the box's trailing edge: where what she
+    /// types here will live. Shown with ONE wing too (C-552-1 — her "always").
+    static func wingLabel(_ wingName: String) -> String { "in \(wingName)" }
+    /// Its hover — the whole fact.
+    static func wingHelp(_ wingName: String) -> String {
+        "A note made here lands in the \u{201C}\(wingName)\u{201D} wing \u{2014} \u{2318}L switches wings"
+    }
+
     /// The refusal names the act, hands the reason to the app's ONE
     /// operations vocabulary — never the raw `\(error)` dump this printed
     /// until now — and ends with the half that is load-bearing: her text is
@@ -197,6 +207,11 @@ struct QuickEntryBar: View {
     /// VX-326: the shell's opening ask, when this bar may be the one to
     /// claim it (the Bookcase's bar, handed the shell's claim); nil elsewhere.
     var openingFocus: QuickEntryOpeningFocus?
+    /// VX-552 (the VX-439 run): the wing a note filed here lands in — the
+    /// host's own `WingsModel.currentName` (the app's one wing, which follows
+    /// the focused note), never a second observation. nil draws no label (a
+    /// host with no wings model — a test, a preview).
+    var wingName: String?
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -234,11 +249,13 @@ struct QuickEntryBar: View {
         session: AppSession,
         onOpen: @escaping (SidebarSelection) -> Void,
         autofocus: Bool = false,
-        openingFocus: QuickEntryOpeningFocus? = nil
+        openingFocus: QuickEntryOpeningFocus? = nil,
+        wingName: String? = nil
     ) {
         self.onOpen = onOpen
         self.autofocus = autofocus
         self.openingFocus = openingFocus
+        self.wingName = wingName
         _box = State(initialValue: QuickEntryModel(session: session))
     }
 
@@ -253,6 +270,7 @@ struct QuickEntryBar: View {
         // the box as the placeholder; typing replaces it.
         @Bindable var box = box
         return VStack(alignment: .leading, spacing: 4) {
+          HStack(alignment: .top, spacing: 10) {
             ZStack(alignment: .topLeading) {
                 if box.text.isEmpty {
                     HStack(spacing: 6) {
@@ -294,6 +312,21 @@ struct QuickEntryBar: View {
                     onFocusChange: { entryFocused = $0 },
                     onFile: { submit() })
             }
+            // VX-552: the wing she is filing into, beside the box she files
+            // in — on the box's first line, at its trailing edge, outside the
+            // text (so her typing never runs under it), visible while she types.
+            if let wingName {
+                Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wingName)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: 180, alignment: .trailing)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, Self.placeholderOrigin.y)
+                    .help(QuickEntryCopy.wingHelp(wingName))
+            }
+          }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .overlay(

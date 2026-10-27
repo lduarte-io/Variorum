@@ -243,7 +243,10 @@ struct LibraryCatalogView: View {
                 // quick-entry bar rides the Library too — type, ⏎, and the
                 // typed text IS a post, opened.
                 Divider().overlay(tokens.line)
-                QuickEntryBar(session: session, onOpen: onOpen)
+                // VX-552 (the VX-439 run): the wing a capture here lands in.
+                QuickEntryBar(
+                    session: session, onOpen: onOpen,
+                    wingName: wings?.currentName ?? WingWords.home)
                     .libraryGeometryProbe(.quickEntry)
             }
             // VX-350: the LIST yields when the room is short — the panel takes

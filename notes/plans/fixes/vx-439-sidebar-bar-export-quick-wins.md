@@ -195,15 +195,21 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     focused book's, a place speaks the note; a book mints a focused member; a gathering mints the planner's tagged note
     and holds nothing; a finished book refuses in the op's words and mints nothing) — build-for-testing GREEN; the
     suite run PENDING the stage window.
-  - VX-553: DONE (this line's commit) — a BOOK's navigator foot renders from ONE ordered table, `BookFootDoors.book
+  - VX-553: DONE (`822122592`) — a BOOK's navigator foot renders from ONE ordered table, `BookFootDoors.book
     (journalTrait:finished:hasDeletedChapters:)`: "+ new chapter", then "+ new entry"/"+ new note" (none on a finished
     book — Round 3's rule), then "restore deleted chapter" (only while one waits) LAST, set apart by `recoveryGap` (6 pt
     over the foot's row gap). A-439-5's pick: "after, set apart" — the foot has no overflow/settings door that holds
     chapter acts. Each door's words, act and condition unchanged (`footDoor(_:)`, one case per door). Design row: pin
     `BookFootDoorsTests` (2: the order per state; restore never between the mint pair, always last, gap > 0) + the
     walk's capture (the orchestrator's) — build-for-testing GREEN; the suite run PENDING the stage window.
-  - VX-552: NOT-STARTED — settled design: `QuickEntryBar` (both hosts — Bookcase + Library) wears the current wing's name
-    as a muted label, from the host's `WingsModel.currentName` (call C-552-1: shown with one wing too — "always").
+  - VX-552: DONE (this line's commit) — the ONE quick-entry bar (`QuickEntryBar`, both hosts: the Bookcase band and the
+    Library bar — the two doors that mint into the current wing; ⌘N is a menu item and books mint into their own wing)
+    wears "in ‹wing›" at the box's trailing edge on its first line (muted small chrome, `lineLimit(1)`, ≤180 pt, the
+    hover the whole fact), visible while she types; the name is the host's own `WingsModel.currentName` (the app's one
+    wing, which follows the focused note — no new observation), Home when no wings model is handed; shown with ONE wing
+    too (C-552-1). Design row: pin `QuickEntryWingLabelTests` (2: the words; both hosts compose the bar with the wing —
+    source-read, the `theLibraryNoteRowMenuRendersItsDeclaredDoors` precedent) + the walk's capture (the
+    orchestrator's, both voices) — build-for-testing GREEN; the suite run PENDING the stage window.
   - VX-332: NOT-STARTED — settled design: every autofocus mount takes the waiting/never-steal opening road; the one-shot
     `QuickEntryOpeningFocus` claim retires; the bar stands down while a tour runs; `aNavigationBack…KeepsTheBarsRaiseAsItWas`
     updated deliberately (it pins the old behavior); red-on-old pin = a navigation back puts the caret in the box.
