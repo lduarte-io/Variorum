@@ -180,4 +180,19 @@ struct MCPTakeLabelFormServerTests {
             await h.hangUp(connection)
         }
     }
+
+    /// VX-352 (RUN VX-548 batch 2a): the take card splits a label where THIS
+    /// convention puts its separator (`TakeLabelFace` in the core — the face
+    /// can't see the wire's module), so the two can never drift: the card's
+    /// separator and legacy word ARE the wire's, and an AI label splits into
+    /// the client's name (yielding) and its own words (kept).
+    @Test func theTakeCardSplitsTheLabelWhereThisConventionPutsItsSeparator() {
+        #expect(TakeLabelFace.separator == MCPWriteTools.labelSeparator)
+        #expect(TakeLabelFace.legacySuggestionWord == MCPWriteTools.legacySuggestionWord)
+        let parts = TakeLabelFace.parts(MCPWriteTools.aiLabel(client: "claude-code", own: "english"))
+        #expect(parts.yielding == "claude-code")
+        #expect(parts.kept == MCPWriteTools.labelSeparator + "english")
+        #expect(TakeLabelFace.parts(MCPWriteTools.aiLabel(client: "claude-code", own: nil)).yielding == nil,
+                "a bare client name is one part — today's face")
+    }
 }

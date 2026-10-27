@@ -549,7 +549,9 @@ struct TutorialMCPChapterTests {
                         "\(name): no tool marks Private, seals or owns")
             }
             // Where, and how long — the durations by their own words.
-            #expect(text.contains("one note; one book, with its notes now and any added to it later; or a whole wing"))
+            // VX-549 (A JUSTIFIED EDIT — the places card names a gathering).
+            #expect(text.contains("one note; one book, with its notes now and any added to it later; one gathering, "
+                                  + "with the notes its rule gathers now; or a whole wing"))
             // The wing and the open book never overclaim: the exceptions are
             // named, and "the next lesson" really is the one that names them.
             // W-UX-17 (A JUSTIFIED EDIT, the ritual): the exceptions are named
@@ -594,8 +596,16 @@ struct TutorialMCPChapterTests {
                 id: "g", rung: .read, scopeKind: .note, scopeID: loose, duration: .once,
                 consumedAt: "2026-07-01T00:00:00.000Z").isLive, "spent, it reaches nothing more")
             // 13n-c U6 — the fourth card (VX-273 + VX-160), prose then truth.
-            #expect(text.contains("A wing grant also lets a client read that wing's gatherings"))
-            #expect(text.contains("a gathering is never shared on its own"))
+            // VX-549 — FLIPPED DELIBERATELY (her sitting 2026-10-27, RATIFIED:
+            // "the supersession of VX-273's facts-only rule is RATIFIED.
+            // Gathering joins the grant scopes"): the card said "A wing grant
+            // also lets a client read that wing's gatherings; a gathering is
+            // never shared on its own" — now it teaches the gathering grant.
+            #expect(text.contains("A gathering grant follows your tags: a note is in reach the moment it wears "
+                                  + "what the gathering's rule asks for, and out of reach when it stops"))
+            #expect(text.contains("With write new, a client can add a note to the gathering, and the note wears "
+                                  + "the tags the rule needs"))
+            #expect(!text.contains("never shared on its own"))
             #expect(text.contains("move a note to another wing only with edit where the note is and write new "
                                   + "in the wing it goes to"))
             #expect(text.contains("the note leaves its books there, its tags come along, and "
@@ -615,13 +625,24 @@ struct TutorialMCPChapterTests {
                 return MCPGrantRule.decideGathering(
                     client: .approved, grants: grants, openBook: false, gathering: gatheringFacts).isAllowed
             }
-            #expect(try await reachesGathering("codex"), "a wing grant reads its gatherings")
+            #expect(try await reachesGathering("codex"), "a wing grant reaches its gatherings")
             #expect(try await !reachesGathering("claude-code"), "a book grant never does")
-            // "never shared on its own": no grant may name one.
+            // VX-549 — FLIPPED DELIBERATELY: "never shared on its own: no grant
+            // may name one" is superseded. A grant NAMES the gathering (its own
+            // scope kind — never the book road), and it "follows your tags": a
+            // note is in reach once it wears the rule's tag, out once it stops.
             let codex = try #require(try await db.read { try Queries.mcpClient($0, name: "codex") })
-            #expect(throws: OperationError.self) {
+            #expect(throws: OperationError.self, "a gathering is still no BOOK") {
                 _ = try ops.grantMCPAccess(codex.id, grant(.read, .book, gathering.id))
             }
+            let cursor = try approvedClient(ops, "cursor", grant(.read, .gathering, gathering.id))
+            _ = cursor
+            let tagged = try note(ops, "a draft in reach")
+            #expect(try await !(reachers(db, tagged).contains("cursor")), "untagged: out of reach")
+            try ops.applyTag(topic.id, toPost: tagged)
+            #expect(try await reachers(db, tagged).contains("cursor"), "tagged: in reach — it follows your tags")
+            try ops.removeTag(topic.id, fromPost: tagged)
+            #expect(try await !(reachers(db, tagged).contains("cursor")), "untagged again: out")
             // "only with edit where the note is and write new in the wing it
             // goes to": the two decisions, on the note's own facts.
             let annex = try ops.createWing(name: "Annex")
@@ -812,6 +833,9 @@ struct TutorialMCPChapterTests {
             // 13n-c UX walk W-UX-19: the pane's rows carry Change… beside Revoke.
             #expect(text.contains("with \(CapabilityRegistry.capability(.mcpChangeGrant).verb) to raise or lower it and \(CapabilityRegistry.capability(.mcpRevokeGrant).verb) to take it back"))
             #expect(MCPPane.surfaceCapabilities.contains(.mcpChangeGrant))
+            // VX-515 (the VX-548 run): the tab's own add door, by its own words.
+            #expect(text.contains("\(CapabilityRegistry.capability(.mcpShareAnotherPlace).verb) adds one beside them"))
+            #expect(MCPPane.surfaceCapabilities.contains(.mcpShareAnotherPlace))
             #expect(text.contains("with \(MCPShareCopy.change) to adjust it and \(MCPShareCopy.revokeDoor) to take it back"))
 
             // THE TRUTH — ⌥⌘A's decision (D1): the newest grant's client and

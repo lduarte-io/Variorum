@@ -102,6 +102,15 @@ import GRDB
 ///   (`insertMCPGrant` revokes it on the act's stamp first), so the store
 ///   refusing a second is what guarantees no future road can mint a duplicate
 ///   silently.
+///
+/// **VX-549 — A GATHERING AS A GRANT PLACE** (`v1_33_mcp_gathering_grants`;
+/// VX-548 batch 3, her sitting 2026-10-27 RATIFIED — the supersession of
+/// VX-273's facts-only rule): `mcp_grant.scope_kind` gains `'gathering'`, born
+/// LOCAL-ONLY on the family's road (zero lockstep, the marker untouched, 14).
+/// A rebuild (a CHECK cannot be altered): rows and rowids copied verbatim,
+/// `idx_mcp_grant_client` and `uq_mcp_grant_standing_place` re-made with their
+/// text unchanged — the latter already keys a place as kind × id, so a
+/// gathering is one more place under VX-393's one standing row.
 /// - The merge (`v1_30MergeSQL`): a store holding duplicates from before keeps
 ///   each place's STRONGEST standing row and revokes the rest on one stamp
 ///   (never a delete) — an "always" row over a while-connected one (none of
@@ -260,6 +269,41 @@ public enum MCPGrantSchema {
     /// family's other uniques it needs no live-row clause of the sync kind
     /// (these rows are never synced, never tombstoned).
     static let v1_30DDL = """
+        CREATE UNIQUE INDEX uq_mcp_grant_standing_place ON mcp_grant(client_id, scope_kind, scope_id)
+          WHERE revoked_at IS NULL AND duration IN ('connection', 'always');
+        """
+
+    /// `v1_33_mcp_gathering_grants`' DDL (VX-549 — her sitting 2026-10-27,
+    /// RATIFIED: "Gathering joins the grant scopes") — FROZEN with the
+    /// migration that runs it. `mcp_grant.scope_kind` gains `'gathering'` (a
+    /// gathering's `reading.id` in `scope_id`). SQLite cannot alter a CHECK, so
+    /// the table is REBUILT (v1_18's road for `reading.kind`): every row copied
+    /// verbatim — its `rowid` too, so Shared with AI's within-one-stamp order
+    /// (`g.rowid`) and ⌥⌘A's newest-grant tiebreak read exactly as before — then
+    /// both of the table's indexes re-made with their v1_24 / v1_30 text
+    /// UNCHANGED. `uq_mcp_grant_standing_place` already keys on client × scope
+    /// kind × scope id, so a gathering is one more place under VX-393's one
+    /// standing row, with no change (pinned). Nothing references `mcp_grant`
+    /// (no foreign key names it; no trigger reads it), so the drop is free.
+    static let v1_33DDL = """
+        CREATE TABLE mcp_grant_v1_33 (
+          id          TEXT PRIMARY KEY,
+          client_id   TEXT NOT NULL REFERENCES mcp_client(id),
+          rung        TEXT NOT NULL CHECK (rung IN ('read','suggest','write_new','edit')),
+          scope_kind  TEXT NOT NULL CHECK (scope_kind IN ('note','book','wing','gathering')),
+          scope_id    TEXT NOT NULL,
+          duration    TEXT NOT NULL CHECK (duration IN ('once','connection','always')),
+          created_at  TEXT NOT NULL,
+          consumed_at TEXT,
+          revoked_at  TEXT
+        );
+        INSERT INTO mcp_grant_v1_33
+          (rowid, id, client_id, rung, scope_kind, scope_id, duration, created_at, consumed_at, revoked_at)
+          SELECT rowid, id, client_id, rung, scope_kind, scope_id, duration, created_at, consumed_at, revoked_at
+          FROM mcp_grant;
+        DROP TABLE mcp_grant;
+        ALTER TABLE mcp_grant_v1_33 RENAME TO mcp_grant;
+        CREATE INDEX idx_mcp_grant_client ON mcp_grant(client_id, revoked_at);
         CREATE UNIQUE INDEX uq_mcp_grant_standing_place ON mcp_grant(client_id, scope_kind, scope_id)
           WHERE revoked_at IS NULL AND duration IN ('connection', 'always');
         """

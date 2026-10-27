@@ -274,6 +274,20 @@ extension Operations {
             guard spec.scopeID.isEmpty || liveWing else {
                 throw OperationError.mcpGrantScopeNotFound(kind: spec.scopeKind.rawValue, id: spec.scopeID)
             }
+        case .gathering:
+            // VX-549 (her sitting, RATIFIED — "Gathering joins the grant
+            // scopes"): a live GATHERING (a book's id here is not one — the
+            // book road above names books); a fenced one (a stale Private stamp
+            // or 'daily' marker — no op mints either on a gathering) refuses as
+            // a fenced book does. An archived or rule-less gathering is a legal
+            // place: it assembles empty, so its grant reaches no note until it
+            // assembles again (the standing rule, AppSpec §9).
+            guard let facts = try Queries.mcpGatheringFacts(db, readingID: spec.scopeID) else {
+                throw OperationError.mcpGrantScopeNotFound(kind: spec.scopeKind.rawValue, id: spec.scopeID)
+            }
+            if facts.fence != nil {
+                throw OperationError.mcpGrantScopeFenced(kind: spec.scopeKind.rawValue, id: spec.scopeID)
+            }
         }
         // VX-393 (VX-348 U5 — her ruling R-VX348-6, "Upgrade in place"): ONE
         // row per client × place. A STANDING grant (while connected · always)

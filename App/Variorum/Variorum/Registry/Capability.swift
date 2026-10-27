@@ -987,8 +987,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// Revoke on a client is a deny (P-13nb-U1-5). Deliberately NOT
     /// `.palette` or `.menuBar`: who may read the library is decided where
     /// the grants are shown, never by a keystroke from elsewhere.
+    /// VX-515 (the VX-548 run): `mcpChangeClientAccess` — the client row's
+    /// ADDING door, "Share a place…" (the id kept; it read "Change…");
+    /// `mcpShareAnotherPlace` — Shared with AI's own add door, "Share another
+    /// place…" (the sheet asking WHO, nothing replaced).
     case mcpApproveClient, mcpDenyClient, mcpChangeClientAccess, mcpRevokeClient
     case mcpRevokeGrant, mcpCopySetupCommand, mcpGrantAccess
+    case mcpShareAnotherPlace
     /// 13n-b U2 — THE JUST-IN-TIME ASK's answer (AF-6; mockup §4), `.surface`
     /// on the MCP family's precedent: rendered ONLY by the ask sheet, which
     /// carries the one ask it answers (once · while connected · always ·
@@ -1017,8 +1022,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// (`.menuBar`); `mcpShowSharing` — the ONE shared icon (VX-271) on a
     /// Bookcase row and in the note's indicator (VX-164), whose click shows
     /// the permission; `mcpChangeGrant` — that popover's Change…, which
-    /// REPLACES the grant it names (T-U3-8; `mcpChangeClientAccess` stays the
-    /// client row's additive Change…).
+    /// REPLACES the grant it names (T-U3-8) while the place confirmed is that
+    /// grant's own (VX-516 — another place confirmed is a new grant);
+    /// `mcpChangeClientAccess` stays the client row's ADDING door ("Share a
+    /// place…" since VX-515).
     case mcpShareHere, mcpShareNotes, mcpShareBook, mcpShareThisNote
     case mcpShowSharing, mcpChangeGrant
     /// 13n-c U4 — ASKS WAIT QUIETLY + THE KEYBOARD (VX-156 items 4/5, VX-157;

@@ -242,6 +242,22 @@ nonisolated enum BookPanelBrain {
         }
     }
 
+    /// **VX-354 — the READINGS the panel names, whose two MCP marks they
+    /// wear** (the Bookcase row's pair — `BookPanelView.readingMarks`): the
+    /// shown book (the header, drawn whenever the panel shows a book) and the
+    /// note's gatherings ONLY while "appears in N gatherings" is open — their
+    /// names are drawn only then, and the reach is held for the rows drawn,
+    /// never more (P1, VX-268). Drawing order, each once. A note- or book-level
+    /// share never icons a gathering: the read decides a gathering by its own
+    /// rule (`decideGathering`, R-VX185-1), not here.
+    static func markedReadings(shown: String?, gatherings: [String], gatheringsOpen: Bool) -> [String] {
+        var ids: [String] = shown.map { [$0] } ?? []
+        if gatheringsOpen {
+            for id in gatherings where !ids.contains(id) { ids.append(id) }
+        }
+        return ids
+    }
+
     /// Move Up / Move Down — the twin of dragging a note onto its
     /// neighbour: WITHIN its own group (its chapter, or unfiled), where the
     /// book's MANUAL order is what she sees. nil at the group's edge, and
@@ -457,6 +473,16 @@ final class BookPanelModel {
     /// `Queries.mcpNoteReaches` over the shown book's entries — ∝ the panel's
     /// own window (`entryWindow`), held while the panel shows that book.
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
+    /// **VX-354 — who reaches each READING the panel names now** (the header's
+    /// shown book; the gatherings' names while their line is open —
+    /// `BookPanelBrain.markedReadings`): `Queries.mcpBookReaches(readingIDs:)`,
+    /// the Bookcase's and the Library's own read — each reading decided by ITS
+    /// kind's ONE rule (`decide` for a book, `decideGathering` for a
+    /// gathering), behind `mcpReachStandings`' gate (no approved client, or no
+    /// live grant with the open book off: nothing is read). ∝ the readings
+    /// drawn (a handful); reads `reading`, `wing` and the grants store, never
+    /// `container`, so it never wakes at autosave rate.
+    private(set) var readingReach: [String: [MCPPlaceReach]] = [:]
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -513,6 +539,21 @@ final class BookPanelModel {
         await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { [weak self] value in
             guard let self, self.reach != value else { return }
             self.reach = value
+        }
+    }
+
+    /// VX-354 — hold the named readings' reach (the view's `.task(id:)` on
+    /// `BookPanelBrain.markedReadings` — a book switch, the gatherings line
+    /// opening or closing, or a gathering coming or going restarts it). No
+    /// reading drawn: nothing held, nothing read.
+    func holdReadingReach(_ ids: [String]) async {
+        guard !ids.isEmpty else {
+            if !readingReach.isEmpty { readingReach = [:] }
+            return
+        }
+        await MCPRowReach.hold(session, { try Queries.mcpBookReaches($0, readingIDs: ids) }) { [weak self] value in
+            guard let self, self.readingReach != value else { return }
+            self.readingReach = value
         }
     }
 

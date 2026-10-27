@@ -248,7 +248,10 @@ nonisolated enum BookSettingsFace {
         reading.kind == .book || reading.locked
     }
 
-    /// 13n-c U3 — whether the grant row draws (P-2 + VX-272 + VX-273).
+    /// 13n-c U3 — whether the grant row draws (P-2 + VX-272 + VX-273). VX-549
+    /// made a gathering a grant place, but its place doors (this row, a row
+    /// menu's Share…) are not built — the grant sheet's WHERE is its road
+    /// (PROVISIONAL MB-18: "expand no other road").
     /// 13n-c Stage B R1 B4: `grantable` is the FENCE's own answer for this
     /// book (`BookSettingsModel.isGrantable` — `Queries.mcpBookFacts`, the one
     /// derivation site the op's refusal and the sheet's offer read), never a
@@ -741,7 +744,7 @@ struct BookSettingsSheet: View {
         // 13n-c U3 — THE GRANT ROW (R-13n-4 named Book Settings a grant face;
         // VX-156 item 2, mockup §2): who reaches this book now, and Share… —
         // THE grant sheet pre-filled. Drawn only where a grant can land (P-2):
-        // a BOOK (never a gathering — VX-273), not THE daily Journal and not
+        // a BOOK (a gathering's door is not built — VX-549's MB-18), not THE daily Journal and not
         // Private (the fence — the op refuses; the Private row above says why),
         // and only while an approved client exists (VX-272). Settings-class
         // words, no "AI" — the client's own name says who.

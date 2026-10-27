@@ -111,8 +111,10 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
 
     /// 13n-b U1 (A-8): the server stops with the app — the socket is
     /// unlinked and every connection hung up before the process exits.
+    /// VX-394 (VX-548 batch 2b): with no end line said — P-VX394-5, "a QUIT
+    /// logs nothing" (`MCPDoor.quit`; `detach()` here raced the exit with one).
     func applicationWillTerminate(_ notification: Notification) {
-        mcp.detach()
+        mcp.quit()
         // VX-308 U3 — VX-448 (her ruling): the twelve words a new-road look copied leave the clipboard at quit (only while
         // the board still holds that copy) — a no-op when no look copied them.
         WordsClipboard.clearHeld()

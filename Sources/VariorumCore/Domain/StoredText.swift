@@ -69,4 +69,19 @@ public enum StoredText {
     public static func nullCount(_ text: String?) -> Int {
         text.map(nullCount) ?? 0
     }
+
+    /// **The same words in another SPELLING** (VX-358 — RUN VX-548 batch 2a,
+    /// PROVISIONAL MB-5): `text` equals `stored` under Swift's `String`
+    /// equality — CANONICAL equivalence, the rule every text no-op guard here
+    /// uses (an NFC "é" equals its NFD "e" + U+0301) — while their UTF-8
+    /// bytes differ. The store keeps exactly what was written (no
+    /// normalization — `stripped` touches only U+0000), so such a write is a
+    /// no-op that the stored bytes, and the wire's digest of them (VX-254),
+    /// do not match; the MCP door says so (`stored_text_normalization_differs`).
+    /// False for byte-identical texts and for texts that differ in meaning.
+    /// Pure; cost ∝ the texts (only reached on a no-op, whose text is ∝ the
+    /// edit).
+    public static func spellingDiffers(_ text: String, from stored: String) -> Bool {
+        text == stored && !text.utf8.elementsEqual(stored.utf8)
+    }
 }

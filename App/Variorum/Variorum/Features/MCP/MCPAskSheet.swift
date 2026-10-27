@@ -119,7 +119,7 @@ struct MCPAskSheet: View {
             let labels = await door.placeDistinguishers()
             distinguisher = switch ask.scopeKind {
             case .note: nil
-            case .book: labels.books[ask.scopeID]
+            case .book, .gathering: labels.books[ask.scopeID]
             case .wing: labels.wings[ask.scopeID]
             }
         }

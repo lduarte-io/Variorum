@@ -359,9 +359,24 @@ final class MCPDoor {
     /// already written those lines, before the store closed —
     /// `recordLibraryClosing`; the host never says one twice).
     func detach() {
+        detach(ending: .libraryClosed)
+    }
+
+    /// **VX-394 (VX-548 batch 2b) — THE APP QUITS** (`applicationWillTerminate`):
+    /// `detach()` with no connection's end said — P-VX394-5, "a QUIT logs
+    /// nothing" (`MCPServerHost.stopWithTheProcess`). The plain detach here
+    /// raced the process's exit with "‹client› was disconnected when the library
+    /// locked or closed" (each connection writes its own end since VX-348's fix
+    /// leg): said on some quits, not on others.
+    func quit() {
+        detach(ending: nil)
+    }
+
+    /// `ending` nil: the app quits — every end forgone (P-VX394-5).
+    private func detach(ending reason: MCPConnectionEnd?) {
         observation?.cancel()
         observation = nil
-        stopServer(ending: .libraryClosed)
+        stopServer(ending: reason)
         adoptionLandingPending = false
         // A closed library's asks die with it (and so does every glyph — and
         // the ask watch, which an empty queue stops).
@@ -442,8 +457,12 @@ final class MCPDoor {
         }
     }
 
-    private func stopServer(ending reason: MCPConnectionEnd) {
-        host?.stop(ending: reason)
+    private func stopServer(ending reason: MCPConnectionEnd?) {
+        if let reason {
+            host?.stop(ending: reason)
+        } else {
+            host?.stopWithTheProcess()
+        }
         host = nil
         starting = false
         connected = []
@@ -765,7 +784,8 @@ final class MCPDoor {
     /// fenced book is never a grant scope (`insertMCPGrant` refuses every
     /// duration), so any answer drawn there would be a dead door (P-2).
     func durations(for ask: MCPAsk) -> [MCPGrantRule.Duration] {
-        if ask.scopeKind == .book, ask.fence != nil { return [] }
+        // VX-549: a fenced GATHERING likewise (no op names one).
+        if ask.scopeKind == .book || ask.scopeKind == .gathering, ask.fence != nil { return [] }
         var offered: [MCPGrantRule.Duration] = [.once]
         if connected.contains(ask.clientName) { offered.append(.connection) }
         if ask.offersAlways { offered.append(.always) }
@@ -843,6 +863,11 @@ final class MCPDoor {
             fence = facts.fence
         case .wing:
             fence = nil
+        // VX-549: a gathering asked on (a client's write into it past its
+        // rung) — gone when it is no longer a live gathering.
+        case .gathering:
+            guard let facts = try Queries.mcpGatheringFacts(db, readingID: ask.scopeID) else { return nil }
+            fence = facts.fence
         }
         guard let title = try Queries.mcpScopeTitle(db, kind: ask.scopeKind, id: ask.scopeID) else { return nil }
         return MCPAsk(
@@ -1089,7 +1114,11 @@ final class MCPDoor {
     /// shared row or an ask names the same book the sheet's picker did.
     func placeDistinguishers(now: Date = Date()) async -> (books: [String: String], wings: [String: String]) {
         let places = await grantPlaces()
-        return (places.bookDistinguishers(now: now), places.wingDistinguishers(now: now))
+        // VX-549: a gathering's distinguisher rides the books' map (one table,
+        // one id space — a reading id names one kind).
+        let readings = places.bookDistinguishers(now: now)
+            .merging(places.gatheringDistinguishers(now: now)) { book, _ in book }
+        return (readings, places.wingDistinguishers(now: now))
     }
 
     private func read<T: Sendable>(_ body: @escaping @Sendable (Database) throws -> T) async -> T? {

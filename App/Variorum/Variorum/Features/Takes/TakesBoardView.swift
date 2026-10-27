@@ -1882,6 +1882,17 @@ struct TakeChooseHeader: View {
     /// it, which is how one addition reaches all four fan styles.
     var acts: TakeCardActs?
 
+    /// The band's act sentences — byte-identical to what the band said before
+    /// VX-352's fix leg (a take with no label still hears exactly these).
+    static let chooseHelp = "Choose this take — the note shows it (everywhere); ⌘⏎ from the keyboard"
+    static let chosenHelp = "The note shows this take (everywhere)"
+
+    /// **The band's ONE hover** (VX-352 fix leg 2a-F2): the whole label on its
+    /// own line, then the act's sentence (`TakeLabelFace.hover`, pure).
+    static func bandHelp(isChosen: Bool, label: String?) -> String {
+        TakeLabelFace.hover(label: label, act: isChosen ? chosenHelp : chooseHelp)
+    }
+
     /// What the card needs to offer the two moves: which way its strip runs,
     /// whether each direction can act (the FIRST card cannot move earlier —
     /// the pager's disabled-◀ grammar), and the act itself.
@@ -1901,10 +1912,11 @@ struct TakeChooseHeader: View {
                         .font(tokens.small)
                         .foregroundStyle(isChosen ? tokens.chosen : tokens.muted)
                     if let label {
-                        Text(label)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .lineLimit(1)
+                        // VX-352 (PROVISIONAL MB-4): a narrow card keeps the
+                        // label's own words and lets the client's name yield
+                        // (`TakeLabelFace`, pure); the whole label rides the
+                        // band's one hover (`bandHelp`, below).
+                        TakeLabelLine(label: label, tokens: tokens)
                     }
                     Spacer(minLength: 0)
                 }
@@ -1912,9 +1924,10 @@ struct TakeChooseHeader: View {
             }
             .buttonStyle(.plain)
             .disabled(isChosen)
-            .help(isChosen
-                  ? "The note shows this take (everywhere)"
-                  : "Choose this take — the note shows it (everywhere); ⌘⏎ from the keyboard")
+            // VX-352 fix leg 2a-F2 (MB-4's hover half, PROVISIONAL): the band's
+            // ONE hover carries the whole label, then the choose sentence —
+            // a `.help` on the label inside this button was subsumed by it.
+            .help(Self.bandHelp(isChosen: isChosen, label: label))
             if let reorder {
                 Button(reorder.axis == .vertical ? "▲" : "◀") { reorder.move(-1) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))

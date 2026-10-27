@@ -71,7 +71,9 @@ struct MCPToolDeclaration: Sendable {
                 idempotentHint: rung == .read, openWorldHint: false))
     }
 
-    static let everyScope: Set<MCPGrantRule.ScopeKind> = [.note, .book, .wing]
+    /// VX-549: a GATHERING grant reaches its assembled notes, so every tool
+    /// that acts on a note acts under it too.
+    static let everyScope: Set<MCPGrantRule.ScopeKind> = [.note, .book, .wing, .gathering]
 }
 
 /// **13n-c UX walk W-UX-14 — the catalog's scope facts, read by the app's
@@ -180,6 +182,17 @@ enum MCPToolCatalog {
         digests the text without it.
         """
 
+    /// VX-358 (RUN VX-548 batch 2a — PROVISIONAL MB-5): THE SPELLING
+    /// SENTENCE, said once and shared by the two tools whose "nothing to
+    /// write" test is canonical equality (`edit_take`, `restore_commit`) —
+    /// where a re-spelled text meets the digest a client checks. The key is
+    /// `MCPTextDigest.spellingDiffersKey`'s, read here, never retyped.
+    static let spellingSentence = """
+        A text that differs from the take's only in its Unicode spelling (the same characters \
+        in other code points — NFD against NFC, say) also changes nothing: changed is false, \
+        \(MCPTextDigest.spellingDiffersKey) is true, and sha256 stays the stored spelling's.
+        """
+
     /// VX-197 (VX-336 U8a): THE LABEL RULE, said in one set of words by every
     /// tool that writes a take's label. Her split (VX-197): the client's name
     /// is worn only by takes a client adds at SUGGEST, inside her writing
@@ -206,15 +219,16 @@ enum MCPToolCatalog {
     static let listBooks = MCPToolDeclaration(
         name: "list_books", rung: .read, title: "List books",
         description: """
-            The Variorum books shared with this client (by a book or wing grant, or the open \
-            book): each book's id, name, wing and live note count, and how it collects — its rule \
+            The Variorum books shared with this client (by a book, gathering or wing grant, or the \
+            open book): each book's id, name, wing and live note count, and how it collects — its rule \
             (tags by path: {"tag": "percy"}, {"star": true}, combined with {"and": […]}, {"or": […]}, \
             {"not": …}), its outflow (the tags notes written there wear), new_matches ("join" or \
             "wait" at Arrivals), word_target / max_notes, and whether it is finished, sealed, owned \
             or collecting now. Archived books appear only with include_archived: true. The daily \
-            Journal and Private books are never listed. A wing shared with you (or the open book) also \
-            lists its gatherings (kind "gathering"): saved rules that gather notes by tag or star, \
-            read-only — list_notes and search take their id like a book's. A wing holding no book lists \
+            Journal and Private books are never listed. A gathering shared with you — its own grant, \
+            its wing's, or the open book — lists too (kind "gathering"): a saved rule that gathers \
+            notes by tag or star, holding none of its own; list_notes and search take its id like a \
+            book's, and create_note writes a new note into it. A wing holding no book lists \
             nothing here — list_wings lists the wings themselves. Returns JSON.
             """,
         inputSchema: .object([
@@ -225,7 +239,7 @@ enum MCPToolCatalog {
             ]),
             "additionalProperties": false,
         ]),
-        scopes: [.book, .wing])
+        scopes: [.book, .wing, .gathering])
 
     static let listNotes = MCPToolDeclaration(
         name: "list_notes", rung: .read, title: "List notes",
@@ -624,7 +638,9 @@ enum MCPToolCatalog {
         description: """
             Create a new note inside a shared book (book_id — it joins the book at its end) or a \
             shared wing (wing_id; "" is Home — it lands bookless; list_wings gives the wing_id of every \
-            wing shared with you, empty ones too). Give EITHER text (plain prose: \
+            wing shared with you, empty ones too). book_id may name a shared gathering: the note lands \
+            bookless in its wing wearing the tags its rule needs, so the gathering shows it (a rule \
+            that needs a starred note refuses — only the author stars). Give EITHER text (plain prose: \
             each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
             — a blank line inside it stays inside the one block — with an optional name and its \
             other takes, each with an optional label). Each label is stored as given (trimmed; a \
@@ -635,7 +651,8 @@ enum MCPToolCatalog {
             block its block_id, the shown_take_id, and every take in fan order (take_id, label \
             where it has one, and sha256), the shown one included — no read_note needed to learn \
             them. Its tag_ids and tags (their paths) list every tag the note wears once it lands, \
-            a book's outflow included, so there is nothing to tag again. \(digestSentence) \
+            a book's outflow or a gathering's rule tags included, so there is nothing to tag again. \
+            \(digestSentence) \
             \(nullSentence) With \
             text, Variorum splits the prose into blocks by its own setting; to verify byte for \
             byte, send blocks.
@@ -671,14 +688,14 @@ enum MCPToolCatalog {
                     ]),
                 ]),
                 "entry_date": .object(["type": "string", "description": "The note's date, yyyy-MM-dd."]),
-                "book_id": .object(["type": "string", "description": "Create it in this book."]),
+                "book_id": .object(["type": "string", "description": "Create it in this book (or gathering)."]),
                 "section_id": .object(["type": "string",
                                        "description": "File it under this chapter of book_id (with book_id only)."]),
                 "wing_id": .object(["type": "string", "description": "Create it bookless in this wing."]),
             ]),
             "additionalProperties": false,
         ]),
-        scopes: [.book, .wing])
+        scopes: [.book, .wing, .gathering])
 
     static let importDocument = MCPToolDeclaration(
         name: "import_document", rung: .writeNew, title: "Import a document",
@@ -687,12 +704,13 @@ enum MCPToolCatalog {
             {t:"title"} {#tag/path}, paragraphs as blocks, "--- Alternates for this block ---" \
             sections as extra takes, each labeled as its take: line says — \(labelNotPrefixed); \
             with {v:2} first in the header, "--- next block ---" lines \
-            separate the blocks and blank lines stay inside them. Either one `document` into a shared book (book_id) or wing \
+            separate the blocks and blank lines stay inside them. Either one `document` into a shared book or gathering \
+            (book_id — into a gathering it lands bookless, wearing its rule's tags, as create_note says) or wing \
             (wing_id — list_wings gives every shared wing's), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
             shared wing. One import is one undo for the author. Returns JSON with the new ids — \
             for one document also blocks, as create_note answers them (each block's shown_take_id \
             and every take's take_id, label and sha256), and tag_ids and tags (their paths): every \
-            tag the note wears, the header's first, then a book's outflow; for a book, its \
+            tag the note wears, the header's first, then a book's outflow or a gathering's rule tags; for a book, its \
             book_id, note_ids and chapter_ids (no sha256 — check a book's notes with read_note). \
             \(digestSentence) \(nullSentence)
             """,
@@ -715,12 +733,13 @@ enum MCPToolCatalog {
                         "documents": .object(["type": "array", "items": .object(["type": "string"])]),
                     ]),
                 ]),
-                "book_id": .object(["type": "string", "description": "Import the document into this book."]),
+                "book_id": .object(["type": "string",
+                                    "description": "Import the document into this book (or gathering)."]),
                 "wing_id": .object(["type": "string", "description": "Import into this wing (\"\" is Home)."]),
             ]),
             "additionalProperties": false,
         ]),
-        scopes: [.book, .wing])
+        scopes: [.book, .wing, .gathering])
 
     static let applyTag = MCPToolDeclaration(
         name: "apply_tag", rung: .writeNew, title: "Tag a note",
@@ -763,7 +782,9 @@ enum MCPToolCatalog {
         description: """
             Add a note to a book (at its end), optionally filed under one of the book's chapters \
             (section_id — from list_notes or create_section). Both must be shared with this client \
-            at write new. Returns JSON.
+            at write new. Returns JSON; its tag_ids and tags (their paths) list every tag the note \
+            wears once it is in the book — its own first, then the book's outflow — so there is \
+            nothing to tag again.
             """,
         inputSchema: .object([
             "type": "object",
@@ -808,7 +829,7 @@ enum MCPToolCatalog {
             compare and come back; these commits stay even if the edit is undone. Writing the text the \
             take already has changes nothing (changed: false). The edit is one undo for the author. \
             Returns JSON with the commit ids and sha256, the take's text as it now stands. \
-            \(digestSentence) \(nullSentence)
+            \(digestSentence) \(nullSentence) \(spellingSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -1314,7 +1335,7 @@ enum MCPToolCatalog {
             or archived take refuses, as does a sealed note; a take already reading that text changes \
             nothing. One undo for the author puts the \
             replaced words back. Returns JSON with the commit ids and sha256, the take's text as it \
-            now stands. \(digestSentence)
+            now stands. \(digestSentence) \(spellingSentence)
             """,
         inputSchema: .object([
             "type": "object",

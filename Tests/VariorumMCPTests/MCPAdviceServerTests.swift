@@ -59,8 +59,11 @@ struct MCPAdviceServerTests {
         // VX-392 (VX-348 U5 adjudication — A JUSTIFIED EDIT, the ritual): the
         // grants clause says where a wing_id comes from (list_wings), per
         // R-VX348-5's "the instructions point at it".
+        // VX-549 (A JUSTIFIED EDIT — the ratified supersession of VX-273's
+        // facts-only rule): the gatherings clause now names create_note (a new
+        // note written into a gathering) where it named list_books.
         let parameters: Set<String> = ["ids_only"]
-        #expect(Set(names) == Set(["read_note", "show_in_app", "list_books", "move_note_to_wing",
+        #expect(Set(names) == Set(["read_note", "show_in_app", "create_note", "move_note_to_wing",
                                    "list_my_activity", "duplicate_note", "list_wings"]).union(parameters),
                 "the tools and parameters it names: \(names)")
         for name in Set(names).subtracting(parameters).union(["search"]) {
@@ -90,7 +93,8 @@ struct MCPAdviceServerTests {
         let positions = rungs.compactMap { advice.range(of: $0)?.lowerBound }
         #expect(positions.count == 4 && positions == positions.sorted(), "the four rungs, in order")
         #expect(advice.contains("each including those before it"))
-        #expect(advice.contains("a note, a book or a wing"))
+        // VX-549 (A JUSTIFIED EDIT): a gathering joins the grant places.
+        #expect(advice.contains("a note, a book, a gathering or a wing"))
         #expect(advice.contains("for once, until you disconnect, or always"))
         #expect(advice.contains("(the open book)"))
         #expect(advice.contains("Ids are live"))
@@ -102,11 +106,17 @@ struct MCPAdviceServerTests {
         // names "the author", never a pronoun that assumes theirs.
         #expect(advice.contains("Never call show_in_app unless the author asks"))
         #expect(advice.contains("one undo for the author, named after you"))
-        // 13n-c U6 — VX-273 and VX-160, the guide's lesson 3 fourth card:
-        // a wing grant reads its gatherings (never granted alone); the move's
-        // two rungs.
-        #expect(advice.contains("A wing grant also reads that wing's gatherings"))
-        #expect(advice.contains("none is ever granted alone"))
+        // 13n-c U6 — VX-273 and VX-160, the guide's lesson 3 fourth card; the
+        // move's two rungs. VX-549 — FLIPPED DELIBERATELY (her sitting
+        // 2026-10-27, RATIFIED: "the supersession of VX-273's facts-only rule
+        // is RATIFIED. Gathering joins the grant scopes"): the advice said "A
+        // wing grant also reads that wing's gatherings … none is ever granted
+        // alone"; it now says what a gathering grant reaches, and what
+        // create_note into one does.
+        #expect(advice.contains("A gathering grant reaches the notes its rule gathers now"))
+        #expect(advice.contains("create_note into one applies its tags"))
+        #expect(!advice.contains("none is ever granted alone"))
+        #expect(MCPToolCatalog.createNote.scopes.contains(.gathering), "the catalog's fact the sentence states")
         #expect(advice.contains("move_note_to_wing needs edit on the note and write new on the wing it goes to"))
         #expect(MCPToolCatalog.moveNoteToWing.rung == .edit, "the catalog's fact the sentence states")
     }
