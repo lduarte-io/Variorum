@@ -1181,3 +1181,15 @@ Study voice only** (capture 50; the label is token-driven) — the Terminal look
 
 Dev store left: unlocked, hold banner standing, Study, walk content deleted via the app's doors, Open empty, ONE
 walk-added prefs key (a dead note's remembered-block entry) removed post-quit; the usual bookkeeping keys only.
+
+- 2026-10-27 **THE ORCHESTRATOR'S LINE-BY-LINE CHECK of the final round's fixes (no later round reads them) — PASSED.**
+  Each R2 item read against its finding in the diffs themselves: R2-1's production change is the one line
+  (`String?.fetchAll(...).compactMap`) with honest headers; the re-staged gap leg CONSTRUCTS the gap (block tombstoned,
+  placement revived, the 6-live-placements premise asserted) and adds the take-less and after-gap legs with the
+  LIMIT-slot behavior pinned; the revert R-R2 red is recorded. R2-2's six bundle items stand as 19–24 with 19 marked
+  BEFORE THE PR — GATES THE MERGE and a head pointer. R2-3's strike-through corrections, the Rename NOT-REACHED line,
+  the Study-only note and the re-pointed pin comments verified at their lines. R2-n1 freshness, R2-n2's
+  `dragInFlight(among:)` doc, R2-n3's VX-552 addition to the canon list, R2-n4's corrected walk headers — all read in
+  place. THE LADDER IS CLOSED: round 1 (3 MAJOR · 7 MINOR · 5 NIT) → L1 fixes, all verified red-on-old → round 2
+  (0 BLOCKER · 0 MAJOR · 3 MINOR · 4 NIT, every round-1 fix HOLDS) → the final items, orchestrator-checked. One stage
+  slice owed (the 10 green-expected suites), then the PR opens and HOLDS for her M-3 call.
