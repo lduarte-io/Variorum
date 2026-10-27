@@ -158,7 +158,30 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 
 ## LIVE STATUS (the running record — updated per piece, in the same commit)
 
-- Batch 1: NOT-STARTED
+- Batch 1: IN-PROGRESS — implementer session 1 (`opus-implementer`, 2026-10-27). Required reading DONE (CLAUDE.md + canon,
+  this record top→brief, SurfaceContracts whole, the resiliency protocol, the 13n-a document-format record, the capability
+  registry + `EditorCommands`). Every member SURVEYED against the tree before code; TWO FORKS returned to the architect
+  (Ledger, 2026-10-27 "B1 fork F-554" and "B1 fork F-568"); no code written yet; no revert in flight.
+  - VX-125: NOT-STARTED — settled design: `.exportNote` (File ▸ Export Note…, ⌘K, both `note ▾` menus), chord **⌥⌘S**
+    (⇧⌘E is Extract's — B1 call C-125-1 below), one act `NoteExport` (flush → `Queries.variorumDocumentText` → save panel
+    `<display title>.md` → write; reads only).
+  - VX-126: NOT-STARTED — settled design: `bulkExportManifest`'s per-NOTE files through `variorumDocumentText` (option A);
+    Pools/ and Readings/ unchanged (call C-126-1); the deliberate byte-pin updates; a library→re-import round-trip pin.
+  - VX-554: HELD on fork F-554 (the door the ticket asks for already exists — see the Ledger).
+  - VX-570: NOT-STARTED — settled design: `.newNoteInBook` ⌥⌘N (File menu + ⌘K; the book foot's and Outline flow's
+    "+ new note"/"+ new entry" declared as its `.surface` renderers), gated on a new `focusedPaneShowsBook` context fact,
+    delivered to the focused pane's `BookView` as a one-shot request that runs the SAME act its foot door runs (book →
+    `newPostInReading`, journal-trait book → `newEntry`, gathering → `newPostInGathering`); refusals speak the op's words
+    (call C-570-1).
+  - VX-553: NOT-STARTED — settled design: the foot's order as data (`BookFootDoors`), restore last and set apart.
+  - VX-552: NOT-STARTED — settled design: `QuickEntryBar` (both hosts — Bookcase + Library) wears the current wing's name
+    as a muted label, from the host's `WingsModel.currentName` (call C-552-1: shown with one wing too — "always").
+  - VX-332: NOT-STARTED — settled design: every autofocus mount takes the waiting/never-steal opening road; the one-shot
+    `QuickEntryOpeningFocus` claim retires; the bar stands down while a tour runs; `aNavigationBack…KeepsTheBarsRaiseAsItWas`
+    updated deliberately (it pins the old behavior); red-on-old pin = a navigation back puts the caret in the box.
+  - VX-568: HELD on fork F-568 (the mechanism in her voice is not the app's — see the Ledger).
+  - VX-602: NOT-STARTED — settled design: "Restore Field Guide…", "Take the Onboarding Tutorial", and (call C-602-1)
+    "Open the Field Guide"; guide CONTENT speaks the old name three times — FLAGGED, not edited (morning bundle 3).
 - Batch 2: NOT-STARTED
 - Ladder: NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
@@ -167,8 +190,70 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 
 1. Riders VX-373 and VX-409 were offered on the run ticket "if the run has room" — not adopted at 17 members; say the word and they ride the next sweep.
 2. Every A-439-N PROVISIONAL above (1, 3–6, 8–12, 14, 16, 17) — built as ruled, reviewable at her pass.
-3. (grows)
+3. **VX-602 — the field guide's own CONTENT still says "Help ▸ Restore Tutorial…" three times** (A-439-9: flagged, not
+   edited — a content edit stales her real store's seeded guide and owes the A1 re-seed): `TutorialSeeder.swift` ~618
+   (the welcome lesson: "Help ▸ Restore Tutorial… replaces the whole book…"), ~1411 (the Trash practice: "…Help ▸ Restore
+   Tutorial… rebuilds the whole book."), ~1975 (the tags lesson: "That is exactly how Help ▸ Restore Tutorial… finds what
+   to replace."). Her call: re-word the three lines + the re-seed in her window, or leave them.
+4. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 
 - 2026-10-27 kickoff: worktree seated at `aeee4d1e3`'s main; in-flight row pushed; VX-502 and VX-548 live in parallel (surfaces checked — export seam shared with VX-502, second merger rebases).
+- 2026-10-27 **B1 fork F-554 (VX-554 — returned to the architect; the member is HELD).** TRACE (read, tree `c2e13f7e2`):
+  the door the ticket says is missing EXISTS. VX-217 (merged with VX-214, 2026-10-13; in every build since 0.9.x) drew a
+  gathering's New Note door exactly where the curated book's stands, through exactly the authority A-439-3 names: the
+  navigator foot ("+ new chapter" then "+ new note" — `BookView.swift` ~956–1006) and the Outline flow's end ("+ new note
+  in this gathering" — ~1856–1873), both `GatheringNoteDoor` over `Operations.newPostInGathering`, whose outcome the face
+  reads from the ONE planner (`Queries.gatheringMintOutcome` → `GatheringMint`) the collect door shares; registry-declared
+  `.newNoteInGathering` (`.surface`, `BookView.surfaceCapabilities`); ALWAYS drawn, greyed with the op's own reason where a
+  mint can't land (R-VX214-3). The navigator (and so the foot) shows in Outline, Book and Read; only INDEX steps the
+  navigator aside — and Index carries NO mint door on either kind (a curated book's Index has none either). So "match the
+  curated book face's New Note placement" is already true on every face. What she could have met: (i) a gathering in
+  Index; (ii) a greyed door (faint ink — e.g. a legacy finished gathering, a dead-tag or legacy-term rule) read as absent;
+  (iii) no keyboard road (⌘N mints into the Library). PROPOSAL: (1) DISMISS AS ALREADY BUILT for the face (no pin can be
+  red-on-old: the door is on the old tree) — the orchestrator's walk captures a gathering's foot + flow end in both voices
+  as the evidence; (2) VX-570's ⌥⌘N, already ruled to route a gathering to this planner (A-439-4), is the one new door —
+  a keyboard New Note from EVERY gathering face, Index included; (3) her morning bundle asks where she looked (if Index,
+  a foot door there for BOTH kinds is a new placement no ruling makes). Alternatives: (b) add an Index-column mint door for
+  both kinds now (unruled placement); (c) make the greyed door louder (contradicts R-VX214-3's faint-ink face).
+- 2026-10-27 **B1 fork F-568 (VX-568 — returned to the architect; the member is HELD).** TRACE (read): the quick entry's
+  prompt has NO fade animation anywhere in the app — no `withAnimation`/`.animation`/`repeatForever` reaches
+  `QuickEntryBar` or `ShelfView` (the one `repeatForever` in `Theme/` is `MarqueeText`'s hover scroll). The only app-drawn
+  blink is the TERMINAL voice's block cursor (`QuickEntryBar.swift` ~263–274: an 8×16 accent bar, opacity toggled HARD
+  every 550 ms, drawn only while the box does NOT hold the caret — `showsBlockCursor` is false in Study). Her store is in
+  STUDY (VX-346's report: "flashes Terminal … before settling into Study"), where nothing app-drawn blinks at all. What
+  does move in Study is the SYSTEM caret: since VX-326 (merged 2026-10-14, eight days before her 10-22 note) the box takes
+  the keyboard at launch, so AppKit's insertion indicator blinks at the box's first-line origin — exactly where the faint
+  placeholder "new note — just start typing…" begins (`QuickEntryBar.placeholderOrigin` = the box's first-line origin, by
+  VX-179 U3's rule). On macOS 14+ that indicator is `NSTextInsertionIndicator` (automatic mode "blinks and animates";
+  `.visible` "disables animations" — Apple docs, via a read-only external-facts lookup; no source states the blink is a
+  fade, none offers a public hard-blink switch; FB17103305: TK2 ignored `shouldDrawInsertionPoint` until macOS 27). So the
+  likeliest reading of "the fading in and out flickering of new note" is the SYSTEM caret's animated blink sitting on the
+  first letters of the placeholder — and VX-332 (focus on every return) will put it there on EVERY Bookcase arrival.
+  A-439-8 as written ("remove the prompt's fade; the system caret's normal blink") has nothing app-made to remove in
+  Study. OPTIONS: (a) build A-439-8's letter: the Terminal block cursor stops blinking (static prompt unfocused) — Study
+  unchanged, so it likely misses her complaint; (b) the capture box (NOT the editor seam — `CaptureNSTextView` is a plain
+  TK2 NSTextView) draws its OWN hard on/off caret (accent bar at the caret rect, the system's on/off cadence, the system
+  indicator hidden via `shouldDrawInsertionPoint` false — reported honored on macOS 27) — her "nice normal cursor blink"
+  literally, pinned by a pure blink-phase rule + a geometry oracle, owing a walk on 27.0.1 in both voices; (c) leave the
+  caret and move the collision: the placeholder steps aside (hidden, or shifted past the caret) while the caret is in the
+  EMPTY box. RECOMMEND: (b) if the architect accepts the platform risk, else (a)+(c); in every case a walk capture of the
+  live caret in Study is the real evidence and her morning look decides.
+- 2026-10-27 **B1 implementer calls (decided — the architect may veto in the same ruling):** **C-125-1** — ⇧⌘E is TAKEN
+  (Extract Selection, `EditorCommands.keyEquivalent`); ⌥⌘E / ⇧⌥⌘E read as ⌥-variants of ⌘E (Use Selection for Find) and
+  ⌘⇧E (Extract) — the convention the `.moveSelectionToTake` sweep already refused; **⌥⌘S** chosen: her own words for the
+  door were "keyboard shortcut for saving note", it is the ⌥ "deliberate variant" of ⌘S (save this note OUT, as a file),
+  and the sweep finds it free (`s` chords: ⌘S, ⌘⇧S, ⌃⌘S; `EditorTextView.performKeyEquivalent` matches bare ⌘S only).
+  **C-126-1** — option A binds the per-NOTE files; `Pools/` (scraps areas, never a note — Copy full text has no door on
+  one) and `Readings/` (a per-post `exportPost` consumer predating the header) stay byte-unchanged; the scheduled
+  plain-text insurance export (`MarkdownInsurance`) reads the SAME manifest, so it gains the header + takes too ("bulk
+  exports round-trip whole") — named for her bundle. **C-570-1** — ⌥⌘N on a JOURNAL-TRAIT book runs that book's foot
+  door ("+ new entry" — `newEntry`), on a gathering the gathering door, else "+ new note": the key is the foot's act, never
+  a second one; a finished book REFUSES in the op's words (the foot hides its door there; the key speaks). The context
+  fact is "the focused pane shows a book" (any mode — the note box's book context included); a note pane in Write is not a
+  book context (which book would it mean?). **C-552-1** — the label shows with ONE wing too (her "always"); a muted "in
+  ‹wing›" at the quick-entry band's trailing edge, from the host's `WingsModel.currentName`. **C-602-1** — Help ▸ "Open the
+  Tutorial" opens the FIELD GUIDE (the same book "Restore Tutorial" restores), so the naming pass renames it "Open the
+  Field Guide" too (and ⌘K's twin row); without it the menu would read "Open the Tutorial" beside "Take the Onboarding
+  Tutorial" — the exact confusion she named.
