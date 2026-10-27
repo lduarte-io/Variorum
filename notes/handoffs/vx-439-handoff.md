@@ -62,6 +62,6 @@ mobile-visible (Mac chrome, doors and local settings only; the shared export ser
 ## Mechanics at your word
 
 The merge ask goes through the coordinator once you answer item 1 (merge-moment ledgers — AppSpecRecord's dated
-entry, QUESTIONS #243, the in-flight row's retirement + closeout paragraph, the board snapshot — land on main then;
+entry, the next free QUESTIONS number (#244 unless something lands first — VX-548 took #243), the in-flight row's retirement + closeout paragraph, the board snapshot — land on main then;
 the run's branch and worktree are removed after; the debris sweep deletes the walk shots, logs and revert trees).
 No release and no /Applications refresh happen without your separate word.
