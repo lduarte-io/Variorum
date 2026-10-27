@@ -42,14 +42,20 @@
 //  one-note-per-chapter book like Sherlock. Steady and monotonic now; the
 //  chapter and the note never contradict.
 //
-//  ── THE END OF THE BOOK (R-562-B) ───────────────────────────────────────
+//  ── THE END OF THE BOOK (R-562-D) ───────────────────────────────────────
 //  The rows of the book's last screenful can never bring their tops to the
-//  page's top edge — the column's foot follows them — so a probe fixed at
-//  the edge never reached them by scrolling (ladder round 1, finding 1,
+//  page's top edge — the column's foot follows them — so the edge rule
+//  alone never reached the end by scrolling (ladder round 1, finding 1,
 //  confirmed live on Sherlock: notes 11–13 on the page, the pin stuck at
-//  10). Over the LAST viewport of scroll the probe SLIDES from the edge to
-//  the page's foot, so at the bottom the last row is the viewed one and
-//  every row of the last screenful is reached on the way down (`probe(_:)`).
+//  10). AT THE BOTTOM the viewed pair CLAMPS to the book's LAST note: while
+//  the page's offset sits within the end band (8 pt — R-562-C's release
+//  threshold, reused) of its maximum, the last note and its chapter are the
+//  viewed pair; everywhere else the plain top-edge rule answers, so the
+//  highlight's pace never changes and it never leads the page (`rule`).
+//  R-562-B's probe that SLID to the page's foot over the last viewport of
+//  scroll is removed — walk 3 read its lead as the wrong note at reading
+//  speed. The stated cost (PROVISIONAL): the last screenful's MIDDLE notes
+//  are reached by a click (the adoption holds them), not by pure scrolling.
 //
 //  ── THE ADOPTION (R-562-A) AND ITS RELEASES (R-562-C) ───────────────────
 //  A landing is the one time the page's top is NOT what she chose to look at
@@ -106,18 +112,21 @@ nonisolated enum BookOutlineViewed {
     ///   row's top), so the page's top really is this row's — only the gap
     ///   above it shows.
     ///
-    /// This is the probe everywhere but the book's last viewport of scroll,
-    /// where it slides (`probe(_:)`, R-562-B).
+    /// This is the probe everywhere (R-562-D removed R-562-B's slide over
+    /// the book's last viewport of scroll); the end of the book is the
+    /// clamp's (`rule`).
     static let probe: CGFloat = 10
 
-    // MARK: R-562-B — the page's scroll, and the probe that slides at the end
+    // MARK: R-562-D — the page's scroll, and the clamp at its bottom
 
     /// **Where the page stands in its scroll** — the scroll's own facts,
     /// read at geometry cadence (`BookView`'s scroll-geometry observer): the
-    /// sliding probe's three inputs.
+    /// page's height (R-562-A's on-screen test), how far it has scrolled
+    /// (R-562-C's release, R-562-D's clamp) and how far it can (the clamp).
     struct Scroll: Equatable, Sendable {
         /// The page's height (the scroll's own frame). `0` = not yet
-        /// measured: no foot is known, and the probe never slides.
+        /// measured: no foot is known (`isOnScreen` then finds a row off the
+        /// page only above it).
         var viewport: CGFloat = 0
         /// How far the page has scrolled down from its top (`0` at rest).
         var offset: CGFloat = 0
@@ -147,31 +156,24 @@ nonisolated enum BookOutlineViewed {
         }
     }
 
-    /// **THE PROBE, where the page stands** (R-562-B, PROVISIONAL for her):
-    /// the shipped edge probe while more than a viewport of scroll remains;
-    /// over the LAST viewport of scroll it slides linearly from the edge to
-    /// the page's FOOT as the remaining scroll runs out — so at the bottom the
-    /// book's last row is the viewed one, and every row of the last
-    /// screenful becomes viewed in turn on the way down.
+    /// **Is the page at the BOTTOM of the book?** (R-562-D, PROVISIONAL for
+    /// her) — its offset within the END BAND of its maximum: the last 8 pt of
+    /// scroll, the band being R-562-C's release threshold reused
+    /// (`BookOutlineFollower.offsetRelease`), inclusive, as the release keeps
+    /// at exactly 8. An overscroll past the bottom is at it; one at the top
+    /// is not.
     ///
-    /// The slide spans the last `min(viewport, travel)` of scroll, so the
-    /// probe is the edge at rest in EVERY book — §DESIGN's "at rest nothing is
-    /// viewed" (the title block holds the page) stays true of a book shorter
-    /// than two pages too, and a book that fits its page and cannot scroll
-    /// keeps the edge probe (PROVISIONAL, the record's morning bundle — the
-    /// ruling's text names the slide over the last viewport of scroll and
-    /// does not speak to a scroll shorter than one).
-    ///
-    /// Monotonic: scrolling down moves every row's top up by the distance
-    /// scrolled and never moves the probe up, so the set of rows at or above
-    /// it only grows (pinned).
-    static func probe(_ scroll: Scroll) -> CGFloat {
-        let slide = min(scroll.viewport, scroll.travel)
-        guard scroll.viewport > probe, slide > 0 else { return probe }
-        let remaining = max(scroll.travel - scroll.offset, 0)
-        guard remaining < slide else { return probe }
-        let reached = 1 - remaining / slide
-        return probe + reached * (scroll.viewport - probe)
+    /// Only a page that can scroll FURTHER than the band has a bottom to
+    /// reach (PROVISIONAL, the record's morning bundle — the ruling does not
+    /// speak to a book that barely scrolls): a column that fits its page, or
+    /// moves no more than the band, sits at its maximum AT REST, and clamping
+    /// there would view its last note with the title block still holding the
+    /// page — so §DESIGN's "at rest nothing is viewed" stays true of every
+    /// book, and such a book's notes highlight by a click. A page whose
+    /// scroll has not reported (`travel` 0) is never at the bottom.
+    static func isAtTheBottom(_ scroll: Scroll) -> Bool {
+        let band = BookOutlineFollower.offsetRelease
+        return scroll.travel > band && scroll.travel - scroll.offset <= band
     }
 
     // MARK: THE RULE
@@ -180,6 +182,8 @@ nonisolated enum BookOutlineViewed {
     /// at or above `probe`, named through the rows (`named(at:in:)`). `tops`
     /// is keyed by anchor id (`BookOutlineRows.Row.id`); a row it does not
     /// hold is skipped, never guessed. Above the first row nothing is viewed.
+    /// This is the TOP-EDGE rule; where the page stands, `rule` adds the
+    /// bottom's clamp (R-562-D).
     ///
     /// Cost: O(rows) — one dictionary probe per row, and one short walk back
     /// to the heading in force. Called at most once per run-loop turn (the
@@ -193,6 +197,34 @@ nonisolated enum BookOutlineViewed {
         }
         guard let viewed else { return .nothingViewed }
         return named(at: viewed, in: rows)
+    }
+
+    /// **THE RULE where the page stands** (R-562-D) — what the follower
+    /// shows whenever no landing's target stands: AT THE BOTTOM of the book
+    /// (`isAtTheBottom`) the book's LAST note and its chapter (the pair its
+    /// row names, `named(at:in:)`); everywhere else the top-edge rule
+    /// (`pair`) — so above the end band the answer is exactly the row that
+    /// owns the page's top, the highlight's pace never changes, and it never
+    /// leads the page. Monotonic as the page scrolls down: the edge rule's
+    /// note never moves up, and no note it names is below the last (pinned).
+    ///
+    /// The last note is named only once its row has REPORTED a top (the
+    /// rule's own law — a row the map does not hold is never guessed): at the
+    /// bottom it is on the page and has; before it has, the edge rule. A
+    /// column with no note row has nothing to clamp to, and the edge rule
+    /// answers.
+    static func rule(
+        rows: [BookOutlineRows.Row], tops: [String: CGFloat], scroll: Scroll
+    ) -> Pair {
+        if isAtTheBottom(scroll),
+           let last = rows.lastIndex(where: { row in
+               if case .note = row { return true }
+               return false
+           }),
+           tops[rows[last].id] != nil {
+            return named(at: last, in: rows)
+        }
+        return pair(rows: rows, tops: tops)
     }
 
     /// **What the row at `index` names** — the chapter heading in force at
@@ -271,12 +303,13 @@ nonisolated enum BookOutlineViewed {
     /// the page shows the TARGET's pair, wherever on the page the target sits
     /// (a row in the book's last screenful never reaches the top, and it is
     /// still what she travelled to: finding F-1); otherwise the adoption is
-    /// dropped and the page shows THE RULE's pair over the probe where the
-    /// page stands (R-562-B) — *"a derivation that finds the adopted row
-    /// off-screen resumes the rule by itself."* The ruling's other releases
-    /// are ACTS or the page's own offset, and `BookOutlineFollower` makes
-    /// them before asking; the travelling landing's freeze is its too (this
-    /// is asked only once no landing is pending).
+    /// dropped and the page shows THE RULE's pair where the page stands
+    /// (`rule` — the top edge, and the last note at the bottom: R-562-D) —
+    /// *"a derivation that finds the adopted row off-screen resumes the rule
+    /// by itself."* The ruling's other releases are ACTS or the page's own
+    /// offset, and `BookOutlineFollower` makes them before asking; the
+    /// travelling landing's freeze is its too (this is asked only once no
+    /// landing is pending).
     static func follow(
         rows: [BookOutlineRows.Row], page: Page, adopted: String?
     ) -> (pair: Pair, adopted: String?) {
@@ -286,7 +319,7 @@ nonisolated enum BookOutlineViewed {
                viewport: page.scroll.viewport) {
             return (target, adopted)
         }
-        return (pair(rows: rows, tops: page.tops, probe: probe(page.scroll)), nil)
+        return (rule(rows: rows, tops: page.tops, scroll: page.scroll), nil)
     }
 
     /// **The viewed note's place in the column** — 1-based, counting note
@@ -411,7 +444,8 @@ nonisolated struct BookOutlineFollower: Equatable, Sendable {
     /// **How far the page may move under a standing adoption before it is
     /// let go** (R-562-C, a named pinned constant): 8 pt. Settle wobble stays
     /// under it — the F-1 page that cannot move included — and anything that
-    /// really scrolls the page is well past it.
+    /// really scrolls the page is well past it. R-562-D reuses it as the END
+    /// BAND (`BookOutlineViewed.isAtTheBottom`).
     static let offsetRelease: CGFloat = 8
 
     init() {}
@@ -453,7 +487,7 @@ nonisolated struct BookOutlineFollower: Equatable, Sendable {
     /// its key is taken at the first look after its landing, and once the
     /// page's offset has moved more than `offsetRelease` from it the
     /// adoption lets go. Then `follow`: the target while its row is on the
-    /// page, else the rule over the probe where the page stands.
+    /// page, else the rule where the page stands.
     mutating func look(
         rows: [BookOutlineRows.Row], page: BookOutlineViewed.Page, landingPending: Bool
     ) -> Pair? {

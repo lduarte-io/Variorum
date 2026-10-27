@@ -1557,7 +1557,7 @@ struct BookView: View {
         /// has is never read: the rule walks the CURRENT rows), the page's
         /// height (its own frame — the foot of R-562-A's on-screen test, `0`
         /// until the first geometry pass), and where it stands in its scroll
-        /// (offset and travel — R-562-B's sliding probe and R-562-C's
+        /// (offset and travel — R-562-D's end clamp and R-562-C's
         /// release; the scroll-geometry observer). Read once per run-loop
         /// turn. The rows and the scroll position are emptied when the
         /// Outline leaves, so a return never reads the old page.
@@ -1624,8 +1624,9 @@ struct BookView: View {
     /// not scrolled from where its landing left it (R-562-A — wherever on
     /// the page: a row in the book's last screenful never reaches the top,
     /// finding F-1; R-562-C — more than 8 pt of scroll lets it go), and
-    /// otherwise THE RULE names what the page shows over the probe where the
-    /// page stands (R-562-B), the adoption dropped by the same look.
+    /// otherwise THE RULE names what the page shows where the page stands
+    /// (the top edge, and the last note at the bottom — R-562-D), the
+    /// adoption dropped by the same look.
     private static func deriveViewedPair(
         box: OutlineLandingBox, landing: LandingAuthority,
         model: BookViewModel, structure: BookStructureModel
@@ -1828,8 +1829,8 @@ struct BookView: View {
         queueViewedPair()
     }
 
-    /// **VX-562 r1 — where the page stands in its scroll** (R-562-B's
-    /// sliding probe, R-562-C's release), from the scroll's own geometry:
+    /// **VX-562 r1 — where the page stands in its scroll** (R-562-D's end
+    /// clamp, R-562-C's release), from the scroll's own geometry:
     /// written into the reference box (bookkeeping, never render state), and
     /// the follower asked again. The landing hears only a content-HEIGHT
     /// change, exactly as before (the flow's `FlowScrollFacts` shape — an
@@ -2166,9 +2167,8 @@ struct BookView: View {
                 else { return }
                 DispatchQueue.main.async { outlinePaneWidth = width }
             }
-            // VX-562 R-562-A + R-562-B: the PAGE's height — the foot of the
-            // adopted target's on-screen test and one of the sliding probe's
-            // three scroll facts (the space every row's top is read in
+            // VX-562 R-562-A: the PAGE's height — the foot of the adopted
+            // target's on-screen test (the space every row's top is read in
             // is this scroll's own). Into the reference box: bookkeeping,
             // never render state, so it re-lays nothing out; a change asks
             // the follower again.
@@ -2185,7 +2185,7 @@ struct BookView: View {
             // interval, and a scroll by the user ends it.
             //
             // VX-562 r1: the same observer carries where the page stands in
-            // its scroll (offset and travel — R-562-B's sliding probe and
+            // its scroll (offset and travel — R-562-D's end clamp and
             // R-562-C's release); only a HEIGHT change reaches the landing
             // (`outlineScrolled` — the flow's `FlowScrollFacts` shape). No
             // new observer: the existing one widened.
@@ -2657,9 +2657,10 @@ enum BookOutlineGeometry {
     static var outlinePinLines: [String: String] { outlinePinLineStore.current }
     static var outlinePinFrames: [String: CGRect] { outlinePinFrameStore.current }
     /// **VX-562 r1 — where each mounted Outline's page stands in its scroll**
-    /// (viewport, offset, travel — exactly what the follower's sliding probe
-    /// reads, R-562-B), keyed by the book. So a pin can ask THE RULE over the
-    /// page's own facts rather than a second reading of the scroll view.
+    /// (viewport, offset, travel — exactly what the follower reads: R-562-A's
+    /// on-screen test, R-562-C's release, R-562-D's end clamp), keyed by the
+    /// book. So a pin can ask THE RULE over the page's own facts rather than
+    /// a second reading of the scroll view.
     static var outlineScrolls: [String: BookOutlineViewed.Scroll] { outlineScrollStore.current }
     /// The round-end Fable pass, MAJOR-1: each mounted book's ONE focus act
     /// (`BookViewModel.focus`), published by the view whose `@State` holds
