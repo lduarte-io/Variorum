@@ -1051,6 +1051,22 @@ extension AppDatabase {
         migrator.registerMigration("v1_32_sync_pull_stage") { db in
             try db.execute(sql: SyncPullStageSchema.ddl)
         }
+        // **VX-549 — A GATHERING AS A GRANT PLACE** (VX-548 batch 3; her sitting
+        // 2026-10-27, RATIFIED — the run record
+        // `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md`, BATCH 3): the
+        // grants family's `mcp_grant.scope_kind` gains `'gathering'`.
+        // `Persistence/MCPGrantSchema.swift` carries the shape (a rebuild — a
+        // CHECK cannot be altered — rows and rowids copied verbatim, both indexes
+        // re-made with their text unchanged).
+        //
+        // **NOT a SyncSpec §12 lockstep event** — v1_24's road exactly (its own
+        // commit, ahead of the code that uses it): no `sync_version`, no outbox
+        // trigger, nothing pushed, no mirror change, the marker stays 14; the
+        // plaintext export keeps the family EMPTY. No backfill: no grant names a
+        // gathering before this migration.
+        migrator.registerMigration("v1_33_mcp_gathering_grants") { db in
+            try db.execute(sql: MCPGrantSchema.v1_33DDL)
+        }
         return migrator
     }
 }
