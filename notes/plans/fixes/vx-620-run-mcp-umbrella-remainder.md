@@ -1670,7 +1670,7 @@ record's commit.
 
 ### FIX LEG 4-F1 (the final window's red: `WingPaletteDoorsTests.theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc`; implementer №4 resumed, 2026-10-27)
 
-**The finding (the coordinator's relay, the log `scratchpad/vx620-final-suites.log` :10979–11029):** the final window
+**The finding — MID620-F1 (THE FINAL WINDOW section; the coordinator's relay, the log `scratchpad/vx620-final-suites.log` :10979–11029):** the final window
 ran the Mac pins from `DerivedData/b4` — 470 executed / 66 suites, all green but ONE: this pin, on its first run, at
 `WingPaletteDoorsTests.swift:471` — `input.currentEditor()` nil ("the field is EDITING on arrival — nobody clicked
 it"); the field itself WAS found (the `#require` on line 470 held), the suite's nine other tests green (the other
@@ -1678,7 +1678,49 @@ mounted pin, the sidebar's, among them). Failed after 1.084 s.
 
 **LIVE STATUS (per piece, flipped in the same commit as each piece):**
 - **No behavioural revert is in flight.**
-- **F1-0 · The trace + the disposition:** IN-PROGRESS — the rig traced (below); the walker's live focus verdict
-  awaited before the disposition is final.
-- **F1-1 · The fix (rig or product, per the disposition):** NOT-STARTED.
-- **F1-2 · Rebuild `DerivedData/b4` in place:** NOT-STARTED.
+- **F1-0 · The trace + the disposition:** DONE (this commit) — RIG-SIDE; the product's focus is right (below).
+- **F1-1 · The fix (the rig — a JUSTIFIED EDIT, no product line):** DONE (this commit) — below.
+- **F1-2 · Rebuild `DerivedData/b4` in place:** DONE (this commit) — `build-for-testing` into the EXISTING
+  `DerivedData/b4` (rebuilt in place, never a clone): **TEST BUILD SUCCEEDED** (`scratchpad/b4-logs/f1-mac-bft2.log`;
+  `f1-mac-bft.log` was the rig's first cut, before the control got the selector's wait), no warning in the edited pin.
+  **`b4` is NO LONGER the final window's frozen evidence:** it is built from this commit's tree (batches 1–4, the 2-F1
+  leg and this leg — the PRODUCT byte-unchanged since `1e9a8f1f7`; only this pin's rig differs). The re-run is a
+  single-suite window (the coordinator's). Headless suites not re-run: no product line changed. (The build ran while
+  another worktree's test host — `variorum-vx-562`'s own DerivedData, pid 89445 — was up; a build needs no stage and
+  touches nothing of theirs.)
+
+**The trace (inputs → wrong output), from the pin and the log — no `xcodebuild test` is mine to run, so the mechanism
+is established by comparison, not by a run:**
+- The rig mounted `WingDestinationSheet` as a NEW window's content and ordered the window in IN THE SAME TURN
+  (`window.contentView = hosting; window.makeKeyAndOrderFront(nil)`), settled a FIXED 30 turns (~1 s — the test failed
+  at 1.084 s) and read `currentEditor()` once. The field WAS in the hierarchy (line 470's `#require` held) but never
+  editing.
+- The test host's facts, measured by this target's own rigs: its windows are never key (`LaunchFocusRig`: "ordered in
+  (never key here)" — `QuickEntryLaunchFocusTests` simulates key status for that reason), and AppKit picks a window's
+  first text field as first responder AT ITS FIRST ORDER-IN (measured there). At this rig's order-in the hosting view had
+  not yet realized its `NSTextField` (SwiftUI builds the platform view on its first layout pass, inside the settle), so
+  nothing was picked; the field's only road to the keyboard was the selector's `.task { fieldFocused = true }`, firing
+  during the brand-new window's very first passes, and the read came after a fixed ~1 s.
+- The target's two GREEN pins on the IDENTICAL product idiom (`.task { focused = true }`) do neither:
+  `MastheadTagDoorTests.oneDoorAtRestAndTheFieldTakesFocusWhenItOpens` (green in prior full runs, 3.1 s) orders its
+  window in with a field-less host, settles 20 turns, THEN swaps the focusing view in and settles 30 longer turns;
+  `TitleQuickfillTests` opens its field after the window settled and waits UNTIL the field editor holds the keyboard
+  (≤ 80 turns). This rig was the outlier on both axes (mounted at first order-in; a short fixed read). Which of the two
+  bit cannot be singled out without a run; the fix closes both.
+- **The product — focused in use (the walk's verdict, THE FINAL WINDOW part 2):** the selector arrives KEYBOARD-FOCUSED
+  WITHOUT A CLICK in both voices, three times; the captures agree (`scratchpad/walk-final/selector-move-study.png` — the
+  caret IN the field under the prompt "Move to a wing", before any typing; `selector-typed-walk-study.png` — "walk"
+  typed, filtering to "Walk Wing"). The same idiom arrives focused in her daily ⌘K (`CommandPaletteView`) and in ⌘L's
+  switcher. **Disposition: RIG-SIDE — no product line changes; a product fix would have no red to turn green.**
+
+**The fix (the rig only; 4-F1 cited in the pin's doc — a JUSTIFIED EDIT):** `mount` orders the window in EMPTY (a clear
+host), settles 20 turns, clears the first responder, and only then mounts the content (the tag pin's shape — and the
+sheet's own situation: a face arriving in a window already on screen); the read waits UNTIL the field's editor exists (≤
+80 turns, the title pin's bound) before the UNCHANGED `#require` on `currentEditor()` and the UNCHANGED
+`window.firstResponder === editor`. **The teeth — a CONTROL in the same rig:** a plain SwiftUI `TextField` that asks for
+nothing is mounted through the same `mount`, given the SAME wait, and must stay unedited with its window's keyboard
+free — the rig grants no field focus by itself, so the selector's focus can only be its own `.task`'s (remove that line
+and the pin goes red at "the field is EDITING on arrival"). The typing, ⏎ and Esc legs are unchanged. **Optional red
+leg for the re-run window:** delete `.task { fieldFocused = true }` in `Core/Views/WingDestinationSheet.swift`, rebuild
+`b4`, run this one test → red at "the field is EDITING on arrival" (the control still green); restore with `git checkout
+-- App/Variorum/Variorum/Core/Views/WingDestinationSheet.swift`, rebuild.

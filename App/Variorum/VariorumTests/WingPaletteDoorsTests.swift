@@ -436,6 +436,23 @@ struct WingPaletteDoorsTests {
     /// ⏎ chooses and the act lands; Esc closes and nothing moves. (↑/↓ are the
     /// palette's and the switcher's `.onKeyPress` idiom — pinned at the model
     /// above, driven for real by the walk.)
+    ///
+    /// **FIX LEG 4-F1 (the final window's red on this pin — A JUSTIFIED EDIT
+    /// of the RIG, the product unchanged):** the first rig set the selector
+    /// as a window's content in the same turn the window was first ordered in
+    /// and read the field after a fixed ~1 s; the field was drawn but never
+    /// editing. The rig now has the shape of this target's two green
+    /// SwiftUI-focus pins (`MastheadTagDoorTests` — the field swapped into a
+    /// window already ordered in and settled; `TitleQuickfillTests` — the
+    /// field opened after the window settled, read once its editor holds the
+    /// keyboard): the window is ordered in EMPTY and settled, the keyboard
+    /// cleared (AppKit picks a window's first text field the moment it is
+    /// first ordered in — `LaunchFocusRig`'s measured note), and only then
+    /// does the selector mount — the sheet's own situation, a face arriving in
+    /// a window already on screen. Its teeth are a CONTROL in the same rig: a
+    /// plain field that asks for nothing is mounted the same way and must
+    /// NOT hold the keyboard — so the selector's focus is its own `.task`'s,
+    /// never the rig's.
     @Test func theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc() async throws {
         try await withMountedWorld { session, db in
             let ops = session.operations
@@ -447,27 +464,57 @@ struct WingPaletteDoorsTests {
             await wings.load()
             let tokens = VoiceTokens.terminalLight
 
-            @MainActor func mount(_ model: WingDestinationModel, closed: Flag) -> (NSWindow, NSView) {
+            /// A window ordered in EMPTY and settled, its keyboard free — then
+            /// `content` mounts into it (4-F1).
+            @MainActor func mount(_ content: some View) async -> (NSWindow, NSView) {
                 let window = NSWindow(
                     contentRect: NSRect(x: 80, y: 80, width: 440, height: 360),
                     styleMask: [.titled], backing: .buffered, defer: false)
                 window.isReleasedWhenClosed = false
-                let hosting = NSHostingView(rootView: WingDestinationSheet(
-                    model: model, tokens: tokens, close: { closed.value = true }))
+                let empty = NSHostingView(rootView: Color.clear.frame(width: 440, height: 360))
+                empty.frame = NSRect(x: 0, y: 0, width: 440, height: 360)
+                window.contentView = empty
+                window.makeKeyAndOrderFront(nil)
+                await self.settle(window, empty, turns: 20)
+                window.makeFirstResponder(nil)
+                let hosting = NSHostingView(rootView: content)
                 hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 360)
                 window.contentView = hosting
-                window.makeKeyAndOrderFront(nil)
                 return (window, hosting)
             }
+            /// Settle until `predicate` holds (at most ~4 s — the title pin's bound).
+            @MainActor func settleUntil(_ window: NSWindow, _ hosting: NSView, _ predicate: () -> Bool) async {
+                for _ in 0..<80 {
+                    await self.settle(window, hosting, turns: 1)
+                    if predicate() { return }
+                }
+            }
+
+            // The CONTROL: a field that asks for nothing, mounted the same way,
+            // never holds the keyboard — the rig gives no field focus by itself.
+            let (control, controlHosting) = await mount(
+                TextField(tokens.chromeLabel("control"), text: .constant("")).frame(width: 440, height: 360))
+            defer { control.orderOut(nil); control.close() }
+            await settle(control, controlHosting)
+            let controlField = try #require(field(tokens.chromeLabel("control"), in: controlHosting), "the control is drawn")
+            // The SAME budget the selector gets below — the control is given
+            // every chance to be focused by the rig, and must not be.
+            await settleUntil(control, controlHosting) { controlField.currentEditor() != nil }
+            #expect(controlField.currentEditor() == nil, "the rig focuses nothing: a field that asks for nothing stays unedited")
+            #expect(control.firstResponder == nil || control.firstResponder === control,
+                    "the control window's keyboard is free: \(String(describing: control.firstResponder))")
+            control.orderOut(nil)  // off screen before the selector's window comes in
 
             // ⏎ — the move.
             let model = try #require(await WingDestinationModel.open(
                 .init(act: .moveNote(moving.id), token: UUID()), wings: wings, session: session))
             let closed = Flag()
-            let (window, hosting) = mount(model, closed: closed)
+            let (window, hosting) = await mount(WingDestinationSheet(
+                model: model, tokens: tokens, close: { closed.value = true }))
             defer { window.orderOut(nil); window.close() }
             await settle(window, hosting)
             let input = try #require(field(tokens.chromeLabel(model.prompt), in: hosting), "the field is drawn")
+            await settleUntil(window, hosting) { input.currentEditor() != nil }
             let editor = try #require(input.currentEditor() as? NSTextView,
                                       "the field is EDITING on arrival — nobody clicked it")
             #expect(window.firstResponder === editor, "the keyboard is in the field: \(String(describing: window.firstResponder))")
@@ -483,7 +530,8 @@ struct WingPaletteDoorsTests {
             let other = try #require(await WingDestinationModel.open(
                 .init(act: .moveNote(staying.id), token: UUID()), wings: wings, session: session))
             let dismissed = Flag()
-            let (window2, hosting2) = mount(other, closed: dismissed)
+            let (window2, hosting2) = await mount(WingDestinationSheet(
+                model: other, tokens: tokens, close: { dismissed.value = true }))
             defer { window2.orderOut(nil); window2.close() }
             await settle(window2, hosting2)
             let esc = try #require(NSEvent.keyEvent(
