@@ -393,7 +393,23 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     the sync row's doors, and the bars' commit · takes · history · comments · more · block ▾ · note ▾ · newlines chip ·
     word count. Out of the ruled scope (surfaces, not the sidebar or a note's face): the Library's and the Bookcase's
     mastheads, the Takes board's card glyphs, the panels' own rows.
-  - VX-560: NOT-STARTED
+  - VX-560: BUILT (this commit) — PENDING the stage run (`BrowserNavKeysTests` 4, incl. a window with a real field).
+    A-439-12 as ruled: ⌘← / ⌘→ are Back / Forward ONLY while no text holds the keyboard; inside any editor or field
+    they stay line start / end. NOT a menu key equivalent (a key equivalent is resolved before the first responder's
+    `keyDown`, so a ⌘← menu item would take line-start from every text view — `PageTurnKeys`' class): the door is
+    `Workspace/BrowserNavKeys.swift`'s `BrowserNavKeyMonitor`, `PageTurnKeyMonitor`'s shape (a zero-size view's local
+    `keyDown` monitor on RootView's full window, consuming only when it navigates), over the pure
+    `BrowserNavKeys.direction` (exactly ⌘ — ⇧⌘← selects, ⌥⌘← pages a fan, ⌃⌘← steps takes; never while
+    `PageTurnKeys.textIsFirstResponder` — the app's one "text holds the keyboard" answer, ANY `NSText` or `NSTextField`,
+    read-only text views included — the conservative reading of review focus 5). The act is `RootView.navigate` — the
+    menu items' own `router.goBack()/goForward()` — or, where the registry says the act cannot go, its declared refusal
+    SPOKEN (AppSpec §12 "a door that did nothing speaks"; the `OneWingChord` precedent — PROVISIONAL bundle 15).
+    ⌥⌘[ / ⌥⌘] stay the chords and the menus' labels; the registry gains `Capability.alternateShortcutLabel` ("⌘←" on
+    `.navigateBack`, "⌘→" on `.navigateForward`), and the helper (⌘/) shows them in a new row. PINS `BrowserNavKeysTests`
+    (4): the rule; the registry (alternates, unchanged chords, NO capability's menu key a bare ⌘←/⌘→, the helper shows
+    them); the act (back/forward through a ShellRouter, the refusal spoken where nothing waits); the monitor in a window
+    (a TextField's editor keeps ⌘← — caret to 0, nothing navigates — and with no text in charge ⌘← back, ⌘→ forward,
+    ⇧⌘← nothing; `PagesArrowKeysHostTests`' sendEvent road). build-for-testing GREEN.
   - VX-441: NOT-STARTED
   - VX-569: NOT-STARTED
 - Ladder: NOT-STARTED
@@ -439,7 +455,11 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     the icon's own title — and so the tour's and the field guide's "Scraps panel" — still says Scraps (renaming it owes
     the guide re-seed in your window); (c) the tester's "Notes & links" for the references icon is NOT adopted — that
     door is "References" everywhere; renaming it is yours.
-15. (grows)
+15. **VX-560 — two PROVISIONALs:** (a) ⌘← with nowhere to go back to SAYS "Nothing to go back to — this is where you
+    started." on the status line (a door that did nothing speaks) rather than doing nothing silently; (b) a read-only
+    text surface that holds the keyboard (after a click into a read page) also keeps ⌘← as its own — the same "text
+    holds the keyboard" rule the page-turn keys use; ⌥⌘[ still goes back there. Say the word for either.
+16. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 

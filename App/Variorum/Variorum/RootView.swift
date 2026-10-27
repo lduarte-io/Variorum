@@ -320,6 +320,14 @@ struct RootView: View {
                 onWindow: { windows.attach($0, to: windowID) },
                 onKey: { windows.noteKey(windowID) })
         }
+        // VX-560 (A-439-12): ⌘← / ⌘→ are Back and Forward in this window
+        // while no text holds the keyboard (in text they stay line start/end)
+        // — the registry's acts, or their declared refusal spoken.
+        .background {
+            BrowserNavKeyMonitor { direction in
+                Self.navigate(direction, session: session, router: router)
+            }
+        }
         .sheet(isPresented: $paletteOpen) {
             CommandPaletteView(
                 model: palette,
@@ -731,6 +739,25 @@ struct RootView: View {
                 guard let picked else { return }
                 adopt(picked, in: router.workspace.focusedPane)
             })
+    }
+
+    /// **VX-560 — ⌘← / ⌘→'s act** (the `BrowserNavKeyMonitor`'s): the pane's
+    /// Back or Forward — the menu items' own calls — where the registry says
+    /// the act can go, else its declared refusal SPOKEN (a door that did
+    /// nothing speaks; a grey menu item would have swallowed the key). Static
+    /// so a pin drives exactly what the key runs.
+    static func navigate(
+        _ direction: BrowserNavKeys.Direction, session: AppSession, router: ShellRouter
+    ) {
+        let act = direction.capability
+        guard session.commandRouter.isEnabled(act) else {
+            session.status.refuse(CapabilityRegistry.capability(act).unavailableNote)
+            return
+        }
+        switch direction {
+        case .back: router.goBack()
+        case .forward: router.goForward()
+        }
     }
 
     /// The ONE door a destination enters a pane through — so her round-7.3

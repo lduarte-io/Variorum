@@ -1492,18 +1492,26 @@ nonisolated enum CapabilityRegistry {
         // app were these two), every `NSMenuItem` keyEquivalent (all empty
         // strings) and both `performKeyEquivalent` overrides (⌘S, plus J7's
         // non-consuming ⌘Z/⌘⇧Z hint arm) — no bracket anywhere carries ⌥.
+        //
+        // VX-560 (the VX-439 run, A-439-12 — her scope call: "outside a text
+        // view only"): ⌘← / ⌘→ are each act's ALTERNATE key, the browser's —
+        // NOT a menu key equivalent (that would take line start/end from every
+        // text view): `BrowserNavKeyMonitor` acts only while no text holds the
+        // keyboard. The menus keep showing ⌥⌘[ / ⌥⌘].
         Capability(
             id: .navigateBack, verb: "Back", scope: .app,
             doors: [.menuBar, .surface],
             shortcutLabel: "\u{2325}\u{2318}[", takesAccess: nil,
             unavailableNote: "Nothing to go back to — this is where you started.",
-            availability: { ctx in ctx.canNavigateBack ? .act : .unavailable }),
+            availability: { ctx in ctx.canNavigateBack ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2190}"),
         Capability(
             id: .navigateForward, verb: "Forward", scope: .app,
             doors: [.menuBar, .surface],
             shortcutLabel: "\u{2325}\u{2318}]", takesAccess: nil,
             unavailableNote: "Nothing to go forward to — you haven't gone back.",
-            availability: { ctx in ctx.canNavigateForward ? .act : .unavailable }),
+            availability: { ctx in ctx.canNavigateForward ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2192}"),
         // VX-287 (the VX-283 run, U1) — **CLOSE NOTE**, her ruling verbatim:
         // *"for command W - can we do shift command W? i like that better than
         // control, it's more natural to type. i think landing in the next note

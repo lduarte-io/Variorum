@@ -253,6 +253,10 @@ struct HelperView: View {
             ("⌥⌘[ / ⌥⌘]", "back / forward, in the pane you're in — the "
                 + "\(ContextBarDoors.backGlyph) and \(ContextBarDoors.forwardGlyph) "
                 + "on the context bar are the same two doors"),
+            // VX-560 (A-439-12): the browser's keys for the same two acts —
+            // the registry's `alternateShortcutLabel`s, shown here.
+            ("⌘← / ⌘→", "back / forward too, like a browser — anywhere except while you're typing "
+                + "in text, where they keep going to the start and the end of the line"),
             // The Act 10 correction round (row 15): ⌘⇧I tags the note — the
             // masthead's ＃ opens the same inline field; the fold is gone.
             ("⌘⇧I", "tag this note — the field slides out in the masthead with the cursor "

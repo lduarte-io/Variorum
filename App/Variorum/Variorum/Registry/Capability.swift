@@ -425,6 +425,12 @@ nonisolated struct Capability: Identifiable, Sendable {
     /// from the memberwise initializer entirely, and the point of the default
     /// is that ~130 declarations that own no system chord say nothing at all.
     var systemShortcutLabel: String? = nil
+    /// **VX-560 (the VX-439 run, A-439-12) — a second key for the same act**,
+    /// reached by its own door rather than a menu key equivalent ("⌘←" on
+    /// Back — `BrowserNavKeyMonitor`, live only while no text holds the
+    /// keyboard). The MENU keeps showing `shortcutLabel`; this is the
+    /// registry's record of the alternate, and the helper (⌘/) shows it.
+    var alternateShortcutLabel: String? = nil
 
     /// **A door's label with its DECLARED chord appended** — "Copy All Takes
     /// (⌘⇧C)" — and the ONE formatter that composes the two, so a key she
