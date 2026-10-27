@@ -1,6 +1,6 @@
 # VX-562 — Book Outline: the highlight follows your scroll, and the book's nav info pins up top
 
-**STATUS: CLOSED 2026-10-27 — one day, kickoff to merge: two build passes + three ruling fixes, a three-round ladder (capped, every finding dispositioned), six stage windows, four walks and a trace walk (one honestly blocked, one honestly failed and measured), every bug-class fix revert-verified, the clamp seen firing live. Merged by PR #PENDING.**
+**STATUS: CLOSED 2026-10-27 — one day, kickoff to merge: two build passes + three ruling fixes, a three-round ladder (capped, every finding dispositioned), six stage windows, four walks and a trace walk (one honestly blocked, one honestly failed and measured), every bug-class fix revert-verified, the clamp seen firing live. Merged by PR #198.**
 Ticket: VX-562 (single ticket — Improvement · Confirmed · Books · High · Pre-launch; project "v1 release readiness") · Branch: `vx-562-outline-follow` · Worktree: `~/dev/variorum-vx-562` (the Pro).
 
 **Her kickoff words (2026-10-27, verbatim):** *"VX-562 contact oct27coordinator for your walk + staging needs"* — the wave-2 shape: stage traffic through the coordinator only (REQUEST → READY → GO; never self-claim), no `/Applications` refresh and no release without her word, PROVISIONAL-and-continue with every question bundled for her morning.

@@ -1,6 +1,6 @@
 # VX-562 handoff — Book Outline: the highlight follows your scroll, and the nav info pins up top
 
-**CLOSED 2026-10-27 — PR #PENDING, merge-ready the same day as kickoff.** Two build passes + three ruling fixes, a three-round ladder (capped, every finding dispositioned in writing), six stage windows, four walks + a trace walk, eight revert recipes each red on exactly their named pins, and the end clamp seen firing live before close. The record: `notes/plans/fixes/vx-562-outline-follow.md`; the ladder: `vx-562-ladder-round1/2/3.md`.
+**CLOSED 2026-10-27 — PR #198, merge-ready the same day as kickoff.** Two build passes + three ruling fixes, a three-round ladder (capped, every finding dispositioned in writing), six stage windows, four walks + a trace walk, eight revert recipes each red on exactly their named pins, and the end clamp seen firing live before close. The record: `notes/plans/fixes/vx-562-outline-follow.md`; the ladder: `vx-562-ladder-round1/2/3.md`.
 
 ## Your checklist
 
