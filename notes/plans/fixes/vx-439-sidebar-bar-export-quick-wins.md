@@ -672,3 +672,15 @@ captures Terminal where visual).
   'subsystem == "io.lduarte.Variorum.debug" && category == "open-list-drag"'` beside a hand drag. NO synthetic road
   reaches a sidebar drop (VX-375 — the VX-283 main-build control), so nothing tonight can read it; it is removed again
   before the ladder (A-439-15) and stays in history at this commit for any hand session.
+- 2026-10-27 **B2 — THE SECOND-MERGER STEP (the coordinator's addendum: VX-502 merged first and shares the export seam).**
+  `git fetch origin` + `git merge origin/main` (a MERGE, never a rebase — the branch is pushed): main at `dd469951e`
+  (VX-502's PR #192 merge `32fb88ec6`) taken in with NO conflicts (VX-502 touched `Operations+PlaintextExportImport.swift`,
+  `Migrations.swift`, the Protection copy doors/words and their pins; batch 2 touched no core file) — merge commit
+  **`0a30e8b09`**, pushed; the merged tree is `0a30e8b09`. HEADLESS ON THE MERGED TREE: `swift build` GREEN; the full core
+  `swift test` — **3,439 tests / 457 suites passed** (5 known issues, the standing ones; +3 over batch 1's 3,436 — VX-502's
+  merged pins) incl. `DocumentFormatRoundTripTests.aLibraryExportReimportsEveryNoteWithItsTitleTagsAndTakes` and the
+  serializer/plaintext-export pins; **32 / 4 passed**; the MCP package **383 / 71 with ONE failure**,
+  `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (18.5 s vs its 15 s bound,
+  load average ~10 — the VX-353 load class batch 1 also met), re-run alone **GREEN 3/3**; the skipped lines are the 7
+  standing gated measurement/integration skips. The Mac-side export pins (`ExportFacesTests`,
+  `PlaintextExportBringInRoadTests`, `U2WordsTests`) ride the b2 stage window on the merged tree.
