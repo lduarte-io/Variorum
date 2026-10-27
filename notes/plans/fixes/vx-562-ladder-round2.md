@@ -49,3 +49,100 @@ The code is book-view chrome (the navigator's labels and the pinned line), the O
 | A×B | the R-562-A × R-562-B step-down named by the fix session | **RECORDED, BUT ITS REACH IS UNDERSTATED → N1 below** | See N1. |
 
 **Part 1 verdict:** every disposition landed as written. All the bug-class pins (1, 2, 4, 8) are confirmed red-on-old by the window's behavioral reverts, read from the logs, and green on the restored tree: `vx562-final-run.log` "47 tests in 2 suites passed", and `vx562-r1-full.log` "324 tests in 60 suites passed … 4 known issues", the standing `IndexTierMetricsTests` four. The tested tree is the HEAD code: `git diff --stat 1f23d7855..HEAD` touches only the record.
+
+---
+
+## PART 2 — the fix diff itself, through `REVIEW_PROMPT.md` (anything NEW the fixes introduced), severity-ranked
+
+### N1. [MINOR — rises to MAJOR if walk 3 reads the lead as the wrong note] · `BookOutlineViewed.swift:167–174` (`probe(_:)`) × `:456–470` (`BookOutlineFollower.look`) · R-562-B's slide runs the highlight up to a page ahead of the page's top across the whole last viewport of scroll, and the R-562-A × R-562-B "step-down" reaches every landing whose target settles there, not only last-screenful clicks
+
+**What is new.** Over the last `min(viewport, travel)` of scroll, the shipped probe slides from the edge (10 pt) to the page's foot. Rows also move up 1 pt per point scrolled, so in that zone the probe crosses the content at about twice the scroll's speed. The viewed note therefore leads the row that owns the page's top, and the lead grows to a full viewport at the bottom.
+
+The fix session's bundle line names only one consequence: "after a click in the last screenful, her first small scroll UP steps the highlight DOWN to the last note". The real reach is wider:
+- **(i) Any landing.** This covers any landing whose target lands at the TOP but whose settled offset is inside the last viewport of scroll. That is an ordinary settled landing, not F-1. The first scroll of more than 8 pt, in EITHER direction, releases the hold (R-562-C) to a rule that names a note several rows below the target.
+- **(ii) Her own scroll.** Inside the last viewport, the highlight names a note well below the one at the top of the page.
+
+**Traced mechanism, from the window's own geometry plus the shipped formula.** The harness page is `viewport 734`, `travel 3465` (SCROLL 1 and F-1 print lines in `vx562-final-run.log`). The fixes those lines give:
+- Note 28 stops at top 293 at the maximum offset (F-1: "gave up at top=293.0").
+- The END pin's samples, at `2721 + 30·i`, first view note 30 at offset ≈ 3381 (remaining 84) and note 29 at ≈ 3351 (remaining 114).
+- With `probe(r) = 10 + (1 − r/734)·724`, those samples bound the last note's top at the bottom to L ∈ (508, 567]. That gives a row pitch of ≈ 120 pt per note and 61 pt per heading, which reproduces `seen[0] = 20` at offset 2721.
+
+Under those (derived, ±10 pt) pitches:
+1. A landing on note 25 settles it at top 0 at offset ≈ 3337 (remaining ≈ 128). That is inside the slide, and the hold names note 25.
+2. A 9-pt nudge UP (offset 3328, remaining 137) gives probe ≈ 599. The tops are then 25@9, 26@129, 27@249, ch9@369, 28@430, 29@550, 30@670.
+3. The rule names **note 29**, so the highlight jumps four notes DOWN while note 25 still sits at the very top of the page. A 9-pt nudge DOWN gives the same note 29.
+4. Without any landing, her own scroll to that offset shows note 25 at the top and highlights note 29. At the bottom the edge rule's top row is note 26 and the slid probe names 30.
+
+On the folded Sherlock (13 one-note chapters), the end of walk 2's A addition becomes "note 13" at the bottom (the fix). In the last viewport before it, though, the highlight runs up to three stories ahead of the card at the top.
+
+**Why it matters.** Her ask is "the note that you're currently on". In the journal-trait shape round 1 named (short entries, newest last), the last page is where she lives. There the navigator and "note N of M" now name an entry up to a page below the one she is reading at the top. Round 1's MAJOR was the highlight stopping short of the end. This is the opposite overshoot across the same region, and it is milder: it resolves at the bottom and is monotonic.
+
+**This is product silence (R-562-B is PROVISIONAL), so it goes to the bundle and `notes/QUESTIONS.md` and is not fixed here.** Options:
+- **(a) Accept as ruled.** Correct the bundle's line to the true reach: any landing settling in the last viewport of scroll, either scroll direction; and her own scroll leads the top row by up to the last screenful's height.
+- **(b) Narrow the slide to what the last screenful needs.** Slide from the edge to the last row's top at the bottom, `L = lastRowTop − remaining`. The page already holds that fact; L stays constant as she scrolls, so the probe stays monotonic. The slide runs over the last `min(L − edge, travel)` points of scroll instead of a full viewport. The bottom still views the last note, every last-screenful note is still reached, and the lead shrinks by `viewport − L` everywhere in the zone (≈ 170–225 pt, 1½–2 notes on the harness page). It does not remove the release-jump for a target settling inside the narrower zone (note 25 → 28 instead of → 29 above); some jump is inherent to any slide combined with a hold.
+
+**Pin (born-red for (b); a documenting table for (a)).** A pure `BookOutlineFollower` table over a column with the harness pitches (cards 110 + gap 10, headings 51 + 10, viewport 734, travel 3465):
+1. `landingStarted(note 25)`, then a settled `look` at offset 3337 gives note 25.
+2. A `look` at offset 3328 gives (a) note 29, green on HEAD, or (b) note 28, red on HEAD.
+
+**Walk 3 should look at it:**
+- the own-scroll lead over the last page of the folded Sherlock;
+- the release-jump, which needs a short target (Sherlock's note doors unfold their story, so use the harness, or a chapter heading of a multi-note book).
+
+### N2. [NIT] · stale docs left behind by P-562-7 and finding 8
+- `BookOutlineViewed.swift:75–79`: `Pair`'s doc still reads *"A chapter heading names the chapter alone; … (nil under the unfiled heading or a tag-path heading)"*. Since P-562-7, a heading names the note it introduces. The `named(at:in:)` doc (`:198–209`) is right; the type's doc contradicts it.
+- `BookOutlineViewed.swift:483–485`: `BookNavigatorMark`'s doc still says the chapter row *"wears the quieter viewed-chapter wash"*. Since finding 8 the mark is the accent fill with the name in ink. The test name `onlyOutlineWashesTheViewedChapter` (`BookOutlineViewedTests.swift:756`) has the same staleness.
+- `BookOutlineLandingTests.swift:2025–2032`: the CLICK pin's doc still frames its red-on-old as an open order question ("the stage window records which way it lands"). The window answered it: `vx562-revE-run.log`, RED, because on this host the reveal's `onChange` arrives first. Say so in the doc, so a later reader never takes the pin for a possibly-hollow one.
+- `BookOutlineLandingTests.swift:1824–1826`: the END pin's doc spells its revert as "`return probe` as its first line". The record's recipe B is `slide = 0`. They are behaviourally equivalent; pick one spelling.
+- `BookView.swift:2169–2173`: the page-height observer's comment names only R-562-A's on-screen test. Since r1 it is also R-562-B's slide input.
+
+No pin applies (docs only).
+
+### N3. [NIT] · record hygiene: the window's outcomes are recorded only at the outline-follow record's foot, so three earlier lines still read PENDING
+- `vx-562-outline-follow.md:120–123`: ledger rows 1, 2 and 4 still read "r1 fixes BUILT-PENDING-SUITES" and "runs, reverts and round 2 the orchestrator's".
+- `vx-562-outline-follow.md:150`: still "PENDING the orchestrator's window: every run … and recipes B, C, E".
+- `vx-562-ladder-round1.md:176`, `:177`, `:179`: the as-built dispositions for 1, 2 and 4 still say "Red-on-old: PENDING" / "PENDING the stage window".
+
+The outcomes themselves (`vx-562-outline-follow.md:343`) are correct, and I confirmed each against its log. A fresh session that reads the ladder file alone would still believe the reverts are owed. **Fix (the orchestrator's, repo-first):** flip those lines to the logs' verdicts, naming `vx562-revB/C/E/G-run.log`, `vx562-r1-full.log` and `vx562-final-run.log`.
+
+---
+
+## Process note (not a code finding): r1's use-shaped evidence is owed
+
+CLAUDE.md: "a batch closes only on use-shaped evidence, never a pin or mount smoke alone". Walk 2 PRECEDED every r1 fix. What r1 changed on screen has been seen only by the test host and token maths: the sliding probe, the offset release, the heading naming its note, the one total and the viewed chapter's new fill. Walk 3 should cover:
+1. Wheel to the very end of the folded Sherlock. Expect "note 13 of 13 · The Adventure of the Copper Beeches" with the fill on its row. Watch N1's lead on the way down.
+2. The viewed chapter's fill in Study light and dark, and Terminal light and dark (finding 8; Study light and Terminal are token maths only).
+3. A chapter heading at the top: the number stays (P-562-7).
+4. R-562-C's motivating inputs after a mid-book click: keyboard paging (no editor focused) and a scroller-knob drag. Both should release the hold.
+5. Finding 10's watch, now with the widened observer: count "OnScrollGeometryChange … multiple times per frame" and "Modifying state during view update" over an Outline scroll, a landing, and the Outline → Index departure.
+6. If a short-note book is staged, N1's release-jump (one wheel notch each way after a click about a page from the end).
+
+The two merge-time tickets the dispositions owe (finding 6's Debt/Low restructure and finding 12's Index → Outline caret block) are not yet filed. They belong to the closeout.
+
+---
+
+## Clean bill (load-bearing things in the FIX DIFF I checked and found solid)
+
+- **R-562-C's key is taken at the right moment, every time.**
+  - `land` always leaves a landing pending (`begin` sets the anchor, then `aim`, then `armAfterEvent`; `LandingAuthority.swift:560–568`). Nothing finishes synchronously, so no key can be taken before the landing's own scroll.
+  - The target's row reports re-arm the quiet interval (`noteTop`, `:622–627`), so the offset the box holds at `onFinish` is the settled one.
+  - `begin` supersedes without `onFinish`, and `landingStarted` resets the key (`BookOutlineViewed.swift:423–428`).
+  - `end()` is silent, and `forget()` clears both fields.
+  - Her phase still lets go before `userTookOver` (`BookView.swift:1826–1827`), so a landing she ends delivers the rule.
+- **The widened observer keeps the landing's contract byte for byte.** Only a content-height change reaches `outlineContentResized` (`BookView.swift:1842–1844`), which is exactly what the old `CGFloat` transform fired on. Offsets write only the reference box (never render state) and queue the one-per-turn derivation. The 60-suite set, landing suites included, is green (`vx562-r1-full.log`).
+- **`OutlineScrollFacts`' arithmetic is right whatever the insets.** `offset = contentOffset.y + insets.top` is 0 at rest. `travel = contentSize + insets.top + insets.bottom − container` is the maximum offset. These are read in the same frame as the rows' `outlineSpace` tops and the page-height viewport. The END print line confirms it: at the bottom `offset 3465 = travel 3465`, matching `doc 4199 − visible 734`.
+- **`probe(_:)`'s edges are each a table line and correct:** an unmeasured page, a column that fits, overscroll at both ends, the exact one-viewport boundary (`remaining < slide`, so the edge holds there), and a short book. At fixed travel, the probe is monotone in the offset.
+- **P-562-7's control flow is right.** `named(at:in:)`'s labelled `break inForce` leaves the loop (an unlabelled one would only leave the `switch`), and `continue` inside the `switch` continues the loop. In `positionLine` (`:337–345`), the unlabelled `break` inside an `if` exits its `for`. `adoptedPair` and the rule name through the same function, so a click's pair and the settled rule cannot disagree (pinned at `:319`).
+- **Finding 7 changes no mark.** `BookNavigatorMark` (`:492–515`) already ignored the focus in Outline and the viewed pair elsewhere, so withholding them changes dependencies and nothing else.
+- **Finding 3 says "N+" only when the window is truncated.** A truncated window is at least 300, so the plural is always right. `metaLine`'s defaulted parameter leaves `VocabularySweepTests`' three lines byte-unchanged.
+- **The new DEBUG oracle (`outlineScrollStore`) is hygienic.** It is released by owner (`release(owner:)`) and forgotten with the pins (`forgetOutlinePins`). Every write is `#if DEBUG`. It is a static on a plain struct (`OwnedRegistrations`, `DebugOracleOwnership.swift:72`), so nothing is observed.
+- **The fences hold.** Nothing in the fix diff writes `focus`/`focusedPostID`, the caret seeds, `pendingReveal`, `pendingChapterReveal` or a landing's aim. There is no new observer, dependency, schema or literal colour (the accent token × an opacity, the `MastheadPopover.rest` precedent). `notes/QUESTIONS.md` and the shared ledgers are untouched. P1 cost is unchanged: one O(rows) derivation per run-loop turn, with rows bounded by the 300-note window.
+- **The new mounted pins are not hollow.** Each bug-class revert (B, C, E, G) went red on exactly its named `#expect`s, with every `#require` premise holding. The reds are verdicts, not harness gaps (`vx562-revB/C/E/G-run.log`, failure lines read).
+
+## Verdict
+
+**No new BLOCKER or MAJOR. This round does not earn a round 3.** Every round-1 disposition landed as written, and the bug-class ones are revert-verified. New from the fixes:
+- **N1 (MINOR):** the reach of R-562-B's slide and its seam with the hold. It is a design consequence for the bundle and `notes/QUESTIONS.md`, and for walk 3 to judge.
+- **N2, N3 (NIT):** stale docs and stale PENDING lines in the records.
+
+The batch still owes walk 3's use-shaped evidence before ledger rows 1–2 close.
