@@ -490,4 +490,9 @@ from the coordinator, relayed). Secrets by field name only.*
   - **8b — ⌃⌘L again → "Use your twelve words instead" (opened from its label — VX-527) → `words` → "Open with the words" → OPENS** (the third `road: opened — library 598d1a34` line). (A walk-tool slip on the way, recorded: the first press hit the passphrase row's own "Open" — the words row's button is "Open with the words"; nothing was refused, nothing typed twice.)
   - The hold marker unchanged across both locks (inode 197902388).
 - `STATE L8 2026-10-27T10:41:05Z` | 1 instance | L2 `598d1a34` key `7e8d8a27`, HELD | castle unchanged (revision 24).
+- **LEG 9 — SYNC END TO END (R2-M2's order; 04:41:31–04:43:45 MDT) — DONE.**
+  - **Resume first, NO round:** the banner **"This is your library as of October 27, 2026. This library doesn't sync, so Resume changes nothing in it."** (VX-522, account-less — captured as its own evidence line) → Resume Sync → the banner gone, the hold marker removed, NO round line in the log, the row **"Sync isn't on for this library yet · Protection…"**; the cards band empty (the words ledger carried — VX-444).
+  *[removed for publication]*
+  - **Content BOTH directions:** the Library lists **note B** ("VX-502 walk note B…", edited today 4:31 AM — written after the backup, so it came DOWN from the server) and **note A** ("…note A…", 4:28 — carried in the backup), beside the account's five VX-510 notes: **7 notes = the server's 7 — no duplicate**. **Note C** ("VX-502 walk note C - written on the restored library, under P2") through the quick entry → pushed UP: live containers **7 → 8** (newest 2026-10-27T10:43:28Z), cursors **18 → 19** (L2's device), the vault unmoved (revision 24 — joins write no vault row).
+- `STATE L9 2026-10-27T10:43:45Z` | 1 instance | L2 `598d1a34` key `7e8d8a27`, not held, synced to castle | castle: castle, revision 24, cursors 19, containers 8.
 | B4 | Legs 1–13 per the script of record | NOT STARTED |
