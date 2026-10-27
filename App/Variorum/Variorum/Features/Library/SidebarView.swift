@@ -1003,6 +1003,20 @@ struct SidebarView: View {
             #endif
     }
 
+    /// **VX-424 — an Open row's two drop halves** (`OpenListRowHalves`), the
+    /// first row's reported to the DEBUG oracle.
+    private func openRowHalves(_ noteID: String, first: Bool) -> some View {
+        #if DEBUG
+        let workspace = workspace
+        return OpenListRowHalves(
+            state: openListDrag, noteID: noteID, workspace: workspace, reach: Self.scrollingSectionMargin,
+            report: first ? { SidebarGeometry.recordOpenListFirstRowHalves($0, $1, for: workspace) } : nil)
+        #else
+        return OpenListRowHalves(
+            state: openListDrag, noteID: noteID, workspace: workspace, reach: Self.scrollingSectionMargin)
+        #endif
+    }
+
     /// The indicator's read key: the rows shown and the wing she stands in.
     private var openWingsKey: String {
         workspace.openNotes.shown.joined(separator: ",") + "|" + session.wing.currentID
@@ -1085,6 +1099,13 @@ struct SidebarView: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .help(Self.closeRowHelp)
+                    #if DEBUG
+                    // VX-424's oracle: the first row's ✕ as laid out — where a
+                    // pin clicks to prove the row's halves take no hit at rest.
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                        if ordinal == 1 { SidebarGeometry.recordOpenListFirstRowClose(frame, for: workspace) }
+                    }
+                    #endif
             }
             #if DEBUG
             // Row 13's oracle: the FIRST strip row's content edge — what the
@@ -1097,6 +1118,13 @@ struct SidebarView: View {
             }
             #endif
         }
+        // VX-424: the row's two drop HALVES — the upper names the slot before
+        // it, the lower the slot after it — reaching the list's side margins,
+        // live only while this list's own drag is in flight (at rest they take
+        // no hits, so every door below is the row's exactly as before). An
+        // overlay INSIDE the gestures and the row's own drop: nearer the
+        // pointer than the row's drop, and still the row's to click and drag.
+        .overlay { openRowHalves(noteID, first: ordinal == 1) }
         #if DEBUG
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             SidebarGeometry.recordOpenRowHeight(height, in: session.debugProbeScope)
@@ -1132,6 +1160,7 @@ struct SidebarView: View {
         }
         // U2d (P-U2d-1): the row is its own drop on MAIN's per-row road — the
         // targeted row draws the line at its top and takes the drop before it.
+        // VX-424: under its two halves (above), as the row's floor.
         .modifier(OpenListRowDrop(state: openListDrag, noteID: noteID, workspace: workspace))
         .contextMenu {
             if let onOpenBeside {
@@ -1330,6 +1359,21 @@ enum SidebarGeometry {
         openListEndZones[bodyKey(for: workspace)] = frame
     }
 
+    /// **VX-424 — the FIRST Open row's two drop halves, as laid out** (global;
+    /// upper, lower), keyed like every oracle here.
+    static var openListFirstRowHalves: [String: (upper: CGRect, lower: CGRect)] = [:]
+
+    static func recordOpenListFirstRowHalves(_ upper: CGRect, _ lower: CGRect, for workspace: WorkspaceModel) {
+        openListFirstRowHalves[bodyKey(for: workspace)] = (upper, lower)
+    }
+
+    /// …and the first row's ✕ (global), where the at-rest click pin presses.
+    static var openListFirstRowCloses: [String: CGRect] = [:]
+
+    static func recordOpenListFirstRowClose(_ frame: CGRect, for workspace: WorkspaceModel) {
+        openListFirstRowCloses[bodyKey(for: workspace)] = frame
+    }
+
     /// A pin clears ITS OWN column's rows and no other (the keying rule).
     static func forgetSections(for workspace: WorkspaceModel) {
         let key = bodyKey(for: workspace)
@@ -1339,6 +1383,8 @@ enum SidebarGeometry {
         openListDrags[key] = nil
         openListLines[key] = nil
         openListEndZones[key] = nil
+        openListFirstRowHalves[key] = nil
+        openListFirstRowCloses[key] = nil
     }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the

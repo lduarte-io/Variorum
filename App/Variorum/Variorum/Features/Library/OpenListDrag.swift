@@ -62,18 +62,25 @@ import SwiftUI
 @MainActor
 @Observable
 final class OpenListDragState {
-    /// Which of the list's drops a drag targets: a row — by its NOTE, so a
-    /// change of the list re-derives where that row stands (main's landing
-    /// names the row the same way) — or the end zone.
+    /// Which of the list's drops a drag targets: a row's HALF — by the row's
+    /// NOTE, so a change of the list re-derives where that row stands (main's
+    /// landing names the row the same way) — or the end zone.
+    ///
+    /// **VX-424:** a row has two targets now — its upper half (`before`, the
+    /// slot before it; also the row's own drop under its halves) and its lower
+    /// half (`after`, the slot after it) — where it had one (`row`, "before"
+    /// whichever half the pointer was in).
     nonisolated enum Target: Equatable, Sendable {
-        case row(String)
+        case before(String)
+        case after(String)
         case end
 
         /// The target as the pure rule reads it, against `rows` as they stand
         /// — nil for a row no longer in the list.
         func hover(in rows: [String]) -> SidebarLayout.OpenListDrop.Hover? {
             switch self {
-            case .row(let noteID): rows.firstIndex(of: noteID).map { .row($0) }
+            case .before(let noteID): rows.firstIndex(of: noteID).map { .before($0) }
+            case .after(let noteID): rows.firstIndex(of: noteID).map { .after($0) }
             case .end: .end
             }
         }
@@ -152,9 +159,10 @@ enum OpenListDropDoor {
     /// into place"*. PROVISIONAL P-U2-4.
     static var settle: Animation { .snappy(duration: SidebarLayout.railTransition) }
 
-    /// **The release on `target`** — named by the drop that took it (its own
-    /// row, or the end zone), never by the hover state, against the rows as
-    /// they stand: the slot before that row, or the last slot. `land` decides
+    /// **The release on `target`** — named by the drop that took it (a row's
+    /// half, the row itself, or the end zone), never by the hover state, against
+    /// the rows as they stand: the slot before or after that row, or the last
+    /// slot. `land` decides
     /// on the payload's word (a drop never depends on the drag having been seen
     /// to begin, nor on the order of the source session's end against the
     /// drop). The drop ends the drag either way. Returns whether anything moved
@@ -209,10 +217,16 @@ enum OpenListDropDoor {
     #endif
 }
 
-/// **An Open row's drop** (U2d, P-U2d-1) — main's per-row Transferable drop:
-/// `isTargeted` marks the row as the drag's target (the line at its top), and
-/// the action lands the decoded token in the slot before THIS row, through the
-/// door and its settle.
+/// **An Open row's own drop** (U2d, P-U2d-1) — main's per-row Transferable
+/// drop: `isTargeted` marks the row as the drag's target (the line at its top),
+/// and the action lands the decoded token in the slot before THIS row, through
+/// the door and its settle.
+///
+/// **VX-424:** the row's two HALVES (`OpenListRowHalves`, an overlay INSIDE
+/// this modifier, so nearer the pointer) take every drop of this list's own
+/// drag; this drop stays UNDER them as the row's floor — should a half ever not
+/// be offered the drag, the row still takes it exactly as it did before VX-424
+/// (the slot before it), never a dead row.
 struct OpenListRowDrop: ViewModifier {
     let state: OpenListDragState
     /// The row's note — its name as a target and at the landing.
@@ -222,9 +236,71 @@ struct OpenListRowDrop: ViewModifier {
     func body(content: Content) -> some View {
         content
             .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in
-                OpenListDropDoor.perform(tokens, onto: .row(noteID), state: state, workspace: workspace)
+                OpenListDropDoor.perform(tokens, onto: .before(noteID), state: state, workspace: workspace)
             } isTargeted: { targeted in
-                state.targeted(.row(noteID), targeted)
+                state.targeted(.before(noteID), targeted)
+            }
+    }
+}
+
+/// **VX-424 — an Open row's two HALVES**, each its own drop on main's road
+/// (the classic `dropDestination(…isTargeted:)` her hands have used, and the
+/// end zone's own shape: a clear, shaped view): the UPPER half names the slot
+/// BEFORE the row, the LOWER half the slot AFTER it. The half IS the target, so
+/// no pointer location is needed while hovering (the macOS 26 session form that
+/// would carry one was never offered a real drag — U2b/U2c). Together they cover
+/// the row and reach the list's side margins (`reach`), which were dead room.
+///
+/// **Live only while THIS list's own drag is in flight** (`state.dragging`, set
+/// when the drag begins, cleared at its session's end or its drop): at rest the
+/// halves take no hits, so every door of the row — the click, the ✕, the
+/// right-click, the title's hover scroll, the drag itself — is exactly as it
+/// was; and a drag that began elsewhere (another window's list, a file) never
+/// meets them.
+struct OpenListRowHalves: View {
+    let state: OpenListDragState
+    let noteID: String
+    let workspace: WorkspaceModel
+    /// The side margin the halves reach into on each side (the list's rows sit
+    /// inside the scroll content's padding).
+    let reach: CGFloat
+    #if DEBUG
+    /// The DEBUG oracle's tap: the two halves as laid out (global), upper first.
+    var report: ((CGRect, CGRect) -> Void)? = nil
+    @State private var upper: CGRect = .zero
+    @State private var lower: CGRect = .zero
+    #endif
+
+    var body: some View {
+        VStack(spacing: 0) {
+            half(.before(noteID))
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    upper = $0
+                    report?(upper, lower)
+                }
+                #endif
+            half(.after(noteID))
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    lower = $0
+                    report?(upper, lower)
+                }
+                #endif
+        }
+        .padding(.horizontal, -reach)
+        .allowsHitTesting(state.dragging != nil)
+        .accessibilityHidden(true)
+    }
+
+    private func half(_ target: OpenListDragState.Target) -> some View {
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in
+                OpenListDropDoor.perform(tokens, onto: target, state: state, workspace: workspace)
+            } isTargeted: { targeted in
+                state.targeted(target, targeted)
             }
     }
 }

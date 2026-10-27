@@ -592,21 +592,39 @@ nonisolated enum SidebarLayout {
     // MAIN's own per-row API).** No synthetic road reaches a drop in the sidebar,
     // on main either (the U2c main-build control), so the drop stays on the
     // API her hands have used: each row a classic `dropDestination(…isTargeted:)`.
-    // The TARGETED row names the slot before it — main's own landing — and now
-    // draws the line at its top; the end zone names the last slot. U2's half-row
+    // The TARGETED row named the slot before it — main's own landing — and drew
+    // the line at its top; the end zone names the last slot. U2's half-row
     // refinement (a pointer's half of the row deciding) needed a location while
     // hovering that only the macOS 26 session form offers, and that form was
-    // never offered a real drag (U2b/U2c's traces): it is gone.
+    // never offered a real drag (U2b/U2c's traces): it went.
+    //
+    // **VX-424 (the VX-439 run, A-439-15) — the half row is back, on main's road.**
+    // Her report: *"sometimes the drag … lifts a card-styled drag image of the
+    // note's name and the drop does nothing"*, and *"it happens trying to move it
+    // up as well"*. The traced mechanism (the record's instrument over this rule):
+    // a row named only the slot BEFORE it, so the row right below the dragged one
+    // named the dragged row's own lower gap — dragging DOWN by one could never
+    // land — and every up-drag landed on the hovered row's top whichever half the
+    // pointer was in. The fix keeps the API her hands have used (a classic
+    // per-target `dropDestination(…isTargeted:)`) and gives each row TWO targets,
+    // its upper half naming the slot before it and its lower half the slot after
+    // it (`OpenListRowHalves`) — no location while hovering is needed, because
+    // the half IS the target. The two halves of one boundary (a row's lower half,
+    // the next row's upper half) name the SAME slot, so the line never jumps
+    // between them.
 
     /// The Open list's drop, as pure decisions over the list's rows (each
     /// `rowHeight` tall, the first at the content's top — the same row model the
     /// section window reads).
     nonisolated enum OpenListDrop {
         /// Which of the list's drops a drag is over — the one SwiftUI says is
-        /// TARGETED (each row's `isTargeted`, and the end zone's).
+        /// TARGETED (each row half's `isTargeted`, and the end zone's).
         enum Hover: Equatable, Sendable {
-            /// Row `index` is the target: the slot BEFORE it.
-            case row(Int)
+            /// Row `index`'s UPPER half (or the row as a whole — its own drop,
+            /// under the halves): the slot BEFORE it.
+            case before(Int)
+            /// Row `index`'s LOWER half: the slot AFTER it (VX-424).
+            case after(Int)
             /// The END ZONE under the last row: the slot after it.
             case end
         }
@@ -620,12 +638,16 @@ nonisolated enum SidebarLayout {
         /// W11a's lesson: 14 pt was "nothing").
         static let endZoneMaxHeight: CGFloat = 28
 
-        /// **The gap a target names**, 0…rows: a targeted row the gap BEFORE
-        /// it — its own index (main's landing); the end zone the gap after the
-        /// last row. nil for a row off the list, or a list with no rows.
+        /// **The gap a target names**, 0…rows: a row's upper half the gap
+        /// BEFORE it — its own index (main's landing); its lower half the gap
+        /// AFTER it — the next index (VX-424); the end zone the gap after the
+        /// last row. So one boundary's two halves — row k's lower, row k+1's
+        /// upper — name one gap, k+1, and the last row's lower half names the
+        /// end zone's. nil for a row off the list, or a list with no rows.
         static func gap(for hover: Hover, rows: Int) -> Int? {
             switch hover {
-            case .row(let index): (0..<rows).contains(index) ? index : nil
+            case .before(let index): (0..<rows).contains(index) ? index : nil
+            case .after(let index): (0..<rows).contains(index) ? index + 1 : nil
             case .end: rows > 0 ? rows : nil
             }
         }
@@ -633,8 +655,9 @@ nonisolated enum SidebarLayout {
         /// **Where the dragged row goes** — the onMove destination (a PRE-move
         /// gap index, `OpenNotes.move`'s convention), which IS the gap. nil
         /// where the drop would change nothing: the dragged row's own two gaps
-        /// (its own row targeted, or the row right after it), or an index off
-        /// the list — §12's false-offer rule: no line there, and no move.
+        /// (its own row's either half, the upper half of the row right after
+        /// it, the lower half of the row right before it), or an index off the
+        /// list — §12's false-offer rule: no line there, and no move.
         static func destination(gap: Int, dragged: Int, rows: Int) -> Int? {
             guard rows > 0, (0..<rows).contains(dragged), (0...rows).contains(gap) else { return nil }
             guard gap != dragged, gap != dragged + 1 else { return nil }
@@ -644,8 +667,9 @@ nonisolated enum SidebarLayout {
         /// **The insertion line's top, in the list's VIEWPORT** — nil where no
         /// line is drawn: nothing targeted, no drag of this list's in flight,
         /// nothing laid out or read yet, or a target where the drop would
-        /// change nothing. The line sits centred on the boundary at the
-        /// targeted row's TOP (the end zone's: the last row's bottom), held
+        /// change nothing. The line sits centred on the boundary the target
+        /// names — an upper half's row TOP, a lower half's row BOTTOM (the end
+        /// zone's: the last row's bottom), one place for one boundary — held
         /// inside the rows at the two ends and inside the window (a top past a
         /// scrolled edge shows at that edge). Every input is an argument — the
         /// target, the scroll window, the rows, the pitch, the dragged row — so

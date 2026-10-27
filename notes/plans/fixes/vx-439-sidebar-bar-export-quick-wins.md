@@ -264,7 +264,39 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 - Batch 2: IN-PROGRESS — implementer session 2 (`opus-implementer`, fresh, 2026-10-27); preflight read (CLAUDE.md +
   canon, this record whole, SurfaceContracts whole, the resiliency protocol, TEXTKIT2_NOTES §3–4, the capability model,
   VX-283's U2b–U2d drag history). No revert in flight. Members in order:
-  - VX-424: IN-PROGRESS — the instrument (both directions) first, then the red-on-old pins, then the half-row fix.
+  - VX-424: BUILT (this commit) — PENDING the stage run (the mounted + source-read pins and the R-O/R-G revert cycle).
+    INSTRUMENT (`295bf3794`, removed `941728f54`): the rule refuses only DOWN BY ONE; up-drags land on the hovered row's
+    top whichever half (Ledger "B2 VX-424 — THE INSTRUMENT"). FIX: each Open row wears `OpenListRowHalves` — an overlay
+    INSIDE its gestures and its own drop, two clear shaped halves stacked with no gap, each main's classic
+    `dropDestination(for:action:isTargeted:)` (the road her hands use; the end zone's own shape): the UPPER half names
+    `Target.before(note)` (the slot before the row), the LOWER `Target.after(note)` (the slot after it); the halves reach
+    the list's side margins (`reach: scrollingSectionMargin`, dead room before) and take hits ONLY while this list's own
+    drag is in flight (`.allowsHitTesting(state.dragging != nil)` — at rest every row door is exactly as before; a foreign
+    drag never meets them). The row's own drop stays UNDER the halves as its floor (`.before(note)`, the pre-VX-424
+    landing) — should a half ever not be offered the drag, the row behaves exactly as before, never dead. Pure rule:
+    `Hover`/`Target` `.row` → `.before`/`.after`; `gap(.after(i)) = i + 1`; one boundary's two halves name ONE gap, so the
+    line never moves crossing it (and the last row's lower half = the end zone). `destination`/`lineTop` unchanged.
+    PINS (`OpenListDragTests.swift`): NEW `aDownByOneDropLands`, `anUpwardDropLandsOnTheHalfItIsReleasedOn`,
+    `oneBoundarysTwoHalvesDrawOneLine`, door `aDownByOneReleaseLandsWhereTheLineWas` +
+    `anUpDragReleasedOnARowsLowerHalfLandsJustBelowIt`, face `eachRowsTwoHalvesAreDropsOnMainsRoadLiveOnlyWhileItsDragIsInFlight`,
+    mount `theRowsTwoHalvesSplitItAtItsMidlineAndReachTheListsEdges` + guard `atRestTheHalvesTakeNoClickSoTheRowsDoorsAct`;
+    DELIBERATELY EDITED (annotated "VX-424", none deleted): the four pins whose subject was "a row names the slot before
+    it" now state the halves (`aRowsUpperHalfNamesTheSlotBeforeIt…` ← `theTargetedRowNamesTheSlotBeforeIt…`,
+    `everyDropLandsOnTheSideOfTheRowItsHalfNames` ← `everyDropLandsBeforeTheTargetedRow`,
+    `everySlotIsReachedAndOneBoundarysTwoHalvesNameOneSlot` ← `everySlotIsReachedByExactlyOneTarget`,
+    `theLineSitsOnTheBoundaryTheHalfNames` ← `theLineSitsAtTheTargetedRowsTop`), `aTargetChangeMovesTheLine` walks halves,
+    the own-place pins name four halves, every other `.row(x)` reads `.before(x)` (same slot). RED ON OLD, HEADLESS —
+    VERIFIED: a replica (scratchpad `vx424/replica/`: the REAL `SidebarLayout.swift`, `OpenListDrag.swift`, `OpenNotes`
+    cut verbatim, a two-method `WorkspaceModel` stub, the Rule + Door suites' 29 bodies transformed mechanically) — the
+    fixed tree **1020 checks, 0 failed**; under the named revert **R-H** (`gap(for: .after(i))` → `i`: the pre-VX-424 rule
+    exactly, a row's either half naming the slot before it) **402 failed, in exactly the 13 pins that state the halves**
+    (the five new direction/flicker pins, the four re-stated, `aTargetChangeMovesTheLine`, both own-place pins, the door's
+    boundary-crossing leg) — the down-by-one and the up-drag pins among them. The mount/face pins and their reverts
+    R-O (the overlay line removed) / R-G (`.allowsHitTesting(true)`) are the stage's (READY list). build-for-testing GREEN.
+    DELIVERY (that AppKit offers a real drag to the halves) has no headless pin and no synthetic road (VX-375): her hand
+    check is the evidence — drag a row down one (release on the next row's lower half), up one (the row above's upper
+    half), to the end, and watch the line stay put crossing a boundary. SurfaceContracts' Open-list drop sentence owes its
+    closeout edit (A-439-15, pointer VX-424 — the orchestrator's).
   - VX-425: NOT-STARTED
   - VX-580: NOT-STARTED
   - VX-589: NOT-STARTED
