@@ -59,7 +59,7 @@ dev-store copy so a merge-gating run can slot in.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight whole; worktree + branch; in-flight row on main; VX-502 In Progress; coordinator announced, slot granted | DONE (this commit) |
-| 1 | Unit A: the subset rule + pins (a fresh opus-implementer, headless) | NOT STARTED — the design ruled below (UNIT A) |
+| 1 | Unit A: the subset rule + pins (a fresh opus-implementer, headless) | IN PROGRESS — the implementer's own table: "UNIT A — LIVE STATUS" at this record's end |
 | 2 | The ladder on unit A's diff | NOT STARTED |
 | 3 | Unit B: the Castle-restore walk (an Opus session; stage via the coordinator; dev-castle.env; posture restored after) | NOT STARTED — the goal and legs ruled below (UNIT B); the walk session proposes the concrete plan back before acting |
 | 4 | Closeout: canon deltas (SurfaceContracts Doors line; AppSpecRecord entry; QUESTIONS #239(a) note), canon-size, tickets triaged, handoff, PR, merge serialized with VX-439 | NOT STARTED |
@@ -187,3 +187,77 @@ Sonnet for external facts.
 | 6 | The walk, legs 1–8 | unit B | OPEN |
 | 7 | Canon deltas + QUESTIONS #239(a) note + AppSpecRecord entry | closeout | OPEN |
 | 8 | Tickets triaged; handoff; PR; merge serialized vs VX-439 | closeout | OPEN |
+
+## UNIT A — LIVE STATUS (the implementer owns this section)
+
+*opus-implementer, 2026-10-27, HEADLESS (no stage, no app launch, no `xcodebuild test`, no store, no server). Every
+claim not marked DONE with its evidence is PENDING. A fresh session with only the repo finishes the unit from this
+table.*
+
+**REVERT STATE: no revert in flight.** (Before any behavioral revert starts, this line names it and the committed
+pre-revert hash; the restore is `git checkout -- <file>` from that commit, verified by `git diff --exit-code`.)
+
+| # | Piece | Status |
+|---|---|---|
+| A0 | Preflight (canon, this record whole, SurfaceContracts' Doors, the resiliency protocol, the code) + the D-A2 verification below + this section | DONE (this commit) |
+| A1 | The pins, committed RED-on-old before the fix: core pins 1–3 in `PlaintextExportImportTests` (the old two-arm `anExportOfAnotherBuildsSchemaRefuses` split — its earlier-build arm FLIPPED into pin 1, its newer arm kept as pin 3); the app-side pin on the dead face (`PlaintextExportBringInRoadTests.thePreflightRefusesAnotherBuildsExportAndWritesNothing`) FLIPPED the same way | NOT STARTED |
+| A2 | The fix: the gate → `applied.isSubset(of: known)`; `Failure.schemaNotCurrent(newer:)` → `Failure.schemaNewer` (D-A1); `readPlaintextExport` catches it with the existing `LibraryOpenCopy.newerSchemaRefusal`; `ProtectionWords.exportFromAnEarlierBuild` deleted with its doc and its two `U2WordsTests` mentions (pins found by grep: `U2WordsTests` ×2, `PlaintextExportBringInRoadTests` ×1 — none in `PlaintextExportDoorTests` or `CopyActTests`); D-A4's doc pointers; the standing feature-detect duty as a comment above the gate | NOT STARTED |
+| A3 | The behavioral reverts, named here before any run: **RV-A1** — the gate restored to exact-match (`applied == known`) → pins 1 and 2 RED; **RV-A2** — the gate deleted whole → pin 3 RED. Each from the committed fix, restored by `git checkout --`, `git diff --exit-code` clean | NOT STARTED |
+| A4 | Evidence on the final tree: `swift test --filter PlaintextExportImportTests`; the adjacent filter `PlaintextExport\|LibraryClassifier\|VariorumDocument\|CopyAct`; the whole core suite debug AND release; ONE `xcodebuild … build-for-testing` (`-derivedDataPath App/Variorum/DerivedData/vx502-unitA`) | NOT STARTED |
+
+**What this unit cannot run (stage-gated — PENDING, the orchestrator's):** the Mac suites it touches —
+`PlaintextExportBringInRoadTests` (the flipped preflight pin) and `U2WordsTests` (the deleted mentions) — are only
+COMPILED here (A4's build-for-testing).
+
+### D-A2 — the read-tolerance verification (in source, column by column)
+
+**The record's premise, checked — and corrected.** D-A2 says no export can be older than "the build that shipped
+`StorePlaintextExport` (vx-309, merged 2026-10-20)". **That attribution is wrong:** the WRITER (`StorePlaintextExport`
++ Data Safety's door, not Debug-gated) was born at pre-13x 3b, `1fce30cb8` (2026-09-06, migrations `v1_core`…`v1_16`);
+vx-309 (`1e9f4abb2`) shipped the READER (T-8's bring-in). **The conclusion holds anyway, for a different reason —
+VX-461** (`3470c6905`; its commit traces it: a sandboxed save panel grants the picked path alone, the export's first
+write opened `<picked>-journal` beside it outside the grant, so the copy failed "unable to open database file" and left
+the picked file at 0 BYTES — proven under `sandbox-exec`, the vx-309 walk's W-VX309-4 line byte for byte). The Mac
+target is sandboxed in BOTH configurations since Phase 7 (`5d9c2ccf8`: `ENABLE_APP_SANDBOX = YES`, user-selected
+read-write only — no Downloads/Desktop entitlement); both writers (`DataSafetyPane`, the new road's
+`SQLCipherLibraryLeaf`) go through `StorePlaintextExport.export` → `write`. So **the first build that could write a
+content-bearing export is the VX-329 merge `0aab72c39` (2026-10-22, carrying VX-461; migrations `v1_core`…`v1_31`)** —
+release 0.10 (9093), exactly F6's scene. A pre-fix door's 0-byte file classifies `.notAVariorumStore` (the
+classifier's empty-file arm) and never reaches the reader. (Theoretical residue, never a real export: a file written
+where the sandbox already held a folder grant — the chosen backups folder, which the door itself refuses — or by an
+unsandboxed headless tool. Such a file older than `v1_21` throws a SQL error — "no such table: wing" below `v1_18`,
+"no such column: archived_at" below `v1_21`, both before any record decode of a missing column — into the generic
+catch → `.unreadableCopy`.)
+
+**Every table and column the reader touches, with the migration that made it** — `PlaintextExportReading.plan` and
+everything it calls: `Queries.variorumDocumentText` → `variorumDocument` → `Container.fetchOne` (Codable — every
+`Container` property), `blockPresentations`, `postTags` (`Tag` Codable), `exportBlocks` → `renderPost` (+ `blockFan`,
+`Variant` Codable); `DisplayTitle` is pure:
+
+| Table · columns read | Born |
+|---|---|
+| `grdb_migrations.identifier` | GRDB's own |
+| `container`: id, owner_id, kind, title, profile, entry_date, locked, locked_at, floating_notes, segmentation_default, last_touched_at, last_major_revision_at, churn_accumulator, baseline_length, created_at, updated_at, archived_at, deleted_at, sync_version | `v1_core` |
+| `container.word_target` (Container decode; optional) | `v1_12` |
+| `container.wing_id` (the notes query + Container decode, non-optional) | `v1_18` |
+| `block`: id, default_variant_id, deleted_at · `variant`: every `Variant` property (id, block_id, parent_variant_id, working_text, status, locked, label, fan_position, created/updated/deleted_at, sync_version) · `container_block`: id, block_id, container_id, position, chosen_variant_id, deleted_at | `v1_core` |
+| `block_comment`: block_id, deleted_at (renderPost's comment count) | `v1_8` |
+| `block.presentation` | `v1_9` |
+| `tag`: id, owner_id, parent_id, name, path, created/updated/deleted_at, sync_version · `post_tag`: tag_id, post_id, deleted_at | `v1_core` |
+| `tag.wing_id` (Tag decode, non-optional) | `v1_18` |
+| `reading`: id, name, kind, deleted_at (kind `'book'`, or the pre-`v1_18` spelling `'curated'` — both read) | `v1_core` (the table rebuilt at `v1_18`) |
+| `reading.wing_id` | `v1_18` |
+| `reading.archived_at` | `v1_21` — **the newest column the reader touches** |
+| `reading_section`: id, reading_id, name, position, deleted_at · `reading_post.section_id` | `v1_10` |
+| `reading_post`: id, reading_id, post_id, position, deleted_at | `v1_core` |
+| `reading_post.status` | `v1_18` — feature-detected (`hasStatus`) |
+| `wing`: id, name, position, deleted_at | `v1_18` |
+
+Never read: `v1_31`'s `protection_record` and `v1_32`'s `sync_pull_stage` (each migration is ONE `CREATE TABLE` of a
+local-only table — `ProtectionRecordSchema.ddl`, `SyncPullStageSchema.ddl` — both in `SyncSchema.localOnlyTables`,
+both DROPPED by the export); `v1_25`'s `ai_private_at` (no `Container` property; the reading query names its
+columns); the MCP family (`v1_24`–`v1_30`; travels empty). **Verdict: every read column was in the migration set at
+vx-309's merge (`007a9f2b1`, through `v1_31`) AND at the first content-bearing export's build (`0aab72c39`, through
+`v1_31`). `v1_31` and `v1_32` change no table the reader touches, so every real export's physical schema is today's
+minus the local-only tables, and the reader reads them all. NO FORK.** The standing duty (any future migration that
+alters a table this list names adds a feature-detect, the `hasStatus` precedent) lands at the gate as a comment (A2).
