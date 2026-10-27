@@ -99,12 +99,15 @@ extension MCPWriteTools {
 
     /// A write aimed at a gathering the client can READ (P-VX196-2) — her
     /// `RemoveFromBookCopy.removeTagHelp` truth: it holds no notes; a note
-    /// leaves it by no longer matching.
+    /// leaves it by no longer matching. VX-596: `set_starred` on a gathering's
+    /// id hears it too, so the author's acts it names include starring
+    /// (PROVISIONAL words, the VX-620 record's bundle).
     static func gatheringWords(_ name: String?) -> String {
         let named = name.map { "\u{201C}\($0)\u{201D}" } ?? "That"
         return "\(named) is a gathering \u{2014} it shows the notes its rule matches and holds none of its own, "
             + "so it can be read but not changed through this door. A note leaves it by no longer matching "
-            + "(remove_tag takes a tag off a note); renaming, archiving or deleting a gathering is the author's."
+            + "(remove_tag takes a tag off a note); renaming, starring, archiving or deleting a gathering is the "
+            + "author's."
     }
 
     /// A note named on a book act that is not one of the book's notes (the

@@ -287,7 +287,10 @@ struct MCPServerTests {
                     "remove_note_from_book", "move_note_in_book", "rename_chapter", "delete_chapter",
                     "move_chapter",
                     // …and a note in the library.
-                    "delete_note", "archive_note", "unarchive_note"])
+                    "delete_note", "archive_note", "unarchive_note",
+                    // VX-596 (justified edit, the ritual — her ruling 2026-10-27,
+                    // "let's add the star over the wire"): her star, a note or a book.
+                    "set_starred"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })

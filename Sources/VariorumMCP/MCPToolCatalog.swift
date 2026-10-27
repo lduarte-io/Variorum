@@ -154,6 +154,9 @@ enum MCPToolCatalog {
         removeNoteFromBook, moveNoteInBook, renameChapter, deleteChapter, moveChapter,
         // …and a note in the library: its Trash road and its archive.
         deleteNote, archiveNote, unarchiveNote,
+        // VX-596 — her star on the wire (her ruling 2026-10-27: "let's add the
+        // star over the wire, it might as well be included"): a note or a book.
+        setStarred,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -639,8 +642,9 @@ enum MCPToolCatalog {
             Create a new note inside a shared book (book_id — it joins the book at its end) or a \
             shared wing (wing_id; "" is Home — it lands bookless; list_wings gives the wing_id of every \
             wing shared with you, empty ones too). book_id may name a shared gathering: the note lands \
-            bookless in its wing wearing the tags its rule needs, so the gathering shows it (a rule \
-            that needs a starred note refuses — only the author stars). Give EITHER text (plain prose: \
+            bookless in its wing wearing the tags its rule needs, so the gathering shows it — and where \
+            only a star gets a note in, it is born starred (one of the author's stars) and the answer \
+            says \(MCPWriteTools.starredMintKey): true. Give EITHER text (plain prose: \
             each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
             — a blank line inside it stays inside the one block — with an optional name and its \
             other takes, each with an optional label). Each label is stored as given (trimmed; a \
@@ -705,7 +709,7 @@ enum MCPToolCatalog {
             sections as extra takes, each labeled as its take: line says — \(labelNotPrefixed); \
             with {v:2} first in the header, "--- next block ---" lines \
             separate the blocks and blank lines stay inside them. Either one `document` into a shared book or gathering \
-            (book_id — into a gathering it lands bookless, wearing its rule's tags, as create_note says) or wing \
+            (book_id — into a gathering it lands bookless, wearing what its rule needs, as create_note says) or wing \
             (wing_id — list_wings gives every shared wing's), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
             shared wing. One import is one undo for the author. Returns JSON with the new ids — \
             for one document also blocks, as create_note answers them (each block's shown_take_id \
@@ -1642,6 +1646,38 @@ enum MCPToolCatalog {
             Returns JSON.
             """,
         inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-596 — her star on the wire
+
+    /// Her Star / Unstar (the union star — a book's two stores, the cap, intake
+    /// hearing a note's star; un-starring a non-event). A note acts under every
+    /// scope (its place decided through the one `decide`), a book under a book or
+    /// wing grant — so the tool declares every scope; a gathering's own star is
+    /// the author's (the gathering sentence, P-VX196-2's posture).
+    static let setStarred = MCPToolDeclaration(
+        name: "set_starred", rung: .edit, title: "Star or unstar",
+        description: """
+            Star or un-star a note or a book, as the author's Star does: pass note_id or book_id, \
+            and starred (true stars it, false un-stars it). Starred things sit in the Starred list \
+            at the top of the author's sidebar, which holds \(Operations.starLimit) at a time — a star \
+            past that is refused (un-star one first). Starring a note is heard as when the author \
+            stars it: a book whose rule collects starred notes takes it in, or holds it at its \
+            Arrivals; un-starring never takes a note out of a book. A gathering's own star is the \
+            author's. Returns JSON with changed — false when it already was as asked: nothing was \
+            written and there is nothing to undo. One undo for the author puts it back as it was, \
+            in its place in the list.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note (instead of book_id)."]),
+                "book_id": .object(["type": "string", "description": "The book (instead of note_id)."]),
+                "starred": .object(["type": "boolean", "description": "true stars it; false un-stars it."]),
+            ]),
+            "required": .array(["starred"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
 
     // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
 

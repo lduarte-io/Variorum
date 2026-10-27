@@ -229,10 +229,8 @@ anchors the brief names. No subagent.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **A behavioural revert is ANNOUNCED (next, over this commit's tree):** `Operations+MCPStars.swift`'s replay with its
-  three design lines knocked out — `at: place.value` → `at: nil`, `heard: false` → `heard: true`, and the
-  compare-and-set guard removed — run against `MCPStarActsTests`, then restored by `git checkout --` (this commit is the
-  pre-revert state; `git diff` after must be clean).
+- **No behavioural revert is in flight.** (The announced revert RAN over `7aa602636` and was restored by `git
+  checkout --`, `git diff` clean after — see piece 3.)
 - **0 · Preflight + this record:** DONE (this commit).
 - **1 · Pins first (red on the pre-fix tree):** DONE (this commit) — `MCPGatheringGrantServerTests`: the deliberate
   flip `aRuleThatNeedsAStarMintsTheNoteStarredWithOneClientNamedUndo` (was `…RefusesWriteNewInWordsAndWritesNothing`),
@@ -252,8 +250,21 @@ anchors the brief names. No subagent.*
 - **3 · `setStarredForClient` (core op + exact-row undo):** DONE (this commit) — `Operations+MCPStars.swift`
   (`setStarredForClient`, `replayMCPStar`), `writeStar` grows `at:` + `heard:` (both defaulted — every other caller
   byte-unchanged; `starTargetIsLive` internal), `MCPWriteAct.star` / `.unstar`. `MCPStarActsTests` (9) GREEN
-  (`scratchpad/b1-logs/star-acts.log`); red on old by construction (no such act). Behavioural revert: announced above.
-- **4 · `set_starred` on the wire (catalog, decisions, answers, Activity):** NOT-STARTED.
+  (`scratchpad/b1-logs/star-acts.log`); red on old by construction (no such act). **BEHAVIOURAL REVERT RUN**
+  (`star-acts-revert-red.log`: the replay's place → `nil`, `heard` → `true`, its compare-and-set removed): **4 of 9
+  red, 11 issues** — `anUnstarsUndoPutsTheStarBackWhereItStood`, `eachHalfWritesOnlyWhileTheStarReadsItsPartnersValue`,
+  `aReplayedStarIsNoApplyingAct`, `aHalfThatWouldPassTheCapRefusesAndKeepsItsEntry`; restored, GREEN again
+  (`star-acts-restored.log`, 9/1).
+- **4 · `set_starred` on the wire (catalog, decisions, answers):** DONE (this commit) — `MCPWriteTools+Star.swift`
+  (parse + perform: a note through `onNote` at EDIT + `guardEdit`, a book through `onBook` at EDIT + `guardBooks`, a
+  readable gathering hearing `gatheringWords` — now naming starring), `Job.setStarred` (flushes nothing; writes no
+  text), `MCPToolCatalog.setStarred` (EDIT, every scope), `create_note` / `import_document` descriptions say the born
+  star. `MCPStarServerTests` (7, over the socket) GREEN (`star-wire.log`); red on old by construction (no such tool).
+  Justified edits: `MCPServerTests.everyDeclaredToolIsHandledAndEveryHandledToolDeclared` (the edit set +
+  `set_starred`) and `MCPWriteServerTests.aSuggestGrantProvablyCannotModifyAnExistingTake` (the proof's completeness —
+  two `set_starred` calls refusing at the rung). The whole MCP target before these two edits: 420/76 with the two
+  expected reds (the catalog-completeness pin) + VX-532's standing flake (`mcp-all-1.log`); the suggest proof green
+  after (`mcp-fix-1.log`). Activity's words ride piece 5 (the app's table).
 - **5 · The faces + the seven wording points + the deliberate flips:** NOT-STARTED.
 - **6 · Suites + Mac `build-for-testing` (fresh `DerivedData/b1`):** NOT-STARTED.
 

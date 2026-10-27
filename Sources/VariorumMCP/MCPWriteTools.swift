@@ -110,6 +110,9 @@ struct MCPWriteTools: Sendable {
         /// U2): `with_tags` (default true) and the book road (`book_id`, with
         /// an optional `section_id`).
         case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?)
+        /// VX-596: her star on the wire — a note or a book, starred or not
+        /// (`MCPWriteTools+Star`).
+        case setStarred(target: StarTarget, starred: Bool)
 
         var tool: String {
             switch self {
@@ -132,6 +135,7 @@ struct MCPWriteTools: Sendable {
             case .addNoteToBook: "add_note_to_book"
             case .insertBlocks: "insert_blocks"
             case .duplicateNote: "duplicate_note"
+            case .setStarred: "set_starred"
             }
         }
 
@@ -165,6 +169,10 @@ struct MCPWriteTools: Sendable {
             // her caret by identity; her open tail stays below the stored
             // blocks and crystallizes after the run, where the screen showed it.
             case .insertBlocks:
+                false
+            // VX-596: a star is a setting-list entry (and a book's column) —
+            // no take's text read, rewritten, copied, frozen or tombstoned.
+            case .setStarred:
                 false
             // VX-311 (the run record's D-311-6, argued from VX-246 U3's COPY
             // row): a duplicate COPIES every take of the note — `copyPlacements`
@@ -263,6 +271,8 @@ struct MCPWriteTools: Sendable {
             return try parseInsertBlocks(args)
         case MCPToolCatalog.duplicateNote.name:
             return try parseDuplicateNote(args)
+        case MCPToolCatalog.setStarred.name:
+            return try parseSetStarred(args)
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
@@ -566,6 +576,8 @@ struct MCPWriteTools: Sendable {
             return try performDuplicateNote(
                 noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, job: job, ops: ops,
                 clientName: clientName)
+        case .setStarred(let target, let starred):
+            return try performSetStarred(target, starred: starred, job: job, ops: ops, clientName: clientName)
         }
     }
 
