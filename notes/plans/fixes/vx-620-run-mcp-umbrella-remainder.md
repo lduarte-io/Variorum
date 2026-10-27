@@ -510,7 +510,7 @@ the editor seam, `VariorumMobile/`, `MCPSession.swift`.
   the star on “X”" (one tool both ways — the coarse log keeps no direction); the receipts "starred “X”" / "unstarred
   “X”"; the undo labels "‹client›'s star" / "‹client›'s unstar"; `starHeadsUp`; the gathering write-new rung sentence;
   the guide's two edits; `create_note`'s new sentence; `gatheringWords`' "starring"; `needsStar`'s bare fact.
-- **RB-9 (ticket for the orchestrator to file — Tests & tooling, the VX-532/VX-607 class, Low):**
+- **RB-9 — FILED as VX-625 (Bug · Test-only · Tests & tooling · Low, 2026-10-27):**
   `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` timed out once under the full-parallel headless run
   (its one-minute limit; 204.9 s), green isolated ×2 and in a second whole run — a held observation starving under
   load. Until ticketed, a full-parallel failure there is re-run isolated before it counts.
