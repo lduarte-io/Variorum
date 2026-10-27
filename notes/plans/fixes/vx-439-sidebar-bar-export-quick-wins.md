@@ -708,3 +708,19 @@ captures Terminal where visual).
   `TitleQuickfillTests.tabTakesTheOfferedFirstLineAndEnterFilesIt` and `aNoteWithNoWordsIsOfferedItsDate` (the old road:
   Tab moves on, the note stays untitled), the rule/read/guard pins green. (VX-424's pure + door reds — R-H — were run
   headless by the replica: 402 of 1020 checks.)
+- 2026-10-27 **B2 STAGE LEG — under claim `vx-439-b2-suites` (05:30 MDT, the coordinator's GO).** The five chunks on the
+  merged tree (default DerivedData, built at `0a30e8b09`'s code): chunk1 **543 tests / 101 suites**, 1 failing test;
+  chunk2 **690 / 99**, 1 failing; chunk3 **677 / 100**, 2 failing; chunk4 **529 / 100** GREEN; chunk5 **618 / 95** GREEN —
+  **3,057 tests in 495 suites**, 4 failing tests. The four: (1) `BrowserNavKeysTests.theKeyRunsBackAndForwardOrSpeaksTheDeclaredRefusal`
+  — MY pin read the wrong observable (`goBack()` REQUESTS a landing via `pendingSelection`, which a bare router never
+  adopts) — corrected to read the request (`0f77f2d95`); (2) `OpenListDragMountTests.atRestTheHalvesTakeNoClickSoTheRowsDoorsAct`
+  — MY rig's click map landed ONE ROW LOW (the ✕ closed row 2, the title click opened row 3 — the doors acted, the
+  coordinates were off by the titled window's chrome) — re-anchored on the list's own AppKit scroll view (`0f77f2d95`);
+  (3) `NoteVersionsPaneTests.theSaveAVersionChordIsTheShiftedTwinOfCommitAndNothingElseTakesIt` — BATCH 1's missed pin:
+  its `s`-chord sweep counts 4 since VX-125's ruled ⌥⌘S — updated DELIBERATELY (`0f77f2d95`); (4)
+  `DestructiveUndoWarningTests.redoNeverAsks` — 3 issues (the redo did not re-divide: `redoDepth` stays 1, no "Redid"
+  receipt). Rebuilt, the five suites re-run (`rerun1`): **36 tests / 5 suites, (1)–(3) GREEN**, (4) RED AGAIN identically —
+  NOT explained away: no batch-2 change is on its road (ShellActions' structural undo/redo, the undo stack and the
+  divide are untouched by this batch; batch 1's ShellActions edits are the export/⌥⌘N/Help lines), and it was in neither
+  batch 1's 152-suite list nor any earlier stage list of this run — PENDING a baseline run on main's own tree (below).
+  NO REVERT IN FLIGHT going into the cycles: tree clean at `0f77f2d95`.
