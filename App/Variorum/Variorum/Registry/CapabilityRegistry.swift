@@ -2260,8 +2260,11 @@ nonisolated enum CapabilityRegistry {
         // Phase 13b Stage 2 (R113): the tutorial's product door — replace
         // wholesale after a spoken confirm; idempotent; fire-and-DO (it
         // seeds AND opens the fresh book).
+        // VX-602 (the VX-439 run, A-439-9 — her words: "'Restore Tutorial'
+        // should be restore field guide"): the door names the book it
+        // restores, the field guide; the tour is the onboarding tutorial.
         Capability(
-            id: .restoreTutorial, verb: "Restore Tutorial…", scope: .app,
+            id: .restoreTutorial, verb: "Restore Field Guide…", scope: .app,
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),

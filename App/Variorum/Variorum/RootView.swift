@@ -1490,7 +1490,8 @@ struct RootView: View {
                 { [self] in adopt(.archived, in: router.workspace.focusedPane) }),
             // 13b Stage 2: the old modes-tutorial entrance points at the
             // one tutorial BOOK (find-or-seed, then open — fire-and-DO).
-            ("Open the Tutorial — \(TutorialSeeder.bookName)", { actions.openTutorial() }),
+            // VX-602 (the VX-439 run, C-602-1): the Help menu's twin, named so.
+            (HelpMenuCopy.openFieldGuide, { actions.openTutorial() }),
             ("Settings — Appearance & Tags", { [self] in openSettings() }),
             ("Use Terminal Voice", { [self] in theme.setVoice(.terminal) }),
             ("Use Study Voice", { [self] in theme.setVoice(.study) }),

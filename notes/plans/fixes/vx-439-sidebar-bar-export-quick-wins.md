@@ -210,7 +210,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     too (C-552-1). Design row: pin `QuickEntryWingLabelTests` (2: the words; both hosts compose the bar with the wing —
     source-read, the `theLibraryNoteRowMenuRendersItsDeclaredDoors` precedent) + the walk's capture (the
     orchestrator's, both voices) — build-for-testing GREEN; the suite run PENDING the stage window.
-  - VX-332: DONE (this line's commit) — TRACED MECHANISM (the VX-282 record's O-U6-1, confirmed by reading): the bar's
+  - VX-332: DONE (`1c7b74f7b`) — TRACED MECHANISM (the VX-282 record's O-U6-1, confirmed by reading): the bar's
     `.task` took the waiting road (`armOpeningFocus` — `CaptureOpeningFocus`: wait for the window, take only a free
     keyboard) ONLY for the shell's first Bookcase mount (VX-326's one-shot `QuickEntryOpeningFocus` claim); every later
     mount raised the counted `focusRequest`, which `takeFocus` drops when the box is not yet in its window — the
@@ -224,8 +224,17 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     no-tour non-vacuity). build-for-testing GREEN. The red-on-old run is PENDING the stage window: the behavioral revert
     (the `.task` back to `focusRequest += 1`) is staged as `scratchpad/b1-revert/vx-332.patch` (gitignored, in the tree).
   - VX-568: PARKED OUT OF THE RUN at her word (2026-10-27) — see Ledger
-  - VX-602: NOT-STARTED — settled design: "Restore Field Guide…", "Take the Onboarding Tutorial", and (call C-602-1)
-    "Open the Field Guide"; guide CONTENT speaks the old name three times — FLAGGED, not edited (morning bundle 3).
+  - VX-602: DONE (this line's commit) — the Help menu names each thing once: `.restoreTutorial`'s verb "Restore Field
+    Guide…"; `TourOfferCopy.menuTitle` (the `.takeTour` verb) "Take the Onboarding Tutorial", its help-road sentence
+    following ("Run it any time from Help ▸ Take the Onboarding Tutorial."); the undeclared field-guide door "Open the
+    Field Guide" (C-602-1) from one constant (`Features/Help/HelpMenuCopy`) for the menu and its ⌘K twin; the two
+    sentences that NAME the restore door follow it (its failure refusal reads the registry verb; the confirm's question
+    "Restore the field guide?"). NOT re-worded (flagged, morning bundle 10): the confirm's detail ("This replaces the
+    tutorial with a fresh copy…") and the receipt ("The tutorial is fresh — …"), which describe the object rather than
+    name the door; the guide's seeded CONTENT (three lessons, bundle 3 — A-439-9). Pins `HelpMenuNamingTests` (4: the
+    names, "tutorial" on one door only; the naming sentences; the old literals gone from menu/palette/registry; the
+    guide content deliberately unchanged) + `TourOfferLineTests` DELIBERATE update (the title + sentence) —
+    build-for-testing GREEN; the suite run PENDING the stage window.
 - Batch 2: NOT-STARTED
 - Ladder: NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
@@ -250,7 +259,10 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
    want it widened to the focused note's book.
 9. **C-602-1 — the naming pass also renames Help ▸ "Open the Tutorial" → "Open the Field Guide"** (+ its ⌘K twin), since
    it opens the field guide and would otherwise sit confusingly beside "Take the Onboarding Tutorial".
-10. (grows)
+10. **VX-602 — two neighbouring sentences still say "tutorial" for the field guide** (not door names, so not re-worded
+    under A-439-9's menu-labels scope): the restore confirm's detail ("This replaces the tutorial with a fresh copy: …") and
+    its receipt ("The tutorial is fresh — “the field guide” is on your Bookcase."). Say the word and they follow the door.
+11. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 

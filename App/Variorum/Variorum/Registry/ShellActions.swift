@@ -487,7 +487,9 @@ struct ShellActions {
                 status.receipt(WelcomeDoorCopy.tutorialRestored(
                     guide: TutorialSeeder.bookName, shelf: arranged?.welcome.shelf.name))
             } catch {
-                status.refuse("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
+                // VX-602: the door's failure says the door's own name.
+                status.refuse("\(HelpMenuCopy.restoreFieldGuideName) failed: "
+                    + OpsRefusalCopy.message(for: error))
             }
         }
     }

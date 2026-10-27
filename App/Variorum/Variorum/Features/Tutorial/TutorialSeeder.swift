@@ -155,7 +155,9 @@ enum TutorialSeeder {
     /// EXACT tag and the PLURAL name-based scope, because cleanup deletes
     /// every same-named book and pool — a user's colliding names included,
     /// accept-and-document per the architect's recorded call).
-    nonisolated static let replaceQuestion = "Restore the tutorial?"
+    /// VX-602 (the VX-439 run): the door's own question names what it
+    /// restores — the field guide (the door reads "Restore Field Guide…").
+    nonisolated static let replaceQuestion = "Restore the field guide?"
     /// 13i-d U7 (the walk's W-1): the door now composes the Welcome
     /// arrangement too, so the disclosure names it — exactly, the MINOR-D3/D4
     /// rule — before it promises the rest is untouched (PROVISIONAL wording).

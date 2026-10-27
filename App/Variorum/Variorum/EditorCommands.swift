@@ -1084,7 +1084,9 @@ struct EditorCommands: Commands {
             // the ruling named Open the Tutorial; Restore is the identical
             // class one line below (the batch-7 follow-on discipline:
             // applied with the class, flagged so it can be reversed).
-            Button("Open the Tutorial") { creationActions()?.openTutorial() }
+            // VX-602 (the VX-439 run, C-602-1): the door opens the FIELD
+            // GUIDE — named so, beside "Take the Onboarding Tutorial".
+            Button(HelpMenuCopy.openFieldGuide) { creationActions()?.openTutorial() }
                 .disabled(!canReachCreationTarget)
             // 13s-b U1a, piece 5 (R-13s-6/13 — "they can find it under
             // help"): the tour's standing door, beside the field guide's. Its

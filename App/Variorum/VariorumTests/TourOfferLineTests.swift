@@ -130,8 +130,11 @@ struct TourOfferLineTests {
     /// The sentence is pinned literally so U2 and the copy pass read the
     /// exact words a stranger sees (the menu name is PROVISIONAL P-U1a-9).
     @Test func theHelpMenuCarriesTheTourDoorTheSentenceNames() throws {
-        #expect(TourOfferCopy.menuTitle == "Take the Tour")
-        #expect(TourOfferCopy.helpRoad == "Run it any time from Help \u{25B8} Take the Tour.")
+        // VX-602 (the VX-439 run — a DELIBERATE pin update, her words: "take
+        // the tour should be the onboarding tutorial still"): the door and the
+        // sentence that names it, re-worded together.
+        #expect(TourOfferCopy.menuTitle == "Take the Onboarding Tutorial")
+        #expect(TourOfferCopy.helpRoad == "Run it any time from Help \u{25B8} Take the Onboarding Tutorial.")
         let doors = CapabilityRegistry.capability(.takeTour).doors
         #expect(doors.contains(.menuBar) && doors.contains(.surface))
         #expect(EditorCommands.menuRendered.contains(.takeTour))
