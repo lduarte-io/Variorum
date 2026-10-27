@@ -916,7 +916,10 @@ clients' reconnect roads — VX-619's guide sentence).*
   `MCPToolCatalog.importDocument` declares `section_id` and its description says both forms. GREEN
   (`scratchpad/b3-logs/vx566-green.log`): `MCPImportSectionServerTests` 5/5 + `MCPMintedAnswerServerTests` 5 +
   the two neutrality nets + core `MCPMintedBlocksActsTests` 3 (16 / 4 + 3 / 1). The record: "VX-566" below.
-- **3 · VX-567 — the book form answers per-note records:** NOT-STARTED — design: `BookImport.notes` (what each seat
+- **3 · VX-567 — the book form answers per-note records:** IN-PROGRESS — the pins COMMITTED RED (this commit): NEW
+  `Tests/VariorumMCPTests/MCPBookImportRecordsServerTests.swift`, 2 tests, RED ON THE PRE-FIX TREE
+  (`scratchpad/b3-logs/vx567-red-on-old.log`: 2 / 2 failed, 4 issues — no `notes` key in the answer, the description
+  still says "no sha256"). The fix is next. Design: `BookImport.notes` (what each seat
   minted, from `mintDocument`'s return — no second read); the wire answers `notes: [{note_id, block_ids, blocks}]` in
   `note_ids`' order beside the three id lists; MCPMintedAnswerServerTests' F-2 guard flips DELIBERATELY (VX-567).
 - **4 · VX-619 — the lock/quit docs:** NOT-STARTED — `MCPSession.instructions` at 2,988 / 3,000 (re-measured here);
