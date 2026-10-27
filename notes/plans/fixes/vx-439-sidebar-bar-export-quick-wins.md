@@ -755,7 +755,7 @@ captures Terminal where visual).
   structural redo after a confirmed destructive undo doesn't re-apply in `DestructiveUndoWarningTests.redoNeverAsks`
   (red on main `dd469951e`)". Instances: both strict `pgrep` forms EMPTY after. Tree clean at `cc8cb7a32` before this record.
 
-## WALK PART 2 (the orchestrator, 2026-10-27 06:10–07:20 MDT, claim vx-439-b2-walk + two renews; captures `walk-shots-vx439/`, gitignored until the debris sweep)
+## WALK PART 2 (the orchestrator, 2026-10-27 06:11–06:28 MDT per the STAGE LOG — claimed 06:11:05, ONE +15 renew at 06:21:43, released 06:28:22; this header first said "06:10–07:20, two renews", the orchestrator's wrong clock, corrected at the coordinator's log check; captures `walk-shots-vx439/`, gitignored until the debris sweep)
 
 On the stage-verified tree (Debug rebuild of `728456d1f`). Dev store as found and as left: unlocked, the Oct-20 hold
 banner STANDING and untouched, Study voice, MCP off; VX-548's Trash content untouched; prefs diff zero added/removed
