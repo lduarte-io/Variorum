@@ -102,7 +102,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 
 | Batch | Members | Session | State |
 |---|---|---|---|
-| 1 — starring on the wire | VX-596 + rider VX-609 | opus-implementer №1 | NOT STARTED |
+| 1 — starring on the wire | VX-596 + rider VX-609 | opus-implementer №1 | DONE (Mac run + walk PENDING the window) |
 | 2 — the pane's honesty | VX-590 (Pre-launch) · VX-605 (Pre-launch) | opus-implementer №2 | NOT STARTED |
 | 3 — the wire's imports & docs | VX-565 (probe first) · VX-566 · VX-567 + rider VX-619 | opus-implementer №3 | NOT STARTED |
 | 4 — the wing doors from ⌘K | VX-377 | opus-implementer №4 | NOT STARTED |
@@ -184,12 +184,15 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 ## THE BUNDLE (accumulates; becomes the QUESTIONS bundle and the handoff's checklist)
 
 - **RB-0 (kickoff fact, for her eyes):** her kickoff said SIX members; the sub-issue listing said SEVEN (VX-377, re-parented at VX-439's closeout). The listing governed — exactly the rule's purpose. VX-377 runs as batch 4.
-- **RB-1 (PROVISIONAL, batch 1):** the mint-then-star call — whether `create_note`/`import_document` into a star-rule gathering stars at WRITE NEW through her door's planner. (Batch 1 records the as-built choice.)
+- **RB-1 (PROVISIONAL, batch 1):** the mint-then-star call — whether `create_note`/`import_document` into a star-rule gathering stars at WRITE NEW through her door's planner. **As built (batch 1):** TAGS FIRST (VX-549's plan, byte-unchanged for every rule a tag can satisfy), born STARRED (cap-exempt, her door's arm) only where a star is the only way in; the answer adds `starred: true`. Options (a) her door's planner outright · (b) as built · (c) keep refusing, reworded · (d) the wire's star respects the cap — the BATCH 1 RECORD's bundle section has the consequences.
 - **RB-2 (rider offers, the standing rule — NOT seated without her word):** open tickets in this run's Areas, cheapest while this code is warm: VX-367 (guide lesson 3's edit acts) · VX-368 (the parity audit — set_starred retires one row) · VX-369 (raw errors reaching the wire) · VX-606 (read_note's undeclared-argument acceptance) · VX-612/613 (the server races). Also noted: VX-189 (Backlog, "share a gathering directly") looks substantially DELIVERED by VX-549 — her triage call whether it closes or narrows to MB-18's place doors.
 - **RB-3 (PROVISIONAL, batch 2):** VX-590's exact visibility fact and any hidden-state wording.
 - **RB-4 (PROVISIONAL, batch 3):** VX-567's book-form answer shape (P-VX252-1 extended; P-VX254-2 flipped).
-- **RB-5 (copy, her pass, batch 3):** VX-619's two docs sentences + the instructions trade; batch 1's reworded star strings join the same list.
+- **RB-5 (copy, her pass, batch 3):** VX-619's two docs sentences + the instructions trade; batch 1's reworded star strings join the same list (batch 1's list: the BATCH 1 RECORD's bundle section — the tool description, Activity's "changed the star on", the receipts, the undo labels, `starHeadsUp`, the gathering write-new sentence, the guide's two edits, `create_note`'s sentence, `gatheringWords`' "starring", `needsStar`'s bare fact). **Batch 1 left `MCPSession.instructions` untouched: 2,988 / 3,000 — 12 characters for VX-619.**
 - **RB-6 (her call, batch 4):** a chord for Move to Wing — the collision-sweep facts recorded; the ⌘K door ships either way.
+- **RB-7 (PROVISIONAL, batch 1):** `set_starred` on a gathering's id answers the gathering sentence (P-VX196-2's posture), now naming "starring" among the author's acts; alternative: R-VX184-1 parity — an edit grant reaching the gathering place stars it.
+- **RB-8 (design calls, batch 1 — for the ladder or her):** `set_starred`'s undo halves restore the star AT ITS PLACE in the Starred list, are not applying acts (a re-star replay seats nothing), refuse past the cap keeping the entry, and bring a column-only book's star back in both stores.
+- **RB-9 (ticket to file, batch 1):** a third load-sensitive pin — `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` timed out once under the full-parallel headless run, green isolated and in a second whole run (Tests & tooling, the VX-532 class).
 - (Batch records append more.)
 
 ## LEDGER
@@ -198,7 +201,7 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 |---|---|---|---|
 | 1 | Worktree + branch + in-flight row + Linear In Progress + riders seated | orchestrator | DONE (in-flight on main; branch pushed; VX-609/VX-619 sub-issues) |
 | 2 | This plan file | orchestrator | DONE |
-| 3 | Batch 1 (VX-596 + VX-609) | opus-implementer №1 | NOT STARTED |
+| 3 | Batch 1 (VX-596 + VX-609) | opus-implementer №1 | DONE 2026-10-27 — headless green (core 3477/464 · MCP 420/76 bar VX-532, isolated green · Strings 32/4); Mac pins COMPILED into fresh `DerivedData/b1`, RUN + walk PENDING the window; record: BATCH 1 RECORD |
 | 4 | Batch 2 (VX-590 · VX-605) | opus-implementer №2 | NOT STARTED |
 | 5 | Batch 3 (VX-565 · VX-566 · VX-567 + VX-619) | opus-implementer №3 | NOT STARTED |
 | 6 | Batch 4 (VX-377) | opus-implementer №4 | NOT STARTED |
@@ -276,7 +279,8 @@ anchors the brief names. No subagent.*
   no new warning in a touched file (the two in the log are pre-existing: `MCPGrantPicker.swift`'s
   `durations(connected:)` isolation warning and `MCPGatheringGrantFacesTests`' redundant `#require`, batch 3's,
   moved from :104 to :122). **PENDING:** the Mac run (the stage).
-- **6 · Suites + Mac `build-for-testing` (fresh `DerivedData/b1`):** NOT-STARTED.
+- **6 · Suites + Mac `build-for-testing` (fresh `DerivedData/b1`):** DONE (this commit) — counts under "Suites"
+  below. **PENDING:** the Mac pins' RUN (the stage) and the walk (the orchestrator's window).
 
 ### THE DESIGN (settled before code; each PROVISIONAL item is bundled)
 
@@ -402,6 +406,28 @@ W-UX-14's truth pin (`MCPAskAndReceiptTests.anAsksRungSentenceClaimsOnlyWhatItsS
 line claims "new notes" and "tags" only, `create_note` and `apply_tag` both act under a gathering); the guide's
 other cards — no pin on the changed prose outside `TutorialMCPChapterTests` (grep-swept).
 
+### Suites (the end, on the final code — `swift build` green; the record's own commits change no code)
+
+- **The whole headless run, twice** (`scratchpad/b1-logs/headless-all.log`, `headless-all-2.log`) — the SECOND is the
+  verdict: VariorumCoreTests **3477 tests / 464 suites passed** (5 known issues, standing; this batch adds 10 —
+  `MCPStarActsTests` 9 + the wire-plan table 1); StringsWorkbook **32 / 4 passed**; VariorumMCPTests **420 / 76 with
+  ONE issue — the standing VX-532 flake** (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`,
+  24.6 s against its 15 s under the full-parallel run; no harness line changed), re-run ISOLATED green ×2
+  (`harness-isolated-1/2.log`: 3/1, 2.2 s each) — 412 + this batch's 8 (`MCPStarServerTests` 7 + VX-609's pin 1);
+  VX-607 green both runs. **The FIRST run carried one more red, not reproduced:**
+  `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` hit its one-minute `.timeLimit` (204.9 s elapsed,
+  under the full-parallel load — a held `ValueObservation`'s `next()` starved); green ISOLATED ×2
+  (`starcontext-isolated-1/2.log`: 11/1, 0.8 s each) and green in the whole second run. Not this diff's mechanism: the
+  test drives her `setStarred` (whose `writeStar` this batch touched only by two DEFAULTED parameters — `at: nil`,
+  `heard: true` — byte-identical on her road) and an observation on its own in-memory store; its own doc already records
+  one starvation ("a 5 s poll starved there once"). A load-sensitive third beside VX-532/VX-607 — RB-9 (ticket for the
+  orchestrator to file).
+- **Targeted, along the way (each green):** `MCPGatheringGrantServerTests` 11/1 · `GatheringTagsSatisfyTests` +
+  `GatheringMintTests` + `CollectSetsTheStarTests` (42/5 with the wire suite's run) · `MCPStarActsTests` 9/1 ·
+  `MCPStarServerTests` 7/1 · `MCPWriteServerTests` 10/1 · `StarContextTests` 11/1 (×2).
+- **Mac:** `build-for-testing` into the FRESH `DerivedData/b1` — **TEST BUILD SUCCEEDED** (`mac-bft1.log`, built from
+  `695161d4c`'s sources — every later commit is record-only). **PENDING:** the Mac pins' run (the stage).
+
 ### THE SEVEN WORDING POINTS (the VX-596 ticket's block — each dispositioned)
 
 | # | The string (VX-548's, PROVISIONAL) | Disposition | As built |
@@ -483,6 +509,10 @@ the editor seam, `VariorumMobile/`, `MCPSession.swift`.
   the star on “X”" (one tool both ways — the coarse log keeps no direction); the receipts "starred “X”" / "unstarred
   “X”"; the undo labels "‹client›'s star" / "‹client›'s unstar"; `starHeadsUp`; the gathering write-new rung sentence;
   the guide's two edits; `create_note`'s new sentence; `gatheringWords`' "starring"; `needsStar`'s bare fact.
+- **RB-9 (ticket for the orchestrator to file — Tests & tooling, the VX-532/VX-607 class, Low):**
+  `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` timed out once under the full-parallel headless run
+  (its one-minute limit; 204.9 s), green isolated ×2 and in a second whole run — a held observation starving under
+  load. Until ticketed, a full-parallel failure there is re-run isolated before it counts.
 - **For VX-368's parity audit (offer, not built):** `set_starred` retires the star row; a gathering's own star (RB-7)
   is the one star-shaped act the wire still lacks.
 
