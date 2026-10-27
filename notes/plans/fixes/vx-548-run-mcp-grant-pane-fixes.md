@@ -95,7 +95,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 
 | Batch | Members | Session | State |
 |---|---|---|---|
-| 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | NOT STARTED |
+| 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | BUILT (headless green, red-on-old verified; Mac pins compiled — run + walk PENDING the stage) — BATCH 1 RECORD |
 | 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | NOT STARTED |
 | 2b — the disconnect story | VX-394 | opus-implementer №3 | NOT STARTED |
 | 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | NOT STARTED |
@@ -202,6 +202,29 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
 - **MB-6 (PROVISIONAL, batch 2b):** App Nap guard built only if traced warranted; see the batch record.
 - **MB-7 (her hands, batch 2b):** does her AIR's lock lock the LIBRARY (Settings ▸ Protection ▸ On this Mac — the idle-lock dial) or only the screen? Decides whether the Air drops are fully the by-design lock road. Also: her call on the reconnect-ergonomics options (batch 2b record).
 - **MB-8 (riders, the standing rule's offer — none seated tonight):** open Low/Medium tickets in this run's Areas, cheapest while this code is open: **VX-565** (duplicate grant rows per client — same pane listing as VX-515), **VX-590** (Shared with AI face hidden until a client ever connects — same zero-state as VX-512), **VX-566/VX-567** (import_document: section_id; book-form sha256s — same wire family as VX-365/358), VX-367/368/369 (MCP docs/parity/raw-error sweeps), VX-321 (Takes wording). Say the word and any of these ride before the ladder.
+- **MB-1, as built (batch 1):** Change… keeps its replace only while the place confirmed IS the place it was opened on
+  (an act's Change… — its notes said, never re-chosen — keeps it over the notes that stand). Picking another place in a
+  Change… sheet turns it into a new grant on the spot: the title reads "Grant access — ‹client›", the replaces line
+  goes, the receipt says "Shared …", and the grant it was opened on stands. A consequence to rule on: Change… on an
+  INERT row (a book fenced since, not in the offer) can no longer move that grant to another book — the inert grant
+  stays (Revoke takes it). Alternative (b): keep Change…'s replace across places but say so in the sheet when the place
+  changes ("replaces the PlanetLillian grant") — the pre-fix behaviour, made visible.
+- **MB-2, as built (batch 1):** "Share a place…" (the Clients row) and "Share another place…" (under Shared with AI's
+  rows). The empty Shared tab (an approved client, nothing shared) shows NO add door — "another" would be false there;
+  the Clients row's "Share a place…" is the road. Options: (a) as built; (b) the empty tab also carries a door, worded
+  "Share a place…" (one more `.surface` door); (c) one word for both doors. The guide's two new sentences are hers to
+  re-voice too: lesson 2 "…with Share a place… to share more with it…", lesson 5 "Share another place… adds one beside
+  them, so a client can reach several places at once." (Existing libraries keep their seeded guide until Help ▸ Restore
+  Tutorial….)
+- **MB-3, as built (batch 1):** the line sits in the pane's top section under the server's line, on every tab, while the
+  library has no client at all — "Clients belong to the library they were set up in — run each one’s setup here." with
+  its (i). Alternatives: (b) on Connect only, under the setup block; (c) other words (her copy pass). The release-notes
+  practice note stands as written above.
+- **MB-9 (batch 1 — for the ladder or her; not built):** the place rule lives at the sheet's one confirm (the brief's
+  seam); the core op `grantMCPAccess(_:_:replacing:)` still revokes whatever grants it is named, its pinned contract
+  (`changingAGrantToAnotherPlaceReplacesThatPlacesRowToo`). Option: also hold the op to it — a named grant on another
+  place refused (`mcpGrantNotFound`-family) or skipped — so a future road that forgets the decision cannot revoke across
+  places (defence in depth; flips that pin deliberately).
 - (Batch records may append more.)
 
 ## LEDGER
@@ -210,7 +233,7 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
 |---|---|---|---|
 | 1 | Worktree + branch + in-flight row + Linear In Progress | orchestrator | DONE (`472ed9bfe` on main; branch pushed) |
 | 2 | This plan file | orchestrator | DONE |
-| 3 | Batch 1 (VX-516 · VX-515 · VX-512) | opus-implementer №1 | NOT STARTED |
+| 3 | Batch 1 (VX-516 · VX-515 · VX-512) | opus-implementer №1 | BUILT — `d0e7f1302` core · `965a05521` app; Mac run + walk PENDING (BATCH 1 RECORD, "For the orchestrator") |
 | 4 | Batch 2a (VX-352 · VX-354 · VX-365 · VX-358) | opus-implementer №2 | NOT STARTED |
 | 5 | Batch 2b (VX-394) | opus-implementer №3 | NOT STARTED |
 | 6 | Batch 3 (VX-549) | opus-implementer №4 | NOT STARTED |
@@ -219,6 +242,13 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
 | 9 | Closeout + handoff + QUESTIONS #243 | orchestrator | NOT STARTED |
 
 ## BATCH 1 RECORD
+
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI walk, no stage claim (the
+orchestrator's) — the Mac pins (`MCPGrantRoadsTests` ×6, the `TutorialMCPChapterTests` justified edit) are written and
+COMPILED (`build-for-testing` green), their RUN PENDING the orchestrator's stage window (the list and command at "For the
+orchestrator" below); no capture of any face; nothing in `Sync/`, `Server/`, custody, the synced schema or the editor
+seam; no op-level guard on `grantMCPAccess(_:_:replacing:)` (the brief places the decision at the sheet's seam — MB-9);
+VX-565 / VX-590 untouched (their symptoms recorded unchanged below).
 
 *Implementer: `opus-implementer` №1 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
 code: CLAUDE.md + its canon, `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · Doors to the outside),
@@ -235,13 +265,13 @@ no `xcodebuild test`, no walk, no stage claim (the orchestrator's).*
 - **VX-516 (Change… on one place, confirmed on ANOTHER, revoked the first):** DONE — core `d0e7f1302` (the pure
   `Domain/MCPGrantChange` + `Tests/VariorumCoreTests/MCPGrantChangeTests.swift`); RED ON OLD verified
   (`scratchpad/b1-logs/vx516-red.log`: 3 of the 6 new tests red — her repro 5 issues, every Change… road 3, the
-  decision table 8 — the 3 guards and VX-393's 8 green); 14 of 14 green after. The app wiring IN THIS COMMIT: the
+  decision table 8 — the 3 guards and VX-393's 8 green); 14 of 14 green after. The app wiring `965a05521`: the
   sheet's one act (`MCPGrantSheet.act` — pure; `submit()` performs exactly it), its title and its replaces line read the
   decision (the line NAMES whose grant, which place, how far, how long — `MCPPaneCopy.replacesLine(client:…)`); the
   receipt's Change… opening factored pure (`MCPDoor.receiptChangeOpening`). Mac pins `MCPGrantRoadsTests` — every
   road's opening by its own door's builder → `MCPGrantSheet.act` → the door → both wings stand — written and COMPILED
   (`build-for-testing` green, `scratchpad/b1-logs/mac-bft2.log`), their RUN **PENDING** the orchestrator's stage window.
-- **VX-515 ask 1 (a visible add door):** DONE (this commit) — `.mcpChangeClientAccess`'s verb "Share a place…"
+- **VX-515 ask 1 (a visible add door):** DONE (`965a05521`) — `.mcpChangeClientAccess`'s verb "Share a place…"
   (`MCPPaneCopy.sharePlaceVerb`; PROVISIONAL MB-2) and its one opening home (`MCPGrantOpening.clientRow`); the new
   `.surface` capability `.mcpShareAnotherPlace` "Share another place…" on the Shared with AI tab
   (`MCPGrantOpening.shareAnotherPlace()` — WHO asked, nothing pre-filled, nothing replaced), drawn by the pure gate
@@ -252,11 +282,160 @@ no `xcodebuild test`, no walk, no stage claim (the orchestrator's).*
   grant of every client, one row per place (a bulk act one row with its members road), the pane's 5-act page + its
   "all N ›" road; headless guard `sharedWithAIListsEveryLiveGrantOfEveryClient` (green on both sides — her "doesn't
   show both" was VX-516's revoke).
-- **VX-512 (a fresh library's silence):** DONE (this commit) — one `ExplainerLine` in the pane's top section while the
+- **VX-512 (a fresh library's silence):** DONE (`965a05521`) — one `ExplainerLine` in the pane's top section while the
   library has no client at all (`MCPPane.saysClientsBelongToTheLibrary` — pending + approved + denied = 0), words
   `MCPPaneCopy.libraryClientsSummary` / `libraryClientsDetail` (PROVISIONAL MB-3). Mac pin compiled, RUN **PENDING**.
 - **Suites:** `swift build --build-tests` green; the targeted core suites green (14/14); the Mac app + test bundle
-  compile (`build-for-testing` green). **PENDING:** the whole headless suite at the end; the Mac pins' run (stage).
+  compile (`build-for-testing` green, `scratchpad/b1-logs/mac-bft2.log`, no warning in a touched file); the WHOLE
+  headless suite run at the end (`scratchpad/b1-logs/headless-all.log`): core **3441 tests / 458 suites passed** (5
+  known issues, standing), StringsWorkbook **32 / 4 passed**, VariorumMCPTests **383 / 71 with ONE issue —
+  `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`'s 15 s wall clock under the
+  full-parallel run (23.3 s)**: the standing **VX-532** class (untouched by this batch — no `VariorumMCP` line changed),
+  run ISOLATED green ×2 (`harness-isolated-1/2.log`: 3/1 passed, 2.1 s each). **PENDING:** the Mac pins' run (stage).
+
+### VX-516 — THE TRACE (inputs → wrong state), road by road
+
+Her act (2026-10-23, the Air, a fresh library after the 0.10 crossing; `vx-510-first-run-sync.md` HER AIR REPORT items
+5/6): PlanetLillian already granted to claude-code (a standing wing grant); she shares a second wing. Every road that can
+reach the grants store, PROVEN BY TEST (the brief's warning — never by reading the opening):
+
+| Road | Opening it builds | What the confirm sent the op (pre-fix) | Pin |
+|---|---|---|---|
+| Clients row's door (was "Change…", now "Share a place…") | `client`, place nil, `replacing []` | `grantMCPAccess(_:_:)` — per place | headless `everyAddingRoadLeavesBothWingsStanding` (GREEN on both sides — the road always added); Mac `everyRoadConfirmedOnAnotherWingLeavesBothWingsStanding` |
+| ⌥⌘A, an ask's answer | — (no sheet) / `.note(id)`, `replacing []` | `grantMCPAccess(_:_:)` — per place | headless guard (same) |
+| Approve… with a grant on an approved client | `approving` | `approveMCPClient(_:granting:)` — per place | headless guard (same) |
+| A place-door sheet (Library row, Book Settings, ⌘L) | `place`, `replacing []` | `grantMCPAccess(_:_:replacing: [])` — per place | headless guard (same) |
+| **A Shared-with-AI row's Change…** (`MCPDoor.changeOpening(_:)`) | the grant's own place, `replacing [grant]` | **`grantMCPAccess(_:_:replacing: [grant])` WHATEVER place was confirmed** | headless `changeOnOneWingConfirmedOnAnotherLeavesBothWingsStanding` RED on old; Mac road pin |
+| **A receipt's Change…** (`speakShared` → now `MCPDoor.receiptChangeOpening`) | the act's place, `replacing [act's grants]` | **the same pass-through** | headless `everyChangeRoadConfirmedElsewhereRevokesNothing` RED on old; Mac road pin |
+| **A shared icon's Change…** (`MCPReachPopover.changeOpening` — Bookcase, Library rows, ⌘L's wing rows, the in-note indicator) | the grant's own place, `replacing [grant]` | **the same pass-through** | headless (book → wing leg) RED on old; Mac road pin |
+| An act's Change… (`changeOpening(act:)`) | `.notes(ids)` — WHERE said, never re-chosen | replaces the act — correct (T-U3-8) | headless `changeOnTheSamePlaceStillReplacesWhatItNames` (guard); Mac `anActsChangeKeepsItsReplace…` |
+
+**The mechanism (stated once):** the one mint (`Operations.insertMCPGrant`) is per place — VX-393's standing replace is
+keyed `client_id AND scope_kind AND scope_id` (`Operations+MCPGrants.swift:289–297`), and `uq_mcp_grant_standing_place`
+is per client × place — so no ADDING road can touch another wing (every adding road proven above). The revoke came from
+Change…: each Change… road opens THE grant sheet pre-filled on exactly the grant(s) it names and fills
+`MCPGrantOpening.replacing` (T-U3-8); the sheet keeps WHERE open to a new pick; and `MCPGrantSheet.submit()` handed
+`opening.replacing` to `grantMCPAccess(_:_:replacing:)` regardless of the place confirmed. Shared with AI's only doors
+were Change… and Revoke, so her road to "another wing" was Change… on PlanetLillian's row (or its icon's popover, or a
+receipt) with the other wing picked — PlanetLillian revoked, the other minted ("it keeps just changing what is shown …
+the other one is revoked when I grant that one"). Whether her Air press was the row's, the popover's or the receipt's is
+not knowable from here; all three share the one mechanism and the one fix. (The orchestrator's VX-510 reading — "the
+Clients row's Change… replaces nothing" — was TRUE of that road; the road she could see, Shared with AI's Change…, was
+the one that replaced.)
+
+### VX-516 — THE FIX (PROVISIONAL MB-1)
+
+- **The rule, pure and headless:** `Sources/VariorumCore/Domain/MCPGrantChange.swift` — `keepsReplacing(opened:confirmed:)`
+  (both non-empty and confirmed ⊆ opened) and `replacing(_:opened:confirmed:)` (the named grants while kept, else none).
+  A grant place is `scope_kind × scope_id` (Home `""` is a place; a kind is part of the place). An act's notes are said,
+  never re-chosen, and a note gone since leaves the confirm (never adds one) — so ⊆, not =.
+- **The one seam:** `MCPGrantSheet.act(opening:place:spec:noteIDs:rung:duration:)` (pure) decides the confirm's act on
+  the very place(s) it grants (`.approve` · `.grantNotes(…, replacing:)` · `.grant(spec, replacing:)`); `submit()`
+  performs exactly it. The title (`sheetTitle(changing:)`) and the replaces line read the same decision on the place
+  picked NOW (`confirmedPlaces`), once the pre-fill has landed (`prefillApplied` — a Change… sheet's first frames never
+  flash a new grant's title); the receipt says "Changed …" only when something was replaced (its `changed:` reads the
+  decided `replacing`). Picking another place in a Change… sheet flips the title to "Grant access — ‹client›" and the
+  replaces line goes; confirming mints a new grant beside the one it was opened on.
+- **The replaces line NAMES what it replaces** (`MCPPaneCopy.replacesLine(client:place:rung:duration:)`): "Confirming
+  replaces claude-code’s grant on the PlanetLillian wing — read, suggest, write new and edit, always." — the receipt's own
+  shape; the plain sentence (`replacesLine`, unchanged) stays where no name is to hand.
+- The receipt's Change… opening is factored pure (`MCPDoor.receiptChangeOpening`) so its road is pinned with the others.
+- **Unchanged on purpose:** the core op `grantMCPAccess(_:_:replacing:)` still revokes the grants it is named — its
+  pinned contract (`MCPOneGrantPerPlaceTests.changingAGrantToAnotherPlaceReplacesThatPlacesRowToo` stands, green); the
+  place rule lives at the one confirm that names them (the brief's seam). An op-level guard is MB-9.
+
+**Pins.** Headless (`Tests/VariorumCoreTests/MCPGrantChangeTests.swift`, suite "VX-516 — Change… replaces only its own
+place; two wings stand together"): `changeOnOneWingConfirmedOnAnotherLeavesBothWingsStanding` (her repro + the second
+hop: both wings live, each at its rung, both reached through the ONE rule, both listed) · `everyChangeRoadConfirmedElsewhereRevokesNothing`
+(the receipt's, a popover's book→wing, a note's note→note) · `theDecisionTable` — RED ON OLD (behavioural revert of
+`replacing` to the old pass-through over the committed `d0e7f1302`: 16 issues across exactly these three,
+`scratchpad/b1-logs/vx516-red.log`), green after (`vx516-green2.log`). Guards, green on both sides by design:
+`changeOnTheSamePlaceStillReplacesWhatItNames` (T-U3-8 kept: a lowered rung, a once → always on the same note, an act
+with a note gone), `everyAddingRoadLeavesBothWingsStanding` (the brief's "prove each road"), and VX-515's
+`sharedWithAIListsEveryLiveGrantOfEveryClient`. Mac (`App/Variorum/VariorumTests/MCPGrantRoadsTests.swift`, compiled,
+RUN PENDING): `everyRoadConfirmedOnAnotherWingLeavesBothWingsStanding` (five openings, each by its own door's builder —
+`MCPGrantOpening.clientRow`, `.shareAnotherPlace()`, `door.changeOpening(row)`, `MCPDoor.receiptChangeOpening`,
+`MCPReachPopover.changeOpening` — through `MCPGrantSheet.act` and the real door: PlanetLillian stands every time) ·
+`changeOnItsOwnPlaceStillReplacesAndNamesWhatItReplaces` · `anActsChangeKeepsItsReplaceAndTheApprovalRoadIsUntouched`.
+Red-on-old for the Mac road pin is by construction (`MCPGrantSheet.act` did not exist; the old `submit()` passed
+`opening.replacing`, which is the reverted decision the headless red leg ran).
+
+### VX-515 — the two asks
+
+- **Ask 1 (a visible add door):** `.mcpChangeClientAccess`'s verb is "Share a place…" (`MCPPaneCopy.sharePlaceVerb`;
+  the id kept), opening from one home (`MCPGrantOpening.clientRow` — the pane's row and its "all N ›" sheet); a NEW
+  `.surface` capability `.mcpShareAnotherPlace` "Share another place…" (`MCPPaneCopy.shareAnotherPlaceVerb`) under
+  Shared with AI's rows, opening `MCPGrantOpening.shareAnotherPlace()` (WHO asked — the most recently granted client
+  picked first — nothing pre-filled, nothing replaced), drawn by `MCPPane.offersShareAnotherPlace` (an approved client
+  — VX-272's gate — AND ≥1 listed grant, so "another" is true); declared in `MCPPane.surfaceCapabilities` (the registry
+  walk). The tab does not group by client, so the per-client door is the Clients row's. Every sentence naming the row's
+  door follows: the approval lead (interpolates the constant), the Settings catalog's Clients blurb (the same), the
+  guide's lesson 2 ("…with Share a place… to share more with it and Deny…") and lesson 5 (+ "Share another place… adds
+  one beside them, so a client can reach several places at once."). The guide pin `TutorialMCPChapterTests`
+  (`lessonFiveSharingFromWhereYouAre`) gains the new door from its registry home — A JUSTIFIED EDIT (the H pattern: the
+  lesson names a new door). Mac pins `theClientRowsDoorAddsAndIsNamedForIt`,
+  `sharedWithAIsAddDoorIsDeclaredOnceAndDrawnOnlyWhereItCanAct` — compiled, RUN PENDING.
+- **Ask 2 (see everything granted) — VERIFIED, no fix owed:** `Queries.mcpSharedGroups` reads every live grant (not
+  revoked, not a spent once) of every client; a book or wing grant is always its own row, note grants group only by one
+  act's exact stamp (the bulk share), each row says place · kind chip · client · rung · duration; the pane shows the
+  newest 5 acts and its "all N ›" road (R-13n-10) opens the whole list, and a grouped act's "and N more ›" names every
+  member. Two wings for one client are two rows. Guard `sharedWithAIListsEveryLiveGrantOfEveryClient` (green on both
+  sides). **Her "it doesn't show both" was VX-516's revoke — the listing never hid a grant.**
+
+### VX-512 — a library's clients are its own (PROVISIONAL words MB-3)
+
+The silence traced at VX-510 (her -32000 after Start fresh): the switch and every client binding are this library's
+LOCAL-ONLY grants rows, so a library started fresh — or filled from the account by sync — has the server off and no
+clients, and nothing said so. Built: ONE `ExplainerLine` in the pane's top section, under the server's own line, while
+the library has no client at all (`MCPPane.saysClientsBelongToTheLibrary` — pending + approved + denied = 0; the store
+has no "came from Start fresh" fact, and the sentence is true of every such library): "Clients belong to the library
+they were set up in — run each one’s setup here." (371 pt at caption size — narrower than two summaries that already
+pass the pane's 420 pt room); its (i): local-only, never synced or carried into another library, a fresh or synced
+library begins with the server off and no clients, turn the server on, run each client's setup again from Connect. No
+"AI" in the line (VX-272). The pane renders only over a ready library (Settings' panes need one), so the line never
+speaks for a locked library. Mac pin `aLibraryWithNoClientSaysItsClientsAreItsOwn` (a real door: fresh → line; a
+connection request → gone; the words fit one line, no "AI", no shouted word) — compiled, RUN PENDING. The release-notes
+half is MB-3 (her drafting).
+
+### Adjacent tickets (noted, not touched)
+
+- **VX-565** (duplicate grant rows per client with different rungs): unchanged — the one-row rule is per place, and a
+  once grant beside a standing one stays its own row (P-VX393-3). After VX-516, one client holding grants on two places
+  shows two rows by design (two places) — not VX-565's class.
+- **VX-590** (Shared with AI out of sight until a client has ever connected): unchanged — the new door draws only with an
+  approved client; VX-512's line sits above the tabs, not on Shared with AI.
+
+### Files touched
+
+Core: `Sources/VariorumCore/Domain/MCPGrantChange.swift` (new) · `Tests/VariorumCoreTests/MCPGrantChangeTests.swift`
+(new). App: `Core/Views/MCPShareRoad.swift` (`MCPGrantPrefill.places`, `MCPGrantOpening.clientRow` /
+`.shareAnotherPlace`) · `Features/MCP/MCPGrantSheet.swift` (`confirmedPlaces`, `replacing`, `Act`, `act`, the faces,
+`submit`) · `Features/MCP/MCPDoor+Share.swift` (`receiptChangeOpening`) · `Features/MCP/MCPPane.swift` (the two gates,
+the Shared door, VX-512's line, the client rows' opening) · `Features/MCP/MCPPaneCopy.swift` (the named replaces line,
+the two verbs, the library line, the approval lead) · `Registry/Capability.swift` + `Registry/CapabilityRegistry.swift`
+(`.mcpChangeClientAccess`'s verb, `.mcpShareAnotherPlace`) · `Features/Settings/SettingsShape.swift` (the Clients blurb)
+· `Features/Tutorial/TutorialSeeder.swift` (lessons 2 and 5). Tests: `VariorumTests/MCPGrantRoadsTests.swift` (new) ·
+`VariorumTests/TutorialMCPChapterTests.swift` (justified edit). Commits: `eff04ea00` (LIVE STATUS) · `d0e7f1302` (core)
+· `965a05521` (app) · this record's commit.
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator): the product is prebuilt at
+  `~/dev/variorum-vx-548/DerivedData/b1` from `965a05521`'s sources (this record's commit changes no code) —
+  `cd App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+  ~/dev/variorum-vx-548/DerivedData/b1 test-without-building` with `-only-testing:VariorumTests/<Suite>` for:
+  `MCPGrantRoadsTests` (new) · `TutorialMCPChapterTests` (justified edit; lesson text) · `TutorialCurrencyTests` ·
+  `MCPShareFacesTests` · `MCPGrantSheetTests` · `MCPPaneTabsTests` (**re-check `aFreshPaneOpensOnConnectWithItsCodeBlockInSight`
+  — a fresh pane now carries VX-512's line above the tabs, ~one caption line; the VX-281 captures showed the block plus
+  four more lines in sight, so ≥ 56 pt should hold — unmeasured here**) · `MCPPaneTests` · `CapabilityRegistryTests` (the
+  new capability in the registry walk) · `SettingsShapeTests` · `CommitVocabularyTests` · `ChromeLineLimitTests` ·
+  `MCPGatheringIconTests`. Read the `skipped:` lines (Swift Testing counts skips).
+- **The walk (both voices, the dev store):** (1) Shared with AI with one wing granted → "Share another place…" under the
+  rows → the sheet asks WHO → another wing → both rows stand. (2) A wing row's Change… → "Change access — ‹client›" and
+  the NAMED replaces line → pick another wing → the title reads "Grant access — ‹client›", the line goes → confirm →
+  both rows. (3) The same Change… kept on its own wing at a lower rung → one row, lowered (T-U3-8 kept). (4) Clients:
+  the row reads "Share a place…". (5) VX-512's line needs a library with NO client — the dev store has clients, so it
+  needs a fresh throwaway library or the gated capture road; the orchestrator's call.
 
 ## BATCH 2a RECORD
 
