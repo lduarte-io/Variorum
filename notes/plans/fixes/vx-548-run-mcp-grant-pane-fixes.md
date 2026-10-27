@@ -220,7 +220,33 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
 
 ## BATCH 1 RECORD
 
-*(the implementer writes LIVE STATUS here from its first commit)*
+*Implementer: `opus-implementer` №1 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
+code: CLAUDE.md + its canon, `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · Doors to the outside),
+this plan IN FULL, `notes/SessionResiliencyProtocol.md`, `notes/plans/fixes/vx-348-prelaunch-sweep.md` §U5 + the U5
+UNIT RECORD (VX-393's section, R-VX348-6, P-VX393-1…3), `notes/plans/fixes/vx-510-first-run-sync.md` "HER AIR REPORT"
+items 1/5/6, and every code anchor the brief names. Lane: no `Sync/`, `Server/`, custody, synced schema or editor seam;
+no `xcodebuild test`, no walk, no stage claim (the orchestrator's).*
+
+### LIVE STATUS (per piece — flipped in the same commit as each piece)
+
+- **No behavioural revert is in flight.**
+- **VX-516 (Change… on one place, confirmed on ANOTHER, revoked the first):** NOT-STARTED — the settled design: a pure
+  Domain decision `MCPGrantChange` (`Sources/VariorumCore/Domain/MCPGrantChange.swift`): replacing is KEPT only while
+  the confirmed place(s) ⊆ the opened place(s) (non-empty both), else DROPPED (PROVISIONAL MB-1); the sheet's
+  `submit()` (and its title, the receipt's verb, the replaces line) read ONE `effectiveReplacing` through it. Headless
+  pin `MCPGrantChangeTests` (Tests/VariorumCoreTests), red-on-old by behavioural revert of the decision to the old
+  pass-through. The replaces line NAMES the client, the place and the grant it replaces.
+- **VX-515 ask 1 (a visible add door):** NOT-STARTED — `.mcpChangeClientAccess`'s verb → "Share a place…" (PROVISIONAL
+  MB-2; the guide's lesson, the Settings catalog blurb and the approval lead follow the one constant); a new `.surface`
+  capability `.mcpShareAnotherPlace` "Share another place…" on the Shared with AI tab (WHO asked, nothing pre-filled,
+  replacing empty), rendered while an approved client exists AND the tab lists at least one grant.
+- **VX-515 ask 2 (see everything granted):** NOT-STARTED — verify `Queries.mcpSharedGroups` + the tab's rendering list
+  every live grant of every client (two wings for one client = two rows); a headless guard; the finding recorded.
+- **VX-512 (a fresh library's silence):** NOT-STARTED — one `ExplainerLine` in the pane's top section while the library
+  has no client at all (pending + approved + denied = 0): clients and their grants belong to one library (PROVISIONAL
+  words MB-3).
+- **Suites:** PENDING — `swift build` + the targeted core suites; the Mac target compiled by `xcodebuild build-for-testing`
+  (Mac pins written + compiled, their RUN pending the orchestrator's stage window).
 
 ## BATCH 2a RECORD
 
