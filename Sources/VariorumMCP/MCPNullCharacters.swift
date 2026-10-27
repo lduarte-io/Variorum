@@ -83,7 +83,7 @@ extension MCPWriteTools.Job {
             case .text(let text): MCPNullCharacters.count(title, text)
             case .blocks(let blocks): MCPNullCharacters.count(title) + MCPNullCharacters.count(blocks)
             }
-        case .importNote(let named, _): MCPNullCharacters.count(named)
+        case .importNote(let named, _, _): MCPNullCharacters.count(named)
         case .importBook(let book, _): MCPNullCharacters.count(book)
         case .applyTag(_, let path): MCPNullCharacters.count(path)
         case .createBook(let name, _): MCPNullCharacters.count(name)

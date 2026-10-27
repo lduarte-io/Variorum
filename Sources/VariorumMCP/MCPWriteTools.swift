@@ -79,7 +79,8 @@ struct MCPWriteTools: Sendable {
         /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
         /// VX-252: an optional chapter of the book (`section_id`).
         case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?)
-        case importNote(VariorumDocument.NamedDocument, place: Place)
+        /// VX-566: `create_note`'s optional chapter, on the one-document form.
+        case importNote(VariorumDocument.NamedDocument, place: Place, sectionID: String?)
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
         case createBook(name: String, wingID: String)
@@ -357,15 +358,26 @@ struct MCPWriteTools: Sendable {
     private func parseImport(_ args: [String: Value]) throws -> Job {
         let document = try optionalString(args, "document")
         let bookValue = args["book"].flatMap { $0 == .null ? nil : $0 }
+        // VX-566 (`create_note`'s D2): a chapter is a chapter OF the book the
+        // note joins — said at the parse, before any decision.
+        let sectionID = try optionalString(args, "section_id")
         switch (document, bookValue) {
         case (let text?, nil):
+            if sectionID != nil, try optionalString(args, "book_id") == nil {
+                throw ArgumentFailure(message: Self.sectionWithoutBookWords)
+            }
             return .importNote(
                 VariorumDocument.NamedDocument(fallbackTitle: "", document: try parsed(text, label: "document")),
-                place: try place(args))
+                place: try place(args), sectionID: sectionID)
         case (nil, let value?):
             guard try optionalString(args, "book_id") == nil else {
                 throw ArgumentFailure(message: "A book imports into a wing: pass wing_id, not book_id.")
             }
+            // VX-566: a whole book has no honest section_id — its chapters
+            // are `book.chapters` — so the argument is refused in words (the
+            // `book_id` precedent above), never ignored into a success that
+            // filed nothing where the client asked.
+            guard sectionID == nil else { throw ArgumentFailure(message: Self.bookFormSectionWords) }
             guard let wingID = try optionalString(args, "wing_id") else {
                 throw ArgumentFailure(message: "A book imports into a wing: pass wing_id (\"\" is Home).")
             }
@@ -479,10 +491,15 @@ struct MCPWriteTools: Sendable {
                 }
                 return try noteAnswer(minted, act: .note, clientName: clientName, sectionID: sectionID)
             }
-        case .importNote(let named, let place):
+        case .importNote(let named, let place, let sectionID):
+            // VX-566: `create_note`'s order exactly — the BOOK decided first
+            // (`into`), so an unreachable book answers the one not-shared
+            // sentence whatever `section_id` names; inside, an id that isn't a
+            // live chapter of THAT book speaks the one chapter sentence.
             return try into(place, job: job, clientName: clientName, admitsGathering: true) { destination in
-                let minted = try ops.importNote(named, in: destination, undoLabel: label(.importNote))
-                return try noteAnswer(minted, act: .importNote, clientName: clientName)
+                let minted = try ops.importNote(
+                    named, in: destination, section: sectionID, undoLabel: label(.importNote))
+                return try noteAnswer(minted, act: .importNote, clientName: clientName, sectionID: sectionID)
             }
         case .importBook(let book, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
@@ -953,6 +970,11 @@ struct MCPWriteTools: Sendable {
     /// VX-252 (D2): `create_note`'s `section_id` without a book to be a chapter of.
     static let sectionWithoutBookWords =
         "section_id goes with book_id: it files the note under a chapter of the book the note joins."
+
+    /// VX-566: `import_document`'s whole-book form given a `section_id` — the
+    /// book's chapters are its own (`book.chapters`). PROVISIONAL words (RB-5).
+    static let bookFormSectionWords =
+        "section_id goes with document and book_id: a book brings its own chapters in book.chapters."
 
     /// **The take label on an AI take** (P-13n-3's convention, re-voiced by
     /// her VX-267 ruling — *"why do we need claude-code * suggested * english.

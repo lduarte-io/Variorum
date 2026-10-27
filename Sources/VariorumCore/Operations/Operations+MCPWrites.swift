@@ -538,11 +538,19 @@ extension Operations {
     /// path through the one application road), landing per `destination`
     /// (a book's member at its end — the hand-add's choke point, its gates
     /// and outflow riding — or bookless in a wing). ONE undo entry.
+    ///
+    /// `section` (VX-566 — the VX-620 run, batch 3): `createNote`'s exactly —
+    /// the chapter of the destination BOOK the membership is filed under, in
+    /// the same transaction and the same undo entry; checked before the mint
+    /// (`sectionNotFound` / `sectionNotInReading`), a wing or a gathering
+    /// holding no chapter.
     @discardableResult
     public func importNote(
-        _ named: VariorumDocument.NamedDocument, in destination: MCPNoteDestination, undoLabel: String
+        _ named: VariorumDocument.NamedDocument, in destination: MCPNoteDestination, section: String? = nil,
+        undoLabel: String
     ) throws -> DocumentImport {
-        try mintNoteEntry(undoLabel: undoLabel, document: { _ in named }, destination: { destination })
+        try mintNoteEntry(
+            undoLabel: undoLabel, section: section, document: { _ in named }, destination: { destination })
     }
 
     /// `finish` (13n-b U3): what the format cannot carry (block names, the

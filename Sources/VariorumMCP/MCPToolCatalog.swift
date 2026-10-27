@@ -711,7 +711,9 @@ enum MCPToolCatalog {
             separate the blocks and blank lines stay inside them. Either one `document` into a shared book or gathering \
             (book_id — into a gathering it lands bookless, wearing what its rule needs, as create_note says) or wing \
             (wing_id — list_wings gives every shared wing's), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
-            shared wing. One import is one undo for the author. Returns JSON with the new ids — \
+            shared wing. section_id (with book_id) files the document's note under one of that book's chapters in the \
+            same call, as create_note does (list_notes or create_section gives chapter ids); a book brings its own \
+            chapters in book.chapters. One import is one undo for the author. Returns JSON with the new ids — \
             for one document also blocks, as create_note answers them (each block's shown_take_id \
             and every take's take_id, label and sha256), and tag_ids and tags (their paths): every \
             tag the note wears, the header's first, then a book's outflow or a gathering's rule tags; for a book, its \
@@ -739,6 +741,10 @@ enum MCPToolCatalog {
                 ]),
                 "book_id": .object(["type": "string",
                                     "description": "Import the document into this book (or gathering)."]),
+                "section_id": .object([
+                    "type": "string",
+                    "description": "File the document's note under this chapter of book_id (one document, with book_id only).",
+                ]),
                 "wing_id": .object(["type": "string", "description": "Import into this wing (\"\" is Home)."]),
             ]),
             "additionalProperties": false,
