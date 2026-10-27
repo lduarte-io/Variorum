@@ -229,7 +229,10 @@ anchors the brief names. No subagent.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.**
+- **A behavioural revert is ANNOUNCED (next, over this commit's tree):** `Operations+MCPStars.swift`'s replay with its
+  three design lines knocked out — `at: place.value` → `at: nil`, `heard: false` → `heard: true`, and the
+  compare-and-set guard removed — run against `MCPStarActsTests`, then restored by `git checkout --` (this commit is the
+  pre-revert state; `git diff` after must be clean).
 - **0 · Preflight + this record:** DONE (this commit).
 - **1 · Pins first (red on the pre-fix tree):** DONE (this commit) — `MCPGatheringGrantServerTests`: the deliberate
   flip `aRuleThatNeedsAStarMintsTheNoteStarredWithOneClientNamedUndo` (was `…RefusesWriteNewInWordsAndWritesNothing`),
@@ -246,7 +249,10 @@ anchors the brief names. No subagent.*
   note." — no door speaks it now). GREEN (`scratchpad/b1-logs/mint-green.log`): the wire suite 11/1 (the three pins
   red at `5c88eee55` now green) + the core 42/5 (`GatheringTagsSatisfyTests` with the new wire table + the flipped
   reason pin, `GatheringMintTests`, `CollectSetsTheStarTests`).
-- **3 · `setStarredForClient` (core op + exact-row undo):** NOT-STARTED.
+- **3 · `setStarredForClient` (core op + exact-row undo):** DONE (this commit) — `Operations+MCPStars.swift`
+  (`setStarredForClient`, `replayMCPStar`), `writeStar` grows `at:` + `heard:` (both defaulted — every other caller
+  byte-unchanged; `starTargetIsLive` internal), `MCPWriteAct.star` / `.unstar`. `MCPStarActsTests` (9) GREEN
+  (`scratchpad/b1-logs/star-acts.log`); red on old by construction (no such act). Behavioural revert: announced above.
 - **4 · `set_starred` on the wire (catalog, decisions, answers, Activity):** NOT-STARTED.
 - **5 · The faces + the seven wording points + the deliberate flips:** NOT-STARTED.
 - **6 · Suites + Mac `build-for-testing` (fresh `DerivedData/b1`):** NOT-STARTED.

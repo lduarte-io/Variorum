@@ -116,6 +116,11 @@ extension Operations {
         case noteDelete = "note deletion"
         case noteArchive = "note archiving"
         case noteUnarchive = "note unarchiving"
+        // VX-596 — her star on the wire (her ruling 2026-10-27: "let's add the
+        // star over the wire"): ONE entry per landed act, as every write
+        // ("Undo claude-code's star" / "Undo claude-code's unstar" — her
+        // door's own verbs, `StarCopy`). PROVISIONAL words, her copy pass.
+        case star, unstar
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 
