@@ -261,7 +261,13 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     names, "tutorial" on one door only; the naming sentences; the old literals gone from menu/palette/registry; the
     guide content deliberately unchanged) + `TourOfferLineTests` DELIBERATE update (the title + sentence) —
     build-for-testing GREEN; the suite GREEN at the stage window (below).
-- Batch 2: BUILT, READY-FOR-STAGE (2026-10-27) — implementer session 2 (`opus-implementer`, fresh); preflight read
+- Batch 2: BUILT + STAGE-VERIFIED (2026-10-27, claim `vx-439-b2-suites` 05:30–06:09 MDT) — 3,057 tests / 495 suites on
+  the merged tree; three reds were the batch's own pins (two rig/observable corrections + batch 1's missed ⌥⌘S chord
+  sweep, `0f77f2d95`) and re-ran GREEN; one red, `DestructiveUndoWarningTests.redoNeverAsks`, is PRE-EXISTING ON MAIN
+  (same red on `dd469951e`'s own build — ticket proposed); R-O / R-G / R-T each red exactly as named, green restored; the
+  export seam (ExportFacesTests 6, PlaintextExportBringInRoadTests 5, U2WordsTests 13) green on the merged tree. Tree
+  clean, no instances, stage released (Ledger "B2 STAGE LEG — RESULTS"). Every member's "PENDING the stage run" below is
+  now VERIFIED by it; the walk is the orchestrator's. — implementer session 2 (`opus-implementer`, fresh); preflight read
   (CLAUDE.md + canon, this record whole, SurfaceContracts whole, the resiliency protocol, TEXTKIT2_NOTES §3–4, the
   capability model, VX-283's U2b–U2d drag history). All eight members BUILT and pushed; origin/main (VX-502) merged in at
   `0a30e8b09` (Ledger "B2 — THE SECOND-MERGER STEP"). Headless at the END on the merged tree: core `swift test` 3,439/457
@@ -730,3 +736,21 @@ captures Terminal where visual).
   cycle now runs with its patch APPLIED in the worktree for the run's whole length (source reads see the revert), on a
   tree rebuilt from `0f77f2d95` + that patch: R-O applied → `build-for-testing` into `dd-ro` → `rev_ro` → `git checkout`
   restore; then R-G the same into `dd-rg`; then R-T into `dd-rt`. Expected reds exactly as named above.
+- 2026-10-27 **B2 STAGE LEG — RESULTS (claim `vx-439-b2-suites` 05:30:03 → RELEASED 06:08:47 MDT).**
+  **Revert cycles** (each patch applied in the worktree for the run, tree rebuilt from `0f77f2d95` + the patch, restored by
+  `git checkout`, `git status`/`git diff` empty after each): **R-O** — 9 tests / 2 suites, RED EXACTLY
+  `OpenListDragFaceTests.eachRowsTwoHalvesAreDropsOnMainsRoadLiveOnlyWhileItsDragIsInFlight` (no `.overlay { openRowHalves`)
+  and `OpenListDragMountTests.theRowsTwoHalvesSplitItAtItsMidlineAndReachTheListsEdges` (no halves laid out), the other 7
+  green (the at-rest click guard green — the rows' doors act with no halves at all). **R-G** — 9 / 2, RED EXACTLY the face
+  pin (its `allowsHitTesting(state.dragging != nil)` line) and `OpenListDragMountTests.atRestTheHalvesTakeNoClickSoTheRowsDoorsAct`
+  — by the predicted mechanism: the ✕'s click was EATEN (all four rows stayed) and the row's tap answered instead (row 1
+  selected). **R-T** — 5 / 1, RED EXACTLY `TitleQuickfillTests.tabTakesTheOfferedFirstLineAndEnterFilesIt` and
+  `aNoteWithNoWordsIsOfferedItsDate` (Tab took nothing; the note stayed untitled — the old road), the rule/read/guard pins
+  green. GREEN on the fixed tree: those suites in the chunks and `rerun1` (36 / 5, all but `redoNeverAsks`). No other red
+  in any cycle. **The export seam on the merged tree** (dedicated runs for the merge ask): `ExportFacesTests` **6 / 1**,
+  `PlaintextExportBringInRoadTests` **5 / 1**, `U2WordsTests` **13 / 1** — all GREEN. **`redoNeverAsks` BASELINE**: main's
+  own tree (`dd469951e`, a temporary detached worktree built into its own DerivedData, removed after) fails it
+  IDENTICALLY — `DestructiveUndoWarningTests` 7 / 1 with `redoNeverAsks` red, 3 issues (`redoDepth` stays 1, no "Redid")
+  — so it is PRE-EXISTING ON MAIN, not this run's; ticket proposed (Tests & tooling or Editor, Bug, Confirmed): "the
+  structural redo after a confirmed destructive undo doesn't re-apply in `DestructiveUndoWarningTests.redoNeverAsks`
+  (red on main `dd469951e`)". Instances: both strict `pgrep` forms EMPTY after. Tree clean at `cc8cb7a32` before this record.
