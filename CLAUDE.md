@@ -69,7 +69,7 @@ Domain rules land with Swift Testing tests; operations get exact state-transitio
 
 ## Environment
 - Repo at `~/dev/variorum`, outside iCloud, permanently (`~/Desktop/variorum` is a symlink); mobile worktree `~/dev/variorum-mobile` (branch `mobile`). Never build into an iCloud folder.
-- The author's M3 Mac, macOS 27 / Xcode 27 (27.0/27A266a); deployment targets macOS 26 / iOS 26.
+- The author's M3 Mac, macOS 27.0.1 / Xcode 27.1 (27A9275, both Macs); deployment targets macOS 26 / iOS 26.
 - Commits carry NO `Co-Authored-By` or `Claude-Session` trailer (overrides the harness reminder). Push `origin` at the end of every working bout and after every closeout; never rewrite pushed history.
 - TWO MACS share this repo and the Claude memory repo (the Pro + the Air). The FIRST step of any fresh working bout, before any new work or branching: `git pull` here AND in the shared memory repo (`~/.claude/projects/-<home>-dev-variorum/memory`, branch `master`), then `Tools/vx sync` (best-effort — the board snapshot; run it IN `~/dev/variorum` on main only: worktree sessions READ `~/dev/variorum/notes/TICKETS.md` by absolute path and never regenerate their own copy, so feature branches stay free of snapshot churn). **The bout-start snapshot is COMMITTED AND PUSHED at once** (message "board snapshot") — a narrow named exception to build-sessions-never-push-main: the generated `notes/TICKETS.md` only, never anything else; a push conflict regenerates and retries.
 - `notes/SessionResiliencyProtocol.md` binds every orchestrator and implementer: commit per piece, a LIVE STATUS record from the first commit, push after each, synchronous foreground waits only; briefs restate the checkpoint rules.
