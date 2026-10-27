@@ -122,6 +122,19 @@ Both ledger pieces in one session — the pin consumes the follower's slot, so s
 | 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | NOT-STARTED |
 | 4 | The ladder (one round minimum; reviewer per the diff — expected `opus-reviewer`: no editor seam, no custody, no `Sync/`) | NOT-STARTED |
 
+## LIVE STATUS (batch 1 — the implementer's; flipped in the same commit as each piece)
+
+Implementer: a fresh `opus-implementer`, 2026-10-27. Preflight read in full, in my own context: this record, `notes/SurfaceContracts.md` §The Bookcase and books, the VX-75 and VX-92 records, `notes/TEXTKIT2_NOTES.md` §3, `notes/SessionResiliencyProtocol.md`; every §DESIGN coordinate re-verified against the tree (no `App/` change since base `ba6bdf3eb`; the line numbers stand).
+
+- **NOT-STARTED — A. The pure rule + the wording brain.** `Features/BookView/BookOutlineViewed.swift` (nonisolated: the last anchor in column order whose top ≤ the probe; resolved through `BookOutlineRows` to the pair; the column ordinal of the viewed note) + `NoteBoxCopy.viewedLine` beside `whereLine` (shared count/chapter pieces — one brain); table tests in `VariorumTests/BookOutlineViewedTests.swift`.
+- **NOT-STARTED — B. The slot + the box.** `BookViewModel.viewedOutlinePair` (`private(set)`, written only by `noteOutlineViewed(_:)`, equality-gated against the live slot); `OutlineLandingBox` keeps every anchor's top (O(1) per report) and coalesces ONE derivation per run-loop turn; frozen while `landing.isPending`; delivered at the landing's end (`onFinish`) and on the entries/sections/expansion axes; cleared with the Outline's teardown.
+- **NOT-STARTED — C. The follow-highlight.** The navigator's note mark in `.outline` = the viewed note (every other mode byte-identical through one pure mark rule); the chapter row's quieter viewed wash; both drawn by small child views so a pair change re-renders the marks, never the whole book; DEBUG mark oracle.
+- **NOT-STARTED — D. The pinned nav info.** A sibling header above `outlineBody` in the `.outline` VStack; the meta line MOVED out of the scrolling title block; the position words through the one brain; DEBUG line oracle.
+- **NOT-STARTED — E. Mounted pins.** In the `BookOutlineLandingTests` scaffold: land far → pair + mark + pin words; the caret ignored (focus A, reveal B ⇒ B marked, focus untouched); the freeze (no pair move between LAND and DONE); the pin unmoved across a far landing.
+- **NOT-STARTED — F. Close.** Headless `build-for-testing` green, ledger rows 1–2 → BUILT-PENDING-SUITES, §IMPLEMENTER SELF-ASSESSMENT, the suite list for the orchestrator's stage window.
+
+No revert is in flight. No mounted suite has run (never mine to run).
+
 ## BATCH BRIEF (batch 1 — the whole unit; a fresh `opus-implementer` at xhigh; this section is the brief, self-contained)
 
 You are the implementer for VX-562 in the worktree `~/dev/variorum-vx-562` (branch `vx-562-outline-follow`; run EVERYTHING from this absolute path). One batch = this whole record's §DESIGN, both pieces.
