@@ -161,14 +161,26 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 - Batch 1: IN-PROGRESS — implementer session 1 (`opus-implementer`, 2026-10-27). Required reading DONE (CLAUDE.md + canon,
   this record top→brief, SurfaceContracts whole, the resiliency protocol, the 13n-a document-format record, the capability
   registry + `EditorCommands`). Every member SURVEYED against the tree before code; TWO FORKS returned to the architect
-  (Ledger, 2026-10-27 "B1 fork F-554" and "B1 fork F-568"); no code written yet; no revert in flight.
-  - VX-125: NOT-STARTED — settled design: `.exportNote` (File ▸ Export Note…, ⌘K, both `note ▾` menus), chord **⌥⌘S**
-    (⇧⌘E is Extract's — B1 call C-125-1 below), one act `NoteExport` (flush → `Queries.variorumDocumentText` → save panel
-    `<display title>.md` → write; reads only).
-  - VX-126: NOT-STARTED — settled design: `bulkExportManifest`'s per-NOTE files through `variorumDocumentText` (option A);
-    Pools/ and Readings/ unchanged (call C-126-1); the deliberate byte-pin updates; a library→re-import round-trip pin.
-  - VX-554: RULED R-439-F554 — RECORD-ONLY (no code; the door exists since VX-217). Evidence = the batch-1 walk's
-    captures; Linear → Needs Lillian; morning bundle 4.
+  (Ledger, 2026-10-27 "B1 fork F-554" and "B1 fork F-568"), both RULED (the Ledger's "ARCHITECT RULING on the B1
+  forks"); the seven ready members in progress in the record's order; no revert in flight.
+  - VX-125: DONE (`a73a7e7f4`) — `.exportNote` "Export Note…" (post scope, `noteScoped`, `.native`) on File ▸ (beside
+    Export Library…, ⌥⌘S — C-125-1's sweep in the registry row), ⌘K, and both `note ▾` menus (Write's in NOTE contexts
+    only, Takes'); one act `Core/Views/NoteExport` (flush → ONE read of `Queries.variorumDocumentText` + the display
+    brain's name → save panel `<name>.md` → atomic write → receipt "Exported “x.md”."; a cancel says nothing; an empty
+    note refuses before the panel); the helper's ⌥⌘S row; `ShellActions.noteOnScreen` lifted out of `duplicateNote`
+    unchanged (the two share it). Pins `NoteExportTests` (6: byte-identical to Copy full text + re-import + no row; the
+    default name; cancel; empty refusal; archived + sealed export; the declaration/chord/renderers) — build-for-testing
+    GREEN; the suite run PENDING the stage window. (The record flip rode one commit late — a stale-read edit miss.)
+  - VX-126: DONE (this line's commit) — `Queries.bulkExportManifest`'s per-NOTE files are `variorumDocumentText` (option
+    A — Copy full text's text, header + takes-carrying body); `Pools/` + `Readings/` byte-unchanged (C-126-1); the
+    insurance export reads the same manifest. DELIBERATE byte-pin updates: `ExportProjectionTests.
+    bulkExportManifestIsTotalOverLivePosts` (the two titled files gain `{t:"…"}`), `Phase13SurfaceQueryTests.
+    readingAndBulkExportBodiesCarryTheMapping` (the same). New pin `DocumentFormatRoundTripTests.
+    aLibraryExportReimportsEveryNoteWithItsTitleTagsAndTakes` (every note file == Copy full text; each re-imports
+    through the door's own read with its title, tags and every take, re-exporting to its file's bytes; pools/readings
+    plain). Core 4 suites GREEN headless (whole-package run at batch end PENDING). Red-on-old of the new pin: PENDING —
+    the one-line behavioral revert runs right after this commit (announced here; the committed tree is the restore).
+  - VX-554: DONE at her word (2026-10-27, in-session — the Ledger): no code; R-439-F554's disposition stands.
   - VX-570: NOT-STARTED — settled design: `.newNoteInBook` ⌥⌘N (File menu + ⌘K; the book foot's and Outline flow's
     "+ new note"/"+ new entry" declared as its `.surface` renderers), gated on a new `focusedPaneShowsBook` context fact,
     delivered to the focused pane's `BookView` as a one-shot request that runs the SAME act its foot door runs (book →
@@ -197,10 +209,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
    (the welcome lesson: "Help ▸ Restore Tutorial… replaces the whole book…"), ~1411 (the Trash practice: "…Help ▸ Restore
    Tutorial… rebuilds the whole book."), ~1975 (the tags lesson: "That is exactly how Help ▸ Restore Tutorial… finds what
    to replace."). Her call: re-word the three lines + the re-seed in her window, or leave them.
-4. **VX-554 — the gathering New Note door already exists** (VX-217, since 0.9.x: the navigator foot + the Outline flow's
-   end, every face but Index — where the curated book has none either). Where did you look when it was missing — Index, a
-   collapsed navigator, or a greyed (faint-ink) door? ⌥⌘N (VX-570) now mints from every gathering face including Index.
-   If you want an Index-column mint door or a louder greyed face, say so — both are unruled placements we didn't build.
+4. Resolved live — VX-554 Done at her word (the door exists since VX-217; the ticket was stale).
 5. **VX-568 — nothing the app draws fades.** The "fading in and out" is macOS's own caret (`NSTextInsertionIndicator`,
    which animates rather than hard-blinks), sitting on the placeholder's first letters since VX-326 focused the box at
    launch — and VX-332 now puts it there on every return. Ruling R-439-F568: we probed for focus churn (a real bug if
@@ -305,3 +314,4 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   The walk captures the live Study caret either way.
   **The C-calls are all CONFIRMED** (C-125-1 ⌥⌘S · C-126-1 incl. the insurance export gaining header+takes · C-570-1
   incl. the Write-pane exclusion · C-552-1 · C-602-1), each named in the morning bundle for her veto.
+- 2026-10-27 HER LIVE RULING (in-session): VX-554 Done at her word — 'gathering does have a new note door - that ticket must've been stale. it can be marked complete.' The walk's F-554 evidence duty and bundle item 4's question are retired; R-439-F554's no-code disposition stands. On VX-568 she asked what the issue is (her 10-22 note quoted back to her); R-439-F568 unchanged pending her reply.

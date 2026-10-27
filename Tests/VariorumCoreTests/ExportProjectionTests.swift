@@ -269,9 +269,14 @@ struct ExportProjectionTests {
                 "Pools/Scraps.md",
                 "Readings/Shelf.md",
             ])
-            #expect(manifest[0].contents == "Kept body.")
+            // VX-126 (her option A, 2026-10-27) — a DELIBERATE byte-pin
+            // update: a note's file is Copy full text's text, so a TITLED
+            // note's file leads with its `{t:"…"}` header line (an untitled
+            // one carries none — IC-11); pools and readings below are the
+            // plain projection, unchanged.
+            #expect(manifest[0].contents == "{t:\"Kept\"}\n\nKept body.")
             #expect(manifest[1].contents == "Dated body.")
-            #expect(manifest[2].contents == "Shelved body.")
+            #expect(manifest[2].contents == "{t:\"Shelved\"}\n\nShelved body.")
             #expect(manifest[3].contents == "Scrap one.\n\nScrap two.")
             #expect(manifest[4].contents.contains("# Shelf"))
             #expect(manifest[4].contents.contains("Kept body."))

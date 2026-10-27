@@ -350,10 +350,20 @@ extension Queries {
     ///   `Readings/<name>.md` per live reading — the reading projection
     ///   above, a VIEW over the same posts (never a second copy of truth).
     ///
-    /// Bodies are the plain projection (`"plain .md"` — no variants; fans
-    /// stay in the app and in the Phase 14 bundle). Cost ∝ the corpus —
-    /// this is the one deliberately corpus-shaped projection, a one-shot
-    /// gesture, never a held observation.
+    /// **A NOTE'S FILE IS COPY FULL TEXT'S TEXT, byte for byte** (VX-126 —
+    /// her option A, 2026-10-27: "each per-note file in the bulk export is
+    /// byte-identical to Copy full text"): `variorumDocumentText`, the ONE
+    /// serializer — the `{t:"…"} {#tag}` header line, then the takes-carrying
+    /// body (Alternates sections where a block has a fan; the plain prose
+    /// wherever it has none). So every note file re-imports whole through
+    /// File ▸ Import… — title, tags and takes — and the bulk export is a
+    /// round-trippable set of plain Markdown files (the no-lock-in story;
+    /// `DocumentFormatRoundTripTests`' library pin). The `Pools/` files (a
+    /// scraps area is never a note — Copy full text has no door on one) and
+    /// the `Readings/` views (a per-post `exportPost` consumer that predates
+    /// the header) keep the PLAIN projection, byte-unchanged (C-126-1). Cost ∝
+    /// the corpus — this is the one deliberately corpus-shaped projection, a
+    /// one-shot gesture, never a held observation.
     public static func bulkExportManifest(
         _ db: Database, includeReadings: Bool = true
     ) throws -> [ExportFile] {
@@ -395,9 +405,10 @@ extension Queries {
             let archivedAt: String? = post["archived_at"]
             let folder = archivedAt != nil ? "Archived/" : ""
             let path = uniquePath(base: "\(folder)\(base)", id: id, used: &usedPaths)
+            // VX-126 (option A): the note's file is Copy full text's text.
             files.append(ExportFile(
                 relativePath: path,
-                contents: try exportPost(db, postID: id)))
+                contents: try variorumDocumentText(db, postID: id)))
         }
 
         // Pools (author ruling 2026-07-16, #22c): through the ONE pools
