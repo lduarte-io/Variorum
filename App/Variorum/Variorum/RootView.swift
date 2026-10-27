@@ -90,6 +90,8 @@ struct RootView: View {
     @State private var mcpAskSheetOpening: MCPAskOpening?
     /// 13n-c U4 — ⌘L's wing switcher while it is up in this window (VX-157).
     @State private var wingSwitcher: WingSwitcherModel?
+    /// VX-377 — ⌘K's Move/Copy to Wing selector while it is up in this window.
+    @State private var wingDestination: WingDestinationModel?
     /// 13s-b U2 — THE TOUR, while one runs in THIS window (its `engine` is
     /// nil otherwise). Per window by construction (`RootView` is the window);
     /// born at `startTour()`, dropped when the tour finishes or ends. A SLOT
@@ -449,6 +451,23 @@ struct RootView: View {
                 open.tapL()
             } else {
                 wingSwitcher = WingSwitcherModel(wings: wings)
+            }
+        }
+        // VX-377 — ⌘K's MOVE / COPY TO WING: the keyboard wing selector, opened
+        // in this window by the palette row's request; the model resolves the
+        // note or book (or says why it can't — a race), and its choice runs the
+        // shared acts and their confirms.
+        .sheet(item: $wingDestination) { model in
+            WingDestinationSheet(
+                model: model, tokens: theme.tokens(for: scheme),
+                close: { wingDestination = nil })
+                .environment(theme)
+        }
+        .onChange(of: router.wingDestinationRequest) { _, request in
+            guard let request else { return }
+            router.wingDestinationRequest = nil
+            Task { @MainActor in
+                wingDestination = await WingDestinationModel.open(request, wings: wings, session: session)
             }
         }
         .environment(\.mcpShareRoad, mcpRoad)
@@ -1545,8 +1564,12 @@ struct RootView: View {
             ("Use Terminal Voice", { [self] in theme.setVoice(.terminal) }),
             ("Use Study Voice", { [self] in theme.setVoice(.study) }),
         ]
+        let navigation = rows
         rows.append(contentsOf: actions.paletteEntries())
         palette.commands = rows
+        // VX-377: each OPEN lists the act rows for what the focused pane shows
+        // then (the wing rows only where they act — `WingPaletteDoors`).
+        palette.commandSource = { navigation + (await actions.listedPaletteEntries()) }
     }
 
 }

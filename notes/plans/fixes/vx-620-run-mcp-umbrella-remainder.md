@@ -1339,8 +1339,20 @@ stage claim. No subagent.*
   `WingBookMoveDoorTests.theBookMoveActsAreDeclaredAndRendered` — the door sets gain `.palette` (+ `paletteActs`
   carries each). Compiled with pieces 2–4 (`b4`, TEST BUILD SUCCEEDED — `scratchpad/b4-logs/mac-bft1.log`); RUN
   PENDING the final window.
-- **2 · The palette's context-listed rows + the acts' request:** NOT-STARTED — THE DESIGN, items 2–3.
-- **3 · The keyboard wing selector (the probe's face fix) + its confirms:** NOT-STARTED — THE DESIGN, items 4–5.
+- **2 · The palette's context-listed rows + the acts' request:** DONE (this commit) — `ShellActions`: the three join
+  `paletteActs`; `paletteEntries()` stays EVERY row (the harnesses' list), `paletteEntries(listing:)` /
+  `listedPaletteEntries()` filter by `WingPaletteDoors.lists` over `paletteListingFacts()` (the focused selection —
+  `.post` a note, `.reading` a book read whole for its marker — and `session.wing.wingCount`);
+  `openWingDestination(_:)` names `ShellRouter.wingDestinationRequest` (NEW, `bookMintRequest`'s shape) under the
+  registry's gate, else speaks the act's note. `PaletteModel`: `commandSource` + `prepare()` (once per open, before the
+  first refresh) and `listedCommands` (the list the rows were built from — `execute` reads it). `RootView`:
+  `wirePaletteCommands` sets the source (navigation rows + `listedPaletteEntries()`). Compiled (`b4`); RUN PENDING.
+- **3 · The keyboard wing selector (the probe's face fix) + its confirms:** DONE (this commit) — NEW
+  `Core/Views/WingDestinationSheet.swift`: `WingPaletteDoors` (pure listing + `context(showing:wingCount:)`),
+  `WingDestinationModel` (`open(_:wings:session:)` resolves + re-checks; `choose(_:)` runs `moveAsk` / `copy` /
+  `bookMoveAsk`, one choice in flight) and `WingDestinationSheet` (the switcher's brain + `WingSwitcherKeyCatcher`; the
+  two confirms hosted over it); `WingCopy` +3 words (RB-15). `RootView` presents it from the request. Compiled (`b4`);
+  RUN + the walk leg PENDING.
 - **4 · The re-ask after any wing act, by construction (VX-425's rule on the new road):** NOT-STARTED — THE DESIGN,
   item 6.
 - **5 · Pins + Mac `build-for-testing` (FRESH `DerivedData/b4`) + the whole headless suite:** NOT-STARTED.

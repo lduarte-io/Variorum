@@ -84,6 +84,22 @@ final class ShellRouter {
         let token: UUID
     }
     var bookMintRequest: BookMintRequest?
+    /// **VX-377 (the VX-620 run, batch 4) — ⌘K's Move/Copy to Wing**: open the
+    /// keyboard wing selector for the FOCUSED note or book. A REQUEST the
+    /// window adopts (the selector is the window's sheet to present —
+    /// `WingDestinationModel.open` resolves it), `bookMintRequest`'s shape: a
+    /// fresh token per press, so a second press on the same note is a second
+    /// request.
+    struct WingDestinationRequest: Equatable, Sendable {
+        enum Act: Equatable, Sendable {
+            case moveNote(String)
+            case copyNote(String)
+            case moveBook(String)
+        }
+        let act: Act
+        let token: UUID
+    }
+    var wingDestinationRequest: WingDestinationRequest?
 
     // MARK: - The shell's CONFIRM (13u4 UNIT S3 — KnownIssues row 67)
 
