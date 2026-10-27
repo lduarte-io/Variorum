@@ -672,7 +672,8 @@ final class LandingAuthority {
     /// `articleLanding`) can let go of exactly that one. Nil on every surface
     /// that reads `isPending` instead (the five before 18l-b U2) — except the
     /// book Outline since VX-562, which reads both: its viewed-pair follower
-    /// holds still while `isPending` and is handed the settled page here.
+    /// holds the landing's adopted target while `isPending` and asks here
+    /// whether that target still stands (R-562-A).
     var onFinish: ((String, LandingOutcome) -> Void)?
 
     /// **18l-c U8 — told ONCE per landing, the first time a quiet look finds

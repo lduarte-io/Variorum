@@ -1556,6 +1556,27 @@ struct BookView: View {
         /// longer has is never read (the rule walks the CURRENT rows). Emptied
         /// when the Outline leaves, so a return never reads the old page.
         var rowTops: [String: CGFloat] = [:]
+        /// **VX-562 R-562-A — where every row last said its BOTTOM is**, as
+        /// its height (written beside `rowTops`, the same report, O(1)): the
+        /// hold's on-screen test reads the adopted row's, so a tall story
+        /// spanning the page's top edge is still on the page.
+        var rowExtents: [String: CGFloat] = [:]
+        /// **R-562-A — the page's height** (the scroll's own frame, the
+        /// space every row's top is read in): the foot of the hold's
+        /// on-screen test. `0` until the first geometry pass — "not yet
+        /// measured", which never finds a row off the bottom.
+        var viewportHeight: CGFloat = 0
+        /// **R-562-A — the landing TARGET the follower adopted at the click**
+        /// (the anchor id; nil ⇒ the follower is the rule). Set at a
+        /// landing's START by `adoptLandingTarget` (every landing re-adopts:
+        /// "a new landing" releases the old one by replacing it); held through
+        /// the landing by the freeze; after it, kept by
+        /// `BookOutlineViewed.follow` while the target's row is on the page,
+        /// dropped by that same derivation when it is not, and cleared by the
+        /// ruling's acts — her scroll (`outlineUserScrolled`), an axis change
+        /// (`releaseStandingAdoption`), the Outline leaving
+        /// (`forgetViewedPair`).
+        var adoptedAnchor: String?
         /// One derivation per run-loop turn: set when a turn's derivation is
         /// queued, cleared when it runs.
         var viewedTurnQueued = false
@@ -1600,21 +1621,74 @@ struct BookView: View {
     ///   programmatic travel — a navigator click, a chapter landing, a width
     ///   change's re-land — moves the column through rows she never chose to
     ///   look at while it settles, and the highlight must not flicker through
-    ///   them. The landing's END delivers the settled pair (`landOutline`
+    ///   them. Since R-562-A what the freeze holds is the landing's TARGET,
+    ///   adopted and published at the click (`adoptLandingTarget`), never
+    ///   the page she left. The landing's END asks again (`landOutline`
     ///   wires `onFinish` here), and her own scroll ends a landing at once
     ///   (`userTookOver`), which unfreezes it.
+    ///
+    /// Unfrozen, it is `BookOutlineViewed.follow`: an adopted target STANDS
+    /// while its row is on the page (R-562-A — wherever on the page: a row in
+    /// the book's last screenful never reaches the top, finding F-1), and
+    /// otherwise THE RULE names what owns the page's top, the adoption
+    /// dropped by the same look.
     private static func deriveViewedPair(
         box: OutlineLandingBox, landing: LandingAuthority,
         model: BookViewModel, structure: BookStructureModel
     ) {
         guard structure.mode == .outline, !landing.isPending else { return }
         let rows = outlineRows(structure: structure, entries: model.entries)
-        model.noteOutlineViewed(BookOutlineViewed.pair(rows: rows, tops: box.rowTops))
+        let followed = BookOutlineViewed.follow(
+            rows: rows, tops: box.rowTops, heights: box.rowExtents,
+            viewport: box.viewportHeight, adopted: box.adoptedAnchor)
+        box.adoptedAnchor = followed.adopted
+        model.noteOutlineViewed(followed.pair)
     }
 
-    /// The Outline left: its page is gone, so is what it was showing.
+    /// **R-562-A — a landing's START: the follower adopts its target**, and
+    /// the slot says the target at once — the highlight and the pinned line
+    /// move at the click, exactly as the old focus mark did, and the freeze
+    /// then holds it through the travel. Every landing re-adopts (a new
+    /// landing is one of the ruling's releases: it replaces the old target);
+    /// a target the column has no row for adopts nothing, and the freeze
+    /// holds the page as it was until the landing's end asks the rule.
+    /// Static, over the three references it needs (the `deriveViewedPair`
+    /// shape). Writes the slot and the box — never focus, the caret seeds,
+    /// `pendingReveal` or the landing's aim.
+    private static func adoptLandingTarget(
+        _ anchorID: String, box: OutlineLandingBox,
+        model: BookViewModel, structure: BookStructureModel
+    ) {
+        let adopted = structure.mode == .outline
+            ? BookOutlineViewed.adoptedPair(
+                anchor: anchorID,
+                rows: outlineRows(structure: structure, entries: model.entries))
+            : nil
+        box.adoptedAnchor = adopted == nil ? nil : anchorID
+        if let adopted { model.noteOutlineViewed(adopted) }
+    }
+
+    /// **R-562-A — an AXIS change returns the follower to the rule** (the
+    /// entries, the chapters, an expansion or a collapse): the adopted target
+    /// is let go — but only an adoption whose landing has ENDED. One still
+    /// travelling belongs to its landing, whose end asks `follow` against the
+    /// column as it then stands; and the navigator's note-row click is itself
+    /// an expansion (`BookNavigatorDoor.openTheNote` is `focus` — which
+    /// unfolds the note — and `requestReveal` in one act), so an axis that let
+    /// go of a travelling adoption would undo the click's own, whichever of
+    /// the two changes SwiftUI delivers first. The caller queues the
+    /// derivation that resumes the rule.
+    private func releaseStandingAdoption() {
+        guard !landing.isPending else { return }
+        landingBox.adoptedAnchor = nil
+    }
+
+    /// The Outline left: its page is gone, so is what it was showing — and
+    /// the target it had adopted (R-562-A: leaving the Outline is a release).
     private func forgetViewedPair() {
         landingBox.rowTops = [:]
+        landingBox.rowExtents = [:]
+        landingBox.adoptedAnchor = nil
         model.noteOutlineViewed(.nothingViewed)
     }
 
@@ -1674,14 +1748,18 @@ struct BookView: View {
         #if DEBUG
         landingBox.rowHeights = [:]
         #endif
-        // VX-562: the landing's END delivers the pair its travel froze — once,
-        // with the authority already idle (`finish` calls this last). Weak on
+        // VX-562: the landing's END asks the follower again — once, with the
+        // authority already idle (`finish` calls this last): the adopted
+        // target stands if it is on the page, else the rule (R-562-A). Weak on
         // the landing: it is the closure's own holder.
         let box = landingBox, model = model, structure = structure, authority = landing
         authority.onFinish = { [weak authority] _, _ in
             guard let authority else { return }
             Self.deriveViewedPair(box: box, landing: authority, model: model, structure: structure)
         }
+        // R-562-A: the follower adopts the TARGET at the click — before the
+        // aim, so the freeze holds the target, never the page she left.
+        Self.adoptLandingTarget(anchorID, box: box, model: model, structure: structure)
         landing.land(
             anchorID,
             // Built on every landing rather than only in DEBUG since this
@@ -1712,7 +1790,9 @@ struct BookView: View {
         }
         // VX-562: and where EVERY row is, for the viewed pair — O(1) here; the
         // derivation runs once for the turn's reports (`queueViewedPair`).
+        // Its height too (R-562-A: the hold's on-screen test).
         landingBox.rowTops[anchorID] = top
+        landingBox.rowExtents[anchorID] = height
         queueViewedPair()
         #if DEBUG
         BookOutlineGeometry.recordAnchor(anchorID, top: top, height: height, owner: oracleOwner)
@@ -1739,8 +1819,16 @@ struct BookView: View {
 
     /// The user scrolled while a landing was pending: she took over — the
     /// landing ends where she put the page, never fighting her.
+    ///
+    /// VX-562 R-562-A: her hand on the page (the user scroll phase) also
+    /// returns the follower to the rule — the adopted target let go FIRST,
+    /// so a landing her scroll ends delivers the rule's pair rather than the
+    /// target's, and a hold standing after its landing (nothing to end) is
+    /// asked again at once.
     fileprivate func outlineUserScrolled() {
+        landingBox.adoptedAnchor = nil
         landing.userTookOver()
+        queueViewedPair()
     }
 
     /// The navigator's note-row click in Outline (the correction round,
@@ -2060,6 +2148,15 @@ struct BookView: View {
                 else { return }
                 DispatchQueue.main.async { outlinePaneWidth = width }
             }
+            // VX-562 R-562-A: the PAGE's height — the foot of the adopted
+            // target's on-screen test (the space every row's top is read in
+            // is this scroll's own). Into the reference box: bookkeeping,
+            // never render state, so it re-lays nothing out; a change asks
+            // the follower again.
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                landingBox.viewportHeight = height
+                queueViewedPair()
+            }
             // Row 53: the landing listens to the WHOLE column, not only its
             // anchor — any content-height change re-arms its quiet
             // interval, and a scroll by the user ends it.
@@ -2119,19 +2216,29 @@ struct BookView: View {
             //
             // VX-562: the same two moments change the ROWS the viewed pair
             // is read through (a note leaving, a chapter added) — re-derived
-            // even when no row's top moves.
+            // even when no row's top moves. R-562-A: each is an AXIS change,
+            // which lets a standing adopted target go — FIRST, so a parked
+            // reveal this lands adopts its own target afterwards.
             .onChange(of: model.entries.map(\.postID)) { _, _ in
+                releaseStandingAdoption()
                 landOutlineReveal(proxy)
                 queueViewedPair()
             }
             .onChange(of: structure.sections.map(\.id)) { _, _ in
+                releaseStandingAdoption()
                 landOutlineReveal(proxy)
                 queueViewedPair()
             }
             // VX-562: an expansion or a collapse is the third axis (the rows'
             // heights move — their reports queue it too; this is the
-            // guarantee, not the usual road).
-            .onChange(of: model.expandedPosts) { _, _ in queueViewedPair() }
+            // guarantee, not the usual road). R-562-A: it lets a STANDING
+            // adoption go; the navigator click's own unfolding never lets go
+            // of the target the click is travelling to
+            // (`releaseStandingAdoption`).
+            .onChange(of: model.expandedPosts) { _, _ in
+                releaseStandingAdoption()
+                queueViewedPair()
+            }
             // **13u2b UNIT 1 — A WIDTH CHANGE KEEPS HER PLACE.** The trace
             // measured it directly: after a settled landing, a width change
             // alone silently relocated the page mid-story. It has to — every
