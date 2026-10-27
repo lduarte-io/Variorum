@@ -97,7 +97,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 | Batch | Members | Session | State |
 |---|---|---|---|
 | 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | BUILT (headless green, red-on-old verified; Mac pins compiled — run + walk PENDING the stage) — BATCH 1 RECORD |
-| 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | IN FLIGHT (spawned at the batch-1 seam) |
+| 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | BUILT (headless green, red-on-old verified incl. two behavioural reverts; Mac pins compiled into `DerivedData/b2a` — run + walk PENDING the stage) — BATCH 2a RECORD |
 | 2b — the disconnect story | VX-394 | opus-implementer №3 | NOT STARTED |
 | 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | NOT STARTED |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
@@ -226,6 +226,26 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
   (`changingAGrantToAnotherPlaceReplacesThatPlacesRowToo`). Option: also hold the op to it — a named grant on another
   place refused (`mcpGrantNotFound`-family) or skipped — so a future road that forgets the decision cannot revoke across
   places (defence in depth; flips that pin deliberately).
+- **MB-4, as built (batch 2a — VX-352):** a narrow take card splits the label at its FIRST " · " — the client's name
+  (with the legacy "suggested" word) yields, the separator and the label's own words are kept whole — and the whole
+  label is the hover: "claude-code · english" reads "claud… · english", then "… · english". A label of hers that holds
+  " · " splits the same way (its first part yields first). Alternatives: (b) middle truncation of the whole label
+  ("claude…english"); (c) on a narrow card drop the client's name entirely (own words only; the name in the hover).
+  Ratify or redirect.
+- **MB-5, as built (batch 2a — VX-358):** canonical equality stays `edit_take`'s and `restore_commit`'s no-op rule; a
+  re-spelled no-op (the same characters in other code points — NFC against NFD) answers
+  `stored_text_normalization_differs: true` beside the stored text's `sha256`, absent otherwise; one sentence in both
+  descriptions. Alternatives: (b) byte equality as the no-op rule — the re-spelling WRITES (commits, churn, an undo
+  entry for an invisible change); (c) the same field under another name, or echoing the sent bytes' digest too.
+- **MB-10 (batch 2a — VX-354's face, for the walk and batch 3):** the header's marks are row-size beside the
+  heading-size book name (the Bookcase's and the Library's row size); a gathering's name wears its marks only while
+  "appears in N gatherings" is open (rows drawn). A gathering wears NO ask glyph because no ask targets a gathering
+  today (`MCPAskTarget`); when batch 3 (VX-549) makes a gathering a grant place, its ask's key decides whether the
+  panel's `MCPAskGlyph(.book(id))` already marks it or a `.gathering` target is owed.
+- **MB-11 (rider candidate + copy, batch 2a):** Read mode's takes view cuts a take's label the same one-run way
+  (`ReadTier/ReadTakesView.swift:108`) — `TakeLabelLine` would serve it in one line; NOT seated (another surface; her
+  word to ride). The two new model-facing sentences (VX-365's on `add_note_to_book`, VX-358's `spellingSentence`) join
+  VX-234's copy list.
 - (Batch records may append more.)
 
 ## LEDGER
@@ -235,7 +255,7 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
 | 1 | Worktree + branch + in-flight row + Linear In Progress | orchestrator | DONE (`472ed9bfe` on main; branch pushed) |
 | 2 | This plan file | orchestrator | DONE |
 | 3 | Batch 1 (VX-516 · VX-515 · VX-512) | opus-implementer №1 | BUILT — `d0e7f1302` core · `965a05521` app; Mac run + walk PENDING (BATCH 1 RECORD, "For the orchestrator") |
-| 4 | Batch 2a (VX-352 · VX-354 · VX-365 · VX-358) | opus-implementer №2 | NOT STARTED |
+| 4 | Batch 2a (VX-352 · VX-354 · VX-365 · VX-358) | opus-implementer №2 | BUILT — `15f94f154` VX-365 · `4d3f3f3d1` VX-358 · `3e1aaa26f` VX-352 · `e3d46b202` VX-354; Mac run + walk PENDING (BATCH 2a RECORD, "For the orchestrator") |
 | 5 | Batch 2b (VX-394) | opus-implementer №3 | NOT STARTED |
 | 6 | Batch 3 (VX-549) | opus-implementer №4 | NOT STARTED |
 | 7 | Orchestrator acceptance walks (stage via coordinator) | orchestrator | NOT STARTED |
@@ -440,7 +460,13 @@ the two verbs, the library line, the approval lead) · `Registry/Capability.swif
 
 ## BATCH 2a RECORD
 
-**NOT DONE BY THIS BATCH (first line, by the rule):** IN PROGRESS — this line is rewritten at the batch's close.
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI walk, no capture, no stage
+claim (the orchestrator's) — the Mac pins (`TakeLabelLineTests` ×3 new, `BookPanelMCPMarksTests` +4) are written and
+COMPILED (`build-for-testing` green into `DerivedData/b2a`), their RUN PENDING the orchestrator's stage window (the list
+and the walk legs at "For the orchestrator" below); no red PRODUCT was built for the Mac pins (VX-352's red leg is the
+core's, run headless; VX-354's is by construction); no canon edit (MCPSpec / SurfaceContracts lines are the closeout's —
+listed below); nothing in `Sync/`, `Server/`, custody, the synced schema or the editor seam; VX-566/567 and every other
+open ticket untouched; the read tier's take label (`ReadTakesView`, the same one-`Text` tail cut) observed, NOT built.
 
 *Implementer: `opus-implementer` №2 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
 code: CLAUDE.md + its canon, `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` IN FULL (The app · The note ·
@@ -455,7 +481,7 @@ orchestrator's). Batch 1's code and record untouched.*
 
 - **No behavioural revert is in flight.** (VX-358's ran over `4d3f3f3d1`, VX-352's over `3e1aaa26f`; each restored
   by `git checkout --`, `git diff` clean after, green again — `vx358-green2.log`, `vx352-green2.log`.)
-- **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (this commit) — core
+- **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (`15f94f154`) — core
   `Operations.addNoteToBookForClient` → `MCPBookAdd {membership, tagIDs, tagPaths}` (the same body and ONE undo entry;
   `addNoteToBook` keeps its signature and returns `.membership`), the tags composed INSIDE the act's transaction by
   VX-361's one rule (`mintedNoteTags`: the note's own tags in application order, read before the add, then the book's
@@ -465,8 +491,8 @@ orchestrator's). Batch 1's code and record untouched.*
   (`vx365-green.log`): the pins 4/4 + `MCPTagTruthServerTests`, `MCPWriteServerTests`, `MCPWingReachServerTests`,
   `MCPAdviceServerTests`, both neutrality walks, `MCPWriteActsTests`, `MCPEditActsTests`, `UndoQuietPressTests` — 94
   tests in 10 suites passed.
-- **VX-358 (an NFC↔NFD re-spelling answers `changed: false` with a digest that isn't the sent bytes'):** DONE (this
-  commit; PROVISIONAL MB-5) — canonical equality stays the no-op rule; the pure `StoredText.spellingDiffers(_:from:)`
+- **VX-358 (an NFC↔NFD re-spelling answers `changed: false` with a digest that isn't the sent bytes'):** DONE
+  (`4d3f3f3d1`; revert run recorded `79d9ec85a`; PROVISIONAL MB-5) — canonical equality stays the no-op rule; the pure `StoredText.spellingDiffers(_:from:)`
   (canonically equal, UTF-8 bytes unequal) is read INSIDE each act's transaction (`MCPTakeEdit.spellingDiffers`,
   `MCPCommitRestore.spellingDiffers` — the sent text after the U+0000 strip, or the commit's text, against the stored
   take); the wire adds `stored_text_normalization_differs: true` (`MCPTextDigest.spellingDiffersKey`) ONLY then;
@@ -478,8 +504,8 @@ orchestrator's). Batch 1's code and record untouched.*
   (`vx358-revert-red.log`): the wire suite 4 of 8 failed, 7 issues (the three answer pins + the description pin; the
   fixture precondition and the three byte-unchanged guards green) and the pure table 5 issues (its five true rows);
   restored → 9/9 green (`vx358-green2.log`).
-- **VX-352 (Terminal's take card cuts "claude-code · english" to "claude-code · e…"):** DONE (this commit; PROVISIONAL
-  MB-4) — the pure `Sources/VariorumCore/Domain/TakeLabelFace.swift`: `parts` splits a label at its first " · " into a
+- **VX-352 (Terminal's take card cuts "claude-code · english" to "claude-code · e…"):** DONE (`3e1aaa26f`; revert run
+  recorded `92b6172d0`; PROVISIONAL MB-4) — the pure `Sources/VariorumCore/Domain/TakeLabelFace.swift`: `parts` splits a label at its first " · " into a
   YIELDING head (the client name — and the legacy "suggested" word with it) and a KEPT tail (the separator + the
   label's own words); `allocate` gives the kept part its whole width first and the head what is left. The card header
   (`TakeChooseHeader`, every fan style) draws the parts through `App/…/Features/Takes/TakeLabelLine.swift` — a custom
@@ -493,7 +519,7 @@ orchestrator's). Batch 1's code and record untouched.*
   (`vx352-revert-red.log`; `allocate` back to reading order — the old face): 3 of 4 failed, 10 issues (the parts table
   green — the split alone changes no face); its `!= "claude-code · e…"` expectation FAILED, i.e. the reverted
   arithmetic reproduces her capture exactly; restored → 4/4 green (`vx352-green2.log`).
-- **VX-354 (the Book Panel's header and gatherings wear neither mark):** DONE (this commit) — `BookPanelModel` holds
+- **VX-354 (the Book Panel's header and gatherings wear neither mark):** DONE (`e3d46b202`) — `BookPanelModel` holds
   the READING reach (`readingReach`, `holdReadingReach` — `Queries.mcpBookReaches(readingIDs:)`: `decide` for the book,
   `decideGathering` for a gathering, behind `mcpReachStandings`' VX-272 gate; never `container`) over exactly the
   readings DRAWN — the pure `BookPanelBrain.markedReadings`: the shown book always, the gatherings' names only while
@@ -506,8 +532,198 @@ orchestrator's). Batch 1's code and record untouched.*
   with no approved client even with the open book on) COMPILED (`build-for-testing` green, `mac-bft2.log`, no warning
   in a touched file), RUN **PENDING** the orchestrator's stage. Red-on-old by construction (the old panel neither held
   nor drew a reading's reach; `holdReadingReach` is new).
-- **Suites:** PENDING (the headless targeted suites per piece; the whole headless suite and `build-for-testing` at
-  the end).
+- **Suites (the end, on the final tree `e3d46b202`'s sources):** the WHOLE headless suite
+  (`scratchpad/b2a-logs/headless-all.log`): core **3446 tests / 460 suites passed** (5 known issues, standing — batch
+  1's 3441/458 + this batch's 5/2), StringsWorkbook **32 / 4 passed**, VariorumMCPTests **396 / 73 with ONE issue —
+  `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`'s 15 s wall clock under the
+  full-parallel run (19.8 s)**: the standing **VX-532** class batch 1 met too (no harness line changed), run ISOLATED
+  green ×2 (`harness-isolated-1/2.log`: 3/1 passed, 2.1–2.2 s) — batch 1's 383/71 + this batch's 13/2. The Mac app +
+  test bundle: `build-for-testing` **TEST BUILD SUCCEEDED** (`mac-bft2.log`, the final app sources), no warning in a
+  touched file (the one `TakesBoardView.swift:2058` warning is pre-existing code — `TakeCardProbeSlot.space`, unchanged
+  since HEAD). **PENDING:** the Mac pins' run (the stage).
+
+### VX-365 — the trace (inputs → wrong output), the build
+
+- **Inputs:** a client at write new on a note and a book whose OUTFLOW is a tag set (her rule editor's outflow
+  chooser), `add_note_to_book {note_id, book_id}`.
+- **The road:** `MCPWriteTools.perform`'s `.addNoteToBook` arm → `noteIntoBook` (both sides decided at write new) →
+  `Operations.addNoteToBook` → the hand-add's ONE choke point `addPostToReading(db, …)` whose last line is
+  `applyAutoTag` (`Operations+Intake.swift:310` — every outflow tag through the one application road, a worn one
+  skipped). So the note WEARS the outflow's tags when the act lands.
+- **Wrong output:** the answer was `{note_id, book_id, section_id?}` — no tag — so a client that meant to tag the note
+  could not know the book already had (VX-361's class on the one road VX-361 left out — the U9 record's OWED 4).
+- **The build:** VX-361's shape exactly (P-VX361-1 — the brief's "applied-then-outflow, each once"). Core
+  `Operations.addNoteToBookForClient(…) -> MCPBookAdd {membership, tagIDs, tagPaths}` runs the SAME body with the SAME
+  one undo entry (`addNoteToBook` now returns its `.membership`, its signature and every caller unchanged), reading the
+  note's own live tags in application order BEFORE the add, then `mintedNoteTags(db, header: own, outflow:
+  book.autoTagIDs)` AFTER it — inside the act's transaction, ∝ the note's applications, never a read after the commit.
+  The wire answer gains `tag_ids` + `tags` (always present; `[]` when none). The description's "Returns JSON." gains
+  create_note's own sentence shape ("…its tag_ids and tags (their paths) list every tag the note wears once it is in
+  the book — its own first, then the book's outflow — so there is nothing to tag again.").
+- **The fence, unchanged (the brief's "byte-unchanged"):** both decisions run before the act as before; a refused add
+  is the ONE not-shared sentence, a hidden note's identical to a missing id's (the guard pin). The tags listed are the
+  NOTE's — which a client allowed write new on that note can already read in `read_note`'s header.
+- **Pins** (`Tests/VariorumMCPTests/MCPBookAddTagsServerTests.swift`, wire only — compile on both trees):
+  `addingANoteToAnOutflowBookAnswersEveryTagItNowWears` (her tag + two outflow tags, the exact key set, ids and paths in
+  the ruled order, the store agreeing, still one undo entry) · `anOutflowTagTheNoteAlreadyWoreIsListedOnceAtItsOwnPlace`
+  · `aBookWithNoOutflowAnswersTheNotesOwnTagsOrNoneAndKeepsTheChapterEcho` (`[]` never absent; `section_id` stays) — RED
+  ON OLD 3 of 4, 8 issues; GUARD `aRefusedAddAnswersTheOneNotSharedShapeWithNoTags` green on both sides.
+
+### VX-358 — the trace, the build (PROVISIONAL MB-5)
+
+- **Inputs:** a take stored "Um café." in one spelling (NFC U+00E9, say); a client sends `edit_take` with the other
+  spelling (NFD e + U+0301) — or `restore_commit` of a commit holding the other spelling.
+- **The road:** `Operations.editTakeUnderInsurance`'s no-op guard `variant.workingText != newText`
+  (`Operations+MCPEdits.swift`) and `restoreCommitForClient`'s `variant.workingText != commitPoint.text`
+  (`Operations+MCPNoteEdits.swift`) are Swift `String` equality — CANONICAL equivalence.
+- **Wrong output (observed on the old tree by the pins' own assertions):** `changed: false`, nothing written (no bytes,
+  no commit, no undo entry), and `sha256` — VX-254's digest of the STORED bytes — differs from the digest of what the
+  client sent, with nothing saying why. Honest about the store; surprising to an agent proving its write by digest.
+- **The build (the brief's default):** canonical equality STAYS the no-op rule (an invisible re-normalization never
+  rewrites prose, churns, or mints commits and an undo entry). The pure `StoredText.spellingDiffers(_:from:)`
+  (canonically equal AND UTF-8 bytes unequal) is read INSIDE each act's transaction — the sent text after the U+0000
+  strip (so a null-only difference is the null count's, never this), or the commit's text — into
+  `MCPTakeEdit.spellingDiffers` / `MCPCommitRestore.spellingDiffers` (always false when `changed`). The wire adds ONE
+  key, `stored_text_normalization_differs: true` (`MCPTextDigest.spellingDiffersKey` — its one home), only then; absent
+  otherwise, so every other answer is byte-unchanged (the guards pin the exact key sets). `sha256` stays the stored
+  text's (VX-254's definition untouched). One shared sentence (`MCPToolCatalog.spellingSentence`, reading the key) in
+  both tools' descriptions, no other tool's.
+- **The sweep (every tool that answers a `sha256`, × whether a canonical no-op can meet it):** `add_take`, `add_takes`,
+  `create_note`, one-document `import_document`, `insert_blocks`, `duplicate_note` — each MINTS, never short-circuits,
+  so the stored bytes are the sent bytes (minus U+0000, VX-357's own key) — SAFE, no change. `edit_take` and
+  `restore_commit` — the two canonical no-ops — FIXED (pinned). `read_note`'s `ids_only` digests what is read — SAFE.
+  The other no-op acts that compare text canonically (`set_take_label`, the renames, `set_block_name`, comment edits)
+  answer no digest — nothing for a client to mismatch; out of VX-358's scope, unchanged.
+- **Pins:** wire `Tests/VariorumMCPTests/MCPSpellingNoOpServerTests.swift` —
+  `editTakeSendingAnotherSpellingIsANoOpThatSaysTheSpellingsDiffer` (exact keys; store bytes kept; no commit; no undo
+  entry) · `editTakeSendingNFCOntoAnNFDTakeSaysTheSpellingsDifferToo` ·
+  `restoringACommitSpelledOtherwiseIsANoOpThatSaysTheSpellingsDiffer` ·
+  `bothToolsDescriptionsSayTheSpellingRuleAndNoOtherDoes`; GUARDS (green both sides)
+  `theFixturesTwoSpellingsAreCanonicallyEqualAndByteDifferent`, `everyOtherEditTakeAnswerKeepsItsExactKeys`,
+  `aNullCharacterOnlyNoOpSaysTheNullsAndNotTheSpelling`, `everyOtherRestoreCommitAnswerKeepsItsExactKeys`; core
+  `Tests/VariorumCoreTests/StoredTextSpellingTests.swift` `theTable` (NFC/NFD both ways, the Ångström singleton,
+  Hangul, reordered marks → true; byte-identical, different words, case, a trailing space, a compatibility ligature →
+  false). Red on old 3 of 7 (5 issues, the description pin added after); the behavioural revert 4 of 8 + the table's 5.
+
+### VX-352 — the trace, the build (PROVISIONAL MB-4)
+
+- **Inputs:** an AI take labelled `claude-code · english` (VX-267's `‹client› · ‹label›`); Takes mode, Terminal voice,
+  a margin-grid card (her U5 STAGE RUN step 12 capture, `live/t/02-u5a-A-card-crop-block1`).
+- **The road:** `TakeChooseHeader` (`TakesBoardView.swift`) drew `Text(label).lineLimit(1)` beside "choose" and a
+  `Spacer` — ONE run, truncated at its TAIL by SwiftUI.
+- **Wrong output:** "choose claude-code · e…" — the client's name whole, "english" (what tells two takes apart) cut.
+  Study's proportional face fit it whole.
+- **The build:** the pure `Domain/TakeLabelFace` (core — headless-pinned): `parts` splits at the FIRST " · " into a
+  YIELDING head (the client's name; the legacy `suggested` word folds into it, so `‹client› · suggested · ‹label›` keeps
+  `‹label›` too) and a KEPT tail (the separator + the own words); a label with no separator, a separator with nothing
+  before it, or nothing after it, is ONE kept part (today's face). `allocate` gives the kept part its whole width FIRST,
+  the head what is left. `TakeLabelLine` (app) draws each part as its own one-line `Text`, laid out by
+  `TakeLabelLayout` (a custom `Layout` whose widths ARE `allocate`'s over the parts' ideal widths), `.help(label)` (the
+  surface's one hover idiom) and the whole label as the accessibility label. Narrowing reads "claud… · english", then
+  "… · english", and only then " · engl…". Every fan style's card shares the header, so all four get it. A label of
+  hers that holds " · " splits the same way (only which side yields first is at stake; the hover is always whole).
+- **Why a Layout, not two `Text`s with `layoutPriority`:** the pinned arithmetic is then the card's own — the pure
+  rule is the layout, not a model of it — and the DEBUG `TakeLabelLayoutProbe` reads the widths the REAL header placed.
+- **Pins:** core `Tests/VariorumCoreTests/TakeLabelFaceTests.swift` — `terminalsNarrowCardKeepsEnglishAndLetsTheClientNameYield`
+  (monospace columns = Terminal: at 16 columns "claud… · english", never "claude-code · e…"; then 12/11/10/8; whole at
+  21+) · `theLegacyFormKeepsItsOwnLabelToo` · `thePartsTable` · `theAllocationTable`; the cross-module
+  `MCPTakeLabelFormServerTests.theTakeCardSplitsTheLabelWhereThisConventionPutsItsSeparator` (the card's separator and
+  legacy word ARE `MCPWriteTools`'); Mac `App/Variorum/VariorumTests/TakeLabelLineTests.swift` —
+  `terminalsNarrowHeaderKeepsTheLabelsOwnWordsWholeAndTheNameYields` (the real `TakeChooseHeader` swept from its ideal
+  width down, Terminal: the own part placed whole whenever the line has room for it; widths where the name is cut
+  exist) · `studyShowsTheWholeLabelWhenItFits` · `aLabelWithNoSeparatorIsOnePart` — compiled, RUN PENDING. RED ON
+  OLD: the behavioural revert (reading-order allocation = the old one-run face) reproduces "claude-code · e…" exactly
+  (3 of 4, 10 issues).
+- **Observed, NOT built (another surface):** Read mode's takes view (`ReadTier/ReadTakesView.swift:108`) draws a take's
+  label as `Text(tokens.chromeLabel(label)).lineLimit(1)` beside "✓ chosen" — the same one-run tail cut, on the read
+  tier. Write's take panel (`WriteTakesPanel.swift:475`) draws it with no `lineLimit` (it wraps — no cut). A candidate
+  rider/ticket for her (MB-11), never seated here.
+
+### VX-354 — the trace, the build
+
+- **Inputs:** an approved client with a book or wing grant (or the open book), a note in that book and in a gathering;
+  the note open with its Book Panel.
+- **The road:** `BookPanelView.header` drew the shown book's name (a `Text` or the switcher's `VoicedMenu`) and
+  `gatheringsLine` the gatherings' names (`Button(gathering.name)` once the line is open) with no mark; the model held
+  only its note rows' reach (`holdReach` over `entryIDs`) — the U6b sweep's two OUTSIDE rows (its OWED 2).
+- **Wrong output:** the panel's own book — reached, icon'd on its Bookcase row — read as unshared at the panel's top;
+  a gathering reached through its wing likewise; a waiting ask on the book never marked there.
+- **The build:** `BookPanelModel.readingReach` / `holdReadingReach(ids)` — `Queries.mcpBookReaches(readingIDs:)`, THE
+  read the Bookcase and the Library's book rows use (each reading by its kind's ONE rule: `decide` for a book,
+  `decideGathering` for a gathering — so a note or book grant never icons a gathering, R-VX185-1; behind
+  `mcpReachStandings`: no approved client, or no live grant with the open book off, reads nothing — VX-272). Its ids
+  are exactly the readings DRAWN — the pure `BookPanelBrain.markedReadings(shown:gatherings:gatheringsOpen:)`: the shown
+  book always, the gatherings only while their line is open — held by the view's `.task(id:)` (a book switch, the line
+  toggling, a gathering coming or going restart it). ∝ a handful of readings; never `container`, so never at autosave
+  rate. One helper, `readingMarks(id)`, draws the Bookcase row's pair in its order — `MCPSharedIcon` then
+  `MCPAskGlyph(.book(id))` — after the header's name/switcher and after each gathering's name. A gathering's glyph is
+  the calm no-view: no ask ever targets a gathering (`MCPAskTarget` has none — a gathering is no grant scope, VX-273),
+  exactly as on the Bookcase, which draws the same pair on its gathering rows.
+- **The sweep (the U6b table's two OUTSIDE rows, closed):** the header → **FIXED** (icon + book ask, pinned); the
+  gatherings' names → **FIXED** (icon through the wing, pinned; ask glyph SAFE — no gathering ask target exists); every
+  other row of that table unchanged (its note rows, collapsed chapter row, headings, "unfiled", the words).
+- **Pins** (`App/Variorum/VariorumTests/BookPanelMCPMarksTests.swift`, an extension of VX-330's suite, its rig):
+  `thePanelHoldsTheReachOfExactlyTheReadingsItNames` (pure) · `theShownBooksNameWearsItsIconAndItsWaitingAskAndEachPressIsItsOwn`
+  (a book grant: two icons — header above the rows — and the book's ask on the header's row, icon first; each press its
+  own; no open fires) · `aGatheringsNameWearsTheIconOnlyThroughItsWingNeverThroughANoteOrBookGrant` (book + note grants:
+  the gathering's reach absent, two icons; a wing grant made while mounted lights the gathering's name on the held
+  read, three) · `nothingIsReadOrDrawnWhileNoClientIsApproved` (a pending client, the open book ON: nothing held, no
+  mark). The VX-330 sweep pin stays as it was (it never starts the reading hold, so its count stays the note rows').
+  Compiled; RUN PENDING.
+
+### Files touched
+
+Core: `Sources/VariorumCore/Operations/Operations+MCPWrites.swift` (`MCPBookAdd`, `addNoteToBookForClient`) ·
+`Sources/VariorumCore/Domain/StoredText.swift` (`spellingDiffers`) · `Operations+MCPEdits.swift` /
+`Operations+MCPNoteEdits.swift` (`spellingDiffers` on the two results) · `Sources/VariorumCore/Domain/TakeLabelFace.swift`
+(new). Wire: `Sources/VariorumMCP/MCPWriteTools.swift` (the add's answer) · `MCPWriteTools+Edit.swift` /
+`MCPWriteTools+NoteEdits.swift` (the key) · `MCPTextDigest.swift` (`spellingDiffersKey`) · `MCPToolCatalog.swift` (the
+add's sentence, `spellingSentence`). App: `Features/Takes/TakeLabelLine.swift` (new — the line, its layout, the DEBUG
+probe) · `Features/Takes/TakesBoardView.swift` (the header draws the line) · `Features/BookView/BookPanelModel.swift`
+(`markedReadings`, `readingReach`, `holdReadingReach`) · `Features/BookView/BookPanelView.swift` (`gatheringsOpen` seam,
+the hold, `readingMarks` on the header and the gatherings). Tests: `Tests/VariorumMCPTests/MCPBookAddTagsServerTests.swift`
+(new) · `MCPSpellingNoOpServerTests.swift` (new) · `MCPTakeLabelFormServerTests.swift` (+1) ·
+`Tests/VariorumCoreTests/StoredTextSpellingTests.swift` (new) · `TakeLabelFaceTests.swift` (new) ·
+`App/Variorum/VariorumTests/TakeLabelLineTests.swift` (new) · `BookPanelMCPMarksTests.swift` (+4, extension). Commits:
+`1fc292c02` (LIVE STATUS) · `15f94f154` (VX-365) · `4d3f3f3d1` (VX-358) · `b374ce98a`/`79d9ec85a` (its revert run) ·
+`3e1aaa26f` (VX-352) · its revert run's two record commits (`cdf517b5a`/`92b6172d0`) · `e3d46b202` (VX-354) · this record's
+commit.
+
+### Canon owed at the closeout (not this batch's to write — the two-file rule)
+
+- MCPSpec (THE WIRE TOOLS…, VX-361's sentence): `add_note_to_book` answers `tag_ids` + `tags` by the same rule (its own
+  tags first, then the outflow — VX-365); the write digest's clause: a canonical no-op of `edit_take`/`restore_commit`
+  whose asked text is spelled otherwise answers `stored_text_normalization_differs: true`, absent otherwise (VX-358,
+  MB-5).
+- MCPSpec (THE PANE AND THE SHARED ICON): "…Book Panel rows (a collapsed one-note chapter row is its note's row and wears
+  its marks — VX-330), the Book Panel's shown book and the gatherings its line names (VX-354), and ⌘L's wing rows…".
+- SurfaceContracts, The note (Takes): a narrow take card keeps the label's own words and lets the client's name yield,
+  the whole label on hover (VX-352, MB-4).
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator): the product is prebuilt at `~/dev/variorum-vx-548/DerivedData/b2a`
+  from the final app sources (`e3d46b202`; this record's commit changes no code) — `cd App/Variorum && xcodebuild -scheme
+  Variorum -destination 'platform=macOS' -derivedDataPath ~/dev/variorum-vx-548/DerivedData/b2a test-without-building`
+  with `-only-testing:VariorumTests/<Suite>` for: **the pins** `TakeLabelLineTests` (new, 3) · `BookPanelMCPMarksTests`
+  (7 = VX-330's 3 + 4); **the header's and the panel's neighbours** `TakeCardDoorTests` · `TakesCardHeightTests` ·
+  `TakesMarginGridAlignmentTests` · `TakesBoardTests` · `TakesPresentationTests` · `TakesChooseRingTests` ·
+  `FanReorderDoorTests` · `TakesLensFilterTests` · `TutorialTakesActsTests` · `BookPanelBrainTests` ·
+  `BookPanelActingTests` · `BookPanelDeclarationTests` · `BookPanelDragGateTests` · `MCPSharedIconClickTests` ·
+  `MCPSharedRowsTests` · `MCPSharedRowsRulesTests` · `CapabilityRegistryTests` · `ChromeLineLimitTests`; **the wire's
+  Mac readers** `MCPWingFacesTests` · `TutorialMCPChapterTests`. Read the `skipped:` lines (Swift Testing counts skips;
+  `TakesMarginGridCaptureTests` is a gated capture — not listed). Batch 1's `DerivedData/b1` is untouched by this batch;
+  `b2a` CONTAINS batch 1's code too (built on its tip), so batch 1's list may also run from `b2a` if the window prefers
+  one product.
+- **The walk (dev store, both voices, a client approved):** (1) **VX-352:** a note with an AI take labelled
+  `claude-code · english` (`add_take` with label "english", or Label… by hand) → Takes → margin grid in **Terminal**:
+  the card header reads "choose claud… · english" (or "… · english") — never "claude-code · e…"; hover the label: the
+  whole label; **Study**: whole, unchanged; also a stack and a carousel card. (2) **VX-354:** a note in a book shared at
+  read (or its wing) → the Book Panel: the shown book's name wears the shared icon (hover names who; click opens the
+  popover) and, with an ask raised on the book (a client's `create_note` into it at the read rung raises one), the
+  pending glyph beside it; "appears in N gatherings ▸" → open → a gathering under a WING grant wears the icon, under a
+  book grant only it wears none; the note rows unchanged. (3) VX-365/358 are wire-only and headless-proven; a
+  real-client turn is optional (`add_note_to_book` into an outflow book → `tag_ids`/`tags`).
 
 ## BATCH 2b RECORD
 
