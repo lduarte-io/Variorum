@@ -4,7 +4,8 @@
 
 **STATUS: OPEN — kickoff 2026-10-27, overnight run (architect-phase).** As of L1 (2026-10-27 morning): both batches
 built and stage-verified; walks part 1 + 2 done; ladder round 1 done and its L1 fixes built, pushed and headless-green
-on the tree merged with VX-548 (`2b33e8bb6`) — PENDING the fix-verify stage window, the evidence slice, then round 2.
+on the tree merged with VX-548 (`2b33e8bb6`); the fix-verify window GREEN (1,562 tests / 267 suites, 0 failures;
+every revert red exactly as named) — PENDING the coordinator's evidence slice, then round 2.
 
 ---
 
@@ -488,16 +489,28 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   the orchestrator's dispositions in the Ledger); its fixes are L1, below; round 2 (a FRESH `opus-reviewer` over the
   L1 fixes, per her kickoff word — the editor-seam file touches named in the bundle) NOT-STARTED.
 - **L1 — THE ROUND-1 FIX SESSION** (`opus-implementer`, fresh, 2026-10-27; scope = the Ledger's "LADDER ROUND 1
-  DISPOSITIONS", nothing else). **BUILT — every item dispositioned below; PENDING the fix-verify stage window.**
-  **THE FIX-VERIFY WINDOW, IN PROGRESS** (claim `vx-439-l1-verify`, 07:50:48 MDT, the coordinator's GO, 60 min — the
-  claim is NOT released by this session; the evidence slice follows under it): `fixed1` **585 tests / 89 suites
-  passed**, `fixed2` **492 / 89 passed** (`NoteExportMenuGateTests` read SKIPPED — its suite and its one test, with the
-  disabled reason), `fixed3` **485 / 89 passed** — **1,562 tests in 267 suites, 0 failures**; the only warnings are the
-  test host's launch-time `@Dependency(\.date)` noise (pre-existing). The export trio on `2b33e8bb6`:
-  `ExportFacesTests` 6/6, `PlaintextExportBringInRoadTests` 5/5, `U2WordsTests` 13/13. **REVERT revA STARTING NOW
-  (announced before applying):** tree A's patches applied in the worktree for the run (`stage.sh revA`), restored by
-  `git checkout -- App/` at its end; then revB the same with `r-g`. (Until this flips: the pre-build's line below.)
-  The revert pre-build (announced at `bf91cd0ba`) ran and restored: tree **A** (every L1
+  DISPOSITIONS", nothing else). **BUILT + STAGE-VERIFIED — every item dispositioned below; every red-on-old run
+  as named.** **NO REVERT IN FLIGHT.**
+  **THE FIX-VERIFY WINDOW — RESULTS** (claim `vx-439-l1-verify`, claimed 07:50:48 MDT at the coordinator's GO, 60 min;
+  this session's part ran 07:50–08:06 and does NOT release — the coordinator's evidence slice follows under the same
+  claim): `fixed1` **585 tests / 89 suites passed**, `fixed2` **492 / 89 passed** (`NoteExportMenuGateTests` read
+  SKIPPED — its suite and its one test, with the disabled reason), `fixed3` **485 / 89 passed** — **1,562 tests in 267
+  suites, 0 failures** on the merged tree `2b33e8bb6`; the only warnings are the test host's launch-time
+  `@Dependency(\.date)` noise (pre-existing). The export trio on `2b33e8bb6`: `ExportFacesTests` 6/6,
+  `PlaintextExportBringInRoadTests` 5/5, `U2WordsTests` 13/13. **revA** (tree A's seven patches applied for the run
+  — announced at `3081640c5` — on `dd-revA`): **58 tests / 9 suites, EXACTLY the 10 expected tests red** (24 issues
+  incl. the 4 Date-noise warnings) — `theReadsWordsAreBoundedSeeksNeverAWindowOverTheWholeNote` (3: the window, no
+  LIMIT, the full sort), `theToolbarsNewNoteButtonWearsTheWingLabel` (1: no item), `aWebViewHoldingTheKeyboardKeepsCommandArrow`
+  (3: the rule false, ⌘←/⌘→ navigated, then not just `.back`), `aStepReadsTheCachedCountAndOnlyNewWordsOrNewTextRescan`
+  (4: the scan counts), `theEditorScansOncePerTextAndAnEditRecounts` (2: the scan counts), `aMoveFromTheRowReasksWhichWingItsDoorsAndIndicatorRead`
+  (3: the doors' read, their destinations, the indicator — all stale), `theColumnsWingDoorsHandTheReaskAndBothReadsAreKeyedOnIt`
+  (1: the keys), `aDragWhoseRowWentAwayLeavesTheRowsDoorsActing` (1: the ✕'s click eaten — the latch's halves live, so
+  **m-7 is NOT hollow**), `eachRowsTwoHalvesAreDropsOnMainsRoadLiveOnlyWhileItsDragIsInFlight` (1: the edited literal),
+  `aFailedWriteNamesItsReason` (1: no reason) — every other test of the nine suites green, no other red. **revB**
+  (`r-g` alone on `dd-revB`): **8 tests / 1 suite, EXACTLY `theEditorScansOncePerTextAndAnEditRecounts` red** (2: "4 of
+  4" not read — the stale cache; one scan, not two). Each cycle restored by `git checkout -- App/`: `git status` and
+  `git diff` EMPTY after both, tip `3081640c5`; both strict `pgrep` forms EMPTY. Logs `scratchpad/l1/stage-logs/`.
+  (The pre-build, for the record:) The revert pre-build (announced at `bf91cd0ba`) ran and restored: tree **A** (every L1
   revert patch but `r-g`) built into `scratchpad/l1/dd-revA`, tree **B** (`r-g` alone) into `scratchpad/l1/dd-revB`
   (each an APFS clone of this worktree's DerivedData, `build-for-testing` GREEN), each restored by `git checkout -- App/`,
   `git status`/`git diff` empty after both. **THE SECOND MERGE (the coordinator's addendum — VX-548 merged first):**
@@ -582,8 +595,8 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     responder in a window with the monitor: the rule says text; ⌘← and ⌘→ deliver nothing; then with nothing in
     charge ⌘← goes back — non-vacuity). RED ON OLD expected under named revert **R-W**
     (`scratchpad/l1/reverts/r-w.patch` — the rule back to `NSText || NSTextField`): the rule expectation and
-    "nothing navigated" fail (`[.back, .forward]` delivered) — PENDING the stage window (a window + WebKit; no headless
-    road). build-for-testing GREEN.
+    "nothing navigated" fail (`[.back, .forward]` delivered) — VERIFIED at the fix-verify window (revA: 3 issues,
+    exactly these; green on the fixed tree). build-for-testing GREEN.
   - m-2 (the find readout's match ranges cached per needle × text generation): DONE (this commit). TRACED (read): each
     ⌘G selects the next match → `textViewDidChangeSelection` → `refreshFindReadout` → `FindReadout.face` past its gates
     → `ranges(of:in:)` walked the whole note per step; the record's justification ("a find step — itself a
@@ -622,7 +635,8 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     `.serialized` (it mounts a window now). DELIBERATE edit: `theNoteActsRunTheSharedRoads`' `.wingMoveConfirm(…)`
     literal (+ `onDone: wingActDone`, annotated). RED ON OLD expected under named revert **R-D**
     (`scratchpad/l1/reverts/r-d.patch` — the generation out of both keys, the pre-fix reads exactly): both new pins
-    red (the reads never re-run; the keys lack it) — PENDING the stage window. build-for-testing GREEN.
+    red (the reads never re-run; the keys lack it) — VERIFIED at the fix-verify window (revA: 3 + 1 issues, exactly
+    these; green on the fixed tree). build-for-testing GREEN.
   - m-5 (`NoteExportMenuGateTests` disabled, named): DONE (this commit) — hygiene, no bug pin (the disposition's own
     words): the suite's trait list gains `.disabled("never executed — the VX-604 host-crash class; re-enabled by the
     VX-603/604 work")`, and its doc says why (never executed; its one run crashed the host before its first line; kept
