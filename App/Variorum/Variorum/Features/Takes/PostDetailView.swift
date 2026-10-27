@@ -738,6 +738,10 @@ struct PostDetailView: View {
         @State private var displayed: String = DisplayTitle.placeholder
         @State private var editing = false
         @State private var draft = ""
+        /// VX-569: what the open field OFFERS an untitled note — its first
+        /// words, else its date (`TitleQuickfill`); Tab takes it. Read when
+        /// the field opens; nil on a titled note.
+        @State private var offer: String?
         @FocusState private var fieldFocused: Bool
         #if DEBUG
         /// This title's own name in the DEBUG oracle (18k UNIT C4): it owns
@@ -861,8 +865,11 @@ struct PostDetailView: View {
                     // within half a point), so nothing moves either way.
                     // (The same shape the 2026-09-06 round's row 10 named as
                     // the API-free road for the digit prompt.)
+                    // VX-569: the faint words are the OFFER — her first
+                    // line, or (a note with no words) the date — in this
+                    // same place and font; Tab takes them.
                     if draft.isEmpty {
-                        Text(displayed)
+                        Text(offer ?? displayed)
                             .font(tokens.title)
                             .foregroundStyle(tokens.faint)
                             .lineLimit(1)
@@ -880,6 +887,15 @@ struct PostDetailView: View {
                         .multilineTextAlignment(.leading)
                         .focused($fieldFocused)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                        // VX-569 (her 10-20: "maybe just tab to complete it
+                        // and enter"): Tab on an empty field TAKES the offer
+                        // — the field then holds it, ⏎ files it; any other
+                        // Tab (a typed name, nothing offered) is Tab.
+                        .onKeyPress(.tab) {
+                            guard draft.isEmpty, let offer else { return .ignored }
+                            draft = offer
+                            return .handled
+                        }
                         .onSubmit { rename() }
                         .onExitCommand { cancel() }
                         .onChange(of: fieldFocused) { _, focused in
@@ -938,11 +954,25 @@ struct PostDetailView: View {
             // reads as it did.
             draft = title
             editing = true
+            // VX-569: the offer, read once as the field opens (the note's
+            // opening — one bounded read — or its shown date), and adopted only
+            // while the field is still open and still empty.
+            offer = nil
+            guard DisplayTitle.isAbsent(title) else { return }
+            let shown = displayed
+            Task {
+                let opening = (try? await session.database.read { [postID] db in
+                    try TitleQuickfill.opening(db, postID: postID)
+                }) ?? []
+                guard editing, draft.isEmpty else { return }
+                offer = TitleQuickfill.offer(storedTitle: title, openingTexts: opening, shownName: shown)
+            }
         }
 
         private func cancel() {
             editing = false
             draft = title
+            offer = nil
         }
 
         /// What the masthead reads: the STORED title (what the rename field
@@ -990,6 +1020,7 @@ struct PostDetailView: View {
         private func rename() {
             guard editing else { return }
             editing = false
+            offer = nil
             let name = draft.trimmingCharacters(in: .whitespaces)
             guard name != title else { return }
             Task {

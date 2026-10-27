@@ -159,10 +159,15 @@ struct MastheadLayoutTests {
     ///
     /// RED ON OLD: the field carried the date as its prompt (`placeholderString`
     /// "2026-06-30"), and Study's glyph tops sat 6.5 pt above the label's.
+    ///
+    /// **VX-569 — edited deliberately:** the open field's faint words are now
+    /// the OFFER (an untitled note's first line, else its date), so this pin
+    /// mounts a WORDLESS note — its offer is the date, the very words the
+    /// resting face shows, which is what the glyph-top comparison needs.
     @Test func theOpenFieldsWordsStayWhereTheTitleRested() async throws {
         for voice in [ThemeVoice.terminal, .study] {
             try await withMountedDetail(
-                width: 1100, title: "", tags: [], voice: voice
+                width: 1100, title: "", tags: [], voice: voice, blockText: ""
             ) { session, _, window, hosting in
                 #if DEBUG
                 let oracle = MastheadGeometry.reader(session.debugProbeScope)
@@ -726,6 +731,10 @@ struct MastheadLayoutTests {
     private func withMountedDetail(
         width: CGFloat, title: String, tags: [String], book: String? = nil,
         voice: ThemeVoice = .terminal,
+        // VX-569: the first block's words — the open title field now OFFERS
+        // an untitled note its first line (else its date), so a pin that
+        // compares the faint words to the resting date mounts a wordless note.
+        blockText: String = "a block, so the mode can host.",
         _ body: @MainActor (AppSession, String, NSWindow, NSView) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
@@ -745,7 +754,7 @@ struct MastheadLayoutTests {
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: title)
-            _ = try session.operations.newBlock(in: post.id, text: "a block, so the mode can host.")
+            _ = try session.operations.newBlock(in: post.id, text: blockText)
             if let book {
                 let reading = try session.operations.createReading(name: book, kind: .book)
                 _ = try session.operations.addPostToReading(post.id, to: reading.id)

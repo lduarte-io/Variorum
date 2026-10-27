@@ -436,7 +436,26 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     build-for-testing GREEN. OPEN at the stage: whether a query typed ONLY into the bar's own field reaches the find
     pasteboard (the header says the finder communicates there; the real-finder pin arms via the board, the app's seed
     road) — the walk's typed-query leg is the evidence.
-  - VX-569: NOT-STARTED
+  - VX-569: BUILT (this commit) — PENDING the stage run (`TitleQuickfillTests` 5 incl. 3 mounted key-press pins +
+    `MastheadLayoutTests`). THE TRACE FIRST (A-439-14): the "existing first-line quickfill" does NOT exist on the note's
+    title — the "first words offered, one tap to adopt" chip lives only on the CAPTURE surfaces (`TitleSuggestionChip`:
+    quick entry, the quick note). The masthead's title field (`PostDetailView.PostTitleLabel`) opened an untitled note on
+    its stored name ("") with the DATE drawn faintly behind (17y B2 (n)), and Tab — a SwiftUI field's focus key — moved
+    the keyboard on and filed the empty draft (a no-op): her 10-20 path ("auto fill in the first line … tab to complete
+    it and enter") was BROKEN end to end. Per the ruling, that traced bug first: `Features/Takes/TitleQuickfill.swift` —
+    on an UNTITLED note the open field OFFERS the note's first words (the capture chip's brain exactly,
+    `NoteCardFace.suggestedTitle` — first line with words, markdown rendered, capped at a word edge, no ellipsis) over ONE
+    bounded read (`Queries.leadingBlockTexts`, 3 slots), read when the field opens; then the 10-21 DATE ARM on the same
+    road — a note with no words is offered the date it already shows (`DisplayTitle`'s — the same string every untitled
+    daily entry reads by). The offer is drawn faint exactly where the date always sat (one place, one font — nothing
+    moves); `.onKeyPress(.tab)` on an EMPTY field takes it (the palette's and the wing switcher's `onKeyPress` precedent on
+    a `TextField`), any other Tab is Tab; typing replaces it; ⏎ files; ⎋ leaves it untitled. A titled note is offered
+    nothing. Nothing is applied for her (her item 4's law). PINS `TitleQuickfillTests` (5): the rule; the bounded read;
+    RED ON OLD — the mounted field: Tab takes "Garden plans" from `# Garden plans`, ⏎ files it (old tree: Tab moved on,
+    the note stayed untitled); the date arm (Tab + ⏎ names a wordless note by its date); a guard (typed words file, never
+    the offer). DELIBERATE edit: `MastheadLayoutTests.theOpenFieldsWordsStayWhereTheTitleRested` mounts a WORDLESS note
+    (`blockText: ""` — its offer is the date, the very words it compares; annotated). The red-on-old for the mounted pin
+    is the stage's revert cycle (R-T: the `.onKeyPress(.tab)` block removed). build-for-testing GREEN.
 - Ladder: NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
 
@@ -487,7 +506,12 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 16. **VX-441 — the readout says "2 of 15"** (the Takes bar's own words for the same count) rather than "2/15"; and it
     shows only while the selection sits ON a match — click elsewhere and it steps aside until the next ⌘G. Say the word
     for "2/15" or for a standing "15 matches".
-17. (grows)
+17. **VX-569 — the title's first-words offer did not exist** on a note's title (only the capture chip did), so this run
+    BUILT your 10-20 ask ("auto fill in the first line … tab to complete it and enter") and your 10-21 date arm on it:
+    click an untitled note's title, its first line (or, with no words, its date) shows faintly; Tab fills it in; ⏎
+    names the note. Typing anything instead is yours, as always. PROVISIONAL — say the word if the offer should look
+    different or come from somewhere else.
+18. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 
