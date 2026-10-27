@@ -586,3 +586,61 @@ An Opus walker ran under the orchestrator's `vx-562-trace` claim (17:22:31, 15 m
 
 **Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I sent `kill -TERM` to pid 99705, path verified with `ps`. At 17:28:42 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing. The `log stream` capture (pid 99670) was stopped at 17:26.
 - **Recipe J — the reachable travel (the TRACE WALK's fix).** File `App/Variorum/Variorum/Features/BookView/BookView.swift`, in `OutlineScrollFacts.init(rawOffset:…)`: `travel = max(contentHeight - containerHeight + insetTop, 0)` → `travel = max(contentHeight - containerHeight + insetTop + insetBottom, 0)  // r4 REVERT J` (the inset-extended travel, walk 4's dead clamp). Suite: `BookOutlineViewedTests`. **Expected RED:** `theTravelIsTheReachableMaximumNeverTheInsetExtendedOne` — the travel line (2023, not 1983), the zero-gap line (40), the clamp-fires line, the mid-scroll gap (143) and the top-inset travel (2033). Everything else green (the synthetic-Scroll pins never pass insets).
+
+## CONFIRM WALK (2026-10-27)
+
+**Verdict: the end-clamp FIRES LIVE. At the true bottom the pin reads "note 13 of 13 · The Adventure of the Copper Beeches" and the navigator marks Copper Beeches. The arrival reads right.** Walk 4's dead clamp is fixed by the reachable travel. The 9-pt-up step is real, though. A nudge of about 12 pt, with all four last stories still fully on the page and "+ new note in this book" still showing, steps the mark from note 13 back to note 10. **That reads as a twitch, not a deliberate act.** A larger tick of about 70 pt reads fine. The clamp re-fires on the way back down. Content was removed as planned. The banner stands. Zero instances.
+
+An Opus walker ran under the orchestrator's `vx-562-confirm` claim, from 17:41 to 17:48:08. The build was the FIXED Debug app (`DerivedData/vx562/…/Debug/Variorum.app`). Its binary and dylib are stamped 17:40. The source carries the reachable travel, `travel = max(contentHeight - containerHeight + insetTop, 0)`, with `insetBottom` unused. I launched it with `open -n --env OS_ACTIVITY_DT_MODE=YES` and stderr to `w6/run.log`. It ran as pid 4100, verified by path. The window was 1240×940 at (60,33), id 9737. The voice was Study, appearance Dark. No What's New sheet appeared. Every act was a click, a wheel, a menu press or ⌘, (Settings). I typed nothing into any editor, changed no setting and never pressed Resume. Captures are in `App/Variorum/DerivedData/vx562-walk/w6/` (gitignored); the names below are relative to it.
+
+**As found** (`a/a0-s.png`, `a/a1-s.png`, `a/set0-s.png`, `a/tags0-s.png`). Both strict forms showed zero instances before launch.
+- Bookcase (Home): "All · starred · + shelf", no Welcome shelf, "No books yet", and the twelve-words offer card (left alone).
+- Library: 1 note, "The walk leaves a stone here: crossings, card,…" (edited Oct 19).
+- Settings ▸ Tags: `walk` only.
+- Settings ▸ General ▸ Appearance: **Dark** (`appearanceChoice=dark`). Theme Study, palette Default.
+
+**What Help ▸ Restore the Sample Library minted.** I pressed it by its menu item at 17:43:04.
+- The book "the adventures of sherlock holmes": 13 notes, 13 ch, 105,335 words, owned, wearing `#classics #sherlock holmes` (`m/bc-s.png`).
+- The **Welcome** shelf, minted, with the book on it.
+- Two tags, `classics` and `sherlock holmes`.
+- The door opened the book in Outline with every card folded (`seed/r5-s.png`). The receipt was caught: *"Restored "the adventures of sherlock holmes" — 12 storys came back. It's on the "Welcome" shelf."* That is the "storys" plural bug again.
+
+**Legs:**
+- **1 — THE LEG, wheel to the true bottom: PASS. The clamp fires.** Evidence: stills `L1/s01…s24`, the stacked pins `L1/pins.png` (s13–s24) and the navigator strip `L1/navs.png` (s13–s24).
+  - Setup: from the folded rest I took 24 WalkKit wheel steps (`walk-scroll 890 533 1`, about 100 pt each), with a still after each step. The steps ran 17:43:24–17:44:14.
+  - s13–s19: the pin climbs one note per two steps, from 7 to 10. The mark is always on the card owning the page's top. There is no lead (the slide is gone, as in walk 4).
+  - **s20–s24 are the bottom.** The page is still and "+ new note in this book" is on the page. The pin reads **"book · 13 chapters · 13 notes · note 13 of 13 · The Adventure of the Copper Beeches"**. The navigator's mark is on **Copper Beeches**, the last row (`L1/s24-s.png`). All five bottom stills agree.
+  - The arrival is one step. At s19, Engineer's Thumb's heading is at the top and the pin says note 10. At s20 the page reaches the bottom and the pin says note 13. Notes 11 and 12 are never named on the way.
+  - **Felt verdict:** the arrival at the end reads right. When the page comes to rest with three whole stories below Engineer's Thumb's tail, the page names the last one. The 10 → 13 jump lands exactly as the page stops, so it reads as "you're at the end", not as a skip. Walk 2's (A) and walk 4's stuck-on-10 bottom are gone.
+- **2 — the 9-pt-up step: the STEP IS REAL. At the small size it reads as a glitch** (`L2/steps.png`; stills `L2/u0`, `u1`, `u1b`, `v1`, `v1b`).
+  - **(a) The big tick:** one phased tick (`phased-scroll 890 533 -9 1`, 17:44:46). Pixel scrolls accelerate, so the page moved about 70 pt. Engineer's Thumb's heading came to the top and "+ new note in this book" left the page (`u1b-s.png`). At 0.4 s and 2 s the pin read "note 10 of 13 · The Adventure of the Engineer's Thumb", with the mark on Engineer's Thumb, three rows up. This reads as deliberate: the end marker visibly leaves, and the mark goes back to naming the top story.
+  - **(b) The small tick:** from the bottom again, one phased tick of `-2 1`. The page moved about **12 pt**: Copper Beeches' heading went from y 641 to 653, and "+ new note in this book" went from 870 to 882 and stayed on the page (`v1b-s.png`). The pin and mark flipped **13 → 10** at once (0.5 s) and stood at 2 s.
+  - **Felt verdict:** at about 12 pt the page barely moves. All four last stories stay fully visible and the end marker stays on screen, yet the navigator mark leaps three rows up. That does not read as something I did. It reads as a twitch. A light rest of the hand on a trackpad, or a rubber-band settle, would flip it.
+  - This is a taste call for her. Options: hold the clamp while "+ new note in this book" is still on the page, or within a band of about one row of the bottom, rather than within the 8-pt tolerance. Or accept it as the rule's honest answer.
+- **3 — back down: PASS. The clamp re-fires.** After each tick up, one wheel step down (`walk-scroll 890 533 1`) returned the page to the bottom. The pin read "note 13 of 13 · The Adventure of the Copper Beeches" at 0.5 s and 2 s, both times (`L3/d1`, `d1b`, `d2`, `d2b`).
+
+**Log** (`run.log`, `OS_ACTIVITY_DT_MODE=YES`, launch to quit):
+- "Modifying state during view update": **0**. There was no Index round trip this walk.
+- "OnScrollGeometryChange … tried to update multiple times per frame": **1**, at 17:43:11.893. That was the seed's paced arrival into the Outline, before any wheel. Across the end-scroll and the step legs: 0.
+- "Invalid view geometry" hum: 224 lines.
+
+**Removal** (17:46–17:47):
+- The book's Bookcase context menu → Delete Book… → the owned-book confirm → "Delete Book and Its 13 Notes" (`m/ctx-s.png`, `m/confirm-s.png`). Receipt: "Deleted "the adventures of sherlock holmes" and its 13 notes — they're in the Trash togeth…" (`m/deleted1-s.png`).
+- The Welcome chip's context menu → Delete Shelf… → "It holds no books. No book is ever touched by deleting a shelf." → Delete Shelf (`m/shelfctx-s.png`, `m/shelfconfirm-s.png`).
+- Settings ▸ Tags: deleted `classics`, then `sherlock holmes`, each through its trash icon and the "Delete Tag?" confirm (`m/tags1-s.png`, `m/tagconfirm-s.png`, `m/tags2-s.png`, `m/tagconfirm2-s.png`). Settings was returned to General (`m/set-general-final-s.png`) and closed.
+
+**Re-check against the as-found list:**
+- Bookcase "All · starred · + shelf · No books yet": matches (`end-banner-s.png`).
+- Library: 1 note, matches (`m/library-final-s.png`).
+- Tags: `walk` only, matches (`m/tags-final-s.png`).
+- Appearance: `dark`, matches (`defaults read`).
+- Trash: grew by the book and its 13 notes, by design; I did not count it.
+
+*[removed for publication]*
+
+**Residue I did not remove (named):**
+- (1) The 14 new Trash rows. Put back returns the notes without their tags, because the tags are deleted.
+- (2) Tombstones for the Welcome shelf and the two tags (S2).
+- (3) The three bookkeeping prefs above.
+
+**Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I sent `kill -TERM` to pid 4100, path verified with `ps`. At 17:48:08 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing.
