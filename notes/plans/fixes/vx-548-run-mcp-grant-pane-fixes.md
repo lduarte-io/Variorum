@@ -96,9 +96,9 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 
 | Batch | Members | Session | State |
 |---|---|---|---|
-| 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | BUILT (headless green, red-on-old verified; Mac pins compiled — run + walk PENDING the stage) — BATCH 1 RECORD |
-| 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | BUILT (headless green, red-on-old verified incl. two behavioural reverts; Mac pins compiled into `DerivedData/b2a` — run + walk PENDING the stage) — BATCH 2a RECORD |
-| 2b — the disconnect story | VX-394 | opus-implementer №3 | NOT STARTED |
+| 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | **ACCEPTED** (window vx548-b1-walk: Mac suites 141/12 green, zero skips; orchestrator walk green — ORCHESTRATOR ACCEPTANCE, BATCH 1) |
+| 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | BUILT (headless green, red-on-old verified incl. two behavioural reverts; Mac pins compiled into `DerivedData/b2a`) — Mac run + faces walk ride the MID WINDOW after 2b — BATCH 2a RECORD |
+| 2b — the disconnect story | VX-394 | opus-implementer №3 | IN FLIGHT (spawned at the 2a seam) |
 | 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | NOT STARTED |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
 
@@ -730,6 +730,17 @@ commit.
 ## BATCH 3 RECORD
 
 ## LADDER RECORD
+
+## ORCHESTRATOR ACCEPTANCE
+
+### BATCH 1 — ACCEPTED 2026-10-27 (window `vx548-b1-walk`, GO from oct26coordinator 02:48 MDT, released clean)
+- **Mac suites:** 141 tests / 12 suites GREEN on the FROZEN `DerivedData/b1` products via `test-without-building`, zero skips; the flagged `MCPPaneTabsTests.aFreshPaneOpensOnConnectWithItsCodeBlockInSight` passed in BOTH voices (the VX-512 line above the tabs fits).
+- **The walk (dev store, Debug from the b1 products):** every brief leg verified in use — (1) VX-512's zero-state explainer live on a clientless library ("Clients belong to the library they were set up in — run each one's setup here." + (i)), and it correctly DISAPPEARS the moment a pending client exists; (2) approve-alone sheet speaks the new "Share a place…" wording in its lead; (3) the Clients row door reads "Share a place…" and ADDS; (4) "Share another place…" on Shared with AI grants a SECOND wing — **both wing grants stand side by side** (Home + Walk Wing, each claude-code · read · always); the door correctly vanishes at zero listed grants; (5) a wing row's Change… opens titled "Change access — ‹client›" with the NAMED replaces line ("Confirming replaces claude-code's grant on the Walk Wing wing — read, always."); picking the OTHER wing flips the title to "Grant access — ‹client›", the line goes, and the confirm REVOKES NOTHING (the opened-on wing's row stands — her Air's exact loss, closed); the other place's standing row upgrades in place (Home read → "read and suggest"); (6) same-place Change… at a lower rung replaces: one Home row back to read (T-U3-8 kept). Bonus: Activity shows the test client's end line "claude-code disconnected" (the client-closed arm — BATCH 2b verifies the arm wordings against P-VX394-1…6).
+- **Walk mechanics:** no set-aside needed — the dev slot currently holds an EMPTY HELD library ("as of October 20, 2026", restore-hold banner; id `1787a29ea0d545b9`), which has no clients, so the zero-state showed directly; found that way, left that way. The test client was the shim driven DIRECTLY with the pane-copied key (no `claude mcp add`; nothing written outside the dev store). Cleanup: both walk grants revoked; server back OFF; same library id reopened UNLOCKED (no lock screen, no pre-design face, no start-fresh offer), quit clean, zero instances (strict pgrep forms). Prefs diff vs pre-walk export: no keys added/removed, only the app's own launch bookkeeping values (the per-launch dev-store backup ledger). **Residue (deliberate, harmless):** the approved client row `claude-code` (zero grants, door off — no removal door short of Deny, and a denied row is a worse trap) and the empty wing "Walk Wing" (the ⌘L switcher offers no per-row delete; left for a later tidy or her hand).
+- Captures lived in the session scratchpad only (deleted at the merge per the closeout rule); this record is the evidence of record.
+
+### THE MID WINDOW (planned; READY after batch 2b lands)
+One claim (`vx548-mid`): (a) 2a's + 2b's Mac suites via `test-without-building` on the frozen `DerivedData/b2a` (+ 2b's product dir); (b) the 2a faces walk — Terminal voice + margin-grid Takes card showing an AI take labelled `claude-code · english` (minted through the wire: re-grant, reconnect the bound shim key, `add_take`, then revoke + server off + voice restored), the whole-label hover, and the Book Panel header/gathering marks (a minted book + gathering; tidied after); (c) MB-10's taste capture for her morning. Batch 3 spawns only after this window passes.
 
 ## SITTING / RULING RECORD (anything she says mid-run lands here verbatim, same turn)
 
