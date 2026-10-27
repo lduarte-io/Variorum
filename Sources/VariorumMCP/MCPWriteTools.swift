@@ -508,7 +508,21 @@ struct MCPWriteTools: Sendable {
                 // names a book) — a hidden one neither blocks it nor is named.
                 let result = try ops.importBook(
                     book, wingId: wingID, undoLabel: label(.importBook), namesCountedBy: readableBooks(clientName))
-                return (["book_id": result.reading.id, "note_ids": result.postIDs, "chapter_ids": result.sectionIDs],
+                // VX-567 (PROVISIONAL RB-4 — superseding P-VX252-1 / P-VX254-2's
+                // "ids only", ratified 2026-10-15, on the ticket she seated): the
+                // three id lists stay, and `notes` answers each minted note in
+                // VX-252's record — `note_id`, `block_ids`, `blocks` with every
+                // take's `sha256` (`MCPMintedBlocks`, the one encoder; no text) —
+                // from what the act minted, never a second read. Its size is ∝
+                // the import itself: the client sent every take whose digest it
+                // reads back, so the answer is linear in the request and owes no
+                // paging (a finished act keeps no state to page through).
+                let notes: [[String: Any]] = result.notes.map { note in
+                    ["note_id": note.postID, "block_ids": note.blockIDs,
+                     "blocks": MCPMintedBlocks.records(note.blocks)]
+                }
+                return (["book_id": result.reading.id, "note_ids": result.postIDs, "chapter_ids": result.sectionIDs,
+                         "notes": notes],
                         MCPWriteReceipt(clientName: clientName, act: .importBook, targetID: result.reading.id,
                                         targetTitle: result.reading.name, count: result.postIDs.count,
                                         show: .book(bookID: result.reading.id, sectionID: nil)))

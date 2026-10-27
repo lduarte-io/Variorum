@@ -717,7 +717,8 @@ enum MCPToolCatalog {
             for one document also blocks, as create_note answers them (each block's shown_take_id \
             and every take's take_id, label and sha256), and tag_ids and tags (their paths): every \
             tag the note wears, the header's first, then a book's outflow or a gathering's rule tags; for a book, its \
-            book_id, note_ids and chapter_ids (no sha256 — check a book's notes with read_note). \
+            book_id, note_ids and chapter_ids, and notes: one per note, in note_ids' order, with its note_id, \
+            block_ids and blocks as create_note answers them (every take's take_id, label and sha256). \
             \(digestSentence) \(nullSentence)
             """,
         inputSchema: .object([

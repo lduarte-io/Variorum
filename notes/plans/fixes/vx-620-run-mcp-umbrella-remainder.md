@@ -916,12 +916,16 @@ clients' reconnect roads — VX-619's guide sentence).*
   `MCPToolCatalog.importDocument` declares `section_id` and its description says both forms. GREEN
   (`scratchpad/b3-logs/vx566-green.log`): `MCPImportSectionServerTests` 5/5 + `MCPMintedAnswerServerTests` 5 +
   the two neutrality nets + core `MCPMintedBlocksActsTests` 3 (16 / 4 + 3 / 1). The record: "VX-566" below.
-- **3 · VX-567 — the book form answers per-note records:** IN-PROGRESS — the pins COMMITTED RED (this commit): NEW
-  `Tests/VariorumMCPTests/MCPBookImportRecordsServerTests.swift`, 2 tests, RED ON THE PRE-FIX TREE
-  (`scratchpad/b3-logs/vx567-red-on-old.log`: 2 / 2 failed, 4 issues — no `notes` key in the answer, the description
-  still says "no sha256"). The fix is next. Design: `BookImport.notes` (what each seat
-  minted, from `mintDocument`'s return — no second read); the wire answers `notes: [{note_id, block_ids, blocks}]` in
-  `note_ids`' order beside the three id lists; MCPMintedAnswerServerTests' F-2 guard flips DELIBERATELY (VX-567).
+- **3 · VX-567 — the book form answers per-note records:** DONE (pins red `8d34b3f34`; the fix this commit) — core
+  `BookImport.notes: [MintedNote]` (NEW public `MintedNote {postID, blockIDs, blocks}`, appended at each seat from
+  `mintDocument`'s own return — no read); wire: the `.importBook` arm answers `notes` (VX-252's record per note, through
+  `MCPMintedBlocks.records` — the one encoder, no text) beside `book_id` / `note_ids` / `chapter_ids`;
+  `MCPToolCatalog.importDocument`'s description says it (the "no sha256" clause retired). THE DELIBERATE FLIP:
+  `MCPMintedAnswerServerTests`' F-2 guard (renamed `…AndABookAnswersItsNotesToo`; header + the digest suite's header
+  re-said). NEW core state-transition pins in `MCPMintedBlocksActsTests` (+2: VX-566's op half, VX-567's notes).
+  GREEN (`scratchpad/b3-logs/vx567-green.log`): MCP 23 / 4 (the VX-567 2, VX-566 5, VX-252 5 with the flip, VX-254 11)
+  + core 34 / 3 (`MCPMintedBlocksActsTests` 5, `DocumentImportOperationTests`, `ImportOperationTests`). The record:
+  "VX-567" below.
 - **4 · VX-619 — the lock/quit docs:** NOT-STARTED — `MCPSession.instructions` at 2,988 / 3,000 (re-measured here);
   O-4 (her 2026-10-11 ruling, `MCPProviderNeutralityTests`) forbids a provider's name in the instructions, so the
   advice says the client's own road neutrally; the guide names Claude Code's road only inside lesson 2's O-4 SETUP
