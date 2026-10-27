@@ -36,6 +36,16 @@
 //  and it reads only rows the column HAS — a row the caller's map does not
 //  know is skipped, never guessed.
 //
+//  ── THE ADOPTION (R-562-A) ──────────────────────────────────────────────
+//  A landing is the one time the page's top is NOT what she chose to look at
+//  — it is travelling, or it has put her target somewhere the rule would not
+//  name (a row in the book's last screenful cannot reach the top). So the
+//  follower adopts the landing's TARGET at the click (`adoptedPair`), holds
+//  it through the travel, and afterwards lets it stand while the target's
+//  row is on the page and she has not scrolled (`follow`); her scroll, a new
+//  landing, an axis change or the target leaving the page returns it to the
+//  rule.
+//
 //  App-side, never `Domain`: it is view geometry (the layer-placement note).
 //
 
@@ -122,6 +132,61 @@ nonisolated enum BookOutlineViewed {
             }
         }
         return viewed
+    }
+
+    // MARK: R-562-A — the follower ADOPTS a landing's target
+
+    /// **The pair a landing's TARGET names** (R-562-A: *"the follower adopts
+    /// a landing's TARGET at the click"* — the navigator note row, the
+    /// chapter row, a reveal, the width change's re-land of the row that was
+    /// at the top). It is THE RULE's own answer for the page the landing is
+    /// making — the column with that row alone at the top (`pair` over
+    /// `[anchor: 0]`, the same one pass, so a note's chapter is the heading
+    /// above it on the page and never a second lookup) — handed to the slot
+    /// at the landing's START, so the highlight and the pinned line move at
+    /// the click. A heading that is not a chapter (unfiled, a tag path) names
+    /// nothing, as the rule says of it at the top. nil when the column has no
+    /// such row: nothing to adopt, and the rule stands.
+    static func adoptedPair(anchor: String, rows: [BookOutlineRows.Row]) -> Pair? {
+        guard rows.contains(where: { $0.id == anchor }) else { return nil }
+        return pair(rows: rows, tops: [anchor: 0])
+    }
+
+    /// **Is any part of a row inside the page?** `top` and `height` are the
+    /// row's last report in the scroll's visible space (`0` the page's top
+    /// edge); `viewport` is the page's height. On screen when its top is on
+    /// the page, or when it starts above the page and reaches into it (a tall
+    /// story spanning the top edge). A row that never reported is nowhere. A
+    /// page not yet measured (`viewport ≤ 0`) has no known bottom edge, so a
+    /// row is found off the page only above it — the hold is released on
+    /// evidence, never on a missing number.
+    static func isOnScreen(top: CGFloat?, height: CGFloat?, viewport: CGFloat) -> Bool {
+        guard let top else { return false }
+        let reachesIn = top >= 0 || top + max(height ?? 0, 0) > 0
+        return reachesIn && (viewport <= 0 || top < viewport)
+    }
+
+    /// **R-562-A after the landing: does the adopted target still stand?**
+    /// The geometric half of the ruling, pure: an adoption STANDS while the
+    /// column still has its row and that row is on screen (`isOnScreen`) —
+    /// the page shows the TARGET's pair, wherever on the page the target sits
+    /// (a row in the book's last screenful never reaches the top, and it is
+    /// still what she travelled to: finding F-1); otherwise the adoption is
+    /// dropped and the page shows THE RULE's pair — *"a derivation that finds
+    /// the adopted row off-screen resumes the rule by itself."* The ruling's
+    /// other releases are ACTS — her scroll, a new landing, an axis change,
+    /// leaving the Outline — and the caller makes them before asking; the
+    /// travelling landing's freeze is the caller's too (this is asked only
+    /// once no landing is pending).
+    static func follow(
+        rows: [BookOutlineRows.Row], tops: [String: CGFloat], heights: [String: CGFloat],
+        viewport: CGFloat, adopted: String?
+    ) -> (pair: Pair, adopted: String?) {
+        if let adopted, let target = adoptedPair(anchor: adopted, rows: rows),
+           isOnScreen(top: tops[adopted], height: heights[adopted], viewport: viewport) {
+            return (target, adopted)
+        }
+        return (pair(rows: rows, tops: tops), nil)
     }
 
     /// **The viewed note's place in the column** — 1-based, counting note

@@ -177,6 +177,123 @@ struct BookOutlineViewedTests {
         #expect(BookOutlineViewed.viewedIndex(tops: tops, probe: 10) == 4)
     }
 
+    // MARK: - R-562-A — the follower adopts a landing's target
+
+    /// The pair a landing's target names is the rule's own answer for the
+    /// page with that row at its top — adopted at the click.
+    @Test func aLandingsTargetNamesWhatTheRuleSaysOfItAtTheTop() {
+        let adopt: (String) -> Pair? = { anchor in
+            BookOutlineViewed.adoptedPair(anchor: anchor, rows: self.chaptered)
+        }
+        #expect(adopt("page-c") == Pair(sectionID: "s2", postID: "c"),
+                "a note: itself, and the chapter heading above it on the page")
+        #expect(adopt("page-a") == Pair(sectionID: "s1", postID: "a"))
+        #expect(adopt("chapter-s2") == Pair(sectionID: "s2"), "a chapter heading: the chapter alone")
+        #expect(adopt("page-d") == Pair(postID: "d"), "a note under the unfiled heading names no chapter")
+        #expect(adopt("unfiled") == .nothingViewed,
+                "the unfiled heading names nothing — what the rule says of it at the top")
+        #expect(adopt("page-zz") == nil, "a row the column does not have: nothing to adopt")
+        // The same answer the rule gives once the landing has put the target
+        // at the top with the whole column reporting.
+        let landed: [String: CGFloat] = [
+            "chapter-s1": -320, "page-a": -270, "page-b": -160, "chapter-s2": -50,
+            "page-c": 0, "unfiled": 8_700, "page-d": 8_750,
+        ]
+        #expect(adopt("page-c") == BookOutlineViewed.pair(rows: chaptered, tops: landed))
+        let flat = BookOutlineRows.rows(flat: [entry("a", path: "life"), entry("b", path: "life")])
+        #expect(BookOutlineViewed.adoptedPair(anchor: "path-0", rows: flat) == .nothingViewed,
+                "a tag-path heading names nothing")
+        #expect(BookOutlineViewed.adoptedPair(anchor: "page-b", rows: flat) == Pair(postID: "b"))
+    }
+
+    /// On the page while ANY part of the row is — the hold's geometric test.
+    @Test func aRowIsOnThePageWhileAnyPartOfItIs() {
+        let page: CGFloat = 700
+        let cases: [(top: CGFloat?, height: CGFloat?, on: Bool, why: String)] = [
+            (0, 100, true, "landed at the top"),
+            (-2, 100, true, "a landing's tolerance above the edge"),
+            (480, 100, true, "the F-1 place: the last screenful, below the top"),
+            (-8_000, 9_000, true, "a tall story spanning the page's top edge"),
+            (699, 100, true, "its top a point above the page's foot"),
+            (700, 100, false, "its top at the page's foot: below the page"),
+            (-150, 100, false, "scrolled wholly past, above the page"),
+            (-100, 100, false, "its bottom exactly at the top edge: nothing of it shows"),
+            (0, 0, true, "a zero-height row at the top"),
+            (nil, 100, false, "a row that never reported is nowhere"),
+            (-50, nil, false, "above the edge with no known height: it reaches nothing"),
+            (40, nil, true, "its top on the page, height unknown"),
+        ]
+        for c in cases {
+            #expect(BookOutlineViewed.isOnScreen(top: c.top, height: c.height, viewport: page) == c.on,
+                    "\(c.why)")
+        }
+        // A page not yet measured has no bottom edge — a row is found off it
+        // only above it.
+        #expect(BookOutlineViewed.isOnScreen(top: 50_000, height: 100, viewport: 0))
+        #expect(!BookOutlineViewed.isOnScreen(top: -150, height: 100, viewport: 0))
+    }
+
+    /// After the landing: the adoption stands while its row is on the page —
+    /// wherever on the page — and the rule resumes, the adoption dropped, the
+    /// moment a derivation finds it off the page or out of the column.
+    @Test func theAdoptedTargetStandsWhileItIsOnThePageAndTheRuleResumesWhenItLeaves() {
+        let heights: [String: CGFloat] = [
+            "chapter-s1": 40, "page-a": 100, "page-b": 100, "chapter-s2": 40,
+            "page-c": 100, "unfiled": 40, "page-d": 100,
+        ]
+        // The column, 10 pt between rows, its first row's top at `t`.
+        let column: (CGFloat) -> [String: CGFloat] = { t in [
+            "chapter-s1": t, "page-a": t + 50, "page-b": t + 160, "chapter-s2": t + 270,
+            "page-c": t + 320, "unfiled": t + 430, "page-d": t + 480,
+        ] }
+        let follow: ([String: CGFloat], String?, CGFloat) -> (pair: Pair, adopted: String?) = {
+            tops, adopted, viewport in
+            BookOutlineViewed.follow(
+                rows: self.chaptered, tops: tops, heights: heights,
+                viewport: viewport, adopted: adopted)
+        }
+
+        // THE F-1 PAGE — the book's last screenful: note a owns the top; the
+        // target d sits 380 pt down, as high as the page can take it.
+        let lastScreen = column(-100)
+        let free = follow(lastScreen, nil, 700)
+        #expect(free.pair == Pair(sectionID: "s1", postID: "a") && free.adopted == nil,
+                "no adoption: the rule names the row at the top")
+        let held = follow(lastScreen, "page-d", 700)
+        #expect(held.pair == Pair(postID: "d"),
+                "the target the landing could not lift to the top STANDS — never the top row")
+        #expect(held.adopted == "page-d", "and the adoption is kept")
+
+        // Landed at the top: the target — what the rule says there too.
+        let atTop = follow(column(-480), "page-d", 700)
+        #expect(atTop.pair == Pair(postID: "d") && atTop.adopted == "page-d")
+        #expect(atTop.pair == BookOutlineViewed.pair(rows: chaptered, tops: column(-480)))
+
+        // Off the page ABOVE (the chapter heading scrolled wholly past): the
+        // rule resumes by itself, the adoption dropped.
+        let above = follow(lastScreen, "chapter-s1", 700)
+        #expect(above.pair == Pair(sectionID: "s1", postID: "a") && above.adopted == nil)
+        // Off the page BELOW (a short page; d's top under its foot).
+        let below = follow(column(-300), "page-d", 150)
+        #expect(below.pair == Pair(sectionID: "s2") && below.adopted == nil,
+                "below the foot: the rule — chapter two's heading owns the top")
+        // Out of the column (the note left the book): the rule, dropped.
+        var gone = lastScreen
+        gone["page-zz"] = 380
+        let left = follow(gone, "page-zz", 700)
+        #expect(left.pair == Pair(sectionID: "s1", postID: "a") && left.adopted == nil)
+        // Never reported: nowhere, so the rule.
+        var unreported = lastScreen
+        unreported["page-d"] = nil
+        let silent = follow(unreported, "page-d", 700)
+        #expect(silent.pair == Pair(sectionID: "s1", postID: "a") && silent.adopted == nil)
+
+        // A heading that names nothing, adopted (the width change re-landing
+        // the row at the top) stands as nothing while it is on the page.
+        let heading = follow(column(-430), "unfiled", 700)
+        #expect(heading.pair == .nothingViewed && heading.adopted == "unfiled")
+    }
+
     // MARK: - The place on the page (P-562-5)
 
     /// The ordinal counts notes in the COLUMN's order — here chapter two is
