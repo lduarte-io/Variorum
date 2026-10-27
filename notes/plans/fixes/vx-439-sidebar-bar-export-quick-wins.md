@@ -319,7 +319,21 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     before Delete; the ✕ unchanged); the shared roads (stored-title seed, own-wing doors, this row's export, the one
     delete ask, the three hosted asks); Starred's note vs book rows; the rename seed + road on a store (stored, never the
     display date; trimmed; blank → NULL); `crossWingIDs`. build-for-testing GREEN.
-  - VX-580: NOT-STARTED
+  - VX-580: BUILT (this commit) — PENDING the stage run (`SidebarRowLeadsTests` 4, incl. a mounted, live-typing pin).
+    A-439-11 as ruled: default ON, NO setting. The sidebar's note rows (the Open list's — title, drag chip, menu words —
+    and Starred's NOTE rows) are called by `noteRowLabel` = the note's PRELIMINARY title where it has one, else the name
+    every surface gives it. The preliminary title is the LIBRARY's one brain exactly — `NoteCardFace.card(…)` over the
+    Library's own bounded opening read (`NoteCards.load`, words only) — for exactly the notes the Library leads with
+    words (no stored title, not a `'journal'`-profile daily entry, at least one word; a heading rendered, a long opening
+    capped at a word edge, 48 chars); `Features/Library/SidebarRowLeads.read`, ONE bounded read (the rows' container facts,
+    then words only for the unnamed ones — a sidebar of named notes reads no words), HELD by a `.task(id: noteRowIDs)`
+    observation so her typing renames the row live (row 18's live-title law), the row's marquee truncating it at rest. No
+    divergence to unify: the sidebar had no derivation of its own (it showed `DisplayTitle`, the date). DISPLAY ONLY —
+    `WorkspaceModel.readTitles`/`DisplayTitle` (the pane line, back chip, View ▸ Open Note rows, exports, the same-note
+    refusal) untouched (guard pin); rename still seeds from the STORED title (VX-425). DEBUG oracle
+    `SidebarGeometry.openRowLabels`. PROVISIONALs (morning bundle 12): the Library's 48-char lead cap kept (her "maybe
+    fewer words than the library shows" — the row's width truncates first at any normal sidebar width); View ▸ Open
+    Note's menu rows keep the display name (the ask was "the lefthand bar"). build-for-testing GREEN.
   - VX-589: NOT-STARTED
   - VX-426: NOT-STARTED
   - VX-560: NOT-STARTED
@@ -351,7 +365,14 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 10. **VX-602 — two neighbouring sentences still say "tutorial" for the field guide** (not door names, so not re-worded
     under A-439-9's menu-labels scope): the restore confirm's detail ("This replaces the tutorial with a fresh copy: …") and
     its receipt ("The tutorial is fresh — “the field guide” is on your Bookcase."). Say the word and they follow the door.
-11. (grows)
+11. **VX-424 — the drag fix is unverifiable by any synthetic road** (VX-375): your hand check is its evidence — drag
+    an Open row DOWN ONE (release on the next row's lower half), UP ONE (the row above's upper half), to the end, and
+    watch the line hold still as the pointer crosses a boundary. If a drop ever fails, the row's own drop under the new
+    halves still lands it the old way (before the row) — say so and the halves come out in one commit.
+12. **VX-580 — two PROVISIONALs:** the sidebar's first-words title uses the Library's own 48-character cap (the row's
+    width cuts it first at any normal sidebar width — your "maybe fewer words"); and View ▸ Open Note's menu still names
+    untitled notes by their date (your ask named the left-hand bar). Say the word for either.
+13. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 

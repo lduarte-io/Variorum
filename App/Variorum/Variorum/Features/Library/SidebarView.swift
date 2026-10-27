@@ -256,6 +256,10 @@ struct SidebarView: View {
     @State private var pendingDelete: NoteDeleteConfirm?
     @State private var wingMove: WingsModel.MoveAsk?
     @State private var noteRowWingIDs: [String: String] = [:]
+    /// VX-580: the note rows' PRELIMINARY titles — an untitled, non-journal
+    /// note's own first words, through the Library's one brain
+    /// (`SidebarRowLeads`); absent for every other note. Display only.
+    @State private var rowLeads: [String: String] = [:]
     #if DEBUG
     /// **This column's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): it owns the rail's drawn height.
@@ -427,6 +431,22 @@ struct SidebarView: View {
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }
         .wingMoveConfirm($wingMove, wings: wings)
+        // VX-580: the untitled notes' first words, HELD (a note she is typing
+        // into renames its row as she goes — the strip's own live-title law,
+        // row 18), the fetch bounded by the rows (P1).
+        .task(id: noteRowIDs) {
+            let ids = noteRowIDs
+            do {
+                for try await leads in session.database.observe({ db in
+                    try SidebarRowLeads.read(db, noteIDs: ids)
+                }) {
+                    rowLeads = leads
+                }
+            } catch {
+                // A failed read leaves the rows' names standing (the strip's
+                // posture — `observeTitles`).
+            }
+        }
         // …and which listed notes live in ANOTHER wing (bounded by the Open
         // list and the star cap — P1).
         .task(id: noteRowsWingKey) {
@@ -674,8 +694,7 @@ struct SidebarView: View {
             HStack(spacing: 4) {
                 if current { marker }
                 MarqueeText(
-                    text: tokens.chromeLabel(WorkspaceNaming.label(
-                        for: destination, titles: stars.titles)),
+                    text: tokens.chromeLabel(starredRowLabel(item, destination: destination)),
                     font: tokens.navigation,
                     color: current ? tokens.ink : tokens.muted,
                     weight: current ? .semibold : .regular)
@@ -718,8 +737,7 @@ struct SidebarView: View {
                 // acts (Rename… · Move/Copy to Wing ▸ · Export Note… · Delete).
                 if item.target.kind == .post {
                     Divider()
-                    noteRowActs(item.target.id, title: WorkspaceNaming.label(
-                        for: destination, titles: stars.titles))
+                    noteRowActs(item.target.id, title: starredRowLabel(item, destination: destination))
                     Divider()
                     deleteNoteDoor(item.target.id)
                 }
@@ -1119,10 +1137,16 @@ struct SidebarView: View {
             HStack(spacing: 4) {
                 if current { marker }
                 MarqueeText(
-                    text: tokens.chromeLabel(workspace.label(for: destination)),
+                    text: tokens.chromeLabel(noteRowLabel(noteID)),
                     font: tokens.navigation,
                     color: current ? tokens.ink : tokens.muted,
                     weight: current ? .semibold : .regular)
+                    #if DEBUG
+                    // VX-580's oracle: what each Open row is CALLED, as drawn.
+                    .onChange(of: noteRowLabel(noteID), initial: true) { _, label in
+                        SidebarGeometry.recordOpenRowLabel(label, noteID: noteID, for: workspace)
+                    }
+                    #endif
                 // 17y B3 item (f) — THE WING INDICATOR (her ruled shape): a
                 // row whose note lives in ANOTHER wing names that wing,
                 // faint (her name for it — never chrome); opening it takes
@@ -1204,7 +1228,7 @@ struct SidebarView: View {
             openListDrag.began(noteID)
             return OpenNoteDragToken(noteID: noteID, listID: openListDrag.listID)
         }) {
-            Self.openRowChip(workspace.label(for: destination), tokens: tokens)
+            Self.openRowChip(noteRowLabel(noteID), tokens: tokens)
         })
         // The source's session END clears the list's drag wherever the
         // release fell (U2c, kept by P-U2d-1).
@@ -1233,7 +1257,7 @@ struct SidebarView: View {
             // Export Note…), then the row's (Close · Close All), then Delete
             // Note… LAST and set apart — the ✕ stays close-only.
             Divider()
-            noteRowActs(noteID, title: workspace.label(for: destination))
+            noteRowActs(noteID, title: noteRowLabel(noteID))
             Divider()
             Button("Close") { Self.closeRow(noteID, in: workspace, selection: $selection) }
             // VX-289 (the VX-283 run): Close All Notes — every row closes; a
@@ -1256,6 +1280,20 @@ struct SidebarView: View {
     private var noteRowIDs: [String] {
         let starredNotes = stars.items.filter { $0.target.kind == .post }.map(\.target.id)
         return workspace.openNotes.shown + starredNotes.filter { !workspace.openNotes.shown.contains($0) }
+    }
+
+    /// **VX-580 — what a note row is called**: its preliminary title (its own
+    /// first words, when it has no name and is not a daily entry), else the
+    /// name every other surface gives it. The Open row's title, its drag chip
+    /// and its menus' words read this one answer.
+    private func noteRowLabel(_ noteID: String) -> String {
+        rowLeads[noteID] ?? workspace.label(for: .post(noteID))
+    }
+
+    /// …and a Starred row's: a NOTE's the same rule; a book keeps its name.
+    private func starredRowLabel(_ item: Queries.StarredItem, destination: SidebarSelection) -> String {
+        if item.target.kind == .post, let lead = rowLeads[item.target.id] { return lead }
+        return WorkspaceNaming.label(for: destination, titles: stars.titles)
     }
 
     /// The wing read's key: the note rows and the wing she stands in.
@@ -1474,6 +1512,13 @@ enum SidebarGeometry {
         openListFirstRowHalves[bodyKey(for: workspace)] = (upper, lower)
     }
 
+    /// **VX-580 — what each Open row is called, as drawn** (note id → label).
+    static var openRowLabels: [String: [String: String]] = [:]
+
+    static func recordOpenRowLabel(_ label: String, noteID: String, for workspace: WorkspaceModel) {
+        openRowLabels[bodyKey(for: workspace), default: [:]][noteID] = label
+    }
+
     /// …and the first row's ✕ (global), where the at-rest click pin presses.
     static var openListFirstRowCloses: [String: CGRect] = [:]
 
@@ -1492,6 +1537,7 @@ enum SidebarGeometry {
         openListEndZones[key] = nil
         openListFirstRowHalves[key] = nil
         openListFirstRowCloses[key] = nil
+        openRowLabels[key] = nil
     }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the

@@ -83,7 +83,7 @@ struct SidebarNoteRowMenuTests {
         let row = try Self.body(of: "private func openRow(", in: sidebar)
         let menu = try #require(row.range(of: ".contextMenu {"), "the row has a menu")
         let tail = String(row[menu.lowerBound...])
-        let acts = try #require(tail.range(of: "noteRowActs(noteID, title: workspace.label(for: destination))"))
+        let acts = try #require(tail.range(of: "noteRowActs(noteID, title: noteRowLabel(noteID))"))
         let close = try #require(tail.range(of: "Button(\"Close\")"))
         let closeAll = try #require(tail.range(of: "CapabilityRegistry.capability(.closeAllNotes).verb"))
         let delete = try #require(tail.range(of: "deleteNoteDoor(noteID)"))
