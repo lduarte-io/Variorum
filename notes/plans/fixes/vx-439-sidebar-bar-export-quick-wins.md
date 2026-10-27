@@ -378,3 +378,35 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 - 2026-10-27 HER LIVE RULING (in-session): VX-554 Done at her word — 'gathering does have a new note door - that ticket must've been stale. it can be marked complete.' The walk's F-554 evidence duty and bundle item 4's question are retired; R-439-F554's no-code disposition stands. On VX-568 she asked what the issue is (her 10-22 note quoted back to her); R-439-F568 unchanged pending her reply.
 - 2026-10-27 HER LIVE RULING (in-session) on VX-568: "oh. i'm talking about the cursor itself - yeah, it is what mac os uses probably, it's just what the cursor looks like in the new note line. it's a subtle issue - just remove it from this run and leave it parked for later for my reconsideration at a later point. doesn't need to be this run." VX-568 is OUT of this run (no churn probe, no knob work — none was started; nothing instrumented); Linear Parked with the trace (the orchestrator's). R-439-F568 is retired with it.
 - 2026-10-27 B1 STAGE LEG (03:15–03:28 MDT, `vx-439-b1-suites`): the prepared command first packed all 152 suites into ONE `-only-testing:` flag (zsh does not word-split an unquoted variable — the coordinator caught it); rebuilt as one flag per suite. Run 1: 821 tests / 152 suites, 1 failing test (`ExportFacesTests.bulkExportGestureWritesTheWholeLibrary`, VX-126's missed app-side byte pin — fixed deliberately, `36b98b750`, 6/6). VX-332 red-on-old: a crude revert (every mount on the counted raise) also broke the launch cell, so a FAITHFUL revert (VX-326's one-shot road) was run — launch green, navigation-back red (3 issues), restored green. Tree clean, no instances, released.
+
+## WALK PART 1 (the orchestrator, 2026-10-27 03:30–03:52 MDT, claim vx-439-b1-walk; captures `walk-shots-vx439/`, gitignored)
+
+Dev store as found: an ACCOUNT-LESS RESTORED library held as of Oct 20 (VX-522's banner sentence), EMPTY (no books, no
+notes), Study voice, dark. The hold banner, the words band card, and every sync/Castle/key door UNTOUCHED (the
+coordinator's constraint for VX-502's walk). Walk content minted through the app's own doors: one tagged bookless note
+("{#walk}" microsyntax — tag chip applied ✓), "Walk Book" + one ⌥⌘N member. Left in place for walk part 2.
+
+GREEN, seen live:
+- **VX-332** — ⌥⌘[ back to the Bookcase, typed immediately with no click: the text landed in the quick-entry box,
+  caret visible (capture 03). Launch focus intact (the mint leg typed straight into the box).
+- **VX-552** — "in Home" at the band's trailing edge on the Bookcase host (captures 02/03); at 820 pt the placeholder
+  elides and the label sits clear — no collision (capture 04). Library host deferred to part 2.
+- **VX-553** — the book foot reads "+ new chapter" / "+ new note" adjacent; no restore row between (capture 07a; a
+  fresh book holds no deleted chapter — the order pin carries the arrangement).
+- **VX-570** — ⌥⌘N inside Walk Book minted a member (book · 1 note, live caret in the new block; capture 07). In a
+  Write note pane the menu item reads disabled — C-570-1's context rule behaving.
+- **VX-602** — the Help menu enumerates "Open the Field Guide · Take the Onboarding Tutorial · Restore Field Guide…"
+  (AX read); File carries "New Note in This Book" and "Export Note…" beside "Export Library…".
+- VX-554's captures: MOOT — she closed the ticket live ("that ticket must've been stale").
+
+**W-439-1 — DEFECT (walk-caught, to the B1 implementer): File ▸ Export Note… is DISABLED with a note open in Write.**
+Proven live with the File menu OPEN (AX `enabled` = false while the menu tracked; ⌥⌘S no-ops; the chord itself is
+declared right — AXMenuItemCmdChar S, mods ⌥⌘). Her ask is precisely a per-note export of the open note, so the
+primary context is dead. Mechanism to trace implementer-side (suspect: the capability's availability rule reads a
+context fact the Write pane never sets). REQUIRED: a red-on-old pin asserting `.exportNote` is AVAILABLE in the
+open-note/Write context, then the fix, then walk part 2 re-runs the export legs (Export Note ⌥⌘S → save panel →
+file bytes vs Copy full text; Export Library headers; the gathering leg, unwalked in part 1).
+
+Walk part 2 owes: the export legs, the gathering ⌥⌘N/Index leg, VX-552 on the Library host, cleanup of the minted
+walk content, and the voice note (store found and left in Study/dark; no voice flip was needed in part 1 — part 2
+captures Terminal where visual).
