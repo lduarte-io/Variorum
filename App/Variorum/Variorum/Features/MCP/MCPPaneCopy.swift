@@ -235,7 +235,13 @@ nonisolated enum MCPPaneCopy {
     /// 13n-c U2 (R2-3): a live grant whose target is fenced since reaches
     /// NOTHING — the row says so instead of calling it shared, and why.
     static func inertDetail(_ fence: MCPGrantRule.Fence, kind: MCPGrantRule.ScopeKind) -> String {
-        let place = kind == .note ? "note" : "book"
+        // VX-549: a gathering grant is inert while its gathering is fenced (a
+        // stale row — no op fences one).
+        let place = switch kind {
+        case .note: "note"
+        case .gathering: "gathering"
+        case .book, .wing: "book"
+        }
         switch fence {
         case .privateMark: return "inert \u{2014} the \(place) is marked Private, which always asks"
         case .journal:
@@ -278,6 +284,7 @@ nonisolated enum MCPPaneCopy {
         case .note: "note"
         case .book: "book"
         case .wing: "wing"
+        case .gathering: "gathering"
         }
     }
 
@@ -383,6 +390,8 @@ nonisolated enum MCPPaneCopy {
         switch kind {
         case "book": "a book"
         case "wing": "a wing"
+        // VX-549: a note written into a gathering logs the gathering.
+        case "gathering": "a gathering"
         default: "a note"
         }
     }
@@ -755,8 +764,51 @@ nonisolated enum MCPPaneCopy {
     }
 
     /// Change…'s one line under the title (T-U3-8 said where she decides):
-    /// the confirm REPLACES what the sheet was opened on.
+    /// the confirm REPLACES what the sheet was opened on. Since VX-516 the
+    /// sheet says it NAMED (below); this plain sentence stays for a sheet
+    /// whose place has no name to hand.
     static let replacesLine = "Confirming replaces the grant you opened this from."
+
+    /// **VX-516 (the VX-548 run — PROVISIONAL words, MB-1): the replace,
+    /// named before she confirms** — whose grant, on which place, at what
+    /// rung and for how long (the receipt's own shape): "Confirming replaces
+    /// claude-code's grant on the PlanetLillian wing — read and suggest,
+    /// always." It shows only while the place picked IS the place the sheet
+    /// was opened on; another place picked is a new grant and the line goes.
+    /// `place` is already said ("“parser notes”", "3 notes", "the Home wing").
+    static func replacesLine(
+        client: String, place: String, rung: MCPGrantRule.Rung, duration: MCPGrantRule.Duration
+    ) -> String {
+        "Confirming replaces \(client)\u{2019}s grant on \(place) \u{2014} \(MCPRungWords.reach(rung)), "
+            + "\(durationWord(duration))."
+    }
+
+    // MARK: - The pane's adding doors (VX-515 — the VX-548 run; PROVISIONAL words, MB-2)
+
+    /// A client row's door (`.mcpChangeClientAccess`) — it ADDS a grant (the
+    /// sheet with the client, nothing else pre-filled, nothing replaced); it
+    /// read "Change…", which said the opposite of what it did.
+    static let sharePlaceVerb = "Share a place\u{2026}"
+    /// Shared with AI's own door (`.mcpShareAnotherPlace`) — her candidate's
+    /// words ("Share another place…"), drawn while the tab lists a grant.
+    static let shareAnotherPlaceVerb = "Share another place\u{2026}"
+
+    // MARK: - A library's own clients (VX-512 — the VX-548 run; PROVISIONAL words, MB-3)
+
+    /// The pane's line while the library has no client at all (none waiting,
+    /// approved or denied): the clients and their grants are this library's
+    /// LOCAL-ONLY rows (§7's grants family — never synced, never carried into
+    /// another library), so a library started fresh, or filled by sync, has
+    /// none — and nothing said so (her Air: "Failed to connect to Variorum
+    /// -32000. re-set up? unexpected or normal?"). One line; the whole text
+    /// behind its (i). No "AI" (VX-272), no shouted word.
+    static let libraryClientsSummary =
+        "Clients belong to the library they were set up in \u{2014} run each one\u{2019}s setup here."
+    static let libraryClientsDetail =
+        "MCP clients, their approvals and everything shared with them are kept in the library they were "
+        + "set up in, on this Mac. They are never synced and never carried into another library, so a "
+        + "library you start fresh, or fill from your account by sync, begins with the server off and no "
+        + "clients. Turn the server on above, then run each client\u{2019}s setup again from Connect."
 
     // MARK: - Several notes (13n-c U3 — the Library's "Share N notes…"; mockup §2)
 
@@ -804,7 +856,8 @@ nonisolated enum MCPPaneCopy {
     /// Its lead: approving admits with zero reach; a grant is its own act.
     static let approvalLead =
         "Approving lets it connect, and it reaches nothing yet. You can grant it a place below, or "
-        + "later with Change\u{2026} on its row."
+        // VX-515: the row's door is named for what it does now.
+        + "later with \(sharePlaceVerb) on its row."
     /// WHERE's first answer on the approval road — and the one it starts on.
     static let nothingYet = "Nothing yet"
     /// The line under WHERE when nothing is picked — honest about the open
@@ -837,6 +890,30 @@ nonisolated enum MCPPaneCopy {
         name.map { "\u{201C}\($0)\u{201D} \u{2014} its notes, takes and tags" } ?? "choose a book"
     }
     static let thisWing = "A wing"
+    /// VX-549 (her sitting 2026-10-27 — PROVISIONAL words, her copy pass): a
+    /// gathering as a grant place. Its detail says the feature in one line:
+    /// reach follows her tags.
+    static let aGathering = "A gathering"
+    static func aGatheringDetail(_ name: String?) -> String {
+        name.map { "\u{201C}\($0)\u{201D} \u{2014} the notes its rule gathers now, as your tags change" }
+            ?? "choose a gathering"
+    }
+    static let gatheringPrompt = "Find a gathering"
+    static let chooseGathering = "Choose a gathering"
+    static let noGatherings = "No gathering can be shared yet."
+    static let allGatherings = "All gatherings"
+    /// **The one-line why a star-rule gathering is read/suggest-shaped**
+    /// (her sitting: "the grant sheet presents such a grant as
+    /// read/suggest-shaped"): starring is not on the wire, so a client can
+    /// never write a new note into it — the write rungs are not offered.
+    static let starRuleWhy =
+        "Its rule needs a starred note, and only you can star one \u{2014} so a client can read and "
+        + "suggest here, but not write new or edit."
+    /// An archived gathering assembles nothing until it is unarchived.
+    /// A star-rule gathering's row footing in the picker.
+    static let readAndSuggestOnly = "read and suggest only"
+    static let archivedGatheringNote =
+        "This gathering is archived, so it gathers nothing until you unarchive it."
     /// 13n-c U1 (VX-163, J8 — mockup §8's words): a journal-style book is
     /// in the wing like any book; only the daily Journal and anything
     /// Private ask.
@@ -968,6 +1045,9 @@ nonisolated enum MCPPaneCopy {
             switch scope {
             case .note?: "it can also apply tags and save versions of it"
             case .book?: "it can also make new notes and chapters in it and apply tags"
+            // VX-549 (PROVISIONAL words): create_note and apply_tag act under a
+            // gathering grant (`MCPToolFacts` — the truth pin reads it).
+            case .gathering?: "it can also make new notes in it, wearing the tags its rule needs, and apply tags"
             case .wing?, nil: "it can also make new notes, apply tags and build books"
             }
         case .edit:
@@ -1048,6 +1128,8 @@ nonisolated enum MCPPaneCopy {
         switch scope {
         case .book: ", including to future entries"
         case .wing: ", including notes added later"
+        // VX-549 (PROVISIONAL words): a gathering's reach is its rule's, live.
+        case .gathering: ", including notes its rule gathers later"
         case .note: ""
         }
     }
@@ -1218,6 +1300,11 @@ nonisolated enum MCPAskCopy {
                 : "Allowing grants it in \(PlaceLabels.quoted(ask.title, distinguisher: distinguisher)), "
                     + "including to future entries."
         case .wing: "Allowing grants it in the \(ask.title) wing, including notes added later."
+        // VX-549 (PROVISIONAL words): a gathering's live reach.
+        case .gathering:
+            ask.fence != nil ? nil
+                : "Allowing grants it in \(PlaceLabels.quoted(ask.title, distinguisher: distinguisher)), "
+                    + "including notes its rule gathers later."
         }
     }
 
@@ -1237,6 +1324,16 @@ nonisolated enum MCPAskCopy {
         case (.book, .privateMark?):
             "This book is marked Private now, which no grant reaches \u{2014} its notes are shared "
                 + "one ask at a time. \(dontAllow) lets this ask go."
+        // VX-549: a gathering fenced since (a stale row — no op fences one)
+        // takes no grant at all. It names WHICH fence, as the book's arms do
+        // (the ladder's round 1, finding 4: `askStanding` re-reads a stale
+        // 'daily' marker as `.journal`, and one arm said "marked Private" for
+        // both) — the book's words, without the book's members clause (a
+        // gathering's notes are not fenced by its row; its grant reaches none).
+        case (.gathering, .journal?):
+            "This gathering is your daily Journal now, which no grant reaches. \(dontAllow) lets this ask go."
+        case (.gathering, .privateMark?):
+            "This gathering is marked Private now, which no grant reaches. \(dontAllow) lets this ask go."
         case (_, .journal?): "A daily Journal entry. Your daily Journal is only ever shared one ask at a time."
         case (_, .privateMark?): "Marked Private. Private notes are only ever shared one ask at a time."
         // 13n-c UX walk W-UX-14: what THIS scope's grant allows, never more.

@@ -273,11 +273,7 @@ struct MCPReachPopover: View {
     /// was seen from — its rung and duration), REPLACING it on confirm
     /// (T-U3-8). Pure, so the pins read it.
     static func changeOpening(_ client: MCPClient, _ grant: MCPGrantRow) -> MCPGrantOpening {
-        let place: MCPGrantPrefill = switch grant.scopeKind {
-        case .note: .note(grant.scopeID)
-        case .book: .book(grant.scopeID)
-        case .wing: .wing(grant.scopeID)
-        }
+        let place = MCPGrantPrefill.place(of: grant)
         return MCPGrantOpening(
             client: client, place: place, rung: grant.rung, duration: grant.duration,
             replacing: [grant.id], origin: .place)

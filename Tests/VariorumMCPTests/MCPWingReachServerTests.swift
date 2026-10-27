@@ -45,6 +45,15 @@ private final class FakeApp: @unchecked Sendable {
 @Suite("13n-c U6 — show_in_app's wing target and gatherings under a wing grant", .serialized)
 struct MCPWingReachServerTests {
     /// Sync reads (the async overloads would win inside the test bodies).
+    /// VX-549: a grant's scope kind, and a gathering's assembly (sync reads).
+    private func grantKind(_ h: ServerHarness, _ grant: String) throws -> MCPGrantRule.ScopeKind? {
+        try h.database.read { try Queries.mcpGrant($0, id: grant) }?.scopeKind
+    }
+
+    private func assembled(_ h: ServerHarness, _ gathering: String) throws -> [String] {
+        try h.database.read { try Queries.assembleReading($0, readingID: gathering).map(\.postID) }
+    }
+
     private func consumedAt(_ h: ServerHarness, _ grant: String) throws -> String? {
         try h.database.read {
             try String.fetchOne($0, sql: "SELECT consumed_at FROM mcp_grant WHERE id = ?", arguments: [grant])
@@ -228,7 +237,18 @@ struct MCPWingReachServerTests {
         }
     }
 
-    @Test func aGatheringStaysNoGrantsScopeAndNoWritesTarget() async throws {
+    /// **VX-549 — FLIPPED DELIBERATELY** (VX-548 batch 3; her sitting
+    /// 2026-10-27, RATIFIED: "the supersession of VX-273's facts-only rule is
+    /// RATIFIED. Gathering joins the grant scopes … write_new mints the note
+    /// bookless in the wing and applies the rule's tags so it assembles in").
+    /// This pin was `aGatheringStaysNoGrantsScopeAndNoWritesTarget`: no grant
+    /// could name a gathering, and `create_note` into one answered "as a book
+    /// that isn't there, under a wing EDIT grant". Now a grant NAMES it (its
+    /// own scope kind — the BOOK road still refuses its id), and a wing EDIT
+    /// grant writes a new note into it (a place of the wing, as its books are
+    /// — PROVISIONAL MB-16), the note wearing the rule's tag. A gathering is
+    /// still no BOOK for a membership act (`add_note_to_book` refuses).
+    @Test func aGatheringIsAGrantScopeAndANewNotesTargetButNoBookStill() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -236,17 +256,23 @@ struct MCPWingReachServerTests {
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, g.wing.id))
             let client = try h.client("claude-code").id
-            #expect(throws: (any Error).self, "no grant names a gathering") {
+            #expect(throws: (any Error).self, "a gathering is no book: the book road refuses its id") {
                 try h.operations.grantMCPAccess(client, spec(.read, .book, g.gathering.id))
             }
+            let named = try h.operations.grantMCPAccess(client, spec(.read, .gathering, g.gathering.id))
+            #expect(try grantKind(h, named) == .gathering, "a grant names the gathering itself")
             h.asks.setValue([])
             let write = try await call(connection, "create_note",
                                        ["text": .string("into a gathering"), "book_id": .string(g.gathering.id)])
-            #expect(write.isError == true && text(write) == MCPRefusalCopy.words(.notShared, .book),
-                    "a write into a gathering answers as a book that isn't there, under a wing EDIT grant")
+            #expect(write.isError != true, "\(text(write))")
+            let minted = try json(write)
+            #expect(minted["tags"] as? [String] == ["parser"], "it wears what the rule needs")
+            let noteID = try #require(minted["note_id"] as? String)
+            #expect(try assembled(h, g.gathering.id).contains(noteID), "so the gathering shows it")
             let add = try await call(connection, "add_note_to_book",
                                      ["note_id": .string(g.plain[1].id), "book_id": .string(g.gathering.id)])
-            #expect(add.isError == true)
+            #expect(add.isError == true && text(add) == MCPRefusalCopy.words(.notShared, .book),
+                    "a membership act is a book's: a gathering's id answers as no book")
             #expect(h.asks.value.isEmpty)
 
             // Archived: out of the listing, and assembling nothing, when asked.

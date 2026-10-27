@@ -210,6 +210,15 @@ enum MCPWireRefusalCopy {
         // sentence. Only a client types this field.
         case .invalidEntryDate:
             return MCPWriteTools.entryDateWords
+        // VX-549 — a new note written INTO a gathering its rule can't take
+        // (`create_note` / `import_document` with a gathering's id): her own
+        // door's sentence, word for word (`GatheringMint.Blocker.reason` — R-13n-4,
+        // "refusals speak to the client exactly as they speak to you"), e.g.
+        // "Its rule needs a starred note, and only the author can star one." A
+        // client meets it only on a gathering it can write into (decided
+        // first), so it is never the not-shared shape and tells nothing hidden.
+        case .smartFilterUnsatisfiable(_, let reason):
+            return reason
         default:
             return nil
         }

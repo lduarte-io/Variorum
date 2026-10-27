@@ -140,7 +140,13 @@ struct MCPLibraryParityFacesTests {
         }
         for tool in ["delete_note", "archive_note", "unarchive_note"] {
             #expect(MCPToolFacts.rung(of: tool) == .edit, "\(tool)")
-            #expect(MCPToolFacts.scopes(of: tool) == [.note, .book, .wing], "\(tool)")
+            // VX-549 (her ratified sitting, 2026-10-27 — the VX-548 run): a
+            // gathering is a grant place and EDIT applies to its member
+            // notes, so the note tools honestly declare the gathering scope.
+            // The pre-supersession expectation was [.note, .book, .wing];
+            // this is the deliberate VX-273-flip class, caught at the run's
+            // final window (batch 3's flip sweep missed this pin).
+            #expect(MCPToolFacts.scopes(of: tool) == [.note, .book, .gathering, .wing], "\(tool)")
         }
         // R-VX184-2: Private, Seal and Own stay hers alone — and so do her
         // owned book's second choices (book AND notes): no tool mints them.

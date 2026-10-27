@@ -22,4 +22,16 @@ enum MCPTextDigest {
     static func sha256(_ text: String) -> String {
         SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
     }
+
+    /// **VX-358 (RUN VX-548 batch 2a — PROVISIONAL MB-5): the one key a
+    /// no-op answers when the spellings differ.** `edit_take` and
+    /// `restore_commit` treat a text that reads as the take's under canonical
+    /// equality as nothing to write (`changed: false` — an invisible
+    /// re-normalization never rewrites prose); when the text asked (sent, or
+    /// the commit's) is nonetheless SPELLED with other code points (NFC
+    /// against NFD — `StoredText.spellingDiffers`), the answer carries this
+    /// key, `true`, beside a `sha256` that stays the STORED text's — absent
+    /// otherwise, so every other answer is byte-unchanged. Read by the two
+    /// answers and by the descriptions' sentence, never retyped.
+    static let spellingDiffersKey = "stored_text_normalization_differs"
 }

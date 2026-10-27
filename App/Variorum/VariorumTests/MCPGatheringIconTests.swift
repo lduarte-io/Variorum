@@ -110,10 +110,17 @@ struct MCPGatheringIconTests {
             let reach = try #require(model.aiReach[gathering.id]?.first)
             #expect(reach.clientName == "claude-code" && reach.grant?.id == wingGrant)
 
-            // The popover's words — the why names the wing; the rung is the
-            // gathering's own (read), whatever the wing grant's.
-            #expect(MCPShareCopy.iconHelp([reach]) == "Shared with claude-code (read) \u{2014} click for details")
-            #expect(MCPShareCopy.reachLine(reach) == "read \u{00B7} always")
+            // The popover's words — the why names the wing. VX-549 — FLIPPED
+            // DELIBERATELY (her sitting 2026-10-27, RATIFIED: "the supersession
+            // of VX-273's facts-only rule is RATIFIED. Gathering joins the grant
+            // scopes"): the rung is the WING GRANT's (a client may write a new
+            // note into the gathering and edit its members — PROVISIONAL MB-16),
+            // where it was "the gathering's own (read), whatever the wing
+            // grant's".
+            #expect(reach.rung == .edit)
+            #expect(MCPShareCopy.iconHelp([reach])
+                    == "Shared with claude-code (\(MCPRungWords.reach(.edit))) \u{2014} click for details")
+            #expect(MCPShareCopy.reachLine(reach) == "\(MCPRungWords.reach(.edit)) \u{00B7} always")
             #expect(MCPShareCopy.why(reach) == "through the Home wing grant")
             // Revoke says WHICH grant it takes (W-UX-5's words) …
             #expect(MCPShareCopy.revokeLabel(reach) == "Revoke the Home wing grant")

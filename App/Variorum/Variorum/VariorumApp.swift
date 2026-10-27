@@ -283,16 +283,14 @@ struct VariorumApp: App {
                         // the open tail and a pending cross-block compound
                         // were dropped by the registry-only shape (see
                         // MacWillLock.swift).
-                        bootstrap.onWillLock = macWillLock(
-                            session: session,
-                            // VX-394 (VX-348 U5): each live MCP connection's
-                            // end is said while the store is still open.
-                            endingConnections: { await appDelegate.mcp.recordLibraryClosing() }
-                        ) {
+                        // VX-394 (VX-348 U5): each live MCP connection's end is
+                        // said while the store is still open; 13n-b U1 (A-8): a
+                        // locked library serves no one — the door detaches after
+                        // the services stop. VX-548 batch 2b: composed in ONE
+                        // named, pinnable place (`macLockTeardown`).
+                        bootstrap.onWillLock = macLockTeardown(session: session, door: appDelegate.mcp) {
                             services?.stop()
                             services = nil
-                            // 13n-b U1 (A-8): a locked library serves no one.
-                            appDelegate.mcp.detach()
                         }
                         await fresh.start()
                         // THE LAUNCH'S FURNITURE — the sample books, the

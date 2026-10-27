@@ -299,6 +299,9 @@ extension MCPWriteTools {
                 ]
                 if let before = result.before { answer["before_commit_id"] = before.id }
                 if let after = result.after { answer["after_commit_id"] = after.id }
+                // VX-358 (MB-5): a no-op whose commit is spelled otherwise
+                // says so — absent otherwise, every other answer unchanged.
+                if result.spellingDiffers { answer[MCPTextDigest.spellingDiffersKey] = true }
                 return (answer, result.changed
                         ? MCPWriteReceipt(clientName: clientName, act: .commitRestore, targetID: noteID,
                                           targetTitle: title,

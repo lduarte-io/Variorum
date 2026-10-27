@@ -75,13 +75,19 @@ struct MCPGatheringReachTests {
             #expect(onHome.map(\.clientName) == ["claude-code"], "a wing grant never crosses wings")
             #expect(onHome[0].grant?.id == homeGrant && onHome[0].grant?.scopeKind == .wing)
             #expect(onHome[0].throughTitle == "Home", "the why names the wing")
-            #expect(onHome[0].rung == .read, "a gathering is read only — decideGathering's one rung, whatever the grant's")
+            // VX-549 — FLIPPED DELIBERATELY (her sitting 2026-10-27, RATIFIED:
+            // "the supersession of VX-273's facts-only rule is RATIFIED.
+            // Gathering joins the grant scopes"): a gathering is a place like a
+            // book, reached at its wing grant's RUNG (a client may write a new
+            // note into it and edit its members) — it was "read only —
+            // decideGathering's one rung, whatever the grant's".
+            #expect(onHome[0].rung == .edit, "a gathering is reached at its wing grant's rung (VX-549)")
             #expect(onHome[0].duration == .always)
 
             let onAway = try #require(all[away.id])
             #expect(onAway.map(\.clientName) == ["codex"])
             #expect(onAway[0].grant?.id == awayGrant && onAway[0].throughTitle == "variorum")
-            #expect(onAway[0].rung == .read && onAway[0].duration == .connection)
+            #expect(onAway[0].rung == .writeNew && onAway[0].duration == .connection, "VX-549: the grant's rung")
 
             // The singular read and the map agree, for a gathering as for a book.
             #expect(try db.read { try Queries.mcpBookReach($0, readingID: home.id) } == onHome)

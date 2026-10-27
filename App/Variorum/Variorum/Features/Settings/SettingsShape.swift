@@ -363,8 +363,9 @@ nonisolated enum SettingsCatalog {
         // Connect. Its blurb is new words (FOR VX-234).
         SettingsRow(
             id: "mcpClients", pane: .mcp, title: MCPPaneCopy.clientsSection,
+            // VX-515 (the VX-548 run): the row's adding door, named for what it does.
             blurb: "Every client you've approved or denied: whether it's connected now, how many "
-                + "grants it holds, and Change\u{2026} or Deny\u{2026} for each.",
+                + "grants it holds, and \(MCPPaneCopy.sharePlaceVerb) or Deny\u{2026} for each.",
             keywords: ["approved", "denied", "deny"]),
         // 13n-b U1 (R-13n-5 — the pane speaks direct and technical): the
         // server toggle and the one open-book switch.

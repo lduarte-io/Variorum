@@ -2570,9 +2570,10 @@ enum TutorialSeeder {
             + "you. Until then, the one thing an approved client can do is look "
             + "back over its own recent acts. Deny turns it away. Every approved "
             // 13n-c UX walk W-UX-4: the client row's verb is Deny… now, and it
-            // says what it takes before it does.
-            + "client is listed under Clients, with Change\u{2026} to share more and "
-            + "Deny\u{2026} to shut it out again, every grant it holds revoked.",
+            // says what it takes before it does. VX-515 (the VX-548 run): its
+            // adding door is "Share a place…" now (it read "Change…").
+            + "client is listed under Clients, with Share a place\u{2026} to share more "
+            + "with it and Deny\u{2026} to shut it out again, every grant it holds revoked.",
 
             // VX-168: the sentence the setup key falsified ("Variorum can't
             // check that name"), made true of the build — and no truer: K2's
@@ -2663,8 +2664,11 @@ enum TutorialSeeder {
             + "knows what each one does and may suggest one when it would help, "
             + "but only you can do it.",
 
+            // VX-549 (VX-548 batch 3 — PROVISIONAL words, her copy pass): a
+            // gathering joins the places (her sitting 2026-10-27).
             "Each grant also says where: one note; one book, with its notes now and "
-            + "any added to it later; or a whole wing and everything in it, except "
+            + "any added to it later; one gathering, with the notes its rule gathers "
+            + "now; or a whole wing and everything in it, except "
             // W-UX-17: the exceptions named where they are pointed at.
             + "what always asks: your daily Journal's entries and anything Private "
             + "(the next lesson). And for "
@@ -2672,8 +2676,13 @@ enum TutorialSeeder {
             + "change); until it disconnects, which ends when the client goes away "
             + "(offered while it's connected); or always, until you revoke it.",
 
-            "A wing grant also lets a client read that wing's gatherings; a "
-            + "gathering is never shared on its own. And a client can move a note "
+            // VX-549 — the supersession of VX-273's facts-only rule (her
+            // sitting 2026-10-27, RATIFIED: "this is the feature, routing work
+            // to an agent by each tag"). PROVISIONAL words, her copy pass.
+            "A gathering grant follows your tags: a note is in reach the moment "
+            + "it wears what the gathering's rule asks for, and out of reach when it "
+            + "stops. With write new, a client can add a note to the gathering, and "
+            + "the note wears the tags the rule needs. And a client can move a note "
             + "to another wing only with edit where the note is and write new in "
             + "the wing it goes to: the note leaves its books there, its tags come "
             + "along, and \u{2325}\u{2318}Z brings it back.",
@@ -2732,8 +2741,12 @@ enum TutorialSeeder {
             // 13n-c UX walk W-UX-19 (her round-8 ask): every row has Change…
             // now — the guide says so. (UXR1-2: a row whose place is gone keeps
             // Revoke only; the sentence speaks of the grants she can change.)
+            // VX-515 (the VX-548 run — her "how am I supposed to be able to grant
+            // multiple wings"): the tab's own add door, said where the grants are.
             "Every grant shows in Settings \u{25B8} MCP, with Change\u{2026} to raise "
             + "or lower it and Revoke to take it back. "
+            + "Share another place\u{2026} adds one beside them, so a client can reach "
+            + "several places at once. "
             + "Sharing several notes at once makes one row there, and one Revoke "
             + "covers them all.",
         ])

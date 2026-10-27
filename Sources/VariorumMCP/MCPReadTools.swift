@@ -232,11 +232,13 @@ struct MCPReadTools: Sendable {
                 return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .book)
             }
             let live = standing.liveGrants
-            let bookIDs = live.filter { $0.scopeKind == .book }.map(\.scopeID)
+            // VX-549: a gathering granted on its own lists too (its id rides
+            // the prefilter beside the books'; the rule decides each by kind).
+            let bookIDs = live.filter { $0.scopeKind == .book || $0.scopeKind == .gathering }.map(\.scopeID)
             let wingIDs = live.filter { $0.scopeKind == .wing }.map(\.scopeID)
-            // 13n-c VX-273: a wing's GATHERINGS list beside its books —
-            // read facts under wing-level reach, never a grant target (the
-            // prefilter's book ids can never name one; the rule decides each).
+            // 13n-c VX-273: a wing's GATHERINGS list beside its books under
+            // wing-level reach — and since VX-549 a gathering under its own
+            // grant (`decideGathering`, each one).
             let rows = try Row.fetchAll(
                 db,
                 sql: """
@@ -301,7 +303,8 @@ struct MCPReadTools: Sendable {
     }
 
     /// **A gathering's `list_books` entry** (13n-c VX-273): listed only when
-    /// the rule's `decideGathering` reaches it (wing-level reach on its wing);
+    /// the rule's `decideGathering` reaches it (wing-level reach on its wing,
+    /// or since VX-549 its own grant);
     /// `notes` counts exactly what `list_notes(book_id:)` would emit — its
     /// assembly (the ONE membership function, through `assembleReading`)
     /// filtered note by note through the same rule (a fenced member never
@@ -736,6 +739,13 @@ struct MCPReadTools: Sendable {
                     """,
                 arguments: [try json(bookIDs)]))
         }
+        // VX-549: a granted gathering's notes are its ASSEMBLY now (the ONE
+        // membership function, through `assembleReading` — empty while it is
+        // archived or rule-less); ∝ each granted gathering's assembly. Every
+        // candidate still passes the per-note rule below.
+        for grant in live where grant.scopeKind == .gathering {
+            candidates.formUnion(try Queries.assembleReading(db, readingID: grant.scopeID).map(\.postID))
+        }
         if wingIDs.isEmpty {
             return try recencyPage(
                 db, wingID: nil, candidates: candidates.sorted(), includeArchived: includeArchived,
@@ -904,9 +914,21 @@ struct MCPReadTools: Sendable {
             bookIDs.insert(facts.id)
             scopes.append(SearchScope(wingID: facts.wingID, within: .book(id: facts.id)))
         }
+        // VX-549: a granted gathering outside the reached wings is its own
+        // scope (the search composer's `.book(id)` on a gathering reads the
+        // ONE membership function); a note it assembles is then not searched
+        // again on its own note grant's scope.
+        var gatheringIDs: Set<String> = []
+        for grant in live where grant.scopeKind == .gathering {
+            guard let facts = try Queries.mcpGatheringFacts(db, readingID: grant.scopeID),
+                  facts.fence == nil, !wingSet.contains(facts.wingID) else { continue }
+            gatheringIDs.insert(facts.id)
+            scopes.append(SearchScope(wingID: facts.wingID, within: .book(id: facts.id)))
+        }
         for grant in live where grant.scopeKind == .note {
             guard let facts = try Queries.mcpNoteFacts(db, noteID: grant.scopeID),
-                  !wingSet.contains(facts.wingID), facts.bookIDs.isDisjoint(with: bookIDs) else { continue }
+                  !wingSet.contains(facts.wingID), facts.bookIDs.isDisjoint(with: bookIDs),
+                  facts.gatheringIDs.isDisjoint(with: gatheringIDs) else { continue }
             scopes.append(SearchScope(wingID: facts.wingID, within: .note(id: facts.id)))
         }
         return scopes

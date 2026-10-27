@@ -379,6 +379,11 @@ extension Operations {
         public let after: CommitPoint?
         /// False when the take already read the commit's words.
         public let changed: Bool
+        /// VX-358 (PROVISIONAL MB-5): on a no-op, the commit's text reads as
+        /// the take's under canonical equality but is SPELLED otherwise (NFC
+        /// against NFD) — the take keeps its own bytes
+        /// (`StoredText.spellingDiffers`). Always false when `changed`.
+        public let spellingDiffers: Bool
     }
 
     /// **`restore_commit`'s act — her `restoreCommit`, INSURED** (the run
@@ -408,22 +413,28 @@ extension Operations {
                 throw OperationError.commitNotFound(id: commitID)
             }
             let variant = try editableVariant(db, commitPoint.variantId)
+            // Canonical equality stays the no-op rule (VX-358, MB-5); whether
+            // the commit's bytes differ from the take's is read here.
+            let spellingDiffers = StoredText.spellingDiffers(commitPoint.text, from: variant.workingText)
             guard variant.workingText != commitPoint.text else {
-                return (MCPCommitRestore(take: variant, before: nil, after: nil, changed: false), nil)
+                return (MCPCommitRestore(
+                    take: variant, before: nil, after: nil, changed: false, spellingDiffers: spellingDiffers), nil)
             }
             let now = date.now
             let before = try isDirty(db, variant)
                 ? try insertCommit(db, variant: variant, kind: .auto, message: names.before, now: now)
                 : nil
             guard let written = try restoreCommitRows(db, variant.id, commitID: commitID) else {
-                return (MCPCommitRestore(take: variant, before: before, after: nil, changed: false), nil)
+                return (MCPCommitRestore(
+                    take: variant, before: before, after: nil, changed: false, spellingDiffers: spellingDiffers), nil)
             }
             let restored = try liveVariant(db, variant.id)
             let after = try isDirty(db, restored)
                 ? try insertCommit(
                     db, variant: restored, kind: .auto, message: names.after, now: now.addingTimeInterval(0.001))
                 : nil
-            return (MCPCommitRestore(take: restored, before: before, after: after, changed: true),
+            return (MCPCommitRestore(
+                        take: restored, before: before, after: after, changed: true, spellingDiffers: false),
                     TextPreImage(variantID: variant.id, text: written.old, postOpText: written.new))
         }
         if let preImage = landed.preImage {

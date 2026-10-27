@@ -246,9 +246,9 @@ extension Queries {
     /// **Who reaches this BOOK — or GATHERING — how far, and why** — the
     /// Bookcase icon's popover and the Book Settings grant row. A fenced book
     /// or gathering answers nobody. VX-185: a gathering answers through ITS
-    /// rule (`decideGathering` — a wing grant on its wing or the open book,
-    /// VX-273 / R-VX185-1), so this read and `mcpBookReaches` agree for
-    /// every id the Bookcase draws.
+    /// rule (`decideGathering` — its own grant since VX-549, a wing grant on
+    /// its wing, or the open book; never a note or book grant, R-VX185-1), so
+    /// this read and `mcpBookReaches` agree for every id the Bookcase draws.
     public static func mcpBookReach(_ db: Database, readingID: String) throws -> [MCPPlaceReach] {
         guard let place = try mcpReachPlace(db, readingID: readingID) else { return [] }
         return try mcpReach(db, place: place)
@@ -295,8 +295,9 @@ extension Queries {
     }
 
     /// **The place a reach is read on, and the ONE rule its kind answers to**
-    /// (VX-185). A note and a book are grant targets (`decide`); a gathering
-    /// is never a grant's scope (VX-273) and answers `decideGathering`.
+    /// (VX-185). A note and a book answer `decide`; a gathering answers
+    /// `decideGathering` — since VX-549 a grant scope of its own (its grant or
+    /// its wing's, never a note or book grant — R-VX185-1).
     enum MCPReachPlace {
         case note(MCPGrantRule.NoteFacts)
         case book(MCPGrantRule.BookFacts)
@@ -315,14 +316,14 @@ extension Queries {
             }
         }
 
-        /// Whether a grant names THIS place itself (its why is then nil). A
-        /// gathering is never a grant's scope, so every reach on one names the
-        /// wider place — its wing — or the open book.
+        /// Whether a grant names THIS place itself (its why is then nil).
+        /// VX-549: a gathering's OWN grant names it; a reach through its wing
+        /// names the wider place, as a book's does.
         func isOwn(_ grant: MCPGrantRow) -> Bool {
             switch self {
             case .note(let facts): grant.scopeKind == .note && grant.scopeID == facts.id
             case .book(let facts): grant.scopeKind == .book && grant.scopeID == facts.id
-            case .gathering: false
+            case .gathering(let facts): grant.scopeKind == .gathering && grant.scopeID == facts.id
             case .wing(let id): grant.scopeKind == .wing && grant.scopeID == id
             }
         }
@@ -414,8 +415,10 @@ extension Queries {
     ///
     /// **P1 — ∝ the ids given (the rows SHOWN), never the corpus, never per
     /// row:** the approved clients and their grants are read once, the
-    /// notes' facts in ONE batched read (`mcpNoteFacts(noteIDs:)` — two
-    /// statements however many ids), the why's titles once per wider place;
+    /// notes' facts in ONE batched read (`mcpNoteFacts(noteIDs:)` — three
+    /// statements however many ids, and since VX-549 one membership statement
+    /// over the same ids per GRANTED gathering), the why's titles once per
+    /// wider place;
     /// and when nothing can reach (no approved client — VX-272 — or no live
     /// grant with the open book off) not one note is read.
     public static func mcpNoteReaches(_ db: Database, noteIDs: [String]) throws -> [String: [MCPPlaceReach]] {

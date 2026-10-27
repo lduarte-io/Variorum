@@ -101,16 +101,50 @@ public final class MCPServerHost: @unchecked Sendable {
         }
     }
 
-    /// Stop: close the listener, unlink the socket, hang up every session.
+    /// Stop: close the listener, unlink its socket, hang up every session (`halt`).
     /// **VX-394 (VX-348 U5): `reason` is why** — each connection this stop ends
     /// leaves that end in the activity log (`MCPConnectionEnd`), written as the
     /// session ends (the store is open on the switch's road); on the library's
     /// closing road the door has already said it, before the store closed
     /// (`recordConnectionEnds`), and the line is never said twice.
     public func stop(ending reason: MCPConnectionEnd = .serverOff) {
-        let (fd, wake, done, live, watcher): (Int32, (read: Int32, write: Int32), DispatchSemaphore?, [MCPSession], Task<Void, Never>?) =
+        halt { $0.markEnding(reason) }
+    }
+
+    /// **THE APP QUITS** (VX-394 — VX-548 batch 2b; P-VX394-5, "a QUIT logs
+    /// nothing"): the server stops with the process and NO connection's end is
+    /// said — each live connection's line is forgone before its hang-up, so
+    /// neither its own end nor a late write can say it. Since VX-348's fix leg
+    /// a connection writes its own end through its own store, host or no host,
+    /// so the quit's old stop ("as the library closes" — the door's `detach()`)
+    /// raced the process's exit: "‹client› was disconnected when the library
+    /// locked or closed" on some quits, nothing on others. A connection whose
+    /// client had already left keeps its own line (it was said first).
+    public func stopWithTheProcess() {
+        halt { $0.forgoEndLine() }
+    }
+
+    /// **The one stop** (`stop` · `stopWithTheProcess`): close the listener,
+    /// remove THIS host's socket, then end every connection the accept loop
+    /// registered — `ending` says (or forgoes) each one's end before its
+    /// hang-up. Two findings of VX-548 batch 2b's stop-road sweep
+    /// (`MCPStopRoadsServerTests`), both closed here:
+    ///   - **The socket file is removed only by the host that bound it**, and
+    ///     while its listener still holds the path — no other host can bind a
+    ///     live path (`MCPSocketRoad.listen`'s probe), so the file removed is
+    ///     always this host's own. A host that never served (the door's stale
+    ///     start after a quick OFF → ON, which found the path served, or one
+    ///     stopped before its start ran) used to unlink the SERVING host's file:
+    ///     the pane said "running" while every client heard "Variorum must be
+    ///     open".
+    ///   - **The connections are listed after the accept loop has stopped**, so
+    ///     one accepted while the server stops is ended with the rest. It was
+    ///     listed before, and a client accepted in between outlived the stop —
+    ///     served on with the switch OFF, its end never said.
+    private func halt(ending: (MCPSession) -> Void) {
+        let (fd, wake, done, watcher): (Int32, (read: Int32, write: Int32), DispatchSemaphore?, Task<Void, Never>?) =
             lock.withLock {
-                let snapshot = (listenFD, wakePipe, acceptDone, Array(sessions.values), observation)
+                let snapshot = (listenFD, wakePipe, acceptDone, observation)
                 listenFD = -1
                 wakePipe = (-1, -1)
                 acceptDone = nil
@@ -118,21 +152,34 @@ public final class MCPServerHost: @unchecked Sendable {
                 _state = .stopped
                 return snapshot
             }
+        #if DEBUG
+        stopWindowProbe?()
+        #endif
         watcher?.cancel()
         if wake.write >= 0 {
             var byte: UInt8 = 1
             _ = write(wake.write, &byte, 1)
         }
         _ = done?.wait(timeout: .now() + 2)
-        if fd >= 0 { close(fd) }
+        if fd >= 0 {
+            MCPSocketRoad.unlink(directory: directory)
+            close(fd)
+        }
         if wake.read >= 0 { close(wake.read) }
         if wake.write >= 0 { close(wake.write) }
-        MCPSocketRoad.unlink(directory: directory)
+        let live = lock.withLock { Array(sessions.values) }
         for session in live {
-            session.markEnding(reason)
+            ending(session)
             session.hangUp()
         }
     }
+
+    #if DEBUG
+    /// TEST-ONLY (VX-548 batch 2b): runs inside a stop, after the listener's
+    /// state is taken and BEFORE the accept loop is woken — the window a
+    /// client connecting just as the server stops can land in.
+    var stopWindowProbe: (() -> Void)?
+    #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
     /// (the library locking or closing — `MCPConnectionEnd.libraryClosed`): one

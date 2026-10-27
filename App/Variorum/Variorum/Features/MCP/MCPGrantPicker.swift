@@ -113,6 +113,62 @@ nonisolated enum MCPGrantPicker {
             detail: context.isEmpty ? nil : context, emphasized: distinguisher != nil, help: edited)
     }
 
+    // MARK: - Gatherings (VX-549)
+
+    /// **The gathering picker's layout** (VX-549 — her sitting: "Gathering
+    /// joins the grant scopes"; the ONE picker control): Starred (quick, before
+    /// typing — the union star the Bookcase floats first) → every offered
+    /// gathering a–z, one section. Each row: the name, its distinguisher where
+    /// the name collides, and its footing — a non-Home wing, its shelf, its
+    /// archived state, and "read and suggest only" where its rule needs a star.
+    static func gatheringArrangements(
+        _ places: MCPGrantPlaces, now: Date,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> [SearchPickerArrangement] {
+        let distinguishers = places.gatheringDistinguishers(now: now, calendar: calendar, locale: locale)
+        func option(_ gathering: Queries.MCPGrantableGathering) -> SearchPickerOption {
+            gatheringOption(gathering, places: places, distinguisher: distinguishers[gathering.id])
+        }
+        let ordered = places.gatherings.sorted { lhs, rhs in
+            switch lhs.name.localizedStandardCompare(rhs.name) {
+            case .orderedAscending: true
+            case .orderedDescending: false
+            case .orderedSame: lhs.id < rhs.id
+            }
+        }
+        return [SearchPickerArrangement(id: "az", label: MCPPaneCopy.alphabetical, sections: [
+            SearchPickerSection(
+                id: "starred", title: MCPPaneCopy.starred, options: ordered.filter(\.starred).map(option),
+                isQuick: true),
+            SearchPickerSection(id: "all", title: MCPPaneCopy.allGatherings, options: ordered.map(option)),
+        ])]
+    }
+
+    static func gatheringOption(
+        _ gathering: Queries.MCPGrantableGathering, places: MCPGrantPlaces, distinguisher: String?
+    ) -> SearchPickerOption {
+        let place = places.place(gathering)
+        var parts: [String] = []
+        if !place.inHome, let wing = place.wing { parts.append("\(wing) wing") }
+        parts.append(place.shelf ?? PlaceLabels.unshelved)
+        parts += place.marks.words
+        if gathering.needsStar { parts.append(MCPPaneCopy.readAndSuggestOnly) }
+        let echoed = Set((distinguisher ?? "").components(separatedBy: PlaceLabels.separator))
+        let context = parts.filter { !echoed.contains($0) }.joined(separator: PlaceLabels.separator)
+        return SearchPickerOption(
+            id: gathering.id, label: gathering.name, annotation: distinguisher, searchText: gathering.name,
+            detail: context.isEmpty ? nil : context, emphasized: distinguisher != nil)
+    }
+
+    /// **The rungs a gathering grant may be offered at** (VX-549 — her sitting:
+    /// "the grant sheet presents such a grant as read/suggest-shaped"): a rule
+    /// that needs a STAR can never take a new note from a client (starring is
+    /// not on the wire), so write new and edit are not offered (P-2); every
+    /// other place offers every rung.
+    static func offeredRungs(needsStar: Bool) -> [MCPGrantRule.Rung] {
+        needsStar ? MCPPaneCopy.offeredRungs.filter { $0 <= .suggest } : MCPPaneCopy.offeredRungs
+    }
+
     // MARK: - Wings and clients
 
     static func wingOptions(

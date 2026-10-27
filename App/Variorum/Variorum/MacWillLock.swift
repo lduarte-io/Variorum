@@ -60,3 +60,30 @@ func macWillLock(
         stopServices()
     }
 }
+
+/// **THE MAC'S LOCK TEARDOWN AS PRODUCTION COMPOSES IT** (VX-394 — VX-548 batch
+/// 2b): `macWillLock` with the MCP door's two steps in their ruled places — each
+/// live connection's end said while the store is still open (`recordLibraryClosing`,
+/// after every note's leaving savepoint: "‹client› was disconnected when the library
+/// locked or closed"), then the services stop and the door detaches (A-8 — a locked
+/// library serves no one; the next unlock's ready re-attaches it). Every road that
+/// closes the open library runs it through `AppBootstrap.onWillLock`: Lock Library
+/// Now (⌃⌘L, the File menu, Settings ▸ Protection), Castle's monitors (sleep, screen
+/// lock, the idle dial) and the re-keying reopens (the crossings, the account acts,
+/// Make this my library, a plain-text export brought in). ONE named composition —
+/// `VariorumApp` wires exactly this — so the sweep's pin drives what ships
+/// (`MCPStopRoadsDoorTests`); it used to be an inline closure no pin reached.
+@MainActor
+func macLockTeardown(
+    session: AppSession,
+    door: MCPDoor,
+    stopServices: @escaping @MainActor () -> Void
+) -> @MainActor () async -> Void {
+    macWillLock(
+        session: session,
+        endingConnections: { await door.recordLibraryClosing() }
+    ) {
+        stopServices()
+        door.detach()
+    }
+}

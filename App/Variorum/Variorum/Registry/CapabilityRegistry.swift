@@ -2439,11 +2439,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Connection requests are denied in Settings \u{25B8} MCP.",
             availability: always),
+        // VX-515 (the VX-548 run — PROVISIONAL words, MB-2): the client row's
+        // door ADDS a grant (the sheet with its client, nothing replaced), so
+        // it is named for that — it read "Change…", the replace verb.
         Capability(
-            id: .mcpChangeClientAccess, verb: "Change\u{2026}", scope: .app,
+            id: .mcpChangeClientAccess, verb: MCPPaneCopy.sharePlaceVerb, scope: .app,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "A client's access is changed in Settings \u{25B8} MCP.",
+            unavailableNote: "A client's places are shared in Settings \u{25B8} MCP.",
+            availability: always),
+        // VX-515: Shared with AI's own add door — THE sheet asking WHO, nothing
+        // pre-filled, nothing replaced (her candidate's words, MB-2).
+        Capability(
+            id: .mcpShareAnotherPlace, verb: MCPPaneCopy.shareAnotherPlaceVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "Places are shared in Settings \u{25B8} MCP \u{25B8} Shared with AI.",
             availability: always),
         Capability(
             // 13n-c UX walk W-UX-4: its OWN verb — the act is a deny (the

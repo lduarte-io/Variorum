@@ -305,6 +305,11 @@ extension Queries {
             (target, fence) = (.book(facts), facts.fence)
         case .wing:
             return nil
+        case .gathering:
+            // VX-549: a gathering grant reaches nothing while its gathering is
+            // fenced (`decideGathering`'s own first clause — the one answer a
+            // fenced book gets); no op fences a gathering, a stale row could.
+            return try mcpGatheringFacts(db, readingID: grant.scopeID)?.fence
         }
         guard let fence, !MCPGrantRule.reaches(grant.ruleGrant, target) else { return nil }
         return fence
@@ -348,6 +353,13 @@ extension Queries {
         case .book:
             return try String.fetchOne(
                 db, sql: "SELECT name FROM reading WHERE id = ? AND deleted_at IS NULL", arguments: [id])
+        case .gathering:
+            // VX-549: a live GATHERING's name — one bound into a book since is
+            // no gathering, and its grant reaches nothing (`mcpGatheringFacts`
+            // reads kind too), so it reads gone, never as a live place.
+            return try String.fetchOne(
+                db, sql: "SELECT name FROM reading WHERE id = ? AND deleted_at IS NULL AND kind = 'gathering'",
+                arguments: [id])
         case .wing:
             if id.isEmpty { return Self.mcpHomeWingName }
             return try String.fetchOne(
@@ -493,15 +505,76 @@ extension Queries {
             let postID: String = row["post_id"]
             facts[postID]?.bookIDs.insert(row["reading_id"])
         }
+        try mcpGatheringMemberships(db, into: &facts)
         return facts
+    }
+
+    /// **VX-549 — which GRANTED gatherings assemble each of these notes NOW**
+    /// (her sitting 2026-10-27, RATIFIED: "reach is resolved by assembling the
+    /// rule at read time"). The gatherings asked are exactly those a LIVE grant
+    /// names (any client's — the facts are the store's, the rule then reads
+    /// only the asking client's grants through `reaches`); each is asked
+    /// through THE ONE membership function its own surfaces assemble by
+    /// (`gatheringMembership` — the wing, the rule, the hide-owned exclusion,
+    /// living unarchived posts), never a parallel evaluation. A gathering that
+    /// assembles EMPTY — archived, rule-less, malformed (the function's nil) —
+    /// or that is FENCED (a stale Private stamp or 'daily' marker; no op mints
+    /// either on a gathering) holds nothing here, so its grant reaches no note.
+    ///
+    /// P1: one read of the live gathering grants (∝ her own grants — a
+    /// handful); per granted gathering, its row, its fence and ONE statement
+    /// over exactly the notes being decided (the page-driven `CROSS JOIN` — the
+    /// id list drives, each note a primary-key seek): ∝ the notes decided × the
+    /// granted gatherings, never the corpus. With no gathering granted, one
+    /// read and nothing else.
+    private static func mcpGatheringMemberships(
+        _ db: Database, into facts: inout [String: MCPGrantRule.NoteFacts]
+    ) throws {
+        guard !facts.isEmpty else { return }
+        let granted = try String.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT scope_id FROM mcp_grant
+                WHERE scope_kind = 'gathering' AND revoked_at IS NULL
+                  AND NOT (duration = 'once' AND consumed_at IS NOT NULL)
+                ORDER BY scope_id
+                """)
+        guard !granted.isEmpty else { return }
+        let json = String(decoding: try JSONEncoder().encode(facts.keys.sorted()), as: UTF8.self)
+        for gatheringID in granted {
+            guard let reading = try Reading.fetchOne(db, key: gatheringID), reading.deletedAt == nil,
+                  reading.kind == .gathering,
+                  try mcpGatheringFacts(db, readingID: gatheringID)?.fence == nil,
+                  let membership = try gatheringMembership(db, reading)
+            else { continue }
+            let members = try String.fetchAll(
+                db, sql: mcpGatheringMembersSQL(membership.conditions),
+                arguments: StatementArguments([json] + membership.arguments))
+            for id in members { facts[id]?.gatheringIDs.insert(gatheringID) }
+        }
+    }
+
+    /// The membership statement over a page of notes (split out so the P1 pin
+    /// reads the shipped text): the id list DRIVES (`CROSS JOIN` keeps
+    /// `json_each` outside — the house's page-driven shape, `smartMembershipSQL`'s
+    /// measured reason), each note a primary-key seek, then the gathering's
+    /// own conditions (`gatheringMembership`). First placeholder: the ids as
+    /// a JSON array; then the conditions' arguments.
+    static func mcpGatheringMembersSQL(_ conditions: [String]) -> String {
+        """
+        SELECT j.value FROM json_each(?) j
+        CROSS JOIN container c ON c.id = j.value
+        WHERE \(conditions.joined(separator: " AND "))
+        """
     }
 
     public static func mcpNoteFacts(_ db: Database, noteID: String) throws -> MCPGrantRule.NoteFacts? {
         try mcpNoteFacts(db, noteIDs: [noteID])[noteID]
     }
 
-    /// A BOOK's facts — live books only (a gathering is not a grant target in
-    /// U1, PROVISIONAL P-13nb-U1-4). Fenced when it is THE daily Journal (its
+    /// A BOOK's facts — live books only (a gathering answers through
+    /// `mcpGatheringFacts` — its own scope kind since VX-549, never a book's
+    /// road). Fenced when it is THE daily Journal (its
     /// 'daily' marker — VX-163: a journal-TRAIT book is not) or carries the
     /// Private mark (R-13nb-4).
     public static func mcpBookFacts(_ db: Database, readingID: String) throws -> MCPGrantRule.BookFacts? {
@@ -587,7 +660,7 @@ extension Queries {
     /// not exclude (THE daily Journal and a Private book are never a grant's
     /// scope — the op refuses them, so the sheet never offers them; P-2; a
     /// journal-TRAIT book IS offered since VX-163), by name. Gatherings are
-    /// not grant targets (P-13nb-U1-4; VX-273 keeps them so). Author-scale.
+    /// offered beside them since VX-549 (`mcpGrantableGatherings`). Author-scale.
     ///
     /// **13n-c U2 — the facts it carries, and their cost (P1, said exactly):**
     /// one statement over the library's live books; each book's shown-member
@@ -662,12 +735,82 @@ extension Queries {
     /// U2): the offered books with their facts, the live shelves of every
     /// wing in strip order (left to right — All's top to bottom, §24), and
     /// the live additional wings in switcher order (Home is virtual, '').
+    /// VX-549: and the offered GATHERINGS (`mcpGrantableGatherings`).
     public static func mcpGrantPlaces(_ db: Database) throws -> MCPGrantPlaces {
         MCPGrantPlaces(
             books: try mcpGrantableBooks(db),
             shelves: try Shelf.fetchAll(
                 db, sql: "SELECT * FROM shelf WHERE deleted_at IS NULL ORDER BY position, id"),
-            wings: try wings(db))
+            wings: try wings(db),
+            gatherings: try mcpGrantableGatherings(db))
+    }
+
+    /// **One gathering a grant may name** (VX-549 — the grant sheet's WHERE):
+    /// its id, name, wing, shelf and star as the Bookcase reads them, whether
+    /// it is archived (a legal place that assembles empty — its grant reaches
+    /// nothing until it is unarchived), and whether its rule NEEDS A STAR
+    /// (`GatheringMint.needsStar` — her sitting: "the grant sheet presents
+    /// such a grant as read/suggest-shaped": a client can't star, so it can
+    /// never write a new note into it).
+    public struct MCPGrantableGathering: Equatable, Sendable, Identifiable {
+        public let id: String
+        public let name: String
+        public let wingID: String
+        /// Its shelf as the Bookcase reads it (nil = unshelved, or dangling).
+        public let shelfID: String?
+        public let starred: Bool
+        public let archived: Bool
+        public let needsStar: Bool
+        public let createdAt: String
+
+        public init(
+            id: String, name: String, wingID: String, shelfID: String? = nil, starred: Bool = false,
+            archived: Bool = false, needsStar: Bool = false, createdAt: String
+        ) {
+            self.id = id
+            self.name = name
+            self.wingID = wingID
+            self.shelfID = shelfID
+            self.starred = starred
+            self.archived = archived
+            self.needsStar = needsStar
+            self.createdAt = createdAt
+        }
+    }
+
+    /// **The gatherings the grant sheet offers** (VX-549): every live
+    /// GATHERING the fence does not exclude (the same two fragments a book's
+    /// offer reads — a stale Private stamp or 'daily' marker, which no op mints
+    /// on a gathering, is never offered: the op refuses it), by name. No note
+    /// count — that would be an assembly per gathering; the row says its wing,
+    /// shelf and state. ∝ the gatherings (shelf-scale), one-shot, never held.
+    public static func mcpGrantableGatherings(_ db: Database) throws -> [MCPGrantableGathering] {
+        let starred = try starredReadingIDs(db)
+        let shelfWings = Dictionary(uniqueKeysWithValues: try Row.fetchAll(
+            db, sql: "SELECT id, wing_id FROM shelf WHERE deleted_at IS NULL"
+        ).map { ($0["id"] as String, $0["wing_id"] as String) })
+        return try Row.fetchAll(
+            db,
+            sql: """
+                SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing, r.shelf_id,
+                       r.archived_at, r.query_spec, r.created_at
+                FROM reading r
+                WHERE r.deleted_at IS NULL AND r.kind = 'gathering'
+                  AND NOT (\(dailyJournalLegForBook))
+                  AND NOT (\(privateLegForBook))
+                ORDER BY r.name COLLATE NOCASE, r.id
+                """
+        ).map { row in
+            let wing: String = row["wing"]
+            let shelf: String? = row["shelf_id"]
+            return MCPGrantableGathering(
+                id: row["id"], name: row["name"], wingID: wing,
+                shelfID: shelf.flatMap { shelfWings[$0] == wing ? $0 : nil },
+                starred: starred.contains(row["id"]),
+                archived: (row["archived_at"] as String?) != nil,
+                needsStar: GatheringMint.needsStar(RuleGrammar.decode(row["query_spec"])),
+                createdAt: row["created_at"])
+        }
     }
 
     /// **The Private leg for a note** (R-13nb-4, wired at 13n-b U2 over

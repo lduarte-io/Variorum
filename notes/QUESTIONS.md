@@ -3647,3 +3647,26 @@ phone, the posture line standing doorless on a local library) → *"Stand as bui
 live at the device moment:** P-VM8-7 (the two stacked Protection… rows) → a BUG at her word → **VM-27**. **Her live
 findings recorded:** the creation words card surprised her ("did it change m y 12 words?" — no; the join replaces
 them) and has no Copy — both onto VM-28/VM-23.
+
+#243 — **THE VX-548 BUNDLE (the binding record is `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md` §MORNING
+BUNDLE; your checklist also leads `notes/handoffs/vx-548-handoff.md`), OPEN — your morning.** The one her-hands trace:
+**MB-7** — on your AIR: is that library in Castle (Settings ▸ Protection)? Activity's lines at the two drop times
+("…locked or closed" = the by-design lock road; plain "disconnected" = the client side); and your pick among the
+reconnect options A–D (the 2b record's read: C now, B2 if wanted, A only as an accepted design event). Ratify or
+redirect, all built and PROVISIONAL: **MB-1** Change… replaces only on the place it was opened on (a re-picked place
+grants new; consequence — an inert grant can't be MOVED by Change…, Revoke takes it) · **MB-2** the door verbs ("Share a
+place…" / "Share another place…") · **MB-3** the zero-state line (+ the Start-fresh release-notes practice note) ·
+**MB-4** the take-label elision (own words kept, client yields, whole label on hover) · **MB-5** the
+`stored_text_normalization_differs` field · **MB-6** NO App Nap guard (a traced non-build) · **MB-12** a quit says
+nothing (P-VX394-5 as ruled; the alternative written up) · **MB-15** the lock-walk evidence call (the Mac pin stands as
+the lock-road evidence; ⌃⌘L shows you the line live in 5 seconds) · **MB-16** a wing grant reaches a gathering place at
+the grant's own rung · **MB-17** an ask on a gathering keys as its reading · **MB-19 + MB-22** the copy pass (the
+star refusal sentence, the gathering Journal-ask lead, the inert row's "always asks", the sheet lines, the guide's two
+gathering cards). OFFERS (nothing built): **MB-8** riders VX-565 · VX-590 · VX-566/567 · VX-367/368/369 · VX-321 —
+cheapest while this code is warm · **MB-18** a gathering's own place doors · **MB-20** `duplicate_note` /
+`add_note_to_book` accepting a gathering id · **MB-11** the Read-tier label cut · **MB-14** the status line's client
+count · **MB-21** the picker's gathering note counts · **MB-10** the Book Panel header marks' size (taste). FILED and
+triaged: VX-605 (the Clients row's "last seen" staleness — Confirmed) · VX-606 (read_note accepted an undeclared
+argument) · VX-607 (the second load-flake beside VX-532) · VX-609 (the star-gathering ask offers write-new it can only
+refuse — the P-2 class) · VX-610 (a once-seen Bookcase row-count lag) · VX-611 (the Trash's kind word on a gathering) ·
+VX-612/VX-613 (MB-13's two traced-unobserved server races). **Status: open — her morning.**

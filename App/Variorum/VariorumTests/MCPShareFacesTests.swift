@@ -443,7 +443,7 @@ struct MCPShareFacesTests {
         #expect(!BookRowMenuTable.doors(for: book).contains(.share), "no approved client ⇒ no door")
         #expect(BookRowMenuTable.doors(for: book, shareable: true).contains(.share))
         #expect(!BookRowMenuTable.doors(for: gathering, shareable: true).contains(.share),
-                "a gathering is never a grant target (VX-273)")
+                "a gathering's place doors are not built (VX-549 MB-18 — the sheet's WHERE is its road)")
         #expect(!BookRowMenuTable.doors(for: nil, shareable: true).contains(.share), "facts unknown ⇒ not drawn")
         let doors = BookRowMenuTable.doors(for: book, shareable: true)
         #expect(doors.firstIndex(of: .share)! > doors.firstIndex(of: .exportPDF)!, "after the exports (mockup §2)")
@@ -462,7 +462,7 @@ struct MCPShareFacesTests {
         #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: false, canShare: true), "the fence (P-2)")
         book.kind = .gathering
         #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true),
-                "a gathering is never a grant target (VX-273)")
+                "a gathering's place doors are not built (VX-549 MB-18 — the sheet's WHERE is its road)")
     }
 
     /// Stage B R1 B4 — THE PARITY PIN (architectural: the face's old spelling
