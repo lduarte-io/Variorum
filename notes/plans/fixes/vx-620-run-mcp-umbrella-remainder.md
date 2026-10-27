@@ -103,7 +103,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 | Batch | Members | Session | State |
 |---|---|---|---|
 | 1 — starring on the wire | VX-596 + rider VX-609 | opus-implementer №1 | DONE (Mac run + walk PENDING the window) |
-| 2 — the pane's honesty | VX-590 (Pre-launch) · VX-605 (Pre-launch) | opus-implementer №2 | NOT STARTED |
+| 2 — the pane's honesty | VX-590 (Pre-launch) · VX-605 (Pre-launch) | opus-implementer №2 | DONE (Mac run + walk PENDING the window) |
 | 3 — the wire's imports & docs | VX-565 (probe first) · VX-566 · VX-567 + rider VX-619 | opus-implementer №3 | NOT STARTED |
 | 4 — the wing doors from ⌘K | VX-377 | opus-implementer №4 | NOT STARTED |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
@@ -186,13 +186,22 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 - **RB-0 (kickoff fact, for her eyes):** her kickoff said SIX members; the sub-issue listing said SEVEN (VX-377, re-parented at VX-439's closeout). The listing governed — exactly the rule's purpose. VX-377 runs as batch 4.
 - **RB-1 (PROVISIONAL, batch 1):** the mint-then-star call — whether `create_note`/`import_document` into a star-rule gathering stars at WRITE NEW through her door's planner. **As built (batch 1):** TAGS FIRST (VX-549's plan, byte-unchanged for every rule a tag can satisfy), born STARRED (cap-exempt, her door's arm) only where a star is the only way in; the answer adds `starred: true`. Options (a) her door's planner outright · (b) as built · (c) keep refusing, reworded · (d) the wire's star respects the cap — the BATCH 1 RECORD's bundle section has the consequences.
 - **RB-2 (rider offers, the standing rule — NOT seated without her word):** open tickets in this run's Areas, cheapest while this code is warm: VX-367 (guide lesson 3's edit acts) · VX-368 (the parity audit — set_starred retires one row) · VX-369 (raw errors reaching the wire) · VX-606 (read_note's undeclared-argument acceptance) · VX-612/613 (the server races). Also noted: VX-189 (Backlog, "share a gathering directly") looks substantially DELIVERED by VX-549 — her triage call whether it closes or narrows to MB-18's place doors.
-- **RB-3 (PROVISIONAL, batch 2):** VX-590's exact visibility fact and any hidden-state wording.
+- **RB-3 (PROVISIONAL, batch 2):** VX-590's exact visibility fact and any hidden-state wording. **As built (batch 2):**
+  the sharing face (the Shared with AI tab + the open book inside it) shows once a client row exists — waiting,
+  approved or denied (VX-512's fact read the other way; monotone — "ever"); no new words (nothing names the hidden
+  tab). Options (a) as built · (b) also while the open book is ON · (c) an approved client only (VX-272's gate) — the
+  BATCH 2 RECORD's bundle section has the consequences.
 - **RB-4 (PROVISIONAL, batch 3):** VX-567's book-form answer shape (P-VX252-1 extended; P-VX254-2 flipped).
 - **RB-5 (copy, her pass, batch 3):** VX-619's two docs sentences + the instructions trade; batch 1's reworded star strings join the same list (batch 1's list: the BATCH 1 RECORD's bundle section — the tool description, Activity's "changed the star on", the receipts, the undo labels, `starHeadsUp`, the gathering write-new sentence, the guide's two edits, `create_note`'s sentence, `gatheringWords`' "starring", `needsStar`'s bare fact). **Batch 1 left `MCPSession.instructions` untouched: 2,988 / 3,000 — 12 characters for VX-619.**
 - **RB-6 (her call, batch 4):** a chord for Move to Wing — the collision-sweep facts recorded; the ⌘K door ships either way.
 - **RB-7 (PROVISIONAL, batch 1):** `set_starred` on a gathering's id answers the gathering sentence (P-VX196-2's posture), now naming "starring" among the author's acts; alternative: R-VX184-1 parity — an edit grant reaching the gathering place stars it.
 - **RB-8 (design calls, batch 1 — for the ladder or her):** `set_starred`'s undo halves restore the star AT ITS PLACE in the Starred list, are not applying acts (a re-star replay seats nothing), refuse past the cap keeping the entry, and bring a column-only book's star back in both stores.
 - **RB-9 (ticket to file, batch 1):** a third load-sensitive pin — `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` timed out once under the full-parallel headless run, green isolated and in a second whole run (Tests & tooling, the VX-532 class).
+- **RB-10 (her call, batch 2 — not built):** two AI-naming faces still show in a library that never had a client,
+  outside the pane her VX-590 words named: the note's Private row "Private — never shared with AI", and the ⌘/
+  helper's / Settings ▸ Shortcuts' MCP group (⌥⌘A, ⌥⌘O). Leave · hide clientlessly · reword, per face.
+- **RB-11 (for the ladder, batch 2):** VX-605's sweep row 5 — VX-258's in-handler flip signals nothing; unreachable in
+  practice, traced, not fixed (no red pin without a handshake seam).
 - (Batch records append more.)
 
 ## LEDGER
@@ -202,7 +211,7 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 | 1 | Worktree + branch + in-flight row + Linear In Progress + riders seated | orchestrator | DONE (in-flight on main; branch pushed; VX-609/VX-619 sub-issues) |
 | 2 | This plan file | orchestrator | DONE |
 | 3 | Batch 1 (VX-596 + VX-609) | opus-implementer №1 | DONE 2026-10-27 — headless green (core 3477/464 · MCP 420/76 bar VX-532, isolated green · Strings 32/4); Mac pins COMPILED into fresh `DerivedData/b1`, RUN + walk PENDING the window; record: BATCH 1 RECORD |
-| 4 | Batch 2 (VX-590 · VX-605) | opus-implementer №2 | NOT STARTED |
+| 4 | Batch 2 (VX-590 · VX-605) | opus-implementer №2 | DONE 2026-10-27 — headless green (core 3477/464 · MCP 423/77 bar VX-532, isolated green · Strings 32/4); VX-605 red-on-old on the pre-fix tree AND under the behavioural revert; VX-590 red by construction; Mac pins COMPILED into fresh `DerivedData/b2`, RUN + walk PENDING the window; record: BATCH 2 RECORD |
 | 5 | Batch 3 (VX-565 · VX-566 · VX-567 + VX-619) | opus-implementer №3 | NOT STARTED |
 | 6 | Batch 4 (VX-377) | opus-implementer №4 | NOT STARTED |
 | 7 | Orchestrator acceptance windows (stage via oct27coordinator) | orchestrator | NOT STARTED (plan: a mid window after batches 1–2, the final window after 3–4 + ladder fixes) |
@@ -548,7 +557,16 @@ the editor seam, `VariorumMobile/`, `MCPSession.swift`.
 
 ## BATCH 2 RECORD
 
-**NOT DONE BY THIS BATCH (first line, by the rule):** IN PROGRESS — this line is rewritten at the batch's close.
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
+claim (the orchestrator's) — the Mac pins (`MCPConnectionNamingDoorTests` 2, `MCPSharingFaceTests` 5, the JUSTIFIED
+EDITS in `MCPPaneTabsTests` and `SettingsAccountSurfaceTests`) are written and COMPILED (`build-for-testing` into a
+FRESH `DerivedData/b2`), their RUN PENDING the orchestrator's stage window, so VX-590's mount pins and VX-605's door
+pin are UNRUN; no canon edit (MCPSpec's lines are DRAFTED below, the two-file rule); no new words (VX-590's hidden state
+says nothing new — RB-3); NOT BUILT, bundled for her: hiding the two AI-naming faces outside the pane (the note's
+Private row, the ⌘/ helper's MCP group — RB-10) and a signal at VX-258's in-handler flip (an unreachable-in-practice
+sub-edge, sweep row 5 — no pin can open its window); `MCPSession.instructions` byte-unchanged (2,988 / 3,000 — batch
+3's 12 characters untouched); no ticket filed or moved; nothing in `Sync/`, `Server/`, custody, the schema, the editor
+seam or `VariorumMobile/`.
 
 *Implementer: `opus-implementer` №2 (xhigh), fresh session, 2026-10-27. Read in its own context before any code:
 CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tree this batch stands on),
@@ -572,7 +590,7 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
   reconnect `[Set([])]` (ONE read — the registration's, nameless — and nothing after), while its non-vacuity checks
   held (the host's `connectedClientNames == ["claude-code"]`; the registration read empty); the two guards green
   (`aConnectionWaitingForHerOKIsNeverHeardAsTheNamesUntilSheAllowsIt`, `aConnectionRefusedAtItsKeyIsNeverHeardAsAnyone`).
-- **2 · VX-605 — the fix:** DONE (this commit) — `MCPSession` takes an `onNamed` signal (defaulted `{}` for the two
+- **2 · VX-605 — the fix:** DONE (`eaf8a3112`) — `MCPSession` takes an `onNamed` signal (defaulted `{}` for the two
   tests that build a session by hand) and calls it right after its `initialize` hook sets the name, outside the
   session's lock; `MCPServerHost.serve` hands it `{ [weak self] in self?.onConnectionsChanged?() }` — the SAME road, a
   signal carrying no decision (P-4); the door's hop to the main actor and its re-read of the CURRENT host are
@@ -585,10 +603,10 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
   VX-180/181's four (`MCPDiscoverProbeServerTests`, `MCPPreInitializeWindowTests`, `MCPShimClosedAppTests`,
   `MCPShimTests`), the setup-key roads (`MCPSetupKeyServerTests`, `MCPSetupKeyTabServerTests`,
   `MCPSetupKeyRebindServerTests`), the two suites that build a session by hand (`MCPServerHostReuseTests`,
-  `MCPReaderAfterCloseTests` — VX-607 green this run). The Mac door pin: WRITTEN (`be4a68456`) —
-  `App/Variorum/VariorumTests/MCPConnectionNamingDoorTests.swift` (2); compile PENDING (piece 5).
-- **4 · VX-590 — the sharing face hidden until the library has ever had a client:** WRITTEN (this commit; compile
-  PENDING, piece 5) — `MCPPane.showsSharingFace`, `MCPPaneTab.offered(sharing:)` / `.shown(_:sharing:approvedCount:)`,
+  `MCPReaderAfterCloseTests` — VX-607 green this run). The Mac door pin: DONE (`be4a68456`, compile fix `01380bf10`)
+  — `App/Variorum/VariorumTests/MCPConnectionNamingDoorTests.swift` (2), COMPILED; its RUN **PENDING** the stage.
+- **4 · VX-590 — the sharing face hidden until the library has ever had a client:** DONE (`a4e757d02`; COMPILED —
+  piece 5; the Mac pins' RUN **PENDING** the stage) — `MCPPane.showsSharingFace`, `MCPPaneTab.offered(sharing:)` / `.shown(_:sharing:approvedCount:)`,
   the pane's tab row and switch read them at render (her pick kept); `SettingsSearch.settingsEntries/wholeIndex(…,
   mcpSharingFace:)` + the results pane's question; NEW Mac `MCPSharingFaceTests` (5); JUSTIFIED EDITS in
   `MCPPaneTabsTests` (2) and `SettingsAccountSurfaceTests` (1). The settled design:
@@ -597,8 +615,251 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
   offered while it is false; the pane's tab is clamped to the offered set (her pick otherwise remembered as before);
   the Settings search does not name the open-book row while the face hides (the account-row precedent,
   `wholeIndex(accountSection:)`); no new words.
-- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b2`):** IN-PROGRESS — Mac `build-for-testing` into the
+- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b2`):** DONE — Mac `build-for-testing` into the
   FRESH `DerivedData/b2` (absent before, never a clone): **TEST BUILD SUCCEEDED** (`scratchpad/b2-logs/mac-bft2.log`;
   the first attempt, `mac-bft1.log`, failed on ONE line of the new door pin — `MCPShim.writeAll` is package-internal;
   it now writes with the `Darwin.write` loop `MCPConnectionEndDoorTests` uses). No warning on a touched line (the one
-  in a touched file, `AppSettingsView.swift:1270`, is 2026-07-18's). The whole headless suite: PENDING.
+  in a touched file, `AppSettingsView.swift:1270`, is 2026-07-18's). The whole headless suite: DONE (this commit) —
+  counts under "Suites" below. **PENDING:** the Mac pins' run (the stage) and the walk (the orchestrator's window).
+
+### VX-605 — THE TRACE (inputs → wrong state), verified in this session's own reading
+
+Her client reconnects under the setup key it is already bound to (her `/mcp` after a lock — the mid window walker's
+repro, MID-2): the shim connects → `MCPServerHost.acceptLoop` → `serve(_:)` registers the new `MCPSession` and fires
+`onConnectionsChanged` (`MCPServerHost.swift`, the line after `sessions[session.id] = session`) — the session's
+`run()` has not started, so its `name` is nil → the door's closure hops to the main actor and `refreshConnected()`
+reads `host.connectedClientNames` = `[]`. Then `run()` reads the opening, `Operations.admitMCPConnection` decides
+`.admit` (a bound key under an approved name) and writes only `recordMCPContact`'s `last_seen_at` — which
+`MCPServerHost.grantsFingerprint` does not read (it reads `mcp_client`'s id · state · setup_key_hash for decided
+clients, the grants' stamps, the switches), and `AppDatabase.observe` applies `.removeDuplicates()`, so the grants
+observation delivers NOTHING. The SDK's `initialize` hook sets `self.name = admitted` (`MCPSession.swift`) and signals
+nothing. Wrong state: `door.connected` stays `[]` while the host serves the connection named — `MCPClientRow`'s
+detail reads `MCPPaneCopy.lastSeen(…)` ("last seen 11 seconds ago") instead of `connectedNow` — until some later
+event (a grant or binding change, another connection opening or closing) happens to re-read. The host's own doc
+already promised the signal "when a connection opens, NAMES ITSELF or closes" — the middle clause was never built.
+(A FIRST connection usually escaped it: its `.bind`/`.rebind` writes `setup_key_hash`, which the fingerprint reads,
+so the observation's later signal re-read — a race the reconnect never gets.)
+
+**The mechanism closed (`eaf8a3112`):** the naming moment signals the SAME road. `MCPSession` holds an
+`onNamed: @Sendable () -> Void` (init parameter, default `{}` — `MCPServerHostReuseTests` and
+`MCPReaderAfterCloseTests` build sessions by hand) and calls it in the `initialize` hook right after `name` is set,
+outside the session's lock; `serve` hands it `{ [weak self] in self?.onConnectionsChanged?() }`. Nothing else changed:
+the signal still carries no decision (P-4) and the door still re-reads.
+
+**Threading — who signals, on what, and why a signal can't race a stop.** Callers of `onConnectionsChanged`: the
+accept thread (`serve` — registration), the session's own task (`ended` — the end; NOW also `onNamed`, inside the
+SDK's `initialize` hook, after the session lock is released), the grants observation's task. The door's closure only
+hops to the main actor; `refreshConnected` re-reads `host?.connectedClientNames` — the door's CURRENT host — and every
+stop road (`stopServer`: `host?.stop(…)`, `host = nil`, `connected = []`) runs on the main actor too, so a naming signal
+that races a stop lands after it and reads no host (`[]`), and one from a host the door has since replaced reads the
+new host's set (the stale host's sessions are not in it). Every read is idempotent and order-free. Lock order: the
+re-read takes the host lock, then each session's lock (`clientName`) — the order `ended` already uses; `onNamed`
+fires with no session lock held, so no inversion. A host the door has let go of signals no one (`[weak self]`).
+
+### VX-605 — THE SWEEP TABLE (every road that changes the connected set × the signal)
+
+| # | Road | Signal | Cell | Pin |
+|---|---|---|---|---|
+| 1 | A connection REGISTERS (`serve`) | yes (pre-existing), reads it nameless | by design | `…SignalServerTests` pin 1 (`door.all.first == []`) |
+| 2 | **It NAMES itself at `initialize`** | **was NONE** | **FIXED** (`onNamed`) — RED ON OLD + under the revert | headless `aReconnectUnderItsBoundKeyIsHeardConnectedOnceItNamesItself`; Mac `aReconnectUnderItsBoundKeyReadsConnectedNowOnceItNamesItself` |
+| 3 | A WAITING setup's connection names itself (VX-258 — `clientName` nil while it waits) | now yes; the re-read finds nothing new | PINNED-GREEN (guard, both sides) | `aConnectionWaitingForHerOKIsNeverHeardAsTheNamesUntilSheAllowsIt` |
+| 4 | Her Allow of a waiting setup — the binding is in the fingerprint → the observation's `announceToolsChanged` flips `awaitingKey` → then the signal | yes (pre-existing) | PINNED-GREEN | the same guard's second half |
+| 5 | The flip inside a HANDLER (`ListTools`/`CallTool` → `awaitsHerOK`) with no observation after it | none | **SAFE IN PRACTICE — traced, NOT fixed:** reachable only if her Allow commits inside the window between the admission's commit (which itself writes the waiting row she would answer) and the SDK's `initialize` hook — then the observation's announce skips the flip (`declaredName` nil) and its signal reads nothing new, the naming's signal reads nothing new (still waiting), and the client's next call flips silently. No pin can open that window without a test seam in the handshake (the hallucination guard: no fix without a red pin); recorded for the ladder (RB-11) | — |
+| 6 | A connection ENDS (`ended`) | yes (pre-existing) | PINNED-GREEN | pin 1's two end legs; Mac pin's end leg |
+| 7 | A STOP (`halt` → each session's `ended`; the door's own `connected = []`) | yes; the door empties at once | PINNED-GREEN | VX-394's `MCPStopRoadsServerTests` (unchanged, green); Mac guard `aStoppedHostsLateSignalNeverBringsItsNamesBack` |
+| 8 | A late signal from a host the door stopped or replaced | — | SAFE BY CONSTRUCTION (the door re-reads its CURRENT host, on the main actor) | Mac guard (above) |
+| 9 | Past the session cap (`refuseOverCap` — never a session) | none needed | SAFE — never registered, never named | VX-394's `pastTheSessionCapTheRefusedConnectionSaysNothing` (unchanged) |
+| 10 | A connection refused at its key (never named) | registration + end only, each reading nobody | PINNED-GREEN (guard) | `aConnectionRefusedAtItsKeyIsNeverHeardAsAnyone` |
+| 11 | The grants observation (approve, deny, grant, revoke, binding) | yes (pre-existing) | unchanged | pin 1's first leg (non-vacuity) |
+
+**VX-394's sweep (the VX-548 BATCH 2b table, rows 1–12) — not regressed:** this batch changed no stop road, no end
+line and no lock road; the end lines are written by `writeEndLine`/`recordConnectionEnds`, untouched. Headless rows
+1–4, 9, 10 GREEN on the fix (`vx605-seam-suites.log`); the Mac rows (2, 5–8, 11 — `MCPConnectionEndDoorTests`,
+`MCPStopRoadsDoorTests`, `MacWillLockTests`, `RoadLockRouteTests`) ride the stage window (listed below). **VX-180/181:**
+`MCPDiscoverProbeServerTests`, `MCPPreInitializeWindowTests`, `MCPShimClosedAppTests`, `MCPShimTests` GREEN on the fix
+(the pre-initialize window answers before admission — no session is named there, so `onNamed` never fires in it).
+
+**Why the Mac door pin is choreographed (hollowness avoided):** a door-level pin whose raw connect blocks the main
+actor through the whole handshake (`MCPConnectionEndDoorTests`' `connect`) lets the registration's ONE main-actor hop
+land AFTER the naming — it then reads the name and the pin goes green on the OLD code. The new pin opens its socket
+off the main actor with not a word sent, lets the registration's hop land (`door.connected` still empty — asserted),
+and only then names itself — the walker's own order.
+
+### VX-590 — THE DESIGN, as built (PROVISIONAL RB-3)
+
+**The store fact:** a client row exists — waiting, approved or denied (`MCPPane.showsSharingFace` =
+`!saysClientsBelongToTheLibrary` — VX-512's own gate, read the other way, so the two faces are ONE fact: while the
+library says "Clients belong to the library they were set up in…", nothing in the pane says sharing). "EVER" holds:
+no road removes a client row but the waiting room's cap (`Operations.recordMCPContact`: past fifty pending requests it
+forgets the OLDEST, never the one just inserted), Deny keeps the row (`denied`), an adopted library keeps its rows (it
+releases only the bindings) — so once shown, the face stays for that library. Not the activity log (capped at 500,
+rows roll out). Not the approved count (VX-272's gate — denying the only client would hide it again, and a pending
+request alone would not reveal it; "ever connected" is her ticket's own word).
+
+**What hides:** the Shared with AI tab (`MCPPaneTab.offered(sharing:)` — Connect · Clients · Activity until the fact
+holds, her four after), and with it the open-book switch it holds, its "Share another place…" door (already gated on
+an approved client) and its "all N ›" road. **What stays:** Connect (the road the first client arrives by), Clients,
+Activity, the server switch, VX-512's line (unchanged), the open-on rule (`MCPPaneTab.opening` unchanged: Connect while
+no client is approved, else Clients), and her remembered pick (`MCPDoor.paneTab` is never overwritten: the pane renders
+`MCPPaneTab.shown(tab, …)` — her pick while offered, else the opening rule — so a Shared with AI pick remembered from
+another library this app run opens on Connect and returns with the face). **The Settings search** names no row the
+hidden tab holds: `SettingsSearch.settingsEntries/wholeIndex(accountSection:mcpSharingFace:)` leaves out the rows
+whose finding lands there (`MCPPaneTab.holding(findingLead:) == .shared` — the open book), the account row's precedent;
+the results pane asks `mcp.map { MCPPane.showsSharingFace($0.snapshot) } ?? true`. **Words: none new** — the hidden
+state says nothing (naming the hidden tab would show the very word she wants hidden); VX-512's one line is the
+zero-state's sentence.
+
+**The open book ON in a clientless library** (reachable only from before this build — the switch was drawn
+clientlessly): it hides with the tab. It reaches nobody (only approved clients read through it), the first connection
+request reveals the tab with the switch ON, and the approval sheet already says so ("The open book is on, so once
+approved it can read everything except what always asks." — `approveAloneDetail(openBook:)`), so nothing reaches
+anyone unannounced. Option (b) in RB-3 keeps the face shown while it is ON.
+
+**The probe (the brief's): every app-wide share door is ALREADY hidden clientlessly — VERIFIED, not rebuilt.** VX-272's
+`MCPDoor.hasApprovedClient` (an APPROVED client) gates: ⌥⌘A (`EditorCommands` — `if mcp.hasApprovedClient`, the menu
+item not drawn at all), the note/book row menus' "Share with AI…" (`BookRowMenu`, `LibraryCatalogView`'s context menu,
+`ShelfView` — `road.canShare`), the Library's bulk "Share N notes with AI…" (`LibraryBulkRow.canShare`), Book Settings'
+"Shared with" row (`BookSettingsFace.showsGrantRow(canShare:)`), the shared icon and the in-note indicator (VX-272 /
+VX-164 — nothing read while no client is approved; `indicatorOn` also needs the server on); "Allow AI here" offers
+approved clients only (`NotePrivacyState.allowable` — empty ⇒ no menu). Pinned already:
+`MCPShareFacesTests.theGatesFollowAnApprovedClientAndTheServerSwitch` ("no client, no server — no share face at all"),
+`theBookRowMenuDrawsShareOnlyOnAShareableBook`, `theBookSettingsGrantRowDrawsOnlyWhereAGrantCanLand`. **Two AI-naming
+faces DO show clientlessly outside the pane** — the note's Private row "Private — never shared with AI" (the fence's
+own toggle, `.markNotePrivate`) and the ⌘/ helper's (and Settings ▸ Shortcuts') MCP group (⌥⌘A "share the note you're
+in…", ⌥⌘O "show the AI's last change") — neither is the "Shared with AI" face her words name; both are her call
+(RB-10), not built. **The field guide** names no tab: its "one switch in Settings ▸ MCP" (the open book, lesson 3)
+reads true from lesson 2 on — the first connection request reveals it. No guide edit owed.
+
+**Red-on-old BY CONSTRUCTION (the mechanism):** before this batch the pane's tab row was `ForEach(MCPPaneTab.allCases)`
+and its body `switch tab` — Shared with AI and the open-book switch rendered whatever the library held; the search's
+index took no MCP question. The new pure rules did not exist; the mount pin
+`aFirstConnectionRequestBringsTheTabAndThePaneStaysWhereSheIs` cannot find a three-tab row on the old pane (four labels
+always).
+
+### PINS
+
+- **Headless (run here), `Tests/VariorumMCPTests/MCPConnectionNamingSignalServerTests.swift` (NEW, 3):**
+  `aReconnectUnderItsBoundKeyIsHeardConnectedOnceItNamesItself` — RED ON THE PRE-FIX TREE (`vx605-red-on-old.log`) and
+  RED UNDER THE BEHAVIOURAL REVERT of the one line (`vx605-revert-red.log`), both `[Set([])]` at :79; GREEN on the fix
+  (`vx605-green.log`, `vx605-restored.log`) · guards, green on both sides:
+  `aConnectionWaitingForHerOKIsNeverHeardAsTheNamesUntilSheAllowsIt`, `aConnectionRefusedAtItsKeyIsNeverHeardAsAnyone`.
+- **Mac (COMPILED into `DerivedData/b2`, RUN PENDING the stage):** NEW `MCPConnectionNamingDoorTests` (2) —
+  `aReconnectUnderItsBoundKeyReadsConnectedNowOnceItNamesItself` (red on old by the headless pin's mechanism; the
+  choreography above makes it so) · `aStoppedHostsLateSignalNeverBringsItsNamesBack` (guard, green both sides). NEW
+  `MCPSharingFaceTests` (5) — `theFaceShowsOnceTheLibraryHasHadAClientWaitingApprovedOrDenied` (the gate table; VX-512's
+  line and the face one fact; the open book alone never brings it, the approval sheet says it) ·
+  `theDoorsFactFollowsTheClientRowsAndNeverGoesBack` (a real door: fresh → hidden; a request → shown; Deny → stays) ·
+  `theTabsOfferedLeaveOutSharedWithAIUntilTheFaceShows` (offered/shown; a remembered Shared with AI pick opens on
+  Connect) · `theSearchNeverNamesTheOpenBookWhileTheFaceHides` (exactly the open-book row leaves; Connect's words still
+  land on Connect; the window's wiring by source) · `aFirstConnectionRequestBringsTheTabAndThePaneStaysWhereSheIs`
+  (mounted: three tabs on Connect → a request → four, still on Connect, nothing picked for her).
+- **JUSTIFIED EDITS (VX-590 cited in each, the ritual):** `MCPPaneTabsTests.aFreshPaneOpensOnConnectWithItsCodeBlockInSight`
+  — a fresh library's row is the three it offers (found by `freshTabLabels`; + `labels == ["Connect", "Clients",
+  "Activity"]`); every geometry expectation unchanged, both voices · `MCPPaneTabsTests.herPickedTabIsRememberedAcrossTheSettingsWindow`
+  — a first connection request arrives before the pane mounts (her four tabs show), the pick-memory subject unchanged
+  · `MCPPaneTabsTests.tabRow(in:labels:)` (the helper, defaulted to her four) · `SettingsAccountSurfaceTests.theResultsPaneAsksForTheWindowsSection`
+  — the pinned source literal carries the second question (`wholeIndex(accountSection: accountSection, mcpSharingFace:
+  mcpSharingFace)`); the account question asked exactly as before. **Re-read and UNCHANGED:** `theTabsAreHerFourInHerOrder`
+  (`allCases` still her four) · `thePaneOpensOnConnectUntilAClientIsApprovedAndKeepsHerPick` (`opening` untouched) ·
+  `aSearchForTheOpenBookLandsOnItsTab` (the all-rows index, default) · `aRemountedPaneShowsTheClientItsCopyReceiptNames`
+  (Connect stays offered) · VX-512's `MCPGrantRoadsTests.aLibraryWithNoClientSaysItsClientsAreItsOwn` (its gate
+  untouched) · the gated capture harnesses (`MCPPaneTabsCaptureTests`' fresh frame now shows three tabs — no assertion
+  reads the count).
+
+### Files touched
+
+Wire: `Sources/VariorumMCP/MCPSession.swift` (`onNamed` — the property, the init parameter, the call in the
+`initialize` hook; `instructions` byte-unchanged) · `Sources/VariorumMCP/MCPServerHost.swift` (`serve` hands `onNamed`).
+App: `Features/MCP/MCPPane.swift` (the header's VX-590 paragraph; `MCPPaneTab.offered(sharing:)` /
+`shown(_:sharing:approvedCount:)`; `MCPPane.showsSharingFace`; `sharing` / `shownTab`; the tab row and the body's
+switch) · `Features/Settings/SettingsShape.swift` (`settingsEntries` / `wholeIndex` — `mcpSharingFace:`) ·
+`Features/Settings/AppSettingsView.swift` (the results pane's second question). Tests: NEW
+`Tests/VariorumMCPTests/MCPConnectionNamingSignalServerTests.swift`, `App/Variorum/VariorumTests/MCPConnectionNamingDoorTests.swift`,
+`App/Variorum/VariorumTests/MCPSharingFaceTests.swift`; JUSTIFIED EDITS `MCPPaneTabsTests`, `SettingsAccountSurfaceTests`.
+Untouched, by the lane: `Sources/VariorumCore/` entirely, `Sync/`, `Server/`, custody, every schema, the editor seam,
+`VariorumMobile/`, every word in `MCPPaneCopy`, the field guide. Commits: `8f103741d` (record) · `ebef21198` (pin, red)
+· `eaf8a3112` (fix) · `58f33aedd` (revert evidence) · `be4a68456` (door pin) · `a4e757d02` (VX-590) · `01380bf10`
+(compile fix) · this record's commits.
+
+### Suites (the end, on the final code — `swift build` green; the record's commits change no code)
+
+- **The whole headless run** (`scratchpad/b2-logs/headless-all.log`, `swift build` then `swift test` on `01380bf10`'s
+  code): VariorumCoreTests **3477 tests / 464 suites passed** (5 known issues, standing — batch 1's count: no core line
+  changed); StringsWorkbook **32 / 4 passed**; VariorumMCPTests **423 / 77 with ONE issue — the standing VX-532 flake**
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 24.0 s against its 15 s
+  under the full-parallel run; no harness line changed), re-run ISOLATED green ×2 (`harness-isolated-1/2.log`: 3 / 1,
+  2.2 s each) — batch 1's 420 / 76 + this batch's 3 / 1. VX-607 (`MCPReaderAfterCloseTests`) and VX-625
+  (`StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar`) green this run; the new suite green under the
+  full-parallel load (14.2 s).
+- **Targeted, along the way (each green):** `MCPConnectionNamingSignalServerTests` 3 / 1 (×2 + the red legs) · the
+  seam's no-regress set 64 / 12 (`vx605-seam-suites.log`).
+- **Mac:** `build-for-testing` into the FRESH `DerivedData/b2` — **TEST BUILD SUCCEEDED** (`mac-bft2.log`), built from
+  `01380bf10`'s sources (batch 1's code + this batch's). **PENDING:** the Mac pins' run (the stage).
+
+### Canon owed at the closeout (DRAFTED for the closeout — not applied; the two-file rule)
+
+- **MCPSpec, THE PANE AND THE SHARED ICON (VX-281's paragraph) — after** "it opens on Connect while no client is
+  approved, else on Clients, and remembers her pick for the app run;" **insert:** "its sharing face — the Shared with AI
+  tab and the open book inside it — is offered only once the library has had a client (a client row exists, waiting,
+  approved or denied: VX-512's fact read the other way — VX-590, PROVISIONAL RB-3; the record
+  `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md` BATCH 2): until then the tabs are Connect · Clients ·
+  Activity, a remembered Shared with AI pick opens by the rule and returns with the face, and the Settings search names
+  no row the hidden tab holds; every share face outside the pane waits for an approved client already (VX-272);"
+- **MCPSpec, the same paragraph or VX-394's "A dropped connection says why" — add:** "the Clients row reads "connected
+  now" from the moment a connection names itself — the host signals at a connection's naming as well as at its
+  registration and its end (VX-605), so a client reconnecting under its bound key never reads "last seen …" while it
+  is served".
+- **SurfaceContracts / AppSpec:** nothing goes false (neither names the pane's tabs nor the connected marker; AppSpec
+  §12's "Settings (nine searchable panes)" stands). No line owed.
+- **The dated entry + narrative → `notes/AppSpecRecord.md`:** her VX-590 words (the ticket's: "what's the lift on only
+  showing the 'share with AI' in the settings menu if someone has connected an MCP server? ... I don't want someone who
+  doesn't use AI to see that & get scared that their work is shared."), the design care (Connect stays), the fact
+  chosen and why "ever"; VX-605's MID-2 trace (registration-only signal, `.admit`'s fingerprint-blind write) and the
+  choreographed door pin.
+
+### THE BUNDLE items born here (fold into §THE BUNDLE)
+
+- **RB-3, as built (PROVISIONAL):** the sharing face (Shared with AI + the open book) shows once a client row exists —
+  waiting, approved or denied, monotone. Options: **(a) as built**; (b) as (a) OR while the open book is ON (a live
+  switch never hidden — its corner: turning the open book off in a clientless library hides the tab under her cursor);
+  (c) an approved client (VX-272's gate — not "ever": a Deny of the only client hides it again, and a waiting request
+  alone does not reveal it). Hidden-state words: **none** — nothing names the hidden tab; VX-512's line is the
+  zero-state's one sentence.
+- **RB-10 (her call — not built):** two AI-naming faces still show in a library that never had a client, outside the
+  pane her words named: (i) the note's Private row "Private — never shared with AI" (the fence's own toggle — hiding it
+  would stop her marking a note Private before any client exists); (ii) the ⌘/ helper's and Settings ▸ Shortcuts' MCP
+  group (⌥⌘A "share the note you're in with the client you granted last…", ⌥⌘O "show the AI's last change") — the
+  helper's list is the registry walk's pinned mirror, so a conditional row is a design event. Options per face: leave
+  (as built) · hide while the library has never had a client · reword.
+- **RB-11 (for the ladder):** VX-605's sweep row 5 — VX-258's in-handler flip signals nothing; unreachable in practice
+  (her Allow would have to commit inside the admission → `initialize` window); traced, not fixed (no red pin without a
+  handshake seam). A one-line signal at the flip would close it by construction if the ladder wants it.
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator) — `DerivedData/b2` is FRESH (built from `01380bf10`, batch 1's code
+  included — a superset of `b1`; run batch 1's list from `b2` too): `cd App/Variorum && xcodebuild -scheme Variorum
+  -destination 'platform=macOS' -derivedDataPath ~/dev/variorum-vx-620/DerivedData/b2 test-without-building` with
+  `-only-testing:VariorumTests/<Suite>` for: **the pins** `MCPConnectionNamingDoorTests` (NEW, 2) ·
+  `MCPSharingFaceTests` (NEW, 5) · `MCPPaneTabsTests` (the two justified edits; the geometry oracle in BOTH voices) ·
+  `SettingsAccountSurfaceTests` (justified edit); **the neighbours** `MCPPaneTests` · `MCPGrantRoadsTests` (VX-512's
+  line) · `MCPConnectionEndDoorTests` · `MCPStopRoadsDoorTests` · `MacWillLockTests` · `RoadLockRouteTests` ·
+  `SettingsLockCloseTests` · `SettingsShapeTests` · `SettingsAccountSearchTests` · `MCPShareFacesTests` (VX-272's gates)
+  · `MCPSetupMenuTests` · `MCPRebindFaceTests` · `MCPAskAndReceiptTests` · `MCPAsksWaitTests` · `CapabilityRegistryTests`
+  · `ChromeLineLimitTests` · `TutorialMCPChapterTests`. State the EXECUTED count (VX-604); read the `skipped:` lines.
+  **Optional red-on-old leg for the door pin:** revert the one line `self.onNamed()` in `MCPSession.swift`, rebuild
+  `b2`, run `MCPConnectionNamingDoorTests` (expect `aReconnect…` red, the guard green), restore by `git checkout --`.
+- **The walk legs (dev store, Debug from `b2`; both voices where a face shows; VX-prefixed content; the shim driven
+  directly with the pane-copied key — batch 1's road; compose after batch 1's legs, before its restore):**
+  (V1 · VX-605) server ON; Settings ▸ MCP ▸ Connect → Claude Code's tab → copy its setup (its key binds or re-binds the
+  approved `claude-code` row with zero clicks); start the shim with that key → `initialize` → Clients: "claude-code ·
+  connected now · …". Close the shim → "last seen …" and Activity "claude-code disconnected". **Start the same shim
+  again with the same key and make one call (`list_my_activity`), touching nothing else** → the row reads "connected
+  now" at once (MID-2's exact road — before the fix it read "last seen N seconds ago" until another event). Capture
+  the Clients row at that moment in BOTH voices. (V2 · VX-590, shown) the dev store as found holds an approved client,
+  so the tab row is Connect · Clients · Shared with AI · Activity — capture in both voices. (V3 · VX-590, hidden) a
+  library with NO client row cannot be shown on the dev store as found (e11e5233 holds `claude-code`); the
+  non-invasive road is the gated capture harness `MCPPaneTabsCaptureTests` (`TEST_RUNNER_VARIORUM_CAPTURE=vx281-u1`,
+  in-memory library — its "u1-fresh-connect" frames, both voices, light and dark, now show the three tabs), else a
+  throwaway library is the orchestrator's call. **Restore:** stop the shim, server OFF, nothing else written (no grant,
+  no client, no wing — `claude-code` stays the known residue); Debug prefs export/diff per the protocol.
