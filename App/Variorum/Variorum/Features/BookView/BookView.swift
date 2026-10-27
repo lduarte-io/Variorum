@@ -2166,8 +2166,9 @@ struct BookView: View {
                 else { return }
                 DispatchQueue.main.async { outlinePaneWidth = width }
             }
-            // VX-562 R-562-A: the PAGE's height — the foot of the adopted
-            // target's on-screen test (the space every row's top is read in
+            // VX-562 R-562-A + R-562-B: the PAGE's height — the foot of the
+            // adopted target's on-screen test and one of the sliding probe's
+            // three scroll facts (the space every row's top is read in
             // is this scroll's own). Into the reference box: bookkeeping,
             // never render state, so it re-lays nothing out; a change asks
             // the follower again.

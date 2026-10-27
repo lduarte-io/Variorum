@@ -74,7 +74,8 @@ import VariorumCore
 nonisolated enum BookOutlineViewed {
     /// What the Outline's viewport is showing: the chapter heading in force
     /// at the viewed row, and the note it is — either may be nil. A chapter
-    /// heading names the chapter alone; a note names itself and its chapter
+    /// heading resolves to the note it introduces, its chapter alone when no
+    /// note stands under it (P-562-7); a note names itself and its chapter
     /// (nil under the unfiled heading or a tag-path heading); above the first
     /// row both are nil.
     struct Pair: Equatable, Sendable {
@@ -481,8 +482,9 @@ nonisolated struct BookOutlineFollower: Equatable, Sendable {
 /// answer is one table rather than an expression repeated at three rows.
 ///
 /// - OUTLINE (VX-562, her ruling): the note the page is SHOWING — the viewed
-///   note, never the caret's. A chapter row wears the quieter viewed-chapter
-///   wash when its chapter is the viewed pair's.
+///   note, never the caret's. A chapter row wears the viewed-chapter mark
+///   (the accent fill, its name in ink — r1 finding 8) when its chapter is
+///   the viewed pair's.
 /// - Every other mode, byte-identical to before: the focused note, and in the
 ///   spread BOTH pages on screen (13b 4F; 13c 2B). No chapter wash (the
 ///   follower runs in Outline only — PROVISIONAL P-562-2).

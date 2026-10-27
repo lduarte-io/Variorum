@@ -1821,9 +1821,9 @@ extension BookOutlineLandingTests {
     /// to the page's top edge (the column's foot follows them), so the
     /// batch's fixed edge probe named the row at the top forever.
     ///
-    /// RED ON OLD by behavioral revert (the record's revert recipe): make
-    /// `BookOutlineViewed.probe(_:)` return the edge probe (`return probe`
-    /// as its first line) — at the bottom the pair is the top row's, and
+    /// RED ON OLD by behavioral revert (the record's recipe B, as run at
+    /// window tests2: zero the slide — `let slide: CGFloat = 0`) — at the
+    /// bottom the pair is the top row's, and
     /// the last notes are never seen. Its premises are `#require`s: the page
     /// really is at its end, the last note really stops below the edge, and
     /// the edge probe really names another row.
@@ -2024,10 +2024,10 @@ extension BookOutlineLandingTests {
     ///
     /// The ORDER question, recorded rather than assumed: the axis release
     /// spares a travelling adoption (`BookOutlineFollower.axisChanged`'s
-    /// pending guard). Whether this pin goes red with that guard reverted
-    /// depends on SwiftUI delivering the reveal's `onChange` before the
-    /// expansion's on this host — the record's revert recipe says how to
-    /// run it and the stage window records which way it lands; the pure
+    /// pending guard). ANSWERED at window tests2 (recipe E): this host
+    /// delivers the reveal's `onChange` before the expansion's, so this pin
+    /// goes RED with the guard reverted — the guard is load-bearing on the
+    /// real click road; the pure
     /// `theClicksOwnExpansionNeverReleasesItsTargetInEitherOrder` pins the
     /// guard in both orders regardless.
     @Test func aNavigatorClickOnAShortNoteInTheLastScreenfulEndsOnThatNote() async throws {

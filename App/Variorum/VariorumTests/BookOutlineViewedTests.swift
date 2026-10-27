@@ -753,7 +753,7 @@ struct BookOutlineViewedTests {
     }
 
     @MainActor
-    @Test func onlyOutlineWashesTheViewedChapter() {
+    @Test func onlyOutlineMarksTheViewedChapter() {
         #expect(BookNavigatorMark.chapter(mode: .outline, sectionID: "s2", viewedSectionID: "s2"))
         #expect(!BookNavigatorMark.chapter(mode: .outline, sectionID: "s1", viewedSectionID: "s2"))
         #expect(!BookNavigatorMark.chapter(mode: .outline, sectionID: "s1", viewedSectionID: nil))
