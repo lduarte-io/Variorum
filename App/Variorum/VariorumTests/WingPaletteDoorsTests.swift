@@ -16,8 +16,10 @@
 //    other palette row listed as before;
 //  · the press — the row asks the window for the selector, or says why not;
 //  · the selector — the submenu's own rows, the switcher's brain (type, ↑/↓, ⏎),
-//    the shared acts and their confirms; MOUNTED: it arrives with the keyboard
-//    in its field, typing filters, ⏎ chooses, Esc closes;
+//    the shared acts and their confirms; MOUNTED: its arrival asks for the
+//    keyboard (once, through its field's focus state) and a real Esc closes it —
+//    the keyboard LANDING in the field is the final window's walk evidence
+//    (fix leg 4-F2: this host's windows never become key);
 //  · the re-ask — a wing act from ANY door re-asks the window's one-shot wing
 //    reads (the sidebar's, mounted; the note ▾ menu's load key).
 //
@@ -432,116 +434,75 @@ struct WingPaletteDoorsTests {
         return nil
     }
 
-    /// It ARRIVES with the keyboard in its field (no click), typing filters,
-    /// ⏎ chooses and the act lands; Esc closes and nothing moves. (↑/↓ are the
-    /// palette's and the switcher's `.onKeyPress` idiom — pinned at the model
-    /// above, driven for real by the walk.)
-    ///
-    /// **FIX LEG 4-F1 (the final window's red on this pin — A JUSTIFIED EDIT
-    /// of the RIG, the product unchanged):** the first rig set the selector
-    /// as a window's content in the same turn the window was first ordered in
-    /// and read the field after a fixed ~1 s; the field was drawn but never
-    /// editing. The rig now has the shape of this target's two green
-    /// SwiftUI-focus pins (`MastheadTagDoorTests` — the field swapped into a
-    /// window already ordered in and settled; `TitleQuickfillTests` — the
-    /// field opened after the window settled, read once its editor holds the
-    /// keyboard): the window is ordered in EMPTY and settled, the keyboard
-    /// cleared (AppKit picks a window's first text field the moment it is
-    /// first ordered in — `LaunchFocusRig`'s measured note), and only then
-    /// does the selector mount — the sheet's own situation, a face arriving in
-    /// a window already on screen. Its teeth are a CONTROL in the same rig: a
-    /// plain field that asks for nothing is mounted the same way and must
-    /// NOT hold the keyboard — so the selector's focus is its own `.task`'s,
-    /// never the rig's.
-    @Test func theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc() async throws {
+    /// **What this mount pins, and what the walk holds** (VX-620 fix legs
+    /// 4-F1/4-F2 — MID620-F1, a JUSTIFIED EDIT: the pin was
+    /// `theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc`). In this test
+    /// host windows never become key (`LaunchFocusRig`, measured) and a SwiftUI
+    /// field's editing road is unreliable even when forced
+    /// (`LibraryControlsFlowTests`' logged fallback); two rigs asking for the
+    /// field EDITING on arrival stayed red (the second waited ~9 s), while the
+    /// final window's walk saw the keyboard land in the field with no click,
+    /// both voices, three times. So:
+    /// · PINNED HERE: the selector's ARRIVAL ASKS for the keyboard — once,
+    ///   through its own field's `@FocusState` (`WingDestinationOracle`; the
+    ///   source read below names the request and the binding), and never again
+    ///   on a re-render; the field is drawn, editable, wearing its prompt; a REAL
+    ///   Esc through the window-scoped monitor closes it and nothing moves.
+    /// · PINNED AT THE MODEL: typing filters and ⏎ chooses
+    ///   (`theSelectorListsTheSubmenusRowsAndItsKeysChoose`), with the field's
+    ///   binding and `onSubmit` wired to them (`theWindowPresentsTheSelector…`).
+    /// · THE WALK'S (evidence, not a pin): the keyboard LANDING in the field on
+    ///   arrival, and typing and ⏎ live — the final window, both voices
+    ///   (`walk-final/selector-move-study.png`, `selector-typed-walk-study.png`).
+    @Test func theSelectorAsksForTheKeyboardOnArrivalAndEscClosesIt() async throws {
         try await withMountedWorld { session, db in
             let ops = session.operations
             _ = try ops.createWing(name: "Work")
-            let letters = try ops.createWing(name: "Letters")
-            let moving = try ops.createPost(title: "moving note")
+            _ = try ops.createWing(name: "Letters")
             let staying = try ops.createPost(title: "staying note")
             let wings = WingsModel(session: session)
             await wings.load()
             let tokens = VoiceTokens.terminalLight
 
-            /// A window ordered in EMPTY and settled, its keyboard free — then
-            /// `content` mounts into it (4-F1).
-            @MainActor func mount(_ content: some View) async -> (NSWindow, NSView) {
-                let window = NSWindow(
-                    contentRect: NSRect(x: 80, y: 80, width: 440, height: 360),
-                    styleMask: [.titled], backing: .buffered, defer: false)
-                window.isReleasedWhenClosed = false
-                let empty = NSHostingView(rootView: Color.clear.frame(width: 440, height: 360))
-                empty.frame = NSRect(x: 0, y: 0, width: 440, height: 360)
-                window.contentView = empty
-                window.makeKeyAndOrderFront(nil)
-                await self.settle(window, empty, turns: 20)
-                window.makeFirstResponder(nil)
-                let hosting = NSHostingView(rootView: content)
-                hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 360)
-                window.contentView = hosting
-                return (window, hosting)
-            }
-            /// Settle until `predicate` holds (at most ~4 s — the title pin's bound).
-            @MainActor func settleUntil(_ window: NSWindow, _ hosting: NSView, _ predicate: () -> Bool) async {
-                for _ in 0..<80 {
-                    await self.settle(window, hosting, turns: 1)
-                    if predicate() { return }
-                }
-            }
-
-            // The CONTROL: a field that asks for nothing, mounted the same way,
-            // never holds the keyboard — the rig gives no field focus by itself.
-            let (control, controlHosting) = await mount(
-                TextField(tokens.chromeLabel("control"), text: .constant("")).frame(width: 440, height: 360))
-            defer { control.orderOut(nil); control.close() }
-            await settle(control, controlHosting)
-            let controlField = try #require(field(tokens.chromeLabel("control"), in: controlHosting), "the control is drawn")
-            // The SAME budget the selector gets below — the control is given
-            // every chance to be focused by the rig, and must not be.
-            await settleUntil(control, controlHosting) { controlField.currentEditor() != nil }
-            #expect(controlField.currentEditor() == nil, "the rig focuses nothing: a field that asks for nothing stays unedited")
-            #expect(control.firstResponder == nil || control.firstResponder === control,
-                    "the control window's keyboard is free: \(String(describing: control.firstResponder))")
-            control.orderOut(nil)  // off screen before the selector's window comes in
-
-            // ⏎ — the move.
             let model = try #require(await WingDestinationModel.open(
-                .init(act: .moveNote(moving.id), token: UUID()), wings: wings, session: session))
-            let closed = Flag()
-            let (window, hosting) = await mount(WingDestinationSheet(
-                model: model, tokens: tokens, close: { closed.value = true }))
-            defer { window.orderOut(nil); window.close() }
-            await settle(window, hosting)
-            let input = try #require(field(tokens.chromeLabel(model.prompt), in: hosting), "the field is drawn")
-            await settleUntil(window, hosting) { input.currentEditor() != nil }
-            let editor = try #require(input.currentEditor() as? NSTextView,
-                                      "the field is EDITING on arrival — nobody clicked it")
-            #expect(window.firstResponder === editor, "the keyboard is in the field: \(String(describing: window.firstResponder))")
-            editor.insertText("let", replacementRange: editor.selectedRange())
-            await settle(window, hosting, turns: 10)
-            #expect(model.brain.query == "let", "typing reached the brain")
-            #expect(model.brain.highlight == letters.id, "typing filters to the match")
-            editor.doCommand(by: #selector(NSResponder.insertNewline(_:)))
-            #expect(await poll { closed.value }, "⏎ chose — the selector closed")
-            #expect(try await wing(of: moving.id, db) == letters.id, "⏎ ran the move")
-
-            // Esc — closes, nothing moves.
-            let other = try #require(await WingDestinationModel.open(
                 .init(act: .moveNote(staying.id), token: UUID()), wings: wings, session: session))
-            let dismissed = Flag()
-            let (window2, hosting2) = await mount(WingDestinationSheet(
-                model: other, tokens: tokens, close: { dismissed.value = true }))
-            defer { window2.orderOut(nil); window2.close() }
-            await settle(window2, hosting2)
+            defer { WingDestinationOracle.keyboardAsks[model.id] = nil }
+            #expect(WingDestinationOracle.keyboardAsks[model.id] == nil, "nothing asked before it is on screen")
+            let closed = Flag()
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 440, height: 360),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer { window.orderOut(nil); window.close() }
+            let hosting = NSHostingView(rootView: WingDestinationSheet(
+                model: model, tokens: tokens, close: { closed.value = true }))
+            hosting.frame = NSRect(x: 0, y: 0, width: 440, height: 360)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting)
+
+            // The field is drawn, editable, wearing its prompt — and the
+            // arrival ASKED for its keyboard, once.
+            let input = try #require(field(tokens.chromeLabel(model.prompt), in: hosting), "the field is drawn")
+            #expect(input.isEditable)
+            #expect(WingDestinationOracle.keyboardAsks[model.id] == 1,
+                    "the selector's arrival asked for the keyboard, once — \(String(describing: WingDestinationOracle.keyboardAsks[model.id]))")
+            // A re-render is not an arrival: it never asks again.
+            model.move(by: 1)
+            model.type("let")
+            await settle(window, hosting, turns: 10)
+            #expect(WingDestinationOracle.keyboardAsks[model.id] == 1, "re-renders never ask again")
+
+            // Esc — a real key event through the window-scoped monitor (no first
+            // responder needed): it closes, and nothing moves.
             let esc = try #require(NSEvent.keyEvent(
                 with: .keyDown, location: .zero, modifierFlags: [],
                 timestamp: ProcessInfo.processInfo.systemUptime,
-                windowNumber: window2.windowNumber, context: nil,
+                windowNumber: window.windowNumber, context: nil,
                 characters: "\u{1B}", charactersIgnoringModifiers: "\u{1B}",
                 isARepeat: false, keyCode: 53))
             NSApp.sendEvent(esc)
-            #expect(await poll { dismissed.value }, "Esc closed the selector")
+            #expect(await poll { closed.value }, "Esc closed the selector")
             #expect(try await wing(of: staying.id, db) == "", "and nothing moved")
         }
     }
@@ -668,7 +629,16 @@ struct WingPaletteDoorsTests {
                 "this open's rows are read before its first listing")
         #expect(palette.contains("listedCommands[index].action()"), "⏎ runs the command its row was listed as")
         let sheet = try Self.source("Variorum/Core/Views/WingDestinationSheet.swift")
-        #expect(sheet.contains(".task { fieldFocused = true }"), "it arrives focused")
+        // VX-620 fix leg 4-F2 (A JUSTIFIED EDIT — the request moved into a named
+        // function the mounted pin's oracle counts): the ARRIVAL's ask is the
+        // FIELD's own focus state — the request, and the binding it lands on.
+        #expect(sheet.contains(".task { askForTheKeyboard() }"), "the arrival asks for the keyboard")
+        #expect(sheet.contains("private func askForTheKeyboard() {\n        fieldFocused = true"),
+                "the ask IS the field's focus state")
+        #expect(sheet.contains(".focused($fieldFocused)"), "…which the field binds")
+        // The keys' wiring to the brain the model pins exercise.
+        #expect(sheet.contains("get: { model.brain.query }, set: { model.type($0) }"), "typing reaches the brain")
+        #expect(sheet.contains(".onSubmit { choose(model.brain.returnPressed()) }"), "⏎ chooses")
         #expect(sheet.contains(".onKeyPress(.downArrow)") && sheet.contains(".onKeyPress(.upArrow)"))
         #expect(sheet.contains("WingSwitcherKeyCatcher"), "Esc through the switcher's window-scoped monitor")
     }

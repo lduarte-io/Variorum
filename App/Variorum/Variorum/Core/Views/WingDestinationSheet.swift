@@ -294,7 +294,7 @@ struct WingDestinationSheet: View {
         // A note's move confirm (when it leaves books) — over the selector.
         .wingMoveConfirm($model.pendingMove, wings: model.wings, onDone: close)
         // Arrive with the keyboard in the field (her "operate via keyboard").
-        .task { fieldFocused = true }
+        .task { askForTheKeyboard() }
         // The keys the field cannot see — Esc, and ⌘L — this sheet's window's
         // only (a confirm over it is another window and keeps its own Esc).
         .background(WingSwitcherKeyCatcher { key in
@@ -317,6 +317,19 @@ struct WingDestinationSheet: View {
         Task { @MainActor in
             if await model.choose(outcome) { close() }
         }
+    }
+
+    /// **The arrival's ask for the keyboard** — the field's own `@FocusState`,
+    /// once per arrival (the palette's and the switcher's idiom). VX-620 fix
+    /// leg 4-F2: the test host's windows never become key, so a mounted pin can
+    /// see this REQUEST (recorded in DEBUG) but not its landing; the landing —
+    /// the keyboard in the field with no click — is the final window's walk
+    /// evidence (both voices, captured).
+    private func askForTheKeyboard() {
+        fieldFocused = true
+        #if DEBUG
+        WingDestinationOracle.keyboardAsks[model.id, default: 0] += 1
+        #endif
     }
 
     private var rows: some View {
@@ -360,6 +373,16 @@ struct WingDestinationSheet: View {
         .onTapGesture { choose(model.brain.pick(row.id)) }
     }
 }
+
+#if DEBUG
+/// **VX-620 fix leg 4-F2 — the mounted pin's seam:** how many times each open
+/// selector (by its model's id) asked for the keyboard. One per arrival; never
+/// per render.
+@MainActor
+enum WingDestinationOracle {
+    static var keyboardAsks: [UUID: Int] = [:]
+}
+#endif
 
 // MARK: - The words (PROVISIONAL — RB-15, her copy pass)
 

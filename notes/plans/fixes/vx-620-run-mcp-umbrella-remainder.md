@@ -1734,10 +1734,28 @@ leg for the re-run window:** delete `.task { fieldFocused = true }` in `Core/Vie
 
 **LIVE STATUS (per piece, flipped in the same commit as each piece):**
 - **No behavioural revert is in flight.**
-- **F2-0 · The trace (how the precedents reach a field) + the decision:** DONE (this commit) — below.
-- **F2-1 · The re-seat (the product's DEBUG request oracle + the pin's honest seam):** NOT-STARTED — the decision
-  below.
-- **F2-2 · Rebuild `DerivedData/b4` in place:** NOT-STARTED.
+- **F2-0 · The trace (how the precedents reach a field) + the decision:** DONE (`d0a370bb2`) — below.
+- **F2-1 · The re-seat (the product's DEBUG request oracle + the pin's honest seam):** DONE (this commit) —
+  **product** (`Core/Views/WingDestinationSheet.swift`, behaviour byte-identical): the arrival's `.task { fieldFocused =
+  true }` becomes `.task { askForTheKeyboard() }`, a named function that sets `fieldFocused = true` and, in DEBUG only,
+  counts the ask per model in `WingDestinationOracle.keyboardAsks` (NEW, `#if DEBUG`). **Pin** (a JUSTIFIED EDIT —
+  4-F1/4-F2 cited in its doc): `theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc` is RENAMED
+  `theSelectorAsksForTheKeyboardOnArrivalAndEscClosesIt` — nothing asked before mount; after it, the field drawn,
+  editable, its prompt as placeholder, and EXACTLY ONE ask; a re-render (↓ and typing at the model) asks no more; a
+  real Esc `NSEvent` closes it and nothing moves. 4-F1's control and its waits are gone. Its doc says which half it
+  pins and which half is the walk's. `theWindowPresentsTheSelectorAndThePaletteListsPerOpen` (JUSTIFIED EDIT): the
+  request read as `.task { askForTheKeyboard() }` whose body is `fieldFocused = true` on the field's
+  `.focused($fieldFocused)`, plus the field's binding (`set: { model.type($0) }`) and `onSubmit` (`choose(
+  model.brain.returnPressed())`) — the wiring the model pin exercises. The file header re-said to match. **Teeth:**
+  remove the arrival's task → the count is nil → red; leave the task but drop `fieldFocused = true` → the source read
+  red; the request asked per render → the second count red.
+- **F2-2 · Rebuild `DerivedData/b4` in place:** DONE (this commit) — `build-for-testing` into the EXISTING `b4`: **TEST
+  BUILD SUCCEEDED** (`scratchpad/b4-logs/f2-mac-bft.log`), no warning in the two edited files. `b4` now holds this
+  commit's tree; the product differs from the final window's only by the named request + the DEBUG oracle. Headless
+  suites not re-run: the core package (`swift test`) contains no app-target file. (Another worktree's test host,
+  `variorum-vx-562`'s own DerivedData — pid 91663 — was up during the build; nothing of theirs touched.)
+- **For the re-run window:** `-only-testing:VariorumTests/WingPaletteDoorsTests` → 10 tests; the renamed one is
+  `theSelectorAsksForTheKeyboardOnArrivalAndEscClosesIt`.
 
 **The trace — how the two named precedents get a field into editing in this host, read exactly (no guess):**
 - **`MastheadTagDoorTests.oneDoorAtRestAndTheFieldTakesFocusWhenItOpens` does NOT pin editing.** Its rig: a plain
