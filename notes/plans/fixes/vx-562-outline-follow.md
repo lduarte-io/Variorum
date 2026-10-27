@@ -117,9 +117,9 @@ Both ledger pieces in one session — the pin consumes the follower's slot, so s
 
 | # | Item | Status |
 |---|---|---|
-| 1 | The follow-highlight: the Outline navigator's highlighted chapter/note follows the viewport as the content scrolls (the view, never the caret) | BUILT-PENDING-SUITES — batch 1 pieces A–C, E + the R-562-A continuation G–I (the follower adopts a landing's target at the click; F-1 built and pinned) (LIVE STATUS); `build-for-testing` green (`vx562-bft8.log`); suites at the orchestrator's stage window; §IMPLEMENTER SELF-ASSESSMENT's continuation bullet before the walk |
-| 2 | The pinned nav info: chapters + notes counts fixed at the top while scrolling; the current note # (and chapter) said during scroll | BUILT-PENDING-SUITES — batch 1 pieces A, D, E (LIVE STATUS); `build-for-testing` green; suites at the orchestrator's stage window |
-| 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | NOT-STARTED |
+| 1 | The follow-highlight: the Outline navigator's highlighted chapter/note follows the viewport as the content scrolls (the view, never the caret) | SUITES GREEN (runs 1+2, §SUITE RUNS: 47/4 + 266/56, 4 standing known issues only) — walk pending |
+| 2 | The pinned nav info: chapters + notes counts fixed at the top while scrolling; the current note # (and chapter) said during scroll | SUITES GREEN (runs 1+2, §SUITE RUNS) — walk pending |
+| 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | TESTS DONE (both runs green, §SUITE RUNS); the walk REQUESTED (§WALK RUNBOOK is the brief) |
 | 4 | The ladder (one round minimum; reviewer per the diff — expected `opus-reviewer`: no editor seam, no custody, no `Sync/`) | NOT-STARTED |
 
 ## LIVE STATUS (batch 1 — the implementer's; flipped in the same commit as each piece)
@@ -195,7 +195,8 @@ You are the implementer for VX-562 in the worktree `~/dev/variorum-vx-562` (bran
 ## SUITE RUNS (the orchestrator's, under stage claim `vx-562-tests`, coordinator GO 2026-10-27 14:08)
 
 - **Run 1 — the batch's own four suites (`DerivedData/vx562-suiterun1.log`):** ✅ "Test run with 47 tests in 4 suites passed after 42.380 seconds" — zero skipped (the one "skipped" grep hit is a test's own name). The pins' print lines are honest: FREEZE sampled 21 travelling turns with zero strays; F-1's premises held (`gave up at top=519.0 after 14 hops, 4061 ms`) and the pair stayed the clicked target through the give-up; SCROLL's rule-vs-pair comparisons agree at each step.
-- **Run 2 — the 56-suite regression set (`DerivedData/vx562-regression.log`):** IN FLIGHT (background; executed counts land here at its exit).
+- **Run 2 — the 56-suite regression set (`DerivedData/vx562-regression2.log`):** ✅ "Test run with 266 tests in 56 suites passed after 197.186 seconds with 4 warnings and 4 known issues" — the 4 known issues are exactly `IndexTierMetricsTests`' standing TK2 short-trailing-blank pins; zero failures, zero skips. (A first attempt, `vx562-regression.log`, executed NOTHING — a zsh word-splitting slip passed the whole suite list as one argument, xcodebuild exit 65 before any test; no verdict consumed, rerun clean.)
+- **Stage:** claim `vx-562-tests` released 2026-10-27 ~14:16 after the two runs (~8 min of the 40 used); dev store untouched all window.
 
 ## WALK RUNBOOK (ledger 3 — an OPUS walker under the orchestrator's `vx-562-walk` claim; simulated input is never Fable's)
 
