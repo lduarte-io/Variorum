@@ -317,7 +317,7 @@ struct BookView: View {
                     BookArchivedLine(model: archived, structure: structure)
                     OutlinePinnedLine(
                         readingID: readingID, model: model, structure: structure,
-                        meta: bookMetaLine, tokens: tokens)
+                        archivedCount: archived.door.count, tokens: tokens)
                     outlineBody
                 }
                 // WA-1: the receipt at the page's foot, trailing.
@@ -1548,35 +1548,27 @@ struct BookView: View {
         /// the next row below can take it (without that last clause the
         /// holder's own receding top would out-rank every candidate forever).
         var topRow: (id: String, top: CGFloat)?
-        /// **VX-562 — where every row last said its top was**, the viewed
-        /// pair's one input (`BookOutlineViewed.pair`). Written per report in
-        /// O(1); read once per run-loop turn. Every row of the column reports
-        /// (none de-realizes — a far row is a placeholder at a known height),
-        /// so the map is the column's own geometry; a row the column no
-        /// longer has is never read (the rule walks the CURRENT rows). Emptied
-        /// when the Outline leaves, so a return never reads the old page.
-        var rowTops: [String: CGFloat] = [:]
-        /// **VX-562 R-562-A — where every row last said its BOTTOM is**, as
-        /// its height (written beside `rowTops`, the same report, O(1)): the
-        /// hold's on-screen test reads the adopted row's, so a tall story
-        /// spanning the page's top edge is still on the page.
-        var rowExtents: [String: CGFloat] = [:]
-        /// **R-562-A — the page's height** (the scroll's own frame, the
-        /// space every row's top is read in): the foot of the hold's
-        /// on-screen test. `0` until the first geometry pass — "not yet
-        /// measured", which never finds a row off the bottom.
-        var viewportHeight: CGFloat = 0
-        /// **R-562-A — the landing TARGET the follower adopted at the click**
-        /// (the anchor id; nil ⇒ the follower is the rule). Set at a
-        /// landing's START by `adoptLandingTarget` (every landing re-adopts:
-        /// "a new landing" releases the old one by replacing it); held through
-        /// the landing by the freeze; after it, kept by
-        /// `BookOutlineViewed.follow` while the target's row is on the page,
-        /// dropped by that same derivation when it is not, and cleared by the
-        /// ruling's acts — her scroll (`outlineUserScrolled`), an axis change
-        /// (`releaseStandingAdoption`), the Outline leaving
-        /// (`forgetViewedPair`).
-        var adoptedAnchor: String?
+        /// **VX-562 — the page the viewed pair is read off**
+        /// (`BookOutlineViewed.Page`): where every row last said its top was
+        /// and how tall it is (written per report in O(1) from
+        /// `outlineAnchorMoved`; every row of the column reports — none
+        /// de-realizes, a far row is a placeholder at a known height — so the
+        /// maps are the column's own geometry, and a row the column no longer
+        /// has is never read: the rule walks the CURRENT rows), the page's
+        /// height (its own frame — the foot of R-562-A's on-screen test, `0`
+        /// until the first geometry pass), and where it stands in its scroll
+        /// (offset and travel — R-562-B's sliding probe and R-562-C's
+        /// release; the scroll-geometry observer). Read once per run-loop
+        /// turn. The rows and the scroll position are emptied when the
+        /// Outline leaves, so a return never reads the old page.
+        var page = BookOutlineViewed.Page()
+        /// **VX-562 — the follower's ADOPT / RELEASE state** (R-562-A,
+        /// R-562-C; ladder round 1 finding 6): the one value that decides,
+        /// fed by the acts below — a landing's start (`adoptLandingTarget`),
+        /// an axis change (`releaseStandingAdoption`), her scroll phase
+        /// (`outlineUserScrolled`), the Outline leaving (`forgetViewedPair`)
+        /// — and asked once per turn (`deriveViewedPair`).
+        var follower = BookOutlineFollower()
         /// One derivation per run-loop turn: set when a turn's derivation is
         /// queued, cleared when it runs.
         var viewedTurnQueued = false
@@ -1627,22 +1619,26 @@ struct BookView: View {
     ///   wires `onFinish` here), and her own scroll ends a landing at once
     ///   (`userTookOver`), which unfreezes it.
     ///
-    /// Unfrozen, it is `BookOutlineViewed.follow`: an adopted target STANDS
-    /// while its row is on the page (R-562-A — wherever on the page: a row in
-    /// the book's last screenful never reaches the top, finding F-1), and
-    /// otherwise THE RULE names what owns the page's top, the adoption
-    /// dropped by the same look.
+    /// Unfrozen, it is the follower's look (`BookOutlineFollower.look`): an
+    /// adopted target STANDS while its row is on the page and the page has
+    /// not scrolled from where its landing left it (R-562-A — wherever on
+    /// the page: a row in the book's last screenful never reaches the top,
+    /// finding F-1; R-562-C — more than 8 pt of scroll lets it go), and
+    /// otherwise THE RULE names what the page shows over the probe where the
+    /// page stands (R-562-B), the adoption dropped by the same look.
     private static func deriveViewedPair(
         box: OutlineLandingBox, landing: LandingAuthority,
         model: BookViewModel, structure: BookStructureModel
     ) {
+        // The freeze is the follower's (`look` answers nil while a landing
+        // travels); asked here first only so a frozen turn skips the O(rows)
+        // row list.
         guard structure.mode == .outline, !landing.isPending else { return }
         let rows = outlineRows(structure: structure, entries: model.entries)
-        let followed = BookOutlineViewed.follow(
-            rows: rows, tops: box.rowTops, heights: box.rowExtents,
-            viewport: box.viewportHeight, adopted: box.adoptedAnchor)
-        box.adoptedAnchor = followed.adopted
-        model.noteOutlineViewed(followed.pair)
+        guard let pair = box.follower.look(
+            rows: rows, page: box.page, landingPending: landing.isPending)
+        else { return }
+        model.noteOutlineViewed(pair)
     }
 
     /// **R-562-A — a landing's START: the follower adopts its target**, and
@@ -1659,13 +1655,11 @@ struct BookView: View {
         _ anchorID: String, box: OutlineLandingBox,
         model: BookViewModel, structure: BookStructureModel
     ) {
-        let adopted = structure.mode == .outline
-            ? BookOutlineViewed.adoptedPair(
-                anchor: anchorID,
-                rows: outlineRows(structure: structure, entries: model.entries))
-            : nil
-        box.adoptedAnchor = adopted == nil ? nil : anchorID
-        if let adopted { model.noteOutlineViewed(adopted) }
+        let rows = structure.mode == .outline
+            ? outlineRows(structure: structure, entries: model.entries) : []
+        if let adopted = box.follower.landingStarted(anchor: anchorID, rows: rows) {
+            model.noteOutlineViewed(adopted)
+        }
     }
 
     /// **R-562-A — an AXIS change returns the follower to the rule** (the
@@ -1676,19 +1670,22 @@ struct BookView: View {
     /// an expansion (`BookNavigatorDoor.openTheNote` is `focus` — which
     /// unfolds the note — and `requestReveal` in one act), so an axis that let
     /// go of a travelling adoption would undo the click's own, whichever of
-    /// the two changes SwiftUI delivers first. The caller queues the
-    /// derivation that resumes the rule.
+    /// the two changes SwiftUI delivers first (the decision is
+    /// `BookOutlineFollower.axisChanged`, table-tested in both orders). The
+    /// caller queues the derivation that resumes the rule.
     private func releaseStandingAdoption() {
-        guard !landing.isPending else { return }
-        landingBox.adoptedAnchor = nil
+        landingBox.follower.axisChanged(landingPending: landing.isPending)
     }
 
     /// The Outline left: its page is gone, so is what it was showing — and
     /// the target it had adopted (R-562-A: leaving the Outline is a release).
+    /// The rows and the scroll position go with the page (a return starts at
+    /// rest, the edge probe, until its own reports arrive); the page's
+    /// height is re-measured by the returning scroll's own first pass.
     private func forgetViewedPair() {
-        landingBox.rowTops = [:]
-        landingBox.rowExtents = [:]
-        landingBox.adoptedAnchor = nil
+        landingBox.page = BookOutlineViewed.Page(
+            scroll: BookOutlineViewed.Scroll(viewport: landingBox.page.scroll.viewport))
+        landingBox.follower.forget()
         model.noteOutlineViewed(.nothingViewed)
     }
 
@@ -1791,8 +1788,8 @@ struct BookView: View {
         // VX-562: and where EVERY row is, for the viewed pair — O(1) here; the
         // derivation runs once for the turn's reports (`queueViewedPair`).
         // Its height too (R-562-A: the hold's on-screen test).
-        landingBox.rowTops[anchorID] = top
-        landingBox.rowExtents[anchorID] = height
+        landingBox.page.tops[anchorID] = top
+        landingBox.page.heights[anchorID] = height
         queueViewedPair()
         #if DEBUG
         BookOutlineGeometry.recordAnchor(anchorID, top: top, height: height, owner: oracleOwner)
@@ -1826,9 +1823,28 @@ struct BookView: View {
     /// target's, and a hold standing after its landing (nothing to end) is
     /// asked again at once.
     fileprivate func outlineUserScrolled() {
-        landingBox.adoptedAnchor = nil
+        landingBox.follower.userScrolled()
         landing.userTookOver()
         queueViewedPair()
+    }
+
+    /// **VX-562 r1 — where the page stands in its scroll** (R-562-B's
+    /// sliding probe, R-562-C's release), from the scroll's own geometry:
+    /// written into the reference box (bookkeeping, never render state), and
+    /// the follower asked again. The landing hears only a content-HEIGHT
+    /// change, exactly as before (the flow's `FlowScrollFacts` shape — an
+    /// offset change must never re-arm a landing's quiet interval).
+    fileprivate func outlineScrolled(_ old: OutlineScrollFacts, _ new: OutlineScrollFacts, _ proxy: ScrollViewProxy) {
+        landingBox.page.scroll.offset = new.offset
+        landingBox.page.scroll.travel = new.travel
+        if old.contentHeight != new.contentHeight {
+            outlineContentResized(new.contentHeight, proxy)
+        }
+        queueViewedPair()
+        #if DEBUG
+        BookOutlineGeometry.recordOutlineScroll(
+            model.readingID, landingBox.page.scroll, owner: oracleOwner)
+        #endif
     }
 
     /// The navigator's note-row click in Outline (the correction round,
@@ -2154,16 +2170,26 @@ struct BookView: View {
             // never render state, so it re-lays nothing out; a change asks
             // the follower again.
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-                landingBox.viewportHeight = height
+                landingBox.page.scroll.viewport = height
                 queueViewedPair()
+                #if DEBUG
+                BookOutlineGeometry.recordOutlineScroll(
+                    model.readingID, landingBox.page.scroll, owner: oracleOwner)
+                #endif
             }
             // Row 53: the landing listens to the WHOLE column, not only its
             // anchor — any content-height change re-arms its quiet
             // interval, and a scroll by the user ends it.
-            .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                geometry.contentSize.height
-            } action: { _, height in
-                outlineContentResized(height, proxy)
+            //
+            // VX-562 r1: the same observer carries where the page stands in
+            // its scroll (offset and travel — R-562-B's sliding probe and
+            // R-562-C's release); only a HEIGHT change reaches the landing
+            // (`outlineScrolled` — the flow's `FlowScrollFacts` shape). No
+            // new observer: the existing one widened.
+            .onScrollGeometryChange(for: OutlineScrollFacts.self) { geometry in
+                OutlineScrollFacts(geometry)
+            } action: { old, new in
+                outlineScrolled(old, new, proxy)
             }
             .onScrollPhaseChange { _, phase in
                 #if DEBUG
@@ -2519,15 +2545,6 @@ struct BookView: View {
             badgesOn: themeStore?.settings.ownershipBadges ?? true)
     }
 
-    /// Kind + extent at a glance (batch 12) — since VX-562 the head of the
-    /// Outline's PINNED line rather than a line under the scrolling title.
-    private var bookMetaLine: String {
-        BookViewCopy.metaLine(
-            gathering: structure.reading?.kind == .gathering,
-            chapters: structure.sections.count, notes: model.entries.count,
-            archived: archived.door.count)
-    }
-
     /// One post in the outline (13c 2A — extracted from four inline
     /// builders so the row has an INIT the virtualization counter can ride,
     /// the `ReadingFlowView` precedent; P-9's split rides along).
@@ -2585,6 +2602,7 @@ enum BookOutlineGeometry {
     private static var navigatorNoteMarkStore = OwnedRegistrations<String, Bool>()
     private static var outlinePinLineStore = OwnedRegistrations<String, String>()
     private static var outlinePinFrameStore = OwnedRegistrations<String, CGRect>()
+    private static var outlineScrollStore = OwnedRegistrations<String, BookOutlineViewed.Scroll>()
     private static var focusDoorStore = OwnedRegistrations<String, @MainActor (String?) -> Void>()
     private static var openDoorStore = OwnedRegistrations<String, @MainActor (String) -> Void>()
     private static var modeDoorStore = OwnedRegistrations<
@@ -2635,6 +2653,11 @@ enum BookOutlineGeometry {
     /// assert both what it says and that the page's scroll never moves it.
     static var outlinePinLines: [String: String] { outlinePinLineStore.current }
     static var outlinePinFrames: [String: CGRect] { outlinePinFrameStore.current }
+    /// **VX-562 r1 — where each mounted Outline's page stands in its scroll**
+    /// (viewport, offset, travel — exactly what the follower's sliding probe
+    /// reads, R-562-B), keyed by the book. So a pin can ask THE RULE over the
+    /// page's own facts rather than a second reading of the scroll view.
+    static var outlineScrolls: [String: BookOutlineViewed.Scroll] { outlineScrollStore.current }
     /// The round-end Fable pass, MAJOR-1: each mounted book's ONE focus act
     /// (`BookViewModel.focus`), published by the view whose `@State` holds
     /// the model — the only way a pin over the real shell can make a note
@@ -2691,6 +2714,12 @@ enum BookOutlineGeometry {
         outlinePinFrameStore.publish(frame, for: readingID, owner: owner)
     }
 
+    static func recordOutlineScroll(
+        _ readingID: String, _ scroll: BookOutlineViewed.Scroll, owner: UUID
+    ) {
+        outlineScrollStore.publish(scroll, for: readingID, owner: owner)
+    }
+
     static func publishFocusDoor(
         _ readingID: String, owner: UUID, _ door: @escaping @MainActor (String?) -> Void
     ) {
@@ -2722,6 +2751,7 @@ enum BookOutlineGeometry {
         navigatorNoteMarkStore.release(owner: owner)
         outlinePinLineStore.release(owner: owner)
         outlinePinFrameStore.release(owner: owner)
+        outlineScrollStore.release(owner: owner)
         focusDoorStore.release(owner: owner)
         openDoorStore.release(owner: owner)
         modeDoorStore.release(owner: owner)
@@ -2743,6 +2773,7 @@ enum BookOutlineGeometry {
     static func forgetOutlinePins() {
         outlinePinLineStore.forgetAll()
         outlinePinFrameStore.forgetAll()
+        outlineScrollStore.forgetAll()
     }
 
     static func forgetAnchorTops() { anchorTopStore.forgetAll() }
@@ -2794,12 +2825,38 @@ nonisolated enum BookNavigatorLayout {
     /// wash with air around the words, never a band flush with them), given
     /// without moving the row's text (the list's scroll makes the room).
     static let washBleed: CGFloat = 6
-    /// **VX-562 — the viewed chapter's mark: the selected-row wash, QUIETER**
-    /// (the record's §DESIGN: the chapter's mark is quieter than the note's).
-    /// A token at the masthead popover's own resting strength
-    /// (`MastheadPopover.rest`, 0.55) — token-derived in both voices and
-    /// every palette, no literal colour.
-    static let viewedChapterWashStrength: Double = 0.55
+    /// **VX-562 — the viewed chapter's mark: a FILL behind the row, its name
+    /// in ink** — the sidebar's own selected-row grammar (a fill with air
+    /// around the words, the selected title in ink), quieter than a
+    /// selection's marker.
+    ///
+    /// **Ladder round 1, finding 8 (walk 2, Study dark):** the batch's mark
+    /// was the selected-row wash at the masthead popover's resting strength
+    /// (`QuietFill.rest`, wash × 0.55) — measured RGB (10,12,14) on the black
+    /// room, 1.07:1, *"at normal viewing … does not read as a highlight"*.
+    /// Study's wash is already a translucent accent (12–13 %) and Terminal
+    /// light's is 1.06:1 at full strength, so no strength of the wash reads
+    /// in all four. The fill is the voice's ACCENT at `viewedChapterFill-
+    /// Strength`: ≈1.33–1.39:1 against the room in Terminal and Study, light
+    /// and dark, and ≥1.25:1 under every palette (the dark room stays black —
+    /// a small tinted tile in the navigator, never a band across the room).
+    /// The name turns to INK on it: the accent-coloured name on an accent
+    /// fill falls under the palette layer's own selected-row floor (4.5:1 —
+    /// `PaletteDerivation`, "selected-row ink on the wash"); ink clears it
+    /// everywhere. Token-only, no literal colour; pinned by token maths
+    /// (`BookOutlineViewedTests`).
+    static let viewedChapterFillStrength: Double = 0.22
+
+    /// The viewed chapter's fill, as a token composition (see above).
+    @MainActor static func viewedChapterFill(_ tokens: VoiceTokens) -> Color {
+        tokens.accent.opacity(viewedChapterFillStrength)
+    }
+
+    /// The viewed chapter's name ink: INK on the fill, the voice's accent
+    /// otherwise (every chapter name's shipped colour).
+    @MainActor static func chapterNameInk(_ tokens: VoiceTokens, viewed: Bool) -> Color {
+        viewed ? tokens.ink : tokens.accent
+    }
 }
 
 private extension View {
@@ -2857,8 +2914,11 @@ private struct NavigatorMarker: View {
 /// Its OWN view so the mark is read in its own body: a viewed-pair change —
 /// every note boundary a scroll crosses — re-renders these labels and
 /// nothing else, never the book's whole body with its Outline column
-/// (P-8: invalidation ∝ what changed). The spread's pages are read only in
-/// the spread, so the other modes take no dependency on them.
+/// (P-8: invalidation ∝ what changed). Each mode reads only the facts its
+/// mark is made of: the Outline never reads the focus (ladder round 1,
+/// finding 7 — a focus change re-rendered every label for a mark that
+/// ignores it), the other modes never read the viewed pair, and the
+/// spread's pages are read only in the spread.
 private struct NavigatorNoteLabel: View {
     let model: BookViewModel
     let mode: BookStructureModel.ViewMode
@@ -2867,8 +2927,9 @@ private struct NavigatorNoteLabel: View {
 
     var body: some View {
         let marked = BookNavigatorMark.note(
-            mode: mode, postID: entry.postID, focusedPostID: model.focusedPostID,
-            viewedPostID: model.viewedOutlinePair.postID,
+            mode: mode, postID: entry.postID,
+            focusedPostID: mode == .outline ? nil : model.focusedPostID,
+            viewedPostID: mode == .outline ? model.viewedOutlinePair.postID : nil,
             spreadPostIDs: mode == .spread ? model.spreadEntries.map(\.postID) : [])
         HStack(spacing: 2) {
             if marked, !tokens.selectionMarker.isEmpty {
@@ -2887,11 +2948,13 @@ private struct NavigatorNoteLabel: View {
 
 /// **A navigator CHAPTER row's label** — the grip, the name, a one-note
 /// chapter's note marker (row 8: that row IS the note's row, so it wears the
-/// note's mark), and in Outline the QUIETER viewed-chapter wash behind the
-/// whole row (`BookNavigatorMark.chapter`). It owns the row's frame so the
-/// wash covers the row, and reaches `washBleed` past it on each side (the
-/// sidebar's selected-row grammar) without moving a word. Its own view for
-/// the note label's reason.
+/// note's mark), and in Outline the viewed chapter's mark behind the whole
+/// row (`BookNavigatorMark.chapter`): the accent fill with the name in ink
+/// (`BookNavigatorLayout.viewedChapterFill` — ladder round 1, finding 8). It
+/// owns the row's frame so the fill covers the row, and reaches `washBleed`
+/// past it on each side (the sidebar's selected-row grammar) without moving
+/// a word. Its own view for the note label's reason, reading only its
+/// mode's facts.
 private struct NavigatorChapterLabel: View {
     let model: BookViewModel
     let mode: BookStructureModel.ViewMode
@@ -2900,15 +2963,16 @@ private struct NavigatorChapterLabel: View {
     let tokens: VoiceTokens
 
     var body: some View {
+        let viewed = mode == .outline ? model.viewedOutlinePair : .nothingViewed
         let noteMarked = collapsedNote.map { note in
             BookNavigatorMark.note(
-                mode: mode, postID: note.postID, focusedPostID: model.focusedPostID,
-                viewedPostID: model.viewedOutlinePair.postID,
+                mode: mode, postID: note.postID,
+                focusedPostID: mode == .outline ? nil : model.focusedPostID,
+                viewedPostID: viewed.postID,
                 spreadPostIDs: mode == .spread ? model.spreadEntries.map(\.postID) : [])
         } ?? false
         let washed = BookNavigatorMark.chapter(
-            mode: mode, sectionID: section.id,
-            viewedSectionID: model.viewedOutlinePair.sectionID)
+            mode: mode, sectionID: section.id, viewedSectionID: viewed.sectionID)
         HStack(spacing: 4) {
             Text("⠿")
                 .font(tokens.small)
@@ -2918,7 +2982,7 @@ private struct NavigatorChapterLabel: View {
             }
             Text(tokens.chromeLabel(section.name))
                 .font(tokens.small.weight(.semibold))
-                .foregroundStyle(tokens.accent)
+                .foregroundStyle(BookNavigatorLayout.chapterNameInk(tokens, viewed: washed))
                 .lineLimit(1)
         }
         .frame(
@@ -2928,7 +2992,7 @@ private struct NavigatorChapterLabel: View {
         .background {
             if washed {
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(tokens.wash.opacity(BookNavigatorLayout.viewedChapterWashStrength))
+                    .fill(BookNavigatorLayout.viewedChapterFill(tokens))
                     .padding(.horizontal, -BookNavigatorLayout.washBleed)
             }
         }
@@ -2978,12 +3042,15 @@ private struct NavigatorMarkProbe: ViewModifier {
 ///   `.outline` stack), never inside it — the landings measure every anchor's
 ///   top in the scroll's own space, and content above them would move them
 ///   all. On the prose column's measure and left edge, as the title below it.
-/// - **What:** the book's count line, MOVED here from the scrolling title
-///   block (PROVISIONAL P-562-3 — no duplication), then the position words
-///   for the viewed pair through the one wording brain
-///   (`BookOutlineViewed.positionLine` → `NoteBoxCopy.viewedLine`); the
-///   chapter only where chapters govern (PROVISIONAL P-562-4). One line,
-///   muted, the chrome's small face; it truncates, never wraps (P-8).
+/// - **What:** the book's count line — kind + extent at a glance (batch 12),
+///   MOVED here from the scrolling title block (PROVISIONAL P-562-3 — no
+///   duplication) — then the position words for the viewed pair through the
+///   one wording brain (`BookOutlineViewed.positionLine` →
+///   `NoteBoxCopy.viewedLine`); the chapter only where chapters govern
+///   (PROVISIONAL P-562-4). Both halves say ONE note total
+///   (`BookOutlineViewed.pinLine` — ladder round 1, finding 3: the window's
+///   floor, "300+", in both). One line, muted, the chrome's small face; it
+///   truncates, never wraps (P-8).
 /// - **Cost:** its own view, so a viewed-pair change re-renders this line and
 ///   the navigator's marks, never the page. The rows are read only while a
 ///   pair is viewed.
@@ -2991,15 +3058,27 @@ private struct OutlinePinnedLine: View {
     let readingID: String
     let model: BookViewModel
     let structure: BookStructureModel
-    /// `BookViewCopy.metaLine`, as the book view computes it.
-    let meta: String
+    /// The book's set-aside notes (the archived line's count) — the count
+    /// line's last piece.
+    let archivedCount: Int
     let tokens: VoiceTokens
     #if DEBUG
     @Environment(\.debugOracleOwner) private var owner
     #endif
 
     var body: some View {
-        let line = BookViewCopy.outlinePinLine(meta: meta, position: position)
+        let line = BookOutlineViewed.pinLine(
+            gathering: structure.reading?.kind == .gathering,
+            chapters: structure.sections.count, archived: archivedCount,
+            total: BookOutlineViewed.NoteTotal(
+                count: model.entries.count, isAtLeast: model.truncated),
+            pair: model.viewedOutlinePair,
+            // The rows are read only while a pair is viewed (the position's
+            // ordinal and chapter name); at rest the line is the counts alone.
+            rows: model.viewedOutlinePair == .nothingViewed
+                ? [] : BookView.outlineRows(structure: structure, entries: model.entries),
+            chaptered: structure.chaptersActive,
+            filtered: model.viewFilter != nil)
         HStack(spacing: 0) {
             Spacer(minLength: 0)
             Text(tokens.chromeLabel(line))
@@ -3033,18 +3112,6 @@ private struct OutlinePinnedLine: View {
         #endif
     }
 
-    /// The viewed pair's words — empty while nothing is viewed.
-    private var position: String {
-        let pair = model.viewedOutlinePair
-        guard pair != .nothingViewed else { return "" }
-        return BookOutlineViewed.positionLine(
-            pair: pair,
-            rows: BookView.outlineRows(structure: structure, entries: model.entries),
-            chaptered: structure.chaptersActive,
-            filtered: model.viewFilter != nil,
-            truncated: model.truncated)
-    }
-
     #if DEBUG
     private func record(_ line: String) {
         BookOutlineGeometry.recordOutlinePin(
@@ -3059,6 +3126,34 @@ private struct OutlinePinnedLine: View {
 nonisolated private struct OutlineAnchorGeometry: Equatable, Sendable {
     var top: CGFloat
     var height: CGFloat
+}
+
+/// **VX-562 r1 — what the Outline's scroll says about the page**, read by
+/// its one scroll-geometry observer: the column's content height (the
+/// landing's re-arm, row 53 — unchanged) and where the page stands in its
+/// scroll, measured from the page's top whatever the insets (the read
+/// face's `ReadScrollFacts` arithmetic): `offset` 0 at rest, `travel` the
+/// maximum offset (0 when the column fits the page).
+nonisolated struct OutlineScrollFacts: Equatable, Sendable {
+    var contentHeight: CGFloat = 0
+    var offset: CGFloat = 0
+    var travel: CGFloat = 0
+
+    init(contentHeight: CGFloat = 0, offset: CGFloat = 0, travel: CGFloat = 0) {
+        self.contentHeight = contentHeight
+        self.offset = offset
+        self.travel = travel
+    }
+
+    init(_ geometry: ScrollGeometry) {
+        let insets = geometry.contentInsets
+        contentHeight = geometry.contentSize.height
+        offset = geometry.contentOffset.y + insets.top
+        travel = max(
+            geometry.contentSize.height + insets.top + insets.bottom
+                - geometry.containerSize.height,
+            0)
+    }
 }
 
 private extension View {
@@ -3677,10 +3772,21 @@ nonisolated enum BookViewCopy {
     /// §1 — "smart" retired app-wide, §14); singular where one (KnownIssues
     /// row 111 — "1 chapters"). 13i-d U4's honest counts kept as built: the
     /// archived count rides only when there is one.
-    static func metaLine(gathering: Bool, chapters: Int, notes: Int, archived: Int) -> String {
+    ///
+    /// VX-562 r1 (finding 3): `notesAreAtLeast` — the book's WINDOW is hiding
+    /// later notes, so the count is a floor ("300+ notes"), the same total
+    /// the pinned line's "note N of 300+" says (`BookOutlineViewed.pinLine`
+    /// feeds both from one value).
+    static func metaLine(
+        gathering: Bool, chapters: Int, notes: Int, notesAreAtLeast: Bool = false, archived: Int
+    ) -> String {
         var parts: [String] = [gathering ? "gathering" : "book"]
         if chapters > 0 { parts.append("\(chapters) chapter\(chapters == 1 ? "" : "s")") }
-        parts.append("\(notes) note\(notes == 1 ? "" : "s")")
+        if notesAreAtLeast {
+            parts.append("\(notes)+ notes")
+        } else {
+            parts.append("\(notes) note\(notes == 1 ? "" : "s")")
+        }
         if archived > 0 { parts.append(ArchivedLineCopy.line(count: archived)) }
         return parts.joined(separator: " \u{00B7} ")
     }
