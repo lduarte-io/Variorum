@@ -52,9 +52,6 @@
 //
 
 import SwiftUI
-#if DEBUG
-import os
-#endif
 
 /// **One Open list's drag, as it stands** — which row a drag of THIS list's
 /// began on, which of the list's drops it targets, and the list's scroll
@@ -224,65 +221,13 @@ struct OpenListRowDrop: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, location in
-                #if DEBUG
-                OpenListHoverLog.drop(.row(noteID), at: location, state: state, workspace: workspace)
-                #endif
-                return OpenListDropDoor.perform(tokens, onto: .row(noteID), state: state, workspace: workspace)
+            .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in
+                OpenListDropDoor.perform(tokens, onto: .row(noteID), state: state, workspace: workspace)
             } isTargeted: { targeted in
                 state.targeted(.row(noteID), targeted)
-                #if DEBUG
-                OpenListHoverLog.hover(.row(noteID), targeted, state: state, workspace: workspace)
-                #endif
             }
     }
 }
-
-#if DEBUG
-/// **VX-424's TEMPORARY instrument (A-439-15 — removed before the ladder).**
-/// One line per hover change and per release, in BOTH directions: the target,
-/// the dragged row's index, the gap the rule names and the destination it
-/// means (nil = refused, the chip slides back). Only a REAL hand drag reaches a
-/// sidebar drop (VX-375 — no synthetic road does), so its reader is
-/// `log stream --level debug --predicate 'subsystem == "io.lduarte.Variorum.debug" && category == "open-list-drag"'`
-/// beside a hand drag on the Debug app.
-@MainActor
-enum OpenListHoverLog {
-    private static let log = Logger(subsystem: "io.lduarte.Variorum.debug", category: "open-list-drag")
-
-    private static func facts(
-        _ target: OpenListDragState.Target, state: OpenListDragState, workspace: WorkspaceModel
-    ) -> String {
-        let shown = workspace.openNotes.shown
-        let dragged = state.dragging.flatMap { shown.firstIndex(of: $0) }
-        let gap = target.hover(in: shown).flatMap { SidebarLayout.OpenListDrop.gap(for: $0, rows: shown.count) }
-        let destination = gap.flatMap { gap in
-            dragged.flatMap { SidebarLayout.OpenListDrop.destination(gap: gap, dragged: $0, rows: shown.count) }
-        }
-        let direction: String
-        switch (target.hover(in: shown), dragged) {
-        case (.row(let row)?, let from?): direction = row > from ? "down" : (row < from ? "up" : "own")
-        case (.end?, _): direction = "end"
-        default: direction = "?"
-        }
-        return "target=\(target) dir=\(direction) dragged=\(dragged.map(String.init) ?? "nil") "
-            + "gap=\(gap.map(String.init) ?? "nil") dest=\(destination.map(String.init) ?? "nil (refused)") "
-            + "rows=\(shown.count)"
-    }
-
-    static func hover(
-        _ target: OpenListDragState.Target, _ targeted: Bool, state: OpenListDragState, workspace: WorkspaceModel
-    ) {
-        log.debug("HOVER \(targeted ? "in " : "out", privacy: .public) \(facts(target, state: state, workspace: workspace), privacy: .public)")
-    }
-
-    static func drop(
-        _ target: OpenListDragState.Target, at location: CGPoint, state: OpenListDragState, workspace: WorkspaceModel
-    ) {
-        log.debug("DROP y=\(Double(location.y), privacy: .public) \(facts(target, state: state, workspace: workspace), privacy: .public)")
-    }
-}
-#endif
 
 /// **The END ZONE's drop** (U2d, P-U2d-1) — the same kind of drop; anywhere in
 /// it names the slot after the last row.
@@ -292,16 +237,10 @@ struct OpenListEndZoneDrop: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, location in
-                #if DEBUG
-                OpenListHoverLog.drop(.end, at: location, state: state, workspace: workspace)
-                #endif
-                return OpenListDropDoor.perform(tokens, onto: .end, state: state, workspace: workspace)
+            .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in
+                OpenListDropDoor.perform(tokens, onto: .end, state: state, workspace: workspace)
             } isTargeted: { targeted in
                 state.targeted(.end, targeted)
-                #if DEBUG
-                OpenListHoverLog.hover(.end, targeted, state: state, workspace: workspace)
-                #endif
             }
     }
 }
