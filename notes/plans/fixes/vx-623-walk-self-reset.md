@@ -443,6 +443,45 @@ read and matched to the ruled shape (R1–R4, the resting-state semantics, exit 
 run on `~/dev/variorum`); traced to `vw_abort`'s key-up-shift belt (`3723268b6`). No VX-623 file touches
 VisualWalk; not this run's to fix.
 
+## UNIT 2 — THE LIVE ACCEPTANCE (the script of record, written before it runs; an OPUS walker under the orchestrator)
+
+**The coordinator's conditions (oct27coordinator, accepted 2026-10-27):** the 90-minute claim `vx-623-walk`
+includes the FULL restoration and the relaunch proof; a mid-walk stop restores the dev slot FIRST and
+reports after (the slot is never left set aside — production's stopped state still stays for diagnosis,
+per fence 1: the slot restoration and the production reset are different things); renew only after asking;
+the RELEASE line carries arm-by-arm outcome, std's end state, the dev slot's end state (e11e5233 held,
+unlocked, signed out, the banner, Resume never pressed), the prefs diff, instance/sim state. **The pause
+question, answered: the walk runs UNINTERRUPTED** — the arms are addressable so a split is possible in
+principle, but a pause with the as-found slot back would add two extra slot-restoration cycles (the
+riskiest manual steps); the coordinator schedules the one window when no merge-gating window is imminent.
+
+**Preconditions (all verified before READY is sent):** the branch build at
+`App/Variorum/DerivedData/vx623/Build/Products/Debug/Variorum.app` (G4's shape); her allow-rule word
+(or she sits through the prompts); GO received with the exact claim line — the walker NEVER claims or
+renews itself; zero instances by the strict forms (`pgrep -lx Variorum` · `pgrep -lf "MacOS/Variorum$"`)
+AND the walk's own path form; `xcrun simctl list devices booted` empty.
+
+**The sequence:**
+1. Prefs export (`defaults export io.lduarte.Variorum.debug` to the run folder) — re-export + diff at the end.
+2. The dev slot: cmp-verified safety copy of the as-found set first, then the WHOLE-FOLDER rename aside (G7).
+3. Under the held claim: `Tools/prod-reset-test-account.sh std --dry-run` then
+   `Tools/WalkKit/first-run-walk.sh std --app <the vx623 build> --dry-run` — every guard shown holding.
+4. The gate: `first-run-walk.sh std --app <the vx623 build>` (default `--arm both`): pre-step reset (std's
+   leftover vault from VX-439 run 3 is the expected target) → set-up arm → the join arm's relaunch →
+   sign-out/quit → cleanup reset. A What's New sheet after any launch is dismissed before the first act.
+5. On PASS: confirm std at rest from the helper's after-read; then the restoration order exactly as
+   VX-439's tail ran it — walk slot folders removed BY their key files' library ids, the as-found set
+   renamed back whole, cmp/inode-checked, ONE relaunch proving e11e5233 held (OK on the swap notice,
+   NEVER Resume; the HELD banner read; signed out; "Sync off (dev store)") → quit by identity.
+6. On STOP: captures kept, production UNTOUCHED (fence 1 — the next run's pre-step heals it after the
+   diagnosis), the slot restored FIRST (step 5's order), then the report.
+7. The orchestrator sends the RELEASE result line; the walker releases nothing itself.
+
+**Walker constraints (Opus, per the standing precedent):** secrets only via `~/.variorum/bin` helpers;
+keys through `keys.sh`, never cliclick text; guarded acts ≥ 2.6 s apart; captures window-scoped only;
+her app never launched, quit or typed into; extras killed by proven PID only; every renew request routes
+through the orchestrator to the coordinator BEFORE it happens.
+
 ## Environment traps (binding; carried into every brief verbatim)
 
 The vx-510 run's traps apply: instance checks by PATH (`pgrep -fl 'Variorum.app/Contents/MacOS'`), her
