@@ -157,6 +157,8 @@ struct CommitBar: View {
             .duplicateNoteWithTags, .duplicateNoteWithoutTags,
             // 13n-a (R-13n-11): Copy for AI — the note ▾ menu's push gesture.
             .copyForAI,
+            // VX-125 (the VX-439 run): Export Note… — the same text, as a file.
+            .exportNote,
             // 13n-b U2 (R-13nb-4): the Private row, beside it (NOTE contexts).
             .markNotePrivate,
             // 13n-b U3: "Allow AI here", the Private row's neighbour.
@@ -842,6 +844,13 @@ struct CommitBar: View {
                     let session = model.session
                     let postID = model.postID
                     Task { await CopyForAI.copy(postID: postID, session: session) }
+                }
+                // VX-125 (the VX-439 run): Copy full text's text as a `.md`
+                // file — the ONE act every Export Note door runs.
+                Button(CapabilityRegistry.capability(.exportNote).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await NoteExport.export(postID: postID, session: session) }
                 }
                 // 13n-b U2 (R-13nb-4): "Private — never shared with AI", and
                 // the note's quiet lines (a Private book holding it; the

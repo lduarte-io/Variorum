@@ -2182,6 +2182,31 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Copy full text copies the note you have open \u{2014} open one first.",
             availability: noteScoped),
+        // VX-125 (the VX-439 run — A-439-1, her ask: "a per note export in
+        // markdown with variorum simple format"; the chord C-125-1): Copy full
+        // text's text written to a `.md` file through the ONE serializer
+        // (`NoteExport`). Its doors are Copy full text's grammar plus the File
+        // menu beside Export Library…: File ▸ Export Note… (`.menuBar`), ⌘K
+        // (`.palette`) and both `note ▾` menus (`.bottomBar` — R6-2); VX-425
+        // adds the sidebar's note rows. `noteScoped` — Copy full text's own rule.
+        //
+        // **⌥⌘S — THE COLLISION SWEEP (C-125-1, 2026-10-27, on `47802c610`).**
+        // The ruled ⇧⌘E is TAKEN (Extract Selection). ⌥⌘E and ⇧⌥⌘E would read
+        // as the ⌥ "deliberate variant" of ⌘E (Use Selection for Find) and of
+        // ⌘⇧E (Extract) — the reading `.moveSelectionToTake`'s sweep already
+        // refused. ⌥⌘S is her own words' chord ("keyboard shortcut for saving
+        // note") and the ⌥ variant of ⌘S: save this note OUT, as a file. FREE:
+        // `EditorCommands.keyEquivalent`'s only `s` chords are ⌘S, ⌘⇧S and
+        // ⌃⌘S; no `.keyboardShortcut(` call site in `Variorum/` or `Shared/`
+        // carries ⌥⌘S; `EditorTextView.performKeyEquivalent` matches bare ⌘S
+        // only (the exact modifier set); the system hot keys are [.quickNote]
+        // (⌃⌥⌘N); macOS reserves no ⌥⌘S.
+        Capability(
+            id: .exportNote, verb: "Export Note\u{2026}", scope: .post,
+            doors: [.menuBar, .palette, .bottomBar],
+            shortcutLabel: "\u{2325}\u{2318}S", takesAccess: .native,
+            unavailableNote: "Export Note writes the note you have open to a file \u{2014} open one first.",
+            availability: noteScoped),
         Capability(
             id: .exportLibrary, verb: "Export Library…", scope: .app,
             doors: [.menuBar, .palette],

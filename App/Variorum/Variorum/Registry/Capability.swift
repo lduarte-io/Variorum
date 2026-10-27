@@ -896,6 +896,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// format onto the clipboard, for any chat anywhere. Post scope; the two
     /// `note ▾` menus and ⌘K render it. Reads only.
     case copyForAI
+    /// VX-125 (the VX-439 run, A-439-1): Copy full text's text as a `.md`
+    /// FILE — File ▸ Export Note… (⌥⌘S), ⌘K and both `note ▾` menus. Post
+    /// scope; reads only.
+    case exportNote
     case toggleSeams, helper
     case restoreTutorial
     /// pre-13u Act 10 (the tenth wave's ruling — "Restore door - yes,

@@ -92,6 +92,10 @@ struct HelperView: View {
             // The post-13l polish round (rows 16/23): the pairing IS the
             // lesson — this take's moment, and this note's.
             ("⌘⇧S", "save a version — the whole note as it is, in Versions"),
+            // VX-125 (the VX-439 run): the third grain — the note OUT, as a file.
+            ("\u{2325}\u{2318}S", "export this note as a Markdown file in the Variorum simple "
+                + "format \u{2014} exactly what Copy full text copies, takes and tags included, "
+                + "so File \u{25B8} Import\u{2026} reads it back"),
             ("⌘Z", "text undo (typing only)"),
             ("⌥⌘Z", "structural undo (splits, merges, moves — never text)"),
             ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),

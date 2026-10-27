@@ -78,6 +78,8 @@ struct TakesBottomBar: View {
             .duplicateNoteWithTags, .duplicateNoteWithoutTags,
             // 13n-a (R-13n-11): Copy for AI — Write's bar's twin (R6-2).
             .copyForAI,
+            // VX-125 (the VX-439 run): Export Note… — Write's bar's twin (R6-2).
+            .exportNote,
             // 13n-b U2 (R-13nb-4): the Private row, beside it.
             .markNotePrivate,
             // 13n-b U3: "Allow AI here", the Private row's neighbour.
@@ -488,6 +490,12 @@ struct TakesBottomBar: View {
                 let session = model.session
                 let postID = model.postID
                 Task { await CopyForAI.copy(postID: postID, session: session) }
+            }
+            // VX-125 (the VX-439 run): Write's bar's Export Note… row, here too.
+            Button(CapabilityRegistry.capability(.exportNote).menuTitle()) {
+                let session = model.session
+                let postID = model.postID
+                Task { await NoteExport.export(postID: postID, session: session) }
             }
             // 13n-b U2 (R-13nb-4): Write's bar's Private row, here too.
             NotePrivacyMenuItems(session: model.session, postID: model.postID, state: privacy)

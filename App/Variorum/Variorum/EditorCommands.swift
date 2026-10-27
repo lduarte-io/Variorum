@@ -97,6 +97,8 @@ struct EditorCommands: Commands {
         // door — a duplicate is a version you write on.
         .duplicateNoteWithTags, .duplicateNoteWithoutTags,
         .importFiles, .exportLibrary, .exportCaretBlock,
+        // VX-125 (the VX-439 run): Export Note… (⌥⌘S), beside the library's.
+        .exportNote,
         .structuralUndo, .structuralRedo,
         // 13n-b U4: the offer door's keyboard road, beside its veto.
         .showLastAIChange,
@@ -302,6 +304,12 @@ struct EditorCommands: Commands {
         // and the one `performKeyEquivalent` override). It is the platform's
         // own save-as chord, which is exactly what saving a whole moment is.
         case .saveNoteVersion: ("s", [.command, .shift])
+        // VX-125 (the VX-439 run, C-125-1): Export Note… — the ⌥ "deliberate
+        // variant" of ⌘S, her "keyboard shortcut for saving note". THE
+        // COLLISION SWEEP'S RESULT is the registry row's (⌥⌘S is free: this
+        // table's `s` chords are ⌘S, ⌘⇧S and ⌃⌘S; ⇧⌘E, the ruled first
+        // choice, is Extract's).
+        case .exportNote: ("s", [.command, .option])
         case .helper: ("/", .command)
         // 13f batch 3 (W16) minted ⌘[ / ⌘] here, on the stated reason that
         // *"they are the platform's own back/forward idiom"* — which the
@@ -577,6 +585,13 @@ struct EditorCommands: Commands {
             Divider()
             Button(verb(.exportLibrary)) { actions?.exportLibrary() }
                 .disabled(session == nil)
+            // VX-125 (the VX-439 run, A-439-1): the note on screen as a `.md`
+            // file in the Variorum simple format — Copy full text's text, the
+            // ONE act every door runs (`NoteExport`). Grey with no note in
+            // reach (the registry's `noteScoped`).
+            Button(verb(.exportNote)) { actions?.exportNote() }
+                .keyboardShortcut("s", modifiers: [.command, .option])
+                .disabled(!enabled(.exportNote))
             // Round-1 MINOR-3: the ONE enablement idiom (the registry) —
             // attachment-level; a caret outside any block speaks in
             // ShellActions instead of silently returning.
