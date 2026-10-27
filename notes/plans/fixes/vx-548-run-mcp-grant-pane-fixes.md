@@ -989,6 +989,37 @@ MB-14 (the status line's client count).
 
 ## BATCH 3 RECORD
 
+**NOT DONE BY THIS BATCH (first line, by the rule):** IN PROGRESS — this line is rewritten at the batch's close.
+
+*Implementer: `opus-implementer` №4 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
+code: CLAUDE.md + its canon, this plan IN FULL (the BATCH 3 BRIEF and HER SITTING), `notes/MCPSpec.md` IN FULL,
+`notes/SurfaceContracts.md` (The app · The Bookcase and books · Doors to the outside), `notes/SessionResiliencyProtocol.md`,
+the VX-549 ticket body (her sitting, read-only), AppSpec §7's reading/`query_spec` contract, and the code anchors:
+`Domain/RuleGrammar.swift`, `Domain/GatheringMint.swift`, `Domain/MCPGrantRule(+Wing).swift`,
+`Queries/MCPGrantQueries.swift`, `Queries/MCPShareQueries.swift`, `Queries/ReadingAssembly.swift`
+(`gatheringMembership` — the ONE membership function), `Queries/GatheringMintQueries.swift`,
+`Operations/Operations+SmartCollect.swift` (`newPostInGathering` — the human door the wire mirrors),
+`Operations/Operations+MCPGrants.swift`, `Operations/Operations+MCPWrites.swift`, `Persistence/MCPGrantSchema.swift` +
+`Migrations.swift` (v1_24 → v1_32), `VariorumMCP/MCPGrantAuthority.swift`, `MCPReadTools.swift`, `MCPWriteTools.swift`,
+`MCPWriteSupport.swift`, and the VX-273 pins (`MCPWingReachServerTests`, `MCPGatheringReachRuleTests`). Lane: no
+`Sync/`, `Server/`, custody, synced schema or editor seam; headless `swift build`/`swift test` + `xcodebuild
+build-for-testing` into `DerivedData/b3` only — no `xcodebuild test`, no GUI, no stage.*
+
+### LIVE STATUS (per piece — flipped in the same commit as each piece)
+
+- **No behavioural revert is in flight.**
+- **Preflight:** DONE (this commit).
+- **1 · Schema (`v1_33_mcp_gathering_grants`, its own commit):** NOT-STARTED — the local-only family's `mcp_grant`
+  rebuilt with `scope_kind` gaining `'gathering'` (SQLite cannot alter a CHECK: v1_18's rebuild road), rows copied
+  verbatim, both indexes re-made identical; no sync, no mirror, no lockstep.
+- **2 · The decide layer:** NOT-STARTED — `ScopeKind.gathering`; `NoteFacts.gatheringIDs` derived in `mcpNoteFacts`
+  through `gatheringMembership` (the ONE membership function) for the gatherings a live grant names; `reaches` /
+  `best` / `decideGathering(rung:consumes:)` / `reach(gathering:)` grown; `GatheringMint` learns `starrable:` and the
+  pure `tagsCanSatisfy`.
+- **3 · The wire:** NOT-STARTED.
+- **4 · The faces:** NOT-STARTED.
+- **5 · Suites + Mac build-for-testing:** NOT-STARTED.
+
 ## LADDER RECORD
 
 ## ORCHESTRATOR ACCEPTANCE
