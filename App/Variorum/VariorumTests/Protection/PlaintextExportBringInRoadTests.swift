@@ -5,8 +5,9 @@
 //  the implementer's SwiftPM harness). The mapping ruled at the plan's §5b-R; the act: the creation's road (fresh identity,
 //  key, device ID, Standard, the words for the band), what stands in the slot set aside WHOLE first (its restore hold with
 //  it — the new library is never held), the export's content minted headless into the new store before its first open,
-//  the export only read. The preflight reads an earlier build's export and refuses a newer build's, with nothing written
-//  (VX-502 — the subset rule, her ratified rule 2026-10-27, superseding P-VX309-U1b-7); the doors' brain
+//  the export only read. The preflight reads an earlier build's export, and a newer build's is refused at the PICK
+//  (`PickedCopy.classify`, before any preflight), with nothing written (VX-502 — the subset rule, her ratified rule
+//  2026-10-27, superseding P-VX309-U1b-7); the doors' brain
 //  names the export and offers its one door. New road — red by construction on the pre-unit tree (the pick refused it).
 //
 
@@ -139,7 +140,7 @@ struct PlaintextExportBringInRoadTests {
     /// (`LibraryOpenCopy.newerSchemaRefusal`) — by the pick's classification, which speaks before any preflight (the
     /// classifier's `.newerSchema` is no export, so the plan's own `schemaNewer` arm stands only for a file that changes
     /// between the two staged reads); a thing that is not a plaintext export at all keeps its honest refusal.
-    @Test func thePreflightReadsAnEarlierBuildsExportRefusesANewerOneAndWritesNothing() async throws {
+    @Test func thePreflightReadsAnEarlierBuildsExportThePickRefusesANewerOneNothingWritten() async throws {
         let road = PlantedRoad()
         let (session, _) = try await road.created()
         try CopyDoorsPlant.migrate(road, key: session.key)

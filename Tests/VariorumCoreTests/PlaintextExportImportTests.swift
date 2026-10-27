@@ -205,9 +205,12 @@ struct PlaintextExportImportTests {
     /// `identifiers` struck from the export's `grdb_migrations`, the physical schema untouched — for the last identifier
     /// (`v1_32`, one local-only table the export drops) exactly the file the build before it wrote; for deeper strikes, the
     /// gate's own arithmetic (the reader's tolerance of older physical schemas is the VX-502 record's D-A2 verification,
-    /// not these pins'). The remaining set is checked to be the known set minus them, so a pin can never pass on a delete
-    /// that took nothing.
+    /// not these pins'). The identifiers must be KNOWN and DISTINCT (an unknown one's DELETE would take nothing and still
+    /// leave the set-equality true), and the remaining set is checked to be the known set minus them, so a pin can never
+    /// pass on a delete that took nothing.
     static func forgetMigrations(_ identifiers: [String], in url: URL) throws {
+        #expect(Set(identifiers).isSubset(of: Set(AppDatabase.migrator.migrations))
+            && Set(identifiers).count == identifiers.count, "known, distinct identifiers")
         let queue = try DatabaseQueue(path: url.path, configuration: AppDatabase.configuration(key: nil))
         defer { try? queue.close() }
         let remaining = try queue.write { db in
