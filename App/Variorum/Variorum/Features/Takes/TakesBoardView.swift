@@ -1901,10 +1901,10 @@ struct TakeChooseHeader: View {
                         .font(tokens.small)
                         .foregroundStyle(isChosen ? tokens.chosen : tokens.muted)
                     if let label {
-                        Text(label)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .lineLimit(1)
+                        // VX-352 (PROVISIONAL MB-4): a narrow card keeps the
+                        // label's own words and lets the client's name yield
+                        // (`TakeLabelFace`, pure); the whole label on hover.
+                        TakeLabelLine(label: label, tokens: tokens)
                     }
                     Spacer(minLength: 0)
                 }

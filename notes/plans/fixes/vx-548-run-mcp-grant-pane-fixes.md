@@ -479,13 +479,19 @@ orchestrator's). Batch 1's code and record untouched.*
   (`vx358-revert-red.log`): the wire suite 4 of 8 failed, 7 issues (the three answer pins + the description pin; the
   fixture precondition and the three byte-unchanged guards green) and the pure table 5 issues (its five true rows);
   restored → 9/9 green (`vx358-green2.log`).
-- **VX-352 (Terminal's take card cuts "claude-code · english" to "claude-code · e…"):** NOT-STARTED — settled design
-  (PROVISIONAL MB-4): the pure `Domain/TakeLabelFace` (core, headless): `parts` splits a label at its first " · " into
-  a YIELDING head (the client name — and the legacy "suggested" word with it) and a KEPT tail (the separator + the
-  label's own part); `allocate` gives the kept part its whole width first and the head what is left (the old face is
-  the reading-order allocation — one run cut at its tail). The card header draws the two parts through a small custom
-  `Layout` (`TakeLabelLine`) that asks `allocate` for each part's width (each `Text` tail-truncates inside its own), plus
-  `.help(label)` — the whole label on hover. A label with no separator is one part: today's face exactly.
+- **VX-352 (Terminal's take card cuts "claude-code · english" to "claude-code · e…"):** DONE (this commit; PROVISIONAL
+  MB-4) — the pure `Sources/VariorumCore/Domain/TakeLabelFace.swift`: `parts` splits a label at its first " · " into a
+  YIELDING head (the client name — and the legacy "suggested" word with it) and a KEPT tail (the separator + the
+  label's own words); `allocate` gives the kept part its whole width first and the head what is left. The card header
+  (`TakeChooseHeader`, every fan style) draws the parts through `App/…/Features/Takes/TakeLabelLine.swift` — a custom
+  `Layout` (`TakeLabelLayout`) that asks `allocate` for each part's width (each `Text` tail-truncates inside its own),
+  `.help(label)` and the accessibility label the whole label; a label with no separator is one part (today's face).
+  Pins: core `TakeLabelFaceTests` (4 — her capture's width in monospace columns; the legacy form; the parts and
+  allocation tables) GREEN; `MCPTakeLabelFormServerTests.theTakeCardSplitsTheLabelWhereThisConventionPutsItsSeparator`
+  (the card's separator and legacy word ARE the wire's) GREEN (`vx352-green.log`); Mac `TakeLabelLineTests` (3 — the
+  real header swept in Terminal and Study, the placed widths read from the DEBUG `TakeLabelLayoutProbe`) COMPILED
+  (`build-for-testing` green, `mac-bft1.log`), RUN **PENDING** the orchestrator's stage. The behavioural revert run:
+  PENDING (next).
 - **VX-354 (the Book Panel's header and gatherings wear neither mark):** NOT-STARTED — settled design: the panel's
   model holds the READING reach (`Queries.mcpBookReaches(readingIDs:)` — `decide` for the book, `decideGathering` for a
   gathering, behind `mcpReachStandings`' VX-272 gate) over exactly the readings DRAWN: the shown book always, the
