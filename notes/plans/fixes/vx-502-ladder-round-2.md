@@ -108,3 +108,27 @@ so the orchestrator checks each landed fix line by line)
   and no build of this worktree exists outside `DerivedData/vx502-unitA` (none in the default DerivedData), so no Debug
   build could have carried a probe.
 - **PENDING (the orchestrator's, unchanged):** `PlaintextExportBringInRoadTests` + `U2WordsTests` under a stage claim.
+
+## THE ORCHESTRATOR'S CHECK — the final round's fixes, line by line (2026-10-27 ~05:05 MDT; no round 3 reads them)
+
+Read against each final call on the diff `c6a45250d..cb64aa9c7` (product/test files):
+- **R2-M1 ✔** `oldestExportEraDroppedTables` is the FROZEN five-name literal, byte-matching 0.10's
+  `SyncSchema.localOnlyTables` as the round-2 reviewer read it at `0aab72c39`; the loop over today's set is gone;
+  the drop is strict `DROP TABLE` (fails loud if the era ever lacks one); the classify `#expect` runs BEFORE the
+  read with an honest message; the pin's doc now covers BOTH gates and keeps the FROZEN discipline ("the READER
+  or the CLASSIFIER owes the era a tolerance, not this pin an edit"). The teeth: the filtered probe announced
+  first (`cb179b627`), run in an ISOLATED scratch copy (right call — the walk session is live in this worktree),
+  red at the classify expect alone (`.plaintextLibrary`), every other pin green, the copy deleted.
+- **R2-N1 ✔** the subset+distinctness `#expect` with the doc stating why (an unknown identifier's DELETE takes
+  nothing yet leaves set-equality true).
+- **R2-N2 ✔** the header clause and the rename say the PICK refuses a newer export; the test's body unchanged;
+  the record's stage line names the SUITE, so nothing else moves.
+- **The commit collision (the implementer's flag): CHECKED, intact** — the walk-rulings block rode `cb64aa9c7`
+  (it was on disk uncommitted when the implementer's close staged the record file); it appears ONCE, text as the
+  orchestrator wrote it, nothing lost; `88fb5ec1b` carried the rest. History not rewritten; attribution noise
+  accepted and recorded here.
+
+**THE LADDER IS CLOSED: round 2 was the final round (0 BLOCKER · 0 MAJOR); its fixes landed and are checked
+above. The one standing gate is the stage batch (the two Mac suites — the flipped pin's FIRST execution — plus
+the derived Protection-door suite set), which runs as the walk window's step 0 under VX-604's executed-count
+rule.**
