@@ -919,7 +919,7 @@ VX-546, VX-547) are the record's; nothing in CastleRules changed (her frozen-des
 
 **→ VX-502 (2026-10-27, one overnight /architect-phase run — the record
 `notes/plans/fixes/vx-502-export-across-migrations.md`; the ladder `vx-502-ladder-round-1.md` · `-round-2.md`; the
-walk `vx-502-walk-script.md`; her handoff `notes/handoffs/vx-502-handoff.md`; PR #192, tip `683068fbb`).** §12
+walk `vx-502-walk-script.md`; her handoff `notes/handoffs/vx-502-handoff.md`; PR #192, merge `32fb88ec6`, tip `683068fbb`).** §12
 Doors ▸ Library portability: the plaintext-export clause in `notes/SurfaceContracts.md` changed in place — an
 export from an earlier build imports (its applied migrations a subset of this build's known set), one written by
 a newer Variorum refuses at the pick. HER RATIFIED RULE, on the ticket (2026-10-27): "accept any export whose
