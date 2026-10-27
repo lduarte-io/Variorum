@@ -14,11 +14,17 @@ public struct MCPGrantPlaces: Equatable, Sendable {
     public var shelves: [Shelf]
     /// The live additional wings, in switcher order (Home is virtual — '').
     public var wings: [Wing]
+    /// VX-549: the offered gatherings (`Queries.mcpGrantableGatherings`).
+    public var gatherings: [Queries.MCPGrantableGathering]
 
-    public init(books: [Queries.MCPGrantableBook] = [], shelves: [Shelf] = [], wings: [Wing] = []) {
+    public init(
+        books: [Queries.MCPGrantableBook] = [], shelves: [Shelf] = [], wings: [Wing] = [],
+        gatherings: [Queries.MCPGrantableGathering] = []
+    ) {
         self.books = books
         self.shelves = shelves
         self.wings = wings
+        self.gatherings = gatherings
     }
 
     /// A wing's name — "Home" for the virtual Home wing and for a dangling id
@@ -42,6 +48,24 @@ public struct MCPGrantPlaces: Equatable, Sendable {
             shelf: book.shelfID.flatMap { id in shelves.first { $0.id == id }?.name },
             noteCount: book.noteCount, marks: book.marks,
             madeAt: Self.date(book.createdAt), lastEdited: Self.date(book.lastEdited))
+    }
+
+    /// VX-549: a gathering as `PlaceLabels` reads it — its wing, shelf and
+    /// archived state (no count: that would be an assembly).
+    public func place(_ gathering: Queries.MCPGrantableGathering) -> PlaceLabels.Place {
+        PlaceLabels.Place(
+            id: gathering.id, name: gathering.name, wing: wingName(gathering.wingID),
+            inHome: gathering.wingID.isEmpty,
+            shelf: gathering.shelfID.flatMap { id in shelves.first { $0.id == id }?.name },
+            marks: PlaceLabels.Marks(archived: gathering.archived), madeAt: Self.date(gathering.createdAt))
+    }
+
+    /// VX-549: the distinguisher of every offered gathering that shares its
+    /// name with another offered gathering (the same ladder).
+    public func gatheringDistinguishers(
+        now: Date, calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> [String: String] {
+        PlaceLabels.disambiguate(gatherings.map(place), now: now, calendar: calendar, locale: locale)
     }
 
     /// **The distinguisher of every offered book that shares its name with

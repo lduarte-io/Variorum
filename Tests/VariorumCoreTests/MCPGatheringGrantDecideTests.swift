@@ -325,6 +325,64 @@ struct MCPGatheringGrantDecideTests {
         }
     }
 
+    // MARK: - The faces' reads: the sheet's offer, the shared icon, the member rows
+
+    /// The grant sheet's WHERE offers every live, unfenced gathering — a stale
+    /// Private one never (the op refuses it) — each saying whether its rule
+    /// needs a star (read/suggest-shaped, her ruling) and whether it is archived.
+    @Test func theSheetsOfferIsEveryUnfencedGatheringWithItsStarShape() throws {
+        try withOperations { ops, db in
+            let parser = try ops.createTag(name: "parser")
+            let byTag = try ops.createReading(
+                name: "parser things", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(parser.id)))
+            let byStar = try ops.createReading(
+                name: "starred parser", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.and([.tag(parser.id), .star])))
+            let shelved = try ops.createReading(
+                name: "archived parser", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(parser.id)))
+            try ops.archiveReading(shelved.id)
+            let stale = try ops.createReading(
+                name: "stale", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(parser.id)))
+            try db.write { db in
+                try db.execute(sql: "UPDATE reading SET ai_private_at = '2026-07-01T00:00:00.000Z' WHERE id = ?",
+                               arguments: [stale.id])
+            }
+            _ = try ops.createReading(name: "a book", kind: .book)
+            let offered = try db.read { try Queries.mcpGrantPlaces($0).gatherings }
+            #expect(Set(offered.map(\.id)) == [byTag.id, byStar.id, shelved.id], "never the fenced one, never a book")
+            #expect(offered.first { $0.id == byStar.id }?.needsStar == true)
+            #expect(offered.first { $0.id == byTag.id }?.needsStar == false)
+            #expect(offered.first { $0.id == shelved.id }?.archived == true)
+        }
+    }
+
+    /// The shared icon on a DIRECTLY granted gathering (through the grown
+    /// `decideGathering` — `mcpBookReaches`, the Bookcase's and the Library's
+    /// one read): its own grant, at its rung, no "through"; its MEMBER notes'
+    /// rows wear the mark through the one `decide` (`mcpNoteReaches`) and name
+    /// the gathering as the why; a note outside the rule wears none.
+    @Test func aGrantedGatheringAndItsMembersWearTheMarkThroughTheOneRule() throws {
+        try withOperations { ops, db in
+            let client = try approved(ops)
+            let parser = try ops.createTag(name: "parser")
+            let gathering = try ops.createReading(
+                name: "parser things", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(parser.id)))
+            let member = try note(ops, "lexer", tags: [parser])
+            let outside = try note(ops, "essay")
+            #expect(try db.read { try Queries.mcpBookReaches($0) }.isEmpty, "nothing granted, nothing marked")
+            let grant = try ops.grantMCPAccess(client.id, spec(.suggest, .gathering, gathering.id))
+            let icons = try db.read { try Queries.mcpBookReaches($0) }
+            let onGathering = try #require(icons[gathering.id])
+            #expect(onGathering.map(\.clientName) == ["claude-code"] && onGathering[0].rung == .suggest)
+            #expect(onGathering[0].grant?.id == grant && onGathering[0].throughTitle == nil, "its own grant")
+            #expect(try db.read { try Queries.mcpBookReach($0, readingID: gathering.id) } == onGathering)
+            let rows = try db.read { try Queries.mcpNoteReaches($0, noteIDs: [member.id, outside.id]) }
+            #expect(rows[member.id]?.first?.throughTitle == "parser things", "the why names the gathering")
+            #expect(rows[member.id]?.first?.rung == .suggest)
+            #expect(rows[outside.id] == nil)
+        }
+    }
+
     // MARK: - P1: the page drives; nothing is assembled while no gathering is granted
 
     @Test func theMembershipReadIsPageDrivenAndAbsentWithNoGatheringGrant() throws {

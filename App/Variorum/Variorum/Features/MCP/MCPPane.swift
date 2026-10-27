@@ -439,7 +439,7 @@ struct MCPPane: View {
     ) -> String? {
         switch ask.scopeKind {
         case .note: nil
-        case .book: labels.books[ask.scopeID]
+        case .book, .gathering: labels.books[ask.scopeID]
         case .wing: labels.wings[ask.scopeID]
         }
     }
@@ -501,7 +501,7 @@ struct MCPPane: View {
     ) -> String? {
         switch row.grant.scopeKind {
         case .note: nil
-        case .book: labels.books[row.grant.scopeID]
+        case .book, .gathering: labels.books[row.grant.scopeID]
         case .wing: labels.wings[row.grant.scopeID]
         }
     }

@@ -27,6 +27,13 @@
 //  - The confirm names the place WITH its distinguisher and carries VX-269's
 //    clause (U1) — one line when it fits, else two (the U2 geometry oracle).
 //
+//  VX-549 (VX-548 batch 3 — her sitting 2026-10-27, RATIFIED: "Gathering joins
+//  the grant scopes"): WHERE grows "A gathering", picked on the same
+//  `SearchPicker` (`MCPGrantPicker.gatheringArrangements`). A gathering whose
+//  rule needs a STAR is read/suggest-shaped — write new and edit not offered,
+//  with the one-line why (`MCPPaneCopy.starRuleWhy`) — since a client can't star
+//  a note, so it can never write one into it (her ruling).
+//
 //  13n-c UX walk W-UX-2 — APPROVE ALONE, GRANT SEPARATE (her ruling, sitting
 //  round 6): the approval road (a request's Approve…) admits the client with
 //  ZERO reach. The sheet still OFFERS a grant, but starts on "Nothing yet" —
@@ -53,6 +60,8 @@ struct MCPGrantSheet: View {
         case notes
         case book
         case wing
+        /// VX-549: a gathering — the notes its rule gathers now.
+        case gathering
     }
 
     /// A pre-filled WHERE — `MCPGrantPrefill`, the road's own type since 13n-c
@@ -64,6 +73,8 @@ struct MCPGrantSheet: View {
     /// 13n-c U3: the several notes a `.notes` opening names, in its order.
     @State private var notes: [MCPGrantPicker.NoteRow] = []
     @State private var bookID: String?
+    /// VX-549: the gathering picked.
+    @State private var gatheringID: String?
     @State private var wingID: String = ""
     /// The note leg's wing (the window's current one by default).
     @State private var noteWingID: String = ""
@@ -80,6 +91,9 @@ struct MCPGrantSheet: View {
     @State private var wingRows: [SearchPickerOption] = []
     @State private var bookDistinguishers: [String: String] = [:]
     @State private var wingDistinguishers: [String: String] = [:]
+    /// VX-549: the gathering picker's layout and its distinguishers (once per load).
+    @State private var gatheringLayouts: [SearchPickerArrangement] = []
+    @State private var gatheringDistinguishers: [String: String] = [:]
     @State private var clients: [MCPClient] = []
     @State private var chosenClientID: String?
     /// VX-516: the opening's pre-fill has landed (`load` ran to its end) —
@@ -121,6 +135,17 @@ struct MCPGrantSheet: View {
         places.books.first { $0.id == bookID }
     }
 
+    /// VX-549: the gathering picked, as offered.
+    private var chosenGathering: Queries.MCPGrantableGathering? {
+        places.gatherings.first { $0.id == gatheringID }
+    }
+
+    /// **The rungs HOW MUCH offers** (VX-549): every rung, except on a
+    /// gathering whose rule needs a star — read and suggest only (her ruling).
+    private var offeredRungs: [MCPGrantRule.Rung] {
+        MCPGrantPicker.offeredRungs(needsStar: place == .gathering && chosenGathering?.needsStar == true)
+    }
+
     /// The fence of the chosen NOTE (a book or wing grant is never fenced —
     /// the offer leaves fenced books out). Several notes: the first fenced
     /// one's — any one withholds "always" for the whole act.
@@ -128,7 +153,7 @@ struct MCPGrantSheet: View {
         switch place {
         case .note: note?.fence
         case .notes: notes.lazy.compactMap(\.fence).first
-        case .nothing, .book, .wing: nil
+        case .nothing, .book, .wing, .gathering: nil
         }
     }
 
@@ -140,7 +165,7 @@ struct MCPGrantSheet: View {
     private var canConfirm: Bool {
         // W-UX-2: the approval alone is always an act (its client is named).
         if place == .nothing { return opening.approving && client != nil }
-        guard client != nil, offeredDurations.contains(duration) else { return false }
+        guard client != nil, offeredDurations.contains(duration), offeredRungs.contains(rung) else { return false }
         return place == .notes ? !notes.isEmpty : spec != nil
     }
 
@@ -149,7 +174,7 @@ struct MCPGrantSheet: View {
         guard client != nil else { return nil }
         return Self.spec(
             place: place, noteID: note?.id, bookID: chosenBook?.id, wingID: wingID, rung: rung,
-            duration: duration, offered: offeredDurations)
+            duration: duration, offered: offeredDurations, gatheringID: chosenGathering?.id)
     }
 
     /// **The grant as picked** (pure — 13n-c UX walk W-UX-2's pin drives it):
@@ -157,7 +182,7 @@ struct MCPGrantSheet: View {
     /// nothing is picked.
     static func spec(
         place: Place, noteID: String?, bookID: String?, wingID: String, rung: MCPGrantRule.Rung,
-        duration: MCPGrantRule.Duration, offered: [MCPGrantRule.Duration]
+        duration: MCPGrantRule.Duration, offered: [MCPGrantRule.Duration], gatheringID: String? = nil
     ) -> Operations.MCPGrantSpec? {
         guard offered.contains(duration) else { return nil }
         switch place {
@@ -173,6 +198,9 @@ struct MCPGrantSheet: View {
             return .init(rung: rung, scopeKind: .book, scopeID: bookID, duration: duration)
         case .wing:
             return .init(rung: rung, scopeKind: .wing, scopeID: wingID, duration: duration)
+        case .gathering:
+            guard let gatheringID else { return nil }
+            return .init(rung: rung, scopeKind: .gathering, scopeID: gatheringID, duration: duration)
         }
     }
 
@@ -182,7 +210,8 @@ struct MCPGrantSheet: View {
     /// (pure): the note, the several notes, the book or the wing picked;
     /// nothing while WHERE is incomplete or nothing is picked.
     static func confirmedPlaces(
-        place: Place, noteID: String?, noteIDs: [String], bookID: String?, wingID: String
+        place: Place, noteID: String?, noteIDs: [String], bookID: String?, wingID: String,
+        gatheringID: String? = nil
     ) -> Set<MCPGrantChange.Place> {
         switch place {
         case .nothing: []
@@ -190,6 +219,7 @@ struct MCPGrantSheet: View {
         case .notes: Set(noteIDs.map { MCPGrantChange.Place(.note, $0) })
         case .book: bookID.map { [MCPGrantChange.Place(.book, $0)] } ?? []
         case .wing: [MCPGrantChange.Place(.wing, wingID)]
+        case .gathering: gatheringID.map { [MCPGrantChange.Place(.gathering, $0)] } ?? []
         }
     }
 
@@ -236,7 +266,8 @@ struct MCPGrantSheet: View {
     /// What this confirm replaces, as picked now.
     private var replacingNow: [String] {
         Self.replacing(opening, confirmed: Self.confirmedPlaces(
-            place: place, noteID: note?.id, noteIDs: notes.map(\.id), bookID: chosenBook?.id, wingID: wingID))
+            place: place, noteID: note?.id, noteIDs: notes.map(\.id), bookID: chosenBook?.id, wingID: wingID,
+            gatheringID: chosenGathering?.id))
     }
 
     /// Whether the faces say CHANGE (the title, the replaces line): the
@@ -281,6 +312,7 @@ struct MCPGrantSheet: View {
         case .nothing, .note, .notes: .note
         case .book: .book
         case .wing: .wing
+        case .gathering: .gathering
         }
     }
 
@@ -291,6 +323,7 @@ struct MCPGrantSheet: View {
         case .notes: MCPShareCopy.notesCount(notes.count)
         case .book: chosenBook?.name ?? ""
         case .wing: places.wingName(wingID)
+        case .gathering: chosenGathering?.name ?? ""
         }
     }
 
@@ -299,6 +332,7 @@ struct MCPGrantSheet: View {
         case .nothing, .note, .notes: nil
         case .book: bookID.flatMap { bookDistinguishers[$0] }
         case .wing: wingDistinguishers[wingID]
+        case .gathering: gatheringID.flatMap { gatheringDistinguishers[$0] }
         }
     }
 
@@ -337,6 +371,7 @@ struct MCPGrantSheet: View {
                     }
                     Text(MCPPaneCopy.aNote).tag(Place.note)
                     Text(MCPPaneCopy.aBook).tag(Place.book)
+                    Text(MCPPaneCopy.aGathering).tag(Place.gathering)
                     Text(MCPPaneCopy.thisWing).tag(Place.wing)
                 }
                 .pickerStyle(.radioGroup)
@@ -349,7 +384,7 @@ struct MCPGrantSheet: View {
             if place != .nothing {
                 section(MCPPaneCopy.howMuchSection)
                 Picker(MCPPaneCopy.howMuchSection, selection: $rung) {
-                    ForEach(MCPPaneCopy.offeredRungs, id: \.self) { rung in
+                    ForEach(offeredRungs, id: \.self) { rung in
                         Text(MCPPaneCopy.rungName(rung)).tag(rung)
                     }
                 }
@@ -362,6 +397,11 @@ struct MCPGrantSheet: View {
                 ExplainerLine(
                     line: MCPPaneCopy.rungSummary(rung, scope: scope),
                     detail: MCPPaneCopy.rungDetail(rung, scope: scope))
+                // VX-549: a star-rule gathering's one-line why (write new and
+                // edit withheld — her ruling).
+                if offeredRungs.count < MCPPaneCopy.offeredRungs.count {
+                    quiet(MCPPaneCopy.starRuleWhy)
+                }
 
                 section(MCPPaneCopy.howLongSection)
                 Picker(MCPPaneCopy.howLongSection, selection: $duration) {
@@ -430,6 +470,10 @@ struct MCPGrantSheet: View {
         }
         .onChange(of: offeredDurations) { _, offered in
             if !offered.contains(duration) { duration = offered.first ?? .once }
+        }
+        // VX-549: a star-rule gathering picked takes the highest rung it offers.
+        .onChange(of: offeredRungs) { _, offered in
+            if !offered.contains(rung) { rung = offered.last ?? .read }
         }
     }
 
@@ -523,6 +567,27 @@ struct MCPGrantSheet: View {
         case .wing:
             wingPicker(selection: wingID) { wingID = $0 }
             quiet(MCPPaneCopy.wingDetail(places.wingName(wingID)))
+        case .gathering:
+            // VX-549 — the same picker control, its own layout.
+            if places.gatherings.isEmpty {
+                quiet(MCPPaneCopy.noGatherings)
+            } else {
+                SearchPicker(
+                    tokens: tokens, label: MCPPaneCopy.chooseGathering, prompt: MCPPaneCopy.gatheringPrompt,
+                    options: [], emptyText: MCPPaneCopy.noGatherings,
+                    onPick: { gatheringID = $0 },
+                    arrangements: gatheringLayouts,
+                    field: .init(
+                        value: chosenGathering?.name,
+                        annotation: placeDistinguisher,
+                        emphasized: placeDistinguisher != nil,
+                        placeholder: MCPPaneCopy.chooseGathering),
+                    panelWidth: 480)
+                quiet(MCPPaneCopy.aGatheringDetail(chosenGathering?.name))
+                if chosenGathering?.archived == true {
+                    quiet(MCPPaneCopy.archivedGatheringNote)
+                }
+            }
         }
     }
 
@@ -567,7 +632,7 @@ struct MCPGrantSheet: View {
         case .nothing: ""
         case .note: MCPShareCopy.quoted(placeName)
         case .notes: MCPShareCopy.notesCount(notes.count)
-        case .book: PlaceLabels.quoted(placeName, distinguisher: placeDistinguisher)
+        case .book, .gathering: PlaceLabels.quoted(placeName, distinguisher: placeDistinguisher)
         case .wing: MCPShareCopy.wingPlace(placeName)
         }
     }
@@ -631,6 +696,8 @@ struct MCPGrantSheet: View {
         wingRows = MCPGrantPicker.wingOptions(places, now: now)
         bookDistinguishers = places.bookDistinguishers(now: now)
         wingDistinguishers = places.wingDistinguishers(now: now)
+        gatheringLayouts = MCPGrantPicker.gatheringArrangements(places, now: now)
+        gatheringDistinguishers = places.gatheringDistinguishers(now: now)
         clients = opening.client == nil ? await loadedClients : []
         if chosenClientID == nil { chosenClientID = clients.first?.id }
         noteWingID = door.currentWingID
@@ -665,6 +732,9 @@ struct MCPGrantSheet: View {
         case .wing(let id)?:
             place = .wing
             wingID = id
+        case .gathering(let id)?:
+            place = .gathering
+            gatheringID = id
         case nil:
             let start = Self.start(
                 approving: opening.approving, mostRecentBookID: places.recentlyEdited(limit: 1).first?.id)
@@ -673,6 +743,7 @@ struct MCPGrantSheet: View {
             duration = start.duration
         }
         if !offeredDurations.contains(duration) { duration = offeredDurations.first ?? .once }
+        if !offeredRungs.contains(rung) { rung = offeredRungs.last ?? .read }
         prefillApplied = true
     }
 

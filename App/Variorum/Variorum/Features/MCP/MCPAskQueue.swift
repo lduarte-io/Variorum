@@ -111,10 +111,16 @@ nonisolated struct MCPAskQueue: Equatable, Sendable {
         MCPAskBoard(faces: entries.map { Self.face($0.ask, raise: $0.raise) })
     }
 
+    /// VX-549 (PROVISIONAL MB-17 — MB-10's question, answered): an ask on a
+    /// GATHERING keys as its READING — `.book(id)`, the key every face that
+    /// draws a reading's row already asks with (the Bookcase's and the Library's
+    /// gathering rows, the Book Panel's gatherings line draw
+    /// `MCPAskGlyph(.book(id))`); a reading id names one kind, so no book can
+    /// collide. No new target case, no face change.
     static func target(_ ask: MCPAsk) -> MCPAskTarget {
         switch ask.scopeKind {
         case .note: .note(ask.scopeID)
-        case .book: .book(ask.scopeID)
+        case .book, .gathering: .book(ask.scopeID)
         case .wing: .wing(ask.scopeID)
         }
     }

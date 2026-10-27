@@ -235,7 +235,13 @@ nonisolated enum MCPPaneCopy {
     /// 13n-c U2 (R2-3): a live grant whose target is fenced since reaches
     /// NOTHING — the row says so instead of calling it shared, and why.
     static func inertDetail(_ fence: MCPGrantRule.Fence, kind: MCPGrantRule.ScopeKind) -> String {
-        let place = kind == .note ? "note" : "book"
+        // VX-549: a gathering grant is inert while its gathering is fenced (a
+        // stale row — no op fences one).
+        let place = switch kind {
+        case .note: "note"
+        case .gathering: "gathering"
+        case .book, .wing: "book"
+        }
         switch fence {
         case .privateMark: return "inert \u{2014} the \(place) is marked Private, which always asks"
         case .journal:
@@ -278,6 +284,7 @@ nonisolated enum MCPPaneCopy {
         case .note: "note"
         case .book: "book"
         case .wing: "wing"
+        case .gathering: "gathering"
         }
     }
 
@@ -383,6 +390,8 @@ nonisolated enum MCPPaneCopy {
         switch kind {
         case "book": "a book"
         case "wing": "a wing"
+        // VX-549: a note written into a gathering logs the gathering.
+        case "gathering": "a gathering"
         default: "a note"
         }
     }
@@ -881,6 +890,30 @@ nonisolated enum MCPPaneCopy {
         name.map { "\u{201C}\($0)\u{201D} \u{2014} its notes, takes and tags" } ?? "choose a book"
     }
     static let thisWing = "A wing"
+    /// VX-549 (her sitting 2026-10-27 — PROVISIONAL words, her copy pass): a
+    /// gathering as a grant place. Its detail says the feature in one line:
+    /// reach follows her tags.
+    static let aGathering = "A gathering"
+    static func aGatheringDetail(_ name: String?) -> String {
+        name.map { "\u{201C}\($0)\u{201D} \u{2014} the notes its rule gathers now, as your tags change" }
+            ?? "choose a gathering"
+    }
+    static let gatheringPrompt = "Find a gathering"
+    static let chooseGathering = "Choose a gathering"
+    static let noGatherings = "No gathering can be shared yet."
+    static let allGatherings = "All gatherings"
+    /// **The one-line why a star-rule gathering is read/suggest-shaped**
+    /// (her sitting: "the grant sheet presents such a grant as
+    /// read/suggest-shaped"): starring is not on the wire, so a client can
+    /// never write a new note into it — the write rungs are not offered.
+    static let starRuleWhy =
+        "Its rule needs a starred note, and only you can star one \u{2014} so a client can read and "
+        + "suggest here, but not write new or edit."
+    /// An archived gathering assembles nothing until it is unarchived.
+    /// A star-rule gathering's row footing in the picker.
+    static let readAndSuggestOnly = "read and suggest only"
+    static let archivedGatheringNote =
+        "This gathering is archived, so it gathers nothing until you unarchive it."
     /// 13n-c U1 (VX-163, J8 — mockup §8's words): a journal-style book is
     /// in the wing like any book; only the daily Journal and anything
     /// Private ask.
@@ -1012,6 +1045,9 @@ nonisolated enum MCPPaneCopy {
             switch scope {
             case .note?: "it can also apply tags and save versions of it"
             case .book?: "it can also make new notes and chapters in it and apply tags"
+            // VX-549 (PROVISIONAL words): create_note and apply_tag act under a
+            // gathering grant (`MCPToolFacts` — the truth pin reads it).
+            case .gathering?: "it can also make new notes in it, wearing the tags its rule needs, and apply tags"
             case .wing?, nil: "it can also make new notes, apply tags and build books"
             }
         case .edit:
@@ -1092,6 +1128,8 @@ nonisolated enum MCPPaneCopy {
         switch scope {
         case .book: ", including to future entries"
         case .wing: ", including notes added later"
+        // VX-549 (PROVISIONAL words): a gathering's reach is its rule's, live.
+        case .gathering: ", including notes its rule gathers later"
         case .note: ""
         }
     }
@@ -1262,6 +1300,11 @@ nonisolated enum MCPAskCopy {
                 : "Allowing grants it in \(PlaceLabels.quoted(ask.title, distinguisher: distinguisher)), "
                     + "including to future entries."
         case .wing: "Allowing grants it in the \(ask.title) wing, including notes added later."
+        // VX-549 (PROVISIONAL words): a gathering's live reach.
+        case .gathering:
+            ask.fence != nil ? nil
+                : "Allowing grants it in \(PlaceLabels.quoted(ask.title, distinguisher: distinguisher)), "
+                    + "including notes its rule gathers later."
         }
     }
 
@@ -1281,6 +1324,10 @@ nonisolated enum MCPAskCopy {
         case (.book, .privateMark?):
             "This book is marked Private now, which no grant reaches \u{2014} its notes are shared "
                 + "one ask at a time. \(dontAllow) lets this ask go."
+        // VX-549: a gathering fenced since (a stale row — no op fences one)
+        // takes no grant at all.
+        case (.gathering, _?):
+            "This gathering is marked Private now, which no grant reaches. \(dontAllow) lets this ask go."
         case (_, .journal?): "A daily Journal entry. Your daily Journal is only ever shared one ask at a time."
         case (_, .privateMark?): "Marked Private. Private notes are only ever shared one ask at a time."
         // 13n-c UX walk W-UX-14: what THIS scope's grant allows, never more.

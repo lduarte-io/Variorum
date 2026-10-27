@@ -235,7 +235,9 @@ struct MCPAskAndReceiptTests {
             #expect(MCPToolFacts.rung(of: tool) == .writeNew, "\(tool) is a write-new tool")
         }
         #expect(MCPToolFacts.scopes(of: "create_book") == [.wing], "a book is born in a wing — never under a book grant")
-        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing] {
+        // VX-549 (A JUSTIFIED EDIT — the truth pin grows with the scopes): a
+        // GATHERING ask's sentence claims only what a gathering grant can do.
+        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing, .gathering] {
             let asked = MCPAsk(
                 clientName: "claude-code", scopeKind: scope, scopeID: "x", title: "the lightning thief",
                 rung: .writeNew, fence: nil)
@@ -291,7 +293,7 @@ struct MCPAskAndReceiptTests {
                 + "rewrites a take, the take's words before and after are kept as commits, so you can always "
                 + "compare and come back",
                 "the edit rung as built")
-        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing] {
+        for scope in [MCPGrantRule.ScopeKind.note, .book, .wing, .gathering] {  // VX-549: + gathering
             let line = MCPPaneCopy.rungDetail(.edit, scope: scope)
             #expect(!line.contains("book") && !line.contains("chapter"),
                     "the book-level edit acts never act under a note grant (MCPToolFacts): \(line)")

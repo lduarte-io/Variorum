@@ -124,7 +124,7 @@ struct MCPWireRefusalSweepTests {
     /// **The cases no wire answer can carry as a refusal**, each with its proof
     /// (the SWEEP TABLE's U-graph, U-hand, X and C rows, verbatim in short).
     static let unspokenOnTheWire: [String: String] = [
-        // U-graph (17): no function a wire tool reaches throws it (the sweep's
+        // U-graph (16 since VX-549): no function a wire tool reaches throws it (the sweep's
         // call graph, `notes/plans/fixes/vx-336-u9-sweep/callgraph-35f9cd70.json`,
         // kept in the VX-336 branch's history at `e454a8ef` and removed from main
         // at the run's closeout).
@@ -143,7 +143,6 @@ struct MCPWireRefusalSweepTests {
         "notVersionHistory": "graph: unreachable",
         "readingHasNoAutoTag": "graph: unreachable",
         "referenceNotFound": "graph: unreachable",
-        "smartFilterUnsatisfiable": "graph: unreachable",
         "spanNotExtractable": "graph: unreachable",
         // U-hand (13): reachable by name, proven unreachable by hand.
         "duplicateTagPath": "adoptPath mints a segment only after reading no live tag holds the path, same transaction",
@@ -181,7 +180,10 @@ struct MCPWireRefusalSweepTests {
         let declared = Set(try Self.declaredCases())
         #expect(Set(Self.unspokenOnTheWire.keys).isSubset(of: declared),
                 "\(Set(Self.unspokenOnTheWire.keys).subtracting(declared).sorted())")
-        #expect(Self.unspokenOnTheWire.count == 33, "17 graph + 13 by hand + 1 posture + 2 by their tool")
+        // VX-549 (A JUSTIFIED EDIT): `smartFilterUnsatisfiable` left the graph's
+        // unreachable set — a new note written into a gathering meets it, and
+        // the wire words it (her door's own sentence, `MCPWireRefusalCopy`).
+        #expect(Self.unspokenOnTheWire.count == 32, "16 graph + 13 by hand + 1 posture + 2 by their tool")
         #expect(Self.unspokenOnTheWire.values.allSatisfy { !$0.isEmpty })
     }
 
@@ -197,6 +199,6 @@ struct MCPWireRefusalSweepTests {
             #expect(!spoken.contains(name + "("), "\(name): \(spoken)")
             #expect(spoken != String(describing: error), "\(name): \(spoken)")
         }
-        #expect(walked == 75, "65 worded + the 10 this unit words")
+        #expect(walked == 76, "65 worded + the 10 this unit words + VX-549's gathering refusal")
     }
 }

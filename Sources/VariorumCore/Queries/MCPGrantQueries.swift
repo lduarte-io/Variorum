@@ -730,12 +730,82 @@ extension Queries {
     /// U2): the offered books with their facts, the live shelves of every
     /// wing in strip order (left to right — All's top to bottom, §24), and
     /// the live additional wings in switcher order (Home is virtual, '').
+    /// VX-549: and the offered GATHERINGS (`mcpGrantableGatherings`).
     public static func mcpGrantPlaces(_ db: Database) throws -> MCPGrantPlaces {
         MCPGrantPlaces(
             books: try mcpGrantableBooks(db),
             shelves: try Shelf.fetchAll(
                 db, sql: "SELECT * FROM shelf WHERE deleted_at IS NULL ORDER BY position, id"),
-            wings: try wings(db))
+            wings: try wings(db),
+            gatherings: try mcpGrantableGatherings(db))
+    }
+
+    /// **One gathering a grant may name** (VX-549 — the grant sheet's WHERE):
+    /// its id, name, wing, shelf and star as the Bookcase reads them, whether
+    /// it is archived (a legal place that assembles empty — its grant reaches
+    /// nothing until it is unarchived), and whether its rule NEEDS A STAR
+    /// (`GatheringMint.needsStar` — her sitting: "the grant sheet presents
+    /// such a grant as read/suggest-shaped": a client can't star, so it can
+    /// never write a new note into it).
+    public struct MCPGrantableGathering: Equatable, Sendable, Identifiable {
+        public let id: String
+        public let name: String
+        public let wingID: String
+        /// Its shelf as the Bookcase reads it (nil = unshelved, or dangling).
+        public let shelfID: String?
+        public let starred: Bool
+        public let archived: Bool
+        public let needsStar: Bool
+        public let createdAt: String
+
+        public init(
+            id: String, name: String, wingID: String, shelfID: String? = nil, starred: Bool = false,
+            archived: Bool = false, needsStar: Bool = false, createdAt: String
+        ) {
+            self.id = id
+            self.name = name
+            self.wingID = wingID
+            self.shelfID = shelfID
+            self.starred = starred
+            self.archived = archived
+            self.needsStar = needsStar
+            self.createdAt = createdAt
+        }
+    }
+
+    /// **The gatherings the grant sheet offers** (VX-549): every live
+    /// GATHERING the fence does not exclude (the same two fragments a book's
+    /// offer reads — a stale Private stamp or 'daily' marker, which no op mints
+    /// on a gathering, is never offered: the op refuses it), by name. No note
+    /// count — that would be an assembly per gathering; the row says its wing,
+    /// shelf and state. ∝ the gatherings (shelf-scale), one-shot, never held.
+    public static func mcpGrantableGatherings(_ db: Database) throws -> [MCPGrantableGathering] {
+        let starred = try starredReadingIDs(db)
+        let shelfWings = Dictionary(uniqueKeysWithValues: try Row.fetchAll(
+            db, sql: "SELECT id, wing_id FROM shelf WHERE deleted_at IS NULL"
+        ).map { ($0["id"] as String, $0["wing_id"] as String) })
+        return try Row.fetchAll(
+            db,
+            sql: """
+                SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing, r.shelf_id,
+                       r.archived_at, r.query_spec, r.created_at
+                FROM reading r
+                WHERE r.deleted_at IS NULL AND r.kind = 'gathering'
+                  AND NOT (\(dailyJournalLegForBook))
+                  AND NOT (\(privateLegForBook))
+                ORDER BY r.name COLLATE NOCASE, r.id
+                """
+        ).map { row in
+            let wing: String = row["wing"]
+            let shelf: String? = row["shelf_id"]
+            return MCPGrantableGathering(
+                id: row["id"], name: row["name"], wingID: wing,
+                shelfID: shelf.flatMap { shelfWings[$0] == wing ? $0 : nil },
+                starred: starred.contains(row["id"]),
+                archived: (row["archived_at"] as String?) != nil,
+                needsStar: GatheringMint.needsStar(RuleGrammar.decode(row["query_spec"])),
+                createdAt: row["created_at"])
+        }
     }
 
     /// **The Private leg for a note** (R-13nb-4, wired at 13n-b U2 over

@@ -784,7 +784,8 @@ final class MCPDoor {
     /// fenced book is never a grant scope (`insertMCPGrant` refuses every
     /// duration), so any answer drawn there would be a dead door (P-2).
     func durations(for ask: MCPAsk) -> [MCPGrantRule.Duration] {
-        if ask.scopeKind == .book, ask.fence != nil { return [] }
+        // VX-549: a fenced GATHERING likewise (no op names one).
+        if ask.scopeKind == .book || ask.scopeKind == .gathering, ask.fence != nil { return [] }
         var offered: [MCPGrantRule.Duration] = [.once]
         if connected.contains(ask.clientName) { offered.append(.connection) }
         if ask.offersAlways { offered.append(.always) }
@@ -862,6 +863,11 @@ final class MCPDoor {
             fence = facts.fence
         case .wing:
             fence = nil
+        // VX-549: a gathering asked on (a client's write into it past its
+        // rung) — gone when it is no longer a live gathering.
+        case .gathering:
+            guard let facts = try Queries.mcpGatheringFacts(db, readingID: ask.scopeID) else { return nil }
+            fence = facts.fence
         }
         guard let title = try Queries.mcpScopeTitle(db, kind: ask.scopeKind, id: ask.scopeID) else { return nil }
         return MCPAsk(
@@ -1108,7 +1114,11 @@ final class MCPDoor {
     /// shared row or an ask names the same book the sheet's picker did.
     func placeDistinguishers(now: Date = Date()) async -> (books: [String: String], wings: [String: String]) {
         let places = await grantPlaces()
-        return (places.bookDistinguishers(now: now), places.wingDistinguishers(now: now))
+        // VX-549: a gathering's distinguisher rides the books' map (one table,
+        // one id space — a reading id names one kind).
+        let readings = places.bookDistinguishers(now: now)
+            .merging(places.gatheringDistinguishers(now: now)) { book, _ in book }
+        return (readings, places.wingDistinguishers(now: now))
     }
 
     private func read<T: Sendable>(_ body: @escaping @Sendable (Database) throws -> T) async -> T? {

@@ -29,6 +29,7 @@ extension MCPDoor {
         case .note: .note(spec.scopeID)
         case .book: .book(spec.scopeID)
         case .wing: .wing(spec.scopeID)
+        case .gathering: .gathering(spec.scopeID)
         }
         share(client: client, prefill: prefill, rung: spec.rung, duration: spec.duration,
               replacing: replacing, saying: place, change: change) { ops in

@@ -359,9 +359,10 @@ struct BookPanelView: View {
     /// through each kind's ONE rule (`decide` for a book, `decideGathering`
     /// for a gathering — a note or book grant never icons a gathering,
     /// R-VX185-1; nothing read while no client is approved, VX-272), then
-    /// 13n-c U4's waiting ask on it. No ask ever targets a gathering
-    /// (`MCPAskTarget`; a gathering is no grant scope — VX-273), so a
-    /// gathering's glyph is the calm no-view, exactly as on the Bookcase.
+    /// 13n-c U4's waiting ask on it. Since VX-549 a gathering is a grant
+    /// scope and an ask may name one; it keys as its READING (`.book(id)` —
+    /// `MCPAskQueue.target`, PROVISIONAL MB-17), so this one glyph marks a
+    /// waiting ask on a gathering exactly as on a book, as on the Bookcase.
     /// Each mark is its own button: the name's own press never fires for them.
     @ViewBuilder
     private func readingMarks(_ readingID: String) -> some View {

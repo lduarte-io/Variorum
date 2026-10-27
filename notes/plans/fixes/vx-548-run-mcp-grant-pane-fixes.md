@@ -1029,20 +1029,36 @@ build-for-testing` into `DerivedData/b3` only — no `xcodebuild test`, no GUI, 
   scope (a justified edit). Core MCP/gathering suites 492/82 green (`core-mcp-1.log`). BEHAVIOURAL REVERT RUN
   (`decide-revert-red.log`; the facts derivation a no-op + `decideGathering` without the gathering's own grant): 6 of 7
   decide pins red, 18 issues (the op pin green — the revert left the op); restored by `git checkout --`, green again.
-- **3 · The wire:** IN-PROGRESS (WIP commit — the wire compiles headless; the Mac app's exhaustive switches are taught
-  in piece 4) — `MCPGrantAuthority.decide(gathering:rung:consumes:)`; no ask on a fenced gathering; `list_books`'
-  prefilter takes gathering grants; `list_notes()` candidates take each granted gathering's assembly; `search`'s reached
-  scopes take standing gathering grants; `create_note` / `import_document` (one document) take a gathering's id in
-  `book_id` (`into(…, admitsGathering: true)` → `intoGathering`: decided at write new on the place; refused rows
-  logged as the BOOK id sent; the ask raised ON the gathering) → `Operations.MCPNoteDestination.gathering` (her door's
-  refuse-before-mint planner with `starrable: false`, the rule's tags through `insertPostTag`, the belt, ONE undo);
-  `MCPWireRefusalCopy` words `smartFilterUnsatisfiable` as her door's own sentence; `everyScope`, `list_books`,
-  `create_note`, `import_document` list under a gathering grant; descriptions + `MCPSession.instructions` (2,988 ≤
-  3,000 — PENDING the count) name the gathering; the guide's two cards (PROVISIONAL copy). FLIPPED DELIBERATELY:
-  `MCPWingReachServerTests.aGatheringStaysNoGrantsScopeAndNoWritesTarget` → `aGatheringIsAGrantScopeAndANewNotesTargetButNoBookStill`,
-  `MCPAdviceServerTests`' VX-273 clause, `TutorialMCPChapterTests`' fourth-card pins (Mac, compiled later). NEXT: the
-  wire's state-transition pins (`MCPGatheringGrantServerTests`).
-- **4 · The faces:** NOT-STARTED.
+- **3 · The wire:** DONE (`cc73fc8cf` WIP + `45cb7ee93` pins) — `MCPGrantAuthority.decide(gathering:rung:consumes:)`;
+  no ask on a fenced gathering; `list_books`' prefilter takes gathering grants; `list_notes()` candidates take each
+  granted gathering's assembly; `search`'s reached scopes take standing gathering grants; `create_note` /
+  `import_document` (one document) take a gathering's id in `book_id` (`into(…, admitsGathering: true)` →
+  `intoGathering`: the PLACE decided at write new; refused rows logged as the BOOK id sent; the ask raised ON the
+  gathering) → `Operations.MCPNoteDestination.gathering` (her door's refuse-before-mint planner with `starrable: false`,
+  the rule's tags through `insertPostTag`, the belt, ONE undo); `MCPWireRefusalCopy` words `smartFilterUnsatisfiable`
+  as her door's own sentence; `everyScope`, `list_books`, `create_note`, `import_document` list under a gathering grant;
+  descriptions + `MCPSession.instructions` (2,988 ≤ 3,000, measured) name the gathering; the guide's two cards
+  (PROVISIONAL copy). FLIPPED DELIBERATELY: `MCPWingReachServerTests.aGatheringStaysNoGrantsScopeAndNoWritesTarget` →
+  `aGatheringIsAGrantScopeAndANewNotesTargetButNoBookStill`, `MCPAdviceServerTests`' VX-273 clause,
+  `TutorialMCPChapterTests`' fourth-card pins. Pins `MCPGatheringGrantServerTests` (9) green (`wire-green-1.log`);
+  BEHAVIOURAL REVERT RUN (`wire-revert-red.log`: `intoGathering` bypassed, `list_books`' prefilter without gathering
+  ids, the refusal arm off): 7 of 9 red, 15 issues (suggest/edit green — the decide layer, reverted on its own above);
+  restored, green.
+- **4 · The faces:** DONE (this commit) — the grant sheet's WHERE grows "A gathering" on the same `SearchPicker`
+  (`MCPGrantPicker.gatheringArrangements` — Starred, then a–z; each row's footing: wing, shelf, archived, "read and
+  suggest only"); a star-rule gathering offers read and suggest only with `MCPPaneCopy.starRuleWhy`
+  (`MCPGrantPicker.offeredRungs(needsStar:)`); spec / confirmedPlaces / receipt place / prefill / Change… on its own
+  place (`MCPGrantPrefill.gathering`, `.place(of:)`); the ask road keys a gathering ask as its READING
+  (`MCPAskQueue.target` → `.book(id)` — PROVISIONAL MB-17); `askStanding` / `durations(for:)` learn it; the pane's and
+  ask sheet's distinguishers ride the books' map; copy for the kind chip, rung detail, live-reach clause, inert detail,
+  the ask's reach line and fenced lead, Activity's fallback noun. Core reads for the faces:
+  `Queries.mcpGrantableGatherings` (+ `MCPGrantPlaces.gatherings`, `place(_:)`, `gatheringDistinguishers`). Pins: Mac
+  `MCPGatheringGrantFacesTests` (6, compiled), core `MCPGatheringGrantDecideTests` +2 (the sheet's offer; the icon on a
+  granted gathering and its members' rows) green; justified edits `MCPAskAndReceiptTests` (the truth pin's scope loops
+  + gathering), `MCPWireRefusalSweepTests` (`smartFilterUnsatisfiable` now spoken: 33→32 unspoken, 75→76 walked),
+  `MCPShareFacesTests` (messages only — the place doors stay unbuilt, MB-18). Mac `build-for-testing` into
+  `DerivedData/b3`: TEST BUILD SUCCEEDED (`mac-bft3.log`; the one MCPGrantPicker warning is pre-existing). Mac RUN
+  PENDING (the orchestrator's stage).
 - **5 · Suites + Mac build-for-testing:** NOT-STARTED.
 
 ## LADDER RECORD
