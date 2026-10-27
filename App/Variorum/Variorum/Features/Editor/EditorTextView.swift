@@ -1047,6 +1047,21 @@ final class TypewriterScrollView: NSScrollView {
     /// Off ⇒ byte-identical to a plain NSScrollView (nothing is written).
     var typewriterRoomEnabled = true
 
+    /// **VX-441 — the find bar's opening and closing, reported** (the
+    /// Write readout's "the bar is up" input). `NSTextFinder` shows and hides
+    /// its bar through this `NSTextFinderBarContainer` property; the override
+    /// is the container's own, calls super, and changes nothing else.
+    var onFindBarVisibilityChange: (() -> Void)?
+
+    override var isFindBarVisible: Bool {
+        get { super.isFindBarVisible }
+        set {
+            let was = super.isFindBarVisible
+            super.isFindBarVisible = newValue
+            if was != newValue { onFindBarVisibilityChange?() }
+        }
+    }
+
     /// How many lines of air β1 keeps below the caret while she types (HER
     /// ruling, 2026-07-29: *"Yes — keep ~2 lines"*).
     static let caretClearanceLines: CGFloat = 2

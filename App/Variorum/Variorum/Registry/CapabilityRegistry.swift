@@ -1046,6 +1046,23 @@ nonisolated enum CapabilityRegistry {
                 + "right-click one in the Library. \(RecoveryPath.archivedSurface) keeps it, "
                 + "with no countdown.",
             availability: always),
+        // VX-425 (the VX-439 run, A-439-16) — **RENAME NOTE…**: the note-row
+        // menus' rename, through the ONE rename road (`LibraryViewModel.rename`
+        // → `renameContainer`) and the ONE ask (`noteRenameAlert`, seeded with
+        // the STORED title, never the display/date — R6-3). `always` for
+        // `.archiveNote`'s reason: the door carries the row it was opened on.
+        // Two renderers: the Library's note rows
+        // (`LibraryCatalogView.contextMenuCapabilities`) and the sidebar's —
+        // the Open list's rows and Starred's note rows
+        // (`SidebarView.noteRowMenuCapabilities`). A sealed note still renames
+        // (AppSpec §9: a seal never refuses a retitle).
+        Capability(
+            id: .renameNote, verb: "Rename\u{2026}", scope: .post,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Renaming acts on a note's row \u{2014} right-click one in the sidebar "
+                + "or the Library.",
+            availability: always),
         // 13j batch 6b (J1 — the purge doors). `.surface` acts on the Trash's
         // own rows and header; app scope because a Trash row can be any kind,
         // and the surface itself is app chrome, not a mode. Both back onto ONE
@@ -1475,18 +1492,26 @@ nonisolated enum CapabilityRegistry {
         // app were these two), every `NSMenuItem` keyEquivalent (all empty
         // strings) and both `performKeyEquivalent` overrides (⌘S, plus J7's
         // non-consuming ⌘Z/⌘⇧Z hint arm) — no bracket anywhere carries ⌥.
+        //
+        // VX-560 (the VX-439 run, A-439-12 — her scope call: "outside a text
+        // view only"): ⌘← / ⌘→ are each act's ALTERNATE key, the browser's —
+        // NOT a menu key equivalent (that would take line start/end from every
+        // text view): `BrowserNavKeyMonitor` acts only while no text holds the
+        // keyboard. The menus keep showing ⌥⌘[ / ⌥⌘].
         Capability(
             id: .navigateBack, verb: "Back", scope: .app,
             doors: [.menuBar, .surface],
             shortcutLabel: "\u{2325}\u{2318}[", takesAccess: nil,
             unavailableNote: "Nothing to go back to — this is where you started.",
-            availability: { ctx in ctx.canNavigateBack ? .act : .unavailable }),
+            availability: { ctx in ctx.canNavigateBack ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2190}"),
         Capability(
             id: .navigateForward, verb: "Forward", scope: .app,
             doors: [.menuBar, .surface],
             shortcutLabel: "\u{2325}\u{2318}]", takesAccess: nil,
             unavailableNote: "Nothing to go forward to — you haven't gone back.",
-            availability: { ctx in ctx.canNavigateForward ? .act : .unavailable }),
+            availability: { ctx in ctx.canNavigateForward ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2192}"),
         // VX-287 (the VX-283 run, U1) — **CLOSE NOTE**, her ruling verbatim:
         // *"for command W - can we do shift command W? i like that better than
         // control, it's more natural to type. i think landing in the next note
@@ -2056,6 +2081,41 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: GatheringNoteDoorCopy.unavailableNote, availability: always),
+        // VX-570 (the VX-439 run — A-439-4 + C-570-1; her 10-21 note:
+        // "command for new note within a book"): ⌥⌘N mints a member of the
+        // book the KEY window's focused pane shows, in any book mode (Index
+        // included), through the ONE act that book's own foot door runs —
+        // "+ new note" (`newPostInReading`), "+ new entry" on a journal-trait
+        // book (`newEntry`), and on a gathering the planner's note
+        // (`.newNoteInGathering`'s act, `newPostInGathering`). Its refusals
+        // are those doors' own, the operations layer's words on the book's
+        // line (a finished book, a full one, a rule a new note can't match).
+        // Doors: the File menu beside New Note (`.menuBar`), ⌘K (`.palette`),
+        // and the book foot's and Outline flow's "+ new note"/"+ new entry"
+        // (`.surface` — `BookView.surfaceCapabilities`; undeclared until now).
+        // Grey wherever the focused pane shows no book (P-2) — a note in its
+        // own pane is not a book context.
+        //
+        // `takesAccess: nil`, EXEMPT from the R118 parity table for
+        // `.openBookAtNote`'s reason, one step over: a BOOK-surface act. Its
+        // context is the book view, which carries no post mode, so no note
+        // mode can be "behind" another here — Write is as grey as Takes.
+        //
+        // **⌥⌘N — THE COLLISION SWEEP (2026-10-27, on `9637e5be2`).**
+        // `EditorCommands.keyEquivalent`'s `n` chords are ⌘N (New Note) and
+        // ⌘⇧N (the quick note); 13b 4D's old ⌥⌘N (New Block Below) moved to
+        // ⌘⇧⏎ at 13d batch 4 and no table, `.keyboardShortcut(` call site or
+        // key override carries it since; the system hot key is ⌃⌥⌘N (Carbon,
+        // a different chord — `noSystemChordShadowsAnInAppOneOrAnother` holds
+        // the pair apart); macOS reserves no ⌥⌘N. It reads as the ⌥
+        // "deliberate variant" of ⌘N: a new note, placed somewhere chosen.
+        Capability(
+            id: .newNoteInBook, verb: "New Note in This Book", scope: .book,
+            doors: [.menuBar, .palette, .surface],
+            shortcutLabel: "\u{2325}\u{2318}N", takesAccess: nil,
+            unavailableNote: "New Note in This Book makes a note inside the book you have open "
+                + "\u{2014} open a book first.",
+            availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable }),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],
@@ -2182,6 +2242,36 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Copy full text copies the note you have open \u{2014} open one first.",
             availability: noteScoped),
+        // VX-125 (the VX-439 run — A-439-1, her ask: "a per note export in
+        // markdown with variorum simple format"; the chord C-125-1): Copy full
+        // text's text written to a `.md` file through the ONE serializer
+        // (`NoteExport`). Its doors are Copy full text's grammar plus the File
+        // menu beside Export Library…: File ▸ Export Note… (`.menuBar`), ⌘K
+        // (`.palette`) and both `note ▾` menus (`.bottomBar` — R6-2); VX-425
+        // adds the sidebar's note rows. `noteScoped` — Copy full text's own rule.
+        //
+        // **⌥⌘S — THE COLLISION SWEEP (C-125-1, 2026-10-27, on `47802c610`).**
+        // The ruled ⇧⌘E is TAKEN (Extract Selection). ⌥⌘E and ⇧⌥⌘E would read
+        // as the ⌥ "deliberate variant" of ⌘E (Use Selection for Find) and of
+        // ⌘⇧E (Extract) — the reading `.moveSelectionToTake`'s sweep already
+        // refused. ⌥⌘S is her own words' chord ("keyboard shortcut for saving
+        // note") and the ⌥ variant of ⌘S: save this note OUT, as a file. FREE:
+        // `EditorCommands.keyEquivalent`'s only `s` chords are ⌘S, ⌘⇧S and
+        // ⌃⌘S; no `.keyboardShortcut(` call site in `Variorum/` or `Shared/`
+        // carries ⌥⌘S; `EditorTextView.performKeyEquivalent` matches bare ⌘S
+        // only (the exact modifier set); the system hot keys are [.quickNote]
+        // (⌃⌥⌘N); macOS reserves no ⌥⌘S.
+        //
+        // VX-425 (A-439-16): + `.contextMenu` — the sidebar's note rows (the
+        // Open list's and Starred's), each carrying its own row's note; the
+        // context rule below governs the menu, palette and bar doors only (the
+        // `.toggleStar` / `.openInNewWindow` split).
+        Capability(
+            id: .exportNote, verb: "Export Note\u{2026}", scope: .post,
+            doors: [.menuBar, .palette, .bottomBar, .contextMenu],
+            shortcutLabel: "\u{2325}\u{2318}S", takesAccess: .native,
+            unavailableNote: "Export Note writes the note you have open to a file \u{2014} open one first.",
+            availability: noteScoped),
         Capability(
             id: .exportLibrary, verb: "Export Library…", scope: .app,
             doors: [.menuBar, .palette],
@@ -2200,8 +2290,11 @@ nonisolated enum CapabilityRegistry {
         // Phase 13b Stage 2 (R113): the tutorial's product door — replace
         // wholesale after a spoken confirm; idempotent; fire-and-DO (it
         // seeds AND opens the fresh book).
+        // VX-602 (the VX-439 run, A-439-9 — her words: "'Restore Tutorial'
+        // should be restore field guide"): the door names the book it
+        // restores, the field guide; the tour is the onboarding tutorial.
         Capability(
-            id: .restoreTutorial, verb: "Restore Tutorial…", scope: .app,
+            id: .restoreTutorial, verb: "Restore Field Guide…", scope: .app,
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),

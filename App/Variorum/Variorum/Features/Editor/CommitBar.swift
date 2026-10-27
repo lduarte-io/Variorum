@@ -157,6 +157,8 @@ struct CommitBar: View {
             .duplicateNoteWithTags, .duplicateNoteWithoutTags,
             // 13n-a (R-13n-11): Copy for AI — the note ▾ menu's push gesture.
             .copyForAI,
+            // VX-125 (the VX-439 run): Export Note… — the same text, as a file.
+            .exportNote,
             // 13n-b U2 (R-13nb-4): the Private row, beside it (NOTE contexts).
             .markNotePrivate,
             // 13n-b U3: "Allow AI here", the Private row's neighbour.
@@ -514,6 +516,7 @@ struct CommitBar: View {
                         // her default, at the bar's trailing end BEFORE the
                         // counts. It yields first (`layoutPriority(-1)`),
                         // so no door or count ever moves for it.
+                        findReadoutFace
                         quietReceipt
                         trailingCluster
                     }
@@ -533,6 +536,7 @@ struct CommitBar: View {
                         .lineLimit(1)
                         .fixedSize()
                         Spacer(minLength: 8)
+                        findReadoutFace
                         quietReceipt
                         Group {
                             countsFace(narrowed: true)
@@ -551,6 +555,7 @@ struct CommitBar: View {
                         .lineLimit(1)
                         .fixedSize()
                         Spacer(minLength: 8)
+                        findReadoutFace
                         quietReceipt
                         helperDoor
                             .lineLimit(1)
@@ -579,6 +584,21 @@ struct CommitBar: View {
     /// The bar's own coordinate space (row 81's DEBUG oracle reads the row's
     /// frame in it against the bar's width).
     nonisolated static let barSpace = "variorum-commit-bar"
+
+    /// **VX-441 — the find readout** ("2 of 15"), muted at the trailing end
+    /// beside the status seam, drawn only while the find bar is up and the
+    /// selection is a match (`EditorViewModel.findReadout`). Weightless when
+    /// absent: nothing in the bar moves for it.
+    @ViewBuilder private var findReadoutFace: some View {
+        if let readout = model.findReadout {
+            Text(tokens.chromeLabel(readout))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .fixedSize()
+                .help(FindReadout.help)
+        }
+    }
 
     /// 18i: the ONE quiet slot this bar composes (both arrangements read
     /// it), reading the ONE centre — no per-bar copy, no second setting read.
@@ -671,7 +691,7 @@ struct CommitBar: View {
     private var helperDoor: some View {
         Button("?") { openWindow(id: "variorum-helper") }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help(HelperCheatSheet.summary)
+            .help(HelperCheatSheet.doorHelp)
     }
 
     /// **block ▾** (R6-2): the structural gestures plus the two block-scoped
@@ -842,6 +862,13 @@ struct CommitBar: View {
                     let session = model.session
                     let postID = model.postID
                     Task { await CopyForAI.copy(postID: postID, session: session) }
+                }
+                // VX-125 (the VX-439 run): Copy full text's text as a `.md`
+                // file — the ONE act every Export Note door runs.
+                Button(CapabilityRegistry.capability(.exportNote).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await NoteExport.export(postID: postID, session: session) }
                 }
                 // 13n-b U2 (R-13nb-4): "Private — never shared with AI", and
                 // the note's quiet lines (a Private book holding it; the

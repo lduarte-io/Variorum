@@ -236,6 +236,14 @@ nonisolated enum SettingsCatalog {
                 + "opens. This Mac only.",
             keywords: ["tabs", "tab", "open notes", "strip", "remember", "restore",
                        "relaunch", "launch", "startup", "reopen", "session"]),
+        // VX-589 (A-439-10): the Open list without what Starred already shows —
+        // her words were "starred" and "Open tabs", so both answer.
+        SettingsRow(
+            id: "hideStarredFromOpen", pane: .general, title: "Hide starred notes from Open",
+            blurb: "A starred note shows in Starred only, not in the Open list too. "
+                + "It is still open; unstar it and its row comes back. This Mac only.",
+            keywords: ["starred", "star", "stars", "duplicate", "duplication", "twice", "tabs",
+                       "open", "open notes", "hide", "sidebar"]),
 
         // MARK: Editor
         SettingsRow(

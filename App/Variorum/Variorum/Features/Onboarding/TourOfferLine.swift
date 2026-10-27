@@ -41,7 +41,12 @@ nonisolated enum TourOfferCopy {
     /// would be two doors with one name. The U1a brief's ruled fallback:
     /// name it "Take the Tour", and let the help-road sentence follow
     /// (PROVISIONAL — the U1a RECORD carries it).
-    static let menuTitle = "Take the Tour"
+    /// **VX-602 (the VX-439 run, A-439-9 — her words: "take the tour should be
+    /// the onboarding tutorial still. it's just confusing.")**: the tour is
+    /// named for what it is, the ONBOARDING tutorial, and the field guide's
+    /// doors say "field guide" (`.restoreTutorial`, Help ▸ Open the Field
+    /// Guide) — so "tutorial" names one thing on the Help menu, never two.
+    static let menuTitle = "Take the Onboarding Tutorial"
     /// The few seconds after "not now": where the tour lives from now on.
     /// Derived from the menu's name, so the two can never disagree.
     static var helpRoad: String { "Run it any time from Help \u{25B8} \(menuTitle)." }

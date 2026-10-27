@@ -88,6 +88,21 @@ nonisolated enum WingFollow {
         }
         return out
     }
+
+    /// **VX-425 — the sidebar note rows' wings**: for each listed note living
+    /// in ANOTHER wing than `current`, that wing's ID (its Move/Copy to Wing ▸
+    /// doors list the wings other than the note's own). Bounded by the rows
+    /// (P1).
+    static func crossWingIDs(
+        _ db: Database, noteIDs: [String], current: String
+    ) throws -> [String: String] {
+        var out: [String: String] = [:]
+        for id in noteIDs {
+            guard let wing = try Queries.effectiveWing(db, ofPost: id), wing != current else { continue }
+            out[id] = wing
+        }
+        return out
+    }
 }
 
 @MainActor

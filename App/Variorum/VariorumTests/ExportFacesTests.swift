@@ -142,12 +142,15 @@ struct ExportFacesTests {
             await exporter.writeBulkExport(to: root)
             #expect(exporter.lastError == nil)
             #expect(exporter.lastReport == "Exported 2 files.")
+            // VX-126 (her option A, 2026-10-27) — a DELIBERATE byte-pin update:
+            // a note's file is Copy full text's text, so a titled note's file
+            // leads with its `{t:"…"}` header line.
             #expect(try String(
                 contentsOf: root.appendingPathComponent("2026-07-10 A.md"),
-                encoding: .utf8) == "A body.")
+                encoding: .utf8) == "{t:\"A\"}\n\nA body.")
             #expect(try String(
                 contentsOf: root.appendingPathComponent("2026-07-11 B.md"),
-                encoding: .utf8) == "B body.")
+                encoding: .utf8) == "{t:\"B\"}\n\nB body.")
         }
     }
 }

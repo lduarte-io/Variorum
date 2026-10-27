@@ -91,8 +91,15 @@ struct NoteVersionsPaneTests {
         #expect(byID[.commitTake] == "\u{2318}S")
         #expect(byID[.saveNoteVersion] == "\u{2318}\u{21E7}S")
         #expect(byID[.toggleSidebar] == "\u{2303}\u{2318}S", "the platform's sidebar chord")
-        #expect(sChords.count == 3,
-                "the two moments and the sidebar toggle carry the `s` chords: \(sChords.map(\.0))")
+        // VX-125 (the VX-439 run — a DELIBERATE pin edit, caught by batch 2's
+        // stage run: batch 1's suite list missed this pin): a FOURTH `s`
+        // chord, ⌥⌘S Export Note… — C-125-1, the ⌥ "deliberate variant" of
+        // ⌘S (save this note OUT, as a file), confirmed by the architect and
+        // in her morning bundle. The pairing this pin guards (⌘S · ⌘⇧S) is
+        // untouched.
+        #expect(byID[.exportNote] == "\u{2325}\u{2318}S", "Export Note…, C-125-1")
+        #expect(sChords.count == 4,
+                "the two moments, the sidebar toggle and Export Note… carry the `s` chords: \(sChords.map(\.0))")
     }
 
     // MARK: - WALK-DRIVEN: the real mounted detail opens the real panel

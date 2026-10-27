@@ -152,7 +152,10 @@ struct Phase13SurfaceQueryTests {
 
             let manifest = try db.read { try Queries.bulkExportManifest($0) }
             let file = manifest.first { $0.relativePath.contains("Framed Post") }
-            #expect(file?.contents == "> the aside")
+            // VX-126 (option A) — a DELIBERATE byte-pin update: the note's
+            // file is Copy full text's text, header line first; the callout
+            // still maps to a blockquote in the body.
+            #expect(file?.contents == "{t:\"Framed Post\"}\n\n> the aside")
         }
     }
 

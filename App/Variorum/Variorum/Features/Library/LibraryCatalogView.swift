@@ -43,7 +43,11 @@ struct LibraryCatalogView: View {
     /// AI…" (`.mcpShareHere`, THE grant sheet pre-filled on the note). Before
     /// this line the walk stayed green only because the BOOK-row menus render
     /// the same act; a deleted Library door would never have turned it red.
-    static let contextMenuCapabilities: [CapabilityID] = [.mcpShareHere]
+    ///
+    /// VX-425 (the VX-439 run): + `.renameNote` — the row's "Rename…", declared
+    /// at last now the sidebar's note rows render the same act (one verb, one
+    /// ask — `noteRenameAlert`).
+    static let contextMenuCapabilities: [CapabilityID] = [.mcpShareHere, .renameNote]
 
     /// **THE MASTHEAD'S DOORS — AND THE ⋯ MENU IS GONE** (the post-13l polish
     /// round, ledger row 7 — her B1 ruling, verbatim: *"I want the ... menu in
@@ -243,7 +247,10 @@ struct LibraryCatalogView: View {
                 // quick-entry bar rides the Library too — type, ⏎, and the
                 // typed text IS a post, opened.
                 Divider().overlay(tokens.line)
-                QuickEntryBar(session: session, onOpen: onOpen)
+                // VX-552 (the VX-439 run): the wing a capture here lands in.
+                QuickEntryBar(
+                    session: session, onOpen: onOpen,
+                    wingName: wings?.currentName ?? WingWords.home)
                     .libraryGeometryProbe(.quickEntry)
             }
             // VX-350: the LIST yields when the room is short — the panel takes
@@ -360,22 +367,13 @@ struct LibraryCatalogView: View {
                 }
             }
         }
-        .alert(
-            "Rename Note",
-            isPresented: Binding(
-                get: { renameTarget != nil },
-                set: { if !$0 { renameTarget = nil } }),
-            presenting: renameTarget
-        ) { postID in
-            TextField("Title", text: $renameTitle)
-            Button("Rename") {
-                let title = renameTitle
-                Task {
-                    await library.rename(postID: postID, title: title)
-                    await model.refresh()
-                }
+        // VX-425: the ONE rename ask (hoisted — the sidebar's note rows
+        // present the same one), unchanged in words, seed and road.
+        .noteRenameAlert(target: $renameTarget, title: $renameTitle) { postID, title in
+            Task {
+                await library.rename(postID: postID, title: title)
+                await model.refresh()
             }
-            Button("Cancel", role: .cancel) {}
         }
         // 13l Act 2 (item 3): ONE host for both asks — a row's and the whole
         // selection's — so the wording cannot differ between them.
@@ -1341,7 +1339,7 @@ struct LibraryCatalogView: View {
                 onOpenInNewWindow(hit.id)
             }
         }
-        Button("Rename…") {
+        Button(CapabilityRegistry.capability(.renameNote).verb) {
             // 13g batch 7 (R6-3): a hit's `title` is already the display
             // answer, so a note showing its DATE must not seed the field
             // with that date — she would be naming it after itself.

@@ -179,7 +179,18 @@ struct SettingsShapeTests {
         // the Updates section renders after it) — the fold's cause was
         // fifteen controls ABOVE the appearance row, and that row still
         // sits second from the top.
-        #expect(general.count <= 6,
+        // VX-589 (a CONSEQUENTIAL pin edit, annotated in place — VX-139's
+        // shape exactly): "Hide starred notes from Open" joins the Open notes
+        // section as General's seventh row, BELOW keep-open-notes; the
+        // appearance row still sits second from the top, so the fold's cause
+        // (controls ABOVE it) is untouched. NO capture of the pane with its
+        // seventh row exists yet — the run's walk capture named
+        // "33-settings-general" shows the MCP pane, not General (the VX-439
+        // ladder's m-4), and the run's evidence slice could not reach the pane
+        // (Settings' interior takes no synthetic clicks). The live look at the
+        // fold is HERS — the VX-439 record's morning bundle item 24 (R2-3);
+        // until she takes it, this cap rests on the reasoning above.
+        #expect(general.count <= 7,
                 "the fold came from fifteen controls in one pane — this one stays short")
     }
 

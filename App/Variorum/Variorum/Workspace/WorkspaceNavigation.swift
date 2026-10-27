@@ -590,7 +590,9 @@ nonisolated enum WorkspaceNaming {
         let deletedPhrase = deleted == 1
             ? "1 block deleted from this note"
             : "\(deleted) blocks deleted from this note"
-        return "\(deletedPhrase) \u{2014} click to put any of them back"
+        // VX-426 (A-439-17): the badge's tooltip leads with the door's name —
+        // it opens the same Tray the masthead icon does.
+        return "Tray \u{2014} \(deletedPhrase); click to put any of them back"
     }
 
     /// The masthead's ONE tag door (the Act 10 correction round, row 15):
