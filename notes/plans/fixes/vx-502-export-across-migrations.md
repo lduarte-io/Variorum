@@ -68,7 +68,7 @@ dev-store copy so a merge-gating run can slot in.
 |---|---|---|
 | 0 | Kickoff: preflight whole; worktree + branch; in-flight row on main; VX-502 In Progress; coordinator announced, slot granted | DONE (this commit) |
 | 1 | Unit A: the subset rule + pins (a fresh opus-implementer, headless) | BUILT AND CLOSED by the implementer (`74cfc1733`…`272fdda65`), orchestrator-verified (commits, gate diff, faces diff, tree clean) — "UNIT A — LIVE STATUS" at this record's end; PENDING: the two Mac suites under a stage claim (`PlaintextExportBringInRoadTests` — the flipped app pin has NEVER EXECUTED, compiled only — and `U2WordsTests`; the walk window's test batch). Implementer findings adopted: F-A1 (D-A2's premise corrected — VX-461, not vx-309's merge, is why no content-bearing export predates v1_31; the canon delta cites VX-461), F-A2 (a stable newer export refuses at the PICK via `PickedCopy.classify`; the gate's catch covers only the between-reads race), F-A3 (MCP load-flakes only) |
-| 2 | The ladder on unit A's diff | ROUND 1 LANDED (`notes/plans/fixes/vx-502-ladder-round-1.md`, a fresh fable-reviewer: 0 BLOCKER · 1 MAJOR · 1 MINOR · 1 NIT + the already-scheduled gating condition; the architect's positions in the round file). The implementer's agree/dispute PENDING (the cross-model flow); fixes then a fresh round-2 reviewer |
+| 2 | The ladder on unit A's diff | ROUND 1 CLOSED (`vx-502-ladder-round-1.md`: 0·1·1·1; all three agreed and fixed `0e14d7bf8`…`a094d8e0a`, the era pin frozen at v1_31). ROUND 2 LANDED (`vx-502-ladder-round-2.md`, a fresh opus-reviewer: 0 BLOCKER · 0 MAJOR · 2 MINOR · 4 NIT; all r1 fixes SOUND) — THE FINAL ROUND (no new MAJOR): its fixes in flight (R2-M1/N1/N2 the implementer; R2-M2/N3/N4 the orchestrator, this commit), closed by the orchestrator's line-by-line check |
 | 3 | Unit B: the Castle-restore walk (an Opus session; stage via the coordinator; dev-castle.env; posture restored after) | SHAPE SETTLED with the coordinator (THE NEGOTIATED WALK below supersedes the kickoff legs); the walk session NOT YET SPAWNED — it builds the helper, runs --check, proposes the concrete plan back, then READY |
 | 4 | Closeout: canon deltas (SurfaceContracts Doors line citing VX-461; AppSpecRecord entry; QUESTIONS #239(a) note), canon-size, tickets triaged, handoff, PR, merge serialized with VX-439 | NOT STARTED |
 
@@ -202,9 +202,10 @@ the id the walk leaves.
    library (rule 17: fresh identity, posture of now, CURRENT pair — rule 7 means no fresh words are ever minted);
    the as-found steps aside WHOLE into the walk's own dated Previous Libraries entry (reported). Resume the walk
    library's hold (account-less — no round).
-3. THE JOIN: sign into the NAMED vxtest account (in the READY ping) and join by the ACCOUNT's secret
-   (type-prod-test-secret); the walk library adopts the account's pair. If the account is not in Castle, ENTER
-   Castle (both account secrets; the VX-469 line screenshotted).
+3. THE JOIN: RECORD the account's as-found posture first — Standard or Castle — by place, never value (R2-N4:
+   it is restored or reported at the end). Sign into the NAMED vxtest account (in the READY ping) and join by the
+   ACCOUNT's secret (type-prod-test-secret); the walk library adopts the account's pair. If the account is not in
+   Castle, ENTER Castle (both account secrets; the VX-469 line screenshotted).
 4. THE CASTLE BACKUP under pair P1 (the account's current pair); the pair noted by place, never value.
 5. THE PAIR CHANGE: Change passphrase → the prod-test env's passphrase2 (P2); the account's lock re-wraps in the
    same act (rule 7); prod-test files stay TRUE throughout (passphrase2 is a recorded field).
@@ -214,14 +215,19 @@ the id the walk leaves.
 7. THE RESTORE: Make this my library on the P1-era Castle backup, opened by the OLD pair; fresh identity, posture
    of now, current pair, lands HELD; the walk library steps aside (walk-owned, cleaned at the end).
 8. UNLOCK END TO END: lock (⌃⌘L), meet the Castle lobby, open with the current secrets.
-9. SYNC END TO END: Resume Sync; the round runs to "Synced" against the account under its CURRENT (P2) pair;
+9. SYNC END TO END (rewritten per R2-M2 — the restored library BINDS NO ACCOUNT, P-VX378-U2-4): Resume Sync lifts
+   the hold with NO round (screenshot VX-522's account-less banner — its own evidence line); then "Sync this
+   library…" — the JOIN — by P2 through type-prod-test-secret (recording whether R-529-7's proof fields keep the
+   words moment quiet); then the first round runs to "Synced" against the account under its CURRENT (P2) pair;
    content verified both directions (the pre-change note present; a new note pushed and confirmed through the
    test-road tooling).
-10. THE PAIR RESTORED: Change passphrase BACK (P2 → the env's passphrase) on the restored library, so
+10. THE PAIR RESTORED, on the now-JOINED library (R2-M2): Change passphrase BACK (P2 → the env's passphrase), so
     `~/.variorum/prod-test-accounts.env` and `prod-test-words-<account>` are TRUE at release with ZERO edits (the
     coordinator checks this at RELEASE). If a failed leg strands P2, the files are updated to truth in the same
-    window (values never printed) and RELEASE says so. Then sign OUT (the resting posture; rule 16 — no key
-    change).
+    window (values never printed) and RELEASE says so. Then the ACCOUNT's posture restored (R2-N4): if leg 3
+    found it STANDARD, follow the restored library back out (Use Standard — both secrets; rule 12's leave walked
+    as its own evidence line); if found CASTLE, leave it in Castle. Then sign OUT (the resting posture; rule 16 —
+    no key change).
 11. THE HAND-RETURN (the coordinator's conditions, verbatim): the app quit and ZERO instances proven with the
     strict pgrep forms before any move; whatever occupies the live slot set aside WHOLE and reported, never
     overwritten or merged into; the stepped-aside as-found set returned whole by a SAME-VOLUME move, no partial
@@ -275,11 +281,11 @@ Sonnet for external facts.
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| 1 | The gate flipped to the ratified subset rule (D-A1) | unit A | OPEN |
-| 2 | The read-tolerance verification + the standing feature-detect duty recorded (D-A2) | unit A | OPEN |
-| 3 | Pins 1–3 + the behavioral reverts (D-A3) | unit A | OPEN |
-| 4 | The faces: dead string deleted, docs updated (D-A1/D-A4) | unit A | OPEN |
-| 5 | The ladder round(s) + dispositions | orchestrator | OPEN |
+| 1 | The gate flipped to the ratified subset rule (D-A1) | unit A | DONE (`e56920846`; unit A's table) |
+| 2 | The read-tolerance verification + the standing feature-detect duty recorded (D-A2) | unit A | DONE (`74cfc1733` + the gate comment; premise corrected per F-A1 — VX-461) |
+| 3 | Pins 1–3 + the behavioral reverts (D-A3) | unit A | DONE (`996478bd8`, reverts `a7434545a`; + the era pin `074c73023`) |
+| 4 | The faces: dead string deleted, docs updated (D-A1/D-A4) | unit A | DONE (`e56920846`, F-2's doc `0e14d7bf8`) |
+| 5 | The ladder round(s) + dispositions | orchestrator | r1 CLOSED; r2 (final) fixes in flight — rows in LIVE STATUS |
 | 6 | The walk, legs 1–8 | unit B | OPEN |
 | 7 | Canon deltas + QUESTIONS #239(a) note + AppSpecRecord entry | closeout | OPEN |
 | 8 | Tickets triaged; handoff; PR; merge serialized vs VX-439 | closeout | OPEN |

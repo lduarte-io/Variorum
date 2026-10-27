@@ -72,10 +72,10 @@ reviewer for the final call; the implementer applies what is confirmed; a fresh 
 - **The gating condition — already scheduled** (the walk window's test batch runs before any dev-store act;
   the record's piece-1 row carries it).
 
-*(The implementer's agree/dispute, the confirmed set, and the fixes' hashes and evidence land below WHEN THEY
-HAPPEN — nothing in this section below this line exists yet.)*
+*(This round is CLOSED: the implementer agreed to all three findings, the fixes landed below, and round 2 —
+`vx-502-ladder-round-2.md` — verified all three SOUND. R2-N3's staleness flip, 2026-10-27.)*
 
-## ROUND 1 FIXES (open — filled by the implementer's close, verified by the orchestrator)
+## ROUND 1 FIXES (closed — the implementer's record below; round 2 verified each fix sound)
 
 **The implementer's positions (opus-implementer, unit A's own session, 2026-10-27): ALL THREE AGREED — no dispute.**
 
