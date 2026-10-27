@@ -218,6 +218,17 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 | 8 | The ladder (whole-run diff, fable-reviewer; roster re-listed first) | orchestrator | NOT STARTED |
 | 9 | Closeout + handoff + QUESTIONS bundle | orchestrator | NOT STARTED |
 
+## THE MID WINDOW — PLAN (claim `vx620-mid`, accepted by oct27coordinator with three conditions; READY sent after batch 2)
+
+**Shape:** tests FIRST (one `test-without-building` invocation from the FRESH `DerivedData/b2`, which holds batches 1+2 — the union of both batches' "For the orchestrator" suite lists; executed counts per VX-604) → **SEAM ping** to the coordinator (a merge-gating run may slot in; yield if vx-601/vx-562 is READY) → the WALK (an Opus walker under the claim; batch 1's six legs + batch 2's V1/V2; both voices where a face shows; restore steps per the batch records).
+
+**The coordinator's three conditions (2026-10-27, folded verbatim-faithfully):**
+1. The walk's leg 0 records the dev store's as-found Enable-the-MCP-server state; the restore returns to THAT state, not blanket OFF; the RELEASE line carries both values (found, returned).
+2. The fresh setup key under claude-code's bound name is the standing VX-258 road (a pane-tab copy carries the name, re-binds with zero clicks, no `mcp_rebind_request`); the changed key hash on the dev row is expected residue, NAMED at release. The key value lives only in the walk's gitignored scratch; the clipboard is cleared at restore.
+3. The RELEASE line names the residue that can't be undone: the walk's Activity rows (the 500-act window), revoked/spent grant tombstones, the superseded setup-key row and the re-bound hash.
+
+**VX-590's hidden-state leg (V3): NOT walked** — the dev store as found holds the claude-code row, and a throwaway-library reset buys nothing the Mac pin (`MCPSharingFaceTests`, a real door) hasn't proven. The shown-state leg (V2) walks; recorded here so the window's evidence story is honest.
+
 ## SITTING / RULING RECORD (anything she says mid-run lands here verbatim, same turn)
 
 *(empty so far)*
