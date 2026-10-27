@@ -292,6 +292,23 @@ struct RootView: View {
                 // nothing on hover — ⌘N's own words, the sidebar toggle's shape.
                 .help(CapabilityRegistry.capability(.newPost).menuTitle())
             }
+            // VX-552 (the VX-439 ladder's M-2 — PROVISIONAL, her morning look):
+            // her "always visible beside the New Note button" — THIS button, on
+            // every surface, mints into the current wing too, so the wing it
+            // lands in sits beside it: the quick-entry bars' words and hover
+            // (one vocabulary), from the shell's one wing (it follows the focused
+            // note). A label, not a door — so no glass button behind it.
+            ToolbarItem(placement: .navigation) {
+                let tokens = theme.tokens(for: scheme)
+                Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: 160, alignment: .leading)
+                    .help(QuickEntryCopy.wingHelp(wings.currentName))
+            }
+            .sharedBackgroundVisibility(.hidden)
         }
         // 13g L4 (WT-4): *"i don't even konw if we need that empty whitespace
         // that says Variorum at the top - let's try getting rid of it."*

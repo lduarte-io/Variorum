@@ -222,8 +222,11 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     chapter acts. Each door's words, act and condition unchanged (`footDoor(_:)`, one case per door). Design row: pin
     `BookFootDoorsTests` (2: the order per state; restore never between the mint pair, always last, gap > 0) + the
     walk's capture (the orchestrator's) — build-for-testing GREEN; the suite GREEN at the stage window (below).
-  - VX-552: DONE (`a6afef06a`) — the ONE quick-entry bar (`QuickEntryBar`, both hosts: the Bookcase band and the
-    Library bar — the two doors that mint into the current wing; ⌘N is a menu item and books mint into their own wing)
+  - VX-552: DONE (`a6afef06a`; the toolbar's door added at L1 M-2, below) — the ONE quick-entry bar (`QuickEntryBar`,
+    both hosts: the Bookcase band and the Library bar; ~~"the two doors that mint into the current wing; ⌘N is a menu
+    item"~~ — CORRECTED at L1 (M-2): the window toolbar's New Note button mints into the current wing too and is the
+    very door her ticket names; ⌘N is the fourth such door, a menu key with no room beside it; books mint into their
+    own wing)
     wears "in ‹wing›" at the box's trailing edge on its first line (muted small chrome, `lineLimit(1)`, ≤180 pt, the
     hover the whole fact), visible while she types; the name is the host's own `WingsModel.currentName` (the app's one
     wing, which follows the focused note — no new observation), Home when no wings model is handed; shown with ONE wing
@@ -503,7 +506,18 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     run's seam; it would also quiet several other held reads) — a closeout ticket candidate, the orchestrator's to
     file. The `NoteCards` header's false "a 10,000-block note costs the same" claim stays the closeout ticket the
     disposition named (not this run's).
-  - M-2 (the toolbar New Note door's wing label): NOT-STARTED
+  - M-2 (the toolbar New Note door's wing label): DONE (this commit) — PROVISIONAL, bundle 18. TRACED (read): the
+    toolbar's `ToolbarItem(placement: .navigation)` New Note (`square.and.pencil`, `RootView`) mints through
+    `library.createPost()` → `session.wing.currentID`, on every surface; unlabelled. The toolbar idiom carries a text
+    item cheaply (one more `.navigation` `ToolbarItem`; `sharedBackgroundVisibility(.hidden)`, macOS 26+, keeps it from
+    reading as a glass button), so the VISIBLE label was built rather than the tooltip fallback: right after the
+    button, `QuickEntryCopy.wingLabel(wings.currentName)` muted small chrome, `lineLimit(1)`, ≤160 pt, its hover
+    `wingHelp` (the bars' one vocabulary; the shell's `WingsModel`, which follows the focused note; Home with one
+    wing). The button's own tooltip (VX-426's "New Note (⌘N)") unchanged. Design-row: PIN
+    `QuickEntryWingLabelTests.theToolbarsNewNoteButtonWearsTheWingLabel` (source-read, the suite's precedent — red on
+    old: no item follows the button); the LOOK is the evidence slice's capture (both voices — the orchestrator's).
+    Named revert **R-M2** (`scratchpad/l1/reverts/r-m2.patch`). C-552-1's premise corrected in place (LIVE STATUS
+    VX-552, the Ledger's C-552-1 — appended, and the suite's header).
   - m-1 (⌘←/⌘→ learn web-view first responders): NOT-STARTED
   - m-2 (the find readout's match ranges cached per needle × text generation): NOT-STARTED
   - m-3 (the sidebar row menus' wing listings re-ask after an act): NOT-STARTED
@@ -566,7 +580,12 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     click an untitled note's title, its first line (or, with no words, its date) shows faintly; Tab fills it in; ⏎
     names the note. Typing anything instead is yours, as always. PROVISIONAL — say the word if the offer should look
     different or come from somewhere else.
-18. (grows)
+18. **VX-552 — the window toolbar's New Note button now wears the wing label too** (the ladder's M-2: that button,
+    on every surface, mints into the current wing, and it is the door your ticket names — the batch had labelled only
+    the two quick-entry bars). A muted "in ‹wing›" sits right after the button, in the bars' words and hover, with no
+    glass capsule behind it (it is a label, not a door). PROVISIONAL — say the word if it should instead ride only the
+    button's tooltip, or sit somewhere else.
+19. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 
@@ -624,7 +643,11 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   a second one; a finished book REFUSES in the op's words (the foot hides its door there; the key speaks). The context
   fact is "the focused pane shows a book" (any mode — the note box's book context included); a note pane in Write is not a
   book context (which book would it mean?). **C-552-1** — the label shows with ONE wing too (her "always"); a muted "in
-  ‹wing›" at the quick-entry band's trailing edge, from the host's `WingsModel.currentName`. **C-602-1** — Help ▸ "Open the
+  ‹wing›" at the quick-entry band's trailing edge, from the host's `WingsModel.currentName`. [CORRECTED at L1 (the
+  ladder's M-2), appended: the batch's premise that the two quick-entry bars are "the two doors that mint into the
+  current wing" was false — the window toolbar's `square.and.pencil` New Note button (every surface,
+  `LibraryViewModel.createPost` → `session.wing.currentID`) is one too, and is the door the ticket names; it now wears
+  the same label (PROVISIONAL, bundle 18).] **C-602-1** — Help ▸ "Open the
   Tutorial" opens the FIELD GUIDE (the same book "Restore Tutorial" restores), so the naming pass renames it "Open the
   Field Guide" too (and ⌘K's twin row); without it the menu would read "Open the Tutorial" beside "Take the Onboarding
   Tutorial" — the exact confusion she named.
