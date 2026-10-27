@@ -874,3 +874,45 @@ Untouched, by the lane: `Sources/VariorumCore/` entirely, `Sync/`, `Server/`, cu
   in-memory library — its "u1-fresh-connect" frames, both voices, light and dark, now show the three tabs), else a
   throwaway library is the orchestrator's call. **Restore:** stop the shim, server OFF, nothing else written (no grant,
   no client, no wing — `claude-code` stays the known residue); Debug prefs export/diff per the protocol.
+
+---
+
+## BATCH 3 RECORD
+
+**NOT DONE BY THIS BATCH (first line, by the rule):** PENDING — written at the batch's close. While in flight: no
+`xcodebuild test`, no GUI, no walk, no capture, no stage claim (the orchestrator's); no canon edit (drafted only);
+nothing in `Sync/`, `Server/`, custody, the schema, the editor seam or `VariorumMobile/`.
+
+*Implementer: `opus-implementer` №3 (xhigh), fresh session, 2026-10-27. Read in its own context before any code:
+CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 and 2 RECORDS — the tree this batch stands on),
+`notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · Doors to the outside),
+`notes/SessionResiliencyProtocol.md`, the VX-548 record's BATCH 1 RECORD (VX-515 ask 2, VX-516's trace) and BATCH 2b
+RECORD's RECONNECT ERGONOMICS (option C — VX-619's birth), the VX-348 record's §U5 + VX-393 section (her original
+duplicate-rows report), QUESTIONS #227 (P-VX252-1 / P-VX254-2 — RATIFIED 2026-10-15), the four ticket bodies via
+Linear (read-only; no comments on any), and the code anchors. One read-only Sonnet lookup for external facts (the
+clients' reconnect roads — VX-619's guide sentence).*
+
+### LIVE STATUS (per piece — flipped in the same commit as each piece)
+
+- **No behavioural revert is in flight.**
+- **0 · Preflight + this record:** DONE (this commit).
+- **1 · VX-565 — the probe (reconstruction tests):** NOT-STARTED — the probe's finding so far (read, not yet pinned):
+  her report's shape — PlanetLillian (wing) twice and "o ladrão de raios" (book) twice for one client with different
+  rungs — is EXACTLY VX-393's report (the VX-348 record §U5: "PlanetLillian (wing) twice for claude-code — `read ·
+  always` AND `read, suggest, write new and edit · always` — and "o ladrão de raios" (book) twice"), fixed at 0.9.8
+  (v1_30's merge + `uq_mcp_grant_standing_place` + the one mint's replace). Pins to write: her exact shape on today's
+  merged tree through every minting road (one row each); the honest two-row shapes (a once beside a standing; two
+  clients; two places sharing a name) each SAID by its row.
+- **2 · VX-566 — `import_document` takes `section_id`:** NOT-STARTED — design: the one-document form takes
+  `create_note`'s exact shape (parse: without `book_id` → `sectionWithoutBookWords`; the op: `importNote(…, section:)`
+  through `mintNoteEntry`'s existing chapter check; the answer echoes `section_id`); the BOOK form REFUSES `section_id`
+  at the parse (its chapters come from `book.chapters`; the wire's discipline for a meaningful-elsewhere argument —
+  `book_id` with a book refuses in words — never a silent ignore).
+- **3 · VX-567 — the book form answers per-note records:** NOT-STARTED — design: `BookImport.notes` (what each seat
+  minted, from `mintDocument`'s return — no second read); the wire answers `notes: [{note_id, block_ids, blocks}]` in
+  `note_ids`' order beside the three id lists; MCPMintedAnswerServerTests' F-2 guard flips DELIBERATELY (VX-567).
+- **4 · VX-619 — the lock/quit docs:** NOT-STARTED — `MCPSession.instructions` at 2,988 / 3,000 (re-measured here);
+  O-4 (her 2026-10-11 ruling, `MCPProviderNeutralityTests`) forbids a provider's name in the instructions, so the
+  advice says the client's own road neutrally; the guide names Claude Code's road only inside lesson 2's O-4 SETUP
+  COPY fence.
+- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b3`):** NOT-STARTED.
