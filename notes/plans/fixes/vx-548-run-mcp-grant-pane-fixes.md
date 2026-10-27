@@ -229,29 +229,34 @@ no `xcodebuild test`, no walk, no stage claim (the orchestrator's).*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **A BEHAVIOURAL REVERT IS STARTING after this commit** (VX-516's red-on-old): `MCPGrantChange.replacing`'s body
-  reverted to `named` (the pre-fix sheet's pass-through of `opening.replacing`), over this committed tree; restore =
-  `git checkout -- Sources/VariorumCore/Domain/MCPGrantChange.swift`. A successor reading this line with no later flip:
-  run `git diff` — any diff in that file IS the revert; restore it.
-- **VX-516 (Change… on one place, confirmed on ANOTHER, revoked the first):** IN-PROGRESS — core DONE (this commit:
-  `Domain/MCPGrantChange.swift` + `Tests/VariorumCoreTests/MCPGrantChangeTests.swift`, 6 tests green after, with
-  VX-393's 8 — `scratchpad/b1-logs/vx516-green1.log`); red-on-old PENDING; the sheet's wiring next. The settled design: a pure
-  Domain decision `MCPGrantChange` (`Sources/VariorumCore/Domain/MCPGrantChange.swift`): replacing is KEPT only while
-  the confirmed place(s) ⊆ the opened place(s) (non-empty both), else DROPPED (PROVISIONAL MB-1); the sheet's
-  `submit()` (and its title, the receipt's verb, the replaces line) read ONE `effectiveReplacing` through it. Headless
-  pin `MCPGrantChangeTests` (Tests/VariorumCoreTests), red-on-old by behavioural revert of the decision to the old
-  pass-through. The replaces line NAMES the client, the place and the grant it replaces.
-- **VX-515 ask 1 (a visible add door):** NOT-STARTED — `.mcpChangeClientAccess`'s verb → "Share a place…" (PROVISIONAL
-  MB-2; the guide's lesson, the Settings catalog blurb and the approval lead follow the one constant); a new `.surface`
-  capability `.mcpShareAnotherPlace` "Share another place…" on the Shared with AI tab (WHO asked, nothing pre-filled,
-  replacing empty), rendered while an approved client exists AND the tab lists at least one grant.
-- **VX-515 ask 2 (see everything granted):** NOT-STARTED — verify `Queries.mcpSharedGroups` + the tab's rendering list
-  every live grant of every client (two wings for one client = two rows); a headless guard; the finding recorded.
-- **VX-512 (a fresh library's silence):** NOT-STARTED — one `ExplainerLine` in the pane's top section while the library
-  has no client at all (pending + approved + denied = 0): clients and their grants belong to one library (PROVISIONAL
-  words MB-3).
-- **Suites:** PENDING — `swift build` + the targeted core suites; the Mac target compiled by `xcodebuild build-for-testing`
-  (Mac pins written + compiled, their RUN pending the orchestrator's stage window).
+- **No behavioural revert is in flight.** (VX-516's headless red leg ran over the committed `d0e7f1302` —
+  `MCPGrantChange.replacing`'s body reverted to `named`, the pre-fix sheet's pass-through — and was restored by
+  `git checkout --`; `git diff` clean after; green again, `scratchpad/b1-logs/vx516-green2.log`.)
+- **VX-516 (Change… on one place, confirmed on ANOTHER, revoked the first):** DONE — core `d0e7f1302` (the pure
+  `Domain/MCPGrantChange` + `Tests/VariorumCoreTests/MCPGrantChangeTests.swift`); RED ON OLD verified
+  (`scratchpad/b1-logs/vx516-red.log`: 3 of the 6 new tests red — her repro 5 issues, every Change… road 3, the
+  decision table 8 — the 3 guards and VX-393's 8 green); 14 of 14 green after. The app wiring IN THIS COMMIT: the
+  sheet's one act (`MCPGrantSheet.act` — pure; `submit()` performs exactly it), its title and its replaces line read the
+  decision (the line NAMES whose grant, which place, how far, how long — `MCPPaneCopy.replacesLine(client:…)`); the
+  receipt's Change… opening factored pure (`MCPDoor.receiptChangeOpening`). Mac pins `MCPGrantRoadsTests` — every
+  road's opening by its own door's builder → `MCPGrantSheet.act` → the door → both wings stand — written and COMPILED
+  (`build-for-testing` green, `scratchpad/b1-logs/mac-bft2.log`), their RUN **PENDING** the orchestrator's stage window.
+- **VX-515 ask 1 (a visible add door):** DONE (this commit) — `.mcpChangeClientAccess`'s verb "Share a place…"
+  (`MCPPaneCopy.sharePlaceVerb`; PROVISIONAL MB-2) and its one opening home (`MCPGrantOpening.clientRow`); the new
+  `.surface` capability `.mcpShareAnotherPlace` "Share another place…" on the Shared with AI tab
+  (`MCPGrantOpening.shareAnotherPlace()` — WHO asked, nothing pre-filled, nothing replaced), drawn by the pure gate
+  `MCPPane.offersShareAnotherPlace` (an approved client AND ≥1 listed grant); the guide's two lessons, the Settings
+  catalog's Clients blurb and the approval lead say the new words (the guide pin `TutorialMCPChapterTests` gains the
+  new door, a JUSTIFIED EDIT — the H pattern). Mac pins compiled, RUN **PENDING**.
+- **VX-515 ask 2 (see everything granted):** DONE — VERIFIED, no fix owed: `Queries.mcpSharedGroups` lists every live
+  grant of every client, one row per place (a bulk act one row with its members road), the pane's 5-act page + its
+  "all N ›" road; headless guard `sharedWithAIListsEveryLiveGrantOfEveryClient` (green on both sides — her "doesn't
+  show both" was VX-516's revoke).
+- **VX-512 (a fresh library's silence):** DONE (this commit) — one `ExplainerLine` in the pane's top section while the
+  library has no client at all (`MCPPane.saysClientsBelongToTheLibrary` — pending + approved + denied = 0), words
+  `MCPPaneCopy.libraryClientsSummary` / `libraryClientsDetail` (PROVISIONAL MB-3). Mac pin compiled, RUN **PENDING**.
+- **Suites:** `swift build --build-tests` green; the targeted core suites green (14/14); the Mac app + test bundle
+  compile (`build-for-testing` green). **PENDING:** the whole headless suite at the end; the Mac pins' run (stage).
 
 ## BATCH 2a RECORD
 

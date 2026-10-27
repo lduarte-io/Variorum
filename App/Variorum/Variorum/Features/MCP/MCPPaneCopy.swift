@@ -755,8 +755,51 @@ nonisolated enum MCPPaneCopy {
     }
 
     /// Change…'s one line under the title (T-U3-8 said where she decides):
-    /// the confirm REPLACES what the sheet was opened on.
+    /// the confirm REPLACES what the sheet was opened on. Since VX-516 the
+    /// sheet says it NAMED (below); this plain sentence stays for a sheet
+    /// whose place has no name to hand.
     static let replacesLine = "Confirming replaces the grant you opened this from."
+
+    /// **VX-516 (the VX-548 run — PROVISIONAL words, MB-1): the replace,
+    /// named before she confirms** — whose grant, on which place, at what
+    /// rung and for how long (the receipt's own shape): "Confirming replaces
+    /// claude-code's grant on the PlanetLillian wing — read and suggest,
+    /// always." It shows only while the place picked IS the place the sheet
+    /// was opened on; another place picked is a new grant and the line goes.
+    /// `place` is already said ("“parser notes”", "3 notes", "the Home wing").
+    static func replacesLine(
+        client: String, place: String, rung: MCPGrantRule.Rung, duration: MCPGrantRule.Duration
+    ) -> String {
+        "Confirming replaces \(client)\u{2019}s grant on \(place) \u{2014} \(MCPRungWords.reach(rung)), "
+            + "\(durationWord(duration))."
+    }
+
+    // MARK: - The pane's adding doors (VX-515 — the VX-548 run; PROVISIONAL words, MB-2)
+
+    /// A client row's door (`.mcpChangeClientAccess`) — it ADDS a grant (the
+    /// sheet with the client, nothing else pre-filled, nothing replaced); it
+    /// read "Change…", which said the opposite of what it did.
+    static let sharePlaceVerb = "Share a place\u{2026}"
+    /// Shared with AI's own door (`.mcpShareAnotherPlace`) — her candidate's
+    /// words ("Share another place…"), drawn while the tab lists a grant.
+    static let shareAnotherPlaceVerb = "Share another place\u{2026}"
+
+    // MARK: - A library's own clients (VX-512 — the VX-548 run; PROVISIONAL words, MB-3)
+
+    /// The pane's line while the library has no client at all (none waiting,
+    /// approved or denied): the clients and their grants are this library's
+    /// LOCAL-ONLY rows (§7's grants family — never synced, never carried into
+    /// another library), so a library started fresh, or filled by sync, has
+    /// none — and nothing said so (her Air: "Failed to connect to Variorum
+    /// -32000. re-set up? unexpected or normal?"). One line; the whole text
+    /// behind its (i). No "AI" (VX-272), no shouted word.
+    static let libraryClientsSummary =
+        "Clients belong to the library they were set up in \u{2014} run each one\u{2019}s setup here."
+    static let libraryClientsDetail =
+        "MCP clients, their approvals and everything shared with them are kept in the library they were "
+        + "set up in, on this Mac. They are never synced and never carried into another library, so a "
+        + "library you start fresh, or fill from your account by sync, begins with the server off and no "
+        + "clients. Turn the server on above, then run each client\u{2019}s setup again from Connect."
 
     // MARK: - Several notes (13n-c U3 — the Library's "Share N notes…"; mockup §2)
 
@@ -804,7 +847,8 @@ nonisolated enum MCPPaneCopy {
     /// Its lead: approving admits with zero reach; a grant is its own act.
     static let approvalLead =
         "Approving lets it connect, and it reaches nothing yet. You can grant it a place below, or "
-        + "later with Change\u{2026} on its row."
+        // VX-515: the row's door is named for what it does now.
+        + "later with \(sharePlaceVerb) on its row."
     /// WHERE's first answer on the approval road — and the one it starts on.
     static let nothingYet = "Nothing yet"
     /// The line under WHERE when nothing is picked — honest about the open

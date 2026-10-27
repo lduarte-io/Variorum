@@ -82,6 +82,10 @@ struct MCPGrantSheet: View {
     @State private var wingDistinguishers: [String: String] = [:]
     @State private var clients: [MCPClient] = []
     @State private var chosenClientID: String?
+    /// VX-516: the opening's pre-fill has landed (`load` ran to its end) —
+    /// until then the faces read the opening's own word (a Change… sheet's
+    /// first frames never flash a new grant's title before WHERE is filled).
+    @State private var prefillApplied = false
     @State private var now = Date()
     /// 13n-c +4b — the Private books the picked note's mark comes through
     /// (display-only, for its why), read for THAT note.
@@ -172,6 +176,86 @@ struct MCPGrantSheet: View {
         }
     }
 
+    // MARK: - What the confirm REPLACES (VX-516 — the VX-548 run; PROVISIONAL MB-1)
+
+    /// **The place(s) the sheet would confirm now**, as grant rows name them
+    /// (pure): the note, the several notes, the book or the wing picked;
+    /// nothing while WHERE is incomplete or nothing is picked.
+    static func confirmedPlaces(
+        place: Place, noteID: String?, noteIDs: [String], bookID: String?, wingID: String
+    ) -> Set<MCPGrantChange.Place> {
+        switch place {
+        case .nothing: []
+        case .note: noteID.map { [MCPGrantChange.Place(.note, $0)] } ?? []
+        case .notes: Set(noteIDs.map { MCPGrantChange.Place(.note, $0) })
+        case .book: bookID.map { [MCPGrantChange.Place(.book, $0)] } ?? []
+        case .wing: [MCPGrantChange.Place(.wing, wingID)]
+        }
+    }
+
+    /// **What a confirm on these places replaces** (pure): the grants the
+    /// opening named, while the confirmed place IS the place it was opened
+    /// on (`MCPGrantChange` — T-U3-8's replace, ruled to change a grant's
+    /// details); none once another place is picked — a new grant, so the
+    /// grant the sheet was opened on stands beside it (her VX-516: Change… on
+    /// one wing with another picked had revoked the first).
+    static func replacing(_ opening: MCPGrantOpening, confirmed: Set<MCPGrantChange.Place>) -> [String] {
+        MCPGrantChange.replacing(opening.replacing, opened: opening.place?.places ?? [], confirmed: confirmed)
+    }
+
+    /// **The confirm's act** (pure — the VX-516 pins drive every road through
+    /// it; `submit` performs exactly this).
+    enum Act: Equatable {
+        /// Approve… — alone, or with the grant she picked riding it (W-UX-2).
+        case approve(Operations.MCPGrantSpec?)
+        /// The bulk share of exactly these notes, replacing these grants.
+        case grantNotes([String], rung: MCPGrantRule.Rung, duration: MCPGrantRule.Duration, replacing: [String])
+        /// One grant, replacing these grants — empty: a new grant, nothing revoked.
+        case grant(Operations.MCPGrantSpec, replacing: [String])
+    }
+
+    /// The act a confirm performs from this opening with this pick (nil when
+    /// the pick is incomplete). What is REPLACED is decided on the very
+    /// place(s) the act grants — the spec's own place, or the notes it shares.
+    static func act(
+        opening: MCPGrantOpening, place: Place, spec: Operations.MCPGrantSpec?, noteIDs: [String],
+        rung: MCPGrantRule.Rung, duration: MCPGrantRule.Duration
+    ) -> Act? {
+        if opening.approving { return .approve(place == .nothing ? nil : spec) }
+        if place == .notes {
+            guard !noteIDs.isEmpty else { return nil }
+            let confirmed = Set(noteIDs.map { MCPGrantChange.Place(.note, $0) })
+            return .grantNotes(
+                noteIDs, rung: rung, duration: duration, replacing: replacing(opening, confirmed: confirmed))
+        }
+        guard let spec else { return nil }
+        let confirmed: Set<MCPGrantChange.Place> = [MCPGrantChange.Place(spec.scopeKind, spec.scopeID)]
+        return .grant(spec, replacing: replacing(opening, confirmed: confirmed))
+    }
+
+    /// What this confirm replaces, as picked now.
+    private var replacingNow: [String] {
+        Self.replacing(opening, confirmed: Self.confirmedPlaces(
+            place: place, noteID: note?.id, noteIDs: notes.map(\.id), bookID: chosenBook?.id, wingID: wingID))
+    }
+
+    /// Whether the faces say CHANGE (the title, the replaces line): the
+    /// decision once the pre-fill has landed, the opening's word before it.
+    private var changing: Bool {
+        prefillApplied ? !replacingNow.isEmpty : !opening.replacing.isEmpty
+    }
+
+    /// The replaces line, NAMING what it replaces (the client, the place, its
+    /// rung and duration as shared) — the place reads as WHERE shows it,
+    /// which is the place replaced whenever the line shows; the opening's
+    /// plain sentence where a name is not to hand.
+    private var replacesWords: String {
+        guard prefillApplied, let name = opening.client?.name, let rung = opening.rung,
+              let duration = opening.duration, !receiptPlace.isEmpty
+        else { return MCPPaneCopy.replacesLine }
+        return MCPPaneCopy.replacesLine(client: name, place: receiptPlace, rung: rung, duration: duration)
+    }
+
     /// **What the sheet STARTS on when its opener names no place** (pure —
     /// 13n-c UX walk W-UX-2's pin drives it).
     struct Start: Equatable {
@@ -231,9 +315,10 @@ struct MCPGrantSheet: View {
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
             // 13n-c U3 (T-U3-8): Change… says, before she confirms, that the
-            // confirm REPLACES what it was opened on.
-            if !opening.replacing.isEmpty {
-                quiet(MCPPaneCopy.replacesLine)
+            // confirm REPLACES what it was opened on. VX-516: only while it
+            // will (the place picked is the place opened on), naming what.
+            if changing {
+                quiet(replacesWords)
             }
 
             if opening.client == nil {
@@ -461,7 +546,7 @@ struct MCPGrantSheet: View {
     /// The title — W-UX-2: the approval road says it APPROVES.
     private var title: String {
         if opening.approving, let name = opening.client?.name { return MCPPaneCopy.approvalTitle(name) }
-        return MCPPaneCopy.sheetTitle(client: opening.client?.name, changing: !opening.replacing.isEmpty)
+        return MCPPaneCopy.sheetTitle(client: opening.client?.name, changing: changing)
     }
 
     private var confirmParts: (lead: String, place: String, tail: String) {
@@ -487,30 +572,33 @@ struct MCPGrantSheet: View {
         }
     }
 
-    /// The confirm's act: an approval (the pane's Approve… — alone, or with
-    /// the grant she picked riding it, W-UX-2), the bulk
-    /// share (several notes), or one grant — Change… when the opening names
-    /// grants to replace (T-U3-8). A place-door's sheet speaks its receipt on
-    /// the window's status seam; the pane's keeps its caption.
+    /// The confirm's act (`Self.act` — pure, pinned): an approval (the pane's
+    /// Approve… — alone, or with the grant she picked riding it, W-UX-2), the
+    /// bulk share (several notes), or one grant — Change… only while the
+    /// place confirmed is the place the opening named (T-U3-8's replace;
+    /// VX-516: another place picked is a NEW grant, nothing revoked). A
+    /// place-door's sheet speaks its receipt on the window's status seam; the
+    /// pane's keeps its caption.
     private func submit() {
-        guard canConfirm, let client else { return }
+        guard canConfirm, let client,
+              let act = Self.act(
+                opening: opening, place: place, spec: spec, noteIDs: notes.map(\.id), rung: rung,
+                duration: duration)
+        else { return }
         let saying = opening.origin == .place ? receiptPlace : nil
         let change = road?.open
-        if opening.approving {
+        switch act {
+        case .approve(let granting):
             // W-UX-2: APPROVE ALONE unless she picked a grant — then it rides.
-            door.approve(client.id, granting: place == .nothing ? nil : spec)
-            done()
-            return
-        }
-        if place == .notes {
+            door.approve(client.id, granting: granting)
+        case .grantNotes(let ids, let rung, let duration, let replacing):
             door.grantNotes(
-                client, notes.map(\.id), rung: rung, duration: duration, replacing: opening.replacing,
-                saying: saying, change: change)
-        } else if let spec {
-            if saying == nil, opening.replacing.isEmpty {
+                client, ids, rung: rung, duration: duration, replacing: replacing, saying: saying, change: change)
+        case .grant(let spec, let replacing):
+            if saying == nil, replacing.isEmpty {
                 door.grant(client.id, spec)
             } else {
-                door.grant(client, spec, replacing: opening.replacing, saying: saying, change: change)
+                door.grant(client, spec, replacing: replacing, saying: saying, change: change)
             }
         }
         done()
@@ -585,6 +673,7 @@ struct MCPGrantSheet: View {
             duration = start.duration
         }
         if !offeredDurations.contains(duration) { duration = offeredDurations.first ?? .once }
+        prefillApplied = true
     }
 
     /// **The durations this sheet may offer** (the U1 walk's fourth

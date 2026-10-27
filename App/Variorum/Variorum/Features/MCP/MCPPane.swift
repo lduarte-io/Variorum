@@ -123,7 +123,26 @@ struct MCPPane: View {
         .mcpChangeGrant,
         // VX-258 (VX-246 U1b): Waiting's re-bind row — Allow / Don't allow.
         .mcpAllowRebind, .mcpDeclineRebind,
+        // VX-515 (the VX-548 run): Shared with AI's own add door.
+        .mcpShareAnotherPlace,
     ]
+
+    /// **VX-515 — Shared with AI's "Share another place…" renders** while an
+    /// approved client exists (VX-272's gate — a sheet with no one to grant
+    /// would be a dead door, P-2) and the tab lists at least one grant (so
+    /// "another" is true). Pure, pinned.
+    nonisolated static func offersShareAnotherPlace(_ snapshot: MCPDoor.Snapshot) -> Bool {
+        snapshot.approvedCount > 0 && snapshot.sharedCount > 0
+    }
+
+    /// **VX-512 — the library's-own-clients line renders** while the library
+    /// has no client at all — none waiting, approved or denied: its grants
+    /// tables hold nobody, which is exactly a library started fresh or filled
+    /// by sync (the store has no "came from Start fresh" fact, and the line is
+    /// true of every such library). Pure, pinned.
+    nonisolated static func saysClientsBelongToTheLibrary(_ snapshot: MCPDoor.Snapshot) -> Bool {
+        snapshot.pendingCount == 0 && snapshot.clientCount == 0
+    }
 
     /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
     static let waitingAnchor = "mcp-waiting"
@@ -187,6 +206,13 @@ struct MCPPane: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
                 ExplainerLine(line: MCPPaneCopy.enableSummary, detail: MCPPaneCopy.enableBlurb)
+                // VX-512 (the VX-548 run): a library with no client says why —
+                // clients and their grants are this library's own (local-only),
+                // so a fresh or synced library starts with none (her Air's
+                // silent -32000 after Start fresh).
+                if Self.saysClientsBelongToTheLibrary(door.snapshot) {
+                    ExplainerLine(line: MCPPaneCopy.libraryClientsSummary, detail: MCPPaneCopy.libraryClientsDetail)
+                }
                 // A refusal from any act lands where she is looking first
                 // (the walk's second finding: a caption at the form's foot
                 // sat below the fold).
@@ -349,6 +375,18 @@ struct MCPPane: View {
                 ForEach(door.snapshot.sharedGroups) { group in sharedGroup(group) }
                 allRoad(door.snapshot.sharedCount, shown: door.snapshot.sharedGroups.count, .shared)
             }
+            // VX-515 (the VX-548 run — her "I don't see the option to add
+            // another one here"): THE sheet asking WHO, nothing pre-filled,
+            // nothing replaced — every row's Change… replaces, this adds.
+            if Self.offersShareAnotherPlace(door.snapshot) {
+                HStack {
+                    Button(CapabilityRegistry.capability(.mcpShareAnotherPlace).verb) {
+                        granting = MCPGrantOpening.shareAnotherPlace()
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    Spacer(minLength: 0)
+                }
+            }
         } header: {
             tabRow
         }
@@ -429,7 +467,8 @@ struct MCPPane: View {
 
     private func clientRow(_ row: MCPDoor.ClientRow) -> some View {
         MCPClientRow(row: row, connected: door.connected.contains(row.client.name), tokens: tokens) {
-            granting = MCPGrantOpening(client: row.client, approving: row.client.state != .approved)
+            // VX-515: "Share a place…" ADDS (nothing replaced); Approve… on a denied client.
+            granting = MCPGrantOpening.clientRow(row.client)
         } revoke: {
             door.deny(row.client.id)
         }
@@ -995,7 +1034,7 @@ struct MCPFullListSheet: View {
                 case .clients:
                     ForEach(clients) { row in
                         MCPClientRow(row: row, connected: door.connected.contains(row.client.name), tokens: tokens) {
-                            grant(MCPGrantOpening(client: row.client, approving: row.client.state != .approved))
+                            grant(MCPGrantOpening.clientRow(row.client))
                         } revoke: {
                             door.deny(row.client.id)
                         }

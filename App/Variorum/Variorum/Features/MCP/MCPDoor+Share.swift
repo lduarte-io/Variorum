@@ -181,12 +181,24 @@ extension MCPDoor {
         }
         let changeDoor = change.map { open in
             StatusCenter.Item.Action(label: MCPShareCopy.changeDoor) {
-                open(MCPGrantOpening(
-                    client: client, place: prefill, rung: rung, duration: duration,
-                    replacing: grantIDs, origin: .place))
+                open(Self.receiptChangeOpening(
+                    client: client, prefill: prefill, rung: rung, duration: duration, grantIDs: grantIDs))
             }
         }
         session.status.deliver(text, kind: .receipt, action: revoke, secondary: changeDoor)
+    }
+
+    /// **The receipt's Change…** (VX-270), pure so its road is pinned (VX-516
+    /// — the VX-548 run): THE sheet on exactly what landed, replacing the
+    /// act's grants — while the sheet's confirm stays on that place
+    /// (`MCPGrantChange`); a different place confirmed is a new grant.
+    nonisolated static func receiptChangeOpening(
+        client: MCPClient, prefill: MCPGrantPrefill, rung: MCPGrantRule.Rung,
+        duration: MCPGrantRule.Duration, grantIDs: [String]
+    ) -> MCPGrantOpening {
+        MCPGrantOpening(
+            client: client, place: prefill, rung: rung, duration: duration,
+            replacing: grantIDs, origin: .place)
     }
 
     /// A receipt's (or a popover's) Revoke: the named grants, one act, and the

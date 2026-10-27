@@ -29,6 +29,19 @@ enum MCPGrantPrefill: Equatable, Sendable {
     case notes([String])
     case book(String)
     case wing(String)
+
+    /// **The place(s) this pre-fill names, as a grant row names them**
+    /// (VX-516 — the VX-548 run): what `MCPGrantChange` compares a confirm
+    /// against. Every Change… road pre-fills exactly the place(s) of the
+    /// grant(s) it replaces, so this IS the replaced grants' place.
+    nonisolated var places: Set<MCPGrantChange.Place> {
+        switch self {
+        case .note(let id): [MCPGrantChange.Place(.note, id)]
+        case .notes(let ids): Set(ids.map { MCPGrantChange.Place(.note, $0) })
+        case .book(let id): [MCPGrantChange.Place(.book, id)]
+        case .wing(let id): [MCPGrantChange.Place(.wing, id)]
+        }
+    }
 }
 
 /// **What opens the grant sheet** (13n-c U2 — the opener; U3 moved it to the
@@ -62,6 +75,24 @@ struct MCPGrantOpening: Identifiable, Equatable {
     }
 
     static func == (lhs: MCPGrantOpening, rhs: MCPGrantOpening) -> Bool { lhs.id == rhs.id }
+
+    // MARK: - The pane's ADDING doors (VX-515 — the VX-548 run; one home, so each road is pinned)
+
+    /// **A client row's door** — "Share a place…" on an approved client
+    /// (`.mcpChangeClientAccess`: the sheet with that client, nothing else
+    /// pre-filled, nothing replaced — it ADDS), "Approve…" on a denied one
+    /// (the approval road, W-UX-2). The pane's row and its "all N ›" sheet
+    /// both open this.
+    nonisolated static func clientRow(_ client: MCPClient) -> MCPGrantOpening {
+        MCPGrantOpening(client: client, approving: client.state != .approved)
+    }
+
+    /// **Shared with AI's "Share another place…"** (`.mcpShareAnotherPlace`):
+    /// THE sheet asking WHO (the most recently granted client picked first),
+    /// nothing else pre-filled, nothing replaced — a new grant.
+    nonisolated static func shareAnotherPlace() -> MCPGrantOpening {
+        MCPGrantOpening()
+    }
 }
 
 /// **The faces' one road to the MCP door** (built per window).

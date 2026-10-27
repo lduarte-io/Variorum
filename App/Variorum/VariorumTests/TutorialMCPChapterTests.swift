@@ -812,6 +812,9 @@ struct TutorialMCPChapterTests {
             // 13n-c UX walk W-UX-19: the pane's rows carry Change… beside Revoke.
             #expect(text.contains("with \(CapabilityRegistry.capability(.mcpChangeGrant).verb) to raise or lower it and \(CapabilityRegistry.capability(.mcpRevokeGrant).verb) to take it back"))
             #expect(MCPPane.surfaceCapabilities.contains(.mcpChangeGrant))
+            // VX-515 (the VX-548 run): the tab's own add door, by its own words.
+            #expect(text.contains("\(CapabilityRegistry.capability(.mcpShareAnotherPlace).verb) adds one beside them"))
+            #expect(MCPPane.surfaceCapabilities.contains(.mcpShareAnotherPlace))
             #expect(text.contains("with \(MCPShareCopy.change) to adjust it and \(MCPShareCopy.revokeDoor) to take it back"))
 
             // THE TRUTH — ⌥⌘A's decision (D1): the newest grant's client and

@@ -2568,9 +2568,10 @@ enum TutorialSeeder {
             + "you. Until then, the one thing an approved client can do is look "
             + "back over its own recent acts. Deny turns it away. Every approved "
             // 13n-c UX walk W-UX-4: the client row's verb is Deny… now, and it
-            // says what it takes before it does.
-            + "client is listed under Clients, with Change\u{2026} to share more and "
-            + "Deny\u{2026} to shut it out again, every grant it holds revoked.",
+            // says what it takes before it does. VX-515 (the VX-548 run): its
+            // adding door is "Share a place…" now (it read "Change…").
+            + "client is listed under Clients, with Share a place\u{2026} to share more "
+            + "with it and Deny\u{2026} to shut it out again, every grant it holds revoked.",
 
             // VX-168: the sentence the setup key falsified ("Variorum can't
             // check that name"), made true of the build — and no truer: K2's
@@ -2730,8 +2731,12 @@ enum TutorialSeeder {
             // 13n-c UX walk W-UX-19 (her round-8 ask): every row has Change…
             // now — the guide says so. (UXR1-2: a row whose place is gone keeps
             // Revoke only; the sentence speaks of the grants she can change.)
+            // VX-515 (the VX-548 run — her "how am I supposed to be able to grant
+            // multiple wings"): the tab's own add door, said where the grants are.
             "Every grant shows in Settings \u{25B8} MCP, with Change\u{2026} to raise "
             + "or lower it and Revoke to take it back. "
+            + "Share another place\u{2026} adds one beside them, so a client can reach "
+            + "several places at once. "
             + "Sharing several notes at once makes one row there, and one Revoke "
             + "covers them all.",
         ])
