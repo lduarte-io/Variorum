@@ -543,3 +543,40 @@ the editor seam, `VariorumMobile/`, `MCPSession.swift`.
   wears #vxwalk, is starred, the gathering shows it. (6) The cap: with fifteen starred, `set_starred` on a sixteenth →
   her words ("You can star 15 things at a time — …"). **Restore:** un-star every walk star, revoke the walk grants,
   delete the walk gathering/notes/tag, server off; the known dev-store residue untouched.
+
+---
+
+## BATCH 2 RECORD
+
+**NOT DONE BY THIS BATCH (first line, by the rule):** IN PROGRESS — this line is rewritten at the batch's close.
+
+*Implementer: `opus-implementer` №2 (xhigh), fresh session, 2026-10-27. Read in its own context before any code:
+CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tree this batch stands on),
+`notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · Doors to the outside),
+`notes/SessionResiliencyProtocol.md`, the VX-548 record's BATCH 1 BRIEF + RECORD (the tabs, VX-512's line,
+`MCPPane.saysClientsBelongToTheLibrary`), BATCH 2b BRIEF + RECORD (the connection story, the stop-roads sweep rows
+1–12), its LADDER RECORD and its MID WINDOW (finding MID-2 = VX-605's birth), the VX-590 and VX-605 ticket bodies
+(read-only), and the code anchors. Lane: no `Sync/`, `Server/`, custody, schema, editor seam or `VariorumMobile/`; no
+`xcodebuild test`, no GUI, no walk, no stage claim. No subagent.*
+
+### LIVE STATUS (per piece — flipped in the same commit as each piece)
+
+- **No behavioural revert is in flight.**
+- **0 · Preflight + this record:** DONE (this commit).
+- **1 · VX-605 — the headless pin, RED on the pre-fix tree:** NOT-STARTED — `MCPConnectionNamingSignalServerTests`:
+  a door-shaped recorder on `MCPServerHost.onConnectionsChanged` (each signal re-reads `connectedClientNames`, exactly
+  as `MCPDoor.refreshConnected`); a reconnect under an already-bound key must leave the recorder's last read holding
+  the name.
+- **2 · VX-605 — the fix:** NOT-STARTED — the settled design: `MCPSession` takes an `onNamed` signal (defaulted `{}`
+  for the tests that build a session by hand) and calls it right after its `initialize` hook sets the name, outside
+  the session's lock; `MCPServerHost.serve` hands it `{ [weak self] in self?.onConnectionsChanged?() }` — the SAME
+  road, a signal carrying no decision (P-4); the door's hop to the main actor and its re-read of the CURRENT host
+  are untouched, so a late signal from a stopped host can never resurrect its names.
+- **3 · VX-605 — the behavioural revert + the Mac door pin:** NOT-STARTED.
+- **4 · VX-590 — the sharing face hidden until the library has ever had a client:** NOT-STARTED — the settled design:
+  the store fact is VX-512's own (client rows — pending + approved + denied — exist; monotone: the pending room's
+  prune never empties it), PROVISIONAL RB-3; the Shared with AI tab (and the open-book switch it holds) is not
+  offered while it is false; the pane's tab is clamped to the offered set (her pick otherwise remembered as before);
+  the Settings search does not name the open-book row while the face hides (the account-row precedent,
+  `wholeIndex(accountSection:)`); no new words.
+- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b2`):** NOT-STARTED.
