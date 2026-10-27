@@ -1357,6 +1357,42 @@ gathering rows).
 **Clean bill:** the reviewer's full clean-bill list is preserved in this section's source message (the orchestrator's transcript) and summarized: VX-516's mechanism-in-the-removed-code + the one-confirm decision + all five roads pinned; VX-393/v1_33 proven (rows+rowids verbatim, indexes byte-unchanged, local-only correctly outside §12); the VX-549 decide layer through the ONE membership function, fence-first, P1 statement-pinned; write_new's refuse-before-mint + in-transaction re-check; VX-358/365/352/354 each verified to their rule; VX-394's quit/socket/teardown shapes; hygiene (no Sync//custody/editor-seam touch, two-file rule held, no trailers, sentence case, P-1 registry declaration).
 **Dispositions:** all four findings to a FRESH L1 fix session verbatim (none disputed-by-construction, no FINDER-FIXES); its agree/dispute returns to the round-1 reviewer for the final call; the confirmed fixes then land red-on-old where pinnable (finding 4), and round 2's fresh reviewer re-checks the fixes.
 
+### L1 agree/dispute (the L1 fix session — `opus-implementer`, fresh, xhigh; 2026-10-27; each finding traced in its own context, read from the tree at `f611b8ef7`)
+
+**AGREE ×4 — no dispute; the session proceeds to the fixes (step 2) in the same session.**
+
+1. **AGREE (MINOR, doc).** The BATCH 1 RECORD's sections are LIVE STATUS · the trace · the fix · VX-515 · VX-512 · adjacent
+   tickets · files · for the orchestrator — no "Canon owed at the closeout" block, while 2a (:758), 2b (:1053) and 3 (:1284)
+   each draft one. MCPSpec's standing sentence "every Shared-with-AI row carries Change… beside Revoke (W-UX-19 ruled — the
+   receipt's pre-filled REPLACE sheet, one grant or a whole act; …)" says REPLACE unconditionally; after `d0e7f1302` /
+   `965a05521` the replace survives only while `MCPGrantChange.keepsReplacing(opened:confirmed:)` holds (confirmed ⊆
+   opened), so on the cross-place arm the canon line would describe the pre-fix behaviour VX-516 removed. MCPSpec's pane
+   sentence ("per-client grant rows …, the client row's Deny…-with-confirm") and SurfaceContracts' MCP bullet name neither
+   door verb (MB-2) nor the zero-state line (MB-3). Nothing in the record carries those three lines to the closeout.
+2. **AGREE (MINOR).** `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds` counts a round as a
+   PREMISE failure when the session's `initialize` answer is not read inside the client socket's 5 s receive timeout
+   (`prepare(client, receiveTimeout: 5)` → `readLine` nil → `oneSession` returns nil → `premiseFailures += 1` →
+   `#expect(premiseFailures == 0)`); 150 rounds × 2 endings, each spinning a real `MCPSession`, under the whole-package
+   parallel load can push one answer past 5 s — a wall-clock premise, the VX-532 class, no product line involved (the file
+   is untouched by this run). The record's suite claims say "the one standing flake"; with two, a full-parallel red in
+   either must be re-run isolated before it counts. Ticket filed (VX-607); the record note is owed.
+3. **AGREE (NIT — hollow as a bug).** `into(_:job:clientName:spendsAfter:admitsGathering:_:)` (`MCPWriteTools.swift:694`)
+   threads `spendsAfter` into the book arm's `land(spending: consumesOnce && spendsAfter ? …)` (:720) but hands the gathering
+   arm to `intoGathering` (:743), which takes no `spendsAfter` and spends `consumesOnce ? [grantID] : []` (:758). Reachable
+   only as `admitsGathering: true` + `spendsAfter: false`: the two `admitsGathering: true` callers (`create_note` :459,
+   `import_document` :473) take the default `spendsAfter: true`, and the two `spendsAfter: false` callers
+   (`MCPWriteTools+Carriage.swift:227`, `MCPWriteTools+Edit.swift:292`) leave `admitsGathering` false, so they never reach
+   the gathering arm. No tool reaches the combination — cleanliness only, as the finding says.
+4. **AGREE (NIT — pinnable).** `MCPAskCopy.lead(_:)` (`MCPPaneCopy.swift:1319`) matches `(.gathering, _?)` before the
+   kind-agnostic arms, so ANY fence on a gathering ask reads "This gathering is marked Private now, …". The ask's fence is
+   re-read at her open by `MCPDoor.askStanding` (`MCPDoor.swift:868`) through `Queries.mcpGatheringFacts` →
+   `mcpReadingFacts`, whose `dailyJournalLegForBook` (`r.profile = 'daily'`) yields `.journal` for a gathering row that
+   carries a stale daily marker (`MCPGrantRule.fence(journal:privateMark:)` — Private wins, else journal). So an ask raised
+   on an unfenced gathering (`intoGathering` raises one only while `facts.fence == nil`) that meets a synced-in 'daily'
+   marker before she opens it hears the Private why-word. Behaviour right (no grant offered — `durations(for:)` and
+   `reachLine` read the fence, not its kind), the word wrong; the pane's own `inertDetail(.journal, kind: .gathering)`
+   already distinguishes ("it's your daily Journal now"), so the ask's lead is the one face that doesn't.
+
 ## ORCHESTRATOR ACCEPTANCE
 
 ### BATCH 1 — ACCEPTED 2026-10-27 (window `vx548-b1-walk`, GO from oct26coordinator 02:48 MDT, released clean)
