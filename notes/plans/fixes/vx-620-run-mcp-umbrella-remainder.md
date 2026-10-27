@@ -1661,3 +1661,18 @@ record's commit.
   closes (RB-17 (iv)), that hand-off is the suspect — report, don't work around.
 - **MOBILE PARITY line:** nothing mobile-visible — the ⌘K palette, the registry, the sidebar and the selector are Mac
   only; `App/Variorum/VariorumMobile/` and `App/Variorum/Shared/` untouched (verified by diff).
+
+### FIX LEG 4-F1 (the final window's red: `WingPaletteDoorsTests.theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc`; implementer №4 resumed, 2026-10-27)
+
+**The finding (the coordinator's relay, the log `scratchpad/vx620-final-suites.log` :10979–11029):** the final window
+ran the Mac pins from `DerivedData/b4` — 470 executed / 66 suites, all green but ONE: this pin, on its first run, at
+`WingPaletteDoorsTests.swift:471` — `input.currentEditor()` nil ("the field is EDITING on arrival — nobody clicked
+it"); the field itself WAS found (the `#require` on line 470 held), the suite's nine other tests green (the other
+mounted pin, the sidebar's, among them). Failed after 1.084 s.
+
+**LIVE STATUS (per piece, flipped in the same commit as each piece):**
+- **No behavioural revert is in flight.**
+- **F1-0 · The trace + the disposition:** IN-PROGRESS — the rig traced (below); the walker's live focus verdict
+  awaited before the disposition is final.
+- **F1-1 · The fix (rig or product, per the disposition):** NOT-STARTED.
+- **F1-2 · Rebuild `DerivedData/b4` in place:** NOT-STARTED.
