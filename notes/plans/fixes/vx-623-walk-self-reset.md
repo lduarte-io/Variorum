@@ -209,7 +209,7 @@ the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swif
 |---|---|---|
 | 1 | D-7 — guard.sh compile-or-refuse + its red-on-old pin | DONE (this commit) — see "D-7 evidence" below |
 | 2 | D-1 — `Tools/prod-reset-test-account.sh` + `--self-test` (incl. the `account_purge()` drift pin) | DONE (this commit) — `--self-test` 85/85 green; see "D-1 evidence" below. `--dry-run` and any live run are UNIT 2's (both read production) |
-| 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | NOT-STARTED |
+| 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | DONE (this commit) — see "D-5 evidence" below |
 | 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | NOT-STARTED |
 | 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | NOT-STARTED |
 | 6 | D-6 — release.sh HANDOFF step 0 + README | NOT-STARTED |
@@ -272,6 +272,20 @@ rest, with the reason · 5 refused). Before/after lines are printed and appended
   maintenance file redefines it) · the network never reached × 1.
 - **The pins bite (mutation runs on a temporary copy, deleted):** `purge_intent` dropped from the family → DRIFT data
   FAIL (+ the R4 case); one word changed in the guard → R1 twin FAIL; the `kp:` CTE removed → three SQL cases FAIL.
+
+**D-5 evidence (VX-537's capture half).** `capture()` (`Tools/WalkKit/first-run-walk.sh`, the `capture()` definition)
+now shoots EVERY on-screen window of the pid through `capture-windows.swift`'s listing road
+(`Tools/WalkKit/capture-windows.swift` gains an optional name prefix and `--every-layer` — every layer the pid owns,
+slivers under 48 pt skipped; its two-argument layer-0 behaviour, which the castle lib uses, is unchanged), each
+`screencapture -x -o -l <id>` (window-scoped, never full-screen), named `<HHMMSS>-<step>-<label>-w<n>.png`, the listing
+appended to the run's `captures.txt`. **The privacy consequence, owned:** capturing Settings and its sheets means a STOP
+while the twelve-words look is up (P5: between "Record your twelve words…" and "I've written them down") would capture
+the words. So every capture first runs the WORDS GUARD — `Tools/WalkKit/words-guard.swift`, VX-502's live-proven Castle
+guard (twelve lowercase words, or the look's markers, re-read from the current code: `ProtectionWords.swift:679, 694,
+696`) — and is WITHHELD (logged, never taken) when it says so or fails to answer. Its new `--classify <text>` mode makes
+its teeth headless: the walk's `--self-test` gains 10 D-5 cases (withholds: twelve words · padded twelve · the look's
+button · its warning · its reveal door; lets through: eleven words · thirteen · the join's landed line · the join's
+words notice; a pid it cannot read → withheld). Both helpers compile in the walk's G9 beside the vis-* helpers.
 
 ## Environment traps (binding; carried into every brief verbatim)
 

@@ -143,6 +143,27 @@ VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
   if [[ $handed == "a+vxtest-std@x.test b+vxtest-castle@x.test" ]]; then print -r -- "SELF-TEST the handed value: the list key alone  ok"
   else print -r -- "SELF-TEST the handed value: '$handed'  FAIL"; fails=$((fails + 1)); fi
   [[ $handed != *notasecret* ]] || { print -r -- "SELF-TEST the handed value carries another key  FAIL"; fails=$((fails + 1)) }
+  # D-5 (VX-623): every capture is withheld while the twelve words could be on screen — the words guard's teeth, over
+  # strings (its --classify mode; the AX walk itself needs a live pid). Compiled into the temp folder, never the repo.
+  sure() {  # <label> <zsh condition>
+    if eval "$2"; then print -r -- "SELF-TEST $1  ok"; else print -r -- "SELF-TEST $1  FAIL"; fails=$((fails + 1)); fi
+  }
+  if swiftc -O -o $T/words-guard $WK/words-guard.swift 2>/dev/null; then
+    wg() { $T/words-guard --classify "$1" >/dev/null }
+    sure "D-5 the words guard withholds twelve lowercase words" '! wg "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima"'
+    sure "D-5 … spaced and padded the same" '! wg "  alpha  bravo charlie delta echo foxtrot golf hotel india juliet kilo lima "'
+    sure "D-5 … the look's button (I've written them down)" '! wg "I'\''ve written them down"'
+    sure "D-5 … the look's warning (These words won't be shown again.)" '! wg "These words won'\''t be shown again."'
+    sure "D-5 … the look's reveal door (Show my twelve words)" '! wg "Show my twelve words"'
+    sure "D-5 lets eleven words through" 'wg "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo"'
+    sure "D-5 lets thirteen words through" 'wg "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike"'
+    sure "D-5 lets the join's landed line through" 'wg "Synced. Your account'\''s writing is in this library now."'
+    sure "D-5 lets the join's words notice through (it names no words)" \
+      'wg "Your twelve words are a+vxtest-std@x.test'\''s twelve words. Your previous twelve words still open backups made with them. If you don'\''t have your account'\''s words written down, you can make new ones at any time."'
+    sure "D-5 the guard refuses a pid it cannot read as withheld (fail-closed)" '! $T/words-guard notapid >/dev/null'
+  else
+    print -r -- "SELF-TEST D-5 the words guard compiles from Tools/WalkKit/words-guard.swift  FAIL"; fails=$((fails + 1))
+  fi
   (( fails == 0 )) && { print "SELF-TEST: every guard fired as expected"; exit 0 }
   print "SELF-TEST: $fails case(s) wrong"; exit 1
 fi
@@ -184,6 +205,11 @@ for h in vis-ax vis-tcc vis-win; do
   [[ $BIN/$h -nt $VW/helpers/$h.swift ]] || swiftc -O -o $BIN/$h $VW/helpers/$h.swift 2>/dev/null \
     || refuse "G9 — cannot compile Tools/VisualWalk/helpers/$h.swift"
 done
+# D-5 (VX-623): the every-window capture (capture-windows.swift's listing road) and the words guard before it.
+[[ $BIN/walk-cap -nt $WK/capture-windows.swift ]] || swiftc -O -o $BIN/walk-cap $WK/capture-windows.swift 2>/dev/null \
+  || refuse "G9 — cannot compile Tools/WalkKit/capture-windows.swift"
+[[ $BIN/words-guard -nt $WK/words-guard.swift ]] || swiftc -O -o $BIN/words-guard $WK/words-guard.swift 2>/dev/null \
+  || refuse "G9 — cannot compile Tools/WalkKit/words-guard.swift"
 open -g -b com.apple.systemevents; sleep 1
 grants=$(perl -e 'alarm shift; exec @ARGV' 15 $BIN/vis-tcc com.apple.systemevents); rc=$?
 (( rc == 142 )) && refuse "G9 — the grants check timed out (a consent prompt may be on screen — the author's to answer)"
@@ -209,7 +235,16 @@ mkdir -p $RUN
 STEP=start PID= WID=
 log() { print -r -- "[$(date +%H:%M:%S)] $STEP: $*" | tee -a $RUN/walk.log }
 window() { local w; w=($($BIN/vis-win $PID 2>/dev/null)); [[ ${w[1]:-none} != none ]] && WID=$w[1] }
-capture() { window; [[ -n $WID ]] && screencapture -x -o -l $WID $RUN/$(date +%H%M%S)-$STEP-$1.png 2>/dev/null }
+capture() {  # <label> — D-5 (VX-537): EVERY on-screen window of the pid, each window-scoped (never the full screen), named
+  # <time>-<step>-<label>-w<n>.png, the listing appended to captures.txt — and NOTHING while the words guard says the
+  # twelve words could be on screen (a failed guard withholds too: fail-closed).
+  local g pre
+  [[ -n $PID ]] || return 0
+  g=$($BIN/words-guard $PID 2>/dev/null) || { log "capture '$1' WITHHELD — ${g:-the words guard did not answer}"; return 0 }
+  pre="$(date +%H%M%S)-$STEP-$1-"
+  $BIN/walk-cap $PID $RUN $pre --every-layer >> $RUN/captures.txt 2>&1
+  log "captured '$1' → ${pre}w*.png ($(tail -1 $RUN/captures.txt))"
+}
 stop() { log "STOPPED — $*"; capture stopped; print -u2 "first-run-walk STOPPED at $STEP: $* (the app is left running; captures in $RUN)"; exit 4 }
 step() { STEP=$1; log "— $2" }
 author() { $WK/guard.sh --author >/dev/null || stop "the author check failed (her app is running, or someone is at the machine) — never retried" }
