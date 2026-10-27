@@ -98,7 +98,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 |---|---|---|---|
 | 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | **ACCEPTED** (window vx548-b1-walk: Mac suites 141/12 green, zero skips; orchestrator walk green — ORCHESTRATOR ACCEPTANCE, BATCH 1) |
 | 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | BUILT (headless green, red-on-old verified incl. two behavioural reverts; Mac pins compiled into `DerivedData/b2a`) — Mac run + faces walk ride the MID WINDOW after 2b — BATCH 2a RECORD |
-| 2b — the disconnect story | VX-394 | opus-implementer №3 | IN FLIGHT (spawned at the 2a seam) — BATCH 2b RECORD |
+| 2b — the disconnect story | VX-394 | opus-implementer №3 | BUILT (headless green, red-on-old verified 3/6; the sweep table 12 roads — 2 FIXED, 9 PINNED-GREEN, 1 safe; App Nap NOT built; reconnect options for her; Mac pins compiled into `DerivedData/b2b`, run rides the MID WINDOW) — BATCH 2b RECORD |
 | 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | NOT STARTED |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
 
@@ -246,6 +246,37 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
   (`ReadTier/ReadTakesView.swift:108`) — `TakeLabelLine` would serve it in one line; NOT seated (another surface; her
   word to ride). The two new model-facing sentences (VX-365's on `add_note_to_book`, VX-358's `spellingSentence`) join
   VX-234's copy list.
+- **MB-6, as built (batch 2b — VX-394): NO App Nap guard.** App Nap lowers priority and delays timers; it never
+  suspends a process or closes a socket, so it can make an answer late, never end a connection — and "MCP server
+  disconnected" is the stdio shim EXITING, which happens only when the app closes the socket (or the client kills the
+  shim). No traced road from throttling to a drop, so `ProcessInfo.beginActivity` would fix nothing it can name, and its
+  `.userInitiated` form would hold her Mac awake while an AI sits connected. Ratify, or name an observed case to trace.
+- **MB-7, sharpened (her hands, batch 2b):** on the AIR — (1) Settings ▸ Protection: is that library in **Castle**? In
+  Castle the SCREEN LOCK always locks the library (not dial-dependent — decision 18) and the idle dial (On this Mac,
+  default 10 minutes, counted from her own use of Variorum, never the AI's calls) does too; Standard never locks. (2)
+  Settings ▸ MCP ▸ **Activity** on the Air, at today's two drops: "claude-code was disconnected when the library locked
+  or closed" = the lock road (by design, A-8); "claude-code disconnected" = the client's side ended it (Claude Code, its
+  process, or a kill). That one look decides the Air's story. (3) Her call on the reconnect options (A) shim reconnect
+  with replay · (B) say why before the close · (C) docs only · (D) fewer locks — the BATCH 2b RECORD's section; the
+  implementer's read is (C) now, (B2) if wanted, (A) only with the MCP-blind design event accepted.
+- **MB-12 (PROVISIONAL, batch 2b — the quit's line):** built as P-VX394-5 says — a QUIT logs nothing, now every time
+  (since VX-348's fix leg it logged "…when the library locked or closed" whenever the connection's end beat the
+  process's exit). Alternative (b): a quit says that line too (MCPSpec's "every connection that named itself leaves ONE
+  line", without the quit exception) — buildable at `applicationShouldTerminate`'s road AFTER its decline decision (so a
+  cancelled ⌘Q never claims a drop), off the main thread and awaited like the lock road; one async hop on ⌘Q only while a
+  client is connected.
+- **MB-13 (proposed tickets, batch 2b — traced, unobserved, DEFERRED):** (i) **the dead listener** — the accept loop
+  returns on EMFILE/ENFILE/ENOMEM/ENOBUFS, poll's EAGAIN or a listener error and nothing tells the host or the door:
+  "running" while no new client is served; the shape: retry the transient class, a fatal exit closes the listener and
+  flips the host to failed, the door adopts it, her words for "stopped by itself" (Bug · Suspected · MCP · Low). (ii)
+  **the door's toggle races** — a stale start's completion clears `starting` for its replacement (a double start that can
+  end "couldn't start: another Variorum is already serving mcp.sock" beside a serving listener), and a stale start that
+  wins the bind fails the new host with that same false reason; the flag's half is a one-line reorder, the pin needs a
+  start-timing seam (Bug · Suspected · MCP · Low).
+- **MB-14 (her face call, batch 2b):** the status line says "running" of the SERVER and nothing of the clients, so after
+  an unlock it read true while her client's connection was dead (the Clients row's "last seen …" and Activity's line
+  are where it shows). Option: the status line carries the live count ("running · 1 client connected" / "running · no
+  client connected"). Not built.
 - (Batch records may append more.)
 
 ## LEDGER
@@ -256,7 +287,7 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
 | 2 | This plan file | orchestrator | DONE |
 | 3 | Batch 1 (VX-516 · VX-515 · VX-512) | opus-implementer №1 | BUILT — `d0e7f1302` core · `965a05521` app; Mac run + walk PENDING (BATCH 1 RECORD, "For the orchestrator") |
 | 4 | Batch 2a (VX-352 · VX-354 · VX-365 · VX-358) | opus-implementer №2 | BUILT — `15f94f154` VX-365 · `4d3f3f3d1` VX-358 · `3e1aaa26f` VX-352 · `e3d46b202` VX-354; Mac run + walk PENDING (BATCH 2a RECORD, "For the orchestrator") |
-| 5 | Batch 2b (VX-394) | opus-implementer №3 | NOT STARTED |
+| 5 | Batch 2b (VX-394) | opus-implementer №3 | BUILT — `fcf13b569` pins (red) · `bf8fa207d` fixes (green); Mac run + walk PENDING (BATCH 2b RECORD, "For the orchestrator") |
 | 6 | Batch 3 (VX-549) | opus-implementer №4 | NOT STARTED |
 | 7 | Orchestrator acceptance walks (stage via coordinator) | orchestrator | NOT STARTED |
 | 8 | The ladder (whole-run diff, fable-reviewer) | orchestrator | NOT STARTED |
@@ -727,42 +758,232 @@ commit.
 
 ## BATCH 2b RECORD
 
-**NOT DONE BY THIS BATCH (first line, by the rule):** PENDING — written at the close. (So far: no `xcodebuild test`, no
-GUI, no stage claim, no walk — the orchestrator's; nothing in `Sync/`, `Server/`, custody or the synced schema.)
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
+claim (the orchestrator's) — the Mac pins (`MCPStopRoadsDoorTests` ×3) are written and COMPILED (`build-for-testing`
+into `DerivedData/b2b`), their RUN PENDING the orchestrator's stage window (the list at "For the orchestrator"); NO App
+Nap guard (`ProcessInfo.beginActivity`) — the trace found no road from throttling to a closed connection (MB-6); NO
+reconnect machinery — options only (the brief's ruling 3); NOTHING against A-8 (the door never survives a lock — the
+brief's ruling 1); two traced dishonest-status corners DEFERRED, not fixed (the dead listener, the door's toggle races —
+each with its mechanism and a proposed ticket, MB-13); her Air never probed (MB-7 is her look); no canon edit (the
+closeout's — listed below); nothing in `Sync/`, `Server/`, custody, the synced schema or the editor seam.
 
 *Implementer: `opus-implementer` №3 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
 code: CLAUDE.md + its canon, this plan IN FULL, `notes/MCPSpec.md` IN FULL, `notes/SessionResiliencyProtocol.md`, the
 vx-348 record's §U5 (the client-session report verbatim) + the U5 UNIT RECORD's VX-394 sections (the trace, P-VX394-1…6,
 the fix leg `0ebf5c926`, THE U5 BATCH + LIVE ROUND, the U5 adjudications, the ladder's NIT 3), QUESTIONS #233 (P-VX394
 still PROVISIONAL — her product call (a)/(b)/(c) still open), SurfaceContracts' protection bullet (VX-445's lock road),
-and the code anchors below. Lane: headless `swift build`/`swift test` + `xcodebuild build`/`build-for-testing` into
-`DerivedData/b2b` only.*
+and the code anchors below. Lane: headless `swift build`/`swift test` + `xcodebuild build-for-testing` into
+`DerivedData/b2b` only. One read-only Sonnet lookup for external facts (Claude Code's disconnect/reconnect behaviour,
+App Nap, AF_UNIX across sleep, the MCP spec's close/ping/stdio rules) — its facts cited below with their sources.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.** (The red leg below needed none: the pins run against the committed
-  pre-fix behaviour, the one new API — `MCPServerHost.stopWithTheProcess` — a SEAM whose body IS the old quit road,
-  `stop(ending: .libraryClosed)`, and the DEBUG `stopWindowProbe` a no-op hook.)
-- **Preflight + the road map:** DONE (`20f1400f6`) — every lock trigger converges on `AppBootstrap.lock()` →
-  `lockOnNewRoad` → `onWillLock` (production: `macWillLock(…, endingConnections: door.recordLibraryClosing) { …;
-  door.detach() }`, `VariorumApp.swift:286`); quit is `applicationWillTerminate` → `door.detach()` alone.
-- **The host's three stop-road findings — pins RED ON OLD:** DONE (`fcf13b569`, WIP) —
-  `Tests/VariorumMCPTests/MCPStopRoadsServerTests.swift`: 3 of 6 red, 5 issues, the 3 guards green
-  (`scratchpad/b2b-logs/stoproads-red.log`): the quit logged `disconnect_library_closed` (P-VX394-5 says nothing); a
-  never-served host's stop unlinked the LIVE host's socket; a connection accepted mid-stop was never hung up and never
-  said its end.
-- **…FIXED, green:** DONE (this commit) — `MCPServerHost.halt` (the one stop: its own socket only, removed before its
-  listener closes; the connections listed after the accept loop stops), `stopWithTheProcess` + `MCPSession.forgoEndLine`
-  (the quit says nothing); the door's `quit()` (`applicationWillTerminate`); the lock composition as ONE named factory
-  `macLockTeardown` (`MacWillLock.swift`; `VariorumApp` wires exactly it — behaviour identical). Headless 16/4 green
-  (`stoproads-green.log`: the new 6 + `MCPConnectionEndServerTests` 7 + host-reuse + reader-after-close). Mac pins
-  `App/Variorum/VariorumTests/MCPStopRoadsDoorTests.swift` (3) COMPILED (`build-for-testing` into `DerivedData/b2b`,
-  TEST BUILD SUCCEEDED, `mac-bft2.log`, no warning in a touched file), RUN **PENDING** the orchestrator's stage.
-- **The sweep table (road × end line):** IN-PROGRESS — the table, each cell's pin.
-- **The pane-status honesty trace:** IN-PROGRESS.
-- **App Nap verdict (MB-6):** IN-PROGRESS.
-- **Reconnect ergonomics (propose only):** NOT-STARTED.
-- **Suites (VX-180/181's included):** NOT-STARTED.
+- **No behavioural revert is in flight.** (The red leg needed none: the pins ran against the committed pre-fix
+  behaviour, the one new API — `MCPServerHost.stopWithTheProcess` — a SEAM whose body WAS the old quit road,
+  `stop(ending: .libraryClosed)`, and the DEBUG `stopWindowProbe` a no-op hook — commit `fcf13b569`.)
+- **Preflight + the road map:** DONE (`20f1400f6`).
+- **The host's three stop-road findings — pins RED ON OLD:** DONE (`fcf13b569`, WIP) — 3 of 6 red, 5 issues, the 3
+  guards green (`scratchpad/b2b-logs/stoproads-red.log`).
+- **…FIXED, green; the door's quit; the lock teardown as ONE factory; the Mac pins:** DONE (`bf8fa207d`) — headless 16/4
+  green (`stoproads-green.log`); Mac pins COMPILED (`mac-bft2.log`), RUN **PENDING** the stage.
+- **The sweep table · the pane-status trace · the App Nap verdict · the reconnect options · MORNING BUNDLE:** DONE
+  (this commit) — below.
+- **Suites:** DONE — the whole headless run on the final code (`headless-all.log`): core 3446/460 passed (5 standing
+  known issues), StringsWorkbook 32/4, VariorumMCPTests 402/74 with the one standing VX-532 flake (green isolated ×2);
+  VX-180/181's suites 30/4 green. **PENDING:** the Mac pins' run (the stage).
+
+### THE SWEEP TABLE — every road that ends a connection × the ruled Activity line
+
+The words (P-VX394-1, PROVISIONAL in #233): clientClosed "‹client› disconnected" · libraryClosed "‹client› was
+disconnected when the library locked or closed" · serverOff "… when the MCP server was turned off" · overLimit "… after
+a message over the size limit". Only a connection that NAMED itself (admitted past its setup key, `initialize` read —
+P-VX394-6 + the ladder's clarification) has a line. Every lock road converges on ONE function, `AppBootstrap.lock()` →
+`lockOnNewRoad` → `onWillLock` (production: `macLockTeardown` — `recordLibraryClosing` after the notes' savepoints and
+before the store closes, then the services stop and `detach()`).
+
+| # | Road (its trigger, in code) | Ruled line | Cell | Pin(s) |
+|---|---|---|---|---|
+| 1 | **Client closed** — the client quits, restarts its server, or its process ends → the reader's EOF → `MCPServerHost.ended` → `writeEndLine` | "‹client› disconnected", once | **PINNED-GREEN.** The b1 walk's live line "claude-code disconnected" IS the ruled clientClosed wording (pinned verbatim by `aConnectionsEndReadsInWords`), and it was this arm: the shim closed before the switch went off (a switch-off would have read "…when the MCP server was turned off") | headless `MCPConnectionEndServerTests.aClientThatClosesItsConnectionLeavesOneLineSayingSo`; Mac `MCPConnectionEndDoorTests.aConnectionsEndReadsInWords`; live (b1 walk) |
+| 2 | **Server switched off** — Settings ▸ MCP's switch → `reconcileServer` → `stopServer(.serverOff)` (the host stopped and let go; each session writes its own end — VX-348's fix leg) | "…when the MCP server was turned off", once | **PINNED-GREEN** | headless `theServerSwitchedOffEndsEveryConnectionAndSaysSo`, `aStopThatLetsGoOfItsHostStillSaysEachConnectionsEnd`; Mac `theDoorsTwoStopRoadsSayTheirReasonsOnce` |
+| 3 | **A message over the size cap** (16 MiB after admission) → the transport's flag → answered, closed | "…after a message over the size limit", once | **PINNED-GREEN** | headless `aMessageOverTheCapEndsTheConnectionAndSaysSo` |
+| 4 | **Over the session cap** (a 17th connection) → `refuseOverCap` (answered with the cap's sentence, closed — never a session) | none (never admitted, never named itself) | **PINNED-GREEN** (new guard — the cell was by-construction only) | headless `MCPStopRoadsServerTests.pastTheSessionCapTheRefusedConnectionSaysNothing` |
+| 5 | **Lock Library Now** — ⌃⌘L, the File menu, Settings ▸ Protection's button (`EditorCommands.swift:568`, `AppBootstrap.swift:957`) → `lock()` | "…when the library locked or closed", once, written while the store is open | **PINNED-GREEN** — the road was right; its production composition (an inline closure in `VariorumApp`) was reached by NO pin, so a deleted wire would have stayed green. Now ONE factory, `macLockTeardown`, driven end to end | Mac `MCPStopRoadsDoorTests.everyRoadThatClosesTheLibrary…` (leg 2: a real Castle library on the planted road, a real door + host + client); `MCPConnectionEndDoorTests.theLockRoadSaysTheConnectionsEndAfterTheSavepointsAndBeforeTheStop`; `RoadLockRouteTests.lockNowClosesACastleLibrary…` |
+| 6 | **The idle-lock monitor** (Castle; this Mac's sealed minutes, default 10; counted from HER use of Variorum only — never a client's calls) → `relockIfIdle` → `lock()` | the same | **PINNED-GREEN** | Mac leg 3; `RoadLockRouteTests.theMonitorsLock…` |
+| 7 | **The sleep monitor / the screen-lock monitor** (Castle — always on, decision 18; `NSWorkspace.willSleepNotification`, `com.apple.screenIsLocked`) → `relockIfPolicySays` → `lock()` | the same | **PINNED-GREEN** (the two subscriptions are VX-445's wiring — read, not driven) | Mac leg 4; `RoadLockRouteTests.theMonitorsLock…` |
+| 8 | **Store close** — every re-keying reopen runs `onWillLock` before the pool closes: the crossings (Use Castle… · Use Standard… · Replace All Keys…) and the account acts through `reopenAround` (`AppBootstrap.swift:1244`), Make this my library (`:876`), a plain-text export brought in (`:741`) | the same | **PINNED-GREEN** (one representative driven; the rest share the line, read) | Mac leg 1 (Use Castle…, the crossings' seam) |
+| 9 | **App quit** — `applicationWillTerminate` → was `door.detach()`: a stop "as the library closes" whose lines each session writes itself (VX-348's fix leg), racing the process's exit | **none** (P-VX394-5 — "a QUIT logs nothing") | **FIXED** — RED ON OLD: the old road logged `disconnect_library_closed` whenever the session's end beat the exit; now `door.quit()` → `MCPServerHost.stopWithTheProcess` forgoes every live line before the hang-up (a client that left first keeps its own line) | headless `aQuitSaysNothingForAConnectionItEnds` (RED → GREEN) + guard `aClientThatLeftBeforeTheQuitKeepsItsOwnLine`; Mac `MCPStopRoadsDoorTests.theQuitRoadStopsTheServerAndSaysNothing` |
+| 10 | **A connection accepted WHILE a stop runs** (rows 2, 5–9) — the stop took its list of connections before its accept loop had stopped | the stop's own line | **FIXED** — RED ON OLD: the latecomer was never hung up (it outlived the stop, served on with the switch OFF) and never said its end; now the list is taken after the accept loop stops | headless `aConnectionAcceptedWhileTheServerStopsIsHungUpAndSaysWhy` (RED → GREEN; the DEBUG `stopWindowProbe` opens it in exactly that window) |
+| 11 | **A re-attach to another session** (`attach` → `detach()` with no lock road before it — defensive: every session change runs `onWillLock` first today) | "…when the library locked or closed", once | **PINNED-GREEN** (new guard) | Mac `aDetachWithNoLockRoadBeforeItStillSaysTheLibraryClosedOnce` |
+| 12 | **A crash / a force quit** — the process is gone | none possible | **SAFE by construction** (nothing is left to write; the next start sweeps every while-connected grant) | — |
+
+### THE PANE-STATUS TRACE — "running" while stopped?
+
+**The source.** The status line is `MCPPaneCopy.status(door.serverState)` (`MCPPane.swift:204`); `serverState` is
+written only by the door: `reconcileServer` (off · waiting for the library · running once a host's start succeeds ·
+failed) and `detach()` (`.waitingForLibrary` — "on · starts when the library is open" — or off).
+
+**Her report's "running · socket in the app container" — the mechanism, not a dishonest status.** While the library is
+locked the pane cannot be seen: the lock closes the Settings window and its content falls to the "Open the main window
+first." stub (VX-224, `SettingsLockCloseTests`); and were it drawn, `detach()` left it at "on · starts when the library is
+open" — now pinned on every lock road (the Mac leg's `closedHonestly`). At the unlock the window's ready re-attaches the
+door and the server starts again: "running" is TRUE of the server. What died was the CLIENT's connection — and the status
+line speaks only of the server. Where the pane does say it: the Clients row reads "last seen …", not "connected now"
+(`door.connected` is emptied at the stop and refilled only by live sessions), and Activity reads "‹client› was
+disconnected when the library locked or closed". Her reading was honest about the server and silent about the client —
+a face question for her (MB-14), not a status bug.
+
+**The trace's dishonest states (the brief: "if there is a state where the server is stopped and the pane would say
+running, pin and fix"):**
+- **FIXED — "running" while nothing can reach the server** (row 10's sibling, `bf8fa207d`): `stop()` unlinked the socket
+  PATH unconditionally. The door's stale start — switch ON, OFF and ON again while the first start is still sweeping its
+  grants (`reconcileServer`: the OFF let the first host go, so the ON makes a second while the first's detached start
+  still runs) — races the new host for the path; when the new host binds first, the stale one's start hears "already served", fails, and its completion arm
+  (`guard self.host === fresh else { fresh.stop() }`) stops it: the unconditional unlink removed the LIVE host's file.
+  The new host's start then landed `.running` — "running · socket in the app container" — while every client's connect
+  met ENOENT and its shim said "Variorum must be open". Now a host removes only the socket it bound, and before its
+  listener closes (while its listener holds the path no other host can bind it — `MCPSocketRoad.listen`'s probe — so the
+  file removed is always its own). Pin `aStopThatNeverServedLeavesTheServingHostsSocketInPlace` (RED ON OLD: "the serving
+  host's socket is gone"); guard `aHostsOwnStopStillRemovesItsSocket`.
+- **DEFERRED — a listener that dies by itself (M1).** The accept loop (`MCPServerHost.acceptLoop`) returns on any
+  `poll` error but EINTR, any non-POLLIN event on the listener, and any `accept` error but EINTR/ECONNABORTED — EMFILE /
+  ENFILE (descriptors exhausted, even for a moment), ENOMEM, ENOBUFS, poll's EAGAIN among them. Nothing then tells the
+  host or the door: `_state` stays `.running`, the pane says "running", the listening descriptor stays open (connects
+  queue in its 8-deep backlog and are never answered; the client times out at its 30 s connect), and a restart's probe
+  would even hear that zombie as "another Variorum is already serving". UNOBSERVED, and its honest fix is a small design,
+  not a line: retry the transient class (EMFILE/ENFILE/ENOMEM/ENOBUFS, poll EAGAIN) after a short pause; on a truly
+  fatal exit close the listener and its socket, flip the host to failed and signal the door, which adopts the host's
+  state on that signal — and the pane's words for "the server stopped by itself" are hers ("couldn't start: …" would be
+  false). Proposed ticket (Bug · Suspected · MCP · Low), MB-13.
+- **DEFERRED — the door's toggle races (M4).** In `reconcileServer`'s completion, `self.starting = false` runs BEFORE
+  `guard self.host === fresh`, so a stale start's completion clears the flag for the host that replaced it; a reconcile
+  during that host's start (any snapshot change) then starts it a SECOND time — its own live listener answers the second
+  start's probe, so the host can end `.failed("another Variorum is already serving mcp.sock")` beside a listener that
+  serves, and the pane says "couldn't start: another Variorum is already serving mcp.sock" while it serves (which
+  completion lands last decides). And when the STALE start wins the bind (the mirror of the fixed case), the new host fails with that same
+  false reason and the server stays down until the next snapshot change. Needs a quick OFF → ON while a start waits on
+  the writer. The flag's half is a one-line reorder (clear `starting` only for the host it belongs to); the pin needs a
+  start-timing seam the door doesn't have. Proposed ticket (Bug · Suspected · MCP · Low), MB-13.
+
+### THE APP NAP VERDICT (MB-6) — not built; the trace says why
+
+- **What "MCP server disconnected" is.** A stdio server's process EXITED: Claude Code's docs (code.claude.com/docs/en/mcp
+  — "The server's process exits mid-session: Claude Code marks the server as failed. To start it again, select
+  Reconnect…"). Our stdio server is the `variorum-mcp` shim, which exits only when its socket → stdout copy ends
+  (`MCPShim.pump`): the app closed the connection, a read error, or stdout failed — or the client killed it.
+- **What App Nap does** (Apple, Energy Efficiency Guide for Mac Apps, "App Nap"; WWDC13 session 209): lowers CPU and
+  I/O priority and throttles/coalesces TIMERS ("we do not fire timers early: we only delay them"). Nothing in Apple's
+  sources suspends a process or closes a socket. The host's accept loop blocks in `poll`, each reader in `read` — both
+  wake on data, not on a timer; the shim is a command-line child of the client, never napped. **So App Nap can make an
+  answer late; it cannot end a connection.** The host CAN be napped (a background, occluded app), but throttling is not
+  a disconnect road.
+- **The only road from "late" to "dropped" is the CLIENT killing a slow server** — and the facts don't carry it: Claude
+  Code documents no keep-alive ping for stdio; its timeouts abort a call or a startup (`MCP_TIMEOUT` 30 s startup;
+  `MCP_TOOL_TIMEOUT`; the per-call idle timeout, 30 min for stdio) — never a connected server. One user report (GitHub
+  anthropics/claude-code #54544, closed not planned, no maintainer word) describes pings every ~5 min and a SIGTERM on a
+  late pong — a lead, not a fact; and our reply rides no timer (a socket read wakes it), so a napped app answers late
+  only by its lowered priority — App Nap's own timer delays are ~100 ms to seconds (WWDC13 209), never minutes. Even if such a kill happened, Activity now names it: a client-side kill reads "‹client›
+  disconnected", a lock reads "…when the library locked or closed".
+- **The lock road is the definite path that fits every fact** (VX-348 U5's trace, re-traced here on today's road: every
+  trigger → `lock()` → `onWillLock` → the line → the stop), and her 2026-10-27 clue (the drops came when her Air locked)
+  is that road IF the Air's library is in Castle (MB-7). Whether her ORIGINAL 3–4 AM night was the lock road needs that
+  night's posture — unknowable here; no other traced road ends a connection from the app's side with the app alive.
+- **Verdict:** the brief's conjunction is not met in the way that matters — no traced mechanism leads from throttling
+  to a closed connection, so a `beginActivity` guard would fix nothing it can name (the hallucination guard), and it has
+  a real cost: `.userInitiated` carries the idle-system-sleep-disabled bit, so it would hold her Mac awake for as long as
+  an AI client sits connected. NOT BUILT. If a ping-kill is ever observed (an Activity "‹client› disconnected" at a
+  moment she knows the client didn't quit), that is the mechanism to trace next.
+
+### RECONNECT ERGONOMICS — investigated, proposed, NOT built (her call, MB-7)
+
+**The facts** (the lookup, cited): Claude Code interactive marks an exited stdio server failed and does NOT reconnect it
+(HTTP/SSE servers: five tries with exponential backoff; stdio: none — the docs' table; GitHub #43847, closed); `/mcp` →
+Reconnect respawns it; `claude -p` / Agent SDK sessions restart a stdio server lazily on the next tool call. The MCP spec
+has no close reason for a server to send (lifecycle: "No specific shutdown messages are defined") and no stdio
+resumption — but its newest revision (2026-07-28, which Claude Code negotiates for stdio by default since 2.1.292) says
+"If the server process exits unexpectedly, the client SHOULD restart it… the protocol is stateless", and that the stdio
+framing "works unchanged over Unix domain sockets". A server's `list_changed` is honoured by Claude Code.
+
+**The options (each with its cost; none built):**
+- **(A) Shim-side reconnect with replay.** When the app ends the socket, the shim keeps its stdio open, waits for the
+  socket to return, reconnects, re-sends its setup-key preamble, replays the client's original `initialize` (+
+  `notifications/initialized`), swallows the server's second answer, and resumes pumping; requests in flight at the drop
+  are answered with an error (or lost). The client never sees a drop and "always" grants work the moment she unlocks.
+  Costs: the shim stops being MCP-BLIND (MCPSpec's A-2 shape — it must recognise, keep and replay the opening frames and
+  filter one response: a design event); while the library is locked every call must be answered by the shim ("the
+  library is locked") or hang — more MCP inside the shim; a replayed connection is a NEW connection to the server, so
+  "until it disconnects" grants are already gone (swept at the start) while the drop is hidden from the client; and every
+  handshake change (VX-180's probe; 2026-07-28's `server/discover`) must now be mirrored in the shim.
+- **(B) Say why before the close.** (B1) The server sends each named connection one MCP log notification before the
+  lock's hang-up ("Variorum's library locked — reconnect from /mcp once it is unlocked"): standard MCP, shim untouched;
+  but Claude Code's display of server log messages is undocumented (may be invisible), and the 2026-07-28 revision
+  removed `logging/setLevel` — a dead end there. (B2) The shim writes one stderr line as it exits ("Variorum closed the
+  connection — reconnect with /mcp"): lands in Claude Code's MCP logs, not the chat; the shim cannot know WHY unless the
+  app tells it out of band (a tiny shim↔app close-reason line before EOF — a private protocol, not MCP).
+- **(C) Documentation only.** The guide's MCP chapter and `MCPSession.instructions` say it: "If Variorum's tools vanish,
+  the library may have locked — tell the author; reconnect with /mcp once it's unlocked." (The instructions are at
+  2,994 of 3,000 characters — room must be made; R-VX184-3.) Activity already says why on her side. Costs nothing; still
+  one manual /mcp per lock.
+- **(D) Fewer locks — her standing product call (#233, VX-394 "Needs Lillian"):** a connected client's calls count as
+  use for Castle's idle dial, or a Castle setting "stay unlocked while an AI client is connected" (default off). It
+  removes the idle-dial drops only — sleep and the screen lock always lock in Castle (decision 18). Relaxing a lock is
+  author-only.
+- **The implementer's read:** (C) now (a copy change for her pass) — it is honest and free; (B2) is the cheapest honest
+  add if she wants the client side told; (A) only if she wants seamless and accepts the MCP-blind design event (and
+  clients are moving toward restarting exited stdio servers themselves — 2026-07-28's SHOULD — which would make (A)'s
+  value shrink); (D) stays hers.
+
+### Files touched
+
+Core/wire: `Sources/VariorumMCP/MCPServerHost.swift` (`halt` — the one stop; `stopWithTheProcess`; the DEBUG
+`stopWindowProbe`) · `Sources/VariorumMCP/MCPSession.swift` (`forgoEndLine`). App: `Features/MCP/MCPDoor.swift`
+(`quit()`, `detach(ending:)`, `stopServer(ending:)` optional) · `VariorumAppDelegate.swift` (`applicationWillTerminate`
+→ `mcp.quit()`) · `MacWillLock.swift` (`macLockTeardown`) · `VariorumApp.swift` (wires `macLockTeardown` — behaviour
+identical). Tests: `Tests/VariorumMCPTests/MCPStopRoadsServerTests.swift` (new, 6) ·
+`App/Variorum/VariorumTests/MCPStopRoadsDoorTests.swift` (new, 3). Commits: `20f1400f6` (LIVE STATUS) · `fcf13b569` (the
+pins, red) · `bf8fa207d` (the fixes, green) · this record's commits.
+
+### Suites (the end, on the final code `bf8fa207d`)
+
+- `swift build --build-tests` green; the new suite + its neighbours 16/4 green (`stoproads-green.log`).
+- **VariorumMCPTests whole: 402 tests / 74 suites, ONE issue** — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswers…`'s
+  15 s wall clock under the full-parallel run (22.7 s): the standing **VX-532** class batches 1 and 2a met (no harness line
+  changed), green ISOLATED ×2 (`harness-isolated-1/2.log`: 3/1, 2.2 s each). Batch 2a's 396/73 + this batch's 6/1.
+- **VX-180 / VX-181 no-regress** (`MCPDiscoverProbeServerTests`, `MCPShimClosedAppTests`, `MCPPreInitializeWindowTests`,
+  `MCPShimTests`): **30 / 4 green** (`vx180-181.log` — U5's same count): the closed-app sentence and the mid-session
+  connect unchanged.
+- **The whole headless run** (`headless-all.log`, `swift test` on the final code): VariorumCoreTests **3446 tests / 460
+  suites passed** (5 known issues, standing — batch 2a's same count: no core line changed), StringsWorkbook **32 / 4
+  passed**, VariorumMCPTests **402 / 74 with the same ONE VX-532 issue** (19.6 s this run; green isolated above).
+- Mac: `build-for-testing` into `DerivedData/b2b` — **TEST BUILD SUCCEEDED** (`mac-bft2.log`), no warning in a touched
+  file. **PENDING:** the Mac pins' run (the stage).
+
+### Canon owed at the closeout (not this batch's to write — the two-file rule)
+
+- MCPSpec, "A dropped connection says why (VX-394)": after the four ends — "a quit says none (P-VX394-5); a stop ends
+  every connection it served, one accepted while it stops included, and a server removes only its own socket".
+- (Nothing for AppSpec or SurfaceContracts — no face changed.)
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator): `DerivedData/b2b` holds batch 1's, 2a's AND 2b's code (cloned from b2a,
+  rebuilt incrementally from the tip `bf8fa207d`; this record's commits change no code), so the mid window can run every
+  list from ONE product — `cd App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+  ~/dev/variorum-vx-548/DerivedData/b2b test-without-building` with `-only-testing:VariorumTests/<Suite>` for 2b's:
+  **the pins** `MCPStopRoadsDoorTests` (new, 3); **the neighbours** `MCPConnectionEndDoorTests` · `MacWillLockTests` ·
+  `RoadLockRouteTests` · `SettingsLockCloseTests` · `AutosaveRegistryLifecycleTests` · `LandingOffsetTests` ·
+  `FirstRoundAfterTheReopenTests` · `MCPPaneTests` · `MCPPaneTabsTests`. Read the `skipped:` lines. (2a's list may run
+  from `b2b` too; `b2a` is untouched.)
+- **The walk legs (dev store):** (1) THE QUIT — a client connected (the shim driven directly with the pane-copied key,
+  as the b1 walk did), quit the Debug app, relaunch: Activity shows NO line for that connection (P-VX394-5). (2) THE
+  LOCK — needs the dev store in Castle (`~/.variorum/dev-castle.env`; restore the posture after): a connected client,
+  ⌃⌘L, unlock → Activity "claude-code was disconnected when the library locked or closed" (once), the status line
+  "running" again, the Clients row "last seen …". (A LIVE CASTLE WALK trips [cyber] on Fable — hand it to Opus, per
+  the standing safeguard.) Leg (2) is optional: the Mac pin drives every lock road on a real Castle library.
+
+### MORNING BUNDLE items born here (folded into §MORNING BUNDLE above)
+
+MB-6 (as built: not built) · MB-7 (sharpened: the exact look) · MB-12 (the quit's line) · MB-13 (two proposed tickets) ·
+MB-14 (the status line's client count).
 
 ## BATCH 3 RECORD
 
