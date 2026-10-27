@@ -196,7 +196,24 @@ note each sourced label in your record with its file:line.
 
 ### UNIT 1 — LIVE STATUS (the implementer owns this section)
 
-(not started)
+**Not done by this unit (by design): no production act of any kind** — no `Tools/prod-read.sh` invocation, no reset
+helper run outside `--self-test`, no walk run beyond `--self-test`; no stage claim, no Variorum launch, nothing written
+under `~/Library/Containers` (one read-only `defaults read` probe of the dev domain for D-4, as the brief names it).
+
+Started 2026-10-27 by the UNIT 1 `opus-implementer` session. Required reading done in the brief's order (this file;
+`first-run-walk.sh`; WalkKit README; `prod-read.sh` + `prod-confirm-test-user.sh`; vx-439 1229–1279; vx-510 3096–3220
+and 2550–2577; `guard.sh`), plus `account_purge()`'s latest body (`Server/supabase/13_phase13i_wings.sql:851-922`) and
+the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swift`).
+
+| Piece | Row | Status |
+|---|---|---|
+| 1 | D-7 — guard.sh compile-or-refuse + its red-on-old pin | NOT-STARTED |
+| 2 | D-1 — `Tools/prod-reset-test-account.sh` + `--self-test` (incl. the `account_purge()` drift pin) | NOT-STARTED |
+| 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | NOT-STARTED |
+| 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | NOT-STARTED |
+| 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | NOT-STARTED |
+| 6 | D-6 — release.sh HANDOFF step 0 + README | NOT-STARTED |
+| 7 | Final evidence: both self-tests' case lists, D-7 red-on-old, `zsh -n`, each D-row's acceptance (file:line) | NOT-STARTED |
 
 ## Environment traps (binding; carried into every brief verbatim)
 
