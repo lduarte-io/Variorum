@@ -340,8 +340,8 @@ rows=$(prodread "select (select count(*) from setting where owner_id = '$UID_') 
 log "key_vault: $vault"; log "kp secret: $kp"; log "device cursors: $cursors"; log "data rows (setting + container): $rows"
 [[ $vault == *'"mode":'* && $vault == *'"proof":true'* ]] || stop "no vault row with its proof"
 [[ $kp == *'"n":1'* ]] || stop "no kp: secret — no round ever reached the key-proof enrollment"
-[[ $cursors != *'"n":0'* ]] || stop "no device cursor"
-[[ $rows != *'"n":0'* ]] || stop "no data rows on the server"
+[[ $cursors == *'"n":'[1-9]* ]] || stop "no device cursor"
+[[ $rows == *'"n":'[1-9]* ]] || stop "no data rows on the server"
 
 STEP=done
 log "PASSED — '$ACCOUNT' first run: the sheet confirmed, the row Synced, the server holds the vault, the proof, a cursor and rows"
