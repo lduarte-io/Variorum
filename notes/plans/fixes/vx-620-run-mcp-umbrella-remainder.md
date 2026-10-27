@@ -1235,7 +1235,10 @@ clients' reconnect roads — VX-619's guide sentence).*
   O-4 (her 2026-10-11 ruling, `MCPProviderNeutralityTests`) forbids a provider's name in the instructions, so the
   advice says the client's own road neutrally; the guide names Claude Code's road only inside lesson 2's O-4 SETUP
   COPY fence.
-- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b3`):** NOT-STARTED.
+- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b3`):** IN-PROGRESS — Mac `build-for-testing` into the
+  FRESH `DerivedData/b3` (absent before, never a clone; built from `bab5c38b3`'s sources — every later commit is
+  record-only): **TEST BUILD SUCCEEDED** (`scratchpad/b3-logs/mac-bft3.log`; no warning in a touched file). The whole
+  headless suite: PENDING (running next).
 
 ### VX-565 — THE PROBE (her kickoff: "VX-548 rebuilt that listing, re-probe on main")
 
