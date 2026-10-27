@@ -167,7 +167,8 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     `<display title>.md` → write; reads only).
   - VX-126: NOT-STARTED — settled design: `bulkExportManifest`'s per-NOTE files through `variorumDocumentText` (option A);
     Pools/ and Readings/ unchanged (call C-126-1); the deliberate byte-pin updates; a library→re-import round-trip pin.
-  - VX-554: HELD on fork F-554 (the door the ticket asks for already exists — see the Ledger).
+  - VX-554: RULED R-439-F554 — RECORD-ONLY (no code; the door exists since VX-217). Evidence = the batch-1 walk's
+    captures; Linear → Needs Lillian; morning bundle 4.
   - VX-570: NOT-STARTED — settled design: `.newNoteInBook` ⌥⌘N (File menu + ⌘K; the book foot's and Outline flow's
     "+ new note"/"+ new entry" declared as its `.surface` renderers), gated on a new `focusedPaneShowsBook` context fact,
     delivered to the focused pane's `BookView` as a one-shot request that runs the SAME act its foot door runs (book →
@@ -179,7 +180,8 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   - VX-332: NOT-STARTED — settled design: every autofocus mount takes the waiting/never-steal opening road; the one-shot
     `QuickEntryOpeningFocus` claim retires; the bar stands down while a tour runs; `aNavigationBack…KeepsTheBarsRaiseAsItWas`
     updated deliberately (it pins the old behavior); red-on-old pin = a navigation back puts the caret in the box.
-  - VX-568: HELD on fork F-568 (the mechanism in her voice is not the app's — see the Ledger).
+  - VX-568: RULED R-439-F568 — probe focus churn (churn ⇒ the bug, pin, fix); else a SUPPORTED indicator knob only;
+    else record-only → Needs Lillian. Custom caret REFUSED tonight (TEXTKIT2_NOTES §3). Morning bundle 5.
   - VX-602: NOT-STARTED — settled design: "Restore Field Guide…", "Take the Onboarding Tutorial", and (call C-602-1)
     "Open the Field Guide"; guide CONTENT speaks the old name three times — FLAGGED, not edited (morning bundle 3).
 - Batch 2: NOT-STARTED
@@ -195,7 +197,26 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
    (the welcome lesson: "Help ▸ Restore Tutorial… replaces the whole book…"), ~1411 (the Trash practice: "…Help ▸ Restore
    Tutorial… rebuilds the whole book."), ~1975 (the tags lesson: "That is exactly how Help ▸ Restore Tutorial… finds what
    to replace."). Her call: re-word the three lines + the re-seed in her window, or leave them.
-4. (grows)
+4. **VX-554 — the gathering New Note door already exists** (VX-217, since 0.9.x: the navigator foot + the Outline flow's
+   end, every face but Index — where the curated book has none either). Where did you look when it was missing — Index, a
+   collapsed navigator, or a greyed (faint-ink) door? ⌥⌘N (VX-570) now mints from every gathering face including Index.
+   If you want an Index-column mint door or a louder greyed face, say so — both are unruled placements we didn't build.
+5. **VX-568 — nothing the app draws fades.** The "fading in and out" is macOS's own caret (`NSTextInsertionIndicator`,
+   which animates rather than hard-blinks), sitting on the placeholder's first letters since VX-326 focused the box at
+   launch — and VX-332 now puts it there on every return. Ruling R-439-F568: we probed for focus churn (a real bug if
+   found), tried only supported knobs, and refused a custom caret overnight (TEXTKIT2_NOTES §3 calls it a TK1-fallback
+   trigger; the workaround rests on a macOS-27-only behavior). If you want the literal hard on/off blink, that custom-caret
+   build is the road — your call with the risk stated. The batch-1 walk has the live Study capture.
+6. **C-125-1 — Export Note…'s chord is ⌥⌘S** (⇧⌘E is Extract's; your words were "keyboard shortcut for saving note").
+   It sits beside ⌘S-commits — cheap to re-chord if that reads wrong.
+7. **C-126-1 — option A also reaches the scheduled plain-text insurance export** (same manifest): its per-note files gain
+   the header + takes too, making the insurance round-trippable whole. Pools/ and Readings/ byte-unchanged.
+8. **C-570-1 — ⌥⌘N's context is "the focused pane shows a book"** (any book mode; journal books mint entries; gatherings
+   mint through the planner). A member note open in Write does NOT count (which book would it mean?) — say the word if you
+   want it widened to the focused note's book.
+9. **C-602-1 — the naming pass also renames Help ▸ "Open the Tutorial" → "Open the Field Guide"** (+ its ⌘K twin), since
+   it opens the field guide and would otherwise sit confusingly beside "Take the Onboarding Tutorial".
+10. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 
@@ -257,3 +278,30 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   Tutorial" opens the FIELD GUIDE (the same book "Restore Tutorial" restores), so the naming pass renames it "Open the
   Field Guide" too (and ⌘K's twin row); without it the menu would read "Open the Tutorial" beside "Take the Onboarding
   Tutorial" — the exact confusion she named.
+- 2026-10-27 **ARCHITECT RULING on the B1 forks (the orchestrator, against the record and TEXTKIT2_NOTES; both bundled for her morning):**
+  **R-439-F554 — VX-554 is RECORD-ONLY, the proposal adopted whole.** (1) The face door exists on the old tree (VX-217),
+  so no pin can be red-on-old — the hallucination guard's "record it, don't fix it" applies; the member lands NO code.
+  The orchestrator's batch-1 walk captures the evidence: a gathering's navigator foot and Outline flow end in BOTH voices,
+  Index on both kinds (no mint door, matching the curated book), and the navigator-collapsed state (a candidate for what
+  she met). (2) VX-570's ⌥⌘N is the one new door and reaches every gathering face, Index included (A-439-4 + C-570-1).
+  (3) Linear: VX-554 → Needs Lillian with the trace; the morning bundle asks where she looked. NOT built tonight: an
+  Index-column mint door (a placement no ruling makes) and a louder greyed face (contradicts R-VX214-3) — hers to order.
+  **R-439-F568 — VX-568: no custom caret tonight; probe first, then only a SUPPORTED knob, else record-only.**
+  Option (b) is REFUSED for this run: TEXTKIT2_NOTES §3 names custom insertion-point drawing a TK1-fallback trigger class
+  ("design around it or accept the system caret"), and the FB note the trace found (TK2 ignored `shouldDrawInsertionPoint`
+  until macOS 27) makes the hide-the-system-caret half rest on a ONE-point-release-old behavior — a flip either way at
+  27.x leaves two carets or none. A cosmetic preference does not buy that risk overnight without her eye. Instead:
+  (1) PROBE FOCUS CHURN, bounded — instrument the capture box's first-responder acquisitions/resignations and the
+  indicator's appearance while idling on the Bookcase and across window key/occlusion changes. The indicator ANIMATES IN
+  on every focus gain, so repeated focus toggling would read exactly as "fading in and out flickering" and would be a BUG:
+  if churn shows, THAT is the member's traced mechanism — fix it with a red-on-old pin and stop there. (2) If no churn:
+  look for a SUPPORTED, documented knob that plain-ifies the system indicator's blink (NSTextInsertionIndicator display
+  mode / automatic-mode options) reachable WITHOUT private API; subview enumeration is legal only as a DEBUG probe, and a
+  shipped mechanism may use it only if nothing documented exists AND it degrades to default behavior when the subview
+  isn't found (the degradation pinned). (3) If neither lands: BUILD NOTHING for VX-568 — Needs Lillian with the full
+  trace and the options priced ((a) Terminal-only no-op for her store; (b) with its platform risk; (c) placeholder
+  stepping aside, which bends the text-alignment instinct and hides teaching exactly when a fresh store looks). Terminal's
+  block cursor stays untouched in every arm; A-439-8's "remove the fade" premise is RETIRED (nothing app-made fades).
+  The walk captures the live Study caret either way.
+  **The C-calls are all CONFIRMED** (C-125-1 ⌥⌘S · C-126-1 incl. the insurance export gaining header+takes · C-570-1
+  incl. the Write-pane exclusion · C-552-1 · C-602-1), each named in the morning bundle for her veto.
