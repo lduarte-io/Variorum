@@ -896,13 +896,12 @@ clients' reconnect roads — VX-619's guide sentence).*
 
 - **No behavioural revert is in flight.**
 - **0 · Preflight + this record:** DONE (this commit).
-- **1 · VX-565 — the probe (reconstruction tests):** NOT-STARTED — the probe's finding so far (read, not yet pinned):
-  her report's shape — PlanetLillian (wing) twice and "o ladrão de raios" (book) twice for one client with different
-  rungs — is EXACTLY VX-393's report (the VX-348 record §U5: "PlanetLillian (wing) twice for claude-code — `read ·
-  always` AND `read, suggest, write new and edit · always` — and "o ladrão de raios" (book) twice"), fixed at 0.9.8
-  (v1_30's merge + `uq_mcp_grant_standing_place` + the one mint's replace). Pins to write: her exact shape on today's
-  merged tree through every minting road (one row each); the honest two-row shapes (a once beside a standing; two
-  clients; two places sharing a name) each SAID by its row.
+- **1 · VX-565 — the probe (reconstruction tests):** DONE (this commit) — disposition RESOLVED, no fix (no mechanism
+  on today's tree): her report's shape is VX-393's report word for word, fixed at 0.9.8; every other way one place
+  lists twice is an honest second row that says what differs. Headless NEW
+  `Tests/VariorumCoreTests/MCPPlaceTwiceProbeTests.swift` — **5 / 1 GREEN** (`scratchpad/b3-logs/vx565-probe.log`);
+  Mac NEW `App/Variorum/VariorumTests/MCPPlaceTwiceFacesTests.swift` (3 — the rows' drawn words) — compile PENDING
+  (piece 5), RUN PENDING the stage. The record: "VX-565 — THE PROBE" below.
 - **2 · VX-566 — `import_document` takes `section_id`:** NOT-STARTED — design: the one-document form takes
   `create_note`'s exact shape (parse: without `book_id` → `sectionWithoutBookWords`; the op: `importNote(…, section:)`
   through `mintNoteEntry`'s existing chapter check; the answer echoes `section_id`); the BOOK form REFUSES `section_id`
@@ -916,3 +915,46 @@ clients' reconnect roads — VX-619's guide sentence).*
   advice says the client's own road neutrally; the guide names Claude Code's road only inside lesson 2's O-4 SETUP
   COPY fence.
 - **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b3`):** NOT-STARTED.
+
+### VX-565 — THE PROBE (her kickoff: "VX-548 rebuilt that listing, re-probe on main")
+
+**Her report** (an agent's feedback, relayed 2026-10-26, filed 2026-10-27 01:01 UTC — before VX-548 merged):
+"PlanetLillian (and "o ladrão de raios") show twice in the pane with different rungs. Either the rows are honest
+(different places or durations) and the face doesn't say why, or they really are duplicates — probe first, then merge
+per client+target into the strongest rung or label the difference."
+
+**The finding — the shape is VX-393's own report, word for word.** The VX-348 record §U5 (2026-10-18): "Her
+screenshot (Settings ▸ MCP ▸ Shared with AI) shows the duplicate rows VX-393 names: PlanetLillian (wing) twice for
+claude-code — `read · always` AND `read, suggest, write new and edit · always` — and "o ladrão de raios" (book)
+twice." The mechanism (VX-393's trace): the grants store's one mint never read what the client already held on the
+place, so a second grant from any fresh sheet ADDED a row. VX-393 fixed it at 0.9.8 (2026-10-18; `98c88a686` the
+one-row rule, `00c754151` the local-only `v1_30` — the merge of every store's existing duplicates to the strongest,
+and `uq_mcp_grant_standing_place`, which refuses a second live standing row per client × place by construction), and
+its walk saw it live ("granting the SAME wing × client a second time from a fresh sheet left ONE row"). Her real store
+crossed 0.9.8 before the report was relayed (0.10.x since 2026-10-23), so the agent's feedback file — not in the repo,
+not found on disk — most plausibly carried a sighting from before 0.9.8. VX-548 did not change this: VX-516 changed
+which grant Change… revokes (never adds a row), VX-515 added the "Share a place…" / "Share another place…" doors (both
+mint through the same one-row rule) and VERIFIED the listing honest. **Disposition: RESOLVED — duplicate shape gone
+since VX-393 (0.9.8), re-proven on today's merged tree; no fix (the hallucination guard: no mechanism found).** The
+ticket closes on this record.
+
+**What each honest second row already says** (the brief: "check what each row already shows … and whether her
+confusion survives it"). `MCPSharedRowView` draws the place's title, its kind chip (note · book · wing · gathering),
+its DISTINGUISHER when the name collides (the door's `PlaceLabels` ladder — shelf, count, made-when, down to the
+second), and the detail line `client · rung · duration` (`MCPPaneCopy.sharedDetail`); an inert grant adds its why.
+The three ways one place lists twice on today's tree, each pinned:
+
+| Shape | Honest? | What the row says | Headless pin (`MCPPlaceTwiceProbeTests`) | Face pin (`MCPPlaceTwiceFacesTests`, Mac) |
+|---|---|---|---|---|
+| Her shape — one client, one place, two standing grants | IMPOSSIBLE since VX-393 (one row, the newer) | — | `herShapeListsEachPlaceOnceOnEveryRoad` (the sheet's new grant — Share a place… / Share another place… / a place door / ⌘L; ⌥⌘A and an ask's answer; Approve… with a grant; Change… kept on its place under VX-516's rule) · `theStoreRefusesASecondStandingRowOnHerPlace` (the index) | — |
+| Two CLIENTS on one place | yes | the detail line leads with each row's client | `twoClientsOnOnePlaceAreTwoRowsEachNamingItsClient` | `twoClientsOnOnePlaceReadAsTheirOwnClients` |
+| A ONCE grant beside a standing one (P-VX393-3 — an ask answered Once) | yes, until its one act spends it | the detail line ends "once" vs "always" / "until it disconnects" | `aOnceGrantBesideAStandingOneIsTwoRowsUntilItsActSpendsIt` | `aOnceBesideAStandingGrantReadsItsDuration` |
+| Two PLACES wearing one name (two wings named PlanetLillian; two books named "o ladrão de raios" — legal for both) | yes | each twin's head wears its distinguisher | `twoPlacesSharingANameAreTwoRowsEachWithItsDistinguisher` | `twoPlacesSharingANameReadWithTheirDistinguishers` |
+
+A fourth place a place name can appear twice in the pane — a waiting ask on PlanetLillian above the tabs ("‹client›
+asks to write new in “PlanetLillian”") beside its grant row below — is an ask, said as one by its own title
+(`MCPAskCopy.title`, pinned in `MCPAskAndReceiptTests`); not a grant row. **Nothing is unsaid** — no face fix.
+
+**Red-on-old:** the duplicate shape's red-on-old is VX-393's own (`MCPOneGrantPerPlaceTests` — red before
+`98c88a686`); these probe pins are green on this tree by design (the probe found no mechanism to pin red). Not
+re-run on a pre-VX-393 tree (the record cites VX-393's).
