@@ -1861,11 +1861,13 @@ extension BookOutlineLandingTests {
             // the edge probe's country — then the last page in 30-pt steps,
             // sampling the viewed note's place at every step.
             _ = try await scrollPage(window, hosting, watchdog: watchdog, by: end - page - 40)
+            // The end, re-read at every step (a row settling its height moves it).
+            let endNow = { (scroll.documentView?.frame.height ?? 0) - clip.bounds.height }
             var seen: [Int] = []
-            while clip.bounds.origin.y < end - 0.5 {
+            while clip.bounds.origin.y < endNow() - 0.5 {
                 let before = clip.bounds.origin.y
                 _ = try await scrollPage(
-                    window, hosting, watchdog: watchdog, by: min(30, end - before), turns: 6)
+                    window, hosting, watchdog: watchdog, by: min(30, endNow() - before), turns: 6)
                 if clip.bounds.origin.y <= before { break }   // the page will not move: stop
                 seen.append(model.viewedOutlinePair.postID
                     .flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0)
