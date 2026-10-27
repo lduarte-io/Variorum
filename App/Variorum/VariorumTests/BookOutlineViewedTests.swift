@@ -10,8 +10,9 @@
 //  (no red-on-old by nature; the record's §DESIGN Evidence names them).
 //
 //  Ladder round 1 (the record's §LIVE STATUS "r1 fixes"): the heading names
-//  the note it introduces (P-562-7); the probe slides to the page's foot
-//  over the last viewport of scroll (R-562-B); the follower's adopt/release
+//  the note it introduces (P-562-7); at the bottom of the book the viewed
+//  pair clamps to the last note (R-562-D, the r3 fix — superseding R-562-B's
+//  probe that slid to the page's foot); the follower's adopt/release
 //  decision is one value, driven here in every order SwiftUI might deliver
 //  (finding 6, R-562-C, finding 4's guard); one note total for both halves
 //  of the pinned line (finding 3); the viewed chapter's mark by token maths
@@ -235,81 +236,165 @@ struct BookOutlineViewedTests {
         #expect(place(-400) == 2 && place(-401) == 1, "exactly at a row's top: that row (≤)")
     }
 
-    // MARK: - R-562-B — the probe slides to the page's foot at the end
+    // MARK: - R-562-D — at the bottom the viewed pair clamps to the last note
 
-    /// The sliding probe's table: the edge while a viewport or more of scroll
-    /// remains; linear to the page's FOOT over the last viewport; the foot at
-    /// (and past) the bottom; the edge whenever the page is unmeasured or
-    /// cannot scroll; and in a book shorter than two pages the slide spans
-    /// its whole travel, so at rest it is still the edge.
-    @Test func theProbeSlidesToThePagesFootOverTheLastViewportOfScroll() {
+    /// **The end band's table** (R-562-D): the page is AT THE BOTTOM while
+    /// its offset sits within 8 pt of its maximum — R-562-C's release
+    /// threshold, the named constant reused, inclusive as the release is —
+    /// and an overscroll past the bottom is at it. A page that cannot scroll
+    /// further than the band never is (PROVISIONAL: it sits at its maximum at
+    /// rest, and at rest nothing is viewed), nor is one whose scroll has not
+    /// reported.
+    @Test func theBottomOfTheBookIsTheLastEightPointsOfItsScroll() {
         typealias Scroll = BookOutlineViewed.Scroll
-        let edge = BookOutlineViewed.probe
-        let probe: (CGFloat, CGFloat, CGFloat) -> CGFloat = { viewport, offset, travel in
-            BookOutlineViewed.probe(Scroll(viewport: viewport, offset: offset, travel: travel))
+        #expect(BookOutlineFollower.offsetRelease == 8, "the band is the release's named threshold, reused")
+        let bottom: (CGFloat, CGFloat) -> Bool = { offset, travel in
+            BookOutlineViewed.isAtTheBottom(Scroll(viewport: 600, offset: offset, travel: travel))
         }
-        #expect(probe(600, 0, 3_000) == edge, "at rest: the edge")
-        #expect(probe(600, 2_000, 3_000) == edge, "a viewport and more to go: the edge")
-        #expect(probe(600, 2_400, 3_000) == edge, "exactly one viewport to go: still the edge")
-        #expect(abs(probe(600, 2_700, 3_000) - (edge + 0.5 * (600 - edge))) < 0.001,
-                "half the last viewport: half way to the foot")
-        #expect(probe(600, 3_000, 3_000) == 600, "at the bottom: the page's foot")
-        #expect(probe(600, 3_050, 3_000) == 600, "past it (an overscroll): the foot")
-        #expect(probe(600, -40, 3_000) == edge, "an overscroll at the top: the edge")
-        #expect(probe(0, 3_000, 3_000) == edge, "a page not yet measured never slides")
-        #expect(probe(600, 0, 0) == edge, "a column that fits its page never slides")
-        // A book shorter than two pages: the slide spans its whole travel.
-        #expect(probe(600, 0, 300) == edge, "at rest in a short book: the edge — nothing viewed at rest")
-        #expect(abs(probe(600, 150, 300) - (edge + 0.5 * (600 - edge))) < 0.001)
-        #expect(probe(600, 300, 300) == 600, "its bottom: the foot")
+        #expect(!bottom(0, 3_000), "at rest")
+        #expect(!bottom(2_000, 3_000), "a page and more to go")
+        #expect(!bottom(2_991, 3_000), "nine points up: one point out of the band")
+        #expect(bottom(2_992, 3_000), "eight points up: the band's edge, inside it")
+        #expect(bottom(2_999.5, 3_000))
+        #expect(bottom(3_000, 3_000), "at the bottom")
+        #expect(bottom(3_050, 3_000), "an overscroll past the bottom")
+        #expect(!bottom(-40, 3_000), "an overscroll at the top")
+        #expect(!BookOutlineViewed.isAtTheBottom(Scroll()), "a page whose scroll has not reported")
+        #expect(!bottom(0, 0), "a column that fits its page: never — at rest nothing is viewed")
+        #expect(!bottom(0, 8) && !bottom(8, 8), "a column that moves no further than the band: never")
+        #expect(!bottom(0, 9), "nine points of scroll, at rest: out of the band")
+        #expect(bottom(1, 9), "one point down: within eight of its nine")
     }
 
-    /// **R-562-B, end to end over a column (ladder round 1, finding 1 —
-    /// MAJOR):** scrolling down a book, the viewed note never moves up; at
-    /// the bottom it is the LAST note; and every note of the last screenful
-    /// — the ones whose tops can never reach the page's top — is viewed in
-    /// turn on the way down. RED on the batch's fixed edge probe: at the
-    /// bottom it named the note owning the page's top, and the last
-    /// screenful's notes were never viewed (the second half of this table
-    /// says so of the old probe).
-    @Test func scrollingToTheEndViewsEveryNoteOfTheLastScreenfulAndTheLastAtTheBottom() {
-        // Twenty 100-pt notes, 10 pt apart, under a 120-pt title block; a
-        // 120-pt foot follows the last; a 600-pt page.
-        let rows = BookOutlineRows.rows(flat: (0..<20).map { entry("n\($0)") })
-        let position: (Int) -> CGFloat = { 120 + CGFloat($0) * 110 }
-        let content = position(19) + 100 + 120
-        let viewport: CGFloat = 600
-        let travel = content - viewport
-        let ordinal: (CGFloat, Bool) -> Int = { offset, sliding in
-            var tops: [String: CGFloat] = [:]
-            for i in 0..<20 { tops["page-n\(i)"] = position(i) - offset }
-            let scroll = BookOutlineViewed.Scroll(viewport: viewport, offset: offset, travel: travel)
-            let probe = sliding ? BookOutlineViewed.probe(scroll) : BookOutlineViewed.probe
-            return BookOutlineViewed.pair(rows: rows, tops: tops, probe: probe).postID
-                .flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
+    /// A chaptered book's column for the bottom's table: four chapters of
+    /// three 100-pt notes (n0…n11), each chapter under a 40-pt heading, 10 pt
+    /// between rows, under a 120-pt title block, with a 120-pt foot after the
+    /// last note — on a 600-pt page (content 1 750, travel 1 150). `tops`
+    /// gives every row's top in the page's visible space at an offset.
+    private var bottomBook: (
+        rows: [BookOutlineRows.Row], tops: (CGFloat) -> [String: CGFloat], travel: CGFloat
+    ) {
+        let names = ["chapter one", "chapter two", "chapter three", "chapter four"]
+        let groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])] = (0..<4).map { c in
+            (section: section("s\(c + 1)", names[c]),
+             entries: (0..<3).map { entry("n\(c * 3 + $0)") })
         }
-        // The last screenful: notes whose top cannot reach the edge probe.
-        let lastScreenful = (0..<20).filter { position($0) - travel > BookOutlineViewed.probe }
-            .map { $0 + 1 }
-        #expect(lastScreenful.count >= 3, "the premise: a last screenful of several notes (\(lastScreenful))")
-        var seen = Set<Int>()
+        let rows = BookOutlineRows.rows(grouped: groups)
+        var position: [String: CGFloat] = [:]
+        var y: CGFloat = 120
+        for row in rows {
+            position[row.id] = y
+            if case .note = row { y += 110 } else { y += 50 }
+        }
+        let content = y - 10 + 120   // the last row's bottom, then the foot
+        let positions = position
+        return (rows, { offset in positions.mapValues { $0 - offset } }, content - 600)
+    }
+
+    /// **R-562-D, over a chaptered column — the clamp's contract** (ladder
+    /// round 1's finding 1, MAJOR; round 2's N1; walk 3's reading-speed
+    /// verdict on the slide): scrolling down a book the viewed note is the
+    /// TOP-EDGE rule's — the row that owns the page's top, never a note ahead
+    /// of it — and never moves up; AT THE BOTTOM (within the 8-pt end band of
+    /// the maximum offset) it is the LAST note and its chapter, and the
+    /// pinned line says so; nine points up, one point out of the band, the
+    /// top-edge answer again.
+    ///
+    /// RED ON OLD, both ways (the record's recipe H): on the SLIDE tree
+    /// (R-562-B, `052d39c11`; recipe H restores it inside `rule`) nine points
+    /// up names a note near the page's foot, not the top row — the ruling's
+    /// own differentiator — and so does every offset over the last viewport;
+    /// with the clamp OFF (H′ — the batch's edge rule everywhere, finding 1's
+    /// MAJOR) the bottom names the top row, as the premise line says of the
+    /// edge rule. The ruling's stated cost is documented too: the last
+    /// screenful's MIDDLE notes are never viewed by pure scrolling (a click
+    /// reaches them — R-562-A's adoption); the slide viewed them, so that
+    /// line is red on the slide tree as well.
+    @Test func atTheBottomTheLastNoteIsViewedAndNinePointsUpTheTopEdgeAnswers() {
+        typealias Scroll = BookOutlineViewed.Scroll
+        let book = bottomBook
+        let rows = book.rows, travel = book.travel
+        // What the follower shows with no landing's target standing.
+        let viewed: (CGFloat) -> Pair = { offset in
+            BookOutlineViewed.follow(
+                rows: rows,
+                page: BookOutlineViewed.Page(
+                    tops: book.tops(offset),
+                    scroll: Scroll(viewport: 600, offset: offset, travel: travel)),
+                adopted: nil
+            ).pair
+        }
+        let edge: (CGFloat) -> Pair = { BookOutlineViewed.pair(rows: rows, tops: book.tops($0)) }
+        let place: (Pair) -> Int = { pair in
+            pair.postID.flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
+        }
+        let pin: (Pair) -> String = { pair in
+            BookOutlineViewed.pinLine(
+                gathering: false, chapters: 4, archived: 0,
+                total: BookOutlineViewed.NoteTotal(count: 12), pair: pair, rows: rows,
+                chaptered: true, filtered: false)
+        }
+        let last = Pair(sectionID: "s4", postID: "n11")
+        let topRow = Pair(sectionID: "s3", postID: "n8")
+
+        // The premises: a last screenful of notes whose tops never reach the
+        // probe — so the edge rule at the bottom names the row at the top
+        // (finding 1's MAJOR, the batch tree's answer there).
+        #expect(travel == 1_150, "the column's arithmetic")
+        let lastScreenful: [Int] = rows.compactMap { row in
+            guard case .note(let entry) = row, let top = book.tops(travel)[row.id],
+                  top > BookOutlineViewed.probe else { return nil }
+            return BookOutlineViewed.noteOrdinal(of: entry.postID, in: rows)
+        }
+        #expect(lastScreenful == [10, 11, 12], "the premise: the last screenful (\(lastScreenful))")
+        #expect(edge(travel) == topRow, "the premise: the edge rule at the bottom names the top row")
+
+        // AT THE BOTTOM: the last note and its chapter, and the pin's words.
+        #expect(viewed(travel) == last, "at the bottom: the LAST note — \(viewed(travel))")
+        #expect(viewed(travel - 8) == last, "eight points up: still in the band — the last note")
+        #expect(viewed(travel + 30) == last, "an overscroll past the bottom: the last note")
+        #expect(pin(viewed(travel))
+                == "book \u{B7} 4 chapters \u{B7} 12 notes \u{B7} note 12 of 12 \u{B7} chapter four",
+                "the pin says the last note and its chapter")
+
+        // NINE POINTS UP — one point out of the band: the top edge answers.
+        #expect(viewed(travel - 9) == edge(travel - 9),
+                "nine points up: the top-edge answer — \(viewed(travel - 9))")
+        #expect(viewed(travel - 9) == topRow, "n8, its top 9 pt down the page — never a note ahead of it")
+        #expect(pin(viewed(travel - 9))
+                == "book \u{B7} 4 chapters \u{B7} 12 notes \u{B7} note 9 of 12 \u{B7} chapter three")
+        // Everywhere above the band: exactly the top-edge rule — the pace
+        // never changes and nothing leads the page.
+        for offset in stride(from: CGFloat(0), to: travel - 8, by: 5) {
+            #expect(viewed(offset) == edge(offset), "offset \(offset): the top-edge rule")
+        }
+
+        // Never backwards on the way down; at rest nothing is viewed.
         var previous = 0
+        var seen = Set<Int>()
         for offset in stride(from: CGFloat(0), through: travel, by: 5) {
-            let now = ordinal(offset, true)
+            let now = place(viewed(offset))
             #expect(now >= previous, "offset \(offset): note \(now) moved up from \(previous)")
             previous = now
             seen.insert(now)
         }
-        #expect(ordinal(travel, true) == 20, "at the bottom: the LAST note")
-        #expect(ordinal(0, true) == 0, "at rest: the title block holds the page")
-        for note in lastScreenful {
-            #expect(seen.contains(note), "note \(note) of the last screenful was viewed on the way down")
-        }
-        // The batch's edge probe, the same scroll: stuck short of the end.
-        #expect(ordinal(travel, false) < 20, "the old probe at the bottom names the top row, not the last")
-        let oldSeen = Set(stride(from: CGFloat(0), through: travel, by: 5).map { ordinal($0, false) })
-        #expect(!lastScreenful.allSatisfy(oldSeen.contains),
-                "and never views the whole last screenful")
+        #expect(place(viewed(0)) == 0, "at rest: the title block holds the page")
+        #expect(seen.contains(12), "the last note, at the bottom")
+        // The stated cost (PROVISIONAL, bundled): the last screenful's middle
+        // notes are not viewed by pure scrolling — a click reaches them.
+        #expect(!seen.contains(10) && !seen.contains(11),
+                "the middle of the last screenful is a click's, not a scroll's: \(seen.sorted())")
+
+        // The clamp's own edges: the last note's row not yet reported — the
+        // edge rule (never guessed); a column with no note — the edge rule.
+        let atBottom = Scroll(viewport: 600, offset: travel, travel: travel)
+        var unreported = book.tops(travel)
+        unreported["page-n11"] = nil
+        #expect(BookOutlineViewed.rule(rows: rows, tops: unreported, scroll: atBottom) == topRow,
+                "the last note never reported: the edge rule")
+        let noNotes = BookOutlineRows.rows(grouped: [(section: section("s1"), entries: [])])
+        #expect(BookOutlineViewed.rule(rows: noNotes, tops: ["chapter-s1": -20], scroll: atBottom)
+                == Pair(sectionID: "s1"), "no note to clamp to: the edge rule")
     }
 
     // MARK: - R-562-A — the follower adopts a landing's target
@@ -372,8 +457,8 @@ struct BookOutlineViewedTests {
     /// After the landing: the adoption stands while its row is on the page —
     /// wherever on the page — and the rule resumes, the adoption dropped, the
     /// moment a derivation finds it off the page or out of the column. (The
-    /// pages here stand still mid-scroll — the edge probe; the probe's slide
-    /// at the end of the book has its own tables above.)
+    /// pages here carry no scroll — the top-edge rule, never the clamp; the
+    /// clamp at the end of the book has its own tables above.)
     @Test func theAdoptedTargetStandsWhileItIsOnThePageAndTheRuleResumesWhenItLeaves() {
         let heights: [String: CGFloat] = [
             "chapter-s1": 40, "page-a": 100, "page-b": 100, "chapter-s2": 40,
