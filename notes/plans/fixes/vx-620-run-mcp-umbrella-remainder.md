@@ -203,6 +203,12 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 - **RB-11 (for the ladder, batch 2):** VX-605's sweep row 5 — VX-258's in-handler flip signals nothing; unreachable in
   practice, traced, not fixed (no red pin without a handshake seam).
 - **RB-12 (batch 3 — the ticket's close):** VX-565 RESOLVED, no code — her report's exact shape is VX-393's (fixed 0.9.8); the honest two-row shapes each say what differs (probe pins). Closes on the BATCH 3 RECORD.
+- **RB-14 (her call, batch 2's fix leg 2-F1 — not built):** the Settings search's WAITING row (`mcpWaiting`, "A client's
+  ask past what you shared waits here…") is listed whatever the library holds (13n-c U4's standing — Waiting renders
+  only while something waits), so a library that never had a client still finds it (e.g. "open book" matches its
+  detail; "ai", "ask", "mcp" its keywords). Options: (a) as built — listed always; (b) leave it out while the library
+  has never had a client, with the open book (VX-590's spirit carried into the search's vocabulary); (c) leave out
+  every MCP row but the server switch and Connect while clientless.
 - **RB-13 (her call, batch 3 — O-4 vs VX-619's letter):** the advice says the reconnect road provider-neutrally (O-4, her 2026-10-11 ruling, pinned); the guide names Claude Code's /mcp inside lesson 2's setup fence. Options (a) as built · (b) "/mcp" in the advice without a provider · (c) an O-4 carve-out for the advice.
 - (Batch records append more.)
 
@@ -889,11 +895,21 @@ Untouched, by the lane: `Sources/VariorumCore/` entirely, `Sync/`, `Server/`, cu
 
 **LIVE STATUS (per piece, flipped in the same commit as each piece):**
 - **No behavioural revert is in flight** (none is planned — the leg edits a pin, no product line).
-- **F1-0 · The trace + the disposition:** DONE (this commit) — below.
-- **F1-1 · The pin's JUSTIFIED EDIT + RB-14:** NOT-STARTED — the settled shape: the query asks for the open book's OWN
-  row (by its lead), and a query-independent invariant joins it: no finding, for any of the open-book row's words, lands
-  on the hidden tab (`MCPPaneTab.holding(findingLead:) != .shared`).
-- **F1-2 · Recompile into the EXISTING `DerivedData/b2`:** NOT-STARTED.
+- **F1-0 · The trace + the disposition:** DONE (`68e119590`) — below.
+- **F1-1 · The pin's JUSTIFIED EDIT + RB-14:** DONE (this commit) — `MCPSharingFaceTests.theSearchNeverNamesTheOpenBookWhileTheFaceHides`
+  (MID620-1 cited in its comment): the query asks for the open book's OWN row by its lead (absent while the face hides,
+  present once it shows), and a query-independent invariant joins it — for each of the open-book row's words ("open
+  book", "read everything", "share all", "always", "mcp", "ai", "everything is readable"), no finding lands on the
+  hidden tab (`MCPPaneTab.holding(findingLead:) != .shared`). Its teeth, by construction: with the leave-out removed,
+  "open book" finds the open-book row, whose finding lands on `.shared` — both expectations go red (the same mechanism
+  the sibling expectation `all.subtracting(hidden) == [the open book's lead]` already proved GREEN in the window). No
+  product line changed, so no product red-on-old is owed (the hallucination guard: the product was right). RB-14 folded
+  into §THE BUNDLE. **The re-run rides the final window** (no `xcodebuild test` here).
+- **F1-2 · Recompile into the EXISTING `DerivedData/b2`:** DONE (this commit) — `swift build` green
+  (`scratchpad/b2-logs/f1-swift-build.log`); `build-for-testing` into `DerivedData/b2` (NOT a clone — the same dir,
+  rebuilt in place): **TEST BUILD SUCCEEDED** (`f1-mac-bft.log`), no warning in the edited pin. **`b2` is NO LONGER the
+  frozen batches-1+2 evidence the mid window ran:** it is now built from `68e119590`'s tree + this pin edit — batches
+  1, 2 AND 3 (pulled before this leg) — so the final window runs from the newest FRESH dir, as planned.
 
 **The trace (inputs → wrong output), from the window's log** (`scratchpad/vx620-mid-suites.log` :2338–2344): the red is
 `MCPSharingFaceTests.swift:133`, `mcpFindings("open book", sharing: false).isEmpty` → false; the one finding it returned

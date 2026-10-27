@@ -130,8 +130,21 @@ struct MCPSharingFaceTests {
                 matching: query, in: SettingsSearch.wholeIndex(accountSection: true, mcpSharingFace: sharing))
                 .filter { $0.pane == .mcp && $0.kind == .setting }
         }
-        #expect(mcpFindings("open book", sharing: false).isEmpty, "the open book lives in the hidden tab")
-        #expect(!mcpFindings("open book", sharing: true).isEmpty, "once the face shows, the search finds it")
+        // MID620-1 (A JUSTIFIED EDIT, the ritual — the VX-620 mid window's first run of this pin): the
+        // query asks for the open book's OWN row, never "no MCP row at all" — "open book" also matches
+        // the Waiting row by its DETAIL ("…the note, book or wing it names … ⌥⌘, opens it."), a row
+        // above the tabs the search lists whatever the library holds (13n-c U4's standing; whether it
+        // too should wait for a first client is RB-14, her call).
+        let openBook = SettingsCatalog.title("mcpOpenBook")
+        let hiddenLeads = mcpFindings("open book", sharing: false).map { $0.lead }
+        let shownLeads = mcpFindings("open book", sharing: true).map { $0.lead }
+        #expect(!hiddenLeads.contains(openBook), "the open book lives in the hidden tab: \(hiddenLeads)")
+        #expect(shownLeads.contains(openBook), "once the face shows, the search finds it: \(shownLeads)")
+        // …and whatever the words, no finding lands on the hidden tab (the search's promise).
+        for word in ["open book", "read everything", "share all", "always", "mcp", "ai", "everything is readable"] {
+            let landings = mcpFindings(word, sharing: false).map { MCPPaneTab.holding(findingLead: $0.lead) }
+            #expect(!landings.contains(MCPPaneTab.shared), "“\(word)” never lands on the hidden tab: \(landings)")
+        }
         // Exactly the hidden tab's rows leave — the rows whose finding lands there.
         let all = Set(SettingsSearch.settingsEntries(accountSection: true).map(\.finding.lead))
         let hidden = Set(SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: false).map(\.finding.lead))
