@@ -226,6 +226,19 @@ struct MCPGatheringGrantDecideTests {
                 try db.execute(sql: "UPDATE reading SET ai_private_at = NULL WHERE id = ?", arguments: [gathering.id])
             }
 
+            // Bound into a book: no gathering any more — its grant reaches
+            // nothing (a gathering grant never reaches a book) and its place
+            // reads gone; the un-bind brings it back.
+            _ = try ops.convertSmartReadingToCurated(gathering.id)
+            #expect(try decide(db, client, note: member.id) == .ask(.notShared, offersAlways: true))
+            #expect(try db.read { try Queries.mcpScopeTitle($0, kind: .gathering, id: gathering.id) } == nil)
+            try db.write { db in
+                try db.execute(sql: "UPDATE reading SET kind = 'gathering' WHERE id = ?", arguments: [gathering.id])
+                try db.execute(sql: "UPDATE reading_post SET deleted_at = '2026-07-02T00:00:00.000Z' WHERE reading_id = ?",
+                               arguments: [gathering.id])
+            }
+            #expect(try decide(db, client, note: member.id).isAllowed)
+
             // Dead: deleted, its grant reaches nothing (a dead place, as every one).
             try ops.deleteReading(gathering.id)
             #expect(try decide(db, client, note: member.id) == .ask(.notShared, offersAlways: true))

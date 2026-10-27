@@ -415,8 +415,10 @@ extension Queries {
     ///
     /// **P1 — ∝ the ids given (the rows SHOWN), never the corpus, never per
     /// row:** the approved clients and their grants are read once, the
-    /// notes' facts in ONE batched read (`mcpNoteFacts(noteIDs:)` — two
-    /// statements however many ids), the why's titles once per wider place;
+    /// notes' facts in ONE batched read (`mcpNoteFacts(noteIDs:)` — three
+    /// statements however many ids, and since VX-549 one membership statement
+    /// over the same ids per GRANTED gathering), the why's titles once per
+    /// wider place;
     /// and when nothing can reach (no approved client — VX-272 — or no live
     /// grant with the open book off) not one note is read.
     public static func mcpNoteReaches(_ db: Database, noteIDs: [String]) throws -> [String: [MCPPlaceReach]] {

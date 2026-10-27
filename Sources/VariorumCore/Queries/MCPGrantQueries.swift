@@ -350,11 +350,16 @@ extension Queries {
             return DisplayTitle.note(
                 title: row["title"], entryDate: row["entry_date"], createdAt: row["created_at"],
                 calendar: calendar)
-        case .book, .gathering:
-            // VX-549: a gathering's name, as the Bookcase shows it (a book and
-            // a gathering are one table — the id names one kind).
+        case .book:
             return try String.fetchOne(
                 db, sql: "SELECT name FROM reading WHERE id = ? AND deleted_at IS NULL", arguments: [id])
+        case .gathering:
+            // VX-549: a live GATHERING's name — one bound into a book since is
+            // no gathering, and its grant reaches nothing (`mcpGatheringFacts`
+            // reads kind too), so it reads gone, never as a live place.
+            return try String.fetchOne(
+                db, sql: "SELECT name FROM reading WHERE id = ? AND deleted_at IS NULL AND kind = 'gathering'",
+                arguments: [id])
         case .wing:
             if id.isEmpty { return Self.mcpHomeWingName }
             return try String.fetchOne(
