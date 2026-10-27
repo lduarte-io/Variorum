@@ -202,9 +202,11 @@ struct PlaintextExportImportTests {
     // heard of) still refuses. The old two-arm `anExportOfAnotherBuildsSchemaRefuses` split: its earlier-build arm FLIPPED
     // DELIBERATELY into pin 1, its newer arm kept as pin 3.
 
-    /// `identifiers` struck from the export's `grdb_migrations` (the physical schema untouched — exactly what a build that
-    /// had not yet run them would have written when they add only local-only tables the export drops); the remaining set is
-    /// checked to be the known set minus them, so the pin can never pass on a delete that took nothing.
+    /// `identifiers` struck from the export's `grdb_migrations`, the physical schema untouched — for the last identifier
+    /// (`v1_32`, one local-only table the export drops) exactly the file the build before it wrote; for deeper strikes, the
+    /// gate's own arithmetic (the reader's tolerance of older physical schemas is the VX-502 record's D-A2 verification,
+    /// not these pins'). The remaining set is checked to be the known set minus them, so a pin can never pass on a delete
+    /// that took nothing.
     static func forgetMigrations(_ identifiers: [String], in url: URL) throws {
         let queue = try DatabaseQueue(path: url.path, configuration: AppDatabase.configuration(key: nil))
         defer { try? queue.close() }
