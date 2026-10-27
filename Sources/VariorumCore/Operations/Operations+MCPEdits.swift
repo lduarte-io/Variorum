@@ -45,6 +45,12 @@ extension Operations {
         public let after: CommitPoint?
         /// False when the take already read as asked — nothing was written.
         public let changed: Bool
+        /// VX-358 (PROVISIONAL MB-5): on a no-op, the text asked (after the
+        /// U+0000 strip) reads as the take's under canonical equality but is
+        /// SPELLED otherwise — other code points, NFC against NFD — so the
+        /// stored bytes stand and differ from the ones asked
+        /// (`StoredText.spellingDiffers`). Always false when `changed`.
+        public let spellingDiffers: Bool
     }
 
     /// The two bracketing commits' names — THE CLIENT'S NAME, verbatim
@@ -92,8 +98,14 @@ extension Operations {
             guard variant.workingText == expectedText else {
                 throw OperationError.bufferChangedSinceGesture(variantID: variantID)
             }
+            // The no-op rule is CANONICAL equality (Swift's `String ==`), kept
+            // on purpose: an invisible re-normalization never rewrites prose,
+            // churns, or mints commits and an undo entry (VX-358, MB-5). Read
+            // HERE, in the act's transaction, whether the bytes differ.
             guard variant.workingText != newText else {
-                return (MCPTakeEdit(take: variant, before: nil, after: nil, changed: false), nil)
+                return (MCPTakeEdit(
+                    take: variant, before: nil, after: nil, changed: false,
+                    spellingDiffers: StoredText.spellingDiffers(newText, from: variant.workingText)), nil)
             }
             let now = date.now
             let old = variant.workingText
@@ -111,7 +123,7 @@ extension Operations {
                     db, variant: variant, kind: .auto, message: names.after,
                     now: now.addingTimeInterval(0.001))
                 : nil
-            return (MCPTakeEdit(take: variant, before: before, after: after, changed: true),
+            return (MCPTakeEdit(take: variant, before: before, after: after, changed: true, spellingDiffers: false),
                     TextPreImage(variantID: variantID, text: old, postOpText: newText))
         }
         if let preImage = landed.preImage {

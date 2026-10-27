@@ -173,6 +173,9 @@ extension MCPWriteTools {
                 ]
                 if let before = edit.before { answer["before_commit_id"] = before.id }
                 if let after = edit.after { answer["after_commit_id"] = after.id }
+                // VX-358 (MB-5): a no-op whose text is spelled otherwise says
+                // so — absent otherwise, every other answer byte-unchanged.
+                if edit.spellingDiffers { answer[MCPTextDigest.spellingDiffersKey] = true }
                 return (answer, edit.changed
                         ? MCPWriteReceipt(clientName: clientName, act: .edit, targetID: noteID, targetTitle: title,
                                           show: .note(noteID: noteID, blockID: edit.take.blockId, select: nil))

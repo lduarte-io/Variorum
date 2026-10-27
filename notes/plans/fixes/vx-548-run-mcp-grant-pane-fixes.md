@@ -464,13 +464,17 @@ orchestrator's). Batch 1's code and record untouched.*
   (`vx365-green.log`): the pins 4/4 + `MCPTagTruthServerTests`, `MCPWriteServerTests`, `MCPWingReachServerTests`,
   `MCPAdviceServerTests`, both neutrality walks, `MCPWriteActsTests`, `MCPEditActsTests`, `UndoQuietPressTests` — 94
   tests in 10 suites passed.
-- **VX-358 (an NFC↔NFD re-spelling answers `changed: false` with a digest that isn't the sent bytes'):** NOT-STARTED —
-  settled design (PROVISIONAL MB-5): canonical equality stays the no-op rule; the pure
-  `StoredText.spellingDiffers(_:from:)` (canonically equal, UTF-8 bytes unequal) is read INSIDE each act's transaction
-  (`MCPTakeEdit.spellingDiffers`, `MCPCommitRestore.spellingDiffers` — the sent text after the U+0000 strip, or the
-  commit's text, against the stored take); the wire adds `stored_text_normalization_differs: true` ONLY then (absent
-  otherwise — every other answer byte-unchanged); one shared sentence in both tools' descriptions. The digest stays the
-  stored text's (VX-254 untouched).
+- **VX-358 (an NFC↔NFD re-spelling answers `changed: false` with a digest that isn't the sent bytes'):** DONE (this
+  commit; PROVISIONAL MB-5) — canonical equality stays the no-op rule; the pure `StoredText.spellingDiffers(_:from:)`
+  (canonically equal, UTF-8 bytes unequal) is read INSIDE each act's transaction (`MCPTakeEdit.spellingDiffers`,
+  `MCPCommitRestore.spellingDiffers` — the sent text after the U+0000 strip, or the commit's text, against the stored
+  take); the wire adds `stored_text_normalization_differs: true` (`MCPTextDigest.spellingDiffersKey`) ONLY then;
+  `MCPToolCatalog.spellingSentence` in both descriptions. The digest stays the stored text's (VX-254 untouched). RED ON
+  OLD (`vx358-red.log`, the wire pins on the pre-fix product `15f94f154`): 3 of 7 failed, 5 issues — the fixture's
+  precondition and the 3 byte-unchanged guards green, and the old tree's `changed: false` + stored-digest assertions
+  passed (the traced mechanism, observed); GREEN (`vx358-green.log`): the 8 wire pins + the pure table + the digest,
+  null, edit, commit, catalog, neutrality and edit-act suites — 105 tests in 14 suites. The behavioural revert run:
+  PENDING (next).
 - **VX-352 (Terminal's take card cuts "claude-code · english" to "claude-code · e…"):** NOT-STARTED — settled design
   (PROVISIONAL MB-4): the pure `Domain/TakeLabelFace` (core, headless): `parts` splits a label at its first " · " into
   a YIELDING head (the client name — and the legacy "suggested" word with it) and a KEPT tail (the separator + the

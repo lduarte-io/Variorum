@@ -180,6 +180,17 @@ enum MCPToolCatalog {
         digests the text without it.
         """
 
+    /// VX-358 (RUN VX-548 batch 2a — PROVISIONAL MB-5): THE SPELLING
+    /// SENTENCE, said once and shared by the two tools whose "nothing to
+    /// write" test is canonical equality (`edit_take`, `restore_commit`) —
+    /// where a re-spelled text meets the digest a client checks. The key is
+    /// `MCPTextDigest.spellingDiffersKey`'s, read here, never retyped.
+    static let spellingSentence = """
+        A text that differs from the take's only in its Unicode spelling (the same characters \
+        in other code points — NFD against NFC, say) also changes nothing: changed is false, \
+        \(MCPTextDigest.spellingDiffersKey) is true, and sha256 stays the stored spelling's.
+        """
+
     /// VX-197 (VX-336 U8a): THE LABEL RULE, said in one set of words by every
     /// tool that writes a take's label. Her split (VX-197): the client's name
     /// is worn only by takes a client adds at SUGGEST, inside her writing
@@ -810,7 +821,7 @@ enum MCPToolCatalog {
             compare and come back; these commits stay even if the edit is undone. Writing the text the \
             take already has changes nothing (changed: false). The edit is one undo for the author. \
             Returns JSON with the commit ids and sha256, the take's text as it now stands. \
-            \(digestSentence) \(nullSentence)
+            \(digestSentence) \(nullSentence) \(spellingSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -1316,7 +1327,7 @@ enum MCPToolCatalog {
             or archived take refuses, as does a sealed note; a take already reading that text changes \
             nothing. One undo for the author puts the \
             replaced words back. Returns JSON with the commit ids and sha256, the take's text as it \
-            now stands. \(digestSentence)
+            now stands. \(digestSentence) \(spellingSentence)
             """,
         inputSchema: .object([
             "type": "object",
