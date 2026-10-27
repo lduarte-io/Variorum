@@ -88,6 +88,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 - The dev store is the Debug app (`io.lduarte.Variorum.debug`); walks via `cliclick` + `Tools/WalkKit/` on the dev store only, under a held stage claim. The dev store's Castle credentials are `~/.variorum/dev-castle.env` on the Pro — never invent new ones; restore the dev store's posture before releasing a claim.
 - zsh `pipestatus` (not bash's `PIPESTATUS`). Screenshots in gitignored dirs. Never `git checkout` over uncommitted work. Push after every commit; never rewrite pushed history. Synchronous foreground waits only — poll logs with `grep -q '<EXIT LINE>' <log> && break; sleep 5` loops, never `tail -f | grep -m1` after the fact, never end a turn awaiting a background run.
 - No subagents inside implementer/reviewer sessions except ONE read-only Sonnet for external facts (spawn with `model: "sonnet"`).
+- **The coordinator's stage protocol (oct26coordinator's, RATIFIED by her 2026-10-27 — see SITTING/RULING RECORD):** only the ORCHESTRATOR talks to the coordinator; REQUEST early → READY when built-and-startable → start only on the coordinator's GO → `Tools/stage release` + one result line. Strict instance checks: `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` (the loose form matches builds). After every Debug launch, dismiss a What's New sheet if one shows. Walks are DEV STORE only; no real-store MCP tool calls or real-app launches. A walk that would write MCP client config outside the dev store (Claude Code's / Claude Desktop's server entries, setup keys) is DECLARED in the request and restored at release. Debug prefs: export first; at restore re-export and diff (`defaults import` merges). Merges serialize through the coordinator.
 
 ---
 
@@ -96,7 +97,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 | Batch | Members | Session | State |
 |---|---|---|---|
 | 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | BUILT (headless green, red-on-old verified; Mac pins compiled — run + walk PENDING the stage) — BATCH 1 RECORD |
-| 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | NOT STARTED |
+| 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | IN FLIGHT (spawned at the batch-1 seam) |
 | 2b — the disconnect story | VX-394 | opus-implementer №3 | NOT STARTED |
 | 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | NOT STARTED |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
@@ -446,3 +447,6 @@ the two verbs, the library line, the approval lead) · `Registry/Capability.swif
 ## LADDER RECORD
 
 ## SITTING / RULING RECORD (anything she says mid-run lands here verbatim, same turn)
+
+- **2026-10-27, in-session, pre-sleep — the coordinator's stage protocol RATIFIED.** She read the orchestrator's point-by-point comparison of oct26coordinator's protocol lines against canon (REQUEST/READY/GO/RELEASE; strict pgrep forms; "the Air runs nothing tonight" as tonight's default, not a ban; What's-New dismissal + Debug-prefs export/diff; the NEW declare-and-restore rule for MCP client config a walk writes outside the dev store) and ruled, verbatim: *"ok yes I like it - makes sense. good luck overnight."* The protocol lines are folded into ENVIRONMENT TRAPS above; the declare-and-restore rule is adopted as this run's walk law.
+- **Her question the same sitting** — *"what is this about the coordinator's stricter environment lines? i haven't said anything to it about that so i'm curious if you think it's going too far"* — answered point by point (not overreach; every line queue arbitration or a condition on the stage it grants; the watch-line is "coordinator: stage only" drift into code/ladder/release calls, none present). Recorded because it bounds what the coordinator's messages may bind: stage conduct yes, build content never.
