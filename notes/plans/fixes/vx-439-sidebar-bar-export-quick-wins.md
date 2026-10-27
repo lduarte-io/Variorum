@@ -703,7 +703,24 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   `BookOutlineRowsTests`, `BookOutlineFacesTests`, `BookOutlineLandingTests`, `BookCardHeightStabilityTests` —
   `BookViewModel.readCardPreviews`), and the three whose files R2 edited in comments only (`OpenListDragFaceTests` —
   a source-read of `OpenListDrag.swift`; `SettingsShapeTests`, `DiagnosticsPaneTests`); one `test-without-building`
-  from `App/Variorum` on the default DerivedData, all green expected, "Test run with N tests" read. Items:
+  from `App/Variorum` on the default DerivedData, all green expected, "Test run with N tests" read.
+  **THE FINAL VERIFY SLICE — RAN** (claim `vx-439-r2-verify`, 08:43:53 → RELEASED 08:46:54 MDT, the coordinator's GO; no
+  walk, no revert, no store write; code = `024c0d23f`, the tip `67a6fa59f` differs in the record only): ONE run, **80
+  tests in 10 suites, 1 failing test** (5 issues incl. the 4 Date-noise warnings) — per suite: `SidebarRowLeadsTests`
+  6/6 (R2-1's gap pin among them), `TitleQuickfillTests` 5/5, `MastheadLayoutTests` **13/14**, `BookOutlineRowsTests`
+  5/5, `BookOutlineFacesTests` 6/6, `BookOutlineLandingTests` 14/14, `BookCardHeightStabilityTests` 2/2,
+  `OpenListDragFaceTests` 4/4, `SettingsShapeTests` 15/15, `DiagnosticsPaneTests` 9/9. **THE RED, NOT explained away:**
+  `MastheadLayoutTests.thePathChipAndTheTagClusterNeverIntersectInTerminal` — "the field (399.5, 52.5, 190×35) covers no
+  card", the open tag field overlapping the sixth tag card `(588, 38, 61×16)` by a 1.5 × 1.5 pt corner (Terminal). One
+  re-run of that suite ALONE in the same claim: **14 / 14 GREEN**. Facts: it passed in batch 2's stage leg (chunk3);
+  it was in neither L1 window; no masthead, tag-cluster or title-field geometry is in L1's or R2's diff (R2-1 changes
+  only what `TitleQuickfill`'s offer reads in a gap state; this pin's note has no gap) nor in VX-548's merged delta
+  (its `Features/Takes/` files are `TakeLabelLine`/`TakesBoardView`). So: an INTERMITTENT geometry pin — red once in a
+  ten-suite run, green alone — mechanism NOT traced (order/load-dependent layout is the candidate class, the
+  TEXTKIT2_NOTES first-measure family); a ticket is proposed for the closeout sweep (Tests & tooling, Bug, Suspected:
+  "MastheadLayoutTests.thePathChipAndTheTagClusterNeverIntersectInTerminal red once at a 1.5-pt corner in a multi-suite
+  run, green alone — 2026-10-27, `scratchpad/l1/stage-logs/r2verify.log`"). Both strict `pgrep` forms EMPTY; tree
+  clean; stage RELEASED. This is the run's last suite line. Items:
   - R2-1 (the one code fix — the orchestrator's option (a)): DONE (this commit). TRACED (the reviewer's probe, confirmed
     here): `leadingBlockTextsSQL` LEFT-JOINs `block` and both takes, so a live placement over a dead block, or a block
     with no resolvable take, yields a NULL `text`; `String.fetchAll` THREW on it (GRDB `valueMismatch`), so one gap in
