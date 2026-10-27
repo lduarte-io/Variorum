@@ -480,19 +480,23 @@ struct TutorialMCPChapterTests {
             // inside a note and across the library ("Edit: it can also change,
             // choose and commit takes, make a lens the note, and divide, merge,
             // move or delete blocks." before).
+            // VX-596 (A JUSTIFIED EDIT, the ritual — her ruling 2026-10-27, "let's
+            // add the star over the wire"): the new act joins the library's list,
+            // "star, unstar," taught where its rung's acts are named (VX-197's
+            // truth-pass rule); `set_starred` joins the truth loop below.
             let editStep = """
                 Edit: it can also do most of what you can do at the keyboard. In a note, it can change, choose, \
                 commit, archive or delete takes, restore a commit, make a lens the note, add blocks anywhere, \
                 divide, merge, move or delete blocks, and edit or delete any comment. Across the library, it can \
-                take a tag off a note, rename, archive or delete notes and books, finish or reopen a book, reorder \
-                a book's notes and chapters, and rename or delete a chapter.
+                take a tag off a note, star, unstar, rename, archive or delete notes and books, finish or reopen a \
+                book, reorder a book's notes and chapters, and rename or delete a chapter.
                 """
             #expect(text.contains(editStep))
             for name in ["edit_take", "choose_take", "save_commit", "archive_take", "delete_take", "restore_commit",
                          "adopt_lens", "divide_block", "merge_blocks", "move_block", "delete_block", "edit_comment",
                          "remove_tag", "rename_note", "archive_note", "delete_note", "rename_book", "archive_book",
                          "delete_book", "finish_book", "reopen_book", "move_note_in_book", "move_chapter",
-                         "rename_chapter", "delete_chapter"] {
+                         "rename_chapter", "delete_chapter", "set_starred"] {
                 #expect(MCPToolFacts.rung(of: name) == .edit, "\(name) is an edit-rung act")
             }
             #expect(try tool("insert_blocks").description.contains("Placing them anywhere else needs edit"),
@@ -605,6 +609,14 @@ struct TutorialMCPChapterTests {
                                   + "what the gathering's rule asks for, and out of reach when it stops"))
             #expect(text.contains("With write new, a client can add a note to the gathering, and the note wears "
                                   + "the tags the rule needs"))
+            // VX-596 (A JUSTIFIED EDIT — the ticket's wording point 5): the star
+            // clause, and its truth — the wire's plan for a rule only a star
+            // satisfies stars the note (it refused before VX-596).
+            #expect(text.contains("the note wears the tags the rule needs, starred if the rule needs a star"))
+            let starOnly = try ops.createReading(
+                name: "starred drafts", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let wirePlan = try await db.read { try Queries.gatheringWireMintOutcome($0, reading: starOnly) }
+            #expect(wirePlan == .plan(.init(tagIDs: [], star: true)), "the client's new note is starred")
             #expect(!text.contains("never shared on its own"))
             #expect(text.contains("move a note to another wing only with edit where the note is and write new "
                                   + "in the wing it goes to"))

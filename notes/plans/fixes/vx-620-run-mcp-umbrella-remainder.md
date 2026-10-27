@@ -265,7 +265,15 @@ anchors the brief names. No subagent.*
   two `set_starred` calls refusing at the rung). The whole MCP target before these two edits: 420/76 with the two
   expected reds (the catalog-completeness pin) + VX-532's standing flake (`mcp-all-1.log`); the suggest proof green
   after (`mcp-fix-1.log`). Activity's words ride piece 5 (the app's table).
-- **5 · The faces + the seven wording points + the deliberate flips:** NOT-STARTED.
+- **5 · The faces + the seven wording points + the deliberate flips:** IN-PROGRESS (this commit: WRITTEN, the Mac
+  compile PENDING) — `MCPPaneCopy` (Activity's words for `set_starred`, the `.star`/`.unstar` receipts, the gathering
+  write-new rung sentence with the star, `starHeadsUp` replacing `starRuleWhy`, `readAndSuggestOnly` retired),
+  `MCPGrantPicker` (`offeredRungs(needsStar:)` retired → `starHeadsUp(needsStar:rung:)`; the footing retired),
+  `MCPGrantSheet` (every rung offered; the heads-up at write new/edit; the clamp + onChange retired),
+  `TutorialSeeder` (lesson 3's Edit card names "star, unstar"; the gathering card's star clause). Mac pins: NEW
+  `MCPStarFacesTests` (5); FLIPS in `MCPGatheringGrantFacesTests` (3) + VX-609's new face pin; JUSTIFIED EDITS in
+  `TutorialMCPChapterTests` (the Edit step + `set_starred` in its truth loop; the gathering card's star clause + its
+  truth). What remains: `build-for-testing` into a FRESH `DerivedData/b1`.
 - **6 · Suites + Mac `build-for-testing` (fresh `DerivedData/b1`):** NOT-STARTED.
 
 ### THE DESIGN (settled before code; each PROVISIONAL item is bundled)

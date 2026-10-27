@@ -2630,13 +2630,15 @@ enum TutorialSeeder {
             // capable as her at the keyboard"), inside a note and across the
             // library; and the commits sentence true of take WORDS only, the
             // first commit skipped when the latest already holds them (U4's
-            // OWED; `editTakeUnderInsurance`'s dedupe).
+            // OWED; `editTakeUnderInsurance`'s dedupe). VX-596 (her ruling
+            // 2026-10-27, "let's add the star over the wire"): the new act
+            // taught where its rung's acts are named (VX-197's truth-pass rule).
             "Edit: it can also do most of what you can do at the keyboard. In a "
             + "note, it can change, choose, commit, archive or delete takes, restore "
             + "a commit, make a lens the note, add blocks anywhere, divide, merge, "
             + "move or delete blocks, and edit or delete any comment. Across the "
-            + "library, it can take a tag off a note, rename, archive or delete "
-            + "notes and books, finish or reopen a book, reorder a book's notes and "
+            + "library, it can take a tag off a note, star, unstar, rename, archive "
+            + "or delete notes and books, finish or reopen a book, reorder a book's notes and "
             + "chapters, and rename or delete a chapter. When it rewrites the words "
             + "of a take, Variorum first commits the words it replaces, unless the "
             + "take's latest commit already holds them, and then commits the new "
@@ -2679,10 +2681,13 @@ enum TutorialSeeder {
             // VX-549 — the supersession of VX-273's facts-only rule (her
             // sitting 2026-10-27, RATIFIED: "this is the feature, routing work
             // to an agent by each tag"). PROVISIONAL words, her copy pass.
+            // VX-596 (the ticket's wording point 5): the star clause — a rule
+            // only a star satisfies takes the client's new note starred.
             "A gathering grant follows your tags: a note is in reach the moment "
             + "it wears what the gathering's rule asks for, and out of reach when it "
             + "stops. With write new, a client can add a note to the gathering, and "
-            + "the note wears the tags the rule needs. And a client can move a note "
+            + "the note wears the tags the rule needs, starred if the rule needs a "
+            + "star. And a client can move a note "
             + "to another wing only with edit where the note is and write new in "
             + "the wing it goes to: the note leaves its books there, its tags come "
             + "along, and \u{2325}\u{2318}Z brings it back.",
