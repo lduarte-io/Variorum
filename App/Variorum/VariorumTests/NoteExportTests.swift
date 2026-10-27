@@ -204,3 +204,70 @@ struct NoteExportTests {
         #expect(CapabilityRegistry.availability(.exportNote, in: CapabilityContext(mode: nil)) == .unavailable)
     }
 }
+
+// MARK: - W-439-1 (the batch-1 walk): the File menu's gate in the open note's Write context
+
+@MainActor
+private func pumpRunLoop() {
+    RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+}
+
+/// **W-439-1** — the walk found File ▸ Export Note… GREY with a note open in
+/// Write (AX `enabled` false while the menu tracked; ⌥⌘S a no-op). The menu
+/// item's gate is `session.commandRouter.isEnabled(.exportNote)` — the
+/// registry's `noteScoped` over the router's LIVE context. This mounts the
+/// real shell, opens a note the shell's own road, and reads that gate (and
+/// two siblings: ⌘⇧S Save a Version — `noteScoped` too, another File group —
+/// and Export Block, the same File group) exactly as the menu reads it.
+@MainActor
+@Suite("W-439-1 — Export Note… is available with a note open in Write", .serialized)
+struct NoteExportMenuGateTests {
+    @Test func theMenusGateReadsTheOpenNoteInWrite() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 439))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let note = try session.operations.createPost(title: "walk note one")
+            _ = try session.operations.newBlock(in: note.id, text: "Walk note one", registeringUndo: false)
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 760),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            window.contentView = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<300 where router.workspace.history().current == nil {
+                pumpRunLoop()
+                await Task.yield()
+            }
+            #expect(!session.commandRouter.isEnabled(.exportNote), "non-vacuity: grey with no note in reach")
+
+            router.pendingSelection = .post(note.id)
+            for _ in 0..<400 where !(session.commandRouter.activeMode == .write
+                && session.commandRouter.activePostID == note.id) {
+                pumpRunLoop()
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(router.workspace.focusedSelection == .post(note.id), "the note is open in the pane")
+            #expect(session.commandRouter.activeMode == .write, "…in Write")
+            let context = session.commandRouter.currentContext()
+            #expect(CapabilityRegistry.availability(.exportNote, in: context) == .act,
+                    "the live context answers act (mode \(String(describing: context.mode)), editor \(context.writeEditorAttached))")
+            #expect(session.commandRouter.isEnabled(.exportNote),
+                    "W-439-1: File ▸ Export Note… is enabled with a note open in Write")
+            // The siblings the menu reads the same way — so a grey item with
+            // these enabled is a menu-surface fault, not the context's.
+            #expect(session.commandRouter.isEnabled(.saveNoteVersion))
+        }
+    }
+}
