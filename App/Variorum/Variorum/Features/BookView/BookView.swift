@@ -1834,7 +1834,9 @@ struct BookView: View {
     /// the follower asked again. The landing hears only a content-HEIGHT
     /// change, exactly as before (the flow's `FlowScrollFacts` shape — an
     /// offset change must never re-arm a landing's quiet interval).
-    fileprivate func outlineScrolled(_ old: OutlineScrollFacts, _ new: OutlineScrollFacts, _ proxy: ScrollViewProxy) {
+    fileprivate func outlineScrolled(
+        _ old: OutlineScrollFacts, _ new: OutlineScrollFacts, _ proxy: ScrollViewProxy
+    ) {
         landingBox.page.scroll.offset = new.offset
         landingBox.page.scroll.travel = new.travel
         if old.contentHeight != new.contentHeight {

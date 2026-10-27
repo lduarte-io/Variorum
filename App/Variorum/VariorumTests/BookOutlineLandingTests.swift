@@ -1968,6 +1968,8 @@ extension BookOutlineLandingTests {
             try #require(landingEnded(anchor), "the landing ended")
             await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 8)
             #expect(model.viewedOutlinePair == adopted, "after the landing the target stands: \(model.viewedOutlinePair)")
+            let landedOffset = try #require(
+                BookOutlineGeometry.outlineScrolls[readingID]?.offset, "the page's scroll reported")
 
             // Settle wobble — under the release: the target stands.
             let wobble = try await scrollPage(window, hosting, watchdog: watchdog, by: 4)
@@ -1979,6 +1981,13 @@ extension BookOutlineLandingTests {
             // A real scroll UP, the target still on the page.
             let moved = try await scrollPage(window, hosting, watchdog: watchdog, by: -400)
             try #require(moved < -300, "the premise: the page moved up (\(moved) pt)")
+            // The host premise: the scroll's own geometry heard the move (the
+            // List header's VX-349 guard is this host's precedent — a clip
+            // scroll reaches `onScrollGeometryChange`); without it the offset
+            // release has nothing to read, which is a harness fact, not a
+            // verdict on the release.
+            let heard = (BookOutlineGeometry.outlineScrolls[readingID]?.offset ?? landedOffset) - landedOffset
+            try #require(heard < -300, "the premise: the page's scroll facts heard the move (\(heard) pt)")
             let top = try #require(anchorTop(anchor), "the target reports")
             let viewport = BookOutlineGeometry.outlineScrolls[readingID]?.viewport ?? 0
             try #require(top > 0 && top < viewport,
