@@ -158,7 +158,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 
 ## LIVE STATUS (the running record — updated per piece, in the same commit)
 
-- Batch 1: BUILT, READY-FOR-STAGE — implementer session 1 (`opus-implementer`, 2026-10-27). Seven members DONE
+- Batch 1: BUILT + STAGE-VERIFIED (2026-10-27 03:15–03:28 MDT, claim `vx-439-b1-suites`) — implementer session 1 (`opus-implementer`, 2026-10-27). Seven members DONE
   (VX-125 · 126 · 570 · 553 · 552 · 332 · 602); VX-554 Done at her word (no code); VX-568 parked out of the run at her
   word. Headless at the END, on `61c6dd7eb`: core WHOLE PACKAGE `swift test` — 3,436 tests / 457 suites passed (5 known
   issues, the standing ones) + 32 / 4 passed + the MCP package 383 / 71 with ONE failure,
@@ -166,13 +166,19 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   load average 25 — the VX-353 load class), re-run alone GREEN 3/3; the skipped lines are the 7 standing gated
   measurement/integration skips. `xcodebuild build-for-testing` GREEN. No revert in flight; the one Mac red-on-old run
   owed (VX-332) has its behavioral revert staged as `scratchpad/b1-revert/vx-332.patch` (gitignored, in the tree:
-  the `.task` back to `focusRequest += 1`). STAGE RUN (PENDING the coordinator's GO): `xcodebuild -scheme Variorum
+  the `.task` back to `focusRequest += 1`). STAGE RUN (DONE — results below): `xcodebuild -scheme Variorum
   -destination 'platform=macOS' test-without-building` with `-only-testing:VariorumTests/<suite>` for these 1
   suites (every suite over a changed source file, by grep of the changed types, plus all of `TutorialWalkTests`' suites;
   the exact command is `scratchpad/b1-revert/stage-command.txt`): AcknowledgmentsCopyTests. Then the VX-332 red-on-old run:
   `git apply scratchpad/b1-revert/vx-332.patch` → build → `-only-testing:VariorumTests/QuickEntryOpeningScopeTests` RED
   expected on `aNavigationBackToTheBookcasePutsTheCaretInItsQuickEntry` → `git checkout -- App/Variorum/Variorum/
   Features/Shelf/QuickEntryBar.swift` → rebuild → GREEN.
+  STAGE RESULTS: the 152-suite run on `c790ecd76` — "Test run with 821 tests in 152 suites" with ONE failing test, 2
+  issues: `ExportFacesTests.bulkExportGestureWritesTheWholeLibrary`, the VX-126 byte pin the batch's grep missed → updated
+  DELIBERATELY (`36b98b750`), its suite re-run GREEN 6/6; 0 skipped lines; the only warnings are the test host's own
+  launch-time `@Dependency(\.date)` noise (pre-existing, no test of ours). The VX-332 revert cycle: RED on the faithful
+  revert, GREEN restored (12/12 over the four focus suites) — see VX-332's line. Tree clean at `36b98b750` (status and diff
+  empty); no Variorum instance left (strict `pgrep` forms empty); stage released.
   - VX-125: DONE (`a73a7e7f4`) — `.exportNote` "Export Note…" (post scope, `noteScoped`, `.native`) on File ▸ (beside
     Export Library…, ⌥⌘S — C-125-1's sweep in the registry row), ⌘K, and both `note ▾` menus (Write's in NOTE contexts
     only, Takes'); one act `Core/Views/NoteExport` (flush → ONE read of `Queries.variorumDocumentText` + the display
@@ -180,7 +186,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     note refuses before the panel); the helper's ⌥⌘S row; `ShellActions.noteOnScreen` lifted out of `duplicateNote`
     unchanged (the two share it). Pins `NoteExportTests` (6: byte-identical to Copy full text + re-import + no row; the
     default name; cancel; empty refusal; archived + sealed export; the declaration/chord/renderers) — build-for-testing
-    GREEN; the suite run PENDING the stage window. (The record flip rode one commit late — a stale-read edit miss.)
+    GREEN; the suite GREEN at the stage window (below). (The record flip rode one commit late — a stale-read edit miss.)
   - VX-126: DONE (`9637e5be2`) — `Queries.bulkExportManifest`'s per-NOTE files are `variorumDocumentText` (option
     A — Copy full text's text, header + takes-carrying body); `Pools/` + `Readings/` byte-unchanged (C-126-1); the
     insurance export reads the same manifest. DELIBERATE byte-pin updates: `ExportProjectionTests.
@@ -188,7 +194,9 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     readingAndBulkExportBodiesCarryTheMapping` (the same). New pin `DocumentFormatRoundTripTests.
     aLibraryExportReimportsEveryNoteWithItsTitleTagsAndTakes` (every note file == Copy full text; each re-imports
     through the door's own read with its title, tags and every take, re-exporting to its file's bytes; pools/readings
-    plain). Core 4 suites GREEN headless (whole-package run at batch end PENDING). RED ON OLD, verified: the one-line
+    plain). Core 4 suites GREEN headless (whole package GREEN at batch end). A FOURTH, app-side byte pin the batch's grep
+    missed (`ExportFacesTests.bulkExportGestureWritesTheWholeLibrary` reads the written files back) went red at the stage
+    run (2 issues — the titled files' new header) and was updated DELIBERATELY (`36b98b750`; 6/6 green). RED ON OLD, verified: the one-line
     behavioral revert (the note files back to `exportPost`) turned the new pin red with 13 issues (no header, tags lost,
     titles from the file name, takes dropped); restored by `git checkout` of the committed file (no revert in flight).
   - VX-554: DONE at her word (2026-10-27, in-session — the Ledger): no code; R-439-F554's disposition stands.
@@ -204,14 +212,14 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     ⌥⌘N. Pins `NewNoteInBookTests` (7: declaration/chord/grey-without-a-book; the foot-act choice; the request is the
     focused book's, a place speaks the note; a book mints a focused member; a gathering mints the planner's tagged note
     and holds nothing; a finished book refuses in the op's words and mints nothing) — build-for-testing GREEN; the
-    suite run PENDING the stage window.
+    suite GREEN at the stage window (below).
   - VX-553: DONE (`822122592`) — a BOOK's navigator foot renders from ONE ordered table, `BookFootDoors.book
     (journalTrait:finished:hasDeletedChapters:)`: "+ new chapter", then "+ new entry"/"+ new note" (none on a finished
     book — Round 3's rule), then "restore deleted chapter" (only while one waits) LAST, set apart by `recoveryGap` (6 pt
     over the foot's row gap). A-439-5's pick: "after, set apart" — the foot has no overflow/settings door that holds
     chapter acts. Each door's words, act and condition unchanged (`footDoor(_:)`, one case per door). Design row: pin
     `BookFootDoorsTests` (2: the order per state; restore never between the mint pair, always last, gap > 0) + the
-    walk's capture (the orchestrator's) — build-for-testing GREEN; the suite run PENDING the stage window.
+    walk's capture (the orchestrator's) — build-for-testing GREEN; the suite GREEN at the stage window (below).
   - VX-552: DONE (`a6afef06a`) — the ONE quick-entry bar (`QuickEntryBar`, both hosts: the Bookcase band and the
     Library bar — the two doors that mint into the current wing; ⌘N is a menu item and books mint into their own wing)
     wears "in ‹wing›" at the box's trailing edge on its first line (muted small chrome, `lineLimit(1)`, ≤180 pt, the
@@ -219,7 +227,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     wing, which follows the focused note — no new observation), Home when no wings model is handed; shown with ONE wing
     too (C-552-1). Design row: pin `QuickEntryWingLabelTests` (2: the words; both hosts compose the bar with the wing —
     source-read, the `theLibraryNoteRowMenuRendersItsDeclaredDoors` precedent) + the walk's capture (the
-    orchestrator's, both voices) — build-for-testing GREEN; the suite run PENDING the stage window.
+    orchestrator's, both voices) — build-for-testing GREEN; the suite GREEN at the stage window (below).
   - VX-332: DONE (`1c7b74f7b`) — TRACED MECHANISM (the VX-282 record's O-U6-1, confirmed by reading): the bar's
     `.task` took the waiting road (`armOpeningFocus` — `CaptureOpeningFocus`: wait for the window, take only a free
     keyboard) ONLY for the shell's first Bookcase mount (VX-326's one-shot `QuickEntryOpeningFocus` claim); every later
@@ -231,8 +239,14 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     `aNavigationBackToTheBookcasePutsTheCaretInItsQuickEntry` (the DELIBERATE update of
     `aNavigationBackToTheBookcaseKeepsTheBarsRaiseAsItWas`, which pinned the old road; `theClaimIsTrueExactlyOnce`
     retired with its type); GUARDS `aMountNeverTakesTheKeyboardFromAField`, `aMountDuringATourStandsDown` (+ its
-    no-tour non-vacuity). build-for-testing GREEN. The red-on-old run is PENDING the stage window: the behavioral revert
-    (the `.task` back to `focusRequest += 1`) is staged as `scratchpad/b1-revert/vx-332.patch` (gitignored, in the tree).
+    no-tour non-vacuity). build-for-testing GREEN. RED ON OLD, VERIFIED at the stage window: a FAITHFUL behavioral revert
+    (the first mount takes the opening road, every later one the counted raise — VX-326's claim road exactly,
+    `scratchpad/b1-revert/vx-332-faithful.patch`) left the launch cell GREEN and turned the navigation-back cells RED (3
+    issues: no opening ask on the return, the counted raise taken, the caret NOT in the second box) — the ticket's
+    mechanism reproduced; the no-tour non-vacuity cell of the stand-down pin went red with it (a later mount); the
+    never-steal guard stayed green (a guard). (A first, cruder revert — every mount on the counted raise — also failed
+    the launch cell, so the faithful one is the evidence.) Restored by `git checkout` of the committed file; GREEN after
+    (the four focus suites 12/12).
   - VX-568: PARKED OUT OF THE RUN at her word (2026-10-27) — see Ledger
   - VX-602: DONE (`61c6dd7eb`) — the Help menu names each thing once: `.restoreTutorial`'s verb "Restore Field
     Guide…"; `TourOfferCopy.menuTitle` (the `.takeTour` verb) "Take the Onboarding Tutorial", its help-road sentence
@@ -244,7 +258,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     name the door; the guide's seeded CONTENT (three lessons, bundle 3 — A-439-9). Pins `HelpMenuNamingTests` (4: the
     names, "tutorial" on one door only; the naming sentences; the old literals gone from menu/palette/registry; the
     guide content deliberately unchanged) + `TourOfferLineTests` DELIBERATE update (the title + sentence) —
-    build-for-testing GREEN; the suite run PENDING the stage window.
+    build-for-testing GREEN; the suite GREEN at the stage window (below).
 - Batch 2: NOT-STARTED
 - Ladder: NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
@@ -363,3 +377,4 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   incl. the Write-pane exclusion · C-552-1 · C-602-1), each named in the morning bundle for her veto.
 - 2026-10-27 HER LIVE RULING (in-session): VX-554 Done at her word — 'gathering does have a new note door - that ticket must've been stale. it can be marked complete.' The walk's F-554 evidence duty and bundle item 4's question are retired; R-439-F554's no-code disposition stands. On VX-568 she asked what the issue is (her 10-22 note quoted back to her); R-439-F568 unchanged pending her reply.
 - 2026-10-27 HER LIVE RULING (in-session) on VX-568: "oh. i'm talking about the cursor itself - yeah, it is what mac os uses probably, it's just what the cursor looks like in the new note line. it's a subtle issue - just remove it from this run and leave it parked for later for my reconsideration at a later point. doesn't need to be this run." VX-568 is OUT of this run (no churn probe, no knob work — none was started; nothing instrumented); Linear Parked with the trace (the orchestrator's). R-439-F568 is retired with it.
+- 2026-10-27 B1 STAGE LEG (03:15–03:28 MDT, `vx-439-b1-suites`): the prepared command first packed all 152 suites into ONE `-only-testing:` flag (zsh does not word-split an unquoted variable — the coordinator caught it); rebuilt as one flag per suite. Run 1: 821 tests / 152 suites, 1 failing test (`ExportFacesTests.bulkExportGestureWritesTheWholeLibrary`, VX-126's missed app-side byte pin — fixed deliberately, `36b98b750`, 6/6). VX-332 red-on-old: a crude revert (every mount on the counted raise) also broke the launch cell, so a FAITHFUL revert (VX-326's one-shot road) was run — launch green, navigation-back red (3 issues), restored green. Tree clean, no instances, released.
