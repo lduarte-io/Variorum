@@ -522,8 +522,15 @@ struct MCPWriteTools: Sendable {
             }
         case .addNoteToBook(let noteID, let bookID, let sectionID):
             return try noteIntoBook(noteID, bookID, job: job, clientName: clientName) { title, bookName in
-                _ = try ops.addNoteToBook(noteID, book: bookID, section: sectionID, undoLabel: label(.bookAdd))
-                var answer: [String: Any] = ["note_id": noteID, "book_id": bookID]
+                let added = try ops.addNoteToBookForClient(
+                    noteID, book: bookID, section: sectionID, undoLabel: label(.bookAdd))
+                // VX-365 (VX-361's shape, P-VX361-1): every tag the note wears
+                // once the act lands — its own, then the book's outflow, each
+                // once — composed inside the act's transaction; `tags` their
+                // paths, parallel. Always present (`[]` when none).
+                var answer: [String: Any] = [
+                    "note_id": noteID, "book_id": bookID, "tag_ids": added.tagIDs, "tags": added.tagPaths,
+                ]
                 if let sectionID { answer["section_id"] = sectionID }
                 return (answer,
                         MCPWriteReceipt(clientName: clientName, act: .bookAdd, targetID: noteID,

@@ -856,8 +856,44 @@ extension Operations {
     public func addNoteToBook(
         _ postID: String, book bookID: String, section sectionID: String? = nil, undoLabel: String
     ) throws -> ReadingPost {
-        let (membership, prior): (ReadingPost, ReadingPost?) = try database.write { db in
+        try addNoteToBookForClient(postID, book: bookID, section: sectionID, undoLabel: undoLabel).membership
+    }
+
+    /// **What `add_note_to_book` landed** (VX-365 — RUN VX-548 batch 2a; the
+    /// VX-336 U9 record's OWED 4): the membership, and EVERY tag the note
+    /// wears once the act lands — VX-361's one rule (`mintedNoteTags`,
+    /// P-VX361-1's shape): the note's own tags first, in the order they were
+    /// applied (read BEFORE the add), then the book's OUTFLOW in its order
+    /// (the hand-add's `applyAutoTag`), each listed once at its first place;
+    /// `tagPaths` parallel. Read inside the act's transaction — ∝ the note's
+    /// own applications, never a read after the commit (U5b's D1: no race).
+    public struct MCPBookAdd: Equatable, Sendable {
+        public let membership: ReadingPost
+        public let tagIDs: [String]
+        public let tagPaths: [String]
+    }
+
+    /// `addNoteToBook`'s act with its answered facts (VX-365) — the SAME body
+    /// and the SAME one undo entry; `addNoteToBook` is this act's membership.
+    @discardableResult
+    public func addNoteToBookForClient(
+        _ postID: String, book bookID: String, section sectionID: String? = nil, undoLabel: String
+    ) throws -> MCPBookAdd {
+        let (membership, prior, worn): (ReadingPost, ReadingPost?, [(id: String, path: String)]) =
+            try database.write { db in
             let prior = try livePairRow(db, postID: postID, readingID: bookID)
+            // The note's own tags, in application order, as they stand BEFORE
+            // the add's outflow lands (`liveTagIDs`' order, any wing — what
+            // the note wears is what the answer says).
+            let own = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT pt.tag_id FROM post_tag pt
+                    JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                    WHERE pt.post_id = ? AND pt.deleted_at IS NULL
+                    ORDER BY pt.created_at, pt.id
+                    """,
+                arguments: [postID])
             var membership = try addPostToReading(db, postID, to: bookID, at: .end)
             if let sectionID {
                 let section = try liveSection(db, sectionID)
@@ -867,7 +903,9 @@ extension Operations {
                 membership.sectionId = sectionID
                 try membership.update(db)
             }
-            return (membership, prior)
+            let outflow = try liveReading(db, bookID).autoTagIDs
+            let worn = try mintedNoteTags(db, postID: postID, header: own, outflow: outflow)
+            return (membership, prior, worn)
         }
         let landed = membership
         // VX-246 U2: the redo re-applies only over what its undo left — the
@@ -883,7 +921,7 @@ extension Operations {
                 return true
             },
             redo: { try $0.reapplyAddedMembership(landed, waitingAs: prior, undoneOn: undoneOn.value) })
-        return membership
+        return MCPBookAdd(membership: membership, tagIDs: worn.map(\.id), tagPaths: worn.map(\.path))
     }
 
     ///

@@ -763,7 +763,9 @@ enum MCPToolCatalog {
         description: """
             Add a note to a book (at its end), optionally filed under one of the book's chapters \
             (section_id — from list_notes or create_section). Both must be shared with this client \
-            at write new. Returns JSON.
+            at write new. Returns JSON; its tag_ids and tags (their paths) list every tag the note \
+            wears once it is in the book — its own first, then the book's outflow — so there is \
+            nothing to tag again.
             """,
         inputSchema: .object([
             "type": "object",

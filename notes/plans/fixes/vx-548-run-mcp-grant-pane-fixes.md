@@ -454,12 +454,16 @@ orchestrator's). Batch 1's code and record untouched.*
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
 - **No behavioural revert is in flight.**
-- **VX-365 (`add_note_to_book`'s answer names no tags):** NOT-STARTED — settled design: core
-  `Operations.addNoteToBookForClient` (the same body and ONE undo entry as `addNoteToBook`, which keeps its signature)
-  returns the membership + `tagIDs`/`tagPaths` composed INSIDE the act's transaction by VX-361's one rule
-  (`mintedNoteTags` — the note's own tags first, in application order, read before the add; then the book's outflow in
-  outflow order; each once); the wire answer gains `tag_ids` + `tags` (always present, `[]` when none); the
-  description's "Returns JSON." gains create_note's tag sentence. Refusal shapes untouched.
+- **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (this commit) — core
+  `Operations.addNoteToBookForClient` → `MCPBookAdd {membership, tagIDs, tagPaths}` (the same body and ONE undo entry;
+  `addNoteToBook` keeps its signature and returns `.membership`), the tags composed INSIDE the act's transaction by
+  VX-361's one rule (`mintedNoteTags`: the note's own tags in application order, read before the add, then the book's
+  outflow in outflow order, each once); the wire answer gains `tag_ids` + `tags` (always present, `[]` when none); the
+  description's "Returns JSON." gains create_note's tag sentence. RED ON OLD (`scratchpad/b2a-logs/vx365-red.log`, the
+  pins run on the pre-fix tree `1fc292c02`): 3 of 4 failed, 8 issues — the guard green; GREEN after
+  (`vx365-green.log`): the pins 4/4 + `MCPTagTruthServerTests`, `MCPWriteServerTests`, `MCPWingReachServerTests`,
+  `MCPAdviceServerTests`, both neutrality walks, `MCPWriteActsTests`, `MCPEditActsTests`, `UndoQuietPressTests` — 94
+  tests in 10 suites passed.
 - **VX-358 (an NFC↔NFD re-spelling answers `changed: false` with a digest that isn't the sent bytes'):** NOT-STARTED —
   settled design (PROVISIONAL MB-5): canonical equality stays the no-op rule; the pure
   `StoredText.spellingDiffers(_:from:)` (canonically equal, UTF-8 bytes unequal) is read INSIDE each act's transaction
