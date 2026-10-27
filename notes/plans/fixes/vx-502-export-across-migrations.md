@@ -29,6 +29,14 @@ backups opened by Look inside but never restored). **The walk arm: restore a Cas
 after the pair has changed, end to end through unlock and sync.** This walk + the code fix together are a release
 gate (her 2026-10-26 rulings).
 
+**Her overnight word (2026-10-27, ~03:35 MDT, in-session, verbatim): "make sure that the castle backup restore is
+solid & if it needs to be tested with a passphrase change in between to verify that the old one still works AND
+the new one works, that's authorized. I want it fully tested"** — the pair-change arm is explicitly AUTHORIZED
+and REQUIRED: the walk proves BOTH roads on the old Castle backup — the old passphrase still opens it (rule 5's
+floor) AND the new one opens it (rule 6) — plus the restore end to end. The negotiated legs 6–9 carry exactly
+this; a failure of either road is a stop-and-record finding, never worked around. (She also confirmed the export
+refusal bug is one she has met herself, several times.)
+
 **Concurrency (the ticket's note):** VX-439 carries the export doors and both efforts touch the import/export
 seam — whichever merges SECOND rebases and re-runs the export/import pins before its PR. Closeouts serialize
 through the coordinator.
