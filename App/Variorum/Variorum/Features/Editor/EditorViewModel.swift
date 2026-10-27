@@ -125,6 +125,11 @@ final class EditorViewModel {
     /// 9d — word counts for the status bar: the caret block's, and the
     /// selection's when one exists.
     private(set) var caretBlockWordCount: Int?
+    /// **VX-441 — Write's find readout** ("2 of 15"): the selected match's
+    /// place among the note's matches while the find bar is up; nil otherwise
+    /// (`FindReadout` — the derivation; the bottom bar draws it). A derived
+    /// count, never text.
+    private(set) var findReadout: String?
     private(set) var selectionWordCount: Int?
     /// Phase 13 C1 (R11 — word-count prominence): the post's total,
     /// maintained INCREMENTALLY (per-variant cache in the LEDGER; only
@@ -409,8 +414,32 @@ final class EditorViewModel {
     /// All silently edit takes, which is the surprise this act exists to
     /// make deliberate.
     @ObservationIgnored var takesScopeArmed = false
+    /// VX-441: where the find readout reads the finder's words — the find
+    /// pasteboard (NSTextFinder's own channel); a pin hands its own so it
+    /// never writes the machine-global board.
+    @ObservationIgnored var findReadoutNeedle: @MainActor () -> FindReadout.Needle? = {
+        FindReadout.pasteboardNeedle()
+    }
 
     var hasOpenTail: Bool { index.tailLength != nil }
+
+    /// **VX-441 — re-derive the find readout** ("2 of 15"), on every
+    /// selection change (a find step selects its match) and on the bar's own
+    /// opening and closing. The detail editor only — the one with a bar. The
+    /// whole-note count runs only past `FindReadout.face`'s cheap gates (the
+    /// bar up, a non-empty selection that IS the finder's words) — never on a
+    /// keystroke (P1). Writes only when the words change.
+    func refreshFindReadout() {
+        let next: String?
+        if let textView, let scrollView {
+            next = FindReadout.face(
+                barVisible: scrollView.isFindBarVisible, needle: findReadoutNeedle,
+                selection: textView.selectedRange(), text: textView.string)
+        } else {
+            next = nil
+        }
+        if findReadout != next { findReadout = next }
+    }
 
     // MARK: - Lifecycle
 
@@ -422,6 +451,11 @@ final class EditorViewModel {
     func attach(textView: EditorTextView, scrollView: NSScrollView?) {
         self.textView = textView
         self.scrollView = scrollView
+        // VX-441: the find bar's opening and closing re-read the readout (a
+        // bar closed by ⎋ or Done changes no selection).
+        (scrollView as? TypewriterScrollView)?.onFindBarVisibilityChange = { [weak self] in
+            self?.refreshFindReadout()
+        }
         // 13u2b UNIT 3: the DETAIL editor answers "where is the carried block
         // on your screen?" when a mode switch asks. The inline book/pool
         // editor does not — it scrolls inside its host's scroll view and owns

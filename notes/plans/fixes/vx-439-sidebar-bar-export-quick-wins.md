@@ -410,7 +410,32 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     them); the act (back/forward through a ShellRouter, the refusal spoken where nothing waits); the monitor in a window
     (a TextField's editor keeps ⌘← — caret to 0, nothing navigates — and with no text in charge ⌘← back, ⌘→ forward,
     ⇧⌘← nothing; `PagesArrowKeysHostTests`' sendEvent road). build-for-testing GREEN.
-  - VX-441: NOT-STARTED
+  - VX-441: BUILT (this commit) — PENDING the stage run (`FindReadoutTests` 6, incl. the real editor and the REAL
+    finder stepping). THE TRACE FIRST (A-439-13): AppKit's `NSTextFinder` bar CANNOT show a count — nothing in
+    `NSTextFinder.h` (macOS 27 SDK), no count or position string in AppKit's `TextFinder.loctable` ("Searching…",
+    "find next", "find previous" only), no container/client hook adds text to the system bar, and the only public match
+    surface, `incrementalMatchRanges`, exists only under incremental searching, which stays OFF (ruled — TEXTKIT2_NOTES
+    §3); the one read-only Sonnet lookup's report + my own header read. So A-439-13's second arm: OUR readout, muted,
+    at the Write bar's trailing end just before the quiet receipt slot (all three arrangements), drawn only while the
+    find bar is up and the selection IS a match. `Features/Editor/FindReadout.swift`: the needle from the FIND PASTEBOARD,
+    where NSTextFinder communicates its words and its options (`NSPasteboardTypeTextFinderOptions` — the header; the
+    app's own find seed arms the bar the same way); the count under the Takes bar's MEASURED sameness rule
+    (`TakesFindPlan.compareOptions`, non-overlapping stepping) and in its words, "2 of 15" (`TakesFindCopy.position` —
+    one vocabulary for the two bars; her "2/15" — PROVISIONAL bundle 16); Ignore Case off honoured (unmeasured,
+    PROVISIONAL); Starts With / Full Word / Ends With draw NOTHING rather than a wrong count. P1: the cheap gates first
+    (bar up, a non-empty selection) — an empty selection, i.e. every keystroke, reads nothing, not even the pasteboard;
+    the whole-note scan runs only when a selection lands EXACTLY on the finder's words (a find step — itself a
+    whole-note walk). WIRING, chrome only: the selection delegate (`EditorSurfaceDelegate.textViewDidChangeSelection`)
+    calls `refreshFindReadout()` AFTER its unchanged identity work; `TypewriterScrollView` overrides the container's
+    `isFindBarVisible` (calls super; reports a change — ⎋/Done change no selection); `EditorViewModel.findReadout`
+    (a derived count, never text) + a needle seam a pin injects. ZERO text-storage, layout or identity changes; incremental
+    searching untouched (pinned). PINS `FindReadoutTests` (6): the needle; the count + words; the gates (no read on an
+    empty selection); the real editor following selection and the container's open/close; the REAL finder's
+    `.next` steps followed via the real find pasteboard (saved and restored — the board's discipline); the wiring read.
+    Headless replica of the three pure pins (the real `FindReadout.swift` + `TakesFindPlan.swift`): 21 checks, 0 failed.
+    build-for-testing GREEN. OPEN at the stage: whether a query typed ONLY into the bar's own field reaches the find
+    pasteboard (the header says the finder communicates there; the real-finder pin arms via the board, the app's seed
+    road) — the walk's typed-query leg is the evidence.
   - VX-569: NOT-STARTED
 - Ladder: NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED
@@ -459,7 +484,10 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     started." on the status line (a door that did nothing speaks) rather than doing nothing silently; (b) a read-only
     text surface that holds the keyboard (after a click into a read page) also keeps ⌘← as its own — the same "text
     holds the keyboard" rule the page-turn keys use; ⌥⌘[ still goes back there. Say the word for either.
-16. (grows)
+16. **VX-441 — the readout says "2 of 15"** (the Takes bar's own words for the same count) rather than "2/15"; and it
+    shows only while the selection sits ON a match — click elsewhere and it steps aside until the next ⌘G. Say the word
+    for "2/15" or for a standing "15 matches".
+17. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 

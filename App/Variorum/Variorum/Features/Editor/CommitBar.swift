@@ -516,6 +516,7 @@ struct CommitBar: View {
                         // her default, at the bar's trailing end BEFORE the
                         // counts. It yields first (`layoutPriority(-1)`),
                         // so no door or count ever moves for it.
+                        findReadoutFace
                         quietReceipt
                         trailingCluster
                     }
@@ -535,6 +536,7 @@ struct CommitBar: View {
                         .lineLimit(1)
                         .fixedSize()
                         Spacer(minLength: 8)
+                        findReadoutFace
                         quietReceipt
                         Group {
                             countsFace(narrowed: true)
@@ -553,6 +555,7 @@ struct CommitBar: View {
                         .lineLimit(1)
                         .fixedSize()
                         Spacer(minLength: 8)
+                        findReadoutFace
                         quietReceipt
                         helperDoor
                             .lineLimit(1)
@@ -581,6 +584,21 @@ struct CommitBar: View {
     /// The bar's own coordinate space (row 81's DEBUG oracle reads the row's
     /// frame in it against the bar's width).
     nonisolated static let barSpace = "variorum-commit-bar"
+
+    /// **VX-441 — the find readout** ("2 of 15"), muted at the trailing end
+    /// beside the status seam, drawn only while the find bar is up and the
+    /// selection is a match (`EditorViewModel.findReadout`). Weightless when
+    /// absent: nothing in the bar moves for it.
+    @ViewBuilder private var findReadoutFace: some View {
+        if let readout = model.findReadout {
+            Text(tokens.chromeLabel(readout))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .fixedSize()
+                .help(FindReadout.help)
+        }
+    }
 
     /// 18i: the ONE quiet slot this bar composes (both arrangements read
     /// it), reading the ONE centre — no per-bar copy, no second setting read.
