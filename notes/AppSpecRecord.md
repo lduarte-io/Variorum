@@ -1021,3 +1021,45 @@ Evidence: 821/152 · 3,057/495 (VX-502's tree; seam trio green) · 1,562/267 + 1
 80/10. Three walks; the dev store restored each time. The history rewrite: `7929147de` → `a3f087842`, tree
 byte-identical, main's signed line intact. Born: VX-603, VX-604, VX-608, VX-614–618 (triaged). Riders VX-373/409
 not taken. canon-size 125,887/150,000 — no crossing. MOBILE PARITY: nothing mobile-visible.
+
+
+**2026-10-27 — VX-620 (Run: MCP umbrella remainder; PR #197, merge 32a779075; the record
+`notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`, the ladder `vx-620-ladder-round1.md` beside it; the VX-548
+remainder under a fresh orchestrator at her morning ruling — four Opus implementer batches, a one-round Fable ladder,
+Fable orchestrating; merged first in wave 2, zero overlap).** THE ROSTER WAS THE SUB-ISSUE LISTING (the rule this run
+was born to prove): her kickoff said six members, the listing said seven — VX-377 re-parented at VX-439's closeout —
+plus riders VX-609/VX-619 seated at kickoff; re-listed before the ladder, unchanged. **§12, the MCP door — starring on
+the wire (VX-596; her words on the ticket: "let's add the star over the wire, it might as well be included" and "the
+star rule wording should be changed since the starring is being added"):** `set_starred` at EDIT through her
+`setStarred`'s own write (the union star, the cap of fifteen worded, intake hearing a wire star as hers, un-star a
+non-event), ONE client-named undo on the move_note_to_wing wrap precedent whose halves are compare-and-set and restore
+the star AT ITS PLACE in the Starred list; VX-549's star-rule clauses superseded — the wire's mint plans TAGS FIRST
+(VX-549's plan, byte-unchanged wherever a tag satisfies) and stars born-cap-exempt only where a star is the only way
+in (PROVISIONAL RB-1, #245 — the narrower road chosen over flipping the planner outright because her door plans
+`★ OR #a` as a star and the flip would have changed VX-549's ratified pinned behaviour); the needsStar refusal retired
+from every road; the sheet offers every rung with the heads-up at write new/edit; the ticket's SEVEN wording points
+each dispositioned (the record's table); VX-609's dead ask-door closed by legitimacy (walked live: her answered Once
+lands a born-starred note). **§12, Settings ▸ MCP (VX-590, her words: "I don't want someone who doesn't use AI to see
+that & get scared that their work is shared"; VX-605, the VX-548 mid-walker's find):** the sharing face waits for the
+library's first client row (PROVISIONAL RB-3), the Connect road standing; the host signals at a connection's NAMING,
+so the Clients row reads connected-now at once (red-on-old + behavioural revert; walked live in both voices). **§12,
+the wire's imports and docs (VX-566/567/619; VX-565):** import_document gains create_note's section_id shape; the
+whole-book answer gains per-note records with per-take sha256s — SUPERSEDING P-VX252-1/P-VX254-2's 2026-10-15
+ratification (#227), flagged loudly as PROVISIONAL RB-4 with a one-commit revert; the instructions say a lock or quit
+ends every connection (2,988→2,994/3,000 — the move_note_to_wing sentence traded out, its rule kept in the tool's own
+description; O-4's provider-neutrality kept the "/mcp" road in the guide's lesson-2 fence, RB-13); VX-565 RESOLVED
+no-fix — her duplicate-rows report was VX-393's shape, gone since 0.9.8, re-proven with fresh pins (the hallucination
+guard's record-only arm). **§12, the app's keyboard family (VX-377; her words: "hmm yeah go ahead and file a ticket
+for that" and "it should pull up a selector that I can also operate via keyboard to make it truly fast"):** ⌘K gains
+the Move/Copy-to-Wing doors over a keyboard wing selector built on the ⌘L switcher's brain (the probe found no
+reusable picker — the old doors were submenus), and the batch's trace found and fixed the cross-door staleness in
+VX-425's re-ask (a signal, P-4, never a decision). THE LADDER: one round, 0/0/0/4 record-only NITs; its final-window
+contingency met after a two-step pin story — the mounted selector-focus pin was red for a RIG reason (test-host
+windows never become key), adjudicated by the walk's live focus verdict (focused without a click, both voices), and
+re-seated at the honest seam (the arrival's ASK, DEBUG-oracled; the landing walk-verified), teeth proven GREEN→RED→
+GREEN by behavioural revert. Windows: vx620-mid (366/50 executed, one pin bug fixed; the MCP walk ALL GREEN) ·
+vx620-final (470/66; the ⌘K walk six-for-six) · two re-runs; every claim released clean under oct27coordinator's
+ratified protocol. Three -only-testing traps recorded (file names and single-test paths drop SILENTLY; verify
+started names — the VX-604 family). Born and triaged: VX-625 · VX-626 · VX-628; VX-611 commented. The bundle is
+QUESTIONS #245. MOBILE PARITY: nothing mobile-visible (no MCP door, no ⌘K on the phone; `VariorumMobile/` untouched,
+diff-verified at the ladder).

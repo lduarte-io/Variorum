@@ -13,24 +13,26 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-620 — Run: MCP umbrella remainder** (the VX-548 remainder — seven members by the sub-issue listing: VX-596 · VX-590 · VX-605 · VX-565 · VX-566 · VX-567 · VX-377; riders VX-609 · VX-619; the record `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`) | VX-620 · `vx-620-run-mcp-umbrella-remainder` | `~/dev/variorum-vx-620` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: the MCP door + wire, Settings ▸ MCP, the grant sheet, the ⌘K registry — no `Sync/`, no custody, no editor seam). |
 | **VX-562 — Book Outline: the highlight follows your scroll + the nav info pins up top** (single ticket, architect-phase; the record `notes/plans/fixes/vx-562-outline-follow.md`) | VX-562 · `vx-562-outline-follow` | `~/dev/variorum-vx-562` · the Pro | In flight 2026-10-27 (surfaces: the book's Outline mode — navigator + pinned masthead — and a read-only viewport→block geometry read on the book content column; no `Sync/`, no custody, no schema; flag: if VX-601 (the Takes/editor run) kicks off concurrently, coordinate any shared read-tier files at merge). |
 | **VX-601 — Run: takes & editor quick fixes** (seven members by the sub-issue listing: VX-421 · VX-427 · VX-428 · VX-429 · VX-574 · VX-586 · VX-594; rider VX-577 seated at her kickoff word; the record `notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md`) | VX-601 · `vx-601-run-takes-editor-quick-fixes` | `~/dev/variorum-vx-601` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: Takes & Lenses — the board, bars, panes and their session memories — plus the editor seam (`PaneSurface`) and the bottom-bar word count; no `Sync/`, no custody, no schema; Fable cold review per the editor seam; VX-562's flag honored — shared read-tier files coordinate at merge). |
 | **VX-623 — Run: the first-run walk resets its own test account** (members by the sub-issue listing: VX-622 cleanup leg + window-frame guard · VX-537 join arm + every-window capture · rider VX-536 guard.sh wl2 fail-closed, seated at her kickoff word; her standing ruling 2026-10-27 lands in canon at the merge; the record `notes/plans/fixes/vx-623-walk-self-reset.md`) | VX-623 · `vx-623-walk-self-reset` | `~/dev/variorum-vx-623` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: `Tools/WalkKit/` + a new guarded prod-reset helper beside `Tools/prod-read.sh` — NO app code, no `Sync/`, no custody slot, no schema; the acceptance walk takes a stage claim through the live coordinator, Opus-driven). |
 
 ### Latest closeout
 
-**→ VX-439 CLOSED 2026-10-27 — RUN: SIDEBAR, BAR & EXPORT QUICK WINS (the record
-`notes/plans/fixes/vx-439-sidebar-bar-export-quick-wins.md`; the ladder `vx-439-ladder-round1.md` · `-round2.md`;
-her handoff `notes/handoffs/vx-439-handoff.md`; PR #194, merge b3b16f2ba; one overnight run, kickoff to
-merge-ready, her morning words closing it).** 15 members shipped (VX-554 Done-stale and VX-568 parked at her live
-word); the wave-1 concurrency served twice (VX-502's and VX-548's main merged in and re-proven — the export seam's
-second-merger rule and the five-file VX-548 overlap, both clean); the two-round Opus ladder closed (r2 0 BLOCKER ·
-0 MAJOR) with the orchestrator's line-by-line check on the final round; three walks + an evidence slice; the
-branch-history rewrite at her word (`a3f087842`, tree byte-identical, main intact). Evidence and counts in the
-record. Born VX-603/604/608/614–618, all triaged; canon 125,887/150,000. MOBILE PARITY: nothing mobile-visible.
-**Next: the 0.10.3 release at her hand (the notes file on main is her approved text), then wave 2 (VX-601, the
-Takes/editor run — Fable-reviewed) at her kickoff.**
+**→ VX-620 CLOSED 2026-10-27 — RUN: MCP UMBRELLA REMAINDER (the record
+`notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`; the ladder `vx-620-ladder-round1.md`; her handoff
+`notes/handoffs/vx-620-handoff.md`; PR #197, merge 32a779075; kickoff to merge in one day — the VX-548 remainder
+under a fresh orchestrator, her ruling).** Nine sub-issues shipped or honestly dispositioned, the roster resolved by
+the SUB-ISSUE LISTING at kickoff and again before the ladder (her kickoff said six; the listing said SEVEN members —
+VX-377 had been re-parented at VX-439's closeout — plus riders VX-609/VX-619): set_starred at EDIT + the VX-549
+star-rule revisit (VX-596/609), the pane's honesty pair (VX-590/605, both Pre-launch), the wire's imports (VX-566/567;
+VX-565 RESOLVED-no-fix with evidence), the lock/quit docs (VX-619), the ⌘K wing doors with the keyboard selector
+(VX-377). The one-round Fable ladder (0 BLOCKER · 0 MAJOR · 0 MINOR · 4 record-only NITs) with its final-window
+contingency met; two stage windows + two re-run windows, all released clean (the walks ALL GREEN in both voices);
+three -only-testing traps recorded. Canon applied in the two-file shape (MCPSpec ×8, SurfaceContracts ×2); canon
+125,887/150,000. Born VX-625/626/628, all triaged; the bundle QUESTIONS #245 (RB-1's mint-star rule and RB-4's
+supersession of a ratified call lead it). MOBILE PARITY: nothing mobile-visible. **Next: her #245 pass; wave 2
+continues (vx-562 · vx-601 · vx-623 in flight).**
 
 *(VX-510's closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at the VX-529 closeout, 2026-10-25.)*
 
