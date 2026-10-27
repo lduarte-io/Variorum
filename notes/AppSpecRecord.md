@@ -916,3 +916,30 @@ catch-up resumed live across a suspend, and the save measured ≈ 4–5 minutes 
 word). The run's rulings, her sitting words verbatim, the ladder's three files and the born tickets (VM-24…VM-31,
 VX-546, VX-547) are the record's; nothing in CastleRules changed (her frozen-design word held: zero `Sync/`,
 `Server/`, `Persistence/`, `CastleRules` lines).
+
+**→ VX-502 (2026-10-27, one overnight /architect-phase run — the record
+`notes/plans/fixes/vx-502-export-across-migrations.md`; the ladder `vx-502-ladder-round-1.md` · `-round-2.md`; the
+walk `vx-502-walk-script.md`; her handoff `notes/handoffs/vx-502-handoff.md`; PR #192, tip `683068fbb`).** §12
+Doors ▸ Library portability: the plaintext-export clause in `notes/SurfaceContracts.md` changed in place — an
+export from an earlier build imports (its applied migrations a subset of this build's known set), one written by
+a newer Variorum refuses at the pick. HER RATIFIED RULE, on the ticket (2026-10-27): "accept any export whose
+applied set is a subset of the importing build's known set; newer-than-me still refuses" — superseding
+P-VX309-U1b-7's exact-match PROVISIONAL (VX-494's F6; #239(a); her R-494-6 word: "yeah, I agree that we should
+fix this. Put it on pre-launch"). The subset rule is safe because no content-bearing export predates v1_31 —
+VX-461's sandbox fix is the floor (a unit-A finding corrected the record's own first premise, which had credited
+vx-309). The gate (`PlaintextExportReading.plan`) now throws only `schemaNewer`; the "earlier build" face is
+deleted; the era-frozen guard pin (frozen at `v1_31_protection_record`, the 0.10 writer's drop list a literal)
+mechanizes the standing feature-detect duty over BOTH gates — the classifier and the reader. Her overnight word,
+in-session, verbatim: "make sure that the castle backup restore is solid & if it needs to be tested with a
+passphrase change in between to verify that the old one still works AND the new one works, that's authorized. I
+want it fully tested" — the Castle-restore walk ran ALL 13 LEGS GREEN on the dev store (the castle vxtest
+account; the as-found held library preserved byte-whole and hand-returned, coordinator-confirmed): rule 5's floor
+(the old pair opened the pair-change-era backup), rule 6 (the new passphrase opened it through the history),
+rule 7 (the account re-wrapped with both changes), rule 17 (fresh key; the old passphrase REFUSED at the restored
+lobby), rule 21 (the hand-return's notice), R-529-7 (the quiet words moment) — NO finding against CastleRules;
+VX-510's R-510-2 restore gap is closed. The ladder: round 1 (fable-reviewer) 0·1·1·1, round 2 (opus-reviewer,
+final) 0·0·2·4, every finding dispositioned, the final fixes orchestrator-checked line by line; the stage batch
+594 tests executed in 109 suites, 0 failed. Cast: Fable orchestrated; one Opus implementer; one Opus walk
+session; stage and merge order through the night's coordinator (first merger of the export-seam pair — VX-439
+rebases). Born tickets: none. A provisional act for her: `type-dev-castle-secret` (the dev-pair typing road,
+--check-guarded; her bundle item 2).

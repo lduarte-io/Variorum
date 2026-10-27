@@ -3555,7 +3555,9 @@ comples to discard its stage and re-download fresh ??"); (c) accepted for 0.10, 
 fine I guess"); (d) VX-503 minted ("yes, ticket that, we should investigate it"); (e) both closed ("Ok, close both.");
 (f) VX-495 and VX-496 Pre-launch ("Agreed… yes, pre launch. mark it as such."), VX-497 deferred to VM-8's measurement
 with the note in the phone prompt; (g) VX-505 minted, riding the sweep; (h) keep the shield ("Agreed."); (i) as filed
-("fine.") — later raised to High and into VX-510 after the sitting's tester trace.
+("fine.") — later raised to High and into VX-510 after the sitting's tester trace. **(a) BUILT at VX-502
+(2026-10-27, her ratified subset rule — the record `notes/plans/fixes/vx-502-export-across-migrations.md`);
+P-VX309-U1b-7 superseded.**
 
 ## VX-510 — Run: the first-run sync failures (2026-10-23/24)
 
