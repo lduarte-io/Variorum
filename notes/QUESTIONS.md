@@ -3670,3 +3670,11 @@ triaged: VX-605 (the Clients row's "last seen" staleness — Confirmed) · VX-60
 argument) · VX-607 (the second load-flake beside VX-532) · VX-609 (the star-gathering ask offers write-new it can only
 refuse — the P-2 class) · VX-610 (a once-seen Bookcase row-count lag) · VX-611 (the Trash's kind word on a gathering) ·
 VX-612/VX-613 (MB-13's two traced-unobserved server races). **Status: open — her morning.**
+
+#244 — **THE VX-439 BUNDLE (the binding record is `notes/plans/fixes/vx-439-sidebar-bar-export-quick-wins.md` — THE
+MORNING BUNDLE items 1–24; the ladder rounds beside it; her answers of 2026-10-27 in the record's Ledger).** ANSWERED
+at her morning pass: the history rewrite ordered and run; the Fable pass declined at her chrome-only criterion; the
+release ordered (0.10.3, one for wave 1). STANDING for her leisure: the A-439/C-call PROVISIONALs (built as ruled);
+VX-602's guide-content tail (three lessons + two sentences still say "tutorial" — re-word + the A1 re-seed in her
+window, or leave); the VX-424 hand check (drag an Open row down one slot); one Settings glance (General's seventh
+row + the toolbar label in Terminal); n-3's two-export-doors taste call; riders VX-373/VX-409.
