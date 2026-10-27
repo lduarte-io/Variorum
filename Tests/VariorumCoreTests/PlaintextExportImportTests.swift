@@ -7,7 +7,9 @@
 //  snippet group and a gathering is exported plain, READ into a plan on a private staged copy, and APPLIED to a fresh
 //  library: every row fresh; each note once, membered in each book in the export's order and chapter; archived things
 //  archived; the empty book left out and named; the wing minted, its tags its own; versions, the Trash and the gathering never
-//  cross. An export of another build's schema refuses. New API — red by construction on the pre-unit tree.
+//  cross. New API — red by construction on the pre-unit tree. VX-502 (her ratified rule, 2026-10-27; supersedes
+//  P-VX309-U1b-7): an export of an EARLIER build's schema — its applied migrations a subset of this build's — reads whole
+//  and imports; a NEWER build's refuses.
 //
 
 import Dependencies
@@ -195,21 +197,80 @@ struct PlaintextExportImportTests {
         }
     }
 
-    /// An export written by ANOTHER build's schema refuses — older (a migration this build carries it has not run) or
-    /// newer (one this build doesn't know) — before anything is planned.
-    @Test func anExportOfAnotherBuildsSchemaRefuses() throws {
+    // MARK: - VX-502 — the subset rule (her ratified rule, 2026-10-27; supersedes P-VX309-U1b-7): an export whose applied
+    // migration set is a SUBSET of this build's known set is accepted; a newer build's (an identifier this build has never
+    // heard of) still refuses. The old two-arm `anExportOfAnotherBuildsSchemaRefuses` split: its earlier-build arm FLIPPED
+    // DELIBERATELY into pin 1, its newer arm kept as pin 3.
+
+    /// `identifiers` struck from the export's `grdb_migrations` (the physical schema untouched — exactly what a build that
+    /// had not yet run them would have written when they add only local-only tables the export drops); the remaining set is
+    /// checked to be the known set minus them, so the pin can never pass on a delete that took nothing.
+    static func forgetMigrations(_ identifiers: [String], in url: URL) throws {
+        let queue = try DatabaseQueue(path: url.path, configuration: AppDatabase.configuration(key: nil))
+        defer { try? queue.close() }
+        let remaining = try queue.write { db in
+            for identifier in identifiers {
+                try db.execute(sql: "DELETE FROM grdb_migrations WHERE identifier = ?", arguments: [identifier])
+            }
+            return try Set(String.fetchAll(db, sql: "SELECT identifier FROM grdb_migrations"))
+        }
+        #expect(remaining == Set(AppDatabase.migrator.migrations).subtracting(identifiers), "a strict subset now")
+        #expect(remaining.count == AppDatabase.migrator.migrations.count - Set(identifiers).count)
+    }
+
+    /// VX-502 PIN 1 — THE F6 SCENE (red on the pre-fix tree): an export whose `grdb_migrations` lacks this build's LAST
+    /// identifier (today `v1_32_sync_pull_stage` — a local-only table the export drops anyway: exactly the shape of every
+    /// export 0.10 (9093) wrote) READS WHOLE — the very plan the unaltered file gives — and imports. The pre-fix gate
+    /// (`applied == known`) threw `schemaNotCurrent(newer: false)` here.
+    @Test func anExportMissingThisBuildsLastMigrationReadsWholeAndImports() throws {
+        let source = try Self.source()
+        defer { try? FileManager.default.removeItem(at: source.url.deletingLastPathComponent()) }
+        let whole = try PlaintextExportReading.read(exportAt: source.url)
+        let last = try #require(AppDatabase.migrator.migrations.last)
+        try Self.forgetMigrations([last], in: source.url)
+        let plan = try PlaintextExportReading.read(exportAt: source.url)
+        #expect(plan == whole, "read whole — the same plan as the unaltered export")
+        let landing = try Self.ops(try AppDatabase.inMemory()) { try $0.importPlaintextExport(plan) }
+        #expect(landing.notes == 4 && landing.books == 3 && landing.snippets == 1 && landing.wings == 1, "and it imports")
+        #expect(landing.emptyBooks == ["Empty"] && landing.membershipsLeftOut == 0)
+    }
+
+    /// VX-502 PIN 2 — THE DEEPER SUBSET (red on the pre-fix tree): several identifiers gone — the last three and one from
+    /// the middle, a set that is no prefix of the known list — and the export still reads whole. The rule is SUBSET, never
+    /// "behind by the last one".
+    @Test func anExportMissingSeveralMigrationsStillReadsWhole() throws {
+        let source = try Self.source()
+        defer { try? FileManager.default.removeItem(at: source.url.deletingLastPathComponent()) }
+        let whole = try PlaintextExportReading.read(exportAt: source.url)
+        let known = AppDatabase.migrator.migrations
+        let forgotten = Array(known.suffix(3)) + [known[known.count / 2]]
+        #expect(Set(forgotten).count == 4, "four distinct identifiers, one of them mid-list")
+        try Self.forgetMigrations(forgotten, in: source.url)
+        #expect(try PlaintextExportReading.read(exportAt: source.url) == whole, "read whole")
+    }
+
+    /// VX-502 PIN 3 — THE NEWER GUARD, KEPT: an identifier this build has never heard of (a newer Variorum wrote it) refuses
+    /// before anything is planned — alone, and beside an identifier this build knows but the file lacks (newer wins). Green
+    /// on the pre-fix tree by design; its teeth are the behavioral revert RV-A2 (the gate deleted whole → this pin red: the
+    /// future export would read).
+    @Test func anExportOfANewerBuildsSchemaRefuses() throws {
         let source = try Self.source()
         defer { try? FileManager.default.removeItem(at: source.url.deletingLastPathComponent()) }
         let queue = try DatabaseQueue(path: source.url.path, configuration: AppDatabase.configuration(key: nil))
-        let last = try #require(AppDatabase.migrator.migrations.last)
-        try queue.write { try $0.execute(sql: "DELETE FROM grdb_migrations WHERE identifier = ?", arguments: [last]) }
-        #expect(throws: PlaintextExportReading.Failure.schemaNotCurrent(newer: false)) {
+        try queue.write { try $0.execute(sql: "INSERT INTO grdb_migrations (identifier) VALUES ('v9_99_from_the_future')") }
+        try queue.close()
+        #expect(throws: PlaintextExportReading.Failure.schemaNotCurrent(newer: true)) {
             _ = try PlaintextExportReading.read(exportAt: source.url)
         }
-        try queue.write {
-            try $0.execute(sql: "INSERT INTO grdb_migrations (identifier) VALUES (?), ('v9_99_from_the_future')", arguments: [last])
+        // Beside a lag: the file now also lacks this build's last identifier.
+        let last = try #require(AppDatabase.migrator.migrations.last)
+        let lagging = try DatabaseQueue(path: source.url.path, configuration: AppDatabase.configuration(key: nil))
+        let struck = try lagging.write { db in
+            try db.execute(sql: "DELETE FROM grdb_migrations WHERE identifier = ?", arguments: [last])
+            return db.changesCount
         }
-        try queue.close()
+        try lagging.close()
+        #expect(struck == 1)
         #expect(throws: PlaintextExportReading.Failure.schemaNotCurrent(newer: true)) {
             _ = try PlaintextExportReading.read(exportAt: source.url)
         }
