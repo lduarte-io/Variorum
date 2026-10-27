@@ -158,11 +158,21 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 
 ## LIVE STATUS (the running record — updated per piece, in the same commit)
 
-- Batch 1: IN-PROGRESS — implementer session 1 (`opus-implementer`, 2026-10-27). Required reading DONE (CLAUDE.md + canon,
-  this record top→brief, SurfaceContracts whole, the resiliency protocol, the 13n-a document-format record, the capability
-  registry + `EditorCommands`). Every member SURVEYED against the tree before code; TWO FORKS returned to the architect
-  (Ledger, 2026-10-27 "B1 fork F-554" and "B1 fork F-568"), both RULED (the Ledger's "ARCHITECT RULING on the B1
-  forks"); the seven ready members in progress in the record's order; no revert in flight.
+- Batch 1: BUILT, READY-FOR-STAGE — implementer session 1 (`opus-implementer`, 2026-10-27). Seven members DONE
+  (VX-125 · 126 · 570 · 553 · 552 · 332 · 602); VX-554 Done at her word (no code); VX-568 parked out of the run at her
+  word. Headless at the END, on `61c6dd7eb`: core WHOLE PACKAGE `swift test` — 3,436 tests / 457 suites passed (5 known
+  issues, the standing ones) + 32 / 4 passed + the MCP package 383 / 71 with ONE failure,
+  `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (19.3 s vs its 15 s bound,
+  load average 25 — the VX-353 load class), re-run alone GREEN 3/3; the skipped lines are the 7 standing gated
+  measurement/integration skips. `xcodebuild build-for-testing` GREEN. No revert in flight; the one Mac red-on-old run
+  owed (VX-332) has its behavioral revert staged as `scratchpad/b1-revert/vx-332.patch` (gitignored, in the tree:
+  the `.task` back to `focusRequest += 1`). STAGE RUN (PENDING the coordinator's GO): `xcodebuild -scheme Variorum
+  -destination 'platform=macOS' test-without-building` with `-only-testing:VariorumTests/<suite>` for these 1
+  suites (every suite over a changed source file, by grep of the changed types, plus all of `TutorialWalkTests`' suites;
+  the exact command is `scratchpad/b1-revert/stage-command.txt`): AcknowledgmentsCopyTests. Then the VX-332 red-on-old run:
+  `git apply scratchpad/b1-revert/vx-332.patch` → build → `-only-testing:VariorumTests/QuickEntryOpeningScopeTests` RED
+  expected on `aNavigationBackToTheBookcasePutsTheCaretInItsQuickEntry` → `git checkout -- App/Variorum/Variorum/
+  Features/Shelf/QuickEntryBar.swift` → rebuild → GREEN.
   - VX-125: DONE (`a73a7e7f4`) — `.exportNote` "Export Note…" (post scope, `noteScoped`, `.native`) on File ▸ (beside
     Export Library…, ⌥⌘S — C-125-1's sweep in the registry row), ⌘K, and both `note ▾` menus (Write's in NOTE contexts
     only, Takes'); one act `Core/Views/NoteExport` (flush → ONE read of `Queries.variorumDocumentText` + the display
@@ -224,7 +234,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     no-tour non-vacuity). build-for-testing GREEN. The red-on-old run is PENDING the stage window: the behavioral revert
     (the `.task` back to `focusRequest += 1`) is staged as `scratchpad/b1-revert/vx-332.patch` (gitignored, in the tree).
   - VX-568: PARKED OUT OF THE RUN at her word (2026-10-27) — see Ledger
-  - VX-602: DONE (this line's commit) — the Help menu names each thing once: `.restoreTutorial`'s verb "Restore Field
+  - VX-602: DONE (`61c6dd7eb`) — the Help menu names each thing once: `.restoreTutorial`'s verb "Restore Field
     Guide…"; `TourOfferCopy.menuTitle` (the `.takeTour` verb) "Take the Onboarding Tutorial", its help-road sentence
     following ("Run it any time from Help ▸ Take the Onboarding Tutorial."); the undeclared field-guide door "Open the
     Field Guide" (C-602-1) from one constant (`Features/Help/HelpMenuCopy`) for the menu and its ⌘K twin; the two
