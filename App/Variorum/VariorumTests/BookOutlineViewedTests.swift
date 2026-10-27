@@ -9,13 +9,23 @@
 //  one mark table. New capability — these are born with the code they pin
 //  (no red-on-old by nature; the record's §DESIGN Evidence names them).
 //
+//  Ladder round 1 (the record's §LIVE STATUS "r1 fixes"): the heading names
+//  the note it introduces (P-562-7); the probe slides to the page's foot
+//  over the last viewport of scroll (R-562-B); the follower's adopt/release
+//  decision is one value, driven here in every order SwiftUI might deliver
+//  (finding 6, R-562-C, finding 4's guard); one note total for both halves
+//  of the pinned line (finding 3); the viewed chapter's mark by token maths
+//  (finding 8). The bug-class ones carry their red-on-old shape in the doc.
+//
 //  The geometry the tables stand in for is `BookView.outlineSpace`: a row's
 //  top in the scroll's VISIBLE space, `0` the viewport's top edge, negative
 //  above it.
 //
 
+import AppKit
 import CoreGraphics
 import Foundation
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -70,24 +80,49 @@ struct BookOutlineViewedTests {
                 "the story whose top scrolled away long ago still owns the page — with its chapter")
     }
 
-    /// Between chapters: a chapter heading at the top names the chapter
-    /// alone; once its first note's top crosses the probe, the note joins it.
-    @Test func aChapterHeadingNamesTheChapterAloneUntilItsFirstNoteArrives() {
+    /// **P-562-7 (ladder round 1, walk finding 11): a chapter heading at the
+    /// top names the note it INTRODUCES** — steady across the heading, so the
+    /// pin's "note N of M" never blinks out between chapters, and the
+    /// chapter and the note never contradict. Red on the batch's rule, which
+    /// named the chapter alone until the note's own top crossed the probe.
+    @Test func aChapterHeadingAtTheTopNamesTheNoteItIntroduces() {
         var tops: [String: CGFloat] = [
             "chapter-s1": -600, "page-a": -550, "page-b": -440, "chapter-s2": 0,
             "page-c": 50, "unfiled": 17_000, "page-d": 17_050,
         ]
-        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == Pair(sectionID: "s2"),
-                "the heading landed at the top: the chapter, no note")
+        let c = Pair(sectionID: "s2", postID: "c")
+        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == c,
+                "the heading landed at the top: its chapter, and the note it introduces")
         tops["chapter-s2"] = -40
         tops["page-c"] = 11
-        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == Pair(sectionID: "s2"),
-                "the heading scrolled past, the note's top still a point below the probe")
+        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == c,
+                "the heading scrolled past, the note's top still a point below the probe: the same pair")
         tops["chapter-s2"] = -45
         tops["page-c"] = 6
-        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops)
-                == Pair(sectionID: "s2", postID: "c"),
-                "the note's top is within the probe: the page is the note's")
+        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == c,
+                "the note's own top within the probe: still the same pair — nothing blinked")
+    }
+
+    /// P-562-7's edges: an EMPTY chapter's heading introduces no note, so it
+    /// names its chapter alone; the unfiled heading and a tag-path heading
+    /// introduce their first notes (no chapter).
+    @Test func aHeadingWithNoNoteUnderItNamesItsChapterAlone() {
+        let rows = BookOutlineRows.rows(grouped: [
+            (section("s1", "chapter one"), [entry("a")]),
+            (section("s2", "chapter two"), []),
+            (section("s3", "chapter three"), [entry("b")]),
+        ])
+        #expect(rows.map(\.id) == ["chapter-s1", "page-a", "chapter-s2", "chapter-s3", "page-b"])
+        #expect(BookOutlineViewed.named(at: 2, in: rows) == Pair(sectionID: "s2"),
+                "the empty chapter: its chapter alone")
+        #expect(BookOutlineViewed.named(at: 3, in: rows) == Pair(sectionID: "s3", postID: "b"))
+        #expect(BookOutlineViewed.named(at: 0, in: rows) == Pair(sectionID: "s1", postID: "a"))
+        #expect(BookOutlineViewed.named(at: 1, in: rows) == Pair(sectionID: "s1", postID: "a"))
+        #expect(BookOutlineViewed.named(at: 9, in: rows) == .nothingViewed, "no such row")
+        let flat = BookOutlineRows.rows(flat: [entry("x", path: "life"), entry("y", path: "work")])
+        #expect(BookOutlineViewed.named(at: 0, in: flat) == Pair(postID: "x"),
+                "a tag-path heading introduces its first note, naming no chapter")
+        #expect(BookOutlineViewed.named(at: 2, in: flat) == Pair(postID: "y"))
     }
 
     /// The previous chapter's last note still owns the page while the next
@@ -101,9 +136,10 @@ struct BookOutlineViewedTests {
                 == Pair(sectionID: "s1", postID: "b"))
     }
 
-    /// Unfiled: a note under the unfiled heading names no chapter; the
-    /// heading itself names nothing (it is not a chapter).
-    @Test func unfiledNotesNameNoChapterAndTheUnfiledHeadingNamesNothing() {
+    /// Unfiled: a note under the unfiled heading names no chapter, and the
+    /// heading itself introduces its first note (P-562-7) — the chapterless
+    /// group is never a blink between notes.
+    @Test func unfiledNotesNameNoChapterAndTheUnfiledHeadingNamesItsFirstNote() {
         var tops: [String: CGFloat] = [
             "chapter-s1": -18_000, "page-a": -17_950, "page-b": -17_840,
             "chapter-s2": -17_730, "page-c": -17_680, "unfiled": -60, "page-d": -10,
@@ -111,8 +147,8 @@ struct BookOutlineViewedTests {
         #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == Pair(postID: "d"))
         tops["unfiled"] = 0
         tops["page-d"] = 50
-        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == .nothingViewed,
-                "the unfiled heading at the top: no chapter, no note")
+        #expect(BookOutlineViewed.pair(rows: chaptered, tops: tops) == Pair(postID: "d"),
+                "the unfiled heading at the top: no chapter, the note it introduces")
     }
 
     /// A book with no notes has no rows, and nothing is viewed.
@@ -120,20 +156,25 @@ struct BookOutlineViewedTests {
         #expect(BookOutlineViewed.pair(rows: [], tops: [:]) == .nothingViewed)
         #expect(BookOutlineViewed.pair(rows: [], tops: ["page-x": -100]) == .nothingViewed,
                 "a stale top for a row the column no longer has is never read")
-        #expect(BookOutlineViewed.viewedIndex(tops: []) == nil)
+        #expect(BookOutlineViewed.pair(rows: [], tops: [:], probe: 5_000) == .nothingViewed,
+                "whatever the probe")
     }
 
-    /// A flat book (tag-path headings): notes name no chapter; the heading
-    /// names nothing.
+    /// A flat book (tag-path headings): notes name no chapter; a heading
+    /// introduces its first note.
     @Test func aFlatBookNamesNotesAndNoChapters() {
         let rows = BookOutlineRows.rows(flat: [
             entry("a", path: "life"), entry("b", path: "life"), entry("c", path: "work"),
         ])
         #expect(rows.map(\.id) == ["path-0", "page-a", "page-b", "path-2", "page-c"])
-        let tops: [String: CGFloat] = [
+        var tops: [String: CGFloat] = [
             "path-0": -500, "page-a": -450, "page-b": -200, "path-2": 300, "page-c": 350,
         ]
         #expect(BookOutlineViewed.pair(rows: rows, tops: tops) == Pair(postID: "b"))
+        tops["path-2"] = 0
+        tops["page-c"] = 50
+        #expect(BookOutlineViewed.pair(rows: rows, tops: tops) == Pair(postID: "c"),
+                "the work heading at the top introduces its note")
     }
 
     /// The probe's ε edge, both sides — and the two facts that make the gap
@@ -160,21 +201,115 @@ struct BookOutlineViewedTests {
         let rows = BookOutlineRows.rows(flat: [entry("a"), entry("b"), entry("c")])
         #expect(BookOutlineViewed.pair(rows: rows, tops: ["page-a": -300, "page-c": 400])
                 == Pair(postID: "a"))
-        #expect(BookOutlineViewed.viewedIndex(tops: [-300, nil, 400]) == 0)
-        #expect(BookOutlineViewed.viewedIndex(tops: [nil, nil]) == nil)
+        #expect(BookOutlineViewed.pair(rows: rows, tops: ["page-b": -300]) == Pair(postID: "b"),
+                "only b reported, at the top: b")
+        #expect(BookOutlineViewed.pair(rows: rows, tops: [:]) == .nothingViewed,
+                "nothing reported: nothing viewed")
     }
 
-    /// Monotonic: as the probe moves down the page, the viewed row never
-    /// moves up the column.
+    /// **Monotonic, over THE SHIPPED RULE** (ladder round 1, finding 5: the
+    /// batch's twin `viewedIndex` — never called by production — carried
+    /// this pin, so an edit to `pair`'s comparison could not fail it; the
+    /// twin is deleted and the table runs `pair` itself): as the probe moves
+    /// down the page, the viewed note never moves up the column. A row with
+    /// no reported top is skipped at every probe.
     @Test func theRuleIsMonotonicInTheProbe() {
-        let tops: [CGFloat?] = [-900, -400, nil, -10, 3, 250, 251, 4_000]
-        var previous = -1
-        for probe in stride(from: CGFloat(-1_000), through: 5_000, by: 7) {
-            let index = BookOutlineViewed.viewedIndex(tops: tops, probe: probe) ?? -1
-            #expect(index >= previous, "probe \(probe): \(index) moved up from \(previous)")
-            previous = index
+        let rows = BookOutlineRows.rows(flat: (0..<8).map { entry("n\($0)") })
+        let tops: [String: CGFloat] = [
+            "page-n0": -900, "page-n1": -400, "page-n3": -10, "page-n4": 3,
+            "page-n5": 250, "page-n6": 251, "page-n7": 4_000,
+        ]
+        let place: (CGFloat) -> Int = { probe in
+            BookOutlineViewed.pair(rows: rows, tops: tops, probe: probe).postID
+                .flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
         }
-        #expect(BookOutlineViewed.viewedIndex(tops: tops, probe: 10) == 4)
+        var previous = 0
+        for probe in stride(from: CGFloat(-1_000), through: 5_000, by: 7) {
+            let now = place(probe)
+            #expect(now >= previous, "probe \(probe): note \(now) moved up from \(previous)")
+            previous = now
+        }
+        #expect(place(BookOutlineViewed.probe) == 5, "at the edge probe: n4 (its top 3 pt down)")
+        #expect(place(5_000) == 8, "a probe past every row: the last")
+        #expect(place(-1_000) == 0, "a probe above every row: nothing")
+        #expect(place(-400) == 2 && place(-401) == 1, "exactly at a row's top: that row (≤)")
+    }
+
+    // MARK: - R-562-B — the probe slides to the page's foot at the end
+
+    /// The sliding probe's table: the edge while a viewport or more of scroll
+    /// remains; linear to the page's FOOT over the last viewport; the foot at
+    /// (and past) the bottom; the edge whenever the page is unmeasured or
+    /// cannot scroll; and in a book shorter than two pages the slide spans
+    /// its whole travel, so at rest it is still the edge.
+    @Test func theProbeSlidesToThePagesFootOverTheLastViewportOfScroll() {
+        typealias Scroll = BookOutlineViewed.Scroll
+        let edge = BookOutlineViewed.probe
+        let probe: (CGFloat, CGFloat, CGFloat) -> CGFloat = { viewport, offset, travel in
+            BookOutlineViewed.probe(Scroll(viewport: viewport, offset: offset, travel: travel))
+        }
+        #expect(probe(600, 0, 3_000) == edge, "at rest: the edge")
+        #expect(probe(600, 2_000, 3_000) == edge, "a viewport and more to go: the edge")
+        #expect(probe(600, 2_400, 3_000) == edge, "exactly one viewport to go: still the edge")
+        #expect(abs(probe(600, 2_700, 3_000) - (edge + 0.5 * (600 - edge))) < 0.001,
+                "half the last viewport: half way to the foot")
+        #expect(probe(600, 3_000, 3_000) == 600, "at the bottom: the page's foot")
+        #expect(probe(600, 3_050, 3_000) == 600, "past it (an overscroll): the foot")
+        #expect(probe(600, -40, 3_000) == edge, "an overscroll at the top: the edge")
+        #expect(probe(0, 3_000, 3_000) == edge, "a page not yet measured never slides")
+        #expect(probe(600, 0, 0) == edge, "a column that fits its page never slides")
+        // A book shorter than two pages: the slide spans its whole travel.
+        #expect(probe(600, 0, 300) == edge, "at rest in a short book: the edge — nothing viewed at rest")
+        #expect(abs(probe(600, 150, 300) - (edge + 0.5 * (600 - edge))) < 0.001)
+        #expect(probe(600, 300, 300) == 600, "its bottom: the foot")
+    }
+
+    /// **R-562-B, end to end over a column (ladder round 1, finding 1 —
+    /// MAJOR):** scrolling down a book, the viewed note never moves up; at
+    /// the bottom it is the LAST note; and every note of the last screenful
+    /// — the ones whose tops can never reach the page's top — is viewed in
+    /// turn on the way down. RED on the batch's fixed edge probe: at the
+    /// bottom it named the note owning the page's top, and the last
+    /// screenful's notes were never viewed (the second half of this table
+    /// says so of the old probe).
+    @Test func scrollingToTheEndViewsEveryNoteOfTheLastScreenfulAndTheLastAtTheBottom() {
+        // Twenty 100-pt notes, 10 pt apart, under a 120-pt title block; a
+        // 120-pt foot follows the last; a 600-pt page.
+        let rows = BookOutlineRows.rows(flat: (0..<20).map { entry("n\($0)") })
+        let position: (Int) -> CGFloat = { 120 + CGFloat($0) * 110 }
+        let content = position(19) + 100 + 120
+        let viewport: CGFloat = 600
+        let travel = content - viewport
+        let ordinal: (CGFloat, Bool) -> Int = { offset, sliding in
+            var tops: [String: CGFloat] = [:]
+            for i in 0..<20 { tops["page-n\(i)"] = position(i) - offset }
+            let scroll = BookOutlineViewed.Scroll(viewport: viewport, offset: offset, travel: travel)
+            let probe = sliding ? BookOutlineViewed.probe(scroll) : BookOutlineViewed.probe
+            return BookOutlineViewed.pair(rows: rows, tops: tops, probe: probe).postID
+                .flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
+        }
+        // The last screenful: notes whose top cannot reach the edge probe.
+        let lastScreenful = (0..<20).filter { position($0) - travel > BookOutlineViewed.probe }
+            .map { $0 + 1 }
+        #expect(lastScreenful.count >= 3, "the premise: a last screenful of several notes (\(lastScreenful))")
+        var seen = Set<Int>()
+        var previous = 0
+        for offset in stride(from: CGFloat(0), through: travel, by: 5) {
+            let now = ordinal(offset, true)
+            #expect(now >= previous, "offset \(offset): note \(now) moved up from \(previous)")
+            previous = now
+            seen.insert(now)
+        }
+        #expect(ordinal(travel, true) == 20, "at the bottom: the LAST note")
+        #expect(ordinal(0, true) == 0, "at rest: the title block holds the page")
+        for note in lastScreenful {
+            #expect(seen.contains(note), "note \(note) of the last screenful was viewed on the way down")
+        }
+        // The batch's edge probe, the same scroll: stuck short of the end.
+        #expect(ordinal(travel, false) < 20, "the old probe at the bottom names the top row, not the last")
+        let oldSeen = Set(stride(from: CGFloat(0), through: travel, by: 5).map { ordinal($0, false) })
+        #expect(!lastScreenful.allSatisfy(oldSeen.contains),
+                "and never views the whole last screenful")
     }
 
     // MARK: - R-562-A — the follower adopts a landing's target
@@ -188,10 +323,11 @@ struct BookOutlineViewedTests {
         #expect(adopt("page-c") == Pair(sectionID: "s2", postID: "c"),
                 "a note: itself, and the chapter heading above it on the page")
         #expect(adopt("page-a") == Pair(sectionID: "s1", postID: "a"))
-        #expect(adopt("chapter-s2") == Pair(sectionID: "s2"), "a chapter heading: the chapter alone")
+        #expect(adopt("chapter-s2") == Pair(sectionID: "s2", postID: "c"),
+                "a chapter heading: its chapter and the note it introduces (P-562-7)")
         #expect(adopt("page-d") == Pair(postID: "d"), "a note under the unfiled heading names no chapter")
-        #expect(adopt("unfiled") == .nothingViewed,
-                "the unfiled heading names nothing — what the rule says of it at the top")
+        #expect(adopt("unfiled") == Pair(postID: "d"),
+                "the unfiled heading introduces its first note — what the rule says of it at the top")
         #expect(adopt("page-zz") == nil, "a row the column does not have: nothing to adopt")
         // The same answer the rule gives once the landing has put the target
         // at the top with the whole column reporting.
@@ -201,8 +337,8 @@ struct BookOutlineViewedTests {
         ]
         #expect(adopt("page-c") == BookOutlineViewed.pair(rows: chaptered, tops: landed))
         let flat = BookOutlineRows.rows(flat: [entry("a", path: "life"), entry("b", path: "life")])
-        #expect(BookOutlineViewed.adoptedPair(anchor: "path-0", rows: flat) == .nothingViewed,
-                "a tag-path heading names nothing")
+        #expect(BookOutlineViewed.adoptedPair(anchor: "path-0", rows: flat) == Pair(postID: "a"),
+                "a tag-path heading introduces its first note")
         #expect(BookOutlineViewed.adoptedPair(anchor: "page-b", rows: flat) == Pair(postID: "b"))
     }
 
@@ -235,7 +371,9 @@ struct BookOutlineViewedTests {
 
     /// After the landing: the adoption stands while its row is on the page —
     /// wherever on the page — and the rule resumes, the adoption dropped, the
-    /// moment a derivation finds it off the page or out of the column.
+    /// moment a derivation finds it off the page or out of the column. (The
+    /// pages here stand still mid-scroll — the edge probe; the probe's slide
+    /// at the end of the book has its own tables above.)
     @Test func theAdoptedTargetStandsWhileItIsOnThePageAndTheRuleResumesWhenItLeaves() {
         let heights: [String: CGFloat] = [
             "chapter-s1": 40, "page-a": 100, "page-b": 100, "chapter-s2": 40,
@@ -249,8 +387,11 @@ struct BookOutlineViewedTests {
         let follow: ([String: CGFloat], String?, CGFloat) -> (pair: Pair, adopted: String?) = {
             tops, adopted, viewport in
             BookOutlineViewed.follow(
-                rows: self.chaptered, tops: tops, heights: heights,
-                viewport: viewport, adopted: adopted)
+                rows: self.chaptered,
+                page: BookOutlineViewed.Page(
+                    tops: tops, heights: heights,
+                    scroll: BookOutlineViewed.Scroll(viewport: viewport)),
+                adopted: adopted)
         }
 
         // THE F-1 PAGE — the book's last screenful: note a owns the top; the
@@ -275,8 +416,8 @@ struct BookOutlineViewedTests {
         #expect(above.pair == Pair(sectionID: "s1", postID: "a") && above.adopted == nil)
         // Off the page BELOW (a short page; d's top under its foot).
         let below = follow(column(-300), "page-d", 150)
-        #expect(below.pair == Pair(sectionID: "s2") && below.adopted == nil,
-                "below the foot: the rule — chapter two's heading owns the top")
+        #expect(below.pair == Pair(sectionID: "s2", postID: "c") && below.adopted == nil,
+                "below the foot: the rule — chapter two's heading owns the top, naming its note")
         // Out of the column (the note left the book): the rule, dropped.
         var gone = lastScreen
         gone["page-zz"] = 380
@@ -288,10 +429,11 @@ struct BookOutlineViewedTests {
         let silent = follow(unreported, "page-d", 700)
         #expect(silent.pair == Pair(sectionID: "s1", postID: "a") && silent.adopted == nil)
 
-        // A heading that names nothing, adopted (the width change re-landing
-        // the row at the top) stands as nothing while it is on the page.
+        // A heading adopted (the width change re-landing the row at the top)
+        // stands as what it names — the note it introduces — while it is on
+        // the page.
         let heading = follow(column(-430), "unfiled", 700)
-        #expect(heading.pair == .nothingViewed && heading.adopted == "unfiled")
+        #expect(heading.pair == Pair(postID: "d") && heading.adopted == "unfiled")
     }
 
     // MARK: - The place on the page (P-562-5)
@@ -313,8 +455,8 @@ struct BookOutlineViewedTests {
     @Test func thePositionWordsSayTheNotesPlaceAndItsChapter() {
         let say: (Pair, Bool, Bool, Bool) -> String = { pair, chaptered, filtered, truncated in
             BookOutlineViewed.positionLine(
-                pair: pair, rows: self.chaptered, chaptered: chaptered,
-                filtered: filtered, truncated: truncated)
+                pair: pair, rows: self.chaptered, chaptered: chaptered, filtered: filtered,
+                total: BookOutlineViewed.NoteTotal(count: 4, isAtLeast: truncated))
         }
         #expect(say(Pair(sectionID: "s2", postID: "c"), true, false, false)
                 == "note 3 of 4 \u{B7} chapter two")
@@ -348,6 +490,242 @@ struct BookOutlineViewedTests {
         // The same pieces, said by the box: unchanged.
         #expect(NoteBoxCopy.whereLine(chapter: "chapter 2", index: 5, total: 12, block: nil)
                 == "chapter 2 \u{B7} 5 of 12 in this book")
+    }
+
+    // MARK: - Finding 3 — one honest total for the whole pinned line
+
+    /// **Past the book's window the two halves of the pinned line say ONE
+    /// total** (ladder round 1, finding 3): a book over 300 notes is read
+    /// through a 300-note window (`BookViewModel.entryWindow`; "show more ›"
+    /// widens it), so the count is a floor — "300+ notes" — and "note 3 of
+    /// 300+" beside it. RED on the batch's composition, which handed the
+    /// count line the window's bare count ("300 notes") beside the
+    /// position's floor ("of 300+"). Red-on-old by behavioral revert: make
+    /// `pinLine` hand `metaLine` `notesAreAtLeast: false`.
+    @Test func thePinnedLineSaysOneTotalForBothHalves() {
+        let line: (BookOutlineViewed.NoteTotal, Pair) -> String = { total, pair in
+            BookOutlineViewed.pinLine(
+                gathering: false, chapters: 2, archived: 0, total: total,
+                pair: pair, rows: self.chaptered, chaptered: true, filtered: false)
+        }
+        let windowed = BookOutlineViewed.NoteTotal(count: 300, isAtLeast: true)
+        let c = Pair(sectionID: "s2", postID: "c")
+        #expect(line(windowed, c)
+                == "book \u{B7} 2 chapters \u{B7} 300+ notes \u{B7} note 3 of 300+ \u{B7} chapter two",
+                "the count line and the position say the same floor")
+        #expect(line(windowed, .nothingViewed) == "book \u{B7} 2 chapters \u{B7} 300+ notes",
+                "at rest: the counts alone, the floor said")
+        #expect(line(BookOutlineViewed.NoteTotal(count: 4), c)
+                == "book \u{B7} 2 chapters \u{B7} 4 notes \u{B7} note 3 of 4 \u{B7} chapter two",
+                "a book inside its window: the exact count, twice")
+        // The count line's own words (its other callers pass no floor and
+        // read exactly as before — `VocabularySweepTests`).
+        #expect(BookViewCopy.metaLine(
+            gathering: false, chapters: 0, notes: 600, notesAreAtLeast: true, archived: 2)
+                == "book \u{B7} 600+ notes \u{B7} " + ArchivedLineCopy.line(count: 2))
+        #expect(BookViewCopy.metaLine(gathering: false, chapters: 0, notes: 1, archived: 0)
+                == "book \u{B7} 1 note")
+    }
+
+    // MARK: - Finding 6 (partial) — the follower's adopt/release, one value
+
+    /// A column of six 100-pt notes mid-scroll (the page 600 pt tall, far
+    /// from the book's end): note `i`'s top is `t + 110·i`.
+    private var followerRows: [BookOutlineRows.Row] {
+        BookOutlineRows.rows(flat: (0..<6).map { entry("f\($0)") })
+    }
+
+    private func followerPage(top t: CGFloat, offset: CGFloat) -> BookOutlineViewed.Page {
+        var tops: [String: CGFloat] = [:]
+        var heights: [String: CGFloat] = [:]
+        for i in 0..<6 {
+            tops["page-f\(i)"] = t + 110 * CGFloat(i)
+            heights["page-f\(i)"] = 100
+        }
+        return BookOutlineViewed.Page(
+            tops: tops, heights: heights,
+            scroll: BookOutlineViewed.Scroll(viewport: 600, offset: offset, travel: 10_000))
+    }
+
+    /// **The navigator's click in either order SwiftUI may deliver it**
+    /// (finding 4's mechanism, headless): the click is `focus` — which
+    /// unfolds the note, an EXPANSION-axis change — and `requestReveal` in
+    /// one act. Whichever change arrives first, the clicked target is what
+    /// the follower says at the landing's end. RED under the behavioral
+    /// revert of `axisChanged`'s pending guard (order A lets the click's own
+    /// expansion release its travelling adoption, and the end says the rule).
+    @Test func theClicksOwnExpansionNeverReleasesItsTargetInEitherOrder() {
+        let target = "page-f3"
+        let targetPair = Pair(postID: "f3")
+        // The landing has ended with f3 on the page at 320 pt (the rule would
+        // name f0, at the top).
+        let landed = followerPage(top: -10, offset: 2_000)
+        #expect(BookOutlineViewed.pair(rows: followerRows, tops: landed.tops) == Pair(postID: "f0"),
+                "the premise: the rule names another row")
+
+        // Order A: the reveal's landing starts first, then the expansion.
+        var a = BookOutlineFollower()
+        #expect(a.landingStarted(anchor: target, rows: followerRows) == targetPair, "the click says f3")
+        a.axisChanged(landingPending: true)
+        #expect(a.look(rows: followerRows, page: landed, landingPending: true) == nil,
+                "frozen while the landing travels")
+        #expect(a.look(rows: followerRows, page: landed, landingPending: false) == targetPair,
+                "the landing's end: the target — the click's own expansion did not release it")
+
+        // Order B: the expansion first (no landing pending yet), then the reveal.
+        var b = BookOutlineFollower()
+        b.axisChanged(landingPending: false)
+        #expect(b.landingStarted(anchor: target, rows: followerRows) == targetPair)
+        #expect(b.look(rows: followerRows, page: landed, landingPending: false) == targetPair)
+
+        // A STANDING adoption does let go on an axis change (R-562-A).
+        var c = BookOutlineFollower()
+        _ = c.landingStarted(anchor: target, rows: followerRows)
+        _ = c.look(rows: followerRows, page: landed, landingPending: false)
+        c.axisChanged(landingPending: false)
+        #expect(c.adopted == nil)
+        #expect(c.look(rows: followerRows, page: landed, landingPending: false) == Pair(postID: "f0"),
+                "after the landing, an expansion returns the follower to the rule")
+    }
+
+    /// Her hand on the page lets go FIRST — so a landing her scroll ends
+    /// delivers the rule's pair, not the target's — and the Outline leaving
+    /// lets go too.
+    @Test func herScrollPhaseAndTheOutlineLeavingLetTheTargetGo() {
+        let landed = followerPage(top: -10, offset: 2_000)
+        var f = BookOutlineFollower()
+        _ = f.landingStarted(anchor: "page-f3", rows: followerRows)
+        f.userScrolled()   // her phase, mid-landing: cleared before `userTookOver`
+        #expect(f.look(rows: followerRows, page: landed, landingPending: false) == Pair(postID: "f0"),
+                "the landing she ended delivers the rule")
+        var g = BookOutlineFollower()
+        _ = g.landingStarted(anchor: "page-f3", rows: followerRows)
+        _ = g.look(rows: followerRows, page: landed, landingPending: false)
+        g.forget()
+        #expect(g.adopted == nil && g.settledOffset == nil)
+        var h = BookOutlineFollower()
+        #expect(h.landingStarted(anchor: "page-zz", rows: followerRows) == nil,
+                "a target the column has no row for: nothing adopted")
+        #expect(h.adopted == nil)
+    }
+
+    /// **R-562-C — the page's own offset releases the hold** (ladder round 1,
+    /// finding 2): the key is where the page stood at the first look after
+    /// the landing (never mid-travel); settle wobble up to 8 pt keeps the
+    /// target, and anything more lets it go — whatever the input (a
+    /// phase-less wheel, keyboard paging, a scroller drag, a programmatic
+    /// scroll), with the target still on the page. RED under the behavioral
+    /// revert (`offsetRelease` = `.infinity`): the target stood while on
+    /// the page, so a scroll that kept it there kept the stale pair.
+    @Test func thePageMovingMoreThanEightPointsLetsTheTargetGo() {
+        #expect(BookOutlineFollower.offsetRelease == 8, "the named threshold")
+        let target = Pair(postID: "f3")
+        var f = BookOutlineFollower()
+        _ = f.landingStarted(anchor: "page-f3", rows: followerRows)
+        // Mid-travel looks are frozen and take no key.
+        #expect(f.look(rows: followerRows, page: followerPage(top: 500, offset: 400),
+                       landingPending: true) == nil)
+        #expect(f.settledOffset == nil, "no key while the landing travels")
+        // The landing's end: the key.
+        #expect(f.look(rows: followerRows, page: followerPage(top: -10, offset: 2_000),
+                       landingPending: false) == target)
+        #expect(f.settledOffset == 2_000)
+        // Wobble within 8 pt either way: still the target.
+        for (top, offset) in [(-14.0, 2_004.0), (-2.0, 1_992.0), (-18.0, 2_008.0)] as [(CGFloat, CGFloat)] {
+            #expect(f.look(rows: followerRows, page: followerPage(top: top, offset: offset),
+                           landingPending: false) == target,
+                    "offset \(offset): within the release — the target stands")
+        }
+        // 8.5 pt up: let go — the rule, with f3 still on the page.
+        let moved = followerPage(top: -1.5, offset: 1_991.5)
+        #expect(BookOutlineViewed.isOnScreen(
+            top: moved.tops["page-f3"], height: 100, viewport: 600), "the premise: f3 is on the page")
+        #expect(f.look(rows: followerRows, page: moved, landingPending: false) == Pair(postID: "f0"),
+                "past the release: the rule")
+        #expect(f.adopted == nil && f.settledOffset == nil)
+        // Back where the landing left it: the adoption does not come back.
+        #expect(f.look(rows: followerRows, page: followerPage(top: -10, offset: 2_000),
+                       landingPending: false) == Pair(postID: "f0"))
+        // A NEW landing re-adopts and takes a fresh key at its own end.
+        _ = f.landingStarted(anchor: "page-f5", rows: followerRows)
+        #expect(f.settledOffset == nil)
+        #expect(f.look(rows: followerRows, page: followerPage(top: -230, offset: 3_000),
+                       landingPending: false) == Pair(postID: "f5"))
+        #expect(f.settledOffset == 3_000)
+    }
+
+    // MARK: - Finding 8 — the viewed chapter's mark reads, by token maths
+
+    /// The colour's sRGB components (the token layer's colours are static
+    /// sRGB; opacity rides in alpha).
+    @MainActor
+    private func components(_ colour: Color) -> (r: Double, g: Double, b: Double, a: Double) {
+        let ns = NSColor(colour).usingColorSpace(.sRGB) ?? .black
+        return (ns.redComponent, ns.greenComponent, ns.blueComponent, ns.alphaComponent)
+    }
+
+    /// `colour` composited over an opaque `backdrop`, as one opaque hex value
+    /// for `PaletteDerivation.contrast` (the SAME maths the palette layer
+    /// pins its own floors with).
+    @MainActor
+    private func composite(_ colour: Color, over backdrop: Color) -> UInt32 {
+        let f = components(colour), b = components(backdrop)
+        func byte(_ fg: Double, _ bg: Double) -> UInt32 {
+            UInt32((min(max(f.a * fg + (1 - f.a) * bg, 0), 1) * 255).rounded())
+        }
+        return (byte(f.r, b.r) << 16) | (byte(f.g, b.g) << 8) | byte(f.b, b.b)
+    }
+
+    /// **Ladder round 1, finding 8 (walk 2): the viewed chapter's mark must
+    /// READ at normal viewing in both voices and both appearances.** The
+    /// fill (the accent at `viewedChapterFillStrength`) against the
+    /// navigator's room: at least 1.3:1 in Terminal and Study, light and
+    /// dark — and at most 1.6:1, a quiet tile, never a band — with the name
+    /// in ink at least 4.5:1 on it (the palette layer's own selected-row
+    /// floor). Under every palette, at least 1.25:1 and the same ink floor.
+    ///
+    /// RED on the batch's mark (the wash at 0.55): Study dark 1.07:1 — the
+    /// walk's measured RGB (10,12,14) on black, *"does not read as a
+    /// highlight"* — and Terminal light 1.03:1; the last lines say so.
+    @MainActor
+    @Test func theViewedChaptersMarkReadsInBothVoicesAndBothAppearances() {
+        for voice in [ThemeVoice.terminal, .study] {
+            for dark in [false, true] {
+                let tokens = VoiceTokens.resolve(voice: voice, dark: dark)
+                let fill = BookNavigatorLayout.viewedChapterFill(tokens)
+                #expect(abs(components(fill).a - BookNavigatorLayout.viewedChapterFillStrength) < 0.01,
+                        "\(voice) dark=\(dark): the fill is the accent at its named strength")
+                let room = composite(tokens.room, over: tokens.room)
+                let tile = composite(fill, over: tokens.room)
+                let reads = PaletteDerivation.contrast(tile, room)
+                #expect(reads >= 1.3, "\(voice) dark=\(dark): the fill reads against the room (\(reads))")
+                #expect(reads <= 1.6, "\(voice) dark=\(dark): and stays a quiet tile (\(reads))")
+                let ink = composite(BookNavigatorLayout.chapterNameInk(tokens, viewed: true), over: tokens.room)
+                let legible = PaletteDerivation.contrast(ink, tile)
+                #expect(legible >= 4.5, "\(voice) dark=\(dark): the name in ink on the fill (\(legible))")
+                #expect(BookNavigatorLayout.chapterNameInk(tokens, viewed: false) == tokens.accent,
+                        "an unviewed chapter's name keeps the accent")
+            }
+        }
+        for palette in ThemePalette.allCases where palette != .default && palette != .custom {
+            for voice in [ThemeVoice.terminal, .study] {
+                for dark in [false, true] {
+                    let tokens = VoiceTokens.resolve(voice: voice, palette: palette, tint: PaletteTint.none, dark: dark)
+                    let room = composite(tokens.room, over: tokens.room)
+                    let tile = composite(BookNavigatorLayout.viewedChapterFill(tokens), over: tokens.room)
+                    let reads = PaletteDerivation.contrast(tile, room)
+                    #expect(reads >= 1.25, "\(palette) \(voice) dark=\(dark): the fill reads (\(reads))")
+                    let ink = composite(BookNavigatorLayout.chapterNameInk(tokens, viewed: true), over: tokens.room)
+                    #expect(PaletteDerivation.contrast(ink, tile) >= 4.5,
+                            "\(palette) \(voice) dark=\(dark): the name in ink on the fill")
+                }
+            }
+        }
+        // The batch's mark, for the record: the wash at 0.55 did not read.
+        let studyDark = VoiceTokens.resolve(voice: .study, dark: true)
+        let oldTile = composite(QuietFill.rest(studyDark), over: studyDark.room)
+        #expect(PaletteDerivation.contrast(oldTile, composite(studyDark.room, over: studyDark.room)) < 1.1,
+                "the retired mark in Study dark: under 1.1:1 — the walk's invisible tile")
     }
 
     // MARK: - The navigator's one mark table
