@@ -77,22 +77,72 @@ Ticket: VX-562 (single ticket — Improvement · Confirmed · Books · High · P
 
 ---
 
-## DESIGN (pending the recon — filled before the implementer brief)
+## DESIGN (the architect's, from the recon + the VX-75/VX-92 records; line numbers as of branch base `ba6bdf3eb` — verify at build time, never trust blind)
 
-*PENDING: the Explore recon of the Outline surface (navigator, content column, existing highlight state, viewport reading machinery, masthead) lands here as §Design, with the follower's mechanism, the pinned header's home, the PROVISIONAL calls and the batch brief.*
+### The surface, as read
+
+- `BookView.body` (BookView.swift:252, "BV") is `SideColumn { mode body } panel: { navigator }`; the navigator (BV:709–1004) renders in every non-Index mode and is `ScrollViewReader { VStack { bookMasthead; ScrollView { chapter rows + note rows }; foot doors } }`.
+- `case .outline:` (BV:301–313) is `VStack(spacing:0) { BookArchivedLine; outlineBody }`; `outlineBody` (BV:1774–2067) is ONE SwiftUI `ScrollView` (coordinate space `BookView.outlineSpace = "book-outline-scroll"`, BV:1580/1974) holding a VStack of `BookOutlineRows.Segment`s — `.run([Row])` small rows (`OutlineRunRow`, BV:2614; far rows `Color.clear` at manifest height) and `.expanded(entry)` notes (`OutlinePostRow`, BV:2672). Row IDs are the landing anchors: `chapter-<sectionID>` · `page-<postID>` · `unfiled` · `path-<n>` (BookOutlineRows.swift:36–49).
+- **Every realized row already reports `OutlineAnchorGeometry { top, height }` in `outlineSpace`** → `BookView.outlineAnchorMoved` (BV:1628), kept in the reference box `OutlineLandingBox` (BV:1535 — a reference type precisely so geometry bookkeeping never re-lays-out the lazy column). Its existing `topRow` rule (first row with `top >= -tolerance`) is the WRONG rule for a follower (a tall story spanning the viewport top is skipped); the follower needs **"the last anchor whose top ≤ probe."**
+- The navigator highlight today is `navigatorMarks(entry)` (BV:2254): `model.focusedPostID == entry.postID || (mode == .spread && isOnSpread)`. `focusedPostID`'s only writer is `BookViewModel.focus(_:caret:fanBlock:)` (BookViewModel:1012), which ALSO seeds the caret and the live editor — **focus is welded to the live-editor authority, so the follower must never write it.** Multi-note chapter rows have no highlight today.
+- The nav info today is `bookMetaLine` (BV:2303 → `BookViewCopy.metaLine`, BV:3185 — "book · N chapters · M notes · …"), rendered INSIDE the ScrollView's title block (BV:1783–1804), so it scrolls away. The sidebar note box's "chapter · N of M in this book" wording brain is `NoteBoxCopy.whereLine` (Core/Views/NoteBox.swift:170) — focus-driven, not view-driven.
+- Landing machinery: `LandingAuthority` (`Surface/LandingAuthority.swift`; `landing.land/end/userTookOver/isPending`), `landOutline` (BV:1607), user takeover via `.onScrollPhaseChange` (BV:1990). VX-96's pre-mount arm (`outlineRowPreMounts`, BookViewModel:605) is adjacent machinery the follower must not touch.
+
+### The mechanism (both pieces ride ONE new read-only slot)
+
+**1. The viewed pair.** A pure, unit-tested rule — *given the anchor geometries `[(id, top, height)]` and a probe offset (the viewport's top edge + a small ε), the viewed anchor is the LAST anchor whose `top ≤ probe`; resolve it through `BookOutlineRows` to `(viewedSectionID?, viewedPostID?)`* — a `page-` anchor names the note (and its chapter); a `chapter-` anchor names the chapter alone; above the first anchor both are nil. The rule is monotonic and handles a tall expanded story spanning the viewport (its top ≤ probe while the next anchor's top > probe). It lives app-side (view geometry, never Domain — the layer-placement note). The bookkeeping extends `OutlineLandingBox` (stays a reference box, the row-53 lesson); the derivation coalesces to one publish per run-loop turn and **publishes only CHANGES of the derived pair** (equality-gated — and per the wire-time law, the box delivers its current pair at wire/mount time and recomputes on EVERY input axis: scroll reports, width reflows, expansion/collapse, the first post-layout pass, landing end).
+- **Freeze while `landing.isPending`** (a programmatic travel must not flicker the highlight through intermediate rows); on the landing's end deliver the settled pair. User takeover (`onScrollPhaseChange`) unfreezes.
+- The slot is `private(set)` on `BookViewModel` (e.g. `viewedOutlinePair`), written by the box's publish, read-only everywhere else. **It never touches `focus`, `pendingReveal`, the caret, or the landing's aim.** P1: O(1) per report, one O(anchors) scan per coalesced turn, anchors ∝ the book's rows — viewport-proportional cost unchanged.
+
+**2. The follow-highlight (ledger 1).** In `.outline` mode `navigatorMarks(entry)`'s note-row term becomes *the viewed note* (`viewedPostID == entry.postID`) — her ruling: the caret is ignored, the highlight follows the view. Chapter rows (BV:753 family) gain a quieter viewed-chapter mark (token wash/ink per voice — no literal colour; `Theme/VoiceControls.swift` vocabulary). Every other mode's marks stay byte-identical (`.spread` keeps its term; Index has its own column and is untouched). The sidebar note box stays focus-driven (it IS the focused note's controls — not this ticket's surface).
+- PROVISIONAL P-562-1: the navigator does NOT auto-scroll to keep the viewed row in view in v1 (most navigators fit on screen; the Open list's follow idiom is the obvious extension) — bundled for her.
+- PROVISIONAL P-562-2: the follow runs in OUTLINE only (the ticket's name and her sentence). The same navigator shows in Book/Read flow modes, where no place-highlight exists today; extending the follower to the flow's `flowAnchor` reports is a natural follow-up — bundled, not built.
+
+**3. The pinned nav info (ledger 2).** A pinned header lands as a SIBLING ABOVE `outlineBody` in the `.outline` VStack (BV:307–310) — never inside the ScrollView (the landing math measures anchor tops in `outlineSpace`; a header inside the scroll content would shift every top — the Index file's archived-line convention argues sibling-above, and it keeps `safeAreaInset` questions moot). Content, one line, muted, chrome-vocabulary: the meta counts (`BookViewCopy.metaLine` — N chapters · M notes) **moved up from the scrolling title block** (no duplication), then, when the viewed pair resolves, the position — "note N of M" and the chapter's name — composed through ONE wording brain beside `NoteBoxCopy.whereLine` (reuse or a sibling pure function; one brain, two readers). `lineLimit` on every fixedSize text (P-8, the b6dae25 class).
+- PROVISIONAL P-562-3: the meta line MOVES to the pin (the scrolling title block keeps the title + expand/collapse doors); the position segment appears whenever a viewed note resolves, with no at-rest suppression. Taste call bundled.
+- PROVISIONAL P-562-4: the chapter segment shows only in a chaptered book (her "maybe what chapter you're in" honoured as: present when chapters exist, absent otherwise).
+
+### Evidence (the acceptance unit's kinds)
+
+- The pure rule: table-driven unit tests (spanning story · at-top nils · between chapters · unfiled · empty book · probe ε edge).
+- Mounted: the `BookOutlineLandingTests` scaffold (the `.serialized` mounted-BookView suite with pump/settle/anchorTop helpers) — land on a far story, assert the viewed pair + the navigator mark + the pin's words at settle; assert freeze-during-landing (no intermediate pair published while `isPending`); assert the pin header sits OUTSIDE the scroll content (first anchor's top unshifted against the pre-change value, or the landing suites' continued green as the guard). HARNESS FACT (18l-c U8, TEXTKIT2 notes): a synthesized scroll wheel does not move a SwiftUI ScrollView in the test host — drive the viewport through the landing/reveal doors or feed the box synthetic geometry; never a CGEvent scroll.
+- New-capability tests are born-red-then-green by nature; the red-on-old pin discipline binds any BUG found along the way (traced mechanism, red pin, behavioral revert).
+- The walk (ledger 3): the seeded sherlock in Outline — scroll continuously, capture the navigator highlight walking the stories and the pin's "note N of M · chapter"; a navigator click (landing) shows no flicker-through; store untouched, nothing added.
+
+### The one batch (ONE acceptance unit, ONE fresh `opus-implementer`)
+
+Both ledger pieces in one session — the pin consumes the follower's slot, so splitting would manufacture a seam. The implementer brief is §BATCH BRIEF below. Mounted suites run ONLY at the orchestrator's stage window (REQUEST → READY → GO through `oct27coordinator`); the implementer iterates headless (`swift build`, `xcodebuild build-for-testing`) and hands the suite list to the orchestrator.
 
 ## LEDGER
 
 | # | Item | Status |
 |---|---|---|
-| 1 | The follow-highlight: the Outline navigator's highlighted chapter/note follows the viewport as the content scrolls (the view, never the caret) | NOT-STARTED |
-| 2 | The pinned nav info: chapters + notes counts fixed at the top while scrolling; the current note # (and chapter) said during scroll | NOT-STARTED |
+| 1 | The follow-highlight: the Outline navigator's highlighted chapter/note follows the viewport as the content scrolls (the view, never the caret) | NOT-STARTED — design §DESIGN pieces 1+2, batch 1 |
+| 2 | The pinned nav info: chapters + notes counts fixed at the top while scrolling; the current note # (and chapter) said during scroll | NOT-STARTED — design §DESIGN piece 3, batch 1 |
 | 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | NOT-STARTED |
-| 4 | The ladder (one round minimum; reviewer per the diff) | NOT-STARTED |
+| 4 | The ladder (one round minimum; reviewer per the diff — expected `opus-reviewer`: no editor seam, no custody, no `Sync/`) | NOT-STARTED |
+
+## BATCH BRIEF (batch 1 — the whole unit; a fresh `opus-implementer` at xhigh; this section is the brief, self-contained)
+
+You are the implementer for VX-562 in the worktree `~/dev/variorum-vx-562` (branch `vx-562-outline-follow`; run EVERYTHING from this absolute path). One batch = this whole record's §DESIGN, both pieces.
+
+**Read first, in this order, in full:** this record file (`notes/plans/fixes/vx-562-outline-follow.md`); `notes/SurfaceContracts.md` §The Bookcase and books; `notes/plans/fixes/vx-75-book-outline-first-edit-flash.md` and `notes/plans/fixes/vx-92-outline-swap-stability.md` (the surface's two governing priors — the swap seam, the placeholder road, the landing machinery, the harness lessons); `notes/TEXTKIT2_NOTES.md` §3's macOS-27 measured findings and harness facts (the U8 scroll fact binds your tests); `notes/SessionResiliencyProtocol.md` (the checkpoint protocol binds you from the first commit). CLAUDE.md's auto-loaded canon you already have.
+
+**Build exactly §DESIGN:** the viewed-pair slot (pure rule + `OutlineLandingBox` bookkeeping + the `private(set)` publish on `BookViewModel`), the `.outline` navigatorMarks change + the chapter-row mark, the pinned header sibling-above with the moved meta line + the position words through one wording brain. The four PROVISIONALs (P-562-1…4) are decided — build them as written, do not re-open them. Line numbers in §DESIGN are from base `ba6bdf3eb`: verify every coordinate against the tree before editing.
+
+**Hard fences:** never write `focusedPostID`/`focus()`, `pendingReveal`, the caret seeds, or the landing's aim from the follower. Do not touch `EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `ReadPostView`'s internals, `outlineRowPreMounts`, or anything under `Sources/VariorumCore/Sync/` — if the trace genuinely pulls you toward the editor seam, STOP and report to the orchestrator instead. No new dependencies. No literal colours (tokens only); chrome text per `Theme/VoiceControls.swift`; every `fixedSize` chrome text carries a `lineLimit`. Sentence case in all rendered copy, no shouty caps. No schema, no migrations.
+
+**Tests:** the pure rule's table tests + the mounted assertions per §DESIGN Evidence. You may run `swift build` / `swift test` (core) and `xcodebuild -scheme Variorum -destination 'platform=macOS' build` / `build-for-testing` from `App/Variorum/` freely (headless). **You may NOT run `xcodebuild test` yourself — every mounted suite run happens at the orchestrator's stage window.** End your batch by handing the orchestrator: the suite list to run (suite-level `-only-testing` args), the expected pass shape, and any suites whose CHANGED SOURCE files they exercise (grep the tests for the changed types — the closeout rule).
+
+**Process:** commit per coherent piece with honest messages, push after every commit, NO attribution trailers. Maintain this record's LIVE STATUS section (add it under the ledger) from your first commit: per-piece `DONE (hash)` / `IN-PROGRESS — what remains` / `NOT-STARTED`, every unverified claim marked PENDING. Synchronous foreground waits only (poll logs with a `grep -q … && break; sleep 5` loop; never background a run you must act on; never end your turn waiting). No subagents except at most ONE Sonnet, read-only, for EXTERNAL facts only. The environment traps section at the end of this file binds verbatim. When the build is done and headlessly green: flip the ledger rows to BUILT-PENDING-SUITES, write your self-assessment (what you built, risks, what you'd want a reviewer to stare at) as §IMPLEMENTER SELF-ASSESSMENT, commit, push, and END with a short report — do not start the walk, the suites, or the ladder.
 
 ## MORNING BUNDLE (for her — PROVISIONALs, riders, taste calls; grows as the run proceeds)
 
-- **Riders offered (cheapest while this code is open; none seated without your word):** VX-96 · VX-616 · VX-563 (see "Not in this effort" above).
+- **Riders offered (cheapest while this code is open; none seated without your word):** VX-96 (Low — this exact surface: hold the pre-mount arm for the landing's lifetime) · VX-616 (Low — "+ new chapter" on a gathering's navigator foot, a door that can never act) · VX-563 (Medium — a keyboard way to navigate the in-note book view; adjacent to the follower). Say the word and any of them seats as a member.
+- **P-562-1 (PROVISIONAL, built):** the navigator does not auto-scroll to keep the viewed row visible in v1. The obvious extension is the Open list's follow idiom (follows on your next act; a hand scroll stops the follow) — want it?
+- **P-562-2 (PROVISIONAL, built):** the follow runs in Outline only. The same left navigator shows in the Book/Read flow modes, where no place-highlight exists today; the flow has the same anchor reports, so extending the follower there is a bounded follow-up — want it (now, as a ticket, or not)?
+- **P-562-3 (PROVISIONAL, built):** the "book · N chapters · M notes" meta line MOVES from the scrolling title block into the pinned header (no duplication); the "note N of M · ‹chapter›" segment shows whenever a viewed note resolves, with no at-rest suppression.
+- **P-562-4 (PROVISIONAL, built):** the chapter name shows in the pin only when the book has chapters.
 
 ## ENVIRONMENT TRAPS (carried verbatim into every batch brief)
 
