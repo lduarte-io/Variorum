@@ -539,10 +539,8 @@ orchestrator's). Batch 1's code and record untouched.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **A BEHAVIOURAL REVERT IS IN FLIGHT (fix leg 2a-F2), over the committed `2cee65c55`:** `TakeLabelFace.hover`'s body
-  forced to `return act` (the old band: the act's sentence alone); restore = `git checkout --
-  Sources/VariorumCore/Domain/TakeLabelFace.swift` (committed — safe). If this line still stands, check `git diff`
-  first. (VX-358's ran over `4d3f3f3d1`, VX-352's over `3e1aaa26f`; each restored, `git diff` clean, green again.)
+- **No behavioural revert is in flight.** (VX-358's ran over `4d3f3f3d1`, VX-352's over `3e1aaa26f`, fix leg 2a-F2's
+  over `2cee65c55`; each restored by `git checkout --`, `git diff` clean after, green again.)
 - **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (`15f94f154`) — core
   `Operations.addNoteToBookForClient` → `MCPBookAdd {membership, tagIDs, tagPaths}` (the same body and ONE undo entry;
   `addNoteToBook` keeps its signature and returns `.membership`), the tags composed INSIDE the act's transaction by
@@ -828,8 +826,11 @@ this shape: the whole label is hoverable over the WHOLE band (the cut label incl
 inside one button and without displacing the choose sentence; and it is the one help an AX reader meets, so the final
 window can verify it as the walker tried to. **Pins:** core `TakeLabelFaceTests.theBandsOneHoverCarriesTheWholeLabelThenTheActsSentence`
 GREEN (`fix-f2-green.log`: 5/5 + the label-form suite 3/3); Mac `TakeLabelLineTests.theHeadersHoverCarriesTheWholeLabelAndKeepsTheChooseSentence`
-(the exact strings, both states, no-label byte-unchanged) COMPILED, run PENDING. **Red-on-old:** the behavioural revert
-run (below). **Final-window check:** the take card header button's AX help reads "claude-code · english⏎Choose this take
+(the exact strings, both states, no-label byte-unchanged) COMPILED, run PENDING. **Red-on-old — THE BEHAVIOURAL REVERT
+RUN** (announced `d388bdfb9`; `hover` forced to `return act`, the old band's hover):
+`fix-f2-revert-red.log` — the core pin RED on exactly its two label rows (2 issues), its three no-label rows green (the
+old sentence IS the no-label answer); restored by `git checkout --`, `git diff` clean, green again (`fix-f2-green2.log`:
+5/5 + 3/3). **Final-window check:** the take card header button's AX help reads "claude-code · english⏎Choose this take
 — …" (and a real hover shows both lines — her 5-second hand-check if the walker's pointer can't raise tooltips).
 
 ## BATCH 2b RECORD
