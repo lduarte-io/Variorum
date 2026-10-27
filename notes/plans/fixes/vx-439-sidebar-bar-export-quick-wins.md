@@ -371,7 +371,9 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     what the key does) — PROVISIONAL (bundle 13). The first-row DEBUG oracles key on the DRAWN first row (= ordinal 1 with
     nothing hidden). CONSEQUENTIAL pin edits (VX-139's shape, annotated): General's catalog cap 6 → 7 in
     `SettingsShapeTests.theAppearanceControlIsOnTheShortOpeningPane` and `DiagnosticsPaneTests` (the new row sits BELOW
-    keep-open-notes; the short dials still top the pane — the walk captures the pane for the fold); the drop face pins read
+    keep-open-notes; the short dials still top the pane ~~— the walk captures the pane for the fold~~ — CORRECTED at L1
+    (m-4): no capture of General with its seventh row exists; walk part 2's "33-settings-general" shows the MCP pane;
+    the live look is owed to the evidence slice); the drop face pins read
     `displayed: rows` (deliberate). PINS `OpenListStarredFilterTests` (6): the preference; the filter; the identity
     mapping (exhaustive 1…6); the hidden-row mapping incl. the drawn own place; the door landing while the hidden note
     stays open; the wiring. build-for-testing GREEN.
@@ -600,7 +602,14 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     anyway), the finding is HOLLOW: the guard comes out in one commit, the pin stays as a guard, the Ledger says so.
     What stays SPECULATIVE either way is the reviewer's own question (whether AppKit ever withholds `.ended` after the
     source row is removed) — the guard makes the answer not matter. build-for-testing GREEN.
-  - m-4 (the honesty half: the settings pins' capture claim): NOT-STARTED
+  - m-4 (the honesty half: the settings pins' capture claim): DONE (this commit) — comments only, no pin. Checked by
+    eye: `walk-shots-vx439/33-settings-general.png` IS the MCP pane (title "MCP", the server toggle, the clients tab).
+    `SettingsShapeTests.theAppearanceControlIsOnTheShortOpeningPane` said "The walk captures the pane." — replaced: no
+    such capture exists, the cited one shows MCP, the live look at the fold is OWED to the evidence slice.
+    `DiagnosticsPaneTests` never cited a capture (the reviewer's "both pins" was one), but its "the short dials still
+    top the pane" is reasoning, not a look — it now says so and names the same owed slice. The record's VX-589 line
+    made the same claim and is corrected in place. The live evidence itself (VX-589's toggle, a true General capture,
+    VX-569's title-Tab, VX-425's three asks) is the orchestrator's evidence slice — not this session's.
   - n-2 (the export write failure names its reason): NOT-STARTED
   - n-4 (LIVE STATUS freshened — the last flip): NOT-STARTED
 - Walks (orchestrator, per batch): NOT-STARTED

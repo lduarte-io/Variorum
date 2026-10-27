@@ -183,7 +183,11 @@ struct SettingsShapeTests {
         // shape exactly): "Hide starred notes from Open" joins the Open notes
         // section as General's seventh row, BELOW keep-open-notes; the
         // appearance row still sits second from the top, so the fold's cause
-        // (controls ABOVE it) is untouched. The walk captures the pane.
+        // (controls ABOVE it) is untouched. NO capture of the pane with its
+        // seventh row exists yet — the run's walk capture named
+        // "33-settings-general" shows the MCP pane, not General (the VX-439
+        // ladder's m-4) — so the live look at the fold is OWED to the run's
+        // evidence slice; until it lands, this cap rests on the reasoning above.
         #expect(general.count <= 7,
                 "the fold came from fifteen controls in one pane — this one stays short")
     }
