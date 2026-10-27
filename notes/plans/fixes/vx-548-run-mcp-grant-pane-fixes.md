@@ -1501,6 +1501,14 @@ two-flake trap line, the L1 blocks, MB-22). Commits: `c6d90a389` (agree/dispute)
 `d395af01c` (finding 2) · `2adce995d` (finding 3) · `7ca166cc4` (finding 4's pin, red) · `70a15edd4` (finding 4's fix) ·
 this commit (suites).
 
+### ROUND 2 — fable-reviewer (fresh; the fix diff `f611b8ef7..HEAD`; 2026-10-27) — **THE LADDER CLOSES**
+**Verdict: no new BLOCKER or MAJOR; all four round-1 fixes verified sound** (each re-traced in the reviewer's own context: the W-UX-19 anchor byte-checked against MCPSpec; the two-flake posture reproduced exactly — 412/75, VX-532 the one failure, green isolated, VX-607 green; finding 3's hollowness re-verified caller by caller and the seam red log read; finding 4's fence exhaustiveness, the stale-'daily'-marker reachability, and the scratch harness judged FAITHFUL — the real file compiled, stubs unread on the fenced arms, red/green logs exact; pin-before-fix order held; no trailer, clean tree). Two new findings, dispositioned by the orchestrator (no round 3 — neither is BLOCKER/MAJOR; both are record/copy class, handled in the final round's orchestrator-check form):
+
+1. **[MINOR] · the L1 record's "b3 untouched" claim is FALSE — DISPOSITION: corrected by this entry, and the FINAL WINDOW RUNS EVERY MAC SUITE FROM `DerivedData/b-l1`, never b3.** The b-l1 APFS clone carried b3's absolute paths in its XCBuildData manifests, and the b-l1 `build-for-testing` stale-file sweep DELETED nine files inside b3 (Sparkle.framework, SQLCipher.framework, five dSYMs, one all-product-headers.yaml — deletions only; the host app's embedded frameworks remain, but b3 is no longer "frozen products" and is RETIRED as evidence). b-l1 is built from the same tree plus L1's two fixes — strictly a superset — and only record commits landed after it, so b-l1 IS the final code tree's product. **Batch 3's "For the orchestrator" b3 instruction is superseded by this line.** Environment-trap lesson: an APFS-cloned DerivedData is NOT isolated from its source — clone manifests carry absolute paths and a later build's stale sweep reaches back; future batches build into FRESH DerivedData dirs, never clones.
+2. **[NIT] · `MCPPaneCopy.inertDetail` says a journal-fenced gathering "always asks" while nothing on a fenced gathering ever asks — DISPOSITION: folded into MB-22's copy pass** (her morning rules the ask lead and the inert row together; the reviewer's suggested shape: "inert — it's your daily Journal now; no grant reaches it"). Copy-only, the already-PROVISIONAL family; no build tonight.
+
+**THE LADDER IS CLOSED (two rounds, hard cap three never reached).** Remaining before the merge ask: the final window (all Mac suites from `b-l1`, the batch-3 drill, the hover + MB-16 AX checks), then the closeout.
+
 ## ORCHESTRATOR ACCEPTANCE
 
 ### BATCH 1 — ACCEPTED 2026-10-27 (window `vx548-b1-walk`, GO from oct26coordinator 02:48 MDT, released clean)
