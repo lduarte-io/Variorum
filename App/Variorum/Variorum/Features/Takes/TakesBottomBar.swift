@@ -599,7 +599,7 @@ struct TakesBottomBar: View {
         }
         Button("?") { openWindow(id: "variorum-helper") }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help(HelperCheatSheet.summary)
+            .help(HelperCheatSheet.doorHelp)
     }
 
     private var contextLabel: String {

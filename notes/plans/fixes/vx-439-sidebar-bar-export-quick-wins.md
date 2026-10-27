@@ -355,7 +355,44 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     `displayed: rows` (deliberate). PINS `OpenListStarredFilterTests` (6): the preference; the filter; the identity
     mapping (exhaustive 1…6); the hidden-row mapping incl. the drawn own place; the door landing while the hidden note
     stays open; the wiring. build-for-testing GREEN.
-  - VX-426: NOT-STARTED
+  - VX-426: BUILT (this commit) — PENDING the stage run (`IconTooltipTests` 4 + the touched suites). A-439-17: the sweep
+    of every ICON-ONLY door in the sidebar (and its window toolbar) and the note's face (context bar, masthead, both
+    bottom bars) — the table below. The one door that said NOTHING on hover was the toolbar's New Note (now "New Note
+    (⌘N)", ⌘N's registry words — the toggle beside it says "Toggle Sidebar (⌃⌘S)"). Every other icon-only door already
+    had a tooltip, but six of them opened with an explanation rather than the door's NAME (the tester's complaint: the
+    copy-like Snippets icon read as copy/paste): each now LEADS with a one-word descriptor, an em dash, then what it
+    said (PROVISIONAL bundle 14 — descriptor-led rather than a bare word, so her ruled teaching sentences survive).
+    PINS `IconTooltipTests` (4): the masthead icons; the badge + the bars' glyphs; the wiring (both "?" doors, the
+    toolbar, every `.iconOnly` masthead door wearing `.help`); a guard over the rows that already named themselves.
+    build-for-testing GREEN.
+
+    **VX-426 — THE ICON × TOOLTIP TABLE (class completeness; scope: the sidebar + its toolbar, the note's face).**
+
+    | # | Where · door (glyph) | Tooltip before | After |
+    |---|---|---|---|
+    | 1 | Toolbar · Toggle sidebar (`sidebar.leading`) | "Toggle Sidebar (⌃⌘S)" | unchanged — names itself |
+    | 2 | Toolbar · New note (`square.and.pencil`) | — none — | **"New Note (⌘N)"** (`.newPost`'s `menuTitle()`) |
+    | 3 | Starred row · ★ | "Un-star this — it leaves the Starred list; nothing else changes." | unchanged |
+    | 4 | Open row · ✕ | "Close this row — the note itself is untouched (…)" | unchanged |
+    | 5 | Context bar · ← | "Back to ‹origin› (⌥⌘[)" · grey "Nothing to go back to — …" | unchanged |
+    | 6 | Context bar · → | "Forward to ‹destination› (⌥⌘])" · grey "Nothing to go forward to — …" | unchanged |
+    | 7 | Context bar · book (`book`) | "Open “‹book›” at this note (⌘-click …)" · "This note is in N books — …" · grey "This note isn't in any book yet" | unchanged (her #55 face) |
+    | 8 | Context bar · tray badge (⌫ N) | "N blocks deleted from this note — click to put any of them back" | **"Tray — N blocks deleted from this note; click to put any of them back"** |
+    | 9 | Context bar · AI lock (`lock`) | "Private — click to change" | unchanged |
+    | 10 | Masthead · book panel (`book.closed`, members only) | "Show this note's book beside the draft — …" | **"Book — this note's book beside the draft: its chapters and notes; click one to open the book there"** |
+    | 11 | Masthead · tray (`tray`) | "What this note has set aside: …" | **"Tray — what this note has set aside: …"** |
+    | 12 | Masthead · scraps (`square.on.square.dashed`) | "Show the scraps beside the draft — drag one into the page (⌥ carries its whole fan)" | **"Snippets — show them beside the draft; drag one into the page (⌥ carries its whole fan)"** |
+    | 13 | Masthead · references (`books.vertical`) | "Show the note's references (sources beside the draft)" | **"References — the note's sources, shown beside the draft"** |
+    | 14 | Masthead · tag door (`number`) | "Tag this note — opens a field … (⌘⇧I)" · open "Put the tag field away (⌘⇧I or ⎋)" | unchanged |
+    | 15 | Masthead · collapsed stamp (`clock`) | the whole time fact ("‹stamp› — ‹hint›") | unchanged |
+    | 16 | Bottom bars (Write's, Takes') · ? | the cheat sheet (key list) | **"Shortcuts & Dictionary (⌘/)" + a newline + the cheat sheet** |
+    | 17 | Bottom bars · Aa | "Bold, italics, sizes, lists, links — and whether ⏎ makes new blocks. …" · open "Put the formatting row away — …" | **"Formatting — bold, italics, …"** · open unchanged |
+
+    Not icon-only (the word is on the door, so no row): the sidebar's five area rows and "this note" rail rows (which
+    carry "(⌘n)" helps), the Open/Starred titles, the wing indicator, the ⌘⇧n badge (not a door), the note box's doors,
+    the sync row's doors, and the bars' commit · takes · history · comments · more · block ▾ · note ▾ · newlines chip ·
+    word count. Out of the ruled scope (surfaces, not the sidebar or a note's face): the Library's and the Bookcase's
+    mastheads, the Takes board's card glyphs, the panels' own rows.
   - VX-560: NOT-STARTED
   - VX-441: NOT-STARTED
   - VX-569: NOT-STARTED
@@ -396,7 +433,13 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     one — ⌘⇧2 still opens the hidden starred note). The alternative is renumbering the visible rows, which would make
     ⌘⇧n mean something different from View ▸ Open Note. Say the word for the other. The setting lives in Settings ▸
     General ▸ Open notes, under "Keep open notes across launches".
-14. (grows)
+14. **VX-426 — three PROVISIONALs:** (a) the tooltips LEAD with the icon's name and keep the sentence they had ("Tray —
+    what this note has set aside: …") rather than becoming a bare one-word label, so the teaching sentences you ruled
+    survive; (b) the masthead's scraps icon's tooltip now says **Snippets** (the area's name everywhere you read it), but
+    the icon's own title — and so the tour's and the field guide's "Scraps panel" — still says Scraps (renaming it owes
+    the guide re-seed in your window); (c) the tester's "Notes & links" for the references icon is NOT adopted — that
+    door is "References" everywhere; renaming it is yours.
+15. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 

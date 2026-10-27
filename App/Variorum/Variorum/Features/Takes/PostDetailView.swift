@@ -81,21 +81,31 @@ struct PostDetailView: View {
     /// someone sweeps it.
     static let scrapsDoorTitle = "Scraps"
 
+    ///
+    /// **VX-426 (the VX-439 run, A-439-17) — each icon's tooltip LEADS with
+    /// its name.** A beta tester: hovering these icons should say what they
+    /// are ("Snippets", "Tray"); "every time I see the 'Snippets' button my
+    /// brain thinks it's a copy/paste tool and becomes fearful to press it".
+    /// So every help here opens with a one-word descriptor and an em dash,
+    /// then says what it opens, as it did. The scraps door's descriptor is
+    /// SNIPPETS — the area's name everywhere she reads it (W8-1); its title
+    /// (and so the tour's and the guide's words) stays "Scraps" (the
+    /// conformance remainder above — the morning bundle carries it).
     static let inspectorDoors: [InspectorDoor] = [
         InspectorDoor(
             panel: .tray(revealBlockID: nil), title: TrayPath.menuLabel,
             symbol: "tray",
-            help: "What this note has set aside: blocks it archived, "
+            help: "Tray \u{2014} what this note has set aside: blocks it archived, "
                 + "everything of its own that is on the \(TrashWindow.days)-day "
                 + "clock, and the originals a divide or a merge kept whole"),
         InspectorDoor(
             panel: .scraps, title: Self.scrapsDoorTitle,
             symbol: "square.on.square.dashed",
-            help: "Show the scraps beside the draft — drag one into the page "
+            help: "Snippets \u{2014} show them beside the draft; drag one into the page "
                 + "(⌥ carries its whole fan)"),
         InspectorDoor(
             panel: .references, title: "References", symbol: "books.vertical",
-            help: "Show the note's references (sources beside the draft)"),
+            help: "References \u{2014} the note's sources, shown beside the draft"),
     ]
 
     /// **13i-d U2 — THE BOOK PANEL's door** (her round-5 design: the panel

@@ -589,6 +589,13 @@ struct HelperView: View {
 enum HelperCheatSheet {
     /// The hover cheat sheet (the "?" buttons' tooltip) — the takes family
     /// in one glance; the full map lives in the helper (⌘/).
+    /// **VX-426 (A-439-17) — the bottom bars' "?" door's tooltip**: its NAME
+    /// first (the registry's own words for the helper — "Shortcuts &
+    /// Dictionary (⌘/)"), then the cheat sheet it always showed.
+    static var doorHelp: String {
+        CapabilityRegistry.capability(.helper).menuTitle() + "\n" + summary
+    }
+
     static let summary = """
         ⌘⇧T open/close takes · ⎋ close all
         ⌘T new take · ⌥⌘T blank · ⇧⌥⌘T blank & choose

@@ -49,7 +49,8 @@ nonisolated enum BookPanelCopy {
     static let showVerb = "Book Panel"
     static let doorTitle = "Book"
     static let doorSymbol = "book.closed"
-    static let doorHelp = "Show this note's book beside the draft \u{2014} its chapters and "
+    /// VX-426: the tooltip leads with the door's name (A-439-17).
+    static let doorHelp = "Book \u{2014} this note's book beside the draft: its chapters and "
         + "notes; click one to open the book there"
     static let unavailableNote = "Open a note that is in a book and its book shows beside it."
 

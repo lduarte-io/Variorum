@@ -288,6 +288,9 @@ struct RootView: View {
                         }
                     }
                 }
+                // VX-426 (A-439-17): the one icon-only door here that said
+                // nothing on hover — ⌘N's own words, the sidebar toggle's shape.
+                .help(CapabilityRegistry.capability(.newPost).menuTitle())
             }
         }
         // 13g L4 (WT-4): *"i don't even konw if we need that empty whitespace

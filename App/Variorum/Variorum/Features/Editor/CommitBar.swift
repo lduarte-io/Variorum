@@ -673,7 +673,7 @@ struct CommitBar: View {
     private var helperDoor: some View {
         Button("?") { openWindow(id: "variorum-helper") }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help(HelperCheatSheet.summary)
+            .help(HelperCheatSheet.doorHelp)
     }
 
     /// **block ▾** (R6-2): the structural gestures plus the two block-scoped
