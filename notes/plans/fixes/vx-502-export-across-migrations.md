@@ -194,8 +194,7 @@ Sonnet for external facts.
 claim not marked DONE with its evidence is PENDING. A fresh session with only the repo finishes the unit from this
 table.*
 
-**REVERT STATE: no revert in flight.** (Before any behavioral revert starts, this line names it and the committed
-pre-revert hash; the restore is `git checkout -- <file>` from that commit, verified by `git diff --exit-code`.)
+**REVERT STATE: RV-A1 THEN RV-A2 IN FLIGHT** (one at a time, each on `Sources/VariorumCore/Operations/Operations+PlaintextExportImport.swift` ONLY) — the committed pre-revert tree is `e56920846`; the restore is `git checkout -- Sources/VariorumCore/Operations/Operations+PlaintextExportImport.swift`, verified by `git diff --exit-code`. A successor finding this line: run that restore first, then re-run the reverts.
 
 | # | Piece | Status |
 |---|---|---|
