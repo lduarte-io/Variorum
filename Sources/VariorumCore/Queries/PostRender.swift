@@ -318,7 +318,13 @@ extension Queries {
     /// words (`BookOutlineRows.cardPreview`, which also skips a lone heading
     /// or numeral at the front, hence a small constant rather than one block).
     /// Gaps contribute nothing (`renderPost`'s rule — render gaps, never
-    /// crash), so the result may be shorter than `blocks`.
+    /// crash), so the result may be shorter than `blocks`: a gap (a live
+    /// placement over a dead block, or a block with no resolvable take — the
+    /// cross-batch sync states SyncSpec §5 designs for) reads as SQL NULL,
+    /// decoded as `String?` and DROPPED, while it still spends its slot of the
+    /// `LIMIT`. (The VX-439 ladder's R2-1: this decoded `String` and THREW on
+    /// the NULL until then — this sentence was false, and its pin's gap leg
+    /// never held a gap.)
     ///
     /// **Why it exists, and why it is not `renderPost(...).prefix(k)` (P1 is
     /// the law here).** The card used to derive its preview from a WHOLE-note
@@ -339,8 +345,9 @@ extension Queries {
         _ db: Database, containerID: String, blocks: Int
     ) throws -> [String] {
         guard blocks > 0 else { return [] }
-        return try String.fetchAll(
-            db, sql: leadingBlockTextsSQL, arguments: [containerID, blocks])
+        return try String?.fetchAll(
+            db, sql: leadingBlockTextsSQL, arguments: [containerID, blocks]
+        ).compactMap { $0 }
     }
 
     /// Several containers' leading slots in ONE read — the book's card-preview

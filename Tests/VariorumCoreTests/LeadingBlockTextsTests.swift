@@ -151,20 +151,52 @@ struct LeadingBlockTextsTests {
             try ops.chooseVariant(archivedSide.block.id, variantID: doomed.id)
             try ops.archiveVariant(doomed.id)
             // (4) a tombstoned BLOCK under a live placement — a gap.
+            // (The VX-439 ladder's R2-1 — RE-STAGED, red on old: a raw block
+            // tombstone fires `cascade_block_tombstone`, which tombstones the
+            // PLACEMENT too, so this leg as first written never held a gap.
+            // The placement is revived after the block's tombstone — the
+            // cross-batch sync state SyncSpec §5 designs for: the block's
+            // tombstone landed, its placement's has not. The read decoded the
+            // gap's NULL as `String` and THREW.)
             let gap = try ops.newBlock(in: post.id, text: "gone", registeringUndo: false)
             try db.write { database in
                 try database.execute(
                     sql: "UPDATE block SET deleted_at = ? WHERE id = ?",
                     arguments: ["2026-09-15T00:00:00.000Z", gap.block.id])
+                try database.execute(
+                    sql: "UPDATE container_block SET deleted_at = NULL WHERE block_id = ?",
+                    arguments: [gap.block.id])
             }
+            // (5) a live block whose only take is tombstoned — a gap too
+            //     (R2-1; the take's tombstone landed, its block's has not).
+            let takeless = try ops.newBlock(in: post.id, text: "no take", registeringUndo: false)
+            try db.write { database in
+                try database.execute(
+                    sql: "UPDATE variant SET deleted_at = ? WHERE id = ?",
+                    arguments: ["2026-09-15T00:00:00.000Z", takeless.variant.id])
+            }
+            // (6) and a block after the gaps: the read goes on past them.
+            try ops.seedBlock(in: post.id, text: "after the gaps")
 
+            let livePlacements = try db.read { database in
+                try Int.fetchOne(
+                    database,
+                    sql: "SELECT COUNT(*) FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
+                    arguments: [post.id]) ?? 0
+            }
+            #expect(livePlacements == 6, "the premise: both gaps hold a live placement — \(livePlacements)")
             let whole = try db.read { try Queries.renderPost($0, containerID: post.id) }
             let bounded = try db.read {
                 try Queries.leadingBlockTexts($0, containerID: post.id, blocks: 10)
             }
             #expect(bounded == whole.compactMap(\.text),
                     "same resolution, gaps dropped the same way: \(bounded)")
-            #expect(bounded == ["plain", "the chosen take", "still the default"])
+            #expect(bounded == ["plain", "the chosen take", "still the default", "after the gaps"])
+            // A gap still spends its slot of the bound (the read is LIMIT-stopped).
+            let five = try db.read {
+                try Queries.leadingBlockTexts($0, containerID: post.id, blocks: 5)
+            }
+            #expect(five == ["plain", "the chosen take", "still the default"], "the two gaps took slots 4 and 5")
         }
     }
 

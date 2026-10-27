@@ -120,6 +120,40 @@ struct SidebarRowLeadsTests {
         }
     }
 
+    /// **A gap in an opening slot never stops the read (the VX-439 ladder's
+    /// R2-1) — RED ON OLD (M-1's road threw).** A live placement over a DEAD
+    /// block (the cross-batch sync state SyncSpec §5 designs for — the block's
+    /// tombstone landed, its placement's has not) reads as a gap: render gaps,
+    /// never crash. Before R2-1 `Queries.leadingBlockTexts` decoded the gap's
+    /// NULL as `String` and THREW, which ended the column's held observation —
+    /// every row's live preliminary title froze. Now the gap is skipped (it
+    /// spends a slot of the window), the next slot's words lead, and every
+    /// other row still answers.
+    @Test func aGapInAnOpeningSlotIsSkippedAndTheReadStillAnswers() async throws {
+        try await withWorld { session, db in
+            let ops = session.operations
+            let gapped = try ops.createPost()
+            let first = try ops.newBlock(in: gapped.id, text: "gone words", registeringUndo: false)
+            _ = try ops.newBlock(in: gapped.id, text: "Seed list", registeringUndo: false)
+            let other = try ops.createPost()
+            _ = try ops.newBlock(in: other.id, text: "Garden plans", registeringUndo: false)
+            let blockID = first.block.id
+            try await db.write { database in
+                try database.execute(
+                    sql: "UPDATE block SET deleted_at = ? WHERE id = ?",
+                    arguments: ["2026-10-27T00:00:00.000Z", blockID])
+                // The cascade tombstoned the placement too; the sync state is
+                // the placement still live — revive it.
+                try database.execute(
+                    sql: "UPDATE container_block SET deleted_at = NULL WHERE block_id = ?",
+                    arguments: [blockID])
+            }
+            let leads = try await db.read { try SidebarRowLeads.read($0, noteIDs: [gapped.id, other.id]) }
+            #expect(leads[gapped.id] == "Seed list", "the gap is skipped — the next slot's words lead: \(leads)")
+            #expect(leads[other.id] == "Garden plans", "every other row still leads: \(leads)")
+        }
+    }
+
     /// **A GUARD — what a note is CALLED elsewhere is untouched.** The
     /// workspace's names (the pane line, the back chip, the View menu's Open
     /// Note rows) are `DisplayTitle`'s: an untitled note's is still its date.

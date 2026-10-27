@@ -686,6 +686,27 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     branch history — her call); m-6 (the canon sweep — closeout work); the evidence slice (VX-589's toggle, a true
     Settings ▸ General capture, VX-569's title-Tab, VX-425's three asks, M-2's toolbar label in both voices — the
     orchestrator's, in the fix-verify window); VX-424's drag delivery (her hand check, bundle 11).
+- **R2 — THE ROUND-2 FINAL ITEMS** (the same implementer, resumed; findings `vx-439-ladder-round2.md` — 0 BLOCKER ·
+  0 MAJOR · 3 MINOR · 4 NIT, all ten L1 fixes HOLD; the orchestrator line-checks these, no later round reads them).
+  **NO REVERT IN FLIGHT** unless a line below says so. Items:
+  - R2-1 (the one code fix — the orchestrator's option (a)): DONE (this commit). TRACED (the reviewer's probe, confirmed
+    here): `leadingBlockTextsSQL` LEFT-JOINs `block` and both takes, so a live placement over a dead block, or a block
+    with no resolvable take, yields a NULL `text`; `String.fetchAll` THREW on it (GRDB `valueMismatch`), so one gap in
+    an untitled listed note's first three slots ended the sidebar's held observation (and blanked a whole batch of
+    `BookViewModel.readCardPreviews`, and `TitleQuickfill`'s offer). FIX, in the core query: `String?.fetchAll(…)
+    .compactMap { $0 }` — gaps contribute nothing and still spend their `LIMIT` slot (SyncSpec §5: render gaps, never
+    crash); the query's header now says how (and that its old sentence was false); the `SidebarRowLeads` header's
+    consequence sentence corrected (a gap never throws; it spends a slot where the Library's window skips a dead block).
+    PINS: `LeadingBlockTextsTests.theBoundedReadResolvesEachSlotExactlyAsRenderPostDoes` leg (4) RE-STAGED with a REAL
+    gap (the block tombstoned, then its placement revived — the raw block tombstone's cascade had tombstoned the
+    placement, so the leg never held one) + leg (5) a take-less live block + a block after both, the premise asserted
+    (six live placements), and a 5-slot read proving the gaps spend their slots; `SidebarRowLeadsTests.aGapInAnOpeningSlotIsSkippedAndTheReadStillAnswers`
+    (the gapped note leads with its next slot's words; another row still leads). RED ON OLD, HEADLESS — VERIFIED (pre-fix):
+    the re-staged core test RED on the current read — "could not decode String from database value NULL"
+    (`scratchpad/l1/r2-core-red.log`); GREEN after the fix (`LeadingBlockTextsTests` + `PostRenderQueryTests` 35 / 2);
+    the app pin through the replica package over the fixed core: **9 checks / 0 failed** (M-1's 7 + the gap's 2).
+    Named revert **R-R2** (`scratchpad/l1/reverts/r-r2.patch` — `String.fetchAll`, the pre-fix decode): revert-verify
+    PENDING (next commit).
 - Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`) and part 2 DONE (06:11–06:28) — the WALK
   PART 1 / WALK PART 2 sections below; the POST-FIX EVIDENCE SLICE (m-4's live legs + M-2's look) is owed in the
   fix-verify window — NOT-STARTED.

@@ -19,9 +19,14 @@
 //  index-ordered seek per untitled note, stopped by a `LIMIT` (that read's own
 //  query-plan pin) — never `NoteCards.load`, whose window function over the
 //  note's placements reads every block of the note before it keeps three (0.2 ms
-//  at 3 blocks, 36 ms at 20,000, measured). The one bounded consequence is that
-//  read's own, stated there: a live placement over a DEAD block (a sync race)
-//  takes a slot as a gap, where the Library's window skips it.
+//  at 3 blocks, 36 ms at 20,000, measured). A GAP in an opening slot — a live
+//  placement over a dead block, or a block with no resolvable take (cross-batch
+//  sync states, SyncSpec §5) — contributes nothing and never throws (that
+//  read decodes gaps as absent since the ladder's R2-1; before it, one gap
+//  THREW and ended the column's held observation). The one bounded difference
+//  from the Library's window: a gap here still spends one of the three slots,
+//  where the Library's window skips a dead block (and reads a take-less one
+//  as empty).
 //
 //  The same rule decides WHICH notes: a note with no name of its own
 //  that is not a daily entry (`LibraryCardName.leadsWithItsWords`' facts — a
