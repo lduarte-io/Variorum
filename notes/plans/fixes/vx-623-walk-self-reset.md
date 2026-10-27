@@ -211,7 +211,7 @@ the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swif
 | 2 | D-1 — `Tools/prod-reset-test-account.sh` + `--self-test` (incl. the `account_purge()` drift pin) | DONE (this commit) — `--self-test` 85/85 green; see "D-1 evidence" below. `--dry-run` and any live run are UNIT 2's (both read production) |
 | 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | DONE (this commit) — see "D-5 evidence" below |
 | 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | DONE (this commit) — see "D-4 evidence" below |
-| 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | NOT-STARTED |
+| 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | DONE (this commit) — see "D-2 + D-3 evidence" below; READINGS R-U1-3…R-U1-5 flagged for the architect |
 | 6 | D-6 — release.sh HANDOFF step 0 + README | NOT-STARTED |
 | 7 | Final evidence: both self-tests' case lists, D-7 red-on-old, `zsh -n`, each D-row's acceptance (file:line) | NOT-STARTED |
 
@@ -303,6 +303,71 @@ and Dock excluded, 2 pt slack) and be at least 640×400; else it captures and ST
 domain → none · the default window centred → holds · the probe's autosaved frame → holds · bottom past the visible frame
 → refused · off the left edge → refused · taller than the display → refused · a 600×300 sliver → refused · wholly on a
 second display → holds · straddling two → refused · no display geometry → refused · no window frame → refused).
+
+**D-2 + D-3 evidence (VX-622's cleanup leg, VX-537's join arm).** `first-run-walk.sh <account> [--arm setup|join|both]`
+(default `both`, her Q2), the legs as functions, the arms composing them:
+- **setup:** P1–P2 (launch, road, frame) → P3 (the id) → **P3r THE PRE-STEP** (`reset_account prestep` → the D-1 helper,
+  its lines into `walk.log`, its log `reset-prestep.log`; exit ≠ 0 STOPS; its resolved id must equal P3's) → P4–P8 as
+  before (P8's vault read now logs the revision) → THE END.
+- **both:** the set-up arm → **J1** quit by identity (Settings closed first, so the relaunch restores none; our pid
+  proven gone; zero instances by path, its own step) → **J2** the walk's OWN library aside → **J3** the window-frame
+  guard + a fresh launch on the road (`app-join.log`) → the join arm → THE END.
+- **join** (alone — e.g. after a `both` run stopped in the join arm): P1–P3 → the join arm → THE END. No pre-step (it
+  would delete the vault the join needs).
+- **The join arm:** **J4** the fresh library's row reads the not-yet line — signed in still (the session outlived the
+  library, as VX-510's LEG D saw), or `sign_in` (P4's steps, factored) when "Sign in…" shows → **J5** the before-reads
+  (vault mode + revision, device cursors) and `join_ready` — the vault must be STANDARD → **J6** Settings ▸ Protection
+  ▸ "Sync this library…" → "Your account's passphrase" (the helper's `passphrase` — the value P6 set) → "Sync this
+  library" → **J7** the words notice's OK when it shows → "Synced. Your account's writing is in this library now." (≤
+  180 s) → Done → the row "Synced" (System Events, VX-621's road) → same pid → **J8** the after-reads and
+  `join_verdict`: cursors EXACTLY +1, mode and revision unchanged.
+- **THE END (after the last arm's PASS; every read above already in `walk.log` — fence 3):** **E1** sign out
+  (Settings ▸ Protection ▸ "Sign out…" → "Sign Out" → "Sign in…" anywhere) → **E2** quit by identity, zero instances →
+  **E3 THE CLEANUP LEG** (`reset_account cleanup`). **A STOP never resets** (fence 1): `stop()` exits 4 at once and now
+  says so — "production left as it stands — the next run's pre-step resets it".
+- **Labels, read from the CURRENT code:** "Sync isn't on for this library yet" `SyncStatusViews.swift:707` ·
+  "Sync this library…" `ProtectionWords.swift:1061` (rendered `RoadAccountFaces.swift:341` → `RoadAccountSheet.swift:106`)
+  · "Your account's passphrase" `ProtectionWords.swift:870` (`RoadAccountSheet.swift:312`) · "Sync this library" (the
+  button) `ProtectionWords.swift:1065` (`RoadAccountFaces.swift:160` → `RoadAccountSheet.swift:193`) · the words notice
+  `ProtectionWords.swift:893-897` and its "OK" `:898` (`RoadAccountSheet.swift:210-219`) · "Synced. Your account's
+  writing is in this library now." `ProtectionWords.swift:1048` (chosen at `RoadAccountModel.swift:302`) · "Done"
+  `ProtectionWords.swift:1058` · "Sync hasn't run yet: …" `ProtectionWords.swift:1053` · "Sign out…" / "Sign in…"
+  `ProtectionWords.swift:756-757` · "Sign Out" `ProtectionCopy.swift:119` (`RoadAccountSheet.swift:371`) · the footer's
+  "Sign in…" `SyncStatusViews.swift:146` · the road log line `road: turnOnSync — library <id8> now names account …`
+  `ProtectionAccountActs.swift:387-390` · the key file `variorum-library-keys.json` `Names.swift:114`, its `libraryID`
+  `KeyFile.swift:130` · Settings' window name "Variorum Dev Settings" and the "Settings…" menu road
+  (`Tools/VisualWalk/lib.zsh:395-402`, in use there).
+- **READING R-U1-3 (the between-arms aside — flagged; the one place the D-row text and the brief's shape note pull two
+  ways):** D-3 says the walk "sets the walk library aside"; the brief's shape note says the walk script "never moves
+  the dev store's files" and the join arm "STOPS with a named message telling the walker what to move when the slot
+  is occupied". Read together: the walk sets aside ONLY its OWN library, and only when it can PROVE it — the slot
+  folder was ABSENT at G7 (the coordinator's whole-folder G7 form, so this run made it) AND its key file names the
+  library this run's set-up enrolled (the app log's turnOnSync line); then ONE same-volume whole-folder rename to
+  `Variorum-dev-walk-<stamp>-setup` beside it, proven by the folder's inode (the "lived here" marker,
+  `ProtectionPlaces.swift:61-63`, goes with it, so the relaunch routes `startFresh`, not the library-missing face —
+  `Assess.swift:87`). ANY doubt (present at G7, no logged library, another library's key file, the name taken, a link)
+  STOPS naming the exact `mv` for the walker, then `--arm join`. The literal alternative — always STOP between the
+  arms — would make `both` two invocations every time; it is a one-line change in J2 if the architect rules it.
+- **READING R-U1-4 (the end legs — flagged):** D-2 names the cleanup reset only; the walk now SIGNS OUT and QUITS
+  before it. Traced: `sync_challenge` mints nonces with NO vault requirement (`12_phase13y_tenant_seq.sql:526-534`), so
+  a still-signed-in walk app would write `key_proof_challenge` rows after the reset — the account would not be at rest
+  (the helper would exit 4). Signed out is also the Debug app's resting posture (the VX-439 tail signed out and quit by
+  hand), so the end needs no hands.
+- **READING R-U1-5 (flagged):** the join arm walks only the same-posture STANDARD join (`join_ready`); a Castle account's
+  join would enter Castle and offer the Touch ID / Always-ask gate — never walked by this script. `both` always meets
+  Standard (the set-up arm sets up in a fresh library's mode).
+- **Incidental fix, owned (same file, unpinned — a message-path):** P7's `waitfor "Sync hasn't run yet" 1` was an exact
+  match against a line that renders "Sync hasn't run yet: <row sentence>." (`ProtectionWords.swift:1053`), so its
+  blocked-round diagnosis never fired; it now matches the prefix (`VIS_AX_PREFIX=1`, as J7's twin does).
+- **The walk's `--self-test` gains 28 D-2/D-3 cases** (`--arm` takes setup/join/both · refuses anything else · the
+  set-up's library is the app log's LAST turnOnSync line, lowercased · no such line → none · the key file's libraryID
+  read · an odd/unreadable/linked key file → none · the walk's own library → aside · present at G7 → STOP · no logged
+  library → STOP · another library's key file → STOP · the aside name taken → STOP · no slot folder → STOP · a linked
+  slot → STOP · the rename is ONE whole-folder move (slot gone, inode and contents beside it) · the rename never leaves
+  the slot's parent · `join_ready`: Standard → ready · Castle → STOP · no vault → STOP · an error answer → STOP ·
+  `join_verdict`: +1 with mode and revision unchanged → PASS · cursors unchanged → STOP · +2 → STOP · revision moved →
+  STOP · mode moved → STOP · a read that did not answer → STOP · a boolean for a number → STOP · `helper_id` reads the
+  helper's resolved id · nothing when the helper refused first). **The walk's self-test now: 64 cases, green.**
 
 ## Environment traps (binding; carried into every brief verbatim)
 

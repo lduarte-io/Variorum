@@ -1,14 +1,26 @@
 #!/bin/zsh
 # Tools/WalkKit/first-run-walk.sh — VX-509's SCRIPTED FIRST-RUN WALK (VX-510 unit B1, D-B2; the run record
-# notes/plans/fixes/vx-510-first-run-sync.md). The DEV-store Debug build on the PROD TEST ROAD (her rulings R-510-1/-6 —
-# `VARIORUM_PROD_TEST_ROAD=1` + the allowlist this script hands it), ONE named test account, through: launch → the road armed → sign in → the
-# twelve words' look (stashed, never read) → Settings ▸ Protection ▸ Turn on sync… → THE SHEET'S "Synced." (VX-507) → the
-# row's "Synced ‹time›" with NO relaunch (VX-498) → the server checks through Tools/prod-read.sh (the vault row · the
-# `kp:` secret · a device cursor · data rows). The release checklist row (Tools/Release/release.sh's HANDOFF) names it beside
-# the headless gate FirstRunDrillTests.
+# notes/plans/fixes/vx-510-first-run-sync.md), SELF-RESETTING with BOTH ARMS since VX-623 (her standing ruling, 2026-10-27:
+# "I want to give a standing ruling that the walk may reset its own allowlisted test accounts."; the run record
+# notes/plans/fixes/vx-623-walk-self-reset.md, D-1…D-7). The DEV-store Debug build on the PROD TEST ROAD (her rulings
+# R-510-1/-6 — `VARIORUM_PROD_TEST_ROAD=1` + the allowlist this script hands it), ONE named test account:
+#   THE SET-UP ARM: launch → the road armed → the PRE-STEP (the account reset to its resting state if it is not at rest —
+#     Tools/prod-reset-test-account.sh) → sign in → the twelve words' look (stashed, never read) → Settings ▸ Protection ▸
+#     Turn on sync… → THE SHEET'S "Synced." (VX-507) → the row's "Synced ‹time›" with NO relaunch (VX-498) → the server
+#     checks through Tools/prod-read.sh (the vault row · the `kp:` secret · a device cursor · data rows).
+#   THE JOIN ARM (VX-537): the set-up instance quit by identity → the walk's OWN library set aside → a fresh launch, a
+#     fresh library → signed in (still, or now) → Settings ▸ Protection ▸ "Sync this library…" → the account's passphrase
+#     → "Synced. Your account's writing is in this library now." → the row "Synced" → the server: device cursors +1, the
+#     vault's mode and revision unchanged (a same-posture join changes no account lock).
+#   THE END, after the last arm's PASS (its evidence logged FIRST): sign out (the Debug app's resting posture) → quit by
+#     identity, zero instances → THE CLEANUP LEG (the account back to its resting state: exists, confirmed, vaultless,
+#     rowless). A STOP never resets: a stopped walk's production state is the diagnosis — the next run's pre-step heals it.
+# The release checklist row (Tools/Release/release.sh's HANDOFF, step 0) names it beside the headless gate FirstRunDrillTests.
 #
-#   Tools/WalkKit/first-run-walk.sh <std|castle|del> [--app <Debug Variorum.app>] [--dry-run]
+#   Tools/WalkKit/first-run-walk.sh <std|castle|del> [--arm setup|join|both] [--app <Debug Variorum.app>] [--dry-run]
 #   Tools/WalkKit/first-run-walk.sh --self-test
+#     --arm both (DEFAULT — her Q2): set-up → join → the end. setup: set-up → the end. join: the join arm alone → the end —
+#     it needs the account's Standard vault (the set-up arm's; e.g. after a `both` run that stopped in the join arm).
 #
 # It REFUSES (exit 5 — nothing launched, nothing read from production, nothing typed) unless EVERY guard holds, in order:
 #   G1  the account is one the allowlist names: std · castle · del
@@ -22,16 +34,25 @@
 #       /Applications (her real-store daily drive is never launched, quit or typed into)
 #   G5  ZERO Variorum instances, by path (her /Applications app or any dev instance): the walk launches its own
 #   G6  the stage is HELD (Tools/stage status) — every GUI act and the dev store are the stage's
-#   G7  the dev slot is set aside (no variorum.sqlite in the Debug container's Variorum-dev): the slot's files go aside by
-#       `mv` BEFORE the walk (the run record's ENVIRONMENT TRAPS) — never this script's act
-#   G8  the road's tools: Tools/prod-read.sh + .env.supabase.local (present, never read here); the typing and stashing
-#       helpers in ~/.variorum/bin (mode 700); cliclick
+#   G7  the dev slot is set aside (no variorum.sqlite in the Debug container's Variorum-dev): the DEV STORE'S files go aside
+#       by `mv` BEFORE the walk (the run record's ENVIRONMENT TRAPS — the coordinator's form, a whole-folder rename) — never
+#       this script's act. Between the arms the walk sets aside ONLY its OWN library, and only when it can prove it: the
+#       slot folder was ABSENT at G7 (so this run made it) and its key file names the library this run's set-up enrolled
+#       (the app log's `road: turnOnSync — library <id>`); it is renamed WHOLE, same volume, beside the slot. Anything
+#       else STOPS, naming the move for the walker (then `--arm join`).
+#   G8  the road's tools: Tools/prod-read.sh + .env.supabase.local (present, never read here) + the reset helper
+#       Tools/prod-reset-test-account.sh; the typing and stashing helpers in ~/.variorum/bin (mode 700); cliclick
 #   G9  this terminal's grants — Accessibility, Screen Recording, Automation for System Events — CHECKED, never prompted
 #       (Tools/VisualWalk's vis-tcc; a consent dialog is the author's to answer)
-#   --dry-run: the guards, then the plan; nothing launched.
-#   --self-test: G1/G2 against temp FIXTURES (never her file) — each refusal shown firing; nothing else runs.
+#   --dry-run: the guards, then the plan; nothing launched, nothing read from production.
+#   --self-test: every pure guard against temp FIXTURES (never her file, never production, never the GUI) — each refusal
+#       shown firing; nothing else runs.
+# Every launch (P1, J3) is preceded by the WINDOW-FRAME GUARD (VX-622, D-4): the main window's frame-autosave key deleted
+# from the dev domain, and after the launch its bounds asserted on screen before any act. Every capture (D-5) shoots EVERY
+# window of the pid, window-scoped, and is withheld while the words guard says the twelve words could be on screen.
 # Exit: 0 the walk PASSED (or the dry run's guards held) · 4 STOPPED at a step (its capture and reason printed; the app is
-# left running for the walker to look — quit it by identity) · 5 refused (a guard; nothing launched).
+# left running for the walker to look — quit it by identity; production left as it stands) · 5 refused (a guard; nothing
+# launched).
 #
 # F-B1-1 (B), RULED (the run record): the sandboxed Debug app cannot read ~/.variorum, so THIS SCRIPT — outside the sandbox —
 # reads the allowlist file (G2's checks: a regular file, mode 600, every entry 'vxtest') and HANDS its one key to the launch
@@ -40,7 +61,9 @@
 # at connect). The emails are no secret (they show in `ps eww`); the secrets beside them in the file are never handed.
 #
 # Written by implementer session B1 and dry-checked for its guards only — NEVER run against production by that session;
-# its first live run is unit C's (LEG S's S4–S7), where the GUI steps' labels meet the real window for the first time.
+# its first live run was unit C's (LEG S's S4–S7). VX-623 unit 1 wrote the arms, the reset legs and D-4/D-5 under the same
+# rule: self-tested over fixtures, never run live by their author — their first live run is VX-623 UNIT 2's, under a held
+# stage, where the join arm's and the end's labels (read from the CURRENT code, file:line in the run record) meet the window.
 
 emulate -L zsh
 setopt pipe_fail
@@ -51,12 +74,22 @@ VW=$REPO/Tools/VisualWalk
 ALLOW=$HOME/.variorum/prod-test-accounts.env
 TYPE=$HOME/.variorum/bin/type-prod-test-secret
 STASH=$HOME/.variorum/bin/stash-prod-test-words
+RESET=$REPO/Tools/prod-reset-test-account.sh
 DEBUG_ID=io.lduarte.Variorum.debug
 SLOT="$HOME/Library/Containers/$DEBUG_ID/Data/Library/Application Support/Variorum-dev"
 APP=$REPO/App/Variorum/DerivedData/vx510/Build/Products/Debug/Variorum.app
 WORK=$REPO/App/Variorum/DerivedData/first-run-walk
 BIN=$WORK/bin
 GAP=2.6   # >= 2.5 s between guarded acts: a synthetic act resets HIDIdleTime (WalkKit's self-trip rule)
+
+# The labels the arms meet, from the CURRENT code (the run record lists each with its file:line).
+NOT_YET="Sync isn't on for this library yet"                     # SyncStatusViews.notOnYetLabel
+SETUP_LANDED="Synced. Your library is on your account now."      # ProtectionWords.firstRoundSetUpLanded
+JOIN_DOOR="Sync this library…"                                   # ProtectionWords.joinSyncDoor
+JOIN_FIELD="Your account's passphrase"                           # ProtectionWords.joinPassphraseField
+JOIN_BUTTON="Sync this library"                                  # ProtectionWords.joinSyncButton
+JOIN_NOTICE="Your twelve words are"                              # ProtectionWords.joinWordsNotShown(_:)'s lead
+JOIN_LANDED="Synced. Your account's writing is in this library now."   # ProtectionWords.firstRoundJoinLanded
 
 refuse() { print -u2 "first-run-walk REFUSES: $*"; exit 5 }
 
@@ -68,6 +101,7 @@ PLAIN_ADDRESS='^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$'
 plain_address() { [[ $1 =~ $PLAIN_ADDRESS ]] }
 # guard_allowlist <file> <account> → 0, or prints the refusal and returns 1. Values never printed.
 # allowlist_value <file> → the file's one key (the list the launch is handed), read in a subshell; the other keys never.
+# (Tools/prod-reset-test-account.sh carries this function VERBATIM — its self-test pins the two byte-identical.)
 guard_allowlist() {
   local file=$1 account=$2
   case $account in std|castle|del) ;; *) print -r -- "unknown account '$account' (std | castle | del)"; return 1 ;; esac
@@ -116,7 +150,80 @@ rect_inside() {
   return 1
 }
 
-# --- --self-test: the allowlist guard's teeth, over fixtures only ----------------------------------------------------
+# --- D-2 / D-3 (VX-622, VX-537): the arms and the slot dance, pure parts (the self-test feeds them fixtures) ---------
+arm_valid() { [[ $1 == (setup|join|both) ]] }
+# turnon_library <app log> → the library the LAST "road: turnOnSync — library <id8> now names account …" line names
+# (ProtectionAccountActs.swift:387-390), lowercased; nothing when there is none.
+turnon_library() {
+  [[ -f $1 ]] || return 1
+  grep -o 'road: turnOnSync — library [0-9A-Fa-f]\{8\} now names account' "$1" | tail -1 | awk '{print tolower($5)}'
+}
+# keyfile_library <key file> → the first 8 characters of its libraryID (KeyFile.libraryID — KeyFile.swift:130; the file
+# Names.keyFilename, Names.swift:114) — ONLY that field is read, never a wrap; nothing for a link or an unreadable file.
+keyfile_library() {
+  [[ -f $1 && ! -L $1 ]] || return 1
+  python3 -I -c 'import json, sys
+k = json.load(open(sys.argv[1]))
+v = k.get("libraryID") if isinstance(k, dict) else None
+print(v[:8].lower() if isinstance(v, str) else "")' "$1" 2>/dev/null
+}
+# aside_verdict <slot> <the slot at G7: absent|present> <the set-up's library from its log> <aside> → 0 when the slot is
+# PROVABLY the walk's own (absent at G7 — so this run made it — and its key file names the library this run's set-up
+# enrolled) and the aside name is free; else prints why and returns 1 (the walk then STOPS, naming the move).
+aside_verdict() {
+  local slot=$1 at_g7=$2 lib=$3 aside=$4 kf
+  [[ $at_g7 == absent ]] || { print -r -- "the slot folder was there before this run (G7 found no library in it, but files this walk cannot prove its own)"; return 1 }
+  [[ -d $slot && ! -L $slot ]] || { print -r -- "there is no slot folder to set aside"; return 1 }
+  [[ $lib =~ '^[0-9a-f]{8}$' ]] || { print -r -- "the set-up arm's app log names no library (no 'road: turnOnSync — library …' line)"; return 1 }
+  kf=$(keyfile_library "$slot/variorum-library-keys.json")
+  [[ $kf == $lib ]] || { print -r -- "the slot's key file names library '${kf:-none}', not the set-up arm's $lib"; return 1 }
+  [[ ! -e $aside && ! -L $aside ]] || { print -r -- "${aside:t} already exists — a walk never merges into a folder"; return 1 }
+  return 0
+}
+# aside_own_slot <slot> <aside> → ONE same-volume rename of the WHOLE folder (its siblings' parent), proven a rename — the
+# folder's inode unchanged, the slot gone — never a copy, never a merge.
+aside_own_slot() {
+  local ino
+  ino=$(stat -f %i "$1" 2>/dev/null) || return 1
+  [[ ${2:h} == ${1:h} ]] || return 1
+  mv -n "$1" "$2" || return 1
+  [[ ! -e $1 && -d $2 && $(stat -f %i "$2") == $ino ]]
+}
+# json_field <one-row JSON answer> <key> → the value, or nothing (an error answer, no row, two rows, not JSON)
+json_field() {
+  python3 -I -c 'import json, sys
+try:
+    r = json.loads(sys.argv[1])
+    v = r[0].get(sys.argv[2]) if isinstance(r, list) and len(r) == 1 and isinstance(r[0], dict) else None
+except Exception:
+    v = None
+print("" if v is None or isinstance(v, bool) else v)' "$1" "$2"
+}
+# join_ready <vault answer> → 0 when the account holds a STANDARD vault (the join arm walks the same-posture join; a Castle
+# account's join would enter Castle and ask for a gate — never walked here); else why, 1.
+join_ready() {
+  local m; m=$(json_field "$1" mode)
+  [[ -n $m ]] || { print -r -- "the account holds no vault — the set-up arm makes it (run --arm both)"; return 1 }
+  [[ $m == standard ]] || { print -r -- "the account's vault is in '$m' — the join arm walks the same-posture Standard join only"; return 1 }
+  return 0
+}
+# join_verdict <vault before> <cursors before> <vault after> <cursors after> → 0 when the join added exactly ONE device
+# cursor (the fresh library's device) and left the vault's mode and revision where they were; else why, 1.
+join_verdict() {
+  local m0 r0 n0 m1 r1 n1
+  m0=$(json_field "$1" mode) r0=$(json_field "$1" revision) n0=$(json_field "$2" n)
+  m1=$(json_field "$3" mode) r1=$(json_field "$3" revision) n1=$(json_field "$4" n)
+  [[ -n $m0 && $r0 == <-> && $n0 == <-> && -n $m1 && $r1 == <-> && $n1 == <-> ]] \
+    || { print -r -- "a server read did not answer whole (the vault and the cursors, before and after)"; return 1 }
+  [[ $m1 == $m0 ]] || { print -r -- "the account's mode moved ($m0 → $m1) — a same-posture join changes no account lock"; return 1 }
+  (( r1 == r0 )) || { print -r -- "the vault revision moved ($r0 → $r1) — a same-posture join changes no account lock"; return 1 }
+  (( n1 == n0 + 1 )) || { print -r -- "device cursors $n0 → $n1, not +1 (the fresh library's one device)"; return 1 }
+  return 0
+}
+# helper_id <the reset helper's output> → the account id it resolved (its "account id <uuid>" line), or nothing
+helper_id() { print -r -- "$1" | grep -o 'account id [0-9a-f]\{8\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{12\}' | head -1 | cut -d' ' -f3 }
+
+# --- --self-test: the guards' teeth, over fixtures only ---------------------------------------------------------------
 if [[ ${1:-} == --self-test ]]; then
   T=$(mktemp -d)
   trap 'rm -rf $T' EXIT
@@ -185,7 +292,7 @@ VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
     sure "D-5 … the look's reveal door (Show my twelve words)" '! wg "Show my twelve words"'
     sure "D-5 lets eleven words through" 'wg "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo"'
     sure "D-5 lets thirteen words through" 'wg "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike"'
-    sure "D-5 lets the join's landed line through" 'wg "Synced. Your account'\''s writing is in this library now."'
+    sure "D-5 lets the join's landed line through" 'wg "$JOIN_LANDED"'
     sure "D-5 lets the join's words notice through (it names no words)" \
       'wg "Your twelve words are a+vxtest-std@x.test'\''s twelve words. Your previous twelve words still open backups made with them. If you don'\''t have your account'\''s words written down, you can make new ones at any time."'
     sure "D-5 the guard refuses a pid it cannot read as withheld (fail-closed)" '! $T/words-guard notapid >/dev/null'
@@ -214,22 +321,71 @@ sys.stdout.buffer.write(plistlib.dumps({k: "60 144 1240 940 0 0 1728 1084" for k
   sure "D-4 a window straddling two displays → refused" '! rect_inside "1200 100 1240 840" $two >/dev/null'
   sure "D-4 no display geometry → refused (fail-closed)" '! rect_inside "244 155 1240 840" "" >/dev/null'
   sure "D-4 no window frame → refused" '! rect_inside "" $one >/dev/null'
+  # D-2 / D-3 (VX-622, VX-537): the arms, the provenance of the walk's own library, the join's evidence.
+  sure "D-3 --arm takes setup, join, both" 'arm_valid setup && arm_valid join && arm_valid both'
+  sure "D-3 --arm refuses anything else" '! arm_valid Both && ! arm_valid all && ! arm_valid "" && ! arm_valid "both "'
+  *[removed for publication]*
+*[removed for publication]*
+[x] road: stopSyncingHere — library 22222222 now names no account" > $T/app.log
+  print -r -- "[x] road: deleteAccountHere — library 2aa0214f now names no account" > $T/none.log
+  sure "D-3 the set-up's library is the app log's LAST turnOnSync line, lowercased" '[[ $(turnon_library $T/app.log) == 6c51f3d0 ]]'
+  sure "D-3 a log with no turnOnSync line names no library" '[[ -z $(turnon_library $T/none.log) ]]'
+  mkslot() {  # <dir> <libraryID> — a fixture slot folder: a key file, a store stand-in, a Backups folder
+    mkdir -p $1/Backups/x; print -r -- "{\"formatVersion\":3,\"libraryID\":\"$2\",\"fingerprint\":\"ab\"}" > $1/variorum-library-keys.json
+    print -r -- store > $1/variorum.sqlite; print -r -- b > $1/Backups/x/b
+  }
+  mkslot $T/sup/Variorum-dev 6c51f3d0-1111-4222-8333-444455556666
+  sure "D-3 the key file's libraryID is read (its first 8)" '[[ $(keyfile_library $T/sup/Variorum-dev/variorum-library-keys.json) == 6c51f3d0 ]]'
+  print -r -- '{"libraryID": 7}' > $T/odd.json; print -r -- 'not json' > $T/bad.json; ln -s $T/sup/Variorum-dev/variorum-library-keys.json $T/kf-link
+  sure "D-3 a key file with no string libraryID, an unreadable one, or a link → nothing" \
+    '[[ -z $(keyfile_library $T/odd.json) && -z $(keyfile_library $T/bad.json) && -z $(keyfile_library $T/kf-link) ]]'
+  A=$T/sup/Variorum-dev-walk-STAMP-setup
+  sure "D-3 the walk's OWN library (absent at G7, its key file the set-up's) → set aside" 'aside_verdict $T/sup/Variorum-dev absent 6c51f3d0 $A >/dev/null'
+  sure "D-3 a slot folder present at G7 → STOP (the walker's to move)" '! aside_verdict $T/sup/Variorum-dev present 6c51f3d0 $A >/dev/null'
+  sure "D-3 the set-up's log names no library → STOP" '! aside_verdict $T/sup/Variorum-dev absent "" $A >/dev/null'
+  sure "D-3 the key file names another library → STOP" '! aside_verdict $T/sup/Variorum-dev absent 11111111 $A >/dev/null'
+  mkdir -p $T/sup/taken
+  sure "D-3 the aside name already exists → STOP (never a merge)" '! aside_verdict $T/sup/Variorum-dev absent 6c51f3d0 $T/sup/taken >/dev/null'
+  sure "D-3 no slot folder → STOP" '! aside_verdict $T/sup/nothing absent 6c51f3d0 $A >/dev/null'
+  ln -s $T/sup/Variorum-dev $T/sup/slot-link
+  sure "D-3 a slot that is a link → STOP" '! aside_verdict $T/sup/slot-link absent 6c51f3d0 $A >/dev/null'
+  ino=$(stat -f %i $T/sup/Variorum-dev)
+  sure "D-3 the aside is ONE whole-folder rename: the slot gone, the folder's inode and contents beside it" \
+    'aside_own_slot $T/sup/Variorum-dev $A && [[ ! -e $T/sup/Variorum-dev && $(stat -f %i $A) == $ino && -f $A/variorum.sqlite && -f $A/Backups/x/b ]]'
+  mkslot $T/sup/Variorum-dev 6c51f3d0-1111-4222-8333-444455556666
+  sure "D-3 the rename refuses an aside on another folder (never leaves the slot's parent)" '! aside_own_slot $T/sup/Variorum-dev $T/elsewhere-setup && [[ -d $T/sup/Variorum-dev ]]'
+  sure "D-3 the join needs a Standard vault: standard → ready" 'join_ready "[{\"mode\":\"standard\",\"revision\":1}]" >/dev/null'
+  sure "D-3 … a Castle vault → STOP (never the Castle join's gate)" '! join_ready "[{\"mode\":\"castle\",\"revision\":16}]" >/dev/null'
+  sure "D-3 … no vault (a reset account) → STOP" '! join_ready "[]" >/dev/null'
+  sure "D-3 … an error answer → STOP" '! join_ready "{\"message\":\"x\"}" >/dev/null'
+  V='[{"mode":"standard","revision":3}]'
+  sure "D-3 the join's evidence: cursors +1, mode and revision unchanged → PASS" 'join_verdict $V "[{\"n\":3}]" $V "[{\"n\":4}]" >/dev/null'
+  sure "D-3 … cursors unchanged → STOP" '! join_verdict $V "[{\"n\":3}]" $V "[{\"n\":3}]" >/dev/null'
+  sure "D-3 … cursors +2 → STOP" '! join_verdict $V "[{\"n\":3}]" $V "[{\"n\":5}]" >/dev/null'
+  sure "D-3 … the vault revision moved → STOP" '! join_verdict $V "[{\"n\":3}]" "[{\"mode\":\"standard\",\"revision\":4}]" "[{\"n\":4}]" >/dev/null'
+  sure "D-3 … the mode moved → STOP" '! join_verdict $V "[{\"n\":3}]" "[{\"mode\":\"castle\",\"revision\":3}]" "[{\"n\":4}]" >/dev/null'
+  sure "D-3 … a read that did not answer → STOP" '! join_verdict $V "[{\"n\":3}]" "[]" "[{\"n\":4}]" >/dev/null'
+  sure "D-3 … a boolean where a number goes → STOP" '! join_verdict $V "[{\"n\":true}]" $V "[{\"n\":4}]" >/dev/null'
+  sure "D-2 the reset helper's resolved id is read from its log line" \
+    '[[ $(helper_id "[x] prod-reset std: account id 0f3c2b1a-9d8e-4f7a-8b6c-5d4e3f2a1b0c (one auth user)") == 0f3c2b1a-9d8e-4f7a-8b6c-5d4e3f2a1b0c ]]'
+  sure "D-2 … and nothing when the helper refused before resolving" '[[ -z $(helper_id "prod-reset-test-account REFUSES: R1 — the allowlist must be mode 600") ]]'
   (( fails == 0 )) && { print "SELF-TEST: every guard fired as expected"; exit 0 }
   print "SELF-TEST: $fails case(s) wrong"; exit 1
 fi
 
 # --- arguments --------------------------------------------------------------------------------------------------------
-ACCOUNT= DRY=
+ACCOUNT= DRY= ARM=both
 while (( $# )); do
   case $1 in
     --app) APP=${2:?--app needs a path}; shift ;;
+    --arm) ARM=${2:-}; shift; arm_valid "$ARM" || refuse "--arm takes setup, join or both (got '$ARM')" ;;
     --dry-run) DRY=1 ;;
     -*) refuse "unknown option $1" ;;
     *) [[ -z $ACCOUNT ]] && ACCOUNT=$1 || refuse "one account only" ;;
   esac
   shift
 done
-[[ -n $ACCOUNT ]] || refuse "usage: first-run-walk.sh <std|castle|del> [--app <Debug Variorum.app>] [--dry-run] | --self-test"
+[[ -n $ACCOUNT ]] || refuse "usage: first-run-walk.sh <std|castle|del> [--arm setup|join|both] [--app <Debug Variorum.app>] [--dry-run] | --self-test"
 
 # --- THE GUARDS (in order; each refusal exits 5 with nothing launched) ------------------------------------------------
 why=$(guard_allowlist $ALLOW $ACCOUNT) || refuse "G1/G2 — $why"
@@ -244,8 +400,11 @@ running=$(pgrep -fl 'Variorum.app/Contents/MacOS')
 [[ -z $running ]] || refuse "G5 — a Variorum instance is running (never quit hers; quit yours by identity first): ${running//$'\n'/ · }"
 stage=$($REPO/Tools/stage status 2>/dev/null)
 [[ $stage == "STAGE HELD by "* ]] || refuse "G6 — the stage is not held (${stage:-no answer}); claim it first: Tools/stage claim --who <you> --reason <why>"
-[[ ! -e $SLOT/variorum.sqlite ]] || refuse "G7 — the dev slot holds a library; set its top-level files aside by mv first (the run record's ENVIRONMENT TRAPS)"
+[[ ! -e $SLOT/variorum.sqlite ]] || refuse "G7 — the dev slot holds a library; set it aside by mv first (the run record's ENVIRONMENT TRAPS)"
+# The slot folder's state at G7 — the provenance the between-arms aside rests on (absent: whatever is in it later, this run made).
+[[ -e $SLOT || -L $SLOT ]] && SLOT_AT_G7=present || SLOT_AT_G7=absent
 [[ -x $REPO/Tools/prod-read.sh && -f $REPO/.env.supabase.local ]] || refuse "G8 — Tools/prod-read.sh or .env.supabase.local is missing"
+[[ -x $RESET ]] || refuse "G8 — the reset helper Tools/prod-reset-test-account.sh is missing or not executable"
 for helper in $TYPE $STASH; do
   [[ -x $helper && $(stat -f %Lp $helper) == 700 ]] || refuse "G8 — $helper is missing or not mode 700"
 done
@@ -266,23 +425,45 @@ grants=$(perl -e 'alarm shift; exec @ARGV' 15 $BIN/vis-tcc com.apple.systemevent
 [[ ${grants%%$'\n'*} == "AX 1 SCREEN 1" && $grants == *"AE:com.apple.systemevents granted"* ]] \
   || refuse "G9 — this terminal lacks a grant (${grants//$'\n'/ · }); granting is the author's"
 
-RUN=$WORK/run-$(date -u +%Y%m%dT%H%M%SZ)-$ACCOUNT
+STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+RUN=$WORK/run-$STAMP-$ACCOUNT
+ASIDE="${SLOT}-walk-$STAMP-setup"
 if [[ -n $DRY ]]; then
-  print "first-run-walk DRY RUN — every guard holds for '$ACCOUNT'. The plan (nothing launched):"
-  print "  P1 launch $APP with VARIORUM_PROD_TEST_ROAD=1 + the handed VARIORUM_PRODTEST_EMAILS (open -n --env; stderr → $RUN/app.log)"
+  print "first-run-walk DRY RUN — every guard holds for '$ACCOUNT', arm '$ARM' (the slot folder $SLOT_AT_G7 at G7). The plan (nothing launched):"
+  print "  P1 the window-frame guard (the dev domain's 'NSWindow Frame variorum-main-AppWindow-<n>' deleted), then launch $APP with"
+  print "     VARIORUM_PROD_TEST_ROAD=1 + the handed VARIORUM_PRODTEST_EMAILS (open -n --env; stderr → $RUN/app.log)"
   print "  P2 ps eww: the road's switch and the handed list present, no walk project · the log: 'PROD TEST ROAD (VX-510): ARMED'"
+  print "     · the main window's bounds inside a display's visible frame (the footer row on screen)"
   print "  P3 prod read: the account exists and is confirmed (auth.users by email → its id)"
-  print "  P4 sign in (the row's Sign in… → Email/Password typed by type-prod-test-secret)"
-  print "  P5 the row: 'Sync isn't on for this library yet' · Settings ▸ Protection ▸ Record your twelve words… → Copy → stash"
-  print "  P6 Turn on sync… → the new passphrase twice + the words (typed by the helper) → Turn on sync"
-  print "  P7 THE SHEET: 'Synced. Your library is on your account now.' (≤ 180 s) → Done · the row 'Synced ‹time›'"
-  print "  P8 prod reads by the account's id: key_vault (mode) · vault.secrets kp:<id> · device_cursor · data rows (setting + container)"
+  if [[ $ARM != join ]]; then
+    print "  P3r THE PRE-STEP: Tools/prod-reset-test-account.sh $ACCOUNT — resets the account to its resting state if it is not at rest"
+    print "  P4 sign in (the row's Sign in… → Email/Password typed by type-prod-test-secret)"
+    print "  P5 the row: '$NOT_YET' · Settings ▸ Protection ▸ Record your twelve words… → Copy → stash"
+    print "  P6 Turn on sync… → the new passphrase twice + the words (typed by the helper) → Turn on sync"
+    print "  P7 THE SHEET: '$SETUP_LANDED' (≤ 180 s) → Done · the row 'Synced ‹time›'"
+    print "  P8 prod reads by the account's id: key_vault (mode, revision, proof) · vault.secrets kp:<id> · device_cursor · data rows"
+  fi
+  if [[ $ARM == both ]]; then
+    print "  J1 quit the set-up instance by identity (Settings closed first) — zero instances, its own step"
+    print "  J2 the walk's OWN library aside: $SLOT → ${ASIDE:t} (one whole-folder rename) — only if absent at G7"
+    print "     and its key file names the set-up's library; else STOP naming the move (then --arm join)"
+    print "  J3 the window-frame guard, then a fresh launch on the road (stderr → $RUN/app-join.log) → a fresh library"
+  fi
+  if [[ $ARM != setup ]]; then
+    print "  J4 the fresh library's row: '$NOT_YET' (signed in still, or signed in now)"
+    print "  J5 prod reads: the account's vault (Standard) and its device cursors — the join's before"
+    print "  J6 Settings ▸ Protection ▸ '$JOIN_DOOR' → '$JOIN_FIELD' (typed by the helper) → '$JOIN_BUTTON'"
+    print "  J7 THE SHEET: the words notice's OK if shown → '$JOIN_LANDED' (≤ 180 s) → Done · the row 'Synced ‹time›'"
+    print "  J8 prod reads: device cursors +1, the vault's mode and revision unchanged"
+  fi
+  print "  E1 sign out (Settings ▸ Protection ▸ Sign out… → Sign Out) · E2 quit by identity, zero instances"
+  print "  E3 THE CLEANUP LEG: Tools/prod-reset-test-account.sh $ACCOUNT — the account back to its resting state"
   exit 0
 fi
 
-# --- THE WALK (live — unit C's; the stage held, the slot aside) -------------------------------------------------------
+# --- THE WALK (live — the stage held, the slot aside) -------------------------------------------------------------------
 mkdir -p $RUN
-STEP=start PID= WID=
+STEP=start PID= WID= APPLOG=
 log() { print -r -- "[$(date +%H:%M:%S)] $STEP: $*" | tee -a $RUN/walk.log }
 window() { local w; w=($($BIN/vis-win $PID 2>/dev/null)); [[ ${w[1]:-none} != none ]] && WID=$w[1] }
 capture() {  # <label> — D-5 (VX-537): EVERY on-screen window of the pid, each window-scoped (never the full screen), named
@@ -295,7 +476,11 @@ capture() {  # <label> — D-5 (VX-537): EVERY on-screen window of the pid, each
   $BIN/walk-cap $PID $RUN $pre --every-layer >> $RUN/captures.txt 2>&1
   log "captured '$1' → ${pre}w*.png ($(tail -1 $RUN/captures.txt))"
 }
-stop() { log "STOPPED — $*"; capture stopped; print -u2 "first-run-walk STOPPED at $STEP: $* (the app is left running; captures in $RUN)"; exit 4 }
+stop() {  # never a reset after a STOP (the premise's fence 1): production is the diagnosis; the next run's pre-step heals it
+  log "STOPPED — $*"; capture stopped
+  print -u2 "first-run-walk STOPPED at $STEP: $* (${PID:+the app is left running — pid $PID; }production left as it stands — the next run's pre-step resets it; captures in $RUN)"
+  exit 4
+}
 step() { STEP=$1; log "— $2" }
 author() { $WK/guard.sh --author >/dev/null || stop "the author check failed (her app is running, or someone is at the machine) — never retried" }
 activate() { osascript -e "tell application \"System Events\" to set frontmost of (first application process whose unix id is $PID) to true" >/dev/null; sleep 0.4 }
@@ -352,31 +537,100 @@ frame_check() {  # D-4, POST-LAUNCH, before any act: the main window's bounds ho
   log "the window-frame guard: the main window ${w[2,5]} lies inside a display's visible frame — its footer row on screen"
 }
 
-step P1 "launch the Debug build on the prod test road (the allowlist handed — F-B1-1 (B))"
-frame_reset
-author
-LIST=$(allowlist_value $ALLOW)   # G2 checked this file; never printed
-[[ -n ${LIST// /} ]] || stop "the allowlist's list is empty"
-open -n --env VARIORUM_PROD_TEST_ROAD=1 --env VARIORUM_PRODTEST_EMAILS="$LIST" --env OS_ACTIVITY_DT_MODE=YES \
-  --stderr $RUN/app.log $APP
-unset LIST
-for i in {1..40}; do PID=$(pgrep -f "$APP/Contents/MacOS" | head -1); [[ -n $PID ]] && break; sleep 0.5; done
-[[ -n $PID ]] || stop "the Debug build did not start"
-log "pid $PID"
+# --- the legs, as functions (each arm composes them) -----------------------------------------------------------------
+launch_on_road() {  # <app log> — P1 + P2: the window-frame guard, the launch, the road armed, the main window, its bounds
+  APPLOG=$1
+  step ${2:-P1} "launch the Debug build on the prod test road (the allowlist handed — F-B1-1 (B))"
+  frame_reset
+  author
+  local LIST i road envline
+  LIST=$(allowlist_value $ALLOW)   # G2 checked this file; never printed
+  [[ -n ${LIST// /} ]] || stop "the allowlist's list is empty"
+  open -n --env VARIORUM_PROD_TEST_ROAD=1 --env VARIORUM_PRODTEST_EMAILS="$LIST" --env OS_ACTIVITY_DT_MODE=YES \
+    --stderr $APPLOG $APP
+  unset LIST
+  for i in {1..40}; do PID=$(pgrep -f "$APP/Contents/MacOS" | head -1); [[ -n $PID ]] && break; sleep 0.5; done
+  [[ -n $PID ]] || stop "the Debug build did not start"
+  log "pid $PID"
 
-step P2 "the road: the process's environment and the app's own line"
-envline=$(ps eww -p $PID)
-[[ $envline == *"VARIORUM_PROD_TEST_ROAD=1"* ]] || stop "the launched process does not carry VARIORUM_PROD_TEST_ROAD=1"
-[[ $envline == *"VARIORUM_PRODTEST_EMAILS="* ]] || stop "the launched process does not carry the handed allowlist"
-[[ $envline != *"VARIORUM_WALK_PROJECT_URL="* ]] || stop "the launched process carries a walk project"
-unset envline   # never printed
-for i in {1..60}; do grep -q "PROD TEST ROAD (VX-510): " $RUN/app.log 2>/dev/null && break; sleep 1; done
-road=$(grep -o "PROD TEST ROAD (VX-510): [A-Z]*[^;]*" $RUN/app.log | head -1)
-[[ $road == *": ARMED"* ]] || stop "the road did not arm: ${road:-no road line in the app's log}"
-log "$road"
-for i in {1..60}; do window && break; sleep 1; done
-[[ -n $WID ]] || stop "no main window"
-sleep 3; frame_check; capture launched
+  step ${3:-P2} "the road: the process's environment and the app's own line"
+  envline=$(ps eww -p $PID)
+  [[ $envline == *"VARIORUM_PROD_TEST_ROAD=1"* ]] || stop "the launched process does not carry VARIORUM_PROD_TEST_ROAD=1"
+  [[ $envline == *"VARIORUM_PRODTEST_EMAILS="* ]] || stop "the launched process does not carry the handed allowlist"
+  [[ $envline != *"VARIORUM_WALK_PROJECT_URL="* ]] || stop "the launched process carries a walk project"
+  unset envline   # never printed
+  for i in {1..60}; do grep -q "PROD TEST ROAD (VX-510): " $APPLOG 2>/dev/null && break; sleep 1; done
+  road=$(grep -o "PROD TEST ROAD (VX-510): [A-Z]*[^;]*" $APPLOG | head -1)
+  [[ $road == *": ARMED"* ]] || stop "the road did not arm: ${road:-no road line in the app's log}"
+  log "$road"
+  WID=
+  for i in {1..60}; do window && break; sleep 1; done
+  [[ -n $WID ]] || stop "no main window"
+  sleep 3; frame_check; capture launched
+}
+sign_in() {  # the row's Sign in… → the Account sheet → Email/Password by the helper → Sign In → its Sign out → Close
+  press "Sign in…" AXButton
+  waitfor "Email" 20 || stop "the Account sheet did not open"
+  focus "Email"; secret email
+  focus "Password"; secret password
+  press "Sign In" AXButton
+  waitfor "Sign out" 60 || { capture signin; stop "the sign-in did not land" }  # the sheet's own door (no ellipsis — Settings' spelling differs); found at the first live run
+  capture signed-in
+  press "Close" AXButton
+}
+close_settings() {  # best-effort, logged — so a relaunch restores no stale Settings window (VisualWalk's recipe, lib.zsh:402)
+  author
+  if osascript -e 'tell application "System Events"' -e "tell (first application process whose unix id is $PID)" \
+      -e 'if exists window "Variorum Dev Settings" then click (first button whose subrole is "AXCloseButton") of window "Variorum Dev Settings"' \
+      -e 'end tell' -e 'end tell' >/dev/null 2>&1; then log "Settings closed (if it was open)"
+  else log "Settings: the close did not answer — a relaunch may restore it"; fi
+  sleep $GAP
+}
+open_protection() {  # <door> — Settings ▸ Protection until <door> shows; ONE close-and-reopen when it doesn't (the open
+  # pane's account section does not re-read an auth change — the VX-510 re-walk's O-RW-1, confirmed live)
+  # Settings through the app menu's item (VisualWalk's road, lib.zsh:395 — ⌘, is swallowed by a focused editor, the
+  # WalkKit README's 13u4 F2), ⌘, only when the menu does not answer.
+  local try
+  for try in 1 2; do
+    author; activate
+    osascript -e "tell application \"System Events\" to tell (first application process whose unix id is $PID) to click menu item \"Settings…\" of menu 1 of menu bar item 2 of menu bar 1" >/dev/null 2>&1 \
+      || osascript -e 'tell application "System Events" to keystroke "," using command down' >/dev/null
+    sleep $GAP
+    press "Protection" AXButton
+    waitfor "$1" 15 && return 0
+    (( try == 1 )) && { log "'$1' is not on the Protection pane — closing Settings and reopening once (O-RW-1)"; close_settings }
+  done
+  capture protection; stop "no '$1' on Settings ▸ Protection, even after a reopen"
+}
+quit_walk_app() {  # by identity (the Debug bundle — her app is another id, and absent by every author check); OUR pid
+  # proven gone, then ZERO instances by path, as its own step (never chained after the quit). Settings closed first.
+  local out i left
+  close_settings
+  out=$(osascript -e "tell application id \"$DEBUG_ID\" to quit" 2>&1)
+  log "quit requested by identity — ${out:-accepted}"
+  for i in {1..30}; do kill -0 $PID 2>/dev/null || break; sleep 1; done
+  kill -0 $PID 2>/dev/null && stop "the walk instance (pid $PID) did not quit (${out:-no answer}) — a sheet may hold ⌘Q: look, dismiss, quit by identity"
+  left=$(pgrep -fl 'Variorum.app/Contents/MacOS')
+  [[ -z $left ]] && PID= WID=
+  [[ -z $left ]] || stop "after the quit a Variorum instance still runs: ${left//$'\n'/ · } — never quit hers; yours only by a proven PID"
+  log "zero instances"
+}
+reset_account() {  # <leg: prestep|cleanup> — the guarded helper (D-1); its lines into this log; its id must be P3's
+  local out rc hid l
+  out=$($RESET $ACCOUNT --log $RUN/reset-$1.log 2>&1); rc=$?
+  for l in ${(f)out}; do log "$l"; done
+  (( rc == 0 )) || stop "the $1 reset did not reach the resting state (exit $rc) — the account stands as reset-$1.log says"
+  hid=$(helper_id "$out")
+  [[ $hid == $UID_ ]] || stop "the $1 reset resolved account '${hid:-none}', not P3's $UID_"
+}
+account_reads() {  # → "<vault answer>\n<cursors answer>" by the account's id (SELECTs only)
+  print -r -- "$(prodread "select mode, revision from key_vault where user_id = '$UID_'")"
+  print -r -- "$(prodread "select count(*) as n from device_cursor where owner_id = '$UID_'")"
+}
+
+# --- THE ARMS ------------------------------------------------------------------------------------------------------
+log "arm '$ARM' · the slot folder $SLOT_AT_G7 at G7"
+launch_on_road $RUN/app.log
 
 step P3 "the account on production (exists, confirmed) — its id, read once"
 EMAIL=$(set -a; source $ALLOW; set +a; eval "print -r -- \"\${VARIORUM_PRODTEST_${(U)ACCOUNT}_EMAIL}\"")
@@ -389,66 +643,155 @@ UID_=$(print -r -- $user | grep -o '"id":"[0-9a-f-]*"' | head -1 | cut -d'"' -f4
 [[ $user == *'"confirmed":true'* ]] || stop "the '$ACCOUNT' account is not confirmed yet (Tools/prod-confirm-test-user.sh)"
 log "account id $UID_ (confirmed)"
 
-step P4 "sign in"
-press "Sign in…" AXButton
-waitfor "Email" 20 || stop "the Account sheet did not open"
-focus "Email"; secret email
-focus "Password"; secret password
-press "Sign In" AXButton
-waitfor "Sign out" 60 || { capture signin; stop "the sign-in did not land" }  # the sheet's own door (no ellipsis — Settings' spelling differs); found at the first live run
-capture signed-in
-press "Close" AXButton
+if [[ $ARM != join ]]; then
+  step P3r "THE PRE-STEP (D-2): the account reset to its resting state if it is not at rest — the set-up arm meets a vaultless account"
+  reset_account prestep
 
-step P5 "the row says not-yet; the twelve words' look (Settings ▸ Protection), copied and stashed"
-waitfor "Sync isn't on for this library yet" 30 || { capture row; stop "the row does not read the not-yet line" }
-capture not-on-yet
-author; activate; osascript -e 'tell application "System Events" to keystroke "," using command down' >/dev/null; sleep $GAP
-press "Protection" AXButton
-press "Record your twelve words…" AXButton
-waitfor "Copy" 20 || stop "the words' look did not show its words"
-press "Copy" AXButton
-$STASH $ACCOUNT >/dev/null || stop "the words stash refused (never twelve words on the clipboard?)"
-log "the words stashed (never printed)"
-press "I've written them down" AXButton
-waitfor "Close" 5 && press "Close" AXButton
+  step P4 "sign in"
+  sign_in
 
-step P6 "Turn on sync — the set-up arm: a new passphrase twice, the words"
-press "Turn on sync…" AXButton
-waitfor "New passphrase" 20 || stop "the set-up confirm did not open (is this the set-up arm?)"
-focus "New passphrase"; secret passphrase
-focus "Again"; secret passphrase
-focus "Your twelve words"; secret words
-capture confirm
-press "Turn on sync" AXButton
+  step P5 "the row says not-yet; the twelve words' look (Settings ▸ Protection), copied and stashed"
+  waitfor "$NOT_YET" 30 || { capture row; stop "the row does not read the not-yet line" }
+  capture not-on-yet
+  author; activate; osascript -e 'tell application "System Events" to keystroke "," using command down' >/dev/null; sleep $GAP
+  press "Protection" AXButton
+  press "Record your twelve words…" AXButton
+  waitfor "Copy" 20 || stop "the words' look did not show its words"
+  press "Copy" AXButton
+  $STASH $ACCOUNT >/dev/null || stop "the words stash refused (never twelve words on the clipboard?)"
+  log "the words stashed (never printed)"
+  press "I've written them down" AXButton
+  waitfor "Close" 5 && press "Close" AXButton
 
-step P7 "THE SHEET confirms the first round (VX-507), the row reads Synced with no relaunch (VX-498)"
-if ! waitfor "Synced. Your library is on your account now." 180; then
-  capture sheet
-  waitfor "Sync hasn't run yet" 1 && stop "the sheet says the first round is blocked (its line is in the capture)"
-  stop "the sheet never confirmed the first round — check the confirm sheet: a still-standing sheet with a disabled button means a field is empty or mistyped (capture every window, not the first)"
+  step P6 "Turn on sync — the set-up arm: a new passphrase twice, the words"
+  press "Turn on sync…" AXButton
+  waitfor "New passphrase" 20 || stop "the set-up confirm did not open (is this the set-up arm?)"
+  focus "New passphrase"; secret passphrase
+  focus "Again"; secret passphrase
+  focus "Your twelve words"; secret words
+  capture confirm
+  press "Turn on sync" AXButton
+
+  step P7 "THE SHEET confirms the first round (VX-507), the row reads Synced with no relaunch (VX-498)"
+  if ! waitfor "$SETUP_LANDED" 180; then
+    capture sheet
+    # The blocked line is "Sync hasn't run yet: <the row's sentence>." (ProtectionWords.firstRoundBlocked — :1053), so the
+    # probe matches its PREFIX (an exact match never fired: this diagnosis was dead before VX-623).
+    VIS_AX_PREFIX=1 waitfor "Sync hasn't run yet" 1 && stop "the sheet says the first round is blocked (its line is in the capture)"
+    stop "the sheet never confirmed the first round — check the confirm sheet: a still-standing sheet with a disabled button means a field is empty or mistyped (capture every window, not the first)"
+  fi
+  capture synced-sheet
+  press "Done" AXButton
+  rowreads "Synced" 30 || { capture row; stop "the row does not read Synced" }
+  capture synced-row
+  pgrep -f "$APP/Contents/MacOS" | grep -qx $PID || stop "the process changed — this was meant to run with no relaunch"
+
+  step P8 "the server, by the account's id (Tools/prod-read.sh — SELECTs only)"
+  vault=$(prodread "select mode, revision, key_proof_hash is not null as proof from key_vault where user_id = '$UID_'")
+  kp=$(prodread "select count(*) as n from vault.secrets where name = 'kp:$UID_'")
+  cursors=$(prodread "select count(*) as n from device_cursor where owner_id = '$UID_'")
+  # The push evidence is setting + container TOGETHER: an account-bound fresh store defers its seed behind
+  # the first clean round (SampleLibraryWelcome's sync gate), so its first push carries setting rows only —
+  # the "3 settings" VX-510's own hand-verification read. A seeded store counts containers too. (VX-621)
+  rows=$(prodread "select (select count(*) from setting where owner_id = '$UID_') + (select count(*) from container where owner_id = '$UID_') as n")
+  log "key_vault: $vault"; log "kp secret: $kp"; log "device cursors: $cursors"; log "data rows (setting + container): $rows"
+  [[ $vault == *'"mode":'* && $vault == *'"proof":true'* ]] || stop "no vault row with its proof"
+  [[ $kp == *'"n":1'* ]] || stop "no kp: secret — no round ever reached the key-proof enrollment"
+  [[ $cursors == *'"n":'[1-9]* ]] || stop "no device cursor"
+  [[ $rows == *'"n":'[1-9]* ]] || stop "no data rows on the server"
+  log "the set-up arm PASSED — the sheet confirmed, the row Synced, the server holds the vault, the proof, a cursor and rows"
 fi
-capture synced-sheet
-press "Done" AXButton
-rowreads "Synced" 30 || { capture row; stop "the row does not read Synced" }
-capture synced-row
-pgrep -f "$APP/Contents/MacOS" | grep -qx $PID || stop "the process changed — this was meant to run with no relaunch"
 
-step P8 "the server, by the account's id (Tools/prod-read.sh — SELECTs only)"
-vault=$(prodread "select mode, key_proof_hash is not null as proof from key_vault where user_id = '$UID_'")
-kp=$(prodread "select count(*) as n from vault.secrets where name = 'kp:$UID_'")
-cursors=$(prodread "select count(*) as n from device_cursor where owner_id = '$UID_'")
-# The push evidence is setting + container TOGETHER: an account-bound fresh store defers its seed behind
-# the first clean round (SampleLibraryWelcome's sync gate), so its first push carries setting rows only —
-# the "3 settings" VX-510's own hand-verification read. A seeded store counts containers too. (VX-621)
-rows=$(prodread "select (select count(*) from setting where owner_id = '$UID_') + (select count(*) from container where owner_id = '$UID_') as n")
-log "key_vault: $vault"; log "kp secret: $kp"; log "device cursors: $cursors"; log "data rows (setting + container): $rows"
-[[ $vault == *'"mode":'* && $vault == *'"proof":true'* ]] || stop "no vault row with its proof"
-[[ $kp == *'"n":1'* ]] || stop "no kp: secret — no round ever reached the key-proof enrollment"
-[[ $cursors == *'"n":'[1-9]* ]] || stop "no device cursor"
-[[ $rows == *'"n":'[1-9]* ]] || stop "no data rows on the server"
+if [[ $ARM == both ]]; then
+  step J1 "the set-up instance quits by identity — zero instances, its own step"
+  quit_walk_app
+
+  step J2 "the walk's OWN library set aside — never the dev store's files (G7)"
+  setup_lib=$(turnon_library $RUN/app.log)
+  why=$(aside_verdict "$SLOT" $SLOT_AT_G7 "$setup_lib" "$ASIDE") \
+    || stop "$why — so the set-up arm's library is the walker's to set aside: mv \"$SLOT\" \"$ASIDE\", then run: Tools/WalkKit/first-run-walk.sh $ACCOUNT --arm join"
+  aside_own_slot "$SLOT" "$ASIDE" || stop "the rename of the slot folder to ${ASIDE:t} did not prove out — look before anything moves again"
+  log "the set-up arm's library $setup_lib set aside WHOLE → ${ASIDE:t} (one rename; the slot folder was absent at G7, so this run made it)"
+
+  launch_on_road $RUN/app-join.log J3 J3
+fi
+
+if [[ $ARM != setup ]]; then
+  step J4 "the fresh library's row — signed in still (the session outlives a library), or signed in now"
+  joined= i=
+  for i in {1..30}; do
+    { waitfor "$NOT_YET" 1 || rowreads "$NOT_YET" 1 } && { joined=1; break }
+    if waitfor "Sign in…" 1; then
+      log "signed out — signing in"; sign_in
+      { waitfor "$NOT_YET" 30 || rowreads "$NOT_YET" 1 } && { joined=1; break }
+      capture row; stop "the row does not read the not-yet line after the sign-in"
+    fi
+  done
+  [[ -n $joined ]] || { capture row; stop "the fresh library's row reads neither '$NOT_YET' nor Sign in…" }
+  capture not-on-yet
+
+  step J5 "the server before the join: the account's Standard vault and its device cursors"
+  before=("${(@f)$(account_reads)}")
+  log "key_vault before: ${before[1]}"; log "device cursors before: ${before[2]}"
+  why=$(join_ready "${before[1]}") || stop "$why"
+
+  step J6 "Sync this library — the join arm: the account's passphrase"
+  open_protection "$JOIN_DOOR"
+  press "$JOIN_DOOR" AXButton
+  waitfor "$JOIN_FIELD" 20 || { capture confirm; stop "the join's confirm did not open (no '$JOIN_FIELD' field)" }
+  focus "$JOIN_FIELD"; secret passphrase
+  capture confirm
+  press "$JOIN_BUTTON" AXButton
+
+  step J7 "THE SHEET confirms the join's first round — the words notice's OK first when it shows"
+  landed= noticed=
+  for i in {1..180}; do
+    $BIN/vis-ax $PID "$JOIN_LANDED" >/dev/null 2>&1 && { landed=1; break }
+    if [[ -z $noticed ]] && VIS_AX_PREFIX=1 $BIN/vis-ax $PID "$JOIN_NOTICE" AXStaticText >/dev/null 2>&1; then
+      capture words-notice
+      press "OK" AXButton; noticed=1
+      log "the words notice (the passphrase was typed, so the library's words are the account's now) — OK"
+    fi
+    sleep 1
+  done
+  if [[ -z $landed ]]; then
+    capture sheet
+    VIS_AX_PREFIX=1 waitfor "Sync hasn't run yet" 1 && stop "the sheet says the join's first round is blocked (its line is in the capture)"
+    stop "the join never confirmed its first round — a refusal line under the confirm's fields (in the capture) means the passphrase did not open the account"
+  fi
+  capture synced-sheet
+  press "Done" AXButton
+  rowreads "Synced" 30 || { capture row; stop "the row does not read Synced after the join" }
+  capture synced-row
+  pgrep -f "$APP/Contents/MacOS" | grep -qx $PID || stop "the process changed — the join was meant to land with no relaunch"
+
+  step J8 "the server after the join: cursors +1, the vault's mode and revision unchanged"
+  after=("${(@f)$(account_reads)}")
+  log "key_vault after: ${after[1]}"; log "device cursors after: ${after[2]}"
+  why=$(join_verdict "${before[1]}" "${before[2]}" "${after[1]}" "${after[2]}") || stop "$why"
+  log "the join arm PASSED — the sheet confirmed, the row Synced, one device cursor more, the account's lock unmoved"
+fi
+
+# --- THE END — the evidence above is logged; now the resting posture, then the account's resting state ------------
+step E1 "sign the walk session out — the Debug app's resting posture"
+open_protection "Sign out…"
+press "Sign out…" AXButton
+waitfor "Sign Out" 15 || { capture signout; stop "the sign-out confirm did not open" }
+press "Sign Out" AXButton
+waitfor "Sign in…" 30 || { capture signout; stop "the sign-out did not land (no 'Sign in…' anywhere)" }
+capture signed-out
+
+step E2 "quit the walk instance by identity — zero instances"
+quit_walk_app
+
+step E3 "THE CLEANUP LEG (D-2): the account back to its resting state — after a PASS, never after a STOP"
+reset_account cleanup
 
 STEP=done
-log "PASSED — '$ACCOUNT' first run: the sheet confirmed, the row Synced, the server holds the vault, the proof, a cursor and rows"
-print "first-run-walk PASSED for '$ACCOUNT' (captures and log: $RUN). The app is still running: sign the session out and quit it"
-print "by identity (osascript -e 'tell application id \"$DEBUG_ID\" to quit') — then the run record's close."
+log "PASSED — '$ACCOUNT', arm '$ARM'; signed out, quit, and the account at rest (exists, confirmed, vaultless, rowless)"
+print "first-run-walk PASSED for '$ACCOUNT' (arm '$ARM'; captures and log: $RUN)."
+print "The walk signed out, quit (zero instances), and reset the account to its resting state (reset-cleanup.log)."
+print "The slot: $SLOT holds the walk's last library$( [[ $ARM == both ]] && print -r -- "; ${ASIDE:t} beside it holds the set-up arm's")."
+print "Both are walk debris — the walker's restoration moves them into the walk debris home and returns the as-found set"
+print "(the run record's ENVIRONMENT TRAPS — the held library is restored exactly as found; never Resume)."
 exit 0
