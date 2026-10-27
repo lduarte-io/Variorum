@@ -503,6 +503,44 @@ the two verbs, the library line, the approval lead) · `Registry/Capability.swif
 `VariorumTests/TutorialMCPChapterTests.swift` (justified edit). Commits: `eff04ea00` (LIVE STATUS) · `d0e7f1302` (core)
 · `965a05521` (app) · this record's commit.
 
+### Canon owed at the closeout (DRAFTED for the closeout — not applied; the two-file rule)
+
+*Written at the ladder's L1 (round 1, finding 1 — batch 1 had drafted none; 2a/2b/3's blocks are the shape). The words in
+quotes are the app's as built (`MCPPaneCopy`); each line is PROVISIONAL until QUESTIONS #243 rules MB-1/2/3.*
+
+- **MCPSpec, W-UX-19's sentence (corrected — VX-516, PROVISIONAL MB-1):** "**every Shared-with-AI row carries Change…
+  beside Revoke** (W-UX-19 ruled — the receipt's pre-filled REPLACE sheet, one grant or a whole act; a GONE target keeps
+  Revoke only)" → append: "— **and Change… replaces only on the place it was opened on (VX-516, PROVISIONAL MB-1; the record
+  `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md` BATCH 1):** confirmed on that place (an act's notes, said and
+  never re-chosen, over the notes that still stand), it replaces what it names, and its sheet's line names whose grant,
+  which place, how far and how long ("Confirming replaces ‹client›’s grant on ‹place› — ‹reach›, ‹duration›."); a
+  DIFFERENT place picked in its sheet makes a new grant there — the title reads "Grant access — ‹client›", the line goes,
+  nothing is revoked and the grant it was opened on stands — on every Change… road (a Shared-with-AI row, a receipt, a
+  shared icon's popover), so one client holds several places at once". (MB-1's consequence stated with it if ruled as
+  built: Change… on an INERT row can no longer move that grant to another place — Revoke takes it.)
+- **MCPSpec, the pane's sentence (the two doors — VX-515, PROVISIONAL MB-2):** "The pane: per-client grant rows (counts
+  say "grants"), …" → after "per-client grant rows (counts say "grants")" insert: "— the client row's add door **Share a
+  place…** (THE grant sheet with that client picked, nothing replaced) and, under Shared with AI's rows while an approved
+  client holds at least one listed grant, **Share another place…** (the sheet asking WHO, the most recently granted client
+  first, nothing pre-filled, nothing replaced); Shared with AI lists every live grant every client holds, one row per place
+  (VX-515)". (Each is a `.surface` door declared in the capability registry — `.mcpChangeClientAccess` (its id kept) and
+  `.mcpShareAnotherPlace`.)
+- **MCPSpec, THE PANE AND THE SHARED ICON (VX-281's paragraph — the zero-state, VX-512, PROVISIONAL MB-3):** after "every
+  explainer is ONE line with its whole text behind an (i) (`Core/Views/ExplainerLine`)." insert: "While the library has
+  no client at all (none waiting, approved or denied), the pane's top section carries ONE such line under the server's —
+  "Clients belong to the library they were set up in — run each one’s setup here." — its (i) saying that clients,
+  approvals and grants are this library's local-only rows, never synced or carried into another library, so a library
+  started fresh or filled by sync begins with the server off and no clients (VX-512)."
+- **SurfaceContracts, Doors to the outside (the MCP door bullet): nothing owed** — its "One standing grant row exists per
+  client and place." stays true (two places are two rows); the pane's doors and words are MCPSpec's, not a cross-cutting
+  rule. (The closeout may add "a client may hold grants on several places at once" beside it if it reads that rule as
+  cross-cutting — a judgment, not a correction.)
+- **The dated entry + narrative → `notes/AppSpecRecord.md`:** VX-516's trace (the three Change… roads that passed
+  `replacing` through on a re-picked place; her words "it keeps just changing what is shown though …" and her urgency
+  "allowing multiple grants is one of my highest priorities …"), VX-515's two asks (the doors; the listing verified honest —
+  her "doesn't show both" was VX-516's revoke), VX-512's silence; MB-1/2/3 as provisionals; MB-9 (no op-level guard) as an
+  open option. MB-3's release-notes practice note is her release drafting, not canon.
+
 ### For the orchestrator (not this batch's to run)
 
 - **The Mac batch** (stage, via the coordinator): the product is prebuilt at
@@ -1392,6 +1430,23 @@ gathering rows).
    marker before she opens it hears the Private why-word. Behaviour right (no grant offered — `durations(for:)` and
    `reachLine` read the fence, not its kind), the word wrong; the pane's own `inertDetail(.journal, kind: .gathering)`
    already distinguishes ("it's your daily Journal now"), so the ask's lead is the one face that doesn't.
+
+### L1 FIXES (the same session, the confirmed findings — all four agreed, no dispute pending)
+
+**NOT DONE BY L1 (first line):** no `xcodebuild test`, no GUI, no stage; no canon applied (finding 1's lines are DRAFTED
+for the closeout, the two-file rule); nothing in `Sync/`, `Server/`, custody, the synced schema or the editor seam.
+
+**LIVE STATUS (per piece, flipped in the same commit as each piece):**
+- **No behavioural revert is in flight.**
+- Finding 1 (batch 1's canon-owed block): DONE (this commit) — the BATCH 1 RECORD's new "Canon owed at the closeout"
+  block (after its "Files touched"): W-UX-19's sentence corrected (Change… replaces only on its own place — MB-1), the two
+  door verbs (MB-2) and the zero-state line (MB-3) drafted for MCPSpec in 2a/2b/3's shape; SurfaceContracts owed nothing
+  (its one-row-per-place line stays true), said with the reason; the AppSpecRecord narrative's batch-1 items listed. Doc
+  only — no pin (the finding's own disposition).
+- Finding 2 (the two-flake note): NOT-STARTED.
+- Finding 3 (`intoGathering` takes `spendsAfter`): NOT-STARTED.
+- Finding 4 (the fenced-gathering ask's why-word): NOT-STARTED — pin first, red on the current code, then the fix.
+- The whole headless suite at the end: NOT-STARTED.
 
 ## ORCHESTRATOR ACCEPTANCE
 
