@@ -241,6 +241,45 @@ the id the walk leaves.
     confirmed, the prefs diff clean, no instances, and the prod-test-account state left (files true, or updated
     and said).
 
+**THE WALK RULINGS (phase 1 → 2, the orchestrator, 2026-10-27 ~04:45 MDT; the walk session's phase-1 proposal is
+the input — its drafts sit gitignored under `App/Variorum/DerivedData/vx502-walk-drafts/` until 2a commits them):**
+1. **Leg 2 = variant B′** (the proposal's finding is CONFIRMED: `ProtectionCopyDoors.makeMine` overwrites the
+   slot's hold marker before anything moves, so the negotiated make-mine leg could never return the hold; B′ also
+   avoids a second, WRITING use of the dev pair and never pushes the as-found library's content into the
+   account). At zero instances the NINE top-level slot files move whole, inode-proven, into a same-volume aside;
+   the empty no-lived-here slot assesses as start-fresh; the walk library is a FRESH library (its minted words
+   never looked at — it joins the account at leg 3 and adopts the account's pair, rule 7). Rule 17's make-mine
+   coverage is NOT lost: leg 7 (the restore under test) exercises it fully. Leg 11 moves the nine back; the
+   INODE check binds the SEVEN persistent files (WAL/SHM move with the set but rebuild at relaunch — presence
+   and store consistency are their check, not inode identity).
+2. **The W0 safe copy: YES** — the nine as-found files copied into the dev container's `Backups/safety-copies/`
+   (UTC name) before anything, her lockout concern made mechanical.
+3. **The prefs baseline is E0, before step 0** (the test host IS the dev-store app).
+4. **type-prod-test-secret is NOT patched tonight** (her R-510-8 tool; an untested change to credential tooling
+   right before its live use is worse than the brief same-user ps exposure it has always had). The observation
+   goes to the morning bundle (item 3) with the stdin-form offer — hers.
+5. **Observation 8a: INCLUDED** (P1 refused at the restored library's lobby — rule 17's "carries no keys" made
+   visible; if P1 OPENS it, that is a finding).
+6. **Voice captures: SKIPPED** (no changed face on the walk's path; a flip writes synced setting rows).
+7. **Step 0's suite set is DERIVED, not guessed:** grep `App/Variorum/VariorumTests` for the changed types
+   (`ProtectionCopyDoors`, `ProtectionWords`, `PlaintextExportReading`) and run every matching suite as its own
+   `-only-testing`; name the set in the READY. Build-for-testing at 2a (no stage), `test-without-building` inside
+   the window, ABSOLUTE derived-data path. **VX-604 (the coordinator's heads-up): a lone-suite run can
+   false-green as "0 tests in 1 suite passed" through a test-host launch crash — every RESULT line states the
+   EXECUTED test count per run; 0 executed = NO VERDICT, rerun or stop.**
+8. **The helper's lane guard STAYS** (a prod-test-road launch refuses dev-pair typing — the coordinator's lanes
+   enforced mechanically). The words-field mapping is CONFIRMED (`VARIORUM_DEV_NEWROAD_WORDS` is the dev
+   library's words — the env's own VX-306 U3 note; `VARIORUM_DEV_CASTLE_WORDS` is the pre-design store's and is
+   never typed).
+9. **No permission config changes for the window** (author-only; a type-mode call that prompts or stalls is a
+   STOP-and-report, the window yielded, bundled for morning — never worked around).
+10. **Serialization:** 2a's COMMIT (the walk script + lib moving to their real paths) waits for the ladder's
+   close (the r2 fixes + the orchestrator's line-by-line check) — one writer on the branch at a time; pull first.
+   The account branches (castle found in Castle / at passphrase2 / Standard / unopenable / stale words stash) run
+   as scripted, the last two as STOPs. The WalkKit `wl2` helper and the wl2-gated guard stay as built.
+11. **For the coordinator at READY:** the as-found set returns byte-whole INCLUDING VX-548's client row and
+   VX-439's "Walk Book" residue — VX-439's part 2 is unaffected but must not run inside this window.
+
 **Stage traffic:** the claim is `vx-502-walk`, already REQUESTED; the window's order is (a) the Mac test batch —
 `-only-testing:VariorumTests/PlaintextExportBringInRoadTests` + `U2WordsTests` + the closeout's changed-source
 suites — (b) the SEAM ping, (c) the legs. READY goes to the coordinator only after the walk session's concrete
@@ -300,7 +339,7 @@ Sonnet for external facts.
 claim not marked DONE with its evidence is PENDING. A fresh session with only the repo finishes the unit from this
 table.*
 
-**REVERT STATE: THE R2-c FILTERED PROBE IN FLIGHT — OUTSIDE THIS WORKTREE.** It runs in an ISOLATED scratch copy (`git archive 45b43fddf Package.swift Package.resolved Sources Tests Vendor Tools/StringsWorkbook` into the implementer's session scratchpad, its own `.build`), never in `~/dev/variorum-vx-502` — because unit B's walk session is live in this worktree (its untracked `Tools/WalkKit/castle-walk-lib.zsh` and `notes/plans/fixes/vx-502-walk-script.md` appeared at 03:45+) and will build the Debug app from it. Nothing in this worktree is modified by the probe, so there is nothing to restore here. (RV-A1/RV-A2 restored from `e56920846`; the R1-c probe restored from `074c73023` — that window, 03:21:59–03:23:17 MDT, predates the walk session's first file and no build of this worktree exists outside `DerivedData/vx502-unitA`.)
+**REVERT STATE: no revert in flight.** RV-A1 and RV-A2 ran and were each restored from `e56920846`; the R1-c probe ran and was restored from `074c73023` (its window, 03:21:59–03:23:17 MDT, predates unit B's walk session's first file in this worktree, and no build of this worktree exists outside `DerivedData/vx502-unitA`); the R2-c probe ran ONLY in an isolated scratch copy of `45b43fddf` (deleted after) — this worktree was never modified by it.
 
 | # | Piece | Status |
 |---|---|---|
@@ -325,9 +364,9 @@ table.*
 | # | Piece | Status |
 |---|---|---|
 | R2-a | R2-N1 — `forgetMigrations` expects its `identifiers` KNOWN and DISTINCT (subset + distinctness); R2-N2 — `PlaintextExportBringInRoadTests`' header line and the test's NAME say the PICK refuses a newer export (name/doc only) | DONE (`f7335503a`; `swift build --build-tests` green — the suites run at R2-d). The stage batch's quoted line names the SUITE (`-only-testing:VariorumTests/PlaintextExportBringInRoadTests`), verified by grep — it needs no change |
-| R2-b | R2-M1 — the era pin's drop list FROZEN as the literal of 0.10's five local-only names (`0aab72c39`'s `SyncSchema.localOnlyTables`: sync_outbox, sync_state, sync_row_seq, _sync_applying, protection_record — the 0.10 writer modeled; its MCP tables exist empty by migration, no strip needed) + `#expect(LibraryClassifier.classify(at:) == .plaintextExport(store:))` before the read | DONE (this commit): `oldestExportEraDroppedTables` (the five names, `DROP TABLE` strict — each exists at v1_31) replaces the loop over today's set; the classify `#expect` sits before the read; the pin's doc names both gates. `swift test --skip-build --filter PlaintextExportImportTests` → `✔ Test anExportOfTheOldestExportEraStillReadsWhole() passed` · `✔ Test run with 6 tests in 1 suite passed` |
-| R2-c | R2-M1's teeth — a FILTERED SCRATCH PROBE, never committed, announced in the REVERT STATE line first: one MCP table name joins the local-only set AS THE CLASSIFIER SEES IT (`LibraryClassifier.readPlaintext`'s loop over `SyncSchema.localOnlyTables` → `.union(["mcp_client"])` — the use site in `Persistence/`, so the probe never edits a `Sync/` file); expected: the era pin's classify expect RED, pins 1–3 GREEN; the run filtered to `PlaintextExportImportTests` | NOT STARTED |
-| R2-d | Evidence on the final tree: `swift build`; the pin suite; the adjacent filter; ONE `build-for-testing` re-run (an `App/` test file renamed) | NOT STARTED |
+| R2-b | R2-M1 — the era pin's drop list FROZEN as the literal of 0.10's five local-only names (`0aab72c39`'s `SyncSchema.localOnlyTables`: sync_outbox, sync_state, sync_row_seq, _sync_applying, protection_record — the 0.10 writer modeled; its MCP tables exist empty by migration, no strip needed) + `#expect(LibraryClassifier.classify(at:) == .plaintextExport(store:))` before the read | DONE (`45b43fddf`): `oldestExportEraDroppedTables` (the five names, `DROP TABLE` strict — each exists at v1_31) replaces the loop over today's set; the classify `#expect` sits before the read; the pin's doc names both gates. `swift test --skip-build --filter PlaintextExportImportTests` → `✔ Test anExportOfTheOldestExportEraStillReadsWhole() passed` · `✔ Test run with 6 tests in 1 suite passed` |
+| R2-c | R2-M1's teeth — a FILTERED SCRATCH PROBE, never committed, announced in the REVERT STATE line first: one MCP table name joins the local-only set AS THE CLASSIFIER SEES IT (`LibraryClassifier.readPlaintext`'s loop over `SyncSchema.localOnlyTables` → `.union(["mcp_client"])` — the use site in `Persistence/`, so the probe never edits a `Sync/` file); expected: the era pin's classify expect RED, pins 1–3 GREEN; the run filtered to `PlaintextExportImportTests` | DONE (announced `cb179b627`; run in an ISOLATED scratch copy — `git archive 45b43fddf …`, its own `.build` — because unit B's walk session is live in this worktree; never committed, the copy deleted): `LibraryClassifier.readPlaintext`'s `for table in SyncSchema.localOnlyTables {` → `.union(["mcp_client"]) {`, then `swift test --skip-build --filter PlaintextExportImportTests` → `✘ Test anExportOfTheOldestExportEraStillReadsWhole() recorded an issue at PlaintextExportImportTests.swift:378:9: Expectation failed: LibraryClassifier.classify(at: url) == .plaintextExport(store: url)` (`→ .plaintextLibrary(store: …/export.sqlite)`) while pins 1–3 and both standing tests ✔ — `✘ Test run with 6 tests in 1 suite failed … with 1 issue`: the reclassification R2-M1 traced, invisible to every other pin, caught by the era pin. The probe edited the classifier's USE SITE (`Persistence/`), never `Sync/SyncSchema.swift` |
+| R2-d | Evidence on the final tree: `swift build`; the pin suite; the adjacent filter; ONE `build-for-testing` re-run (an `App/` test file renamed) | DONE on `cb179b627` (code = `45b43fddf`): `swift build` → `Build complete!` · `swift test --skip-build --filter PlaintextExportImportTests` → `✔ Test run with 6 tests in 1 suite passed` · the adjacent filter → `✔ Test run with 61 tests in 7 suites passed` · `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx502-unitA build-for-testing` (from `App/Variorum/`) → `** TEST BUILD SUCCEEDED **`, zero errors, no warning in the renamed file. App/ changes this round: the one test file, NAME and DOC only. The round's diff is test code + records only (no production line), so the unit close's whole-suite runs stand. PENDING (the orchestrator's, unchanged): the two Mac suites under a stage claim — the quoted `-only-testing` names the SUITE, so the rename needs no change there |
 
 ### D-A2 — the read-tolerance verification (in source, column by column)
 

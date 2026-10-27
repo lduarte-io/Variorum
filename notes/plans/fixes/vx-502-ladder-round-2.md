@@ -73,4 +73,38 @@ so the orchestrator checks each landed fix line by line)
 
 ## ROUND 2 FIXES (open — filled as they land; the orchestrator's line-by-line check closes the ladder)
 
-PENDING.
+**The implementer's three (opus-implementer, unit A's session; headless; each call built as ruled — none stopped on):**
+
+- `66c4e41eb` — the round-2 fixes table opened in unit A's LIVE STATUS.
+- `f7335503a` — **R2-N1**: `forgetMigrations` opens with `#expect(Set(identifiers).isSubset(of:
+  Set(AppDatabase.migrator.migrations)) && Set(identifiers).count == identifiers.count, "known, distinct identifiers")`;
+  its doc says why (an unknown identifier's DELETE takes nothing yet leaves the set-equality true). **R2-N2**:
+  `PlaintextExportBringInRoadTests`' header line now says a newer build's export is refused at the PICK
+  (`PickedCopy.classify`, before any preflight); the test is renamed
+  `thePreflightReadsAnEarlierBuildsExportThePickRefusesANewerOneNothingWritten` (name/doc only — the body untouched).
+  The stage batch's quoted line names the SUITE (`-only-testing:VariorumTests/PlaintextExportBringInRoadTests`) —
+  verified by grep, no change needed; unit A's A1 row now notes the rename beside the old name.
+- `45b43fddf` — **R2-M1**: (1) `static let oldestExportEraDroppedTables = ["sync_outbox", "sync_state",
+  "sync_row_seq", "_sync_applying", "protection_record"]` — 0.10's writer's set (`SyncSchema.localOnlyTables` at
+  `0aab72c39`, read there) as a FROZEN literal, replacing the loop over today's `StorePlaintextExport.localOnlyTables`;
+  strict `DROP TABLE` (each exists at v1_31); the MCP family's rows not stripped (empty by migration). (2)
+  `#expect(LibraryClassifier.classify(at: url) == .plaintextExport(store: url), …)` before the read. The pin's doc
+  names both gates and the FROZEN rule for the drop.
+- `cb179b627` — the probe announced; **R2-M1's teeth, the reviewer's FILTERED probe, run in an ISOLATED scratch copy**
+  (`git archive 45b43fddf` + its own `.build`, deleted after — unit B's walk session is live in this worktree, so no
+  production file here was touched): `LibraryClassifier.readPlaintext`'s loop → `SyncSchema.localOnlyTables.union(
+  ["mcp_client"])` (the classifier's use site, so no `Sync/` file was edited even uncommitted) → `✘ Test
+  anExportOfTheOldestExportEraStillReadsWhole() … :378:9: Expectation failed: LibraryClassifier.classify(at: url) ==
+  .plaintextExport(store: url)` (`→ .plaintextLibrary(store: …/export.sqlite)`), pins 1–3 and both standing tests ✔ —
+  `✘ Test run with 6 tests in 1 suite failed … with 1 issue`.
+- **Evidence on the final tree** (`cb179b627`; code = `45b43fddf`): `swift build` → `Build complete!` · the pin suite
+  → `✔ Test run with 6 tests in 1 suite passed` · the adjacent filter → `✔ Test run with 61 tests in 7 suites passed` ·
+  ONE `build-for-testing` re-run (`-derivedDataPath DerivedData/vx502-unitA`, the renamed App test) → `** TEST BUILD
+  SUCCEEDED **`. The round's diff is test code + records only (App/: the one file, name/doc), so the unit close's
+  whole-suite runs stand.
+- **Observed, for the orchestrator:** unit B's walk session works in THIS worktree (untracked
+  `Tools/WalkKit/castle-walk-lib.zsh` 03:45, then `notes/plans/fixes/vx-502-walk-script.md`). My commits are
+  path-limited and touched neither. The R1-c probe's window (03:21:59–03:23:17 MDT) predates that session's first file,
+  and no build of this worktree exists outside `DerivedData/vx502-unitA` (none in the default DerivedData), so no Debug
+  build could have carried a probe.
+- **PENDING (the orchestrator's, unchanged):** `PlaintextExportBringInRoadTests` + `U2WordsTests` under a stage claim.
