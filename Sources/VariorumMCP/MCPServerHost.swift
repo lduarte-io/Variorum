@@ -118,6 +118,9 @@ public final class MCPServerHost: @unchecked Sendable {
                 _state = .stopped
                 return snapshot
             }
+        #if DEBUG
+        stopWindowProbe?()
+        #endif
         watcher?.cancel()
         if wake.write >= 0 {
             var byte: UInt8 = 1
@@ -133,6 +136,21 @@ public final class MCPServerHost: @unchecked Sendable {
             session.hangUp()
         }
     }
+
+    /// **THE APP QUITS** (VX-394 — VX-548 batch 2b): the server stops with the
+    /// process. SEAM ONLY in this commit — the body is the road the quit took
+    /// until now (the door's `detach()`: a stop "as the library closes"), so
+    /// the batch's pins read the old behaviour through it.
+    public func stopWithTheProcess() {
+        stop(ending: .libraryClosed)
+    }
+
+    #if DEBUG
+    /// TEST-ONLY (VX-548 batch 2b): runs inside a stop, after the listener's
+    /// state is taken and BEFORE the accept loop is woken — the window a
+    /// client connecting just as the server stops can land in.
+    var stopWindowProbe: (() -> Void)?
+    #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
     /// (the library locking or closing — `MCPConnectionEnd.libraryClosed`): one

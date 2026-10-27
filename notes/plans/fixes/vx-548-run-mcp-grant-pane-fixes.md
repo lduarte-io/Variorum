@@ -740,10 +740,17 @@ and the code anchors below. Lane: headless `swift build`/`swift test` + `xcodebu
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.**
-- **Preflight + the road map:** DONE (this commit) — every lock trigger converges on `AppBootstrap.lock()` →
+- **No behavioural revert is in flight.** (The red leg below needed none: the pins run against the committed
+  pre-fix behaviour, the one new API — `MCPServerHost.stopWithTheProcess` — a SEAM whose body IS the old quit road,
+  `stop(ending: .libraryClosed)`, and the DEBUG `stopWindowProbe` a no-op hook.)
+- **Preflight + the road map:** DONE (`20f1400f6`) — every lock trigger converges on `AppBootstrap.lock()` →
   `lockOnNewRoad` → `onWillLock` (production: `macWillLock(…, endingConnections: door.recordLibraryClosing) { …;
   door.detach() }`, `VariorumApp.swift:286`); quit is `applicationWillTerminate` → `door.detach()` alone.
+- **The host's three stop-road findings — pins RED ON OLD:** DONE (this commit, WIP — no fix yet) —
+  `Tests/VariorumMCPTests/MCPStopRoadsServerTests.swift`: 3 of 6 red, 5 issues, the 3 guards green
+  (`scratchpad/b2b-logs/stoproads-red.log`): the quit logged `disconnect_library_closed` (P-VX394-5 says nothing); a
+  never-served host's stop unlinked the LIVE host's socket; a connection accepted mid-stop was never hung up and never
+  said its end. **NEXT:** the three fixes in `MCPServerHost`/`MCPSession`, then green.
 - **The sweep table (road × end line):** IN-PROGRESS — the table, each cell's pin.
 - **The pane-status honesty trace:** IN-PROGRESS.
 - **App Nap verdict (MB-6):** IN-PROGRESS.
