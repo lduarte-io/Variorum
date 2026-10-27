@@ -111,9 +111,14 @@ struct MCPPaneTabsTests {
     }
 
     /// The pane's tab row: the segmented control whose segments are her four.
-    private func tabRow(in view: NSView) -> NSSegmentedControl? {
-        segmented(in: view).first { labels($0) == Self.tabLabels }
+    /// VX-590 (A JUSTIFIED EDIT, the ritual — the VX-620 run, batch 2): or the
+    /// three a library that never had a client offers (no Shared with AI).
+    private func tabRow(in view: NSView, labels expected: [String] = Self.tabLabels) -> NSSegmentedControl? {
+        segmented(in: view).first { labels($0) == expected }
     }
+
+    /// VX-590: the tabs a library that never had a client offers.
+    static let freshTabLabels = MCPPaneTab.offered(sharing: false).map(\.label)
 
     // MARK: - VX-232 (RED ON OLD)
 
@@ -183,6 +188,16 @@ struct MCPPaneTabsTests {
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }
+            // VX-590 (A JUSTIFIED EDIT, the ritual — the VX-620 run, batch 2):
+            // her four tabs show once the library has had a client, so a first
+            // connection request arrives before the pane mounts; the pin's
+            // subject — her pick remembered — is unchanged.
+            _ = try session.operations.recordMCPContact(name: "claude-code", version: "2")
+            for _ in 0..<200 where door.snapshot.pendingCount == 0 {
+                pump()
+                await Task.yield()
+            }
+            #expect(door.snapshot.pendingCount == 1, "a client has asked to connect")
             door.paneTab = .activity
             do {
                 let (window, host) = mount(MCPPane(door: door), size: NSSize(width: 523, height: 700))
@@ -467,10 +482,16 @@ struct MCPPaneTabsTests {
             let size = AppSettingsView.contentSize
             let (window, host) = mount(AppSettingsView(session: session, mcp: door), size: size)
             defer { unmount(window) }
-            await settle(host, until: { tabRow(in: host) != nil && clientMenu(in: host) != nil })
+            // VX-590 (A JUSTIFIED EDIT, the ritual — the VX-620 run, batch 2): a
+            // fresh library has never had a client, so its tab row is the three
+            // it offers — Connect · Clients · Activity, no Shared with AI; the
+            // oracle's geometry below is unchanged.
+            let fresh = Self.freshTabLabels
+            await settle(host, until: { tabRow(in: host, labels: fresh) != nil && clientMenu(in: host) != nil })
             await settle(host, until: { false }, turns: 15)
 
-            let tabs = try #require(tabRow(in: host), "\(voice): the pane renders her four tabs")
+            let tabs = try #require(tabRow(in: host, labels: fresh), "\(voice): the pane renders a fresh library's tabs")
+            #expect(labels(tabs) == ["Connect", "Clients", "Activity"], "\(voice): VX-590 — no Shared with AI yet")
             #expect(tabs.selectedSegment == 0, "\(voice): no client approved — the pane opens on Connect")
             let tabFrame = tabs.convert(tabs.bounds, to: nil)
             #expect(tabFrame.minX >= AppSettingsView.sidebarWidth + 1 && tabFrame.maxX <= size.width,

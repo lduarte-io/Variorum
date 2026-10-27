@@ -120,7 +120,8 @@ nonisolated enum MCPGrantPicker {
     /// typing — the union star the Bookcase floats first) → every offered
     /// gathering a–z, one section. Each row: the name, its distinguisher where
     /// the name collides, and its footing — a non-Home wing, its shelf, its
-    /// archived state, and "read and suggest only" where its rule needs a star.
+    /// archived state. (VX-596 retired VX-549's "read and suggest only" footing
+    /// with the shaping it named — the ticket's wording point 2.)
     static func gatheringArrangements(
         _ places: MCPGrantPlaces, now: Date,
         calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
@@ -152,7 +153,6 @@ nonisolated enum MCPGrantPicker {
         if !place.inHome, let wing = place.wing { parts.append("\(wing) wing") }
         parts.append(place.shelf ?? PlaceLabels.unshelved)
         parts += place.marks.words
-        if gathering.needsStar { parts.append(MCPPaneCopy.readAndSuggestOnly) }
         let echoed = Set((distinguisher ?? "").components(separatedBy: PlaceLabels.separator))
         let context = parts.filter { !echoed.contains($0) }.joined(separator: PlaceLabels.separator)
         return SearchPickerOption(
@@ -160,13 +160,17 @@ nonisolated enum MCPGrantPicker {
             detail: context.isEmpty ? nil : context, emphasized: distinguisher != nil)
     }
 
-    /// **The rungs a gathering grant may be offered at** (VX-549 — her sitting:
-    /// "the grant sheet presents such a grant as read/suggest-shaped"): a rule
-    /// that needs a STAR can never take a new note from a client (starring is
-    /// not on the wire), so write new and edit are not offered (P-2); every
-    /// other place offers every rung.
-    static func offeredRungs(needsStar: Bool) -> [MCPGrantRule.Rung] {
-        needsStar ? MCPPaneCopy.offeredRungs.filter { $0 <= .suggest } : MCPPaneCopy.offeredRungs
+    /// **The heads-up a star-rule gathering's grant wears at write new or
+    /// edit** (VX-596 — her ruling 2026-10-27, "let's add the star over the
+    /// wire"; the ticket's wording point 1). VX-549 offered such a gathering
+    /// read and suggest only (`offeredRungs(needsStar:)`, retired here): a
+    /// client could never star, so it could never write a note in. Now the wire
+    /// stars where the rule needs it, so every rung is offered, and at the rungs
+    /// that write a new note (write new, and edit, which includes it) the sheet
+    /// says the one consequence for her stars. Nil elsewhere — read and suggest
+    /// write no note; a tag rule stars nothing.
+    static func starHeadsUp(needsStar: Bool, rung: MCPGrantRule.Rung) -> String? {
+        needsStar && rung >= .writeNew ? MCPPaneCopy.starHeadsUp : nil
     }
 
     // MARK: - Wings and clients

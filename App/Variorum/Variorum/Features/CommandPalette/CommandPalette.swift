@@ -59,6 +59,16 @@ final class PaletteModel {
     /// The command vocabulary — injected by the shell (actions live in
     /// composition; the palette only lists and picks).
     @ObservationIgnored var commands: [(title: String, action: @MainActor () -> Void)] = []
+    /// **VX-377 — where ONE open's commands come from** (the shell's, asked by
+    /// `prepare()` once per open): some rows list only where they can act
+    /// (`WingPaletteDoors`), and what the focused pane shows is a fact of the
+    /// moment ⌘K was pressed. nil keeps `commands` as set (harness mounts).
+    @ObservationIgnored var commandSource: (@MainActor () async -> [(title: String, action: @MainActor () -> Void)])?
+    /// The command list the current `items` were built FROM — `execute` reads
+    /// this, never `commands`, so a row's index always names the command it was
+    /// listed as, whatever `prepare()` or the shell wrote since (VX-377: a
+    /// listing that varies per open must never skew ⏎ onto another act).
+    @ObservationIgnored private var listedCommands: [(title: String, action: @MainActor () -> Void)] = []
 
     /// Set by the view's binding, which also spawns `refresh()` — no
     /// hidden didSet task, so tests drive the model deterministically and
@@ -88,11 +98,20 @@ final class PaletteModel {
         self.session = session
     }
 
+    /// **VX-377 — this open's commands, from the shell's source** (once per
+    /// open, before the first `refresh()`). Without a source, `commands` stands.
+    func prepare() async {
+        guard let commandSource else { return }
+        commands = await commandSource()
+    }
+
     func refresh() async {
         generation += 1
         let mine = generation
         let trimmed = query.trimmingCharacters(in: .whitespaces).lowercased()
         var result: [PaletteItem] = []
+        // VX-377: the rows below name commands by index — of THIS list.
+        let commands = self.commands
         // Commands first — matching ones only once a query exists.
         for (index, command) in commands.enumerated() {
             if trimmed.isEmpty || command.title.lowercased().contains(trimmed) {
@@ -137,6 +156,7 @@ final class PaletteModel {
                 words: query))
         }
         items = result
+        listedCommands = commands  // VX-377: the list these rows' indices name
         selectedIndex = 0  // N11: a fresh list selects its top row
     }
 
@@ -197,9 +217,10 @@ final class PaletteModel {
         case .allMatches:
             if let words = item.words { onSearchLibrary?(words) }
         case .command:
+            // VX-377: the list the row was BUILT from — its index names it.
             if let index = Int(item.id.dropFirst("command-".count)),
-               commands.indices.contains(index) {
-                commands[index].action()
+               listedCommands.indices.contains(index) {
+                listedCommands[index].action()
             }
         case .book:
             onOpen(.reading(String(item.id.dropFirst("book-".count))), nil)
@@ -311,6 +332,8 @@ struct CommandPaletteView: View {
         .background(tokens.card)
         .task {
             model.query = ""
+            // VX-377: this open's rows (some list only where they act).
+            await model.prepare()
             await model.refresh()
             fieldFocused = true
         }

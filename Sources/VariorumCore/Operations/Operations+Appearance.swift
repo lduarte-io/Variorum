@@ -295,8 +295,16 @@ extension Operations {
     /// in-transaction mints share it (`setShelfPinned(_:_:pinned:)`).
     /// `enforcingCap` is false only for those born-starred mints
     /// (PROVISIONAL P-13id-U2-1 — a mint never fails on a star).
+    ///
+    /// **VX-596 — the MCP undo's two parameters** (`Operations+MCPStars`; every
+    /// other caller keeps both defaults, byte-unchanged): `position` puts a NEW
+    /// list entry back at that place in star order (clamped) instead of the
+    /// end — an un-star's undo returns the row where it stood; `heard: false`
+    /// keeps intake from hearing a note's star — a replay's exact revival is
+    /// no applying act (`apply_tag`'s replay doctrine: it seats nothing).
     func writeStar(
-        _ db: Database, _ target: StarTarget, starred: Bool, enforcingCap: Bool
+        _ db: Database, _ target: StarTarget, starred: Bool, enforcingCap: Bool,
+        at position: Int? = nil, heard: Bool = true
     ) throws {
         let stored = try Queries.starredTargets(db)
         // The LIST's live entries — what the self-heal persists (a dead
@@ -324,8 +332,15 @@ extension Operations {
                 starsANote = target.kind == .post
             }
             // Both stores: a column-only book gains its list entry (its star
-            // TIME is now — the section's order from here on).
-            if !next.contains(target) { next.append(target) }
+            // TIME is now — the section's order from here on). VX-596: at
+            // `position` when a replay puts a star back where it stood.
+            if !next.contains(target) {
+                if let position {
+                    next.insert(target, at: min(max(position, 0), next.count))
+                } else {
+                    next.append(target)
+                }
+            }
         } else {
             next.removeAll { $0 == target }
         }
@@ -348,14 +363,15 @@ extension Operations {
         guard next != stored else { return }
         let json = String(decoding: try JSONEncoder().encode(next.map(\.key)), as: UTF8.self)
         try upsertSetting(db, key: "starred", value: json)
-        if starsANote {
+        if starsANote, heard {
             try intakeAfterStarring(db, postID: target.id, now: date.now)
         }
     }
 
     /// Is this star's target a live note or book? The `liveReading` guard's
-    /// shape, over the two kinds a star can point at.
-    private func starTargetIsLive(_ db: Database, _ target: StarTarget) throws -> Bool {
+    /// shape, over the two kinds a star can point at. (VX-596: internal — the
+    /// MCP star replays ask it before putting a star back.)
+    func starTargetIsLive(_ db: Database, _ target: StarTarget) throws -> Bool {
         switch target.kind {
         case .post:
             return try Bool.fetchOne(

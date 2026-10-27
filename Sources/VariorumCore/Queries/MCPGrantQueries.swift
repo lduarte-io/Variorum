@@ -749,9 +749,10 @@ extension Queries {
     /// its id, name, wing, shelf and star as the Bookcase reads them, whether
     /// it is archived (a legal place that assembles empty — its grant reaches
     /// nothing until it is unarchived), and whether its rule NEEDS A STAR
-    /// (`GatheringMint.needsStar` — her sitting: "the grant sheet presents
-    /// such a grant as read/suggest-shaped": a client can't star, so it can
-    /// never write a new note into it).
+    /// (`GatheringMint.needsStar`). VX-549 shaped such a grant read/suggest
+    /// (a client couldn't star); since VX-596 a client's new note there is born
+    /// starred, and the sheet reads this fact for its one heads-up line at
+    /// write new or edit (`MCPGrantPicker.starHeadsUp`).
     public struct MCPGrantableGathering: Equatable, Sendable, Identifiable {
         public let id: String
         public let name: String
