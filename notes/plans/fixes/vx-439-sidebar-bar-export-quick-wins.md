@@ -754,3 +754,42 @@ captures Terminal where visual).
   — so it is PRE-EXISTING ON MAIN, not this run's; ticket proposed (Tests & tooling or Editor, Bug, Confirmed): "the
   structural redo after a confirmed destructive undo doesn't re-apply in `DestructiveUndoWarningTests.redoNeverAsks`
   (red on main `dd469951e`)". Instances: both strict `pgrep` forms EMPTY after. Tree clean at `cc8cb7a32` before this record.
+
+## WALK PART 2 (the orchestrator, 2026-10-27 06:10–07:20 MDT, claim vx-439-b2-walk + two renews; captures `walk-shots-vx439/`, gitignored until the debris sweep)
+
+On the stage-verified tree (Debug rebuild of `728456d1f`). Dev store as found and as left: unlocked, the Oct-20 hold
+banner STANDING and untouched, Study voice, MCP off; VX-548's Trash content untouched; prefs diff zero added/removed
+keys (only the app's own bookkeeping changed; a routine launch backup landed beside the store).
+
+GREEN, seen live:
+- **VX-125** — File ▸ Export Note… driven end-to-end through the REAL save panel: the written file is
+  BYTE-IDENTICAL to Copy full text (sha-verified); ⌥⌘S declared on the item (mods=⌥⌘); the door also renders in the
+  note ▾ menu. (And the door was ENABLED in Write all session — more VX-603 intermittency evidence.)
+- **VX-126** — Export Library…: the tagged note's file leads `{#walk}` + body; an untagged, untitled note's file is
+  plain; same-named notes disambiguate (`2026-10-27 F7F7F290.md`); `Readings/Walk Book.md` keeps its old shape.
+- **VX-570** — ⌥⌘N inside a GATHERING in INDEX mode (batch 2's unobserved risk): minted through the planner, note
+  born wearing #walk, assembled instantly ("2 of 2 in this book").
+- **VX-441** — a query typed ONLY into the find bar + one step: the bar's trailing end reads "1 of 1" (the finder
+  DOES write the find pasteboard — risk 3 resolved live).
+- **VX-560** — in-editor ⌘← kept the view and moved the caret to line start; outside text (Library focused) ⌘←
+  navigated BACK to the note.
+- **VX-425** — the Open-row context menu complete (Open Beside · Open in New Window · Star — Rename… · Move/Copy to
+  Wing ▸ · Export Note… — Close · Close All Notes — Delete Note…); the note ▾ menu carries the same acts.
+- **VX-580** — untitled notes' Open rows read their first words ("Walk note one") instead of the date form.
+- **VX-426** — AX help sweep: tooltips lead with names ("Tray — …", "Snippets — …", "References — …"), the
+  back/forward doors speak live hints, the savepoint field and word-count speak their sentences.
+- **The delete roads** — note deletes through the note ▾ door with the 30-day sheet; the plain book's confirm says
+  "Deleting a plain book never touches a note"; the gathering's confirm says "No note is touched: a gathering holds
+  none" with the button "Delete Gathering"; every receipt spoke.
+
+NOT-REACHED (honest; pins + revert cycles carry the behavior): VX-569's live title-click+Tab (the driver missed the
+title field twice; `TitleQuickfillTests` is revert-verified); VX-589's live toggle and the Settings General capture
+(the Settings window never took the driver's clicks; the setting is pin-covered); VX-424's drag delivery (no
+synthetic road reaches a sidebar drop — VX-375; her hand check is bundle item 11); the Terminal-voice captures
+(driver time; VX-552/426 are token-driven).
+
+WALK-FOUND NITS (tickets at the closeout sweep): (1) a GATHERING's Bookcase context menu ends in "Delete Book…"
+while its confirm correctly says Delete Gathering — one label, Wording; (2) "+ new chapter" renders on a GATHERING's
+navigator foot (gatherings refuse sections at the operation — a door that can never act, P-2; pre-existing, VX-217
+era). One transient observation, no ticket: right after Create Gathering, one walk-cap listing showed a second
+on-screen window holding the dialog's stale pixels; not present on re-list.
