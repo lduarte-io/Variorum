@@ -724,3 +724,9 @@ captures Terminal where visual).
   divide are untouched by this batch; batch 1's ShellActions edits are the export/⌥⌘N/Help lines), and it was in neither
   batch 1's 152-suite list nor any earlier stage list of this run — PENDING a baseline run on main's own tree (below).
   NO REVERT IN FLIGHT going into the cycles: tree clean at `0f77f2d95`.
+- 2026-10-27 **B2 STAGE LEG — the revert cycles, corrected method (announced BEFORE applying).** The first `rev_ro`
+  (05:57) on the tree pre-built BEFORE `0f77f2d95` is VOID as evidence: its test bundle carried the old click map (so
+  `atRestTheHalves…` read red for the rig's reason), and the face pin reads the LIVE source, which was restored. So each
+  cycle now runs with its patch APPLIED in the worktree for the run's whole length (source reads see the revert), on a
+  tree rebuilt from `0f77f2d95` + that patch: R-O applied → `build-for-testing` into `dd-ro` → `rev_ro` → `git checkout`
+  restore; then R-G the same into `dd-rg`; then R-T into `dd-rt`. Expected reds exactly as named above.
