@@ -453,10 +453,9 @@ orchestrator's). Batch 1's code and record untouched.*
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **A BEHAVIOURAL REVERT IS IN FLIGHT (VX-358), over the committed `4d3f3f3d1`:** `StoredText.spellingDiffers`'s body
-  forced to `false` and `\(spellingSentence)` dropped from the two descriptions (`MCPToolCatalog.swift`); restore =
-  `git checkout -- Sources/VariorumCore/Domain/StoredText.swift Sources/VariorumMCP/MCPToolCatalog.swift` (both
-  committed — safe). If this line still stands, check `git diff` first.
+- **No behavioural revert is in flight.** (VX-358's ran over the committed `4d3f3f3d1` — `StoredText.spellingDiffers`
+  forced `false`, the sentence dropped from both descriptions — and was restored by `git checkout --`; `git diff`
+  clean after; green again, `vx358-green2.log`.)
 - **VX-365 (`add_note_to_book`'s answer names no tags):** DONE (this commit) — core
   `Operations.addNoteToBookForClient` → `MCPBookAdd {membership, tagIDs, tagPaths}` (the same body and ONE undo entry;
   `addNoteToBook` keeps its signature and returns `.membership`), the tags composed INSIDE the act's transaction by
@@ -476,8 +475,10 @@ orchestrator's). Batch 1's code and record untouched.*
   OLD (`vx358-red.log`, the wire pins on the pre-fix product `15f94f154`): 3 of 7 failed, 5 issues — the fixture's
   precondition and the 3 byte-unchanged guards green, and the old tree's `changed: false` + stored-digest assertions
   passed (the traced mechanism, observed); GREEN (`vx358-green.log`): the 8 wire pins + the pure table + the digest,
-  null, edit, commit, catalog, neutrality and edit-act suites — 105 tests in 14 suites. The behavioural revert run:
-  PENDING (next).
+  null, edit, commit, catalog, neutrality and edit-act suites — 105 tests in 14 suites. THE BEHAVIOURAL REVERT RUN
+  (`vx358-revert-red.log`): the wire suite 4 of 8 failed, 7 issues (the three answer pins + the description pin; the
+  fixture precondition and the three byte-unchanged guards green) and the pure table 5 issues (its five true rows);
+  restored → 9/9 green (`vx358-green2.log`).
 - **VX-352 (Terminal's take card cuts "claude-code · english" to "claude-code · e…"):** NOT-STARTED — settled design
   (PROVISIONAL MB-4): the pure `Domain/TakeLabelFace` (core, headless): `parts` splits a label at its first " · " into
   a YIELDING head (the client name — and the legacy "suggested" word with it) and a KEPT tail (the separator + the
