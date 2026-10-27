@@ -231,8 +231,13 @@ anchors the brief names. No subagent.*
 
 - **No behavioural revert is in flight.**
 - **0 · Preflight + this record:** DONE (this commit).
-- **1 · Pins first (red on the pre-fix tree):** NOT-STARTED — VX-609's ask-answer road and the star-rule mint, wire
-  level, run on the pre-fix tree before any fix.
+- **1 · Pins first (red on the pre-fix tree):** DONE (this commit) — `MCPGatheringGrantServerTests`: the deliberate
+  flip `aRuleThatNeedsAStarMintsTheNoteStarredWithOneClientNamedUndo` (was `…RefusesWriteNewInWordsAndWritesNothing`),
+  `aStarOrATagRuleTakesTheTagOnTheWire` grown (the star-only leg + the unsatisfiable leg + "nothing starred"), and
+  VX-609's `anAnsweredAskOnAStarRuleGatheringLandsTheNoteNeverADeadDoor`. RED ON THE PRE-FIX TREE
+  (`scratchpad/b1-logs/pins-red-on-old.log`): 11 tests / 1 suite, 3 red with 6 issues — every red leg the refusal
+  "Its rule needs a starred note, and only the author can star one." (VX-609's retry after her answered Once among
+  them: the P-2 dead door, reproduced); the 8 others green. The pins are committed RED; the fix follows.
 - **2 · The mint flow (RB-1):** NOT-STARTED — settled design below (THE DESIGN, item 1).
 - **3 · `setStarredForClient` (core op + exact-row undo):** NOT-STARTED.
 - **4 · `set_starred` on the wire (catalog, decisions, answers, Activity):** NOT-STARTED.
