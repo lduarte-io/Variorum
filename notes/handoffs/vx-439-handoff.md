@@ -1,6 +1,6 @@
 # VX-439 handoff — Run: sidebar, bar & export quick wins (overnight 2026-10-27)
 
-The run is DONE and VERIFIED; the PR is OPEN and **HELD — one call of yours gates the merge** (item 1). The record is
+The run is DONE and VERIFIED. Your morning words are IN: the history is rewritten (item 1 DONE — new tip `a3f087842`, tree byte-identical to the tested one, main's line untouched), the Fable pass stood down at your chrome-only criterion, and the release follows the merge (the mechanics section has your command). The record is
 `notes/plans/fixes/vx-439-sidebar-bar-export-quick-wins.md` (its MORNING BUNDLE section carries every detail; this
 checklist points into it).
 
@@ -9,18 +9,18 @@ checklist points into it).
 1. **GATES THE MERGE — the walk captures in the branch's history (my error).** ~11 MB of walk screenshots + two Debug
    prefs exports rode two `git add -A` record commits into the branch's history (the tip has been clean and ignored
    since mid-run; nothing sensitive beyond dev-store content and Debug prefs). Two roads, pick one:
-   (a) **"rewrite it"** — I rewrite the unmerged branch to drop the two blobs (one force-with-lease at your word,
-   PR refreshes, then the merge); RECOMMENDED — cheap now, impossible after the merge commit.
-   (b) **"merge as is"** — the 11 MB enters main's history permanently.
-   Say (a) or (b) and I run the rest of the closeout unattended.
+   **DONE at your word (2026-10-27 morning): rewritten and force-with-lease pushed, `7929147de` → `a3f087842`;
+   the folder appears in zero commits of the branch's history; the tip tree is byte-identical to the tested tree
+   (no re-test owed); main's signed commits kept their original SHAs. The 53 capture files remain on disk only.**
 2. **VX-424 — your ten-second hand check:** drag an Open row down ONE slot (the old always-fail), then up one. No
    synthetic road can prove drag delivery (VX-375); the half-row fix is pinned both directions and red-on-old.
 3. **One Settings visit (bundle 24):** General's seventh row ("Hide starred notes from Open"), flip it live once, and
    glance at the toolbar's "in Home" label in Terminal — the two looks no walk could reach (the Settings window takes
    no synthetic clicks; everything else about both is pinned and was seen live).
-4. **The Fable-pass question (bundle 23):** three editor-FILE touches shipped, all chrome (an `isFindBarVisible`
-   override; a selection-delegate tail call; one `findTextGeneration` counter line). Your kickoff chose the Opus
-   reviewer; both rounds + my line-by-line check stand behind the diff. Order a Fable pass if you want one.
+4. **The Fable pass — STOOD DOWN at your word** ("is it because it's chrome only? … in that case probably not
+   needed"): the three editor-file touches are chrome-only (an `isFindBarVisible` override calling super; a
+   selection-delegate tail call; one counter line), measured O(1) by round 1 and re-checked by round 2. Say the
+   word if you want it after all.
 5. **VX-602's tail (bundle 3 + 10):** the field guide's CONTENT still says "Help ▸ Restore Tutorial…" in three lessons,
    and two neighbouring sentences still say "tutorial" — re-word + the A1 re-seed in your window, or leave them.
 6. **The PROVISIONALs** (bundle 2, 6–9, 12–18): all built as ruled and reviewable at your pass — headline ones:
@@ -61,7 +61,14 @@ mobile-visible (Mac chrome, doors and local settings only; the shared export ser
 
 ## Mechanics at your word
 
-The merge ask goes through the coordinator once you answer item 1 (merge-moment ledgers — AppSpecRecord's dated
+**THE RELEASE (your word: "then we can do a release"):** after the merge, run on main at a zero-instance window —
+`Tools/Release/release.sh --version 0.10.3` — it stamps the version itself and refuses until then; the notes it
+reads are DRAFTED FOR YOUR REVIEW at `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-0.10.3.md` (one 0.10.3
+for the whole wave: VX-502 + VX-548 + VX-439, per your one-release-per-set rule — edit freely, it's your voice
+that ships). I cannot run release.sh (your standing rule); the A1 rail and the /Applications refresh stay in your
+window as ever.
+
+The merge ask goes through the coordinator (merge-moment ledgers — AppSpecRecord's dated
 entry, the next free QUESTIONS number (#244 unless something lands first — VX-548 took #243), the in-flight row's retirement + closeout paragraph, the board snapshot — land on main then;
 the run's branch and worktree are removed after; the debris sweep deletes the walk shots, logs and revert trees).
 No release and no /Applications refresh happen without your separate word.
