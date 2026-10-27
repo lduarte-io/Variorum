@@ -287,13 +287,24 @@ struct PlaintextExportImportTests {
     /// is a 0-byte file (the VX-502 record's D-A2). FROZEN: never move it forward.
     static let oldestExportEra = "v1_31_protection_record"
 
+    /// What that era's writer left behind (ladder round 2, R2-M1): 0.10's `StorePlaintextExport` dropped exactly these —
+    /// `SyncSchema.localOnlyTables` at `0aab72c39` — and stripped the MCP grants family's rows (empty here by migration, so
+    /// no strip is modeled). FROZEN as a literal: the era file models 0.10's WRITER, never today's.
+    static let oldestExportEraDroppedTables = [
+        "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying", "protection_record",
+    ]
+
     /// VX-502 F-1 (ladder round 1) — THE ERA-FROZEN PIN: a file migrated only up to the oldest export era, seeded by raw
     /// SQL in that era's own columns, with the writer's local-only drop applied — the very shape of a 0.10 export — must
-    /// still plan whole under THIS build's reader, and import. A GUARD pin (the pin-3 class; no red-on-old applies): it
-    /// goes red the moment a future migration changes a table the reader touches — a column `plan()`'s SQL names, a column
-    /// a record decodes non-optionally — without a feature-detect (the `hasStatus` precedent), which pins 1–2 cannot see:
-    /// they strike only `grdb_migrations` rows of a current-schema file. FROZEN: the seed names only the era's columns and
-    /// is never edited to follow a later schema — if this goes red, the READER owes a feature-detect, not this pin an edit.
+    /// still be CLASSIFIED a plaintext export by THIS build's picked-thing classifier and plan whole under THIS build's
+    /// reader, and import. A GUARD pin (the pin-3 class; no red-on-old applies) over BOTH gates an export passes: it goes
+    /// red the moment a future migration changes a table the reader touches — a column `plan()`'s SQL names, a column a
+    /// record decodes non-optionally — without a feature-detect (the `hasStatus` precedent), or a future change moves a
+    /// table a 0.10 export carries into the local-only set the classifier tells export from library by (ladder round 2,
+    /// R2-M1) — neither of which pins 1–2 can see: they strike only `grdb_migrations` rows of a current-schema file.
+    /// FROZEN: the seed names only the era's columns and the drop is the era writer's literal; neither is ever edited to
+    /// follow a later schema — if this goes red, the READER or the CLASSIFIER owes the era a tolerance, not this pin an
+    /// edit.
     @Test func anExportOfTheOldestExportEraStillReadsWhole() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("vx502-era-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -353,9 +364,9 @@ struct PlaintextExportImportTests {
                 INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
                 VALUES ('P2', 'PL1', 'B2', 'a0', 'V3', ?, ?)
                 """, arguments: [t, t])
-            // The writer's own drop (`StorePlaintextExport`): the local-only tables stay behind.
-            for table in StorePlaintextExport.localOnlyTables.sorted() {
-                try db.execute(sql: "DROP TABLE IF EXISTS \"\(table.replacingOccurrences(of: "\"", with: "\"\""))\"")
+            // The era writer's drop (0.10's `StorePlaintextExport`): its local-only tables stay behind.
+            for table in Self.oldestExportEraDroppedTables {
+                try db.execute(sql: "DROP TABLE \(table)")
             }
         }
         let applied = try queue.read { try String.fetchAll($0, sql: "SELECT identifier FROM grdb_migrations") }
@@ -364,6 +375,8 @@ struct PlaintextExportImportTests {
         let era = try #require(known.firstIndex(of: Self.oldestExportEra))
         #expect(Set(applied) == Set(known[...era]), "the file is of the frozen era")
 
+        #expect(LibraryClassifier.classify(at: url) == .plaintextExport(store: url),
+                "the pick's classifier still calls the era file a plaintext export (the bring-in's first gate)")
         let plan = try PlaintextExportReading.read(exportAt: url)
         #expect(plan.wings == [PlaintextExportPlan.Wing(id: "W1", name: "studio")])
         #expect(plan.notes.count == 1)
