@@ -104,7 +104,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 |---|---|---|---|
 | 1 — starring on the wire | VX-596 + rider VX-609 | opus-implementer №1 | DONE (Mac run + walk PENDING the window) |
 | 2 — the pane's honesty | VX-590 (Pre-launch) · VX-605 (Pre-launch) | opus-implementer №2 | DONE (Mac run + walk PENDING the window) |
-| 3 — the wire's imports & docs | VX-565 (probe first) · VX-566 · VX-567 + rider VX-619 | opus-implementer №3 | NOT STARTED |
+| 3 — the wire's imports & docs | VX-565 (probe first) · VX-566 · VX-567 + rider VX-619 | opus-implementer №3 | DONE (Mac run PENDING the window; walk legs optional) |
 | 4 — the wing doors from ⌘K | VX-377 | opus-implementer №4 | NOT STARTED |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
 
@@ -191,8 +191,8 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
   approved or denied (VX-512's fact read the other way; monotone — "ever"); no new words (nothing names the hidden
   tab). Options (a) as built · (b) also while the open book is ON · (c) an approved client only (VX-272's gate) — the
   BATCH 2 RECORD's bundle section has the consequences.
-- **RB-4 (PROVISIONAL, batch 3):** VX-567's book-form answer shape (P-VX252-1 extended; P-VX254-2 flipped).
-- **RB-5 (copy, her pass, batch 3):** VX-619's two docs sentences + the instructions trade; batch 1's reworded star strings join the same list (batch 1's list: the BATCH 1 RECORD's bundle section — the tool description, Activity's "changed the star on", the receipts, the undo labels, `starHeadsUp`, the gathering write-new sentence, the guide's two edits, `create_note`'s sentence, `gatheringWords`' "starring", `needsStar`'s bare fact). **Batch 1 left `MCPSession.instructions` untouched: 2,988 / 3,000 — 12 characters for VX-619.**
+- **RB-4 (PROVISIONAL, batch 3 — SUPERSEDES A RATIFIED CALL):** VX-567's book-form answer: `notes` (per note `note_id`, `block_ids`, `blocks` with every take's `sha256`) beside the three id lists. P-VX252-1/P-VX254-2 ("ids only") were RATIFIED 2026-10-15 (#227) — her explicit word asked. Options (a) as built · (b) keep ids only (revert one commit) · (c) as built + per-note `tag_ids`/chapter. The BATCH 3 RECORD's bundle section has the size reasoning.
+- **RB-5 (copy, her pass, batch 3):** VX-619's two docs sentences + the instructions trade; batch 1's reworded star strings join the same list (batch 1's list: the BATCH 1 RECORD's bundle section — the tool description, Activity's "changed the star on", the receipts, the undo labels, `starHeadsUp`, the gathering write-new sentence, the guide's two edits, `create_note`'s sentence, `gatheringWords`' "starring", `needsStar`'s bare fact). **Batch 1 left `MCPSession.instructions` untouched: 2,988 / 3,000 — 12 characters for VX-619.** **Batch 3 (VX-619): 2,988 → 2,994 — the trade (move_note_to_wing's sentence out; show_in_app's tail) and the lock/quit clause, plus the guide's sentence and VX-566's book-form refusal; the list in the BATCH 3 RECORD's bundle section.**
 - **RB-6 (her call, batch 4):** a chord for Move to Wing — the collision-sweep facts recorded; the ⌘K door ships either way.
 - **RB-7 (PROVISIONAL, batch 1):** `set_starred` on a gathering's id answers the gathering sentence (P-VX196-2's posture), now naming "starring" among the author's acts; alternative: R-VX184-1 parity — an edit grant reaching the gathering place stars it.
 - **RB-8 (design calls, batch 1 — for the ladder or her):** `set_starred`'s undo halves restore the star AT ITS PLACE in the Starred list, are not applying acts (a re-star replay seats nothing), refuse past the cap keeping the entry, and bring a column-only book's star back in both stores.
@@ -202,6 +202,8 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
   helper's / Settings ▸ Shortcuts' MCP group (⌥⌘A, ⌥⌘O). Leave · hide clientlessly · reword, per face.
 - **RB-11 (for the ladder, batch 2):** VX-605's sweep row 5 — VX-258's in-handler flip signals nothing; unreachable in
   practice, traced, not fixed (no red pin without a handshake seam).
+- **RB-12 (batch 3 — the ticket's close):** VX-565 RESOLVED, no code — her report's exact shape is VX-393's (fixed 0.9.8); the honest two-row shapes each say what differs (probe pins). Closes on the BATCH 3 RECORD.
+- **RB-13 (her call, batch 3 — O-4 vs VX-619's letter):** the advice says the reconnect road provider-neutrally (O-4, her 2026-10-11 ruling, pinned); the guide names Claude Code's /mcp inside lesson 2's setup fence. Options (a) as built · (b) "/mcp" in the advice without a provider · (c) an O-4 carve-out for the advice.
 - (Batch records append more.)
 
 ## LEDGER
@@ -212,7 +214,7 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 | 2 | This plan file | orchestrator | DONE |
 | 3 | Batch 1 (VX-596 + VX-609) | opus-implementer №1 | DONE 2026-10-27 — headless green (core 3477/464 · MCP 420/76 bar VX-532, isolated green · Strings 32/4); Mac pins COMPILED into fresh `DerivedData/b1`, RUN + walk PENDING the window; record: BATCH 1 RECORD |
 | 4 | Batch 2 (VX-590 · VX-605) | opus-implementer №2 | DONE 2026-10-27 — headless green (core 3477/464 · MCP 423/77 bar VX-532, isolated green · Strings 32/4); VX-605 red-on-old on the pre-fix tree AND under the behavioural revert; VX-590 red by construction; Mac pins COMPILED into fresh `DerivedData/b2`, RUN + walk PENDING the window; record: BATCH 2 RECORD |
-| 5 | Batch 3 (VX-565 · VX-566 · VX-567 + VX-619) | opus-implementer №3 | NOT STARTED |
+| 5 | Batch 3 (VX-565 · VX-566 · VX-567 + VX-619) | opus-implementer №3 | DONE 2026-10-27 — headless green (core 3484/465 · MCP 431/79 bar VX-532, isolated green ×2 · Strings 32/4); VX-565 RESOLVED by VX-393 (probe pins, no fix); VX-566/567 red-on-old on the pre-fix tree; VX-619 2,994/3,000; Mac pins COMPILED into fresh `DerivedData/b3`, RUN PENDING the window; record: BATCH 3 RECORD |
 | 6 | Batch 4 (VX-377) | opus-implementer №4 | NOT STARTED |
 | 7 | Orchestrator acceptance windows (stage via oct27coordinator) | orchestrator | NOT STARTED (plan: a mid window after batches 1–2, the final window after 3–4 + ladder fixes) |
 | 8 | The ladder (whole-run diff, fable-reviewer; roster re-listed first) | orchestrator | NOT STARTED |
@@ -885,9 +887,16 @@ Untouched, by the lane: `Sources/VariorumCore/` entirely, `Sync/`, `Server/`, cu
 
 ## BATCH 3 RECORD
 
-**NOT DONE BY THIS BATCH (first line, by the rule):** PENDING — written at the batch's close. While in flight: no
-`xcodebuild test`, no GUI, no walk, no capture, no stage claim (the orchestrator's); no canon edit (drafted only);
-nothing in `Sync/`, `Server/`, custody, the schema, the editor seam or `VariorumMobile/`.
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
+claim (the orchestrator's) — the Mac pins (`MCPPlaceTwiceFacesTests` 3 NEW, `TutorialMCPChapterTests`' justified
+edit) are written and COMPILED (`build-for-testing` into a FRESH `DerivedData/b3`), their RUN PENDING the
+orchestrator's stage window; no canon edit (MCPSpec's lines DRAFTED below, the two-file rule); no fix for VX-565 (the
+probe found no mechanism — RESOLVED by VX-393, re-proven here); no ticket filed, moved or commented (VX-565's close on
+this record is the orchestrator's at the merge); the real store's field-guide re-seed (VX-619's lesson-2 sentence
+reaches an existing library only through Help ▸ Restore Field Guide…) is HER window's; the instructions do NOT carry
+the ticket's literal "(Claude Code: /mcp)" (O-4 — RB-13); the book import's per-note record carries no `tag_ids` /
+`section_id` (the brief's list — RB-4 option); nothing in `Sync/`, `Server/`, custody, the schema, the editor seam or
+`VariorumMobile/`.
 
 *Implementer: `opus-implementer` №3 (xhigh), fresh session, 2026-10-27. Read in its own context before any code:
 CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 and 2 RECORDS — the tree this batch stands on),
@@ -937,10 +946,15 @@ clients' reconnect roads — VX-619's guide sentence).*
   label, the advice's parity line). GREEN headless (`scratchpad/b3-logs/vx619-advice.log`: 26 / 4 — the advice suite,
   both neutrality nets — the provider net proves the fence holds the new literal — and the VX-180 probe suite);
   the Mac edits compile PENDING (piece 5), RUN PENDING the stage.
-- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b3`):** IN-PROGRESS — Mac `build-for-testing` into the
-  FRESH `DerivedData/b3` (absent before, never a clone; built from `bab5c38b3`'s sources — every later commit is
+- **5 · Suites + Mac `build-for-testing` (FRESH `DerivedData/b3`):** DONE — Mac `build-for-testing` into the FRESH
+  `DerivedData/b3` (absent before, never a clone; built from `bab5c38b3`'s sources — every later commit is
   record-only): **TEST BUILD SUCCEEDED** (`scratchpad/b3-logs/mac-bft3.log`; no warning in a touched file). The whole
-  headless suite: PENDING (running next).
+  headless suite on the final code: GREEN bar the standing VX-532 flake, isolated green ×2 — counts under "Suites"
+  below. **PENDING:** the Mac pins' RUN (the stage) and any walk leg (the orchestrator's window).
+- **Machinery honesty:** `bab5c38b3`'s LIVE STATUS flip (a scripted replace whose end anchor "- **5 · Suites" first
+  matched BATCH 2's piece-5 line) duplicated 298 lines into this file — batch 2's record tail and a stale copy of this
+  record's head; found while closing, removed by `37704ae76` (0 added / 298 deleted; batch 1 and 2's records verified
+  byte-identical to their pre-batch text). Every later flip anchored on a string asserted unique.
 
 ### VX-565 — THE PROBE (her kickoff: "VX-548 rebuilt that listing, re-probe on main")
 
@@ -1123,3 +1137,124 @@ drops move_note_to_wing — VX-619's trade) and `theAdviceSaysTheSameFactsTheGui
 → the trade's premise: absent from the advice, present in the tool's description); `TutorialMCPChapterTests.lessonTwoConnectingAClient`
 (+ VX-619's sentence); header comments re-said in `MCPMintedAnswerServerTests` and `MCPWriteDigestServerTests` (the
 F-254-4 exception retired).
+
+### Files touched
+
+Core: `Operations/Operations+MCPWrites.swift` (`importNote(_:in:section:undoLabel:)` — `section` threaded into
+`mintNoteEntry`) · `Operations/Operations+DocumentImport.swift` (`BookImport.notes`; NEW public `MintedNote`; the seat
+appends what it minted). Wire: `MCPWriteTools.swift` (`Job.importNote` carries `sectionID`; `parseImport` — the parse
+sentence and the book form's refusal; the `.importNote` arm passes the section and echoes it; the `.importBook` arm
+answers `notes`; NEW `bookFormSectionWords`) · `MCPNullCharacters.swift` (the job's pattern) · `MCPToolCatalog.swift`
+(`import_document` declares `section_id`; its description says both forms and the book form's records) ·
+`MCPSession.swift` (the instructions — the lock/quit clause, the trade; its doc). App: `Features/Tutorial/TutorialSeeder.swift`
+(lesson 2's setup card, inside the O-4 fence). Tests: NEW `Tests/VariorumCoreTests/MCPPlaceTwiceProbeTests.swift`,
+`Tests/VariorumMCPTests/MCPImportSectionServerTests.swift`, `Tests/VariorumMCPTests/MCPBookImportRecordsServerTests.swift`,
+`App/Variorum/VariorumTests/MCPPlaceTwiceFacesTests.swift`; edits to `MCPMintedBlocksActsTests` (+2),
+`MCPMintedAnswerServerTests` (the flip), `MCPWriteDigestServerTests` (header), `MCPAdviceServerTests` (+1, two justified
+edits), Mac `TutorialMCPChapterTests` (justified edit). Untouched, by the lane: `Sources/VariorumCore/Sync/`, `Server/`,
+custody, every schema, the editor seam, `VariorumMobile/`, batch 1's `set_starred` and `starred` key (the one-document
+answer's `starred` rides `noteAnswer` exactly as before; the gathering mint's shape is byte-unchanged), batch 2's pane.
+Commits: `1033b29da` (record) · `c5d8d3c50` (VX-565) · `6721d651c` (VX-566 red) · `37ffefefb` (VX-566 fix) ·
+`8d34b3f34` (VX-567 red) · `313cb5e6c` (VX-567 fix) · `bab5c38b3` (VX-619) · `2be48176d` (record) · `683dc757f` (Mac
+compile) · `37704ae76` (record repair) · this record's commits.
+
+### Suites (the end, on the final code — `swift build` green; the record's commits change no code)
+
+- **The whole headless run** (`scratchpad/b3-logs/headless-all.log`, `swift test` on `bab5c38b3`'s code):
+  VariorumCoreTests **3484 tests / 465 suites passed** (5 known issues, standing — batch 2's 3477 / 464 + this batch's
+  7 / 1: `MCPPlaceTwiceProbeTests` 5, `MCPMintedBlocksActsTests` +2); StringsWorkbook **32 / 4 passed**;
+  VariorumMCPTests **431 / 79 with ONE issue — the standing VX-532 flake**
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 25.0 s against its 15 s
+  under the full-parallel run; no harness line changed), re-run ISOLATED green ×2 (`harness-isolated-1/2.log`: 3 / 1,
+  2.2 s each) — batch 2's 423 / 77 + this batch's 8 / 2 (`MCPImportSectionServerTests` 5, `MCPBookImportRecordsServerTests`
+  2, the advice suite +1). VX-607 (`MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds`) and VX-625
+  (`StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar`) green this run.
+- **Targeted, along the way (each green):** `MCPPlaceTwiceProbeTests` 5/1 · VX-566's set 16/4 + 3/1 · VX-567's set
+  23/4 + 34/3 · VX-619's set 26/4 (logs named in LIVE STATUS).
+- **Mac:** `build-for-testing` into the FRESH `DerivedData/b3` — **TEST BUILD SUCCEEDED** (`mac-bft3.log`).
+  **PENDING:** the Mac pins' run (the stage).
+
+### Canon owed at the closeout (DRAFTED for the closeout — not applied; the two-file rule)
+
+- **MCPSpec, VX-252's clause ("What a minted note answers") — replacing** "the BOOK form keeps `book_id`, `note_ids`,
+  `chapter_ids` (P-VX252-1)." **with:** "the BOOK form keeps `book_id`, `note_ids`, `chapter_ids` and answers `notes` —
+  per minted note, in `note_ids`' order, its `note_id`, `block_ids` and `blocks` in that same record, built from what
+  the act minted (VX-567, PROVISIONAL RB-4 — superseding P-VX252-1's ratified ids-only answer; the record
+  `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md` BATCH 3)."
+- **MCPSpec, the same clause — replacing** "`create_note`'s optional `section_id` (with `book_id` only) files the note
+  under that chapter …" **with:** "`create_note`'s and a one-document `import_document`'s optional `section_id` (with
+  `book_id` only — VX-566 for the import) files the note under that chapter in the same call and the same undo; after
+  the book's own decision, any `section_id` that is not a live chapter of that book answers the ONE chapter sentence
+  `add_note_to_book` speaks; the whole-book form refuses a `section_id` in words (its chapters are `book.chapters`)."
+- **MCPSpec, VX-254's clause — replacing** "`create_note`, a one-document `import_document`, `insert_blocks`,
+  `duplicate_note`, `edit_take` and `restore_commit` answer it per take; `divide_block`, `merge_blocks`, `save_version`
+  and the book import answer none (P-VX254-1/2)" **with:** "`create_note`, `import_document` (one document, and a whole
+  book per note — VX-567), `insert_blocks`, `duplicate_note`, `edit_take` and `restore_commit` answer it per take;
+  `divide_block`, `merge_blocks` and `save_version` answer none (P-VX254-1/2 — the book import's exception retired by
+  VX-567, PROVISIONAL RB-4)".
+- **MCPSpec, VX-197's docs clause — after** "and the three acts that are hers alone, so an AI may suggest one
+  (R-VX184-2);" **insert:** "that a lock or a quit ends every connection by design and the client reconnects once
+  Variorum is back — provider-neutral, O-4 (VX-619, her C pick; the move_note_to_wing sentence traded out, its rule
+  kept in the tool's description; 2,994 of 3,000);" **and after** "The field guide's chapter "AI & the MCP door" stays
+  seven lessons —" **insert in the list:** "lesson 2's setup card saying a lock or a quit ends every connection and each
+  client's road back (Claude Code's /mcp ▸ Reconnect, inside its O-4 fence — VX-619),".
+- **MCPSpec, VX-394's last clause** ("a locked library still serves no one (A-8 — …)") — **append:** "; the AI's
+  docs and the guide say so (VX-619)". (Optional — the VX-197 insert already carries it.)
+- **VX-565:** no canon line (RESOLVED by VX-393's shipped rule, which MCPSpec already states: "One grant row per
+  client × place (VX-393 …)").
+- **AppSpec / SurfaceContracts:** nothing goes false (AppSpec §12's MCP summary and SurfaceContracts' MCP bullet name
+  neither `section_id`, the import answers nor the reconnect road; "Every connection's end says why in Activity"
+  stands). No line owed.
+- **The dated entry + narrative → `notes/AppSpecRecord.md`:** VX-565's finding (her VX-393 report resurfacing via the
+  agent's file; RESOLVED, no fix); VX-566's agent report ("49 extra file_note_in_chapter calls") and the book form's
+  refusal; VX-567's agent report and the supersession of P-VX252-1/P-VX254-2's 2026-10-15 ratification (RB-4); VX-619's
+  ruling (MB-7 → C, 2026-10-27), O-4's shaping of the two sentences, the trade and the count.
+
+### THE BUNDLE items born here (fold into §THE BUNDLE)
+
+- **RB-4, as built (PROVISIONAL — and it SUPERSEDES A RATIFIED CALL):** the whole-book `import_document` answers
+  `notes` (per note: `note_id`, `block_ids`, `blocks` with every take's `sha256`) beside its three id lists. P-VX252-1
+  and P-VX254-2 ("ids only", "no fingerprints from … the book import") were RATIFIED 2026-10-15 (#227); VX-567 asks the
+  opposite and she seated it in this run — her explicit word is asked. Options: **(a) as built**; (b) keep ids only
+  (revert `313cb5e6c` + the flip — one commit); (c) as built plus each note's `tag_ids`/`tags` and chapter (the full
+  one-document answer per note). Size: linear in the request (prose answers smaller than it sent; her bilingual book
+  ≈1.7M characters), no paging (no write keeps a finished act's state).
+- **RB-5 (copy, joins her pass):** the advice's new clause "open only while Variorum runs unlocked: locking or quitting
+  it ends every connection, by design, so reconnect once it's back." and the trade (move_note_to_wing's sentence out;
+  show_in_app's "asks to see something"); the guide's "Locking Variorum or quitting it ends every client's connection,
+  by design. Once it's open again, reconnect the client: in Claude Code, choose Reconnect for it in /mcp; any client
+  reconnects when you restart it."; VX-566's "section_id goes with document and book_id: a book brings its own chapters
+  in book.chapters."; `import_document`'s two new description sentences and its `section_id` input description.
+- **RB-12 (for the closeout — the ticket's close):** VX-565 RESOLVED — her report's exact shape is VX-393's (fixed
+  0.9.8, 2026-10-18; v1_30 merged any store's duplicates); the agent's feedback file evidently carried a pre-0.9.8
+  sighting. Closes on this record (Done, with the reason), no code. If her real store's pane still shows one place
+  twice for one client, it is one of the three honest shapes (another client · a once beside a standing grant · two
+  places sharing a name), each said by its row — a screenshot would tell which.
+- **RB-13 (her call — O-4 vs the ticket's letter):** the ticket says "the client reconnects with its own road (Claude
+  Code: /mcp)"; her O-4 ruling (2026-10-11) keeps every provider's name out of everything but the provider setup, and
+  `MCPProviderNeutralityTests` sweeps `MCPSession.swift`. As built: the ADVICE is provider-neutral ("so reconnect once
+  it's back" — a model in Claude Code knows /mcp); the GUIDE names Claude Code's road inside lesson 2's setup fence.
+  Options: **(a) as built**; (b) the advice names "/mcp" without a provider (O-4's net would pass, but Codex's /mcp only
+  lists — misleading there); (c) her explicit carve-out of O-4 for the advice (one fenced line in `MCPSession.swift`;
+  the fence table's file list grows).
+- **For the ladder:** the book form refuses `section_id` rather than ignoring it — a declared argument meaningless in
+  one form; VX-606 (undeclared arguments accepted silently) is the wider question and untouched.
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator) — the products are prebuilt at `~/dev/variorum-vx-620/DerivedData/b3`
+  (a FRESH dir, never a clone; built from `bab5c38b3` — batches 1, 2 and 3's code, so a superset of `b1`/`b2`: batch 1's
+  and 2's lists can run from it too): `cd App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS'
+  -derivedDataPath ~/dev/variorum-vx-620/DerivedData/b3 test-without-building` with `-only-testing:VariorumTests/<Suite>`
+  for: **the pins** `MCPPlaceTwiceFacesTests` (NEW, 3) · `TutorialMCPChapterTests` (the justified edit — lesson 2);
+  **the neighbours** `TutorialCurrencyTests` · `TutorialWalkTests` · `MCPShareFacesTests` · `MCPGrantRoadsTests` ·
+  `MCPSharedRowsTests` · `MCPPaneTests` · `MCPPaneTabsTests` · `MCPSharingFaceTests` · `MCPAskAndReceiptTests` ·
+  `CapabilityRegistryTests` · `ChromeLineLimitTests`. State the EXECUTED count (VX-604); read the `skipped:` lines.
+- **Walk legs (optional — every answer change is wire-proven headless; dev store, the shim driven directly, VX-prefixed
+  content):** (W1 · VX-566) a book "VX import" with a chapter "um"; `import_document {document, book_id, section_id}` →
+  the note sits under "um" in the book's Outline; ⌥⌘Z (named "Undo ‹client›'s import") takes it away. (W2 · VX-567) a
+  whole-book `import_document` → the answer's `notes` (one per note, the digests). (W3 · VX-619) Help ▸ Restore Field
+  Guide… on the DEV store → "AI & the MCP door" ▸ "connecting a client" shows the new sentence (both voices if captured);
+  and the lock leg already walked at the mid window (MID-2's road) is the mechanism. **Restore:** delete the walk's
+  book/notes; the restored guide is dev-store content (replaceable). **The real store's re-seed is HER window's** (the
+  closeout note).
