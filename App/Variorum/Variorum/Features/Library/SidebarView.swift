@@ -260,6 +260,8 @@ struct SidebarView: View {
     /// note's own first words, through the Library's one brain
     /// (`SidebarRowLeads`); absent for every other note. Display only.
     @State private var rowLeads: [String: String] = [:]
+    /// VX-589: "Hide starred notes from Open" — LOCAL (this Mac), default off.
+    @AppStorage(SidebarLayout.OpenListStarredFilter.settingKey) private var hideStarredFromOpen = false
     #if DEBUG
     /// **This column's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): it owns the rail's drawn height.
@@ -300,14 +302,14 @@ struct SidebarView: View {
         SidebarLayout.rowCount(
             starred: stars.items.count, areas: Self.areas.count,
             rail: railEquivalentRows,
-            openNotes: workspace.openNotes.shown.count)
+            openNotes: openListRows.count)
     }
 
     /// The headed groups the column is about to draw (ladder R1-12: the
     /// fit test counts the chrome actually present).
     private var headedGroupCount: Int {
         (stars.items.isEmpty ? 0 : 1) + (railEquivalentRows == 0 ? 0 : 1)
-            + (workspace.openNotes.shown.isEmpty ? 0 : 1)
+            + (openListRows.isEmpty ? 0 : 1)
     }
 
     private var rowHeight: CGFloat {
@@ -366,7 +368,7 @@ struct SidebarView: View {
                 // zone's last points ARE the padding, so the layout is
                 // unchanged and a list that scrolls keeps a last-slot target);
                 // the column keeps it only when there is no list.
-                .padding(.bottom, workspace.openNotes.shown.isEmpty ? SidebarLayout.contentBottomPadding : 0)
+                .padding(.bottom, openListRows.isEmpty ? SidebarLayout.contentBottomPadding : 0)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 // VX-285: the column content's own space — the Open list's
                 // top is read here, unmoved by the outer scroll's offset.
@@ -913,7 +915,9 @@ struct SidebarView: View {
     /// pitch — where her tabs were before Act 10 sent them to the bottom.
     @ViewBuilder
     private var openGroup: some View {
-        let shown = workspace.openNotes.shown
+        // VX-589: the rows the list DRAWS — the strip, less its starred notes
+        // while "Hide starred notes from Open" is on (display only).
+        let shown = openListRows
         if !shown.isEmpty {
             separator
             // VX-285: the list's tallest form is the room left above the sync
@@ -926,7 +930,13 @@ struct SidebarView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         ForEach(shown, id: \.self) { noteID in
-                            openRow(noteID, ordinal: (shown.firstIndex(of: noteID) ?? 99) + 1)
+                            // VX-589: the ordinal is the STRIP's (the ⌘⇧n key's
+                            // truth — a hidden starred row keeps its key, so the
+                            // badges may skip one); `first` is the drawn list's.
+                            openRow(
+                                noteID,
+                                ordinal: (workspace.openNotes.shown.firstIndex(of: noteID) ?? 99) + 1,
+                                first: noteID == shown.first, rows: shown)
                                 .id(noteID)
                         }
                     }
@@ -1064,7 +1074,7 @@ struct SidebarView: View {
             .frame(maxWidth: .infinity)
             .frame(height: height)
             .contentShape(Rectangle())
-            .modifier(OpenListEndZoneDrop(state: openListDrag, workspace: workspace))
+            .modifier(OpenListEndZoneDrop(state: openListDrag, rows: shown, workspace: workspace))
             #if DEBUG
             // VX-288's oracle: the end zone as laid out.
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
@@ -1076,15 +1086,17 @@ struct SidebarView: View {
 
     /// **VX-424 — an Open row's two drop halves** (`OpenListRowHalves`), the
     /// first row's reported to the DEBUG oracle.
-    private func openRowHalves(_ noteID: String, first: Bool) -> some View {
+    private func openRowHalves(_ noteID: String, first: Bool, rows: [String]) -> some View {
         #if DEBUG
         let workspace = workspace
         return OpenListRowHalves(
-            state: openListDrag, noteID: noteID, workspace: workspace, reach: Self.scrollingSectionMargin,
+            state: openListDrag, noteID: noteID, rows: rows, workspace: workspace,
+            reach: Self.scrollingSectionMargin,
             report: first ? { SidebarGeometry.recordOpenListFirstRowHalves($0, $1, for: workspace) } : nil)
         #else
         return OpenListRowHalves(
-            state: openListDrag, noteID: noteID, workspace: workspace, reach: Self.scrollingSectionMargin)
+            state: openListDrag, noteID: noteID, rows: rows, workspace: workspace,
+            reach: Self.scrollingSectionMargin)
         #endif
     }
 
@@ -1098,8 +1110,19 @@ struct SidebarView: View {
     /// scraps container, or a note shown without a row.
     private var currentOpenRow: String? {
         guard case .post(let noteID) = selection,
-              workspace.openNotes.shown.contains(noteID) else { return nil }
+              openListRows.contains(noteID) else { return nil }
         return noteID
+    }
+
+    /// **VX-589 — the rows the Open list DRAWS**: the strip, less every
+    /// starred note while "Hide starred notes from Open" is on (LOCAL, default
+    /// off — `SidebarLayout.OpenListStarredFilter`). Display only: the strip
+    /// itself (order, ⌘⇧n, closing, following) is untouched.
+    private var openListRows: [String] {
+        SidebarLayout.OpenListStarredFilter.displayed(
+            workspace.openNotes.shown,
+            starredNotes: Set(stars.items.filter { $0.target.kind == .post }.map(\.target.id)),
+            hidingStarred: hideStarredFromOpen)
     }
 
     /// U1b: the DEBUG oracle's tap for the fades a scrolling section drew (nil
@@ -1130,7 +1153,7 @@ struct SidebarView: View {
     /// The two scrolling sections, by name (the oracle's own enum is DEBUG-only).
     private enum SectionName { case starred, open }
 
-    private func openRow(_ noteID: String, ordinal: Int) -> some View {
+    private func openRow(_ noteID: String, ordinal: Int, first: Bool, rows: [String]) -> some View {
         let destination = SidebarSelection.post(noteID)
         let current = selection == destination
         return rowChrome(selected: current) {
@@ -1180,7 +1203,7 @@ struct SidebarView: View {
                     // VX-424's oracle: the first row's ✕ as laid out — where a
                     // pin clicks to prove the row's halves take no hit at rest.
                     .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                        if ordinal == 1 { SidebarGeometry.recordOpenListFirstRowClose(frame, for: workspace) }
+                        if first { SidebarGeometry.recordOpenListFirstRowClose(frame, for: workspace) }
                     }
                     #endif
             }
@@ -1188,7 +1211,7 @@ struct SidebarView: View {
             // Row 13's oracle: the FIRST strip row's content edge — what the
             // "Open" header above it must sit on.
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                if ordinal == 1 {
+                if first {  // VX-589: the DRAWN first row (= ordinal 1 with nothing hidden)
                     SidebarGeometry.recordFirstRowContent(
                         WorkspaceNaming.openSectionHeader, $0, in: session.debugProbeScope)
                 }
@@ -1201,13 +1224,13 @@ struct SidebarView: View {
         // no hits, so every door below is the row's exactly as before). An
         // overlay INSIDE the gestures and the row's own drop: nearer the
         // pointer than the row's drop, and still the row's to click and drag.
-        .overlay { openRowHalves(noteID, first: ordinal == 1) }
+        .overlay { openRowHalves(noteID, first: first, rows: rows) }
         #if DEBUG
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             SidebarGeometry.recordOpenRowHeight(height, in: session.debugProbeScope)
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
-            if ordinal == 1 {
+            if first {  // VX-589: the DRAWN first row (= ordinal 1 with nothing hidden)
                 SidebarGeometry.recordFirstRowBox(
                     WorkspaceNaming.openSectionHeader, box, in: session.debugProbeScope)
                 // VX-286's oracle: the ✕ sits at this box's trailing end.
@@ -1238,7 +1261,7 @@ struct SidebarView: View {
         // U2d (P-U2d-1): the row is its own drop on MAIN's per-row road — the
         // targeted row draws the line at its top and takes the drop before it.
         // VX-424: under its two halves (above), as the row's floor.
-        .modifier(OpenListRowDrop(state: openListDrag, noteID: noteID, workspace: workspace))
+        .modifier(OpenListRowDrop(state: openListDrag, noteID: noteID, rows: rows, workspace: workspace))
         .contextMenu {
             if let onOpenBeside {
                 Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }

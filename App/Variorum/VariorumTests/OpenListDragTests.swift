@@ -899,7 +899,10 @@ struct OpenListDragFaceTests {
             #expect(body.contains(".dropDestination(for: SidebarView.OpenNoteDragToken.self) {"),
                     "\(name): main's per-row Transferable drop")
             #expect(body.contains("} isTargeted: {"), "\(name): isTargeted marks the target")
-            #expect(body.contains("OpenListDropDoor.perform(tokens, onto: \(target), state: state, workspace: workspace)"),
+            // VX-589 — edited deliberately: each drop hands the door the rows
+            // the list DRAWS (`displayed: rows`), so a list hiding its starred
+            // notes lands among what she sees.
+            #expect(body.contains("OpenListDropDoor.perform(tokens, onto: \(target), displayed: rows, state: state, workspace: workspace)"),
                     "\(name): lands through the door with its settle")
         }
         for gone in ["onDropSessionUpdated", "dropConfiguration", "DragConfiguration", "dragConfiguration",
@@ -946,7 +949,7 @@ struct OpenListDragFaceTests {
         #expect(halves.contains("VStack(spacing: 0) {"), "the two halves stack with no gap between them")
         #expect(halves.contains(".dropDestination(for: SidebarView.OpenNoteDragToken.self) {")
                 && halves.contains("} isTargeted: {"), "each half is main's classic per-target drop")
-        #expect(halves.contains("OpenListDropDoor.perform(tokens, onto: target, state: state, workspace: workspace)"),
+        #expect(halves.contains("OpenListDropDoor.perform(tokens, onto: target, displayed: rows, state: state, workspace: workspace)"),
                 "each half lands through the door with its settle")
         #expect(halves.contains(".padding(.horizontal, -reach)"), "the halves reach into the margins")
         #expect(halves.contains(".allowsHitTesting(state.dragging != nil)"),

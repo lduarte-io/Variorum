@@ -179,7 +179,12 @@ struct SettingsShapeTests {
         // the Updates section renders after it) — the fold's cause was
         // fifteen controls ABOVE the appearance row, and that row still
         // sits second from the top.
-        #expect(general.count <= 6,
+        // VX-589 (a CONSEQUENTIAL pin edit, annotated in place — VX-139's
+        // shape exactly): "Hide starred notes from Open" joins the Open notes
+        // section as General's seventh row, BELOW keep-open-notes; the
+        // appearance row still sits second from the top, so the fold's cause
+        // (controls ABOVE it) is untouched. The walk captures the pane.
+        #expect(general.count <= 7,
                 "the fold came from fifteen controls in one pane — this one stays short")
     }
 

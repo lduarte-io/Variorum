@@ -334,7 +334,27 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     `SidebarGeometry.openRowLabels`. PROVISIONALs (morning bundle 12): the Library's 48-char lead cap kept (her "maybe
     fewer words than the library shows" — the row's width truncates first at any normal sidebar width); View ▸ Open
     Note's menu rows keep the display name (the ask was "the lefthand bar"). build-for-testing GREEN.
-  - VX-589: NOT-STARTED
+  - VX-589: BUILT (this commit) — PENDING the stage run (`OpenListStarredFilterTests` 6 + the drag/settings suites).
+    A-439-10 as ruled: a LOCAL preference (`UserDefaults` key `openListHidesStarred`, `@AppStorage` — never the synced
+    `setting` table), default OFF, the pane named: **Settings ▸ General ▸ "Open notes"**, beside its kindred "Keep open
+    notes across launches" (catalog row `hideStarredFromOpen`, "Hide starred notes from Open", searchable by her words
+    "starred", "duplication", "tabs"). When on, the Open list DRAWS the strip less every note wearing the union star
+    (`SidebarLayout.OpenListStarredFilter.displayed`, the strip's order); DISPLAY ONLY — the strip itself (order, ⌘⇧n keys,
+    closing, ⇧⌘W landings, following, the View ▸ Open Note menu) is untouched, so a row returns the moment its note is
+    unstarred or the setting turns off. Every Open-list reader of the drawn rows moved to `openListRows` (the fit count,
+    the headed-group count, the bottom padding, the section window's current row, the rows, the line, the end zone).
+    THE DRAG among the drawn rows: each drop hands the door the drawn rows (`displayed:`); the target and the own place
+    are judged among them (where the line was drawn), and the landing names the STRIP's slot right before the drawn row
+    at that slot, or right after the last drawn row (`OpenListDrop.stripGap` — the identity with nothing hidden, so every
+    VX-288/VX-424 pin still describes the list; headless replica 1147 checks / 0 failed incl. this suite's four pure/door
+    pins). The ⌘⇧n badge stays the STRIP's key (so a hidden starred row's number is skipped — honest: the badge says
+    what the key does) — PROVISIONAL (bundle 13). The first-row DEBUG oracles key on the DRAWN first row (= ordinal 1 with
+    nothing hidden). CONSEQUENTIAL pin edits (VX-139's shape, annotated): General's catalog cap 6 → 7 in
+    `SettingsShapeTests.theAppearanceControlIsOnTheShortOpeningPane` and `DiagnosticsPaneTests` (the new row sits BELOW
+    keep-open-notes; the short dials still top the pane — the walk captures the pane for the fold); the drop face pins read
+    `displayed: rows` (deliberate). PINS `OpenListStarredFilterTests` (6): the preference; the filter; the identity
+    mapping (exhaustive 1…6); the hidden-row mapping incl. the drawn own place; the door landing while the hidden note
+    stays open; the wiring. build-for-testing GREEN.
   - VX-426: NOT-STARTED
   - VX-560: NOT-STARTED
   - VX-441: NOT-STARTED
@@ -372,7 +392,11 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
 12. **VX-580 — two PROVISIONALs:** the sidebar's first-words title uses the Library's own 48-character cap (the row's
     width cuts it first at any normal sidebar width — your "maybe fewer words"); and View ▸ Open Note's menu still names
     untitled notes by their date (your ask named the left-hand bar). Say the word for either.
-13. (grows)
+13. **VX-589 — the ⌘⇧n badges keep the Open list's real keys** while starred rows are hidden (so the numbers may skip
+    one — ⌘⇧2 still opens the hidden starred note). The alternative is renumbering the visible rows, which would make
+    ⌘⇧n mean something different from View ▸ Open Note. Say the word for the other. The setting lives in Settings ▸
+    General ▸ Open notes, under "Keep open notes across launches".
+14. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 

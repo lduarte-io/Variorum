@@ -137,7 +137,9 @@ struct AppSettingsView: View {
 
     /// The panes' own rows (the account section's joins them in `rowIDsRendered`).
     static let paneRowIDs: [SettingsPane: [String]] = [
-        .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "updates"],
+        // VX-589: + "hideStarredFromOpen", the Open notes section's second toggle.
+        .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "hideStarredFromOpen",
+                   "updates"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
                   "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
                   "hoverHandles", "spellcheck", "longBlocks"],
@@ -541,6 +543,9 @@ private struct GeneralPane: View {
     /// UserDefaults, the writeHoverHandles class) — the strip is one
     /// window's chrome on one machine; the ids never sync.
     @AppStorage(OpenNotesMemory.settingKey) private var keepOpenNotes = true
+    /// VX-589 (A-439-10): "Hide starred notes from Open" — LOCAL like its
+    /// neighbour (the Open list is this Mac's view state), default OFF.
+    @AppStorage(SidebarLayout.OpenListStarredFilter.settingKey) private var hideStarredFromOpen = false
 
     var body: some View {
         Form {
@@ -612,6 +617,10 @@ private struct GeneralPane: View {
             // writing pane — it is how the app OPENS, not how a note behaves.
             Section("Open notes") {
                 Toggle(SettingsCatalog.title("keepOpenNotes"), isOn: $keepOpenNotes)
+                // VX-589 (her 10-20 notes: "a setting where you could choose to
+                // not have items that are starred show in the Open tabs"): the
+                // sidebar's kindred toggle, in its section.
+                Toggle(SettingsCatalog.title("hideStarredFromOpen"), isOn: $hideStarredFromOpen)
                 // Her 2026-10-13 ruling: the one line beneath.
                 Text("This Mac only.")
                     .font(.caption)

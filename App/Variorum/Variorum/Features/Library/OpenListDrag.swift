@@ -168,17 +168,27 @@ enum OpenListDropDoor {
     /// drop). The drop ends the drag either way. Returns whether anything moved
     /// — false (the image slides back) for no payload, a row no longer listed,
     /// another list's drag, or the dragged row's own place.
+    ///
+    /// **VX-589:** `displayed` — the rows the list DRAWS (the strip less its
+    /// starred notes while "Hide starred notes from Open" is on; nil = the
+    /// strip). The target and the own place are read among the drawn rows,
+    /// where the line was judged; the landing names the strip's slot
+    /// (`OpenListDrop.stripGap`). With nothing hidden, exactly as before.
     @discardableResult
     static func perform(
         _ tokens: [SidebarView.OpenNoteDragToken], onto target: OpenListDragState.Target,
+        displayed: [String]? = nil,
         state: OpenListDragState, workspace: WorkspaceModel, animation: Animation? = settle
     ) -> Bool {
         state.ended()
         let shown = workspace.openNotes.shown
-        guard let token = tokens.first, let hover = target.hover(in: shown),
-              let gap = SidebarLayout.OpenListDrop.gap(for: hover, rows: shown.count)
+        let drawn = displayed ?? shown
+        guard let token = tokens.first, let hover = target.hover(in: drawn),
+              let gap = SidebarLayout.OpenListDrop.gap(for: hover, rows: drawn.count),
+              let stripGap = SidebarLayout.OpenListDrop.stripGap(
+                displayedGap: gap, displayed: drawn, strip: shown, dragged: token.noteID)
         else { return false }
-        return land(token, atGap: gap, listID: state.listID, in: workspace, animation: animation)
+        return land(token, atGap: stripGap, listID: state.listID, in: workspace, animation: animation)
     }
 
     /// **The landing**: the dragged row moves to the gap — when the drag began
@@ -231,12 +241,14 @@ struct OpenListRowDrop: ViewModifier {
     let state: OpenListDragState
     /// The row's note — its name as a target and at the landing.
     let noteID: String
+    /// VX-589: the rows the list draws (nil = the strip).
+    var rows: [String]? = nil
     let workspace: WorkspaceModel
 
     func body(content: Content) -> some View {
         content
             .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in
-                OpenListDropDoor.perform(tokens, onto: .before(noteID), state: state, workspace: workspace)
+                OpenListDropDoor.perform(tokens, onto: .before(noteID), displayed: rows, state: state, workspace: workspace)
             } isTargeted: { targeted in
                 state.targeted(.before(noteID), targeted)
             }
@@ -260,6 +272,8 @@ struct OpenListRowDrop: ViewModifier {
 struct OpenListRowHalves: View {
     let state: OpenListDragState
     let noteID: String
+    /// VX-589: the rows the list draws (nil = the strip).
+    var rows: [String]? = nil
     let workspace: WorkspaceModel
     /// The side margin the halves reach into on each side (the list's rows sit
     /// inside the scroll content's padding).
@@ -298,7 +312,7 @@ struct OpenListRowHalves: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
             .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in
-                OpenListDropDoor.perform(tokens, onto: target, state: state, workspace: workspace)
+                OpenListDropDoor.perform(tokens, onto: target, displayed: rows, state: state, workspace: workspace)
             } isTargeted: { targeted in
                 state.targeted(target, targeted)
             }
@@ -309,12 +323,14 @@ struct OpenListRowHalves: View {
 /// it names the slot after the last row.
 struct OpenListEndZoneDrop: ViewModifier {
     let state: OpenListDragState
+    /// VX-589: the rows the list draws (nil = the strip).
+    var rows: [String]? = nil
     let workspace: WorkspaceModel
 
     func body(content: Content) -> some View {
         content
             .dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in
-                OpenListDropDoor.perform(tokens, onto: .end, state: state, workspace: workspace)
+                OpenListDropDoor.perform(tokens, onto: .end, displayed: rows, state: state, workspace: workspace)
             } isTargeted: { targeted in
                 state.targeted(.end, targeted)
             }

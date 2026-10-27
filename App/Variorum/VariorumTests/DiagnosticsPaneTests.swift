@@ -70,7 +70,11 @@ struct DiagnosticsPaneTests {
         // top) holds. The cap moves 5 → 6; the crash-report opt-in this
         // pin guards is still not on the pane. PROVISIONAL P-VX139-vi —
         // hers to reverse by re-homing the toggle.
-        #expect(SettingsCatalog.rows(in: .general).count <= 6,
+        // VX-589 (the same CONSEQUENTIAL edit, annotated): "Hide starred
+        // notes from Open" joins the Open notes section as the seventh row,
+        // below keep-open-notes — the short dials still top the pane; the cap
+        // moves 6 → 7, and the crash-report opt-in is still not on it.
+        #expect(SettingsCatalog.rows(in: .general).count <= 7,
                 "the opt-in did not land on the short opening pane (row 59)")
     }
 

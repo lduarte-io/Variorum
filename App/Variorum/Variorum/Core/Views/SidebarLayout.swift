@@ -575,6 +575,31 @@ nonisolated enum SidebarLayout {
         }
     }
 
+    // MARK: - VX-589 — the Open list, less what Starred already shows
+
+    /// **"Hide starred notes from Open"** (VX-589, the VX-439 run, A-439-10 —
+    /// her notes, 2026-10-20: *"ability to not see in Open what is already in
+    /// Starred"* · *"a setting where you could choose to not have items that
+    /// are starred show in the Open tabs. i'm noticing a lot of duplication
+    /// there"*). A LOCAL preference (this Mac — the Open list is per-device
+    /// view state, like appearance), default OFF, in Settings ▸ General ▸
+    /// Open notes beside its kindred "Keep open notes across launches".
+    nonisolated enum OpenListStarredFilter {
+        static let settingKey = "openListHidesStarred"
+
+        /// Off unless she turned it on.
+        static func isOn(_ defaults: UserDefaults) -> Bool { defaults.bool(forKey: settingKey) }
+
+        /// **The rows the Open list DRAWS**: the strip, less every note that
+        /// wears the star while the setting is on — in the strip's order. A
+        /// DISPLAY filter only: the strip keeps every row (its order, its keys,
+        /// closing and following are untouched), so a note returns the moment
+        /// it is unstarred or the setting turns off.
+        static func displayed(_ strip: [String], starredNotes: Set<String>, hidingStarred: Bool) -> [String] {
+            hidingStarred ? strip.filter { !starredNotes.contains($0) } : strip
+        }
+    }
+
     // MARK: - The Open list's drop (U2 — VX-288, the light version; the VX-283 run)
     //
     // Her words (2026-10-13): *"the dragging between open notes in there needs
@@ -685,6 +710,24 @@ nonisolated enum SidebarLayout {
             let inRows = min(max(CGFloat(gap) * rowHeight - lineThickness / 2, 0),
                              max(CGFloat(rows) * rowHeight - lineThickness, 0))
             return min(max(inRows - window.offset, 0), max(window.viewport - lineThickness, 0))
+        }
+
+        /// **VX-589 — a slot among the DRAWN rows, as a slot in the STRIP.**
+        /// With "Hide starred notes from Open" on, the list draws the strip
+        /// less its starred notes, while the strip itself — its order, its
+        /// ⌘⇧n keys, closing — is untouched (A-439-10: display only). The line
+        /// and the drop's "own place" are judged among the rows she SEES
+        /// (nil there — no line was drawn, so nothing moves); the landing then
+        /// names the strip slot right before the drawn row at that slot, or
+        /// right after the last drawn row. With nothing hidden this is the
+        /// identity, so every pin above still describes the list.
+        static func stripGap(displayedGap gap: Int, displayed: [String], strip: [String], dragged: String) -> Int? {
+            guard let from = displayed.firstIndex(of: dragged),
+                  destination(gap: gap, dragged: from, rows: displayed.count) != nil
+            else { return nil }
+            if gap < displayed.count { return strip.firstIndex(of: displayed[gap]) }
+            guard let last = displayed.last, let at = strip.firstIndex(of: last) else { return nil }
+            return at + 1
         }
 
         /// **The end zone's height** (P-U2d-2, PROVISIONAL): the room the list
