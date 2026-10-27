@@ -341,3 +341,88 @@ Instance checks use `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` (the 
 
 **Window tests2 (2026-10-27 ~15:25): revert B applied** — pre-revert tree clean at 1f23d7855; restore = git checkout -- the one file.
 **Window tests2 outcomes (2026-10-27 15:22:18–15:38:01 per stage.log, ~16 min of the 45; claim `vx-562-tests2`):** the full 60-suite run GREEN — "324 tests in 60 suites passed" (`vx562-r1-full.log`; the 4 known issues = the standing IndexTierMetrics pins; the SQLCipher hmac lines are standing test-host noise, 87 in the green run too). REVERTS, each applied → BFT → run → restored (`git status` clean after each): **B** RED on exactly its three named pins (the mounted end-scroll pin + the two pure slide pins; 23 issues, everything else green — `vx562-revB-run.log`); **C** RED on exactly its two (`aScrollThatKeepsTheLandedTargetOnThePage…` + `thePageMovingMoreThanEightPoints…` — `vx562-revC-run.log`); **E** RED on BOTH the pure table AND the mounted click pin (`aNavigatorClickOnAShortNoteInTheLastScreenfulEndsOnThatNote` — so on this host the reveal's onChange precedes the expansion's and the guard is load-bearing on the real click road; finding 4's question ANSWERED — `vx562-revE-run.log`); **G** RED on exactly the contrast pin (`vx562-revG-run.log`). Final restored tree: both suites GREEN 47/2 (`vx562-final-run.log`); no revert in flight; D and F not run (their tables are their own pins — the window's slack call, recorded). R-562-B and R-562-C stand REVERT-VERIFIED; ledger rows 1–2 evidence complete pending round 2 + walk 3.
+
+## WALK 3 (the walker's record, 2026-10-27)
+
+**Verdict: the fixed build behaves as ruled. But N1's lead reads as the WRONG note at reading speed. Over the last screenful the highlight names a story two or three below the one at the page's top.** The end itself is right: the bottom lands on note 13 of 13 (the r1 MAJOR's fix holds).
+- Legs 1, 2, 4, 6 and 7 PASS.
+- Leg 3: the premise was NOT MET on Sherlock (a navigator click unfolds its story, so no landing settles in the slide zone).
+- Leg 5: (a) a keyboard PageUp scrolled the page and the highlight followed the view, but whether R-562-C's release did it can't be told apart on this page; (b) the scroller-knob drag was NOT ACHIEVED.
+- Content was removed as planned. The banner stands. Zero instances. The app's appearance is back to its as-found **Dark**.
+
+An Opus walker ran under the orchestrator's `vx-562-walk3` claim (15:56:23, 30 min), from 15:57 to 16:11:35. The build was the FIXED Debug app (`DerivedData/vx562/…/Debug/Variorum.app`, binary 15:54), launched with `open -n --env OS_ACTIVITY_DT_MODE=YES` and stderr to `w3/run.log`. It ran as pid 65439, verified by path. The window was 1240×940 at (60,33). The voice was Study. No What's New sheet appeared. I typed nothing into any editor and never pressed Resume. Captures are in `App/Variorum/DerivedData/vx562-walk/w3/` (gitignored); the names below are relative to it.
+
+**As found** (before the door; `a0-s.png`, `a1-s.png`, `a2-s.png`, `a2b-s.png`, `set/s0-s.png`, `set/tags0-s.png`):
+- Bookcase (Home): "All · starred · + shelf", no Welcome shelf, and "No books yet". The "Your library is encrypted — record the twelve words" offer card was showing; I left it alone.
+- Library: 1 note, "The walk leaves a stone here: crossings, card,…".
+- Trash: 36 rows. 35 are visible across two captures; the 36th is inferred to be walk 2's "A Scandal in Bohemia", hidden between them. They are 16 from before walk 2, walk 2's 14 (2:35 PM), and 6 from 3:13–3:16 PM (VX-620's).
+- Settings ▸ Tags: `walk` only.
+- **Settings ▸ General ▸ Light & dark ▸ Appearance: Dark** (`appearanceChoice=dark`). macOS was in light mode, and I never touched it. Theme Study, palette Default.
+
+**What Help ▸ Restore the Sample Library minted** (15:59:24; the start-up log said `alreadySeeded` / `alreadySettled`, run.log:309/311):
+- The book "the adventures of sherlock holmes": 13 notes, 13 chapters, 105,335 words, **owned**, wearing `#classics #sherlock holmes`. It opened in Outline (`seed/r12-s.png`).
+- The **Welcome** shelf, freshly minted, with the book on it (`m/bookcase-s.png`).
+- Two tags, `classics` and `sherlock holmes`.
+- The receipt, caught this time (`seed/foot-sheet.png`): *"Restored "the adventures of sherlock holmes" — 12 storys came back. It's on the "Welcome" shelf."* **"storys" is a plural bug in the sample-library receipt.** It is not this diff's; it is a Wording-ticket candidate for the closeout.
+
+**Legs:**
+- **1 — walk 2's core: PASS.**
+  - *Follow:* three wheel steps from rest. The pin went from "book · 13 chapters · 13 notes" to "note 1 of 13 · about this text", then "note 2 of 13 · A Scandal in Bohemia", then "note 3 of 13 · The Red-Headed League". The fill walked the navigator row by row (`L1/sheet1.png`).
+  - *Mid-book navigator click (Blue Carbuncle):* I took a 10-frame burst (`L1c/sheet.png`). t01, at the press, still shows note 3. From t02 (about 0.3 s, the page still mid-landing) every frame shows "note 8 of 13 · The Adventure of the Blue Carbuncle" with the fill on its row. No intermediate row appeared in the pin or the navigator. The landing logged `ms=1021 end=settled top=0` (run.log:572). *Observation:* t02's page was the landing's own in-flight frame (the story's header at the top over an empty unfolding body, with Speckled Band and the stories after it below). The pin and mark were already on the target. Nothing settled wrong.
+  - *Caret ignored:* the caret was live in Blue Carbuncle; the note box read "editing · 8 of 13 · block 1/214". I wheeled about 800 pt up with no typing. The pin then read "note 4 of 13 · A Case of Identity" with the fill on Case of Identity, and Blue Carbuncle was unmarked (`L1d/c1-s.png`).
+- **2 — N1, the end-scroll at reading speed: the end PASSES; the lead reads as the WRONG note.**
+  - Setup: I scrolled to the top and pressed "collapse all", so every card was folded (`L2/top-s.png`). Then I took 24 WalkKit wheel steps of about 100 pt each (10 line events over about 1.2 s per step, about 70 pt/s). I filmed the run (`L2/n1.mov`, 40 s) and took a still after every step (`L2/s01…s24`, sheets `L2/sheet1.png` and `L2/sheet2.png`). The stacked pin lines are in `L2/pins.png`.
+  - Steps s01–s13: one note per two steps, monotone. The top row and the highlight agree; at s13 Twisted Lip's heading is at the top and the pin says note 7.
+  - **The slide zone, s14–s19:** the pin advances one note EVERY step. Compared with the story at the page's top:
+
+    | Still | Story at the page's top | Pin and highlight | Lead |
+    |---|---|---|---|
+    | s14 | the end of Twisted Lip's card (7) | note 8 | +1 |
+    | s15 | Blue Carbuncle's heading (8) | note 9 | +1 |
+    | s16 | the end of Blue Carbuncle's card (8) | note 10 | +2 |
+    | s17 | Speckled Band's heading (9) | note 11 | +2 |
+    | s18 | the end of Speckled Band's card (9) | note 12 | +3 |
+    | s19 | Engineer's Thumb's heading (10) | note 13 | +3, one step before the bottom |
+
+  - s20–s24 are the bottom: "note 13 of 13 · The Adventure of the Copper Beeches", the fill on its row, and "+ new note in this book" on the page.
+  - Across the run the number never skipped a note and never went backwards.
+  - **Felt verdict, in plain words:** over the last screenful the highlight visibly speeds up, to twice the pace it kept all the way down. It names the story near the page's FOOT while I am looking at the one at the top. At s17 Speckled Band's heading sits at the top of the page, and the navigator and pin say "Noble Bachelor", two whole stories lower, mid-page. That does **not** read as "the note I'm viewing". It reads as the wrong note, racing ahead to be at the end in time.
+  - The bottom itself is right. Noble Bachelor, Beryl Coronet and Copper Beeches are each highlighted on the way, unlike walk 2's A, which stuck at note 10.
+  - (I judged from the 24 stills taken at reading-speed spacing during the filmed run. The film is the same run and was not separately reviewed.)
+- **3 — the post-click step-down: PREMISE NOT MET** (`L3/sheet.png`).
+  - At the folded book's end I clicked Beryl Coronet (note 12, in the last screenful) in the navigator. It unfolded (total 2774 → 18809), and the landing settled it at top 0 at offset 2256, far from the last viewport (run.log 16:05:54, `target=23 … end=settled top=0`).
+  - A 12-pt phased scroll up then kept "note 12 of 13 · The Adventure of the Beryl Coronet", which is the rule's own answer with Beryl at the top. There was no step-down, and none was possible.
+  - As in walk 2's F-1, every navigator click on the seeded Sherlock unfolds its story to pages, so no navigator landing can settle inside the slide zone. The step-down needs a short-note book, which was not staged (out of this walk's bounds). The round-2 numbers stay its only evidence.
+- **4 — P-562-7, a chapter heading at the top: PASS.** At s13, s15, s17 and s19 a chapter heading is the top row. The pin always carries a number: s13 reads "note 7 of 13 · The Man with the Twisted Lip" with the Twisted Lip heading at the top. Across all 24 end-scroll stills and leg 1's stills the pin never once dropped to the chapter-only form. No blink.
+- **5 — R-562-C's untried inputs:**
+  - **(a) Keyboard: PageUp, outcome PASS, mechanism INCONCLUSIVE** (`L5/sheetA.png`, `L5/a2-bottom.png`). After the Blue Carbuncle landing, with its editor live and the caret at its start, I pressed one PageUp (key code 116 through `keys.sh`). The page scrolled up about a page; the caret's note was not edited. At 0.6 s and 2.6 s the pin and mark read "note 4 of 13 · A Case of Identity", the rule's answer for the new top. But after the scroll the target's chapter heading sat at the page's very foot, with its note row just below the fold. So this page cannot tell R-562-C's offset release apart from the off-screen rule. The facts: keyboard paging does reach the Outline's page even while an editor holds the caret, and no hold stuck.
+  - **(b) Scroller-knob drag: NOT ACHIEVED** (`L5/sheetB.png`). I re-landed Blue Carbuncle (`end=settled top=0`, total 23165). The Outline's overlay scroller is hidden at rest, and hovering the edge did not reveal it (`L5/b0k-edge.png`). A synthetic press-and-drag (about 5 pt up) at the computed knob spot (screen 1293,192) grabbed no knob. It fell into Blue Carbuncle's live text view as a **text selection** of one prose line. Nothing was typed while it stood, and the next act was a wheel, so no write followed. The page did not move, and the hold correctly stayed on note 8. Revealing the knob needs a scroll, which would itself release; a legacy-scroller switch is a system preference outside the brief. **The knob road stays unverified.**
+- **6 — the viewed chapter's mark, Study dark and light: PASS in both** (`L6/pair-nav.png`, `L6/dark.png`, `L6/light.png`).
+  - **Dark:** the viewed row is a slate tile, sampled **RGB (30,37,44)**, on the navigator's (0,0,0), with the name in near-white ink. Every other row's name is in the accent blue.
+  - **Light:** the tile is **(211,217,221)** on (250,248,244), with the name in dark ink against the other rows' blue.
+  - The filled tile and the ink-versus-accent name switch together make the row unmistakable at normal viewing size, in both appearances. Compare walk 2's barely-there (10,12,14) wash.
+  - Terminal was not walked; the voice is a synced store setting, outside the brief.
+  - The toggle used Settings ▸ General ▸ Appearance only: Light at about 16:06:35, then **Dark again** at about 16:07:15. My first return click did not land, because the guard refused it on HID idle just after my own keystroke, so I repeated it. `defaults read … appearanceChoice` reads `dark`, and `m/final-pair.png` shows Dark selected. The system appearance was never touched.
+- **7 — the finding-10 count, live: PASS** (run.log; the session ran under `OS_ACTIVITY_DT_MODE=YES` from launch 15:57:45 to quit 16:11:35).
+  - **"Modifying state during view update": 2**, both at 16:07:34.025/.026, the instant of the Outline → Index click (the departure). The Index → Outline return added **0** (`L7/back-s.png`: the pin reads "note 12 of 13 · The Adventure of the Beryl Coronet", with exactly one mark).
+  - **"OnScrollGeometryChange … tried to update multiple times per frame": 0** over the whole session. That covers the 24-step end-scroll, the other wheel legs, the PageUp, five Outline landings and the round trip. Walk 2 saw 1, at the Index departure.
+  - The "[AppKit] Invalid view geometry: width is infinity" hum ran to about 400 lines, unattributed as before.
+
+**Removal** (16:09–16:11):
+- The book's row context menu on the Bookcase → **Delete Book…** → the owned-book confirm → "Delete Book and Its 13 Notes" (`m/confirm-s.png`). Receipt: "Deleted "the adventures of sherlock holmes" and its 13 notes — they're in the Trash togeth…" (`m/deleted1-s.png`).
+- The Welcome chip's context menu → Delete Shelf… → "It holds no books…" → Delete Shelf (`m/shelfconfirm-s.png`, `m/shelfgone-s.png`).
+- Settings ▸ Tags: deleted `classics`, then `sherlock holmes`, each through its trash icon and the "Delete Tag?" confirm (`m/tags2-pair.png`). Settings was returned to General before closing.
+
+**Re-check against the as-found list:**
+- Bookcase "All · starred · + shelf · No books yet": matches (`m/shelfgone-s.png`).
+- Library: 1 note, matches.
+- Tags: `walk` only, matches.
+- Trash: grew by exactly the 14 rows stamped 4:09 PM (the book "and 13 notes" plus its 13 notes) above the earlier rows (`m/final3.png`). That is the expected growth.
+- Appearance: Dark, matches.
+
+**Residue I did not remove (named):**
+- (1) The 14 new Trash rows. Put back returns the notes WITHOUT their two tags, because the tags are deleted.
+- (2) Tombstones for the Welcome shelf and the two tags (S2).
+- (3) Three app-written prefs keys: `currentBlock.63F053F8…`, `surfaceSize.outline.63F053F8…` and `surfaceSize.outline.6BB4FC37…`. There is also the launch bookkeeping, since every Debug launch takes a dev-store backup. The keys are diffed in `prefs-before3w.plist` against `prefs-after-w3.plist`; I wrote nothing to the domain.
+
+**Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I killed pid 65439 (`kill -TERM`, path verified with `ps`). At 16:11:35 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing.
