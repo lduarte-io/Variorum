@@ -129,6 +129,35 @@ struct MCPGatheringGrantFacesTests {
                 == "Allowed claude-code: write new in \u{201C}parser things\u{201D} always.")
     }
 
+    /// The ladder's round 1, finding 4: a gathering ask that meets a fence
+    /// before she opens it — `MCPDoor.askStanding` re-reads it through
+    /// `mcpGatheringFacts`, where a stale 'daily' marker on the row is
+    /// `.journal` — names WHICH fence, as the book's ask does and as the pane's
+    /// inert row already does (`inertDetail`), never "marked Private" for the
+    /// Journal. Red on the old tree: its one gathering arm said "marked
+    /// Private" for any fence.
+    @Test func aFencedGatheringsAskNamesItsFenceAsTheBooksDoes() {
+        func ask(_ kind: MCPGrantRule.ScopeKind, _ fence: MCPGrantRule.Fence) -> MCPAsk {
+            MCPAsk(clientName: "claude-code", scopeKind: kind, scopeID: "g", title: "parser things",
+                   rung: .writeNew, fence: fence)
+        }
+        let journal = MCPAskCopy.lead(ask(.gathering, .journal))
+        #expect(journal
+                == "This gathering is your daily Journal now, which no grant reaches. Don't allow lets this ask go.")
+        #expect(!journal.contains("Private"), "the Journal's fence is never called the Private mark")
+        #expect(MCPAskCopy.lead(ask(.gathering, .privateMark))
+                == "This gathering is marked Private now, which no grant reaches. Don't allow lets this ask go.",
+                "the Private arm is unchanged")
+        // The words are the book arm's where the kinds align, and the pane's
+        // inert row says the same of the same gathering.
+        #expect(MCPAskCopy.lead(ask(.book, .journal))
+                    .hasPrefix("This book is your daily Journal now, which no grant reaches"))
+        #expect(MCPPaneCopy.inertDetail(.journal, kind: .gathering).contains("your daily Journal now"))
+        // Either fence still grants nothing from the ask.
+        #expect(MCPAskCopy.reachLine(ask(.gathering, .journal)) == nil)
+        #expect(MCPAskCopy.reachLine(ask(.gathering, .privateMark)) == nil)
+    }
+
     /// The words a gathering grant wears in the pane, the confirm and the
     /// popover's why (PROVISIONAL, her copy pass).
     @Test func theWordsAGatheringGrantWears() {

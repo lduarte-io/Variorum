@@ -1461,7 +1461,15 @@ for the closeout, the two-file rule); nothing in `Sync/`, `Server/`, custody, th
   seam-level red only: **no product red-on-old is claimed**, the finding stays hollow as a bug (no tool reaches the
   combination). Green after (`f3-green.log`: the gathering wire suite + `MCPLibraryOnceServerTests` +
   `MCPNoteEditOnceServerTests`, 15 tests / 3 suites).
-- Finding 4 (the fenced-gathering ask's why-word): NOT-STARTED — pin first, red on the current code, then the fix.
+- Finding 4 (the fenced-gathering ask's why-word): IN-PROGRESS — the PIN is committed (this commit), RED on the current
+  code; the fix is next (`MCPAskCopy.lead`'s `(.gathering, _?)` arm split by fence kind). The pin: Mac
+  `MCPGatheringGrantFacesTests.aFencedGatheringsAskNamesItsFenceAsTheBooksDoes` (its run rides the final window — no
+  `xcodebuild test` in L1). Its RED, headless: a scratch harness (`scratchpad/l1-harness/` — `swiftc-flags.sh` compiles
+  the App target's REAL `MCPPaneCopy.swift`, unmodified, against the package's built products, with three copied stubs
+  for the app symbols it names outside its file — `MCPRungWords`, `String.capitalizedFirst`, `MCPDoor.ServerState`,
+  none read by a fenced arm — and `pin-main.swift`, the Mac pin's seven expectations verbatim): `f4-red.log` — "This
+  gathering is marked Private now, …" for a `.journal` fence; 2 issues (the sentence; "never called the Private mark"),
+  exit 1.
 - The whole headless suite at the end: NOT-STARTED.
 
 ## ORCHESTRATOR ACCEPTANCE
