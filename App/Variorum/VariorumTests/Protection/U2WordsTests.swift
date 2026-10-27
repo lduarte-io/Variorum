@@ -308,10 +308,10 @@ struct U2WordsTests {
         let guide = try #require(ProtectionWords.guideCopiesLesson.last)
         #expect(guide.contains("its gatherings, entry dates, commits, comments, note versions, book settings, stars and "
             + "shelves stay behind."), "\(guide)")
-        #expect(ProtectionWords.exportFromAnEarlierBuild
-            == "This plain-text copy was written by an earlier Variorum than this one, which can't bring it in.")
+        // VX-502 — the earlier-build export line is DELETED (the subset rule — her ratified rule, 2026-10-27, superseding
+        // P-VX309-U1b-7 — reads an earlier build's export); a newer build's export refuses in the sibling door's own words.
         #expect(LibraryOpenCopy.newerSchemaRefusal.hasPrefix("This library was written by a newer Variorum than this one."),
-                "the sibling refusal's shape it mirrors")
+                "the newer export's refusal is the sibling door's")
         #expect(ProtectionWords.exportNoteUnreadable("Spring", line: 12)
             == "The note \u{201C}Spring\u{201D} couldn't be read from this copy (line 12), so nothing was brought in.")
         #expect(ProtectionWords.exportNoteUnreadable("Spring", line: nil)
@@ -357,7 +357,7 @@ struct U2WordsTests {
             ProtectionWords.makeMineEmptySlotLead, ProtectionWords.makeMineEmptySlotReceipt,
             ProtectionWords.emptySlotRestoreListLead, ProtectionWords.noCopiesOnThisMac,
             ProtectionWords.bringInLead(stepsALibraryAside: true), ProtectionWords.bringInLead(stepsALibraryAside: false),
-            ProtectionWords.bringInButton, ProtectionWords.bringInWorking, ProtectionWords.exportFromAnEarlierBuild,
+            ProtectionWords.bringInButton, ProtectionWords.bringInWorking,
             ProtectionWords.exportNoteUnreadable("A note", line: 3),
             ProtectionWords.bringInReceipt(landing, stoppedEarly: true, steppedAside: true),
             ProtectionWords.deleteCopiesLead(Self.choice(backups: 1, previous: 1, opened: 1, staying: 2), libraryOpen: true),
