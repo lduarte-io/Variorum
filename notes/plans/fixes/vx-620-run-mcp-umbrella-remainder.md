@@ -1729,3 +1729,47 @@ and the pin goes red at "the field is EDITING on arrival"). The typing, ⏎ and 
 leg for the re-run window:** delete `.task { fieldFocused = true }` in `Core/Views/WingDestinationSheet.swift`, rebuild
 `b4`, run this one test → red at "the field is EDITING on arrival" (the control still green); restore with `git checkout
 -- App/Variorum/Variorum/Core/Views/WingDestinationSheet.swift`, rebuild.
+
+### FIX LEG 4-F2 (4-F1 did not hold: the re-run window, twice, red at the edited :518 after ~9.3 s; implementer №4 resumed)
+
+**LIVE STATUS (per piece, flipped in the same commit as each piece):**
+- **No behavioural revert is in flight.**
+- **F2-0 · The trace (how the precedents reach a field) + the decision:** DONE (this commit) — below.
+- **F2-1 · The re-seat (the product's DEBUG request oracle + the pin's honest seam):** NOT-STARTED — the decision
+  below.
+- **F2-2 · Rebuild `DerivedData/b4` in place:** NOT-STARTED.
+
+**The trace — how the two named precedents get a field into editing in this host, read exactly (no guess):**
+- **`MastheadTagDoorTests.oneDoorAtRestAndTheFieldTakesFocusWhenItOpens` does NOT pin editing.** Its rig: a plain
+  `NSWindow` (`.titled`), `makeKeyAndOrderFront`, a field-less host settled 20 turns, the focusing host swapped in,
+  settled 30 — no forced key status, no `NSPanel`, no `makeFirstResponder`. Its assertion is `responder is NSTextView
+  || responder is NSTextField` on `window.firstResponder` — an `NSTextField` that holds first responder WITHOUT a field
+  editor passes it. It never reads `currentEditor()`. It is no precedent for the fact this pin demanded.
+- **`TitleQuickfillTests` DOES reach editing (5/5 green, the VX-439 stage leg — `vx-439-sidebar-bar-export-quick-wins.md`
+  :471, :710).** Its rig: a plain `NSWindow` (`.titled`), `PostDetailView` installed as content BEFORE the order-in,
+  `makeKeyAndOrderFront`, settled until the detail registers; then the title's own door flips `editing` INSIDE that same
+  hosting view, the field's `.task { fieldFocused = true }` asks, and the rig waits until `window.firstResponder` is a
+  field editor. No forced key, no panel, no `makeFirstResponder`. What makes it work there and not in either of this
+  pin's rigs is NOT established by reading: its hosting view holds the Write editor's `NSTextView` (which AppKit can
+  take as the window's first responder at the first order-in — `LaunchFocusRig`'s measured note), and its field appears
+  inside a hosting view already in place — two differences, neither provable as THE cause without a run.
+- **The host's editing road is unreliable even when forced:** `LibraryControlsFlowTests`' `type(_:into:)` calls
+  `window.makeKey()` + `window.makeFirstResponder(field)` + `field.currentEditor()` and FALLS BACK to the binding when
+  that road fails — and the past full runs log it failing: "[VX-175 U3b] study/terminal: typing fell back to the binding
+  for " from"/" listing"/…" (×4 each, `full-mac.log`), the first chunk landing and every later one not. Its own comment:
+  "The field editor's road did not reach the binding in this host".
+- **The two reds, read again:** both failed at a `#require` (`:471`, then `:518`), which THROWS — so the typing, ⏎ and
+  Esc halves of the pin NEVER RAN in either window (they are not green; they are unrun).
+
+**The decision (the brief's rule — no third rig variant on a guess):** editing at this seam is unreachable in the
+rigs tried and unreliable in this host by the target's own measured evidence; the one green route (`TitleQuickfillTests`')
+has no reading-established mechanism to copy. So the pin RE-SEATS at the honest seam: **(pinned, mounted)** the
+selector's ARRIVAL ASKS for the keyboard — once per arrival, through its own field's `@FocusState` (a DEBUG oracle at the
+request site, `WingDestinationOracle.keyboardAsks`, plus a source read that the request is `fieldFocused = true` on the
+field `.focused($fieldFocused)` binds); the field is drawn, editable, wearing its prompt; a REAL Esc `NSEvent` through the
+window-scoped monitor closes it and nothing moves (no first responder needed — the `BookcaseMastheadPopoverTests`
+road); **(pinned, model + source)** typing filters and ⏎ chooses at the brain (`theSelectorListsTheSubmenusRowsAndItsKeysChoose`,
+green) with the field's binding and `onSubmit` wired to them (source); **(the walk's — evidence, not a pin)** the
+keyboard LANDING in the field on arrival, typing and ⏎ live: THE FINAL WINDOW part 2, both voices, three times, the
+captures `scratchpad/walk-final/selector-move-study.png` / `selector-typed-walk-study.png` (the MB-15 evidence-shape
+precedent). The control field goes (it pinned the rig's arrival read, which no longer exists).
