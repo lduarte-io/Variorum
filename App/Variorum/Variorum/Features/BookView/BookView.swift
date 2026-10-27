@@ -3157,6 +3157,18 @@ nonisolated struct OutlineScrollFacts: Equatable, Sendable {
             geometry.contentSize.height + insets.top + insets.bottom
                 - geometry.containerSize.height,
             0)
+        #if DEBUG
+        // VX562TRACE — throwaway walk instrumentation (the walk-4 dead clamp's
+        // measurement; REMOVED once the mechanism is recorded).
+        if geometry.contentOffset.y
+            > geometry.contentSize.height - geometry.containerSize.height - 120 {
+            NSLog(
+                "VX562TRACE rawOffset=%.1f content=%.1f container=%.1f insetTop=%.1f insetBottom=%.1f derivedOffset=%.1f derivedTravel=%.1f gap=%.1f",
+                geometry.contentOffset.y, geometry.contentSize.height,
+                geometry.containerSize.height, insets.top, insets.bottom,
+                offset, travel, travel - offset)
+        }
+        #endif
     }
 }
 
