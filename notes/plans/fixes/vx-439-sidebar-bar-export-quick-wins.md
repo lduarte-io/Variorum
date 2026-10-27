@@ -793,3 +793,45 @@ while its confirm correctly says Delete Gathering — one label, Wording; (2) "+
 navigator foot (gatherings refuse sections at the operation — a door that can never act, P-2; pre-existing, VX-217
 era). One transient observation, no ticket: right after Create Gathering, one walk-cap listing showed a second
 on-screen window holding the dialog's stale pixels; not present on re-list.
+
+- 2026-10-27 **LADDER ROUND 1 DISPOSITIONS (the orchestrator, same-model ladder — arbitrated against the spec; the
+  findings file is `vx-439-ladder-round1.md`, committed at `080e15a08`):**
+  **M-1 ACCEPTED, fix in L1** (the P1 invariant outranks everything here; the mechanism is measured): `SidebarRowLeads`
+  moves to `Queries.leadingBlockTexts` (flat, already query-plan-pinned) and narrows its observation; red-on-old pin =
+  a statement/query-plan test on `SidebarRowLeads.read`. The `NoteCards` false-claim side-finding goes to a closeout
+  ticket, not this run.
+  **M-2 ACCEPTED narrowly, fix in L1, PROVISIONAL + bundled:** the toolbar's New Note is a third current-wing mint
+  door, so her "always" reaches it; L1 adds the muted wing label beside it where the toolbar idiom carries a text item
+  cheaply, else the label rides its tooltip and the shape goes to her morning (bundle). C-552-1's two-door premise is
+  corrected in the record.
+  **M-3 ACKNOWLEDGED — the orchestrator's own error:** the walk captures were swept into the branch by `git add -A`
+  record commits (the ignore pattern matched `.walkshots-*/`, not `walk-shots-*/`). The tip is clean as of
+  `080e15a08` (untracked + ignored; files kept on disk for her morning look); the ~11 MB in BRANCH HISTORY is hers to
+  rule: rewrite the unmerged branch before the PR (one force-with-lease at her word — never autonomous) or accept it
+  into main's history. Bundle item.
+  **m-1 ACCEPTED, fix in L1** (traced: a WKWebView text input + ⌘← navigates the pane away): the not-while-text rule
+  learns web-view first responders; pin red-on-old.
+  **m-2 ACCEPTED, fix in L1:** cache the readout's match ranges per (needle, options, text generation); the record's
+  "a find step is itself a whole-note walk" justification is retracted in place.
+  **m-3 ACCEPTED, fix in L1:** the row menus' wing listing takes the `WingNoteDoors` one-shot re-read contract
+  (`onDone`); pin red-on-old (move from the row → reopen menu → fresh list).
+  **m-4 PARTIALLY ACCEPTED:** the VX-589 pins' justification text is corrected (the cited capture shows the MCP pane —
+  an evidence-honesty fix in the pin comments); the LIVE evidence gaps (VX-589 toggle, VX-569 title-Tab, VX-425's
+  three asks, a true Settings General capture) fold into ONE post-fix EVIDENCE SLICE under the fix-verify stage
+  window; VX-424's drag delivery stays her morning hand check (bundle 11, unchanged).
+  **m-5 ACCEPTED, fix in L1:** `NoteExportMenuGateTests` gains `.disabled("never executed — the VX-604 host-crash
+  class; re-enabled by the VX-603/604 work")`.
+  **m-6 ACCEPTED AS CLOSEOUT WORK:** the canon sweep list (SurfaceContracts' tour line and keyboard family; MCPSpec's
+  one Help-label sentence — applying VX-602's ruled rename exactly, one pointer; the Open-list row menu + hide-starred
+  filter lines; Export Note + bulk export as document-format clients) joins the closeout's canon deltas, each a
+  contract line + pointer, nothing beyond the rulings.
+  **m-7 SPECULATIVE — conditional:** L1 writes the pin FIRST (dragging latched + the dragged row gone ⇒ the halves
+  must not be hit-testable); red ⇒ the cheap guard lands; green-on-old ⇒ RECORD-ONLY per the hallucination guard, and
+  the finding is noted hollow.
+  **n-1 / n-3 / n-5 BUNDLED** (journal-profile title offer; the Library's second export door "Markdown with Takes…"
+  beside Export Note — consolidation is her taste call; the one-turn faint-text swap). **n-2 ACCEPTED in L1** (the
+  write-failure message names the error). **n-4 ACCEPTED** (LIVE STATUS freshened by L1's record flips).
+  **The reviewer's scope note (two editor-seam FILE touches, chrome-only, measured O(1)):** her kickoff word chose the
+  Opus reviewer for this run knowing VX-441 was a member; the touches change no storage/layout/identity code. Round 2
+  stays Opus per her word; the two lines are NAMED in the morning bundle so she can order a Fable pass if she wants
+  one.
