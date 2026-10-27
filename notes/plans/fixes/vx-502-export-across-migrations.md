@@ -445,3 +445,20 @@ alters a table this list names adds a feature-detect, the `hasStatus` precedent)
 - **F-A3 — the MCP target's reds in both whole-suite runs are the recorded load-flake class only** (VX-353's
   `aPeerThatNeverAnswersInitialize…` wall-clock bound; the `twoToolsUnderOneNameAreToldApart` sighting under full
   `-c release` load), each green alone; not touched.
+
+## UNIT B — LIVE STATUS (the walk session owns this section; the script of record is `notes/plans/fixes/vx-502-walk-script.md`)
+
+**NOT DONE YET (first, as the contract asks):** no stage act, no Debug launch, no `xcodebuild test`, no dev-store or
+real-store touch, no account act. The ONE server read allowed before the window (W0's precheck) is PENDING in 2a's
+hand-back. Every leg below is PENDING until its row carries its machine-state line (`wk_state`, committed per leg).
+
+*Walk session — Opus subagent of the vx-502 orchestrator. Worktree `~/dev/variorum-vx-502`. Claim `vx-502-walk` (GO only
+from the coordinator, relayed). Secrets by field name only.*
+
+| # | Piece | Status |
+|---|---|---|
+| B0 | Phase 1: preflight read whole; `~/.variorum/bin/type-dev-castle-secret` minted (mode 700; fields `passphrase` → `VARIORUM_DEV_CASTLE_PASSPHRASE`, `words` → `VARIORUM_DEV_NEWROAD_WORDS`; lane guard; stdin road); 12 fixture guard cases + escaping round-trip; `--check` on the real file exit 0 for both fields (frontmost guard deferred to type time); `dev-castle.env` +6 comment lines, value-lines fingerprint unchanged | DONE (outside the repo; the proposal's hand-back) |
+| B1 | THE WALK RULINGS 1–11 (`88fb5ec1b`) applied: B′ leg 2; the seven-persistent-file inode rule at leg 11; the W0 safe copy; E0 before step 0; 8a in; the derived step-0 suite set; VX-604's executed-count rule; the script + the lib (`Tools/WalkKit/castle-walk-lib.zsh`) COMMITTED FIRST | DONE (this commit) |
+| B2 | 2a builds (headless): test products `build-for-testing` → `App/Variorum/DerivedData/vx502-close` (absolute path; started at `88fb5ec1b`, whose code = `776859237`'s — the ladder-close commits are notes only); the walk app `build -configuration Debug` → `App/Variorum/DerivedData/vx502-walk`; `--check` again; W0's prod precheck | IN-PROGRESS — the build lines PENDING |
+| B3 | READY (relayed by the orchestrator) → GO → W0 (safe copy, E0, account line) → step 0 (the derived 109-suite set, executed count stated) → SEAM | NOT STARTED |
+| B4 | Legs 1–13 per the script of record | NOT STARTED |
