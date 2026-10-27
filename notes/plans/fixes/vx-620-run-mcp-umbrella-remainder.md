@@ -105,7 +105,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 | 1 — starring on the wire | VX-596 + rider VX-609 | opus-implementer №1 | DONE (Mac run + walk PENDING the window) |
 | 2 — the pane's honesty | VX-590 (Pre-launch) · VX-605 (Pre-launch) | opus-implementer №2 | DONE (Mac run + walk PENDING the window) |
 | 3 — the wire's imports & docs | VX-565 (probe first) · VX-566 · VX-567 + rider VX-619 | opus-implementer №3 | DONE (Mac run PENDING the window; walk legs optional) |
-| 4 — the wing doors from ⌘K | VX-377 | opus-implementer №4 | NOT STARTED |
+| 4 — the wing doors from ⌘K | VX-377 | opus-implementer №4 | DONE (Mac run + walk PENDING the window) |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
 
 ---
@@ -194,6 +194,9 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 - **RB-4 (PROVISIONAL, batch 3 — SUPERSEDES A RATIFIED CALL):** VX-567's book-form answer: `notes` (per note `note_id`, `block_ids`, `blocks` with every take's `sha256`) beside the three id lists. P-VX252-1/P-VX254-2 ("ids only") were RATIFIED 2026-10-15 (#227) — her explicit word asked. Options (a) as built · (b) keep ids only (revert one commit) · (c) as built + per-note `tag_ids`/chapter. The BATCH 3 RECORD's bundle section has the size reasoning.
 - **RB-5 (copy, her pass, batch 3):** VX-619's two docs sentences + the instructions trade; batch 1's reworded star strings join the same list (batch 1's list: the BATCH 1 RECORD's bundle section — the tool description, Activity's "changed the star on", the receipts, the undo labels, `starHeadsUp`, the gathering write-new sentence, the guide's two edits, `create_note`'s sentence, `gatheringWords`' "starring", `needsStar`'s bare fact). **Batch 1 left `MCPSession.instructions` untouched: 2,988 / 3,000 — 12 characters for VX-619.** **Batch 3 (VX-619): 2,988 → 2,994 — the trade (move_note_to_wing's sentence out; show_in_app's tail) and the lock/quit clause, plus the guide's sentence and VX-566's book-form refusal; the list in the BATCH 3 RECORD's bundle section.**
 - **RB-6 (her call, batch 4):** a chord for Move to Wing — the collision-sweep facts recorded; the ⌘K door ships either way.
+  **The sweep (batch 4, at its tip — the BATCH 4 RECORD's RB-6 section):** free — **⌥⌘L "Move to Wing…"** (the ⌥
+  "deliberate variant" of ⌘L, her ⌥⌘Z / ⌥⌘N / ⌥⌘S grammar) and **⇧⌥⌘L "Copy to Wing…"**; not free — ⌥⌘W, ⌥⌘M (the
+  system's), ⇧⌘M (Merge). A chord would be a menu item reading the availability batch 4 made honest.
 - **RB-7 (PROVISIONAL, batch 1):** `set_starred` on a gathering's id answers the gathering sentence (P-VX196-2's posture), now naming "starring" among the author's acts; alternative: R-VX184-1 parity — an edit grant reaching the gathering place stars it.
 - **RB-8 (design calls, batch 1 — for the ladder or her):** `set_starred`'s undo halves restore the star AT ITS PLACE in the Starred list, are not applying acts (a re-star replay seats nothing), refuse past the cap keeping the entry, and bring a column-only book's star back in both stores.
 - **RB-9 (ticket to file, batch 1):** a third load-sensitive pin — `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` timed out once under the full-parallel headless run, green isolated and in a second whole run (Tests & tooling, the VX-532 class).
@@ -210,6 +213,19 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
   has never had a client, with the open book (VX-590's spirit carried into the search's vocabulary); (c) leave out
   every MCP row but the server switch and Connect while clientless.
 - **RB-13 (her call, batch 3 — O-4 vs VX-619's letter):** the advice says the reconnect road provider-neutrally (O-4, her 2026-10-11 ruling, pinned); the guide names Claude Code's /mcp inside lesson 2's setup fence. Options (a) as built · (b) "/mcp" in the advice without a provider · (c) an O-4 carve-out for the advice.
+- **RB-15 (copy, her pass, batch 4):** the wing selector's words — the field "Move to a wing" / "Copy to a wing", the
+  foot "“X” is in Home · ⏎ chooses · esc closes", no-match "No wing has that name." (the switcher's); the palette rows
+  wear the registry's verbs "Move to Wing" / "Copy to Wing" (no ellipsis — the submenus' titles). Options for the rows:
+  (a) as built · (b) "…" on the verb (the submenus then carry it too) · (c) a palette-only title (a second spelling).
+- **RB-16 (PROVISIONAL, batch 4 — the palette's second grammar):** ⌘K lists Move/Copy to Wing ONLY where they act (a
+  note pane: the note's two; a book or gathering pane: the book's one; never with one wing, never on the daily
+  Journal); every other palette row stays listed always, speaking its note. Options (a) as built · (b) always listed,
+  speaking (two identical "Move to Wing" rows on every pane, one refusing) · (c) extend (a) to every context-gated
+  palette row (its own ticket).
+- **RB-17 (for the ladder, batch 4):** the wing-act re-ask signal is per window (a second window's sidebar/bars
+  unchanged, as before); it also closes the pre-existing cross-door half of VX-425 (a Library/Pool row's or note ▾
+  menu's move left the sidebar's Open indicator and row doors stale — one pin covers both roads); the selector consumes
+  ⌘L as a step and commits on no release; the palette → selector sheet hand-off is walk-verified only.
 - (Batch records append more.)
 
 ## LEDGER
@@ -221,7 +237,7 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 | 3 | Batch 1 (VX-596 + VX-609) | opus-implementer №1 | DONE 2026-10-27 — headless green (core 3477/464 · MCP 420/76 bar VX-532, isolated green · Strings 32/4); Mac pins COMPILED into fresh `DerivedData/b1`, RUN + walk PENDING the window; record: BATCH 1 RECORD |
 | 4 | Batch 2 (VX-590 · VX-605) | opus-implementer №2 | DONE 2026-10-27 — headless green (core 3477/464 · MCP 423/77 bar VX-532, isolated green · Strings 32/4); VX-605 red-on-old on the pre-fix tree AND under the behavioural revert; VX-590 red by construction; Mac pins COMPILED into fresh `DerivedData/b2`, RUN + walk PENDING the window; record: BATCH 2 RECORD |
 | 5 | Batch 3 (VX-565 · VX-566 · VX-567 + VX-619) | opus-implementer №3 | DONE 2026-10-27 — headless green (core 3484/465 · MCP 431/79 bar VX-532, isolated green ×2 · Strings 32/4); VX-565 RESOLVED by VX-393 (probe pins, no fix); VX-566/567 red-on-old on the pre-fix tree; VX-619 2,994/3,000; Mac pins COMPILED into fresh `DerivedData/b3`, RUN PENDING the window; record: BATCH 3 RECORD |
-| 6 | Batch 4 (VX-377) | opus-implementer №4 | NOT STARTED |
+| 6 | Batch 4 (VX-377) | opus-implementer №4 | DONE 2026-10-27 — headless green (core 3484/465 bar VX-625 · MCP 431/79 bar VX-532, each isolated green ×2 · Strings 32/4 — no core line changed); the existing selector was a SUBMENU, so the face fix is a keyboard wing selector on ⌘L's brain; ⌘K lists the three rows only where they act (RB-16); the re-ask made cross-door (it did NOT hold by construction — THE TRACE); RB-6's chord sweep recorded, no chord; Mac pins (`WingPaletteDoorsTests` 10) COMPILED into fresh `DerivedData/b4` — the final window's one product — RUN + walk PENDING; record: BATCH 4 RECORD |
 | 7 | Orchestrator acceptance windows (stage via oct27coordinator) | orchestrator | NOT STARTED (plan: a mid window after batches 1–2, the final window after 3–4 + ladder fixes) |
 | 8 | The ladder (whole-run diff, fable-reviewer; roster re-listed first) | orchestrator | NOT STARTED |
 | 9 | Closeout + handoff + QUESTIONS bundle | orchestrator | NOT STARTED |
@@ -1316,7 +1332,17 @@ compile) · `37704ae76` (record repair) · this record's commits.
 
 ## BATCH 4 RECORD
 
-**NOT DONE BY THIS BATCH (first line, by the rule):** PENDING — written at the close.
+**NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
+claim (the orchestrator's) — the Mac pins (`WingPaletteDoorsTests` 10 NEW, the justified edits in
+`CapabilityRegistryTests`, `WingSwitcherTests`, `WingBookMoveDoorTests`) are written and COMPILED (`build-for-testing`
+into a FRESH `DerivedData/b4`), their RUN PENDING the final window, so the selector's mounted keyboard pin and the
+sidebar re-ask pin are UNRUN; the palette → selector sheet hand-off (the palette sheet dismissing as the selector's
+request lands) is walk-verified only — no harness mounts the shell's two sheets; NO CHORD (RB-6 — her call; the sweep
+is recorded); no canon edit (the SurfaceContracts lines are DRAFTED below, the two-file rule); no guide lesson text
+(lesson 11's "a note's right-click carries Move to Wing…" stays true — a ⌘K mention is her copy call); a second
+window's sidebar and bars do not hear a wing act from this one (the re-ask signal is per window, as the per-door
+re-ask was — RB-17, for the ladder); no ticket filed or moved; nothing in `Sync/`, `Server/`, custody, the schema, the
+editor seam, `VariorumMobile/`, `App/Variorum/Shared/` or any MCP file.
 
 *Implementer: `opus-implementer` №4 (xhigh), fresh session, 2026-10-27. Read in its own context before any code:
 CLAUDE.md + its canon, this plan IN FULL (BATCH 1–3 RECORDS and the mid window's two parts — the tree this batch
@@ -1329,9 +1355,9 @@ stage claim. No subagent.*
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
 - **No behavioural revert is in flight** (none is planned: the doors are new, so their red-on-old is by construction).
-- **0 · Preflight + this record:** DONE (this commit).
+- **0 · Preflight + this record:** DONE (`8b10ece08`).
 - **1 · The registry: `.palette` on the three wing acts, their routed availability, the walk's justified edits:**
-  DONE (this commit) — `CapabilityRegistry.swift`: `.palette` on `.moveNoteToWing` / `.copyNoteToWing` (availability
+  DONE (`fc25c3092`) — `CapabilityRegistry.swift`: `.palette` on `.moveNoteToWing` / `.copyNoteToWing` (availability
   `noteWingDoor`: `focusedPaneShowsNote && wingCount > 1`) and `.moveBookToWing` (`focusedPaneShowsBook && wingCount >
   1`). JUSTIFIED EDITS (VX-377 cited in each): `CapabilityRegistryTests` — the walk's sampled contexts gain (note +
   two wings) and (book + two wings), and `takesIsNeverBehindWrite`'s two contexts satisfy the pane facts and the wing
@@ -1339,7 +1365,7 @@ stage claim. No subagent.*
   `WingBookMoveDoorTests.theBookMoveActsAreDeclaredAndRendered` — the door sets gain `.palette` (+ `paletteActs`
   carries each). Compiled with pieces 2–4 (`b4`, TEST BUILD SUCCEEDED — `scratchpad/b4-logs/mac-bft1.log`); RUN
   PENDING the final window.
-- **2 · The palette's context-listed rows + the acts' request:** DONE (this commit) — `ShellActions`: the three join
+- **2 · The palette's context-listed rows + the acts' request:** DONE (`b9d26b816`) — `ShellActions`: the three join
   `paletteActs`; `paletteEntries()` stays EVERY row (the harnesses' list), `paletteEntries(listing:)` /
   `listedPaletteEntries()` filter by `WingPaletteDoors.lists` over `paletteListingFacts()` (the focused selection —
   `.post` a note, `.reading` a book read whole for its marker — and `session.wing.wingCount`);
@@ -1347,26 +1373,27 @@ stage claim. No subagent.*
   registry's gate, else speaks the act's note. `PaletteModel`: `commandSource` + `prepare()` (once per open, before the
   first refresh) and `listedCommands` (the list the rows were built from — `execute` reads it). `RootView`:
   `wirePaletteCommands` sets the source (navigation rows + `listedPaletteEntries()`). Compiled (`b4`); RUN PENDING.
-- **3 · The keyboard wing selector (the probe's face fix) + its confirms:** DONE (this commit) — NEW
+- **3 · The keyboard wing selector (the probe's face fix) + its confirms:** DONE (`b9d26b816`) — NEW
   `Core/Views/WingDestinationSheet.swift`: `WingPaletteDoors` (pure listing + `context(showing:wingCount:)`),
   `WingDestinationModel` (`open(_:wings:session:)` resolves + re-checks; `choose(_:)` runs `moveAsk` / `copy` /
   `bookMoveAsk`, one choice in flight) and `WingDestinationSheet` (the switcher's brain + `WingSwitcherKeyCatcher`; the
   two confirms hosted over it); `WingCopy` +3 words (RB-15). `RootView` presents it from the request. Compiled (`b4`);
   RUN + the walk leg PENDING.
-- **4 · The re-ask after any wing act, by construction (VX-425's rule on the new road):** DONE (this commit) —
+- **4 · The re-ask after any wing act, by construction (VX-425's rule on the new road):** DONE (`403c6e843`) —
   `WingsModel.actGeneration` + `wingActLanded()`, called after each landed `move` / `copy` (`WingsModel.swift`) and
   `moveBook` / `moveContents` (`WingBookMoves.swift`); `SidebarView`'s `noteRowsWingKey` + `openWingsKey` and
   `noteMenuWingDoors`' task (`NoteMenuWingContext.loadKey` — the note + the signal; both bars) key on it. Compiled
   (`b4`); RUN PENDING.
-- **5 · Pins + Mac `build-for-testing` (FRESH `DerivedData/b4`) + the whole headless suite:** IN-PROGRESS — the pins
-  are written and COMPILED (this commit): NEW `App/Variorum/VariorumTests/WingPaletteDoorsTests.swift` (8 tests —
-  PINS below); `build-for-testing` into the FRESH `DerivedData/b4` (absent before this batch, never a clone): **TEST
-  BUILD SUCCEEDED** (`scratchpad/b4-logs/mac-bft4.log`; `-bft2/-bft3` were the test file's two isolation fixes; no
-  warning in a touched file — the one in `SidebarView.swift` is :453's, `98924b443c`'s). Remains: `swift build` + the
-  whole headless suite (no core line changed); the final `b4` rebuild from the closing tip. RUN of the Mac pins PENDING
-  the final window.
+- **5 · Pins + Mac `build-for-testing` (FRESH `DerivedData/b4`) + the whole headless suite:** DONE (`1e9a8f1f7` + the
+  suites below) — NEW `App/Variorum/VariorumTests/WingPaletteDoorsTests.swift` (10 tests — PINS below);
+  `build-for-testing` into the FRESH `DerivedData/b4` (absent before this batch, never a clone; built from
+  `1e9a8f1f7`'s sources — every later commit is record-only, `git diff 1e9a8f1f7..HEAD -- App` empty): **TEST BUILD
+  SUCCEEDED** (`scratchpad/b4-logs/mac-bft4.log`; `-bft2/-bft3` were the test file's two isolation fixes; no warning in
+  a touched file — the one in `SidebarView.swift` is :453's, `98924b443c`'s). The whole headless suite GREEN bar the
+  two standing flakes, each isolated green ×2 (Suites below). **PENDING:** the Mac pins' RUN and the walk leg (the
+  final window).
 - **6 · The record's close (RB-6's chord sweep, canon owed, the orchestrator's leg), ledger row 6 + the batches
-  table:** NOT-STARTED.
+  table:** DONE (this commit).
 
 ### THE PROBE (her "a selector that I can also operate via keyboard"; the brief's "probe the existing sheet first")
 
@@ -1439,3 +1466,198 @@ stage claim. No subagent.*
    note ▾ menu's context (`noteMenuWingDoors`' task, both bars). A signal, never a decision (P-4): each read re-asks the
    store. Any door that runs the shared acts — the ⌘K selector included — re-asks every one of them in its window.
 7. **No chord** (her call — RB-6: the collision sweep is recorded, nothing built).
+
+### THE TRACE — the re-ask (the one mechanism this batch closes beyond the new door)
+
+- **Inputs → wrong state, on the pre-fix tree (traced in this session's reading; red by the pin below):** a note open
+  in the Open list (Home) is moved to "Work" by a door OUTSIDE the sidebar — ⌘K's selector (new) or, already before this
+  batch, a Library/Pool row's Move to Wing ▸ or the open note's own note ▾ menu — all through `WingsModel.moveAsk` →
+  `move` → `Operations.moveNoteToWing`. The sidebar's two one-shot reads are keyed on `noteRowsWingKey` /
+  `openWingsKey` = rows + current wing + the column's PRIVATE `wingActGeneration`, which only the sidebar's own row
+  doors' `onDone` bump (`wingActDone`). The rows are unchanged (the note stays open), she still stands in Home, and no
+  other door can reach the private generation — so neither read re-runs: the row's Move/Copy ▸ still lists from Home
+  (offering "Work", the note's own wing, and omitting Home) and its wing indicator stays blank. The same for the open
+  note's note ▾ menu: its `NoteMenuWingContext` loads per `postID` (`.task(id: postID)`) and re-loads only after ITS
+  OWN doors' acts. (VX-439 ladder r1's m-3 named the row-door half and closed it per door; the cross-door half — any
+  door but the surface's own — was never keyed.)
+- **The mechanism closed (`403c6e843`):** the shared brain counts every landed wing act (`WingsModel.actGeneration`,
+  bumped by `wingActLanded()` after `move` / `copy` / `moveBook` / `moveContents` land — a refusal changed nothing and
+  signals nothing), and the three one-shot reads key on it. Every door that runs the shared acts — the ⌘K selector,
+  the Library/Pool rows, the sidebar rows, both note ▾ menus, the Bookcase row, the switcher's Move Everything —
+  re-asks them all in its window. The sidebar's own `wingActGeneration` stays (VX-439's pinned contract); for a
+  sidebar row's act both fire, two idempotent re-reads.
+
+### PINS (red-on-old evidence)
+
+All in NEW `App/Variorum/VariorumTests/WingPaletteDoorsTests.swift` (suite `WingPaletteDoorsTests`, 10 tests,
+`.serialized`) — COMPILED into `b4`, RUN PENDING the final window:
+
+- `theThreeWingActsGainThePaletteDoorWithTheirGateAsData` — `.palette` on each, in `paletteActs`, no chord; the gate
+  table (a note pane + two wings acts; one wing, a book pane, a place never; the book act the mirror) and the two
+  identical "Move to Wing" verbs never enabled together. **Red on old by construction:** no `.palette`, availability
+  `always` (every `!act(…)` expectation fails).
+- `thePaletteListsTheWingRowsExactlyUnderTheirGates` — `WingPaletteDoors.lists` over seven facts (a note / one wing /
+  a book / a gathering / the daily Journal / a book with one wing / a place), every other palette act listed under
+  every facts; `paletteEntries(listing:)`'s titles: one "Move to Wing" + one "Copy to Wing" on a note, one "Move to
+  Wing" and no "Copy" on a book, neither elsewhere (`paletteActs.count - 3`), and the unfiltered list whole.
+- `theListingFactsAreWhatTheFocusedPaneShows` — the facts at the press: `.post` → the note; `.reading` → the book read
+  whole (the row lists); the daily Journal's pane → the row does NOT list; a place → `.other`.
+- `aRowAsksTheWindowForTheSelectorOrSaysWhyNot` — one wing: the press speaks the act's note (a refusal), no request;
+  two wings: `.moveNote` / `.copyNote` requests, a fresh token per press, the palette row runs the same; a book pane:
+  the note's acts speak, the book's requests `.moveBook`.
+- `theSelectorListsTheSubmenusRowsAndItsKeysChoose` — the rows == `wings.destinations(from:)` (never its own wing;
+  Home included for a note living elsewhere); the brain's keys (↓, ↓ wraps, ↑ wraps, case-insensitive filter, nothing
+  listed ⇒ ⏎ stays); ⏎ moves a bookless note at once with the act's own receipt; a click chooses; Copy leaves the
+  original and lands one copy in the chosen wing with its receipt.
+- `aNoteInABookAndEveryBookAskFirstAndTheGatesHoldAtOpen` — one wing: `open` says `switchWingUnavailable`, no empty
+  selector; a membered note asks (`pendingMove.leaves == ["Alpha"]`, nothing moved until the confirm's Move); a book
+  always asks; the daily Journal never opens a selector (the op's own words).
+- `theSelectorArrivesFocusedAndAnswersTypingReturnAndEsc` — **MOUNTED** (NSWindow + NSHostingView, the
+  `MastheadTagDoorTests` / `LibraryControlsFlowTests` idioms): the field is EDITING on arrival with the window's first
+  responder its editor (nobody clicked), typing through the field editor reaches the brain and filters, ⏎
+  (`doCommand(by: insertNewline:)`, the Return key's own road) closes the selector and the note lands in the chosen
+  wing; a real Esc `NSEvent` (`NSApp.sendEvent`, the `BookcaseMastheadPopoverTests` road) closes it with nothing moved.
+  ↑/↓ are the palette's and the switcher's walked `.onKeyPress` idiom, pinned at the model above and driven for real by
+  the walk. Red on old by construction (no selector).
+- `everyLandedWingActSignalsAndTheNoteMenusContextKeysOnIt` — move, copy, book move and move-everything each bump the
+  signal; a refusal (a note in a finished book) does not; the note ▾ menu's load key changes with it, and the bars'
+  modifier keys its task on it (source).
+- `aWingActFromAnyDoorReasksTheSidebarsReads` — **MOUNTED** (VX-439's m-3 pin, WITHOUT its `done()`): after
+  `wings.moveAsk` (the act every outside door runs) the row's doors read from Work and its indicator names "Work".
+  **RED ON OLD by mechanism (THE TRACE):** on the pre-fix keys nothing outside the column re-keys the reads — the m-3
+  pin's own premise, which is why it had to call `done()`. Optional behavioural leg for the window: delete the two
+  `+ "|\(wings?.actGeneration ?? 0)"` clauses in `SidebarView.swift`, rebuild `b4`, run this test → the two polls red;
+  restore with `git checkout -- App/Variorum/Variorum/Features/Library/SidebarView.swift`.
+- `theWindowPresentsTheSelectorAndThePaletteListsPerOpen` — the window's wiring, read: the selector sheet and its
+  request, the palette's per-open source, `prepare()` before the first `refresh()`, ⏎ through `listedCommands`, the
+  sheet's focus task, its arrow keys and its Esc catcher.
+
+**Justified edits (each cites VX-377 in place):** `CapabilityRegistryTests` — two sampled contexts (note + two wings;
+book + two wings) and `takesIsNeverBehindWrite`'s two contexts satisfying the pane facts and the wing count (non-mode
+gates); `WingSwitcherTests.theWingActsAreDeclaredAndRendered` and `WingBookMoveDoorTests.theBookMoveActsAreDeclaredAndRendered`
+— the door sets gain `.palette`, `paletteActs` carries each. **Re-read and UNCHANGED:**
+`SidebarNoteRowMenuTests.aMoveFromTheRowReasksWhichWingItsDoorsAndIndicatorRead` (its `done()` still re-asks; the
+new signal re-asks first — its expectations hold either way) and `theColumnsWingDoorsHandTheReaskAndBothReadsAreKeyedOnIt`
+(both keys still carry `wingActGeneration`); `PromoteAndPaletteTests` (a harness palette has no source — `prepare()`
+leaves its `commands`; `execute` reads the list `refresh()` built from, which the pins set before refreshing);
+`WingSwitcherChordTests` (the brain and the catcher are reused, never changed).
+
+### Files touched
+
+App: `Registry/CapabilityRegistry.swift` (the three declarations; `noteWingDoor`) · `Registry/ShellActions.swift`
+(`paletteActs` +3; `paletteEntries(listing:)`, `listedPaletteEntries()`, `paletteListingFacts()`,
+`openWingDestination(_:)`; the three palette actions) · `ShellRouter.swift` (`WingDestinationRequest`,
+`wingDestinationRequest`) · `Features/CommandPalette/CommandPalette.swift` (`commandSource`, `prepare()`,
+`listedCommands`; the view's task) · `RootView.swift` (the per-open source; the selector's state, sheet and request
+adoption) · NEW `Core/Views/WingDestinationSheet.swift` (`WingPaletteDoors`, `WingDestinationModel`,
+`WingDestinationSheet`, three `WingCopy` words) · `Core/Views/WingsModel.swift` (`actGeneration`, `wingActLanded()`,
+the two bumps; `NoteMenuWingContext.LoadKey` / `loadKey`; `noteMenuWingDoors`' task key) · `Core/Views/WingBookMoves.swift`
+(the two bumps) · `Features/Library/SidebarView.swift` (the two keys). Tests: NEW `VariorumTests/WingPaletteDoorsTests.swift`;
+justified edits to `CapabilityRegistryTests`, `WingSwitcherTests`, `WingBookMoveDoorTests`. Untouched, by the lane
+(verified by `git diff --stat 956c9984e..HEAD`): `Sources/`, `Tests/`, `Server/`, `App/Variorum/Shared/`,
+`App/Variorum/VariorumMobile/`, every MCP file, the editor seam, every schema. Commits: `8b10ece08` (record) ·
+`fc25c3092` (registry) · `b9d26b816` (listing, request, selector) · `403c6e843` (re-ask) · `1e9a8f1f7` (pins) · this
+record's commit.
+
+### Suites (the end, on the final code — `swift build` green; the record's commits change no code)
+
+- **The whole headless run** (`scratchpad/b4-logs/headless-all.log`, `swift build` then `swift test` on `1e9a8f1f7`'s
+  code — no core, MCP or Strings line changed this batch, so the counts are batch 3's exactly): VariorumCoreTests
+  **3484 tests / 465 suites** (5 known issues, standing) with ONE red — the standing VX-625 flake
+  (`StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar`, its one-minute limit under the full-parallel
+  load), re-run ISOLATED green ×2 (`starcontext-isolated-1/2.log`: 11 / 1, 0.8 s each); VariorumMCPTests **431 / 79**
+  with ONE red — the standing VX-532 flake (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`,
+  24.9 s against its 15 s), re-run ISOLATED green ×2 (`harness-isolated-1/2.log`: 3 / 1, 2.2 s each); StringsWorkbook
+  **32 / 4 passed**. VX-607 green in the run.
+- **Mac:** `build-for-testing` into the FRESH `DerivedData/b4` — **TEST BUILD SUCCEEDED** (`mac-bft4.log`), built from
+  `1e9a8f1f7` (batches 1–4 + the 2-F1 leg: `b4` is the final window's one product). **PENDING:** the Mac pins' run.
+
+### RB-6 — THE CHORD SWEEP (her call; nothing built), at this tip
+
+- **`EditorCommands.keyEquivalent`'s `l` chords:** ⌘L (Switch Wing), ⇧⌘L (Save Choices as Lens), ⌃⌘L (Lock Library
+  Now). The table's ⌥⌘ family: ⌥⌘Z / ⇧⌥⌘Z, ⌥⌘O, ⌥⌘A, ⌥⌘, , ⇧⌥⌘D / ⇧⌥⌘M, ⌥⌘T / ⇧⌥⌘T, ⌥⌘⏎ / ⇧⌥⌘⏎, ⌥⌘← / ⌥⌘→,
+  ⌥⌘C, ⌥⌘F, ⌥⌘S, ⌥⌘[ / ⌥⌘], ⌥⌘N — **no ⌥⌘L, no ⇧⌥⌘L.**
+- **Every `.keyboardShortcut(` call site in `Variorum/` and `Shared/`:** `l` only as ⌘L (`EditorCommands.swift:545`),
+  ⌃⌘L (:592) and ⇧⌘L (:828); `m` as ⇧⌘M (:752) and ⇧⌥⌘M (:760); `w` as ⇧⌘W (:1054). **`NSMenuItem` keyEquivalents:**
+  all "" (`MarkdownActs`, `CalloutMenu`, `EditorTextView`, `PaneSurface`).
+- **The local key monitors:** `WingSwitcherKeyCatcher` (⌘L / Esc / ⌘'s release — the switcher's sheet, and now the
+  selector's, its own window only; it classifies ⌥⌘L as nothing), `OneWingChord` (bare ⌘L with one wing),
+  `BrowserNavKeyMonitor` (⌘← / ⌘→), `PageTurnKeys` (bare ← / →), `CommentsPanel` (⌘⏎, ⎋), `MenuLifeReporter` (⎋),
+  `DivideWSheet` (refuses ⌘/⌃ events), `CalmAsks` / `ProtectionController` (observe only), `PressReporter` /
+  `PaneFocusCatcher` (mouse). **System hot keys:** `[.quickNote]` ⌃⌥⌘N. **The platform:** ⌘M, ⌘W, ⌥⌘W (Close All),
+  ⌥⌘M (Minimize All), ⌥⌘H, ⌥⌘D, ⌥⌘Esc, ⌥⌘Space are the system's.
+- **The free candidates:** (a) **⌥⌘L "Move to Wing…"** — the ⌥ "deliberate variant" of ⌘L, her standing modifier
+  grammar (⌥⌘Z beside ⌘Z, ⌥⌘N beside ⌘N, ⌥⌘S beside ⌘S, the ⌥⌘⇧ ceremonies), on the wings letter; Finder's and
+  Safari's ⌥⌘L (Downloads) are app-scoped; (b) **⇧⌥⌘L "Copy to Wing…"** — the ⇧ step of the same family (⇧⌥⌘T,
+  ⇧⌥⌘Z); (c) ⌃⌘M (free, an unrelated letter — listed for completeness). Not free: ⌥⌘W, ⌥⌘M (system), ⇧⌘M (Merge).
+- **What a chord would cost:** a `.menuBar` door + its `keyEquivalent` row + its helper (⌘/) row (R73/R91/R93), reading
+  the availability THIS batch made honest (grey without a focused note/book or with one wing); a chord pressed on the
+  daily Journal's pane would reach the selector's open-time re-check and speak the op's own refusal (a menu item cannot
+  read the book row synchronously) — P-2-honest, no new road.
+
+### Canon owed at the closeout (DRAFTED for the closeout — not applied; the two-file rule)
+
+- **SurfaceContracts, The app — the keyboard family bullet, after** "⌥⌘S is Export Note… (VX-125);" **insert:** "⌘K
+  reaches Move to Wing and Copy to Wing on the focused note, and Move to Wing on the focused book or gathering —
+  listed only while another wing exists and never on the daily Journal — each opening a keyboard wing selector (the
+  field focused on arrival, type to filter, ↑/↓, ⏎ chooses, esc closes) whose choice runs the right-click's act and
+  confirm (VX-377, PROVISIONAL RB-15/RB-16; no chord — RB-6);".
+- **SurfaceContracts, The app — the Open list bullet:** "and the wing listings re-ask after any move (VX-425)" →
+  "and the wing listings re-ask after any move from any door in the window (VX-425; VX-377)".
+- **AppSpec:** nothing goes false (§12's keyboard-family summary names chords only; "⌘K is the palette" stands). No line
+  owed.
+- **The dated entry + narrative → `notes/AppSpecRecord.md`:** her two quotes (2026-10-16, 2026-10-21); the probe (the
+  doors were a submenu; ⌘L's switcher the one keyboard wing selector, its brain reused over the destinations); the
+  listing grammar (RB-16) and the note-vs-book focus; THE TRACE's cross-door re-ask and the shared signal; RB-6's sweep.
+
+### THE BUNDLE items born here (fold into §THE BUNDLE)
+
+- **RB-6 (her call — the chord; nothing built):** the sweep above. Free: **⌥⌘L Move to Wing…** (the ⌥ deliberate
+  variant of ⌘L) and **⇧⌥⌘L Copy to Wing…**; not free: ⌥⌘W, ⌥⌘M, ⇧⌘M. The ⌘K door ships either way.
+- **RB-15 (copy, her pass):** the selector's field "Move to a wing" / "Copy to a wing"; its foot "“X” is in Home · ⏎
+  chooses · esc closes" ("chooses", never "moves" — a note in books and every book ask first); no-match "No wing has
+  that name." (the switcher's). The palette rows wear the registry's verbs "Move to Wing" / "Copy to Wing" (the
+  submenus' titles, no ellipsis) — options: (a) as built; (b) "Move to Wing…" on the verb (the submenus then read with
+  an ellipsis); (c) a palette-only title (a second spelling of one act — against P-1's one verb).
+- **RB-16 (PROVISIONAL, design — the palette's second grammar):** these three rows list ONLY where they act; every
+  other palette row is listed always and speaks its note where it cannot. Options: **(a) as built** (P-2's letter; on a
+  note pane the note's two rows, on a book pane the book's one — never two identical "Move to Wing" rows); (b) always
+  listed, speaking the note (the older grammar — two identical "Move to Wing" rows on every pane, one refusing); (c) (a)
+  extended to every context-gated palette row (a sweep — its own ticket).
+- **RB-17 (for the ladder):** (i) the re-ask signal is PER WINDOW (each window owns its `WingsModel`), as the per-door
+  re-ask was — a wing act in one window leaves a second window's sidebar and bars as they were before this batch;
+  (ii) the shared signal also closes the pre-existing cross-door half (a Library/Pool row's or the note ▾ menu's move
+  left the sidebar's Open indicator and row doors stale) — the same pin covers both roads; (iii) the selector consumes
+  ⌘L as a step (like ↓) so the menu's ⌘L never stacks the switcher under it, and no key's release ever commits; (iv) the
+  palette → selector hand-off is two RootView sheets in sequence (the palette dismissing as the request's async open
+  lands) — walk-verified only; ⌘K's ceremony rows opening the ceremony sheets are the standing precedent.
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator) — the product is prebuilt at `~/dev/variorum-vx-620/DerivedData/b4` (a
+  FRESH dir, never a clone; built from `1e9a8f1f7` — batches 1–4 and the 2-F1 leg, so every batch's list runs from it):
+  `cd App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+  ~/dev/variorum-vx-620/DerivedData/b4 test-without-building` with `-only-testing:VariorumTests/<SuiteType>` — TYPE
+  names, verified against the files (the mid window's trap): **the pins** `WingPaletteDoorsTests` (NEW, 10) ·
+  `CapabilityRegistryTests` · `WingSwitcherTests` · `WingBookMoveDoorTests` (the justified edits); **the neighbours**
+  `WingSwitcherChordTests` · `SidebarNoteRowMenuTests` (VX-425's m-3 pins — the keys grew) · `PromoteAndPaletteTests`
+  (the palette's execute) · `PaletteSearchTests` · `BlockHistoryPaletteDoorTests` · `QuickNoteDoorTests` ·
+  `NewNoteInBookTests` · `DuplicateDoorsTests` · `NoteExportTests` · `WingFollowTests` · `WingFollowDecisionTests` ·
+  `StarTargetingTests` · `StarActingTests` · `ChromeLineLimitTests`. State the EXECUTED count (VX-604); read the
+  `skipped:` lines. Optional red leg: PINS' `aWingActFromAnyDoorReasksTheSidebarsReads` note.
+- **The walk leg (dev store, Debug from `b4`; the selector's face in BOTH voices; VX-prefixed content):** the dev store
+  as found holds Home + the empty "Walk Wing" (two wings — no wing to make). (1) A bookless note "VX377 walk note" in
+  Home, open in Write. ⌘K, type "move" → the rows "Move to Wing" and "Copy to Wing" show (one of each) → ⏎ → the
+  selector appears with the keyboard already in its field (type WITHOUT clicking) — its one row "Walk Wing", the foot
+  "“VX377 walk note” is in Home · ⏎ chooses · esc closes"; capture both voices → type "walk" → ⏎ → the receipt
+  "Moved “VX377 walk note” to “Walk Wing”."; the sidebar's Open row now wears the "Walk Wing" indicator and the note ▾
+  menu's Move to Wing ▸ lists Home (the re-ask). (2) ⌘K → "Move to Wing" → the selector lists Home → ↓ / ↑ step (one
+  row: the highlight stays) → ⏎ → back in Home. (3) ⌘K → "Copy to Wing" → Esc → nothing copied. (4) The gates: on the
+  Bookcase (no note in the pane) ⌘K "move" lists no "Move to Wing". Optional (the pins cover both; the dev store as
+  found has no books, so each needs walk content): a VX-prefixed book's pane lists ONE "Move to Wing" and no "Copy to
+  Wing" (open its selector, Esc — move nothing); the daily Journal's pane lists none — only if a daily Journal already
+  exists (⌘J would mint one: residue). **Restore:** the walk note (and any walk book) → the Trash; "Walk Wing" left
+  EMPTY as found; nothing else written. **Watch:** if the selector does not appear after ⌘K
+  closes (RB-17 (iv)), that hand-off is the suspect — report, don't work around.
+- **MOBILE PARITY line:** nothing mobile-visible — the ⌘K palette, the registry, the sidebar and the selector are Mac
+  only; `App/Variorum/VariorumMobile/` and `App/Variorum/Shared/` untouched (verified by diff).
