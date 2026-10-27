@@ -1210,3 +1210,18 @@ walk-added prefs key (a dead note's remembered-block entry) removed post-quit; t
   place. THE LADDER IS CLOSED: round 1 (3 MAJOR · 7 MINOR · 5 NIT) → L1 fixes, all verified red-on-old → round 2
   (0 BLOCKER · 0 MAJOR · 3 MINOR · 4 NIT, every round-1 fix HOLDS) → the final items, orchestrator-checked. One stage
   slice owed (the 10 green-expected suites), then the PR opens and HOLDS for her M-3 call.
+
+- 2026-10-27 **THE HISTORY REWRITE (her word: "rewrite it, just remove the walk screenshots").** The branch was
+  rewritten in a fresh clone (`git filter-branch --index-filter 'git rm -r --cached … walk-shots-vx439'`, range
+  bounded to the branch's OWN commits — main's line excluded, so main's signed merge commits keep their original
+  SHAs) and force-with-lease pushed: `7929147de` → **`a3f087842`**. Verified before the push: the folder appears in
+  ZERO commits of the branch's history; the tip tree is BYTE-IDENTICAL to the tested tip (empty diff — no re-test
+  owed, the coordinator's condition); `6def23df0` (main's tip) remains an ancestor by its original SHA; pre-walk
+  commits (e.g. `b85d1714d`) kept their SHAs. The first attempt (an unbounded range) was DISCARDED before any push:
+  it re-created main's GitHub-signed merge commits unsigned, which would have duplicated main's history at the merge.
+  NAMING NOTE: this record's commit names from `e8594fec8` through `7929147de` are the PRE-REWRITE history's names,
+  kept as historical labels — the rewritten commits carry the same messages one-to-one (`git log --grep` finds them);
+  names before `e8594fec8`, and main's, are unchanged. The 53 capture files remain ON DISK only (untracked, ignored)
+  for her look and the debris sweep. Her same word orders A RELEASE after the merge and NO Fable pass (her criterion
+  confirmed: the three editor-file touches are chrome-only — her "wait - is it because it's chrome only? … in that
+  case probably not needed").
