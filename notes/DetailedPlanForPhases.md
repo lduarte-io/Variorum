@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-620 — Run: MCP umbrella remainder** (the VX-548 remainder — seven members by the sub-issue listing: VX-596 · VX-590 · VX-605 · VX-565 · VX-566 · VX-567 · VX-377; riders VX-609 · VX-619; the record `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`) | VX-620 · `vx-620-run-mcp-umbrella-remainder` | `~/dev/variorum-vx-620` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: the MCP door + wire, Settings ▸ MCP, the grant sheet, the ⌘K registry — no `Sync/`, no custody, no editor seam). |
 
 ### Latest closeout
 
