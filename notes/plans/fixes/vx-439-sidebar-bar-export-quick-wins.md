@@ -1,0 +1,174 @@
+# VX-439 — Run: sidebar, bar & export quick wins
+
+**Ticket:** VX-439 (Umbrella, run ticket) · **Project:** v1 release readiness · **Branch:** `vx-439-run-sidebar-bar-export-quick-wins` · **Worktree:** `~/dev/variorum-vx-439` (the Pro) · **PR:** `VX-439: …` (merge commit only)
+
+**STATUS: OPEN — kickoff 2026-10-27, overnight run (architect-phase).**
+
+---
+
+## Kickoff (her words, verbatim — 2026-10-27)
+
+> "vx-439 — overnight protocol: run autonomously, provisional-and-continue, bundle every question for my morning. Two implementer batches; the Opus reviewer is fine (no editor seam — the takes cluster moved to VX-601). My rulings are all on the tickets (VX-332 yes, VX-126 option A, VX-602's words). Mind the concurrency note: VX-502 shares the export seam — second merger rebases. Stage claims through tonight's coordinator. No release without my word. coordinator is oct26coordinator"
+
+**The overnight protocol applied:** PROVISIONAL-and-continue on every ambiguity that doesn't gate a member's core; anything genuinely needing her (taste calls, deploys, releases, adjudication she reserved) is HELD and bundled into THE MORNING BUNDLE section below — never improvised around, never dropped. No release, no `/Applications` refresh, without her word. The offered riders VX-373 and VX-409 are NOT adopted (17 members is a full run; noted in the morning bundle).
+
+**Cast (her kickoff word):** Fable orchestrates (this session); `opus-implementer` per batch (fresh session each, xhigh); **`opus-reviewer`** for the ladder (her explicit call — no editor seam in this run; the takes cluster moved to VX-601). Cross-model rules do NOT apply (same-model Opus implement/review ⇒ the orchestrator arbitrates disputes against the spec).
+
+**Concurrency (her kickoff + the run ticket):** runs alongside **VX-502** (`~/dev/variorum-vx-502`), which changes the import acceptance rule in the same document-format home that VX-125/VX-126 touch (`Domain/VariorumDocument`, `Queries.variorumDocumentText`, the import/export pins). **Whichever merges second rebases and re-runs the export/import pins before its PR.** Also alongside VX-548 (MCP run; disjoint surfaces except possibly the Book Panel header file — watch at merge). Closeouts serialize.
+
+**Stage:** every `xcodebuild test` run (Mac app), every GUI walk, every Debug-app launch holds a `Tools/stage` claim (the Pro's lock, `~/.variorum/stage.d`). Tonight's coordinator is session **oct26coordinator** — announce claims; if the stage is held, poll until free (claims expire); never steal a live claim. Headless `swift build` / `swift test` on the core package never needs the stage.
+
+---
+
+## Binding principles — the 13b constitution (P-1…P-9, carried verbatim per the architect-phase skill)
+
+- **P-1 — One capability registry.** Every user-facing act is declared exactly once: verb, scope (block/take/post/book), per-mode availability rule, its doors (menu / context / bar / shortcut / palette), and its refusal copy. Surfaces render their doors FROM the registry; gating is data, never per-view if-statements. A registry-walk test asserts every declared door exists and every rendered door is declared. This kills the D3/D4 class structurally — the capability matrix stays green by construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act — including any mode-switch choreography, done visibly for the user — or delivers the operations layer's real refusal. A door that can never act in its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface component (live + read modes; one measurement brain — the width-gated remeasure; the shared canary) that every pane composes; the live editor core's identity machinery (`BlockRangeIndex`, crystallization) becomes its live mode, not a sibling implementation. "What text does this pane show, and is it live" is answered by ONE pure, unit-tested authority (`PaneTextAuthority`); views never re-derive it. Its invariants stated as code: exactly one live pane; the live pane is buffer-authoritative; read panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter may announce that something happened (mode changed, post opened); no listener derives business state or availability from a broadcast, and no flow's correctness depends on broadcast ordering. Cross-feature flows route through composition. (Stage 0's survey enumerates today's notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule marks an under-architected feature. The response is never another patch: write the feature's DESIGN MEMO — intended behavior whole, edge cases enumerated on paper, refusal wordings, undo story — get the author's rulings on the product-flavored edges, then build to the memo. Happy path ships first, but the edges are *decided at design time*, not discovered by the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial flow is the contract for every happy path. It stays green — automated where the harness allows, screenshot-walked otherwise — and any change that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive harness: the ops-layer soaks (exist), the board/view-model invariant soak (Stage 1), the registry walk (P-1), the per-batch scripted screenshot walkthrough. Red-on-old stays absolute: no bug-class fix without a pin that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind the rebuilt layer exactly as they bind the substrate (invalidation ∝ realized rows; one live editor; virtualized long views). Overlays, never rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit` (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary. Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing board layout, text authority, and gesture routing splits by concern (`TakesViewModel` at 890 lines is the standing counterexample). Same hygiene rule as the substrate, applied where it was being waived.
+
+Application notes that bind here: P-1's scope is the ROUTED vocabulary grown incrementally (inline-only doors declare `.surface`, never mis-filed `.contextMenu`); P-3's two deliberate surface kinds stand (this run must NOT absorb or fork `EditorTextView`/`PaneSurface` machinery — VX-441 and VX-569 are chrome beside the editor, not seam work); storage-coupled code stays feature-side.
+
+---
+
+## The members (17, post-split — the Takes/editor cluster is VX-601's)
+
+| # | Ticket | What | Batch | Kind |
+|---|---|---|---|---|
+| 1 | VX-125 | File ▸ Export Note… as markdown (Variorum simple format) + keyboard shortcut — pre-launch | 1 | Feature |
+| 2 | VX-126 | Export Library writes the format header — **option A ruled** — pre-launch | 1 | Feature |
+| 3 | VX-554 | Gatherings need a New Note button — pre-launch | 1 | Improvement |
+| 4 | VX-570 | A keyboard command for a new note inside the current book | 1 | Improvement |
+| 5 | VX-553 | "Restore deleted chapter" moved away from between the two mint doors — pre-launch | 1 | Improvement |
+| 6 | VX-552 | The wing you're in always visible beside the New Note button — pre-launch | 1 | Improvement |
+| 7 | VX-332 | Bookcase quick-entry focus on EVERY return — **ruled YES, option (b)** | 1 | Improvement |
+| 8 | VX-568 | Quick entry's new-note prompt: normal cursor blink, not fade | 1 | Improvement |
+| 9 | VX-602 | Help menu wording: field guide / onboarding tutorial — pre-launch, Wording | 1 | Improvement |
+| 10 | VX-424 | Open list drag-to-reorder: floating card, nothing reorders — **"fix tonight"**, probe BOTH directions | 2 | Bug |
+| 11 | VX-425 | Sidebar note rows: context menu (Rename · Delete · Close · Move/Copy to Wing · Export) — pre-launch, widened 2026-10-26 | 2 | Improvement |
+| 12 | VX-580 | Sidebar preliminary titles for untitled notes, default on — pre-launch | 2 | Improvement |
+| 13 | VX-589 | A setting to hide starred notes from the Open list | 2 | Improvement |
+| 14 | VX-426 | Icon chrome hover tooltips (1–2 word descriptors) — pre-launch | 2 | Improvement |
+| 15 | VX-560 | ⌘← / ⌘→ back and forward outside text views | 2 | Improvement |
+| 16 | VX-441 | Write find & replace: a match counter that follows you (2/15) | 2 | Improvement |
+| 17 | VX-569 | Fresh empty note: Tab from body to title offers the date fill-in | 2 | Improvement |
+
+Riders offered on the run ticket but NOT adopted (no room at 17 members): VX-373, VX-409 — in the morning bundle.
+
+---
+
+## Her rulings on the tickets (verbatim-faithful; the build follows these)
+
+- **VX-332 (2026-10-27):** "RULED: YES — focus on every return." Every Bookcase mount asks for quick-entry focus (P-U6-2's option (b), R102's wording), yielding when something else holds the keyboard and standing down during the tour (the W-U1a-1 lesson).
+- **VX-126 (2026-10-27):** "The takes-carrying-bodies choice is MADE: **option A** — each per-note file in the bulk export is byte-identical to Copy full text (header + the takes-carrying body; plain-markdown-identical wherever a note has no fans). The header-only/plain-bodies alternative is declined." Per-post `exportPost` consumers that predate the header stay as they are.
+- **VX-602 (her CLEAN checklist, 2026-10-26):** "what's under the help menu is SO confusing. 'Restore Tutorial' should be restore field guide. take the tour should be the onboarding tutorial still. it's just confusing."
+- **VX-424 (her triage 2026-10-18):** "fix tonight" (High). "I swear it happens trying to move it up as well — so there might be a bit more to that one." → instrument BOTH directions (log gap/destination per hover) before pinning; cover up-drags in the pin.
+- **VX-425 (widened at her word, 2026-10-26):** the row menu also carries Move to Wing / Copy to Wing and Export — her "empowered note sidebar." Multi-select is VX-344 (NOT in this run).
+- **VX-580 (her 10-21 note):** "I NEED to make showing a preliminary title on the lefthand bar the default - maybe fewer words than the library shows, but agh. I suppose that could be a setting too." Default on; a setting is optional.
+- **VX-589 (her 10-20 note, twice):** "ability to not see in Open what is already in Starred"; "it would be nice if there was a *setting* where you could choose to not have items that are starred show in the Open tabs. i'm noticing a lot of duplication there."
+- **VX-560 (her scope call):** outside a text view only — inside the editor ⌘←/⌘→ stay line start/end. ⌥⌘[ / ⌥⌘] remain.
+- **VX-569 (her 10-21 + 10-20 notes):** "in a fresh note with no words, going to the title and tab should make the title fill-in-able with the date so that you can enter it, as a match to the quickfill title option." The first-line quickfill exists; verify the click-in + Tab-accept path works as she describes and add the empty-note date arm.
+- **VX-554 (design note on the ticket):** a gathering holds nothing, so the minted note presumably lands bookless and wears the rule's tag(s) so the gathering assembles it — the kickoff names the exact shape (named below, A-439-3).
+- **VX-125 (2026-10-09 + 2026-10-26):** "I do want a per note export in markdown with variorum simple format - that's a super obvious part of V1…" — writes exactly what Copy full text emits; registry-declared; gets a keyboard shortcut ("keyboard shortcut for saving note" — she confirmed she most likely meant export).
+- **VX-552 (her ask, 2026-10-26):** the focused wing's name should always sit next to the New Note door, so a new note's landing place is never a surprise.
+- **VX-553 (her words, 2026-10-26):** "'restore deleted chapter' can NOT be in between new note and new chapter at the bottom of a book — that's so annoying, def the wrong place for it."
+- **VX-570 (her 10-21 note):** "command for new note within a book" — ⌘N mints into the Library; from inside a book there's no keyboard way to mint a member.
+- **VX-441 (her ask 2026-10-18):** "a # of matches in find and replace within write as you go down that count — so you can see if you're 2/3, 2/15, etc."
+- **VX-568 (her 2026-10-22 note):** "I don't like the fading in and out flickering of new note on the bookcase - it should just be a nice normal cursor blink."
+- **VX-426 (beta tester via her 10-20 note; her word 2026-10-18: pre-release):** descriptors like "Notes & Links", "Snippets", "Tray" — "every time I see the 'Snippets' button my brain thinks it's a copy/paste tool and becomes fearful to press it."
+
+---
+
+## Architect rulings for this run (A-439-N; PROVISIONAL where product-flavored — all bundled for her morning)
+
+- **A-439-1 (VX-125, PROVISIONAL):** the door is **File ▸ Export Note…**, registry-declared with shortcut **⇧⌘E** unless the registry shows it taken (then the implementer picks the nearest free export-shaped chord and records it here). Save panel defaults to `<title>.md`. Available on any shown note (export is read-only; archived and sealed notes export fine). Also declared in ⌘K and the note menus where the capability registry's door families naturally carry it.
+- **A-439-2 (VX-126):** built exactly as her option A: the library export's per-note writer calls the one serializer road Copy full text uses (`Queries.variorumDocumentText`); the byte pins on the library-export shapes are updated DELIBERATELY (the commit says so), and a new round-trip pin exports a library, re-imports the files, and proves titles, tags and takes ride whole. Per-post `exportPost` consumers predating the header: untouched.
+- **A-439-3 (VX-554 — the shape, named at kickoff as the ticket asked):** the gathering face gets a **New Note** door rendered from the capability registry, wired to the ONE planner authority the existing gathering mint and collect doors share (SurfaceContracts: "one planner authority shared with the mint"). The minted note lands bookless in the gathering's wing wearing the rule-satisfying tags/star so the gathering assembles it; a rule the planner cannot satisfy (`#a AND NOT #a`) greys the door exactly as the existing mint door greys. No new operation; no intake special-casing (the applying act does the work). PROVISIONAL only on placement: match the curated book face's New Note placement.
+- **A-439-4 (VX-570, PROVISIONAL):** **⌥⌘N — "New Note in This Book"**, registry-declared, available when a book context is focused (book surfaces and a membered note's book context); it mints through the existing add road so the gate speaks its real refusals (finished, at capacity → the operations layer's words). On a gathering it routes to A-439-3's planner door. Not rendered where no book context exists (P-2).
+- **A-439-5 (VX-553, PROVISIONAL):** the book foot keeps **New note · New chapter** adjacent; **Restore deleted chapter** moves out of the everyday path — after the mint pair, visually separated, or into the book's overflow/settings door if one is the surface's existing idiom. The implementer picks whichever placement matches the surface's existing idiom and records the choice here; the door itself, its wording and behavior are untouched.
+- **A-439-6 (VX-552, PROVISIONAL):** the focused wing's name renders as a quiet, muted label immediately beside the primary New Note door (the Bookcase quick-entry band's and/or the toolbar's — the implementer traces where New Note doors live and covers the primary ones), through the existing wing-follow state (no new observation machinery). Styling from `Theme/VoiceControls` tokens; never a literal colour.
+- **A-439-7 (VX-332):** built exactly as ruled — every Bookcase mount asks; yields when anything else in the window holds the keyboard; stands down during the tour. The SurfaceContracts line ("arriving back at the Bookcase later is unchanged, QUESTIONS #224") changes at closeout with the pointer VX-332.
+- **A-439-8 (VX-568, PROVISIONAL):** the prompt's fade in/out animation is removed; focused quick entry shows the system caret's normal blink; unfocused shows the static prompt. (With VX-332, the band will be focused on most arrivals.)
+- **A-439-9 (VX-602, PROVISIONAL wording):** Help menu door renames — "Restore Tutorial" → **"Restore Field Guide"**; "Take the Tour" → **"Take the Onboarding Tutorial"** (her words name the tour "the onboarding tutorial"; menu-item capitalization follows the menu's existing convention). Scope is the Help MENU's doors and any registry labels naming them; if the field guide's own seeded CONTENT speaks the old names, do NOT edit the content — flag it here for the morning bundle (a content edit stales the real store's seeded guide and owes the A1 re-seed, which is held for her window).
+- **A-439-10 (VX-589, PROVISIONAL):** a LOCAL preference (the Open list is per-device and view-only, like appearance), default OFF, toggled in the Settings pane where the sidebar's kindred toggles live (the implementer names the pane here). When on, a note with the union star shows in Starred only; the Open list filter is display-only (closing/follow semantics untouched; rows return when unstarred or the setting flips).
+- **A-439-11 (VX-580, PROVISIONAL):** default ON with NO new setting (her "a setting is optional" — the lightest build): untitled note rows derive their preliminary title through the Library's one derivation brain, truncated naturally by row width. If the sidebar and Library derivations have diverged, unify on the Library's.
+- **A-439-12 (VX-560, PROVISIONAL):** ⌘← / ⌘→ fire back/forward only while the first responder is not a text-input view; inside any editor or field the system line-start/line-end behavior is untouched. ⌥⌘[ / ⌥⌘] remain and stay the labels shown in menus; the registry carries the alternates. (⌘[ / ⌘] stay indent — the keyboard family's standing law.)
+- **A-439-13 (VX-441):** trace FIRST whether NSTextFinder's native "X of N" counter can be fed by our finder-client hooks (that may be the whole fix); only if the system bar cannot show it, draw our own muted readout at the bottom bar's trailing end (the status seam's home) while the find bar is active. No change to `EditorTextView`'s text/layout machinery — chrome and client-protocol methods only. Read `notes/TEXTKIT2_NOTES.md` §3–4 before touching those files.
+- **A-439-14 (VX-569, PROVISIONAL):** the empty-note date arm offers the SAME date string the daily-entry title convention uses, through the existing quickfill accept gesture (Tab to accept, typing to dismiss). First verify the existing first-line quickfill's click-in + Tab path works as her 10-20 note describes; if it is broken, that is a traced bug fixed first (with a pin), then the date arm lands on it.
+- **A-439-15 (VX-424):** instrument both drag directions BEFORE the fix (temporary logging of gap/destination per hover, removed before the ladder); the pin covers down-by-one AND an up-drag case; the fix follows the scout's shape (half-row before/after targets or `DropInfo.location` against row height) flowing through `OpenListDragState.Target` / `SidebarLayout.OpenListDrop`; the before/after targets of one boundary must resolve to the same gap (no line flicker). The SurfaceContracts Open-list drop sentence changes at closeout to describe the half-row targets, pointer VX-424.
+- **A-439-16 (VX-425):** the row menu renders from the registry (the `.surface`/`.contextMenu` door cases as the registry's idiom has them): **Rename** (inline row edit writing through the title operation — PROVISIONAL on inline vs. focusing the note's title field; implementer picks the surface's existing idiom), **Delete note** (routes through her Delete door's one road, confirm included), **Close** (the contract's exact row semantics: on the shown note like ⇧⌘W, else remove the row), **Move to Wing / Copy to Wing** (the existing capabilities' doors re-rendered here), **Export** (VX-125's capability). Single-row only (multi-select is VX-344's).
+- **A-439-17 (VX-426, PROVISIONAL):** every icon-only door in the sidebar and note-face chrome wears `.help` with a 1–2 word descriptor, sourced from the registry's verb/label where the door is registry-rendered (one vocabulary), hand-named otherwise; sentence case per her caps rule except surface proper names ("Snippets", "Tray", "Notes & links"). The sweep enumerates every icon-only door it found and its tooltip in this file (the class-completeness table).
+
+Anything a batch finds itself needing that would CHANGE a §9 operation's semantics, relax an invariant, or touch `Sync/`/custody: STOP that member, record here, move on (the morning bundle).
+
+---
+
+## BATCH 1 BRIEF — export, books & Bookcase (one implementer session)
+
+**Members:** VX-125, VX-126, VX-554, VX-570, VX-553, VX-552, VX-332, VX-568, VX-602 — in that order (export seam first: VX-502 shares it, and VX-425 in batch 2 reuses VX-125's capability).
+
+**Required reading before any code (never delegated):** `CLAUDE.md` + its auto-loaded canon; this file TOP TO HERE plus this brief; `notes/SurfaceContracts.md` in full; `notes/SessionResiliencyProtocol.md`; `notes/plans/phase-13n-a-document-format.md` (the document format's record) for VX-125/126; the capability-registry area (`App/Variorum/Variorum/Registry/CapabilityRegistry.swift`) before declaring any door.
+
+**Per member:** work to the ruling (hers verbatim above; A-439-N where I ruled). PIN-BEFORE-FIX PER MEMBER: a bug-class change lands with a red-on-old pin verified by behavioral revert; a feature lands with its state-transition/registry/round-trip tests; VX-126's byte-pin updates are deliberate and say so in the commit. One commit (or a few) per member, message `Part of VX-<member>: <traced mechanism + the pin>`; push after every commit. No attribution trailers on commits (her standing rule).
+
+**Specific cautions:**
+- VX-125/126: the format's one home stays `Domain/VariorumCore`'s `VariorumDocument`; no export path ever writes a row. Do not change the import acceptance rule — VX-502 owns that seam tonight. If `Domain/VariorumDocument` itself needs more than a consumer-side call, STOP and report (seam contention).
+- VX-332: the quick-entry bar yields to any keyboard holder and the tour (W-U1a-1: never steal). The pin: a mount-focus test on the Bookcase return path, red on old.
+- VX-602: menu labels only; if guide CONTENT speaks the old names, flag — don't edit (A-439-9).
+- VX-554/570: the gate refusals are the operations layer's real words (P-2) — no new refusal copy without the registry's declaration.
+- Settings/registry work: never a literal colour; chrome `fixedSize` texts carry `lineLimit`.
+
+**Tests at the END of the batch (never the start):** `swift test` on the core package headless (free, no stage); then the Mac app suites that exercise every changed SOURCE file — suite-level `-only-testing` from `App/Variorum/`, under a HELD `Tools/stage` claim (`Tools/stage claim --reason "vx-439 batch 1 suites" …`; if held, poll until free; never steal). `TutorialWalkTests` rides the run (P-6). Confirm the "Test run with N tests" line; Swift Testing counts skipped tests — read the `skipped:` lines before claiming a gated suite ran.
+
+**Checkpoint protocol (binding from the first commit):** LIVE STATUS section below updated in the same commit as each piece (`DONE (hash)` / `IN-PROGRESS — what remains` / `NOT-STARTED`); records before final verification marked PENDING; synchronous foreground waits only (poll logs with `grep -q '<EXIT LINE>' && break; sleep 5` loops — `tail -f | grep -m1` hangs after the line lands); never spawn subagents except at most ONE read-only Sonnet for external facts; commit before any revert; no `git checkout` over uncommitted work; push after every commit; never force-push.
+
+**Environment traps (verbatim core):** instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test host matches mid-run); treat real-store instances by STORE, not path — NEVER quit/kill one; no Release builds or `/Applications` refreshes (held for her word regardless); `xcodebuild build-for-testing` compiles without the runner; Mac tests from `App/Variorum/`, suite-level `-only-testing` only; zsh `pipestatus`; NEVER add a custom build configuration (anything not named exactly "Debug" builds the packages Release and strips the DEBUG oracles); suites flash the test host's windows — hence the stage claim; screenshots in gitignored dirs; backups (if a store is ever touched — it should not be in this batch) A1 into `Backups/safety-copies/`.
+
+---
+
+## BATCH 2 BRIEF — sidebar & bar (one FRESH implementer session)
+
+**Members:** VX-424 (first — instrument, pin, fix), VX-425, VX-580, VX-589, VX-426, VX-560, VX-441, VX-569.
+
+**Required reading before any code:** same list as batch 1, PLUS `notes/TEXTKIT2_NOTES.md` §3–4 (VX-441 and VX-569 touch chrome beside `EditorTextView` / the title field — NO text-storage, layout or identity machinery changes; if a member seems to need one, STOP that member and record here), and VX-424's mechanism trace (below).
+
+**VX-424's traced mechanism (the 2026-10-18 read-only scout, from the ticket):** the card-styled chip (`DragTitleChip`, `Core/Views/DragChipCanvas.swift:85-109`) is the one intended preview and draws on EVERY drag; the "weird card, no reorder" case is the drop being REFUSED — the gap rule in `Core/Views/SidebarLayout.swift:626-642`: `gap(for: .row(i)) = i` (hovering a row always means "insert before"), `destination` nil when `gap == dragged || gap == dragged + 1`. Consequence: dragging DOWN by one place always fails; side margins/headers/separators are dead zones (`SidebarView.swift:864`; the sidebar-wide `.onDrop` at `:392` deliberately ignores this token). Her report widens it: up-drags too — so instrument both directions before pinning (A-439-15). Fix shape: half-row before/after drop targets or `DropInfo.location` against row height, through `OpenListDragState.Target`, `SidebarLayout.OpenListDrop.gap`/`lineTop` (`SidebarLayout.swift:604-664`, `Features/Library/OpenListDrag.swift`, row attachment `SidebarView.swift:1135`). The pinned gap/destination/lineTop rules have tests to UPDATE deliberately; the before/after targets of one boundary must resolve to the same gap or the line flickers.
+
+**Per member / pins / commits / checkpoint / environment / tests:** exactly as batch 1's sections (read them — they bind this batch identically). VX-425's Export item routes to VX-125's capability (batch 1 lands first). The VX-426 sweep records its class-completeness table (icon × tooltip) in this file.
+
+---
+
+## Review foci (written at plan time, for the cold reviewer — per REVIEW_PROMPT's foci rule)
+
+1. VX-126/VX-125: is the export byte-identical to Copy full text per note (option A), with the round-trip proven by test, and is `Domain/VariorumDocument` still the format's ONE home with no import-acceptance change (VX-502's seam)?
+2. VX-424: does the pin cover BOTH directions? Do the half-row targets resolve one boundary to one gap (no flicker)? Were the old pinned gap/destination/lineTop tests updated deliberately rather than deleted?
+3. Registry discipline (P-1/P-2): is every new door declared once and rendered from the registry; is every refusal the operations layer's; is any door rendered where it can never act?
+4. VX-332: can the quick-entry focus ask ever steal from a field, a sheet, or the tour?
+5. VX-560: can ⌘←/⌘→ ever reach a first responder that is a text view?
+6. VX-589/VX-580: do the sidebar filters/titles stay display-only (no view-model copies of persisted text; P3 untouched)?
+7. No literal colours outside the token layer; `fixedSize` texts carry `lineLimit`.
+8. VX-441: zero changes to text-storage/layout/identity machinery; chrome and finder-client protocol only.
+
+---
+
+## LIVE STATUS (the running record — updated per piece, in the same commit)
+
+- Batch 1: NOT-STARTED
+- Batch 2: NOT-STARTED
+- Ladder: NOT-STARTED
+- Walks (orchestrator, per batch): NOT-STARTED
+
+## THE MORNING BUNDLE (held for her — grows as the night runs)
+
+1. Riders VX-373 and VX-409 were offered on the run ticket "if the run has room" — not adopted at 17 members; say the word and they ride the next sweep.
+2. Every A-439-N PROVISIONAL above (1, 3–6, 8–12, 14, 16, 17) — built as ruled, reviewable at her pass.
+3. (grows)
+
+## Ledger (findings, decisions, deaths, dispositions — append-only)
+
+- 2026-10-27 kickoff: worktree seated at `aeee4d1e3`'s main; in-flight row pushed; VX-502 and VX-548 live in parallel (surfaces checked — export seam shared with VX-502, second merger rebases).
