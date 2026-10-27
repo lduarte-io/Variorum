@@ -124,3 +124,16 @@ Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 �
   window (her face + the whole set-aside live on her real store's byte copy; VX-461's three live arms).
 - The deploy, installs and release 0.10 are HERS at her window (the vx307 checklist + the pg_temp belt;
   marker-14 entry HELD in SyncSpec §12 until the window closes).
+
+
+## VX-439 — Run: sidebar, bar & export quick wins (CLOSED 2026-10-27; PR #194, merge b3b16f2ba)
+- Cast: Fable orchestrated; two fresh Opus implementers (one per batch) + the L1/R2 fix session; a fresh Opus
+  reviewer per ladder round (her kickoff word — the takes cluster moved to VX-601); her overnight protocol.
+- Merge order: LAST of wave 1 — VX-502's main merged at 0a30e8b09, VX-548's at 2b33e8bb6, both re-proven (the seam
+  trio and the five-file overlap suites green on the merged trees).
+- Evidence floors at the tip: b1 821/152 · b2 3,057/495 · L1 1,562/267 + revA/revB/R-R2 exact reds · final 80/10
+  (VX-614 the one intermittent, green alone); headless core 3,467/463 at the end; three walks + an evidence slice.
+- The history rewrite at her word: 7929147de → a3f087842 (captures zeroed from history, tree byte-identical,
+  main's signed line intact).
+- Born: VX-603 · VX-604 · VX-608 · VX-614 · VX-615 · VX-616 · VX-617 · VX-618 (triaged at filing). Her bundle:
+  QUESTIONS #244. The release 0.10.3 at her in-session word, run after this entry.
