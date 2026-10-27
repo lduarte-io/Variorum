@@ -729,6 +729,13 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     checked by eye) and what it rests on; M-2's look captured in Study only, Terminal riding bundle 24. The two settings
     pins' comments (`SettingsShapeTests`, `DiagnosticsPaneTests`) re-pointed from "owed to the evidence slice" (which
     could not reach the pane) to her look — bundle item 24.
+  - The four NITs: DONE (`4e6504f46`). **R2-n1** — the STATUS banner, the Ladder line and the Walks line brought to the
+    truth (round 2 done; the evidence slice done, with what it reached and what is hers). **R2-n2** — `OpenListRowHalves`'
+    type doc names its liveness as `state.dragInFlight(among:)` (began here AND its row still drawn), not `state.dragging`
+    alone (comment only). **R2-n3** — the Ledger's m-6 closeout canon list gains VX-552 (appended in brackets — the Ledger
+    is append-only): a contract line for the wing label names all three current-wing mint doors that wear it. **R2-n4** —
+    both walk headers' "gitignored" corrected in place to the M-3 truth (committed by `e8594fec8`/`aed5708c1`, untracked
+    only at `080e15a08`; the history question is bundle 19).
 - Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`), part 2 DONE (06:11–06:28), and the POST-FIX
   EVIDENCE SLICE DONE (under claim `vx-439-l1-verify` after the L1 suites; `744b27ade`) — M-2's toolbar label (Study),
   VX-569's title-Tab, the star family and VX-589's searchable row seen live; the Settings interior, VX-589's live
