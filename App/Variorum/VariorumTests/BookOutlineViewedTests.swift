@@ -291,6 +291,69 @@ struct BookOutlineViewedTests {
         return (rows, { offset in positions.mapValues { $0 - offset } }, content - 600)
     }
 
+    /// **R-562-D′ (ladder round 3, R3-1) — the clamp stands only for a last
+    /// note that is ON the page.** A column ending in a PAGE of empty
+    /// chapters (chapters planned ahead, nothing unfiled) pushes the last
+    /// note wholly above the viewport at the bottom; the clamp then stands
+    /// down and the edge rule answers, so the chapter mark never steps back
+    /// UP as the page scrolls DOWN into the band.
+    ///
+    /// RED ON OLD (recipe I — the pre-R-562-D′ tree clamps by the last
+    /// note's EXISTENCE alone): entering the band it named (s1, e2), a row
+    /// spanning −370…−270, and the chapter mark jumped from the trailing
+    /// headings back to chapter one.
+    @Test func aLastNoteOffThePageKeepsTheEdgeRuleAtTheBottom() {
+        typealias Scroll = BookOutlineViewed.Scroll
+        // Chapter one holds the only notes; fifteen empty chapters follow.
+        var groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])] =
+            [(section: section("s1", "chapter one"), entries: (0..<3).map { entry("e\($0)") })]
+        groups += (2...16).map { (section: section("s\($0)", "chapter \($0)"), entries: []) }
+        let rows = BookOutlineRows.rows(grouped: groups)
+        var position: [String: CGFloat] = [:]
+        var y: CGFloat = 120
+        for row in rows {
+            position[row.id] = y
+            if case .note = row { y += 110 } else { y += 50 }
+        }
+        let travel = (y - 10 + 120) - 600
+        #expect(travel == 760, "the column's arithmetic (\(travel))")
+        let heights: [String: CGFloat] = rows.reduce(into: [:]) { out, row in
+            if case .note = row { out[row.id] = 100 } else { out[row.id] = 40 }
+        }
+        let viewed: (CGFloat) -> Pair = { offset in
+            BookOutlineViewed.follow(
+                rows: rows,
+                page: BookOutlineViewed.Page(
+                    tops: position.mapValues { $0 - offset }, heights: heights,
+                    scroll: Scroll(viewport: 600, offset: offset, travel: travel)),
+                adopted: nil
+            ).pair
+        }
+        let edge: (CGFloat) -> Pair = { offset in
+            BookOutlineViewed.pair(rows: rows, tops: position.mapValues { $0 - offset })
+        }
+        // The premise: at the bottom the last note is wholly off the page.
+        let lastTop = position["page-e2"]! - travel
+        #expect(lastTop + 100 < 0, "the premise: e2 off the page (top \(lastTop))")
+        // In the band and at the bottom the EDGE rule answers; never (s1, e2).
+        for offset: CGFloat in [travel - 8, travel, travel + 30] {
+            #expect(viewed(offset) == edge(offset),
+                    "in the band at \(offset): the edge rule — \(viewed(offset))")
+            #expect(viewed(offset) != Pair(sectionID: "s1", postID: "e2"),
+                    "never the off-page last note at \(offset)")
+        }
+        // The chapter mark never steps back up anywhere on the way down.
+        var lastChapterRow = -1
+        for offset in stride(from: CGFloat(0), through: travel, by: 10) {
+            guard let chapter = viewed(offset).sectionID,
+                  let at = rows.firstIndex(where: { $0.id == "chapter-\(chapter)" })
+            else { continue }
+            #expect(at >= lastChapterRow,
+                    "the chapter mark never steps up (offset \(offset), row \(at) after \(lastChapterRow))")
+            lastChapterRow = at
+        }
+    }
+
     /// **R-562-D, over a chaptered column — the clamp's contract** (ladder
     /// round 1's finding 1, MAJOR; round 2's N1; walk 3's reading-speed
     /// verdict on the slide): scrolling down a book the viewed note is the
@@ -390,10 +453,10 @@ struct BookOutlineViewedTests {
         let atBottom = Scroll(viewport: 600, offset: travel, travel: travel)
         var unreported = book.tops(travel)
         unreported["page-n11"] = nil
-        #expect(BookOutlineViewed.rule(rows: rows, tops: unreported, scroll: atBottom) == topRow,
+        #expect(BookOutlineViewed.rule(rows: rows, page: BookOutlineViewed.Page(tops: unreported, scroll: atBottom)) == topRow,
                 "the last note never reported: the edge rule")
         let noNotes = BookOutlineRows.rows(grouped: [(section: section("s1"), entries: [])])
-        #expect(BookOutlineViewed.rule(rows: noNotes, tops: ["chapter-s1": -20], scroll: atBottom)
+        #expect(BookOutlineViewed.rule(rows: noNotes, page: BookOutlineViewed.Page(tops: ["chapter-s1": -20], scroll: atBottom))
                 == Pair(sectionID: "s1"), "no note to clamp to: the edge rule")
     }
 

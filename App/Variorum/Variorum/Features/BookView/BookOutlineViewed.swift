@@ -213,18 +213,24 @@ nonisolated enum BookOutlineViewed {
     /// bottom it is on the page and has; before it has, the edge rule. A
     /// column with no note row has nothing to clamp to, and the edge rule
     /// answers.
+    /// R3-1 (R-562-D′, ladder round 3): the clamp stands only for a last
+    /// note that is ON the page — a column ending in a page or more of
+    /// EMPTY chapters keeps the edge rule, so the chapter mark never steps
+    /// back up on entering the band.
     static func rule(
-        rows: [BookOutlineRows.Row], tops: [String: CGFloat], scroll: Scroll
+        rows: [BookOutlineRows.Row], page: Page
     ) -> Pair {
-        if isAtTheBottom(scroll),
+        if isAtTheBottom(page.scroll),
            let last = rows.lastIndex(where: { row in
                if case .note = row { return true }
                return false
            }),
-           tops[rows[last].id] != nil {
+           isOnScreen(
+               top: page.tops[rows[last].id], height: page.heights[rows[last].id],
+               viewport: page.scroll.viewport) {
             return named(at: last, in: rows)
         }
-        return pair(rows: rows, tops: tops)
+        return pair(rows: rows, tops: page.tops)
     }
 
     /// **What the row at `index` names** — the chapter heading in force at
@@ -319,7 +325,7 @@ nonisolated enum BookOutlineViewed {
                viewport: page.scroll.viewport) {
             return (target, adopted)
         }
-        return (rule(rows: rows, tops: page.tops, scroll: page.scroll), nil)
+        return (rule(rows: rows, page: page), nil)
     }
 
     /// **The viewed note's place in the column** — 1-based, counting note

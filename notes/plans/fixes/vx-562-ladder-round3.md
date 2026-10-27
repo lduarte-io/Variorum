@@ -158,3 +158,10 @@ New from the r3 diff:
 - **R3-3 (NIT):** the ledger rows still stale from round 2's N3, and the bundle missing the two step consequences.
 
 Still owed before rows 1–2 close: the r3 suites, recipes H and H′, and a walk 4 on the clamp.
+
+## THE ORCHESTRATOR'S ROUND-3 DISPOSITIONS (the capped final round — fixes applied by the orchestrator under the architect mandate's small-fix clause, with this section as the line-by-line record; no round 4 exists to re-read them)
+
+- **Part 1 — accepted in full.** R-562-D stands landed; the H/H′ red/green calls await the combined stage window's runs.
+- **R3-1 [MINOR] — AGREE, FIX NOW as R-562-D′ (the ruling's refinement):** the clamp stands only for a last note that is ON the page (`isOnScreen` over the row's own top and height — `rule` now reads the `Page`, which already carries both); a column ending in a page or more of empty chapters keeps the edge rule, so the chapter mark never steps back up and "Monotonic as before" holds in chapter terms too. The reviewer's option (b), exactly; (a) would leave a wrongness my own ruling's clause forbids, (c) re-opens the last-row semantics for no gain. The born-red table `aLastNoteOffThePageKeepsTheEdgeRuleAtTheBottom` (the reviewer's mirror column: 3 notes then 15 empty chapters, travel 760) is RED on the pre-fix r3 tree — staged as recipe I, run at the combined window.
+- **R3-2 [NIT] — AGREE, the bundle line re-worded** (the short-scroll book's honest shape: a book that scrolls less than about its title block goes from nothing straight to the last note; a first-week daily Journal has it).
+- **R3-3 [NIT] — AGREE, the record hygiene finished** (ledger rows 1/2/4 re-stated once, the r3 clause folded in; the R-562-D bundle line gains the two felt steps the self-assessment names: the 9-pt-up step 13 → ~10, and the step UP to the top row after a last-screenful click's release).

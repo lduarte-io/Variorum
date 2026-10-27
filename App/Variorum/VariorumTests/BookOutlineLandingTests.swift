@@ -1341,7 +1341,7 @@ extension BookOutlineLandingTests {
     /// first.
     private func ruled(_ rows: [BookOutlineRows.Row], _ readingID: String) -> BookOutlineViewed.Pair {
         let scroll = BookOutlineGeometry.outlineScrolls[readingID] ?? BookOutlineViewed.Scroll()
-        return BookOutlineViewed.rule(rows: rows, tops: BookOutlineGeometry.anchorTops, scroll: scroll)
+        return BookOutlineViewed.rule(rows: rows, page: BookOutlineViewed.Page(tops: BookOutlineGeometry.anchorTops, scroll: scroll))
     }
 
     /// Move the Outline's page by `points` (negative = up) the programmatic
