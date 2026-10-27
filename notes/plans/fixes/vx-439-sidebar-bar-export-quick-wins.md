@@ -1225,3 +1225,55 @@ walk-added prefs key (a dead note's remembered-block entry) removed post-quit; t
   for her look and the debris sweep. Her same word orders A RELEASE after the merge and NO Fable pass (her criterion
   confirmed: the three editor-file touches are chrome-only — her "wait - is it because it's chrome only? … in that
   case probably not needed").
+
+## THE RELEASE TAIL (2026-10-27, after the merge — the 0.10.3 gate trace)
+
+`release.sh --version 0.10.3` PASSED (build 9720; DMG sha256 64ace56b…, 30,988,441 bytes; appcast verified). The
+step-0 first-run gate (VX-509) then took THREE walk runs:
+
+- **Run 1 (16:20Z) stopped at P6:** the std account carried a leftover VAULT on production, so the app showed the
+  JOIN door ("Sync this library…", correct per VX-526) where the walk knows only the set-up arm. The in-app
+  deletion road dead-ended (the signed-in Protection pane has only the join and a plain sign-out confirm). HER
+  WORDS: "yes, go ahead on the std reset", then "Can you not do this with the PAT?" — so the reset ran AT HER WORD
+  by my hand through the Management-API token (`.env.supabase.local`, the same endpoint `prod-read.sh` reads
+  through; a production WRITE, legal only at her word): one atomic CTE statement mirroring `account_purge()`
+  MINUS the auth user and entitlement — the key_vault row, the data tables, device cursors, tenant seq, challenge
+  nonces, write budget, and the kp proof secret (best-effort, the purge's own shape). Before/after reads verified:
+  vault 0 · auth user 1 · entitlement 1. Run twice (the walk's own completed set-up re-mints the vault — VX-622's
+  missing cleanup leg).
+- **Run 2 (17:39Z) proved the APP whole and stopped on the WALK:** P1–P6 clean, the sheet confirmed the first
+  round, the server enrolled (vault standard + proof, kp 1, cursor 1, 3 setting rows), the row visibly "Synced
+  11:40 AM", same pid — and P7/P8 failed anyway: both assertions had NEVER run live (VX-510's first live run was
+  hand-recovered at exactly P7; 0.10.2's gate used the castle stand-in). P7's probe (vis-ax) cannot reach the
+  footer's "Synced ‹time›" static text at all (live-probed: every sibling resolves, that element never does,
+  on-screen or off — a System Events value read returns it instantly); P8 asserted `container` rows, but an
+  account-bound fresh store DEFERS its sample-library seed behind the first clean round (SampleLibraryWelcome's
+  sync gate), so the first push is the 3 `setting` rows — the very "3 settings" VX-510's hand-verification read.
+  NO sync defect, NO app change. Born: **VX-621** (the assertion fixes — P7 reads the row by System Events value;
+  P8 counts setting + container, hardened to positive matches) and **VX-622** (cleanup leg · join arm ·
+  window-frame guard; extends VX-537). VX-621 landed as PR #196 (branch vx-621-walk-assertions, two commits,
+  Opus cold review CLEAN — 0 BLOCKER/MAJOR, the two MINORs dispositioned on the PR), merged by HER OWN HAND
+  (c596c8868 — the classifier refuses `gh pr merge` to the session).
+- **Run 3 (18:03Z) PASSED:** the full log — sheet confirmed, row Synced via the new probe, server: key_vault
+  `[{"mode":"standard","proof":true}]` · kp `[{"n":1}]` · cursors `[{"n":1}]` · data rows (setting + container)
+  `[{"n":3}]`. The gate is green on the merged script at a reset-clean account.
+
+**The restoration order (the coordinator's, executed in order):** the walk app signed out and quit by identity,
+zero instances both strict forms; run 3's slot contents (6 items) reported and set into the walk debris home with
+runs 1–2's; the aside verified back to EXACTLY its as-found 11 items and renamed whole to `Variorum-dev` on the
+same volume; ONE relaunch proved the held library standing — the "different library than the one this Mac last had
+open" notice acknowledged (OK, never Resume), the HELD banner reading "This is your library as of October 20,
+2026. This library doesn't sync, so Resume changes nothing in it.", footer "Sync off (dev store)", signed out,
+unlocked to content — then quit. **A1:** `variorum-a1-0.10.3-install-2026-10-27T180840Z` in the real container's
+`Backups/safety-copies/`, five files cmp-verified byte-identical, her real app never running. **The refresh:**
+staged from the DMG itself (sha256 matching the release record), codesign --verify --deep --strict on the staged
+and the installed copy, swapped at a zero-instance window — `/Applications/Variorum.app` is 0.10.3 (9720), nothing
+launched, no re-seed.
+
+**Owned plainly:** the release claim `vx-439-release` was renewed twice (+45, +90) with the coordinator told after
+the fact rather than through a fresh REQUEST→GO each time — the stage log is the clock's truth. Main moved two
+commits past the version bump before the refresh (7e3eb2e58, VX-548's docs correction; c596c8868, VX-621's merge);
+the 0.10.3 artifacts were stamped at 12c99b4a8 and are unaffected — the walk's PASSED ran on the merged script,
+which is the script's own fix, not the app's. **Her morning catch, recorded:** VX-377 (Move/Copy to Wing from ⌘K)
+appears on her pre-launch map as a wave-1 member but never entered this run's sub-issue set — [Todo], Needs
+Lillian, zero mentions in this record before this line; the VX-548-class member-resolution lesson applies.
