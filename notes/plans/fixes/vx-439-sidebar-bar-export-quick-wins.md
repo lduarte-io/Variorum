@@ -710,11 +710,20 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     the decode throw), the replica's app pin RED (8 checks / 1 failed: "the read THREW"); restored by `git checkout --
     Sources/`, status/diff empty, the core suite GREEN again (5 / 1) (`scratchpad/l1/r2-*.log`, `r2-replica-*.txt`). The
     app pin's stage run is the final verify slice's.
+  - R2-2 (the bundle's missing items): DONE (this commit) — six items appended, each in her register with the choice it
+    asks: **19 M-3's history question, marked "BEFORE THE PR — GATES THE MERGE"** (and a one-line pointer to it at the
+    bundle's head, so it is read first without renumbering the items other lines cite), 20 n-1 (the journal-entry title
+    offer), 21 n-3 (the Library's second per-note export door), 22 n-5 (the one-turn faint-text swap), 23 the editor-file
+    touches and the Fable-pass question (three now — `EditorTextView`'s override, `EditorView`'s delegate tail call, L1's
+    `storageDidEdit` counter line), 24 the one Settings visit (General's seventh row, the toggle flipped live, and M-2's
+    label in Terminal). No code, no pin (a repo-state check — M-3's precedent).
 - Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`) and part 2 DONE (06:11–06:28) — the WALK
   PART 1 / WALK PART 2 sections below; the POST-FIX EVIDENCE SLICE (m-4's live legs + M-2's look) is owed in the
   fix-verify window — NOT-STARTED.
 
 ## THE MORNING BUNDLE (held for her — grows as the night runs)
+
+**Before the PR: item 19 gates the merge** (your call on the walk captures already in this branch's history).
 
 1. Riders VX-373 and VX-409 were offered on the run ticket "if the run has room" — not adopted at 17 members; say the word and they ride the next sweep.
 2. Every A-439-N PROVISIONAL above (1, 3–6, 8–12, 14, 16, 17) — built as ruled, reviewable at her pass.
@@ -771,7 +780,35 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     the two quick-entry bars). A muted "in ‹wing›" sits right after the button, in the bars' words and hover, with no
     glass capsule behind it (it is a label, not a door). PROVISIONAL — say the word if it should instead ride only the
     button's tooltip, or sit somewhere else.
-19. (grows)
+19. **BEFORE THE PR — GATES THE MERGE: the walk captures in this branch's history (the ladder's M-3).** The batch
+    walks' captures — `walk-shots-vx439/`: 40-odd screenshots, two full Debug-app preference dumps and some exported
+    dev-store notes, about 11 MB — were committed by two record commits (`e8594fec8`, `aed5708c1`), because the ignore
+    pattern did not match that folder's name. The branch tip no longer tracks them (`080e15a08`; `walk-shots-*/` is
+    ignored now) and the files are still on disk for you. But merges here are merge commits and history is never
+    rewritten without your word, so unless you rule otherwise, those 11 MB enter `main`'s history for good when the PR
+    merges. Your choice: (a) rewrite this unmerged branch to drop them before the PR — one force-with-lease push, at
+    your word only; or (b) accept them into `main`'s history.
+20. **VX-569 — the title's first-words offer on a daily entry (the ladder's n-1).** An untitled ⌘J journal entry's title
+    field also offers its first words, while the sidebar and the Library call a daily entry by its day. It is only an
+    offer (Tab takes it), but it is one rule in two places — say the word to skip the offer on daily entries, or keep it.
+21. **Two per-note markdown exports on a Library row (the ladder's n-3).** The Library row still has Export ▸ "Markdown
+    with Takes…" (no format header) beside the new Export Note… (the header + the same body), so the two files differ by
+    one line. Kept as ruled (A-439-2); folding them into one door is your call.
+22. **VX-569 — the faint words in the title field swap once (the ladder's n-5).** On an untitled note with words, the
+    faint date in the title field changes to the first-words offer a moment after the field opens (the read is
+    asynchronous). Harmless; say the word if it reads as a flicker.
+23. **The editor files this run touched — a Fable pass is your call.** Your kickoff picked the Opus reviewer ("no editor
+    seam"); the run did touch three editor files, chrome only: `EditorTextView.swift` (the find bar's visibility
+    override on its scroll view), `EditorView.swift` (the selection handler's last line asks for the find readout), and,
+    since the round-1 fixes, one counter line in `EditorViewModel.storageDidEdit` (the find readout's text generation —
+    no text read, no layout). Both Opus rounds judged them safe; order a Fable pass before the merge if you want one.
+24. **One Settings visit (VX-589, and M-2's other voice).** The walks could not click inside the Settings window (a
+    walk-driver limit), so nobody has looked at Settings ▸ General with its new seventh row ("Hide starred notes from
+    Open", under "Keep open notes across launches") or flipped it live. In one visit: check General still reads short
+    with its dials on top, flip the toggle once with a starred note open (its Open row should step aside, and come
+    back when you flip it off), and switch the voice to Terminal for a look at the toolbar's "in ‹wing›" label (the
+    walk saw it in Study only).
+25. (grows)
 
 ## Ledger (findings, decisions, deaths, dispositions — append-only)
 
