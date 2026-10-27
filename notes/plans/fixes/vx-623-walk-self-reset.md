@@ -408,6 +408,41 @@ second display → holds · straddling two → refused · no display geometry �
   STOP · mode moved → STOP · a read that did not answer → STOP · a boolean for a number → STOP · `helper_id` reads the
   helper's resolved id · nothing when the helper refused first). **The walk's self-test now: 64 cases, green.**
 
+## UNIT 1 — THE ORCHESTRATOR'S VERIFICATION AND RULINGS (2026-10-27, after implementer session 1 closed)
+
+**Verified, never trusted (the orchestrator's own runs):** 8 commits `b090395e4`…`2f656ddbc`, zero
+attribution trailers; the walk's `--self-test` green ("every guard fired as expected", 64 cases) and the
+helper's green (85 cases, the drift pins against `account_purge()`'s own body and the network-never-reached
+case among them) — both run by the orchestrator's own hand; the D-7 pin RED-ON-OLD confirmed by the
+orchestrator's own run (main's guard: **6 failing of 11**, the silent pass shown; this branch's guard:
+**0 failing of 11**); `zsh -n` clean on all four changed scripts; the helper's header and guard order
+read and matched to the ruled shape (R1–R4, the resting-state semantics, exit 0/4/5 grammar).
+
+**The readings, adjudicated (the implementer proposed, the architect rules — each APPROVED as built):**
+- **R-U1-1 APPROVED.** The `kp:` delete rides inside the atomic statement and the after-read demands kp 0.
+  The mechanism is traced (a kept account id + a surviving secret ⇒ ALREADY_ENROLLED at the next set-up
+  while proofs check the OLD master's kp2 — `12_phase13y_tenant_seq.sql:611-615`); the VX-439 record's
+  "best-effort" described the purge's own shape, not a requirement on the reset.
+- **R-U1-2 APPROVED.** The reset fires on ANY family row, not only a vault — P8's evidence must be
+  attributable to this run, so the account must be fully at rest before the set-up arm.
+- **R-U1-3 APPROVED.** The join arm renames only a slot folder it can PROVE it made (absent at G7, its key
+  file naming the library this run's set-up enrolled); anything else stops naming the exact `mv`. The
+  brief's "the script never moves files" line protected the DEV STORE's files; the proof condition
+  guarantees the folder is not the dev store's, so `both` stays one invocation. The deviation from the
+  brief's letter is recorded here with its reason, per the skill.
+- **R-U1-4 APPROVED.** Sign out + quit precede the cleanup reset (`sync_challenge` needs no vault —
+  a signed-in app would mint challenge rows after the reset and the after-read would read not-at-rest).
+- **R-U1-5 APPROVED.** The join arm walks the same-posture Standard join only; `both` meets Standard by
+  construction (the set-up arm just minted a standard vault). A Castle join is a lifecycle drill's matter
+  (its Touch ID gate is a hands-moment, not gate plumbing).
+- **The unpinned P7 prefix-match fix is ACCEPTED** (it changes only which stop message prints); flagged
+  for the ladder's reviewer as part of the diff.
+
+**Filed from unit 1's observation: VX-627** (Low · Bug · Confirmed · Tests & tooling, project 12) —
+`Tools/VisualWalk/pins/guard-order.zsh` fails 7 of 9 cases on MAIN (reproduced by the orchestrator's own
+run on `~/dev/variorum`); traced to `vw_abort`'s key-up-shift belt (`3723268b6`). No VX-623 file touches
+VisualWalk; not this run's to fix.
+
 ## Environment traps (binding; carried into every brief verbatim)
 
 The vx-510 run's traps apply: instance checks by PATH (`pgrep -fl 'Variorum.app/Contents/MacOS'`), her
@@ -423,8 +458,8 @@ rule); quit by identity, kill extras by proven PID; zsh `pipestatus`; push after
 |---|---|---|
 | 1 | Kickoff: worktree, in-flight row, Linear flips, this record | DONE (in-flight row on main `VX-623 kickoff`; members In Progress 19:06Z) |
 | 2 | The kickoff sitting (Q1–Q3) + her premise answer delivered | DONE 2026-10-27 — headless · both arms · VX-536 seated; premise answer in the kickoff reply |
-| 3 | UNIT 1 — the script work (D-1…D-7) | IN FLIGHT — implementer spawned on this file's UNIT 1 BRIEF |
-| 4 | UNIT 2 — the live acceptance on production | NOT-STARTED (stage claim via oct27coordinator; Opus walker) |
+| 3 | UNIT 1 — the script work (D-1…D-7) | DONE 2026-10-27 (`b090395e4`…`2f656ddbc`; self-tests 64/64 + 85/85 and the D-7 pin red-on-old ALL re-run by the orchestrator; R-U1-1…5 adjudicated APPROVED; VX-627 filed) |
+| 4 | UNIT 2 — the live acceptance on production | PREPARING — REQUEST sent to oct27coordinator (claim `vx-623-walk`); READY waits on the walk app build + her allow-rule word |
 | 5 | The ladder (fresh fable-reviewer, whole diff) | NOT-STARTED |
 | 6 | Closeout: canon delta (the standing ruling, two-file shape), tickets, handoff, merge | NOT-STARTED |
 
