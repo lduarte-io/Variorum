@@ -498,7 +498,7 @@ rule); quit by identity, kill extras by proven PID; zsh `pipestatus`; push after
 | 1 | Kickoff: worktree, in-flight row, Linear flips, this record | DONE (in-flight row on main `VX-623 kickoff`; members In Progress 19:06Z) |
 | 2 | The kickoff sitting (Q1–Q3) + her premise answer delivered | DONE 2026-10-27 — headless · both arms · VX-536 seated; premise answer in the kickoff reply |
 | 3 | UNIT 1 — the script work (D-1…D-7) | DONE 2026-10-27 (`b090395e4`…`2f656ddbc`; self-tests 64/64 + 85/85 and the D-7 pin red-on-old ALL re-run by the orchestrator; R-U1-1…5 adjudicated APPROVED; VX-627 filed) |
-| 4 | UNIT 2 — the live acceptance on production | PREPARING — REQUEST accepted by oct27coordinator (claim `vx-623-walk`, uninterrupted); the walk build READY (`DerivedData/vx623`, io.lduarte.Variorum.debug, build 9746, BUILD SUCCEEDED); READY waits ONLY on her allow-rule word |
+| 4 | UNIT 2 — the live acceptance on production | PREPARING — REQUEST accepted by oct27coordinator (claim `vx-623-walk`, uninterrupted); the walk build READY on the MERGED tree (`f92ca2730` = branch + main's VX-620 merge; `DerivedData/vx623`, io.lduarte.Variorum.debug, build 9812, BUILD SUCCEEDED); READY waits ONLY on her allow-rule word |
 | 5 | The ladder (fresh fable-reviewer, whole diff) | NOT-STARTED |
 | 6 | Closeout: canon delta (the standing ruling, two-file shape), tickets, handoff, merge | NOT-STARTED |
 
