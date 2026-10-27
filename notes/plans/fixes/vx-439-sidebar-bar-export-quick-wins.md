@@ -2,7 +2,9 @@
 
 **Ticket:** VX-439 (Umbrella, run ticket) · **Project:** v1 release readiness · **Branch:** `vx-439-run-sidebar-bar-export-quick-wins` · **Worktree:** `~/dev/variorum-vx-439` (the Pro) · **PR:** `VX-439: …` (merge commit only)
 
-**STATUS: OPEN — kickoff 2026-10-27, overnight run (architect-phase).**
+**STATUS: OPEN — kickoff 2026-10-27, overnight run (architect-phase).** As of L1 (2026-10-27 morning): both batches
+built and stage-verified; walks part 1 + 2 done; ladder round 1 done and its L1 fixes built, pushed and headless-green
+on the tree merged with VX-548 (`2b33e8bb6`) — PENDING the fix-verify stage window, the evidence slice, then round 2.
 
 ---
 
@@ -269,22 +271,22 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   sweep, `0f77f2d95`) and re-ran GREEN; one red, `DestructiveUndoWarningTests.redoNeverAsks`, is PRE-EXISTING ON MAIN
   (same red on `dd469951e`'s own build — ticket proposed); R-O / R-G / R-T each red exactly as named, green restored; the
   export seam (ExportFacesTests 6, PlaintextExportBringInRoadTests 5, U2WordsTests 13) green on the merged tree. Tree
-  clean, no instances, stage released (Ledger "B2 STAGE LEG — RESULTS"). Every member's "PENDING the stage run" below is
-  now VERIFIED by it; the walk is the orchestrator's. — implementer session 2 (`opus-implementer`, fresh); preflight read
+  clean, no instances, stage released (Ledger "B2 STAGE LEG — RESULTS"). Every member's line below reads STAGE-VERIFIED
+  (flipped from "PENDING the stage run" at L1, n-4); the walk is the orchestrator's. — implementer session 2 (`opus-implementer`, fresh); preflight read
   (CLAUDE.md + canon, this record whole, SurfaceContracts whole, the resiliency protocol, TEXTKIT2_NOTES §3–4, the
   capability model, VX-283's U2b–U2d drag history). All eight members BUILT and pushed; origin/main (VX-502) merged in at
   `0a30e8b09` (Ledger "B2 — THE SECOND-MERGER STEP"). Headless at the END on the merged tree: core `swift test` 3,439/457
   passed (5 known) + 32/4, MCP 383/71 with the VX-353 timing flake re-run green 3/3; `xcodebuild build-for-testing`
   GREEN (default DerivedData = the fixed tree). **NO REVERT IN FLIGHT** — `git status` clean; the three revert trees are
-  pre-built in `scratchpad/b2/dd-r{o,g,t}` (Ledger "B2 — THE NAMED REVERTS"). THE STAGE RUN (PENDING the relayed claim
-  line): `scratchpad/b2/stage.sh` (gitignored; `zsh -n` clean), run from `App/Variorum`: `chunk1`…`chunk5` — the 495
+  pre-built in `scratchpad/b2/dd-r{o,g,t}` (Ledger "B2 — THE NAMED REVERTS"). THE STAGE RUN (RAN 05:30–06:09 MDT —
+  the Ledger's "B2 STAGE LEG — RESULTS"; the plan as it was written): `scratchpad/b2/stage.sh` (gitignored; `zsh -n` clean), run from `App/Variorum`: `chunk1`…`chunk5` — the 495
   suites of `scratchpad/b2/stage-suites.txt` (every suite in a test file naming a changed type — the grep rule — ∪ all 11
   of `TutorialWalkTests.swift`'s suites ∪ `ExportFacesTests`, `PlaintextExportBringInRoadTests`, `U2WordsTests` for the
   merged export seam; `NoteExportMenuGateTests` EXCLUDED — batch 1's crashing probe, untouched), 100 suites per
   `test-without-building`, each log's "Test run with N tests" line read (VX-604); then `rev_ro`, `rev_rg`, `rev_rt` on
   their own trees (expected reds named in the Ledger). A shorter fallback if the window is tight: `focused` (197 suites,
   `scratchpad/b2/stage-suites-focused.txt` — the suites over the changed behaviors). Members in order:
-  - VX-424: BUILT (this commit) — PENDING the stage run (the mounted + source-read pins and the R-O/R-G revert cycle).
+  - VX-424: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (the mounted + source-read pins and the R-O/R-G revert cycle).
     INSTRUMENT (`295bf3794`, removed `941728f54`): the rule refuses only DOWN BY ONE; up-drags land on the hovered row's
     top whichever half (Ledger "B2 VX-424 — THE INSTRUMENT"). FIX: each Open row wears `OpenListRowHalves` — an overlay
     INSIDE its gestures and its own drop, two clear shaped halves stacked with no gap, each main's classic
@@ -317,7 +319,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     check is the evidence — drag a row down one (release on the next row's lower half), up one (the row above's upper
     half), to the end, and watch the line stay put crossing a boundary. SurfaceContracts' Open-list drop sentence owes its
     closeout edit (A-439-15, pointer VX-424 — the orchestrator's).
-  - VX-425: BUILT (this commit) — PENDING the stage run (`SidebarNoteRowMenuTests` + the walk/export/registry suites).
+  - VX-425: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (`SidebarNoteRowMenuTests` + the walk/export/registry suites).
     Feature (no bug pin; registry + source-read + state pins). The Open list's rows and Starred's NOTE rows carry, on
     right-click: [Open beside · Open in New Window · Star] · **Rename…** · **Move to Wing ▸ / Copy to Wing ▸** (from the
     note's OWN wing; drawn only while another wing exists — `WingNoteDoors`, P-2) · **Export Note…** (VX-125's one act,
@@ -339,7 +341,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     before Delete; the ✕ unchanged); the shared roads (stored-title seed, own-wing doors, this row's export, the one
     delete ask, the three hosted asks); Starred's note vs book rows; the rename seed + road on a store (stored, never the
     display date; trimmed; blank → NULL); `crossWingIDs`. build-for-testing GREEN.
-  - VX-580: BUILT (this commit) — PENDING the stage run (`SidebarRowLeadsTests` 4, incl. a mounted, live-typing pin).
+  - VX-580: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (`SidebarRowLeadsTests` 4, incl. a mounted, live-typing pin).
     A-439-11 as ruled: default ON, NO setting. The sidebar's note rows (the Open list's — title, drag chip, menu words —
     and Starred's NOTE rows) are called by `noteRowLabel` = the note's PRELIMINARY title where it has one, else the name
     every surface gives it. The preliminary title is the LIBRARY's one brain exactly — `NoteCardFace.card(…)` over the
@@ -354,7 +356,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     `SidebarGeometry.openRowLabels`. PROVISIONALs (morning bundle 12): the Library's 48-char lead cap kept (her "maybe
     fewer words than the library shows" — the row's width truncates first at any normal sidebar width); View ▸ Open
     Note's menu rows keep the display name (the ask was "the lefthand bar"). build-for-testing GREEN.
-  - VX-589: BUILT (this commit) — PENDING the stage run (`OpenListStarredFilterTests` 6 + the drag/settings suites).
+  - VX-589: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (`OpenListStarredFilterTests` 6 + the drag/settings suites).
     A-439-10 as ruled: a LOCAL preference (`UserDefaults` key `openListHidesStarred`, `@AppStorage` — never the synced
     `setting` table), default OFF, the pane named: **Settings ▸ General ▸ "Open notes"**, beside its kindred "Keep open
     notes across launches" (catalog row `hideStarredFromOpen`, "Hide starred notes from Open", searchable by her words
@@ -377,7 +379,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     `displayed: rows` (deliberate). PINS `OpenListStarredFilterTests` (6): the preference; the filter; the identity
     mapping (exhaustive 1…6); the hidden-row mapping incl. the drawn own place; the door landing while the hidden note
     stays open; the wiring. build-for-testing GREEN.
-  - VX-426: BUILT (this commit) — PENDING the stage run (`IconTooltipTests` 4 + the touched suites). A-439-17: the sweep
+  - VX-426: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (`IconTooltipTests` 4 + the touched suites). A-439-17: the sweep
     of every ICON-ONLY door in the sidebar (and its window toolbar) and the note's face (context bar, masthead, both
     bottom bars) — the table below. The one door that said NOTHING on hover was the toolbar's New Note (now "New Note
     (⌘N)", ⌘N's registry words — the toggle beside it says "Toggle Sidebar (⌃⌘S)"). Every other icon-only door already
@@ -415,7 +417,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     the sync row's doors, and the bars' commit · takes · history · comments · more · block ▾ · note ▾ · newlines chip ·
     word count. Out of the ruled scope (surfaces, not the sidebar or a note's face): the Library's and the Bookcase's
     mastheads, the Takes board's card glyphs, the panels' own rows.
-  - VX-560: BUILT (this commit) — PENDING the stage run (`BrowserNavKeysTests` 4, incl. a window with a real field).
+  - VX-560: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (`BrowserNavKeysTests` 4, incl. a window with a real field).
     A-439-12 as ruled: ⌘← / ⌘→ are Back / Forward ONLY while no text holds the keyboard; inside any editor or field
     they stay line start / end. NOT a menu key equivalent (a key equivalent is resolved before the first responder's
     `keyDown`, so a ⌘← menu item would take line-start from every text view — `PageTurnKeys`' class): the door is
@@ -432,7 +434,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     them); the act (back/forward through a ShellRouter, the refusal spoken where nothing waits); the monitor in a window
     (a TextField's editor keeps ⌘← — caret to 0, nothing navigates — and with no text in charge ⌘← back, ⌘→ forward,
     ⇧⌘← nothing; `PagesArrowKeysHostTests`' sendEvent road). build-for-testing GREEN.
-  - VX-441: BUILT (this commit) — PENDING the stage run (`FindReadoutTests` 6, incl. the real editor and the REAL
+  - VX-441: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (`FindReadoutTests` 6, incl. the real editor and the REAL
     finder stepping). THE TRACE FIRST (A-439-13): AppKit's `NSTextFinder` bar CANNOT show a count — nothing in
     `NSTextFinder.h` (macOS 27 SDK), no count or position string in AppKit's `TextFinder.loctable` ("Searching…",
     "find next", "find previous" only), no container/client hook adds text to the system bar, and the only public match
@@ -459,10 +461,10 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     empty selection); the real editor following selection and the container's open/close; the REAL finder's
     `.next` steps followed via the real find pasteboard (saved and restored — the board's discipline); the wiring read.
     Headless replica of the three pure pins (the real `FindReadout.swift` + `TakesFindPlan.swift`): 21 checks, 0 failed.
-    build-for-testing GREEN. OPEN at the stage: whether a query typed ONLY into the bar's own field reaches the find
-    pasteboard (the header says the finder communicates there; the real-finder pin arms via the board, the app's seed
-    road) — the walk's typed-query leg is the evidence.
-  - VX-569: BUILT (this commit) — PENDING the stage run (`TitleQuickfillTests` 5 incl. 3 mounted key-press pins +
+    build-for-testing GREEN. ~~OPEN at the stage: whether a query typed ONLY into the bar's own field reaches the find
+    pasteboard~~ — RESOLVED live at walk part 2: a query typed only into the find bar + one step read "1 of 1" (the
+    finder does write the find pasteboard).
+  - VX-569: BUILT (batch 2's commit) — STAGE-VERIFIED at the B2 stage leg (`TitleQuickfillTests` 5 incl. 3 mounted key-press pins +
     `MastheadLayoutTests`). THE TRACE FIRST (A-439-14): the "existing first-line quickfill" does NOT exist on the note's
     title — the "first words offered, one tap to adopt" chip lives only on the CAPTURE surfaces (`TitleSuggestionChip`:
     quick entry, the quick note). The masthead's title field (`PostDetailView.PostTitleLabel`) opened an untitled note on
@@ -482,14 +484,43 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     the offer). DELIBERATE edit: `MastheadLayoutTests.theOpenFieldsWordsStayWhereTheTitleRested` mounts a WORDLESS note
     (`blockText: ""` — its offer is the date, the very words it compares; annotated). The red-on-old for the mounted pin
     is the stage's revert cycle (R-T: the `.onKeyPress(.tab)` block removed). build-for-testing GREEN.
-- Ladder: NOT-STARTED
+- Ladder: ROUND 1 DONE (`opus-reviewer`; findings `vx-439-ladder-round1.md` — 3 MAJOR · 7 MINOR · 5 NIT, no BLOCKER;
+  the orchestrator's dispositions in the Ledger); its fixes are L1, below; round 2 (a FRESH `opus-reviewer` over the
+  L1 fixes, per her kickoff word — the editor-seam file touches named in the bundle) NOT-STARTED.
 - **L1 — THE ROUND-1 FIX SESSION** (`opus-implementer`, fresh, 2026-10-27; scope = the Ledger's "LADDER ROUND 1
-  DISPOSITIONS", nothing else). **REVERT PRE-BUILD STARTING (announced before applying)** — on the committed tip
-  (the merge `2b33e8bb6`; the tip IS the pre-revert copy): tree **A** = every L1 revert patch EXCEPT `r-g.patch` applied
-  → `build-for-testing -derivedDataPath scratchpad/l1/dd-revA` (an APFS clone of this worktree's DerivedData) → restore
-  by `git checkout --` of the touched files; then tree **B** = `r-g.patch` alone → `scratchpad/l1/dd-revB` → restore.
-  If a session dies mid-way: `git diff --stat` shows what is reverted; `git checkout -- App/` restores (nothing
-  uncommitted is ever under it). Method (the run's own, batch 2's): each fix lands WITH its
+  DISPOSITIONS", nothing else). **BUILT — every item dispositioned below; PENDING the fix-verify stage window.**
+  **NO REVERT IN FLIGHT** — the revert pre-build (announced at `bf91cd0ba`) ran and restored: tree **A** (every L1
+  revert patch but `r-g`) built into `scratchpad/l1/dd-revA`, tree **B** (`r-g` alone) into `scratchpad/l1/dd-revB`
+  (each an APFS clone of this worktree's DerivedData, `build-for-testing` GREEN), each restored by `git checkout -- App/`,
+  `git status`/`git diff` empty after both. **THE SECOND MERGE (the coordinator's addendum — VX-548 merged first):**
+  `git merge origin/main` (main `6def23df0`) — the five shared files (`BookPanelModel`, `SettingsShape`,
+  `TutorialSeeder`, `Capability`, `CapabilityRegistry`) auto-merged with DISJOINT hunks, both sides kept (main: the
+  MCP "Share a place…"/"Share another place…" verbs + `mcpShareAnotherPlace`, the Book Panel's reading-reach marks,
+  the guide's MCP sentences; ours: VX-589's settings row, VX-426's Book door help, VX-602's restore question) — no hunk
+  asked a behavioral judgment; none of L1's files was in main's delta (every revert patch still applies) — merge
+  commit **`2b33e8bb6`**, pushed. HEADLESS ON THE MERGED TREE: `swift build` GREEN; full `swift test` — core **3,467
+  tests / 463 suites passed** (5 known issues, the standing ones), StringsWorkbook **32 / 4 passed**, MCP **412 / 75 with
+  ONE failure**, `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (23.9 s vs
+  its 15 s bound, load average ~22 — the VX-353 load class both batches met), re-run alone **GREEN 3 / 1**; the
+  skipped lines are the standing gated measurement/integration skips; `xcodebuild build-for-testing` GREEN on the
+  merged tree (default DerivedData). THE STAGE PLAN (PENDING the relayed claim line): `zsh scratchpad/l1/stage.sh
+  fixed1|fixed2|fixed3` — the **267 suites** of `scratchpad/l1/stage-suites.txt` (every suite in a test file naming a
+  type L1 changed — the grep rule, `scratchpad/l1/suites.py`, test subfolders included — ∪ the coordinator's merge
+  additions: the capability-registry suite, every Settings* suite + the settings-search readers, all eleven of
+  `TutorialWalkTests.swift`'s suites + every seeder-reading suite, the Book Panel suites incl. `BookPanelMCPMarksTests`,
+  the export-seam trio `ExportFacesTests`/`PlaintextExportBringInRoadTests`/`U2WordsTests`), 89 per
+  `test-without-building`, each log's "Test run with N tests" line read (VX-604) and `NoteExportMenuGateTests` read
+  SKIPPED; then `revA` (tree A's patches applied for the run, the nine L1 pin suites on `dd-revA`, restored) and `revB`
+  (`r-g` applied, `FindReadoutTests` on `dd-revB`, restored). EXPECTED REDS under A, exactly: `SidebarRowLeadsTests.
+  theReadsWordsAreBoundedSeeksNeverAWindowOverTheWholeNote`, `QuickEntryWingLabelTests.theToolbarsNewNoteButtonWearsTheWingLabel`,
+  `BrowserNavKeysTests.aWebViewHoldingTheKeyboardKeepsCommandArrow`, `FindReadoutTests.aStepReadsTheCachedCountAndOnlyNewWordsOrNewTextRescan`
+  + `theEditorScansOncePerTextAndAnEditRecounts`, `SidebarNoteRowMenuTests.aMoveFromTheRowReasksWhichWingItsDoorsAndIndicatorRead`
+  + `theColumnsWingDoorsHandTheReaskAndBothReadsAreKeyedOnIt`, `OpenListDragMountTests.aDragWhoseRowWentAwayLeavesTheRowsDoorsActing`,
+  `OpenListDragFaceTests.eachRowsTwoHalvesAreDropsOnMainsRoadLiveOnlyWhileItsDragIsInFlight` (its deliberately edited
+  literal), `NoteExportTests.aFailedWriteNamesItsReason` — every other test of those nine suites green (`OpenListDropDoorTests.
+  theDragIsInFlightOnlyWhileItsRowIsDrawn` green under A by construction — the predicate exists; the mounted pin is
+  m-7's red-on-old). Under B, exactly: `FindReadoutTests.theEditorScansOncePerTextAndAnEditRecounts` (its edit leg).
+  Method (the run's own, batch 2's): each fix lands WITH its
   pin and a NAMED behavioral revert (patch gitignored in `scratchpad/l1/reverts/`); app-side pins are red-on-old
   verified at the fix-verify stage window (the reverts applied for the run, restored by `git checkout`), and
   headlessly first wherever a replica is cheap. Items (each flips in its own commit):
@@ -625,8 +656,17 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     OLD, HEADLESS — the pin's assertions over the old and new sentences with the real failing write (scratchpad
     `l1-n2`, `scratchpad/l1/n2-replica.txt`): old FAIL (no reason), new PASS; the mounted-free app pin itself runs at the
     stage under named revert **R-N** (`scratchpad/l1/reverts/r-n2.patch`). build-for-testing GREEN.
-  - n-4 (LIVE STATUS freshened — the last flip): NOT-STARTED
-- Walks (orchestrator, per batch): NOT-STARTED
+  - n-4 (LIVE STATUS freshened — the last flip): DONE (this commit) — the STATUS banner, the Ladder and Walks lines,
+    batch 2's eight member lines (each "PENDING the stage run" → STAGE-VERIFIED at the B2 leg, under a header that
+    already said so), the B2 stage plan's tense, VX-441's resolved typed-query question, and this L1 block's
+    revert/merge/headless/stage-plan state — all brought to the truth as of `2b33e8bb6` + this commit.
+  - NOT THIS SESSION'S (the brief's NOT-YOURS, restated so nothing reads as dropped): M-3 (the 11 MB of walk captures in
+    branch history — her call); m-6 (the canon sweep — closeout work); the evidence slice (VX-589's toggle, a true
+    Settings ▸ General capture, VX-569's title-Tab, VX-425's three asks, M-2's toolbar label in both voices — the
+    orchestrator's, in the fix-verify window); VX-424's drag delivery (her hand check, bundle 11).
+- Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`) and part 2 DONE (06:11–06:28) — the WALK
+  PART 1 / WALK PART 2 sections below; the POST-FIX EVIDENCE SLICE (m-4's live legs + M-2's look) is owed in the
+  fix-verify window — NOT-STARTED.
 
 ## THE MORNING BUNDLE (held for her — grows as the night runs)
 
