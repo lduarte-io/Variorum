@@ -257,7 +257,9 @@ struct RootView: View {
                 // mode truth (the broadcast-derived shadow is retired).
                 postMode: (session.commandRouter.activeMode ?? .takes).rawValue,
                 noteBox: noteBoxView,
-                bottom: statusRows)
+                bottom: statusRows,
+                // VX-425: the note rows' Move/Copy to Wing ▸ doors.
+                wings: wings)
         } detail: {
             paneRow
                 // 13b 1b (AD-14): the ONE status/refusal presentation —

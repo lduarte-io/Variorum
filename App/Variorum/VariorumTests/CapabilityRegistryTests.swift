@@ -374,6 +374,10 @@ struct CapabilityRegistryTests {
             // new line): the Open list's own right-click act, Close All Notes,
             // beyond the shared note-row grammar its rows also render.
             .union(SidebarView.openListMenuCapabilities)
+            // VX-425 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the sidebar's NOTE rows' own acts (Rename…, Export
+            // Note…), beyond the shared note-row grammar they also render.
+            .union(SidebarView.noteRowMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 

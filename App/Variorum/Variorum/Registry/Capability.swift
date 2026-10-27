@@ -515,6 +515,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // `.deleteNote`'s is, and so the receipt (`RecoveryCopy
     // .archivedNoteReceipt`) names where the note went.
     case archiveNote
+    // VX-425 (the VX-439 run, A-439-16) — RENAME A NOTE, declared at last: her
+    // ask (2026-10-18) plus a beta tester's — "two-finger click on an Open row
+    // … gets a menu: Rename, Delete note, Close". The Library's row has carried
+    // an undeclared "Rename…" since 9d; the sidebar's note rows are its second
+    // renderer, so the act is declared once and both read its verb.
+    case renameNote
     // 13j batch 6b (J1 — her round-3 rider, verbatim: "have a delete now
     // option WITHIN the trash (not from within the normal note) … but never
     // accidental full delete from within a note, but an option for full

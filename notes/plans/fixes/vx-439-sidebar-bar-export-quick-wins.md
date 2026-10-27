@@ -297,7 +297,28 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     check is the evidence — drag a row down one (release on the next row's lower half), up one (the row above's upper
     half), to the end, and watch the line stay put crossing a boundary. SurfaceContracts' Open-list drop sentence owes its
     closeout edit (A-439-15, pointer VX-424 — the orchestrator's).
-  - VX-425: NOT-STARTED
+  - VX-425: BUILT (this commit) — PENDING the stage run (`SidebarNoteRowMenuTests` + the walk/export/registry suites).
+    Feature (no bug pin; registry + source-read + state pins). The Open list's rows and Starred's NOTE rows carry, on
+    right-click: [Open beside · Open in New Window · Star] · **Rename…** · **Move to Wing ▸ / Copy to Wing ▸** (from the
+    note's OWN wing; drawn only while another wing exists — `WingNoteDoors`, P-2) · **Export Note…** (VX-125's one act,
+    this row's note) · [Close · Close All Notes] · **Delete Note…** LAST, set apart by a divider (the one shared confirm
+    `NoteDeletion.ask`/`.deleteNoteConfirmDialog`/`fire` — its signal closes the note's Open rows and moves panes off it);
+    Starred's note rows the same minus the Open-list acts; a starred BOOK keeps the book row menu. The ✕ is unchanged
+    (close-only, "the note itself is untouched"). The recorded "the Open strip does not render Delete" decision is
+    REVERSED at her ask (comments rewritten, `SidebarView.contextMenuCapabilities`). REGISTRY: NEW `.renameNote` ("Rename…",
+    `.contextMenu`, `always` — the door carries its row; its renderers: the Library's note rows, whose undeclared
+    "Rename…" it now is, and the sidebar's) — A-439-16's PROVISIONAL inline-vs-title-field call resolved to the surface's
+    EXISTING idiom: the Library's "Rename Note" alert, hoisted ONCE into `Features/Library/NoteRename.swift`
+    (`noteRenameAlert`, seeded with the STORED title — R6-3; the write is `LibraryViewModel.rename` → `renameContainer`;
+    the Library now presents the same hoisted ask, words unchanged). `.exportNote` gains `.contextMenu`;
+    `SidebarView.noteRowMenuCapabilities = [.renameNote, .exportNote]` joins the walk's union (a JUSTIFIED EDIT). The
+    wing read: `WingFollow.crossWingIDs` (the other-wing notes' wing ids, bounded by the rows — P1), keyed on the Open +
+    starred note rows; `RootView` hands the column its `wings`. DELIBERATE pin edits: `NoteExportTests.theDoorIsDeclaredOnce…`
+    (+ `.contextMenu`), `CapabilityRegistryTests.theContextMenusRenderExactlyTheDeclaredContextDoors` (+ the new union line).
+    PINS `SidebarNoteRowMenuTests` (6): the declarations; the Open row's order (acts · Close · Close All · Delete, divider
+    before Delete; the ✕ unchanged); the shared roads (stored-title seed, own-wing doors, this row's export, the one
+    delete ask, the three hosted asks); Starred's note vs book rows; the rename seed + road on a store (stored, never the
+    display date; trimmed; blank → NULL); `crossWingIDs`. build-for-testing GREEN.
   - VX-580: NOT-STARTED
   - VX-589: NOT-STARTED
   - VX-426: NOT-STARTED

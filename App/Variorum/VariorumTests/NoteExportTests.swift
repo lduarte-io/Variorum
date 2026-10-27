@@ -184,7 +184,10 @@ struct NoteExportTests {
         let door = CapabilityRegistry.capability(.exportNote)
         #expect(door.verb == "Export Note\u{2026}")
         #expect(door.scope == .post)
-        #expect(Set(door.doors) == [.menuBar, .palette, .bottomBar])
+        // VX-425 — edited deliberately: + `.contextMenu`, the sidebar's note
+        // rows (`SidebarView.noteRowMenuCapabilities`), each carrying its row.
+        #expect(Set(door.doors) == [.menuBar, .palette, .bottomBar, .contextMenu])
+        #expect(SidebarView.noteRowMenuCapabilities.contains(.exportNote))
         #expect(door.shortcutLabel == "\u{2325}\u{2318}S")
         let key = EditorCommands.keyEquivalent(for: .exportNote)
         #expect(key?.0 == KeyEquivalent("s") && key?.1 == [.command, .option])

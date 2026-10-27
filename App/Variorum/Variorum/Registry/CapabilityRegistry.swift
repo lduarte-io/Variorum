@@ -1046,6 +1046,23 @@ nonisolated enum CapabilityRegistry {
                 + "right-click one in the Library. \(RecoveryPath.archivedSurface) keeps it, "
                 + "with no countdown.",
             availability: always),
+        // VX-425 (the VX-439 run, A-439-16) — **RENAME NOTE…**: the note-row
+        // menus' rename, through the ONE rename road (`LibraryViewModel.rename`
+        // → `renameContainer`) and the ONE ask (`noteRenameAlert`, seeded with
+        // the STORED title, never the display/date — R6-3). `always` for
+        // `.archiveNote`'s reason: the door carries the row it was opened on.
+        // Two renderers: the Library's note rows
+        // (`LibraryCatalogView.contextMenuCapabilities`) and the sidebar's —
+        // the Open list's rows and Starred's note rows
+        // (`SidebarView.noteRowMenuCapabilities`). A sealed note still renames
+        // (AppSpec §9: a seal never refuses a retitle).
+        Capability(
+            id: .renameNote, verb: "Rename\u{2026}", scope: .post,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Renaming acts on a note's row \u{2014} right-click one in the sidebar "
+                + "or the Library.",
+            availability: always),
         // 13j batch 6b (J1 — the purge doors). `.surface` acts on the Trash's
         // own rows and header; app scope because a Trash row can be any kind,
         // and the surface itself is app chrome, not a mode. Both back onto ONE
@@ -2236,9 +2253,14 @@ nonisolated enum CapabilityRegistry {
         // carries ⌥⌘S; `EditorTextView.performKeyEquivalent` matches bare ⌘S
         // only (the exact modifier set); the system hot keys are [.quickNote]
         // (⌃⌥⌘N); macOS reserves no ⌥⌘S.
+        //
+        // VX-425 (A-439-16): + `.contextMenu` — the sidebar's note rows (the
+        // Open list's and Starred's), each carrying its own row's note; the
+        // context rule below governs the menu, palette and bar doors only (the
+        // `.toggleStar` / `.openInNewWindow` split).
         Capability(
             id: .exportNote, verb: "Export Note\u{2026}", scope: .post,
-            doors: [.menuBar, .palette, .bottomBar],
+            doors: [.menuBar, .palette, .bottomBar, .contextMenu],
             shortcutLabel: "\u{2325}\u{2318}S", takesAccess: .native,
             unavailableNote: "Export Note writes the note you have open to a file \u{2014} open one first.",
             availability: noteScoped),

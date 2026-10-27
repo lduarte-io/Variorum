@@ -106,13 +106,15 @@ struct SidebarView: View {
         // confirmation for the library door of deletion"), and where the door
         // already lived without one.
         //
-        // **The OPEN STRIP deliberately does not render it**, and that is a
-        // decision rather than an omission: the strip is pure view state and
-        // its own copy promises exactly that — "Close this row — the note
-        // itself is untouched" — so putting a tombstoning act one row above
-        // "Close" is the confusion that sentence exists to prevent. Her
-        // ruling named the note menu and the library door; a third door is
-        // hers to ask for.
+        // **VX-425 (the VX-439 run) — the Open strip renders it now, at her
+        // ask.** It was a recorded decision that it should not ("a tombstoning
+        // act one row above Close is the confusion that sentence exists to
+        // prevent … a third door is hers to ask for"); her 2026-10-18 ask —
+        // "Rename, Delete note, Close" on a two-finger click — is that ask. The
+        // ✕ keeps its close-only meaning and its help sentence ("the note
+        // itself is untouched"); the menu's Delete Note… sits LAST, set apart
+        // from Close by a divider, and asks first (the one shared confirm).
+        // Starred's note rows render it too.
         .deleteNote,
         // The post-13l polish round (ledger row 25): ARCHIVE joins the same
         // grammar and the same two renderers — the Library's rows and the
@@ -124,8 +126,9 @@ struct SidebarView: View {
         // 13i-d U5: the cross-wing NOTE doors join the same grammar and the
         // same two renderers (the Library's rows and the Pool's) — Move to
         // Wing ▸ / Copy to Wing ▸ (the sitting record §9's "explicit move/copy
-        // doors"). The Open strip does not render them (`.deleteNote`'s
-        // reason above).
+        // doors"). VX-425 (her 2026-10-26 widening — the "empowered note
+        // sidebar"): the Open strip's rows and Starred's note rows render them
+        // too, each from its note's OWN wing.
         .moveNoteToWing, .copyNoteToWing,
         // VX-372 (VX-383 U1 — D-C-2): her two DUPLICATE doors join the same
         // grammar and the same two renderers (the Library's rows and the
@@ -140,6 +143,14 @@ struct SidebarView: View {
     /// Pool's rows render too. Close All Notes is about the LIST, so only the
     /// list renders it (the walk's union carries this as its own line).
     static let openListMenuCapabilities: [CapabilityID] = [.closeAllNotes]
+
+    /// **VX-425 (the VX-439 run, A-439-16) — the sidebar NOTE ROWS' own acts**
+    /// beyond the shared grammar: Rename… (whose other renderer is the
+    /// Library's row) and Export Note… (whose other doors are File, ⌘K and the
+    /// note ▾ menus), on the Open list's rows and Starred's note rows, each
+    /// carrying its own row's note. Single-row (several rows at once is
+    /// VX-344's).
+    static let noteRowMenuCapabilities: [CapabilityID] = [.renameNote, .exportNote]
 
     /// The five areas, in R44's ruled order (+ Archived at the end, the
     /// post-13l polish round's addition). ONE table the column iterates —
@@ -210,6 +221,9 @@ struct SidebarView: View {
     /// were the split view's `safeAreaInset`; with the flat `ShellSplit`
     /// they are the column's own last region, above nothing.
     var bottom: AnyView? = nil
+    /// VX-425: the wings the note rows' Move/Copy to Wing ▸ doors list (the
+    /// composition root's model; nil — a harness mount — draws no wing doors).
+    var wings: WingsModel? = nil
     @Environment(ThemeStore.self) private var theme
     @Environment(\.colorScheme) private var scheme
     /// Phase 11b (B2): the drop-in import model, created on first drop.
@@ -233,6 +247,15 @@ struct SidebarView: View {
     /// VX-288: the Open list's drag — which row is dragged, where it points,
     /// the list's window as the insertion line reads it (`OpenListDrag.swift`).
     @State private var openListDrag = OpenListDragState()
+    /// VX-425: the note rows' asks — Rename's (the note and the field's
+    /// words), Delete's confirm, a cross-wing move's confirm — and the wing
+    /// each OTHER-wing note row's note lives in (its wing doors list the
+    /// wings other than that one; absent = the current wing).
+    @State private var renameTarget: String?
+    @State private var renameTitle = ""
+    @State private var pendingDelete: NoteDeleteConfirm?
+    @State private var wingMove: WingsModel.MoveAsk?
+    @State private var noteRowWingIDs: [String: String] = [:]
     #if DEBUG
     /// **This column's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): it owns the rail's drawn height.
@@ -393,6 +416,25 @@ struct SidebarView: View {
             let model = importer ?? ImportModel(session: session)
             importer = model
             return model.handleDrop(providers, into: .library)
+        }
+        // VX-425: the note rows' asks, hosted on the column (an alert cannot
+        // hang off a menu item) — the ONE rename ask, the ONE delete confirm,
+        // the ONE cross-wing move confirm, each shared with the Library's rows.
+        .noteRenameAlert(target: $renameTarget, title: $renameTitle) { postID, title in
+            Task { await model.rename(postID: postID, title: title) }
+        }
+        .deleteNoteConfirmDialog($pendingDelete) { confirm in
+            NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
+        }
+        .wingMoveConfirm($wingMove, wings: wings)
+        // …and which listed notes live in ANOTHER wing (bounded by the Open
+        // list and the star cap — P1).
+        .task(id: noteRowsWingKey) {
+            let ids = noteRowIDs
+            let current = session.wing.currentID
+            noteRowWingIDs = (try? await session.database.read { db in
+                try WingFollow.crossWingIDs(db, noteIDs: ids, current: current)
+            }) ?? [:]
         }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? importer?.lastError {
@@ -666,9 +708,20 @@ struct SidebarView: View {
                 BookRowMenu(
                     readingID: item.target.id, doors: bookRowDoors, starDoor: starDoor,
                     open: { selection = destination })
-            } else if let starDoor {
-                Button(starDoor.title(for: item.target)) {
-                    starDoor.toggle(item.target)
+            } else {
+                if let starDoor {
+                    Button(starDoor.title(for: item.target)) {
+                        starDoor.toggle(item.target)
+                    }
+                }
+                // VX-425: a starred NOTE's row carries the sidebar note rows'
+                // acts (Rename… · Move/Copy to Wing ▸ · Export Note… · Delete).
+                if item.target.kind == .post {
+                    Divider()
+                    noteRowActs(item.target.id, title: WorkspaceNaming.label(
+                        for: destination, titles: stars.titles))
+                    Divider()
+                    deleteNoteDoor(item.target.id)
                 }
             }
         }
@@ -1176,6 +1229,12 @@ struct SidebarView: View {
                     starDoor.toggle(.post(noteID))
                 }
             }
+            // VX-425: the note's own acts (Rename… · Move/Copy to Wing ▸ ·
+            // Export Note…), then the row's (Close · Close All), then Delete
+            // Note… LAST and set apart — the ✕ stays close-only.
+            Divider()
+            noteRowActs(noteID, title: workspace.label(for: destination))
+            Divider()
             Button("Close") { Self.closeRow(noteID, in: workspace, selection: $selection) }
             // VX-289 (the VX-283 run): Close All Notes — every row closes; a
             // pane showing a note lands by ⌘⇧W's rule (the list empty: the
@@ -1185,6 +1244,54 @@ struct SidebarView: View {
             Button(CapabilityRegistry.capability(.closeAllNotes).verb) {
                 if let landing = workspace.closeAllNotes() { selection = landing }
             }
+            Divider()
+            deleteNoteDoor(noteID)
+        }
+    }
+
+    // MARK: - VX-425 — the sidebar note rows' acts (the Open list's, Starred's notes)
+
+    /// The notes the sidebar lists as NOTE rows — the Open list's and
+    /// Starred's notes (bounded by the list and the star cap).
+    private var noteRowIDs: [String] {
+        let starredNotes = stars.items.filter { $0.target.kind == .post }.map(\.target.id)
+        return workspace.openNotes.shown + starredNotes.filter { !workspace.openNotes.shown.contains($0) }
+    }
+
+    /// The wing read's key: the note rows and the wing she stands in.
+    private var noteRowsWingKey: String {
+        noteRowIDs.joined(separator: ",") + "|" + session.wing.currentID
+    }
+
+    /// **A note row's own acts** (`noteRowMenuCapabilities` + the shared
+    /// grammar's wing doors): Rename… (the ONE ask, seeded with the STORED
+    /// title), Move/Copy to Wing ▸ (from the note's OWN wing — drawn only while
+    /// another wing exists, P-2), Export Note… (VX-125's one act, this row's
+    /// note).
+    @ViewBuilder
+    private func noteRowActs(_ noteID: String, title: String) -> some View {
+        Button(CapabilityRegistry.capability(.renameNote).verb) {
+            Task {
+                renameTitle = await NoteRename.storedTitle(session: session, postID: noteID)
+                renameTarget = noteID
+            }
+        }
+        if let wings {
+            WingNoteDoors(
+                wings: wings, postID: noteID, title: title,
+                fromWing: noteRowWingIDs[noteID], onAsk: { wingMove = $0 })
+        }
+        Button(CapabilityRegistry.capability(.exportNote).verb) {
+            Task { await NoteExport.export(postID: noteID, session: session) }
+        }
+    }
+
+    /// **Delete Note…** on a note row — the one shared ask (its version count
+    /// read at ask time), then the one road (`NoteDeletion.fire`), whose signal
+    /// closes the note's Open rows and moves every pane off it.
+    private func deleteNoteDoor(_ noteID: String) -> some View {
+        Button(RecoveryCopy.deleteNoteTitle, role: .destructive) {
+            Task { pendingDelete = await NoteDeletion.ask(session: session, postIDs: [noteID]) }
         }
     }
 }
