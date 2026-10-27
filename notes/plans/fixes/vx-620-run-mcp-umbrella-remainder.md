@@ -561,10 +561,8 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **BEHAVIOURAL REVERT ANNOUNCED (piece 3), starting AFTER this commit:** the one line `self.onNamed()` in
-  `MCPSession.run()`'s `initialize` hook removed in the working tree (the fix committed here, so `git checkout --
-  Sources/VariorumMCP/MCPSession.swift` is the SAFE restore and `git diff` says exactly what is reverted). If this
-  line still reads "announced" and `git diff` shows that file, the tree IS mid-revert: restore by that checkout.
+- **No behavioural revert is in flight.** (Piece 3's revert RAN over `eaf8a3112` — the one line `self.onNamed()`
+  removed — and was restored by `git checkout -- Sources/VariorumMCP/MCPSession.swift`; `git diff` clean after.)
 - **0 · Preflight + this record:** DONE (`8f103741d`).
 - **1 · VX-605 — the headless pin, RED on the pre-fix tree:** DONE (`ebef21198`, the pin committed RED) —
   `Tests/VariorumMCPTests/MCPConnectionNamingSignalServerTests.swift`: a door-shaped recorder on
@@ -580,7 +578,14 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
   signal carrying no decision (P-4); the door's hop to the main actor and its re-read of the CURRENT host are
   untouched, so a late signal from a stopped host can never resurrect its names. GREEN
   (`scratchpad/b2-logs/vx605-green.log`): 3 / 1, the red pin passing in 0.43 s.
-- **3 · VX-605 — the behavioural revert + the Mac door pin:** NOT-STARTED.
+- **3 · VX-605 — the behavioural revert + the Mac door pin:** the revert DONE — RED under it
+  (`scratchpad/b2-logs/vx605-revert-red.log`: 1 of 3, the same :79, the door's reads `[Set([])]`), restored GREEN
+  (`vx605-restored.log`, 3/1). The seam's no-regress suites GREEN on the fix (`vx605-seam-suites.log`: **64 tests / 12
+  suites**) — VX-394's `MCPConnectionEndServerTests` + `MCPStopRoadsServerTests` (rows 1–4, 9, 10's headless pins),
+  VX-180/181's four (`MCPDiscoverProbeServerTests`, `MCPPreInitializeWindowTests`, `MCPShimClosedAppTests`,
+  `MCPShimTests`), the setup-key roads (`MCPSetupKeyServerTests`, `MCPSetupKeyTabServerTests`,
+  `MCPSetupKeyRebindServerTests`), the two suites that build a session by hand (`MCPServerHostReuseTests`,
+  `MCPReaderAfterCloseTests` — VX-607 green this run). The Mac door pin: IN-PROGRESS.
 - **4 · VX-590 — the sharing face hidden until the library has ever had a client:** NOT-STARTED — the settled design:
   the store fact is VX-512's own (client rows — pending + approved + denied — exist; monotone: the pending room's
   prune never empties it), PROVISIONAL RB-3; the Shared with AI tab (and the open-book switch it holds) is not
