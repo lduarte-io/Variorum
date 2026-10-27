@@ -1,6 +1,6 @@
 # VX-548 — Run: MCP grant & pane fixes — author handoff
 
-**STATUS: FINAL — the run is CLOSED; everything below is complete.** The run's record (everything below in full detail): `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md`. Overnight run 2026-10-27 at your word; the ladder closed in two rounds (r1: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT, all fixed with evidence; r2: no new BLOCKER/MAJOR). PR: PENDING(filled at the merge — see the record's banner). No release happened and none is minted — that stays your word.
+**STATUS: FINAL, CORRECTED 2026-10-27 — the run is CLOSED and merged (PR #193), but its closeout MISSED five members you had seated under the umbrella before kickoff (VX-565 · VX-566 · VX-567 · VX-590 · VX-596): the remainder is VX-620, a fresh orchestrator's run (kickoff `notes/handoffs/vx-620-kickoff.md`). Your morning answers are recorded: MB-7 (the Air IS Castle — mechanism settled), reconnect = C (→ VX-619), VX-605 Pre-launch. The record's CORRECTION section has the full story.** The run's record (everything below in full detail): `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md`. Overnight run 2026-10-27 at your word; the ladder closed in two rounds (r1: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT, all fixed with evidence; r2: no new BLOCKER/MAJOR). PR: PENDING(filled at the merge — see the record's banner). No release happened and none is minted — that stays your word.
 
 ## YOUR CHECKLIST (the morning bundle — QUESTIONS #243 carries the same items)
 

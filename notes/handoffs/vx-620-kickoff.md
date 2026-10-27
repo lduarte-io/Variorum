@@ -1,0 +1,20 @@
+# VX-620 — Run: MCP umbrella remainder — kickoff (for a FRESH orchestrator)
+
+**Why this run exists:** VX-548 (merged 2026-10-27, PR #193) closed having MISSED five members she had seated under its umbrella before kickoff — its orchestrator resolved the roster from the run ticket's description and never listed the sub-issues. Her ruling the same morning: run the five now, fresh orchestrator, and the member-resolution rule now lives in both phase skills. Read the predecessor's record IN FULL before anything: `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md` — especially its CORRECTION section, ENVIRONMENT TRAPS (the VX-604 executed-count rule; the two standing flakes VX-532/VX-607; the APFS-clone DerivedData trap — build into FRESH DerivedData dirs, never clones), and the BATCH 3 RECORD (the VX-549 machinery this run's VX-596 builds on).
+
+## The paste-ready kickoff prompt
+
+> /architect-phase vx-620 — the VX-548 remainder (the record's CORRECTION section has the story; resolve the members by LISTING VX-620's sub-issues, per the skill's new rule). Suggested batches: (1) VX-596 — set_starred at the edit rung, one client-named undo, AND the VX-549 star-rule revisit it unlocks (the grant sheet's read/suggest-shaping, the mint flow on star-rule gatherings, the just-in-time ask — VX-609 describes the ask's current dead-door state and is a natural rider); (2) VX-590 — the "Shared with AI" face hidden until a client has ever connected (Pre-launch; keep the Connect road findable — the design care is on the ticket); (3) VX-565 (probe first — VX-548 rebuilt that listing, re-probe on main) + VX-566 + VX-567 (the import_document pair). My rulings are on the tickets. Rider candidates at kickoff: VX-609, VX-619. Stage, merges and any walk per the standing rules and whichever coordinator is live; no release without my word.
+
+## What the fresh orchestrator must know (beyond the standing preflight)
+
+- **Member resolution:** list VX-620's sub-issues via the Linear MCP at kickoff AND again before the ladder (the skills now carry this; it is this run's reason for existing).
+- **VX-596's design footing is already ruled:** her word "let's add the star over the wire, it might as well be included"; stars are NOT in the hers-alone trio (Private · Seal · Own); shape per the ticket — `set_starred` at EDIT, one ⌥⌘Z entry naming the client. Its second half is making VX-549's star-rule story truthful again: the sheet's "read and suggest only" shaping, `GatheringMint.starrable`/`needsStar`, the mint flow (can a client mint-then-star into a star-rule gathering, and in what order?), the star refusal sentence, and the ask VX-609 describes. Where the mint-then-star order is genuinely a product call, PROVISIONAL + bundle — don't invent.
+- **MCPSpec is authoritative and was updated at VX-548's close** (the gathering-place paragraph, the Change…-own-place rule, the stop-roads clause). Read it in full; your canon deltas land the same two-file way.
+- **The dev store** (if a walk runs): whatever library sits in the slot, read the predecessor record's walk sections for the conduct that was accepted (direct shim with the pane-copied key — never `claude mcp add`; VX-prefixed content; never press Resume; prefs export/diff; strict pgrep forms; What's New dismissed). Known residue: an approved `claude-code` client row; walk content in the Trash.
+- **No release, no `/Applications` refresh** — her standing word: one release when the wave is done.
+
+## Open context that touches this run
+
+- QUESTIONS #243's remaining provisionals include MB-16/MB-17 (wing-grant rung on a gathering; asks keyed as the reading) — if she rules them while this run is open, VX-596's faces follow her ruling, not the provisionals.
+- VX-619 (the lock/quit reconnect docs, her C pick) is a one-sitting docs ticket with a hard cap to respect (`MCPSession.instructions` ≤ 3,000 chars; it sits at 2,988) — a cheap rider here.
