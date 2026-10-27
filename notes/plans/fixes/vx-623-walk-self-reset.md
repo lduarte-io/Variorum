@@ -210,7 +210,7 @@ the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swif
 | 1 | D-7 — guard.sh compile-or-refuse + its red-on-old pin | DONE (this commit) — see "D-7 evidence" below |
 | 2 | D-1 — `Tools/prod-reset-test-account.sh` + `--self-test` (incl. the `account_purge()` drift pin) | DONE (this commit) — `--self-test` 85/85 green; see "D-1 evidence" below. `--dry-run` and any live run are UNIT 2's (both read production) |
 | 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | DONE (this commit) — see "D-5 evidence" below |
-| 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | NOT-STARTED |
+| 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | DONE (this commit) — see "D-4 evidence" below |
 | 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | NOT-STARTED |
 | 6 | D-6 — release.sh HANDOFF step 0 + README | NOT-STARTED |
 | 7 | Final evidence: both self-tests' case lists, D-7 red-on-old, `zsh -n`, each D-row's acceptance (file:line) | NOT-STARTED |
@@ -286,6 +286,23 @@ guard (twelve lowercase words, or the look's markers, re-read from the current c
 its teeth headless: the walk's `--self-test` gains 10 D-5 cases (withholds: twelve words · padded twelve · the look's
 button · its warning · its reveal door; lets through: eleven words · thirteen · the join's landed line · the join's
 words notice; a pid it cannot read → withheld). Both helpers compile in the walk's G9 beside the vis-* helpers.
+
+**D-4 evidence (VX-622's window-frame guard).** THE TRACE (by inspection, read-only): the brief's probe
+`defaults read io.lduarte.Variorum.debug | grep -i frame` found, among the dev domain's 2,378 keys, ONE main-window
+frame autosave — `"NSWindow Frame variorum-main-AppWindow-1" = "60 144 1240 940 0 0 1728 1084"` — beside the note
+window's, Settings', the helper/about/quick-note panels' and the split views' (left alone). Its source: SwiftUI autosaves
+a WindowGroup's frame as `NSWindow Frame <id>-AppWindow-<n>`; the main group's id is `"variorum-main"`
+(`EditorCommands.swift:1191`, the group at `VariorumApp.swift:62`, `.defaultSize(width: 1240, height: 840)` at `:94`).
+THE GUARD (`first-run-walk.sh`): `frame_reset` runs PRE-LAUNCH (zero instances — after G5, and before every relaunch)
+and deletes exactly the keys matching `NSWindow Frame variorum-main-AppWindow-[0-9]+` (whole-key, `defaults export … -`
+parsed with plistlib), then proves none remain; nothing is restored. `frame_check` runs POST-LAUNCH in P2, before any
+act: the pid's main window (vis-win) must lie inside ONE display's visible frame (NSScreen via JXA — no events — menu bar
+and Dock excluded, 2 pt slack) and be at least 640×400; else it captures and STOPS naming the frame and the displays
+(fail-closed with no geometry). The display read was validated once on this Pro: `0 33 1728 1084`. The walk's
+`--self-test` gains 12 D-4 cases (the key filter picks exactly AppWindow-1 and -2 out of nine look-alikes · an empty
+domain → none · the default window centred → holds · the probe's autosaved frame → holds · bottom past the visible frame
+→ refused · off the left edge → refused · taller than the display → refused · a 600×300 sliver → refused · wholly on a
+second display → holds · straddling two → refused · no display geometry → refused · no window frame → refused).
 
 ## Environment traps (binding; carried into every brief verbatim)
 

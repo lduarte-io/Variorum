@@ -88,6 +88,34 @@ guard_allowlist() {
 }
 allowlist_value() { (set -a; source $1 2>/dev/null; set +a; print -r -- "${VARIORUM_PRODTEST_EMAILS:-}") }
 
+# --- D-4 (VX-622): the WINDOW-FRAME GUARD, pure parts (the self-test feeds them fixtures) ----------------------------
+# The key, traced at VX-623 unit 1: SwiftUI autosaves the main WindowGroup's frame as "NSWindow Frame <id>-AppWindow-<n>"
+# in the dev defaults domain; the group's id is "variorum-main" (EditorCommands.mainWindowGroupID, EditorCommands.swift:1191;
+# the group at VariorumApp.swift:62, its .defaultSize 1240×840 at :94). The probe found exactly one such key,
+# "NSWindow Frame variorum-main-AppWindow-1" = "60 144 1240 940 0 0 1728 1084". Pre-launch, ONLY those keys are deleted, so
+# the window comes up at its default size; nothing is restored (the dev store's frame is walk state, not hers).
+FRAME_KEY='NSWindow Frame variorum-main-AppWindow-[0-9]+'
+frame_keys() {  # <a plist on stdin> → the main window's frame-autosave keys, one per line (whole-key matches only)
+  python3 -I -c 'import plistlib, re, sys
+d = plistlib.loads(sys.stdin.buffer.read())
+[print(k) for k in sorted(d) if re.fullmatch(sys.argv[1], k)]' "$FRAME_KEY"
+}
+# rect_inside <x y w h> <displays> → 0 when the window lies inside ONE display's visible frame (2 pt of slack) and is at
+# least 640×400 — room for the footer row, on screen; else prints why and returns 1. Points, Quartz global (top-left
+# origin): the window from vis-win, each display's visible frame (menu bar and Dock excluded) one "x y w h" per line.
+rect_inside() {
+  local -a r d; local line
+  r=(${=1})
+  (( ${#r} == 4 )) || { print -r -- "no window frame to check ('$1')"; return 1 }
+  (( r[3] >= 640 && r[4] >= 400 )) || { print -r -- "the main window is ${r[3]}×${r[4]} — too small to hold the footer row"; return 1 }
+  for line in ${(f)2}; do
+    d=(${=line}); (( ${#d} == 4 )) || continue
+    (( r[1] >= d[1] - 2 && r[2] >= d[2] - 2 && r[1] + r[3] <= d[1] + d[3] + 2 && r[2] + r[4] <= d[2] + d[4] + 2 )) && return 0
+  done
+  print -r -- "the main window (${r[*]}) lies outside every display's visible frame (${(j: · :)${(f)2}}) — its footer row may be off-screen"
+  return 1
+}
+
 # --- --self-test: the allowlist guard's teeth, over fixtures only ----------------------------------------------------
 if [[ ${1:-} == --self-test ]]; then
   T=$(mktemp -d)
@@ -164,6 +192,28 @@ VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
   else
     print -r -- "SELF-TEST D-5 the words guard compiles from Tools/WalkKit/words-guard.swift  FAIL"; fails=$((fails + 1))
   fi
+  # D-4 (VX-622): only the main window's frame-autosave keys go; the bounds check holds the footer row on screen.
+  python3 -I -c 'import plistlib, sys
+keys = ["NSWindow Frame variorum-main-AppWindow-1", "NSWindow Frame variorum-main-AppWindow-2",
+        "NSWindow Frame variorum-note-AppWindow-1", "NSSplitView Subview Frames variorum-main-AppWindow-1, SidebarNavigationSplitView",
+        "NSWindow Frame com_apple_SwiftUI_Settings_window", "NSWindow Frame variorum-main-AppWindow-1x",
+        "xNSWindow Frame variorum-main-AppWindow-1", "NSWindow Frame variorum-main", "appearanceChoice"]
+sys.stdout.buffer.write(plistlib.dumps({k: "60 144 1240 940 0 0 1728 1084" for k in keys}))' > $T/prefs.plist
+  got=$(frame_keys < $T/prefs.plist)
+  sure "D-4 the frame guard picks exactly the main window's autosave keys" \
+    '[[ $got == "NSWindow Frame variorum-main-AppWindow-1"$'\''\n'\''"NSWindow Frame variorum-main-AppWindow-2" ]]'
+  sure "D-4 an empty domain yields no key" '[[ -z $(python3 -I -c "import plistlib,sys; sys.stdout.buffer.write(plistlib.dumps({}))" | frame_keys) ]]'
+  one='0 33 1728 1084'; two='0 33 1728 1084'$'\n''1728 0 1920 1055'
+  sure "D-4 the default window, centred on the Pro's display → holds the footer row" 'rect_inside "244 155 1240 840" $one >/dev/null'
+  sure "D-4 the probe's autosaved frame (1240×940 high on the screen) → holds" 'rect_inside "60 33 1240 940" $one >/dev/null'
+  sure "D-4 a window whose bottom runs past the visible frame → refused" '! rect_inside "60 300 1240 940" $one >/dev/null'
+  sure "D-4 a window hanging off the left edge → refused" '! rect_inside "-400 100 1240 840" $one >/dev/null'
+  sure "D-4 a window taller than the display → refused" '! rect_inside "0 33 1728 1200" $one >/dev/null'
+  sure "D-4 a sliver of a window (600×300) → refused" '! rect_inside "100 100 600 300" $one >/dev/null'
+  sure "D-4 a window wholly on a second display → holds" 'rect_inside "1900 100 1240 840" $two >/dev/null'
+  sure "D-4 a window straddling two displays → refused" '! rect_inside "1200 100 1240 840" $two >/dev/null'
+  sure "D-4 no display geometry → refused (fail-closed)" '! rect_inside "244 155 1240 840" "" >/dev/null'
+  sure "D-4 no window frame → refused" '! rect_inside "" $one >/dev/null'
   (( fails == 0 )) && { print "SELF-TEST: every guard fired as expected"; exit 0 }
   print "SELF-TEST: $fails case(s) wrong"; exit 1
 fi
@@ -283,8 +333,27 @@ rowreads() {  # <prefix> <seconds> — the main window's footer row, read by VAL
   return 1
 }
 prodread() { $REPO/Tools/prod-read.sh "$1" }
+frame_reset() {  # D-4, PRE-LAUNCH (zero instances): delete the main window's frame-autosave key(s) from the dev domain
+  local k left
+  for k in ${(f)"$(defaults export $DEBUG_ID - 2>/dev/null | frame_keys)"}; do
+    defaults delete $DEBUG_ID "$k" 2>/dev/null || stop "the window-frame guard could not delete the dev domain's '$k'"
+    log "the window-frame guard: deleted the dev domain's '$k' — the main window comes up at its default size"
+  done
+  left=$(defaults export $DEBUG_ID - 2>/dev/null | frame_keys)
+  [[ -z $left ]] || stop "the window-frame guard: the dev domain still holds '${left//$'\n'/ · }' after the delete"
+}
+displays() {  # each display's VISIBLE frame, Quartz global points ("x y w h" per line) — NSScreen read by JXA, no events
+  osascript -l JavaScript -e 'ObjC.import("AppKit"); var s = $.NSScreen.screens, H = s.objectAtIndex(0).frame.size.height, out = []; for (var i = 0; i < s.count; i++) { var v = s.objectAtIndex(i).visibleFrame; out.push([v.origin.x, H - (v.origin.y + v.size.height), v.size.width, v.size.height].map(Math.round).join(" ")); } out.join("\n")' 2>/dev/null
+}
+frame_check() {  # D-4, POST-LAUNCH, before any act: the main window's bounds hold its footer row on screen
+  local -a w; local why
+  w=($($BIN/vis-win $PID 2>/dev/null))   # "<id> <x> <y> <w> <h>" — the pid's largest on-screen layer-0 window
+  why=$(rect_inside "${w[2,5]}" "$(displays)") || { capture frame; stop "the window-frame guard: $why" }
+  log "the window-frame guard: the main window ${w[2,5]} lies inside a display's visible frame — its footer row on screen"
+}
 
 step P1 "launch the Debug build on the prod test road (the allowlist handed — F-B1-1 (B))"
+frame_reset
 author
 LIST=$(allowlist_value $ALLOW)   # G2 checked this file; never printed
 [[ -n ${LIST// /} ]] || stop "the allowlist's list is empty"
@@ -307,7 +376,7 @@ road=$(grep -o "PROD TEST ROAD (VX-510): [A-Z]*[^;]*" $RUN/app.log | head -1)
 log "$road"
 for i in {1..60}; do window && break; sleep 1; done
 [[ -n $WID ]] || stop "no main window"
-sleep 3; capture launched
+sleep 3; frame_check; capture launched
 
 step P3 "the account on production (exists, confirmed) — its id, read once"
 EMAIL=$(set -a; source $ALLOW; set +a; eval "print -r -- \"\${VARIORUM_PRODTEST_${(U)ACCOUNT}_EMAIL}\"")
