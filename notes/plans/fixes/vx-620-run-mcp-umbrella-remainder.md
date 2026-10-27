@@ -561,17 +561,25 @@ CLAUDE.md + its canon, this plan IN FULL (the BATCH 1 RECORD included — the tr
 
 ### LIVE STATUS (per piece — flipped in the same commit as each piece)
 
-- **No behavioural revert is in flight.**
-- **0 · Preflight + this record:** DONE (this commit).
-- **1 · VX-605 — the headless pin, RED on the pre-fix tree:** NOT-STARTED — `MCPConnectionNamingSignalServerTests`:
-  a door-shaped recorder on `MCPServerHost.onConnectionsChanged` (each signal re-reads `connectedClientNames`, exactly
-  as `MCPDoor.refreshConnected`); a reconnect under an already-bound key must leave the recorder's last read holding
-  the name.
-- **2 · VX-605 — the fix:** NOT-STARTED — the settled design: `MCPSession` takes an `onNamed` signal (defaulted `{}`
-  for the tests that build a session by hand) and calls it right after its `initialize` hook sets the name, outside
-  the session's lock; `MCPServerHost.serve` hands it `{ [weak self] in self?.onConnectionsChanged?() }` — the SAME
-  road, a signal carrying no decision (P-4); the door's hop to the main actor and its re-read of the CURRENT host
-  are untouched, so a late signal from a stopped host can never resurrect its names.
+- **BEHAVIOURAL REVERT ANNOUNCED (piece 3), starting AFTER this commit:** the one line `self.onNamed()` in
+  `MCPSession.run()`'s `initialize` hook removed in the working tree (the fix committed here, so `git checkout --
+  Sources/VariorumMCP/MCPSession.swift` is the SAFE restore and `git diff` says exactly what is reverted). If this
+  line still reads "announced" and `git diff` shows that file, the tree IS mid-revert: restore by that checkout.
+- **0 · Preflight + this record:** DONE (`8f103741d`).
+- **1 · VX-605 — the headless pin, RED on the pre-fix tree:** DONE (`ebef21198`, the pin committed RED) —
+  `Tests/VariorumMCPTests/MCPConnectionNamingSignalServerTests.swift`: a door-shaped recorder on
+  `MCPServerHost.onConnectionsChanged` (each signal re-reads `connectedClientNames`, exactly as
+  `MCPDoor.refreshConnected`). RED ON THE PRE-FIX TREE (`scratchpad/b2-logs/vx605-red-on-old.log`): 3 tests / 1
+  suite, ONE red — `aReconnectUnderItsBoundKeyIsHeardConnectedOnceItNamesItself` at :79, the door's reads after the
+  reconnect `[Set([])]` (ONE read — the registration's, nameless — and nothing after), while its non-vacuity checks
+  held (the host's `connectedClientNames == ["claude-code"]`; the registration read empty); the two guards green
+  (`aConnectionWaitingForHerOKIsNeverHeardAsTheNamesUntilSheAllowsIt`, `aConnectionRefusedAtItsKeyIsNeverHeardAsAnyone`).
+- **2 · VX-605 — the fix:** DONE (this commit) — `MCPSession` takes an `onNamed` signal (defaulted `{}` for the two
+  tests that build a session by hand) and calls it right after its `initialize` hook sets the name, outside the
+  session's lock; `MCPServerHost.serve` hands it `{ [weak self] in self?.onConnectionsChanged?() }` — the SAME road, a
+  signal carrying no decision (P-4); the door's hop to the main actor and its re-read of the CURRENT host are
+  untouched, so a late signal from a stopped host can never resurrect its names. GREEN
+  (`scratchpad/b2-logs/vx605-green.log`): 3 / 1, the red pin passing in 0.43 s.
 - **3 · VX-605 — the behavioural revert + the Mac door pin:** NOT-STARTED.
 - **4 · VX-590 — the sharing face hidden until the library has ever had a client:** NOT-STARTED — the settled design:
   the store fact is VX-512's own (client rows — pending + approved + denied — exist; monotone: the pending room's

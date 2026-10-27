@@ -252,9 +252,14 @@ public final class MCPServerHost: @unchecked Sendable {
             refuseOverCap(fd)
             return
         }
+        // VX-605: the connection is heard twice on its way in — as it
+        // registers (no name yet) and as it names itself at `initialize` (the
+        // session's `onNamed`, this same road). Weak: a host already let go of
+        // (the door's stops drop it at once) signals no one.
         let session = MCPSession(
             fd: fd, database: database, operations: operations, version: version,
-            executor: executor, hooks: hooks)
+            executor: executor, hooks: hooks,
+            onNamed: { [weak self] in self?.onConnectionsChanged?() })
         lock.withLock { sessions[session.id] = session }
         onConnectionsChanged?()
         Task { [weak self] in

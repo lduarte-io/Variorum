@@ -35,6 +35,15 @@ final class MCPSession: @unchecked Sendable {
     private let shows: MCPShowTool
     private let database: AppDatabase
     private let operations: Operations
+    /// **VX-605 — the naming moment is heard** (the VX-620 run, batch 2): called
+    /// once this connection's `initialize` has named it (the host hands it its
+    /// one connections-changed road — `MCPServerHost.onConnectionsChanged`, a
+    /// SIGNAL carrying no decision, P-4). The host signalled only when the
+    /// connection registered — before it had a name — so a client reconnecting
+    /// under its bound key (nothing the grants observation hears) was served
+    /// while the pane's Clients row read "last seen …". Called outside this
+    /// session's lock, on the session's own task; the listener re-reads.
+    private let onNamed: @Sendable () -> Void
     private let lock = NSLock()
     private var name: String?
     /// VX-258: the hash of the key this connection presented while that key
@@ -234,11 +243,12 @@ final class MCPSession: @unchecked Sendable {
 
     init(
         fd: Int32, database: AppDatabase, operations: Operations, version: String,
-        executor: any MCPWriteExecutor, hooks: MCPHostHooks
+        executor: any MCPWriteExecutor, hooks: MCPHostHooks, onNamed: @escaping @Sendable () -> Void = {}
     ) {
         self.fd = fd
         self.database = database
         self.operations = operations
+        self.onNamed = onNamed
         var reads = MCPReadTools(database: database, operations: operations)
         reads.hooks = hooks
         self.tools = reads
@@ -337,6 +347,12 @@ final class MCPSession: @unchecked Sendable {
                     throw MCPError.serverError(code: MCPShim.refusalCode, message: MCPHandshake.refusal)
                 }
                 self.lock.withLock { self.name = admitted }
+                // VX-605: the connection has named itself — say so on the
+                // host's one road (a waiting setup's connection reads as no
+                // one's until her OK, `clientName`; the re-read then finds
+                // nothing new, and her Allow is heard through the grants
+                // observation as before).
+                self.onNamed()
             }
             await server.waitUntilCompleted()
         } catch {
