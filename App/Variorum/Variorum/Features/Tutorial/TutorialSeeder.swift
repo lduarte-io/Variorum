@@ -2557,7 +2557,17 @@ enum TutorialSeeder {
             + "it in a terminal, then start a new session of that app. For any other "
             + "client it is a few lines of JSON to paste into that client's MCP "
             + "settings. The pane also shows the path they all point at, because "
-            + "the door is a standard MCP server: one program inside the app.",
+            + "the door is a standard MCP server: one program inside the app. "
+            // VX-619 (her C pick, 2026-10-27 — the VX-548 record's RECONNECT
+            // ERGONOMICS): a lock or a quit ends every connection by design
+            // (A-8), and each client has its own road back. Said HERE, inside the
+            // provider setup's fence, because it names Claude Code's road (O-4);
+            // the roads are the clients' documented ones (Claude Code's /mcp ▸
+            // Reconnect; a restarted client starts its servers fresh).
+            + "Locking Variorum or quitting it ends every client's connection, by "
+            + "design. Once it's open again, reconnect the client: in Claude Code, "
+            + "choose Reconnect for it in /mcp; any client reconnects when you "
+            + "restart it.",
             // O-4 SETUP COPY END
 
             // VX-197 U8b: where a request shows (above the tabs, VX-281), the

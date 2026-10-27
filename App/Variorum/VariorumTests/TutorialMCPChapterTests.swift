@@ -305,6 +305,23 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("the door is a standard MCP server: one program inside the app"))
             #expect(MCPPaneCopy.stdioLine.contains("standard MCP server")
                 && MCPPaneCopy.stdioLine.contains("one program"), "the pane says the same")
+            // VX-619 (A JUSTIFIED EDIT, the ritual — the VX-620 run, batch 3; her C
+            // pick, 2026-10-27, docs only): the setup card says that a lock or a
+            // quit ends every connection by design and how a client comes back —
+            // Claude Code's road by name, inside the card's O-4 fence (the
+            // provider-neutrality net proves the fence holds it). RED ON OLD:
+            // never said. THE TRUTH lives where the mechanics run: the lock road
+            // stops the server and ends every connection (`MCPStopRoadsDoorTests`,
+            // `MacWillLockTests`; headless `MCPAdviceServerTests.theAdviceSaysALock…`
+            // executes stop → every connection gone → start → a reconnect served),
+            // and the advice says the same, provider-neutral.
+            #expect(text.contains("Locking Variorum or quitting it ends every client's connection, by design. Once "
+                                  + "it's open again, reconnect the client: in Claude Code, choose Reconnect for it in "
+                                  + "/mcp; any client reconnects when you restart it."))
+            #expect(MCPSetupClient.claudeCode.label == "Claude Code", "the client the road is named for, by its label")
+            #expect(MCPSession.instructions.contains("locking or quitting it ends every connection, by design, "
+                                                     + "so reconnect once it's back"), "the advice says the same (D-2)")
+            #expect(MCPConnectionEnd.allCases.contains(.libraryClosed), "a lock's end is one Activity names")
             #expect(text.contains("as a connection request"))
             #expect(MCPPaneCopy.requestsSection == "Connection requests")
             for id in [CapabilityID.mcpApproveClient, .mcpDenyClient, .mcpChangeClientAccess, .mcpRevokeClient] {

@@ -62,8 +62,12 @@ struct MCPAdviceServerTests {
         // VX-549 (A JUSTIFIED EDIT — the ratified supersession of VX-273's
         // facts-only rule): the gatherings clause now names create_note (a new
         // note written into a gathering) where it named list_books.
+        // VX-619 (A JUSTIFIED EDIT — the VX-620 run, batch 3, the instructions'
+        // trade): move_note_to_wing's sentence left the advice to make room for
+        // the lock/quit sentence; its rule stays in the tool's own description
+        // (pinned in `theAdviceSaysTheSameFactsTheGuideTeaches`).
         let parameters: Set<String> = ["ids_only"]
-        #expect(Set(names) == Set(["read_note", "show_in_app", "create_note", "move_note_to_wing",
+        #expect(Set(names) == Set(["read_note", "show_in_app", "create_note",
                                    "list_my_activity", "duplicate_note", "list_wings"]).union(parameters),
                 "the tools and parameters it names: \(names)")
         for name in Set(names).subtracting(parameters).union(["search"]) {
@@ -117,8 +121,44 @@ struct MCPAdviceServerTests {
         #expect(advice.contains("create_note into one applies its tags"))
         #expect(!advice.contains("none is ever granted alone"))
         #expect(MCPToolCatalog.createNote.scopes.contains(.gathering), "the catalog's fact the sentence states")
-        #expect(advice.contains("move_note_to_wing needs edit on the note and write new on the wing it goes to"))
+        // VX-619 (A JUSTIFIED EDIT — the VX-620 run, batch 3, THE TRADE inside
+        // R-VX184-3's 3,000): "move_note_to_wing needs edit on the note and write
+        // new on the wing it goes to" left the advice for the lock/quit sentence.
+        // No claim a client reads went with it: the tool's own description says
+        // it word for word, and the tool is listed only to a client holding edit.
+        #expect(!advice.contains("move_note_to_wing"), "traded out of the advice (VX-619)")
+        #expect(MCPToolCatalog.moveNoteToWing.description.contains(
+            "Needs edit on the note and write new on the wing it goes to."), "…said where the tool is described")
         #expect(MCPToolCatalog.moveNoteToWing.rung == .edit, "the catalog's fact the sentence states")
+    }
+
+    // MARK: - VX-619 (the VX-620 run, batch 3 — her C pick): a lock or a quit ends every connection
+
+    /// The advice says it plainly (provider-neutral — O-4: no client's own
+    /// command is named in the advice; the guide's setup lesson names Claude
+    /// Code's), and the sentence's mechanics are EXECUTED: a stop — the lock
+    /// road's own step (A-8; `macLockTeardown` composes it, pinned Mac-side in
+    /// `MCPStopRoadsDoorTests`) — ends every live connection, and once the server
+    /// is back a reconnect is served again. RED ON OLD: never said.
+    @Test func theAdviceSaysALockOrQuitEndsEveryConnectionAndReconnectingWorks() async throws {
+        #expect(advice.contains(
+            "open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, "
+                + "so reconnect once it's back."))
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let first = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
+            #expect(try await h.eventually { h.host.connectedClientNames == ["claude-code"] })
+            h.host.stop()  // the lock road's step: every session hung up
+            #expect(try await h.eventually { h.host.connectedClientNames.isEmpty }, "every connection ended")
+            try h.host.start()  // the unlock: the server is back
+            let again = try await h.connect(as: "claude-code")
+            let tools = try await again.client.listTools().tools.map(\.name)
+            #expect(tools.contains("read_note"), "reconnected, the always grant serves again: \(tools)")
+            await h.hangUp(again)
+            _ = first
+        }
     }
 
     /// The U1 ladder's two carries. F5: a fenced or unshared target answers
