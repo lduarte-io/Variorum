@@ -468,8 +468,11 @@ nonisolated enum ProtectionCopyDoors {
 
     /// THE PREFLIGHT, reads only (before anything moves — with a library open, before the window comes down): the picked
     /// thing is a plaintext export, and its content plans on a private staged copy — this build's schema or an earlier
-    /// one's, a newer build's refusing in the sibling door's words (the subset rule — VX-502 (her ratified rule,
-    /// 2026-10-27; supersedes P-VX309-U1b-7)).
+    /// one's (the subset rule — VX-502 (her ratified rule, 2026-10-27; supersedes P-VX309-U1b-7)). A NEWER build's export
+    /// never plans here, and never gets the newer words from here either: the classifier answers `.newerSchema` before it
+    /// tells export from library, so this returns `.refused(.unreadableCopy)` for it — the PICK (`PickedCopy.classify`)
+    /// is what refuses it in `LibraryOpenCopy.newerSchemaRefusal`'s words. The `schemaNewer` catch below answers only a
+    /// file that gains an unknown identifier between this function's own two staged reads.
     static func readPlaintextExport(_ url: URL) -> PlaintextExportRead {
         guard case .plaintextExport(let store) = LibraryClassifier.classify(at: url) else {
             return .refused(.unreadableCopy)

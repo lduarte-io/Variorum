@@ -217,7 +217,6 @@ struct PlaintextExportImportTests {
             return try Set(String.fetchAll(db, sql: "SELECT identifier FROM grdb_migrations"))
         }
         #expect(remaining == Set(AppDatabase.migrator.migrations).subtracting(identifiers), "a strict subset now")
-        #expect(remaining.count == AppDatabase.migrator.migrations.count - Set(identifiers).count)
     }
 
     /// VX-502 PIN 1 — THE F6 SCENE (red on the pre-fix tree): an export whose `grdb_migrations` lacks this build's LAST

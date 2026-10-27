@@ -308,8 +308,8 @@ table.*
 
 | # | Piece | Status |
 |---|---|---|
-| R1-0 | Positions recorded (all three agreed, reasons in the round file) | DONE (this commit) |
-| R1-a | F-2 — `readPlaintextExport`'s doc says the newer arm truthfully; F-3 — the redundant count `#expect` deleted | NOT STARTED |
+| R1-0 | Positions recorded (all three agreed, reasons in the round file) | DONE (`91429974f`) |
+| R1-a | F-2 — `readPlaintextExport`'s doc says the newer arm truthfully; F-3 — the redundant count `#expect` deleted | DONE (this commit; doc-only + one deleted line; `swift build --build-tests` green; the suite runs at R1-d) |
 | R1-b | F-1 — the ERA-FROZEN PIN (`anExportOfTheOldestExportEraStillReadsWhole`: a file migrated `upTo: "v1_31_protection_record"`, seeded by raw SQL in that era's columns, the writer's local-only drop applied, must plan whole and import) + the pointer comment at the head of `Migrations.swift` and at the gate | NOT STARTED |
 | R1-c | F-1's teeth — a SCRATCH PROBE, never committed: a temporary `v1_33_probe` migration (`ALTER TABLE container ADD COLUMN probe …`) + the reader's notes query naming `probe`; expected: pins 1–2 GREEN (blind, the reviewer's point), the era pin RED. Announced in the REVERT STATE line before it runs; restored by `git checkout --` | NOT STARTED |
 | R1-d | Evidence on the final tree: `swift build`; `swift test --filter PlaintextExportImportTests`; the adjacent filter | NOT STARTED |
