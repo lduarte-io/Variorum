@@ -3704,3 +3704,25 @@ session's START time) · VX-628 (Terminal's bottom-bar receipt truncates). Walke
 name a date-titled note by its date), W-3 (Activity's target_kind asymmetry on refused gathering mints — the no-oracle
 posture, reviewer-endorsed), F-W2 = RB-18. The roster lesson held: the sub-issue listing governed at kickoff AND
 before the ladder (seven members, not the kickoff's six).
+
+#246 — **THE VX-562 BUNDLE (the binding record is `notes/plans/fixes/vx-562-outline-follow.md` §MORNING BUNDLE; your
+checklist leads `notes/handoffs/vx-562-handoff.md`), OPEN — your morning.** The headline taste call: **P-562-8** — at
+the very bottom of a book a tiny ~12-pt nudge up steps the navigator's mark from the last note back to the top row at
+once (the walker: "reads as a twitch, not deliberate"), while ~70 pt reads deliberate; as built the honest 8-pt band
+works both ways, and the recorded alternative holds the clamp while the page sits within about a row of the bottom.
+Ratify or redirect, all built, all walked: **P-562-1** no navigator auto-scroll (the Open list's follow idiom is the
+ready extension — want it?) · **P-562-2** the follow runs in Outline only (extend to the Book/Read flow's left bar?) ·
+**P-562-3** the counts line MOVED into the pinned header · **P-562-4** the chapter name only in chaptered books ·
+**P-562-5** the pin's "note N of M" counts PAGE order (the note box says membership order; they agree in sherlock and
+chapter-built books) · **P-562-7** a chapter heading names the note it introduces (no blink) · the short-book edges
+(nothing viewed at rest in every book; a barely-scrolling book goes straight from nothing to its last note) ·
+**R-562-A** a click's target holds until your scroll · **R-562-C** any scroll past 8 pt releases, whatever the input ·
+**R-562-D/D′** the at-bottom clamp standing only for an on-page last note — the SLIDE was walked and REJECTED at
+reading speed (a two-story lead, visible pace-doubling), and the clamp's stated cost stands: the last screenful's
+MIDDLE notes highlight by click, not by pure scroll (the slide and an eased probe remain your recorded alternates) ·
+the measured travel fact (the app's 40-pt bottom bar is never scrollable room on macOS — pinned verbatim from the
+trace) · the chapter mark's composition (accent fill at 22%, the name in INK — an accent name fails the palette
+layer's 4.5 floor in Terminal light). RIDERS still open while the code is warm: VX-96 · VX-616 · VX-563. FILED and
+triaged: VX-624 (the pre-existing 4-s landing watchdog spin, Suspected) · VX-629 (the follower wiring consolidates,
+Debt) · VX-630 (Index → Outline carry loses the caret's block, pre-existing Confirmed) · VX-631 (the "12 storys"
+receipt, Wording).

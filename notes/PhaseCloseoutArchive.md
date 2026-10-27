@@ -1,5 +1,20 @@
 # Variorum — Phase Closeout Archive
 
+**→ VX-620 CLOSED 2026-10-27 — RUN: MCP UMBRELLA REMAINDER (the record
+`notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`; the ladder `vx-620-ladder-round1.md`; her handoff
+`notes/handoffs/vx-620-handoff.md`; PR #197, merge 32a779075; kickoff to merge in one day — the VX-548 remainder
+under a fresh orchestrator, her ruling).** Nine sub-issues shipped or honestly dispositioned, the roster resolved by
+the SUB-ISSUE LISTING at kickoff and again before the ladder (her kickoff said six; the listing said SEVEN members —
+VX-377 had been re-parented at VX-439's closeout — plus riders VX-609/VX-619): set_starred at EDIT + the VX-549
+star-rule revisit (VX-596/609), the pane's honesty pair (VX-590/605, both Pre-launch), the wire's imports (VX-566/567;
+VX-565 RESOLVED-no-fix with evidence), the lock/quit docs (VX-619), the ⌘K wing doors with the keyboard selector
+(VX-377). The one-round Fable ladder (0 BLOCKER · 0 MAJOR · 0 MINOR · 4 record-only NITs) with its final-window
+contingency met; two stage windows + two re-run windows, all released clean (the walks ALL GREEN in both voices);
+three -only-testing traps recorded. Canon applied in the two-file shape (MCPSpec ×8, SurfaceContracts ×2); canon
+125,887/150,000. Born VX-625/626/628, all triaged; the bundle QUESTIONS #245 (RB-1's mint-star rule and RB-4's
+supersession of a ratified call lead it). MOBILE PARITY: nothing mobile-visible. **Next: her #245 pass; wave 2
+continues (vx-562 · vx-601 · vx-623 in flight).**
+
 **What this is (author housekeeping, 2026-08-01 — the Fragments precedent):** `notes/DetailedPlanForPhases.md` grew past the context-load limit, so its HISTORY moved here VERBATIM — every superseded "Current phase" pointer and every completed phase's closeout paragraph except the most recent. The master plan keeps the ACTIVE pointer, the phase table, and only the MOST RECENTLY CLOSED phase's closeout; **each closeout ritual moves the newly superseded pointer and the previous phase's closeout paragraph here, in the same commit that records the new ones.**
 
 **This file is canon history, exactly as binding as it was in the master plan — nothing was reworded in the move.** It is deliberately NOT context-loaded into every session (that is the point of the move); read it when a question reaches back past the most recent phase. Order within each section is the master plan's own accretion order, preserved as-was (the closeout log was never strictly chronological).
