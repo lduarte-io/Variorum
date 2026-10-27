@@ -304,8 +304,20 @@ struct BookView: View {
                 // that stood above it here (her 13i-b morning ruling) LEFT
                 // the content — the door is the masthead's icon (R-17y-1),
                 // visible in every mode, Outline included.
+                //
+                // VX-562 — THE PINNED NAV INFO (her ask: the chapters and
+                // notes counts "stay fixed at the top while scrolling", and
+                // "show during scroll what # note you're in, maybe what
+                // chapter you're in"): a SIBLING above the page, never inside
+                // its scroll — every landing measures its anchors' tops in
+                // the scroll's own space, and a header in the content would
+                // shift every one of them (the Index's archived-line
+                // convention, the same reason).
                 VStack(spacing: 0) {
                     BookArchivedLine(model: archived, structure: structure)
+                    OutlinePinnedLine(
+                        readingID: readingID, model: model, structure: structure,
+                        meta: bookMetaLine, tokens: tokens)
                     outlineBody
                 }
                 // WA-1: the receipt at the page's foot, trailing.
@@ -750,22 +762,14 @@ struct BookView: View {
                                         navigateToChapter(section)
                                     }
                                 } label: {
-                                    HStack(spacing: 4) {
-                                        Text("⠿")
-                                            .font(tokens.small)
-                                            .foregroundStyle(tokens.faint)
-                                        if let collapsedNote, navigatorMarks(collapsedNote),
-                                           !tokens.selectionMarker.isEmpty {
-                                            Text(tokens.selectionMarker
-                                                .trimmingCharacters(in: .whitespaces))
-                                                .font(tokens.small.weight(.bold))
-                                                .foregroundStyle(tokens.accent)
-                                        }
-                                        Text(tokens.chromeLabel(section.name))
-                                            .font(tokens.small.weight(.semibold))
-                                            .foregroundStyle(tokens.accent)
-                                            .lineLimit(1)
-                                    }
+                                    // VX-562: the label — grip, name, the
+                                    // one-note chapter's note marker, and in
+                                    // Outline the viewed-chapter wash — is its
+                                    // own view, so a viewed-pair change
+                                    // re-renders the marks and never this
+                                    // whole body. It carries the row's FRAME
+                                    // (the wash covers the whole row).
+                                    //
                                     // 13f W11a: the whole ROW is the target,
                                     // not the glyphs — INSIDE the label (the
                                     // correction round's walk, capture 23: a
@@ -777,12 +781,11 @@ struct BookView: View {
                                     //
                                     // 18d batch 3: at the generous pitch, and
                                     // the taller row is a bigger target too.
-                                    .frame(
-                                        maxWidth: .infinity,
-                                        minHeight: BookNavigatorLayout.chapterRowHeight,
-                                        alignment: .leading)
-                                    .contentShape(Rectangle())
-                                    .navigatorRowFrame(section.id, chapter: true)
+                                    NavigatorChapterLabel(
+                                        model: model, mode: structure.mode, section: section,
+                                        collapsedNote: collapsedNote, tokens: tokens)
+                                        .contentShape(Rectangle())
+                                        .navigatorRowFrame(section.id, chapter: true)
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {
@@ -832,26 +835,16 @@ struct BookView: View {
                                     BookNavigatorDoor.noteRowClicked(
                                         entry, model: model, structure: structure)
                                 } label: {
-                                    HStack(spacing: 2) {
-                                        // Batch 9 (R100's continuation): the
-                                        // focused post wears the color › in
-                                        // the navigator too — and while
-                                        // PAGING, the current page does
-                                        // (13b 4F).
-                                        if navigatorMarks(entry),
-                                           !tokens.selectionMarker.isEmpty {
-                                            Text(tokens.selectionMarker
-                                                .trimmingCharacters(in: .whitespaces))
-                                                .font(tokens.small.weight(.bold))
-                                                .foregroundStyle(tokens.accent)
-                                        }
-                                        Text(outlineEntryTitle(entry))
-                                            .font(tokens.small)
-                                            .foregroundStyle(
-                                                navigatorMarks(entry)
-                                                    ? tokens.ink : tokens.muted)
-                                            .lineLimit(1)
-                                    }
+                                    // Batch 9 (R100's continuation): the
+                                    // marked post wears the color › in the
+                                    // navigator too — and while PAGING, the
+                                    // current page does (13b 4F). VX-562: in
+                                    // Outline the mark is the note the page
+                                    // is SHOWING (her ruling — never the
+                                    // caret's), drawn by its own small view.
+                                    NavigatorNoteLabel(
+                                        model: model, mode: structure.mode, entry: entry,
+                                        tokens: tokens)
                                     .padding(.leading, group.section != nil ? 10 : 0)
                                     // The whole row is the target — inside
                                     // the label (see the chapter row). 18d
@@ -917,8 +910,18 @@ struct BookView: View {
                                 } isTargeted: { chapterDropAtEnd = $0 }
                         }
                     }
+                    // VX-562: room for the viewed chapter's wash to reach past
+                    // its row (`BookNavigatorLayout.washBleed`) — the list's
+                    // content steps in by the bleed and its scroll steps out
+                    // by the same into the column's own padding, so every
+                    // row's text and frame stand exactly where they stood; only
+                    // the scroll's clip (and its scroller) moves outward, by
+                    // the bleed, which is what lets the wash's rounded ends
+                    // show instead of being cut square at the clip.
+                    .padding(.horizontal, BookNavigatorLayout.washBleed)
                     .id("nav-noop")
                 }
+                .padding(.horizontal, -BookNavigatorLayout.washBleed)
                 Spacer(minLength: 4)
                 if let reading = structure.reading, reading.kind == .book {
                     // VX-553 (the VX-439 run — her words: "'restore deleted
@@ -1859,10 +1862,13 @@ struct BookView: View {
                         Text(tokens.chromeLabel(readingName ?? model.readingName ?? "book"))
                             .font(tokens.title)
                             .foregroundStyle(tokens.ink)
+                        // VX-562 (P-562-3): the count line that led this row
+                        // ("book · N chapters · M notes") MOVED to the pinned
+                        // line above the page (`OutlinePinnedLine`) — her
+                        // "stays fixed at the top while scrolling". The row
+                        // keeps the two doors, and its height (the doors
+                        // were already its tallest members).
                         HStack(spacing: 8) {
-                            Text(tokens.chromeLabel(bookMetaLine))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
                             // Her #43(a) ruling (13d batch 1): the book opens
                             // as CARDS and "expand all" opens it whole in one
                             // click; "collapse all" folds it back (13b 3E D1:
@@ -2347,13 +2353,11 @@ struct BookView: View {
     /// 13f W11: the navigator's post-row drop indicator.
     @State private var postDropTarget: String?
 
-    /// The navigator's "you are here": the focused post — and, in the
-    /// SPREAD, BOTH pages on screen (13b 4F; 13c 2B — a spread shows two
-    /// posts, so two rows are honestly "here").
-    private func navigatorMarks(_ entry: Queries.ReadingEntry) -> Bool {
-        model.focusedPostID == entry.postID
-            || (structure.mode == .spread && model.isOnSpread(entry.postID))
-    }
+    // (The navigator's "you are here" — `navigatorMarks` — became ONE pure
+    //  table at VX-562, `BookNavigatorMark` (`BookOutlineViewed.swift`), read
+    //  by the rows' own label views below: Outline marks the note the page is
+    //  showing, every other mode the shipped rule — the focused post, and in
+    //  the SPREAD both pages on screen, 13b 4F / 13c 2B.)
 
     /// Outline's flat row list (`BookOutlineRows`): chapters from the
     /// structure model where they govern, else the tag-path grammar.
@@ -2363,8 +2367,8 @@ struct BookView: View {
 
     /// The same list over the two models alone (VX-562: the viewed pair's
     /// derivation runs from a queued hop and a landing's finish, which hold
-    /// the models, never the view).
-    private static func outlineRows(
+    /// the models, never the view; the pinned line reads it too).
+    fileprivate static func outlineRows(
         structure: BookStructureModel, entries: [Queries.ReadingEntry]
     ) -> [BookOutlineRows.Row] {
         structure.chaptersActive
@@ -2408,6 +2412,8 @@ struct BookView: View {
             badgesOn: themeStore?.settings.ownershipBadges ?? true)
     }
 
+    /// Kind + extent at a glance (batch 12) — since VX-562 the head of the
+    /// Outline's PINNED line rather than a line under the scrolling title.
     private var bookMetaLine: String {
         BookViewCopy.metaLine(
             gathering: structure.reading?.kind == .gathering,
@@ -2468,6 +2474,10 @@ enum BookOutlineGeometry {
     private static var navigatorFrameStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorChapterRowStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorNoteRowStore = OwnedRegistrations<String, CGRect>()
+    private static var navigatorChapterMarkStore = OwnedRegistrations<String, Bool>()
+    private static var navigatorNoteMarkStore = OwnedRegistrations<String, Bool>()
+    private static var outlinePinLineStore = OwnedRegistrations<String, String>()
+    private static var outlinePinFrameStore = OwnedRegistrations<String, CGRect>()
     private static var focusDoorStore = OwnedRegistrations<String, @MainActor (String?) -> Void>()
     private static var openDoorStore = OwnedRegistrations<String, @MainActor (String) -> Void>()
     private static var modeDoorStore = OwnedRegistrations<
@@ -2505,6 +2515,19 @@ enum BookOutlineGeometry {
     static var navigatorFrames: [String: CGRect] { navigatorFrameStore.current }
     static var navigatorChapterRows: [String: CGRect] { navigatorChapterRowStore.current }
     static var navigatorNoteRows: [String: CGRect] { navigatorNoteRowStore.current }
+    /// **VX-562 — what the navigator MARKED**: per chapter row (by section
+    /// id) whether it wears the viewed-chapter wash, and per note row (by
+    /// post id — a one-note chapter's collapsed row records its note here
+    /// too) whether it wears the "you are here" mark. Keyed by the rows' own
+    /// ids, as the frames beside them are.
+    static var navigatorChapterMarks: [String: Bool] { navigatorChapterMarkStore.current }
+    static var navigatorNoteMarks: [String: Bool] { navigatorNoteMarkStore.current }
+    /// **VX-562 — the Outline's PINNED line**, keyed by the book: the words
+    /// it draws (`BookViewCopy.outlinePinLine`, as composed — before the
+    /// voice's case folding) and its rectangle in the window, so a pin can
+    /// assert both what it says and that the page's scroll never moves it.
+    static var outlinePinLines: [String: String] { outlinePinLineStore.current }
+    static var outlinePinFrames: [String: CGRect] { outlinePinFrameStore.current }
     /// The round-end Fable pass, MAJOR-1: each mounted book's ONE focus act
     /// (`BookViewModel.focus`), published by the view whose `@State` holds
     /// the model — the only way a pin over the real shell can make a note
@@ -2545,6 +2568,22 @@ enum BookOutlineGeometry {
         }
     }
 
+    static func recordNavigatorMark(_ id: String, chapter: Bool, marked: Bool, owner: UUID) {
+        if chapter {
+            navigatorChapterMarkStore.publish(marked, for: id, owner: owner)
+        } else {
+            navigatorNoteMarkStore.publish(marked, for: id, owner: owner)
+        }
+    }
+
+    static func recordOutlinePin(_ readingID: String, line: String, owner: UUID) {
+        outlinePinLineStore.publish(line, for: readingID, owner: owner)
+    }
+
+    static func recordOutlinePinFrame(_ readingID: String, _ frame: CGRect, owner: UUID) {
+        outlinePinFrameStore.publish(frame, for: readingID, owner: owner)
+    }
+
     static func publishFocusDoor(
         _ readingID: String, owner: UUID, _ door: @escaping @MainActor (String?) -> Void
     ) {
@@ -2572,6 +2611,10 @@ enum BookOutlineGeometry {
         navigatorFrameStore.release(owner: owner)
         navigatorChapterRowStore.release(owner: owner)
         navigatorNoteRowStore.release(owner: owner)
+        navigatorChapterMarkStore.release(owner: owner)
+        navigatorNoteMarkStore.release(owner: owner)
+        outlinePinLineStore.release(owner: owner)
+        outlinePinFrameStore.release(owner: owner)
         focusDoorStore.release(owner: owner)
         openDoorStore.release(owner: owner)
         modeDoorStore.release(owner: owner)
@@ -2585,6 +2628,14 @@ enum BookOutlineGeometry {
         navigatorFrameStore.forgetAll()
         navigatorChapterRowStore.forgetAll()
         navigatorNoteRowStore.forgetAll()
+        navigatorChapterMarkStore.forgetAll()
+        navigatorNoteMarkStore.forgetAll()
+    }
+
+    /// VX-562: the pinned line's oracle, for a pin starting clean.
+    static func forgetOutlinePins() {
+        outlinePinLineStore.forgetAll()
+        outlinePinFrameStore.forgetAll()
     }
 
     static func forgetAnchorTops() { anchorTopStore.forgetAll() }
@@ -2631,6 +2682,17 @@ nonisolated enum BookNavigatorLayout {
     static let rowSpacing: CGFloat = 1
     /// Between groups: the mockup's group gap.
     static let groupSpacing: CGFloat = 20
+    /// **VX-562 — how far the viewed chapter's wash reaches past its row**
+    /// on each side: the sidebar's own selected-row inset (`.sb-row.sel` — a
+    /// wash with air around the words, never a band flush with them), given
+    /// without moving the row's text (the list's scroll makes the room).
+    static let washBleed: CGFloat = 6
+    /// **VX-562 — the viewed chapter's mark: the selected-row wash, QUIETER**
+    /// (the record's §DESIGN: the chapter's mark is quieter than the note's).
+    /// A token at the masthead popover's own resting strength
+    /// (`MastheadPopover.rest`, 0.55) — token-derived in both voices and
+    /// every palette, no literal colour.
+    static let viewedChapterWashStrength: Double = 0.55
 }
 
 private extension View {
@@ -2665,6 +2727,224 @@ private struct NavigatorRowProbe: ViewModifier {
     }
 }
 #endif
+
+// MARK: - VX-562 — the navigator's marks, each drawn by its own small view
+
+/// **The voice's "you are here" glyph** — the `›` (Terminal; Study's marker
+/// is empty and draws nothing), in the accent, bold: the navigator's shipped
+/// marker, unchanged, named once for the two labels below.
+private struct NavigatorMarker: View {
+    let tokens: VoiceTokens
+
+    var body: some View {
+        Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
+            .font(tokens.small.weight(.bold))
+            .foregroundStyle(tokens.accent)
+    }
+}
+
+/// **A navigator NOTE row's label** — the marker and the title in the
+/// mark's ink (`BookNavigatorMark.note`: in Outline the note the page is
+/// SHOWING, elsewhere the shipped rule).
+///
+/// Its OWN view so the mark is read in its own body: a viewed-pair change —
+/// every note boundary a scroll crosses — re-renders these labels and
+/// nothing else, never the book's whole body with its Outline column
+/// (P-8: invalidation ∝ what changed). The spread's pages are read only in
+/// the spread, so the other modes take no dependency on them.
+private struct NavigatorNoteLabel: View {
+    let model: BookViewModel
+    let mode: BookStructureModel.ViewMode
+    let entry: Queries.ReadingEntry
+    let tokens: VoiceTokens
+
+    var body: some View {
+        let marked = BookNavigatorMark.note(
+            mode: mode, postID: entry.postID, focusedPostID: model.focusedPostID,
+            viewedPostID: model.viewedOutlinePair.postID,
+            spreadPostIDs: mode == .spread ? model.spreadEntries.map(\.postID) : [])
+        HStack(spacing: 2) {
+            if marked, !tokens.selectionMarker.isEmpty {
+                NavigatorMarker(tokens: tokens)
+            }
+            Text(outlineEntryTitle(entry))
+                .font(tokens.small)
+                .foregroundStyle(marked ? tokens.ink : tokens.muted)
+                .lineLimit(1)
+        }
+        #if DEBUG
+        .modifier(NavigatorMarkProbe(id: entry.postID, chapter: false, marked: marked))
+        #endif
+    }
+}
+
+/// **A navigator CHAPTER row's label** — the grip, the name, a one-note
+/// chapter's note marker (row 8: that row IS the note's row, so it wears the
+/// note's mark), and in Outline the QUIETER viewed-chapter wash behind the
+/// whole row (`BookNavigatorMark.chapter`). It owns the row's frame so the
+/// wash covers the row, and reaches `washBleed` past it on each side (the
+/// sidebar's selected-row grammar) without moving a word. Its own view for
+/// the note label's reason.
+private struct NavigatorChapterLabel: View {
+    let model: BookViewModel
+    let mode: BookStructureModel.ViewMode
+    let section: ReadingSection
+    let collapsedNote: Queries.ReadingEntry?
+    let tokens: VoiceTokens
+
+    var body: some View {
+        let noteMarked = collapsedNote.map { note in
+            BookNavigatorMark.note(
+                mode: mode, postID: note.postID, focusedPostID: model.focusedPostID,
+                viewedPostID: model.viewedOutlinePair.postID,
+                spreadPostIDs: mode == .spread ? model.spreadEntries.map(\.postID) : [])
+        } ?? false
+        let washed = BookNavigatorMark.chapter(
+            mode: mode, sectionID: section.id,
+            viewedSectionID: model.viewedOutlinePair.sectionID)
+        HStack(spacing: 4) {
+            Text("⠿")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+            if noteMarked, !tokens.selectionMarker.isEmpty {
+                NavigatorMarker(tokens: tokens)
+            }
+            Text(tokens.chromeLabel(section.name))
+                .font(tokens.small.weight(.semibold))
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
+        }
+        .frame(
+            maxWidth: .infinity,
+            minHeight: BookNavigatorLayout.chapterRowHeight,
+            alignment: .leading)
+        .background {
+            if washed {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(tokens.wash.opacity(BookNavigatorLayout.viewedChapterWashStrength))
+                    .padding(.horizontal, -BookNavigatorLayout.washBleed)
+            }
+        }
+        #if DEBUG
+        .modifier(NavigatorMarkProbe(id: section.id, chapter: true, marked: washed))
+        .modifier(NavigatorMarkProbe(
+            id: collapsedNote?.postID, chapter: false, marked: noteMarked))
+        #endif
+    }
+}
+
+#if DEBUG
+/// **What the navigator MARKED, as a test oracle** (VX-562 — the
+/// `NavigatorRowProbe` shape: it reads its owning book from the environment
+/// and registers under that name). Recorded on appear and on every change of
+/// the mark — a mark changes no geometry, so the row probe never hears it.
+/// A nil id records nothing (a chapter row with no collapsed note).
+private struct NavigatorMarkProbe: ViewModifier {
+    let id: String?
+    let chapter: Bool
+    let marked: Bool
+    @Environment(\.debugOracleOwner) private var owner
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { record() }
+            .onChange(of: marked) { _, _ in record() }
+    }
+
+    private func record() {
+        guard let id else { return }
+        BookOutlineGeometry.recordNavigatorMark(
+            id, chapter: chapter, marked: marked, owner: owner ?? DebugOracleOwner.unowned)
+    }
+}
+#endif
+
+// MARK: - VX-562 — the Outline's pinned nav info
+
+/// **The line that stays at the top of the Outline while the page scrolls**
+/// — her beta ask (*"the navigation info (number of chapters and notes)
+/// stays fixed at the top while scrolling"*), widened by her improvements
+/// note (*"show during scroll what # note you're in, maybe what chapter
+/// you're in"*).
+///
+/// - **Where:** a sibling ABOVE the page's scroll view (`BookView.body`'s
+///   `.outline` stack), never inside it — the landings measure every anchor's
+///   top in the scroll's own space, and content above them would move them
+///   all. On the prose column's measure and left edge, as the title below it.
+/// - **What:** the book's count line, MOVED here from the scrolling title
+///   block (PROVISIONAL P-562-3 — no duplication), then the position words
+///   for the viewed pair through the one wording brain
+///   (`BookOutlineViewed.positionLine` → `NoteBoxCopy.viewedLine`); the
+///   chapter only where chapters govern (PROVISIONAL P-562-4). One line,
+///   muted, the chrome's small face; it truncates, never wraps (P-8).
+/// - **Cost:** its own view, so a viewed-pair change re-renders this line and
+///   the navigator's marks, never the page. The rows are read only while a
+///   pair is viewed.
+private struct OutlinePinnedLine: View {
+    let readingID: String
+    let model: BookViewModel
+    let structure: BookStructureModel
+    /// `BookViewCopy.metaLine`, as the book view computes it.
+    let meta: String
+    let tokens: VoiceTokens
+    #if DEBUG
+    @Environment(\.debugOracleOwner) private var owner
+    #endif
+
+    var body: some View {
+        let line = BookViewCopy.outlinePinLine(meta: meta, position: position)
+        HStack(spacing: 0) {
+            Spacer(minLength: 0)
+            Text(tokens.chromeLabel(line))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                // The prose column's measure and left edge — the page's own
+                // device (`outlineBody`: flexible margins either side of a
+                // `proseColumn`-capped column that claims its width first).
+                .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                .layoutPriority(1)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 6)
+        // The page's edge, drawn: the archived line's hairline idiom, so the
+        // stack above the page reads as one.
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(tokens.line)
+                .frame(height: 1)
+        }
+        #if DEBUG
+        .onAppear { record(line) }
+        .onChange(of: line) { _, new in record(new) }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            BookOutlineGeometry.recordOutlinePinFrame(
+                readingID, frame, owner: owner ?? DebugOracleOwner.unowned)
+        }
+        #endif
+    }
+
+    /// The viewed pair's words — empty while nothing is viewed.
+    private var position: String {
+        let pair = model.viewedOutlinePair
+        guard pair != .none else { return "" }
+        return BookOutlineViewed.positionLine(
+            pair: pair,
+            rows: BookView.outlineRows(structure: structure, entries: model.entries),
+            chaptered: structure.chaptersActive,
+            filtered: model.viewFilter != nil,
+            truncated: model.truncated)
+    }
+
+    #if DEBUG
+    private func record(_ line: String) {
+        BookOutlineGeometry.recordOutlinePin(
+            readingID, line: line, owner: owner ?? DebugOracleOwner.unowned)
+    }
+    #endif
+}
 
 /// What an Outline anchor reports: where its top sits in the scroll's
 /// visible space, and how tall the row is (the landing converges on the
@@ -3296,6 +3576,15 @@ nonisolated enum BookViewCopy {
         parts.append("\(notes) note\(notes == 1 ? "" : "s")")
         if archived > 0 { parts.append(ArchivedLineCopy.line(count: archived)) }
         return parts.joined(separator: " \u{00B7} ")
+    }
+
+    /// **VX-562 — the Outline's pinned line**: the count line, then — while
+    /// the page is showing a note or a chapter — where she is
+    /// (`BookOutlineViewed.positionLine`): *"book · 12 chapters · 12 notes ·
+    /// note 5 of 12 · a scandal in bohemia"*. No at-rest suppression
+    /// (PROVISIONAL P-562-3): the position says itself whenever one resolves.
+    static func outlinePinLine(meta: String, position: String) -> String {
+        position.isEmpty ? meta : meta + " \u{00B7} " + position
     }
 
     // (VX-217, her ruling 2026-10-13: the gathering's navigator FOOTER —
