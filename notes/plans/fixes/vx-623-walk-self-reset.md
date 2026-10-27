@@ -212,7 +212,7 @@ the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swif
 | 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | DONE (this commit) — see "D-5 evidence" below |
 | 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | DONE (this commit) — see "D-4 evidence" below |
 | 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | DONE (this commit) — see "D-2 + D-3 evidence" below; READINGS R-U1-3…R-U1-5 flagged for the architect |
-| 6 | D-6 — release.sh HANDOFF step 0 + README | NOT-STARTED |
+| 6 | D-6 — release.sh HANDOFF step 0 + README | DONE (this commit) — step 0 names the self-resetting, both-arms walk; the WalkKit README carries the walk's new shape, the reset helper, `walk-cap`'s new arguments, the words guard and guard.sh's exit 8 |
 | 7 | Final evidence: both self-tests' case lists, D-7 red-on-old, `zsh -n`, each D-row's acceptance (file:line) | NOT-STARTED |
 
 **D-7 evidence (VX-536).** The traced mechanism: `guard.sh`'s full check ran `win=$("$S"/wl2 $pid)`; `Tools/WalkKit/wl2`
