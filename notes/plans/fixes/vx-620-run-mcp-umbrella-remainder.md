@@ -279,7 +279,7 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 
 ### THE RERUN-2 PREP (orchestrator, outside the stage — the coordinator's shortening suggestion)
 
-- **REVERT IN FLIGHT (announced before it starts, the resiliency rule):** the teeth-proof's red PRODUCT is pre-built OUTSIDE the window — `WingDestinationSheet.swift`'s `.task { askForTheKeyboard() }` line deleted in the working tree, `build-for-testing` into a FRESH `DerivedData/b4red` (never a clone), then the file restored by `git checkout --` and the tree verified clean. The green product stays the untouched `b4`. The window is then runs only: green (b4) → red single test (b4red) → green suite (b4). Status: PENDING — flipped below when the tree is clean again.
+- **REVERT IN FLIGHT (announced before it starts, the resiliency rule):** the teeth-proof's red PRODUCT is pre-built OUTSIDE the window — `WingDestinationSheet.swift`'s `.task { askForTheKeyboard() }` line deleted in the working tree, `build-for-testing` into a FRESH `DerivedData/b4red` (never a clone), then the file restored by `git checkout --` and the tree verified clean. The green product stays the untouched `b4`. The window is then runs only: green (b4) → red single test (b4red) → green suite (b4). Status: DONE — b4red TEST BUILD SUCCEEDED (the red product), the file restored by `git checkout --`, the tree verified clean; NO revert is in flight.
 
 ## SITTING / RULING RECORD (anything she says mid-run lands here verbatim, same turn)
 
