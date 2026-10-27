@@ -208,7 +208,7 @@ the join sheet's current source (`RoadAccountSheet.swift`, `ProtectionWords.swif
 | Piece | Row | Status |
 |---|---|---|
 | 1 | D-7 — guard.sh compile-or-refuse + its red-on-old pin | DONE (this commit) — see "D-7 evidence" below |
-| 2 | D-1 — `Tools/prod-reset-test-account.sh` + `--self-test` (incl. the `account_purge()` drift pin) | NOT-STARTED |
+| 2 | D-1 — `Tools/prod-reset-test-account.sh` + `--self-test` (incl. the `account_purge()` drift pin) | DONE (this commit) — `--self-test` 85/85 green; see "D-1 evidence" below. `--dry-run` and any live run are UNIT 2's (both read production) |
 | 3 | D-5 — capture every window of the pid (+ the words guard before any capture) | NOT-STARTED |
 | 4 | D-4 — the window-frame guard (autosave key deleted pre-launch; bounds asserted post-launch) | NOT-STARTED |
 | 5 | D-2 + D-3 — the pre-step, `--arm setup\|join\|both`, the join arm, the cleanup leg | NOT-STARTED |
@@ -230,6 +230,48 @@ a temp WalkKit folder per case, pgrep/ioreg/osascript/swiftc PATH-shimmed and ch
   absent + compiles → compiled, 0 · older than its source → recompiled · answers nothing → 8 · answers nonsense → 8 ·
   current, on this Space → 0 · offscreen → 6 · a point inside → 0 · a point outside → 7 · `--author` with no helper → 0,
   nothing compiled.
+
+**D-1 evidence — `Tools/prod-reset-test-account.sh <std|castle|del> [--dry-run] [--log <file>] | --self-test`.**
+Guards R1–R4 (exit 5, nothing written): R1 = the walk's G1/G2 VERBATIM (`guard_allowlist`, `plain_address`); R2 =
+`Tools/prod-read.sh` + `.env.supabase.local`; R3 = the guarded email→id read — exactly one auth user, its email
+BYTE-EQUAL to the allowlist's entry, a lowercase-UUID id (the only value any statement splices); R4 = the before-read
+parses whole. Every read goes through `Tools/prod-read.sh`'s SELECT-only fence; the ONE write is the helper's own curl to
+the same endpoint and pinned ref, the token fed on stdin (`-H @-`), never in argv. Already at rest → nothing written;
+`--dry-run` → the plan and the before-read; else the one statement, then the after-read ALWAYS (exit 0 at rest · 4 not at
+rest, with the reason · 5 refused). Before/after lines are printed and appended to the log (default
+`App/Variorum/DerivedData/prod-reset/<UTC>-<account>.log`, gitignored; the walk passes `--log` into its run folder).
+- **The statement** (`reset_sql`): ONE data-modifying CTE — the 21 data tables, `device_cursor`, `purged_row`,
+  `sync_tenant_seq`, `key_proof_challenge`, `sync_write_budget`, `vault.secrets` `kp:<id>`, `key_vault` — derived from
+  `account_purge()`'s latest body (`Server/supabase/13_phase13i_wings.sql:851-917`: `data_tables` 856-861, the server
+  deletes + the secret + the vault 890-901) minus `entitlement` and `auth.users`.
+- **READING R-U1-1 (the implementer's, flagged for the architect — built, one line to change):** the `kp:` secret is
+  deleted INSIDE the atomic statement and the after-read DEMANDS kp 0, rather than best-effort. Traced: the purge may be
+  best-effort because its uuid dies; a reset KEEPS the uuid, and a surviving `kp:<id>` makes the next set-up's
+  `key_proof_enroll` raise `VARIORUM_KEY_PROOF_ALREADY_ENROLLED` (`12_phase13y_tenant_seq.sql:611-615`) — the loser
+  "proceeds", and every later proof is then checked against the OLD master's kp2. "Best-effort" cannot be expressed
+  inside one atomic CTE anyway; the VX-439 tail's statement evidently deleted it (run 3's fresh enrollment PASSED). If the
+  role ever lacks the vault privilege the statement refuses whole — nothing written, exit 4 named — fail-closed.
+- **READING R-U1-2 (likewise):** the helper resets when the account is NOT AT REST (any family row, not only a vault
+  row), and writes nothing when it is — a superset of D-2's "if a vault row exists", so P8's cursor/row evidence can
+  never be satisfied by rows a half-cleaned account carried in (e.g. a leftover `kp:` or cursor with no vault).
+- **`--self-test`, 85 cases, green** (fixtures only; `prodread`/`prodwrite` replaced by tripwires that exit 99):
+  R1 × 13 (the walk's own G1/G2 cases: good std · good castle · unknown account · mode 644 · unmarked entry · empty list
+  · not listed · a link · no file · a quote · uppercase · a newline · the plus-address-with-digits shape) + R1's twin pins
+  × 2 (`guard_allowlist` and `plain_address` byte-identical to `first-run-walk.sh`'s) · R3 × 11 (one auth user equal →
+  the id · email differs by case · another address · a trailing space · no auth user · two auth users · an uppercase id
+  · an id with a quote · an error answer · not JSON · a non-plain address refused at the splice) · R4 × 13 (clean → at
+  rest · a vault + rows → not at rest · the summary line exact · a `kp:` alone not at rest · challenges alone not at rest ·
+  a `purge_intent` row alone not at rest · no auth user not at rest · a missing count · a non-integer · a boolean · an
+  unreadable vault_mode · two rows · an error answer) · AFTER × 5 (at rest → ok · auth user gone · entitlement changed ·
+  `kp:` survived, named · a data row remains) · SQL × 33 (one statement, a CTE · each of the 26 owner tables deleted
+  exactly once · the `kp:` secret and the vault once each · exactly 28 deletes · never `auth.users`/`entitlement` · the
+  id spliced exactly 28 times and no other quoted value · a non-UUID id builds nothing · the counts read passes
+  `prod-read.sh`'s OWN fence, its regex read from the file) · DRIFT × 7 (the latest `account_purge()` found · its
+  `data_tables` = ours exactly · its owner deletes = ours exactly · it deletes `key_vault`+`entitlement` by user_id — we
+  keep only the entitlement · it deletes `auth.users` by id — we keep it · it deletes the `kp:` secret — so do we · no
+  maintenance file redefines it) · the network never reached × 1.
+- **The pins bite (mutation runs on a temporary copy, deleted):** `purge_intent` dropped from the family → DRIFT data
+  FAIL (+ the R4 case); one word changed in the guard → R1 twin FAIL; the `kp:` CTE removed → three SQL cases FAIL.
 
 ## Environment traps (binding; carried into every brief verbatim)
 
