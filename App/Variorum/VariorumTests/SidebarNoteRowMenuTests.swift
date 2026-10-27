@@ -17,15 +17,17 @@
 //  notes of another wing. The walk (the orchestrator's) right-clicks the rows.
 //
 
+import AppKit
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
 
 @MainActor
-@Suite("VX-425 — the sidebar's note rows: Rename · Move/Copy to Wing · Export · Close · Delete")
+@Suite("VX-425 — the sidebar's note rows: Rename · Move/Copy to Wing · Export · Close · Delete", .serialized)
 struct SidebarNoteRowMenuTests {
     private static var appRoot: URL {
         URL(fileURLWithPath: #filePath)
@@ -121,7 +123,9 @@ struct SidebarNoteRowMenuTests {
         #expect(sidebar.contains("await model.rename(postID: postID, title: title)"))
         #expect(sidebar.contains(".deleteNoteConfirmDialog($pendingDelete)"))
         #expect(sidebar.contains("NoteDeletion.fire(session: session, postIDs: confirm.postIDs)"))
-        #expect(sidebar.contains(".wingMoveConfirm($wingMove, wings: wings)"))
+        // (The VX-439 ladder's m-3 — edited in place: the confirm now hands the
+        // column's after-act re-ask, `onDone: wingActDone`; same confirm.)
+        #expect(sidebar.contains(".wingMoveConfirm($wingMove, wings: wings, onDone: wingActDone)"))
         let root = try Self.source("Variorum/RootView.swift")
         #expect(root.contains("wings: wings)"), "the shell hands the column its wings")
     }
@@ -181,6 +185,134 @@ struct SidebarNoteRowMenuTests {
                 try WingFollow.crossWingIDs(db, noteIDs: [homeNote.id, studioNote.id], current: studio.id)
             }
             #expect(fromStudio == [homeNote.id: ""], "Home is the virtual wing ''")
+        }
+    }
+
+    // MARK: - After an act, the one-shot wing reads re-ask (the VX-439 ladder's m-3)
+
+    /// **A move from the row re-asks which wing its doors and its indicator
+    /// read — RED ON OLD (R-D: the act's re-ask not folded into the reads'
+    /// keys).** The rows' wing read (`noteRowWingIDs`, the doors' `fromWing`)
+    /// and the Open row's wing indicator (`openRowWings`) are ONE-SHOT reads
+    /// keyed on the rows and the current wing. A Move to Wing ▸ from the row
+    /// changes neither (the row stays — F-U5-6 — and she stands where she
+    /// stood), so before this the reads never re-ran: the row's Move/Copy ▸
+    /// went on listing the note's NEW wing as a destination and omitting its
+    /// old one, and the indicator stayed blank. `WingNoteDoors`' contract is
+    /// "after an act, the one-shot listings re-ask" (`onDone`); the column now
+    /// passes it (and the move's confirm its own), and the re-ask re-runs both.
+    @Test func aMoveFromTheRowReasksWhichWingItsDoorsAndIndicatorRead() async throws {
+        try await withMountedWorld { session, db in
+            let ops = session.operations
+            let work = try ops.createWing(name: "Work")
+            let moving = try ops.createPost(title: "moving note")
+            let staying = try ops.createPost(title: "staying note")
+            let workspace = WorkspaceModel()
+            workspace.visit(.post(moving.id))
+            workspace.visit(.post(staying.id))
+            workspace.select(.library)
+            let stars = StarsModel(session: session)
+            let observing = Task { await stars.start() }
+            defer { observing.cancel() }
+            let wings = WingsModel(session: session)
+            await wings.load()
+            let theme = ThemeStore(session: session)
+            SidebarGeometry.forgetSections(for: workspace)
+            defer { SidebarGeometry.forgetSections(for: workspace) }
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 230, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            window.contentView = NSHostingView(rootView: SidebarView(
+                session: session, model: LibraryViewModel(session: session),
+                pool: PoolViewModel(session: session), workspace: workspace, stars: stars,
+                selection: Binding(
+                    get: { workspace.selections[workspace.focusedPane] },
+                    set: { picked in if let picked { workspace.select(picked) } }),
+                wings: wings)
+                .frame(width: 230)
+                .environment(theme))
+            window.makeKeyAndOrderFront(nil)
+            let key = SidebarGeometry.bodyKey(for: workspace)
+            #expect(await poll { SidebarGeometry.noteRowFromWings[key] != nil && SidebarGeometry.openRowWingNames[key] != nil },
+                    "the rows' wing reads ran")
+            #expect(SidebarGeometry.noteRowFromWings[key]?[moving.id] == nil, "it lives in the current wing (Home)")
+            #expect(SidebarGeometry.openRowWingNames[key]?[moving.id] == nil, "no indicator")
+
+            // The door's act — `WingNoteDoors`' Move to Wing ▸ Work: a bookless
+            // note moves at once (no confirm) — and then the door's `onDone`.
+            #expect(await wings.moveAsk(postID: moving.id, title: "moving note", to: work.id) == nil,
+                    "bookless: moved without a confirm")
+            let wingNow = try await db.read { db in
+                try String.fetchOne(db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [moving.id])
+            }
+            #expect(wingNow == work.id, "the premise: the note moved")
+            #expect(workspace.openNotes.shown.contains(moving.id) && wings.currentID == "",
+                    "the premise: the row stayed and she stands in Home — nothing else re-keys the reads")
+            let done = try #require(SidebarGeometry.noteRowWingActDone[key], "the column's after-act re-ask")
+            done()
+            #expect(await poll { SidebarGeometry.noteRowFromWings[key]?[moving.id] == work.id },
+                    "re-asked: the row's doors read from Work — \(String(describing: SidebarGeometry.noteRowFromWings[key]))")
+            let from = SidebarGeometry.noteRowFromWings[key]?[moving.id] ?? wings.currentID
+            #expect(wings.destinations(from: from).map(\.id) == [""], "its Move/Copy ▸ now list Home, never Work")
+            #expect(await poll { SidebarGeometry.openRowWingNames[key]?[moving.id] == "Work" },
+                    "the row's indicator names its new wing — \(String(describing: SidebarGeometry.openRowWingNames[key]))")
+        }
+    }
+
+    /// …and the wiring, read: both of the column's wing doors hand the one
+    /// re-ask, and both one-shot reads are keyed on it.
+    @Test func theColumnsWingDoorsHandTheReaskAndBothReadsAreKeyedOnIt() throws {
+        let sidebar = try Self.source("Variorum/Features/Library/SidebarView.swift")
+        let acts = try Self.body(of: "private func noteRowActs(", in: sidebar)
+        #expect(acts.contains("onAsk: { wingMove = $0 }, onDone: wingActDone"), "the row's doors re-ask after an act")
+        #expect(sidebar.contains(".wingMoveConfirm($wingMove, wings: wings, onDone: wingActDone)"),
+                "the move's confirm re-asks after its act")
+        let rowsKey = try Self.body(of: "private var noteRowsWingKey: String {", in: sidebar)
+        let openKey = try Self.body(of: "private var openWingsKey: String {", in: sidebar)
+        #expect(rowsKey.contains("wingActGeneration") && openKey.contains("wingActGeneration"),
+                "both one-shot reads re-run on the re-ask")
+    }
+
+    private func pump() {
+        RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+    }
+
+    private func poll(_ condition: () -> Bool) async -> Bool {
+        for _ in 0..<300 {
+            if condition() { return true }
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        return condition()
+    }
+
+    /// The mounted pins' world: the LIVE uuid generator (the DEBUG-oracle
+    /// keying rule — `SidebarRowLeadsTests`' rig).
+    private func withMountedWorld<T>(
+        _ body: @MainActor (AppSession, AppDatabase) async throws -> T
+    ) async throws -> T {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        return try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 425))
+        } operation: { @MainActor in
+            try await body(AppSession(database: db), db)
         }
     }
 

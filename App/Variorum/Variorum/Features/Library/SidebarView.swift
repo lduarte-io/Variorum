@@ -256,6 +256,13 @@ struct SidebarView: View {
     @State private var pendingDelete: NoteDeleteConfirm?
     @State private var wingMove: WingsModel.MoveAsk?
     @State private var noteRowWingIDs: [String: String] = [:]
+    /// **The VX-439 ladder's m-3 — the re-ask after a wing act.** The rows'
+    /// two wing reads (the doors' `noteRowWingIDs`, the indicator's
+    /// `openRowWings`) are ONE-SHOT, keyed on the rows and the current wing —
+    /// and a Move/Copy to Wing ▸ from a row changes neither. `WingNoteDoors`'
+    /// contract ("after an act, the one-shot listings re-ask") is honoured by
+    /// bumping this, which both reads' keys carry.
+    @State private var wingActGeneration = 0
     /// VX-580: the note rows' PRELIMINARY titles — an untitled, non-journal
     /// note's own first words, through the Library's one brain
     /// (`SidebarRowLeads`); absent for every other note. Display only.
@@ -432,7 +439,11 @@ struct SidebarView: View {
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }
-        .wingMoveConfirm($wingMove, wings: wings)
+        .wingMoveConfirm($wingMove, wings: wings, onDone: wingActDone)
+        #if DEBUG
+        // The ladder's m-3 oracle: the column's after-act re-ask, as the doors run it.
+        .onAppear { SidebarGeometry.noteRowWingActDone[SidebarGeometry.bodyKey(for: workspace)] = wingActDone }
+        #endif
         // VX-580: the untitled notes' first words, HELD (a note she is typing
         // into renames its row as she goes — the strip's own live-title law,
         // row 18), the fetch bounded by the rows (P1).
@@ -457,6 +468,9 @@ struct SidebarView: View {
             noteRowWingIDs = (try? await session.database.read { db in
                 try WingFollow.crossWingIDs(db, noteIDs: ids, current: current)
             }) ?? [:]
+            #if DEBUG
+            SidebarGeometry.noteRowFromWings[SidebarGeometry.bodyKey(for: workspace)] = noteRowWingIDs
+            #endif
         }
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? importer?.lastError {
@@ -1017,6 +1031,9 @@ struct SidebarView: View {
                 openRowWings = (try? await session.database.read { db in
                     try WingFollow.crossWingNames(db, noteIDs: ids, current: current)
                 }) ?? [:]
+                #if DEBUG
+                SidebarGeometry.openRowWingNames[SidebarGeometry.bodyKey(for: workspace)] = openRowWings
+                #endif
             }
         }
     }
@@ -1100,9 +1117,12 @@ struct SidebarView: View {
         #endif
     }
 
-    /// The indicator's read key: the rows shown and the wing she stands in.
+    /// The indicator's read key: the rows shown, the wing she stands in, and
+    /// the after-act re-ask (the ladder's m-3 — a move from a row changes
+    /// neither of the others).
     private var openWingsKey: String {
         workspace.openNotes.shown.joined(separator: ",") + "|" + session.wing.currentID
+            + "|\(wingActGeneration)"
     }
 
     /// U1b (F-1): the Open row of the note the pane shows — the highlighted
@@ -1319,9 +1339,17 @@ struct SidebarView: View {
         return WorkspaceNaming.label(for: destination, titles: stars.titles)
     }
 
-    /// The wing read's key: the note rows and the wing she stands in.
+    /// The wing read's key: the note rows, the wing she stands in, and the
+    /// after-act re-ask (the ladder's m-3).
     private var noteRowsWingKey: String {
-        noteRowIDs.joined(separator: ",") + "|" + session.wing.currentID
+        noteRowIDs.joined(separator: ",") + "|" + session.wing.currentID + "|\(wingActGeneration)"
+    }
+
+    /// **After a wing act from a row, the one-shot wing reads re-ask** (the
+    /// ladder's m-3 — `WingNoteDoors`' `onDone` contract; the move's confirm
+    /// runs it too). Both reads' keys carry the generation.
+    private func wingActDone() {
+        wingActGeneration &+= 1
     }
 
     /// **A note row's own acts** (`noteRowMenuCapabilities` + the shared
@@ -1340,7 +1368,7 @@ struct SidebarView: View {
         if let wings {
             WingNoteDoors(
                 wings: wings, postID: noteID, title: title,
-                fromWing: noteRowWingIDs[noteID], onAsk: { wingMove = $0 })
+                fromWing: noteRowWingIDs[noteID], onAsk: { wingMove = $0 }, onDone: wingActDone)
         }
         Button(CapabilityRegistry.capability(.exportNote).verb) {
             Task { await NoteExport.export(postID: noteID, session: session) }
@@ -1542,6 +1570,13 @@ enum SidebarGeometry {
         openRowLabels[bodyKey(for: workspace), default: [:]][noteID] = label
     }
 
+    /// **The VX-439 ladder's m-3 — the rows' one-shot wing reads, as last
+    /// read** (note id → its wing's id for the doors; → its wing's NAME for the
+    /// indicator), and the column's after-act re-ask, as the doors run it.
+    static var noteRowFromWings: [String: [String: String]] = [:]
+    static var openRowWingNames: [String: [String: String]] = [:]
+    static var noteRowWingActDone: [String: () -> Void] = [:]
+
     /// …and the first row's ✕ (global), where the at-rest click pin presses.
     static var openListFirstRowCloses: [String: CGRect] = [:]
 
@@ -1561,6 +1596,9 @@ enum SidebarGeometry {
         openListFirstRowHalves[key] = nil
         openListFirstRowCloses[key] = nil
         openRowLabels[key] = nil
+        noteRowFromWings[key] = nil
+        openRowWingNames[key] = nil
+        noteRowWingActDone[key] = nil
     }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the

@@ -559,7 +559,24 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     exactly the new pin's scan counts** (6 / 7 / 8 / 8), every word still right (`scratchpad/l1/m2-replica-{new,rc}.txt`).
     The editor pin's reds are the stage's: under R-C its scan counts; under named revert **R-G** (the generation bump
     removed, `r-g.patch`) its edit leg (a stale cache: nil, not "4 of 4"; one scan, not two). build-for-testing GREEN.
-  - m-3 (the sidebar row menus' wing listings re-ask after an act): NOT-STARTED
+  - m-3 (the sidebar row menus' wing listings re-ask after an act): DONE (this commit). TRACED (read): `noteRowWingIDs`
+    (the row doors' `fromWing`) and the pre-existing indicator's `openRowWings` are ONE-SHOT reads keyed on (rows,
+    current wing); a Move to Wing ▸ from a row changes neither (the row stays — F-U5-6; she stands where she stood),
+    and the column passed no `onDone` to `WingNoteDoors` nor to `.wingMoveConfirm` — so after the move the row's
+    Move/Copy ▸ listed the note's NEW wing as a destination and omitted its old one, and its indicator stayed blank.
+    FIX: `wingActGeneration` (`@State`), bumped by ONE method `wingActDone()` that the column hands both doors
+    (`WingNoteDoors(…, onDone: wingActDone)`, `.wingMoveConfirm(…, onDone: wingActDone)`); both reads' keys
+    (`noteRowsWingKey`, `openWingsKey`) carry it, so the contract "after an act, the one-shot listings re-ask" holds
+    for both (the indicator is the same staleness, the reviewer's own note — one re-ask, not two). DEBUG oracles
+    `SidebarGeometry.noteRowFromWings` / `openRowWingNames` (each read's last answer) and `noteRowWingActDone` (the
+    column's re-ask, as the doors run it). PINS `SidebarNoteRowMenuTests.aMoveFromTheRowReasksWhichWingItsDoorsAndIndicatorRead`
+    (mounted, two wings: the door's act — `wings.moveAsk` moves a bookless note at once — then the door's `onDone`; the
+    doors now read from Work, list Home only; the indicator names Work; the premises asserted: the row stayed, she
+    stands in Home) + `theColumnsWingDoorsHandTheReaskAndBothReadsAreKeyedOnIt` (source-read wiring); the suite gains
+    `.serialized` (it mounts a window now). DELIBERATE edit: `theNoteActsRunTheSharedRoads`' `.wingMoveConfirm(…)`
+    literal (+ `onDone: wingActDone`, annotated). RED ON OLD expected under named revert **R-D**
+    (`scratchpad/l1/reverts/r-d.patch` — the generation out of both keys, the pre-fix reads exactly): both new pins
+    red (the reads never re-run; the keys lack it) — PENDING the stage window. build-for-testing GREEN.
   - m-5 (`NoteExportMenuGateTests` disabled, named): NOT-STARTED
   - m-7 (CONDITIONAL — pin first; guard only if red on current code): NOT-STARTED
   - m-4 (the honesty half: the settings pins' capture claim): NOT-STARTED
