@@ -98,7 +98,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 |---|---|---|---|
 | 1 — the gates | VX-516 (Urgent) · VX-515 · VX-512 | opus-implementer №1 | **ACCEPTED** (window vx548-b1-walk: Mac suites 141/12 green, zero skips; orchestrator walk green — ORCHESTRATOR ACCEPTANCE, BATCH 1) |
 | 2a — faces & wire answers | VX-352 · VX-354 · VX-365 · VX-358 | opus-implementer №2 | BUILT (headless green, red-on-old verified incl. two behavioural reverts; Mac pins compiled into `DerivedData/b2a`) — Mac run + faces walk ride the MID WINDOW after 2b — BATCH 2a RECORD |
-| 2b — the disconnect story | VX-394 | opus-implementer №3 | IN FLIGHT (spawned at the 2a seam) |
+| 2b — the disconnect story | VX-394 | opus-implementer №3 | IN FLIGHT (spawned at the 2a seam) — BATCH 2b RECORD |
 | 3 — gatherings as a grant place | VX-549 (not launch-gating) | opus-implementer №4 | NOT STARTED |
 | L — the ladder | the run's whole diff | fable-reviewer, fresh per round | NOT STARTED |
 
@@ -726,6 +726,29 @@ commit.
   real-client turn is optional (`add_note_to_book` into an outflow book → `tag_ids`/`tags`).
 
 ## BATCH 2b RECORD
+
+**NOT DONE BY THIS BATCH (first line, by the rule):** PENDING — written at the close. (So far: no `xcodebuild test`, no
+GUI, no stage claim, no walk — the orchestrator's; nothing in `Sync/`, `Server/`, custody or the synced schema.)
+
+*Implementer: `opus-implementer` №3 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
+code: CLAUDE.md + its canon, this plan IN FULL, `notes/MCPSpec.md` IN FULL, `notes/SessionResiliencyProtocol.md`, the
+vx-348 record's §U5 (the client-session report verbatim) + the U5 UNIT RECORD's VX-394 sections (the trace, P-VX394-1…6,
+the fix leg `0ebf5c926`, THE U5 BATCH + LIVE ROUND, the U5 adjudications, the ladder's NIT 3), QUESTIONS #233 (P-VX394
+still PROVISIONAL — her product call (a)/(b)/(c) still open), SurfaceContracts' protection bullet (VX-445's lock road),
+and the code anchors below. Lane: headless `swift build`/`swift test` + `xcodebuild build`/`build-for-testing` into
+`DerivedData/b2b` only.*
+
+### LIVE STATUS (per piece — flipped in the same commit as each piece)
+
+- **No behavioural revert is in flight.**
+- **Preflight + the road map:** DONE (this commit) — every lock trigger converges on `AppBootstrap.lock()` →
+  `lockOnNewRoad` → `onWillLock` (production: `macWillLock(…, endingConnections: door.recordLibraryClosing) { …;
+  door.detach() }`, `VariorumApp.swift:286`); quit is `applicationWillTerminate` → `door.detach()` alone.
+- **The sweep table (road × end line):** IN-PROGRESS — the table, each cell's pin.
+- **The pane-status honesty trace:** IN-PROGRESS.
+- **App Nap verdict (MB-6):** IN-PROGRESS.
+- **Reconnect ergonomics (propose only):** NOT-STARTED.
+- **Suites (VX-180/181's included):** NOT-STARTED.
 
 ## BATCH 3 RECORD
 
