@@ -220,8 +220,9 @@ Results + counts here; the sub-issue listing re-run and every member accounted f
 **NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
 claim (the orchestrator's) — the Mac pins are written and COMPILED (`build-for-testing` into a FRESH
 `DerivedData/b1`), their RUN PENDING the orchestrator's stage window; no canon edit (MCPSpec's replacing lines are
-DRAFTED below, the two-file rule); `MCPSession.instructions` untouched unless the record below says otherwise; nothing
-in `Sync/`, `Server/`, custody, the synced schema or the editor seam.
+DRAFTED below, the two-file rule); `MCPSession.instructions` UNTOUCHED (2,988 / 3,000 — 12 characters left for
+VX-619); no ticket filed or moved (RB-9's flake ticket is the orchestrator's to file); a gathering's OWN star not built
+(RB-7); nothing in `Sync/`, `Server/`, custody, the synced schema, the editor seam or `VariorumMobile/`.
 
 *Implementer: `opus-implementer` №1 (xhigh), fresh session, 2026-10-27. Read in its own context before any code:
 CLAUDE.md + its canon, this plan IN FULL, `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · The
