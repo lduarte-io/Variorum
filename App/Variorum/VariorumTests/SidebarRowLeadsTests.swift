@@ -5,7 +5,8 @@
 //  **VX-580 (the VX-439 run, A-439-11) — the sidebar's untitled notes lead
 //  with their own first words, by default.** Her note (2026-10-21): *"I NEED
 //  to make showing a preliminary title on the lefthand bar the default."* The
-//  words are the LIBRARY's one brain's (`NoteCardFace` over `NoteCards`' read),
+//  words are the LIBRARY's one brain's (`NoteCardFace` over the card's own
+//  opening window — read FLAT since the ladder's M-1, `Queries.leadingBlockTexts`),
 //  for exactly the notes the Library leads with words (no name of their own,
 //  not a daily entry), display-only.
 //
@@ -65,6 +66,57 @@ struct SidebarRowLeadsTests {
             let library = NoteCardFace.card(storedTitle: nil, leadingTexts: [sentence])
             #expect(library.lead == .words(capped), "one brain, one answer: \(library.lead)")
             #expect(try await db.read { try SidebarRowLeads.read($0, noteIDs: []) }.isEmpty)
+        }
+    }
+
+    /// **THE P1 PIN (VX-439 ladder round 1, M-1) — RED ON OLD.** The read is
+    /// HELD (the column observes it, and every autosave stamps `container`,
+    /// so it re-runs at typing rate), so its words must be read FLAT in the
+    /// note's length: one bounded, index-ordered seek per untitled note,
+    /// stopped by a `LIMIT` — never a window function over the note's whole
+    /// placement list. The old read went through `NoteCards.load`, whose
+    /// `ROW_NUMBER() OVER (PARTITION BY …) … WHERE n <= 3` materializes EVERY
+    /// block of the note before its filter (the reviewer measured 0.2 ms at 3
+    /// blocks, 36 ms at 20,000 — linear, at autosave rate). Shape facts, never
+    /// a stopwatch (`LeadingBlockTextsTests`' rule): the statements the read
+    /// issues, as traced, and each words statement's plan.
+    @Test func theReadsWordsAreBoundedSeeksNeverAWindowOverTheWholeNote() async throws {
+        try await withWorld { session, db in
+            let ops = session.operations
+            let long = try ops.createPost()
+            for i in 0..<40 { _ = try ops.newBlock(in: long.id, text: "line \(i)", registeringUndo: false) }
+            let titled = try ops.createPost(title: "Kept")
+            _ = try ops.newBlock(in: titled.id, text: "words under a name", registeringUndo: false)
+            let traced = LockIsolated<[String]>([])
+            let leads = try await db.read { database in
+                database.trace(options: .statement) { event in
+                    guard case .statement(let statement) = event else { return }
+                    let sql = statement.expandedSQL
+                    traced.withValue { $0.append(sql) }
+                }
+                defer { database.trace(options: .statement, nil) }
+                return try SidebarRowLeads.read(database, noteIDs: [long.id, titled.id])
+            }
+            #expect(leads[long.id] == "line 0", "the untitled note leads with its first words: \(leads)")
+            #expect(leads[titled.id] == nil)
+            let words = traced.value.filter {
+                $0.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("SELECT")
+                    && $0.contains("container_block")
+            }
+            #expect(words.count == 1, "one words statement — the untitled note's; a named note reads none: \(words)")
+            for sql in words {
+                #expect(!sql.contains("OVER ("), "no window over the note's placements: \(sql)")
+                #expect(sql.contains("LIMIT"), "the words stop at their bound: \(sql)")
+                let plan = try await db.read { database in
+                    try Row.fetchAll(database, sql: "EXPLAIN QUERY PLAN \(sql)")
+                        .map { ($0["detail"] as String?) ?? "" }
+                        .joined(separator: "\n")
+                }
+                #expect(plan.contains("SEARCH cb USING INDEX idx_cblock_order"),
+                        "the placements are SEEKED by the ordered index: \(plan)")
+                #expect(!plan.contains("SCAN cb") && !plan.contains("USE TEMP B-TREE FOR ORDER BY"),
+                        "never a scan, never a full sort of the note's placements: \(plan)")
+            }
         }
     }
 

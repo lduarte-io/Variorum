@@ -8,10 +8,22 @@
 //  fewer words than the library shows, but agh. I suppose that could be a
 //  setting too."* Built the lightest way she allowed: ON, with no setting.
 //
-//  The words come from the LIBRARY's one brain — `NoteCardFace` (core), fed by
-//  the Library's own bounded opening read (`NoteCards.load`, words only) — so a
-//  note is never called one thing in the Library's list and another in the
-//  sidebar. The same rule decides WHICH notes: a note with no name of its own
+//  The words come from the LIBRARY's one brain — `NoteCardFace` (core), fed the
+//  same opening the Library's card reads (the first `NoteCards.blockWindow`
+//  slots, each cut at `NoteCards.snippetLimit`) — so a note is never called one
+//  thing in the Library's list and another in the sidebar.
+//
+//  **The read is FLAT in the note's length (the VX-439 ladder's M-1, P1).** The
+//  column HOLDS this read (every autosave stamps `container`, so it re-runs at
+//  typing rate), so its words come through `Queries.leadingBlockTexts` — one
+//  index-ordered seek per untitled note, stopped by a `LIMIT` (that read's own
+//  query-plan pin) — never `NoteCards.load`, whose window function over the
+//  note's placements reads every block of the note before it keeps three (0.2 ms
+//  at 3 blocks, 36 ms at 20,000, measured). The one bounded consequence is that
+//  read's own, stated there: a live placement over a DEAD block (a sync race)
+//  takes a slot as a gap, where the Library's window skips it.
+//
+//  The same rule decides WHICH notes: a note with no name of its own
 //  that is not a daily entry (`LibraryCardName.leadsWithItsWords`' facts — a
 //  journal entry's day IS its identity, and a named note says what it is). A
 //  note with no words at all keeps the name every other surface gives it (its
@@ -32,8 +44,9 @@ nonisolated enum SidebarRowLeads {
     /// **The sidebar rows' derived leads** — for each listed note that leads
     /// with its words, the card lead's text; absent for every other note (its
     /// row keeps its display name). One bounded read: the rows' own container
-    /// facts, then the Library's opening read over only the notes that need it
-    /// (P1 — the Open list and the star cap bound it; a sidebar of named notes
+    /// facts, then each untitled note's opening slots — a `LIMIT`-stopped seek
+    /// per note (P1 — cost ∝ the rows × the window, never ∝ a note's length;
+    /// the Open list and the star cap bound the rows; a sidebar of named notes
     /// reads no words at all).
     static func read(_ db: Database, noteIDs: [String]) throws -> [String: String] {
         guard !noteIDs.isEmpty else { return [:] }
@@ -50,13 +63,16 @@ nonisolated enum SidebarRowLeads {
                 && (row["profile"] as String?) != Profile.journal.rawValue
         }
         guard !unnamed.isEmpty else { return [:] }
-        let cards = try NoteCards.load(
-            db, postIDs: unnamed.map { $0["id"] as String }, includingBooks: false)
         var out: [String: String] = [:]
         for row in unnamed {
             let id: String = row["id"]
+            // The Library card's opening, read flat: its window of slots, each
+            // cut where the card's read cuts it (`substr(…, 1, snippetLimit)`).
+            let leading = try Queries.leadingBlockTexts(
+                db, containerID: id, blocks: NoteCards.blockWindow
+            ).map { String($0.prefix(NoteCards.snippetLimit)) }
             let face = NoteCardFace.card(
-                storedTitle: row["title"], leadingTexts: cards[id]?.leadingTexts ?? [],
+                storedTitle: row["title"], leadingTexts: leading,
                 isJournal: false, entryDate: row["entry_date"], createdAt: row["created_at"])
             if case .words(let words) = face.lead { out[id] = words }
         }

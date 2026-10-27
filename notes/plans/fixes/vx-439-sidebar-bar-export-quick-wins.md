@@ -479,7 +479,30 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
   pin and a NAMED behavioral revert (patch gitignored in `scratchpad/l1/reverts/`); app-side pins are red-on-old
   verified at the fix-verify stage window (the reverts applied for the run, restored by `git checkout`), and
   headlessly first wherever a replica is cheap. Items (each flips in its own commit):
-  - M-1 (P1 — `SidebarRowLeads` through `Queries.leadingBlockTexts`): NOT-STARTED
+  - M-1 (P1 — `SidebarRowLeads` through `Queries.leadingBlockTexts`): DONE (this commit). TRACED (confirmed by
+    reading): the column holds `observe { SidebarRowLeads.read }`; every autosave's full-record `container.update`
+    (`registerTextChange`) wakes it; for an untitled listed note the words came from `NoteCards.load`, whose
+    `ROW_NUMBER() OVER (PARTITION BY …) … WHERE n <= 3` materializes every block of the note (∝ the note, at typing
+    rate). FIX: each untitled note's opening is `Queries.leadingBlockTexts(…, blocks: NoteCards.blockWindow)` (the
+    flat, plan-pinned read `TitleQuickfill` already uses), each slot cut at `NoteCards.snippetLimit` so the brain sees
+    the Library card's exact opening. PIN `SidebarRowLeadsTests.theReadsWordsAreBoundedSeeksNeverAWindowOverTheWholeNote`
+    (traces the read's statements: one words statement per untitled note, no `OVER (`, a `LIMIT`, its plan a `SEARCH
+    cb USING INDEX idx_cblock_order` with no scan and no full sort). RED ON OLD, HEADLESS — VERIFIED: a replica
+    package (scratchpad `l1-m1-replica`: the REAL `SidebarRowLeads.swift` + `LibraryListingReads.swift` over the
+    worktree's core, the pin's body transformed mechanically) — the old read **3 of 7 checks failed** (the window,
+    no `LIMIT`, the plan's `USE TEMP B-TREE FOR ORDER BY`), the fixed read **7 / 0**; five lead shapes (a heading, a
+    capped long line, a wordless note, a checkbox lead, an emphasis lead) read IDENTICAL old vs new
+    (`scratchpad/l1/m1-replica-{old,new}.txt`). Named revert **R-M1** (`scratchpad/l1/reverts/r-m1.patch`) for the
+    stage. THE OBSERVATION'S NARROWING, EXAMINED — NOT AVAILABLE, recorded rather than invented: the observation
+    already tracks exactly the read's own region, column-level (a titled sidebar reads only `container`'s id · title ·
+    profile · entry_date · created_at · kind · deleted_at, so `touchContainer`'s two-column stamp never wakes it); what
+    wakes it per keystroke is the operations layer's FULL-RECORD `container.update`/`variant.update` in `autosave`,
+    which no region (table or column) can tell from a rename — and a rename MUST wake it (an untitled row that gains
+    a title must drop its lead). So each wake now costs ∝ the listed rows × 3 slots, flat in every note's length;
+    narrowing further would mean a changed-columns update in `registerTextChange` (the operations layer — out of this
+    run's seam; it would also quiet several other held reads) — a closeout ticket candidate, the orchestrator's to
+    file. The `NoteCards` header's false "a 10,000-block note costs the same" claim stays the closeout ticket the
+    disposition named (not this run's).
   - M-2 (the toolbar New Note door's wing label): NOT-STARTED
   - m-1 (⌘←/⌘→ learn web-view first responders): NOT-STARTED
   - m-2 (the find readout's match ranges cached per needle × text generation): NOT-STARTED
