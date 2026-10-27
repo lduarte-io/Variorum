@@ -171,15 +171,51 @@ nonisolated enum NoteBoxCopy {
         chapter: String?, index: Int, total: Int, totalIsAtLeast: Bool = false, block: String?
     ) -> String {
         var pieces: [String] = []
-        if let chapter, !chapter.trimmingCharacters(in: .whitespaces).isEmpty {
-            pieces.append(chapter)
-        }
-        if index > 0, total > 0 {
-            let count = totalIsAtLeast ? "\(total)+" : "\(total)"
-            pieces.append(block == nil ? "\(index) of \(count) in this book" : "\(index) of \(count)")
+        if let chapter = chapterPiece(chapter) { pieces.append(chapter) }
+        if let place = placePiece(index: index, total: total, totalIsAtLeast: totalIsAtLeast) {
+            pieces.append(block == nil ? "\(place) in this book" : place)
         }
         if let block { pieces.append(block) }
         return pieces.joined(separator: " \u{B7} ")
+    }
+
+    /// **VX-562 — the book Outline's pinned line, its POSITION half:**
+    /// *"note 5 of 12 · chapter 2"* — what she is looking at as she scrolls
+    /// (her words: *"show during scroll what # note you're in, maybe what
+    /// chapter you're in"*). The note first, because the number is the half
+    /// that moves; the chapter after it.
+    ///
+    /// **The same brain as `whereLine`, two readers** (the record's §DESIGN
+    /// piece 3): the place ("5 of 12", a windowed book's floor "5 of 300+",
+    /// an unknown place omitted) and the chapter (a blank name omitted) are
+    /// the two pieces below, which `whereLine` speaks too — so the box and
+    /// the pin can never disagree about how a place or a chapter is SAID.
+    /// The facts handed in differ by reader: the box hands the membership
+    /// index; the pin hands the note's place on the page
+    /// (`BookOutlineViewed.positionLine`, PROVISIONAL P-562-5).
+    static func viewedLine(
+        chapter: String?, index: Int, total: Int, totalIsAtLeast: Bool = false
+    ) -> String {
+        var pieces: [String] = []
+        if let place = placePiece(index: index, total: total, totalIsAtLeast: totalIsAtLeast) {
+            pieces.append("note \(place)")
+        }
+        if let chapter = chapterPiece(chapter) { pieces.append(chapter) }
+        return pieces.joined(separator: " \u{B7} ")
+    }
+
+    /// *"5 of 12"* — or *"5 of 300+"* where the total is a floor; nil when
+    /// the place is unknown (index 0: the in-book filter, a note not in the
+    /// book's rows) or the book holds nothing.
+    private static func placePiece(index: Int, total: Int, totalIsAtLeast: Bool) -> String? {
+        guard index > 0, total > 0 else { return nil }
+        return "\(index) of \(totalIsAtLeast ? "\(total)+" : "\(total)")"
+    }
+
+    /// The chapter's name, or nil for none or a blank one.
+    private static func chapterPiece(_ chapter: String?) -> String? {
+        guard let chapter, !chapter.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+        return chapter
     }
 
     /// *"3,214 words · 41 blocks"*.
