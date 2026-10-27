@@ -693,7 +693,17 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     orchestrator's, in the fix-verify window); VX-424's drag delivery (her hand check, bundle 11).
 - **R2 — THE ROUND-2 FINAL ITEMS** (the same implementer, resumed; findings `vx-439-ladder-round2.md` — 0 BLOCKER ·
   0 MAJOR · 3 MINOR · 4 NIT, all ten L1 fixes HOLD; the orchestrator line-checks these, no later round reads them).
-  **NO REVERT IN FLIGHT** unless a line below says so. Items:
+  **ALL R2 ITEMS DONE; NO REVERT IN FLIGHT.** Headless at the END on `6cc549f37`'s code: `swift build` GREEN; full
+  `swift test` — core **3,467 / 463 passed** (5 known issues), StringsWorkbook **32 / 4**, MCP **412 / 75 with ONE
+  failure**, `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (23.9 s vs its
+  15 s bound — the VX-353 load class, every run of this run has met it), re-run alone **GREEN 3 / 1**;
+  `xcodebuild build-for-testing` GREEN. THE FINAL VERIFY SLICE (PENDING the relayed claim line — no claim taken by this
+  session): `scratchpad/l1/r2-verify-suites.txt`, ten suites — `SidebarRowLeadsTests` (R2-1's app pin), every suite over
+  `Queries.leadingBlockTexts`' other app callers (`TitleQuickfillTests`, `MastheadLayoutTests` — `TitleQuickfill`;
+  `BookOutlineRowsTests`, `BookOutlineFacesTests`, `BookOutlineLandingTests`, `BookCardHeightStabilityTests` —
+  `BookViewModel.readCardPreviews`), and the three whose files R2 edited in comments only (`OpenListDragFaceTests` —
+  a source-read of `OpenListDrag.swift`; `SettingsShapeTests`, `DiagnosticsPaneTests`); one `test-without-building`
+  from `App/Variorum` on the default DerivedData, all green expected, "Test run with N tests" read. Items:
   - R2-1 (the one code fix — the orchestrator's option (a)): DONE (this commit). TRACED (the reviewer's probe, confirmed
     here): `leadingBlockTextsSQL` LEFT-JOINs `block` and both takes, so a live placement over a dead block, or a block
     with no resolvable take, yields a NULL `text`; `String.fetchAll` THREW on it (GRDB `valueMismatch`), so one gap in
