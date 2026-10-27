@@ -440,6 +440,50 @@ the two verbs, the library line, the approval lead) · `Registry/Capability.swif
 
 ## BATCH 2a RECORD
 
+**NOT DONE BY THIS BATCH (first line, by the rule):** IN PROGRESS — this line is rewritten at the batch's close.
+
+*Implementer: `opus-implementer` №2 (xhigh), fresh session, 2026-10-27 overnight. Read in its own context before any
+code: CLAUDE.md + its canon, `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` IN FULL (The app · The note ·
+The Bookcase and books · Doors to the outside among it), this plan IN FULL, `notes/SessionResiliencyProtocol.md`, the
+vx-336 record's U5 STAGE RUN step 12 (VX-352's capture), U6b UNIT RECORD (the sweep table, OWED 2 — VX-354), U7 UNIT
+RECORD's D-254-1 + BUILDER A's RECORD and OWED 3 (VX-358), U9 UNIT RECORD's traces + D1/F-1 (VX-365, OWED 4), and every
+code anchor below. Lane: no `Sync/`, `Server/`, custody, synced schema or editor seam; headless `swift build`/`swift
+test` + `xcodebuild build-for-testing` into `DerivedData/b2a` only — no `xcodebuild test`, no walk, no stage claim (the
+orchestrator's). Batch 1's code and record untouched.*
+
+### LIVE STATUS (per piece — flipped in the same commit as each piece)
+
+- **No behavioural revert is in flight.**
+- **VX-365 (`add_note_to_book`'s answer names no tags):** NOT-STARTED — settled design: core
+  `Operations.addNoteToBookForClient` (the same body and ONE undo entry as `addNoteToBook`, which keeps its signature)
+  returns the membership + `tagIDs`/`tagPaths` composed INSIDE the act's transaction by VX-361's one rule
+  (`mintedNoteTags` — the note's own tags first, in application order, read before the add; then the book's outflow in
+  outflow order; each once); the wire answer gains `tag_ids` + `tags` (always present, `[]` when none); the
+  description's "Returns JSON." gains create_note's tag sentence. Refusal shapes untouched.
+- **VX-358 (an NFC↔NFD re-spelling answers `changed: false` with a digest that isn't the sent bytes'):** NOT-STARTED —
+  settled design (PROVISIONAL MB-5): canonical equality stays the no-op rule; the pure
+  `StoredText.spellingDiffers(_:from:)` (canonically equal, UTF-8 bytes unequal) is read INSIDE each act's transaction
+  (`MCPTakeEdit.spellingDiffers`, `MCPCommitRestore.spellingDiffers` — the sent text after the U+0000 strip, or the
+  commit's text, against the stored take); the wire adds `stored_text_normalization_differs: true` ONLY then (absent
+  otherwise — every other answer byte-unchanged); one shared sentence in both tools' descriptions. The digest stays the
+  stored text's (VX-254 untouched).
+- **VX-352 (Terminal's take card cuts "claude-code · english" to "claude-code · e…"):** NOT-STARTED — settled design
+  (PROVISIONAL MB-4): the pure `Domain/TakeLabelFace` (core, headless): `parts` splits a label at its first " · " into
+  a YIELDING head (the client name — and the legacy "suggested" word with it) and a KEPT tail (the separator + the
+  label's own part); `allocate` gives the kept part its whole width first and the head what is left (the old face is
+  the reading-order allocation — one run cut at its tail). The card header draws the two parts through a small custom
+  `Layout` (`TakeLabelLine`) that asks `allocate` for each part's width (each `Text` tail-truncates inside its own), plus
+  `.help(label)` — the whole label on hover. A label with no separator is one part: today's face exactly.
+- **VX-354 (the Book Panel's header and gatherings wear neither mark):** NOT-STARTED — settled design: the panel's
+  model holds the READING reach (`Queries.mcpBookReaches(readingIDs:)` — `decide` for the book, `decideGathering` for a
+  gathering, behind `mcpReachStandings`' VX-272 gate) over exactly the readings DRAWN: the shown book always, the
+  gatherings' names only while "appears in N gatherings" is open (the pure `BookPanelBrain.markedReadings`); the header
+  and each listed gathering wear the Bookcase row's pair — `MCPSharedIcon` then `MCPAskGlyph(.book(id))` (no ask ever
+  targets a gathering — `MCPAskTarget`, VX-273 — so a gathering's glyph draws nothing, exactly as on the Bookcase).
+  Mac pins extend `BookPanelMCPMarksTests` (compiled; RUN PENDING the orchestrator's stage).
+- **Suites:** PENDING (the headless targeted suites per piece; the whole headless suite and `build-for-testing` at
+  the end).
+
 ## BATCH 2b RECORD
 
 ## BATCH 3 RECORD
