@@ -705,8 +705,11 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     the re-staged core test RED on the current read — "could not decode String from database value NULL"
     (`scratchpad/l1/r2-core-red.log`); GREEN after the fix (`LeadingBlockTextsTests` + `PostRenderQueryTests` 35 / 2);
     the app pin through the replica package over the fixed core: **9 checks / 0 failed** (M-1's 7 + the gap's 2).
-    Named revert **R-R2** (`scratchpad/l1/reverts/r-r2.patch` — `String.fetchAll`, the pre-fix decode): revert-verify
-    PENDING (next commit).
+    Named revert **R-R2** (`scratchpad/l1/reverts/r-r2.patch` — `String.fetchAll`, the pre-fix decode), applied on the
+    committed fix `c9d039fb2`, REVERT-VERIFIED HEADLESS: `LeadingBlockTextsTests` RED (5 tests, exactly the gap leg —
+    the decode throw), the replica's app pin RED (8 checks / 1 failed: "the read THREW"); restored by `git checkout --
+    Sources/`, status/diff empty, the core suite GREEN again (5 / 1) (`scratchpad/l1/r2-*.log`, `r2-replica-*.txt`). The
+    app pin's stage run is the final verify slice's.
 - Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`) and part 2 DONE (06:11–06:28) — the WALK
   PART 1 / WALK PART 2 sections below; the POST-FIX EVIDENCE SLICE (m-4's live legs + M-2's look) is owed in the
   fix-verify window — NOT-STARTED.
