@@ -885,6 +885,36 @@ Untouched, by the lane: `Sources/VariorumCore/` entirely, `Sync/`, `Server/`, cu
 
 ---
 
+### FIX LEG 2-F1 (the mid window's FINDING MID620-1; implementer №2 resumed, 2026-10-27)
+
+**LIVE STATUS (per piece, flipped in the same commit as each piece):**
+- **No behavioural revert is in flight** (none is planned — the leg edits a pin, no product line).
+- **F1-0 · The trace + the disposition:** DONE (this commit) — below.
+- **F1-1 · The pin's JUSTIFIED EDIT + RB-14:** NOT-STARTED — the settled shape: the query asks for the open book's OWN
+  row (by its lead), and a query-independent invariant joins it: no finding, for any of the open-book row's words, lands
+  on the hidden tab (`MCPPaneTab.holding(findingLead:) != .shared`).
+- **F1-2 · Recompile into the EXISTING `DerivedData/b2`:** NOT-STARTED.
+
+**The trace (inputs → wrong output), from the window's log** (`scratchpad/vx620-mid-suites.log` :2338–2344): the red is
+`MCPSharingFaceTests.swift:133`, `mcpFindings("open book", sharing: false).isEmpty` → false; the one finding it returned
+is `SettingsFinding(kind: .setting, pane: .mcp, lead: "Waiting", detail: "A client's ask past what you shared waits
+here, newest first, and at its icon on the note, book or wing it names — nothing pops up by itself. ⌥⌘, opens it.")`.
+`SettingsSearch.findings` ANDs the query's terms across a row's lead, keywords and DETAIL (rank 4): "open" is in the
+detail's "opens it", "book" in "the note, book or wing" — so the Waiting row (`mcpWaiting`, `SettingsShape.swift:392`)
+matches "open book" by its detail, sharing face or not. The open-book row itself WAS left out (the same test's
+`all.subtracting(hidden) == [the open book's lead]` held in the window, and only :133 recorded an issue).
+
+**The disposition: a PIN BUG — the product is right as built.** The pin's name is "the search never names the open
+book while the face hides", but its query asserted "no MCP setting row at all" — over-broad for its subject, and it
+was never run before the window (batch 2 compiled it only). VX-590's leave-out did exactly what was designed: the rows
+the hidden tab holds (the open book) are out; the Waiting row was never one of them (it sits ABOVE the tabs — its finding
+lands on no tab, `MCPPaneTab.holding` → nil). **The product question underneath is genuinely open — RB-14, her call, not
+built:** the Waiting row is the 13n-c U4 standing (`AppSettingsView.paneRowIDs` comment: "Waiting renders while an
+ask waits (the catalog row says so)") — the search lists it whether or not anything waits, and a library that never
+had a client can have nothing waiting; its blurb says "past what you shared". Leaving it out clientlessly would extend
+VX-590 past the face her words named ("the 'share with AI' in the settings menu") into the search's vocabulary — a
+product call, so the most spec-defensible narrow thing is the pin fixed to its subject and the question bundled.
+
 ## BATCH 3 RECORD
 
 **NOT DONE BY THIS BATCH (first line, by the rule):** no `xcodebuild test` run, no GUI, no walk, no capture, no stage
