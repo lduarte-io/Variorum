@@ -717,6 +717,13 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     touches and the Fable-pass question (three now — `EditorTextView`'s override, `EditorView`'s delegate tail call, L1's
     `storageDidEdit` counter line), 24 the one Settings visit (General's seventh row, the toggle flipped live, and M-2's
     label in Terminal). No code, no pin (a repo-state check — M-3's precedent).
+  - R2-3 (the evidence slice's account): DONE (this commit) — record and comments only. In THE EVIDENCE SLICE, in place
+    with strike-through: VX-589's live toggle rests on `OpenListStarredFilterTests` + its replica, NOT revA (revA holds no
+    VX-589 pin); VX-425's Move-confirm alert rests on SOURCE-READ pins only (m-3's mounted pin takes the confirm-less
+    road). Added there: VX-425's sidebar Rename… alert NOT REACHED (capture 54, named for it, shows the Settings search —
+    checked by eye) and what it rests on; M-2's look captured in Study only, Terminal riding bundle 24. The two settings
+    pins' comments (`SettingsShapeTests`, `DiagnosticsPaneTests`) re-pointed from "owed to the evidence slice" (which
+    could not reach the pane) to her look — bundle item 24.
 - Walks (orchestrator): part 1 DONE (03:30–03:52, claim `vx-439-b1-walk`) and part 2 DONE (06:11–06:28) — the WALK
   PART 1 / WALK PART 2 sections below; the POST-FIX EVIDENCE SLICE (m-4's live legs + M-2's look) is owed in the
   fix-verify window — NOT-STARTED.
@@ -1134,8 +1141,16 @@ and the cleanup returned the store to its as-found state.
 
 NOT-REACHED, final: the Settings scene's INTERIOR takes no synthetic clicks (three roads tried across two walks — a
 WALK-DRIVER limitation to note in the walk lessons, not a product fault; the search field accepts typed text, which is
-how capture 54 exists). The live toggle flip therefore rests on its pins + revA's red; the General pane's 7-row glance
-is hers (one Settings visit, bundle). VX-425's Move-confirm ask needs a second wing and rests on its mounted pin.
+how capture 54 exists). The live toggle flip therefore rests on its pins ~~+ revA's red~~ — CORRECTED at R2-3:
+`OpenListStarredFilterTests` (6) and its headless replica (batch 2's VX-589 line); revA holds no VX-589 pin or revert
+(its nine suites are the L1 pins). The General pane's 7-row glance is hers (one Settings visit, bundle 24). VX-425's
+Move-confirm ask needs a second wing and rests on ~~its mounted pin~~ — CORRECTED at R2-3: SOURCE-READ pins only
+(`SidebarNoteRowMenuTests.theNoteActsRunTheSharedRoads`, `theColumnsWingDoorsHandTheReaskAndBothReadsAreKeyedOnIt`);
+m-3's mounted pin takes the confirm-LESS road (a bookless note moves at once) and calls the column's re-ask directly.
+Added at R2-3: **VX-425's sidebar-row Rename… alert — NOT REACHED** (neither seen nor exercised live; capture
+`54-es-renamemenu.png`, by its name the planned leg, shows the Settings search instead); it rests on the source-read
+wiring pins and the store-level `theRenameSeedIsTheStoredTitleAndTheRoadWritesIt`. And **M-2's look was captured in the
+Study voice only** (capture 50; the label is token-driven) — the Terminal look rides bundle 24's Settings visit.
 
 Dev store left: unlocked, hold banner standing, Study, walk content deleted via the app's doors, Open empty, ONE
 walk-added prefs key (a dead note's remembered-block entry) removed post-quit; the usual bookkeeping keys only.

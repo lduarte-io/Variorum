@@ -76,8 +76,9 @@ struct DiagnosticsPaneTests {
         // moves 6 → 7, and the crash-report opt-in is still not on it. ("The
         // short dials still top the pane" is reasoning from the catalog's
         // order, not a look: no capture of General with its seventh row exists
-        // yet — the VX-439 ladder's m-4 — and the live look is OWED to the
-        // run's evidence slice.)
+        // yet — the VX-439 ladder's m-4 — and the run's evidence slice could not
+        // reach the pane; the live look is HERS — the VX-439 record's morning
+        // bundle item 24 (R2-3).)
         #expect(SettingsCatalog.rows(in: .general).count <= 7,
                 "the opt-in did not land on the short opening pane (row 59)")
     }

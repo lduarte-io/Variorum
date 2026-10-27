@@ -186,8 +186,10 @@ struct SettingsShapeTests {
         // (controls ABOVE it) is untouched. NO capture of the pane with its
         // seventh row exists yet — the run's walk capture named
         // "33-settings-general" shows the MCP pane, not General (the VX-439
-        // ladder's m-4) — so the live look at the fold is OWED to the run's
-        // evidence slice; until it lands, this cap rests on the reasoning above.
+        // ladder's m-4), and the run's evidence slice could not reach the pane
+        // (Settings' interior takes no synthetic clicks). The live look at the
+        // fold is HERS — the VX-439 record's morning bundle item 24 (R2-3);
+        // until she takes it, this cap rests on the reasoning above.
         #expect(general.count <= 7,
                 "the fold came from fifteen controls in one pane — this one stays short")
     }
