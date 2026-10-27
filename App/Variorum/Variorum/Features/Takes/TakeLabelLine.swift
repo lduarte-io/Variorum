@@ -13,9 +13,11 @@
 //  gives the kept part its whole width first. This view only composes it: each part
 //  is its own `Text` (one line, its tail truncating inside its own width), laid out by
 //  `TakeLabelLayout`, which asks `allocate` for the widths — so the arithmetic the pins
-//  read IS the arithmetic the card lays out. The whole label is the hover (`.help`, the
-//  surface's one hover idiom) and the accessibility label. A label with no separator is
-//  one part: exactly the face it had.
+//  read IS the arithmetic the card lays out. The whole label is its accessibility label;
+//  its HOVER is the choose band's one `.help` (`TakeChooseHeader.bandHelp` — fix leg
+//  2a-F2: this line draws inside the choose button, which is met as ONE element whose
+//  help is the button's own, so a `.help` here was subsumed and is not set). A label
+//  with no separator is one part: exactly the face it had.
 //
 
 import SwiftUI
@@ -33,7 +35,6 @@ struct TakeLabelLine: View {
             }
             part(parts.kept)
         }
-        .help(label)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(label)
     }

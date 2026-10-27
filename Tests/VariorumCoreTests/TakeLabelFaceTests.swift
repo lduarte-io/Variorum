@@ -90,6 +90,26 @@ struct TakeLabelFaceTests {
         }
     }
 
+    // MARK: - The band's one hover (fix leg 2a-F2 — FINDING MID-4)
+
+    /// The whole label rides the choose band's ONE hover — its own line, then
+    /// the act's sentence, never displaced (a `.help` on the label INSIDE the
+    /// choose button was subsumed by the button's own: the walker's
+    /// accessibility tree carried no element with the label). No label →
+    /// the act's sentence exactly. RED ON OLD (the behavioural revert: the
+    /// band's hover was the act's sentence alone).
+    @Test func theBandsOneHoverCarriesTheWholeLabelThenTheActsSentence() {
+        let act = "Choose this take \u{2014} the note shows it (everywhere); \u{2318}\u{23CE} from the keyboard"
+        let label = "claude-code \u{00B7} english"
+        #expect(TakeLabelFace.hover(label: label, act: act) == label + "\n" + act,
+                "the whole label first — the part a narrow card cuts — then the act, whole")
+        #expect(TakeLabelFace.hover(label: "claude-code \u{00B7} suggested \u{00B7} english", act: act)
+                .hasPrefix("claude-code \u{00B7} suggested \u{00B7} english\n"), "the legacy form whole too")
+        #expect(TakeLabelFace.hover(label: nil, act: act) == act, "no label: the act's sentence, byte for byte")
+        #expect(TakeLabelFace.hover(label: "", act: act) == act)
+        #expect(TakeLabelFace.hover(label: "  \n", act: act) == act, "a blank label is none")
+    }
+
     // MARK: - The allocation (pure)
 
     @Test func theAllocationTable() {

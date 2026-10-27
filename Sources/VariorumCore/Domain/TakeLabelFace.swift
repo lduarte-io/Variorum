@@ -26,7 +26,8 @@ import Foundation
 ///   the label's own part give way. The old face was the READING-ORDER
 ///   allocation (the head first — one run cut at its tail).
 ///
-/// The whole label is always the hover (`.help`). Labels are text: nothing here
+/// The whole label is always in the band's hover (`hover` — the label's line,
+/// then the choose sentence; fix leg 2a-F2). Labels are text: nothing here
 /// decides who wrote a take — a label of hers that holds the separator splits
 /// the same way, and only which side yields first is at stake.
 ///
@@ -72,6 +73,20 @@ public enum TakeLabelFace {
         // A separator with nothing after it is no own part to keep.
         guard !own.isEmpty else { return Parts(yielding: nil, kept: label) }
         return Parts(yielding: String(label[..<cut]), kept: kept)
+    }
+
+    /// **The header band's ONE hover** (VX-352's fix leg 2a-F2 — the mid
+    /// window's FINDING MID-4; MB-4's hover half, PROVISIONAL): the whole
+    /// label on its own line — the words a narrow card may cut — then the
+    /// band's own act sentence (`act`, choosing), never displaced. The label
+    /// draws INSIDE the choose button, which a reader meets as ONE element
+    /// whose help is the button's own; a `.help` on the label inside it was
+    /// subsumed (the walker's accessibility tree carried no element with the
+    /// label), so the label rides the button's one help instead. No label (nil,
+    /// or nothing but whitespace) → `act` exactly, byte for byte.
+    public static func hover(label: String?, act: String) -> String {
+        guard let label, !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return act }
+        return label + "\n" + act
     }
 
     /// Each part's width on a card that offers `available` (nil — or room for

@@ -102,6 +102,25 @@ struct TakeLabelLineTests {
         }
     }
 
+    /// **Fix leg 2a-F2 (FINDING MID-4 — MB-4's hover half).** The label draws
+    /// inside the choose button, met as ONE element whose help is the
+    /// button's own, so the whole label rides THAT help: its own line, then
+    /// the band's sentence exactly as before. A take with no label hears the
+    /// band's sentences byte for byte. (The tooltip itself can't be raised
+    /// in-process — the final window's walker reads the button's AX help.)
+    @Test func theHeadersHoverCarriesTheWholeLabelAndKeepsTheChooseSentence() {
+        #expect(TakeChooseHeader.chooseHelp
+                == "Choose this take \u{2014} the note shows it (everywhere); \u{2318}\u{23CE} from the keyboard",
+                "the band's choose sentence, unchanged")
+        #expect(TakeChooseHeader.chosenHelp == "The note shows this take (everywhere)", "unchanged")
+        #expect(TakeChooseHeader.bandHelp(isChosen: false, label: nil) == TakeChooseHeader.chooseHelp)
+        #expect(TakeChooseHeader.bandHelp(isChosen: true, label: nil) == TakeChooseHeader.chosenHelp)
+        #expect(TakeChooseHeader.bandHelp(isChosen: false, label: Self.label)
+                == Self.label + "\n" + TakeChooseHeader.chooseHelp, "the whole label, then the act")
+        #expect(TakeChooseHeader.bandHelp(isChosen: true, label: Self.label)
+                == Self.label + "\n" + TakeChooseHeader.chosenHelp)
+    }
+
     /// A label with no separator is ONE part — exactly the face it had.
     @Test func aLabelWithNoSeparatorIsOnePart() throws {
         let label = "english, but longer than a narrow card"
