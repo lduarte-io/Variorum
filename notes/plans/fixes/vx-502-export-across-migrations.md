@@ -69,8 +69,8 @@ dev-store copy so a merge-gating run can slot in.
 | 0 | Kickoff: preflight whole; worktree + branch; in-flight row on main; VX-502 In Progress; coordinator announced, slot granted | DONE (this commit) |
 | 1 | Unit A: the subset rule + pins (a fresh opus-implementer, headless) | BUILT AND CLOSED by the implementer (`74cfc1733`…`272fdda65`), orchestrator-verified (commits, gate diff, faces diff, tree clean) — "UNIT A — LIVE STATUS" at this record's end; PENDING: the two Mac suites under a stage claim (`PlaintextExportBringInRoadTests` — the flipped app pin has NEVER EXECUTED, compiled only — and `U2WordsTests`; the walk window's test batch). Implementer findings adopted: F-A1 (D-A2's premise corrected — VX-461, not vx-309's merge, is why no content-bearing export predates v1_31; the canon delta cites VX-461), F-A2 (a stable newer export refuses at the PICK via `PickedCopy.classify`; the gate's catch covers only the between-reads race), F-A3 (MCP load-flakes only) |
 | 2 | The ladder on unit A's diff | ROUND 1 CLOSED (`vx-502-ladder-round-1.md`: 0·1·1·1; all three agreed and fixed `0e14d7bf8`…`a094d8e0a`, the era pin frozen at v1_31). ROUND 2 LANDED (`vx-502-ladder-round-2.md`, a fresh opus-reviewer: 0 BLOCKER · 0 MAJOR · 2 MINOR · 4 NIT; all r1 fixes SOUND) — THE FINAL ROUND (no new MAJOR). **CLOSED**: R2-M2/N3/N4 the orchestrator (`c6a45250d`), R2-M1/N1/N2 the implementer (`f7335503a`, `45b43fddf`, probe `cb179b627`→`cb64aa9c7`), the orchestrator's line-by-line check in the round-2 file (`844fc4a91`). The one standing gate: the stage batch (the walk window's step 0) |
-| 3 | Unit B: the Castle-restore walk (an Opus session; stage via the coordinator; dev-castle.env; posture restored after) | SHAPE SETTLED with the coordinator (THE NEGOTIATED WALK below supersedes the kickoff legs); the walk session NOT YET SPAWNED — it builds the helper, runs --check, proposes the concrete plan back, then READY |
-| 4 | Closeout: canon deltas (SurfaceContracts Doors line citing VX-461; AppSpecRecord entry; QUESTIONS #239(a) note), canon-size, tickets triaged, handoff, PR, merge serialized with VX-439 | NOT STARTED |
+| 3 | Unit B: the Castle-restore walk (an Opus session; stage via the coordinator; dev-castle.env; posture restored after) | DONE 2026-10-27 04:51 MDT — ALL 13 LEGS GREEN, NO finding against CastleRules (rules 5/6/7/17/21 + R-529-7 each seen working; 8a's negative probe refused as rule 17 says); step 0: 594 tests EXECUTED in 109 suites, 0 failed; posture hand-returned and INDEPENDENTLY CONFIRMED by the coordinator (e11e5233, Standard, held, signed out, quiet-road open); the RELEASE line + per-leg state lines in UNIT B LIVE STATUS; evidence folder + safety copy kept until the post-merge tidy |
+| 4 | Closeout: canon deltas (SurfaceContracts Doors line citing VX-461; AppSpecRecord entry; QUESTIONS #239(a) note), canon-size, tickets triaged, handoff, PR, merge serialized with VX-439 | IN FLIGHT (this commit: SurfaceContracts delta + handoff + flips; FIRST-READY per the coordinator — the merge ask follows; AppSpecRecord/QUESTIONS/in-flight row at the merge on latest main). RULINGS RECONCILED: her ratified rule re-read against the build — subset ships exactly (pin 2 proves subset, not last-only), newer-than-me refuses (pin 3); her overnight word re-read against the walk — the old pair opened the backup (leg 6), the new one opened it (leg 6), the restore ran end to end through unlock and sync (legs 7–9); no remainder to ticket |
 
 ## UNIT A — the subset rule (the architect's design, ruled at kickoff)
 
@@ -307,7 +307,7 @@ Sonnet for external facts.
    machinery (the join adopts the account's pair — rule 7), because the active dev library is HELD (VX-309's
    banner, Resume never pressed) and any Castle/sync act on it would destroy that hold. The dev store's own pair
    is never changed and nothing new is invented. Flagged because your sentence could be read as "the Castle legs
-   themselves type dev-castle values". *(Flip this line to as-run at the walk's close.)*
+   themselves type dev-castle values". *(AS-RUN, walk closed 04:51 MDT: exactly as planned — the dev pair's one use was leg 1's check door; every test leg ran under the castle account's pair; the dev pair and dev-castle.env values unchanged.)*
 2. **A provisional act, PENDING the walk session: `~/.variorum/bin/type-dev-castle-secret` is to be minted** (the
    walk needs a typing road for the dev library's secrets and none exists — your R-510-8 helper covers only
    prod-test accounts; the coordinator confirmed the gap and ruled the conditions). Byte-patterned on
@@ -332,7 +332,7 @@ Sonnet for external facts.
 | 3 | Pins 1–3 + the behavioral reverts (D-A3) | unit A | DONE (`996478bd8`, reverts `a7434545a`; + the era pin `074c73023`) |
 | 4 | The faces: dead string deleted, docs updated (D-A1/D-A4) | unit A | DONE (`e56920846`, F-2's doc `0e14d7bf8`) |
 | 5 | The ladder round(s) + dispositions | orchestrator | DONE — r1 + r2 both CLOSED, every finding dispositioned; the stage batch rides unit B's window |
-| 6 | The walk, legs 1–8 | unit B | OPEN |
+| 6 | The walk (the negotiated 13 legs; the kickoff's 8 superseded) | unit B | DONE — all green, no finding; posture restored and coordinator-confirmed |
 | 7 | Canon deltas + QUESTIONS #239(a) note + AppSpecRecord entry | closeout | OPEN |
 | 8 | Tickets triaged; handoff; PR; merge serialized vs VX-439 | closeout | OPEN |
 
