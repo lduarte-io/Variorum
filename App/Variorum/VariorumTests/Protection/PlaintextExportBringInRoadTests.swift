@@ -5,7 +5,9 @@
 //  the implementer's SwiftPM harness). The mapping ruled at the plan's §5b-R; the act: the creation's road (fresh identity,
 //  key, device ID, Standard, the words for the band), what stands in the slot set aside WHOLE first (its restore hold with
 //  it — the new library is never held), the export's content minted headless into the new store before its first open,
-//  the export only read. The preflight refuses an export of another build's schema with nothing written; the doors' brain
+//  the export only read. The preflight reads an earlier build's export, and a newer build's is refused at the PICK
+//  (`PickedCopy.classify`, before any preflight), with nothing written (VX-502 — the subset rule, her ratified rule
+//  2026-10-27, superseding P-VX309-U1b-7); the doors' brain
 //  names the export and offers its one door. New road — red by construction on the pre-unit tree (the pick refused it).
 //
 
@@ -131,9 +133,14 @@ struct PlaintextExportBringInRoadTests {
         #expect(try ExportPlant.contents(road, key: created.session.key).books == ["Travels"])
     }
 
-    /// THE PREFLIGHT refuses with NOTHING written: an export of an earlier build's schema (its words), and a thing that is
-    /// not a plaintext export at all.
-    @Test func thePreflightRefusesAnotherBuildsExportAndWritesNothing() async throws {
+    /// THE PREFLIGHT, with NOTHING written — VX-502, FLIPPED DELIBERATELY (her ratified subset rule, 2026-10-27; supersedes
+    /// P-VX309-U1b-7): an export of an EARLIER build's schema (its newest migration not yet applied — the shape of every
+    /// 0.10 export) now PLANS, whole (the earlier-build face is gone, unreachable under the rule); a NEWER build's (an
+    /// identifier this build has never heard of) is refused at the door in the sibling door's own words
+    /// (`LibraryOpenCopy.newerSchemaRefusal`) — by the pick's classification, which speaks before any preflight (the
+    /// classifier's `.newerSchema` is no export, so the plan's own `schemaNewer` arm stands only for a file that changes
+    /// between the two staged reads); a thing that is not a plaintext export at all keeps its honest refusal.
+    @Test func thePreflightReadsAnEarlierBuildsExportThePickRefusesANewerOneNothingWritten() async throws {
         let road = PlantedRoad()
         let (session, _) = try await road.created()
         try CopyDoorsPlant.migrate(road, key: session.key)
@@ -146,11 +153,20 @@ struct PlaintextExportBringInRoadTests {
         }
         try queue.close()
         let before = try CopyDoorsPlant.tree(road.slot.places.container)
-        guard case .refused(.exportRefused(let sentence)) = ProtectionCopyDoors.readPlaintextExport(export) else {
-            Issue.record("an earlier build's export refuses")
+        guard case .plan(let plan) = ProtectionCopyDoors.readPlaintextExport(export) else {
+            Issue.record("an earlier build's export plans")
             return
         }
-        #expect(sentence == ProtectionWords.exportFromAnEarlierBuild)
+        #expect(plan.notes.count == 3 && plan.books.map(\.name) == ["Travels"] && plan.pools.map(\.title) == ["Ideas"],
+                "read whole")
+        // A newer build's export: an identifier this build has never heard of (the Downloads folder is outside the
+        // container the tree compares).
+        let newer = try DatabaseQueue(path: export.path)
+        try await newer.write { try $0.execute(sql: "INSERT INTO grdb_migrations (identifier) VALUES ('v9_99_from_the_future')") }
+        try newer.close()
+        #expect(PickedCopy.classify(export)
+            == .refused(LibraryOpenCopy.newerSchemaRefusal, detail: "v9_99_from_the_future"),
+                "a newer build's export refuses at the door, in the sibling door's words")
         guard case .refused(.unreadableCopy) = ProtectionCopyDoors.readPlaintextExport(road.slot.places.liveKeyFile) else {
             Issue.record("a key file is no export")
             return

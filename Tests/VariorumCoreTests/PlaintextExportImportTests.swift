@@ -7,7 +7,9 @@
 //  snippet group and a gathering is exported plain, READ into a plan on a private staged copy, and APPLIED to a fresh
 //  library: every row fresh; each note once, membered in each book in the export's order and chapter; archived things
 //  archived; the empty book left out and named; the wing minted, its tags its own; versions, the Trash and the gathering never
-//  cross. An export of another build's schema refuses. New API — red by construction on the pre-unit tree.
+//  cross. New API — red by construction on the pre-unit tree. VX-502 (her ratified rule, 2026-10-27; supersedes
+//  P-VX309-U1b-7): an export of an EARLIER build's schema — its applied migrations a subset of this build's — reads whole
+//  and imports; a NEWER build's refuses.
 //
 
 import Dependencies
@@ -195,23 +197,201 @@ struct PlaintextExportImportTests {
         }
     }
 
-    /// An export written by ANOTHER build's schema refuses — older (a migration this build carries it has not run) or
-    /// newer (one this build doesn't know) — before anything is planned.
-    @Test func anExportOfAnotherBuildsSchemaRefuses() throws {
+    // MARK: - VX-502 — the subset rule (her ratified rule, 2026-10-27; supersedes P-VX309-U1b-7): an export whose applied
+    // migration set is a SUBSET of this build's known set is accepted; a newer build's (an identifier this build has never
+    // heard of) still refuses. The old two-arm `anExportOfAnotherBuildsSchemaRefuses` split: its earlier-build arm FLIPPED
+    // DELIBERATELY into pin 1, its newer arm kept as pin 3.
+
+    /// `identifiers` struck from the export's `grdb_migrations`, the physical schema untouched — for the last identifier
+    /// (`v1_32`, one local-only table the export drops) exactly the file the build before it wrote; for deeper strikes, the
+    /// gate's own arithmetic (the reader's tolerance of older physical schemas is the VX-502 record's D-A2 verification,
+    /// not these pins'). The identifiers must be KNOWN and DISTINCT (an unknown one's DELETE would take nothing and still
+    /// leave the set-equality true), and the remaining set is checked to be the known set minus them, so a pin can never
+    /// pass on a delete that took nothing.
+    static func forgetMigrations(_ identifiers: [String], in url: URL) throws {
+        #expect(Set(identifiers).isSubset(of: Set(AppDatabase.migrator.migrations))
+            && Set(identifiers).count == identifiers.count, "known, distinct identifiers")
+        let queue = try DatabaseQueue(path: url.path, configuration: AppDatabase.configuration(key: nil))
+        defer { try? queue.close() }
+        let remaining = try queue.write { db in
+            for identifier in identifiers {
+                try db.execute(sql: "DELETE FROM grdb_migrations WHERE identifier = ?", arguments: [identifier])
+            }
+            return try Set(String.fetchAll(db, sql: "SELECT identifier FROM grdb_migrations"))
+        }
+        #expect(remaining == Set(AppDatabase.migrator.migrations).subtracting(identifiers), "a strict subset now")
+    }
+
+    /// VX-502 PIN 1 — THE F6 SCENE (red on the pre-fix tree): an export whose `grdb_migrations` lacks this build's LAST
+    /// identifier (today `v1_32_sync_pull_stage` — a local-only table the export drops anyway: exactly the shape of every
+    /// export 0.10 (9093) wrote) READS WHOLE — the very plan the unaltered file gives — and imports. The pre-fix gate
+    /// (`applied == known`) threw `schemaNotCurrent(newer: false)` here.
+    @Test func anExportMissingThisBuildsLastMigrationReadsWholeAndImports() throws {
+        let source = try Self.source()
+        defer { try? FileManager.default.removeItem(at: source.url.deletingLastPathComponent()) }
+        let whole = try PlaintextExportReading.read(exportAt: source.url)
+        let last = try #require(AppDatabase.migrator.migrations.last)
+        try Self.forgetMigrations([last], in: source.url)
+        let plan = try PlaintextExportReading.read(exportAt: source.url)
+        #expect(plan == whole, "read whole — the same plan as the unaltered export")
+        let landing = try Self.ops(try AppDatabase.inMemory()) { try $0.importPlaintextExport(plan) }
+        #expect(landing.notes == 4 && landing.books == 3 && landing.snippets == 1 && landing.wings == 1, "and it imports")
+        #expect(landing.emptyBooks == ["Empty"] && landing.membershipsLeftOut == 0)
+    }
+
+    /// VX-502 PIN 2 — THE DEEPER SUBSET (red on the pre-fix tree): several identifiers gone — the last three and one from
+    /// the middle, a set that is no prefix of the known list — and the export still reads whole. The rule is SUBSET, never
+    /// "behind by the last one".
+    @Test func anExportMissingSeveralMigrationsStillReadsWhole() throws {
+        let source = try Self.source()
+        defer { try? FileManager.default.removeItem(at: source.url.deletingLastPathComponent()) }
+        let whole = try PlaintextExportReading.read(exportAt: source.url)
+        let known = AppDatabase.migrator.migrations
+        let forgotten = Array(known.suffix(3)) + [known[known.count / 2]]
+        #expect(Set(forgotten).count == 4, "four distinct identifiers, one of them mid-list")
+        try Self.forgetMigrations(forgotten, in: source.url)
+        #expect(try PlaintextExportReading.read(exportAt: source.url) == whole, "read whole")
+    }
+
+    /// VX-502 PIN 3 — THE NEWER GUARD, KEPT: an identifier this build has never heard of (a newer Variorum wrote it) refuses
+    /// before anything is planned — alone, and beside an identifier this build knows but the file lacks (newer wins). Green
+    /// on the pre-fix tree by design; its teeth are the behavioral revert RV-A2 (the gate deleted whole → this pin red: the
+    /// future export would read).
+    @Test func anExportOfANewerBuildsSchemaRefuses() throws {
         let source = try Self.source()
         defer { try? FileManager.default.removeItem(at: source.url.deletingLastPathComponent()) }
         let queue = try DatabaseQueue(path: source.url.path, configuration: AppDatabase.configuration(key: nil))
-        let last = try #require(AppDatabase.migrator.migrations.last)
-        try queue.write { try $0.execute(sql: "DELETE FROM grdb_migrations WHERE identifier = ?", arguments: [last]) }
-        #expect(throws: PlaintextExportReading.Failure.schemaNotCurrent(newer: false)) {
-            _ = try PlaintextExportReading.read(exportAt: source.url)
-        }
-        try queue.write {
-            try $0.execute(sql: "INSERT INTO grdb_migrations (identifier) VALUES (?), ('v9_99_from_the_future')", arguments: [last])
-        }
+        try queue.write { try $0.execute(sql: "INSERT INTO grdb_migrations (identifier) VALUES ('v9_99_from_the_future')") }
         try queue.close()
-        #expect(throws: PlaintextExportReading.Failure.schemaNotCurrent(newer: true)) {
+        #expect(throws: PlaintextExportReading.Failure.schemaNewer) {
             _ = try PlaintextExportReading.read(exportAt: source.url)
         }
+        // Beside a lag: the file now also lacks this build's last identifier.
+        let last = try #require(AppDatabase.migrator.migrations.last)
+        let lagging = try DatabaseQueue(path: source.url.path, configuration: AppDatabase.configuration(key: nil))
+        let struck = try lagging.write { db in
+            try db.execute(sql: "DELETE FROM grdb_migrations WHERE identifier = ?", arguments: [last])
+            return db.changesCount
+        }
+        try lagging.close()
+        #expect(struck == 1)
+        #expect(throws: PlaintextExportReading.Failure.schemaNewer) {
+            _ = try PlaintextExportReading.read(exportAt: source.url)
+        }
+    }
+
+    // MARK: - VX-502 ladder round 1, F-1 — THE ERA-FROZEN PIN (the standing feature-detect duty, mechanized)
+
+    /// The oldest era a content-bearing export can carry. VX-461's fix (the export's journal kept in memory) reached users
+    /// in the VX-329 merge — release 0.10 — whose schema runs through this identifier; every app-written export before it
+    /// is a 0-byte file (the VX-502 record's D-A2). FROZEN: never move it forward.
+    static let oldestExportEra = "v1_31_protection_record"
+
+    /// What that era's writer left behind (ladder round 2, R2-M1): 0.10's `StorePlaintextExport` dropped exactly these —
+    /// `SyncSchema.localOnlyTables` at `0aab72c39` — and stripped the MCP grants family's rows (empty here by migration, so
+    /// no strip is modeled). FROZEN as a literal: the era file models 0.10's WRITER, never today's.
+    static let oldestExportEraDroppedTables = [
+        "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying", "protection_record",
+    ]
+
+    /// VX-502 F-1 (ladder round 1) — THE ERA-FROZEN PIN: a file migrated only up to the oldest export era, seeded by raw
+    /// SQL in that era's own columns, with the writer's local-only drop applied — the very shape of a 0.10 export — must
+    /// still be CLASSIFIED a plaintext export by THIS build's picked-thing classifier and plan whole under THIS build's
+    /// reader, and import. A GUARD pin (the pin-3 class; no red-on-old applies) over BOTH gates an export passes: it goes
+    /// red the moment a future migration changes a table the reader touches — a column `plan()`'s SQL names, a column a
+    /// record decodes non-optionally — without a feature-detect (the `hasStatus` precedent), or a future change moves a
+    /// table a 0.10 export carries into the local-only set the classifier tells export from library by (ladder round 2,
+    /// R2-M1) — neither of which pins 1–2 can see: they strike only `grdb_migrations` rows of a current-schema file.
+    /// FROZEN: the seed names only the era's columns and the drop is the era writer's literal; neither is ever edited to
+    /// follow a later schema — if this goes red, the READER or the CLASSIFIER owes the era a tolerance, not this pin an
+    /// edit.
+    @Test func anExportOfTheOldestExportEraStillReadsWhole() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("vx502-era-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appendingPathComponent("export.sqlite")
+        let queue = try DatabaseQueue(path: url.path)
+        try AppDatabase.migrator.migrate(queue, upTo: Self.oldestExportEra)
+        let t = "2026-10-22T12:00:00.000Z"
+        try queue.write { db in
+            // A wing; a note in it — one block of two takes (the chosen one and a labeled alternate) and a tag.
+            try db.execute(sql: """
+                INSERT INTO wing (id, name, position, created_at, updated_at) VALUES ('W1', 'studio', 'a0', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO container (id, kind, title, wing_id, created_at, updated_at)
+                VALUES ('N1', 'post', 'Era note', 'W1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "INSERT INTO block (id, created_at, updated_at) VALUES ('B1', ?, ?)", arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO variant (id, block_id, working_text, label, fan_position, created_at, updated_at)
+                VALUES ('V1', 'B1', 'The era''s prose.', NULL, 'a0', ?, ?),
+                       ('V2', 'B1', 'Another take.', 'second', 'a1', ?, ?)
+                """, arguments: [t, t, t, t])
+            try db.execute(sql: "UPDATE block SET default_variant_id = 'V1' WHERE id = 'B1'")
+            try db.execute(sql: """
+                INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
+                VALUES ('P1', 'N1', 'B1', 'a0', 'V1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO tag (id, name, path, wing_id, created_at, updated_at) VALUES ('T1', 'sketch', 'sketch', 'W1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "INSERT INTO post_tag (id, tag_id, post_id, created_at) VALUES ('PT1', 'T1', 'N1', ?)",
+                           arguments: [t])
+            // A book in the wing with one chapter, the note membered under it.
+            try db.execute(sql: """
+                INSERT INTO reading (id, name, kind, wing_id, created_at, updated_at) VALUES ('R1', 'Era book', 'book', 'W1', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO reading_section (id, reading_id, name, position, created_at, updated_at)
+                VALUES ('S1', 'R1', 'One', 'a0', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO reading_post (id, reading_id, post_id, position, section_id, status, created_at)
+                VALUES ('RP1', 'R1', 'N1', 'a0', 'S1', 'member', ?)
+                """, arguments: [t])
+            // A snippet group with one scrap.
+            try db.execute(sql: """
+                INSERT INTO container (id, kind, title, created_at, updated_at) VALUES ('PL1', 'pool', 'Scraps', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "INSERT INTO block (id, created_at, updated_at) VALUES ('B2', ?, ?)", arguments: [t, t])
+            try db.execute(sql: """
+                INSERT INTO variant (id, block_id, working_text, fan_position, created_at, updated_at)
+                VALUES ('V3', 'B2', 'A loose line.', 'a0', ?, ?)
+                """, arguments: [t, t])
+            try db.execute(sql: "UPDATE block SET default_variant_id = 'V3' WHERE id = 'B2'")
+            try db.execute(sql: """
+                INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at)
+                VALUES ('P2', 'PL1', 'B2', 'a0', 'V3', ?, ?)
+                """, arguments: [t, t])
+            // The era writer's drop (0.10's `StorePlaintextExport`): its local-only tables stay behind.
+            for table in Self.oldestExportEraDroppedTables {
+                try db.execute(sql: "DROP TABLE \(table)")
+            }
+        }
+        let applied = try queue.read { try String.fetchAll($0, sql: "SELECT identifier FROM grdb_migrations") }
+        try queue.close()
+        let known = AppDatabase.migrator.migrations
+        let era = try #require(known.firstIndex(of: Self.oldestExportEra))
+        #expect(Set(applied) == Set(known[...era]), "the file is of the frozen era")
+
+        #expect(LibraryClassifier.classify(at: url) == .plaintextExport(store: url),
+                "the pick's classifier still calls the era file a plaintext export (the bring-in's first gate)")
+        let plan = try PlaintextExportReading.read(exportAt: url)
+        #expect(plan.wings == [PlaintextExportPlan.Wing(id: "W1", name: "studio")])
+        #expect(plan.notes.count == 1)
+        let note = try #require(plan.notes.first)
+        #expect(note.id == "N1" && note.wingID == "W1" && !note.archived)
+        #expect(note.document.document.title == "Era note" && note.document.document.tagPaths == ["sketch"])
+        #expect(note.document.document.blocks.map(\.text) == ["The era's prose."])
+        #expect(note.document.document.blocks.first?.alternates
+            == [VariorumDocument.Take(label: "second", text: "Another take.")], "the alternate take rides")
+        #expect(plan.books == [PlaintextExportPlan.Book(
+            name: "Era book", wingID: "W1", archived: false,
+            chapters: [.init(id: "S1", name: "One")], members: [.init(noteID: "N1", chapterID: "S1")])])
+        #expect(plan.pools == [PlaintextExportPlan.Pool(title: "Scraps", archived: false, scraps: ["A loose line."])])
+        let landing = try Self.ops(try AppDatabase.inMemory()) { try $0.importPlaintextExport(plan) }
+        #expect(landing.notes == 1 && landing.books == 1 && landing.snippets == 1 && landing.wings == 1, "and it imports")
+        #expect(landing.membershipsLeftOut == 0 && landing.emptyBooks.isEmpty)
     }
 }
