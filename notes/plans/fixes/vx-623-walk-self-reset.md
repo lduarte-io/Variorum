@@ -63,12 +63,27 @@ preference honestly surfaced rather than silently overridden.
 
 ## The kickoff sitting (2026-10-27 — questions put to her; her answers land here VERBATIM)
 
-- **Q1 — the reset road:** headless guarded Management-API reset (recommended) · in-app Delete Account +
-  re-mint per release · headless pre-step + in-app delete as cleanup. → PENDING
-- **Q2 — the gate's scope:** the std release gate runs BOTH arms every release (set-up → join → cleanup;
-  recommended) · set-up only, the join arm a separate mode for drills. → PENDING
-- **Q3 — rider VX-536** (guard.sh wl2 gap; same files open): join this run (recommended) · stays on the
-  board. → PENDING
+- **Q1 — the reset road: "Headless reset" (her pick, 2026-10-27, the kickoff sitting's question tool —
+  the recommended option).** The gate uses the guarded Management-API statement as pre-step and cleanup;
+  the deletion/creation doors keep their live coverage in lifecycle drills. The ticket's "prefer the app's
+  road" preference was surfaced to her with the door's location and is RESOLVED by this pick.
+- **Q2 — the gate's scope: "Both arms" (her pick, same sitting).** Set-up → join → cleanup every release;
+  arms stay individually addressable (`--arm setup|join|both`, default both).
+- **Q3 — rider VX-536: "Join this run" (her pick, same sitting).** Seated as a sub-issue; D-7 binds.
+
+**The stage protocol (oct27coordinator, received at kickoff, 2026-10-27):** REQUEST early (what · minutes ·
+claim name) → a separate READY ping → GO only from the coordinator with the exact claim line — never
+self-claim, a FREE stage is no invitation; tell the coordinator BEFORE any renew; RELEASE runs
+`Tools/stage release --who <claim>` then one result line naming each arm's outcome, the dev-store posture,
+instance + sim state (strict forms `pgrep -lx Variorum` · `pgrep -lf "MacOS/Variorum$"` ·
+`xcrun simctl list devices booted`), which allowlisted accounts were reset and their end state, and
+EXECUTED test counts where tests ran. Every `xcodebuild test` needs the stage; headless never does. The
+walk REQUEST must name the accounts reset and the helper's refusal shape; G7 is a whole-folder rename of
+the as-found set with a cmp-verified safety copy first, restored exactly as VX-439's tail ran it; Debug
+prefs re-exported and diffed if touched; secrets only via the `~/.variorum/bin` helpers; the throwaway
+Supabase project is GONE (she deleted it) — nothing may target it; What's New dismissed after any Debug
+launch. The coordinator's heads-up: the cleanup leg's end state (std clean) may serve a release window
+right after the merge — answered at the acceptance result line.
 
 **The cast (stated, hers to redirect):** the standing default — this Fable session orchestrates and
 architect-rules; ONE `opus-implementer` session builds the script work; a fresh `fable-reviewer` runs the
@@ -78,15 +93,18 @@ stage claim (the R-510-5 precedent + the coordinator's brief: live walks and sim
 
 ## The design (the architect's; D-rows are the implementer's brief sections)
 
-- **D-1 — the reset helper** (`Tools/WalkKit/reset-test-account.sh`, a sibling of the walk, calling the same
+- **D-1 — the reset helper** (`Tools/prod-reset-test-account.sh`, a sibling of `Tools/prod-read.sh` and
+  `Tools/prod-confirm-test-user.sh` — the prod-tooling family's home, calling the same
   Management-API endpoint `Tools/prod-read.sh` reads through): resets ONE allowlisted account to
   "exists, confirmed, vaultless, rowless" with the VX-439 release-tail statement — one atomic CTE mirroring
   `account_purge()` MINUS the auth user and the entitlement: the key_vault row, the data tables, device
   cursors, tenant seq, challenge nonces, write budget, the `kp:` proof secret (best-effort, the purge's own
   shape). Guards: the fence rules above (premise fence 2). Before/after reads printed and logged. Exit 5 on
   any guard, nothing written. `--self-test` over fixtures; `--dry-run` prints the plan + the before reads.
-  *(If Q1 lands on the in-app road, D-1 becomes the pre-step healer only, and D-2's cleanup drives the
-  Account sheet instead.)*
+  *(Q1 ruled headless — this row stands as written.)* **The allow rule (R-510-3's shape, PROPOSED to her at
+  the kickoff reply, hers to add or to have the orchestrator add at her word):** one narrow Bash rule for
+  `Tools/prod-reset-test-account.sh` beside the five standing walk rules in `.claude/settings.local.json`,
+  so the acceptance walker can run the guarded helper without an interactive prompt.
 - **D-2 — the walk's two new seats:** a PRE-STEP after P3 (the account's id is in hand): if a vault row
   exists, run D-1's reset (logged); the set-up arm then always meets a vaultless account. A CLEANUP LEG
   after P8's reads land on a PASS: reset, leaving the resting state. On a STOP: never (fence 1).
@@ -108,8 +126,9 @@ stage claim (the R-510-5 precedent + the coordinator's brief: live walks and sim
 - **D-6 — the release checklist row:** `Tools/Release/release.sh`'s HANDOFF step-0 text names the walk's
   new shape (self-resetting; the arms per Q2), so no release REQUEST needs the "manual std reset" line
   again. The coordinator's standing brief line retires at the merge (said in the handoff).
-- **D-7 — rider VX-536** (if Q3 seats it): `guard.sh`'s on-this-Space check refuses, with a naming message,
-  when its wl2 helper is absent — compile-or-refuse, never silently pass.
+- **D-7 — rider VX-536 (SEATED, Q3):** `guard.sh`'s on-this-Space check refuses, with a naming message,
+  when its wl2 helper is absent — compile-or-refuse, never silently pass. Pin: a self-test/fixture case
+  proving the refusal fires with the helper absent (red on the old silent-pass behavior).
 
 **What this run never touches:** app code, `Sources/`, the schema, the mirror, custody, the dev store's
 HELD library (e11e5233 — any walk restores it as found, never presses Resume), her account (cannot pass the
@@ -129,6 +148,56 @@ allowlist), her `/Applications` app (G4/G5 stand).
   pin-before-fix PER MEMBER where a pin is expressible (the guard refusals are the pins' shape here —
   self-test cases red-on-old where a guard was missing).
 
+## UNIT 1 — THE BRIEF (a fresh `opus-implementer`, one session; the implementer owns its LIVE STATUS below)
+
+**Workspace:** `~/dev/variorum-vx-623` (branch `vx-623-walk-self-reset`, upstream set). Run EVERYTHING from
+this absolute path. Commit per coherent piece with NO attribution trailer of any kind, push after every
+commit, keep the LIVE STATUS section current in the same commits
+(`notes/SessionResiliencyProtocol.md` binds you — read it).
+
+**Required reading, in order, before any edit:** (1) THIS FILE WHOLE; (2) `Tools/WalkKit/first-run-walk.sh`
+whole — its guard style, helpers and step grammar are the house style every change must match; (3)
+`Tools/WalkKit/README.md` whole (walker facts; the capture privacy rule); (4) `Tools/prod-read.sh` and
+`Tools/prod-confirm-test-user.sh` (the Management-API call shape and the allowlist-guard shape to mirror);
+(5) `notes/plans/fixes/vx-439-sidebar-bar-export-quick-wins.md` lines 1229–1279 (THE RELEASE TAIL — the
+reset statement's content and the before/after read discipline); (6) `notes/plans/fixes/vx-510-first-run-sync.md`
+lines 3096–3220 (THE SUCCESSOR'S RE-WALK + THE THIRD ORCHESTRATOR'S CASTLE LEG — the join door driven live:
+labels, the sheet's confirm line, cursor evidence) and lines 2550–2577 (LEG D); (7) `Tools/WalkKit/guard.sh`
+(D-7's target). **Label truth comes from the CODE, not the records:** before writing the join arm's probes,
+read the join sheet's current source (the protection pane / account faces under `App/Variorum/` and
+`Shared/` — grep for "Sync this library" and the join confirm sentence) and use the exact current strings;
+note each sourced label in your record with its file:line.
+
+**Build D-1…D-7 exactly as ruled.** Shape notes, binding:
+- The reset STATEMENT is one atomic CTE mirroring `account_purge()` minus the auth user and the entitlement.
+  Read `account_purge()`'s definition from the repo's server artifacts (`Server/supabase/` — grep for
+  `account_purge`) and derive the family from IT, never from memory; the helper takes the account's id from
+  its own guarded email→id read (the same whole-value plain-address splice rule as the walk's P3 — F-R1-5).
+- The helper and every walk change REFUSE by default: any guard failure is exit 5 with nothing written,
+  matching the walk's grammar. The helper additionally refuses when the resolved auth row's email does not
+  byte-equal the allowlist's entry for the named account.
+- `--self-test` for the helper mirrors the walk's: fixtures only, every refusal shown firing, never her file,
+  never production. EXTEND the walk's own `--self-test` for any new guard you add to the walk.
+- The walk's new arms ride the existing step grammar (`step/press/focus/secret/waitfor/rowreads/capture`);
+  the join arm's relaunch reuses the slot-aside discipline ALREADY DOCUMENTED in the walk's header (G7's
+  files go aside by `mv` — in the LIVE walk that act is the walker's, so the join arm STOPS with a named
+  message telling the walker what to move when the slot is occupied, exactly as G7 refuses today; the walk
+  script itself never moves the dev store's files).
+- D-4 (window-frame): trace the dev build's window-frame autosave key by inspection (`defaults read
+  io.lduarte.Variorum.debug | grep -i frame` is the starting probe — note what you find); the guard deletes
+  only that key, pre-launch, and post-launch asserts the main window's bounds hold the footer row.
+- D-5 (capture every window): follow `capture-windows.swift`'s listing road; window-scoped only.
+- **NEVER run anything against production.** No invocation of `prod-read.sh`, the new helper (outside
+  `--self-test`), or the walk beyond `--self-test`. The live run is UNIT 2's, under a stage claim you will
+  not hold. You need no stage: your evidence is headless.
+- **Evidence to record:** both self-tests green with every case named; the D-7 fixture pin red-on-old
+  (demonstrate the old silent pass with a one-line revert note); `zsh -n` clean on every changed script;
+  each D-row's acceptance stated with file:line.
+
+### UNIT 1 — LIVE STATUS (the implementer owns this section)
+
+(not started)
+
 ## Environment traps (binding; carried into every brief verbatim)
 
 The vx-510 run's traps apply: instance checks by PATH (`pgrep -fl 'Variorum.app/Contents/MacOS'`), her
@@ -143,8 +212,8 @@ rule); quit by identity, kill extras by proven PID; zsh `pipestatus`; push after
 | # | Item | Status |
 |---|---|---|
 | 1 | Kickoff: worktree, in-flight row, Linear flips, this record | DONE (in-flight row on main `VX-623 kickoff`; members In Progress 19:06Z) |
-| 2 | The kickoff sitting (Q1–Q3) + her premise answer delivered | PENDING her answers |
-| 3 | UNIT 1 — the script work (D-1…D-7) | NOT-STARTED (brief = this file's D-rows + traps) |
+| 2 | The kickoff sitting (Q1–Q3) + her premise answer delivered | DONE 2026-10-27 — headless · both arms · VX-536 seated; premise answer in the kickoff reply |
+| 3 | UNIT 1 — the script work (D-1…D-7) | IN FLIGHT — implementer spawned on this file's UNIT 1 BRIEF |
 | 4 | UNIT 2 — the live acceptance on production | NOT-STARTED (stage claim via oct27coordinator; Opus walker) |
 | 5 | The ladder (fresh fable-reviewer, whole diff) | NOT-STARTED |
 | 6 | Closeout: canon delta (the standing ruling, two-file shape), tickets, handoff, merge | NOT-STARTED |
