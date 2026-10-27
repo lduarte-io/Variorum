@@ -96,10 +96,10 @@ struct ShelfView: View {
     /// Built by the composition root (the protection faces are the bootstrap's) and RENDERED here, the offer line's
     /// road. nil (no protection faces yet, harness mounts): no card — the first open stays calm either way.
     var wordsBand: AnyView? = nil
-    /// VX-326 — the shell's opening ask for the quick entry's caret, handed
-    /// down by the shell that owns it (`RootView`); the bar claims it once.
-    /// nil (harness mounts): the bar's mount raise as it always was.
-    var openingFocus: QuickEntryOpeningFocus? = nil
+    /// VX-332 (the VX-439 run) — a tour is running in this window: the quick
+    /// entry's mount stands down rather than ask for the caret (W-U1a-1).
+    /// Handed down by the shell that owns the tour (`RootView`).
+    var tourRunning = false
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -999,7 +999,7 @@ struct ShelfView: View {
     private var entryBar: some View {
         // VX-552 (the VX-439 run): the wing a capture here lands in, beside it.
         QuickEntryBar(
-            session: session, onOpen: onOpen, autofocus: true, openingFocus: openingFocus,
+            session: session, onOpen: onOpen, autofocus: true, standsDown: tourRunning,
             wingName: wings?.currentName ?? WingWords.home)
     }
 

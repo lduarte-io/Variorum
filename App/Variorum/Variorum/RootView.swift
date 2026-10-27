@@ -96,12 +96,10 @@ struct RootView: View {
     /// object rather than a bare `@State` engine so the engine's doors can
     /// hold it weakly — a window closed mid-tour leaves no cycle behind.
     @State private var tourSlot = TourSlot()
-    /// **VX-326 — this shell's ONE opening ask** for the Bookcase quick
-    /// entry's caret (R102: the Bookcase opens with the cursor in the bar). A
-    /// shell opens on the Bookcase — at launch, after every unlock, in a new
-    /// window — and its first Bookcase bar claims this; later Bookcase mounts
-    /// in the same shell find it spent.
-    @State private var bookcaseOpeningFocus = QuickEntryOpeningFocus()
+    // (VX-326's one-shot `bookcaseOpeningFocus` claim RETIRED at VX-332 — the
+    // VX-439 run, her "focus on every return": every Bookcase mount asks
+    // through the quick entry's waiting, never-stealing road, and stands down
+    // while this window's tour runs — `tourRunning` below.)
     // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
     // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
     // but on the object every navigation door already speaks to, so the
@@ -1199,7 +1197,8 @@ struct RootView: View {
                 // and rendered by the Bookcase alone ("Bookcase only").
                 offerLine: tourOfferLine,
                 wordsBand: wordsBand,
-                openingFocus: bookcaseOpeningFocus)
+                // VX-332: the Bookcase's quick entry stands down during a tour.
+                tourRunning: tourSlot.engine != nil)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:

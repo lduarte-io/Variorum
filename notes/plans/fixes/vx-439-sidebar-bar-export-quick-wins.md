@@ -202,7 +202,7 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     chapter acts. Each door's words, act and condition unchanged (`footDoor(_:)`, one case per door). Design row: pin
     `BookFootDoorsTests` (2: the order per state; restore never between the mint pair, always last, gap > 0) + the
     walk's capture (the orchestrator's) — build-for-testing GREEN; the suite run PENDING the stage window.
-  - VX-552: DONE (this line's commit) — the ONE quick-entry bar (`QuickEntryBar`, both hosts: the Bookcase band and the
+  - VX-552: DONE (`a6afef06a`) — the ONE quick-entry bar (`QuickEntryBar`, both hosts: the Bookcase band and the
     Library bar — the two doors that mint into the current wing; ⌘N is a menu item and books mint into their own wing)
     wears "in ‹wing›" at the box's trailing edge on its first line (muted small chrome, `lineLimit(1)`, ≤180 pt, the
     hover the whole fact), visible while she types; the name is the host's own `WingsModel.currentName` (the app's one
@@ -210,9 +210,19 @@ Anything a batch finds itself needing that would CHANGE a §9 operation's semant
     too (C-552-1). Design row: pin `QuickEntryWingLabelTests` (2: the words; both hosts compose the bar with the wing —
     source-read, the `theLibraryNoteRowMenuRendersItsDeclaredDoors` precedent) + the walk's capture (the
     orchestrator's, both voices) — build-for-testing GREEN; the suite run PENDING the stage window.
-  - VX-332: NOT-STARTED — settled design: every autofocus mount takes the waiting/never-steal opening road; the one-shot
-    `QuickEntryOpeningFocus` claim retires; the bar stands down while a tour runs; `aNavigationBack…KeepsTheBarsRaiseAsItWas`
-    updated deliberately (it pins the old behavior); red-on-old pin = a navigation back puts the caret in the box.
+  - VX-332: DONE (this line's commit) — TRACED MECHANISM (the VX-282 record's O-U6-1, confirmed by reading): the bar's
+    `.task` took the waiting road (`armOpeningFocus` — `CaptureOpeningFocus`: wait for the window, take only a free
+    keyboard) ONLY for the shell's first Bookcase mount (VX-326's one-shot `QuickEntryOpeningFocus` claim); every later
+    mount raised the counted `focusRequest`, which `takeFocus` drops when the box is not yet in its window — the
+    navigation-back shape — so a return never got the caret. FIX: every autofocus mount takes the waiting road; the claim
+    type, its RootView state and its ShelfView/QuickEntryBar params RETIRE; a running tour stands the mount down
+    (`QuickEntryBar.standsDown` ← `ShelfView.tourRunning` ← `RootView` `tourSlot.engine != nil` — W-U1a-1). The counted
+    raise stays the explicit asks' (padding tap, title chip). Pins `QuickEntryOpeningScopeTests` (3): RED-ON-OLD
+    `aNavigationBackToTheBookcasePutsTheCaretInItsQuickEntry` (the DELIBERATE update of
+    `aNavigationBackToTheBookcaseKeepsTheBarsRaiseAsItWas`, which pinned the old road; `theClaimIsTrueExactlyOnce`
+    retired with its type); GUARDS `aMountNeverTakesTheKeyboardFromAField`, `aMountDuringATourStandsDown` (+ its
+    no-tour non-vacuity). build-for-testing GREEN. The red-on-old run is PENDING the stage window: the behavioral revert
+    (the `.task` back to `focusRequest += 1`) is staged as `scratchpad/b1-revert/vx-332.patch` (gitignored, in the tree).
   - VX-568: PARKED OUT OF THE RUN at her word (2026-10-27) — see Ledger
   - VX-602: NOT-STARTED — settled design: "Restore Field Guide…", "Take the Onboarding Tutorial", and (call C-602-1)
     "Open the Field Guide"; guide CONTENT speaks the old name three times — FLAGGED, not edited (morning bundle 3).
