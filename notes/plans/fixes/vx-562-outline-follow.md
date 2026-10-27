@@ -119,8 +119,8 @@ Both ledger pieces in one session — the pin consumes the follower's slot, so s
 |---|---|---|
 | 1 | The follow-highlight: the Outline navigator's highlighted chapter/note follows the viewport as the content scrolls (the view, never the caret) | SUITES GREEN (runs 1+2, §SUITE RUNS: 47/4 + 266/56, 4 standing known issues only) — walk pending |
 | 2 | The pinned nav info: chapters + notes counts fixed at the top while scrolling; the current note # (and chapter) said during scroll | SUITES GREEN (runs 1+2, §SUITE RUNS) — walk pending |
-| 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | TESTS DONE (both runs green, §SUITE RUNS); the walk REQUESTED (§WALK RUNBOOK is the brief) |
-| 4 | The ladder (one round minimum; reviewer per the diff — expected `opus-reviewer`: no editor seam, no custody, no `Sync/`) | NOT-STARTED |
+| 3 | The walk (Opus walker, seeded sherlock, store left as found) + the test batch under coordinator GO | TESTS DONE (both runs green, §SUITE RUNS); walk attempt 1 BLOCKED AT PREMISE (§WALK — the held store holds NO book; legs 3–8 not walked; nothing added, banner standing, prefs clean: 0 added/0 removed/3 launch-bookkeeping keys changed, restored nothing). RE-WALK REQUESTED with a content plan: Help ▸ Restore the Sample Library at start; Delete Book + its notes (owned ⇒ the Trash) at end; Bookcase back to "No books yet" confirmed |
+| 4 | The ladder (one round minimum; reviewer per the diff — expected `opus-reviewer`: no editor seam, no custody, no `Sync/`) | ROUND 1 IN FLIGHT (a fresh `opus-reviewer`, REVIEW_PROMPT verbatim, zero framing; the diff = merge-base(origin/main)..HEAD) |
 
 ## LIVE STATUS (batch 1 — the implementer's; flipped in the same commit as each piece)
 
