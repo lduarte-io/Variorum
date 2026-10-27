@@ -237,8 +237,12 @@ struct WingSwitcherTests {
         }
         // 13i-d U6 (k) (A JUSTIFIED EDIT — a new renderer of the same acts):
         // the note ▾ menu in BOTH bars renders them too (R6-2's one grammar).
+        // VX-377 (the VX-620 run, batch 4 — A JUSTIFIED EDIT, a new door on
+        // the same acts): + `.palette` — ⌘K's Move/Copy to Wing on the
+        // focused note (`ShellActions.paletteActs`; the walk's palette line).
         for id in [CapabilityID.moveNoteToWing, .copyNoteToWing] {
-            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu, .bottomBar])
+            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu, .bottomBar, .palette])
+            #expect(ShellActions.paletteActs.contains(id))
             #expect(CommitBar.renderedCapabilities.contains(id))
             #expect(TakesBottomBar.renderedCapabilities.contains(id))
         }

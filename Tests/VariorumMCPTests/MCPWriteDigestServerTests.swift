@@ -23,8 +23,10 @@ import Testing
 // `add_takes` a `takes` list of objects beside its unchanged `take_ids` (F-254-5
 // (a), the no-positional rule). Ruled OUT (guards below, green on both sides):
 // `divide_block` / `merge_blocks` (F-254-2 (b) — no words sent; the halves come
-// from the seam rule) and the book-form import (F-254-4 (a) — its answer stays
-// `book_id, note_ids, chapter_ids`; pinned in `MCPMintedAnswerServerTests`).
+// from the seam rule). The book-form import was ruled out too (F-254-4 (a)) until
+// VX-567 (the VX-620 run, batch 3 — PROVISIONAL RB-4) flipped it DELIBERATELY: its
+// answer now carries every note's records with each take's digest
+// (`MCPBookImportRecordsServerTests`; the flipped guard in `MCPMintedAnswerServerTests`).
 //
 // Wire only (the SDK's own client over a real socket). Every expected digest is
 // computed HERE, by CryptoKit over the text's UTF-8 bytes — never by the product's

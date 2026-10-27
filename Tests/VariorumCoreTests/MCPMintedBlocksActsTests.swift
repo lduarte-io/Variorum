@@ -92,4 +92,77 @@ struct MCPMintedBlocksActsTests {
             #expect(try db.fetchInt(notes) == before && stack.depth == 0, "nothing minted, no entry")
         }
     }
+
+    // MARK: - VX-566 / VX-567 (the VX-620 run, batch 3): the import doors' halves
+
+    /// VX-566: `importNote`'s `section` is `createNote`'s — filed in the same
+    /// transaction, the undo and redo carrying it; anything that isn't a live
+    /// chapter of THAT book refuses before a row is minted. New API: green by
+    /// construction (the wire pins `MCPImportSectionServerTests` ran red on old).
+    @Test func anImportedDocumentFilesUnderItsChapterAsCreateNoteDoes() throws {
+        try withUndo { ops, stack, db in
+            let book = try ops.createReading(name: "o ladrão de raios", kind: .book)
+            let chapter = try ops.createSection(in: book.id, name: "um")
+            let other = try ops.createReading(name: "another", kind: .book)
+            let theirs = try ops.createSection(in: other.id, name: "theirs")
+            let named = VariorumDocument.NamedDocument(
+                fallbackTitle: "", document: try VariorumDocument.parse("{t:\"capítulo\"}\n\nOlá."))
+            let notes = "SELECT COUNT(*) FROM container WHERE kind = 'post'"
+            let before = try db.fetchInt(notes)
+            #expect(throws: OperationError.sectionNotInReading(sectionID: theirs.id, readingID: book.id)) {
+                try ops.importNote(named, in: .book(book.id), section: theirs.id, undoLabel: "u")
+            }
+            #expect(throws: OperationError.sectionNotFound(id: chapter.id), "a wing holds no chapter") {
+                try ops.importNote(named, in: .wing(""), section: chapter.id, undoLabel: "u")
+            }
+            #expect(try db.fetchInt(notes) == before && stack.depth == 0, "nothing minted, no entry")
+
+            let minted = try ops.importNote(named, in: .book(book.id), section: chapter.id, undoLabel: "claude-code's import")
+            let filed = "SELECT section_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL"
+            #expect(try db.fetchString(filed, [minted.post.id]) == chapter.id)
+            #expect(try stack.undo(with: ops) == "claude-code's import")
+            #expect(try stack.redo(with: ops) == "claude-code's import")
+            #expect(try db.fetchString(filed, [minted.post.id]) == chapter.id, "the redo returns it filed")
+        }
+    }
+
+    /// VX-567: `BookImport.notes` is what each seat minted — parallel to
+    /// `postIDs`, each note's blocks in note order, each block's takes the fan
+    /// rows in fan order (the in-place text first, shown) — never a second read.
+    @Test func aBookImportsNotesAreWhatEachSeatMinted() throws {
+        try withUndo { ops, _, db in
+            let one = try VariorumDocument.parse("{t:\"um\"}\n\nOlá.\n\nAdeus.")
+            let two = try VariorumDocument.parse("{t:\"dois\"}\n\nCapítulo dois.")
+            let result = try ops.importBook(
+                VariorumDocument.Book(
+                    name: "o ladrão de raios",
+                    chapters: [.init(name: "um", notes: [.init(fallbackTitle: "", document: one)])],
+                    unfiled: [.init(fallbackTitle: "", document: two)]),
+                wingId: "", undoLabel: "claude-code's book import")
+            #expect(result.notes.map(\.postID) == result.postIDs, "one record per note, in book order")
+            for note in result.notes {
+                let placed = try db.read { db in
+                    try String.fetchAll(
+                        db, sql: """
+                            SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL
+                            ORDER BY position, id
+                            """, arguments: [note.postID])
+                }
+                #expect(note.blockIDs == placed && note.blocks.map(\.blockID) == placed, "the note's blocks, in order")
+                for record in note.blocks {
+                    let fan = try db.read { db in
+                        try Row.fetchAll(
+                            db, sql: """
+                                SELECT id, working_text FROM variant WHERE block_id = ? AND deleted_at IS NULL
+                                ORDER BY fan_position, id
+                                """, arguments: [record.blockID])
+                    }
+                    #expect(record.takes.map(\.id) == fan.map { $0["id"] as String })
+                    #expect(record.takes.map(\.text) == fan.map { $0["working_text"] as String }, "the stored text")
+                    #expect(record.shownTakeID == record.takes.first?.id)
+                }
+            }
+            #expect(result.notes.map { $0.blocks.count } == [2, 1])
+        }
+    }
 }

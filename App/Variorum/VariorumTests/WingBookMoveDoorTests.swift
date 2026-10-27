@@ -279,7 +279,10 @@ struct WingBookMoveDoorTests {
     @Test func theBookMoveActsAreDeclaredAndRendered() {
         #expect(ShelfView.contextMenuCapabilities.contains(.moveBookToWing))
         #expect(WingSwitcherMenu.surfaceCapabilities.contains(.moveWingContents))
-        #expect(CapabilityRegistry.capability(.moveBookToWing).doors == [.contextMenu])
+        // VX-377 (the VX-620 run, batch 4 — A JUSTIFIED EDIT, a new door on
+        // the same act): + `.palette` — ⌘K's Move to Wing on the focused book.
+        #expect(CapabilityRegistry.capability(.moveBookToWing).doors == [.contextMenu, .palette])
+        #expect(ShellActions.paletteActs.contains(.moveBookToWing))
         #expect(CapabilityRegistry.capability(.moveWingContents).doors == [.surface])
         #expect(CapabilityRegistry.capability(.moveBookToWing).verb == "Move to Wing")
         #expect(CapabilityRegistry.capability(.moveWingContents).verb == "Move Everything to Another Wing")

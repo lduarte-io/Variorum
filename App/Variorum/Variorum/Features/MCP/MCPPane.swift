@@ -30,6 +30,13 @@
 //  an (i) (`ExplainerLine`). The setup menu is its own file
 //  (`MCPSetupMenu.swift` — the code block, VX-205).
 //
+//  VX-590 (the VX-620 run, batch 2 — her words: "I don't want someone who
+//  doesn't use AI to see that & get scared that their work is shared"): the
+//  sharing face — Shared with AI and the open book inside it — renders only
+//  once the library has ever had a client (`showsSharingFace`, VX-512's fact
+//  read the other way); Connect, Clients and Activity stay, and the Settings
+//  search names no row the hidden tab holds.
+//
 
 import SwiftUI
 import VariorumCore
@@ -61,6 +68,23 @@ nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
     static func opening(remembered: MCPPaneTab?, approvedCount: Int) -> MCPPaneTab {
         if let remembered { return remembered }
         return approvedCount > 0 ? .clients : .connect
+    }
+
+    /// **VX-590 — the tabs the pane offers, in her order** (her words: "I don't
+    /// want someone who doesn't use AI to see that & get scared that their work
+    /// is shared"): Shared with AI — the sharing face, the open book inside it —
+    /// only once the library shows it (`MCPPane.showsSharingFace`); Connect,
+    /// the road the first client arrives by, always.
+    static func offered(sharing: Bool) -> [MCPPaneTab] {
+        sharing ? allCases : allCases.filter { $0 != .shared }
+    }
+
+    /// **VX-590 — the tab the pane SHOWS:** the one picked while it is offered,
+    /// else where the pane opens by its rule (a pick remembered from another
+    /// library this app run, which has no client yet, opens by the rule; the
+    /// pick itself is kept, so it returns with the face).
+    static func shown(_ picked: MCPPaneTab, sharing: Bool, approvedCount: Int) -> MCPPaneTab {
+        offered(sharing: sharing).contains(picked) ? picked : opening(remembered: nil, approvedCount: approvedCount)
     }
 
     /// **The tab a Settings search finding lands on** — the open-book row
@@ -142,6 +166,19 @@ struct MCPPane: View {
     /// true of every such library). Pure, pinned.
     nonisolated static func saysClientsBelongToTheLibrary(_ snapshot: MCPDoor.Snapshot) -> Bool {
         snapshot.pendingCount == 0 && snapshot.clientCount == 0
+    }
+
+    /// **VX-590 — the pane's sharing face renders once this library has ever
+    /// had a client** (PROVISIONAL RB-3): the Shared with AI tab, and the open
+    /// book it holds. The fact is VX-512's own — a client row exists, waiting,
+    /// approved or denied — read the other way: the two faces are one fact, so
+    /// while the library says its clients are its own, nothing says sharing.
+    /// "Ever": a client row is never removed (Deny keeps it; the waiting room's
+    /// cap forgets only the oldest requests past fifty, never the newest), so
+    /// once shown the face stays. Every share face OUTSIDE the pane already
+    /// waits for an approved client (VX-272's `hasApprovedClient`). Pure, pinned.
+    nonisolated static func showsSharingFace(_ snapshot: MCPDoor.Snapshot) -> Bool {
+        !saysClientsBelongToTheLibrary(snapshot)
     }
 
     /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
@@ -260,7 +297,7 @@ struct MCPPane: View {
                     allRoad(door.snapshot.pendingCount, shown: door.snapshot.pending.count, .requests)
                 }
             }
-            switch tab {
+            switch shownTab {
             case .connect: connectTab
             case .clients: clientsTab
             case .shared: sharedTab
@@ -299,18 +336,30 @@ struct MCPPane: View {
 
     // MARK: - The tabs (VX-281 U1 — R-VX184-6)
 
-    /// The tab row — her four, one segmented control, centred over the tab's
-    /// content as its header. A pick is remembered for the session.
+    /// VX-590: whether the library shows its sharing face (Shared with AI),
+    /// read from the door's snapshot at every render — it appears the moment
+    /// a first client asks to connect.
+    private var sharing: Bool { Self.showsSharingFace(door.snapshot) }
+
+    /// VX-590: the tab on screen — her pick while it is offered, else where
+    /// the pane opens by its rule (`MCPPaneTab.shown`; her pick is kept).
+    private var shownTab: MCPPaneTab {
+        MCPPaneTab.shown(tab, sharing: sharing, approvedCount: door.snapshot.approvedCount)
+    }
+
+    /// The tab row — her four (Shared with AI once the library has had a
+    /// client — VX-590), one segmented control, centred over the tab's content
+    /// as its header. A pick is remembered for the session.
     private var tabRow: some View {
         HStack {
             Spacer(minLength: 0)
             Picker(SettingsPane.mcp.title, selection: Binding(
-                get: { tab },
+                get: { shownTab },
                 set: { picked in
                     tab = picked
                     door.paneTab = picked
                 })) {
-                ForEach(MCPPaneTab.allCases) { option in
+                ForEach(MCPPaneTab.offered(sharing: sharing)) { option in
                     Text(option.label).tag(option)
                 }
             }

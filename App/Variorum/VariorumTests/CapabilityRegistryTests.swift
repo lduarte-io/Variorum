@@ -96,6 +96,13 @@ struct CapabilityRegistryTests {
         // ⌥⌘N's gate is what the focused pane SHOWS (a book), never a mode;
         // without this context it reads `.unavailable` everywhere the walk looks.
         contexts.append(CapabilityContext(mode: nil, focusedPaneShowsBook: true))
+        // VX-377 (the VX-620 run, batch 4 — A JUSTIFIED EDIT, the VX-570 line's
+        // class): ⌘K's Move/Copy to Wing act on what the focused pane SHOWS
+        // (a note; a book) AND need another wing — two non-mode facts at
+        // once; without these contexts the three read `.unavailable`
+        // everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: nil, focusedPaneShowsNote: true, wingCount: 2))
+        contexts.append(CapabilityContext(mode: nil, focusedPaneShowsBook: true, wingCount: 2))
         return contexts
     }
 
@@ -254,10 +261,19 @@ struct CapabilityRegistryTests {
         // available in Write is unavailable in Takes.
         // Mode parity, with the non-mode gates satisfied (undo's stack
         // gate applies identically everywhere — it is not a mode rule).
-        let takes = CapabilityContext(mode: .takes, undoAvailable: true, redoAvailable: true)
+        // VX-377 (the VX-620 run, batch 4 — A JUSTIFIED EDIT): so are the
+        // PANE facts and the wing count — Move/Copy to Wing's ⌘K door asks
+        // what the focused pane shows and whether another wing exists, never
+        // which mode it is in; both contexts satisfy them, so those acts are
+        // judged on mode alone (a note open in Takes shows a note exactly as
+        // in Write). No other `takesAccess` act reads these three facts.
+        let takes = CapabilityContext(
+            mode: .takes, undoAvailable: true, redoAvailable: true,
+            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2)
         let write = CapabilityContext(
             mode: .write, writeEditorAttached: true,
-            undoAvailable: true, redoAvailable: true)
+            undoAvailable: true, redoAvailable: true,
+            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2)
         for capability in CapabilityRegistry.all {
             guard let access = capability.takesAccess else { continue }
             let inTakes = capability.availability(takes)

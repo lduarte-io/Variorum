@@ -857,15 +857,80 @@ struct ShellActions {
         // her binding is "the Block menu, the block context menu, AND the
         // ⌘K palette; never only a buried item".
         .divideWithCeremony, .mergeWithCeremony,
+        // VX-377 (the VX-620 run, batch 4 — her "a selector that I can also
+        // operate via keyboard"): Move/Copy to Wing on the focused note, Move
+        // to Wing on the focused book — LISTED only where they act
+        // (`WingPaletteDoors`), each opening the keyboard wing selector.
+        .moveNoteToWing, .copyNoteToWing, .moveBookToWing,
     ]
 
     /// Palette rows for the act capabilities: title = the registry verb,
     /// action = the same routed body as the menu door (fire-and-DO — an
-    /// act that can't work HERE speaks its honest note).
+    /// act that can't work HERE speaks its honest note). EVERY act row,
+    /// whatever the context (the harnesses' and the walk's list); the
+    /// window's palette lists `listedPaletteEntries()`.
     func paletteEntries() -> [(title: String, action: @MainActor () -> Void)] {
-        Self.paletteActs.map { id in
-            (CapabilityRegistry.capability(id).verb, paletteAction(for: id))
+        paletteEntries(listing: nil)
+    }
+
+    /// **VX-377 — the rows for ONE open of ⌘K**: every act row, the three
+    /// wing rows only where they act on what the focused pane shows
+    /// (`WingPaletteDoors.lists` — P-2). The facts are read once, at the open.
+    func listedPaletteEntries() async -> [(title: String, action: @MainActor () -> Void)] {
+        paletteEntries(listing: await paletteListingFacts())
+    }
+
+    /// The rows under these facts (nil = every row). Pure over its input, so a
+    /// pin reads exactly what an open would list.
+    func paletteEntries(
+        listing facts: WingPaletteDoors.Facts?
+    ) -> [(title: String, action: @MainActor () -> Void)] {
+        Self.paletteActs
+            .filter { id in facts.map { WingPaletteDoors.lists(id, $0) } ?? true }
+            .map { id in (CapabilityRegistry.capability(id).verb, paletteAction(for: id)) }
+    }
+
+    /// What the FOCUSED pane shows right now, and how many wings exist — the
+    /// listing's facts. A book is read whole (one row) for its daily-Journal
+    /// marker; nothing else is read.
+    func paletteListingFacts() async -> WingPaletteDoors.Facts {
+        let wingCount = session.wing.wingCount
+        switch shell.workspace.focusedSelection {
+        case .post(let postID)?:
+            return WingPaletteDoors.Facts(focus: .note(postID), wingCount: wingCount)
+        case .reading(let readingID)?:
+            let reading = try? await session.database.read { db in
+                try Queries.reading(db, id: readingID)
+            }
+            return WingPaletteDoors.Facts(focus: reading.map { .book($0) } ?? .other, wingCount: wingCount)
+        default:
+            return WingPaletteDoors.Facts(focus: .other, wingCount: wingCount)
         }
+    }
+
+    /// **VX-377 — ⌘K's Move/Copy to Wing**: the focused note's (or book's)
+    /// keyboard wing selector, ASKED of the window
+    /// (`ShellRouter.wingDestinationRequest` — the window presents it). The
+    /// row lists only where it acts, so the guard is the belt for a race: it
+    /// speaks the act's registry note rather than doing nothing (P-2).
+    func openWingDestination(_ id: CapabilityID) {
+        let selection = shell.workspace.focusedSelection
+        let act: ShellRouter.WingDestinationRequest.Act?
+        switch (id, selection) {
+        case (.moveNoteToWing, .post(let postID)?): act = .moveNote(postID)
+        case (.copyNoteToWing, .post(let postID)?): act = .copyNote(postID)
+        case (.moveBookToWing, .reading(let readingID)?): act = .moveBook(readingID)
+        default: act = nil
+        }
+        // The registry's gate over what the press can know — the focus and the
+        // wings. The book's daily-Journal half is the window's re-check at
+        // open (it reads the book; `WingDestinationModel.open`).
+        let context = WingPaletteDoors.context(showing: selection, wingCount: session.wing.wingCount)
+        guard let act, CapabilityRegistry.isEnabled(id, in: context) else {
+            status.refuse(CapabilityRegistry.capability(id).unavailableNote)
+            return
+        }
+        shell.wingDestinationRequest = ShellRouter.WingDestinationRequest(act: act, token: UUID())
     }
 
     private func paletteAction(for id: CapabilityID) -> @MainActor () -> Void {
@@ -910,6 +975,8 @@ struct ShellActions {
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
         case .restoreJekyllBook: return { restoreJekyllBook() }
         case .restoreClassicsGathering: return { restoreClassicsGathering() }
+        // VX-377: the three wing acts open the keyboard wing selector.
+        case .moveNoteToWing, .copyNoteToWing, .moveBookToWing: return { openWingDestination(id) }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without
             // a wired case must never compile into a silent no-op row —
