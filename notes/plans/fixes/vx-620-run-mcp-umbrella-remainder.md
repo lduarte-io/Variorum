@@ -902,7 +902,12 @@ clients' reconnect roads — VX-619's guide sentence).*
   `Tests/VariorumCoreTests/MCPPlaceTwiceProbeTests.swift` — **5 / 1 GREEN** (`scratchpad/b3-logs/vx565-probe.log`);
   Mac NEW `App/Variorum/VariorumTests/MCPPlaceTwiceFacesTests.swift` (3 — the rows' drawn words) — compile PENDING
   (piece 5), RUN PENDING the stage. The record: "VX-565 — THE PROBE" below.
-- **2 · VX-566 — `import_document` takes `section_id`:** NOT-STARTED — design: the one-document form takes
+- **2 · VX-566 — `import_document` takes `section_id`:** IN-PROGRESS — the pins COMMITTED RED (this commit):
+  NEW `Tests/VariorumMCPTests/MCPImportSectionServerTests.swift`, 5 tests, RED ON THE PRE-FIX TREE
+  (`scratchpad/b3-logs/vx566-red-on-old.log`: 5 / 5 failed, 27 issues — the note landed UNSECTIONED with no echo, every
+  bad chapter and a gathering's LANDED, the parse sentence never spoken, the book form imported past `section_id`, the
+  catalog declares no `section_id`; the book pin's :229 is that leg's old-tree consequence — the ignored-section import
+  took the name first). The fix is next. Design: the one-document form takes
   `create_note`'s exact shape (parse: without `book_id` → `sectionWithoutBookWords`; the op: `importNote(…, section:)`
   through `mintNoteEntry`'s existing chapter check; the answer echoes `section_id`); the BOOK form REFUSES `section_id`
   at the parse (its chapters come from `book.chapters`; the wire's discipline for a meaningful-elsewhere argument —
