@@ -1331,7 +1331,14 @@ stage claim. No subagent.*
 - **No behavioural revert is in flight** (none is planned: the doors are new, so their red-on-old is by construction).
 - **0 · Preflight + this record:** DONE (this commit).
 - **1 · The registry: `.palette` on the three wing acts, their routed availability, the walk's justified edits:**
-  NOT-STARTED — settled design below (THE DESIGN, items 1–2).
+  DONE (this commit) — `CapabilityRegistry.swift`: `.palette` on `.moveNoteToWing` / `.copyNoteToWing` (availability
+  `noteWingDoor`: `focusedPaneShowsNote && wingCount > 1`) and `.moveBookToWing` (`focusedPaneShowsBook && wingCount >
+  1`). JUSTIFIED EDITS (VX-377 cited in each): `CapabilityRegistryTests` — the walk's sampled contexts gain (note +
+  two wings) and (book + two wings), and `takesIsNeverBehindWrite`'s two contexts satisfy the pane facts and the wing
+  count (non-mode gates, as undo's); `WingSwitcherTests.theWingActsAreDeclaredAndRendered` and
+  `WingBookMoveDoorTests.theBookMoveActsAreDeclaredAndRendered` — the door sets gain `.palette` (+ `paletteActs`
+  carries each). Compiled with pieces 2–4 (`b4`, TEST BUILD SUCCEEDED — `scratchpad/b4-logs/mac-bft1.log`); RUN
+  PENDING the final window.
 - **2 · The palette's context-listed rows + the acts' request:** NOT-STARTED — THE DESIGN, items 2–3.
 - **3 · The keyboard wing selector (the probe's face fix) + its confirms:** NOT-STARTED — THE DESIGN, items 4–5.
 - **4 · The re-ask after any wing act, by construction (VX-425's rule on the new road):** NOT-STARTED — THE DESIGN,
