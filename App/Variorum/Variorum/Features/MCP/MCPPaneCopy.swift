@@ -1325,8 +1325,14 @@ nonisolated enum MCPAskCopy {
             "This book is marked Private now, which no grant reaches \u{2014} its notes are shared "
                 + "one ask at a time. \(dontAllow) lets this ask go."
         // VX-549: a gathering fenced since (a stale row — no op fences one)
-        // takes no grant at all.
-        case (.gathering, _?):
+        // takes no grant at all. It names WHICH fence, as the book's arms do
+        // (the ladder's round 1, finding 4: `askStanding` re-reads a stale
+        // 'daily' marker as `.journal`, and one arm said "marked Private" for
+        // both) — the book's words, without the book's members clause (a
+        // gathering's notes are not fenced by its row; its grant reaches none).
+        case (.gathering, .journal?):
+            "This gathering is your daily Journal now, which no grant reaches. \(dontAllow) lets this ask go."
+        case (.gathering, .privateMark?):
             "This gathering is marked Private now, which no grant reaches. \(dontAllow) lets this ask go."
         case (_, .journal?): "A daily Journal entry. Your daily Journal is only ever shared one ask at a time."
         case (_, .privateMark?): "Marked Private. Private notes are only ever shared one ask at a time."

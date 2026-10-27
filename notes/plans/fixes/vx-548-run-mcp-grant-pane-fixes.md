@@ -311,6 +311,11 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
   existing note — `collectPostIntoSmartReading`, without the star). A VX-368 parity item; never seated without her word.
 - **MB-21 (design note, batch 3):** the sheet's gathering rows carry no note count (an assembly per gathering, at sheet
   open — the books' count is a membership read); the Bookcase's own gathering counts exist if she wants them there.
+- **MB-22 (copy, PROVISIONAL — the ladder's L1, finding 4; joins MB-19's copy pass):** a gathering ask re-read with the
+  daily-Journal fence (a stale 'daily' marker) now leads "This gathering is your daily Journal now, which no grant
+  reaches. Don't allow lets this ask go." — composed from the book arm's words and batch 3's gathering-arm shape (the
+  pane's inert row already says "it's your daily Journal now" of the same row); the Private arm unchanged. No new idea,
+  one new string.
 - (Batch records may append more.)
 
 ## LEDGER
@@ -1461,8 +1466,16 @@ for the closeout, the two-file rule); nothing in `Sync/`, `Server/`, custody, th
   seam-level red only: **no product red-on-old is claimed**, the finding stays hollow as a bug (no tool reaches the
   combination). Green after (`f3-green.log`: the gathering wire suite + `MCPLibraryOnceServerTests` +
   `MCPNoteEditOnceServerTests`, 15 tests / 3 suites).
-- Finding 4 (the fenced-gathering ask's why-word): IN-PROGRESS — the PIN is committed (this commit), RED on the current
-  code; the fix is next (`MCPAskCopy.lead`'s `(.gathering, _?)` arm split by fence kind). The pin: Mac
+- Finding 4 (the fenced-gathering ask's why-word): DONE — the PIN first (`7ca166cc4`, red), then THE FIX (this commit):
+  `MCPAskCopy.lead`'s one `(.gathering, _?)` arm split by fence kind, as the book's arms are — `(.gathering, .journal?)`
+  "This gathering is your daily Journal now, which no grant reaches. Don't allow lets this ask go." (the book arm's
+  words, the pane's `inertDetail(.journal, kind: .gathering)` saying the same of the same row; WITHOUT the book's members
+  clause — a gathering's notes are not fenced by its row, its grant reaches none — batch 3's gathering-arm shape) and
+  `(.gathering, .privateMark?)` byte-unchanged. GREEN (`f4-green.log`: the harness rebuilt on the fixed file — "PIN GREEN:
+  7 expectations held", exit 0). The Mac pin COMPILED (`build-for-testing` into `DerivedData/b-l1`, an APFS clone of
+  `b3`, TEST BUILD SUCCEEDED — `l1-logs/mac-bft.log`; b-l1's `MCPPaneCopy.o` and the suite's `.o` fresh, `b3` untouched;
+  no warning on an L1 line — the one in that suite is batch 3's `:104`); its RUN rides the final window. The one string
+  is PROVISIONAL copy (MB-22). The pin: Mac
   `MCPGatheringGrantFacesTests.aFencedGatheringsAskNamesItsFenceAsTheBooksDoes` (its run rides the final window — no
   `xcodebuild test` in L1). Its RED, headless: a scratch harness (`scratchpad/l1-harness/` — `swiftc-flags.sh` compiles
   the App target's REAL `MCPPaneCopy.swift`, unmodified, against the package's built products, with three copied stubs
