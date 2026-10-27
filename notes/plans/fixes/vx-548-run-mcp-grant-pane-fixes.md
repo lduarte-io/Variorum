@@ -232,7 +232,11 @@ Results + counts here; in-flight row retired; MCPSpec gains VX-549's superseding
   label is the hover: "claude-code · english" reads "claud… · english", then "… · english". A label of hers that holds
   " · " splits the same way (its first part yields first). Alternatives: (b) middle truncation of the whole label
   ("claude…english"); (c) on a narrow card drop the client's name entirely (own words only; the name in the hover).
-  Ratify or redirect.
+  Ratify or redirect. **The hover's shape (fix leg 2a-F2, PROVISIONAL — the mid window's MID-4):** the label sits inside
+  the choose band's button, so its own hover was subsumed; the band's ONE hover now reads the whole label on its own
+  line, then "Choose this take — the note shows it (everywhere); ⌘⏎ from the keyboard" unchanged (no label: the sentence
+  alone). Alternatives: (b) the label first in ONE line ("claude-code · english — choose this take…"); (c) move the
+  label out of the button (its own hover; the band no longer clickable over the label).
 - **MB-5, as built (batch 2a — VX-358):** canonical equality stays `edit_take`'s and `restore_commit`'s no-op rule; a
   re-spelled no-op (the same characters in other code points — NFC against NFD) answers
   `stored_text_normalization_differs: true` beside the stored text's `sha256`, absent otherwise; one sentence in both
@@ -832,6 +836,18 @@ RUN** (announced `d388bdfb9`; `hover` forced to `return act`, the old band's hov
 old sentence IS the no-label answer); restored by `git checkout --`, `git diff` clean, green again (`fix-f2-green2.log`:
 5/5 + 3/3). **Final-window check:** the take card header button's AX help reads "claude-code · english⏎Choose this take
 — …" (and a real hover shows both lines — her 5-second hand-check if the walker's pointer can't raise tooltips).
+
+**Suites (the fix leg's end, on the merged tree — batches 1 + 2a + 2b + 3 + this leg, `3440bf92d`'s sources):** the WHOLE
+headless suite (`scratchpad/b2a-logs/fix-headless-all.log`): core **3463 tests / 463 suites passed** (5 known issues,
+standing), StringsWorkbook **32 / 4 passed**, VariorumMCPTests **411 / 75 with ONE issue — the standing VX-532
+wall clock** (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 23.1 s under the
+full-parallel run), ISOLATED green ×2 (`fix-harness-isolated-1/2.log`: 3/1, 2.1–2.2 s). The Mac app + tests:
+`build-for-testing` into `DerivedData/b2afix` TEST BUILD SUCCEEDED (`mac-bft-fix.log`).
+
+**For the final window (the orchestrator's):** from `DerivedData/b2afix` — or the window's merged product — re-run at
+least `BookPanelMCPMarksTests` (7: VX-330's 3 with the sweep's justified edit + VX-354's 4) and `TakeLabelLineTests`
+(4: the three placed-width pins + the band's help strings), with 2a's neighbour list above; the walk adds the band's
+AX help (or her hand-check) for the whole label.
 
 ## BATCH 2b RECORD
 
