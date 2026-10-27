@@ -265,15 +265,17 @@ anchors the brief names. No subagent.*
   two `set_starred` calls refusing at the rung). The whole MCP target before these two edits: 420/76 with the two
   expected reds (the catalog-completeness pin) + VX-532's standing flake (`mcp-all-1.log`); the suggest proof green
   after (`mcp-fix-1.log`). Activity's words ride piece 5 (the app's table).
-- **5 · The faces + the seven wording points + the deliberate flips:** IN-PROGRESS (this commit: WRITTEN, the Mac
-  compile PENDING) — `MCPPaneCopy` (Activity's words for `set_starred`, the `.star`/`.unstar` receipts, the gathering
-  write-new rung sentence with the star, `starHeadsUp` replacing `starRuleWhy`, `readAndSuggestOnly` retired),
-  `MCPGrantPicker` (`offeredRungs(needsStar:)` retired → `starHeadsUp(needsStar:rung:)`; the footing retired),
-  `MCPGrantSheet` (every rung offered; the heads-up at write new/edit; the clamp + onChange retired),
-  `TutorialSeeder` (lesson 3's Edit card names "star, unstar"; the gathering card's star clause). Mac pins: NEW
-  `MCPStarFacesTests` (5); FLIPS in `MCPGatheringGrantFacesTests` (3) + VX-609's new face pin; JUSTIFIED EDITS in
-  `TutorialMCPChapterTests` (the Edit step + `set_starred` in its truth loop; the gathering card's star clause + its
-  truth). What remains: `build-for-testing` into a FRESH `DerivedData/b1`.
+- **5 · The faces + the seven wording points + the deliberate flips:** DONE (`695161d4c` + this commit) —
+  `MCPPaneCopy` (Activity's words for `set_starred`, the `.star`/`.unstar` receipts, the gathering write-new rung
+  sentence with the star, `starHeadsUp` replacing `starRuleWhy`, `readAndSuggestOnly` retired), `MCPGrantPicker`
+  (`offeredRungs(needsStar:)` retired → `starHeadsUp(needsStar:rung:)`; the footing retired), `MCPGrantSheet` (every
+  rung offered; the heads-up at write new/edit; the clamp + onChange retired), `TutorialSeeder` (lesson 3's Edit card
+  names "star, unstar"; the gathering card's star clause). Mac pins: NEW `MCPStarFacesTests` (5); FLIPS in
+  `MCPGatheringGrantFacesTests` (3) + VX-609's new face pin; JUSTIFIED EDITS in `TutorialMCPChapterTests`. COMPILED:
+  `build-for-testing` into the FRESH `DerivedData/b1` — **TEST BUILD SUCCEEDED** (`scratchpad/b1-logs/mac-bft1.log`);
+  no new warning in a touched file (the two in the log are pre-existing: `MCPGrantPicker.swift`'s
+  `durations(connected:)` isolation warning and `MCPGatheringGrantFacesTests`' redundant `#require`, batch 3's,
+  moved from :104 to :122). **PENDING:** the Mac run (the stage).
 - **6 · Suites + Mac `build-for-testing` (fresh `DerivedData/b1`):** NOT-STARTED.
 
 ### THE DESIGN (settled before code; each PROVISIONAL item is bundled)
@@ -309,3 +311,204 @@ anchors the brief names. No subagent.*
    write-new rung sentence (the sheet's HOW MUCH line AND the ask's lead — one function) says the star; the guide's
    gathering card gains the star clause and lesson 3's Edit card names starring; `MCPSession.instructions` untouched
    (2,988 — nothing in it is false as built); MCPSpec drafted only.
+
+### THE TRACE (inputs → wrong state), the mechanisms the build closes
+
+- **VX-609 — the dead door (traced, then reproduced red at `5c88eee55`).** A client holding READ on a gathering whose
+  rule is `#parser AND ★` calls `create_note {book_id: <gathering>}` → `MCPWriteTools.into` finds no book facts,
+  finds gathering facts (`admitsGathering`), and `intoGathering` decides the PLACE at write new
+  (`MCPGrantAuthority.decide(…, gathering:, rung: .writeNew)`): refused `rungTooLow`, and because the gathering is
+  unfenced the ask is raised ON the gathering at `.writeNew` — the ask never consulted the rule. Her answer
+  (`MCPDoor.answer` → `grantMCPAccess(spec(ask.rung, ask.scopeKind, ask.scopeID, duration))`) minted a write-new
+  gathering grant. The retry passes the decision, lands in `mintNoteEntry`'s gathering arm, where
+  `Queries.gatheringMintOutcome(…, starrable: false)` answers `.blocked(.needsStar)` → `smartFilterUnsatisfiable`
+  → "Its rule needs a starred note, and only the author can star one." — the grant minted by her answer could never
+  act (P-2), unspent. Red on the pre-fix tree: `anAnsweredAskOnAStarRuleGatheringLandsTheNoteNeverADeadDoor`, the
+  retry's text exactly that sentence (`scratchpad/b1-logs/pins-red-on-old.log`).
+- **The mechanism closed:** the refusal's premise (no star on the wire) is gone — the wire's write new plans through
+  `GatheringMint.starringOnlyWhereNeeded` (THE DESIGN, item 1), so exactly the rules that answered `.needsStar` now
+  plan her door's starred plan, and the note is born starred through `writeStar(…, enforcingCap: false)` right after
+  the rule's tags. The ask's face needed no structural change: its durations were always the honest ones for an
+  unfenced gathering; what was dead was the act, and the act now lands. Its lead (`rungDetail(.writeNew, .gathering)`,
+  the sheet's HOW MUCH line too — one function) now says the star.
+- **The order inside the mint** (her door's, `newPostInGathering`): the rule's tags, the star, then (the wire's own
+  addition since VX-549) the document's header tags, then the belt (`matchesRule` with a FRESH star context, so the
+  belt sees the star the act just wrote). A header tag that breaks a NOT still unwinds the whole mint, star included.
+- **The undo of a starred mint:** `registerMintedContainerEntry` tombstones the note; its star entry is then a dead
+  list entry the read rule hides (`Queries.starred` reads live targets only) and the next star write self-heals away —
+  the standing star semantics for any deleted starred note (pinned: `!starredNotes.contains(noteID)` after the undo).
+  A redo revives the note; its star reads again unless a star write in between self-healed the entry (then the
+  revived note reads unstarred and leaves the gathering — the same edge her own Put back of a trashed starred note has;
+  recorded, not changed).
+
+### PINS (red-on-old evidence)
+
+- **Wire, `Tests/VariorumMCPTests/MCPGatheringGrantServerTests.swift`** — RED ON THE PRE-FIX TREE
+  (`pins-red-on-old.log`, committed red at `5c88eee55`: 11 tests, 3 red, 6 issues), GREEN after (`mint-green.log`):
+  `aRuleThatNeedsAStarMintsTheNoteStarredWithOneClientNamedUndo` (THE DELIBERATE FLIP — table below; with the Starred
+  list FULL first, so the born star is proven cap-exempt; a living ★-rule book seats it; one client-named undo;
+  `import_document` the same road) · `aStarOrATagRuleTakesTheTagOnTheWire` (grown: "nothing starred", no `starred`
+  key; a star-only rule's mint starred and tagless; `#a AND NOT #a` still refusing in her words) ·
+  `anAnsweredAskOnAStarRuleGatheringLandsTheNoteNeverADeadDoor` (VX-609).
+- **Pure, `Tests/VariorumCoreTests/GatheringTagsSatisfyTests.swift`:** `theWirePlansTagsFirstAndStarsOnlyWhereAStarIsTheOnlyWayIn`
+  (the unit table — 10 rules: every tag-satisfiable rule's wire plan IS the star-forbidden plan, every needs-a-star
+  rule's IS her door's, the wire never answers `.needsStar`) + the flipped reason pin. Red on old by construction.
+- **Core act, `Tests/VariorumCoreTests/MCPStarActsTests.swift` (9):** `aStarActStarsTheNoteAsHerStarDoesWithOneClientNamedEntry`
+  (seat + bell exactly as her own star — her door the witness) · `anUnstarIsANonEventAndABookStarWritesBothStores` ·
+  `aStarAlreadyAsAskedWritesNothingAndRegistersNoEntry` (no setting write, no outbox row, the column-only book) ·
+  `theCapRefusesTheActAndWritesNothing` · `theGuardRunsFirstAndARefusalWritesNothing` ·
+  `anUnstarsUndoPutsTheStarBackWhereItStood` · `eachHalfWritesOnlyWhileTheStarReadsItsPartnersValue` (VX-276, both
+  halves, and a trashed note) · `aReplayedStarIsNoApplyingAct` · `aHalfThatWouldPassTheCapRefusesAndKeepsItsEntry`.
+  Red on old by construction (no such act); BEHAVIOURAL REVERT RUN on the design lines — 4 of 9 red, 11 issues
+  (`star-acts-revert-red.log`), restored green.
+- **Wire act, `Tests/VariorumMCPTests/MCPStarServerTests.swift` (7, over the socket):**
+  `aNoteStarredAtEditIsHeardAsHersWithOneClientNamedUndo` · `aStarAlreadyAsAskedAnswersChangedFalseWithNothingToUndo`
+  · `aBookStarsUnderItsOwnGrantInBothStores` · `theCapRefusesThroughTheOneChainAndWritesNothing` ·
+  `anUnreachedOrFencedTargetAnswersTheOneShapeAndBelowEditTheRungAsks` (a Private note, a ⌘J daily-Journal entry, a
+  note of another wing, the daily Journal and a Private book — each byte-identical to a missing id; below edit the
+  rung's sentence + her ask; not listed below edit) · `aGatheringsOwnStarIsTheAuthors` ·
+  `theArgumentsAreSaidNeverGuessedAndAOnceGrantIsOneAct`. Red on old by construction ("Unknown tool").
+- **Mac (COMPILED into `DerivedData/b1`, RUN PENDING the orchestrator's window):** NEW
+  `App/Variorum/VariorumTests/MCPStarFacesTests.swift` (5: receipts both ways, undo labels, Activity's words allowed
+  and refused, the tool's rung and scopes, the cap's words through the chain with `OpsRefusalCopy`); in
+  `MCPGatheringGrantFacesTests` the three FLIPS (table) + NEW `theWriteNewAskOnAGatheringOffersItsDurationsAndSaysTheStar`
+  (VX-609's face: durations `[.once, .always]` for a not-connected client, the lead says the star — red on old: the
+  lead never said "starred"); `TutorialMCPChapterTests`' JUSTIFIED EDITS (below).
+
+### THE DELIBERATE FLIPS (VX-549's star-rule shaping, superseded — her ruling 2026-10-27, "let's add the star over the wire, it might as well be included"; each cites it in its comment)
+
+| Pin | Was | Now |
+|---|---|---|
+| `MCPGatheringGrantServerTests.aRuleThatNeedsAStarRefusesWriteNewInWordsAndWritesNothing` → renamed `aRuleThatNeedsAStarMintsTheNoteStarredWithOneClientNamedUndo` (wire) | `create_note` into `#parser AND ★` refused "Its rule needs a starred note, and only the author can star one.", nothing minted, the once grant unspent, no ask | the note lands born starred (cap-exempt past a full list), tagged, assembled in, heard by a living ★ book, one client-named undo, the once grant spent, `starred: true` in the answer |
+| `GatheringTagsSatisfyTests.theWirePlanTakesATagWhereHerDoorWouldStar` — its last expectation (core) | `Blocker.needsStar.reason` == "Its rule needs a starred note, and only the author can star one." | == "Its rule needs a starred note." (no door speaks it now; the premise is gone) |
+| Mac `MCPGatheringGrantFacesTests.aStarRuleGatheringOffersReadAndSuggestOnlyWithTheWhy` → renamed `aStarRuleGatheringOffersEveryRungWithAHeadsUpWhereANoteIsWritten` | `offeredRungs(needsStar: true) == [.read, .suggest]`; `starRuleWhy` "…only you can star one…" | every rung offered; `starHeadsUp(needsStar:rung:)` — the line at write new and edit only, nil for a tag rule |
+| Mac `MCPGatheringGrantFacesTests.theGatheringPickerIsStarredThenAToZWithEachRowsFooting` | the star-rule row's footing contains "read and suggest only" | its footing is its shelf alone |
+| Mac `MCPGatheringGrantFacesTests.theWordsAGatheringGrantWears` | `rungDetail(.writeNew, .gathering)` == "…wearing the tags its rule needs, and apply tags" | "…wearing the tags its rule needs (starred, if it needs a star), and apply tags" |
+
+**Justified edits (not flips — a set grows or a sentence gains a clause):** `MCPServerTests.everyDeclaredToolIsHandledAndEveryHandledToolDeclared`
+(the edit set + `set_starred`) · `MCPWriteServerTests.aSuggestGrantProvablyCannotModifyAnExistingTake` (the proof's
+completeness: two `set_starred` calls, refusing at the rung) · `TutorialMCPChapterTests.lessonThreeHowMuchWhereHowLong`
+(the Edit step's "star, unstar," + `set_starred` in its truth loop) and its fourth-card leg (the star clause + its
+truth: `Queries.gatheringWireMintOutcome` plans a star-only gathering's note starred).
+
+**The sweep for every pin asserting the old shaping (the brief's list, each read):** the sheet's `offeredRungs` —
+FLIPPED (above); `starRuleWhy` — FLIPPED; "the ask's withholding" — no pin asserted one (the ask never withheld:
+that was VX-609's finding; `MCPAskAndReceiptTests.anAskOffersOnlyTheDurationsThatCanActAsNamed` and
+`MCPAsksWaitTests`' duration pins read fences only — untouched, still true); `MCPLibraryParityFacesTests`' scope
+expectations — UNTOUCHED (no existing tool's rung or scopes changed; `set_starred` is pinned in its own faces suite);
+the refusal sweep's walked set — UNCHANGED (no new `OperationError` case; `starLimitReached` was already walked and
+worded; `smartFilterUnsatisfiable` stays reachable through the other blockers — 32 unspoken / 76 walked hold);
+W-UX-14's truth pin (`MCPAskAndReceiptTests.anAsksRungSentenceClaimsOnlyWhatItsScopeAllows`) — holds (the gathering
+line claims "new notes" and "tags" only, `create_note` and `apply_tag` both act under a gathering); the guide's
+other cards — no pin on the changed prose outside `TutorialMCPChapterTests` (grep-swept).
+
+### THE SEVEN WORDING POINTS (the VX-596 ticket's block — each dispositioned)
+
+| # | The string (VX-548's, PROVISIONAL) | Disposition | As built |
+|---|---|---|---|
+| 1 | The grant sheet's star-rule why: "Its rule needs a starred note, and only you can star one — so a client can read and suggest here, but not write new or edit." | REWORDED (the shaping retired) | Every rung is offered; at write new or edit only, one quiet line: "Its rule needs a star, so a new note a client writes here is starred." (`MCPPaneCopy.starHeadsUp`, shown through `MCPGrantPicker.starHeadsUp(needsStar:rung:)`; nil at read/suggest and for a tag rule) |
+| 2 | The picker row's footing "read and suggest only" | RETIRED | The row's footing is its wing/shelf/marks/archived state, as every row (`MCPGrantPicker.gatheringOption`) |
+| 3 | The wire refusal "Its rule needs a starred note, and only the author can star one." | RETIRED from every road | The wire stars where the rule needs it (RB-1); no door speaks `.needsStar`; the case keeps only the fact, "Its rule needs a starred note." (`GatheringMint.Blocker.needsStar.reason`) |
+| 4 | The ask's shape on a star-rule gathering (VX-609) | LEGITIMATE — follows the new reach | Its durations stand (each honest — the answered grant now acts, pinned on the wire); its lead (one function with the sheet's line) says "…wearing the tags its rule needs (starred, if it needs a star), and apply tags." |
+| 5 | The guide's gathering card | STAR CLAUSE ADDED | "…the note wears the tags the rule needs, starred if the rule needs a star." Also lesson 3's Edit card names the new act ("…take a tag off a note, star, unstar, rename, archive or delete notes and books…") — VX-197's truth-pass rule (every added tool taught where its rung's acts are named); VX-367's remaining-acts list NOT touched |
+| 6 | MCPSpec's VX-549 paragraph lines | DRAFTED, NOT APPLIED | "Canon owed" below (the two-file rule) |
+| 7 | `MCPSession.instructions` | UNTOUCHED — 0 characters spent | Nothing in it went false: the edit rung's list is examples ("most of what the author can do at the keyboard: …"), and "create_note into one applies its tags" stays true (it applies them; the star is said in `create_note`'s description). **The count stays 2,988 / 3,000** (the VX-548 batch 3 measurement; the string is byte-unchanged — `git diff` on `MCPSession.swift` is empty; `MCPAdviceServerTests`' bound pin green in the headless run) — **12 characters of headroom remain for batch 3's VX-619** |
+
+### Files touched
+
+Core: `Domain/GatheringMint.swift` (`starringOnlyWhereNeeded`, `wireGrammarOutcome`, the `needsStar` case's doc and
+words, the docs of `starrable` / `tagsCanSatisfy` / `needsStar(_:)`) · `Queries/GatheringMintQueries.swift`
+(`gatheringWireMintOutcome`) · `Queries/MCPGrantQueries.swift` (a doc) · `Operations/Operations+MCPWrites.swift`
+(`MCPNoteDestination` doc; the gathering arm plans through the wire outcome and writes the star; `MCPWriteAct.star` /
+`.unstar`) · `Operations/Operations+DocumentImport.swift` (`DocumentImport.starred`) · `Operations/Operations+Appearance.swift`
+(`writeStar`'s `at:` / `heard:`, `starTargetIsLive` internal) · NEW `Operations/Operations+MCPStars.swift`. Wire:
+NEW `VariorumMCP/MCPWriteTools+Star.swift` · `MCPWriteTools.swift` (`Job.setStarred`, the parse/perform arms, the
+minted answer's `starred` key, `starredMintKey`) · `MCPToolCatalog.swift` (`setStarred`; `create_note` /
+`import_document` descriptions) · `MCPWriteTools+LibraryEdits.swift` (`gatheringWords` names starring) ·
+`MCPNullCharacters.swift` · `MCPWriteSupport.swift` (a comment). App: `Features/MCP/MCPPaneCopy.swift` ·
+`MCPGrantPicker.swift` · `MCPGrantSheet.swift` · `Features/Tutorial/TutorialSeeder.swift`. Tests: NEW
+`Tests/VariorumCoreTests/MCPStarActsTests.swift`, `Tests/VariorumMCPTests/MCPStarServerTests.swift`,
+`App/Variorum/VariorumTests/MCPStarFacesTests.swift`; edits to `GatheringTagsSatisfyTests`,
+`MCPGatheringGrantServerTests`, `MCPServerTests`, `MCPWriteServerTests`, Mac `MCPGatheringGrantFacesTests`,
+`TutorialMCPChapterTests`. Untouched, by the lane: `Sources/VariorumCore/Sync/`, `Server/`, custody, every schema,
+the editor seam, `VariorumMobile/`, `MCPSession.swift`.
+
+### Canon owed at the closeout (DRAFTED for the closeout — not applied; the two-file rule)
+
+- **MCPSpec, the VX-549 paragraph — replacing** "`create_note` / `import_document` with its id write a new note bookless
+  in its wing wearing the tags its rule needs (her own gathering door's planner without the star; the ONE application
+  road, so living books hear it; one client-named undo; VX-252's answer with VX-361's tags); a rule only a star could
+  satisfy refuses in her door's words ("Its rule needs a starred note, and only the author can star one."), never the
+  not-shared shape, and the grant sheet offers such a gathering read and suggest only, with the why." **with:**
+  "`create_note` / `import_document` with its id write a new note bookless in its wing wearing the tags its rule needs
+  — tags first, as her door's planner plans them without the star, and born STARRED (her door's star, cap-exempt) only
+  where a star is the only way in (VX-596, PROVISIONAL RB-1 — `★ OR #a` takes #a); the ONE application road and the
+  one star write, so living books hear both; one client-named undo; VX-252's answer with VX-361's tags, plus
+  `starred: true` on a starred mint (absent otherwise). The grant sheet offers such a gathering every rung, saying at
+  write new and edit that a client's new note there is starred; the just-in-time ask offers its honest durations."
+- **MCPSpec, the EDIT rung's reach (R-VX184-1's list) — after** "a note deleted (the Trash, 30 days), archived or
+  unarchived;" **add:** "a note or a book starred or un-starred (`set_starred` — VX-596, her ruling 2026-10-27, "let's
+  add the star over the wire, it might as well be included"; the record `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`
+  BATCH 1): her star write — the union star's two stores, the cap of fifteen refusing in her words, intake hearing a
+  note's star as hers, un-starring a non-event; a star already as asked answers `changed: false` with nothing to undo;
+  ONE client-named undo (her door has none — the `move_note_to_wing` wrap) whose halves write only while the star
+  reads the value their partner left and put it back at its place in the Starred list, and are not applying acts; a
+  gathering's own star is the author's (the gathering sentence);"
+- **AppSpec / SurfaceContracts:** nothing goes false (AppSpec §12's MCP summary and SurfaceContracts' MCP bullet name
+  neither the star nor the star-rule refusal; "Private, Seal and Own are hers alone" stands — the star is not among
+  them). No line owed.
+- **The dated entry + narrative → `notes/AppSpecRecord.md`:** her ruling's words (the ticket), the two wording asks,
+  RB-1's trace (why tags first), VX-609's mechanism and its pin, the undo's place-restore.
+
+### THE BUNDLE items born here (fold into §THE BUNDLE)
+
+- **RB-1, as built (PROVISIONAL):** the wire's write new into a gathering plans TAGS FIRST (VX-549's plan, byte-unchanged
+  for every rule a tag can satisfy) and stars ONLY where a star is the only way in — there her door's plan, born
+  starred, cap-exempt (`newPostInGathering`'s arm); the answer adds `starred: true` (absent otherwise). Consequences
+  for her eyes: (i) a client minting many notes into a star-only gathering can push her Starred list past fifteen, as
+  her own gathering door can (cap-exempt — "a mint never fails on a star"); (ii) `★ OR #a` takes #a on the wire where
+  her door stars. Options: (a) her door's planner outright (the wire stars `★ OR #a` too — one planner, no
+  composition; flips `aStarOrATagRuleTakesTheTagOnTheWire`); **(b) as built**; (c) keep refusing, reworded to point at
+  `set_starred`; and, independent of the three, (d) the wire's star respects the cap (a full list refuses the mint in
+  her cap words).
+- **RB-7 (PROVISIONAL):** `set_starred` on a GATHERING's id answers the gathering sentence (P-VX196-2's posture — "read,
+  never changed through this door"), which now names "starring" among the author's acts. Alternative (b): R-VX184-1's
+  parity — she stars a gathering at the keyboard, so an edit grant reaching the gathering place (its own or its
+  wing's, MB-16) could star it.
+- **RB-8 (design calls, for the ladder or her):** the entry's halves restore the star AT ITS PLACE in the Starred list
+  (an un-star's undo returns the row where it stood, never at the end); they are not applying acts (`apply_tag`'s
+  replay doctrine — a re-star replay seats nothing); a half that would pass the cap refuses in her words and keeps
+  its entry; a column-only book's star comes back in both stores (the union's normal form).
+- **RB-5 (copy, joins her pass):** the tool's description; Activity's "changed the star on “X”" / "was refused changing
+  the star on “X”" (one tool both ways — the coarse log keeps no direction); the receipts "starred “X”" / "unstarred
+  “X”"; the undo labels "‹client›'s star" / "‹client›'s unstar"; `starHeadsUp`; the gathering write-new rung sentence;
+  the guide's two edits; `create_note`'s new sentence; `gatheringWords`' "starring"; `needsStar`'s bare fact.
+- **For VX-368's parity audit (offer, not built):** `set_starred` retires the star row; a gathering's own star (RB-7)
+  is the one star-shaped act the wire still lacks.
+
+### For the orchestrator (not this batch's to run)
+
+- **The Mac batch** (stage, via the coordinator) — the products are prebuilt at `~/dev/variorum-vx-620/DerivedData/b1`
+  (a FRESH dir, never a clone) from the final sources: `cd App/Variorum && xcodebuild -scheme Variorum -destination
+  'platform=macOS' -derivedDataPath ~/dev/variorum-vx-620/DerivedData/b1 test-without-building` with
+  `-only-testing:VariorumTests/<Suite>` for: **the pins** `MCPStarFacesTests` (NEW, 5) · `MCPGatheringGrantFacesTests`
+  (8 — the three flips + VX-609's face pin) · `TutorialMCPChapterTests` (the justified edits); **the neighbours**
+  `MCPWireRefusalSweepTests` · `MCPAskAndReceiptTests` · `MCPAsksWaitTests` · `MCPGrantSheetTests` · `MCPGrantRoadsTests`
+  · `MCPPaneTests` · `MCPPaneTabsTests` · `MCPSharedRowsTests` · `MCPWingFacesTests` (W-UX-13's every-tool words) ·
+  `MCPLibraryParityFacesTests` · `MCPEditParityFacesTests` · `MCPDeliberateFacesTests` · `MCPDoorErgonomicsFacesTests`
+  · `MCPGatheringIconTests` · `StarDoorTests` · `BookcaseStarredShelfTests` · `TutorialCurrencyTests` · `TutorialWalkTests`
+  · `ChromeLineLimitTests` · `CapabilityRegistryTests`. State the EXECUTED count (VX-604); read the `skipped:` lines.
+  If a later batch rebuilds, run from the newest FRESH dir (each batch's dir is built from the tip it saw).
+- **The walk (dev store, both voices where a face shows; the shim driven with the pane-copied key; VX-prefixed
+  content):** (1) an EDIT wing grant: `set_starred {note_id, starred: true}` → the note in the sidebar's Starred list;
+  the receipt "‹client› starred “VX…” · ⌥⌘Z undoes"; Activity "‹client› changed the star on “VX…”"; ⌥⌘Z (named "Undo
+  ‹client›'s star") takes it off. (2) Star three notes by hand; `set_starred {…, starred: false}` on the MIDDLE one;
+  ⌥⌘Z → it returns to the middle of Starred (the place-restore). (3) `set_starred {book_id}` → the Bookcase floats it
+  and the starred shelf shows it. (4) A gathering "VX starred walk" with rule `#vxwalk AND ★`: Settings ▸ MCP ▸ Share
+  another place… → A gathering → pick it → HOW MUCH offers all four rungs; at Write new and at Edit the quiet line
+  "Its rule needs a star, so a new note a client writes here is starred." shows, at Read/Suggest it does not — capture
+  in BOTH voices. (5) VX-609: a READ grant on that gathering; `create_note` into it → refused, the ask waits on the
+  gathering's row; open the ask: its lead says "(starred, if it needs a star)"; Allow Once → the retry LANDS: the note
+  wears #vxwalk, is starred, the gathering shows it. (6) The cap: with fifteen starred, `set_starred` on a sixteenth →
+  her words ("You can star 15 things at a time — …"). **Restore:** un-star every walk star, revoke the walk grants,
+  delete the walk gathering/notes/tag, server off; the known dev-store residue untouched.
