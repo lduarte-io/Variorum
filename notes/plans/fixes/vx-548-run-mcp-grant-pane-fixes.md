@@ -1450,7 +1450,17 @@ for the closeout, the two-file rule); nothing in `Sync/`, `Server/`, custody, th
   flakes are standing — VX-532 and VX-607 — a full-parallel failure in either is re-run isolated before it counts", each
   named with its premise), and the latest merged-tree suite claim (the 2a fix leg's) carries the same note. The ticket
   (VX-607) was filed by the orchestrator. No product pin applies (the finding's own disposition).
-- Finding 3 (`intoGathering` takes `spendsAfter`): NOT-STARTED.
+- Finding 3 (`intoGathering` takes `spendsAfter`): DONE (this commit) — `into` hands its `spendsAfter` to
+  `intoGathering`, whose `land` now spends `consumesOnce && spendsAfter` exactly as the book arm (:720); the doc says
+  why. A seam existed (tests construct `MCPWriteTools` and call its internal `into` — `MCPEditServerTests`' guard pin is
+  the precedent), so the pin extends the gathering write-new once-spend pin's family:
+  `MCPGatheringGrantServerTests.theGatheringArmSpendsAfterExactlyAsTheBookArmDoes` (a once grant on the gathering and one
+  on the living book; `spendsAfter: false` → each arm lands on its own destination and leaves its grant; the default →
+  each spends). **Red at the SEAM on the old code** (`scratchpad/l1-logs/f3-seam-old.log`: 2 issues — the gathering's
+  once grant spent under `false` (:321), so the default leg's call was then refused (:325); the book legs green) — a
+  seam-level red only: **no product red-on-old is claimed**, the finding stays hollow as a bug (no tool reaches the
+  combination). Green after (`f3-green.log`: the gathering wire suite + `MCPLibraryOnceServerTests` +
+  `MCPNoteEditOnceServerTests`, 15 tests / 3 suites).
 - Finding 4 (the fenced-gathering ask's why-word): NOT-STARTED — pin first, red on the current code, then the fix.
 - The whole headless suite at the end: NOT-STARTED.
 

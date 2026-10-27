@@ -276,6 +276,59 @@ struct MCPGatheringGrantServerTests {
         }
     }
 
+    /// The pin above's once grant, at `into`'s SEAM (the ladder's round 1,
+    /// finding 3 — a NIT, hollow as a bug): the gathering arm honours
+    /// `spendsAfter` exactly as the book arm does — `false` (a caller whose
+    /// guard re-decides and spends inside the act's own transaction) leaves the
+    /// once grant for that guard; the default spends it by the landed act. No
+    /// tool reaches the gathering arm with `false` today (`create_note` and
+    /// `import_document` keep the default; the two `spendsAfter: false` callers
+    /// never admit a gathering), so this pins the symmetry a future caller
+    /// relies on — never a product road.
+    @Test func theGatheringArmSpendsAfterExactlyAsTheBookArmDoes() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try world(h)
+            _ = try h.operations.recordMCPContact(name: "claude-code", version: "1")
+            let onGathering = try #require(
+                try h.approve("claude-code", spec(.writeNew, .gathering, w.gathering.id, .once)))
+            let onBook = try h.operations.grantMCPAccess(
+                try h.client("claude-code").id, spec(.writeNew, .book, w.living.id, .once))
+            let tools = MCPWriteTools(
+                database: h.database, grants: h.operations, executor: SeededExecutor(operations: h.writeOperations))
+            let job = MCPWriteTools.Job.createNote(
+                title: nil, payload: .text(""), entryDate: nil, place: .book(w.gathering.id), sectionID: nil)
+
+            func land(_ id: String, spendsAfter: Bool?) throws -> Operations.MCPNoteDestination? {
+                var landedOn: Operations.MCPNoteDestination?
+                let act: (Operations.MCPNoteDestination) throws -> MCPWriteTools.Act = { destination in
+                    landedOn = destination
+                    return (answer: [:], receipt: nil)
+                }
+                let result = if let spendsAfter {
+                    try tools.into(.book(id), job: job, clientName: "claude-code", spendsAfter: spendsAfter,
+                                   admitsGathering: true, act)
+                } else {
+                    try tools.into(.book(id), job: job, clientName: "claude-code", admitsGathering: true, act)
+                }
+                guard case .success = result else { return nil }
+                return landedOn
+            }
+
+            // `spendsAfter: false` — both arms land and leave the once grant.
+            #expect(try land(w.gathering.id, spendsAfter: false) == .gathering(w.gathering.id))
+            #expect(try consumedAt(h, onGathering) == nil, "the gathering arm leaves it for the caller's guard")
+            #expect(try land(w.living.id, spendsAfter: false) == .book(w.living.id))
+            #expect(try consumedAt(h, onBook) == nil, "as the book arm always has")
+            // The default — both arms spend it by the landed act.
+            #expect(try land(w.gathering.id, spendsAfter: nil) == .gathering(w.gathering.id))
+            #expect(try consumedAt(h, onGathering) != nil, "the default spends by the landed act")
+            #expect(try land(w.living.id, spendsAfter: nil) == .book(w.living.id))
+            #expect(try consumedAt(h, onBook) != nil)
+        }
+    }
+
     @Test func importDocumentIntoAGatheringWearsTheHeadersTagsThenTheRules() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }

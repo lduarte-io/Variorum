@@ -706,7 +706,8 @@ struct MCPWriteTools: Sendable {
             }
             if let gathering {
                 return try intoGathering(
-                    gathering, name: name, standing: standing, job: job, clientName: clientName, act)
+                    gathering, name: name, standing: standing, job: job, clientName: clientName,
+                    spendsAfter: spendsAfter, act)
             }
             let decision = MCPGrantAuthority.decide(standing, book: facts, rung: .writeNew, consumes: true)
             guard case .allow(let grantID, let consumesOnce) = decision else {
@@ -739,10 +740,13 @@ struct MCPWriteTools: Sendable {
     /// then plans inside its own transaction (`Operations.mintNoteEntry`'s
     /// gathering arm) and a rule only a star could satisfy refuses in her
     /// door's words through the ONE chain (`MCPWireRefusalCopy`) — never the
-    /// not-shared shape.
+    /// not-shared shape. `spendsAfter` as the book arm's (the ladder's round
+    /// 1, finding 3 — symmetry: a caller whose guard re-decides and spends
+    /// inside the act's own transaction passes `false`; no tool admitting a
+    /// gathering does today).
     private func intoGathering(
         _ facts: MCPGrantRule.BookFacts, name: String?, standing: MCPGrantAuthority.Standing, job: Job,
-        clientName: String, _ act: (Operations.MCPNoteDestination) throws -> Act
+        clientName: String, spendsAfter: Bool, _ act: (Operations.MCPNoteDestination) throws -> Act
     ) throws -> Result<Landed, Refused> {
         let decision = MCPGrantAuthority.decide(standing, gathering: facts, rung: .writeNew, consumes: true)
         guard case .allow(let grantID, let consumesOnce) = decision else {
@@ -755,7 +759,7 @@ struct MCPWriteTools: Sendable {
                 .refusal(decision, .book, standing: standing, ask: ask)))
         }
         return try land(job, clientName: clientName, kind: "gathering", id: facts.id, title: name,
-                        spending: consumesOnce ? [grantID].compactMap { $0 } : []) {
+                        spending: consumesOnce && spendsAfter ? [grantID].compactMap { $0 } : []) {
             try act(.gathering(facts.id))
         }
     }
