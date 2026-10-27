@@ -153,7 +153,7 @@ wk_account() {  # one line: vault mode/revision/updated_at · cursors · live co
 #     record's LIVE STATUS and commits per leg ------------------------------------------------------------------------------
 wk_state() {
   local line
-  line="STATE ${1:-$WK_LEG} $(date -u +%Y-%m-%dT%H:%M:%SZ) | instances: $(wk_instances | wc -l | tr -d ' ')$( [[ -n $(wk_instances) ]] && print -r -- " ($(wk_instances | tr '\n' ' '))")"
+  line="STATE ${1:-$WK_LEG} $(date -u +%Y-%m-%dT%H:%M:%SZ) | instances: $(wk_instances | awk '{print $1}' | sort -u | wc -l | tr -d ' ')$( [[ -n $(wk_instances) ]] && print -r -- " ($(wk_instances | tr '\n' ' '))")"
   line+=" | slot files: $(wk_inodes $WK_SLOT | tr '\n' ' ')| slot library: $(wk_keyfile_id $WK_SLOT/variorum-library-keys.json) | $(wk_hold)"
   line+=" | as-found aside: $( [[ -d $WK_ASIDE ]] && print -r -- "$(ls -1 $WK_ASIDE | wc -l | tr -d ' ') files" || print -r -- none)"
   line+=" | Previous Libraries: $(ls -1 "$WK_SLOT/Previous Libraries" 2>/dev/null | tr '\n' ' ')"
