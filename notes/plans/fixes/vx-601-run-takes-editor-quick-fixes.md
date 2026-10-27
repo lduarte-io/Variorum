@@ -237,4 +237,25 @@ if B lands small; default is three fresh sessions. The ladder runs ONCE over the
 
 ## THE SITTING RECORD (kickoff, 2026-10-27)
 
-*(Her rulings land here verbatim-faithful, same turn.)*
+**R-601-1 (VX-421, the ⌘Z meaning):** per-pane undo managers — her pick of the recommended arm.
+Each take pane owns its `UndoManager`; ⌘Z undoes only the pane the cursor is in; a deleted take's
+history goes with its pane by construction. The shared-history-cleared-at-teardown arm is the
+recorded alternative, not built. The bound-take-change occasion (a pane re-bound to a new take must
+not keep the old take's history) rides the fix either way.
+
+**R-601-2 (VX-428):** build it in this run — her pick of the recommended arm, confirming her
+seating. The VX-170 road (per-note session memory on `EditorRouter`), citing R-VX170-5; her
+verbatim perf requirement rides batch B (the seeded-remount measurement + the landing/scroll
+proof). The ticket leaves Needs Lillian at the batch's start.
+
+**VX-427 — her clarification (verbatim):** *"I think the whoel idea was to beable to count the
+take that you're typing in - is that not what is being done? why is the take face in the bar's
+shared click cycle an option ?"* — Answered: the fix IS exactly that (the bar's existing "Nw take"
+unit counts the focused pane's take); the cycle face was the scout's optional extra, recommended
+dropped. Her confirm is batch 2 of the sitting.
+
+**VX-594 — her lean + question (verbatim):** *"I think the menu door + caret following makes the
+most sense - by that, do you mean if your caret is in a particular take the keyboard shortcuts
+will work for that too?"* — Answered yes (⌘T / New Take (Branch) and the take-scoped doors resolve
+to the focused pane's take when the caret sits in one, chosen take otherwise); her confirm of that
+exact semantics is batch 2 of the sitting.
