@@ -89,6 +89,7 @@ Every implementer reads: CLAUDE.md + its auto-loaded canon (automatic) · **`not
 - zsh `pipestatus` (not bash's `PIPESTATUS`). Screenshots in gitignored dirs. Never `git checkout` over uncommitted work. Push after every commit; never rewrite pushed history. Synchronous foreground waits only — poll logs with `grep -q '<EXIT LINE>' <log> && break; sleep 5` loops, never `tail -f | grep -m1` after the fact, never end a turn awaiting a background run.
 - No subagents inside implementer/reviewer sessions except ONE read-only Sonnet for external facts (spawn with `model: "sonnet"`).
 - **The VX-604 false-green trap (coordinator heads-up, 2026-10-27, from VX-439's run):** a lone-suite Mac run on this machine can false-green through a test-host launch crash, reporting "0 tests in 1 suite passed". Every Mac run's verdict states its EXECUTED test count; a run that executed 0 is NO verdict, red-on-old legs included. (The b1 window's verdict stands: 141 executed in 12 suites, one invocation.)
+- **Two load-sensitive flakes are standing — VX-532 and VX-607 (the ladder's round 1, finding 2):** a full-parallel failure in either is re-run isolated before it counts. VX-532: `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (a 15 s wall clock). VX-607: `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds` (its "premiseFailures == 0" — every session's `initialize` answered inside the client socket's 5 s receive timeout, 150 rounds × 2 endings). Every headless suite claim in this record that says "the one standing flake" predates VX-607's sighting and reads as "the standing flakes" from here on.
 - **The coordinator's stage protocol (oct26coordinator's, RATIFIED by her 2026-10-27 — see SITTING/RULING RECORD):** only the ORCHESTRATOR talks to the coordinator; REQUEST early → READY when built-and-startable → start only on the coordinator's GO → `Tools/stage release` + one result line. Strict instance checks: `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` (the loose form matches builds). After every Debug launch, dismiss a What's New sheet if one shows. Walks are DEV STORE only; no real-store MCP tool calls or real-app launches. A walk that would write MCP client config outside the dev store (Claude Code's / Claude Desktop's server entries, setup keys) is DECLARED in the request and restored at release. Debug prefs: export first; at restore re-export and diff (`defaults import` merges). Merges serialize through the coordinator.
 
 ---
@@ -880,7 +881,9 @@ headless suite (`scratchpad/b2a-logs/fix-headless-all.log`): core **3463 tests /
 standing), StringsWorkbook **32 / 4 passed**, VariorumMCPTests **411 / 75 with ONE issue — the standing VX-532
 wall clock** (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 23.1 s under the
 full-parallel run), ISOLATED green ×2 (`fix-harness-isolated-1/2.log`: 3/1, 2.1–2.2 s). The Mac app + tests:
-`build-for-testing` into `DerivedData/b2afix` TEST BUILD SUCCEEDED (`mac-bft-fix.log`).
+`build-for-testing` into `DerivedData/b2afix` TEST BUILD SUCCEEDED (`mac-bft-fix.log`). *(L1 note: two load-sensitive
+flakes are standing — VX-532 and VX-607 — a full-parallel failure in either is re-run isolated before it counts;
+ENVIRONMENT TRAPS.)*
 
 **For the final window (the orchestrator's):** from `DerivedData/b2afix` — or the window's merged product — re-run at
 least `BookPanelMCPMarksTests` (7: VX-330's 3 with the sweep's justified edit + VX-354's 4) and `TakeLabelLineTests`
@@ -1443,7 +1446,10 @@ for the closeout, the two-file rule); nothing in `Sync/`, `Server/`, custody, th
   door verbs (MB-2) and the zero-state line (MB-3) drafted for MCPSpec in 2a/2b/3's shape; SurfaceContracts owed nothing
   (its one-row-per-place line stays true), said with the reason; the AppSpecRecord narrative's batch-1 items listed. Doc
   only — no pin (the finding's own disposition).
-- Finding 2 (the two-flake note): NOT-STARTED.
+- Finding 2 (the two-flake note): DONE (this commit) — ENVIRONMENT TRAPS gains the binding line ("two load-sensitive
+  flakes are standing — VX-532 and VX-607 — a full-parallel failure in either is re-run isolated before it counts", each
+  named with its premise), and the latest merged-tree suite claim (the 2a fix leg's) carries the same note. The ticket
+  (VX-607) was filed by the orchestrator. No product pin applies (the finding's own disposition).
 - Finding 3 (`intoGathering` takes `spendsAfter`): NOT-STARTED.
 - Finding 4 (the fenced-gathering ask's why-word): NOT-STARTED — pin first, red on the current code, then the fix.
 - The whole headless suite at the end: NOT-STARTED.
