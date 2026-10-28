@@ -220,8 +220,8 @@ the skill.
 
 | # | Item | Status |
 |---|---|---|
-| 1 | VX-421 crash fix (per-pane undo) + pins | NOT-STARTED (batch A) |
-| 2 | VX-248 bound-take adoption + VX-222/227 pins green | NOT-STARTED (batch A) |
+| 1 | VX-421 crash fix (per-pane undo) + pins | BUILT; RED-ON-OLD VERIFIED BY REVERT (window a2: rev421 red on exactly its 6 pins) — walk W1/W2 owed |
+| 2 | VX-248 bound-take adoption + VX-222/227 pins green | BUILT; RED-ON-OLD VERIFIED BY REVERT (window a2: rev248 red on exactly its 4 pins; VX-222/227 green, tier 1) — walk W3/W4 owed |
 | 3 | VX-429 instrumented probe → fix or record | NOT-STARTED (batch A2) |
 | 4 | VX-592 drag probe → fix or record | NOT-STARTED (batch A2) |
 | 5 | VX-428 session memory + measurements + landing proof | NOT-STARTED (batch B) |
@@ -235,6 +235,23 @@ the skill.
 | 13 | The kickoff sitting record | DONE 2026-10-27 (R-601-1…6) |
 | 14 | The ladder (whole-diff, fable-reviewer) | NOT-STARTED |
 | 15 | Closeout (canon deltas · the #245 bundle · tickets · handoff) | NOT-STARTED |
+
+## WINDOW a2 — the owed runs (the orchestrator, 2026-10-27, claim vx-601-tests-a2 from 20:26)
+
+**Red runs on the REBUILT trees (gated rig; array args; zero host restarts in all three):** every
+run executed **12 tests in 3 suites**. `vx601a-pre` — 9 red; `vx601a-rev421` — 6 red;
+`vx601a-rev248` — 4 red. Counts match the prediction table EXACTLY, and the names partition
+cleanly: rev421's reds are precisely the undo/history pins, rev248's precisely the
+rebind-adoption pins, and their union is exactly pre's nine. **No pin is hollow** (none is green
+on its own member's revert while red on pre), so red-on-old is verified by revert PER MEMBER.
+Logs: `DerivedData/logs/red2-*.log`.
+
+**Tier 1 on `vx601a-post`: 132 tests in 17 suites, ALL PASSED, 0 skipped** (VX-222's and VX-227's
+contamination pins among them — green and now redundant by construction). Log:
+`DerivedData/logs/tier1-post.log`.
+
+**The 196-suite battery on post:** launched in this window (names extracted from this file's list
+and count-checked at 196); result lands below when the run completes. PENDING.
 
 ## Environment traps (every batch brief carries this section verbatim)
 
