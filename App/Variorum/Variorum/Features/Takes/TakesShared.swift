@@ -407,7 +407,15 @@ struct TakesCellView: View {
                 model.revealOriginBlock(ofBlock: slot.blockID)
             })
         }
-        if let fan = model.projection.fans[slot.blockID], fan.count > 1 {
+        // VX-244 (the VX-440 run): only a column that can PICK offers the
+        // rows — the ‹ › switcher's own guard (`LensesBoardView.pickSwitcher`),
+        // since the two are one road (VX-227). A `.main` column shows the
+        // note's chosen takes and has no pick: on the Lenses Chosen column
+        // every row could only refuse (J38), and on the Takes article — whose
+        // board-local column `pick` never finds — every row did nothing at all
+        // (P-2: a door that can never act is not rendered).
+        if column.kind != .main,
+           let fan = model.projection.fans[slot.blockID], fan.count > 1 {
             specs.append(.init(
                 title: "Show take",
                 children: fan.map { take in

@@ -466,7 +466,11 @@ Pieces (flipped per commit):
   OLD — the mechanism: the pick refuses with J38's words), `aScratchColumnKeepsShowTakeAndItActs`
   (control, green both sides: two rows, a press moves the scratch pick). DONE (this commit — the PRE-FIX
   tree: the red-on-old SHA).
-- B2-4 VX-244 fix: NOT STARTED.
+- B2-4 VX-244 fix: one guard — the cell menu offers "Show take ▸" only when `column.kind != .main` (the
+  switcher's rule). `pick`'s `.main` refusal arm is UNCHANGED (⌃⌘←/→ on the Chosen column still speaks
+  J38 — `TakesParkedFollowTests.aChosenColumnPickInTheMintGapLeavesTheParkAlone` keeps driving it
+  directly). The two B2-3 absence pins turn GREEN at this commit (RUN PENDING). DONE (this commit — the
+  fix: the green-on-new SHA).
 - B2-5 core: bring a commit back as a take (the op, mirroring `branchVariant`'s posture) + state-transition tests: NOT STARTED.
 - B2-6 the pane at rest: calm one-line rows that expand; explainers behind (i); header counts: NOT STARTED.
 - B2-7 read in full (the sheet) + Bring back as a take (the door, the receipt): NOT STARTED.
