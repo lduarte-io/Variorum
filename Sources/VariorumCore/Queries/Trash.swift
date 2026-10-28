@@ -589,7 +589,41 @@ extension Queries {
     /// **Did deleting these blocks strand an original?** (her round-8b
     /// ruling (d): the receipt names it.) Returns the originals whose LAST
     /// live descendant is now gone — read after the delete, so the answer is
-    /// the store's, not a guess from the projection.
+    /// the store's, not a guess from the projection. Sorted by id.
+    ///
+    /// The rule, exactly: an ANCESTOR of a named block (over `derived_from`
+    /// edges, read past their tombstones — the delete we are asking about
+    /// took its own edges down with it) that is live, unarchived and
+    /// unplaced, has at least one descendant with a block row, and has no
+    /// LIVE descendant. A descendant id with no block row is walked through
+    /// and never counts; a cycle through an original counts it as its own
+    /// live descendant.
+    ///
+    /// **Cost ∝ the deleted blocks' lineage neighbourhood, never its square
+    /// (VX-654).** The earlier body carried an `(origin, descendant)` PAIR for
+    /// every ancestor and every one of that ancestor's descendants — O(L²) in
+    /// lineage depth, and a note's SEAM history (⏎ mid-paragraph divides, ⌫
+    /// at the seam merges) is exactly a lineage chain that deepens by one per
+    /// round: 13 s at 600 rounds, awaited in the Delete Block receipt chain
+    /// (`notes/plans/fixes/vx-648-launch-week.md`, A-648-3). Here every set
+    /// is ONE column, so every node is visited once per walk:
+    /// · `anc` — the named blocks' ancestors (the old first half, unchanged);
+    /// · `cand` — the ancestors that could be stranded (live, unarchived,
+    ///   unplaced);
+    /// · `nb` — every descendant of a candidate: the neighbourhood, which
+    ///   holds every descendant the rule could ever ask about;
+    /// · `up` — ONE upward walk from the neighbourhood's real rows, carrying
+    ///   whether the row it started from is live. "Has a live descendant" is
+    ///   "is an ancestor of a live block", so an upward walk needs no origin
+    ///   label — that label was the pair set. The walk stays inside the
+    ///   neighbourhood and the candidates (`scope`): every path from a
+    ///   descendant up to its candidate runs through that candidate's own
+    ///   descendants. At most two rows per node (live or not).
+    /// A candidate reached only by dead-row walks is stranded; one never
+    /// reached has no real descendant (no clock to ride) and is not.
+    /// Pinned by `LineageReadP1Tests` — exact rows on rich fixtures (run
+    /// against the old body first, green on both sides) and a VM-step bound,
+    /// red on the old body.
     public static func originalsStrandedBy(
         _ db: Database, blockIDs: [String]
     ) throws -> [String] {
@@ -598,9 +632,6 @@ extension Queries {
         return try String.fetchAll(
             db,
             sql: """
-                -- Edges read past their tombstones, for `strandedOriginals`'
-                -- reason: the delete we are asking about took its own edges
-                -- down with it.
                 WITH RECURSIVE anc(id) AS (
                   SELECT e.target_block_id FROM edge e
                   WHERE e.source_block_id IN (\(placeholders))
@@ -610,22 +641,37 @@ extension Queries {
                   JOIN anc a ON e.source_block_id = a.id
                   WHERE e.type = 'derived_from'
                 ),
-                fam(origin, id) AS (
-                  SELECT a.id, e.source_block_id FROM anc a
-                  JOIN edge e ON e.target_block_id = a.id AND e.type = 'derived_from'
+                cand(id) AS (
+                  SELECT o.id FROM anc a
+                  JOIN block o ON o.id = a.id
+                  WHERE o.deleted_at IS NULL AND o.archived_at IS NULL
+                    AND NOT EXISTS (
+                      SELECT 1 FROM container_block placed
+                      WHERE placed.block_id = o.id AND placed.deleted_at IS NULL)
+                ),
+                nb(id) AS (
+                  SELECT e.source_block_id FROM cand c
+                  JOIN edge e ON e.target_block_id = c.id AND e.type = 'derived_from'
                   UNION
-                  SELECT f.origin, e.source_block_id FROM fam f
-                  JOIN edge e ON e.target_block_id = f.id AND e.type = 'derived_from'
+                  SELECT e.source_block_id FROM nb n
+                  JOIN edge e ON e.target_block_id = n.id AND e.type = 'derived_from'
+                ),
+                scope(id) AS (SELECT id FROM nb UNION SELECT id FROM cand),
+                up(id, live) AS (
+                  SELECT e.target_block_id, d.deleted_at IS NULL FROM nb n
+                  JOIN block d ON d.id = n.id
+                  JOIN edge e ON e.source_block_id = n.id AND e.type = 'derived_from'
+                  WHERE e.target_block_id IN (SELECT id FROM scope)
+                  UNION
+                  SELECT e.target_block_id, u.live FROM up u
+                  JOIN edge e ON e.source_block_id = u.id AND e.type = 'derived_from'
+                  WHERE e.target_block_id IN (SELECT id FROM scope)
                 )
-                SELECT f.origin FROM fam f
-                JOIN block d ON d.id = f.id
-                JOIN block o ON o.id = f.origin
-                WHERE o.deleted_at IS NULL AND o.archived_at IS NULL
-                  AND NOT EXISTS (
-                    SELECT 1 FROM container_block placed
-                    WHERE placed.block_id = o.id AND placed.deleted_at IS NULL)
-                GROUP BY f.origin
-                HAVING SUM(CASE WHEN d.deleted_at IS NULL THEN 1 ELSE 0 END) = 0
+                SELECT u.id FROM up u
+                WHERE u.id IN (SELECT id FROM cand)
+                GROUP BY u.id
+                HAVING MAX(u.live) = 0
+                ORDER BY u.id
                 """,
             arguments: StatementArguments(blockIDs))
     }
