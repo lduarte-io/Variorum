@@ -1184,6 +1184,52 @@ deleted; if any walk content is purged forever, NAME it in the release line.
   appearance restored, walk-added prefs keys deleted, the prefs diff ZERO against leg 0, instance closed.
   A STOPPED walk never self-cleans — evidence survives for diagnosis (the standing rule).
 
+### vx440-walk (2026-10-28, claimed 05:59:21 → released 06:36:40; the walk 06:00–06:33; Opus walker under the orchestrator's claim; shots `.vx440-walk-shots/` — UNTRACKED, never added, deleted post-merge)
+
+**Verdicts (both voices where a face):** batch 1 — ALL SEVEN rows WORK-AS-RULED (the auto-fill reached via
+the doors; the date-titled sealed column with "a saved version of this note"; the P-440-5 confirm verbatim;
+promote from Compare and from the band both land a regular note; the latest-version door grey without a
+moment on File, live with one on File/note ▾/⌘K; the band exact, no mode rail, ⌘⇧S disabled; Back returns
+whence it came). Batch 2 — the pane at rest, the open row, read-in-full (title = the commit's name, foot
+doors, selectable), bring-back (label = the commit's name, unchosen, badge v2, the receipt naming the fan's
+end), the pane-row restore in Write (wash at the block start, caret at the start) and the Lenses Chosen
+right-click all WORK-AS-RULED — plus TWO exceptions below. Batch 3 — ALL FOUR members WORK-AS-RULED
+(the kind words everywhere reached, with the confirm/Delete Now/Put back sentences shot; the foot; both
+share doors opening the one sheet on the gathering, Esc'd, zero grants; VX-356's Study band with ink
+9.95:1 on the fill, the fill 1.47:1 on the panel — reads clearly; Terminal's ›).
+
+**Walk findings:**
+- **W-1 (FINDING, bug-class):** a restore from a Block History ROW while TAKES is mounted flashes the block
+  but the article keeps showing the OLD text until re-mount — Write shows the restored text at once, the
+  footer counts update, the store is right. The flash thus lands on visibly pre-restore words: her original
+  "unclear which part came back" complaint, re-created by display staleness. Likely the stale-pane class
+  (VX-248, vx-601's root-fix ticket, was In Progress — check what landed in the merge before fixing).
+  Shots: `FINDING-b2-takes-article-stale-after-restore-terminal.png` and siblings.
+- **W-2 (finding, small):** the read-in-full SHEET road's restore lands the caret at the block's END where
+  the pane-row road lands at its START; the sheet road's wash was not captured (burst came late) — fix the
+  inconsistency, then a burst re-shoot verifies both.
+- **Incidental (not this run's rows):** the note header's book popover says "This note is in 2 books —"
+  counting a gathering as a book (`incidental-in-2-books-wording.png`) — wording-family ticket at closeout.
+  `Tools/words-guard` fails closed with AXError -25200 on every run on this build, blocking Settings
+  captures — ALREADY VX-658 (vx-601's mint, the coordinator's de-dupe); our Settings-captures fact added as
+  a comment there (voice flips went through ⌘K; the tag deletion AX-only, uncaptured).
+- **Honesty (the walker's not-walked list):** the bare no-door Compare auto-fill; ⌘K/note ▾ checked only
+  with a moment present (File checked both ways); the sheet's scroll (the long commit fit); no scratch
+  column for Lenses' control row; the Takes article cell's own header menu (the text right-click showed the
+  system menu, no Show take ▸); the grant leg (no grant minted, by the plan); Settings shots (words-guard);
+  the Study fill measured in app-Dark only.
+
+**Teardown proof:** every mint out (the note's promoted versions went as notes; nothing purged forever —
+Delete Now cancelled after its shot); `#vx440walk` deleted, 0 occurrences; voice restored via ⌘K; three
+walk-added prefs keys deleted by exact key; three launch-rewritten bookkeeping values (idle-sweep mark,
+backup log, the calm-ask launch counter) restored by defaults import — the restore-exactly rule; final
+`diff leg0-prefs.xml final-prefs.xml` exit 0 (2538/2538 keys); app quit by bundle id, both strict pgreps
+empty; clipboard restored; no new backup (upToDate); Resume never pressed; v1_34 left; /Applications
+untouched. Leg 0: no rule-21 notice, no What's New, MCP server off, claude-code approved.
+
+**Morning-bundle keepers:** the b1 band pair + promote confirm; b2 rest/open/sheet in both voices (the
+declutter verdict); b3's VX-356 close-ups with the contrast numbers; the W-1 FINDING set.
+
 ## FOR THE CLOSEOUT (owed; do not improvise past it)
 
 - Canon deltas in the two-file shape: SurfaceContracts (The note — the Versions/Compare doors, the full-size
