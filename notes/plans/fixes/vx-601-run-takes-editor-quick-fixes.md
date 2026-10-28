@@ -220,8 +220,8 @@ the skill.
 
 | # | Item | Status |
 |---|---|---|
-| 1 | VX-421 crash fix (per-pane undo) + pins | BUILT; RED-ON-OLD VERIFIED BY REVERT (window a2: rev421 red on exactly its 6 pins) — walk W1/W2 owed |
-| 2 | VX-248 bound-take adoption + VX-222/227 pins green | BUILT; RED-ON-OLD VERIFIED BY REVERT (window a2: rev248 red on exactly its 4 pins; VX-222/227 green, tier 1) — walk W3/W4 owed |
+| 1 | VX-421 crash fix (per-pane undo) + pins | **ACCEPTED 2026-10-27** — red-on-old by revert (rev421: exactly its 6 pins), tier 1 + battery green, walk W1/W2 PASS both voices |
+| 2 | VX-248 bound-take adoption + VX-222/227 pins green | **ACCEPTED 2026-10-27** — red-on-old by revert (rev248: exactly its 4 pins), VX-222/227 green in tier 1, walk W3/W4 PASS both voices |
 | 3 | VX-429 instrumented probe → fix or record | NOT-STARTED (batch A2) |
 | 4 | VX-592 drag probe → fix or record | NOT-STARTED (batch A2) |
 | 5 | VX-428 session memory + measurements + landing proof | NOT-STARTED (batch B) |
@@ -871,3 +871,34 @@ walk note (`canvasViewMemory.` / `currentBlock.` / `postMode.` / `takesViewMemor
 `IdleCommitSweepMark.Variorum-dev` (stamp), `variorum.backup.log` (the per-launch dev-store backup
 *[removed for publication]*
 before: nothing added, nothing removed.
+
+## ORCHESTRATOR ADDENDUM — batch A acceptance + the walk's tails (2026-10-27 ~21:05)
+
+**Batch A is ACCEPTED** (suites: red-on-old by revert per member, tier 1 132/17, battery 1143/196;
+the walk: W1–W4 pass, both voices, no crash). The coordinator verified both releases
+(tests-a2 20:25:47–20:41:46; walk 20:42:52–21:00:49).
+
+**The launch counter, and an orchestrator slip said plainly:** restoring
+`calmAsks.passphrase.<library-uuid>.launches` to its as-found 29, the first write keyed on a first-match
+grep and hit a DIFFERENT library's counter (`…159caa3f….launches`, 3 → 29) before being caught
+against the walker's before-export. Both keys were then restored to their exact before-export
+values (159caa3f = 3, e11e5233 = 29) and verified against `/tmp/vx601-prefs-before.plist`. The
+lesson, adopted: restore from the export's ground truth, never a pattern match.
+
+**F-1, her clipboard (for her):** the walk's one `pbcopy` (~20:45) overwrote the pasteboard; by the
+Terminal pass it held a Reddit URL of hers (Universal Clipboard pulls her devices' clipboard onto
+the Pro), which then rode W1's paste. **Where the URL sits now: the DEV store's Trash, top row —
+the walk note "vx601 walk note" (deleted 8:57 PM), in one of its takes.** Nothing purged; deleting
+it forever is hers to say. **The standing rule from the coordinator, adopted for every future walk
+brief in this run: NO pasteboard writes — type the text, or save-and-restore the pasteboard,
+declared in the REQUEST.**
+
+**Walk findings routed:** O-1 (the receipt "Undid: Delete Variant" speaks the model word) → a
+Wording ticket to mint (OWED — see Linear writes below). O-2 (a ⌃⌘ take-step keeps the caret's
+character offset, landing mid-word) → the #245 bundle as an unruled edge, options at closeout.
+O-3's three observations stay recorded for their owning batches (VX-428, VX-427, batch A2's
+caret territory).
+
+**OWED LINEAR WRITES (the MCP needs her /mcp re-auth; noted per the workflow rule):** mint the O-1
+Wording ticket (Improvement · Confirmed · Takes & Lenses · Low; description drafted in this
+addendum's commit); VX-421/VX-248 → In Review at the ladder, Done at the merge, as usual.
