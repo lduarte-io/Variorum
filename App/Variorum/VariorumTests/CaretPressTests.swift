@@ -41,8 +41,11 @@ import VariorumCore
 @MainActor
 enum CaretPressGesture {
     /// The point on `index`'s glyph, `dx` points right of its leading edge,
-    /// in the VIEW's space (the caret before `index` stands at `dx == 0`).
-    static func point(_ index: Int, dx: CGFloat = 2, in view: NSTextView) -> NSPoint {
+    /// in the VIEW's space (the caret before `index` stands at `dx == 0`). The
+    /// default, one point in, is ON the caret where she sees it and inside the
+    /// glyph's leading half in either voice — so a press there anchors at
+    /// `index` (the pins assert it: `anchors(_:at:in:)`).
+    static func point(_ index: Int, dx: CGFloat = 1, in view: NSTextView) -> NSPoint {
         guard let window = view.window else { return .zero }
         var actual = NSRange()
         let screen = view.firstRect(
@@ -84,6 +87,15 @@ enum CaretPressGesture {
         while let left = NSApp.nextEvent(
             matching: [.leftMouseDragged, .leftMouseUp], until: Date(),
             inMode: .default, dequeue: true) { _ = left }
+    }
+
+    /// The press's own precondition, said: the point is on character `index`
+    /// (the one the caret precedes — the measured zone) and a press there
+    /// anchors a selection at `index`.
+    static func anchors(_ point: NSPoint, at index: Int, in view: NSTextView) -> Bool {
+        guard let window = view.window else { return false }
+        let under = view.characterIndex(for: window.convertPoint(toScreen: view.convert(point, to: nil)))
+        return under == index && view.characterIndexForInsertion(at: point) == index
     }
 
     /// A plain click (no hold) — how she puts the caret somewhere.
@@ -266,6 +278,8 @@ struct PaneCaretPressTests {
         #expect(view.selectedRange() == NSRange(location: 12, length: 0),
                 "the click put the caret at 12 (\(view.selectedRange()))")
         let end = view.characterIndexForInsertion(at: CaretPressGesture.point(30, dx: 0, in: view))
+        #expect(CaretPressGesture.anchors(CaretPressGesture.point(12, in: view), at: 12, in: view),
+                "the press is on the caret's own character")
         CaretPressGesture.press(
             view, from: CaretPressGesture.point(12, in: view),
             to: CaretPressGesture.point(30, dx: 0, in: view), hold: 0.4)
@@ -287,6 +301,8 @@ struct PaneCaretPressTests {
         #expect(view.selectedRange() == NSRange(location: 0, length: 0),
                 "the landing put the caret at the start (\(view.selectedRange()))")
         let end = view.characterIndexForInsertion(at: CaretPressGesture.point(20, dx: 0, in: view))
+        #expect(CaretPressGesture.anchors(CaretPressGesture.point(0, in: view), at: 0, in: view),
+                "the press is on the caret's own character")
         CaretPressGesture.press(
             view, from: CaretPressGesture.point(0, in: view),
             to: CaretPressGesture.point(20, dx: 0, in: view), hold: 0.4)
@@ -308,6 +324,8 @@ struct PaneCaretPressTests {
                 "the read pane kept its selection (\(view.selectedRange()))")
         let focusBefore = pane.focusRequests
         let end = view.characterIndexForInsertion(at: CaretPressGesture.point(30, dx: 0, in: view))
+        #expect(CaretPressGesture.anchors(CaretPressGesture.point(12, in: view), at: 12, in: view),
+                "the press is on the caret's own character")
         CaretPressGesture.press(
             view, from: CaretPressGesture.point(12, in: view),
             to: CaretPressGesture.point(30, dx: 0, in: view), hold: 0.4)
@@ -336,6 +354,8 @@ struct PaneCaretPressTests {
         guard case let (_, rig, view)? = await liveRig(caret: 12) else { return }
         defer { rig.close() }
         let end = view.characterIndexForInsertion(at: CaretPressGesture.point(30, dx: 0, in: view))
+        #expect(CaretPressGesture.anchors(CaretPressGesture.point(12, in: view), at: 12, in: view),
+                "the press is on the caret's own character")
         CaretPressGesture.press(
             view, from: CaretPressGesture.point(12, in: view),
             to: CaretPressGesture.point(30, dx: 0, in: view), hold: 0.02)
@@ -351,6 +371,8 @@ struct PaneCaretPressTests {
         defer { rig.close() }
         let reportsBefore = pane.selections.count
         let placesBefore = pane.clickPlaces.count
+        #expect(CaretPressGesture.anchors(CaretPressGesture.point(12, in: view), at: 12, in: view),
+                "the press is on the caret's own character")
         CaretPressGesture.press(
             view, from: CaretPressGesture.point(12, in: view), to: nil, hold: 0.4)
         #expect(view.selectedRange() == NSRange(location: 12, length: 0),
@@ -419,6 +441,8 @@ struct EditorCaretPressTests {
             #expect(view.selectedRange() == NSRange(location: 12, length: 0),
                     "the click put the caret at 12 (\(view.selectedRange()))")
             let end = view.characterIndexForInsertion(at: CaretPressGesture.point(30, dx: 0, in: view))
+            #expect(CaretPressGesture.anchors(CaretPressGesture.point(12, in: view), at: 12, in: view),
+                    "the press is on the caret's own character")
             CaretPressGesture.press(
                 view, from: CaretPressGesture.point(12, in: view),
                 to: CaretPressGesture.point(30, dx: 0, in: view), hold: 0.4)
@@ -445,6 +469,8 @@ struct EditorCaretPressTests {
             #expect(view.selectedRange() == NSRange(location: 12, length: 0),
                     "typing left the caret at 12 (\(view.selectedRange()))")
             let end = view.characterIndexForInsertion(at: CaretPressGesture.point(30, dx: 0, in: view))
+            #expect(CaretPressGesture.anchors(CaretPressGesture.point(12, in: view), at: 12, in: view),
+                    "the press is on the caret's own character")
             CaretPressGesture.press(
                 view, from: CaretPressGesture.point(12, in: view),
                 to: CaretPressGesture.point(30, dx: 0, in: view), hold: 0.4)
@@ -482,6 +508,8 @@ struct EditorCaretPressTests {
                 window.close()
             }
             let view = h.textView
+            #expect(CaretPressGesture.anchors(CaretPressGesture.point(12, in: view), at: 12, in: view),
+                    "the press is on the caret's own character")
             CaretPressGesture.press(
                 view, from: CaretPressGesture.point(12, in: view), to: nil, hold: 0.4)
             #expect(view.selectedRange() == NSRange(location: 12, length: 0),

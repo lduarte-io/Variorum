@@ -94,12 +94,15 @@ extension CaretPress {
                   modifiers: event.modifierFlags),
               !view.hasMarkedText(), let window = view.window
         else { return false }
+        // Only a lone caret can cover a character — anything else pays no
+        // hit-test (the rule below re-asks the whole question).
+        let selection = view.selectedRanges.map(\.rangeValue)
+        guard selection.count == 1, selection[0].length == 0 else { return false }
         let pressed = view.characterIndex(
             for: window.convertPoint(toScreen: event.locationInWindow))
         guard pressed != NSNotFound,
               let target = caretBeforePress(
-                  selection: view.selectedRanges.map(\.rangeValue),
-                  pressedCharacter: pressed,
+                  selection: selection, pressedCharacter: pressed,
                   text: view.string as NSString)
         else { return false }
         view.setSelectedRange(
