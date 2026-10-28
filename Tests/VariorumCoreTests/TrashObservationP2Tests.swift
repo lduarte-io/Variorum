@@ -146,13 +146,17 @@ struct TrashObservationP2Tests {
 
     /// **RED ON OLD.** One autosave in another note, with the Trash closed and
     /// then open (both of `RecoveryView`'s observations held, exactly as the
-    /// Mac starts them): the writer connection must do the SAME work either
-    /// way. Old: the writer re-ran `Queries.trash` for each held observation
-    /// inside the autosave's commit.
+    /// Mac starts them), over a small Trash and one six times its lineage:
+    /// what the open Trash adds to the WRITER connection's work must not grow
+    /// with what the Trash holds — the listing is re-read on a reader. (What
+    /// it does add is GRDB's constant snapshot handshake for the concurrent
+    /// read, ~80 instructions; one re-read of this Trash is tens of
+    /// thousands.) Old: the writer re-ran `Queries.trash` for each held
+    /// observation inside the autosave's commit.
     @Test func aWriteWhileTheTrashIsOpenNeverPaysForItsListing() async throws {
-        func writerWork(trashOpen: Bool) async throws -> Int {
+        func writerWork(trashOpen: Bool, rounds: Int) async throws -> Int {
             try await withOnDiskOperations { ops, db in
-                try seamNoteDeleted(ops, rounds: 40)
+                try seamNoteDeleted(ops, rounds: rounds)
                 let elsewhere = try ops.createPost(title: "elsewhere")
                 let typed = try ops.seedBlock(in: elsewhere.id, text: "alpha beta")
                 let now = Date(timeIntervalSince1970: 1_782_864_000 + 86_400)
@@ -175,11 +179,18 @@ struct TrashObservationP2Tests {
                 return work
             }
         }
-        let closed = try await writerWork(trashOpen: false)
-        let open = try await writerWork(trashOpen: true)
-        print("VX-670 one autosave's writer VM instructions: Trash closed \(closed), Trash open \(open)")
-        #expect(open - closed < 100,
-                "the open Trash added \(open - closed) VM instructions to a write on the writer (\(closed) → \(open))")
+        var added: [Int] = []
+        for rounds in [10, 60] {
+            let closed = try await writerWork(trashOpen: false, rounds: rounds)
+            let open = try await writerWork(trashOpen: true, rounds: rounds)
+            print("VX-670 one autosave's writer VM instructions (\(rounds) seam rounds in the Trash): "
+                  + "Trash closed \(closed), Trash open \(open)")
+            added.append(open - closed)
+        }
+        #expect(added[1] <= added[0] + 50,
+                "the open Trash's added writer work grew with the Trash: \(added[0]) → \(added[1])")
+        #expect(added.allSatisfy { $0 < 500 },
+                "the open Trash added \(added) VM instructions to one write on the writer")
     }
 
     /// The named region against the regions GRDB derives from every

@@ -842,11 +842,27 @@ extension Queries {
 
 extension AppDatabase {
     /// The Trash, live (13j J1). Windowed like every other recovery listing.
+    ///
+    /// **Woken by NAMED tables, so its re-fetch never runs on the writer**
+    /// (VX-670). `observe { }` tracks the region it records from its own
+    /// fetch, and GRDB 7.11 re-runs such an observation SYNCHRONOUSLY ON THE
+    /// WRITER CONNECTION inside every commit that touches it (the VX-647
+    /// trace's amplifier). The open Trash holds two (the Mac's listing and its
+    /// unfiltered total; the phone's listing), so every write in the app —
+    /// her Put back, her Delete Now's intent, the local sweep's family write,
+    /// an autosave in another window — returned only after the Trash had
+    /// re-read itself twice: 5.5 s per write at 600 seam rounds with the old
+    /// stranded arm. A constant region (`observe(tracking:)`) lets GRDB
+    /// re-fetch on a READER after the commit, coalesced: the write answers at
+    /// once and the listing follows (P2 — reads never block writes). The
+    /// fetch and its answer are unchanged; only WHEN it runs moved. Pinned by
+    /// `TrashObservationP2Tests` (the writer's work, the region's exactness,
+    /// the held listing's liveness).
     public func observeTrash(
         now: Date, kinds: Set<Queries.TrashItem.Kind>, oldestFirst: Bool, limit: Int,
         wingID: String? = nil
     ) -> AsyncValueObservation<[Queries.TrashItem]> {
-        observe {
+        observe(tracking: Queries.trashTables.map { Table($0) }) {
             try Queries.trash(
                 $0, now: now, kinds: kinds, oldestFirst: oldestFirst, limit: limit,
                 wingID: wingID)
