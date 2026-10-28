@@ -281,7 +281,33 @@ the skill.
   high-water mark — `PaneMeasurement` is the one measurement brain. `notes/TEXTKIT2_NOTES.md` is
   required reading for batch A (and any batch that touches pane geometry).
 
-## THE SITTING RECORD (kickoff, 2026-10-27)
+## INCIDENT — the vx-601-tests-a window, 2026-10-27 evening (window STOPPED early; the orchestrator)
+
+**What ran.** Under the coordinator's GO (claim 19:50–, 45 min): first attempt 19:50–19:51 executed
+0 tests on all three revert trees (the zsh word-split slip — the whole `-only-testing` list passed
+as one argument; the VX-604 no-verdict shape; caught by the coordinator). Re-run with array args:
+`vx601a-pre` 20:03 — **12 tests in 3 suites, failed with 19 issues** (the red run; failing names
+match the expected red families by name; per-pin verification below still owed); `vx601a-rev421`
+20:04 and `vx601a-rev248` 20:05 — **NO VERDICT: the test host died AT LAUNCH on every attempt**
+("Restarting after unexpected exit…" ×3 each), the app's store open failing at startup
+(`AppDatabase+Dependency.swift:19`, the dev-store path in `io.lduarte.Variorum.debug`). Logs:
+`App/Variorum/DerivedData/logs/red-*.log`.
+
+**The slot's file facts at 20:06** (no store opened, file listing only): the dev slot holds ONE
+`variorum.sqlite` (397,312 bytes, mtime Sep 25 08:07), NO -wal/-shm, NO key file beside it, and
+the slot folder's own mtime is Sep 25 — while its parent (`…/Application Support`) changed TODAY
+at 19:02, before this window's claim (19:50). That contents does not look like the wave's
+held-since-10-20 library. Two readings fit: (a) the slot was replaced with a preserved-mtime copy
+before this window (19:02), with the pre run's host at 20:03 having opened something that later
+launches could not; or (b) the breakage happened during/after the pre run (20:03–20:04). File
+facts alone cannot distinguish; handed to the coordinator to correlate with the other sessions'
+19:02 acts. **Her real store is a different container and was never touched.**
+
+**Status consequences.** Tier 1 and the battery DID NOT RUN. rev421/rev248 red-on-old verification
+is OWED (the per-member hollow-pin discrimination was exactly their job). The pre red run stands
+PROVISIONALLY. No process of this window survived it (pgrep strict forms clean, no booted sims);
+the claim was released with the incident reported. NOTHING in this window pressed Resume Sync or
+opened the store by hand.
 
 **R-601-1 (VX-421, the ⌘Z meaning):** per-pane undo managers — her pick of the recommended arm.
 Each take pane owns its `UndoManager`; ⌘Z undoes only the pane the cursor is in; a deleted take's
