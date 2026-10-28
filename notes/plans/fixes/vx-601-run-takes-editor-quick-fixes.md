@@ -1287,3 +1287,27 @@ per-note keys for the walk note — `currentBlock.` / `postMode.` `C2C2D07F-F967
 (02:04:19Z → 02:17:33Z), `variorum.backup.log` (the per-launch dev-store backup entry),
 *[removed for publication]*
 Final export (`/tmp/vx601a2-prefs-final.plist`) vs before: nothing added, nothing removed.
+
+**Deletion duty, second leg (same claim, 22:34–22:37 MDT; the coordinator's corrected naming: batch
+A's walk note was auto-titled by its date).** Guards empty; relaunched the same `vx601a2-post` build
+(pid 67144; no What's New sheet). Trash read after its loading face (~9 s): row 1 "vx601 a2 walk
+note · 10:31 PM", row 2 **"2026-10-27 · note · deleted Oct 27, 2026 at 8:57 PM" — the only row at
+that stamp**, then the Sherlock set (5:46 PM) — `leg2-trash-before-w0.png`. Pressed that row's
+**"Delete Now"** once → the confirm "Delete this note for good? It skips the rest of its 30 days —
+there's no putting it back." (Delete for Good / Cancel). **The walker's turn ended here, mid-leg**
+(the app left running, the confirm open, nothing in it pressed); on resume, the state was read
+FIRST before any press: the confirm still open over the Trash, the 8:57 PM row still standing,
+row 1 and the Sherlock set unchanged (`leg2-now-w0.png`). Then pressed **"Delete for Good"** — that
+one row, nothing else; the Trash never emptied. Receipt: "The note is gone from the app now — the
+app's own cleanup removes the bytes." The list refreshed ~5 s later. **After:** the 8:57 PM
+"2026-10-27" row GONE; "vx601 a2 walk note · 10:31 PM" still on top (it STAYS in the Trash); the
+Sherlock set directly beneath, unchanged and in order through "A Scandal in Bohemia"; held banner
+present, Resume Sync never pressed; "Sync off (dev store)"; Study + app Dark
+(`leg2-trash-after2-w0.png`). Observation O-A2W-3 (pre-existing, not this batch): that receipt line
+draws over the bottom-most visible Trash row's text. Quit by bundle id (22:36); both strict guards
+empty. **Prefs after the leg:** nothing added or removed vs `/tmp/vx601a2-prefs-before.plist`; the
+*[removed for publication]*
+and was restored by its exact key to **29** (`defaults write -int 29`, read back 29, an int as
+before; every other library's counter unchanged against the before-export); remaining CHANGED =
+bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`). Final export
+`/tmp/vx601a2-prefs-final2.plist`. F-A2W-1 is CLOSED by this leg.
