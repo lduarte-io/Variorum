@@ -82,6 +82,21 @@ Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by P
 - Evidence of its kind: a repro note, a pin on the visible state through the act (red on the pre-fix tree), the fix — or the trace + deferral case.
 **Batch duties:** report the TOUCHED EDITOR FILES to the orchestrator as soon as the trace names them (the VX-601 overlap). Fixes land with red-on-old pins verified by behavioral revert, per member. If the trace proves the finding hollow (no deleted-blocks dependence reproducible), record it — don't fix it. If a fix would change product behavior anywhere ruled (the Return door's semantics, caret landings, receipts), STOP and return the proposal to the orchestrator before building that half (the in-batch design fork rule). Suite scope at close: the suites exercising every changed SOURCE file.
 
+## BATCH 1 RECORD (implementer: Opus, fresh session, 2026-10-28)
+
+**Not done (first line, kept current):** nothing closed yet — trace in progress. No stage claim held; no app-target suite, no live walk run by this batch so far.
+
+LIVE STATUS (per piece):
+- B1-0 — required reading (TEXTKIT2_NOTES in full, SurfaceContracts §The note, AppSpec §7 Return paragraph + §9, OverallModel §5, resiliency protocol): DONE (this commit).
+- B1-1 — VX-647 headless fixture: cost of `newBlock` / `deleteBlock` / the editor structural roads' queries vs M deleted blocks: NOT-STARTED.
+- B1-2 — VX-647 view-side trace (which observation/query re-runs per structural act, its cost vs M): NOT-STARTED.
+- B1-3 — VX-647 pin (red-on-old) + fix, or deferral case: NOT-STARTED.
+- B1-4 — VX-649 trace (the list door's road; shared cause with VX-647?): NOT-STARTED.
+- B1-5 — VX-649 pin + fix, or deferral case: NOT-STARTED.
+- B1-6 — close: `swift test` green on touched core; app-target/walk needs listed; self-assessment: NOT-STARTED.
+
+Revert state: no behavioral revert in flight.
+
 ## BATCH 2 — the MCP door: VX-639 · VX-640 · VX-641 · VX-606 · VX-626 · VX-612 · VX-367 (brief to be finalized at spawn; the ticket rulings are in the roster + the tickets, the records in `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md` and `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md`; `notes/MCPSpec.md` read IN FULL by the implementer)
 
 ## BATCH 3 — wings, stars & keys: VX-644 · VX-632 · VX-643 · VX-563 (brief at spawn; VX-643 is MOBILE-VISIBLE — the phone's star doors, `MobileStars`, `MobileStarredView`, the mobile tutorial's cap line; a MobileSoul ledger row is owed at closeout)
