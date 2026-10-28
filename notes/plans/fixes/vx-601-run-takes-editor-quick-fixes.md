@@ -1,6 +1,6 @@
 # VX-601 — Run: takes & editor quick fixes
 
-**STATUS: OPEN — kicked off 2026-10-27 (architect-phase).**
+**STATUS: CLOSED 2026-10-28 — merged (PR #200, b3b1041aa) and RELEASED as 0.10.4 (9992) at her standing word (DMG/appcast/site all verify-published PASS; the step-0 walk green; her handoff `notes/handoffs/vx-601-handoff.md`).**
 Ticket: VX-601 · Project: v1 release readiness · Branch: `vx-601-run-takes-editor-quick-fixes` ·
 Worktree: `~/dev/variorum-vx-601` · Machine: the Pro · Stage/walks via **oct27coordinator**.
 Split out of VX-439 at her word (2026-10-27): the Takes/editor cluster isolated under the Fable
@@ -2385,3 +2385,21 @@ coordinator's pre-release triage rule. Lesson adopted: a RELEASE line's "no dial
 the screen, not inferred from clean pgreps.
 
 | 15 (final) | Closeout | Ledgers landed on main at the merge (this commit); the release window remains, then the banner flips CLOSED. |
+
+
+## THE RELEASE — executed 2026-10-28 (the record's last entry)
+
+0.10.4 (build 9992) from release SHA e07a4e65f: all ten pipeline steps green; A1
+`variorum-a1-0.10.4-install-2026-10-28T092056Z` cmp-verified (the 0.10.3 A1 pruned after the
+refresh verified); the step-0 walk PASS both arms (Opus-driven; the dev slot restored
+inode-identical with v1_34 untouched; the words guard over-withheld all captures → VX-658, the
+gate accepted on the walk's logs + server reads — the orchestrator's recorded call);
+/Applications refreshed (codesign deep/strict PASS staged + installed, CFBundleVersion 9992); the
+site legs in publish-and-leave order (R2 upload after the cache-busted 404 preflight;
+verify-published dmg PASS byte-identical; appcast deployed + verify-published PASS; the beta page
+shows 0.10.4; site commit 9f7a95f). The coordinator verified the release independently. Leftovers
+by precedent: the walk libraries' Documents backups (f38de1d6, 0a0629af — beside VX-623's);
+`variorum.whatsNew.lastVersion` left at 0.10.4 in the dev domain (the sheet-dismissed state,
+reversal documented in the walk report). Debris tidied; the worktree and branch deleted; the run's
+tickets: members Done at the merge, born VX-634 · 636 · 637 · 638 · 650 · 651 · 652 · 656 · 657 ·
+658 all triaged.
