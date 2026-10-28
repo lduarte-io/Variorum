@@ -205,7 +205,7 @@ struct PrinceSeedTests {
             #expect(mine.text == generated.ricciText, Comment(rawValue: generated.noteTitle))
             #expect(mine.label == PB.ricciTakeLabel)
         }
-        #expect(PB.ricciTakeLabel == "ricci 1909", "R-633-14, its year corrected at U2b: the 1909 Oxford printing PG #57037 transcribes")
+        #expect(PB.ricciTakeLabel == "ricci 1903", "R-633-19: the translation's own date (first published 1903, Grant Richards); PG #57037 transcribes the 1909 Oxford printing — the credits' fact")
         let english = Dictionary(
             uniqueKeysWithValues: try SampleLibrarySeeder.loadStories(for: prince).map { ($0.title, $0.text) })
         for third in PB.thirdTakes {
@@ -225,7 +225,7 @@ struct PrinceSeedTests {
         #expect(PB.dacre.text == lines[0..<4].joined(separator: "\n"))
         #expect(lines[4].isEmpty && lines[5] == "Edward Dacre, 1640.", "the attribution follows")
         #expect(!PB.dacre.text.contains("Dacre"), "and is not part of the take")
-        #expect(PB.dacre.label == "dacre 1640", "R-633-13")
+        #expect(PB.dacre.label == "dacres 1640", "R-633-20")
         let english = try SampleLibrarySeeder.loadStories(for: prince)
         let last = try #require(english.last)
         let blocks = SegmentationRules.bulkSegments(last.text, mode: SampleLibrarySeeder.segmentation)
@@ -449,8 +449,8 @@ struct PrinceSeedTests {
                 let seventeen = try #require(byTitle["XVII. Concerning cruelty and clemency, and whether it is better to be loved than feared"])
                 let twentySix = try #require(byTitle["XXVI. An exhortation to liberate Italy from the barbarians"])
                 let two = try #require(byTitle["II. Concerning hereditary principalities"])
-                #expect(try lensPicks(db, noteID: seventeen).map(\.name) == ["marriott 1908", "il principe 1532", "ricci 1909"])
-                #expect(try lensPicks(db, noteID: twentySix).map(\.name) == ["marriott 1908", "il principe 1532", "dacre 1640"])
+                #expect(try lensPicks(db, noteID: seventeen).map(\.name) == ["marriott 1908", "il principe 1532", "ricci 1903"])
+                #expect(try lensPicks(db, noteID: twentySix).map(\.name) == ["marriott 1908", "il principe 1532", "dacres 1640"])
                 #expect(try lensPicks(db, noteID: two).map(\.name) == ["marriott 1908", "il principe 1532"])
 
                 // THE THIRD TAKES — on their blocks, word for word.

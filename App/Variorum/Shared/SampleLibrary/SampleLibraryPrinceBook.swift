@@ -9,12 +9,15 @@
 //  English (chosen — the page opens on it) and Machiavelli's Italian (the
 //  1814 printing Wikisource transcribes, re-paragraphed by hand to Marriott's
 //  breaks, words untouched — the U1 record), labelled "il principe 1532".
-//  A few of the most quoted lines carry a THIRD take, Luigi Ricci's 1909
-//  translation ("ricci 1909", R-633-14 as corrected — the Oxford University
-//  Press printing PG #57037 transcribes is dated 1909 on its own title page),
-//  and the book's last block — the
-//  Petrarch stanza Marriott prints in Italian — carries Edward Dacre's 1640
-//  English verse ("dacre 1640", R-633-13).
+//  A few of the most quoted lines carry a THIRD take, Luigi Ricci's
+//  translation ("ricci 1903", R-633-19 — the label carries the TEXT's own
+//  date per the book's convention (il principe 1532, marriott 1908): Ricci
+//  first published 1903, Grant Richards; PG #57037 transcribes the Oxford
+//  1909 printing, the credits' fact), and the book's last block — the
+//  Petrarch stanza Marriott prints in Italian — carries Edward Dacres' 1640
+//  English verse ("dacres 1640", R-633-13 + R-633-20: the catalogues'
+//  spelling of his name; Marriott's apparatus line prints "Dacre" and the
+//  raw-source pin keeps that spelling where it asserts HIS line).
 //
 //  ── HOW IT SEEDS (the seeder's own road, `Book.prince`) ──────────────────
 //  The English imports exactly as Sherlock's stories do (`ThePrince.txt`,
@@ -42,7 +45,7 @@
 //  in the same turn, named by the take-label pattern: "marriott 1908" (every
 //  block its English take, by explicit id — the way back after choosing
 //  Italian), "il principe 1532" (every block its Italian), and on the
-//  chapters that carry them "ricci 1909" / "dacre 1640" (that block its
+//  chapters that carry them "ricci 1903" / "dacres 1640" (that block its
 //  third take, the rest following the chosen). A lens is never rendering
 //  truth — the page still opens on Marriott.
 //
@@ -111,9 +114,9 @@ nonisolated enum SampleLibraryPrinceBook {
     /// PRESS … 1909", `notes/source/prince-ricci-pg57037.txt` ~line 54; the
     /// earlier 1903 was an unverified recollection). It names the Ricci LENS
     /// too (the take-label pattern).
-    static let ricciTakeLabel = "ricci 1909"
+    static let ricciTakeLabel = "ricci 1903"
     /// R-633-13 — the ruled label pattern.
-    static let dacreTakeLabel = "dacre 1640"
+    static let dacreTakeLabel = "dacres 1640"
     /// R-633-15 — the English lens's name: the take-label pattern for
     /// Marriott's takes, which carry no label of their own (the chosen
     /// original). The other lenses are named by their takes' labels.
