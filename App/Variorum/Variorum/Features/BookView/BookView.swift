@@ -37,6 +37,9 @@ struct BookView: View {
         // same two places) — ⌥⌘N's act, its `.surface` renderers, declared at
         // last (they were undeclared since Sitting 9).
         + [.newNoteInBook]
+        // VX-563 — ⌘↑ / ⌘↓: the book's key monitor is the step's one door
+        // (`BookNoteStepKeyMonitor`).
+        + [.previousNoteInBook, .nextNoteInBook]
 
     let session: AppSession
     let readingID: String
@@ -377,6 +380,15 @@ struct BookView: View {
             navigator
         }
         .background(tokens.surface)
+        // VX-563 (her kickoff ruling; A-648-6): ⌘↑ / ⌘↓ step to the previous /
+        // next note while she READS — the book's key monitor, live only in the
+        // focused pane, never while text holds the keyboard, never in Index.
+        .background {
+            BookNoteStepKeyMonitor(
+                isActive: paneFocused, mode: structure.mode,
+                onStep: { stepNote($0) })
+                .frame(width: 0, height: 0)
+        }
         #if DEBUG
         // 18k C4: the navigator's rows register under THIS book's name.
         .environment(\.debugOracleOwner, oracleOwner)
@@ -1859,6 +1871,15 @@ struct BookView: View {
     /// `BookNavigatorDoor`, whose Outline act is exactly this.
     private func openFromNavigator(_ entry: Queries.ReadingEntry) {
         BookNavigatorDoor.openTheNote(entry, model: model, structure: structure)
+    }
+
+    /// **VX-563 — ⌘↑ / ⌘↓, one step** (A-648-6): from the mode's VIEWED note
+    /// (the named seam, `BookNoteStep.viewedNote`) through the mode's own page
+    /// order, landed by `BookNoteStepDoor` — or, at the book's ends, its words
+    /// said as a refusal. Answers whether the key was used (an empty book uses
+    /// nothing — the key passes on).
+    private func stepNote(_ direction: BookNoteStep.Direction) -> Bool {
+        BookNoteStepDoor.step(direction, model: model, structure: structure, status: session.status)
     }
 
     /// The navigator's chapter click — and, since the correction round
@@ -3781,6 +3802,95 @@ enum BookNavigatorDoor {
         structure.mode = .outline
         model.focus(entry.postID)
         model.requestReveal(entry.postID)
+    }
+}
+
+/// **VX-563 — ⌘↑ / ⌘↓'s act** (A-648-6; the rule is `BookNoteStep`'s, pure).
+/// One step from the mode's VIEWED note through the mode's own page order —
+/// the order that mode renders: Outline's rows and Read ▸ Scroll's flow (the
+/// chapters' grouping when chapters are on), the spread's and Read ▸ Pages'
+/// leaves (the book's entries). The landing is the navigator's note-row act
+/// for the mode, except Outline's, which is REVEAL-ONLY (A-648-6 (3) — never
+/// the focus that mounts a live editor and would take the keyboard from the
+/// next press). Separate from `BookNavigatorDoor` so the navigator's click
+/// keeps its own acts exactly.
+@MainActor
+enum BookNoteStepDoor {
+    /// The mode's page order, as post ids.
+    static func order(structure: BookStructureModel, entries: [Queries.ReadingEntry]) -> [String] {
+        switch (structure.mode, structure.readForm) {
+        case (.outline, _), (.read, .flow):
+            let grouped = structure.chaptersActive
+                ? structure.grouped(entries: entries).flatMap(\.entries)
+                : entries
+            return grouped.map(\.postID)
+        case (.spread, _), (.read, .pages):
+            return entries.map(\.postID)
+        case (.index, _):
+            return []
+        }
+    }
+
+    /// The seam's facts, read from what the book's surfaces already report.
+    static func facts(model: BookViewModel) -> BookNoteStep.Facts {
+        BookNoteStep.Facts(
+            outlineViewed: model.viewedOutlinePair.postID,
+            spreadLeft: model.leftPage?.postID,
+            pagedShown: model.pagedAnchorPostID,
+            standingAnchor: model.standingAnchorPostID)
+    }
+
+    /// One press: lands the neighbour, or says the book's end as a refusal.
+    /// Returns whether the key was used (false only for a book with no notes,
+    /// or a mode that never steps).
+    @discardableResult
+    static func step(
+        _ direction: BookNoteStep.Direction, model: BookViewModel, structure: BookStructureModel,
+        status: StatusCenter
+    ) -> Bool {
+        guard BookNoteStep.steps(in: structure.mode) else { return false }
+        let order = order(structure: structure, entries: model.entries)
+        let viewed = BookNoteStep.viewedNote(
+            mode: structure.mode, readForm: structure.readForm, facts: facts(model: model), order: order)
+        guard let outcome = BookNoteStep.step(direction, from: viewed, order: order) else { return false }
+        if let words = BookNoteStep.words(for: outcome) {
+            status.refuse(words)
+            return true
+        }
+        if case .land(let postID) = outcome {
+            land(postID, model: model, structure: structure)
+        }
+        return true
+    }
+
+    /// The landing per mode.
+    static func land(_ postID: String, model: BookViewModel, structure: BookStructureModel) {
+        switch (structure.mode, structure.readForm) {
+        case (.outline, _):
+            // REVEAL-ONLY (A-648-6 (3)): Outline's landing puts the note at the
+            // top and its follower adopts it at the landing's start (VX-562), so
+            // the next press steps on from here; focus — the live editor — is
+            // left exactly as it was.
+            model.requestReveal(postID)
+        case (.spread, _):
+            // The note becomes the LEFT page: one note further, never the leaf
+            // (two) — the navigator's `showPost` would leave a note already on
+            // the spread where it is, which a step must not do.
+            if let index = model.entries.firstIndex(where: { $0.postID == postID }) {
+                model.openSpread(leftIndex: index)
+            }
+        case (.read, .pages):
+            // The paged reader follows the book's focus to the story's first
+            // page — the navigator's `.turnThePages`.
+            model.focus(postID)
+        case (.read, .flow):
+            // The flow consumes the reveal and lands the story — the
+            // navigator's `.landTheFlow`; the reveal also becomes the book's
+            // standing anchor, the seam's interim Read ▸ Scroll answer.
+            model.requestReveal(postID)
+        case (.index, _):
+            break
+        }
     }
 }
 

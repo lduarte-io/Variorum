@@ -211,6 +211,12 @@ struct HelperView: View {
             ("\u{2325}\u{2318}N", "new note inside the book you have open \u{2014} the book's own "
                 + "+ new note (an entry in a journal book; in a gathering, a note wearing what its "
                 + "rule asks)"),
+            // VX-563 (her kickoff ruling; A-648-6 — PROVISIONAL words): the
+            // registry's `alternateShortcutLabel`s for the book's step, VX-560's
+            // reading-vs-typing rule said the way its row says it.
+            ("\u{2318}\u{2191} / \u{2318}\u{2193}", "the note before / after the one you're reading, in a "
+                + "book's Outline, Read or Book \u{2014} except while you're typing in text, where "
+                + "they keep going to the start and the end"),
             ("⌘J", "today's journal entry"),
             // 13n-c U4 — VX-157 (her ratified chord, VX-157).
             ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "

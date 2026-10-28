@@ -2124,6 +2124,32 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "New Note in This Book makes a note inside the book you have open "
                 + "\u{2014} open a book first.",
             availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable }),
+        // VX-563 (her kickoff ruling — "⌘↑/⌘↓ step between notes while
+        // reading, document start/end while editing"; A-648-6): the book's
+        // key monitor is the ONE door (`.surface` — `BookView` renders it,
+        // `BookNoteStepKeyMonitor`); NO menu item and so no `shortcutLabel`
+        // (a ⌘↑ menu key would take document start from every text view —
+        // VX-560's reason); the keys are `alternateShortcutLabel`s, VX-560's
+        // record, shown in the helper. The gate is the focused pane showing a
+        // book; WHICH modes step (Outline, Read, Book — never Index) and that
+        // no text holds the keyboard is the monitor's pure rule
+        // (`BookNoteStep.direction`). The note is empty: no dispatch reaches
+        // these (the monitor exists only inside a book view) — the
+        // directly-wired idiom (`.lockLibraryNow`).
+        Capability(
+            id: .previousNoteInBook, verb: "Previous Note in This Book", scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "",
+            availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2191}"),
+        Capability(
+            id: .nextNoteInBook, verb: "Next Note in This Book", scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "",
+            availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2193}"),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],
