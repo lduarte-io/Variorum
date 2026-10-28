@@ -450,16 +450,25 @@ enum SampleLibrarySeeder {
             }
         }
 
-        /// Runs the pass on one freshly imported note.
+        /// Runs the pass on one freshly imported note (its takes, then —
+        /// R-633-15 — its saved lenses).
         func apply(
-            _ ops: Operations, title: String, blockIDs: [String], companion: [String: [String]]
+            _ ops: Operations, title: String, note: ImportedNote, companion: [String: [String]]
         ) throws -> SampleLibraryPrinceBook.PassReport {
             switch self {
             case .princeBilingual:
                 return try SampleLibraryPrinceBook.attachTakes(
-                    ops, title: title, blockIDs: blockIDs, italian: companion[title])
+                    ops, title: title, noteID: note.noteID, blockIDs: note.blockIDs,
+                    italian: companion[title], undoLabel: SampleLibrarySeeder.undoLabel)
             }
         }
+    }
+
+    /// What `place` minted when it imported a note afresh: the note and its
+    /// blocks in placement order — the take pass's input (VX-633).
+    nonisolated struct ImportedNote: Sendable, Equatable {
+        var noteID: String
+        var blockIDs: [String]
     }
 
     /// One note of a book's seed, in book order: an imported story, or the
@@ -1322,7 +1331,7 @@ enum SampleLibrarySeeder {
                         var pass: SampleLibraryPrinceBook.PassReport?
                         if let minted, let takePass {
                             pass = try takePass.apply(
-                                quiet, title: title, blockIDs: minted, companion: companion)
+                                quiet, title: title, note: minted, companion: companion)
                         }
                         return (sectionID, pass)
                     }
@@ -1344,7 +1353,7 @@ enum SampleLibrarySeeder {
                     // (the book deleted, the note kept) is RE-MEMBERED, with
                     // whatever history she has given it since.
                     if let stray {
-                        try Self.underClock(clock) {
+                        _ = try Self.underClock(clock) {
                             try Self.place(
                                 quiet, title: scripted.title, text: "", stray: stray,
                                 in: bookID, wing: wing, section: sectionID, tag: tagID, label: label)
@@ -1381,17 +1390,17 @@ enum SampleLibrarySeeder {
     /// Puts one shipped note into the book: a surviving tagged note is
     /// RE-MEMBERED (F10 — it already wears the tag and carries whatever she
     /// did to it); only a title with no such note mints afresh. VX-633:
-    /// answers the FRESH import's block ids in placement order (the take
-    /// pass's input), nil when it re-membered or copied a note it did not
-    /// mint.
+    /// answers the FRESH import (the note and its blocks in placement order —
+    /// the take pass's input), nil when it re-membered or copied a note it
+    /// did not mint.
     @discardableResult
     nonisolated private static func place(
         _ quiet: Operations, title: String, text: String, stray: String?,
         in bookID: String, wing: String, section sectionID: String, tag tagID: String,
         label: String
-    ) throws -> [String]? {
+    ) throws -> ImportedNote? {
         let noteID: String
-        var mintedBlockIDs: [String]?
+        var minted: ImportedNote?
         if let stray {
             noteID = stray
         } else {
@@ -1412,7 +1421,7 @@ enum SampleLibrarySeeder {
                 title: title, text: text, undoLabel: label,
                 segmentation: Self.segmentation, wingId: wing)
             noteID = imported.container.id
-            mintedBlockIDs = imported.blockIDs
+            minted = ImportedNote(noteID: noteID, blockIDs: imported.blockIDs)
             _ = try quiet.applyTag(tagID, toPost: noteID)
         }
         // 13i-d U7 continuation — F-U7-3, RULED re-add-as-COPY (the ownership
@@ -1436,6 +1445,6 @@ enum SampleLibrarySeeder {
             }
         }
         try quiet.assignPostToSection(memberID, in: bookID, section: sectionID)
-        return mintedBlockIDs
+        return minted
     }
 }

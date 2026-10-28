@@ -35,6 +35,15 @@
 //  and the pass refuses a drifted pair at seed time (DEBUG: loud; Release:
 //  that note's takes are skipped, never a crashed seed).
 //
+//  Every CHAPTER also ships with SAVED LENSES (R-633-15 — her words: "saved
+//  lenses on the seed book is definitely a need"), minted by the same pass
+//  in the same turn, named by the take-label pattern: "marriott 1908" (every
+//  block its English take, by explicit id — the way back after choosing
+//  Italian), "il principe 1532" (every block its Italian), and on the
+//  chapters that carry them "ricci 1903" / "dacre 1640" (that block its
+//  third take, the rest following the chosen). A lens is never rendering
+//  truth — the page still opens on Marriott.
+//
 //  The note's book is grouped into the FOUR PARTS her R-633-5 names (its
 //  second set, lowercased to the shelf idiom) rather than one chapter per
 //  note: the notes ARE the chapters, the book's `reading_section` rows are the
@@ -96,6 +105,10 @@ nonisolated enum SampleLibraryPrinceBook {
     static let ricciTakeLabel = "ricci 1903"
     /// R-633-13 — the ruled label pattern.
     static let dacreTakeLabel = "dacre 1640"
+    /// R-633-15 — the English lens's name: the take-label pattern for
+    /// Marriott's takes, which carry no label of their own (the chosen
+    /// original). The other lenses are named by their takes' labels.
+    static let englishLensName = "marriott 1908"
 
     // MARK: - The four parts (R-633-5, her second set, lowercased)
 
@@ -393,6 +406,8 @@ nonisolated enum SampleLibraryPrinceBook {
         var italianTakes = 0
         var thirdTakes = 0
         var versesRestored = 0
+        /// The saved lenses minted, by name, in minting order.
+        var lenses: [String] = []
         /// Non-empty only when something did not match (and was skipped):
         /// a DEBUG build has already stopped on it.
         var skipped: [String] = []
@@ -400,21 +415,26 @@ nonisolated enum SampleLibraryPrinceBook {
 
     /// **The per-note take pass** — run by the seeder right after a FRESH
     /// import of `title` (never on a re-membered or copied note: those carry
-    /// their own takes), inside the same runner turn, on the quiet facade,
-    /// under the book's clock. `blockIDs` are the import's, in placement
-    /// order; `italian` is the note's Italian paragraphs. The English each
-    /// block holds is read from the STORE (the same ambient database the
-    /// facade writes through — `Takemania`'s `liveActiveFan` precedent),
-    /// never assumed from the resource.
+    /// their own takes and lenses), inside the same runner turn, on the quiet
+    /// facade, under the book's clock. `noteID` and `blockIDs` are the
+    /// import's (blocks in placement order); `italian` is the note's Italian
+    /// paragraphs. The English each block holds is read from the STORE (the
+    /// same ambient database the facade writes through — `Takemania`'s
+    /// `liveActiveFan` precedent), never assumed from the resource. Its last
+    /// act is the note's saved lenses (R-633-15), so a note present implies
+    /// its takes AND its lenses present (cancellation lands only between
+    /// turns).
     ///
     /// A mismatch never writes and never crashes a Release seed: a missing
-    /// or miscounted Italian skips the whole note's takes; a third take or
-    /// verse whose English anchor is not where the table says skips just
-    /// that write. In DEBUG every skip is an `assertionFailure` — loud, by
-    /// design (the brief's rule).
+    /// or miscounted Italian skips the whole note's takes and lenses; a third
+    /// take or verse whose English anchor is not where the table says skips
+    /// just that write (and a third take skipped leaves its lens unminted).
+    /// In DEBUG every skip is an `assertionFailure` — loud, by design (the
+    /// brief's rule).
     @discardableResult
     static func attachTakes(
-        _ ops: Operations, title: String, blockIDs: [String], italian: [String]?
+        _ ops: Operations, title: String, noteID: String, blockIDs: [String], italian: [String]?,
+        undoLabel: String
     ) throws -> PassReport {
         var report = PassReport()
         func skip(_ why: String) {
@@ -428,11 +448,16 @@ nonisolated enum SampleLibraryPrinceBook {
         // A fresh import mints exactly ONE take per block — Marriott's.
         @Dependency(\.database) var database
         let fans = try database.read { db in try Queries.activeFans(db, blockIDs: blockIDs) }
+        // The lenses' picks, block → take, gathered as the takes land.
+        var englishPicks: [String: String] = [:]
+        var italianPicks: [String: String] = [:]
+        var thirdPicks: [String: [String: String]] = [:]   // label → block → take
         for (index, blockID) in blockIDs.enumerated() {
             guard let english = fans[blockID]?.first, fans[blockID]?.count == 1 else {
                 skip("\(title) ¶\(index): the block is not a fresh one-take import")
                 continue
             }
+            englishPicks[blockID] = english.id
             // The English verse, line-broken again (validated first).
             if let verse = verseRestorations.first(where: {
                 $0.noteTitle == title && $0.paragraphIndex == index
@@ -447,7 +472,7 @@ nonisolated enum SampleLibraryPrinceBook {
                 }
             }
             // Take 2 — Machiavelli's Italian.
-            try addTake(ops, to: blockID, text: italian[index], label: italianTakeLabel)
+            italianPicks[blockID] = try addTake(ops, to: blockID, text: italian[index], label: italianTakeLabel)
             report.italianTakes += 1
             // Take 3 — Ricci's rendering, or Dacre's verse.
             for third in thirdTakes where third.noteTitle == title && third.paragraphIndex == index {
@@ -455,9 +480,37 @@ nonisolated enum SampleLibraryPrinceBook {
                     skip("\(title) ¶\(index): \u{201C}\(third.quoteHint)\u{201D} is not in its English")
                     continue
                 }
-                try addTake(ops, to: blockID, text: third.text, label: third.label)
+                thirdPicks[third.label, default: [:]][blockID] =
+                    try addTake(ops, to: blockID, text: third.text, label: third.label)
                 report.thirdTakes += 1
             }
+        }
+        // The saved lenses (R-633-15), through the operations layer's own
+        // lens door (`saveLens` — the MCP door's `save_lens` body: picks
+        // validated as `setLensChoice` validates them, never a placement's
+        // chosen take touched; the quiet facade registers no undo). "marriott
+        // 1908" names EVERY block explicitly — a lens that only followed the
+        // chosen would be no way back once she chose Italian; "il principe
+        // 1532" every block; the third-take lenses only their blocks (sparse
+        // — the rest follow the chosen, the lens model's own default). Each
+        // lens one SECOND after the last on the book's clock, so the Lenses
+        // list (created_at, id) reads in this order on every device rather
+        // than by random id (the stamps a few seconds into the book's day).
+        var lenses: [(name: String, picks: [String: String])] = [
+            (englishLensName, englishPicks), (italianTakeLabel, italianPicks),
+        ]
+        for label in [ricciTakeLabel, dacreTakeLabel] {
+            if let picks = thirdPicks[label], !picks.isEmpty { lenses.append((label, picks)) }
+        }
+        @Dependency(\.date) var date
+        let base = date.now
+        for (offset, lens) in lenses.enumerated() where !lens.picks.isEmpty {
+            try withDependencies {
+                $0.date = .constant(base.addingTimeInterval(Double(offset)))
+            } operation: {
+                _ = try ops.saveLens(post: noteID, name: lens.name, picks: lens.picks, undoLabel: undoLabel)
+            }
+            report.lenses.append(lens.name)
         }
         return report
     }
@@ -465,9 +518,12 @@ nonisolated enum SampleLibraryPrinceBook {
     /// A genuinely different take, begun blank, written, named — never chosen
     /// (`newBlankVariant` appends at the fan's end and leaves the pointer's
     /// choice alone).
-    private static func addTake(_ ops: Operations, to blockID: String, text: String, label: String) throws {
+    private static func addTake(
+        _ ops: Operations, to blockID: String, text: String, label: String
+    ) throws -> String {
         let take = try ops.newBlankVariant(blockID)
         try ops.autosave(take.id, text: text, charDelta: text.count)
         try ops.setTakeLabel(take.id, label: label)
+        return take.id
     }
 }
