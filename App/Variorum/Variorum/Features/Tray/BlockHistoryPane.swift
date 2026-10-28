@@ -508,14 +508,30 @@ final class BlockHistoryModel {
     nonisolated enum ReadingStep: Equatable, Sendable { case acted, dismissed }
     private(set) var readingTrace: [ReadingStep] = []
 
-    /// A foot door was pressed on the sheet showing `reading`.
+    /// The act a foot press handed over, waiting for its sheet to go.
+    @ObservationIgnored private var pendingReadingAct: (act: ReadingAct, reading: CommitReading)?
+
+    /// **A foot door was pressed on the sheet showing `reading` — the act
+    /// WAITS for the sheet to go** (W-2). It used to run at once, so the
+    /// restore's store write, the delivery's rewrite of the block and the
+    /// landing with its wash all ran WHILE the sheet was being dismissed —
+    /// the window not key, the sheet still over the page — and the walk saw
+    /// the caret left at the block's END (the rewrite's, with no landing
+    /// standing after it) and the wash missed. Run from the sheet's
+    /// `onDismiss` instead, the act is the pane row's own road, in the row
+    /// road's window: one landing behaviour.
     func readingFootPressed(_ act: ReadingAct, for reading: CommitReading) {
-        Task { await runReadingAct(act, for: reading) }
+        pendingReadingAct = (act, reading)
     }
 
-    /// The sheet is gone (the pane's `.sheet(onDismiss:)`).
+    /// The sheet is gone (the pane's `.sheet(onDismiss:)`): the act a foot
+    /// press handed over runs now — at most once; a sheet closed by Close or
+    /// ⎋ hands nothing over and nothing runs.
     func readingSheetDismissed() async {
         readingTrace.append(.dismissed)
+        guard let pending = pendingReadingAct else { return }
+        pendingReadingAct = nil
+        await runReadingAct(pending.act, for: pending.reading)
     }
 
     private func runReadingAct(_ act: ReadingAct, for reading: CommitReading) async {
@@ -1351,7 +1367,11 @@ struct CommitRowView: View {
 /// Restore here is the row's Restore exactly — the same model act, its
 /// pre-split warning asked HERE (the pane's own alert cannot present over this
 /// sheet) — and both foot doors close the sheet, so what they did is seen in
-/// the pane and on the page behind it.
+/// the pane and on the page behind it. **W-2 (the VX-440 walk):** a foot door
+/// hands its act to the model and THEN closes the sheet; the model runs the
+/// act once the sheet is gone (`readingSheetDismissed`, the pane's
+/// `onDismiss`), so the landing and its wash happen on the page she can see,
+/// exactly as the row's do.
 struct CommitReadingSheet: View {
     let reading: BlockHistoryModel.CommitReading
     let tokens: VoiceTokens
@@ -1406,9 +1426,11 @@ struct CommitReadingSheet: View {
             .frame(maxHeight: .infinity)
             HStack(spacing: 10) {
                 Spacer(minLength: 0)
+                // W-2: the act is handed over FIRST, then the sheet goes —
+                // the model runs it once the sheet is gone (`onDismiss`).
                 Button(tokens.chromeLabel(BlockHistoryPath.bringBackAsTakeVerb)) {
-                    dismiss()
                     onBringBack()
+                    dismiss()
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                 .help(BlockHistoryPath.bringBackAsTakeHelp)
@@ -1416,8 +1438,8 @@ struct CommitReadingSheet: View {
                     if predatesSplit {
                         confirmingRestore = true
                     } else {
-                        dismiss()
                         onRestore(false)
+                        dismiss()
                     }
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
@@ -1431,8 +1453,8 @@ struct CommitReadingSheet: View {
         .background(tokens.surface)
         .alert(BlockHistoryCopy.predatesSplitTitle, isPresented: $confirmingRestore) {
             Button(BlockHistoryCopy.restoreAnyway, role: .destructive) {
-                dismiss()
                 onRestore(true)
+                dismiss()
             }
             Button("Cancel", role: .cancel) {}
         } message: {

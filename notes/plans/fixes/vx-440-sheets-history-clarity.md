@@ -759,7 +759,13 @@ Pieces (flipped per commit):
   foot does it; EXPECT RED on this commit at the trace line (`[.acted, .dismissed]` — the act ran before
   the sheet was gone); the caret line (START) is red here only if the host reproduces the walked END —
   the run says which. DONE (this commit — the PRE-FIX tree: the red-on-old SHA).
-- WF-4 W-2 fix: NOT STARTED.
+- WF-4 W-2 fix: `readingFootPressed` RECORDS the act (`pendingReadingAct`); `readingSheetDismissed()`
+  (the pane's `.sheet(onDismiss:)`) runs it, at most once — a sheet closed by Close/⎋ hands nothing over.
+  The sheet's foot doors (and the pre-split confirm's Restore Anyway) hand the act over FIRST, then
+  dismiss. So the sheet road IS the row road (`model.restore` / `model.bringBackAsTake`), run after the
+  sheet is gone: the landing and its wash happen on the page she can see; one landing behaviour. Wash
+  mechanics untouched; no editor-seam file. Build ✓ (`vx440-merge`). The WF-3 pin turns GREEN here (RUN
+  PENDING). DONE (this commit — the fix).
 - WF-5 verification + record: NOT STARTED.
 
 **W-1 — TRACED (the mechanism, inputs → wrong output):**
