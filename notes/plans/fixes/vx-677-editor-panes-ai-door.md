@@ -319,19 +319,19 @@ Deliverables: per-member red-on-old pins revert-verified (pin-first where the me
 
 ### BATCH 2 RECORD (implementer: Opus, fresh session, 2026-10-28)
 
-**NOT DONE (first line, kept current):** everything below is headless; NO `xcodebuild test`, NO app launch, NO walk, NO stage claim (the orchestrator's window). Nothing under `Sources/` is touched (app target only).
+**NOT DONE (first line, kept current):** NO `xcodebuild test`, NO app launch, NO walk, NO stage claim — every Mac pin of the five members is COMPILED (six products in `App/Variorum/DerivedData/vx677-b2/`) but UNRUN: the red-on-old runs (including VX-662's CONFIRM — Suspected), the green runs and the walk rows are the orchestrator's window ("READY-FOR-THE-STAGE — batch 2"). No canon edit, no QUESTIONS number, no ticket moved (P-680-1/2 wait in the Rulings log for the closeout bundle). Nothing under `Sources/` is touched (app target only). **No behavioural revert is in flight** — all five were built and restored; the tree is clean.
 
 *Read in this session's own context before any code (never delegated): CLAUDE.md + its auto-loaded canon; this file in full (batch 1's record, the BATCH 2 BRIEF, the environment traps, the coordinator protocol, the rulings log); `notes/SessionResiliencyProtocol.md`; `notes/SurfaceContracts.md` §The app (the keyboard family) + §The Bookcase and books; `notes/TEXTKIT2_NOTES.md` IN FULL; the VX-648 record's BATCH 4 RECORD in full (B4-6, the VX-662 FINDING, P-B4-1, B4-P4, A-648-8, the pin landscape); the VX-562 record (F-1's trace, R-562-A, the morning bundle, the revert recipes); QUESTIONS #248 (P-B4-1 → VX-680 ruled; B4-P4 → VX-681); the five tickets on Linear in full (no comments on any); the code: `PagedReadView`/`PagedReadModel`, `BookIndexView.landOrSeed`/`select`, `BookAnchor`, `BookViewModel` (the carry slots, `carryPlace`, the viewed pairs), `BookView` (`switchMode`, `switchReadForm`, `landOutline`, `landOutlineReveal`, the Outline's scroll facts), `ReadingFlowView` (its landing + follower), `Surface/LandingAuthority.swift` whole, `Surface/LandingAim.swift`, `JumpPrimitive`, `EditorView`'s inline surface + `EditorViewModel.applyFocusSeeds`, the existing pins (`PagedReadTests`, `BookNoteBoxDoorsTests`' carry suites, `BookOutlineLandingTests`' F-1/Pages/flow pins, `BookNoteStepTests`, `LandingAimTests`).*
 
 **LIVE STATUS** (flipped in the same commit as each piece; every unverified claim PENDING)
-- **REVERT BUILDS ANNOUNCED (before any starts):** five behavioural reverts, ONE AT A TIME, each applied over the committed tip (the tree clean first), built fresh into its own `App/Variorum/DerivedData/vx677-b2/rev<member>`, restored by `git checkout -- <file>` and verified clean (`git diff` empty, no `VX677-REVERT` marker) before the next — the recipes are in "REVERT PRODUCTS — batch 2" below. A successor reading this line with a `VX677-REVERT` marker in the tree restores that one file with `git checkout --` (the file is committed).
+- **REVERT BUILDS — DONE, ALL RESTORED** (announced `8a6ccad37` before any started): five behavioural reverts, one at a time over the committed tip, each built fresh into its own `App/Variorum/DerivedData/vx677-b2/rev<member>` (`rev624`, `rev663`, `rev662`, `rev681`, `rev680` — every `build-rev<m>.log` TEST BUILD SUCCEEDED), each restored by `git checkout -- <file>` and verified clean (`git status` empty, no `VX677-REVERT` marker) before the next. Recipes: "REVERT PRODUCTS — batch 2" below.
 - B2-0 — preflight + this record: DONE (`534f281ad`).
 - B2-1 — VX-624 (the landing settles at the page's floor): DONE (`20a5c39b5`) — "VX-624 — trace, confirm, fix" below. Confirmed headless on the REAL pre-fix `decide` (16 corrections, give-up at 4.25 s); fix + pins compiled (`DerivedData/vx677-b2/post`, `logs/build-post-1.log` TEST BUILD SUCCEEDED; touched-file warnings only the standing `outlineSpace`/`flowSpace`/`BookOutlineLandingTests.swift:1296–1297`/`BookIndexView.swift:1401` lines); the headless twin of the pure pin GREEN on the fix and RED (8 of 21, exactly the floor lines) under the behavioural revert applied to a COPY of the file (the tree never reverted). Mac runs PENDING the stage window.
 - B2-2 — VX-663 (Pages arrivals land at the carried place): DONE — pins on the PRE-FIX tree `2a636ee7b` (production untouched), the fix + its model pin `11ec0e3eb`; compiled (`logs/build-post-3.log` TEST BUILD SUCCEEDED, no warning in a touched file). "VX-663 — trace and fix" below. Mac runs PENDING the stage window.
 - B2-3 — VX-662 (the Index's carry anchor): DONE — the PIN FIRST on the PRE-FIX tree `97384209d` (production untouched; suite `BookIndexCarryAnchorTests`: `aCarriedArrivalInIndexIsWhatLeavingIndexCarries` RED there by the static trace + the guard `herSelectionInThisVisitIsStillWhatLeavingCarries`); the fix-shape pick written below BEFORE the fix — shape (a); the fix `c48829c37` (one argument in `landOrSeed`), compiled (`logs/build-post-5.log` TEST BUILD SUCCEEDED). The CONFIRM run (red on `rev662`) and the green run PENDING the stage window.
 - B2-4 — VX-681 (leaving Read ▸ Scroll carries from the story on screen): DONE — pins on the PRE-FIX tree `7a3f5d548` (production untouched); the fix + the pure arm's pin `7dfea5667` (`BookAnchor`'s `.read .flow` arm reads the flow's viewed note, the standing anchor while nothing is viewed); compiled (`logs/build-post-7.log` TEST BUILD SUCCEEDED); the headless twin of the pure pin over the REAL `BookAnchor.swift` GREEN 7/7 and RED on exactly the 2 viewed-arm lines under the revert applied to a COPY (`logs/vx681/`). "VX-681 — trace and fix" below. Mac runs PENDING the stage window.
 - B2-5 — VX-680 (Index → Outline lands block-precise): DONE (`4122d25b9`) — "VX-680 — trace, design, fix" below; compiled (`logs/build-post-10.log` TEST BUILD SUCCEEDED; touched-file warnings only the standing `outlineSpace` lines). Mac runs PENDING the stage window.
-- B2-6 — revert products, suites, READY-FOR-THE-STAGE, walk rows, self-assessment: NOT-STARTED.
+- B2-6 — revert products, suites, READY-FOR-THE-STAGE, walk rows, self-assessment: DONE (this commit) — the five revert products + `post` built; the core package headless at the end (3,511/471 green bar 5 standing known issues; MCP 455/457 — the two load-dependent harness tests green alone, F-B2-1); "READY-FOR-THE-STAGE — batch 2", "SELF-ASSESSMENT (batch 2)", "SUITES — headless", "FINDINGS RECORDED, NOT FIXED (batch 2)" below.
 
 #### REVERT PRODUCTS — batch 2 (batch 1's method: one behavioural revert per member over the tip, its own fresh product)
 
@@ -421,6 +421,91 @@ Deliverables: per-member red-on-old pins revert-verified (pin-first where the me
 
 **Headless twin (the pure pin's table over the REAL fixed source, `logs/vx624/fixed/main.swift`):** GREEN 21/21 (`fixed-green.log`); the behavioural revert applied to a COPY of `LandingAuthority.swift` (the `cannotClose` arm → `|| false`) — RED on exactly the 8 floor lines, the sequence back to `giveUp after 16 at 4.25` (`revert-red.log`). The tree was never reverted.
 
+#### READY-FOR-THE-STAGE — batch 2 (the orchestrator's window; from `App/Variorum/`; `test-without-building`, no rebuild)
+
+**Products** (all fresh `build-for-testing` into `App/Variorum/DerivedData/vx677-b2/<product>`, TEST BUILD SUCCEEDED, logs in `DerivedData/vx677-b2/logs/`): `post` = the tip's App sources (`build-post-10.log`; every later commit is record-only) · `rev624` · `rev663` · `rev662` · `rev681` · `rev680` (`build-rev<m>.log`), each = the tip with ONLY that member's one-line behavioural revert (the table in "REVERT PRODUCTS — batch 2"), restored after its build — the tree is clean, no `VX677-REVERT` marker anywhere.
+
+Each run: set `T` to the zsh array, then `A=(); for s in $T; do A+=(-only-testing:VariorumTests/$s); done; xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx677-b2/<product> test-without-building "${A[@]}"` — suite TYPE names (each grepped as `struct` from its file), zsh arrays, never a quoted string. Confirm the "Test run with N tests" line against N and read the `skipped:` lines (0 ran = no verdict). Counts are `@Test` functions (a parameterized test is one).
+
+**1. RED-ON-OLD — `rev624`** (expect 32 tests, EXACTLY 4 failures):
+```zsh
+T=(LandingFloorTests BookOutlineLandingTests)
+```
+Fail: `LandingFloorTests` 3 (`aTargetThePageCannotBringNearerIsHome`, `theSpinAgainstAnImmovablePageEndsAtTheHold`, `eachPolicySettlesAtItsFloorByItsOwnRules`) · `BookOutlineLandingTests.aLandingThatCannotReachTheTopSettlesAtThePagesFloorWithinItsHold` (its `VX-624 FLOOR:` line shows `gave up … ~4,1xx ms`). Pass: the 2 guards and the other 26 Outline pins (VX-562's F-1 pins included — they assert only that the landing ended).
+
+**2. RED-ON-OLD — `rev663`** (expect 37 tests, EXACTLY 4 failures):
+```zsh
+T=(PagedReadViewTests BookOutlineLandingTests)
+```
+Fail: `PagedReadViewTests` 3 (`aCarriedArrivalOpensAtTheCarriedNoteNeverPageOne`, `aFocusedArrivalOpensAtTheFocusedNote`, `theFirstAdoptionLandsTheArrivalsPlace`) · `BookOutlineLandingTests.leavingReadScrollForPagesOpensAtTheStoryItsPageShows` (the joint leg — page one). Pass: `anArrivalCarryingNothingOpensAtTheFirstPage` (guard), the 6 shipped Pages pins, `theDiscretePagesMarkTheirShownNoteAndItsChapter` (VX-645's, unmodified), the rest of the Outline suite.
+
+**3. RED-ON-OLD — `rev662`, THE CONFIRM** (expect 14 tests, EXACTLY 1 failure):
+```zsh
+T=(BookIndexCarryAnchorTests BookIndexCarryBlockTests BookCarryLiveBlockTests BookIndexToOutlineCarryTests BookIndexToOutlineBlockLandingTests)
+```
+Fail: `BookIndexCarryAnchorTests.aCarriedArrivalInIndexIsWhatLeavingIndexCarries` (the carry names A; the Outline's caret not at B's block 2). Pass: its guard, VX-630's 4, VX-304's 4, R1-1's 1, VX-680's 3 (their Index arrivals carry through the standing anchor either way). **If this pin is GREEN here, VX-662 is HOLLOW: record it, and the fix (`c48829c37`, one argument) is to be reverted, not kept.**
+
+**4. RED-ON-OLD — `rev681`** (expect 39 tests, EXACTLY 4 failures):
+```zsh
+T=(BookAnchorTests BookCarryTests BookOutlineLandingTests)
+```
+Fail: `BookAnchorTests.theFlowsPlaceIsTheStoryItsPageShows` · `BookCarryTests.leavingTheReadingFlowCarriesTheStoryItsPageShows` · `BookOutlineLandingTests.leavingReadScrollForOutlineLandsTheStoryItsPageShows` · `BookOutlineLandingTests.leavingReadScrollForPagesOpensAtTheStoryItsPageShows` (the joint leg — note 3). Pass: `anEmptyFlowSlotCarriesWhereSheArrived`, the table's fallback lines, `leavingTheReadingFlowCarriesWhereSheArrived`, the rest.
+
+**5. RED-ON-OLD — `rev680`** (expect 9 tests, EXACTLY 2 failures):
+```zsh
+T=(BookIndexToOutlineBlockLandingTests OutlineBlockLandingTests BookIndexCarryBlockTests)
+```
+Fail: `theCarryIntoOutlineParksHerBlockForItsLanding` (the park lines) · `aFarBlockArrivesOnThePage` (block 30 ~2,000 pt below the page — read its `VX-680 FAR:` line). Pass: `aBlockAlreadyOnThePageMovesNothing`, the 2 pure tables, VX-630's 4.
+
+**6. GREEN — `post`, the new and changed pins** (expect 61 tests, 0 failures):
+```zsh
+T=(LandingFloorTests PagedReadViewTests BookIndexCarryAnchorTests BookAnchorTests BookCarryTests BookOutlineLandingTests OutlineBlockLandingTests BookIndexToOutlineBlockLandingTests)
+```
+Per suite: 5 · 10 · 2 · 2 · 10 · 27 · 2 · 3. Read the print lines: `VX-624 FLOOR:` (settled at the page's floor, ≤ 2 hops, ~1,0xx–1,3xx ms), `VX-681 FLOW:` (entered note 3, the page shows note N), `VX-680 block 30:` / `VX-680 FAR:` (residual ~0; the trace shows `block-home residual=…` falling to 0 and the DONE).
+
+**7. GREEN — `post`, the neighbours: every landing adopter + the carry/navigator family** (expect 171 tests in 21 suites, 0 failures):
+```zsh
+T=(LandingAuthorityTests LandingSignpostTests LandingAimTests ReadingFlowLandingTests ReadingFlowEstimateTests TakesArticleWatchTests TakesArticleScrollTests ReadNoteLandingTests ReadNoteLandingArithmeticTests ReadModeTests PageDomainTests PagePaginatorTests PagedAnchorReportTests AscentDoorTests AscentRoutingTests BookNoteStepTests BookNavigatorFollowTests BookNavigatorViewedPairTests BookOutlineViewedTests BookOutlineRowsTests BookIndexCarryBlockTests)
+```
+Per suite: 7 · 3 · 6 · 9 · 7 · 12 · 41 · 7 · 7 · 6 · 5 · 5 · 1 · 3 · 1 · 7 · 3 · 1 · 31 · 5 · 4.
+
+**8. GREEN — `post`, VX-562's 56-suite regression set** (every suite that mounts `BookView` — the Outline landing, the Index, the flow and the Pages reader changed under them; expect 266 tests in 56 suites, 0 failures; `IndexTierMetricsTests`' four standing known issues are KNOWN issues, not failures):
+```zsh
+T=(BookViewTests OutlineWritingSurfaceTests BookFocusFoldTests SpreadBookViewTests OutlineRoomTests OutlineLandingTeardownTests BookCardHeightStabilityTests BookOutlineCostTests BookOutlineFacesTests BookArchivedLineTests BookOrderConversionTests NavigatorReadRowsTests DebugOracleOwnershipTests DebugOracleTwoWindowTests NoteBoxCompositionTests NoteBoxGeometryTests NoteBoxSlotTests BookNoteBoxSubjectTests NoteBoxStateTests NoteBoxHeightTests VocabularySweepTests BookRedesignMountTests NewNoteInBookTests BookOpenDoorMountTests BookOpenDoorRuleTests BookOpenDoorShellTests BookEditHereRiderTests BookPlaceMemoryTests BookCarryLiveBlockTests BookIndexTakesTests BookIndexToOutlineCarryTests BookNoteBoxOpenDoorTests SidebarNoteBoxDoorFacesTests SidebarNoteBoxTakesCellClickTests InlineEditorWidthReflowTests BookFoldDisclosureTests ScrubAndOutlineTests OwnershipBadgeTests BookArrivalsTests ArrivalArmsTests BookLeavingSavepointTests BookLeavingRegistryTests BookWindowRoadTests BookIndexLandingTests BookIndexEditingTests BookIndexColumnHeightsTests IndexClickCaretTests IndexLandingCaretTests IndexTierMetricsTests ModesSherlockMeasureTests PaneBookBlurTests PaneMountTests PaneHeldModeTests TutorialBookShapeTests TutorialStructureActsTests TutorialLookingActsTests)
+```
+(The count is my `@Test` tally on this tree — it reproduces VX-562's measured run exactly, 266 / 56.)
+
+**THE USE WALK — batch 2 rows** (an Opus walker under the orchestrator's claim; the DEV-STORE Debug build; both voices where a face shows; one capture per row). The dev store holds no book: the window's first act is Help ▸ Restore the Sample Library (the seeded Sherlock — 13 long one-note chapters) and its last is VX-562's removal routine (Delete Book and Its 13 Notes; the Welcome shelf; the `classics` / `sherlock holmes` tags), prefs export/diff by exact key, Resume never pressed.
+- **W-680-1 — Index → Outline lands block-precise (her acceptance road):** Index: click into a paragraph FAR down a story (≥ 30 paragraphs in — "A Scandal in Bohemia"), mid-word; the mode tab Outline → the story arrives LIVE at that paragraph with the caret where she left it (VX-630) AND the page shows that paragraph — the note's row lands first, then (within about a second) the page moves the minimum that shows the paragraph, which rests at the page's FOOT; type one key → it lands at her caret. Capture the Index before and the Outline after. Both voices. **For her eye (P-680-2):** does the paragraph resting at the foot read right, and does the short two-beat (row, then paragraph) read calm?
+- **W-680-2 — the guard:** a paragraph near the story's START → the Outline lands the story's row at the top and nothing more moves.
+- **W-662-1 — the stale anchor, live:** Index: click story A's row in the column; mode tab Outline; in Outline click into story B's second paragraph; mode tab Index (B's paragraph live there — VX-304); mode tab Outline → B at her paragraph — NEVER A. Both voices.
+- **W-681-1 — leaving Read ▸ Scroll from the story on screen:** Read ▸ Scroll, arrive at story 3 (its navigator row), wheel down into story 8 (the navigator's mark on 8); mode tab Outline → the Outline lands story 8 (the navigator's mark and the pinned line "note 8 of 13 · …"), never 3. Both voices.
+- **W-681-2 / W-663-1 — Scroll → Pages, and an arrival in Pages:** Read ▸ Scroll at story 8 as above → switch the read form to Pages → the reader opens at story 8's first page (the bar's line names story 8), never page 1. Then Outline, click into story 5 → mode tab Read (Pages still the form) → Pages opens at story 5. Both voices.
+- **W-624-1 — the floor (Console, no face of its own):** Outline, every card collapsed ("collapse all"), ⌘↓ (reveal-only — it never unfolds a card) down to the LAST story; `log show --last 2m --predicate 'eventMessage CONTAINS "landing surface=BookOutline"'` → the last landing's signpost reads `end=settled` with `ms` about 1,000–1,300 and `hops` 0–2 — never `end=gaveup … ms≈4,000`. One voice suffices (no face changes).
+
+#### SELF-ASSESSMENT (batch 2 — the first of the two reviews, the implementer's)
+
+- **The traces held, each read in the code before a line was written:** VX-624 — confirmed on the REAL pre-fix `decide` by a headless driver (16 corrections, give-up at 4.25 s); VX-663 — the `.task` seeding a reader with no entries (the B4-6 finding exactly); VX-662 — `select(report:)`'s two silent arms, the anchor never cleared (statically — the stage's `rev662` run is the confirm, and the record says what to do if it is green); VX-681 — the `.read .flow` arm and an `anchorPlace` that never handed the flow's slot; VX-680 — the inline editor's inert reveal and a landing that knows only rows.
+- **What each pin is worth:** VX-624 and VX-681 have headless twins over the REAL source files, red/green both ways (the reverts applied to COPIES — the tree was never touched for them). Every Mac pin is compiled only: its red on the revert product and its green on `post` are the window's. The pre-fix-tree commits (`2a636ee7b` VX-663, `97384209d` VX-662, `7a3f5d548` VX-681) carry the pins BEFORE their fixes.
+- **Where I would want the cold reviewer to stare:**
+  1. **VX-680's home-switch inside the authority** — the target row's reports carry the block's residual (a minimal-reveal number) on a policy whose declared aim is `.top`; the declared kind still answers the row's top for every other landing (the agreement pin is untouched), and the end-of-landing re-seed restores the row's true top so no later landing seeds from a residual. A reader who sees `top=` in the DEBUG story for that landing is reading the row; `block-home residual=` is the number the authority was given.
+  2. **VX-680's aim is AppKit's `scrollToVisible`, not `proxy.scrollTo`** — the one place an Outline landing moves the page through the clip rather than SwiftUI; justified (a block is not a SwiftUI view) and precedented (the caret road; `CommentTextArea.revealForEditing`), but it is the line most likely to be read as "a second scroll mechanism". The VX-562 pins already prove a programmatic clip scroll holds on this ScrollView (no `.scrollPosition` binding).
+  3. **VX-680's editor choice** — `editorRouter.editing` filtered to this note and an inline editor. If a SECOND inline editor of the same note (another window's book on the same note) took `editing` during the ~1-s hold, the sighting would read that editor's geometry; recorded, not built around.
+  4. **VX-624's reach on the Index** — the Index's height observer was WIDENED (the action now fires on offset changes too and gates its old body on a height change); equivalent by construction, but it is a Release observer whose firing cadence changed.
+  5. **VX-662's pick** — the carried reveal now writes the carry anchor; the seed arm still does not (18d's cold-open rule). The table in the VX-662 section is the argument that this is not a product fork.
+  6. **VX-663's `landingAt:` outranks the identity re-anchor** in `adopt` — only the FIRST adoption of a reader is ever handed a place (the view's `.task`); the `.onChange(of: entries)` adoptions pass none, so a membership change mid-read still re-anchors by identity (`theAddressSurvivesMembershipAndOrderChangesByIdentity` unchanged).
+- **Rails kept:** zero lines under `Sources/` (the whole branch: `git diff origin/main...HEAD -- Sources Package.swift` is empty); no `Sync/`, no custody, no schema; `EditorTextView`, `EditorViewModel`, `BlockRangeIndex` (read only), `runStructural`, `PaneSurface` untouched; TEXTKIT2's rails on VX-680 each kept (stated in its section); no new dependency; no literal colour, no copy change. **MOBILE PARITY: nothing mobile-visible** for all five (Mac-only files).
+
+#### SUITES — headless (the end; at `4122d25b9`'s sources)
+
+- **Core package** (`swift build --build-tests` then `swift test --skip-build`, `DerivedData/vx677-b2/logs/swift-test.log`): **VariorumCoreTests 3,511 tests in 471 suites PASSED** (5 known issues — the standing Castle `PairInvariantPinsTests`/`PairCatchUpTests` ones), identical to batch 1; StringsWorkbook 32/4 passed; **VariorumMCPTests 455 of 457** — the two socket-harness WALL-CLOCK tests failed under the machine's load (load average 37 at the time): `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (26.9 s vs its 15-s bound — the standing VX-532 flake, batch 1's F-1) and `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds` (its premise counter under load — the same class); both suites GREEN run alone (5 of 5, `swift-test-mcp-isolated.log`). This branch changes nothing under `Sources/`, so neither can be this diff's.
+- **Mac:** six products compiled (above); no Mac test run (the window's).
+
+#### FINDINGS RECORDED, NOT FIXED (batch 2 — for the orchestrator to ticket or dismiss)
+
+- **F-B2-1 (Test-only · Tests & tooling, suggest Low — joins batch 1's F-1):** a second MCP socket-harness test is load-dependent — `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds(.clientHangsUp)` recorded `premiseFailures == 0` failed in the full-package run at load 37, green alone. Same class as VX-532 / F-1.
+- **F-B2-2 (Suspected · Books, suggest Low):** the Outline's width-change re-land (`onChange(of: outlineContentWidth)`) supersedes ANY pending landing with a landing on the row at the top — during an arrival it drops the carried block home (VX-680) and, before this batch, the arrival's target too. Pre-existing for the target (13u2b UNIT 1's design); recorded as VX-680's edge.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
@@ -432,5 +517,10 @@ Deliverables: per-member red-on-old pins revert-verified (pin-first where the me
 **A-677-2 (B2, the go-live transition — B2-i, PROVISIONAL for her bundle).** In the one render where a pane turns live while carrying a changed projection text, the pane completes its READ adoption before turning live. That is the read pane's own contract (projection-authoritative) finishing before liveness transfers — NOT the vetoed clean-buffer adoption of a live pane — and without it the race she is most likely to hit (clicking into a pane right after an MCP edit) re-admits the silent-overwrite class. Mark it PROVISIONAL in the record (adjacent to her "no clean-buffer adoption" words; recorded alternative B2-ii: leave the window as a residual); it joins the closeout bundle for her ratify.
 
 **A-677-2 RATIFIED by the author, live, 2026-10-28 (relayed by the orchestrator; her words verbatim, her spelling as typed):** "I think taht what you're saying about going live in the same instant as a changed text showing it in a read pane going live is fine - that seems like a very edge scenario and it's still not two items editing the same live pane, so doesn't seem like it introduces the clobbering risk." — so B2-i builds as RULED behaviour (no longer PROVISIONAL) and drops from the closeout bundle; B2-ii stays recorded as the road not taken.
+
+**Batch 2 PROVISIONALs (the implementer's, 2026-10-28 — for the closeout bundle; the orchestrator numbers them into QUESTIONS at the merge):**
+- **P-680-1 (VX-680) — a carried block TALLER than the page:** (a) BUILT: the reveal shows her CARET's line inside it; (b) the block's top (the minimal reveal's own tall-row rule — her caret may stay below the page); (c) the caret's line centred.
+- **P-680-2 (VX-680) — what "into view" means:** (a) BUILT: minimal — the block wholly on the page at the nearest edge (a block below the fold rests at the page's FOOT), reached inside the arrival's one landing (the row first, the block within about a second); (b) the block's top at the page's top (the forced top the brief rules out); (c) the comfort band (Write's resting place). Her walk W-680-1 says whether the foot and the short two-beat read right.
+- **VX-662's fix shape (a)** is the implementer's pick under the brief's fork rule (no product fork — the other two shapes leave stale roads; the table is in the VX-662 section); recorded here for the reviewer, not for her.
 
 **A-677-3 (the residual r1 — ticketed as VX-683).** "A sync pull applied into her autosave's debounce window on the same take is overwritten — the remote words survive nowhere" — Bug · Suspected · Castle & sync, Medium, NOT seated in this run (the Sync/ fence). Reference VX-683 in the sweep table's sync row; build nothing for it.
