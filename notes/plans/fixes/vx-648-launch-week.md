@@ -90,7 +90,7 @@ LIVE STATUS (per piece):
 - B1-0 — required reading (TEXTKIT2_NOTES in full, SurfaceContracts §The note, AppSpec §7 Return paragraph + §9, OverallModel §5, resiliency protocol): DONE (a1a1211de).
 - B1-1 — VX-647 headless fixture: cost of `newBlock` / `deleteBlock` / the editor structural roads' queries vs M deleted blocks: DONE (this commit — `Tests/VariorumCoreTests/VX647DeletedHistoryProbeTests.swift`, gated `VX647_PROBE=1`; numbers in "VX-647 TRACE" below).
 - B1-2 — VX-647 view-side trace (which observation/query re-runs per structural act, its cost vs M): DONE (this commit — mechanism named below; headless, no app run needed for the mechanism).
-- B1-3 — VX-647 pin (red-on-old) + fix, or deferral case: IN-PROGRESS — the fix is a LOCAL index migration (a schema change, outside this batch's brief): proposal sent to the orchestrator for the go; meanwhile the red pins are being written against the pre-fix tree.
+- B1-3 — VX-647 pin (red-on-old) + fix, or deferral case: IN-PROGRESS — the PINS are committed RED on the pre-fix tree (this commit — `Tests/VariorumCoreTests/TrayBadgeP1Tests.swift`, three tests, all ✘ on the current tree: the plan reads `SCAN cb` in both `trayCounts` and `trayBlocks`; VM steps 14,885 → 104,485 (badge) and 15,373 → 104,973 (listing) at library placements ×15, same note, same 40 carved blocks). The FIX is a LOCAL index migration (a schema change, outside this batch's brief): proposal sent to the orchestrator 2026-10-28, awaiting the go. Until then these three pins are EXPECTED RED on this branch.
 
 ### VX-647 TRACE (2026-10-28)
 
