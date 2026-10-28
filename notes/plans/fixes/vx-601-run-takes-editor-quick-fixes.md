@@ -2198,3 +2198,19 @@ the correct 27 ran; both logs kept, `tier1-c-post.log` is the 27). **The WHOLE M
 is running** (the battery + VX-337's soak-load observation + the pre-ladder baseline; VX-627's
 VisualWalk pin is red on main and PRE-EXISTING per the coordinator — separated from this batch's
 verdict). PENDING.
+
+## HER WORD — the release (2026-10-28, live in the orchestrator session, verbatim)
+
+*"ok so I will be starting some new waves that are still going to use you as the coordinator, but I
+want VX-601 to release anyway when it's done, including to the stargazing.tech website. I told the
+coordinator too."*
+
+**Read as:** (1) new waves are starting around this run; this session continues VX-601 to its close
+(the stage keeps routing through oct27coordinator; if she meant this session should take on a
+coordinator role beyond VX-601, that needs her explicit word — asked in the reply, not assumed).
+(2) **THE RELEASE WORD IS GIVEN for VX-601's close** — the wave-2 release mints when this run is
+done (VX-601 is the wave's last run), published to the DMG/appcast road INCLUDING the
+stargazing.tech website. The standing release rules apply unchanged: the version bump lands on the
+branch BEFORE the merge; the pre-release notes are DRAFTED FOR HER; release.sh runs per its current
+shape (if it still refuses an unattended session, the staged command is handed to her in the
+closeout bundle). No release before the ladder closes and the PR merges.
