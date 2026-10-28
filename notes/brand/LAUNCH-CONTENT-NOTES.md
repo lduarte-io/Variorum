@@ -6,6 +6,18 @@ way, and what's still owed. Written so a fresh session can pick up fine-tuning
 on these posts without the original chat. Keep this file current when any of
 it changes.
 
+**2026-10-27 — LAUNCH WEEK IS LIVE.** The beta ships this week (launch build
+Wednesday evening). The execution plan is **`site/launch-plan-2026-10-27.md`**
+— the artifact map (product page + readme/essay + Show HN are the launch set;
+the blog posts moved to post-launch sustain), the Obsidian-grammar page
+architecture, the embedded interactive-demo plan, and VX-633 (the seed build:
+readme note + bilingual *Prince* example book replacing Sherlock). Where that
+plan and older posting-order notes below differ, the plan governs. Her
+rulings the same session: GIF/still capture in a demo WING of her real
+library (the dev-store-only rule now binds the stunt video and WalkKit
+choreography, not stills); the page and demo are built directly in the
+stargazing.tech repo by authorized sessions.
+
 ## What exists (the inventory)
 
 - **`video/`** — three shorts scripts in one shape (hook → pain → turn → demo
