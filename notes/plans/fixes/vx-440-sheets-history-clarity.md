@@ -1360,11 +1360,26 @@ declutter verdict); b3's VX-356 close-ups with the contrast numbers; the W-1 FIN
 
 ## FOR THE CLOSEOUT (owed; do not improvise past it)
 
-- Canon deltas in the two-file shape: SurfaceContracts (The note — the Versions/Compare doors, the full-size
-  band, Block History's read/bring-back; The Bookcase — the gathering's kind word, the foot, the Shared-with
-  doors), MCPSpec (the gathering place-doors line superseding P-VX185-2's as-built note), AppSpec §9 only if
-  the bring-back lands as a new named operation; the dated entry + narratives to `notes/AppSpecRecord.md`;
-  `Tools/canon-size` run, its line in the handoff.
+- Canon deltas in the two-file shape — batch 3's are DRAFTED in its unit record ("Canon owed at the
+  closeout"); batches 1–2's DRAFTED here (apply at the merge moment, exactly these):
+  - **AppSpec §9, Blocks/variants/savepoints (after branchVariant's bullet):** "**bringBackCommitAsTake
+    (commit)** mints a new take on the commit's block — the commit's text, parent = the commit's take, at
+    the fan's end, never chosen, never born locked, label = the commit's message when it has one; refuses
+    under a seal; branchVariant's posture (no touch, no churn, no undo entry) (VX-431, vx-440)."
+  - **SurfaceContracts, The note — a Versions/Compare line:** "Compare's auto-fill seats a note's saved
+    versions — date-titled, sealed read-only, after its ordinary `version_of` peers — and unmarking a saved
+    version there PROMOTES it after a confirm, never a bare edge delete; each Note ▸ Versions row carries
+    Compare with now and Open full size; Compare with Latest Version lives on File, the note ▾ menus and ⌘K,
+    rendered only while the note has a saved version; a version opens full size read-only under the identity
+    band on Read's calm page (Back to the note · Promote to a regular note…) with no mode rail, no ⌘⇧S and
+    no per-note memories written (R-440-1/2; `notes/plans/fixes/vx-440-sheets-history-clarity.md`)."
+  - **SurfaceContracts, The note — a Block History line:** "Block History rests as one-line commit rows that
+    open in place; region headers carry counts and meaning lines sit behind (i); read in full opens a sheet
+    — the whole moment, Restore and Bring back as a take at its foot (the new take at the fan's end, never
+    chosen, wearing the commit's name); a restore lands at the block's start with a brief wash in Write and
+    the Takes article and ends the ring over the restored take (Takes and Lenses), elsewhere a receipt
+    (R-440-3, W-1/W-2; vx-440)."
+  - The dated entry + narratives to `notes/AppSpecRecord.md`; `Tools/canon-size` run, its line in the handoff.
 - The QUESTIONS bundle (PROVISIONALs P-440-1…5 + the kept `show_in_app` version refusal + anything the ladder
   disputes) — lands at the merge moment, on latest main, by the merging session.
 - Tickets: members Done as their fixes land; **every ticket this run FILES triaged** to the labeling rule;

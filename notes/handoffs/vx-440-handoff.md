@@ -53,14 +53,23 @@ Record: `notes/plans/fixes/vx-440-sheets-history-clarity.md` · Ladder: `notes/p
   defects, fixed, then 57/57 on the touched suites); vx-601's merge overlap re-run green.
 - Two in-window test-host crashes triaged: swift-testing's own ABI event encoder in the runtime
   metadata cache — a toolchain class, NOT VX-657's → **VX-661**.
-- Walk: PENDING(verdicts + shots).
+- Walk (06:00–06:33, both voices): every row WORKS-AS-RULED except W-1 and W-2, BOTH FIXED same night —
+  **W-1 is worth your read:** a restore beside a mounted Takes/Lenses pane left the LIVE pane showing the
+  old words, and the next keystroke would have written them back over the restore. Fixed on our road (the
+  restore ends the ring over the restored take — VX-222's shape); the GENERAL outside-change class is
+  **VX-664 (High)**, and its real fix wants your ruling on the P-3 live-pane exception. W-2: the read-in-full
+  sheet now runs Restore after it closes, landing exactly as the pane row does. Teardown: dev-store posture
+  restored exactly (prefs diff zero; nothing purged). PENDING(reshoot verdicts).
 
 ## Filed tickets, by priority
 
+- High: **VX-664** (the live-pane outside-change class — W-1's general form; your P-3 ruling wanted).
 - Medium: VX-659 (observeLatestNoteVersion at autosave cadence — Perf/Debt).
-- Low: VX-660 (book navigator's Study open-note mark — VX-356's sibling) · VX-661 (the toolchain crash
-  class) · PENDING(the two closeout candidates: the host-launch date warnings; the defaults-domain
-  cross-suite pollution).
+- Low: VX-660 (book navigator's Study open-note mark — VX-356's sibling) · VX-661 (the swift-testing
+  toolchain crash class, related VX-657) · VX-665 (host-launch date warnings in hosted runs) · VX-666
+  (test-host defaults cross-suite pollution) · VX-667 (the "in 2 books" popover counts a gathering).
+- Comments: VX-234 (guide lesson 5's gathering share doors + the pane header's bare Close) · VX-658 (the
+  words-guard AX fail blocked every Settings capture).
 
 ## Mechanical state
 
