@@ -90,3 +90,25 @@ above stand as committed.)*
   (first-run-walk.sh:208).
 - **`bash -n` on release.sh: clean** (my own run at the tip).
 - No pin — document text, per the final call. Correct disposition.
+
+## Finding 4 · [NIT] `--log`/`--app` exit grammar — FIX VERIFIED, pin's fences real, old exit 1 demonstrated by my own run (`e50ea8fb6`)
+
+- **The refuse-shaped fix is in BOTH files at the tip:** helper :406
+  `--log) [[ -n ${2:-} ]] || refuse "--log needs a file"; LOG=$2; shift ;;` and walk :418
+  `--app) [[ -n ${2:-} ]] || refuse "--app needs a path"; APP=$2; shift ;;`. `refuse` is exit 5
+  with the named reason in both (helper :59, walk :94) — the documented shape.
+- **The pin's three fences, present at the tip in BOTH self-tests** (helper :390–394, walk
+  :405–409): `HOME=$T/nohome` (an empty temp dir — no allowlist can exist, so even a regressed
+  parse refuses at R1/G1 before any read) · `zsh -f` (no startup files) · exit-99 PATH shims
+  (helper: curl; walk: curl + open + osascript + cliclick — a superset of the final call's third
+  belt). Each self-test runs a fence-holds case FIRST, proving every shim shadows the real tool
+  and no allowlist exists under the fenced HOME.
+- **The OLD exit-1 behavior, demonstrated under the fence BY MY OWN RUN:** both pre-fix scripts
+  extracted via `git show 33de94d33:…` into a scratch copy and run under the identical triple
+  fence — helper `std --log` → `…:393: 2: --log needs a file`, **exit 1**; walk `std --app` →
+  `…:406: 2: --app needs a path`, **exit 1**. Both outside the 0/4/5 grammar, exactly as the
+  finding traced. **The CURRENT scripts under the same fence:** helper →
+  `prod-reset-test-account REFUSES: --log needs a file`, **exit 5**; walk →
+  `first-run-walk REFUSES: --app needs a path`, **exit 5**. Red-on-old genuine, both sides mine.
+- Safety note: the fenced runs die at the arg parse, before any guard, read or launch; nothing
+  but function definitions and assignments precedes the parse in either script (read myself).
