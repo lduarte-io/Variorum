@@ -72,6 +72,17 @@
 //
 //  App-side, never `Domain`: it is view geometry (the layer-placement note).
 //
+//  ── VX-645 — THE SAME BRAIN, IN EVERY MODE THE NAVIGATOR SHOWS ───────────
+//  Her P-562-2 ask (*"I want a ticket made / this added"*): the navigator's
+//  follow-highlight beyond Outline, "the same brain, not a second one". Read
+//  ▸ Scroll is a continuous column too, so it runs THIS rule and THIS follower
+//  over its own rows' geometry (its rows expressed in `BookOutlineRows`'
+//  model — `FlowRows.viewedAnchor`), into its own slot
+//  (`BookViewModel.viewedFlowPair`). Read ▸ Pages and the spread are DISCRETE
+//  — a page turn, not a scroll — so their pair is the note they show
+//  (`pagePair`; A-648-8, PROVISIONAL), named as `named(at:in:)` names a note:
+//  itself and the chapter it stands in.
+//
 
 import CoreGraphics
 import Foundation
@@ -287,6 +298,18 @@ nonisolated enum BookOutlineViewed {
     static func adoptedPair(anchor: String, rows: [BookOutlineRows.Row]) -> Pair? {
         guard let index = rows.firstIndex(where: { $0.id == anchor }) else { return nil }
         return named(at: index, in: rows)
+    }
+
+    /// **VX-645 (A-648-8, PROVISIONAL) — a DISCRETE page's viewed pair**: the
+    /// note Read ▸ Pages shows, or the spread's left page — the note itself
+    /// and the chapter it stands in (`chapterOf` — the grouping's own
+    /// attribution, `BookStructureModel.chapterID(of:)`), which is exactly the
+    /// pair `named(at:in:)` gives that note's row. Nothing shown ⇒ nothing
+    /// viewed. A page turn moves it whole: there is no scroll between turns,
+    /// so nothing to adopt, release or clamp.
+    static func pagePair(postID: String?, chapterOf: (String) -> String?) -> Pair {
+        guard let postID else { return .nothingViewed }
+        return Pair(sectionID: chapterOf(postID), postID: postID)
     }
 
     /// **Is any part of a row inside the page?** `top` and `height` are the
@@ -525,9 +548,15 @@ nonisolated struct BookOutlineFollower: Equatable, Sendable {
 ///   note, never the caret's. A chapter row wears the viewed-chapter mark
 ///   (the accent fill, its name in ink — r1 finding 8) when its chapter is
 ///   the viewed pair's.
-/// - Every other mode, byte-identical to before: the focused note, and in the
-///   spread BOTH pages on screen (13b 4F; 13c 2B). No chapter wash (the
-///   follower runs in Outline only — PROVISIONAL P-562-2).
+/// - READ (VX-645 — P-562-2 superseded at her word, A-648-8): the same — the
+///   viewed note and its chapter, whichever face: Scroll's follower, or the
+///   note Pages shows (`BookViewModel.navigatorViewedPair` resolves which).
+///   Read's old mark, the FOCUSED note, went stale as she turned pages.
+/// - THE SPREAD: BOTH pages on screen keep their note markers, and the focused
+///   note, as shipped (13b 4F; 13c 2B); VX-645 adds the viewed chapter's
+///   mark — the LEFT page's chapter (A-648-8, PROVISIONAL).
+/// - INDEX, byte-identical to before: the focused note, no chapter mark (its
+///   navigator is hidden).
 nonisolated enum BookNavigatorMark {
     /// `spreadPostIDs`: the spread's pages (`BookNoteBox.selectedPost`'s
     /// input, the same facts) — read only in the spread.
@@ -538,11 +567,11 @@ nonisolated enum BookNavigatorMark {
         // A `switch`, not `==`: `ViewMode`'s synthesized Equatable is
         // main-actor isolated (it is nested in the structure model).
         switch mode {
-        case .outline:
+        case .outline, .read:
             return viewedPostID == postID
         case .spread:
             return focusedPostID == postID || spreadPostIDs.contains(postID)
-        case .index, .read:
+        case .index:
             return focusedPostID == postID
         }
     }
@@ -551,8 +580,8 @@ nonisolated enum BookNavigatorMark {
         mode: BookStructureModel.ViewMode, sectionID: String, viewedSectionID: String?
     ) -> Bool {
         switch mode {
-        case .outline: return viewedSectionID == sectionID
-        case .index, .spread, .read: return false
+        case .outline, .read, .spread: return viewedSectionID == sectionID
+        case .index: return false
         }
     }
 }

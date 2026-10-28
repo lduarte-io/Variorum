@@ -364,7 +364,10 @@ struct BookView: View {
                         reveal: model.pendingReveal,
                         onRevealLanded: { model.consumeReveal() },
                         sizes: model.flowSurfaceSizes,
-                        extentsCache: model.flowExtents)
+                        extentsCache: model.flowExtents,
+                        // VX-645: what the page shows — the navigator's
+                        // follow-highlight and ⌘↑/⌘↓'s seam read it.
+                        onViewed: { model.noteFlowViewed($0) })
                     // WA-1: the receipt at the page's foot, trailing.
                     .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                     .overlay { searchAnswerOverlay }
@@ -794,7 +797,9 @@ struct BookView: View {
                                     // 18d batch 3: at the generous pitch, and
                                     // the taller row is a bigger target too.
                                     NavigatorChapterLabel(
-                                        model: model, mode: structure.mode, section: section,
+                                        model: model, structure: structure,
+                                        mode: structure.mode, readForm: structure.readForm,
+                                        section: section,
                                         collapsedNote: collapsedNote, tokens: tokens)
                                         .contentShape(Rectangle())
                                         .navigatorRowFrame(section.id, chapter: true)
@@ -855,7 +860,8 @@ struct BookView: View {
                                     // is SHOWING (her ruling — never the
                                     // caret's), drawn by its own small view.
                                     NavigatorNoteLabel(
-                                        model: model, mode: structure.mode, entry: entry,
+                                        model: model, mode: structure.mode,
+                                        readForm: structure.readForm, entry: entry,
                                         tokens: tokens)
                                     .padding(.leading, group.section != nil ? 10 : 0)
                                     // The whole row is the target — inside
@@ -2945,28 +2951,36 @@ private struct NavigatorMarker: View {
 }
 
 /// **A navigator NOTE row's label** — the marker and the title in the
-/// mark's ink (`BookNavigatorMark.note`: in Outline the note the page is
-/// SHOWING, elsewhere the shipped rule).
+/// mark's ink (`BookNavigatorMark.note`: in Outline and Read the note the page
+/// is SHOWING — VX-645 — and in the spread and Index the shipped rule).
 ///
 /// Its OWN view so the mark is read in its own body: a viewed-pair change —
 /// every note boundary a scroll crosses — re-renders these labels and
 /// nothing else, never the book's whole body with its Outline column
 /// (P-8: invalidation ∝ what changed). Each mode reads only the facts its
-/// mark is made of: the Outline never reads the focus (ladder round 1,
+/// mark is made of: Outline and Read never read the focus (ladder round 1,
 /// finding 7 — a focus change re-rendered every label for a mark that
-/// ignores it), the other modes never read the viewed pair, and the
+/// ignores it), the spread and Index never read a viewed note, and the
 /// spread's pages are read only in the spread.
 private struct NavigatorNoteLabel: View {
     let model: BookViewModel
     let mode: BookStructureModel.ViewMode
+    /// VX-645: Read's face decides which follower it reads.
+    let readForm: BookStructureModel.ReadForm
     let entry: Queries.ReadingEntry
     let tokens: VoiceTokens
 
     var body: some View {
+        // Each mode's own facts only (ladder round 1, finding 7): Outline and
+        // Read their viewed note (VX-645 — `navigatorViewedPair`); the spread
+        // its pages and the focus; Index the focus.
+        let follows = mode == .outline || mode == .read
         let marked = BookNavigatorMark.note(
             mode: mode, postID: entry.postID,
-            focusedPostID: mode == .outline ? nil : model.focusedPostID,
-            viewedPostID: mode == .outline ? model.viewedOutlinePair.postID : nil,
+            focusedPostID: follows ? nil : model.focusedPostID,
+            viewedPostID: follows
+                ? model.navigatorViewedPair(mode: mode, readForm: readForm, chapterOf: { _ in nil }).postID
+                : nil,
             spreadPostIDs: mode == .spread ? model.spreadEntries.map(\.postID) : [])
         HStack(spacing: 2) {
             if marked, !tokens.selectionMarker.isEmpty {
@@ -2994,17 +3008,28 @@ private struct NavigatorNoteLabel: View {
 /// mode's facts.
 private struct NavigatorChapterLabel: View {
     let model: BookViewModel
+    /// VX-645: the grouping's chapter attribution, for the discrete pages'
+    /// viewed chapter (`BookStructureModel.chapterID(of:)`).
+    let structure: BookStructureModel
     let mode: BookStructureModel.ViewMode
+    let readForm: BookStructureModel.ReadForm
     let section: ReadingSection
     let collapsedNote: Queries.ReadingEntry?
     let tokens: VoiceTokens
 
     var body: some View {
-        let viewed = mode == .outline ? model.viewedOutlinePair : .nothingViewed
+        // VX-645: every mode but Index has a viewed pair now — Outline's and
+        // Read ▸ Scroll's followers, Read ▸ Pages' shown note, the spread's
+        // left page (A-648-8).
+        let viewed = mode == .index
+            ? .nothingViewed
+            : model.navigatorViewedPair(
+                mode: mode, readForm: readForm, chapterOf: { structure.chapterID(of: $0) })
+        let follows = mode == .outline || mode == .read
         let noteMarked = collapsedNote.map { note in
             BookNavigatorMark.note(
                 mode: mode, postID: note.postID,
-                focusedPostID: mode == .outline ? nil : model.focusedPostID,
+                focusedPostID: follows ? nil : model.focusedPostID,
                 viewedPostID: viewed.postID,
                 spreadPostIDs: mode == .spread ? model.spreadEntries.map(\.postID) : [])
         } ?? false
@@ -3851,7 +3876,8 @@ enum BookNoteStepDoor {
             outlineViewed: model.viewedOutlinePair.postID,
             spreadLeft: model.leftPage?.postID,
             pagedShown: model.pagedAnchorPostID,
-            standingAnchor: model.standingAnchorPostID)
+            // VX-645 (A-648-6 (2)): the follow brain's viewed note.
+            flowViewed: model.viewedFlowPair.postID)
     }
 
     /// One press: lands the neighbour, or says the book's end as a refusal.
@@ -3899,8 +3925,9 @@ enum BookNoteStepDoor {
             model.focus(postID)
         case (.read, .flow):
             // The flow consumes the reveal and lands the story — the
-            // navigator's `.landTheFlow`; the reveal also becomes the book's
-            // standing anchor, the seam's interim Read ▸ Scroll answer.
+            // navigator's `.landTheFlow`; the flow's follower adopts the
+            // landing's target at its start (VX-645), so the next press steps
+            // on from it.
             model.requestReveal(postID)
         case (.index, _):
             break

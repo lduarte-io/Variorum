@@ -21,7 +21,11 @@
 //  is precisely the machinery 13c 2A deleted on her A6 ruling ("it seems a
 //  bit buggy… remove it fully for now"). So leaving the scroll carries the
 //  book's STANDING anchor — where she arrived — rather than re-adding a
-//  subsystem she asked to have removed. Recorded, never implied.
+//  subsystem she asked to have removed. Recorded, never implied. (VX-645
+//  since gave the flow VX-562's follow-highlight — the note its page SHOWS,
+//  `BookViewModel.viewedFlowPair`, for the navigator and ⌘↑/⌘↓ — but this
+//  carry was not asked to read it and still leaves from the standing anchor;
+//  reading it here is a recorded follow-up, not built.)
 //
 
 import Foundation

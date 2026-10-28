@@ -1352,6 +1352,58 @@ final class BookViewModel {
         guard pair != viewedOutlinePair else { return }
         viewedOutlinePair = pair
     }
+
+    // MARK: - VX-645 — what Read ▸ Scroll's page is SHOWING (the same brain)
+
+    /// **The chapter and the note Read ▸ Scroll's page is showing** — the
+    /// Outline's slot's twin for the reading flow (VX-645, her P-562-2 ask:
+    /// *"I want a ticket made / this added"*): derived by the flow from the
+    /// geometry its own rows already report, through the SAME follower
+    /// (`BookOutlineFollower` over `BookOutlineViewed`'s rule — the adoption
+    /// at a landing's start, the 8-pt release, the at-bottom clamp), and
+    /// written ONLY through `noteFlowViewed`. Its own slot, never the
+    /// Outline's: the Outline's clears when the Outline leaves (VX-562's
+    /// pins), and the two pages are never on screen together. Read by the
+    /// navigator's marks in Read ▸ Scroll and by ⌘↑/⌘↓'s seam
+    /// (`BookNoteStep.viewedNote`, A-648-6 (2) — the interim standing-anchor
+    /// source replaced). A report, never a decision: it reaches no focus, no
+    /// reveal and no landing's aim.
+    private(set) var viewedFlowPair = BookOutlineViewed.Pair.nothingViewed
+
+    /// The flow's report — equality-gated against the slot itself.
+    func noteFlowViewed(_ pair: BookOutlineViewed.Pair) {
+        guard pair != viewedFlowPair else { return }
+        viewedFlowPair = pair
+    }
+
+    /// **The pair the navigator marks, mode by mode** (VX-645, A-648-8) — its
+    /// labels' one read, so each label observes only its own mode's facts:
+    /// - Outline: its follower's slot (VX-562);
+    /// - Read ▸ Scroll: its follower's slot — the same brain over the flow;
+    /// - Read ▸ Pages: the note the reader SHOWS (reported on every turn —
+    ///   `notePagedAnchor`) and its chapter: a page turn is discrete, so
+    ///   there is nothing to follow between turns (no adoption, release or
+    ///   clamp);
+    /// - the spread: its LEFT page and its chapter (VX-563's seam reads the
+    ///   same note as "the current one"); both pages keep their note markers
+    ///   (the mark table's shipped spread rule);
+    /// - Index: nothing (its navigator is hidden).
+    /// `chapterOf` is the grouping's own attribution
+    /// (`BookStructureModel.chapterID(of:)`).
+    func navigatorViewedPair(
+        mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm,
+        chapterOf: (String) -> String?
+    ) -> BookOutlineViewed.Pair {
+        switch (mode, readForm) {
+        case (.outline, _): viewedOutlinePair
+        case (.read, .flow): viewedFlowPair
+        case (.read, .pages):
+            BookOutlineViewed.pagePair(postID: pagedAnchorPostID, chapterOf: chapterOf)
+        case (.spread, _):
+            BookOutlineViewed.pagePair(postID: leftPage?.postID, chapterOf: chapterOf)
+        case (.index, _): .nothingViewed
+        }
+    }
 }
 
 #if DEBUG

@@ -17,10 +17,10 @@
 //      her letter is "while reading".
 //  (2) FROM — the mode's own VIEWED note, through ONE named seam
 //      (`viewedNote`): Outline's VX-562 viewed pair, the spread's left page,
-//      Read ▸ Pages' reported note, and — INTERIM — Read ▸ Scroll's standing
-//      anchor (where the book last landed), else its first note. Batch 4
-//      (VX-645) wires the follow brain's Read ▸ Scroll viewed note into this
-//      seam; nothing here reads the scroll's geometry.
+//      Read ▸ Pages' reported note, and Read ▸ Scroll's viewed note — the
+//      follow brain over the flow's page (VX-645, batch 4; batch 3's interim
+//      standing-anchor source replaced). Nothing here reads geometry: the
+//      seam reads the slots the followers write.
 //  (3) THE STEP lands like the navigator's note-row act for the mode — EXCEPT
 //      in Outline, where it is REVEAL-ONLY: the navigator's focus+reveal mounts
 //      the live editor, which would take the keyboard and turn the next ⌘↓
@@ -97,17 +97,19 @@ nonisolated enum BookNoteStep {
     /// the mode views no note (Outline's title block holds the page; an empty
     /// book).
     ///
-    /// The Read ▸ Scroll arm is INTERIM: the flow tracks no position of its own
-    /// (`BookAnchor`'s header — 13c 2A removed per-row reporting at her A6
-    /// ruling), so it answers the book's STANDING anchor — where it last
-    /// landed (a mode switch's carry, a navigator click, a step) — else its
-    /// first note. VX-645 (batch 4) replaces this arm with the follow brain's
-    /// viewed note.
+    /// The Read ▸ Scroll arm reads the flow's VIEWED note (VX-645, wired at
+    /// A-648-6 (2)): the follow brain's answer over the flow's own page — the
+    /// same rule and follower as Outline's, so a landing's target is the note
+    /// from the moment it starts, and nil (the title on screen) means BEFORE
+    /// the first note, exactly as Outline's title block does. It replaced
+    /// batch 3's interim source here (the book's standing anchor, else the
+    /// first note), which stepped from the last LANDING, never from where her
+    /// own scroll had put the page.
     struct Facts: Equatable, Sendable {
         var outlineViewed: String?
         var spreadLeft: String?
         var pagedShown: String?
-        var standingAnchor: String?
+        var flowViewed: String?
     }
 
     static func viewedNote(
@@ -119,7 +121,7 @@ nonisolated enum BookNoteStep {
         case (.outline, _): viewed = facts.outlineViewed
         case (.spread, _): viewed = facts.spreadLeft
         case (.read, .pages): viewed = facts.pagedShown ?? order.first
-        case (.read, .flow): viewed = facts.standingAnchor ?? order.first
+        case (.read, .flow): viewed = facts.flowViewed
         case (.index, _): viewed = nil
         }
         // A note the mode's order no longer holds (a stale report) views
