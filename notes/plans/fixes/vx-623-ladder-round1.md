@@ -400,4 +400,7 @@ line 345 is left as is. `bash -n` clean. No pin (document text).
   answer, fenced the same way: `prod-reset-test-account.sh:406: 2: --log needs a file` exit 1 and
   `first-run-walk.sh:418: 2: --app needs a path` exit 1. **GREEN ON THE FIX:** walk 72/72 · helper 90/90.
 
-**5 · [NIT] — PENDING** (piece E).
+**5 · [NIT] — FIXED** (the piece-E commit). `launch_on_road $RUN/app-join.log J3 J3b` — the launch logs as J3, the
+road/window/bounds checks as J3b (P1/P2's twins). The dry-run plan gains its J3b line: "J3b the road: the process's
+environment and the app's ARMED line · the main window's bounds (P2's checks)". The P1 header comment ("Every launch
+(P1, J3)") stays true. No pin (log naming); `zsh -n` clean; the walk's `--self-test` re-run green.

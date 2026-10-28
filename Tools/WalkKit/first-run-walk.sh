@@ -486,6 +486,7 @@ if [[ -n $DRY ]]; then
     print "  J2 the walk's OWN library aside: $SLOT → ${ASIDE:t} (one whole-folder rename) — only if absent at G7"
     print "     and its key file names the set-up's library; else STOP naming the move (then --arm join)"
     print "  J3 the window-frame guard, then a fresh launch on the road (stderr → $RUN/app-join.log) → a fresh library"
+    print "  J3b the road: the process's environment and the app's ARMED line · the main window's bounds (P2's checks)"
   fi
   if [[ $ARM != setup ]]; then
     print "  J4 the fresh library's row: '$NOT_YET' (signed in still, or signed in now)"
@@ -752,7 +753,7 @@ if [[ $ARM == both ]]; then
   aside_own_slot "$SLOT" "$ASIDE" || stop "the rename of the slot folder to ${ASIDE:t} did not prove out — look before anything moves again"
   log "the set-up arm's library $setup_lib set aside WHOLE → ${ASIDE:t} (one rename; the slot folder was absent at G7, so this run made it)"
 
-  launch_on_road $RUN/app-join.log J3 J3
+  launch_on_road $RUN/app-join.log J3 J3b   # the launch, then the road and the window's bounds (P1/P2's twins)
 fi
 
 if [[ $ARM != setup ]]; then
