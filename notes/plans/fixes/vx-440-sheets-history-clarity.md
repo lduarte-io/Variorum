@@ -664,7 +664,31 @@ Pieces (flipped per commit):
   menus without "Show take ▸", a scratch column's with it. `BlockHistoryCommitsCaptureTests` (disabled
   capture harness, VX-144's) can re-shoot the pane in both voices if the trait is dropped for a run.
 
-- Batch 3 (gathering faces): NOT STARTED.
+- Batch 3 (gathering faces): IN PROGRESS — implementer (Opus) 2026-10-28; UNIT RECORD below.
+
+### Batch 3 — UNIT RECORD (gathering faces: VX-611 · VX-616 · VX-189 · rider VX-356)
+
+**Not done by this unit (first line, per the contract):** IN PROGRESS — this line is rewritten at the unit's
+close. Headless lane only (`swift build` / `swift test` / `xcodebuild build-for-testing` into
+`App/Variorum/DerivedData/vx440-b3`); every Mac pin's RUN and every walk capture are the orchestrator's stage
+window.
+
+*Read in this session's own context before any code: CLAUDE.md + its canon, THIS FILE in full,
+`notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · The Bookcase and books · Doors to the
+outside), `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md` (MB-18, MB-19, the BATCH 3 RECORD),
+`notes/SessionResiliencyProtocol.md`, and the code anchors the brief names. No subagent.*
+
+Pieces (flipped per commit):
+- B3-0 record skeleton: IN THIS COMMIT.
+- B3-1 VX-611 seams + red-on-old pins (behaviour unchanged): NOT STARTED.
+- B3-2 VX-611 fix (the kind word): NOT STARTED.
+- B3-3 VX-616 the gathering foot loses "+ new chapter": NOT STARTED.
+- B3-4 VX-616 the unreachable `.createChapter` bind follow-up retired: NOT STARTED.
+- B3-5 VX-189 the gathering's own Shared-with doors: NOT STARTED.
+- B3-6 VX-356 verify (trace) + seam + red-on-old pin: NOT STARTED.
+- B3-7 VX-356 fix (if real): NOT STARTED.
+- B3-8 verification (headless) + the record closed: NOT STARTED.
+
 - Ladder: NOT STARTED.
 - Stage windows: EARLY request sent to oct27coordinator (suite runs + end-of-run walk); none READY yet.
 
