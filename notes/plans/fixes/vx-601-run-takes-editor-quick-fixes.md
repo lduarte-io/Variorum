@@ -2218,3 +2218,16 @@ closeout bundle). No release before the ladder closes and the PR merges.
 **Bundle-number correction (2026-10-28):** QUESTIONS #245 was taken by VX-620's closure and #246 by
 VX-562's — every "#245" reference in this record means THIS RUN'S bundle, which takes the next free
 number on latest main at the closeout merge (expected #247).
+
+**Her confirmation (2026-10-28, live, verbatim):** *"and yes this word covers the notes too"* — the
+release runs at this run's close with NO separate approval stop; the orchestrator drafts the release
+notes itself (ONE LINE PER BULLET — the What's New parser trap) and they land in her handoff to read
+after. THE RELEASE WINDOW (one window, post-merge, the coordinator's relayed shape, stage via
+oct27coordinator): (1) A1 of her REAL store first, cmp-verified (current A1
+`variorum-a1-0.10.3-install-2026-10-27T180840Z`, pruned to the new one only after the refresh
+verifies); (2) `release.sh` — if the classifier refuses it from this session, STOP and tell the
+coordinator; it goes to her with the one staged command; (3) the step-0 first-run walk
+(self-resetting per VX-623 — no separate reset; its G7 dev-slot set-aside and restore) — OPUS-driven
+under the claim, per the standing safeguard; (4) the `/Applications` refresh from the DMG, codesign
+verified on staged AND installed; (5) the site publish + both verify-published checks.
+Zero-instance checks before every act; a running real-store instance is NEVER quit.
