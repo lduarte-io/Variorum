@@ -330,9 +330,12 @@ VX-586 · VX-594 · VX-577 · VX-592 · VX-248 · VX-321 · VX-337.
 
 ## BATCH A RECORD — pane LIFECYCLE: VX-421 + VX-248 (implementer: opus-implementer, 2026-10-27)
 
-**NOT DONE (first line, kept current):** everything below the trace — pins, fixes, builds, the
-suite window (the orchestrator's: this session never runs `xcodebuild test`), the walk (Opus walker
-under the orchestrator's claim). No behavioural revert is in flight.
+**NOT DONE (first line, kept current):** the suite window (the orchestrator's: this session never
+runs `xcodebuild test`) — every red and green claim below is PENDING it; the walk (Opus walker under
+the orchestrator's claim). **REVERTS IN FLIGHT (2026-10-27, from e0021460, committed-first):** the
+three revert builds below edit ONLY `App/Variorum/Variorum/Surface/PaneSurface.swift`, each restored
+by `git checkout -- App/Variorum/Variorum/Surface/PaneSurface.swift` (the fix is committed, so that is
+the safe restore); `git diff` against HEAD shows exactly what is reverted at any moment.
 
 **LIVE STATUS**
 - Reading — DONE: this file in full (members, batches, ENVIRONMENT TRAPS, the sitting record
