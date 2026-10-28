@@ -13,22 +13,29 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-440 — Sheets & history clarity: books, Block History, versions** (SEVEN members by the sub-issue listing at kickoff: versions & Compare as one design VX-130 · VX-437 · VX-432 · Block History VX-431 · gathering faces VX-611 · VX-616 · VX-189; VX-216 is NOT a member — design context only, it stays under VX-551; the record `notes/plans/fixes/vx-440-sheets-history-clarity.md`) | VX-440 · `vx-440-sheets-history-clarity` | `~/dev/variorum-vx-440` · the Pro | In flight 2026-10-28 (architect-phase; surfaces: Note ▸ Versions + Compare (Takes & Lenses), the Block History pane, book/gathering row menus + Book Settings + the Trash row, the MCP grant doors on a gathering (MCPSpec read in full; no wire-tool change planned); no `Sync/`, no custody, no schema; overlaps: VX-648 (Book Settings, book/gathering row menus) — closeouts serialize, the second merger merges main in and re-runs the overlap). |
 
 ### Latest closeout
 
-**→ VX-648 CLOSED 2026-10-28 — RUN: LAUNCH-WEEK UMBRELLA (the record
-`notes/plans/fixes/vx-648-launch-week.md`; the ladder `notes/plans/vx-648-ladder-round1.md`; her handoff
-`notes/handoffs/vx-648-handoff.md`; PR #202, merge edc7a901b; kickoff to merge in one overnight run).** All 17
-members by the sub-issue listing. Her reported editor lag (VX-647/649) traced to the tray badge's unindexed
-deleted-blocks fence on the writer and fixed by the LOCAL migration v1_34 (not a §12 event; marker 14; the release
-that carries this run states "local-only migration v1_34"); the MCP door grew gathering book-acts (VX-639, rule hers),
-/mcp in the instructions at a 3,100 bound (VX-640), the Private row's client gate (VX-641), universal schema
-enforcement (VX-606), honest last-seen (VX-626) and a fail-loud accept loop (VX-612); the star cap retired everywhere
-(VX-643, MOBILE-VISIBLE — MobileSoul PL-61); ⌥⌘L/⇧⌥⌘L, the wing-label door, ⌘↑/⌘↓ book stepping (VX-632/644/563);
-the navigator follows and self-scrolls in every book mode with the block-keeping Index carry (VX-645/646/630/631).
-One Fable ladder round, clean; suites green at the final tree (the Mac union 953/146, sim 20/3); two dev-store walks
-restored line by line. Born: VX-653/654/655/662/663, all triaged. Her bundle: QUESTIONS #248.
+**→ VX-440 CLOSED 2026-10-28 — SHEETS & HISTORY CLARITY: BOOKS, BLOCK HISTORY, VERSIONS (the record
+`notes/plans/fixes/vx-440-sheets-history-clarity.md`; the ladder `notes/plans/fixes/vx-440-ladder-round1.md`; her
+handoff `notes/handoffs/vx-440-handoff.md`; PR #201, merge 8f835f5b3; kickoff to merge in one overnight run).** Seven
+members + three sitting-seated riders, by the sub-issue listing. Versions & Compare became ONE design (VX-130/437/432):
+saved versions seat in Compare's auto-fill (date-titled, sealed, after ordinary peers), unmarking one PROMOTES after a
+confirm (the declassify leak pinned red-on-old and killed), "Compare with now" on Versions rows + "Compare with Latest
+Version" on File/note ▾/⌘K, and the full-size version under the identity band (Back + Promote; no per-note memories).
+Block History (VX-431 + riders VX-331/244): one-line rows opening in place, counts, (i) explainers, the read-in-full
+sheet with Restore + Bring back as a take (the shared op `bringBackCommitAsTake`, AppSpec §9), the restore landing with
+its wash — and the walk's W-1 catch: a restore beside a LIVE Takes/Lenses pane left the old words, which the next
+keystroke would have written back; fixed by ending the ring over the restored take (the general outside-change class
+→ VX-664, High — her P-3 ruling wanted). Gathering faces (VX-611/616/189 + rider VX-356): the kind word at every
+delete/Trash/Put-back sentence, the foot's "+ new chapter" removed at her word, book-parity Shared-with doors
+(MCPSpec's P-VX185-2 superseded), the Book Panel's Study open-note mark. Evidence: one Fable ladder round (no
+BLOCKER/MAJOR); SIX red-on-old stage runs exact; the WHOLE VariorumTests target 5,572/978 at the final gate — which
+caught MAIN'S OWN red (VX-648's `.switchWing` vs the unupdated ShellChromeTests pin; fixed at the coordinator's GO)
+and re-sighted VX-608's flake; a full walk + a reshoot verified every face in both voices, the dev store restored to a
+zero prefs diff each time. Born: VX-659/660/661/664/665/666/667/668, all triaged. Her bundle: QUESTIONS #249. MOBILE
+PARITY: MobileSoul PL-62. Canon 126,682/150,000. One shipped gap, NAMED: VX-668 (the read-in-full sheet's landing).
+
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 

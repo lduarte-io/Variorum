@@ -1123,3 +1123,45 @@ dev-store walks. Born: VX-634 · VX-636 · VX-637 · VX-638 · VX-650 · VX-651 
 bundle: QUESTIONS #247. Merge order: last of wave 2, after VX-620 · VX-562 · VX-623.
 
 **2026-10-28 — VX-648 (Run: launch-week umbrella; PR #202; the record `notes/plans/fixes/vx-648-launch-week.md`; one overnight run, kickoff to merge).** Her kickoff (verbatim in the record): the roster by the SUB-ISSUE LISTING — 17 members after her same-evening edits (+VX-649, +VX-612, −VX-633 "it's fine for us to run VX-633 at a different time later") — in four suggested batches, "rule provisionally overnight on what you are able to"; stage and merges through oct27coordinator; no release without her word. §9/§4: **VX-647** (hers: "3-5 seconds at least… really annoying") traced to the tray badge's `deleted_count` cascade-victim fence — a full `container_block` scan per tombstoned block, run synchronously on the WRITER inside `databaseDidCommit` at every structural write and autosave — fixed by the LOCAL migration **v1_34** (`idx_cblock_dead_block ON container_block(block_id, deleted_at) WHERE deleted_at IS NOT NULL`, the dead-rows mirror of I2's live-only index; NOT a §12 event by SyncSpec §2 + the v1_15/v1_17 precedents, marker 14 untouched; rulings A-648-1 amended to the partial shape — zero pinned-plan churn): 1,071→21.9 ms per carve round and 548→10.5 ms per autosave at 600 deleted blocks on a ~20k library, flat in both axes, four pins revert-verified, walked live flat to 305 carved blocks (worst ⏎ 88.7 ms). **VX-649** (hers: "the new line briefly disappears for about a second") was the SAME mechanism — the list-exit's two writes each paid the held-badge fetch; fixed by v1_34 with no VX-649 code; the frame-scale residual (R1-3's retraction order, live-measured one 50–67 ms frame) is VX-655. §12/MCPSpec: **VX-639** built to her RB-7 ruling ("we literally just built set_starred for notes, so why is it not allowed to do it on a gathering?") — rename/archive/unarchive/delete/star at EDIT on the gathering place, one client-named undo each in a gathering's words, `set_book_rule` still refusing with the REWORDED gathering sentence on a readable gathering (**A-648-5**, PROVISIONAL; option (b), the not-shared shape, recorded); **VX-640** "(e.g. with /mcp)" provider-neutral, the bound 3,000→3,100 (3,011 used); **VX-641** the Private row on VX-590's has-ever-had-a-client fact, always shown on anything already marked (her three #245 passes' words are the 2026-10-28 entries above); **VX-606** one schema check at the call door for every tool; **VX-626** `last_seen_at` stamped at the close on the end line's own clock read; **VX-612** the accept loop's transient class retried, a fatal exit flipping the host to `.stoppedByItself` (the status sentence PROVISIONAL); **VX-367** lesson 3's eight acts named one by one. §12: **VX-643** the 15-star cap retired on every road, phone included (MOBILE-VISIBLE — MobileSoul PL-61), with the ticket's own P1 check finding and fixing `starredListItems`' whole-notes walk (+kind: 525 flat at notes ×10); **VX-632** both chords over VX-377's selector (one Move item by focus, the ellipsis per the ticket's spelling — A-648-7); **VX-644** the "in ‹wing›" label as ⌘L's own door; **VX-563** her kickoff ruling built — ⌘↑/⌘↓ step a book's notes while reading, document start/end while editing (VX-560's rule), Outline REVEAL-ONLY so stepping repeats, never in Index, the ends speaking (**A-648-6**, PROVISIONAL, with the named per-mode viewed-note seam); **VX-645** the one follower in Book and Read (Pages marks the note it shows per turn; the spread its LEFT page — **A-648-8**, PROVISIONAL); **VX-646** the navigator keeps its highlighted row in view (the Open list's idiom; P-562-1 superseded at her word); **VX-630** the Index→Outline carry keeps the block; **VX-631** "stories". Cast: Fable architect/orchestrator (rulings A-648-1…8; small record fixes only) · four fresh Opus implementers + three resumed fix legs · one Opus walker ×2 · a FABLE ladder, ONE round (notes/plans/vx-648-ladder-round1.md): NO BLOCKER, NO MAJOR, 1 MINOR (doc wording, retired with the in-flight row) + 3 NITs (the ⌥⌘L-re-fire one closed AGREE-harmless by traced read), every deliberate pin flip APPROVED, the reviewer independently re-verifying v1_34's §12 reasoning and re-running the headless pins byte-matching. Evidence: suites at the final code tree 81686f215 (core 3,495/469 · MCP 457/84 · Strings 32/4 · the Mac union 953/146 + the 28/3 re-run · sim 20/3); two dev-store walks, posture restored (the one classifier-denied cleanup — two stray notes — left surfaced, never routed around); five w2a first-run reds all traced (two pin faults, one stale count, two VX-645 pins) and fixed with assertions kept. vx-601 merged first (zero overlap; main merged in at the batch-3 seam). Born: VX-653 · VX-654 (the quadratic lineage reads, her rider offer) · VX-655 · VX-662 · VX-663 (seen live), all triaged. The bundle: QUESTIONS #248. Mobile parity: MobileSoul PL-61 (VX-643); nothing else mobile-visible.
+
+## 2026-10-28 — VX-440 (Sheets & history clarity — books, Block History, versions; PR #201, merge 8f835f5b3; one overnight run, kickoff to merge)
+
+**Her kickoff (the /architect-phase command, verbatim-faithful):** "Taste-heavy: bring me the design calls at a
+sitting before building them. My rulings are on the tickets." … "Rule provisionally overnight on what you are able
+to - I'm around for the start of your run if you have any messages off the start and then will send a goodnight
+message." Members BY THE SUB-ISSUE LISTING (7) + three riders seated at the sitting (VX-331, VX-244, VX-356; VX-315
+offered and not taken); VX-216 read for design context only, at her word, and left under VX-551.
+
+**The sitting (2026-10-28, she present at the start; the question tool):** R-440-1 — Compare doors = "Rows +
+one-press door" ("Compare with now" on each Versions row; "Compare with Latest Version" on File/note ▾/⌘K). R-440-2 —
+the full-size version's band = "Back + Promote". R-440-3 — reading a whole commit = "Row expands + full-text sheet"
+with Restore and Bring back as a take at its foot. R-440-4 — the riders above.
+
+**Her rulings from the tickets, built:** VX-437's redirect — "doesn't it seem wrong for the older version of a note
+to NOT show up in compare?? that seems like exactly what you would want from compare. i also think that you should be
+allowed to stop counting it as a version but i think that should mean that it is automatically promoted." — confirmed
+"i like it. sounds good on both." (§9/§12: versions never filtered from auto-fill; unmark promotes after a confirm).
+VX-616 — "agree with removing the button." (the gathering foot's "+ new chapter" removed; Bind into a Book… stays the
+*[removed for publication]*
+no words at the top and I want it to stay that way". VX-189's repurpose — "gatherings should have shared with doors —
+you can file a ticket for this or repurpose VX-189 for it."
+
+**The canon deltas this run landed (the two-file shape):** AppSpec §9 — `bringBackCommitAsTake` (branchVariant's
+posture). SurfaceContracts, The note — the versions-in-Compare/full-size-band line (R-440-1/2) and the Block History
+line (R-440-3; VX-668 named). SurfaceContracts, The Bookcase and books — the gathering kind word (VX-611, every
+delete/Trash/Put-back sentence through one rule), the Shared-with row on a gathering (VX-189), the Book Panel's
+open-note mark (VX-356, P-440-12), the gathering foot (VX-616). MCPSpec — a gathering's own place doors, her word
+2026-10-28, SUPERSEDING P-VX185-2's ratified-for-now no-sharing-line posture and delivering VX-548's MB-18 offer;
+faces only, no wire or reach change.
+
+**The run:** three batches (Opus implementers, fresh each; Fable orchestrating and cold-reviewing), one ladder round
+(no BLOCKER/MAJOR; 3 MINOR → VX-659/VX-660/a VX-234 comment; 3 NIT), six red-on-old stage runs exact, the whole
+VariorumTests target 5,572/978 at the final gate, a full walk + a reshoot in both voices with the dev store restored
+to a zero prefs diff each time. The walk's W-1 (a restore beside a live Takes/Lenses pane keeping the old words, the
+next keystroke writing them back) was fixed by ending the ring over the restored take; the GENERAL outside-change
+class is VX-664 (High — her P-3 ruling wanted). The final gate caught MAIN'S OWN red (VX-648's `.switchWing` beside
+the unupdated ShellChromeTests pin — fixed at the coordinator's GO, credited) and re-sighted VX-608's flake. The
+provisionals P-440-1…13 and the kept `show_in_app` version-id refusal are QUESTIONS #249; the one shipped gap is
+VX-668 (the read-in-full sheet's landing, trace plan on the ticket). Mobile parity: PL-62. Born: VX-659 · VX-660 ·
+VX-661 · VX-664 · VX-665 · VX-666 · VX-667 · VX-668, all triaged. Merge order this wave: third, after vx-601
+(b3b1041aa) and VX-648 (edc7a901b), both merged in with recorded conflict resolutions.

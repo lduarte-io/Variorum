@@ -1,5 +1,18 @@
 # Variorum — Phase Closeout Archive
 
+**→ VX-648 CLOSED 2026-10-28 — RUN: LAUNCH-WEEK UMBRELLA (the record
+`notes/plans/fixes/vx-648-launch-week.md`; the ladder `notes/plans/vx-648-ladder-round1.md`; her handoff
+`notes/handoffs/vx-648-handoff.md`; PR #202, merge edc7a901b; kickoff to merge in one overnight run).** All 17
+members by the sub-issue listing. Her reported editor lag (VX-647/649) traced to the tray badge's unindexed
+deleted-blocks fence on the writer and fixed by the LOCAL migration v1_34 (not a §12 event; marker 14; the release
+that carries this run states "local-only migration v1_34"); the MCP door grew gathering book-acts (VX-639, rule hers),
+/mcp in the instructions at a 3,100 bound (VX-640), the Private row's client gate (VX-641), universal schema
+enforcement (VX-606), honest last-seen (VX-626) and a fail-loud accept loop (VX-612); the star cap retired everywhere
+(VX-643, MOBILE-VISIBLE — MobileSoul PL-61); ⌥⌘L/⇧⌥⌘L, the wing-label door, ⌘↑/⌘↓ book stepping (VX-632/644/563);
+the navigator follows and self-scrolls in every book mode with the block-keeping Index carry (VX-645/646/630/631).
+One Fable ladder round, clean; suites green at the final tree (the Mac union 953/146, sim 20/3); two dev-store walks
+restored line by line. Born: VX-653/654/655/662/663, all triaged. Her bundle: QUESTIONS #248.
+
 **→ VX-562 CLOSED 2026-10-27 — BOOK OUTLINE: THE HIGHLIGHT FOLLOWS YOUR SCROLL, AND THE NAV INFO PINS UP TOP
 (the record `notes/plans/fixes/vx-562-outline-follow.md`; the ladders `vx-562-ladder-round1/2/3.md`; her handoff
 `notes/handoffs/vx-562-handoff.md`; PR #198, merge 40d501404; kickoff to merge in one day).** Her pre-launch ask built
