@@ -1875,7 +1875,8 @@ is in flight.
 - Revert trees — NOT-STARTED (the plan: `vx601c-pre` all four reverted, then one tree per member;
   each revert IN PLACE on the member's face/door function, committed-first, restored by
   `git checkout <fix-sha> -- <file>` — the batch B lesson).
-- VX-337 — IN PROGRESS (bounded: one trace).
+- VX-337 — DONE (the bounded trace yielded for the fold-settle flake — a deterministic TEST fix +
+  its pure pin, this commit; the soak flake's trace NOT done, the bound spent — findings below).
 - Red/green runs, walk — PENDING (the orchestrator's window).
 
 **THE TRACES (pre-fix line numbers).**
@@ -1978,6 +1979,58 @@ pointers read: 13g R5-1, 13b 3F, VX-170's collapsed row — which is ruled "mute
 - **P-C-2 — the read twin's ink (VX-574).** Built: ink (her VX-574 word over the 13g brief's
   "dimmed/read styling"). Option (b): keep a lighter twin but in the prose's ink at reduced opacity —
   not built; her words ask for "not a weird light font compared to anything else".
+
+**VX-337 — THE BOUNDED TRACE (ticket-shaped; the orchestrator relays it to VX-337).**
+*The fold-settle flake (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt`) —
+TRACED, a deterministic TEST fix built.*
+1. *The failure's own shape* (`DerivedData/logs/tier1-b-post.log:1563-1567`): ONE issue —
+   `restIsReached(second.board.articleRestore) → false` after 9 aims — while the SAME test's page
+   assertion beside it (her row's top back at −30 ± 2) PASSED. So the page was right and only the
+   restore's STATE was not "reached". 9 aims < the 24-aim budget, so not an exhausted restore (an
+   exhausted one goes `.settled`, which reads as reached).
+2. *The mechanism (code, read):* a `.wanted` restore advances ONLY on a scroll-GEOMETRY report
+   (`TakesArticleScroll.consumeArticleGeometry` → `restoreStep`, which settles into `.holding` when
+   the row's frame sits at `into ± 2`); a row-FRAME report never advances it
+   (`articleRowFramesMoved` returns `.wait` unless `.settled`). Every geometry report carries the
+   rows' PREVIOUS frames (the 17q ladder's W-2, measured, documented at
+   `TakesViewModel.noteArticleRowFrame`), and the restore's re-aim is absolute — so when SwiftUI's
+   re-resolution of the last aim puts the row exactly where it sat, the geometry report of that
+   move reads the row off its place, re-aims to the same offset (no geometry change follows), and
+   the row then reports its arrival with no geometry report after it: `.wanted` with the page right.
+3. *This is the DESIGN, pinned — not a code bug to fix:* 18l-b U2 met exactly this stall (the
+   bloom's landing stranded behind it) and fixed it only for a restore a LANDING waits on
+   (`restoreLooksAgainForAWaitingLanding`); with no landing waiting the restore keeps its own
+   geometry cadence ON PURPOSE — "the guard for her R-Q21: a plain round trip's restore cadence is
+   the byte-preserved restore's own" — pinned by
+   `TakesArticleWatchTests.aRestoreWithNoLandingWaitingIsLeftToItsOwnCadence` (expects `.wanted`).
+   So the code change I first drafted (settle a pending restore on the row's own report) would have
+   reversed a pinned decision tied to her ruling — NOT built.
+4. *So the TEST over-asserts:* the fold pin is a plain round trip (`forgetCurrentBlock`, no
+   landing), and `restIsReached` demands `.settled`/`.holding`, which the design reaches only if a
+   geometry report happens to FOLLOW the row's arrival inside the 20-turn window — SwiftUI's pass
+   ordering and coalescing, which load moves (alone and in the 196/209-suite batteries a later
+   report arrived; in the whole-target run and once in batch B's 30-suite tier 1 it did not).
+   *The fix (test-only, `TakesArticleScrollTests.swift`):* the state assertion becomes
+   `restArrived(_:on: hersRow)` — `.settled`/`.holding`, OR `.wanted` on HER row (any other shape
+   still fails) — beside the UNCHANGED page assertion (her row's top at −30 ± 2), which is the
+   contract and carries the pin's red on the round-1 tree (the row came back AT the fold there).
+   Deterministic in the variable the trace found; NOT a widened timeout (the window is untouched).
+5. *The pin (pure board, deterministic):* `aPlainRoundTripsRestoreArrivingBetweenReportsIsArrivedNotLost`
+   drives the exact shape (aim → the aim's report reads the previous frame and re-aims → the row
+   reports itself at −30, no report after) and asserts the design's state (`.wanted(place)`), that
+   the OLD assertion rejects it (the run's red) and the corrected one accepts it, and that the
+   corrected one still rejects `.undecided` and a restore wanting another row. Red-on-old by revert:
+   `restArrived`'s body reverted to `restIsReached`'s → this pin's acceptance line reds.
+*The soak flake (`TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)`, "block
+0001 strips 4 cards for a fan of 5") — NOT traced (the bound was spent on the first; read only).*
+Two hypotheses from a read of the test, for VX-337's next session: (i) **process-global state**
+(the VX-167 class) — the soak WRITES `UserDefaults.standard`'s `takesGridRows`/`takesGridCols`/
+`takesBeneathCount` for its run and restores them after, while Swift Testing runs other suites
+concurrently in the whole-target process (all `@MainActor`, interleaving at every `await`); any
+suite touching those keys (or the strip's other `.standard` settings) mid-soak changes what the
+strip renders; (ii) **an invariant read before the strip's last card realized** after a mint under
+load (invariant 5 counts realized "mini" panes against the fan). The next step is to log, at the
+failure, the three `.standard` keys and the strip's realized ids; no fix is proposed.
 
 **RESIDUE / NOT MINE (for the orchestrator to ticket or drop):**
 - **R-C-1:** `RefusalCopy.swift:29` (Write's Make Block refusal) says "see blk n/n below" — the word
