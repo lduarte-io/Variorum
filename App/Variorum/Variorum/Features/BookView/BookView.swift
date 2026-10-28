@@ -800,11 +800,14 @@ struct BookView: View {
                                         model: model, structure: structure,
                                         mode: structure.mode, readForm: structure.readForm,
                                         section: section,
-                                        collapsedNote: collapsedNote, tokens: tokens)
+                                        collapsedNote: collapsedNote, tokens: tokens,
+                                        follow: navigatorFollow)
                                         .contentShape(Rectangle())
                                         .navigatorRowFrame(section.id, chapter: true)
                                 }
                                 .buttonStyle(.plain)
+                                // VX-646: the row's scroll identity (the follow's reveal).
+                                .id(BookNavigatorFollow.chapterRowID(section.id))
                                 .contextMenu {
                                     chapterMenu(section)
                                     if let collapsedNote {
@@ -862,7 +865,7 @@ struct BookView: View {
                                     NavigatorNoteLabel(
                                         model: model, mode: structure.mode,
                                         readForm: structure.readForm, entry: entry,
-                                        tokens: tokens)
+                                        tokens: tokens, follow: navigatorFollow)
                                     .padding(.leading, group.section != nil ? 10 : 0)
                                     // The whole row is the target — inside
                                     // the label (see the chapter row). 18d
@@ -879,6 +882,8 @@ struct BookView: View {
                                     .navigatorRowFrame(entry.postID, chapter: false)
                                 }
                                 .buttonStyle(.plain)
+                                // VX-646: the row's scroll identity (the follow's reveal).
+                                .id(BookNavigatorFollow.noteRowID(entry.postID))
                                 .contextMenu {
                                     outlineChapterMenu(
                                         structure: structure, postID: entry.postID)
@@ -939,6 +944,17 @@ struct BookView: View {
                     .padding(.horizontal, BookNavigatorLayout.washBleed)
                     .id("nav-noop")
                 }
+                // VX-646 — the list follows its highlighted row (the Open
+                // list's idiom, `BookNavigatorFollow`): the rows' frames are
+                // read in the list's own visible space, the list's height and
+                // her hand's scroll phase reach the follow, and the reveal
+                // lands through this reader's proxy.
+                .coordinateSpace(name: BookNavigatorFollow.space)
+                .onScrollGeometryChange(for: CGFloat.self) { $0.containerSize.height } action: { _, height in
+                    navigatorFollow.listResized(height)
+                }
+                .onScrollPhaseChange { _, phase in navigatorFollow.phase(phase) }
+                .onAppear { wireNavigatorFollow(proxy) }
                 .padding(.horizontal, -BookNavigatorLayout.washBleed)
                 Spacer(minLength: 4)
                 if let reading = structure.reading, reading.kind == .book {
@@ -1939,6 +1955,28 @@ struct BookView: View {
     /// R19 drag state: the chapter the dragged one would land BEFORE, and
     /// the end zone's highlight.
     @State private var chapterDropTarget: String?
+
+    /// **VX-646 — the navigator list's follow** (`BookNavigatorFollow`): a
+    /// reference box, so the highlighted row's frame reports and the list's
+    /// readings never re-render the book.
+    @State private var navigatorFollow = BookNavigatorFollowMemory()
+
+    /// VX-646: the follow's road (the list's proxy) and, in DEBUG, its oracle
+    /// and its phase seam — a pin plays a hand scroll through the same door
+    /// `onScrollPhaseChange` takes (the Open list's `SidebarSectionPhaseSeam`
+    /// precedent: the test host injects no pointer events).
+    private func wireNavigatorFollow(_ proxy: ScrollViewProxy) {
+        navigatorFollow.proxy = proxy
+        #if DEBUG
+        let readingID = readingID, owner = oracleOwner, follow = navigatorFollow
+        follow.report = { state in
+            BookOutlineGeometry.recordNavigatorFollow(readingID, state, owner: owner)
+        }
+        BookOutlineGeometry.publishNavigatorPhaseSeam(readingID, owner: owner) { phase in
+            follow.phase(phase)
+        }
+        #endif
+    }
     @State private var chapterDropAtEnd = false
 
     @ViewBuilder
@@ -2649,6 +2687,9 @@ enum BookOutlineGeometry {
     private static var openDoorStore = OwnedRegistrations<String, @MainActor (String) -> Void>()
     private static var modeDoorStore = OwnedRegistrations<
         String, @MainActor (BookStructureModel.ViewMode) -> Void>()
+    private static var navigatorFollowStore = OwnedRegistrations<String, BookNavigatorFollowState>()
+    private static var navigatorPhaseSeamStore = OwnedRegistrations<
+        String, @MainActor (ScrollPhase) -> Void>()
 
     static var anchorTops: [String: CGFloat] { anchorTopStore.current }
     /// **13u2 UNIT A2: each anchor row's CURRENT height**, recorded on the
@@ -2721,6 +2762,17 @@ enum BookOutlineGeometry {
     static var modeDoors: [String: @MainActor (BookStructureModel.ViewMode) -> Void] {
         modeDoorStore.current
     }
+    /// **VX-646 — each mounted navigator's follow, as it stands** (following
+    /// or paused, the highlighted row's id, its frame in the list's visible
+    /// space, the list's height), keyed by the book — so a pin asks "is the
+    /// highlighted row in view" of the list's own facts.
+    static var navigatorFollows: [String: BookNavigatorFollowState] { navigatorFollowStore.current }
+    /// **VX-646 — each mounted navigator's phase seam**: feeds a scroll
+    /// PHASE to its follow exactly as `onScrollPhaseChange` does (a pin's
+    /// hand scroll; the test host posts no wheel events — U8).
+    static var navigatorPhaseSeams: [String: @MainActor (ScrollPhase) -> Void] {
+        navigatorPhaseSeamStore.current
+    }
 
     // MARK: - The writes (each names its owner)
 
@@ -2782,6 +2834,18 @@ enum BookOutlineGeometry {
         modeDoorStore.publish(door, for: readingID, owner: owner)
     }
 
+    static func recordNavigatorFollow(
+        _ readingID: String, _ state: BookNavigatorFollowState, owner: UUID
+    ) {
+        navigatorFollowStore.publish(state, for: readingID, owner: owner)
+    }
+
+    static func publishNavigatorPhaseSeam(
+        _ readingID: String, owner: UUID, _ seam: @escaping @MainActor (ScrollPhase) -> Void
+    ) {
+        navigatorPhaseSeamStore.publish(seam, for: readingID, owner: owner)
+    }
+
     /// A `BookView` leaving: its own registrations, every one, and nothing
     /// another window's book still answers for.
     static func release(owner: UUID) {
@@ -2798,6 +2862,8 @@ enum BookOutlineGeometry {
         focusDoorStore.release(owner: owner)
         openDoorStore.release(owner: owner)
         modeDoorStore.release(owner: owner)
+        navigatorFollowStore.release(owner: owner)
+        navigatorPhaseSeamStore.release(owner: owner)
         // VX-291: the Outline's fold controls' frames.
         BookFoldGeometry.release(owner: owner)
     }
@@ -2810,6 +2876,7 @@ enum BookOutlineGeometry {
         navigatorNoteRowStore.forgetAll()
         navigatorChapterMarkStore.forgetAll()
         navigatorNoteMarkStore.forgetAll()
+        navigatorFollowStore.forgetAll()
     }
 
     /// VX-562: the pinned line's oracle, for a pin starting clean.
@@ -2969,18 +3036,23 @@ private struct NavigatorNoteLabel: View {
     let readForm: BookStructureModel.ReadForm
     let entry: Queries.ReadingEntry
     let tokens: VoiceTokens
+    /// VX-646: the list's follow — this row reports its frame while it is
+    /// the highlighted row.
+    let follow: BookNavigatorFollowMemory
 
     var body: some View {
         // Each mode's own facts only (ladder round 1, finding 7): Outline and
         // Read their viewed note (VX-645 — `navigatorViewedPair`); the spread
-        // its pages and the focus; Index the focus.
+        // its pages and the focus for the MARK, its left page for the follow;
+        // Index the focus (its navigator is hidden — nothing follows).
         let follows = mode == .outline || mode == .read
+        let viewed = mode == .index
+            ? .nothingViewed
+            : model.navigatorViewedPair(mode: mode, readForm: readForm, chapterOf: { _ in nil })
         let marked = BookNavigatorMark.note(
             mode: mode, postID: entry.postID,
             focusedPostID: follows ? nil : model.focusedPostID,
-            viewedPostID: follows
-                ? model.navigatorViewedPair(mode: mode, readForm: readForm, chapterOf: { _ in nil }).postID
-                : nil,
+            viewedPostID: follows ? viewed.postID : nil,
             spreadPostIDs: mode == .spread ? model.spreadEntries.map(\.postID) : [])
         HStack(spacing: 2) {
             if marked, !tokens.selectionMarker.isEmpty {
@@ -2991,6 +3063,9 @@ private struct NavigatorNoteLabel: View {
                 .foregroundStyle(marked ? tokens.ink : tokens.muted)
                 .lineLimit(1)
         }
+        .modifier(NavigatorFollowReport(
+            memory: follow, rowID: BookNavigatorFollow.noteRowID(entry.postID),
+            active: BookNavigatorFollow.followsNoteRow(entry.postID, viewed: viewed)))
         #if DEBUG
         .modifier(NavigatorMarkProbe(id: entry.postID, chapter: false, marked: marked))
         #endif
@@ -3016,6 +3091,8 @@ private struct NavigatorChapterLabel: View {
     let section: ReadingSection
     let collapsedNote: Queries.ReadingEntry?
     let tokens: VoiceTokens
+    /// VX-646: the list's follow (the note label's reason).
+    let follow: BookNavigatorFollowMemory
 
     var body: some View {
         // VX-645: every mode but Index has a viewed pair now — Outline's and
@@ -3058,6 +3135,11 @@ private struct NavigatorChapterLabel: View {
                     .padding(.horizontal, -BookNavigatorLayout.washBleed)
             }
         }
+        // VX-646: the row's whole frame, while it is the highlighted row.
+        .modifier(NavigatorFollowReport(
+            memory: follow, rowID: BookNavigatorFollow.chapterRowID(section.id),
+            active: BookNavigatorFollow.followsChapterRow(
+                section.id, collapsedNote: collapsedNote?.postID, viewed: viewed)))
         #if DEBUG
         .modifier(NavigatorMarkProbe(id: section.id, chapter: true, marked: washed))
         .modifier(NavigatorMarkProbe(
