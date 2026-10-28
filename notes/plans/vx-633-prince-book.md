@@ -196,7 +196,7 @@ Implementer: Opus (opus-implementer), 2026-10-28, branch `vx-633-prince-book`, t
 - **R-633-14 — the Ricci label "ricci 1903" RATIFIED.** Her words: "Ricci's take label - I think that's fine honestly." Ledger item 7 → ruled; no PROVISIONAL marker.
 
 ### LIVE STATUS
-- P1 `SampleLibraryPrinceBook.swift` (constants, the four parts, the front note, the verse restorations, the Ricci + Dacre third takes, the Italian parser, the per-note take pass) — IN-PROGRESS.
+- P1 `SampleLibraryPrinceBook.swift` (constants, the four parts, the front note, the verse restorations, the Ricci + Dacre third takes, the Italian parser, the per-note take pass) — DONE (the commit naming P1). Headless evidence: the take pass driven through the core operations against the REAL bundled resources (a scratch Swift Testing harness in the core package, never committed — kept at the session scratchpad): 27 imports + the pass in ~1 s on the Air; 200 Italian takes, 6 Ricci + 1 Dacre third takes, both verses restored, zero skips; fans 193 × 2 takes + 7 × 3; every take active, unlocked, stamped 1532-01-04; Marriott's take stays the default (and the only chosen one); the 1532 stamp round-trips byte-identically through `DateFormatter.variorumISO8601`.
 - P2 the seeding road (`Book.prince`, part sections by name, the bilingual pass in the note's own runner turn) — NOT-STARTED.
 - P3 the swap (`launchSet = [.prince]`, `Book.all`, the launch's birth decision on the launch book, the Welcome arrangement extended, the phone's first-write seed, Help ▸ Restore "the prince") — NOT-STARTED.
 - P4 the pins (the Prince seed-shape suite, the resource-pair pin, the swap pin, mechanical updates) — NOT-STARTED.
