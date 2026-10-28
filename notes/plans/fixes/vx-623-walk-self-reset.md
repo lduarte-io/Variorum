@@ -480,6 +480,15 @@ AND the walk's own path form; `xcrun simctl list devices booted` empty.
    diagnosis), the slot restored FIRST (step 5's order), then the report.
 7. The orchestrator sends the RELEASE result line; the walker releases nothing itself.
 
+**GO (oct27coordinator, 2026-10-27 18:53):** claim `vx-623-walk` HELD (claimed 18:53:47, 90 min) through the
+coordinator's exact bridge line; floor verified by the orchestrator — zero instances (both strict forms),
+zero booted sims, the dev slot holding the as-found 11-item set. **The as-found dev store (the coordinator's
+word, as the 17:49 vx-562-confirm walk left it; LEG 0 records the ACTUALS before the set-aside):** library
+e11e5233 HELD, signed out, Study voice with the APP Appearance set to DARK (macOS is Light — never touch
+either), no books, ONE note (Oct-19), Walk Wing empty, MCP server OFF, claude-code approved with 0 grants,
+Trash ~65. RELEASE line owes: arm-by-arm, std's end state, slot end state (banner read, Resume never
+pressed), prefs diff, instance/sim state, stage.log times.
+
 **Walker constraints (Opus, per the standing precedent):** secrets only via `~/.variorum/bin` helpers;
 keys through `keys.sh`, never cliclick text; guarded acts ≥ 2.6 s apart; captures window-scoped only;
 her app never launched, quit or typed into; extras killed by proven PID only; every renew request routes
@@ -501,7 +510,7 @@ rule); quit by identity, kill extras by proven PID; zsh `pipestatus`; push after
 | 1 | Kickoff: worktree, in-flight row, Linear flips, this record | DONE (in-flight row on main `VX-623 kickoff`; members In Progress 19:06Z) |
 | 2 | The kickoff sitting (Q1–Q3) + her premise answer delivered | DONE 2026-10-27 — headless · both arms · VX-536 seated; premise answer in the kickoff reply |
 | 3 | UNIT 1 — the script work (D-1…D-7) | DONE 2026-10-27 (`b090395e4`…`2f656ddbc`; self-tests 64/64 + 85/85 and the D-7 pin red-on-old ALL re-run by the orchestrator; R-U1-1…5 adjudicated APPROVED; VX-627 filed) |
-| 4 | UNIT 2 — the live acceptance on production | PREPARING — REQUEST accepted by oct27coordinator (claim `vx-623-walk`, uninterrupted); the walk build READY on the MERGED tree (`bcd03bec1` = branch + main through VX-620 and VX-562; `DerivedData/vx623`, io.lduarte.Variorum.debug, build 9876, BUILD SUCCEEDED; fresh binary 17:56); her allow-rule word GIVEN ("go ahead on that tool", 2026-10-27 — the three rules added); READY sent to oct27coordinator, GO awaited |
+| 4 | UNIT 2 — the live acceptance on production | PREPARING — REQUEST accepted by oct27coordinator (claim `vx-623-walk`, uninterrupted); the walk build READY on the MERGED tree (`bcd03bec1` = branch + main through VX-620 and VX-562; `DerivedData/vx623`, io.lduarte.Variorum.debug, build 9876, BUILD SUCCEEDED; fresh binary 17:56); GO 18:53 — claim `vx-623-walk` held; the Opus walker IN FLIGHT on the UNIT 2 script of record |
 | 5 | The ladder (fresh fable-reviewer, whole diff) | NOT-STARTED |
 | 6 | Closeout: canon delta (the standing ruling, two-file shape), tickets, handoff, merge | NOT-STARTED |
 
