@@ -635,6 +635,16 @@ struct TutorialMCPChapterTests {
             let wirePlan = try await db.read { try Queries.gatheringWireMintOutcome($0, reading: starOnly) }
             #expect(wirePlan == .plan(.init(tagIDs: [], star: true)), "the client's new note is starred")
             #expect(!text.contains("never shared on its own"))
+            // VX-639 (her RB-7 ruling, 2026-10-28): the gathering's own acts at
+            // edit, and its truth — those tools act under a gathering grant at
+            // edit, and the rule's never does.
+            #expect(text.contains("With edit, it can also rename, star, archive or delete the gathering itself, but "
+                                  + "its rule stays yours."))
+            for name in ["rename_book", "set_starred", "archive_book", "delete_book"] {
+                #expect(MCPToolFacts.scopes(of: name)?.contains(.gathering) == true && MCPToolFacts.rung(of: name) == .edit,
+                        "\(name) acts on a gathering at edit")
+            }
+            #expect(MCPToolFacts.scopes(of: "set_book_rule")?.contains(.gathering) == false, "its rule stays hers")
             #expect(text.contains("move a note to another wing only with edit where the note is and write new "
                                   + "in the wing it goes to"))
             #expect(text.contains("the note leaves its books there, its tags come along, and "

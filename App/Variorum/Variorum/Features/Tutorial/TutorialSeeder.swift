@@ -2693,11 +2693,14 @@ enum TutorialSeeder {
             // to an agent by each tag"). PROVISIONAL words, her copy pass.
             // VX-596 (the ticket's wording point 5): the star clause — a rule
             // only a star satisfies takes the client's new note starred.
+            // VX-639 (her RB-7 ruling, 2026-10-28 — PROVISIONAL words, the VX-648
+            // record's bundle): with edit, a gathering's own acts; its rule stays hers.
             "A gathering grant follows your tags: a note is in reach the moment "
             + "it wears what the gathering's rule asks for, and out of reach when it "
             + "stops. With write new, a client can add a note to the gathering, and "
             + "the note wears the tags the rule needs, starred if the rule needs a "
-            + "star. And a client can move a note "
+            + "star. With edit, it can also rename, star, archive or delete the "
+            + "gathering itself, but its rule stays yours. And a client can move a note "
             + "to another wing only with edit where the note is and write new in "
             + "the wing it goes to: the note leaves its books there, its tags come "
             + "along, and \u{2325}\u{2318}Z brings it back.",

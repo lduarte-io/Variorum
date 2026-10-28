@@ -298,7 +298,11 @@ struct MCPAskAndReceiptTests {
             #expect(!line.contains("book") && !line.contains("chapter"),
                     "the book-level edit acts never act under a note grant (MCPToolFacts): \(line)")
         }
-        #expect(MCPToolFacts.scopes(of: "delete_book") == [.book, .wing], "why the clause names no book")
+        // VX-639 — A DELIBERATE FLIP (her RB-7 ruling, 2026-10-28: a gathering
+        // takes a book's acts at edit, the rule staying hers): delete_book acts
+        // under a gathering grant too — still never a note's, so the clause
+        // still names no book.
+        #expect(MCPToolFacts.scopes(of: "delete_book") == [.book, .wing, .gathering], "why the clause names no book")
         #expect(!MCPPaneCopy.rungDetail(.edit).contains("every change"))
         #expect(!MCPPaneCopy.enableBlurb.contains("every change"))
         #expect(MCPPaneCopy.rungDetail(.suggest)
