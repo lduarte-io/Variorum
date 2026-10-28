@@ -541,6 +541,8 @@ struct EditorSurface: NSViewRepresentable {
             badges?.uninstall()
             decor?.uninstall()
             anchor?.uninstall()
+            // VX-656: the editor's typing history goes with the editor.
+            surfaceDelegate.endUndoHistory()
         }
     }
 }
@@ -834,6 +836,8 @@ struct InlineEditorSurface: NSViewRepresentable {
             badges?.uninstall()
             decor?.uninstall()
             reportHeight = nil
+            // VX-656: the editor's typing history goes with the editor.
+            surfaceDelegate.endUndoHistory()
         }
     }
 }
@@ -844,6 +848,9 @@ struct InlineEditorSurface: NSViewRepresentable {
 @MainActor
 final class EditorSurfaceDelegate: NSObject {
     let model: EditorViewModel
+    /// The one text view this delegate is wired to (`wire(to:)`) — the only
+    /// view whose history it answers for.
+    private weak var wiredView: EditorTextView?
 
     init(model: EditorViewModel) {
         self.model = model
@@ -851,12 +858,57 @@ final class EditorSurfaceDelegate: NSObject {
 
     /// Wires both delegates the pipeline needs.
     func wire(to textView: EditorTextView) {
+        wiredView = textView
         textView.delegate = self
         textView.textStorage?.delegate = self
+    }
+
+    // MARK: - The editor's own undo history (VX-656 — R-601-1's road, carried)
+
+    /// **Write's typing history is the EDITOR's own** (VX-656 — VX-421's class
+    /// on the other surface kind). The editor is built `allowsUndo = true`
+    /// (`makeEditor`, `makeInlineEditor`), and while this delegate answered no
+    /// `undoManager(for:)` every keystroke registered its undo on the WINDOW's
+    /// manager, aimed at the editor view. A mode switch dismantles the editor
+    /// and `NSUndoManager` retains no targets, so the next ⌘Z with no text
+    /// input focused popped an action into the freed editor (`EXC_BAD_ACCESS`
+    /// in `popAndInvoke`) — or, while something still held it, edited an
+    /// editor no longer on screen.
+    ///
+    /// It has to be the editor's OWN manager — `PaneSurface`'s,
+    /// `CommentTextArea`'s and `CaptureTextView`'s road (VX-179 U3-g,
+    /// VX-193, VX-421): `removeAllActions(withTarget:)` on the view or its
+    /// storage does not reach TK2's registrations (measured at U3-g), so no
+    /// teardown can clear the window's manager exactly, and clearing all of
+    /// it would reach other text's history. ⌘Z keeps AppKit's road — `undo:`
+    /// travels to the window, which undoes through the first responder's
+    /// `undoManager`, answered here — so ⌘Z in Write undoes Write's typing and
+    /// nothing else, and the history goes with the editor: this delegate's
+    /// life is its representable coordinator's, and `endUndoHistory` empties
+    /// it at the dismantle and at the model's teardown besides.
+    ///
+    /// Every existing `textView.undoManager?.removeAllActions()` site (the
+    /// structural rewrites, `clearTextUndo`) and every reader of
+    /// `textView.undoManager` (the find bar's grouping, the J7 undo hint)
+    /// resolve through this answer, so they meet exactly the history her
+    /// typing registered on — nothing about WHEN the editor ends its history
+    /// changes, only WHERE it lives.
+    let undoHistory = UndoManager()
+
+    /// The editor is torn down (or its model let go): its history ends with
+    /// it — said here rather than left to whenever SwiftUI releases the
+    /// coordinator that holds this delegate.
+    func endUndoHistory() {
+        wiredView?.breakUndoCoalescing()
+        undoHistory.removeAllActions()
     }
 }
 
 extension EditorSurfaceDelegate: NSTextViewDelegate {
+    func undoManager(for view: NSTextView) -> UndoManager? {
+        view === wiredView ? undoHistory : nil
+    }
+
     func textView(
         _ textView: NSTextView,
         shouldChangeTextIn affectedCharRange: NSRange,

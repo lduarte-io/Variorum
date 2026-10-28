@@ -711,6 +711,15 @@ final class EditorViewModel {
         // model that has let go must not re-take `active` if its view is
         // re-parented on the way out.
         textView?.onWindowChange = nil
+        // VX-656: the editor's typing history ends with the surface (the
+        // dismantle's `EditorSurfaceDelegate.endUndoHistory` is the exact
+        // road; this is the model's own belt). Only the editor's OWN manager
+        // is ever cleared here: a text view whose delegate has already let go
+        // falls back to the WINDOW's manager, which holds other text's history.
+        if let textView, let manager = textView.undoManager,
+           manager !== textView.window?.undoManager {
+            manager.removeAllActions()
+        }
         canary.disarm()
         // 13c 1E: the phantom fix's debounce dies with the surface it was
         // measuring (its geometry world goes with the text view).

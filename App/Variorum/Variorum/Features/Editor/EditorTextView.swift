@@ -843,9 +843,11 @@ final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface 
         // `super` on every path, so ⌘Z that CAN undo text still does, and the
         // hint is the only thing added where it could not. The
         // first-responder gate keeps a split window's second editor quiet:
-        // `performKeyEquivalent` walks the whole hierarchy, and both editors
-        // share the window's undo manager, so without it one press would
-        // speak twice. (A view with no window is a harness's, and it is by
+        // `performKeyEquivalent` walks the whole hierarchy, so without it one
+        // press would speak from an editor she is not in — and since VX-656
+        // each editor answers its OWN history (`EditorSurfaceDelegate.
+        // undoHistory`), so the unfocused one would speak about a stack ⌘Z
+        // never reaches. (A view with no window is a harness's, and it is by
         // definition the one being driven.)
         if let chord = Self.undoHintChord(for: event),
            window == nil || window?.firstResponder === self {
@@ -877,6 +879,8 @@ final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface 
         textView.isEditable = true
         textView.isSelectable = true
         textView.isRichText = false
+        // Undoable — and the history is the EDITOR's own, never the window's
+        // (VX-656: `EditorSurfaceDelegate.undoHistory`).
         textView.allowsUndo = true
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
@@ -950,6 +954,7 @@ final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface 
         textView.isEditable = true
         textView.isSelectable = true
         textView.isRichText = false
+        // VX-656: the editor's own history (`EditorSurfaceDelegate.undoHistory`).
         textView.allowsUndo = true
         textView.isVerticallyResizable = false  // the wrapper sizes the frame
         textView.isHorizontallyResizable = false
