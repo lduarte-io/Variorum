@@ -727,8 +727,17 @@ walk re-shoot PENDING the orchestrator's window. Tree verified clean at resume (
 dirs `.vx440-stagelogs/` · `.vx440-walk-shots/` are the walk's, never added); pulled to `f2cea88bb`.
 
 Pieces (flipped per commit):
-- WF-1 W-1 trace + red-on-old pins: IN-PROGRESS (this commit — the PRE-FIX tree).
-- WF-2 W-1 fix: NOT STARTED.
+- WF-1 W-1 trace + red-on-old pins: DONE (383954445 — the PRE-FIX tree: the red-on-old SHA).
+- WF-2 W-1 fix: `TakesViewModel.consumeRestoreLanding` — FIRST, on every board that hears the parcel for
+  its note, a ring in a pane showing the restored take ENDS (`blur()`: its flush is the restore's already,
+  nothing pending); the pane goes READ and adopts the restored words (PaneSurface's read arm, untouched);
+  THEN the landing, Takes board only, unchanged. `LensesBoardView` now hears the parcel too (one
+  `onChange`; it ends its ring and leaves the parcel — no Lenses landing). VX-222's shape (a ring never
+  outlives the words it was typing over); no editor-seam file touched (`PaneSurface`/`EditorTextView`/
+  `BlockRangeIndex` unchanged), the wash mechanics unchanged. Consequence for her (recorded under
+  P-440-8): after a restore beside Takes/Lenses the ring is off that pane — one click puts her back in,
+  over the restored words. Build ✓ (`vx440-merge`). The two WF-1 pins turn GREEN here (RUNS PENDING).
+  DONE (this commit — the fix: the green-on-new SHA).
 - WF-3 W-2 trace + seam + pin: NOT STARTED.
 - WF-4 W-2 fix: NOT STARTED.
 - WF-5 verification + record: NOT STARTED.

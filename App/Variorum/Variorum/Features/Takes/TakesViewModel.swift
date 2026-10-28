@@ -1249,15 +1249,30 @@ final class TakesViewModel {
     /// change ends a pending landing, 13u2 UNIT E's one structural arm).
     @ObservationIgnored private var parkedRestoreLanding: (landing: RestoreLanding, until: Date)?
 
-    /// The router's parcel, heard by the mounted board. THE Takes board only
-    /// (`landingEnabled` — never Write's embedded panel model, never the
-    /// Lenses host, whose columns have no article landing), and only a parcel
-    /// for THIS note.
+    /// The router's parcel, heard by the mounted board. **First, on EVERY
+    /// board that hears it (the Takes board and the Lenses board): a ring in
+    /// a pane showing the restored take ENDS** (W-1, the vx440 walk) — a live
+    /// pane is buffer-authoritative and never adopts projection text
+    /// (`PaneTextAuthority`; VX-248's adoption keys on a change of the BOUND
+    /// take, and a restore keeps the take), so the ring's pane kept the
+    /// pre-restore words under the wash, and its next keystroke would have
+    /// written them back over the restore. Ended through `blur()` (its flush
+    /// is load-bearing — the restore already flushed, so nothing is pending),
+    /// the pane goes READ and adopts the restored words; she clicks back in
+    /// to type in them. VX-222's shape exactly: a ring never outlives the
+    /// words it was typing over. The general class — any outside change to a
+    /// live pane's take — is VX-248's sibling, recorded in the run record.
+    ///
+    /// Then the LANDING: THE Takes board only (`landingEnabled` — never
+    /// Write's embedded panel model, never the Lenses host, whose columns
+    /// have no article landing), and only a parcel for THIS note; the Lenses
+    /// board leaves the parcel where it is (inert — heard on change only).
     func consumeRestoreLanding() {
-        guard host == .takes, landingEnabled,
-              let landing = session.commandRouter.pendingRestoreLanding,
+        guard let landing = session.commandRouter.pendingRestoreLanding,
               landing.postID == postID
         else { return }
+        if authority.livePane?.variantID == landing.variantID { blur() }
+        guard host == .takes, landingEnabled else { return }
         session.commandRouter.pendingRestoreLanding = nil
         parkedRestoreLanding = (landing, Date().addingTimeInterval(RestoreLanding.patience))
         landParkedRestore(in: projection)
