@@ -1747,3 +1747,15 @@ args; ~2 minutes in all):**
    the tree is unchanged.)
 `rev428map` and `rev594` need nothing more. If #1/#5/#9 are STILL green on the rebuilt rev428, the
 write-back is reached by a road my trace missed — stop and report, never adjust the pin.
+
+## WINDOW b-final, phase 1 — the red re-runs on the REBUILT trees (the orchestrator, 2026-10-28, claim vx-601-b-final from ~00:08)
+
+All four re-opened rows now prove RED-ON-OLD on their member's tree, and every other row holds:
+`vx601b-pre` (33 tests / 6 suites, the corrected suite set): red = #1 #2 #3 #5 #6 #7×4 #8 #9
+#10(slotSplit) #12 #13 #14 #15 #16×2 #17×2 — the full union, #12 red now that
+`TakesPresentationTests` is named; guards #18–#20 green. `vx601b-rev428` (34 / 7 with the cost
+suite): red = exactly #1 #2 #3 #5 #6 #7×4 #8 #9 #11×3 — the rebuilt revert (the bare-return slip
+gone) turns the write-back off and #1/#5/#9 red as they must. `vx601b-rev577` (6 / 2): red =
+exactly #12 + #10(slotSplit). Zero restarts everywhere. **Batch B's red-on-old verification is
+COMPLETE per member; nothing hollow but the two deliberately-hollow ⌘T guards.** Logs:
+`DerivedData/logs/red2-vx601b-*.log`. Phase 2 (the B walk) proceeds under the same claim.
