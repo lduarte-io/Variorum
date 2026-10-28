@@ -1738,7 +1738,7 @@ be from the fix commit by id (`git checkout <fix-sha> -- <file>`), never from HE
 args; ~2 minutes in all):**
 1. `vx601b-pre` — `-only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakeCardMenuTitleTests -only-testing:VariorumTests/TakesPresentationTests`
    — expect the union: #1 #2 #3 #5 #6 #7×4 #8 #9 #10(slotSplit) #12 #13 #14 #15 #16×2 #17×2 red;
-   #4 #10(stack) #18 #19 and the card suite's other 10, the chord guard's 2 and the presentation
+   #4 #10(stack) #18 #19 and the card suite's other 9, the chord guard's 2 and the presentation
    suite's other 3 green. (TakesBoardTests dropped from this list: none of its 13 tests is a pin.)
 2. `vx601b-rev428` — the same six suites plus `-only-testing:VariorumTests/TakesExpansionCostTests`
    — expect exactly #1 #2 #3 #5 #6 #7×4 #8 #9 #11×3 red; everything else green.
