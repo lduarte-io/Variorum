@@ -205,7 +205,7 @@ struct PrinceSeedTests {
             #expect(mine.text == generated.ricciText, Comment(rawValue: generated.noteTitle))
             #expect(mine.label == PB.ricciTakeLabel)
         }
-        #expect(PB.ricciTakeLabel == "ricci 1903", "R-633-14, ratified")
+        #expect(PB.ricciTakeLabel == "ricci 1909", "R-633-14, its year corrected at U2b: the 1909 Oxford printing PG #57037 transcribes")
         let english = Dictionary(
             uniqueKeysWithValues: try SampleLibrarySeeder.loadStories(for: prince).map { ($0.title, $0.text) })
         for third in PB.thirdTakes {
@@ -297,17 +297,23 @@ struct PrinceSeedTests {
     }
 
     /// The front note names the door the registry actually renders (a
-    /// renamed verb would make it lie), carries the tag sentence and the
-    /// two-copies line, and stores no blank line.
+    /// renamed verb would make it lie), carries the tag sentence, and stores
+    /// no blank line. **LOOSENED at U2b (R-633-18, her word: "I decided that
+    /// I don't need the two variorum warnigns … it seems worse to say it"):**
+    /// the two-copies paragraph is no longer required, and the paragraph
+    /// count is no longer fixed at the draft's five — her edited text lands
+    /// in a later commit (the seed-shape pin derives the front note's blocks
+    /// from the text itself, so it follows whatever she writes).
     @Test("The front note names the real Restore door and stores no blank line")
     func theFrontNoteNamesTheRealRestoreDoor() {
         let text = PB.aboutThisText
         #expect(text.contains("Help \u{25B8} " + CapabilityRegistry.capability(.restorePrinceBook).verb))
         #expect(CapabilityRegistry.capability(.restorePrinceBook).verb == "Restore \u{201C}the prince\u{201D}")
         #expect(text.contains("\u{201C}\(PB.tagName)\u{201D}"), "the tag sentence")
-        #expect(text.contains("can appear twice"), "R-633-7's two-copies line")
         #expect(!text.contains("\n\n"), "no stored blank lines")
-        #expect(text.components(separatedBy: "\n").count == 5, "five paragraphs, five blocks")
+        #expect(text.components(separatedBy: "\n").allSatisfy {
+            !$0.isEmpty && $0 == $0.trimmingCharacters(in: .whitespaces)
+        }, "one block per paragraph, none blank or padded")
     }
 
     // MARK: - The seed
@@ -443,7 +449,7 @@ struct PrinceSeedTests {
                 let seventeen = try #require(byTitle["XVII. Concerning cruelty and clemency, and whether it is better to be loved than feared"])
                 let twentySix = try #require(byTitle["XXVI. An exhortation to liberate Italy from the barbarians"])
                 let two = try #require(byTitle["II. Concerning hereditary principalities"])
-                #expect(try lensPicks(db, noteID: seventeen).map(\.name) == ["marriott 1908", "il principe 1532", "ricci 1903"])
+                #expect(try lensPicks(db, noteID: seventeen).map(\.name) == ["marriott 1908", "il principe 1532", "ricci 1909"])
                 #expect(try lensPicks(db, noteID: twentySix).map(\.name) == ["marriott 1908", "il principe 1532", "dacre 1640"])
                 #expect(try lensPicks(db, noteID: two).map(\.name) == ["marriott 1908", "il principe 1532"])
 

@@ -9,8 +9,10 @@
 //  English (chosen — the page opens on it) and Machiavelli's Italian (the
 //  1814 printing Wikisource transcribes, re-paragraphed by hand to Marriott's
 //  breaks, words untouched — the U1 record), labelled "il principe 1532".
-//  A few of the most quoted lines carry a THIRD take, Luigi Ricci's 1903
-//  translation ("ricci 1903", R-633-14), and the book's last block — the
+//  A few of the most quoted lines carry a THIRD take, Luigi Ricci's 1909
+//  translation ("ricci 1909", R-633-14 as corrected — the Oxford University
+//  Press printing PG #57037 transcribes is dated 1909 on its own title page),
+//  and the book's last block — the
 //  Petrarch stanza Marriott prints in Italian — carries Edward Dacre's 1640
 //  English verse ("dacre 1640", R-633-13).
 //
@@ -40,7 +42,7 @@
 //  in the same turn, named by the take-label pattern: "marriott 1908" (every
 //  block its English take, by explicit id — the way back after choosing
 //  Italian), "il principe 1532" (every block its Italian), and on the
-//  chapters that carry them "ricci 1903" / "dacre 1640" (that block its
+//  chapters that carry them "ricci 1909" / "dacre 1640" (that block its
 //  third take, the rest following the chosen). A lens is never rendering
 //  truth — the page still opens on Marriott.
 //
@@ -54,8 +56,9 @@
 //  A born-fanned copy always reads EDITED to the sync engine's pristine-copy
 //  classifier, so the book joins `Book.all` with `joinsPristineDedupe: false`
 //  and the engine's facts stay byte-identical (zero `Sync/`). Two devices that
-//  each seed before their first sync therefore keep two copies — the front
-//  note's two-copies line (R-633-7) says so and how to delete one.
+//  each seed before their first sync therefore keep two copies — R-633-7's
+//  two-copies line said so; R-633-18 (U2b, her word: "it seems worse to say
+//  it") takes it OUT of the front note, which lands with her edited text.
 //
 
 import Dependencies
@@ -102,8 +105,13 @@ nonisolated enum SampleLibraryPrinceBook {
     /// italian") — names the WORK; the 1814 printing is disclosed in the
     /// front note (R-633-10).
     static let italianTakeLabel = "il principe 1532"
-    /// R-633-14 — ratified ("I think that's fine honestly").
-    static let ricciTakeLabel = "ricci 1903"
+    /// R-633-14 — ratified ("I think that's fine honestly"), its year
+    /// CORRECTED to 1909 at U2b (the author's front-note edit, confirmed by
+    /// the primary source: PG #57037's title page reads "OXFORD UNIVERSITY
+    /// PRESS … 1909", `notes/source/prince-ricci-pg57037.txt` ~line 54; the
+    /// earlier 1903 was an unverified recollection). It names the Ricci LENS
+    /// too (the take-label pattern).
+    static let ricciTakeLabel = "ricci 1909"
     /// R-633-13 — the ruled label pattern.
     static let dacreTakeLabel = "dacre 1640"
     /// R-633-15 — the English lens's name: the take-label pattern for
@@ -165,7 +173,9 @@ nonisolated enum SampleLibraryPrinceBook {
     // pins the match). Paragraphs are separated by ONE newline, so each lands
     // as a block with no stored blank line (the Jekyll book's design call 4).
     // The draft predates R-633-13: it does not mention Dacre's take on the
-    // last block (flagged for her pass in the U2 record).
+    // last block (flagged for her pass in the U2 record). It also predates
+    // R-633-18 (U2b): its two-copies paragraph is ruled OUT — her edited text,
+    // which drops it, replaces this whole constant in a later commit.
     static let aboutThisText = """
         \u{201C}The Prince\u{201D} by Niccol\u{F2} Machiavelli, written around 1513 and published in \
         1532. Every note here is a chapter, and every paragraph carries two takes: W. K. \
