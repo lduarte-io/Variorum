@@ -899,9 +899,10 @@ character offset, landing mid-word) → the #245 bundle as an unruled edge, opti
 O-3's three observations stay recorded for their owning batches (VX-428, VX-427, batch A2's
 caret territory).
 
-**OWED LINEAR WRITES (the MCP needs her /mcp re-auth; noted per the workflow rule):** mint the O-1
-Wording ticket (Improvement · Confirmed · Takes & Lenses · Low; description drafted in this
-addendum's commit); VX-421/VX-248 → In Review at the ladder, Done at the merge, as usual.
+**OWED LINEAR WRITES — SETTLED 2026-10-27 (she re-authed /mcp):** O-1 minted as **VX-634**
+(Improvement · Wording · Confirmed · Takes & Lenses · Low; standalone — a candidate rider, not
+seated); VX-429/VX-592 moved In Progress with batch A2. VX-421/VX-248 → In Review at the ladder,
+Done at the merge, as usual.
 
 **HER WORD (2026-10-27, relayed by the coordinator, verbatim-faithful):** (1) walks MAY use the
 clipboard — *"it's really very rarely an actual issue"*; her Mac↔Air clipboard sharing is on and
