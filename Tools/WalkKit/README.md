@@ -11,9 +11,16 @@ NEVER her installed `/Applications/Variorum.app` — discriminate instances by P
 swiftc -O -o /tmp/walk-cap    Tools/WalkKit/capture-windows.swift
 swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 ```
-- `walk-cap <pid> <outdir>` — lists the process's on-screen layer-0 windows (id · name · bounds in POINTS) and
-  saves each as `<outdir>/w<n>.png` via `screencapture -l`. Read the PNG with the Read tool. The main window
-  is captured at 2× (a 1728-pt window → 3456 px).
+- `walk-cap <pid> <outdir> [<prefix>] [--every-layer]` — lists the process's on-screen layer-0 windows (id · layer ·
+  name · bounds in POINTS) and saves each as `<outdir>/<prefix>w<n>.png` via `screencapture -l`. Read the PNG with the
+  Read tool. The main window is captured at 2× (a 1728-pt window → 3456 px). `--every-layer` (VX-623) takes every layer
+  the pid owns — an app-modal alert and a floating panel are not layer 0 — skipping slivers under 48 pt.
+- `words-guard <pid>` (`swiftc -O -o /tmp/words-guard Tools/WalkKit/words-guard.swift`) — run it BEFORE any capture
+  that could include Settings: it prints `ok (<n> elements read)`, or `withheld (…)` while twelve lowercase words or the
+  words look's own markers are on screen (never the text) — and withholds too whenever it cannot read the pid's tree
+  whole (a dead, hung or non-GUI pid, an AX failure mid-scan, the 30,000-element cap; fail-closed since the VX-623
+  ladder). `words-guard --classify <text>` is the same matcher over one string; `words-guard --self-check` runs the scan
+  over synthetic trees (headless); `Tools/WalkKit/pins/words-guard-fail-closed.zsh` is its pin.
 - `walk-scroll <x> <y> <lines>` — posts real scroll-wheel events at a screen point (points). SwiftUI Settings
   forms do not expose an addressable scroll area to AppleScript and page-down keys do not reach them; this does.
 
@@ -326,14 +333,33 @@ state (`NSEvent.modifierFlags` the class property) and for driving other apps.
 - **`defaults read io.lduarte.Variorum.debug appearanceChoice`** before a walk and restore it after: another session's walk
   may have left `dark`.
 
-## The scripted first-run walk (VX-509 — VX-510 unit B1, D-B2)
+## The scripted first-run walk (VX-509 — VX-510 unit B1, D-B2; self-resetting with both arms since VX-623)
 
-`Tools/WalkKit/first-run-walk.sh <std|castle|del> [--app <Debug Variorum.app>] [--dry-run] | --self-test` drives the
-DEV-store Debug build on the PROD TEST ROAD (`VARIORUM_PROD_TEST_ROAD=1` + the allowlist — her rulings R-510-1/-6; the
-script reads `~/.variorum/prod-test-accounts.env` outside the sandbox and hands its one key to the launch as
-`VARIORUM_PRODTEST_EMAILS`, F-B1-1 (B)) for ONE named test account: sign in → the words' look (stashed, never read) → Turn on sync → the
-sheet's "Synced." → the row's "Synced ‹time›" with no relaunch → the server checks through `Tools/prod-read.sh`. It
-refuses (exit 5, nothing launched) unless every guard in its header holds — the allowlist (mode 600, marked, the account's
-address plain — matched whole, since it is spliced into a SELECT — and listed), no walk project, a Debug build outside `/Applications`, zero instances, the stage held, the dev slot set aside,
-the road's tools, the GUI grants. `--self-test` shows the allowlist guard's refusals over fixtures. The release checklist
-row (`Tools/Release/release.sh`'s HANDOFF, step 0) names it beside the headless gate `FirstRunDrillTests`.
+`Tools/WalkKit/first-run-walk.sh <std|castle|del> [--arm setup|join|both] [--app <Debug Variorum.app>] [--dry-run] | --self-test`
+drives the DEV-store Debug build on the PROD TEST ROAD (`VARIORUM_PROD_TEST_ROAD=1` + the allowlist — her rulings
+R-510-1/-6; the script reads `~/.variorum/prod-test-accounts.env` outside the sandbox and hands its one key to the launch as
+`VARIORUM_PRODTEST_EMAILS`, F-B1-1 (B)) for ONE named test account. THE SET-UP ARM: a pre-step resets the account to its
+resting state if it is not at rest → sign in → the words' look (stashed, never read) → Turn on sync → the sheet's
+"Synced." → the row's "Synced ‹time›" with no relaunch → the server checks through `Tools/prod-read.sh`. THE JOIN ARM:
+the set-up instance quit → the walk's OWN library renamed aside whole (only when it can prove it made it — else it
+stops naming the `mv`) → a fresh library → "Sync this library…" with the account's passphrase → "Synced. Your account's
+writing is in this library now." → cursors +1, the vault's lock unmoved. THE END after the last arm's PASS: sign out,
+quit, and the cleanup leg (the account vaultless and rowless again). A STOP never resets — production is the diagnosis.
+`--arm both` is the default (her Q2); `--arm join` alone needs the account's Standard vault. It refuses (exit 5, nothing
+launched) unless every guard in its header holds — the allowlist (mode 600, marked, the account's address plain —
+matched whole, since it is spliced into a SELECT — and listed), no walk project, a Debug build outside `/Applications`,
+zero instances, the stage held, the dev slot set aside, the road's tools (the reset helper among them), the GUI grants.
+Every launch deletes the main window's frame-autosave key first and checks the window's bounds on screen after
+(VX-622); every capture shoots every window of the pid behind the words guard (VX-537). `--self-test` shows every pure
+guard's refusals over fixtures. The release checklist row (`Tools/Release/release.sh`'s HANDOFF, step 0) names it
+beside the headless gate `FirstRunDrillTests`.
+
+**The reset helper** (`Tools/prod-reset-test-account.sh <std|castle|del> [--dry-run] [--log <file>] | --self-test`,
+her standing ruling of 2026-10-27) resets ONE allowlisted test account — the walk's own guard, verbatim, plus the
+resolved auth user's email byte-equal to the allowlist's entry — with one atomic statement mirroring `account_purge()`
+minus the auth user and the entitlement, the before/after reads printed and logged. Quit or sign out any walk instance
+signed in to the account first (a signed-in app mints challenge rows on its own, so the reset would end not at rest).
+
+**guard.sh exit 8** (VX-536): the on-this-Space check compiles its `wl2` helper from `wl2.swift` when absent or stale and
+REFUSES when it cannot (or the helper answers nonsense) — it never passes silently. The pin:
+`zsh Tools/WalkKit/pins/guard-space-helper.zsh` (headless).

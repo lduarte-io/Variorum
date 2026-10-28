@@ -13,25 +13,28 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-601 — Run: takes & editor quick fixes** (seven members by the sub-issue listing: VX-421 · VX-427 · VX-428 · VX-429 · VX-574 · VX-586 · VX-594; rider VX-577 seated at her kickoff word; the record `notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md`) | VX-601 · `vx-601-run-takes-editor-quick-fixes` | `~/dev/variorum-vx-601` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: Takes & Lenses — the board, bars, panes and their session memories — plus the editor seam (`PaneSurface`) and the bottom-bar word count; no `Sync/`, no custody, no schema; Fable cold review per the editor seam; VX-562's flag honored — shared read-tier files coordinate at merge). |
-| **VX-623 — Run: the first-run walk resets its own test account** (members by the sub-issue listing: VX-622 cleanup leg + window-frame guard · VX-537 join arm + every-window capture · rider VX-536 guard.sh wl2 fail-closed, seated at her kickoff word; her standing ruling 2026-10-27 lands in canon at the merge; the record `notes/plans/fixes/vx-623-walk-self-reset.md`) | VX-623 · `vx-623-walk-self-reset` | `~/dev/variorum-vx-623` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: `Tools/WalkKit/` + a new guarded prod-reset helper beside `Tools/prod-read.sh` — NO app code, no `Sync/`, no custody slot, no schema; the acceptance walk takes a stage claim through the live coordinator, Opus-driven). |
+| **VX-601 — Run: takes & editor quick fixes** (TWELVE members by the sub-issue listing after the kickoff sitting: VX-421 · VX-427 · VX-428 · VX-429 · VX-574 · VX-586 · VX-594 + rider VX-577 at her kickoff word + sitting-seated VX-592 · VX-248 · VX-321 · VX-337 (bounded); the record `notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md`) | VX-601 · `vx-601-run-takes-editor-quick-fixes` | `~/dev/variorum-vx-601` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: Takes & Lenses — the board, bars, panes and their session memories — plus the editor seam (`PaneSurface`) and the bottom-bar word count; no `Sync/`, no custody, no schema; Fable cold review per the editor seam; merge-time file intersection with the other wave-2 efforts per the coordinator's rule). |
 
 ### Latest closeout
 
-**→ VX-562 CLOSED 2026-10-27 — BOOK OUTLINE: THE HIGHLIGHT FOLLOWS YOUR SCROLL, AND THE NAV INFO PINS UP TOP
-(the record `notes/plans/fixes/vx-562-outline-follow.md`; the ladders `vx-562-ladder-round1/2/3.md`; her handoff
-`notes/handoffs/vx-562-handoff.md`; PR #198, merge 40d501404; kickoff to merge in one day).** Her pre-launch ask built
-whole: the Outline navigator's highlight follows what the page shows (the viewed-pair slot over the rows' own geometry
-— never the caret, her ruling), and the nav info sits pinned above the page with "note N of M · ‹chapter›". Four
-architect rulings landed PROVISIONAL (R-562-A the click's adoption · R-562-C the 8-pt release · R-562-D/D′ the
-at-bottom clamp after the slide FAILED a walk at reading speed — rejected on film) plus the measured reachable-travel
-fact (the app's 40-pt bottom bar reports as a ScrollGeometry inset that is never scrollable room on macOS; trace-walked,
-pinned). A three-round capped ladder, every finding dispositioned; 326 tests in 60 suites green; EIGHT revert recipes
-each red on exactly their named pins; six stage windows, four walks + a trace walk (one honestly premise-blocked, one
-honestly failed → measured → fixed), the clamp seen firing live before close; the store returned as-found every time.
-One SurfaceContracts line (§The Bookcase and books); canon 125,887/150,000. Born VX-624/629/630/631, all triaged; the
-bundle QUESTIONS #246 (P-562-8's bottom-twitch taste knob leads it). MOBILE PARITY: nothing mobile-visible. **Next:
-her #246 pass; wave 2 continues (vx-601 · vx-623 in flight).**
+**→ VX-623 CLOSED 2026-10-27 — RUN: THE FIRST-RUN WALK RESETS ITS OWN TEST ACCOUNT (the record
+`notes/plans/fixes/vx-623-walk-self-reset.md`; the ladders `vx-623-ladder-round1/2.md`; her handoff
+`notes/handoffs/vx-623-handoff.md`; PR #199, merge d02946cc1; kickoff to merge in one day).** Release step 0 is
+self-serve: her standing ruling (2026-10-27, "the walk may reset its own allowlisted test accounts") landed in canon
+(CLAUDE.md's Environment line, one pointer), built as the guarded `Tools/prod-reset-test-account.sh` (R1–R4 — the
+walk's G1/G2 verbatim under a byte-identity pin, byte-equal email resolution, one atomic CTE mirroring
+`account_purge()` minus the auth user and entitlement, before/after reads, 90 self-test cases incl. drift pins
+against the purge's own body) and the walk's new shape: the pre-step reset + cleanup leg (a STOP never resets —
+failure evidence survives for diagnosis), the JOIN ARM (the gate's first-ever live "Sync this library…"),
+`--arm setup|join|both`, the window-frame guard, capture-every-window behind the now FAIL-CLOSED words guard, and
+guard.sh's wl2 compile-or-refuse (VX-536). Members by the sub-issue listing: VX-622 · VX-537 · rider VX-536, all
+Done. Evidence: the full std gate PASSED LIVE on production (pre-step reset → set-up → join → cleanup; std ending
+at rest; the dev slot restored exactly, 197/197 cmp, Resume never pressed; coordinator-verified); a two-round
+cross-model ladder (r1 1 MAJOR · 2 MINOR · 2 NIT, all fixed red-on-old; r2 NO FINDINGS, twice-corroborated);
+self-tests 72/72 · 90/90, pins 0/11 · 0/6; ZERO Swift sources changed (a Tools-only diff). Born VX-627, triaged;
+canon 126,190/150,000. Two owned slips in the record (the kickoff trailer; the round-2 twin spawn, lesson recorded).
+MOBILE PARITY: nothing mobile-visible. **Next: wave 2 continues (vx-601 in flight); the next release's step 0
+needs no hands.**
 
 *(VX-510's closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at the VX-529 closeout, 2026-10-25.)*
 

@@ -320,9 +320,14 @@ if [ "$MODE" = release ]; then
 VARIORUM ${VERSION} (build ${BUILD}) — READY TO PUBLISH. SHE carries it to the site repo, whose agent runs
 its notes/variorum-releases.md. THE SITE'S PUBLISH-AND-LEAVE ORDER (binding — the site-side report):
 
-  0. BEFORE ANY OF IT — THE FIRST-RUN GATE (VX-509): the headless drill FirstRunDrillTests green on this commit,
-     AND the scripted first-run walk PASSED on the prod test road with a Debug build of this commit, for a test
-     account (the stage held, the dev slot aside — its own guards refuse otherwise; it prints PASSED):
+  0. BEFORE ANY OF IT — THE FIRST-RUN GATE (VX-509 · VX-623): the headless drill FirstRunDrillTests green on this
+     commit, AND the scripted first-run walk PASSED on the prod test road with a Debug build of this commit, for a test
+     account — BOTH ARMS by default, set-up then join (the stage held, the dev slot aside — its own guards refuse
+     otherwise; it prints PASSED). The walk RESETS ITS OWN test account (her standing ruling, VX-623): its pre-step
+     heals a leftover vault before the set-up arm, and after a PASS it signs out, quits and its cleanup leg leaves the
+     account vaultless — no hand reset is owed. A STOP leaves production as found for the diagnosis (the next run's
+     pre-step heals it). --arm join alone resumes a both run that stopped in the join arm (it needs that run's
+     Standard vault); --arm setup alone also ends with the cleanup reset.
      Tools/WalkKit/first-run-walk.sh std
   1. THE DMG FIRST:  ${FEED}/${DMG_NAME}
                      ${DMG_BYTES} bytes · sha256 ${DMG_SHA}
