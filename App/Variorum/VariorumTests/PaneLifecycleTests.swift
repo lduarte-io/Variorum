@@ -283,6 +283,43 @@ struct PaneUndoLifecycleTests {
         #expect(two.string == "The second take.")
     }
 
+    /// **RED ON OLD — a READ pane's ⌘Z moves nothing.** A read pane can still
+    /// hold the keyboard (a drag-selection; the moment a parked follow's blur
+    /// leaves it holding it), and AppKit applies an undo to a NON-EDITABLE
+    /// text view (measured offscreen — the run record's probe). On the old
+    /// tree ⌘Z there reverted a projection-authoritative pane's characters off
+    /// its take's text. A read pane holds no caret of hers, so its history
+    /// waits — and is there again when the pane next goes live over the same
+    /// characters.
+    @Test func aReadPaneHoldingTheKeyboardUndoesNothing() async throws {
+        let first = LifecyclePane(text: Self.take, variantID: "take-a", isLive: true)
+        let rig = LifecycleRig(first: first)
+        defer { rig.close() }
+        await rig.settle()
+        let pane = try #require(rig.pane("first"))
+        rig.type(Self.pasted, into: pane)
+        await rig.settle()
+
+        first.isLive = false  // the ring left her pane
+        await rig.settle()
+        #expect(!pane.isEditable, "non-vacuity: read")
+        rig.window.makeFirstResponder(pane)  // …and her keyboard is still in it
+        #expect(rig.window.firstResponder === pane, "non-vacuity: the read pane holds the keyboard")
+        #expect(pane.undoManager?.canUndo != true,
+                "RED ON OLD: ⌘Z in a read pane reached the typing under it")
+        rig.commandZ()
+        await rig.settle()
+        #expect(pane.string == Self.take + Self.pasted,
+                "RED ON OLD: ⌘Z reverted a READ pane's characters off its take (shows: \(pane.string))")
+
+        first.isLive = true  // back live over the same characters
+        await rig.settle()
+        #expect(pane.undoManager?.canUndo == true, "her history waited for the pane's next going-live")
+        rig.commandZ()
+        await rig.settle()
+        #expect(pane.string == Self.take, "⌘Z undid her paste, live again")
+    }
+
     /// **A GUARD (green on both sides) — the re-parent edge** (TEXTKIT2_NOTES
     /// §3, 18l-c U7: SwiftUI may detach and re-attach a representable's view
     /// within one layout pass). The history SURVIVES a detach and re-attach:

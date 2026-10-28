@@ -24,7 +24,10 @@
 //  - The LIVE pane is BUFFER-AUTHORITATIVE: while an edit is unsettled the
 //    buffer overlays the store text (`text(variantID:storeText:)` always
 //    prefers the buffer), and surfaces must never clobber a live pane
-//    with projection text (`isLive` is the surface's adopt guard).
+//    with projection text (`isLive` is the surface's adopt guard). A pane
+//    whose BOUND take changes is a pane for ANOTHER take: it adopts that
+//    take's text once, by the one surface's re-bind (VX-248, her ruled bend
+//    — `PaneSurfaceRepresentable.Coordinator.rebindIfTakeChanged`).
 //  - READ panes are PROJECTION-AUTHORITATIVE once caught up: `settle`
 //    drops every buffer with no pending autosave record, so external
 //    edits (sync, repairs, sibling surfaces) reach the display and

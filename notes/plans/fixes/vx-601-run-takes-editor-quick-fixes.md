@@ -353,12 +353,19 @@ under the orchestrator's claim). No behavioural revert is in flight.
 - Fix VX-421 — DONE (436bf331): the coordinator's own `undoHistory` + `undoManager(for:)`; the read
   adoption and `uninstall` end it. build-for-testing GREEN into `DerivedData/vx601a-post` (at
   436bf331; rebuilt after VX-248). (This status flip rides its own commit — the fix commit missed it.)
-- Fix VX-248 — IN-PROGRESS (design settled: the coordinator binds the host's `variantID`; a change is
-  a RE-BIND, written before the liveness note, which then lands the caret and claims the keyboard
-  as any programmatic going-live; the old history ends; the find/room token baselines are adopted
-  as at a mount).
-- Builds (pre / post / per-member reverts) — pre DONE (`vx601a-pre`); post rebuilt after VX-248;
-  per-member revert builds NOT-STARTED.
+- Fix VX-248 — DONE (this commit): the coordinator binds the host's `variantID`
+  (`boundVariantID`); a change is a RE-BIND (`rebindIfTakeChanged`) run BEFORE the liveness note —
+  the new take's text written where it differs, the old history ended, the find/room token baselines
+  adopted as at a mount — and `noteLiveness(_:rebound:)` then lands a live re-bind's caret in the new
+  text and claims the keyboard as any programmatic going-live.
+- VX-421 addendum — DONE (this commit): a READ pane answers an always-empty history
+  (`readHistory`), because AppKit applies an undo to a NON-editable text view (the probe below);
+  + its red-on-old pin `aReadPaneHoldingTheKeyboardUndoesNothing` (written after the fix — its red
+  run rides the rebuilt red build, below).
+- Builds — post DONE (`DerivedData/vx601a-post`, build-for-testing GREEN at this commit's tree).
+  The red build (`vx601a-pre`) predates the read-pane pin, so it is REBUILT from the final tests over
+  the pre-fix `PaneSurface.swift` (a behavioural revert, committed-first) — NOT-STARTED; per-member
+  revert builds NOT-STARTED.
 - Self-assessment + READY-FOR-SUITES — NOT-STARTED.
 
 **THE TRACE (pre-fix line numbers, `PaneSurface.swift` at c2a0b833).**

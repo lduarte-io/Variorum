@@ -1132,6 +1132,13 @@ struct PaneSurfaceView: View {
     /// Surface identity for tests/soaks: the pane's role in its
     /// composition ("article", "card", "mini", …) and the variant it
     /// mirrors — carried on the NSView identifier, rendered nowhere.
+    ///
+    /// **`variantID` is also the take the pane is BOUND to** (VX-248): when
+    /// a host hands the same mounted pane ANOTHER take, the pane re-binds —
+    /// it adopts that take's text even while live, its typing history ends,
+    /// and a live pane lands its caret in the new text
+    /// (`Coordinator.rebindIfTakeChanged`). Every host passes the take whose
+    /// edit closure it hands down beside it.
     var role: String = "pane"
     var variantID: String? = nil
     /// A plain click on a read pane — the container migrates the live
@@ -1388,6 +1395,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         applyStyle(to: view)
         applyIdentity(to: view)
         spellcheck.apply(to: view)  // A24
+        context.coordinator.boundVariantID = variantID  // VX-248: the take it is born bound to
         view.string = text
         context.coordinator.adoptedText = text  // TRACE 1a: the record starts here
         // 13g batch 2 (L7): a pane wears the same dimmed-marker face as the
@@ -1423,12 +1431,23 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.caretOnGoingLive = caretOnGoingLive
         context.coordinator.find = findFace
         view.variorumMenu = menuItems
+        // VX-248 (her ruled bend of P-3): a RE-BIND first — the take this pane
+        // is bound to changed under it, so the new take's words are written in
+        // BEFORE the liveness note places a caret against them, and the pane is
+        // a fresh mount for that take: the find's and the room's requests it
+        // arrives under are its baselines (a re-bind is not a step).
+        let rebound = context.coordinator.rebindIfTakeChanged(
+            to: variantID, text: text, live: isLive, in: view)
+        if rebound {
+            context.coordinator.adoptFindBaseline()
+            context.coordinator.adoptCaretToEndBaseline(caretToEndToken)
+        }
         // 18l-c U7: a pane about to go live sheds its painted matches FIRST,
         // so the liveness note's selection (and the caret she types at) never
         // sits in a painted run.
         context.coordinator.paintFind(live: isLive, in: view)
         view.isEditable = isLive
-        context.coordinator.noteLiveness(isLive)
+        context.coordinator.noteLiveness(isLive, rebound: rebound)
         let faceBefore = view.appliedFace
         applyFace(to: view)  // before `applyStyle`: its `style` reads the palette
         // 18l-c U7: a face change re-derives the faced lines, whose clear owns
@@ -1487,7 +1506,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // The buffer is authoritative while live: a projection may lag the
         // keystroke; never clobber the surface under the caret. Read panes
         // adopt any change. (The view-level half of PaneTextAuthority's
-        // isLive contract.)
+        // isLive contract.) The ONE exception is VX-248's, ruled and written
+        // above: a live pane takes the projection's text when — and only
+        // when — the take it is BOUND to changes (a re-key is a re-bind, not
+        // an edit; `rebindIfTakeChanged`).
         //
         // **TRACE 1a (13u2 UNIT D, routed here by RULING A-1).** This line
         // used to read `view.string != text`, and `view.string` on an
@@ -1505,14 +1527,17 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // The repair is the trace's own second suggestion: the coordinator
         // REMEMBERS what it last wrote here, and the question is asked of
         // that native string instead. It is authoritative because exactly
-        // two sites ever write a pane's characters — `makeNSView` and this
-        // one — and a read pane is `isEditable == false`, so no input path
-        // can touch it. While the pane is LIVE the record is dropped: her
-        // buffer is the truth there, and what we last wrote says nothing
-        // about what the view now holds. That leaves the first read pass
-        // after liveness with nothing to consult, and it takes the old
-        // foreign comparison — correct, and rare. **Byte-for-byte the same
-        // decision as before; only the road to it is cheap.**
+        // three sites ever write a pane's characters — `makeNSView`, this
+        // one and VX-248's re-bind (which keeps the record itself) — and a
+        // read pane is `isEditable == false`, so no input path can touch it
+        // (nor ⌘Z since VX-421: a read pane answers an empty history,
+        // `Coordinator.undoManager(for:)`). While the pane is LIVE the
+        // record is dropped: her buffer is the truth there, and what we last
+        // wrote says nothing about what the view now holds. That leaves the
+        // first read pass after liveness with nothing to consult, and it
+        // takes the old foreign comparison — correct, and rare.
+        // **Byte-for-byte the same decision as before; only the road to it
+        // is cheap.**
         if isLive {
             context.coordinator.adoptedText = nil
         } else if context.coordinator.readPaneNeedsText(text, in: view) {
@@ -1641,12 +1666,81 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             return view.string != text
         }
 
+        // MARK: - The bound take (VX-248 — her ruled bend of P-3)
+
+        /// The take this pane is BOUND to — the host's `variantID`: the take
+        /// whose words it shows and whose edit closure its keystrokes reach.
+        /// nil when the host names none (the tutorial samples, the pins).
+        /// Written at the mount, and by `rebindIfTakeChanged` only.
+        var boundVariantID: String?
+
+        /// **A RE-KEY IS A RE-BIND, NOT AN EDIT** (VX-248 — her ruling, the
+        /// root fix QUESTIONS #217 asked for: *"I think that we should probably
+        /// fix it"*; seated R-601-6). A stable-identity cell (the Takes
+        /// article, a Lenses column, Canvas, the workbench, Read ▸ edit) keeps
+        /// ONE pane while the take it shows can change (a choose, a step, a
+        /// mint), and its host hands the new take's edit closure down on the
+        /// same render. A LIVE pane never took projection text, so a pane
+        /// re-keyed while live — or in the render that turned it live, VX-222's
+        /// revival — kept the OLD take's words under the NEW take's closure,
+        /// and her next keystroke saved them over the new take (silently: one
+        /// writer, never a sync conflict). VX-222's end-rule and VX-227's
+        /// parked follow keep every road the boards know of from re-keying a
+        /// live cell; this closes the class at the one component, whatever
+        /// road arrives (those two stay, now redundant by construction).
+        ///
+        /// So when the bound take CHANGES the pane takes the new take's text
+        /// — the one exception to "a live pane never adopts projection text",
+        /// hers — and is, from here, a fresh pane for that take:
+        /// - the characters are written only where they differ (a branch
+        ///   arrives identical, and a needless full write is the A47c class);
+        /// - the old take's typing history ENDS (VX-421 meets VX-248 here —
+        ///   ⌘Z must never replay one take's typing into another), even when
+        ///   the characters happen to agree;
+        /// - a LIVE re-bind lands its caret in the NEW text, after the write,
+        ///   and claims the keyboard, exactly as a programmatic going-live
+        ///   does (`noteLiveness(_:rebound:)`) — a `string =` leaves AppKit's
+        ///   END, so a landing made before the write was lost.
+        /// Nothing is handed up: adoption is not her typing (`string =` posts
+        /// no `textDidChange`), so no autosave follows. The keystrokes she
+        /// typed into the old take were handed up as she typed them (every
+        /// `textDidChange`) — the re-bind drops only their on-screen mirror.
+        /// Returns whether the pane was re-bound.
+        func rebindIfTakeChanged(
+            to variantID: String?, text: String, live: Bool, in view: PaneTextView
+        ) -> Bool {
+            guard variantID != boundVariantID else { return false }
+            boundVariantID = variantID
+            // TRACE 1a's record answers for a read pane; a live one is asked
+            // directly (rare — once per re-bind, never per update pass).
+            let holds = adoptedText.map { $0 == text } ?? (view.string == text)
+            if !holds {
+                view.string = text
+                // A fresh string carries only typing attributes — the face is
+                // re-derived caret-blind over it, so no line carries a caret's
+                // honour (the ledger starts over), and no paint either.
+                if let storage = view.textStorage { MarkdownStyling.style(storage) }
+                markdownCaret = MarkdownCaretRescue.Ledger()
+                findPaintWasReset()
+                remeasure()
+            }
+            endUndoHistory(in: view)
+            adoptedText = live ? nil : text
+            return true
+        }
+
         /// 13b 1b (N9's keyboard half): a pane TRANSITIONING to live holds
         /// the keyboard — programmatic ring moves (the Takes landing, the
         /// add-block door, ⌃⌘←/→ steps) must make "just start typing"
         /// literal. A click-focused pane is already first responder (the
         /// claim is a no-op); read transitions never claim.
-        func noteLiveness(_ live: Bool) {
+        ///
+        /// VX-248: a LIVE pane `rebound` to another take arrives exactly as a
+        /// pane going live does — the landing, then the claim — because the
+        /// ring is now on a take this pane did not hold a moment ago. Called
+        /// AFTER `rebindIfTakeChanged`, so the landing is placed in the new
+        /// take's text.
+        func noteLiveness(_ live: Bool, rebound: Bool = false) {
             let was = wasLive
             defer { wasLive = live }
             // VX-296: a pane going READ keeps its selection but holds no
@@ -1659,9 +1753,12 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // convergence occasion — "clicking into other blocks" moves the
             // ring, and the stale card's live→read flip is the one event it
             // reliably receives. Transition-gated so ordinary read→read
-            // updates cost nothing.
-            if live != was { view?.fireConvergenceOccasion() }
-            guard live, !was, let view else {
+            // updates cost nothing. VX-248: a live pane re-bound in place is
+            // the same discrete event (its whole text was rewritten — the
+            // occasion's render restore is the A47c belt); a READ re-bind
+            // keeps the read adoption's own road, a remeasure only.
+            if live != was || (live && rebound) { view?.fireConvergenceOccasion() }
+            guard live, !was || rebound, let view else {
                 // 17o batch b's ladder, R1-2: a click's flag is spent by a
                 // live render (the pane already held the ring — nothing to
                 // land) or by a live→read transition (the gesture is over);
@@ -1669,7 +1766,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 if live || live != was { view?.clickBroughtPlace = false }
                 return
             }
-            let clickBroughtPlace = view.clickBroughtPlace
+            // VX-248: a click's place was made in the text a re-bind just
+            // replaced — the landing decides.
+            let clickBroughtPlace = view.clickBroughtPlace && !rebound
             view.clickBroughtPlace = false
             // 17o batch b (U-20): the ring arrives WHERE SHE WAS. Placed
             // before the responder claim, so the claim's own selection
@@ -1940,8 +2039,23 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// arrives from outside it is not undone into.
         let undoHistory = UndoManager()
 
+        /// **What a READ pane answers: a history nothing is ever registered
+        /// on.** A read pane can still hold the keyboard (a drag-selection, or
+        /// the moment a parked follow's blur leaves it holding it), and AppKit
+        /// applies an undo to a NON-EDITABLE text view (measured offscreen on
+        /// 27: the characters revert, no `textDidChange`) — so ⌘Z there would
+        /// move a projection-authoritative pane off its take's text
+        /// (`PaneTextAuthority`'s read contract; TRACE 1a's record would go
+        /// stale with it). ⌘Z undoes the pane her CARET is in, and a read pane
+        /// holds no caret of hers (VX-296's line): its own history waits,
+        /// untouched, for the pane's next going-live over the same
+        /// characters. Never nil — nil falls back to the window's manager
+        /// (measured), the cross-pane history this fix ends.
+        private let readHistory = UndoManager()
+
         func undoManager(for view: NSTextView) -> UndoManager? {
-            view === self.view ? undoHistory : nil
+            guard view === self.view else { return nil }
+            return view.isEditable ? undoHistory : readHistory
         }
 
         /// The pane's characters were written from outside her typing: the
