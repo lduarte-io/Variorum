@@ -1215,3 +1215,75 @@ deliberately-loud pinned set, unchanged; zero host restarts). Log:
 (both wires standing; "Write is fine" falsified), tier 1 green, the battery green. The USE walk
 (A1–A6) is the remaining acceptance evidence; the old walk note's delete-forever rides that
 window.
+
+## THE WALK RECORD — batch A2 (A1–A6) (Opus walker, claim `vx-601-walk-a2`, 2026-10-27 22:17–22:33 MDT)
+
+Build: `App/Variorum/DerivedData/vx601a2-post/Build/Products/Debug/Variorum.app` (dev store, pid 64032
+for the whole walk — ONE launch, no crash, no relaunch; no What's New sheet). Captures (gitignored):
+`App/Variorum/DerivedData/walkshots-vx601a2/` — `leg0-*` as-found, `del-before*` the Trash before
+the duty, `a1*`/`a2*`/`a3*`/`a4*`/`a5*`/`a6*` Study, `t-*` Terminal, `r-*` leave-taking. The press
+is exactly the row's: `cliclick m: w:300 dd:<caret+1–2 pt> w:500 dm:… du:` under
+`Tools/WalkKit/guard.sh` every step (HID idle rests ≥ 2 s between synthetic steps — the guard
+cannot tell the walker's own last click from a person; one step was refused for that and re-run).
+Window 1240×840 at (244,155).
+
+**As-found (leg 0, before any act):** Bookcase, no books; the held banner "This is your library as of
+October 20, 2026…" with Resume Sync (NEVER pressed); "Sync off (dev store)"; Study voice, app Dark,
+macOS Light (system appearance never touched); Library = ONE note ("The walk leaves a stone here…",
+edited Oct 19); the twelve-words card on the Bookcase (never touched). Trash (read after its
+"The Trash is empty." loading face cleared, ~10 s): top row "2026-10-27 · note · deleted Oct 27, 2026
+at 8:57 PM", then the Sherlock seed set (notes + "the adventures of sherlock holmes" book and 13
+notes, all 5:46 PM). Not opened (untouched by any act): sign-in, MCP, Walk Wing.
+
+**THE DELETION DUTY — NOT DONE, held by its own guard (F-A2W-1).** The brief named the note
+"vx601 walk note" with an 8:57 PM stamp and said: title or stamp not matching exactly ⇒ do not
+delete, record, report. The Trash row's STAMP matches (8:57 PM, the only 8:57 row) but its TITLE
+reads **"2026-10-27"** — quick entry titled the batch A walk note by its date (this record's batch A
+walk section says so: "titled '2026-10-27'"; "vx601 walk note…" is its first block's TEXT). The row's
+destructive button also reads **"Delete Now"**, not "Delete forever". Nothing was pressed; the row is
+still in the Trash (`del-before2-w0.png`, `r-trash-w0.png`). It is almost certainly the right note —
+the orchestrator's next REQUEST can name it as it shows: **"2026-10-27 · deleted 8:57 PM ▸ Delete
+Now"**.
+
+**The walk note:** quick entry ("alpha bravo charlie delta echo foxtrot golf hotel india juliet.
+kilo lima mike november oscar papa quebec.") ⏎ → a one-block note shown as "2026-10-27"; retitled in
+Write's title field to **"vx601 a2 walk note"** (so the Trash never holds two same-named walk
+notes); Write typing added " romeo"; ⌘T → ⑂2. Takes below: take 1 = chosen, take 2 = ⌘T's take
+(edited: " sierra", later " yankee"; Terminal Write added " xray" to the chosen).
+
+| Row | Study | Terminal | What was seen |
+|---|---|---|---|
+| **A1** (VX-429, Takes, her gesture) | **PASS** | **PASS** | Collapsed fan's pane: click placed the caret in "delt\|a"; ~1.5 s; held press ON the caret, drag right → **"a echo foxtrot golf" selected FROM the caret** (`a1-right`). Leftwards: caret before "india", held press, drag left → **"foxtrot golf hotel " selected, ending AT the caret** (`a1-left`). Terminal: caret before "golf" → "golf hotel india" (`t-a1`). |
+| **A2** (VX-429, the landed caret) | **PASS** | **PASS** | ⌘1→⌘2: the pane landed its own caret (before "foxtrot" — the previous selection's start; in Terminal, before "kilo"); held press on it, drag → **"foxtrot golf hotel" selected** (`a2`); Terminal → "india juliet. " (`t-a2`). |
+| **A3** (VX-592, Write + a take card) | **PASS** | **PASS** | Write: typed " romeo" at the block's end, no move, held press at the caret, drag left → **"pa quebec. romeo" selected** (`a3w`); Terminal " xray" → "quebec. romeo xray" (`t-a3w`). Takes, bloomed fan (expand all), take 2's card: typed " sierra", held press at the caret, drag left → **"papa quebec. romeo sierra" selected** (`a3t`); Terminal " yankee" → "romeo sierra yankee" (`t-a3t`). |
+| **A4** (no regression) | **PASS** | (d)-Write only: **PASS** | Take 2's card: (a) held CLICK on the caret (before "kilo"), no move → no selection, text unchanged; the caret blinked out of two captures, so ⇧→ probed it: it selected exactly "k" — **the caret stayed where it was** (`a4a*`). (b) ⇧-click → **extended from the caret: "kilo lima mike"** (`a4b`). (c) double-click → **"hotel"** (`a4c-dbl2`; the first double-click hit the space between two words and selected the space — ordinary AppKit); triple → **the whole take's paragraph** (`a4c-tri`; macOS's Writing Tools badge appeared beside it — the system's). (d) Takes: "hotel" selected, pressed INSIDE, held, dragged two words along, dropped → **MOVED** ("…golf india juliet. hotel kilo…"), **⌘Z restored it** (`a4d-t*`); Write: same → moved, ⌘Z restored (`a4d-w*`). Terminal: (d) in Write the same (`t-a4d-w*`); (a)–(c) and (d)-Takes not repeated in Terminal (window). |
+| **A5** (RECORD ONLY, Q-A2-1 → #245) | recorded | not repeated | Fan open. LIVE take-2 card: "lima" selected, held, dragged onto the chosen (read) card over "delta", released → **nothing: no drop, no text moved, both cards unchanged** ("lima" still selected in take 2) (`a5-l2r`). READ → live: a double-click on the chosen card made THAT card the live one ("mike" selected, active colour; take 2's "lima" went inactive grey) — so a read card cannot be the drag's source as such; dragging "mike" into take 2's card → **nothing: no drop, both unchanged** (`a5-r-sel`, `a5-r2l`). No verdict. |
+| **A6** (RECORD ONLY, R-A2-2) | recorded | not repeated | **Quick entry: SELECTS** — typed text, caret at its end, held press at the caret, drag left → "golf hotel india juliet" selected (`a6-qe-crop`). **Comment field (Comments sheet): SELECTS** — typed "tango uniform victor whiskey", held press at the caret, drag left → "uniform victor whiskey" selected (`a6c`). The draft was then cleared (⌘A ⌫) and the sheet closed — no comment added. Both on AppKit's other road, unchanged by the batch, already select. |
+
+**Findings and observations (none blocks a row):**
+- **F-A2W-1 — the deletion duty's naming** (above): the 8:57 PM note's Trash title is "2026-10-27",
+  and the Trash button is "Delete Now". Left in place by the guard; the orchestrator's to re-name.
+- **O-A2W-1 (unverified, for whoever touches capture):** typed into quick entry via System Events,
+  `{t:"vx601 a2 walk note"}` rendered with CURLY quotes (smart quotes on in the box), and the
+  "name it '…'?" offer kept proposing the first-words title — the token looked unrecognized. It was
+  deleted before submitting, so whether curly quotes break the capture microsyntax is NOT tested.
+- **O-A2W-2 (prefs shape):** batch A's walk wrote four per-note keys (canvas/currentBlock/postMode/
+  takesViewMemory); this walk wrote only `currentBlock.` and `postMode.` — recorded, not judged.
+
+**Leave-taking / returned:** palette "Use Study Voice" (the Terminal switch was the palette's "Use
+Terminal Voice"); Appearance never touched (app Dark throughout). The walk note ▸ note ▾ ▸ "Delete
+Note…" ▸ Delete ("The note goes to the Trash for 30 days…"; receipt "Note moved to the Trash — 30
+days to put it back."); NOT deleted forever. Verified after: Library = the one Oct-19 note; Trash
+top row **"vx601 a2 walk note · note · deleted Oct 27, 2026 at 10:31 PM"**, then "2026-10-27 · 8:57
+PM" (STILL PRESENT — F-A2W-1), then the Sherlock set in the same order (Trash = as-found + 1); held
+banner present (Resume Sync never pressed); "Sync off (dev store)"; Study + app Dark; ended on the
+Bookcase with the twelve-words card as found (`r-bookcase-w0.png`). Quit by bundle id
+`io.lduarte.Variorum.debug` 22:32:36; guards `pgrep -lx Variorum` / `pgrep -lf "MacOS/Variorum$"`
+empty before launch and after quit.
+
+**Prefs (`io.lduarte.Variorum.debug`, `/tmp/vx601a2-prefs-before.plist` → after):** ADDED two
+per-note keys for the walk note — `currentBlock.` / `postMode.` `C2C2D07F-F967-45AB-AA1D-B1A8D278F734`
+— both DELETED. CHANGED bookkeeping left as is for the orchestrator: `IdleCommitSweepMark.Variorum-dev`
+(02:04:19Z → 02:17:33Z), `variorum.backup.log` (the per-launch dev-store backup entry),
+*[removed for publication]*
+Final export (`/tmp/vx601a2-prefs-final.plist`) vs before: nothing added, nothing removed.
