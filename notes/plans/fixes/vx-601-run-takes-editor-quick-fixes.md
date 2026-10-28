@@ -325,3 +325,74 @@ the ticket and it stays open, no heroics.
 
 **The run after the sitting: twelve members.** VX-421 · VX-427 · VX-428 · VX-429 · VX-574 ·
 VX-586 · VX-594 · VX-577 · VX-592 · VX-248 · VX-321 · VX-337.
+
+---
+
+## BATCH A RECORD — pane LIFECYCLE: VX-421 + VX-248 (implementer: opus-implementer, 2026-10-27)
+
+**NOT DONE (first line, kept current):** everything below the trace — pins, fixes, builds, the
+suite window (the orchestrator's: this session never runs `xcodebuild test`), the walk (Opus walker
+under the orchestrator's claim). No behavioural revert is in flight.
+
+**LIVE STATUS**
+- Reading — DONE: this file in full (members, batches, ENVIRONMENT TRAPS, the sitting record
+  R-601-1/R-601-6), `notes/TEXTKIT2_NOTES.md` in full, `notes/SurfaceContracts.md` "The note",
+  `notes/SessionResiliencyProtocol.md`, the VX-214 record's VX-222/VX-227 trace + the F2 ruling
+  (`notes/plans/fixes/vx-214-settings-launch-polish.md` §BATCH 4 + ARCHITECT RULING), and the code:
+  `Surface/PaneSurface.swift` (whole), `Surface/PaneTextAuthority.swift`,
+  `Core/Views/CommentTextArea.swift` (the U3-g road), `Core/Views/CaptureTextView.swift` (VX-193),
+  every `PaneSurfaceView(` host, `TakesViewModel`'s focus/park/end-rule section, the pins
+  `PaneSurfaceTests`, `PaneFindFaceTests`, `CommentTextAreaTests`' undo pin.
+- Trace — DONE (below); both members' mechanisms CONFIRMED by my own read; no divergence from the
+  briefed mechanisms (one widening for VX-421, stated).
+- Pins — NOT-STARTED.
+- Fix VX-421 — NOT-STARTED.
+- Fix VX-248 — NOT-STARTED.
+- Builds (pre / post / per-member reverts) — IN-PROGRESS: the pre-fix baseline build-for-testing
+  into `App/Variorum/DerivedData/vx601a-pre` started (the pins join it incrementally).
+- Self-assessment + READY-FOR-SUITES — NOT-STARTED.
+
+**THE TRACE (pre-fix line numbers, `PaneSurface.swift` at c2a0b833).**
+
+*VX-421 — CONFIRMED, and WIDER than the ticket's Takes cards.*
+1. Every `PaneSurfaceView` mounts through ONE representable whose `makeNSView` builds the view with
+   `PaneTextView.makeTakeSurface()` (`:1342` → `:874` → `makeSurface(inset:allowsUndo: true)`,
+   `:822` `view.allowsUndo = allowsUndo`). The read tier proper (`ReadPostView`) is the only pane-kind
+   surface that does not (`makeReadSurface`, `allowsUndo: false`, its own coordinator).
+2. The view's delegate is the representable's `Coordinator` (`:1351`), which implements no
+   `undoManager(for:)` — so NSTextView registers every typing/paste undo on its WINDOW's manager.
+3. Teardown is `dismantleNSView` → `coordinator.uninstall()` (`:1587`, `:1893-1900`): the canary
+   disarms, the publisher invalidates, the view reference drops — nothing touches undo.
+4. So the window's manager keeps actions aimed at the torn-down pane. `NSUndoManager` does not retain
+   targets; ⌘Z travels `undo:` → `NSWindow` → the first responder's manager (measured at VX-179 U3-g),
+   pops the dead pane's action and invokes it: `EXC_BAD_ACCESS` in `popAndInvoke` once the view is
+   freed (the ticket), or a silent edit into a detached pane while something still holds it.
+5. **The widening (same class, same component):** the reach is every host of the one representable,
+   not only the Takes cards — the Takes article and fan/mini/stack cards, Lenses cells, Compare,
+   Write's take panel (⌘⇧T closes it: its panes dismantle while Write's editor shares the window's
+   manager), Canvas, the Blocks workbench, Read ▸ edit and the book Index (the last two render the
+   pane ONLY while live — `ReadEditPane.swift:348`, `BookIndexView.swift:1789` — so every going-read
+   dismantles it). And a second road to a corrupt replay: a READ pane's projection adoption
+   (`:1514-1524`, `view.string = text`) rewrites the characters while that pane's typing history
+   still names ranges of the OLD text — VX-179 U3-g's `NSRangeException` class, which is why both
+   precedents (`CommentTextArea`, `CaptureTextView`) END their history on a programmatic write.
+6. Why the per-view manager is the road (R-601-1): `removeAllActions(withTarget:)` on the view or the
+   storage does NOT reach TK2's registrations (measured at U3-g), so no teardown-time clearing of the
+   window's manager can be made exact; and clearing the window's whole manager would reach other
+   text's history.
+
+*VX-248 — CONFIRMED (the VX-214 record's mechanism step 3 — "the leaf").*
+1. `updateNSView` refreshes the callbacks first — `onEdit` at `:1415` — so the coordinator's edit
+   closure is ALWAYS the take the cell resolves NOW (`TakesShared.swift:217`:
+   `model.paneEdited(variantID: resolved.variantID, …)`).
+2. The characters are written only into a READ pane (`:1514-1524`: `if isLive { adoptedText = nil }
+   else if readPaneNeedsText … { view.string = text }`); `noteLiveness` (`:1644-1720`, called at
+   `:1429`, BEFORE that block) lands the caret and claims the keyboard but writes no text.
+3. The pane's `variantID` (`:1134`, `:1302`) is identity-only today — it reaches nothing but the
+   NSView identifier (`applyIdentity`, `:1582-1585`).
+4. So a stable-identity cell whose bound take changes while it is LIVE (live→live), or in the same
+   render that makes it live (read→live — VX-222's revival), keeps the OLD take's characters under the
+   NEW take's edit closure: the next keystroke hands `old words + keystroke` up as the NEW take's
+   text and autosave writes it over that take (one writer, never a sync conflict — silent).
+   VX-222's end-rule and VX-227's parked follow close every road the board knows of today by never
+   letting a cell be live across a re-key; the leaf itself still allows it.
