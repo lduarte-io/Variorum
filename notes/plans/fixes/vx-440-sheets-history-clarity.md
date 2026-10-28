@@ -420,7 +420,24 @@ Pieces (flipped per commit):
   of this note"); its unmark → the P-440-5 confirm → promoted; a Versions row's "Compare with now"; File/
   note ▾/⌘K "Compare with Latest Version" present with a moment, absent/grey without; "Open full size" →
   the band over the calm page, no "this note" rail, ⌘⇧S grey; Back; Promote from the band.
-- Batch 2 (Block History): NOT STARTED.
+- Batch 2 (Block History): IN PROGRESS — implementer (Opus) 2026-10-28; UNIT RECORD below.
+
+### Batch 2 — UNIT RECORD (Block History: VX-431 · riders VX-331 · VX-244)
+
+**Not done by this unit (first line, per the contract):** IN PROGRESS — the final list lands at close.
+
+Pieces (flipped per commit):
+- B2-0 record skeleton: DONE (this commit).
+- B2-1 VX-331 trace + red-on-old core pin (the `now` plumbing, behaviour unchanged): NOT STARTED.
+- B2-2 VX-331 fix (the 30-day window in `restoreCost`): NOT STARTED.
+- B2-3 VX-244 traces (both arms) + red-on-old Mac pins (the cell menu made inspectable, behaviour unchanged): NOT STARTED.
+- B2-4 VX-244 fix: NOT STARTED.
+- B2-5 core: bring a commit back as a take (the op, mirroring `branchVariant`'s posture) + state-transition tests: NOT STARTED.
+- B2-6 the pane at rest: calm one-line rows that expand; explainers behind (i); header counts: NOT STARTED.
+- B2-7 read in full (the sheet) + Bring back as a take (the door, the receipt): NOT STARTED.
+- B2-8 restore says where it landed (the landing + the overlay wash): NOT STARTED.
+- B2-9 verification (headless) + the record closed: NOT STARTED.
+
 - Batch 3 (gathering faces): NOT STARTED.
 - Ladder: NOT STARTED.
 - Stage windows: EARLY request sent to oct27coordinator (suite runs + end-of-run walk); none READY yet.
