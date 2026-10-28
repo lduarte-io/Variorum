@@ -150,7 +150,17 @@ struct WingPaletteDoorsTests {
         for id in Self.wingActs {
             #expect(CapabilityRegistry.capability(id).doors.contains(.palette), "\(id) is typeable from ⌘K")
             #expect(ShellActions.paletteActs.contains(id), "the palette renders \(id)")
-            #expect(CapabilityRegistry.capability(id).shortcutLabel == nil, "no chord — RB-6 is her call")
+            // VX-632 — THE DELIBERATE FLIP (her #245 RB-6 ruling: BOTH chords):
+            // was `shortcutLabel == nil, "no chord — RB-6 is her call"`.
+            // (The book's Move reaches ⌥⌘L through the note's one menu item —
+            // the key table's one owner per chord — so it wears no label.)
+            let ruled: String? = switch id {
+            case .moveNoteToWing: "\u{2325}\u{2318}L"
+            case .copyNoteToWing: "\u{21E7}\u{2325}\u{2318}L"
+            default: nil
+            }
+            #expect(CapabilityRegistry.capability(id).shortcutLabel == ruled,
+                    "\(id): the chord her RB-6 ruling gave it")
         }
         func act(_ id: CapabilityID, note: Bool = false, book: Bool = false, wings: Int) -> Bool {
             CapabilityRegistry.isEnabled(id, in: CapabilityContext(

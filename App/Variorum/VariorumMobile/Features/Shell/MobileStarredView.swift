@@ -26,16 +26,16 @@
 //
 //  ── P1, and why there is no window here ───────────────────────────────
 //  Every held listing on this phone is windowed with a truncation marker
-//  (the Phase 10 discipline). This one is bounded by the DATA instead:
-//  `Operations.setStarred` refuses past `Operations.starLimit`, and
-//  `Queries.starred` returns live targets only — so the list is at most
-//  `Operations.starLimit` rows (15 since her #112(b) ruling) by
-//  construction, which is the argument `MobileStarsModel`'s
-//  own observation already makes (*"Held: at most `starLimit` rows by
-//  construction"*). A render window over a list that can never reach it,
-//  and a marker that can never render, would be exactly the dead guard the
-//  6c cold review named (m3: *"a dead guard reads as a rule and is not
-//  one"*). The bound is pinned instead of drawn.
+//  (the Phase 10 discipline). This one was bounded by the DATA instead —
+//  `Operations.setStarred` refused past `Operations.starLimit` (15) — until
+//  VX-643 retired the cap (her 2026-10-28 word). It is now bounded by HER
+//  OWN LIST: the rows are exactly the things she starred, one deliberate
+//  press each, never a corpus listing — the Mac's Open list's class (also
+//  unwindowed, also ∝ her own acts). The read costs ∝ the stars, never the
+//  corpus (`StarsP1Tests`, core), and the `LazyVStack` below renders only
+//  the rows on screen (P3). No window and no marker: a truncation marker on
+//  a list she builds one press at a time would hide her own stars from her.
+//  (VX-643's record names this for the cold reviewer.)
 //
 
 import SwiftUI

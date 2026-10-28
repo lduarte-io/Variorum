@@ -285,6 +285,12 @@ nonisolated enum WingCopy {
     static let deleteWingVerb = "Delete Wing\u{2026}"
     static let moveToWingVerb = "Move to Wing"
     static let copyToWingVerb = "Copy to Wing"
+    /// **VX-632 — the View menu's two chord items** (A-648-7: the ellipsis on
+    /// the MENU face only — the ticket's spelling and the macOS convention for
+    /// an item that opens a selector; every other face wears the bare verb,
+    /// RB-15's copy pass may still adjust). Derived from the verb, so the two
+    /// can never drift apart.
+    static func menuTitle(_ verb: String) -> String { verb + "\u{2026}" }
     // 13n-c U4 (round 5 — the switcher joins the Library masthead; ⌘L, VX-157):
     // the note says where wings live now, both mastheads and the chord.
     static let unavailableNote = "Wings live at the top of the Bookcase and the Library \u{2014} "

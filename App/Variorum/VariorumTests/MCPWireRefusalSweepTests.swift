@@ -111,7 +111,6 @@ struct MCPWireRefusalSweepTests {
         .wingMoveChangedSince(postID: "p"), .dailyJournalIsHomeOnly(id: "r"),
         .readingAlreadyInWing(readingID: "r", wingID: "w"), .wingMoveIntoItself(wingID: "w"),
         .placementAnchorNotOnShelf(readingID: "r", anchorID: "a"),
-        .starLimitReached(limit: 5),
         .duplicateBookName(name: "letters"),
         .purgeTargetNotDeleted(table: "container", id: "p"), .unsupportedPurgeTarget(table: "tag"),
         .deliberateSavepointNeverPruned(id: "m"),
@@ -199,6 +198,13 @@ struct MCPWireRefusalSweepTests {
             #expect(!spoken.contains(name + "("), "\(name): \(spoken)")
             #expect(spoken != String(describing: error), "\(name): \(spoken)")
         }
-        #expect(walked == 76, "65 worded + the 10 this unit words + VX-549's gathering refusal")
+        // VX-643 (A JUSTIFIED EDIT — the traced delta, VX-648 batch 3): the
+        // declared cases went 108 → 107 across the run, the ONE change
+        // `starLimitReached` (one of the 65 worded, walked) retired with the
+        // star cap; nothing joined (batch 2's new wire refusals — VX-606's
+        // undeclared-argument words, VX-639's gathering sentence — are not
+        // `OperationError` cases), and `unspokenOnTheWire` is unchanged.
+        #expect(walked == 75,
+                "65 worded + the 10 this unit words + VX-549's gathering refusal − VX-643's retired star cap")
     }
 }

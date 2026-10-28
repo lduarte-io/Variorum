@@ -51,7 +51,7 @@ nonisolated enum SidebarRowLeads {
     /// row keeps its display name). One bounded read: the rows' own container
     /// facts, then each untitled note's opening slots — a `LIMIT`-stopped seek
     /// per note (P1 — cost ∝ the rows × the window, never ∝ a note's length;
-    /// the Open list and the star cap bound the rows; a sidebar of named notes
+    /// the Open list and her stars bound the rows; a sidebar of named notes
     /// reads no words at all).
     static func read(_ db: Database, noteIDs: [String]) throws -> [String: String] {
         guard !noteIDs.isEmpty else { return [:] }

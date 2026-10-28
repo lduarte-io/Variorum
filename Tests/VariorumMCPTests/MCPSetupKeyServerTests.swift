@@ -41,6 +41,15 @@ struct MCPSetupKeyServerTests {
     }
 
     /// Her Activity list's CONNECTION lines (the tool calls log beside them).
+    /// VX-626: the client's own closes said so far.
+    private func closedEnds(_ h: ServerHarness) throws -> Int {
+        try h.database.read { db in
+            try Int.fetchOne(
+                db, sql: "SELECT COUNT(*) FROM mcp_activity WHERE act = ? AND client_name = 'claude-code'",
+                arguments: [MCPConnectionEnd.clientClosed.act]) ?? 0
+        }
+    }
+
     private func activity(_ h: ServerHarness) throws -> [String] {
         try h.database.read { db in
             try Row.fetchAll(db, sql: "SELECT client_name, act, outcome FROM mcp_activity WHERE act LIKE 'connect_%' ORDER BY id")
@@ -104,9 +113,16 @@ struct MCPSetupKeyServerTests {
             // an "Any MCP client" copy here waits for her OK instead
             // (`MCPSetupKeyImpostorServerTests`, `MCPSetupKeyTabServerTests`).
             let newer = try h.operations.mintMCPSetupKey(copiedFor: "claude-code")
+            let endsBefore = try closedEnds(h)
             let (newerFD, rebound) = try h.rawOpen(as: "claude-code", presenting: newer, id: 6)
             #expect(rebound["id"] as? Int == 6 && rebound["result"] != nil, "the newest setup is admitted: \(rebound)")
             close(newerFD)
+            // VX-626 (a JUSTIFIED EDIT, the ritual — the VX-648 run, batch 2):
+            // that connection NAMED itself, so its close says its end AND stamps
+            // the client's last seen. Wait for that line before taking `before`,
+            // so the row comparison below reads only what the refusals did — its
+            // subject, unchanged ("no refusal touched the row it claimed").
+            #expect(try await h.eventually { try closedEnds(h) == endsBefore + 1 })
             let before = try h.client("claude-code")
             #expect(before.state == .approved && before.isSetupBound, "approval kept, the name bound to the newer key")
 

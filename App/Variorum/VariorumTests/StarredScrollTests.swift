@@ -117,10 +117,10 @@ struct StarredScrollMountTests {
     ///
     /// **Why the fixture writes the `setting` row directly** and not through
     /// `Operations.setStarred`: this pin is about the SECTION'S GEOMETRY when
-    /// the list outgrows the window — not about the cap — so the fixture must
-    /// stay independent of `starLimit`'s number (5 when this pin was born,
-    /// 15 since her 2026-09-18 #112(b) ruling). It writes exactly the value
-    /// the door would write (`StarTarget.key`s, JSON, in star order).
+    /// the list outgrows the window — never about a cap (5 when this pin was
+    /// born, 15 at her #112(b) ruling, RETIRED at VX-643) — so the fixture
+    /// stays independent of any count. It writes exactly the value the door
+    /// would write (`StarTarget.key`s, JSON, in star order).
     @Test func twelveStarredRowsScrollInsideTheWindowInsteadOfGrowingTheColumn() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {

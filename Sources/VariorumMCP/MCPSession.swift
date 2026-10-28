@@ -119,10 +119,9 @@ final class MCPSession: @unchecked Sendable {
     /// the session's own task, never the main thread (P2).
     func writeEndLine() {
         guard let line = claimEndLine() else { return }
+        // VX-626: the line and the client's last-seen stamp land together.
         try? database.write { db in
-            try operations.recordMCPActivity(
-                db, clientName: line.clientName, act: line.end.act, targetKind: nil, targetID: nil,
-                targetTitle: nil, allowed: true)
+            try operations.recordMCPConnectionEnd(db, clientName: line.clientName, end: line.end)
         }
     }
 
@@ -204,10 +203,17 @@ final class MCPSession: @unchecked Sendable {
     /// tool's own description says it word for word, and the tool is listed only
     /// to a client that can call it — and show_in_app's sentence ends "asks to
     /// see something" (its pinned clause unchanged). 2,988 → 2,994.
+    ///
+    /// VX-640 (the VX-648 run, batch 2 — her ruling 2026-10-28, QUESTIONS #245
+    /// RB-13: "i think it would be fine to put / mcp in the instructions without
+    /// naming a provider"): the lock/quit sentence names the reconnect road, "/mcp",
+    /// as an example and without a provider's name — O-4's net
+    /// (`MCPProviderNeutralityTests`) bans names, not the command. No trade: her
+    /// bound rose to 3,100 for it (below). PROVISIONAL words.
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, \
-        so reconnect once it's back. A new client is a connection request until the author approves \
+        so reconnect once it's back (e.g. with /mcp). A new client is a connection request until the author approves \
         it in Variorum \u{25B8} Settings \u{25B8} MCP. Once approved, list_my_activity is always listed; \
         other tools appear only for what the author has shared (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
@@ -250,8 +256,10 @@ final class MCPSession: @unchecked Sendable {
     /// ruling (P-13nc-U5-5's bound half, 2026-10-11 — "yeah let's do 2,000
     /// because then we'll have a bit of wiggle room for future updates as
     /// well"): 1,500 → 2,000. VX-197 (VX-336 U8a): her R-VX184-3, carried from
-    /// VX-184's pre-run sitting — 2,000 → 3,000, moved with its pin.
-    static let instructionsBound = 3_000
+    /// VX-184's pre-run sitting — 2,000 → 3,000, moved with its pin. VX-640 (her
+    /// ruling 2026-10-28: "i think it's fine to raise the limit to 3100? I don't
+    /// see why not") — 3,000 → 3,100, so /mcp goes in with no trade.
+    static let instructionsBound = 3_100
 
     init(
         fd: Int32, database: AppDatabase, operations: Operations, version: String,
@@ -337,6 +345,15 @@ final class MCPSession: @unchecked Sendable {
             if try self.awaitsHerOK() {
                 let waiting = Self.waitingAnswer(params.name)
                 return .init(content: [.text(text: waiting.text, annotations: nil, _meta: nil)], isError: waiting.isError)
+            }
+            // VX-606: the schema the wire publishes is the schema it enforces —
+            // an argument the tool's schema does not declare refuses the call
+            // here, ONE check for every tool, before any decision (a parse
+            // refusal: nothing read, written, asked, spent or logged). After the
+            // waiting branch, so a waiting setup's face stays the pending
+            // sentence for every known tool (VX-258), as for every parse refusal.
+            if let refusal = MCPArgumentSchema.refusal(tool: params.name, arguments: params.arguments) {
+                return .init(content: [.text(text: refusal, annotations: nil, _meta: nil)], isError: true)
             }
             // U2: the write rungs run on the session's executor (AF-8);
             // the reads stay where U1 built them.

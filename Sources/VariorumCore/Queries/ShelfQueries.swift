@@ -557,7 +557,7 @@ extension Queries {
     /// per live gathering (a tag term is the shipped rule predicate's plan —
     /// the wing's live tags by `uq_tag_path_live`, each a `(tag, note)`
     /// application seek on `uq_post_tag_live`, so ∝ the taxonomy; a ★ term an
-    /// `IN` over at most `Operations.starLimit` ids) — so cost ∝ notes +
+    /// `IN` over the starred notes, ∝ the stars since VX-643) — so cost ∝ notes +
     /// bookless × gatherings × terms × tags-in-wing, plus one sort of the
     /// bookless set; the result is ≤ 2 × `window` rows. Gatherings and tags
     /// are author-scale; nothing reads text. This is the shipped Pool's own class

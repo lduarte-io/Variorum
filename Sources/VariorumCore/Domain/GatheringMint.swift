@@ -424,7 +424,7 @@ public enum GatheringMint {
     /// walk with the star allowed, so the note is born starred. `★ OR #a` takes
     /// #a (her door would star — the first satisfiable option); `#a AND ★` and
     /// `★` star; every other outcome is the star-forbidden walk's, unchanged.
-    /// Stars are her scarce, visible list (the cap, the Starred section), so a
+    /// Stars are her visible list (the Starred section), so a
     /// client spends one only where nothing else gets the note in.
     ///
     /// `walk(starrable)` is the ONE planner over the same facts (a store-fed

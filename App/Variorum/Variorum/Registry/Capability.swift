@@ -430,6 +430,10 @@ nonisolated struct Capability: Identifiable, Sendable {
     /// Back — `BrowserNavKeyMonitor`, live only while no text holds the
     /// keyboard). The MENU keeps showing `shortcutLabel`; this is the
     /// registry's record of the alternate, and the helper (⌘/) shows it.
+    /// VX-563: also the record of a key that is an act's ONLY key because a
+    /// menu key equivalent would steal it from every text view — ⌘↑ / ⌘↓ on
+    /// Previous / Next Note in This Book (`BookNoteStepKeyMonitor`), whose
+    /// `shortcutLabel` is nil (no menu item).
     var alternateShortcutLabel: String? = nil
 
     /// **A door's label with its DECLARED chord appended** — "Copy All Takes
@@ -879,6 +883,16 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // the foot's and the Outline flow's "+ new note"/"+ new entry" are its
     // `.surface` renderers.
     case newNoteInBook
+    // VX-563 (her kickoff ruling 2026-10-28: "⌘↑/⌘↓ step between notes while
+    // reading, document start/end while editing" — VX-560's rule; A-648-6):
+    // the previous / next note in the book the focused pane shows, in
+    // Outline, Read and Book. TWO declarations on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds (each its own key and its
+    // own end's words). The door is the book view's key monitor (`.surface`
+    // — `BookNoteStepKeyMonitor`), never a menu key (it would steal document
+    // start/end from every text view); the keys are VX-560's
+    // `alternateShortcutLabel`s, shown in the helper.
+    case previousNoteInBook, nextNoteInBook
     // 13i-d U4 — A BOOK'S ARCHIVED LINE (her #169(a)(1) ruling — the 13i-d
     // plan item 9): its two row doors are **Unarchive** (NEW — the archived
     // line is its one declared renderer; the Library's Archived view carries

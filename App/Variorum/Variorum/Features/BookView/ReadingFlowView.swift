@@ -67,6 +67,11 @@ struct ReadingFlowView: View {
     /// without the cache every return to Read ▸ Scroll re-ran the
     /// book-proportional lengths query. nil ⇒ the view's own cache below.
     var extentsCache: FlowExtentsCache?
+    /// **VX-645 — where the follow-highlight's pair goes** (the book's
+    /// `noteFlowViewed`): what this page is SHOWING, by the Outline's own
+    /// rule and follower. nil (every pre-VX-645 call site, the test hosts) ⇒
+    /// the flow follows nothing.
+    var onViewed: ((BookOutlineViewed.Pair) -> Void)? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -118,6 +123,8 @@ struct ReadingFlowView: View {
     /// What this column's rows REPORTED while rendering real content — the
     /// manifest's `measured` arm (13u2b UNIT 2).
     @State private var heights = FlowRowHeights()
+    /// VX-645 — the follow-highlight's bookkeeping (`FlowFollowBox`).
+    @State private var follow = FlowFollowBox()
 
     private var page: ReadingPageTokens {
         scheme == .dark ? .dark : .light
@@ -193,22 +200,42 @@ struct ReadingFlowView: View {
                 .onScrollGeometryChange(for: FlowScrollFacts.self) { geometry in
                     FlowScrollFacts(
                         offset: geometry.contentOffset.y,
-                        height: geometry.contentSize.height)
+                        height: geometry.contentSize.height,
+                        viewport: geometry.containerSize.height,
+                        follow: OutlineScrollFacts(geometry))
                 } action: { old, new in
                     landing.lastOffset = new.offset
                     if old.height != new.height { contentResized(new.height, proxy) }
+                    // VX-645: where the page stands — the follower's on-screen
+                    // test, the 8-pt release, the clamp at the bottom.
+                    follow.page.scroll = BookOutlineViewed.Scroll(
+                        viewport: new.viewport, offset: new.follow.offset,
+                        travel: new.follow.travel)
+                    Self.queueLook(follow, authority)
                 }
                 .onScrollPhaseChange { _, phase in
                     if phase == .interacting { userScrolled() }
                 }
-                // 13f W21 — the flow's LANDING half. (Its reporting half
-                // does not exist: this surface tracks no scroll position,
-                // and per-row visibility reporting is the machinery 13c 2A
-                // deleted on her A6 ruling. Leaving the scroll therefore
-                // carries the book's standing anchor — `BookAnchor`'s header
-                // states it, and the batch record lists it for her walk.)
-                .onAppear { land(proxy) }
+                // 13f W21 — the flow's LANDING half. Since VX-645 the page also
+                // knows what it SHOWS — VX-562's follower over the geometry the
+                // rows already report to the landing (her ask, P-562-2 → VX-645).
+                // That is not the 13b 4F progress/visibility brain 13c 2A
+                // deleted with Outline's bottom bar on her A6 ruling (no bar,
+                // no progress number returns). The mode carry out of the scroll
+                // still leaves from the book's standing anchor (`BookAnchor` —
+                // unchanged by VX-645).
+                .onAppear {
+                    startFollowing()
+                    land(proxy)
+                }
                 .onChange(of: reveal) { _, _ in land(proxy) }
+                // VX-645: the rows changed (a membership, a chapter) — an AXIS
+                // change: a standing adoption lets go, and the page is asked again.
+                .onChange(of: FlowRows.viewedRows(grouped: grouped)) { _, rows in
+                    follow.rows = rows
+                    follow.follower.axisChanged(landingPending: authority.isPending)
+                    Self.queueLook(follow, authority)
+                }
                 // Ladder R2-12: a pending landing dies WITH the flow (a mode
                 // switch mid-landing) — its check would otherwise re-arm
                 // itself against a dead proxy for the whole time budget and
@@ -217,6 +244,7 @@ struct ReadingFlowView: View {
                 .onDisappear {
                     landing.end()
                     authority.end()
+                    stopFollowing()
                     #if DEBUG
                     // 18k C4: this flow's row tops, and no other window's.
                     ReadingFlowGeometry.release(owner: oracleOwner)
@@ -272,13 +300,16 @@ struct ReadingFlowView: View {
                                 onSettled: { storySettled(entry.postID) },
                                 onLoaded: { })
                                 .id(segment.id)
-                                .flowAnchor(segment.id) { top, _ in
+                                .flowAnchor(segment.id) { top, height in
                                     // A story's own measured height needs no
                                     // second store: `SurfaceSizeMemory` IS
                                     // it, and the manifest reads it as the
                                     // REMEMBERED arm (18d's U-12 memory, per
                                     // note × surface × width).
                                     rowMoved(segment.id, top: top, height: nil)
+                                    // VX-645: the follower's page (its own
+                                    // copy — the on-screen test reads it).
+                                    followRowMoved(segment.id, top: top, height: height)
                                 }
                         }
                     }
@@ -326,6 +357,7 @@ struct ReadingFlowView: View {
                 .padding(.top, 22)
                 .flowAnchor(row.id) { top, height in
                     rowMoved(row.id, top: top, height: height)
+                    followRowMoved(row.id, top: top, height: height)
                 }
         case .end:
             Text("· · ·")
@@ -452,6 +484,22 @@ struct ReadingFlowView: View {
         onRevealLanded?()
         let anchor = FlowRows.landingAnchor(for: reveal, grouped: grouped)
         landing.begin(anchor: anchor, target: reveal, storiesInOrder: storyIDs)
+        // VX-645 — the Outline's follower wiring, one for one (`BookView
+        // .landOutline`): the landing's END asks the follower again (weak on
+        // the authority, the closure's own holder; only the box is captured,
+        // never this view), and the follower ADOPTS the landing's target at
+        // its START (R-562-A) — so the highlight moves at the click and the
+        // freeze holds the target, never a row the travel passes.
+        let box = follow
+        authority.onFinish = { [weak authority] _, _ in
+            guard let authority else { return }
+            Self.look(box, authority)
+        }
+        if let target = FlowRows.viewedAnchor(of: anchor),
+           let adopted = box.follower.landingStarted(anchor: target, rows: box.rows),
+           box.live {
+            box.onViewed?(adopted)
+        }
         authority.land(
             anchor,
             // What this column KNOWS about the landing — its rows, the
@@ -544,8 +592,68 @@ struct ReadingFlowView: View {
 
     /// The user scrolled while a landing was pending: she took over — the
     /// landing ends where she put the page, never fighting her.
+    ///
+    /// VX-645 (R-562-A): her hand on the page also returns the follower to
+    /// the rule — let go FIRST, so a landing her scroll ends delivers the
+    /// rule's pair, not the target's (the Outline's order).
     private func userScrolled() {
+        follow.follower.userScrolled()
         authority.userTookOver()
+        Self.queueLook(follow, authority)
+    }
+
+    // MARK: - VX-645 — the follow-highlight (VX-562's brain, over this page)
+
+    /// The flow is on screen: the box learns where the pair goes and the rows
+    /// as drawn. (Before `land`, so a landing on arrival adopts its target.)
+    private func startFollowing() {
+        follow.onViewed = onViewed
+        follow.live = true
+        follow.rows = FlowRows.viewedRows(grouped: grouped)
+    }
+
+    /// The flow left: its page is gone, and so is what it showed and what it
+    /// had adopted (R-562-A: leaving is a release) — the slot says nothing.
+    private func stopFollowing() {
+        follow.live = false
+        follow.follower.forget()
+        follow.page = BookOutlineViewed.Page()
+        onViewed?(.nothingViewed)
+    }
+
+    /// A row reported where it sits — the follower's page, in its own row ids
+    /// (`FlowRows.viewedAnchor`; the title and the closing mark are none).
+    /// O(1) here; the look runs once per turn.
+    private func followRowMoved(_ flowID: String, top: CGFloat, height: CGFloat) {
+        guard let id = FlowRows.viewedAnchor(of: flowID) else { return }
+        follow.page.tops[id] = top
+        follow.page.heights[id] = height
+        Self.queueLook(follow, authority)
+    }
+
+    /// At most one look per run-loop turn (the Outline's `queueViewedPair`):
+    /// a scroll reports every row every frame.
+    private static func queueLook(_ box: FlowFollowBox, _ authority: LandingAuthority) {
+        guard !box.queued, box.onViewed != nil else { return }
+        box.queued = true
+        DispatchQueue.main.async {
+            box.queued = false
+            look(box, authority)
+        }
+    }
+
+    /// **What the page shows** — the follower's look (`BookOutlineFollower`:
+    /// frozen while a landing travels; an adopted target standing while it is
+    /// on the page and the page has not moved past the 8-pt release; else THE
+    /// RULE — the top edge, the last note at the bottom), published to the
+    /// book's slot, which is equality-gated. Static over the box and the
+    /// authority (the Outline's reason: the landing keeps this closure).
+    private static func look(_ box: FlowFollowBox, _ authority: LandingAuthority) {
+        guard box.live, let onViewed = box.onViewed,
+              let pair = box.follower.look(
+                rows: box.rows, page: box.page, landingPending: authority.isPending)
+        else { return }
+        onViewed(pair)
     }
 
 }
@@ -553,6 +661,33 @@ struct ReadingFlowView: View {
 nonisolated struct FlowScrollFacts: Equatable, Sendable {
     var offset: CGFloat
     var height: CGFloat
+    /// VX-645 — the page's height (the scroll's container: the follower's
+    /// on-screen test, the clamp's) and where it stands in its scroll,
+    /// through the Outline's own measured arithmetic (`OutlineScrollFacts` —
+    /// the REACHABLE travel, never the inset-extended one: VX-562's trace
+    /// walk). Defaulted, so the trace-only two-field form is unchanged.
+    var viewport: CGFloat = 0
+    var follow = OutlineScrollFacts()
+}
+
+/// **VX-645 — the flow's follower bookkeeping** (the Outline's
+/// `OutlineLandingBox` shape: a reference box `@State` merely holds, so a
+/// geometry report never re-renders the column): the page the follower reads
+/// (every row's last top and height in the follower's row ids, the scroll's
+/// facts), the ONE follower value (`BookOutlineFollower` — the same adopt /
+/// release decision the Outline runs), the rows as last drawn, and where the
+/// pair goes. Mutated only on the main actor.
+@MainActor
+final class FlowFollowBox {
+    var page = BookOutlineViewed.Page()
+    var follower = BookOutlineFollower()
+    var rows: [BookOutlineRows.Row] = []
+    /// One look per run-loop turn (the Outline's coalescing).
+    var queued = false
+    /// While the flow is on screen — a queued look that runs after it left
+    /// never speaks for a page that is gone.
+    var live = false
+    var onViewed: ((BookOutlineViewed.Pair) -> Void)?
 }
 
 /// **What only this surface knows about a pending landing** — which stories
@@ -667,6 +802,32 @@ nonisolated enum FlowRows {
         guard id.hasPrefix("flow-"), !id.hasPrefix("flow-chapter-"),
               id != "flow-title", id != "flow-end" else { return nil }
         return String(id.dropFirst("flow-".count))
+    }
+
+    /// **VX-645 — a flow row's id in the follower's row model**
+    /// (`BookOutlineRows.Row.id`): a story is its note's `page-` anchor, a
+    /// chapter heading its `chapter-` anchor; the title and the closing mark
+    /// are no rows of that model (nil) — the title sits above the first row,
+    /// so at rest nothing is viewed (the Outline's title-block rule), and the
+    /// closing mark follows the last. Pure — pinned.
+    static func viewedAnchor(of flowID: String) -> String? {
+        if flowID.hasPrefix("flow-chapter-") {
+            return BookOutlineRows.Row.chapterAnchor(String(flowID.dropFirst("flow-chapter-".count)))
+        }
+        return postID(ofAnchor: flowID).map(BookOutlineRows.Row.noteAnchor)
+    }
+
+    /// **VX-645 — the flow's rows in the follower's row model**: the same
+    /// grouping the column draws (`rows(grouped:)` — each chapter's heading,
+    /// or the unfiled heading the flow draws no words for, then its notes),
+    /// so `BookOutlineViewed.named(at:in:)` names a note's chapter by the
+    /// heading in force above it on this page. A heading the flow never draws
+    /// reports no top and is never itself viewed; it still closes the chapter
+    /// above it, so an unfiled note never reads as the last chapter's.
+    static func viewedRows(
+        grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    ) -> [BookOutlineRows.Row] {
+        BookOutlineRows.rows(grouped: grouped)
     }
 
     /// Where a reveal of this post LANDS (batch H): at its CHAPTER's

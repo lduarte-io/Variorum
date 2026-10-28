@@ -180,26 +180,37 @@ struct UnionStarTests {
         }
     }
 
-    // MARK: - The cap counts the union
+    // MARK: - The union has no ceiling (VX-643)
 
-    @Test func theCapCountsColumnOnlyStars() throws {
+    /// **VX-643 — THE DELIBERATE FLIP** of `theCapCountsColumnOnlyStars` (the
+    /// cap counted the union, so a column-only book spent a slot): the cap is
+    /// gone, so twenty list stars and a column-only book stand together and the
+    /// next star lands. The union's ORDER is untouched — the list in star order,
+    /// then the column-only tail; re-starring the column-only book gives it its
+    /// list entry (star time now), exactly as before. RED ON OLD: the
+    /// twenty-first list star refused `starLimitReached`.
+    @Test func aColumnOnlyStarAndTheListPassFifteenTogether() throws {
         try withOperations { ops, db in
-            for index in 0..<(Operations.starLimit - 1) {
+            var listed: [StarTarget] = []
+            for index in 0..<20 {
                 let note = try ops.createPost(title: "n\(index)", profile: .generic)
                 try ops.setStarred(.post(note.id), starred: true)
+                listed.append(.post(note.id))
             }
             let pinned = try ops.createReading(name: "pinned", kind: .book)
-            try setColumnStar(db, pinned.id)  // the fifteenth star, column-only
-            let one = try ops.createPost(title: "one too many", profile: .generic)
+            try setColumnStar(db, pinned.id)  // column-only, beside twenty listed
+            let one = try ops.createPost(title: "one more", profile: .generic)
 
-            #expect(throws: OperationError.starLimitReached(limit: Operations.starLimit)) {
+            #expect(throws: Never.self, "no cap: the star lands") {
                 try ops.setStarred(.post(one.id), starred: true)
             }
-            // Re-starring something already starred is never refused by the
-            // cap — it is already counted.
-            #expect(throws: Never.self) {
-                try ops.setStarred(.reading(pinned.id), starred: true)
-            }
+            #expect(try db.read { try Queries.starred($0) }.map(\.target)
+                    == listed + [.post(one.id), .reading(pinned.id)],
+                    "the list in star order, then the column-only tail")
+            try ops.setStarred(.reading(pinned.id), starred: true)
+            #expect(try db.read { try Queries.starredTargets($0) }
+                    == listed + [.post(one.id), .reading(pinned.id)],
+                    "re-starring the column-only book lists it — star time now")
         }
     }
 

@@ -69,16 +69,8 @@ struct MCPStarFacesTests {
         #expect(MCPToolFacts.scopes(of: "set_starred") == [.note, .book, .gathering, .wing])
     }
 
-    /// The cap refuses through the wire's ONE chain (`MCPWireRefusalCopy.spoken`
-    /// with the Mac door's hook) in HER words — the road the refusal names —
-    /// never a raw case (`MCPWireRefusalSweepTests` walks every case; this is
-    /// the star's own leg, said whole).
-    @Test func theCapRefusesInHerWordsOnTheWire() {
-        let spoken = MCPWireRefusalCopy.spoken(OperationError.starLimitReached(limit: Operations.starLimit)) {
-            OpsRefusalCopy.message(for: $0)
-        }
-        #expect(spoken == OpsRefusalCopy.message(for: OperationError.starLimitReached(limit: Operations.starLimit)))
-        #expect(spoken.hasPrefix("You can star \(Operations.starLimit) things at a time"))
-        #expect(!spoken.contains("starLimitReached"))
-    }
+    // (`theCapRefusesInHerWordsOnTheWire` RETIRED at VX-643 with the cap and
+    // its refusal: the wire's star never refuses for a count — the server pin
+    // `MCPStarServerTests.aStarPastFifteenLandsOverTheWireWithOneEntry` holds
+    // the sixteenth star landing; the sweep below no longer lists the case.)
 }

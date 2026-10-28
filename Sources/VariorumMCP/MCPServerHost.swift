@@ -22,6 +22,13 @@ public final class MCPServerHost: @unchecked Sendable {
         case stopped
         case running
         case failed(String)
+        /// **VX-612 — the listener died while the server ran** (a fatal
+        /// `poll`/`accept` failure, or the listener reporting an error): its
+        /// socket is closed and removed, so no new client can connect; the
+        /// connections already served keep being served until they end. Never
+        /// restarted by itself — the door says so and waits for her switch (or
+        /// the next unlock), which starts a fresh host.
+        case stoppedByItself(String)
     }
 
     private let database: AppDatabase
@@ -42,6 +49,12 @@ public final class MCPServerHost: @unchecked Sendable {
     /// Called (off the main thread) when a connection opens, names itself or
     /// closes — a SIGNAL for the pane to re-read; it carries no decision.
     public var onConnectionsChanged: (@Sendable () -> Void)?
+
+    /// **VX-612** — called (off the main thread) when the host's state changes
+    /// BY ITSELF (the listener died: `.stoppedByItself`) — a SIGNAL for the door
+    /// to re-read `state` (P-4: it carries no decision). Her own starts and
+    /// stops are the door's acts and never signal here.
+    public var onStateChanged: (@Sendable () -> Void)?
 
     /// U2: the app's seams — refusal words, the just-in-time ask, the write
     /// receipt. Set before `start()`; every session reads them as it opens.
@@ -89,7 +102,12 @@ public final class MCPServerHost: @unchecked Sendable {
             }
             let wakeRead = pipeFDs[0]
             let thread = Thread { [weak self] in
-                self?.acceptLoop(listenFD: fd, wakeFD: wakeRead)
+                // VX-612: a loop that ends on a FATAL failure says so — the
+                // listener closed, the host flipped, the door signalled — where
+                // it used to return in silence with the pane saying "running".
+                if case .fatal(let reason)? = self?.acceptLoop(listenFD: fd, wakeFD: wakeRead) {
+                    self?.listenerDied(fd, reason: reason)
+                }
                 done.signal()
             }
             thread.name = "variorum.mcp.accept"
@@ -194,10 +212,9 @@ public final class MCPServerHost: @unchecked Sendable {
         guard !claimed.isEmpty else { return }
         do {
             try database.write { db in
+                // VX-626: each line stamps its client's last seen, on its clock read.
                 for (_, line) in claimed {
-                    try operations.recordMCPActivity(
-                        db, clientName: line.clientName, act: line.end.act, targetKind: nil, targetID: nil,
-                        targetTitle: nil, allowed: true)
+                    try operations.recordMCPConnectionEnd(db, clientName: line.clientName, end: line.end)
                 }
             }
         } catch {
@@ -208,29 +225,134 @@ public final class MCPServerHost: @unchecked Sendable {
 
     // MARK: - Accept
 
-    private func acceptLoop(listenFD: Int32, wakeFD: Int32) {
+    /// How the accept loop ended: woken by a stop, or a FATAL failure (VX-612).
+    enum AcceptLoopExit: Equatable {
+        case woken
+        case fatal(String)
+    }
+
+    /// **VX-612 — THE ACCEPT LOOP's failures, classified** (the VX-548 batch 2b
+    /// trace, M1: the loop returned on EMFILE / ENFILE / ENOMEM / ENOBUFS, poll's
+    /// EAGAIN or a listener error, and nothing told the host or the door — the
+    /// pane said "running" while no new client was ever served). Pure; pinned.
+    enum AcceptStep: String, Sendable { case poll, accept }
+    enum AcceptFailure: Equatable, Sendable {
+        /// Interrupted, or a connection that died before it was accepted: try
+        /// again at once (the loop's old continue).
+        case again
+        /// A resource the process will get back (descriptors, memory, buffers):
+        /// pause — bounded backoff, `pause(afterRetries:)` — and try again.
+        case retry
+        /// The listener itself is broken: the loop ends and says so.
+        case fatal
+    }
+
+    static func classify(_ step: AcceptStep, errno code: Int32) -> AcceptFailure {
+        switch (step, code) {
+        case (_, EINTR): .again
+        case (.accept, ECONNABORTED): .again
+        case (.poll, EAGAIN), (.poll, ENOMEM): .retry
+        case (.accept, EMFILE), (.accept, ENFILE), (.accept, ENOMEM), (.accept, ENOBUFS), (.accept, EAGAIN): .retry
+        default: .fatal
+        }
+    }
+
+    /// The pause before the next try, in milliseconds: 10 ms doubling to a
+    /// one-second cap — bounded, and woken at once by a stop. The tries
+    /// themselves never run out (a transient condition passes when the process
+    /// gets its descriptors or memory back); a success resets the count.
+    static func pause(afterRetries retries: Int) -> Int32 {
+        Int32(min(10 << min(retries, 7), Int(pauseCap)))
+    }
+    static let pauseCap: Int32 = 1_000
+
+    /// The words a fatal exit leaves on the host's state (the pane shows them).
+    static func reason(_ step: AcceptStep, errno code: Int32) -> String {
+        "\(step.rawValue): \(String(cString: strerror(code)))"
+    }
+
+    #if DEBUG
+    /// TEST-ONLY (VX-612): a fault for the loop's next `poll` or `accept` —
+    /// return an errno and that call fails with it instead of running; nil runs
+    /// the real call. Read once per call, on the accept thread.
+    var acceptLoopFault: (@Sendable (AcceptStep) -> Int32?)?
+    #endif
+
+    private func faulted(_ step: AcceptStep) -> Int32? {
+        #if DEBUG
+        return acceptLoopFault?(step)
+        #else
+        return nil
+        #endif
+    }
+
+    private func acceptLoop(listenFD: Int32, wakeFD: Int32) -> AcceptLoopExit {
+        var retries = 0
+        /// A transient failure: pause (woken at once by a stop), then try again.
+        func pausedThroughAStop() -> Bool {
+            var wake = [pollfd(fd: wakeFD, events: Int16(POLLIN), revents: 0)]
+            let woken = poll(&wake, 1, Self.pause(afterRetries: retries)) > 0 && wake[0].revents != 0
+            retries += 1
+            return woken
+        }
         while true {
             var fds = [pollfd(fd: listenFD, events: Int16(POLLIN), revents: 0),
                        pollfd(fd: wakeFD, events: Int16(POLLIN), revents: 0)]
-            let ready = poll(&fds, 2, -1)
+            let pollFault = faulted(.poll)
+            let ready = pollFault == nil ? poll(&fds, 2, -1) : -1
             if ready < 0 {
-                if errno == EINTR { continue }
-                return
+                let code = pollFault ?? errno
+                switch Self.classify(.poll, errno: code) {
+                case .again: continue
+                case .retry:
+                    if pausedThroughAStop() { return .woken }
+                    continue
+                case .fatal: return .fatal(Self.reason(.poll, errno: code))
+                }
             }
-            if fds[1].revents != 0 { return }
+            if fds[1].revents != 0 { return .woken }
             guard fds[0].revents & Int16(POLLIN) != 0 else {
-                if fds[0].revents != 0 { return }
+                // POLLERR / POLLHUP / POLLNVAL on the listener: it is broken.
+                if fds[0].revents != 0 { return .fatal("the listener reported an error (\(fds[0].revents))") }
                 continue
             }
-            let connection = accept(listenFD, nil, nil)
+            let acceptFault = faulted(.accept)
+            let connection = acceptFault == nil ? accept(listenFD, nil, nil) : -1
             guard connection >= 0 else {
-                if errno == EINTR || errno == ECONNABORTED { continue }
-                return
+                let code = acceptFault ?? errno
+                switch Self.classify(.accept, errno: code) {
+                case .again: continue
+                case .retry:
+                    if pausedThroughAStop() { return .woken }
+                    continue
+                case .fatal: return .fatal(Self.reason(.accept, errno: code))
+                }
             }
+            retries = 0
             MCPSocketRoad.suppressSIGPIPE(connection)
             _ = fcntl(connection, F_SETFD, FD_CLOEXEC)
             serve(connection)
         }
+    }
+
+    /// **VX-612 — the listener died: say so, honestly.** The loop has ended on a
+    /// fatal failure. Unless a stop has already taken the listener (then the
+    /// stop is the one ending it, and removes it), the host closes its listener
+    /// and removes its OWN socket — while the listener still holds the path, so
+    /// the file removed is this host's (`halt`'s rule) — flips to
+    /// `.stoppedByItself` and signals the door. Sessions already served are
+    /// left serving (their own descriptors are healthy); a later stop ends them.
+    private func listenerDied(_ fd: Int32, reason: String) {
+        let owned: Bool = lock.withLock {
+            guard listenFD == fd, _state == .running else { return false }
+            listenFD = -1
+            _state = .stoppedByItself(reason)
+            return true
+        }
+        guard owned else { return }
+        MCPSocketRoad.unlink(directory: directory)
+        close(fd)
+        onStateChanged?()
     }
 
     /// Round 1 F7 — the session ceiling: each session costs a reader thread,

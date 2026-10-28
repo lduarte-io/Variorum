@@ -389,14 +389,38 @@ extension Operations {
         _ db: Database, clientName: String, act: String, targetKind: String?, targetID: String?,
         targetTitle: String?, allowed: Bool
     ) throws {
+        try insertMCPActivity(
+            db, clientName: clientName, act: act, targetKind: targetKind, targetID: targetID,
+            targetTitle: targetTitle, allowed: allowed, at: DateFormatter.variorumISO8601.string(from: date.now))
+    }
+
+    /// **A connection's END — said and STAMPED** (VX-626, the VX-648 run's
+    /// batch 2; the VX-620 mid window's W-1: a closed session's Clients row read
+    /// "last seen" at its START, because `last_seen_at` was written only at
+    /// admission, `recordMCPContact`). The end line (VX-394 — every ending that
+    /// says why: the client's close, a stop, the lock road's early write) and
+    /// the client's `last_seen_at` land together, on ONE clock read, so the row
+    /// and Activity agree to the instant. The quit says no line (P-VX394-5) and
+    /// so stamps nothing. A name with no client row stamps nothing.
+    public func recordMCPConnectionEnd(_ db: Database, clientName: String, end: MCPConnectionEnd) throws {
+        let now = DateFormatter.variorumISO8601.string(from: date.now)
+        try insertMCPActivity(
+            db, clientName: clientName, act: end.act, targetKind: nil, targetID: nil, targetTitle: nil,
+            allowed: true, at: now)
+        try db.execute(sql: "UPDATE mcp_client SET last_seen_at = ? WHERE name = ?", arguments: [now, clientName])
+    }
+
+    private func insertMCPActivity(
+        _ db: Database, clientName: String, act: String, targetKind: String?, targetID: String?,
+        targetTitle: String?, allowed: Bool, at: String
+    ) throws {
         try db.execute(
             sql: """
                 INSERT INTO mcp_activity (client_name, act, target_kind, target_id, target_title, outcome, at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
             arguments: [clientName, act, targetKind, targetID, targetTitle,
-                        allowed ? "allowed" : "refused",
-                        DateFormatter.variorumISO8601.string(from: date.now)])
+                        allowed ? "allowed" : "refused", at])
         try db.execute(
             sql: "DELETE FROM mcp_activity WHERE id <= (SELECT MAX(id) FROM mcp_activity) - ?",
             arguments: [Self.mcpActivityCap])

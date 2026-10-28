@@ -294,13 +294,17 @@ struct MCPBookStateServerTests {
             let gatheringBefore = try reading(h, gathering.id)
 
             // A wing EDIT grant READS the gathering (VX-273) — so every write
-            // aimed at it hears what it is, never "doesn't exist".
+            // aimed at it that a gathering can't take hears what it is, never
+            // "doesn't exist". VX-639 — A DELIBERATE FLIP (her ruling 2026-10-28,
+            // QUESTIONS #245 RB-7: book parity at the edit rung, the rule staying
+            // hers): rename_book, archive_book, unarchive_book and delete_book now
+            // LAND on a gathering at edit on its place (pinned whole in
+            // `MCPGatheringBookActsServerTests`), so they leave this loop; a
+            // finish and a reopen (a gathering can't be finished) still refuse in
+            // the gathering's words.
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
-            for (tool, extra): (String, [String: Value]) in [
-                ("rename_book", ["name": .string("x")]), ("finish_book", [:]), ("reopen_book", [:]),
-                ("archive_book", [:]), ("unarchive_book", [:]), ("delete_book", [:]),
-            ] {
+            for (tool, extra): (String, [String: Value]) in [("finish_book", [:]), ("reopen_book", [:])] {
                 let refused = try await call(h, connection, tool, ["book_id": .string(gathering.id)].merging(extra) { $1 })
                 #expect(refused.isError == true && text(refused).contains("is a gathering"), "\(tool): \(text(refused))")
                 #expect(!text(refused).contains("doesn't exist"))

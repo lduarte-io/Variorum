@@ -163,30 +163,41 @@ struct MCPStarServerTests {
         }
     }
 
-    // MARK: - The cap, through the one refusal chain
+    // MARK: - No cap (VX-643)
 
-    /// The cap refuses through the wire's ONE chain to HER table
-    /// (`MCPWireRefusalCopy.spoken` → the host's `refusalWords` — the Mac's
-    /// `OpsRefusalCopy` words it, `MCPWireRefusalSweepTests` walks it); this
-    /// harness's hook marks what reached it. Nothing written, no entry.
-    @Test func theCapRefusesThroughTheOneChainAndWritesNothing() async throws {
+    /// **VX-643 — THE DELIBERATE FLIP** of `theCapRefusesThroughTheOneChainAndWritesNothing`
+    /// (her word 2026-10-28: "the rules of a book / the AI go past it anyway"):
+    /// the sixteenth star LANDS over the wire exactly as any star — `changed:
+    /// true`, appended in star order, one receipt, the allowed Activity line, ONE
+    /// client-named undo — and the tool's description no longer speaks of a
+    /// limit. RED ON OLD: refused `starLimitReached` through the one chain, and
+    /// the description said the list "holds 15 at a time".
+    @Test func aStarPastFifteenLandsOverTheWireWithOneEntry() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
-            for index in 0..<Operations.starLimit {
+            for index in 0..<15 {
                 try h.operations.setStarred(.post(try h.operations.createPost(title: "n\(index)").id), starred: true)
             }
-            let full = try starred(h)
-            let one = try h.operations.createPost(title: "one too many")
+            let before = try starred(h)
+            let one = try h.operations.createPost(title: "one more")
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
-            let refused = try await call(connection, "set_starred",
-                                         ["note_id": .string(one.id), "starred": .bool(true)])
-            #expect(refused.isError == true)
-            #expect(text(refused) == "Refused: \(OperationError.starLimitReached(limit: Operations.starLimit))",
-                    "her table's words, through the one chain: \(text(refused))")
-            #expect(try starred(h) == full && h.undoStack.depth == 0 && h.receipts.value.isEmpty)
-            #expect(try activity(h).map { $0["outcome"] as String } == ["refused"])
+            let tool = try #require(try await connection.client.listTools().tools.first { $0.name == "set_starred" })
+            let description = tool.description ?? ""
+            #expect(!description.contains("15") && !description.contains("at a time")
+                    && !description.contains("refused"),
+                    "no limit is said: \(description)")
+            let landed = try await call(connection, "set_starred",
+                                        ["note_id": .string(one.id), "starred": .bool(true)])
+            #expect(landed.isError != true, "\(text(landed))")
+            #expect(try json(landed)["changed"] as? Bool == true)
+            #expect(try starred(h) == before + [.post(one.id)], "appended, the sixteenth")
+            #expect(h.receipts.value.map(\.act) == [.star])
+            #expect(try activity(h).map { $0["outcome"] as String } == ["allowed"])
+            #expect(h.undoStack.depth == 1 && h.undoStack.topLabel == "claude-code's star")
+            #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's star")
+            #expect(try starred(h) == before)
             await h.hangUp(connection)
         }
     }
@@ -245,10 +256,13 @@ struct MCPStarServerTests {
         }
     }
 
-    /// A GATHERING's own star is the author's: an id this client can read hears
-    /// the gathering sentence (P-VX196-2's posture, the author's acts naming
-    /// starring now — PROVISIONAL); a gathering it can't read, the one shape.
-    @Test func aGatheringsOwnStarIsTheAuthors() async throws {
+    /// VX-639 — A DELIBERATE FLIP (her ruling 2026-10-28, QUESTIONS #245 RB-7:
+    /// "we literally just built set_starred for notes, so why is it not allowed
+    /// to do it on a gathering?" → book parity at the edit rung, the rule staying
+    /// hers; was `aGatheringsOwnStarIsTheAuthors`, RB-7's PROVISIONAL gathering
+    /// sentence). An edit grant reaching the gathering PLACE (here its wing's)
+    /// stars it — her union star, both stores — with ONE client-named undo.
+    @Test func aGatheringsOwnStarLandsAtEditOnItsPlace() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -257,10 +271,13 @@ struct MCPStarServerTests {
                 name: "gathered", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(percy.id)))
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
-            let refused = try await call(connection, "set_starred",
-                                         ["book_id": .string(gathering.id), "starred": .bool(true)])
-            #expect(refused.isError == true && text(refused) == MCPWriteTools.gatheringWords("gathered"))
-            #expect(text(refused).contains("starring"))
+            let landed = try await call(connection, "set_starred",
+                                        ["book_id": .string(gathering.id), "starred": .bool(true)])
+            #expect(landed.isError != true, "\(text(landed))")
+            #expect(try json(landed)["changed"] as? Bool == true)
+            #expect(try starred(h) == [.reading(gathering.id)] && (try column(h, gathering.id)) == 1)
+            #expect(h.undoStack.depth == 1 && h.undoStack.topLabel == "claude-code's star")
+            #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's star")
             #expect(try starred(h).isEmpty && (try column(h, gathering.id)) == 0)
             await h.hangUp(connection)
         }

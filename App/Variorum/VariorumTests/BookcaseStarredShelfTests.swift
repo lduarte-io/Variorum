@@ -183,14 +183,17 @@ struct BookcaseStarredShelfDropTests {
         }
     }
 
-    /// The cap's refusal speaks exactly as at every star door.
-    @Test func atTheCapTheDropRefusesInTheStarDoorsWords() async throws {
+    /// **VX-643 — THE DELIBERATE FLIP** of `atTheCapTheDropRefusesInTheStarDoorsWords`:
+    /// with fifteen things already starred, a book dropped on "starred" is
+    /// STARRED, silently — no count refuses any more. RED ON OLD: the drop
+    /// refused with the cap's sentence and the book stayed unstarred.
+    @Test func pastFifteenStarsTheDropStillStarsTheBook() async throws {
         try await withStarredSession { session, _, defaults in
             let model = ShelfViewModel(session: session, defaults: defaults)
             let observe = Task { await model.start() }
             defer { observe.cancel() }
             let ops = session.operations
-            for i in 0..<Operations.starLimit {
+            for i in 0..<15 {
                 let note = try ops.createPost(title: "n\(i)")
                 try ops.setStarred(.post(note.id), starred: true)
             }
@@ -198,10 +201,9 @@ struct BookcaseStarredShelfDropTests {
             await settle(model) { model.books.contains { $0.reading.id == book.id } }
 
             await model.starBook(book.id)
-            #expect(session.status.current?.kind == .refusal)
-            #expect(session.status.current?.text == OpsRefusalCopy.message(
-                for: OperationError.starLimitReached(limit: Operations.starLimit)))
-            #expect(model.books.first { $0.reading.id == book.id }?.starred == false)
+            await settle(model) { model.books.first { $0.reading.id == book.id }?.starred == true }
+            #expect(session.status.current == nil, "silent on success, like every star door")
+            #expect(model.books.first { $0.reading.id == book.id }?.starred == true)
         }
     }
 }

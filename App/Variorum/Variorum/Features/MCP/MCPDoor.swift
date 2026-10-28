@@ -36,6 +36,11 @@ final class MCPDoor {
         /// test process) — the server starts when one is.
         case waitingForLibrary
         case failed(String)
+        /// **VX-612** — the host's listener died while it ran (`MCPServerHost`'s
+        /// `.stoppedByItself`): no new client can connect. Adopted from the
+        /// host's own signal; never restarted by a snapshot change — her switch
+        /// (off, then on) or the next unlock starts a fresh host.
+        case stoppedByItself(String)
     }
 
     /// One client row: the client and its live grants.
@@ -404,6 +409,14 @@ final class MCPDoor {
             serverState = .waitingForLibrary
             return
         }
+        // VX-612: a host whose listener died stays down until her switch (or
+        // the next unlock) replaces it — re-starting it here, on any snapshot
+        // change, would sweep the while-connected grants of the connections it
+        // still serves, and a broken listener could die again at once.
+        if let host, case .stoppedByItself(let reason) = host.state {
+            serverState = .stoppedByItself(reason)
+            return
+        }
         if let host, host.state == .running || starting {
             if host.state == .running { serverState = .running }
             return
@@ -416,6 +429,12 @@ final class MCPDoor {
         }
         fresh.onConnectionsChanged = { [weak self] in
             Task { @MainActor in self?.refreshConnected() }
+        }
+        // VX-612: the host's own state change (its listener died) — a signal;
+        // the door re-reads the host it still holds (a replaced host's late
+        // signal changes nothing).
+        fresh.onStateChanged = { [weak self, weak fresh] in
+            Task { @MainActor in self?.adoptStateChange(of: fresh) }
         }
         fresh.hooks = MCPHostHooks(
             // "Every refusal speaks to the client exactly as it speaks to
@@ -450,11 +469,25 @@ final class MCPDoor {
                 return
             }
             switch outcome {
-            case .success: self.serverState = .running
+            // VX-612: read the host — its listener may already have died in the
+            // hop back here (its own signal then lands first, and is kept).
+            case .success:
+                if case .stoppedByItself(let reason) = fresh.state {
+                    self.serverState = .stoppedByItself(reason)
+                } else {
+                    self.serverState = .running
+                }
             case .failure(let error): self.serverState = .failed(String(describing: error))
             }
             self.refreshConnected()
         }
+    }
+
+    /// **VX-612 — the host said its listener died.** Adopted only from the host
+    /// the door still holds; the pane stops saying "running".
+    private func adoptStateChange(of signalling: MCPServerHost?) {
+        guard let signalling, signalling === host, case .stoppedByItself(let reason) = signalling.state else { return }
+        serverState = .stoppedByItself(reason)
     }
 
     private func stopServer(ending reason: MCPConnectionEnd?) {

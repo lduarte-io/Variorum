@@ -15,19 +15,38 @@
 //  while switching is unavailable it consumes the chord and speaks the note.
 //  With two or more wings it passes every ⌘L to the menu untouched.
 //
+//  VX-632 (her #245 RB-6 ruling; A-648-7 — "the grey chord SPEAKING, the
+//  OneWingChord W-UX-6 precedent generalized"): the SAME monitor speaks for
+//  ⌘L's two ⌥ variants. ⌥⌘L (Move to Wing…) and ⇧⌥⌘L (Copy to Wing…) are
+//  View-menu items grey wherever their act cannot run — and a grey item
+//  swallows its chord in silence exactly as ⌘L's did — so while the chord's
+//  item is grey (`WingChords.enabled`) the monitor consumes it and speaks
+//  `WingChords.refusal` (one wing: ⌘L's own note; else the note act's).
+//  Enabled, every chord passes to the menu untouched.
+//
 
 import AppKit
 
 enum OneWingChord {
     /// One key event's road: consumed (and the note spoken on the session's
-    /// status line) when it is ⌘L and switching is unavailable; otherwise
-    /// passed on. Pure of AppKit's dispatch — the pin feeds it real events.
+    /// status line) when it is ⌘L and switching is unavailable — or (VX-632)
+    /// ⌥⌘L / ⇧⌥⌘L while that chord's menu item is grey; otherwise passed on.
+    /// Pure of AppKit's dispatch — the pin feeds it real events.
     @MainActor
     static func speak(_ event: NSEvent, session: AppSession?) -> Bool {
-        guard let session, WingSwitcherKeys.key(for: event) == .tapL,
-              !session.commandRouter.isEnabled(.switchWing)
+        guard let session else { return false }
+        if WingSwitcherKeys.key(for: event) == .tapL {
+            guard !session.commandRouter.isEnabled(.switchWing) else { return false }
+            session.status.refuse(CapabilityRegistry.capability(.switchWing).unavailableNote)
+            return true
+        }
+        guard event.type == .keyDown,
+              let chord = WingChords.chord(
+                charactersIgnoringModifiers: event.charactersIgnoringModifiers,
+                flags: event.modifierFlags),
+              !WingChords.enabled(chord, isEnabled: session.commandRouter.isEnabled)
         else { return false }
-        session.status.refuse(CapabilityRegistry.capability(.switchWing).unavailableNote)
+        session.status.refuse(WingChords.refusal(chord, wingCount: session.wing.wingCount))
         return true
     }
 

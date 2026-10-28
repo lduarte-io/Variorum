@@ -39,7 +39,10 @@ struct MCPAdviceServerTests {
         // VX-197 (VX-336 U8a — A JUSTIFIED EDIT, the ritual): R-VX184-3, her
         // ruling carried from VX-184's pre-run sitting — 2,000 → 3,000, the
         // bound and its pin moved together.
-        #expect(MCPSession.instructionsBound == 3_000)
+        // VX-640 (A JUSTIFIED EDIT, the ritual — her ruling 2026-10-28, QUESTIONS
+        // #245: "i think it's fine to raise the limit to 3100? I don't see why
+        // not"): 3,000 → 3,100, the bound and its pin moved together.
+        #expect(MCPSession.instructionsBound == 3_100)
         #expect(advice.count <= MCPSession.instructionsBound,
                 "the advice is \(advice.count) characters — a client may carry it in every turn")
         #expect(advice.count > 600, "…and long enough to say what the door is")
@@ -141,9 +144,13 @@ struct MCPAdviceServerTests {
     /// `MCPStopRoadsDoorTests`) — ends every live connection, and once the server
     /// is back a reconnect is served again. RED ON OLD: never said.
     @Test func theAdviceSaysALockOrQuitEndsEveryConnectionAndReconnectingWorks() async throws {
+        // VX-640 (A JUSTIFIED EDIT, the ritual — her RB-13 ruling, 2026-10-28):
+        // the sentence names the reconnect road, /mcp, as an example and with no
+        // provider's name (O-4's net bans names, not the command).
         #expect(advice.contains(
             "open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, "
-                + "so reconnect once it's back."))
+                + "so reconnect once it's back (e.g. with /mcp)."))
+        #expect(advice.firstMatch(of: #/(?i)\b(claude|anthropic|codex|openai)\b/#) == nil, "no provider named (O-4)")
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {

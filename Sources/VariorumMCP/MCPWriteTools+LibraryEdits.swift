@@ -16,12 +16,20 @@ import VariorumCore
 /// transaction and spends any once grant there. ONE client-named undo entry per
 /// act (P-VX196-1).
 ///
-/// **A GATHERING is read, never changed** (VX-273; the record's call 3,
-/// PROVISIONAL P-VX196-2): a book id naming a gathering THIS client can read
-/// (wing reach, or the open book — `decideGathering`, the one rule) hears what
-/// it is — never "doesn't exist", which `list_books` has already contradicted;
-/// one it cannot read is the one shape. Private, Seal and Own stay hers alone
-/// (R-VX184-2): nothing here touches them.
+/// **A GATHERING takes a book's own acts at EDIT; its rule and its notes stay as
+/// they are** (VX-639 — her ruling 2026-10-28, QUESTIONS #245 RB-7: "we literally
+/// just built set_starred for notes, so why is it not allowed to do it on a
+/// gathering?" → book parity at the edit rung, the RULE staying hers). Superseding
+/// VX-273's read-never-changed (P-VX196-2): at EDIT on the gathering PLACE — its
+/// own grant or its wing's, `decideGathering(rung: .edit)`, the one rule —
+/// `rename_book`, `archive_book` / `unarchive_book`, `delete_book` and
+/// `set_starred` act on a gathering exactly as on a book (her doors' bodies, one
+/// client-named undo each — `onBookOrGathering`). What a gathering cannot take —
+/// a finish, a note taken out or moved (it holds none), its RULE (a client
+/// editing the rule of a gathering it holds a grant on would widen its own reach,
+/// the reason an AI-written book rule only bells) — answers the gathering
+/// sentence where the client can read it, and the one shape where it can't.
+/// Private, Seal and Own stay hers alone (R-VX184-2): nothing here touches them.
 extension MCPWriteTools {
     enum LibraryEditJob: Sendable {
         case renameBook(bookID: String, name: String)
@@ -97,17 +105,19 @@ extension MCPWriteTools {
 
     // MARK: - The wire's own sentences (P-U5-WORDS, 13s-a sweepable)
 
-    /// A write aimed at a gathering the client can READ (P-VX196-2) — her
-    /// `RemoveFromBookCopy.removeTagHelp` truth: it holds no notes; a note
-    /// leaves it by no longer matching. VX-596: `set_starred` on a gathering's
-    /// id hears it too, so the author's acts it names include starring
-    /// (PROVISIONAL words, the VX-620 record's bundle).
+    /// An act a gathering can't take, aimed at one the client can READ
+    /// (P-VX196-2 — her `RemoveFromBookCopy.removeTagHelp` truth: it holds no
+    /// notes; a note leaves it by no longer matching). VX-639 (PROVISIONAL
+    /// words, the VX-648 record's BATCH 2 bundle): a gathering is renamed,
+    /// starred, archived and deleted at edit now, so the sentence says what
+    /// still isn't the client's — a finish, its notes' order and membership,
+    /// and its RULE, with the why.
     static func gatheringWords(_ name: String?) -> String {
         let named = name.map { "\u{201C}\($0)\u{201D}" } ?? "That"
         return "\(named) is a gathering \u{2014} it shows the notes its rule matches and holds none of its own, "
-            + "so it can be read but not changed through this door. A note leaves it by no longer matching "
-            + "(remove_tag takes a tag off a note); renaming, starring, archiving or deleting a gathering is the "
-            + "author's."
+            + "so it can't be finished, and its notes can't be ordered or taken out of it: a note leaves it by no "
+            + "longer matching (remove_tag takes a tag off a note). Its rule is the author's, since a client "
+            + "changing it would widen what its own grant reaches."
     }
 
     /// A note named on a book act that is not one of the book's notes (the
@@ -244,6 +254,74 @@ extension MCPWriteTools {
 
     // MARK: - The decisions
 
+    /// VX-639: what a book act lands on.
+    enum BookPlace: Sendable, Equatable {
+        case book
+        case gathering
+    }
+
+    /// **VX-639 — a book act a GATHERING takes too** (rename, archive, unarchive,
+    /// delete, star): a book id is decided as a book (`onBook`, unchanged); a
+    /// GATHERING's is decided as a PLACE at `rung` — its own grant or its
+    /// wing's (`decideGathering`, the one rule; never a note or book grant,
+    /// R-VX185-1) — the snapshot speaking the refusal and raising the ask ON
+    /// the gathering (MB-17), the act's guard (`guardGathering`) re-deciding
+    /// inside its transaction and spending any once grant there. A refused row
+    /// logs the argument's noun (`book`), so `list_my_activity` never tells a
+    /// gathering from a book it cannot reach (W-3's posture); an allowed one
+    /// logs `gathering` (her Activity says so).
+    func onBookOrGathering(
+        _ bookID: String, rung: MCPGrantRule.Rung, job: Job, clientName: String,
+        _ act: (_ name: String?, _ place: BookPlace) throws -> Act
+    ) throws -> Result<Landed, Refused> {
+        let (standing, gathering, name) = try database.read { db in
+            let gathering = try Queries.mcpBookFacts(db, readingID: bookID) == nil
+                ? try Queries.mcpGatheringFacts(db, readingID: bookID) : nil
+            return (try MCPGrantAuthority.standing(db, clientName: clientName), gathering,
+                    gathering == nil ? nil : try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar))
+        }
+        guard let gathering else {
+            return try onBook(bookID, rung: rung, job: job, clientName: clientName, spendsAfter: false) { name in
+                try act(name, .book)
+            }
+        }
+        let decision = MCPGrantAuthority.decide(standing, gathering: gathering, rung: rung, consumes: true)
+        guard case .allow = decision else {
+            try log(clientName, job.tool, "book", bookID, name, allowed: false)
+            let ask = MCPAsk(clientName: clientName, scopeKind: .gathering, scopeID: bookID, title: name ?? "",
+                             rung: rung, fence: gathering.fence)
+            return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
+                .refusal(decision, .book, standing: standing, ask: ask)))
+        }
+        return try land(job, clientName: clientName, kind: "gathering", id: bookID, title: name, spending: []) {
+            try act(name, .gathering)
+        }
+    }
+
+    /// VX-639: a GATHERING act's guard — the gathering re-resolved on its own
+    /// row and decided as a place at `rung` INSIDE the act's transaction; any
+    /// once grant spent here, atomic with the act. A reading that is no longer
+    /// a live gathering (deleted, or bound into a book since) is the one answer.
+    func guardGathering(_ clientName: String, _ rung: MCPGrantRule.Rung, _ gatheringID: String) -> Operations.WriteGuard {
+        { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            let decision = MCPGrantAuthority.decide(
+                standing, gathering: try Queries.mcpGatheringFacts(db, readingID: gatheringID), rung: rung,
+                consumes: true)
+            guard case .allow(let grantID, let consumesOnce) = decision else { throw Self.refused(decision, .book) }
+            if consumesOnce, let grantID { try grants.consumeMCPOnceGrant(db, grantID) }
+        }
+    }
+
+    /// VX-639: the guard for a book act on `place` — the book's (`guardBooks`)
+    /// or the gathering's.
+    func guardPlace(_ clientName: String, _ place: BookPlace, _ readingID: String) -> Operations.WriteGuard {
+        switch place {
+        case .book: guardBooks(clientName, .edit) { _ in [readingID] }
+        case .gathering: guardGathering(clientName, .edit, readingID)
+        }
+    }
+
     /// A BOOK's act, decided on the book at `rung` (the snapshot — the
     /// refusal and the ask; the act's guard re-decides and spends, so
     /// `spendsAfter: false` on every act here). A gathering the client can
@@ -308,15 +386,17 @@ extension MCPWriteTools {
         let label = { (act: Operations.MCPWriteAct) in act.undoLabel(client: clientName) }
         switch edit {
         case .renameBook(let bookID, let name):
-            return try onBook(bookID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { _ in
+            // VX-639: a gathering renames under the same name guard (books AND
+            // gatherings the client can read collide), its own words.
+            return try onBookOrGathering(bookID, rung: .edit, job: job, clientName: clientName) { _, place in
+                let act: Operations.MCPWriteAct = place == .gathering ? .gatheringName : .bookName
                 let result = try ops.renameBookForClient(
-                    bookID, name: name, undoLabel: label(.bookName),
-                    guardedBy: guardBooks(clientName, .edit) { _ in [bookID] },
+                    bookID, name: name, undoLabel: label(act), guardedBy: guardPlace(clientName, place, bookID),
                     namesCountedBy: readableBooks(clientName))
                 // The receipt and the activity line name the book as it NOW reads.
                 return (["book_id": bookID, "name": result.name, "changed": result.changed],
                         result.changed
-                        ? MCPWriteReceipt(clientName: clientName, act: .bookName, targetID: bookID,
+                        ? MCPWriteReceipt(clientName: clientName, act: act, targetID: bookID,
                                           targetTitle: result.name, detail: result.name,
                                           show: .book(bookID: bookID, sectionID: nil))
                         : nil)
@@ -338,30 +418,38 @@ extension MCPWriteTools {
             }
 
         case .archiveBook(let bookID):
-            return try onBook(bookID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { name in
+            // VX-639: her archiveReading archives a gathering too (it then
+            // assembles empty everywhere until unarchived — §9's book archive).
+            return try onBookOrGathering(bookID, rung: .edit, job: job, clientName: clientName) { name, place in
+                let act: Operations.MCPWriteAct = place == .gathering ? .gatheringArchive : .bookArchive
                 _ = try ops.archiveBookForClient(
-                    bookID, undoLabel: label(.bookArchive), guardedBy: guardBooks(clientName, .edit) { _ in [bookID] })
+                    bookID, undoLabel: label(act), guardedBy: guardPlace(clientName, place, bookID))
                 return (["book_id": bookID, "archived": true],
-                        MCPWriteReceipt(clientName: clientName, act: .bookArchive, targetID: bookID, targetTitle: name,
+                        MCPWriteReceipt(clientName: clientName, act: act, targetID: bookID, targetTitle: name,
                                         show: .book(bookID: bookID, sectionID: nil)))
             }
 
         case .unarchiveBook(let bookID):
-            return try onBook(bookID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { name in
+            return try onBookOrGathering(bookID, rung: .edit, job: job, clientName: clientName) { name, place in
+                let act: Operations.MCPWriteAct = place == .gathering ? .gatheringUnarchive : .bookUnarchive
                 _ = try ops.unarchiveBookForClient(
-                    bookID, undoLabel: label(.bookUnarchive), guardedBy: guardBooks(clientName, .edit) { _ in [bookID] })
+                    bookID, undoLabel: label(act), guardedBy: guardPlace(clientName, place, bookID))
                 return (["book_id": bookID, "archived": false],
-                        MCPWriteReceipt(clientName: clientName, act: .bookUnarchive, targetID: bookID,
+                        MCPWriteReceipt(clientName: clientName, act: act, targetID: bookID,
                                         targetTitle: name, show: .book(bookID: bookID, sectionID: nil)))
             }
 
         case .deleteBook(let bookID):
-            return try onBook(bookID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { name in
+            // VX-639: her deleteReading takes a gathering to the Trash as it
+            // does a book (a gathering holds no notes — none leave it; never
+            // owned, so `notes_released` is false).
+            return try onBookOrGathering(bookID, rung: .edit, job: job, clientName: clientName) { name, place in
+                let act: Operations.MCPWriteAct = place == .gathering ? .gatheringDelete : .bookDelete
                 let result = try ops.deleteBookForClient(
-                    bookID, undoLabel: label(.bookDelete), guardedBy: guardBooks(clientName, .edit) { _ in [bookID] })
+                    bookID, undoLabel: label(act), guardedBy: guardPlace(clientName, place, bookID))
                 return (["book_id": bookID, "deleted": true, "notes_released": result.releasedNotes,
                          "trash_days": TrashWindow.days],
-                        MCPWriteReceipt(clientName: clientName, act: .bookDelete, targetID: bookID, targetTitle: name,
+                        MCPWriteReceipt(clientName: clientName, act: act, targetID: bookID, targetTitle: name,
                                         detail: result.releasedNotes ? Self.releasedNotesDetail : nil))
             }
 

@@ -302,8 +302,8 @@ struct BookcaseStrip: View {
     /// — no count, no sentence, no badge inline (her second addendum; the
     /// empty one-liner lives in the solo'd board). It solos like a shelf;
     /// a BOOK dropped on it is STARRED (`ShelfViewModel.starBook` — the
-    /// union star's one road, the cap's refusal spoken as at every star
-    /// door); a dragged SHELF name does nothing here (the starred shelf is
+    /// union star's one road — no count refuses since VX-643); a dragged
+    /// SHELF name does nothing here (the starred shelf is
     /// virtual — it has no strip position to take). No right-click menu: it
     /// cannot be renamed, re-glyphed, moved or deleted (structurally).
     /// PROVISIONALs P-17y-B3-s1/s2 (place · shown always · the word).

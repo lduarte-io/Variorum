@@ -432,8 +432,17 @@ struct MCPCarriageServerTests {
             let onGathering = try await call(connection, "set_book_rule", [
                 "book_id": .string(gathering.id), "rule": .object(["star": .bool(true)]),
             ])
-            #expect(onGathering.isError == true && text(onGathering).hasPrefix("That book isn't shared with this client"),
-                    "a gathering is never a grant target (P-13nb-U1-4): the one answer")
+            // VX-639 — A DELIBERATE FLIP (A-648-5, PROVISIONAL — the VX-648 record):
+            // was the one not-shared shape under P-13nb-U1-4 ("a gathering is never
+            // a grant target"), which VX-549 superseded; the wing grant READS this
+            // gathering (`list_books` lists it), so — P-VX196-2's posture — it hears
+            // what it is: the gathering sentence, which now says its RULE is the
+            // author's and why (her RB-7 ruling: the rule stays hers). Still a
+            // refusal; nothing written (the rule check after this line is unchanged).
+            #expect(onGathering.isError == true && text(onGathering) == MCPWriteTools.gatheringWords("gathered"),
+                    "\(text(onGathering))")
+            #expect(try await h.database.read { try Reading.fetchOne($0, key: gathering.id)?.querySpec }
+                    == gathering.querySpec)
             let legacy = try await call(connection, "set_book_rule", [
                 "book_id": .string(book.id), "rule": .object(["profile": .string("journal")]),
             ])
