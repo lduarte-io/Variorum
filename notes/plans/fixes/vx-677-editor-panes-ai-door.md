@@ -317,6 +317,22 @@ Member scopes:
 
 Deliverables: per-member red-on-old pins revert-verified (pin-first where the member is Suspected; behavioural-revert products `vx677-b2/rev-…` where a pin follows its fix, batch 1's method); compiled Mac targets into `DerivedData/vx677-b2/`; a READY-FOR-THE-STAGE section (zsh-array @Suite TYPE lists, expected counts, exact expected failures per revert product); walk rows for the window (the carry legs, both voices); the ledger rows flipped; everything pushed.
 
+### BATCH 2 RECORD (implementer: Opus, fresh session, 2026-10-28)
+
+**NOT DONE (first line, kept current):** everything below is headless; NO `xcodebuild test`, NO app launch, NO walk, NO stage claim (the orchestrator's window). Nothing under `Sources/` is touched (app target only).
+
+*Read in this session's own context before any code (never delegated): CLAUDE.md + its auto-loaded canon; this file in full (batch 1's record, the BATCH 2 BRIEF, the environment traps, the coordinator protocol, the rulings log); `notes/SessionResiliencyProtocol.md`; `notes/SurfaceContracts.md` §The app (the keyboard family) + §The Bookcase and books; `notes/TEXTKIT2_NOTES.md` IN FULL; the VX-648 record's BATCH 4 RECORD in full (B4-6, the VX-662 FINDING, P-B4-1, B4-P4, A-648-8, the pin landscape); the VX-562 record (F-1's trace, R-562-A, the morning bundle, the revert recipes); QUESTIONS #248 (P-B4-1 → VX-680 ruled; B4-P4 → VX-681); the five tickets on Linear in full (no comments on any); the code: `PagedReadView`/`PagedReadModel`, `BookIndexView.landOrSeed`/`select`, `BookAnchor`, `BookViewModel` (the carry slots, `carryPlace`, the viewed pairs), `BookView` (`switchMode`, `switchReadForm`, `landOutline`, `landOutlineReveal`, the Outline's scroll facts), `ReadingFlowView` (its landing + follower), `Surface/LandingAuthority.swift` whole, `Surface/LandingAim.swift`, `JumpPrimitive`, `EditorView`'s inline surface + `EditorViewModel.applyFocusSeeds`, the existing pins (`PagedReadTests`, `BookNoteBoxDoorsTests`' carry suites, `BookOutlineLandingTests`' F-1/Pages/flow pins, `BookNoteStepTests`, `LandingAimTests`).*
+
+**LIVE STATUS** (flipped in the same commit as each piece; every unverified claim PENDING)
+- **No behavioural revert is in flight.**
+- B2-0 — preflight + this record: DONE (this commit).
+- B2-1 — VX-624 (the landing settles at the page's floor): NOT-STARTED.
+- B2-2 — VX-663 (Pages arrivals land at the carried place): NOT-STARTED.
+- B2-3 — VX-662 (the Index's carry anchor): NOT-STARTED — pin first (Suspected).
+- B2-4 — VX-681 (leaving Read ▸ Scroll carries from the story on screen): NOT-STARTED.
+- B2-5 — VX-680 (Index → Outline lands block-precise): NOT-STARTED.
+- B2-6 — revert products, suites, READY-FOR-THE-STAGE, walk rows, self-assessment: NOT-STARTED.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
