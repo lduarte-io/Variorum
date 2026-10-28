@@ -2368,3 +2368,20 @@ mechanism, the per-member revert discipline, the P1/P3 math, and the notes file.
 - **NIT (HostLaunchSettle's gate signal)** → a comment on VX-604 (done).
 - **NIT (the unreachable un-landing arm)** → documented in place this commit (no behavior change).
 - **NIT (the Lenses parenthesis + the 1240-pt truncation)** → already riding P-C-1 into her bundle.
+
+## POST-MERGE ADDENDUM — the verify window's teardown crash, triaged (2026-10-28 ~03:20)
+
+The coordinator found a Problem Reporter dialog that opened at 03:12:48 — TEN SECONDS BEFORE this
+orchestrator's verify RELEASE line said "no dialog" (the guards checked processes, not dialogs; the
+line is CORRECTED here). The report (`Variorum-2026-10-28-031246.ips`, the Debug TEST HOST, 0.10.4
+build 9990): the crashed thread is `GRDB.DatabasePool.reader.1` inside `LocalPurge.sweep()` →
+`PurgeJanitor.collectRoots` → the page-decrypt path — a TEARDOWN RACE between the host process's
+exit and the purge janitor's in-flight background read (pointer-auth failure on the freed decrypt
+context). Not this run's diff (no core/DB change — the ladder's clean bill); the first such crash
+in ~30 host exits tonight; the test host is the exposed face because a runner exit skips the app's
+orderly quit road. **Minted VX-657** (High; the real-quit reachability is its first question; her
+pre-launch call in the handoff). The 0.10.4 release proceeds with this disposition per the
+coordinator's pre-release triage rule. Lesson adopted: a RELEASE line's "no dialog" is read from
+the screen, not inferred from clean pgreps.
+
+| 15 (final) | Closeout | Ledgers landed on main at the merge (this commit); the release window remains, then the banner flips CLOSED. |

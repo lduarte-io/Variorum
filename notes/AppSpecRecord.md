@@ -1076,3 +1076,48 @@ diff-verified at the ladder).
 
 **2026-10-28 — her third pass on the VX-620 thread (rulings and tickets; nothing built).** The Private row (VX-641): "that note should always be there once an mcp has been connected, right? … (unless they connected on another device, that's a fine case to handle)" — the row's fact is VX-590's "the library has ever had a client", and a note or book already marked Private shows it regardless, because the mark syncs while clients are local-only per library. The star cap: "i feel like we should mint a ticket for getting rid of the 15 star cap - seems weird and the rules of a book / the AI go past it anyway" → VX-643 (the cap was her own — 5 at 13f, 15 on 2026-09-18 once the section scrolled; its premise is gone). The MCP instructions' bound: "i think it's fine to raise the limit to 3100? I don't see why not" — R-VX184-3 rises 3,000 → 3,100 when VX-640 lands (the bound was always her own choice, kept because a client may carry the instructions every turn). VX-367 and VX-606: "should be done" / "we should fix this". From her run list, minted: VX-644 (VX-552's remainder — the "in ‹wing›" label is also the wing switcher), VX-645 / VX-646 (VX-562's P-562-2 / P-562-1), VX-647 (a note with many deleted blocks lags 3–5 s on new blocks and deletes — a suspected P1 break, trace first). Her ⌘↑/⌘↓ proposal recorded on VX-563 with VX-560's precedent (step notes while reading, document start/end while editing).
 
+
+## 2026-10-28 — VX-601 (Run: takes & editor quick fixes; PR #200, merge b3b1041aa; kickoff to merge overnight, the 0.10.4 release riding)
+
+**Her kickoff words (verbatim):** "VX-601. carry along this rider: VX-577 expand-all takes in slot split. Contact
+oct27coordinator for your stage / walk needs." Mid-run, live (verbatim): "ok so I will be starting some new waves that
+are still going to use you as the coordinator, but I want VX-601 to release anyway when it's done, including to the
+stargazing.tech website. I told the coordinator too." — then "and yes this word covers the notes too", and "and no,
+you are not the new coordinator. i meant that for oct27coordinator". The cast: Fable orchestrated and cold-reviewed
+(one round, zero findings against the diff), Opus implemented (four batches, fresh sessions), Opus drove every walk.
+
+**§12 / The note (Takes) — the sitting's rulings, her words.** R-601-1 (VX-421): per-pane undo histories — her pick of
+the recommended arm; ⌘Z undoes only the pane the cursor is in. R-601-2 (VX-428): build in this run; the VX-170 road
+ratified — the TakesBoardLayout mount-only letter superseded in the per-note-session-memory spirit, R-VX170-5 cited;
+her verbatim requirement ("any relevant performance or rendering calculations need to be made and we need to make sure
+this doesn't degrade the app in other ways (like getting to the right location)") answered by the measured seeds
+(1.2–4.0 µs), the 25-below-fold ≡ 0-open realization proof, and the mounted landing pins. R-601-3 (VX-427), settled
+across three asks — her words: "I think the whoel idea was to beable to count the take that you're typing in - is that
+not what is being done? why is the take face in the bar's shared click cycle an option ?" and "what if the count fix
+exactly ? where do you see the take unit? this is so you can easily see how many words each take is at" — the bar
+follows the caret; the cycle face and per-card counts both declined. R-601-4 (VX-594) — her words: "I think the menu
+door + caret following makes the most sense - by that, do you mean if your caret is in a particular take the keyboard
+shortcuts will work for that too?" — confirmed as both doors; the ⌘T half proved ALREADY TRUE (hollow-good, guards
+green on every tree). R-601-5: the standing cast confirmed. R-601-6: riders VX-592 · VX-248 · VX-321 · VX-337 seated —
+her words on the last: "id try on 337 but bound your efforts on that one."
+
+**The R25 supersession (§12, Takes):** "Expand-all only where it MEANS something (R25's agreed half): the article that
+isn't slot-split" is superseded by her 10-21 note ("where is expand all takes when you're in slot split?? you still
+need it lowkey") — `offersExpandAll` is now an exhaustive true switch over the four styles; the SurfaceContracts Takes
+line carries the contract.
+
+**VX-248 — the ruled P-3 bend (QUESTIONS #217's "I think that we should probably fix it — ticket it") built:** a live
+pane whose bound take CHANGES (a re-key is a re-bind, not an edit) adopts the new take's text, the caret landing in
+`noteLiveness` after the write; VX-222's and VX-227's contamination pins stay green and are redundant by construction;
+the Canvas switcher was the class's one live road (pinned red-on-old).
+
+**The run's new measured canon:** TEXTKIT2_NOTES §3 gained the 27.0.1 settled-caret classic-road finding (a settled
+empty selection covers its next character for the drag-or-select decision; `CaretPress` is the one shared rule, wired
+in PaneTextView and EditorTextView — the ticket's "Write is fine" falsified by revert).
+
+**The ladder and the evidence:** one round, zero findings against the diff; the MAJOR it surfaced is the pre-existing
+Write sibling of the undo class → VX-656 (High, hers to label pre-launch). Red-on-old BY REVERT PER MEMBER across all
+four batches — including two honestly-recorded forensics (a bare-`return` revert slip that left a write-back alive;
+a suite named by its file); the whole Mac target 5,486/963 with zero failures as the pre-ladder baseline; four
+dev-store walks. Born: VX-634 · VX-636 · VX-637 · VX-638 · VX-650 · VX-651 · VX-652 · VX-656 (all triaged). The
+bundle: QUESTIONS #247. Merge order: last of wave 2, after VX-620 · VX-562 · VX-623.

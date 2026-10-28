@@ -13,30 +13,27 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-601 — Run: takes & editor quick fixes** (TWELVE members by the sub-issue listing after the kickoff sitting: VX-421 · VX-427 · VX-428 · VX-429 · VX-574 · VX-586 · VX-594 + rider VX-577 at her kickoff word + sitting-seated VX-592 · VX-248 · VX-321 · VX-337 (bounded); the record `notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md`) | VX-601 · `vx-601-run-takes-editor-quick-fixes` | `~/dev/variorum-vx-601` · the Pro | In flight 2026-10-27 (architect-phase; surfaces: Takes & Lenses — the board, bars, panes and their session memories — plus the editor seam (`PaneSurface`) and the bottom-bar word count; no `Sync/`, no custody, no schema; Fable cold review per the editor seam; merge-time file intersection with the other wave-2 efforts per the coordinator's rule). |
 | **VX-648 — Run: launch-week umbrella** (SEVENTEEN members by the sub-issue listing at kickoff: the editor lag pair VX-647 · VX-649 (trace-then-fix-if-feasible, her rule) · the MCP door VX-639 · VX-640 · VX-641 · VX-606 · VX-626 · VX-612 · VX-367 · wings/stars/keys VX-644 · VX-632 · VX-643 · VX-563 · book navigator & small fixes VX-645 · VX-646 · VX-630 · VX-631; the record `notes/plans/fixes/vx-648-launch-week.md`) | VX-648 · `vx-648-launch-week` | `~/dev/variorum-vx-648` · the Pro | In flight 2026-10-28 (architect-phase; surfaces: the editor seam (VX-647/649/563 — Fable cold review), Settings ▸ MCP + the MCP server host + guide content, app shell (wing switcher, wing chords), Library stars (VX-643, mobile-visible), the book navigator; no `Sync/`, no custody, no schema; overlaps: VX-440 (book navigator, Book Settings) and VX-601 (editor seam) — closeouts serialize, the second merger merges main in and re-runs the overlap). |
 | **VX-440 — Sheets & history clarity: books, Block History, versions** (SEVEN members by the sub-issue listing at kickoff: versions & Compare as one design VX-130 · VX-437 · VX-432 · Block History VX-431 · gathering faces VX-611 · VX-616 · VX-189; VX-216 is NOT a member — design context only, it stays under VX-551; the record `notes/plans/fixes/vx-440-sheets-history-clarity.md`) | VX-440 · `vx-440-sheets-history-clarity` | `~/dev/variorum-vx-440` · the Pro | In flight 2026-10-28 (architect-phase; surfaces: Note ▸ Versions + Compare (Takes & Lenses), the Block History pane, book/gathering row menus + Book Settings + the Trash row, the MCP grant doors on a gathering (MCPSpec read in full; no wire-tool change planned); no `Sync/`, no custody, no schema; overlaps: VX-648 (Book Settings, book/gathering row menus) — closeouts serialize, the second merger merges main in and re-runs the overlap). |
 
 ### Latest closeout
 
-**→ VX-623 CLOSED 2026-10-27 — RUN: THE FIRST-RUN WALK RESETS ITS OWN TEST ACCOUNT (the record
-`notes/plans/fixes/vx-623-walk-self-reset.md`; the ladders `vx-623-ladder-round1/2.md`; her handoff
-`notes/handoffs/vx-623-handoff.md`; PR #199, merge d02946cc1; kickoff to merge in one day).** Release step 0 is
-self-serve: her standing ruling (2026-10-27, "the walk may reset its own allowlisted test accounts") landed in canon
-(CLAUDE.md's Environment line, one pointer), built as the guarded `Tools/prod-reset-test-account.sh` (R1–R4 — the
-walk's G1/G2 verbatim under a byte-identity pin, byte-equal email resolution, one atomic CTE mirroring
-`account_purge()` minus the auth user and entitlement, before/after reads, 90 self-test cases incl. drift pins
-against the purge's own body) and the walk's new shape: the pre-step reset + cleanup leg (a STOP never resets —
-failure evidence survives for diagnosis), the JOIN ARM (the gate's first-ever live "Sync this library…"),
-`--arm setup|join|both`, the window-frame guard, capture-every-window behind the now FAIL-CLOSED words guard, and
-guard.sh's wl2 compile-or-refuse (VX-536). Members by the sub-issue listing: VX-622 · VX-537 · rider VX-536, all
-Done. Evidence: the full std gate PASSED LIVE on production (pre-step reset → set-up → join → cleanup; std ending
-at rest; the dev slot restored exactly, 197/197 cmp, Resume never pressed; coordinator-verified); a two-round
-cross-model ladder (r1 1 MAJOR · 2 MINOR · 2 NIT, all fixed red-on-old; r2 NO FINDINGS, twice-corroborated);
-self-tests 72/72 · 90/90, pins 0/11 · 0/6; ZERO Swift sources changed (a Tools-only diff). Born VX-627, triaged;
-canon 126,190/150,000. Two owned slips in the record (the kickoff trailer; the round-2 twin spawn, lesson recorded).
-MOBILE PARITY: nothing mobile-visible. **Next: wave 2 continues (vx-601 in flight); the next release's step 0
-needs no hands.**
+**→ VX-601 CLOSED 2026-10-28 — RUN: TAKES & EDITOR QUICK FIXES (the record
+`notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md`; the ladder `vx-601-ladder-round1.md`; her handoff
+`notes/handoffs/vx-601-handoff.md`; PR #200, merge b3b1041aa; kickoff to merge overnight, the 0.10.4 release riding
+at her standing word).** Twelve members shipped (seven seated + rider VX-577 at her kickoff word + sitting-seated
+VX-592 · VX-248 · VX-321 · VX-337-bounded): the ⌘Z take-delete crash dead by per-pane undo histories (the launch
+gate); her ruled P-3 bend built (a re-bound live pane adopts its take); the held-press-at-the-caret dead drag fixed
+in Takes AND Write (one classic-mouse-road mechanism, the ticket's "Write is fine" falsified by revert); open fans a
+per-note session memory (P3-clean measured: seeds 1–4 µs, 25 fans below the fold ≡ 0 open); expand-all under every
+fan style; the "New branched take" door (the ⌘T half proved already-working); the bar counting the typed-in take;
+the two genuinely-lighter faces; "block i/N" through the one wording brain; per-host receipts; VX-337's fold flake
+test-fixed against the pinned R-Q21 design (the soak half stays open on the ticket). Red-on-old BY REVERT PER MEMBER
+across four batches (16 revert trees, two revert-slip forensics honestly recorded); the WHOLE Mac target
+5,486/963 zero failures; four dev-store walks (W, A, B, C — both voices where owed); ONE ladder round, ZERO findings
+against the diff (the MAJOR it surfaced is pre-existing → VX-656). Born VX-634 · 636 · 637 · 638 · 650 · 651 · 652 ·
+656, all triaged; the bundle is QUESTIONS #247. MOBILE PARITY: nothing mobile-visible. **Next: the 0.10.4 release
+(this close's rider, her word of 2026-10-28), then the new waves (VX-648, VX-440) at her kickoffs.**
 
 *(VX-510's closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at the VX-529 closeout, 2026-10-25.)*
 
