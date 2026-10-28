@@ -823,6 +823,23 @@ extension Queries {
     }
 }
 
+extension Queries {
+    /// **Every table `Queries.trash` reads, in any arm, under any fence**
+    /// (VX-670) — the Trash's held observations' NAMED region. `container`
+    /// (notes, snippet groups, a row's home, a version's peer), `reading`
+    /// (books), `block` + `variant` (blocks, takes, texts, the lineage's
+    /// liveness), `container_block` (placements, the cascade test, a
+    /// version's blocks), `edge` (lineage, a version's link), `purge_intent`
+    /// (the fence), `wing` (the per-wing fence). Pinned EXACT against the
+    /// regions GRDB derives from every statement the fetch runs
+    /// (`TrashObservationP2Tests`): a table read here and missing from this
+    /// list would leave the open Trash stale on that table's writes.
+    public static let trashTables: [String] = [
+        "container", "reading", "block", "variant", "container_block", "edge",
+        "purge_intent", "wing",
+    ]
+}
+
 extension AppDatabase {
     /// The Trash, live (13j J1). Windowed like every other recovery listing.
     public func observeTrash(
