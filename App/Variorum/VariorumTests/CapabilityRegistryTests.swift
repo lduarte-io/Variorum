@@ -246,6 +246,12 @@ struct CapabilityRegistryTests {
             // no post mode. No note mode can be "behind" another here: Write
             // and Takes are equally grey, and the book's own foot renders it.
             .newNoteInBook,
+            // VX-563 (A JUSTIFIED EDIT): ⌘↑ / ⌘↓'s two acts join
+            // `.newNoteInBook` and `.openBookAtNote` for their reason — a
+            // book-surface NAVIGATION act (it lands a note in the book's
+            // reading modes; nothing is edited), whose door is the book view's
+            // own key monitor: no note mode is "behind" another here.
+            .previousNoteInBook, .nextNoteInBook,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {

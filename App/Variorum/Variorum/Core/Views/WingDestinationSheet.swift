@@ -126,7 +126,8 @@ nonisolated enum WingChords {
     }
 
     /// The acts a chord's one menu item renders, as the registry declares them
-    /// (each wears the chord's label).
+    /// (each carries the `.menuBar` door); the FIRST owns the chord in the key
+    /// table — one owner per chord — and the item reaches the rest by focus.
     static func acts(_ chord: Chord) -> [CapabilityID] {
         switch chord {
         case .move: [.moveNoteToWing, .moveBookToWing]

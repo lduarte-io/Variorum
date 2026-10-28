@@ -2246,14 +2246,18 @@ nonisolated enum CapabilityRegistry {
         // target-less door's gate is a pane showing a book and another wing;
         // the per-target half (never the daily Journal) is the row door's own
         // `WingBookMoveDoor.drawn`, which ⌘K's listing reads too.
-        // VX-632: + `.menuBar` ⌥⌘L — the SAME View-menu item as the note's
-        // Move (`WingChords`: the book's act on a book pane); on the daily
-        // Journal's pane the selector's open-time re-check speaks the op's own
-        // refusal (a menu item cannot read the book row synchronously — RB-6).
+        // VX-632: + `.menuBar` — the SAME View-menu item as the note's Move
+        // ("Move to Wing…", ⌥⌘L), which runs THIS act on a book pane
+        // (`WingChords`). No `shortcutLabel` of its own: the key table keeps
+        // one owner per chord (its collision pins), so ⌥⌘L is declared and
+        // wired once, on the note's act — the item's key — and reaches the
+        // book's act through that one item, by focus. On the daily Journal's
+        // pane the selector's open-time re-check speaks the op's own refusal
+        // (a menu item cannot read the book row synchronously — RB-6).
         Capability(
             id: .moveBookToWing, verb: WingCopy.moveToWingVerb, scope: .book,
             doors: [.contextMenu, .palette, .menuBar],
-            shortcutLabel: "\u{2325}\u{2318}L", takesAccess: .native,
+            shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.bookUnavailableNote,
             availability: { ctx in
                 ctx.focusedPaneShowsBook && ctx.wingCount > 1 ? .act : .unavailable

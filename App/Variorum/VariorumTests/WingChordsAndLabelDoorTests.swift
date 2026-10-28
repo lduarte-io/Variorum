@@ -79,16 +79,22 @@ struct WingChordsAndLabelDoorTests {
 
     // MARK: - VX-632 · the registry (P-1)
 
-    /// The three acts wear their chords on a `.menuBar` door, the menu renders
-    /// them, the keys are wired, no other act maps either chord (RB-6's sweep
-    /// as a pin), and the helper (⌘/) shows both.
+    /// The three acts carry the `.menuBar` door, the menu renders them, the
+    /// chords are declared and wired ONCE each — ⌥⌘L on the note's Move (the
+    /// one item's key; the book's Move reaches it through that item by focus
+    /// and wears no label, so the key table keeps one owner per chord), ⇧⌥⌘L
+    /// on the Copy — no other act maps either (RB-6's sweep as a pin), and the
+    /// helper (⌘/) shows both.
     @Test func theChordsAreDeclaredWiredFreeAndShown() {
-        for id in [CapabilityID.moveNoteToWing, .moveBookToWing] {
-            let cap = CapabilityRegistry.capability(id)
-            #expect(cap.doors.contains(.menuBar) && cap.shortcutLabel == Self.moveLabel, "\(id) wears ⌥⌘L")
-            let key = EditorCommands.keyEquivalent(for: id)
-            #expect(key?.0 == "l" && key?.1 == [.command, .option])
-        }
+        let move = CapabilityRegistry.capability(.moveNoteToWing)
+        #expect(move.doors.contains(.menuBar) && move.shortcutLabel == Self.moveLabel, "the note's Move owns ⌥⌘L")
+        let moveKey = EditorCommands.keyEquivalent(for: .moveNoteToWing)
+        #expect(moveKey?.0 == "l" && moveKey?.1 == [.command, .option])
+        let book = CapabilityRegistry.capability(.moveBookToWing)
+        #expect(book.doors.contains(.menuBar), "the book's Move is the same item's act")
+        #expect(book.shortcutLabel == nil && EditorCommands.keyEquivalent(for: .moveBookToWing) == nil,
+                "one owner per chord — the item's key is the note act's")
+        #expect(WingChords.acts(.move) == [.moveNoteToWing, .moveBookToWing], "the one item serves both")
         let copy = CapabilityRegistry.capability(.copyNoteToWing)
         #expect(copy.doors.contains(.menuBar) && copy.shortcutLabel == Self.copyLabel)
         let copyKey = EditorCommands.keyEquivalent(for: .copyNoteToWing)

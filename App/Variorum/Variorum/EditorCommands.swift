@@ -248,8 +248,11 @@ struct EditorCommands: Commands {
         //     while up; `CommentsPanel` ⌘⏎/⎋; the rest observe or are mouse;
         //   · the system hot keys ([.quickNote], ⌃⌥⌘N) and the platform: not
         //     reserved (Finder's and Safari's ⌥⌘L are app-scoped).
-        // The Move chord is the ONE menu item of both Move acts (`WingChords`).
-        case .moveNoteToWing, .moveBookToWing: ("l", [.command, .option])
+        // The Move chord is the ONE menu item of both Move acts (`WingChords`);
+        // the table keeps ONE owner per chord, so it is wired here once, on
+        // the note's act (the book's act declares the item's menu door and
+        // no key of its own).
+        case .moveNoteToWing: ("l", [.command, .option])
         case .copyNoteToWing: ("l", [.command, .option, .shift])
         // 13d batch 4 (A14, her row verbatim: "⌘⇧Enter = new block").
         // ⌘⇧⏎ SUPERSEDES the 13b-4D ⌥⌘N: one act declares one key (P-1),
