@@ -92,6 +92,8 @@ struct TakesBoardView: View {
         .deleteTake,
         // 13e E2 (A17): the same banner offers the delete door.
         .deleteSelectedBlocks,
+        // VX-594 (R-601-4): the live card's ⌄ menu — "New branched take".
+        .newTake,
         // 18c batch 3 (her U-6): …and the newline repair over that selection.
         .splitSelectedBlocksAtNewlines,
         // VX-372 (VX-383 U1 — D-C-2): the header's `note actions` row — the
@@ -106,6 +108,17 @@ struct TakesBoardView: View {
     /// both went live, and a live pane never adopts text, so the article
     /// froze stale. Distinct namespaces keep exactly ONE pane live (R22).
     static let fanColumnID = TakesViewModel.takesFanColumnID
+
+    /// **VX-574 — the stack card's COLLAPSED line wears the voice's type.**
+    /// A card folded by its ▾ shows its take's first line; that line was set
+    /// in `.callout` — a literal system font, the one take-words face on the
+    /// board drawn outside the token layer (SF Pro 12 pt in both voices: a
+    /// sans in Study's serif room, proportional in Terminal's monospaced one,
+    /// under her *"I need Takes to not be a weird light font compared to
+    /// anything else"*). It now wears `tokens.small` — the face the board's
+    /// other one-line take summary already wears (VX-170's `collapsedRow`,
+    /// R-VX170-2: "muted", which this line keeps too).
+    static func collapsedTakeLineFont(_ tokens: VoiceTokens) -> Font { tokens.small }
 
     /// **The board's own coordinate space (13e batch 7 — the routed rider
     /// from batch 5's E12 sweep; `CanvasView.surfaceSpace`'s twin).** A
@@ -184,6 +197,10 @@ struct TakesBoardView: View {
         // restore, the restore settled at once, and every entry became "the
         // top, then the landing's reveal". Which board a model is THE takes
         // board for is known here. (`.onAppear` still sets it — harmless.)
+        // VX-428 (R-601-2): the same construction-time fact SEEDS the note's
+        // open fans from the session — this line is what opens the board's
+        // expansion memory, so the first geometry report is already judged
+        // with the fans she left open drawn.
         model.landingEnabled = true
         _model = State(initialValue: model)
     }
@@ -1821,15 +1838,12 @@ struct TakesBoardView: View {
     /// panel. Every refusal — a sealed note, a locked take, the take the note
     /// shows, the block's last take — comes from the operations layer through
     /// `model.run` and speaks (P-2).
+    ///
+    /// VX-594: the wiring lives on the model now (`TakesViewModel.cardActs`),
+    /// ONE copy for this board and Write's panel, since the menu grew its
+    /// branch row; the board's cards are the fan namespace's.
     private func cardActs(take: Variant) -> TakeCardActs {
-        TakeCardActs(
-            locked: take.locked,
-            archive: { Task { await model.archiveTake(take.id) } },
-            label: { model.requestTakeLabel(variantID: take.id) },
-            toggleLock: {
-                Task { await model.setTakeLocked(take.id, locked: !take.locked) }
-            },
-            delete: { Task { await model.deleteTake(take.id) } })
+        model.cardActs(for: take, columnID: Self.fanColumnID)
     }
 
     /// 13e E4 (her A19): the card's fan-order doors, or nil where the act
@@ -2193,7 +2207,7 @@ private struct CollapsibleTakeCard: View {
                 }
                 if collapsed {
                     Text(text.split(separator: "\n").first.map(String.init) ?? "(empty)")
-                        .font(.callout)
+                        .font(TakesBoardView.collapsedTakeLineFont(tokens))  // VX-574
                         .lineLimit(1)
                         .foregroundStyle(tokens.muted)
                         .onTapGesture { collapsed = false }

@@ -703,7 +703,8 @@ final class TakesStructureController {
                 try ops.takeToBlockBelow(target.blockID, variantID: target.variantID)
             }
             model.choreography.parkFocus(onVariant: result.variant.id)
-            model.setReceipt(TakeStructureCopy.movedNote)  // 18i: a receipt
+            // 18i: a receipt — VX-321: naming the road back in THIS host's words.
+            model.setReceipt(TakeStructureCopy.movedNote(model.archivedRoad))
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }

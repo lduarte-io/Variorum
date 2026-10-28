@@ -1800,8 +1800,19 @@ struct TakesArticleScrollTests {
                 return
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 20)
-            #expect(restIsReached(second.board.articleRestore),
-                    "the restore settled on the row's own report (\(second.board.articleRestoreAims) aims)")
+            // VX-337 (traced — the load-dependent half of this pin): this is a
+            // PLAIN round trip (no landing waits), so a restore whose row
+            // ARRIVES between geometry reports stays `.wanted` with the page
+            // right, by design — `restArrived`'s doc. Whether a geometry
+            // report happens to follow the arrival inside this window is
+            // SwiftUI's pass ordering, which load moves; the restore's STATE
+            // is therefore asserted as arrived-or-reached, and the page's own
+            // position (below, unchanged) is the contract.
+            #expect(restArrived(second.board.articleRestore, on: hersRow),
+                    """
+                    the restore reached her row (\(second.board.articleRestore), \
+                    \(second.board.articleRestoreAims) aims)
+                    """)
             // The pane sits a fixed inset below its row's top; the control
             // mount's fitting row gives the inset (pane top − row top).
             guard let controlPane = paneTopBelowTheFold(known.rowID!, control, hostingA, articleA)
@@ -2487,6 +2498,70 @@ struct TakesArticleScrollTests {
         case .settled, .holding: return true
         case .undecided, .wanted: return false
         }
+    }
+
+    /// **VX-337 — what a PLAIN round trip's restore is allowed to be once
+    /// the page is back**: `.settled`/`.holding` (a geometry report followed
+    /// the row's arrival), OR still `.wanted` on HER row — the arrival came
+    /// BETWEEN geometry reports (every geometry report carries the rows'
+    /// previous frames, the 17q ladder's W-2), and with no landing waiting
+    /// the restore keeps its own geometry cadence by design (18l-b U2's
+    /// `restoreLooksAgainForAWaitingLanding` re-looks only for a waiting
+    /// landing; `TakesArticleWatchTests.aRestoreWithNoLandingWaitingIsLeftToItsOwnCadence`
+    /// pins that). Which of the two a mounted run lands in is SwiftUI's pass
+    /// ordering — load moves it — so `restIsReached` alone was a
+    /// load-dependent assertion of a state the design never promises. A
+    /// pin using this asserts the page's own position beside it.
+    private func restArrived(
+        _ restore: TakesBoardLayout.ArticleRestore, on rowID: String
+    ) -> Bool {
+        switch restore {
+        case .settled, .holding: return true
+        case .wanted(let place): return place.rowID == rowID
+        case .undecided: return false
+        }
+    }
+
+    /// **VX-337's mechanism, deterministic (pure board — no window, no
+    /// load):** the straddling-fold pin's exact shape — her row remembered
+    /// 30 pt ABOVE the fold, a plain round trip, the restore's aim moving
+    /// the page and its geometry report carrying the row's PREVIOUS frame,
+    /// then the row reporting itself where it sat with no geometry report
+    /// after it. The restore stays `.wanted` with the row at its place — the
+    /// design's own state (no landing waits on it). RED ON THE OLD ASSERTION:
+    /// `restIsReached` rejects that legal state, which is the whole-target
+    /// run's failure ("restIsReached … → false" while the page assertion
+    /// beside it held); `restArrived` accepts it and still rejects the
+    /// shapes that are wrong.
+    @Test func aPlainRoundTripsRestoreArrivingBetweenReportsIsArrivedNotLost() {
+        let place = TakesBoardLayout.ArticlePlace(rowID: "r", into: -30, rowHeight: 46)
+        let order = ["q", "r", "s"]
+        let board = freshBoard("vx337-arrival")
+        #expect(board.consumeArticleGeometry(
+            geometry(offset: 0), remembered: place, positionedByUser: false, order: order)
+                == .scrollToRow("r", anchorY: TakesBoardLayout.ArticlePlace.anchorY(
+                    into: -30, rowHeight: 46, viewport: 700)),
+                "the restore aims at her row")
+        // The aim's own geometry report reads the row's PREVIOUS frame: off
+        // its place, so it re-aims (absolute — no offset change follows).
+        board.noteArticleRowFrame("r", CGRect(x: 0, y: 300, width: 680, height: 46))
+        #expect(board.consumeArticleGeometry(
+            geometry(offset: 800), remembered: place, positionedByUser: false, order: order)
+                == .scrollToRow("r", anchorY: TakesBoardLayout.ArticlePlace.anchorY(
+                    into: -30, rowHeight: 46, viewport: 700)))
+        // SwiftUI's re-resolution: the row where it sat, reported by the ROW;
+        // no geometry report follows.
+        #expect(board.noteArticleRowFrame("r", CGRect(x: 0, y: -30, width: 680, height: 46)))
+        #expect(board.articleRowFramesMoved() == .wait, "nothing is remembered under a pending restore")
+        #expect(board.articleRestore == .wanted(place),
+                "a plain round trip keeps its geometry cadence — the design's own state, the page right")
+        #expect(!restIsReached(board.articleRestore),
+                "the OLD assertion rejects this legal state — the whole-target run's red")
+        #expect(restArrived(board.articleRestore, on: "r"), "the corrected assertion accepts it")
+        // …and still rejects what IS wrong.
+        #expect(!restArrived(.undecided, on: "r"), "no geometry report ever arrived")
+        #expect(!restArrived(.wanted(TakesBoardLayout.ArticlePlace(
+            rowID: "elsewhere", into: 0, rowHeight: 46)), on: "r"), "a restore wanting another row")
     }
 
     /// **THE HOLD, pure** (the 17q ladder's round 3, R3-1 — the compile-red

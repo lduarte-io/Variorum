@@ -36,6 +36,28 @@ continues (vx-562 · vx-601 · vx-623 in flight).**
 
 ---
 
+## VX-623 (rolled at the VX-601 closeout, 2026-10-28)
+
+**→ VX-623 CLOSED 2026-10-27 — RUN: THE FIRST-RUN WALK RESETS ITS OWN TEST ACCOUNT (the record
+`notes/plans/fixes/vx-623-walk-self-reset.md`; the ladders `vx-623-ladder-round1/2.md`; her handoff
+`notes/handoffs/vx-623-handoff.md`; PR #199, merge d02946cc1; kickoff to merge in one day).** Release step 0 is
+self-serve: her standing ruling (2026-10-27, "the walk may reset its own allowlisted test accounts") landed in canon
+(CLAUDE.md's Environment line, one pointer), built as the guarded `Tools/prod-reset-test-account.sh` (R1–R4 — the
+walk's G1/G2 verbatim under a byte-identity pin, byte-equal email resolution, one atomic CTE mirroring
+`account_purge()` minus the auth user and entitlement, before/after reads, 90 self-test cases incl. drift pins
+against the purge's own body) and the walk's new shape: the pre-step reset + cleanup leg (a STOP never resets —
+failure evidence survives for diagnosis), the JOIN ARM (the gate's first-ever live "Sync this library…"),
+`--arm setup|join|both`, the window-frame guard, capture-every-window behind the now FAIL-CLOSED words guard, and
+guard.sh's wl2 compile-or-refuse (VX-536). Members by the sub-issue listing: VX-622 · VX-537 · rider VX-536, all
+Done. Evidence: the full std gate PASSED LIVE on production (pre-step reset → set-up → join → cleanup; std ending
+at rest; the dev slot restored exactly, 197/197 cmp, Resume never pressed; coordinator-verified); a two-round
+cross-model ladder (r1 1 MAJOR · 2 MINOR · 2 NIT, all fixed red-on-old; r2 NO FINDINGS, twice-corroborated);
+self-tests 72/72 · 90/90, pins 0/11 · 0/6; ZERO Swift sources changed (a Tools-only diff). Born VX-627, triaged;
+canon 126,190/150,000. Two owned slips in the record (the kickoff trailer; the round-2 twin spawn, lesson recorded).
+MOBILE PARITY: nothing mobile-visible. **Next: wave 2 continues (vx-601 in flight); the next release's step 0
+needs no hands.**
+
+
 ## The pointer thread (superseded "Current phase" pointers)
 
 ## Rolled at the VX-529 closeout (2026-10-25) — VX-510's closeout paragraph, verbatim
