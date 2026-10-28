@@ -75,3 +75,15 @@ Flags riding the draft for her: the TAG name ("machiavelli" proposed; "the princ
 3. Front-note draft → her edit pass. → OWED
 4. VX-292 instruction append (after the build's sherlock-reference grep). → OWED
 5. The Pro carry-over prompt. → OWED (last)
+
+## U1 record
+
+**NOT DONE / NOT VERIFIED (first line, per the contract): PENDING — the unit is in progress; nothing below is claimed until its line says DONE with a hash.**
+
+Implementer: Opus (opus-implementer), 2026-10-28, branch `vx-633-prince-book`. Scope: `notes/source/` + the two bundled resources + this section only — no Swift, no `Sources/VariorumCore/`, no xcodebuild.
+
+### LIVE STATUS
+- D1 `notes/source/prince-italiano-aligned.txt` — IN-PROGRESS — curating chapter by chapter against Marriott's body paragraphs (working views in the session scratchpad; the curated file is the truth once committed).
+- D2 `notes/source/prince-extract.py` + `ThePrince.txt` + `ThePrinceItaliano.txt` — NOT-STARTED.
+- D3 `notes/source/prince-famous-lines.json` — NOT-STARTED.
+- D4 this record's final tables (counts, famous lines, break cases, spot checks) — NOT-STARTED.
