@@ -227,16 +227,22 @@ final class TakesArticleScroll {
     struct ArticleArrival: Equatable {
         let placementID: String
         let at: Date
+        /// Which landing arrived — an ENTRY (the mode switch's flash, her
+        /// setting's to turn off) or a RESTORE (VX-431: the restore's answer
+        /// to "which part came back", which that setting's words never name).
+        var kind: ArticleLandingKind = .entry
     }
 
     private(set) var articleArrival: ArticleArrival?
 
-    /// The watch says the landing ARRIVED. Only an ENTRY landing — the mode
-    /// switch's — flashes; a bloom or a find step is her in-mode act (U7's
-    /// decision 9).
+    /// The watch says the landing ARRIVED. An ENTRY landing — the mode
+    /// switch's — flashes, and (VX-431) a RESTORE's does; a bloom or a find
+    /// step is her in-mode act and never flashes (U7's decision 9).
     private func watchedLandingArrived(_ anchor: String) {
-        guard articleLanding == anchor, articleLandingKind == .entry else { return }
-        let arrival = ArticleArrival(placementID: anchor, at: Date())
+        guard articleLanding == anchor,
+              articleLandingKind == .entry || articleLandingKind == .restore
+        else { return }
+        let arrival = ArticleArrival(placementID: anchor, at: Date(), kind: articleLandingKind)
         articleArrival = arrival
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(ArrivalFlash.stateLifetime))
@@ -289,6 +295,13 @@ final class TakesArticleScroll {
         /// from it so the kind says which door asked. The resolver consults
         /// `.entry` alone, so this reveals by the same minimal rule (R-Q1).
         case find
+        /// **VX-431 (the VX-440 run) — a Block History RESTORE's landing**
+        /// (her words: *"briefly highlight at least where it starts"*). Made
+        /// only once the article SHOWS the restored words
+        /// (`TakesViewModel.landParkedRestore`), weighed against nothing (her
+        /// act, like a bloom or a find), revealed by R-Q1's minimal rule — and
+        /// FLASHED on arrival like an entry, because the wash is the point.
+        case restore
     }
 
     @ObservationIgnored private(set) var articleLandingKind: ArticleLandingKind = .entry

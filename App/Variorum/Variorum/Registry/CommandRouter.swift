@@ -133,6 +133,9 @@ final class CommandRouter {
         if let landing = pendingCompareLanding, landing.postID != postID {
             pendingCompareLanding = nil
         }
+        if let landing = pendingRestoreLanding, landing.postID != postID {
+            pendingRestoreLanding = nil
+        }
         return token
     }
 
@@ -157,6 +160,7 @@ final class CommandRouter {
         pendingTakesLanding = nil
         pendingLensLanding = nil
         pendingCompareLanding = nil
+        pendingRestoreLanding = nil
         pendingTrayRequest = nil
         focusedBlockIdentity = nil
         focusedOffset = nil
@@ -799,6 +803,10 @@ final class CommandRouter {
     /// VX-298 (VX-336 U6a): a landing on the Compare board (these notes beside
     /// the anchor) — observed, like the lens landing.
     var pendingCompareLanding: CompareLanding?
+    /// VX-431 (the VX-440 run): a confirmed Block History restore's landing —
+    /// observed, and consumed only on CHANGE by a writing surface already
+    /// mounted (`RestoreLanding` carries the whole contract).
+    var pendingRestoreLanding: RestoreLanding?
 
     /// **VX-440 batch 1 — her own doors onto the Compare landing** (R-440-1:
     /// a Versions row's "Compare with now", the one-press "Compare with Latest

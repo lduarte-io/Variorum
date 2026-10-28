@@ -534,7 +534,41 @@ Pieces (flipped per commit):
   (Mac `BlockHistoryClarityTests`, compiled ✓, RUNS PENDING): `readInFullShowsTheWholeMomentWithItsTwoFootDoors`,
   `anUnnamedMomentIsTitledByWhen`, `bringBackAsATakeLandsTheTakeAndSaysSo`,
   `bringBackUnderASealRefusesInTheStandingWords`. DONE (this commit).
-- B2-8 restore says where it landed (the landing + the overlay wash): NOT STARTED.
+- B2-8 restore says where it landed (the landing + the overlay wash). **NO FORK** — the wash is built on
+  EXISTING machinery and touches no editor-seam file (`EditorTextView`, `PaneSurface`, `BlockRangeIndex`
+  unchanged; `notes/TEXTKIT2_NOTES.md` read in full anyway, since the landing drives `JumpPrimitive` and
+  the decor flash from `EditorViewModel`). The road: a LANDED restore (row or sheet) posts
+  `RestoreLanding` (postID · blockID · the restored take · the words it now holds · a fresh id) on
+  `CommandRouter.pendingRestoreLanding` (observed; cleared with its detail like the landings beside it).
+  A SIGNAL each surface decides about (P-4), heard on CHANGE only (never at an arrival — a parcel nobody
+  took is inert). **Write** (`EditorViewModel.consumeRestoreLanding`, the DETAIL editor only — the
+  inline book/pool editors own no reveal): parks it, lands once the page SHOWS the words (the slot's
+  text = the parcel's; checked at the parcel and at every settle hop after the rewrite; dropped past
+  `RestoreLanding.patience` = 2 s, when she types, or when the page renders another take / lacks the
+  block): caret at the block's start, the line rested in the comfort band (`restCaretLineInTheBand`, the
+  mode switch's rule), and the FIRST line washed through the decor layer's existing `arrivalFlashSink`
+  (the 18l-c arrival flash's face — wash fill + accent border, a `DecorRectView` below the text: an
+  OVERLAY, never a rendering attribute). First line only: her "at least where it starts", and the one
+  line measurable without forcing layout away from the viewport (TEXTKIT2 §3's VX-246 rule). The line
+  rect's geometry moved to ONE helper (`lineFlashRect`) shared with the mode-switch flash (behaviour
+  unchanged). **Takes** (`TakesViewModel.consumeRestoreLanding`, THE board only — `landingEnabled`,
+  host `.takes`): parks it, lands in `adopt` AFTER `noteProjectionArrived` once the article shows the
+  words (a landing made against the old projection would be ended by the delivery that brings them —
+  13u2 UNIT E's structural arm), as the article's own landing with a NEW kind `.restore`
+  (`TakesArticleScroll`: weighed against nothing, R-Q1's minimal reveal, FLASHED on arrival like an
+  entry; `ArticleArrival` gains its `kind`). **Not governed by the mode-switch flash setting** (its title
+  and help name mode switches only) — PROVISIONAL **P-440-8**; Reduce Motion's discreet variant holds.
+  Other modes (Read, Lenses, Compare, Blocks, Canvas) and the sheet hosts (the book's inline and the
+  scraps editors, the Takes bar's sheet, Write's take panel) land nothing: the receipt alone. A restore of
+  a take the surface does not show lands nothing (no restored words there to wash). Pins (Mac, compiled ✓
+  `DerivedData/vx440-b2`, RUNS PENDING): NEW `RestoreLandingTests` —
+  `aLandedRestorePostsItsLandingAndARefusedOneNothing`, `aStaleRestoreLandingIsLetGoWithItsDetail`,
+  mounted `writeLandsAtTheRestoredBlockAndWashesItsFirstLine` (the setting OFF; DEBUG oracle),
+  mounted `writeLandsNothingForATakeItDoesNotShow`, `takesLandsOnlyOnceTheArticleShowsTheRestoredWords`,
+  `takesLandsNothingForATakeTheArticleDoesNotShow`; ADDITIVE to `TakesEntryBandTests` (DEBUG):
+  `aRestoreLandingFlashesItsRowEvenWithTheSettingOff`. Harness note: an inline `{ false }` predicate
+  beside another closure in one test body tripped a compiler "function type mismatch" at this build —
+  routed through a `pause` helper. DONE (this commit).
 - B2-9 verification (headless) + the record closed: NOT STARTED.
 
 - Batch 3 (gathering faces): NOT STARTED.

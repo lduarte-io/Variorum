@@ -294,6 +294,11 @@ struct TakesBoardView: View {
         .onChange(of: session.commandRouter.pendingTakesLanding) { _, _ in
             model.consumePendingTakesLanding()
         }
+        // VX-431 (the VX-440 run): a Block History restore beside this board
+        // says where it landed (heard on CHANGE only — `RestoreLanding`).
+        .onChange(of: session.commandRouter.pendingRestoreLanding) { _, _ in
+            model.consumeRestoreLanding()
+        }
         .onChange(of: beneathCount) { _, _ in pushDensity() }
         .onChange(of: gridRows) { _, _ in pushDensity() }
         .onChange(of: gridColsChoice) { _, _ in pushDensity() }
@@ -1235,10 +1240,13 @@ struct TakesBoardView: View {
     /// **18l-c U8 (a): when the mode switch's arrival flash on this row began**
     /// — nil unless the entry landing's arrival names this row AND her setting
     /// has the flash on (R-18l-7: default ON, a switch to turn it off).
+    /// VX-431: a RESTORE's landing flashes whatever that setting says — its
+    /// words name mode switches only, and this wash is the restore's answer to
+    /// "which part came back" (PROVISIONAL P-440-8).
     private func arrivalFlash(_ slot: Queries.RenderedBlock) -> Date? {
-        guard themeSettings.arrivalFlash,
-              let arrival = model.board.article.articleArrival,
-              arrival.placementID == slot.placementID
+        guard let arrival = model.board.article.articleArrival,
+              arrival.placementID == slot.placementID,
+              themeSettings.arrivalFlash || arrival.kind == .restore
         else { return nil }
         return arrival.at
     }

@@ -149,6 +149,49 @@ nonisolated extension BlockHistoryPath {
     }
 }
 
+/// **A CONFIRMED RESTORE'S LANDING** (VX-431, the VX-440 run — the plan's
+/// Batch 2 design, item 4; her words on the ticket: restoring a long commit,
+/// *"it's unclear which part came back (briefly highlight at least where it
+/// starts)"*).
+///
+/// Posted on `CommandRouter.pendingRestoreLanding` by the pane once a restore
+/// LANDED (the row's Restore or the read-in-full sheet's), and consumed by the
+/// writing surface standing beside the pane — the detail's Write editor, or
+/// the Takes board — which lands at the block's start and washes it with the
+/// arrival flash's face (an OVERLAY, never a rendering attribute — P-8). A
+/// SIGNAL, never a decision (P-4): each surface decides for itself whether it
+/// shows the restored words, and a surface that does not (another take
+/// rendered there, another mode, a host with no landing road) simply lets it
+/// go. Consumed only on CHANGE by a surface already mounted — never at an
+/// arrival — so a parcel nobody took is inert, and the router clears it with
+/// its detail like the landings beside it.
+nonisolated struct RestoreLanding: Equatable, Sendable, Identifiable {
+    /// Each restore is its own landing — restoring the same words twice lands
+    /// twice (an observed change is what a mounted surface hears).
+    let id: UUID
+    let postID: String
+    let blockID: String
+    /// The take that was restored — a surface lands only where it shows it.
+    let variantID: String
+    /// The words the take holds now — a surface lands once it SHOWS them
+    /// (before that its layout is the old words', and the projection that
+    /// brings them would end a landing made against the old ones).
+    let text: String
+
+    /// **How long a surface may wait for the restored words to arrive** — the
+    /// store's own delivery, milliseconds in practice; past this the landing
+    /// is dropped rather than haul the page somewhere seconds later.
+    static let patience: TimeInterval = 2
+
+    init(id: UUID = UUID(), postID: String, blockID: String, variantID: String, text: String) {
+        self.id = id
+        self.postID = postID
+        self.blockID = blockID
+        self.variantID = variantID
+        self.text = text
+    }
+}
+
 /// A surface's pending request to open the pane — the `TrayRequest` shape,
 /// and for its reason: the doors that raise it live on view models and bars
 /// while the panel lives in the post detail's inspector.
@@ -376,6 +419,11 @@ final class BlockHistoryModel {
                 try ops.restoreCommit(variantID, commitID: commit.id)
             }
             status = .receipt(BlockHistoryCopy.restoredSavepoint)
+            // VX-431 (item 4): the restore LANDED — say where, on the writing
+            // surface beside this pane (`RestoreLanding`: a signal each
+            // surface decides about for itself).
+            session.commandRouter.pendingRestoreLanding = RestoreLanding(
+                postID: postID, blockID: blockID, variantID: variantID, text: commit.text)
         } catch let error as OperationError {
             status = .refusal(TrayRefusalCopy.message(for: error))
         } catch {

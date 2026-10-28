@@ -579,5 +579,48 @@ struct TakesEntryBandTests {
             model.find.close()
         }
     }
+
+    /// **VX-431 (the VX-440 run) — a Block History RESTORE's landing flashes
+    /// its row** — the restore's answer to "which part came back" (her words:
+    /// *"briefly highlight at least where it starts"*) — **even with the
+    /// mode-switch flash setting OFF**, whose words name mode switches only
+    /// (PROVISIONAL P-440-8). The landing is made once the article shows the
+    /// restored words (`TakesViewModel.landParkedRestore`) and arrives as kind
+    /// `.restore`. Additive to this suite: the entry/bloom/find pins above ride
+    /// unmodified.
+    @Test func aRestoreLandingFlashesItsRowEvenWithTheSettingOff() async throws {
+        try await withSession(blocks: 60, flashOn: false) { session, fixture, db, mount in
+            ArrivalFlashOracle.reset()
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let target = fixture.blocks[40]
+            let commit = try session.operations.commit(target.variant)
+            try session.operations.autosave(
+                target.variant, text: "Rewritten since the moment.", charDelta: 20)
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let row = try #require(model.projection.slots.first { $0.blockID == target.block }?.placementID)
+            let (window, hosting) = await mount(model)
+
+            // The restore lands in the store; the pane posts its landing.
+            try session.operations.restoreCommit(target.variant, commitID: commit.id)
+            router.pendingRestoreLanding = RestoreLanding(
+                postID: fixture.postID, blockID: target.block, variantID: target.variant,
+                text: Self.proseText(41))
+            // The board hears the parcel (its `onChange`) and its own observation
+            // brings the words; a fresh adoption stands in should the delivery
+            // lag this pin's clock.
+            await wait(window, hosting, seconds: 1) { router.pendingRestoreLanding == nil }
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
+            await wait(window, hosting, seconds: 4) { model.board.article.articleArrival != nil }
+            #expect(model.board.article.articleArrival?.placementID == row, "the arrival names the row")
+            #expect(model.board.article.articleArrival?.kind == .restore)
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let key = "takes|\(ObjectIdentifier(model.board.article))|\(row)"
+            let seen = ArrivalFlashOracle.seen[key]
+            #expect((seen?.peakFill ?? 0) > 0.9 && (seen?.peakStroke ?? 0) > 0.9,
+                    "the cell drew the flash with the setting OFF: \(String(describing: seen))")
+        }
+    }
     #endif
 }
