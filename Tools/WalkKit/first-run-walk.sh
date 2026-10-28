@@ -295,7 +295,17 @@ VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
     sure "D-5 lets the join's landed line through" 'wg "$JOIN_LANDED"'
     sure "D-5 lets the join's words notice through (it names no words)" \
       'wg "Your twelve words are a+vxtest-std@x.test'\''s twelve words. Your previous twelve words still open backups made with them. If you don'\''t have your account'\''s words written down, you can make new ones at any time."'
-    sure "D-5 the guard refuses a pid it cannot read as withheld (fail-closed)" '! $T/words-guard notapid >/dev/null'
+    sure "D-5 a non-numeric argument → usage, withheld (exit 2)" '$T/words-guard notapid >/dev/null; (( $? == 2 ))'
+    # The ladder's round-1 MAJOR: a pid whose AX tree cannot be read is WITHHELD (exit 1), never "ok" — a live non-GUI pid
+    # (AXError -25204 at once, the hung app's code) and a reaped one; and the scan's own cap / cycle / mid-scan checks.
+    sleep 60 & sleeper=$!
+    sure "D-5 a live pid whose AX tree cannot be read (a backgrounded sleep) → withheld (exit 1)" \
+      'wgout=$($T/words-guard $sleeper); wgrc=$?; (( wgrc == 1 )) && [[ $wgout == "withheld ("* ]]'
+    kill $sleeper 2>/dev/null; wait $sleeper 2>/dev/null
+    true & gone=$!; wait $gone 2>/dev/null
+    sure "D-5 a reaped pid → withheld (exit 1)" 'wgout=$($T/words-guard $gone); wgrc=$?; (( wgrc == 1 )) && [[ $wgout == "withheld ("* ]]'
+    sure "D-5 the guard's own --self-check (the scan over synthetic trees: cap · cycle · unreadable · deep words · clean)" \
+      '$T/words-guard --self-check >/dev/null'
   else
     print -r -- "SELF-TEST D-5 the words guard compiles from Tools/WalkKit/words-guard.swift  FAIL"; fails=$((fails + 1))
   fi
@@ -468,13 +478,14 @@ log() { print -r -- "[$(date +%H:%M:%S)] $STEP: $*" | tee -a $RUN/walk.log }
 window() { local w; w=($($BIN/vis-win $PID 2>/dev/null)); [[ ${w[1]:-none} != none ]] && WID=$w[1] }
 capture() {  # <label> — D-5 (VX-537): EVERY on-screen window of the pid, each window-scoped (never the full screen), named
   # <time>-<step>-<label>-w<n>.png, the listing appended to captures.txt — and NOTHING while the words guard says the
-  # twelve words could be on screen (a failed guard withholds too: fail-closed).
+  # twelve words could be on screen, or that it could not read the pid's tree whole (any non-zero exit withholds:
+  # fail-closed). Its "ok (<n> elements read)" rides the captured line, so every capture shows the guard read a real tree.
   local g pre
   [[ -n $PID ]] || return 0
   g=$($BIN/words-guard $PID 2>/dev/null) || { log "capture '$1' WITHHELD — ${g:-the words guard did not answer}"; return 0 }
   pre="$(date +%H%M%S)-$STEP-$1-"
   $BIN/walk-cap $PID $RUN $pre --every-layer >> $RUN/captures.txt 2>&1
-  log "captured '$1' → ${pre}w*.png ($(tail -1 $RUN/captures.txt))"
+  log "captured '$1' → ${pre}w*.png ($(tail -1 $RUN/captures.txt); the words guard: $g)"
 }
 stop() {  # never a reset after a STOP (the premise's fence 1): production is the diagnosis; the next run's pre-step heals it
   log "STOPPED — $*"; capture stopped

@@ -16,8 +16,11 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
   Read tool. The main window is captured at 2× (a 1728-pt window → 3456 px). `--every-layer` (VX-623) takes every layer
   the pid owns — an app-modal alert and a floating panel are not layer 0 — skipping slivers under 48 pt.
 - `words-guard <pid>` (`swiftc -O -o /tmp/words-guard Tools/WalkKit/words-guard.swift`) — run it BEFORE any capture
-  that could include Settings: it prints `ok`, or `withheld (…)` while twelve lowercase words or the words look's own
-  markers are on screen (never the text). `words-guard --classify <text>` is the same matcher over one string.
+  that could include Settings: it prints `ok (<n> elements read)`, or `withheld (…)` while twelve lowercase words or the
+  words look's own markers are on screen (never the text) — and withholds too whenever it cannot read the pid's tree
+  whole (a dead, hung or non-GUI pid, an AX failure mid-scan, the 30,000-element cap; fail-closed since the VX-623
+  ladder). `words-guard --classify <text>` is the same matcher over one string; `words-guard --self-check` runs the scan
+  over synthetic trees (headless); `Tools/WalkKit/pins/words-guard-fail-closed.zsh` is its pin.
 - `walk-scroll <x> <y> <lines>` — posts real scroll-wheel events at a screen point (points). SwiftUI Settings
   forms do not expose an addressable scroll area to AppleScript and page-down keys do not reach them; this does.
 

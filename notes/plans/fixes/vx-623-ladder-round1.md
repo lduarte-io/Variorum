@@ -324,3 +324,39 @@ line). No pin (log naming).
 **After the fixes:** both `--self-test` suites re-run green (the walk's with its new cases), P-1/P-2 and
 the NIT-4 pin shown red-on-old in the fix commits' messages or this file, `zsh -n` on every touched zsh
 script and `bash -n` on release.sh — then round 2's fresh reviewer re-checks the fixes per the ladder.
+
+## ROUND 1 — THE FIXES (the implementer, phase 2 — applied exactly as the final call states; for round 2's reviewer)
+
+Headless throughout: no production, stage, GUI, Variorum launch or container write. The AX reads are of the pins' own
+`sleep`/reaped pids, plus one positive control on Finder (the verdict line only — `ok (32 elements read)`).
+Every pin was written BEFORE its fix and shown red on the pre-fix tree.
+
+**1 · [MAJOR] — FIXED** (the piece-A commit). `Tools/WalkKit/words-guard.swift` rewritten to the three classes: one
+reader `ax()` classes each answer PRESENT / ABSENT (`.noValue` · `.attributeUnsupported` · `.notImplemented` · a
+`.success` of another type) / UNREADABLE (every other code). A generic `scan()` is the ONE code path for both the pid
+mode and `--self-check`. The windows read must be a present list (an empty one is ok, zero windows). An unreadable
+read mid-scan withholds at once, and so does the 30,000 cap with elements still queued (this also ends a cycle). The
+queue is index-walked, never `removeFirst`. Exit grammar (0/1/2) and `--classify` unchanged. The pid mode's success
+line is `ok (<n> elements read)`, logged on `capture()`'s captured line (`first-run-walk.sh` `capture()`). The README's
+words-guard line was updated. The walk's `--self-test`: the misnamed case was renamed "a non-numeric argument → usage,
+withheld (exit 2)", and three cases were added (a live non-GUI sleep pid → withheld/1 · a reaped pid → withheld/1 ·
+the guard's own `--self-check`).
+- **P-1** `Tools/WalkKit/pins/words-guard-fail-closed.zsh [<source>]` — **RED ON OLD** (`git show
+  14ad4a09c:Tools/WalkKit/words-guard.swift`): **3 failing of 6** — `a live non-GUI pid … exit 0 (want 1): ok` ·
+  `a reaped pid … exit 0 (want 1): ok` · `--self-check … exit 2 (want 0)` (no such mode). **GREEN ON THE FIX: 0 failing of
+  6** — both pids `withheld (the pid's windows could not be read — AXError -25204)`. The walk's new cases were also
+  run before the fix: `SELF-TEST: 3 case(s) wrong` (sleep, reaped, --self-check); after it, green.
+- **P-2** `words-guard --self-check`, 12 synthetic cases: cap + 1 → withheld · exactly cap → ok (30000 read) · a self-
+  child cycle → withheld · windows unreadable → withheld · windows absent → withheld · an EMPTY window list → ok ·
+  children unreadable mid-scan → withheld · a string unreadable mid-scan → withheld · twelve words 40 deep → withheld ·
+  the look's marker deep → withheld · words BEYOND an absent node still found → withheld · a clean 496-element tree →
+  ok, all 496 read. (The phase-1 answer said "500"; the tree built is exactly 496 and the count is asserted.)
+  **RED BY MUTATION** (a temp copy with the four new verdicts reduced to the old fold-into-nothing — the cap `break`, the
+  mid-scan unreadables `continue`, the windows' absent/unreadable `queue = []`): **6 verdict(s) wrong** — cap + 1, the
+  cycle, both windows cases, both mid-scan cases all `ok`. **GREEN ON THE FIX: every verdict held.**
+- **The CG-vs-AX empty-list cross-check — NOT DONE**, the final call's reason: an empty-success AX answer could coexist
+  with real CG windows only at launch-time AX warm-up, and every capture near the words look comes after successful
+  vis-ax AX presses (the look exists only after P5's press chain). No ticket.
+
+**2 · [MINOR] — PENDING** (piece B). **3 · [MINOR] — PENDING** (piece C). **4 · [NIT] — PENDING** (piece D).
+**5 · [NIT] — PENDING** (piece E).
