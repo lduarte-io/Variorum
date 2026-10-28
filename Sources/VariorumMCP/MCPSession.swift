@@ -119,10 +119,9 @@ final class MCPSession: @unchecked Sendable {
     /// the session's own task, never the main thread (P2).
     func writeEndLine() {
         guard let line = claimEndLine() else { return }
+        // VX-626: the line and the client's last-seen stamp land together.
         try? database.write { db in
-            try operations.recordMCPActivity(
-                db, clientName: line.clientName, act: line.end.act, targetKind: nil, targetID: nil,
-                targetTitle: nil, allowed: true)
+            try operations.recordMCPConnectionEnd(db, clientName: line.clientName, end: line.end)
         }
     }
 

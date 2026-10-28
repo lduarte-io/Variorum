@@ -194,10 +194,9 @@ public final class MCPServerHost: @unchecked Sendable {
         guard !claimed.isEmpty else { return }
         do {
             try database.write { db in
+                // VX-626: each line stamps its client's last seen, on its clock read.
                 for (_, line) in claimed {
-                    try operations.recordMCPActivity(
-                        db, clientName: line.clientName, act: line.end.act, targetKind: nil, targetID: nil,
-                        targetTitle: nil, allowed: true)
+                    try operations.recordMCPConnectionEnd(db, clientName: line.clientName, end: line.end)
                 }
             }
         } catch {
