@@ -410,7 +410,7 @@ enum SampleLibrarySeeder {
     /// before the Prince mints one chapter per note, named after it; the
     /// Prince's chapters are its four PARTS (R-633-5), each holding several
     /// notes — the seed reuses a part's section by name, so eleven notes share
-    /// one row.
+    /// one row — after the Dedication's own, "dedication" (R-633-17).
     nonisolated enum NoteGrouping: Sendable, Equatable {
         case chapterPerNote
         case princeParts

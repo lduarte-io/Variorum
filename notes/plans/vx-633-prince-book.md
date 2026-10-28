@@ -278,7 +278,7 @@ Implementer: Opus (opus-implementer), 2026-10-28, branch `vx-633-prince-book`, t
 
 ### LIVE STATUS
 - P0 record opened — DONE (this commit).
-- P1 R-633-17 (the Dedication's own chapter) — NEXT.
-- P2 R-633-16 (fresh stores only, both platforms) — PENDING.
+- P1 R-633-17 (the Dedication's own chapter) — DONE (the commit naming P1): `SampleLibraryPrinceBook.parts` gains a FIRST entry `("dedication", 0)` (`dedicationChapter`; 0 = it holds no numbered chapter) and `part(for:)` answers it for the numberless title — the seed mints a chapter at its first note, so the sections read about this text · dedication · the four parts. Pins: `PrinceSeedTests.everyNoteFallsInItsPart` (the map, per-part counts 1 · 11 · 3 · 9 · 3, the Dedication alone, chapter I opening part one), the seed shape (the six section names SPELLED OUT in order; the "dedication" section holds exactly the Dedication; part one opens on chapter I), the resume (halfway: front · dedication · part one · part two; six sections after), the restore (six); the phone's `aPhoneOnlyStoreGetsTheSampleLibrary` (5 → 6 sections). Red-on-old by behavioural revert (drop the map's first entry).
+- P2 R-633-16 (fresh stores only, both platforms) — NEXT.
 - P3 pins + mechanical updates — PENDING.
 - P4 compile-only evidence + the headless scratch harness + the Pro's suite list — PENDING.

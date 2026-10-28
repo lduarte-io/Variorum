@@ -47,7 +47,8 @@
 //  The note's book is grouped into the FOUR PARTS her R-633-5 names (its
 //  second set, lowercased to the shelf idiom) rather than one chapter per
 //  note: the notes ARE the chapters, the book's `reading_section` rows are the
-//  parts (`NoteGrouping.princeParts`), plus the front note's own section.
+//  parts (`NoteGrouping.princeParts`), plus the front note's own section and —
+//  R-633-17 — the Dedication's own, "dedication", before part one.
 //
 //  ── OUTSIDE THE PRISTINE DEDUPE (the Jekyll precedent) ───────────────────
 //  A born-fanned copy always reads EDITED to the sync engine's pristine-copy
@@ -110,22 +111,32 @@ nonisolated enum SampleLibraryPrinceBook {
     /// original). The other lenses are named by their takes' labels.
     static let englishLensName = "marriott 1908"
 
-    // MARK: - The four parts (R-633-5, her second set, lowercased)
+    // MARK: - The dedication and the four parts (R-633-5, her second set, lowercased; R-633-17)
 
-    /// The book's chapters, in order: each part and the LAST chapter number
-    /// it holds. Roman-numbered notes fall in by number; the Dedication has
-    /// no number and opens the first part (PROVISIONAL — the U2 record).
+    /// The Dedication's own chapter — R-633-17, her D3 ruling at the sitting:
+    /// "the Dedication gets ITS OWN CHAPTER — a one-note section named
+    /// 'dedication' before part one".
+    static let dedicationChapter = "dedication"
+
+    /// The book's chapters, in order: each one's name and the LAST chapter
+    /// number it holds. Roman-numbered notes fall in by number; the
+    /// Dedication has no number and sits ALONE in the first entry (R-633-17 —
+    /// it holds no numbered chapter, hence 0), so the seed, which mints a
+    /// chapter at its first note, makes "dedication" right after the front
+    /// matter's and before part one. (U2 put the Dedication in part one,
+    /// PROVISIONAL; her ruling superseded it.)
     static let parts: [(name: String, throughChapter: Int)] = [
+        (dedicationChapter, 0),
         ("types of principalities", 11),
         ("military and armies", 14),
         ("rulership, conduct, and virtue", 23),
         ("the state of italy and conclusion", 26),
     ]
 
-    /// The part a note's title belongs in. A title without a roman numeral
-    /// (the Dedication) opens the book, so it joins the first part.
+    /// The chapter a note's title belongs in. A title without a roman
+    /// numeral — the Dedication — has its own (R-633-17).
     static func part(for title: String) -> String {
-        guard let number = chapterNumber(of: title) else { return parts[0].name }
+        guard let number = chapterNumber(of: title) else { return dedicationChapter }
         return parts.first { number <= $0.throughChapter }?.name ?? parts[parts.count - 1].name
     }
 

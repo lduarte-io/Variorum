@@ -210,7 +210,8 @@ struct MobileFirstWriteFurnitureTests {
     /// tag on every note. **JUSTIFIED EDIT (VX-633, R-633-6):** the library
     /// the Mac seeds is *The Prince*, bilingual — the launch book — so a
     /// phone-only store gets the Prince: 27 chapters in the front matter's
-    /// section and four parts, every note wearing `machiavelli`. RED ON OLD:
+    /// section, the Dedication's own (U2b, R-633-17) and four parts, every
+    /// note wearing `machiavelli`. RED ON OLD:
     /// the occasion named no book and seeded Sherlock by the default.
     ///
     /// *Red on the old behaviour:* before this act the phone had no sample
@@ -251,7 +252,8 @@ struct MobileFirstWriteFurnitureTests {
                         tagged.postIDs.count, italian)
             }
             #expect(facts.0 == stories + 1, "every chapter, plus the attribution")
-            #expect(facts.1 == 5, "the front matter's section and the four parts")
+            // U2b (R-633-17): the Dedication's own chapter joins them — six.
+            #expect(facts.1 == 6, "the front matter's section, the Dedication's and the four parts")
             #expect(facts.2, "the attribution ships with the public-domain text")
             #expect(facts.3 == facts.0, "every note wears her tag")
             #expect(facts.4 == 200, "every paragraph carries its Italian take — the same brain as the Mac")

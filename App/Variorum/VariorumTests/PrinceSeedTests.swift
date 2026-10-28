@@ -5,7 +5,8 @@
 //  VX-633 U2 — *THE PRINCE*, BILINGUAL: the seeded book's acceptance bar as
 //  state evidence (`notes/plans/vx-633-prince-book.md`, the U2 brief and
 //  record). What a fresh seed leaves in the store, block by block — the four
-//  parts and the front matter, 27 notes in book order, every paragraph two
+//  parts, the front matter and (U2b, R-633-17) the Dedication's own chapter,
+//  27 notes in book order, every paragraph two
 //  takes (Marriott's chosen, the Italian labelled "il principe 1532"), the
 //  six Ricci third takes and Dacre's verse on the last block, the verse
 //  blocks' line breaks on both sides, the 1532 clock on every row, the tag
@@ -257,11 +258,15 @@ struct PrinceSeedTests {
 
     // MARK: - The parts, the clock, the front note
 
-    /// R-633-5's second set, lowercased: I–XI · XII–XIV · XV–XXIII · XXIV–XXVI,
-    /// the Dedication opening the first part (PROVISIONAL).
-    @Test("Every note falls in its part; the dedication opens the first")
+    /// R-633-5's second set, lowercased: I–XI · XII–XIV · XV–XXIII · XXIV–XXVI
+    /// — after the Dedication's OWN chapter, "dedication", alone (R-633-17,
+    /// her D3 ruling: "a one-note section named 'dedication' before part
+    /// one"). RED ON OLD (behavioural revert: drop the parts map's first
+    /// entry — U2's PROVISIONAL put the Dedication in part one).
+    @Test("Every note falls in its part; the dedication has its own, before part one")
     func everyNoteFallsInItsPart() throws {
         #expect(PB.parts.map(\.name) == [
+            "dedication",
             "types of principalities", "military and armies",
             "rulership, conduct, and virtue", "the state of italy and conclusion",
         ])
@@ -272,10 +277,13 @@ struct PrinceSeedTests {
             perPart[PB.part(for: title), default: 0] += 1
         }
         #expect(perPart == [
-            "types of principalities": 12, "military and armies": 3,
+            "dedication": 1,
+            "types of principalities": 11, "military and armies": 3,
             "rulership, conduct, and virtue": 9, "the state of italy and conclusion": 3,
         ])
-        #expect(prince.grouping.chapter(for: "Dedication") == "types of principalities")
+        #expect(prince.grouping.chapter(for: "Dedication") == "dedication", "the Dedication, alone")
+        #expect(prince.grouping.chapter(for: "I. How many kinds of principalities there are, and by what means they are acquired")
+                == "types of principalities", "chapter I opens part one")
         #expect(SampleLibrarySeeder.Book.sherlock.grouping.chapter(for: "A Scandal in Bohemia")
                 == "A Scandal in Bohemia", "every earlier book: one chapter per note, unchanged")
     }
@@ -330,12 +338,24 @@ struct PrinceSeedTests {
                 #expect(book.name == "the prince" && book.kind == .book && book.profile == "book")
                 #expect(book.createdAt == PB.publicationDate, "the book carries 1532")
                 #expect(!book.owned, "owning is the Welcome arrangement's act, never the seed's")
-                // THE CHAPTERS — the front matter's, then the four parts, once each.
-                #expect(try Queries.readingSections(db, readingID: bookID).map(\.name)
-                        == [PB.frontMatterChapter] + PB.parts.map(\.name))
+                // THE CHAPTERS — the front matter's, then the Dedication's own
+                // (R-633-17), then the four parts, once each — spelled out, so
+                // the order is pinned and not derived from the map alone.
+                #expect(try Queries.readingSections(db, readingID: bookID).map(\.name) == [
+                    "about this text", "dedication",
+                    "types of principalities", "military and armies",
+                    "rulership, conduct, and virtue", "the state of italy and conclusion",
+                ])
                 // THE NOTES — in book order, each in its part.
                 let entries = try Queries.assembleReading(db, readingID: bookID)
                 #expect(entries.compactMap(\.title) == [PB.frontMatterTitle] + englishTitles)
+                // R-633-17: the Dedication ALONE in "dedication", before part one.
+                let bySection = Dictionary(grouping: entries.compactMap { e in e.title.map { (e.sectionPath, $0) } },
+                                           by: { $0.0 }).mapValues { $0.map(\.1) }
+                #expect(bySection["dedication"] == ["Dedication"], "a one-note chapter")
+                #expect(bySection["types of principalities"]?.first
+                        == "I. How many kinds of principalities there are, and by what means they are acquired",
+                        "part one opens on chapter I")
                 for entry in entries {
                     let section = try String.fetchOne(
                         db,
@@ -495,10 +515,11 @@ struct PrinceSeedTests {
     // MARK: - Resume, re-member, restore
 
     /// **m5, for parts.** A seed cancelled after thirteen chapters (the
-    /// dedication through XII — part one whole, part two begun) resumes at
-    /// the next occasion: the missing fourteen mint, the parts are REUSED by
-    /// name (five sections, never a doubled part), and every resumed chapter
-    /// gets its takes.
+    /// dedication through XII — the Dedication's own chapter and part one
+    /// whole, part two begun) resumes at the next occasion: the missing
+    /// fourteen mint, the parts are REUSED by name (six sections — the front
+    /// matter's, the Dedication's (R-633-17) and the four parts — never a
+    /// doubled one), and every resumed chapter gets its takes.
     @Test("A cancelled seed resumes into the same parts, every chapter with its takes")
     func aCancelledSeedResumesIntoTheSameParts() async throws {
         try await withPrinceWorld { session, db in
@@ -509,7 +530,7 @@ struct PrinceSeedTests {
             #expect(partial.minted == 13)
             let halfway = try await db.read { db in try SampleLibrarySeeder.discover(db, book: prince) }
             #expect(Set(halfway.chapterIDsByName.keys)
-                    == [PB.frontMatterChapter, "types of principalities", "military and armies"])
+                    == [PB.frontMatterChapter, "dedication", "types of principalities", "military and armies"])
 
             let mark = PrinceMark()
             guard case .seeded(let bookID, let resumed) = await SampleLibrarySeeder.seedIfNeeded(
@@ -521,7 +542,8 @@ struct PrinceSeedTests {
             #expect(bookID == partial.readingID && resumed == 14)
             try await db.read { db in
                 #expect(try Queries.readingSections(db, readingID: bookID).map(\.name)
-                        == [PB.frontMatterChapter] + PB.parts.map(\.name), "five sections, none doubled")
+                        == [PB.frontMatterChapter] + PB.parts.map(\.name), "six sections, none doubled")
+                #expect(try Queries.readingSections(db, readingID: bookID).count == 6)
                 var fanSizes: [Int: Int] = [:]
                 for entry in try Queries.assembleReading(db, readingID: bookID).dropFirst() {
                     for block in try Self.blocks(db, noteID: entry.postID, title: entry.title ?? "") {
@@ -588,7 +610,8 @@ struct PrinceSeedTests {
                 #expect(blocks[1].takes.count == 3, "fortune's river keeps Ricci's take")
                 #expect(try lensPicks(db, noteID: fresh).map(\.name) == expectedLenses(deletedTitle),
                         "…and its lenses")
-                #expect(try Queries.readingSections(db, readingID: bookID).count == 5, "no part doubled")
+                #expect(try Queries.readingSections(db, readingID: bookID).count == 6,
+                        "no part doubled — the front matter's, the Dedication's (R-633-17), the four parts")
             }
         }
     }
