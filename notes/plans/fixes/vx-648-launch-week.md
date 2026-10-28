@@ -627,6 +627,10 @@ FLAT in M; worst single gesture of 305 rounds: ⏎ **88.7 ms**, ⌫ **76.0 ms**;
 
 **Stage:** NOT released by the walker (the orchestrator's); no `renew` was needed.
 
+## WINDOW 2a RESULT (2026-10-28, claim 06:37:05–06:53:00)
+
+MAC: the union as ONE run from the fresh `DerivedData/w2` at 94e462101 — "Test run with 953 tests in 146 suites", 606 s; 4 warnings + the 4 standing IndexTierMetricsTests known issues (expected) + **5 REAL failures in 3 suites**, each a compiled-never-run pin meeting its first real run: `BookNavigatorViewedPairTests.eachModeNamesItsOwnViewedNoteAndItsChapter` (VX-645 pure) · `BookOutlineLandingTests.theDiscretePagesMarkTheirShownNoteAndItsChapter` (VX-645 mounted — the Read▸Pages reported-note arm not landing, 3 issues at :2351–2353) · `MCPWireRefusalSweepTests.everyCaseTheWireCanCarrySpeaksWordsNeverARawCase` (walked == 76 — the batches moved the case set). SIM: the first pick was an iOS 18.3 device (deployment target 26) + one XPC boot error; re-picked iPhone 17 Pro (26/27 runtime) — "Test run with 20 tests in 3 suites passed", sim shut down, zero booted. No instances before/after; no new Variorum .ips. FIXES IN FLIGHT: batch 4's implementer resumed on the two VX-645 pins; batch 3's resumed on the sweep count (trace the real walked set, never bump the number; an unworded wire case would be a real VX-362-class finding). The re-run (3 suites) is w2b's FIRST LEG (coordinator: a red re-run releases rather than walks); READY-for-w2b states the rebuilt SHA + expected counts.
+
 ## LIVE STATUS
 
 2026-10-28 (kickoff): preflight complete (MCPSpec + SurfaceContracts + TEXTKIT2_NOTES + resiliency + workflow-transition + QUESTIONS #245/#246 + AppSpecRecord 10-27/28 entries read in full; 17 ticket bodies fetched). Coordinator announced and protocol received.
