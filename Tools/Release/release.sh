@@ -326,7 +326,8 @@ its notes/variorum-releases.md. THE SITE'S PUBLISH-AND-LEAVE ORDER (binding — 
      otherwise; it prints PASSED). The walk RESETS ITS OWN test account (her standing ruling, VX-623): its pre-step
      heals a leftover vault before the set-up arm, and after a PASS it signs out, quits and its cleanup leg leaves the
      account vaultless — no hand reset is owed. A STOP leaves production as found for the diagnosis (the next run's
-     pre-step heals it). Arms one at a time: --arm setup | --arm join.
+     pre-step heals it). --arm join alone resumes a both run that stopped in the join arm (it needs that run's
+     Standard vault); --arm setup alone also ends with the cleanup reset.
      Tools/WalkKit/first-run-walk.sh std
   1. THE DMG FIRST:  ${FEED}/${DMG_NAME}
                      ${DMG_BYTES} bytes · sha256 ${DMG_SHA}

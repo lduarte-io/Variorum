@@ -382,4 +382,11 @@ say so. The helper's `expect` no longer shows the email on accept.
   'her@x.test'`. The fixed main path has no re-read left to do that: `grep -nF 'source $'` over both files now finds only
   the guard's two reads and `allowlist_value`.
 
-**3 · [MINOR] — PENDING** (piece C). **4 · [NIT] — PENDING** (piece D). **5 · [NIT] — PENDING** (piece E).
+**3 · [MINOR] — FIXED** (the piece-C commit). `Tools/Release/release.sh` step 0's last sentence now reads: "--arm join
+alone resumes a both run that stopped in the join arm (it needs that run's Standard vault); --arm setup alone also ends
+with the cleanup reset." The words are the final call's, verbatim. Its markdown code marks are dropped because the
+HANDOFF text is an UNQUOTED `cat <<EOF` heredoc (it expands `${VERSION}` and others), where a backtick would run as
+command substitution; the surrounding step-0 text carries none either (0 backticks in the heredoc, checked). README
+line 345 is left as is. `bash -n` clean. No pin (document text).
+
+**4 · [NIT] — PENDING** (piece D). **5 · [NIT] — PENDING** (piece E).
