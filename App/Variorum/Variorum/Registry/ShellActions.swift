@@ -568,11 +568,11 @@ struct ShellActions {
     }
 
     /// ONE road for every seeded book (pre-13x 5a generalized Sherlock's):
-    /// mint what is missing, open the book, speak the outcome. The noun in
-    /// the receipt is the book's ("stories" for Sherlock, "chapters" for the
-    /// encryption book).
+    /// mint what is missing, open the book, speak the outcome. The unit in
+    /// the receipt is the book's ("stories" for Sherlock, "chapters" for every
+    /// other seeded book) — both forms spelled whole (VX-631, `SeededBookReceipt`).
     private func restoreSeededBook(_ book: SampleLibrarySeeder.Book) {
-        let noun = book == .sherlock ? "story" : "chapter"
+        let unit: SeededBookUnit = book == .sherlock ? .story : .chapter
         Task { @MainActor in
             do {
                 // F2 (MINOR-8): the brain hoisted to `SeededBookRestore`
@@ -607,8 +607,7 @@ struct ShellActions {
                 case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
                     status.receipt(
-                        "Restored \u{201C}\(book.name)\u{201D} — "
-                        + "\(minted) \(minted == 1 ? noun : noun + "s") came back."
+                        SeededBookReceipt.restored(book: book.name, unit: unit, minted: minted)
                         + WelcomeDoorCopy.onTheShelfSuffix(shelf: arranged?.welcome.shelf.name))
                 }
             } catch {

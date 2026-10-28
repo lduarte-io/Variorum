@@ -432,9 +432,9 @@ Batch duties: per-member pins; the follow-brain extension keeps VX-562's pins gr
 *Read in this session's own context before any code: CLAUDE.md + its loaded canon, this record IN FULL (the shared sections, BATCH 1–3 RECORDS, the RULINGS LOG — A-648-6 (2)'s duty, WALK 1), `notes/plans/fixes/vx-562-outline-follow.md` IN FULL, `notes/SurfaceContracts.md` §The app + §The Bookcase and books, QUESTIONS #246, `notes/SessionResiliencyProtocol.md`. No subagent.*
 
 LIVE STATUS (per piece — flipped in the same commit as each piece):
-- **No behavioural revert is in flight.**
+- **REVERT ANNOUNCED (VX-631 #1):** `SeededBookUnit.counted` answering `one + "s"` (the old `noun + "s"`) in the working tree over the fix commit; restore = `git checkout -- App/Variorum/Variorum/Registry/SeededBookReceipt.swift`.
 - B4-0 — preflight + this record: DONE (this commit).
-- B4-1 — VX-631 ("12 storys" → the plural): NOT-STARTED.
+- B4-1 — VX-631 ("12 storys" → the plural): IN-PROGRESS — fix + pins committed (this commit): NEW `Registry/SeededBookReceipt.swift` (the unit's two forms spelled whole; no app-wide plural brain exists — every copy home spells its own counts — so the fix is local, as the brief allows); `ShellActions.restoreSeededBook` composes through it; pins `SampleLibraryWelcomeTests.theRestoreReceiptSpellsEachUnitsPluralWhole` (pure) + `restoringSherlockSaysStoriesCameBack` (the door: two stories released, Help ▸ Restore → "2 stories came back.") — app target, RUN PENDING the window; the real source file run headlessly by `swiftc` + a scratch driver (`DerivedData/b4-logs/vx631/`) GREEN. REMAINS: the behavioural revert, `build-for-testing`.
 - B4-2 — VX-630 (Index → Outline carry keeps the block): NOT-STARTED — trace, pin red-on-old, fix, behavioural revert.
 - B4-3 — VX-645 (the ONE follow brain extended to Book and Read's left bar; the VX-563 seam wired): NOT-STARTED — trace first; any design fork returns to the orchestrator before that half is built.
 - B4-4 — VX-646 (the navigator scrolls itself — the Open list's follow idiom; P-562-1's pin flips deliberately): NOT-STARTED.
