@@ -113,7 +113,7 @@ Plan (the brief's order; A-678-1 binds A's shape):
 - U3-3 — C (VX-671), Trash multi-select with bulk Put back / Delete Now over the existing per-row roads; state-transition tests; app view-model tests WRITTEN, PENDING-run. NOT STARTED.
 - U3-4 — full headless `swift test`, `xcodebuild build-for-testing` (stage-free) at the very end, record + ledger flipped. NOT STARTED.
 
-Unit 3 revert state: **no behavioral revert in flight.**
+Unit 3 revert state: **R-U3-1 ANNOUNCED, STARTING** — `Sources/VariorumCore/Queries/Trash.swift` ← its ba4987247 body (the old pair-set `strandedOriginals`/`originFamilyClocks`, nothing else differs), `TrashLineageP1Tests` run against it; restore = `git checkout -- Sources/VariorumCore/Queries/Trash.swift` (committed fix c546619a4). If this line still says STARTING, the tree may be mid-revert: `git diff` against HEAD shows it.
 
 ### UNIT 3 MEASUREMENTS
 
