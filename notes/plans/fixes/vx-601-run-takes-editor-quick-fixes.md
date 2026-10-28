@@ -345,11 +345,20 @@ under the orchestrator's claim). No behavioural revert is in flight.
   `PaneSurfaceTests`, `PaneFindFaceTests`, `CommentTextAreaTests`' undo pin.
 - Trace — DONE (below); both members' mechanisms CONFIRMED by my own read; no divergence from the
   briefed mechanisms (one widening for VX-421, stated).
-- Pins — NOT-STARTED.
-- Fix VX-421 — NOT-STARTED.
-- Fix VX-248 — NOT-STARTED.
-- Builds (pre / post / per-member reverts) — IN-PROGRESS: the pre-fix baseline build-for-testing
-  into `App/Variorum/DerivedData/vx601a-pre` started (the pins join it incrementally).
+- Pins — DONE (73a7a2ca): `VariorumTests/PaneLifecycleTests.swift` — suites
+  `PaneUndoLifecycleTests` (VX-421: 4 red-on-old + 1 guard) and `PaneRebindTests` (VX-248: 3
+  red-on-old + 2 guards). Compiled against the PRE-FIX tree: build-for-testing GREEN into
+  `App/Variorum/DerivedData/vx601a-pre` — **that DerivedData is the red-on-old build; never rebuild
+  into it.** Red/green runs PENDING (the orchestrator's window).
+- Fix VX-421 — DONE (436bf331): the coordinator's own `undoHistory` + `undoManager(for:)`; the read
+  adoption and `uninstall` end it. build-for-testing GREEN into `DerivedData/vx601a-post` (at
+  436bf331; rebuilt after VX-248). (This status flip rides its own commit — the fix commit missed it.)
+- Fix VX-248 — IN-PROGRESS (design settled: the coordinator binds the host's `variantID`; a change is
+  a RE-BIND, written before the liveness note, which then lands the caret and claims the keyboard
+  as any programmatic going-live; the old history ends; the find/room token baselines are adopted
+  as at a mount).
+- Builds (pre / post / per-member reverts) — pre DONE (`vx601a-pre`); post rebuilt after VX-248;
+  per-member revert builds NOT-STARTED.
 - Self-assessment + READY-FOR-SUITES — NOT-STARTED.
 
 **THE TRACE (pre-fix line numbers, `PaneSurface.swift` at c2a0b833).**
