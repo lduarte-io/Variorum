@@ -43,7 +43,7 @@ The coordinator's standing lines (2026-10-28): `-only-testing` silently drops FI
 
 ## LIVE STATUS (flip per piece, same commit)
 
-- Unit 1 (VX-669 + VX-657, Fable implementer subagent): **IN PROGRESS — WIP baseline committed by the orchestrator, the subagent adopts it.** DONE in the baseline: pins 1+2 written and observed RED on the pre-fix tree (the revival itself, both clients — the single-delete pin failed `liveCopyIDs == [copyA]` and `deletedAt(reading, copyB) != nil` on both, i.e. the deleted copy returned alive everywhere); the defense-leg removal applied (Repairs.swift ×3, SampleLibraryDedupe.swift splice + doc, `swift build` green); migration `v1_35_sweep_kill_verdict_markers`; `p5bTheDoubleRetirementRaceCostsATrashTripButNeverBytes` flipped with a Put back arm. REMAINING (the subagent's): flip `p5bBothEditedMeansBothCopiesSurvive` and `aSamplePostInASecondBookStillRecordsItsKillEvidence` to the ruled new outcomes; soften `aRetirementSplitAtTheReadingBoundary…`'s doc (machinery gone, pin stays); the purge-staleness pin (ledger 3); VX-657 (ledger 4); full core suite green; commits per piece.
+- Unit 1 (VX-669 + VX-657, Fable implementer subagent): **IN PROGRESS — the probe flips are DONE; the staleness pin and VX-657 remain.** DONE in the baseline (395a3806c): pins 1+2 written and observed RED on the pre-fix tree (the revival itself, both clients — the single-delete pin failed `liveCopyIDs == [copyA]` and `deletedAt(reading, copyB) != nil` on both, i.e. the deleted copy returned alive everywhere); the defense-leg removal applied (Repairs.swift ×3, SampleLibraryDedupe.swift splice + doc, `swift build` green); migration `v1_35_sweep_kill_verdict_markers`; `p5bTheDoubleRetirementRaceCostsATrashTripButNeverBytes` flipped with a Put back arm. DONE by the subagent (this commit): `p5bBothEditedMeansBothCopiesSurvive` → `p5bBothEditedCrossingRetirementsBothLandInTheTrashButNeverLoseBytes` (both copies tombstoned everywhere, each edit riding its own dead row, Put back arm kept); `aSamplePostInASecondBookStillRecordsItsKillEvidence` → `aCrossingBesideASecondBookNeverTakesHerCollectionDown` (both copies in the Trash, the edit's bytes exactly once on a dead row, her collection live, its membership an ordinary cascade victim); `aRetirementSplitAtTheReadingBoundary…` KEPT with its doc softened (verdict machinery gone; stands as the split-retirement convergence pin, marker count trivially zero); `aDeliberateDeleteWithNoSecondCopy…` and `aDeliberateDeleteAfterTheMeetingSettled…` docs softened to post-removal framing; symbol grep clean (sources carry only deliberate tombstone-comment references). The four suites (`SyncReconciliationProbeTests|SampleLibraryDedupeRepairTests|SampleLibrarySignedOutRetirementTests|SeededFurnitureDedupeTests`) GREEN: 66 tests in 5 suites passed. REMAINING: the purge-staleness pin (ledger 3); VX-657 (ledger 4); full core suite green at unit end.
 - Unit 2 (VX-654 + VX-653, Opus): NOT STARTED — brief = this file's Unit 2 + the A-648-3 trace.
 - Unit 3 (VX-670 + VX-671, Opus): NOT STARTED — brief = this file's Unit 3; runs after Unit 2 lands (shared root).
 - Ladder: NOT STARTED.
@@ -53,8 +53,8 @@ The coordinator's standing lines (2026-10-28): `-only-testing` silently drops FI
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| 1 | VX-669 defense-leg removal + pins 1–2 + p5b flip | Unit 1 (Fable) | IN PROGRESS |
-| 2 | v1_35 local-only verdict-marker sweep | Unit 1 (Fable) | OPEN |
+| 1 | VX-669 defense-leg removal + pins 1–2 + probe flips | Unit 1 (Fable) | DONE (395a3806c + the probe-flip commit; full-suite re-verify at unit end) |
+| 2 | v1_35 local-only verdict-marker sweep | Unit 1 (Fable) | DONE (395a3806c) |
 | 3 | Purge-staleness pin (brief obligation; fix if red) | Unit 1 (Fable) | OPEN |
 | 4 | VX-657 quit-race guard + pins | Unit 1 (Fable) | OPEN |
 | 5 | VX-654 `originalsStrandedBy` rewrite + pins | Unit 2 (Opus) | OPEN |
