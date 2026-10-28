@@ -1622,3 +1622,35 @@ SYNCED store setting** (`fan_style`): the walker reads the as-found style first 
   bound (#11, ≤ 3 panes per at-rest row) assumes LazyVStack prefetch stays within ~2 rows; a red there
   is a measured fact to report, not a reason to loosen the bound silently. (d) The fan card's END
   landing (R-B-3) is visible in B4.
+
+## WINDOW b — batch B's runs (the orchestrator, 2026-10-27/28, claim vx-601-tests-b from 23:34; renewed to ~00:25 at the coordinator's approval)
+
+**Red runs on the five trees (array args; 42 tests / 6 suites each, 43 / 7 on rev428 with the cost
+suite; zero restarts):** the partition by member is CLEAN — rev428's reds are exactly the memory
+pins (#2 #3 #6 #7×4 #8 #11×3), rev428map's exactly the mapping pin (#8 — REAL, not hollow),
+rev577's exactly the ring pin's slotSplit case (#10), rev594's exactly the five door pins
+(#13–#17), pre the union; the two ⌘T HOLLOW guards (#18 #19) are green everywhere, as predicted —
+the caret-following half of VX-594 already worked, confirmed. **BUT FOUR PINS ARE GREEN WHERE THE
+TABLE PREDICTS RED:** #1 and #5 (green on pre AND rev428), #9 (green on pre and rev428), #12 (green
+on pre AND rev577 — the loudest: the flipped-gate test must red on a tree whose gate still excludes
+slot split). The green-on-both-sides rule applies: batch B does NOT accept until each of the four
+is traced — pin-indirection, a revert that missed a file, or a genuinely hollow row — and the
+implementer is resumed on exactly that forensics (pins and trees only). Logs:
+`DerivedData/logs/red-vx601b-*.log`.
+
+**Tier 1 on `vx601b-post`: 279 tests in 30 suites, ONE failure** —
+`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt`, which is one of VX-337's two
+known load-dependent flakes; it is GREEN alone on the same tree, twice (40/1 each). Disposition:
+not a determinate batch B regression; the NEW FACT — it now reproduces at 30-suite load on this
+branch where it previously needed the whole target — is routed to VX-337's bounded trace (batch C)
+as a cheaper repro. Watch it in the ladder: if it recurs at low load, re-examine against batch B's
+restore-seam changes first.
+
+**HER VX-428 MEASUREMENT (the `VX428-MEASURE` lines, tier 1's run on post — an UNSHARED machine,
+nothing else queued, per the coordinator):** the seed is 1.2–4.0 µs across all twelve shapes. P3
+holds exactly: 25 fans open BELOW the fold realize precisely what 0 open do (19 article panes, 0
+cards, in every style), and 25 at the top realize one viewport's worth (stack 4+8, marginGrid 3+6,
+slotSplit 0+10). Settled time: stack 154→168 ms (0 → 25-top), marginGrid 152→166 ms, slotSplit
+155→203 ms (the card realization's price, still viewport-bounded). First pane: 108→122 ms stack,
+113→159 ms slotSplit. Her requirement's other half — landings with a seeded set — is pin #7
+(red-on-old verified on rev428, ×4 styles) plus walk rows B2/B4.
