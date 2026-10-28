@@ -107,8 +107,11 @@ enum VersionActs {
     static func restoreCost(
         session: AppSession, postID: String
     ) async -> Queries.RestoreCost {
-        (try? await session.database.read { db in
-            try Queries.restoreCost(db, of: postID)
+        // VX-331: the clock the deleted-takes count is read against — the
+        // session's, the one Block History's own listing reads.
+        let now = session.now
+        return (try? await session.database.read { db in
+            try Queries.restoreCost(db, of: postID, now: now)
         }) ?? .none
     }
 

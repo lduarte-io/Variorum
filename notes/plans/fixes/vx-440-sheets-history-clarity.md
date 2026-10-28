@@ -428,7 +428,22 @@ Pieces (flipped per commit):
 
 Pieces (flipped per commit):
 - B2-0 record skeleton: DONE (this commit).
-- B2-1 VX-331 trace + red-on-old core pin (the `now` plumbing, behaviour unchanged): NOT STARTED.
+- B2-1 VX-331 trace + red-on-old core pin (the `now` plumbing, behaviour unchanged): VERDICT — REAL.
+  Traced: Block History's deleted region (and the tray) list a block's deleted takes through
+  `Queries.deletedTakes(db, blockID:, now:)`, which keeps only `deleted_at >= TrashWindow.cutoffStamp(now:)`
+  (past the clock no door offers Put back); `Queries.restoreCost`'s population-2 arm
+  (`RestoreCost.swift`, the `deleted_takes` subselect) counted every tombstoned take on the outgoing
+  blocks with the purge fence but NO window — so a take deleted >30 days ago that the janitor has not
+  yet removed (`PurgeJanitor.collectRoots`' 30-day variant roots wait for a synced family's horizon;
+  `LocalPurge` for its next sweep) was named in the version-restore confirm
+  (`VersionsPath.restoreCostLine` — "Going with these paragraphs, and held by no version: N deleted
+  takes") as "waiting in Block History" (the field's own doc), a take no surface shows. Plumbing:
+  `restoreCost(_:of:now:)` (REQUIRED `now`, `deletedTakes`' reason), `VersionActs.restoreCost` passes
+  `session.now`, the existing pins pass `RestoreCostTests.asked` (a day into the harness world). Pin
+  `RestoreCostTests.aTakePastTheThirtyDayClockIsNotCountedAsStillRestorable` (one take past the clock,
+  one inside; the count equals `deletedTakes`' listing at that moment; the `>=` edge counts) — RUN RED
+  headless on this commit: 3 issues (`cost.deletedTakes == 1` read 2; `== listed.count` 2 vs 1; the
+  edge ask 2). DONE (this commit — the PRE-FIX tree).
 - B2-2 VX-331 fix (the 30-day window in `restoreCost`): NOT STARTED.
 - B2-3 VX-244 traces (both arms) + red-on-old Mac pins (the cell menu made inspectable, behaviour unchanged): NOT STARTED.
 - B2-4 VX-244 fix: NOT STARTED.

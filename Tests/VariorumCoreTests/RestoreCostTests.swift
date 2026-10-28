@@ -15,6 +15,12 @@ import Testing
 /// said to take survive — so a future change to either says so out loud.
 @Suite("What a restore takes (13u3 UNIT E, item 15(a))")
 struct RestoreCostTests {
+    /// **When the confirm is asked** (VX-331 — `restoreCost` reads the 30-day
+    /// clock now): a day after the harness's world begins (2026-07-01, one
+    /// second per clock read), so every take these pins delete is well inside
+    /// its window unless a pin says otherwise.
+    static let asked = Date(timeIntervalSince1970: 1_782_864_000 + 86_400)
+
     /// The janitor's own expansion over every standing intent — the technique
     /// `NoteVersionsTests` uses, for the same reason: the consequence driven
     /// rather than argued.
@@ -74,7 +80,7 @@ struct RestoreCostTests {
             let comment = try ops.addBlockComment(to: block.block.id, text: "a note to self")
             try ops.deleteBlockComment(comment.id)
 
-            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
             #expect(cost.outgoingBlocks == 1)
             #expect(cost.savedMoments == 3, "three savepoints she pressed for")
             #expect(cost.deletedTakes == 1, "…and one take waiting in this block's History")
@@ -140,7 +146,7 @@ struct RestoreCostTests {
             _ = try ops.newBlock(in: note.id, text: "A paragraph.", at: .end)
             _ = try ops.saveNoteVersion(note.id)
 
-            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
             #expect(cost.outgoingBlocks == 1)
             #expect(cost.isEmpty, "nothing here is held anywhere but the words")
             #expect(cost.savedMoments == 0 && cost.deletedTakes == 0
@@ -156,7 +162,7 @@ struct RestoreCostTests {
             let note = try ops.createPost(title: "the note", profile: .generic)
             let block = try ops.newBlock(in: note.id, text: "A paragraph.", at: .end)
             _ = try ops.commit(block.variant.id, message: "mine")
-            let before = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let before = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
 
             for index in 0..<8 {
                 let other = try ops.createPost(title: "other \(index)", profile: .generic)
@@ -168,7 +174,7 @@ struct RestoreCostTests {
                 try ops.deleteVariant(spare.id)
             }
 
-            let after = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let after = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
             #expect(after == before, "24 savepoints and 8 deleted takes elsewhere: no change")
             #expect(after.savedMoments == 1)
         }
@@ -187,11 +193,11 @@ struct RestoreCostTests {
             let waiting = try ops.addBlockComment(to: block.block.id, text: "still restorable")
             try ops.deleteBlockComment(gone.id)
             try ops.deleteBlockComment(waiting.id)
-            #expect(try db.read { try Queries.restoreCost($0, of: note.id) }.deletedComments == 2)
+            #expect(try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }.deletedComments == 2)
 
             _ = try ops.requestPurge([SyncPurgeTarget(table: "block_comment", rowID: gone.id)])
 
-            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
             #expect(cost.deletedComments == 1,
                     "the confirm counts only what the panel can still restore")
         }
@@ -212,13 +218,61 @@ struct RestoreCostTests {
             let waiting = try ops.branchVariant(block.block.id, from: block.variant.id)
             try ops.deleteVariant(gone.id)
             try ops.deleteVariant(waiting.id)
-            #expect(try db.read { try Queries.restoreCost($0, of: note.id) }.deletedTakes == 2)
+            #expect(try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }.deletedTakes == 2)
 
             _ = try ops.requestPurge([SyncPurgeTarget(table: "variant", rowID: gone.id)])
 
-            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
             #expect(cost.deletedTakes == 1,
                     "the confirm counts only what Block History can still put back")
+        }
+    }
+
+    /// **RED-ON-OLD (VX-331 — the 30-day window, applied to population 2).**
+    /// The mechanism, traced: Block History's deleted region and the tray list
+    /// a block's deleted takes through `Queries.deletedTakes`, which keeps only
+    /// tombstones at or after `TrashWindow.cutoffStamp(now:)`; past the clock
+    /// no door offers a Put back. `restoreCost`'s population-2 arm counted
+    /// every tombstoned take on the outgoing blocks with no window at all — so
+    /// a take deleted 31 days ago that the janitor has not yet removed (a
+    /// synced family waits for its horizon; a local one for the next sweep)
+    /// was named in the version-restore confirm as "waiting in Block History",
+    /// a take no surface shows and no door brings back. Without the window the
+    /// count is 2 at both asks below.
+    @Test func aTakePastTheThirtyDayClockIsNotCountedAsStillRestorable() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "the note", profile: .generic)
+            let block = try ops.newBlock(in: note.id, text: "A paragraph.", at: .end)
+            let expired = try ops.branchVariant(block.block.id, from: block.variant.id)
+            let waiting = try ops.branchVariant(block.block.id, from: block.variant.id)
+            try ops.deleteVariant(expired.id)
+            try ops.deleteVariant(waiting.id)
+            let stamps = try db.read { db -> (expired: Date, waiting: Date) in
+                (try #require(try Variant.fetchOne(db, key: expired.id)?.deletedAt),
+                 try #require(try Variant.fetchOne(db, key: waiting.id)?.deletedAt))
+            }
+            #expect(stamps.expired < stamps.waiting, "fixture: the harness clock ticks between them")
+            let window = Double(TrashWindow.days) * 86_400
+
+            // Asked half a second after the first take's clock ran out: one
+            // take past it, one still waiting.
+            let past = stamps.expired.addingTimeInterval(window + 0.5)
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id, now: past) }
+            #expect(cost.deletedTakes == 1,
+                    "the confirm counts only what Block History can still put back")
+            let listed = try db.read {
+                try Queries.deletedTakes($0, blockID: block.block.id, now: past)
+            }
+            #expect(cost.deletedTakes == listed.count,
+                    "…exactly the takes Block History lists at that moment")
+
+            // The boundary belongs to the thing being recovered (`>=` at every
+            // listing): asked exactly 30 days after the second delete, the
+            // second take still counts and the first does not.
+            let edge = stamps.waiting.addingTimeInterval(window)
+            #expect(try db.read {
+                try Queries.restoreCost($0, of: note.id, now: edge)
+            }.deletedTakes == 1, "a take at the clock's very edge is still waiting")
         }
     }
 
@@ -239,7 +293,7 @@ struct RestoreCostTests {
             try ops.restoreVariant(take.id)
             try ops.deleteVariant(take.id)
 
-            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
             #expect(cost.deletedTakes == 1, "the re-deleted take waits in Block History again")
             // The History face's own read, asked as of the moment of the
             // re-delete (the harness's world is stamped on its own clock).
@@ -318,7 +372,7 @@ struct RestoreCostTests {
             let moment = try ops.saveNoteVersion(note.id).post
             let divided = try ops.divideW(made.block.id, cuts: [made.variant.id: 16])
 
-            let cost = try db.read { try Queries.restoreCost($0, of: note.id) }
+            let cost = try db.read { try Queries.restoreCost($0, of: note.id, now: Self.asked) }
             #expect(cost.setAsideOriginals.isEmpty,
                     "nothing is stranded, so the confirm must not say anything is")
 

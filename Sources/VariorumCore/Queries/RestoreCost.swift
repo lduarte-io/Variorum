@@ -115,7 +115,14 @@ extension Queries {
 
     /// The read itself. A note that does not exist, or holds nothing, costs
     /// nothing — the door refuses such a restore on its own terms.
-    public static func restoreCost(_ db: Database, of postID: String) throws -> RestoreCost {
+    ///
+    /// `now` (VX-331) is REQUIRED, `Queries.deletedTakes`' own reason: a
+    /// deleted take rides the 30-day clock, and the population this counts is
+    /// the takes still WAITING in Block History — which is the clock's answer
+    /// at the moment of the ask.
+    public static func restoreCost(
+        _ db: Database, of postID: String, now: Date
+    ) throws -> RestoreCost {
         // The outgoing set, defined EXACTLY as `restoreNoteVersion` step 2
         // defines it: this note's live placements whose block is still live.
         let outgoing = try String.fetchAll(
