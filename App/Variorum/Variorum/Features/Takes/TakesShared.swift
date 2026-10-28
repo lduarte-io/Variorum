@@ -640,8 +640,7 @@ struct TakeCardMenu: View {
             // VX-594 (R-601-4): branch from the take the card IS — the one
             // road to a branch of a not-chosen take without clicking into it
             // first. Leads the list: it is the one act that ADDS a take.
-            .init(id: .newTake, title: TakeCardMenuCopy.newBranchedTake,
-                  destructive: false, act: acts.branch),
+            // VX601B-REVERT (rev594): the branch row removed.
             .init(id: .archiveTake, title: TakeCardMenuCopy.archiveTake,
                   destructive: false, act: acts.archive),
             .init(id: .labelTake, title: TakeCardMenuCopy.labelTake,

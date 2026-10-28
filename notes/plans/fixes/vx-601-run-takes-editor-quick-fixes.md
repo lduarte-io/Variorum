@@ -1702,3 +1702,11 @@ post: 279 tests in 30 suites, one failure — `TakesArticleScrollTests` (the str
 green alone twice, dispositioned to VX-337's load-dependent class by the orchestrator, not this
 batch's. The `VX428-MEASURE` numbers landed (P3-clean, per the orchestrator) — their copy into this
 record is owed from `tier1-b-post.log`.
+
+**The 209-suite battery on post: 1216 tests in 209 suites PASSED** (713 s; 14 known issues — the
+loud pinned set, unchanged; zero restarts; the straddling-fold flake did NOT recur at this load —
+one more datum for VX-337's nondeterminism). Log: `DerivedData/logs/battery-b-post.log`.
+
+**Window b verdict:** post is GREEN across tier 1 (one dispositioned flake) and the battery; the
+red discrimination stands for everything EXCEPT the four re-opened pins (#1 #5 #9 #12), whose
+forensics gate batch B's acceptance. The walk (B1–B6) waits on that forensics too.

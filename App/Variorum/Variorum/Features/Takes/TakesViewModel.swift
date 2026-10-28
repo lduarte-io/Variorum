@@ -301,9 +301,7 @@ final class TakesViewModel {
     /// you're in slot split?? you still need it lowkey."* An exhaustive switch,
     /// so a future style decides for itself rather than inheriting a yes.
     var offersExpandAll: Bool {
-        switch projection.fanStyle {
-        case .stack, .carousel, .marginGrid, .slotSplit: true
-        }
+        projection.fanStyle != .slotSplit  // VX601B-REVERT (rev577): the old gate
     }
 
     /// R24's short/long rule for the margin grid — the board layout's
@@ -1360,11 +1358,7 @@ final class TakesViewModel {
         // hides the live pane blurs it, because the view she asked for is
         // exactly what shows). PROVISIONAL (the batch B record, P-B-1). Every
         // other style keeps the article cell, so nothing moves there.
-        if let pane = focusedPane, host == .takes, pane.columnID == Self.takesMainColumnID,
-           let slot = projection.slots.first(where: { $0.blockID == pane.blockID }),
-           slotSplitReplacesArticleCell(slot) {
-            blur()
-        }
+        // VX601B-REVERT (rev577): no blur.
     }
 
     func closeAllFans() {
@@ -2667,6 +2661,7 @@ final class TakesViewModel {
     /// seeded fans cost to DRAW is the lazy column's: only realized rows build
     /// their cards (P3), measured in the batch B record.
     private func openExpansionMemory() {
+        if true { return }  // VX601B-REVERT (rev428): no memory — no seed, no write-back
         board.expansionSink = { [weak self] blockIDs in
             self?.rememberExpansion(blockIDs)
         }
@@ -2730,7 +2725,7 @@ final class TakesViewModel {
         // and the room's own mapping (`TakesFindController.land`,
         // `TakesBoardView.landInTheRoom`). Read AFTER the filter's reveal,
         // which can itself bloom the block.
-        let pane = paneRenderingArticleTake(requested)
+        let pane = requested  // VX601B-REVERT (rev428map): no slot-split mapping
         if pane != requested {
             // …on the pager's visible page (the step's own reveal road).
             pageToReveal(blockID: pane.blockID, variantID: pane.variantID)
