@@ -806,7 +806,13 @@ struct BookIndexView<Masthead: View>: View {
             model.consumeReveal()
             seeded = true
             if let landing { edit.requestLiveBlock(landing) }
-            select(reveal, scrollPane: true, report: false)
+            // VX-662: a CARRIED place is where she is — it becomes the carry
+            // anchor too (`report: true`), so leaving Index carries the note the
+            // Index shows. Unreported, an earlier visit's click stood as the
+            // anchor forever and the next click-over landed that old note. (The
+            // SEED arm below stays unreported — 18d batch 1's cold open: a book
+            // opened straight into Index has no place of hers to carry.)
+            select(reveal, scrollPane: true, report: true)
             return
         }
         guard !seeded, !model.entries.isEmpty else { return }

@@ -80,7 +80,7 @@ Order: 1 → 2 → 3 → 4 → 5 (batch 5 last so its stage-trace window can be 
 | 1 | VX-664 | BUILT HEADLESS (batch 1) — A-677-1/2 ruled (B2-i ratified by her); mechanism `8bea570e3`, pins `e081a9d20` (30: the rule, every ring owner on a real road, 2 mounted, B2-i); sweep table FINAL (S1–S21); r1 → VX-683; red-on-`rev664` + green runs + walk W-664-1/2(/3) PENDING the stage window |
 | 2 | VX-656 | BUILT HEADLESS (batch 1) — pins `179955298` (the pre-fix tree), fix `7c499c44f` (the editor's own undo manager, R-601-1's road); red-on-`rev656` + green runs + her film W-656-1 PENDING the stage window |
 | 3 | VX-663 | BUILT HEADLESS (batch 2) — the arrival's place rides INTO the first `adopt` (`landingAt:`); pins on the pre-fix tree `2a636ee7b` + the model pin; red-on-`rev663` + green runs PENDING the stage window |
-| 4 | VX-662 | NOT-STARTED (batch 2) |
+| 4 | VX-662 | BUILT HEADLESS (batch 2) — pin first on the pre-fix tree `97384209d`; shape (a) picked and justified (the carried-reveal arm reports — the anchor is the Index's selected note on every road; (b)/(c) leave roads 3/2 stale); the confirm (red on `rev662`) + green PENDING the stage window |
 | 5 | VX-681 | NOT-STARTED (batch 2) |
 | 6 | VX-680 | NOT-STARTED (batch 2) |
 | 7 | VX-675 | NOT-STARTED (batch 3) |
@@ -328,10 +328,28 @@ Deliverables: per-member red-on-old pins revert-verified (pin-first where the me
 - B2-0 — preflight + this record: DONE (this commit).
 - B2-1 — VX-624 (the landing settles at the page's floor): DONE (`20a5c39b5`) — "VX-624 — trace, confirm, fix" below. Confirmed headless on the REAL pre-fix `decide` (16 corrections, give-up at 4.25 s); fix + pins compiled (`DerivedData/vx677-b2/post`, `logs/build-post-1.log` TEST BUILD SUCCEEDED; touched-file warnings only the standing `outlineSpace`/`flowSpace`/`BookOutlineLandingTests.swift:1296–1297`/`BookIndexView.swift:1401` lines); the headless twin of the pure pin GREEN on the fix and RED (8 of 21, exactly the floor lines) under the behavioural revert applied to a COPY of the file (the tree never reverted). Mac runs PENDING the stage window.
 - B2-2 — VX-663 (Pages arrivals land at the carried place): DONE — pins on the PRE-FIX tree `2a636ee7b` (production untouched), the fix + its model pin `11ec0e3eb`; compiled (`logs/build-post-3.log` TEST BUILD SUCCEEDED, no warning in a touched file). "VX-663 — trace and fix" below. Mac runs PENDING the stage window.
-- B2-3 — VX-662 (the Index's carry anchor): IN-PROGRESS — the PIN FIRST, committed on the PRE-FIX tree (this commit; production untouched): NEW suite `BookIndexCarryAnchorTests` in `BookNoteBoxDoorsTests.swift` — `aCarriedArrivalInIndexIsWhatLeavingIndexCarries` (her road, mounted: RED on the pre-fix tree by the static trace — the CONFIRM itself is the stage window's run of `rev662`, PENDING) + the guard `herSelectionInThisVisitIsStillWhatLeavingCarries` (green on both); compiled (`logs/build-post-4.log` TEST BUILD SUCCEEDED). Next: the fix-shape pick (written before the fix).
+- B2-3 — VX-662 (the Index's carry anchor): DONE — the PIN FIRST on the PRE-FIX tree `97384209d` (production untouched; suite `BookIndexCarryAnchorTests`: `aCarriedArrivalInIndexIsWhatLeavingIndexCarries` RED there by the static trace + the guard `herSelectionInThisVisitIsStillWhatLeavingCarries`); the fix-shape pick written below BEFORE the fix — shape (a); the fix this commit (one argument in `landOrSeed`), compiled (`logs/build-post-5.log` TEST BUILD SUCCEEDED). The CONFIRM run (red on `rev662`) and the green run PENDING the stage window.
 - B2-4 — VX-681 (leaving Read ▸ Scroll carries from the story on screen): NOT-STARTED.
 - B2-5 — VX-680 (Index → Outline lands block-precise): NOT-STARTED.
 - B2-6 — revert products, suites, READY-FOR-THE-STAGE, walk rows, self-assessment: NOT-STARTED.
+
+#### VX-662 — trace, the fix-shape pick (written BEFORE the fix), fix
+
+**The trace (my own read — the VX-648 FINDING confirmed statically):** `BookIndexView.select(_:scrollPane:report:)` writes `model.noteIndexAnchor(postID)` only when `report` is true — her column click (`noteRow`'s `onSelect`) and her pane tap (`BookIndexPaneNote`'s `onTap`). `landOrSeed`'s two arms both pass `report: false`: the SEED arm (no parcel — 18d batch 1's deliberate rule: a book opened straight into Index has a selected row and a nil anchor) and the CARRIED-REVEAL arm (no recorded rationale — the original W8-5 commit `46828a08d`). Nothing ever clears the anchor. `BookAnchor.currentPost`'s `.index` arm answers `indexPostID ?? standingPostID`. So: her click on A in an earlier Index visit leaves the anchor A for the BookViewModel's whole life; a later carry INTO Index of B selects B without writing the anchor; leaving Index carries A — and with B's block live the block cannot ride (`BookAnchor.landing`: live note ≠ carried note), so the Outline lands A's row.
+
+**The three shapes, by what she would see:**
+
+| Road | (a) the carried-reveal arm reports | (b) Index's `onDisappear` clears | (c) the `.index` arm prefers the live note |
+|---|---|---|---|
+| 1 — the ticket's: click A earlier, carried in on B with block 2 live, leave | B + block 2 ✓ | B (via the standing anchor) + block 2 ✓ | B + block 2 ✓ |
+| 2 — click A earlier, carried in on B with NOTHING live (the spread → Index carry, note only), leave | B ✓ | B ✓ | **A ✗** — no live note, the stale anchor wins |
+| 3 — within ONE visit: her click on A, then an outside reveal lands D (an ascent into the open book — `requestReveal` while Index shows), leave | D ✓ (what the Index now shows) | **A ✗** — this visit's click is never cleared before the leave | A ✗ (no block rides an ascent) |
+| 4 — carried in on B, then her own click on A this visit, leave | A ✓ | A ✓ | A ✓ (her click on another note's row releases the ring — `noteRow` — so no live B) |
+| 5 — a book opened straight into Index (the seed arm), leave | unchanged: nil anchor → the standing anchor (18d's rule kept) | unchanged | unchanged |
+
+**PICK: (a).** The rule already written is W21's ("the departing mode is the one that knows where she is") with `BookAnchor`'s own words for this mode: *"The index's place is its selected note (reported, like the paginated reader's address)."* (a) makes the carry anchor exactly the Index's selected note on every road that selects one — her click, her tap, and a carried or outside reveal — so the class is closed by construction; (b) and (c) diverge from (a) ONLY where they are still wrong by that same rule (roads 3 and 2 respectively), so this is not a product fork (no road shows her two defensible answers — the other two shapes leave a stale-anchor road open). The seed arm keeps `report: false` (18d batch 1's ruled reason — a cold open has no place to carry; road 5 unchanged). The one residual, recorded: a carried parcel naming a note the delivered entries do not hold falls to the seed arm and leaves an anchor from an EARLIER visit standing — reachable only if the carried note left the book between the switch and the Index's first delivery (a sync removal in that beat); not built around.
+
+**The fix:** `landOrSeed`'s carried-reveal arm selects with `report: true` (one argument and its comment). No other line moves; `select`'s body, the seed arm, the selection report (18d) and `BookAnchor` are untouched. **MOBILE PARITY: nothing mobile-visible.**
 
 #### VX-663 — trace and fix
 
