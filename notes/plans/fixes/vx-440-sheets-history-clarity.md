@@ -721,7 +721,7 @@ Pieces (flipped per commit):
 
 #### WALK FIXES (W-1, W-2) — batch 2's implementer, resumed 2026-10-28 after the vx440-walk
 
-**Not done by this piece (first line):** nothing run on the stage — the four pins are WRITTEN AND COMPILED
+**Not done by this piece (first line):** nothing run on the stage — the three pins are WRITTEN AND COMPILED
 (`build-for-testing` into `App/Variorum/DerivedData/vx440-merge`), their red-on-old and green runs and the
 walk re-shoot PENDING the orchestrator's window. Tree verified clean at resume (the two untracked walk
 dirs `.vx440-stagelogs/` · `.vx440-walk-shots/` are the walk's, never added); pulled to `f2cea88bb`.
