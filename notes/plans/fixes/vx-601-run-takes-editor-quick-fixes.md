@@ -2214,3 +2214,7 @@ stargazing.tech website. The standing release rules apply unchanged: the version
 branch BEFORE the merge; the pre-release notes are DRAFTED FOR HER; release.sh runs per its current
 shape (if it still refuses an unattended session, the staged command is handed to her in the
 closeout bundle). No release before the ladder closes and the PR merges.
+
+**Bundle-number correction (2026-10-28):** QUESTIONS #245 was taken by VX-620's closure and #246 by
+VX-562's — every "#245" reference in this record means THIS RUN'S bundle, which takes the next free
+number on latest main at the closeout merge (expected #247).
