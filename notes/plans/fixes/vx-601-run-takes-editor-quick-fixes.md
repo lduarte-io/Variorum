@@ -1344,6 +1344,7 @@ USE walk (rows B1–B6 below, an Opus walker under the orchestrator's claim); th
   `VX601B-REVERT` marker anywhere).
 - Red/green runs + the VX-428 measurement — PENDING (the orchestrator's window; READY-FOR-SUITES below).
 - USE walk — PENDING (rows B1–B6 below).
+- Prediction table, READY-FOR-SUITES, walk rows, self-assessment — DONE (below).
 
 **THE TRACE.**
 
@@ -1547,8 +1548,8 @@ and `TakeCardDoorTests`' bloomed-board harness now does too.
    TakesExpansionRemountTests TakesSlotSplitExpandAllTests TakesExpansionCostTests
    TakeCardMenuTitleTests TakesBoardTests TakesArticleWatchTests ArticleLandingProjectionArmTests
    TakesEntryBandTests TakesRoomTests TakesCardHeightTests TakesLandingTests CommandRouterTests
-   BranchDoorFlushTests SpreadBookViewTests TutorialWalkTests' TutorialTakesActsTests` (the ones not
-   already in the 201) — ~215 suite types. Standing reds that are NOT this batch's, if met: VX-337's
+   BranchDoorFlushTests SpreadBookViewTests TutorialTakesActsTests` (any already in the 201 counts
+   once) — ~215 suite types. Standing reds that are NOT this batch's, if met: VX-337's
    two flakes and the trait-skipped singleton-window oracle suite.
 
 ## THE USE WALK — batch B rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug
