@@ -272,13 +272,22 @@ struct CapabilityRegistryTests {
         // which mode it is in; both contexts satisfy them, so those acts are
         // judged on mode alone (a note open in Takes shows a note exactly as
         // in Write). No other `takesAccess` act reads these three facts.
+        // VX-440 batch 1 (SF-1 — A JUSTIFIED EDIT, the VX-377 line's class):
+        // so is the NOTE fact `noteHasSavedVersion` — "Compare with Latest
+        // Version" asks whether the mounted note has a saved moment, never
+        // which mode it is in (it acts from every mode: its road switches to
+        // Compare itself); both contexts satisfy it, so it too is judged on
+        // mode alone. Without it the act read `.unavailable` in BOTH contexts
+        // and this walk failed its `.native` letter. No other act reads it.
         let takes = CapabilityContext(
             mode: .takes, undoAvailable: true, redoAvailable: true,
-            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2)
+            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2,
+            noteHasSavedVersion: true)
         let write = CapabilityContext(
             mode: .write, writeEditorAttached: true,
             undoAvailable: true, redoAvailable: true,
-            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2)
+            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2,
+            noteHasSavedVersion: true)
         for capability in CapabilityRegistry.all {
             guard let access = capability.takesAccess else { continue }
             let inTakes = capability.availability(takes)

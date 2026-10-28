@@ -420,6 +420,22 @@ Pieces (flipped per commit):
   of this note"); its unmark → the P-440-5 confirm → promoted; a Versions row's "Compare with now"; File/
   note ▾/⌘K "Compare with Latest Version" present with a moment, absent/grey without; "Open full size" →
   the band over the calm page, no "this note" rail, ⌘⇧S grey; Back; Promote from the band.
+
+#### FIXES AFTER THE STAGE RUN (SF-1..3) — batch 1's implementer resumed, 2026-10-28, headless
+
+All three were the batch's TEST harnesses, not its product code; each trace below says why, with the evidence.
+- **SF-1 `CapabilityRegistryTests.takesIsNeverBehindWrite`** — traced: the walk synthesizes ONE Takes and ONE
+  Write context and leaves every non-mode fact at its default; `.compareWithLatestVersion` gates on the NOTE
+  fact `noteHasSavedVersion` (does the mounted note have a moment — independent of mode), so it read
+  `.unavailable` in BOTH contexts and the `.native` letter (`inTakes == .act`) failed. The declaration is
+  right as it stands: `mode != nil && noteHasSavedVersion` acts in EVERY mode once the note has a moment (its
+  road switches to Compare itself), already pinned across all `PostMode` cases by
+  `VersionDoorsTests.theLatestVersionDoorActsOnlyWhereTheNoteHasAMoment` (green on the stage). Making it act
+  in Takes without the fact would break P-2 (live in Takes over a note with no moment, grey in Write).
+  FIX: a JUSTIFIED EDIT of the walk, the VX-377 line's class — both contexts satisfy the note fact, so the act
+  is judged on mode alone (no other act reads it). DONE (this commit).
+- **SF-2** — IN-PROGRESS.
+- **SF-3** — IN-PROGRESS.
 - Batch 2 (Block History): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + the VX-244 red-on-old run + walk PENDING the stage window; UNIT RECORD below.
 
 ### Batch 2 — UNIT RECORD (Block History: VX-431 · riders VX-331 · VX-244)
