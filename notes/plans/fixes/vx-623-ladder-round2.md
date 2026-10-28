@@ -1,9 +1,13 @@
 # VX-623 — Ladder round 2 (fresh cold reviewer re-checking round 1's fixes, 2026-10-27)
 
-**STATUS: IN FLIGHT — PAUSED at her word (budget limit), 2026-10-27.** Written incrementally; this
-checkpoint carries findings 1 and 2's verification. Remaining when resumed: finding 2's self-test
-runs, findings 3–5, the after-fix gate re-run (walk 72/72 · helper 90/90 · D-7 0/11 · `zsh -n`/
-`bash -n`/`swiftc`), the whole-diff sweep for any new BLOCKER/MAJOR, the clean bill, the verdict.
+**STATUS: COMPLETE, 2026-10-27. NO FINDINGS — all five round-1 fixes verified against the final
+call's binding shapes, every pin re-run and genuinely red-on-old, both recorded deviations verified,
+the gate green fresh at the tip, nothing new introduced. The ladder closes at round 2 with a clean
+bill (the verdict at the end of this file).** The round ran across a pause at her word: findings
+1–2 are the opening reviewer's (`79c8734a9`); findings 3–5, the pending ticks and the gate below
+are the resumed closing reviewer's (`d7fb66192`…`27e03a95f`); the opening reviewer, resumed in
+parallel, ALSO verified findings 3–5 and the gate independently with agreeing results (the
+corroboration section near the end), and wrote the sweep, clean bill and verdict.
 
 Target: the round 1 fix set (five findings, the final call's binding shapes, commits `a57bb863c` ·
 `761461712` · `33de94d33` · `e50ea8fb6` · `bcac53925`) on branch `vx-623-walk-self-reset` at
@@ -155,3 +159,78 @@ empty — only record files moved since), so these runs gate the fix set exactly
 Environment constraints honored: fixtures and pins only; the one AX-adjacent act was the
 self-tests' own spawned-and-reaped sleep; no production, stage, GUI, container, dry-run or live
 mode was touched.
+
+## Corroboration — findings 3–5 and the gate, independently verified by the opening reviewer (resumed)
+
+The opening reviewer's own runs, made before reading the closing reviewer's sections above, agree on
+every point, from distinct baselines:
+
+- **Finding 3:** sentence word-for-word the final call's minus code marks (release.sh:329–330); the
+  HANDOFF confirmed an unquoted `cat <<EOF` (it expands `${VERSION}`/`${FEED}`); my own count via awk
+  over the file's `cat <<EOF`…`EOF` regions: **0 backticks**; `bash -n` clean. The deviation holds.
+- **Finding 4:** fix shape and the triple fence re-read in both files; red-on-old demonstrated from
+  the OTHER old baseline — the `14ad4a09c` scripts, fenced identically (`HOME` empty · `zsh -f` ·
+  exit-99 shims): helper `std --log` → `…:380: 2: --log needs a file` **exit 1**, walk `std --app` →
+  `…:380: 2: --app needs a path` **exit 1**; the current scripts under the same fence → **exit 5**
+  with the named refusals. (The closing reviewer's `:393`/`:406` are the same lines in the
+  pieces-A–C tree — same mechanism, both red.)
+- **Finding 5:** `J3 J3b` at :756 against `launch_on_road`'s `${2:-P1}`/`${3:-P2}` grammar, the
+  dry-run plan's J3b line at :489 — verified.
+- **The gate, my own runs:** walk `--self-test` **72 ok cases counted**, exit 0; helper **"every
+  guard fired as expected (90 cases)"**, exit 0; D-7 pin **0/11 exit 0** and, against `b090395e4`'s
+  guard.sh, **6/11 exit 1** — still red-on-old; P-1 **0/6** (and **3/6** on `14ad4a09c`'s guard);
+  P-2 **every verdict held** (and **6 wrong** on my own rebuilt fold-back mutant); `zsh -n` ×5,
+  `bash -n`, `swiftc` ×3 all clean.
+- **One datum beyond the sections above — the present-path positive control, verdict-only:** the
+  fixed guard run on Finder → `ok (32 elements read)`, exit 0 — the `v as? [AXUIElement]` cast
+  works on a real AX tree, matching the implementer's recorded control byte for byte.
+
+## The whole-diff sweep for anything new
+
+- The only CODE commits since round 1's review tip (`14ad4a09c`) are the five fix commits — each
+  read whole, each scoped exactly to its finding; `git diff bcac53925..HEAD -- Tools/ Server/
+  Sources/ App/` is EMPTY, so every later commit is record-only (stat-checked one by one:
+  `33830fedf` · `065396b8f` · `f85717274` · `94e9fcb4f` · `79c8734a9` · `d7fb66192` · `e24dd5459`
+  · `abd933ac6` · `27e03a95f`). Every commit since `14ad4a09c` is trailer-free (checked `%b` for
+  `Co-Authored-By`/`Claude-Session` across the range).
+- **No new BLOCKER or MAJOR — and no new MINOR or NIT either.** The one behavioral consequence
+  worth naming (accepted by the final call): the guard is now strictly fail-closed, so a transient
+  AX failure withholds a capture; `capture()` logs and continues, never stalls — captures are
+  evidence, not gates — and the next live walk's `ok (<n> elements read)` lines are the
+  over-withhold proof, as the final call stated.
+
+## Clean bill (what round 2 specifically checked and found solid)
+
+- The three-class taxonomy's boundaries: exactly-cap trees read whole; cap+1 withholds; a cycle
+  terminates withheld; absent answers continue the scan (words beyond an absent node still found —
+  self-check case 11); an empty windows list stays ok; the texts sequence is lazy, so an unreadable
+  answer withholds at once with no timeout chain.
+- The matcher's immutability across the rewrite: `verdict`/`twelve`/`markers`/`--classify`
+  byte-identical old→new, so every pre-existing D-5 `--classify` case still proves the same thing.
+- The same-read plumbing end to end: one guard call, one `EMAIL` (assigned at the guard, used at
+  the splice, unset, no intervening assignment), no re-read anywhere (`source $` exists only inside
+  `guard_allowlist` and the exempt `allowlist_value`), belts kept, twins byte-identical under the
+  standing twin pin; the structural pin's awk correctly exempts only the guard's body and
+  `allowlist_value`'s one-liner, and its own grep line is split so it never counts itself.
+- The guard's internal two reads (`list`, then `email`) — noted and judged NOT a finding: every
+  check (vxtest marker, plain, listed) binds the HANDED value, so an unmarked or non-plain address
+  can never be handed back; the fence "her account can never pass" holds on the handed value.
+- The fenced-subprocess pin's safety: under `HOME=<empty>` + `zsh -f` + shims, both scripts die at
+  the arg parse or refuse at R1/G1 before any read — verified by running them myself; the pin can
+  never reach the network, the GUI or an allowlist. Its assertion demands the NAMED refusal, not
+  merely exit 5, so a parse regression falling through to a different guard still fails the case.
+- The release.sh HANDOFF heredocs carry zero backticks; the new sentence is operationally accurate
+  against the walk's arm composition as currently coded (a lone `--arm setup` runs THE END with
+  E3's cleanup; `--arm join` skips the pre-step and `join_ready` stops on a vaultless account).
+- The 496-element deviation: 1 root + 99 kids + 99×4 grandkids = 496, asserted in the self-check —
+  the phase-1 "500" was the estimate, 496 the built truth, recorded honestly.
+- Commit hygiene: no trailers anywhere in the range; records repo-first per piece; `.env`/logs/
+  compiled helpers all under ignores (unchanged since round 1's clean bill).
+
+## Verdict
+
+**The round 1 fix set is sound and complete.** Every fix matches its binding final-call shape;
+every pin is real and red-on-old — re-run on both sides by this round's reviewers' own hands, from
+two independent old baselines; the two recorded deviations (release.sh's dropped code marks, the
+496-element tree) both hold up; the gate is green fresh at the tip; nothing new was introduced
+anywhere in the diff. **No findings. The VX-623 ladder closes at round 2 with a clean bill.**
