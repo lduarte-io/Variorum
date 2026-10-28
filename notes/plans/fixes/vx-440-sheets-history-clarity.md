@@ -1035,6 +1035,32 @@ voiced label (not bug-class). Under the final-round rule the orchestrator's line
 N-1's diff is exactly the one-token change the finding proposes, verified against the file's own
 chromeLabel idiom (:680/:921/:968/:1006). A fresh round re-reading a one-line diff is not spawned.
 
+## THE WALK PLAN (claim `vx440-walk` — runs only after a green vx440-tests window, on the coordinator's GO)
+
+An Opus walker under the orchestrator's claim (cliclick + `Tools/WalkKit/`, the DEV-STORE Debug build
+`io.lduarte.Variorum.debug` only; the walker's brief is this section + the three batches' "Walk rows" lists).
+- **Leg 0 — as-found, recorded before anything:** the dev store's resting posture per the coordinator
+  (e11e5233, HELD since 10-20, signed out, Study with app Appearance Dark — macOS stays LIGHT, never
+  changed; no books, one note (Oct-19), Walk Wing empty, MCP server OFF, claude-code approved with 0
+  grants; NEVER press Resume). Prefs exported for the end-diff; What's New dismissed after launch.
+- **Mints, all through product doors, all named here (the coordinator's rule):** one note "VX440 walk
+  note" (several paragraphs; 2 named commits via ⌘S; one saved version via ⌘⇧S; then one more edit so the
+  live note differs from the moment) · one book "VX440 walk book" (the creation dialog) · one gathering
+  "VX440 walk gathering" (rule: tag `#vx440walk`) · the tag rides the note so the gathering assembles.
+  NO grant is minted: the share-door legs open the sheet and Esc out (claude-code's approval alone renders
+  the doors; zero grant rows written).
+- **The rows:** batch 1's (Compare auto-fill with the date-titled moment; unmark → the P-440-5 confirm;
+  "Compare with now"; the latest-version door present/grey; Open full size → the band, Back, Promote) ·
+  batch 2's (the pane at rest and open; Read in full on a long commit; Restore from sheet and from Takes
+  with the wash; Bring back as a take; the VX-356 fill's CONTRAST check on the panel surface — the ladder's
+  outstanding item) · batch 3's (Delete Gathering… wording, the Trash row's kind word, the foot without
+  "+ new chapter", the two share doors, Study's open-note mark) — BOTH VOICES where a face (switch the
+  voice in Settings, restore at the end). Screenshots to a gitignored dir; the keepers into the morning
+  bundle.
+- **Teardown:** every mint deleted (Trash → Delete Now where offered), the tag deleted, the voice and
+  appearance restored, walk-added prefs keys deleted, the prefs diff ZERO against leg 0, instance closed.
+  A STOPPED walk never self-cleans — evidence survives for diagnosis (the standing rule).
+
 ## FOR THE CLOSEOUT (owed; do not improvise past it)
 
 - Canon deltas in the two-file shape: SurfaceContracts (The note — the Versions/Compare doors, the full-size
