@@ -224,9 +224,9 @@ the skill.
 | 2 | VX-248 bound-take adoption + VX-222/227 pins green | **ACCEPTED 2026-10-27** — red-on-old by revert (rev248: exactly its 4 pins), VX-222/227 green in tier 1, walk W3/W4 PASS both voices |
 | 3 | VX-429 instrumented probe → fix or record | **ACCEPTED 2026-10-27** — red-on-old by revert, suites green, walk A1/A2/A4 PASS (Study + partial Terminal) |
 | 4 | VX-592 drag probe → fix or record | **ACCEPTED 2026-10-27** — red-on-old by revert ("Write is fine" falsified), suites green, walk A3/A4 PASS; A5 recorded; Q-A2-1 → #245 |
-| 5 | VX-428 session memory + measurements + landing proof | NOT-STARTED (batch B) |
-| 6 | VX-577 expand-all in slot split | NOT-STARTED (batch B) |
-| 7 | VX-594 the […] door + caret-following ⌘T | NOT-STARTED (batch B) |
+| 5 | VX-428 session memory + measurements + landing proof | **ACCEPTED 2026-10-28** — red-on-old by revert (incl. the rebuilt trees), her measurement P3-clean, walk B1/B2/B4 PASS |
+| 6 | VX-577 expand-all in slot split | **ACCEPTED 2026-10-28** — red-on-old by revert (#12 + #10), walk B3 PASS (P-B-1 blur seen live); the ⎋ clause → VX-637 (pre-existing/harness, her 5-s check) |
+| 7 | VX-594 the […] door + caret-following ⌘T | **ACCEPTED 2026-10-28** — the door red-on-old by revert, walk B5/B6 PASS; the ⌘T half HOLLOW-GOOD (already worked, guards green); the no-current-take edge → #245 |
 | 8 | VX-427 focused-take count | NOT-STARTED (batch C) |
 | 9 | VX-574 font weight | NOT-STARTED (batch C) |
 | 10 | VX-586 "block i/N" via BlockLineLabel | NOT-STARTED (batch C) |
@@ -1828,3 +1828,28 @@ read 30 and was restored to **29** (`defaults write -int 29`, read back 29, "Typ
 other counter unchanged. Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`,
 `variorum.backup.log`). Final export `/tmp/vx601b-prefs-final.plist` vs before: nothing added, nothing
 removed.
+
+
+## ORCHESTRATOR DISPOSITIONS — the B walk's findings and batch B acceptance (2026-10-28 ~00:30)
+
+**Batch B is ACCEPTED** (red-on-old by revert per member on the rebuilt trees; tier 1 + the
+209-battery green; walk B1–B5 PASS with B6's caret half). The open items, each dispositioned:
+- **Finding 1 (⎋ closed nothing):** the wiring (`TakesBoardView.swift:318` `.onExitCommand`)
+  PREDATES this run and the batch's diff never touched it; `closeAllFans` is pin-green
+  programmatically and the header door works live. So not this run's regression — minted
+  **VX-637** (Suspected: the synthetic key-53 road may simply not reach SwiftUI's onExitCommand
+  when an AppKit pane holds focus, the known blind-spot class). HER 5-SECOND CHECK is in the
+  ticket and the morning bundle; the walk's ⎋ clauses stand UNPROVEN, not failed.
+- **Finding 3 (stale slot-split pager label):** minted **VX-638** (Confirmed, Low) — within one
+  mount, so likely pre-existing; not a batch gate.
+- **Finding 2 (landed caret on a fresh line):** record-only — the walk note's pasted blocks likely
+  carry a trailing newline; untraced; re-examine only if seen on real content.
+- **Finding 4 (new takes seat right after their source):** behavior as built, record-only.
+- **B6's neutral half:** the "Click into a take first" refusal is UNREACHABLE on the board — a
+  margin click greys the caret but never clears the board's current take, so ⌘T always branches
+  the current take once one existed. Goes to **#245** as the ruled-edge question (options: (a) as
+  built — the current take persists and ⌘T always has a target; (b) a margin click clears the
+  current take and ⌘T then refuses; (c) keep the caret-grey state but make ⌘T refuse from it).
+- **The Terminal pass (not walked):** dispositioned COVERED-FORWARD — batch B's members are
+  voice-independent behavior, and batch C's walk (VX-574's font work) must run BOTH voices through
+  Takes anyway; its rows will re-touch the B surfaces in Terminal. The gap is named here, not hidden.
