@@ -32,8 +32,13 @@ private func initialize(_ name: String, id: Int = 1, pad: String = "") -> String
     #"{"jsonrpc":"2.0","id":\#(id),"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"},"pad":"\#(pad)"}}"#
 }
 
+/// VX-606 (a JUSTIFIED EDIT, the ritual — the VX-648 run, batch 2): the pad rides
+/// in `params` beside the call, as `initialize`'s does, never inside
+/// `arguments` — `list_books` declares no `pad`, and the wire now refuses an
+/// argument its schema does not declare. The subject (the 16 MiB cap, served
+/// at exactly the cap) is unchanged: the line is still exactly its length.
 private func listBooks(id: Int, pad: String) -> String {
-    #"{"jsonrpc":"2.0","id":\#(id),"method":"tools/call","params":{"name":"list_books","arguments":{"pad":"\#(pad)"}}}"#
+    #"{"jsonrpc":"2.0","id":\#(id),"method":"tools/call","params":{"name":"list_books","arguments":{},"pad":"\#(pad)"}}"#
 }
 
 /// Write `bytes` on a helper thread (a reader on the other end may stop

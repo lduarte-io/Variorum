@@ -717,9 +717,18 @@ struct MCPReadFormsUnchangedServerTests {
             let plainText = try await call(connection, ["note_id": .string(note.id)])
             let document = try await h.database.read { try Queries.variorumDocumentText($0, postID: note.id) }
             #expect(text(plainText) == document, "the Level 0 text form")
-            let exported = try await call(connection, "export_note", ["note_id": .string(note.id), "limit": 1, "ids_only": true])
+            // VX-606 — A DELIBERATE FLIP (the VX-648 run, batch 2; her word
+            // "refuse undeclared arguments on every tool"): export_note declares
+            // only note_id, so `limit` / `ids_only` were IGNORED in silence here
+            // (the pinned "ignores the new arguments") — MID-3's class. Now they
+            // refuse in words, and the declared call stays byte-unchanged.
             let rendered = try await h.database.read { try Queries.renderedText($0, containerID: note.id) }
-            #expect(exported.isError != true && text(exported) == rendered, "export_note ignores the new arguments")
+            let exported = try await call(connection, "export_note", ["note_id": .string(note.id)])
+            #expect(exported.isError != true && text(exported) == rendered, "export_note's declared form, unchanged")
+            let undeclared = try await call(connection, "export_note", ["note_id": .string(note.id), "limit": 1, "ids_only": true])
+            #expect(undeclared.isError == true
+                    && text(undeclared) == MCPArgumentSchema.words(tool: "export_note", undeclared: ["ids_only", "limit"]),
+                    "export_note refuses what it does not declare: \(text(undeclared))")
 
             let stranger = try await call(connection, ["note_id": .string(note.id), "commit_ids": .array(["nope"])])
             #expect(stranger.isError == true && text(stranger) == "commit_id nope isn't a commit of this note.",
