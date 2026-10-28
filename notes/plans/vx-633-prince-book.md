@@ -262,3 +262,10 @@ Mac, `xcodebuild -scheme Variorum -destination 'platform=macOS' test` under a he
 - Her D1 (existing stores) and D3 (Dedication's section) — asked at the sitting; rulings land here.
 - VX-292 pointer on the Linear ticket — done at this edit.
 - The preview note "prince preview — chapter XVII" in her v^2 wing (note D38D18B9…, with its "il principe 1532" lens) is HERS to delete when done; one ⌥⌘Z per act if fresh.
+
+### Her D1/D3 rulings (2026-10-28, the sitting — U2b builds them)
+
+- **R-633-16 (D1): FRESH STORES ONLY.** Existing stores are untouched at the release — the Prince seeds only on a fresh store's launch road; an existing store (hers, the testers') gets it via Help ▸ Restore "the prince", which arranges it properly. The as-built per-book-mark catch-up seeding of the Prince into existing stores is REMOVED for the Prince; Sherlock/Jekyll door behavior unchanged. The phone mirrors: its first-write occasion seeds the launch book on a fresh store only — an existing phone store never gains the Prince by update.
+- **R-633-17 (D3): the Dedication gets ITS OWN CHAPTER** — a one-note section named "dedication" before part one (the parts map's first entry; the front-matter chapter unchanged). Pins updated accordingly (the parts/seed-shape tests; resume/stray tests if they name the Dedication's section).
+
+**U2b (mini-batch, fresh implementer):** exactly these two rulings + their pin updates + the U2b record appended here. No other scope.
