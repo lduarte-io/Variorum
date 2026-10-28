@@ -150,6 +150,7 @@ struct TrayBadgeP1Tests {
         }
         let thin = try steps(blocksEach: 2)
         let thick = try steps(blocksEach: 30)
+        print("VX-647 badge VM steps: library ×1 \(thin), ×15 \(thick)")
         #expect(Double(thick) < Double(thin) * 1.5,
                 "library placements ×15: \(thin) → \(thick) VM steps — the library must not drive the badge (P1)")
     }
@@ -167,6 +168,7 @@ struct TrayBadgeP1Tests {
         }
         let thin = try steps(blocksEach: 2)
         let thick = try steps(blocksEach: 30)
+        print("VX-647 listing VM steps: library ×1 \(thin), ×15 \(thick)")
         #expect(Double(thick) < Double(thin) * 1.5,
                 "library placements ×15: \(thin) → \(thick) VM steps — the library must not drive the listing (P1)")
     }
