@@ -65,7 +65,11 @@
 //  The fresh-birth decision reads the LAUNCH BOOK's outcome
 //  (`Book.launchBook` — the Prince's now) rather than Sherlock's. Sherlock
 //  keeps every arrangement step on a store that has it (a restored copy, the
-//  installed base).
+//  installed base). U2b (R-633-16, "FRESH STORES ONLY"): the Prince seeds on
+//  a fresh store's launch road only, so its launch outcome on an existing
+//  store is `.existingStore` — declined here, nothing arranged; the restore
+//  door ("Help ▸ Restore “the prince”") composes this arrangement after it,
+//  which is how an existing store gets the Prince owned and on Welcome.
 //
 //  ── SHERLOCK OWNED, FORK-FREE ONLY (PROVISIONAL P-13id-U7-3) ────────────
 //  `setReadingOwned` FORKS a member that also lives in another book. A copy
@@ -342,6 +346,20 @@ nonisolated enum SampleLibraryWelcome {
         "SampleLibraryWelcome.\(variant.rawValue)"
     }
 
+    /// The launch mark as production reads it (`arrangeAtLaunch`'s default).
+    static func storedLaunchMark(for variant: AppDatabase.StoreVariant) -> String? {
+        UserDefaults.standard.string(forKey: launchMarkKey(for: variant))
+    }
+
+    /// **Whether this device already SETTLED the store's launch** — `done` or
+    /// `declined`: `decide`'s first arm, named so the Mac's launch hands a
+    /// fresh-only seed the SAME reading (VX-633 U2b — R-633-16: a settled
+    /// store is an existing store by the device's own record, and the Prince
+    /// never seeds into it; `SampleLibraryFreshStore`).
+    static func launchIsSettled(_ mark: String?) -> Bool {
+        mark == "done" || mark == "declined"
+    }
+
     private static let log = Logger(subsystem: "io.lduarte.Variorum", category: "sample-library")
 
     /// **A FRESH STORE'S BIRTH.** The store is fresh when THIS launch's
@@ -402,11 +420,8 @@ nonisolated enum SampleLibraryWelcome {
         mark: String?, launchSeed outcome: SampleLibrarySeeder.Outcome, save: (String) -> Void
     ) async -> LaunchOutcome? {
         let book = SampleLibrarySeeder.Book.launchBook
-        switch mark {
-        case "done", "declined": return .alreadySettled
-        case "pending": return nil
-        default: break
-        }
+        if launchIsSettled(mark) { return .alreadySettled }
+        if mark == "pending" { return nil }
         switch outcome {
         case .seeded(_, let minted):
             let expected: Int
@@ -426,7 +441,9 @@ nonisolated enum SampleLibraryWelcome {
             return nil
         case .awaitingFirstSync, .refused:
             return .undecided
-        case .alreadySeeded, .alreadyPresent, .deletedByTheReader:
+        // VX-633 U2b (R-633-16): the launch book declined an EXISTING store —
+        // not a birth, exactly as a library already here is not.
+        case .alreadySeeded, .alreadyPresent, .deletedByTheReader, .existingStore:
             save("declined")
             return .declined
         }

@@ -35,6 +35,9 @@
 //     is not seeding; what her ruling moved off the launch path is the
 //     MINT. This one gates the starter Journal only — the sample library
 //     is not new-user furniture (her Act 3 ruling: every reader's store).
+//     *(VX-633 U2b — R-633-16, "FRESH STORES ONLY": the launch book, the
+//     Prince, IS fresh-store furniture now; its own fact is taken here at
+//     launch beside this one, by the shared rule — `SampleLibraryFreshStore`.)*
 //  3. **Has this device seeded before?** — the per-store-variant marks,
 //     each seeder's own. Deleting the furniture keeps it deleted.
 //
@@ -86,7 +89,9 @@ final class MobileFirstWriteFurniture {
         /// The occasion ran. `journal` is nil when the launch verdict was
         /// never taken (`prime` never ran, or its read failed) — the
         /// starter Journal is skipped rather than guessed at, while the
-        /// sample library, which has no virgin-store guard, still runs.
+        /// sample library's seeder still runs (VX-633 U2b: with its own
+        /// launch-time fact untaken too, the fresh-only launch book reads
+        /// the store as existing — `.existingStore` — never a guess).
         case ran(journal: MobileStarterJournal.Outcome?,
                  sample: SampleLibrarySeeder.Outcome)
     }
@@ -98,6 +103,14 @@ final class MobileFirstWriteFurniture {
 
     /// Fact 2, taken at launch and spent at the write. Nil until `prime`.
     private var storeWasEmptyAtLaunch: Bool?
+    /// **The launch book's fresh-store fact** (VX-633 U2b — R-633-16, her
+    /// word: "the phone mirrors: its first-write occasion seeds the launch
+    /// book on a fresh store only"), taken at launch beside fact 2 for the
+    /// same reason — by the write her own note exists. The SHARED rule
+    /// (`SampleLibraryFreshStore.storeIsFresh`), so the two platforms judge
+    /// one predicate; nil until `prime` (or when its read failed), which the
+    /// occasion spends as NOT fresh — never a guess that seeds.
+    private var storeWasFreshAtLaunch: Bool?
     /// The one in-flight occasion. Held (rather than a bare bool) so a
     /// second door firing mid-seed joins the first instead of starting a
     /// second, and so a pin can await deterministically what production
@@ -140,8 +153,14 @@ final class MobileFirstWriteFurniture {
     ///
     /// A read that throws leaves the verdict UNTAKEN rather than guessing
     /// `true`: the guess that seeds is the one that duplicates her Journal.
+    /// VX-633 U2b (R-633-16): a second cheap read, the launch book's
+    /// fresh-store fact (`storeWasFreshAtLaunch`), on the same terms.
     func prime() async {
         storeWasEmptyAtLaunch = try? await MobileStarterJournal.storeIsNew(session)
+        let launchBook = SampleLibrarySeeder.Book.launchBook.name
+        storeWasFreshAtLaunch = try? await session.database.read { db in
+            try SampleLibraryFreshStore.storeIsFresh(db, ownBook: launchBook)
+        }
     }
 
     /// **The signal.** Called by every door that puts content in the store;
@@ -197,7 +216,10 @@ final class MobileFirstWriteFurniture {
         // R-pre13u-8: the phone gets the sample library on the same
         // occasion, through the same gate — and with NO virgin-store guard,
         // exactly as the Mac has none (her Act 3 ruling is every reader's
-        // store, not every new reader's). `.unowned` again, for the reason
+        // store, not every new reader's). *(VX-633 U2b — R-633-16: except the
+        // launch book, the Prince, which seeds on a FRESH store only, on both
+        // platforms — judged here by the fact `prime` took at launch.)*
+        // `.unowned` again, for the reason
         // above, and it also makes the Mac's bounded wait structurally
         // unreachable from the phone: this occasion never waits.
         //
@@ -215,6 +237,10 @@ final class MobileFirstWriteFurniture {
         let session = self.session
         let storeVariant = self.storeVariant
         let marks = self.marks
+        // VX-633 U2b (R-633-16): the launch-time fact, untaken read as NOT
+        // fresh. The Prince's own partial copy (a first write's seed stopped
+        // by a lock) is still completed — `SampleLibraryFreshStore`.
+        let freshness = SampleLibraryFreshness.takenAtLaunch(storeWasFreshAtLaunch ?? false)
         // VX-633 (R-633-6): the LAUNCH BOOK — *The Prince*, bilingual, in
         // Sherlock's place on both platforms (the R-17y-8 precedent: a launch
         // list names people's libraries, and a phone-seeded copy re-arrives
@@ -224,6 +250,7 @@ final class MobileFirstWriteFurniture {
         let sample = await Task(priority: .utility) { @MainActor in
             await SampleLibrarySeeder.seedIfNeeded(
                 session: session, book: .launchBook, storeVariant: storeVariant, gate: .unowned,
+                freshness: freshness,
                 loadMark: marks.loadSample, saveMark: marks.saveSample,
                 pacing: { await Self.holdWhileWritingLands(session) })
         }.value

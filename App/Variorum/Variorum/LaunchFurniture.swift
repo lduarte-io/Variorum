@@ -31,6 +31,10 @@
 //      FRESH store's birth (below). VX-633: the launch seeds *The Prince*,
 //      bilingual, in Sherlock's place (`Book.launchSet`), and the launch
 //      book's outcome (`Book.launchBook`) is the one that decides the birth.
+//      U2b (R-633-16, "FRESH STORES ONLY"): ON A FRESH STORE ONLY — a store
+//      this device settled, or one that has held writing, declines it
+//      (`.existingStore`, recorded) and so is never arranged either; its road
+//      is Help ▸ Restore “the prince” (`SampleLibraryFreshStore`).
 //    · 13i-b U4 (P-13ib-4): the STARRED-NOTES gathering — an ordinary
 //      gathering on ★, seeded once per store (fresh AND existing), her
 //      deletion honoured; same occasion, same gate, its own mark.
@@ -88,6 +92,16 @@ enum LaunchFurniture {
         firstRoundWait: Duration? = nil
     ) async -> SampleLibraryWelcome.LaunchOutcome? {
         var birthOutcome: SampleLibrarySeeder.Outcome?
+        // VX-633 U2b (R-633-16, her word: "FRESH STORES ONLY"): the launch
+        // book seeds on a FRESH store's launch road only. A store this device
+        // already SETTLED (the Welcome mark, read as the arrangement reads it)
+        // is an existing store by the device's own record; otherwise the seed
+        // judges the store at its deciding reads, after the sync gate
+        // (`SampleLibraryFreshStore`). Read for a fresh-only book alone.
+        let loadWelcomeMark: () -> String? = marks.welcome?.load
+            ?? { SampleLibraryWelcome.storedLaunchMark(for: storeVariant) }
+        let freshness: SampleLibraryFreshness =
+            SampleLibraryWelcome.launchIsSettled(loadWelcomeMark()) ? .settled : .readAtDecision
         for book in SampleLibrarySeeder.Book.launchSet {
             let mark = marks.book?(book)
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
@@ -95,6 +109,7 @@ enum LaunchFurniture {
                 book: book,
                 storeVariant: storeVariant,
                 gate: gate,
+                freshness: freshness,
                 firstRoundWait: firstRoundWait,
                 loadMark: mark?.load,
                 saveMark: mark?.save)

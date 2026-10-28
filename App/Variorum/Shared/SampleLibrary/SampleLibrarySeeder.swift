@@ -63,6 +63,12 @@
 //  virgin-store guard. The sample library is not first-launch furniture for
 //  new users only — her ruling is *every* reader's store, so a store that
 //  already holds her writing gets it at the next launch too.
+//  *(VX-633 U2b — R-633-16, her word: "FRESH STORES ONLY": ONE book bends
+//  this. *The Prince* (`Book.seedsFreshStoresOnly`) seeds on a fresh store's
+//  launch road only — an existing store never gains it at an update, on
+//  either platform; Help ▸ Restore is its road. The rule, what "fresh" means
+//  and when each platform judges it: `SampleLibraryFreshStore.swift`. Every
+//  other book keeps the no-guard doctrine above, byte-unchanged.)*
 //
 //  ── DELETION IS FINAL, AND THAT IS THE POINT ──────────────────────────
 //  The device mark is set only after a COMPLETE seed (or, since 18o U2, when
@@ -264,6 +270,12 @@ enum SampleLibrarySeeder {
         /// own runner turn (the Prince's other takes) — nil for every book
         /// before it.
         var takePass: TakePass? = nil
+        /// **VX-633 U2b (R-633-16, her word: "FRESH STORES ONLY"):** whether
+        /// the LAUNCH road seeds this book only into a fresh store
+        /// (`SampleLibraryFreshStore` — the rule and its reasons). False for
+        /// every book before the Prince: their launch behaviour is
+        /// byte-unchanged, and no restore door ever asks.
+        var seedsFreshStoresOnly: Bool = false
 
         /// *The Adventures of Sherlock Holmes* — pre-13u Act 3's book, its
         /// values exactly as they shipped.
@@ -325,6 +337,8 @@ enum SampleLibrarySeeder {
         /// first printing's (Sherlock's m6 precedent). Born fanned, so it
         /// reads EDITED to the pristine-copy classifier and stays OUT of the
         /// dedupe (the Jekyll precedent — the engine's facts byte-identical).
+        /// U2b (R-633-16): it seeds on a FRESH store's launch road only — an
+        /// existing store's road is Help ▸ Restore “the prince”.
         static let prince = Book(
             name: SampleLibraryPrinceBook.name,
             tagName: SampleLibraryPrinceBook.tagName,
@@ -337,7 +351,8 @@ enum SampleLibrarySeeder {
             clock: SampleLibraryPrinceBook.publicationDate,
             joinsPristineDedupe: false,
             grouping: .princeParts,
-            takePass: .princeBilingual)
+            takePass: .princeBilingual,
+            seedsFreshStoresOnly: true)
 
         /// Every seeded book, in seeding order — the RESTORE doors' and the
         /// pins' vocabulary. Since 17y B-DEDUPE this is NOT the launch's
@@ -365,9 +380,13 @@ enum SampleLibrarySeeder {
         /// precedent: a launch list names people's libraries, and the phone's
         /// first-write occasion reads this same list); Sherlock joins Jekyll
         /// as restore-only (`all` keeps every door). An existing store keeps
-        /// what it has; the Prince carries its OWN mark, so an existing store
-        /// seeds it at its next occasion — the 5a/U6 precedent for every book
-        /// that ever joined the launch (PROVISIONAL — the U2 record).
+        /// what it has. **U2b (R-633-16, her D1 ruling — superseding U2's
+        /// PROVISIONAL, which seeded the Prince into existing stores by its
+        /// own mark, the 5a/U6 precedent):** the Prince seeds on a FRESH
+        /// store's launch road only (`Book.seedsFreshStoresOnly`,
+        /// `SampleLibraryFreshStore`); an existing store — hers, the
+        /// testers' — never gains it at an update, on either platform, and
+        /// Help ▸ Restore “the prince” is its road (arranged by the door).
         static let launchSet: [Book] = [.prince]
 
         /// **The launch set's FIRST book — the one whose launch outcome
@@ -1015,6 +1034,15 @@ enum SampleLibrarySeeder {
         /// Minted `stories` story notes (fewer than the full set when a
         /// cancelled earlier run is being resumed).
         case seeded(readingID: String, stories: Int)
+        /// **VX-633 U2b (R-633-16, her word: "FRESH STORES ONLY"):** a book
+        /// that seeds on a fresh store's launch road alone
+        /// (`Book.seedsFreshStoresOnly` — the Prince) met an EXISTING store —
+        /// it has held writing, or this device already settled its launch
+        /// (`SampleLibraryFreshStore`). Nothing minted; the decision is
+        /// RECORDED in the mark (`deletedByTheReader`'s precedent), so later
+        /// launches short-circuit before the parse. Help ▸ Restore is an
+        /// existing store's road, and never reads the mark.
+        case existingStore
         /// The store said no. Recorded, never surfaced.
         case refused(String)
     }
@@ -1037,12 +1065,18 @@ enum SampleLibrarySeeder {
     /// Mac's launch seed, the restore door) paces nothing.
     typealias Pacing = @MainActor () async -> Void
 
+    /// `freshness` (VX-633 U2b — R-633-16) is read only for a book that seeds
+    /// fresh stores alone (`Book.seedsFreshStoresOnly`); every other book
+    /// ignores it. The default judges the store at the deciding reads — the
+    /// Mac's launch hands `.settled` when this device already settled the
+    /// store, the phone its launch-time fact.
     @discardableResult
     static func seedIfNeeded(
         session: AppSession,
         book: Book = .sherlock,
         storeVariant: AppDatabase.StoreVariant = .real,
         gate: SyncGate = .unowned,
+        freshness: SampleLibraryFreshness = .readAtDecision,
         firstRoundWait: Duration? = nil,
         pollInterval: Duration = .milliseconds(100),
         loadMark: (() -> Bool)? = nil,
@@ -1051,6 +1085,7 @@ enum SampleLibrarySeeder {
     ) async -> Outcome {
         let outcome = await perform(
             session: session, book: book, storeVariant: storeVariant, gate: gate,
+            freshness: freshness,
             firstRoundWait: firstRoundWait, pollInterval: pollInterval,
             loadMark: loadMark, saveMark: saveMark, pacing: pacing)
         log.notice("sample library (\(book.name, privacy: .public)): \(String(describing: outcome), privacy: .public)")
@@ -1062,6 +1097,7 @@ enum SampleLibrarySeeder {
         book: Book,
         storeVariant: AppDatabase.StoreVariant,
         gate: SyncGate,
+        freshness: SampleLibraryFreshness,
         firstRoundWait: Duration?,
         pollInterval: Duration,
         loadMark: (() -> Bool)?,
@@ -1085,8 +1121,15 @@ enum SampleLibrarySeeder {
             // 18o U2 (R-18k-5): every read that can DECIDE reads the same two
             // facts — what the store holds, and whether the reader deleted
             // this book (`readerDeletedTheBook`, the tutorial door's rule) —
-            // and decides the same way (`decidedWithoutMinting`).
-            let known = try await session.database.read { db in try facts(db, book: book) }
+            // and decides the same way (`decidedWithoutMinting`). VX-633 U2b
+            // (R-633-16): a third, for a fresh-only book alone — whether the
+            // store is an EXISTING one. Here, before the gate, it can only
+            // decline (writing already in the store cannot un-exist); an
+            // account store that reads empty now is judged again below, by
+            // what its first clean round brought.
+            let known = try await session.database.read { db in
+                try facts(db, book: book, titles: titles, freshness: freshness)
+            }
             if let decided = decidedWithoutMinting(known, titles: titles, save: save) {
                 return decided
             }
@@ -1108,7 +1151,9 @@ enum SampleLibrarySeeder {
             // her deletion of it can both land IN the first round the gate
             // waited for, which is the row's own "arrived by sync" road.)
             return try await withSeedLatch(session: session, book: book) {
-                let known = try await session.database.read { db in try facts(db, book: book) }
+                let known = try await session.database.read { db in
+                    try facts(db, book: book, titles: titles, freshness: freshness)
+                }
                 if let decided = decidedWithoutMinting(known, titles: titles, save: save) {
                     return decided
                 }
@@ -1122,13 +1167,30 @@ enum SampleLibrarySeeder {
         }
     }
 
-    /// The two facts a launch read decides on, from ONE read transaction —
-    /// what the store holds of the book (`discover`) and whether the reader
-    /// deleted it (`readerDeletedTheBook`) — so they can never disagree.
+    /// The facts a launch read decides on, from ONE read transaction — what
+    /// the store holds of the book (`discover`) and whether the reader deleted
+    /// it (`readerDeletedTheBook`) — so they can never disagree. VX-633 U2b
+    /// (R-633-16): for a book that seeds fresh stores alone, a third, read in
+    /// the same transaction — whether the store is an EXISTING one
+    /// (`SampleLibraryFreshStore.mayMint` answered no: a settled store, or one
+    /// that has held writing and holds no partial copy of this book's own to
+    /// complete). Always false for every other book, whose reads are
+    /// byte-unchanged (nothing more is read for them).
     nonisolated private static func facts(
-        _ db: Database, book: Book
-    ) throws -> (existing: Existing, readerDeleted: Bool) {
-        (try discover(db, book: book), try readerDeletedTheBook(db, book: book))
+        _ db: Database, book: Book, titles: [String], freshness: SampleLibraryFreshness
+    ) throws -> (existing: Existing, readerDeleted: Bool, existingStore: Bool) {
+        let existing = try discover(db, book: book)
+        let readerDeleted = try readerDeletedTheBook(db, book: book)
+        var existingStore = false
+        if book.seedsFreshStoresOnly {
+            let resuming = SampleLibraryFreshStore.isResuming(
+                bookExists: existing.bookID != nil, presentTitles: existing.presentTitles,
+                shippedTitles: [book.frontMatterTitle] + titles)
+            existingStore = try !SampleLibraryFreshStore.mayMint(freshness, resuming: resuming) {
+                try SampleLibraryFreshStore.storeIsFresh(db, ownBook: book.name)
+            }
+        }
+        return (existing, readerDeleted, existingStore)
     }
 
     /// **What the facts decide WITHOUT a mint — asked at both of the launch's
@@ -1143,9 +1205,13 @@ enum SampleLibrarySeeder {
     /// healed here, the ensure's answer too: it is a copy arriving from a
     /// device that restored the book (sync brings the rest), or residue of a
     /// re-mint only the pre-18o launch could make; Help ▸ Restore completes
-    /// either on request. `nil` = nothing decided: seed what is missing.
+    /// either on request. **VX-633 U2b (R-633-16):** then, for a book that
+    /// seeds fresh stores alone, an EXISTING store declines — recorded the
+    /// same way — AFTER both answers above, so a whole copy still reads
+    /// present and her deletion still reads as hers. `nil` = nothing decided:
+    /// seed what is missing.
     private static func decidedWithoutMinting(
-        _ facts: (existing: Existing, readerDeleted: Bool),
+        _ facts: (existing: Existing, readerDeleted: Bool, existingStore: Bool),
         titles: [String],
         save: (Bool) -> Void
     ) -> Outcome? {
@@ -1156,6 +1222,10 @@ enum SampleLibrarySeeder {
         if facts.readerDeleted {
             save(true)
             return .deletedByTheReader
+        }
+        if facts.existingStore {
+            save(true)
+            return .existingStore
         }
         return nil
     }
