@@ -233,8 +233,8 @@ the skill.
 | 11 | VX-321 receipt wording | **ACCEPTED 2026-10-28** — per-host receipts, walk C3 PASS; the Write/board truncation at 1240 pt rides P-C-1 to her bundle |
 | 12 | VX-337 bounded flake trace | **BOUND MET 2026-10-28** — the fold half traced + test-fixed on the pinned R-Q21 design, HELD under whole-target load; the soak half's two hypotheses on the ticket (stays open) |
 | 13 | The kickoff sitting record | DONE 2026-10-27 (R-601-1…6) |
-| 14 | The ladder (whole-diff, fable-reviewer) | NOT-STARTED |
-| 15 | Closeout (canon deltas · the #245 bundle · tickets · handoff) | NOT-STARTED |
+| 14 | The ladder (whole-diff, fable-reviewer) | **DONE 2026-10-28 — ONE ROUND, zero findings against the diff's code** (`notes/plans/vx-601-ladder-round1.md`); dispositions below |
+| 15 | Closeout (canon deltas · the bundle · tickets · handoff · the release at her word) | IN PROGRESS 2026-10-28 |
 
 ## WINDOW a2 — the owed runs (the orchestrator, 2026-10-27, claim vx-601-tests-a2 from 20:26)
 
@@ -2348,3 +2348,23 @@ findings, each dispositioned:
 - **Smaller:** the panel keeping its receipt line after the undo (nit, in VX-651's description);
   Terminal's panel chrome in the system sans (R-C-2's class — closeout triage); Lenses' "+ column"
   menu clipping past the window edge — minted **VX-652** (Confirmed, Low).
+
+
+## THE LADDER — round 1 verdict and dispositions (the orchestrator, 2026-10-28 ~03:20)
+
+**One round; no round 2 owed** (`notes/plans/vx-601-ladder-round1.md`, fresh `fable-reviewer`, the
+canonical prompt verbatim, zero framing; diff at 86ff62dd8 incl. the 0.10.4 bump and notes). The
+verdict: **zero findings against the diff's own code**; a clean bill covering every member's
+mechanism, the per-member revert discipline, the P1/P3 math, and the notes file. Dispositions:
+- **MAJOR (pre-existing, out of the diff): Write's editor carries VX-421's undo class**
+  (`EditorTextView` on the window's manager, teardown clears nothing — batch A's R-1, confirmed by
+  the reviewer's own read) → **minted VX-656** (High · Suspected · Editor; the pin shape and both
+  fix roads in the ticket; pre-launch is HERS, asked in the handoff).
+- **MINOR (the closeout's own canon duty, enumerated):** executed this closeout — the
+  SurfaceContracts Takes line (the open-fans session memory + the every-style expand-all, R-601-2/
+  R-601-6), the TEXTKIT2_NOTES §3 entry (the settled-caret classic-road finding, R-A2-3's drafted
+  text), and at the merge moment on main: AppSpecRecord's dated entry with R-601-1…6 + the R25
+  slot-split-half supersession + VX-248's ruled P-3 bend, and the QUESTIONS bundle.
+- **NIT (HostLaunchSettle's gate signal)** → a comment on VX-604 (done).
+- **NIT (the unreachable un-landing arm)** → documented in place this commit (no behavior change).
+- **NIT (the Lenses parenthesis + the 1240-pt truncation)** → already riding P-C-1 into her bundle.
