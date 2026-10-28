@@ -286,6 +286,59 @@ Two legs in one window, ~45–60 min total. A-648-4 binds throughout: v1_34 free
 - **Leg 3 — restore.** Delete the walk note; Delete forever from Trash (and the tray if offered); verify the Library shows only the Oct-19 note, Walk Wing empty, no Trash residue. Quit the app (its own instance only). Re-export prefs, diff against leg 0's, delete walk-added keys BY EXACT KEY (the launch counter included). Confirm posture matches leg 0's record line by line.
 - **Leg 4 — report.** WALK 1 RESULT section in this file (legs, timings, any finding); `Tools/stage release --who <claim>`; the coordinator's one result line through the orchestrator (EXECUTED tests per run, dev-store posture, instance/sim state, stage.log times).
 
+## WALK 1 RESULT (legs 2–4; Opus walker under the orchestrator's claim `vx-648-b1`, 2026-10-28 03:48–04:11 MDT)
+
+**Legs run:** 2a (as-found re-recorded) · 2b (305 carved blocks) · 2c (a) list exit ×2, (b) carve latency on every round · 3 (restore) · 4 (this section). Legs 0–1 ran earlier under the same claim (not this walker's). The app: the leg-1 Debug build `~/Library/Developer/Xcode/DerivedData/Variorum-hatiuebnaeycruadryepcesyjies/Build/Products/Debug/Variorum.app` (built 03:19, 0.10.3 (9934) — not rebuilt), launched by `open -n` with `OS_ACTIVITY_DT_MODE=YES` (stderr kept), pid 57788, the ONE dev instance throughout; every act through `Tools/WalkKit/click.sh` / `keys.sh` (author guard first; idle-gap ≥ 2 s between guarded calls). Evidence (gitignored): `App/Variorum/DerivedData/vx648-b1/leg2/` — captures, the two recordings (`listexit1.mov`, `rep.mov`) + extracted frames (`lx1/`, `lx2/`, the stacked strips), per-batch `*-posts.txt` (key-post stamps) / `*-ax.txt` (the AX trace), `app-stderr.log`, the slot listings; prefs `prefs-leg2-baseline.plist` / `prefs-leg3-after.plist` / `prefs-leg3-restored.plist`.
+
+**How latency was measured (a number per gesture, not an adjective).** Each key's epoch stamp is taken INSIDE the AppleScript immediately before its `key code` (perl `Time::HiRes`); a read-only AX poller (scratchpad `axpoll`, ~1 ms cadence) logs every change of the focused `AXTextArea`'s character count + selection with an epoch stamp and each poll's own round trip (a blocked main thread shows as a slow poll). Latency = first observed text-storage change after the post. The two list-exit runs also ran a region screen recording (`screencapture -v`, frames on change, up to 120 fps), frame-analysed with ffmpeg.
+
+**(b) VX-647 — the carve road (⏎ at a block end → empty block; ⌫ in it → carved), 305 rounds, M = 0 → 305 deleted blocks in the note:**
+
+| rounds (M before → after) | ⏎ median / p90 / max | ⌫ median / p90 / max |
+|---|---|---|
+| 1 (0 → 1) | 63.6 ms | 57.5 ms |
+| 49 (1 → 50) | 74.1 / 82.8 / 87.9 | 64.7 / 72.9 / 76.0 |
+| 50 (50 → 100) | 71.6 / 80.0 / 88.7 | 58.2 / 71.1 / 75.6 |
+| 50 (100 → 150) | 58.5 / 72.6 / 86.2 | 48.6 / 64.3 / 68.8 |
+| 50 (150 → 200) | 61.2 / 67.6 / 74.9 | 46.2 / 54.5 / 66.8 |
+| 50 (200 → 250) | 62.7 / 69.7 / 74.7 | 48.9 / 59.8 / 66.3 |
+| 50 (250 → 300) | 62.6 / 79.3 / 84.2 | 54.6 / 69.7 / 71.0 |
+| 5 (300 → 305, recorded) | 55.6–66.8 | 45.9–56.3 |
+
+FLAT in M; worst single gesture of 305 rounds: ⏎ **88.7 ms**, ⌫ **76.0 ms**; zero missed keys; every round's end state exact (7 → 6 characters, caret back at the end of "walk"); slowest single AX poll across all batches 46.9 ms (the main thread never held > 47 ms). The nav row's deleted-blocks badge read **⌫ 300** after the 300th round and ⌫ 305 at the end. No multi-second hang. Caveat as batch 1 stated: the dev store's library is small, so the PRE-fix lag (∝ M × library placements) would barely show here either — this walk proves "snappy at 305 deleted blocks"; the headless pins carry before/after.
+
+**(a) VX-649 — the list exit at M = 300 / 305 (a `- [ ] item` block; ⏎ continues; ⏎ on the empty item exits):**
+- Continue ⏎ → the `- [ ] ` line: **24.1 ms** / **39.9 ms**.
+- Exit ⏎ → the retracted state (the new line GONE) observed 49.6 / 23.2 ms after the post → the empty block landed at **99.3 ms** / **73.9 ms** after the post. The line was observed gone for **49.6 ms** (run 1) / **50.7 ms** (run 2); hard upper bound ≤ 96 / ≤ 74 ms.
+- On screen: the recordings DO show the vanished frame — run 1 pts 3.625 → 3.692 s = **66.7 ms**, run 2 pts 4.778 → 4.830 s = **51.7 ms** (frames `lx1/f04.png`, `lx2/f10.png`; strips `listexit1-f03-f06.png`, `listexit2-f09-f11.png`).
+- VERDICT: her ~1 s is gone (≈ 15–20× shorter); what remains is a single **~50–67 ms flash** (3–4 frames at 60 Hz) — exactly batch 1's predicted frame-scale residual, R1-3's retraction landing one turn before the block, **ticketed VX-655** (Low, Editor). Not "imperceptible" by the numbers — an attentive eye may catch a flicker; whether it is acceptable is her call, VX-655 owns it. No new ticket.
+
+**Findings and observations (none is a defect of this run's diff):**
+- **W1-1 (rule 21 notice at launch — informational).** First launch showed *"This is a different library than the one this Mac last had open"* (OK only). Cause: the 0.10.4 release window's step-0 walk opened other libraries in this slot, so this Mac's memory (Keychain, `io.lduarte.Variorum.memory`) named another library; per CastleRules rule 21 the open goes on, says so once, and remembers e11e5233 — the stderr shows `repair refreshMemory: done` at 03:50:34.264, BEFORE any press. Not restorable (only the app's doors write the memory) and restoring would be wrong: the memory now names e11e5233 again, the dev store's pre-release-window state. Expect it after every slot set-aside/restore.
+- **W1-2 (What's New shown).** The branch build is 0.10.3 vs the recorded 0.10.4; `WhatsNewLedger` shows on ANY difference (`recorded != currentVersion`, not only upgrades), so the sheet appeared and `markShown` wrote 0.10.3 → dismissed, and the key restored to 0.10.4 by exact key. The coordinator's "no sheet" premise holds only for builds at ≥ main's version.
+- **W1-3 (the leg-3 road — a deliberate deviation from the brief's letter).** Delete Now on a note purges the note's own family only; blocks carved EARLIER (their own tombstone stamp, `last_container_id` at the note) are survivors (`PurgeFamily.deleteLocal` detaches them) and stay as individual Trash "block" rows — 305 `(empty block)` rows, one confirm each. The Trash is wing-scoped (`TrashPurge.emptyTrashConfirm` reads `session.wing.readScope`), so the walk note was minted in the as-found-EMPTY **Walk Wing** (its Library "Nothing matches.", its Trash "The Trash is empty." — captured before minting), deleted there, and that wing's **Empty Trash** confirm read *"Empty the Trash? 306 things go for good: 1 note, 305 blocks."* — exactly the walk's rows — then Delete for Good. Home's Trash was never touched. Product observation for her bundle (no ticket filed by the walker): a note's carved history lands in the Trash as N separate empty-block rows that outlive the note's own Delete Now.
+- **W1-4 (observation).** After Delete for Good the Walk Wing Trash still listed every row at +2 s and read empty by ~+4.5 s (306 intents in one act) — not measured tightly; noted only.
+- **W1-5 (observation).** stderr carries ~20 `sqlcipher_page_cipher: hmac check failed for pgno=1` lines at 03:50:34.64 during the open's key probing; the road then logged `opened — library e11e5233` and everything worked. Pre-existing launch behavior, not this run's.
+
+**Leg 3 — posture restore, line by line against leg 2a's record:**
+- Library e11e5233 HELD — the banner "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." unchanged; **Resume never pressed**. ✓
+- Signed out — "Sync off (dev store)" unchanged; **never signed in**. ✓
+- Study voice, app Appearance **dark** (`appearanceChoice` = dark), macOS **light** (`AppleInterfaceStyle` absent) — untouched. ✓
+- v1_34: no rebuild, no new migration (the leg-1 build). ✓
+- No books (Bookcase Home "No books yet"). ✓
+- ONE note, Oct-19 ("The walk leaves a stone here: crossings, card,…", edited Oct 19) — never opened or touched. ✓
+- Walk Wing empty — Library "Nothing matches.", Trash "The Trash is empty." (both as found). ✓
+- Home Trash as found — the end capture is **byte-identical** (`cmp`) to the leg-2a capture; the pre-existing walk notes/blocks untouched. ✓
+- The twelve-words calm-ask card still shows (Later / × never pressed). ✓
+- Fan style, MCP server: never opened Settings — untouched (MCP server OFF; the harness's own MCP connect failed with "its MCP server is not running"). ✓
+- Open list: none as found, none at end. ✓
+- This Mac's Keychain memory now names e11e5233 — W1-1 (by design, not restorable, correct).
+- Instances: `pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"`, `pgrep -fl 'Variorum.app/Contents/MacOS'` all EMPTY after the quit by identity (04:09:18); no simulator booted; no dialog left.
+
+*[removed for publication]*
+
+**Stage:** NOT released by the walker (the orchestrator's); no `renew` was needed.
+
 ## LIVE STATUS
 
 2026-10-28 (kickoff): preflight complete (MCPSpec + SurfaceContracts + TEXTKIT2_NOTES + resiliency + workflow-transition + QUESTIONS #245/#246 + AppSpecRecord 10-27/28 entries read in full; 17 ticket bodies fetched). Coordinator announced and protocol received.
