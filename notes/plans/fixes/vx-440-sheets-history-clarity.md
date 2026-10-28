@@ -273,7 +273,21 @@ red-on-old Mac verification, PENDING for the orchestrator's stage window; no wal
 
 Pieces (flipped per commit):
 - B1-0 record skeleton: DONE (this commit).
-- B1-1 VX-437 live check (trace + pins): IN-PROGRESS.
+- B1-1 VX-437 live check (trace + pins): VERDICT — the scout's finding is REAL. Traced:
+  `CompareViewModel.read` → `Queries.versionPeerSplit(…).sameWing` → `versionPeerPosts` (live `version_of`
+  edges between live placements, NO version-history/archive fence) ⇒ a saved version (minted by `copyPost`
+  with exactly such an edge, in the source's wing) IS a same-wing peer; `adopt` auto-fills
+  `versionPeers.first` (order `c.id` — a UUID coin flip when an ordinary peer exists too) and the offer band
+  lists it; its card wears "unmark" (`isVersionPeer`); the button runs `unmarkPostsAsVersions(anchor,
+  version)`, tombstoning every cross edge on a fresh stamp no endpoint block shares ⇒ the classifier's edge
+  fence drops it ⇒ it leaves Note ▸ Versions, rows onto Archived (`archivedPosts`), and Restore/Promote
+  throw `notVersionHistory`. The Library's "Unmark Versions with…" picker can NOT reach a version
+  (`notePickerNotes(ids:)` fences `archived_at IS NULL`), so Compare's card is the one door. Pins: core
+  `VersionsInCompareTests.aSavedVersionIsASameWingVersionPeerSoCompareSeatsIt` (the auto-fill input, green
+  both sides — a contract pin, not a bug pin; RUN GREEN headless); Mac red-on-old
+  `CompareVersionsTests.unmarkOnASavedVersionNeverDeclassifiesIt` — COMMITTED ON THE PRE-FIX TREE in this
+  commit (pre-fix API only) and compiled (`build-for-testing` ✓); its RED run on this SHA and GREEN run on
+  the B1-3 fix commit are PENDING (stage window). DONE (this commit) for the trace + pins.
 - B1-2 core: saved-version stamps query (newest-first, the one classifier) + its pins: NOT-STARTED.
 - B1-3 Compare: auto-fill order (P-440-2) · version columns show the DATE · unmark on a saved version = the
   promote confirm (P-440-5): NOT-STARTED.
