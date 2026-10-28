@@ -602,7 +602,7 @@ over-withhold proof. Evidence per finding: `notes/plans/fixes/vx-623-ladder-roun
 | Piece | Finding | Status |
 |---|---|---|
 | A | 1 MAJOR — the words guard fail-closed (three classes, generic scan, `--self-check`, P-1 pin script, walk self-test +3 / 1 renamed, `capture()` logs the count) | DONE `a57bb863c` — P-1 red-on-old 3/6 → 0/6; P-2 mutation-red 6/12 → 0/12; walk `--self-test` 67/67 |
-| B | 2 MINOR — the allowlist seam, SAME-READ (`guard_allowlist` prints the checked email, both twins; the re-reads deleted; contract + structural pins in both self-tests) | NOT-STARTED |
+| B | 2 MINOR — the allowlist seam, SAME-READ (`guard_allowlist` prints the checked email, both twins; the re-reads deleted; contract + structural pins in both self-tests) | DONE (this commit) — red-on-old walk 2 wrong · helper 2 of 88 wrong → green walk 70/70 · helper 88/88; the old :393–394 harness built the SELECT for `her@x.test` |
 | C | 3 MINOR — release.sh :329 sentence verbatim; `bash -n` | NOT-STARTED |
 | D | 4 NIT — `--log` / `--app` missing value → `refuse` (exit 5), fenced-subprocess pin in both self-tests | NOT-STARTED |
 | E | 5 NIT — `J3 J3b` + the dry-run plan's J3b | NOT-STARTED |

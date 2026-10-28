@@ -24,10 +24,11 @@
 #   R1  the account is std · castle · del, and the allowlist ~/.variorum/prod-test-accounts.env is a regular file (never a
 #       link), mode 600, every listed email carries 'vxtest', and this account's email is PLAIN (matched whole — it is
 #       spliced into a SELECT) and listed — first-run-walk.sh's G1/G2, VERBATIM (`guard_allowlist`; the self-test pins
-#       the two functions byte-identical)
+#       the two functions byte-identical). The guard hands back the email it CHECKED, and that is the one value R3 uses —
+#       the file is never re-read (the VX-623 ladder's round-1 check-to-use seam; pinned)
 #   R2  the road's tools: Tools/prod-read.sh (every read goes through its SELECT-only fence) and .env.supabase.local
 #   R3  the account's id is resolved by its own guarded email→id read: exactly ONE auth user, its email BYTE-EQUAL to the
-#       allowlist's entry, its id a lowercase UUID (the only value the statement splices)
+#       email R1 checked, its id a lowercase UUID (the only value the statement splices)
 #   R4  the before-read parses whole (every count present and an integer) — any doubt refuses
 # Then: already at rest → nothing written (exit 0) · --dry-run → the plan and the before-read printed (exit 0) · else the
 # one statement, then the after-read, ALWAYS (the after-read is the truth, whatever the write's answer said).
@@ -76,7 +77,7 @@ guard_allowlist() {
   [[ $email == *vxtest* ]] || { print -r -- "the $account account's email carries no 'vxtest' marker"; return 1 }
   plain_address "$email" || { print -r -- "the $account account's email is not a plain address (lowercase letters, digits, . _ + -, one @)"; return 1 }
   [[ " $list " == *" $email "* ]] || { print -r -- "the $account account's email is not on the allowlist"; return 1 }
-  return 0
+  print -r -- "$email"
 }
 # --- end of the verbatim twin ---------------------------------------------------------------------------------------
 
@@ -237,6 +238,7 @@ VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
     local why rc got
     why=$(guard_allowlist $T/$2 $3); rc=$?
     got=accept; (( rc )) && got=refuse
+    [[ $got == refuse ]] || why=   # (on accept the guard prints the checked email — never shown here)
     if [[ $got == $4 ]]; then ok "R1 $1: $got${why:+ ($why)}"; else fail "R1 $1: $got — expected $4"; fi
   }
   expect "a good file, std" good std accept
@@ -259,6 +261,17 @@ VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
     '[[ -n $(twin $SELF) && $(twin $SELF) == $(twin $walk) ]]'
   check "R1 plain_address is the walk's, byte for byte" \
     '[[ -n $(grep -x "PLAIN_ADDRESS=.*" $SELF) && $(grep -x "PLAIN_ADDRESS=.*" $SELF) == $(grep -x "PLAIN_ADDRESS=.*" $walk) && $(grep -x "plain_address() .*" $SELF) == $(grep -x "plain_address() .*" $walk) ]]'
+  # The ladder's round-1 finding 2 (the check-to-use seam): the email R3 splices and compares is the one R1 CHECKED —
+  # guard_allowlist hands it back on accept, and the main path never re-reads the file.
+  outside_reads() {  # <file> → how many lines source the allowlist outside guard_allowlist's body (and the walk's allowlist_value)
+    awk '$0 == "guard_allowlist() {" { f = 1; next } f && $0 == "}" { f = 0; next } f { next } /^allowlist_value\(\) \{/ { next } { print }' $1 \
+      | grep -c 'sour''ce \$'
+  }
+  check "R1 on accept prints exactly the CHECKED email (the one value R3 splices and compares)" \
+    '[[ $(guard_allowlist $T/good std) == "a+vxtest-std@x.test" && $(guard_allowlist $T/good castle) == "b+vxtest-castle@x.test" ]]'
+  check "R1 on a refusal prints the reason, never an address" \
+    '[[ $(guard_allowlist $T/unmarked std) == "an allowlist entry is not a plainly-test address" ]]'
+  check "R1 the allowlist is sourced only inside guard_allowlist — the main path never re-reads it" '[[ $(outside_reads $SELF) == 0 ]]'
 
   # R3 — the id read: exactly one auth user, its email byte-equal to the entry, a lowercase UUID.
   ID=0f3c2b1a-9d8e-4f7a-8b6c-5d4e3f2a1b0c
@@ -388,10 +401,9 @@ if [[ -z $LOG ]]; then mkdir -p $REPO/App/Variorum/DerivedData/prod-reset; LOG=$
 say() { print -r -- "[$(date -u +%H:%M:%SZ)] prod-reset $ACCOUNT: $*" | tee -a $LOG }
 
 # --- THE GUARDS (in order; each refusal exits 5 with nothing written) -----------------------------------------------
-why=$(guard_allowlist $ALLOW $ACCOUNT) || refuse "R1 — $why"
+EMAIL=$(guard_allowlist $ALLOW $ACCOUNT) || refuse "R1 — $EMAIL"   # on accept: the CHECKED email — never a re-read of the file
 [[ -x $PRODREAD && -f $REPO/.env.supabase.local ]] || refuse "R2 — Tools/prod-read.sh or .env.supabase.local is missing"
-EMAIL=$(set -a; source $ALLOW; set +a; eval "print -r -- \"\${VARIORUM_PRODTEST_${(U)ACCOUNT}_EMAIL}\"")
-q=$(id_sql "$EMAIL") || { unset EMAIL; refuse "R3 — the '$ACCOUNT' email is not a plain address (the allowlist changed since R1?)" }
+q=$(id_sql "$EMAIL") || { unset EMAIL; refuse "R3 — the '$ACCOUNT' email R1 checked failed the splice's plain-address re-check (a belt — R1 checks the same rule)" }
 answer=$(prodread "$q") || { unset EMAIL; refuse "R3 — the account read failed (Tools/prod-read.sh)" }
 UID_=$(py resolve "$answer" "$EMAIL"); rc=$?
 unset EMAIL answer

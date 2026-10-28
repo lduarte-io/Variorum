@@ -99,7 +99,9 @@ refuse() { print -u2 "first-run-walk REFUSES: $*"; exit 5 }
 # which passes a value whose FIRST line is plain (the ladder's F-R1-5: P3 splices the address into its SELECT).
 PLAIN_ADDRESS='^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]+$'
 plain_address() { [[ $1 =~ $PLAIN_ADDRESS ]] }
-# guard_allowlist <file> <account> → 0, or prints the refusal and returns 1. Values never printed.
+# guard_allowlist <file> <account> → prints the account's CHECKED email and returns 0 — the ONE value a caller may use
+#   (P3 splices it; the file is never re-read: the VX-623 ladder's round-1 check-to-use seam) — or prints the refusal and
+#   returns 1. Captured by `$(…)`, never printed to the terminal (an email is no secret — it rides `ps eww` — but stays quiet).
 # allowlist_value <file> → the file's one key (the list the launch is handed), read in a subshell; the other keys never.
 # (Tools/prod-reset-test-account.sh carries this function VERBATIM — its self-test pins the two byte-identical.)
 guard_allowlist() {
@@ -118,7 +120,7 @@ guard_allowlist() {
   [[ $email == *vxtest* ]] || { print -r -- "the $account account's email carries no 'vxtest' marker"; return 1 }
   plain_address "$email" || { print -r -- "the $account account's email is not a plain address (lowercase letters, digits, . _ + -, one @)"; return 1 }
   [[ " $list " == *" $email "* ]] || { print -r -- "the $account account's email is not on the allowlist"; return 1 }
-  return 0
+  print -r -- "$email"
 }
 allowlist_value() { (set -a; source $1 2>/dev/null; set +a; print -r -- "${VARIORUM_PRODTEST_EMAILS:-}") }
 
@@ -253,6 +255,10 @@ VARIORUM_PRODTEST_STD_EMAIL="a+vxtest-std@x.test
 VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
   ln -s $T/good $T/link
   fails=0
+  SELF=${0:A}   # (read at the top level — inside a function $0 is the function's name)
+  sure() {  # <label> <zsh condition>
+    if eval "$2"; then print -r -- "SELF-TEST $1  ok"; else print -r -- "SELF-TEST $1  FAIL"; fails=$((fails + 1)); fi
+  }
   expect() {  # <label> <file> <account> <accept|refuse>
     local why rc got
     why=$(guard_allowlist $T/$2 $3); rc=$?   # (the status read at once — never after another assignment)
@@ -278,11 +284,21 @@ VARIORUM_PRODTEST_STD_EMAIL="someone08+vxtest-std@gmail.com"'
   if [[ $handed == "a+vxtest-std@x.test b+vxtest-castle@x.test" ]]; then print -r -- "SELF-TEST the handed value: the list key alone  ok"
   else print -r -- "SELF-TEST the handed value: '$handed'  FAIL"; fails=$((fails + 1)); fi
   [[ $handed != *notasecret* ]] || { print -r -- "SELF-TEST the handed value carries another key  FAIL"; fails=$((fails + 1)) }
+  # The ladder's round-1 finding 2 (the check-to-use seam): the email P3 splices is the one G2 CHECKED — guard_allowlist
+  # hands it back on accept, and the main path never re-reads the file (allowlist_value's launch list is the one other
+  # read: never spliced, re-guarded by the app at connect — F-B1-1).
+  outside_reads() {  # <file> → how many lines source the allowlist outside guard_allowlist's body and allowlist_value
+    awk '$0 == "guard_allowlist() {" { f = 1; next } f && $0 == "}" { f = 0; next } f { next } /^allowlist_value\(\) \{/ { next } { print }' $1 \
+      | grep -c 'sour''ce \$'
+  }
+  sure "G1/G2 on accept prints exactly the CHECKED email (the one value P3 splices)" \
+    '[[ $(guard_allowlist $T/good std) == "a+vxtest-std@x.test" && $(guard_allowlist $T/good castle) == "b+vxtest-castle@x.test" ]]'
+  sure "G1/G2 on a refusal prints the reason, never an address" \
+    '[[ $(guard_allowlist $T/unmarked std) == "an allowlist entry is not a plainly-test address" ]]'
+  sure "the allowlist is sourced only inside guard_allowlist and allowlist_value — the main path never re-reads it" \
+    '[[ $(outside_reads $SELF) == 0 ]]'
   # D-5 (VX-623): every capture is withheld while the twelve words could be on screen — the words guard's teeth, over
   # strings (its --classify mode; the AX walk itself needs a live pid). Compiled into the temp folder, never the repo.
-  sure() {  # <label> <zsh condition>
-    if eval "$2"; then print -r -- "SELF-TEST $1  ok"; else print -r -- "SELF-TEST $1  FAIL"; fails=$((fails + 1)); fi
-  }
   if swiftc -O -o $T/words-guard $WK/words-guard.swift 2>/dev/null; then
     wg() { $T/words-guard --classify "$1" >/dev/null }
     sure "D-5 the words guard withholds twelve lowercase words" '! wg "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima"'
@@ -398,7 +414,7 @@ done
 [[ -n $ACCOUNT ]] || refuse "usage: first-run-walk.sh <std|castle|del> [--arm setup|join|both] [--app <Debug Variorum.app>] [--dry-run] | --self-test"
 
 # --- THE GUARDS (in order; each refusal exits 5 with nothing launched) ------------------------------------------------
-why=$(guard_allowlist $ALLOW $ACCOUNT) || refuse "G1/G2 — $why"
+EMAIL=$(guard_allowlist $ALLOW $ACCOUNT) || refuse "G1/G2 — $EMAIL"   # on accept: the CHECKED email P3 splices
 [[ -z ${VARIORUM_WALK_PROJECT_URL:-}${VARIORUM_WALK_ANON_KEY:-} ]] \
   || refuse "G3 — a walk project is set in this environment; the walk project and the prod test road are exclusive"
 APP=${APP:A}
@@ -644,9 +660,9 @@ log "arm '$ARM' · the slot folder $SLOT_AT_G7 at G7"
 launch_on_road $RUN/app.log
 
 step P3 "the account on production (exists, confirmed) — its id, read once"
-EMAIL=$(set -a; source $ALLOW; set +a; eval "print -r -- \"\${VARIORUM_PRODTEST_${(U)ACCOUNT}_EMAIL}\"")
-# Re-checked at the splice (the file is re-read here — G2's check is of an earlier read).
-plain_address "$EMAIL" || { unset EMAIL; stop "the '$ACCOUNT' account's email is not a plain address (the allowlist changed since G2?)" }
+# The email is the one G2 CHECKED (guard_allowlist handed it back) — the file is never re-read (the VX-623 ladder's round-1
+# check-to-use seam). The plain-address re-check at the splice stays as a belt.
+plain_address "$EMAIL" || { unset EMAIL; stop "the '$ACCOUNT' account's checked email failed the splice's plain-address re-check (a belt — G2 checks the same rule)" }
 user=$(prodread "select id, email_confirmed_at is not null as confirmed from auth.users where email = '$EMAIL'")
 unset EMAIL
 UID_=$(print -r -- $user | grep -o '"id":"[0-9a-f-]*"' | head -1 | cut -d'"' -f4)

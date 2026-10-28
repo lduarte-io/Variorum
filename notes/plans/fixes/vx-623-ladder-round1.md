@@ -358,5 +358,28 @@ the guard's own `--self-check`).
   with real CG windows only at launch-time AX warm-up, and every capture near the words look comes after successful
   vis-ax AX presses (the look exists only after P5's press chain). No ticket.
 
-**2 · [MINOR] — PENDING** (piece B). **3 · [MINOR] — PENDING** (piece C). **4 · [NIT] — PENDING** (piece D).
-**5 · [NIT] — PENDING** (piece E).
+**2 · [MINOR] — FIXED, the SAME-READ form** (the piece-B commit). The final call's conditions, met one by one:
+- **(a)** `guard_allowlist`'s success line is now `print -r -- "$email"` (was `return 0`), changed byte-identically in both
+  twins; the helper's twin pin `R1 the guard is first-run-walk.sh's G1/G2, byte for byte` stays green.
+- **(b)** The contract pin lands in BOTH self-tests: "on accept prints exactly the CHECKED email". The walk's self-test
+  also gains a companion: "on a refusal prints the reason, never an address".
+- **(c)** The structural pin lands in BOTH: "the allowlist is sourced only inside `guard_allowlist` (and the walk's
+  `allowlist_value`, exempt) — the main path never re-reads it".
+- **(d)** The `plain_address` belts stay: `id_sql`'s, and P3's before the walk's SELECT.
+- **(e)** The stale refusal wording is replaced. The helper now says "R3 — the '‹account›' email R1 checked failed the
+  splice's plain-address re-check (a belt — R1 checks the same rule)", and the walk's P3 stop has the same shape.
+
+The helper's R1 line takes `EMAIL=$(guard_allowlist $ALLOW $ACCOUNT) || refuse "R1 — $EMAIL"`, and the old :393 re-read
+is deleted. The walk's G1/G2 takes it the same way, its :636 re-read is deleted, and P3 uses G2's value. Both headers
+say so. The helper's `expect` no longer shows the email on accept.
+- **RED ON OLD** (both pins written into the self-tests BEFORE the fix, run on the pre-fix code): walk **2 case(s) wrong**
+  (the contract and structural cases FAIL; the refusal-text case passes, as expected, on both sides); helper **2 of 88
+  case(s) wrong**, the same two. **GREEN ON THE FIX:** walk 70/70 · helper 88/88.
+- **The mechanism, demonstrated once (a scratch harness, not landed — the final call's (c)):** the OLD helper's :61–85
+  (`PLAIN_ADDRESS` · `plain_address` · `guard_allowlist` · `id_sql`) and :393–394, extracted verbatim by `git show
+  14ad4a09c:Tools/prod-reset-test-account.sh`, run with R1 passing over a marked fixture that is then rewritten to a
+  plain UNMARKED address before the re-read → `the OLD :393-394 built: select id, email from auth.users where email =
+  'her@x.test'`. The fixed main path has no re-read left to do that: `grep -nF 'source $'` over both files now finds only
+  the guard's two reads and `allowlist_value`.
+
+**3 · [MINOR] — PENDING** (piece C). **4 · [NIT] — PENDING** (piece D). **5 · [NIT] — PENDING** (piece E).
