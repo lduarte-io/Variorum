@@ -1191,3 +1191,21 @@ the same REQUEST.
   drag-or-select decision; held presses there drag nothing; TK1 never does — belongs in the
   build companion beside the other measured findings, pinned in `CaretPressTests`. Canon is the
   orchestrator's at closeout; the text is ready here.
+
+## WINDOW a2b — batch A2's runs (the orchestrator, 2026-10-27, claim vx-601-tests-a2b from ~21:59)
+
+**Red runs on the three trees: 21 tests in 3 suites EXECUTED on each, zero host restarts, zero
+crash dialogs.** `vx601a2-pre` — 5 red; `vx601a2-rev429` — 3 red (exactly the pane pins:
+caret's-own-place, landed-at-start, read-pane's-kept-caret); `vx601a2-rev592` — 2 red (exactly the
+Write pins: from-the-caret, from-where-she-just-typed). The union is pre's five; the partition is
+clean; **no pin is hollow — both wires STAND.** The Write-side pins red on pre settle the
+discrimination the implementer designed: **the ticket's "Write is fine" was FALSE** — Write had
+the same held-press-at-the-caret dead drag, and VX-592's EditorTextView wire is real, not
+withdrawn. Red-on-old is verified by revert PER MEMBER. Logs: `DerivedData/logs/red-vx601a2-*.log`.
+
+**Tier 1 on `vx601a2-post`: 149 tests in 19 suites PASSED, 0 skipped** (every suite delivering a
+mouseDown to either view, plus the pane family — batch A's suites among them, still green over the
+new wires). Log: `DerivedData/logs/tier1-a2-post.log`.
+
+**The 201-suite battery on post:** launched (batch A's 196 + the 3 CaretPress suites +
+PhantomSpaceTests + TypewriterRoomTests, deduped and count-checked at 201). PENDING.
