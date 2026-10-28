@@ -162,3 +162,102 @@ walk.log). · **Fix:** `J3 J3b` (or similar) — log clarity only.
 No BLOCKER. One MAJOR (the words guard's fail-open seam — a real hole in a privacy guard this diff
 itself made load-bearing), two MINOR, two NIT. The run's substance — the guarded reset, the two arms,
 the self-test lattice, the D-7 pin — is solid, carefully built, and verified end to end.
+
+## ROUND 1 — THE IMPLEMENTER'S ANSWERS (the Opus ladder-fix implementer, 2026-10-27 — phase 1, agree/dispute)
+
+**Nothing is applied yet:** this section is the answer only; no fix lands before the reviewer's final call. Every trace
+below is my own (headless — no production, stage, GUI, Variorum launch or container write; the only probes were AX reads
+of a backgrounded `sleep` and of Finder, codes and counts only, never a string). **Five AGREE, no DISPUTE**; on the
+MAJOR and the first MINOR I propose a fix one step wider than the sketch, with the sketch kept as the fallback.
+
+**1 · [MAJOR] words guard fail-open — AGREE.** My trace: `words-guard.swift:31` folds every non-`.success` answer of the
+windows read into `?? []`; the loop at :33 never runs; :41 prints `ok`, exit 0; `capture()` (`first-run-walk.sh:474`)
+reads exit 0 as go-ahead, and `walk-cap` lists by `CGWindowListCopyWindowInfo` (`capture-windows.swift:14`), no AX, so it
+shoots the pid's windows regardless. **Reproduced:** the current guard compiled from this tip, run on a backgrounded
+`sleep 30` → `'ok' exit 0`; the windows read there answers **-25204 (`kAXErrorCannotComplete`) in 0.01 s** (my shell is AX-
+trusted; a nonexistent pid, 999999, answers -25204 too) — the same code a hung app returns after AX's ≈6 s timeout, which is the
+reviewer's stop()-mid-P5 road (`stop()` :480 → `capture stopped`). Two more holes of the same class, beyond the sketch:
+(a) mid-scan, a children or string read that fails (`.cannotComplete` — the app hung after the windows answered) is also
+folded into `nil`/`[]` at :36 and :39, so the subtree is silently skipped and the scan still ends `ok`; and each further
+read waits out its own ≈6 s timeout, so a hang mid-scan also stalls the walk for minutes before the fail-open `ok`.
+(b) The cap exit at :33 → :41 with the queue non-empty, exactly as the reviewer traced. And the self-test case at
+`first-run-walk.sh:298` proves only the usage guard (`notapid` → exit 2), as stated.
+- **The fix (exact):** one reader classifies every AX answer three ways — **present** (`.success` with the expected type),
+  **absent** (`.noValue`, `.attributeUnsupported`, `.notImplemented` — the element has no such attribute; a `.success`
+  of another type, e.g. a slider's number, is absent too), **unreadable** (every other code: `.cannotComplete`,
+  `.apiDisabled`, `.failure`, `.illegalArgument`, `.invalidUIElement` — fail-closed; the last one rare at rest, and a
+  withheld capture during churn is cheap). The scan becomes ONE generic function over the node type, so the same code
+  runs in the pid mode and over synthetic trees; its verdicts: the windows read not present (anything but a `.success`
+  array — an empty array stays legal, zero windows) → `withheld (the pid's windows could not be read — AXError <n>)`;
+  any unreadable read mid-scan → `withheld (the pid stopped answering mid-scan — AXError <n>)`, at once (no chain of
+  timeouts); the cap reached with the queue non-empty → `withheld (the tree was not fully scanned — more than 30000
+  elements)` (this also terminates a cyclic tree fail-closed). All exit 1. The pid mode's success line becomes
+  `ok (<n> elements read)` and `capture()` logs it on its "captured" line, so every live capture shows the guard read a
+  real tree (the old `ok` on an empty queue was indistinguishable from a full scan). Exit grammar unchanged (0 ok · 1
+  withheld · 2 usage); `--classify` unchanged.
+- **Why the stricter taxonomy will not over-withhold:** Finder's whole tree at rest (32 elements) answered only 0,
+  -25212 (noValue) and -25205 (attributeUnsupported); and the live gate's captures (`run-20261028T005847Z-std/walk.log`)
+  each logged within about a second of the line before it (seconds resolution — J3's frame line, its capture and J4's
+  capture all at 19:00:34), guard and shoot together — far from a 30,000-element scan of ~120,000 AX calls — so the cap's
+  new verdict will not bite at the walk's scale. The next live walk's `ok (<n> elements read)` lines are the proof.
+- **Pins:** (P-1, the reviewer's, behavioural red-on-old) `Tools/WalkKit/pins/words-guard-fail-closed.zsh [<source>]`
+  (the D-7 pin's shape — compiles the given `words-guard.swift`, default the repo's, into a temp dir): a backgrounded
+  non-GUI pid → `withheld (…)`/1 · a reaped (dead) pid → withheld/1 · `notapid` → usage/2 · `--classify` twelve words → 1 and the
+  join's landed line → 0 · `--self-check` → 0. **Against `git show 14ad4a09c:Tools/WalkKit/words-guard.swift`:** the two
+  pid cases FAIL (`ok`/0, already seen above) and `--self-check` FAILS (no such mode — usage/2); against the fix, all pass.
+  (P-2, the cap and the mid-scan class) `words-guard --self-check` drives the generic scan over synthetic trees: a
+  30,001-node tree → withheld (not fully scanned) · a node that is its own child → withheld, terminates · a children read
+  unreadable mid-scan → withheld · a string read unreadable → withheld · the windows read unreadable → withheld · twelve
+  words at depth 40 → withheld · a clean 500-node tree with absent attributes throughout → ok. **Red by mutation** (a temp
+  copy with the cap verdict and the unreadable verdicts reduced to the old `continue`/`?? []`): the cap, cycle and
+  mid-scan cases go `ok` — red. The walk's `--self-test` gains the sleep-pid case, the reaped-pid case, the
+  `--self-check` case, and the misnamed case renamed to "a non-numeric argument → usage, withheld (exit 2)".
+- **Considered and not done (one line, the reviewer's to weigh):** a guard that also counts the pid's CG windows and
+  withholds when AX answers an EMPTY windows list while CG shows windows on screen — an AX-bug state, not the hung road,
+  and outside this finding.
+
+**2 · [MINOR] the helper's check-to-use seam — AGREE.** My trace: `prod-reset-test-account.sh:391` checks the file
+(inside `guard_allowlist`, two sourcings at :69–70); :393 sources it a THIRD time, with no type/mode/marker re-check,
+and that value is the one spliced (:394 `id_sql` re-checks only `plain_address`) and compared byte-equal at :396 — so
+the byte-equal R3 check compares the resolved user against the unchecked value, not against what R1 approved. The
+walk's :636–638 is the same shape (its own grep of `source $` shows these two main-path re-reads are the ONLY ones in
+either file). Opening it needs her own mid-run edit of her own 600-mode file; the fix is still owed because the fence
+is stated as absolute.
+- **The fix (exact — the "same read" form, closing the marker, listed and file-type seams at once):** `guard_allowlist`
+  prints the CHECKED email on success (its one stdout line; the refusal text on failure, as now), in BOTH twins byte-
+  identically (the twin pin keeps them so); the helper takes `EMAIL=$(guard_allowlist $ALLOW $ACCOUNT) || refuse "R1 —
+  $EMAIL"` and deletes the :393 re-read; the walk takes its G1/G2 the same way and deletes the :636 re-read, P3 using
+  G2's value; `id_sql`'s and P3's `plain_address` re-checks stay as belts. No other value moves (the launch's
+  `allowlist_value` list re-read is the app's to re-guard — every entry marked, per-account admission — and not a reset
+  path). **Fallback if the reviewer prefers not to touch the pinned twin:** the sketch's one-liner,
+  `[[ $EMAIL == *vxtest* ]] || refuse …` after each re-read (closes the marker seam; leaves listed/file-type).
+- **Pins:** (a) structural, red-on-old: in each self-test, "the allowlist is sourced only inside `guard_allowlist`
+  (and the walk's `allowlist_value`) — the main path never re-reads it" — old: 1 offending line in each file (helper :393,
+  walk :636) → FAIL; fixed: 0. (b) the contract, red-on-old: "on accept, `guard_allowlist` prints exactly the fixture's
+  email" (old prints nothing) — in both self-tests. (c) the mechanism, demonstrated once and recorded (a scratch
+  harness, not landed): the OLD :393–394 lines, extracted verbatim by `git show 14ad4a09c:…`, run after a passing
+  `guard_allowlist` over a fixture rewritten in between to a plain UNMARKED address → they build `select id, email from
+  auth.users where email = 'her@x.test'`; the fixed main path has no line that can.
+
+**3 · [MINOR] release.sh "Arms one at a time" — AGREE.** My trace: `--arm setup` runs P1–P8 then THE END (E1 sign-out,
+E2 quit, E3 `reset_account cleanup` — `first-run-walk.sh:776–788`), leaving the account vaultless; a following `--arm
+join` skips the pre-step, reaches J5 and `join_ready` (:204–209) stops on "the account holds no vault — the set-up arm
+makes it (run --arm both)". So the offered sequence refuses by construction; `--arm join` works only after a `both` run
+stopped inside the join arm (a STOP never resets). **Fix:** release.sh:329's sentence becomes "`--arm join` alone resumes
+a `both` run that stopped in the join arm (it needs that run's Standard vault); `--arm setup` alone also ends with the
+cleanup reset." The README's line (345, "`--arm join` alone needs the account's Standard vault") is already true; left.
+No pin (document text) — `bash -n` re-run.
+
+**4 · [NIT] `${2:?…}` outside the exit grammar — AGREE.** Reproduced: `LOG=${2:?--log needs a file}` with no value →
+zsh's own `2: --log needs a file`, **exit 1** (a one-line scratch script). Same at `first-run-walk.sh:380` (`--app`).
+**Fix:** `--log) [[ -n ${2:-} ]] || refuse "--log needs a file"; LOG=$2; shift ;;` and the walk's `--app` twin (`refuse
+"--app needs a path"`) — exit 5, the documented shape. **Pin (offered; the orchestrator may rule it out):** each
+self-test runs its own script as a FENCED subprocess — `HOME=$T/nohome` (no allowlist can exist, so even a regressed
+parse refuses at R1/G1 before any read), `PATH=$T/shim:$PATH` with a `curl` that exits 99 (a third belt) — `std --log`
+/ `std --app` → exit 5 naming the missing value; old → exit 1. If a subprocess of the script's main path is outside
+"self-tests over fixtures", the NIT lands unpinned as a message path.
+
+**5 · [NIT] `J3 J3` — AGREE.** `launch_on_road`'s defaults are P1 (launch) and P2 (road, window, frame) — two steps; the
+join passes `J3 J3`, and the live walk.log shows the launch, the road and `captured 'launched'` all under J3 (line 62).
+**Fix:** `launch_on_road $RUN/app-join.log J3 J3b`, and the dry-run plan's J3 line names J3b (the road armed, the
+window's bounds). No pin (log naming).
