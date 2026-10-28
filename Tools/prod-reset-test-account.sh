@@ -380,6 +380,19 @@ PY
   check "DRIFT no maintenance file redefines account_purge()" \
     '! grep -l "create or replace function account_purge" $REPO/Server/supabase/maintenance/*.sql >/dev/null 2>&1'
 
+  # The ladder's round-1 NIT 4: a missing option value refuses in the documented exit grammar (5, named) — never zsh's
+  # own exit 1. The script runs as a FENCED subprocess, three ways: HOME at an empty temp dir (no allowlist can exist
+  # there, so even a regressed parse refuses at R1 before any read), `zsh -f` (no startup files), and a `curl` on PATH
+  # that exits 99 (any network attempt dies).
+  mkdir -p $T/nohome $T/shim
+  print -r -- '#!/bin/sh
+exit 99' > $T/shim/curl; chmod +x $T/shim/curl
+  check "ARGS the fence holds: the curl shim shadows the real one, and no allowlist exists under the fenced HOME" \
+    '[[ $(PATH=$T/shim:$PATH whence -p curl) == $T/shim/curl && ! -e $T/nohome/.variorum/prod-test-accounts.env ]]'
+  argout=$(HOME=$T/nohome PATH=$T/shim:$PATH zsh -f $SELF std --log 2>&1); argrc=$?
+  check "ARGS a missing --log value → refused in the grammar (exit 5, named) — fenced" \
+    '(( argrc == 5 )) && [[ $argout == *"REFUSES: --log needs a file"* ]]'
+
   check "the network was never reached" 'true'   # (prodread/prodwrite are tripwires that exit 99)
   (( fails == 0 )) && { print "SELF-TEST: every guard fired as expected ($cases cases)"; exit 0 }
   print "SELF-TEST: $fails of $cases case(s) wrong"; exit 1
@@ -390,7 +403,7 @@ ACCOUNT= DRY= LOG=
 while (( $# )); do
   case $1 in
     --dry-run) DRY=1 ;;
-    --log) LOG=${2:?--log needs a file}; shift ;;
+    --log) [[ -n ${2:-} ]] || refuse "--log needs a file"; LOG=$2; shift ;;
     -*) refuse "unknown option $1" ;;
     *) [[ -z $ACCOUNT ]] && ACCOUNT=$1 || refuse "one account only" ;;
   esac

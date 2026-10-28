@@ -389,4 +389,15 @@ HANDOFF text is an UNQUOTED `cat <<EOF` heredoc (it expands `${VERSION}` and oth
 command substitution; the surrounding step-0 text carries none either (0 backticks in the heredoc, checked). README
 line 345 is left as is. `bash -n` clean. No pin (document text).
 
-**4 · [NIT] — PENDING** (piece D). **5 · [NIT] — PENDING** (piece E).
+**4 · [NIT] — FIXED, WITH the pin** (the piece-D commit). The helper's `--log` and the walk's `--app` now read
+`[[ -n ${2:-} ]] || refuse "--log needs a file"` / `refuse "--app needs a path"` — exit 5, the documented shape.
+- **The pin, in BOTH self-tests:** the script runs itself as a FENCED subprocess. The fences: `HOME` is an empty temp
+  dir (no allowlist can exist there, so even a regressed parse refuses at R1/G1/G2 before any read); `zsh -f` loads no
+  startup files; on PATH, a `curl` that exits 99 (the helper), plus `open`/`osascript`/`cliclick` the same way (the
+  walk). Each self-test first runs a fence-holds case proving every shim shadows the real tool and no allowlist exists
+  under the fenced HOME. Then `std --log` / `std --app` must give exit 5 with the named refusal.
+- **RED ON OLD** (the pin written before the fix): walk **1 case(s) wrong**, helper **1 of 90 case(s) wrong**. The old
+  answer, fenced the same way: `prod-reset-test-account.sh:406: 2: --log needs a file` exit 1 and
+  `first-run-walk.sh:418: 2: --app needs a path` exit 1. **GREEN ON THE FIX:** walk 72/72 · helper 90/90.
+
+**5 · [NIT] — PENDING** (piece E).

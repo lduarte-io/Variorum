@@ -395,6 +395,18 @@ sys.stdout.buffer.write(plistlib.dumps({k: "60 144 1240 940 0 0 1728 1084" for k
   sure "D-2 the reset helper's resolved id is read from its log line" \
     '[[ $(helper_id "[x] prod-reset std: account id 0f3c2b1a-9d8e-4f7a-8b6c-5d4e3f2a1b0c (one auth user)") == 0f3c2b1a-9d8e-4f7a-8b6c-5d4e3f2a1b0c ]]'
   sure "D-2 … and nothing when the helper refused before resolving" '[[ -z $(helper_id "prod-reset-test-account REFUSES: R1 — the allowlist must be mode 600") ]]'
+  # The ladder's round-1 NIT 4: a missing option value refuses in the documented exit grammar (5, named) — never zsh's
+  # own exit 1. The script runs as a FENCED subprocess: HOME at an empty temp dir (no allowlist can exist there, so even a
+  # regressed parse refuses at G1/G2 before anything runs), `zsh -f` (no startup files), and curl · open · osascript ·
+  # cliclick on PATH as shims that exit 99 (no network, no launch, no event).
+  mkdir -p $T/nohome $T/shim
+  for c in curl open osascript cliclick; do print -r -- '#!/bin/sh
+exit 99' > $T/shim/$c; chmod +x $T/shim/$c; done
+  sure "ARGS the fence holds: every shim shadows the real tool, and no allowlist exists under the fenced HOME" \
+    '[[ $(PATH=$T/shim:$PATH whence -p curl) == $T/shim/curl && $(PATH=$T/shim:$PATH whence -p open) == $T/shim/open && $(PATH=$T/shim:$PATH whence -p osascript) == $T/shim/osascript && $(PATH=$T/shim:$PATH whence -p cliclick) == $T/shim/cliclick && ! -e $T/nohome/.variorum/prod-test-accounts.env ]]'
+  argout=$(HOME=$T/nohome PATH=$T/shim:$PATH zsh -f $SELF std --app 2>&1); argrc=$?
+  sure "ARGS a missing --app value → refused in the grammar (exit 5, named) — fenced" \
+    '(( argrc == 5 )) && [[ $argout == *"REFUSES: --app needs a path"* ]]'
   (( fails == 0 )) && { print "SELF-TEST: every guard fired as expected"; exit 0 }
   print "SELF-TEST: $fails case(s) wrong"; exit 1
 fi
@@ -403,7 +415,7 @@ fi
 ACCOUNT= DRY= ARM=both
 while (( $# )); do
   case $1 in
-    --app) APP=${2:?--app needs a path}; shift ;;
+    --app) [[ -n ${2:-} ]] || refuse "--app needs a path"; APP=$2; shift ;;
     --arm) ARM=${2:-}; shift; arm_valid "$ARM" || refuse "--arm takes setup, join or both (got '$ARM')" ;;
     --dry-run) DRY=1 ;;
     -*) refuse "unknown option $1" ;;
