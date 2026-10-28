@@ -13,37 +13,22 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-648 — Run: launch-week umbrella** (SEVENTEEN members by the sub-issue listing at kickoff: the editor lag pair VX-647 · VX-649 (trace-then-fix-if-feasible, her rule) · the MCP door VX-639 · VX-640 · VX-641 · VX-606 · VX-626 · VX-612 · VX-367 · wings/stars/keys VX-644 · VX-632 · VX-643 · VX-563 · book navigator & small fixes VX-645 · VX-646 · VX-630 · VX-631; the record `notes/plans/fixes/vx-648-launch-week.md`) | VX-648 · `vx-648-launch-week` | `~/dev/variorum-vx-648` · the Pro | In flight 2026-10-28 (architect-phase; surfaces: the editor seam (VX-647/649/563 — Fable cold review), Settings ▸ MCP + the MCP server host + guide content, app shell (wing switcher, wing chords), Library stars (VX-643, mobile-visible), the book navigator; no `Sync/`, no custody, no schema; overlaps: VX-440 (book navigator, Book Settings) and VX-601 (editor seam) — closeouts serialize, the second merger merges main in and re-runs the overlap). |
 | **VX-440 — Sheets & history clarity: books, Block History, versions** (SEVEN members by the sub-issue listing at kickoff: versions & Compare as one design VX-130 · VX-437 · VX-432 · Block History VX-431 · gathering faces VX-611 · VX-616 · VX-189; VX-216 is NOT a member — design context only, it stays under VX-551; the record `notes/plans/fixes/vx-440-sheets-history-clarity.md`) | VX-440 · `vx-440-sheets-history-clarity` | `~/dev/variorum-vx-440` · the Pro | In flight 2026-10-28 (architect-phase; surfaces: Note ▸ Versions + Compare (Takes & Lenses), the Block History pane, book/gathering row menus + Book Settings + the Trash row, the MCP grant doors on a gathering (MCPSpec read in full; no wire-tool change planned); no `Sync/`, no custody, no schema; overlaps: VX-648 (Book Settings, book/gathering row menus) — closeouts serialize, the second merger merges main in and re-runs the overlap). |
 
 ### Latest closeout
 
-**→ VX-601 CLOSED 2026-10-28 — RUN: TAKES & EDITOR QUICK FIXES (the record
-`notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md`; the ladder `vx-601-ladder-round1.md`; her handoff
-`notes/handoffs/vx-601-handoff.md`; PR #200, merge b3b1041aa; kickoff to merge overnight, the 0.10.4 release riding
-at her standing word).** Twelve members shipped (seven seated + rider VX-577 at her kickoff word + sitting-seated
-VX-592 · VX-248 · VX-321 · VX-337-bounded): the ⌘Z take-delete crash dead by per-pane undo histories (the launch
-gate); her ruled P-3 bend built (a re-bound live pane adopts its take); the held-press-at-the-caret dead drag fixed
-in Takes AND Write (one classic-mouse-road mechanism, the ticket's "Write is fine" falsified by revert); open fans a
-per-note session memory (P3-clean measured: seeds 1–4 µs, 25 fans below the fold ≡ 0 open); expand-all under every
-fan style; the "New branched take" door (the ⌘T half proved already-working); the bar counting the typed-in take;
-the two genuinely-lighter faces; "block i/N" through the one wording brain; per-host receipts; VX-337's fold flake
-test-fixed against the pinned R-Q21 design (the soak half stays open on the ticket). Red-on-old BY REVERT PER MEMBER
-across four batches (16 revert trees, two revert-slip forensics honestly recorded); the WHOLE Mac target
-5,486/963 zero failures; four dev-store walks (W, A, B, C — both voices where owed); ONE ladder round, ZERO findings
-against the diff (the MAJOR it surfaced is pre-existing → VX-656). Born VX-634 · 636 · 637 · 638 · 650 · 651 · 652 ·
-656, all triaged; the bundle is QUESTIONS #247. MOBILE PARITY: nothing mobile-visible. **Next: the 0.10.4 release
-(this close's rider, her word of 2026-10-28), then the new waves (VX-648, VX-440) at her kickoffs.**
-
-*(VX-510's closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at the VX-529 closeout, 2026-10-25.)*
-
-*(The outgoing VX-308 closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at the VX-309 closeout, 2026-10-20.)*
-
-
-*(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
-
-
----
+**→ VX-648 CLOSED 2026-10-28 — RUN: LAUNCH-WEEK UMBRELLA (the record
+`notes/plans/fixes/vx-648-launch-week.md`; the ladder `notes/plans/vx-648-ladder-round1.md`; her handoff
+`notes/handoffs/vx-648-handoff.md`; PR #202, merge edc7a901b; kickoff to merge in one overnight run).** All 17
+members by the sub-issue listing. Her reported editor lag (VX-647/649) traced to the tray badge's unindexed
+deleted-blocks fence on the writer and fixed by the LOCAL migration v1_34 (not a §12 event; marker 14; the release
+that carries this run states "local-only migration v1_34"); the MCP door grew gathering book-acts (VX-639, rule hers),
+/mcp in the instructions at a 3,100 bound (VX-640), the Private row's client gate (VX-641), universal schema
+enforcement (VX-606), honest last-seen (VX-626) and a fail-loud accept loop (VX-612); the star cap retired everywhere
+(VX-643, MOBILE-VISIBLE — MobileSoul PL-61); ⌥⌘L/⇧⌥⌘L, the wing-label door, ⌘↑/⌘↓ book stepping (VX-632/644/563);
+the navigator follows and self-scrolls in every book mode with the block-keeping Index carry (VX-645/646/630/631).
+One Fable ladder round, clean; suites green at the final tree (the Mac union 953/146, sim 20/3); two dev-store walks
+restored line by line. Born: VX-653/654/655/662/663, all triaged. Her bundle: QUESTIONS #248.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
