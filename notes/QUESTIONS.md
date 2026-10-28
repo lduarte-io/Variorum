@@ -3727,3 +3727,25 @@ triaged: VX-624 (the pre-existing 4-s landing watchdog spin, Suspected) · VX-62
 Debt) · VX-630 (Index → Outline carry loses the caret's block, pre-existing Confirmed) · VX-631 (the "12 storys"
 receipt, Wording). **Status on the headline item, 2026-10-27 (her word, same evening): P-562-8 waits on her LIVE look — "hmm i'll have to see this live before deciding, good to have it noted though." As-built (the symmetric 8-pt band) stands until she rules; the wider leave-band remains the recorded alternative.**
 **2026-10-28 (her pass from the VX-620 thread):** P-562-1 → VX-646 (the navigator scrolls itself — the Open list's follow idiom) · P-562-2 → VX-645 (the follow-highlight in Book and Read modes) — both to be built, at her word.
+
+#247 — **THE VX-601 BUNDLE (the binding record is `notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md` — THE
+SITTING RECORD R-601-1…6, the four batch records, the walk records W/A/B/C, the ladder
+`notes/plans/vx-601-ladder-round1.md`; her handoff `notes/handoffs/vx-601-handoff.md`).** Each built as recorded, each
+one line to overturn: **P-A1** — ⌘Z in a READ pane that holds the keyboard does nothing (the read pane answers an
+always-empty undo history; the alternative is routing it to the window's manager, which is the crash class this run
+killed). **O-2** — a ⌃⌘ take-step keeps the caret's CHARACTER OFFSET in the new take, so a step can land mid-word
+("paQragraph"); options: (a) as built, (b) the step lands at the take's end, (c) at its start. **Q-A2-1** — if a
+selection is dragged out of a live pane, should a READ take card accept the drop? (a) built: no drop, by P-3's
+read/live split; (b) a drop makes the card live and inserts; (c) a drop offers a door. **P-B-1** — in slot split,
+expand-all replaces the article cell the ring may sit in; built: the ring ends by a flushed blur (the R-VX170 rule's
+shape); alternatives: the ring moves onto the same take's card, or (forbidden by R112) strands. **B6's edge** — a
+margin click greys the caret but never clears the board's current take, so ⌘T's "Click into a take first" refusal is
+UNREACHABLE once any take was current; options: (a) as built (⌘T always has a target), (b) a margin click clears the
+current take, (c) the greyed state refuses ⌘T. **P-C-1** — Move Take into a Block Below's receipt now names each
+host's own list (panel/Write/board/Lenses; the words in the record), WITH the walk's fact that the Write and board
+sentences TRUNCATE at the 1240-pt default before the distinguishing clause — shorter words are yours to pick; the
+Lenses sentence also nests "(⌘2)" inside its own parenthesis. **P-C-2** — the read-only takes twin now draws her
+words in INK (its dimming came from a 13g brief, not a ruling); the dimmed alternative is one token. **Also for your
+eye:** VX-637 (does real ⎋ close the fans? — the 5-second check in the ticket), VX-656 (Write's editor carries
+VX-421's undo class — pre-launch is YOURS to label), and the four undo-residue "block" rows left in the dev Trash
+(VX-650; aging out unless you say Delete Now). Status: OPEN — her leisure.

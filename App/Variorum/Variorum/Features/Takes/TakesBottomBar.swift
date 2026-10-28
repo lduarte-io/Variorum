@@ -615,23 +615,42 @@ struct TakesBottomBar: View {
     /// composed string — her remembered face decides which are said). Every
     /// word is byte-identical to what this bar has always said, *"take"*
     /// and *"note"* included.
-    private var wordCounts: WordCounts {
-        var take: String?
-        if let pane = model.focusedPane,
-           let slot = model.projection.slots.first(where: { $0.blockID == pane.blockID }),
-           let column = model.columns.first,
-           let resolved = model.resolvedTake(column: column, slot: slot) {
-            // O(the focused take) per render — the P1 edit unit.
-            take = "\(TextMetrics.wordCount(resolved.text))w take"
-        }
+    private var wordCounts: WordCounts { Self.wordCounts(for: model) }
+
+    /// The bar's counts for `model` — static so a pin reads exactly what the
+    /// bar draws.
+    static func wordCounts(for model: TakesViewModel) -> WordCounts {
         // Round-1 MINOR-5: the post total is the model's CACHE (recomputed
         // per projection, incremental) — the bar re-renders per keystroke
         // (it reads the observed authority) and must never re-enumerate
         // every slot's full text each time.
-        return WordCounts(
-            unit: take,
+        WordCounts(
+            unit: takeUnit(for: model),
             selected: nil,
             note: "\(model.postWordCount.formatted())w note",
             unitNoun: "take")
+    }
+
+    /// **VX-427 (R-601-3) — the "Nw take" unit counts the take being TYPED
+    /// IN**: the focused pane's OWN take (`focusedPane.variantID`), through
+    /// the authority's overlay, so it moves with every keystroke. It used to
+    /// resolve the FIRST COLUMN's pick for the focused block
+    /// (`resolvedTake(column: columns.first, …)`) — on the Takes board that
+    /// is the chosen take, so typing in any other take of a bloomed fan
+    /// counted the chosen one; on the Lenses board it was the Chosen column
+    /// whatever lens column she typed in. Nil (no unit) with no ring.
+    ///
+    /// P1: one dictionary read for the block's fan, a scan of that ONE fan
+    /// for the take, and the word count of that ONE take — the edit unit,
+    /// never the note. Every live pane shows a live ACTIVE take, and the
+    /// projection carries every placed block's active fan (`activeFans`), so
+    /// the fan is where the take is; a take the projection does not hold yet
+    /// (a mint not yet echoed) says no unit rather than a wrong one.
+    static func takeUnit(for model: TakesViewModel) -> String? {
+        guard let pane = model.focusedPane,
+              let take = model.projection.fans[pane.blockID]?
+                .first(where: { $0.id == pane.variantID })
+        else { return nil }
+        return "\(TextMetrics.wordCount(model.liveText(take)))w take"
     }
 }

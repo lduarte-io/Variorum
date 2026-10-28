@@ -79,6 +79,8 @@ struct WriteTakesPanel: View {
     /// could see it.
     static let surfaceCapabilities: [CapabilityID] = [
         .unarchiveTake, .archiveTake, .labelTake, .lockTake, .deleteTake,
+        // VX-594 (R-601-4): the card ⌄ menu's "New branched take".
+        .newTake,
     ]
 
     /// VX-154: how the panel closes itself — `EditorView` passes the sheet's
@@ -107,6 +109,23 @@ struct WriteTakesPanel: View {
         model.projection.slots.first { $0.blockID == blockID }
     }
 
+    /// **VX-586 — the panel's title says WHERE the block sits, never its
+    /// id** (her words: *"change it from the block ID showing in takes mode
+    /// to block 1/10"*). It read "Takes — block D9B30289", the raw id 13g's
+    /// R5-4 retired from both bars (*"stop showing the actual ID of the
+    /// block … show 'block 1/1'"*); it now speaks the bars' ONE wording
+    /// brain, `BlockLineLabel`, so the three faces cannot drift. The ordinal
+    /// is the block's place in the note's current order (the panel's model
+    /// projects the whole note); a block the projection does not hold — not
+    /// landed yet, or gone from the note — reads "block —", the brain's own
+    /// honest blank, never a wrong number. O(blocks) per render, the bar's
+    /// own cost.
+    static func title(blockID: String, slots: [Queries.RenderedBlock]) -> String {
+        let index = slots.firstIndex { $0.blockID == blockID }
+        return "Takes — " + BlockLineLabel.caret(
+            ordinal: index.map { $0 + 1 }, of: slots.count)
+    }
+
     private var fan: [Variant] {
         model.projection.fans[blockID] ?? []
     }
@@ -114,7 +133,7 @@ struct WriteTakesPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Takes — block \(String(blockID.prefix(8)))")
+                Text(Self.title(blockID: blockID, slots: model.projection.slots))
                     .font(.headline)
                     // VX-154: ⌘S's optional name, asked IN the panel (the
                     // Takes bar's ask, its own presentation here — Write's
@@ -181,7 +200,9 @@ struct WriteTakesPanel: View {
                         }
                         growthDoors(slot: slot)
                         if !archived.isEmpty {
-                            Text("archived takes")
+                            // VX-321: the ONE literal the receipts that
+                            // send her here name (`TakeStructureCopy`).
+                            Text(TakeStructureCopy.archivedTakesHeader)
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.muted)
                                 .padding(.top, 6)
@@ -496,16 +517,12 @@ struct WriteTakesPanel: View {
                     // the one word that moved is the label row, which said
                     // "Label…" here and "Label take…" on the card context
                     // menu, i.e. the two "matching" menus did not agree on it.
-                    TakeCardMenu(acts: TakeCardActs(
-                        locked: take.locked,
-                        archive: { Task { await model.archiveTake(take.id) } },
-                        // 13b Stage 3 (3D — N6): the label door rides
-                        // Write's panel too (one grammar everywhere).
-                        label: { model.requestTakeLabel(variantID: take.id) },
-                        toggleLock: {
-                            Task { await model.setTakeLocked(take.id, locked: !take.locked) }
-                        },
-                        delete: { Task { await model.deleteTake(take.id) } }))
+                    // VX-594 (R-601-4): the acts are wired ONCE on the model
+                    // (`TakesViewModel.cardActs`) for this panel and the
+                    // board's cards — the four rows above plus "New branched
+                    // take", whose reveal lands the ring on THIS panel's new
+                    // card (its own column).
+                    TakeCardMenu(acts: model.cardActs(for: take, columnID: column.id))
                 }
                 PaneSurfaceView(
                     text: model.liveText(take),
