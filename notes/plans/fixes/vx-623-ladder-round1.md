@@ -404,3 +404,16 @@ line 345 is left as is. `bash -n` clean. No pin (document text).
 road/window/bounds checks as J3b (P1/P2's twins). The dry-run plan gains its J3b line: "J3b the road: the process's
 environment and the app's ARMED line · the main window's bounds (P2's checks)". The P1 header comment ("Every launch
 (P1, J3)") stays true. No pin (log naming); `zsh -n` clean; the walk's `--self-test` re-run green.
+
+**ROUND 1 FIXES CLOSED — the after-fix gate, run fresh at `bcac53925`:**
+- `zsh -n` is clean on `first-run-walk.sh`, `prod-reset-test-account.sh`, `pins/words-guard-fail-closed.zsh`,
+  `guard.sh` and `pins/guard-space-helper.zsh`; `bash -n` is clean on `release.sh`; `swiftc` compiles
+  `words-guard.swift`, `capture-windows.swift` and `wl2.swift`.
+- The walk's `--self-test` is **72/72** green: 64 + D-5 × 3 + finding 2 × 3 + NIT 4 × 2, with the one misnamed case
+  renamed.
+- The helper's `--self-test` is **90/90** green: 85 + finding 2 × 3 + NIT 4 × 2.
+- **P-1** reads 0 failing of 6; **P-2** (`--self-check`) holds every verdict; the D-7 pin still reads 0 failing of 11.
+- No stray `sleep` was left behind.
+- Commits: `a57bb863c` (1) · `f85717274` (record) · `761461712` (2) · `33de94d33` (3) · `e50ea8fb6` (4) · `bcac53925`
+  (5) · the closing record commit.
+- Every finding is FIXED; nothing is deferred or dismissed. Round 2's fresh reviewer re-checks these per the ladder.
