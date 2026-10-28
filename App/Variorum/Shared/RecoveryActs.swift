@@ -147,7 +147,8 @@ enum TrashPutBack {
         case .block(let landing): return RecoveryCopy.landingReceipt(landing)
         case .take(let status): return RecoveryCopy.takeRestoredReceipt(status)
         case .bookWhole(let notes): return RecoveryCopy.bookPutBackWhole(item.title, notes: notes)
-        case .plain: return RecoveryCopy.putBackReceipt(item.kind)
+        // VX-611: a gathering's row says "Gathering put back."
+        case .plain: return RecoveryCopy.putBackReceipt(item.kind, isGathering: item.isGathering)
         }
     }
 }
@@ -349,7 +350,8 @@ enum TrashPurge {
             switch self {
             case .deleteNow(let item, let savedVersions):
                 return RecoveryCopy.deleteNowConfirm(
-                    item.kind, isVersion: item.isVersion, savedVersions: savedVersions)
+                    item.kind, isVersion: item.isVersion, savedVersions: savedVersions,
+                    isGathering: item.isGathering)
             case .emptyTrash(let counts, let versions):
                 return RecoveryCopy.emptyTrashConfirm(counts, versions: versions)
             }
@@ -418,7 +420,8 @@ enum TrashPurge {
                 _ = try ops.requestPurge([target])
             }
             receipt = RecoveryCopy.deleteNowReceipt(
-                item.kind, synced: synced, familyEverSynced: familySynced)
+                item.kind, synced: synced, familyEverSynced: familySynced,
+                isGathering: item.isGathering)
         case .emptyTrash:
             // Re-read at ACT time (a confirm is a pause; the listing is a
             // projection — the R3-1 lesson): everything currently in the

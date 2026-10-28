@@ -16,7 +16,9 @@
 //
 //  THE TABLE (her carve-out applied, the basics proposed — PROVISIONAL
 //  P-17y-B3-l1): Open · Star/Unstar · Book/Gathering Settings… · Export
-//  Markdown… · Export PDF… · Archive (or Unarchive) · Delete Book… (never on
+//  Markdown… · Export PDF… · Archive (or Unarchive) · Delete Book… — or
+//  Delete Gathering… on a gathering, the one capability's verb chosen by the
+//  kind (VX-611, `BookStateCopy.deleteDoorLabel`) — (never on
 //  the daily Journal — `BookArchiveDoorSet`, the op's own guard). The
 //  Bookcase menu's POSITIONAL doors drop (Move to Shelf ▸, Send to Top /
 //  Bottom — position means nothing off the Bookcase), and so do the

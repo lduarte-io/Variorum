@@ -700,8 +700,18 @@ Pieces (flipped per commit):
   AndBookOnABook` · `theTrashCallsADeletedGatheringAGathering` · `aDeletedGatheringsDeleteNowAsksAndAnswersIn
   ItsOwnKind` · `aPutBackGatheringSaysGatheringPutBackAndABookStillSaysBook` — RED ON OLD at this commit (the
   words are still the book's) — and the guard `everyRowRendererOfTheDeleteDoorChoosesItsWordsByKind` (green
-  both sides by design). IN THIS COMMIT (the PRE-FIX tree: the red-on-old SHA).
-- B3-2 VX-611 fix (the kind word): NOT STARTED.
+  both sides by design). DONE (7715a4a3d — the PRE-FIX tree: the red-on-old SHA).
+- B3-2 VX-611 fix (the kind word): `BookStateCopy.deleteVerb(.gathering)` = "Delete Gathering" (so every row
+  door reads "Delete Gathering…" on a gathering; a book's stays "Delete Book…"; the registry's ONE declared
+  verb is untouched — P-1); `RecoveryCopy.gatheringRowKind` ("gathering") through ONE rule,
+  `rowKind(_:isGathering:)`, read by `rowKind(item)` (the row's word — the phone's accessibility labels ride
+  it), and by `deleteNowConfirm` / `deleteNowReceipt` / `putBackReceipt`, each with a DEFAULTED
+  `isGathering:` (the `isVersion`/`versions:` precedent — every shipped caller and pin byte-identical), the
+  shared acts (`TrashPurge.Confirm.message`, `TrashPurge.confirm`, `TrashPutBack.run`'s plain arm) passing the
+  row's fact. The Mac Trash row's Put back hover on a gathering: "The gathering comes back with its rule"
+  (was "The book comes back whole — chapters and membership included", false of a gathering — PROVISIONAL
+  P-440-13). The four B3-1 words pins turn GREEN at this commit (RUN PENDING). `build-for-testing` ✓.
+  IN THIS COMMIT (the fix: the green-on-new SHA).
 - B3-3 VX-616 the gathering foot loses "+ new chapter": NOT STARTED.
 - B3-4 VX-616 the unreachable `.createChapter` bind follow-up retired: NOT STARTED.
 - B3-5 VX-189 the gathering's own Shared-with doors: NOT STARTED.

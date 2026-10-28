@@ -190,7 +190,7 @@ nonisolated enum BookStateCopy {
     /// registry's, so a gathering's door says what it deletes. Its confirm
     /// already did (`deleteGathering` — "Delete Gathering").
     static func deleteVerb(_ kind: ReadingKind) -> String {
-        deleteVerb
+        kind == .gathering ? "Delete Gathering" : deleteVerb
     }
 
     /// The row's door label: the kind's verb and the ellipsis (it asks first).

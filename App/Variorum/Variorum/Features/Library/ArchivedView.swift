@@ -267,8 +267,9 @@ struct ArchivedView: View {
 
     /// One archived book or gathering: its name, its honest facts, when it was
     /// archived — and its doors, from the archive table (P-1): Open (the book
-    /// view; navigation, never an act), Unarchive, Delete Book… (not drawn on
-    /// the daily Journal — P-2).
+    /// view; navigation, never an act), Unarchive, Delete Book… — Delete
+    /// Gathering… on a gathering (VX-611) — (not drawn on the daily Journal —
+    /// P-2).
     private func bookRow(_ reading: Reading) -> some View {
         CalmCard(tokens: tokens) {
             HStack(spacing: 8) {
