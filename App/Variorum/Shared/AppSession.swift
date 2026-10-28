@@ -134,9 +134,57 @@ final class AppSession {
     /// EXPLICITLY — this session's, never the ambient installed one (the
     /// A4 fence's lesson: a test host's ambient database is the dev store,
     /// and physical removal must never land there by dependency accident).
+    ///
+    /// **VX-657 — the sweep is HELD where quit can reach it.** ⌘Q used to
+    /// exit the process over an in-flight sweep's GRDB reader (the SIGSEGV
+    /// in the page-decrypt teardown): `applicationShouldTerminate` awaited
+    /// only the editor flush and the `quitFinalize` registry, and nothing
+    /// registered the sweeps. The sweep now runs in a tracked Task, so the
+    /// quit door's proceed path can cancel-and-await every one of them
+    /// (`quiesceLocalPurgeForExit`); the sweep itself stops at its next
+    /// family boundary (`LocalPurge.sweep` — completed families stay
+    /// completed, nothing half-done). Once quiescing, new sweeps refuse —
+    /// an hourly tick landing mid-quit is a quiet no-op.
     func sweepLocalPurge() async {
-        guard !syncConfigured() else { return }
-        _ = try? await LocalPurge(database: database).sweep()
+        guard !quiescingForExit, !syncConfigured() else { return }
+        let body = localPurgeSweepBody ?? { [database] in
+            _ = try? await LocalPurge(database: database).sweep()
+        }
+        let id = UUID()
+        let task = Task { await body() }
+        localPurgeSweeps[id] = task
+        await task.value
+        localPurgeSweeps[id] = nil
+    }
+
+    /// VX-657: the sweep's body, injectable so the quit-guard pins can park
+    /// a sweep mid-flight deterministically (the injected-spy evidence
+    /// shape); nil — production — runs `LocalPurge` over this session's
+    /// store exactly as before.
+    @ObservationIgnored var localPurgeSweepBody: (@Sendable () async -> Void)?
+    /// VX-657: the in-flight local sweeps, held for the quit door. Keyed so
+    /// overlapping callers (the hourly tick, a purge-door confirm) each
+    /// hold their own entry; MainActor isolation keeps the map safe.
+    @ObservationIgnored private var localPurgeSweeps: [UUID: Task<Void, Never>] = [:]
+    /// VX-657: true once the quit door's proceed path has begun — new
+    /// sweeps refuse from then on. Never reset: the process is exiting.
+    @ObservationIgnored private(set) var quiescingForExit = false
+    /// How many sweeps are in flight right now — the pins read it; nothing
+    /// in the app decides anything from it (the `openAutosaveCount` idiom).
+    var localPurgeSweepsInFlight: Int { localPurgeSweeps.count }
+
+    /// **VX-657 — the exit quiesce's local half:** refuse new sweeps, then
+    /// cancel-and-await every in-flight one, so the process never exits
+    /// over an in-flight GRDB access. Cancellation lands at the sweep's
+    /// next family boundary (or rolls the in-progress family back whole),
+    /// so the await is prompt and nothing is half-done. Idempotent; the
+    /// quit door's proceed path is the one caller.
+    func quiesceLocalPurgeForExit() async {
+        quiescingForExit = true
+        let tasks = Array(localPurgeSweeps.values)
+        for task in tasks { task.cancel() }
+        for task in tasks { await task.value }
+        localPurgeSweeps.removeAll()
     }
     /// The session-scoped structural undo stack (AppSpec §9) — in-memory,
     /// never persisted. (On the Mac it wires to the Edit menu; the phone

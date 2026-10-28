@@ -287,6 +287,21 @@ final class AppServices {
         localPurgeTask = nil
     }
 
+    /// **VX-657 — the quit door's one quiesce**, run on the PROCEED path
+    /// only (the Mac delegate, after the decline decision says the app is
+    /// really exiting — a declined quit keeps everything running): the
+    /// hourly clock stops, the session's in-flight local sweep is
+    /// cancelled-and-awaited, and the sync chain retires AWAITED (the
+    /// transported janitor rides its rounds), so the process never exits
+    /// over an in-flight GRDB access — the SIGSEGV in the page-decrypt
+    /// teardown, her crash report. Idempotent.
+    func quiesceForExit() async {
+        localPurgeTask?.cancel()
+        localPurgeTask = nil
+        await session.quiesceLocalPurgeForExit()
+        await sync.quiesceForExit()
+    }
+
     /// THE ONE retired-credential sweep road (pre-13x batch 1a — the bridge
     /// retirement's round-3 finding 1), serving BOTH occasions: every
     /// `start()` and every sign-in. REAL STORE ONLY (round-2 N1): a
