@@ -130,7 +130,10 @@ struct MobileFirstWriteFurnitureTests {
 
     /// An occasion whose launch verdict was never taken skips the JOURNAL
     /// (the guess that seeds is the one that duplicates her book) while
-    /// still running the sample library, which has no virgin-store guard.
+    /// still running the sample library's seeder. (VX-633 U2b: that seeder
+    /// now reads its own untaken launch fact as NOT fresh for the fresh-only
+    /// Prince — `anExistingPhoneStoreNeverGainsThePrince` pins the decline;
+    /// here its mark short-circuits first, as before.)
     @Test func anUnprimedOccasionSkipsTheJournalOnly() async throws {
         try await withEditorWorld { session, db in
             let marks = Marks()
@@ -269,8 +272,19 @@ struct MobileFirstWriteFurnitureTests {
     /// book does not even exist — and the moment the text lands, the seed
     /// proceeds to completion. Old code minted the book and its first
     /// stories immediately, pending autosave or not.
+    /// **JUSTIFIED EDIT (VX-633 U2b — R-633-16, "FRESH STORES ONLY"):** the
+    /// launch is PRIMED on the empty store FIRST and her note is written
+    /// after — the real order (`prime` at launch, the occasion at her first
+    /// write). Primed after her note, the launch-time fact read a store that
+    /// already held writing, and the fresh-only Prince would — correctly —
+    /// decline it; the subject (the pacing) is unchanged.
     @Test func theSampleSeedWaitsForPendingWritingToLand() async throws {
         try await withEditorWorld { session, db in
+            let marks = Marks()
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            await furniture.prime()
+
             // Her note, with text sitting in its autosave debounce (a sleep
             // that never wakes — the pin flushes explicitly, deterministically).
             let (postID, variantID) = try await session.runner.run { ops in
@@ -283,10 +297,6 @@ struct MobileFirstWriteFurnitureTests {
             autosave.record(variantID: variantID, text: "Dear diary, today", charDelta: 7)
             #expect(session.hasPendingAutosave, "positive activity: her text is pending")
 
-            let marks = Marks()
-            let furniture = MobileFirstWriteFurniture(
-                session: session, storeVariant: .dev, marks: marks.both)
-            await furniture.prime()
             let occasion = Task { await furniture.run() }
 
             // While her text has not landed, NOTHING of the library exists —
@@ -359,6 +369,114 @@ struct MobileFirstWriteFurnitureTests {
             #expect(books.contains { $0.name == MobileStarterJournal.bookName },
                     "the starter Journal survived the library's book")
             #expect(books.contains { $0.name == SampleLibrarySeeder.Book.launchBook.name })
+        }
+    }
+
+    // MARK: VX-633 U2b (R-633-16) — the Prince seeds a FRESH phone store only
+
+    /// **RED ON OLD — AN EXISTING PHONE STORE NEVER GAINS THE PRINCE BY
+    /// UPDATE** (her word: "the phone mirrors: its first-write occasion seeds
+    /// the launch book on a fresh store only"). A phone store an earlier build
+    /// furnished — its first write minted Sherlock and spent the Journal's
+    /// occasion; her note since — meets this build's launch: `prime` reads a
+    /// store that has held writing, and her next first write DECLINES the
+    /// Prince (`.existingStore`, recorded), leaving the store as it was.
+    /// *Old (behavioural revert: `seedsFreshStoresOnly: false` on the
+    /// Prince):* the occasion seeded the Prince — its own mark was unset.
+    @Test func anExistingPhoneStoreNeverGainsThePrince() async throws {
+        try await withEditorWorld { session, db in
+            session.seededBookMarkIsSet = { _ in false }
+            session.markSeededBook = { _ in }
+            // The earlier build's furniture: Sherlock, then her own note.
+            let sherlock = SampleLibrarySeeder.Book.sherlock
+            let stories = try SampleLibrarySeeder.loadStories(for: sherlock)
+            let found = try await db.read { db in try SampleLibrarySeeder.discover(db, book: sherlock) }
+            _ = try await SampleLibrarySeeder.seed(
+                session: session, book: sherlock, stories: stories, existing: found)
+            _ = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "my phone note")
+                return try ops.newBlock(in: post.id, text: "From before the Prince.").variant.id
+            }
+
+            let marks = Marks()
+            marks.journal = true    // that build spent the Journal's occasion
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            await furniture.prime()
+            guard case .ran(_, let sample) = await furniture.run() else {
+                Issue.record("expected the occasion to run")
+                return
+            }
+            #expect(sample == .existingStore, "\(sample)")
+            #expect(marks.sample, "the decision is recorded on this device")
+            let (names, princeEver) = try await db.read { db in
+                (try Queries.readings(db).map(\.name),
+                 try Queries.readingTombstoneExists(db, name: SampleLibrarySeeder.Book.launchBook.name))
+            }
+            #expect(!names.contains(SampleLibrarySeeder.Book.launchBook.name) && !princeEver,
+                    "no Prince — not a row of its name")
+            #expect(names.contains(sherlock.name), "her Sherlock untouched")
+        }
+    }
+
+    /// **RED ON OLD — NEVER A GUESS THAT SEEDS.** An occasion whose launch
+    /// facts were never taken (`prime` never ran, or its read failed) reads
+    /// the store as NOT fresh — the starter Journal's never-a-guess rule —
+    /// so even an empty store gets no Prince from it: `.existingStore`.
+    /// *Old:* the Prince seeded regardless (no guard).
+    @Test func anUnprimedOccasionSeedsNoPrince() async throws {
+        try await withEditorWorld { session, db in
+            let marks = Marks()
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            guard case .ran(let journal, let sample) = await furniture.run() else {
+                Issue.record("expected the occasion to run")
+                return
+            }
+            #expect(journal == nil, "no verdict, no Journal")
+            #expect(sample == .existingStore, "\(sample)")
+            let books = try await db.read { db in try Queries.readings(db) }
+            #expect(books.isEmpty, "nothing minted")
+        }
+    }
+
+    /// **GUARD — a fresh phone store's STOPPED first write resumes.** The
+    /// first write's seed stopped after thirteen notes (a lock killed the
+    /// occasion's task: no mark). At the next launch `prime` reads a store
+    /// that holds writing — the seed's own rows and her note — but the
+    /// Prince's OWN partial copy is completed, never stranded: the next
+    /// first write mints the missing fourteen into the same book.
+    @Test func aStoppedFirstWriteSeedResumesThePrince() async throws {
+        try await withEditorWorld { session, db in
+            session.seededBookMarkIsSet = { _ in false }
+            session.markSeededBook = { _ in }
+            let book = SampleLibrarySeeder.Book.launchBook
+            let stories = try SampleLibrarySeeder.loadStories(for: book)
+            let fresh = try await db.read { db in try SampleLibrarySeeder.discover(db, book: book) }
+            let partial = try await SampleLibrarySeeder.seed(
+                session: session, book: book, stories: Array(stories.prefix(13)), existing: fresh)
+            _ = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "the note that summoned it")
+                return try ops.newBlock(in: post.id, text: "Hello.").variant.id
+            }
+
+            let marks = Marks()
+            marks.journal = true
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            await furniture.prime()
+            guard case .ran(_, let sample) = await furniture.run(),
+                  case .seeded(let readingID, let minted) = sample
+            else {
+                Issue.record("the stopped seed resumes")
+                return
+            }
+            #expect(readingID == partial.readingID && minted == 14, "the same book, the missing fourteen")
+            #expect(marks.sample)
+            let members = try await db.read { db in
+                try Queries.assembleReading(db, readingID: readingID).count
+            }
+            #expect(members == 28, "the whole book")
         }
     }
 

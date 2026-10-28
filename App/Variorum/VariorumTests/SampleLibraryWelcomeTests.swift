@@ -64,16 +64,25 @@ private func poll(_ condition: @MainActor () -> Bool, turns: Int = 600) async {
 
 /// A launch's seeds, marks injected; returns the LAUNCH BOOK's outcome —
 /// what the launch occasion decides by (VX-633: the Prince's; Sherlock's
-/// before it). The DEFAULT is `Book.all` — the INSTALLED
+/// before it). The DEFAULT is every book of `Book.all` — the INSTALLED
 /// BASE's shape (stores born before 17y/13s carry Jekyll and *Encryption
 /// Explained*), which most of this suite's existing-store pins exercise;
 /// the fresh-birth pin passes `Book.launchSet`, the real launch's list
 /// (13s-b U1b — `LaunchFurnitureTests` drives the production composition).
+/// **JUSTIFIED EDIT (VX-633 U2b — R-633-16, "FRESH STORES ONLY"):** the
+/// default seeds the LAUNCH SET FIRST, then the rest of `Book.all` in its
+/// order. The Prince seeds on a fresh store's launch road only, so in
+/// `Book.all`'s own order (the Prince last) it would now — correctly —
+/// decline the store Sherlock had just filled (`.existingStore`), and the
+/// pins below that read every classic book and arrange at a birth would
+/// lose their subject. The world they want is a store born fresh with the
+/// Prince that also holds the installed base's books (each restorable).
 @MainActor
 @discardableResult
 private func launchSeeds(
     _ session: AppSession,
-    books: [SampleLibrarySeeder.Book] = SampleLibrarySeeder.Book.all
+    books: [SampleLibrarySeeder.Book] = SampleLibrarySeeder.Book.launchSet
+        + SampleLibrarySeeder.Book.all.filter { !SampleLibrarySeeder.Book.launchSet.contains($0) }
 ) async -> SampleLibrarySeeder.Outcome {
     var birth: SampleLibrarySeeder.Outcome = .alreadySeeded
     for book in books {
@@ -674,8 +683,8 @@ struct SampleLibraryWelcomeTests {
                 let sherlockNotes = Set(try Queries.assembleReading(db, readingID: sherlockBook.id).map(\.postID))
                 let jekyllNotes = Set(try Queries.assembleReading(db, readingID: jekyllBook.id).map(\.postID))
                 let princeNotes = Set(try Queries.assembleReading(db, readingID: princeBook.id).map(\.postID))
-                // VX-633: the Prince joined the classic books (and the
-                // installed-base world `Book.all` seeds it).
+                // VX-633: the Prince joined the classic books (and this
+                // suite's world seeds it first — U2b, R-633-16).
                 #expect(shown == sherlockNotes.union(jekyllNotes).union(princeNotes),
                         "the classic books' notes, side by side — and nothing else")
                 let badges = try Queries.ownershipFacts(db, postIDs: Array(shown))

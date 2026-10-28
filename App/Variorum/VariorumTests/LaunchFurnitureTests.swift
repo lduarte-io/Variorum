@@ -471,6 +471,15 @@ struct LaunchFurnitureTests {
     /// stands ALONE. (c) An account whose corpus holds a guide but no
     /// Sherlock reads fresh — and the birth seed finds her guide and seeds
     /// none: one guide, now on Welcome.
+    /// **JUSTIFIED EDIT of (c) (VX-633 U2b — R-633-16, her word: "FRESH
+    /// STORES ONLY … existing stores are untouched"):** (c) read "fresh" off
+    /// the LAUNCH BOOK's absence, which held while every library carried
+    /// Sherlock; now every existing library lacks the launch book, so that
+    /// reading would seed the Prince into her account's library and ARRANGE
+    /// it on any new device. An account corpus holding anything — here, her
+    /// guide — is an EXISTING library: the launch declines it (`declined`,
+    /// recorded), no Prince is minted, nothing is arranged, and her guide
+    /// stands alone. RED ON OLD: `.arranged`, the Prince minted and owned.
     @Test func theSignedInRoadMintsNoGuideAheadOfItsCorpus() async throws {
         try await withLaunchWorld { session, db in
             let device = DeviceMarks()
@@ -500,16 +509,18 @@ struct LaunchFurnitureTests {
         try await withLaunchWorld { session, db in
             let hers = try await TutorialSeeder.restore(session: session)
             let device = DeviceMarks()
-            let arranged = await LaunchFurniture.seed(
+            let declined = await LaunchFurniture.seed(
                 session: session, storeVariant: .dev,
                 gate: gate(account: true, clean: true), marks: device.marks)
-            guard case .arranged = arranged else {
-                Issue.record("no Sherlock in the corpus reads fresh: \(String(describing: arranged))")
-                return
-            }
+            #expect(declined == .declined, "a corpus holding writing is an existing library (R-633-16)")
+            #expect(device.welcome == "declined")
+            #expect(device.books[SampleLibrarySeeder.Book.prince.name] == true,
+                    "the launch book's decision is recorded")
+            #expect(try await reading(db, named: SampleLibrarySeeder.Book.prince.name) == nil,
+                    "no Prince minted into her library")
             let facts = try await guideFacts(db)
             #expect(facts.guides.map(\.id) == [hers], "never a second guide beside hers")
-            #expect(facts.guides.first?.shelfId == facts.welcomeIDs.first, "hers, on Welcome")
+            #expect(facts.welcomeIDs.isEmpty, "nothing arranged — her guide stands where it was")
         }
     }
 
