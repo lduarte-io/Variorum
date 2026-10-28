@@ -1318,8 +1318,7 @@ bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`). Fi
 runs `xcodebuild test`, never launches the app, never claims the stage) — **every red/green claim
 and every VX-428 measurement below is a PREDICTION or a PENDING number until that window**; the
 USE walk (rows B1–B6 below, an Opus walker under the orchestrator's claim); the cold ladder. The
-⌘T caret-following half of VX-594 is HOLLOW (nothing built — the guards pin it). **Revert trees:
-IN PROGRESS** (see the BUILDS line — the source is HEAD whenever no revert is named in flight).
+⌘T caret-following half of VX-594 is HOLLOW (nothing built — the guards pin it). No revert is in flight — all six trees are built and the source is HEAD.
 
 **LIVE STATUS**
 - Reading — DONE: this file (the sitting record R-601-2/R-601-4, members VX-428/VX-577/VX-594,
@@ -1340,7 +1339,9 @@ IN PROGRESS** (see the BUILDS line — the source is HEAD whenever no revert is 
 - Fixes + pins — DONE (110e038c3), all three members; `DerivedData/vx601b-post` build-for-testing
   GREEN (log `App/Variorum/DerivedData/logs/b-post-build.log`; the one warning in a touched file,
   `TakesBoardView.swift` `TakeCardProbeSlot.space` from a Sendable closure, is pre-existing).
-- Revert trees — IN PROGRESS (pre · rev428 · rev428map · rev577 · rev594; the plan below).
+- Revert trees — DONE: all six trees build-for-testing GREEN, every one carrying the FINAL tests
+  (the BUILDS paragraph below). **No revert is in flight; the source is HEAD** (`git diff` empty, no
+  `VX601B-REVERT` marker anywhere).
 - Red/green runs + the VX-428 measurement — PENDING (the orchestrator's window; READY-FOR-SUITES below).
 - USE walk — PENDING (rows B1–B6 below).
 
@@ -1457,3 +1458,166 @@ and there is no edge to rule.
   (`TakesFindController.fanCaretLanding` honours only `.select`), where the article cell lands at
   the remembered place — so in slot split, an entry onto a remembered-open block lands at the end of
   the take rather than where she was. Her call if it matters.
+
+**BUILDS (all six carrying the FINAL tests of 110e038c3; each build-for-testing GREEN; logs
+`App/Variorum/DerivedData/logs/b-<tree>-build.log`; each revert tree built incrementally from an APFS
+clone of the post tree's DerivedData, its app, debug dylib and test bundle all rebuilt — mtimes
+checked):** `DerivedData/vx601b-post` = HEAD · `vx601b-pre` = all three members reverted ·
+`vx601b-rev428` = VX-428 reverted (`openExpansionMemory` returns at once — no seed, no write-back —
+and the entry ring's slot-split mapping off) · `vx601b-rev428map` = ONLY the mapping off (the memory
+on — proves the slot-split ring pin is not riding the memory alone) · `vx601b-rev577` = VX-577
+reverted (the old `!= .slotSplit` gate, no blur) · `vx601b-rev594` = VX-594 reverted (the
+`.newTake` row removed from `TakeCardMenu.rows`; the declaration and the lists kept, so the tree
+compiles — a behavioural revert). Each revert: edited on the committed tree (the record named it
+first), built, restored by `git checkout -- <file>`; restore verified by an empty `git diff`.
+
+**THE PREDICTION TABLE (the red/green runs — PENDING the orchestrator's window).** R = red, G =
+green; ×n = a parameterized test's cases. "guard" = green on every tree by design; HOLLOW = the ⌘T
+half of VX-594, green everywhere.
+
+| # | Test | pre | rev428 | rev428map | rev577 | rev594 | post |
+|---|---|---|---|---|---|---|---|
+| 1 | `TakesExpansionMemoryTests/theBoardsOpenFansAreWrittenToTheSessionAsTheyChange` | R | R | G | G | G | G |
+| 2 | `…/aFreshBoardIsSeededBeforeItsFirstProjection` | R | R | G | G | G | G |
+| 3 | `…/theFirstProjectionPrunesBlocksTheNoteNoLongerHolds` | R | R | G | G | G | G |
+| 4 | `…/onlyTheTakesBoardReadsOrWritesTheMemory` (guard — the fence) | G | G | G | G | G | G |
+| 5 | `…/applyingAShowFilterForgetsTheFansItCloses` (its non-vacuity line reds without the memory) | R | R | G | G | G | G |
+| 6 | `TakesExpansionRemountTests/aModeRoundTripComesBackWithItsFansOpenAndOnTheSameBlock` (the "open" half; the place half green everywhere) | R | R | G | G | G | G |
+| 7 | `…/anEntryLandingStillReachesAFarBlockWithFansOpenAboveIt` ×4 (proof; only its "seeded" non-vacuity line reds without the memory) | R×4 | R×4 | G | G | G | G |
+| 8 | `…/slotSplitsEntryRingLandsOnTheCardThatRendersItsTake` | R | R | **R** | G | G | G |
+| 9 | `TakesSlotSplitExpandAllTests/expandAllOpensEverySplitAndCloseAllBringsThePlainPageBack` (rendering guard; its memory line reds without VX-428) | R | R | G | G | G | G |
+| 10 | `…/expandAllNeverLeavesTheRingOnAPaneNoSurfaceRenders` ×2 (slotSplit · stack) | R·G | G·G | G·G | R·G | G·G | G·G |
+| 11 | `TakesExpansionCostTests/aSeededRemountCostsOnlyWhatIsOnScreen` ×3 (measurement; its "seeded" non-vacuity reds without VX-428 — run it on rev428 and post only) | R×3 | R×3 | — | — | — | G×3 |
+| 12 | `TakesBoardTests/expandAllIsOfferedOnlyWhereMeaningful` (JUSTIFIED EDIT: the slot-split line flipped) | R | G | G | R | G | G |
+| 13 | `TakeCardDoorTests/theBoardsLiveTakeCardCarriesTheFourActs` (its grammar now includes `.newTake`) | R | G | G | G | R | G |
+| 14 | `…/theOtherLiveCardShapeCarriesThemToo` (same) | R | G | G | G | R | G |
+| 15 | `…/theCardMenuIsOneListWithTheRegistrysOwnWords` (JUSTIFIED EDIT: the branch row at the head) | R | G | G | G | R | G |
+| 16 | `…/aLiveCardsMenuOffersNewBranchedTake` ×2 (stack · carousel) | R×2 | G | G | G | R×2 | G×2 |
+| 17 | `…/theBranchRowBranchesFromTheCardsOwnNotChosenTake` ×2 (board · Write panel) | R×2 | G | G | G | R×2 | G×2 |
+| 18 | `…/commandTBranchesTheTakeTheCaretIsInElseRefuses` (HOLLOW guard) | G | G | G | G | G | G |
+| 19 | `…/theWritePanelsCommandTBranchesTheTakeTheRingIsIn` (HOLLOW guard) | G | G | G | G | G | G |
+| 20 | `…/bothTakesSurfacesDeclareTheOneCardGrammar` + the suite's other 9 (guards) | G | G | G | G | G | G |
+| 21 | `TakeCardMenuTitleTests/*` (2 — the chord drift guard now walks the new row) | G | G | G | G | G | G |
+
+**Reading the runs:** rev428 reds exactly #1–#3, #5–#9, #11 (the memory); rev428map reds exactly
+#8 (the slot-split entry mapping — green there would make #8's mapping half HOLLOW: then the mapping
+is dispositioned hollow and withdrawn); rev577 reds exactly #10(slotSplit) and #12; rev594 reds
+exactly #13–#17; their union is pre's. A pin green on its own member's revert is HOLLOW — record it,
+never fix it. #18/#19 are predicted green on every tree: **that is the evidence that R-601-4's ⌘T
+half is hollow** — if either is RED on pre, the trace above is wrong and the ⌘T half is real (stop,
+report; do not build on a guess).
+
+**THE VX-428 MEASUREMENT — PENDING the window (#11's `VX428-MEASURE` lines, from the post run's
+log; the numbers land here).** The fixture: 60 blocks, every block fanned (two takes), a 1100×700
+window; per style (stack · margin grid · slot split) four remounts — 0 fans open, 5 open at the top,
+25 open at the top (all on the first screen: the worst case), 25 open BELOW the fold. Each line
+gives the seed (µs — `landingEnabled`'s seed + sink install), the first realized pane (ms from the
+hosting view's mount), the settle (ms until the realized pane set holds still for three turns — the
+first paint and the restore's re-renders done) and the realized panes (article · cards). **What the
+code predicts, for checking the numbers against:** the seed is O(open fans) — one dictionary read,
+one set copy (single-digit µs); the remount's cost is the lazy column's: only REALIZED rows build
+their cards (P3), so 25 fans below the fold realize exactly what 0 do (asserted), and 25 at the top
+realize at most a viewport's worth (asserted: ≤ 3 panes per at-rest row, two cards per open fanned
+row, the rows fewer because taller); nothing scales with the 60 blocks except the existing O(slots)
+reads every render already makes (`marginRailWidth`'s candidate filter, `railEngaged`'s scan) —
+unchanged by this member. The margin rail is engaged from the FIRST frame on a seeded board (the
+prose column's measure is the engaged one at first paint — no widening after it).
+
+## READY-FOR-SUITES — batch B (the orchestrator's window; from `App/Variorum/`)
+
+All six builds are done; run `test-without-building` on each (no rebuild), array args:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building -only-testing:…`.
+Confirm each "Test run with N tests in M suites" line and read the `skipped:` lines (VX-604: 0 ran =
+no verdict). Every new mounted pin waits on `HostLaunchSettle` before it pumps (the launch gate),
+and `TakeCardDoorTests`' bloomed-board harness now does too.
+
+1. **THE RED RUNS** — on `vx601b-pre`, `vx601b-rev428`, `vx601b-rev428map`, `vx601b-rev577`,
+   `vx601b-rev594` (seconds to ~2 minutes each):
+   `-only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakeCardMenuTitleTests -only-testing:VariorumTests/TakesBoardTests`
+   **plus on `vx601b-rev428` only** `-only-testing:VariorumTests/TakesExpansionCostTests` — expect the
+   table's reds exactly (TakesBoardTests runs whole: its other 22 tests green everywhere).
+2. **THE GREEN RUN, tier 1** (on `vx601b-post`) — the pins, the measurement (its `VX428-MEASURE`
+   lines are the numbers this record is owed), and the Takes-board family the change reaches (the
+   expansion memory, the entry ring, the card menu, the routed ⌘T):
+   `-only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakesExpansionCostTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakeCardMenuTitleTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/ArticleLandingProjectionArmTests -only-testing:VariorumTests/TakesArticleWatchTests -only-testing:VariorumTests/TakesLandingTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/TakesFindBoardTests -only-testing:VariorumTests/TakesStepFollowTests -only-testing:VariorumTests/TakesStepFollowModelTests -only-testing:VariorumTests/TakesParkedFollowTests -only-testing:VariorumTests/TakesChooseRingTests -only-testing:VariorumTests/TakesRailPagingTests -only-testing:VariorumTests/TakesCardHeightTests -only-testing:VariorumTests/TakesRoomTests -only-testing:VariorumTests/TakesEntryBandTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/WriteTakesPanelTests -only-testing:VariorumTests/WriteTakesPanelChooseTests -only-testing:VariorumTests/WriteTakesPanelKeysTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/CapabilityRegistryTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/ModeSwitchCarryTests -only-testing:VariorumTests/ModeSwitchFeelTests`
+   — 30 suites, all green expected (VX-337's two load-dependent flakes are whole-TARGET-load only;
+   met here, they are not this batch's — note them for batch C).
+3. **THE GREEN RUN, tier 2 — the battery** (on `vx601b-post`): batch A2's 201 suite types (the
+   READY-FOR-SUITES — batch A2 list, verbatim) PLUS `TakesExpansionMemoryTests
+   TakesExpansionRemountTests TakesSlotSplitExpandAllTests TakesExpansionCostTests
+   TakeCardMenuTitleTests TakesBoardTests TakesArticleWatchTests ArticleLandingProjectionArmTests
+   TakesEntryBandTests TakesRoomTests TakesCardHeightTests TakesLandingTests CommandRouterTests
+   BranchDoorFlushTests SpreadBookViewTests TutorialWalkTests' TutorialTakesActsTests` (the ones not
+   already in the 201) — ~215 suite types. Standing reds that are NOT this batch's, if met: VX-337's
+   two flakes and the trait-skipped singleton-window oracle suite.
+
+## THE USE WALK — batch B rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug
+build from `DerivedData/vx601b-post`; never press Resume Sync; restore exactly as found)
+
+The walk REQUEST names: one fresh walk note minted by quick entry with FOUR plain paragraphs
+(blocks), each given a second take with ⌘T in Takes (each take edited so the two differ — e.g. "…
+second take"), retitled "vx601 b walk note"; it leaves to the Trash at the end. **The fan style is a
+SYNCED store setting** (`fan_style`): the walker reads the as-found style first (the header's
+"style: …") and restores it exactly at leave-taking. Captures one per row per voice, both voices
+(Study first — the store's voice — then Terminal, restored to Study).
+- **B1 — VX-428, her tester's words:** Takes (⌘2), stack style; open two fans with their ⑂ badges;
+  ⌘1 (Write), look, ⌘2 → **both fans are still open**, the page where she left it. Then ⎋ (close
+  all), ⌘1, ⌘2 → all closed (close-all is remembered too).
+- **B2 — VX-428, "getting to the right location":** open the first block's fan; scroll so the third
+  block is at the top; ⌘1, ⌘2 → **the same block at the top, the fan above still open.** Then in
+  Write put the caret in the LAST block, ⌘2 → **the board lands on the last block** (on screen, the
+  ring in it) with the first block's fan still open above.
+- **B3 — VX-577, the door (style: Slot split):** the header shows **"expand all"** and **"close
+  all"**; expand all → every fanned block opens into its split (cards side by side); ◀ ▶ on one split
+  pages it alone; close all → the plain page; expand all again, then ⎋ → plain. Then click into a
+  block's text, type a word, press expand all → **the word is kept** (⌘1 shows it), no ring is left
+  floating, a click in a card takes the caret again.
+- **B4 — VX-428 × slot split:** (still slot split) open one block's split, click into its chosen
+  card, ⌘1, ⌘2 → the split is still open and **the ring lands in that block's card** (typing lands
+  there). Restore the as-found style afterwards.
+- **B5 — VX-594, the door:** stack style, a block's fan open; on the NOT-chosen take's card, ⌄ →
+  **"New branched take (⌘T)"** → a new card appears with the not-chosen take's words, the caret in
+  it; the ✓ chosen card unchanged. Then Write (⌘1) → the block's ⑂ badge (Write's take panel) → a
+  not-chosen card's ⌄ → New branched take → the same, in the panel.
+- **B6 — VX-594's ⌘T (the hollow half, confirmed live):** click into the not-chosen take's card in
+  Takes, ⌘T → the new take carries THAT take's words (not the chosen's). Click somewhere neutral so
+  no take holds the caret, ⌘T → the board's "Click into a take first" refusal.
+
+## SELF-ASSESSMENT (the first of the two reviews — the implementer's)
+
+- **Scope and seams.** Production: `EditorRouter.swift` (one session slot), `TakesBoardLayout.swift`
+  (the sink, seed, prune; reports only on a change — the assignments, hence observation, unchanged),
+  `TakesViewModel.swift` (the landingEnabled edge, the memory, the first-projection prune, the gate,
+  the expand-all blur, the slot-split predicate and the entry mapping), `TakesBoardView.swift`
+  (`cardActs` forwards to the model, `.newTake` in `surfaceCapabilities`, two doc comments),
+  `TakesShared.swift` (`TakeCardActs.branch`, the row, the copy, the one wiring),
+  `WriteTakesPanel.swift` (the wiring, `.newTake` declared), `CapabilityRegistry.swift` (`.surface` on
+  `.newTake`). Zero `Sync/`, schema, operations, Shared/, `PaneSurface`, `EditorTextView`,
+  `BlockRangeIndex`, structural door, storage write. No TK1 API, no attribute stamp. P-1: the door
+  is declared, rendered from the one list, walked per surface. P-3: no second liveness — the entry
+  mapping and the blur go through the authority's own doors (`authority.focus`, `blur`). P1/P3: the
+  memory is O(open fans) per change; drawing seeded fans is the lazy column's (measured).
+- **The trace held, with one member half falsified.** VX-428/VX-577 as briefed plus one widening
+  each (both the same R112 class, both slot split's article-cell replacement); VX-594's door missing
+  as suspected, and its ⌘T half already true on every host — the sitting's premise for that half was
+  wrong, so nothing was built for it and the guards pin her semantics.
+- **What could regress, and why I think it doesn't.** (1) *Existing two-mount pins on one session*
+  now see the second board seeded — every such suite I found expands nothing before its remount
+  (`TakesArticleScrollTests`'s remounts; the soak expands, then remounts — its invariants are about
+  rings, mirrors and heights, all honest under open fans); the battery decides. (2) *The Write panel
+  and Lenses* never set `landingEnabled` — fenced (pin #4). (3) *Twin models* (SwiftUI builds a
+  discarded `TakesViewModel` on every `TakesBoardView` re-init) get seeded too — a read and a copy;
+  they never mutate, so they never write. (4) *The card wiring's move* — the four old closures are
+  byte-identical in behavior (the delete pin presses the real wiring now). (5) *The blur* fires only
+  on the one shape (slot split, ring in an article cell expand-all replaced); every other style keeps
+  the ring (pin #10's stack case). (6) *The entry mapping* applies only when the article cell is
+  really gone (`slotSplitReplacesArticleCell` reads the board's own bloom rule).
+- **Risks I see.** (a) Pins written without a run: the harnesses are the measured suites' own
+  (`TakesArticleScrollTests`' mount/settle/topOfPage, `TakeCardDoorTests`' oracle,
+  `TutorialWalkTests`' routed ⌘T); a red on post is a pin to fix, never a production edit without a
+  trace. (b) #6's ±1-block restore tolerance under two taller-than-estimated rows above the place is
+  the existing pin's tolerance, not a new promise; if the window shows it outside, that is her
+  "getting to the right location" failing and the record must say so plainly. (c) The measurement's
+  bound (#11, ≤ 3 panes per at-rest row) assumes LazyVStack prefetch stays within ~2 rows; a red there
+  is a measured fact to report, not a reason to loosen the bound silently. (d) The fan card's END
+  landing (R-B-3) is visible in B4.
