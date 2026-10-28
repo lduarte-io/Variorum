@@ -915,14 +915,12 @@ window launches the app, the coordinator folds it into a short window of its own
 
 ## BATCH A2 RECORD — pane INPUT probes: VX-429 + VX-592 (implementer: opus-implementer, 2026-10-27)
 
-**NOT DONE (first line, kept current):** everything below the trace is IN PROGRESS — the pins,
-the fix, the builds; every red/green claim is a PREDICTION, PENDING the orchestrator's suite
-window (this session never runs `xcodebuild test`, never launches the app, never claims the
-stage); the USE walk (rows below, an Opus walker under the orchestrator's claim); the cold ladder.
-**REVERTS STARTING (from ca626390, committed first):** rev429 = `Surface/PaneSurface.swift`'s one
-`CaretPress.clearPressedCharacter` line removed; rev592 = `Features/Editor/EditorTextView.swift`'s
-one line removed; each built into its own `DerivedData/vx601a2-rev…`, then restored by
-`git checkout -- <file>` (the committed fix). `git diff` against HEAD says what is reverted right now.
+**NOT DONE (first line, kept current):** the suite window (the orchestrator's: this session never
+runs `xcodebuild test`, never launches the app, never claims the stage) — **every red and green
+claim below is a PREDICTION, PENDING that window**; the USE walk (rows A1–A6 below, an Opus walker
+under the orchestrator's claim — the A2 gate is use, not the pins); the cold ladder. VX-592 rides
+*[removed for publication]*
+four builds are done and the source is HEAD (`git diff` empty; no `VX601A2-REVERT` marker).
 
 **LIVE STATUS**
 - Reading — DONE: this file (members VX-429/VX-592, batches, ENVIRONMENT TRAPS, BATCH A RECORD +
@@ -934,23 +932,21 @@ one line removed; each built into its own `DerivedData/vx601a2-rev…`, then res
   `PressReporter`, the shared caret settle (`MarkdownCaretRescue`, `MarkdownFace.settleCaret`),
   the rigs (`PaneLifecycleTests`, `EditorTestSupport`, `TakePaneMeasureTests`' click). Linear was
   unreachable from this session (re-auth) — the ticket bodies were read from this file only.
-- Trace — DONE (below): the PROBE (13 standalone offscreen binaries) found ONE AppKit mechanism
+- Trace — DONE (below): the PROBE (15 standalone offscreen binaries) found ONE AppKit mechanism
   that is BOTH members' symptom; the scout's hypothesis is FALSIFIED by measurement.
-- Pins — DONE (this commit): `VariorumTests/CaretPressTests.swift`, 21 tests in 3 suites —
+- Pins — DONE: `VariorumTests/CaretPressTests.swift`, 21 tests in 3 suites —
   `PaneCaretPressTests` (VX-429: 3 red-on-old + 4 guards), `EditorCaretPressTests` (VX-592 in
-  Write: 2 red-on-old + 2 guards), `CaretPressRuleTests` (the pure rule: 10, green by
-  construction). The rule type `Surface/CaretPress.swift` lands in the same commit UNWIRED, so this
-  commit's tree IS the pre tree.
-- Build `DerivedData/vx601a2-pre` (this commit's tree: pins + rule, no wire) — DONE,
-  build-for-testing GREEN (`DerivedData/logs/a2-pre-build.log`).
-- Fix (the two wires) — DONE (this commit): `PaneTextView.mouseDown` (VX-429) and
-  `EditorTextView.mouseDown` (VX-592) each call `CaretPress.clearPressedCharacter(in:for:)`
-  immediately before `super.mouseDown`; nothing else in either file moved.
-- Build `DerivedData/vx601a2-post` (HEAD, the fix) — DONE, build-for-testing GREEN
-  (`DerivedData/logs/a2-post-build.log`; the one PaneSurface warning, `:218` PanePublisher's
-  scheduler, is pre-existing).
-- Builds rev429 / rev592 (one wire reverted each, committed-first) — NOT STARTED.
-- Red/green runs, walk — PENDING (the orchestrator's windows).
+  Write: 2 red-on-old + 2 guards), `CaretPressRuleTests` (the pure rule: 10) (b62478c3; hardened
+  37521ea6 — each pin asserts its own preconditions).
+- Fix — DONE: `Surface/CaretPress.swift` (the rule, b62478c3; the wire's lone-caret gate,
+  37521ea6) + one call line each in `PaneTextView.mouseDown` (VX-429) and `EditorTextView.mouseDown`
+  (VX-592) (ca626390).
+- Builds — DONE, all four carrying the FINAL tests (37521ea6), each build-for-testing GREEN, every
+  binary newer than the final sources (logs `App/Variorum/DerivedData/logs/a2-*-build2.log`):
+  post · pre · rev429 · rev592 (the BUILDS paragraph below).
+- Red/green runs — PENDING (the orchestrator's window; the prediction table below).
+- USE walk — PENDING (the orchestrator's claim, an Opus walker; rows A1–A6 below).
+- Self-assessment + READY-FOR-SUITES — DONE (below, this commit).
 
 **THE PROBE (standalone `swiftc` binaries in the session scratchpad, copies kept in the gitignored
 `App/Variorum/DerivedData/a2probe/` — never the app, no store, no screen: windows at −20 000 never
@@ -1007,6 +1003,11 @@ a CGEvent, never the real pointer; every drag door intercepted, no pasteboard wr
    **Only moving the empty selection off the pressed character, silently (`stillSelecting: true`),
    in the same turn as `super.mouseDown`, works**: the press selects, a plain click on the caret
    still ends at `{c, 0}` with exactly ONE notification (identical to before), no extra notification.
+7. *The pins' footing:* the whole mechanism reproduces INSIDE A MAIN-QUEUE CALLBACK (the test
+   host's own shape — Swift Testing's main-actor job, where a nested run loop runs no main-queue
+   hop) in a NON-key window never ordered in, with plain run-loop pumps as the settle (probe 14;
+   the `NSTextInsertionIndicator` is not even present there, so the settle is a run-loop turn, not
+   the indicator); and the wire's AppKit calls never drop a TK2 view to TK1 (probe 15).
 
 **THE SETTLED DESIGN (the fix — one rule, two surfaces):** a pure rule (`Surface/CaretPress.swift`)
 and one wire each surface calls immediately before `super.mouseDown`: on a PLAIN single click (no
@@ -1018,3 +1019,175 @@ notification), and AppKit's own tracking then does exactly what it does anywhere
 moves: a non-empty selection, a ⇧/⌘/⌥/⌃ click, a double click, a press elsewhere never reach the
 lever; no storage or attribute write; no new liveness or selection authority (P-3); cost one
 `characterIndex(for:)` per qualifying click (P1).
+
+**AS BUILT (`Surface/CaretPress.swift` new; one call line each in `Surface/PaneSurface.swift`
+and `Features/Editor/EditorTextView.swift`; no other production file).**
+- *The rule (pure, `nonisolated enum CaretPress`):* `caretBeforePress(selection:pressedCharacter:text:)`
+  — one empty range at `c < length`, the press on `c` or `c − 1` → the far edge of the composed
+  character at `c`; anything else → nil. `isPlainSingleClick(type:clickCount:modifiers:)` — a left
+  mouse-down, `clickCount == 1`, no ⇧/⌘/⌥/⌃ (caps lock is not a modifier of the gesture).
+- *The wire (`CaretPress.clearPressedCharacter(in:for:)`):* the plain-single-click and
+  no-marked-text gates, a lone-caret gate BEFORE any hit-test, one `characterIndex(for:)` at the
+  press, the rule, then `setSelectedRange(_:affinity:stillSelecting: true)` — the caret's own
+  affinity kept, no notification. Probe 15: 240 hit-tests and the selection writes leave a TK2
+  view on TK2 (no `willSwitchToNSLayoutManager`, `textLayoutManager` still set).
+- *Where it is called:* `PaneTextView.mouseDown` after the checkbox, link and ⌘-claim doors and
+  immediately before `super` (VX-429); `EditorTextView.mouseDown` after the checkbox, link and
+  block-pick doors and immediately before `super` (VX-592). The doors before it are unchanged and
+  still win (a checkbox click, a ⌘-click never reach it).
+- *What did NOT change:* no storage or attribute write (no stamp — TEXTKIT2 §3), no `runStructural`,
+  `BlockRangeIndex` untouched, no liveness or selection authority added (P-3), no `Sync/`, no
+  schema, no Shared/ file (**MOBILE PARITY: nothing mobile-visible** — both surfaces are Mac-only;
+  the phone's text views are UIKit's own road). `CaptureNSTextView` and `CommentNSTextView` do not
+  override `mouseDown` (AppKit's gesture road) and are not touched (residue R-A2-2).
+
+**BUILDS (all four carrying the FINAL tests, 37521ea6; each build-for-testing GREEN; logs
+`App/Variorum/DerivedData/logs/a2-*-build2.log`):** `DerivedData/vx601a2-post` = HEAD (the fix) ·
+`DerivedData/vx601a2-pre` = both wires reverted (the rule type unwired) · `DerivedData/vx601a2-rev429`
+= ONLY the pane wire reverted · `DerivedData/vx601a2-rev592` = ONLY the editor wire reverted. Each
+revert committed-first, built, restored by `git checkout -- <file>`; no `VX601A2-REVERT` marker
+remains; `git diff` empty. **No revert is in flight.**
+
+**THE PREDICTION TABLE (the red/green runs — PENDING the orchestrator's window).** 21 tests in 3
+suites; R = red, G = green; "guard" = green on both sides by design.
+
+| # | Test | pre | rev429 | rev592 | post |
+|---|---|---|---|---|---|
+| 1 | `PaneCaretPressTests/aHeldDragFromTheCaretsOwnPlaceSelects` | R | R | G | G |
+| 2 | `…/aHeldDragFromALandedCaretAtTheStartSelects` | R | R | G | G |
+| 3 | `…/aReadPanesKeptCaretNeverEatsADrag` (two lines red: no selection, and a focus request) | R | R | G | G |
+| 4 | `…/aHeldDragFromElsewhereSelects` (guard) | G | G | G | G |
+| 5 | `…/aQuickDragFromTheCaretSelects` (guard — why it read "sometimes") | G | G | G | G |
+| 6 | `…/aHeldClickOnTheCaretIsStillAPlainClick` (guard — one report, the place handed up) | G | G | G | G |
+| 7 | `…/aShiftClickStillExtendsFromTheCaret` (guard) | G | G | G | G |
+| 8 | `EditorCaretPressTests/aHeldDragFromTheCaretSelectsInWrite` | R | G | R | G |
+| 9 | `…/aHeldDragFromWhereSheJustTypedSelectsInWrite` | R | G | R | G |
+| 10 | `…/aHeldDragFromElsewhereSelectsInWrite` (guard) | G | G | G | G |
+| 11 | `…/aHeldClickOnTheCaretStaysAClickInWrite` (guard) | G | G | G | G |
+| 12–21 | `CaretPressRuleTests/*` (the pure rule — 10 tests) | G | G | G | G |
+
+pre: 5 red · rev429: 3 red (#1–#3) · rev592: 2 red (#8–#9) · post: 0 red. **A pin green on its own
+member's revert is HOLLOW — record it, never fix it:** #8/#9 green on pre/rev592 would mean Write
+does NOT carry the mechanism in the host ("Write is fine" true) — then VX-592's Write half is
+withdrawn (the editor wire reverted, the record says so); #1–#3 green on pre/rev429 would mean the
+offscreen gesture cannot reach the mechanism — then VX-429 needs the staged real-pointer window
+(below) before any fix stands. Every pin's preconditions are asserted in the pin (the click put the
+caret where it says; the press is on the caret's own character and anchors at it — `anchors`), so
+a red names its line.
+
+## READY-FOR-SUITES — batch A2 (the orchestrator's window; from `App/Variorum/`)
+
+All four builds are done; run `test-without-building` on each (no rebuild):
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<build> test-without-building -only-testing:…`
+(array args — the window-a lesson). Confirm each "Test run with N tests in M suites" line and read
+the `skipped:` lines (VX-604: 0 ran = no verdict). **No pin here can start a real drag session or
+write a pasteboard on either tree** (a held press on an empty selection reaches AppKit's own
+`dragSelection`, which answers false before any image, pasteboard or session — measured, probe 11);
+no drag-out of a non-empty selection is ever pressed (that would start a real one). Each held
+gesture costs ~0.5 s; the three suites run in well under a minute.
+
+1. **THE RED RUNS** — on `vx601a2-pre`, `vx601a2-rev429`, `vx601a2-rev592`:
+   `-only-testing:VariorumTests/PaneCaretPressTests -only-testing:VariorumTests/EditorCaretPressTests -only-testing:VariorumTests/CaretPressRuleTests`
+   — expect **21 tests in 3 suites** each, the reds exactly as the table (pre 5 · rev429 3 · rev592 2).
+2. **THE GREEN RUN, tier 1** (on `vx601a2-post`) — the pins plus EVERY suite that delivers a
+   `mouseDown` to `PaneTextView` or `EditorTextView` (the touched road; grep `\.mouseDown(with:` in
+   `VariorumTests/`) and the pane component's own suites:
+   `-only-testing:VariorumTests/PaneCaretPressTests -only-testing:VariorumTests/EditorCaretPressTests -only-testing:VariorumTests/CaretPressRuleTests -only-testing:VariorumTests/TakePaneMeasureTests -only-testing:VariorumTests/BlockHighlightTests -only-testing:VariorumTests/WriteBlockSelectionTests -only-testing:VariorumTests/BlockSelectionRuleTests -only-testing:VariorumTests/TypewriterRoomTests -only-testing:VariorumTests/PhantomSpaceTests -only-testing:VariorumTests/PaneSurfaceTests -only-testing:VariorumTests/PaneFindFaceTests -only-testing:VariorumTests/PaneUndoLifecycleTests -only-testing:VariorumTests/PaneRebindTests -only-testing:VariorumTests/CanvasSwitcherRebindTests -only-testing:VariorumTests/PaneTextAuthorityTests -only-testing:VariorumTests/PaneMarkdownCaretFaceTests -only-testing:VariorumTests/MarkdownCaretFaceTests -only-testing:VariorumTests/MarkdownActsTests -only-testing:VariorumTests/IndexClickCaretTests`
+   — 19 suites, all green expected.
+3. **THE GREEN RUN, tier 2 — the battery** (on `vx601a2-post`): batch A's 196 suite types (the
+   READY-FOR-SUITES — batch A list above, verbatim) PLUS `CaretPressRuleTests PaneCaretPressTests
+   EditorCaretPressTests PhantomSpaceTests TypewriterRoomTests` — **201 suite types**. Standing reds
+   that are NOT this batch's, if met: VX-337's two load-dependent flakes and the trait-skipped
+   singleton-window oracle suite (as batch A's list says).
+
+## THE USE WALK — batch A2 rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug
+build from `DerivedData/vx601a2-post`; never press Resume Sync; restore exactly as found)
+
+The walk REQUEST names: one fresh walk note minted by quick entry with ONE ordinary paragraph
+(e.g. "alpha bravo charlie delta echo foxtrot golf hotel india juliet") plus ⌘T for a second take;
+it leaves to the Trash at the end. The press is `cliclick` `dd:` at the caret's own spot (1–2 px
+right of the drawn caret), `w:500`, then `dm:` steps and `du:` — the HOLD is the point (a quick
+`dd`→`dm` selects on the old build too). Her clipboard word (2026-10-27) stands: the walk may use
+the pasteboard; it should not need to. Captures one per row per voice, both voices (Study first —
+the store's voice — then Terminal, restored to Study). The standing duty of this run's NEXT Debug
+window (the earlier walk note's Delete forever, nothing else) is the orchestrator's to carry in
+the same REQUEST.
+- **A1 — VX-429, her gesture (Takes ⌘2):** click between two words to put the caret; wait ~1 s;
+  press ON the caret, hold ½ s, drag right ~3 words, release → **those words are selected** (from
+  the caret). Then the same from the caret leftwards. (Old build, for contrast if the window
+  allows: nothing selects, the caret stays.)
+- **A2 — VX-429, the landed caret:** ⌘1 then ⌘2 (or re-open the note in Takes) so the pane lands
+  its caret by itself; press on that caret, hold, drag → selects.
+*[removed for publication]*
+  press on the caret, hold, drag → selects. Then in a Takes take card (a bloomed fan): type a word,
+  the same → selects.
+- **A4 — no regression:** (a) a held CLICK on the caret, no move → the caret stays, nothing else
+  happens; (b) ⇧-click extends from the caret; (c) double-click selects a word, triple a line;
+  (d) **drag-and-drop still works**: select a word in the live pane, press INSIDE the selection,
+  hold, drag it two words along, drop → the word MOVES (then ⌘Z undoes it); the same in Write.
+- **A5 — RECORD ONLY (VX-592's other reading, for her):** in Takes with the fan open: select a
+  word in the LIVE pane and drag it onto ANOTHER take's card (a read pane) → record what happens
+  (expected: the drop is refused — a read pane accepts no drop, P-3 by construction); then select a
+  word in a READ card and drag it into the live pane → record. No verdict; it rides #245.
+- **A6 — RECORD ONLY (residue R-A2-2):** the quick-entry box and a comment field run AppKit's other
+  (gesture) road and were not changed: type a word in quick entry, press on the caret, hold, drag →
+  record whether it selects.
+
+## SELF-ASSESSMENT (the first of the two reviews — the implementer's)
+
+- **Scope and seams.** One new file (`Surface/CaretPress.swift`: a pure rule + one wire), one call
+  line in each of `PaneTextView.mouseDown` and `EditorTextView.mouseDown`, one new test file. Zero
+  `Sync/`, schema, Shared/, `BlockRangeIndex`, structural door, storage or attribute write. No TK1
+  API (the wire's calls are `NSTextView`/`NSTextInputClient` API; probe 15 shows no fallback). P-3:
+  no second liveness or selection authority — the move happens inside one gesture of the view that
+  already owns the selection and is never reported. P1: one hit-test where she pressed, only for a
+  plain single click on a lone caret.
+- **The trace held, and replaced the brief's.** The scout's mechanism was falsified by measurement
+  (no mid-drag notification exists); the measured one explains every word of both reports and the
+  "sometimes" (the hold), and predicts the brief's "Write is fine" WRONG — the Write pins decide.
+- **What could regress, and why I think it doesn't.** (1) *A click at the caret:* the caret now
+  makes one silent trip and AppKit puts it where the click always put it, with the one notification
+  it always posted (pinned both surfaces; probe 9). (2) *Typing attributes after such a click* are
+  re-derived from the text at the caret, exactly as for any click elsewhere — the surfaces are
+  plain text whose face is re-derived per edit, so nothing she types changes. (3) *Drag-and-drop of
+  a real selection* never reaches the rule (a non-empty selection is gated before the hit-test,
+  pinned in the rule suite); the walk's A4d checks it live. (4) *⇧/⌘/⌥/⌃ clicks, double/triple
+  clicks, marked text* are gated out (pinned / by construction). (5) *The doors before it*
+  (checkbox, link, ⌘-claim, block pick) still run first and still consume their clicks.
+- **Risks I see.** (a) Pins written without a run, on a synthesized gesture: the shapes are the
+  probes' own (14 standalone binaries, including the test host's main-queue-callback shape, probe
+  14), but a harness surprise is possible — a red on `post` is a pin to fix, never a reason to touch
+  the production change without a trace; a green on `pre` is a hollow pin and says so above.
+  (b) *A point-release dependency:* the rule leans on a 27.0.1 TK2 behaviour; if a later macOS
+  drops it the rule is a harmless no-op, and if it moves the zone, the ±1 window covers the
+  boundary pixel — TEXTKIT2_NOTES §5's re-verify should name `CaretPressTests` (a canon line for
+  the closeout, the orchestrator's). (c) The gesture-road text views (capture, comments) are
+  unmeasured (R-A2-2).
+
+**PROVISIONAL / FOR #245 (the orchestrator's bundle — I do not touch QUESTIONS.md):**
+*[removed for publication]*
+  at the cursor (FIXED here, both surfaces). If she meant drag-AND-DROP of an already-selected span
+  out of the live pane: no source-side mechanism exists (the AppKit source road is identical live
+  and read — probe 12), and the one live/read asymmetry is the destination — a READ pane accepts no
+  drop, by construction (P-3). Options if that is what she meant: (a) keep it — a read pane is
+  projection-authoritative, so dropping text there means nothing until it is live (BUILT: unchanged);
+  (b) a drop on a read pane makes it live and lands the text there (focus + edit in one gesture);
+  (c) a drop on a read take card offers a door (insert into this take · new take from the dropped
+  text). Most spec-defensible: (a). Walk row A5 records the facts for her.
+- *Carried, not new:* none.
+
+**RESIDUE / NOT MINE (for the orchestrator to ticket or drop):**
+- **R-A2-1 (O-3's caret, traced — not this mechanism):** after Canvas, Takes' head pane landed
+  before the "x" typed on the Canvas card because Canvas reports the focused block with NO caret
+  offset (`CanvasViewModel.focus`, 18k C5 — "a canvas caret reporter would be a design act"), so
+  the note's memory kept the offset from before the "x" and Takes' `.offset` landing used it. A
+  recorded design limit, Canvas-only (Debug); a Canvas caret reporter is her call.
+- **R-A2-2 (the gesture road, unmeasured):** `CaptureNSTextView` (quick entry, the capture box) and
+  `CommentNSTextView` do not override `mouseDown`, so they run AppKit's gesture-recognizer road,
+  which an offscreen probe cannot drive (the window road delivers nothing to an unordered window,
+  probe 3). Walk row A6 records whether the same press fails there; a fix would be its own ticket.
+- **R-A2-3 (a TEXTKIT2_NOTES §3 entry is owed at closeout):** the measured 27.0.1 fact — on the
+  classic (`mouseDown`-override) road a settled empty selection covers its next character for the
+  drag-or-select decision; held presses there drag nothing; TK1 never does — belongs in the
+  build companion beside the other measured findings, pinned in `CaretPressTests`. Canon is the
+  orchestrator's at closeout; the text is ready here.
