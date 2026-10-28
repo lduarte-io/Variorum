@@ -847,6 +847,74 @@ it still reads the pre-restore text; also the pane still editable) and
 `aRestoreBesideLensesLeavesTheLiveCellShowingTheRestoredWords` (the Chosen column's live cell; red line:
 the cell's string).
 
+#### W-2, second pass (2026-10-28, after vx440-reshoot) — CAN'T TRACE the concrete cause headless; NO FIX applied
+
+**First line, per the bounds:** I could NOT trace the concrete mechanism from the code. I narrowed it to
+ONE link by elimination (below), but I cannot name the SwiftUI/AppKit step that breaks that link on the
+sheet road, so — as the coordinator's bound requires — no fix was made this pass. **The sheet road's
+LANDING ships as a named ticket**; the first pass's ORDER fix (`10476aab6` — the act runs from the
+sheet's `onDismiss`, walk-verified: the sheet fades, closes, THEN the words change) stays as landed.
+Tree clean at resume (the walk dirs untracked), pulled to `2224e2bd4`.
+
+**The elimination (what the code and the reshoot frames prove):**
+1. *The act ran and posted its parcel.* The pane's receipt "Saved moment restored into this take…" is on
+   screen (`reshoot-c-4…f06`, `c-5`), and in `BlockHistoryModel.restore` the parcel assignment is the
+   statement after that receipt, same success arm — so `CommandRouter.pendingRestoreLanding` was set.
+2. *The editor applied the restored words.* The block changes from "…was saved. Write typed a third
+   ending, to be undone by the sheet." (`c-1`) to "…was saved." (`c-4`), i.e. the delivery ran
+   `applyProjection` → `.refetchFresh` → a fresh read → `.differential` → `programmaticReplace` →
+   `adoptRewrite` (slots now hold the restored text) → the storage edit bumps the overlay generation →
+   the next `viewWillDraw` schedules the settle hop. The caret at the block's END is exactly that
+   rewrite's signature (block 2/2 is the note's last block; a caret at the replaced range's end rides to
+   the new text's end) — with no landing standing after it.
+3. *Every guard downstream of consumption passes on this state.* Once `EditorViewModel.consumeRestoreLanding`
+   holds the parcel, `landRestoreIfShown` lands at the first hop after the rewrite unless: the 2-s patience
+   ran out (measured from CONSUMPTION, so a late consume still lands at once — and `c-5`, 28 s later, still
+   shows END), the coordinator was dirty (no typing in the burst), the page renders another take (one take
+   here), or the slot's text differs from the parcel's (the same commit's text on both sides). None holds.
+4. *A landing that ran and was then undone is ruled out by the frames:* its wash is a decor subview that
+   only a new flash, the flash's own end, or the text view's teardown removes, and none of the 16 burst
+   frames to +1.55 s shows it; a teardown-and-remount would land the fresh editor at her REMEMBERED caret,
+   which the landing had just reported as the block's START (`updateCaretContext`) — not END.
+5. **So the one link that failed:** the detail editor's consumer never ran with the parcel in hand. Its
+   only road is a PUSH — `EditorView`'s `.onChange(of: session.commandRouter.pendingRestoreLanding)`,
+   delivered only when SwiftUI re-evaluates EditorView's body after the parcel changes (an equality-gated
+   change notification). On the row road that push arrives (the control landed at +0.23 s); on the sheet
+   road it evidently does not.
+6. **What I could not establish from the code:** WHY that push is missed after a sheet presented from the
+   inspector is dismissed. Read and excluded: the editor's identity (`.id("\(postID)-caret-…")` and the
+   detail's `landingGeneration` key — neither moves on this road), the pane mount rule (the window
+   registry's sticky key-ness ignores sheet windows — `WindowRegistry.noteKey`), the router's clears
+   (`registerDetail` for another note / `unregisterDetail` — no road here), the other consumers
+   (`TakesViewModel.consumeRestoreLanding` is called only by mounted Takes/Lenses boards; none is mounted in
+   Write). The candidates left are inside SwiftUI's update graph across the sheet's teardown (EditorView's
+   observation not re-registered for the parcel after the dismissal transaction; or the parcel's change and
+   its clearing landing within one update so the gate sees no change) — not observable without the app,
+   and **the host does not reproduce it**: `aSheetRestoreLandsWhereTheRowRestoreDoesAfterTheSheetIsGone`
+   (the real sheet presented and dismissed in a hosted window, the pane BESIDE the detail rather than
+   inside its inspector as in the app) lands at the START in-host.
+
+**The pin's limit, stated honestly:** that pin holds the ORDER (red-on-old verified at `92fb2f2d8`,
+reshoot rb6 — exactly its trace line failed) and the in-host landing; it does NOT reproduce the app's lost
+landing, so the walk re-verify is the evidence of record for that half.
+
+**For the ticket (the landing half — Bug · Confirmed · Takes & Lenses, related VX-431; Mac-only):**
+- *Mechanism to establish first (needs the app):* a DEBUG trace on the sheet road of (a) the parcel's post
+  time, (b) EditorView's `onChange` fire time and the value it read, (c) the settle hop's time — against the
+  row road's. One run says which of the two SwiftUI candidates it is.
+- *The likely fix shape, for the architect (NOT built — it would be a blind fix today):* the sink law —
+  the consumer PULLS when its surface is ready instead of relying only on the equality-gated push: the
+  settle hop after a rewrite takes a parcel for its note that it has not yet seen (with a posted-at stamp
+  inside `RestoreLanding.patience`, so a parcel left standing by the Lenses board — which deliberately does
+  not take it — can never land a later ARRIVAL). The row road's semantics stay exactly as they are (its push
+  consumes first; the pull then finds nothing).
+- *Pin:* the trace above, once it names the step, decides whether a hosted pin can reproduce it (the pane
+  INSIDE PostDetailView's inspector, opened through `requestBlockHistory`, is the first thing to try — the
+  current pin mounts it beside the detail).
+
+**Hashes:** no code commit this pass; the record only (this commit). No build needed (no code change);
+`build-for-testing` at the tip is the first pass's green (`10476aab6`, `vx440-merge`).
+
 - Batch 3 (gathering faces): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + the two red-on-old Mac runs + walk PENDING the stage window; UNIT RECORD below.
 
 ### Batch 3 — UNIT RECORD (gathering faces: VX-611 · VX-616 · VX-189 · rider VX-356)
