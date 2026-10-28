@@ -540,6 +540,13 @@ struct BookIndexView<Masthead: View>: View {
     @MainActor private final class PaneLandingBox {
         /// The column's last reported content height — the signpost's `total`.
         var contentHeight: CGFloat = 0
+        /// **VX-624 — where the page stands in its scroll** (the derived
+        /// offset and the REACHABLE travel — `OutlineScrollFacts`' measured
+        /// arithmetic), and whether the scroll has reported at all since this
+        /// Index appeared (until it has, a landing's reach is unknown, never
+        /// "the page can move no further").
+        var scroll = OutlineScrollFacts()
+        var scrollReported = false
     }
     @State private var paneBox = PaneLandingBox()
 
@@ -1219,9 +1226,18 @@ struct BookIndexView<Masthead: View>: View {
             // is the single biggest thing that can move a target (a row is ~40
             // pt until its blocks land and thousands afterwards) — and a scroll
             // by HER ends the landing where she put the page.
-            .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                geometry.contentSize.height
-            } action: { _, height in
+            //
+            // VX-624: the SAME observer (widened — no new one, the Outline's
+            // precedent) carries where the page stands in its scroll, so a
+            // landing's reach is the scroll's own last report. Only a HEIGHT
+            // change reaches the landing, exactly as before.
+            .onScrollGeometryChange(for: OutlineScrollFacts.self) { geometry in
+                OutlineScrollFacts(geometry)
+            } action: { old, new in
+                paneBox.scroll = new
+                paneBox.scrollReported = true
+                guard old.contentHeight != new.contentHeight else { return }
+                let height = new.contentHeight
                 paneBox.contentHeight = height
                 #if DEBUG
                 // 13u4 UNIT F3's probe: behaviour-free — it reads the value the
@@ -1272,7 +1288,19 @@ struct BookIndexView<Masthead: View>: View {
     /// hold, the quiet interval, the corrections, the watchdog and the
     /// content-free signpost are the authority's.
     private func land(_ anchorID: String, _ proxy: ScrollViewProxy) {
-        landing.land(anchorID, facts: paneFacts(anchorID)) { id in
+        landing.land(
+            anchorID, facts: paneFacts(anchorID),
+            // VX-624: how far the page can still move, read off the scroll's
+            // last report at every look — a note (or a block) in the column's
+            // last screenful that cannot reach the top settles there at the
+            // hold instead of correcting into an immovable page until the
+            // six-second watchdog.
+            reach: { [paneBox] in
+                paneBox.scrollReported
+                    ? LandingReach(offset: paneBox.scroll.offset, maxOffset: paneBox.scroll.travel)
+                    : nil
+            }
+        ) { id in
             proxy.scrollTo(id, anchor: .top)
         }
     }

@@ -299,6 +299,57 @@ nonisolated struct LandingPolicy: Equatable {
     }
 }
 
+// MARK: - The page's reach (VX-624)
+
+/// **How far the page can still move, read LIVE from the surface's own
+/// scroll at every look** (VX-624 — VX-562's F-1, the ticket's option b′).
+///
+/// The trace it answers: a target in a column's LAST screenful cannot reach
+/// the top — the column's foot follows it — so a landing on it corrected
+/// against a page that could not move, every 0.25 s, until the watchdog gave
+/// up at four seconds (measured on the real pre-fix `decide`: 16 corrections,
+/// `giveUp` at 4.25 s). A correction that moves nothing draws nothing, so the
+/// spin was invisible — but it was four seconds of a landing pending: the
+/// follower frozen, the signpost saying `gaveup`, a 4 Hz loop. A page whose
+/// remaining scroll in the target's direction is within the policy's
+/// tolerance has put the target as near home as it ever can: that IS home
+/// (`LandingSettle.decide`), the same rule note Read's resting anchor has
+/// always applied through its residual's clamp (`LandingAim.ViewportFraction`
+/// — "a resting place the page cannot reach is replaced by the nearest one
+/// it can").
+///
+/// Read at every look and never once per landing (TEXTKIT2_NOTES §3, 18k:
+/// "read the maximum scroll live at every use") — the surface hands a
+/// closure, never a number. A surface that hands none (`nil`) keeps the
+/// pre-VX-624 decision exactly.
+nonisolated struct LandingReach: Equatable, Sendable {
+    /// How far the page can still scroll DOWN (toward its maximum offset) —
+    /// the direction a POSITIVE residual asks for.
+    var down: CGFloat
+    /// How far it can still scroll UP (toward its minimum offset).
+    var up: CGFloat
+
+    init(down: CGFloat, up: CGFloat) {
+        self.down = max(0, down)
+        self.up = max(0, up)
+    }
+
+    /// The page's reach from where it stands in its scroll: `offset` between
+    /// `minOffset` and `maxOffset` (an overscroll reads as no room that way).
+    init(offset: CGFloat, minOffset: CGFloat = 0, maxOffset: CGFloat) {
+        self.init(down: maxOffset - offset, up: offset - minOffset)
+    }
+
+    /// **Can the page close any more of `residual` than `tolerance`?** The
+    /// residual's sign is the scroll it asks for (positive: the page must
+    /// scroll DOWN — `LandingAim.residual`'s convention). No: the page stands
+    /// at its floor (or ceiling) in that direction, and a correction there
+    /// moves less than the landing would ever call a difference.
+    func cannotClose(_ residual: CGFloat, tolerance: CGFloat) -> Bool {
+        residual > 0 ? down <= tolerance : up <= tolerance
+    }
+}
+
 // MARK: - The decision, pure
 
 nonisolated enum LandingDecision: Equatable {
@@ -318,11 +369,22 @@ nonisolated enum LandingSettle {
     /// - `mayFinish`: the surface's own veto. The flow's is *"every near
     ///   story above the target has said it settled"* — geometry, never a
     ///   clock. The Outline has none.
+    /// - `reach` (VX-624): how far the page can still move, read live by the
+    ///   surface — nil where the surface hands none, which decides exactly as
+    ///   before. A REPORTED target the page cannot bring any nearer
+    ///   (`LandingReach.cannotClose`) is HOME: the page's floor is as near the
+    ///   top as that target ever gets, so the landing finishes by the
+    ///   at-home rules below — at the hold, under the surface's veto, the
+    ///   watchdog still binding — instead of correcting against a page that
+    ///   cannot move until the watchdog gives up. An UNREPORTED target is
+    ///   never at a floor (nothing says where it is).
     static func decide(
         top: CGFloat?, corrections: Int, elapsed: TimeInterval,
-        mayFinish: Bool, policy: LandingPolicy
+        mayFinish: Bool, policy: LandingPolicy, reach: LandingReach? = nil
     ) -> LandingDecision {
-        if let top, abs(top) <= policy.tolerance {
+        if let top,
+           abs(top) <= policy.tolerance
+            || reach?.cannotClose(top, tolerance: policy.tolerance) == true {
             if elapsed >= policy.minimumHold, mayFinish { return .done(top: top) }
             // THE WATCHDOG BINDS HERE TOO (13u2b ladder round 1, MAJOR 1 —
             // red-on-old in `LandingAuthorityTests`): a target AT the top
@@ -530,6 +592,9 @@ final class LandingAuthority {
     private var check: DispatchWorkItem?
     private var aim: ((String) -> Void)?
     private var mayFinish: () -> Bool = { true }
+    /// VX-624: the page's reach, re-read at every look (nil = the surface
+    /// hands none — the pre-VX-624 decision).
+    private var reach: () -> LandingReach? = { nil }
 
     #if DEBUG
     private let storyboard: LandingStoryboard?
@@ -557,12 +622,15 @@ final class LandingAuthority {
     ///   offset while rows realize under it (row 44's class).
     /// - `facts`: what the column's manifest knows about this landing.
     /// - `mayFinish`: the surface's veto, re-taken at every look.
+    /// - `reach` (VX-624): how far the page can still move, re-taken at every
+    ///   look — the surface's own scroll facts, never a number frozen here.
     func land(
         _ anchorID: String, facts: LandingFacts = LandingFacts(),
         mayFinish: @escaping () -> Bool = { true },
+        reach: @escaping () -> LandingReach? = { nil },
         aim: @escaping (String) -> Void
     ) {
-        begin(anchorID, facts: facts, mayFinish: mayFinish, aim: aim)
+        begin(anchorID, facts: facts, mayFinish: mayFinish, reach: reach, aim: aim)
         aim(anchorID)
         armAfterEvent()
     }
@@ -579,9 +647,10 @@ final class LandingAuthority {
     func watch(
         _ anchorID: String, facts: LandingFacts = LandingFacts(),
         mayFinish: @escaping () -> Bool = { true },
+        reach: @escaping () -> LandingReach? = { nil },
         aim: @escaping (String) -> Void
     ) {
-        begin(anchorID, facts: facts, mayFinish: mayFinish, aim: aim)
+        begin(anchorID, facts: facts, mayFinish: mayFinish, reach: reach, aim: aim)
         armAfterEvent()
     }
 
@@ -589,13 +658,15 @@ final class LandingAuthority {
     /// shared with `watch` (byte-for-byte the lines `land` always ran first).
     private func begin(
         _ anchorID: String, facts: LandingFacts,
-        mayFinish: @escaping () -> Bool, aim: @escaping (String) -> Void
+        mayFinish: @escaping () -> Bool, reach: @escaping () -> LandingReach?,
+        aim: @escaping (String) -> Void
     ) {
         check?.cancel()
         self.anchor = anchorID
         self.facts = facts
         self.aim = aim
         self.mayFinish = mayFinish
+        self.reach = reach
         corrections = 0
         contentMoves = 0
         arrivalTold = false
@@ -702,6 +773,7 @@ final class LandingAuthority {
         anchor = nil
         aim = nil
         mayFinish = { true }
+        reach = { nil }
     }
 
     // MARK: - The loop
@@ -731,10 +803,14 @@ final class LandingAuthority {
         guard self.anchor == anchor else { return }   // an arrival may start another landing
         switch LandingSettle.decide(
             top: lastTop, corrections: corrections, elapsed: elapsed,
-            mayFinish: mayFinish(), policy: policy
+            mayFinish: mayFinish(), policy: policy, reach: reach()
         ) {
         case .done(let top):
-            finish(.settled, why: "settled at top=\(top) after \(corrections) hops, \(Int(elapsed * 1000)) ms")
+            // VX-624: a landing the page's FLOOR finished (the target as near
+            // home as the page can bring it) says so in its story; its
+            // signpost is `settled` with the top it rests at, numbers only.
+            let floor = abs(top) > policy.tolerance ? "the page's floor, " : ""
+            finish(.settled, why: "settled at \(floor)top=\(top) after \(corrections) hops, \(Int(elapsed * 1000)) ms")
         case .giveUp(let top):
             // **"unrealized" is the word, on BOTH surfaces** — the book
             // Outline's, kept because its own pin asserts a settled landing
@@ -798,6 +874,7 @@ final class LandingAuthority {
         anchor = nil
         aim = nil
         mayFinish = { true }
+        reach = { nil }
         if arrivedUntold, let ended { onArrived?(ended) }
         // 18l-b U2: last, with the authority already idle, so a surface
         // answering it may start the next landing at once.

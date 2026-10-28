@@ -88,7 +88,7 @@ Order: 1 → 2 → 3 → 4 → 5 (batch 5 last so its stage-trace window can be 
 | 9 | VX-674 | NOT-STARTED (batch 4) |
 | 10 | VX-572 | NOT-STARTED (batch 4) |
 | 11 | VX-668 | NOT-STARTED (batch 5) |
-| 12 | VX-624 | NOT-STARTED (batch 2; seated at her word 2026-10-28) |
+| 12 | VX-624 | BUILT HEADLESS (batch 2) — confirmed on the real pre-fix `decide` (16 corrections, give-up 4.25 s); the page's reach read live, a target the page cannot bring nearer is home; wired Outline · flow · Index, note Read + Takes SAFE by mechanism; pins `LandingFloorTests` (5) + 1 mounted; red-on-`rev624` + green runs PENDING the stage window |
 
 ## Batch records
 
@@ -326,12 +326,34 @@ Deliverables: per-member red-on-old pins revert-verified (pin-first where the me
 **LIVE STATUS** (flipped in the same commit as each piece; every unverified claim PENDING)
 - **No behavioural revert is in flight.**
 - B2-0 — preflight + this record: DONE (this commit).
-- B2-1 — VX-624 (the landing settles at the page's floor): NOT-STARTED.
+- B2-1 — VX-624 (the landing settles at the page's floor): DONE (this commit) — "VX-624 — trace, confirm, fix" below. Confirmed headless on the REAL pre-fix `decide` (16 corrections, give-up at 4.25 s); fix + pins compiled (`DerivedData/vx677-b2/post`, `logs/build-post-1.log` TEST BUILD SUCCEEDED; touched-file warnings only the standing `outlineSpace`/`flowSpace`/`BookOutlineLandingTests.swift:1296–1297`/`BookIndexView.swift:1401` lines); the headless twin of the pure pin GREEN on the fix and RED (8 of 21, exactly the floor lines) under the behavioural revert applied to a COPY of the file (the tree never reverted). Mac runs PENDING the stage window.
 - B2-2 — VX-663 (Pages arrivals land at the carried place): NOT-STARTED.
 - B2-3 — VX-662 (the Index's carry anchor): NOT-STARTED — pin first (Suspected).
 - B2-4 — VX-681 (leaving Read ▸ Scroll carries from the story on screen): NOT-STARTED.
 - B2-5 — VX-680 (Index → Outline lands block-precise): NOT-STARTED.
 - B2-6 — revert products, suites, READY-FOR-THE-STAGE, walk rows, self-assessment: NOT-STARTED.
+
+#### VX-624 — trace, confirm, fix
+
+**The trace (my own read of `Surface/LandingAuthority.swift`, the ticket's F-1 statically confirmed):** a landing's target in a column's LAST screenful cannot reach the page's top — the column's foot (the window line, "+ new note", the padding) follows it, so at the page's maximum offset the target still stands `top` pt down. `LandingSettle.decide` knew only the target's top: outside tolerance and inside the budget ⇒ `.correct`; the correction (`proxy.scrollTo(id, .top)`) moves nothing at the page's maximum, so no report changes `top`, and the next look decides `.correct` again — every 0.25 s (the Outline's `.quiet` pace) until `elapsed > timeBudget` gives up. Invisible (a correction that moves nothing draws nothing) but real: four seconds of a PENDING landing — the VX-562 follower frozen on its adopted target, a 4 Hz loop, and a Release signpost saying `end=gaveup` for a landing that arrived exactly where the page allows. The flow (`.spacedByTheHold`, budget 6) and the Index (budget 3, a six-second watchdog) spin the same way, slower.
+
+**The CONFIRM, pin-first (Suspected):** a headless `swiftc` driver over the REAL pre-fix `LandingAuthority.swift` + `LandingAim.swift` + `ViewportCarry.swift` (only `BookHeightManifest` stubbed — it imports `VariorumCore`; `decide` never reads it), driving `decide` exactly as `look` does against an immovable page (top 519 — F-1's measured number): **`GAVE UP top=519.0 after 16 corrections at 4.25 s`** (`App/Variorum/DerivedData/vx677-b2/logs/vx624/pre-fix-spin.log`). The class is real.
+
+**The fix (F-1's option b′, the ticket's shape):** the page's REACH is a fact the surface hands the authority, read LIVE at every look (`reach: () -> LandingReach?` beside `mayFinish` on `land`/`watch`; TEXTKIT2 §3's "read the maximum scroll live at every use" — never a number frozen per landing). `LandingReach` is the page's room each way (`down` = max offset − offset, `up` = offset − min offset, floored at 0 — an overscroll is no room). In `decide`, a REPORTED target whose residual the page cannot close by more than the policy's tolerance (`cannotClose`; the residual's sign is the direction, `LandingAim`'s convention) is HOME: the landing finishes by the at-home rules — DONE at the hold under the surface's veto, the watchdog still binding — instead of correcting. An UNREPORTED target is never at a floor. `nil` reach (any surface that hands none) decides byte-for-byte as before. This is the same rule note Read's resting anchor has always applied through its residual's clamp (`ViewportFraction.residual`: "a resting place the page cannot reach is replaced by the nearest one it can"). The DEBUG story says `settled at the page's floor, top=…`; the signpost stays numbers-only (`end=settled top=519`).
+
+**Every surface that consults it — the sweep (the ticket's "for every surface"):**
+
+| Adopter | Policy | Floor shape? | Verdict |
+|---|---|---|---|
+| Book Outline (`BookView.landOutline`) | `.bookOutline` | YES — F-1's traced road (the last screenful's rows) | WIRED — `reach` from `OutlineLandingBox.page.scroll` (the derived offset, the REACHABLE travel — VX-562's trace-walk arithmetic), nil until the scroll has reported in this appearance (`scrollReported`, cleared by `forgetViewedPair`, so the box's zeros never read as "no room"); pins `LandingFloorTests` (pure) + mounted `BookOutlineLandingTests.aLandingThatCannotReachTheTopSettlesAtThePagesFloorWithinItsHold` |
+| Reading flow (`ReadingFlowView.land`) | `.readingFlow` | YES — a short LAST story | WIRED — `reach` from `FlowFollowBox.page.scroll` (VX-645's facts, the same arithmetic), `scrollReported` cleared by `stopFollowing`; covered by the pure pin (the flow's policy line); no mounted pin (see the self-assessment) |
+| Book Index pane (`BookIndexView.land`) | `.bookIndex` | YES — a short last note, or a block near the column's end | WIRED — the EXISTING content-height observer WIDENED to `OutlineScrollFacts` (no new observer — the Outline's precedent), its old body gated on a height change exactly as before; `reach` from `PaneLandingBox.scroll`; covered by the pure pin (the Index's policy line) |
+| Note Read `read`/`edit` faces | `.readNote` / `.readNoteEdit` | NO | SAFE by mechanism: their residual (`ViewportFraction`) already clamps the resting place to the reachable range — at the page's limit it IS 0 (home) |
+| Takes article (`watch`) | `.takesArticle` | NO | SAFE by mechanism: the minimal reveal's home is any place where the row is fully on screen, and every row can be (a row's bottom never exceeds the content's end; a taller-than-the-page row's home is its top at the head — reachable because the content below it is taller than the page); and the typewriter room makes the last block reachable |
+
+**Pins.** `VariorumTests/LandingAuthorityTests.swift`, NEW suite `LandingFloorTests` (5 tests): `aTargetThePageCannotBringNearerIsHome` · `theSpinAgainstAnImmovablePageEndsAtTheHold` (the authority's own decision sequence — 0 corrections, done at the hold; old: 16 and the watchdog) · `eachPolicySettlesAtItsFloorByItsOwnRules` (the flow's, the Index's; the veto holds; the watchdog still ends) — RED on `rev624`; guards `roomLeftNoReachAndAnUnreportedTargetDecideAsBefore` and `theReachIsThePagesRoomEachWay` — GREEN on both. Mounted: `BookOutlineLandingTests.aLandingThatCannotReachTheTopSettlesAtThePagesFloorWithinItsHold` (the 30-note chaptered book, the LAST note's collapsed card revealed — premise `#require`d: it stops below the top; then the DONE line says `settled` at the page's floor, ≤ 2 hops, < 2,500 ms; prints `VX-624 FLOOR:`) — RED on `rev624` (old: `gave up … ~15 hops, ~4,100 ms`). The VX-562 F-1 pins (`aLandingOnTheLastScreenfulEndsOnItsTargetNeverTheTopRow`, `aNavigatorClickOnAShortNoteInTheLastScreenfulEndsOnThatNote`) are UNMODIFIED and stay green by construction (each asserts only that the landing ENDED and the adopted target stands — never the give-up); the follower's freeze-while-travelling contract is untouched (the landing still freezes the follower while `isPending` — it now ends three seconds sooner).
+
+**Headless twin (the pure pin's table over the REAL fixed source, `logs/vx624/fixed/main.swift`):** GREEN 21/21 (`fixed-green.log`); the behavioural revert applied to a COPY of `LandingAuthority.swift` (the `cannotClose` arm → `|| false`) — RED on exactly the 8 floor lines, the sequence back to `giveUp after 16 at 4.25` (`revert-red.log`). The tree was never reverted.
 
 ## Rulings log
 

@@ -1583,6 +1583,13 @@ struct BookView: View {
         /// turn. The rows and the scroll position are emptied when the
         /// Outline leaves, so a return never reads the old page.
         var page = BookOutlineViewed.Page()
+        /// **VX-624 — has the scroll's own geometry reported in this
+        /// appearance?** `page.scroll` reads zeros until the observer's first
+        /// pass and after the Outline leaves (`forgetViewedPair`), and a
+        /// landing's REACH must never read those zeros as "the page can move
+        /// no further" — so it is unknown (`nil`, the pre-VX-624 decision)
+        /// until a report has landed.
+        var scrollReported = false
         /// **VX-562 — the follower's ADOPT / RELEASE state** (R-562-A,
         /// R-562-C; ladder round 1 finding 6): the one value that decides,
         /// fed by the acts below — a landing's start (`adoptLandingTarget`),
@@ -1707,6 +1714,9 @@ struct BookView: View {
     private func forgetViewedPair() {
         landingBox.page = BookOutlineViewed.Page(
             scroll: BookOutlineViewed.Scroll(viewport: landingBox.page.scroll.viewport))
+        // VX-624: the scroll position went with the page — a landing's reach
+        // is unknown again until the returning scroll reports.
+        landingBox.scrollReported = false
         landingBox.follower.forget()
         model.noteOutlineViewed(.nothingViewed)
     }
@@ -1786,10 +1796,25 @@ struct BookView: View {
             // arithmetic over the rows in hand — ∝ entries, measured at
             // 1.16 ms for the 400-row window cap and ~0.08 ms at Sherlock's
             // 26 — paid once per click.
-            facts: LandingFacts(manifest: outlineHeightManifest, anchor: anchorID)
+            facts: LandingFacts(manifest: outlineHeightManifest, anchor: anchorID),
+            // VX-624: how far the page can still move, read off the scroll's
+            // own last report at every look (`OutlineScrollFacts`: the derived
+            // offset from 0 to the REACHABLE travel — VX-562's trace-walk
+            // arithmetic). A target in the book's last screenful that the
+            // page cannot bring any nearer the top settles there at the hold
+            // instead of correcting into an immovable page until the watchdog.
+            reach: { [box] in Self.outlineReach(box) }
         ) { id in
             proxy.scrollTo(id, anchor: .top)
         }
+    }
+
+    /// **VX-624 — the Outline page's reach** (`LandingReach`), or nil before
+    /// its scroll has reported in this appearance (never the zeros the box
+    /// holds until then).
+    private static func outlineReach(_ box: OutlineLandingBox) -> LandingReach? {
+        guard box.scrollReported else { return nil }
+        return LandingReach(offset: box.page.scroll.offset, maxOffset: box.page.scroll.travel)
     }
 
     /// A realized anchor reported where it sits. Every report feeds the
@@ -1861,6 +1886,7 @@ struct BookView: View {
     ) {
         landingBox.page.scroll.offset = new.offset
         landingBox.page.scroll.travel = new.travel
+        landingBox.scrollReported = true
         if old.contentHeight != new.contentHeight {
             outlineContentResized(new.contentHeight, proxy)
         }

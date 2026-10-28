@@ -2464,3 +2464,83 @@ extension BookOutlineLandingTests {
         }
     }
 }
+
+// MARK: - VX-624 (the VX-677 run, batch 2) — a landing settles at the page's floor
+
+extension BookOutlineLandingTests {
+    /// The landing story's numbers — "… after N hops, M ms" — off a DONE line.
+    private func hopsAndMilliseconds(_ done: String) -> (hops: Int, ms: Int)? {
+        guard let after = done.range(of: "after ", options: .backwards) else { return nil }
+        let words = done[after.upperBound...].split(separator: " ")
+        guard words.count >= 3, let hops = Int(words[0]),
+              let ms = Int(words[2].trimmingCharacters(in: .punctuationCharacters)) else { return nil }
+        return (hops, ms)
+    }
+
+    /// **VX-624 — a landing whose target cannot reach the top settles at the
+    /// page's floor, at the hold.** The book's LAST note, a collapsed card: the
+    /// column's foot follows it, so the page's maximum offset leaves it well
+    /// below the top (F-1's shape — VX-562's trace). Old: the authority
+    /// corrected into the immovable page every 0.25 s until the four-second
+    /// watchdog (`gave up at top=… after ~15 hops, ~4100 ms`). New: the page's
+    /// reach says it can move no further, so the landing is DONE where the
+    /// target rests, within its one-second hold and with at most a correction
+    /// or two spent.
+    ///
+    /// RED ON OLD (behavioural revert `rev624`: `decide` ignores the reach):
+    /// the `settled` line, the hops line and the time line. The premises are
+    /// `#require`s that say so if the geometry does not make the floor shape.
+    @Test func aLandingThatCannotReachTheTopSettlesAtThePagesFloorWithinItsHold() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: {
+                anchorTop(BookOutlineRows.Row.noteAnchor(postIDs[0])) != nil
+            })
+
+            let last = postIDs[29]
+            let anchor = BookOutlineRows.Row.noteAnchor(last)
+            let asked = Date()
+            model.requestReveal(last)
+            var endedAfter: TimeInterval?
+            for _ in 0..<320 {
+                await settle(window, hosting, watchdog: watchdog, until: { true }, maxTurns: 1)
+                if landingEnded(anchor) {
+                    endedAfter = Date().timeIntervalSince(asked)
+                    break
+                }
+            }
+            let done = BookOutlineGeometry.trace.last { $0.hasPrefix("\(anchor) DONE:") } ?? "no DONE"
+            print("VX-624 FLOOR: \(done) — ended \(String(describing: endedAfter)) s after the ask;",
+                  scrollFacts(hosting))
+            try #require(endedAfter != nil, "the landing ended at all")
+
+            // The premise: the floor shape — the last note stops below the top.
+            let top = try #require(anchorTop(anchor), "the last note reports")
+            try #require(top > BookView.landingTolerance,
+                         "the premise: the page cannot bring the last note to the top (it stops \(top) pt down)")
+
+            #expect(done.contains("DONE: settled"),
+                    "RED ON OLD: the landing SETTLED at the page's floor — never the watchdog's give-up: \(done)")
+            #expect(done.contains("the page's floor"), "and its story says where it rests: \(done)")
+            let numbers = hopsAndMilliseconds(done)
+            #expect((numbers?.hops ?? .max) <= 2,
+                    "RED ON OLD: at most a correction or two against a page that cannot move: \(done)")
+            #expect((numbers?.ms ?? .max) < 2_500,
+                    "RED ON OLD: within the hold (1 s) and a quiet look or two, not the 4-s watchdog: \(done)")
+        }
+    }
+}
