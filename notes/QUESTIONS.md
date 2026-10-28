@@ -3778,7 +3778,7 @@ carved history outlives its own Delete Now as N empty-block Trash rows; the fiel
 store (expected). HER HANDS: two stray walk notes sit in Home's Trash (the walker's Delete Now was classifier-DENIED
 and nobody routed around it — they age out in 30 days, or your Delete Now takes them); the REAL store's field-guide
 re-seed (the guide's new MCP sentences reach your library only through Help ▸ Restore Field Guide…, your window); the
-release that carries this run states "local-only migration v1_34" as a release fact.
+release that carries this run states "local-only migration v1_34" as a release fact. **Status 2026-10-28 (her sitting, the question sheet): RATIFIED WHOLESALE — A-648-5 · A-648-6 · A-648-8 · B2-P1…P5 · B3-P1…P5 · B4-P3; plus her word on B3-P1: the phone's Starred page gets a proper design pass someday (→ MobileSoul PL-63). P-B4-1 → the block-precise Outline landing RULED and ticketed (VX-680, seated in the VX-677 editor run). B4-P4 explained, pending her word. The offers: VX-653/VX-654 seated in VX-678; VX-655 left as is (her word); VX-663 and VX-662 seated in VX-677. Her-hands items stand: the stray walk notes (age out or her Delete Now), the real store's field-guide re-seed at the next release install.**
 
 #249 — **THE VX-440 BUNDLE (the binding record is `notes/plans/fixes/vx-440-sheets-history-clarity.md`; the handoff
 `notes/handoffs/vx-440-handoff.md` carries the same list with the walk shots).** The run's provisionals, hers at
