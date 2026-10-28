@@ -919,7 +919,10 @@ window launches the app, the coordinator folds it into a short window of its own
 the fix, the builds; every red/green claim is a PREDICTION, PENDING the orchestrator's suite
 window (this session never runs `xcodebuild test`, never launches the app, never claims the
 stage); the USE walk (rows below, an Opus walker under the orchestrator's claim); the cold ladder.
-No behavioural revert is in flight.
+**REVERTS STARTING (from ca626390, committed first):** rev429 = `Surface/PaneSurface.swift`'s one
+`CaretPress.clearPressedCharacter` line removed; rev592 = `Features/Editor/EditorTextView.swift`'s
+one line removed; each built into its own `DerivedData/vx601a2-rev…`, then restored by
+`git checkout -- <file>` (the committed fix). `git diff` against HEAD says what is reverted right now.
 
 **LIVE STATUS**
 - Reading — DONE: this file (members VX-429/VX-592, batches, ENVIRONMENT TRAPS, BATCH A RECORD +
