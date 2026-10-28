@@ -532,10 +532,10 @@ Confirm each run's "Test run with N tests in M suites" line and read the `skippe
 1. **THE RED RUNS** — the three pin suites on each revert build (`vx601a-pre`, `vx601a-rev421`,
    `vx601a-rev248`), seconds each:
    `-only-testing:VariorumTests/PaneUndoLifecycleTests -only-testing:VariorumTests/PaneRebindTests -only-testing:VariorumTests/CanvasSwitcherRebindTests`
-   — expect **12 tests in 3 suites**, the reds exactly as the table (pre: 10 red / 2 guards… precisely
-   #1–#4, #6–#9, #12 red = 9 red, 3 green; rev421: #1–#4, #6, #7 red = 6 red; rev248: #7–#9, #12 red
-   = 4 red). Both `#require`-guarded pins STOP before their replay line when red, so no red run can
-   take the test host down.
+   — expect **12 tests in 3 suites** on each, the reds exactly as the table: pre — #1–#4, #6–#9, #12
+   red (9 red, 3 green); rev421 — #1–#4, #6, #7 red (6 red, 6 green); rev248 — #7–#9, #12 red (4
+   red, 8 green). Both `#require`-guarded pins STOP before their replay line when red, so no red run
+   can take the test host down.
 2. **THE GREEN RUN, tier 1** (on `vx601a-post`) — the pins, VX-222's and VX-227's contamination pins
    (now redundant by construction — their executed counts go in the record), and the pane component's
    own suites:
