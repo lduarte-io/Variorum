@@ -494,14 +494,104 @@ keys through `keys.sh`, never cliclick text; guarded acts ≥ 2.6 s apart; captu
 her app never launched, quit or typed into; extras killed by proven PID only; every renew request routes
 through the orchestrator to the coordinator BEFORE it happens.
 
-### UNIT 2 — THE WALKER'S LIVE STATUS (the Opus walker owns this section)
+### UNIT 2 — THE WALKER'S RECORD (the Opus walker, 2026-10-27 18:55–19:06; the claim `vx-623-walk` held throughout)
 
-Walker evidence folder: `App/Variorum/DerivedData/first-run-walk/walker-vx623-20261027T1856/` (gitignored).
-- LEG 0 (18:56) DONE: 11 items + inodes recorded, folder inode 198725396, key file e11e5233; prefs exported; appearanceChoice dark.
-- LEG 1 (safety copy + set-aside): IN-PROGRESS. If this session dies from here, the slot may be set aside as
-  `Variorum-dev-aside-vx623walk` with the cmp-verified copy `Variorum-dev-safety-vx623walk` beside it — restore by
-  `mv Variorum-dev-aside-vx623walk Variorum-dev` after moving any walk-made `Variorum-dev` aside; never Resume.
-- LEG 2–6: NOT-STARTED.
+**Not done by the walker (by design or left for the orchestrator):** the stage was neither claimed, renewed nor
+released (the orchestrator's RELEASE); the LEDGER's row 4 is not flipped (the orchestrator's); the cmp-verified safety
+copy `Variorum-dev-safety-vx623walk` is LEFT in the Debug container's Application Support beside the restored slot
+(not asked to remove it — the orchestrator's or coordinator's call); the worktree's gitignored `.env.supabase.local`
+SYMLINK (below) is left in place; the four walk-made `calmAsks` keys in the dev defaults domain are left (inert, named for
+the debris libraries — the prefs diff below). **One deviation, owned:** the worktree had no `.env.supabase.local`, so
+LEG 2's first helper dry-run REFUSED at R2 (exit 5, nothing read or written); the walker linked it from main
+(`ln -s ~/dev/variorum/.env.supabase.local` into the worktree root — gitignored by `.env.*.local`; no copy, the value
+never read or printed), the VX-510 S3 and VX-529 precedent, rather than hand back with the slot set aside (a hand-back
+would have cost an extra slot-restoration cycle). Every guard then held.
+
+**Evidence:** the walker's folder `App/Variorum/DerivedData/first-run-walk/walker-vx623-20261027T1856/` (walker.log,
+the leg files, prefs-before/after.plist, `caps/` — the relaunch-proof captures, `debris/` — the walk's two libraries);
+the gate's own run folder `App/Variorum/DerivedData/first-run-walk/run-20261028T005847Z-std/` (walk.log, 28
+window-scoped captures listed in captures.txt, reset-prestep.log, reset-cleanup.log, app.log, app-join.log). Both
+gitignored. Captures viewed by the walker: P7 synced-sheet, J7 synced-sheet, J7 synced-row, E1 signed-out, and the
+three LEG 5 proofs. The P6/J6 confirm captures were NOT opened (their fields are `PeekableSecretField`, secure by
+default — `RoadAccountSheet.swift:311-339`); no capture was taken while the words' look was up (P5 has none between
+"Record your twelve words…" and "I've written them down").
+
+- **LEG 0 (18:56) — the actuals.** Floor: `STAGE HELD by 'vx-623-walk'` (claimed 18:53:47, 90 min); zero instances by
+  `pgrep -lx Variorum` · `pgrep -lf "MacOS/Variorum$"` · `pgrep -fl 'Variorum.app/Contents/MacOS'`; no booted sims. The
+  slot `Variorum-dev` (folder inode 198725396) held the 11 items (Backups · Previous Libraries · three
+  `variorum-keys-*.json` · `variorum-library-keys.json` · `variorum-library-lived-here` · `variorum-restore-hold.json` ·
+  `variorum.sqlite` + `-shm` + `-wal`), the key file's libraryID **e11e5233**; `prefs-before.plist` (2,439 keys);
+  `appearanceChoice` = dark; `variorum.whatsNew.lastVersion` = 0.10.3 = the build's version (no What's New sheet met).
+- **LEG 1 (18:57) — safety copy + set-aside.** `cp -Rp Variorum-dev Variorum-dev-safety-vx623walk` (same Application
+  Support folder); `cmp -s` over all **197 files: 197 same, 0 differ**, file lists identical; then
+  `mv -n Variorum-dev Variorum-dev-aside-vx623walk` — one whole-folder rename, inode 198725396 unchanged, the slot absent.
+- **LEG 2 (18:57–18:58) — dry-runs under the held claim.** The helper's first run: `prod-reset-test-account REFUSES:
+  R2 — Tools/prod-read.sh or .env.supabase.local is missing` (exit 5) → the link above → re-run, exit 0, verbatim:
+  ```
+  *[removed for publication]*
+  [00:58:01Z] prod-reset std: BEFORE: vault 1 (mode standard, rev 1) · kp 1 · cursors 1 · purged 0 · seq 1 · challenges 35 · budget 1 · data 3 (setting 3) · entitlement 1 · auth user 1
+  [00:58:01Z] prod-reset std: DRY RUN — every guard holds. The plan (nothing written): ONE statement deleting this account's 21 data tables, device_cursor, purged_row, sync_tenant_seq, key_proof_challenge, sync_write_budget, its kp: proof secret and its key_vault row — never its auth user or entitlement — then the after-read. It holds 43 family row(s): a real run resets them.
+  ```
+  The walk's dry run, exit 0: `first-run-walk DRY RUN — every guard holds for 'std', arm 'both' (the slot folder absent
+  at G7).` then the P1…E3 plan (in `leg2-walk-dryrun.out`).
+- **LEG 3 (18:58:47 → 19:01:33) — THE GATE: `first-run-walk.sh std --app …/DerivedData/vx623/…/Variorum.app`,
+  `--arm both`, EXIT 0 — every arm PASSED, no stop, no What's New, no retry.** Verbatim from its walk.log:
+  - **The pre-step (P3r) — PASS:**
+    ```
+    [00:58:57Z] prod-reset std: BEFORE: vault 1 (mode standard, rev 1) · kp 1 · cursors 1 · purged 0 · seq 1 · challenges 35 · budget 1 · data 3 (setting 3) · entitlement 1 · auth user 1
+    [00:58:57Z] prod-reset std: RESET — one atomic statement over 43 family row(s)
+    [00:58:57Z] prod-reset std: the statement took: data_rows=3 device_cursor=1 purged_row=0 sync_tenant_seq=1 key_proof_challenge=35 sync_write_budget=1 kp=1 vault=1
+    [00:58:58Z] prod-reset std: AFTER: vault 0 (mode -, rev -) · kp 0 · cursors 0 · purged 0 · seq 0 · challenges 0 · budget 0 · data 0 · entitlement 1 · auth user 1
+    [00:58:58Z] prod-reset std: AT REST — the account exists, confirmed as it was, vaultless and rowless; its entitlement kept
+    ```
+  - **The set-up arm (P1–P8) — PASS:** P2 `PROD TEST ROAD (VX-510): ARMED`; the frame guard deleted
+    `NSWindow Frame variorum-main-AppWindow-1` and the window `60 33 1240 940` held the footer row; P3 `account id
+    *[removed for publication]*
+    the sheet **"Synced. Your library is on your account now."** (19:00:18, 4 s after the press) → Done → the row
+    Synced, same pid. P8: `key_vault: [{"mode":"standard","revision":1,"proof":true}]` · `kp secret: [{"n":1}]` ·
+    `device cursors: [{"n":1}]` · `data rows (setting + container): [{"n":3}]`.
+  - **The join arm (J1–J8) — PASS:** J1 quit by identity, zero instances; J2 `the set-up arm's library 3f3d9fb8 set
+    aside WHOLE → Variorum-dev-walk-20261028T005847Z-setup`; J3 the frame guard, a fresh launch (pid 11939), the window
+    `244 155 1240 840`; J4 the row read the not-yet line still signed in (the session outlived the library); J5
+    `key_vault before: [{"mode":"standard","revision":1}]` · `device cursors before: [{"n":1}]`; J6 "Sync this library…"
+    → the passphrase by the helper → "Sync this library"; J7 the words notice → OK → **"Synced. Your account's writing
+    is in this library now."** (19:01:05) → Done → the row **"Synced 7:01 PM"**; J8 `key_vault after:
+    [{"mode":"standard","revision":1}]` · `device cursors after: [{"n":2}]` — cursors +1, mode and revision unmoved.
+  - **The end (E1–E3) — PASS:** E1 Sign out… → Sign Out → the footer "Signed out · Sign in…"; E2 quit by identity,
+    zero instances; **E3 THE CLEANUP LEG:**
+    ```
+    [01:01:32Z] prod-reset std: BEFORE: vault 1 (mode standard, rev 1) · kp 1 · cursors 2 · purged 0 · seq 1 · challenges 62 · budget 1 · data 3 (setting 3) · entitlement 1 · auth user 1
+    [01:01:32Z] prod-reset std: RESET — one atomic statement over 71 family row(s)
+    [01:01:32Z] prod-reset std: the statement took: data_rows=3 device_cursor=2 purged_row=0 sync_tenant_seq=1 key_proof_challenge=62 sync_write_budget=1 kp=1 vault=1
+    [01:01:33Z] prod-reset std: AFTER: vault 0 (mode -, rev -) · kp 0 · cursors 0 · purged 0 · seq 0 · challenges 0 · budget 0 · data 0 · entitlement 1 · auth user 1
+    [01:01:33Z] prod-reset std: AT REST — the account exists, confirmed as it was, vaultless and rowless; its entitlement kept
+    [19:01:33] done: PASSED — 'std', arm 'both'; signed out, quit, and the account at rest (exists, confirmed, vaultless, rowless)
+    ```
+- **LEG 4 (19:02) — std's end state, read.** The helper's dry run, exit 0, verbatim:
+  ```
+  *[removed for publication]*
+  [01:02:07Z] prod-reset std: BEFORE: vault 0 (mode -, rev -) · kp 0 · cursors 0 · purged 0 · seq 0 · challenges 0 · budget 0 · data 0 · entitlement 1 · auth user 1
+  [01:02:07Z] prod-reset std: DRY RUN — every guard holds. The plan (nothing written): … It is ALREADY AT REST: a real run writes nothing.
+  ```
+  plus `Tools/prod-read.sh` → `[{"confirmed":true,"vault":0}]`. Zero instances by all three forms (19:02:07).
+- **LEG 5 (19:02–19:05) — the restoration.** The walk's two slot folders identified by their key files' libraryID AND
+  the app logs' `road: created — library <id>` lines: `Variorum-dev` = **918e9672** (app-join.log) and
+  `Variorum-dev-walk-20261028T005847Z-setup` = **3f3d9fb8** (app.log) → moved whole into the walker's `debris/`
+  (`lib-918e9672-join`, `lib-3f3d9fb8-setup`); then `mv -n Variorum-dev-aside-vx623walk Variorum-dev` (19:02:36).
+  **`ls -i` against LEG 0: every name, inode, size and mtime MATCHES** (the 11 items + the folder's 198725396); `cmp`
+  against the safety copy: 197/197 same. **ONE relaunch**, plain `open -n` (pid 13580; `ps eww` carries no `VARIORUM_`
+  variable): the notice "This is a different library than the one this Mac last had open" → **OK** (the only control;
+  no Resume targeted) → library e11e5233 open in Study, dark; **the HELD banner, its AX value verbatim: "This is your
+  library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." — "Resume Sync" NEVER
+  pressed**; the footer **"Sync off (dev store)"**; Settings ▸ Protection: "Sign in…" present, "Sign out…" absent →
+  **signed out**; Settings closed; quit by identity (19:04:35), the pid gone. After the relaunch the store's mtime and
+  its `-wal`/`-shm` changed (any open/quit does that; still 11 items). Zero instances by all three forms (19:04:45); no
+  booted sims. **Prefs:** `appearanceChoice` still **dark**; the diff (2,439 → 2,443 keys) is walk state only —
+  `NSWindow Frame variorum-main-AppWindow-1` `60 144 1240 940 …` → `244 122 1240 840 …` (D-4, restore nothing),
+  *[removed for publication]*
+  and four ADDED `variorum.calmAsks.{passphrase….launches, words….recorded}` keys for 3f3d9fb8 and 918e9672.
+- **Stage:** `2026-10-27 18:53:47 CLAIMED who=vx-623-walk … minutes=90`; still HELD at the record's commit (~79 min
+  left at 19:05); not released by the walker.
 
 ## Environment traps (binding; carried into every brief verbatim)
 
