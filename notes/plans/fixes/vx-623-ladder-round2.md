@@ -125,3 +125,33 @@ above stand as committed.)*
   the line-50 header comment "Every launch (P1, J3)…" stays TRUE under the rename, since the
   launch halves remain P1 and J3 (J3b is the road check, and `frame_reset` runs in the launch
   half, :584). No pin — log naming, per the final call. Correct disposition.
+
+## Finding 2 — the two pending ticks, now CLOSED (finding 2 FIX VERIFIED whole)
+
+- **The email-hiding line on accept, BOTH expects read myself:** helper :241 and walk :266 carry
+  the same `[[ $got == refuse ]] || why=` — on accept the guard's printed email (captured into
+  `why`) is cleared before the case line prints, so no self-test output ever shows an address;
+  on refuse `why` is the refusal text, as intended.
+- **The full self-test runs, MY OWN, at the tip:** walk `--self-test` → **72 ok cases, "every
+  guard fired as expected", exit 0 (72/72)**; helper `--self-test` → **"every guard fired as
+  expected (90 cases)", exit 0 (90/90)**. Both match the fix record's claims. No stray `sleep`
+  left behind (checked).
+
+## The after-fix gate — RE-RUN FRESH at the tip, all MY OWN runs, ALL GREEN
+
+The Tools/ files are byte-identical to `bcac53925`'s (`git diff bcac53925..HEAD -- Tools/` is
+empty — only record files moved since), so these runs gate the fix set exactly.
+
+- Walk `--self-test`: **72/72 green**, exit 0.
+- Helper `--self-test`: **90/90 green**, exit 0.
+- D-7 pin (`Tools/WalkKit/pins/guard-space-helper.zsh`): **0 failing of 11**.
+- P-1 pin (`Tools/WalkKit/pins/words-guard-fail-closed.zsh`): **0 failing of 6** (its last case
+  runs the guard's `--self-check` — P-2's synthetic trees — green inside it).
+- `zsh -n` clean on all five: first-run-walk.sh · prod-reset-test-account.sh ·
+  pins/words-guard-fail-closed.zsh · guard.sh · pins/guard-space-helper.zsh.
+- `bash -n` clean on Tools/Release/release.sh.
+- `swiftc` compiles words-guard.swift, capture-windows.swift and wl2.swift (into a scratch dir).
+
+Environment constraints honored: fixtures and pins only; the one AX-adjacent act was the
+self-tests' own spawned-and-reaped sleep; no production, stage, GUI, container, dry-run or live
+mode was touched.
