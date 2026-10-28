@@ -654,6 +654,17 @@ struct PostDetailView: View {
         .task(id: postID) {
             await membership.track(session: session, postID: postID)
         }
+        // VX-440 batch 1 (R-440-1, P-2): the note's NEWEST saved moment, held
+        // for the visit and handed to the router — "Compare with Latest
+        // Version" exists exactly while there is one (File, `note ▾`, ⌘K). A
+        // note-driven read (`noteVersionStamps`), never the corpus's moments.
+        .task(id: postID) {
+            do {
+                for try await latest in session.database.observeLatestNoteVersion(postID) {
+                    session.commandRouter.noteLatestVersion(latest, postID: postID)
+                }
+            } catch {}
+        }
         .onChange(of: inspectorPanel, initial: true) { _, panel in
             #if DEBUG
             PostDetailOracle.recordInspectorPanel(panel, owner: oracleOwner)

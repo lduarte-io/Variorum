@@ -312,8 +312,27 @@ Pieces (flipped per commit):
   `aMomentsColumnIsNamedByItsDateAndSaysWhatItIs`, `unmarkOnAMomentAsksAndTheAnswerPromotes`,
   `unmarkOnAnOrdinaryVersionPeerStillUnlinks`, `thePromoteConfirmSaysWhatTheNoteBecomes`; and the B1-1 pin
   `unmarkOnASavedVersionNeverDeclassifiesIt` turns GREEN at this commit (PENDING the run). DONE (this commit).
-- B1-4 doors: Versions row "Compare with now" + the registry act "Compare with Latest Version" (File ·
-  note ▾ · ⌘K, rendered only while the note has a saved version): NOT-STARTED.
+- B1-4 doors: ONE act (`Core/Views/VersionCompareDoor.swift`) over ONE road (`CommandRouter.requestCompare` —
+  `pendingCompareLanding` + `requestMode(.compare)`, the wire's compare road for a note whose detail is
+  mounted; a refused switch takes its parcel back). (a) Versions rows: "Compare with now" on a second line
+  under the four verbs, DRAWN ONLY while the note's detail is the mounted one (`canCompareHere` — a bar's
+  sheet over a book's inline note has no Compare mode: P-2; the row acts stay the listing's own undeclared
+  vocabulary, as Read/Restore/Promote/Delete are). (b) The registry act `.compareWithLatestVersion`
+  ("Compare with Latest Version", post scope, doors File `.menuBar` · both `note ▾` `.bottomBar` · ⌘K
+  `.palette`, no chord; availability `mode != nil && noteHasSavedVersion`): the new context fact
+  `CapabilityContext.noteHasSavedVersion` ← `CommandRouter.activeNoteLatestVersionID` (observable; written
+  only for the mounted note, cleared on another note's register and on unregister) ← the detail's held
+  `observeLatestNoteVersion` task (`PostDetailView`); File greys, `note ▾` hides (`latestDoorShows`), ⌘K's
+  per-open listing drops the row (`paletteEntries(listing:noteHasSavedVersion:)`, default true so the walk's
+  every-row listing and `WingPaletteDoorsTests`' counts stand). The newest moment is re-read AT THE PRESS
+  (`compareWithLatest`); none ⇒ the act's note speaks. Registry walk: ONE justified edit — a sampled context
+  `CapabilityContext(mode: .write, noteHasSavedVersion: true)` (the VX-570 line's class). Pins (Mac
+  `VersionDoorsTests`, compiled ✓, RUNS PENDING): `theLatestVersionDoorIsDeclaredOnFileTheBarsAndThePalette`,
+  `theLatestVersionDoorActsOnlyWhereTheNoteHasAMoment`, `theRoutersLatestVersionFactBelongsToTheMountedNote`,
+  `requestCompareParksTheLandingAndSwitchesToCompare`, `thePaletteListsTheLatestDoorOnlyWhileTheNoteHasAMoment`,
+  mounted `theMountedDetailReportsItsNotesNewestMomentLive`, mounted
+  `compareWithNowLandsTheMomentBesideTheNoteInCompare`; plus the registry walk suite
+  (`CapabilityRegistryTests`) — RUN PENDING. DONE (this commit).
 - B1-5 full size: a Versions row's "Open full size" → the version on Read's calm page with the identity band
   (Back to the note · Promote to a regular note…), no mode row, ⌘⇧S grey, no per-note memories (P-440-1):
   NOT-STARTED.

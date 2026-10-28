@@ -96,6 +96,8 @@ struct EditorCommands: Commands {
         // The post-13l polish round (rows 16/23): ⌘⇧S, beside ⌘S in the File
         // menu — the two moments, one grain apart.
         .saveNoteVersion,
+        // VX-440 batch 1 (R-440-1): the newest moment beside the note in Compare.
+        .compareWithLatestVersion,
         // VX-372 (VX-383 U1 — D-C-2): the two duplicates, beside the version
         // door — a duplicate is a version you write on.
         .duplicateNoteWithTags, .duplicateNoteWithoutTags,
@@ -571,6 +573,10 @@ struct EditorCommands: Commands {
             Button(verb(.saveNoteVersion)) { actions?.saveNoteVersion() }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(!enabled(.saveNoteVersion))
+            // VX-440 batch 1 (R-440-1): one press seats the note's newest saved
+            // moment beside it in Compare — grey while the note has none (P-2).
+            Button(verb(.compareWithLatestVersion)) { actions?.compareWithLatestVersion() }
+                .disabled(!enabled(.compareWithLatestVersion))
             // VX-372 (VX-383 U1 — D-C-2): her two duplicate doors, beside the
             // version door, on the note on screen (no chord — none asked).
             Button(verb(.duplicateNoteWithTags)) { actions?.duplicateNote(tags: .applied) }

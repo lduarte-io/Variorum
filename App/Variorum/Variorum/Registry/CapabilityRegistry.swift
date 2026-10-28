@@ -934,6 +934,18 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "A note's saved moments live with the note — "
                 + "open one and its \(VersionsPath.name) lists them.",
             availability: noteScoped),
+        // **VX-440 batch 1 (R-440-1, her "rows + one-press door")** — the note's
+        // NEWEST saved moment seated beside it in Compare. The same three doors
+        // as Save a Version (File, both bars' `note ▾`, ⌘K), no chord. It acts
+        // only where a note's DETAIL is mounted (Compare is one of its modes)
+        // AND that note has a moment — with none it could only refuse, so it is
+        // grey in File and absent from `note ▾` and ⌘K (P-2).
+        Capability(
+            id: .compareWithLatestVersion, verb: VersionsPath.compareWithLatestVerb,
+            scope: .post, doors: [.menuBar, .bottomBar, .palette],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: VersionsPath.compareWithLatestUnavailable,
+            availability: { ctx in ctx.mode != nil && ctx.noteHasSavedVersion ? .act : .unavailable }),
 
         // **VX-372 (VX-383 U1 — D-C-2): DUPLICATE A NOTE, TWO ACTS, DECLARED
         // ONCE.** Her ticket: *"a direct duplicate door, with tags / without

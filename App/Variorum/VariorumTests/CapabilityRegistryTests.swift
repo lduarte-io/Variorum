@@ -103,6 +103,11 @@ struct CapabilityRegistryTests {
         // everywhere the walk looks.
         contexts.append(CapabilityContext(mode: nil, focusedPaneShowsNote: true, wingCount: 2))
         contexts.append(CapabilityContext(mode: nil, focusedPaneShowsBook: true, wingCount: 2))
+        // VX-440 batch 1 (A JUSTIFIED EDIT, the VX-570 line's class): "Compare
+        // with Latest Version" acts where a note's detail is mounted AND that
+        // note has a saved moment — a fact about the NOTE, never a mode alone;
+        // without this context it reads `.unavailable` everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: .write, noteHasSavedVersion: true))
         return contexts
     }
 

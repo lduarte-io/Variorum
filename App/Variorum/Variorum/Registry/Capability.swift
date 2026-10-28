@@ -339,6 +339,12 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// "Switch Wing…" is honestly grey (P-2) — the `openNoteCount` family, a
     /// fact about the library, wired through `WingState`.
     var wingCount = 1
+    /// **VX-440 batch 1 — the mounted detail's note has at least one saved
+    /// version** (the detail's held `observeLatestNoteVersion`, through
+    /// `CommandRouter.activeNoteLatestVersionID`). "Compare with Latest
+    /// Version"'s gate: with no moment it could only refuse, so it is not a
+    /// live door (P-2).
+    var noteHasSavedVersion = false
 }
 
 // MARK: - The capability declaration
@@ -491,6 +497,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // moment (⌘⇧S) and opening the listing of them.
     case saveNoteVersion
     case showNoteVersions
+    // VX-440 batch 1 (R-440-1 — her "rows + one-press door"): the newest saved
+    // moment seated beside the live note in Compare, in one press.
+    case compareWithLatestVersion
     // VX-372 (VX-383 U1 — D-C-2): DUPLICATE A NOTE, declared at last — her
     // ticket, *"a direct duplicate door, with tags / without tags; a duplicate
     // with tags counts as tagging"*. TWO acts (one verb each, P-C-1's words):

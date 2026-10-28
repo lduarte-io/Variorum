@@ -152,6 +152,10 @@ struct CommitBar: View {
             // grain pairing with commit/history one line up IS the teaching
             // moment her G4 chapter names.
             .saveNoteVersion, .showNoteVersions,
+            // VX-440 batch 1 (R-440-1): the newest moment beside the note in
+            // Compare — drawn only while the note's detail is mounted and it
+            // HAS a moment (`VersionCompareDoor.latestDoorShows`, P-2).
+            .compareWithLatestVersion,
             // VX-372 (VX-383 U1 — D-C-2): the two duplicates, under the note's
             // two time controls (NOTE contexts only — the kind gate below).
             .duplicateNoteWithTags, .duplicateNoteWithoutTags,
@@ -838,6 +842,16 @@ struct CommitBar: View {
                 Task { await model.saveNoteVersion() }
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            // VX-440 batch 1 (R-440-1): one press, the newest moment beside the
+            // note in Compare — the ONE act (`VersionCompareDoor`), drawn only
+            // where it can act (P-2).
+            if VersionCompareDoor.latestDoorShows(noteID: model.postID, session: model.session) {
+                Button(CapabilityRegistry.capability(.compareWithLatestVersion).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await VersionCompareDoor.compareWithLatest(noteID: postID, session: session) }
+                }
+            }
             // VX-372 (VX-383 U1 — D-C-2): her two duplicate doors, beside the
             // version pair — the ONE act (`NoteDuplicate`) every door runs.
             // NOTE contexts only: the scraps editor composes this bar with a

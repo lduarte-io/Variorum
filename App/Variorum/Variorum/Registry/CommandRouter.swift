@@ -95,6 +95,9 @@ final class CommandRouter {
             focusedBlockIdentity = identity
             // 13u2b UNIT 3: a place on ANOTHER note's screen means nothing here.
             carriedPlace = nil
+            // VX-440 batch 1: the newest moment was the leaving note's fact;
+            // the arriving detail's observation reports its own.
+            activeNoteLatestVersionID = nil
         }
         activePostID = postID
         activeMode = mode
@@ -147,6 +150,7 @@ final class CommandRouter {
         if let leaving = activePostID { currentBlocks.persist(postID: leaving) }
         activePostID = nil
         activeMode = nil
+        activeNoteLatestVersionID = nil  // VX-440 batch 1: the fact left with its note
         // A genuine teardown (no successor mounted yet): any parked
         // choreography intent's round is over (round-1 MAJOR, half b).
         pendingWriteIntent = nil
@@ -796,6 +800,40 @@ final class CommandRouter {
     /// the anchor) — observed, like the lens landing.
     var pendingCompareLanding: CompareLanding?
 
+    /// **VX-440 batch 1 — her own doors onto the Compare landing** (R-440-1:
+    /// a Versions row's "Compare with now", the one-press "Compare with Latest
+    /// Version"): the road `MCPNavigator`'s compare target takes once its note
+    /// is open — the landing parked for the anchor's board, then Compare
+    /// requested — for a note whose detail is already the mounted one. A
+    /// refused switch (another note mounted meanwhile — it speaks) takes its
+    /// parcel back, so nothing is left armed for a later board.
+    @discardableResult
+    func requestCompare(postID: String, peers: [String]) -> Bool {
+        pendingCompareLanding = CompareLanding(postID: postID, peerIDs: peers)
+        guard requestMode(.compare, postID: postID) else {
+            pendingCompareLanding = nil
+            return false
+        }
+        return true
+    }
+
+    // MARK: - The mounted note's newest saved moment (VX-440 batch 1)
+
+    /// **The mounted detail's note's NEWEST saved moment**, or nil — the fact
+    /// "Compare with Latest Version" renders on (P-2: the door exists exactly
+    /// while the note has a moment). Written by the detail's held observation
+    /// (`observeLatestNoteVersion`) and ONLY for the note it shows; a different
+    /// note's arrival, or the detail leaving, clears it. Observable so menu
+    /// enablement follows a ⌘⇧S or a promote at once.
+    private(set) var activeNoteLatestVersionID: String?
+
+    /// The detail reports its note's newest moment. A report for a note that is
+    /// not the mounted one (a departing detail's late delivery) is dropped.
+    func noteLatestVersion(_ versionID: String?, postID: String) {
+        guard activePostID == postID, activeNoteLatestVersionID != versionID else { return }
+        activeNoteLatestVersionID = versionID
+    }
+
     // MARK: - Composition wiring (set once by the session)
 
     /// Speech lands in the StatusCenter (AD-14's one presentation).
@@ -869,7 +907,8 @@ final class CommandRouter {
             focusedPaneShowsNote: focusedPaneShowsNote(),
             focusedPaneShowsBook: focusedPaneShowsBook(),
             windowKind: windowKind(),
-            wingCount: wingCount())
+            wingCount: wingCount(),
+            noteHasSavedVersion: activeNoteLatestVersionID != nil)
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {
