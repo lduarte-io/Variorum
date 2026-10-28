@@ -181,9 +181,11 @@ struct VocabularySweepTests {
     /// collecting; every rule an act can reach keeps the shipped words.
     @Test func theCollectingPromiseIsTrueOfTheRule() {
         let legacy = RuleTerm.legacyProfile("journal")
-        let explained = BindCopy.explanation(count: 2, followUp: .none, hearsActs: false)
+        // VX-616 (A JUSTIFIED EDIT): `followUp:` retired with the gathering
+        // navigator's "+ new chapter" — the words under test are unchanged.
+        let explained = BindCopy.explanation(count: 2, hearsActs: false)
         #expect(explained.contains("catches up") && !explained.contains("keeps collecting"))
-        #expect(BindCopy.explanation(count: 2, followUp: .none).contains(BindCopy.keepsCollecting))
+        #expect(BindCopy.explanation(count: 2).contains(BindCopy.keepsCollecting))
         #expect(BindCopy.bound("g", count: 2, hearsActs: false).hasSuffix(
             "It collects only when it catches up."))
         #expect(BindCopy.bound("g", count: 2).hasSuffix("It keeps collecting."))

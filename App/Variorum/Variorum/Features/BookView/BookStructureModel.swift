@@ -615,29 +615,26 @@ final class BookStructureModel {
     // MARK: - Bind into a book (13i-b U3; the door 13c 2D shipped as "convert")
 
     /// The bind sheet's ITEM while it is up (13i-b U3) — held HERE rather than
-    /// in the view because two roads open it: the navigator's "+ new chapter"
-    /// on a gathering, and the teaching OFFER `acceptDrop` makes on a
-    /// gathering's hand-drag, which is this model's to make. The item carries
-    /// its own count (F-U2-3's fix shape).
+    /// in the view because its road is the teaching OFFER `acceptDrop` makes on
+    /// a gathering's hand-drag, which is this model's to make. (The
+    /// navigator's "+ new chapter" on a gathering was the other road until
+    /// VX-616 retired it — her ruling 2026-10-28.) The item carries its own
+    /// count (F-U2-3's fix shape).
     var bindOffer: BindOffer?
 
     /// Open the bind confirm for THIS gathering: load the offer (count
     /// included), then present it with one write. `order` is the A31 view
     /// order the book view is looking through, so the bind freezes what she
     /// sees.
-    func openBindOffer(
-        followUp: BindFollowUp = .none, order: Queries.ReadingOrder? = nil
-    ) async {
+    func openBindOffer(order: Queries.ReadingOrder? = nil) async {
         guard let reading, reading.kind == .gathering else { return }
-        bindOffer = await BindOffer.load(
-            session, reading: reading, followUp: followUp, order: order)
+        bindOffer = await BindOffer.load(session, reading: reading, order: order)
     }
 
-    /// Bind, then finish the act she asked for. Returns true on success so
-    /// the caller can run the follow-up (P-2's choreography: "+ new chapter"
-    /// on a gathering binds AND opens the chapter prompt). The same row
-    /// becomes the book and keeps collecting (the sitting record §14.6,
-    /// §19.6); no "(collecting)" sibling any more (the ruling's clause).
+    /// Bind. Returns true on success. The same row becomes the book and keeps
+    /// collecting (the sitting record §14.6, §19.6); no "(collecting)" sibling
+    /// any more (the ruling's clause). (VX-616 retired the chapter follow-up
+    /// the navigator's "+ new chapter" on a gathering ran after a bind.)
     ///
     /// `order` (13c K6 review, K2): the A31 view-order override the book
     /// view is browsing through, so the bind freezes the order she is

@@ -538,10 +538,10 @@ struct BookView: View {
             RuleEditorSheet(model: editor)
         }
         // 13i-b U3 — BIND INTO A BOOK (the door 13c 2D shipped as the
-        // conversion offer). One sheet, whichever road opened it: the
-        // navigator's "+ new chapter" on a gathering, or the teaching offer a
-        // hand-drag earns. The item carries its count (F-U2-3) and the view
-        // order she was looking through (K2).
+        // conversion offer), opened here by the teaching offer a hand-drag
+        // earns (VX-616 retired the navigator's "+ new chapter" road and the
+        // chapter follow-up it ran). The item carries its count (F-U2-3) and
+        // the view order she was looking through (K2).
         .sheet(item: Bindable(structure).bindOffer) { offer in
             BindIntoBookSheet(offer: offer) { ownedNotes in
                 Task {
@@ -552,12 +552,6 @@ struct BookView: View {
                     // rule; the content is identical at this instant, so
                     // nothing on screen moves).
                     if bound { model.viewOrder = nil }
-                    // P-2: the door performs the act she asked for —
-                    // binding was the step on the way, not the point.
-                    if bound, offer.followUp == .createChapter {
-                        chapterNameField = ""
-                        newChapterPresented = true
-                    }
                 }
             }
         }

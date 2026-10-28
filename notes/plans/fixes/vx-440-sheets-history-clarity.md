@@ -722,9 +722,24 @@ Pieces (flipped per commit):
   no longer names the navigator's chapter door as a bind road (it was never a declared door — the registry
   walk's unions are unchanged and stay green). Pin (Mac, compiled ✓, RUN PENDING): `BookFootDoorsTests
   .aGatheringsFootIsTheNoteDoorAloneAndABookKeepsItsChapterDoor`. Tutorial (P-6) checked: its "＋ new chapter"
-  sentences are about BOOKS ("a book from the inside", "membership, not ownership") — unaffected. IN THIS
-  COMMIT.
-- B3-4 VX-616 the unreachable `.createChapter` bind follow-up retired: NOT STARTED.
+  sentences are about BOOKS ("a book from the inside", "membership, not ownership") — unaffected. DONE
+  (486d05c5d).
+- B3-4 VX-616 the unreachable `.createChapter` bind follow-up retired (its own commit, so the ladder can
+  weigh it apart from the ruled removal): the gathering foot's door was the ONLY road that opened the bind
+  with `BindFollowUp.createChapter` (the teaching offer opens it with none; the Bookcase row's bind passes
+  none) — with the door gone, the follow-up's machinery was reachable by no road: `BindFollowUp` (the enum),
+  `BindOffer.followUp`, `BindOffer.load(followUp:)`, `BookStructureModel.openBindOffer(followUp:)`, the
+  three `.createChapter` word arms ("Bind “x” into a book to add chapters?", "Bind & Add Chapter", "Chapters
+  need a book that holds its notes…") and `BookView`'s bind-then-open-the-chapter-prompt branch. RETIRED
+  (dead code removed, not parked): `BindCopy.title(_:)` / `BindCopy.confirm` / `BindCopy.explanation(count:
+  hearsActs:)` keep the bind's own words byte-for-byte. The bind's live roads are unchanged (the Bookcase
+  row's "Bind into a Book…", the teaching offer, ⌥⌘Z's un-bind). JUSTIFIED pin edits (each comment says so):
+  `BindDoorTests.theBindWordsSayTheTruthAtEveryCount` (the chapter arm's words → the bind's at count 3),
+  `.aHandDragInAGatheringOffersTheBindAndItsActOpensTheConfirm` (its `followUp == .none` line gone with the
+  field), `.theChapterDoorOpensTheBindWithItsCountAndItsFollowUp` → RENAMED
+  `.theBookViewsBindRoadCarriesItsCountAndItsOrder` (the same road and its count/order carriage, minus the
+  follow-up), `VocabularySweepTests.theCollectingPromiseIsTrueOfTheRule` (the parameter only);
+  `BookOrderConversionTests` comments only. `build-for-testing` ✓. IN THIS COMMIT.
 - B3-5 VX-189 the gathering's own Shared-with doors: NOT STARTED.
 - B3-6 VX-356 verify (trace) + seam + red-on-old pin: NOT STARTED.
 - B3-7 VX-356 fix (if real): NOT STARTED.

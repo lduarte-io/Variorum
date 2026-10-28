@@ -8,8 +8,10 @@
 //  The core contract is pinned in `SmartConversionTests` (core suite). This
 //  suite pins what only exists up here: the order VOCABULARY (pure), the
 //  view-local override actually reaching the assembly, the save door, and
-//  the P-2 choreography — "+ new chapter" on a smart book converts and then
-//  the chapter really is creatable, which it was not one step earlier.
+//  that a bound gathering's chapter really is creatable, which it was not one
+//  step earlier. (The "+ new chapter" door that ran bind-then-chapter on a
+//  gathering is retired — VX-616, her ruling 2026-10-28; the model road it
+//  composed is what the pin below still drives.)
 //
 
 import AppKit
@@ -175,8 +177,8 @@ struct BookOrderConversionTests {
             #expect(structure.lastError != nil)
             #expect(try await db.read { try Queries.readingSections($0, readingID: reading.id) }.isEmpty)
 
-            // The offer's confirm, then the follow-up the door promised.
-            // (13i-b U3: the confirm is the BIND now — same act, same row.)
+            // The bind, then a chapter. (13i-b U3: the confirm is the BIND —
+            // same act, same row.)
             let converted = await structure.bind()
             #expect(converted)
             await structure.createChapter(named: "I")
