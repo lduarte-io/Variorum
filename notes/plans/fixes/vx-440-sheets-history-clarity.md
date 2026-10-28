@@ -1035,6 +1035,42 @@ voiced label (not bug-class). Under the final-round rule the orchestrator's line
 N-1's diff is exactly the one-token change the finding proposes, verified against the file's own
 chromeLabel idiom (:680/:921/:968/:1006). A fresh round re-reading a one-line diff is not spawned.
 
+## THE STAGE RUNS
+
+### vx440-tests (2026-10-28, claimed 05:35:12 → released 05:43:42 on the coordinator's GO; logs `.vx440-stagelogs/`, gitignored)
+
+- **Red-on-old, all four AS EXPECTED** (test-without-building against frozen pre-fix DerivedData clones):
+  rb1 `34c21e938` CompareVersionsTests 1/1 failed (the declassify pin) · rb2 `c9d0b3c66` ShowTakeDoorTests —
+  the 2 expected failed, control passed · rb3 `7715a4a3d` GatheringKindWordTests — the 4 expected failed,
+  guard passed on every execution · rb4 `0d963ce22` BookPanelOpenNoteMarkTests 2/2 failed on their Study legs.
+- **Two test-host crashes INSIDE the window** (the coordinator's catch — my first read called the Problem
+  Reporter "pre-window residue", WRONG): `Variorum-…-053550.ips` (0.10.3 host 9927, a historical clone) and
+  `…-053637.ips` (0.10.4 host 10014), identical MAIN-THREAD stacks with ZERO Variorum frames — swift-testing's
+  own `ABI.EncodedEvent.encode` → JSONEncoder → `Dictionary.reserveCapacity` → the Swift runtime's
+  generic-metadata cache, EXC_BAD_ACCESS. A toolchain/test-harness class, NOT VX-657's family (that one is a
+  GRDB page-decrypt teardown race with app frames). **Ticketed VX-661** (Bug · Confirmed · Tests & tooling ·
+  Low, related to VX-657). Effect in-window: xcodebuild "Restarting after unexpected exit" during red2 (×1)
+  and red3 (several), so those logs show repeated executions with totals from previous launches — the earlier
+  "plan configurations" guess is corrected to crash-restarts. Every expected test delivered its verdict,
+  consistently, on every execution; the red verdicts stand.
+- **Green union at tip `1e4c5a4fb`: 587 tests in 71 suites — 584 passed, 3 FAILED + 4 warnings** (no
+  restarts in this run), reducing to THREE batch-1 defects (the run's own pins caught them live — they are
+  the red evidence):
+  - **SF-1** `CapabilityRegistryTests.takesIsNeverBehindWrite`: `.compareWithLatestVersion` reads
+    `.unavailable` in Takes while Write reads `.act` — the registry's takes-never-behind-Write rule. The door
+    acts from any mode (the landing road switches to Compare itself), so the declaration is wrong.
+  - **SF-2** `WingPaletteDoorsTests.thePaletteListsTheLatestDoorOnlyWhileTheNoteHasAMoment` + ALL 4 warnings:
+    the `noteHasSavedVersion` observation reaches `@Dependency(\.date)` from `AppSession.swift:762` with no
+    test value (swift-dependencies strict access in test contexts).
+  - **SF-3** `VersionDoorsTests.theMountedPageWritesNoMemoryAndOffersNoModesOrSave`: mounting the version
+    page records a `FocusedBlock` (utf16Offset 0) in the router's place memory — P-440-1 violated by one
+    mount-path write the batch missed.
+- Problem Reporter dismissed at release; zero instances and sims; dev store untouched; worktree clean at tip.
+- **Fixes:** batch 1's implementer resumed with SF-1…SF-3; the three failing tests are the pins (already red
+  on the current tree). Then a SHORT re-run window (`vx440-retests`): CapabilityRegistryTests ·
+  WingPaletteDoorsTests · VersionDoorsTests · CompareVersionsTests at the new tip, plus any suite the fixes'
+  diff reaches; the other suites' greens stand where the fixes' diff doesn't touch their code.
+
 ## THE WALK PLAN (claim `vx440-walk` — runs only after a green vx440-tests window, on the coordinator's GO)
 
 An Opus walker under the orchestrator's claim (cliclick + `Tools/WalkKit/`, the DEV-STORE Debug build
