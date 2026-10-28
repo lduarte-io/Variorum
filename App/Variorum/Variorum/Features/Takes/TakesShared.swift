@@ -487,6 +487,14 @@ nonisolated enum TakeCardMenuCopy {
         CapabilityRegistry.capability(.blankTake).menuTitle("＋ Blank take")
     }
 
+    /// VX-594 — the card ⌄ menu's branch row, in her ruled words (R-601-4:
+    /// *"New branched take"*), the chord from the declaration — the
+    /// `archiveTake` row's shape: the row acts on this card's take, the chord
+    /// on the take the caret is in (this one, once she is in it).
+    static var newBranchedTake: String {
+        CapabilityRegistry.capability(.newTake).menuTitle("New branched take")
+    }
+
     static var archiveTake: String {
         CapabilityRegistry.capability(.archiveTake).menuTitle("Archive this take")
     }
@@ -546,7 +554,8 @@ nonisolated enum TakeCardMenuCopy {
     /// Every chorded row on the card, paired with the capability that
     /// declares its key — what the drift guard walks.
     static var chorded: [(id: CapabilityID, title: String)] {
-        [(.newTake, newTake), (.blankTake, blankTake), (.archiveTake, archiveTake),
+        [(.newTake, newTake), (.newTake, newBranchedTake),
+         (.blankTake, blankTake), (.archiveTake, archiveTake),
          (.copyAllTakes, copyAllTakes), (.takeToBlockBelow, takeToBlockBelow),
          (.takesToBlocks, takesToBlocks)]
     }
@@ -574,10 +583,43 @@ struct TakeCardActs {
     /// (Write's panel has always worded it that way — a row reading "Lock"
     /// on a locked take is the small dishonesty `lockVerb` exists to end).
     let locked: Bool
+    /// VX-594 (R-601-4): a new take branched from THIS card's take — the
+    /// card's own target, chosen or not (`branchVariant` takes any parent).
+    let branch: () -> Void
     let archive: () -> Void
     let label: () -> Void
     let toggleLock: () -> Void
     let delete: () -> Void
+}
+
+extension TakesViewModel {
+    /// **The card's acts, wired ONCE for both hosts** (VX-594 — the menu's
+    /// fifth row is what made the two hand-built copies worth one home: the
+    /// board's cards and Write's take panel built the same four closures
+    /// beside each other). Every target is the card's own take, NAMED — a
+    /// press on a card never moves the keyboard (13k K6), and the act belongs
+    /// to the card she pointed at, not the take the caret is in. `columnID`
+    /// is the host's card namespace, so the branch's reveal puts the ring on
+    /// a card that host renders (the board's fan cards; the panel's own).
+    /// Every refusal — a sealed note, a locked take, the take the note shows,
+    /// the block's last take — comes from the operations layer through the
+    /// model's doors and speaks (P-2).
+    func cardActs(for take: Variant, columnID: String) -> TakeCardActs {
+        TakeCardActs(
+            locked: take.locked,
+            branch: { [self] in
+                Task {
+                    await branchTakeRevealed(
+                        blockID: take.blockId, from: take.id, preferredColumnID: columnID)
+                }
+            },
+            archive: { [self] in Task { await archiveTake(take.id) } },
+            label: { [self] in requestTakeLabel(variantID: take.id) },
+            toggleLock: { [self] in
+                Task { await setTakeLocked(take.id, locked: !take.locked) }
+            },
+            delete: { [self] in Task { await deleteTake(take.id) } })
+    }
 }
 
 struct TakeCardMenu: View {
@@ -595,6 +637,11 @@ struct TakeCardMenu: View {
     /// by the per-surface pin. Never two lists.
     static func rows(_ acts: TakeCardActs) -> [Row] {
         [
+            // VX-594 (R-601-4): branch from the take the card IS — the one
+            // road to a branch of a not-chosen take without clicking into it
+            // first. Leads the list: it is the one act that ADDS a take.
+            .init(id: .newTake, title: TakeCardMenuCopy.newBranchedTake,
+                  destructive: false, act: acts.branch),
             .init(id: .archiveTake, title: TakeCardMenuCopy.archiveTake,
                   destructive: false, act: acts.archive),
             .init(id: .labelTake, title: TakeCardMenuCopy.labelTake,
@@ -611,7 +658,10 @@ struct TakeCardMenu: View {
 
     /// The capability ids this menu declares — what the per-surface registry
     /// pin compares against each host's `surfaceCapabilities`.
-    static let capabilities: [CapabilityID] = [.archiveTake, .labelTake, .lockTake, .deleteTake]
+    static let capabilities: [CapabilityID] = [
+        .newTake,  // VX-594 (R-601-4): "New branched take"
+        .archiveTake, .labelTake, .lockTake, .deleteTake,
+    ]
 
     var body: some View {
         let rows = Self.rows(acts)

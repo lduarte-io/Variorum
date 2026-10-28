@@ -129,6 +129,9 @@ struct TakeCardDoorTests {
             _ doors: TakeCardDoors.Reader, _ hosting: NSView
         ) async throws -> Void
     ) async throws {
+        // The launch gate (batch A's rig diagnosis): never pump the run loop
+        // into the test host's own launch.
+        await HostLaunchSettle.wait()
         try await world { session, db, fixture in
             try session.operations.setFanStyle(style)
             // Row 50: this mount's OWN reports, cleared BEFORE the mount so a
@@ -214,27 +217,32 @@ struct TakeCardDoorTests {
 
     /// ONE list, built once: the rows the menu renders carry the registry's
     /// own titles, in the F1 order, and the lock row says which way it points.
-    @Test func theCardMenuIsOneListWithTheRegistrysOwnWords() {
+    /// (VX-594, a JUSTIFIED EDIT: the list grew its branch row — R-601-4's
+    /// "New branched take" — at its head; the lock row's index moved with it.)
+    @Test func theCardMenuIsOneListWithTheRegistrysOwnWords() throws {
         var pressed: [String] = []
         let unlocked = TakeCardMenu.rows(TakeCardActs(
-            locked: false,
+            locked: false, branch: { pressed.append("branch") },
             archive: { pressed.append("archive") }, label: { pressed.append("label") },
             toggleLock: { pressed.append("lock") }, delete: { pressed.append("delete") }))
         #expect(unlocked.map(\.id) == TakeCardMenu.capabilities,
                 "the rendered list and the declared list are the same list")
         #expect(unlocked.map(\.title) == [
+            TakeCardMenuCopy.newBranchedTake,
             TakeCardMenuCopy.archiveTake, TakeCardMenuCopy.labelTake,
             TakeCardMenuCopy.lockVerb(locked: false), TakeCardMenuCopy.deleteTake,
         ])
         #expect(unlocked.last?.destructive == true, "delete is the destructive row")
         // Which way the lock points is the TAKE's fact, not the menu's.
         let locked = TakeCardMenu.rows(TakeCardActs(
-            locked: true, archive: {}, label: {}, toggleLock: {}, delete: {}))
-        #expect(locked[2].title.contains("Unlock"), "a locked take offers Unlock")
-        #expect(unlocked[2].title.contains("Lock") && !unlocked[2].title.contains("Unlock"))
+            locked: true, branch: {}, archive: {}, label: {}, toggleLock: {}, delete: {}))
+        let lockRow = try #require(TakeCardMenu.capabilities.firstIndex(of: .lockTake))
+        #expect(locked[lockRow].title.contains("Unlock"), "a locked take offers Unlock")
+        #expect(unlocked[lockRow].title.contains("Lock")
+                && !unlocked[lockRow].title.contains("Unlock"))
         // The rows are the acts, not a label list (P-2: fire-and-DO).
         for row in unlocked { row.act() }
-        #expect(pressed == ["archive", "label", "lock", "delete"])
+        #expect(pressed == ["branch", "archive", "label", "lock", "delete"])
     }
 
     /// **Fire-and-DO, through the board's own acts.** The row does not merely
@@ -250,12 +258,12 @@ struct TakeCardDoorTests {
             let spare = fixture.variantIDs[1]
             #expect(model.projection.fans[fixture.blockID]?.count == 2, "non-vacuity: two takes")
 
-            // Exactly what the card builds — the row's own act.
-            let rows = TakeCardMenu.rows(TakeCardActs(
-                locked: false,
-                archive: {}, label: {},
-                toggleLock: {},
-                delete: { Task { await model.deleteTake(spare) } }))
+            // Exactly what the card builds — the row's own act (VX-594: the
+            // card's wiring is the model's ONE copy now, so the pin presses it).
+            let spareTake = try #require(
+                model.projection.fans[fixture.blockID]?.first { $0.id == spare })
+            let rows = TakeCardMenu.rows(
+                model.cardActs(for: spareTake, columnID: TakesViewModel.takesFanColumnID))
             let delete = try #require(rows.first { $0.id == .deleteTake })
             delete.act()
             await pollUntil {
@@ -268,6 +276,167 @@ struct TakeCardDoorTests {
                     "the spare is gone; the take the note shows stays (I10)")
             let deleted = try await db.read { try Variant.fetchOne($0, key: spare) }
             #expect(deleted?.deletedAt != nil, "a tombstone — Put back is real")
+        }
+    }
+
+    // MARK: - VX-594 (R-601-4) — "New branched take" on the card, and ⌘T
+    //         follows the caret
+    //
+    // THE PROBE (the batch B record): on the pre-fix tree the card ⌄ menu
+    // carried Archive · Label · Lock · Delete and NO branch row, and a fan
+    // card's pane carries no Variorum context menu (only the ARTICLE cell's
+    // right-click offers "＋ New take — branch of this one", and the article
+    // shows the CHOSEN take) — so a not-chosen take had no door that branched
+    // from IT without first clicking into it. The ⌘T family's target was
+    // traced to ALREADY follow the caret on every surface that hosts it (the
+    // board's and the Lenses board's `.branch` arms branch `focusedPane`'s
+    // take, Write's panel the ring's take else the shown one, the Takes bar's
+    // "+ take" and block ▾ row the focused pane's take) — the ⌘T guards below
+    // pin her confirmed semantics and are predicted GREEN on the pre-fix
+    // tree: that half of the member is HOLLOW (recorded, nothing built).
+
+    /// **RED ON OLD (the row removed): a live card offers the branch door**,
+    /// on both live-card shapes (the two door pins above assert the whole
+    /// grammar, which now includes it; this one names the row).
+    @Test(arguments: [FanStyle.stack, .carousel])
+    func aLiveCardsMenuOffersNewBranchedTake(style: FanStyle) async throws {
+        try await withBloomedBoard(style: style) { _, _, doors, hosting in
+            #expect(panes(in: hosting).count >= 2,
+                    "non-vacuity: the fan really bloomed (\(panes(in: hosting).count) panes)")
+            #expect(doors.rendered.contains(.newTake),
+                    "the card's ⌄ menu offers \"New branched take\" (rendered: \(doors.rendered))")
+        }
+        #expect(TakeCardMenuCopy.newBranchedTake.hasPrefix("New branched take"),
+                "her ruled words (R-601-4): \(TakeCardMenuCopy.newBranchedTake)")
+    }
+
+    /// **RED ON OLD (the row removed): the row BRANCHES FROM THE CARD'S OWN
+    /// TAKE** — a not-chosen take is the parent, its words the new take's, the
+    /// note's chosen take untouched (minting never chooses — R90), and the
+    /// ring lands on the new card where the host renders it. Both hosts: the
+    /// board's fan cards and Write's take panel (its own column).
+    @Test(arguments: [TakesViewModel.takesFanColumnID, "write-panel-main"])
+    func theBranchRowBranchesFromTheCardsOwnNotChosenTake(columnID: String) async throws {
+        try await world { session, db, fixture in
+            let model = TakesViewModel(
+                session: session, postID: fixture.postID,
+                defaults: freshTakeCardDefaults())
+            defer { model.teardown() }
+            if columnID != TakesViewModel.takesFanColumnID {
+                model.writePanelBlockID = fixture.blockID  // the panel's one-block scope
+            }
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
+            let chosen = fixture.variantIDs[0]
+            let spare = try #require(
+                model.projection.fans[fixture.blockID]?.first { $0.id == fixture.variantIDs[1] })
+            #expect(model.projection.slots.first?.variantID == chosen,
+                    "non-vacuity: the spare is NOT the take the note shows")
+
+            let rows = TakeCardMenu.rows(model.cardActs(for: spare, columnID: columnID))
+            let branch = try #require(
+                rows.first { $0.id == .newTake },
+                "the card's menu carries the branch row (rows: \(rows.map(\.title)))")
+            branch.act()
+            await pollUntil {
+                ((try? await db.read { try Queries.blockFan($0, blockID: fixture.blockID) })?
+                    .count ?? 2) == 3
+            }
+
+            let fan = try await db.read { try Queries.blockFan($0, blockID: fixture.blockID) }
+            let minted = try #require(
+                fan.first { !fixture.variantIDs.contains($0.id) }, "a third take was minted")
+            #expect(minted.parentVariantId == spare.id,
+                    "the parent is the card's own take — the not-chosen spare (\(String(describing: minted.parentVariantId)))")
+            #expect(minted.workingText == spare.workingText,
+                    "…and it starts as a copy of THAT take's words")
+            let shown = try await db.read { try Queries.takesProjection($0, post: fixture.postID) }
+            #expect(shown.slots.first?.variantID == chosen, "minting never chooses (R90)")
+            await pollUntil { model.authority.livePane?.variantID == minted.id }
+            #expect(model.authority.livePane == TakesViewModel.PaneKey(
+                columnID: columnID, blockID: fixture.blockID, variantID: minted.id),
+                    "the ring lands on the new take's card in this host's own namespace")
+        }
+    }
+
+    /// **GUARD (predicted green on BOTH trees — the HOLLOW half of R-601-4):
+    /// ⌘T follows the caret.** The caret in the not-chosen take's card → the
+    /// routed ⌘T branches THAT take; no pane holding the ring → the board's
+    /// own refusal speaks and nothing is minted (today's behavior with no
+    /// focus — her R-601-4 fallback, unchanged).
+    @Test func commandTBranchesTheTakeTheCaretIsInElseRefuses() async throws {
+        try await withBloomedBoard(style: .stack) { model, fixture, _, _ in
+            let session = model.session
+            await pollUntil { session.commandRouter.handlerCount > 0 }
+            let spare = fixture.variantIDs[1]
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesFanColumnID,
+                blockID: fixture.blockID, variantID: spare))
+            #expect(model.focusedPane?.variantID == spare, "non-vacuity: the caret is in the spare")
+
+            let db = session.database
+            @MainActor func fan() async -> [Variant] {
+                (try? await db.read { try Queries.blockFan($0, blockID: fixture.blockID) }) ?? []
+            }
+            #expect(session.commandRouter.dispatch(.takes(.branch)), "the board handles ⌘T")
+            await pollUntil { await fan().count == 3 }
+            let minted = try #require(
+                await fan().first { !fixture.variantIDs.contains($0.id) }, "⌘T minted a take")
+            #expect(minted.parentVariantId == spare,
+                    "⌘T with the caret in a not-chosen take branches THAT take")
+
+            // The guard: no ring, no guess — the refusal, nothing minted.
+            model.blur()
+            #expect(model.focusedPane == nil)
+            #expect(session.commandRouter.dispatch(.takes(.branch)))
+            await pollUntil { model.status != nil }
+            let status = try #require(model.status)
+            #expect(status.isRefusal, "with no take holding the caret ⌘T refuses (\(status.text))")
+            try? await Task.sleep(for: .milliseconds(200))
+            #expect(await fan().count == 3, "and nothing was minted")
+        }
+    }
+
+    /// **GUARD (predicted green on BOTH trees): Write's take panel's ⌘T follows
+    /// the ring** — the caret in the panel's not-chosen card branches THAT
+    /// take (the panel's own handler, the LIFO top while it is up).
+    @Test func theWritePanelsCommandTBranchesTheTakeTheRingIsIn() async throws {
+        await HostLaunchSettle.wait()
+        try await world { session, db, fixture in
+            let model = TakesViewModel(
+                session: session, postID: fixture.postID,
+                defaults: freshTakeCardDefaults())
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 700, height: 500),
+                styleMask: [.borderless], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: WriteTakesPanel(
+                session: session, postID: fixture.postID, blockID: fixture.blockID,
+                model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 500)
+            window.contentView = hosting
+            defer {
+                window.orderOut(nil)
+                window.close()
+                model.teardown()
+            }
+            await settle(window, hosting, until: {
+                session.commandRouter.handlerCount > 0 && !model.projection.slots.isEmpty
+            })
+            #expect(session.commandRouter.handlerCount > 0, "non-vacuity: the panel registered")
+            let spare = fixture.variantIDs[1]
+            model.focus(TakesViewModel.PaneKey(
+                columnID: "write-panel-main", blockID: fixture.blockID, variantID: spare))
+            #expect(model.focusedPane?.variantID == spare, "non-vacuity: the ring is in the spare")
+
+            #expect(session.commandRouter.dispatch(.takes(.branch)))
+            await pollUntil {
+                ((try? await db.read { try Queries.blockFan($0, blockID: fixture.blockID) })?
+                    .count ?? 2) == 3
+            }
+            let fan = try await db.read { try Queries.blockFan($0, blockID: fixture.blockID) }
+            let minted = try #require(fan.first { !fixture.variantIDs.contains($0.id) })
+            #expect(minted.parentVariantId == spare,
+                    "the panel's ⌘T branches the take the ring is in, not the shown one")
         }
     }
 
@@ -475,7 +644,7 @@ struct TakeCardDoorTests {
     /// the Menu the control's font was 9 pt.
     @Test func thePoppedRowsReadAtMenuSizeNotMini() async throws {
         let hosting = NSHostingView(rootView: TakeCardMenu(acts: TakeCardActs(
-            locked: false, archive: {}, label: {}, toggleLock: {}, delete: {})))
+            locked: false, branch: {}, archive: {}, label: {}, toggleLock: {}, delete: {})))
         hosting.frame = NSRect(x: 0, y: 0, width: 120, height: 40)
         let window = NSWindow(
             contentRect: hosting.frame, styleMask: [.borderless],

@@ -152,4 +152,23 @@ final class EditorRouter {
     /// relaunch starts every note at "all takes". Only THE takes board reads or
     /// writes it (`TakesLensFilterController.applies`).
     @ObservationIgnored var takesShowFilters: [String: LensTakeFilter] = [:]
+
+    /// **Which of the Takes board's fans are OPEN, per note** (VX-428 — her
+    /// ruling R-601-2, built on the VX-170 road her R-VX170-5 laid: *"session-
+    /// only, per note (the Takes-row-memory precedent): survives mode flips
+    /// within the session"*). The tester's words: *"I wish my current Takes
+    /// stayed open even when I briefly switch to 'Write' to check on
+    /// something."* It sits beside the article's memories for their reason:
+    /// the board's model is per-MOUNT (`TakesBoardLayout.expandedBlocks` lives
+    /// in it), so an open-fan set that is to survive a mode round trip can
+    /// only live at the session.
+    ///
+    /// Block ids, per note id; an empty set is never stored (close-all forgets
+    /// the note). Session-only, never persisted, never synced, never a setting
+    /// — a relaunch opens every note's board plain. Only THE takes board reads
+    /// or writes it (`TakesViewModel.landingEnabled` — Write's take panel and
+    /// the Lenses board never do): the board SEEDS its layout from it at
+    /// construction, before the first article geometry report, and writes
+    /// every change back (`TakesViewModel.openExpansionMemory`).
+    @ObservationIgnored var takesExpandedBlocks: [String: Set<String>] = [:]
 }
