@@ -484,6 +484,10 @@ struct PagedReadViewTests {
 
     private func withHostedPages<T>(
         posts: Int, blocksPerPost: Int = 3, width: CGFloat = 1500, height: CGFloat = 900,
+        // VX-663: what the book holds BEFORE the reader mounts — an arrival's
+        // carried place (the mode switch's parcel) or its focus. Nothing by
+        // default, so every earlier pin mounts exactly as it always did.
+        prepare: @MainActor (BookViewModel, _ postIDs: [String]) -> Void = { _, _ in },
         _ body: @MainActor (
             AppSession, _ postIDs: [String], _ window: NSWindow,
             _ hosting: NSHostingView<PagedReadView>, _ model: BookViewModel,
@@ -498,6 +502,7 @@ struct PagedReadViewTests {
             })
             let structure = BookStructureModel(session: session, readingID: readingID)
             structure.readForm = .pages
+            prepare(model, postIDs)
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: width, height: height),
                 styleMask: [.titled], backing: .buffered, defer: false)
@@ -698,6 +703,90 @@ struct PagedReadViewTests {
             let shown = pages.leaves.first??.postID
             #expect(shown != nil && shown != postIDs[1],
                     "a removed post cannot be shown; the clamp lands a real page")
+        }
+    }
+
+    /// The drawn leaves, left first: each `PageFrameNSView` the spread draws,
+    /// sorted by its page number.
+    private func drawnLeaves(in hosting: NSView) -> [PageFrameNSView] {
+        var leaves: [PageFrameNSView] = []
+        func walk(_ view: NSView) {
+            if let page = view as? PageFrameNSView { leaves.append(page) }
+            for sub in view.subviews { walk(sub) }
+        }
+        walk(hosting)
+        return leaves.sorted { $0.pageNumber < $1.pageNumber }
+    }
+
+    /// **VX-663 (Bug · Confirmed — the VX-648 record's B4-6) — an ARRIVAL in
+    /// Read ▸ Pages opens at the carried place, never the book's first page.**
+    /// The mechanism: a fresh `PagedReadView`'s `.task` SEEDED its reader from
+    /// the carried place (W21's `pendingReveal`, consumed by that same task)
+    /// BEFORE `adopt` had given the reader its entries — `PagedReadModel
+    /// .entries` starts empty, so `seed`'s `firstIndex` found nothing and the
+    /// reader opened at page one. The existing address pin
+    /// (`theAddressSurvivesMembershipAndOrderChangesByIdentity`) seeds AFTER
+    /// `adopt` by hand, which is exactly why it never saw the arrival.
+    ///
+    /// This pin stages the REAL order: the parcel is parked BEFORE the reader
+    /// mounts (what a mode switch's `carryPlace` leaves — `requestReveal` is
+    /// the same two slots), then the reader mounts and its own `.task` runs.
+    ///
+    /// RED ON OLD (the pre-fix tree, and `rev663`): the reader reports post 0
+    /// and draws post 0's pages.
+    @Test func aCarriedArrivalOpensAtTheCarriedNoteNeverPageOne() async throws {
+        try await withHostedPages(posts: 8, prepare: { model, postIDs in
+            model.requestReveal(postIDs[5])
+        }) { session, postIDs, window, hosting, model, _ in
+            await settle(window, hosting, until: {
+                model.pagedAnchorPostID != nil && drawnLeaves(in: hosting).count >= 2
+                    && drawnLeaves(in: hosting).first?.blocks.isEmpty == false
+            })
+            #expect(model.pendingReveal == nil, "the arriving reader consumed the parcel")
+            #expect(model.pagedAnchorPostID == postIDs[5],
+                    "RED ON OLD: the reader opens at the carried note, not page one — reported \(String(describing: model.pagedAnchorPostID))")
+            let carried = Set(try await session.database.read {
+                try Queries.renderPost($0, containerID: postIDs[5])
+            }.map(\.blockID))
+            let left = try #require(drawnLeaves(in: hosting).first, "the spread draws a left page")
+            #expect(!carried.isEmpty && Set(left.blocks.map(\.blockID)) == carried,
+                    "RED ON OLD: the LEFT page is the carried note's (page \(left.pageNumber))")
+        }
+    }
+
+    /// **VX-663 — the focus arrival, the same road** (`.task`'s second source:
+    /// `landing ?? model.focusedPostID`). A focused note and no parcel: the
+    /// reader opens at the focused note. RED ON OLD: page one.
+    @Test func aFocusedArrivalOpensAtTheFocusedNote() async throws {
+        try await withHostedPages(posts: 8, prepare: { model, postIDs in
+            model.focus(postIDs[4])
+        }) { _, postIDs, window, hosting, model, _ in
+            await settle(window, hosting, until: {
+                model.pagedAnchorPostID != nil && drawnLeaves(in: hosting).count >= 2
+            })
+            #expect(model.pagedAnchorPostID == postIDs[4],
+                    "RED ON OLD: the reader opens at the focused note, not page one — reported \(String(describing: model.pagedAnchorPostID))")
+        }
+    }
+
+    /// The guard: an arrival carrying NOTHING (no parcel, no focus) opens at
+    /// the book's first page, as it always did — and a parcel for a note the
+    /// book does not hold is dropped, the reader at page one.
+    @Test func anArrivalCarryingNothingOpensAtTheFirstPage() async throws {
+        try await withHostedPages(posts: 8) { _, postIDs, window, hosting, model, _ in
+            await settle(window, hosting, until: {
+                model.pagedAnchorPostID != nil && drawnLeaves(in: hosting).count >= 2
+            })
+            #expect(model.pagedAnchorPostID == postIDs[0], "nothing carried: the first page")
+            #expect(drawnLeaves(in: hosting).map(\.pageNumber) == [1, 2])
+        }
+        try await withHostedPages(posts: 8, prepare: { model, _ in
+            model.requestReveal("a-note-not-in-this-book")
+        }) { _, postIDs, window, hosting, model, _ in
+            await settle(window, hosting, until: {
+                model.pagedAnchorPostID != nil && drawnLeaves(in: hosting).count >= 2
+            })
+            #expect(model.pagedAnchorPostID == postIDs[0], "a foreign parcel: the first page")
         }
     }
 
