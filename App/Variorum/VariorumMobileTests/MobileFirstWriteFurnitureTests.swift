@@ -207,7 +207,11 @@ struct MobileFirstWriteFurnitureTests {
     /// be phone only users and they should get to experience it."* Same
     /// occasion, same gate, and the same library the Mac seeds — book,
     /// chapters, the attribution front matter, and the `sherlock holmes`
-    /// tag on every note.
+    /// tag on every note. **JUSTIFIED EDIT (VX-633, R-633-6):** the library
+    /// the Mac seeds is *The Prince*, bilingual — the launch book — so a
+    /// phone-only store gets the Prince: 27 chapters in the front matter's
+    /// section and four parts, every note wearing `machiavelli`. RED ON OLD:
+    /// the occasion named no book and seeded Sherlock by the default.
     ///
     /// *Red on the old behaviour:* before this act the phone had no sample
     /// library at all — `SampleLibrarySeeder` was Mac-app-local code the
@@ -227,24 +231,30 @@ struct MobileFirstWriteFurnitureTests {
                 Issue.record("expected a sample seed, got \(sample)")
                 return
             }
-            #expect(stories >= 12, "the twelve adventures")
+            let book = SampleLibrarySeeder.Book.launchBook
+            #expect(book == .prince)
+            #expect(stories == 27, "the dedication and twenty-six chapters")
             #expect(marks.sample)
 
-            let facts = try await db.read { db -> (Int, Int, Bool, Int) in
+            let facts = try await db.read { db -> (Int, Int, Bool, Int, Int) in
                 let members = try Queries.assembleReading(db, readingID: readingID)
                 let chapters = try Queries.readingSections(db, readingID: readingID)
                 let tag = try #require(
                     Queries.allTags(db)
-                        .first { $0.path == SampleLibrarySeeder.tagName })
+                        .first { $0.path == book.tagName })
                 let tagged = try Queries.everythingTagged(db, tagID: tag.id)
+                let italian = try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM variant WHERE label = ? AND deleted_at IS NULL",
+                    arguments: [SampleLibraryPrinceBook.italianTakeLabel]) ?? 0
                 return (members.count, chapters.count,
-                        members.contains { $0.title == SampleLibrarySeeder.frontMatterTitle },
-                        tagged.postIDs.count)
+                        members.contains { $0.title == book.frontMatterTitle },
+                        tagged.postIDs.count, italian)
             }
-            #expect(facts.0 == stories + 1, "every story, plus the attribution")
-            #expect(facts.1 == facts.0, "one chapter per note — the front matter has one too")
+            #expect(facts.0 == stories + 1, "every chapter, plus the attribution")
+            #expect(facts.1 == 5, "the front matter's section and the four parts")
             #expect(facts.2, "the attribution ships with the public-domain text")
             #expect(facts.3 == facts.0, "every note wears her tag")
+            #expect(facts.4 == 200, "every paragraph carries its Italian take — the same brain as the Mac")
         }
     }
 
@@ -285,7 +295,7 @@ struct MobileFirstWriteFurnitureTests {
             while ContinuousClock.now < watch {
                 try await Task.sleep(for: .milliseconds(25))
                 let books = try await db.read { db in try Queries.readings(db) }
-                if books.contains(where: { $0.name == SampleLibrarySeeder.bookName }) {
+                if books.contains(where: { $0.name == SampleLibrarySeeder.Book.launchBook.name }) {
                     sampleBookSeen = true
                     break
                 }
@@ -301,7 +311,7 @@ struct MobileFirstWriteFurnitureTests {
                 Issue.record("expected the paced seed to complete")
                 return
             }
-            #expect(stories >= 12)
+            #expect(stories == 27)
             let facts = try await db.read { db -> (Int, String?) in
                 (try Queries.assembleReading(db, readingID: readingID).count,
                  try String.fetchOne(
@@ -326,7 +336,7 @@ struct MobileFirstWriteFurnitureTests {
             _ = await furniture.run()
 
             let books = try await db.read { db in try Queries.readings(db) }
-            #expect(!books.contains { $0.name == SampleLibrarySeeder.bookName })
+            #expect(!books.contains { $0.name == SampleLibrarySeeder.Book.launchBook.name })
         }
     }
 
@@ -346,7 +356,7 @@ struct MobileFirstWriteFurnitureTests {
             let books = try await db.read { db in try Queries.readings(db) }
             #expect(books.contains { $0.name == MobileStarterJournal.bookName },
                     "the starter Journal survived the library's book")
-            #expect(books.contains { $0.name == SampleLibrarySeeder.bookName })
+            #expect(books.contains { $0.name == SampleLibrarySeeder.Book.launchBook.name })
         }
     }
 

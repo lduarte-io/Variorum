@@ -80,8 +80,9 @@ struct EncryptionExplainedDrillTests {
             let books = try await seedEverything(session)
             // 18l-c U6 (re-armed, a changed fact of that unit): `Book.all`
             // grew a THIRD seeded book — the takemania book — so the Mac's
-            // launch shape seeds three.
-            #expect(books.count == SampleLibrarySeeder.Book.all.count && books.count == 3)
+            // launch shape seeds three. VX-633 (re-armed again): a FOURTH —
+            // the Prince — so the doors' vocabulary seeds four.
+            #expect(books.count == SampleLibrarySeeder.Book.all.count && books.count == 4)
 
             // THE SHELF: the field guide + the seeded books.
             let shelf = try await db.read { db in try Queries.readings(db).map(\.name) }

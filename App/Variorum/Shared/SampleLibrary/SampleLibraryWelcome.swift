@@ -346,9 +346,10 @@ nonisolated enum SampleLibraryWelcome {
 
     /// **A FRESH STORE'S BIRTH.** The store is fresh when THIS launch's
     /// seed of the LAUNCH BOOK minted every note — the sample library was
-    /// born here now (13i-d U7 read Sherlock's outcome; VX-633: `book`, the
-    /// launch book — the Prince — by default, and a caller holding another
-    /// book's outcome names that book). Marked `pending` before arranging (a
+    /// born here now (13i-d U7 read Sherlock's outcome; VX-633: the LAUNCH
+    /// BOOK's — `Book.launchBook`, the Prince — so `launchSeed` is that
+    /// book's outcome and the minted count is compared with ITS titles).
+    /// Marked `pending` before arranging (a
     /// window closed mid-arrange resumes at the next launch), `done` after.
     /// Any other outcome on an undecided store marks `declined` and writes
     /// nothing.
@@ -368,7 +369,6 @@ nonisolated enum SampleLibraryWelcome {
     static func arrangeAtLaunch(
         session: AppSession,
         launchSeed outcome: SampleLibrarySeeder.Outcome,
-        of book: SampleLibrarySeeder.Book = .launchBook,
         storeVariant: AppDatabase.StoreVariant = .real,
         guideName: String?,
         beforeArranging: (@MainActor () async -> Void)? = nil,
@@ -378,7 +378,7 @@ nonisolated enum SampleLibraryWelcome {
         let key = launchMarkKey(for: storeVariant)
         let load = loadMark ?? { UserDefaults.standard.string(forKey: key) }
         let save = saveMark ?? { UserDefaults.standard.set($0, forKey: key) }
-        let decided = await decide(mark: load(), launchSeed: outcome, of: book, save: save)
+        let decided = await decide(mark: load(), launchSeed: outcome, save: save)
         guard decided == nil else {
             log.notice("welcome arrangement: \(String(describing: decided!), privacy: .public)")
             return decided!
@@ -399,9 +399,9 @@ nonisolated enum SampleLibraryWelcome {
     /// store fresh and marked it `pending`); otherwise the decided outcome.
     @MainActor
     private static func decide(
-        mark: String?, launchSeed outcome: SampleLibrarySeeder.Outcome,
-        of book: SampleLibrarySeeder.Book, save: (String) -> Void
+        mark: String?, launchSeed outcome: SampleLibrarySeeder.Outcome, save: (String) -> Void
     ) async -> LaunchOutcome? {
+        let book = SampleLibrarySeeder.Book.launchBook
         switch mark {
         case "done", "declined": return .alreadySettled
         case "pending": return nil
