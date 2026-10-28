@@ -23,7 +23,11 @@
 //    stranded-originals arm, which `Queries.trash` runs) and
 //    `Queries.originFamilyClocks` (the tray panel's held fates read), in
 //    the receipt state — NOT this unit's tickets; measured for Unit 3
-//    (VX-670), which builds on the Trash listing.
+//    (VX-670), which builds on the Trash listing;
+//  · `control` — `Queries.renderPost` of the same note (20 live blocks), a
+//    read the seam history should not move: its WALL time shows what the
+//    store itself costs at each R (page cache, SQLCipher page decrypts),
+//    separating that from any query's own growth (its VM count is flat).
 //
 //  The old `originalsStrandedBy` body rides here verbatim (`legacyStranded`)
 //  so the probe can also assert, at every R, that the new body answers the
@@ -176,7 +180,7 @@ struct VX653LineageProbeTests {
             var seam = live[10]
             let legacyMax = env("VX653_LEGACY_MAX", 600)
             print("VX653 corpus=\(posts)x\(blocks) (keyed on-disk); each cell = median wall · VM instructions")
-            print("VX653     R | stranded live NEW     | stranded live OLD     | stranded rcpt NEW     | stranded rcpt OLD     | preserved (v1_34)     | preserved (no index)  | trash arm (rcpt)      | fam clocks (rcpt)")
+            print("VX653     R | stranded live NEW     | stranded live OLD     | stranded rcpt NEW     | stranded rcpt OLD     | preserved (v1_34)     | preserved (no index)  | trash arm (rcpt)      | fam clocks (rcpt)     | control renderPost")
             var done = 0
             for target in probeSteps {
                 for _ in done..<target {
@@ -199,7 +203,7 @@ struct VX653LineageProbeTests {
                 // The receipt's road: delete it, ask, put it back.
                 try ops.deleteBlock(seam)
                 let receipt: (new: Measure, old: Measure?, preserved: Measure, preservedOld: Measure,
-                              trashArm: Measure, famClocks: Measure) = try {
+                              trashArm: Measure, famClocks: Measure, control: Measure) = try {
                     let side: (Measure, Measure?) = try db.read { d in
                         var new: [String] = [], old: [String] = []
                         let n = try measure(d, runs: 3) { new = try Queries.originalsStrandedBy(d, blockIDs: [seam]) }
@@ -208,10 +212,11 @@ struct VX653LineageProbeTests {
                         if timeOld { #expect(new == old, "R=\(target): the new body answers the old rows") }
                         return (n, o)
                     }
-                    let (preserved, trashArm, famClocks): (Measure, Measure, Measure) = try db.read { d in
+                    let (preserved, trashArm, famClocks, control): (Measure, Measure, Measure, Measure) = try db.read { d in
                         (try measure(d, runs: 5) { _ = try Queries.preservedOriginals(d, postID: note.id, limit: 501) },
                          try measure(d, runs: 1) { _ = try Queries.strandedOriginals(d, now: now, limit: 501) },
-                         try measure(d, runs: 1) { _ = try Queries.originFamilyClocks(d, postID: note.id, now: now) })
+                         try measure(d, runs: 1) { _ = try Queries.originFamilyClocks(d, postID: note.id, now: now) },
+                         try measure(d, runs: 5) { _ = try Queries.renderPost(d, containerID: note.id) })
                     }
                     try db.write { try $0.execute(sql: "DROP INDEX idx_cblock_dead_block") }
                     let preservedOld = try db.read { d in
@@ -223,12 +228,13 @@ struct VX653LineageProbeTests {
                               WHERE deleted_at IS NOT NULL
                             """)
                     }
-                    return (side.0, side.1, preserved, preservedOld, trashArm, famClocks)
+                    return (side.0, side.1, preserved, preservedOld, trashArm, famClocks, control)
                 }()
                 _ = try ops.restoreBlock(seam)
                 print("VX653 \(String(format: "%5d", target)) | \(cell(liveSide.new)) | \(cell(liveSide.old)) | "
                       + "\(cell(receipt.new)) | \(cell(receipt.old)) | \(cell(receipt.preserved)) | "
-                      + "\(cell(receipt.preservedOld)) | \(cell(receipt.trashArm)) | \(cell(receipt.famClocks))")
+                      + "\(cell(receipt.preservedOld)) | \(cell(receipt.trashArm)) | \(cell(receipt.famClocks)) | "
+                      + "\(cell(receipt.control))")
             }
         }
     }
