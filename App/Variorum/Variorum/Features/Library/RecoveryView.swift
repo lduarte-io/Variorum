@@ -473,8 +473,16 @@ final class RecoveryViewModel {
         lastError = nil
         receipt = nil
         do {
-            receipt = try await TrashPurge.confirm(session: session, confirm)
-            forgetLocalMemories(of: confirm)
+            if case .deleteSelection(let taken, _, _) = confirm {
+                // VX-671: the selection's road answers what it REALLY took
+                // (re-read at act time), so only those notes' memories go.
+                let result = try await TrashPurge.confirmSelection(session: session, taken)
+                receipt = result.receipt
+                forgetLocalMemories(ofTaken: result.taken)
+            } else {
+                receipt = try await TrashPurge.confirm(session: session, confirm)
+                forgetLocalMemories(of: confirm)
+            }
         } catch let error as OperationError {
             lastError = TrayRefusalCopy.message(for: error)
         } catch {
@@ -515,6 +523,15 @@ final class RecoveryViewModel {
         session.commandRouter.forgetCurrentBlock(for: item.id)
     }
 
+    /// The selection's twin of the above (VX-671): the same rule, over the
+    /// rows the act really took — a note put back in the pause keeps its
+    /// memories, exactly as it would have had she never pressed.
+    private func forgetLocalMemories(ofTaken taken: [Queries.TrashItem]) {
+        for item in taken where item.kind == .note && !item.isVersion {
+            session.commandRouter.forgetCurrentBlock(for: item.id)
+        }
+    }
+
     /// **Put back — one verb, each kind's own road** (13j J1). Every road
     /// already existed; what was missing was a place to stand where all four
     /// are offered together.
@@ -543,6 +560,92 @@ final class RecoveryViewModel {
             // Includes `RecoveryRefusal` — a preserved original with no note.
             lastError = DeletionRefusal.fallback(error)
         }
+    }
+
+    // MARK: Several rows at once (VX-671)
+
+    /// **The picked rows** — her report: *"i also should be able to select
+    /// multiple items to delete."* Model state, never the view's, so the
+    /// routing that fills it can be driven (the Library's P-0 lesson: a
+    /// selection decided inside a gesture closure is a door nothing can
+    /// reach). Keyed by each row's own store id — every Trash row is one
+    /// UUID-keyed row, unique across kinds.
+    private(set) var selectedRows: Set<String> = []
+    /// The last row a click named — a ⇧-range's other end.
+    private(set) var selectionAnchor: String?
+
+    /// **A click on a row's body** — the standard macOS idiom through the
+    /// Library's one brain (`NoteRowSelection`): a plain click picks that row
+    /// alone, ⌘ toggles it, ⇧ takes everything from the anchor to here.
+    /// `order` is the rows AS THE LISTING SHOWS THEM (folded originals
+    /// excluded), which is what makes a range mean what she is pointing at.
+    func clickRow(_ id: String, modifiers: NoteRowClickModifiers, order: [String]) {
+        let next = NoteRowSelection.apply(
+            NoteRowSelection.intent(for: modifiers), row: id,
+            to: selectedRows, anchor: selectionAnchor, order: order)
+        selectedRows = next.selection
+        selectionAnchor = next.anchor
+    }
+
+    /// **Keep the pick to what the listing SHOWS** (the Library's R2-2
+    /// standard): a row put back, purged, filtered out or folded away leaves
+    /// the pick with it — a bar acting on rows nothing on screen highlights is
+    /// the invisible-selection hazard. Pruned, never cleared: the rows a bulk
+    /// act could not move stay picked, so the retry is one press.
+    func pruneSelection(toVisible order: [String]) {
+        guard !selectedRows.isEmpty || selectionAnchor != nil else { return }
+        let visible = Set(order)
+        selectedRows.formIntersection(visible)
+        if let anchor = selectionAnchor, !visible.contains(anchor) { selectionAnchor = nil }
+    }
+
+    func clearSelection() {
+        selectedRows = []
+        selectionAnchor = nil
+    }
+
+    /// The picked rows, in the listing's order.
+    func selectedItems(in order: [String]) -> [Queries.TrashItem] {
+        guard !selectedRows.isEmpty else { return [] }
+        let byID = Dictionary(trash.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return order.compactMap { selectedRows.contains($0) ? byID[$0] : nil }
+    }
+
+    /// The bulk Delete Now door: raises the selection's confirm — never acts
+    /// directly, asked every time (round 10). A press that cannot take
+    /// anything (only originals picked — the door is not rendered then; this
+    /// is the race's answer) says so instead of doing nothing silently.
+    func requestDeleteSelection(order: [String]) {
+        lastError = nil
+        receipt = nil
+        guard let confirm = TrashPurge.deleteSelectionConfirm(
+            for: selectedItems(in: order), in: trash)
+        else {
+            lastError = RecoveryCopy.bulkDeleteNowNothingTakes
+            return
+        }
+        pendingConfirm = confirm
+    }
+
+    /// The bulk Put back: every picked row's own road, in `TrashBulk`'s
+    /// order; the words are the shared decision's, the refusals in this
+    /// surface's own voice (the row door's: `TrayRefusalCopy`, else the
+    /// shared fallback).
+    func putBackSelection(order: [String]) async {
+        lastError = nil
+        receipt = nil
+        let picked = selectedItems(in: order)
+        guard !picked.isEmpty else {
+            lastError = RecoveryCopy.bulkNothingSelected
+            return
+        }
+        let outcomes = await TrashBulk.putBack(session: session, picked)
+        let words = TrashBulk.putBackWords(outcomes) { error in
+            (error as? OperationError).map(TrayRefusalCopy.message(for:))
+                ?? DeletionRefusal.fallback(error)
+        }
+        receipt = words.receipt
+        lastError = words.refusal
     }
 }
 
@@ -677,6 +780,29 @@ struct RecoveryView: View {
     /// `TrashGrouping`'s; this renders it.
     private var entries: [TrashGrouping.Entry] { TrashGrouping.entries(model.trash) }
 
+    /// **The rows AS THE LISTING SHOWS THEM, top to bottom** (VX-671) — what
+    /// a ⇧-range spans and what the pick is kept to. A folded run of
+    /// originals is not shown, so it is not here: a range never reaches rows
+    /// she cannot see, and folding a picked original away un-picks it.
+    nonisolated static func visibleRowIDs(
+        _ entries: [TrashGrouping.Entry], collapsed: Set<String>
+    ) -> [String] {
+        func withNested(_ row: TrashGrouping.Row) -> [String] {
+            [row.item.id] + (collapsed.contains(row.item.id) ? [] : row.nested.map(\.id))
+        }
+        return entries.flatMap { entry -> [String] in
+            switch entry {
+            case .row(let row): return withNested(row)
+            case .group(let group):
+                return (group.noteRow.map { [$0.id] } ?? []) + group.rows.flatMap(withNested)
+            }
+        }
+    }
+
+    private var visibleRowIDs: [String] {
+        Self.visibleRowIDs(entries, collapsed: collapsedAncestors)
+    }
+
     private var list: some View {
         List {
             // Ledger row 8: the Archived half MOVED to its own sidebar
@@ -688,6 +814,12 @@ struct RecoveryView: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
                 controls
+                // VX-671: the pick's doors, on a row of their own while
+                // several rows are picked (the Library's bulk-row grammar —
+                // one picked row keeps its own doors on its own line).
+                if model.selectedRows.count > 1 {
+                    bulkRow
+                }
                 if model.trash.isEmpty {
                     // Ledger row 2: an empty VIEW is not an empty Trash, and
                     // the sentence now knows the difference.
@@ -748,6 +880,40 @@ struct RecoveryView: View {
         // Ledger row 2: the unfiltered truth, on its own observation, which
         // deliberately does NOT restart with the filter.
         .task(id: session.wing.currentID) { await model.startTrashTotal() }
+        // VX-671: the pick follows what is shown — a row put back, purged,
+        // filtered or folded away leaves it.
+        .onChange(of: visibleRowIDs) { _, shown in model.pruneSelection(toVisible: shown) }
+    }
+
+    /// **The pick's doors** (VX-671): the count, kind by kind, then the two
+    /// verbs every row already wears — Put back (each row's own road, in
+    /// `TrashBulk`'s order) and Delete Now (one confirm naming the full count
+    /// by kind; drawn only while the pick holds something it can take — P-2,
+    /// a preserved original rides its family).
+    private var bulkRow: some View {
+        let order = visibleRowIDs
+        let picked = model.selectedItems(in: order)
+        let taken = TrashBulk.taken(picked)
+        return HStack(spacing: 12) {
+            Text(tokens.chromeLabel(RecoveryCopy.trashSelected(picked)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            Button(RecoveryCopy.bulkPutBackLabel(picked)) {
+                Task { await model.putBackSelection(order: order) }
+            }
+            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+            .fixedSize()
+            if !taken.isEmpty {
+                Button(RecoveryCopy.bulkDeleteNowLabel(taken), role: .destructive) {
+                    model.requestDeleteSelection(order: order)
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                .fixedSize()
+                .help("Skips the rest of the \(TrashWindow.days) days for every one — asked to confirm every time")
+            }
+        }
     }
 
     /// A row with nobody to gather under — it keeps its own "from ‹note›".
@@ -980,10 +1146,34 @@ struct RecoveryView: View {
         // card surface inside a hairline, never a list separator. The row's
         // own padding is the card's, so the indentation every nested caller
         // applies still reads as indentation.
+        //
+        // VX-671: a PICKED row wears the Library's pick grammar (row 56 —
+        // the wash and a tinted border, never a system highlight).
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .background(tokens.card, in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
+        .background(
+            model.selectedRows.contains(item.id) ? tokens.wash : tokens.card,
+            in: RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8).stroke(
+                model.selectedRows.contains(item.id) ? tokens.accent.opacity(0.42) : tokens.line,
+                lineWidth: 1))
+        // VX-671: the row's body picks (the shared click brain, `rowClick`;
+        // the row's own buttons keep their clicks). A Trash row opens
+        // nothing, so a quick second click is simply another click with the
+        // keyboard's chord — a ⌘-double-click toggles twice, as it reads.
+        .contentShape(Rectangle())
+        .rowClick(
+            onClick: { modifiers in pick(item.id, modifiers) },
+            onDoubleClick: { pick(item.id, RowClickModifier.currentModifiers) })
+    }
+
+    private func pick(_ id: String, _ modifiers: EventModifiers) {
+        model.clickRow(
+            id,
+            modifiers: NoteRowClickModifiers(
+                command: modifiers.contains(.command), shift: modifiers.contains(.shift)),
+            order: visibleRowIDs)
     }
 
     private func putBackHelp(_ item: Queries.TrashItem) -> String {

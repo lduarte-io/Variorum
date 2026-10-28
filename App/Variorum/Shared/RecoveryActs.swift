@@ -43,10 +43,14 @@ enum RecoveryRefusal: Error {
     /// A preserved original with no note recorded: placing needs somewhere
     /// to place, and there is none.
     case originalHasNoNote
+    /// VX-671: a bulk Delete Now found none of its rows still in the Trash at
+    /// act time — nothing was purged, so the door says so.
+    case nothingLeftToDelete
 
     var sentence: String {
         switch self {
         case .originalHasNoNote: return RecoveryCopy.originalHasNoNote
+        case .nothingLeftToDelete: return RecoveryCopy.bulkDeleteNowNothingLeft
         }
     }
 }
@@ -328,10 +332,17 @@ enum TrashPurge {
         /// go, so the total is unchanged — what changes is that the sentence
         /// names them, instead of counting a note's past as another note.
         case emptyTrash(counts: [Queries.TrashItem.Kind: Int], versions: Int)
+        /// **VX-671 — Delete Now over a SELECTION** (her report: *"i also
+        /// should be able to select multiple items to delete"*). `taken` is
+        /// the picked rows the door takes (an original rides its family and
+        /// is never taken on its own); `versionsLeft` and `ridingOriginals`
+        /// are what the confirm names as NOT taken (`TrashBulk`). Asked every
+        /// time, like its row's door (round 10).
+        case deleteSelection([Queries.TrashItem], versionsLeft: Int, ridingOriginals: Int)
 
         var title: String {
             switch self {
-            case .deleteNow: return RecoveryCopy.deleteNowVerb
+            case .deleteNow, .deleteSelection: return RecoveryCopy.deleteNowVerb
             case .emptyTrash: return RecoveryCopy.emptyTrashVerb
             }
         }
@@ -341,7 +352,7 @@ enum TrashPurge {
         /// (caught in the phone's visual capture).
         var confirmVerb: String {
             switch self {
-            case .deleteNow: return RecoveryCopy.deleteNowVerb
+            case .deleteNow, .deleteSelection: return RecoveryCopy.deleteNowVerb
             case .emptyTrash: return "Empty Trash"
             }
         }
@@ -354,6 +365,9 @@ enum TrashPurge {
                     isGathering: item.isGathering)
             case .emptyTrash(let counts, let versions):
                 return RecoveryCopy.emptyTrashConfirm(counts, versions: versions)
+            case .deleteSelection(let taken, let versionsLeft, let ridingOriginals):
+                return RecoveryCopy.bulkDeleteNowConfirm(
+                    taken, versionsLeft: versionsLeft, ridingOriginals: ridingOriginals)
             }
         }
     }
@@ -454,12 +468,241 @@ enum TrashPurge {
             receipt = RecoveryCopy.emptyTrashReceipt(
                 targets.count, synced: synced, anyFamilyEverSynced: anyFamilySynced,
                 versions: versionsTaken)
+        case .deleteSelection(let taken, _, _):
+            receipt = try await deleteSelection(session: session, taken).receipt
         }
         // On a local-only install the cleanup IS the app's — run it now, so
         // Delete Now means what it says the moment she reads it (a configured
         // chain's janitor owns the road instead).
         await session.sweepLocalPurge()
         return receipt
+    }
+
+    /// **VX-671 — the selection's Delete Now, answering what it really
+    /// took.** `confirm`'s road with the rows in hand, for a host that must
+    /// act on exactly the taken ones afterwards (the Mac forgets a purged
+    /// note's local memories, `RecoveryViewModel`). The same tail: the local
+    /// sweep before the receipt (her round-11 ruling).
+    static func confirmSelection(
+        session: AppSession, _ taken: [Queries.TrashItem]
+    ) async throws -> (receipt: String, taken: [Queries.TrashItem]) {
+        let result = try await deleteSelection(session: session, taken)
+        await session.sweepLocalPurge()
+        return result
+    }
+
+    /// The selection's purge: Empty Trash's road (one `requestPurge` over
+    /// many targets, one transaction — the same op every Delete Now writes),
+    /// restricted to the picked rows. Re-read at ACT time like Empty Trash
+    /// (a confirm is a pause, the listing a projection — 13c's R3-1): a row
+    /// put back or purged in the pause is simply not taken, and `requestPurge`
+    /// — which refuses the WHOLE batch on one row that is no longer deleted —
+    /// never sees it. Nothing left ⇒ a refusal, nothing written.
+    private static func deleteSelection(
+        session: AppSession, _ picked: [Queries.TrashItem]
+    ) async throws -> (receipt: String, taken: [Queries.TrashItem]) {
+        let synced = session.syncConfigured()
+        let now = session.now
+        let wing = session.wing.readScope
+        let present: Set<String> = try await session.database.read { db in
+            Set(try Queries.trash(db, now: now, wingID: wing).map(\.id))
+        }
+        let taken = picked.filter { TrashScope.emptyTrashTakes($0.kind) && present.contains($0.id) }
+        guard !taken.isEmpty else { throw RecoveryRefusal.nothingLeftToDelete }
+        let targets = taken.map { SyncPurgeTarget(table: $0.kind.purgeTable, rowID: $0.id) }
+        var anyFamilySynced = false
+        if !synced {
+            anyFamilySynced = try await session.database.read { db in
+                try PurgeJanitor.anyFamilyEverSynced(db, targets: targets)
+            }
+        }
+        try await session.runner.run { ops in
+            _ = try ops.requestPurge(targets)
+        }
+        return (RecoveryCopy.bulkDeleteNowReceipt(
+            taken, synced: synced, anyFamilyEverSynced: anyFamilySynced), taken)
+    }
+
+    /// **The selection's confirm** (VX-671), or nil when the door takes
+    /// nothing (only originals picked — each rides its family; P-2: the door
+    /// is not rendered). Pure over the picked rows and the listing she is
+    /// reading: `versionsLeft` counts the listed saved versions of the taken
+    /// notes that are NOT picked (a note's purge never takes another
+    /// container — LR1-4's sentence, for a selection).
+    nonisolated static func deleteSelectionConfirm(
+        for picked: [Queries.TrashItem], in listing: [Queries.TrashItem]
+    ) -> Confirm? {
+        let taken = TrashBulk.taken(picked)
+        guard !taken.isEmpty else { return nil }
+        let takenIDs = Set(taken.map(\.id))
+        let notes = Set(taken.filter { $0.kind == .note && !$0.isVersion }.map(\.id))
+        let versionsLeft = listing.count { row in
+            row.isVersion && !takenIDs.contains(row.id)
+                && (row.versionOfNoteID.map(notes.contains) ?? false)
+        }
+        let riding = picked.count { $0.kind == .preservedOriginal }
+        return .deleteSelection(taken, versionsLeft: versionsLeft, ridingOriginals: riding)
+    }
+}
+
+/// **SEVERAL TRASH ROWS AT ONCE — ONE DECISION, BOTH PLATFORMS' ACTS**
+/// (VX-671; her report, verbatim: *"i also should be able to select multiple
+/// items to delete."*).
+///
+/// The bulk acts DRIVE THE EXISTING PER-ROW ROADS, unchanged: Put back runs
+/// `TrashPutBack.run` row by row (each row's own operation, its own
+/// transaction, its own landing); Delete Now is `TrashPurge`'s
+/// `.deleteSelection` — the one `requestPurge` op over the picked rows,
+/// Empty Trash's road restricted to them. No new operation exists for
+/// either.
+///
+/// **The Put back ORDER is a decision, and this is its one home**
+/// (PROVISIONAL, QUESTIONS #250): books first, then notes and snippet
+/// groups, then blocks, then preserved originals — each in the order the
+/// listing shows them. Every per-row act then runs in the state where it
+/// means what its row said: a book that went in with its notes comes back
+/// WHOLE (and its notes' rows find themselves already back — `restoreReading`
+/// returns them on its stamp); a note comes back before a block deleted from
+/// it earlier, so the block lands where it was rather than set aside with its
+/// note gone; a block comes back before an original its deletion stranded —
+/// and an original that is no longer on the clock at its turn (its family
+/// lives again) is NOT placed: that row left the Trash, and placing it beside
+/// its own successor would put the same words in the note twice.
+@MainActor
+enum TrashBulk {
+    /// The picked rows a bulk Delete Now takes: Empty Trash's kinds (G6) —
+    /// an original rides its family, never purged on its own.
+    nonisolated static func taken(_ picked: [Queries.TrashItem]) -> [Queries.TrashItem] {
+        picked.filter { TrashScope.emptyTrashTakes($0.kind) }
+    }
+
+    /// The order a bulk Put back runs its rows in (the type's doc says why):
+    /// a stable sort by kind rank, the listing's own order within a rank.
+    nonisolated static func putBackOrder(_ picked: [Queries.TrashItem]) -> [Queries.TrashItem] {
+        picked.enumerated()
+            .sorted { a, b in
+                let (ra, rb) = (rank(a.element.kind), rank(b.element.kind))
+                return ra != rb ? ra < rb : a.offset < b.offset
+            }
+            .map(\.element)
+    }
+
+    nonisolated private static func rank(_ kind: Queries.TrashItem.Kind) -> Int {
+        switch kind {
+        case .book: return 0
+        case .note, .snippetGroup: return 1
+        case .block: return 2
+        case .take: return 3
+        case .preservedOriginal: return 4
+        }
+    }
+
+    /// What one row's turn came to.
+    nonisolated enum RowOutcome {
+        /// The row's own road ran and answered this receipt.
+        case landed(String)
+        /// The row had left the Trash before its turn — back WITH an earlier
+        /// row of this press (a book's notes; an original whose family came
+        /// back), or by another hand in the pause. Its road was not run, or
+        /// refused only to say "already back" (its transaction changed
+        /// nothing).
+        case alreadyBack
+        /// The row's road refused; each platform words it in its own voice.
+        case refused(any Error)
+    }
+
+    /// Runs every picked row's own Put back, in `putBackOrder`.
+    static func putBack(
+        session: AppSession, _ picked: [Queries.TrashItem]
+    ) async -> [(item: Queries.TrashItem, outcome: RowOutcome)] {
+        var outcomes: [(item: Queries.TrashItem, outcome: RowOutcome)] = []
+        for item in putBackOrder(picked) {
+            if item.kind == .preservedOriginal,
+               let noteID = item.noteID,
+               !(await stillOnTheClock(session: session, original: item.id, noteID: noteID)) {
+                outcomes.append((item, .alreadyBack))
+                continue
+            }
+            do {
+                outcomes.append((item, .landed(try await TrashPutBack.run(session: session, item: item))))
+            } catch let error as OperationError where isAlreadyBack(error) {
+                outcomes.append((item, .alreadyBack))
+            } catch {
+                outcomes.append((item, .refused(error)))
+            }
+        }
+        return outcomes
+    }
+
+    /// Is this original still stranded on its family's clock — still a Trash
+    /// row? The tray's own read of its note's fates (`originFamilyClocks`,
+    /// linear since VX-670). A read that fails says yes, so the row's own
+    /// road runs and answers for itself.
+    private static func stillOnTheClock(
+        session: AppSession, original: String, noteID: String
+    ) async -> Bool {
+        let now = session.now
+        // The whole map, not the one entry: `try?` would flatten an absent
+        // entry (no longer stranded — NOT on the clock) into a failed read.
+        let fates = try? await session.database.read { db in
+            try Queries.originFamilyClocks(db, postID: noteID, now: now)
+        }
+        guard let fates else { return true }
+        if case .counting = fates[original] { return true }
+        return false
+    }
+
+    /// A per-row road's "it's not deleted" — the row is already back.
+    nonisolated static func isAlreadyBack(_ error: OperationError) -> Bool {
+        switch error {
+        case .containerNotDeleted, .readingNotDeleted, .blockNotDeleted, .variantNotDeleted:
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// **The words for a bulk Put back** — a receipt when everything picked
+    /// is back, a refusal when anything refused (both facts in one sentence
+    /// when some came back), and a refusal when the press did nothing.
+    /// `voice` words a refused row's error, in the host's own voice.
+    nonisolated static func putBackWords(
+        _ outcomes: [(item: Queries.TrashItem, outcome: RowOutcome)],
+        voice: (any Error) -> String
+    ) -> (receipt: String?, refusal: String?) {
+        var back: [Queries.TrashItem] = []
+        var landed = 0
+        var news: [String] = []
+        var refusals: [String] = []
+        for (item, outcome) in outcomes {
+            switch outcome {
+            case .landed(let receipt):
+                back.append(item)
+                landed += 1
+                // A row's own news rides along once: the plain "it's back"
+                // sentences are what the count already says.
+                let plain: Set<String> = [
+                    RecoveryCopy.putBackReceipt(item.kind, isGathering: item.isGathering),
+                    RecoveryCopy.putBackWhereItWas, RecoveryCopy.putBackBeside,
+                ]
+                if !plain.contains(receipt), !news.contains(receipt) { news.append(receipt) }
+            case .alreadyBack:
+                back.append(item)
+            case .refused(let error):
+                refusals.append(voice(error))
+            }
+        }
+        guard landed > 0 else {
+            guard let first = refusals.first else {
+                return (nil, RecoveryCopy.bulkPutBackAllAlreadyBack)
+            }
+            return (nil, RecoveryCopy.bulkPutBackRefused(refusals.count, reason: first))
+        }
+        guard let first = refusals.first else {
+            return (RecoveryCopy.bulkPutBackReceipt(back, news: news), nil)
+        }
+        return (nil, RecoveryCopy.bulkPutBackPartial(
+            back, news: news, refused: refusals.count, reason: first))
     }
 }
 
