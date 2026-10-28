@@ -231,7 +231,9 @@ enum MCPToolCatalog {
             Journal and Private books are never listed. A gathering shared with you — its own grant, \
             its wing's, or the open book — lists too (kind "gathering"): a saved rule that gathers \
             notes by tag or star, holding none of its own; list_notes and search take its id like a \
-            book's, and create_note writes a new note into it. A wing holding no book lists \
+            book's, create_note writes a new note into it, and at edit rename_book, archive_book, \
+            unarchive_book, delete_book and set_starred act on it as on a book (its rule stays the \
+            author's). A wing holding no book lists \
             nothing here — list_wings lists the wings themselves. Returns JSON.
             """,
         inputSchema: .object([
@@ -1417,7 +1419,9 @@ enum MCPToolCatalog {
 
     // MARK: - VX-184 U5 — VX-196 edit parity across the library (R-VX184-1)
 
-    /// The book acts' input: one book id (a gathering is read, never changed).
+    /// The book acts' input: one book id (VX-639: archive, unarchive and delete
+    /// take a gathering's id too; finish and reopen never — a gathering can't be
+    /// finished).
     private static let bookIDOnly: Value = .object([
         "type": "object",
         "properties": .object([
@@ -1433,8 +1437,9 @@ enum MCPToolCatalog {
         description: """
             Give a book a new name. A name already worn (ignoring case) by another live, unarchived \
             book or gathering that you can read is refused; one you can't read never counts, so it \
-            can't block the name. A finished or sealed book can still be renamed. Gatherings are the \
-            author's to rename. One undo for the author puts the old name back. Returns JSON.
+            can't block the name. A finished or sealed book can still be renamed, and so can a \
+            gathering (book_id takes its id; an edit grant on it or its wing). One undo for the author \
+            puts the old name back. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1445,7 +1450,7 @@ enum MCPToolCatalog {
             "required": .array(["book_id", "name"]),
             "additionalProperties": false,
         ]),
-        scopes: [.book, .wing])
+        scopes: [.book, .wing, .gathering])
 
     /// Her Finish — the finish dismisses what waits at Arrivals. VX-184 ladder
     /// round 1 (PROVISIONAL P-VX196-8 (a)): the act is the BOOK's, so it
@@ -1479,9 +1484,11 @@ enum MCPToolCatalog {
         description: """
             Archive a book, as the author's Archive does: it leaves the Bookcase and is kept, \
             never deleted, and it stops collecting until it is unarchived. Its notes stay live and \
-            stay in it. One undo for the author unarchives it. Returns JSON.
+            stay in it. A gathering archives the same way (book_id takes its id; an edit grant on it \
+            or its wing): kept, out of view, gathering nothing until it is unarchived. One undo for \
+            the author unarchives it. Returns JSON.
             """,
-        inputSchema: bookIDOnly, scopes: [.book, .wing])
+        inputSchema: bookIDOnly, scopes: [.book, .wing, .gathering])
 
     /// Her Unarchive — what was archived with it comes back with it.
     static let unarchiveBook = MCPToolDeclaration(
@@ -1489,9 +1496,10 @@ enum MCPToolCatalog {
         description: """
             Bring an archived book back to the Bookcase, as the author's Unarchive does (notes the \
             author archived together with it come back too; list_books with include_archived: \
-            true lists archived books). One undo for the author archives it again. Returns JSON.
+            true lists archived books). An archived gathering comes back the same way. One undo for \
+            the author archives it again. Returns JSON.
             """,
-        inputSchema: bookIDOnly, scopes: [.book, .wing])
+        inputSchema: bookIDOnly, scopes: [.book, .wing, .gathering])
 
     /// Her Delete Book — the Trash; the daily Journal never deletes. VX-184
     /// ladder round 1 (PROVISIONAL P-VX196-8 (a)): the act is the BOOK's, so
@@ -1503,10 +1511,12 @@ enum MCPToolCatalog {
             Delete a book, as the author's Delete Book does: it goes to the Trash for 30 days with \
             its chapters. Its notes are never deleted with it, but every note in the book leaves \
             it — including any you can't read — and a note in no other book lands in the Pool (a \
-            book that owns its notes releases all of them there). One undo for the author, or the \
-            Trash's Put back, brings the book back whole, its notes in it again. Returns JSON.
+            book that owns its notes releases all of them there). A gathering goes to the Trash the \
+            same way (book_id takes its id; an edit grant on it or its wing) — it holds no notes, so \
+            none leave it. One undo for the author, or the Trash's Put back, brings the book back \
+            whole, its notes in it again. Returns JSON.
             """,
-        inputSchema: bookIDOnly, scopes: [.book, .wing])
+        inputSchema: bookIDOnly, scopes: [.book, .wing, .gathering])
 
     /// Her Remove from This Book — "Release" on a book that owns its notes.
     static let removeNoteFromBook = MCPToolDeclaration(
@@ -1656,21 +1666,23 @@ enum MCPToolCatalog {
 
     // MARK: - VX-596 — her star on the wire
 
-    /// Her Star / Unstar (the union star — a book's two stores, the cap, intake
-    /// hearing a note's star; un-starring a non-event). A note acts under every
+    /// Her Star / Unstar (the union star — a book's two stores, intake hearing a
+    /// note's star; un-starring a non-event; no cap since VX-643, so the
+    /// description says none). A note acts under every
     /// scope (its place decided through the one `decide`), a book under a book or
-    /// wing grant — so the tool declares every scope; a gathering's own star is
-    /// the author's (the gathering sentence, P-VX196-2's posture).
+    /// wing grant, a gathering at edit on the gathering place (VX-639 — her RB-7
+    /// ruling: book parity, the rule staying hers) — so the tool declares every
+    /// scope.
     static let setStarred = MCPToolDeclaration(
         name: "set_starred", rung: .edit, title: "Star or unstar",
         description: """
-            Star or un-star a note or a book, as the author's Star does: pass note_id or book_id, \
+            Star or un-star a note, a book or a gathering, as the author's Star does: pass note_id, \
+            or book_id for a book or a gathering, \
             and starred (true stars it, false un-stars it). Starred things sit in the Starred list \
-            at the top of the author's sidebar, which holds \(Operations.starLimit) at a time — a star \
-            past that is refused (un-star one first). Starring a note is heard as when the author \
+            at the top of the author's sidebar. Starring a note is heard as when the author \
             stars it: a book whose rule collects starred notes takes it in, or holds it at its \
-            Arrivals; un-starring never takes a note out of a book. A gathering's own star is the \
-            author's. Returns JSON with changed — false when it already was as asked: nothing was \
+            Arrivals; un-starring never takes a note out of a book. Returns JSON with changed — \
+            false when it already was as asked: nothing was \
             written and there is nothing to undo. One undo for the author puts it back as it was, \
             in its place in the list.
             """,
@@ -1836,8 +1848,8 @@ enum MCPToolCatalog {
             starred; {"not": …}; null clears it), outflow (the tag paths notes written in the book \
             wear; [] clears), new_matches ("join" quietly at the end, or "wait" at Arrivals). A \
             missing tag is created in the book's wing. A finished or archived book keeps the \
-            change and collects again when the author reopens it. One undo for the author. \
-            Returns JSON with the book's collecting facts.
+            change and collects again when the author reopens it. A gathering's rule stays the \
+            author's. One undo for the author. Returns JSON with the book's collecting facts.
             """,
         inputSchema: .object([
             "type": "object",

@@ -211,11 +211,26 @@ struct HelperView: View {
             ("\u{2325}\u{2318}N", "new note inside the book you have open \u{2014} the book's own "
                 + "+ new note (an entry in a journal book; in a gathering, a note wearing what its "
                 + "rule asks)"),
+            // VX-563 (her kickoff ruling; A-648-6 — PROVISIONAL words): the
+            // registry's `alternateShortcutLabel`s for the book's step, VX-560's
+            // reading-vs-typing rule said the way its row says it.
+            ("\u{2318}\u{2191} / \u{2318}\u{2193}", "the note before / after the one you're reading, in a "
+                + "book's Outline, Read or Book \u{2014} except while you're typing in text, where "
+                + "they keep going to the start and the end"),
             ("⌘J", "today's journal entry"),
             // 13n-c U4 — VX-157 (her ratified chord, VX-157).
             ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
                 + "and tap L to step, release to go; clicking the wing's name in the "
-                + "Bookcase or Library masthead steps to the next one"),
+                + "Bookcase or Library masthead steps to the next one"
+                // VX-644 (PROVISIONAL words): the "in ‹wing›" label is the
+                // switcher's door too.
+                + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} beside New Note "
+                + "opens this switcher"),
+            // VX-632 (her #245 RB-6 ruling; PROVISIONAL words): ⌘L's two ⌥
+            // variants, VX-377's selector from the keys.
+            ("\u{2325}\u{2318}L", "move the note or book you're in to another wing \u{2014} "
+                + "type a few letters of the wing and \u{23CE}"),
+            ("\u{21E7}\u{2325}\u{2318}L", "copy the note you're in to another wing, the same way"),
             ("⌘,", "settings (voice, seams, takes options, tags)"),
             ("⌘/", "this helper"),
         ]),
@@ -285,7 +300,7 @@ struct HelperView: View {
             // StarCopy.starRow ("Star"/"Unstar"); ONLY the ⌘K act wears
             // StarCopy.verb — the helper must not join the two.
             ("right-click ▸ \(StarCopy.starRow)", "star a note or book — the Starred "
-                + "section sits at the sidebar's top (up to fifteen); \u{2318}K's "
+                + "section sits at the sidebar's top; \u{2318}K's "
                 + "\u{201C}\(StarCopy.verb)\u{201D} is the same act"),
         ]),
         // 13g batch 7 (R6-1/R6-2): the two things that MOVED. Her round-1
@@ -524,7 +539,7 @@ struct HelperView: View {
          "A shortcut to a note or a book, pinned at the sidebar's top under "
          + "\u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ "
          + "\(StarCopy.starRow), or \u{2318}K's \u{201C}\(StarCopy.verb)\u{201D} — the "
-         + "same act. Up to fifteen: stars are meant to "
+         + "same act. Stars are meant to "
          + "be the things you're in right now, not a filing system."),
         // 13g batch 3 (L8/L9): the formatting vocabulary. Storage is
         // markdown-as-content (F-1), so the words she needs are the ones the

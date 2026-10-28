@@ -722,4 +722,46 @@ struct SampleLibraryWelcomeTests {
             #expect(f.readingByName[sherlockName]?.owned == true, "…and it really did write")
         }
     }
+
+    // MARK: - VX-631 — the restore receipt's plural
+
+    /// **VX-631 (Wording · Bug).** The unit's two forms are spelled whole —
+    /// "story" + "s" read "storys". RED ON OLD: the door built the plural as
+    /// `noun + "s"` (behavioural revert: `counted` answering `one + "s"`).
+    @Test func theRestoreReceiptSpellsEachUnitsPluralWhole() {
+        #expect(SeededBookUnit.story.counted(12) == "12 stories")
+        #expect(SeededBookUnit.story.counted(1) == "1 story")
+        #expect(SeededBookUnit.story.counted(0) == "0 stories")
+        #expect(SeededBookUnit.chapter.counted(3) == "3 chapters")
+        #expect(SeededBookUnit.chapter.counted(1) == "1 chapter")
+        #expect(SeededBookReceipt.restored(book: sherlockName, unit: .story, minted: 12)
+            == "Restored \u{201C}\(sherlockName)\u{201D} \u{2014} 12 stories came back.")
+    }
+
+    /// **VX-631, through the door** — Help ▸ Restore the Sample Library with
+    /// two stories gone speaks "2 stories came back", never "storys" (the
+    /// walkers' receipt at VX-562's walks 3/trace/confirm: "12 storys").
+    @Test func restoringSherlockSaysStoriesCameBack() async throws {
+        try await withWelcomeWorld { session, db in
+            _ = await launchSeeds(session)
+            let ops = session.operations
+            let sherlockID = try #require(try await facts(db).readingByName[sherlockName]?.id)
+            let stories = try await db.read { db in
+                try Queries.assembleReading(db, readingID: sherlockID)
+                    .filter { $0.title != SampleLibrarySeeder.frontMatterTitle }
+                    .suffix(2).map(\.postID)
+            }
+            try #require(stories.count == 2)
+            for story in stories { _ = try ops.removePostFromReading(story, from: sherlockID) }
+
+            let actions = ShellActions(session: session, shell: ShellRouter())
+            actions.restoreSampleLibrary()
+            await poll { session.status.spoken != nil }
+            let spoken = try #require(session.status.spoken?.text)
+            #expect(spoken.hasPrefix(SeededBookReceipt.restored(
+                book: sherlockName, unit: .story, minted: 2)), "the receipt: \(spoken)")
+            #expect(spoken.contains("2 stories came back."))
+            #expect(!spoken.contains("storys"))
+        }
+    }
 }

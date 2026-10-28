@@ -2144,6 +2144,32 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "New Note in This Book makes a note inside the book you have open "
                 + "\u{2014} open a book first.",
             availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable }),
+        // VX-563 (her kickoff ruling — "⌘↑/⌘↓ step between notes while
+        // reading, document start/end while editing"; A-648-6): the book's
+        // key monitor is the ONE door (`.surface` — `BookView` renders it,
+        // `BookNoteStepKeyMonitor`); NO menu item and so no `shortcutLabel`
+        // (a ⌘↑ menu key would take document start from every text view —
+        // VX-560's reason); the keys are `alternateShortcutLabel`s, VX-560's
+        // record, shown in the helper. The gate is the focused pane showing a
+        // book; WHICH modes step (Outline, Read, Book — never Index) and that
+        // no text holds the keyboard is the monitor's pure rule
+        // (`BookNoteStep.direction`). The note is empty: no dispatch reaches
+        // these (the monitor exists only inside a book view) — the
+        // directly-wired idiom (`.lockLibraryNow`).
+        Capability(
+            id: .previousNoteInBook, verb: "Previous Note in This Book", scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "",
+            availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2191}"),
+        Capability(
+            id: .nextNoteInBook, verb: "Next Note in This Book", scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "",
+            availability: { ctx in ctx.focusedPaneShowsBook ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}\u{2193}"),
         Capability(
             id: .setJournalTrait, verb: CollectingCopy.journalTraitVerb, scope: .book,
             doors: [.surface],
@@ -2208,18 +2234,27 @@ nonisolated enum CapabilityRegistry {
         // move's context, never the note's (C-570-1's reading), so the two
         // identical "Move to Wing" verbs never list together. ⌘K lists these
         // rows only where they act (`WingPaletteDoors.lists` — P-2).
+        //
+        // VX-632 (her ruling at #245 RB-6, 2026-10-27: BOTH chords — "⌥⌘L Move
+        // to Wing… and ⇧⌥⌘L Copy to Wing…", the deliberate ⌥ variants of ⌘L
+        // Switch Wing): + `.menuBar` with the chord, under the SAME gate as
+        // the ⌘K row. ⌥⌘L is ONE View-menu item for the two Move acts — the
+        // note's on a note pane, the book's on a book pane (`WingChords` —
+        // never two identical items, RB-16's grammar); a grey chord SPEAKS
+        // (`OneWingChord`, W-UX-6). Collision sweep: RB-6's (the VX-620
+        // record's BATCH 4 RECORD), re-run at `EditorCommands.keyEquivalent`.
         Capability(
             id: .moveNoteToWing, verb: WingCopy.moveToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar, .palette],
-            shortcutLabel: nil, takesAccess: .native,
+            doors: [.contextMenu, .bottomBar, .palette, .menuBar],
+            shortcutLabel: "\u{2325}\u{2318}L", takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: noteWingDoor),
         Capability(
             id: .copyNoteToWing, verb: WingCopy.copyToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar, .palette],
-            shortcutLabel: nil, takesAccess: .native,
+            doors: [.contextMenu, .bottomBar, .palette, .menuBar],
+            shortcutLabel: "\u{21E7}\u{2325}\u{2318}L", takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: noteWingDoor),
         // 13i-d U5b — the book-move half (R-13id-6 item 9). The book door
@@ -2231,9 +2266,17 @@ nonisolated enum CapabilityRegistry {
         // target-less door's gate is a pane showing a book and another wing;
         // the per-target half (never the daily Journal) is the row door's own
         // `WingBookMoveDoor.drawn`, which ⌘K's listing reads too.
+        // VX-632: + `.menuBar` — the SAME View-menu item as the note's Move
+        // ("Move to Wing…", ⌥⌘L), which runs THIS act on a book pane
+        // (`WingChords`). No `shortcutLabel` of its own: the key table keeps
+        // one owner per chord (its collision pins), so ⌥⌘L is declared and
+        // wired once, on the note's act — the item's key — and reaches the
+        // book's act through that one item, by focus. On the daily Journal's
+        // pane the selector's open-time re-check speaks the op's own refusal
+        // (a menu item cannot read the book row synchronously — RB-6).
         Capability(
             id: .moveBookToWing, verb: WingCopy.moveToWingVerb, scope: .book,
-            doors: [.contextMenu, .palette],
+            doors: [.contextMenu, .palette, .menuBar],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.bookUnavailableNote,
             availability: { ctx in
@@ -2547,7 +2590,12 @@ nonisolated enum CapabilityRegistry {
         // scraps group). The book's: the settings sheet's State row (books
         // only — a gathering refuses `wrongReadingKind`, so it never renders).
         // 13n-c U3 (VX-164): the in-note indicator's LOCK popover renders
-        // the same toggle — its `.surface` door.
+        // the same toggle — its `.surface` door. VX-641 (her ruling 2026-10-28):
+        // the RENDER gate, applied where the rows render (the share doors'
+        // precedent below): the library has EVER had an MCP client, or the note
+        // or book is already marked (`MCPLibraryClients.showsPrivateRow` — the
+        // pane's one fact); the indicator's popover draws only with an approved
+        // client, so the gate holds there by construction.
         Capability(
             id: .markNotePrivate, verb: PrivateMarkCopy.rowWords, scope: .post,
             doors: [.bottomBar, .surface],
@@ -2661,6 +2709,12 @@ nonisolated enum CapabilityRegistry {
         // grey on the View menu — and the note says where another wing comes
         // from (the masthead already applies P-2 to that case: with one wing
         // the word does not cycle).
+        //
+        // VX-644 (VX-552's remainder; A-648-7): the "in ‹wing›" label — the
+        // window toolbar's beside New Note (`RootView`) and both quick-entry
+        // bars' (`QuickEntryBar`) — joins the `.surface` renderers: its press
+        // is THIS act in its window (`ShellActions.openWingSwitcher` — ⌘L's
+        // sheet; with one wing the note spoken, as ⌘L's chord does).
         Capability(
             id: .switchWing, verb: WingCopy.switchWingVerb, scope: .app,
             doors: [.menuBar, .surface],

@@ -580,11 +580,11 @@ struct ShellActions {
     }
 
     /// ONE road for every seeded book (pre-13x 5a generalized Sherlock's):
-    /// mint what is missing, open the book, speak the outcome. The noun in
-    /// the receipt is the book's ("stories" for Sherlock, "chapters" for the
-    /// encryption book).
+    /// mint what is missing, open the book, speak the outcome. The unit in
+    /// the receipt is the book's ("stories" for Sherlock, "chapters" for every
+    /// other seeded book) — both forms spelled whole (VX-631, `SeededBookReceipt`).
     private func restoreSeededBook(_ book: SampleLibrarySeeder.Book) {
-        let noun = book == .sherlock ? "story" : "chapter"
+        let unit: SeededBookUnit = book == .sherlock ? .story : .chapter
         Task { @MainActor in
             do {
                 // F2 (MINOR-8): the brain hoisted to `SeededBookRestore`
@@ -619,8 +619,7 @@ struct ShellActions {
                 case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
                     status.receipt(
-                        "Restored \u{201C}\(book.name)\u{201D} — "
-                        + "\(minted) \(minted == 1 ? noun : noun + "s") came back."
+                        SeededBookReceipt.restored(book: book.name, unit: unit, minted: minted)
                         + WelcomeDoorCopy.onTheShelfSuffix(shelf: arranged?.welcome.shelf.name))
                 }
             } catch {
@@ -951,6 +950,29 @@ struct ShellActions {
             return
         }
         shell.wingDestinationRequest = ShellRouter.WingDestinationRequest(act: act, token: UUID())
+    }
+
+    /// **VX-644 — the "in ‹wing›" label IS the wing switcher** (her word
+    /// 2026-10-28: "the wing swap is not there and it is supposed to be" —
+    /// VX-552's remainder). The label's press is ⌘L's own act in THIS window:
+    /// the same request the View menu's Switch Wing… sets (the window adopts
+    /// it and presents ⌘L's sheet — never a second picker), under the same
+    /// registry gate; with ONE wing it speaks ⌘L's ruled note exactly as the
+    /// chord does (`OneWingChord` — P-2's refusal, never a silent click).
+    func openWingSwitcher() {
+        guard isEnabled(.switchWing) else {
+            status.refuse(CapabilityRegistry.capability(.switchWing).unavailableNote)
+            return
+        }
+        shell.wingSwitcherRequested = true
+    }
+
+    /// **VX-632 — ⌥⌘L / ⇧⌥⌘L**: the chord's act for what the focused pane
+    /// shows (`WingChords.act` — the book's Move on a book pane, else the
+    /// note's), through the ⌘K rows' own road — the same gate, the same
+    /// selector request, the same spoken note where it cannot act.
+    func wingChord(_ chord: WingChords.Chord) {
+        openWingDestination(WingChords.act(chord, showing: shell.workspace.focusedSelection))
     }
 
     private func paletteAction(for id: CapabilityID) -> @MainActor () -> Void {

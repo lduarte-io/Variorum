@@ -384,6 +384,14 @@ final class EditorViewModel {
     /// placements out of another note's memory — so a click's place is
     /// reported once more, outside it.
     @ObservationIgnored var pendingCaretSeedIsHers = false
+    /// **VX-630 — a BLOCK-precise caret seed** (a book's click-over from the
+    /// Index into the Outline: her block, and the note's remembered offset in
+    /// it when it has one). Resolved at the first render, where the index is
+    /// real, through the bare arrival's own brain (`rememberedArrivalLanding`
+    /// — the block's start plus the offset, clamped); when it resolves it
+    /// REPLACES `pendingCaretSeed` and is her place. A block the index no
+    /// longer holds leaves `pendingCaretSeed` standing.
+    @ObservationIgnored var pendingCaretBlockSeed: FocusedBlock?
     @ObservationIgnored var pendingFanSeed: String?
     /// **13o U2 — the third one-shot: the FIND seed** (land-at-match, D6): a
     /// search passage's matched words, applied after the caret seed lands —
@@ -2059,6 +2067,15 @@ final class EditorViewModel {
     private func applyFocusSeeds(arrivalFact: FocusedBlock? = nil) -> Bool {
         var caretClaimed = false
         var seedWasHers = false
+        // VX-630: a block-precise seed becomes the caret seed here, the first
+        // moment the index can say where its block sits.
+        if let blockSeed = pendingCaretBlockSeed {
+            pendingCaretBlockSeed = nil
+            if let landing = rememberedArrivalLanding(fact: blockSeed) {
+                pendingCaretSeed = landing
+                pendingCaretSeedIsHers = true
+            }
+        }
         if let seed = pendingCaretSeed, let textView {
             pendingCaretSeed = nil
             seedWasHers = pendingCaretSeedIsHers

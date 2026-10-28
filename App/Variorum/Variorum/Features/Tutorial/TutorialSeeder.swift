@@ -745,8 +745,8 @@ enum TutorialSeeder {
             // 13s-b U1b (R-13s-36/38): the lesson NAMES the default
             // gathering — the one constant, the lowercase fresh default.
             "Two more, for keeping and catching. Right-click any note or book "
-            + "\u{25B8} \u{201C}Star\u{201D} pins it to the sidebar's top: up to "
-            + "fifteen, meant for what you are in right now rather than as a "
+            + "\u{25B8} \u{201C}Star\u{201D} pins it to the sidebar's top, "
+            + "meant for what you are in right now rather than as a "
             + "filing system. And \u{2318}\u{21E7}N pops the quick note, a small "
             + "floating pad that stays above your writing, also reachable from "
             + "the \u{270F}\u{FE0E} in the system menu bar while you are in "
@@ -2643,13 +2643,22 @@ enum TutorialSeeder {
             // OWED; `editTakeUnderInsurance`'s dedupe). VX-596 (her ruling
             // 2026-10-27, "let's add the star over the wire"): the new act
             // taught where its rung's acts are named (VX-197's truth-pass rule).
+            // VX-367 (the VX-648 run, batch 2 — VX-336's D6 row 14, her "should be
+            // done"): the eight acts the card covered only by its general sentence
+            // are named one by one — locking a take, renaming a commit, deleting a
+            // lens, naming a block, putting back from the tray, setting a note's
+            // date, restoring a deleted comment, taking a note out of a book — and
+            // VX-639's gatherings join the library's acts. PROVISIONAL words.
             "Edit: it can also do most of what you can do at the keyboard. In a "
-            + "note, it can change, choose, commit, archive or delete takes, restore "
-            + "a commit, make a lens the note, add blocks anywhere, divide, merge, "
-            + "move or delete blocks, and edit or delete any comment. Across the "
-            + "library, it can take a tag off a note, star, unstar, rename, archive "
-            + "or delete notes and books, finish or reopen a book, reorder a book's notes and "
-            + "chapters, and rename or delete a chapter. When it rewrites the words "
+            + "note, it can change, choose, commit, lock or unlock, archive or "
+            + "delete takes, restore a commit or rename it, make a lens the note or "
+            + "delete a lens, add blocks anywhere, divide, merge, move, name or "
+            + "delete blocks, put a deleted block or take back from the note's tray, "
+            + "set the note's date, and edit, delete or restore any comment. Across "
+            + "the library, it can take a tag off a note, take a note out of a book, "
+            + "star, unstar, rename, archive or delete notes, books and gatherings, "
+            + "finish or reopen a book, reorder a book's notes and chapters, and "
+            + "rename or delete a chapter. When it rewrites the words "
             + "of a take, Variorum first commits the words it replaces, unless the "
             + "take's latest commit already holds them, and then commits the new "
             + "words, so you can always compare and come back. Both commits stay "
@@ -2693,11 +2702,14 @@ enum TutorialSeeder {
             // to an agent by each tag"). PROVISIONAL words, her copy pass.
             // VX-596 (the ticket's wording point 5): the star clause — a rule
             // only a star satisfies takes the client's new note starred.
+            // VX-639 (her RB-7 ruling, 2026-10-28 — PROVISIONAL words, the VX-648
+            // record's bundle): with edit, a gathering's own acts; its rule stays hers.
             "A gathering grant follows your tags: a note is in reach the moment "
             + "it wears what the gathering's rule asks for, and out of reach when it "
             + "stops. With write new, a client can add a note to the gathering, and "
             + "the note wears the tags the rule needs, starred if the rule needs a "
-            + "star. And a client can move a note "
+            + "star. With edit, it can also rename, star, archive or delete the "
+            + "gathering itself, but its rule stays yours. And a client can move a note "
             + "to another wing only with edit where the note is and write new in "
             + "the wing it goes to: the note leaves its books there, its tags come "
             + "along, and \u{2325}\u{2318}Z brings it back.",
@@ -2718,7 +2730,12 @@ enum TutorialSeeder {
             "To mark a note Private, open the note \u{25BE} menu in the bar at the "
             + "bottom of the note and choose Private \u{2014} never shared with AI. "
             + "A book has the same mark in its Book Settings, and it covers every "
-            + "note in the book. Other books with date-stamped entries share like "
+            // VX-641 (her ruling 2026-10-28: "the field guide can easily say that
+            // it says private once you have a connected thing" — PROVISIONAL
+            // words, the VX-648 record's bundle).
+            + "note in the book. Both appear once an AI client has connected to "
+            + "this library, and always on anything already marked Private. "
+            + "Other books with date-stamped entries share like "
             + "any book; only the daily Journal asks. An entry made with \u{2318}J "
             + "keeps asking even if you later file it in another book.",
 

@@ -5,14 +5,14 @@
 //  Phase 13f, W4 — STARS (her sitting ruling, round 3: *"stars = a synced
 //  `setting` list + a Starred sidebar section … up to 5 notes or books,
 //  star/unstar via context menu + ⌘K, section at the sidebar's top"*; the
-//  cap is 15 since her 2026-09-18 #112(b) ruling — `Operations.starLimit`
-//  is the number's one home).
+//  cap went 5 → 15 at her #112(b) ruling and was RETIRED at VX-643, her
+//  2026-10-28 word — the section scrolls, and there is no count to meet).
 //
 //  A star is STORE state, not window state — it is synced, it outlives the
 //  session, and both windows show the same list. So unlike the Open strip
 //  (which hangs off the window's `WorkspaceModel`) this model observes the
 //  core's one `setting` row and writes through the runner. Every DECISION
-//  is the core's (`Operations.setStarred`'s order, cap and self-heal); this
+//  is the core's (`Operations.setStarred`'s order and self-heal); this
 //  holds the observed list, hands the surfaces one door value, and speaks
 //  the operations layer's real refusal (P-2).
 //
@@ -36,8 +36,9 @@ final class StarsModel {
         self.session = session
     }
 
-    /// Held: at most `Operations.starLimit` rows by construction, which is
-    /// the bounded-observation discipline satisfied by the data itself.
+    /// Held: the rows she starred in this wing — ∝ the stars she keeps, never
+    /// the corpus (VX-643's P1 check, `StarsP1Tests`; the Open list's class —
+    /// a list of her own deliberate acts, scrolling in its window of 7).
     func start() async {
         // 13i-d U5 (P-13id-U5-10): the CURRENT WING's stars — a star belongs
         // to its thing, and the thing lives in one library (§9). The shell
@@ -59,9 +60,9 @@ final class StarsModel {
         items.contains { $0.target == target }
     }
 
-    /// Star or un-star, and SPEAK whatever the operations layer answers —
-    /// the cap's refusal is the whole reason this door fires rather than
-    /// disappearing at five (P-2, and her ruling's "refuses honestly").
+    /// Star or un-star, and SPEAK whatever the operations layer answers
+    /// (P-2 — a target deleted under her press refuses in words; no count
+    /// refuses since VX-643).
     func toggle(_ target: StarTarget) async {
         let starred = isStarred(target)
         do {

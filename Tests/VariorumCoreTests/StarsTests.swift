@@ -34,27 +34,39 @@ struct StarsTests {
         }
     }
 
-    @Test func theCapRefusesTheSixthAndNamesItsLimit() throws {
+    /// **VX-643 — THE CAP IS GONE** (her word 2026-10-28: "getting rid of the 15
+    /// star cap - seems weird and the rules of a book / the AI go past it anyway
+    /// and i'm not convinced it should exist anymore"). THE DELIBERATE FLIP of
+    /// 13f W4's `theCapRefusesTheSixthAndNamesItsLimit` (5, then 15 at #112(b)):
+    /// forty stars — notes and books on the one list — all land, each APPENDED in
+    /// star order, nothing evicted, still ONE upsert-only setting row; an
+    /// un-star and re-star still moves the thing to the end. RED ON OLD: the
+    /// sixteenth star refused `starLimitReached`.
+    @Test func starringPastFifteenLandsEveryStarInStarOrder() throws {
         try withOperations { ops, db in
-            var ids: [String] = []
-            for index in 0..<Operations.starLimit {
-                let note = try ops.createPost(title: "n\(index)", profile: .generic)
-                ids.append(note.id)
-                try ops.setStarred(.post(note.id), starred: true)
+            var targets: [StarTarget] = []
+            for index in 0..<40 {
+                let target: StarTarget = index % 8 == 7
+                    ? .reading(try ops.createReading(name: "book \(index)", kind: .book).id)
+                    : .post(try ops.createPost(title: "n\(index)", profile: .generic).id)
+                #expect(throws: Never.self, "star \(index + 1) lands") {
+                    try ops.setStarred(target, starred: true)
+                }
+                targets.append(target)
             }
-            let sixth = try ops.createPost(title: "one too many", profile: .generic)
+            #expect(try db.read { try Queries.starred($0) }.map(\.target) == targets,
+                    "every star, in star TIME order — nothing evicted, nothing refused")
+            #expect(try db.read { try Queries.starredTargets($0) } == targets)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM setting WHERE key = 'starred'") == 1,
+                    "upsert-only — still one row")
 
-            #expect(throws: OperationError.starLimitReached(limit: Operations.starLimit)) {
-                try ops.setStarred(.post(sixth.id), starred: true)
-            }
-            #expect(try db.read { try Queries.starred($0) }.map(\.target.id) == ids,
-                    "the refusal leaves the five exactly as they were — nothing evicted")
-
-            // And un-starring is the road the refusal names.
-            try ops.setStarred(.post(ids[0]), starred: false)
-            try ops.setStarred(.post(sixth.id), starred: true)
-            #expect(try db.read { try Queries.starred($0) }.map(\.target.id)
-                    == Array(ids.dropFirst()) + [sixth.id])
+            // Un-star from the middle and star again: it moves to the end.
+            try ops.setStarred(targets[3], starred: false)
+            try ops.setStarred(targets[3], starred: true)
+            var moved = targets
+            moved.remove(at: 3)
+            moved.append(targets[3])
+            #expect(try db.read { try Queries.starred($0) }.map(\.target) == moved)
         }
     }
 
@@ -84,32 +96,10 @@ struct StarsTests {
         }
     }
 
-    @Test func theCapCountsOnlyWhatSheCanSee() throws {
-        // The reason the self-heal matters: a ghost star must never spend a
-        // slot she cannot free, because the refusal's only road (un-star)
-        // has no door for a row that renders nothing.
-        try withOperations { ops, db in
-            var ids: [String] = []
-            for index in 0..<Operations.starLimit {
-                let note = try ops.createPost(title: "n\(index)", profile: .generic)
-                ids.append(note.id)
-                try ops.setStarred(.post(note.id), starred: true)
-            }
-            try ops.deleteContainer(ids[2])
-
-            let next = try ops.createPost(title: "one past the cap", profile: .generic)
-            try ops.setStarred(.post(next.id), starred: true)
-            // Symbolic over the cap (it was 5 at this pin's birth, 15 since
-            // her 2026-09-18 #112(b) ruling): the live survivors in star
-            // order, then the newcomer in the freed slot.
-            var expected = ids
-            expected.remove(at: 2)
-            expected.append(next.id)
-            #expect(try db.read { try Queries.starred($0) }.map(\.target.id)
-                    == expected,
-                    "the dead star freed its slot — the cap counts the live list")
-        }
-    }
+    // (`theCapCountsOnlyWhatSheCanSee` — "a ghost star must never spend a slot
+    // she cannot free" — RETIRED at VX-643 with the cap: there are no slots.
+    // The self-heal it leaned on stays pinned by
+    // `aDeadTargetRendersNothingAndTheNextWriteHealsTheStoredList` above.)
 
     @Test func unstarringRemovesAndANoOpWritesNothing() throws {
         try withOperations { ops, db in

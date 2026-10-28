@@ -1071,6 +1071,46 @@ extension AppDatabase {
         migrator.registerMigration("v1_33_mcp_gathering_grants") { db in
             try db.execute(sql: MCPGrantSchema.v1_33DDL)
         }
+        // **VX-647 — A PLACEMENT FOUND BY ITS BLOCK, LIVE OR DEAD** (VX-648
+        // batch 1; the ruling A-648-1 and the trace are the run record
+        // `notes/plans/fixes/vx-648-launch-week.md`, "VX-647 TRACE").
+        //
+        // Her report: a note with many deleted blocks lagged 3–5 s on every
+        // new block and every delete. The open note HOLDS the tray door's
+        // badge (`Queries.trayCounts`), GRDB re-runs a held fetch on the
+        // WRITER after every commit it can see, and the badge's cascade-victim
+        // fence asks, per deleted block of the note, for a TOMBSTONED
+        // placement by `block_id` — which nothing could serve:
+        // `uq_cblock_ownership` is partial (`WHERE deleted_at IS NULL`, I2's
+        // live-only uniqueness) and `idx_cblock_order` leads with
+        // `container_id`. The plan read `SCAN cb`: the library's whole
+        // placement table, once per deleted block, on every structural write
+        // and every autosave — measured 1,071 ms per ⏎-then-⌫ round at 600
+        // carved blocks on a ~20k-block library, ~20 ms with this index,
+        // flat. The fence (and `trayBlocks`' twin) now seeks; no query text
+        // changes. Pinned by `TrayBadgeP1Tests` (red on the tree without it).
+        //
+        // **NOT a SyncSpec §12 lockstep event**, on `v1_15`/`v1_17`'s own
+        // reasoning: the Postgres mirrors carry no indexes beyond the PK by
+        // design (SyncSpec §2), so a local index changes no wire semantics, no
+        // column and no classification. The marker stays 14; an un-migrated
+        // client simply keeps the old plan. Its own commit, ahead of the
+        // pins' green (CLAUDE.md).
+        //
+        // **PARTIAL on the DEAD rows, deliberately** — the mirror image of
+        // `uq_cblock_ownership`'s `WHERE deleted_at IS NULL`. The fence's
+        // `cb.deleted_at = b.deleted_at` implies `deleted_at IS NOT NULL`, so
+        // SQLite uses it there; a LIVE-placement seek (`deleted_at IS NULL`)
+        // can never use it, so every existing plan keeps I2's own index. The
+        // first, non-partial shape `(block_id, deleted_at)` took over live
+        // seeks too and moved five pinned plans (the batch record, B1-3) — an
+        // equivalent seek, but churn this fix has no reason to cause.
+        migrator.registerMigration("v1_34_placement_by_block") { db in
+            try db.execute(sql: """
+                CREATE INDEX idx_cblock_dead_block ON container_block(block_id, deleted_at)
+                  WHERE deleted_at IS NOT NULL;
+                """)
+        }
         return migrator
     }
 }

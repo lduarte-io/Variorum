@@ -371,8 +371,10 @@ struct MCPGatheringGrantServerTests {
             let w = try world(h) { parser, _ in .and([.tag(parser.id), .star]) }
             let starBook = try h.operations.createReading(
                 name: "starred things", kind: .book, querySpec: try RuleGrammar.encode(.star), wingId: w.wing.id)
-            // Her Starred list is FULL: the born star is cap-exempt (her door's arm).
-            for index in 0..<Operations.starLimit {
+            // Fifteen stars already (the old cap's number — JUSTIFIED EDIT, VX-643:
+            // the cap is retired, so the literal keeps this pin's old premise
+            // without naming the gone `Operations.starLimit`).
+            for index in 0..<15 {
                 let filler = try h.operations.createPost(title: "filler \(index)")
                 try h.operations.setStarred(.post(filler.id), starred: true)
             }
@@ -387,8 +389,8 @@ struct MCPGatheringGrantServerTests {
             #expect(Set(answer.keys) == ["note_id", "block_ids", "tag_ids", "tags", "blocks", "starred"])
             #expect(answer["starred"] as? Bool == true && answer["tags"] as? [String] == ["parser"])
             let noteID = try #require(answer["note_id"] as? String)
-            #expect(try starredNotes(h).contains(noteID), "born starred — past a full list (cap-exempt)")
-            #expect(try starredNotes(h).count == Operations.starLimit + 1)
+            #expect(try starredNotes(h).contains(noteID), "born starred — past fifteen stars")
+            #expect(try starredNotes(h).count == 16)
             #expect(try assembled(h, w.gathering.id).contains(noteID), "the gathering shows it")
             #expect(try members(h, ofBook: starBook.id).contains(noteID),
                     "a living book collecting the star heard it, as when the author stars")

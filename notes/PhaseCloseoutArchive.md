@@ -1317,3 +1317,29 @@ record. Born VX-603/604/608/614–618, all triaged; canon 125,887/150,000. MOBIL
 **Next: the 0.10.3 release at her hand (the notes file on main is her approved text), then wave 2 (VX-601, the
 Takes/editor run — Fable-reviewed) at her kickoff.**
 
+**→ VX-601 CLOSED 2026-10-28 — RUN: TAKES & EDITOR QUICK FIXES (the record
+`notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md`; the ladder `vx-601-ladder-round1.md`; her handoff
+`notes/handoffs/vx-601-handoff.md`; PR #200, merge b3b1041aa; kickoff to merge overnight, the 0.10.4 release riding
+at her standing word).** Twelve members shipped (seven seated + rider VX-577 at her kickoff word + sitting-seated
+VX-592 · VX-248 · VX-321 · VX-337-bounded): the ⌘Z take-delete crash dead by per-pane undo histories (the launch
+gate); her ruled P-3 bend built (a re-bound live pane adopts its take); the held-press-at-the-caret dead drag fixed
+in Takes AND Write (one classic-mouse-road mechanism, the ticket's "Write is fine" falsified by revert); open fans a
+per-note session memory (P3-clean measured: seeds 1–4 µs, 25 fans below the fold ≡ 0 open); expand-all under every
+fan style; the "New branched take" door (the ⌘T half proved already-working); the bar counting the typed-in take;
+the two genuinely-lighter faces; "block i/N" through the one wording brain; per-host receipts; VX-337's fold flake
+test-fixed against the pinned R-Q21 design (the soak half stays open on the ticket). Red-on-old BY REVERT PER MEMBER
+across four batches (16 revert trees, two revert-slip forensics honestly recorded); the WHOLE Mac target
+5,486/963 zero failures; four dev-store walks (W, A, B, C — both voices where owed); ONE ladder round, ZERO findings
+against the diff (the MAJOR it surfaced is pre-existing → VX-656). Born VX-634 · 636 · 637 · 638 · 650 · 651 · 652 ·
+656, all triaged; the bundle is QUESTIONS #247. MOBILE PARITY: nothing mobile-visible. **Next: the 0.10.4 release
+(this close's rider, her word of 2026-10-28), then the new waves (VX-648, VX-440) at her kickoffs.**
+
+*(VX-510's closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at the VX-529 closeout, 2026-10-25.)*
+
+*(The outgoing VX-308 closeout paragraph rolled VERBATIM to `notes/PhaseCloseoutArchive.md` at the VX-309 closeout, 2026-10-20.)*
+
+
+*(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
+
+
+---

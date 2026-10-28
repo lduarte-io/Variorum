@@ -98,6 +98,9 @@ nonisolated enum MCPPaneCopy {
         case .running: "running \u{00B7} socket in the app container \u{00B7} serves while Variorum is open"
         case .waitingForLibrary: "on \u{00B7} starts when the library is open"
         case .failed(let reason): "couldn't start: \(reason)"
+        // VX-612 (PROVISIONAL — the VX-648 record's BATCH 2 bundle): the
+        // listener died while it ran; her switch restarts it.
+        case .stoppedByItself(let reason): "stopped by itself (\(reason)) \u{00B7} turn it off and on to restart"
         }
     }
 
@@ -619,7 +622,10 @@ nonisolated enum MCPPaneCopy {
         case "delete_lens": return n == 1 ? "deleted a lens of \(at)" : "deleted \(n) lenses of \(at)"
         // VX-184 U5 — VX-196's edit parity across the library (PROVISIONAL
         // words, P-U5-WORDS). A renamed book is logged under its NEW name.
-        case "rename_book": return "renamed a book to \(at)" + times
+        // VX-639: a gathering renamed at edit is logged as one (PROVISIONAL
+        // words, the VX-648 record's bundle).
+        case "rename_book":
+            return (kind == "gathering" ? "renamed a gathering to \(at)" : "renamed a book to \(at)") + times
         case "finish_book": return "finished \(at)" + times
         case "reopen_book": return "reopened \(at)" + times
         case "archive_book": return "archived \(at)" + times
@@ -1617,6 +1623,17 @@ nonisolated enum MCPReceiptCopy {
         case .unstar:
             return n == 1 ? "unstarred \(quoted(receipts[0].targetTitle))"
                 : "unstarred \(quoted(receipts[0].targetTitle)) \(n) times"
+        // VX-639 — a gathering's own acts at edit (her RB-7 ruling: book
+        // parity, the rule staying hers), said as a gathering's. PROVISIONAL
+        // words, the VX-648 record's bundle (her copy pass).
+        case .gatheringName:
+            return n == 1 ? "renamed the gathering \(quoted(receipts[0].detail))" : "renamed \(n) gatherings"
+        case .gatheringArchive:
+            return n == 1 ? "archived \(quoted(receipts[0].targetTitle))" : "archived \(n) gatherings"
+        case .gatheringUnarchive:
+            return n == 1 ? "unarchived \(quoted(receipts[0].targetTitle))" : "unarchived \(n) gatherings"
+        case .gatheringDelete:
+            return n == 1 ? "deleted the gathering \(quoted(receipts[0].targetTitle))" : "deleted \(n) gatherings"
         }
     }
 

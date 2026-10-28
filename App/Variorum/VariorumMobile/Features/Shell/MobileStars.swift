@@ -6,10 +6,9 @@
 //  "CROSS — act + starred face, exact shape at the batch"). The storage
 //  mechanism is the Mac's own, found in code and reused THROUGH CORE
 //  (13f W4, her ruling: "stars = a synced `setting` list … up to 5
-//  notes or books"; the cap is 15 since her 2026-09-18 #112(b) ruling —
-//  `Operations.starLimit` is the number's one home): `Operations.
-//  setStarred` owns the append-order list, the honest cap, and the
-//  self-heal; `Queries.starred` is the
+//  notes or books"; the cap went to 15 at her #112(b) ruling and was
+//  RETIRED at VX-643, her 2026-10-28 word): `Operations.setStarred` owns
+//  the append-order list and the self-heal; `Queries.starred` is the
 //  ONE read rule (live targets only). Nothing star-shaped is decided
 //  here — this model observes, toggles, and speaks the op's refusal in
 //  phone words.
@@ -40,7 +39,7 @@ final class MobileStarsModel {
     @ObservationIgnored private let session: AppSession
 
     /// The starred rows, star order, live targets only (the core read
-    /// rule; at most `Operations.starLimit` by construction).
+    /// rule; ∝ the stars she keeps — VX-643's P1 check).
     private(set) var items: [Queries.StarredItem] = []
     /// Note stars' display names through the ONE brain (keyed by
     /// target id; books render their own stored name).
@@ -48,7 +47,7 @@ final class MobileStarsModel {
     private(set) var lastError: String?
     /// WHERE the last refusal's door fired (parity D2 — the routed C3
     /// R1-7 mechanism: `lastError` is one field on the one shared model
-    /// and BOTH tab roots rendered it, so a cap refusal fired from the
+    /// and BOTH tab roots rendered it, so a refusal fired from the
     /// Library also sat waiting at the shelf's bottom, and vice versa,
     /// until some later toggle happened to succeed). A door refusal now
     /// carries its origin and renders THERE only (`error(on:)`); a
@@ -111,21 +110,10 @@ final class MobileStarsModel {
         starred ? "Unstar" : "Star"
     }
 
-    /// The cap's refusal in PHONE words: the road it names is the
-    /// phone's own starred list (the Mac copy names the sidebar, which
-    /// does not exist here).
-    ///
-    /// **RE-POINTED AT BATCH 10, and it is a bug-class fix rather than a
-    /// re-wording.** It said *"in the starred list at the top of the
-    /// shelf"* — and this batch retired that list from the shelf at her
-    /// instruction (*"I don't like where it appears above the shelf"*), so
-    /// the sentence would have sent her to a place that no longer exists.
-    /// The name now comes from `pageName`, the one symbol the tab door and
-    /// the path line also read, so a re-wording can never strand it again.
-    nonisolated static func capRefusal(limit: Int) -> String {
-        "You can star \(limit) things at a time — un-star one in \(pageName), "
-            + "and this can take its place."
-    }
+    // (`capRefusal(limit:)` — the cap's refusal in phone words, "You can star
+    // N things at a time — un-star one in Starred…" — RETIRED at VX-643 with
+    // the cap and `starLimitReached`: no star refuses for a count, on either
+    // platform.)
 
     /// Where a starred row navigates — the phone's route vocabulary.
     nonisolated static func route(for target: StarTarget) -> MobileRoute {
@@ -137,9 +125,8 @@ final class MobileStarsModel {
 
     // MARK: - Observation
 
-    /// Held: at most `starLimit` rows by construction (the bounded-
-    /// observation discipline satisfied by the data itself — the Mac
-    /// StarsModel's own note).
+    /// Held: the rows she starred — ∝ the stars she keeps, never the corpus
+    /// (VX-643's P1 check, `StarsP1Tests`; the Mac StarsModel's own note).
     func start() async {
         do {
             for try await value in session.database.observe({ db in
@@ -167,7 +154,7 @@ final class MobileStarsModel {
 
     /// Note stars resolve their display name through the ONE brain
     /// (title → entry day → created day — the C2 one-chain doctrine).
-    /// Bounded by the cap: at most `Operations.starLimit` point-reads.
+    /// ∝ the stars: one point-read per starred note.
     private func resolveNames() async {
         let postIDs = items.filter { $0.target.kind == .post }.map(\.target.id)
         guard !postIDs.isEmpty else {
@@ -203,10 +190,10 @@ final class MobileStarsModel {
         return item.name ?? ""
     }
 
-    /// Star or un-star, and SPEAK what the operations layer answers —
-    /// the cap refuses honestly rather than evicting the oldest star
-    /// (the op's own rule; P-2's fire-and-refuse). The refusal speaks
-    /// at ITS door's root and clears after a beat (the D2 routed item).
+    /// Star or un-star, and SPEAK what the operations layer answers (P-2's
+    /// fire-and-refuse — a target deleted under her press; no count refuses
+    /// since VX-643). The refusal speaks at ITS door's root and clears after
+    /// a beat (the D2 routed item).
     func toggle(_ target: StarTarget, from home: DoorHome) async {
         let starred = isStarred(target)
         do {
@@ -215,11 +202,7 @@ final class MobileStarsModel {
             }
             clearError()
         } catch let error as OperationError {
-            if case .starLimitReached(let limit) = error {
-                speak(Self.capRefusal(limit: limit), at: home)
-            } else {
-                speak("Refused: \(error)", at: home)
-            }
+            speak("Refused: \(error)", at: home)
         } catch {
             speak(String(describing: error), at: home)
         }

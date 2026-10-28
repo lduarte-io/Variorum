@@ -142,11 +142,15 @@ struct CollectSetsTheStarTests {
         }
     }
 
-    /// RED ON OLD. Her ruling: the 15-star limit never blocks the collect —
-    /// the note always joins. Her own Star door still meets the cap.
-    @Test func theCollectsStarIsCapExempt() throws {
+    /// RED ON OLD (VX-249). Her ruling: the star limit never blocks the
+    /// collect — the note always joins. **VX-643 — THE DELIBERATE FLIP of the
+    /// tail:** "Her own Star door still meets the cap" goes with the cap (her
+    /// 2026-10-28 word; VX-251's flag — "it's weird for the system to be able
+    /// to do something a user can't" — answered): her own Star door stars past
+    /// fifteen too. RED ON OLD (the tail): `starLimitReached`.
+    @Test func theCollectsStarAndHerOwnBothPassFifteen() throws {
         try withOperations { ops, db in
-            for index in 0..<Operations.starLimit {
+            for index in 0..<15 {
                 let other = try ops.createPost(title: "starred \(index)")
                 try ops.setStarred(.post(other.id), starred: true)
             }
@@ -155,13 +159,15 @@ struct CollectSetsTheStarTests {
 
             let result = try ops.collectPostIntoSmartReading(note.id, into: g.id)
             #expect(result.starred)
-            #expect(try starredNotes(db).count == Operations.starLimit + 1)
+            #expect(try starredNotes(db).count == 16)
             #expect(try shown(db, g.id).contains(note.id))
 
             let mine = try ops.createPost(title: "by hand")
-            #expect(throws: OperationError.starLimitReached(limit: Operations.starLimit)) {
+            #expect(throws: Never.self, "her own door: no cap either") {
                 try ops.setStarred(.post(mine.id), starred: true)
             }
+            #expect(try starredNotes(db).count == 17)
+            #expect(try shown(db, g.id).contains(mine.id), "and the ★ gathering shows it")
         }
     }
 

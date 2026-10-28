@@ -100,6 +100,10 @@ struct ShelfView: View {
     /// entry's mount stands down rather than ask for the caret (W-U1a-1).
     /// Handed down by the shell that owns the tour (`RootView`).
     var tourRunning = false
+    /// **VX-644** — the quick-entry bar's "in ‹wing›" press: ⌘L's own act in
+    /// this window (`ShellActions.openWingSwitcher`), handed down by the
+    /// composition root. nil (harness mounts): the label stays a plain label.
+    var onSwitchWing: (() -> Void)? = nil
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -1003,7 +1007,9 @@ struct ShelfView: View {
         // VX-552 (the VX-439 run): the wing a capture here lands in, beside it.
         QuickEntryBar(
             session: session, onOpen: onOpen, autofocus: true, standsDown: tourRunning,
-            wingName: wings?.currentName ?? WingWords.home)
+            wingName: wings?.currentName ?? WingWords.home,
+            // VX-644: the label is the wing switcher's door.
+            onWingLabel: onSwitchWing)
     }
 
     /// The ⌘K hint at the window's foot — and, at its trailing end, the

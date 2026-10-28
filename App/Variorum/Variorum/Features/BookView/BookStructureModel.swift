@@ -180,6 +180,18 @@ final class BookStructureModel {
         Self.grouped(entries: entries, sections: sections, assignments: assignments)
     }
 
+    /// **VX-645 (A-648-8) — the chapter a note stands in, as `grouped` draws
+    /// it**: its assigned chapter while chapters are active and that chapter is
+    /// live, else nil (unfiled, a flat book, a gathering's tag-path heading).
+    /// O(chapters) — the navigator's discrete pages (Read ▸ Pages, the spread)
+    /// name their viewed note's chapter by it without building the rows.
+    func chapterID(of postID: String) -> String? {
+        guard chaptersActive, let sectionID = assignments[postID],
+              sections.contains(where: { $0.id == sectionID })
+        else { return nil }
+        return sectionID
+    }
+
     // MARK: - Chapter CRUD (R28; movable chapters — sitting 2)
 
     func createChapter(named name: String) async {

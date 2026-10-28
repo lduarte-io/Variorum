@@ -304,6 +304,21 @@ final class BookSettingsModel {
     /// 13n-b U2 (R-13nb-4): the book's Private mark (read with the rest;
     /// kept off the `Reading` model so no stale model can ever clear it).
     private(set) var isPrivate = false
+    /// VX-641: the library has EVER had an MCP client (`MCPLibraryClients`,
+    /// the pane's own fact), read with the mark.
+    private(set) var libraryHasHadClient = false
+    /// **VX-641 — the Private row shows** once the library has had a client,
+    /// and always while the book is marked (her ruling 2026-10-28; the mark
+    /// syncs, clients don't). LATCHED for the sheet's life (PROVISIONAL — the
+    /// VX-648 record's bundle): clearing a mark in a library that never had a
+    /// client keeps the row where her cursor is until the sheet closes.
+    private(set) var showsPrivateRow = false
+
+    private func notePrivateRowShown() {
+        if MCPLibraryClients.showsPrivateRow(everHadClient: libraryHasHadClient, marked: isPrivate) {
+            showsPrivateRow = true
+        }
+    }
     /// 13n-c U3 — who reaches this book now, and how far (the grant row —
     /// `Queries.mcpBookReach`, the ONE rule's why). Held while the sheet is up
     /// (`watchReach`) so a grant made from the row's own Share… shows at once.
@@ -326,13 +341,15 @@ final class BookSettingsModel {
         let ids = Array(RuleGrammar.tagIDs(of: RuleGrammar.decode(reading.querySpec)))
             + reading.autoTagIDs
         let readingID = readingID
-        guard let (paths, hides, marked) = try? await session.database.read({ db in
+        guard let (paths, hides, marked, hadClient) = try? await session.database.read({ db in
             (try Queries.tagPaths(db, ids: ids), try Queries.hideOwnedDefault(db),
-             try Queries.isBookPrivate(db, readingID: readingID))
+             try Queries.isBookPrivate(db, readingID: readingID), try Queries.mcpLibraryHasHadClient(db))
         }) else { return }
         self.paths = paths
         hideOwnedDefault = hides
         isPrivate = marked
+        libraryHasHadClient = hadClient
+        notePrivateRowShown()
     }
 
     /// **13n-c U3 — the grant row's held read** (reading + the grants store
@@ -386,6 +403,7 @@ final class BookSettingsModel {
         do {
             let wrote = try await session.runner.run { try $0.setBookPrivate(id, on) }
             isPrivate = on
+            notePrivateRowShown()
             if wrote {
                 session.status.receipt(on ? PrivateMarkCopy.markedBook(name) : PrivateMarkCopy.clearedBook(name))
             }
@@ -748,8 +766,10 @@ struct BookSettingsSheet: View {
                 act: own, readingID: reading.id)
         }
         // 13n-b U2 — PRIVATE (R-13nb-4): BOOKS only — a gathering refuses
-        // the mark (`wrongReadingKind`), so it never renders (P-2).
-        if reading.kind == .book {
+        // the mark (`wrongReadingKind`), so it never renders (P-2). VX-641: and
+        // only once the library has had an MCP client, or while the book is
+        // marked (`model.showsPrivateRow` — the pane's one fact).
+        if reading.kind == .book, model.showsPrivateRow {
             Toggle(tokens.chromeLabel(CapabilityRegistry.capability(.markBookPrivate).verb), isOn: Binding(
                 get: { model.isPrivate },
                 set: { on in Task { await model.setPrivate(on, name: reading.name) } }))

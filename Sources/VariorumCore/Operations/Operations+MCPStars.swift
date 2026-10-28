@@ -8,9 +8,9 @@ import GRDB
 // not in the hers-alone trio (Private · Seal · Own — R-VX184-2), so the EDIT
 // rung stars and un-stars a note or a book as she does at the keyboard
 // (R-VX184-1). Like every act the door takes, an ORDINARY OPERATION: HER star
-// write (`writeStar` — the union star's two stores, the cap of fifteen refusing
-// in her words, the self-heal, intake hearing a note's star; un-starring a
-// non-event), run inside ONE transaction behind the caller's `WriteGuard`, plus
+// write (`writeStar` — the union star's two stores, the self-heal, intake
+// hearing a note's star; un-starring a non-event; no cap since VX-643), run
+// inside ONE transaction behind the caller's `WriteGuard`, plus
 // the one thing her door deliberately lacks and every MCP write carries
 // (P-13nb-U2-4): a client-named structural-undo entry. Her own star door
 // registers none ("trivially re-toggled" — `UndoStack`'s header), so the MCP
@@ -26,10 +26,10 @@ import GRDB
 // returns the row to its place, not to the end. The halves are not applying acts
 // (`writeStar(heard: false)` — `apply_tag`'s replay doctrine: an exact revival
 // seats nothing; a seat the act's star caused stays, as an un-star never evicts).
-// A half that would star past the cap REFUSES in her words and keeps its entry
-// (resolvable: un-star one, then ⌥⌘Z) — `starLimitReached`, through the wire's
-// one refusal chain and her `OpsRefusalCopy`. A book star put back writes both
-// stores (the union star's normal form — a column-only book comes back listed).
+// (RB-8's third clause — a half re-adding a star past the cap refused and kept its
+// entry — went with the cap at VX-643: a half that re-adds a star now simply
+// lands at its place.) A book star put back writes both stores (the union star's
+// normal form — a column-only book comes back listed).
 //
 // These ops decide nothing about clients — who may act is the server's per-call
 // rule (`MCPWriteTools+Star`).
@@ -46,8 +46,8 @@ extension Operations {
     /// **`set_starred`'s act — her star write**: the caller's guard FIRST
     /// inside the act's own transaction (the server's decision, re-made on the
     /// act's own facts, any once grant stamped there — AF-10 (a)), then the
-    /// star as asked through `writeStar` (her cap refusing `starLimitReached`,
-    /// intake hearing a note's star). A target that already reads as asked —
+    /// star as asked through `writeStar` (intake hearing a note's star). A
+    /// target that already reads as asked —
     /// starred by EITHER store of the union, or not starred at all — writes
     /// nothing (`changed: false`, no entry). ONE entry, `undoLabel`, whose
     /// halves restore the star compare-and-set, at its place (see the file's
@@ -63,7 +63,7 @@ extension Operations {
             let isStarred = try Queries.starred(db).contains { $0.target == target }
             guard isStarred != starred else { return nil }
             let place = try Queries.starredListItems(db).map(\.target).firstIndex(of: target)
-            try writeStar(db, target, starred: starred, enforcingCap: true)
+            try writeStar(db, target, starred: starred)
             return .some(place)
         }
         guard case .some(let place) = landed else {
@@ -92,11 +92,11 @@ extension Operations {
             guard isStarred != starred else { return false }
             if starred {
                 guard try starTargetIsLive(db, target) else { return false }
-                try writeStar(db, target, starred: true, enforcingCap: true, at: place.value, heard: false)
+                try writeStar(db, target, starred: true, at: place.value, heard: false)
             } else {
                 let stood = try Queries.starredListItems(db).map(\.target).firstIndex(of: target)
                 place.setValue(stood)
-                try writeStar(db, target, starred: false, enforcingCap: true, heard: false)
+                try writeStar(db, target, starred: false, heard: false)
             }
             return true
         }

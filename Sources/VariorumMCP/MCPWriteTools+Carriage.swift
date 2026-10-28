@@ -224,6 +224,16 @@ extension MCPWriteTools {
             }
 
         case .setBookRule(let bookID, let write):
+            // VX-639 (A-648-5, PROVISIONAL — the VX-648 record): a gathering's
+            // RULE stays the author's — a client editing the rule of a gathering
+            // it holds a grant on would widen its own reach. One it can READ hears
+            // the gathering sentence, which says so (P-VX196-2's posture: never
+            // "doesn't exist" for what `list_books` lists); one it can't is the
+            // one shape, through `into` as before.
+            if let gathering = try readableGathering(bookID, clientName: clientName) {
+                try log(clientName, job.tool, "book", bookID, gathering, allowed: false)
+                return .failure(Refused(outcome: Outcome(text: Self.gatheringWords(gathering), isError: true)))
+            }
             return try into(.book(bookID), job: job, clientName: clientName, spendsAfter: false) { _ in
                 let result: Operations.MCPBookRuleResult
                 do {

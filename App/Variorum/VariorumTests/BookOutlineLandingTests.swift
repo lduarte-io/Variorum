@@ -1477,21 +1477,29 @@ extension BookOutlineLandingTests {
                         && abs(pinAfter.height - pinAtRest.height) <= 0.5,
                     "the pinned line stands still while the page scrolls: \(pinAtRest) → \(pinAfter)")
 
-            // Leaving the Outline lets go: no page, nothing viewed — and the
-            // chapter wash goes with it (the spread's navigator keeps its own
-            // marks, the shipped rule).
+            // Leaving the Outline lets go: no page, nothing viewed in the
+            // Outline's slot. **DELIBERATE FLIP (VX-645, A-648-8):** the
+            // spread now has a viewed pair of its own — its LEFT page (the
+            // spread seeds from the focus: the caret's story, chapter 1) — so
+            // the wash moves to THAT chapter rather than leaving the
+            // navigator; the Outline's chapter 3 wears none. The spread's NOTE
+            // markers stay the shipped rule's (both pages and the focus).
             structure.mode = .spread
             await settle(window, hosting, watchdog: watchdog, until: {
                 model.viewedOutlinePair == .nothingViewed
                     && BookOutlineGeometry.navigatorChapterMarks[sectionIDs[3]] == false
+                    && BookOutlineGeometry.navigatorChapterMarks[sectionIDs[1]] == true
             }, maxTurns: 40)
             #expect(model.viewedOutlinePair == .nothingViewed, "the Outline left, and what it showed with it")
+            #expect(model.leftPage?.postID == story, "the premise: the spread seeded from the focus")
+            #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[1]] == true,
+                    "VX-645: in the spread the wash is the LEFT page's chapter")
             #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[3]] == false,
-                    "no viewed-chapter wash outside the Outline")
+                    "…never the chapter the Outline was showing")
             #expect(BookOutlineGeometry.navigatorNoteMarks[target] == BookNavigatorMark.note(
                         mode: .spread, postID: target, focusedPostID: model.focusedPostID,
                         viewedPostID: nil, spreadPostIDs: model.spreadEntries.map(\.postID)),
-                    "the spread's marks are the shipped rule's")
+                    "the spread's note markers are the shipped rule's")
         }
     }
 
@@ -2156,6 +2164,303 @@ extension BookOutlineLandingTests {
             await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 12)
             #expect(model.viewedOutlinePair == expected,
                     "and it stands, turns later, while she has not scrolled")
+        }
+    }
+}
+
+// MARK: - VX-645 / VX-646 (the VX-648 run, batch 4) — the navigator beyond Outline
+
+extension BookOutlineLandingTests {
+    /// The navigator's list: the scroll view standing furthest LEFT in the
+    /// window (the book's leading column), whatever its document's height.
+    private func navigatorScroll(in view: NSView) -> NSScrollView? {
+        var found: [NSScrollView] = []
+        func walk(_ v: NSView) {
+            if let scroll = v as? NSScrollView { found.append(scroll) }
+            for sub in v.subviews { walk(sub) }
+        }
+        walk(view)
+        return found.min {
+            $0.convert($0.bounds, to: nil).minX < $1.convert($1.bounds, to: nil).minX
+        }
+    }
+
+    private func flowLanded(_ anchor: String) -> Bool {
+        ReadingFlowGeometry.trace.contains { $0.hasPrefix("\(anchor) DONE:") }
+    }
+
+    /// **VX-645 — Read ▸ Scroll follows what its page shows, through VX-562's
+    /// own brain.** At rest the flow's title holds the page: nothing viewed.
+    /// A landing's target is adopted AT ITS START (R-562-A) — the slot, the
+    /// navigator's note marker and its chapter's fill move at the click — and
+    /// stands once it has landed. ⌘↑/⌘↓'s seam steps from it (A-648-6 (2):
+    /// the interim standing-anchor source replaced). Her scroll past the
+    /// target hands the highlight to THE RULE (a later note, the mark
+    /// following); the bottom of the book clamps to its last note (R-562-D,
+    /// over the flow's reachable travel); leaving Read empties the slot.
+    ///
+    /// New capability — red on old by construction (no flow slot existed;
+    /// in Read the navigator marked the FOCUSED note).
+    @Test func readScrollFollowsWhatItsPageShows() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, sectionIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .read
+            structure.readForm = .flow
+            ReadingFlowGeometry.forgetAnchorTops()
+            ReadingFlowGeometry.trace = []
+            BookOutlineGeometry.resetNavigator()
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: {
+                ReadingFlowGeometry.anchorTops[postIDs[0]] != nil
+            }, maxTurns: 120)
+            try #require(ReadingFlowGeometry.anchorTops[postIDs[0]] != nil, "the flow drew its first note")
+            #expect(model.viewedFlowPair == .nothingViewed, "at rest the flow's title holds the page")
+
+            // A landing: the target is the follower's from its START.
+            let target = postIDs[13]
+            let anchor = FlowRows.anchor(target)
+            let adopted = BookOutlineViewed.Pair(sectionID: sectionIDs[4], postID: target)
+            model.requestReveal(target)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                ReadingFlowGeometry.trace.contains("\(anchor) LAND")
+            }, maxTurns: 40)
+            try #require(ReadingFlowGeometry.trace.contains("\(anchor) LAND"), "the flow's landing started")
+            #expect(model.viewedFlowPair == adopted, "adopted at the click: \(model.viewedFlowPair)")
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.navigatorNoteMarks[target] == true
+                    && BookOutlineGeometry.navigatorChapterMarks[sectionIDs[4]] == true
+            }, maxTurns: 40)
+            #expect(BookOutlineGeometry.navigatorNoteMarks[target] == true, "the navigator marks it")
+            #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[4]] == true, "and fills its chapter")
+            await settle(window, hosting, watchdog: watchdog, until: { flowLanded(anchor) }, maxTurns: 300)
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 8)
+            print("VX-645 FLOW:", ReadingFlowGeometry.trace.suffix(3), "pair=\(model.viewedFlowPair)")
+            #expect(model.viewedFlowPair == adopted, "landed, the target stands: \(model.viewedFlowPair)")
+
+            // ⌘↓'s seam steps from the note the flow shows (A-648-6 (2)).
+            let order = BookNoteStepDoor.order(structure: structure, entries: model.entries)
+            let next = try #require(order.firstIndex(of: target).map { order[$0 + 1] })
+            #expect(BookNoteStepDoor.step(.next, model: model, structure: structure, status: session.status))
+            #expect(model.standingAnchorPostID == next, "⌘↓ lands the note after the one shown")
+            await settle(window, hosting, watchdog: watchdog, until: {
+                flowLanded(FlowRows.anchor(next)) || flowLanded(FlowRows.landingAnchor(
+                    for: next, grouped: structure.grouped(entries: model.entries)))
+            }, maxTurns: 300)
+            #expect(model.viewedFlowPair.postID == next, "and the flow shows it: \(model.viewedFlowPair)")
+
+            // Her scroll past it: THE RULE — a later note, the mark following.
+            let moved = try await scrollPage(window, hosting, watchdog: watchdog, by: 1_500)
+            try #require(moved > 1_000, "the harness premise: the page moved (\(moved) pt)")
+            let rows = FlowRows.viewedRows(grouped: structure.grouped(entries: model.entries))
+            let after = model.viewedFlowPair
+            let place = { (id: String?) in id.flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0 }
+            print("VX-645 FLOW SCROLL: moved \(moved) pair=\(after)")
+            #expect(place(after.postID) > place(next), "further down, a later note: \(after)")
+            if let shown = after.postID {
+                await settle(window, hosting, watchdog: watchdog, until: {
+                    BookOutlineGeometry.navigatorNoteMarks[shown] == true
+                }, maxTurns: 20)
+                #expect(BookOutlineGeometry.navigatorNoteMarks[shown] == true, "the mark follows the page")
+                #expect(BookOutlineGeometry.navigatorNoteMarks[next] == false, "and left the stepped-to note")
+            }
+
+            // The bottom of the book: its last note (the clamp).
+            let scroll = try #require(outlineScroll(in: hosting), "the flow's scroll")
+            let clip = scroll.contentView
+            let end = (scroll.documentView?.frame.height ?? 0) - clip.bounds.height
+            clip.scroll(to: NSPoint(x: 0, y: end))
+            scroll.reflectScrolledClipView(clip)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.viewedFlowPair.postID == postIDs[29]
+            }, maxTurns: 40)
+            print("VX-645 FLOW END: pair=\(model.viewedFlowPair) end=\(end)")
+            #expect(model.viewedFlowPair == .init(sectionID: sectionIDs[9], postID: postIDs[29]),
+                    "at the bottom, the book's last note: \(model.viewedFlowPair)")
+
+            // Leaving Read empties the flow's slot.
+            structure.mode = .outline
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.viewedFlowPair == .nothingViewed
+            }, maxTurns: 40)
+            #expect(model.viewedFlowPair == .nothingViewed, "the flow left, and what it showed with it")
+        }
+    }
+
+    /// **VX-645 (A-648-8) — the DISCRETE pages mark what they show.** The
+    /// spread: its LEFT page's chapter wears the fill (one viewed chapter —
+    /// the Outline's precedent), both pages keep their note markers. Read ▸
+    /// Pages: the note the reader shows and its chapter — moving with the
+    /// reader's own report, never with the focus.
+    ///
+    /// New capability — red on old by construction (no chapter mark outside
+    /// Outline; Read marked the focused note).
+    @Test func theDiscretePagesMarkTheirShownNoteAndItsChapter() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, sectionIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .spread
+            BookOutlineGeometry.resetNavigator()
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.navigatorNoteMarks[postIDs[0]] != nil
+            }, maxTurns: 60)
+
+            // THE SPREAD, straddling two chapters: 14 (chapter 4) | 15 (chapter 5).
+            model.openSpread(leftIndex: 14)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.navigatorChapterMarks[sectionIDs[4]] == true
+            }, maxTurns: 40)
+            #expect(model.leftPage?.postID == postIDs[14])
+            #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[4]] == true,
+                    "the LEFT page's chapter wears the fill")
+            #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[5]] == false,
+                    "one viewed chapter — never the right page's")
+            #expect(BookOutlineGeometry.navigatorNoteMarks[postIDs[14]] == true
+                        && BookOutlineGeometry.navigatorNoteMarks[postIDs[15]] == true,
+                    "both pages keep their note markers (the shipped rule)")
+
+            // READ ▸ PAGES: the reader's shown note and its chapter.
+            // JUSTIFIED EDIT (w2a's red — the pin's premise, never the arm):
+            // the first cut set the focus in the SAME turn as the mode switch,
+            // before the reader existed. The navigator row's `.turnThePages`
+            // act reaches the reader through `PagedReadView`'s
+            // `.onChange(of: focusedPostID)` — a reader ON SCREEN — and a
+            // fresh reader's own arrival seed cannot land it: its `.task` seeds
+            // from the focus BEFORE `adopt` gives the model its entries, so
+            // the seed finds no note and the reader opens at the book's first
+            // page (pre-existing since 13f W21 — the record's FINDING, ticket
+            // owed). So the reader mounts and reports first, then the row's act.
+            structure.mode = .read
+            structure.readForm = .pages
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.pagedAnchorPostID != nil
+            }, maxTurns: 120)
+            try #require(model.pagedAnchorPostID != nil, "the premise: the reader is on screen and reported")
+            model.focus(postIDs[20])   // the navigator row's road: the reader turns to it
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.pagedAnchorPostID == postIDs[20]
+                    && BookOutlineGeometry.navigatorNoteMarks[postIDs[20]] == true
+            }, maxTurns: 120)
+            #expect(model.pagedAnchorPostID == postIDs[20], "the premise: the reader shows note 20")
+            #expect(BookOutlineGeometry.navigatorNoteMarks[postIDs[20]] == true, "its note is marked")
+            #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[6]] == true, "and its chapter filled")
+            // The reader turns on by itself (its report), the focus unmoved.
+            model.notePagedAnchor(postIDs[22])
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.navigatorNoteMarks[postIDs[22]] == true
+            }, maxTurns: 20)
+            #expect(model.focusedPostID == postIDs[20], "the premise: the focus stayed on 20")
+            #expect(BookOutlineGeometry.navigatorNoteMarks[postIDs[22]] == true, "the mark follows the page shown")
+            #expect(BookOutlineGeometry.navigatorNoteMarks[postIDs[20]] == false, "never the focused note")
+            #expect(BookOutlineGeometry.navigatorChapterMarks[sectionIDs[7]] == true
+                        && BookOutlineGeometry.navigatorChapterMarks[sectionIDs[6]] == false,
+                    "the fill moved to the shown note's chapter")
+        }
+    }
+
+    /// **VX-646 — the navigator keeps its highlighted row in view** (the Open
+    /// list's idiom, superseding P-562-1's "no auto-scroll" at her word). A
+    /// book whose navigator outgrows its list: a landing far down makes a
+    /// row far below the list's foot the highlighted one — the list follows
+    /// and shows it. Her HAND scroll of the list (the phase seam — the road
+    /// `onScrollPhaseChange` takes; the host posts no wheel events) pauses the
+    /// follow: she scrolls the list away and it stays; a RESIZE never pulls it
+    /// back. The next highlighted row is the act — the list follows again.
+    ///
+    /// New capability — red on old by construction (the list never moved; no
+    /// follow existed). P-562-1 was encoded by no pin, so nothing flips.
+    @Test func theNavigatorKeepsItsHighlightedRowInView() async throws {
+        try await withLandingBook(posts: 45, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.resetNavigator()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: {
+                anchorTop(BookOutlineRows.Row.noteAnchor(postIDs[0])) != nil
+                    && BookOutlineGeometry.navigatorNoteRows[postIDs[44]] != nil
+            }, maxTurns: 120)
+            let list = try #require(navigatorScroll(in: hosting), "the navigator's list")
+            let listHeight = list.contentView.bounds.height
+            let content = list.documentView?.frame.height ?? 0
+            try #require(content > listHeight + 400,
+                         "the premise: the navigator outgrows its list (\(content) in \(listHeight))")
+
+            @MainActor func follows(_ postID: String) -> BookNavigatorFollowState? {
+                guard let state = BookOutlineGeometry.navigatorFollows[readingID],
+                      state.rowID == BookNavigatorFollow.noteRowID(postID) else { return nil }
+                return state
+            }
+
+            // A landing far down: the highlighted row, far below the list's foot, comes into view.
+            model.requestReveal(postIDs[40])
+            await settle(window, hosting, watchdog: watchdog, until: {
+                follows(postIDs[40])?.rowIsInView == true
+            }, maxTurns: 120)
+            let far = follows(postIDs[40])
+            print("VX-646 FOLLOW:", String(describing: far), "list offset=\(list.contentView.bounds.origin.y)")
+            #expect(far?.following == true, "the list follows its highlighted row")
+            #expect(far?.rowIsInView == true, "RED ON OLD: note 40's row is in view: \(String(describing: far))")
+            #expect(list.contentView.bounds.origin.y > 200, "the list itself moved down to it")
+
+            // Her hand on the list: the follow pauses, and the list stays where she puts it.
+            let seam = try #require(BookOutlineGeometry.navigatorPhaseSeams[readingID], "the phase seam")
+            seam(.interacting)
+            list.contentView.scroll(to: .zero)
+            list.reflectScrolledClipView(list.contentView)
+            seam(.idle)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                follows(postIDs[40])?.rowIsInView == false
+            }, maxTurns: 40)
+            #expect(follows(postIDs[40])?.following == false, "a hand scroll pauses the follow")
+            #expect(follows(postIDs[40])?.rowIsInView == false, "and the list stays where she put it")
+            #expect(list.contentView.bounds.origin.y < 1, "at its top")
+
+            // A resize never pulls it back.
+            window.setContentSize(NSSize(width: 1200, height: 640))
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 12)
+            #expect(follows(postIDs[40])?.rowIsInView == false, "a resize never pulls the list back")
+            #expect(list.contentView.bounds.origin.y < 1)
+
+            // The next act — a new highlighted row — follows again.
+            model.requestReveal(postIDs[44])
+            await settle(window, hosting, watchdog: watchdog, until: {
+                follows(postIDs[44])?.rowIsInView == true
+            }, maxTurns: 120)
+            #expect(follows(postIDs[44])?.following == true, "the next highlighted row is the act")
+            #expect(follows(postIDs[44])?.rowIsInView == true, "and the list shows it")
         }
     }
 }

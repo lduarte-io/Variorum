@@ -60,8 +60,10 @@ struct QuickEntryWingLabelTests {
     /// the current wing" missed it. So the item right after it carries the same
     /// words and hover as the bars (one vocabulary), from the shell's own wings
     /// model (the app's one wing — it follows the focused note), muted, one
-    /// line, never a glass button (`sharedBackgroundVisibility(.hidden)` — it is
-    /// a label, not a door). PROVISIONAL (her morning look decides the shape).
+    /// line, never a glass button (`sharedBackgroundVisibility(.hidden)`).
+    /// PROVISIONAL (her morning look decides the shape). VX-644 made the label
+    /// the wing switcher's door (a quiet voiced word — `WingChordsAndLabelDoorTests`);
+    /// every expectation here holds unchanged.
     @Test func theToolbarsNewNoteButtonWearsTheWingLabel() throws {
         let root = try source("RootView.swift")
         let button = try #require(root.range(of: "Button(\"New Note\", systemImage: \"square.and.pencil\")"),

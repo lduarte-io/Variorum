@@ -68,9 +68,16 @@ struct BrowserNavKeysTests {
             guard let (key, modifiers) = EditorCommands.keyEquivalent(for: capability.id) else { continue }
             let bareCommandArrow = (key == .leftArrow || key == .rightArrow) && modifiers == .command
             #expect(!bareCommandArrow, "\(capability.id) would take ⌘←/⌘→ from every text view as a menu key")
+            // VX-563 (A JUSTIFIED EDIT — its keys share this class): no menu
+            // key takes ⌘↑ / ⌘↓ (document start/end) either.
+            let bareCommandVertical = (key == .upArrow || key == .downArrow) && modifiers == .command
+            #expect(!bareCommandVertical, "\(capability.id) would take ⌘↑/⌘↓ from every text view as a menu key")
         }
         let alternates = CapabilityRegistry.all.compactMap(\.alternateShortcutLabel)
-        #expect(Set(alternates) == ["\u{2318}\u{2190}", "\u{2318}\u{2192}"], "the only alternates: \(alternates)")
+        // VX-563 (A JUSTIFIED EDIT): the book's step joins VX-560's alternates —
+        // the same monitor-door shape, ⌘↑ / ⌘↓ (A-648-6 (6)).
+        #expect(Set(alternates) == ["\u{2318}\u{2190}", "\u{2318}\u{2192}", "\u{2318}\u{2191}", "\u{2318}\u{2193}"],
+                "the only alternates: \(alternates)")
         #expect(HelperView.shortcutKeysShown.isSuperset(of: Set(alternates)), "the helper (⌘/) shows them")
     }
 

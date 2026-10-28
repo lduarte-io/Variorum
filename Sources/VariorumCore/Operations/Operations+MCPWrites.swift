@@ -121,6 +121,14 @@ extension Operations {
         // ("Undo claude-code's star" / "Undo claude-code's unstar" — her
         // door's own verbs, `StarCopy`). PROVISIONAL words, her copy pass.
         case star, unstar
+        // VX-639 — a gathering takes a book's own acts at edit (her RB-7
+        // ruling, 2026-10-28: book parity, the rule staying hers): ONE entry
+        // per landed act, in words that say what it was ("Undo claude-code's
+        // gathering name"). PROVISIONAL words, the VX-648 record's bundle.
+        case gatheringName = "gathering name"
+        case gatheringArchive = "gathering archiving"
+        case gatheringUnarchive = "gathering unarchiving"
+        case gatheringDelete = "gathering deletion"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 
@@ -630,10 +638,11 @@ extension Operations {
                 }
                 // VX-596 — the star the rule needs, right after its tags (her
                 // door's order, `newPostInGathering`): the ONE star write, so
-                // intake hears it as when she stars; CAP-EXEMPT, her door's arm
-                // exactly (P-13id-U2-1 — "a mint must never fail on a star").
+                // intake hears it as when she stars; her door's arm exactly
+                // (P-13id-U2-1 — "a mint must never fail on a star"; no cap
+                // since VX-643).
                 if gathering.plan.star {
-                    try writeStar(db, .post(minted.post.id), starred: true, enforcingCap: false)
+                    try writeStar(db, .post(minted.post.id), starred: true)
                 }
             }
             if let bookID {

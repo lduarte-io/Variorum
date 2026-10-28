@@ -102,6 +102,81 @@ nonisolated enum WingPaletteDoors {
     }
 }
 
+// MARK: - VX-632 — the chords
+
+/// **VX-632 — ⌥⌘L Move to Wing… and ⇧⌥⌘L Copy to Wing…** (her ruling at the
+/// VX-620 bundle sitting, #245 RB-6, 2026-10-27: BOTH chords, "the deliberate
+/// ⌥ variants of ⌘L Switch Wing"). Each opens VX-377's keyboard selector
+/// through the SAME road as the ⌘K rows (`ShellActions.openWingDestination`),
+/// under the SAME registry gates (a note or book in the focused pane, another
+/// wing; the daily Journal's half is the selector's open-time re-check).
+///
+/// ⌥⌘L serves TWO declared acts — the note's Move on a note pane, the book's
+/// on a book pane — through ONE View-menu item, the palette rows' grammar
+/// (RB-16: never two identical "Move to Wing" doors at once). The registry
+/// gates make the two mutually exclusive (pinned since VX-377), so "either is
+/// enabled" is exactly "the focused pane's act is". Pure, so the pins read
+/// the rule without a menu.
+nonisolated enum WingChords {
+    nonisolated enum Chord: Equatable, Sendable, CaseIterable {
+        /// ⌥⌘L — Move to Wing (the note's, or the book's).
+        case move
+        /// ⇧⌥⌘L — Copy to Wing (a note's only — a book has no copy door).
+        case copy
+    }
+
+    /// The acts a chord's one menu item renders, as the registry declares them
+    /// (each carries the `.menuBar` door); the FIRST owns the chord in the key
+    /// table — one owner per chord — and the item reaches the rest by focus.
+    static func acts(_ chord: Chord) -> [CapabilityID] {
+        switch chord {
+        case .move: [.moveNoteToWing, .moveBookToWing]
+        case .copy: [.copyNoteToWing]
+        }
+    }
+
+    /// The act the chord runs for what the focused pane SHOWS: a book pane's
+    /// Move is the book's; every other Move is the note's (whose gate then
+    /// answers for the rest — a place, no wing to go to); Copy is the note's.
+    static func act(_ chord: Chord, showing selection: SidebarSelection?) -> CapabilityID {
+        switch (chord, selection) {
+        case (.move, .reading(_)?): .moveBookToWing
+        case (.move, _): .moveNoteToWing
+        case (.copy, _): .copyNoteToWing
+        }
+    }
+
+    /// The menu item's enablement: any act it renders is enabled — the gates
+    /// are disjoint, so this is the focused pane's act's own answer.
+    static func enabled(_ chord: Chord, isEnabled: (CapabilityID) -> Bool) -> Bool {
+        acts(chord).contains(where: isEnabled)
+    }
+
+    /// The chord a key event is (pure — the grey-chord monitor and the pins
+    /// classify real and synthesized events alike): ⌥⌘L, ⇧⌥⌘L; never with ⌃.
+    static func chord(charactersIgnoringModifiers: String?, flags: NSEvent.ModifierFlags) -> Chord? {
+        guard charactersIgnoringModifiers?.lowercased() == "l" else { return nil }
+        switch flags.intersection([.command, .option, .control, .shift]) {
+        case [.command, .option]: return .move
+        case [.command, .option, .shift]: return .copy
+        default: return nil
+        }
+    }
+
+    /// **What a grey chord SAYS** (W-UX-6's rule — a grey menu item swallows
+    /// its chord in silence, and a door that did nothing speaks a refusal;
+    /// `OneWingChord` is the monitor). With ONE wing the reason is that there
+    /// is nowhere to go — ⌘L's own ruled note, which also says where another
+    /// wing comes from. With more, a grey chord means the pane holds nothing
+    /// it can act on — no note (and, for Move, no book: a book pane's Move
+    /// acts), so the act it speaks for is the NOTE's, whose registry note
+    /// says where a note's move and copy live. PROVISIONAL (VX-632, A-648-7).
+    static func refusal(_ chord: Chord, wingCount: Int) -> String {
+        guard wingCount > 1 else { return WingCopy.switchWingUnavailable }
+        return CapabilityRegistry.capability(act(chord, showing: nil)).unavailableNote
+    }
+}
+
 // MARK: - The selector's model
 
 /// One open selector (per window, per ⌘K choice) — the brain over the act's

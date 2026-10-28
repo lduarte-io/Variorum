@@ -689,8 +689,8 @@ extension Queries {
     /// A nil term is NO RULE: wing scope only (the standing match-all).
     ///
     /// `starredNoteIDs` is the star term's context (the 'starred' setting's
-    /// live NOTE targets — `starredNoteIDs(_:)`; the `IN` list is bounded by
-    /// `Operations.starLimit`, which caps the write side). **REQUIRED, no
+    /// live NOTE targets — `starredNoteIDs(_:)`; the `IN` list is the starred
+    /// notes, ∝ the stars she keeps since VX-643 retired the cap). **REQUIRED, no
     /// default** (13i-b U4, F-U3-3): the old `= []` let every caller but
     /// intake match a ★ term against NOTHING, silently — so the compiler now
     /// enumerates the sites, and each passes `StarContext.ids` (a read only
@@ -720,8 +720,9 @@ extension Queries {
     /// makes an un-star evict on the next emission); a tag-only gathering's
     /// must not start re-fetching on every unrelated setting write.
     ///
-    /// Cost: one `setting` row + at most `Operations.starLimit` (15) id
-    /// resolutions in two indexed reads (`Queries.starred`'s own bound).
+    /// Cost: one `setting` row + one id resolution per star in two indexed
+    /// reads — ∝ the stars, never the corpus (`Queries.starred`'s own shape;
+    /// VX-643, `StarsP1Tests`).
     struct StarContext {
         private var cached: [String]?
 

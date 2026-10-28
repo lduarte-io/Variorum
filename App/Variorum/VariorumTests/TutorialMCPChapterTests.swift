@@ -501,19 +501,29 @@ struct TutorialMCPChapterTests {
             // add the star over the wire"): the new act joins the library's list,
             // "star, unstar," taught where its rung's acts are named (VX-197's
             // truth-pass rule); `set_starred` joins the truth loop below.
+            // VX-367 (A JUSTIFIED EDIT, the ritual — the VX-648 run; VX-336's D6
+            // row 14): the eight acts the card left to its general sentence named
+            // one by one, each joining the truth loop (lock_take/unlock_take,
+            // rename_commit, delete_lens, set_block_name, put_back, set_entry_date,
+            // restore_comment, remove_note_from_book); and VX-639's gatherings.
             let editStep = """
                 Edit: it can also do most of what you can do at the keyboard. In a note, it can change, choose, \
-                commit, archive or delete takes, restore a commit, make a lens the note, add blocks anywhere, \
-                divide, merge, move or delete blocks, and edit or delete any comment. Across the library, it can \
-                take a tag off a note, star, unstar, rename, archive or delete notes and books, finish or reopen a \
-                book, reorder a book's notes and chapters, and rename or delete a chapter.
+                commit, lock or unlock, archive or delete takes, restore a commit or rename it, make a lens the note \
+                or delete a lens, add blocks anywhere, divide, merge, move, name or delete blocks, put a deleted \
+                block or take back from the note's tray, set the note's date, and edit, delete or restore any \
+                comment. Across the library, it can take a tag off a note, take a note out of a book, star, unstar, \
+                rename, archive or delete notes, books and gatherings, finish or reopen a book, reorder a book's \
+                notes and chapters, and rename or delete a chapter.
                 """
             #expect(text.contains(editStep))
             for name in ["edit_take", "choose_take", "save_commit", "archive_take", "delete_take", "restore_commit",
                          "adopt_lens", "divide_block", "merge_blocks", "move_block", "delete_block", "edit_comment",
                          "remove_tag", "rename_note", "archive_note", "delete_note", "rename_book", "archive_book",
                          "delete_book", "finish_book", "reopen_book", "move_note_in_book", "move_chapter",
-                         "rename_chapter", "delete_chapter", "set_starred"] {
+                         "rename_chapter", "delete_chapter", "set_starred",
+                         // VX-367's eight, one by one.
+                         "lock_take", "unlock_take", "rename_commit", "delete_lens", "set_block_name", "put_back",
+                         "set_entry_date", "restore_comment", "remove_note_from_book"] {
                 #expect(MCPToolFacts.rung(of: name) == .edit, "\(name) is an edit-rung act")
             }
             #expect(try tool("insert_blocks").description.contains("Placing them anywhere else needs edit"),
@@ -635,6 +645,16 @@ struct TutorialMCPChapterTests {
             let wirePlan = try await db.read { try Queries.gatheringWireMintOutcome($0, reading: starOnly) }
             #expect(wirePlan == .plan(.init(tagIDs: [], star: true)), "the client's new note is starred")
             #expect(!text.contains("never shared on its own"))
+            // VX-639 (her RB-7 ruling, 2026-10-28): the gathering's own acts at
+            // edit, and its truth — those tools act under a gathering grant at
+            // edit, and the rule's never does.
+            #expect(text.contains("With edit, it can also rename, star, archive or delete the gathering itself, but "
+                                  + "its rule stays yours."))
+            for name in ["rename_book", "set_starred", "archive_book", "delete_book"] {
+                #expect(MCPToolFacts.scopes(of: name)?.contains(.gathering) == true && MCPToolFacts.rung(of: name) == .edit,
+                        "\(name) acts on a gathering at edit")
+            }
+            #expect(MCPToolFacts.scopes(of: "set_book_rule")?.contains(.gathering) == false, "its rule stays hers")
             #expect(text.contains("move a note to another wing only with edit where the note is and write new "
                                   + "in the wing it goes to"))
             #expect(text.contains("the note leaves its books there, its tags come along, and "
@@ -781,6 +801,14 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("Always is never offered for them."))
             #expect(text.contains("choose \(PrivateMarkCopy.rowWords)"), "the note's row, by its own words")
             #expect(text.contains("in its Book Settings"))
+            // VX-641 (her ruling 2026-10-28 — a JUSTIFIED EDIT, the ritual): the
+            // card says when the row appears, and its truth is the rule both rows
+            // read (`MCPLibraryClients.showsPrivateRow`).
+            #expect(text.contains("Both appear once an AI client has connected to this library, and always on "
+                                  + "anything already marked Private."))
+            #expect(!MCPLibraryClients.showsPrivateRow(everHadClient: false, marked: false))
+            #expect(MCPLibraryClients.showsPrivateRow(everHadClient: true, marked: false))
+            #expect(MCPLibraryClients.showsPrivateRow(everHadClient: false, marked: true))
             #expect(text.contains("Other books with date-stamped entries share like any book"))
             #expect(CollectingCopy.journalTraitValue.hasPrefix("date-stamped"),
                     "the trait, by the Book Settings row's own word")

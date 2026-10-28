@@ -134,9 +134,16 @@ struct MCPLibraryParityFacesTests {
     @Test func eachNewToolSitsOnTheEditRungAtItsScopes() {
         let bookTools = ["rename_book", "finish_book", "reopen_book", "archive_book", "unarchive_book", "delete_book",
                          "remove_note_from_book", "move_note_in_book", "rename_chapter", "delete_chapter", "move_chapter"]
+        // VX-639 — A DELIBERATE FLIP (her RB-7 ruling, 2026-10-28: book parity
+        // at the edit rung, the rule staying hers): a gathering takes rename,
+        // archive, unarchive and delete under its own grant or its wing's, so
+        // those four declare the gathering scope; a finish, a note's membership
+        // or order and the chapters never act on one.
+        let gatheringTakes: Set<String> = ["rename_book", "archive_book", "unarchive_book", "delete_book"]
         for tool in bookTools {
             #expect(MCPToolFacts.rung(of: tool) == .edit, "\(tool)")
-            #expect(MCPToolFacts.scopes(of: tool) == [.book, .wing], "\(tool)")
+            #expect(MCPToolFacts.scopes(of: tool)
+                    == (gatheringTakes.contains(tool) ? [.book, .wing, .gathering] : [.book, .wing]), "\(tool)")
         }
         for tool in ["delete_note", "archive_note", "unarchive_note"] {
             #expect(MCPToolFacts.rung(of: tool) == .edit, "\(tool)")
