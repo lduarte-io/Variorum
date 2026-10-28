@@ -51,7 +51,11 @@ fileprivate final class LifecyclePane {
     /// Every edit the pane handed up, with the take its closure was bound to
     /// at render time — exactly how `TakesCellView` binds `resolved.variantID`
     /// into its `onEdit`, so a stale pane's keystroke shows up here as the
-    /// NEW take's text carrying the OLD take's words.
+    /// NEW take's text carrying the OLD take's words. Each edit also becomes
+    /// the pane's `text`, as the authority's buffer overlay makes it the
+    /// projection's in production (`PaneTextAuthority.text(variantID:…)`) —
+    /// without that, a pane going read would adopt a stale text the app never
+    /// hands it.
     @ObservationIgnored var edits: [Edit] = []
 
     struct Edit: Equatable {
@@ -83,7 +87,10 @@ fileprivate struct LifecycleHost: View {
         return PaneSurfaceView(
             text: pane.text, isLive: pane.isLive,
             role: role, variantID: bound,
-            onEdit: { pane.edits.append(.init(variantID: bound, text: $0)) },
+            onEdit: { edited in
+                pane.edits.append(.init(variantID: bound, text: edited))
+                pane.text = edited  // the buffer overlay (see `edits`)
+            },
             caretOnGoingLive: pane.landing)
     }
 }
