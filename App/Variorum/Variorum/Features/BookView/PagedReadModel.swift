@@ -100,7 +100,21 @@ final class PagedReadModel {
     /// its index re-derived from the new list; the clamp remains only for
     /// the post that left the book (she lands on a page that still exists,
     /// never nowhere).
-    func adopt(entries: [Queries.ReadingEntry], chapterOpeners: [String: String]) async {
+    ///
+    /// **`landingAt` — an ARRIVAL's place rides INTO the adoption** (VX-663,
+    /// the VX-648 record's B4-6). The arriving reader is born with no entries
+    /// (`entries` starts empty), so a seed made BEFORE the first adoption could
+    /// never find its note — and every arrival in Read ▸ Pages opened at the
+    /// book's first page, whatever the mode switch carried or the book had
+    /// focused. Handed here, the place is resolved against the entries this
+    /// very adoption gives the reader, and the FIRST realization is that
+    /// note's spread (P1: the book's page one is never paginated on the way).
+    /// It outranks the identity re-anchor below — it IS where she was. A
+    /// place the entries do not hold is dropped (the clamp lands a real page).
+    func adopt(
+        entries: [Queries.ReadingEntry], chapterOpeners: [String: String],
+        landingAt landing: String? = nil
+    ) async {
         let anchorPostID = self.entries.indices.contains(position.postIndex)
             ? self.entries[position.postIndex].postID : nil
         self.entries = entries
@@ -116,7 +130,9 @@ final class PagedReadModel {
                     hasChapter: chapterOpeners[entry.postID] != nil)
             }
             index.adopt(postIDs: postIDs, extents: extents, headingLines: headings)
-            if let anchorPostID,
+            if let landing, let target = entries.firstIndex(where: { $0.postID == landing }) {
+                position = PageIndex.Position(postIndex: target, pageInPost: 0)
+            } else if let anchorPostID,
                let newIndex = entries.firstIndex(where: { $0.postID == anchorPostID }) {
                 position = PageIndex.Position(
                     postIndex: newIndex, pageInPost: position.pageInPost)
@@ -330,7 +346,11 @@ final class PagedReadModel {
         entries.indices.contains(position.postIndex) ? entries[position.postIndex].postID : nil
     }
 
-    /// Enter where she was: the post the book model holds focus on.
+    /// Put the reader IN a post it already holds (its first page). An
+    /// ARRIVAL's place does not come through here (VX-663): the arriving
+    /// reader holds no entries until its first adoption, so its place rides
+    /// into `adopt(entries:chapterOpeners:landingAt:)`. This stays the road for
+    /// a reader that already has its book (the address pin's).
     func seed(fromFocus postID: String?) {
         guard let postID, let target = entries.firstIndex(where: { $0.postID == postID })
         else { return }

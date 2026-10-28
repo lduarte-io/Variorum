@@ -769,6 +769,32 @@ struct PagedReadViewTests {
         }
     }
 
+    /// **VX-663 — the fix's own arm, on the model: the arrival's place rides
+    /// INTO the first adoption** (`adopt(entries:chapterOpeners:landingAt:)`).
+    /// A reader born with no entries is handed the place with them: its first
+    /// spread is that note's, and the book's FIRST post is never paginated on
+    /// the way there (P1 — realization is a pure function of the address). A
+    /// place the entries do not hold is dropped and the reader stands at page
+    /// one. RED on `rev663` (`adopt` ignoring `landingAt`).
+    @Test func theFirstAdoptionLandsTheArrivalsPlace() async throws {
+        try await withPagedWorld(posts: 6) { session, db, readingID, postIDs in
+            let entries = try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            }
+            let pages = PagedReadModel(session: session)
+            await pages.adopt(entries: entries, chapterOpeners: [:], landingAt: postIDs[3])
+            #expect(pages.currentPostID == postIDs[3],
+                    "RED on rev663: the first adoption stands the reader IN the carried note (\(String(describing: pages.currentPostID)))")
+            #expect(pages.leaves.first??.postID == postIDs[3], "its left page is the carried note's")
+            #expect(pages.slicedPages(of: postIDs[0]) == nil,
+                    "RED on rev663: page one was never paginated on the way (P1)")
+
+            let foreign = PagedReadModel(session: session)
+            await foreign.adopt(entries: entries, chapterOpeners: [:], landingAt: "not-in-this-book")
+            #expect(foreign.currentPostID == postIDs[0], "a place the book does not hold: page one")
+        }
+    }
+
     /// The guard: an arrival carrying NOTHING (no parcel, no focus) opens at
     /// the book's first page, as it always did — and a parcel for a note the
     /// book does not hold is dropped, the reader at page one.
