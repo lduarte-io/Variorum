@@ -719,6 +719,65 @@ Pieces (flipped per commit):
   menus without "Show take ▸", a scratch column's with it. `BlockHistoryCommitsCaptureTests` (disabled
   capture harness, VX-144's) can re-shoot the pane in both voices if the trait is dropped for a run.
 
+#### WALK FIXES (W-1, W-2) — batch 2's implementer, resumed 2026-10-28 after the vx440-walk
+
+**Not done by this piece (first line):** nothing run on the stage — the pins are WRITTEN AND COMPILED
+(`build-for-testing` into `App/Variorum/DerivedData/vx440-merge`), their red-on-old and green runs and the
+walk re-shoot PENDING the orchestrator's window. Tree verified clean at resume (the two untracked walk
+dirs `.vx440-stagelogs/` · `.vx440-walk-shots/` are the walk's, never added); pulled to `f2cea88bb`.
+
+Pieces (flipped per commit):
+- WF-1 W-1 trace + red-on-old pins: IN-PROGRESS (this commit — the PRE-FIX tree).
+- WF-2 W-1 fix: NOT STARTED.
+- WF-3 W-2 trace + seam + pin: NOT STARTED.
+- WF-4 W-2 fix: NOT STARTED.
+- WF-5 verification + record: NOT STARTED.
+
+**W-1 — TRACED (the mechanism, inputs → wrong output):**
+1. The Takes bar's history door asks for the FOCUSED block (`TakesViewModel.requestBlockHistory` → the
+   ring's block), so Block History opens beside Takes on the block her ring is in — the restored take's
+   ARTICLE pane is the LIVE pane (the walk's shot shows "block 2/3" in the bar — the ring's block — and the
+   restored block 2 stale).
+2. A live pane is BUFFER-AUTHORITATIVE: `PaneSurfaceRepresentable.updateNSView` writes projection text only
+   into a READ pane (`if isLive { adoptedText = nil } else if readPaneNeedsText … { view.string = text }`);
+   `PaneTextAuthority`'s contract says the same ("surfaces must never clobber a live pane with projection
+   text").
+3. The restore writes `working_text` from outside the pane; the board's adoption drops the authority's
+   buffer (`settle` — nothing pending) and the cell's resolved text IS the restored words, but the live
+   surface refuses them — it keeps the pre-restore characters. My B2-8 landing then flashed that cell: the
+   wash on visibly pre-restore words (her original complaint, re-created). Write is unaffected (its editor
+   re-renders a clean block from the projection — the walk confirms).
+4. **The twin, worse than the display:** the live pane's next keystroke hands up its WHOLE text (old words
+   + the key) through `paneEdited` → autosave → the restore is silently overwritten (one writer, never a
+   sync conflict). The same cell class on the LENSES board (its own history door → the inspector pane
+   beside a live cell). Pre-existing before batch 2 (any Block History restore beside a live Takes/Lenses
+   pane), surfaced by the landing's wash.
+
+**VX-248's relationship — read, not assumed:** VX-248 LANDED (vx-601 batch A, `b1a82dc3`, ACCEPTED
+2026-10-27 — red-on-old by revert, walk W3/W4 PASS; merged into this branch tonight). It is HER RULED bend of
+P-3 for a RE-BIND only: `Coordinator.rebindIfTakeChanged` runs when the pane's BOUND take id changes
+(`guard variantID != boundVariantID else { return false }`) and then adopts the new take's text. A restore
+keeps the take's id, so VX-248's machinery does not fire — by its own design, not unfinished. Extending
+the bend to "the bound take's text changed from outside" would be a second bend of P-3 (a decision about
+when a live pane adopts, in `PaneSurface` — the editor seam) that her ruling did not make. So: the NARROW
+fix on OUR road (WF-2), and the GENERAL class recorded below as VX-248's sibling.
+
+**The general class (comment-worthy; a closeout ticket candidate, related to VX-248 — NOT reopened here):**
+a LIVE pane whose take's text changes from OUTSIDE the pane keeps — and on the next keystroke writes back —
+the old words. Roads that reach it today, by reading: a Block History restore beside Compare / Canvas /
+Write's take panel (the narrow fix covers Takes and Lenses only), a sync apply of `working_text` under a live
+pane, the MCP door's `edit_take` / `restore_commit` on a take she has live in Takes/Lenses (the door
+flushes her typing FIRST, then edits — the live pane keeps her words, and her next key overwrites the AI's
+edit), another window's restore. The design question is hers/the architect's: end the ring (VX-222's shape,
+what WF-2 does on this road) or a second P-3 bend (adopt on an external change when nothing is pending).
+
+Pins (Mac, `RestoreLandingTests`, compiled ✓, RUNS PENDING — EXPECT RED on this commit, the pre-fix tree):
+`aRestoreBesideTakesLeavesTheArticleShowingTheRestoredWords` (mounted Takes board, the ring live in the
+restored block's article pane, the pane road's restore; red line: the pane's string ≠ the restored words —
+it still reads the pre-restore text; also the pane still editable) and
+`aRestoreBesideLensesLeavesTheLiveCellShowingTheRestoredWords` (the Chosen column's live cell; red line:
+the cell's string).
+
 - Batch 3 (gathering faces): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + the two red-on-old Mac runs + walk PENDING the stage window; UNIT RECORD below.
 
 ### Batch 3 — UNIT RECORD (gathering faces: VX-611 · VX-616 · VX-189 · rider VX-356)

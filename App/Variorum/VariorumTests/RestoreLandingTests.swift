@@ -381,4 +381,123 @@ struct RestoreLandingTests {
             #expect(model.board.articleLanding == nil, "the article does not show that take")
         }
     }
+
+    // MARK: - W-1 (the vx440 walk) — the live pane beside the pane road
+
+    private static func pane(_ role: String, _ variantID: String, in hosting: NSView) -> PaneTextView? {
+        views(PaneTextView.self, in: hosting).first {
+            $0.identifier?.rawValue == "pane:\(role)|\(variantID)"
+        }
+    }
+
+    private func mountBoard<V: View>(_ board: V, theme: ThemeStore, in window: NSWindow) -> NSView {
+        let hosting = NSHostingView(rootView: board.environment(theme))
+        hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+        window.contentView = hosting
+        window.makeKeyAndOrderFront(nil)
+        return hosting
+    }
+
+    private func storeText(_ w: World, _ variantID: String) async throws -> String? {
+        try await w.session.database.read { db in
+            try Variant.fetchOne(db, key: variantID)?.workingText
+        }
+    }
+
+    /// **W-1 (RED ON THE PRE-FIX TREE) — a restore from the pane's ROW while
+    /// TAKES is mounted leaves the article showing the RESTORED words.** The
+    /// walk's finding, traced: the Takes bar's history door opens Block
+    /// History on the block her ring is in, so the restored take's article
+    /// pane is the LIVE pane — and a live pane is buffer-authoritative: it
+    /// never adopts projection text (`PaneSurface.updateNSView`'s `isLive`
+    /// arm; `PaneTextAuthority`'s contract), the one exception being VX-248's
+    /// RE-BIND, which keys on the bound take's id, and a restore keeps the id.
+    /// So the cell kept the pre-restore words under the wash — and her next
+    /// keystroke would have handed those words up and written them back over
+    /// the restore. On the pre-fix tree the pane still reads the pre-restore
+    /// words here.
+    @Test func aRestoreBesideTakesLeavesTheArticleShowingTheRestoredWords() async throws {
+        try await withWorld(count: 6) { w, theme in
+            let ops = w.session.operations
+            let target = w.blocks[2]
+            let take = try await chosen(w, target)
+            let commit = try ops.commit(take)
+            let typed = "Changed since the moment, and typed into."
+            try ops.autosave(take, text: typed, charDelta: 20)
+            let model = try await takesBoard(w)
+            let window = newWindow()
+            defer { window.orderOut(nil); window.close() }
+            let hosting = mountBoard(
+                TakesBoardView(session: w.session, postID: w.postID, model: model),
+                theme: theme, in: window)
+            let mounted = await Self.settle(window, hosting) {
+                Self.pane("article", take, in: hosting)?.string == typed
+            }
+            #expect(mounted, "fixture: the article shows the take as it is now")
+            // Her ring in that block's article pane — the block the bar's
+            // history door opens Block History on.
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID, blockID: target, variantID: take))
+            let live = await Self.settle(window, hosting) {
+                Self.pane("article", take, in: hosting)?.isEditable == true
+            }
+            #expect(live, "fixture: the pane is LIVE")
+
+            let history = BlockHistoryModel(
+                session: w.session, postID: w.postID, blockID: target, focusedVariantID: take)
+            await history.restore(commit, of: take)
+            #expect(history.status?.isRefusal == false)
+            let shows = await Self.settle(window, hosting, timeout: 4) {
+                Self.pane("article", take, in: hosting)?.string == Self.prose(3)
+            }
+            #expect(shows, "the article shows the restored words, not: \(Self.pane("article", take, in: hosting)?.string ?? "nil")")
+            #expect(Self.pane("article", take, in: hosting)?.isEditable == false,
+                    "the ring that was over the pre-restore words ended")
+            await Self.pause(window, hosting, 0.6)
+            #expect(try await storeText(w, take) == Self.prose(3), "the restore stands")
+        }
+    }
+
+    /// **W-1's twin on the LENSES board (RED ON THE PRE-FIX TREE)** — the same
+    /// pane road beside Lenses (its own history door): the Chosen column's
+    /// live cell on the restored take shows the restored words.
+    @Test func aRestoreBesideLensesLeavesTheLiveCellShowingTheRestoredWords() async throws {
+        try await withWorld(count: 6) { w, theme in
+            let ops = w.session.operations
+            let target = w.blocks[1]
+            let take = try await chosen(w, target)
+            let commit = try ops.commit(take)
+            let typed = "A lens cell's own later words."
+            try ops.autosave(take, text: typed, charDelta: 12)
+            let suite = "RestoreLandingTests-lenses-\(UUID().uuidString)"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defaults.removePersistentDomain(forName: suite)
+            let model = TakesViewModel(session: w.session, postID: w.postID, defaults: defaults)
+            model.host = .lenses
+            try await adoptFresh(model, w)
+            let chosenColumn = try #require(model.columns.first { $0.kind == .main })
+            let window = newWindow()
+            defer { window.orderOut(nil); window.close() }
+            let hosting = mountBoard(
+                LensesBoardView(session: w.session, postID: w.postID, model: model),
+                theme: theme, in: window)
+            let mounted = await Self.settle(window, hosting) {
+                Self.pane("cell", take, in: hosting)?.string == typed
+            }
+            #expect(mounted, "fixture: the Chosen column shows the take as it is now")
+            model.focus(TakesViewModel.PaneKey(
+                columnID: chosenColumn.id, blockID: target, variantID: take))
+            let live = await Self.settle(window, hosting) {
+                Self.pane("cell", take, in: hosting)?.isEditable == true
+            }
+            #expect(live, "fixture: the cell is LIVE")
+
+            let history = BlockHistoryModel(session: w.session, postID: w.postID, blockID: target)
+            await history.restore(commit, of: take)
+            let shows = await Self.settle(window, hosting, timeout: 4) {
+                Self.pane("cell", take, in: hosting)?.string == Self.prose(2)
+            }
+            #expect(shows, "the live cell shows the restored words, not: \(Self.pane("cell", take, in: hosting)?.string ?? "nil")")
+        }
+    }
 }
