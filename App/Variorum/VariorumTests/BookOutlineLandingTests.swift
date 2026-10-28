@@ -2544,3 +2544,121 @@ extension BookOutlineLandingTests {
         }
     }
 }
+
+// MARK: - VX-681 (the VX-677 run, batch 2) — leaving Read ▸ Scroll carries the story on screen
+
+extension BookOutlineLandingTests {
+    /// The flow, mounted in a 30-note chaptered book, entered at note 3 and
+    /// scrolled by HER (the clip road) to a later story — what the page now
+    /// shows (`viewedFlowPair`, VX-645's follower) is returned.
+    private func flowEnteredAtNote3AndScrolled(
+        _ window: NSWindow, _ hosting: NSView, watchdog: MainThreadWatchdog,
+        model: BookViewModel, structure: BookStructureModel, postIDs: [String]
+    ) async throws -> String {
+        await settle(window, hosting, watchdog: watchdog, until: {
+            ReadingFlowGeometry.anchorTops[postIDs[0]] != nil
+        }, maxTurns: 120)
+        try #require(ReadingFlowGeometry.anchorTops[postIDs[0]] != nil, "the flow drew its first note")
+        // She enters at note 3 (the carried place a mode switch lands).
+        let entered = postIDs[3]
+        let anchor = FlowRows.landingAnchor(for: entered, grouped: structure.grouped(entries: model.entries))
+        model.requestReveal(entered)
+        await settle(window, hosting, watchdog: watchdog, until: { flowLanded(anchor) }, maxTurns: 300)
+        try #require(flowLanded(anchor), "the premise: the flow landed note 3")
+        try #require(model.standingAnchorPostID == entered, "the premise: the standing anchor is where she arrived")
+        // …and reads down: her own scroll (no landing).
+        let moved = try await scrollPage(window, hosting, watchdog: watchdog, by: 1_400)
+        try #require(moved > 1_000, "the harness premise: the page moved (\(moved) pt)")
+        await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 6)
+        let shown = try #require(model.viewedFlowPair.postID, "the premise: the page shows a story")
+        let ordinal = try #require(postIDs.firstIndex(of: shown))
+        try #require(ordinal > 3 && ordinal < 22,
+                     "the premise: a later story, clear of the book's last screenful (note \(ordinal))")
+        print("VX-681 FLOW: entered note 3, the page shows note \(ordinal) after \(moved) pt")
+        return shown
+    }
+
+    /// **VX-681 — Read ▸ Scroll → Outline lands the story the page SHOWS.**
+    /// She entered the flow at note 3 and read down; the mode door's carry
+    /// (`switchMode` → `carryPlace`) names the story on screen, and the
+    /// Outline lands it (its follower adopts the landing's target at the
+    /// start — R-562-A). RED ON OLD (`rev681`): note 3, where she arrived.
+    @Test func leavingReadScrollForOutlineLandsTheStoryItsPageShows() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .read
+            structure.readForm = .flow
+            ReadingFlowGeometry.forgetAnchorTops()
+            ReadingFlowGeometry.trace = []
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let shown = try await flowEnteredAtNote3AndScrolled(
+                window, hosting, watchdog: watchdog, model: model, structure: structure, postIDs: postIDs)
+#if DEBUG
+            let modeDoor = try #require(BookOutlineGeometry.modeDoors[readingID], "the book published its mode door")
+            modeDoor(.outline)
+            #expect(model.standingAnchorPostID == shown,
+                    "RED ON OLD: the carry names the story on screen, not note 3 (\(String(describing: model.standingAnchorPostID)))")
+            let anchor = BookOutlineRows.Row.noteAnchor(shown)
+            await settle(window, hosting, watchdog: watchdog, until: { landingEnded(anchor) }, maxTurns: 300)
+            #expect(structure.mode == .outline, "the click-over arrived in Outline")
+            #expect(landingEnded(anchor), "RED ON OLD: the Outline landed the story on screen")
+            #expect(model.viewedOutlinePair.postID == shown,
+                    "RED ON OLD: and it is what the Outline shows (\(model.viewedOutlinePair))")
+            let top = anchorTop(anchor)
+            #expect(top.map { abs($0) <= 4 } == true,
+                    "RED ON OLD: its row at the top of the page, not \(String(describing: top))")
+#endif
+        }
+    }
+
+    /// **VX-681 + VX-663 — Read ▸ Scroll → Pages opens at the story the page
+    /// shows.** The read-form switch is the same carry (`switchReadForm`'s two
+    /// statements, replayed — the precedent of the Index row menu's road):
+    /// the paged reader opens at the shown story. RED on `rev681` (the reader
+    /// opens at note 3) AND on `rev663` (the reader opens at page one) — the
+    /// family's joint leg.
+    @Test func leavingReadScrollForPagesOpensAtTheStoryItsPageShows() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .read
+            structure.readForm = .flow
+            ReadingFlowGeometry.forgetAnchorTops()
+            ReadingFlowGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let shown = try await flowEnteredAtNote3AndScrolled(
+                window, hosting, watchdog: watchdog, model: model, structure: structure, postIDs: postIDs)
+            // `BookView.switchReadForm(to: .pages)`, verbatim.
+            model.carryPlace(from: structure.mode, readForm: structure.readForm)
+            structure.readForm = .pages
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.pagedAnchorPostID != nil
+            }, maxTurns: 160)
+            #expect(model.pagedAnchorPostID == shown,
+                    "RED ON rev681 (note 3) AND rev663 (page one): the reader opens at the story on screen — reported \(String(describing: model.pagedAnchorPostID))")
+        }
+    }
+}
