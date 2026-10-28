@@ -737,6 +737,20 @@ final class TakesViewModel {
     ///   never the board's "archived · n" disclosure the panel does not have.
     @ObservationIgnored var writePanelBlockID: String?
 
+    /// **VX-321 — where THIS host lists a block's archived takes**, for the
+    /// receipts that name the road back (Move Take into a Block Below's
+    /// `TakeStructureCopy.movedNote`): the board's "archived · n" disclosure,
+    /// the Lenses board's none (it points at the Takes board), or Write's take
+    /// panel's "archived takes" list — VX-154's rider's rule, read from the
+    /// same two facts its archive receipt reads.
+    var archivedRoad: TakeStructureCopy.ArchivedRoad {
+        if writePanelBlockID != nil { return .writePanel }
+        switch host {
+        case .takes: return .takesBoard
+        case .lenses: return .lensesBoard
+        }
+    }
+
     /// May the ring land on `pane`? Always on the boards; on Write's take
     /// panel only inside its block — a request for any other block BLURS the
     /// ring instead (it never stays on a take the act just moved away), so a
@@ -1993,7 +2007,8 @@ final class TakesViewModel {
     /// its receipt names that list — the board's "archived · n" disclosure is
     /// not in the panel.
     static let writePanelArchiveReceipt =
-        "Take archived — never gone: \u{201C}archived takes\u{201D} below brings it back."
+        "Take archived — never gone: \u{201C}\(TakeStructureCopy.archivedTakesHeader)\u{201D} "
+        + "below brings it back."
 
     func unarchiveTake(_ variantID: String) async {
         await run { ops in try ops.unarchiveVariant(variantID) }

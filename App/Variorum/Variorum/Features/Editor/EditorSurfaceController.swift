@@ -1069,7 +1069,9 @@ final class EditorSurfaceController {
                 caretBlockID: result.block.id, caretOffset: 0, seam: nil)
         }
         if landed {
-            model.showReceipt(TakeStructureCopy.movedNote)
+            // VX-321: Write's road back is the block's takes panel, whose
+            // list is headed "archived takes" — never the board's disclosure.
+            model.showReceipt(TakeStructureCopy.movedNote(.write))
         }
     }
 

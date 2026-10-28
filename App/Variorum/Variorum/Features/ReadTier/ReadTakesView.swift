@@ -46,6 +46,20 @@ struct ReadTakesView: View {
         PostDetailView.rememberedMode(postID: postID, defaults: defaults) == .takes
     }
 
+    /// **VX-574 — her words: *"I need Takes to not be a weird light font
+    /// compared to anything else."*** A take's WORDS here wear the voice's
+    /// prose register — `tokens.body` in the voice's INK, the face every
+    /// other reader of her prose draws (the board's panes and Write through
+    /// `EditorTypography.ink`, this view's own precedent `ReadPostView`
+    /// through `applyVoiceChrome`). It used to be `tokens.muted`: built at
+    /// 13g batch 6 to the brief's "dimmed/read styling" (the architect's
+    /// line, not a ruling of hers — R5-1 ruled only takes-first), so every
+    /// unfocused pane or non-key window holding a note in Takes showed her
+    /// words a grey lighter than anywhere else in the app, while the same
+    /// note left in Write showed them in ink. The chrome around the words
+    /// (the ✓ chosen mark, a label) keeps its quiet colours.
+    static func proseInk(_ tokens: VoiceTokens) -> Color { tokens.ink }
+
     @State private var projection = Queries.TakesProjection()
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -90,7 +104,7 @@ struct ReadTakesView: View {
                 // paragraph.
                 Text(slot.text ?? "")
                     .font(tokens.body)
-                    .foregroundStyle(tokens.muted)
+                    .foregroundStyle(Self.proseInk(tokens))  // VX-574
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -115,7 +129,7 @@ struct ReadTakesView: View {
             }
             Text(take.workingText)
                 .font(tokens.body)
-                .foregroundStyle(tokens.muted)
+                .foregroundStyle(Self.proseInk(tokens))  // VX-574
                 .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }

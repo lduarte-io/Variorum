@@ -3587,7 +3587,9 @@ final class EditorViewModel {
                 // list (the tutorial's "keeping takes safe" lesson teaches
                 // both roads; the Takes-board siblings name theirs).
                 // J43: it was archived (the board's twin is a receipt).
-                showReceipt("Take archived — never gone: the takes panel (⌘⇧T) keeps it under “archived takes”.")
+                // VX-321: the panel's header through its ONE literal.
+                showReceipt("Take archived — never gone: the takes panel (⌘⇧T) keeps it under "
+                    + "“\(TakeStructureCopy.archivedTakesHeader)”.")
             } catch {
                 showOperationError(error)
             }

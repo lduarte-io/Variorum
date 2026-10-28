@@ -178,10 +178,51 @@ nonisolated enum WordTargetFaceCopy {
 /// fan without saying it is recoverable is the lecture-less-silence class
 /// P-2 retired.
 nonisolated enum TakeStructureCopy {
-    static let movedNote =
+    /// **VX-321 — the host the door was pressed on**, because the road back
+    /// to the archived original is a LIST, and each host lists archived takes
+    /// under its own words (or not at all). VX-154's rider set the rule for
+    /// the archive receipt — a receipt names the list the place she is
+    /// standing in actually shows — and this receipt is its twin.
+    enum ArchivedRoad: Equatable, Sendable {
+        /// The Takes board: the block's "archived · n" disclosure.
+        case takesBoard
+        /// The Lenses board renders no archived list — it points at Takes.
+        case lensesBoard
+        /// Write's take panel: its list headed `archivedTakesHeader`.
+        case writePanel
+        /// Write itself: the block's takes panel holds that list.
+        case write
+    }
+
+    /// **The header Write's take panel gives its archived list** — ONE
+    /// literal, read by the panel's header and by every receipt that sends
+    /// her to that list (VX-321), so a receipt can never again name a header
+    /// the list does not wear.
+    static let archivedTakesHeader = "archived takes"
+
+    /// Move Take into a Block Below's receipt, naming the road back in the
+    /// words of the list on `road`. The Takes board's sentence is the one
+    /// this receipt always said (its disclosure IS "archived · n"); the other
+    /// hosts' reuse their own archive receipts' roads (PROVISIONAL copy — her
+    /// copy pass, as VX-154's rider's was, P-U3-6).
+    static func movedNote(_ road: ArchivedRoad) -> String {
         "That take is now the block below — the original is archived on its "
-        + "block (\u{201c}archived \u{B7} n\u{201d} under its takes brings it back); "
-        + "\u{2325}\u{2318}Z undoes it."
+            + "block (\(wayBack(road))); \u{2325}\u{2318}Z undoes it."
+    }
+
+    /// The parenthesis of `movedNote` — where the archived original waits.
+    static func wayBack(_ road: ArchivedRoad) -> String {
+        switch road {
+        case .takesBoard:
+            "\u{201c}archived \u{B7} n\u{201d} under its takes brings it back"
+        case .lensesBoard:
+            "the archived list under its takes on the Takes board (\u{2318}2) brings it back"
+        case .writePanel:
+            "\u{201c}\(archivedTakesHeader)\u{201d} below brings it back"
+        case .write:
+            "its takes panel keeps it under \u{201c}\(archivedTakesHeader)\u{201d}"
+        }
+    }
 
     /// The conversion's receipt, counts and all — including the blank takes
     /// it passed over (AR-1(d): they are skipped, and the door says so

@@ -109,6 +109,17 @@ struct TakesBoardView: View {
     /// froze stale. Distinct namespaces keep exactly ONE pane live (R22).
     static let fanColumnID = TakesViewModel.takesFanColumnID
 
+    /// **VX-574 — the stack card's COLLAPSED line wears the voice's type.**
+    /// A card folded by its ▾ shows its take's first line; that line was set
+    /// in `.callout` — a literal system font, the one take-words face on the
+    /// board drawn outside the token layer (SF Pro 12 pt in both voices: a
+    /// sans in Study's serif room, proportional in Terminal's monospaced one,
+    /// under her *"I need Takes to not be a weird light font compared to
+    /// anything else"*). It now wears `tokens.small` — the face the board's
+    /// other one-line take summary already wears (VX-170's `collapsedRow`,
+    /// R-VX170-2: "muted", which this line keeps too).
+    static func collapsedTakeLineFont(_ tokens: VoiceTokens) -> Font { tokens.small }
+
     /// **The board's own coordinate space (13e batch 7 — the routed rider
     /// from batch 5's E12 sweep; `CanvasView.surfaceSpace`'s twin).** A
     /// `DragGesture` with no coordinate space measures in the gesture
@@ -2188,7 +2199,7 @@ private struct CollapsibleTakeCard: View {
                 }
                 if collapsed {
                     Text(text.split(separator: "\n").first.map(String.init) ?? "(empty)")
-                        .font(.callout)
+                        .font(TakesBoardView.collapsedTakeLineFont(tokens))  // VX-574
                         .lineLimit(1)
                         .foregroundStyle(tokens.muted)
                         .onTapGesture { collapsed = false }

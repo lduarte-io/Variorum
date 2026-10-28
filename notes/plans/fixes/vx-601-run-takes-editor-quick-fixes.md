@@ -1867,5 +1867,124 @@ is in flight.
   ORCHESTRATOR DISPOSITIONS — VX-637/VX-638 not re-fixed), `notes/SurfaceContracts.md` "The app" and
   "The note", `notes/SessionResiliencyProtocol.md`; the tickets VX-321/VX-337/VX-574/VX-586 read
   through Linear (read-only); the VX-282 record's O-3 (VX-321's origin).
-- Trace — IN PROGRESS (per member, below as each lands).
-- VX-427 · VX-574 · VX-586 · VX-321 · VX-337 — NOT-STARTED (fix/pin).
+- Trace — DONE for VX-427 · VX-586 · VX-321 · VX-574 (below); VX-337 IN PROGRESS (the bounded trace).
+- Fixes + pins — DONE (this commit) for VX-427 · VX-586 · VX-321 · VX-574:
+  `VariorumTests/TakesBarAndFacesTests.swift`, 11 tests in 4 suites; `DerivedData/vx601c-post`
+  build-for-testing GREEN (log `App/Variorum/DerivedData/logs/c-post-build.log`; no warning in a
+  touched file).
+- Revert trees — NOT-STARTED (the plan: `vx601c-pre` all four reverted, then one tree per member;
+  each revert IN PLACE on the member's face/door function, committed-first, restored by
+  `git checkout <fix-sha> -- <file>` — the batch B lesson).
+- VX-337 — IN PROGRESS (bounded: one trace).
+- Red/green runs, walk — PENDING (the orchestrator's window).
+
+**THE TRACES (pre-fix line numbers).**
+
+*VX-427 — CONFIRMED (the scout's trace, read myself).* `TakesBottomBar.wordCounts` (`:618-626`)
+built the "Nw take" unit from `model.resolvedTake(column: model.columns.first, slot:)` for the
+FOCUSED BLOCK's slot — the first column's pick (`TakesViewModel.resolvedTake` →
+`PaneTextAuthority.resolvedText(pick:…)`). On the Takes board `columns.first` is the main column,
+whose pick is nil, so it resolved the CHOSEN take: with the ring in any other card of a bloomed fan
+the bar counted the chosen take's words, and kept them while she typed (the buffer she was filling
+was another take's). The batch A walk saw it live (O-3: "7w take" while typing in the long take);
+batch A's Terminal capture `t2a-w0.png` shows "9w take" with the caret in the 3-line take. A WIDENING
+(same line): the Lenses board hosts the same bar, and there `columns.first` is the Chosen column —
+typing in a lens column counted the chosen take too. Write needs nothing (the scout's finding 2).
+
+*VX-586 — the sweep.* Every face in the Takes family that could speak a block's id, grepped
+(`prefix(`, `\(…blockID`/`…ID` interpolations in `Text`/`help`/`accessibilityLabel`/receipt/refusal
+calls, `Text(id)`, "blk") over `Features/Takes`, `Surface`, `Features/Editor`, `Features/TOC`,
+`Features/ReadTier`, `Core`:
+| Site | Face | Disposition |
+|---|---|---|
+| `WriteTakesPanel.swift:119` "Takes — block \(blockID.prefix(8))" | Write's take panel title (also the book Index's in-place Takes sheet — the same view) — the live one the B walk saw ("Takes — block D9B30289") | **FIXED** — `WriteTakesPanel.title(blockID:slots:)` → "Takes — " + `BlockLineLabel.caret` ("Takes — block 2/10"; "block —" when the projection does not hold the block) |
+| `TakesBottomBar.swift:605-612` | the Takes bar's context label | already `BlockLineLabel` (13g R5-4) — untouched |
+| `PaneSurface.swift:1620` `view.identifier` | the pane NSView's identifier — never drawn, never spoken (test/probe identity) | KEPT, deliberately (not a face) |
+| `VisualWalkProbe.swift` (`post`, `rlSel`, …`prefix(8)`) | DEBUG walk-probe log lines | KEPT (DEBUG diagnostics, never rendered) |
+| `BookIndexView.swift:829` `BookIndexGeometry.trace` | DEBUG geometry trace | KEPT (not a face) |
+| `RefusalCopy.swift:29` "see blk n/n below" | Write's Make Block refusal — not an id, but the retired word "blk" R5-4 replaced with "block n/n" | NOT MINE (Write's refusal, not a Takes face) — residue R-C-1 |
+No other Takes face interpolates an id (the take cards, the bars, the receipts, the rail, the filter
+rows, the article, the empty state all read ordinals, labels or text).
+
+*VX-321 — CONFIRMED, and wider.* `TakeStructureCopy.movedNote` (`OpsRefusalCopy.swift:181-184`) is
+ONE constant spoken by FOUR hosts: the Takes board (`TakesStructureController.swift:706`, whose
+disclosure IS "archived · n" — correct there), Write's take panel (the same controller through the
+panel's `TakesViewModel` — its list is headed "archived takes", VX-154's rider), the Lenses board
+(the same controller — it renders NO archived list; its archive receipt already points at the Takes
+board), and Write itself (`EditorSurfaceController.swift:1072` — the road back is the block's takes
+panel, "archived takes"). Three of four named a list that host does not show.
+
+*VX-574 — the trace, and what it FALSIFIED.* (1) *The focused board's prose is NOT lighter.* Every
+take pane draws `EditorDocument.baseFont` (the voice's one font — `EditorTypography.current`) in
+`EditorTypography.ink(for: voice)`, the same font object and the same dynamic ink as Write's editor
+(`applyVoiceChrome`) and the read tier; no weight, no alpha, no opacity, no draw override anywhere on
+`PaneTextView`. The one code difference is the BACKGROUND (`applyStyle`: `drawsBackground = false`
+on a pane; Write and `ReadPostView` draw opaque paper), and font smoothing is the lever that could
+turn a transparent background into thinner stems — so I measured it: an offscreen probe (scratchpad
+`c574probe/probe2`) shows CoreText smoothing DOES add 15–19% glyph ink on macOS 27.0.1, but the
+in-app captures show the panes rendered exactly as Write: glyph pixels over the same words, Write vs
+the board — dark Study (`walkshots-vx601b/b1-write` vs `b1-after`): 5392 vs 5372 and 5583 vs 5537;
+light Terminal (13u3 `F01` Write vs `uh-05` Takes): 1933 vs 1944; light Study (13u3 `d-13` vs
+`ug-14`): the same weight by eye at 3×. So the board's prose is byte-for-byte Write's face, in both
+voices and both rooms — **the "transparent pane loses smoothing" hypothesis is FALSIFIED by
+measurement.** (2) *Two Takes faces DO draw her words lighter than anything else, in code:*
+(a) **`ReadTakesView`** — the Takes board's read-only twin, shown by EVERY unfocused pane (Open
+Beside) and every non-key window holding a note left in Takes (`RootView.readCheapNote`) — drew all
+prose in `tokens.muted`, the ONLY reader of her prose not in the voice's ink (its precedent
+`ReadPostView`, the same note left in Write, draws ink). Its "dimmed/read styling" was the 13g batch
+6 BRIEF's line (`phase-13g-formatting-lists-checkboxes.md:2373`), not a ruling of hers — R5-1 ruled
+only takes-first — so her VX-574 word governs it. (b) **the stack card's collapsed line**
+(`CollapsibleTakeCard`, the ▾ fold) set the take's first line in `.callout`, a LITERAL system font
+outside the token layer (SF Pro 12 in both voices). Not deliberate-and-ruled anywhere (the record
+pointers read: 13g R5-1, 13b 3F, VX-170's collapsed row — which is ruled "muted" at `tokens.small`).
+
+**AS BUILT.**
+- *VX-427* — `TakesBottomBar.takeUnit(for:)`: the focused pane's own take, found in
+  `projection.fans[pane.blockID]` (the projection carries every placed block's ACTIVE fan, and a
+  live pane is always an active take) and counted through the authority's overlay
+  (`model.liveText`) — per keystroke; nil with no ring, and nil for a take the projection does not
+  hold yet (says no unit rather than a wrong one). `wordCounts` → `static wordCounts(for:)` so the
+  pin reads what the bar draws. P1: one dictionary read + one fan scan + one take's word count.
+  Her ruling R-601-3's limits kept: no click-cycle face, no per-card count, words byte-unchanged.
+- *VX-586* — `WriteTakesPanel.title(blockID:slots:)` (above). The panel's model projects the whole
+  note, so the ordinal and count are the note's; O(blocks) per render, the bar's own cost.
+- *VX-321* — `TakeStructureCopy.ArchivedRoad` (takesBoard · lensesBoard · writePanel · write) and
+  `movedNote(_:)`; `TakesViewModel.archivedRoad` reads the two facts the archive receipt already
+  reads (`writePanelBlockID`, `host`); `EditorSurfaceController` passes `.write`. The board's
+  sentence is byte-unchanged; the panel's reuses VX-154's rider's "“archived takes” below brings it
+  back"; Lenses reuses its archive receipt's road ("the archived list under its takes on the Takes
+  board (⌘2) brings it back"); Write says "its takes panel keeps it under “archived takes”" (no ⌘⇧T
+  in it: after the move Write's caret is in the NEW block, whose panel ⌘⇧T would open). The panel's
+  header literal is ONE constant now, `TakeStructureCopy.archivedTakesHeader`, read by the header
+  and by every receipt naming that list (the panel's archive receipt and Write's ⌘⇧A receipt
+  interpolate it — byte-identical). **PROVISIONAL copy** (her copy pass, as VX-154's rider's was —
+  P-U3-6); for the orchestrator's #245 bundle: P-C-1 below.
+- *VX-574* — `ReadTakesView.proseInk(_:)` = `tokens.ink` for both prose sites (the take's words and
+  an unfanned block's prose); the chrome around them (✓ chosen, labels) keeps its quiet colours.
+  `TakesBoardView.collapsedTakeLineFont(_:)` = `tokens.small` (VX-170's ruled one-line face; the
+  line stays muted, as that ruled sibling is). Nothing changed on the focused board's panes — the
+  measurement says there is nothing there to change; the walk's side-by-side captures (rows C4/C5)
+  are the acceptance evidence, BOTH voices.
+- *What did NOT change:* no operation, no schema, no `Sync/`, no `PaneSurface`/`EditorTextView`/
+  `BlockRangeIndex`, no structural door, no Shared/ file — **MOBILE PARITY: nothing
+  mobile-visible** (every touched file is Mac-only: `Features/`, `Registry/`).
+
+**PROVISIONAL (for the orchestrator's #245 bundle — I do not touch QUESTIONS.md):**
+- **P-C-1 — the receipt's words on the three non-board hosts (VX-321).** Built: each host names its
+  own road (above). Options: (a) as built — each host's own list; (b) one host-neutral sentence for
+  every host ("…the original is archived on its block — its takes keep it; ⌥⌘Z undoes it."), naming
+  no list; (c) Write's names the chord ("its takes panel (⌘⇧T on that block)…"). Most
+  spec-defensible: (a) — VX-154's rider's rule, her-copy-pass words.
+- **P-C-2 — the read twin's ink (VX-574).** Built: ink (her VX-574 word over the 13g brief's
+  "dimmed/read styling"). Option (b): keep a lighter twin but in the prose's ink at reduced opacity —
+  not built; her words ask for "not a weird light font compared to anything else".
+
+**RESIDUE / NOT MINE (for the orchestrator to ticket or drop):**
+- **R-C-1:** `RefusalCopy.swift:29` (Write's Make Block refusal) says "see blk n/n below" — the word
+  "blk" R5-4 retired; the bar now reads "block n/n". A Wording one-liner in Write, not a Takes face.
+- **R-C-2:** literal system fonts on Takes-family CHROME (not take words): `WriteTakesPanel` title
+  `.headline` + status `.caption` ×2, `LensesBoardView` `.caption`/`.callout.weight(.bold)`/
+  `.caption2`, `TakesShared` `.headline`/`.caption`, `DiffView`. The token-layer sweep of chrome
+  fonts is wider than VX-574's take-words scope.
+- **R-C-3:** `notes/copy-pass/all-user-facing-strings.md:614` still lists the old panel title (a
+  copy-pass inventory, not canon) — the copy pass's to refresh.
