@@ -33,6 +33,10 @@ struct VoicedButtonStyle: ButtonStyle {
     /// it reads THIS number rather than re-typing it (VX-179 U3 — the
     /// comments panel's deleted fold).
     static let labelInset: CGFloat = 5
+    /// …and its vertical inset, named for the same reason (VX-644 — the
+    /// quick-entry bar's wing label keeps its words on the box's first line
+    /// now that it is a voiced word).
+    static let labelVerticalInset: CGFloat = 2
 
     func makeBody(configuration: Configuration) -> some View {
         BodyView(configuration: configuration, tokens: tokens, role: role, font: font)
@@ -56,7 +60,7 @@ struct VoicedButtonStyle: ButtonStyle {
                 .lineLimit(1)
                 .foregroundStyle(ink)
                 .padding(.horizontal, VoicedButtonStyle.labelInset)
-                .padding(.vertical, 2)
+                .padding(.vertical, VoicedButtonStyle.labelVerticalInset)
                 .background(
                     hovering && enabled ? tokens.wash : Color.clear,
                     in: RoundedRectangle(cornerRadius: 4))

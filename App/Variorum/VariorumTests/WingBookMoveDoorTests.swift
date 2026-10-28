@@ -281,7 +281,9 @@ struct WingBookMoveDoorTests {
         #expect(WingSwitcherMenu.surfaceCapabilities.contains(.moveWingContents))
         // VX-377 (the VX-620 run, batch 4 — A JUSTIFIED EDIT, a new door on
         // the same act): + `.palette` — ⌘K's Move to Wing on the focused book.
-        #expect(CapabilityRegistry.capability(.moveBookToWing).doors == [.contextMenu, .palette])
+        // VX-632 (A JUSTIFIED EDIT, the same class): + `.menuBar` — ⌥⌘L, the
+        // ONE View-menu Move item it shares with the note's act by focus.
+        #expect(CapabilityRegistry.capability(.moveBookToWing).doors == [.contextMenu, .palette, .menuBar])
         #expect(ShellActions.paletteActs.contains(.moveBookToWing))
         #expect(CapabilityRegistry.capability(.moveWingContents).doors == [.surface])
         #expect(CapabilityRegistry.capability(.moveBookToWing).verb == "Move to Wing")

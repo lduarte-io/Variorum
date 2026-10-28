@@ -110,6 +110,9 @@ struct EditorCommands: Commands {
         // 13n-c U4: ⌥⌘, — MCP Settings… (the app menu, under Settings…) and
         // ⌘L — Switch Wing… (the View menu, beside ⌘K).
         .mcpSettings, .switchWing,
+        // VX-632: ⌥⌘L / ⇧⌥⌘L beside ⌘L — ONE Move item for the note's and the
+        // book's acts (`WingChords`), and the note's Copy.
+        .moveNoteToWing, .moveBookToWing, .copyNoteToWing,
         .divide, .extract, .makeBlock, .merge, .deleteInEveryTake,
         // 13j J4/J4b: the two ceremony doors, beside the verbs they used to
         // be the default of.
@@ -231,6 +234,23 @@ struct EditorCommands: Commands {
         //   · the platform: neither is reserved (the brief §13's list).
         case .mcpSettings: (",", [.command, .option])
         case .switchWing: ("l", .command)
+        // VX-632 (her #245 RB-6 ruling — both chords, the ⌥ variants of ⌘L).
+        // THE COLLISION SWEEP, RE-RUN AT THE TIP (2026-10-28, VX-648 batch 3 —
+        // RB-6's sweep in kind): ⌥⌘L AND ⇧⌥⌘L ARE FREE —
+        //   · this table: the `l` chords are ⌘L, ⇧⌘L (Save Choices as Lens)
+        //     and ⌃⌘L (Lock Library Now); no ⌥ on `l`;
+        //   · every `.keyboardShortcut(` call site in `Variorum/` and
+        //     `Shared/`: `l` only as those three; every `NSMenuItem`
+        //     keyEquivalent: none set;
+        //   · the local monitors: `WingSwitcherKeyCatcher` / `OneWingChord`
+        //     classify bare ⌘L only (⌥⌘L is no `tapL`); `PageTurnKeys`,
+        //     `BrowserNavKeyMonitor` arrows only; `DivideWSheet` refuses ⌘/⌃
+        //     while up; `CommentsPanel` ⌘⏎/⎋; the rest observe or are mouse;
+        //   · the system hot keys ([.quickNote], ⌃⌥⌘N) and the platform: not
+        //     reserved (Finder's and Safari's ⌥⌘L are app-scoped).
+        // The Move chord is the ONE menu item of both Move acts (`WingChords`).
+        case .moveNoteToWing, .moveBookToWing: ("l", [.command, .option])
+        case .copyNoteToWing: ("l", [.command, .option, .shift])
         // 13d batch 4 (A14, her row verbatim: "⌘⇧Enter = new block").
         // ⌘⇧⏎ SUPERSEDES the 13b-4D ⌥⌘N: one act declares one key (P-1),
         // every shortcut is a menu item (R73/R91/R93), and the sweep found
@@ -544,6 +564,20 @@ struct EditorCommands: Commands {
             Button(verb(.switchWing)) { windows.creationRouter()?.wingSwitcherRequested = true }
                 .keyboardShortcut("l", modifiers: .command)
                 .disabled(!canReachCreationTarget || !enabled(.switchWing))
+            // VX-632 (her #245 RB-6 ruling): ⌥⌘L / ⇧⌥⌘L, the ⌥ variants of
+            // ⌘L — VX-377's keyboard selector for the KEY window's focused
+            // note (or book, for Move), through the ⌘K rows' own road
+            // (`ShellActions.wingChord` → `openWingDestination`). ONE Move
+            // item for the note's and the book's acts (`WingChords` — their
+            // gates are disjoint); grey where neither acts, and a grey chord
+            // SPEAKS (`OneWingChord`, W-UX-6). The titles carry the ellipsis
+            // (A-648-7 — the menu face only).
+            Button(WingCopy.menuTitle(verb(.moveNoteToWing))) { actions?.wingChord(.move) }
+                .keyboardShortcut("l", modifiers: [.command, .option])
+                .disabled(!WingChords.enabled(.move, isEnabled: enabled))
+            Button(WingCopy.menuTitle(verb(.copyNoteToWing))) { actions?.wingChord(.copy) }
+                .keyboardShortcut("l", modifiers: [.command, .option, .shift])
+                .disabled(!WingChords.enabled(.copy, isEnabled: enabled))
         }
         // Row 67 (the Act 10 correction round): this group was anchored
         // `after: .saveItem` — and a non-document WindowGroup's File menu

@@ -240,8 +240,10 @@ struct WingSwitcherTests {
         // VX-377 (the VX-620 run, batch 4 — A JUSTIFIED EDIT, a new door on
         // the same acts): + `.palette` — ⌘K's Move/Copy to Wing on the
         // focused note (`ShellActions.paletteActs`; the walk's palette line).
+        // VX-632 (A JUSTIFIED EDIT, the same class — a new door on the same
+        // acts): + `.menuBar` — ⌥⌘L / ⇧⌥⌘L, the View menu's chord items.
         for id in [CapabilityID.moveNoteToWing, .copyNoteToWing] {
-            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu, .bottomBar, .palette])
+            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu, .bottomBar, .palette, .menuBar])
             #expect(ShellActions.paletteActs.contains(id))
             #expect(CommitBar.renderedCapabilities.contains(id))
             #expect(TakesBottomBar.renderedCapabilities.contains(id))

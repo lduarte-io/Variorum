@@ -450,6 +450,10 @@ struct CapabilityRegistryTests {
             // button was undeclared chrome — so the shell renders one
             // `.surface` door and joins the walk as a new line here.
             .union(RootView.surfaceCapabilities)
+            // VX-644 (A JUSTIFIED EDIT, the E2/E8 class — a new renderer is a
+            // new line): the quick-entry bar's "in ‹wing›" label renders
+            // `.switchWing` (the toolbar's twin is in `RootView`'s line above).
+            .union(QuickEntryBar.surfaceCapabilities)
             // 13e E2 (A17): Write's block-selection banner — the SECOND
             // renderer of the one delete-selected act (the board's banner is
             // the first). A JUSTIFIED EDIT to this pin: E2 adds a surface

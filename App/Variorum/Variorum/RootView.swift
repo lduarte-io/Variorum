@@ -213,8 +213,9 @@ struct RootView: View {
 
     /// The `.surface` acts this shell renders (P-1's declared ⇔ rendered
     /// walk): the sidebar toggle, a toolbar door since the correction round
-    /// made the split ours (row 2).
-    static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar]
+    /// made the split ours (row 2); and (VX-644) the toolbar's "in ‹wing›"
+    /// label, the wing switcher's door.
+    static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar, .switchWing]
 
     /// **13n-c U3 — this window's road to the MCP door** (`MCPShareRoad`):
     /// the two gates read off the door's NARROW observables (so this body
@@ -299,16 +300,27 @@ struct RootView: View {
             // every surface, mints into the current wing too, so the wing it
             // lands in sits beside it: the quick-entry bars' words and hover
             // (one vocabulary), from the shell's one wing (it follows the focused
-            // note). A label, not a door — so no glass button behind it.
+            // note). No glass button behind it.
+            // VX-644 (VX-552's remainder — her "the wing swap is not there and
+            // it is supposed to be"; A-648-7): the label IS the wing switcher's
+            // door — a plain-styled voiced word (the chrome vocabulary's quiet
+            // role) whose press is ⌘L's own act in this window
+            // (`ShellActions.openWingSwitcher` — the sheet, or ⌘L's one-wing
+            // note spoken). It still reads "in ‹wing›" at rest.
             ToolbarItem(placement: .navigation) {
                 let tokens = theme.tokens(for: scheme)
-                Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: 160, alignment: .leading)
-                    .help(QuickEntryCopy.wingHelp(wings.currentName))
+                Button {
+                    ShellActions(session: session, shell: router).openWingSwitcher()
+                } label: {
+                    Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: 160, alignment: .leading)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(QuickEntryCopy.wingHelp(wings.currentName))
             }
             .sharedBackgroundVisibility(.hidden)
         }
@@ -1266,7 +1278,9 @@ struct RootView: View {
                 offerLine: tourOfferLine,
                 wordsBand: wordsBand,
                 // VX-332: the Bookcase's quick entry stands down during a tour.
-                tourRunning: tourSlot.engine != nil)
+                tourRunning: tourSlot.engine != nil,
+                // VX-644: the bar's "in ‹wing›" is the wing switcher's door.
+                onSwitchWing: { ShellActions(session: session, shell: router).openWingSwitcher() })
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:
@@ -1283,7 +1297,9 @@ struct RootView: View {
                 // The correction round, batch E (row 33): the panel's book
                 // outline opens the book AT a note — the ascent's landing.
                 onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) },
-                starDoor: starDoor, wings: wings)
+                starDoor: starDoor, wings: wings,
+                // VX-644: the bar's "in ‹wing›" is the wing switcher's door.
+                onSwitchWing: { ShellActions(session: session, shell: router).openWingSwitcher() })
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts,

@@ -215,7 +215,16 @@ struct HelperView: View {
             // 13n-c U4 — VX-157 (her ratified chord, VX-157).
             ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
                 + "and tap L to step, release to go; clicking the wing's name in the "
-                + "Bookcase or Library masthead steps to the next one"),
+                + "Bookcase or Library masthead steps to the next one"
+                // VX-644 (PROVISIONAL words): the "in ‹wing›" label is the
+                // switcher's door too.
+                + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} beside New Note "
+                + "opens this switcher"),
+            // VX-632 (her #245 RB-6 ruling; PROVISIONAL words): ⌘L's two ⌥
+            // variants, VX-377's selector from the keys.
+            ("\u{2325}\u{2318}L", "move the note or book you're in to another wing \u{2014} "
+                + "type a few letters of the wing and \u{23CE}"),
+            ("\u{21E7}\u{2325}\u{2318}L", "copy the note you're in to another wing, the same way"),
             ("⌘,", "settings (voice, seams, takes options, tags)"),
             ("⌘/", "this helper"),
         ]),

@@ -2188,18 +2188,27 @@ nonisolated enum CapabilityRegistry {
         // move's context, never the note's (C-570-1's reading), so the two
         // identical "Move to Wing" verbs never list together. ⌘K lists these
         // rows only where they act (`WingPaletteDoors.lists` — P-2).
+        //
+        // VX-632 (her ruling at #245 RB-6, 2026-10-27: BOTH chords — "⌥⌘L Move
+        // to Wing… and ⇧⌥⌘L Copy to Wing…", the deliberate ⌥ variants of ⌘L
+        // Switch Wing): + `.menuBar` with the chord, under the SAME gate as
+        // the ⌘K row. ⌥⌘L is ONE View-menu item for the two Move acts — the
+        // note's on a note pane, the book's on a book pane (`WingChords` —
+        // never two identical items, RB-16's grammar); a grey chord SPEAKS
+        // (`OneWingChord`, W-UX-6). Collision sweep: RB-6's (the VX-620
+        // record's BATCH 4 RECORD), re-run at `EditorCommands.keyEquivalent`.
         Capability(
             id: .moveNoteToWing, verb: WingCopy.moveToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar, .palette],
-            shortcutLabel: nil, takesAccess: .native,
+            doors: [.contextMenu, .bottomBar, .palette, .menuBar],
+            shortcutLabel: "\u{2325}\u{2318}L", takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: noteWingDoor),
         Capability(
             id: .copyNoteToWing, verb: WingCopy.copyToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar, .palette],
-            shortcutLabel: nil, takesAccess: .native,
+            doors: [.contextMenu, .bottomBar, .palette, .menuBar],
+            shortcutLabel: "\u{21E7}\u{2325}\u{2318}L", takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: noteWingDoor),
         // 13i-d U5b — the book-move half (R-13id-6 item 9). The book door
@@ -2211,10 +2220,14 @@ nonisolated enum CapabilityRegistry {
         // target-less door's gate is a pane showing a book and another wing;
         // the per-target half (never the daily Journal) is the row door's own
         // `WingBookMoveDoor.drawn`, which ⌘K's listing reads too.
+        // VX-632: + `.menuBar` ⌥⌘L — the SAME View-menu item as the note's
+        // Move (`WingChords`: the book's act on a book pane); on the daily
+        // Journal's pane the selector's open-time re-check speaks the op's own
+        // refusal (a menu item cannot read the book row synchronously — RB-6).
         Capability(
             id: .moveBookToWing, verb: WingCopy.moveToWingVerb, scope: .book,
-            doors: [.contextMenu, .palette],
-            shortcutLabel: nil, takesAccess: .native,
+            doors: [.contextMenu, .palette, .menuBar],
+            shortcutLabel: "\u{2325}\u{2318}L", takesAccess: .native,
             unavailableNote: WingCopy.bookUnavailableNote,
             availability: { ctx in
                 ctx.focusedPaneShowsBook && ctx.wingCount > 1 ? .act : .unavailable
@@ -2646,6 +2659,12 @@ nonisolated enum CapabilityRegistry {
         // grey on the View menu — and the note says where another wing comes
         // from (the masthead already applies P-2 to that case: with one wing
         // the word does not cycle).
+        //
+        // VX-644 (VX-552's remainder; A-648-7): the "in ‹wing›" label — the
+        // window toolbar's beside New Note (`RootView`) and both quick-entry
+        // bars' (`QuickEntryBar`) — joins the `.surface` renderers: its press
+        // is THIS act in its window (`ShellActions.openWingSwitcher` — ⌘L's
+        // sheet; with one wing the note spoken, as ⌘L's chord does).
         Capability(
             id: .switchWing, verb: WingCopy.switchWingVerb, scope: .app,
             doors: [.menuBar, .surface],
