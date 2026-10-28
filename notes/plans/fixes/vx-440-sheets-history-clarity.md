@@ -721,7 +721,7 @@ Pieces (flipped per commit):
 
 #### WALK FIXES (W-1, W-2) — batch 2's implementer, resumed 2026-10-28 after the vx440-walk
 
-**Not done by this piece (first line):** nothing run on the stage — the pins are WRITTEN AND COMPILED
+**Not done by this piece (first line):** nothing run on the stage — the four pins are WRITTEN AND COMPILED
 (`build-for-testing` into `App/Variorum/DerivedData/vx440-merge`), their red-on-old and green runs and the
 walk re-shoot PENDING the orchestrator's window. Tree verified clean at resume (the two untracked walk
 dirs `.vx440-stagelogs/` · `.vx440-walk-shots/` are the walk's, never added); pulled to `f2cea88bb`.
@@ -766,7 +766,41 @@ Pieces (flipped per commit):
   sheet is gone: the landing and its wash happen on the page she can see; one landing behaviour. Wash
   mechanics untouched; no editor-seam file. Build ✓ (`vx440-merge`). The WF-3 pin turns GREEN here (RUN
   PENDING). DONE (this commit — the fix).
-- WF-5 verification + record: NOT STARTED.
+- WF-5 verification + record: `xcodebuild build-for-testing` (scheme Variorum, platform=macOS,
+  `DerivedData/vx440-merge`) ✓ TEST BUILD SUCCEEDED at every piece and at the final tree (`10476aab6`).
+  No core (`Sources/`) change in the walk fixes, so the core suite's batch-2 green stands (not re-run).
+  DONE (this commit).
+
+**Walk fixes — dispositioned:** W-1 FIXED on the restore road (Takes + Lenses), red-on-old pins at
+`383954445`, the fix at `872d94ec7`; the GENERAL class (an outside change to a live pane's take) recorded
+above as VX-248's sibling — a closeout ticket candidate (Bug · Suspected · Takes & Lenses; related VX-248),
+NOT fixed here. W-2 FIXED by construction (the sheet's act runs after the sheet is gone), the pin at
+`92fb2f2d8`, the fix at `10476aab6`; the exact dismissal-time step that cost the landing is not isolated
+headless — the walk re-shoot is its use evidence.
+
+**P-440-8 gains one consequence (for her verdict):** a restore beside Takes or Lenses ENDS the ring when it
+sat in a pane showing the restored take (VX-222's shape) — the pane then shows the restored words, read-
+only, until she clicks back in. The alternative is a second bend of P-3 (a live pane adopting an outside
+change when nothing of hers is pending) — hers/the architect's, with the general class.
+
+**Re-run window (the orchestrator's; suite TYPE names as a zsh array; compare "Executed N"):**
+- RED-ON-OLD at `383954445` (W-1 pins on the pre-fix tree): `-only-testing:VariorumTests/RestoreLandingTests`
+  — 8 tests, EXPECT 2 FAILURES: `aRestoreBesideTakesLeavesTheArticleShowingTheRestoredWords` (the article
+  pane's string is still "Changed since the moment, and typed into."; the pane still editable) and
+  `aRestoreBesideLensesLeavesTheLiveCellShowingTheRestoredWords` (the cell's string is still "A lens
+  cell's own later words."); the batch-2 six pass.
+- RED-ON-OLD at `92fb2f2d8` (W-2's seam, W-1 fixed): `RestoreLandingTests` — 9 tests, EXPECT 1 FAILURE:
+  `aSheetRestoreLandsWhereTheRowRestoreDoesAfterTheSheetIsGone` at its trace line (`[.acted, .dismissed]`);
+  its caret line fails too ONLY if the host reproduces the walked END (report which).
+- GREEN at the tip `10476aab6`: `RestoreLandingTests` (9) · `TakesEntryBandTests` (11 — the restore flash
+  pin rides the changed consumer) · `TakesChooseRingTests` · `TakesParkedFollowTests` ·
+  `TakesStepFollowTests` · `TakesStepFollowModelTests` (the ring/park family beside the new blur) ·
+  `TakesBoardTests` · `TakesLensFilterTests` · `BlockHistoryClarityTests` (6) · `BlockHistoryPaneTests` ·
+  `CommitsPageLedgerTests` (7 — the no-bezel source pin reads the pane file).
+- Walk re-shoot (both voices): Takes with the ring in the restored block → Restore from a pane row → the
+  article shows the restored words, washed, the ring off; the same beside Lenses (no wash — no landing
+  there); Read in full → Restore → the sheet closes, THEN Write lands the caret at the block's START with
+  the wash (a burst after the sheet is gone).
 
 **W-1 — TRACED (the mechanism, inputs → wrong output):**
 1. The Takes bar's history door asks for the FOCUSED block (`TakesViewModel.requestBlockHistory` → the
