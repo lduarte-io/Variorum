@@ -98,6 +98,44 @@ fileprivate struct LifecycleHost: View {
     }
 }
 
+/// **THE HOST'S LAUNCH, settled BEFORE a rig pumps the run loop** (the VX-601
+/// red window's incident — the run record's BATCH A RECORD, "THE REV-TREE
+/// LAUNCH DEATHS"; the VX-604 class). The test host IS the Debug app: it
+/// launches, opens its store on the protection road and only then builds its
+/// shell. A rig that pumps `RunLoop.main` while that launch is still in
+/// flight runs the host's shell construction SYNCHRONOUSLY INSIDE THE TEST'S
+/// TASK — where the dependency scope is the test's, not the app's prepared
+/// one — so the shell's first `@Dependency(\.database)` read found no value,
+/// fell to the live guard (`AppDatabase.liveValue`, the default store path)
+/// and fatal'd the host: every test of the rev421 and rev248 runs, the
+/// guards included, on every relaunch (their tests started +0.44 s after
+/// launch, the store opened at +0.8 s; the pre run's opened at +0.73 s and
+/// its tests started at +1.15 s — the same race, won by timing).
+///
+/// The wait SLEEPS, never pumps: while the test is suspended the host's
+/// launch runs on the main run loop outside any test's task, exactly as it
+/// did before the pre run's tests began. The signal is the host shell's own
+/// first landed settings value (`EditorTypography.isAdopted` — its one
+/// production setter is `ThemeStore.start`, inside the ready shell), then a
+/// half-second tail for the shell's first tasks to land (the pre run's tests
+/// began 0.42 s after its store opened, with no dependency issue at all);
+/// bounded, because a host that cannot open (a lobby) builds no shell at all;
+/// and once per process — the latch makes every later call free.
+@MainActor
+enum HostLaunchSettle {
+    private static var settled = false
+
+    static func wait(upTo limit: Duration = .seconds(20)) async {
+        guard !settled else { return }
+        defer { settled = true }
+        let deadline = ContinuousClock.now.advanced(by: limit)
+        while !EditorTypography.isAdopted, ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        try? await Task.sleep(for: .milliseconds(500))
+    }
+}
+
 /// The mounted rig: an OFFSCREEN window that is never ordered in (the
 /// `CommentTextAreaTests` undo pin's shape — a window owns the keyboard and
 /// the undo road, nothing needs to be seen).
@@ -136,6 +174,7 @@ fileprivate struct LifecycleRig {
     /// Let SwiftUI apply what the rig changed (an update pass, a removal, a
     /// liveness flip) — layout, display and a few run-loop and task turns.
     func settle() async {
+        await HostLaunchSettle.wait()  // never pump into the host's launch
         for _ in 0..<8 {
             hosting.layoutSubtreeIfNeeded()
             window.displayIfNeeded()
@@ -585,6 +624,7 @@ struct CanvasSwitcherRebindTests {
     }
 
     private func settle(_ window: NSWindow, _ hosting: NSView, turns: Int = 6) async {
+        await HostLaunchSettle.wait()  // never pump into the host's launch
         for _ in 0..<turns {
             hosting.layoutSubtreeIfNeeded()
             window.displayIfNeeded()

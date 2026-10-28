@@ -712,3 +712,64 @@ reopens clean and still held before anything else. Captures one per row per voic
   batch. (R-2) the optional naive-follow demonstration (VX-227's batch4revert over this fix: its
   scratch pins green, proving the park redundant for contamination) was NOT built — the Canvas pin
   is the same demonstration on a real road.
+
+## THE REV-TREE LAUNCH DEATHS — the rig diagnosis (batch A implementer, resumed 2026-10-27 ~20:30)
+
+**Read first:** the INCIDENT section and its CORRECTION (above, the orchestrator's and the
+coordinator's). Bounded brief: why the rev421/rev248 test hosts died where the pre tree's did not;
+fix the RIG or the tree-build road only; rebuild; no `xcodebuild test` (not ours).
+
+**THE TRACE (from the three logs, `App/Variorum/DerivedData/logs/red-vx601a-{pre,rev421,rev248}.log`):**
+1. *Not the old code paths.* The fatal fires in EVERY test of both rev runs — the guards included
+   (`aPaneKeepsItsHistoryAcrossADetachAndReattach`, `aRebindHandsNothingUp`), whose code is identical
+   in all three trees and never touches a torn-down pane or a re-bind — each time preceded by the same
+   failing issue, attributed to the RUNNING test: `@Dependency(\.database) has no test implementation
+   … Location: VariorumCore/Operations.swift:16`, then `AppDatabase+Dependency.swift:19` (the live
+   guard, `AppDatabase.liveValue`, opening the DEFAULT path — the relic `Application Support/Variorum/`)
+   → fatal → "Restarting after unexpected exit" → the next test, the same death.
+2. *Not a different build.* All three were made by the one command (`xcodebuild -scheme Variorum
+   -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> build-for-testing`), from the same
+   tests, differing only in `PaneSurface.swift` (pre = c2a0b833's file; rev421/rev248 = one-line
+   behavioural reverts — the batch A record's builds line).
+3. *A LAUNCH RACE in the test host.* The test host IS the Debug app; it opens its store on the
+   protection road asynchronously after launch and only then builds its shell. **Pre:** process start
+   20:03:30.76 → `[protection] road: opened` 20:03:31.49 → "Test run started" ~20:03:31.91 (the shell
+   was built before any test ran — zero dependency issues in the whole run). **rev421 (and rev248, every
+   relaunch):** process start 20:04:04.81 → "Test run started" 20:04:05.25 → road opened 20:04:05.62
+   (MID-TEST) → the shell's hot-key registration (RootView `onAppear`) at 05.785 → the `\.database`
+   issue → fatal 05.90. The tests began ~0.44 s after launch, before the store opened.
+4. *Why inside the test.* The pins' `settle` pumps `RunLoop.main` from within the test's task; the host's
+   shell, built when the open completes, was therefore constructed SYNCHRONOUSLY inside that task —
+   where swift-dependencies resolves `@Dependency` in the TEST's scope, not the app's
+   `prepareDependencies` ambient — so the shell's first `\.database` read found nothing and fell to the
+   live guard. (The launch-time `\.date` reports at `AppSession.swift:762`, "Test «unknown» recorded a
+   warning", are VX-439's documented harmless noise, outside any test.)
+
+**VERDICT: a RIG fact (the VX-604 class — the test host's own launch), NOT a production bug.** Outside a
+test there is no test scope: the shell's reads see the ambient the bootstrap prepared before any view
+exists. Nothing in batch A's production change is on the path (the fatal fires in tests that exercise
+none of it). The pre run's clean pass was the same race, won by timing.
+
+**THE RIG FIX (this commit — `VariorumTests/PaneLifecycleTests.swift` only):** `HostLaunchSettle.wait()`
+— called at the top of BOTH settle helpers, so no rig ever pumps the run loop before the host's launch
+has settled. It SLEEPS (never pumps) until the host shell's first landed settings value
+(`EditorTypography.isAdopted`, whose one production setter is `ThemeStore.start` inside the ready
+shell), then a 0.5 s tail (the pre run's observed gap was 0.42 s); bounded at 20 s (a host that cannot
+open builds no shell); once per process (a latch — later calls are free). While the test sleeps, the
+host's launch runs on the main run loop outside any test's task — the pre run's condition, made
+deterministic. Not done, deliberately: wrapping the rig suites in `withDependencies` (it would let the
+host's shell build against the test's in-memory store and still surface the shell's OTHER unscoped
+dependencies as failures attributed to the pin).
+
+**Exposure beyond this batch (for the orchestrator / VX-604):** any suite that pumps `RunLoop.main`
+before the host's launch settles is exposed when it runs FIRST in a process — the existing
+no-dependency rigs (`PaneFindFaceTests`, `PaneSurfaceTests`) fatally, the `withDependencies` suites by
+building the host's shell inside their scope. A suite-wide host gate is VX-604's to design; this batch's
+three suites carry their own.
+
+**LIVE STATUS (this follow-up):**
+- Trace + verdict — DONE (above).
+- Rig fix — DONE (this commit); `DerivedData/vx601a-post` rebuilt, build-for-testing GREEN.
+- Rebuild of `vx601a-pre`, `vx601a-rev421`, `vx601a-rev248` with the fixed rig — NOT-STARTED (next
+  commit; reverts committed-first, restored by checkout, as before).
+- The red runs on all three + the green tiers — PENDING the coordinator's next window.
