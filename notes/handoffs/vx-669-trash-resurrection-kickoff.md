@@ -1,8 +1,13 @@
 # VX-669 run kickoff — deleted Sherlock books resurrect from sync (+ the Trash's responsiveness)
 
-**STATUS: READY FOR KICKOFF (written 2026-10-28 on the Air, trace complete; the fix runs on the PRO — the diff lives in `Sources/VariorumCore/Sync/`, so this is the one Sync/-touching effort and it holds that slot).**
+**STATUS: READY FOR KICKOFF — HER RULINGS LANDED AT THE 2026-10-28 SITTING (trace complete on the Air; the fix runs on the PRO — the diff lives in `Sources/VariorumCore/Sync/`, so this is the one Sync/-touching effort and it holds that slot).**
 
-**Kickoff (paste-ready):** `/architect-phase vx-669 vx-670 vx-672` — riders to offer at kickoff: VX-671 (Trash multi-select), VX-654 (the quadratic `originalsStrandedBy` CTE — same code neighborhood as VX-670). Mint the run ticket per the skill; members by sub-issue listing. Cast: **the Sync/ half is Fable work** (CLAUDE.md — `SampleLibraryDedupe.swift` is in `Sync/`); Opus may implement the Trash-surface members; Fable cold-reviews the whole diff.
+**Kickoff (paste-ready):** `/run-phase vx-669 vx-670 vx-654 vx-671` — the membership is HER ruled bundle (sitting, 2026-10-28): VX-669 (the resurrection), VX-670 (Trash speed — **Pre-launch, her label**), VX-654 (the quadratic `originalsStrandedBy` CTE), VX-671 (Trash multi-select). **VX-672 (the minutes-long phone round) is deliberately NOT a member** — her word: "i don't think that the slow phone round needs to be fixed right now"; it stays Todo on the board. Mint the run ticket per the skill; members by sub-issue listing. Cast: **the Sync/ half is Fable work** (CLAUDE.md — `SampleLibraryDedupe.swift` is in `Sync/`); Opus may implement the Trash-surface members; Fable cold-reviews the whole diff.
+
+**HER RULINGS (2026-10-28 sitting, binding on this run):**
+- **The fix direction is RULED: REMOVE THE DEFENSE LEG** (option B below) — her words at the sitting: "seems like simplifying would probably be better but I don't know what the level of risk is"; the risk was laid out (without the defense, the rare crossing race costs a seeded copy a visible, recoverable trip to the Trash — nothing lost) and she confirmed "Remove the defense leg". The §Fix-directions section below is kept as the trace's record; option B is what gets built. The QUESTIONS #143(b) row and SyncSpec §7's dedupe bullet take the delta at this run's closeout (the two-file rule).
+- **Launch gating:** VX-669 does NOT gate the beta — her words: "i'm the only two device user right now unless someone logs in on two different macs, so i'm not convinced that it should gate launch." **VX-670 IS Pre-launch** (her label, applied) — "dealing with the trash speed is more of a big deal to me."
+- The acceptance note stands: her Sherlock deletes stick only once the PHONE build also carries the fix — and the VX-633 seed swap (deleting the old Sherlock books) waits on exactly that.
 
 **Her reports, verbatim (2026-10-28, the morning sitting):**
 - "I have 2 copies of the adventures of sherlock holmes, and several times I have tried deleting them, and they have both returned … I didn't full delete them - they restored themselves from the trash."
@@ -58,9 +63,9 @@ Either A or B also needs: the purge-intent staleness pin (above); a **red-on-old
 - The dev store does not sync by design; the live proof road is the PROD TEST ROAD with vxtest accounts (`Tools/WalkKit/first-run-walk.sh`, `~/.variorum/prod-test-accounts.env`) or her own hands on her real account at her word. Her real store: A1 safety copy first, always.
 - SyncSpec read IN FULL before touching `Sync/` (binding); the fix is a client-side repair change — **no schema, no lockstep event** under options A/B.
 
-## Her items bundled from this sitting (answer/rule at the Pro kickoff)
+## Her items — ALL RULED at the 2026-10-28 sitting (see the rulings block at the top)
 
-1. **Rule the fix direction:** Option A (narrow to in-flight evidence) or B (remove the defense leg) — A recommended.
-2. **Pre-launch label:** hers per ticket — VX-669 (and VX-670?) gate the Wednesday beta build? (Seed work VX-633 depends on 669's fix per the trace.)
-3. VX-671 (multi-select) as a rider on this run, or later?
-4. The one-hour settle window and #143(b)'s wording: after the fix, the QUESTIONS #143(b) row and SyncSpec §7's dedupe bullet need the delta recorded at closeout (the two-file rule).
+1. Fix direction: RULED — remove the defense leg.
+2. Pre-launch: VX-670 labeled; VX-669 not gating.
+3. Riders: VX-671 and VX-654 are RUN MEMBERS; VX-672 stays on the board unfixed.
+4. Closeout owes the canon delta: QUESTIONS #143(b)'s row and SyncSpec §7's dedupe bullet updated to the defense-leg removal (the two-file rule; the dated narrative to AppSpecRecord).
