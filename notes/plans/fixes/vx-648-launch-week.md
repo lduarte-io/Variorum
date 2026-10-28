@@ -297,6 +297,21 @@ Core: NEW `Sources/VariorumCore/Domain/MCPLibraryClients.swift` · `Operations/O
 
 Batch duties: per-member pins (the chord/door additions get registry-walk coverage; VX-643's removal gets the inverted pin); `swift test` green; app-target suite needs listed for the stage window; every new/changed product sentence recorded for the bundle.
 
+## BATCH 3 RECORD (implementer: Opus, fresh session, 2026-10-28)
+
+**Not done (first line, kept current):** NO `xcodebuild test`, NO app launch, NO walk, NO capture, NO simulator by this batch (no stage claim — the orchestrator's). PENDING: everything below the preflight.
+
+*Read in this session's own context before any code: CLAUDE.md + its loaded canon, this record IN FULL (the shared sections, BATCH 1 and 2 RECORDS, the RULINGS LOG, WALK 1), `notes/SessionResiliencyProtocol.md`, `notes/SurfaceContracts.md` §The app + §The Bookcase and books, the VX-620 record's BATCH 4 RECORD (the probe, THE DESIGN, the pins, RB-6's chord sweep, the 4-F1/4-F2 legs), AppSpec §9 (the union star, `setShelfPinned`), the four ticket bodies + VX-563's comment (Linear, read-only), and the code anchors. No subagent.*
+
+LIVE STATUS (per piece — flipped in the same commit as each piece):
+- **No behavioural revert is in flight.**
+- B3-0 — preflight + this record: DONE (this commit).
+- B3-1 — VX-643 (the star cap retired on every road: core op + refusal, the wire's description + RB-8's undo arm, her Mac doors' words, the helper + both tutorials, the phone's doors + tutorial line; the inverted cap pin; the P1 check): NOT-STARTED.
+- B3-2 — VX-632 (⌥⌘L Move to Wing… / ⇧⌥⌘L Copy to Wing… over VX-377's selector; registry chords, key wiring, helper rows, registry-walk + gate pins): NOT-STARTED.
+- B3-3 — VX-644 (the "in ‹wing›" label IS the switcher's door — ⌘L's sheet, the same act; P-2 with one wing): NOT-STARTED.
+- B3-4 — VX-563 (⌘↑/⌘↓ step notes in the book's view while no text holds the keyboard; document start/end inside an editor): NOT-STARTED.
+- B3-5 — close (headless suites, Mac `build-for-testing` into a FRESH `DerivedData/b3`, the app-window list, the bundle sentences, the MobileSoul row draft, self-assessment): NOT-STARTED.
+
 ## BATCH 4 — the book navigator & small fixes: VX-645 · VX-646 · VX-630 · VX-631
 
 **The implementer's brief is this section + the shared sections above.** Required reading: `notes/plans/fixes/vx-562-outline-follow.md` IN FULL (the follow brain, R-562-A/C/D′, the at-bottom clamp, P-562-1…8, the reachable-travel fact); `notes/SurfaceContracts.md` §The Bookcase and books ("The Outline follows the page" + the mode row) and §The app (the Open list's follow idiom — VX-646's ready shape); QUESTIONS #246 (what she ratified vs. what these two tickets now change). OVERLAP: VX-440 (live, parallel) touches the navigator and Book Settings — build on this branch as normal; the merge-time intersection is the orchestrator's and coordinator's.
