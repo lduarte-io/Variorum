@@ -494,6 +494,15 @@ keys through `keys.sh`, never cliclick text; guarded acts ≥ 2.6 s apart; captu
 her app never launched, quit or typed into; extras killed by proven PID only; every renew request routes
 through the orchestrator to the coordinator BEFORE it happens.
 
+### UNIT 2 — THE WALKER'S LIVE STATUS (the Opus walker owns this section)
+
+Walker evidence folder: `App/Variorum/DerivedData/first-run-walk/walker-vx623-20261027T1856/` (gitignored).
+- LEG 0 (18:56) DONE: 11 items + inodes recorded, folder inode 198725396, key file e11e5233; prefs exported; appearanceChoice dark.
+- LEG 1 (safety copy + set-aside): IN-PROGRESS. If this session dies from here, the slot may be set aside as
+  `Variorum-dev-aside-vx623walk` with the cmp-verified copy `Variorum-dev-safety-vx623walk` beside it — restore by
+  `mv Variorum-dev-aside-vx623walk Variorum-dev` after moving any walk-made `Variorum-dev` aside; never Resume.
+- LEG 2–6: NOT-STARTED.
+
 ## Environment traps (binding; carried into every brief verbatim)
 
 The vx-510 run's traps apply: instance checks by PATH (`pgrep -fl 'Variorum.app/Contents/MacOS'`), her
