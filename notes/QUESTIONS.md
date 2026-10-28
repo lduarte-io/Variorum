@@ -3703,7 +3703,7 @@ triaged: VX-625 (the StarContext flake, the VX-532 class) · VX-626 (the Clients
 session's START time) · VX-628 (Terminal's bottom-bar receipt truncates). Walker observations recorded: W-2 (receipts
 name a date-titled note by its date), W-3 (Activity's target_kind asymmetry on refused gathering mints — the no-oracle
 posture, reviewer-endorsed), F-W2 = RB-18. The roster lesson held: the sub-issue listing governed at kickoff AND
-before the ladder (seven members, not the kickoff's six).
+before the ladder (seven members, not the kickoff's six). **Status: the FOUR HEADLINERS ANSWERED 2026-10-27 (her evening pass, the question sheet): RB-1 AS BUILT, ratified (tags first; born starred cap-exempt only where a star is the only way in; `★ OR #a` takes #a on the wire) · RB-4 RATIFIED (the whole-book import's per-note records stand; P-VX252-1/P-VX254-2's ids-only arm retires) · RB-6 BOTH CHORDS (⌥⌘L Move to Wing… + ⇧⌥⌘L Copy to Wing… → VX-632) · RB-18 KEEP AS RULED (the wing follows on open and on focus only; a move never switches it). Remaining open for her leisure: RB-3, RB-7, RB-8, RB-13, RB-14, RB-15/RB-5 (the copy pass), RB-16, and the offers RB-2/RB-10/RB-17.**
 
 #246 — **THE VX-562 BUNDLE (the binding record is `notes/plans/fixes/vx-562-outline-follow.md` §MORNING BUNDLE; your
 checklist leads `notes/handoffs/vx-562-handoff.md`), OPEN — your morning.** The headline taste call: **P-562-8** — at
