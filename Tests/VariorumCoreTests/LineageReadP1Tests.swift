@@ -359,6 +359,60 @@ struct LineageReadP1Tests {
                 "seam rounds ×3: \(short) → \(long) VM instructions — linear is ≤ ×3, the pair set was ×9")
     }
 
+    /// P1's other half: the receipt's read must not grow with the LIBRARY.
+    /// The same seam note, the same delete, in a library fifteen times
+    /// thicker (more blocks AND more lineage edges elsewhere) must cost the
+    /// same. Not red on the old body (its pair set was quadratic but
+    /// seek-driven); RED on the rewrite's first draft (f1066ac8a), whose
+    /// un-materialized candidate set SQLite flattened into a full scan of
+    /// `block` (the `scope` union) and of `edge` (the neighbourhood's seed) —
+    /// the probe measured ~19 VM instructions per library block.
+    @Test func theDeleteReceiptsReadDoesNotGrowWithTheLibrary() throws {
+        func work(blocksEach: Int) throws -> Int {
+            try withOperations { ops, db in
+                for n in 0..<20 {
+                    let other = try ops.createPost(title: "library \(n)")
+                    for b in 0..<blocksEach {
+                        let minted = try ops.seedBlock(
+                            in: other.id, text: "Library paragraph \(b) of note \(n). And a second sentence.")
+                        if b % 2 == 0 { _ = try ops.divide(minted.block.id, cut: 8) }
+                    }
+                }
+                let (_, a, c) = try seamNote(ops, rounds: 10)
+                try ops.deleteBlock(a[10])
+                #expect(try db.read {
+                    try Queries.originalsStrandedBy($0, blockIDs: [a[10]])
+                } == [c[10]])
+                return try instructions(db) {
+                    _ = try Queries.originalsStrandedBy($0, blockIDs: [a[10]])
+                }
+            }
+        }
+        let thin = try work(blocksEach: 2)
+        let thick = try work(blocksEach: 30)
+        print("VX-654 originalsStrandedBy VM instructions: library ×1 \(thin), ×15 \(thick)")
+        #expect(Double(thick) < Double(thin) * 1.5,
+                "library ×15: \(thin) → \(thick) VM instructions — the library must not drive the receipt (P1)")
+    }
+
+    /// The plan, as the claim above's mechanism: the lineage walks seek by
+    /// edge and by block id and only ever SCAN their own small sets — never
+    /// the `block`, `edge` or `container_block` tables.
+    @Test func theDeleteReceiptsReadNeverScansAStoreTable() throws {
+        try withOperations { ops, db in
+            let (_, a, _) = try seamNote(ops, rounds: 3)
+            try ops.deleteBlock(a[3])
+            let plan = try capturedPlan(db) {
+                _ = try Queries.originalsStrandedBy($0, blockIDs: [a[3]])
+            }
+            let tableScans = plan.split(separator: "\n").filter { line in
+                ["SCAN e", "SCAN o", "SCAN d", "SCAN placed", "SCAN edge", "SCAN block", "SCAN container_block"]
+                    .contains { line == $0 || line.hasPrefix($0 + " ") }
+            }
+            #expect(tableScans.isEmpty, "store-table scans \(tableScans); plan was:\n\(plan)")
+        }
+    }
+
     // MARK: - VX-653: preservedOriginals — GREEN VERIFICATION (hollow at HEAD)
 
     /// The tray's preserved-originals listing, exact: a seam history, a

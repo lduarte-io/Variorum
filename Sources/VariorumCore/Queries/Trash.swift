@@ -621,9 +621,21 @@ extension Queries {
     ///   descendants. At most two rows per node (live or not).
     /// A candidate reached only by dead-row walks is stranded; one never
     /// reached has no real descendant (no clock to ride) and is not.
+    ///
+    /// **`MATERIALIZED` and `CROSS JOIN` are load-bearing, not style** (the
+    /// `ShelfQueries` precedent). Left to itself SQLite flattened `cand` into
+    /// each of its three uses and planned the `scope` union's half as a scan
+    /// of the whole `block` table and the neighbourhood's seed as a scan of
+    /// the whole `edge` table — linear in the deleted block's lineage, but
+    /// also in the LIBRARY (P1's other half; the probe measured ~19 VM
+    /// instructions per library block). Materialized, and with every walk
+    /// driven from its own small set, the plan SCANs only the query's own
+    /// CTEs and SEARCHes every store table by index.
+    ///
     /// Pinned by `LineageReadP1Tests` — exact rows on rich fixtures (run
-    /// against the old body first, green on both sides) and a VM-step bound,
-    /// red on the old body.
+    /// against the old body first, green on both sides), a VM-step bound
+    /// over the seam history (red on the old body), and the library-growth
+    /// and plan pins (red on this rewrite's un-materialized first draft).
     public static func originalsStrandedBy(
         _ db: Database, blockIDs: [String]
     ) throws -> [String] {
@@ -641,9 +653,9 @@ extension Queries {
                   JOIN anc a ON e.source_block_id = a.id
                   WHERE e.type = 'derived_from'
                 ),
-                cand(id) AS (
+                cand(id) AS MATERIALIZED (
                   SELECT o.id FROM anc a
-                  JOIN block o ON o.id = a.id
+                  CROSS JOIN block o ON o.id = a.id
                   WHERE o.deleted_at IS NULL AND o.archived_at IS NULL
                     AND NOT EXISTS (
                       SELECT 1 FROM container_block placed
@@ -651,16 +663,16 @@ extension Queries {
                 ),
                 nb(id) AS (
                   SELECT e.source_block_id FROM cand c
-                  JOIN edge e ON e.target_block_id = c.id AND e.type = 'derived_from'
+                  CROSS JOIN edge e ON e.target_block_id = c.id AND e.type = 'derived_from'
                   UNION
                   SELECT e.source_block_id FROM nb n
                   JOIN edge e ON e.target_block_id = n.id AND e.type = 'derived_from'
                 ),
-                scope(id) AS (SELECT id FROM nb UNION SELECT id FROM cand),
+                scope(id) AS MATERIALIZED (SELECT id FROM nb UNION SELECT id FROM cand),
                 up(id, live) AS (
                   SELECT e.target_block_id, d.deleted_at IS NULL FROM nb n
-                  JOIN block d ON d.id = n.id
-                  JOIN edge e ON e.source_block_id = n.id AND e.type = 'derived_from'
+                  CROSS JOIN block d ON d.id = n.id
+                  CROSS JOIN edge e ON e.source_block_id = n.id AND e.type = 'derived_from'
                   WHERE e.target_block_id IN (SELECT id FROM scope)
                   UNION
                   SELECT e.target_block_id, u.live FROM up u
