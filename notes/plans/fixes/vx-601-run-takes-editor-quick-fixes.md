@@ -1856,10 +1856,12 @@ removed.
 
 ## BATCH C RECORD — bars, chrome, wording, the bounded flake: VX-427 + VX-574 + VX-586 + VX-321 + VX-337 (implementer: opus-implementer, 2026-10-28)
 
-**NOT DONE (first line, kept current):** everything below is IN PROGRESS — the suite window and the
-USE walk are the orchestrator's (this session never runs `xcodebuild test`, never launches the app,
-never claims the stage); every red/green claim will be a PREDICTION, PENDING that window. No revert
-is in flight.
+**NOT DONE (first line, kept current):** the suite window and the USE walk (rows C1–C6) — both the
+orchestrator's (this session never runs `xcodebuild test`, never launches the app, never claims the
+stage), so **every red/green claim below is a PREDICTION, PENDING that window**; VX-337's SOAK flake
+(`TakesBoardSoakTests` seed 21) — not traced, the bound spent on the fold flake (hypotheses below);
+the cold ladder. **No revert is in flight** — all seven trees are built and the source is HEAD
+(`git diff` empty; no `VX601C-REVERT` marker anywhere).
 
 **LIVE STATUS**
 - Reading — DONE: this file (the sitting record R-601-3, members VX-427/VX-574/VX-586/VX-321/VX-337,
@@ -1867,20 +1869,22 @@ is in flight.
   ORCHESTRATOR DISPOSITIONS — VX-637/VX-638 not re-fixed), `notes/SurfaceContracts.md` "The app" and
   "The note", `notes/SessionResiliencyProtocol.md`; the tickets VX-321/VX-337/VX-574/VX-586 read
   through Linear (read-only); the VX-282 record's O-3 (VX-321's origin).
-- Trace — DONE for VX-427 · VX-586 · VX-321 · VX-574 (below); VX-337 IN PROGRESS (the bounded trace).
-- Fixes + pins — DONE (this commit) for VX-427 · VX-586 · VX-321 · VX-574:
-  `VariorumTests/TakesBarAndFacesTests.swift`, 11 tests in 4 suites; `DerivedData/vx601c-post`
-  build-for-testing GREEN (log `App/Variorum/DerivedData/logs/c-post-build.log`; no warning in a
+- Trace — DONE, all five (below; VX-574's main hypothesis FALSIFIED by measurement, VX-337's fold
+  flake traced to a test over-assertion of a pinned design state).
+- Fixes + pins — DONE: VX-427 · VX-586 · VX-321 · VX-574 (44519c5dc, the Lenses pin hardened
+  fa7ea5567) — `VariorumTests/TakesBarAndFacesTests.swift`, 11 tests in 4 suites; VX-337
+  (e5731ecc4) — `TakesArticleScrollTests.swift`: the fold pin's state assertion corrected + one pure
+  pin. `DerivedData/vx601c-post` build-for-testing GREEN (`logs/c-post-build3.log`; no warning in a
   touched file).
-- Revert trees — IN PROGRESS from fa7ea5567 (**REVERTS IN FLIGHT while this line says so** — a
-  successor reads `git diff`; restore = `git checkout fa7ea5567 -- App/Variorum`). Six trees, each
-  an APFS clone of `vx601c-post` built incrementally: `vx601c-pre` (all five reverted),
-  `vx601c-rev427`, `-rev586`, `-rev321`, `-rev574`, `-rev337`. Each revert IN PLACE on the member's
-  face/door function (marker `VX601C-REVERT`; the script, kept beside the trees:
-  `App/Variorum/DerivedData/c-revert.py`), restored from the fix SHA by id, never from HEAD (the
-  batch B lesson).
-- VX-337 — DONE (the bounded trace yielded for the fold-settle flake — a deterministic TEST fix +
-  its pure pin, this commit; the soak flake's trace NOT done, the bound spent — findings below).
+- Revert trees — DONE from fa7ea5567: `vx601c-pre` (all five reverted) · `vx601c-rev427` ·
+  `-rev586` · `-rev321` · `-rev574` · `-rev337`, each an APFS clone of `vx601c-post` built
+  incrementally, every one build-for-testing GREEN (`logs/c-<tree>-build.log`; zero "will never be
+  executed"/"treated as an argument" warnings — the batch B slip class cannot be here); each revert IN
+  PLACE on the member's face/door function (marker `VX601C-REVERT`; the script beside the trees,
+  `App/Variorum/DerivedData/c-revert.py`), restored by `git checkout fa7ea5567 -- App/Variorum`
+  (by id, never HEAD). Partition spot-check on the binaries: the old panel-title literal
+  "Takes — block " is in exactly `pre` and `rev586`'s dylibs, in none of the other five.
+- Prediction table, READY-FOR-SUITES, walk rows C1–C6, self-assessment — DONE (below).
 - Red/green runs, walk — PENDING (the orchestrator's window).
 
 **THE TRACES (pre-fix line numbers).**
@@ -2045,3 +2049,135 @@ failure, the three `.standard` keys and the strip's realized ids; no fix is prop
   fonts is wider than VX-574's take-words scope.
 - **R-C-3:** `notes/copy-pass/all-user-facing-strings.md:614` still lists the old panel title (a
   copy-pass inventory, not canon) — the copy pass's to refresh.
+
+**THE PREDICTION TABLE (the red/green runs — PENDING the orchestrator's window).** R = red, G =
+green; "guard" = green on every tree by design.
+
+| # | Test | pre | rev427 | rev586 | rev321 | rev574 | rev337 | post |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `TakesBarTakeCountTests/theBarCountsTheFocusedCardsOwnTakeNotTheChosenOne` | R | R | G | G | G | G | G |
+| 2 | `…/onTheLensesBoardTheBarCountsTheLensColumnsTake` | R | R | G | G | G | G | G |
+| 3 | `TakesPanelBlockLabelTests/thePanelTitleSaysWhereTheBlockSitsNeverItsID` | R | G | R | G | G | G | G |
+| 4 | `…/aBlockTheNoteDoesNotHoldReadsTheHonestBlank` | R | G | R | G | G | G | G |
+| 5 | `TakeMovedReceiptWordingTests/eachHostsReceiptNamesItsOwnList` (its header + board lines are guards) | R | G | G | R | G | G | G |
+| 6 | `…/thePanelsDoorSpeaksThePanelsList` | R | G | G | R | G | G | G |
+| 7 | `…/theLensesBoardsDoorPointsAtTheTakesBoard` | R | G | G | R | G | G | G |
+| 8 | `…/theTakesBoardsDoorKeepsItsDisclosuresWords` (guard) | G | G | G | G | G | G | G |
+| 9 | `…/writesDoorNamesTheTakesPanelsList` | R | G | G | R | G | G | G |
+| 10 | `TakesProseFaceTests/theReadTwinDrawsHerWordsInTheVoicesInk` | R | G | G | G | R | G | G |
+| 11 | `…/theCollapsedCardLineWearsTheVoicesFont` | R | G | G | G | R | G | G |
+| 12 | `TakesArticleScrollTests/aPlainRoundTripsRestoreArrivingBetweenReportsIsArrivedNotLost` | R | G | G | G | G | R | G |
+| 13 | `TakesArticleScrollTests/aShortRowStraddlingTheFoldComesBackAboveIt` (VX-337's flake) | load-dependent (the old assertion) | ← | ← | ← | ← | load-dependent | G (deterministic in the traced variable) |
+| — | `TakesArticleScrollTests`' other 39 | G | G | G | G | G | G | G |
+
+pre: #1–#7 #9–#12 red (11 red); rev427 #1–#2; rev586 #3–#4; rev321 #5–#7 #9; rev574 #10–#11; rev337
+#12; their union is pre's. A pin green on its own member's revert is HOLLOW — record it, never fix it.
+#6/#7/#9 compare the door's receipt with BOTH the copy function and a literal, so a revert of the
+copy function cannot agree with itself (the literal line reds).
+
+## READY-FOR-SUITES — batch C (the orchestrator's window; from `App/Variorum/`)
+
+All seven builds are done; `test-without-building` on each, array args:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building -only-testing:…`.
+Confirm each "Test run with N tests in M suites" line and read the `skipped:` lines (VX-604: 0 ran =
+no verdict). The new pins are headless model/copy pins and pure-board pins (no window, nothing that
+pumps the run loop before a test body except `withEditor`'s own harness and `TakesArticleScrollTests`'
+existing mounts — the suite's established rig).
+1. **THE RED RUNS** — on `vx601c-pre`, `-rev427`, `-rev586`, `-rev321`, `-rev574`, `-rev337`:
+   `-only-testing:VariorumTests/TakesBarTakeCountTests -only-testing:VariorumTests/TakesPanelBlockLabelTests -only-testing:VariorumTests/TakeMovedReceiptWordingTests -only-testing:VariorumTests/TakesProseFaceTests -only-testing:VariorumTests/TakesArticleScrollTests`
+   — expect **52 tests in 5 suites** on each (11 + 41), the reds exactly as the table. (Only `pre` and
+   `rev337` carry the old fold assertion; met red there, #13 is VX-337's own flake, not a verdict.)
+2. **THE GREEN RUN, tier 1** (on `vx601c-post`) — the pins, VX-337's suite and its sibling (the
+   restore-cadence guard), the soak (the other flake; the stack card), and every suite touching a
+   changed face or door (the bar, the panel, the take↔block receipt on all four hosts, the archive
+   receipts, the read twin's holdsTakes, the card menus):
+   `-only-testing:VariorumTests/TakesBarTakeCountTests -only-testing:VariorumTests/TakesPanelBlockLabelTests -only-testing:VariorumTests/TakeMovedReceiptWordingTests -only-testing:VariorumTests/TakesProseFaceTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/TakesArticleWatchTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/TakesWordCountTests -only-testing:VariorumTests/TakeToBlockDoorTests -only-testing:VariorumTests/CopyAllTakesDoorTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/WriteTakesPanelTests -only-testing:VariorumTests/WriteTakesPanelChooseTests -only-testing:VariorumTests/WriteTakesPanelKeysTests -only-testing:VariorumTests/ConfirmationsSettingTests -only-testing:VariorumTests/RefusalTableConvergenceTests -only-testing:VariorumTests/MorningListTests -only-testing:VariorumTests/ArchivedListingTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakeCardMenuTitleTests -only-testing:VariorumTests/CapabilityRegistryTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/BookIndexTakesTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/LensesReorderTests`
+   — 27 suites, all green expected. If `TakesBoardSoakTests(seed: 21)` reds, it is VX-337's
+   untraced half (note it; not this batch's).
+3. **THE GREEN RUN, tier 2 — the battery** (on `vx601c-post`): batch B's 209-suite battery list (its
+   READY-FOR-SUITES tier 2, verbatim) PLUS `TakesBarTakeCountTests TakesPanelBlockLabelTests
+   TakeMovedReceiptWordingTests TakesProseFaceTests ConfirmationsSettingTests
+   RefusalTableConvergenceTests ArchivedListingTests` (any already present counts once). VX-337's
+   fold pin should now be green whatever the load (the point of the fix — watch it).
+
+## THE USE WALK — batch C rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug
+build from `DerivedData/vx601c-post`; never press Resume Sync; restore exactly as found)
+
+The walk REQUEST names: one fresh walk note minted by quick entry with THREE plain paragraphs
+(blocks) of unequal length (e.g. "alpha bravo charlie." / "delta echo foxtrot golf hotel india
+juliet." / "kilo lima mike."), retitled "vx601 c walk note"; ⌘T in Takes on block 1 and block 2 so
+each has a second take, each second take edited to a DIFFERENT word count than its chosen (e.g. add
+three words); it leaves to the Trash at the end. Rows C5 needs a SECOND note open beside it (the
+store's one Oct-19 note, opened beside and closed again — view-only, nothing written). **BOTH
+VOICES** for every row (Study first — the store's voice — then Terminal, restored to Study); the fan
+style is a synced setting — read as found, restore exactly.
+- **C1 — VX-427 (R-601-3), the bar counts the take being typed in:** Takes (⌘2), block 1's fan open
+  (its ⑂ badge or expand all). Click into the NOT-chosen card → the bar's trailing "Nw take" reads
+  THAT card's words (count them); type two words → it reads two more; click the ✓ chosen card → its
+  own count. Then Lenses (⌘4): "+ column ▾ ▸ New lens — arrange existing takes", flip block 1 to the
+  second take (‹ ›), click into that lens cell → the bar counts the lens cell's take, not the Chosen
+  column's. (Old build: the chosen take's count throughout — batch A's capture `t2a-w0` shows it.)
+- **C2 — VX-586, block i/N:** Write (⌘1), block 2's ⑂ badge → the take panel's title reads
+  **"Takes — block 2/3"** (no hex id anywhere). Close it; block 1's badge → "Takes — block 1/3".
+- **C3 — VX-321, the receipt names the list:** (a) in that panel (block 1), click into the
+  NOT-chosen card, ⌥⌘⏎ (Move Take into a Block Below) → the panel's line reads "…archived on its
+  block (“archived takes” below brings it back); ⌥⌘Z undoes it." and "archived takes" lists the
+  original below the cards; ⌥⌘Z. (b) Write itself: caret in block 1, ⌥⌘⏎ → the bar's quiet line
+  reads "…(its takes panel keeps it under “archived takes”)…"; ⌥⌘Z. (c) Takes board: ring in a card,
+  ⌥⌘⏎ → "…(“archived · n” under its takes brings it back)…" — unchanged; ⌥⌘Z. (Receipts are the
+  quiet line at the bar's trailing end under `receipt_style` quiet — capture the bar.)
+- **C4 — VX-574, side by side (the acceptance evidence):** the same note, Write (⌘1) then Takes (⌘2,
+  stack, fans closed so the article shows prose), captured at the SAME window size and the same
+  scroll so the same paragraph sits in both; both voices. The prose must read the same weight and
+  ink in both modes (the orchestrator may measure glyph coverage per word as this record did —
+  crop the same words from both captures). Note in the row if Takes reads lighter anywhere — that
+  would be a finding against the trace (it measured identical).
+- **C5 — VX-574, the faces that were lighter:** (a) the READ TWIN: with the walk note left in Takes,
+  open the Oct-19 note beside it (its row's Open Beside) and click into THAT pane, so the walk note's
+  pane goes unfocused → it shows the read-only takes cards; its words are in the prose ink (as dark
+  as the focused pane's), not grey. Capture both panes; close the beside pane after. (b) the STACK
+  CARD FOLD: Takes, block 1's fan open, the ▾ at a card's top-left → the card folds to one line in the
+  voice's small face (Study: the sans small; Terminal: the mono small — no longer a system sans in
+  Terminal); ▸ unfolds it.
+- **C6 — batch B's Terminal residue (one row, Terminal only):** style → slot split: the header shows
+  **expand all · close all**, expand all opens every split, close all brings the plain page back;
+  then stack style, a NOT-chosen card's ⌄ → **"New branched take (⌘T)"** → a new card with that
+  take's words, the caret in it. Restore the as-found style.
+
+## SELF-ASSESSMENT (the first of the two reviews — the implementer's)
+
+- **Scope and seams.** Production: `TakesBottomBar.swift` (the take unit), `WriteTakesPanel.swift`
+  (the title; the archived header through the one literal), `OpsRefusalCopy.swift`
+  (`TakeStructureCopy.ArchivedRoad`/`movedNote(_:)`/`archivedTakesHeader`),
+  `TakesStructureController.swift` + `EditorSurfaceController.swift` (one call each),
+  `TakesViewModel.swift` (`archivedRoad`; the panel's archive receipt through the literal),
+  `EditorViewModel.swift` (⌘⇧A's receipt through the literal — byte-identical), `ReadTakesView.swift`
+  (the prose ink), `TakesBoardView.swift` (the collapsed line's font). Tests: one new file, and
+  `TakesArticleScrollTests.swift` (VX-337). Zero `Sync/`, schema, operations, Shared/, `PaneSurface`,
+  `EditorTextView`, `BlockRangeIndex`, structural door, storage write; no TK1 API, no attribute
+  stamp. P-1: no new door. P-3: no liveness change (the bar READS `focusedPane`). P1: the bar's unit
+  is one fan + one take per render; the title O(blocks) like the bar's own label.
+- **The traces held — and two were corrected by evidence.** VX-427/VX-586/VX-321 as briefed (VX-427
+  and VX-321 each one widening: the Lenses board). VX-574: the brief's "where do the panes get a
+  lighter face" — they don't (measured, four capture pairs, both voices and rooms; the smoothing
+  hypothesis falsified); the two faces that DO draw take words lighter were found and fixed at their
+  token consumers. VX-337: my first drafted fix (settle a pending restore on the row's own report)
+  would have reversed a pinned, ruling-tied design (`aRestoreWithNoLandingWaitingIsLeftToItsOwnCadence`)
+  — found before building, so the fix is to the over-asserting TEST, not the code.
+- **What could regress, and why I think it doesn't.** (1) *The bar on a projection lag* (a take the
+  projection does not hold yet): no unit for a moment rather than the wrong one — a live pane's take
+  is always in `fans` once the mint lands (the ring parks until the slot arrives). (2) *The receipts*:
+  the board's sentence is pinned byte-identical; the two archive receipts that now interpolate the
+  header literal are byte-identical (the existing `theArchiveReceiptNamesThePanelsOwnList` and
+  `ConfirmationsSettingTests` read them). (3) *The read twin's ink*: chrome around the words untouched;
+  `tokens.ink` is palette-free like the panes' `EditorTypography.ink`. (4) *The fold pin* is not
+  weakened against its original target: the page assertion (−30 ± 2) still reds the round-1 tree;
+  only the state assertion admits the design's legal `.wanted`-on-her-row.
+- **Risks I see.** (a) Pins written without a run: the shapes follow measured suites
+  (`TakeStructureDoorTests`' world, `TakesBoardTests`' focus/edit, `RefusalTableConvergenceTests`'
+  Write door, the pure-board restore pins); a red on post is a pin to fix, never a production edit
+  without a trace. (b) `writesDoorNamesTheTakesPanelsList` is the first harness pin of a SUCCESSFUL
+  ⌥⌘⏎ in Write (only its refusal was pinned before) — if `runStructural` needs more than the harness
+  gives, it reds on post for a rig reason; say so rather than adjust the production line. (c) VX-574
+  is accepted on the WALK's side-by-side (C4) — if her "weird light font" is something the trace did
+  not find (her own store's settings, a palette), C4/C5 are where it shows; the record says so.
