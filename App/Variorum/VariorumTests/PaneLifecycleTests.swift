@@ -30,10 +30,13 @@
 //
 
 import AppKit
+import Dependencies
 import Foundation
+import GRDB
 import Observation
 import SwiftUI
 import Testing
+import VariorumCore
 @testable import Variorum
 
 /// One pane's worth of host state — what a composition hands the ONE pane
@@ -532,5 +535,162 @@ struct PaneRebindTests {
         #expect(pane.string == Self.takeB)
         #expect(!pane.isEditable)
         #expect(first.edits.isEmpty)
+    }
+}
+
+// MARK: - VX-248 on a road that exists today — Canvas's ‹ › under a live card
+
+private let canvasTakeA = "The card's first take, the words she is editing."
+private let canvasTakeB = "Its second take reads differently, word for word."
+
+@MainActor
+private func withCanvasRebindWorld<T>(
+    _ body: @MainActor (AppSession, AppDatabase) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 248))
+    } operation: { @MainActor in
+        try await body(AppSession(database: db), db)
+    }
+}
+
+/// **The VX-248 class on a REAL road the VX-222/VX-227 sweep never reached**
+/// (that sweep's table covers the Takes and Lenses boards; Canvas was not on
+/// it). Canvas's ‹ › switcher is view-local (R88), and since 13b 4E the ring
+/// FOLLOWS a switched card — `CanvasViewModel.switchTake` writes the view
+/// pick and re-focuses the ring onto the newly shown take in the SAME turn —
+/// while the card keeps ONE pane per placement (`CanvasView`'s card ForEach
+/// is keyed by placement; the pane carries no per-take identity). So the
+/// live pane is re-keyed while live: on the old tree it kept take A's words
+/// under take B's edit closure, and her next keystroke handed `A's words +
+/// "!"` up as take B. (Canvas is a Debug-build mode — Release has six; the
+/// road is real wherever the mode is.)
+@MainActor
+@Suite("VX-248 — Canvas's switcher under a live card re-binds its pane", .serialized)
+struct CanvasSwitcherRebindTests {
+    private func pump() {
+        RunLoop.main.run(until: Date().addingTimeInterval(0.03))
+    }
+
+    private func settle(_ window: NSWindow, _ hosting: NSView, turns: Int = 6) async {
+        for _ in 0..<turns {
+            hosting.layoutSubtreeIfNeeded()
+            window.displayIfNeeded()
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(15))
+        }
+    }
+
+    private func panes(in view: NSView) -> [PaneTextView] {
+        var found: [PaneTextView] = []
+        if let pane = view as? PaneTextView { found.append(pane) }
+        for sub in view.subviews { found.append(contentsOf: panes(in: sub)) }
+        return found
+    }
+
+    /// The variant a pane renders — the last field of `pane:<role>|<variant>`.
+    private func variant(of pane: PaneTextView) -> String {
+        String(pane.identifier?.rawValue.split(separator: "|").last ?? "")
+    }
+
+    private func storeText(_ db: AppDatabase, _ variantID: String) async throws -> String {
+        try await db.read { db in
+            try String.fetchOne(
+                db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                arguments: [variantID]) ?? "MISSING"
+        }
+    }
+
+    @Test func switchingTheLiveCardsTakeNeverWritesTheOldWordsIntoTheNewTake() async throws {
+        try await withCanvasRebindWorld { session, db in
+            let world = try await session.runner.run {
+                ops -> (post: String, block: String, a: String, b: String) in
+                let post = try ops.createPost(title: "the switcher canvas", profile: .generic)
+                let mint = try ops.newBlock(in: post.id, text: canvasTakeA, at: .end)
+                let b = try ops.branchVariant(mint.block.id, from: mint.variant.id)
+                try ops.autosave(b.id, text: canvasTakeB, charDelta: 30)
+                _ = try ops.newBlock(in: post.id, text: "A second card, never fanned.", at: .end)
+                return (post.id, mint.block.id, mint.variant.id, b.id)
+            }
+            // Defaults hygiene (the 4G rule): deterministic ids recur across
+            // runs — clear the view-memory keys the view would read.
+            UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(world.post)")
+            UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(world.post)")
+            let model = CanvasViewModel(session: session, containerID: world.post)
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: CanvasView(
+                session: session, containerID: world.post, offersLensSave: false, model: model))
+            hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 700)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<60 where model.projection.cards.count < 2 {
+                await settle(window, hosting, turns: 1)
+            }
+            await settle(window, hosting)
+            #expect(model.projection.cards.count == 2, "the board mounted")
+            let card = try #require(
+                panes(in: hosting).first { variant(of: $0) == world.a },
+                "the fanned card shows take A (the chosen take, nothing picked)")
+
+            // Her click into the card (the card's own focus door), then a key.
+            model.focus(blockID: world.block, variantID: world.a)
+            await settle(window, hosting)
+            #expect(card.isEditable, "non-vacuity: the card is live on take A")
+            window.makeFirstResponder(card)
+            card.setSelectedRange(NSRange(location: (card.string as NSString).length, length: 0))
+            card.insertText("x", replacementRange: card.selectedRange())
+            await settle(window, hosting)
+            #expect(model.authority.text(variantID: world.a, storeText: "") == canvasTakeA + "x",
+                    "non-vacuity: the keystroke reached take A")
+
+            // › — the card shows take B, and the ring follows it (13b 4E).
+            model.switchTake(blockID: world.block, delta: 1)
+            await settle(window, hosting)
+            let live = panes(in: hosting).filter(\.isEditable)
+            #expect(live.count == 1, "one live pane")
+            let after = try #require(live.first)
+            #expect(after === card,
+                    "non-vacuity: the card kept ONE pane across the switch — a re-bind, not a remount")
+            #expect(variant(of: after) == world.b, "the live card is take B's now")
+            #expect(after.string == canvasTakeB,
+                    "RED ON OLD: the re-keyed live card kept take A's words (shows: \(after.string))")
+
+            after.insertText("!", replacementRange: after.selectedRange())
+            await settle(window, hosting)
+            let handedUp = model.authority.text(variantID: world.b, storeText: canvasTakeB)
+            #expect(!handedUp.contains(canvasTakeA),
+                    "RED ON OLD: her keystroke handed take A's words up as take B (\(handedUp))")
+            #expect(handedUp == canvasTakeB + "!", "the keystroke landed in take B's own words")
+
+            // Nothing she typed into A was lost: it was handed up as she typed
+            // it, and the ring's migration flushed it (a guard, both sides).
+            var storedA = ""
+            for _ in 0..<40 {
+                storedA = try await storeText(db, world.a)
+                if storedA == canvasTakeA + "x" { break }
+                await settle(window, hosting, turns: 1)
+            }
+            #expect(storedA == canvasTakeA + "x", "take A kept her keystroke")
+        }
     }
 }
