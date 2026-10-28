@@ -269,3 +269,16 @@ Mac, `xcodebuild -scheme Variorum -destination 'platform=macOS' test` under a he
 - **R-633-17 (D3): the Dedication gets ITS OWN CHAPTER** — a one-note section named "dedication" before part one (the parts map's first entry; the front-matter chapter unchanged). Pins updated accordingly (the parts/seed-shape tests; resume/stray tests if they name the Dedication's section).
 
 **U2b (mini-batch, fresh implementer):** exactly these two rulings + their pin updates + the U2b record appended here. No other scope.
+
+## U2b record
+
+**NOT DONE (first line, per the contract — kept current):** no `xcodebuild test`, no walk, no GUI (the AIR FENCES); every pin below is written and COMPILED here, and its red-on-old (a behavioural revert) and green runs ride the Pro absorption. No `notes/QUESTIONS.md` entry written (shared ledger — merge moments only; the PROVISIONALs below are for the orchestrator to carry).
+
+Implementer: Opus (opus-implementer), 2026-10-28, branch `vx-633-prince-book`, the Air. Scope: exactly R-633-16 and R-633-17 (the section above) + their pins + this record.
+
+### LIVE STATUS
+- P0 record opened — DONE (this commit).
+- P1 R-633-17 (the Dedication's own chapter) — NEXT.
+- P2 R-633-16 (fresh stores only, both platforms) — PENDING.
+- P3 pins + mechanical updates — PENDING.
+- P4 compile-only evidence + the headless scratch harness + the Pro's suite list — PENDING.
