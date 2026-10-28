@@ -164,9 +164,9 @@ Batch duties: the wire and server-host suites are core-package (headless) — ex
 *Read in this session's own context before any code: CLAUDE.md + its loaded canon, this record IN FULL (the shared sections, BATCH 1's record, the RULINGS LOG), `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` §Doors to the outside, `notes/SessionResiliencyProtocol.md`, the VX-620 record's BUNDLE + BATCH 1 RECORD (set_starred, RB-7) + BATCH 2 RECORD (VX-590/605, RB-10) + BATCH 3 RECORD (VX-619, RB-13) + THE MID WINDOW part 2 (W-1), the VX-548 record's MB-13 + BATCH 2b RECORD (the pane-status trace, M1) + THE MID WINDOW (MID-3), QUESTIONS #245's three passes, the VX-336 record's D6 row 14 / T2 (the eight acts), and the seven ticket bodies (Linear, read-only). No subagent.*
 
 LIVE STATUS (per piece — flipped in the same commit as each piece):
-- **No behavioural revert is in flight.**
-- B2-0 — preflight + this record: DONE (this commit).
-- B2-1 — VX-606 (undeclared arguments refused on every tool): NOT-STARTED — trace first (where the published schema stops being enforced), then one universal check at the call door, worded through the refusal chain.
+- **BEHAVIOURAL REVERT IN FLIGHT (VX-606, announced before it starts):** the one check in `MCPSession`'s `CallTool` handler (`if let refusal = MCPArgumentSchema.refusal(…)`) deleted in the working tree over the committed fix `7679de5dd`; restore = `git checkout -- Sources/VariorumMCP/MCPSession.swift`.
+- B2-0 — preflight + this record: DONE (5a4eda02b).
+- B2-1 — VX-606 (undeclared arguments refused on every tool): FIX + PINS DONE (7679de5dd), green 8/2; the revert leg RUNNING.
 - B2-2 — VX-626 ("last seen" stamps the close): NOT-STARTED — trace the end-line road; pin red-on-old.
 - B2-3 — VX-612 (the accept loop: retry the transient class, fail loudly otherwise): NOT-STARTED — headless fault seam on the host; pin red-on-old; the door adopts the failed state; the status sentence PROVISIONAL.
 - B2-4 — VX-639 (a gathering gets a book's acts at EDIT; the rule stays hers): NOT-STARTED.
