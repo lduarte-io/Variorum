@@ -1658,10 +1658,9 @@ slotSplit 0+10). Settled time: stack 154→168 ms (0 → 25-top), marginGrid 152
 ## BATCH B FORENSICS — the four "green where predicted red" rows (implementer, 2026-10-28, from the window's `DerivedData/logs/red-vx601b-*.log`)
 
 **NOT DONE (first line):** the re-runs (the orchestrator's window — the plan at the end of this
-section). Rebuilding `vx601b-pre` and `vx601b-rev428` is IN PROGRESS below — **a revert is in flight
-while that line says so**; the restore is `git checkout -- App/Variorum/Variorum/Features/Takes/
-TakesViewModel.swift App/Variorum/Variorum/Features/Takes/TakesShared.swift` (both committed at HEAD,
-no uncommitted edits in them).
+section). **No revert is in flight; the production source is the fix again** (7dc216f23 — App/ is
+byte-identical to 110e038c3; no `VX601B-REVERT` marker anywhere). Both affected trees are rebuilt,
+build-for-testing GREEN.
 
 **THE TRACE (read off the logs and the build logs; no test run by this session).**
 - **#1, #5, #9 — a TREE defect, mine: the rev428 revert never turned the write-back off.** The
@@ -1710,3 +1709,41 @@ one more datum for VX-337's nondeterminism). Log: `DerivedData/logs/battery-b-po
 **Window b verdict:** post is GREEN across tier 1 (one dispositioned flake) and the battery; the
 red discrimination stands for everything EXCEPT the four re-opened pins (#1 #5 #9 #12), whose
 forensics gate batch B's acceptance. The walk (B1–B6) waits on that forensics too.
+
+**THE REBUILDS — DONE.** `vx601b-rev428` rebuilt with `if true { return }` as the revert's first
+line (log `b-rev428-build2.log`: no "treated as an argument of the 'return'" warning; dylib 23:56) —
+both the seed and the sink are now unreachable. `vx601b-pre` rebuilt with the same corrected rev428
+revert plus the rev577 and rev594 reverts unchanged (log `b-pre-build2.log`, GREEN, dylib 00:05).
+The other three trees (`rev428map`, `rev577`, `rev594`) never contained the slip and stand as
+measured. The rev428 rebuild overlapped the tail of the window's battery (≈23:53–23:56, CPU load
+only — no pointer events); the battery passed regardless (1216/209), so nothing there needs a re-read.
+
+**A WORKTREE COLLISION, said plainly (and repaired).** The window's ledger commit bd6a17ef7
+(00:02:32) was made from this same worktree while the pre-tree revert was in flight (applied
+≈00:02:20, restored after the build at 00:05) — it captured `TakesViewModel.swift` and
+`TakesShared.swift` WITH the `VX601B-REVERT` edits and pushed them as HEAD (the old slot-split gate,
+no blur, no expansion memory, no entry mapping, no branch row). My `git checkout --` afterwards then
+restored to that HEAD, i.e. to the reverted bytes. **Repaired by a forward commit, 7dc216f23**, which
+restores both files from 767fb4206 — App/ is now byte-identical to the fix (110e038c3), verified by
+`git diff 110e038c3 HEAD -- App/` being empty. No history rewritten. No test result is affected:
+every run used the DerivedData trees, all built before bd6a17ef7. **Lesson for the record:** a
+revert-in-flight window and a ledger commit must not share a worktree moment — the orchestrator's
+ledger commits should be pathspec-limited (`git commit -- notes/…`), and a revert's restore should
+be from the fix commit by id (`git checkout <fix-sha> -- <file>`), never from HEAD.
+
+**#12 on post:** it RAN in the window's battery (which lists `TakesPresentationTests`) and PASSED
+(`battery-b-post.log`) — post's verdict is green; pre/rev577 still owe theirs.
+
+**THE RE-RUN PLAN (the orchestrator's window; from `App/Variorum/`, `test-without-building`, array
+args; ~2 minutes in all):**
+1. `vx601b-pre` — `-only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakeCardMenuTitleTests -only-testing:VariorumTests/TakesPresentationTests`
+   — expect the union: #1 #2 #3 #5 #6 #7×4 #8 #9 #10(slotSplit) #12 #13 #14 #15 #16×2 #17×2 red;
+   #4 #10(stack) #18 #19 and the card suite's other 10, the chord guard's 2 and the presentation
+   suite's other 3 green. (TakesBoardTests dropped from this list: none of its 13 tests is a pin.)
+2. `vx601b-rev428` — the same six suites plus `-only-testing:VariorumTests/TakesExpansionCostTests`
+   — expect exactly #1 #2 #3 #5 #6 #7×4 #8 #9 #11×3 red; everything else green.
+3. `vx601b-rev577` — `-only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests`
+   — expect exactly #12 and #10(slotSplit) red. (rev577's other suites ran clean last window and
+   the tree is unchanged.)
+`rev428map` and `rev594` need nothing more. If #1/#5/#9 are STILL green on the rebuilt rev428, the
+write-back is reached by a road my trace missed — stop and report, never adjust the pin.
