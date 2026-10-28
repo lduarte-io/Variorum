@@ -101,10 +101,10 @@ struct MigrationTests {
         // standing grant per client × place.
         "uq_mcp_grant_standing_place",
         // VX-647 (A JUSTIFIED EDIT, the ritual — VX-648 batch 1, A-648-1):
-        // v1_34's placement-by-block, live OR dead — the tray badge's
-        // cascade-victim fence seeks instead of scanning the library. LOCAL
-        // only, no §12 event, marker 14.
-        "idx_cblock_block",
+        // v1_34's DEAD placements by block (partial on `deleted_at IS NOT
+        // NULL`) — the tray badge's cascade-victim fence seeks instead of
+        // scanning the library. LOCAL only, no §12 event, marker 14.
+        "idx_cblock_dead_block",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -190,18 +190,19 @@ struct MigrationTests {
             "uq_mcp_client_setup_key", "idx_mcp_setup_key_minted",
             "uq_mcp_rebind_request_client", "uq_mcp_rebind_request_key",
             "uq_mcp_grant_standing_place",
-            "idx_cblock_block",
+            "idx_cblock_dead_block",
         ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 + v1_30 + v1_34 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
     }
 
-    /// **VX-647 — v1_34's placement-by-block index** (VX-648 batch 1,
+    /// **VX-647 — v1_34's dead-placement-by-block index** (VX-648 batch 1,
     /// A-648-1). A store that ran every migration up to v1_33 does not have
     /// it; the next migration adds exactly it, on `(block_id, deleted_at)`
-    /// and NOT partial — the tombstoned placements are what it exists to
-    /// find. Red on the pre-fix tree by construction: no such migration
-    /// existed.
-    @Test func thePlacementByBlockIndexArrivesForAnOlderStore() throws {
+    /// PARTIAL on `deleted_at IS NOT NULL` — the tombstoned placements are
+    /// what it exists to find, and a live seek must keep I2's own
+    /// `uq_cblock_ownership`. Red on the pre-fix tree by construction: no
+    /// such migration existed.
+    @Test func theDeadPlacementByBlockIndexArrivesForAnOlderStore() throws {
         let queue = try DatabaseQueue()
         try AppDatabase.migrator.migrate(queue, upTo: "v1_33_mcp_gathering_grants")
         func indexes() throws -> Set<String> {
@@ -212,16 +213,16 @@ struct MigrationTests {
             }
         }
         let before = try indexes()
-        #expect(!before.contains("idx_cblock_block"))
+        #expect(!before.contains("idx_cblock_dead_block"))
         try AppDatabase.migrator.migrate(queue)
-        #expect(try indexes().subtracting(before) == ["idx_cblock_block"],
+        #expect(try indexes().subtracting(before) == ["idx_cblock_dead_block"],
                 "v1_34 adds exactly the one index")
         let sql = try queue.read { db in
             try String.fetchOne(
-                db, sql: "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_cblock_block'")
+                db, sql: "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_cblock_dead_block'")
         } ?? ""
         #expect(sql.contains("container_block(block_id, deleted_at)"), "the shape: \(sql)")
-        #expect(!sql.contains("WHERE"), "not partial — dead placements are its point: \(sql)")
+        #expect(sql.contains("WHERE deleted_at IS NOT NULL"), "partial on the dead rows: \(sql)")
     }
 
     /// **13o — v1_22's BACKFILL** (the rebuild engine run once inside the

@@ -1086,7 +1086,7 @@ extension AppDatabase {
         // `container_id`. The plan read `SCAN cb`: the library's whole
         // placement table, once per deleted block, on every structural write
         // and every autosave — measured 1,071 ms per ⏎-then-⌫ round at 600
-        // carved blocks on a ~20k-block library, 19.6 ms with this index,
+        // carved blocks on a ~20k-block library, ~20 ms with this index,
         // flat. The fence (and `trayBlocks`' twin) now seeks; no query text
         // changes. Pinned by `TrayBadgeP1Tests` (red on the tree without it).
         //
@@ -1095,11 +1095,20 @@ extension AppDatabase {
         // design (SyncSpec §2), so a local index changes no wire semantics, no
         // column and no classification. The marker stays 14; an un-migrated
         // client simply keeps the old plan. Its own commit, ahead of the
-        // pins' green (CLAUDE.md). Not partial, deliberately: the tombstoned
-        // rows are exactly the ones it exists to find.
+        // pins' green (CLAUDE.md).
+        //
+        // **PARTIAL on the DEAD rows, deliberately** — the mirror image of
+        // `uq_cblock_ownership`'s `WHERE deleted_at IS NULL`. The fence's
+        // `cb.deleted_at = b.deleted_at` implies `deleted_at IS NOT NULL`, so
+        // SQLite uses it there; a LIVE-placement seek (`deleted_at IS NULL`)
+        // can never use it, so every existing plan keeps I2's own index. The
+        // first, non-partial shape `(block_id, deleted_at)` took over live
+        // seeks too and moved five pinned plans (the batch record, B1-3) — an
+        // equivalent seek, but churn this fix has no reason to cause.
         migrator.registerMigration("v1_34_placement_by_block") { db in
             try db.execute(sql: """
-                CREATE INDEX idx_cblock_block ON container_block(block_id, deleted_at);
+                CREATE INDEX idx_cblock_dead_block ON container_block(block_id, deleted_at)
+                  WHERE deleted_at IS NOT NULL;
                 """)
         }
         return migrator
