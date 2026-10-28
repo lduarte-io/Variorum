@@ -67,7 +67,16 @@ nonisolated struct CompareProjection: Equatable, Sendable {
     /// Posts version-linked to the anchor — IN ITS OWN WING only (13i-d U5:
     /// a version that lives in another library is never offered as a note,
     /// never auto-filled, never pulled in as content — #166(e)).
+    /// **VX-440 batch 1 (her VX-437 ruling — saved versions are "never filtered
+    /// out of auto-fill"): the ordinary `version_of` peers first, then the
+    /// anchor's SAVED MOMENTS newest-first** (PROVISIONAL P-440-2) — the live
+    /// pair is the comparison she asked for, the moments the extra columns.
     var versionPeers: [String] = []
+    /// VX-440 batch 1: the anchor's saved moments (`noteVersionStamps` — the
+    /// one classifier) by id, with the moment each was saved. A column for one
+    /// of these names it by its DATE (V6 — derived, no title mutation), and its
+    /// unmark is the promote's confirm, never a bare unlink.
+    var savedVersions: [String: Date] = [:]
     /// 13i-d U5 — THE LINEAGE LINE (#166(e), RULED: "it can say it was in a
     /// different wing … maybe move back to that wing for more"): the OTHER
     /// wings holding a version of this note, by id and name — named, with a
@@ -359,11 +368,19 @@ final class CompareViewModel {
             kinship[peerID] = try Queries.blockKinship(db, anchor: anchorID, other: peerID)
         }
         let split = try Queries.versionPeerSplit(db, of: anchorID)
+        // VX-440 batch 1 (P-440-2): the moments ride AFTER the ordinary peers,
+        // newest first — and every one the classifier names, including a
+        // moment whose link only the tombstone-tolerant classifier still reads.
+        let moments = try Queries.noteVersionStamps(db, of: anchorID)
+        let momentIDs = Set(moments.map(\.postID))
         return CompareProjection(
             anchor: try face(anchorID),
             peers: peers,
             kinship: kinship,
-            versionPeers: split.sameWing,
+            versionPeers: split.sameWing.filter { !momentIDs.contains($0) }
+                + moments.map(\.postID),
+            savedVersions: Dictionary(
+                moments.map { ($0.postID, $0.savedAt) }, uniquingKeysWith: { first, _ in first }),
             otherWingVersions: try split.otherWings.map { id in
                 CompareProjection.OtherWing(
                     id: id, name: try Queries.wingName(db, id: id, home: WingWords.home)
@@ -871,8 +888,30 @@ final class CompareViewModel {
         }
     }
 
+    /// VX-440 batch 1 (her VX-437 ruling): a saved moment's column — the one
+    /// fact the column's date, its relationship line and its unmark read.
+    func savedVersionDate(_ peerID: String) -> Date? {
+        projection.savedVersions[peerID]
+    }
+
+    /// **The saved moment whose unmark is ASKING** (VX-437): stopping counting
+    /// a moment as a version PROMOTES it, after the one confirm
+    /// (`VersionsPath.stopCounting…`, P-440-5). A VALUE the board's alert
+    /// presents, never a flag it reads back (13l Act 2's rule).
+    var pendingVersionPromote: String?
+
     /// Sitting 9 (R60/R68): unmarkable right where it shows.
+    ///
+    /// **VX-437 — on a SAVED MOMENT the door asks to PROMOTE it, and writes
+    /// nothing until she answers.** The bare unlink below is the road that
+    /// declassified a moment (out of Note ▸ Versions, onto Archived, Restore
+    /// and Promote refusing); her ruling makes "stop counting it as a version"
+    /// mean promote. An ordinary `version_of` peer unmarks exactly as before.
     func unmarkVersions(_ peerID: String) {
+        if savedVersionDate(peerID) != nil {
+            pendingVersionPromote = peerID
+            return
+        }
         statusMessage = nil
         Task { [runner = session.runner, anchorPostID] in
             do {
@@ -884,6 +923,23 @@ final class CompareViewModel {
             } catch {
                 self.statusMessage = OpsRefusalCopy.message(for: error)
             }
+        }
+    }
+
+    /// **The confirm's answer: the moment becomes a regular note** — the
+    /// shared versions act (`VersionActs.promote` → `promoteNoteVersion`:
+    /// unarchived, unsealed, the note's live tags applied), its receipt and
+    /// its refusals in the family's own words. The column stays: the promoted
+    /// note keeps its `version_of` link, so it reads as an ordinary version
+    /// beside the anchor from the next projection on.
+    func promoteSavedVersion(_ versionID: String) async {
+        if pendingVersionPromote == versionID { pendingVersionPromote = nil }
+        statusMessage = nil
+        do {
+            showReceipt(try await VersionActs.promote(
+                session: session, postID: anchorPostID, versionID: versionID))
+        } catch {
+            statusMessage = VersionActs.words(error, seal: .mac)
         }
     }
 
@@ -1186,6 +1242,22 @@ struct CompareBoardView: View {
                     model.setPeer(slotID: pick.id, postID: row.id)
                 })
         }
+        // VX-437 (P-440-5): unmark on a saved moment asks — the promote's one
+        // confirm, shared with the full-size band's door.
+        .alert(
+            VersionsPath.stopCountingTitle,
+            isPresented: Binding(
+                get: { model.pendingVersionPromote != nil },
+                set: { if !$0 { model.pendingVersionPromote = nil } }),
+            presenting: model.pendingVersionPromote
+        ) { versionID in
+            Button(VersionsPath.stopCountingVerb) {
+                Task { await model.promoteSavedVersion(versionID) }
+            }
+            Button("Cancel", role: .cancel) { model.pendingVersionPromote = nil }
+        } message: { _ in
+            Text(VersionsPath.stopCountingDetail)
+        }
     }
 
     // MARK: Header (board-level)
@@ -1352,10 +1424,14 @@ struct CompareBoardView: View {
                     relationshipLine(peerID)
                     HStack(spacing: 5) {
                         if model.isVersionPeer(peerID) {
+                            // VX-437: on a saved moment the same door asks to
+                            // promote it (the model decides; the help says so).
                             Button(tokens.chromeLabel("unmark")) { model.unmarkVersions(peerID) }
                                 .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
-                                .help("These two stop being versions of each other — the link "
-                                    + "deletes, both notes stay exactly as they are (Sitting 9, R60)")
+                                .help(model.savedVersionDate(peerID) != nil
+                                    ? VersionsPath.compareUnmarkHelp
+                                    : "These two stop being versions of each other — the link "
+                                        + "deletes, both notes stay exactly as they are (Sitting 9, R60)")
                         } else {
                             Button(tokens.chromeLabel("mark as versions")) {
                                 model.markAsVersions(peerID)
@@ -1434,7 +1510,13 @@ struct CompareBoardView: View {
     /// N29's honesty line, per peer: say what the relationship IS.
     @ViewBuilder
     private func relationshipLine(_ peerID: String) -> some View {
-        if !model.isRelated(peerID) {
+        if model.savedVersionDate(peerID) != nil {
+            // VX-440 batch 1: the column's title is the moment's date (V6);
+            // this line says what kind of column it is.
+            Text(tokens.chromeLabel(VersionsPath.compareRelationship))
+                .font(tokens.small)
+                .foregroundStyle(tokens.accent)
+        } else if !model.isRelated(peerID) {
             Text(tokens.chromeLabel("there is no relationship here"))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
@@ -1697,6 +1779,11 @@ struct CompareBoardView: View {
     }
 
     private func peerTitle(_ id: String) -> String {
+        // VX-440 batch 1 (V6): a saved moment is called by its DATE — derived
+        // here, never written into the copy's title.
+        if let savedAt = model.savedVersionDate(id) {
+            return VersionsPath.momentTitle(savedAt)
+        }
         // The projection is the truth once a face has loaded (a picked
         // note may sit outside the recent-100 candidates window). Both
         // roads read the ONE display rule (row 17): a nameless note is

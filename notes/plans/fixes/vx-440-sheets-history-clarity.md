@@ -299,8 +299,19 @@ Pieces (flipped per commit):
   .theStampsAreTheListingsOwnAnswerNewestFirst`, `.theStampsFollowTheListingAcrossTheAnchorsShapes`
   (merge / archiveBlock / deleteBlock on the anchor; unmark, promote, Trash), `.theStampsReadIsDrivenFrom
   TheNotesOwnPlacements` (the plan). DONE (this commit).
-- B1-3 Compare: auto-fill order (P-440-2) · version columns show the DATE · unmark on a saved version = the
-  promote confirm (P-440-5): NOT-STARTED.
+- B1-3 Compare (`CompareBoardView.swift`, `Shared/VersionsCopy.swift`): the projection gains `savedVersions`
+  (id → saved-at, from `noteVersionStamps` — the classifier's whole set, a moment whose link only the
+  tombstone-tolerant read still holds included) and `versionPeers` becomes ordinary same-wing peers first, then
+  the moments newest-first (P-440-2 — auto-fill and the offer band read it); a moment's column is titled by
+  its DATE (`VersionsPath.momentTitle`, the listing's own format — V6, no title mutation) with the line "a
+  saved version of this note" (P-440-6, PROVISIONAL wording); its "unmark" ARMS `pendingVersionPromote` and
+  writes nothing — the board's alert (P-440-5's copy, `VersionsPath.stopCounting…`) answers through
+  `promoteSavedVersion` → `VersionActs.promote` (its receipt/refusal words); an ordinary peer's unmark is
+  byte-unchanged. The column's "open" door is untouched here — it moves to the full-size face in B1-5. Pins
+  (Mac `CompareVersionsTests`, compiled ✓, RUNS PENDING): `autoFillSeatsTheOrdinaryPeerFirstThenTheNewestMoment`,
+  `aMomentsColumnIsNamedByItsDateAndSaysWhatItIs`, `unmarkOnAMomentAsksAndTheAnswerPromotes`,
+  `unmarkOnAnOrdinaryVersionPeerStillUnlinks`, `thePromoteConfirmSaysWhatTheNoteBecomes`; and the B1-1 pin
+  `unmarkOnASavedVersionNeverDeclassifiesIt` turns GREEN at this commit (PENDING the run). DONE (this commit).
 - B1-4 doors: Versions row "Compare with now" + the registry act "Compare with Latest Version" (File ·
   note ▾ · ⌘K, rendered only while the note has a saved version): NOT-STARTED.
 - B1-5 full size: a Versions row's "Open full size" → the version on Read's calm page with the identity band

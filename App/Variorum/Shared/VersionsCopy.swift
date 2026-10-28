@@ -86,8 +86,68 @@ nonisolated enum VersionsPath {
     /// have the date"* answered by derivation): the copy's own title is never
     /// touched, and the DATE is what the row leads with.
     static func rowTitle(_ item: Queries.NoteVersionItem) -> String {
-        item.savedAt.formatted(date: .abbreviated, time: .shortened)
+        momentTitle(item.savedAt)
     }
+
+    /// **A saved moment's derived name, wherever it is shown** — the listing's
+    /// row, a Compare column, the full-size band (VX-440 batch 1). One format,
+    /// so the moment she picked in the pane is the moment the column names.
+    static func momentTitle(_ savedAt: Date) -> String {
+        savedAt.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    // MARK: VX-440 batch 1 — the moment in Compare and at full size
+
+    /// **Stop counting it as a version = PROMOTE, after a confirm** (her VX-437
+    /// ruling: *"you should be allowed to stop counting it as a version but i
+    /// think that should mean that it is automatically promoted"*). ONE ask,
+    /// shared by Compare's unmark on a saved moment and the full-size band's
+    /// Promote door. PROVISIONAL P-440-5 (the plan's copy, sentence case).
+    static let stopCountingTitle = "Stop counting this as a version?"
+    static let stopCountingDetail =
+        "It becomes a regular note \u{2014} unarchived, unsealed, wearing the note's current tags."
+    static let stopCountingVerb = "Promote"
+
+    /// A saved moment's column in Compare says what it is under its date
+    /// (PROVISIONAL P-440-6 — the batch record).
+    static let compareRelationship = "a saved version of this note"
+
+    /// The unmark door's help on a saved moment's column — it asks first, and
+    /// what it asks is the promote (P-440-6).
+    static let compareUnmarkHelp =
+        "Stop counting this as a version \u{2014} it becomes a regular note of its own "
+        + "(asks first)"
+
+    /// **The one-press door** (R-440-1): the note menus, File and ⌘K seat the
+    /// newest moment beside the live note in Compare. Rendered only while the
+    /// note HAS a moment (P-2); the note below is what a press with none —
+    /// a race — speaks.
+    static let compareWithLatestVerb = "Compare with Latest Version"
+    static let compareWithLatestUnavailable =
+        "Compare with Latest Version needs a saved version of the note you have open "
+        + "\u{2014} \u{2318}\u{21E7}S saves one."
+
+    /// The Versions row's two new doors (R-440-1, R-440-2) and their help.
+    static let compareWithNowVerb = "Compare with now"
+    static let compareWithNowHelp =
+        "Opens Compare with this moment beside the note as it is now"
+    static let openFullSizeVerb = "Open full size"
+    static let openFullSizeHelp =
+        "Reads this moment on a whole page, without changing the note"
+
+    /// **The full-size face's identity band** (R-440-2): "A saved version of
+    /// ‹title› · ‹date›", with the one road back and the promote.
+    static func bandLine(noteTitle: String, savedAt: Date) -> String {
+        "A saved version of \u{201C}\(noteTitle)\u{201D} \u{00B7} \(momentTitle(savedAt))"
+    }
+    static let backToNoteVerb = "Back to the note"
+    static let promoteToNoteVerb = "Promote to a regular note\u{2026}"
+
+    /// What the full-size face says when what it was opened on is no longer
+    /// one of the note's saved moments (promoted, deleted or unlinked since —
+    /// a back/forward visit can arrive after any of them).
+    static let fullSizeGone =
+        "This isn't one of the note's saved versions any more."
 
     // MARK: The receipts
 
