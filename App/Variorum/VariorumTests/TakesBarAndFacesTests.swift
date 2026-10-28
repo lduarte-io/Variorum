@@ -258,6 +258,10 @@ struct TakeMovedReceiptWordingTests {
             await model.moveTakeIntoBlockBelow(blockID: note.blockID, variantID: note.other)
             let receipt = try #require(model.statusMessage, "the door spoke")
             #expect(receipt == TakeStructureCopy.movedNote(.lensesBoard), "\(receipt)")
+            // The literal halves, so a revert of the copy function cannot
+            // agree with itself here.
+            #expect(receipt.contains("Takes board"), "it points at the board that lists it: \(receipt)")
+            #expect(!receipt.contains("archived \u{B7} n"), "never a list Lenses does not show")
         }
     }
 
