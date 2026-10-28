@@ -104,7 +104,10 @@ stage claim (the R-510-5 precedent + the coordinator's brief: live walks and sim
   *(Q1 ruled headless — this row stands as written.)* **The allow rule (R-510-3's shape, PROPOSED to her at
   the kickoff reply, hers to add or to have the orchestrator add at her word):** one narrow Bash rule for
   `Tools/prod-reset-test-account.sh` beside the five standing walk rules in `.claude/settings.local.json`,
-  so the acceptance walker can run the guarded helper without an interactive prompt.
+  so the acceptance walker can run the guarded helper without an interactive prompt. **GIVEN — her word
+  2026-10-27: "go ahead on that tool." Added by the orchestrator (the R-510-12 precedent) as three lines in
+  the standing form: `Bash(Tools/prod-reset-test-account.sh *)` + the main checkout's and this worktree's
+  absolute forms. The helper's own R1–R4 guards are the fence that makes the rule safe (its header says so).**
 - **D-2 — the walk's two new seats:** a PRE-STEP after P3 (the account's id is in hand): if a vault row
   exists, run D-1's reset (logged); the set-up arm then always meets a vaultless account. A CLEANUP LEG
   after P8's reads land on a PASS: reset, leaving the resting state. On a STOP: never (fence 1).
@@ -498,7 +501,7 @@ rule); quit by identity, kill extras by proven PID; zsh `pipestatus`; push after
 | 1 | Kickoff: worktree, in-flight row, Linear flips, this record | DONE (in-flight row on main `VX-623 kickoff`; members In Progress 19:06Z) |
 | 2 | The kickoff sitting (Q1–Q3) + her premise answer delivered | DONE 2026-10-27 — headless · both arms · VX-536 seated; premise answer in the kickoff reply |
 | 3 | UNIT 1 — the script work (D-1…D-7) | DONE 2026-10-27 (`b090395e4`…`2f656ddbc`; self-tests 64/64 + 85/85 and the D-7 pin red-on-old ALL re-run by the orchestrator; R-U1-1…5 adjudicated APPROVED; VX-627 filed) |
-| 4 | UNIT 2 — the live acceptance on production | PREPARING — REQUEST accepted by oct27coordinator (claim `vx-623-walk`, uninterrupted); the walk build READY on the MERGED tree (`bcd03bec1` = branch + main through VX-620 and VX-562; `DerivedData/vx623`, io.lduarte.Variorum.debug, build 9876, BUILD SUCCEEDED; fresh binary 17:56); READY waits ONLY on her allow-rule word |
+| 4 | UNIT 2 — the live acceptance on production | PREPARING — REQUEST accepted by oct27coordinator (claim `vx-623-walk`, uninterrupted); the walk build READY on the MERGED tree (`bcd03bec1` = branch + main through VX-620 and VX-562; `DerivedData/vx623`, io.lduarte.Variorum.debug, build 9876, BUILD SUCCEEDED; fresh binary 17:56); her allow-rule word GIVEN ("go ahead on that tool", 2026-10-27 — the three rules added); READY sent to oct27coordinator, GO awaited |
 | 5 | The ladder (fresh fable-reviewer, whole diff) | NOT-STARTED |
 | 6 | Closeout: canon delta (the standing ruling, two-file shape), tickets, handoff, merge | NOT-STARTED |
 
