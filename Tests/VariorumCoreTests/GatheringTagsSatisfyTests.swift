@@ -82,7 +82,56 @@ struct GatheringTagsSatisfyTests {
             archived: false, finished: false, rule: .rule(.and([a, .star])), tagIsLive: { _ in false },
             starrable: false)
         #expect(dead == .blocked(.deadTag(path: nil)), "a dead tag the star could not fix is the dead tag")
-        #expect(GatheringMint.Blocker.needsStar.reason
-                == "Its rule needs a starred note, and only the author can star one.")
+        // A DELIBERATE FLIP (VX-596 — her ruling 2026-10-27, "let's add the star
+        // over the wire"; the ticket's wording point 3): the case's words were
+        // "Its rule needs a starred note, and only the author can star one." — a
+        // premise `set_starred` made false. No door speaks the case now (the
+        // wire stars where it is the block — `starringOnlyWhereNeeded`), so it
+        // keeps only the fact.
+        #expect(GatheringMint.Blocker.needsStar.reason == "Its rule needs a starred note.")
+        #expect(!GatheringMint.Blocker.needsStar.reason.contains("only the author"))
+    }
+
+    /// **VX-596 — the wire's write new: tags first, the star only where it is
+    /// the only way in** (RB-1, PROVISIONAL — `starringOnlyWhereNeeded`). Every
+    /// rule the star-forbidden walk plans keeps VX-549's plan exactly; every
+    /// rule it refused for want of a star (`needsStar`) takes her door's own
+    /// plan, starred; every other block stays the block. RED ON OLD by
+    /// construction (the composition did not exist; the wire refused the star
+    /// rows — `MCPGatheringGrantServerTests`' red run).
+    @Test func theWirePlansTagsFirstAndStarsOnlyWhereAStarIsTheOnlyWayIn() {
+        let rows: [(String, RuleTerm, GatheringMint.Outcome)] = [
+            ("#a", a, .plan(.init(tagIDs: ["a"], star: false))),
+            ("★ OR #a — the tag, where her door stars", .or([.star, a]), .plan(.init(tagIDs: ["a"], star: false))),
+            ("#a OR ★", .or([a, .star]), .plan(.init(tagIDs: ["a"], star: false))),
+            ("★", .star, .plan(.init(tagIDs: [], star: true))),
+            ("#a AND ★", .and([a, .star]), .plan(.init(tagIDs: ["a"], star: true))),
+            ("(★ OR #a) AND NOT #a — only the star gets in", .and([.or([.star, a]), .not(a)]),
+             .plan(.init(tagIDs: [], star: true))),
+            ("#a AND NOT ★ — never starred", .and([a, .not(.star)]), .plan(.init(tagIDs: ["a"], star: false))),
+            ("#a AND NOT #a — nothing gets in", .and([a, .not(a)]), .blocked(.unreachableTerm)),
+            ("★ AND NOT ★ — nothing gets in", .and([.star, .not(.star)]), .blocked(.unreachableTerm)),
+            ("a legacy date term AND ★", .and([.legacyEntryDateFrom("2026-01-01"), .star]), .blocked(.datedRule)),
+        ]
+        for (name, term, expected) in rows {
+            let wire = GatheringMint.wireGrammarOutcome(term)
+            #expect(wire == expected, "\(name): \(wire)")
+            #expect(wire != .blocked(.needsStar), "\(name): the wire never answers needs-a-star")
+            // Where the star-forbidden walk planned, the wire's plan IS that plan
+            // (VX-549's behaviour byte-unchanged); where it needed the star, the
+            // wire's plan is her door's.
+            if GatheringMint.tagsCanSatisfy(term) {
+                #expect(wire == GatheringMint.grammarOutcome(term, starrable: false), "\(name)")
+            }
+            if GatheringMint.needsStar(term) {
+                #expect(wire == GatheringMint.grammarOutcome(term, starrable: true), "\(name)")
+            }
+        }
+        // The gathering's own state still speaks first.
+        let archived = GatheringMint.starringOnlyWhereNeeded { starrable in
+            GatheringMint.outcome(
+                archived: true, finished: false, rule: .rule(.star), tagIsLive: { _ in true }, starrable: starrable)
+        }
+        #expect(archived == .blocked(.archived))
     }
 }

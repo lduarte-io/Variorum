@@ -505,6 +505,10 @@ nonisolated enum MCPPaneCopy {
         case "delete_note": return "deleting \(at)"
         case "archive_note": return "archiving \(at)"
         case "unarchive_note": return "unarchiving \(at)"
+        // VX-596 — her star on the wire: ONE tool both ways (`starred` true or
+        // false) and a coarse log that keeps no direction, so the line says the
+        // act without it (PROVISIONAL words, her copy pass — VX-234).
+        case "set_starred": return "changing the star on \(at)"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -629,6 +633,9 @@ nonisolated enum MCPPaneCopy {
         case "delete_note": return "deleted \(at)" + times
         case "archive_note": return "archived \(at)" + times
         case "unarchive_note": return "unarchived \(at)" + times
+        // VX-596 — her star on the wire, either way (the log keeps no
+        // direction; the receipt says which — PROVISIONAL words, VX-234).
+        case "set_starred": return "changed the star on \(at)" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -902,16 +909,17 @@ nonisolated enum MCPPaneCopy {
     static let chooseGathering = "Choose a gathering"
     static let noGatherings = "No gathering can be shared yet."
     static let allGatherings = "All gatherings"
-    /// **The one-line why a star-rule gathering is read/suggest-shaped**
-    /// (her sitting: "the grant sheet presents such a grant as
-    /// read/suggest-shaped"): starring is not on the wire, so a client can
-    /// never write a new note into it — the write rungs are not offered.
-    static let starRuleWhy =
-        "Its rule needs a starred note, and only you can star one \u{2014} so a client can read and "
-        + "suggest here, but not write new or edit."
+    /// **The heads-up under HOW MUCH on a star-rule gathering** (VX-596 — the
+    /// ticket's wording point 1, REWORDED: VX-549's why, "Its rule needs a
+    /// starred note, and only you can star one — so a client can read and
+    /// suggest here, but not write new or edit.", went false when the star came
+    /// onto the wire — her ruling 2026-10-27). Every rung is offered now; at
+    /// write new or edit the line says what such a grant does with her stars:
+    /// a note a client writes here is born starred, as one she makes there is
+    /// (`MCPGrantPicker.starHeadsUp`). Settings-class words (VX-272).
+    /// PROVISIONAL, her copy pass.
+    static let starHeadsUp = "Its rule needs a star, so a new note a client writes here is starred."
     /// An archived gathering assembles nothing until it is unarchived.
-    /// A star-rule gathering's row footing in the picker.
-    static let readAndSuggestOnly = "read and suggest only"
     static let archivedGatheringNote =
         "This gathering is archived, so it gathers nothing until you unarchive it."
     /// 13n-c U1 (VX-163, J8 — mockup §8's words): a journal-style book is
@@ -1046,8 +1054,13 @@ nonisolated enum MCPPaneCopy {
             case .note?: "it can also apply tags and save versions of it"
             case .book?: "it can also make new notes and chapters in it and apply tags"
             // VX-549 (PROVISIONAL words): create_note and apply_tag act under a
-            // gathering grant (`MCPToolFacts` — the truth pin reads it).
-            case .gathering?: "it can also make new notes in it, wearing the tags its rule needs, and apply tags"
+            // gathering grant (`MCPToolFacts` — the truth pin reads it). VX-596
+            // (the ticket's wording point 4 — VX-609): a rule only a star
+            // satisfies takes the note STARRED now, so the sentence — the sheet's
+            // HOW MUCH line and the ask's lead, one function — says so.
+            case .gathering?:
+                "it can also make new notes in it, wearing the tags its rule needs (starred, if it needs a star), "
+                    + "and apply tags"
             case .wing?, nil: "it can also make new notes, apply tags and build books"
             }
         case .edit:
@@ -1595,6 +1608,15 @@ nonisolated enum MCPReceiptCopy {
         case .noteArchive: return n == 1 ? "archived \(quoted(receipts[0].targetTitle))" : "archived \(n) notes"
         case .noteUnarchive:
             return n == 1 ? "unarchived \(quoted(receipts[0].targetTitle))" : "unarchived \(n) notes"
+        // VX-596 — her star on the wire (her door's verbs, `StarCopy`; a run is
+        // ONE target — a note or a book — so a count says how many times;
+        // PROVISIONAL words, her copy pass).
+        case .star:
+            return n == 1 ? "starred \(quoted(receipts[0].targetTitle))"
+                : "starred \(quoted(receipts[0].targetTitle)) \(n) times"
+        case .unstar:
+            return n == 1 ? "unstarred \(quoted(receipts[0].targetTitle))"
+                : "unstarred \(quoted(receipts[0].targetTitle)) \(n) times"
         }
     }
 

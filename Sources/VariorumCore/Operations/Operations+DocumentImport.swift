@@ -69,6 +69,11 @@ extension Operations {
         /// with, in document order — what the act minted, said back so a caller
         /// never reads the note again to learn an id the write itself made.
         public let blocks: [MintedBlockTakes]
+        /// **VX-596 — the act STARRED the note** (RB-1, PROVISIONAL): a note
+        /// the MCP door minted into a gathering whose rule only a star satisfies
+        /// is born starred (`mintNoteEntry`'s gathering arm). False for every
+        /// other mint.
+        public var starred: Bool = false
     }
 
     /// **One minted block, as the act minted it** (VX-252 — the run record's
@@ -122,6 +127,21 @@ extension Operations {
         /// Every minted note, in book order (chapters in order, then the
         /// unfiled ones).
         public let postIDs: [String]
+        /// **VX-567 — what each note's seat minted** (the VX-620 run, batch 3;
+        /// PROVISIONAL RB-4), parallel to `postIDs`: its blocks with every take
+        /// they were born with, from `mintDocument`'s own return — never a
+        /// second read, ∝ the import itself. The MCP door answers it as VX-252's
+        /// per-note record; her File ▸ Import… and the Bookcase drop read none of it.
+        public let notes: [MintedNote]
+    }
+
+    /// **One minted note of a book import, as the act minted it** (VX-567):
+    /// its id, its blocks in note order, and each block's takes (`MintedBlockTakes`
+    /// — VX-252's shared core half, the one the one-document form answers).
+    public struct MintedNote: Equatable, Sendable {
+        public let postID: String
+        public let blockIDs: [String]
+        public let blocks: [MintedBlockTakes]
     }
 
     /// One document → one bookless note in `wingId` (P-13n-2).
@@ -192,6 +212,7 @@ extension Operations {
 
             var sectionIDs: [String] = []
             var postIDs: [String] = []
+            var notes: [MintedNote] = []
             var sectionPosition: String?
             var memberPosition: String?
             func seat(_ note: VariorumDocument.NamedDocument, in sectionID: String?) throws {
@@ -207,6 +228,7 @@ extension Operations {
                 _ = try applyDocumentTags(
                     db, note.document.tagPaths, to: minted.post.id, wingId: wingId, now: now)
                 postIDs.append(minted.post.id)
+                notes.append(MintedNote(postID: minted.post.id, blockIDs: minted.blockIDs, blocks: minted.blocks))
             }
             for chapter in book.chapters {
                 let chapterName = StoredText.stripped(chapter.name).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -227,7 +249,7 @@ extension Operations {
             for note in book.unfiled {
                 try seat(note, in: nil)
             }
-            return BookImport(reading: reading, sectionIDs: sectionIDs, postIDs: postIDs)
+            return BookImport(reading: reading, sectionIDs: sectionIDs, postIDs: postIDs, notes: notes)
         }
         let readingID = result.reading.id
         let postIDs = result.postIDs

@@ -16,9 +16,8 @@ extension Queries {
     /// `reading` must be a live GATHERING (the caller's guard — a book's
     /// door is `newPostInReading`'s, never this).
     ///
-    /// `starrable` (VX-549): `false` for a door that cannot star the note —
-    /// the MCP door's `write new` into a gathering (`GatheringMint.outcome`'s
-    /// own parameter; her doors keep the default).
+    /// `starrable` (VX-549): `false` for a walk that may not star the note
+    /// (`GatheringMint.outcome`'s own parameter; her doors keep the default).
     public static func gatheringMintOutcome(
         _ db: Database, reading: Reading, starrable: Bool = true
     ) throws -> GatheringMint.Outcome {
@@ -31,6 +30,19 @@ extension Queries {
             archived: reading.archivedAt != nil, finished: reading.locked, rule: rule,
             tagIsLive: facts.isLive, deadTagPath: facts.deadPath, tagCovers: facts.covers,
             starrable: starrable)
+    }
+
+    /// **The MCP door's write new into a gathering** (VX-596, RB-1 PROVISIONAL —
+    /// `GatheringMint.starringOnlyWhereNeeded` over THIS store's facts): tags
+    /// first, exactly as VX-549 built it, and the star only where the rule
+    /// needs one — where it does, her door's own plan (`newPostInGathering`'s).
+    /// Read inside the act's own transaction (`Operations.mintNoteEntry`).
+    public static func gatheringWireMintOutcome(
+        _ db: Database, reading: Reading
+    ) throws -> GatheringMint.Outcome {
+        try GatheringMint.starringOnlyWhereNeeded { starrable in
+            try gatheringMintOutcome(db, reading: reading, starrable: starrable)
+        }
     }
 
     /// **VX-249 — what collecting THIS existing note into the gathering

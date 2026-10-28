@@ -29,10 +29,11 @@
 //
 //  VX-549 (VX-548 batch 3 — her sitting 2026-10-27, RATIFIED: "Gathering joins
 //  the grant scopes"): WHERE grows "A gathering", picked on the same
-//  `SearchPicker` (`MCPGrantPicker.gatheringArrangements`). A gathering whose
-//  rule needs a STAR is read/suggest-shaped — write new and edit not offered,
-//  with the one-line why (`MCPPaneCopy.starRuleWhy`) — since a client can't star
-//  a note, so it can never write one into it (her ruling).
+//  `SearchPicker` (`MCPGrantPicker.gatheringArrangements`). VX-596 (her ruling
+//  2026-10-27, "let's add the star over the wire"): VX-549's read/suggest shaping
+//  of a star-rule gathering is retired — the wire stars a note such a rule needs,
+//  so every rung is offered, and at write new or edit one quiet line says a new
+//  note written there is starred (`MCPGrantPicker.starHeadsUp`).
 //
 //  13n-c UX walk W-UX-2 — APPROVE ALONE, GRANT SEPARATE (her ruling, sitting
 //  round 6): the approval road (a request's Approve…) admits the client with
@@ -140,10 +141,13 @@ struct MCPGrantSheet: View {
         places.gatherings.first { $0.id == gatheringID }
     }
 
-    /// **The rungs HOW MUCH offers** (VX-549): every rung, except on a
-    /// gathering whose rule needs a star — read and suggest only (her ruling).
-    private var offeredRungs: [MCPGrantRule.Rung] {
-        MCPGrantPicker.offeredRungs(needsStar: place == .gathering && chosenGathering?.needsStar == true)
+    /// **The rungs HOW MUCH offers:** every rung, on every place (VX-596 retired
+    /// VX-549's star-rule shaping — the wire can star now).
+    private var offeredRungs: [MCPGrantRule.Rung] { MCPPaneCopy.offeredRungs }
+
+    /// VX-596: the star-rule gathering's one heads-up at write new or edit.
+    private var starHeadsUp: String? {
+        MCPGrantPicker.starHeadsUp(needsStar: place == .gathering && chosenGathering?.needsStar == true, rung: rung)
     }
 
     /// The fence of the chosen NOTE (a book or wing grant is never fenced —
@@ -397,10 +401,11 @@ struct MCPGrantSheet: View {
                 ExplainerLine(
                     line: MCPPaneCopy.rungSummary(rung, scope: scope),
                     detail: MCPPaneCopy.rungDetail(rung, scope: scope))
-                // VX-549: a star-rule gathering's one-line why (write new and
-                // edit withheld — her ruling).
-                if offeredRungs.count < MCPPaneCopy.offeredRungs.count {
-                    quiet(MCPPaneCopy.starRuleWhy)
+                // VX-596: a star-rule gathering's one heads-up at write new or
+                // edit (VX-549's "read and suggest only" why, reworded — the
+                // ticket's wording point 1).
+                if let starHeadsUp {
+                    quiet(starHeadsUp)
                 }
 
                 section(MCPPaneCopy.howLongSection)
@@ -470,10 +475,6 @@ struct MCPGrantSheet: View {
         }
         .onChange(of: offeredDurations) { _, offered in
             if !offered.contains(duration) { duration = offered.first ?? .once }
-        }
-        // VX-549: a star-rule gathering picked takes the highest rung it offers.
-        .onChange(of: offeredRungs) { _, offered in
-            if !offered.contains(rung) { rung = offered.last ?? .read }
         }
     }
 
@@ -743,7 +744,6 @@ struct MCPGrantSheet: View {
             duration = start.duration
         }
         if !offeredDurations.contains(duration) { duration = offeredDurations.first ?? .once }
-        if !offeredRungs.contains(rung) { rung = offeredRungs.last ?? .read }
         prefillApplied = true
     }
 

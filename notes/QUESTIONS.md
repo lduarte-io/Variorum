@@ -3678,3 +3678,51 @@ release ordered (0.10.3, one for wave 1). STANDING for her leisure: the A-439/C-
 VX-602's guide-content tail (three lessons + two sentences still say "tutorial" — re-word + the A1 re-seed in her
 window, or leave); the VX-424 hand check (drag an Open row down one slot); one Settings glance (General's seventh
 row + the toolbar label in Terminal); n-3's two-export-doors taste call; riders VX-373/VX-409.
+
+#245 — **THE VX-620 BUNDLE (the binding record is `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md` §THE
+BUNDLE; your checklist leads `notes/handoffs/vx-620-handoff.md`), OPEN — your pass.** Ratify or redirect, all built
+most-defensible and PROVISIONAL: **RB-1** the wire's mint-star rule — tags first (VX-549's plan wherever a tag can
+satisfy), born starred cap-exempt ONLY where a star is the only way in; consequences: a star-only gathering's wire
+mints can pass your Starred 15, and `★ OR #a` takes #a on the wire where your door stars; options (a) your door's
+planner outright / **(b) as built** / (c) keep refusing, pointed at set_starred / (d) the wire's star respects the cap ·
+**RB-4** VX-567 SUPERSEDES RATIFIED P-VX252-1/P-VX254-2 (#227, 2026-10-15): the whole-book import answers per-note
+records with per-take sha256s — your explicit word; one-commit revert · **RB-3** VX-590's visibility fact (a client
+row EVER — waiting/approved/denied; options: + the open book ON · approved only) · **RB-6** a chord for Move to Wing
+(⌥⌘L / ⇧⌥⌘L free; the ⌘K door ships either way) · **RB-7** a gathering's OWN star stays yours (alternative: EDIT-grant
+parity) · **RB-8** set_starred's undo design (place-restore; replays seat nothing; a cap-blocked half refuses keeping
+its entry) · **RB-13** VX-619's "(Claude Code: /mcp)" is NOT in the instructions — O-4's provider-neutrality (your
+pinned ruling) put the provider road in the guide's lesson-2 fence; confirm the placement · **RB-14** the Settings
+search lists the Waiting row clientlessly (options: hide with the open book · hide all but the switch and Connect) ·
+**RB-15/RB-5** the copy pass (the star strings, the selector's words, the docs sentences — joins VX-234) · **RB-16**
+the palette's second grammar (the three wing rows list only where they act) · **RB-18** should the app's wing FOLLOW
+a ⌘K move of the focused note? (today it doesn't — the follow is "on open and on focus", the letter held). OFFERS
+(nothing built): **RB-2** riders VX-367/368/369/606/612/613, and VX-189 looks substantially delivered by VX-549 —
+close or narrow it · **RB-10** two AI-naming faces show clientlessly outside the pane (the note's Private row; ⌘/'s
+MCP group) · **RB-17** batch 4's ladder notes (per-window re-ask signal; ⌘L-in-selector steps like ↓). FILED and
+triaged: VX-625 (the StarContext flake, the VX-532 class) · VX-626 (the Clients row's "last seen" shows a closed
+session's START time) · VX-628 (Terminal's bottom-bar receipt truncates). Walker observations recorded: W-2 (receipts
+name a date-titled note by its date), W-3 (Activity's target_kind asymmetry on refused gathering mints — the no-oracle
+posture, reviewer-endorsed), F-W2 = RB-18. The roster lesson held: the sub-issue listing governed at kickoff AND
+before the ladder (seven members, not the kickoff's six).
+
+#246 — **THE VX-562 BUNDLE (the binding record is `notes/plans/fixes/vx-562-outline-follow.md` §MORNING BUNDLE; your
+checklist leads `notes/handoffs/vx-562-handoff.md`), OPEN — your morning.** The headline taste call: **P-562-8** — at
+the very bottom of a book a tiny ~12-pt nudge up steps the navigator's mark from the last note back to the top row at
+once (the walker: "reads as a twitch, not deliberate"), while ~70 pt reads deliberate; as built the honest 8-pt band
+works both ways, and the recorded alternative holds the clamp while the page sits within about a row of the bottom.
+Ratify or redirect, all built, all walked: **P-562-1** no navigator auto-scroll (the Open list's follow idiom is the
+ready extension — want it?) · **P-562-2** the follow runs in Outline only (extend to the Book/Read flow's left bar?) ·
+**P-562-3** the counts line MOVED into the pinned header · **P-562-4** the chapter name only in chaptered books ·
+**P-562-5** the pin's "note N of M" counts PAGE order (the note box says membership order; they agree in sherlock and
+chapter-built books) · **P-562-7** a chapter heading names the note it introduces (no blink) · the short-book edges
+(nothing viewed at rest in every book; a barely-scrolling book goes straight from nothing to its last note) ·
+**R-562-A** a click's target holds until your scroll · **R-562-C** any scroll past 8 pt releases, whatever the input ·
+**R-562-D/D′** the at-bottom clamp standing only for an on-page last note — the SLIDE was walked and REJECTED at
+reading speed (a two-story lead, visible pace-doubling), and the clamp's stated cost stands: the last screenful's
+MIDDLE notes highlight by click, not by pure scroll (the slide and an eased probe remain your recorded alternates) ·
+the measured travel fact (the app's 40-pt bottom bar is never scrollable room on macOS — pinned verbatim from the
+trace) · the chapter mark's composition (accent fill at 22%, the name in INK — an accent name fails the palette
+layer's 4.5 floor in Terminal light). RIDERS still open while the code is warm: VX-96 · VX-616 · VX-563. FILED and
+triaged: VX-624 (the pre-existing 4-s landing watchdog spin, Suspected) · VX-629 (the follower wiring consolidates,
+Debt) · VX-630 (Index → Outline carry loses the caret's block, pre-existing Confirmed) · VX-631 (the "12 storys"
+receipt, Wording).

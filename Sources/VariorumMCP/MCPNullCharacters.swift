@@ -83,7 +83,7 @@ extension MCPWriteTools.Job {
             case .text(let text): MCPNullCharacters.count(title, text)
             case .blocks(let blocks): MCPNullCharacters.count(title) + MCPNullCharacters.count(blocks)
             }
-        case .importNote(let named, _): MCPNullCharacters.count(named)
+        case .importNote(let named, _, _): MCPNullCharacters.count(named)
         case .importBook(let book, _): MCPNullCharacters.count(book)
         case .applyTag(_, let path): MCPNullCharacters.count(path)
         case .createBook(let name, _): MCPNullCharacters.count(name)
@@ -95,8 +95,8 @@ extension MCPWriteTools.Job {
         case .noteEdit(let job): job.nullCharactersWritten
         case .libraryEdit(let job): job.nullCharactersWritten
         // A membership, a deletion, a tag taken off by its path (a lookup),
-        // a version link, a copy of stored text: no text written.
-        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .duplicateNote: 0
+        // a version link, a copy of stored text, a star (VX-596): no text written.
+        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .duplicateNote, .setStarred: 0
         }
     }
 }

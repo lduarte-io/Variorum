@@ -79,7 +79,8 @@ struct MCPWriteTools: Sendable {
         /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
         /// VX-252: an optional chapter of the book (`section_id`).
         case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?)
-        case importNote(VariorumDocument.NamedDocument, place: Place)
+        /// VX-566: `create_note`'s optional chapter, on the one-document form.
+        case importNote(VariorumDocument.NamedDocument, place: Place, sectionID: String?)
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
         case createBook(name: String, wingID: String)
@@ -110,6 +111,9 @@ struct MCPWriteTools: Sendable {
         /// U2): `with_tags` (default true) and the book road (`book_id`, with
         /// an optional `section_id`).
         case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?)
+        /// VX-596: her star on the wire — a note or a book, starred or not
+        /// (`MCPWriteTools+Star`).
+        case setStarred(target: StarTarget, starred: Bool)
 
         var tool: String {
             switch self {
@@ -132,6 +136,7 @@ struct MCPWriteTools: Sendable {
             case .addNoteToBook: "add_note_to_book"
             case .insertBlocks: "insert_blocks"
             case .duplicateNote: "duplicate_note"
+            case .setStarred: "set_starred"
             }
         }
 
@@ -165,6 +170,10 @@ struct MCPWriteTools: Sendable {
             // her caret by identity; her open tail stays below the stored
             // blocks and crystallizes after the run, where the screen showed it.
             case .insertBlocks:
+                false
+            // VX-596: a star is a setting-list entry (and a book's column) —
+            // no take's text read, rewritten, copied, frozen or tombstoned.
+            case .setStarred:
                 false
             // VX-311 (the run record's D-311-6, argued from VX-246 U3's COPY
             // row): a duplicate COPIES every take of the note — `copyPlacements`
@@ -263,6 +272,8 @@ struct MCPWriteTools: Sendable {
             return try parseInsertBlocks(args)
         case MCPToolCatalog.duplicateNote.name:
             return try parseDuplicateNote(args)
+        case MCPToolCatalog.setStarred.name:
+            return try parseSetStarred(args)
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
@@ -347,15 +358,26 @@ struct MCPWriteTools: Sendable {
     private func parseImport(_ args: [String: Value]) throws -> Job {
         let document = try optionalString(args, "document")
         let bookValue = args["book"].flatMap { $0 == .null ? nil : $0 }
+        // VX-566 (`create_note`'s D2): a chapter is a chapter OF the book the
+        // note joins — said at the parse, before any decision.
+        let sectionID = try optionalString(args, "section_id")
         switch (document, bookValue) {
         case (let text?, nil):
+            if sectionID != nil, try optionalString(args, "book_id") == nil {
+                throw ArgumentFailure(message: Self.sectionWithoutBookWords)
+            }
             return .importNote(
                 VariorumDocument.NamedDocument(fallbackTitle: "", document: try parsed(text, label: "document")),
-                place: try place(args))
+                place: try place(args), sectionID: sectionID)
         case (nil, let value?):
             guard try optionalString(args, "book_id") == nil else {
                 throw ArgumentFailure(message: "A book imports into a wing: pass wing_id, not book_id.")
             }
+            // VX-566: a whole book has no honest section_id — its chapters
+            // are `book.chapters` — so the argument is refused in words (the
+            // `book_id` precedent above), never ignored into a success that
+            // filed nothing where the client asked.
+            guard sectionID == nil else { throw ArgumentFailure(message: Self.bookFormSectionWords) }
             guard let wingID = try optionalString(args, "wing_id") else {
                 throw ArgumentFailure(message: "A book imports into a wing: pass wing_id (\"\" is Home).")
             }
@@ -469,10 +491,15 @@ struct MCPWriteTools: Sendable {
                 }
                 return try noteAnswer(minted, act: .note, clientName: clientName, sectionID: sectionID)
             }
-        case .importNote(let named, let place):
+        case .importNote(let named, let place, let sectionID):
+            // VX-566: `create_note`'s order exactly — the BOOK decided first
+            // (`into`), so an unreachable book answers the one not-shared
+            // sentence whatever `section_id` names; inside, an id that isn't a
+            // live chapter of THAT book speaks the one chapter sentence.
             return try into(place, job: job, clientName: clientName, admitsGathering: true) { destination in
-                let minted = try ops.importNote(named, in: destination, undoLabel: label(.importNote))
-                return try noteAnswer(minted, act: .importNote, clientName: clientName)
+                let minted = try ops.importNote(
+                    named, in: destination, section: sectionID, undoLabel: label(.importNote))
+                return try noteAnswer(minted, act: .importNote, clientName: clientName, sectionID: sectionID)
             }
         case .importBook(let book, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
@@ -481,7 +508,21 @@ struct MCPWriteTools: Sendable {
                 // names a book) — a hidden one neither blocks it nor is named.
                 let result = try ops.importBook(
                     book, wingId: wingID, undoLabel: label(.importBook), namesCountedBy: readableBooks(clientName))
-                return (["book_id": result.reading.id, "note_ids": result.postIDs, "chapter_ids": result.sectionIDs],
+                // VX-567 (PROVISIONAL RB-4 — superseding P-VX252-1 / P-VX254-2's
+                // "ids only", ratified 2026-10-15, on the ticket she seated): the
+                // three id lists stay, and `notes` answers each minted note in
+                // VX-252's record — `note_id`, `block_ids`, `blocks` with every
+                // take's `sha256` (`MCPMintedBlocks`, the one encoder; no text) —
+                // from what the act minted, never a second read. Its size is ∝
+                // the import itself: the client sent every take whose digest it
+                // reads back, so the answer is linear in the request and owes no
+                // paging (a finished act keeps no state to page through).
+                let notes: [[String: Any]] = result.notes.map { note in
+                    ["note_id": note.postID, "block_ids": note.blockIDs,
+                     "blocks": MCPMintedBlocks.records(note.blocks)]
+                }
+                return (["book_id": result.reading.id, "note_ids": result.postIDs, "chapter_ids": result.sectionIDs,
+                         "notes": notes],
                         MCPWriteReceipt(clientName: clientName, act: .importBook, targetID: result.reading.id,
                                         targetTitle: result.reading.name, count: result.postIDs.count,
                                         show: .book(bookID: result.reading.id, sectionID: nil)))
@@ -566,6 +607,8 @@ struct MCPWriteTools: Sendable {
             return try performDuplicateNote(
                 noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, job: job, ops: ops,
                 clientName: clientName)
+        case .setStarred(let target, let starred):
+            return try performSetStarred(target, starred: starred, job: job, ops: ops, clientName: clientName)
         }
     }
 
@@ -924,14 +967,28 @@ struct MCPWriteTools: Sendable {
             "tags": minted.tagPaths, "blocks": MCPMintedBlocks.records(minted.blocks),
         ]
         if let sectionID { answer["section_id"] = sectionID }
+        // VX-596 (RB-1, PROVISIONAL): a note born starred into a gathering says
+        // so — the star is one of the author's, the client never asked for it by
+        // name. Absent otherwise, so every other answer stays byte-unchanged
+        // (VX-357's `null_characters_removed` shape).
+        if minted.starred { answer[Self.starredMintKey] = true }
         return (answer,
                 MCPWriteReceipt(clientName: clientName, act: act, targetID: minted.post.id, targetTitle: title,
                                 show: .note(noteID: minted.post.id, blockID: nil, select: nil)))
     }
 
+    /// VX-596: the answer key a born-starred mint carries (read by the
+    /// descriptions, never retyped).
+    static let starredMintKey = "starred"
+
     /// VX-252 (D2): `create_note`'s `section_id` without a book to be a chapter of.
     static let sectionWithoutBookWords =
         "section_id goes with book_id: it files the note under a chapter of the book the note joins."
+
+    /// VX-566: `import_document`'s whole-book form given a `section_id` — the
+    /// book's chapters are its own (`book.chapters`). PROVISIONAL words (RB-5).
+    static let bookFormSectionWords =
+        "section_id goes with document and book_id: a book brings its own chapters in book.chapters."
 
     /// **The take label on an AI take** (P-13n-3's convention, re-voiced by
     /// her VX-267 ruling — *"why do we need claude-code * suggested * english.

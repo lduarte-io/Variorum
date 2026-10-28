@@ -1021,3 +1021,49 @@ Evidence: 821/152 · 3,057/495 (VX-502's tree; seam trio green) · 1,562/267 + 1
 80/10. Three walks; the dev store restored each time. The history rewrite: `7929147de` → `a3f087842`, tree
 byte-identical, main's signed line intact. Born: VX-603, VX-604, VX-608, VX-614–618 (triaged). Riders VX-373/409
 not taken. canon-size 125,887/150,000 — no crossing. MOBILE PARITY: nothing mobile-visible.
+
+
+**2026-10-27 — VX-620 (Run: MCP umbrella remainder; PR #197, merge 32a779075; the record
+`notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`, the ladder `vx-620-ladder-round1.md` beside it; the VX-548
+remainder under a fresh orchestrator at her morning ruling — four Opus implementer batches, a one-round Fable ladder,
+Fable orchestrating; merged first in wave 2, zero overlap).** THE ROSTER WAS THE SUB-ISSUE LISTING (the rule this run
+was born to prove): her kickoff said six members, the listing said seven — VX-377 re-parented at VX-439's closeout —
+plus riders VX-609/VX-619 seated at kickoff; re-listed before the ladder, unchanged. **§12, the MCP door — starring on
+the wire (VX-596; her words on the ticket: "let's add the star over the wire, it might as well be included" and "the
+star rule wording should be changed since the starring is being added"):** `set_starred` at EDIT through her
+`setStarred`'s own write (the union star, the cap of fifteen worded, intake hearing a wire star as hers, un-star a
+non-event), ONE client-named undo on the move_note_to_wing wrap precedent whose halves are compare-and-set and restore
+the star AT ITS PLACE in the Starred list; VX-549's star-rule clauses superseded — the wire's mint plans TAGS FIRST
+(VX-549's plan, byte-unchanged wherever a tag satisfies) and stars born-cap-exempt only where a star is the only way
+in (PROVISIONAL RB-1, #245 — the narrower road chosen over flipping the planner outright because her door plans
+`★ OR #a` as a star and the flip would have changed VX-549's ratified pinned behaviour); the needsStar refusal retired
+from every road; the sheet offers every rung with the heads-up at write new/edit; the ticket's SEVEN wording points
+each dispositioned (the record's table); VX-609's dead ask-door closed by legitimacy (walked live: her answered Once
+lands a born-starred note). **§12, Settings ▸ MCP (VX-590, her words: "I don't want someone who doesn't use AI to see
+that & get scared that their work is shared"; VX-605, the VX-548 mid-walker's find):** the sharing face waits for the
+library's first client row (PROVISIONAL RB-3), the Connect road standing; the host signals at a connection's NAMING,
+so the Clients row reads connected-now at once (red-on-old + behavioural revert; walked live in both voices). **§12,
+the wire's imports and docs (VX-566/567/619; VX-565):** import_document gains create_note's section_id shape; the
+whole-book answer gains per-note records with per-take sha256s — SUPERSEDING P-VX252-1/P-VX254-2's 2026-10-15
+ratification (#227), flagged loudly as PROVISIONAL RB-4 with a one-commit revert; the instructions say a lock or quit
+ends every connection (2,988→2,994/3,000 — the move_note_to_wing sentence traded out, its rule kept in the tool's own
+description; O-4's provider-neutrality kept the "/mcp" road in the guide's lesson-2 fence, RB-13); VX-565 RESOLVED
+no-fix — her duplicate-rows report was VX-393's shape, gone since 0.9.8, re-proven with fresh pins (the hallucination
+guard's record-only arm). **§12, the app's keyboard family (VX-377; her words: "hmm yeah go ahead and file a ticket
+for that" and "it should pull up a selector that I can also operate via keyboard to make it truly fast"):** ⌘K gains
+the Move/Copy-to-Wing doors over a keyboard wing selector built on the ⌘L switcher's brain (the probe found no
+reusable picker — the old doors were submenus), and the batch's trace found and fixed the cross-door staleness in
+VX-425's re-ask (a signal, P-4, never a decision). THE LADDER: one round, 0/0/0/4 record-only NITs; its final-window
+contingency met after a two-step pin story — the mounted selector-focus pin was red for a RIG reason (test-host
+windows never become key), adjudicated by the walk's live focus verdict (focused without a click, both voices), and
+re-seated at the honest seam (the arrival's ASK, DEBUG-oracled; the landing walk-verified), teeth proven GREEN→RED→
+GREEN by behavioural revert. Windows: vx620-mid (366/50 executed, one pin bug fixed; the MCP walk ALL GREEN) ·
+vx620-final (470/66; the ⌘K walk six-for-six) · two re-runs; every claim released clean under oct27coordinator's
+ratified protocol. Three -only-testing traps recorded (file names and single-test paths drop SILENTLY; verify
+started names — the VX-604 family). Born and triaged: VX-625 · VX-626 · VX-628; VX-611 commented. The bundle is
+QUESTIONS #245. MOBILE PARITY: nothing mobile-visible (no MCP door, no ⌘K on the phone; `VariorumMobile/` untouched,
+diff-verified at the ladder).
+
+---
+
+**2026-10-27 — VX-562: Book Outline — the highlight follows your scroll, and the nav info pins up top (§12, The Bookcase and books; PR #198, merge `40d501404`; the record `notes/plans/fixes/vx-562-outline-follow.md`).** Her rulings, verbatim from the ticket (minted from her 2026-10-26 planning session and her 10-21 improvements note): the highlight follows the view and the caret is ignored — *"maybe not [highlight the one you're typing in], it just follows what your view is"*; *"make the note that you're currently on highlight on the left bar ABSOLUTELY pre launch"*; the pin's content — the chapter and note counts fixed at the top, widened by *"show during scroll what # note you're in, maybe what chapter you're in."* The contract line this landed is SurfaceContracts §The Bookcase and books ("The Outline follows the page"). The architect rulings, all PROVISIONAL for her (QUESTIONS #246): **R-562-A** (a navigator click adopts its target at the click and holds it on screen until her scroll — the scroll-spy convention; it also dissolved the batch's F-1, the landing-watchdog hold, whose pre-existing spin is VX-624); **R-562-C** (a standing adoption releases when the page's offset moves past 8 pt, whatever the input); **R-562-B superseded by R-562-D/D′** — the sliding end-of-book probe was built to fix the ladder's one MAJOR (her own scroll could never highlight the last screenful; walk-confirmed live) and then REJECTED on walk film at reading speed (*"it reads as the highlight racing ahead"* — a two-story lead, visible pace-doubling), replaced by the at-bottom clamp to the last note, standing only for an on-page last note (round 3's R3-1); **the reachable-travel fact**, measured by a trace walk after the clamp sat dead in the real app (the app's 40-pt bottom bar reports in `ScrollGeometry.contentInsets` but is never scrollable room on macOS — rawOffset stops at exactly content − container; seven verbatim trace lines in the record); **P-562-1…8** (the navigator does not auto-scroll; Outline-only scope; the counts line moved into the pin; chapter only when chaptered; page-order numbering; the heading names the note it introduces; the short-book edges; the bottom-twitch taste knob). Cast: Fable architect/orchestrator (small fixes at adjudication: R-562-D′ and the N2/N3 hygiene, line-checked in the round files) · three fresh Opus implementers (the batch; the R-562-A continuation; the r1 fixes) · `opus-reviewer` ladder, three rounds, capped (r1 0B·1M·5m·3n; r2 0B·0M·1m·2n; r3 0B·0M·1m·2n), every finding dispositioned in writing. Evidence: 326 tests in 60 suites green; eight revert recipes (B·C·E·G·H·H′·I·J) each red on exactly their named pins; six coordinator-bridged stage windows; four walks + a trace walk on the held dev store (walk 1 premise-blocked — the store held no books; walk 2 the pre-fix baseline via Help ▸ Restore the Sample Library, removed whole; walk 3 the slide's rejection; walk 4 the dead clamp's honest fail; the confirm walk the clamp firing live — "note 13 of 13 · The Adventure of the Copper Beeches"), the store returned as-found after every window. Born: VX-624 · VX-629 · VX-630 · VX-631, all triaged. The bundle: QUESTIONS #246. Mobile parity: nothing mobile-visible.

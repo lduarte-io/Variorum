@@ -326,6 +326,11 @@ struct MCPWriteServerTests {
             // grows with the catalog): VX-311's duplicate_note, aimed at her
             // note, refusing at the rung (a copy is a write new in the wing).
             calls.append(("duplicate_note", ["note_id": .string(note.id)]))
+            // VX-596 (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): her star, aimed at her note and her
+            // book, refusing at the rung.
+            calls.append(("set_starred", ["note_id": .string(note.id), "starred": .bool(true)]))
+            calls.append(("set_starred", ["book_id": .string(book.id), "starred": .bool(true)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
