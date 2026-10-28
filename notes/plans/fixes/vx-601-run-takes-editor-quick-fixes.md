@@ -1872,9 +1872,13 @@ is in flight.
   `VariorumTests/TakesBarAndFacesTests.swift`, 11 tests in 4 suites; `DerivedData/vx601c-post`
   build-for-testing GREEN (log `App/Variorum/DerivedData/logs/c-post-build.log`; no warning in a
   touched file).
-- Revert trees — NOT-STARTED (the plan: `vx601c-pre` all four reverted, then one tree per member;
-  each revert IN PLACE on the member's face/door function, committed-first, restored by
-  `git checkout <fix-sha> -- <file>` — the batch B lesson).
+- Revert trees — IN PROGRESS from fa7ea5567 (**REVERTS IN FLIGHT while this line says so** — a
+  successor reads `git diff`; restore = `git checkout fa7ea5567 -- App/Variorum`). Six trees, each
+  an APFS clone of `vx601c-post` built incrementally: `vx601c-pre` (all five reverted),
+  `vx601c-rev427`, `-rev586`, `-rev321`, `-rev574`, `-rev337`. Each revert IN PLACE on the member's
+  face/door function (marker `VX601C-REVERT`; the script, kept beside the trees:
+  `App/Variorum/DerivedData/c-revert.py`), restored from the fix SHA by id, never from HEAD (the
+  batch B lesson).
 - VX-337 — DONE (the bounded trace yielded for the fold-settle flake — a deterministic TEST fix +
   its pure pin, this commit; the soak flake's trace NOT done, the bound spent — findings below).
 - Red/green runs, walk — PENDING (the orchestrator's window).
