@@ -887,13 +887,15 @@ struct ShelfView: View {
             openSettings(reading.id)
         }
         // 13n-c U3 (VX-156 item 2; mockup §2): share THIS book — drawn only
-        // while an approved client exists (VX-272) and only on a book a grant
-        // may name (never a gathering, the daily Journal or a Private book —
-        // the op refuses those; P-2).
-        if let road = mcpShareRoad, road.canShare, reading.kind == .book,
-           !model.fencedBooks.contains(reading.id) {
+        // while an approved client exists (VX-272) and only on a reading a
+        // grant may name (never the daily Journal or a Private book — the op
+        // refuses those; P-2). VX-189 (her word 2026-10-28, book parity): a
+        // GATHERING's row draws it too, the sheet opened on the gathering — a
+        // grant place of its own since VX-549 (the fenced set names a stale
+        // gathering's fence as well).
+        if let road = mcpShareRoad, road.canShare, !model.fencedBooks.contains(reading.id) {
             Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
-                road.open(MCPGrantOpening(place: .book(reading.id), origin: .place))
+                road.open(MCPGrantOpening(place: .reading(reading), origin: .place))
             }
         }
         // 13i-c U4 — DUPLICATE (§6): books only.

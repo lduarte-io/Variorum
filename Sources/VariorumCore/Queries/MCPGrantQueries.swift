@@ -711,17 +711,20 @@ extension Queries {
         ORDER BY r.name COLLATE NOCASE, r.id
         """
 
-    /// **The live books a grant may NOT name** (13n-c U3 — a book row's
-    /// "Share with AI…" is drawn only where the op could act, P-2): exactly
-    /// the complement of `mcpGrantableBooksSQL`'s fence filter, on the SAME
-    /// two fragments (THE daily Journal's marker, the Private mark) — never a
-    /// parallel fence. ∝ the fenced books (a handful).
+    /// **The live books — and gatherings — a grant may NOT name** (13n-c U3 —
+    /// a book row's "Share with AI…" is drawn only where the op could act,
+    /// P-2): exactly the complement of `mcpGrantableBooksSQL`'s fence filter
+    /// and, since VX-189 drew the door on a GATHERING's row too (book parity),
+    /// of `mcpGrantableGatherings`' — on the SAME two fragments (THE daily
+    /// Journal's marker, the Private mark; no op mints either on a gathering,
+    /// a stale synced row could) — never a parallel fence. ∝ the fenced
+    /// readings (a handful).
     public static func mcpFencedBookIDs(_ db: Database) throws -> Set<String> {
         Set(try String.fetchAll(
             db,
             sql: """
                 SELECT r.id FROM reading r
-                WHERE r.deleted_at IS NULL AND r.kind = 'book'
+                WHERE r.deleted_at IS NULL AND r.kind IN ('book', 'gathering')
                   AND ((\(dailyJournalLegForBook)) OR (\(privateLegForBook)))
                 """))
     }

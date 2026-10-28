@@ -739,8 +739,39 @@ Pieces (flipped per commit):
   field), `.theChapterDoorOpensTheBindWithItsCountAndItsFollowUp` → RENAMED
   `.theBookViewsBindRoadCarriesItsCountAndItsOrder` (the same road and its count/order carriage, minus the
   follow-up), `VocabularySweepTests.theCollectingPromiseIsTrueOfTheRule` (the parameter only);
-  `BookOrderConversionTests` comments only. `build-for-testing` ✓. IN THIS COMMIT.
-- B3-5 VX-189 the gathering's own Shared-with doors: NOT STARTED.
+  `BookOrderConversionTests` comments only. `build-for-testing` ✓. DONE (94a1486fd).
+- B3-5 VX-189 the gathering's own Shared-with doors — BOOK PARITY, faces only (no wire tool, no grant
+  semantics, no new reach: every door opens THE one grant sheet, whose confirm is `grantMCPAccess`'s gathering
+  arm, VX-549's, untouched). MCPSpec read in full first. What a book's place doors had and a gathering's
+  lacked, traced: (1) Book Settings' "Shared with" row — `BookSettingsFace.showsGrantRow` required
+  `kind == .book` and `BookSettingsModel.isGrantable` read `Queries.mcpBookFacts` (books only); the held reach
+  (`Queries.mcpBookReach`) ALREADY answered a gathering through `decideGathering`. (2) The row menus' "Share
+  with AI…" — `BookRowMenuTable.doors` (the Library's / Starred's / Archived's right-click) and the Bookcase
+  row's menu (`ShelfView.bookMenu`) required `kind == .book`, and the fence they read
+  (`Queries.mcpFencedBookIDs`) named books only. (3) Every door opened `.book(id)`. Built: CORE —
+  `mcpFencedBookIDs` reads `kind IN ('book', 'gathering')` on the SAME two fragments (a stale Private stamp /
+  'daily' marker on a gathering — no op mints either; the op's gathering arm already refuses one), so it is
+  the exact complement of the sheet's offered books AND gatherings; pin `MCPShareTests
+  .theFencedSetNamesTheGatheringsTheSheetNeverOffers` RUN RED headless on the pre-fix query (2 issues: the set
+  missed both stale gatherings) then GREEN (`MCPShareTests` 17/1 passed). APP — `MCPGrantPrefill.reading(_:)`
+  (the ONE switch: a gathering's place is `.gathering`, a book's `.book`); `isGrantable` reads
+  `mcpBookFacts ?? mcpGatheringFacts`; `showsGrantRow` drops the kind gate (superseding P-VX185-2's
+  no-sharing-line and VX-549's MB-18); `grantRowCaption(_:kind:)` — "No client reaches this gathering." on a
+  gathering (`MCPShareCopy.notShared(_:)`, PROVISIONAL P-440-11; a book's words unchanged);
+  `BookSettingsFace.grantOpening(for:)` (Share… → the sheet on the reading's own place, WHO asked, nothing
+  replaced); `BookRowMenuTable.doors` draws `.share` on any shareable reading and its button opens
+  `.reading(reading)`; `ShelfView.bookMenu` the same. The registry: no declaration changed (`.mcpShareHere`
+  `.contextMenu` / `.mcpShareBook` `.surface` already declared and rendered — the walk's unions unchanged);
+  one doc line on the case (`Capability.swift`). Change…/Revoke: the Book Settings row carries neither
+  (a book's never did); the shared icon's popover (Change…/Revoke) already reads a gathering's own grant since
+  VX-549 — untouched. Pins (Mac `MCPShareFacesTests`, compiled ✓, RUNS PENDING): the "place doors unbuilt"
+  messages FLIPPED to assertions — `theBookRowMenuDrawsShareOnlyOnAShareableBook` (a gathering's row draws it;
+  ungated it doesn't), `theBookSettingsGrantRowDrawsOnlyWhereAGrantCanLand` (a gathering's row draws, gated
+  as a book's), `theGrantRowsGateIsTheFencesOwnAnswer` ("a gathering is never grantable" flipped; a stale-
+  fenced gathering joins the parity sweep); NEW `aGatheringsPlaceDoorsOpenTheSheetOnTheGathering` (the
+  prefill switch, the opening, the caption, no "AI") and `aGatheringsSharedWithRowReadsItsOwnGrantAndOpens`
+  (the settings model's held read on a gathering: the gate opens, its own grant named with no "through" —
+  red on old by the gate). IN THIS COMMIT.
 - B3-6 VX-356 verify (trace) + seam + red-on-old pin: NOT STARTED.
 - B3-7 VX-356 fix (if real): NOT STARTED.
 - B3-8 verification (headless) + the record closed: NOT STARTED.

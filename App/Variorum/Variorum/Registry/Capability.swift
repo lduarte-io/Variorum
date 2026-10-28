@@ -1056,7 +1056,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// on a note row's and a book row's menu (`.contextMenu`, the row it is
     /// on); `mcpShareNotes` — the Library bulk bar's "Share N notes with AI…"
     /// (`.surface`, the ⌘-click pick); `mcpShareBook` — Book Settings' grant
-    /// row's Share… (`.surface`); `mcpShareThisNote` — ⌥⌘A, the Edit menu
+    /// row's Share… (`.surface`) — VX-189: a book row's and the settings row's
+    /// doors draw on a GATHERING too, the sheet on the gathering's own place
+    /// (`MCPGrantPrefill.reading`); `mcpShareThisNote` — ⌥⌘A, the Edit menu
     /// (`.menuBar`); `mcpShowSharing` — the ONE shared icon (VX-271) on a
     /// Bookcase row and in the note's indicator (VX-164), whose click shows
     /// the permission; `mcpChangeGrant` — that popover's Change…, which

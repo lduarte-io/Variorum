@@ -248,24 +248,35 @@ nonisolated enum BookSettingsFace {
         reading.kind == .book || reading.locked
     }
 
-    /// 13n-c U3 — whether the grant row draws (P-2 + VX-272 + VX-273). VX-549
-    /// made a gathering a grant place, but its place doors (this row, a row
-    /// menu's Share…) are not built — the grant sheet's WHERE is its road
-    /// (PROVISIONAL MB-18: "expand no other road").
+    /// 13n-c U3 — whether the grant row draws (P-2 + VX-272). **VX-189 (her
+    /// word 2026-10-28 — "gatherings should have shared with doors"; book
+    /// parity, superseding VX-185's P-VX185-2 "a gathering's Book Settings
+    /// shows no sharing line" and VX-549's MB-18 "not built"):** a BOOK and a
+    /// GATHERING alike — a gathering is a grant place of its own since
+    /// VX-549, its reach the rule's (`Queries.mcpBookReach` →
+    /// `decideGathering`).
     /// 13n-c Stage B R1 B4: `grantable` is the FENCE's own answer for this
-    /// book (`BookSettingsModel.isGrantable` — `Queries.mcpBookFacts`, the one
-    /// derivation site the op's refusal and the sheet's offer read), never a
-    /// second fence spelled here from the profile and the Private flag (plan
-    /// §2: no parallel fence).
+    /// reading (`BookSettingsModel.isGrantable` — `Queries.mcpBookFacts` /
+    /// `mcpGatheringFacts`, the derivation sites the op's refusal and the
+    /// sheet's offer read), never a second fence spelled here from the profile
+    /// and the Private flag (plan §2: no parallel fence).
     static func showsGrantRow(for reading: Reading, grantable: Bool, canShare: Bool) -> Bool {
-        canShare && reading.kind == .book && grantable
+        canShare && grantable
     }
 
     /// The grant row's sentence: "Shared with claude-code (read and suggest)"
-    /// or "No client reaches this book."
-    static func grantRowCaption(_ reach: [MCPPlaceReach]) -> String {
-        reach.isEmpty ? MCPShareCopy.notShared
+    /// or "No client reaches this book." — "…this gathering." on a gathering
+    /// (VX-189; PROVISIONAL wording P-440-11).
+    static func grantRowCaption(_ reach: [MCPPlaceReach], kind: ReadingKind = .book) -> String {
+        reach.isEmpty ? MCPShareCopy.notShared(kind)
             : "\(MCPShareCopy.sharedWithLabel) \(MCPShareCopy.clients(reach))"
+    }
+
+    /// VX-189: the row's Share… opens THE grant sheet on this reading's OWN
+    /// place — a gathering's on the gathering (`MCPGrantPrefill.reading`),
+    /// nothing replaced, WHO asked (the book row's road, unchanged).
+    static func grantOpening(for reading: Reading) -> MCPGrantOpening {
+        MCPGrantOpening(place: .reading(reading), origin: .place)
     }
 
     /// 13i-e U2 — the State section's Archived row: Archive or Unarchive, from
@@ -347,12 +358,16 @@ final class BookSettingsModel {
         let grantable: Bool
     }
 
-    /// **May a grant name this book?** — the fence's OWN facts
+    /// **May a grant name this book — or gathering?** — the fence's OWN facts
     /// (`Queries.mcpBookFacts`: a live BOOK with no fence — not THE daily
-    /// Journal, not Private), the very read `insertMCPGrant` refuses on and
-    /// `mcpGrantableBooks` / `mcpFencedBookIDs` filter by. Never re-derived.
+    /// Journal, not Private; VX-189: `Queries.mcpGatheringFacts`, a live
+    /// GATHERING on the same two fragments), the very reads `insertMCPGrant`
+    /// refuses on and `mcpGrantableBooks` / `mcpGrantableGatherings` /
+    /// `mcpFencedBookIDs` filter by. Never re-derived.
     nonisolated static func isGrantable(_ db: Database, readingID: String) throws -> Bool {
-        guard let facts = try Queries.mcpBookFacts(db, readingID: readingID) else { return false }
+        guard let facts = try Queries.mcpBookFacts(db, readingID: readingID)
+            ?? Queries.mcpGatheringFacts(db, readingID: readingID)
+        else { return false }
         return facts.fence == nil
     }
 
@@ -744,21 +759,22 @@ struct BookSettingsSheet: View {
         // 13n-c U3 — THE GRANT ROW (R-13n-4 named Book Settings a grant face;
         // VX-156 item 2, mockup §2): who reaches this book now, and Share… —
         // THE grant sheet pre-filled. Drawn only where a grant can land (P-2):
-        // a BOOK (a gathering's door is not built — VX-549's MB-18), not THE daily Journal and not
-        // Private (the fence — the op refuses; the Private row above says why),
-        // and only while an approved client exists (VX-272). Settings-class
-        // words, no "AI" — the client's own name says who.
+        // not THE daily Journal and not Private (the fence — the op refuses;
+        // the Private row above says why), and only while an approved client
+        // exists (VX-272). VX-189: on a GATHERING too (book parity — its own
+        // grant place since VX-549; the sheet opens on the gathering). Settings-
+        // class words, no "AI" — the client's own name says who.
         if BookSettingsFace.showsGrantRow(
             for: reading, grantable: model.grantable, canShare: mcpShareRoad?.canShare ?? false) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(tokens.chromeLabel(BookSettingsFace.grantRowCaption(model.reach)))
+                Text(tokens.chromeLabel(BookSettingsFace.grantRowCaption(model.reach, kind: reading.kind)))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
                 Button(tokens.chromeLabel(CapabilityRegistry.capability(.mcpShareBook).verb)) {
-                    grantOpening = MCPGrantOpening(place: .book(reading.id), origin: .place)
+                    grantOpening = BookSettingsFace.grantOpening(for: reading)
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
             }

@@ -442,8 +442,13 @@ struct MCPShareFacesTests {
         gathering.kind = .gathering
         #expect(!BookRowMenuTable.doors(for: book).contains(.share), "no approved client ⇒ no door")
         #expect(BookRowMenuTable.doors(for: book, shareable: true).contains(.share))
-        #expect(!BookRowMenuTable.doors(for: gathering, shareable: true).contains(.share),
-                "a gathering's place doors are not built (VX-549 MB-18 — the sheet's WHERE is its road)")
+        // VX-189 (A DELIBERATE FLIP — her word 2026-10-28, superseding VX-549's
+        // MB-18 "not built"): a gathering's row draws its place door, book
+        // parity; ungated (no client, or a fenced gathering) it draws none.
+        #expect(BookRowMenuTable.doors(for: gathering, shareable: true).contains(.share),
+                "a gathering's row draws Share with AI… (VX-189 — its own grant place)")
+        #expect(!BookRowMenuTable.doors(for: gathering, shareable: false).contains(.share),
+                "no approved client, or a fenced gathering ⇒ no door")
         #expect(!BookRowMenuTable.doors(for: nil, shareable: true).contains(.share), "facts unknown ⇒ not drawn")
         let doors = BookRowMenuTable.doors(for: book, shareable: true)
         #expect(doors.firstIndex(of: .share)! > doors.firstIndex(of: .exportPDF)!, "after the exports (mockup §2)")
@@ -461,16 +466,24 @@ struct MCPShareFacesTests {
         #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: false), "VX-272")
         #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: false, canShare: true), "the fence (P-2)")
         book.kind = .gathering
-        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true),
-                "a gathering's place doors are not built (VX-549 MB-18 — the sheet's WHERE is its road)")
+        // VX-189 (A DELIBERATE FLIP — superseding P-VX185-2's no-sharing-line
+        // and VX-549's MB-18): a gathering's settings carry the row, gated
+        // exactly as a book's.
+        #expect(BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: true),
+                "a gathering's settings draw the Shared-with row (VX-189 — book parity)")
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: true, canShare: false), "VX-272")
+        #expect(!BookSettingsFace.showsGrantRow(for: book, grantable: false, canShare: true), "the fence (P-2)")
     }
 
     /// Stage B R1 B4 — THE PARITY PIN (architectural: the face's old spelling
     /// was equivalent, so this is green on both sides by design): the Book
     /// Settings row's gate is exactly the complement of `mcpFencedBookIDs`
     /// (the share doors' gate) over every kind of book — plain, Private, a
-    /// journal-TRAIT book, THE daily Journal, an archived Private book — and a
-    /// gathering is never grantable.
+    /// journal-TRAIT book, THE daily Journal, an archived Private book.
+    /// VX-189 (A DELIBERATE FLIP — "a gathering is never grantable" was the
+    /// unbuilt place doors' gate): a gathering IS grantable, and a fenced one
+    /// (a stale Private stamp — no op mints one on a gathering) is not, the
+    /// same complement of the same fenced set.
     @Test func theGrantRowsGateIsTheFencesOwnAnswer() async throws {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
             let ops = session.operations
@@ -485,13 +498,78 @@ struct MCPShareFacesTests {
             try ops.archiveReading(archived.id)
             let gathering = try ops.createReading(
                 name: "a gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let fencedGathering = try ops.createReading(
+                name: "a stale private gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            try await db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET ai_private_at = '2026-10-28T00:00:00.000Z' WHERE id = ?",
+                    arguments: [fencedGathering.id])
+            }
             let fenced = try await db.read { try Queries.mcpFencedBookIDs($0) }
-            #expect(fenced == [privateBook.id, daily.id, archived.id])
-            for book in [plain, privateBook, trait, daily, archived] {
+            #expect(fenced == [privateBook.id, daily.id, archived.id, fencedGathering.id])
+            for book in [plain, privateBook, trait, daily, archived, gathering, fencedGathering] {
                 let grantable = try await db.read { try BookSettingsModel.isGrantable($0, readingID: book.id) }
                 #expect(grantable == !fenced.contains(book.id), "\(book.name): the row's gate is the fence's")
             }
-            #expect(try await db.read { try BookSettingsModel.isGrantable($0, readingID: gathering.id) } == false)
+            #expect(try await db.read { try BookSettingsModel.isGrantable($0, readingID: gathering.id) } == true,
+                    "VX-189: a gathering is a grant place — its settings row draws")
+            #expect(try await db.read { try BookSettingsModel.isGrantable($0, readingID: "gone") } == false)
+        }
+    }
+
+    /// **VX-189 — a gathering's own Shared-with doors open THE grant sheet ON
+    /// the gathering** (her word 2026-10-28: "gatherings should have shared
+    /// with doors"): the row menus' "Share with AI…" and Book Settings'
+    /// Share… read the one switch (`MCPGrantPrefill.reading`) — a gathering's
+    /// place is `.gathering`, never a book's (it is a grant place of its own
+    /// since VX-549); nothing replaced, WHO asked (the book road's opening,
+    /// unchanged); the row's not-shared sentence says its kind (PROVISIONAL
+    /// P-440-11), settings-class — no "AI".
+    @Test func aGatheringsPlaceDoorsOpenTheSheetOnTheGathering() {
+        let book = Reading(
+            id: "b", name: "the lightning thief", kind: .book,
+            createdAt: Date(timeIntervalSince1970: 0), updatedAt: Date(timeIntervalSince1970: 0))
+        var gathering = book
+        gathering.id = "g"
+        gathering.kind = .gathering
+        #expect(MCPGrantPrefill.reading(gathering) == .gathering("g"))
+        #expect(MCPGrantPrefill.reading(book) == .book("b"), "a book's place, byte-unchanged")
+        let opening = BookSettingsFace.grantOpening(for: gathering)
+        #expect(opening.place == .gathering("g") && opening.origin == .place)
+        #expect(opening.client == nil && opening.replacing.isEmpty && !opening.approving,
+                "WHO asked, nothing replaced — a new grant on the gathering")
+        #expect(BookSettingsFace.grantOpening(for: book).place == .book("b"))
+        #expect(BookSettingsFace.grantRowCaption([], kind: .gathering) == "No client reaches this gathering.")
+        #expect(BookSettingsFace.grantRowCaption([]) == MCPShareCopy.notShared, "a book's words unchanged")
+        #expect(!MCPShareCopy.notSharedGathering.split(whereSeparator: { !$0.isLetter }).contains("AI"))
+    }
+
+    /// **VX-189 — the gathering's Shared-with row reads its own grant.** The
+    /// settings model's held read (`watchReach` — `Queries.mcpBookReach`,
+    /// which answers a gathering through `decideGathering`) names the client a
+    /// gathering grant reaches, with no "through" (its own grant), and the
+    /// row's gate opens; a wing grant's reach names the wing. Red on old: the
+    /// gate read a BOOK's facts only, so a gathering's row never drew.
+    @Test func aGatheringsSharedWithRowReadsItsOwnGrantAndOpens() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let ops = session.operations
+            let client = try approved(ops)
+            let gathering = try ops.createReading(
+                name: "parser things", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let model = BookSettingsModel(session: session, readingID: gathering.id)
+            let watch = Task { await model.watchReach() }
+            defer { watch.cancel() }
+            #expect(try await settle { model.grantable }, "a gathering may take a grant — the row's gate opens")
+            #expect(model.reach.isEmpty)
+
+            _ = try ops.grantMCPAccess(
+                client.id, .init(rung: .suggest, scopeKind: .gathering, scopeID: gathering.id, duration: .always))
+            #expect(try await settle { model.reach.first?.clientID == client.id })
+            let own = try #require(model.reach.first)
+            #expect(own.rung == .suggest && own.grant?.scopeKind == .gathering && own.throughTitle == nil,
+                    "its own grant — no why")
+            #expect(BookSettingsFace.grantRowCaption(model.reach, kind: .gathering)
+                    == "Shared with claude-code (read and suggest)")
         }
     }
 
