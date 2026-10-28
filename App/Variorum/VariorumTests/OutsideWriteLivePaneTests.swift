@@ -212,6 +212,7 @@ struct OutsideWriteLivePaneTests {
             #expect(await Self.settle(window, hosting) {
                 Self.pane("cell", take, in: hosting)?.isEditable == true
             }, "fixture: the cell is LIVE")
+            let paneAtFixture = Self.pane("cell", take, in: hosting)
 
             let remote = Self.remoteWords
             try await w.session.database.write { db in
@@ -220,12 +221,43 @@ struct OutsideWriteLivePaneTests {
                     sql: "UPDATE variant SET working_text = ? WHERE id = ?", arguments: [remote, take])
                 try db.execute(sql: "DELETE FROM _sync_applying")
             }
-            let shows = await Self.settle(window, hosting, timeout: 4) {
-                Self.pane("cell", take, in: hosting)?.string == Self.remoteWords
+            // **The decisive line, awaited as ONE condition** (the vx677-b1
+            // window's red-on-both finding, traced in the record): the ring
+            // over the take ENDS — the cell READ, showing the pulled words. The
+            // ring-end follows a fresh confirming read (`OutsideWriteConfirmation`),
+            // and on this host the cell already reads the pulled words BEFORE
+            // that ring-end, on both trees — so the first form (wait for the
+            // text, then read the editability at that same instant) raced the
+            // confirmation and was red on the fixed tree too.
+            let ended = await Self.settle(window, hosting, timeout: 4) {
+                guard let cell = Self.pane("cell", take, in: hosting) else { return false }
+                return cell.string == Self.remoteWords && !cell.isEditable
             }
-            #expect(shows, "RED ON OLD: the live cell still reads \(Self.pane("cell", take, in: hosting)?.string ?? "nil")")
-            #expect(Self.pane("cell", take, in: hosting)?.isEditable == false,
-                    "the ring over the old words ended")
+            Self.diagnose(take, paneAtFixture: paneAtFixture, model: model, in: hosting)
+            #expect(ended, "RED ON OLD: the live cell's ring never ended over the pulled words — it reads \(Self.pane("cell", take, in: hosting)?.string ?? "nil"), editable: \(Self.pane("cell", take, in: hosting)?.isEditable == true)")
         }
+    }
+
+    /// **TEMPORARY — the vx677-b1 trace's open question** (remove once the next
+    /// window's log has answered it; the record names this line): HOW the
+    /// Lenses cell came to read the pulled words while still live on BOTH
+    /// trees. Only `makeNSView`, the read arm, VX-248's re-bind and A-677-2's
+    /// go-live completion write a pane's characters, and a live pane takes
+    /// none of the last three — so this says whether the pane the finder hits
+    /// is the SAME object that went live at the fixture (no: a re-mount or a
+    /// second copy), how many panes carry the identifier, and what the one
+    /// authority says. Printed, never asserted: it decides nothing.
+    private static func diagnose(
+        _ take: String, paneAtFixture: PaneTextView?, model: TakesViewModel, in hosting: NSView
+    ) {
+        let matching = views(PaneTextView.self, in: hosting).filter {
+            $0.identifier?.rawValue == "pane:cell|\(take)"
+        }
+        let found = matching.first
+        print("VX664-DIAG lenses-sync-pull: panes-with-id=\(matching.count) "
+            + "same-object-as-fixture=\(found.map { $0 === paneAtFixture } ?? false) "
+            + "editable=\(matching.map(\.isEditable)) "
+            + "authority-live=\(model.focusedPane?.variantID == take) "
+            + "liveHeld-is-remote=\(model.authority.liveHeld == remoteWords)")
     }
 }

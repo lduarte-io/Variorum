@@ -201,7 +201,14 @@ struct OutsideWriteRingEndTests {
             model.focus(Self.article(blocks[1], take))
 
             _ = try session.operations.divide(blocks[1], cut: 11)
-            #expect(try Self.stored(db, take) == String(Self.second.prefix(11)))
+            // Fixture (non-vacuity): the take now holds the FIRST HALF exactly as
+            // `divide` stores it — the seam's whitespace trimmed by the op's own
+            // pure rule (`BoundarySnapping.seamTrimmedHalves`: "The second", not
+            // the raw prefix "The second " this line first expected — the vx677-b1
+            // window's red-on-both finding, traced in the record).
+            let firstHalf = try #require(
+                BoundarySnapping.seamTrimmedHalves(Self.second, cutAtUTF16: 11)?.first)
+            #expect(try Self.stored(db, take) == firstHalf, "fixture: the divide rewrote her take")
             model.adopt(try Self.takesProjection(db, postID))
 
             #expect(await eventually { model.focusedPane == nil }, "RED ON OLD")
