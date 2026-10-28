@@ -738,7 +738,27 @@ Pieces (flipped per commit):
   P-440-8): after a restore beside Takes/Lenses the ring is off that pane — one click puts her back in,
   over the restored words. Build ✓ (`vx440-merge`). The two WF-1 pins turn GREEN here (RUNS PENDING).
   DONE (this commit — the fix: the green-on-new SHA).
-- WF-3 W-2 trace + seam + pin: NOT STARTED.
+- WF-3 W-2 trace + seam + pin (behaviour unchanged). **The trace, as far as a headless read reaches:**
+  the two roads run the SAME act (`model.restore` → the parcel → Write's landing); the ONE difference is
+  the sheet — its foot did `dismiss(); onRestore(false)` and the pane ran the restore in a `Task` AT ONCE,
+  so the store write, the delivery's rewrite of the block and the landing (setSelectedRange + the band +
+  the wash) all ran WHILE the sheet was being dismissed: the window not key, the sheet still over the page
+  (the wash ran under it — the walk's "burst came late" shot at 06:06:18 is 18 s after the restore, which
+  the 06:06:00 frame already shows landed), and AppKit/SwiftUI handing the window back after the act. The
+  walk's frames (`m20-w1` 06:05:49 → `m21-w0` 06:06:00) show the caret at the restored block's END — the
+  signature of the delivery's `programmaticReplace` moving a caret inside the replaced block to the end
+  of its new text, with no landing standing after it. WHICH dismissal-time step undid or pre-empted the
+  landing (focus restoration at the sheet's end; the landing running in a non-key window) is NOT
+  isolatable headless (no app, no stage); the fix removes the overlap by construction rather than
+  chasing it. Seam (behaviour unchanged): the sheet's foot doors hand their act to
+  `BlockHistoryModel.readingFootPressed(_:for:)` (still runs at once here), the pane's `.sheet` gains
+  `onDismiss` → `readingSheetDismissed()`, and `readingTrace` records `.acted` / `.dismissed` in order.
+  Pin (Mac `RestoreLandingTests`, compiled ✓, RUN PENDING):
+  `aSheetRestoreLandsWhereTheRowRestoreDoesAfterTheSheetIsGone` — Write + the pane mounted side by
+  side, her caret at the block's END (the walk's state), the REAL sheet presented, its Restore as the
+  foot does it; EXPECT RED on this commit at the trace line (`[.acted, .dismissed]` — the act ran before
+  the sheet was gone); the caret line (START) is red here only if the host reproduces the walked END —
+  the run says which. DONE (this commit — the PRE-FIX tree: the red-on-old SHA).
 - WF-4 W-2 fix: NOT STARTED.
 - WF-5 verification + record: NOT STARTED.
 

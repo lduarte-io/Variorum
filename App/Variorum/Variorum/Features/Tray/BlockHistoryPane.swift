@@ -490,7 +490,42 @@ final class BlockHistoryModel {
     /// **"Read in full"** (R-440-3): the open row's door puts the moment in
     /// the sheet. Nothing is written.
     func readInFull(_ commit: CommitPoint, of take: Variant, heading: String) {
+        readingTrace = []
         reading = CommitReading(commit: commit, variantID: take.id, takeHeading: heading)
+    }
+
+    /// **The sheet's two foot doors, as one act** (VX-431 W-2, the VX-440
+    /// walk) — what a foot press asks the model to do with the moment it
+    /// shows.
+    nonisolated enum ReadingAct: Equatable, Sendable {
+        case restore(confirmed: Bool)
+        case bringBack
+    }
+
+    /// **What the sheet road did, in order** — the act running and the sheet
+    /// going (an observation seam, plain values like `restoreLandings`;
+    /// cleared when a moment is put in the sheet). The W-2 pin's read.
+    nonisolated enum ReadingStep: Equatable, Sendable { case acted, dismissed }
+    private(set) var readingTrace: [ReadingStep] = []
+
+    /// A foot door was pressed on the sheet showing `reading`.
+    func readingFootPressed(_ act: ReadingAct, for reading: CommitReading) {
+        Task { await runReadingAct(act, for: reading) }
+    }
+
+    /// The sheet is gone (the pane's `.sheet(onDismiss:)`).
+    func readingSheetDismissed() async {
+        readingTrace.append(.dismissed)
+    }
+
+    private func runReadingAct(_ act: ReadingAct, for reading: CommitReading) async {
+        readingTrace.append(.acted)
+        switch act {
+        case .restore(let confirmed):
+            await restore(reading.commit, of: reading.variantID, confirmed: confirmed)
+        case .bringBack:
+            await bringBackAsTake(reading.commit)
+        }
     }
 
     /// **"Bring back as a take"** (R-440-3, the sheet's second foot door): the
@@ -741,18 +776,16 @@ struct BlockHistoryPane: View {
         .sheet(
             item: Binding(
                 get: { model.reading },
-                set: { model.reading = $0 })
+                set: { model.reading = $0 }),
+            onDismiss: { Task { await model.readingSheetDismissed() } }
         ) { reading in
             CommitReadingSheet(
                 reading: reading, tokens: tokens, now: session.now,
                 predatesSplit: model.predatesSplit(reading.commit),
                 onRestore: { confirmed in
-                    Task {
-                        await model.restore(
-                            reading.commit, of: reading.variantID, confirmed: confirmed)
-                    }
+                    model.readingFootPressed(.restore(confirmed: confirmed), for: reading)
                 },
-                onBringBack: { Task { await model.bringBackAsTake(reading.commit) } })
+                onBringBack: { model.readingFootPressed(.bringBack, for: reading) })
         }
     }
 
