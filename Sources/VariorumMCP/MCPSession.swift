@@ -338,6 +338,15 @@ final class MCPSession: @unchecked Sendable {
                 let waiting = Self.waitingAnswer(params.name)
                 return .init(content: [.text(text: waiting.text, annotations: nil, _meta: nil)], isError: waiting.isError)
             }
+            // VX-606: the schema the wire publishes is the schema it enforces —
+            // an argument the tool's schema does not declare refuses the call
+            // here, ONE check for every tool, before any decision (a parse
+            // refusal: nothing read, written, asked, spent or logged). After the
+            // waiting branch, so a waiting setup's face stays the pending
+            // sentence for every known tool (VX-258), as for every parse refusal.
+            if let refusal = MCPArgumentSchema.refusal(tool: params.name, arguments: params.arguments) {
+                return .init(content: [.text(text: refusal, annotations: nil, _meta: nil)], isError: true)
+            }
             // U2: the write rungs run on the session's executor (AF-8);
             // the reads stay where U1 built them.
             // U4: show_in_app awaits the app's delivery (AF-11 F-3).
