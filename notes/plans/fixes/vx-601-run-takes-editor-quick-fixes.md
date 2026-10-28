@@ -222,8 +222,8 @@ the skill.
 |---|---|---|
 | 1 | VX-421 crash fix (per-pane undo) + pins | **ACCEPTED 2026-10-27** — red-on-old by revert (rev421: exactly its 6 pins), tier 1 + battery green, walk W1/W2 PASS both voices |
 | 2 | VX-248 bound-take adoption + VX-222/227 pins green | **ACCEPTED 2026-10-27** — red-on-old by revert (rev248: exactly its 4 pins), VX-222/227 green in tier 1, walk W3/W4 PASS both voices |
-| 3 | VX-429 instrumented probe → fix or record | BUILT + RED-ON-OLD BY REVERT (a2b: rev429 exactly its 3 pins); tier 1 + battery green — walk A1/A2/A4 owed |
-| 4 | VX-592 drag probe → fix or record | BUILT + RED-ON-OLD BY REVERT (a2b: rev592 exactly its 2 Write pins; "Write is fine" falsified); walk A3/A4/A5 owed; Q-A2-1 → #245 |
+| 3 | VX-429 instrumented probe → fix or record | **ACCEPTED 2026-10-27** — red-on-old by revert, suites green, walk A1/A2/A4 PASS (Study + partial Terminal) |
+| 4 | VX-592 drag probe → fix or record | **ACCEPTED 2026-10-27** — red-on-old by revert ("Write is fine" falsified), suites green, walk A3/A4 PASS; A5 recorded; Q-A2-1 → #245 |
 | 5 | VX-428 session memory + measurements + landing proof | NOT-STARTED (batch B) |
 | 6 | VX-577 expand-all in slot split | NOT-STARTED (batch B) |
 | 7 | VX-594 the […] door + caret-following ⌘T | NOT-STARTED (batch B) |
