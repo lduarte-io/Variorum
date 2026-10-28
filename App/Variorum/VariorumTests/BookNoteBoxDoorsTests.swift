@@ -980,6 +980,107 @@ struct BookIndexCarryBlockTests {
     }
 }
 
+// MARK: - VX-662 — the Index's carry anchor never goes stale
+
+/// **VX-662 (Bug · Low · Suspected — statically traced at VX-648 batch 4, the
+/// record's FINDING paragraph; never observed live).** The Index's carry
+/// anchor (`BookViewModel.indexAnchorPostID` — what leaving Index carries,
+/// `BookAnchor.currentPost`'s `.index` arm: `indexPostID ?? standingPostID`)
+/// was written ONLY by her selection (`BookIndexView.select(report: true)`) and
+/// never cleared, while a CARRIED arrival selects with `report: false`. So:
+/// her click on note A in an earlier Index visit, a later Outline → Index carry
+/// of note B (block 2 live there), and leaving Index carried A — with B's block
+/// live the block could not ride either (live note ≠ carried note), and the
+/// Outline landed A.
+///
+/// PIN FIRST (the confirm): written and committed on the pre-fix tree.
+/// RED ON OLD: the carry out of Index names A (`standingAnchorPostID`), and
+/// the Outline's editor is not at B's block 2.
+@Suite("VX-662 — the Index's carry anchor is what the Index shows, never an old click", .serialized)
+@MainActor
+struct BookIndexCarryAnchorTests {
+    /// **HER ROAD.** Index: she selects note A (the select road's write —
+    /// `noteIndexAnchor`, exactly what `select(report: true)` does on her
+    /// click). Outline: her caret in note B's block 2, nine in. Outline →
+    /// Index: B arrives with block 2 live (VX-304). Index → Outline: the
+    /// Outline must reopen in B at block 2, nine in (VX-630) — never land A.
+    @Test func aCarriedArrivalInIndexIsWhatLeavingIndexCarries() async throws {
+        try await withTakesBook { session, db, book in
+            let b = book.postIDs[0]          // the carried note (makeBlockTwoLive's note)
+            let a = book.postIDs[1]          // her earlier click
+            let second = book.blocks[b]![1]
+            let chosen = book.variants[b]![1]
+            let inside = 9
+            let mounted = try await mountBook(session, db, book, mode: .index)
+            defer { mounted.close(book.readingID) }
+#if DEBUG
+            let modeDoor = try #require(
+                BookOutlineGeometry.modeDoors[book.readingID], "the book published its mode door")
+            // 1 — Index, her click on A (the selection's own report).
+            mounted.model.noteIndexAnchor(a)
+            // 2 — leave for the Outline: the click-over carries A, as it should.
+            modeDoor(.outline)
+            await settle(mounted.window, mounted.hosting, until: { mounted.structure.mode == .outline })
+            #expect(mounted.model.standingAnchorPostID == a, "the premise: leaving Index carried her click (A)")
+            // 3 — Outline: her caret in B's block 2.
+            try await makeBlockTwoLive(mounted, session, db, book, mode: .outline, inside: inside)
+            // 4 — Outline → Index: B arrives with block 2 live (VX-304's carry).
+            modeDoor(.index)
+            await settle(mounted.window, mounted.hosting, until: {
+                indexPane(chosen, in: mounted.hosting)?.selectedRange().location == inside
+            }, maxTurns: 240)
+            try #require(indexPane(chosen, in: mounted.hosting) != nil,
+                         "the premise: B's block 2 arrived live in the Index")
+            #expect(mounted.model.indexSelectedPostID == b, "the premise: the Index shows B")
+            // 5 — Index → Outline, touching nothing in between.
+            modeDoor(.outline)
+            await settle(mounted.window, mounted.hosting, until: {
+                guard let editing = session.editorRouter.editing, editing.postID == b,
+                      let place = editing.caretIdentity()
+                else { return false }
+                return place.blockID == second && place.offset == inside
+            }, maxTurns: 240)
+            #expect(mounted.structure.mode == .outline, "the click-over arrived back in Outline")
+            #expect(mounted.model.standingAnchorPostID == b,
+                    "RED ON OLD: leaving Index carries the note it SHOWS (B), never her old click (A) — carried \(String(describing: mounted.model.standingAnchorPostID))")
+            let place = session.editorRouter.editing?.caretIdentity()
+            #expect(session.editorRouter.editing?.postID == b && place?.blockID == second
+                        && place?.offset == inside,
+                    "RED ON OLD: the Outline reopens in B at block 2, nine in (VX-630's arrival) — \(String(describing: place))")
+#endif
+        }
+    }
+
+    /// The guard: her OWN selection in this Index visit is still what leaving
+    /// carries (the select road's write stands). Arrive carried on B, then
+    /// her click on A in the column ⇒ leaving carries A.
+    @Test func herSelectionInThisVisitIsStillWhatLeavingCarries() async throws {
+        try await withTakesBook { session, db, book in
+            let b = book.postIDs[0]
+            let a = book.postIDs[1]
+            let mounted = try await mountBook(session, db, book, mode: .outline)
+            defer { mounted.close(book.readingID) }
+#if DEBUG
+            let modeDoor = try #require(
+                BookOutlineGeometry.modeDoors[book.readingID], "the book published its mode door")
+            mounted.model.focus(b)
+            await settle(mounted.window, mounted.hosting, until: {
+                session.editorRouter.editing?.postID == b
+            })
+            modeDoor(.index)
+            await settle(mounted.window, mounted.hosting, until: {
+                mounted.model.indexSelectedPostID == b
+            }, maxTurns: 120)
+            #expect(mounted.model.indexSelectedPostID == b, "the premise: carried into Index on B")
+            mounted.model.noteIndexAnchor(a)   // her click on A, this visit
+            modeDoor(.spread)
+            await settle(mounted.window, mounted.hosting, until: { mounted.structure.mode == .spread })
+            #expect(mounted.model.standingAnchorPostID == a, "her selection this visit is what leaving carries")
+#endif
+        }
+    }
+}
+
 // MARK: - The ladder's R1-1 — D-2's class, the departing INDEX
 
 /// Forty one-block notes in one book (a realistic card preview each — the
