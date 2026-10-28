@@ -1006,6 +1006,35 @@ words and VX-356 (if real); face pins for the two new doors; compiled into `Deri
 PENDING. Checkpoint protocol per ENVIRONMENT. Commits: `Part of VX-611/VX-616/VX-189/VX-356 (VX-440)`.
 UNIT RECORD under LIVE STATUS → Batch 3.
 
+## THE LADDER
+
+### Round 1 (fable-reviewer, cold, 2026-10-28 — findings file `notes/plans/fixes/vx-440-ladder-round1.md`)
+
+**Verdict: no BLOCKER, no MAJOR; 3 MINOR · 3 NIT.** Cross-model note: nothing disputed, so no
+implementer exchange was owed; the orchestrator adjudicated the dispositions directly and, round 1 being
+the final findings round, checked its own fixes line-by-line against the findings (the final-round rule).
+
+| # | Finding | Disposition |
+|---|---|---|
+| M-1 | `observeLatestNoteVersion` pays the classifier's automatic partial index over `version_of` at AUTOSAVE cadence for a mounted note with a version candidate (P1 pressure ∝ the library's version links) | ACCEPTED — ticket MINTED at adjudication (Debt · Confirmed · Performance · Medium). No code change this run (personal-scale cost; the design question is the observation's keying/debounce, the ticket's). |
+| M-2 | The book NAVIGATOR's collapsed one-note chapter row keeps VX-356's exact Study gap (`NavigatorChapterLabel`, BookView.swift:2937) | ACCEPTED — ticket MINTED at adjudication (Improvement · Confirmed · Books · Low), pinnable exactly as `BookPanelOpenNoteMarkTests`. Out of this run's ruled scope (VX-356 named the Book Panel). |
+| M-3 | The guide's MCP lesson 5 card now incomplete (gatherings have Share with AI… since VX-189) | ACCEPTED — comment added to VX-234 (the copy pass) at adjudication; `TutorialSeeder.swift` is VX-648's file this window, correctly untouched. |
+| N-1 | `Button("Close")` unvoiced on the new commit-reading sheet | FIXED at adjudication (orchestrator, the small-code mandate; not bug-class, no pin owed — `VocabularySweepTests` covers the class at the stage window): `tokens.chromeLabel("Close")` at BlockHistoryPane.swift:1352. The pane header's own pre-existing bare Close (~:663) is NOT touched — outside the finding's scope; it rides the copy-pass family if she wants it. |
+| N-2 | `.help("")` on ReadModeView's read-only arm leans on AppKit suppressing empty tooltips | RECORDED, no change — correct behavior today; no clean one-line fix without restructuring the modifier chain; folds into the next ReadMode touch. |
+| N-3 | `paletteEntries(noteHasSavedVersion: Bool = true)` permissive default | RECORDED, no change — the reviewer's own suggestion (fold the fact into `WingPaletteDoors.Facts` at the next refactor). |
+
+Hollow/weighed and NOT raised (the reviewer's, kept for the record): the `unmarkPostsAsVersions` core
+belt (no reachable declassify road remains; unpinnable), Compare's cross-wing moment (unreachable —
+versions ride wing moves), the read-in-full sheet's one-Text cost (∝ the summoned moment). Clean bill in
+the findings file, including: `bringBackCommitAsTake` ≡ `branchVariant` posture verified side-by-side;
+the restore landing touches no editor-seam file; VX-189 faces-only verified in SQL; `.noteVersion` holds
+R-440-2 structurally.
+
+**Round 2: NOT OWED.** The ladder's round 2 re-reviews the FIXES; this round's only fix is N-1's one
+voiced label (not bug-class). Under the final-round rule the orchestrator's line-by-line check stands in:
+N-1's diff is exactly the one-token change the finding proposes, verified against the file's own
+chromeLabel idiom (:680/:921/:968/:1006). A fresh round re-reading a one-line diff is not spawned.
+
 ## FOR THE CLOSEOUT (owed; do not improvise past it)
 
 - Canon deltas in the two-file shape: SurfaceContracts (The note — the Versions/Compare doors, the full-size

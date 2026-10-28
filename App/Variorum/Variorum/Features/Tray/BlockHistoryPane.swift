@@ -1349,7 +1349,7 @@ struct CommitReadingSheet: View {
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 12)
-                Button("Close") { dismiss() }
+                Button(tokens.chromeLabel("Close")) { dismiss() }
                     .keyboardShortcut(.cancelAction)
             }
             // Whose moment, and when — the details the pane's row carries.
