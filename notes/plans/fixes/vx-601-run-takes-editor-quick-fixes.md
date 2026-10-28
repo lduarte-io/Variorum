@@ -2242,3 +2242,12 @@ it with its true home and state rather than silently checking or dropping it.
 **Her clarification (2026-10-28, live):** *"and no, you are not the new coordinator. i meant that
 for oct27coordinator"* — the new waves route through oct27coordinator as before; this session is
 VX-601's orchestrator only, through its close and release.
+
+**THE WHOLE MAC TARGET on `vx601c-post`: 5,486 tests in 963 suites PASSED — ZERO failures, zero
+restarts** (2,350 s; 14 known issues, the loud pinned set; the trait-gated suites skipped by
+design). VX-337's seed-21 soak HELD under whole-target load, and the fixed fold pin HELD at the
+load that used to break it — the bounded trace's best possible outcome; the soak hypotheses stay on
+the ticket for its untraced half. VX-627's main-side VisualWalk red did not appear in this run
+(noted, not investigated — not this run's). **Window c verdict: batch C's suite evidence is
+COMPLETE; this run doubles as the PRE-LADDER BASELINE (the whole target green on the full run
+diff).** Log: `DerivedData/logs/wholetarget-c-post.log`.
