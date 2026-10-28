@@ -227,11 +227,11 @@ the skill.
 | 5 | VX-428 session memory + measurements + landing proof | **ACCEPTED 2026-10-28** — red-on-old by revert (incl. the rebuilt trees), her measurement P3-clean, walk B1/B2/B4 PASS |
 | 6 | VX-577 expand-all in slot split | **ACCEPTED 2026-10-28** — red-on-old by revert (#12 + #10), walk B3 PASS (P-B-1 blur seen live); the ⎋ clause → VX-637 (pre-existing/harness, her 5-s check) |
 | 7 | VX-594 the […] door + caret-following ⌘T | **ACCEPTED 2026-10-28** — the door red-on-old by revert, walk B5/B6 PASS; the ⌘T half HOLLOW-GOOD (already worked, guards green); the no-current-take edge → #245 |
-| 8 | VX-427 focused-take count | NOT-STARTED (batch C) |
-| 9 | VX-574 font weight | NOT-STARTED (batch C) |
-| 10 | VX-586 "block i/N" via BlockLineLabel | NOT-STARTED (batch C) |
-| 11 | VX-321 receipt wording | NOT-STARTED (batch C) |
-| 12 | VX-337 bounded flake trace | NOT-STARTED (batch C; bounded, her word) |
+| 8 | VX-427 focused-take count | **ACCEPTED 2026-10-28** — red-on-old by revert (incl. the Lenses widening), walk C1 PASS both voices |
+| 9 | VX-574 font weight | **ACCEPTED 2026-10-28** — the two real faces fixed (read twin's ink, the literal .callout); walk C4/C5 PASS both voices with glyph-coverage measurements |
+| 10 | VX-586 "block i/N" via BlockLineLabel | **ACCEPTED 2026-10-28** — the sweep's one live face fixed; walk C2 PASS both voices |
+| 11 | VX-321 receipt wording | **ACCEPTED 2026-10-28** — per-host receipts, walk C3 PASS; the Write/board truncation at 1240 pt rides P-C-1 to her bundle |
+| 12 | VX-337 bounded flake trace | **BOUND MET 2026-10-28** — the fold half traced + test-fixed on the pinned R-Q21 design, HELD under whole-target load; the soak half's two hypotheses on the ticket (stays open) |
 | 13 | The kickoff sitting record | DONE 2026-10-27 (R-601-1…6) |
 | 14 | The ladder (whole-diff, fable-reviewer) | NOT-STARTED |
 | 15 | Closeout (canon deltas · the #245 bundle · tickets · handoff) | NOT-STARTED |
@@ -2325,3 +2325,26 @@ per-note keys for the walk note — `currentBlock.` / `postMode.` / `takesViewMe
 to **29** (`defaults write -int 29`, read back 29, "Type is integer"); no other counter touched.
 Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`).
 Final export `/tmp/vx601c-prefs-final.plist` vs before: nothing added, nothing removed.
+
+
+## ORCHESTRATOR DISPOSITIONS — the C walk's findings; BATCH C ACCEPTED (2026-10-28 ~02:50)
+
+**Batch C is ACCEPTED** (red-on-old per member; tier 1 + the whole target green; walk C1–C6 PASS in
+both voices, with C4's glyph-coverage measurement proving the Takes/Write faces identical). The
+findings, each dispositioned:
+- **Finding 1 (four "block" rows left in the Trash by ⌥⌘Z of Move Take):** likely the structural
+  undo's own bookkeeping (the inverse tombstones the block the move minted; a tombstoned block
+  surfaces as a Trash row) — pre-existing machinery, untouched by this run. Minted **VX-639**
+  (Suspected). The four rows STAY in the dev store's Trash (removing them means Delete Now =
+  forever, not taken without her word; they age out with the Trash's own 30 days) — said in the
+  RELEASE line.
+- **Finding 2 (the Write and board receipts cut at 1240 pt, the list-naming clause lost):** rides
+  **P-C-1** into her bundle with this fact attached — the per-host wording is hers, and the
+  truncation argues for shorter sentences; the full words rest on the copy pins meanwhile.
+- **Finding 3 (the bar's "in note" count briefly short by the moved block's words after ⌥⌘Z):**
+  minted **VX-640** (Confirmed — seen twice with the deficit exactly the moved block's count; the
+  mechanism untraced — the note total is the model's projection cache, NOT VX-427's take unit, so
+  not this run's diff; the ladder reads this record and may judge otherwise).
+- **Smaller:** the panel keeping its receipt line after the undo (nit, in VX-640's description);
+  Terminal's panel chrome in the system sans (R-C-2's class — closeout triage); Lenses' "+ column"
+  menu clipping past the window edge — minted **VX-641** (Confirmed, Low).
