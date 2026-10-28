@@ -1126,10 +1126,42 @@ chromeLabel idiom (:680/:921/:968/:1006). A fresh round re-reading a one-line di
   WingPaletteDoorsTests · VersionDoorsTests · CompareVersionsTests at the new tip, plus any suite the fixes'
   diff reaches; the other suites' greens stand where the fixes' diff doesn't touch their code.
 
+### vx440-retests (2026-10-28, claimed 05:57:17 → released 05:57:52 on the coordinator's GO)
+
+- **57/57 PASSED in 6.087 s, 0 restarts** — CapabilityRegistryTests (30) · VersionDoorsTests (11) ·
+  CompareVersionsTests (6) · WingPaletteDoorsTests (10) at tip `94e402cf0` (test-without-building, the
+  rebuilt vx440-merge clone). The 4 remaining warnings are the PRE-EXISTING host-launch class (each follows
+  the host's own "[protection] road: opened … (a hosted test run)" line — `AppBootstrap.swift:416` building
+  the live session during a hosted run; ticket candidate below). No Problem Reporter, no new `.ips`, zero
+  instances and sims at release, dev store untouched, worktree clean.
+- **SF-1..3 adjudication (the orchestrator's line-by-line check, each diff read):** all three were defects
+  in batch 1's TEST HARNESSES; product code untouched by the fixes (`1d2ce417a` · `cf8613d7a` · `94e402cf0`,
+  test files + record only). SF-1 is the VX-377 justified-edit class (the registry carries exactly ONE
+  reader of `noteHasSavedVersion` — `CapabilityRegistry.swift:956` — so the context edit masks nothing);
+  SF-2's `\.date` access is `AppSession.init`'s, from 13j; SF-3's pin was reading another suite's persisted
+  `currentBlock.<id>` key (deterministic `.incrementing` ids in the host's real defaults domain) and now
+  starts clean, asserts persisted-nowhere, and carries a positive control. **The run's suite evidence is
+  COMPLETE: 4/4 red-on-old as expected; the union green (584/587 with the 3 harness artifacts); the touched
+  suites 57/57 green after the fixes.**
+- **Closeout ticket candidates recorded here (mint at closeout, the filed-tickets triage):** (a) the
+  host-launch `@Dependency(\.date)` warnings — the one-statement seam is `AppBootstrap`'s `.ready` arm
+  (`withDependencies { $0.date = .now }`), deliberately NOT made in-run (the protection road's bootstrap,
+  shared with the phone, outside this run's fences); Tests & tooling · Low. (b) The persisted
+  `currentBlock.<id>` / `postMode.<id>` keys left in the test host's defaults domain by deterministic test
+  ids — a standing cross-suite pollution source (SF-3's test now protects itself; others don't); Tests &
+  tooling.
+
 ## THE WALK PLAN (claim `vx440-walk` — runs only after a green vx440-tests window, on the coordinator's GO)
 
 An Opus walker under the orchestrator's claim (cliclick + `Tools/WalkKit/`, the DEV-STORE Debug build
 `io.lduarte.Variorum.debug` only; the walker's brief is this section + the three batches' "Walk rows" lists).
+**The coordinator's leg-0/teardown notes (2026-10-28, at the GO):** the dev store now carries VX-648's
+local migration v1_34 — this branch's build ignores it; LEAVE IT. `theme_voice`, the fan style and the app
+Appearance (Dark) are SYNCED settings — record and restore EXACTLY; macOS stays Light. The rule-21
+"different library" notice may show at launch after tonight's slot set-asides — note it and dismiss. What's
+New may show (build vs pref mismatch) — dismiss, and put the key back BY EXACT KEY at teardown. Teardown:
+the note's delete carries its versions (they ride); the book and gathering go to the Trash; #vx440walk
+deleted; if any walk content is purged forever, NAME it in the release line.
 - **Leg 0 — as-found, recorded before anything:** the dev store's resting posture per the coordinator
   (e11e5233, HELD since 10-20, signed out, Study with app Appearance Dark — macOS stays LIGHT, never
   changed; no books, one note (Oct-19), Walk Wing empty, MCP server OFF, claude-code approved with 0
