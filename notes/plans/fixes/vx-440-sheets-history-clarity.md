@@ -288,7 +288,17 @@ Pieces (flipped per commit):
   `CompareVersionsTests.unmarkOnASavedVersionNeverDeclassifiesIt` — COMMITTED ON THE PRE-FIX TREE in this
   commit (pre-fix API only) and compiled (`build-for-testing` ✓); its RED run on this SHA and GREEN run on
   the B1-3 fix commit are PENDING (stage window). DONE (this commit) for the trace + pins.
-- B1-2 core: saved-version stamps query (newest-first, the one classifier) + its pins: NOT-STARTED.
+- B1-2 core: `Queries.noteVersionStamps(_:of:limit:)` (newest-first, `noteVersions`' exact answer and order,
+  the ONE classifier deciding) + `latestNoteVersionID` + `AppDatabase.observeLatestNoteVersion` —
+  NOTE-DRIVEN (candidates from the note's own placements → both `version_of` edge arms → the other end's
+  live placement; the outer row a seek by id), because it feeds a fact held for every note visit; the summoned
+  listing keeps its own shape. Recorded cost note: the classifier's own EXISTS still has SQLite build an
+  automatic partial index over `version_of` edges once per execution — only when the note HAS a candidate;
+  that is `versionHistoryPredicate`'s shared shape (every consumer pays it), out of this batch's scope —
+  a closeout ticket candidate. Pins (core, RUN GREEN headless): `VersionsInCompareTests
+  .theStampsAreTheListingsOwnAnswerNewestFirst`, `.theStampsFollowTheListingAcrossTheAnchorsShapes`
+  (merge / archiveBlock / deleteBlock on the anchor; unmark, promote, Trash), `.theStampsReadIsDrivenFrom
+  TheNotesOwnPlacements` (the plan). DONE (this commit).
 - B1-3 Compare: auto-fill order (P-440-2) · version columns show the DATE · unmark on a saved version = the
   promote confirm (P-440-5): NOT-STARTED.
 - B1-4 doors: Versions row "Compare with now" + the registry act "Compare with Latest Version" (File ·
