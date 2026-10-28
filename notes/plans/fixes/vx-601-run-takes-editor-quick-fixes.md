@@ -1314,10 +1314,12 @@ bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`). Fi
 
 ## BATCH B RECORD — the board and its doors: VX-428 + VX-577 + VX-594 (implementer: opus-implementer, 2026-10-27)
 
-**NOT DONE (first line, kept current):** everything below is IN PROGRESS — the suite window and
-the USE walk are the orchestrator's (this session never runs `xcodebuild test`, never launches the
-app, never claims the stage); every red/green claim is a PREDICTION, PENDING that window. No
-behavioural revert is in flight.
+**NOT DONE (first line, kept current):** the suite window (the orchestrator's: this session never
+runs `xcodebuild test`, never launches the app, never claims the stage) — **every red/green claim
+and every VX-428 measurement below is a PREDICTION or a PENDING number until that window**; the
+USE walk (rows B1–B6 below, an Opus walker under the orchestrator's claim); the cold ladder. The
+⌘T caret-following half of VX-594 is HOLLOW (nothing built — the guards pin it). **Revert trees:
+IN PROGRESS** (see the BUILDS line — the source is HEAD whenever no revert is named in flight).
 
 **LIVE STATUS**
 - Reading — DONE: this file (the sitting record R-601-2/R-601-4, members VX-428/VX-577/VX-594,
@@ -1329,9 +1331,129 @@ behavioural revert is in flight.
   family), `TakesChoreographer` (landings), `TakesBoardView` (init, header, articleRow, the slot-split
   bloom, cards, the routed handler), `TakesLensFilterController`, `TakesFindController.land`,
   `TakesShared` (cell menu, `TakeCardActs`/`TakeCardMenu`), `WriteTakesPanel`, `LensesBoardView`'s
-  ⌘T arm, `TakesBottomBar`'s take doors, `CapabilityRegistry`'s take family + `Capability`, the
-  pins `TakeCardDoorTests`, `TakesBoardTests`, `TakesArticleScrollTests`, `TakesBoardSoakTests`,
-  `TutorialWalkTests.branchOnAClosedFanRevealsTheNewTake`.
-- Trace / probe — IN PROGRESS (below).
-- VX-428 — NOT-STARTED. VX-577 — NOT-STARTED. VX-594 — NOT-STARTED.
-- Builds / READY-FOR-SUITES / walk rows / self-assessment — NOT-STARTED.
+  ⌘T arm, `TakesBottomBar`'s take doors, `EditorView`'s ⌘T arm, `CapabilityRegistry`'s take family
+  + `Capability`, `PostDetailView`'s mode switch; the pins `TakeCardDoorTests`, `TakesBoardTests`,
+  `TakesArticleScrollTests`, `TakesBoardSoakTests`, `TutorialWalkTests.branchOnAClosedFanRevealsTheNewTake`.
+- Trace — DONE (below). VX-428's and VX-577's briefed mechanisms CONFIRMED; VX-594's ⌘T half
+  FALSIFIED (it already follows the caret — HOLLOW); one widening each for VX-428 (slot split's entry
+  ring) and VX-577 (the ring under expand-all in slot split).
+- Fixes + pins — DONE (110e038c3), all three members; `DerivedData/vx601b-post` build-for-testing
+  GREEN (log `App/Variorum/DerivedData/logs/b-post-build.log`; the one warning in a touched file,
+  `TakesBoardView.swift` `TakeCardProbeSlot.space` from a Sendable closure, is pre-existing).
+- Revert trees — IN PROGRESS (pre · rev428 · rev428map · rev577 · rev594; the plan below).
+- Red/green runs + the VX-428 measurement — PENDING (the orchestrator's window; READY-FOR-SUITES below).
+- USE walk — PENDING (rows B1–B6 below).
+
+**THE TRACE.**
+
+*VX-428 — CONFIRMED.* (1) `PostDetailView` (`:446-448`) mounts `TakesBoardView` only while the mode
+is Takes, keyed `.id("takes-<post>")`, so every mode switch destroys the board and its per-mount
+`@State` `TakesViewModel`. (2) The open-fan set is `TakesBoardLayout.expandedBlocks` inside that model
+(its doc said "session-only … nothing persists", i.e. mount-only in practice), so it dies with the
+board: a fresh board opens every fan closed (walk observation O-3 of batch A saw exactly this). (3)
+The session's `EditorRouter` survives remounts and already holds the article's per-note memories
+(`takesArticlePlaces`, `takesArticleCurrentRows`, `takesShowFilters`). (4) `TakesBoardView.init`
+(`:175-189`) sets `landingEnabled = true` on the model BEFORE `State(initialValue:)` — the
+construction-time fact (17q R1-1) — so a seed placed when that flag goes true is in the layout
+before the view's first body, hence before the first article geometry report. (5) **The widening
+(found by my own read): in SLOT SPLIT a bloomed fanned block has no article cell** (`articleRow`
+replaces it with the fan's cards, `TakesBoardView.swift` `splitBloomed`), and the N9 entry arm
+(`TakesChoreographer.consumeLandings`) rings `takes-main|<block>|<chosen>` — so a board BORN with its
+entry block's fan open (possible only once fans survive the switch) would ring a pane no surface
+renders (the R112 class). Before VX-428 a remount never had an open fan (follow-the-scroll's
+visibility blooms arrive after the first adoption), so the road is new with this member.
+
+*VX-577 — CONFIRMED.* `TakesViewModel.offersExpandAll` (`:295-297`) returned
+`projection.fanStyle != .slotSplit` citing R25's "slot split IS a whole-post fan presentation"; the
+header (`TakesBoardView.swift` `headerControls`) renders "expand all"/"close all" only under that
+gate; ⎋ (`onExitCommand` → `closeAllFans`) and the menu's Close All Takes always reached slot split.
+`expandAllFans()`/`closeAllFans()` themselves never read the style. Under slot split a bloom draws
+the fan as cards in the article cell's place, each split paging under its own key (the block id),
+follow-the-scroll blooming visible fanned rows, the lens filter's `paneIsShown` (`:192`) already
+knowing the article cell is gone under a split. **The widening:** expand all in slot split REPLACES
+the article cell the ring may be in — the ring would be left keyed to `takes-main|…`, a pane no
+surface renders (the same R112 class; the per-block ⑂ badge and ⌘⇧T on the live block reach it too
+today — residue R-B-1).
+
+*VX-594 — the door CONFIRMED missing; the ⌘T half FALSIFIED (HOLLOW).* (a) The take card's ⌄ menu
+(`TakeCardMenu.rows`, `TakesShared.swift`) carried Archive · Label · Lock · Delete; a fan card's pane
+(`takeMiniPane`, `CollapsibleTakeCard`, Write's panel cards) has NO Variorum context menu; only the
+ARTICLE cell's right-click offers "＋ New take — branch of this one", and the article shows the
+CHOSEN take. So a not-chosen take had no door that branches from IT without first clicking into it.
+(b) **Every ⌘T host already resolves the source to the take the caret is in**: the Takes board's
+`.branch` arm branches `model.focusedPane`'s take and refuses with no ring
+(`TakesBoardView.handleTakesCommand`); the Lenses board's diverges from the focused pane's take;
+Write's take panel's branches the ring's take, else the shown one (P-VX150-1); the Takes bar's "+
+take" and block ▾ row use `focusedPane?.variantID ?? slot.variantID`; Write's editor's caret is
+always in the take Write shows (`mintCaretTake`). `branchVariant` takes any parent. So her
+confirmed semantics ("if your caret is in a particular take the keyboard shortcuts will work for
+that too") ALREADY HOLD — the guards below pin them and are predicted GREEN on the pre-fix tree:
+**DISMISSED AS HOLLOW** (recorded, nothing built). The blank doors (⌥⌘T, ⇧⌥⌘T) already target the
+caret's block; a blank take has no parent (`newBlankVariant` writes `parent_variant_id = NULL` —
+"a blank/new take is a different gesture", OverallModel §3), so R-601-4's words do not reach them
+and there is no edge to rule.
+
+**AS BUILT.**
+- *VX-428:* `EditorRouter.takesExpandedBlocks: [String: Set<String>]` (`@ObservationIgnored`,
+  session-only, never persisted/synced; no empty set stored). `TakesBoardLayout` gains
+  `expansionSink` (called after every CHANGE — `bloom` only when it inserted, `toggleExpanded`,
+  `expandAll`/`closeAllFans` only when the set changed; the assignments themselves are unchanged, so
+  observation is byte-identical), `seedExpansion` (no report) and `pruneExpansion(to:)`.
+  `TakesViewModel.landingEnabled`'s false→true edge runs `openExpansionMemory()` (installs the sink,
+  seeds from the session; prunes at once if a projection is already in hand); `rememberExpansion`
+  writes (guarded by `landingEnabled`, equality-gated); `adopt` prunes the seed against the FIRST
+  projection only (inside a showing nothing is pruned — a ⌥⌘Z that puts a block back brings it back
+  open). Write's panel and the Lenses board never set `landingEnabled`: never seeded, never write.
+  The widening's fix: `landAuthorityFocus` (the N9 entry door, the choreographer's only call) maps an
+  article key to the card that renders the same take when a slot-split bloom replaced its cell
+  (`paneRenderingArticleTake`, read AFTER the filter's reveal, which can itself bloom), paging it
+  into view — the find's and the room's own mapping. The shared predicate is
+  `TakesViewModel.slotSplitReplacesArticleCell(_:)` (`articleRow`'s branch, asked of the model).
+  Doc lines superseded in place, citing R-601-2/R-VX170-5: `TakesBoardLayout`'s header and its
+  "Expansion" MARK (the mount-only letter), `TakesBoardView.init`'s construction-time comment.
+- *VX-577:* `offersExpandAll` is an exhaustive switch answering true for all four styles (a future
+  style decides for itself), its doc citing VX-577 and her words. `expandAllFans()` ends the ring
+  by the flushed `blur()` when, after the expansion, the ring's article cell is replaced by a
+  slot-split bloom (P-B-1, PROVISIONAL). Nothing else in the style's rendering needed a change:
+  page offsets are per block; follow-the-scroll composes (`isBloomed`'s OR); the filter's `.ordinary`
+  rows for expanded blocks follow the board's rule.
+- *VX-594:* `.newTake` declares the `.surface` door (the `.archiveTake` shape — the card's row names
+  its target; the chord acts on the caret's take). `TakeCardActs` gains `branch`; `TakeCardMenu.rows`
+  leads with `.newTake` titled `TakeCardMenuCopy.newBranchedTake` = "New branched take (⌘T)" (her
+  ruled words + the declared chord; the `chorded` drift guard walks it); `TakeCardMenu.capabilities`,
+  `TakesBoardView.surfaceCapabilities` and `WriteTakesPanel.surfaceCapabilities` list it. The card
+  acts are wired ONCE on the model — `TakesViewModel.cardActs(for:columnID:)` (in `TakesShared.swift`)
+  — for both hosts, the four old closures byte-identical in behavior; the branch is
+  `branchTakeRevealed(blockID:, from: <the card's take>, preferredColumnID: <the host's card
+  namespace>)`, so the ring lands on the new card where the host renders it (the board's fan cards,
+  Write's panel's own column — the panel's ⌘T road exactly).
+- *What did NOT change:* no operation, no schema, no `Sync/`, no `PaneSurface`/`EditorTextView`/
+  `BlockRangeIndex`, no structural door, no Shared/ file (`AppSession` untouched — the router is
+  Mac-only): **MOBILE PARITY: nothing mobile-visible.** No TK1 API, no attribute stamp.
+
+**PROVISIONAL (for the orchestrator's #245 bundle — I do not touch QUESTIONS.md):**
+- **P-B-1 — the ring when expand all hides its cell in slot split.** Options: (a) end the ring by
+  the flushed blur — BUILT, the most spec-defensible: it is the `show ▾` filter's ratified rule for
+  exactly this shape (R-VX170: her own view change that hides the live pane blurs it, because the
+  view she asked for is exactly what shows), and it satisfies R112; (b) follow onto the card that
+  renders the same take (the find/room/step mapping — those are TARGETED landings, not page-wide
+  reshapes; the caret would land at the card's END, `fanCaretLanding`'s `.leave`); (c) leave the ring
+  keyed to the vanished cell (the pre-fix shape: stranded, keyboard acts reach an invisible take,
+  close-all revives it) — refused by R112.
+- *Carried, not new:* the entry ring's slot-split mapping is the find's/room's existing mapping
+  applied to the N9 door; a card going live by a landing takes `fanCaretLanding`'s `.leave` (the
+  shipped END) rather than the remembered caret place the article cell would honour — a fan card has
+  never honoured it (residue R-B-3).
+
+**RESIDUE / NOT MINE (for the orchestrator to ticket or drop):**
+- **R-B-1 (pre-existing, same class as P-B-1):** in slot split the per-block bloom doors — the ⑂
+  badge on the live article cell, ⌘⇧T (`toggleFocusedFan`) — replace the cell the ring is in and
+  strand it; and in EVERY style close all / ⎋ with the ring in a fan card strands it (the card
+  vanishes). P-B-1's blur (or its ruled successor) would extend to them in one helper.
+- **R-B-2 (pre-existing, traced):** the choreographer's `.bloom` landing (Write panel's "Open Takes
+  mode", Lenses' ⌘⇧T) blooms the block and then rings `takes-main|…` — in slot split a pane no
+  surface renders. `paneRenderingArticleTake` is the one-line fix; not built (its own pin owed).
+- **R-B-3 (observation):** a fan card that takes the ring by a landing puts the caret at its END
+  (`TakesFindController.fanCaretLanding` honours only `.select`), where the article cell lands at
+  the remembered place — so in slot split, an entry onto a remembered-open block lands at the end of
+  the take rather than where she was. Her call if it matters.
