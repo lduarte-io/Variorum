@@ -70,8 +70,15 @@ private final class Held: @unchecked Sendable {
     var count: Int { state.value.count }
 
     /// Waits (polling) until a delivered value satisfies `accepts`.
+    ///
+    /// The ceiling is GENEROUS on purpose: this waits for an EVENT, it never
+    /// bounds a time. Values are delivered on the cooperative pool, which the
+    /// whole-package run saturates with blocking tests (the VX-685 class):
+    /// the first whole-package run of this suite saw a 30 s ceiling expire
+    /// before a held listing's first value arrived (the test took 288 s; green
+    /// in isolation in 1.3 s). A healthy delivery returns at once.
     func value(
-        where accepts: ([Queries.TrashItem]) -> Bool, timeout: Duration = .seconds(30)
+        where accepts: ([Queries.TrashItem]) -> Bool, timeout: Duration = .seconds(300)
     ) async throws -> [Queries.TrashItem]? {
         let deadline = ContinuousClock.now + timeout
         while ContinuousClock.now < deadline {
