@@ -1023,6 +1023,9 @@ final class BookViewModel {
         caretSeed = postID == nil ? nil : (caret ?? 0)
         caretSeedIsHers = postID != nil && caret != nil
         caretBlockSeed = nil
+        // VX-680: a later focus is a later navigation — a parked block landing
+        // never outlives it.
+        pendingOutlineBlockLanding = nil
         fanSeed = fanBlock
         focusedPostID = postID
         if let postID {
@@ -1061,6 +1064,7 @@ final class BookViewModel {
     /// text through the per-post coordinator, the Stage 1a machinery).
     func collapse(_ postID: String) {
         expandedPosts.remove(postID)
+        if pendingOutlineBlockLanding?.postID == postID { pendingOutlineBlockLanding = nil }
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
@@ -1079,6 +1083,7 @@ final class BookViewModel {
     func collapseAll() {
         let wereOpen = Array(expandedPosts)
         expandedPosts.removeAll()
+        pendingOutlineBlockLanding = nil
         focusedPostID = nil
         caretSeed = nil
         caretSeedIsHers = false
@@ -1277,7 +1282,30 @@ final class BookViewModel {
         // VX-630: …and the Outline consumes a block as a focus at it.
         if arriving == .outline, let block = target.blockID {
             focus(target.postID, atBlock: block)
+            // VX-680: …and its PAGE lands the block, not only the note's row
+            // (after the focus — `focus` drops any parked block landing).
+            pendingOutlineBlockLanding = target
         }
+    }
+
+    // MARK: - VX-680 — the Outline arrival's carried block (its landing's home)
+
+    /// **The block an Index → Outline click-over asked the arriving Outline's
+    /// landing to bring into view** (VX-680, P-B4-1's second option, ruled at
+    /// #248). Set ONLY by `carryPlace`'s Outline arm, beside VX-630's focus at
+    /// that block; taken ONCE by the Outline's landing of that very note
+    /// (`takeOutlineBlockLanding`); dropped by any later navigation in the book
+    /// — a focus, a collapse, a reveal, a block or chapter landing — so it can
+    /// never land on a later visit. Not observed (no view reads it; the
+    /// Outline takes it in its landing's own call).
+    @ObservationIgnored private(set) var pendingOutlineBlockLanding: LandingTarget?
+
+    /// The Outline's landing of `postID` takes the parked block — its blockID
+    /// when the park names that note, else nil. The park is spent either way.
+    func takeOutlineBlockLanding(for postID: String) -> String? {
+        guard let parked = pendingOutlineBlockLanding else { return nil }
+        pendingOutlineBlockLanding = nil
+        return parked.postID == postID ? parked.blockID : nil
     }
 
     /// An outside door (W20's ascent) asking this book to open AT a post.
@@ -1285,6 +1313,7 @@ final class BookViewModel {
         standingAnchorPostID = postID
         pendingReveal = postID
         pendingLanding = nil
+        pendingOutlineBlockLanding = nil   // VX-680: a new navigation
     }
 
     /// The arriving surface took the landing. Idempotent. A block-precise
@@ -1309,6 +1338,7 @@ final class BookViewModel {
         standingAnchorPostID = target.postID
         pendingReveal = target.postID
         pendingLanding = target
+        pendingOutlineBlockLanding = nil   // VX-680: a new navigation
     }
 
     // MARK: - Outline's CHAPTER landing (the Act 10 correction round, rows
@@ -1325,6 +1355,7 @@ final class BookViewModel {
 
     func requestChapterReveal(_ sectionID: String) {
         pendingChapterReveal = sectionID
+        pendingOutlineBlockLanding = nil   // VX-680: a new navigation
     }
 
     /// Outline took the chapter landing. Idempotent.

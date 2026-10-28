@@ -980,6 +980,220 @@ struct BookIndexCarryBlockTests {
     }
 }
 
+// MARK: - VX-680 — Index → Outline lands block-precise
+
+/// A book whose FIRST note is long — forty blocks of a few lines each — and
+/// two short notes after it, so a block far down the first note sits well
+/// below the Outline's fold when the note's row is at the top of the page.
+@MainActor
+private func withLongNoteBook<T>(
+    _ body: @MainActor (AppSession, AppDatabase, TakesBook) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = UUIDGenerator { UUID() }
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 680))
+    } operation: { @MainActor in
+        let session = AppSession(database: db)
+        let reading = try session.operations.createReading(name: "the long-note book", kind: .book)
+        var postIDs: [String] = []
+        var blocks: [String: [String]] = [:]
+        var variants: [String: [String]] = [:]
+        for p in 0..<3 {
+            let post = try session.operations.createPost(title: "note \(p)")
+            for b in 0..<(p == 0 ? 40 : 2) {
+                let minted = try session.operations.newBlock(
+                    in: post.id,
+                    text: "Paragraph \(b) of note \(p). We were seated at breakfast one morning, my "
+                        + "wife and I, when the maid brought in a telegram. It was from Sherlock "
+                        + "Holmes and ran in this way: have you a couple of days to spare?",
+                    at: .end)
+                blocks[post.id, default: []].append(minted.block.id)
+                variants[post.id, default: []].append(minted.variant.id)
+            }
+            try session.operations.addPostToReading(post.id, to: reading.id)
+            postIDs.append(post.id)
+        }
+        defer {
+            for id in postIDs {
+                session.commandRouter.forgetCurrentBlock(for: id)
+                UserDefaults.standard.removeObject(forKey: "postMode.\(id)")
+            }
+        }
+        for id in postIDs { session.commandRouter.forgetCurrentBlock(for: id) }
+        return try await body(session, db, TakesBook(
+            readingID: reading.id, postIDs: postIDs, blocks: blocks, variants: variants))
+    }
+}
+
+/// **VX-680 (Improvement · Medium — P-B4-1's second option, RULED at #248):**
+/// an Index → Outline click-over with a block live arrived with the note LIVE
+/// at her block (VX-630) while the PAGE landed the note's row — a block far
+/// down a long note sat live below the visible page. Ruled: the Outline
+/// landing scrolls the carried block's row into view — minimally, never a
+/// forced top. The fix: the arrival's landing homes on the block's minimal
+/// reveal (`OutlineBlockLanding`) once the live editor has laid it out.
+///
+/// RED ON OLD (`rev680`: the park is never taken — the landing homes on the
+/// row's top): the model's park lines and the mounted far-block pin.
+@Suite("VX-680 — Index → Outline lands block-precise", .serialized)
+@MainActor
+struct BookIndexToOutlineBlockLandingTests {
+    /// The park, at the model: the carry INTO Outline with a block parks it
+    /// beside VX-630's focus; the Outline's landing of that note takes it
+    /// ONCE; every later navigation drops it; a carry anywhere else parks
+    /// nothing.
+    @Test func theCarryIntoOutlineParksHerBlockForItsLanding() async throws {
+        try await withTakesBook { session, _, book in
+            let x = book.postIDs[0], y = book.postIDs[1]
+            let second = book.blocks[x]![1]
+            let model = BookViewModel(session: session, readingID: book.readingID)
+            await model.adopt(book.postIDs.map {
+                Queries.ReadingEntry(postID: $0, title: nil, entryDate: nil, sectionPath: nil)
+            })
+            model.noteIndexAnchor(x)
+            model.carryPlace(from: .index, to: .outline, readForm: .flow, livePostID: x, liveBlockID: second)
+            #expect(model.pendingOutlineBlockLanding == LandingTarget(postID: x, blockID: second),
+                    "RED ON OLD (rev680): the carry parks her block for the Outline's landing")
+            #expect(model.takeOutlineBlockLanding(for: x) == second,
+                    "RED ON OLD (rev680): the Outline's landing of that note takes it")
+            #expect(model.takeOutlineBlockLanding(for: x) == nil, "taken ONCE")
+
+            // Another note's landing spends the park and takes nothing.
+            model.carryPlace(from: .index, to: .outline, readForm: .flow, livePostID: x, liveBlockID: second)
+            #expect(model.takeOutlineBlockLanding(for: y) == nil, "another note's landing takes nothing")
+            #expect(model.pendingOutlineBlockLanding == nil, "…and spends the park")
+
+            // Every later navigation drops it.
+            let drops: [(String, (BookViewModel) -> Void)] = [
+                ("a focus", { $0.focus(y) }),
+                ("a reveal", { $0.requestReveal(y) }),
+                ("a block landing", { $0.requestLanding(LandingTarget(postID: y, blockID: book.blocks[y]![0])) }),
+                ("a chapter landing", { $0.requestChapterReveal("any-chapter") }),
+                ("collapsing the note", { $0.collapse(x) }),
+                ("collapse all", { $0.collapseAll() }),
+            ]
+            for (what, drop) in drops {
+                model.carryPlace(from: .index, to: .outline, readForm: .flow, livePostID: x, liveBlockID: second)
+                drop(model)
+                #expect(model.pendingOutlineBlockLanding == nil, "\(what) drops the parked block")
+            }
+
+            // A carry anywhere else parks nothing.
+            model.carryPlace(from: .index, to: .spread, readForm: .flow, livePostID: x, liveBlockID: second)
+            #expect(model.pendingOutlineBlockLanding == nil, "into the spread: nothing parked")
+            model.consumeReveal()
+            model.carryPlace(from: .index, to: .outline, readForm: .flow, livePostID: y, liveBlockID: second)
+            #expect(model.pendingOutlineBlockLanding == nil,
+                    "a live pane in another note carries no block (VX-630's rule) — nothing parked")
+        }
+    }
+
+    /// Mount the long-note book in INDEX with the long note's block `i` LIVE
+    /// and her caret nine characters in (her move — the note's memory takes
+    /// it), then click over to Outline through the mode door; settle until the
+    /// Outline's editor is live at that block and the landing has ENDED.
+    private func indexBlockToOutline(
+        _ mounted: MountedBook, _ session: AppSession, _ book: TakesBook, block i: Int, inside: Int
+    ) async throws -> EditorViewModel {
+        let x = book.postIDs[0]
+        let blockID = book.blocks[x]![i]
+        let variantID = book.variants[x]![i]
+        mounted.model.requestLanding(LandingTarget(postID: x, blockID: blockID))
+        await settle(mounted.window, mounted.hosting, until: {
+            indexPane(variantID, in: mounted.hosting) != nil
+        }, maxTurns: 240)
+        let pane = try #require(indexPane(variantID, in: mounted.hosting), "the premise: block \(i) went live in the Index")
+        await settle(mounted.window, mounted.hosting, until: { false }, maxTurns: 4)
+        pane.setSelectedRange(NSRange(location: inside, length: 0))
+        await settle(mounted.window, mounted.hosting, until: {
+            mounted.model.indexLiveBlockID == blockID
+                && mounted.model.indexCaret?.place == BookOpenDoor.Place(blockID: blockID, offsetInBlock: inside)
+        })
+        try #require(mounted.model.indexLiveBlockID == blockID, "the premise: her caret in block \(i) in the Index")
+#if DEBUG
+        BookOutlineGeometry.trace = []
+        let modeDoor = try #require(BookOutlineGeometry.modeDoors[book.readingID], "the book published its mode door")
+        modeDoor(.outline)
+        let anchor = BookOutlineRows.Row.noteAnchor(x)
+        await settle(mounted.window, mounted.hosting, until: {
+            guard let editing = session.editorRouter.editing, editing.postID == x,
+                  let place = editing.caretIdentity(), place.blockID == blockID, place.offset == inside
+            else { return false }
+            return BookOutlineGeometry.trace.contains { $0.hasPrefix("\(anchor) DONE:") }
+        }, maxTurns: 400)
+        await settle(mounted.window, mounted.hosting, until: { false }, maxTurns: 6)
+        print("VX-680 block \(i):", BookOutlineGeometry.trace.filter {
+            $0.contains("block-home") || $0.contains("DONE") || $0.contains("BLOCK-REVEAL")
+        }.suffix(6))
+#endif
+        let editing = try #require(session.editorRouter.editing, "the Outline's editor is live")
+        try #require(editing.postID == x && editing.caretIdentity()?.blockID == blockID,
+                     "the premise (VX-630): the note arrived live at block \(i) — \(String(describing: editing.caretIdentity()))")
+        return editing
+    }
+
+    /// **THE PIN, her road.** Index: the long note's block 30 live, her caret
+    /// nine in. The mode door → Outline: the note arrives live at block 30
+    /// (VX-630) AND the page shows block 30 — wholly on the page.
+    ///
+    /// RED ON OLD (`rev680`): the page lands the note's ROW at the top and
+    /// block 30 sits ~2,000 pt below the visible page.
+    @Test func aFarBlockArrivesOnThePage() async throws {
+        try await withLongNoteBook { session, db, book in
+            let x = book.postIDs[0]
+            let block = book.blocks[x]![30]
+            let mounted = try await mountBook(session, db, book, mode: .index)
+            defer { mounted.close(book.readingID) }
+            let editing = try await indexBlockToOutline(mounted, session, book, block: 30, inside: 9)
+            let textView = try #require(editing.textView)
+            let seen = try #require(
+                OutlineBlockSighting.read(blockID: block, textView: textView, index: editing.index),
+                "the premise: the live editor has laid block 30 out")
+            print("VX-680 FAR: residual \(seen.residual), top-in-page \(seen.topInViewport), page \(seen.viewportHeight)")
+            #expect(abs(seen.residual) <= LandingPolicy.bookOutline.tolerance,
+                    "RED ON OLD: block 30 is wholly on the page, not \(seen.residual) pt beyond it")
+            #expect(textView.visibleRect.intersects(seen.target),
+                    "RED ON OLD: the text view's visible part holds block 30")
+            #expect(session.editorRouter.editing?.caretIdentity()?.blockID == block,
+                    "her caret still in block 30 (VX-630's arrival, untouched)")
+        }
+    }
+
+    /// **The guard — minimal, never a forced top.** A carried block ALREADY on
+    /// the page when the note's row lands (block 2, near the row's top): the
+    /// page does not move for it — the row stays at the top. Green on both.
+    @Test func aBlockAlreadyOnThePageMovesNothing() async throws {
+        try await withLongNoteBook { session, db, book in
+            let x = book.postIDs[0]
+            let block = book.blocks[x]![1]
+            let mounted = try await mountBook(session, db, book, mode: .index)
+            defer { mounted.close(book.readingID) }
+            let editing = try await indexBlockToOutline(mounted, session, book, block: 1, inside: 9)
+            let textView = try #require(editing.textView)
+            let seen = try #require(
+                OutlineBlockSighting.read(blockID: block, textView: textView, index: editing.index),
+                "the live editor has laid block 2 out")
+            #expect(abs(seen.residual) <= LandingPolicy.bookOutline.tolerance, "block 2 is on the page")
+#if DEBUG
+            let top = BookOutlineGeometry.anchorTops[BookOutlineRows.Row.noteAnchor(x)]
+            #expect(top.map { abs($0) <= 4 } == true,
+                    "the note's row stays at the top of the page — the reveal never moved it (\(String(describing: top)))")
+#endif
+        }
+    }
+}
+
 // MARK: - VX-662 — the Index's carry anchor never goes stale
 
 /// **VX-662 (Bug · Low · Suspected — statically traced at VX-648 batch 4, the
