@@ -122,6 +122,31 @@ nonisolated extension BlockHistoryPath {
     static let readInFullHelp =
         "The whole of this saved moment, to read and select \u{2014} with Restore and "
         + "Bring back as a take beside it"
+
+    /// **The read-in-full sheet's title** (R-440-3: "titled by the commit's
+    /// name else 'Commit · ‹date›'") — the date in the row's own stamp form.
+    static func readingTitle(_ commit: CommitPoint, now: Date) -> String {
+        SavepointRowFace.name(commit)
+            ?? "Commit \u{B7} \(CommitRowFace.stamp(commit.createdAt, now: now))"
+    }
+
+    /// **Bring back as a take** (R-440-3's second foot door; the op is
+    /// `Operations.bringBackCommitAsTake`). PROVISIONAL words (P-440-4/-10).
+    static let bringBackAsTakeVerb = "Bring back as a take"
+    static let bringBackAsTakeHelp =
+        "Makes this saved moment a take of its own on this block \u{2014} the last in "
+        + "its fan, never chosen \u{2014} so you can read it and work on it in the editor. "
+        + "The moment itself stays"
+
+    /// The act's receipt (P-440-4: "a quiet receipt names the act"), naming
+    /// the take by the label it was born with when the moment had a name.
+    static func broughtBackAsTake(label: String?) -> String {
+        guard let label else {
+            return "Brought back as a take \u{2014} it's the last take in this block's fan."
+        }
+        return "Brought back as the take \u{201C}\(label)\u{201D} \u{2014} it's the last "
+            + "take in this block's fan."
+    }
 }
 
 /// A surface's pending request to open the pane — the `TrayRequest` shape,
@@ -200,6 +225,20 @@ final class BlockHistoryModel {
     nonisolated struct PendingRestore: Identifiable, Equatable, Sendable {
         let variantID: String
         let commit: CommitPoint
+        var id: String { commit.id }
+    }
+
+    /// **The moment open in the read-in-full sheet** (VX-431 — R-440-3), or
+    /// nil. A fact on the model rather than a view's private state, for row
+    /// 69's reason: a claim about what a door opens has to be checkable.
+    var reading: CommitReading?
+
+    nonisolated struct CommitReading: Identifiable, Equatable, Sendable {
+        let commit: CommitPoint
+        /// The take the moment was saved from — Restore's target.
+        let variantID: String
+        /// That take's heading, as its run in the pane names it.
+        let takeHeading: String
         var id: String { commit.id }
     }
 
@@ -391,6 +430,37 @@ final class BlockHistoryModel {
             // that never existed (13u3 ladder round 1, R1-2's face half).
             guard wrote else { return }
             status = .receipt(BlockHistoryCopy.renamed(SavepointName.normalized(name)))
+        } catch let error as OperationError {
+            status = .refusal(TrayRefusalCopy.message(for: error))
+        } catch {
+            status = .refusal(DeletionRefusal.fallback(error))
+        }
+    }
+
+    // MARK: - Region 1: read a moment in full, bring it back as a take (VX-431)
+
+    /// **"Read in full"** (R-440-3): the open row's door puts the moment in
+    /// the sheet. Nothing is written.
+    func readInFull(_ commit: CommitPoint, of take: Variant, heading: String) {
+        reading = CommitReading(commit: commit, variantID: take.id, takeHeading: heading)
+    }
+
+    /// **"Bring back as a take"** (R-440-3, the sheet's second foot door): the
+    /// moment becomes a take of its own on the block
+    /// (`Operations.bringBackCommitAsTake` — `branchVariant`'s posture: no
+    /// touch, no churn, no undo entry; a seal refuses). NO flush first, and
+    /// deliberately: the op copies the COMMIT's text, never a buffer, so a
+    /// keystroke still pending in the take it came from cannot be lost or
+    /// raced (the branch doors flush because they copy the buffer). Its
+    /// receipt names the act (P-440-4); a refusal speaks in the tray family's
+    /// words, like every act in this pane.
+    func bringBackAsTake(_ commit: CommitPoint) async {
+        status = nil
+        do {
+            let take = try await session.runner.run { ops in
+                try ops.bringBackCommitAsTake(commit.id)
+            }
+            status = .receipt(BlockHistoryPath.broughtBackAsTake(label: take.label))
         } catch let error as OperationError {
             status = .refusal(TrayRefusalCopy.message(for: error))
         } catch {
@@ -617,6 +687,25 @@ struct BlockHistoryPane: View {
         } message: { _ in
             Text(BlockHistoryCopy.predatesSplitDetail)
         }
+        // VX-431 (R-440-3): "read in full" — the moment's whole text, with
+        // Restore and Bring back as a take at its foot. A sheet over the pane
+        // (in the inspector or over a host's own sheet alike).
+        .sheet(
+            item: Binding(
+                get: { model.reading },
+                set: { model.reading = $0 })
+        ) { reading in
+            CommitReadingSheet(
+                reading: reading, tokens: tokens, now: session.now,
+                predatesSplit: model.predatesSplit(reading.commit),
+                onRestore: { confirmed in
+                    Task {
+                        await model.restore(
+                            reading.commit, of: reading.variantID, confirmed: confirmed)
+                    }
+                },
+                onBringBack: { Task { await model.bringBackAsTake(reading.commit) } })
+        }
     }
 
     private func close() {
@@ -708,7 +797,9 @@ struct BlockHistoryPane: View {
                         }
                         .padding(.vertical, 4)
                     case .commit(let commit):
-                        commitRow(commit, of: take)
+                        commitRow(
+                            commit, of: take,
+                            heading: BlockHistoryPath.takeHeading(take, ordinal: ordinal, of: total))
                     }
                 }
             }
@@ -719,7 +810,9 @@ struct BlockHistoryPane: View {
     /// the pane's model: the rename door (row 69's seal rule, R-13u3-1's
     /// one-ask-per-row binding) and Restore. VX-431: the row rests as ONE
     /// line and opens in place on a press (`openCommits`).
-    private func commitRow(_ commit: CommitPoint, of take: Variant) -> some View {
+    private func commitRow(
+        _ commit: CommitPoint, of take: Variant, heading: String
+    ) -> some View {
         CommitRowView(
             commit: commit, tokens: tokens,
             predatesSplit: model.predatesSplit(commit), now: session.now,
@@ -746,7 +839,8 @@ struct BlockHistoryPane: View {
                 withAnimation(.easeInOut(duration: 0.15)) {
                     openCommits = SavepointHistoryFace.toggling(commit.id, in: openCommits)
                 }
-            })
+            },
+            onReadInFull: { model.readInFull(commit, of: take, heading: heading) })
     }
 
     // MARK: - Region 2 — archived takes
@@ -1158,6 +1252,110 @@ struct CommitRowView: View {
                     ? BlockHistoryCopy.nameHelp(commit)
                     : TrayRefusalCopy.sealed)
                 .savepointNameAsk(renameAsk, tokens: tokens) { _, name in onRename(name) }
+        }
+    }
+}
+
+/// **READ IN FULL** (VX-431 — R-440-3, her sitting's "Row expands + full-text
+/// sheet": *"a 'read in full' door opens a sheet with the whole text
+/// (scrollable, selectable) with Restore and 'Bring back as a take' at its
+/// foot"*). Her ticket words are why it exists: *"a long commit can't be read
+/// in full."*
+///
+/// **READ-CHEAP, NEVER AN EDITOR (P3):** the moment is ONE selectable `Text`
+/// in a scroll — a saved moment is immutable (I5), and nothing that shows it
+/// may look like a place to type. Its cost is the moment's own length, paid
+/// once when she summons it (a block's text, never the note's or the corpus's).
+///
+/// Restore here is the row's Restore exactly — the same model act, its
+/// pre-split warning asked HERE (the pane's own alert cannot present over this
+/// sheet) — and both foot doors close the sheet, so what they did is seen in
+/// the pane and on the page behind it.
+struct CommitReadingSheet: View {
+    let reading: BlockHistoryModel.CommitReading
+    let tokens: VoiceTokens
+    let now: Date
+    let predatesSplit: Bool
+    /// Restore — `confirmed` is true when the pre-split warning was answered.
+    let onRestore: (_ confirmed: Bool) -> Void
+    let onBringBack: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmingRestore = false
+
+    /// The sheet's measure — a reading width, never the pane's narrow column.
+    static let idealWidth: CGFloat = 560
+
+    private var commit: CommitPoint { reading.commit }
+
+    /// What the body reads — the moment's own words, or the take's empty word.
+    static func bodyText(_ commit: CommitPoint) -> String {
+        commit.text.isEmpty ? BlockPastCopy.emptyTake : commit.text
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(BlockHistoryPath.readingTitle(commit, now: now))
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 12)
+                Button("Close") { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+            }
+            // Whose moment, and when — the details the pane's row carries.
+            Text(tokens.chromeLabel(
+                ([reading.takeHeading]
+                    + CommitRowFace.details(commit, predatesSplit: predatesSplit, now: now))
+                    .joined(separator: " \u{B7} ")))
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            ScrollView {
+                Text(Self.bodyText(commit))
+                    .font(tokens.body)
+                    .foregroundStyle(commit.text.isEmpty ? tokens.muted : tokens.ink)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.vertical, 4)
+            }
+            .frame(maxHeight: .infinity)
+            HStack(spacing: 10) {
+                Spacer(minLength: 0)
+                Button(tokens.chromeLabel(BlockHistoryPath.bringBackAsTakeVerb)) {
+                    dismiss()
+                    onBringBack()
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(BlockHistoryPath.bringBackAsTakeHelp)
+                Button(tokens.chromeLabel(BlockHistoryCopy.restoreVerb)) {
+                    if predatesSplit {
+                        confirmingRestore = true
+                    } else {
+                        dismiss()
+                        onRestore(false)
+                    }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .help(CommitRowView.restoreHelp)
+            }
+        }
+        .padding(16)
+        .frame(
+            minWidth: 420, idealWidth: Self.idealWidth, maxWidth: 820,
+            minHeight: 320, idealHeight: 520)
+        .background(tokens.surface)
+        .alert(BlockHistoryCopy.predatesSplitTitle, isPresented: $confirmingRestore) {
+            Button(BlockHistoryCopy.restoreAnyway, role: .destructive) {
+                dismiss()
+                onRestore(true)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(BlockHistoryCopy.predatesSplitDetail)
         }
     }
 }

@@ -143,6 +143,106 @@ struct BlockHistoryClarityTests {
         }
     }
 
+    // MARK: - Item 2: read in full (R-440-3)
+
+    /// **"Read in full" opens the moment WHOLE** — every paragraph, past
+    /// anything the open row's capped preview can show — in a read-cheap
+    /// sheet titled by the moment's name, with Restore and Bring back as a
+    /// take at its foot. Nothing in it is an editor (P3).
+    @Test func readInFullShowsTheWholeMomentWithItsTwoFootDoors() async throws {
+        try await withNote(["Short."]) { session, postID, blocks in
+            let chosen = try #require(try await session.database.read {
+                try Queries.renderPost($0, containerID: postID)
+            }.first?.variantID)
+            let long = (1...12).map {
+                "Paragraph \($0) of a long moment, long enough that no row could show it all."
+            }.joined(separator: "\n")
+            try session.operations.autosave(chosen, text: long, charDelta: 900)
+            let commit = try session.operations.commit(chosen, message: "the long one")
+            #expect(long.count > CommitRowFace.expandedCap, "fixture: past the open row's cap")
+
+            let model = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
+            let history = try await history(session, blocks[0])
+            model.adopt(history)
+            let take = try #require(history.activeTakes.first)
+            model.readInFull(commit, of: take, heading: "this take")
+            let reading = try #require(model.reading, "the door names the moment")
+            #expect(reading.commit.id == commit.id && reading.variantID == chosen)
+
+            let sheet = CommitReadingSheet(
+                reading: reading, tokens: .studyLight, now: session.now,
+                predatesSplit: false, onRestore: { _ in }, onBringBack: {})
+            var dumped = ""
+            dump(sheet.body, to: &dumped, maxDepth: 160)
+            #expect(dumped.contains("Paragraph 12 of a long moment"), "the WHOLE moment")
+            #expect(BlockHistoryPath.readingTitle(commit, now: session.now) == "the long one",
+                    "titled by its name")
+            #expect(Self.values(VoicedButtonStyle.self, in: sheet.body).count == 2,
+                    "Bring back as a take and Restore, voiced words at the foot")
+            #expect(Self.values(TextField<Text>.self, in: sheet.body).isEmpty
+                    && !dumped.contains("TextEditor"),
+                    "a saved moment is read, never typed into (P3, I5)")
+            await SurfaceComposition.host(sheet, size: NSSize(width: 560, height: 520))
+        }
+    }
+
+    /// An unnamed moment's sheet is titled "Commit · ‹when›" (R-440-3).
+    @Test func anUnnamedMomentIsTitledByWhen() {
+        let now = Date(timeIntervalSince1970: 1_791_331_200)
+        let commit = CommitPoint(
+            id: "c", variantId: "v", text: "words", kind: .manual, createdAt: now)
+        #expect(BlockHistoryPath.readingTitle(commit, now: now)
+            == "Commit \u{B7} \(CommitRowFace.stamp(now, now: now))")
+    }
+
+    // MARK: - Item 5: bring back as a take (P-440-3 / P-440-4)
+
+    /// **The door lands the take and its receipt names the act** — the take
+    /// at the fan's end, labelled with the moment's name (P-440-3), the
+    /// moment untouched.
+    @Test func bringBackAsATakeLandsTheTakeAndSaysSo() async throws {
+        try await withNote(["The words as they were."]) { session, postID, blocks in
+            let ops = session.operations
+            let chosen = try #require(try await session.database.read {
+                try Queries.renderPost($0, containerID: postID)
+            }.first?.variantID)
+            let commit = try ops.commit(chosen, message: "before the rewrite")
+            try ops.autosave(chosen, text: "The words as they are now.", charDelta: 8)
+
+            let model = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
+            await model.bringBackAsTake(commit)
+            #expect(model.status?.isRefusal == false)
+            #expect(model.status?.text == BlockHistoryPath.broughtBackAsTake(label: "before the rewrite"))
+
+            let after = try await history(session, blocks[0])
+            let brought = try #require(after.activeTakes.last)
+            #expect(after.activeTakes.count == 2)
+            #expect(brought.workingText == "The words as they were.")
+            #expect(brought.label == "before the rewrite")
+            #expect(brought.parentVariantId == chosen)
+        }
+    }
+
+    /// Under a seal the door ACTS and SPEAKS — the pane's uniform grammar
+    /// (Restore's, the rename door's) — in the tray family's standing words.
+    @Test func bringBackUnderASealRefusesInTheStandingWords() async throws {
+        try await withNote(["Sealed words."]) { session, postID, blocks in
+            let ops = session.operations
+            let chosen = try #require(try await session.database.read {
+                try Queries.renderPost($0, containerID: postID)
+            }.first?.variantID)
+            let commit = try ops.commit(chosen)
+            try ops.lockPost(postID)
+
+            let model = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
+            await model.bringBackAsTake(commit)
+            #expect(model.status?.isRefusal == true)
+            #expect(model.status?.text
+                == TrayRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
+            #expect(try await history(session, blocks[0]).activeTakes.count == 1, "nothing minted")
+        }
+    }
+
     /// Empty regions stay hidden, as before: a block with one take and one
     /// commit draws the Commits header alone.
     @Test func anEmptyRegionDrawsNoHeader() async throws {

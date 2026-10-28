@@ -517,7 +517,23 @@ Pieces (flipped per commit):
   `CommitsPageLedgerTests.theDetailsLineSaysOnlyWhatTellsCommitsApart` (`details` kept — the sheet's
   subtitle), `.theCommitsPageDrawsNoBezels`, `.theDefiningSentenceSurvivesAndThePaneBlurbIsGone`.
   DONE (this commit).
-- B2-7 read in full (the sheet) + Bring back as a take (the door, the receipt): NOT STARTED.
+- B2-7 read in full (the sheet) + Bring back as a take (the door, the receipt). The open row's "Read in
+  full" → `BlockHistoryModel.readInFull(_:of:heading:)` sets the observable `reading`
+  (`CommitReading`: the commit, its take, the take's heading) → the pane's `.sheet(item:)` presents
+  `CommitReadingSheet`: titled by the moment's name else "Commit · ‹stamp›"
+  (`BlockHistoryPath.readingTitle`), a details line (the take's heading · `CommitRowFace.details`), the
+  WHOLE text as ONE selectable read-cheap `Text` in a scroll (never an editor — P3/I5; cost = the
+  moment's own length, paid once when summoned), and at its foot **Bring back as a take** (quiet) and
+  **Restore** (primary). Restore is the row's own act (`model.restore`), its pre-split warning asked IN
+  the sheet (the pane's alert cannot present over a sheet) → `confirmed: true`; both foot doors dismiss
+  the sheet first, so the act is seen in the pane and on the page. Bring back →
+  `model.bringBackAsTake` → the B2-5 op, NO flush (it copies the commit's text, never a buffer), receipt
+  `BlockHistoryPath.broughtBackAsTake(label:)` ("Brought back as a take — it's the last take in this
+  block's fan." / names the label when the moment had a name — P-440-4), refusals in the tray family's
+  words. Inline door, undeclared — the pane's own vocabulary like Restore/Name (registry untouched). Pins
+  (Mac `BlockHistoryClarityTests`, compiled ✓, RUNS PENDING): `readInFullShowsTheWholeMomentWithItsTwoFootDoors`,
+  `anUnnamedMomentIsTitledByWhen`, `bringBackAsATakeLandsTheTakeAndSaysSo`,
+  `bringBackUnderASealRefusesInTheStandingWords`. DONE (this commit).
 - B2-8 restore says where it landed (the landing + the overlay wash): NOT STARTED.
 - B2-9 verification (headless) + the record closed: NOT STARTED.
 
