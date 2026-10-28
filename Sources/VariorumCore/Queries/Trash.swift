@@ -145,9 +145,11 @@ extension Queries {
     /// when every arm sorts the same way the merge does; a DESC arm under
     /// an oldest-first merge would hand over its newest rows and present
     /// the oldest of THOSE — silently wrong, not merely slow). The
-    /// stranded-originals half walks the derived_from families of unplaced
-    /// blocks (`originFamilies`), which is why it is a DELIBERATELY-opened
-    /// surface's query and not a held per-keystroke one.
+    /// stranded-originals half walks the derived_from lineage of the blocks
+    /// deleted inside the window (`strandedOriginals` — linear in that
+    /// lineage since VX-670; it was the pair set, quadratic in a note's seam
+    /// history), which is why it is a DELIBERATELY-opened surface's query and
+    /// not a held per-keystroke one.
     ///
     /// **`wingID` — the per-wing Trash** (13i-d U5, additive; her 2026-08-25
     /// ruling: "will trash be per library? I also think that makes sense" —
@@ -409,6 +411,32 @@ extension Queries {
     /// `oldestFirst`/`limit` (13j ladder B, B4 — additive, defaults keep
     /// every existing caller byte-identical): the arm sorts and bounds in
     /// SQL like its four siblings above, in the caller's direction.
+    ///
+    /// **Cost ∝ one window scan of `block` + the trashed blocks' own
+    /// lineage, never its square (VX-670, ruling A-678-1).** The earlier
+    /// body seeded a pair set with EVERY live unplaced original in the store
+    /// and paired each with every one of its descendants — O(L²) in a note's
+    /// seam history, 24 s at 600 rounds; and the open Trash holds this read
+    /// in TWO observations GRDB re-runs on the writer after every commit, so
+    /// that cost was her blank listing AND every slow Put back and Delete Now
+    /// (`notes/plans/fixes/vx-678-trash-purge-resurrection.md`, Unit 3).
+    /// Now:
+    /// · `trashed` — the blocks deleted inside the window. A listed original
+    ///   has a family clock in the window, i.e. at least one family member
+    ///   deleted in it, so every listed original is an ANCESTOR of a trashed
+    ///   block and nothing outside that set can list. (The one store-table
+    ///   scan: there is no `deleted_at` index, and the block arm beside this
+    ///   one pays the same scan.)
+    /// · `anc` → `cand` — their ancestors, kept when live, unarchived,
+    ///   unplaced, in a live note of the asked wing (the old seed's terms);
+    /// · phase 1, `strandedFamilyWalk` — the candidates with no live
+    ///   descendant (VX-654's linear upward liveness walk);
+    /// · phase 2 — the clock, the anchor and the fence over ONLY those
+    ///   all-dead families (`members`), with the anchor read by a window
+    ///   ordered exactly as the old correlated read was.
+    /// Pinned by `TrashLineageP1Tests` (exact rows against the old body,
+    /// kept verbatim as `LegacyTrashLineage`; the seam step, library and
+    /// plan pins).
     public static func strandedOriginals(
         _ db: Database, now: Date, oldestFirst: Bool = false, limit: Int? = nil,
         wingID: String? = nil
@@ -434,62 +462,60 @@ extension Queries {
         return try Row.fetchAll(
             db,
             sql: """
-                WITH RECURSIVE origins(id) AS (
-                  SELECT b.id FROM block b
-                  JOIN container c ON c.id = b.last_container_id AND c.deleted_at IS NULL
-                  WHERE b.deleted_at IS NULL AND b.archived_at IS NULL\(wingFence)
+                WITH RECURSIVE trashed(id) AS MATERIALIZED (
+                  SELECT t.id FROM block t
+                  WHERE t.deleted_at IS NOT NULL AND t.deleted_at >= :cutoff
+                ),
+                anc(id) AS (
+                  SELECT e.target_block_id FROM trashed tr
+                  CROSS JOIN edge e ON e.source_block_id = tr.id AND e.type = 'derived_from'
+                  UNION
+                  SELECT e.target_block_id FROM anc a
+                  JOIN edge e ON e.source_block_id = a.id AND e.type = 'derived_from'
+                ),
+                cand(id) AS MATERIALIZED (
+                  SELECT o.id FROM anc a
+                  CROSS JOIN block o ON o.id = a.id
+                  CROSS JOIN container c ON c.id = o.last_container_id AND c.deleted_at IS NULL
+                  WHERE o.deleted_at IS NULL AND o.archived_at IS NULL\(wingFence)
                     AND NOT EXISTS (
                       SELECT 1 FROM container_block placed
-                      WHERE placed.block_id = b.id AND placed.deleted_at IS NULL)
+                      WHERE placed.block_id = o.id AND placed.deleted_at IS NULL)
                 ),
-                fam(origin, id) AS (
-                  -- The edges are read WITHOUT their tombstones on purpose:
-                  -- deleting a block cascade-tombstones its edges, and a
-                  -- family whose members are all deleted is precisely the
-                  -- state this query exists to find. Lineage is a fact about
-                  -- what happened; the tombstone rides the block, not the
-                  -- history (`derived_from` has no user-facing delete door).
-                  SELECT o.id, e.source_block_id FROM origins o
-                  JOIN edge e ON e.target_block_id = o.id AND e.type = 'derived_from'
-                  UNION
-                  SELECT f.origin, e.source_block_id FROM fam f
-                  JOIN edge e ON e.target_block_id = f.id AND e.type = 'derived_from'
+                \(strandedFamilyWalk),
+                ranked(origin, id, deleted_at, fenced, rank) AS (
+                  -- Ledger row 22 (her tenth-sitting ruling): the family
+                  -- member whose tombstone IS the family clock — the block
+                  -- she just deleted, which the Trash nests this original
+                  -- UNDER. An explicit ordering (clock, then id, both
+                  -- descending — the old correlated read's own words), never
+                  -- SQLite's bare-column-beside-MAX() convenience.
+                  SELECT origin, id, deleted_at, fenced,
+                         ROW_NUMBER() OVER (
+                           PARTITION BY origin ORDER BY deleted_at DESC, id DESC)
+                  FROM members
                 )
-                SELECT f.origin AS block_id,
-                       MAX(d.deleted_at) AS family_clock,
-                       SUM(CASE WHEN d.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count,
-                       -- Ledger row 22 (her tenth-sitting ruling): the family
-                       -- member whose tombstone IS the family clock — the
-                       -- block she just deleted, which the Trash nests this
-                       -- original UNDER. Written as an explicit ordered
-                       -- correlated read rather than leaning on SQLite's
-                       -- bare-column-beside-MAX() convenience, so the answer
-                       -- is deterministic by the statement's own words.
-                       (SELECT d2.id FROM fam f2
-                          JOIN block d2 ON d2.id = f2.id
-                         WHERE f2.origin = f.origin AND d2.deleted_at IS NOT NULL
-                         ORDER BY d2.deleted_at DESC, d2.id DESC
-                         LIMIT 1) AS anchor_block_id,
+                SELECT r.origin AS block_id,
+                       MAX(r.deleted_at) AS family_clock,
+                       SUM(CASE WHEN r.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count,
+                       MAX(CASE WHEN r.rank = 1 AND r.deleted_at IS NOT NULL
+                                THEN r.id END) AS anchor_block_id,
                        dv.working_text AS text,
                        c.id AS note_id, c.title AS note_title,
                        c.entry_date AS note_entry_date, c.created_at AS note_created_at
-                FROM fam f
-                JOIN block d ON d.id = f.id
-                JOIN block o ON o.id = f.origin
+                FROM ranked r
+                CROSS JOIN block o ON o.id = r.origin
                 LEFT JOIN variant dv ON dv.id = o.default_variant_id AND dv.deleted_at IS NULL
                 LEFT JOIN container c ON c.id = o.last_container_id
-                GROUP BY f.origin
+                GROUP BY r.origin
                 HAVING live_count = 0 AND family_clock >= :cutoff
                   -- 13j batch 6b: a family with a standing purge intent has
                   -- left every surface (the doors' promise); its origin
                   -- rides the purge and stops listing with it. Stamp-aware
                   -- (ladder B, B1): a VOIDED intent from before a re-delete
                   -- never fences the fresh tombstone's family.
-                  AND SUM(CASE WHEN EXISTS (SELECT 1 FROM purge_intent pi
-                    WHERE pi.table_name = 'block' AND pi.row_id = f.id
-                      AND (pi.deleted_at IS NULL OR pi.deleted_at >= d.deleted_at))
-                    THEN 1 ELSE 0 END) = 0
-                ORDER BY family_clock \(dir), f.origin \(dir)\(limitClause)
+                  AND SUM(r.fenced) = 0
+                ORDER BY family_clock \(dir), r.origin \(dir)\(limitClause)
                 """,
             arguments: arguments
         ).map { row in
@@ -531,7 +557,16 @@ extension Queries {
     /// truthfully permanent; `.counting` rides the tray's clock section;
     /// `.gone` leaves both buckets (above). The window and intent fences
     /// here MIRROR `strandedOriginals`' exactly — two surfaces answering
-    /// one state differently was B5's finding.
+    /// one state differently was B5's finding — and since VX-670 the two
+    /// share ONE walk (`strandedFamilyWalk`), so they cannot drift apart.
+    ///
+    /// **Cost ∝ this note's originals' lineage, never its square (VX-670,
+    /// A-678-1):** the earlier body paired every original with every
+    /// descendant (14.6 s at 600 seam rounds, held by the open tray and so
+    /// re-run on the writer after every commit in its region). Phase 1 finds
+    /// the stranded originals with the linear upward liveness walk; phase 2
+    /// aggregates over only their all-dead families. Pinned by
+    /// `TrashLineageP1Tests`.
     public static func originFamilyClocks(
         _ db: Database, postID: String, now: Date
     ) throws -> [String: OriginFamilyFate] {
@@ -539,7 +574,7 @@ extension Queries {
         for row in try Row.fetchAll(
             db,
             sql: """
-                WITH RECURSIVE origins(id) AS (
+                WITH RECURSIVE cand(id) AS MATERIALIZED (
                   SELECT b.id FROM block b
                   WHERE b.last_container_id = :post AND b.deleted_at IS NULL
                     AND b.archived_at IS NULL
@@ -547,30 +582,15 @@ extension Queries {
                       SELECT 1 FROM container_block placed
                       WHERE placed.block_id = b.id AND placed.deleted_at IS NULL)
                 ),
-                fam(origin, id) AS (
-                  -- The edges are read WITHOUT their tombstones on purpose:
-                  -- deleting a block cascade-tombstones its edges, and a
-                  -- family whose members are all deleted is precisely the
-                  -- state this query exists to find. Lineage is a fact about
-                  -- what happened; the tombstone rides the block, not the
-                  -- history (`derived_from` has no user-facing delete door).
-                  SELECT o.id, e.source_block_id FROM origins o
-                  JOIN edge e ON e.target_block_id = o.id AND e.type = 'derived_from'
-                  UNION
-                  SELECT f.origin, e.source_block_id FROM fam f
-                  JOIN edge e ON e.target_block_id = f.id AND e.type = 'derived_from'
-                )
-                SELECT f.origin AS block_id,
-                       MAX(d.deleted_at) AS family_clock,
-                       SUM(CASE WHEN d.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count,
+                \(strandedFamilyWalk)
+                SELECT m.origin AS block_id,
+                       MAX(m.deleted_at) AS family_clock,
+                       SUM(CASE WHEN m.deleted_at IS NULL THEN 1 ELSE 0 END) AS live_count,
                        -- The intent fence, stamp-aware (B1/B5 — the exact
                        -- condition `strandedOriginals` applies).
-                       SUM(CASE WHEN EXISTS (SELECT 1 FROM purge_intent pi
-                         WHERE pi.table_name = 'block' AND pi.row_id = f.id
-                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= d.deleted_at))
-                         THEN 1 ELSE 0 END) AS fenced_count
-                FROM fam f JOIN block d ON d.id = f.id
-                GROUP BY f.origin
+                       SUM(m.fenced) AS fenced_count
+                FROM members m
+                GROUP BY m.origin
                 HAVING live_count = 0
                 """,
             arguments: ["post": postID]) {
@@ -585,6 +605,78 @@ extension Queries {
         }
         return fates
     }
+
+    /// **The stranded-family walk — ONE text for the Trash arm and the tray
+    /// twin** (VX-670, ruling A-678-1). It follows a caller's
+    /// `cand(id) AS MATERIALIZED` (the originals that COULD be stranded:
+    /// live, unarchived, unplaced, plus each caller's own terms) inside a
+    /// `WITH RECURSIVE`, and ends with `members(origin, id, deleted_at,
+    /// fenced)`: one row per (stranded original, real family member).
+    ///
+    /// The edges are read WITHOUT their tombstones on purpose: deleting a
+    /// block cascade-tombstones its edges, and a family whose members are all
+    /// deleted is precisely the state this walk exists to find. Lineage is a
+    /// fact about what happened; the tombstone rides the block, not the
+    /// history (`derived_from` has no user-facing delete door).
+    ///
+    /// · PHASE 1 (`nb`, `scope`, `up`, `stranded`) — VX-654's linear upward
+    ///   liveness walk (`originalsStrandedBy` documents why it is exact):
+    ///   `nb` is every descendant of a candidate, one column; `up` walks UP
+    ///   from nb's real rows carrying the start row's liveness, confined to
+    ///   `scope` (≤ 2 rows per node); `stranded` = the candidates reached only
+    ///   by dead-row walks — at least one real descendant, none live. A
+    ///   descendant id with no block row is walked through and never counts;
+    ///   a cycle through a candidate makes it its own live descendant.
+    /// · PHASE 2 (`fam`, `members`) — the `(origin, member)` pairs the old
+    ///   bodies built for EVERY original, now built only for the stranded
+    ///   ones: all-dead families, typically one or two blocks (the deletion
+    ///   that stranded it). `fenced` is the stamp-aware intent fence, per
+    ///   member (13j ladder B, B1/B5): a live intent, or one completed
+    ///   at-or-after the member's tombstone.
+    ///
+    /// **`MATERIALIZED` and `CROSS JOIN` are load-bearing, not style** (the
+    /// VX-654 lesson, `originalsStrandedBy`): each walk is driven from its
+    /// own small set, so the plan SEARCHes every store table by index.
+    private static let strandedFamilyWalk = """
+        nb(id) AS (
+          SELECT e.source_block_id FROM cand k
+          CROSS JOIN edge e ON e.target_block_id = k.id AND e.type = 'derived_from'
+          UNION
+          SELECT e.source_block_id FROM nb n
+          JOIN edge e ON e.target_block_id = n.id AND e.type = 'derived_from'
+        ),
+        scope(id) AS MATERIALIZED (SELECT id FROM nb UNION SELECT id FROM cand),
+        up(id, live) AS (
+          SELECT e.target_block_id, d.deleted_at IS NULL FROM nb n
+          CROSS JOIN block d ON d.id = n.id
+          CROSS JOIN edge e ON e.source_block_id = n.id AND e.type = 'derived_from'
+          WHERE e.target_block_id IN (SELECT id FROM scope)
+          UNION
+          SELECT e.target_block_id, u.live FROM up u
+          JOIN edge e ON e.source_block_id = u.id AND e.type = 'derived_from'
+          WHERE e.target_block_id IN (SELECT id FROM scope)
+        ),
+        stranded(id) AS MATERIALIZED (
+          SELECT u.id FROM up u
+          WHERE u.id IN (SELECT id FROM cand)
+          GROUP BY u.id
+          HAVING MAX(u.live) = 0
+        ),
+        fam(origin, id) AS (
+          SELECT s.id, e.source_block_id FROM stranded s
+          CROSS JOIN edge e ON e.target_block_id = s.id AND e.type = 'derived_from'
+          UNION
+          SELECT f.origin, e.source_block_id FROM fam f
+          JOIN edge e ON e.target_block_id = f.id AND e.type = 'derived_from'
+        ),
+        members(origin, id, deleted_at, fenced) AS MATERIALIZED (
+          SELECT f.origin, d.id, d.deleted_at,
+                 EXISTS (SELECT 1 FROM purge_intent pi
+                   WHERE pi.table_name = 'block' AND pi.row_id = d.id
+                     AND (pi.deleted_at IS NULL OR pi.deleted_at >= d.deleted_at))
+          FROM fam f CROSS JOIN block d ON d.id = f.id
+        )
+        """
 
     /// **Did deleting these blocks strand an original?** (her round-8b
     /// ruling (d): the receipt names it.) Returns the originals whose LAST
