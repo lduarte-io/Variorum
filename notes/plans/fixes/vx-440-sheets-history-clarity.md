@@ -471,7 +471,27 @@ Pieces (flipped per commit):
   J38 — `TakesParkedFollowTests.aChosenColumnPickInTheMintGapLeavesTheParkAlone` keeps driving it
   directly). The two B2-3 absence pins turn GREEN at this commit (RUN PENDING). DONE (this commit — the
   fix: the green-on-new SHA).
-- B2-5 core: bring a commit back as a take (the op, mirroring `branchVariant`'s posture) + state-transition tests: NOT STARTED.
+- B2-5 core: bring a commit back as a take (the op, mirroring `branchVariant`'s posture) + state-transition
+  tests. **`branchVariant`'s posture, VERIFIED IN CODE** (`Operations+Variant.swift`): `insertFanVariant`
+  checks `liveBlock` → `ensurePlacementUnlocked` (the seal) → the source's `liveVariant` (archived and
+  locked sources ALLOWED — the source is only read), inserts ONE `variant` row and writes nothing else —
+  no `registerTextChange`, no `touchContainer` (so no `last_touched_at`, no churn), and NO
+  `undoStack?.register` (it is not on AppSpec §9's undo list; no app caller registers one either —
+  `TakesViewModel.branchTake`/`branchIntoColumn`, `EditorViewModel.mintCaretTake`). The op
+  `Operations.bringBackCommitAsTake(_ commitID:) -> Variant` mirrors it in ONE transaction: the commit
+  (else `commitNotFound`) and its take's row name the block, then `liveBlock` → seal → the take's
+  liveness in `insertFanVariant`'s order; text = the commit's, parent = the commit's take, at the fan's
+  END (`newBlankVariant`'s `MAX(fan_position)` road — the moment is not a sibling of the take as it is
+  now), never chosen, never locked, label = the commit's name through the take label's own
+  normalisation (P-440-3), no touch/churn/undo (P-440-4). Pins (core, NEW `BringBackCommitAsTakeTests`,
+  RUN GREEN headless — with `BlockVariantOperationsTests` 29/2 passed):
+  `theMomentBecomesANewTakeAtTheFansEndAndNothingElseMoves`, `anUnnamedMomentBringsBackAnUnlabelledTake`,
+  `itTouchesNothingAndChurnsNothingExactlyAsABranchDoes` (side by side with a branch),
+  `itRegistersNoUndoEntryExactlyAsABranchDoes` (side by side), `aSealedNoteRefuses`,
+  `aDeletedTakesMomentRefuses`, `aDeletedBlockRefuses`, `anUnknownCommitRefuses`,
+  `aLockedOrArchivedSourceStillBringsItsMomentBack`. No new `OperationError` case (the wire-refusal sweep
+  untouched); not wire-called (no MCP change). A NEW NAMED OPERATION → AppSpec §9 owes a line at closeout
+  (the plan's FOR THE CLOSEOUT already names it). DONE (this commit).
 - B2-6 the pane at rest: calm one-line rows that expand; explainers behind (i); header counts: NOT STARTED.
 - B2-7 read in full (the sheet) + Bring back as a take (the door, the receipt): NOT STARTED.
 - B2-8 restore says where it landed (the landing + the overlay wash): NOT STARTED.
