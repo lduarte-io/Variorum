@@ -1279,6 +1279,29 @@ chromeLabel idiom (:680/:921/:968/:1006). A fresh round re-reading a one-line di
   ids — a standing cross-suite pollution source (SF-3's test now protects itself; others don't); Tests &
   tooling.
 
+### vx440-reshoot (2026-10-28, claimed 07:52:43 → released 08:09:19 on the coordinator's GO; suites first, the walk on its "walk OK"; shots `.vx440-walk-shots/reshoot/`)
+
+- **Reds exact:** rb5 (`383954445`) RestoreLandingTests 8 ran, EXACTLY the two W-1 pins failed; rb6
+  (`92fb2f2d8`) 9 ran, EXACTLY the W-2 ORDER pin failed — the caret line green in-host, as predicted, so the
+  order line is the mechanism pin and the walk is the caret evidence. **Green at tip `3e0425ea3`: 122/122 in
+  11 suites, 0 restarts** (the 4 standing VX-665 warnings only).
+- **Re-shoot rows:** (a) Takes and (b) Lenses — W-1 WORKS-AS-RULED in both voices (the restored words at
+  once at +0.22 s, the ring off, the wash on the Takes road; no wash on Lenses by design). **(c) FINDING —
+  W-2 HALF-FIXED on use:** the order is right (burst: the sheet fades over the pre-restore text, closes,
+  THEN the words change) but the LANDING never fires on the sheet road — the caret stays at the block's END,
+  no wash to +1.55 s, both voices; the row-road CONTROL in the identical state landed at the START with the
+  wash at +0.23 s. The pin passes in-host (the host's dismissal timing evidently isn't the app's animated
+  one). **Batch 2's implementer resumed for ONE final bounded pass** (trace-or-ticket; the run's last fix
+  round). Incidental for the ladder's eye at closeout: the row road's wash box may cover only the first
+  visual line of a two-line block (`reshoot-c-7…f02` ctl crop) — cosmetic, judged with W-2's disposition.
+- **As-found notes, both resolved by the coordinator:** the Castle words calm-ask card above quick entry is
+  STANDING as-found (VX-648's walk-1 recorded it at 04:12), left untouched; Home's Trash rows from 07:41–42
+  (~14 field-guide lesson notes + "compare & versions — the twin") are VX-648's w2b walk content (its owned
+  field-guide delete), left untouched — VX-648 corrects its own record (the coordinator's word).
+- Teardown: the reshoot note to the Trash, two walk-added keys deleted by exact key, three launch-rewritten
+  values re-imported, prefs diff EXIT 0 (2599/2599), voice restored, nothing purged, app quit by bundle id,
+  her /Applications app never ran.
+
 ## THE WALK PLAN (claim `vx440-walk` — runs only after a green vx440-tests window, on the coordinator's GO)
 
 An Opus walker under the orchestrator's claim (cliclick + `Tools/WalkKit/`, the DEV-STORE Debug build
