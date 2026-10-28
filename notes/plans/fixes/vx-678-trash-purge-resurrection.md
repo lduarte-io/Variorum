@@ -113,9 +113,19 @@ Plan (the brief's order; A-678-1 binds A's shape):
 - U3-3 — C (VX-671), Trash multi-select with bulk Put back / Delete Now over the existing per-row roads; state-transition tests; app view-model tests WRITTEN, PENDING-run. NOT STARTED.
 - U3-4 — full headless `swift test`, `xcodebuild build-for-testing` (stage-free) at the very end, record + ledger flipped. NOT STARTED.
 
-Unit 3 revert state: **R-U3-1 ANNOUNCED, STARTING** — `Sources/VariorumCore/Queries/Trash.swift` ← its ba4987247 body (the old pair-set `strandedOriginals`/`originFamilyClocks`, nothing else differs), `TrashLineageP1Tests` run against it; restore = `git checkout -- Sources/VariorumCore/Queries/Trash.swift` (committed fix c546619a4). If this line still says STARTING, the tree may be mid-revert: `git diff` against HEAD shows it.
+Unit 3 revert state: **no behavioral revert in flight.** R-U3-1 (announced in its own commit before starting) DONE: `Trash.swift` ← its ba4987247 body (the old pair-set bodies) → `TrashLineageP1Tests` RED on exactly the pre-fix numbers — `strandedOriginals` **85,173 → 742,333**, `originFamilyClocks` **56,639 → 493,759** (both ×8.72 against the < ×3.9 bound), the Trash arm's library pin (growth 6,440 vs the block arm's 2,520) and plan pin (`SCAN e`) red, the 7 rows pins and the tray's two library guards green (an index-free rewrite moves no rows; those guards bind the rewrite's own failure mode) — 5 issues in 4 tests; RESTORED by `git checkout -- Sources/VariorumCore/Queries/Trash.swift` from c546619a4, `git status` clean, 13/13 green again (13,610 → 39,810; 11,777 → 34,937; 5,987 / 5,987; growth 2,520 = 2,520).
 
 ### UNIT 3 MEASUREMENTS
+
+**Table A — the two rewritten reads (Unit 2's gated probe, extended: `VX653_PROBE=1 swift test --filter VX653LineageProbeTests`; keyed on-disk store, corpus 200 × 20, the receipt state — the seam note's placed block just deleted; each cell = median wall ms · VM instructions; OLD = the pre-rewrite body verbatim, `LegacyTrashLineage`, its rows asserted EQUAL to the new body's at every R — all green).**
+
+| R | `strandedOriginals` NEW | `strandedOriginals` OLD | `originFamilyClocks` NEW | `originFamilyClocks` OLD | control `renderPost` |
+|---|---|---|---|---|---|
+| 100 | 4.11 ms · 78,180 | 60.44 ms · 2,050,198 | 1.93 ms · 58,096 | 42.33 ms · 1,363,064 | 0.36 ms · 3,435 |
+| 300 | 19.86 ms · 209,180 | 2,876.91 ms · 18,328,398 | 11.44 ms · 173,896 | 2,192.26 ms · 12,189,064 | 1.18 ms · 5,435 |
+| 600 | **108.70 ms** · 405,680 | 27,603.48 ms · 73,195,698 | **70.27 ms** · 347,596 | 18,381.57 ms · 48,678,064 | 6.43 ms · 8,435 |
+
+The bound beaten: the Trash arm 27.6 s → **108.7 ms** at R=600 (~254×), the tray's fates 18.4 s → **70.3 ms** (~262×); VM work LINEAR in the rounds — 78,180 → 209,180 → 405,680 (×2.68 for ×3 rounds, ×1.94 for ×2) and 58,096 → 173,896 → 347,596 (×2.99, ×2.00) — where the old bodies grew ×4 per doubling. The wall's residual step at 600 is the store's page cost, as Unit 2 showed (the `renderPost` control rises ~5× per VM instruction over the same span). The rest of the row (Unit 2's columns, re-measured in the same run): `originalsStrandedBy` live 82.1 ms / receipt 94.1 ms (old 24.4 s / 24.8 s), `preservedOriginals` 65.8 ms (9.0 s with v1_34's index dropped).
 
 **Table B — the three roads (`VX670_PROBE=1 swift test --filter VX670TrashRoadsProbeTests`; keyed on-disk store, corpus 200 × 20, the seam note's placed block deleted; wall ms).**
 

@@ -22,8 +22,10 @@
 //  · `trash arm` / `fam clocks` — `Queries.strandedOriginals` (the Trash's
 //    stranded-originals arm, which `Queries.trash` runs) and
 //    `Queries.originFamilyClocks` (the tray panel's held fates read), in
-//    the receipt state — NOT this unit's tickets; measured for Unit 3
-//    (VX-670), which builds on the Trash listing;
+//    the receipt state. Unit 2 measured them for Unit 3 (VX-670); Unit 3
+//    rewrote both (A-678-1) and extended the probe: each is now timed NEW
+//    beside its pre-rewrite body (`LegacyTrashLineage`, verbatim) with the
+//    rows asserted equal at every R (old timed up to VX653_LEGACY_MAX);
 //  · `control` — `Queries.renderPost` of the same note (20 live blocks), a
 //    read the seam history should not move: its WALL time shows what the
 //    store itself costs at each R (page cache, SQLCipher page decrypts),
@@ -180,7 +182,7 @@ struct VX653LineageProbeTests {
             var seam = live[10]
             let legacyMax = env("VX653_LEGACY_MAX", 600)
             print("VX653 corpus=\(posts)x\(blocks) (keyed on-disk); each cell = median wall · VM instructions")
-            print("VX653     R | stranded live NEW     | stranded live OLD     | stranded rcpt NEW     | stranded rcpt OLD     | preserved (v1_34)     | preserved (no index)  | trash arm (rcpt)      | fam clocks (rcpt)     | control renderPost")
+            print("VX653     R | stranded live NEW     | stranded live OLD     | stranded rcpt NEW     | stranded rcpt OLD     | preserved (v1_34)     | preserved (no index)  | trash arm NEW (rcpt)  | fam clocks NEW (rcpt) | control renderPost    | trash arm OLD (rcpt)  | fam clocks OLD (rcpt)")
             var done = 0
             for target in probeSteps {
                 for _ in done..<target {
@@ -203,7 +205,8 @@ struct VX653LineageProbeTests {
                 // The receipt's road: delete it, ask, put it back.
                 try ops.deleteBlock(seam)
                 let receipt: (new: Measure, old: Measure?, preserved: Measure, preservedOld: Measure,
-                              trashArm: Measure, famClocks: Measure, control: Measure) = try {
+                              trashArm: Measure, famClocks: Measure, control: Measure,
+                              trashArmOld: Measure?, famClocksOld: Measure?) = try {
                     let side: (Measure, Measure?) = try db.read { d in
                         var new: [String] = [], old: [String] = []
                         let n = try measure(d, runs: 3) { new = try Queries.originalsStrandedBy(d, blockIDs: [seam]) }
@@ -214,9 +217,29 @@ struct VX653LineageProbeTests {
                     }
                     let (preserved, trashArm, famClocks, control): (Measure, Measure, Measure, Measure) = try db.read { d in
                         (try measure(d, runs: 5) { _ = try Queries.preservedOriginals(d, postID: note.id, limit: 501) },
-                         try measure(d, runs: 1) { _ = try Queries.strandedOriginals(d, now: now, limit: 501) },
-                         try measure(d, runs: 1) { _ = try Queries.originFamilyClocks(d, postID: note.id, now: now) },
+                         try measure(d, runs: 3) { _ = try Queries.strandedOriginals(d, now: now, limit: 501) },
+                         try measure(d, runs: 3) { _ = try Queries.originFamilyClocks(d, postID: note.id, now: now) },
                          try measure(d, runs: 5) { _ = try Queries.renderPost(d, containerID: note.id) })
+                    }
+                    // VX-670 (Unit 3): the pre-rewrite bodies, verbatim, and
+                    // the rows asserted equal on this store.
+                    let (trashArmOld, famClocksOld): (Measure?, Measure?) = try db.read { d in
+                        let newArm = try Queries.strandedOriginals(d, now: now, limit: 501)
+                        let newFates = try Queries.originFamilyClocks(d, postID: note.id, now: now)
+                        #expect(newArm.count == 1, "the Trash arm lists the released second half")
+                        #expect(newFates.count == 1, "the tray reads its one clock")
+                        guard timeOld else { return (nil, nil) }
+                        var oldArm: [Queries.TrashItem] = []
+                        var oldFates: [String: Queries.OriginFamilyFate] = [:]
+                        let arm = try measure(d, runs: 1) {
+                            oldArm = try LegacyTrashLineage.strandedOriginals(d, now: now, limit: 501)
+                        }
+                        let fates = try measure(d, runs: 1) {
+                            oldFates = try LegacyTrashLineage.originFamilyClocks(d, postID: note.id, now: now)
+                        }
+                        #expect(newArm == oldArm, "R=\(target): the Trash arm answers the old rows")
+                        #expect(newFates == oldFates, "R=\(target): the tray answers the old fates")
+                        return (arm, fates)
                     }
                     try db.write { try $0.execute(sql: "DROP INDEX idx_cblock_dead_block") }
                     let preservedOld = try db.read { d in
@@ -228,13 +251,14 @@ struct VX653LineageProbeTests {
                               WHERE deleted_at IS NOT NULL
                             """)
                     }
-                    return (side.0, side.1, preserved, preservedOld, trashArm, famClocks, control)
+                    return (side.0, side.1, preserved, preservedOld, trashArm, famClocks, control,
+                            trashArmOld, famClocksOld)
                 }()
                 _ = try ops.restoreBlock(seam)
                 print("VX653 \(String(format: "%5d", target)) | \(cell(liveSide.new)) | \(cell(liveSide.old)) | "
                       + "\(cell(receipt.new)) | \(cell(receipt.old)) | \(cell(receipt.preserved)) | "
                       + "\(cell(receipt.preservedOld)) | \(cell(receipt.trashArm)) | \(cell(receipt.famClocks)) | "
-                      + "\(cell(receipt.control))")
+                      + "\(cell(receipt.control)) | \(cell(receipt.trashArmOld)) | \(cell(receipt.famClocksOld))")
             }
         }
     }
