@@ -2643,13 +2643,22 @@ enum TutorialSeeder {
             // OWED; `editTakeUnderInsurance`'s dedupe). VX-596 (her ruling
             // 2026-10-27, "let's add the star over the wire"): the new act
             // taught where its rung's acts are named (VX-197's truth-pass rule).
+            // VX-367 (the VX-648 run, batch 2 — VX-336's D6 row 14, her "should be
+            // done"): the eight acts the card covered only by its general sentence
+            // are named one by one — locking a take, renaming a commit, deleting a
+            // lens, naming a block, putting back from the tray, setting a note's
+            // date, restoring a deleted comment, taking a note out of a book — and
+            // VX-639's gatherings join the library's acts. PROVISIONAL words.
             "Edit: it can also do most of what you can do at the keyboard. In a "
-            + "note, it can change, choose, commit, archive or delete takes, restore "
-            + "a commit, make a lens the note, add blocks anywhere, divide, merge, "
-            + "move or delete blocks, and edit or delete any comment. Across the "
-            + "library, it can take a tag off a note, star, unstar, rename, archive "
-            + "or delete notes and books, finish or reopen a book, reorder a book's notes and "
-            + "chapters, and rename or delete a chapter. When it rewrites the words "
+            + "note, it can change, choose, commit, lock or unlock, archive or "
+            + "delete takes, restore a commit or rename it, make a lens the note or "
+            + "delete a lens, add blocks anywhere, divide, merge, move, name or "
+            + "delete blocks, put a deleted block or take back from the note's tray, "
+            + "set the note's date, and edit, delete or restore any comment. Across "
+            + "the library, it can take a tag off a note, take a note out of a book, "
+            + "star, unstar, rename, archive or delete notes, books and gatherings, "
+            + "finish or reopen a book, reorder a book's notes and chapters, and "
+            + "rename or delete a chapter. When it rewrites the words "
             + "of a take, Variorum first commits the words it replaces, unless the "
             + "take's latest commit already holds them, and then commits the new "
             + "words, so you can always compare and come back. Both commits stay "
