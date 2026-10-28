@@ -664,14 +664,19 @@ Pieces (flipped per commit):
   menus without "Show take ▸", a scratch column's with it. `BlockHistoryCommitsCaptureTests` (disabled
   capture harness, VX-144's) can re-shoot the pane in both voices if the trait is dropped for a run.
 
-- Batch 3 (gathering faces): IN PROGRESS — implementer (Opus) 2026-10-28; UNIT RECORD below.
+- Batch 3 (gathering faces): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + the two red-on-old Mac runs + walk PENDING the stage window; UNIT RECORD below.
 
 ### Batch 3 — UNIT RECORD (gathering faces: VX-611 · VX-616 · VX-189 · rider VX-356)
 
-**Not done by this unit (first line, per the contract):** IN PROGRESS — this line is rewritten at the unit's
-close. Headless lane only (`swift build` / `swift test` / `xcodebuild build-for-testing` into
-`App/Variorum/DerivedData/vx440-b3`); every Mac pin's RUN and every walk capture are the orchestrator's stage
-window.
+**Not done by this unit (first line, per the contract):** nothing run on the stage — every Mac pin below is
+WRITTEN AND COMPILED (`build-for-testing` into `App/Variorum/DerivedData/vx440-b3`, cloned from
+`vx440-merge` by APFS clone) with its RUN, the two red-on-old Mac runs (VX-611 at `7715a4a3d`, VX-356 at
+`0d963ce22`) and every walk capture PENDING for the orchestrator's stage window; the core pins RAN headless
+(VX-189's fence pin red on the pre-fix query, then green). NOT compiled for iOS (the shared
+`RecoveryCopy.swift` / `RecoveryActs.swift` gained only defaulted parameters and one overload; the core
+`TrashItem` init a defaulted parameter — the phone's calls are unchanged in source). No canon / QUESTIONS /
+AppSpecRecord edits (the closeout's — drafted below). The guide's MCP lesson 5 card was NOT touched
+(`TutorialSeeder.swift` is VX-648's seam this window — see the concerns).
 
 *Read in this session's own context before any code: CLAUDE.md + its canon, THIS FILE in full,
 `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` (The app · The Bookcase and books · Doors to the
@@ -800,9 +805,148 @@ Pieces (flipped per commit):
   attribute (P-8); drawn inside the row's own frame (the grip slot is its leading air — VX-562's `washBleed`
   NOT ported: the panel's scroll/row geometry is untouched), so no word, row or drop site moves. Token-only,
   no literal colour. PROVISIONAL P-440-12 (the face is hers). The two B3-6 Study legs turn GREEN at this
-  commit (RUN PENDING); `build-for-testing` ✓, no new warning in a touched file. IN THIS COMMIT (the fix:
+  commit (RUN PENDING); `build-for-testing` ✓, no new warning in a touched file. DONE (8505d937f — the fix:
   the green-on-new SHA).
-- B3-8 verification (headless) + the record closed: NOT STARTED.
+- B3-8 verification (headless) + the record closed: `xcodebuild build-for-testing` (scheme Variorum,
+  platform=macOS, `DerivedData/vx440-b3`) ✓ TEST BUILD SUCCEEDED at the final tree (`8505d937f`; this
+  record's commit changes no code); no new warning in a touched file (ShelfView's `Text +` deprecations at
+  :362/:813 are pre-existing lines; the clone's "Stale file … outside the allowed root paths" lines are the
+  clone's, harmless). Core `swift test` (full) — VariorumCoreTests **3500 tests / 467 suites PASSED** (5
+  known issues, standing — batch 2's 3498 + this batch's 2), StringsWorkbook 32/4 PASSED, VariorumMCPTests
+  431/79 with ONE failure, the standing load flake (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswers
+  InitializeFailsTheConnectNamedAndBounded`, 28 s vs its 15-s bound under the full run) — re-run ALONE: 3/3
+  PASSED in 2.2 s (no MCP-target code touched). DONE (this commit).
+
+**Batch 3's rows, dispositioned:**
+- VX-611 (Bug, Wording, Confirmed): FIXED — a gathering's row door reads "Delete Gathering…" (the Bookcase
+  row's menu, `BookRowMenu`, the Archived group's button; the rule editor's gate hover "Delete Gathering"),
+  the ONE capability kept (P-1); the Trash calls a deleted gathering a gathering (row word, Delete Now confirm
+  + receipt, Put back's plain receipt; its Put back hover). Pins `GatheringKindWordTests` (4 words pins
+  committed RED on `7715a4a3d`, fixed at `fe94dbbd7`; a renderer guard) + core
+  `TrashAndArchiveTests.aDeletedGatheringRowsOnTheBookArmAndKnowsItIsAGathering` (green). RED/GREEN Mac runs
+  PENDING.
+- VX-616 (Improvement, RULED): BUILT — the gathering foot's "+ new chapter" and its hover removed
+  (`486d05c5d`); the follow-up no road reached retired (`94a1486fd`). Design-row pin
+  `BookFootDoorsTests.aGatheringsFootIsTheNoteDoorAloneAndABookKeepsItsChapterDoor` + the walk's capture.
+- VX-189 (Feature, MCP — repurposed): BUILT — book parity: Book Settings' Shared-with row on a gathering, the
+  row menus' Share with AI… on a gathering, both opening THE grant sheet on the gathering (`f4aaef4a9`).
+  No wire / grant-semantics / reach change; Private, Seal, Own untouched. Pins: core `MCPShareTests
+  .theFencedSetNamesTheGatheringsTheSheetNeverOffers` (red headless on the old query → green); Mac
+  `MCPShareFacesTests` (three flips + two new), RUNS PENDING.
+- VX-356 (Improvement, Suspected → CONFIRMED by trace): FIXED — Study marks the open note's collapsed chapter
+  row with the navigator's viewed-chapter fill + ink; Terminal keeps its ›. Pins
+  `BookPanelOpenNoteMarkTests` (both committed RED on `0d963ce22`, fixed at `8505d937f`), RUNS PENDING. Not
+  hollow, not by design (the design's own premise — weight and ink say it — has nothing to say with on a
+  chapter row).
+
+**PROVISIONALs this unit adds (for the closeout's QUESTIONS bundle):**
+- **P-440-11 (VX-189 wording):** a gathering's Shared-with row, unshared, reads "No client reaches this
+  gathering." (the book's "…this book." kept). Options: (a) as built; (b) one kind-neutral sentence for
+  both ("No client reaches this yet.").
+- **P-440-12 (VX-356's Study face):** the open note's collapsed chapter row in Study wears the navigator's
+  viewed-chapter face (VX-562's accent fill at 0.22 behind the row, the name in ink), inside the row's frame
+  (no bleed). Options: (a) as built; (b) the name in ink only, no fill (quieter; reads as "different", less
+  as "here"); (c) a Study glyph on that row only (e.g. a small accent dot — a new token, both platforms'
+  theme file); (d) the fill ALSO in Terminal beside its ›.
+- **P-440-13 (VX-611's extent + one hover):** the kind word reaches every sentence the Trash says about the
+  row in hand (its word, Delete Now's confirm and receipt, Put back's plain receipt), the Archived group's
+  delete button and the rule editor's gate hover — beyond the ticket's two named sightings, by the same one
+  rule; the Trash row's Put back hover on a gathering reads "The gathering comes back with its rule" (the
+  book's "chapters and membership included" was false of a gathering). NOT changed (counts, not a row's
+  word): the kind filter's "Books" and Empty Trash's count ("1 book" counts a gathering among the
+  readings, as its filter does). Options for the counts: (a) as built; (b) Empty Trash names gatherings
+  apart ("1 book, 1 gathering").
+
+**For the reviewer / the orchestrator (concerns, not forks — nothing here stopped the build):**
+1. **B3-4 is a cleanup beyond the ruled removal**, in its own commit so it can be weighed apart: the
+   `.createChapter` bind follow-up had no road left once the door went (the teaching offer and the Bookcase's
+   bind pass none). Retired whole; the bind's own words and live roads byte-unchanged; four justified pin
+   edits. Revertible alone if the ladder prefers the machinery parked.
+2. **VX-611 reaches two renderers the ticket did not name** (the Archived group's button, the rule editor's
+   gate hover) and the Trash's row-scoped sentences — the same one rule, so a row never says "gathering" in
+   one place and "book" in the next (P-440-13). The registry's declared verb stays "Delete Book" (P-1: one
+   capability; the kind chooses the drawn words, as `CollectingCopy.openVerb(isBook:)` already did for
+   Book/Gathering Settings…).
+3. **VX-189's fence read grew** (`Queries.mcpFencedBookIDs` names fenced gatherings): a core query, not the
+   grant op (whose gathering arm already refused a fenced gathering on the same facts). Its other reader, the
+   Bookcase's held sharing snapshot (`ShelfViewModel`), only gains the same truth.
+4. **VX-189 left the guide's MCP lesson 5 card as it is** ("Right-click a note in the Library, or a book on
+   the Bookcase or in the Library, and choose Share with AI…" — true, now incomplete for gatherings):
+   `TutorialSeeder.swift` is VX-648's seam this window; a copy-pass line (VX-234) or the closeout's, not a
+   defect.
+5. **VX-356's adjacent remainder (NOT touched — one surface):** the book NAVIGATOR's collapsed one-note
+   chapter row has the same Study gap outside Outline (`NavigatorChapterLabel` draws the note mark as the
+   glyph only) — a ticket candidate (Books · Improvement · Confirmed by trace).
+6. The fill's contrast on the panel's `surface` (not the room VX-562 measured against) is a walk-check item
+   (both voices, light and dark, a palette or two).
+7. MOBILE PARITY candidates: the phone's book-details "Delete Book…" door (`MobileShelfFaces
+   .deleteBookDoorTitle`) on a gathering, if the phone lists gatherings there — VM's own pass; the shared
+   Trash words already reach the phone (its accessibility labels and receipts ride `RecoveryCopy`). The phone
+   has no Book Panel and no MCP faces.
+
+**Canon owed at the closeout (DRAFTED — not applied; the two-file rule):**
+- **SurfaceContracts, The Bookcase and books — the Delete bullet:** "…rows Open, Unarchive, Delete Book…
+  (never Delete on the daily Journal)" → add "— Delete Gathering… on a gathering, everywhere the door draws
+  (the one capability's verb by kind; VX-611)"; and after "The Trash row says “and N notes”" add "a deleted
+  gathering's row, its Delete Now and its receipts call it a gathering (VX-611)".
+- **SurfaceContracts, The book settings sheet:** add "Its Shared-with row (who reaches it, with Share…) draws
+  on a book and a gathering alike — only while a client is approved and a grant can land — and Share… opens
+  the grant sheet on that place (VX-189; `notes/MCPSpec.md`)."
+- **SurfaceContracts, The Book Panel:** add "the open note marked in both voices — on a collapsed one-note
+  chapter row, Study wears the navigator's viewed-chapter fill (VX-356, PROVISIONAL P-440-12)".
+- **SurfaceContracts, The Bookcase and books (the book's mode row / navigator):** add "A gathering's navigator
+  foot carries “+ new note” only; binding is the row menu's Bind into a Book… and the hand-drag's teaching
+  offer (VX-616)."
+- **MCPSpec, the gathering-place paragraph (VX-549's):** add "**A gathering's own place doors (VX-189 — her
+  word 2026-10-28, superseding P-VX185-2 and MB-18):** Book Settings' Shared-with row and the row menus'
+  Share with AI… draw on a gathering as on a book, opening THE grant sheet on the gathering (nothing
+  replaced; the fence and VX-272's approved-client gate as a book's) — faces only, no wire or reach change."
+- **The dated entry + narrative → `notes/AppSpecRecord.md`** (her VX-616 ruling and VX-189 repurpose in her
+  words; the VX-611 trace; VX-356's verdict).
+
+**Stage-window run list (the orchestrator's; suite TYPE names, built as a zsh array; compare "Executed N"):**
+- RED-ON-OLD at `7715a4a3d`: `-only-testing:VariorumTests/GatheringKindWordTests` — 5 tests, EXPECT 4
+  FAILURES (`theRowsDeleteDoorSaysGatheringOnAGatheringAndBookOnABook`, `theTrashCallsADeletedGathering
+  AGathering`, `aDeletedGatheringsDeleteNowAsksAndAnswersInItsOwnKind`, `aPutBackGatheringSaysGathering
+  PutBackAndABookStillSaysBook`), the guard `everyRowRendererOfTheDeleteDoorChoosesItsWordsByKind` passing.
+- RED-ON-OLD at `0d963ce22`: `-only-testing:VariorumTests/BookPanelOpenNoteMarkTests` — 2 tests, EXPECT 2
+  FAILURES (each on its Study leg: `.fill` expected, `.none` drawn); the Terminal legs pass.
+- GREEN at the batch tip (`@Test` declarations per touched file): `GatheringKindWordTests` (5) ·
+  `BookPanelOpenNoteMarkTests` (2) · `BookFootDoorsTests` (3) · `MCPShareFacesTests` (20) · `BindDoorTests`
+  (11) · `VocabularySweepTests` (19) · `BookOrderConversionTests` (13); the neighbours `TrashBookNotesTests`
+  · `TrashSurfaceTests` · `TrashPoolHonestyTests` · `TrashPurgeDoorsTests` · `TrashConfirmEdgeTests` ·
+  `TrashPurgeSharedLayerTests` · `SnippetGroupTrashTests` · `IAAndTrashShapeTests` (the Trash words' roads) ·
+  `BookRowMenuTests` · `BookDeleteAndDuplicateTests` · `TutorialBooksLessonTests` ·
+  `TutorialBooksRitualTests` (`deleteVerb`) · `BookPanelBrainTests` · `BookPanelDeclarationTests` ·
+  `BookPanelActingTests` · `BookPanelMCPMarksTests` · `BookPanelDragGateTests` · `BookOutlineViewedTests`
+  (the fill's token maths) · `MCPGatheringGrantFacesTests` · `MCPGatheringIconTests` · `MCPGrantSheetTests`
+  · `CapabilityRegistryTests` (the walk — no declaration changed).
+- Walk rows (both voices; a client approved for the VX-189 rows): (1) a gathering's right-click on the
+  Bookcase, in the Library's Books section and in Archived → "Delete Gathering…" (a book's "Delete Book…");
+  delete one → the Trash row says "gathering", its Delete Now asks "Delete this gathering for good?", Put
+  back says "Gathering put back."; (2) a gathering open → the navigator's foot shows "+ new note" only (a
+  book's keeps "+ new chapter"); the row menu still offers Bind into a Book…; a hand-drag still offers the
+  bind; (3) Gathering Settings… → the "Shared with" row ("No client reaches this gathering." → Share… → the
+  grant sheet with WHERE = the gathering → grant → "Shared with ‹client› (…)"); the gathering's right-click
+  → Share with AI… → the same sheet on the gathering; (4) a note that is a chapter's only note (named as its
+  chapter) open with the Book Panel up: Study → the row washed, its name in ink; Terminal → the ›.
+
+**Files touched (this batch):** Core `Sources/VariorumCore/Queries/Trash.swift` (`TrashItem.isGathering`,
+the book arm's `kind`) · `Sources/VariorumCore/Queries/MCPGrantQueries.swift` (`mcpFencedBookIDs`). App:
+`App/Variorum/Shared/RecoveryCopy.swift` · `App/Variorum/Shared/RecoveryActs.swift` ·
+`Variorum/Core/Views/BookRowMenu.swift` · `Variorum/Core/Views/MCPShareRoad.swift`
+(`MCPGrantPrefill.reading`, `MCPShareCopy.notShared(_:)`) · `Variorum/Features/BookView/BookPanelModel.swift`
+· `BookPanelView.swift` · `BookSettingsSheet.swift` (the grant row's gate, caption and opening; the
+`isGrantable` read — NOT the Private row, VX-648's) · `BookStructureModel.swift` · `BookView.swift` (the
+gathering foot, the bind sheet's follow-up branch) · `Variorum/Features/Library/ArchivedView.swift` ·
+`RecoveryView.swift` · `Variorum/Features/Readings/BookOrderAndConversion.swift` · `BookStateDoors.swift` ·
+`RuleEditor.swift` · `Variorum/Features/Shelf/ShelfView.swift` · `Variorum/Registry/Capability.swift` (one doc
+line) · `Variorum/Registry/CapabilityRegistry.swift` (`.bindIntoBook`'s comment only). Tests: NEW Mac
+`GatheringKindWordTests.swift`, `BookPanelOpenNoteMarkTests.swift`; edited Mac `MCPShareFacesTests.swift`,
+`BookFootDoorsTests.swift`, `BindDoorTests.swift`, `VocabularySweepTests.swift`,
+`BookOrderConversionTests.swift` (comments); core `TrashAndArchiveTests.swift`, `MCPShareTests.swift`.
+Commits: `3b5e40b99` · `7715a4a3d` · `fe94dbbd7` · `486d05c5d` · `94a1486fd` · `f4aaef4a9` · `0d963ce22` ·
+`8505d937f` · this record's commit.
 
 - Ladder: NOT STARTED.
 - Stage windows: EARLY request sent to oct27coordinator (suite runs + end-of-run walk); none READY yet.
