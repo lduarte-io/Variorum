@@ -263,7 +263,26 @@ is built provisionally per the above).
 
 - Kickoff: DONE — members listed from Linear sub-issues, canon read (MCPSpec + SurfaceContracts in full),
   worktree seated, in-flight row pushed, coordinator announced, sitting held, rulings recorded above.
-- Batch 1 (versions & Compare): NOT STARTED — brief below is ready.
+- Batch 1 (versions & Compare): IN-PROGRESS — implementer (Opus) seated 2026-10-28; UNIT RECORD below.
+
+### Batch 1 — UNIT RECORD (versions & Compare: VX-130 · VX-437 · VX-432)
+
+**Not done by this unit (first line, per the contract):** nothing run on the stage — every Mac-suite pin below
+is WRITTEN AND COMPILED (`build-for-testing` into `App/Variorum/DerivedData/vx440-b1`) with its RUN, and every
+red-on-old Mac verification, PENDING for the orchestrator's stage window; no walk captures (headless brief).
+
+Pieces (flipped per commit):
+- B1-0 record skeleton: DONE (this commit).
+- B1-1 VX-437 live check (trace + pins): IN-PROGRESS.
+- B1-2 core: saved-version stamps query (newest-first, the one classifier) + its pins: NOT-STARTED.
+- B1-3 Compare: auto-fill order (P-440-2) · version columns show the DATE · unmark on a saved version = the
+  promote confirm (P-440-5): NOT-STARTED.
+- B1-4 doors: Versions row "Compare with now" + the registry act "Compare with Latest Version" (File ·
+  note ▾ · ⌘K, rendered only while the note has a saved version): NOT-STARTED.
+- B1-5 full size: a Versions row's "Open full size" → the version on Read's calm page with the identity band
+  (Back to the note · Promote to a regular note…), no mode row, ⌘⇧S grey, no per-note memories (P-440-1):
+  NOT-STARTED.
+- B1-6 Mac pins compiled (`build-for-testing`), core suite green: NOT-STARTED.
 - Batch 2 (Block History): NOT STARTED.
 - Batch 3 (gathering faces): NOT STARTED.
 - Ladder: NOT STARTED.
