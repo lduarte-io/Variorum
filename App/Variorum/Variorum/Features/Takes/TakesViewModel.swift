@@ -2649,6 +2649,9 @@ final class TakesViewModel {
             if opening {
                 openExpansionMemory()
             } else if !newValue {
+                // Unreachable today (nothing sets the flag back to false;
+                // teardown doesn't) — kept as the symmetric arm so any future
+                // un-landing road detaches the sink instead of leaking it.
                 board.expansionSink = nil
             }
         }
