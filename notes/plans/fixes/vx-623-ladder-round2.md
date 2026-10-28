@@ -71,14 +71,22 @@ stage, no GUI, no containers.
   green), and the helper `expect`'s accept-path email-hiding line (read, looks right — walk's expect
   has the same `[[ $got == refuse ]] || why=` line, verified at :266).
 
-## Findings 3–5 and the gate — NOT YET RE-CHECKED (next on resume)
+*(Resumed 2026-10-27 by the round's closing reviewer at tip `79c8734a9`; findings 1–2's verdicts
+above stand as committed.)*
 
-- Finding 3 (release.sh step-0 sentence, `33de94d33`): verify the sentence is the final call's
-  verbatim minus backticks, and the unquoted-heredoc reason (an unquoted `cat <<EOF` executes a
-  backtick); `bash -n`.
-- Finding 4 (exit-grammar NIT + fenced-subprocess pin, `e50ea8fb6`): verify the refuse-shaped fix in
-  both files and the pin's three fences; demonstrate old exit 1 under the fence.
-- Finding 5 (J3/J3b, `bcac53925`): verify the call site and dry-run plan line.
-- The after-fix gate fresh at the tip: walk `--self-test` 72/72 · helper 90/90 · D-7 pin 0/11 ·
-  `zsh -n` ×5 · `bash -n` · `swiftc` ×3; then the whole-diff sweep for new BLOCKER/MAJOR, clean
-  bill, verdict.
+## Finding 3 · [MINOR] release.sh "Arms one at a time" — FIX VERIFIED (`33de94d33`)
+
+- **The sentence is the final call's verbatim minus backticks** (release.sh:329–330): "--arm join
+  alone resumes a both run that stopped in the join arm (it needs that run's Standard vault);
+  --arm setup alone also ends with the cleanup reset." — compared word for word against the binding
+  text; the only delta is the dropped code marks.
+- **The deviation reason HOLDS, checked mechanically:** the HANDOFF block is `cat <<EOF` at
+  release.sh:319 — UNQUOTED, and necessarily so (it expands `${VERSION}`, `${BUILD}`, `${FEED}`,
+  `${DMG_SHA}` at :320/:332–342). In an unquoted heredoc a backtick runs as command substitution,
+  so dropping the marks is correct, not cosmetic. I counted backticks over both heredocs
+  (:319–343, :346–352): **0**.
+- **The premise still stands at the tip:** the lone-`--arm join` road refuses as described —
+  `join_ready`'s "the account holds no vault — the set-up arm makes it (run --arm both)"
+  (first-run-walk.sh:208).
+- **`bash -n` on release.sh: clean** (my own run at the tip).
+- No pin — document text, per the final call. Correct disposition.
