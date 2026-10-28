@@ -309,6 +309,22 @@ PROVISIONALLY. No process of this window survived it (pgrep strict forms clean, 
 the claim was released with the incident reported. NOTHING in this window pressed Resume Sync or
 opened the store by hand.
 
+**CORRECTION (the coordinator's own check, ~20:20 — the orchestrator's slot reading was WRONG).**
+(1) The dev slot is `…/Application Support/Variorum-dev/` and is INTACT — store 27,856,896 bytes,
+-wal/-shm present, `variorum-restore-hold.json` (Oct 20) and key files in place; last write 20:05
+by this window's own test hosts. The Sep-25 397KB file this record's file-facts paragraph describes
+is `Application Support/Variorum/` — a RELIC folder, untouched (nothing wrote it); the parent's
+19:02 mtime was vx-623's walk restoring itself (18:53–19:07, 197/197 cmp-verified). NOT a
+dev-store incident; nothing for her to rule. (2) The rev421/rev248 launch deaths are a RIG/TREE
+fact: their logs show 22× "@Dependency(\.date) has no test implementation… accessed from a test
+context" before each fatal — in the REVERTED trees the pins reach the LIVE `database`/`date`
+dependencies, whose live road opens the relic path and fatals. The pre tree did not show this, so
+the question is why the partially-reverted trees differ (a dependency access outside the test's
+scope on the old code paths — e.g. a torn-down pane's escaped callback — or the trees built
+differently). Handed to the batch A implementer as a narrow rig diagnosis: fix the RIG or the
+tree-build road, never production code without a trace; rebuild the revert trees; the red runs
+then re-run in a fresh window.
+
 **R-601-1 (VX-421, the ⌘Z meaning):** per-pane undo managers — her pick of the recommended arm.
 Each take pane owns its `UndoManager`; ⌘Z undoes only the pane the cursor is in; a deleted take's
 history goes with its pane by construction. The shared-history-cleared-at-teardown arm is the
