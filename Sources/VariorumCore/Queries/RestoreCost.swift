@@ -152,9 +152,14 @@ extension Queries {
                   -- a completed one fences only the tombstone it covered, and
                   -- a voided one (a Put back, then a re-delete) never hides
                   -- the fresh tombstone.
+                  -- VX-331: and only while it is on the 30-day clock — the
+                  -- listing's own window (`deletedTakes`, `>=` so the edge
+                  -- belongs to the take). Past it no door offers Put back,
+                  -- so it is not "waiting in Block History" either.
                   (SELECT COUNT(*) FROM variant v
                     WHERE v.block_id IN (SELECT value FROM json_each(:ids))
                       AND v.deleted_at IS NOT NULL
+                      AND v.deleted_at >= :cutoff
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
                         WHERE pi.table_name = 'variant' AND pi.row_id = v.id
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))
@@ -170,7 +175,7 @@ extension Queries {
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= bc.deleted_at))
                   ) AS deleted_comments
                 """,
-            arguments: ["ids": ids])
+            arguments: ["ids": ids, "cutoff": TrashWindow.cutoffStamp(now: now)])
 
         let originals = try setAsideOriginals(db, family: Set(outgoing))
         let takes = originals.isEmpty ? 0 : (try Int.fetchOne(

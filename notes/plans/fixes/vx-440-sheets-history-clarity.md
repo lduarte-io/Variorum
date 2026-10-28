@@ -444,7 +444,10 @@ Pieces (flipped per commit):
   one inside; the count equals `deletedTakes`' listing at that moment; the `>=` edge counts) — RUN RED
   headless on this commit: 3 issues (`cost.deletedTakes == 1` read 2; `== listed.count` 2 vs 1; the
   edge ask 2). DONE (this commit — the PRE-FIX tree).
-- B2-2 VX-331 fix (the 30-day window in `restoreCost`): NOT STARTED.
+- B2-2 VX-331 fix (the 30-day window in `restoreCost`): the population-2 subselect gains
+  `v.deleted_at >= :cutoff` (`TrashWindow.cutoffStamp(now:)`, the listing's `>=`). The B2-1 pin RUN GREEN
+  headless (`RestoreCostTests` + `NoteVersionsTests`: 39 tests / 2 suites passed). The Mac face reads
+  through `VersionActs.restoreCost` (session clock) — unchanged words. DONE (this commit — the fix).
 - B2-3 VX-244 traces (both arms) + red-on-old Mac pins (the cell menu made inspectable, behaviour unchanged): NOT STARTED.
 - B2-4 VX-244 fix: NOT STARTED.
 - B2-5 core: bring a commit back as a take (the op, mirroring `branchVariant`'s posture) + state-transition tests: NOT STARTED.
