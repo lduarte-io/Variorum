@@ -57,6 +57,7 @@ Application notes (the skill's precisions) bind too: P-1's scope is the ROUTED v
 - **VX-601** (live, in its batch-C windows → Fable ladder → merge → a RELEASE at her word): the editor seam (`PaneTextView`, `EditorTextView`, `PaneSurface`, the Takes board). Batch 1 (VX-647/649) is the likely collision; the coordinator asked to be told EARLY which editor files batch 1 touches — the batch-1 implementer reports its touched-file list as soon as the trace names them, and the orchestrator forwards it.
 - Shared ledgers (master plan, TICKETS.md, QUESTIONS.md, AppSpecRecord) are touched only at merge moments, on latest main, by the merging session. The in-flight row landed at kickoff (commit on main).
 - **Migration number v1_34 is RESERVED to this run** (oct27coordinator, 2026-10-28): any other branch minting a migration this week takes v1_35+ and merges after us; neither VX-601 nor VX-440 declares a schema change. The release that carries this run states "local-only migration v1_34" as a release fact (a closeout-handoff line).
+- **VX-601 MERGED FIRST (PR #200, main at b3b1041aa + ledgers e07a4e65f; coordinator, 2026-10-28 ~03:30):** ZERO file overlap with this run's diff so far. OWED before this run's merge ask: merge main IN (never rewrite the pushed branch) at a batch seam — no overlap suites owed unless later batches create overlap. vx-601's 0.10.4 release window runs at our leg-1 SEAM; our walk is first in line after it.
 
 ## Stage protocol (oct27coordinator, 2026-10-28)
 
