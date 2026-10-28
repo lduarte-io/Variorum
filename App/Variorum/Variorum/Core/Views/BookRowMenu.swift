@@ -208,8 +208,9 @@ struct BookRowMenu: View {
                 }
             case .state(let act):
                 if act == .deleteBook {
-                    Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}",
-                           role: .destructive) {
+                    // VX-611: the verb chosen by the kind (one capability). A
+                    // state door draws only with the facts in hand (the table).
+                    Button(BookStateCopy.deleteDoorLabel(reading?.kind ?? .book), role: .destructive) {
                         Task { await doors.open(.deleteBook, readingID: readingID) }
                     }
                 } else if act == .archiveBook, let reading {

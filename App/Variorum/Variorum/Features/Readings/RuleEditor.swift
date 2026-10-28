@@ -523,7 +523,8 @@ struct RuleEditorSheet: View {
                         Task { await model.stateDoors.open(.deleteBook, readingID: model.readingID) }
                     }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
-                    .help(CapabilityRegistry.capability(.deleteBook).verb)
+                    // VX-611: the gate is a gathering's — its kind's verb.
+                    .help(BookStateCopy.deleteVerb(.gathering))
                 }
             }
             HStack {

@@ -293,7 +293,8 @@ struct ArchivedView: View {
                 ForEach(BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading))
                     .filter { $0 != .archiveBook }, id: \.self) { act in
                     if act == .deleteBook {
-                        Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}") {
+                        // VX-611: the verb chosen by the kind (one capability).
+                        Button(BookStateCopy.deleteDoorLabel(reading.kind)) {
                             Task { await doors.open(.deleteBook, readingID: reading.id) }
                         }
                         .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))

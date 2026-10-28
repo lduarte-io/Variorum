@@ -965,7 +965,8 @@ struct ShelfView: View {
         ForEach(BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading))
             .filter { $0 != .unarchiveBook }, id: \.self) { act in
             if act == .deleteBook {
-                Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}", role: .destructive) {
+                // VX-611: the verb chosen by the kind (one capability).
+                Button(BookStateCopy.deleteDoorLabel(reading.kind), role: .destructive) {
                     Task { await model.stateDoors.open(.deleteBook, readingID: reading.id) }
                 }
             } else {

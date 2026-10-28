@@ -679,8 +679,28 @@ outside), `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md` (MB-18, MB-19, 
 `notes/SessionResiliencyProtocol.md`, and the code anchors the brief names. No subagent.*
 
 Pieces (flipped per commit):
-- B3-0 record skeleton: IN THIS COMMIT.
-- B3-1 VX-611 seams + red-on-old pins (behaviour unchanged): NOT STARTED.
+- B3-0 record skeleton: DONE (3b5e40b99).
+- B3-1 VX-611 trace + seams + red-on-old pins (behaviour unchanged): VERDICT — REAL, both halves, traced.
+  (a) THE ROW'S DOOR: `.deleteBook` is ONE capability whose declared verb is the book's
+  (`BookStateCopy.deleteVerb` = "Delete Book"); every renderer of its door on a ROW glued that verb to an
+  ellipsis — `BookRowMenu` (:211 — the Library List's Books section, the sidebar's Starred book rows, the
+  Archived books group's right-click), the Bookcase row's context menu (`ShelfView.bookMenu` — the VX-620
+  walker's W-4 sighting), the Archived books group's own button (`ArchivedView.bookRow`) — and the rule
+  editor's gathering gate hovered the same verb; the confirm a gathering's door opens already said
+  "Delete Gathering" (`BookStateCopy.deleteGathering`). (b) THE TRASH: `Queries.trash`'s book arm reads
+  `reading` rows of either kind into ONE `.book` kind with no kind fact, so `RecoveryCopy.rowKind(item)` (the
+  one row rule, the phone's accessibility labels included) answered "book"; the row's Delete Now confirm
+  ("Delete this book for good?"), its receipt ("The book is gone…") and the plain Put back receipt ("Book
+  put back.") read the same `.book` kind. Seams (words unchanged): `BookStateCopy.deleteVerb(_:)` /
+  `deleteDoorLabel(_:)` (the book's words for both kinds at this commit) — the four renderers draw through
+  them; core `Queries.TrashItem.isGathering` (defaulted init parameter; the book arm selects the row's own
+  `kind` in the same statement). Pins: core `TrashAndArchiveTests.aDeletedGatheringRowsOnTheBookArmAndKnows
+  ItIsAGathering` (the seam's fact — RUN GREEN headless); Mac NEW `GatheringKindWordTests` (compiled ✓
+  `build-for-testing` into `DerivedData/vx440-b3`, RUNS PENDING): `theRowsDeleteDoorSaysGatheringOnAGathering
+  AndBookOnABook` · `theTrashCallsADeletedGatheringAGathering` · `aDeletedGatheringsDeleteNowAsksAndAnswersIn
+  ItsOwnKind` · `aPutBackGatheringSaysGatheringPutBackAndABookStillSaysBook` — RED ON OLD at this commit (the
+  words are still the book's) — and the guard `everyRowRendererOfTheDeleteDoorChoosesItsWordsByKind` (green
+  both sides by design). IN THIS COMMIT (the PRE-FIX tree: the red-on-old SHA).
 - B3-2 VX-611 fix (the kind word): NOT STARTED.
 - B3-3 VX-616 the gathering foot loses "+ new chapter": NOT STARTED.
 - B3-4 VX-616 the unreachable `.createChapter` bind follow-up retired: NOT STARTED.

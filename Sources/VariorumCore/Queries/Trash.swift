@@ -91,11 +91,21 @@ extension Queries {
         /// True for a saved-version row. The face's one question.
         public var isVersion: Bool { versionOfNoteID != nil }
 
+        /// **VX-611 — THIS BOOK ROW IS A GATHERING.** A deleted gathering
+        /// rides the `.book` arm and its doors unchanged (one `reading` row,
+        /// one Put back — `restoreReading` — one Delete Now), exactly as a saved
+        /// version rides `.note`: the KIND filter and the purge mapping stay
+        /// the reading's. What the face owes is its word — a gathering is not
+        /// a book (`RecoveryCopy.rowKind(_:)` is the one rule that reads this).
+        /// False on every other row.
+        public let isGathering: Bool
+
         public init(
             kind: Kind, id: String, deletedAt: String, title: String? = nil,
             text: String? = nil, noteID: String? = nil, noteTitle: String? = nil,
             noteIsDeleted: Bool = false, blockID: String? = nil,
-            anchorBlockID: String? = nil, versionOfNoteID: String? = nil
+            anchorBlockID: String? = nil, versionOfNoteID: String? = nil,
+            isGathering: Bool = false
         ) {
             self.kind = kind
             self.id = id
@@ -108,6 +118,7 @@ extension Queries {
             self.blockID = blockID
             self.anchorBlockID = anchorBlockID
             self.versionOfNoteID = versionOfNoteID
+            self.isGathering = isGathering
         }
     }
 
@@ -261,7 +272,7 @@ extension Queries {
             items += try Row.fetchAll(
                 db,
                 sql: """
-                    SELECT id, name, deleted_at FROM reading
+                    SELECT id, name, kind, deleted_at FROM reading
                     WHERE deleted_at IS NOT NULL AND deleted_at >= :cutoff\(fence("wing_id"))
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
                         WHERE pi.table_name = 'reading' AND pi.row_id = reading.id
@@ -270,9 +281,12 @@ extension Queries {
                     """,
                 arguments: arguments
             ).map { row in
+                // VX-611: the row's own kind column, read in the same
+                // statement (no second read) — the face's word for it.
                 TrashItem(
                     kind: .book, id: row["id"], deletedAt: row["deleted_at"],
-                    title: row["name"])
+                    title: row["name"],
+                    isGathering: (row["kind"] as String?) == ReadingKind.gathering.rawValue)
             }
         }
 
