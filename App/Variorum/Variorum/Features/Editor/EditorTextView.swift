@@ -753,6 +753,13 @@ final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface 
                 return
             }
         }
+        *[removed for publication]*
+        // is currently typing, it doesn't work"*): the panes' VX-429 mechanism,
+        // on this surface too — overriding `mouseDown` puts the editor on
+        // AppKit's classic road, where a settled caret covers the character
+        // after it and a held press there drags the EMPTY selection. The same
+        // one rule, before `super` (`Surface/CaretPress.swift`).
+        CaretPress.clearPressedCharacter(in: self, for: event)
         super.mouseDown(with: event)
         // 13e E2: an ORDINARY click puts the selection down — she is writing
         // again, not picking. The banner's "clear" is the deliberate door;

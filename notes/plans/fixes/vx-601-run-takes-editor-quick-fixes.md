@@ -940,8 +940,14 @@ No behavioural revert is in flight.
   commit's tree IS the pre tree.
 - Build `DerivedData/vx601a2-pre` (this commit's tree: pins + rule, no wire) — DONE,
   build-for-testing GREEN (`DerivedData/logs/a2-pre-build.log`).
-- Fix (the two wires) — NOT STARTED.
-- Builds post / rev429 / rev592, red-green runs, walk — PENDING.
+- Fix (the two wires) — DONE (this commit): `PaneTextView.mouseDown` (VX-429) and
+  `EditorTextView.mouseDown` (VX-592) each call `CaretPress.clearPressedCharacter(in:for:)`
+  immediately before `super.mouseDown`; nothing else in either file moved.
+- Build `DerivedData/vx601a2-post` (HEAD, the fix) — DONE, build-for-testing GREEN
+  (`DerivedData/logs/a2-post-build.log`; the one PaneSurface warning, `:218` PanePublisher's
+  scheduler, is pre-existing).
+- Builds rev429 / rev592 (one wire reverted each, committed-first) — NOT STARTED.
+- Red/green runs, walk — PENDING (the orchestrator's windows).
 
 **THE PROBE (standalone `swiftc` binaries in the session scratchpad, copies kept in the gitignored
 `App/Variorum/DerivedData/a2probe/` — never the app, no store, no screen: windows at −20 000 never

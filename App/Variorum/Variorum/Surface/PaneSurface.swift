@@ -791,6 +791,13 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
             fireConvergenceOccasion()  // 13c 1G: a click is an occasion
             return
         }
+        // VX-429 (her report: a drag from the caret's own place did nothing in
+        // Takes): on AppKit's classic road — this override puts every pane on it
+        // — a settled caret covers the character after it, and a held press
+        // there drags the EMPTY selection instead of selecting. Moved silently
+        // off the pressed character first, the press is AppKit's ordinary one
+        // (`Surface/CaretPress.swift` carries the measured mechanism).
+        CaretPress.clearPressedCharacter(in: self, for: event)
         super.mouseDown(with: event)  // the selection tracking loop runs first
         defer { fireConvergenceOccasion() }  // 13c 1G: a click is an occasion
         guard selectedRange().length == 0 else { return }
