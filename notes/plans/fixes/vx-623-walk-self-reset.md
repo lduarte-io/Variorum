@@ -593,6 +593,21 @@ default — `RoadAccountSheet.swift:311-339`); no capture was taken while the wo
 - **Stage:** `2026-10-27 18:53:47 CLAIMED who=vx-623-walk … minutes=90`; still HELD at the record's commit (~79 min
   left at 19:05); not released by the walker.
 
+## LADDER ROUND 1 FIXES — LIVE STATUS (the Opus ladder-fix implementer, phase 2; the binding text is the ladder file's "ROUND 1 — THE REVIEWER'S FINAL CALL")
+
+**Not done by this piece of work (by design):** no production act, no stage, no GUI, no Variorum launch, no container
+write. These fixes are Tools-only; their live run is the next walk's, where `ok (<n> elements read)` lines are the
+over-withhold proof. Evidence per finding: `notes/plans/fixes/vx-623-ladder-round1.md` "ROUND 1 — THE FIXES".
+
+| Piece | Finding | Status |
+|---|---|---|
+| A | 1 MAJOR — the words guard fail-closed (three classes, generic scan, `--self-check`, P-1 pin script, walk self-test +3 / 1 renamed, `capture()` logs the count) | DONE `a57bb863c` — P-1 red-on-old 3/6 → 0/6; P-2 mutation-red 6/12 → 0/12; walk `--self-test` 67/67 |
+| B | 2 MINOR — the allowlist seam, SAME-READ (`guard_allowlist` prints the checked email, both twins; the re-reads deleted; contract + structural pins in both self-tests) | NOT-STARTED |
+| C | 3 MINOR — release.sh :329 sentence verbatim; `bash -n` | NOT-STARTED |
+| D | 4 NIT — `--log` / `--app` missing value → `refuse` (exit 5), fenced-subprocess pin in both self-tests | NOT-STARTED |
+| E | 5 NIT — `J3 J3b` + the dry-run plan's J3b | NOT-STARTED |
+| F | Final: both self-tests green, `zsh -n`/`bash -n`/`swiftc`, dispositions closed | NOT-STARTED |
+
 ## Environment traps (binding; carried into every brief verbatim)
 
 The vx-510 run's traps apply: instance checks by PATH (`pgrep -fl 'Variorum.app/Contents/MacOS'`), her
