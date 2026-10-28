@@ -1853,3 +1853,19 @@ removed.
 - **The Terminal pass (not walked):** dispositioned COVERED-FORWARD — batch B's members are
   voice-independent behavior, and batch C's walk (VX-574's font work) must run BOTH voices through
   Takes anyway; its rows will re-touch the B surfaces in Terminal. The gap is named here, not hidden.
+
+## BATCH C RECORD — bars, chrome, wording, the bounded flake: VX-427 + VX-574 + VX-586 + VX-321 + VX-337 (implementer: opus-implementer, 2026-10-28)
+
+**NOT DONE (first line, kept current):** everything below is IN PROGRESS — the suite window and the
+USE walk are the orchestrator's (this session never runs `xcodebuild test`, never launches the app,
+never claims the stage); every red/green claim will be a PREDICTION, PENDING that window. No revert
+is in flight.
+
+**LIVE STATUS**
+- Reading — DONE: this file (the sitting record R-601-3, members VX-427/VX-574/VX-586/VX-321/VX-337,
+  the batches, ENVIRONMENT TRAPS, the batch A/A2/B records incl. `HostLaunchSettle`, the
+  ORCHESTRATOR DISPOSITIONS — VX-637/VX-638 not re-fixed), `notes/SurfaceContracts.md` "The app" and
+  "The note", `notes/SessionResiliencyProtocol.md`; the tickets VX-321/VX-337/VX-574/VX-586 read
+  through Linear (read-only); the VX-282 record's O-3 (VX-321's origin).
+- Trace — IN PROGRESS (per member, below as each lands).
+- VX-427 · VX-574 · VX-586 · VX-321 · VX-337 — NOT-STARTED (fix/pin).
