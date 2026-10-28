@@ -902,3 +902,12 @@ caret territory).
 **OWED LINEAR WRITES (the MCP needs her /mcp re-auth; noted per the workflow rule):** mint the O-1
 Wording ticket (Improvement · Confirmed · Takes & Lenses · Low; description drafted in this
 addendum's commit); VX-421/VX-248 → In Review at the ladder, Done at the merge, as usual.
+
+**HER WORD (2026-10-27, relayed by the coordinator, verbatim-faithful):** (1) walks MAY use the
+clipboard — *"it's really very rarely an actual issue"*; her Mac↔Air clipboard sharing is on and
+that is fine; the addendum's no-pasteboard rule is WITHDRAWN (a walker should still expect her
+content can be on the pasteboard via Universal Clipboard — that is a fact to know, not a rule to
+enforce). (2) The trashed walk note ("vx601 walk note", holding her URL) *"can be deleted
+forever"* — **a standing duty for this run's NEXT window that launches the Debug app**: Trash ▸
+that one note ▸ Delete forever, NOTHING ELSE, named in that window's RELEASE line. If no later
+window launches the app, the coordinator folds it into a short window of its own.
