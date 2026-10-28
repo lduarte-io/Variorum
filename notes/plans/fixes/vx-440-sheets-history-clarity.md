@@ -771,8 +771,26 @@ Pieces (flipped per commit):
   fenced gathering joins the parity sweep); NEW `aGatheringsPlaceDoorsOpenTheSheetOnTheGathering` (the
   prefill switch, the opening, the caption, no "AI") and `aGatheringsSharedWithRowReadsItsOwnGrantAndOpens`
   (the settings model's held read on a gathering: the gate opens, its own grant named with no "through" —
-  red on old by the gate). IN THIS COMMIT.
-- B3-6 VX-356 verify (trace) + seam + red-on-old pin: NOT STARTED.
+  red on old by the gate). DONE (f4aaef4a9).
+- B3-6 VX-356 verify (trace) + seam + red-on-old pins (behaviour unchanged): VERDICT — REAL (by trace; not
+  by design). The panel marks the open note with the voice's selection glyph (`BookPanelView.marker` —
+  `tokens.selectionMarker`: Terminal "› ", Study ""), and its own doc names Study's design: "Study's empty
+  marker leaves the weight and the ink to say it" — a NOTE row does (open: semibold + ink; else regular +
+  muted). A COLLAPSED one-note chapter row IS its note's row (row 8) and drew the same glyph (`if marked {
+  marker }`), but its name is ALWAYS semibold and in the accent (`chapterRow`) — so in Study the open note's
+  collapsed chapter row was pixel-identical to every other chapter row: no glyph, and no weight or ink left
+  to say it. The design's own premise fails on exactly this row, so the gap is a defect, not a choice.
+  (Adjacent, NOT touched — one surface: the book NAVIGATOR's `NavigatorChapterLabel` has the same shape — a
+  collapsed one-note chapter's note mark is the glyph only, so Study shows nothing there either outside
+  Outline's viewed-chapter wash; a ticket candidate for the orchestrator.) Seam: `BookPanelBrain.OpenNoteMark`
+  (`.none` · `.glyph(String)` · `.fill`) and `chapterRowMark(_:openPostID:selectionMarker:)` — at this commit
+  answering the OLD rule (the glyph, else `.none`); the chapter row draws from it; DEBUG `BookPanelMarkProbe`
+  records what each mounted chapter row drew. Pins (Mac NEW `BookPanelOpenNoteMarkTests`, compiled ✓
+  `build-for-testing`, RUNS PENDING): `theOpenNotesCollapsedChapterRowIsMarkedInEitherVoice` (pure; its
+  Study leg RED ON OLD, the Terminal and not-the-open-note legs guards) and mounted
+  `theMountedPanelMarksTheOpenNotesChapterRowInStudyAndTerminal` (the theme store STARTED so the fresh
+  store reads Study; the probe's Study leg RED ON OLD — `.none`; then `setThemeVoice(.terminal)` → the ›).
+  IN THIS COMMIT (the PRE-FIX tree: the red-on-old SHA).
 - B3-7 VX-356 fix (if real): NOT STARTED.
 - B3-8 verification (headless) + the record closed: NOT STARTED.
 

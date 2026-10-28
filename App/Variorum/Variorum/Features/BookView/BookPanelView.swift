@@ -252,7 +252,10 @@ struct BookPanelView: View {
         _ section: ReadingSection, collapsed: Queries.ReadingEntry?, line: BookPanelBrain.Line,
         book: Reading, snapshot: BookPanelModel.Snapshot, groups: [BookPanelBrain.Group]
     ) -> some View {
-        let marked = collapsed?.postID == postID
+        // VX-356: the open note's mark on its collapsed chapter row — decided
+        // by the voice (`BookPanelBrain.chapterRowMark`, pinned).
+        let mark = BookPanelBrain.chapterRowMark(
+            line, openPostID: postID, selectionMarker: tokens.selectionMarker)
         // VX-21: only where a row can be placed by hand (manual order).
         let gripDrawn = BookPanelBrain.chapterGripDrawn(
             chapterCount: snapshot.sections.count,
@@ -277,7 +280,7 @@ struct BookPanelView: View {
                     .onAppear { BookPanelGripProbe.drawn[section.id] = gripDrawn }
                     .onChange(of: gripDrawn) { _, now in BookPanelGripProbe.drawn[section.id] = now }
                     #endif
-                if marked { marker }
+                if case .glyph = mark { marker }
                 Text(tokens.chromeLabel(section.name))
                     .font(tokens.small.weight(.semibold))
                     .foregroundStyle(tokens.accent)
@@ -288,6 +291,10 @@ struct BookPanelView: View {
             .frame(maxWidth: .infinity, minHeight: BookNavigatorLayout.chapterRowHeight,
                    alignment: .leading)
             .contentShape(Rectangle())
+            #if DEBUG
+            .onAppear { BookPanelMarkProbe.drawn[section.id] = mark }
+            .onChange(of: mark) { _, now in BookPanelMarkProbe.drawn[section.id] = now }
+            #endif
         }
         .buttonStyle(.plain)
         .help(collapsed.map { _ in BookPanelCopy.openHelp(book: book.name) } ?? "")
@@ -498,6 +505,14 @@ struct BookPanelView: View {
 @MainActor
 enum BookPanelGripProbe {
     static var drawn: [String: Bool] = [:]
+}
+
+/// VX-356: the open-note mark each mounted chapter row DRAWS, keyed by the
+/// chapter's id (the grip probe's pattern) — so a pin reads what the panel
+/// drew in a voice, not only what the brain would say.
+@MainActor
+enum BookPanelMarkProbe {
+    static var drawn: [String: BookPanelBrain.OpenNoteMark] = [:]
 }
 #endif
 

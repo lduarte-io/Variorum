@@ -243,6 +243,32 @@ nonisolated enum BookPanelBrain {
         }
     }
 
+    /// **VX-356 — how a CHAPTER row says it is the OPEN note's row.** A
+    /// collapsed one-note chapter row IS its note's row (row 8), so the open
+    /// note's mark must show there too. A note row says it three ways — the
+    /// voice's glyph (Terminal's "›"), the title's weight and its ink — and
+    /// Study's glyph is empty BY DESIGN ("Study's empty marker leaves the
+    /// weight and the ink to say it"). A chapter row has neither to give: its
+    /// name is ALWAYS semibold and in the accent. The voice's glyph where it
+    /// has one; otherwise nothing.
+    nonisolated enum OpenNoteMark: Equatable, Sendable {
+        /// Not the open note's row (or not a collapsed chapter row).
+        case none
+        /// The voice's selection glyph, trimmed (Terminal's "›").
+        case glyph(String)
+        /// The navigator's "you are here" face for a chapter row (VX-562's
+        /// viewed chapter: the accent fill behind the row, the name in ink —
+        /// `BookNavigatorLayout.viewedChapterFill` / `chapterNameInk`).
+        case fill
+    }
+
+    static func chapterRowMark(_ line: Line, openPostID: String, selectionMarker: String) -> OpenNoteMark {
+        guard case .chapter(_, let collapsed) = line, let collapsed, collapsed.postID == openPostID
+        else { return .none }
+        let glyph = selectionMarker.trimmingCharacters(in: .whitespaces)
+        return glyph.isEmpty ? .none : .glyph(glyph)
+    }
+
     /// **VX-354 — the READINGS the panel names, whose two MCP marks they
     /// wear** (the Bookcase row's pair — `BookPanelView.readingMarks`): the
     /// shown book (the header, drawn whenever the panel shows a book) and the
