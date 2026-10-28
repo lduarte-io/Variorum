@@ -156,6 +156,24 @@ Bare writes are flat; the held cost is ≈ trayCounts alone and is linear in M �
 
 Batch duties: the wire and server-host suites are core-package (headless) — exhaust them; Settings ▸ MCP pane faces and the Private-row visibility are app-target (SwiftUI) — list what needs an app-suite window and route it through the orchestrator. Every new sentence an AI or the pane speaks is recorded in the BATCH 2 RECORD for her morning bundle. Per-member red-on-old pins; `swift test` green at close; the honest list of what waits on a stage window.
 
+## BATCH 2 RECORD (implementer: Opus, fresh session, 2026-10-28)
+
+**Not done (first line, kept current):** IN PROGRESS — nothing closed yet. No stage claim held; no `xcodebuild test`, no app launch, no walk by this batch (the app-suite needs are listed at close for the orchestrator's window).
+
+*Read in this session's own context before any code: CLAUDE.md + its loaded canon, this record IN FULL (the shared sections, BATCH 1's record, the RULINGS LOG), `notes/MCPSpec.md` IN FULL, `notes/SurfaceContracts.md` §Doors to the outside, `notes/SessionResiliencyProtocol.md`, the VX-620 record's BUNDLE + BATCH 1 RECORD (set_starred, RB-7) + BATCH 2 RECORD (VX-590/605, RB-10) + BATCH 3 RECORD (VX-619, RB-13) + THE MID WINDOW part 2 (W-1), the VX-548 record's MB-13 + BATCH 2b RECORD (the pane-status trace, M1) + THE MID WINDOW (MID-3), QUESTIONS #245's three passes, the VX-336 record's D6 row 14 / T2 (the eight acts), and the seven ticket bodies (Linear, read-only). No subagent.*
+
+LIVE STATUS (per piece — flipped in the same commit as each piece):
+- **No behavioural revert is in flight.**
+- B2-0 — preflight + this record: DONE (this commit).
+- B2-1 — VX-606 (undeclared arguments refused on every tool): NOT-STARTED — trace first (where the published schema stops being enforced), then one universal check at the call door, worded through the refusal chain.
+- B2-2 — VX-626 ("last seen" stamps the close): NOT-STARTED — trace the end-line road; pin red-on-old.
+- B2-3 — VX-612 (the accept loop: retry the transient class, fail loudly otherwise): NOT-STARTED — headless fault seam on the host; pin red-on-old; the door adopts the failed state; the status sentence PROVISIONAL.
+- B2-4 — VX-639 (a gathering gets a book's acts at EDIT; the rule stays hers): NOT-STARTED.
+- B2-5 — VX-640 (/mcp in the instructions, provider-neutral; the bound 3,100): NOT-STARTED.
+- B2-6 — VX-641 (the Private row hides until the library has ever had a client; already-marked always shows; the guide says when): NOT-STARTED.
+- B2-7 — VX-367 (lesson 3 names the eight remaining edit acts — after VX-639): NOT-STARTED.
+- B2-8 — close: suites, the app-window needs list, the bundle sentences, the self-assessment: NOT-STARTED.
+
 ## BATCH 3 — wings, stars & keys: VX-644 · VX-632 · VX-643 · VX-563
 
 **The implementer's brief is this section + the shared sections above.** Required reading: `notes/SurfaceContracts.md` §The app (the keyboard family; the focused wing's name; the capability-registry idiom) and §The Bookcase and books (the wing switcher); the VX-620 record's BATCH 4 RECORD (RB-6 — the ⌘K wing doors and VX-377's selector); AppSpec §9 (the union star, `setShelfPinned`); for VX-643's phone side, the mobile star doors (`MobileStars`, `MobileStarredView`, the mobile tutorial's cap line).
