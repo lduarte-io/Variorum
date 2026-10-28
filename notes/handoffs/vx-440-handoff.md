@@ -5,7 +5,11 @@ Record: `notes/plans/fixes/vx-440-sheets-history-clarity.md` · Ladder: `notes/p
 
 ## Your checklist (the morning bundle)
 
-1. **The Block History declutter verdict (P-440-9 + the pass itself)** — walk shots: PENDING(shots).
+1. **The Block History declutter verdict (P-440-9 + the pass itself)** — the walk verified the pass in both
+   voices (the record's vx440-walk section carries the per-row verdicts); the SHOTS went with the walk debris
+   at the merge, per the standing deletion rule — an owned miss against this checklist's promise. Your verdict
+   roads: press the faces in the next build you run, or say the word and a 10-minute stage window re-shoots
+   the keeper set (pane at rest / row open / sheet, both voices).
    One-line resting rows (stamp · name · a quiet ◦ on automatic commits), rows open in place, region
    headers carry counts, meaning lines behind (i). FLAGGED for you: an unnamed commit at rest shows only a
    time — none of its words until you open it. Good, or should the resting line carry a word or two of the
