@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-678 — Run: Trash, purge & resurrection** (six members by the sub-issue listing: VX-669 resurrection · VX-670 Trash speed · VX-654 · VX-671 multi-select · VX-657 quit race · VX-653; the binding brief `notes/handoffs/vx-669-trash-resurrection-kickoff.md`). HOLDS THE ONE Sync/ SLOT (coordinator-granted 2026-10-28). Surfaces: `Sync/` (SampleLibraryDedupe, purge janitor), Queries.trash/originalsStrandedBy/preservedOriginals, RecoveryView, app termination. No release at close (one after VX-678 + VX-677 both merge). | VX-678 · `vx-678-trash-purge-resurrection` | `~/dev/variorum-vx-678` · Pro | In progress |
 
 ### Latest closeout
 
