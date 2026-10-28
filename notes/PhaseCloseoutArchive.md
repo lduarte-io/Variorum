@@ -1,5 +1,20 @@
 # Variorum — Phase Closeout Archive
 
+**→ VX-562 CLOSED 2026-10-27 — BOOK OUTLINE: THE HIGHLIGHT FOLLOWS YOUR SCROLL, AND THE NAV INFO PINS UP TOP
+(the record `notes/plans/fixes/vx-562-outline-follow.md`; the ladders `vx-562-ladder-round1/2/3.md`; her handoff
+`notes/handoffs/vx-562-handoff.md`; PR #198, merge 40d501404; kickoff to merge in one day).** Her pre-launch ask built
+whole: the Outline navigator's highlight follows what the page shows (the viewed-pair slot over the rows' own geometry
+— never the caret, her ruling), and the nav info sits pinned above the page with "note N of M · ‹chapter›". Four
+architect rulings landed PROVISIONAL (R-562-A the click's adoption · R-562-C the 8-pt release · R-562-D/D′ the
+at-bottom clamp after the slide FAILED a walk at reading speed — rejected on film) plus the measured reachable-travel
+fact (the app's 40-pt bottom bar reports as a ScrollGeometry inset that is never scrollable room on macOS; trace-walked,
+pinned). A three-round capped ladder, every finding dispositioned; 326 tests in 60 suites green; EIGHT revert recipes
+each red on exactly their named pins; six stage windows, four walks + a trace walk (one honestly premise-blocked, one
+honestly failed → measured → fixed), the clamp seen firing live before close; the store returned as-found every time.
+One SurfaceContracts line (§The Bookcase and books); canon 125,887/150,000. Born VX-624/629/630/631, all triaged; the
+bundle QUESTIONS #246 (P-562-8's bottom-twitch taste knob leads it). MOBILE PARITY: nothing mobile-visible. **Next:
+her #246 pass; wave 2 continues (vx-601 · vx-623 in flight).**
+
 **→ VX-620 CLOSED 2026-10-27 — RUN: MCP UMBRELLA REMAINDER (the record
 `notes/plans/fixes/vx-620-run-mcp-umbrella-remainder.md`; the ladder `vx-620-ladder-round1.md`; her handoff
 `notes/handoffs/vx-620-handoff.md`; PR #197, merge 32a779075; kickoff to merge in one day — the VX-548 remainder
