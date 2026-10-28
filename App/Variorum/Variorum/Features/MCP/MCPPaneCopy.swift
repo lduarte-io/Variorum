@@ -98,6 +98,9 @@ nonisolated enum MCPPaneCopy {
         case .running: "running \u{00B7} socket in the app container \u{00B7} serves while Variorum is open"
         case .waitingForLibrary: "on \u{00B7} starts when the library is open"
         case .failed(let reason): "couldn't start: \(reason)"
+        // VX-612 (PROVISIONAL — the VX-648 record's BATCH 2 bundle): the
+        // listener died while it ran; her switch restarts it.
+        case .stoppedByItself(let reason): "stopped by itself (\(reason)) \u{00B7} turn it off and on to restart"
         }
     }
 
