@@ -121,6 +121,14 @@ extension Operations {
         // ("Undo claude-code's star" / "Undo claude-code's unstar" — her
         // door's own verbs, `StarCopy`). PROVISIONAL words, her copy pass.
         case star, unstar
+        // VX-639 — a gathering takes a book's own acts at edit (her RB-7
+        // ruling, 2026-10-28: book parity, the rule staying hers): ONE entry
+        // per landed act, in words that say what it was ("Undo claude-code's
+        // gathering name"). PROVISIONAL words, the VX-648 record's bundle.
+        case gatheringName = "gathering name"
+        case gatheringArchive = "gathering archiving"
+        case gatheringUnarchive = "gathering unarchiving"
+        case gatheringDelete = "gathering deletion"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 

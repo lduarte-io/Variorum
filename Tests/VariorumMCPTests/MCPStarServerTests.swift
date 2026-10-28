@@ -245,10 +245,13 @@ struct MCPStarServerTests {
         }
     }
 
-    /// A GATHERING's own star is the author's: an id this client can read hears
-    /// the gathering sentence (P-VX196-2's posture, the author's acts naming
-    /// starring now — PROVISIONAL); a gathering it can't read, the one shape.
-    @Test func aGatheringsOwnStarIsTheAuthors() async throws {
+    /// VX-639 — A DELIBERATE FLIP (her ruling 2026-10-28, QUESTIONS #245 RB-7:
+    /// "we literally just built set_starred for notes, so why is it not allowed
+    /// to do it on a gathering?" → book parity at the edit rung, the rule staying
+    /// hers; was `aGatheringsOwnStarIsTheAuthors`, RB-7's PROVISIONAL gathering
+    /// sentence). An edit grant reaching the gathering PLACE (here its wing's)
+    /// stars it — her union star, both stores — with ONE client-named undo.
+    @Test func aGatheringsOwnStarLandsAtEditOnItsPlace() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -257,10 +260,13 @@ struct MCPStarServerTests {
                 name: "gathered", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(percy.id)))
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.edit, .wing, ""))
-            let refused = try await call(connection, "set_starred",
-                                         ["book_id": .string(gathering.id), "starred": .bool(true)])
-            #expect(refused.isError == true && text(refused) == MCPWriteTools.gatheringWords("gathered"))
-            #expect(text(refused).contains("starring"))
+            let landed = try await call(connection, "set_starred",
+                                        ["book_id": .string(gathering.id), "starred": .bool(true)])
+            #expect(landed.isError != true, "\(text(landed))")
+            #expect(try json(landed)["changed"] as? Bool == true)
+            #expect(try starred(h) == [.reading(gathering.id)] && (try column(h, gathering.id)) == 1)
+            #expect(h.undoStack.depth == 1 && h.undoStack.topLabel == "claude-code's star")
+            #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's star")
             #expect(try starred(h).isEmpty && (try column(h, gathering.id)) == 0)
             await h.hangUp(connection)
         }
