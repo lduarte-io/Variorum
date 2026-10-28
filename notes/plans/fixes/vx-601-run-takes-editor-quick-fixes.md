@@ -250,8 +250,16 @@ Logs: `DerivedData/logs/red2-*.log`.
 contamination pins among them — green and now redundant by construction). Log:
 `DerivedData/logs/tier1-post.log`.
 
-**The 196-suite battery on post:** launched in this window (names extracted from this file's list
-and count-checked at 196); result lands below when the run completes. PENDING.
+**The 196-suite battery on post: 1143 tests in 196 suites PASSED** (655 s; 4 warnings; 14 known
+issues — the deliberately-loud pinned cases, e.g. `IndexTierMetricsTests`' TK2 short-blank-line
+set; the only skips the trait-disabled singleton-window oracle suite, by design; zero host
+restarts). Log: `DerivedData/logs/battery-post.log`. **An observation for VX-337's bounded trace:**
+both its named tests (`TakesArticleScrollTests` fold settle, `TakesBoardSoakTests` seed 21) PASSED
+inside this 196-suite run — consistent with the flake being whole-TARGET-load-dependent, not
+196-suite-load-dependent; batch C's trace should use the whole target.
+
+**Window a2 verdict: batch A's suite evidence is COMPLETE** — red-on-old by revert per member,
+tier 1 green, the battery green. The USE walk (W1–W4) is the remaining acceptance evidence.
 
 ## Environment traps (every batch brief carries this section verbatim)
 
