@@ -871,6 +871,8 @@ extension PaneTextView {
     static let takeSurfaceInset: CGFloat = 6
 
     /// A take pane's configuration (live/read toggled by the composer).
+    /// Undoable — and the history is the PANE's own, never the window's
+    /// (VX-421: `PaneSurfaceRepresentable.Coordinator.undoHistory`).
     static func makeTakeSurface() -> PaneTextView {
         makeSurface(inset: takeSurfaceInset, allowsUndo: true)
     }
@@ -1515,6 +1517,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             context.coordinator.adoptedText = nil
         } else if context.coordinator.readPaneNeedsText(text, in: view) {
             view.string = text
+            // VX-421: the words this pane's typing history described have
+            // left it — the history ends with them (VX-179 U3-g's rule).
+            context.coordinator.endUndoHistory(in: view)
             // 13g batch 2 (L7): a fresh string carries only typing
             // attributes — the face is re-derived over the adopted text.
             if let storage = view.textStorage { MarkdownStyling.style(storage) }
@@ -1894,9 +1899,57 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             canary.disarm()
             publisher?.invalidate()
             publisher = nil
+            // VX-421: the history goes with the pane — said here rather than
+            // left to whenever SwiftUI lets this coordinator go.
+            undoHistory.removeAllActions()
             view = nil
             onMeasuredHeight = nil
             pendingMeasuredHeight = nil
+        }
+
+        // MARK: - The pane's own undo history (VX-421 — her R-601-1)
+
+        /// **This pane's typing history is ITS OWN** (VX-421 — her report: ⌘Z
+        /// after deleting a take in Takes crashed the app; R-601-1, the
+        /// per-pane arm). Every pane is built `allowsUndo: true`, and while
+        /// nothing answered `undoManager(for:)` its typing and pastes went onto
+        /// the WINDOW's manager — so a pane torn down with its take left actions
+        /// there aimed at a view `NSUndoManager` does not retain, and the next
+        /// ⌘Z messaged a freed pane (`EXC_BAD_ACCESS` in `popAndInvoke`) or
+        /// edited one no longer on screen. Every host of this one component
+        /// shared it: the Takes cards and article, Lenses, Compare, Write's
+        /// take panel, Canvas, the Blocks workbench, and Read ▸ edit and the
+        /// book Index, which dismantle their pane on every going-read.
+        ///
+        /// It has to be the pane's OWN manager (the `CommentTextArea` /
+        /// `CaptureTextView` road, VX-179 U3-g and VX-193):
+        /// `removeAllActions(withTarget:)` on the view or its storage does not
+        /// reach TK2's registrations (measured at U3-g), and clearing the
+        /// window's manager would reach other text's history. ⌘Z still arrives
+        /// by AppKit's road — `undo:` travels to the window, which undoes
+        /// through the first responder's `undoManager`, answered here — so ⌘Z
+        /// undoes only the pane the caret is in, and the history goes with
+        /// the pane: this coordinator's life is the representable's (it
+        /// survives a detach and re-attach — TEXTKIT2_NOTES §3's re-parent —
+        /// untouched), and `uninstall` empties it besides.
+        ///
+        /// The rule the precedents keep, kept here: the history describes
+        /// only the characters the pane holds, so every PROGRAMMATIC write of
+        /// them ends it (`endUndoHistory`) — a read pane's adoption of the
+        /// projection, a re-bind to another take. Typing is the pane's; what
+        /// arrives from outside it is not undone into.
+        let undoHistory = UndoManager()
+
+        func undoManager(for view: NSTextView) -> UndoManager? {
+            view === self.view ? undoHistory : nil
+        }
+
+        /// The pane's characters were written from outside her typing: the
+        /// history that named the old characters ends, and the next keystroke
+        /// starts a fresh entry rather than coalescing into one just removed.
+        func endUndoHistory(in view: PaneTextView) {
+            view.breakUndoCoalescing()
+            undoHistory.removeAllActions()
         }
 
         // MARK: - The measured-height sink (QoL batch 2 — L3/L4)
