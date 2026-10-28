@@ -169,6 +169,126 @@ struct VersionDoorsTests {
         }
     }
 
+    // MARK: - B1-5: the moment, full size (R-440-2)
+
+    /// **A MOMENT IS ITS OWN DESTINATION, NEVER A NOTE** — so nothing a note's
+    /// visit writes is written: no Open-list row, no star target, no same-note
+    /// detail host; the pane's history carries the visit like any other, and
+    /// the back chip names it by its date (V6).
+    @Test func aSavedMomentIsItsOwnDestinationNeverANote() {
+        let moment = SidebarSelection.noteVersion("moment", of: "note")
+        #expect(moment.noteID == nil, "no detail host, so the same-note rule never meets it")
+        #expect(StarTargeting.target(for: moment) == nil, "a moment's note is what is starred")
+        #expect(WorkspaceNaming.label(for: moment, titles: [:]) == "Saved version")
+        #expect(WorkspaceNaming.label(for: moment, titles: ["moment": "Oct 28, 2026"])
+                == "Oct 28, 2026", "the back chip reads its date, as the row does")
+
+        let workspace = WorkspaceModel()
+        workspace.select(.post("note"))
+        workspace.select(moment)
+        #expect(workspace.openNotes.ids == ["note"], "the Open list tracks notes, never a moment")
+        #expect(workspace.focusedSelection == moment)
+        #expect(workspace.goBack() == .post("note"), "back/forward carry the visit (P-440-1)")
+    }
+
+    /// **The note's deletion takes its moments' pages with it** — a pane
+    /// reading a moment full size leaves for the Library with the note's own
+    /// panes (V2: the moments rode the deletion).
+    @Test func deletingTheNoteLeavesAMomentsPageToo() {
+        let workspace = WorkspaceModel()
+        workspace.select(.noteVersion("moment", of: "note"))
+        #expect(workspace.notesDeleted(["note"]))
+        #expect(workspace.focusedSelection == .library)
+        workspace.select(.noteVersion("other-moment", of: "kept-note"))
+        #expect(!workspace.notesDeleted(["unrelated"]), "another note's deletion leaves it be")
+        #expect(workspace.focusedSelection == .noteVersion("other-moment", of: "kept-note"))
+    }
+
+    /// **THE BAND SAYS WHOSE MOMENT AND WHEN, AND PROMOTE ENDS IT** — the
+    /// facts the band reads (the classifier, the birth stamp, the note's
+    /// display name), the P-440-5 ask, and the promote's own road.
+    @Test func theBandNamesTheMomentAndPromoteMakesItANote() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let note = try session.operations.createPost(title: "the note")
+            _ = try session.operations.newBlock(in: note.id, text: "Words.")
+            let moment = try session.operations.saveNoteVersion(note.id).post
+            let model = NoteVersionPageModel(session: session, versionID: moment.id, noteID: note.id)
+            model.adopt(try await db.read {
+                try NoteVersionPageModel.read($0, versionID: moment.id, noteID: note.id)
+            })
+            #expect(model.facts?.isVersion == true)
+            #expect(model.facts?.savedAt == moment.createdAt)
+            #expect(model.bandLine
+                    == VersionsPath.bandLine(noteTitle: "the note", savedAt: moment.createdAt))
+            #expect(model.bandLine?.hasPrefix("A saved version of \u{201C}the note\u{201D} \u{00B7} ") == true)
+
+            #expect(await model.promote(), "the moment became a note")
+            model.adopt(try await db.read {
+                try NoteVersionPageModel.read($0, versionID: moment.id, noteID: note.id)
+            })
+            #expect(model.facts?.isVersion == false, "the page now says it is gone from Versions")
+            #expect(try await db.read { try Queries.library($0) }.map(\.postID).contains(moment.id))
+            #expect(!(await model.promote()), "a second press refuses in the family's words")
+        }
+    }
+
+    /// **NO PER-NOTE MEMORY, NO MODE ROW, NO ⌘⇧S** (P-440-1, R-440-2): the
+    /// real page mounted over a real moment registers no detail with the router
+    /// (no mode, so neither the rail nor ⌘⇧S has anything to act on) and writes
+    /// none of a note visit's memories.
+    @Test func theMountedPageWritesNoMemoryAndOffersNoModesOrSave() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let note = try session.operations.createPost(title: "the note")
+            _ = try session.operations.newBlock(in: note.id, text: "Words to read.")
+            let moment = try session.operations.saveNoteVersion(note.id).post
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            var backs = 0
+            let hosting = NSHostingView(
+                rootView: NoteVersionPage(
+                    session: session, versionID: moment.id, noteID: note.id,
+                    onBack: { backs += 1 }, onPromoted: {})
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 700)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            // The page realizes its rows (the calm page's paper, read-cheap Text).
+            await Self.settle(window, hosting, maxTurns: 40) { false }
+
+            let router = session.commandRouter
+            #expect(router.activePostID == nil, "no detail registered: no mode row to draw")
+            #expect(router.activeMode == nil)
+            #expect(!router.isEnabled(.saveNoteVersion), "⌘⇧S has nothing to act on here")
+            #expect(!router.isEnabled(.switchMode), "nor do the mode keys")
+            #expect(UserDefaults.standard.object(forKey: "postMode.\(moment.id)") == nil,
+                    "no mode memory")
+            #expect(UserDefaults.standard.object(forKey: ReadModeView.faceKey(moment.id)) == nil,
+                    "no Read face memory")
+            #expect(router.currentBlock(for: moment.id) == nil, "no place memory")
+            #expect(backs == 0)
+        }
+    }
+
     // MARK: - Harness (the `NoteVersionsPaneTests` mount)
 
     private func mounted(

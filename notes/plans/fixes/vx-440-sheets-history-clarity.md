@@ -333,9 +333,31 @@ Pieces (flipped per commit):
   mounted `theMountedDetailReportsItsNotesNewestMomentLive`, mounted
   `compareWithNowLandsTheMomentBesideTheNoteInCompare`; plus the registry walk suite
   (`CapabilityRegistryTests`) — RUN PENDING. DONE (this commit).
-- B1-5 full size: a Versions row's "Open full size" → the version on Read's calm page with the identity band
-  (Back to the note · Promote to a regular note…), no mode row, ⌘⇧S grey, no per-note memories (P-440-1):
-  NOT-STARTED.
+- B1-5 full size (R-440-2, VX-432): a NEW destination `SidebarSelection.noteVersion(versionID, of: noteID)`
+  rather than `router.adopt(.post(versionID), mode: .read)` (the scout's bare door) — so the clauses hold
+  STRUCTURALLY, not by suppression: no `PostDetailView` mounts ⇒ no detail registers ⇒ the sidebar's "this note"
+  rail (drawn for `.post` only) is absent, `noteScoped` has nothing ⇒ ⌘⇧S greys in File and its ⌘K row speaks
+  its note, the Open list (tracks `.post`) gains no row, and NO per-note memory is written (P-440-1: no
+  `postMode.‹id›`, no `readFace.‹id›`, no `CurrentBlockMemory` report — it opens at the start); back/forward
+  carry the visit. `Features/Versions/NoteVersionPage.swift`: the identity band ("A saved version of
+  “‹title›” · ‹date›" — `VersionsPath.bandLine`; Back to the note; Promote to a regular note… → the P-440-5
+  confirm → `VersionActs.promote`, receipt/refusal on the status seam, then the pane shows the promoted note AS
+  a note — PROVISIONAL P-440-7) over `ReadPageColumn` (Read's own calm page — made internal in
+  `ReadModeView.swift`, its paragraph click-through optional: nil ⇒ no click-to-edit, no help; Read's own
+  call sites byte-unchanged in behaviour) fed by a `BlockTOCViewModel` over the moment; a held band read
+  (`NoteVersionPageModel.read` — the classifier, the birth stamp, the note's display name) shows "This isn't
+  one of the note's saved versions any more." instead of the words once promoted/deleted/unlinked. Doors:
+  the Versions row's second line "Open full size" (always) beside "Compare with now" (B1-4's gate), and a
+  moment's Compare column's "open" — both through `NoteVersionPage.open` → `.variorumOpenNoteVersion` (a
+  navigation signal, `.variorumOpenPost`'s precedent) → `RootView` → `.noteVersion`. Shell arms:
+  `RootView` (the detail arm + the listener), `WorkspaceModel` (title key; the back chip's date via
+  `readTitles`; `notesDeleted` now also leaves a pane reading one of a deleted note's moments),
+  `WorkspaceNaming.label` ("Saved version" fallback), `StarTargeting` (never a star target), `TourPlaces`
+  (`.elsewhere`), `SidebarSelection.noteID` (nil). Pins (Mac `VersionDoorsTests`, compiled ✓, RUNS PENDING):
+  `aSavedMomentIsItsOwnDestinationNeverANote`, `deletingTheNoteLeavesAMomentsPageToo`,
+  `theBandNamesTheMomentAndPromoteMakesItANote`, mounted `theMountedPageWritesNoMemoryAndOffersNoModesOrSave`.
+  The notification → destination hop and the band's face are walk-evidence (the orchestrator's stage window).
+  DONE (this commit).
 - B1-6 Mac pins compiled (`build-for-testing`), core suite green: NOT-STARTED.
 - Batch 2 (Block History): NOT STARTED.
 - Batch 3 (gathering faces): NOT STARTED.

@@ -343,13 +343,16 @@ struct NoteVersionsPane: View {
             // VX-440 batch 1 — the two LOOKING doors (R-440-1, R-440-2): the
             // moment beside the note in Compare, and the moment on a whole page.
             // Their own line, so the four verbs above keep theirs.
-            if model.canCompareHere {
-                HStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Button(VersionsPath.openFullSizeVerb) { openFullSize(item) }
+                    .controlSize(.small)
+                    .help(VersionsPath.openFullSizeHelp)
+                if model.canCompareHere {
                     Button(VersionsPath.compareWithNowVerb) { model.compareWithNow(item) }
                         .controlSize(.small)
                         .help(VersionsPath.compareWithNowHelp)
-                    Spacer(minLength: 0)
                 }
+                Spacer(minLength: 0)
             }
             if expanded.contains(item.postID) {
                 Text(texts[item.postID] ?? "\u{2026}")
@@ -361,6 +364,15 @@ struct NoteVersionsPane: View {
             }
         }
         .padding(.vertical, 3)
+    }
+
+    /// VX-440 batch 1 (R-440-2): the moment on a whole page — the shell's
+    /// `.noteVersion` destination (`NoteVersionPage`). Hosted as a bar's SHEET
+    /// the pane steps out of the way first; in the side column the detail it
+    /// stands in is what the open replaces.
+    private func openFullSize(_ item: Queries.NoteVersionItem) {
+        if onClose == nil { dismiss() }
+        NoteVersionPage.open(versionID: item.postID, of: model.postID)
     }
 
     private func readLabel(_ item: Queries.NoteVersionItem) -> String {

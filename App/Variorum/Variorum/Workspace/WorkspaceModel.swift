@@ -490,7 +490,15 @@ final class WorkspaceModel {
     @discardableResult
     func notesDeleted(_ ids: [String]) -> Bool {
         let gone = Set(ids)
-        let showing = panes.filter { selections[$0]?.noteID.map(gone.contains) == true }
+        let showing = panes.filter { pane in
+            // VX-440 batch 1: a pane reading one of the note's saved moments
+            // full size is showing that note's past — its moments rode the
+            // deletion (V2), so it leaves with the note's own panes.
+            if case .noteVersion(let version, let note)? = selections[pane] {
+                return gone.contains(version) || gone.contains(note)
+            }
+            return selections[pane]?.noteID.map(gone.contains) == true
+        }
         for pane in showing { select(.library, in: pane, takingFocus: false) }
         for id in ids { openNotes.close(id) }
         rememberOpenNotesIfClaimed()
@@ -648,6 +656,7 @@ final class WorkspaceModel {
         case .pool(let id): return "pool:\(id)"
         case .reading(let id): return "reading:\(id)"
         case .tag(let id): return "tag:\(id)"
+        case .noteVersion(let id, _): return "version:\(id)"  // VX-440 batch 1
         }
     }
 
@@ -761,6 +770,12 @@ final class WorkspaceModel {
                         })
                 }
                 if let path = tagPaths?[id] { out[id] = path }
+            case .noteVersion(let id, _):
+                // VX-440 batch 1 (V6): a moment is named by when it was saved —
+                // the same derived name the Versions row and its band say.
+                if let saved = try Container.fetchOne(db, key: id)?.createdAt {
+                    out[id] = VersionsPath.momentTitle(saved)
+                }
             case .shelf, .library, .poolPosts, .blocks, .archived, .recovery:
                 break  // these name themselves (WorkspaceNaming)
             }

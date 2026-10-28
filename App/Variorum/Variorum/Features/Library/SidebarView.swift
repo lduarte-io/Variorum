@@ -73,6 +73,14 @@ nonisolated enum SidebarSelection: Hashable {
     case pool(String)
     /// The archived + deleted recovery surfaces (⌘K / Library-reachable).
     case recovery
+    /// **VX-440 batch 1 (R-440-2) — a saved version, FULL SIZE**: the moment
+    /// (`String`) of the note it belongs to (`of:`), read-only on Read's calm
+    /// page under its identity band (`NoteVersionPage`). Its own destination
+    /// rather than a `.post`, because a moment is not a note she writes in:
+    /// no detail, no mode row, no ⌘⇧S over it, no Open-list row, and no
+    /// per-note memory written (PROVISIONAL P-440-1); back/forward carry the
+    /// visit like any other.
+    case noteVersion(String, of: String)
 
     /// The container this destination OPENS IN A DETAIL SURFACE, if any —
     /// the thing her same-note rule is about (13f batch 4, round 7.3).
@@ -85,7 +93,10 @@ nonisolated enum SidebarSelection: Hashable {
     var noteID: String? {
         switch self {
         case .post(let id), .pool(let id): return id
-        case .shelf, .library, .poolPosts, .blocks, .archived, .recovery, .tag, .reading:
+        case .shelf, .library, .poolPosts, .blocks, .archived, .recovery, .tag, .reading,
+             .noteVersion:
+            // VX-440: a moment's page is read-only — no detail surface, so the
+            // same-note rule (two detail hosts on one container) never meets it.
             return nil
         }
     }

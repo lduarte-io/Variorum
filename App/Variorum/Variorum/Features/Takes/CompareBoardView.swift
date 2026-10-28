@@ -1449,9 +1449,16 @@ struct CompareBoardView: View {
                         // the ordinary editor; ⌥⌘[ comes straight back (P-4,
                         // the `.variorumOpenPost` channel).
                         Button(tokens.chromeLabel(CapabilityRegistry.capability(.openPeerPost).verb)) {
-                            NotificationCenter.default.post(
-                                name: .variorumOpenPost, object: nil,
-                                userInfo: ["postID": peerID])
+                            // VX-432 (R-440-2): a saved moment opens FULL SIZE —
+                            // its own read-only page under the band — never as a
+                            // note in the editor (no modes, no ⌘⇧S over it).
+                            if model.savedVersionDate(peerID) != nil {
+                                NoteVersionPage.open(versionID: peerID, of: postID)
+                            } else {
+                                NotificationCenter.default.post(
+                                    name: .variorumOpenPost, object: nil,
+                                    userInfo: ["postID": peerID])
+                            }
                         }
                         .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                         .help("Open this note on its own — \u{2318}[ comes straight back to "

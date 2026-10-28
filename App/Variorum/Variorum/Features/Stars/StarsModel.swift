@@ -147,6 +147,10 @@ nonisolated enum StarTargeting {
         // to the same question).
         case .shelf, .library, .poolPosts, .blocks, .archived, .recovery, .pool, .tag, nil:
             return nil
+        // VX-440 batch 1: a saved moment is not a thing you star — it is its
+        // note's past (star the note).
+        case .noteVersion:
+            return nil
         }
     }
 
