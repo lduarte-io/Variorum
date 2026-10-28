@@ -2341,8 +2341,22 @@ extension BookOutlineLandingTests {
                     "both pages keep their note markers (the shipped rule)")
 
             // READ ▸ PAGES: the reader's shown note and its chapter.
+            // JUSTIFIED EDIT (w2a's red — the pin's premise, never the arm):
+            // the first cut set the focus in the SAME turn as the mode switch,
+            // before the reader existed. The navigator row's `.turnThePages`
+            // act reaches the reader through `PagedReadView`'s
+            // `.onChange(of: focusedPostID)` — a reader ON SCREEN — and a
+            // fresh reader's own arrival seed cannot land it: its `.task` seeds
+            // from the focus BEFORE `adopt` gives the model its entries, so
+            // the seed finds no note and the reader opens at the book's first
+            // page (pre-existing since 13f W21 — the record's FINDING, ticket
+            // owed). So the reader mounts and reports first, then the row's act.
             structure.mode = .read
             structure.readForm = .pages
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.pagedAnchorPostID != nil
+            }, maxTurns: 120)
+            try #require(model.pagedAnchorPostID != nil, "the premise: the reader is on screen and reported")
             model.focus(postIDs[20])   // the navigator row's road: the reader turns to it
             await settle(window, hosting, watchdog: watchdog, until: {
                 model.pagedAnchorPostID == postIDs[20]

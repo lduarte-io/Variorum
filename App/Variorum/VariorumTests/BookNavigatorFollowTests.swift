@@ -130,6 +130,12 @@ struct BookNavigatorViewedPairTests {
             $0.database = db
             $0.uuid = .incrementing
             $0.date = DateGenerator { Date(timeIntervalSince1970: 1_782_864_000) }
+            // w2a's red (the fixture's, never the code's): `createSection`
+            // mints its fractional position with the jitter
+            // `FractionalIndex` draws from this dependency, and a test
+            // context refuses the live default — seeded, as every sibling
+            // fixture does (`BookNoteStepTests`' 563).
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 645))
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let ops = session.operations
