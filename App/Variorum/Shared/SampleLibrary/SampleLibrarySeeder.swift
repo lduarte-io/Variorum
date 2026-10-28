@@ -256,6 +256,14 @@ enum SampleLibrarySeeder {
         /// this book (`allDedupeFacts`). True for every book before it; the
         /// Jekyll book opts OUT (the header's reason; QUESTIONS #155).
         var joinsPristineDedupe: Bool = true
+        /// VX-633: how the book's notes map onto its chapters — one chapter
+        /// per note for every book before it; the Prince's notes ARE its
+        /// chapters and its `reading_section` rows are the four parts.
+        var grouping: NoteGrouping = .chapterPerNote
+        /// VX-633: a pass run right after each FRESH import, in the note's
+        /// own runner turn (the Prince's other takes) — nil for every book
+        /// before it.
+        var takePass: TakePass? = nil
 
         /// *The Adventures of Sherlock Holmes* — pre-13u Act 3's book, its
         /// values exactly as they shipped.
@@ -309,10 +317,32 @@ enum SampleLibrarySeeder {
             scriptedNote: .takemania,
             joinsPristineDedupe: false)
 
+        /// *The Prince*, bilingual — VX-633 (R-633-1…14,
+        /// `notes/plans/vx-633-prince-book.md`): the dedication and all
+        /// twenty-six chapters, one note each, grouped into the four parts;
+        /// every block Marriott's English (chosen) + the Italian, a few with a
+        /// third take (`SampleLibraryPrinceBook`). The book's clock is the
+        /// first printing's (Sherlock's m6 precedent). Born fanned, so it
+        /// reads EDITED to the pristine-copy classifier and stays OUT of the
+        /// dedupe (the Jekyll precedent — the engine's facts byte-identical).
+        static let prince = Book(
+            name: SampleLibraryPrinceBook.name,
+            tagName: SampleLibraryPrinceBook.tagName,
+            frontMatterChapter: SampleLibraryPrinceBook.frontMatterChapter,
+            frontMatterTitle: SampleLibraryPrinceBook.frontMatterTitle,
+            frontMatterText: SampleLibraryPrinceBook.aboutThisText,
+            resourceName: SampleLibraryPrinceBook.resourceName,
+            profile: "book",
+            markSuffix: SampleLibraryPrinceBook.markSuffix,
+            clock: SampleLibraryPrinceBook.publicationDate,
+            joinsPristineDedupe: false,
+            grouping: .princeParts,
+            takePass: .princeBilingual)
+
         /// Every seeded book, in seeding order — the RESTORE doors' and the
         /// pins' vocabulary. Since 17y B-DEDUPE this is NOT the launch's
-        /// list: `launchSet` is.
-        static let all: [Book] = [.sherlock, .encryptionExplained, .jekyllAndHyde]
+        /// list: `launchSet` is. (VX-633: the Prince joins at the end.)
+        static let all: [Book] = [.sherlock, .encryptionExplained, .jekyllAndHyde, .prince]
 
         /// **The DEFAULT seed — what a fresh store is born with (R-17y-8,
         /// 2026-10-05, her word: "I don't want it in people's libraries
@@ -357,6 +387,62 @@ enum SampleLibrarySeeder {
             try Takemania.mint(
                 ops, anchor: anchor, bookID: bookID, sectionID: sectionID, tagID: tagID,
                 interruptAfterStep: interruptAfterStep)
+        }
+    }
+
+    /// **How a book's notes map onto its chapters** (VX-633). Every book
+    /// before the Prince mints one chapter per note, named after it; the
+    /// Prince's chapters are its four PARTS (R-633-5), each holding several
+    /// notes — the seed reuses a part's section by name, so eleven notes share
+    /// one row.
+    nonisolated enum NoteGrouping: Sendable, Equatable {
+        case chapterPerNote
+        case princeParts
+
+        /// The chapter (section name) a note of this title is filed in.
+        func chapter(for title: String) -> String {
+            switch self {
+            case .chapterPerNote: return title
+            case .princeParts: return SampleLibraryPrinceBook.part(for: title)
+            }
+        }
+    }
+
+    /// **A pass run right after each FRESH import, in the same runner turn**
+    /// (VX-633) — so the note never exists without what it adds, and the
+    /// resumable seed stays correct by construction (cancellation lands only
+    /// between turns). Never run on a re-membered or copied note: those
+    /// carry whatever takes they already have. One case today.
+    nonisolated enum TakePass: Sendable, Equatable {
+        /// The Prince's Italian take on every block, the third takes and the
+        /// English verse's line breaks (`SampleLibraryPrinceBook.attachTakes`).
+        case princeBilingual
+
+        /// The pass's companion text, note title → paragraphs — loaded once
+        /// per seed, off the main actor. A build missing it throws the
+        /// seeder's own `resourceMissing` BEFORE anything is minted: the same
+        /// class as a missing English text (the restore door words it "This
+        /// build is missing the book's text — nothing was restored."), so a
+        /// broken bundle never seeds a one-language book.
+        func loadCompanion() throws -> [String: [String]] {
+            switch self {
+            case .princeBilingual:
+                let raw = try SampleLibrarySeeder.bundledText(SampleLibraryPrinceBook.italianResourceName)
+                let notes = SampleLibrarySeeder.parse(raw).map { (title: $0.title, text: $0.text) }
+                guard !notes.isEmpty else { throw LoadError.noStories }
+                return SampleLibraryPrinceBook.italianParagraphs(notes)
+            }
+        }
+
+        /// Runs the pass on one freshly imported note.
+        func apply(
+            _ ops: Operations, title: String, blockIDs: [String], companion: [String: [String]]
+        ) throws -> SampleLibraryPrinceBook.PassReport {
+            switch self {
+            case .princeBilingual:
+                return try SampleLibraryPrinceBook.attachTakes(
+                    ops, title: title, blockIDs: blockIDs, italian: companion[title])
+            }
         }
     }
 
@@ -484,13 +570,20 @@ enum SampleLibrarySeeder {
     /// main actor — it is ~0.5 MB of string work for Sherlock. The
     /// parameterless form is Sherlock's (every pre-5a caller and pin).
     nonisolated static func loadStories(for book: Book = .sherlock) throws -> [Story] {
-        let bundle = Bundle(for: SampleLibraryBundleAnchor.self)
-        guard let url = bundle.url(forResource: book.resourceName, withExtension: "txt"),
-              let raw = try? String(contentsOf: url, encoding: .utf8)
-        else { throw LoadError.resourceMissing }
-        let stories = parse(raw)
+        let stories = parse(try bundledText(book.resourceName))
         guard !stories.isEmpty else { throw LoadError.noStories }
         return stories
+    }
+
+    /// A bundled `.txt` resource's text (VX-633: shared by the book's own
+    /// resource and the Prince's Italian companion). Missing or unreadable →
+    /// `resourceMissing`.
+    nonisolated static func bundledText(_ resourceName: String) throws -> String {
+        let bundle = Bundle(for: SampleLibraryBundleAnchor.self)
+        guard let url = bundle.url(forResource: resourceName, withExtension: "txt"),
+              let raw = try? String(contentsOf: url, encoding: .utf8)
+        else { throw LoadError.resourceMissing }
+        return raw
     }
 
     /// Split on the delimiter lines. Kept separate from the bundle read so
@@ -1094,6 +1187,18 @@ enum SampleLibrarySeeder {
     /// and before it mints, the seeder's own half-built note from a stopped
     /// earlier history goes to the Trash. `interruptScriptAfterStep` is the
     /// pins' seam for that stopped history — nil in production.
+    ///
+    /// **VX-633 — chapters by NAME across turns, and the take pass.** A note's
+    /// chapter is `book.grouping`'s answer (its own title for every book
+    /// before the Prince; the Prince's PART), and the seed remembers every
+    /// chapter it reuses or mints as it goes, so the eleven notes of a part
+    /// share ONE section row — the m5 reuse-by-name rule, extended from "a
+    /// cancelled run's chapter" to "this run's chapter". A book with a
+    /// `takePass` loads its companion text ONCE, before anything is minted
+    /// (a build missing it throws `resourceMissing` with nothing written),
+    /// and runs the pass on each FRESHLY imported note inside that note's own
+    /// runner turn — so cancellation can never leave a note without its
+    /// takes; a re-membered or copied note is never passed again.
     @discardableResult
     static func seed(
         session: AppSession, book: Book = .sherlock, stories: [Story], existing: Existing,
@@ -1107,7 +1212,9 @@ enum SampleLibrarySeeder {
         let profile = book.profile
         let label = Self.undoLabel
         let present = existing.presentTitles
-        let chapters = existing.chapterIDsByName
+        // VX-633: every chapter this seed knows by name — what discovery
+        // found, plus what each turn reuses or mints (read back after it).
+        var chapterIDs = existing.chapterIDsByName
         let strays = existing.strayNoteIDsByTitle
         // 13i-d ladder B fix C: everything the seed mints lives where the
         // book lives ('' = Home when none exists — the fresh seed's shape).
@@ -1116,9 +1223,24 @@ enum SampleLibrarySeeder {
         // The book's own clock (Sherlock: 1892 — m6), or the ambient one.
         let clock = book.clock
 
+        // VX-633: the take pass's companion text, parsed once and off the
+        // main actor, BEFORE the skeleton turn — a missing companion throws
+        // with nothing minted.
+        let takePass = book.takePass
+        let companion: [String: [String]]
+        if let takePass {
+            companion = try await Task.detached(priority: .utility) {
+                try takePass.loadCompanion()
+            }.value
+        } else {
+            companion = [:]
+        }
+
         // Turn 1: the book, the tag, and the front matter.
         await pacing?()
-        let skeleton = try await session.runner.run { _ -> (book: String, tag: String) in
+        let chapters = chapterIDs
+        let skeleton = try await session.runner.run {
+            _ -> (book: String, tag: String, frontChapter: String?) in
             try Self.underClock(clock) {
                 let quiet = Operations(undoStack: nil)
                 let bookID: String
@@ -1130,6 +1252,7 @@ enum SampleLibrarySeeder {
                 }
                 let tagID = try existing.tagID
                     ?? quiet.createTag(name: tagName, wingID: wing).id
+                var frontSectionID: String?
                 if !present.contains(frontTitle) {
                     // m5: reuse a chapter a cancelled run already left behind,
                     // never mint a second one wearing the same name.
@@ -1138,10 +1261,12 @@ enum SampleLibrarySeeder {
                     try Self.place(
                         quiet, title: frontTitle, text: frontText, stray: strays[frontTitle],
                         in: bookID, wing: wing, section: sectionID, tag: tagID, label: label)
+                    frontSectionID = sectionID
                 }
-                return (bookID, tagID)
+                return (bookID, tagID, frontSectionID)
             }
         }
+        if let frontSectionID = skeleton.frontChapter { chapterIDs[frontChapter] = frontSectionID }
 
         // 18l-c U6: the scripted note's "now" — read once, OUTSIDE the book's
         // clock, so its history lands relative to this seed (the tray and the
@@ -1158,19 +1283,39 @@ enum SampleLibrarySeeder {
             let bookID = skeleton.book
             let tagID = skeleton.tag
             let stray = strays[entry.title]
+            let chapters = chapterIDs
             switch entry {
             case .story(let title, let text):
-                try await session.runner.run { _ in
+                let chapter = book.grouping.chapter(for: title)
+                let turn = try await session.runner.run {
+                    _ -> (section: String, pass: SampleLibraryPrinceBook.PassReport?) in
                     try Self.underClock(clock) {
                         let quiet = Operations(undoStack: nil)
                         // m5, again: a run cancelled between `createSection` and
-                        // `importPost` left this story's chapter standing empty.
-                        let sectionID = try chapters[title]
-                            ?? quiet.createSection(in: bookID, name: title).id
-                        try Self.place(
+                        // `importPost` left this story's chapter standing empty
+                        // — and (VX-633) a part an earlier note of THIS run
+                        // minted is reused by name, never doubled.
+                        let sectionID = try chapters[chapter]
+                            ?? quiet.createSection(in: bookID, name: chapter).id
+                        let minted = try Self.place(
                             quiet, title: title, text: text, stray: stray,
                             in: bookID, wing: wing, section: sectionID, tag: tagID, label: label)
+                        // VX-633: the take pass, in THIS turn — only on a note
+                        // this turn imported (a re-membered stray or a copy
+                        // already carries its takes).
+                        var pass: SampleLibraryPrinceBook.PassReport?
+                        if let minted, let takePass {
+                            pass = try takePass.apply(
+                                quiet, title: title, blockIDs: minted, companion: companion)
+                        }
+                        return (sectionID, pass)
                     }
+                }
+                chapterIDs[chapter] = turn.section
+                if let skipped = turn.pass?.skipped, !skipped.isEmpty {
+                    // Release only (a DEBUG build stopped at the first one):
+                    // the note seeded with the takes that DID match.
+                    log.error("sample library (\(book.name, privacy: .public)): take pass skipped \(skipped.count): \(skipped.joined(separator: " | "), privacy: .public)")
                 }
             case .scripted(let scripted):
                 try await session.runner.run { _ in
@@ -1219,13 +1364,18 @@ enum SampleLibrarySeeder {
 
     /// Puts one shipped note into the book: a surviving tagged note is
     /// RE-MEMBERED (F10 — it already wears the tag and carries whatever she
-    /// did to it); only a title with no such note mints afresh.
+    /// did to it); only a title with no such note mints afresh. VX-633:
+    /// answers the FRESH import's block ids in placement order (the take
+    /// pass's input), nil when it re-membered or copied a note it did not
+    /// mint.
+    @discardableResult
     nonisolated private static func place(
         _ quiet: Operations, title: String, text: String, stray: String?,
         in bookID: String, wing: String, section sectionID: String, tag tagID: String,
         label: String
-    ) throws {
+    ) throws -> [String]? {
         let noteID: String
+        var mintedBlockIDs: [String]?
         if let stray {
             noteID = stray
         } else {
@@ -1242,9 +1392,11 @@ enum SampleLibrarySeeder {
             // moved restores where it lives (a Home-born mint met the
             // membership guard's `crossWingMembership` partway, with a
             // "try again" that could never succeed).
-            noteID = try quiet.importPost(
+            let imported = try quiet.importPost(
                 title: title, text: text, undoLabel: label,
-                segmentation: Self.segmentation, wingId: wing).container.id
+                segmentation: Self.segmentation, wingId: wing)
+            noteID = imported.container.id
+            mintedBlockIDs = imported.blockIDs
             _ = try quiet.applyTag(tagID, toPost: noteID)
         }
         // 13i-d U7 continuation — F-U7-3, RULED re-add-as-COPY (the ownership
@@ -1268,5 +1420,6 @@ enum SampleLibrarySeeder {
             }
         }
         try quiet.assignPostToSection(memberID, in: bookID, section: sectionID)
+        return mintedBlockIDs
     }
 }
