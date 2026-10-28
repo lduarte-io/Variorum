@@ -260,7 +260,7 @@ Batch duties: per-member pins; the follow-brain extension keeps VX-562's pins gr
 |---|---|---|
 | L-1 | Workspace seated, branch pushed, in-flight row landed on main | DONE (f7331583b + the in-flight commit) |
 | L-2 | VX-648 In Progress; roster listed (17) | DONE 2026-10-28 |
-| L-3 | Batch 1 (VX-647 + VX-649) | BUILT 2026-10-28 (closed on headless evidence at 3d520950c: v1_34 partial dead-placement index, 4 pins revert-verified, VX-649 same cause; residual → VX-655, finds → VX-653/654, rider evidence → VX-618). OWED: the WALK 1 window below (use-shaped walk + app tray suites) before the batch's final close. |
+| L-3 | Batch 1 (VX-647 + VX-649) | **DONE 2026-10-28** — headless (3d520950c: v1_34 partial dead-placement index, 4 pins revert-verified; VX-649 same cause; residual → VX-655, finds → VX-653/654, rider evidence → VX-618) + the app tray suites (50 tests / 5 suites, the SEAM window) + WALK 1 GREEN (76d11b33c: carve flat across 0→305 deleted blocks, worst ⏎ 88.7 ms; list exit 74–99 ms with VX-655's one 50–67 ms frame; posture restored line by line). Walk observations for the bundle are in WALK 1 RESULT. |
 | L-4 | Batch 2 (MCP door, 7 members) | NOT-STARTED |
 | L-5 | Batch 3 (wings/stars/keys, 4 members) | NOT-STARTED |
 | L-6 | Batch 4 (book navigator & small fixes, 4 members) | NOT-STARTED |
