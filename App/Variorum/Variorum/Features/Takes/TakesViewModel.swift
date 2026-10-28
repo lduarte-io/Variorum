@@ -529,7 +529,17 @@ final class TakesViewModel {
         // dirty half). Accepted residual, recorded: a stale pre-flush
         // emission racing settle can flicker one observation cycle before
         // the post-commit emission converges it.
-        authority.settle(isPending: { autosave.pending[$0] != nil })
+        //
+        // VX-664 (A-677-1): the same door hears whether the ring's OWN take
+        // was written from outside (a restore, an AI's edit, a sync apply,
+        // another window, a structural act such as Split at Newlines that
+        // keeps the ring's block as its first half) — the authority suspects
+        // from this delivery, a fresh read confirms, and the ring ENDS
+        // (VX-222's shape, beside it below: the pane goes read and adopts).
+        let liveIncoming = authority.livePane.flatMap { Self.storedText(of: $0.variantID, in: new) }
+        let suspect = authority.settle(
+            isPending: { autosave.pending[$0] != nil }, liveIncoming: liveIncoming)
+        endRingIfWrittenFromOutside(suspect)
         // VX-222: a ring whose article cell changed take under it ends here —
         // BEFORE the landings below may ring the fresh projection. VX-227
         // (F5): the same for a ring in any Lenses column; and a parked follow
@@ -702,7 +712,7 @@ final class TakesViewModel {
         // Block History pane's jump without a second liveness mechanism.
         session.commandRouter.noteFocusedBlock(
             pane.blockID, variantID: pane.variantID, postID: postID)
-        switch authority.focus(pane) {
+        switch authority.focus(pane, showing: shownText(of: pane.variantID)) {
         case .unchanged:
             return
         case .migrated(let leaving):
@@ -1135,12 +1145,43 @@ final class TakesViewModel {
     }
 
     private func currentStoreText(variantID: String) -> String? {
+        Self.storedText(of: variantID, in: projection)
+    }
+
+    /// A take's stored text in `projection` — its fan's row, else the slot
+    /// that renders it (one lookup for the current projection and an
+    /// incoming delivery alike).
+    private static func storedText(
+        of variantID: String, in projection: Queries.TakesProjection
+    ) -> String? {
         for (_, fan) in projection.fans {
             if let take = fan.first(where: { $0.id == variantID }) {
                 return take.workingText
             }
         }
         return projection.slots.first { $0.variantID == variantID }?.text
+    }
+
+    /// VX-664 (A-677-1): what a pane shows as it takes the ring — the buffer
+    /// overlay over the stored text (the authority's `liveHeld` baseline).
+    private func shownText(of variantID: String) -> String? {
+        currentStoreText(variantID: variantID).map {
+            authority.text(variantID: variantID, storeText: $0)
+        }
+    }
+
+    /// **VX-664 — the ring's own take was written from OUTSIDE** (her ruling,
+    /// option (a) scoped; A-677-1): confirmed on a fresh read, the ring ends by
+    /// this board's own `blur()` — VX-222/VX-440's shape (the flush is empty
+    /// by the rule; the pane goes read and adopts the stored words; she clicks
+    /// back in to type in them). VX-440's restore-parcel blur stays beside it,
+    /// redundant by construction.
+    private func endRingIfWrittenFromOutside(_ suspect: PaneKey?) {
+        OutsideWriteConfirmation.endRing(
+            ifConfirmed: suspect, in: session.database,
+            authority: { [weak self] in self?.authority },
+            isPending: { [weak self] in self?.autosave.pending[$0] != nil },
+            endRing: { [weak self] in self?.blur() })
     }
 
     /// Settled buffers converge back to the store's text (round 2 MAJOR:
@@ -2831,7 +2872,7 @@ final class TakesViewModel {
         if paneCaretLanding == nil {
             paneCaretLanding = (variantID: pane.variantID, landing: .start)
         }
-        authority.focus(pane)
+        authority.focus(pane, showing: shownText(of: pane.variantID))
         // 17q piece 6 (her R-Q21): the entry ring IS this board's current
         // block from now on — the next mount's snapshot. (It is written AFTER
         // the layout took its own snapshot in `init`, which is what keeps the

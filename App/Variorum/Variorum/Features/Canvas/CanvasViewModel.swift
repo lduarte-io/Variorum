@@ -193,8 +193,17 @@ final class CanvasViewModel {
         projection = face.projection
         sealed = face.sealed
         // Convergence: every buffer with no pending autosave record has
-        // landed — drop it so external edits reach the display.
-        authority.settle(isPending: { [coordinator] in coordinator.pending[$0] != nil })
+        // landed — drop it so external edits reach the display. VX-664
+        // (A-677-1): the same door hears whether the ring's OWN take was
+        // written from outside — suspected here, confirmed on a fresh read,
+        // and then the ring ends (`endRingIfWrittenFromOutside`).
+        let liveIncoming = authority.livePane.flatMap {
+            storeText(blockID: $0.blockID, variantID: $0.variantID)
+        }
+        let suspect = authority.settle(
+            isPending: { [coordinator] in coordinator.pending[$0] != nil },
+            liveIncoming: liveIncoming)
+        endRingIfWrittenFromOutside(suspect)
         recomputeSpreadDefaults()
         recull()
     }
@@ -698,7 +707,11 @@ final class CanvasViewModel {
         // router ignores it.
         session.commandRouter.noteFocusedBlock(
             blockID, variantID: variantID, postID: containerID)
-        switch authority.focus(paneKey(blockID: blockID, variantID: variantID)) {
+        // VX-664 (A-677-1): what the card's pane shows as it takes the ring.
+        let shown = storeText(blockID: blockID, variantID: variantID).map {
+            authority.text(variantID: variantID, storeText: $0)
+        }
+        switch authority.focus(paneKey(blockID: blockID, variantID: variantID), showing: shown) {
         case .unchanged:
             return
         case .migrated:
@@ -713,6 +726,18 @@ final class CanvasViewModel {
         authority.blur()
         let coordinator = coordinator
         Task { await coordinator.flushNow() }
+    }
+
+    /// **VX-664 — the ring's own take was written from OUTSIDE** (A-677-1):
+    /// confirmed on a fresh read, the ring ends by this board's own `blur()` —
+    /// VX-222/VX-440's shape (the card's pane goes read and adopts the stored
+    /// words).
+    private func endRingIfWrittenFromOutside(_ suspect: PaneTextAuthority.PaneKey?) {
+        OutsideWriteConfirmation.endRing(
+            ifConfirmed: suspect, in: session.database,
+            authority: { [weak self] in self?.authority },
+            isPending: { [weak self] in self?.coordinator.pending[$0] != nil },
+            endRing: { [weak self] in self?.blur() })
     }
 
     /// A live pane's keystroke: buffer-authoritative while dirty; the

@@ -1449,12 +1449,24 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             context.coordinator.adoptFindBaseline()
             context.coordinator.adoptCaretToEndBaseline(caretToEndToken)
         }
+        // VX-664 — A-677-2 (B2-i, RATIFIED by her 2026-10-28): the one render
+        // in which a READ pane turns live while the projection hands it
+        // changed text completes its read adoption FIRST — it holds no buffer
+        // of hers yet (it was projection-authoritative until this render), so
+        // this is the read pane's own contract finishing before liveness
+        // transfers, never a live pane adopting. Without it an outside write
+        // whose delivery shares her click's turn would stay on screen as the
+        // OLD words under the ring, and her first key would write them back.
+        let completedReadAdoption = !rebound
+            && context.coordinator.completeReadAdoptionIfGoingLive(text, live: isLive, in: view)
         // 18l-c U7: a pane about to go live sheds its painted matches FIRST,
         // so the liveness note's selection (and the caret she types at) never
         // sits in a painted run.
         context.coordinator.paintFind(live: isLive, in: view)
         view.isEditable = isLive
-        context.coordinator.noteLiveness(isLive, rebound: rebound)
+        // A completed adoption replaced the text a click's place was made in,
+        // exactly as a re-bind does — the landing decides (`noteLiveness`).
+        context.coordinator.noteLiveness(isLive, rebound: rebound || completedReadAdoption)
         let faceBefore = view.appliedFace
         applyFace(to: view)  // before `applyStyle`: its `style` reads the palette
         // 18l-c U7: a face change re-derives the faced lines, whose clear owns
@@ -1534,9 +1546,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // The repair is the trace's own second suggestion: the coordinator
         // REMEMBERS what it last wrote here, and the question is asked of
         // that native string instead. It is authoritative because exactly
-        // three sites ever write a pane's characters — `makeNSView`, this
-        // one and VX-248's re-bind (which keeps the record itself) — and a
-        // read pane is `isEditable == false`, so no input path can touch it
+        // four sites ever write a pane's characters — `makeNSView`, this
+        // one, VX-248's re-bind (which keeps the record itself) and A-677-2's
+        // go-live completion (which asks through the record and keeps it) —
+        // and a read pane is `isEditable == false`, so no input path can touch it
         // (nor ⌘Z since VX-421: a read pane answers an empty history,
         // `Coordinator.undoManager(for:)`). While the pane is LIVE the
         // record is dropped: her buffer is the truth there, and what we last
@@ -1548,16 +1561,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         if isLive {
             context.coordinator.adoptedText = nil
         } else if context.coordinator.readPaneNeedsText(text, in: view) {
-            view.string = text
-            // VX-421: the words this pane's typing history described have
-            // left it — the history ends with them (VX-179 U3-g's rule).
-            context.coordinator.endUndoHistory(in: view)
-            // 13g batch 2 (L7): a fresh string carries only typing
-            // attributes — the face is re-derived over the adopted text.
-            if let storage = view.textStorage { MarkdownStyling.style(storage) }
-            // 18l-c U7: a fresh string carries no paint either.
-            context.coordinator.findPaintWasReset()
-            context.coordinator.remeasure()
+            context.coordinator.adoptProjectionText(text, in: view)
         }
         // 18l-c U7: re-paint over whatever the two roads above re-wrote
         // (change-gated — a pane whose paint still holds writes nothing).
@@ -1671,6 +1675,39 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             PaneSurfaceAudit.foreignTextComparisons += 1
             #endif
             return view.string != text
+        }
+
+        /// **A READ pane's adoption of the projection's text** — the one body
+        /// both read roads run: `updateNSView`'s read arm, and the go-live
+        /// render's completion below (A-677-2).
+        func adoptProjectionText(_ text: String, in view: PaneTextView) {
+            view.string = text
+            // VX-421: the words this pane's typing history described have
+            // left it — the history ends with them (VX-179 U3-g's rule).
+            endUndoHistory(in: view)
+            // 13g batch 2 (L7): a fresh string carries only typing
+            // attributes — the face is re-derived over the adopted text.
+            if let storage = view.textStorage { MarkdownStyling.style(storage) }
+            // 18l-c U7: a fresh string carries no paint either.
+            findPaintWasReset()
+            remeasure()
+        }
+
+        /// **VX-664 — A-677-2 (B2-i, RATIFIED by her 2026-10-28): a pane
+        /// turning live in THIS render completes its read adoption first.**
+        /// Only on the read → live transition (`wasLive` is the previous
+        /// render's answer; a pane born live wrote its text at the mount), and
+        /// only where the projection's text moved since the pane last adopted
+        /// (TRACE 1a's record answers natively — the transition is exactly
+        /// when the record still holds the last read text). Returns whether it
+        /// wrote. Her words: *"it's still not two items editing the same live
+        /// pane, so doesn't seem like it introduces the clobbering risk."*
+        func completeReadAdoptionIfGoingLive(
+            _ text: String, live: Bool, in view: PaneTextView
+        ) -> Bool {
+            guard live, !wasLive, readPaneNeedsText(text, in: view) else { return false }
+            adoptProjectionText(text, in: view)
+            return true
         }
 
         // MARK: - The bound take (VX-248 — her ruled bend of P-3)

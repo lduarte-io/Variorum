@@ -1713,7 +1713,8 @@ private struct BookIndexPaneNote: View {
                 for try await value in session.database.observeBlockTOC(entry.postID) {
                     rows = value
                     loaded = true
-                    edit.settle()
+                    // VX-664 (A-677-1): the delivery, with this note's rows.
+                    edit.settle(postID: entry.postID, rows: value)
                     if let landed = edit.takePendingLiveBlock(postID: entry.postID, rows: value) {
                         onLandedBlock(landed)
                     }
@@ -1793,7 +1794,9 @@ private struct BookIndexPaneNote: View {
                 indicator: indicator,
                 role: BookIndexEditModel.columnID, variantID: variantID,
                 onFocusRequest: {
-                    edit.makeLive(postID: entry.postID, blockID: row.blockID, variantID: variantID)
+                    edit.makeLive(
+                        postID: entry.postID, blockID: row.blockID, variantID: variantID,
+                        storedText: row.text)
                 },
                 onEdit: { newText in
                     edit.paneEdited(
@@ -1888,7 +1891,7 @@ private struct BookIndexPaneNote: View {
                 onTap()
                 edit.makeLive(
                     postID: entry.postID, blockID: row.blockID, variantID: variantID,
-                    clickOffset: offset)
+                    clickOffset: offset, storedText: row.text)
             })
         }
     }
