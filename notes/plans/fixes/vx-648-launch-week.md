@@ -97,7 +97,7 @@ LIVE STATUS (per piece):
 - B1-6 — close: `swift test` green on touched core; app-target/walk needs listed; self-assessment: NOT-STARTED.
 - B1-7 — the A-648-2 rider (narrow the badge's observation): NOT-STARTED — judged after the index lands.
 
-Revert state: no behavioral revert in flight. (v1_34's revert ran 2026-10-28 and is RESTORED — see B1-3.)
+Revert state: **BEHAVIORAL REVERT #2 STARTING (2026-10-28)** — for the new held-badge writer pin (`aWriteUnderTheHeldBadgeDoesNotGrowWithTheLibrary`, committed green in this commit at writer instructions 6,827 / 6,827 per carve round and 3,230 / 3,230 per autosave): v1_34's body is about to be withheld in the working tree of `Sources/VariorumCore/Persistence/Migrations.swift` again; restore = `git checkout -- Sources/VariorumCore/Persistence/Migrations.swift` (the committed body, c63f2e67c).
 
 ### VX-647 TRACE (2026-10-28)
 

@@ -84,6 +84,31 @@ private func vmSteps(
     }
 }
 
+/// Counts every SQLite VM instruction the WRITER connection executes while
+/// `body` runs — including the re-fetch GRDB performs synchronously on the
+/// writer, inside the commit, for every held observation the write touches
+/// (`sqlite3_progress_handler` at a period of one instruction). This is the
+/// work a keystroke's write actually waits for, observations and all.
+private final class InstructionCount: @unchecked Sendable { var value = 0 }
+
+private func writerInstructions(_ db: AppDatabase, _ body: () throws -> Void) throws -> Int {
+    let counter = InstructionCount()
+    let context = Unmanaged.passRetained(counter).toOpaque()
+    defer { Unmanaged<InstructionCount>.fromOpaque(context).release() }
+    try db.write { database in
+        sqlite3_progress_handler(database.sqliteConnection, 1, { pointer in
+            guard let pointer else { return 0 }
+            Unmanaged<InstructionCount>.fromOpaque(pointer).takeUnretainedValue().value += 1
+            return 0
+        }, context)
+    }
+    counter.value = 0
+    try body()
+    let counted = counter.value
+    try db.write { database in sqlite3_progress_handler(database.sqliteConnection, 0, nil, nil) }
+    return counted
+}
+
 /// ⏎ at a block's end mints an empty block; ⌫ in it carves it — the road
 /// that adds one TOMBSTONED block to the note per round (the Mac's
 /// `runEmptyBlockDeletion`, through the same operation and precondition).
@@ -171,5 +196,50 @@ struct TrayBadgeP1Tests {
         print("VX-647 listing VM steps: library ×1 \(thin), ×15 \(thick)")
         #expect(Double(thick) < Double(thin) * 1.5,
                 "library placements ×15: \(thin) → \(thick) VM steps — the library must not drive the listing (P1)")
+    }
+
+    /// **HER ROAD, end to end at the store** — RED ON OLD. With the open
+    /// note's badge observation HELD (the app's `observeTrayCounts`, through
+    /// `AppDatabase.observe` exactly as `PaneHost.watchTray` holds it), the
+    /// two writes a ⏎-then-⌫ round makes (newBlock, the carve's deleteBlock)
+    /// and the autosave every flight flushes first must not do work that
+    /// grows with the LIBRARY. Before v1_34 each of those writes waited, on
+    /// the writer, for a badge re-fetch that scanned every placement row in
+    /// the store once per deleted block of the note.
+    @Test func aWriteUnderTheHeldBadgeDoesNotGrowWithTheLibrary() async throws {
+        func work(blocksEach: Int) async throws -> (round: Int, autosave: Int) {
+            try await withOperationsAsync { ops, db in
+                let noteID = try fixture(ops, deleted: 40, libraryNotes: 20, blocksEach: blocksEach)
+                let anchor = try #require(try await db.read { d in
+                    try Queries.renderPost(d, containerID: noteID).first
+                })
+                let started = LockIsolated(false)
+                let held = Task {
+                    do {
+                        for try await _ in db.observeTrayCounts(noteID, now: harnessNow) {
+                            started.setValue(true)
+                        }
+                    } catch {}
+                }
+                defer { held.cancel() }
+                while !started.value { try await Task.sleep(nanoseconds: 1_000_000) }
+                let round = try writerInstructions(db) {
+                    try carve(ops, in: noteID, after: anchor.blockID)
+                }
+                let variantID = try #require(anchor.variantID)
+                let autosave = try writerInstructions(db) {
+                    try ops.autosave(variantID, text: "the one paragraph that stays, edited.", charDelta: 8)
+                }
+                return (round, autosave)
+            }
+        }
+        let thin = try await work(blocksEach: 2)
+        let thick = try await work(blocksEach: 30)
+        print("VX-647 held-badge writer instructions: carve round ×1 \(thin.round), ×15 \(thick.round); "
+              + "autosave ×1 \(thin.autosave), ×15 \(thick.autosave)")
+        #expect(Double(thick.round) < Double(thin.round) * 1.5,
+                "a ⏎-then-⌫ round under the held badge: \(thin.round) → \(thick.round) instructions at library ×15 (P1)")
+        #expect(Double(thick.autosave) < Double(thin.autosave) * 1.5,
+                "an autosave under the held badge: \(thin.autosave) → \(thick.autosave) instructions at library ×15 (P1)")
     }
 }
