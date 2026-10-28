@@ -15,7 +15,7 @@ This run HOLDS THE ONE Sync/-custody SLOT (granted by oct27coordinator 2026-10-2
 
 ## The acceptance units (one per implementer session; evidence named per unit)
 
-**Unit 1 — VX-669 + VX-657, the Sync/ half (FABLE — the orchestrator implements under the architect mandate, the pre-13u Act 0 precedent; a FRESH Fable reviewer cold-reviews at the ladder, same-model disputes arbitrated against the spec).**
+**Unit 1 — VX-669 + VX-657, the Sync/ half (a FABLE IMPLEMENTER SUBAGENT — her ruling mid-run, 2026-10-28, verbatim: "you do have an implementer subagent. as part of /architect-phase you are allowed an implementer subagent. stop doing it yourself - you are the orchestrator. … and that subagent can be a fable subagent - just like the fable cold review subagent." The orchestrator's in-session start on this unit — the pins observed RED, the removal, v1_35, one flipped probe — was committed as the WIP baseline the subagent ADOPTS; a FRESH Fable reviewer cold-reviews at the ladder, same-model disputes arbitrated against the spec).**
 - **VX-669, remove the defense leg** (her ruling, option B). The removal surface, traced in-session 2026-10-28:
   - `Sources/VariorumCore/Sync/Repairs.swift`: `TouchedRows.sampleCopyKills` (line ~58); the kill-evidence hook in `writeResolvedRow` (lines ~221–243); the `defendEditedSampleCopies` post-batch call (lines ~883–889).
   - `Sources/VariorumCore/Sync/SampleLibraryDedupe.swift`: `recordSampleCopyKillEvidence`, `meetingStands` + `meetingSettleWindow`, `defendEditedSampleCopies`, `killVerdictKey`/`persistKillVerdict`/`consumeKillVerdict`, `reviveSampleCopy`. KEPT: the core matrix, `retireSampleCopy` (the seeded-furniture fold's shared body), `retireSignedOutCopyIfOutranked` (its defense-referencing doc updated), the classifier whole.
@@ -43,7 +43,7 @@ The coordinator's standing lines (2026-10-28): `-only-testing` silently drops FI
 
 ## LIVE STATUS (flip per piece, same commit)
 
-- Unit 1 (VX-669 + VX-657, Fable): **IN PROGRESS** — removal surface traced (this file); build not started.
+- Unit 1 (VX-669 + VX-657, Fable implementer subagent): **IN PROGRESS — WIP baseline committed by the orchestrator, the subagent adopts it.** DONE in the baseline: pins 1+2 written and observed RED on the pre-fix tree (the revival itself, both clients — the single-delete pin failed `liveCopyIDs == [copyA]` and `deletedAt(reading, copyB) != nil` on both, i.e. the deleted copy returned alive everywhere); the defense-leg removal applied (Repairs.swift ×3, SampleLibraryDedupe.swift splice + doc, `swift build` green); migration `v1_35_sweep_kill_verdict_markers`; `p5bTheDoubleRetirementRaceCostsATrashTripButNeverBytes` flipped with a Put back arm. REMAINING (the subagent's): flip `p5bBothEditedMeansBothCopiesSurvive` and `aSamplePostInASecondBookStillRecordsItsKillEvidence` to the ruled new outcomes; soften `aRetirementSplitAtTheReadingBoundary…`'s doc (machinery gone, pin stays); the purge-staleness pin (ledger 3); VX-657 (ledger 4); full core suite green; commits per piece.
 - Unit 2 (VX-654 + VX-653, Opus): NOT STARTED — brief = this file's Unit 2 + the A-648-3 trace.
 - Unit 3 (VX-670 + VX-671, Opus): NOT STARTED — brief = this file's Unit 3; runs after Unit 2 lands (shared root).
 - Ladder: NOT STARTED.

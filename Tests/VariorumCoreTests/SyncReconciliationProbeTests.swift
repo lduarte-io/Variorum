@@ -923,17 +923,20 @@ struct SyncReconciliationProbeTests {
     /// (the pristine tombstoned baseline over the dirty row; rescue
     /// block-dead-skipped; outbox cleared).
     ///
-    /// THE RULED MATRIX, now pinned green (the orchestrator's row-15
-    /// ruling): **exactly-one-edited ⇒ the EDITED copy survives LIVE on
-    /// both devices with its edit intact; the pristine copy stays
-    /// retired.** Two repairs land it: Part 1 (the merge's ride-the-row
-    /// rescue keeps the edit's bytes AND its outbox entry alive through
-    /// the retirement batch) and Part 2 (the dedupe's defense leg: a
-    /// same-name copy killed by an ARRIVING retirement, in the two-copy
-    /// meeting context, whose family carries PRE-BATCH outbox dirt —
-    /// unpushed local intent the retiring device could never have seen —
-    /// revives exact-stamp and pushes).
-    @Test func p5bTheDoubleRetirementRaceKeepsTheEditedCopyAliveWithItsEdit() async throws {
+    /// THE OUTCOME SINCE VX-669 (her 2026-10-28 ruling removed the row-15
+    /// defense leg — a deliberate cross-device delete is never
+    /// second-guessed, so no revival machinery exists): **the crossing
+    /// retirements BOTH land — both copies end in the Trash on both
+    /// devices, every byte intact, Put back real.** Part 1 (the merge's
+    /// ride-the-row rescue) still carries the unpushed edit's bytes onto
+    /// the tombstoned row and keeps it enqueued, so nothing is ever lost —
+    /// the race's accepted cost is a visible, recoverable Trash trip
+    /// (QUESTIONS #143(b) as amended at the VX-678 closeout). The ruled
+    /// matrix itself is untouched: a TRUE meeting (both edits landed
+    /// before a pass runs) still keeps the edited copy — the suite's
+    /// `anEditedCopySurvivesAndThePristineOneRetiresWhateverTheIDs` and
+    /// the settled-pair pins below carry that.
+    @Test func p5bTheDoubleRetirementRaceCostsATrashTripButNeverBytes() async throws {
         let (a, b, server) = try dedupePair()
         let copyA = try seedCopy(a)
         let copyB = try seedCopy(b)
@@ -954,8 +957,8 @@ struct SyncReconciliationProbeTests {
                 "B kept the edited copy and retired the pristine one — the ruled outcome, on B's evidence")
 
         // A's pass: both pristine (the edit is still only in B's outbox)
-        // → copyB retired on A — correct on A's evidence; the defense is
-        // what un-crosses it when the evidence lands.
+        // → copyB retired on A — correct on A's evidence. Nothing
+        // un-crosses the race any more; tombstones win both ways.
         _ = try await a.pull()
         _ = try await a.pull()
         #expect(try liveCopyIDs(a) == [copyA.bookID],
@@ -965,20 +968,34 @@ struct SyncReconciliationProbeTests {
         try await productionQuiescence(a, b, server: server, maxRounds: 16)
         #expect(try a.syncedDump() == b.syncedDump(), "the stores converge")
 
-        // THE RULED MATRIX: the edited copy alive everywhere, edit intact,
-        // the pristine copy retired. (Red on old: both copies dead and the
-        // bytes gone — B1's reproduction, wrapped until this fix.)
+        // THE ACCEPTED OUTCOME (VX-669): both copies in the Trash on both
+        // devices; the edit's bytes ride the dead row (Part 1), lost
+        // nowhere.
         for client in [a, b] {
-            #expect(try liveCopyIDs(client) == [copyB.bookID],
-                    "\(client.name): the EDITED copy survives — never silently retired (R-pre13u-8)")
+            #expect(try liveCopyIDs(client).isEmpty,
+                    "\(client.name): the crossing retirements both land — a Trash trip, never a revival")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil, "\(client.name)")
+            #expect(try client.db.deletedAt("reading", copyB.bookID) != nil, "\(client.name)")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE working_text = ?",
+                ["Rewritten in her own words."]) == 1,
+                "\(client.name): the edit's bytes ride the Trash row — §6's forbidden outcome still held off")
+        }
+
+        // Put back is real: restoring the edited note revives its family
+        // with the ridden text live, and the revival converges.
+        try b.with { ops, _ in try ops.restoreContainer(editedPost) }
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try client.db.deletedAt("container", editedPost) == nil,
+                    "\(client.name): Put back returned the note")
             #expect(try client.db.fetchInt(
                 """
                 SELECT COUNT(*) FROM variant
                 WHERE working_text = 'Rewritten in her own words.' AND deleted_at IS NULL
                 """) == 1,
-                "\(client.name): the edit lives on the surviving copy (§6's forbidden outcome held off)")
-            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil,
-                    "\(client.name): the pristine copy stays retired — one library, hers")
+                "\(client.name): the edit came back live")
         }
     }
 
@@ -1204,6 +1221,116 @@ struct SyncReconciliationProbeTests {
             #expect(try client.db.deletedAt("reading", copyA.bookID) != nil,
                     "\(client.name): her deliberate delete STANDS — the month-old loser tombstone is not a meeting")
             #expect(try liveCopyIDs(client).isEmpty, "\(client.name): nothing revives")
+        }
+    }
+
+    // MARK: - VX-669: deliberate deletes of a STANDING both-edited pair stick
+
+    /// The SETTLED two-copy state her library lives in (the 2026-10-28
+    /// report): both copies edited BEFORE either push, so every pass reads
+    /// both-edited and the ruled matrix keeps both — no retirement, no
+    /// defense, the same settled pair on old and new code.
+    private func settledBothEditedPair() async throws -> (
+        a: SyncClient, b: SyncClient, server: FakeSyncServer,
+        copyA: (bookID: String, postIDs: [String: String]),
+        copyB: (bookID: String, postIDs: [String: String])
+    ) {
+        let (a, b, server) = try dedupePair()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        let variantA = try firstVariantID(a, postID: copyA.postIDs["A Scandal in Bohemia"]!)
+        let variantB = try firstVariantID(b, postID: copyB.postIDs["A Scandal in Bohemia"]!)
+        try a.with { ops, _ in
+            try ops.autosave(variantA, text: "In A's own words.", charDelta: 10)
+        }
+        try b.with { ops, _ in
+            try ops.autosave(variantB, text: "In B's own words.", charDelta: 10)
+        }
+        try await a.push()
+        try await b.push()
+        _ = try await a.pull()
+        _ = try await a.pull()
+        _ = try await b.pull()
+        _ = try await b.pull()
+        try await productionQuiescence(a, b, server: server, maxRounds: 20)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID, copyB.bookID].sorted(),
+                    "\(client.name): the settled standing pair — both edited, both live")
+        }
+        return (a, b, server, copyA, copyB)
+    }
+
+    /// **VX-669 pin 1 — HER SCENARIO, red-on-old:** a settled both-edited
+    /// pair, then a deliberate delete of BOTH books (notes first, then the
+    /// book — the family-tombstones shape her door mints) on one device.
+    /// The deletes must STAND everywhere: no same-name revival, every byte
+    /// on the Trash rows, Put back real. (Old code: the receiving device's
+    /// kill-time classifier read each copy EDITED while its twin's reading
+    /// row was still live — the standing-twin meeting arm — and revived
+    /// both families exact-stamp; her books "restored themselves from the
+    /// trash".)
+    @Test func aDeliberateDeleteOfBothStandingEditedCopiesSticksEverywhere() async throws {
+        let (a, b, server, copyA, copyB) = try await settledBothEditedPair()
+        try a.with { ops, _ in
+            for copy in [copyA, copyB] {
+                for postID in copy.postIDs.values.sorted() {
+                    try ops.deleteContainer(postID)
+                }
+                try ops.deleteReading(copy.bookID)
+            }
+        }
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client).isEmpty,
+                    "\(client.name): her deliberate deletes STAND — nothing revives (VX-669)")
+            for (bookID, text) in [(copyA.bookID, "In A's own words."),
+                                   (copyB.bookID, "In B's own words.")] {
+                #expect(try client.db.deletedAt("reading", bookID) != nil, "\(client.name)")
+                #expect(try client.db.fetchInt(
+                    "SELECT COUNT(*) FROM variant WHERE working_text = ?", [text]) == 1,
+                    "\(client.name): every byte rides the Trash rows — recoverable, never lost")
+            }
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM sync_state WHERE key LIKE 'sample_kill_verdict:%'") == 0,
+                "\(client.name): no defense bookkeeping is written")
+        }
+    }
+
+    /// **VX-669 pin 2 — the standing-twin arm alone, red-on-old:** the same
+    /// settled pair, then a deliberate delete of ONE copy a MONTH later —
+    /// far outside any settle window, this device's own act long pushed, so
+    /// the ONLY thing the old meeting predicate could stand on was the
+    /// twin's live reading row — which a settled both-edited library holds
+    /// FOREVER. The delete must stand beside the live twin. (Old code: the
+    /// copies were mutually undeletable from any second device.)
+    @Test func aDeliberateDeleteOfOneCopyBesideItsLiveTwinSticks() async throws {
+        let (a, b, server, copyA, copyB) = try await settledBothEditedPair()
+        let aMonthOn = Date(timeIntervalSince1970: 1_785_542_400)  // 2026-08-01T00:00:00Z
+        try a.with { ops, _ in
+            try withDependencies {
+                $0.date = .constant(aMonthOn)
+            } operation: {
+                for postID in copyB.postIDs.values.sorted() {
+                    try ops.deleteContainer(postID)
+                }
+                try ops.deleteReading(copyB.bookID)
+            }
+        }
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID],
+                    "\(client.name): the delete stands beside the live twin — no standing meeting (VX-669)")
+            #expect(try client.db.deletedAt("reading", copyB.bookID) != nil, "\(client.name)")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE working_text = ?", ["In B's own words."]) == 1,
+                "\(client.name): the deleted copy's edit is in the Trash, not lost")
         }
     }
 
