@@ -1796,12 +1796,12 @@ nonisolated enum CapabilityRegistry {
             availability: always),
         // 13i-b U3 — THE TWO STRENGTHENING DOORS (the sitting record §3). Both
         // on the shelf row's menu of a GATHERING, `always` for `.editRule`'s
-        // reason (the row carries its target). Bind's other two roads open
-        // the SAME confirm and are not doors of their own in this table: the
-        // book navigator's "+ new chapter" on a gathering is the chapter
-        // act's choreography (P-2), and the teaching moment is an OFFER on
-        // the status seam (18i), the kind the `.divergeForBook` toast
-        // precedent never declared as a door. The per-target condition — a
+        // reason (the row carries its target). Bind's other road opens the
+        // SAME confirm and is not a door of its own in this table: the
+        // teaching moment is an OFFER on the status seam (18i), the kind the
+        // `.divergeForBook` toast precedent never declared as a door. (The
+        // book navigator's "+ new chapter" on a gathering — the chapter act's
+        // choreography — is retired: VX-616, her ruling 2026-10-28.) The per-target condition — a
         // finished gathering refuses a bind — is the op's, and the menu hides
         // the door there (P-2).
         Capability(

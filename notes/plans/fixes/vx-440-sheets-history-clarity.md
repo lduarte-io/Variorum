@@ -711,8 +711,19 @@ Pieces (flipped per commit):
   row's fact. The Mac Trash row's Put back hover on a gathering: "The gathering comes back with its rule"
   (was "The book comes back whole — chapters and membership included", false of a gathering — PROVISIONAL
   P-440-13). The four B3-1 words pins turn GREEN at this commit (RUN PENDING). `build-for-testing` ✓.
-  IN THIS COMMIT (the fix: the green-on-new SHA).
-- B3-3 VX-616 the gathering foot loses "+ new chapter": NOT STARTED.
+  DONE (fe94dbbd7 — the fix: the green-on-new SHA).
+- B3-3 VX-616 the gathering foot loses "+ new chapter" (a ruled DESIGN row — pinned by the list the foot
+  renders from, plus the walk's capture; no red-on-old by the contract): `BookView`'s navigator foot on a
+  gathering no longer draws "+ new chapter" or its hover ("Chapters need a book that holds its notes — this
+  offers to bind…"); it renders `BookFootDoors.gathering()` = `[.newNote]` (NEW, beside VX-553's
+  `BookFootDoors.book`) → the `GatheringNoteDoor` exactly as before (VX-217's always-drawn, greys-and-says-
+  why door). Books keep their foot byte-unchanged. "Bind into a Book…" (`.bindIntoBook`, the Bookcase row's
+  menu) and the hand-drag teaching offer are untouched. The registry: `.bindIntoBook`'s declaration comment
+  no longer names the navigator's chapter door as a bind road (it was never a declared door — the registry
+  walk's unions are unchanged and stay green). Pin (Mac, compiled ✓, RUN PENDING): `BookFootDoorsTests
+  .aGatheringsFootIsTheNoteDoorAloneAndABookKeepsItsChapterDoor`. Tutorial (P-6) checked: its "＋ new chapter"
+  sentences are about BOOKS ("a book from the inside", "membership, not ownership") — unaffected. IN THIS
+  COMMIT.
 - B3-4 VX-616 the unreachable `.createChapter` bind follow-up retired: NOT STARTED.
 - B3-5 VX-189 the gathering's own Shared-with doors: NOT STARTED.
 - B3-6 VX-356 verify (trace) + seam + red-on-old pin: NOT STARTED.

@@ -940,50 +940,31 @@ struct BookView: View {
                     }
                 }
                 if structure.reading?.kind == .gathering {
-                    // 13c 2D (C2/N38, the memo's §3 + P-2): the chapter door
-                    // is RENDERED on a smart book and it ACTS — it opens the
-                    // conversion offer and, on confirm, creates the chapter.
-                    // Before this, chapters were a dead end here: the notice
-                    // below explained the absence honestly, which is better
-                    // than silence but is still lecture-and-stop.
+                    // VX-616 (her ruling 2026-10-28 — "agree with removing the
+                    // button"): the gathering's foot no longer draws "+ new
+                    // chapter". It ACTED (13c 2D's bind-then-chapter
+                    // choreography) but read as a promise a gathering cannot
+                    // keep — a gathering holds no notes, so it has no
+                    // chapters. Binding stays where it is asked for by name:
+                    // the row menu's "Bind into a Book…" (`.bindIntoBook`) and
+                    // the teaching offer a hand-drag earns. The foot is data
+                    // (`BookFootDoors.gathering`, pinned): "+ new note" alone.
                     //
-                    // NOTE what deliberately did NOT become an offer: adding
-                    // a post to a smart book already has a BETTER answer
-                    // than converting — R98's `collectPostIntoSmartReading`
-                    // applies the filter's tags and reports. Chapters are
-                    // the one genuinely dead end, because `section_id` lives
-                    // on a membership row and derived membership has none.
-                    if structure.reading?.locked != true {
-                        Button(tokens.chromeLabel("+ new chapter")) {
-                            Task {
-                                await structure.openBindOffer(
-                                    followUp: .createChapter, order: model.viewOrder)
+                    // VX-217 (her ruling): the footer that explained what a
+                    // gathering is (batch 6's legibility notice) is GONE: "we
+                    // don't need that info here, it's in the field guide if
+                    // they care and it looks cluttered." The note door is
+                    // always drawn; where a new note can't land it greys and
+                    // says why (R-VX214-3).
+                    ForEach(BookFootDoors.gathering(), id: \.self) { door in
+                        if door == .newNote {
+                            GatheringNoteDoor(
+                                tokens: tokens, word: GatheringNoteDoorCopy.navigatorWord,
+                                face: structure.gatheringMint
+                            ) {
+                                mint(.gathering, reveal: false)
                             }
                         }
-                        .buttonStyle(.borderless)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                        .help("Chapters need a book that holds its notes — this "
-                            + "offers to bind the gathering into one, keeping every "
-                            + "note it shows; "
-                            // 13i-d U6 (row 111): the promise only where an
-                            // act can reach the rule.
-                            + ((structure.reading.map(BindCopy.hearsActs) ?? true)
-                                ? "it keeps collecting after."
-                                : "after that it collects only when it catches up."))
-                    }
-                    // VX-217 (her ruling): the gathering's foot is the book's
-                    // — "+ new chapter", then "+ new note" — and the footer
-                    // that explained what a gathering is (batch 6's
-                    // legibility notice) is GONE: "we don't need that info
-                    // here, it's in the field guide if they care and it looks
-                    // cluttered." The note door is always drawn; where a new
-                    // note can't land it greys and says why (R-VX214-3).
-                    GatheringNoteDoor(
-                        tokens: tokens, word: GatheringNoteDoorCopy.navigatorWord,
-                        face: structure.gatheringMint
-                    ) {
-                        mint(.gathering, reveal: false)
                     }
                 }
                 // (The quiet slot that stood at the navigator's foot here —
@@ -3831,8 +3812,9 @@ nonisolated enum BookViewCopy {
 
 // MARK: - VX-553 — THE BOOK FOOT'S ORDER (data, so a pin can read it)
 
-/// One door at a BOOK's navigator foot (a gathering's foot is its own:
-/// "+ new chapter" as the bind offer, then the planner's note door).
+/// One door at a book's navigator foot. A GATHERING's foot draws only the
+/// planner's note door (`.newNote` → `GatheringNoteDoor`) — VX-616 retired its
+/// "+ new chapter" (the bind offer in a chapter's clothes).
 nonisolated enum BookFootDoor: Hashable, Sendable {
     case newChapter, newEntry, newNote, restoreChapter
 }
@@ -3859,5 +3841,15 @@ nonisolated enum BookFootDoors {
         if !finished { doors.append(journalTrait ? .newEntry : .newNote) }
         if hasDeletedChapters { doors.append(.restoreChapter) }
         return doors
+    }
+
+    /// **A GATHERING's foot** (VX-616 — her ruling 2026-10-28, "agree with
+    /// removing the button"): the note door alone, always drawn (it greys
+    /// where a note can't land — R-VX214-3). No chapter door: a gathering
+    /// holds no notes, so it has no chapters; binding is asked for by name in
+    /// the row menu ("Bind into a Book…") or earned by a hand-drag's teaching
+    /// offer. No restore door either: a gathering refuses sections.
+    static func gathering() -> [BookFootDoor] {
+        [.newNote]
     }
 }
