@@ -791,6 +791,14 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("Always is never offered for them."))
             #expect(text.contains("choose \(PrivateMarkCopy.rowWords)"), "the note's row, by its own words")
             #expect(text.contains("in its Book Settings"))
+            // VX-641 (her ruling 2026-10-28 — a JUSTIFIED EDIT, the ritual): the
+            // card says when the row appears, and its truth is the rule both rows
+            // read (`MCPLibraryClients.showsPrivateRow`).
+            #expect(text.contains("Both appear once an AI client has connected to this library, and always on "
+                                  + "anything already marked Private."))
+            #expect(!MCPLibraryClients.showsPrivateRow(everHadClient: false, marked: false))
+            #expect(MCPLibraryClients.showsPrivateRow(everHadClient: true, marked: false))
+            #expect(MCPLibraryClients.showsPrivateRow(everHadClient: false, marked: true))
             #expect(text.contains("Other books with date-stamped entries share like any book"))
             #expect(CollectingCopy.journalTraitValue.hasPrefix("date-stamped"),
                     "the trait, by the Book Settings row's own word")

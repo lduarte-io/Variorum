@@ -101,6 +101,20 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
     /// U3: every APPROVED client, by name — "Allow AI here" offers those
     /// not already reaching the note.
     var approvedClients: [String] = []
+    /// VX-641: the library has EVER had an MCP client (`MCPLibraryClients` —
+    /// VX-590's fact, the pane's own). Read with the rest, so the row appears
+    /// the moment a first client connects.
+    var libraryHasHadClient = false
+
+    /// **VX-641 — does the note's Private row show?** Once the library has had
+    /// a client (her ruling 2026-10-28: "it should be hidden if there's no AI to
+    /// share with"), and ALWAYS while the note is marked — its own mark or a
+    /// Private book's that holds it (the mark syncs, clients don't; a mark is
+    /// never invisible and can always be removed). The rule is the one the pane
+    /// reads (`MCPLibraryClients.showsPrivateRow`).
+    var showsPrivateRow: Bool {
+        MCPLibraryClients.showsPrivateRow(everHadClient: libraryHasHadClient, marked: own || !throughBooks.isEmpty)
+    }
 
     /// The clients "Allow AI here" can offer: approved, and not already
     /// reaching this note (a grant that changes nothing is a door that
@@ -116,7 +130,8 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
             own: try Queries.isNotePrivate(db, postID: postID),
             throughBooks: try Queries.privateBooksHolding(db, postID: postID),
             sharing: try Queries.mcpNoteSharing(db, noteID: postID),
-            approvedClients: try Queries.mcpClients(db, states: [.approved]).map(\.name))
+            approvedClients: try Queries.mcpClients(db, states: [.approved]).map(\.name),
+            libraryHasHadClient: try Queries.mcpLibraryHasHadClient(db))
     }
 
     /// Only a state loaded for THIS note draws (the wing doors' subject rule).
@@ -171,15 +186,19 @@ struct NotePrivacyMenuItems: View {
 
     var body: some View {
         if let state = NotePrivacyState.matching(state, postID: postID) {
-            Toggle(CapabilityRegistry.capability(.markNotePrivate).verb, isOn: Binding(
-                get: { state.own },
-                set: { on in
-                    let session = session
-                    let postID = postID
-                    Task { await NotePrivacyAct.set(on, postID: postID, session: session) }
-                }))
-            if !state.own, !state.throughBooks.isEmpty {
-                Text(PrivateMarkCopy.throughBooks(state.throughBooks))
+            // VX-641: the row and its line wait for the library's first client,
+            // unless the note is already marked (`showsPrivateRow`).
+            if state.showsPrivateRow {
+                Toggle(CapabilityRegistry.capability(.markNotePrivate).verb, isOn: Binding(
+                    get: { state.own },
+                    set: { on in
+                        let session = session
+                        let postID = postID
+                        Task { await NotePrivacyAct.set(on, postID: postID, session: session) }
+                    }))
+                if !state.own, !state.throughBooks.isEmpty {
+                    Text(PrivateMarkCopy.throughBooks(state.throughBooks))
+                }
             }
             if let shared = PrivateMarkCopy.sharedLine(state.sharing) {
                 Text(shared)

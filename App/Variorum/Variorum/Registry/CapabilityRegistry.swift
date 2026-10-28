@@ -2527,7 +2527,12 @@ nonisolated enum CapabilityRegistry {
         // scraps group). The book's: the settings sheet's State row (books
         // only — a gathering refuses `wrongReadingKind`, so it never renders).
         // 13n-c U3 (VX-164): the in-note indicator's LOCK popover renders
-        // the same toggle — its `.surface` door.
+        // the same toggle — its `.surface` door. VX-641 (her ruling 2026-10-28):
+        // the RENDER gate, applied where the rows render (the share doors'
+        // precedent below): the library has EVER had an MCP client, or the note
+        // or book is already marked (`MCPLibraryClients.showsPrivateRow` — the
+        // pane's one fact); the indicator's popover draws only with an approved
+        // client, so the gate holds there by construction.
         Capability(
             id: .markNotePrivate, verb: PrivateMarkCopy.rowWords, scope: .post,
             doors: [.bottomBar, .surface],

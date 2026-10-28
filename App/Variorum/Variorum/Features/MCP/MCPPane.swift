@@ -165,7 +165,9 @@ struct MCPPane: View {
     /// by sync (the store has no "came from Start fresh" fact, and the line is
     /// true of every such library). Pure, pinned.
     nonisolated static func saysClientsBelongToTheLibrary(_ snapshot: MCPDoor.Snapshot) -> Bool {
-        snapshot.pendingCount == 0 && snapshot.clientCount == 0
+        // VX-641: the ONE fact, shared with the Private row (`MCPLibraryClients`)
+        // — every client row, waiting (`pendingCount`) or decided (`clientCount`).
+        !MCPLibraryClients.everHadClient(clientRows: snapshot.pendingCount + snapshot.clientCount)
     }
 
     /// **VX-590 — the pane's sharing face renders once this library has ever

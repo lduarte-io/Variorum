@@ -2721,7 +2721,12 @@ enum TutorialSeeder {
             "To mark a note Private, open the note \u{25BE} menu in the bar at the "
             + "bottom of the note and choose Private \u{2014} never shared with AI. "
             + "A book has the same mark in its Book Settings, and it covers every "
-            + "note in the book. Other books with date-stamped entries share like "
+            // VX-641 (her ruling 2026-10-28: "the field guide can easily say that
+            // it says private once you have a connected thing" — PROVISIONAL
+            // words, the VX-648 record's bundle).
+            + "note in the book. Both appear once an AI client has connected to "
+            + "this library, and always on anything already marked Private. "
+            + "Other books with date-stamped entries share like "
             + "any book; only the daily Journal asks. An entry made with \u{2318}J "
             + "keeps asking even if you later file it in another book.",
 
