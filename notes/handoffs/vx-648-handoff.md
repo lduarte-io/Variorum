@@ -4,7 +4,7 @@
 
 ## Your checklist (the morning bundle)
 
-1. **QUESTIONS #247** — the run's PROVISIONALs, one place: A-648-5 (set_book_rule's gathering sentence), A-648-6 (⌘↑/⌘↓'s arms — reveal-only stepping, the speaking ends), A-648-8 (Pages/spread follow marks), P-B4-1 (Index→Outline arrives live below the page), the batch P-items, and the sentences sheet (all new words ride VX-234's copy pass).
+1. **QUESTIONS #248** — the run's PROVISIONALs, one place: A-648-5 (set_book_rule's gathering sentence), A-648-6 (⌘↑/⌘↓'s arms — reveal-only stepping, the speaking ends), A-648-8 (Pages/spread follow marks), P-B4-1 (Index→Outline arrives live below the page), the batch P-items, and the sentences sheet (all new words ride VX-234's copy pass).
 2. **VX-655, your call:** the checklist-exit line still vanishes for ONE 50–67 ms frame (3–4 frames, live-measured). Your reported ~1 s is GONE (it was VX-647's lag). Acceptable, or seat VX-655 in a later editor run (it needs VX-601's seam files)?
 3. **Rider offer:** VX-653 + VX-654 — batch 1 measured two quadratic lineage reads (the tray panel's 5.8 s and the Delete Block receipt's 13 s at 600 divide/merge rounds). Not your reported road; real at heavy seam history. Want them on a future run?
 4. **Two stray walk notes in Home's Trash** (titled "2026-10-28", deleted 07:07/07:31): the walker's Delete Now was permission-DENIED and nobody routed around it. They age out in 30 days, or your Delete Now takes them.
@@ -27,7 +27,7 @@ Per-member red-on-old pins verified by behavioral revert; suites at the final co
 
 - **Medium:** VX-653 (preservedOriginals quadratic — tray panel), VX-654 (originalsStrandedBy quadratic — the Delete Block receipt chain), VX-663 (Pages arrivals at page one, seen live).
 - **Low:** VX-655 (the list-exit frame residual — VX-601's seam files, a later editor run), VX-662 (the stale Index carry anchor).
-All triaged (kind · evidence · area · priority); none seated anywhere yet — #247 carries the offers.
+All triaged (kind · evidence · area · priority); none seated anywhere yet — #248 carries the offers.
 
 ## Standing facts
 

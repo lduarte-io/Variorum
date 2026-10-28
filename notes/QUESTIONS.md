@@ -3750,7 +3750,7 @@ eye:** VX-637 (does real ⎋ close the fans? — the 5-second check in the ticke
 VX-421's undo class — pre-launch is YOURS to label), and the four undo-residue "block" rows left in the dev Trash
 (VX-650; aging out unless you say Delete Now). Status: OPEN — her leisure.
 
-#247 — **THE VX-648 BUNDLE (the binding record is `notes/plans/fixes/vx-648-launch-week.md` — THE BUNDLE sections of
+#248 — **THE VX-648 BUNDLE (the binding record is `notes/plans/fixes/vx-648-launch-week.md` — THE BUNDLE sections of
 each batch; your checklist leads `notes/handoffs/vx-648-handoff.md`), OPEN — your morning.** Ratify or redirect, all
 built most-defensible and PROVISIONAL: **A-648-5** set_book_rule on a READABLE gathering speaks the reworded gathering
 sentence (option (b), the one not-shared shape even when readable, recorded) · **A-648-6** VX-563's arms — Outline
