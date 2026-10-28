@@ -2231,3 +2231,10 @@ coordinator; it goes to her with the one staged command; (3) the step-0 first-ru
 under the claim, per the standing safeguard; (4) the `/Applications` refresh from the DMG, codesign
 verified on staged AND installed; (5) the site publish + both verify-published checks.
 Zero-instance checks before every act; a running real-store instance is NEVER quit.
+
+**Her closeout-deliverable ask (2026-10-28, live):** at closeout, hand her the run's accomplishments
+CHECKED OFF in her pasted pre-launch-map format (the "## 4. VX-601 …" block with `- [x]` rows,
+riders line kept), with everything MINTED by the run listed underneath. NOTE for that delivery: her
+pasted block lists **VX-377 (Move/Copy to Wing from ⌘K)** as a row — VX-377 was never VX-601's
+member; it was the VX-439-missed member that ran in VX-620 (closed 2026-10-27). The delivery marks
+it with its true home and state rather than silently checking or dropping it.
