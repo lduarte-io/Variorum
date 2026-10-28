@@ -351,7 +351,10 @@ struct TakesBoardTests {
 
     /// Lens round-trip: a NAMED lens survives close/reopen through the
     /// STORE; a scratch column survives through VIEW MEMORY; fan expansion
-    /// does NOT survive (session-only, the plan's letter).
+    /// does NOT survive through either — it is never persisted. (Since VX-428
+    /// THE takes board remembers its open fans per note for the SESSION —
+    /// `TakesExpansionMemoryTests`; these models are not that board, and no
+    /// expansion ever reaches the defaults.)
     @Test func lensAndScratchRoundTripWhileExpansionIsSessionOnly() async throws {
         try await withWorld { session, db in
             let world = try await TakesWorld.make(session, db)
@@ -872,9 +875,12 @@ struct TakesPresentationTests {
         }
     }
 
-    /// Expand-all renders only where it means something: the single-column
-    /// article in a non-slot-split style (columns and slot-split ARE
-    /// whole-post fan presentations — R25's agreed half).
+    /// Expand-all renders wherever it means something — since VX-577 that is
+    /// EVERY fan style: slot split's blocks bloom one by one like every other
+    /// style's, and her word on the ticket (*"where is expand all takes when
+    /// you're in slot split?? you still need it lowkey"*) supersedes R25's
+    /// "slot split IS a whole-post fan presentation" half. (A JUSTIFIED EDIT —
+    /// the slot-split line flipped; RED on the pre-VX-577 gate.)
     @Test func expandAllIsOfferedOnlyWhereMeaningful() async throws {
         try await withWorld { session, db in
             let world = try await TakesWorld.make(session, db)
@@ -888,7 +894,12 @@ struct TakesPresentationTests {
             model.adopt(Queries.TakesProjection(
                 slots: model.projection.slots, fans: model.projection.fans,
                 fanStyle: .slotSplit))
-            #expect(!model.offersExpandAll, "slot split IS a whole-post presentation")
+            #expect(model.offersExpandAll,
+                    "VX-577: slot split offers expand all too — its blocks bloom one by one")
+            model.adopt(Queries.TakesProjection(
+                slots: model.projection.slots, fans: model.projection.fans,
+                fanStyle: .carousel))
+            #expect(model.offersExpandAll, "carousel: offered")
 
             model.adopt(Queries.TakesProjection(
                 slots: model.projection.slots, fans: model.projection.fans,

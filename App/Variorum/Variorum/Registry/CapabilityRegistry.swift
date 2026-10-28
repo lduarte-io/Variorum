@@ -407,9 +407,17 @@ nonisolated enum CapabilityRegistry {
                 if ctx.mode == .lenses { return .actElsewhere(.takes) }  // blooms live in Takes — GO there
                 return takeFamily(ctx)
             }),
+        *[removed for publication]*
+        // take (eg if the […] button had a 'create branched take' option…)"*):
+        // the `.surface` door is the take CARD's ⌄ menu — "New branched take",
+        // acting on the card's own take, the `.archiveTake` shape (one act,
+        // the card's row names its target; the chord acts on the take the
+        // caret is in, which on that card IS this take). Rendered by both card
+        // hosts from the one `TakeCardMenu` list (the board's cards and
+        // Write's take panel).
         Capability(
             id: .newTake, verb: "New Take (Branch)", scope: .take,
-            doors: [.menuBar, .contextMenu, .bottomBar, .palette],
+            doors: [.menuBar, .contextMenu, .bottomBar, .palette, .surface],
             shortcutLabel: "⌘T", takesAccess: .native,
             unavailableNote: "Takes grow on a block inside a note — open one first.",
             availability: takeFamily),

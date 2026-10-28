@@ -92,6 +92,8 @@ struct TakesBoardView: View {
         .deleteTake,
         // 13e E2 (A17): the same banner offers the delete door.
         .deleteSelectedBlocks,
+        // VX-594 (R-601-4): the live card's ⌄ menu — "New branched take".
+        .newTake,
         // 18c batch 3 (her U-6): …and the newline repair over that selection.
         .splitSelectedBlocksAtNewlines,
         // VX-372 (VX-383 U1 — D-C-2): the header's `note actions` row — the
@@ -184,6 +186,10 @@ struct TakesBoardView: View {
         // restore, the restore settled at once, and every entry became "the
         // top, then the landing's reveal". Which board a model is THE takes
         // board for is known here. (`.onAppear` still sets it — harmless.)
+        // VX-428 (R-601-2): the same construction-time fact SEEDS the note's
+        // open fans from the session — this line is what opens the board's
+        // expansion memory, so the first geometry report is already judged
+        // with the fans she left open drawn.
         model.landingEnabled = true
         _model = State(initialValue: model)
     }
@@ -1813,15 +1819,12 @@ struct TakesBoardView: View {
     /// panel. Every refusal — a sealed note, a locked take, the take the note
     /// shows, the block's last take — comes from the operations layer through
     /// `model.run` and speaks (P-2).
+    ///
+    /// VX-594: the wiring lives on the model now (`TakesViewModel.cardActs`),
+    /// ONE copy for this board and Write's panel, since the menu grew its
+    /// branch row; the board's cards are the fan namespace's.
     private func cardActs(take: Variant) -> TakeCardActs {
-        TakeCardActs(
-            locked: take.locked,
-            archive: { Task { await model.archiveTake(take.id) } },
-            label: { model.requestTakeLabel(variantID: take.id) },
-            toggleLock: {
-                Task { await model.setTakeLocked(take.id, locked: !take.locked) }
-            },
-            delete: { Task { await model.deleteTake(take.id) } })
+        model.cardActs(for: take, columnID: Self.fanColumnID)
     }
 
     /// 13e E4 (her A19): the card's fan-order doors, or nil where the act

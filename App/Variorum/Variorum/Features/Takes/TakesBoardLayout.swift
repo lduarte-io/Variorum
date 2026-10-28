@@ -10,7 +10,10 @@
 //  Nothing here touches the store, the projection, or the authority: it
 //  is exactly the state a board renders its geometry from, and it dies
 //  with the session (the plan's letter: fans stay open once expanded,
-//  close-all resets, nothing persists).
+//  close-all resets, nothing persists). One piece of it outlives the MOUNT
+//  since VX-428 (R-601-2): the open-fan set is the note's for the session —
+//  seeded at construction and reported back through `expansionSink`
+//  (see "Expansion" below); the rest still dies with the board.
 //
 //  The view model forwards every existing property/method name, so every
 //  view and pin call site reads unchanged (behavior parity is the batch
@@ -342,15 +345,55 @@ final class TakesBoardLayout {
         (text ?? "").count < 200
     }
 
-    // MARK: - Expansion (session-only)
+    // MARK: - Expansion (per-note session memory — VX-428)
 
-    /// Fanned blocks currently bloomed — SESSION-ONLY by the plan's letter
-    /// (fans stay open once expanded; close-all resets; nothing persists).
+    /// Fanned blocks currently bloomed: fans stay open once expanded,
+    /// close-all resets, nothing persists past the session, nothing syncs.
+    ///
+    /// **VX-428 (her ruling R-601-2, the R-VX170-5 road) supersedes the Takes
+    /// plan's MOUNT-ONLY letter** that used to stand here ("session-only …
+    /// nothing persists", which in practice meant the set died with the
+    /// board's per-mount model at every mode switch). The set is now the
+    /// note's for the SESSION: THE takes board's conductor seeds it at
+    /// construction from `EditorRouter.takesExpandedBlocks` — before the first
+    /// article geometry report, because expanded rows change heights and the
+    /// margin rail (`TakesBoardView.init`'s construction-time-fact lesson) —
+    /// and every change below is handed to `expansionSink`, which writes it
+    /// back. This component still never reads the projection or the session.
     private(set) var expandedBlocks: Set<String> = []
+
+    /// VX-428: where a change to `expandedBlocks` is reported — installed by
+    /// the conductor on THE takes board only (`landingEnabled`), nil on
+    /// Write's take panel and the Lenses board, whose expansion stays theirs.
+    /// Called after the change, with the whole new set; a mutation that
+    /// changes nothing reports nothing.
+    @ObservationIgnored var expansionSink: ((Set<String>) -> Void)?
+
+    private func expansionChanged() {
+        expansionSink?(expandedBlocks)
+    }
 
     /// The one insert door (reveals, landings, and the toggle share it).
     func bloom(_ blockID: String) {
-        expandedBlocks.insert(blockID)
+        if expandedBlocks.insert(blockID).inserted { expansionChanged() }
+    }
+
+    /// VX-428: the session's remembered set, placed at construction — a
+    /// seed, never a change (the memory already holds it), so it reports
+    /// nothing.
+    func seedExpansion(_ blockIDs: Set<String>) {
+        expandedBlocks = blockIDs
+    }
+
+    /// VX-428: drops remembered blocks the note no longer holds — the
+    /// conductor hands over the FIRST projection's block set (the
+    /// `pruneMergeSelection` shape; this component never reads the
+    /// projection). Reports only when something left.
+    func pruneExpansion(to blockIDs: Set<String>) {
+        let kept = expandedBlocks.intersection(blockIDs)
+        guard kept.count != expandedBlocks.count else { return }
+        expandedBlocks = kept
+        expansionChanged()
     }
 
 
@@ -478,6 +521,7 @@ final class TakesBoardLayout {
         } else {
             expandedBlocks.insert(blockID)
         }
+        expansionChanged()
     }
 
     /// Expand-all-fans (AppSpec §12): every FANNED block blooms, in the set
@@ -485,11 +529,15 @@ final class TakesBoardLayout {
     /// passes the projection's fanned set (this component never reads the
     /// projection).
     func expandAll(fannedBlockIDs: Set<String>) {
+        let changed = expandedBlocks != fannedBlockIDs
         expandedBlocks = fannedBlockIDs
+        if changed { expansionChanged() }
     }
 
     func closeAllFans() {
+        let changed = !expandedBlocks.isEmpty
         expandedBlocks = []
+        if changed { expansionChanged() }
     }
 
     // MARK: - The block selection (13e E3 — her A18: "⌘-click in Takes to

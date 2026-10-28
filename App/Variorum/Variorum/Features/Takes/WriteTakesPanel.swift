@@ -79,6 +79,8 @@ struct WriteTakesPanel: View {
     /// could see it.
     static let surfaceCapabilities: [CapabilityID] = [
         .unarchiveTake, .archiveTake, .labelTake, .lockTake, .deleteTake,
+        // VX-594 (R-601-4): the card ⌄ menu's "New branched take".
+        .newTake,
     ]
 
     /// VX-154: how the panel closes itself — `EditorView` passes the sheet's
@@ -496,16 +498,12 @@ struct WriteTakesPanel: View {
                     // the one word that moved is the label row, which said
                     // "Label…" here and "Label take…" on the card context
                     // menu, i.e. the two "matching" menus did not agree on it.
-                    TakeCardMenu(acts: TakeCardActs(
-                        locked: take.locked,
-                        archive: { Task { await model.archiveTake(take.id) } },
-                        // 13b Stage 3 (3D — N6): the label door rides
-                        // Write's panel too (one grammar everywhere).
-                        label: { model.requestTakeLabel(variantID: take.id) },
-                        toggleLock: {
-                            Task { await model.setTakeLocked(take.id, locked: !take.locked) }
-                        },
-                        delete: { Task { await model.deleteTake(take.id) } }))
+                    // VX-594 (R-601-4): the acts are wired ONCE on the model
+                    // (`TakesViewModel.cardActs`) for this panel and the
+                    // board's cards — the four rows above plus "New branched
+                    // take", whose reveal lands the ring on THIS panel's new
+                    // card (its own column).
+                    TakeCardMenu(acts: model.cardActs(for: take, columnID: column.id))
                 }
                 PaneSurfaceView(
                     text: model.liveText(take),

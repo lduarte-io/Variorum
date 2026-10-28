@@ -288,12 +288,22 @@ final class TakesViewModel {
         lensFilter.bloomTakes(slot)
     }
 
-    /// Expand-all only where it MEANS something (R25's agreed half): the
-    /// article that isn't slot-split (slot split IS a whole-post fan
-    /// presentation already). Columns no longer figure in — they live in
-    /// the LENSES tab now (Sitting 9, R86: the entanglement is dead).
+    /// Expand-all (and its close-all twin) in EVERY fan style. Columns no
+    /// longer figure in — they live in the LENSES tab now (Sitting 9, R86: the
+    /// entanglement is dead).
+    ///
+    /// **VX-577 — slot split offers it too.** The gate used to exclude slot
+    /// split on R25's agreed half ("slot split IS a whole-post fan
+    /// presentation already"), but its blocks bloom one by one exactly as in
+    /// every other style (`articleRow`'s split branch, the lens filter's own
+    /// slot-split rule), so the door has a meaning there — and her word on the
+    /// ticket supersedes that half of R25: *"where is expand all takes when
+    /// you're in slot split?? you still need it lowkey."* An exhaustive switch,
+    /// so a future style decides for itself rather than inheriting a yes.
     var offersExpandAll: Bool {
-        projection.fanStyle != .slotSplit
+        switch projection.fanStyle {
+        case .stack, .carousel, .marginGrid, .slotSplit: true
+        }
     }
 
     /// R24's short/long rule for the margin grid — the board layout's
@@ -485,6 +495,7 @@ final class TakesViewModel {
     /// Internal so tests drive projections deterministically (the test host
     /// never fires `.task`).
     func adopt(_ new: Queries.TakesProjection) {
+        let firstProjection = !loaded
         loaded = true
         // **13u2 UNIT E — THE ONE STRUCTURAL ARM** (KnownIssues row 51's
         // recommended design, built inside the `TakesArticleScroll` split).
@@ -525,6 +536,15 @@ final class TakesViewModel {
         // whose cell re-resolved elsewhere is dropped.
         endRingIfItsTakeChanged(from: ringTakeBefore)
         dropParkedFollowIfMovedElsewhere(from: parkedTakeBefore)
+        // VX-428: the remembered open fans this board was SEEDED with may name
+        // blocks the note no longer holds (a delete, a merge, another device) —
+        // the FIRST projection prunes them, layout and memory alike. Only the
+        // first: inside one showing a block that leaves keeps its open state
+        // exactly as before (its id never matches a row), so a ⌥⌘Z that puts
+        // it back brings it back open.
+        if firstProjection, landingEnabled {
+            board.pruneExpansion(to: Set(new.slots.map(\.blockID)))
+        }
         // VX-170: the `show ▾` filter re-reads the fresh projection BEFORE the
         // landings below resolve against it (a landing onto a pane the filter
         // hides opens its block — the filter must already know the shapes).
@@ -1331,6 +1351,20 @@ final class TakesViewModel {
         board.clearArticleLanding()
         board.expandAll(
             fannedBlockIDs: Set(projection.slots.filter(\.hasFan).map(\.blockID)))
+        // VX-577: in SLOT SPLIT a bloom REPLACES the article cell with the
+        // fan's cards, so expand-all can take away the very pane the ring is
+        // in — the ring would stand on a pane no surface renders (the R112
+        // class). Her own act reshaped the page, so the ring ends by the
+        // FLUSHED blur (no keystroke dies with it) — the `show ▾` filter's
+        // ratified rule for the same shape (R-VX170: her own view change that
+        // hides the live pane blurs it, because the view she asked for is
+        // exactly what shows). PROVISIONAL (the batch B record, P-B-1). Every
+        // other style keeps the article cell, so nothing moves there.
+        if let pane = focusedPane, host == .takes, pane.columnID == Self.takesMainColumnID,
+           let slot = projection.slots.first(where: { $0.blockID == pane.blockID }),
+           slotSplitReplacesArticleCell(slot) {
+            blur()
+        }
     }
 
     func closeAllFans() {
@@ -2587,9 +2621,73 @@ final class TakesViewModel {
 
     /// True on the PRIMARY takes board only (never the Write panel's
     /// embedded model): landing focus + cross-mode landings apply there.
+    ///
+    /// VX-428: the flag's going TRUE is also the moment THE takes board's
+    /// expansion memory opens (`openExpansionMemory`) — `TakesBoardView.init`
+    /// sets it at construction, before the view's first body, which is what
+    /// puts the seeded fans in place before the first article geometry report.
     var landingEnabled: Bool {
         get { choreography.landingEnabled }
-        set { choreography.landingEnabled = newValue }
+        set {
+            let opening = newValue && !choreography.landingEnabled
+            choreography.landingEnabled = newValue
+            if opening {
+                openExpansionMemory()
+            } else if !newValue {
+                board.expansionSink = nil
+            }
+        }
+    }
+
+    // MARK: - VX-428 — the open fans, remembered per note for the session
+
+    /// **The board's open-fan set survives a mode round trip** (her ruling
+    /// R-601-2 on VX-428 — the tester's *"I wish my current Takes stayed open
+    /// even when I briefly switch to 'Write' to check on something"*; built on
+    /// the VX-170 road, R-VX170-5's session-only per-note memory).
+    ///
+    /// THE takes board only — the flag `TakesBoardView` alone sets — so
+    /// Write's take panel (one block's cards, its own reveals) and the Lenses
+    /// board (no blooms) never read or write the note's memory. Two halves:
+    /// - **the seed**: the remembered set goes into the layout NOW, at the
+    ///   board's construction (`TakesBoardView.init` → this setter), so the
+    ///   first render already draws the open fans — expanded rows change
+    ///   heights and engage the margin rail, and the article's restore and
+    ///   landing judge the page by its first geometry report (the 17q
+    ///   ladder's R1-1 construction-time-fact lesson, `TakesBoardView.init`);
+    ///   blocks the note no longer holds are pruned against the first
+    ///   projection (`adopt`);
+    /// - **the write-back**: every change the layout reports — her badge, ⌘⇧T,
+    ///   expand all / close all / ⎋, a reveal's bloom, a landing's bloom, the
+    ///   `show ▾` filter's fresh page — lands in the session at once, so no
+    ///   teardown road has to be relied on (SwiftUI does not promise one).
+    ///
+    /// Cost: one dictionary read and one set copy at construction, one set
+    /// comparison per change — ∝ the open fans, never the note (P1). What the
+    /// seeded fans cost to DRAW is the lazy column's: only realized rows build
+    /// their cards (P3), measured in the batch B record.
+    private func openExpansionMemory() {
+        board.expansionSink = { [weak self] blockIDs in
+            self?.rememberExpansion(blockIDs)
+        }
+        guard let remembered = session.editorRouter.takesExpandedBlocks[postID],
+              !remembered.isEmpty
+        else { return }
+        board.seedExpansion(remembered)
+        // A board told AFTER its first projection (a pin's order, never the
+        // app's) prunes against the projection it already holds.
+        if loaded {
+            board.pruneExpansion(to: Set(projection.slots.map(\.blockID)))
+        }
+    }
+
+    private func rememberExpansion(_ blockIDs: Set<String>) {
+        guard landingEnabled else { return }
+        if blockIDs.isEmpty {
+            session.editorRouter.takesExpandedBlocks.removeValue(forKey: postID)
+        } else if session.editorRouter.takesExpandedBlocks[postID] != blockIDs {
+            session.editorRouter.takesExpandedBlocks[postID] = blockIDs
+        }
     }
 
     /// The Takes board's fixed main-column identity (shared with the view).
@@ -2614,15 +2712,29 @@ final class TakesViewModel {
     /// pane with pending text, exactly the pre-move `authority.focus`
     /// call. Internal for the choreographer; everything else focuses
     /// through `focus(_:)`.
-    func landAuthorityFocus(_ pane: PaneKey) {
+    func landAuthorityFocus(_ requested: PaneKey) {
         // VX-154: the panel's one-block rule holds at this door too (it is
         // the N9 landing's, which the panel's model never runs — a belt).
-        guard ringMayStand(on: pane) else { return }
+        guard ringMayStand(on: requested) else { return }
         parkedFollow = nil  // VX-227 (rider 1): a landing is a focus too
         parkedTransit = []
         // VX-170: the entry ring lands where she was — and if the `show ▾`
         // filter folded that block to a line, the block opens (`focus`'s rule).
-        lensFilter.reveal(pane)
+        lensFilter.reveal(requested)
+        // VX-428: since the open fans survive the mode switch, the board can be
+        // BORN with the entry block bloomed — and in SLOT SPLIT that bloom
+        // replaces the article cell with the fan's cards, so the article key
+        // the choreographer asks for would name a pane no surface renders (the
+        // R112 class: the ring may only land on a pane some surface renders).
+        // The ring lands on the card that renders the same take — the find's
+        // and the room's own mapping (`TakesFindController.land`,
+        // `TakesBoardView.landInTheRoom`). Read AFTER the filter's reveal,
+        // which can itself bloom the block.
+        let pane = paneRenderingArticleTake(requested)
+        if pane != requested {
+            // …on the pager's visible page (the step's own reveal road).
+            pageToReveal(blockID: pane.blockID, variantID: pane.variantID)
+        }
         // 17o batch b (U-20): the N9 landing enters the note's current block
         // — and enters it WHERE SHE WAS. (This door deliberately does not
         // report the fact; it is landing ON the fact.)
@@ -2640,6 +2752,30 @@ final class TakesViewModel {
         // the layout took its own snapshot in `init`, which is what keeps the
         // two showings apart.)
         rememberArticleCurrentBlock(pane.blockID)
+    }
+
+    /// **Does a slot-split bloom REPLACE this block's article cell?** —
+    /// `TakesBoardView.articleRow`'s own branch, asked of the model: in slot
+    /// split a bloomed FANNED block renders its fan's cards in the cell's place
+    /// (the style's whole point), so no `takes-main` pane exists for it.
+    /// (VX-428's entry ring and VX-577's expand-all ask it; the find's land and
+    /// the room's landing carry their own copies of the same condition.)
+    func slotSplitReplacesArticleCell(_ slot: Queries.RenderedBlock) -> Bool {
+        projection.fanStyle == .slotSplit && slot.hasFan && isBloomed(slot)
+    }
+
+    /// The pane that RENDERS an article-keyed ring's take on this board: the
+    /// key itself, unless a slot-split bloom replaced its block's article cell
+    /// — then that take's fan card (`fanCardColumn`'s namespace). Every other
+    /// key, and the Lenses host, names itself.
+    private func paneRenderingArticleTake(_ pane: PaneKey) -> PaneKey {
+        guard host == .takes, pane.columnID == Self.takesMainColumnID,
+              let slot = projection.slots.first(where: { $0.blockID == pane.blockID }),
+              slotSplitReplacesArticleCell(slot)
+        else { return pane }
+        return PaneKey(
+            columnID: Self.takesFanColumnID, blockID: pane.blockID,
+            variantID: pane.variantID, context: pane.context)
     }
 
     // MARK: - Keyboard fan paging (13b 1b — AD-2's keyboard companion;
