@@ -121,19 +121,23 @@ struct MCPStarActsTests {
         }
     }
 
-    /// The cap refuses the act in HER words' case (`starLimitReached` — the wire
-    /// speaks it through her `OpsRefusalCopy`), nothing written, no entry.
-    @Test func theCapRefusesTheActAndWritesNothing() throws {
+    /// **VX-643 — THE DELIBERATE FLIP** of `theCapRefusesTheActAndWritesNothing`:
+    /// her cap is gone, so the client's star past fifteen LANDS — appended in
+    /// star order with its ONE client-named entry, which takes it back. RED ON
+    /// OLD: the act refused `starLimitReached` and wrote nothing.
+    @Test func theClientsStarPassesFifteenWithOneEntry() throws {
         try withUndo { ops, stack, db in
-            for index in 0..<Operations.starLimit {
+            for index in 0..<15 {
                 try ops.setStarred(.post(try ops.createPost(title: "n\(index)").id), starred: true)
             }
-            let full = try starred(db)
-            let one = try ops.createPost(title: "one too many")
-            #expect(throws: OperationError.starLimitReached(limit: Operations.starLimit)) {
-                try ops.setStarredForClient(.post(one.id), starred: true, undoLabel: label)
-            }
-            #expect(try starred(db) == full && stack.depth == 0)
+            let before = try starred(db)
+            let one = try ops.createPost(title: "one more")
+            let change = try ops.setStarredForClient(.post(one.id), starred: true, undoLabel: label)
+            #expect(change.changed)
+            #expect(try starred(db) == before + [.post(one.id)], "appended, the sixteenth")
+            #expect(stack.depth == 1 && stack.topLabel == label)
+            #expect(try stack.undo(with: ops) == label)
+            #expect(try starred(db) == before, "the entry takes it back")
         }
     }
 
@@ -236,26 +240,26 @@ struct MCPStarActsTests {
         }
     }
 
-    /// A half that would star past the cap REFUSES in her words and KEEPS its
-    /// entry — resolvable: she un-stars one, and the undo then lands.
-    @Test func aHalfThatWouldPassTheCapRefusesAndKeepsItsEntry() throws {
+    /// **VX-643 — THE DELIBERATE FLIP** of `aHalfThatWouldPassTheCapRefusesAndKeepsItsEntry`
+    /// (RB-8's cap-blocked arm, moot with the cap): an un-star's undo that
+    /// re-adds the star past fifteen LANDS at once — back at its PLACE in the
+    /// Starred list (RB-8's place-restore, untouched), nothing for her to free
+    /// first. RED ON OLD: the half refused `starLimitReached` and kept its entry.
+    @Test func anUndoThatRestarsPastFifteenLandsAtItsPlace() throws {
         try withUndo { ops, stack, db in
             var notes: [Container] = []
-            for index in 0..<Operations.starLimit {
+            for index in 0..<15 {
                 let note = try ops.createPost(title: "n\(index)")
                 notes.append(note)
                 try ops.setStarred(.post(note.id), starred: true)
             }
             _ = try ops.setStarredForClient(.post(notes[3].id), starred: false, undoLabel: unstarLabel)
             let filler = try ops.createPost(title: "filler")
-            try ops.setStarred(.post(filler.id), starred: true)  // the list is full again
-            #expect(throws: OperationError.starLimitReached(limit: Operations.starLimit)) {
-                try stack.undo(with: ops)
-            }
-            #expect(stack.depth == 1 && stack.topLabel == unstarLabel, "the entry is kept")
-            try ops.setStarred(.post(filler.id), starred: false)
-            #expect(try stack.undo(with: ops) == unstarLabel)
-            #expect(try starred(db) == notes.map { .post($0.id) }, "back at its place, fourth")
+            try ops.setStarred(.post(filler.id), starred: true)  // fifteen again
+            #expect(try stack.undo(with: ops) == unstarLabel, "no cap: the half lands")
+            #expect(stack.depth == 0)
+            #expect(try starred(db) == notes.map { .post($0.id) } + [.post(filler.id)],
+                    "back at its place, fourth; hers stays last")
         }
     }
 }
