@@ -806,3 +806,68 @@ three suites carry their own.
   rebuilt tree with the rest).
 - Expected cost of the gate in a window: one wait per test process, ≤ ~1–2 s when the host opens
   normally (the half-second tail included); 20 s at most if the host cannot open.
+
+## THE WALK RECORD — batch A (W1–W4) (Opus walker, claim `vx-601-walk`, 2026-10-27 20:43–21:00 MDT)
+
+Build: `App/Variorum/DerivedData/vx601a-post/Build/Products/Debug/Variorum.app` (dev store, pid 47334
+for the whole walk — ONE launch, no crash, no relaunch). Captures (gitignored):
+`App/Variorum/DerivedData/walkshots-vx601a/` — `leg0-*` as-found, `w1*`–`w4*` Study, `t1*`–`t4*`
+Terminal, `r*` leave-taking. No What's New sheet showed at launch.
+
+**As-found (leg 0, captured before any act):** Bookcase, no books; the held banner "This is your
+library as of October 20, 2026…" with Resume Sync (NEVER pressed); "Sync off (dev store)"; Study voice,
+app Dark while macOS stayed Light (system appearance never touched); Library = ONE note ("The walk
+leaves a stone here…", edited Oct 19); Trash = the Sherlock seed set (notes + "the adventures of
+sherlock holmes" book, deleted Oct 27 5:46 PM — the ≈65 the brief names; NOT counted exactly — the
+Trash list loads lazily and reads "The Trash is empty." for its first ~1–3 s, which a walker must not
+mistake for the as-found). The encrypted-library ask card ("record the twelve words") showed on the
+Bookcase and was never touched.
+
+**The walk note:** minted by quick entry ("vx601 walk note, the fanned block one." ⇧⏎ "The second
+plain block two." ⏎ — titled "2026-10-27", two blocks), then ⌘T in Write → block 1 fanned (⑂2).
+W1 added a third take (restored by ⌥⌘Z); the Terminal pass a fourth. Takes below: take 1 = the
+chosen, take 2 = the take ⌘T mints in Takes (it lands SECOND, right after the chosen — the caret
+lands in it), take 3 = the Write-minted take.
+
+| Row | Study | Terminal | What was seen |
+|---|---|---|---|
+| **W1** (VX-421, her gesture) | **PASS** | **PASS** | Takes, fan expanded; ⌘T → ⑂3, caret in the fresh take; ⌘V pasted the long paragraph whole into it; card ⌄ ▸ "Delete this take" → ⑂2; **⌘Z → the app LIVED** (same pid, nothing undid, fan still ⑂2); **⌥⌘Z → the take came back whole** with the paragraph (⑂3), receipt "Undid: Delete Variant". Terminal: same sequence, same result (⑂4 → ⑂3 → ⌘Z alive, nothing → ⌥⌘Z ⑂4) — but see finding F-1 (the pasted text). |
+| **W2** (R-601-1) | **PASS** | **PASS** | Typed " oneTYPED" at take 1's end, clicked take 2's end, typed " twoTYPED"; ⌘Z → only " twoTYPED" left take 2; second ⌘Z → nothing further visible; take 1 kept " oneTYPED". ⌘1 → ⌘2 (re-expanded): take 2 still reads UNDONE (no re-do — no pre-existing finding to record). Terminal: " tA" / " tB", identical outcome. |
+| **W3** (VX-248, Canvas ⌘7) | **PASS** | **PASS** | Card 1 ("see takes (3)"): clicked its end, typed "x" → "…oneTYPEDx"; "see takes" opened "‹ take 1 of 3 ›"; › → "take 2 of 3 · viewing — not what the note shows", the card showing **take 2's OWN words** ("…W1 long paragraph: the morning…"); typed "!" — the clipped card can't show its end, so verified in Takes after: take 2 ends "…strangely glad.!" (the caret sat at take 2's end), take 1 has no "!"; ‹ → take 1's words with the "x". Terminal: "tAx", › → take 2's own words, "!" → confirmed in Lenses (take 2 ends ".../!"), ‹ → take 1 with "x". |
+| **W4** (VX-227 follow, Lenses) | **PASS** | **PASS** | "+ column ▾ ▸ New lens — arrange existing takes" (= `addScratchColumn`, session-only, no store write) → "Lens 1 · unnamed lens"; clicked its pane at take 1's end; ⌃⌘→ → "take 2 of 3", the live pane showing **take 2's own words**; "Q" landed IN take 2; ⌃⌘← → "take 1 of 3", take 1's own words; "W" landed at take 1's end ("…oneTYPEDxW", the Chosen column agreeing). Terminal identical ("take 2 of 4" → Q in take 2; ← → "tAxW"). Observation O-2. |
+
+**Findings and observations (none blocks a row):**
+- **F-1 (walk-environment, not the app): the clipboard changed under the walk.** The walker set the
+  pasteboard once (`pbcopy`, ~20:45, the long paragraph) for W1-Study; by the Terminal pass (~20:52)
+  the pasteboard held a Reddit URL someone else copied (Universal Clipboard — this Mac's HID stayed
+  idle throughout, the guard passing every step). So Terminal W1 pasted that 3-line URL, not the
+  paragraph — still a paste on the fresh take's undo stack, which is the mechanism the row exercises,
+  and the URL now sits in that take of the TRASHED walk note. The walker did not touch the clipboard
+  again. **The author's clipboard was overwritten once by the walk (~20:45) — tell her.**
+- **O-1 (wording, pre-existing, not this batch):** the structural-undo receipt reads "Undid: Delete
+  Variant" — the model word on a face that otherwise says "take". Candidate Wording ticket.
+- **O-2 (behaviour as built, not a failure):** after a step, the caret keeps its character OFFSET in
+  the new take, so W4's "Q" landed mid-word ("paQragraph" / "httpQs" — offset 48, take 1's end). The
+  row's contract (own words, caret in it, a keystroke lands in it) holds; whether a step should park
+  the caret at the end is an unruled edge for her, not a regression.
+- **O-3 (later batches' members, recorded only):** Takes came back COLLAPSED after the ⌘1→⌘2
+  round-trip (VX-428's territory); the bottom bar read "7w take" while typing in the long take
+  (VX-427's); after Canvas the Takes head pane's caret sat before the "x" rather than after it.
+
+**Leave-taking / returned:** palette "Use Study Voice" (the Terminal switch was the palette's "Use
+Terminal Voice" — the setting is synced document semantics, now back to Study); Appearance never
+touched (app Dark throughout, both voices); the walk note deleted by note ▾ ▸ "Delete Note…" ▸
+Delete ("goes to the Trash for 30 days"; receipt "Note moved to the Trash — 30 days to put it back.");
+NOT emptied, NOT deleted forever. Verified after: Library = the one Oct-19 note; Trash top row
+"2026-10-27 · note · deleted Oct 27, 2026 at 8:57 PM", the as-found list unchanged beneath it in the
+same order (Trash = as-found + 1); held banner present (Resume Sync never pressed); "Sync off (dev
+store)"; Study + app Dark. Not re-opened (untouched by any walk act): sign-in, the MCP pane, Walk Wing.
+Quit by bundle id `io.lduarte.Variorum.debug`; guards `pgrep -lx Variorum` / `pgrep -lf
+"MacOS/Variorum$"` empty before launch and after quit.
+
+**Prefs (`io.lduarte.Variorum.debug`, before/after export diff):** ADDED four per-note keys for the
+walk note (`canvasViewMemory.` / `currentBlock.` / `postMode.` / `takesViewMemory.`
+`398495C7-ADA3-415B-A971-8CA8953D5DCA`) — all four DELETED; CHANGED bookkeeping left as is:
+`IdleCommitSweepMark.Variorum-dev` (stamp), `variorum.backup.log` (the per-launch dev-store backup
+*[removed for publication]*
+before: nothing added, nothing removed.
