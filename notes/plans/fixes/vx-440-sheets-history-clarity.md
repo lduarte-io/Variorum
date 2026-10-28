@@ -434,7 +434,25 @@ All three were the batch's TEST harnesses, not its product code; each trace belo
   in Takes without the fact would break P-2 (live in Takes over a note with no moment, grey in Write).
   FIX: a JUSTIFIED EDIT of the walk, the VX-377 line's class — both contexts satisfy the note fact, so the act
   is judged on mode alone (no other act reads it). DONE (this commit).
-- **SF-2** — IN-PROGRESS.
+- **SF-2 `VersionDoorsTests.thePaletteListsTheLatestDoorOnlyWhileTheNoteHasAMoment` + the 4 warnings** — the
+  location `AppSession.swift:762` is `AppSession.init`'s `@Dependency(\.date) var date; self.clock = date`
+  (13j-era code, unchanged by this run); the `noteHasSavedVersion` observation reads NO dependency
+  (`observeLatestNoteVersion` → `AppDatabase.observe` → `Queries`) and constructs no session. TWO mechanisms:
+  (1) THE FAILURE is this batch's test harness — `withDependencies { $0.database = db }` built an
+  `AppSession` with no date value, so swift-dependencies' strict test-context check fired inside the test.
+  FIX (at that source): the harness gives the date, as every other harness in the suite does. (2) THE FOUR
+  "Test «unknown»" WARNINGS are not attributed to any test: in every log that has them (green, red2, red4)
+  they print on the line right after the HOST APP's own "[protection] road: opened … (a hosted test run)",
+  i.e. the host app's launch building its live session (`AppBootstrap.swift:416`,
+  `AppSession(database: view, …)`) while the test run was already live; red1 (`34c21e938`) has none because
+  there the road opened (log line 324) before the test run started (415), and red3 (`7715a4a3d` — a tree
+  carrying ALL of batch 1, the observation included) has none either. They predate batch 1 and are independent
+  of it. Their source fix would be one statement in the bootstrap's `.ready` arm
+  (`withDependencies { $0.date = .now } operation: { AppSession(…) }` — byte-identical live behaviour, since
+  `DateGenerator.liveValue` IS `.now`) — NOT taken here: `AppBootstrap.swift` is the protection road's
+  bootstrap shared with the phone (CastleRules-read territory, outside this batch's fences, and the brief says
+  keep the diff tight). CHOSEN: fix the one that is batch 1's at its source; ticket-candidate the host-launch
+  four for the orchestrator (Tests & tooling · Low — the seam above). DONE (this commit).
 - **SF-3** — IN-PROGRESS.
 - Batch 2 (Block History): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + the VX-244 red-on-old run + walk PENDING the stage window; UNIT RECORD below.
 

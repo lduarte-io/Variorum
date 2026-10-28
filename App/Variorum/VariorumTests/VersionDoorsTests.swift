@@ -99,7 +99,14 @@ struct VersionDoorsTests {
     /// every-row listing (the walk) still carries it.
     @Test func thePaletteListsTheLatestDoorOnlyWhileTheNoteHasAMoment() throws {
         let db = try AppDatabase.inMemory()
-        withDependencies { $0.database = db } operation: {
+        // SF-2 (the stage run): `AppSession.init` takes the session clock from
+        // `@Dependency(\.date)`, and swift-dependencies refuses a live clock in
+        // a test context — the harness owes it a value, as every other harness
+        // in this suite gives one (this one gave only the database).
+        withDependencies {
+            $0.database = db
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: {
             let session = AppSession(database: db)
             let actions = ShellActions(session: session, shell: ShellRouter())
             let verb = CapabilityRegistry.capability(.compareWithLatestVersion).verb
