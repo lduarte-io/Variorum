@@ -249,8 +249,10 @@ nonisolated enum BookPanelBrain {
     /// voice's glyph (Terminal's "›"), the title's weight and its ink — and
     /// Study's glyph is empty BY DESIGN ("Study's empty marker leaves the
     /// weight and the ink to say it"). A chapter row has neither to give: its
-    /// name is ALWAYS semibold and in the accent. The voice's glyph where it
-    /// has one; otherwise nothing.
+    /// name is ALWAYS semibold and in the accent — so in Study the open note's
+    /// chapter row looked like every other (VX-356). The voice's glyph where it
+    /// has one (Terminal, unchanged); otherwise the navigator's own "you are
+    /// here" face for a chapter row (PROVISIONAL P-440-12).
     nonisolated enum OpenNoteMark: Equatable, Sendable {
         /// Not the open note's row (or not a collapsed chapter row).
         case none
@@ -266,7 +268,7 @@ nonisolated enum BookPanelBrain {
         guard case .chapter(_, let collapsed) = line, let collapsed, collapsed.postID == openPostID
         else { return .none }
         let glyph = selectionMarker.trimmingCharacters(in: .whitespaces)
-        return glyph.isEmpty ? .none : .glyph(glyph)
+        return glyph.isEmpty ? .fill : .glyph(glyph)
     }
 
     /// **VX-354 — the READINGS the panel names, whose two MCP marks they

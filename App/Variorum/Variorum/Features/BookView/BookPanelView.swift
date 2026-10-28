@@ -283,13 +283,28 @@ struct BookPanelView: View {
                 if case .glyph = mark { marker }
                 Text(tokens.chromeLabel(section.name))
                     .font(tokens.small.weight(.semibold))
-                    .foregroundStyle(tokens.accent)
+                    // VX-356: INK on the fill (the navigator's own rule —
+                    // the accent name on an accent fill falls under the
+                    // selected-row floor); the accent everywhere else.
+                    .foregroundStyle(BookNavigatorLayout.chapterNameInk(tokens, viewed: mark == .fill))
                     .lineLimit(1)
                 // VX-330: a collapsed row IS its note's row — the note's marks.
                 noteMarks(for: line)
             }
             .frame(maxWidth: .infinity, minHeight: BookNavigatorLayout.chapterRowHeight,
                    alignment: .leading)
+            // VX-356: in a voice with no glyph (Study), the open note's
+            // collapsed chapter row wears the navigator's viewed-chapter face —
+            // the accent fill behind the row (VX-562's token composition). An
+            // OVERLAY behind the words, never a rendering attribute; inside the
+            // row's own frame (the grip slot is its leading air), so no row,
+            // word or scroll geometry moves.
+            .background {
+                if mark == .fill {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(BookNavigatorLayout.viewedChapterFill(tokens))
+                }
+            }
             .contentShape(Rectangle())
             #if DEBUG
             .onAppear { BookPanelMarkProbe.drawn[section.id] = mark }
@@ -379,7 +394,9 @@ struct BookPanelView: View {
 
     /// The open note's mark — the voice's own selection marker (the
     /// navigator's), in the accent; Study's empty marker leaves the weight
-    /// and the ink to say it.
+    /// and the ink to say it on a note row, and the fill on a collapsed
+    /// chapter row, whose name has no weight or ink to spare (VX-356 —
+    /// `BookPanelBrain.chapterRowMark`).
     @ViewBuilder private var marker: some View {
         if !tokens.selectionMarker.isEmpty {
             Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))

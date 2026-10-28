@@ -790,8 +790,18 @@ Pieces (flipped per commit):
   Study leg RED ON OLD, the Terminal and not-the-open-note legs guards) and mounted
   `theMountedPanelMarksTheOpenNotesChapterRowInStudyAndTerminal` (the theme store STARTED so the fresh
   store reads Study; the probe's Study leg RED ON OLD — `.none`; then `setThemeVoice(.terminal)` → the ›).
-  IN THIS COMMIT (the PRE-FIX tree: the red-on-old SHA).
-- B3-7 VX-356 fix (if real): NOT STARTED.
+  DONE (0d963ce22 — the PRE-FIX tree: the red-on-old SHA).
+- B3-7 VX-356 fix (ONE voice-tokened mark): `chapterRowMark` answers `.fill` where the voice has no glyph
+  (Study); Terminal's `.glyph("›")` unchanged. The face: the chapter row wears VX-562's viewed-chapter
+  composition — `BookNavigatorLayout.viewedChapterFill(tokens)` (the voice's accent at 0.22, measured
+  ≈1.33–1.39:1 against the room in both voices/schemes at VX-562) as a rounded `.background` behind the row,
+  and the name in INK (`chapterNameInk(tokens, viewed: true)` — the accent name on an accent fill falls under
+  the palette's selected-row floor; ink clears 4.5:1). An OVERLAY behind the words, never a rendering
+  attribute (P-8); drawn inside the row's own frame (the grip slot is its leading air — VX-562's `washBleed`
+  NOT ported: the panel's scroll/row geometry is untouched), so no word, row or drop site moves. Token-only,
+  no literal colour. PROVISIONAL P-440-12 (the face is hers). The two B3-6 Study legs turn GREEN at this
+  commit (RUN PENDING); `build-for-testing` ✓, no new warning in a touched file. IN THIS COMMIT (the fix:
+  the green-on-new SHA).
 - B3-8 verification (headless) + the record closed: NOT STARTED.
 
 - Ladder: NOT STARTED.
