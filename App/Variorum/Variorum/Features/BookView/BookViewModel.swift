@@ -1108,8 +1108,9 @@ final class BookViewModel {
     /// Index's selected note, REPORTED by the index column (wave 2c — the
     /// same pattern, same reason).
     private(set) var indexAnchorPostID: String?
-    /// Where the book was last carried to — the fallback for a surface that
-    /// tracks no position (Read ▸ Scroll; see `BookAnchor`'s header).
+    /// Where the book was last carried to — every arm's fallback, and Read ▸
+    /// Scroll's answer while its page views nothing (VX-681; see `BookAnchor`'s
+    /// header).
     private(set) var standingAnchorPostID: String?
     /// The post a mode switch asked the ARRIVING surface to land on. One
     /// slot, consumed by whichever surface mounts — never a queue, because a
@@ -1227,7 +1228,10 @@ final class BookViewModel {
             spreadPostIDs: spreadEntries.map(\.postID),
             pagedPostID: pagedAnchorPostID,
             indexPostID: indexAnchorPostID,
-            standingPostID: standingAnchorPostID)
+            standingPostID: standingAnchorPostID,
+            // VX-681: Read ▸ Scroll's place is the story its page shows — the
+            // flow's own slot (empty whenever the flow is not on screen).
+            flowViewedPostID: viewedFlowPair.postID)
     }
 
     /// THE CARRY (her round-8 ruling): capture where the DEPARTING mode is
@@ -1366,10 +1370,13 @@ final class BookViewModel {
     /// written ONLY through `noteFlowViewed`. Its own slot, never the
     /// Outline's: the Outline's clears when the Outline leaves (VX-562's
     /// pins), and the two pages are never on screen together. Read by the
-    /// navigator's marks in Read ▸ Scroll and by ⌘↑/⌘↓'s seam
+    /// navigator's marks in Read ▸ Scroll, by ⌘↑/⌘↓'s seam
     /// (`BookNoteStep.viewedNote`, A-648-6 (2) — the interim standing-anchor
-    /// source replaced). A report, never a decision: it reaches no focus, no
-    /// reveal and no landing's aim.
+    /// source replaced) and, since VX-681, by the mode carry out of the scroll
+    /// (`anchorPlace` → `BookAnchor`'s `.read .flow` arm). A report, never a
+    /// decision: it reaches no focus, no reveal and no landing's aim — the
+    /// carry reads it at the switch, exactly as it reads the paged reader's
+    /// reported address.
     private(set) var viewedFlowPair = BookOutlineViewed.Pair.nothingViewed
 
     /// The flow's report — equality-gated against the slot itself.

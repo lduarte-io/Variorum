@@ -223,9 +223,9 @@ struct ReadingFlowView: View {
                 // rows already report to the landing (her ask, P-562-2 → VX-645).
                 // That is not the 13b 4F progress/visibility brain 13c 2A
                 // deleted with Outline's bottom bar on her A6 ruling (no bar,
-                // no progress number returns). The mode carry out of the scroll
-                // still leaves from the book's standing anchor (`BookAnchor` —
-                // unchanged by VX-645).
+                // no progress number returns). Since VX-681 the mode carry out
+                // of the scroll leaves from it too (`BookAnchor`'s `.read .flow`
+                // arm — the standing anchor only while nothing is viewed).
                 .onAppear {
                     startFollowing()
                     land(proxy)
