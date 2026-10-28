@@ -1759,3 +1759,72 @@ gone) turns the write-back off and #1/#5/#9 red as they must. `vx601b-rev577` (6
 exactly #12 + #10(slotSplit). Zero restarts everywhere. **Batch B's red-on-old verification is
 COMPLETE per member; nothing hollow but the two deliberately-hollow ⌘T guards.** Logs:
 `DerivedData/logs/red2-vx601b-*.log`. Phase 2 (the B walk) proceeds under the same claim.
+
+## THE WALK RECORD — batch B (B1–B6) (Opus walker, claim `vx-601-b-final`, 2026-10-28 00:12–00:24 MDT)
+
+Build: `App/Variorum/DerivedData/vx601b-post/Build/Products/Debug/Variorum.app` (dev store, pid 83475
+for the whole walk — ONE launch, no crash, no What's New sheet). Captures (gitignored):
+`App/Variorum/DerivedData/walkshots-vx601b/` — `leg0-*` as-found, `mint*` the note, `b1*`…`b6*` the
+rows, `r-*` leave-taking (each with a `-s` 1240-wide copy). Every step through `Tools/WalkKit/click.sh`
+/ `keys.sh` (the full guard each time; ≥ 2.2 s between synthetic steps — no refusal this walk). Window
+1240×840 at (244,155). **Study voice only** — the record's row text asks both voices; Terminal was NOT
+walked (a Terminal pass needed a second walk note, against the request's ONE note, inside a brisk
+claim). Recorded, not judged.
+
+**As-found (leg 0, before any act):** Bookcase, no books; held banner "This is your library as of
+October 20, 2026…" + Resume Sync (NEVER pressed); "Sync off (dev store)"; Study voice, app Dark
+(macOS Light, never touched); the twelve-words card (never touched). Library/Trash read at
+leave-taking (below). **As-found fan style: "style: stack", "wash: on"** (Takes header, read before any
+style act); under slot split the dial read **"× 2 beside"** — never touched.
+
+**The walk note:** quick entry ⌘V of four paragraphs ("alpha … golf." / "hotel … november." /
+"oscar … uniform." / "victor … three.") ⏎ → a four-block note shown as "2026-10-28", retitled
+**"vx601 b walk note"**. Takes: block 1 ⌘T → ⑂2 (take 2 edited "… golf. second take"); block 2 ⌘T →
+⑂2 (take 2 "… november. second take"). Block 1 later grew to ⑂8 through B3/B5/B6's mints.
+
+| Row | Study | What was seen |
+|---|---|---|
+| **B1** (VX-428) | **PASS** (open half) · **PASS via the header door** (close half; ⎋ = F-BW-1) | Both fans open, caret in block 2's article; ⌘1 (Write: ⑂2 on both blocks) → ⌘2 → **both fans still open**, block 2 in view with block 1's cards above (`b1-after`). Then ⎋ → **nothing closed** (`b1-esc`), ⌘1/⌘2 → still both open (nothing had closed). The header's **"close all"** → plain page, ⌘1/⌘2 → **all closed, "close all" dimmed** — the memory heard the close (`b1-closeall-after`). |
+| **B2** (VX-428) | **PASS** | Block 1's fan opened by its ⑂2 badge; the note is too short to scroll block 3 to the top — the reference top was block 1's ✓ chosen card with block 2's article at y≈428. ⌘1/⌘2 → **pixel-identical page: same top, the fan open, the caret in block 2** (`b2-rt`). Write: caret at the end of the LAST block ("three.|") → ⌘2 → **"block 4/4", the caret after "three." on screen, block 1's fan still open above** (`b2-last-land`). |
+| **B3** (VX-577) | **PASS** (⎋ = F-BW-1) | Style → Slot split: header **"style: slot split ▾ · × 2 beside ▾ · expand all · close all"** (`b3-slot`). **expand all** → both fanned blocks in side-by-side splits (`b3-expand`). Block 1 given a 3rd take ("+ new take (branch)" — it branched the chosen and seated the new card 2nd) → its split showed **"◀ 1–2 of 3 ▶"**, block 2's (2 takes) none; **▶ → block 1 alone to "2–3 of 3"**, block 2's split unchanged (`b3-page`). **close all** → the plain page (`b3-closeall`). expand all again → splits back; **⎋ → nothing** (caret in a card, `b3-esc`); a click in the empty right margin greyed the caret, **⎋ → still nothing** (`b3-esc2`). Typed word, unfanned block 3: " kept" → expand all → kept, caret stays in its (unreplaced) cell (`b3-typed-expand`, first try). **The P-B-1 case, fanned block 2:** close all, caret at the article's end, typed " held" → **expand all → " held" is in block 2's ✓ chosen card, NO caret drawn anywhere, the status reads "click into a take"** (`b3-typed2-expand`) — the blur; a click in the card took the caret again (`b4-clickcard`); ⌘1 showed " held" and " kept" in Write (`b4-write`). |
+| **B4** (VX-428 × VX-577) | **PASS** | Still slot split, both splits open; click into block 2's ✓ chosen card (caret in "h\|eld") → ⌘1 → ⌘2 → **both splits still open, the caret landed in block 2's chosen card** (at its END — R-B-3) (`b4-back`); typed " ring" → **landed in that card** (`b4-typed`; see O-BW-1). Block 1's pager read "1–2 of 3" after the remount. Style restored to **Stack** (wash: on unchanged) before B5 (`b5-stack`). |
+| **B5** (VX-594) | **PASS** (board) · **PASS** (Write panel) | Stack, block 1 ⑂3 open; the NOT-chosen card "… golf. second take" ⌄ → the menu **leads with "New branched take (⌘T)"**, then "Archive this take (⌘⇧A)", "Label take…", "Lock this take", "Delete this take" (`b5-chev`) → pressed → **⑂4, a new card "… golf. second take" (that take's words) right after its source, the caret in it; the ✓ chosen card unchanged ("… golf.")** (`b5-branched`). Write (⌘1) → block 1's ⑂ badge → panel **"Takes — block D9B30289"** (VX-586's id, live) → 3rd card ("… second take", not chosen) ⌄ → the same menu, led by "New branched take (⌘T)" (`b5-panel-chev`) → **⑂5, a new card "… second take" after its source with the caret; chosen unchanged** (`b5-panel-branched`). |
+| **B6** (VX-594 guard) | **PASS** (caret in the take) · **RECORDED** (the neutral half — no refusal seen) | Takes, block 1's 3rd card (not chosen): typed " six" → ⌘T → **⑂6, a new card "… golf. second take six" right after it with the caret; ✓ chosen still "… golf."** (`b6-cmdT`). **The neutral half, exactly:** (a) a click in the EMPTY RIGHT MARGIN beside the cards left the caret live (white) in the card ⌘T had just made, status "block 1/4" (`b6-neutral`) → ⌘T → **⑂7, another "… second take six" branched from that not-chosen card, the caret into it; NO toast, NO words** (`b6-neutral-cmdT`). (b) a click in the LEFT board margin (left of the cards) **greyed the caret** (the text view resigned) but the status stayed "block 1/4" (`b6-left`) → ⌘T → **⑂8, again a "… second take six" branch of the card holding the greyed caret, the greyed caret moving into it; NO toast, NO words, NOT a chosen-take branch** (`b6-left-cmdT`, `b6-left-scrolled`). The board's "Click into a take first" refusal was **never reached** — a margin click does not clear the board's current take (#245's edge). |
+
+**Findings and observations (none blocks a row's fix):**
+- **F-BW-1 — ⎋ closed nothing, three tries:** stack, caret in block 2's article (`b1-esc`); slot
+  split, caret in a card (`b3-esc`); slot split after a margin click greyed the caret (`b3-esc2`).
+  The record traces ⎋ as `onExitCommand` → `closeAllFans` — in this build, by synthetic `key code 53`,
+  that road never fired (the header's close all works every time). Whether a live text view swallows
+  ⎋ (`cancelOperation:`) and the margin click leaves no SwiftUI focus for `onExitCommand`, or this is
+  pre-existing, is NOT traced here — for the orchestrator (B1's and B3's ⎋ clauses stand unproven).
+- **O-BW-1 — the landed END sits on a fresh line:** every ⌘T-minted card and the B4 landing drew
+  the caret on a line BELOW the text, and " ring" typed there landed on its own line ("… held⏎ ring",
+  also in the article). Clicked carets were inline. Looks like quick entry's paste left a trailing
+  newline in each block's text (blocks also render a blank line tall); not traced.
+- **O-BW-2 — a stale pager label:** after close all → expand all, block 1's split read "2–3 of 3"
+  while showing the ✓ chosen card + card 2 (= 1–2) (`b3-expand2`); after the ⌘1/⌘2 remount it read
+  "1–2 of 3" over the same two cards (`b4-back`).
+- **O-BW-3 — new takes seat right after their source:** "+ new take (branch)" seated its branch of
+  the chosen 2nd; ⌄ ▸ New branched take and ⌘T seated each new card directly after the card it came
+  from. Recorded, not judged.
+
+**Leave-taking / returned:** fan style back to **"style: stack", "wash: on"** (as found; set in B4,
+read again before leaving Takes, `b6-*`); "× 2 beside" never touched. The walk note ▸ note ▾ ▸
+"Delete Note…" ▸ **Delete** ("The note goes to the Trash for 30 days. You can put it back from there
+until then."; receipt "Note moved to the Trash — 30 days to put it back."); NOT deleted forever.
+Verified after: Library = the one Oct-19 note ("The walk leaves a stone here…"); Trash (read ~8 s
+after opening) top row **"vx601 b walk note · note · deleted Oct 28, 2026 at 12:23 AM"**, then "vx601
+a2 walk note · 10:31 PM", then the Sherlock set (5:46 PM) in order — as-found + 1, no 8:57 PM row
+(`r-trash`); held banner present, Resume Sync never pressed; "Sync off (dev store)"; Study + app Dark;
+ended on the Bookcase with the twelve-words card as found (`r-bookcase`). Quit by bundle id
+`io.lduarte.Variorum.debug` 00:23:50; guards `pgrep -lx Variorum` / `pgrep -lf "MacOS/Variorum$"`
+empty before launch and after quit.
+
+**Prefs (`io.lduarte.Variorum.debug`, `/tmp/vx601b-prefs-before.plist` → after):** ADDED two per-note
+keys for the walk note — `currentBlock.` / `postMode.` `F8F0338C-070B-4013-A101-034E471EA7B2` — both
+*[removed for publication]*
+read 30 and was restored to **29** (`defaults write -int 29`, read back 29, "Type is integer"); every
+other counter unchanged. Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`,
+`variorum.backup.log`). Final export `/tmp/vx601b-prefs-final.plist` vs before: nothing added, nothing
+removed.
