@@ -203,10 +203,17 @@ final class MCPSession: @unchecked Sendable {
     /// tool's own description says it word for word, and the tool is listed only
     /// to a client that can call it — and show_in_app's sentence ends "asks to
     /// see something" (its pinned clause unchanged). 2,988 → 2,994.
+    ///
+    /// VX-640 (the VX-648 run, batch 2 — her ruling 2026-10-28, QUESTIONS #245
+    /// RB-13: "i think it would be fine to put / mcp in the instructions without
+    /// naming a provider"): the lock/quit sentence names the reconnect road, "/mcp",
+    /// as an example and without a provider's name — O-4's net
+    /// (`MCPProviderNeutralityTests`) bans names, not the command. No trade: her
+    /// bound rose to 3,100 for it (below). PROVISIONAL words.
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, \
-        so reconnect once it's back. A new client is a connection request until the author approves \
+        so reconnect once it's back (e.g. with /mcp). A new client is a connection request until the author approves \
         it in Variorum \u{25B8} Settings \u{25B8} MCP. Once approved, list_my_activity is always listed; \
         other tools appear only for what the author has shared (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
@@ -249,8 +256,10 @@ final class MCPSession: @unchecked Sendable {
     /// ruling (P-13nc-U5-5's bound half, 2026-10-11 — "yeah let's do 2,000
     /// because then we'll have a bit of wiggle room for future updates as
     /// well"): 1,500 → 2,000. VX-197 (VX-336 U8a): her R-VX184-3, carried from
-    /// VX-184's pre-run sitting — 2,000 → 3,000, moved with its pin.
-    static let instructionsBound = 3_000
+    /// VX-184's pre-run sitting — 2,000 → 3,000, moved with its pin. VX-640 (her
+    /// ruling 2026-10-28: "i think it's fine to raise the limit to 3100? I don't
+    /// see why not") — 3,000 → 3,100, so /mcp goes in with no trade.
+    static let instructionsBound = 3_100
 
     init(
         fd: Int32, database: AppDatabase, operations: Operations, version: String,
