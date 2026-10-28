@@ -262,6 +262,21 @@ struct VersionDoorsTests {
             let note = try session.operations.createPost(title: "the note")
             _ = try session.operations.newBlock(in: note.id, text: "Words to read.")
             let moment = try session.operations.saveNoteVersion(note.id).post
+            // SF-3 (the stage run) — THE PIN WAS NOT HERMETIC. The three
+            // memories are PERSISTED in the test host's real defaults domain,
+            // keyed by note id, and `.incrementing` ids repeat across suites:
+            // another suite's note `…0004` (block `…0005`, take `…0006`, caret
+            // at 0) had left `currentBlock.…0004` behind — read back on the
+            // stage machine, value for value — so the pin read a stranger's
+            // place, not a write of this page's. Start from a clean slate and
+            // put it back afterwards.
+            let memoryKeys = [
+                "postMode.\(moment.id)", ReadModeView.faceKey(moment.id),
+                CurrentBlockMemory.key(moment.id),
+            ]
+            for key in memoryKeys { UserDefaults.standard.removeObject(forKey: key) }
+            #expect(session.commandRouter.currentBlock(for: moment.id) == nil,
+                    "the slate is clean before the mount")
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 900, height: 700),
                 styleMask: [.titled], backing: .buffered, defer: false)
@@ -269,6 +284,7 @@ struct VersionDoorsTests {
             defer {
                 window.orderOut(nil)
                 window.close()
+                for key in memoryKeys { UserDefaults.standard.removeObject(forKey: key) }
             }
             var backs = 0
             let hosting = NSHostingView(
@@ -292,7 +308,22 @@ struct VersionDoorsTests {
             #expect(UserDefaults.standard.object(forKey: ReadModeView.faceKey(moment.id)) == nil,
                     "no Read face memory")
             #expect(router.currentBlock(for: moment.id) == nil, "no place memory")
+            #expect(UserDefaults.standard.object(forKey: CurrentBlockMemory.key(moment.id)) == nil,
+                    "…persisted nowhere either")
             #expect(backs == 0)
+
+            // The control — the oracle is not blind: the place memory's ONE
+            // writer for a note no detail shows (`remembersOtherNotes`, a Write
+            // editor's or the book Index's report) is seen at once. The page
+            // never calls it; this proves the expectation above could fail.
+            let block = try #require(try await db.read {
+                try Queries.renderPost($0, containerID: moment.id)
+            }.first)
+            router.noteFocusedBlock(
+                block.blockID, variantID: block.variantID, postID: moment.id,
+                utf16Offset: 0, remembersOtherNotes: true)
+            #expect(router.currentBlock(for: moment.id)?.blockID == block.blockID,
+                    "a real write is visible to the same read")
         }
     }
 

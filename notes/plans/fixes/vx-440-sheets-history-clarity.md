@@ -453,7 +453,28 @@ All three were the batch's TEST harnesses, not its product code; each trace belo
   bootstrap shared with the phone (CastleRules-read territory, outside this batch's fences, and the brief says
   keep the diff tight). CHOSEN: fix the one that is batch 1's at its source; ticket-candidate the host-launch
   four for the orchestrator (Tests & tooling · Low — the seam above). DONE (this commit).
-- **SF-3** — IN-PROGRESS.
+- **SF-3 `VersionDoorsTests.theMountedPageWritesNoMemoryAndOffersNoModesOrSave`** — traced: there is NO
+  writer on the version page's path; the pin was not hermetic. `CommandRouter.currentBlock(for:)` answers the
+  live fact (only for `activePostID` — nil here, the same test's own expectation, green), else
+  `CurrentBlockMemory.current`: the session dict (empty — a fresh session's router) and, behind it, the
+  PERSISTED `currentBlock.<id>` in the test host's REAL defaults domain. Every writer of that memory was
+  enumerated: `noteFocusedBlock` (drops a report for a note that is not the mounted one unless
+  `remembersOtherNotes: true`, which only `EditorViewModel` and `BookIndexView` pass — neither is on the
+  page; `ReadPageColumn`/`ReadPageBlock`/`BlockTOCViewModel` call it only through Read's HOST or a live pane,
+  neither present) and `persist`/`persistCurrentBlocks` (the mounted note only). Meanwhile `.incrementing`
+  ids repeat across suites, and a read-only `defaults read io.lduarte.Variorum.debug
+  currentBlock.00000000-0000-0000-0000-000000000004` on this machine returns exactly the failing value
+  (`…0005|…0006|0` — another suite's note `…0004` with its first block and take, caret at 0); the domain
+  carries 10 such deterministic-id keys. FIX: the pin clears the moment's three memory keys before the
+  mount (and asserts the clean slate), asserts after the mount that neither the router nor the defaults hold
+  a place, removes the keys after, and gains a CONTROL — the memory's one other-note writer
+  (`remembersOtherNotes`) is seen at once by the same read, so the absence above can fail. No product change:
+  P-440-1 holds as built. DONE (this commit).
+- **Suites the SF diff reaches** (test files only — no product code changed): `CapabilityRegistryTests`
+  (`takesIsNeverBehindWrite` — all walk tests share the file) and `VersionDoorsTests` (11 tests). The
+  re-run window's list stands as the record above names it (+ `WingPaletteDoorsTests`,
+  `CompareVersionsTests` unchanged since the green union). `build-for-testing` into
+  `DerivedData/vx440-merge` ✓ TEST BUILD SUCCEEDED at the SF tip.
 - Batch 2 (Block History): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + the VX-244 red-on-old run + walk PENDING the stage window; UNIT RECORD below.
 
 ### Batch 2 — UNIT RECORD (Block History: VX-431 · riders VX-331 · VX-244)
