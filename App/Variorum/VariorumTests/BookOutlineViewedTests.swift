@@ -913,8 +913,11 @@ struct BookOutlineViewedTests {
     // MARK: - The navigator's one mark table
 
     /// Outline marks the VIEWED note — the caret's (focused) note is ignored,
-    /// her ruling. Every other mode is the shipped rule: focus, and in the
-    /// spread both pages.
+    /// her ruling. **DELIBERATE FLIP (VX-645, A-648-8):** Read now marks its
+    /// viewed note too — the flow's follower or the note Pages shows — never
+    /// the focused one (the old line was P-562-2's "Outline only", superseded
+    /// at her word). The spread and Index keep the shipped rule: focus, and in
+    /// the spread both pages.
     @MainActor
     @Test func theNavigatorMarksTheViewedNoteInOutlineAndTheFocusedOneElsewhere() {
         let mark: (BookStructureModel.ViewMode, String) -> Bool = { mode, id in
@@ -927,21 +930,104 @@ struct BookOutlineViewedTests {
         #expect(!mark(.outline, "left"))
         #expect(mark(.spread, "typing") && mark(.spread, "left") && mark(.spread, "right"))
         #expect(!mark(.spread, "viewing"))
-        #expect(mark(.read, "typing") && !mark(.read, "viewing"))
+        #expect(mark(.read, "viewing") && !mark(.read, "typing"),
+                "VX-645 (A-648-8): Read marks the note its page shows, never the caret's")
         #expect(mark(.index, "typing") && !mark(.index, "viewing"))
         #expect(!BookNavigatorMark.note(
             mode: .outline, postID: "a", focusedPostID: "a", viewedPostID: nil, spreadPostIDs: []),
                 "nothing viewed: no note is marked in Outline, whatever is focused")
     }
 
+    /// **DELIBERATE FLIP (VX-645, A-648-8)** — was `onlyOutlineMarksTheViewedChapter`
+    /// (P-562-2: "the follower runs in Outline only", superseded at her word):
+    /// the viewed chapter is marked in every mode that has a viewed pair —
+    /// Outline, Read (both faces) and the spread (its left page's chapter) —
+    /// and never in Index, whose navigator is hidden.
     @MainActor
-    @Test func onlyOutlineMarksTheViewedChapter() {
-        #expect(BookNavigatorMark.chapter(mode: .outline, sectionID: "s2", viewedSectionID: "s2"))
-        #expect(!BookNavigatorMark.chapter(mode: .outline, sectionID: "s1", viewedSectionID: "s2"))
-        #expect(!BookNavigatorMark.chapter(mode: .outline, sectionID: "s1", viewedSectionID: nil))
-        for mode: BookStructureModel.ViewMode in [.spread, .read, .index] {
-            #expect(!BookNavigatorMark.chapter(mode: mode, sectionID: "s2", viewedSectionID: "s2"),
-                    "P-562-2: the follower runs in Outline only")
+    @Test func theViewedChapterIsMarkedWhereverAPairIsViewedNeverInIndex() {
+        for mode: BookStructureModel.ViewMode in [.outline, .read, .spread] {
+            #expect(BookNavigatorMark.chapter(mode: mode, sectionID: "s2", viewedSectionID: "s2"),
+                    "\(mode): the viewed chapter wears the mark")
+            #expect(!BookNavigatorMark.chapter(mode: mode, sectionID: "s1", viewedSectionID: "s2"))
+            #expect(!BookNavigatorMark.chapter(mode: mode, sectionID: "s1", viewedSectionID: nil))
         }
+        #expect(!BookNavigatorMark.chapter(mode: .index, sectionID: "s2", viewedSectionID: "s2"),
+                "Index: no chapter mark (its navigator is hidden)")
+    }
+
+    // MARK: - VX-645 — the same brain over Read ▸ Scroll's page, and the discrete pages
+
+    /// The flow's rows in the follower's row model: a story is its note's
+    /// `page-` anchor, a heading its `chapter-` anchor, the title and the
+    /// closing mark are none — and the flow's grouping keeps an UNFILED
+    /// boundary (a heading the flow draws no words for), so an unfiled note is
+    /// never read as the last chapter's.
+    @Test func theFlowsRowsSpeakTheFollowersRowModel() {
+        #expect(FlowRows.viewedAnchor(of: "flow-chapter-s1") == "chapter-s1")
+        #expect(FlowRows.viewedAnchor(of: "flow-p7") == "page-p7")
+        #expect(FlowRows.viewedAnchor(of: "flow-title") == nil)
+        #expect(FlowRows.viewedAnchor(of: "flow-end") == nil)
+        let a = section("s1", "one")
+        let grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])] = [
+            (a, [entry("p1"), entry("p2")]), (nil, [entry("p3")]),
+        ]
+        let rows = FlowRows.viewedRows(grouped: grouped)
+        #expect(rows.map(\.id) == ["chapter-s1", "page-p1", "page-p2", "unfiled", "page-p3"])
+        #expect(BookOutlineViewed.named(at: 4, in: rows) == .init(sectionID: nil, postID: "p3"),
+                "an unfiled note names no chapter — never the last chapter's")
+        #expect(BookOutlineViewed.named(at: 2, in: rows) == .init(sectionID: "s1", postID: "p2"))
+    }
+
+    /// **The Outline's rule, over the flow's own page** (keyed through
+    /// `FlowRows.viewedAnchor`): at rest the title holds the page (nothing
+    /// viewed); scrolled, the row that owns the top; at the bottom the last
+    /// note (the clamp, over the flow's REACHABLE travel); and a landing's
+    /// target adopted at its start through the same follower.
+    @Test func theFlowRunsTheOutlinesRuleOverItsOwnPage() {
+        let a = section("s1", "one"), b = section("s2", "two")
+        let rows = FlowRows.viewedRows(grouped: [
+            (a, [entry("p1"), entry("p2")]), (b, [entry("p3"), entry("p4")]),
+        ])
+        func page(_ flowTops: [String: CGFloat], offset: CGFloat, travel: CGFloat) -> BookOutlineViewed.Page {
+            var tops: [String: CGFloat] = [:]
+            var heights: [String: CGFloat] = [:]
+            for (id, top) in flowTops {
+                guard let key = FlowRows.viewedAnchor(of: id) else { continue }
+                tops[key] = top
+                heights[key] = 300
+            }
+            return .init(tops: tops, heights: heights,
+                         scroll: .init(viewport: 800, offset: offset, travel: travel))
+        }
+        // At rest: the title row sits above everything; the first heading is
+        // below the probe — nothing viewed.
+        let rest = page(["flow-title": 96, "flow-chapter-s1": 220, "flow-p1": 260], offset: 0, travel: 2_000)
+        #expect(BookOutlineViewed.rule(rows: rows, page: rest) == .nothingViewed)
+        // Scrolled: p2's top owns the page's top.
+        let mid = page(["flow-chapter-s1": -400, "flow-p1": -360, "flow-p2": -20, "flow-chapter-s2": 300],
+                       offset: 800, travel: 2_000)
+        #expect(BookOutlineViewed.rule(rows: rows, page: mid) == .init(sectionID: "s1", postID: "p2"))
+        // At the bottom (within 8 pt of the reachable travel): the last note.
+        let end = page(["flow-p2": -300, "flow-chapter-s2": -10, "flow-p3": 30, "flow-p4": 400],
+                       offset: 1_995, travel: 2_000)
+        #expect(BookOutlineViewed.rule(rows: rows, page: end) == .init(sectionID: "s2", postID: "p4"),
+                "the clamp: the flow's last note at its bottom")
+        // A landing on p3's chapter heading (the flow lands a chapter's first
+        // note at its heading) adopts what the heading introduces — p3.
+        var follower = BookOutlineFollower()
+        let target = FlowRows.viewedAnchor(of: "flow-chapter-s2") ?? ""
+        #expect(follower.landingStarted(anchor: target, rows: rows) == .init(sectionID: "s2", postID: "p3"))
+        #expect(follower.look(rows: rows, page: mid, landingPending: true) == nil, "frozen while it travels")
+    }
+
+    /// A DISCRETE page's pair (Read ▸ Pages' shown note, the spread's left
+    /// page): the note and the chapter it stands in; nothing shown ⇒ nothing.
+    @Test func aDiscretePagesPairIsItsNoteAndItsChapter() {
+        let chapters = ["p1": "s1"]
+        #expect(BookOutlineViewed.pagePair(postID: "p1", chapterOf: { chapters[$0] })
+                == .init(sectionID: "s1", postID: "p1"))
+        #expect(BookOutlineViewed.pagePair(postID: "p9", chapterOf: { chapters[$0] })
+                == .init(sectionID: nil, postID: "p9"), "unfiled: the note alone")
+        #expect(BookOutlineViewed.pagePair(postID: nil, chapterOf: { chapters[$0] }) == .nothingViewed)
     }
 }

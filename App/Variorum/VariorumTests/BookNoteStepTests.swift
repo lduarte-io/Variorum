@@ -7,11 +7,12 @@
 //  editing" — VX-560's rule; the arms are A-648-6, all PROVISIONAL). The pins:
 //  the key rule (pure — exactly ⌘, never while text holds the keyboard, never
 //  in Index), the step (pure — the order, the ends' words), the NAMED seam
-//  (pure — each mode's viewed note; Read ▸ Scroll's interim arm), the
-//  registry's VX-560 shape, and a model-level walk of every mode's landing
-//  road (Outline REVEAL-ONLY — focus untouched; the spread one note on; Read
-//  ▸ Pages the paged reader's focus; Read ▸ Scroll the reveal, which becomes
-//  the standing anchor). Red on old by construction: nothing here existed. The
+//  (pure — each mode's viewed note; Read ▸ Scroll's arm the flow's follower
+//  since VX-645), the registry's VX-560 shape, and a model-level walk of
+//  every mode's landing road (Outline REVEAL-ONLY — focus untouched; the
+//  spread one note on; Read ▸ Pages the paged reader's focus; Read ▸ Scroll
+//  the reveal, stepping on from the note the flow shows). Red on old by
+//  construction: nothing here existed. The
 //  key's real press in a window is the walk's (the monitor's road is
 //  `BrowserNavKeyMonitor`'s, whose own pins and walk carry it).
 //
@@ -76,9 +77,14 @@ struct BookNoteStepTests {
 
     // MARK: - The named seam (A-648-6 (2))
 
+    /// **DELIBERATE FLIP (VX-645 — A-648-6 (2), wired in batch 4):** Read ▸
+    /// Scroll's arm reads the FLOW's viewed note — the follow brain over its
+    /// page — replacing batch 3's interim source (the standing anchor, else
+    /// the first note); nothing viewed (the title on screen) now reads as
+    /// BEFORE the first note, exactly as Outline's title block does.
     @Test func theSeamReadsEachModesOwnViewedNote() {
         let order = ["a", "b", "c"]
-        let facts = BookNoteStep.Facts(outlineViewed: "b", spreadLeft: "c", pagedShown: "a", standingAnchor: "b")
+        let facts = BookNoteStep.Facts(outlineViewed: "b", spreadLeft: "c", pagedShown: "a", flowViewed: "b")
         func viewed(_ mode: BookStructureModel.ViewMode, _ facts: BookNoteStep.Facts,
                     _ form: BookStructureModel.ReadForm = .flow) -> String? {
             BookNoteStep.viewedNote(mode: mode, readForm: form, facts: facts, order: order)
@@ -86,11 +92,12 @@ struct BookNoteStepTests {
         #expect(viewed(.outline, facts) == "b", "Outline: VX-562's viewed note")
         #expect(viewed(.spread, facts) == "c", "the spread: its left page")
         #expect(viewed(.read, facts, .pages) == "a", "Read ▸ Pages: the paged reader's note")
-        #expect(viewed(.read, facts, .flow) == "b", "Read ▸ Scroll (INTERIM): the standing anchor")
+        #expect(viewed(.read, facts, .flow) == "b", "Read ▸ Scroll: the flow's viewed note (VX-645)")
         #expect(viewed(.index, facts) == nil, "Index never steps")
         let empty = BookNoteStep.Facts()
         #expect(viewed(.outline, empty) == nil, "the title block holds the page")
-        #expect(viewed(.read, empty, .flow) == "a", "nothing landed yet: the flow's first note")
+        #expect(viewed(.read, empty, .flow) == nil,
+                "nothing viewed (the flow's title on screen): before the first note — VX-645's flip")
         #expect(viewed(.read, empty, .pages) == "a")
         #expect(viewed(.outline, BookNoteStep.Facts(outlineViewed: "gone")) == nil, "a stale report")
     }
@@ -195,17 +202,27 @@ struct BookNoteStepTests {
             model.notePagedAnchor(b)
             #expect(press(.next) && model.focusedPostID == c, "the paged reader turns to c's first page")
 
-            // READ ▸ SCROLL — the grouped order; the reveal becomes the standing anchor.
+            // READ ▸ SCROLL — the grouped order; the step reads the FLOW's
+            // viewed note. JUSTIFIED EDIT (VX-645, A-648-6 (2)): the interim
+            // standing-anchor source is replaced, so — as the Outline arm above
+            // does — the pin plays the flow's follower adopting each landing's
+            // target (`noteFlowViewed`, which the mounted flow does at the
+            // landing's start).
             structure.readForm = .flow
             model.consumeReveal()
             #expect(press(.next))
             let first = try #require(model.pendingReveal)
-            #expect(model.standingAnchorPostID == first)
+            #expect(first == a, "nothing viewed: the first note of the grouped order")
             model.consumeReveal()
+            model.noteFlowViewed(.init(postID: first))   // the flow's follower adopts the landing
             let second = BookNoteStepDoor.order(structure: structure, entries: model.entries)
             #expect(second == [a, c, b, d])
             #expect(press(.next) && model.pendingReveal == second[(second.firstIndex(of: first) ?? 0) + 1],
-                    "each press steps on from where the last landed")
+                    "each press steps on from the note the flow shows")
+            model.consumeReveal()
+            model.noteFlowViewed(.init(postID: b))   // her own scroll carried the page to b
+            #expect(press(.next) && model.pendingReveal == d,
+                    "VX-645: from where HER scroll put the page, never the last landing (c)")
 
             // INDEX — never consumed; nothing moves.
             structure.mode = .index
