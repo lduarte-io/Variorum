@@ -263,7 +263,7 @@ is built provisionally per the above).
 
 - Kickoff: DONE — members listed from Linear sub-issues, canon read (MCPSpec + SurfaceContracts in full),
   worktree seated, in-flight row pushed, coordinator announced, sitting held, rulings recorded above.
-- Batch 1 (versions & Compare): IN-PROGRESS — implementer (Opus) seated 2026-10-28; UNIT RECORD below.
+- Batch 1 (versions & Compare): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + red-on-old + walk PENDING the stage window; UNIT RECORD below.
 
 ### Batch 1 — UNIT RECORD (versions & Compare: VX-130 · VX-437 · VX-432)
 
@@ -272,7 +272,7 @@ is WRITTEN AND COMPILED (`build-for-testing` into `App/Variorum/DerivedData/vx44
 red-on-old Mac verification, PENDING for the orchestrator's stage window; no walk captures (headless brief).
 
 Pieces (flipped per commit):
-- B1-0 record skeleton: DONE (this commit).
+- B1-0 record skeleton: DONE (ed49145b0).
 - B1-1 VX-437 live check (trace + pins): VERDICT — the scout's finding is REAL. Traced:
   `CompareViewModel.read` → `Queries.versionPeerSplit(…).sameWing` → `versionPeerPosts` (live `version_of`
   edges between live placements, NO version-history/archive fence) ⇒ a saved version (minted by `copyPost`
@@ -287,7 +287,7 @@ Pieces (flipped per commit):
   both sides — a contract pin, not a bug pin; RUN GREEN headless); Mac red-on-old
   `CompareVersionsTests.unmarkOnASavedVersionNeverDeclassifiesIt` — COMMITTED ON THE PRE-FIX TREE in this
   commit (pre-fix API only) and compiled (`build-for-testing` ✓); its RED run on this SHA and GREEN run on
-  the B1-3 fix commit are PENDING (stage window). DONE (this commit) for the trace + pins.
+  the B1-3 fix commit are PENDING (stage window). DONE (34c21e938 — the PRE-FIX tree: the red-on-old SHA) for the trace + pins.
 - B1-2 core: `Queries.noteVersionStamps(_:of:limit:)` (newest-first, `noteVersions`' exact answer and order,
   the ONE classifier deciding) + `latestNoteVersionID` + `AppDatabase.observeLatestNoteVersion` —
   NOTE-DRIVEN (candidates from the note's own placements → both `version_of` edge arms → the other end's
@@ -298,7 +298,7 @@ Pieces (flipped per commit):
   a closeout ticket candidate. Pins (core, RUN GREEN headless): `VersionsInCompareTests
   .theStampsAreTheListingsOwnAnswerNewestFirst`, `.theStampsFollowTheListingAcrossTheAnchorsShapes`
   (merge / archiveBlock / deleteBlock on the anchor; unmark, promote, Trash), `.theStampsReadIsDrivenFrom
-  TheNotesOwnPlacements` (the plan). DONE (this commit).
+  TheNotesOwnPlacements` (the plan). DONE (144972474).
 - B1-3 Compare (`CompareBoardView.swift`, `Shared/VersionsCopy.swift`): the projection gains `savedVersions`
   (id → saved-at, from `noteVersionStamps` — the classifier's whole set, a moment whose link only the
   tombstone-tolerant read still holds included) and `versionPeers` becomes ordinary same-wing peers first, then
@@ -311,7 +311,7 @@ Pieces (flipped per commit):
   (Mac `CompareVersionsTests`, compiled ✓, RUNS PENDING): `autoFillSeatsTheOrdinaryPeerFirstThenTheNewestMoment`,
   `aMomentsColumnIsNamedByItsDateAndSaysWhatItIs`, `unmarkOnAMomentAsksAndTheAnswerPromotes`,
   `unmarkOnAnOrdinaryVersionPeerStillUnlinks`, `thePromoteConfirmSaysWhatTheNoteBecomes`; and the B1-1 pin
-  `unmarkOnASavedVersionNeverDeclassifiesIt` turns GREEN at this commit (PENDING the run). DONE (this commit).
+  `unmarkOnASavedVersionNeverDeclassifiesIt` turns GREEN at this commit (PENDING the run). DONE (773cf2a02 — the fix: the green-on-new SHA for the B1-1 pin).
 - B1-4 doors: ONE act (`Core/Views/VersionCompareDoor.swift`) over ONE road (`CommandRouter.requestCompare` —
   `pendingCompareLanding` + `requestMode(.compare)`, the wire's compare road for a note whose detail is
   mounted; a refused switch takes its parcel back). (a) Versions rows: "Compare with now" on a second line
@@ -332,7 +332,7 @@ Pieces (flipped per commit):
   `requestCompareParksTheLandingAndSwitchesToCompare`, `thePaletteListsTheLatestDoorOnlyWhileTheNoteHasAMoment`,
   mounted `theMountedDetailReportsItsNotesNewestMomentLive`, mounted
   `compareWithNowLandsTheMomentBesideTheNoteInCompare`; plus the registry walk suite
-  (`CapabilityRegistryTests`) — RUN PENDING. DONE (this commit).
+  (`CapabilityRegistryTests`) — RUN PENDING. DONE (8c409dc75).
 - B1-5 full size (R-440-2, VX-432): a NEW destination `SidebarSelection.noteVersion(versionID, of: noteID)`
   rather than `router.adopt(.post(versionID), mode: .read)` (the scout's bare door) — so the clauses hold
   STRUCTURALLY, not by suppression: no `PostDetailView` mounts ⇒ no detail registers ⇒ the sidebar's "this note"
@@ -357,8 +357,69 @@ Pieces (flipped per commit):
   `aSavedMomentIsItsOwnDestinationNeverANote`, `deletingTheNoteLeavesAMomentsPageToo`,
   `theBandNamesTheMomentAndPromoteMakesItANote`, mounted `theMountedPageWritesNoMemoryAndOffersNoModesOrSave`.
   The notification → destination hop and the band's face are walk-evidence (the orchestrator's stage window).
-  DONE (this commit).
-- B1-6 Mac pins compiled (`build-for-testing`), core suite green: NOT-STARTED.
+  DONE (1e8a7b4ba).
+- B1-6 verification (headless): `xcodebuild build-for-testing` (scheme Variorum, platform=macOS,
+  `DerivedData/vx440-b1`) ✓ TEST BUILD SUCCEEDED at the final tree; core `swift test` (full) — VariorumCoreTests
+  3488 tests / 466 suites PASSED (5 known issues, pre-existing), the second target 32/4 PASSED, the MCP target
+  431/79 with ONE failure `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+  (a 15-s wall-clock bound measured 24 s under the full run's ~460% CPU load) — re-run ALONE: 3/3 PASSED in
+  2.1 s; a load flake in a suite this batch does not touch (no MCP change). NOT compiled for iOS: the shared
+  `VersionsCopy.swift` gained only plain `static let`/`func` members (Foundation `Date.formatted`) — the phone's
+  build is the orchestrator's to confirm if wanted. DONE (this commit).
+
+**Batch 1's rows, dispositioned:**
+- VX-437 (Bug, Suspected → CONFIRMED by the live check): FIXED — the declassify road is unreachable from
+  her doors (Compare's card was the only one; the Library picker fences archived). Pin
+  `CompareVersionsTests.unmarkOnASavedVersionNeverDeclassifiesIt` committed on the pre-fix tree (34c21e938),
+  the fix at 773cf2a02 — RED/GREEN runs PENDING. The core op `unmarkPostsAsVersions` is deliberately
+  UNCHANGED (its documented unlink stays pinned by `NoteVersionsTests.adeliberateUnmarkStillUnlinksAVersion`;
+  a core refusal would need a new `OperationError` case, which the MCP wire-refusal sweep enumerates — kept
+  out of a no-MCP batch; a belt the ladder may weigh). Contract half (versions DO show, never filtered out of
+  auto-fill): built, B1-3.
+- VX-130 (Feature): BUILT — B1-3/B1-4 (Compare with now · Compare with Latest Version · moments as columns).
+- VX-432 (Improvement): BUILT — B1-5 (the full-size face).
+
+**PROVISIONALs this unit adds (for the closeout's QUESTIONS bundle — batch 2/3 take the next free numbers):**
+- **P-440-6 (Compare/Versions wording):** a moment's column line "a saved version of this note"; its unmark
+  help "Stop counting this as a version — it becomes a regular note of its own (asks first)"; the row doors
+  "Open full size" / "Compare with now" and their helps; the band line «A saved version of “‹title›” ·
+  ‹date›» (curly quotes round the title); the gone line "This isn't one of the note's saved versions any
+  more."; the back chip's fallback "Saved version". All in `Shared/VersionsCopy.swift` (`VersionsPath`).
+- **P-440-7 (after the band's Promote):** the pane shows the promoted note AS a note (`adopt(.post(id))`,
+  Write/its remembered mode) — the thing she was reading became hers to write in. Options: (a) as built;
+  (b) back to the live note, the receipt naming where the promoted one went; (c) stay on a "promoted — open
+  it ›" state. (a) chosen: continuous with what she was looking at, and the receipt already says it left
+  Versions.
+
+**For the reviewer / the orchestrator (concerns, not forks — nothing here stopped the build):**
+1. The band's Back/Promote and the Versions row's two new doors are UNDECLARED inline doors — the pane's own
+   precedent ("the row acts … are the listing's own vocabulary, not app-scope capabilities"); only the
+   one-press act with File/bar/⌘K doors is declared. A P-1 purist may ask for `.surface` declarations.
+2. Compare's "open" on a moment's column now opens FULL SIZE (not the editor) — R-440-2's "no ⌘⇧S over a
+   version" applied to the one other door that reached a moment; flagged as a small scope reach.
+3. A promoted moment STAYS in its Compare column as an ordinary version (the `version_of` edge is kept —
+   `promoteNoteVersion`'s standing semantics, "ends as Duplicate with Tags does").
+4. The classifier's EXISTS makes SQLite build an automatic partial index over `version_of` edges once per
+   execution when the note has a candidate (B1-2's note) — shared by every `versionHistoryPredicate`
+   consumer; a closeout ticket candidate (Performance, Debt).
+5. ⌘K's "Save a Version" row stays LISTED on a moment's page and speaks its note when pressed (the palette's
+   standing grammar lists act rows everywhere); File greys it. R-440-2's "⌘⇧S refuses/absent" holds either way.
+6. MOBILE PARITY candidates: none built (Compare is Mac-only by her named exception; the phone has no unmark
+   door). The phone's Versions face could later take "open full size".
+
+**Stage-window run list (the orchestrator's; suite TYPE names, built as a zsh array; compare "Executed N"):**
+- RED-ON-OLD at `34c21e938`: `-only-testing:VariorumTests/CompareVersionsTests` — 1 test, EXPECT 1 FAILURE
+  (`unmarkOnASavedVersionNeverDeclassifiesIt`: the moment gone from Versions, listed on Archived).
+- GREEN at the batch tip: `CompareVersionsTests` (6) · `VersionDoorsTests` (11) · `CapabilityRegistryTests`
+  (the walk + the one justified context edit) · `NoteVersionsPaneTests` · `CompareViewModelTests` ·
+  `CompareCompositionTests` · `MCPCompareLandingTests` (the landing road the doors share) ·
+  `WingPaletteDoorsTests` (palette counts) · `CommandRouterTests` · `WorkspaceModelTests` ·
+  `WorkspaceNamingTests` · `NavigationDoorsTests` (the new destination) · `ModeSwitchCarryTests` ·
+  `NoteOpenLandingTests` · `ModeSwitchFeelTests` (Read's page, now internal with an optional click-through).
+- Walk rows (both voices where a face): Compare auto-filled with a moment (date-titled column, "a saved version
+  of this note"); its unmark → the P-440-5 confirm → promoted; a Versions row's "Compare with now"; File/
+  note ▾/⌘K "Compare with Latest Version" present with a moment, absent/grey without; "Open full size" →
+  the band over the calm page, no "this note" rail, ⌘⇧S grey; Back; Promote from the band.
 - Batch 2 (Block History): NOT STARTED.
 - Batch 3 (gathering faces): NOT STARTED.
 - Ladder: NOT STARTED.
