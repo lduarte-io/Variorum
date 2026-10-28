@@ -1,6 +1,6 @@
 # VX-648 — Run: launch-week umbrella (MCP follow-ups, book navigation, wing doors, stars & the deleted-blocks trace)
 
-**STATUS: OPEN — kicked off 2026-10-28 (overnight, /architect-phase).**
+**STATUS: CLOSED 2026-10-28 — one overnight run, kickoff to merge (PR #202). All 17 members built, walked, laddered clean (one Fable round, no blocker/major). Her bundle: QUESTIONS #247; her handoff: notes/handoffs/vx-648-handoff.md.**
 Ticket: VX-648 · Project: v1 release readiness · Branch: `vx-648-launch-week` · Worktree: `~/dev/variorum-vx-648` · Machine: the Pro.
 Orchestrator: Fable (architect shape). Implementers: fresh Opus per batch (xhigh). Cold review: **Fable** (`fable-reviewer`) — VX-647/649/563 touch the editor seam. Stage: via **oct27coordinator** (REQUEST → READY → GO protocol; never self-claim). No release without her word.
 
@@ -554,7 +554,7 @@ Mac: NEW `Registry/SeededBookReceipt.swift`, NEW `Features/BookView/BookNavigato
 | L-6 | Batch 4 (book navigator & small fixes, 4 members) | **BUILT 2026-10-28** on headless evidence + compiled pins (VX-631 plural via `SeededBookReceipt`, revert-verified headlessly on the real file; VX-630 Index → Outline keeps the block, pure rule red on the pre-fix tree + revert-verified headlessly; VX-645 per A-648-8 — Read ▸ Scroll runs VX-562's follower, Pages/the spread their shown/left note, VX-563's seam wired; VX-646 the navigator follows its highlighted row — the Open list's `SectionFollow` reused; suites core 3,495/469 + MCP 457/84 bar the standing VX-532 flake isolated green ×2 + Strings 32/4). OWED: the batch-4 app-suite window (DerivedData/b4 prebuilt; the record's list + revert recipes) + walk legs W4-1…4; her bundle P-B4-1…4. |
 | L-7 | Re-list the roster before the ladder | DONE 2026-10-28 (post-batch-4): the sub-issue listing holds the SAME 17 members, nothing seated or unseated since kickoff; all 17 In Progress. |
 | L-8 | The ladder (Fable cold review, whole run diff, REVIEW_PROMPT verbatim) | **DONE 2026-10-28, ONE ROUND** (notes/plans/vx-648-ladder-round1.md, 8d9f6a4d0): NO BLOCKER, NO MAJOR — 1 MINOR (the in-flight row's "no schema" wording, corrected at its retirement) + 3 NITs (two recorded-not-fix; the ⌥⌘L-re-fire speculative NIT closed AGREE-harmless by the implementer's traced read — sheet(item:) replaces, nothing double-acts, 173bb30af); every flagged flip/edit APPROVED; the reviewer independently re-verified v1_34's §12 reasoning and re-ran the headless pins byte-matching. No fix leg ⇒ no round 2 (round 2 re-reviews fixes; none exist). |
-| L-9 | Closeout (canon deltas in the two-file shape; MCPSpec's 3,000→3,100 line + set_starred cap clause + RB-7 paragraph; SurfaceContracts' keyboard-family line (⌥⌘L/⇧⌥⌘L, ⌘↑/⌘↓) + star-cap words + navigator lines; AppSpecRecord dated entry; tickets; MOBILE PARITY row for VX-643; handoff) | NOT-STARTED |
+| L-9 | Closeout | DONE 2026-10-28: canon deltas in the two-file shape (MCPSpec ×9 · SurfaceContracts ×7 · AppSpec §12 · MobileSoul PL-61 · the AppSpecRecord dated entry); QUESTIONS #247; the handoff; canon-size 126,313/150,000 (headroom 23,687); tickets triaged; MOBILE PARITY = PL-61; PR #202 |
 
 ## WINDOW 2 BRIEF (the combined evidence window; REQUESTED after batch 4's close)
 

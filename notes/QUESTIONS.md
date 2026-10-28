@@ -3749,3 +3749,33 @@ words in INK (its dimming came from a 13g brief, not a ruling); the dimmed alter
 eye:** VX-637 (does real ⎋ close the fans? — the 5-second check in the ticket), VX-656 (Write's editor carries
 VX-421's undo class — pre-launch is YOURS to label), and the four undo-residue "block" rows left in the dev Trash
 (VX-650; aging out unless you say Delete Now). Status: OPEN — her leisure.
+
+#247 — **THE VX-648 BUNDLE (the binding record is `notes/plans/fixes/vx-648-launch-week.md` — THE BUNDLE sections of
+each batch; your checklist leads `notes/handoffs/vx-648-handoff.md`), OPEN — your morning.** Ratify or redirect, all
+built most-defensible and PROVISIONAL: **A-648-5** set_book_rule on a READABLE gathering speaks the reworded gathering
+sentence (option (b), the one not-shared shape even when readable, recorded) · **A-648-6** VX-563's arms — Outline
+steps REVEAL-ONLY (the click keeps focus+reveal; click-parity recorded), never in Index, chapter headings aren't stops,
+the ends SPEAK ("That's the book's first/last note." — silent-consume recorded), no menu item (VX-560's reason) ·
+**A-648-8** VX-645's discrete modes — Pages marks the note it shows per turn; the spread's viewed pair is its LEFT page
+(left-only marking and both-chapters recorded) · **B2-P1…P5** (the record): VX-612's status sentence ("stopped by
+itself (‹reason›) · turn it off and on to restart") and live-session posture; VX-626's quit edge (a quit stamps
+nothing — the lock road does); VX-641's Private-book clause (a Private BOOK's hold shows its notes' rows) + the Book
+Settings latch (the row stays for the sheet's life); VX-606's refusal placement · **B3-P1…P5**: the phone's Starred
+page stays unwindowed (bounded by your own list); the starred-read P1 fix (found-and-fixed, FYI); a grey chord speaks
+EXISTING words; the label's hover text unchanged; VX-563's spread reading (the next note becomes the LEFT page) and
+Outline stepping leaving any open editor as it was · **P-B4-1** Index → Outline arrives with the note LIVE at your
+block, the page landing the note's row — a block far down a long note is live below the page (options: as built · a
+block-precise Outline landing, its own ticket · caret only when already focused) · **B4-P3** the follow's "next act" =
+the highlighted row CHANGING · **B4-P4 (offered, not built)** the carry out of Read ▸ Scroll could leave from the story
+on screen · **the sentences sheet** (every new/changed sentence verbatim in the record's bundle sections — all ride
+VX-234's copy pass). OFFERS: **VX-653/VX-654** (the quadratic lineage reads batch 1 measured — preservedOriginals
+5.8 s, originalsStrandedBy 13 s at 600 divide/merge rounds, the latter awaited in the Delete Block receipt chain) as
+riders on a future run · **VX-655** the list-exit's one 50–67 ms frame (live-measured; her ~1 s is gone — acceptable?).
+FILED and triaged: VX-653 · VX-654 · VX-655 · VX-662 (the stale Index anchor) · VX-663 (Pages arrivals open at page
+one — seen live, Medium). WALK observations, recorded: receipts COALESCE at ~8 s act spacing (single-act gathering
+phrases unseen in use; pins carry them); a cross-wing sample restore's receipt is replaced by "Now in Home."; a note's
+carved history outlives its own Delete Now as N empty-block Trash rows; the field-guide restore MINTS on a bookless
+store (expected). HER HANDS: two stray walk notes sit in Home's Trash (the walker's Delete Now was classifier-DENIED
+and nobody routed around it — they age out in 30 days, or your Delete Now takes them); the REAL store's field-guide
+re-seed (the guide's new MCP sentences reach your library only through Help ▸ Restore Field Guide…, your window); the
+release that carries this run states "local-only migration v1_34" as a release fact.
