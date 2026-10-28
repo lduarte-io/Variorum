@@ -28,7 +28,9 @@
 //      books, in order — Sherlock, then *Encryption Explained* (its own
 //      mark, so an existing store seeds only the new one); 18l-c U6 adds
 //      Jekyll. 13i-d U7: Sherlock's outcome decides whether this launch is a
-//      FRESH store's birth (below).
+//      FRESH store's birth (below). VX-633: the launch seeds *The Prince*,
+//      bilingual, in Sherlock's place (`Book.launchSet`), and the launch
+//      book's outcome (`Book.launchBook`) is the one that decides the birth.
 //    · 13i-b U4 (P-13ib-4): the STARRED-NOTES gathering — an ordinary
 //      gathering on ★, seeded once per store (fresh AND existing), her
 //      deletion honoured; same occasion, same gate, its own mark.
@@ -70,9 +72,10 @@ enum LaunchFurniture {
     }
 
     /// Every seed a launch runs, in the launch's order. Answers the Welcome
-    /// arrangement's launch decision (nil only if `Book.launchSet` ever
-    /// stopped carrying Sherlock). Silent by design — every outcome is
-    /// logged by its own seeder, none is ever surfaced.
+    /// arrangement's launch decision (nil only if `Book.launchSet` were ever
+    /// empty — VX-633: the decision reads the LAUNCH BOOK's outcome, the
+    /// Prince's since Sherlock left the launch). Silent by design — every
+    /// outcome is logged by its own seeder, none is ever surfaced.
     /// 17y B-DEDUPE (R-17y-8): the loop iterates the LAUNCH SET — Jekyll
     /// left the default seed; the Restore doors still mint it from
     /// `Book.all`.
@@ -84,7 +87,7 @@ enum LaunchFurniture {
         marks: Marks = .production,
         firstRoundWait: Duration? = nil
     ) async -> SampleLibraryWelcome.LaunchOutcome? {
-        var sherlockOutcome: SampleLibrarySeeder.Outcome?
+        var birthOutcome: SampleLibrarySeeder.Outcome?
         for book in SampleLibrarySeeder.Book.launchSet {
             let mark = marks.book?(book)
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
@@ -95,7 +98,7 @@ enum LaunchFurniture {
                 firstRoundWait: firstRoundWait,
                 loadMark: mark?.load,
                 saveMark: mark?.save)
-            if book == .sherlock { sherlockOutcome = outcome }
+            if book == SampleLibrarySeeder.Book.launchBook { birthOutcome = outcome }
         }
         await StarredGatheringSeeder.seedIfNeeded(
             session: session,
@@ -104,9 +107,9 @@ enum LaunchFurniture {
             firstRoundWait: firstRoundWait ?? SampleLibrarySeeder.firstRoundWait,
             loadMark: marks.starred?.load,
             saveMark: marks.starred?.save)
-        guard let sherlockOutcome else { return nil }
+        guard let birthOutcome else { return nil }
         return await SampleLibraryWelcome.arrangeAtLaunch(
-            session: session, sherlock: sherlockOutcome,
+            session: session, launchSeed: birthOutcome,
             storeVariant: storeVariant,
             guideName: TutorialSeeder.bookName,
             // 17y B-SEED: the field guide is born with the store, on the

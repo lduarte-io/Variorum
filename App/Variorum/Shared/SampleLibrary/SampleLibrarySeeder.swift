@@ -359,7 +359,23 @@ enum SampleLibrarySeeder {
         /// restorable", so its doors leave with it (U1b piece 3) and `all`
         /// keeps it only as the dedupe facts' vocabulary for the installed
         /// base.
-        static let launchSet: [Book] = [.sherlock]
+        /// **VX-633 (R-633-6, her word: "sherlock and jekyll and hyde are
+        /// still restorable"):** *The Prince*, bilingual, REPLACES Sherlock
+        /// in the launch, on BOTH platforms (the R-17y-8 / R-13s-37
+        /// precedent: a launch list names people's libraries, and the phone's
+        /// first-write occasion reads this same list); Sherlock joins Jekyll
+        /// as restore-only (`all` keeps every door). An existing store keeps
+        /// what it has; the Prince carries its OWN mark, so an existing store
+        /// seeds it at its next occasion — the 5a/U6 precedent for every book
+        /// that ever joined the launch (PROVISIONAL — the U2 record).
+        static let launchSet: [Book] = [.prince]
+
+        /// **The launch set's FIRST book — the one whose launch outcome
+        /// decides a FRESH store's birth** (the Welcome arrangement's
+        /// decision, `SampleLibraryWelcome.arrangeAtLaunch`; 13i-d U7's
+        /// "this launch's Sherlock seed minted every story" — the Prince's
+        /// since VX-633) and the book the phone's first-write occasion seeds.
+        static var launchBook: Book { launchSet[0] }
 
         /// The books the sync engine's pristine-copy dedupe judges
         /// (`allDedupeFacts`) — every book whose shipped seed is PRISTINE by

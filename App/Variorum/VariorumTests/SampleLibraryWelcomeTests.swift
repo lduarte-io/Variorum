@@ -158,7 +158,7 @@ struct SampleLibraryWelcomeTests {
             let sherlock = await launchSeeds(session, books: SampleLibrarySeeder.Book.launchSet)
             let mark = WelcomeMark()
             let outcome = await SampleLibraryWelcome.arrangeAtLaunch(
-                session: session, sherlock: sherlock, guideName: TutorialSeeder.bookName,
+                session: session, launchSeed: sherlock, of: .sherlock, guideName: TutorialSeeder.bookName,
                 loadMark: mark.load, saveMark: mark.save)
             guard case .arranged(let arranged) = outcome else {
                 Issue.record("a fresh store is arranged at birth: \(outcome)")
@@ -218,7 +218,7 @@ struct SampleLibraryWelcomeTests {
             let sherlock = await launchSeeds(session)
             let mark = WelcomeMark()
             await SampleLibraryWelcome.arrangeAtLaunch(
-                session: session, sherlock: sherlock, guideName: nil,
+                session: session, launchSeed: sherlock, of: .sherlock, guideName: nil,
                 loadMark: mark.load, saveMark: mark.save)
             try await db.read { db in
                 #expect(try Queries.readings(db).first {
@@ -265,7 +265,7 @@ struct SampleLibraryWelcomeTests {
             let sherlock = await launchSeeds(session)
             let mark = WelcomeMark()
             await SampleLibraryWelcome.arrangeAtLaunch(
-                session: session, sherlock: sherlock, guideName: nil,
+                session: session, launchSeed: sherlock, of: .sherlock, guideName: nil,
                 loadMark: mark.load, saveMark: mark.save)
             let (story, wearsClassics) = try await db.read { db -> (String, Bool) in
                 let id = try #require(try Queries.readings(db).first { $0.name == sherlockName }?.id)
@@ -317,7 +317,7 @@ struct SampleLibraryWelcomeTests {
             for outcome in [again, present] {
                 let mark = WelcomeMark()
                 let decided = await SampleLibraryWelcome.arrangeAtLaunch(
-                    session: session, sherlock: outcome, guideName: TutorialSeeder.bookName,
+                    session: session, launchSeed: outcome, of: .sherlock, guideName: TutorialSeeder.bookName,
                     loadMark: mark.load, saveMark: mark.save)
                 #expect(decided == .declined)
                 #expect(mark.value == "declined", "the decision is recorded")
@@ -339,13 +339,13 @@ struct SampleLibraryWelcomeTests {
         try await withWelcomeWorld { session, db in
             let undecided = WelcomeMark()
             #expect(await SampleLibraryWelcome.arrangeAtLaunch(
-                session: session, sherlock: .awaitingFirstSync, guideName: nil,
+                session: session, launchSeed: .awaitingFirstSync, guideName: nil,
                 loadMark: undecided.load, saveMark: undecided.save) == .undecided)
             #expect(undecided.value == nil, "not marked — the next launch asks again")
 
             let partial = WelcomeMark()
             #expect(await SampleLibraryWelcome.arrangeAtLaunch(
-                session: session, sherlock: .seeded(readingID: "x", stories: 5), guideName: nil,
+                session: session, launchSeed: .seeded(readingID: "x", stories: 5), guideName: nil,
                 loadMark: partial.load, saveMark: partial.save) == .declined,
                     "five of twelve stories is a resumed seed in a store that already had some")
 
@@ -353,7 +353,7 @@ struct SampleLibraryWelcomeTests {
                 let mark = WelcomeMark()
                 mark.value = settled
                 #expect(await SampleLibraryWelcome.arrangeAtLaunch(
-                    session: session, sherlock: .alreadySeeded, guideName: nil,
+                    session: session, launchSeed: .alreadySeeded, guideName: nil,
                     loadMark: mark.load, saveMark: mark.save) == .alreadySettled)
             }
             let untouched = try await facts(db)
@@ -362,7 +362,7 @@ struct SampleLibraryWelcomeTests {
             let pending = WelcomeMark()
             pending.value = "pending"
             guard case .arranged = await SampleLibraryWelcome.arrangeAtLaunch(
-                session: session, sherlock: .alreadySeeded, guideName: nil,
+                session: session, launchSeed: .alreadySeeded, guideName: nil,
                 loadMark: pending.load, saveMark: pending.save)
             else {
                 Issue.record("a pending mark resumes the arrangement")

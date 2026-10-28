@@ -215,9 +215,15 @@ final class MobileFirstWriteFurniture {
         let session = self.session
         let storeVariant = self.storeVariant
         let marks = self.marks
+        // VX-633 (R-633-6): the LAUNCH BOOK — *The Prince*, bilingual, in
+        // Sherlock's place on both platforms (the R-17y-8 precedent: a launch
+        // list names people's libraries, and a phone-seeded copy re-arrives
+        // everywhere by sync). This occasion used to name no book and so
+        // seeded Sherlock by the seeder's default; it reads the shared list
+        // now, so the two platforms can never drift.
         let sample = await Task(priority: .utility) { @MainActor in
             await SampleLibrarySeeder.seedIfNeeded(
-                session: session, storeVariant: storeVariant, gate: .unowned,
+                session: session, book: .launchBook, storeVariant: storeVariant, gate: .unowned,
                 loadMark: marks.loadSample, saveMark: marks.saveSample,
                 pacing: { await Self.holdWhileWritingLands(session) })
         }.value
