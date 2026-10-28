@@ -1,6 +1,6 @@
 # VX-623 — Run: the first-run walk resets its own test account
 
-**STATUS: OPEN (kicked off 2026-10-27, /architect-phase; the orchestrator is a Fable architect session).**
+**STATUS: CLOSED 2026-10-27 (kickoff to merge-ready in one day; the PR is the merge vehicle — its number and merge SHA are in the master plan's closeout paragraph and `notes/AppSpecRecord.md`'s dated entry, applied on main at the merge moment).**
 Branch `vx-623-walk-self-reset` · worktree `~/dev/variorum-vx-623` · the Pro. PR takes this number.
 Members BY THE SUB-ISSUE LISTING (re-listed at kickoff, 2026-10-27 19:06Z; re-list again before the ladder):
 **VX-622** (cleanup leg + window-frame guard) · **VX-537** (join arm + capture every window of the pid).
@@ -627,9 +627,38 @@ rule); quit by identity, kill extras by proven PID; zsh `pipestatus`; push after
 | 2 | The kickoff sitting (Q1–Q3) + her premise answer delivered | DONE 2026-10-27 — headless · both arms · VX-536 seated; premise answer in the kickoff reply |
 | 3 | UNIT 1 — the script work (D-1…D-7) | DONE 2026-10-27 (`b090395e4`…`2f656ddbc`; self-tests 64/64 + 85/85 and the D-7 pin red-on-old ALL re-run by the orchestrator; R-U1-1…5 adjudicated APPROVED; VX-627 filed) |
 | 4 | UNIT 2 — the live acceptance on production | **DONE 2026-10-27 — the std gate PASSED LIVE** (walker commits `21a7b8b1b` + `a9e5fbd92`; all five arms pass 18:58:47–19:01:33, exit 0, no retry; the claim 18:53:47–19:07:18 by stage.log, ~75 of 90 min; std at rest RE-VERIFIED by the orchestrator's own dry-run read 19:07; the slot restored exactly — 11 items inode-matched, 197/197 cmp-identical, e11e5233 held, banner read, Resume never pressed; RELEASE line sent, the coordinator verified independently). **Walker deviation ADJUDICATED ACCEPTED:** the gitignored `.env.supabase.local` symlink in the worktree root (R2 refused without it; the VX-510 S3 / VX-529 precedent; nothing copied, read or printed; dies with the worktree). **The window-rule prefs tail: the four ADDED keys were the two debris libraries' calmAsks state — deleted at zero instances; the final export reads 0 added · 0 removed vs pre-walk** (the accepted bookkeeping classes remain as value changes only). Closeout owes: one more cmp of the live slot at zero instances, THEN delete `Variorum-dev-safety-vx623walk` + the debris libraries (3f3d9fb8, 918e9672); the symlink's death confirmed in the retirement line. |
-| 5 | The ladder (fresh fable-reviewer, whole diff) | ROUND 1 IN FLIGHT — roster re-listed pre-ladder (VX-622 · VX-537 · VX-536, unchanged); findings land in `notes/plans/fixes/vx-623-ladder-round1.md` (`14ad4a09c`: 1 MAJOR · 2 MINOR · 2 NIT). **The implementer's answers landed** in its "ROUND 1 — THE IMPLEMENTER'S ANSWERS" section (`33830fedf`, all five AGREE); the reviewer's FINAL CALL `065396b8f` confirmed all five; **the fixes are APPLIED** (`a57bb863c` · `761461712` · `33de94d33` · `e50ea8fb6` · `bcac53925`, each pin red-on-old, the gate green — "LADDER ROUND 1 FIXES — LIVE STATUS" below). ROUND 2 (a fresh reviewer re-checking the fixes) owed |
-| 6 | Closeout: canon delta (the standing ruling, two-file shape), tickets, handoff, merge | NOT-STARTED |
+| 5 | The ladder (fresh fable-reviewer, whole diff) | **DONE 2026-10-27 — CLOSED AT ROUND 2 WITH A CLEAN BILL.** Round 1 (`14ad4a09c`): 1 MAJOR (words-guard fail-open on an AX-unreadable pid/truncated scan) · 2 MINOR (the helper's check-to-use allowlist seam; release.sh's arms sentence) · 2 NIT; the implementer's answers `33830fedf` (all five AGREE with own traces, the MAJOR reproduced live); the reviewer's FINAL CALL `065396b8f` (all five confirmed; the SAME-READ form chosen over the patch); the fixes `a57bb863c`·`761461712`·`33de94d33`·`e50ea8fb6`·`bcac53925`, each pin red-on-old, re-run by the orchestrator too (P-1 3/6→0/6; outside-reads 1→0 both files; fenced old exit-1→5). Round 2 (`vx-623-ladder-round2.md`, closed `b67b208cc`): NO FINDINGS — every fix verified against the binding shapes, the gate green fresh at the tip (walk 72/72 · helper 90/90 · D-7 0/11 · P-1 0/6 · syntax ×9), code frozen at `bcac53925`, **independently corroborated by TWO reviewers** (the budget-killed opener resumed and the fresh closer, distinct old baselines, agreeing on every point — the twin spawn owned below). No round 3 owed. |
+| 6 | Closeout: canon delta (the standing ruling, two-file shape), tickets, handoff, merge | DONE 2026-10-27 — CLAUDE.md's Environment line amended in place on this branch (the standing-ruling exception + this file as the one pointer); the dated AppSpecRecord entry, the master plan's row-retire + closeout paragraph and the VX-562 archive roll land ON MAIN at the merge moment (the merging session's ledger commits, the VX-620 pattern); her handoff `notes/handoffs/vx-623-handoff.md`; canon-size after the CLAUDE.md edit: its line in the handoff; tickets Done ride the merge (VX-622 · VX-537 · VX-536; VX-627 stays open, triaged); MOBILE PARITY: nothing mobile-visible. |
 
 **Owned at kickoff:** the in-flight-row commit on main carries a `Co-Authored-By` trailer against her
 standing no-trailer rule (the harness reminder was followed over CLAUDE.md for one commit; caught at once;
 pushed history is never rewritten, so it stands). No later commit of this run carries one.
+
+**Owned at the ladder (the twin spawn):** when round 2's reviewer died at the Fable budget, the orchestrator
+resumed it, read its 3-tool-call silence as a failed resume, and spawned a fresh closer — then the original
+woke and both ran CONCURRENTLY on one round, against the one-reviewer cast rule. No harm: their results agree
+on every point from distinct old baselines, recorded in the round-2 file as independent corroboration, and
+the closer stood down at the orchestrator's word holding nothing. The lesson, binding on later runs: after
+resuming a dead agent, CONFIRM it is gone (ListAgents metadata + a wait for its next commit or hand-back)
+before spawning its replacement — the resiliency protocol's twin rule, which this run re-proved.
+
+**Closer corroborative notes (recorded, neither a finding):** the reaped-pid self-test/pin cases carry a
+theoretical pid-reuse race — a self-test false-FAIL at worst, never a privacy hole, no deterministic pin
+possible; and the trailer sweep over `14ad4a09c..HEAD` was independently confirmed clean.
+
+## CLOSEOUT RESULTS (2026-10-27)
+
+**Shipped (the 8-file Tools diff, code frozen at `bcac53925`):** the guarded reset helper
+`Tools/prod-reset-test-account.sh` (R1–R4, one atomic CTE, before/after reads, exits 0/4/5, 90 self-test
+cases incl. the account_purge drift pins); the walk's pre-step reset + cleanup leg (a STOP never resets);
+the join arm J1–J8 with `--arm setup|join|both` (default both); the window-frame guard; capture-every-window
+behind the fail-closed words guard (`words-guard.swift`, three-class verdicts, P-1/P-2 pins);
+guard.sh wl2 compile-or-refuse (D-7, the VX-536 pin 6/11→0/11); release.sh step-0 text. **The evidence:**
+unit 1 headless (self-tests, every pin red-on-old, all re-run by the orchestrator); unit 2 THE LIVE GATE
+PASSED on production (all five arms, 18:58:47–19:01:33, std ending at rest, the slot restored exactly,
+197/197 cmp; the coordinator verified independently); the two-round ladder above. **Her rulings this run:**
+the standing reset ruling (the charter); "go ahead on that tool" (the three allow rules); Q1 headless ·
+Q2 both arms · Q3 rider seated. **Born:** VX-627 (triaged Low · Bug · Confirmed · Tests & tooling).
+**Rulings reconciled against shipped:** the standing ruling's "its own allowlisted test accounts" — the
+helper serves exactly the allowlist's three and nothing else; Q1/Q2/Q3 shipped as picked; R-U1-1…5 shipped
+as adjudicated; no remainder to ticket.
