@@ -331,11 +331,10 @@ VX-586 · VX-594 · VX-577 · VX-592 · VX-248 · VX-321 · VX-337.
 ## BATCH A RECORD — pane LIFECYCLE: VX-421 + VX-248 (implementer: opus-implementer, 2026-10-27)
 
 **NOT DONE (first line, kept current):** the suite window (the orchestrator's: this session never
-runs `xcodebuild test`) — every red and green claim below is PENDING it; the walk (Opus walker under
-the orchestrator's claim). **REVERTS IN FLIGHT (2026-10-27, from e0021460, committed-first):** the
-three revert builds below edit ONLY `App/Variorum/Variorum/Surface/PaneSurface.swift`, each restored
-by `git checkout -- App/Variorum/Variorum/Surface/PaneSurface.swift` (the fix is committed, so that is
-the safe restore); `git diff` against HEAD shows exactly what is reverted at any moment.
+runs `xcodebuild test`) — **every red and green claim below is a PREDICTION, PENDING that window**;
+the USE walk (an Opus walker under the orchestrator's claim — rows W1–W4 below); the cold ladder.
+No behavioural revert is in flight — all three revert builds are DONE and the source is HEAD
+(`git diff` empty; no `VX601A-REVERT` marker in `PaneSurface.swift`).
 
 **LIVE STATUS**
 - Reading — DONE: this file in full (members, batches, ENVIRONMENT TRAPS, the sitting record
@@ -344,32 +343,35 @@ the safe restore); `git diff` against HEAD shows exactly what is reverted at any
   (`notes/plans/fixes/vx-214-settings-launch-polish.md` §BATCH 4 + ARCHITECT RULING), and the code:
   `Surface/PaneSurface.swift` (whole), `Surface/PaneTextAuthority.swift`,
   `Core/Views/CommentTextArea.swift` (the U3-g road), `Core/Views/CaptureTextView.swift` (VX-193),
-  every `PaneSurfaceView(` host, `TakesViewModel`'s focus/park/end-rule section, the pins
-  `PaneSurfaceTests`, `PaneFindFaceTests`, `CommentTextAreaTests`' undo pin.
+  every `PaneSurfaceView(` host, `TakesViewModel`'s focus/park/end-rule section,
+  `CanvasViewModel`'s switcher, the pins `PaneSurfaceTests`, `PaneFindFaceTests`,
+  `CommentTextAreaTests`' undo pin.
 - Trace — DONE (below); both members' mechanisms CONFIRMED by my own read; no divergence from the
-  briefed mechanisms (one widening for VX-421, stated).
-- Pins — DONE (73a7a2ca): `VariorumTests/PaneLifecycleTests.swift` — suites
-  `PaneUndoLifecycleTests` (VX-421: 4 red-on-old + 1 guard) and `PaneRebindTests` (VX-248: 3
-  red-on-old + 2 guards). Compiled against the PRE-FIX tree: build-for-testing GREEN into
-  `App/Variorum/DerivedData/vx601a-pre` — **that DerivedData is the red-on-old build; never rebuild
-  into it.** Red/green runs PENDING (the orchestrator's window).
-- Fix VX-421 — DONE (436bf331): the coordinator's own `undoHistory` + `undoManager(for:)`; the read
-  adoption and `uninstall` end it. build-for-testing GREEN into `DerivedData/vx601a-post` (at
-  436bf331; rebuilt after VX-248). (This status flip rides its own commit — the fix commit missed it.)
-- Fix VX-248 — DONE (this commit): the coordinator binds the host's `variantID`
-  (`boundVariantID`); a change is a RE-BIND (`rebindIfTakeChanged`) run BEFORE the liveness note —
-  the new take's text written where it differs, the old history ended, the find/room token baselines
-  adopted as at a mount — and `noteLiveness(_:rebound:)` then lands a live re-bind's caret in the new
-  text and claims the keyboard as any programmatic going-live.
-- VX-421 addendum — DONE (this commit): a READ pane answers an always-empty history
-  (`readHistory`), because AppKit applies an undo to a NON-editable text view (the probe below);
-  + its red-on-old pin `aReadPaneHoldingTheKeyboardUndoesNothing` (written after the fix — its red
-  run rides the rebuilt red build, below).
-- Builds — post DONE (`DerivedData/vx601a-post`, build-for-testing GREEN at this commit's tree).
-  The red build (`vx601a-pre`) predates the read-pane pin, so it is REBUILT from the final tests over
-  the pre-fix `PaneSurface.swift` (a behavioural revert, committed-first) — NOT-STARTED; per-member
-  revert builds NOT-STARTED.
-- Self-assessment + READY-FOR-SUITES — NOT-STARTED.
+  briefed mechanisms — two WIDENINGS, stated (VX-421's reach; VX-248's live road on Canvas).
+- Pins — DONE: `VariorumTests/PaneLifecycleTests.swift`, 12 tests in 3 suites —
+  `PaneUndoLifecycleTests` (VX-421: 5 red-on-old + 1 guard; 73a7a2ca, + the read-pane pin
+  b1a82dc3), `PaneRebindTests` (VX-248: 3 red-on-old + 2 guards; 73a7a2ca),
+  `CanvasSwitcherRebindTests` (VX-248 on a real road: 1 red-on-old; 24b835b5); the rig's edit mirror
+  e0021460 (a self-review find — without it three pins would have read false-red on the fixed tree).
+- Fix VX-421 — DONE (436bf331 + b1a82dc3): the coordinator's own `undoHistory` answered through
+  `undoManager(for:)`; the read adoption and `uninstall` end it; a READ pane answers an always-empty
+  `readHistory` (the probe below).
+- Fix VX-248 — DONE (b1a82dc3): the coordinator binds the host's `variantID` (`boundVariantID`); a
+  change is a RE-BIND (`rebindIfTakeChanged`) run BEFORE the liveness note — the new take's text
+  written where it differs, the old history ended, the find/room token baselines adopted as at a
+  mount — and `noteLiveness(_:rebound:)` lands a live re-bind's caret in the new text and claims the
+  keyboard as any programmatic going-live.
+- Builds — DONE, all four carrying the FINAL tests (24b835b5), each build-for-testing GREEN
+  (logs `App/Variorum/DerivedData/logs/`):
+  `DerivedData/vx601a-post` = HEAD (the fix) · `DerivedData/vx601a-pre` = HEAD's tests over the
+  PRE-FIX `PaneSurface.swift` (c2a0b833's — both members reverted) · `DerivedData/vx601a-rev421` =
+  HEAD with ONLY VX-421 reverted (`undoManager(for:)` answers nil → the window's manager, as before)
+  · `DerivedData/vx601a-rev248` = HEAD with ONLY VX-248 reverted (`rebindIfTakeChanged` returns
+  false first — never a re-bind, as before). Each revert: committed-first, built, restored by
+  `git checkout -- …/PaneSurface.swift`.
+- Red/green runs — PENDING (the orchestrator's window; the prediction table below).
+- USE walk — PENDING (the orchestrator's claim, an Opus walker; rows W1–W4 below).
+- Self-assessment + READY-FOR-SUITES — DONE (below, this commit).
 
 **THE TRACE (pre-fix line numbers, `PaneSurface.swift` at c2a0b833).**
 
@@ -415,3 +417,256 @@ the safe restore); `git diff` against HEAD shows exactly what is reverted at any
    text and autosave writes it over that take (one writer, never a sync conflict — silent).
    VX-222's end-rule and VX-227's parked follow close every road the board knows of today by never
    letting a cell be live across a re-key; the leaf itself still allows it.
+5. **The widening — a live road reaches the leaf TODAY, on Canvas** (found by my own read at the
+   self-review; the VX-214 sweep's table covered the Takes and Lenses boards and named Compare as
+   unexamined — Canvas was not on it). `CanvasViewModel.switchTake` (`:605-623`) writes the view
+   pick AND re-focuses the ring onto the newly shown take in the SAME turn ("4E: the ring follows the
+   card"), while the card keeps ONE pane per placement (`CanvasView.swift:639`, the card `ForEach`
+   keyed by `placementID`; the pane carries no per-take identity) — a live→live re-key, the naive
+   follow VX-227's park exists to avoid. So on the old tree ‹ › (or ⌃⌘←/→ with the switcher open)
+   under a live card hands the next keystroke up as the NEW take with the OLD take's words. Canvas is
+   a Debug-build mode (Release has six), so the road is real wherever the mode is. Pinned
+   (`CanvasSwitcherRebindTests`, red on old by mechanism — its non-vacuity asserts the card keeps the
+   SAME pane across the switch; a remount would make the road hollow and the pin would say so).
+
+**THE PROBE (offscreen AppKit, a standalone `swiftc` binary in the session scratchpad — never the
+app, no store, no screen; the VX-179 U3-g method).** A TK2 `NSTextView` with `allowsUndo`, a
+delegate answering `undoManager(for:)`, in a borderless window never ordered in; macOS 27.0.1:
+1. `string =` posts NO `textDidChange` and registers NO undo (so a re-bind/adoption hands nothing
+   up — the `aRebindHandsNothingUp` guard rests on it).
+2. Typing registers on the DELEGATE's manager (the window's `canUndo` stays false).
+3. **An undo APPLIES to a NON-editable text view** — `isEditable = false`, then `undo:` through the
+   window: the characters reverted (and no `textDidChange` posted offscreen). → the read-pane gate.
+4. A delegate answering nil falls back to the WINDOW's manager (`view.undoManager ===
+   window.undoManager`). → `readHistory` is never nil.
+5. `undo:` with the WINDOW as first responder undoes through the window's own manager.
+
+**AS BUILT (`Surface/PaneSurface.swift`; `Surface/PaneTextAuthority.swift` gains one doc sentence;
+no other production file).**
+- *VX-421 — the pane's own history (`PaneSurfaceRepresentable.Coordinator`):* `let undoHistory`,
+  answered by `undoManager(for:)` for the coordinator's own view while it is EDITABLE (live); a READ
+  pane answers `readHistory`, a manager nothing is ever registered on (never nil — nil is the
+  window's). `endUndoHistory(in:)` (`breakUndoCoalescing()` + `removeAllActions()`) runs at every
+  PROGRAMMATIC write of the pane's characters — the read adoption in `updateNSView` and the re-bind —
+  and `uninstall()` empties the history at teardown (by construction it dies with the coordinator
+  anyway). ⌘Z keeps AppKit's road (`undo:` → the window → the first responder's manager).
+- *The lifecycle edges, said which (the brief's ask):* **teardown** — the history goes with the pane
+  (emptied in `uninstall`; the coordinator's life is the representable's); **detach/re-attach**
+  (TEXTKIT2 §3's re-parent) — the history **SURVIVES**, untouched: nothing in it is window-bound
+  any more (the guard `aPaneKeepsItsHistoryAcrossADetachAndReattach`); **first-responder edges** — ⌘Z
+  reaches the history only while the pane is live; a read pane holding the keyboard reaches nothing,
+  and its history waits for its next going-live over the same characters; **a re-bind** — the old
+  take's history ends.
+- *VX-248 — the bound take:* `boundVariantID` is written at the mount (from the host's
+  `variantID`) and by `rebindIfTakeChanged` only. In `updateNSView` the re-bind runs right after the
+  callbacks refresh and BEFORE `paintFind`/`isEditable`/`noteLiveness`: when the bound take changed,
+  the new take's text is written where it differs (TRACE 1a's record answers for a read pane, the
+  view for a live one — once per re-bind, never per pass; an identical branch writes nothing — the
+  A47c class), the face re-derived caret-blind, the caret ledger and the find paint reset, a
+  remeasure, the history ended, the record set (`nil` live, the text read); then the find and room
+  token baselines are adopted as at a mount (a re-bind is not a step); then
+  `noteLiveness(_:rebound:)` treats a LIVE re-bind exactly as a programmatic going-live — the
+  landing (`caretOnGoingLive`) placed in the NEW text, then the keyboard claim (the find field's
+  keyboard rule kept); a click flag never overrides a re-bind's landing (the click was made in the
+  replaced text); a live re-bind is also a convergence occasion (the render restore is the A47c
+  belt); a READ re-bind keeps the read adoption's road. `PaneSurfaceView.variantID`'s doc now says it
+  is the bound take; every one of the ten production hosts passes the take whose `onEdit` it hands
+  down beside it (each read: TakesCellView, the mini/stack cards, Compare ×2, the Write panel,
+  Canvas, the workbench, Read ▸ edit, the book Index).
+- *What did NOT change:* the read tier proper (`ReadPostView`, its own coordinator), the full-document
+  editor (`EditorTextView`), `BlockRangeIndex`, `TakesViewModel` (VX-222's end-rule and VX-227's
+  parked follow stay, untouched — redundant by construction now, never removed), no `Sync/`, no
+  schema, no Shared/ file (**MOBILE PARITY: nothing mobile-visible** — `PaneSurface.swift` is Mac-only).
+
+**PROVISIONAL (for the orchestrator's #245 bundle — I do not touch QUESTIONS.md):**
+- **P-A1 — ⌘Z in a READ pane that holds the keyboard does nothing.** The rulings say "⌘Z undoes only
+  the pane the cursor is in" (R-601-1) and do not name a read pane holding the keyboard (a
+  drag-selection; the gap a parked follow's blur leaves). Options: (a) nothing — BUILT, the most
+  spec-defensible: a read pane holds no caret of hers (VX-296's line) and is projection-authoritative
+  (`PaneTextAuthority`'s contract), and the probe shows AppKit WOULD move its characters; (b) undo that
+  pane's own typing (the precedents' shape without the gate) — moves a read pane off its take's text
+  (and in the live app hands it up from a read pane); (c) fall back to the window's manager — the
+  cross-pane history R-601-1 ends. Red-on-old pinned (`aReadPaneHoldingTheKeyboardUndoesNothing`).
+- *Carried, not new:* "a programmatic write of the characters ends the history" is the precedents'
+  rule (P-VX179-U3-4, carried at VX-193 as P-U4-1) applied to panes.
+
+**CONSEQUENCES FOR HER TO KNOW (not decisions — what the ruled arm means in use):**
+- A pane's history is the REALIZED pane's: a take scrolled far enough that its lazy row
+  de-realizes (the Takes article and boards are lazy) comes back with no ⌘Z history — on the old
+  tree that same scroll-away-and-⌘Z replayed into the de-realized pane (this ticket's crash road by
+  scrolling). Likewise every going-read of Read ▸ edit's and the book Index's pane (those hosts
+  render the pane only while live).
+- ⌘Z after a take's words changed elsewhere while she was away (another pane of the same take, sync,
+  an agent) has nothing to undo in that pane — the history named words that left it.
+
+**THE PREDICTION TABLE (the red/green runs — PENDING the orchestrator's window).** 12 tests in 3
+suites; R = red, G = green; "guard" = green on both sides by design.
+
+| # | Test | pre (both reverted) | rev421 | rev248 | post |
+|---|---|---|---|---|---|
+| 1 | `PaneUndoLifecycleTests/aTornDownPanesTypingNeverReachesTheWindowsUndo` | R | R | G | G |
+| 2 | `…/undoAfterATornDownPaneIsReleasedIsACleanNoOp` (stops at its `#require` when red — never runs the crash line) | R | R | G | G |
+| 3 | `…/undoInAPaneUndoesOnlyThatPanesTyping` | R | R | G | G |
+| 4 | `…/aReadPaneHoldingTheKeyboardUndoesNothing` | R | R | G | G |
+| 5 | `…/aPaneKeepsItsHistoryAcrossADetachAndReattach` (guard) | G | G | G | G |
+| 6 | `…/aProgrammaticWriteEndsThePanesHistory` (stops at its `#require` when red) | R | R | G | G |
+| 7 | `PaneRebindTests/aLivePaneReboundToAnotherTakeShowsThatTakesWords` | R | R (the history line only — the re-bind's history half rides VX-421's manager) | R | G |
+| 8 | `…/aReadPaneReboundAsItGoesLiveShowsTheNewTake` | R | G | R | G |
+| 9 | `…/aReboundLivePaneLandsItsCaretInTheNewText` | R | G | R | G |
+| 10 | `…/aRebindHandsNothingUp` (guard) | G | G | G | G |
+| 11 | `…/aReadPaneReboundShowsTheNewTakeAndStaysRead` (guard) | G | G | G | G |
+| 12 | `CanvasSwitcherRebindTests/switchingTheLiveCardsTakeNeverWritesTheOldWordsIntoTheNewTake` | R | G | R | G |
+
+A pin green on its own member's revert = HOLLOW (record it, never fix it). #12's non-vacuity line
+("the card kept ONE pane across the switch") red on BOTH sides would mean SwiftUI remounts the card's
+pane and the Canvas road is hollow — then #12 is dispositioned hollow and the Canvas widening
+withdrawn.
+
+## READY-FOR-SUITES — batch A (the orchestrator's window; from `App/Variorum/`)
+
+All four builds are done; run `test-without-building` on each (no rebuild):
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<build> test-without-building -only-testing:… `.
+Confirm each run's "Test run with N tests in M suites" line and read the `skipped:` lines (VX-604:
+0 ran = no verdict).
+
+1. **THE RED RUNS** — the three pin suites on each revert build (`vx601a-pre`, `vx601a-rev421`,
+   `vx601a-rev248`), seconds each:
+   `-only-testing:VariorumTests/PaneUndoLifecycleTests -only-testing:VariorumTests/PaneRebindTests -only-testing:VariorumTests/CanvasSwitcherRebindTests`
+   — expect **12 tests in 3 suites**, the reds exactly as the table (pre: 10 red / 2 guards… precisely
+   #1–#4, #6–#9, #12 red = 9 red, 3 green; rev421: #1–#4, #6, #7 red = 6 red; rev248: #7–#9, #12 red
+   = 4 red). Both `#require`-guarded pins STOP before their replay line when red, so no red run can
+   take the test host down.
+2. **THE GREEN RUN, tier 1** (on `vx601a-post`) — the pins, VX-222's and VX-227's contamination pins
+   (now redundant by construction — their executed counts go in the record), and the pane component's
+   own suites:
+   `-only-testing:VariorumTests/PaneUndoLifecycleTests -only-testing:VariorumTests/PaneRebindTests -only-testing:VariorumTests/CanvasSwitcherRebindTests -only-testing:VariorumTests/TakesChooseRingTests -only-testing:VariorumTests/TakesStepFollowTests -only-testing:VariorumTests/TakesStepFollowModelTests -only-testing:VariorumTests/TakesParkedFollowTests -only-testing:VariorumTests/PaneSurfaceTests -only-testing:VariorumTests/PanePublishDoorTests -only-testing:VariorumTests/PaneFindFaceTests -only-testing:VariorumTests/PaneTextAuthorityTests -only-testing:VariorumTests/PaneTextCompareTests -only-testing:VariorumTests/PaneMarkdownCaretFaceTests -only-testing:VariorumTests/TakePaneMeasureTests -only-testing:VariorumTests/PaneRenderRestoreClipTests -only-testing:VariorumTests/CanvasTakesSwitcherTests -only-testing:VariorumTests/MarkdownActsTests`
+   — 17 suites, all green expected (the counts per suite are the run's; VX-222's
+   `TakesChooseRingTests` is 5 tests).
+3. **THE GREEN RUN, tier 2 — the pane-family battery** (on `vx601a-post`): every suite type in the
+   91 test files that name the pane component or any of its ten hosts (`PaneTextView`,
+   `PaneSurfaceView`, `PaneTextAuthority`, `PaneCaretLanding`, `PaneFindFace`, `PaneMeasurement`,
+   `PanePublisher`, `PaneDecoration`, `TakesBoardView`, `LensesBoardView`, `CompareBoardView`,
+   `WriteTakesPanel`, `CanvasView`, `BlocksWorkbenchView`, `ReadEditPane`, `BookIndexView`,
+   `TakesCellView`) + `TakesParkedFollowTests` — **196 suite types** (extracted as types containing
+   `@Test`, never file names — the VX-184 lesson). One `-only-testing:VariorumTests/<name>` per name:
+   ArrivalsDoorPlacementTests AutosaveRegistryLifecycleTests AutosaveRegistryReleaseGuardTests
+   BlockHighlightTests BlockHistoryPaletteDoorTests BlockHistoryPaneTests BlocksArrivalMeasureTests
+   BlockSelectionRegistryTests BlockSelectionRuleTests BlocksWorkbenchFaceTests
+   BlockTagSheetVoiceTests BlockTOCStatusTests BoardBlockSelectionTests BoardDeliveryPolicyTests
+   BookAscentDeclarationTests BookCarryLiveBlockTests BookCollectingDoorsTests
+   BookEditHereRiderTests BookIndexEditingTests BookIndexGroupingTests BookIndexTakesTests
+   BookIndexToOutlineCarryTests BookLeavingRegistryTests BookLeavingSavepointTests
+   BookNoteBoxOpenDoorTests BookOpenDoorMountTests BookOpenDoorRuleTests BookOpenDoorShellTests
+   BookPlaceMemoryTests BookRedesignMountTests CalloutContextMenuTests CalloutEmojiPickerTests
+   CalloutSwatchTests CanvasAndPoolTests CanvasArrivalTests CanvasBankDropTests
+   CanvasBankHostedTests CanvasBankMembershipTests CanvasBoardGeometryTests CanvasDragTrackingTests
+   CanvasFocusedBlockFactTests CanvasHostedRealizationTests CanvasOrderAndOverviewTests
+   CanvasRealizationTests CanvasSwitcherRebindTests CanvasTakesSwitcherTests CapabilityRegistryTests
+   CaptureFocusReattachTests CaptureHandOffTests CaptureHostsUndoFilingTests CaptureKeysTests
+   CaptureOpeningFocusBoxTests CaptureOpeningFocusRuleTests CaptureTextViewKeyTests
+   CaptureTourFocusTests CaptureUndoHistoryTests CaptureUndoSyncTests CommandRouterTests
+   CommentPanelHostLeavingTests CommentPanelHostSuites CommentPanelReleaseTests
+   CompareAnchorWholeTests CompareCompositionTests CompareLeavingSavepointTests
+   CompareLensesAlignmentTests CompareOnePlacementTests CompareViewModelTests CopyAllTakesDoorTests
+   CurrentBlockContinuityTests DebugOracleSingletonWindowTests DuplicateBookNameDoorTests
+   DuplicateDoorsTests FanReorderDoorTests FormattingSurfacesTests GlobalSegmentationFaceTests
+   IndexClickCaretTests IndexLandingCaretTests IndexProseColumnTests IndexTierMetricsTests
+   InlineEditorWidthReflowTests InlineHeightReportTests LensesReorderTests ListContinuationTests
+   MarkdownActsTests MarkdownCaretFaceTests MCPCompareLandingTests MergeSelectionTests
+   ModeSwitchCarryTests ModeSwitchFeelTests MoveAndExecuteTests NavigationDoorsTests
+   NavigationHistoryTests NestedListDoorTests NewBlockShortcutTests NoteCardSmartBooksTests
+   NoteOpenLandingTests OpenNotesTests PaneBookBlurTests PaneFindFaceTests PaneFocusCatcherTests
+   PaneHeldModeTests PaneLayoutTests PaneLineMetricsScopeTests PaneMarkdownCaretFaceTests
+   PaneMountTests PanePublishDoorTests PaneRebindTests PaneRenderRestoreClipTests PaneSplitDoorTests
+   PaneSplitModelTests PaneSurfaceTests PaneTextAuthorityTests PaneTextCompareTests
+   PaneUndoLifecycleTests PaneUnmountTests ParagraphGapTests PlainPasteDoorTests PlainPasteRuleTests
+   PostDetailModeMemoryTests PostDetailRoutingTests ProseGutterTests QuickEntryOpeningScopeTests
+   QuitFinalizeSurfacesTests ReadModeTests ReadNoteLandingTests ReturnKeyTraceTests
+   SavepointCommitDoorTests SavepointNameAskTests SavepointNameCopyTests SavepointNameFaceTests
+   SavepointRenameDoorTests SavepointSealedDoorTests SavepointTakesDoorTests SealDoorTests
+   SettleRewrapOverlayTests SidebarNoteBoxDoorFacesTests SidebarNoteBoxTakesCellClickTests
+   SidebarSmokeTests SoftNewlineTests SpellcheckLevelTests SplitAtNewlinesDoorTests
+   StaleWriteIntentTests StatusCenterTests TagChipLeafTests TakeCardDoorTests
+   TakePaneDurabilityTests TakePaneMeasureTests TakesArticleRenderTests TakesArticleScrollTests
+   TakesArticleWatchTests TakesBoardSoakTests TakesBoardTests TakesBufferConvergenceTests
+   TakesCardHeightTests TakesChooseRingTests TakesEmptyBlockFaceTests TakesEmptyStateTests
+   TakesEntryBandTests TakesFindBoardTests TakesLandingTests TakesLensFilterTests
+   TakesMarginGridAlignmentTests TakesMarginGridCaptureTests TakesParkedFollowTests
+   TakesPresentationTests TakesRailPagingTests TakesRoomTests TakesSlotDragTests
+   TakesStepFollowModelTests TakesStepFollowTests TakesWordCountTests TakeToBlockDoorTests
+   TrayPanelMoveTests TutorialBookShapeTests TutorialDeletionActsTests TutorialDoorTests
+   TutorialFannedMatrixTests TutorialLibraryActsTests TutorialLookingActsTests
+   TutorialPrivacyChapterTests TutorialStructureActsTests TutorialTakesActsTests
+   TutorialWherePlacesActsTests TutorialWritingActsTests TypedReturnKeyTests
+   VX347AskedTakeFilingTests VX347LeaveRuleTests VX347LeavingBoxTests VX347OneCommitPerFieldTests
+   WorkspaceModelTests WorkspaceNamingTests WriteBlockSelectionTests WriteTakesPanelChooseTests
+   WriteTakesPanelKeysTests WriteTakesPanelRoutedCommandTests WriteTakesPanelTests
+   Standing reds that are NOT this batch's, if met: VX-337's two load-dependent flakes
+   (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt`,
+   `TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)` — whole-target load only;
+   batch C's bounded trace) and the trait-skipped singleton-window oracle suite.
+
+## THE USE WALK — batch A rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug build
+from `DerivedData/vx601a-post`; never press Resume Sync; restore exactly as found)
+
+The walk REQUEST names: one fresh walk note with one fanned block (two takes) and a second plain
+block, minted by quick entry and ⌘T; it leaves to the Trash at the end. The fixed build is not
+expected to crash; if it does, the walker stops, records, and the orchestrator confirms the store
+reopens clean and still held before anything else. Captures one per row per voice, both voices
+(Study first — the store's voice — then Terminal, restored to Study):
+- **W1 — VX-421, her exact gesture:** Takes; ⌘T mints a take; paste a long paragraph into it; delete
+  that take (the card's Delete Take); **⌘Z — the app lives** (nothing undoes; no crash); **⌥⌘Z
+  restores the take**. (Old build: the crash — not walked.)
+- **W2 — R-601-1's meaning:** type in take 1, click take 2 and type there; ⌘Z, ⌘Z — only take 2's
+  typing goes; take 1 is untouched. Then switch to Write and back to Takes: take 2 still reads
+  undone (the store heard the undo — the live road's `textDidChange`, which this fix does not move;
+  if it reads re-done, that is a pre-existing finding to record, not this batch's regression).
+- **W3 — VX-248 on its live road (Canvas, ⌘7 — Debug only):** the fanned block's card: click in,
+  type "x"; open its ‹ › switcher and press › — **the card shows take 2's own words, the caret in
+  it**; type "!" — it lands in take 2's words; ‹ back — take 1's words, with the "x". (Old build: take
+  1's words shown under take 2 — the contamination.)
+- **W4 — no regression of VX-227's follow:** Lenses, a scratch column: click its pane, ⌃⌘→ — take 2's
+  own words, caret in it; ⌃⌘← — take 1's own words; a keystroke lands in each.
+
+## SELF-ASSESSMENT (the first of the two reviews — the implementer's)
+
+- **Scope and seams.** Two production files: `Surface/PaneSurface.swift` (the coordinator's undo
+  history, the bound take, the re-bind, `noteLiveness(_:rebound:)`, two doc paragraphs) and
+  `Surface/PaneTextAuthority.swift` (one doc sentence naming the re-bind exception). Zero
+  `Sync/`, schema, Shared/, `EditorTextView`, `BlockRangeIndex` (regions untouched), read tier,
+  `TakesViewModel`. No TK1 API (`.layoutManager` appears nowhere new); no attribute stamp added (the
+  re-bind writes a whole string and re-derives the face exactly as the read adoption does). P-3: no
+  second liveness mechanism — the history reads `isEditable`, which the authority's answer sets; the
+  re-bind extends the one component's lifecycle, as the brief asked.
+- **The trace held.** Both briefed mechanisms confirmed by my own read; two widenings, stated: VX-421
+  reaches every pane host (and the read adoption is a second replay road), VX-248 has a live road
+  today on Canvas. The probe added one fact the brief did not have (undo applies to a non-editable
+  text view) and the read-pane gate answers it (P-A1, PROVISIONAL).
+- **What could regress, and why I think it doesn't.** (1) *Existing re-key roads now re-bind:* the
+  Takes article on a choose and the Lenses park both re-key a READ cell — the re-bind writes exactly
+  what the read adoption wrote, and the read adoption then finds its record current (one write, as
+  before). (2) *Order inside `updateNSView`:* the re-bind writes before `applyFace`/`applyStyle`/the
+  font branch; each of those re-derives over whatever text is there, so a voice/palette change in
+  the same pass converges as it did. (3) *Ten hosts' `variantID`:* each read; each passes the take
+  whose `onEdit` it binds. (4) *Write's take panel:* its panes no longer share the Write editor's
+  history (the editor's structural `removeAllActions` no longer reaches them) — each pane's history
+  ends on its own programmatic writes instead. (5) *Cost:* two `UndoManager`s per mounted pane (one
+  never used); the re-bind's view comparison runs once per re-bind, never per pass. (6) *The F1
+  source walk* (`PaneSurfaceTests`): no binding written, no SwiftUI wrapper word in the coordinator.
+- **Risks I see.** (a) Pins written without a run: the rig, the window shapes and the undo road
+  follow measured precedents (`CommentTextAreaTests`' undo pin, `PaneFindFaceTests`' re-parent,
+  `CanvasAndPoolTests`' mounted board), and one false-red was caught in self-review (e0021460) — but a
+  harness surprise is possible; a red on `post` is a pin to fix, never a reason to touch the
+  production change without a trace. (b) #12's premise (the card keeps one pane across the switch) is
+  read from the code, not measured — its non-vacuity line decides. (c) An IME composition in progress
+  at a re-bind is replaced with the old take's text (a programmatic write ends a composition — the same
+  as any adoption; no road re-binds a live pane mid-composition today). (d) `textDidChange` on ⌘Z in
+  the live app is AppKit's and unchanged by which manager holds the actions — W2 confirms it.
+- **Residue / not mine (for the orchestrator to ticket or drop):** (R-1) **the full-document editor's
+  sibling** — `EditorViewModel.teardown` leaves the Write editor's typing history on the WINDOW's
+  manager and its `textView` is weak, so a torn-down Write editor's actions may name a freed view the
+  same way (e.g. type in Write, switch to a mode that unmounts the editor, ⌘Z with nothing holding the
+  keyboard). Suspected, NOT traced to a crash, the editor seam's other surface kind — out of this
+  batch. (R-2) the optional naive-follow demonstration (VX-227's batch4revert over this fix: its
+  scratch pins green, proving the park redundant for contamination) was NOT built — the Canvas pin
+  is the same demonstration on a real road.
