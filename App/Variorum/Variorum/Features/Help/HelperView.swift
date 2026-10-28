@@ -285,7 +285,7 @@ struct HelperView: View {
             // StarCopy.starRow ("Star"/"Unstar"); ONLY the ⌘K act wears
             // StarCopy.verb — the helper must not join the two.
             ("right-click ▸ \(StarCopy.starRow)", "star a note or book — the Starred "
-                + "section sits at the sidebar's top (up to fifteen); \u{2318}K's "
+                + "section sits at the sidebar's top; \u{2318}K's "
                 + "\u{201C}\(StarCopy.verb)\u{201D} is the same act"),
         ]),
         // 13g batch 7 (R6-1/R6-2): the two things that MOVED. Her round-1
@@ -524,7 +524,7 @@ struct HelperView: View {
          "A shortcut to a note or a book, pinned at the sidebar's top under "
          + "\u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ "
          + "\(StarCopy.starRow), or \u{2318}K's \u{201C}\(StarCopy.verb)\u{201D} — the "
-         + "same act. Up to fifteen: stars are meant to "
+         + "same act. Stars are meant to "
          + "be the things you're in right now, not a filing system."),
         // 13g batch 3 (L8/L9): the formatting vocabulary. Storage is
         // markdown-as-content (F-1), so the words she needs are the ones the

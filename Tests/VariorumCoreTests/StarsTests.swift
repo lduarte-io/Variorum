@@ -96,32 +96,10 @@ struct StarsTests {
         }
     }
 
-    @Test func theCapCountsOnlyWhatSheCanSee() throws {
-        // The reason the self-heal matters: a ghost star must never spend a
-        // slot she cannot free, because the refusal's only road (un-star)
-        // has no door for a row that renders nothing.
-        try withOperations { ops, db in
-            var ids: [String] = []
-            for index in 0..<Operations.starLimit {
-                let note = try ops.createPost(title: "n\(index)", profile: .generic)
-                ids.append(note.id)
-                try ops.setStarred(.post(note.id), starred: true)
-            }
-            try ops.deleteContainer(ids[2])
-
-            let next = try ops.createPost(title: "one past the cap", profile: .generic)
-            try ops.setStarred(.post(next.id), starred: true)
-            // Symbolic over the cap (it was 5 at this pin's birth, 15 since
-            // her 2026-09-18 #112(b) ruling): the live survivors in star
-            // order, then the newcomer in the freed slot.
-            var expected = ids
-            expected.remove(at: 2)
-            expected.append(next.id)
-            #expect(try db.read { try Queries.starred($0) }.map(\.target.id)
-                    == expected,
-                    "the dead star freed its slot — the cap counts the live list")
-        }
-    }
+    // (`theCapCountsOnlyWhatSheCanSee` — "a ghost star must never spend a slot
+    // she cannot free" — RETIRED at VX-643 with the cap: there are no slots.
+    // The self-heal it leaned on stays pinned by
+    // `aDeadTargetRendersNothingAndTheNextWriteHealsTheStoredList` above.)
 
     @Test func unstarringRemovesAndANoOpWritesNothing() throws {
         try withOperations { ops, db in

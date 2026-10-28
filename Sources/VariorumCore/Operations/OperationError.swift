@@ -332,12 +332,9 @@ public enum OperationError: Error, Equatable, Sendable {
     /// moving book's shelf — the drag's target moved under it.
     case placementAnchorNotOnShelf(readingID: String, anchorID: String)
 
-    // Stars (13f W4 — her round-3 ruling: "up to 5 notes or books").
-    /// The star list is full. Refused rather than silently evicting the
-    /// oldest star: a cap she cannot see acting on its own would be the
-    /// one outcome she never asked for, and the refusal names un-starring
-    /// as the road (P-2 — the door fires and speaks).
-    case starLimitReached(limit: Int)
+    // (Stars: `starLimitReached(limit:)` — 13f W4's cap refusal, 5 then 15 —
+    // RETIRED at VX-643 with the cap itself, her 2026-10-28 word. No star
+    // write refuses for a count.)
 
     // Book names (Phase 13e, E13 — her kickoff-sitting round-3 ruling).
     /// A DOOR that names a book found a LIVE book already wearing that name

@@ -461,7 +461,7 @@ struct SidebarView: View {
             }
         }
         // …and which listed notes live in ANOTHER wing (bounded by the Open
-        // list and the star cap — P1).
+        // list and her stars — ∝ the rows, never the corpus; P1).
         .task(id: noteRowsWingKey) {
             let ids = noteRowIDs
             let current = session.wing.currentID
@@ -690,7 +690,7 @@ struct SidebarView: View {
             }
             // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
             //  here put the margin OUTSIDE the scroll view — it moved inside.)
-            // 17y B3 item (l): the starred books' facts (≤ the star cap) and
+            // 17y B3 item (l): the starred books' facts (∝ her starred books) and
             // what their row menus present.
             .task(id: starredBookIDs) { await bookRowDoors?.load(starredBookIDs) }
             .modifier(OptionalBookRowDoorsHost(doors: bookRowDoors))
@@ -698,7 +698,7 @@ struct SidebarView: View {
         }
     }
 
-    /// The Starred section's BOOK ids, in star order (≤ the cap — P1).
+    /// The Starred section's BOOK ids, in star order (∝ her stars — P1).
     private var starredBookIDs: [String] {
         stars.items.filter { $0.target.kind == .reading }.map(\.target.id)
     }
@@ -1321,7 +1321,7 @@ struct SidebarView: View {
     // MARK: - VX-425 — the sidebar note rows' acts (the Open list's, Starred's notes)
 
     /// The notes the sidebar lists as NOTE rows — the Open list's and
-    /// Starred's notes (bounded by the list and the star cap).
+    /// Starred's notes (bounded by the list and her stars).
     private var noteRowIDs: [String] {
         let starredNotes = stars.items.filter { $0.target.kind == .post }.map(\.target.id)
         return workspace.openNotes.shown + starredNotes.filter { !workspace.openNotes.shown.contains($0) }

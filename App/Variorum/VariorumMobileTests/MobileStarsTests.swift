@@ -65,44 +65,23 @@ struct MobileStarsTests {
         }
     }
 
-    /// The cap refuses HONESTLY in PHONE words: the sixth star speaks
-    /// the phone's own road (the starred list at the top of the SHELF —
-    /// never the Mac's sidebar), and nothing is evicted.
-    @Test func theCapRefusalSpeaksPhoneWords() async throws {
+    /// **VX-643 — THE DELIBERATE FLIP** of `theCapRefusalSpeaksPhoneWords`
+    /// (her word 2026-10-28 — the cap is gone, on the phone too): the
+    /// sixteenth star LANDS from the phone's door, silently, in star order.
+    /// RED ON OLD: it spoke the phone's cap sentence and stayed unstarred.
+    @Test func theSixteenthStarLandsOnThePhone() async throws {
         try await withEditorWorld { session, db in
-            // SYMBOLIC on core's cap (13u3: these two tests were the only
-            // pins in either suite still asserting the literal 5 after her
-            // #112(b) ruling raised `Operations.starLimit` to 15 — red on
-            // every mobile run since 13u2b, unnoticed because that phase's
-            // Mac-only diff didn't owe a mobile run. The phone TUTORIAL's
-            // "up to five" sentence rides the mobile catch-up, #112(b).)
-            let cap = Operations.starLimit
             let ids = try await session.runner.run { ops -> [String] in
-                try (0..<(cap + 1)).map { try ops.createPost(title: "Note \($0)").id }
+                try (0..<16).map { try ops.createPost(title: "Note \($0)").id }
             }
             let model = MobileStarsModel(session: session)
-            for id in ids.prefix(cap) {
+            for id in ids {
                 await model.toggle(.post(id), from: .shelf)
             }
-            #expect(model.items.count == cap)
-            #expect(model.lastError == nil)
-
-            await model.toggle(.post(ids[cap]), from: .shelf)
-            #expect(model.items.count == cap, "the cap evicts nothing")
-            #expect(!model.isStarred(.post(ids[cap])))
-            let refusal = try #require(model.lastError)
-            #expect(refusal == MobileStarsModel.capRefusal(limit: cap))
-            // **RE-POINTED AT BATCH 10.** This line read `"top of the shelf"`
-            // — the road the sentence named until that batch moved the
-            // starred list off the shelf at her word (*"I don't like where it
-            // appears above the shelf"*). The RULE it was written to protect
-            // is unchanged and is what it still asserts: the refusal names a
-            // road that EXISTS ON THE PHONE. What changed is which one.
-            #expect(refusal.contains(MobileStarsModel.pageName),
-                    "the phone's own road is named")
-            #expect(!refusal.contains("shelf"), "and it is no longer the shelf's")
-            #expect(!refusal.contains("sidebar"), "never the Mac's surface")
-            #expect(!refusal.contains("Mac"))
+            #expect(model.items.map(\.target) == ids.map { .post($0) },
+                    "all sixteen, in star order")
+            #expect(model.lastError == nil, "no refusal anywhere")
+            #expect(model.isStarred(.post(ids[15])))
         }
     }
 
@@ -140,31 +119,34 @@ struct MobileStarsTests {
 
     /// The refusal's ONE HOME + clearing cadence (parity D2 — the
     /// routed C3 R1-7 mechanism): `lastError` was one field on the one
-    /// shared model and BOTH tab roots rendered it, so a cap refusal
+    /// shared model and BOTH tab roots rendered it, so a refusal
     /// fired from the Library also sat at the shelf's bottom — and it
     /// never cleared passively. Now: a door refusal renders at ITS
     /// root only, a fresh success clears it at once, and an untouched
     /// refusal clears itself after the cadence. A HOMELESS store-read
     /// error still renders everywhere (it is not door-fired) and never
     /// auto-clears — pinned so the gating can't over-reach.
+    ///
+    /// JUSTIFIED EDIT (VX-643): the cap's refusal was this pin's trigger, and
+    /// the cap is gone — so the refusal is now the op's own for a star whose
+    /// note was deleted under the press (`containerNotFound`); the subject
+    /// (where a refusal speaks, and when it clears) is unchanged.
     @Test func aRefusalSpeaksAtItsOwnDoorAndClearsAfterABeat() async throws {
         try await withEditorWorld { session, db in
-            // Symbolic on core's cap — see the sibling test's note (13u3).
-            let cap = Operations.starLimit
-            let ids = try await session.runner.run { ops -> [String] in
-                try (0..<(cap + 1)).map { try ops.createPost(title: "Note \($0)").id }
+            let (dead, live) = try await session.runner.run { ops -> (String, String) in
+                let dead = try ops.createPost(title: "gone").id
+                let live = try ops.createPost(title: "Note").id
+                try ops.deleteContainer(dead)
+                return (dead, live)
             }
             let model = MobileStarsModel(session: session)
             model.errorClearDelay = .milliseconds(40)
-            for id in ids.prefix(cap) {
-                await model.toggle(.post(id), from: .shelf)
-            }
             #expect(model.lastError == nil)
 
-            // The over-cap star, fired from the LIBRARY's door: the
-            // refusal renders there and ONLY there.
-            await model.toggle(.post(ids[cap]), from: .library)
-            #expect(model.error(on: .library) == MobileStarsModel.capRefusal(limit: cap))
+            // A refused star, fired from the LIBRARY's door: the refusal
+            // renders there and ONLY there.
+            await model.toggle(.post(dead), from: .library)
+            #expect(model.error(on: .library) != nil)
             #expect(model.error(on: .shelf) == nil,
                     "the refusal speaks where its door fired — never on the other root")
 
@@ -174,11 +156,11 @@ struct MobileStarsTests {
             #expect(model.error(on: .library) == nil)
 
             // A success clears immediately (no stale ghost): refuse
-            // again, then un-star one — the refusal is gone at once.
+            // again, then star a live note — the refusal is gone at once.
             model.errorClearDelay = .seconds(60) // the cadence must not be what clears it
-            await model.toggle(.post(ids[cap]), from: .library)
+            await model.toggle(.post(dead), from: .library)
             #expect(model.error(on: .library) != nil)
-            await model.toggle(.post(ids[0]), from: .shelf)
+            await model.toggle(.post(live), from: .shelf)
             #expect(model.lastError == nil, "a successful toggle clears the refusal at once")
 
             // (The HOMELESS arm — a store-read failure rendering on

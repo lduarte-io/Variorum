@@ -31,7 +31,7 @@ extension Operations {
         /// now — the tags still apply (explicit adds stay open, R-13ie-4).
         public let gatheringArchived: Bool
         /// VX-249: whether the act STARRED the note — the rule's ★ term,
-        /// satisfied by the one star write (cap-exempt). False when the note
+        /// satisfied by the one star write. False when the note
         /// was starred already or the rule asks for no star.
         public let starred: Bool
     }
@@ -169,11 +169,11 @@ extension Operations {
             }
             // VX-249: the star the rule needs, through the ONE star write —
             // so intake hears it (starring a note is an applying act, 13i-b
-            // U1). CAP-EXEMPT by her ruling (2026-10-13 — P-VX217-c's twin:
-            // "starring an existing note to collect it ignores the 15-star
-            // limit, like the mint"): the limit never blocks the collect.
+            // U1). (Her 2026-10-13 ruling made it cap-exempt — "starring an
+            // existing note to collect it ignores the 15-star limit, like the
+            // mint"; VX-643 retired the cap itself, so no star write meets one.)
             if plan.star {
-                try writeStar(db, .post(postID), starred: true, enforcingCap: false)
+                try writeStar(db, .post(postID), starred: true)
             }
             // The probe must pass now — a rule this op can't satisfy by
             // tagging and starring refuses loudly, and the transaction
@@ -220,9 +220,8 @@ extension Operations {
     /// holds nothing — §1); no undo entry (`newPostInReading`'s class:
     /// deleting the note is the inverse).
     ///
-    /// The star is written cap-exempt — the born-starred mints' precedent
-    /// (P-13id-U2-1: "a mint must never fail on a star"); PROVISIONAL, in the
-    /// batch record.
+    /// The star is written through the one star write — a mint never fails
+    /// on a star (P-13id-U2-1; no star write meets a cap since VX-643).
     @discardableResult
     public func newPostInGathering(_ readingID: String) throws -> GatheringMintResult {
         try database.write { db in
@@ -248,7 +247,7 @@ extension Operations {
                 paths.append(tag.path)
             }
             if plan.star {
-                try writeStar(db, .post(post.id), starred: true, enforcingCap: false)
+                try writeStar(db, .post(post.id), starred: true)
             }
             // The belt: the assembly's own predicate decides "the gathering
             // shows it" — the planner only proposes. A plan that fails it

@@ -496,9 +496,10 @@ final class ShelfViewModel {
     /// (s), R-17y-9 — the strip's drop grammar; its menu twin is the row's
     /// own Star/Unstar). One-way: an already-starred book is a quiet
     /// nothing (the drop asked for what is already true). The write is the
-    /// union star's one road (`setStarred(.reading)` — both stores, the cap
-    /// counted over the union), and the cap's refusal speaks exactly as at
-    /// every star door (`OpsRefusalCopy` — `StarsModel.toggle`'s words).
+    /// union star's one road (`setStarred(.reading)` — both stores; no cap
+    /// since VX-643), and any refusal (a book deleted under the drag) speaks
+    /// exactly as at every star door (`OpsRefusalCopy` — `StarsModel.toggle`'s
+    /// words).
     /// Silent on success, like every star door: the ★ and the starred
     /// shelf's row are the answer (PROVISIONAL P-17y-B3-s5).
     func starBook(_ readingID: String) async {

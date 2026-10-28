@@ -7,8 +7,8 @@ import Testing
 /// 13i-b U4 — F-U3-3, carried: **the star term's context reaches every site
 /// that can meet it.** The rule grammar has a ★ term since 13i-a; its SQL is
 /// `c.id IN (<the starred notes>)`, and the list comes from the 'starred'
-/// setting (`Queries.starredNoteIDs` — live NOTE targets, star order, bounded
-/// by `Operations.starLimit` on the write side). Until U4 only INTAKE passed the
+/// setting (`Queries.starredNoteIDs` — live NOTE targets, star order; no cap
+/// since VX-643). Until U4 only INTAKE passed the
 /// list (U1); every other caller took `ruleMatchSQL`'s old `= []` default, so a
 /// gathering's ★ term matched NOTHING — silently — in its assembly, the bind
 /// that materializes that assembly, the shelf's word count, the Pool's

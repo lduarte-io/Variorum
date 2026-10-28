@@ -223,9 +223,8 @@ extension Operations {
     ///
     /// **13i-d U2 ACT 0 — A PIN IS A STAR** (F-U1-2 (A), ruled: "`setShelfPinned`
     /// routes through the same write"): this door IS `setStarred(.reading)` —
-    /// both stores, the cap, the self-heal. The phone's "Pin to Shelf Top"
-    /// keeps its words until its catch-up and writes the same truth (so it
-    /// now refuses at the cap like every star door, naming un-starring).
+    /// both stores, the self-heal. The phone's "Pin to Shelf Top" keeps its
+    /// words until its catch-up and writes the same truth.
     public func setShelfPinned(_ readingID: String, pinned: Bool) throws {
         try setStarred(.reading(readingID), starred: pinned)
     }
@@ -237,43 +236,37 @@ extension Operations {
     /// reading it is pinning (live by then).
     ///
     /// **13i-d U2 ACT 0:** it routes through the ONE star write — both
-    /// stores — and is EXEMPT from the cap's refusal (PROVISIONAL
-    /// P-13id-U2-1): her R-13id-5 keeps the daily Journal and Quicknotes
-    /// BORN STARRED, and a mint must never fail on a star. The book counts
-    /// toward the cap thereafter like any star. The name survives until
-    /// 13i-d's vocabulary sweep.
+    /// stores (her R-13id-5 keeps the daily Journal and Quicknotes BORN
+    /// STARRED). The name survives until 13i-d's vocabulary sweep.
     func setShelfPinned(_ db: Database, _ readingID: String, pinned: Bool) throws {
-        try writeStar(db, .reading(readingID), starred: pinned, enforcingCap: false)
+        try writeStar(db, .reading(readingID), starred: pinned)
     }
 
     // MARK: - Stars (13f W4)
 
-    /// How many things may be starred at once — her ruling's number
-    /// (raised 5 → 15 at her 2026-09-18 ruling on QUESTIONS #112(b),
-    /// "scroll should be allowed, maybe 15 items max" — superseding 13f
-    /// W4's "up to 5"; the Starred section scrolls past its window of 7).
-    /// Public so a face can name it without re-stating it (and so the
-    /// refusal below carries it rather than hard-coding a word).
-    public static let starLimit = 15
+    // **VX-643 — NO CAP** (her word 2026-10-28: "getting rid of the 15 star cap
+    // - seems weird and the rules of a book / the AI go past it anyway and i'm
+    // not convinced it should exist anymore"). `starLimit` (5 at 13f W4, 15 at
+    // her #112(b) ruling) and its refusal `starLimitReached` are RETIRED from
+    // every road: its premise — a small Starred section — went when the section
+    // learned to scroll, and the born-starred mints, the collect door and the
+    // wire's mints already passed it. Every read of the list costs ∝ the stars
+    // she keeps, never the corpus (`StarsP1Tests` — the Open list's class).
 
     /// Star or un-star a note or a book (13f W4 — her round-3 ruling).
     /// Stars are a synced `setting` list in STAR ORDER, exactly the
     /// `shelf_pins` shape: ZERO schema, no §12 lockstep event, plain
     /// metadata CAS.
     ///
-    /// Three rules, all of them visible in the body:
+    /// Two rules, both of them visible in the body:
     ///
     /// 1. **Star time is the order** — a new star is APPENDED, so the
     ///    section reads in the order she starred things.
-    /// 2. **THE CAP REFUSES HONESTLY** (`starLimitReached`) rather than
-    ///    silently dropping the oldest star. P-2: the door fires and
-    ///    delivers the operations layer's real refusal, and the refusal
-    ///    names un-starring as the road (`OpsRefusalCopy`).
-    /// 3. **EVERY WRITE SELF-HEALS.** It rewrites the list `Queries.starred`
+    /// 2. **EVERY WRITE SELF-HEALS.** It rewrites the list `Queries.starred`
     ///    would return — i.e. live targets only — so a star whose note or
     ///    book was deleted disappears from the stored value the next time
-    ///    she stars anything. That is what keeps the CAP honest: it counts
-    ///    exactly the stars she can see, never ghosts she cannot un-star.
+    ///    she stars anything: the stored list never keeps ghosts she cannot
+    ///    see or un-star.
     ///
     /// Idempotent both ways, and a write that changes nothing writes
     /// nothing — no `updated_at`, no outbox row (the identity-metadata
@@ -283,18 +276,17 @@ extension Operations {
     /// record §7's "one mechanism"): a BOOK's star is also its
     /// `reading.starred` column (the Bookcase's float). Every star write on a
     /// reading writes BOTH stores in this one transaction, and un-starring
-    /// clears both; the cap counts the union (`Queries.starred` — the list
+    /// clears both; "is it starred" is the union (`Queries.starred` — the list
     /// plus the column-only tail). See `writeStar`.
     public func setStarred(_ target: StarTarget, starred: Bool) throws {
         try database.write { db in
-            try writeStar(db, target, starred: starred, enforcingCap: true)
+            try writeStar(db, target, starred: starred)
         }
     }
 
     /// **THE ONE STAR WRITE** (13i-d U2 ACT 0), at db level so the
-    /// in-transaction mints share it (`setShelfPinned(_:_:pinned:)`).
-    /// `enforcingCap` is false only for those born-starred mints
-    /// (PROVISIONAL P-13id-U2-1 — a mint never fails on a star).
+    /// in-transaction mints share it (`setShelfPinned(_:_:pinned:)`, the
+    /// collect door, the gathering and wire mints).
     ///
     /// **VX-596 — the MCP undo's two parameters** (`Operations+MCPStars`; every
     /// other caller keeps both defaults, byte-unchanged): `position` puts a NEW
@@ -303,7 +295,7 @@ extension Operations {
     /// keeps intake from hearing a note's star — a replay's exact revival is
     /// no applying act (`apply_tag`'s replay doctrine: it seats nothing).
     func writeStar(
-        _ db: Database, _ target: StarTarget, starred: Bool, enforcingCap: Bool,
+        _ db: Database, _ target: StarTarget, starred: Bool,
         at position: Int? = nil, heard: Bool = true
     ) throws {
         let stored = try Queries.starredTargets(db)
@@ -316,18 +308,15 @@ extension Operations {
         // §24): it never evicts a member.
         var starsANote = false
         if starred {
-            // The UNION — the ONE rule the read side states, so the cap and
+            // The UNION — the ONE rule the read side states, so the write and
             // the section can never disagree about what is starred. A target
-            // already in it (by either store) is already counted.
+            // already in it (by either store) is already starred: no applying act.
             let union = try Queries.starred(db).map(\.target)
             if !union.contains(target) {
                 guard try starTargetIsLive(db, target) else {
                     throw target.kind == .post
                         ? OperationError.containerNotFound(id: target.id)
                         : OperationError.readingNotFound(id: target.id)
-                }
-                if enforcingCap, union.count >= Self.starLimit {
-                    throw OperationError.starLimitReached(limit: Self.starLimit)
                 }
                 starsANote = target.kind == .post
             }

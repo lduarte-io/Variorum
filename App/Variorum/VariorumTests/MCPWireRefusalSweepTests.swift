@@ -111,7 +111,6 @@ struct MCPWireRefusalSweepTests {
         .wingMoveChangedSince(postID: "p"), .dailyJournalIsHomeOnly(id: "r"),
         .readingAlreadyInWing(readingID: "r", wingID: "w"), .wingMoveIntoItself(wingID: "w"),
         .placementAnchorNotOnShelf(readingID: "r", anchorID: "a"),
-        .starLimitReached(limit: 5),
         .duplicateBookName(name: "letters"),
         .purgeTargetNotDeleted(table: "container", id: "p"), .unsupportedPurgeTarget(table: "tag"),
         .deliberateSavepointNeverPruned(id: "m"),

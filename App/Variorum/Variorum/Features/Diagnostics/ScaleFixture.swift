@@ -37,7 +37,7 @@
 //  13n-c U2 — THE GRANT ROAD's SCALE (her "a user might have hundreds of
 //  books and notes"): with `books=N,shelves=M` the fixture also mints N books
 //  across M shelves of Home (every 13th left unshelved), the fixture's notes
-//  filed into them round-robin, a few starred (the star cap tolerated), every
+//  filed into them round-robin, a few starred, every
 //  17th finished, every 23rd owned, one archived, one journal-TRAIT book, one
 //  Private book and one Private note — and TWO books called "the adventures
 //  of sherlock holmes" on the first shelf, made two days apart (her

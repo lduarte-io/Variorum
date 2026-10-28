@@ -419,16 +419,9 @@ nonisolated extension OpsRefusalCopy {
         case .deliberateSavepointNeverPruned:
             return "That's a deliberate ⌘S commit — those are never pruned, "
                 + "in any mode."
-        // 13f batch 6 (W4): the star cap, refusing honestly rather than
-        // evicting her oldest star. The refusal NAMES the road, which
-        // is the whole reason the cap is a refusal and not a silent
-        // drop (P-2 — a door that fires and says what to do instead).
-        // The road is the Mac sidebar's list; the phone's star door words
-        // its own.
-        case .starLimitReached(let limit):
-            return "You can star \(limit) things at a time — un-star one in the "
-                + "\(StarCopy.sectionHeader) list at the top of the sidebar, and "
-                + "this can take its place."
+        // (13f batch 6's star-cap sentence, "You can star N things at a time —
+        // un-star one…", is RETIRED with the cap at VX-643: no star write
+        // refuses for a count.)
         // 13e batch 4 (E2 — her A17): `blockNotFound` has existed since
         // Phase 2 and dumped the raw enum, because until now every door
         // onto it addressed the ONE block the caret was in and the

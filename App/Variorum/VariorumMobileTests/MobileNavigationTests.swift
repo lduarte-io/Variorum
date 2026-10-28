@@ -390,46 +390,43 @@ struct MobileNavigationTests {
         }
     }
 
-    /// **THE CAP REFUSAL STOPS NAMING A ROAD THAT NO LONGER EXISTS.**
-    ///
-    /// It said *"un-star one in the starred list at the top of the shelf"* —
-    /// and this batch retired that list from the shelf, so the sentence would
-    /// have sent her somewhere that is not there. A bug-class fix, pinned as
-    /// one. RED-ON-OLD: restore the old sentence and both assertions go red.
-    @Test func theCapRefusalNamesTheListThatActuallyExists() {
-        let refusal = MobileStarsModel.capRefusal(limit: Operations.starLimit)
-        #expect(!refusal.contains("shelf"),
-                "the shelf no longer holds the starred list: \(refusal)")
-        #expect(refusal.contains(MobileStarsModel.pageName),
-                "it names the page that does: \(refusal)")
-    }
+    // (`theCapRefusalNamesTheListThatActuallyExists` RETIRED at VX-643 with
+    // the cap and `MobileStarsModel.capRefusal`: no star refuses for a count,
+    // so there is no cap sentence left to point anywhere.)
 
     /// **A REFUSAL FIRED FROM THE STARRED PAGE SPEAKS THERE, AND ONLY
     /// THERE** — D2's rule, extended to the third root by giving it its own
     /// `DoorHome`. Without the new case the page's refusals would have had to
     /// borrow another root's home, which is the exact defect D2 closed: a
     /// refusal waiting on a surface that did not fire it.
+    ///
+    /// JUSTIFIED EDIT (VX-643): the trigger was the cap's refusal, which is
+    /// gone; the refusal here is the op's own for a starred row whose note was
+    /// deleted under the page (an un-star always lands, so the page's own
+    /// refusable press is a re-star of a target no longer live). Sixteen stars
+    /// stand first — past the old cap — and none of them refuses.
     @Test func aStarRefusalFromTheStarredPageSpeaksOnlyThere() async throws {
         try await withEditorWorld { session, _ in
-            let ids = try await session.runner.run { ops -> [String] in
-                try (0..<(Operations.starLimit + 1)).map { try ops.createPost(title: "n\($0)").id }
+            let (ids, dead) = try await session.runner.run { ops -> ([String], String) in
+                let ids = try (0..<16).map { try ops.createPost(title: "n\($0)").id }
+                let dead = try ops.createPost(title: "gone").id
+                try ops.deleteContainer(dead)
+                return (ids, dead)
             }
             let stars = MobileStarsModel(session: session)
-            for id in ids.prefix(Operations.starLimit) {
+            for id in ids {
                 await stars.toggle(.post(id), from: .shelf)
             }
-            #expect(stars.items.count == Operations.starLimit)
-            #expect(stars.error(on: .shelf) == nil, "a full list is not a refusal")
+            #expect(stars.items.count == 16)
+            #expect(stars.error(on: .shelf) == nil, "sixteen stars are not a refusal")
 
-            // The one that does not fit, fired from the starred page.
-            await stars.toggle(.post(ids[Operations.starLimit]), from: .starred)
-            #expect(stars.error(on: .starred)
-                    == MobileStarsModel.capRefusal(limit: Operations.starLimit))
+            // The one that cannot land, fired from the starred page.
+            await stars.toggle(.post(dead), from: .starred)
+            #expect(stars.error(on: .starred) != nil)
             #expect(stars.error(on: .shelf) == nil,
                     "it does not wait on a root that did not fire it")
             #expect(stars.error(on: .library) == nil)
-            #expect(stars.items.count == Operations.starLimit,
-                    "the cap refuses honestly rather than evicting")
+            #expect(stars.items.count == 16, "nothing else moved")
         }
     }
 

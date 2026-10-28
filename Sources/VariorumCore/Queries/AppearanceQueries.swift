@@ -167,9 +167,9 @@ extension Queries {
     /// readings whose column is set OR whose key the list holds — by (name,
     /// id), case-insensitive. Every reader of "is this book starred" — the
     /// Bookcase's float, the phone's pins, the Starred section's column-only
-    /// tail, the cap — asks THIS, so the two stores can never disagree about
-    /// a book again. Cost: one pass over the live readings (author-scale)
-    /// with an `IN` list bounded by the cap.
+    /// tail — asks THIS, so the two stores can never disagree about a book
+    /// again. Cost: one pass over the live readings (author-scale) with an
+    /// `IN` list of the starred books.
     static func starredReadingRows(_ db: Database) throws -> [(id: String, name: String)] {
         let listed = try starredTargets(db).compactMap { $0.kind == .reading ? $0.id : nil }
         var clause = "starred = 1"
@@ -222,13 +222,12 @@ extension Queries {
     ///
     /// The list's SELF-HEAL is the write side's: `Operations.setStarred`
     /// persists exactly what this returns, so a dead entry disappears from
-    /// the stored value the next time she stars or un-stars anything — which
-    /// is also what keeps the cap counting only what she can see.
+    /// the stored value the next time she stars or un-stars anything.
     ///
-    /// Cost is bounded by the cap (`Operations.starLimit`), not by the
-    /// corpus: at most fifteen ids, resolved in two indexed reads — plus,
-    /// since 13i-d U2, one pass over the live readings for the column-only
-    /// tail (author-scale).
+    /// Cost ∝ the STARS she keeps, never the corpus (VX-643 retired the cap
+    /// that used to bound it — `StarsP1Tests` pins the shape): the ids
+    /// resolved by primary-key seeks in two reads — plus, since 13i-d U2, one
+    /// pass over the live readings for the column-only tail (author-scale).
     ///
     /// **13i-d U2 ACT 0 — THE UNION** (F-U1-2 (A), ruled; R-13id-5): the
     /// list's live entries in STAR ORDER, then every live reading starred by
@@ -255,9 +254,9 @@ extension Queries {
     /// P-13id-U5-10: §9's total isolation reaches the sidebar's Starred too —
     /// a star belongs to its thing, and the thing lives in one library). The
     /// union above, filtered to the targets that live in `wingID` as surfaces
-    /// read wings (a dangling pointer is Home's). The cap stays STORE-WIDE —
-    /// one star list, fifteen stars across every wing (the cap is about the
-    /// list she keeps, not a room). Cost ∝ the cap (≤ 15 point reads).
+    /// read wings (a dangling pointer is Home's). The list stays STORE-WIDE —
+    /// one star list across every wing (it is the list she keeps, not a room).
+    /// Cost ∝ the stars (one point read each — `StarsP1Tests`).
     public static func starred(_ db: Database, wingID: String) throws -> [StarredItem] {
         try starred(db).filter { item in
             let table = item.target.kind == .post ? "container" : "reading"
@@ -295,9 +294,15 @@ extension Queries {
                 uniquingKeysWith: { first, _ in first })
         }
 
+        // VX-643 (the P1 check): `+kind` — the unary plus takes the kind test
+        // out of the planner's index choice, so the ids are SOUGHT by the
+        // primary key. With a bare `kind = 'post'` SQLite took
+        // `idx_container_kind (kind=?)` — a walk of every note in the library
+        // per read, under a read both Starred faces HOLD (re-run on the writer
+        // after every autosave). Pinned: `StarsP1Tests`.
         let posts = try names(
             targets.filter { $0.kind == .post }.map(\.id),
-            from: "container", titleColumn: "title", filter: "AND kind = 'post'")
+            from: "container", titleColumn: "title", filter: "AND +kind = 'post'")
         let readings = try names(
             targets.filter { $0.kind == .reading }.map(\.id),
             from: "reading", titleColumn: "name", filter: "")
@@ -314,7 +319,7 @@ extension Queries {
 
     /// The LIVE starred NOTES' ids, in star order — the rule grammar's STAR
     /// term context (`ruleMatchSQL`'s `starredNoteIDs`; the 13i-a plan §9
-    /// hand-off c). Bounded by the cap, never the corpus. 13i-b U1's intake
+    /// hand-off c). ∝ the stars, never the corpus (VX-643). 13i-b U1's intake
     /// is its first consumer; the gathering assembly's call sites are U4's.
     public static func starredNoteIDs(_ db: Database) throws -> [String] {
         // Notes live in the LIST alone (the column is a reading's), so the

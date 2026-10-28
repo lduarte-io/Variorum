@@ -210,16 +210,10 @@ enum MobileTutorialSeeder {
             name: bookName, kind: .book, profile: "collection")
         // The shelf's pin face, taught by wearing it (pinned books sit
         // first — the guide leads the shelf so it is findable on a fresh
-        // dev store; "getting around" says so). The star is a NICETY and
-        // never worth failing the seed: since 13i-d U2's union star this
-        // public door carries the 15-star cap, so with the cap full the
-        // guide simply seeds unstarred (F-U2-1, the architect's
-        // adjudication — every other refusal still aborts the seed).
-        do {
-            try ops.setShelfPinned(book.id, pinned: true)
-        } catch OperationError.starLimitReached {
-            // Proceed unstarred.
-        }
+        // dev store; "getting around" says so). (13i-d F-U2-1 seeded the
+        // guide UNSTARRED when the star cap was full; VX-643 retired the
+        // cap, so the star always lands and every refusal aborts the seed.)
+        try ops.setShelfPinned(book.id, pinned: true)
 
         // Chapters, in reading order.
         let welcome = try ops.createSection(in: book.id, name: "welcome")
@@ -293,7 +287,7 @@ enum MobileTutorialSeeder {
             + "starts a bookless note and drops you straight into writing; "
             + "+ new book, at the list's end, starts a fresh book — "
             + "hand-picked, a dated journal, or a smart book collecting by "
-            + "tags. A long press also STARS a note or a book (up to fifteen) — "
+            + "tags. A long press also STARS a note or a book — "
             + "starred things sit above everything at the shelf's very top, "
             + "and the same press takes the star back off.",
 

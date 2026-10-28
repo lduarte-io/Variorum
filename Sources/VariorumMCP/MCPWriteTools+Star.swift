@@ -21,10 +21,11 @@ import VariorumCore
 /// parity, the rule staying hers; `onBookOrGathering`) — then the act's guard
 /// re-decides INSIDE its own transaction and spends any once grant there.
 ///
-/// **The act** is `Operations.setStarredForClient` — her `writeStar`: the cap of
-/// fifteen refusing in her words (`starLimitReached` through the ONE refusal
-/// chain, her `OpsRefusalCopy`), intake hearing a note's star exactly as hers
-/// (a living ★-rule book seats or bells by its dial), un-starring a non-event.
+/// **The act** is `Operations.setStarredForClient` — her `writeStar`: intake
+/// hearing a note's star exactly as hers (a living ★-rule book seats or bells by
+/// its dial), un-starring a non-event, no count ever refusing (VX-643 retired
+/// her cap of fifteen — her word 2026-10-28, "the rules of a book / the AI go
+/// past it anyway").
 /// A star already as asked writes nothing: `changed: false`, no undo entry, no
 /// receipt, the landed Activity line (VX-362's `apply_tag` shape). Otherwise
 /// ONE client-named ⌥⌘Z entry, compare-and-set, the star back at its place.

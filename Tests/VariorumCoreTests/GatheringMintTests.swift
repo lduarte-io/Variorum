@@ -254,10 +254,13 @@ struct GatheringMintOperationTests {
     }
 
     /// The born-starred mints' precedent (P-13id-U2-1 — PROVISIONAL here):
-    /// a mint never fails on a star, so the cap does not refuse it.
+    /// a mint never fails on a star. JUSTIFIED EDIT (VX-643): the cap it was
+    /// exempt from is retired, so the pin keeps the mint starring past fifteen
+    /// stars (the old cap's number, as a literal) rather than naming the gone
+    /// `Operations.starLimit`.
     @Test func theStarIsCapExemptAtMint() throws {
         try withOperations { ops, db in
-            for i in 0..<Operations.starLimit {
+            for i in 0..<15 {
                 let note = try ops.createPost(title: "starred \(i)")
                 try ops.setStarred(.post(note.id), starred: true)
             }

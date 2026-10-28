@@ -745,8 +745,8 @@ enum TutorialSeeder {
             // 13s-b U1b (R-13s-36/38): the lesson NAMES the default
             // gathering — the one constant, the lowercase fresh default.
             "Two more, for keeping and catching. Right-click any note or book "
-            + "\u{25B8} \u{201C}Star\u{201D} pins it to the sidebar's top: up to "
-            + "fifteen, meant for what you are in right now rather than as a "
+            + "\u{25B8} \u{201C}Star\u{201D} pins it to the sidebar's top, "
+            + "meant for what you are in right now rather than as a "
             + "filing system. And \u{2318}\u{21E7}N pops the quick note, a small "
             + "floating pad that stays above your writing, also reachable from "
             + "the \u{270F}\u{FE0E} in the system menu bar while you are in "

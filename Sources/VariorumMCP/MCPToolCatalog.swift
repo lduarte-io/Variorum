@@ -1666,8 +1666,9 @@ enum MCPToolCatalog {
 
     // MARK: - VX-596 — her star on the wire
 
-    /// Her Star / Unstar (the union star — a book's two stores, the cap, intake
-    /// hearing a note's star; un-starring a non-event). A note acts under every
+    /// Her Star / Unstar (the union star — a book's two stores, intake hearing a
+    /// note's star; un-starring a non-event; no cap since VX-643, so the
+    /// description says none). A note acts under every
     /// scope (its place decided through the one `decide`), a book under a book or
     /// wing grant, a gathering at edit on the gathering place (VX-639 — her RB-7
     /// ruling: book parity, the rule staying hers) — so the tool declares every
@@ -1678,8 +1679,7 @@ enum MCPToolCatalog {
             Star or un-star a note, a book or a gathering, as the author's Star does: pass note_id, \
             or book_id for a book or a gathering, \
             and starred (true stars it, false un-stars it). Starred things sit in the Starred list \
-            at the top of the author's sidebar, which holds \(Operations.starLimit) at a time — a star \
-            past that is refused (un-star one first). Starring a note is heard as when the author \
+            at the top of the author's sidebar. Starring a note is heard as when the author \
             stars it: a book whose rule collects starred notes takes it in, or holds it at its \
             Arrivals; un-starring never takes a note out of a book. Returns JSON with changed — \
             false when it already was as asked: nothing was \

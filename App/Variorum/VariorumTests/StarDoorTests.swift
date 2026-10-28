@@ -64,13 +64,40 @@ struct StarTargetingTests {
                 "the registry declares the ACT once; the rows say the direction")
     }
 
-    @Test func theCapRefusalNamesUnStarringAsTheRoad() {
-        let message = OpsRefusalCopy.message(
-            for: OperationError.starLimitReached(limit: Operations.starLimit))
-        #expect(message.contains("\(Operations.starLimit)"), "it names the number")
-        #expect(message.lowercased().contains("un-star"), "…and the road out")
-        #expect(message.contains(StarCopy.sectionHeader), "…and where to walk it")
-        #expect(!message.hasPrefix("Refused:"), "never the raw enum dump")
+    // (`theCapRefusalNamesUnStarringAsTheRoad` RETIRED at VX-643 with the cap
+    // and its refusal — `starLimitReached` no longer exists to word. Its other
+    // half, "never the raw enum dump", is every refusal's and stays with
+    // `MCPWireRefusalSweepTests`' walk of every case.)
+
+    /// **VX-643** — no star word anywhere the helper or the guide says names a
+    /// count: the cap's number, "up to fifteen", went with the cap. RED ON OLD:
+    /// the helper's two star rows and the guide's star lesson each said "up to
+    /// fifteen".
+    @MainActor
+    @Test func noStarSentenceNamesALimit() {
+        let helperRows = HelperView.groups.flatMap(\.items)
+            .filter { $0.keys.contains(StarCopy.starRow) || $0.does.contains(StarCopy.sectionHeader) }
+        #expect(!helperRows.isEmpty, "the helper still teaches the star")
+        for row in helperRows {
+            #expect(!row.does.lowercased().contains("fifteen") && !row.does.lowercased().contains("up to "),
+                    "no limit in the helper: \(row.does)")
+        }
+        let starTerm = HelperView.entries.first { $0.term == "star" }
+        #expect(starTerm != nil, "the dictionary still defines the star")
+        #expect(!(starTerm?.definition.lowercased().contains("fifteen") ?? true),
+                "the dictionary's star line names no limit")
+        // The guide's lesson text is written inline in the seeder, so it is
+        // read from the seeder's own source (the registry walk's
+        // `theLibraryNoteRowMenuRendersItsDeclaredDoors` precedent).
+        let guide = (try? String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/Tutorial/TutorialSeeder.swift"),
+            encoding: .utf8)) ?? ""
+        #expect(guide.contains("pins it to the sidebar's top, \""),
+                "the guide still teaches the star, its clause unbroken")
+        #expect(!guide.contains("up to \"\n            + \"fifteen") && !guide.lowercased().contains("up to fifteen"),
+                "and names no limit")
     }
 }
 
@@ -151,9 +178,12 @@ struct StarActingTests {
         }
     }
 
-    /// The CAP reaching her IN WORDS — the whole reason it is a refusal and
-    /// not a silent eviction (P-2, and her ruling's "refuses honestly").
-    @Test func theSixthStarSpeaksTheOperationsOwnRefusal() async throws {
+    /// **VX-643 — THE DELIBERATE FLIP** of `theSixthStarSpeaksTheOperationsOwnRefusal`
+    /// (the cap reaching her in words): her Star door stars the sixteenth thing
+    /// and says nothing — a star is silent on success, and there is no count
+    /// left to refuse. RED ON OLD: the sixteenth spoke "You can star 15 things
+    /// at a time — un-star one…" and was not starred.
+    @Test func theSixteenthStarLandsSilently() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
             $0.database = db
@@ -162,25 +192,23 @@ struct StarActingTests {
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let notes = try await session.runner.run { ops in
-                try (0...Operations.starLimit).map { try ops.createPost(title: "n\($0)") }
+                try (0...15).map { try ops.createPost(title: "n\($0)") }
             }
             let stars = StarsModel(session: session)
             let task = Task { await stars.start() }
             defer { task.cancel() }
 
-            for note in notes.prefix(Operations.starLimit) {
+            for note in notes.prefix(15) {
                 await stars.toggle(.post(note.id))
             }
-            try await settle { stars.items.count == Operations.starLimit }
+            try await settle { stars.items.count == 15 }
+            await stars.toggle(.post(notes[15].id))
+            try await settle { stars.items.count == 16 }
             // 18i: silence means BOTH slots empty.
-            #expect(session.status.spoken == nil, "five stars say nothing at all")
-
-            await stars.toggle(.post(notes[Operations.starLimit].id))
-            let spoken = session.status.spoken?.text ?? ""
-            #expect(spoken.lowercased().contains("un-star"),
-                    "the door FIRED and named the road: \(spoken)")
-            #expect(stars.items.count == Operations.starLimit,
-                    "and nothing was evicted to make room")
+            #expect(session.status.spoken == nil, "sixteen stars say nothing at all")
+            #expect(stars.lastError == nil)
+            #expect(stars.items.map(\.target) == notes.map { .post($0.id) },
+                    "every star, in star order")
         }
     }
 
