@@ -1983,7 +1983,8 @@ pointers read: 13g R5-1, 13b 3F, VX-170's collapsed row — which is ruled "mute
   own road (above). Options: (a) as built — each host's own list; (b) one host-neutral sentence for
   every host ("…the original is archived on its block — its takes keep it; ⌥⌘Z undoes it."), naming
   no list; (c) Write's names the chord ("its takes panel (⌘⇧T on that block)…"). Most
-  spec-defensible: (a) — VX-154's rider's rule, her-copy-pass words.
+  spec-defensible: (a) — VX-154's rider's rule, her-copy-pass words. A copy-pass nit to carry: the
+  Lenses sentence nests its archive receipt's "(⌘2)" inside the receipt's own parenthesis.
 - **P-C-2 — the read twin's ink (VX-574).** Built: ink (her VX-574 word over the 13g brief's
   "dimmed/read styling"). Option (b): keep a lighter twin but in the prose's ink at reduced opacity —
   not built; her words ask for "not a weird light font compared to anything else".
