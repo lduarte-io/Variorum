@@ -13,7 +13,8 @@
 //  environment, so the ordinary suite never pays for it.
 //
 //  Knobs (environment): VX647_CORPUS_POSTS (default 200), VX647_CORPUS_BLOCKS
-//  (default 20), VX647_STEPS (default "0,100,400,1000").
+//  (default 20), VX647_STEPS (default "0,100,400,1000"), VX647_WITHOUT_INDEX=1
+//  (drop v1_34's `idx_cblock_block` to measure the pre-fix shape).
 //
 
 import Dependencies
@@ -92,11 +93,11 @@ private func seedCorpusAndNote(_ ops: Operations) throws -> (noteID: String, liv
             if b == 0, p % 5 == 0 { _ = try ops.divide(minted.block.id, cut: 24) }
         }
     }
-    // The candidate fix, measured in place: a LOCAL index serving
-    // tombstoned placements by block (VX647_WITH_INDEX=1).
-    if ProcessInfo.processInfo.environment["VX647_WITH_INDEX"] == "1" {
+    // The fix shipped as migration v1_34 (`idx_cblock_block`); the probe can
+    // still measure the pre-fix shape by dropping it (VX647_WITHOUT_INDEX=1).
+    if ProcessInfo.processInfo.environment["VX647_WITHOUT_INDEX"] == "1" {
         try ops.database.write { db in
-            try db.execute(sql: "CREATE INDEX IF NOT EXISTS vx647_probe_cblock_block ON container_block(block_id, deleted_at)")
+            try db.execute(sql: "DROP INDEX IF EXISTS idx_cblock_block")
         }
     }
     let note = try ops.createPost(title: "the note")
