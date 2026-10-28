@@ -2251,3 +2251,77 @@ the ticket for its untraced half. VX-627's main-side VisualWalk red did not appe
 (noted, not investigated — not this run's). **Window c verdict: batch C's suite evidence is
 COMPLETE; this run doubles as the PRE-LADDER BASELINE (the whole target green on the full run
 diff).** Log: `DerivedData/logs/wholetarget-c-post.log`.
+
+
+## THE WALK RECORD — batch C (C1–C6) (Opus walker, claim `vx-601-walk-c`, 2026-10-28 02:26–02:41 MDT)
+
+Build: `App/Variorum/DerivedData/vx601c-post/Build/Products/Debug/Variorum.app` (dev store, pid 13188
+for the whole walk — ONE launch, no crash, no What's New sheet). Window 1240×840 at (244,155), never
+resized. Captures (gitignored): `App/Variorum/DerivedData/walkshots-vx601c/` — `leg0-*` as-found,
+`mint*`/`f*` the note, `c1-*`…`c6-*` the rows (`-s-` Study, `-t-` Terminal; each with a `-s` 1240-wide
+copy), `r-*` leave-taking. Every step through `Tools/WalkKit/click.sh` / `keys.sh` (the full guard;
+≥ 2.6 s between synthetic steps — no refusal); right-clicks and the Settings window's Theme buttons
+(outside the main window's rect) took `guard.sh <pid>` then one `cliclick`; View ▸ Close Split by
+System Events menu click. **BOTH VOICES** (Study first, then Terminal, restored to Study).
+
+**As-found (leg 0, before any act):** Bookcase · Home, no books; held banner "This is your library as
+of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." + Resume Sync
+(NEVER pressed); "Sync off (dev store)"; Study voice, app Appearance Dark (macOS Light, never
+touched); the twelve-words card (never touched); palette Default. **As-found fan style: "style:
+stack", "wash: on"** (Takes header, read before any style act); slot split's dial read "× 2 beside" —
+never touched. Library (read at C5): the one Oct-19 note "The walk leaves a stone here…" besides the
+walk note. Walk Wing and MCP were never touched (not opened).
+
+**The walk note:** quick entry ⌘V of three lines ("The river was low that autumn." / "We walked the
+long bank at dusk and counted the herons standing in the shallows." / "Nobody spoke on the way
+home.") ⏎ → a three-block note (6w · 15w · 6w = 27w), retitled **"vx601 c walk note"**. Takes: block
+1 ⌘T → take 2 (" and the water ran cold") ⌘T → take 3 (" by morning") → ⑂3; block 2 ⌘T → take 2
+(" before dark") → ⑂2. The ✓ chosen take stayed take 1 on both blocks throughout.
+
+| Row | Study | Terminal | What was seen |
+|---|---|---|---|
+| **C1** (VX-427) | **PASS** (board) · **PASS** (Lenses) | **PASS** (board) · Lenses not re-run | Study board: click into block 1's NOT-chosen take 2 → bar **"11w take · 27w note"**; typed " and clear" → **"13w take"**; click the ✓ chosen card → **"6w take"** (`c1-s-a/b/c-bar`). Lenses: "+ column ▾ ▸ New lens — arrange existing takes" → Lens 1; block 1's cell ›  → "take 2 of 3"; click into that cell → **"13w take"** (the Chosen column's block 1 is 6w); typed " today" → **"14w take"** (`c1-lens4-bar`, `c1-lens5-crop`). Terminal board: take 2 → **"14w take"**, " so still" → **"16w take"** (`c1-t-a/b-bar`). Also seen: every freshly minted take counted itself while typed (11w, 13w, 17w; C6's branch 13w). |
+| **C2** (VX-586) | **PASS** | **PASS** | Write, block 2's ⑂2 badge → **"Takes — block 2/3"**; Close; block 1's ⑂3 → **"Takes — block 1/3"** (`c2-b2`, `c2-b1`); mid-C3 the same panel read **"Takes — block 1/4"** while the moved block stood. No hex id anywhere. Terminal: **"Takes — block 2/3"** (`c2-t`). The book-Index Takes sheet: **SKIPPED** (the store holds no book; reaching one would mean minting one). "block —" did not arise naturally (not forced). |
+| **C3** (VX-321) | **PASS** (a) (b) (c) — (b)/(c) read truncated, F-CW-2 | not re-run (voice-independent words) | (a) the panel (block 1), click into NOT-chosen take 3, ⌥⌘⏎ → block 2 became the moved take; the panel's line, exactly: **"That take is now the block below — the original is archived on its block (“archived takes” below brings it back); ⌥⌘Z undoes it."**; "archived takes" listed the original below the cards with Unarchive · Delete this take (`c3a-s`, `c3a-s-line`); ⌥⌘Z → take 3 back in the fan (⑂3, "block 1/3"), bar "Undid: Move Take into a Block" (`c3a-s-undo`). (b) Write, caret in block 1, ⌥⌘⏎ → the bar's quiet line: **"That take is now the block below — the original is ar…"** at the normal layout; repeated with the sidebar hidden (after ⌥⌘Z) → **"That take is now the block below — the original is archived on its block (its takes panel keeps it…"** (`c3b-s-wide`); ⌥⌘Z after each → restored (`c3b-undo1`, `c3b-undo2`). (c) board, block 1's NOT-chosen take 3, ⌥⌘⏎ → **"That take is now the block below — the original is archived on its block (“archived · n” under its t…"** (sidebar hidden, `c3c-s-wide`); the board showed **"archived · 1"** under block 1's takes and the take as its own block below (`c3c-s`); ⌥⌘Z → ⑂3 back, "Undid: Move Take into a Block" (`c3c-undo`). |
+| **C4** (VX-574) | **PASS** | **PASS** | Takes (stack, close all → the plain article) vs Write, same window, same note top, same paragraph ("We walked the long bank…"): same face, weight and ink; line ends identical. Measured on 2× crops of that line (glyph pixels > background + 40; coverage = Σ luminance above background): **Study Takes 10234 px / 1781325 = Write 10234 px / 1781325; Terminal Takes 8063 px / 1367300 = Write 8063 px / 1367300** — identical (`c4-s-takes-para` / `c4-s-write-para`, `c4-t-takes-para` / `c4-t-write-para`). Takes reads lighter nowhere. |
+| **C5** (VX-574) | **PASS** (a) (b) | **PASS** (a) (b) | (a) Library ▸ the Oct-19 row ▸ Open Beside → that note in a right pane beside the Library; the walk note opened in the left pane (Takes, fans expanded); a click into the right pane → the left became **"vx601 c walk note · takes"**, the read-only cards, words in the prose ink — as bright as the focused right pane's (`c5a-s-twin`, `c5a-t-twin`); the Oct-19 note closed from the Open list, then View ▸ Close Split → one pane (nothing typed in the Oct-19 note). (b) Takes, block 1's take 2 ▾ → one muted line in the **small sans** (Study, `c5b-s-crop`) / the **small mono** (Terminal, `c5b-t-crop`); ▸ unfolded it. |
+| **C6** (B residue) | — | **PASS** (both halves) | Style ▸ Slot split → header **"style: slot split ▾ · × 2 beside ▾ · expand all · close all"** (`c6-slot`); **expand all** → both fanned blocks in splits (block 1 "◀ 1–2 of 3 ▶") (`c6-expand`); **close all** → the plain page, close all dimmed (`c6-closeall`). Style ▸ Stack (wash: on unchanged), expand all; block 1's NOT-chosen take 3 ⌄ → menu led by **"New branched take (⌘T)"**, then Archive this take (⌘⇧A), Label take…, Lock this take, Delete this take (`c6-chev-crop`) → pressed → **⑂4, a new card "…cold by morning" (take 3's words) right after its source, the caret in it (inline); ✓ chosen unchanged; bar "13w take"** (`c6-branched`). |
+
+**Findings and observations (none blocks a row's fix):**
+- **F-CW-1 — undone moves leave Trash rows:** each ⌥⌘Z of Move Take into a Block Below left the
+  minted block as its own **"block" row in the Trash** — four rows ("…cold by morning" 2:30 AM, "The
+  river was low that autumn." 2:32 AM ×2, "…cold by morning" 2:33 AM), still there after the walk
+  note went to the Trash on its own stamp. Not deleted forever (Delete Now is forever — not this
+  walk's to press). Likely the standing undo shape (an undone mint is a tombstone flip, which the
+  Trash lists); untraced — for the orchestrator.
+- **F-CW-2 — the Write and board receipts do not fit the bar:** at a 1240-pt window the quiet line
+  truncates before its distinguishing clause; even with the sidebar hidden the tail is cut (Write
+  after "keeps it…", board after "under its t…"). The panel's line wraps whole. The full words were
+  never on screen in (b)/(c); the C-batch copy pins hold them. A copy-pass/length note for P-C-1.
+- **F-CW-3 — a transient short "in note" count:** after the panel's ⌥⌘Z (C3a) the Write bar read
+  "6w block · **12w** in note" (true 27w), then "**25w** in note" after the first Write move (true
+  40w) — short by block 2's 15w both times; after the next ⌥⌘Z it read a correct 27w, and 40w on the
+  repeat. Untraced; the orchestrator to judge whether the note count shares VX-427's bar road.
+- **O-CW-1:** the panel's receipt line stayed on the panel after ⌥⌘Z undid its move (`c3a-s-undo`).
+- **O-CW-2:** under Terminal, Write's take panel title and buttons draw in the system sans (`c2-t`).
+- **O-CW-3:** Lenses' "+ column ▾" menu opens partly past the window's right edge (`c1-lensmenu`).
+
+**Leave-taking / returned:** fan style **"style: stack", "wash: on"** (as found; set at C6, seen in
+`c6-branched`); "× 2 beside" never touched. Voice back to **Study**, Appearance **Dark**, palette
+Default (`r-settings`). The walk note ▸ Library row ▸ "Delete Note…" ▸ **Delete** ("The note goes to
+the Trash for 30 days. You can put it back from there until then."); NOT deleted forever. Verified
+after: Library = the one Oct-19 note (`r-deleted-crop`); Trash (read ~6 s after opening) from the top:
+**"vx601 c walk note · note · deleted Oct 28, 2026 at 2:40 AM"**, the four F-CW-1 block rows, then
+"vx601 b walk note · 12:23 AM", "vx601 a2 walk note · 10:31 PM", then the Sherlock set (5:46 PM) in
+order (`r-trash`); held banner present, Resume Sync never pressed; "Sync off (dev store)"; ended on the
+Bookcase with the twelve-words card as found (`r-bookcase`). Quit by bundle id
+`io.lduarte.Variorum.debug` 02:41:02; guards `pgrep -lx Variorum` / `pgrep -lf "MacOS/Variorum$"` empty
+before launch and after quit. The stage claim was not released (the orchestrator's).
+
+**Prefs (`io.lduarte.Variorum.debug`, `/tmp/vx601c-prefs-before.plist` → after):** ADDED three
+per-note keys for the walk note — `currentBlock.` / `postMode.` / `takesViewMemory.`
+`4BAF819B-04EE-42F5-8A98-AAD71355DDDA` — all DELETED. The launch counter
+*[removed for publication]*
+to **29** (`defaults write -int 29`, read back 29, "Type is integer"); no other counter touched.
+Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`).
+Final export `/tmp/vx601c-prefs-final.plist` vs before: nothing added, nothing removed.
