@@ -2182,3 +2182,19 @@ style is a synced setting — read as found, restore exactly.
   gives, it reds on post for a rig reason; say so rather than adjust the production line. (c) VX-574
   is accepted on the WALK's side-by-side (C4) — if her "weird light font" is something the trace did
   not find (her own store's settings, a palette), C4/C5 are where it shows; the record says so.
+
+## WINDOW c — batch C's runs (the orchestrator, 2026-10-28, claim vx-601-tests-c from ~01:26)
+
+**Red runs on the six trees: 52 tests in 5 suites EXECUTED on each, zero restarts — the partition
+matches the prediction table EXACTLY, nothing hollow:** pre reds the full union (#1–#7, #9–#12);
+rev427 exactly the two count pins (the Lenses widening's pin included); rev586 exactly the
+panel-title pair; rev321 exactly the four receipt/door pins; rev574 exactly the two face pins;
+rev337 exactly the new restore pin. The fold flake (#13) did NOT red anywhere in these runs.
+**Batch C's red-on-old is verified by revert per member.** Logs: `DerivedData/logs/red-vx601c-*.log`.
+
+**Tier 1 on `vx601c-post`: 236 tests in 27 suites, ALL PASSED** (one honest slip first: the
+orchestrator's list extraction initially re-ran batch A's 17-suite tier 1 — also green — before
+the correct 27 ran; both logs kept, `tier1-c-post.log` is the 27). **The WHOLE Mac target on post
+is running** (the battery + VX-337's soak-load observation + the pre-ladder baseline; VX-627's
+VisualWalk pin is red on main and PRE-EXISTING per the coordinator — separated from this batch's
+verdict). PENDING.
