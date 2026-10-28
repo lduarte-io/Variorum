@@ -2334,7 +2334,7 @@ both voices, with C4's glyph-coverage measurement proving the Takes/Write faces 
 findings, each dispositioned:
 - **Finding 1 (four "block" rows left in the Trash by ⌥⌘Z of Move Take):** likely the structural
   undo's own bookkeeping (the inverse tombstones the block the move minted; a tombstoned block
-  surfaces as a Trash row) — pre-existing machinery, untouched by this run. Minted **VX-639**
+  surfaces as a Trash row) — pre-existing machinery, untouched by this run. Minted **VX-650**
   (Suspected). The four rows STAY in the dev store's Trash (removing them means Delete Now =
   forever, not taken without her word; they age out with the Trash's own 30 days) — said in the
   RELEASE line.
@@ -2342,9 +2342,9 @@ findings, each dispositioned:
   **P-C-1** into her bundle with this fact attached — the per-host wording is hers, and the
   truncation argues for shorter sentences; the full words rest on the copy pins meanwhile.
 - **Finding 3 (the bar's "in note" count briefly short by the moved block's words after ⌥⌘Z):**
-  minted **VX-640** (Confirmed — seen twice with the deficit exactly the moved block's count; the
+  minted **VX-651** (Confirmed — seen twice with the deficit exactly the moved block's count; the
   mechanism untraced — the note total is the model's projection cache, NOT VX-427's take unit, so
   not this run's diff; the ladder reads this record and may judge otherwise).
-- **Smaller:** the panel keeping its receipt line after the undo (nit, in VX-640's description);
+- **Smaller:** the panel keeping its receipt line after the undo (nit, in VX-651's description);
   Terminal's panel chrome in the system sans (R-C-2's class — closeout triage); Lenses' "+ column"
-  menu clipping past the window edge — minted **VX-641** (Confirmed, Low).
+  menu clipping past the window edge — minted **VX-652** (Confirmed, Low).
