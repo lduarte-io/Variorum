@@ -755,7 +755,12 @@ private struct ReadModeGeometryProbe: ViewModifier {
 /// column's click landing the page on its block, a paragraph click opening
 /// `edit` there. No count line but the header's (row 36: the old footer
 /// said the same facts twice).
-private struct ReadPageColumn: View {
+///
+/// **VX-440 batch 1 (R-440-2): internal, so a saved version's full-size face
+/// reads on THIS page** (`NoteVersionPage`) — one calm page, never a second
+/// look. That face is read-only by definition, so the paragraph click-through
+/// is optional: nil draws no click and no "click to edit" help.
+struct ReadPageColumn: View {
     let session: AppSession
     let postID: String
     let model: BlockTOCViewModel
@@ -772,7 +777,8 @@ private struct ReadPageColumn: View {
     let heights: ReadNoteHeights
     /// 18l-c U8 (a): her arrival-flash switch (R-18l-7 — default ON).
     var flashOn = true
-    let onOpenInEdit: (Queries.TOCRow) -> Void
+    /// nil on a page nothing can edit (VX-440's saved version, R-440-2).
+    let onOpenInEdit: ((Queries.TOCRow) -> Void)?
 
     /// 18l-c U8 (a): the mode switch's arrival on the page — the row its
     /// landing put home, and when (the authority's `onArrived`).
@@ -813,7 +819,7 @@ private struct ReadPageColumn: View {
                                 ? arrival?.at : nil,
                             flashPlan: ArrivalFlash.plan(reduceMotion: reduceMotion),
                             tokens: tokens,
-                            onOpenInEdit: { onOpenInEdit(row) },
+                            onOpenInEdit: onOpenInEdit.map { open in { open(row) } },
                             onPlace: { frame in rowMoved(row.placementID, frame) })
                     }
                     Text("· · ·")
@@ -1019,7 +1025,8 @@ private struct ReadPageBlock: View {
     let arrivalFlash: Date?
     let flashPlan: ArrivalFlash.Plan
     let tokens: VoiceTokens
-    let onOpenInEdit: () -> Void
+    /// nil on a page nothing can edit (VX-440, R-440-2): no click, no help.
+    let onOpenInEdit: (() -> Void)?
     /// 18l U1: where this row is (host space), nil when it goes away — rides
     /// the row's EXISTING observer.
     let onPlace: (CGRect?) -> Void
@@ -1079,7 +1086,7 @@ private struct ReadPageBlock: View {
         }
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
-        .onTapGesture { onOpenInEdit() }
+        .onTapGesture { onOpenInEdit?() }
         .readModeGeometryProbe(.pageBlock(blockID))
         .onGeometryChange(for: CGRect.self) {
             $0.frame(in: .named(ReadModeView.probeSpace))
@@ -1088,7 +1095,9 @@ private struct ReadPageBlock: View {
             onPlace(frame)
         }
         .onDisappear { onPlace(nil) }
-        .help("Click to edit this paragraph — the page turns to edit with this block live")
+        .help(onOpenInEdit == nil
+            ? ""
+            : "Click to edit this paragraph — the page turns to edit with this block live")
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })

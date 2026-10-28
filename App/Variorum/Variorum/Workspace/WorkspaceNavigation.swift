@@ -469,6 +469,9 @@ nonisolated enum WorkspaceNaming {
         case .pool(let id): return resolved(id, in: titles) ?? "Snippets"
         case .reading(let id): return resolved(id, in: titles) ?? "Book"
         case .tag(let id): return resolved(id, in: titles) ?? "Tag"
+        // VX-440 batch 1: a saved moment reads as its date (V6), resolved like
+        // a note's name; unresolved, as what it IS.
+        case .noteVersion(let id, _): return resolved(id, in: titles) ?? "Saved version"
         }
     }
 

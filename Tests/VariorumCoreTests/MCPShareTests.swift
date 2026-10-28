@@ -362,6 +362,40 @@ struct MCPShareTests {
         }
     }
 
+    /// **VX-189 — a GATHERING's row draws "Share with AI…" too (book parity),
+    /// so the fenced set the row menus read names the gatherings a grant may
+    /// not name** — exactly the complement of the sheet's offered gatherings
+    /// (`mcpGrantableGatherings`), on the SAME two fragments (a stale Private
+    /// stamp or 'daily' marker — no op mints either on a gathering; a synced
+    /// row could). Red on old: the set read books only.
+    @Test func theFencedSetNamesTheGatheringsTheSheetNeverOffers() throws {
+        try withOperations { ops, db in
+            let plain = try ops.createReading(
+                name: "plain gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let stalePrivate = try ops.createReading(
+                name: "stale private", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let staleDaily = try ops.createReading(
+                name: "stale daily", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let privateBook = try ops.createReading(name: "private book", kind: .book)
+            _ = try ops.setBookPrivate(privateBook.id, true)
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET ai_private_at = '2026-10-28T00:00:00.000Z' WHERE id = ?",
+                    arguments: [stalePrivate.id])
+                try db.execute(
+                    sql: "UPDATE reading SET profile = ? WHERE id = ?",
+                    arguments: [Queries.dailyJournalBookProfile, staleDaily.id])
+            }
+            let fenced = try db.read { try Queries.mcpFencedBookIDs($0) }
+            let offered = Set(try db.read { try Queries.mcpGrantableGatherings($0) }.map(\.id))
+            #expect(fenced == [privateBook.id, stalePrivate.id, staleDaily.id])
+            #expect(offered == [plain.id])
+            let gatherings: Set<String> = [plain.id, stalePrivate.id, staleDaily.id]
+            #expect(fenced.intersection(gatherings) == gatherings.subtracting(offered),
+                    "the fenced gatherings are exactly the ones the sheet never offers")
+        }
+    }
+
     /// The icon's set is EXACTLY the retired chip's honest set
     /// (P-13nb-U2-11 — `mcpReachableBookIDs`), under every grant shape; and
     /// the books a row may not offer to share are exactly the ones the sheet

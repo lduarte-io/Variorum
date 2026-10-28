@@ -16,7 +16,9 @@
 //
 //  THE TABLE (her carve-out applied, the basics proposed — PROVISIONAL
 //  P-17y-B3-l1): Open · Star/Unstar · Book/Gathering Settings… · Export
-//  Markdown… · Export PDF… · Archive (or Unarchive) · Delete Book… (never on
+//  Markdown… · Export PDF… · Archive (or Unarchive) · Delete Book… — or
+//  Delete Gathering… on a gathering, the one capability's verb chosen by the
+//  kind (VX-611, `BookStateCopy.deleteDoorLabel`) — (never on
 //  the daily Journal — `BookArchiveDoorSet`, the op's own guard). The
 //  Bookcase menu's POSITIONAL doors drop (Move to Shelf ▸, Send to Top /
 //  Bottom — position means nothing off the Bookcase), and so do the
@@ -45,8 +47,10 @@ nonisolated enum BookRowDoor: Hashable, Sendable {
     case exportPDF
     /// 13n-c U3 (VX-156 item 2; mockup §2): "Share with AI…" — THE grant
     /// sheet pre-filled on this book. Drawn only when an approved client
-    /// exists (VX-272) and the book can take a grant (a book, never the
-    /// daily Journal or a Private book — the op refuses those, P-2).
+    /// exists (VX-272) and the reading can take a grant (never the daily
+    /// Journal or a Private book — the op refuses those, P-2). VX-189: on a
+    /// GATHERING's row too (book parity — a gathering is a grant place since
+    /// VX-549), the sheet pre-filled on the gathering.
     case share
     /// A state door from the archive table (Archive · Unarchive · Delete).
     case state(CapabilityID)
@@ -64,7 +68,9 @@ nonisolated enum BookRowMenuTable {
         if let reading {
             out += [.exportMarkdown, .exportPDF]
             // 13n-c U3: after the exports, before the state doors (mockup §2).
-            if shareable, reading.kind == .book { out.append(.share) }
+            // VX-189: a gathering's row too (book parity; the fence — a stale
+            // Private stamp or 'daily' marker — is `shareable`'s, P-2).
+            if shareable { out.append(.share) }
             out += BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading)).map { .state($0) }
         }
         return out
@@ -92,7 +98,8 @@ final class BookRowDoors {
     private(set) var facts: [String: Reading] = [:]
     /// 13n-c U3: the live books a grant may NOT name (THE daily Journal,
     /// Private books — `Queries.mcpFencedBookIDs`, the one fence's own
-    /// fragments): their row draws no "Share with AI…" (P-2).
+    /// fragments): their row draws no "Share with AI…" (P-2). VX-189: and the
+    /// fenced gatherings (a stale synced stamp — the same fragments).
     private(set) var fencedBooks: Set<String> = []
     var settingsTarget: BookSettingsTarget?
     var pendingRuleEditor: RuleEditorModel?
@@ -199,17 +206,20 @@ struct BookRowMenu: View {
                     }
                 }
             case .share:
-                if let road = mcpShareRoad {
+                if let road = mcpShareRoad, let reading {
                     Divider()
                     Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
-                        road.open(MCPGrantOpening(place: .book(readingID), origin: .place))
+                        // VX-189: the reading's OWN place — a gathering's row
+                        // opens the sheet on the gathering.
+                        road.open(MCPGrantOpening(place: .reading(reading), origin: .place))
                     }
                     Divider()
                 }
             case .state(let act):
                 if act == .deleteBook {
-                    Button(CapabilityRegistry.capability(.deleteBook).verb + "\u{2026}",
-                           role: .destructive) {
+                    // VX-611: the verb chosen by the kind (one capability). A
+                    // state door draws only with the facts in hand (the table).
+                    Button(BookStateCopy.deleteDoorLabel(reading?.kind ?? .book), role: .destructive) {
                         Task { await doors.open(.deleteBook, readingID: readingID) }
                     }
                 } else if act == .archiveBook, let reading {

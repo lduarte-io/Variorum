@@ -225,6 +225,89 @@ extension Queries {
         }
     }
 
+    /// One saved moment's identity and its moment — what Compare's columns and
+    /// the "Compare with Latest Version" door need, without the listing's
+    /// per-row block count and preview reads.
+    public struct NoteVersionStamp: Equatable, Sendable {
+        /// The version container's id.
+        public let postID: String
+        /// The copy's `created_at` — its birth moment (V6: the DATE is the
+        /// version's derived name).
+        public let savedAt: Date
+
+        public init(postID: String, savedAt: Date) {
+            self.postID = postID
+            self.savedAt = savedAt
+        }
+    }
+
+    /// **The note's saved moments, newest first — NOTE-DRIVEN** (VX-440 batch
+    /// 1: Compare's columns and the "Compare with Latest Version" door,
+    /// `notes/plans/fixes/vx-440-sheets-history-clarity.md`).
+    ///
+    /// The answer is `noteVersions`' exactly — same classifier
+    /// (`versionHistoryPredicate`, LR1-5: one classifier, read by every scope),
+    /// same order — and only the DRIVING differs. `noteVersions` seeks the
+    /// partial `idx_container_note_version` index, i.e. walks every saved
+    /// moment in the CORPUS and asks each whether it is this note's: fine for a
+    /// pane summoned on purpose, wrong for what this read feeds — a fact held
+    /// for every note visit (the door's availability), re-asked whenever the
+    /// note's rows move. So the candidates come FROM THE NOTE: its placements
+    /// (tombstoned included — the classifier reads the note side past its
+    /// tombstones, LR1-1), their `version_of` edges in both directions (the
+    /// two arms seek `idx_edge_source` / `idx_edge_target`), and the other
+    /// endpoint's LIVE placement (the partial live-ownership index). The
+    /// classifier then decides every candidate, so this can only ever answer
+    /// a subset of `noteVersions`; it answers exactly that set because a saved
+    /// moment's own placements are live for as long as the moment is (it is
+    /// sealed at birth — nothing restructures it — and its deletion is
+    /// `v.deleted_at`, fenced anyway). Pinned equal to the listing across the
+    /// note-side shapes LR1-1 rescued (`VersionsInCompareTests`).
+    ///
+    /// Cost: the note's own placements and their version links — never the
+    /// corpus (P1; the plan is pinned).
+    public static func noteVersionStamps(
+        _ db: Database, of postID: String, limit: Int? = nil
+    ) throws -> [NoteVersionStamp] {
+        var sql = """
+            SELECT v.id AS post_id, v.created_at AS saved_at
+            FROM container v
+            WHERE v.id IN (
+                SELECT mine.container_id
+                  FROM container_block theirs
+                  JOIN edge e
+                    ON e.source_block_id = theirs.block_id AND e.type = 'version_of'
+                  JOIN container_block mine
+                    ON mine.block_id = e.target_block_id AND mine.deleted_at IS NULL
+                 WHERE theirs.container_id = :note
+                UNION
+                SELECT mine.container_id
+                  FROM container_block theirs
+                  JOIN edge e
+                    ON e.target_block_id = theirs.block_id AND e.type = 'version_of'
+                  JOIN container_block mine
+                    ON mine.block_id = e.source_block_id AND mine.deleted_at IS NULL
+                 WHERE theirs.container_id = :note)
+              AND v.deleted_at IS NULL
+              AND \(versionHistoryPredicate())
+            ORDER BY v.created_at DESC, v.id DESC
+            """
+        var arguments: StatementArguments = ["note": postID]
+        if let limit {
+            sql += " LIMIT :limit"
+            arguments += ["limit": limit]
+        }
+        return try Row.fetchAll(db, sql: sql, arguments: arguments).map { row in
+            NoteVersionStamp(postID: row["post_id"], savedAt: row["saved_at"])
+        }
+    }
+
+    /// The note's NEWEST saved moment, if it has one — "Compare with Latest
+    /// Version"'s target and its availability fact (VX-440 batch 1).
+    public static func latestNoteVersionID(_ db: Database, of postID: String) throws -> String? {
+        try noteVersionStamps(db, of: postID, limit: 1).first?.postID
+    }
+
     /// The ids alone — what `deleteContainer`'s sweep needs (V2: versions ride
     /// the note's deletion).
     public static func noteVersionIDs(_ db: Database, of postID: String) throws -> [String] {
@@ -431,5 +514,15 @@ extension AppDatabase {
         _ postID: String, limit: Int
     ) -> AsyncValueObservation<[Queries.NoteVersionItem]> {
         observe { try Queries.noteVersions($0, of: postID, limit: limit) }
+    }
+
+    /// **The note's newest saved moment, live** (VX-440 batch 1) — held for a
+    /// note's visit by its detail, so "Compare with Latest Version" renders
+    /// exactly while the note has one (P-2). The read is note-driven
+    /// (`noteVersionStamps`), so a re-run costs the note's own placements and
+    /// links, never the corpus; it reads no `variant`, so a keystroke's
+    /// autosave re-asks only through the container row it touches.
+    public func observeLatestNoteVersion(_ postID: String) -> AsyncValueObservation<String?> {
+        observe { try Queries.latestNoteVersionID($0, of: postID) }
     }
 }

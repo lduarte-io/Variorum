@@ -103,6 +103,11 @@ struct CapabilityRegistryTests {
         // everywhere the walk looks.
         contexts.append(CapabilityContext(mode: nil, focusedPaneShowsNote: true, wingCount: 2))
         contexts.append(CapabilityContext(mode: nil, focusedPaneShowsBook: true, wingCount: 2))
+        // VX-440 batch 1 (A JUSTIFIED EDIT, the VX-570 line's class): "Compare
+        // with Latest Version" acts where a note's detail is mounted AND that
+        // note has a saved moment — a fact about the NOTE, never a mode alone;
+        // without this context it reads `.unavailable` everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: .write, noteHasSavedVersion: true))
         return contexts
     }
 
@@ -273,13 +278,22 @@ struct CapabilityRegistryTests {
         // which mode it is in; both contexts satisfy them, so those acts are
         // judged on mode alone (a note open in Takes shows a note exactly as
         // in Write). No other `takesAccess` act reads these three facts.
+        // VX-440 batch 1 (SF-1 — A JUSTIFIED EDIT, the VX-377 line's class):
+        // so is the NOTE fact `noteHasSavedVersion` — "Compare with Latest
+        // Version" asks whether the mounted note has a saved moment, never
+        // which mode it is in (it acts from every mode: its road switches to
+        // Compare itself); both contexts satisfy it, so it too is judged on
+        // mode alone. Without it the act read `.unavailable` in BOTH contexts
+        // and this walk failed its `.native` letter. No other act reads it.
         let takes = CapabilityContext(
             mode: .takes, undoAvailable: true, redoAvailable: true,
-            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2)
+            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2,
+            noteHasSavedVersion: true)
         let write = CapabilityContext(
             mode: .write, writeEditorAttached: true,
             undoAvailable: true, redoAvailable: true,
-            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2)
+            focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2,
+            noteHasSavedVersion: true)
         for capability in CapabilityRegistry.all {
             guard let access = capability.takesAccess else { continue }
             let inTakes = capability.availability(takes)

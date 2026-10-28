@@ -13,9 +13,10 @@
 //     Phase 2 (`reading.sort_field` + `setReadingSort`); the lens half is
 //     the read-time override (`Queries.ReadingOrder`) plus one deliberate
 //     save door.
-//  2. **The smart→curated conversion offer (C2/N38)** — the one sheet both
-//     doors (the shelf's deliberate menu item, the navigator's
-//     "+ new chapter") open, per the memo's §3.
+//  2. **The smart→curated conversion offer (C2/N38)** — the one sheet the
+//     shelf's deliberate menu item and the hand-drag's teaching offer open,
+//     per the memo's §3. (The navigator's "+ new chapter" on a gathering was
+//     its third road until VX-616 retired it — her ruling 2026-10-28.)
 //
 
 import SwiftUI
@@ -89,13 +90,11 @@ enum BookOrderChoices {
 // (same row — §19.6, pinned — the assembly materialized, the rule left on the
 // row, so the book is a LIVING book under U1's intake).
 
-/// What the bind door completes afterwards — the act she actually asked for,
-/// finished by the choreography (P-2: a door performs the act, including the
-/// steps it needs on the way).
-enum BindFollowUp: Equatable {
-    case none
-    case createChapter
-}
+// (VX-616 — her ruling 2026-10-28: the gathering navigator's "+ new chapter"
+// is removed. `BindFollowUp` — what the bind completed afterwards, its one
+// non-trivial case the chapter that door asked for — retired with it: no
+// road binds-then-anything now, so the sheet's title, body and confirm are
+// the bind's own words alone.)
 
 /// How many notes a gathering SHOWS right now — the number the bind promises
 /// will become members.
@@ -129,7 +128,6 @@ struct BindOffer: Identifiable, Equatable {
     let reading: Reading
     /// The notes the gathering shows — what becomes membership.
     let count: Int
-    let followUp: BindFollowUp
     /// The A31 view order the host is LOOKING through (the book view's), so
     /// the bind freezes the order she sees; nil = the stored order.
     let order: Queries.ReadingOrder?
@@ -146,15 +144,14 @@ struct BindOffer: Identifiable, Equatable {
     /// The door's one road to an offer: load the count AND the owned-notes
     /// limb, then hand back ONE value — the host assigns it in a single write.
     static func load(
-        _ session: AppSession, reading: Reading,
-        followUp: BindFollowUp = .none, order: Queries.ReadingOrder? = nil
+        _ session: AppSession, reading: Reading, order: Queries.ReadingOrder? = nil
     ) async -> BindOffer {
         let count = await SmartConversionCount.collected(session, readingID: reading.id)
         let owned = (try? await session.database.read { db in
             try Queries.bindOwnedNotesPreview(db, readingID: reading.id, order: order)
         }) ?? []
         return BindOffer(
-            reading: reading, count: count, followUp: followUp, order: order,
+            reading: reading, count: count, order: order,
             ownedElsewhere: owned.map { BindCopy.OwnedNote(title: $0.title, owner: $0.owner.name) })
     }
 }
@@ -167,33 +164,18 @@ nonisolated enum BindCopy {
     static let bindVerb = "Bind into a Book\u{2026}"
     static let spawnVerb = "Make a Book from This Gathering\u{2026}"
 
-    static func title(_ name: String, followUp: BindFollowUp) -> String {
-        switch followUp {
-        case .none: "Bind \u{201C}\(name)\u{201D} into a book?"
-        case .createChapter: "Bind \u{201C}\(name)\u{201D} into a book to add chapters?"
-        }
+    static func title(_ name: String) -> String {
+        "Bind \u{201C}\(name)\u{201D} into a book?"
     }
 
-    static func confirm(_ followUp: BindFollowUp) -> String {
-        switch followUp {
-        case .none: "Bind into a Book"
-        case .createChapter: "Bind & Add Chapter"
-        }
-    }
+    static let confirm = "Bind into a Book"
 
     /// The sheet's body — the trade made concrete, and the truth §14.6 rules:
     /// the bound book KEEPS COLLECTING.
-    static func explanation(
-        count: Int, followUp: BindFollowUp, hearsActs: Bool = true
-    ) -> String {
-        let opener: String = switch followUp {
-        case .none:
+    static func explanation(count: Int, hearsActs: Bool = true) -> String {
+        let opener =
             "A gathering shows every note its rule matches and holds none of them, so it "
                 + "can\u{2019}t be arranged by hand. Bind it into a book to take it in hand: "
-        case .createChapter:
-            "Chapters need a book that holds its notes \u{2014} a gathering only shows the "
-                + "notes its rule matches. Bind it into a book and the chapter follows: "
-        }
         let members: String = switch count {
         case 0: "it shows no notes right now, so the book starts empty"
         case 1: "the 1 note it shows becomes a member, ready to reorder and give chapters"
@@ -366,9 +348,9 @@ nonisolated enum BindCopy {
         "A book is made from a gathering \u{2014} right-click one on the Bookcase."
 }
 
-/// **THE BIND SHEET** — both doors present it (the shelf's menu item and the
-/// book navigator's "+ new chapter"), and the teaching offer opens it. It
-/// decides nothing itself: it reports (`onConfirm`) and composition acts.
+/// **THE BIND SHEET** — the shelf's menu item presents it, and the teaching
+/// offer opens it (VX-616 retired the book navigator's "+ new chapter" road).
+/// It decides nothing itself: it reports (`onConfirm`) and composition acts.
 struct BindIntoBookSheet: View {
     let offer: BindOffer
     /// Reports the press WITH the owned-notes choice (13i-c U3 — the limb).
@@ -386,7 +368,7 @@ struct BindIntoBookSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(BindCopy.title(offer.reading.name, followUp: offer.followUp))
+            Text(BindCopy.title(offer.reading.name))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(2)
@@ -394,8 +376,7 @@ struct BindIntoBookSheet: View {
             ChromeNotice(
                 tokens: tokens,
                 text: BindCopy.explanation(
-                    count: memberCount, followUp: offer.followUp,
-                    hearsActs: BindCopy.hearsActs(offer.reading)),
+                    count: memberCount, hearsActs: BindCopy.hearsActs(offer.reading)),
                 ink: tokens.ink, lines: 10)
             if !offer.ownedElsewhere.isEmpty {
                 ownedLimb
@@ -404,7 +385,7 @@ struct BindIntoBookSheet: View {
                 Spacer()
                 Button(tokens.chromeLabel("Cancel")) { dismiss() }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                Button(tokens.chromeLabel(BindCopy.confirm(offer.followUp))) {
+                Button(tokens.chromeLabel(BindCopy.confirm)) {
                     onConfirm(ownedNotes)
                     dismiss()
                 }
@@ -464,11 +445,10 @@ struct BindIntoBookSheet: View {
     private func record() {
         BindDoorProbe.shown = .init(
             readingID: offer.reading.id, count: offer.count,
-            title: BindCopy.title(offer.reading.name, followUp: offer.followUp),
+            title: BindCopy.title(offer.reading.name),
             body: BindCopy.explanation(
-                count: memberCount, followUp: offer.followUp,
-                hearsActs: BindCopy.hearsActs(offer.reading)),
-            confirm: BindCopy.confirm(offer.followUp),
+                count: memberCount, hearsActs: BindCopy.hearsActs(offer.reading)),
+            confirm: BindCopy.confirm,
             owned: offer.ownedElsewhere.map(BindCopy.ownedLine),
             ownedChoice: ownedNotes)
     }

@@ -359,6 +359,66 @@ extension Operations {
         }
     }
 
+    /// **BRING A COMMIT BACK AS A TAKE** (VX-431, the VX-440 run — R-440-3;
+    /// her words on the ticket: *"offer 'bring back as a take' so a commit can
+    /// be read in the regular editor"*). A saved moment becomes a take of its
+    /// own on the block, beside the take it was saved from, and nothing else
+    /// moves: the moment stays (I5 — it is copied, never consumed), the take
+    /// it came from keeps its buffer, the chosen take stays chosen.
+    ///
+    /// The new take: text = the commit's text; parent = the commit's own take
+    /// (it descends from that take's history, the branch tree's meaning);
+    /// at the fan's END (`newBlankVariant`'s place — the moment is not a
+    /// sibling of the take as it is NOW, so it does not sit beside it the way
+    /// a branch does); never chosen, never locked, active; **label = the
+    /// commit's name when it has one, else none** (PROVISIONAL P-440-3),
+    /// through the take label's own normalisation (`setTakeLabelRows`).
+    ///
+    /// **It mirrors `branchVariant`'s posture exactly** — verified in code,
+    /// not assumed: `insertFanVariant` checks the block is live and the post
+    /// unsealed (`ensurePlacementUnlocked`), then the source take's liveness
+    /// (`liveVariant` — archived is allowed, a locked source is allowed: the
+    /// source is only read), inserts one `variant` row, and writes NOTHING
+    /// else — no `last_touched_at`, no churn (no `registerTextChange`, no
+    /// `touchContainer`), and NO structural-undo entry (`branchVariant` is not
+    /// on AppSpec §9's undo list and none of its doors registers one). So: a
+    /// SEALED post refuses (`lockedPost`), a dead block refuses
+    /// (`blockNotFound`), a dead take refuses (`variantNotFound` — Block
+    /// History lists only live takes' moments), an unknown commit refuses
+    /// (`commitNotFound`); the road back is deleting the take by hand
+    /// (PROVISIONAL P-440-4). The checks run in `insertFanVariant`'s order,
+    /// after the one read that names the block, inside ONE transaction.
+    @discardableResult
+    public func bringBackCommitAsTake(_ commitID: String) throws -> Variant {
+        try database.write { db in
+            guard let commitPoint = try CommitPoint.fetchOne(db, key: commitID) else {
+                throw OperationError.commitNotFound(id: commitID)
+            }
+            guard let sourceRow = try Variant.fetchOne(db, key: commitPoint.variantId) else {
+                throw OperationError.variantNotFound(id: commitPoint.variantId)
+            }
+            let blockID = sourceRow.blockId
+            _ = try liveBlock(db, blockID)
+            try ensurePlacementUnlocked(db, blockID: blockID)
+            let source = try liveVariant(db, sourceRow.id)
+            let last = try String.fetchOne(
+                db,
+                sql: "SELECT MAX(fan_position) FROM variant WHERE block_id = ? AND deleted_at IS NULL",
+                arguments: [blockID])
+            let trimmed = StoredText.stripped(commitPoint.message)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let now = date.now
+            let variant = Variant(
+                id: newID(), blockId: blockID, parentVariantId: source.id,
+                workingText: commitPoint.text,
+                label: (trimmed?.isEmpty ?? true) ? nil : trimmed,
+                fanPosition: FractionalIndex.between(last, nil),
+                createdAt: now, updatedAt: now)
+            try variant.insert(db)
+            return variant
+        }
+    }
+
     /// The "genuinely different take" gesture: an empty, parentless variant
     /// at the fan's end.
     @discardableResult

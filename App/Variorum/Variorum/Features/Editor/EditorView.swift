@@ -189,6 +189,12 @@ struct EditorView: View {
         .onChange(of: themeSettings) { _, _ in pushAppearance() }
         .onChange(of: scheme) { _, _ in pushAppearance() }
         .onChange(of: writeHoverHandles) { _, _ in pushAppearance() }
+        // VX-431 (the VX-440 run): a Block History restore beside this
+        // editor says where it landed — heard on CHANGE only, so a parcel
+        // posted before this editor mounted is never taken at an arrival.
+        .onChange(of: session.commandRouter.pendingRestoreLanding) { _, _ in
+            model.consumeRestoreLanding()
+        }
         .onDisappear { model.teardown() }
         .sheet(item: $model.fanPanel) { panel in
             // Sitting 9 (R87): the FanPanel is retired — Write's take

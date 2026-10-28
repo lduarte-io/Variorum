@@ -132,23 +132,26 @@ struct BindDoorTests {
 
     // MARK: - The bind sheet's words (pure)
 
+    /// VX-616 (A JUSTIFIED EDIT): the `.createChapter` follow-up's words
+    /// ("Chapters need a book…", "Bind & Add Chapter", "…to add chapters?")
+    /// retired with the gathering navigator's "+ new chapter" — her ruling
+    /// 2026-10-28; the bind's own words are pinned here at three counts.
     @Test func theBindWordsSayTheTruthAtEveryCount() {
-        let none = BindCopy.explanation(count: 0, followUp: .none)
+        let none = BindCopy.explanation(count: 0)
         #expect(none.contains("it shows no notes right now, so the book starts empty"))
-        let one = BindCopy.explanation(count: 1, followUp: .none)
+        let one = BindCopy.explanation(count: 1)
         #expect(one.contains("the 1 note it shows becomes a member"))
-        let chapter = BindCopy.explanation(count: 3, followUp: .createChapter)
-        #expect(chapter.hasPrefix("Chapters need a book that holds its notes"))
-        #expect(chapter.contains("the 3 notes it shows become members"))
-        for text in [none, one, chapter] {
+        let three = BindCopy.explanation(count: 3)
+        #expect(three.hasPrefix("A gathering shows every note its rule matches"))
+        #expect(three.contains("the 3 notes it shows become members"))
+        for text in [none, one, three] {
             // Lesson 3's truth (the sitting record §25): "bind it into a book
             // to take it in hand, and it keeps collecting after you do".
             #expect(text.contains("keeps collecting after you bind it"))
             #expect(!text.contains("stop"))
         }
-        #expect(BindCopy.confirm(.createChapter) == "Bind & Add Chapter")
-        #expect(BindCopy.title("x", followUp: .createChapter)
-                == "Bind \u{201C}x\u{201D} into a book to add chapters?")
+        #expect(BindCopy.confirm == "Bind into a Book")
+        #expect(BindCopy.title("x") == "Bind \u{201C}x\u{201D} into a book?")
         // The teaching offer — the sitting record §3, verbatim.
         #expect(BindCopy.teachingOffer == "Turn into a book to arrange by hand?")
     }
@@ -432,7 +435,6 @@ struct BindDoorTests {
             let offer = try #require(structure.bindOffer)
             #expect(offer.reading.id == reading.id)
             #expect(offer.count == 2)
-            #expect(offer.followUp == .none)
         }
     }
 
@@ -481,20 +483,23 @@ struct BindDoorTests {
         }
     }
 
-    /// The navigator's "+ new chapter" on a gathering opens the SAME confirm,
-    /// its follow-up named and its count carried (F-U2-3's fix shape, on the
-    /// book view's road).
-    @Test func theChapterDoorOpensTheBindWithItsCountAndItsFollowUp() async throws {
+    /// The book view's road to the bind (the teaching offer's act) opens the
+    /// SAME confirm with its count and the order she is looking through
+    /// carried (F-U2-3's fix shape). VX-616 (A JUSTIFIED EDIT): this pin rode
+    /// the navigator's "+ new chapter" (`followUp: .createChapter`) until her
+    /// ruling 2026-10-28 retired that door and its follow-up; the road it
+    /// pins — count and order carried, the bind freezing what she sees — is
+    /// the teaching offer's, unchanged.
+    @Test func theBookViewsBindRoadCarriesItsCountAndItsOrder() async throws {
         try await withBindWorld { session, db in
             let (reading, _, _) = try gathering(session, count: 3)
             let structure = try await structure(session, for: reading, db: db)
             let looking = Queries.ReadingOrder(field: .createdAt, direction: .desc)
 
-            await structure.openBindOffer(followUp: .createChapter, order: looking)
+            await structure.openBindOffer(order: looking)
 
             let offer = try #require(structure.bindOffer)
             #expect(offer.count == 3)
-            #expect(offer.followUp == .createChapter)
             #expect(offer.order == looking, "the bind will freeze the order she is looking through")
 
             // Binding through it: the same row, the order she was looking at.

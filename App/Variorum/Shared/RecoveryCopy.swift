@@ -139,7 +139,23 @@ nonisolated enum RecoveryCopy {
     /// over a saved moment. One rule, one home, both platforms — rather than
     /// a second inline ternary on the phone.
     static func rowKind(_ item: Queries.TrashItem) -> String {
-        item.isVersion ? VersionsPath.trashRowKind : rowKind(item.kind)
+        item.isVersion ? VersionsPath.trashRowKind : rowKind(item.kind, isGathering: item.isGathering)
+    }
+
+    /// **VX-611 — a deleted GATHERING calls itself a gathering.** It rides
+    /// the `.book` arm (one `reading` row — the kind filter, the purge mapping
+    /// and Put back are the reading's, as a saved version rides `.note`), so
+    /// the kind alone said "book". The row carries its own kind
+    /// (`TrashItem.isGathering`); every sentence the Trash says about THE ROW
+    /// in hand — its kind word, its Delete Now confirm, Delete Now's receipt
+    /// and the plain Put back receipt — names it through this rule. (The kind
+    /// FILTER keeps "Books" — a gathering lists among the readings, as before.)
+    static let gatheringRowKind = "gathering"
+
+    /// The singular word for a row of `kind` — "gathering" for a gathering's
+    /// book-arm row (VX-611), else the kind's own word.
+    static func rowKind(_ kind: Queries.TrashItem.Kind, isGathering: Bool) -> String {
+        kind == .book && isGathering ? gatheringRowKind : rowKind(kind)
     }
 
     /// What one row of a given KIND calls itself, in the singular. Prefer the
@@ -479,10 +495,13 @@ nonisolated enum RecoveryCopy {
     /// link they are grouped by rode those blocks. Taking them WITH the note
     /// is the honest repair and it lives in `PurgeFamily` — `Sync/`-fenced
     /// this round, and carried to its owning phase in KnownIssues.)*
+    /// VX-611: `isGathering` (defaulted, like `isVersion`) names a deleted
+    /// gathering's row a gathering.
     static func deleteNowConfirm(
-        _ kind: Queries.TrashItem.Kind, isVersion: Bool = false, savedVersions: Int = 0
+        _ kind: Queries.TrashItem.Kind, isVersion: Bool = false, savedVersions: Int = 0,
+        isGathering: Bool = false
     ) -> String {
-        let noun = isVersion ? VersionsPath.trashRowKind : rowKind(kind)
+        let noun = isVersion ? VersionsPath.trashRowKind : rowKind(kind, isGathering: isGathering)
         var sentence = "Delete this \(noun) for good? It skips the rest of its "
             + "\(TrashWindow.days) days — there's no putting it back."
         if savedVersions > 0 {
@@ -583,18 +602,22 @@ nonisolated enum RecoveryCopy {
     /// bytes follow once every device on the account has seen the deletion.
     /// The three populations are synced · never-synced · signed-out-with-
     /// synced-history (13j ladder B, B3 + R2-M1).
+    /// VX-611: `isGathering` (defaulted) names a deleted gathering's row a
+    /// gathering.
     static func deleteNowReceipt(
-        _ kind: Queries.TrashItem.Kind, synced: Bool, familyEverSynced: Bool = false
+        _ kind: Queries.TrashItem.Kind, synced: Bool, familyEverSynced: Bool = false,
+        isGathering: Bool = false
     ) -> String {
+        let noun = rowKind(kind, isGathering: isGathering)
         if synced {
-            return "The \(rowKind(kind)) is gone from the app now — the bytes follow "
+            return "The \(noun) is gone from the app now — the bytes follow "
                 + "once every synced device has caught up."
         }
         if familyEverSynced {
-            return "The \(rowKind(kind)) is gone from the app now — it once synced, "
+            return "The \(noun) is gone from the app now — it once synced, "
                 + "so the bytes finish clearing after you next sign in."
         }
-        return "The \(rowKind(kind)) is gone from the app now — the app's own "
+        return "The \(noun) is gone from the app now — the app's own "
             + "cleanup removes the bytes."
     }
 
@@ -760,8 +783,10 @@ nonisolated enum RecoveryCopy {
     // MARK: Put-back receipts, by kind and by landing (hoisted at 4.5b)
 
     /// What a put-back says when the op reports no landing of its own.
-    static func putBackReceipt(_ kind: Queries.TrashItem.Kind) -> String {
-        "\(rowKind(kind).prefix(1).uppercased())\(rowKind(kind).dropFirst()) put back."
+    /// VX-611: `isGathering` (defaulted) — "Gathering put back."
+    static func putBackReceipt(_ kind: Queries.TrashItem.Kind, isGathering: Bool = false) -> String {
+        let noun = rowKind(kind, isGathering: isGathering)
+        return "\(noun.prefix(1).uppercased())\(noun.dropFirst()) put back."
     }
 
     // MARK: A book that went to the Trash WITH its notes (13i-c U4 — the

@@ -572,6 +572,10 @@ final class TakesViewModel {
         // blooms, the N9 "just start typing" ring) resolve against the
         // fresh slots.
         consumeLandings(new)
+        // VX-431: a restore's landing waiting for exactly this delivery — it
+        // lands AFTER `noteProjectionArrived` above, so the content change
+        // that brought the words cannot end it.
+        landParkedRestore(in: new)
         // 13b 3F: a revealed mint that lagged its projection pages its fan
         // now (re-parking while the take is still in flight). NIT-2: a
         // re-park inherits the DECREMENTED budget — a fresh reveal gets a
@@ -1233,6 +1237,69 @@ final class TakesViewModel {
     func consumePendingTakesLanding() {
         guard loaded, session.commandRouter.pendingTakesLanding?.postID == postID else { return }
         consumeLandings(projection)
+    }
+
+    // MARK: - A restore says where it landed (VX-431, the VX-440 run)
+
+    /// **A Block History restore's landing, parked until the article SHOWS
+    /// the restored words** (`RestoreLanding`; the plan's Batch 2 design, item
+    /// 4). The article lands on a row only once its projection carries the
+    /// words: a landing made against the OLD projection would be ended by the
+    /// very delivery that brings them (`noteProjectionArrived` — a content
+    /// change ends a pending landing, 13u2 UNIT E's one structural arm).
+    @ObservationIgnored private var parkedRestoreLanding: (landing: RestoreLanding, until: Date)?
+
+    /// The router's parcel, heard by the mounted board. **First, on EVERY
+    /// board that hears it (the Takes board and the Lenses board): a ring in
+    /// a pane showing the restored take ENDS** (W-1, the vx440 walk) — a live
+    /// pane is buffer-authoritative and never adopts projection text
+    /// (`PaneTextAuthority`; VX-248's adoption keys on a change of the BOUND
+    /// take, and a restore keeps the take), so the ring's pane kept the
+    /// pre-restore words under the wash, and its next keystroke would have
+    /// written them back over the restore. Ended through `blur()` (its flush
+    /// is load-bearing — the restore already flushed, so nothing is pending),
+    /// the pane goes READ and adopts the restored words; she clicks back in
+    /// to type in them. VX-222's shape exactly: a ring never outlives the
+    /// words it was typing over. The general class — any outside change to a
+    /// live pane's take — is VX-248's sibling, recorded in the run record.
+    ///
+    /// Then the LANDING: THE Takes board only (`landingEnabled` — never
+    /// Write's embedded panel model, never the Lenses host, whose columns
+    /// have no article landing), and only a parcel for THIS note; the Lenses
+    /// board leaves the parcel where it is (inert — heard on change only).
+    func consumeRestoreLanding() {
+        guard let landing = session.commandRouter.pendingRestoreLanding,
+              landing.postID == postID
+        else { return }
+        if authority.livePane?.variantID == landing.variantID { blur() }
+        guard host == .takes, landingEnabled else { return }
+        session.commandRouter.pendingRestoreLanding = nil
+        parkedRestoreLanding = (landing, Date().addingTimeInterval(RestoreLanding.patience))
+        landParkedRestore(in: projection)
+    }
+
+    /// Lands the parked restore once `projection` shows its words: the
+    /// article's own landing, kind `.restore` — revealed by R-Q1's minimal
+    /// rule and washed with the arrival flash's face when it arrives
+    /// (`TakesArticleScroll.ArticleLandingKind.restore`). The article shows
+    /// CHOSEN takes only, so a restore of another take of the block lands
+    /// nothing (the fan's cards show it where she looks for it).
+    func landParkedRestore(in projection: Queries.TakesProjection) {
+        guard let parked = parkedRestoreLanding else { return }
+        guard Date() < parked.until else {
+            parkedRestoreLanding = nil
+            return
+        }
+        let landing = parked.landing
+        guard let slot = projection.slots.first(where: { $0.blockID == landing.blockID }),
+              slot.variantID == landing.variantID
+        else {
+            parkedRestoreLanding = nil
+            return
+        }
+        guard slot.text == landing.text else { return }  // the delivery has not come yet
+        parkedRestoreLanding = nil
+        board.landArticle(on: slot.placementID, kind: .restore)
     }
 
     func removeColumn(_ columnID: String) {

@@ -73,6 +73,8 @@ struct TakesBottomBar: View {
             // time controls, in `note ▾` — Write's bar's pair, here too
             // (R118's letter: no surface is privileged).
             .saveNoteVersion, .showNoteVersions,
+            // VX-440 batch 1 (R-440-1): Write's bar's latest-version row (R6-2).
+            .compareWithLatestVersion,
             // VX-372 (VX-383 U1 — D-C-2): the two duplicates — Write's bar's
             // pair, here too (R6-2).
             .duplicateNoteWithTags, .duplicateNoteWithoutTags,
@@ -476,6 +478,15 @@ struct TakesBottomBar: View {
                 Task { await model.saveNoteVersion() }
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            // VX-440 batch 1 (R-440-1): Write's bar's latest-version row, in the
+            // same place and under the same gate (R6-2, P-2).
+            if VersionCompareDoor.latestDoorShows(noteID: model.postID, session: model.session) {
+                Button(CapabilityRegistry.capability(.compareWithLatestVersion).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await VersionCompareDoor.compareWithLatest(noteID: postID, session: session) }
+                }
+            }
             // VX-372 (VX-383 U1 — D-C-2): Write's bar's two duplicate rows, in
             // the same place (R6-2) — through the board's own door, which lifts
             // her hand off the article landing first, then runs the ONE act.

@@ -209,6 +209,37 @@ struct TrashAndArchiveTests {
         }
     }
 
+    /// **VX-611 — a deleted GATHERING rows on the book arm and knows it is a
+    /// gathering.** One `reading` row, one Put back, one purge mapping — the
+    /// kind filter (`.book`) and the doors are the reading's, exactly as a saved
+    /// version rides `.note` — so the listing carries the one fact the face's
+    /// word needs (`isGathering`, read from the row's own `kind` in the same
+    /// statement). A book's row says false; every non-book row says false.
+    @Test func aDeletedGatheringRowsOnTheBookArmAndKnowsItIsAGathering() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "a book", kind: .book)
+            let gathering = try ops.createReading(
+                name: "a gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let post = try ops.createPost(title: "a note")
+            try ops.deleteReading(book.id)
+            try ops.deleteReading(gathering.id)
+            try ops.deleteContainer(post.id)
+
+            try db.read { db in
+                let all = try Queries.trash(db, now: harnessNow)
+                let gatheringRow = try #require(all.first { $0.id == gathering.id })
+                let bookRow = try #require(all.first { $0.id == book.id })
+                #expect(gatheringRow.kind == .book, "the reading's arm: the filter and the doors are the book's")
+                #expect(gatheringRow.isGathering && gatheringRow.title == "a gathering")
+                #expect(!bookRow.isGathering)
+                #expect(all.filter { $0.kind != .book }.allSatisfy { !$0.isGathering })
+                // The kind filter still lists it among the readings.
+                let readings = try Queries.trash(db, now: harnessNow, kinds: [.book])
+                #expect(Set(readings.map(\.id)) == [book.id, gathering.id])
+            }
+        }
+    }
+
     /// **13l Act 7 — the 8d walk's find: the Trash was the ONE surface that
     /// still said "Untitled".**
     ///

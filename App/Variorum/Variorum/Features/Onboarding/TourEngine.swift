@@ -205,7 +205,7 @@ enum TourPlaces {
         case .post(let id): .note(id)
         case .reading(let id): .book(id)
         case .pool(let id): .snippetGroup(id)
-        case .tag, .recovery: .elsewhere
+        case .tag, .recovery, .noteVersion: .elsewhere
         }
     }
 

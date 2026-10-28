@@ -989,6 +989,10 @@ struct RecoveryView: View {
     private func putBackHelp(_ item: Queries.TrashItem) -> String {
         switch item.kind {
         case .note: return "The note comes back with its blocks, its tags and its books"
+        // VX-611: a gathering holds no chapters or membership — its rule is
+        // what comes back (PROVISIONAL wording, P-440-13).
+        case .book where item.isGathering:
+            return "The gathering comes back with its rule"
         case .book:
             return (model.bookNoteCounts[item.id] ?? 0) > 0
                 ? "The book comes back whole — with the notes that went in with it"

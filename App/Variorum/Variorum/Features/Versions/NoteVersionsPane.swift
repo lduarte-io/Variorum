@@ -149,6 +149,21 @@ final class NoteVersionsModel {
         }
     }
 
+    /// **VX-440 batch 1 (R-440-1) — "Compare with now"**: this moment beside
+    /// the note as it is, in Compare (`VersionCompareDoor`, the one act every
+    /// door runs). The row draws it only where the note's detail is the
+    /// mounted one (`canCompareHere`); a refused switch has already spoken.
+    func compareWithNow(_ item: Queries.NoteVersionItem) {
+        VersionCompareDoor.compare(versionID: item.postID, with: postID, session: session)
+    }
+
+    /// Whether the row's Compare door can act from where this pane is shown —
+    /// the note's detail must be mounted (a bar's sheet over a book's inline
+    /// note has no Compare mode to switch to — P-2).
+    var canCompareHere: Bool {
+        VersionCompareDoor.canCompare(noteID: postID, session: session)
+    }
+
     /// The read the inline **Read** disclosure shows — one shot, never held:
     /// a moment does not change, so nothing here needs an observation.
     func text(of item: Queries.NoteVersionItem) async -> String {
@@ -325,6 +340,20 @@ struct NoteVersionsPane: View {
                 .controlSize(.small)
                 .help(VersionsPath.deleteHelp)
             }
+            // VX-440 batch 1 — the two LOOKING doors (R-440-1, R-440-2): the
+            // moment beside the note in Compare, and the moment on a whole page.
+            // Their own line, so the four verbs above keep theirs.
+            HStack(spacing: 8) {
+                Button(VersionsPath.openFullSizeVerb) { openFullSize(item) }
+                    .controlSize(.small)
+                    .help(VersionsPath.openFullSizeHelp)
+                if model.canCompareHere {
+                    Button(VersionsPath.compareWithNowVerb) { model.compareWithNow(item) }
+                        .controlSize(.small)
+                        .help(VersionsPath.compareWithNowHelp)
+                }
+                Spacer(minLength: 0)
+            }
             if expanded.contains(item.postID) {
                 Text(texts[item.postID] ?? "\u{2026}")
                     .font(tokens.body)
@@ -335,6 +364,15 @@ struct NoteVersionsPane: View {
             }
         }
         .padding(.vertical, 3)
+    }
+
+    /// VX-440 batch 1 (R-440-2): the moment on a whole page — the shell's
+    /// `.noteVersion` destination (`NoteVersionPage`). Hosted as a bar's SHEET
+    /// the pane steps out of the way first; in the side column the detail it
+    /// stands in is what the open replaces.
+    private func openFullSize(_ item: Queries.NoteVersionItem) {
+        if onClose == nil { dismiss() }
+        NoteVersionPage.open(versionID: item.postID, of: model.postID)
     }
 
     private func readLabel(_ item: Queries.NoteVersionItem) -> String {

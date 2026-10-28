@@ -115,7 +115,14 @@ extension Queries {
 
     /// The read itself. A note that does not exist, or holds nothing, costs
     /// nothing — the door refuses such a restore on its own terms.
-    public static func restoreCost(_ db: Database, of postID: String) throws -> RestoreCost {
+    ///
+    /// `now` (VX-331) is REQUIRED, `Queries.deletedTakes`' own reason: a
+    /// deleted take rides the 30-day clock, and the population this counts is
+    /// the takes still WAITING in Block History — which is the clock's answer
+    /// at the moment of the ask.
+    public static func restoreCost(
+        _ db: Database, of postID: String, now: Date
+    ) throws -> RestoreCost {
         // The outgoing set, defined EXACTLY as `restoreNoteVersion` step 2
         // defines it: this note's live placements whose block is still live.
         let outgoing = try String.fetchAll(
@@ -145,9 +152,14 @@ extension Queries {
                   -- a completed one fences only the tombstone it covered, and
                   -- a voided one (a Put back, then a re-delete) never hides
                   -- the fresh tombstone.
+                  -- VX-331: and only while it is on the 30-day clock — the
+                  -- listing's own window (`deletedTakes`, `>=` so the edge
+                  -- belongs to the take). Past it no door offers Put back,
+                  -- so it is not "waiting in Block History" either.
                   (SELECT COUNT(*) FROM variant v
                     WHERE v.block_id IN (SELECT value FROM json_each(:ids))
                       AND v.deleted_at IS NOT NULL
+                      AND v.deleted_at >= :cutoff
                       AND NOT EXISTS (SELECT 1 FROM purge_intent pi
                         WHERE pi.table_name = 'variant' AND pi.row_id = v.id
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= v.deleted_at))
@@ -163,7 +175,7 @@ extension Queries {
                           AND (pi.deleted_at IS NULL OR pi.deleted_at >= bc.deleted_at))
                   ) AS deleted_comments
                 """,
-            arguments: ["ids": ids])
+            arguments: ["ids": ids, "cutoff": TrashWindow.cutoffStamp(now: now)])
 
         let originals = try setAsideOriginals(db, family: Set(outgoing))
         let takes = originals.isEmpty ? 0 : (try Int.fetchOne(

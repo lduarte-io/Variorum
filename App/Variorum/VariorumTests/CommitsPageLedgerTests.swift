@@ -176,58 +176,105 @@ struct CommitsPageLedgerTests {
             .contains("saved by hand"))
     }
 
-    /// ONE line of the first non-blank paragraph, and no ellipsis of the
-    /// face's own — the "…had.…" artifact (a two-line cut at a newline, an
-    /// ellipsis after the period) cannot be produced.
-    @Test func thePreviewIsTheFirstParagraphAndNeverADotEllipsis() {
+    /// **JUSTIFIED PIN EDIT (VX-431, the VX-440 run — the clarity pass):**
+    /// this pin held the RESTING row's one-paragraph preview
+    /// (`CommitRowFace.preview`), and the clarity pass retires the moment's
+    /// words from the resting row (the plan's Batch 2 design, item 1: "one
+    /// line — clock · name (when named) · kind glyph"). The preview now lives
+    /// in the OPEN row, LONGER and with its paragraphs kept; what VX-144 cared
+    /// about here survives unchanged — no ellipsis of the face's own (the
+    /// "…had.…" artifact cannot be produced), leading blank lines dropped, the
+    /// empty moment worded as a take, a cheap cap.
+    @Test func theOpenPreviewKeepsParagraphsCapsAndAddsNoEllipsisOfItsOwn() {
         let twoParagraphs = "The keeper climbed the stairs at dusk, counting them as he always had."
             + "\nBelow, the sea rearranged itself around the rocks, patient and loud."
-        let preview = CommitRowFace.preview(twoParagraphs)
-        #expect(preview == "The keeper climbed the stairs at dusk, counting them as he always had.")
-        #expect(!preview.hasSuffix(".\u{2026}") && !preview.contains("\n"))
-        #expect(CommitRowFace.preview("\n  \nSecond line leads.") == "Second line leads.")
-        #expect(CommitRowFace.preview("") == BlockPastCopy.emptyTake)
-        let long = CommitRowFace.preview(String(repeating: "word. ", count: 80))
-        #expect(long.count <= CommitRowFace.previewCap && !long.hasSuffix("\u{2026}"))
+        let preview = CommitRowFace.expandedPreview(twoParagraphs)
+        #expect(preview == twoParagraphs, "both paragraphs, the newline kept")
+        #expect(!preview.hasSuffix(".\u{2026}"))
+        #expect(CommitRowFace.expandedPreview("\n  \nSecond line leads.") == "Second line leads.")
+        #expect(CommitRowFace.expandedPreview("") == BlockPastCopy.emptyTake)
+        #expect(CommitRowFace.expandedPreview(" \n\t ") == BlockPastCopy.emptyTake)
+        let long = CommitRowFace.expandedPreview(String(repeating: "word. ", count: 400))
+        #expect(long.count == CommitRowFace.expandedCap && !long.hasSuffix("\u{2026}"))
     }
 
     // MARK: - Precisions 1 + 3 — the row's anatomy and height
 
-    private static func rowHeight(
-        _ commit: CommitPoint, tokens: VoiceTokens, width: CGFloat = 396
-    ) -> CGFloat {
-        let host = NSHostingController(rootView: CommitRowView(
+    private static func row(
+        _ commit: CommitPoint, tokens: VoiceTokens, expanded: Bool = false
+    ) -> CommitRowView {
+        CommitRowView(
             commit: commit, tokens: tokens, predatesSplit: false, now: Self.now,
             renameOpensField: true, renameAsk: .constant(nil),
-            onName: {}, onRename: { _ in }, onRestore: {}))
+            onName: {}, onRename: { _ in }, onRestore: {},
+            expanded: expanded, onToggle: {}, onReadInFull: {})
+    }
+
+    private static func rowHeight(
+        _ commit: CommitPoint, tokens: VoiceTokens, expanded: Bool = false,
+        width: CGFloat = 396
+    ) -> CGFloat {
+        let host = NSHostingController(rootView: Self.row(commit, tokens: tokens, expanded: expanded))
         return host.sizeThatFits(in: NSSize(width: width, height: 10_000)).height
     }
 
-    /// The two acts are quiet voiced WORDS, and the row is compact at the
-    /// column's default width (420 − the pane's 24 pt of padding) in both
-    /// voices: before the ledger a commit row measured ≈ 90 pt (the
-    /// before-captures — seven commits in an 820-pt pane).
+    /// **JUSTIFIED PIN EDIT (VX-431, the VX-440 run — the clarity pass).**
+    /// VX-144's pin held a three-line row (name · preview · details + two
+    /// acts, measured 68 / 49 pt); the clarity pass RESTS the row as ONE line
+    /// (the plan's Batch 2 design, item 1) and opens it in place. What this
+    /// pin still holds is VX-144's own point — the acts are quiet voiced WORDS
+    /// and the row is compact at the column's default width (420 − the pane's
+    /// 24 pt of padding) in both voices — now in the new shape: AT REST one
+    /// voiced word (Restore — her ruled "Restore per row") and one line, named
+    /// or not; OPEN the row's other two doors join it ("Read in full", the
+    /// name door) and the moment's words appear.
     @Test func theRowIsCompactAndItsActsAreWords() {
         for tokens in [VoiceTokens.studyLight, .terminalLight] {
-            let named = Self.commit(
-                "The keeper climbed the stairs at dusk, unhurried, a hand on the cold rail.",
-                message: "before the AI edit")
-            let row = CommitRowView(
-                commit: named, tokens: tokens, predatesSplit: false, now: Self.now,
-                renameOpensField: true, renameAsk: .constant(nil),
-                onName: {}, onRename: { _ in }, onRestore: {})
-            #expect(Self.values(VoicedButtonStyle.self, in: row.body).count == 2,
-                    "Name/Rename and Restore are voiced words")
+            let words = "The keeper climbed the stairs at dusk, unhurried, a hand on the cold rail."
+            let named = Self.commit(words, message: "before the AI edit")
+            let resting = Self.row(named, tokens: tokens)
+            #expect(Self.values(VoicedButtonStyle.self, in: resting.body).count == 1,
+                    "at rest the one act is Restore, a voiced word")
+            let open = Self.row(named, tokens: tokens, expanded: true)
+            #expect(Self.values(VoicedButtonStyle.self, in: open.body).count == 3,
+                    "open: Read in full, Name/Rename and Restore — voiced words")
+
             let namedHeight = Self.rowHeight(named, tokens: tokens)
-            let bare = Self.rowHeight(Self.commit(
-                "The keeper climbed the stairs at dusk, unhurried, a hand on the cold rail."),
-                tokens: tokens)
-            print("[VX-144] row heights: named \(namedHeight) · bare \(bare)")
-            // Measured on the Air at the build: 68 / 49 pt in BOTH voices; the
-            // bounds leave 4 pt of OS line-height drift and nothing more.
-            #expect(namedHeight <= 72, "a named commit is three short lines: \(namedHeight)")
-            #expect(bare <= 52, "an unnamed commit is two: \(bare)")
+            let bare = Self.rowHeight(Self.commit(words), tokens: tokens)
+            let openHeight = Self.rowHeight(named, tokens: tokens, expanded: true)
+            print("[VX-431] row heights: named \(namedHeight) · bare \(bare) · open \(openHeight)")
+            // One line of a voiced word (~19 pt) + 10 pt of padding ≈ 29 pt;
+            // the bound leaves 5 pt of OS line-height drift (VX-144's 68 / 49
+            // were three and two lines).
+            #expect(namedHeight <= 34, "a named commit rests on one line: \(namedHeight)")
+            #expect(bare <= 34, "so does an unnamed one: \(bare)")
+            #expect(openHeight > namedHeight + 12, "an open row shows more: \(openHeight)")
         }
+    }
+
+    /// **VX-431 — what the resting line says.** When, the name (when there is
+    /// one), and the QUIET glyph — a deliberate commit earns none; the open
+    /// row's details words drop the stamp the line already says.
+    @Test func theRestingLineSaysWhenTheNameAndTheQuietGlyphOnly() {
+        let manual = Self.commit(message: "first draft")
+        let quiet = Self.commit(kind: .auto)
+        #expect(CommitRowFace.kindGlyph(manual) == nil, "deliberate is the default: no glyph")
+        #expect(CommitRowFace.kindGlyph(quiet) == CommitRowFace.quietGlyph)
+        #expect(CommitRowFace.quietGlyph.count == 1, "one grapheme")
+        #expect(CommitRowFace.notes(manual, predatesSplit: false).isEmpty)
+        #expect(CommitRowFace.notes(quiet, predatesSplit: true)
+            == [CommitRowFace.quietMark, BlockHistoryCopy.predatesSplitMark])
+
+        // The moment's words are NOT on the resting row; they are on the open one.
+        let words = "A sentence only the open row shows."
+        let resting = Self.row(Self.commit(words), tokens: .studyLight)
+        var dumped = ""
+        dump(resting.body, to: &dumped, maxDepth: 120)
+        #expect(!dumped.contains(words), "the resting line carries no preview")
+        let open = Self.row(Self.commit(words), tokens: .studyLight, expanded: true)
+        dumped = ""
+        dump(open.body, to: &dumped, maxDepth: 120)
+        #expect(dumped.contains(words), "the open row does")
     }
 
     // MARK: - Harness

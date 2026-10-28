@@ -71,6 +71,18 @@ struct ShellActions {
         router.dispatch(.saveNoteVersion)
     }
 
+    /// **VX-440 batch 1 (R-440-1) — File's and ⌘K's "Compare with Latest
+    /// Version"**: the mounted detail's note, its newest moment read AT THE
+    /// PRESS, seated beside it in Compare (`VersionCompareDoor`, the one act
+    /// every door runs). With no detail mounted, the registry's note speaks.
+    func compareWithLatestVersion() {
+        guard let postID = router.activePostID else {
+            status.refuse(CapabilityRegistry.capability(.compareWithLatestVersion).unavailableNote)
+            return
+        }
+        Task { @MainActor in await VersionCompareDoor.compareWithLatest(noteID: postID, session: session) }
+    }
+
     /// **The ⌘K "Block History" row** (the Act 10 correction round, batch G
     /// — row 86(d); `toggleSeal`'s shape). The mounted surface's handler
     /// opens the pane for its caret/ring block (Write, Takes, Lenses); where
@@ -845,6 +857,9 @@ struct ShellActions {
         // …and the note's own two time controls (ledger rows 16/23): saving a
         // whole moment, and the list of the moments it has.
         .saveNoteVersion, .showNoteVersions,
+        // VX-440 batch 1 (R-440-1): the newest moment beside the note in
+        // Compare — LISTED only while the note has one (`paletteEntries`).
+        .compareWithLatestVersion,
         // 13n-a (R-13n-11): Copy for AI, typeable — the note on screen.
         .copyForAI,
         // VX-125 (the VX-439 run): Export Note…, typeable — the same note.
@@ -876,16 +891,21 @@ struct ShellActions {
     /// wing rows only where they act on what the focused pane shows
     /// (`WingPaletteDoors.lists` — P-2). The facts are read once, at the open.
     func listedPaletteEntries() async -> [(title: String, action: @MainActor () -> Void)] {
-        paletteEntries(listing: await paletteListingFacts())
+        paletteEntries(
+            listing: await paletteListingFacts(),
+            noteHasSavedVersion: router.isEnabled(.compareWithLatestVersion))
     }
 
     /// The rows under these facts (nil = every row). Pure over its input, so a
-    /// pin reads exactly what an open would list.
+    /// pin reads exactly what an open would list. VX-440 batch 1: "Compare
+    /// with Latest Version" lists only while the mounted note has a saved
+    /// moment (P-2) — `noteHasSavedVersion`, the router's fact at the open.
     func paletteEntries(
-        listing facts: WingPaletteDoors.Facts?
+        listing facts: WingPaletteDoors.Facts?, noteHasSavedVersion: Bool = true
     ) -> [(title: String, action: @MainActor () -> Void)] {
         Self.paletteActs
             .filter { id in facts.map { WingPaletteDoors.lists(id, $0) } ?? true }
+            .filter { id in id != .compareWithLatestVersion || noteHasSavedVersion }
             .map { id in (CapabilityRegistry.capability(id).verb, paletteAction(for: id)) }
     }
 
@@ -989,6 +1009,7 @@ struct ShellActions {
         case .showNoteTray: return { dispatch(.showNoteTray) }
         case .saveNoteVersion: return { saveNoteVersion() }
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
+        case .compareWithLatestVersion: return { compareWithLatestVersion() }
         case .copyForAI: return { copyForAI() }
         case .exportNote: return { exportNote() }
         case .duplicateNoteWithTags: return { duplicateNote(tags: .applied) }

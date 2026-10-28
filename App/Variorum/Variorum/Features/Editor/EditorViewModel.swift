@@ -2669,13 +2669,99 @@ final class EditorViewModel {
         else { return }
         lastArrivalFlashLine = span
         arrivalFlashes += 1
-        let rect = BlockDecor.indicatorRect(
+        arrivalFlashSink?(lineFlashRect(span, textView: textView), appearance.tokens)
+    }
+
+    /// The flash's rect for one line — the caret line across the prose column,
+    /// the block highlight's own geometry. ONE home for the two flashes (the
+    /// mode switch's arrival above, a restore's landing below).
+    private func lineFlashRect(
+        _ span: (top: Double, bottom: Double), textView: EditorTextView
+    ) -> CGRect {
+        BlockDecor.indicatorRect(
             block: CGRect(
                 x: textView.proseLeft, y: CGFloat(span.top),
                 width: textView.proseRight - textView.proseLeft,
                 height: CGFloat(span.bottom - span.top)),
             textLeft: textView.proseLeft, textRight: textView.proseRight)
-        arrivalFlashSink?(rect, appearance.tokens)
+    }
+
+    // MARK: - A restore says where it landed (VX-431, the VX-440 run)
+
+    /// **A Block History restore's landing, parked until this surface SHOWS
+    /// the restored words** (`RestoreLanding` — the plan's Batch 2 design,
+    /// item 4; her words: *"briefly highlight at least where it starts"*).
+    /// The restore's projection reaches this editor on its own delivery, and
+    /// until it has rewritten the block the line at the block's start is the
+    /// OLD words' line — so the landing waits, and is spent at the settle hop
+    /// after that rewrite (or at once, when the words are already shown: a
+    /// restore of the text the take already held). Dropped past
+    /// `RestoreLanding.patience`, or the moment she types (a landing never
+    /// yanks a caret she is using — the reveal park's own rule).
+    @ObservationIgnored private var parkedRestoreLanding: (landing: RestoreLanding, until: Date)?
+
+    /// Observation seam (`lastArrivalFlashLine`'s precedent — plain values,
+    /// not DEBUG-gated): where the last restore landed (the block's start)
+    /// and the line it washed, and how many restores this editor has landed.
+    @ObservationIgnored private(set) var lastRestoreLanding: (offset: Int, line: (top: Double, bottom: Double))?
+    @ObservationIgnored private(set) var restoreLandings = 0
+
+    /// The router's parcel, heard by the mounted editor (`EditorView`'s
+    /// `onChange`). The DETAIL editor only — the inline book/pool editors
+    /// scroll in their host and own no reveal (`revealLanding`'s rule) — and
+    /// only a parcel for THIS note.
+    func consumeRestoreLanding() {
+        guard scrollView != nil,
+              let landing = session.commandRouter.pendingRestoreLanding,
+              landing.postID == postID
+        else { return }
+        session.commandRouter.pendingRestoreLanding = nil
+        parkedRestoreLanding = (landing, Date().addingTimeInterval(RestoreLanding.patience))
+        landRestoreIfShown()
+    }
+
+    /// Lands the parked restore once the surface shows its words: the caret at
+    /// the block's start, that line rested in the comfort band (the mode
+    /// switch's own rule — `restCaretLineInTheBand`), and the line washed with
+    /// the arrival flash's face through the decor layer's sink — an OVERLAY,
+    /// never a rendering attribute (P-8; TEXTKIT2 §3). Only the block's FIRST
+    /// line is washed: her "at least where it starts", and the one line this
+    /// road can measure without forcing layout away from the viewport (a
+    /// long block's end is exactly the mid-document layout TEXTKIT2 §3's
+    /// VX-246 finding forbids). NOT governed by the mode-switch flash setting,
+    /// whose words name mode switches only — this wash is the restore's
+    /// answer to "which part came back" (PROVISIONAL P-440-8); Reduce Motion's
+    /// discreet variant holds (the sink's plan).
+    private func landRestoreIfShown() {
+        guard let parked = parkedRestoreLanding else { return }
+        guard Date() < parked.until, !autosave.isDirty else {
+            parkedRestoreLanding = nil
+            return
+        }
+        let landing = parked.landing
+        guard let i = index.entries.firstIndex(where: { $0.blockID == landing.blockID }),
+              index.entries[i].variantID == landing.variantID
+        else {
+            // The block is not in this note's page, or the page renders
+            // another of its takes: there is nothing of the restored words
+            // here to wash (the restore's receipt said what happened).
+            parkedRestoreLanding = nil
+            return
+        }
+        // Not adopted yet: the projection carrying the words has not reached
+        // the surface — the settle hop after its rewrite tries again.
+        guard slots.first(where: { $0.blockID == landing.blockID })?.text == landing.text,
+              let textView, let scrollView
+        else { return }
+        parkedRestoreLanding = nil
+        let start = index.range(ofEntryAt: i).location
+        textView.setSelectedRange(NSRange(location: start, length: 0))
+        updateCaretContext()
+        restCaretLineInTheBand(start, textView: textView, scrollView: scrollView)
+        guard let span = JumpPrimitive.lineSpan(ofOffset: start, in: textView) else { return }
+        lastRestoreLanding = (start, span)
+        restoreLandings += 1
+        arrivalFlashSink?(lineFlashRect(span, textView: textView), appearance.tokens)
     }
 
     /// The bare arrival's landing offset (rows 39/49): this post's current
@@ -3893,6 +3979,10 @@ final class EditorViewModel {
             // 18l-c U8 (a): a mode switch's landing has rested — its caret's
             // line flashes now, never before the page is where it will stay.
             consumeModeSwitchArrival(deliveredBy: generation)
+            // VX-431: a restore's landing waiting for its words to be shown
+            // — this hop is the first moment after the rewrite that its
+            // block's line is the restored words' line.
+            landRestoreIfShown()
             // A generation bumped between schedule and run re-arms on its
             // own draw pass — delivered records what this refresh SAW.
             refreshBadges()

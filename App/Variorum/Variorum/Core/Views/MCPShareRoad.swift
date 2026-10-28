@@ -58,6 +58,15 @@ enum MCPGrantPrefill: Equatable, Sendable {
         case .gathering: .gathering(grant.scopeID)
         }
     }
+
+    /// **VX-189 — a book's or a gathering's OWN place** (its place doors: Book
+    /// Settings' "Shared with" row's Share…, a row menu's Share with AI…),
+    /// chosen by the reading's kind — the one switch those doors read, so a
+    /// gathering's door never opens the sheet on a book's place (a gathering is
+    /// a grant place of its own since VX-549, never a book's).
+    nonisolated static func reading(_ reading: Reading) -> MCPGrantPrefill {
+        reading.kind == .gathering ? .gathering(reading.id) : .book(reading.id)
+    }
 }
 
 /// **What opens the grant sheet** (13n-c U2 — the opener; U3 moved it to the
@@ -211,6 +220,12 @@ nonisolated enum MCPShareCopy {
 
     static let sharedWithLabel = "Shared with"
     static let notShared = "No client reaches this book."
+    /// VX-189 — the row on a GATHERING's settings says its own kind
+    /// (PROVISIONAL wording, P-440-11 — the VX-611 kind-word rule).
+    static let notSharedGathering = "No client reaches this gathering."
+    static func notShared(_ kind: ReadingKind) -> String {
+        kind == .gathering ? notSharedGathering : notShared
+    }
     static let shareButton = "Share\u{2026}"
 
     /// "claude-code (read and suggest), codex (read)" — at most two, then

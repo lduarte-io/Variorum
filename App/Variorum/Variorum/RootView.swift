@@ -520,6 +520,15 @@ struct RootView: View {
             guard let id = note.userInfo?["postID"] as? String, claimBroadcast() else { return }
             router.pendingSelection = .post(id)
         }
+        // VX-440 batch 1 (R-440-2): a door names a saved moment to open FULL
+        // SIZE — its own destination, never the editor (`NoteVersionPage`).
+        .onReceive(NotificationCenter.default.publisher(for: .variorumOpenNoteVersion)) { note in
+            guard let versionID = note.userInfo?["versionID"] as? String,
+                  let noteID = note.userInfo?["noteID"] as? String,
+                  claimBroadcast()
+            else { return }
+            router.pendingSelection = .noteVersion(versionID, of: noteID)
+        }
         // 13f W20(a) — THE ASCENT: the membership chip names a book and a
         // post; the SHELL decides that this means "navigate to the book,
         // and hand it the post to land on" (P-4, the W10b precedent).
@@ -1423,6 +1432,17 @@ struct RootView: View {
             } else {
                 readCheapNote(poolID, pane: pane)
             }
+        case .noteVersion(let versionID, let noteID):
+            // VX-440 batch 1 (R-440-2): a saved moment, full size — read-only
+            // on Read's calm page under its identity band; no detail, so no
+            // mode row, no ⌘⇧S, no per-note memory (P-440-1). The band is its
+            // navigation: Back adopts the note; a promote shows the new note
+            // AS a note, in this pane (P-440-7).
+            NoteVersionPage(
+                session: session, versionID: versionID, noteID: noteID,
+                onBack: { adopt(.post(noteID), in: pane) },
+                onPromoted: { adopt(.post(versionID), in: pane) })
+                .id("version-\(versionID)")
         case .recovery:
             RecoveryView(
                 session: session, library: library,

@@ -182,6 +182,22 @@ nonisolated enum BookStateCopy {
     /// R-13ic-4's door on the rule editor's gathering gate.
     static let deleteGatheringDoor = "Delete this gathering\u{2026}"
 
+    /// **VX-611 — the delete door's verb, chosen by the reading's KIND.** ONE
+    /// capability (`.deleteBook`, P-1 — the registry keeps the book's verb as
+    /// its declared word); every renderer of its door on a ROW (the Bookcase
+    /// row's menu, `BookRowMenu`, the Archived books group's button) and the
+    /// rule editor's gathering-gate hover draw these words instead of the
+    /// registry's, so a gathering's door says what it deletes. Its confirm
+    /// already did (`deleteGathering` — "Delete Gathering").
+    static func deleteVerb(_ kind: ReadingKind) -> String {
+        kind == .gathering ? "Delete Gathering" : deleteVerb
+    }
+
+    /// The row's door label: the kind's verb and the ellipsis (it asks first).
+    static func deleteDoorLabel(_ kind: ReadingKind) -> String {
+        deleteVerb(kind) + "\u{2026}"
+    }
+
     static let unavailableNote =
         "A book's state lives on the book \u{2014} right-click it on the Bookcase, or open its "
         + "settings (the gear)."

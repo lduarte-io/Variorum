@@ -165,6 +165,13 @@ struct LensesBoardView: View {
         .onChange(of: session.commandRouter.pendingLensLanding) { _, _ in
             model.consumePendingLensLanding()
         }
+        // VX-431 W-1 (the VX-440 walk): a Block History restore beside this
+        // board ends a ring that was typing over the restored take's old
+        // words, so its cell adopts the restored ones (no landing here — the
+        // Lenses columns have none; `consumeRestoreLanding` says which).
+        .onChange(of: session.commandRouter.pendingRestoreLanding) { _, _ in
+            model.consumeRestoreLanding()
+        }
         .onDisappear {
             if let commandToken {
                 session.commandRouter.unregisterHandler(commandToken)
