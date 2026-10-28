@@ -14,10 +14,10 @@ takes in slot split. Contact oct27coordinator for your stage / walk needs."*
 reviewer makes the final call; the implementer applies confirmed fixes; FINDER-FIXES per her
 2026-10-13 ruling). Confirmed at the kickoff sitting unless redirected there.
 
-**The members (the SUB-ISSUE LISTING, read live at kickoff 2026-10-27 — the VX-548 lesson):**
-VX-421 · VX-427 · VX-428 · VX-429 · VX-574 · VX-586 · VX-594, plus rider **VX-577** seated at her
-kickoff word. (VX-592 remains an offered rider, not seated — re-offered at the sitting.)
-Pin-before-fix binds PER MEMBER; the cold review covers the run's whole diff.
+**The members (the SUB-ISSUE LISTING, read live at kickoff 2026-10-27 — the VX-548 lesson; TWELVE
+after the sitting):** VX-421 · VX-427 · VX-428 · VX-429 · VX-574 · VX-586 · VX-594 + rider
+**VX-577** (her kickoff word) + the sitting's seated riders **VX-592 · VX-248 · VX-321 · VX-337**
+(R-601-6; VX-337 bounded). Pin-before-fix binds PER MEMBER; the cold review covers the whole diff.
 
 **Concurrency (the in-flight table, 2026-10-27):** VX-620 (MCP door — no overlap), VX-562 (book
 Outline + a read-only viewport→block geometry read — its row flags shared read-tier files with
@@ -69,9 +69,9 @@ treatment.
 pane's own typing only; teardown takes the history with the manager by construction. The
 alternative (end the window-manager history at teardown / bound-take change) is recorded, not
 preferred: it keeps cross-pane history mixing and must chase every teardown road.
-**Related:** VX-248 (the live pane's bound-take class) — offered as a rider; if declined, this fix
-still must handle the BOUND-TAKE CHANGE occasion (a pane re-bound to a new take must not keep the
-old take's undo history), since that is the same freed/stale-target class one step milder.
+**Related:** VX-248 (the live pane's bound-take class) — SEATED at the sitting and batched beside
+this fix; the bound-take-change occasion (a re-bound pane must not keep the old take's undo
+history) is the shared seam the two fixes meet on.
 **Pin (red-on-old, revert-verified):** offscreen — a take surface in a window, register typing
 undo on it, release the view, run undo (zombie/crash on old; clean no-op or pane-scoped undo on
 new). Plus the in-app shape if stageable: type/paste in a take pane, delete the take, ⌘Z.
@@ -158,37 +158,83 @@ does not enumerate the gate, so likely record-only).
 behave in slot split (follow-the-scroll, page offsets). **Pin:** the door offered and acting in slot
 split; red-on-old on the gate.
 
+### VX-248 — live pane adopts the new take's text when its bound take changes (DEBT · seated R-601-6)
+**Her ruled root fix (QUESTIONS #217, 2026-10-13: "I think that we should probably fix it — ticket
+it").** The class: Takes/Lenses board cells keep a stable on-screen identity while the take they
+show can change (choose, step, mint). A LIVE pane is buffer-authoritative and never adopts
+projection text (`PaneSurface.swift:1514-1524`) — so a cell re-keyed while live keeps the OLD
+take's words wired to the NEW take, and the next keystroke saves them over it (silent; one writer,
+never a sync conflict). VX-222 (the adopt end-rule) and VX-227 (the parked follow + transit rule)
+close every reachable case today by never letting a cell be live across a re-key. **The fix:** when
+a live pane's bound take CHANGES (a re-key is a RE-BIND, not an edit), it adopts the new take's
+text — the ratified bend of P-3's "a live pane never adopts projection text" (her ratification IS
+this ticket); the caret landing moves in `noteLiveness` after the text write. **Pins:** VX-222's
+and VX-227's contamination pins stay green and become redundant-by-construction; a new pin on the
+re-bind adoption itself (red-on-old: the stale words survive a forced re-key on old code). The
+record of the F2(b) ruling: `notes/plans/fixes/vx-214-settings-launch-polish.md`.
+
+### VX-592 — dragging a selection out of the live editor doesn't work (BUG · Suspected · PROBE-FIRST · seated R-601-6)
+*[removed for publication]*
+work."* Probe: dragging a selection from the FOCUSED LIVE pane vs the read-tier panes (where it
+works). Same binding order as VX-429: instrumented trace first, pin as the confirm, fix only on
+red, record-only on green/other.
+
+### VX-321 — "archived · n" where the list header reads "archived takes" (WORDING · seated R-601-6)
+VX-154's rider fixed the take panel's archive receipt to match its own list header; the Move Take
+into a Block Below receipt (`TakeStructureCopy.movedNote`, shared with Write) still says
+"archived · n". Make it speak the header's words. Pin on the receipt string.
+
+### VX-337 — two load-dependent Takes flakes (TEST-ONLY · seated R-601-6 · BOUNDED, her word)
+`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt` (`:1803`) and
+`TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)` (`:168`) fail only in the
+whole-Mac-target run; both pass alone twice. The VX-167 load-dependence class. **Bounded:** one
+timeboxed trace under whole-target load (the run's own full-suite window is the natural occasion);
+a fix to test or code if the trace yields; otherwise the findings land on the ticket and it stays
+open — her words: *"id try on 337 but bound your efforts on that one."*
+
 ---
 
-## The batches (one acceptance unit per implementer session; strictly sequential)
+## The batches (one acceptance unit per implementer session; strictly sequential; set at the sitting)
 
-- **BATCH A — the editor seam (`PaneSurface`):** VX-421 + VX-429 (+ VX-592/VX-248 if she seats
-  them). The crash fix with its pins; the selection probe with its instrumented trace. Required
-  reading for the implementer: this file's VX-421/VX-429 sections, `notes/TEXTKIT2_NOTES.md`,
-  SurfaceContracts "The note", the environment traps below.
-- **BATCH B — the board and its doors:** VX-428 (session memory + her measurements) + VX-577
-  (the gate) + VX-594 (the ruled door).
-- **BATCH C — bars and chrome:** VX-427 (the count) + VX-574 (the font) + VX-586 (the label).
+- **BATCH A — pane LIFECYCLE (the editor seam):** VX-421 (per-pane undo managers, R-601-1) +
+  VX-248 (the bound-take adoption root fix — her ruled P-3 bend; VX-222/VX-227's contamination
+  pins stay green and become redundant-by-construction). One coherent unit: what happens to a live
+  pane when its take is deleted or re-bound. Required reading: this file's sections,
+  `notes/TEXTKIT2_NOTES.md`, SurfaceContracts "The note", the environment traps.
+- **BATCH A2 — pane INPUT probes (the editor seam):** VX-429 (selection at the caret —
+  instrumented trace first) + VX-592 (drag a selection out of the live editor — probe: focused
+  live editor vs read-tier panes). Both probe-first: the pin is the confirm; green means
+  record-only.
+- **BATCH B — the board and its doors:** VX-428 (the session memory, R-601-2, her measurements +
+  landing proof) + VX-577 (the expand-all gate in slot split) + VX-594 (both doors, R-601-4).
+- **BATCH C — bars, chrome, wording, the bounded flake:** VX-427 (the focused-take count,
+  R-601-3) + VX-574 (the font) + VX-586 (block i/N — route through `BlockLineLabel`, the one
+  wording brain; the bar's context label already uses it, 13g R5-4) + VX-321 (the receipt word) +
+  VX-337 (BOUNDED: one timeboxed trace under whole-target load; findings to the ticket either way).
 
-Order: A first (the launch gate), then B, then C — C is light enough to fold into B's session only
-if B lands small; default is three fresh sessions. The ladder runs ONCE over the run's whole diff
-(fable-reviewer, `notes/REVIEW_PROMPT.md` verbatim, zero framing), rounds per the skill.
+Order: A (the launch gate) → A2 → B → C. Fresh implementer per batch. The ladder runs ONCE over
+the run's whole diff (fable-reviewer, `notes/REVIEW_PROMPT.md` verbatim, zero framing), rounds per
+the skill.
 
 ## The ledger (every row owned; statuses live here)
 
 | # | Item | Status |
 |---|---|---|
-| 1 | VX-421 crash fix + pins | NOT-STARTED (batch A) |
-| 2 | VX-429 instrumented probe → fix or record | NOT-STARTED (batch A) |
-| 3 | VX-428 session memory + measurements + landing proof | NOT-STARTED (batch B) |
-| 4 | VX-577 expand-all in slot split | NOT-STARTED (batch B) |
-| 5 | VX-594 probe → her door ruling → build | NOT-STARTED (batch B; ruling at the sitting) |
-| 6 | VX-427 focused-take count (+ her call on the cycle face) | NOT-STARTED (batch C) |
-| 7 | VX-574 font weight | NOT-STARTED (batch C) |
-| 8 | VX-586 "block i/N" | NOT-STARTED (batch C) |
-| 9 | The kickoff sitting record | PENDING — asked 2026-10-27 |
-| 10 | The ladder (whole-diff, fable-reviewer) | NOT-STARTED |
-| 11 | Closeout (canon deltas · #245 bundle · tickets · handoff) | NOT-STARTED |
+| 1 | VX-421 crash fix (per-pane undo) + pins | NOT-STARTED (batch A) |
+| 2 | VX-248 bound-take adoption + VX-222/227 pins green | NOT-STARTED (batch A) |
+| 3 | VX-429 instrumented probe → fix or record | NOT-STARTED (batch A2) |
+| 4 | VX-592 drag probe → fix or record | NOT-STARTED (batch A2) |
+| 5 | VX-428 session memory + measurements + landing proof | NOT-STARTED (batch B) |
+| 6 | VX-577 expand-all in slot split | NOT-STARTED (batch B) |
+| 7 | VX-594 the […] door + caret-following ⌘T | NOT-STARTED (batch B) |
+| 8 | VX-427 focused-take count | NOT-STARTED (batch C) |
+| 9 | VX-574 font weight | NOT-STARTED (batch C) |
+| 10 | VX-586 "block i/N" via BlockLineLabel | NOT-STARTED (batch C) |
+| 11 | VX-321 receipt wording | NOT-STARTED (batch C) |
+| 12 | VX-337 bounded flake trace | NOT-STARTED (batch C; bounded, her word) |
+| 13 | The kickoff sitting record | DONE 2026-10-27 (R-601-1…6) |
+| 14 | The ladder (whole-diff, fable-reviewer) | NOT-STARTED |
+| 15 | Closeout (canon deltas · the #245 bundle · tickets · handoff) | NOT-STARTED |
 
 ## Environment traps (every batch brief carries this section verbatim)
 
@@ -248,14 +294,34 @@ seating. The VX-170 road (per-note session memory on `EditorRouter`), citing R-V
 verbatim perf requirement rides batch B (the seeded-remount measurement + the landing/scroll
 proof). The ticket leaves Needs Lillian at the batch's start.
 
-**VX-427 — her clarification (verbatim):** *"I think the whoel idea was to beable to count the
-take that you're typing in - is that not what is being done? why is the take face in the bar's
-shared click cycle an option ?"* — Answered: the fix IS exactly that (the bar's existing "Nw take"
-unit counts the focused pane's take); the cycle face was the scout's optional extra, recommended
-dropped. Her confirm is batch 2 of the sitting.
+**R-601-3 (VX-427, settled across three asks):** the bar follows the caret — the existing "Nw take"
+unit counts the take being typed in (the focused pane's own take, never the column's pick), per
+keystroke. The click-cycle take face is DROPPED; the per-card always-visible count was offered and
+DECLINED (her pick of "Bar follows caret"). Her clarifying words, verbatim: *"I think the whoel
+idea was to beable to count the take that you're typing in - is that not what is being done? why is
+the take face in the bar's shared click cycle an option ?"* and *"what if the count fix exactly ?
+where do you see the take unit? this is so you can easily see how many words each take is at"* —
+both answered in the sitting (the unit lives in the Takes bar's trailing counts cluster,
+`TakesBottomBar.swift` `wordCounts`; the bug is `resolvedTake(column:slot:)` at `:612-618`).
 
-**VX-594 — her lean + question (verbatim):** *"I think the menu door + caret following makes the
-most sense - by that, do you mean if your caret is in a particular take the keyboard shortcuts
-will work for that too?"* — Answered yes (⌘T / New Take (Branch) and the take-scoped doors resolve
-to the focused pane's take when the caret sits in one, chosen take otherwise); her confirm of that
-exact semantics is batch 2 of the sitting.
+**R-601-4 (VX-594):** BOTH doors — the take card's […] menu gains "New branched take"
+(registry-declared, the `.surface` case, acts on the named take), AND ⌘T / the take-scoped branch
+doors follow the caret: the focused pane's take is the branch parent when the caret sits in one;
+no focus falls back to today's chosen-take behavior. Her words: *"I think the menu door + caret
+following makes the most sense - by that, do you mean if your caret is in a particular take the
+keyboard shortcuts will work for that too?"* — confirmed as exactly that semantics, her pick
+"Yes, both as described".
+
+**R-601-5 (cast):** standing default confirmed — Fable orchestrates + `fable-reviewer` on the whole
+run diff; fresh `opus-implementer` per batch at xhigh; cross-model ladder rules.
+
+**R-601-6 (riders):** ALL FOUR seated as sub-issues — VX-592 (drag from the live editor,
+probe-first), VX-248 (the stale-live-pane root fix — HER RULED bend of P-3's never-adopt rule,
+QUESTIONS #217's "I think that we should probably fix it"; pins VX-222/VX-227 stay green and become
+redundant-by-construction), VX-321 (the receipt wording one-liner), VX-337 (the two load-dependent
+Takes flakes) — VX-337 with BOUNDED effort, her words: *"id try on 337 but bound your efforts on
+that one"* — one timeboxed trace under whole-target load; if it doesn't yield, the findings land on
+the ticket and it stays open, no heroics.
+
+**The run after the sitting: twelve members.** VX-421 · VX-427 · VX-428 · VX-429 · VX-574 ·
+VX-586 · VX-594 · VX-577 · VX-592 · VX-248 · VX-321 · VX-337.
