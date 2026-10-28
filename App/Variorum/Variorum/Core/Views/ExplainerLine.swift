@@ -24,7 +24,21 @@ struct ExplainerLine: View {
     /// The whole explanation, shown in the (i)'s popover.
     let detail: String
     var font: Font = .caption
+    /// **A VOICED host's tokens** (VX-431, the VX-440 run — Block History's
+    /// region lines adopt this idiom). Given, the line speaks in the voice —
+    /// the voice's small type and faint ink, its chrome casing — the rule the
+    /// pane's own lines already keep (`CommitsPageLedgerTests`' precision 6:
+    /// no system caption between mono rows). Nil — every Settings host — is
+    /// the token-free form, byte for byte. The STORED strings stay raw either
+    /// way; the voice is applied where they are drawn.
+    var tokens: VoiceTokens? = nil
     @State private var showing = false
+
+    private var lineFont: Font { tokens?.small ?? font }
+    private var lineInk: AnyShapeStyle {
+        tokens.map { AnyShapeStyle($0.faint) } ?? AnyShapeStyle(.secondary)
+    }
+    private func voiced(_ text: String) -> String { tokens?.chromeLabel(text) ?? text }
 
     /// The (i)'s name — its help tag and what VoiceOver says (PROVISIONAL
     /// words — VX-234).
@@ -40,9 +54,9 @@ struct ExplainerLine: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Text(line)
-                .font(font)
-                .foregroundStyle(.secondary)
+            Text(voiced(line))
+                .font(lineFont)
+                .foregroundStyle(lineInk)
                 // P-8: one line, by her ruling — the whole text is one press
                 // away, so the summary never wraps (and never measures one
                 // character per line under a probe).
@@ -53,15 +67,15 @@ struct ExplainerLine: View {
                     showing.toggle()
                 } label: {
                     Image(systemName: "info.circle")
-                        .font(font)
-                        .foregroundStyle(.secondary)
+                        .font(lineFont)
+                        .foregroundStyle(lineInk)
                 }
                 .buttonStyle(.borderless)
                 .help(Self.moreLabel)
                 .accessibilityLabel(Self.moreLabel)
                 .popover(isPresented: $showing, arrowEdge: .bottom) {
-                    Text(detail)
-                        .font(.callout)
+                    Text(voiced(detail))
+                        .font(tokens?.body ?? .callout)
                         .textSelection(.enabled)
                         // P-8, deliberate: the WHOLE explanation — truncating
                         // it would undo the very cut the line made.

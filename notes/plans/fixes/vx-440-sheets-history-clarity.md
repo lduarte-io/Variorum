@@ -492,7 +492,31 @@ Pieces (flipped per commit):
   `aLockedOrArchivedSourceStillBringsItsMomentBack`. No new `OperationError` case (the wire-refusal sweep
   untouched); not wire-called (no MCP change). A NEW NAMED OPERATION → AppSpec §9 owes a line at closeout
   (the plan's FOR THE CLOSEOUT already names it). DONE (this commit).
-- B2-6 the pane at rest: calm one-line rows that expand; explainers behind (i); header counts: NOT STARTED.
+- B2-6 the pane at rest: calm one-line rows that expand; explainers behind (i); header counts.
+  `BlockHistoryPane.swift`: `CommitRowView` RESTS as ONE line — the stamp (`CommitRowFace.stamp`, never
+  truncates) · the name (when named, one line) · the quiet glyph (`◦` on an automatic commit only — a
+  deliberate one earns none, VX-144's rule) — the whole line but Restore is the press that opens the row
+  (`openCommits`, session state; hover "Show more/less of this commit"); Restore stays at the line's end
+  (her "Restore per row"). OPEN adds the longer capped preview (`CommitRowFace.expandedPreview`:
+  paragraphs kept, leading blanks dropped, 600-char cap, 8 lines, no ellipsis of its own), the details
+  words (`notes`: "quiet" · "predates a split" — the stamp is on the line), and the row's other doors
+  "Read in full" (wired in B2-7) · Name/Rename. Region headers: `HistoryRegionHeader` (title + COUNT —
+  `BlockHistoryModel.commitCount` = every moment of every live take; archived/deleted/came-from counts)
+  over an `ExplainerLine` whose short line is new Mac-local copy (`BlockHistoryPath.savepointsLine` etc.)
+  and whose (i) holds the SHIPPED sentence verbatim; `ExplainerLine` gains an optional `tokens` (voiced:
+  small type, faint ink, chrome casing — nil = every Settings host byte-identical). Empty regions stay
+  hidden. Pins (Mac, compiled ✓ `build-for-testing` `DerivedData/vx440-b2`, RUNS PENDING): NEW
+  `BlockHistoryClarityTests.theRegionHeadersCarryCountsAndOneLineEachWithTheWholeBehindAnI`,
+  `.anEmptyRegionDrawsNoHeader`; `CommitsPageLedgerTests` — TWO JUSTIFIED PIN EDITS (VX-144's resting
+  preview and three-line row retired by the design's item 1; each edit's doc names what of VX-144 it
+  still holds): `thePreviewIsTheFirstParagraph…` → `theOpenPreviewKeepsParagraphsCapsAndAddsNoEllipsisOfItsOwn`;
+  `theRowIsCompactAndItsActsAreWords` (rest: one voiced word, ≤ 34 pt named or bare — an ESTIMATE, the
+  run prints the heights; open: three voiced words, taller); NEW
+  `theRestingLineSaysWhenTheNameAndTheQuietGlyphOnly`. Unchanged and expected green:
+  `BlockHistoryPaneTests` (its region pin reads the raw sentences the new header stores),
+  `CommitsPageLedgerTests.theDetailsLineSaysOnlyWhatTellsCommitsApart` (`details` kept — the sheet's
+  subtitle), `.theCommitsPageDrawsNoBezels`, `.theDefiningSentenceSurvivesAndThePaneBlurbIsGone`.
+  DONE (this commit).
 - B2-7 read in full (the sheet) + Bring back as a take (the door, the receipt): NOT STARTED.
 - B2-8 restore says where it landed (the landing + the overlay wash): NOT STARTED.
 - B2-9 verification (headless) + the record closed: NOT STARTED.
