@@ -97,7 +97,7 @@ LIVE STATUS (per piece):
 - B1-6 — close: `swift test` green on touched core; app-target/walk needs listed; self-assessment: NOT-STARTED.
 - B1-7 — the A-648-2 rider (narrow the badge's observation): NOT-STARTED — judged after the index lands.
 
-Revert state: no behavioral revert in flight.
+Revert state: **BEHAVIORAL REVERT STARTING (2026-10-28)** — v1_34's `CREATE INDEX` body is about to be replaced by a no-op in `Sources/VariorumCore/Persistence/Migrations.swift` (working tree only, never committed). Restore point: the committed tree at c63f2e67c — `git checkout -- Sources/VariorumCore/Persistence/Migrations.swift` restores it exactly. Expected while reverted: `TrayBadgeP1Tests` 3/3 RED (and `MigrationTests`' index-set pins red — the index is absent).
 
 ### VX-647 TRACE (2026-10-28)
 
