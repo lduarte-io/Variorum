@@ -912,3 +912,94 @@ enforce). (2) The trashed walk note ("vx601 walk note", holding her URL) *"can b
 forever"* — **a standing duty for this run's NEXT window that launches the Debug app**: Trash ▸
 that one note ▸ Delete forever, NOTHING ELSE, named in that window's RELEASE line. If no later
 window launches the app, the coordinator folds it into a short window of its own.
+
+## BATCH A2 RECORD — pane INPUT probes: VX-429 + VX-592 (implementer: opus-implementer, 2026-10-27)
+
+**NOT DONE (first line, kept current):** everything below the trace is IN PROGRESS — the pins,
+the fix, the builds; every red/green claim is a PREDICTION, PENDING the orchestrator's suite
+window (this session never runs `xcodebuild test`, never launches the app, never claims the
+stage); the USE walk (rows below, an Opus walker under the orchestrator's claim); the cold ladder.
+No behavioural revert is in flight.
+
+**LIVE STATUS**
+- Reading — DONE: this file (members VX-429/VX-592, batches, ENVIRONMENT TRAPS, BATCH A RECORD +
+  its rig diagnosis, the ORCHESTRATOR ADDENDUM incl. O-3 and her clipboard word),
+  `notes/TEXTKIT2_NOTES.md` in full, `notes/SurfaceContracts.md` "The note",
+  `notes/SessionResiliencyProtocol.md`; code: `Surface/PaneSurface.swift` (whole), the Takes hosts
+  (`TakesShared.swift` cell, `TakesBoardView.swift` article/mini/card panes + gestures),
+  `TakesViewModel.notePaneSelection`, `EditorTextView.mouseDown`, `PaneFocusCatcher`,
+  `PressReporter`, the shared caret settle (`MarkdownCaretRescue`, `MarkdownFace.settleCaret`),
+  the rigs (`PaneLifecycleTests`, `EditorTestSupport`, `TakePaneMeasureTests`' click). Linear was
+  unreachable from this session (re-auth) — the ticket bodies were read from this file only.
+- Trace — DONE (below): the PROBE (13 standalone offscreen binaries) found ONE AppKit mechanism
+  that is BOTH members' symptom; the scout's hypothesis is FALSIFIED by measurement.
+- Pins — IN PROGRESS (`VariorumTests/CaretPressTests.swift`).
+- Fix — NOT STARTED (the settled design below).
+- Builds / red-green / walk — PENDING.
+
+**THE PROBE (standalone `swiftc` binaries in the session scratchpad, copies kept in the gitignored
+`App/Variorum/DerivedData/a2probe/` — never the app, no store, no screen: windows at −20 000 never
+ordered in; mouse events built with `NSEvent.mouseEvent` and QUEUED with `NSApp.postEvent` — never
+a CGEvent, never the real pointer; every drag door intercepted, no pasteboard written). macOS
+27.0.1, Swift 6.4, TK2 `NSTextView` unless said:**
+1. *During a drag NO selection notification is posted* — one `textViewDidChangeSelection`, at the
+   mouse-up (AppKit's `stillSelecting: YES` contract), for a press at the caret AND elsewhere. The
+   scout's mechanism ("the first notification lands MID-DRAG… the VX-296 settle → `remeasure()`
+   inside the tracking loop") cannot occur: there is no mid-drag notification for the settle to
+   ride. **FALSIFIED.** (Suspect 2, the same-value `isEditable`/`noteLiveness` writes, needs an
+   update pass mid-drag; nothing posts one — not pursued.)
+2. *A text view that OVERRIDES `mouseDown` is on AppKit's CLASSIC mouse road*: a bare TK2
+   `NSTextView` carries 9 gesture recognizers (click/press recognizers, `_NSTextSelectionTouchTracker`
+   — the gesture-driven selection road), a `mouseDown`-overriding subclass carries NONE. Both
+   Variorum surfaces that this batch touches override `mouseDown` — `PaneTextView` (every pane: the
+   Takes cards and article, Lenses, Compare, the Write take panel, Canvas, the workbench, Read ▸ edit,
+   the book Index, the read tier) and `EditorTextView` (Write) — so BOTH are on the classic road.
+   (`CaptureNSTextView`/`CommentNSTextView` do not override it — the gesture road, unmeasured.)
+3. **THE MECHANISM.** On the classic road, an EMPTY selection (a caret at `c`) whose caret has
+   SETTLED (one run-loop turn after it was placed — the `NSTextInsertionIndicator` arrives then;
+   "set + display" alone does not do it) counts as COVERING THE CHARACTER AFTER IT: a press anywhere
+   on character `c`'s glyph box (measured: x from char 12's leading edge to char 13's, 83.8…91.5 pt,
+   both affinities) is a press INSIDE THE SELECTION — and a press inside the selection that is HELD
+   before moving (≥ ~0.15–0.2 s; 0.03–0.1 s still selects) begins a TEXT DRAG of the selection
+   (`dragSelection(with:offset:slideBack:)` is asked, with `{c, 0}`). AppKit's own `dragSelection`
+   answers `false` for the empty selection at once (no drag image, no pasteboard, no session —
+   every door intercepted, none reached), AppKit consumes the rest of the gesture, and NOTHING
+   HAPPENS: no selection, the caret stays, no notification. A press on the character BEFORE the
+   caret, past the line's end (a caret before `\n`), at the text's end, or on a non-empty
+   selection's neighbours selects normally; double/triple clicks select normally; a quick
+   press-and-move (< ~0.1 s hold) selects normally — which is why it reads as "sometimes".
+   **TK1 never does it** (same probe, `usingTextLayoutManager: false`: every case selects). Editable
+   or not, key window or not, as a scroll view's document or not: the same.
+4. So **VX-429's symptom exactly**: a drag starting at the caret's own position (on its right side,
+   *[removed for publication]*
+   *"when I try to drag a highlight from where my cursor is currently typing, it doesn't work"*: a
+   drag-to-highlight STARTING AT THE CURSOR, in the live editor; the read panes "work" because they
+   show no caret, so nobody presses on one (a read pane keeps a settled invisible selection —
+   VX-296 — and the same press on it fails the same way, unseen). **"Write is fine" is predicted
+   FALSE**: `EditorTextView` is on the same road; the Write pin decides (if it is green on old,
+   VX-592's Write half is hollow and its fix is withdrawn).
+5. *The other reading of VX-592* (drag-AND-DROP of an already-selected span out of the live pane):
+   the source road is IDENTICAL live and read — a press inside a non-empty selection held past the
+   delay asks `dragSelection` on both, and AppKit's own `dragSelection` reaches the session door
+   (the deprecated `dragImage:at:offset:event:pasteboard:source:slideBack:`, refused in the probe)
+   for an editable and a non-editable view alike. No source-side asymmetry exists to fix. The one
+   live/read asymmetry left is the DESTINATION — only the live pane is editable (P-3), so a drop onto
+   any read pane is refused by construction; a real drag session is needed to see it (a staged
+   window) and whether read panes should accept drops is a product call (below, for #245).
+6. *Levers measured* (a fresh settled caret per case): re-setting the SAME selection (silently or
+   not), re-assigning `textSelections`, `updateInsertionPointStateAndRestartTimer` — all still drag
+   nothing; declining `dragSelection` (returning false) — AppKit does NOT fall back to selecting.
+   **Only moving the empty selection off the pressed character, silently (`stillSelecting: true`),
+   in the same turn as `super.mouseDown`, works**: the press selects, a plain click on the caret
+   still ends at `{c, 0}` with exactly ONE notification (identical to before), no extra notification.
+
+**THE SETTLED DESIGN (the fix — one rule, two surfaces):** a pure rule (`Surface/CaretPress.swift`)
+and one wire each surface calls immediately before `super.mouseDown`: on a PLAIN single click (no
+modifiers, `clickCount == 1`, no marked text) while the selection is ONE empty range at `c < length`
+and the press lands on either character beside the caret (`characterIndex(for:)` ∈ {c−1, c} — the
+measured zone plus the boundary pixel; firing on `c−1` is harmless, measured), the caret is moved
+silently to the far edge of the composed character at `c` (`stillSelecting: true` — no
+notification), and AppKit's own tracking then does exactly what it does anywhere else. Nothing else
+moves: a non-empty selection, a ⇧/⌘/⌥/⌃ click, a double click, a press elsewhere never reach the
+lever; no storage or attribute write; no new liveness or selection authority (P-3); cost one
+`characterIndex(for:)` per qualifying click (P1).
