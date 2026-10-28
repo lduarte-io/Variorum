@@ -317,7 +317,7 @@ Batch duties: per-member pins; the follow-brain extension keeps VX-562's pins gr
 | L-1 | Workspace seated, branch pushed, in-flight row landed on main | DONE (f7331583b + the in-flight commit) |
 | L-2 | VX-648 In Progress; roster listed (17) | DONE 2026-10-28 |
 | L-3 | Batch 1 (VX-647 + VX-649) | **DONE 2026-10-28** — headless (3d520950c: v1_34 partial dead-placement index, 4 pins revert-verified; VX-649 same cause; residual → VX-655, finds → VX-653/654, rider evidence → VX-618) + the app tray suites (50 tests / 5 suites, the SEAM window) + WALK 1 GREEN (76d11b33c: carve flat across 0→305 deleted blocks, worst ⏎ 88.7 ms; list exit 74–99 ms with VX-655's one 50–67 ms frame; posture restored line by line). Walk observations for the bundle are in WALK 1 RESULT. |
-| L-4 | Batch 2 (MCP door, 7 members) | NOT-STARTED |
+| L-4 | Batch 2 (MCP door, 7 members) | **BUILT 2026-10-28** on headless evidence (closed 15bf9f7c2, tip d1af239e6; all seven members done — VX-606 schema check, VX-626 close-stamp, VX-612 retry/fail-loud, VX-639 gathering book-acts + A-648-5, VX-640 /mcp + 3,100, VX-641 one-fact row visibility, VX-367 lesson 3; suites core 3,494/468 + MCP 457/84 + Strings 32/4, code-complete at the suite's tree). OWED: the batch 2 app-suite window (the record's list; DerivedData/b2 prebuilt) + walk legs W1–W5; her bundle carries B2-P1…P5 and the sentence sheet. |
 | L-5 | Batch 3 (wings/stars/keys, 4 members) | NOT-STARTED |
 | L-6 | Batch 4 (book navigator & small fixes, 4 members) | NOT-STARTED |
 | L-7 | Re-list the roster before the ladder | NOT-STARTED |
