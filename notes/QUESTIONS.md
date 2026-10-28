@@ -3725,4 +3725,4 @@ trace) · the chapter mark's composition (accent fill at 22%, the name in INK �
 layer's 4.5 floor in Terminal light). RIDERS still open while the code is warm: VX-96 · VX-616 · VX-563. FILED and
 triaged: VX-624 (the pre-existing 4-s landing watchdog spin, Suspected) · VX-629 (the follower wiring consolidates,
 Debt) · VX-630 (Index → Outline carry loses the caret's block, pre-existing Confirmed) · VX-631 (the "12 storys"
-receipt, Wording).
+receipt, Wording). **Status on the headline item, 2026-10-27 (her word, same evening): P-562-8 waits on her LIVE look — "hmm i'll have to see this live before deciding, good to have it noted though." As-built (the symmetric 8-pt band) stands until she rules; the wider leave-band remains the recorded alternative.**
