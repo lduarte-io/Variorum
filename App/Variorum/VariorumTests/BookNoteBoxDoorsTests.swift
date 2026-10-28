@@ -817,6 +817,169 @@ struct BookCarryLiveBlockTests {
     }
 }
 
+// MARK: - VX-630 — Index → Outline carries her block back
+
+/// **VX-630 (Bug · Confirmed — VX-562's ladder r1 finding 12, seen live at its
+/// walk 2 leg 8):** an Outline → Index → Outline round trip moved the caret
+/// from block 2 to block 1 of the live note. The mechanism: `BookAnchor
+/// .landing`'s `.index` arm carried only the NOTE (VX-304 built the Outline →
+/// Index direction alone), and the departing Index's live pane was never read
+/// (`switchMode` read only the full-document editor, which Index never mounts),
+/// so the Outline's editor re-mounted on the bare focus's seed — the note's
+/// start. The fix: the Index's live block rides the carry, and an arrival in
+/// Outline focuses the note AT it (the offset from the note's one memory).
+///
+/// RED ON OLD (behavioural revert: the `.index` arm back among the note-only
+/// arms): the pure arm, the model's focus-at-block, and both mounted roads.
+@Suite("VX-630 — the click-over from Index back to Outline keeps her block", .serialized)
+@MainActor
+struct BookIndexCarryBlockTests {
+    /// The rule, pure: leaving INDEX with its live pane in the carried note
+    /// names the pane's block; a pane in another note, or none, carries the
+    /// note alone — VX-304's outline arm, mirrored.
+    @Test func leavingIndexNamesItsLivePanesBlock() {
+        var place = BookAnchor.Place(standingPostID: "X")
+        place.livePostID = "X"
+        place.liveBlockID = "b2"
+        #expect(BookAnchor.landing(mode: .index, readForm: .flow, place: place)
+                == LandingTarget(postID: "X", blockID: "b2"),
+                "RED ON OLD: the Index's live block rides the carry")
+        var selected = place
+        selected.indexPostID = "X"
+        #expect(BookAnchor.landing(mode: .index, readForm: .flow, place: selected)
+                == LandingTarget(postID: "X", blockID: "b2"), "her selection is the live note")
+        var other = place
+        other.livePostID = "Y"
+        #expect(BookAnchor.landing(mode: .index, readForm: .flow, place: other)
+                == LandingTarget(postID: "X"), "a pane in ANOTHER note is not this note's block")
+        var nothingLive = place
+        nothingLive.liveBlockID = nil
+        #expect(BookAnchor.landing(mode: .index, readForm: .flow, place: nothingLive)
+                == LandingTarget(postID: "X"), "nothing live ⇒ the note alone")
+    }
+
+    /// The model: a carry from Index INTO Outline focuses the note at the
+    /// block, the offset the note's memory holds for THAT block; into any other
+    /// mode it only parks the landing, and a memory naming another block lands
+    /// at the block's start.
+    @Test func theCarryIntoOutlineFocusesTheNoteAtHerBlock() async throws {
+        try await withTakesBook { session, _, book in
+            let x = book.postIDs[0]
+            let second = book.blocks[x]![1]
+            let model = BookViewModel(session: session, readingID: book.readingID)
+            await model.adopt(book.postIDs.map {
+                Queries.ReadingEntry(postID: $0, title: nil, entryDate: nil, sectionPath: nil)
+            })
+            model.noteIndexAnchor(x)   // her selection in the Index — the carry's note
+            session.commandRouter.noteFocusedBlock(
+                second, variantID: book.variants[x]![1], postID: x, utf16Offset: 9,
+                remembersOtherNotes: true)
+
+            model.carryPlace(
+                from: .index, to: .spread, readForm: .flow, livePostID: x, liveBlockID: second)
+            #expect(model.pendingLanding == LandingTarget(postID: x, blockID: second),
+                    "RED ON OLD: the Index's block rides the carry")
+            #expect(model.focusedPostID == nil && model.caretBlockSeed == nil,
+                    "into the spread: the landing only — no focus")
+            model.consumeReveal()
+
+            model.carryPlace(
+                from: .index, to: .outline, readForm: .flow, livePostID: x, liveBlockID: second)
+            #expect(model.focusedPostID == x, "RED ON OLD: arriving in Outline, the note is focused")
+            #expect(model.caretBlockSeed
+                    == FocusedBlock(postID: x, blockID: second, utf16Offset: 9),
+                    "RED ON OLD: at her block, at the memory's offset (\(String(describing: model.caretBlockSeed)))")
+            model.consumeReveal()
+
+            session.commandRouter.noteFocusedBlock(
+                book.blocks[x]![2], variantID: book.variants[x]![2], postID: x, utf16Offset: 4,
+                remembersOtherNotes: true)
+            model.carryPlace(
+                from: .index, to: .outline, readForm: .flow, livePostID: x, liveBlockID: second)
+            #expect(model.caretBlockSeed
+                    == FocusedBlock(postID: x, blockID: second, utf16Offset: nil),
+                    "a memory naming another block ⇒ the block's start")
+
+            model.focus(x)
+            #expect(model.caretBlockSeed == nil, "any other focus clears the block seed")
+        }
+    }
+
+    /// **THE PIN, her road (walk 2 leg 8).** Her caret in Outline in block 2,
+    /// nine characters in; the mode tabs go to Index (block 2 arrives live at
+    /// 9 — VX-304) and back to Outline: the Outline's editor reopens IN block
+    /// 2 at 9, never at the note's start.
+    ///
+    /// RED ON OLD: the caret at block 1, offset 0 (the bare focus's seed).
+    @Test func outlineToIndexAndBackKeepsHerBlockAndCaret() async throws {
+        try await withTakesBook { session, db, book in
+            let x = book.postIDs[0]
+            let second = book.blocks[x]![1]
+            let chosen = book.variants[x]![1]
+            let inside = 9
+            let mounted = try await mountBook(session, db, book, mode: .outline)
+            defer { mounted.close(book.readingID) }
+            try await makeBlockTwoLive(mounted, session, db, book, mode: .outline, inside: inside)
+#if DEBUG
+            let modeDoor = try #require(
+                BookOutlineGeometry.modeDoors[book.readingID], "the book published its mode door")
+            modeDoor(.index)
+            await settle(mounted.window, mounted.hosting, until: {
+                indexPane(chosen, in: mounted.hosting)?.selectedRange().location == inside
+            }, maxTurns: 240)
+            #expect(indexPane(chosen, in: mounted.hosting)?.selectedRange().location == inside,
+                    "the premise: block 2 arrived live in the Index at \(inside) (VX-304)")
+
+            modeDoor(.outline)
+            await settle(mounted.window, mounted.hosting, until: {
+                guard let editing = session.editorRouter.editing, editing.postID == x,
+                      let place = editing.caretIdentity()
+                else { return false }
+                return place.blockID == second && place.offset == inside
+            }, maxTurns: 240)
+            #expect(mounted.structure.mode == .outline, "the click-over arrived back in Outline")
+            let place = session.editorRouter.editing?.caretIdentity()
+            #expect(session.editorRouter.editing?.postID == x, "the note is live in the Outline")
+            #expect(place?.blockID == second,
+                    "RED ON OLD: the Outline reopens in block 2, not the note's start — \(String(describing: place))")
+            #expect(place?.offset == inside, "…at her caret (\(inside)) — \(String(describing: place))")
+#endif
+        }
+    }
+
+    /// The other road in: a book working in INDEX, her caret in block 2 there
+    /// (nothing focused in the Outline); the mode tabs go to Outline, which
+    /// arrives with the note LIVE at her block and caret.
+    ///
+    /// RED ON OLD: the Outline lands the note's row and nothing is live.
+    @Test func indexToOutlineArrivesWithHerBlockLive() async throws {
+        try await withTakesBook { session, db, book in
+            let x = book.postIDs[0]
+            let second = book.blocks[x]![1]
+            let inside = 9
+            let mounted = try await mountBook(session, db, book, mode: .index)
+            defer { mounted.close(book.readingID) }
+            try await makeBlockTwoLive(mounted, session, db, book, mode: .index, inside: inside)
+            #expect(mounted.model.focusedPostID == nil, "the premise: nothing focused in the Outline")
+#if DEBUG
+            let modeDoor = try #require(
+                BookOutlineGeometry.modeDoors[book.readingID], "the book published its mode door")
+            modeDoor(.outline)
+            await settle(mounted.window, mounted.hosting, until: {
+                guard let editing = session.editorRouter.editing, editing.postID == x,
+                      let place = editing.caretIdentity()
+                else { return false }
+                return place.blockID == second && place.offset == inside
+            }, maxTurns: 240)
+            #expect(mounted.model.focusedPostID == x, "RED ON OLD: the carried note is live")
+            let place = session.editorRouter.editing?.caretIdentity()
+            #expect(place?.blockID == second && place?.offset == inside,
+                    "RED ON OLD: at her block and caret — \(String(describing: place))")
+#endif
+        }
+    }
+}
+
 // MARK: - The ladder's R1-1 — D-2's class, the departing INDEX
 
 /// Forty one-block notes in one book (a realistic card preview each — the

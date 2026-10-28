@@ -45,8 +45,11 @@ nonisolated enum BookAnchor {
         var standingPostID: String?
         /// VX-304: Outline's LIVE note and the block her caret stands in —
         /// read from the editor under the caret at the switch (`BookView
-        /// .switchMode`), only when it is the book's live note. nil ⇒ no
-        /// caret to carry (nothing live, the open tail, any other mode).
+        /// .switchMode`), only when it is the book's live note. VX-630: the
+        /// INDEX's live note and block when the departing mode is Index (its
+        /// one live pane is the block her caret stands in — reported to the
+        /// book as `indexLivePostID` / `indexLiveBlockID`). nil ⇒ no caret to
+        /// carry (nothing live, the open tail, any other mode).
         var livePostID: String? = nil
         var liveBlockID: String? = nil
     }
@@ -92,11 +95,16 @@ nonisolated enum BookAnchor {
     /// and, leaving OUTLINE with her caret live in that very note, the BLOCK
     /// her caret stands in — so Outline → Index arrives with that block live
     /// (the Index consumes block landings: `BookIndexView.landOrSeed`, the
-    /// Read click's road, row 38). Every other arm carries the note alone,
-    /// exactly as before. The caret's OFFSET is not this value's: it travels
-    /// on the note's one memory (`CommandRouter.currentBlock`, R-U1a-1), and
-    /// the Index's landing enters the remembered block at it
-    /// (`PaneCaretLanding.entering`).
+    /// Read click's road, row 38). **VX-630 — and the way back:** leaving
+    /// INDEX with its live pane in that very note names the pane's block, so
+    /// Index → Outline reopens at her block rather than the note's start (the
+    /// Outline consumes it as a focus at the block — `BookViewModel
+    /// .carryPlace`). The spread and Read arms carry the note alone, exactly
+    /// as before. The caret's OFFSET is not this value's: it travels on the
+    /// note's one memory (`CommandRouter.currentBlock`, R-U1a-1), and each
+    /// landing enters the remembered block at it (`PaneCaretLanding.entering`
+    /// in the Index; `EditorViewModel.rememberedArrivalLanding` in the
+    /// Outline's editor).
     static func landing(
         mode: BookStructureModel.ViewMode,
         readForm: BookStructureModel.ReadForm,
@@ -108,12 +116,12 @@ nonisolated enum BookAnchor {
         // A `switch`, not `==`: `ViewMode`'s synthesized `Equatable` is
         // isolated (this file's header names the reason).
         switch mode {
-        case .outline:
+        case .outline, .index:
             guard place.livePostID == post, let block = place.liveBlockID else {
                 return LandingTarget(postID: post)
             }
             return LandingTarget(postID: post, blockID: block)
-        case .spread, .read, .index:
+        case .spread, .read:
             return LandingTarget(postID: post)
         }
     }

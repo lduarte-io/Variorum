@@ -503,6 +503,13 @@ final class BookViewModel {
     /// editor remembers the one and never the other (`EditorView`'s
     /// `caretSeedIsHers`).
     private(set) var caretSeedIsHers = false
+    /// **VX-630 — a BLOCK-precise caret seed**: the carry's way back from the
+    /// Index (`focus(_:atBlock:)`). The editor resolves it against its own
+    /// index at birth — the block's start plus the note's remembered offset
+    /// there — because only the editor knows where a block sits in the
+    /// document; `caretSeed` (0) stands beneath it for a block the note no
+    /// longer holds. Every other focus clears it.
+    private(set) var caretBlockSeed: FocusedBlock?
     private(set) var fanSeed: String?
     /// The posts unfolded — Outline opens with its posts COLLAPSED.
     ///
@@ -1015,12 +1022,28 @@ final class BookViewModel {
         if postID != nil, !paneFocused { onPaneFocusRequest?() }
         caretSeed = postID == nil ? nil : (caret ?? 0)
         caretSeedIsHers = postID != nil && caret != nil
+        caretBlockSeed = nil
         fanSeed = fanBlock
         focusedPostID = postID
         if let postID {
             expandedPosts.insert(postID)
             ensureOutlineExtents()
         }
+    }
+
+    /// **VX-630 — focus a note AT a block** (the carry's way back from the
+    /// Index: her caret's block rides the click-over into the Outline, the
+    /// mirror of VX-304's Outline → Index). The offset is the note's one
+    /// memory when it names THIS block (R-U1a-1 — `PaneCaretLanding
+    /// .entering`'s rule, the Index's own road the other way), else nil —
+    /// the block's start. A bare focus beneath it (`caretSeed` 0) is the
+    /// fallback for a block the editor's index no longer holds.
+    func focus(_ postID: String, atBlock blockID: String) {
+        let remembered = session.commandRouter.currentBlock(for: postID)
+        focus(postID)
+        caretBlockSeed = FocusedBlock(
+            postID: postID, blockID: blockID,
+            utf16Offset: remembered?.blockID == blockID ? remembered?.utf16Offset : nil)
     }
 
     /// Unfold a collapsed post (the card's disclosure) — the deliberate act
@@ -1042,6 +1065,7 @@ final class BookViewModel {
             focusedPostID = nil
             caretSeed = nil
             caretSeedIsHers = false
+            caretBlockSeed = nil
             fanSeed = nil
         }
         // 13u2 UNIT A2: the card is about to show again, and the note may
@@ -1058,6 +1082,7 @@ final class BookViewModel {
         focusedPostID = nil
         caretSeed = nil
         caretSeedIsHers = false
+        caretBlockSeed = nil
         fanSeed = nil
         refreshCardPreviews(wereOpen)
     }
@@ -1211,12 +1236,23 @@ final class BookViewModel {
     /// focused and nothing read has no place to carry, and clearing the
     /// standing anchor there would throw away the last one she had.
     ///
-    /// VX-304: `livePostID`/`liveBlockID` — Outline's live note and the block
-    /// her caret stands in, read by the view from the editor under the caret
-    /// at the switch (the model holds no editor). nil ⇒ nothing to carry
-    /// beyond the note.
+    /// VX-304: `livePostID`/`liveBlockID` — the departing mode's live note and
+    /// the block her caret stands in (Outline's editor; VX-630: the Index's
+    /// live pane), read by the view at the switch (the model holds no
+    /// editor). nil ⇒ nothing to carry beyond the note.
+    ///
+    /// VX-630: `arriving` — the mode the switch is going TO, when the caller
+    /// knows it (the mode tabs do). Arriving in OUTLINE with a block, the
+    /// carried note goes live AT that block (`focus(_:atBlock:)`) — the
+    /// Outline's place IS its focus (`BookAnchor.currentPost`'s outline arm
+    /// reads `focusedPostID`), the mirror of the Index making the block live.
+    /// Done HERE, at the switch, rather than at the Outline's landing: the
+    /// focused row mounts its editor in the very update the mode changes in,
+    /// and an editor takes its seeds once, at birth (`EditorView`'s state).
     func carryPlace(
-        from mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm,
+        from mode: BookStructureModel.ViewMode,
+        to arriving: BookStructureModel.ViewMode? = nil,
+        readForm: BookStructureModel.ReadForm,
         livePostID: String? = nil, liveBlockID: String? = nil
     ) {
         var place = anchorPlace
@@ -1232,6 +1268,10 @@ final class BookViewModel {
         // and drops it (`consumeReveal`). A carry naming no block leaves the
         // slot exactly as it always did.
         if target.blockID != nil { pendingLanding = target }
+        // VX-630: …and the Outline consumes a block as a focus at it.
+        if arriving == .outline, let block = target.blockID {
+            focus(target.postID, atBlock: block)
+        }
     }
 
     /// An outside door (W20's ascent) asking this book to open AT a post.

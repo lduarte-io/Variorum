@@ -1389,10 +1389,11 @@ struct BookView: View {
     private func switchMode(to newMode: BookStructureModel.ViewMode) {
         guard newMode != structure.mode else { return }
         // VX-304: the click-over carries her BLOCK out of Outline too (Index
-        // arrives with it live — `BookAnchor.landing`).
+        // arrives with it live — `BookAnchor.landing`); VX-630: and out of
+        // Index (Outline arrives with it live — the carry's `to:`).
         let live = liveCaretBlock()
         model.carryPlace(
-            from: structure.mode, readForm: structure.readForm,
+            from: structure.mode, to: newMode, readForm: structure.readForm,
             livePostID: live?.postID, liveBlockID: live?.blockID)
         structure.mode = newMode
     }
@@ -1403,7 +1404,18 @@ struct BookView: View {
     /// — `openPlace`'s rule; `caretIdentity` is the editor's existing
     /// read-only answer, nil in the open tail). The model holds no editor, so
     /// the view hands it the fact.
+    ///
+    /// **VX-630 — leaving INDEX**, the fact is its one live pane's: the note
+    /// and block the pane holds, as the Index reports them to the book
+    /// (`noteIndexLive` / `noteIndexLiveBlock` — still current at the switch,
+    /// which runs before the Index disappears). Index mounts no full-document
+    /// editor, so the editor road above has nothing to say there.
     private func liveCaretBlock() -> (postID: String, blockID: String)? {
+        if structure.mode == .index {
+            guard let post = model.indexLivePostID, let block = model.indexLiveBlockID
+            else { return nil }
+            return (post, block)
+        }
         guard let live = model.liveFocusedPostID,
               let editor = session.editorRouter.editing, editor.postID == live,
               let block = editor.caretIdentity()?.blockID
@@ -3462,6 +3474,8 @@ private struct OutlinePostRow: View {
                                         session: session, postID: entry.postID, inline: true,
                                         caretSeed: model.caretSeed,
                                         caretSeedIsHers: model.caretSeedIsHers,
+                                        // VX-630: the carry back from the Index.
+                                        caretBlockSeed: model.caretBlockSeed,
                                         fanSeed: model.fanSeed,
                                         barPlacement: .inSidebarBox,
                                         gutter: gutter,
