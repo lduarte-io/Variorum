@@ -420,14 +420,20 @@ Pieces (flipped per commit):
   of this note"); its unmark → the P-440-5 confirm → promoted; a Versions row's "Compare with now"; File/
   note ▾/⌘K "Compare with Latest Version" present with a moment, absent/grey without; "Open full size" →
   the band over the calm page, no "this note" rail, ⌘⇧S grey; Back; Promote from the band.
-- Batch 2 (Block History): IN PROGRESS — implementer (Opus) 2026-10-28; UNIT RECORD below.
+- Batch 2 (Block History): BUILT HEADLESS — implementer (Opus) 2026-10-28; Mac-suite RUNS + the VX-244 red-on-old run + walk PENDING the stage window; UNIT RECORD below.
 
 ### Batch 2 — UNIT RECORD (Block History: VX-431 · riders VX-331 · VX-244)
 
-**Not done by this unit (first line, per the contract):** IN PROGRESS — the final list lands at close.
+**Not done by this unit (first line, per the contract):** nothing run on the stage — every Mac pin below
+is WRITTEN AND COMPILED (`build-for-testing` into `App/Variorum/DerivedData/vx440-b2`) with its RUN, the
+VX-244 red-on-old run at `c9d0b3c66`, and every walk capture (the pane at rest/open, the sheet, both
+landings, both voices) PENDING for the orchestrator's stage window; the core pins RAN headless (VX-331
+red-on-old verified at `c42ab4b84`, green at `fdde811b6`). NOT compiled for iOS (the shared
+`VersionActs.swift` only passes `session.now` through — the phone calls no `restoreCost`). No AppSpec /
+SurfaceContracts / QUESTIONS edits (the closeout's, per FOR THE CLOSEOUT).
 
 Pieces (flipped per commit):
-- B2-0 record skeleton: DONE (this commit).
+- B2-0 record skeleton: DONE (bb23ff0be).
 - B2-1 VX-331 trace + red-on-old core pin (the `now` plumbing, behaviour unchanged): VERDICT — REAL.
   Traced: Block History's deleted region (and the tray) list a block's deleted takes through
   `Queries.deletedTakes(db, blockID:, now:)`, which keeps only `deleted_at >= TrashWindow.cutoffStamp(now:)`
@@ -443,11 +449,11 @@ Pieces (flipped per commit):
   `RestoreCostTests.aTakePastTheThirtyDayClockIsNotCountedAsStillRestorable` (one take past the clock,
   one inside; the count equals `deletedTakes`' listing at that moment; the `>=` edge counts) — RUN RED
   headless on this commit: 3 issues (`cost.deletedTakes == 1` read 2; `== listed.count` 2 vs 1; the
-  edge ask 2). DONE (this commit — the PRE-FIX tree).
+  edge ask 2). DONE (c42ab4b84 — the PRE-FIX tree: the red-on-old SHA).
 - B2-2 VX-331 fix (the 30-day window in `restoreCost`): the population-2 subselect gains
   `v.deleted_at >= :cutoff` (`TrashWindow.cutoffStamp(now:)`, the listing's `>=`). The B2-1 pin RUN GREEN
   headless (`RestoreCostTests` + `NoteVersionsTests`: 39 tests / 2 suites passed). The Mac face reads
-  through `VersionActs.restoreCost` (session clock) — unchanged words. DONE (this commit — the fix).
+  through `VersionActs.restoreCost` (session clock) — unchanged words. DONE (fdde811b6 — the fix).
 - B2-3 VX-244 traces (both arms) + red-on-old Mac pins (the cell menu made inspectable, behaviour unchanged):
   BOTH ARMS REAL, traced apart. The cell menu (`TakesCellView.menuSpecs`, `TakesShared.swift`) appended
   "Show take ▸" wherever `projection.fans[blockID].count > 1`, never consulting the cell's COLUMN.
@@ -464,12 +470,12 @@ Pieces (flipped per commit):
   `theTakesArticleCellOffersNoShowTake` (RED ON OLD — the mechanism asserted green-both-sides: a pick on
   the article's column says nothing and moves nothing), `theLensesChosenColumnOffersNoShowTake` (RED ON
   OLD — the mechanism: the pick refuses with J38's words), `aScratchColumnKeepsShowTakeAndItActs`
-  (control, green both sides: two rows, a press moves the scratch pick). DONE (this commit — the PRE-FIX
+  (control, green both sides: two rows, a press moves the scratch pick). DONE (c9d0b3c66 — the PRE-FIX
   tree: the red-on-old SHA).
 - B2-4 VX-244 fix: one guard — the cell menu offers "Show take ▸" only when `column.kind != .main` (the
   switcher's rule). `pick`'s `.main` refusal arm is UNCHANGED (⌃⌘←/→ on the Chosen column still speaks
   J38 — `TakesParkedFollowTests.aChosenColumnPickInTheMintGapLeavesTheParkAlone` keeps driving it
-  directly). The two B2-3 absence pins turn GREEN at this commit (RUN PENDING). DONE (this commit — the
+  directly). The two B2-3 absence pins turn GREEN at this commit (RUN PENDING). DONE (a459fd075 — the
   fix: the green-on-new SHA).
 - B2-5 core: bring a commit back as a take (the op, mirroring `branchVariant`'s posture) + state-transition
   tests. **`branchVariant`'s posture, VERIFIED IN CODE** (`Operations+Variant.swift`): `insertFanVariant`
@@ -491,7 +497,7 @@ Pieces (flipped per commit):
   `aDeletedTakesMomentRefuses`, `aDeletedBlockRefuses`, `anUnknownCommitRefuses`,
   `aLockedOrArchivedSourceStillBringsItsMomentBack`. No new `OperationError` case (the wire-refusal sweep
   untouched); not wire-called (no MCP change). A NEW NAMED OPERATION → AppSpec §9 owes a line at closeout
-  (the plan's FOR THE CLOSEOUT already names it). DONE (this commit).
+  (the plan's FOR THE CLOSEOUT already names it). DONE (44ff62f65).
 - B2-6 the pane at rest: calm one-line rows that expand; explainers behind (i); header counts.
   `BlockHistoryPane.swift`: `CommitRowView` RESTS as ONE line — the stamp (`CommitRowFace.stamp`, never
   truncates) · the name (when named, one line) · the quiet glyph (`◦` on an automatic commit only — a
@@ -516,7 +522,7 @@ Pieces (flipped per commit):
   `BlockHistoryPaneTests` (its region pin reads the raw sentences the new header stores),
   `CommitsPageLedgerTests.theDetailsLineSaysOnlyWhatTellsCommitsApart` (`details` kept — the sheet's
   subtitle), `.theCommitsPageDrawsNoBezels`, `.theDefiningSentenceSurvivesAndThePaneBlurbIsGone`.
-  DONE (this commit).
+  DONE (843841758).
 - B2-7 read in full (the sheet) + Bring back as a take (the door, the receipt). The open row's "Read in
   full" → `BlockHistoryModel.readInFull(_:of:heading:)` sets the observable `reading`
   (`CommitReading`: the commit, its take, the take's heading) → the pane's `.sheet(item:)` presents
@@ -533,7 +539,7 @@ Pieces (flipped per commit):
   words. Inline door, undeclared — the pane's own vocabulary like Restore/Name (registry untouched). Pins
   (Mac `BlockHistoryClarityTests`, compiled ✓, RUNS PENDING): `readInFullShowsTheWholeMomentWithItsTwoFootDoors`,
   `anUnnamedMomentIsTitledByWhen`, `bringBackAsATakeLandsTheTakeAndSaysSo`,
-  `bringBackUnderASealRefusesInTheStandingWords`. DONE (this commit).
+  `bringBackUnderASealRefusesInTheStandingWords`. DONE (dbfed41bb).
 - B2-8 restore says where it landed (the landing + the overlay wash). **NO FORK** — the wash is built on
   EXISTING machinery and touches no editor-seam file (`EditorTextView`, `PaneSurface`, `BlockRangeIndex`
   unchanged; `notes/TEXTKIT2_NOTES.md` read in full anyway, since the landing drives `JumpPrimitive` and
@@ -568,8 +574,95 @@ Pieces (flipped per commit):
   `takesLandsNothingForATakeTheArticleDoesNotShow`; ADDITIVE to `TakesEntryBandTests` (DEBUG):
   `aRestoreLandingFlashesItsRowEvenWithTheSettingOff`. Harness note: an inline `{ false }` predicate
   beside another closure in one test body tripped a compiler "function type mismatch" at this build —
-  routed through a `pause` helper. DONE (this commit).
-- B2-9 verification (headless) + the record closed: NOT STARTED.
+  routed through a `pause` helper. DONE (338f9ccba).
+- B2-9 verification (headless) + the record closed: `xcodebuild build-for-testing` (scheme Variorum,
+  platform=macOS, `DerivedData/vx440-b2`) ✓ TEST BUILD SUCCEEDED at the final tree; core `swift test`
+  (full) — VariorumCoreTests 3498 tests / 467 suites PASSED (5 known issues, pre-existing), the second
+  target 32/4 PASSED, the MCP target 431/79 with ONE failure, batch 1's same load flake
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, a 15-s
+  wall-clock bound measured 27 s under the full run's load) — re-run ALONE: 3/3 PASSED in 2.2 s (no MCP
+  change in this batch). DONE (this commit).
+
+**Batch 2's rows, dispositioned:**
+- VX-331 (Bug, Confirmed): FIXED — pin `RestoreCostTests.aTakePastTheThirtyDayClockIsNotCountedAsStillRestorable`,
+  RED headless at `c42ab4b84` (3 issues), GREEN at `fdde811b6`.
+- VX-244 (Bug, Confirmed): FIXED, BOTH arms real — pins `ShowTakeDoorTests.theTakesArticleCellOffersNoShowTake`
+  and `.theLensesChosenColumnOffersNoShowTake` committed on the pre-fix tree (`c9d0b3c66`), the fix at
+  `a459fd075`; RED/GREEN runs PENDING (stage window). No hollow half.
+- VX-431 (Improvement): BUILT — items 1–5 of the design (B2-5…B2-8): rows calm at rest that open in
+  place, Read in full (the sheet), explainers behind (i) with header counts, restore lands and washes
+  (Write + Takes), Bring back as a take (a new named core op). Her ruled structure untouched (every
+  take sectioned with the focused one open, the four regions, Restore per row, no purge door, the
+  *[removed for publication]*
+
+**PROVISIONALs this unit adds (for the closeout's QUESTIONS bundle; P-440-3/-4 are the plan's own, built as written):**
+- **P-440-3 (built):** the brought-back take's label = the commit's name, else none (through the take
+  label's normalisation).
+- **P-440-4 (built):** no structural-undo entry (`branchVariant` registers none — verified); the receipt
+  "Brought back as a take — it's the last take in this block's fan." / "Brought back as the take
+  “‹name›” — …" when it was named.
+- **P-440-8 (the restore landing's reach):** the landing lands where the restored take is SHOWN, in the
+  mode she is in — Write's detail editor (caret at the block's start, comfort band, first line washed)
+  and the Takes board (the article's `.restore` landing, flashed); every other mode, the sheet hosts, and
+  a restored take the surface does not show land nothing (the receipt alone). The wash is NOT governed by
+  the mode-switch flash setting (its words name mode switches only); Reduce Motion's discreet variant
+  holds. Options for her: (a) as built; (b) every restore lands in WRITE (the `jump(to:)` road — switching
+  mode from Takes/Read/Blocks), shown take or not; (c) also land an unshown take (Takes: bloom its block;
+  Write: open the take panel on it); and separately (d) let the mode-switch flash setting govern this
+  wash too.
+- **P-440-9 (the resting row's anatomy):** one line — the stamp · the name · a QUIET glyph (`◦`,
+  automatic commits only; a deliberate one earns none, VX-144's rule) — with **Restore kept at the
+  line's end** (her "Restore per row", one press as before); Name/Rename and "Read in full" moved into the
+  OPEN row. No disclosure chevron (the design's anatomy lists none; the row's hover says "Show more of
+  this commit"). Consequence named for her verdict: an UNNAMED commit at rest is a time and (if quiet) a
+  glyph — none of her words until she opens it. Options: (a) as built; (b) the moment's first words fill
+  the rest of an unnamed commit's line, faint; (c) Restore into the open row too (one more press).
+- **P-440-10 (wording, all Mac-local in `BlockHistoryPane.swift`):** the region one-liners "Each take's
+  saved moments." · "Set aside, out of the fan." · "On the 30-day clock." · "Kept whole and set aside —
+  not deleted." (the shipped sentences verbatim behind each (i)); "Read in full" + its help; the sheet's
+  "Commit · ‹when›" title; "Bring back as a take" + its help; the glyph's hover "A quiet commit — the app
+  saved this moment on its own"; "Show more/less of this commit".
+
+**For the reviewer / the orchestrator (concerns, not forks — nothing here stopped the build):**
+1. **No fork on item 4:** the wash rides the 18l-c arrival flash's EXISTING overlay roads (Write's decor
+   `arrivalFlashSink`, the Takes article's `ArrivalFlashFace`); no editor-seam file changed. The one
+   refactor inside `EditorViewModel`: the flash's line rect moved to `lineFlashRect`, shared with the
+   mode-switch flash (behaviour unchanged — `ModeSwitchFeelTests` / `ComfortBandAndFlashTests` re-run at
+   the window).
+2. `RestoreLanding` is defined beside its producer (`BlockHistoryPane.swift`) and read by two other
+   features' models — `CompareLanding`'s precedent (defined in `CompareBoardView.swift`, held by the
+   router). A value type, never a sibling's view model.
+3. The TAKES landing changes `TakesArticleScroll` (a new `.restore` kind; `ArticleArrival.kind`) — the
+   entry/bloom/find pins ride unmodified; the article's watch/authority code is untouched.
+4. `ExplainerLine` gained an optional `tokens` (voiced arm); nil keeps every Settings/MCP host byte-for-byte.
+5. The Read-in-full sheet is ONE `Text` for the whole moment (selection across paragraphs needs one
+   text) — cost ∝ the moment's own length, paid once when summoned; a 10k-word block's moment lays out
+   whole in the sheet. A P1 reader may want it named; recorded rather than split.
+6. The `CommitsPageLedgerTests` row-height bounds (≤ 34 pt at rest, both voices) are ESTIMATES — the run
+   prints the heights; a miss there is a bound to re-measure, not a defect, unless the row wraps.
+7. MOBILE PARITY candidates: the phone's Block History is untouched (its face, `SavepointRowFace`, keeps
+   its words); `bringBackCommitAsTake` is a shared core op a phone face could adopt.
+8. AppSpec §9 owes a line for the new named operation at closeout (`bringBackCommitAsTake`), and
+   SurfaceContracts (The note) the Block History clarity contract.
+
+**Stage-window run list (the orchestrator's; suite TYPE names, built as a zsh array; compare "Executed N"):**
+- RED-ON-OLD at `c9d0b3c66`: `-only-testing:VariorumTests/ShowTakeDoorTests` — 3 tests, EXPECT 2
+  FAILURES (`theTakesArticleCellOffersNoShowTake`, `theLensesChosenColumnOffersNoShowTake`; each fails
+  on the `menu.showTake == nil` line), the control `aScratchColumnKeepsShowTakeAndItActs` passing.
+- GREEN at the batch tip (new suites' counts exact): `ShowTakeDoorTests` (3) · `BlockHistoryClarityTests`
+  (6) · `RestoreLandingTests` (6 — four mounted/real-window) · `CommitsPageLedgerTests` (7) ·
+  `TakesEntryBandTests` (its 10 + 1 new, DEBUG) · `BlockHistoryPaneTests` · `BlockHistorySealTests` ·
+  `BlockHistoryHostTests` · `TakesParkedFollowTests` · `TakesStepFollowTests` · `TakesStepFollowModelTests`
+  (pick's roads, unchanged) · `ModeSwitchFeelTests` · `ComfortBandAndFlashTests` (the shared flash rect)
+  · `NoteVersionsPaneTests` (the restore confirm's cost read) · `MCPPaneTabsTests` · `MCPGrantRoadsTests`
+  (`ExplainerLine`'s token-free arm) · `CapabilityRegistryTests` (registry untouched — the walk) ·
+  `MCPCompareLandingTests` (the router's landing family).
+- Walk rows (both voices): the pane at rest (one-line rows, header counts, (i) lines) and a row open; Read
+  in full on a long commit (scroll, select) → Restore from the sheet → Write lands at the block with the
+  wash; Restore from a row in Takes → the article reveals and flashes the row; Bring back as a take → the
+  receipt, the new take last in the fan; the Lenses Chosen column's and the Takes article's right-click
+  menus without "Show take ▸", a scratch column's with it. `BlockHistoryCommitsCaptureTests` (disabled
+  capture harness, VX-144's) can re-shoot the pane in both voices if the trait is dropped for a run.
 
 - Batch 3 (gathering faces): NOT STARTED.
 - Ladder: NOT STARTED.
