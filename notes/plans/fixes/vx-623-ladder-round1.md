@@ -261,3 +261,66 @@ parse refuses at R1/G1 before any read), `PATH=$T/shim:$PATH` with a `curl` that
 join passes `J3 J3`, and the live walk.log shows the launch, the road and `captured 'launched'` all under J3 (line 62).
 **Fix:** `launch_on_road $RUN/app-join.log J3 J3b`, and the dry-run plan's J3 line names J3b (the road armed, the
 window's bounds). No pin (log naming).
+
+## ROUND 1 — THE REVIEWER'S FINAL CALL (the round-1 fable-reviewer, 2026-10-27 — binding; the implementer applies exactly this)
+
+Before ruling I reproduced the MAJOR's live repro with my own hands: the branch's words-guard compiled fresh,
+run on a backgrounded `sleep` pid → `'ok' exit 0` — the fail-open confirmed first-hand, not taken from the
+answer. All five findings: the implementer AGREES with traces that are sound and, on findings 1 and 2,
+sharper than my sketches. No finding is marked FINDER-FIXES; nothing touches `Sync/` — the implementer
+applies every fix below.
+
+**1 · [MAJOR] — CONFIRMED; the implementer's broadened three-class fix LANDS as specified, with P-1 and
+P-2.** The present/absent/unreadable taxonomy is the right scoping: "absent" (`.noValue`,
+`.attributeUnsupported`, `.notImplemented`, a `.success` of the wrong type) continuing the scan is correct —
+those are answers, not failures — and everything else withholding at once also closes the two holes the
+implementer found beyond my sketch (the mid-scan unreadable read silently skipped, and the timeout-chain
+stall before the wrong `ok`). The windows read's rule — anything but a `.success` array withholds, an EMPTY
+success array stays `ok` — matches my scoping exactly (zero AX windows = nothing walk-cap's privacy rule
+needs guarding beyond what CG shoots; see the out-of-scope note below). `ok (<n> elements read)` logged by
+`capture()` is accepted and welcome: it makes every live capture's guard legible, and the next live walk's
+lines are the over-withhold proof the implementer promised. Exit grammar and `--classify` unchanged —
+required, so the existing D-5 cases stand. P-1 red against `14ad4a09c`'s words-guard (the sleep pid and the
+reaped pid both `ok`/0 on old — the sleep case verified by my own run above) and P-2's mutation-red
+`--self-check` over synthetic trees (cap · cycle · unreadable children/string/windows · deep words · clean)
+together pin both classes; the walk's `--self-test` gains the three cases and the RENAMED non-numeric-
+argument case (required — the old name overclaimed, which was part of the finding). **The "considered and
+not done" CG-vs-AX empty-list cross-check stays NOT DONE, with the reason recorded:** the only moment an
+empty-success AX answer could coexist with real CG windows is launch-time AX warm-up, and every capture
+near the words look is preceded by successful vis-ax AX presses (the look only exists after P5's press
+chain), so the exotic state cannot coincide with the words on screen. Out of this finding's scope; no
+ticket owed.
+
+**2 · [MINOR] — CONFIRMED; the implementer's SAME-READ form lands (the fallback one-liner is retired).**
+`guard_allowlist` printing the CHECKED email on success closes the marker, listed, mode and file-type seams
+in one move by deleting the unchecked re-read entirely — a patched gap stays a gap; a removed read cannot
+reopen. Conditions, all from the implementer's own proposal, now binding: (a) BOTH twins change
+byte-identically and the helper's twin pin keeps proving it; (b) the printed-email contract is pinned in
+both self-tests ("on accept, prints exactly the fixture's email" — red on old, which prints nothing);
+(c) the structural pin lands in both self-tests ("the allowlist is sourced only inside `guard_allowlist`
+and the walk's `allowlist_value`" — red on old: helper :393, walk :636); (d) the `plain_address` belts at
+the splices STAY; (e) the helper's now-obsolete ":393 re-read" refusal wording ("the allowlist changed
+since R1?") is updated to match the new shape. The `allowlist_value` launch-list read stays as-is —
+accepted scoping: it is not a reset path, is never spliced, and the app re-guards every entry at connect
+(F-B1-1). Emails are no secret (they ride `ps eww`), so the success-print is hygiene-clean. The mechanism
+demonstration (c in the implementer's pin list) is recorded once in this file's round-2 evidence, not
+landed as a test — fine.
+
+**3 · [MINOR] — CONFIRMED; the proposed release.sh:329 sentence lands verbatim** ("`--arm join` alone
+resumes a `both` run that stopped in the join arm (it needs that run's Standard vault); `--arm setup`
+alone also ends with the cleanup reset."). README line 345 already true — agreed, left. `bash -n` after.
+No pin (document text).
+
+**4 · [NIT] — CONFIRMED, WITH the offered pin.** The refuse-shaped fix lands in both files (`--log`,
+`--app` → exit 5 naming the missing value). The pin DESERVES to land: the 0/4/5 grammar is a documented,
+composition-bearing contract (the walk's `reset_account` keys off exit classes), the pin is expressible,
+and the orchestrator has ruled the triple-fenced subprocess shape allowed — pin-before-fix binds where a
+pin is expressible, so it is taken: `HOME` at an empty temp dir (R1/G1 refuses before any read), the
+`curl`-exits-99 shim as the third belt, `std --log` / `std --app` → 5 on the fix, 1 on old.
+
+**5 · [NIT] — CONFIRMED as proposed** (`J3 J3b`, and the dry-run plan naming J3b for the road/bounds
+line). No pin (log naming).
+
+**After the fixes:** both `--self-test` suites re-run green (the walk's with its new cases), P-1/P-2 and
+the NIT-4 pin shown red-on-old in the fix commits' messages or this file, `zsh -n` on every touched zsh
+script and `bash -n` on release.sh — then round 2's fresh reviewer re-checks the fixes per the ladder.
