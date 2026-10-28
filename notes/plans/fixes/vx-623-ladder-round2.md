@@ -112,3 +112,16 @@ above stand as committed.)*
   `first-run-walk REFUSES: --app needs a path`, **exit 5**. Red-on-old genuine, both sides mine.
 - Safety note: the fenced runs die at the arg parse, before any guard, read or launch; nothing
   but function definitions and assignments precedes the parse in either script (read myself).
+
+## Finding 5 · [NIT] `J3 J3` — FIX VERIFIED (`bcac53925`)
+
+- **The call site:** first-run-walk.sh:756 is `launch_on_road $RUN/app-join.log J3 J3b` —
+  checked against the function (:581–610): arg 2 names the LAUNCH step (`step ${2:-P1}`, :583),
+  arg 3 the ROAD/window/bounds step (`step ${3:-P2}`, :596), so the join's two distinct steps now
+  log under two names, exactly launch_on_road's P1/P2 twins.
+- **The dry-run plan line** (:489): "J3b the road: the process's environment and the app's ARMED
+  line · the main window's bounds (P2's checks)" — present, in the join branch of the plan.
+- **No collateral:** the setup arm's call (:673) passes no names and keeps the P1/P2 defaults;
+  the line-50 header comment "Every launch (P1, J3)…" stays TRUE under the rename, since the
+  launch halves remain P1 and J3 (J3b is the road check, and `frame_reset` runs in the launch
+  half, :584). No pin — log naming, per the final call. Correct disposition.
