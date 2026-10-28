@@ -2238,3 +2238,7 @@ riders line kept), with everything MINTED by the run listed underneath. NOTE for
 pasted block lists **VX-377 (Move/Copy to Wing from ⌘K)** as a row — VX-377 was never VX-601's
 member; it was the VX-439-missed member that ran in VX-620 (closed 2026-10-27). The delivery marks
 it with its true home and state rather than silently checking or dropping it.
+
+**Her clarification (2026-10-28, live):** *"and no, you are not the new coordinator. i meant that
+for oct27coordinator"* — the new waves route through oct27coordinator as before; this session is
+VX-601's orchestrator only, through its close and release.
