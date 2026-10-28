@@ -1654,3 +1654,51 @@ slotSplit 0+10). Settled time: stack 154→168 ms (0 → 25-top), marginGrid 152
 155→203 ms (the card realization's price, still viewport-bounded). First pane: 108→122 ms stack,
 113→159 ms slotSplit. Her requirement's other half — landings with a seeded set — is pin #7
 (red-on-old verified on rev428, ×4 styles) plus walk rows B2/B4.
+
+## BATCH B FORENSICS — the four "green where predicted red" rows (implementer, 2026-10-28, from the window's `DerivedData/logs/red-vx601b-*.log`)
+
+**NOT DONE (first line):** the re-runs (the orchestrator's window — the plan at the end of this
+section). Rebuilding `vx601b-pre` and `vx601b-rev428` is IN PROGRESS below — **a revert is in flight
+while that line says so**; the restore is `git checkout -- App/Variorum/Variorum/Features/Takes/
+TakesViewModel.swift App/Variorum/Variorum/Features/Takes/TakesShared.swift` (both committed at HEAD,
+no uncommitted edits in them).
+
+**THE TRACE (read off the logs and the build logs; no test run by this session).**
+- **#1, #5, #9 — a TREE defect, mine: the rev428 revert never turned the write-back off.** The
+  revert inserted a bare `return` as the first line of `openExpansionMemory()`, with the sink's
+  installation (`board.expansionSink = { … }`) on the NEXT line. Swift parses a Void `return`
+  followed by an expression on the next line as `return <expression>` — the assignment ran, THEN the
+  function returned. Both revert builds say so: `b-rev428-build.log:5631` and `b-pre-build.log:5629`,
+  *"Expression following 'return' is treated as an argument of the 'return'"* (TakesViewModel.swift
+  :2671 / :2665), then *"code after 'return' will never be executed"* for the SEED lines only. So on
+  pre and rev428 the memory's WRITE-BACK was live and only the SEED was off — exactly the observed
+  partition: the seed pins (#2, #3, #6, #7, #8, #11) red, the write-back pins (#1, #5, and #9's memory
+  line) green. The pins are sound; the trees were not the trees the table named. **Fix: rebuild pre
+  and rev428 with a revert that cannot swallow the next line** (`if true { return }` — the sink and
+  the seed both unreachable).
+- **#12 — NO VERDICT, not green: it never ran.** `expandAllIsOfferedOnlyWhereMeaningful` lives in
+  the suite type `TakesPresentationTests` (`TakesBoardTests.swift:817-951` — the file holds five suite
+  types), and my READY-FOR-SUITES named only `TakesBoardTests`. Every red log shows the "Takes board
+  (Phase 11, A3)" suite running its 13 tests and no line for #12 anywhere (`grep -c` = 0 in all five
+  red logs and in `tier1-b-post.log`). So the gate edit is NOT dead code — nothing else offers expand
+  all (the header renders the two buttons only under `model.offersExpandAll`); the pin simply was not
+  run. The battery on post lists `TakesPresentationTests` and will give post's verdict; pre and rev577
+  need a run with the right suite name. No tree change.
+
+**THE CORRECTED TABLE (only the rows this section changes; every other row stands as the window
+measured it, which matched the original table):**
+
+| # | Test | pre | rev428 | rev428map | rev577 | rev594 | post |
+|---|---|---|---|---|---|---|---|
+| 1 | `TakesExpansionMemoryTests/theBoardsOpenFansAreWrittenToTheSessionAsTheyChange` | R (rebuilt tree) | R (rebuilt tree) | G | G | G | G |
+| 5 | `…/applyingAShowFilterForgetsTheFansItCloses` | R (rebuilt) | R (rebuilt) | G | G | G | G |
+| 9 | `TakesSlotSplitExpandAllTests/expandAllOpensEverySplitAndCloseAllBringsThePlainPageBack` (its memory line) | R (rebuilt) | R (rebuilt) | G | G | G | G |
+| 12 | `TakesPresentationTests/expandAllIsOfferedOnlyWhereMeaningful` (the suite NAME corrected) | R | G | G | R | G | G |
+
+**Measured in the window and standing (the orchestrator's relay):** rev428map reds #8 alone — the
+slot-split entry mapping is REAL; rev577 reds #10 (slot split) — the blur is real; rev594 reds
+#13–#17 exactly; both ⌘T guards green on every tree — R-601-4's ⌘T half confirmed HOLLOW. Tier 1 on
+post: 279 tests in 30 suites, one failure — `TakesArticleScrollTests` (the straddling-fold pin),
+green alone twice, dispositioned to VX-337's load-dependent class by the orchestrator, not this
+batch's. The `VX428-MEASURE` numbers landed (P3-clean, per the orchestrator) — their copy into this
+record is owed from `tier1-b-post.log`.
