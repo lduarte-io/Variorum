@@ -271,7 +271,11 @@ struct TakesCellView: View {
     /// renders through the pane surface's real menu path, above the
     /// standard edit items. Registry-declared: see
     /// `TakesCellView.contextMenuCapabilities`.
-    private func menuSpecs(
+    ///
+    /// Internal (VX-244, the VX-440 run) so a pin can read the rows a cell
+    /// really offers — a claim about which doors a menu renders has to be
+    /// checkable (P-2), and the menu is built nowhere else.
+    func menuSpecs(
         resolved: (variantID: String, text: String)
     ) -> [PaneTextView.MenuItemSpec] {
         // The take's own lock state, read off the projection the menu is

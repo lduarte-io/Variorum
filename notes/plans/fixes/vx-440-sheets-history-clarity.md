@@ -448,7 +448,24 @@ Pieces (flipped per commit):
   `v.deleted_at >= :cutoff` (`TrashWindow.cutoffStamp(now:)`, the listing's `>=`). The B2-1 pin RUN GREEN
   headless (`RestoreCostTests` + `NoteVersionsTests`: 39 tests / 2 suites passed). The Mac face reads
   through `VersionActs.restoreCost` (session clock) — unchanged words. DONE (this commit — the fix).
-- B2-3 VX-244 traces (both arms) + red-on-old Mac pins (the cell menu made inspectable, behaviour unchanged): NOT STARTED.
+- B2-3 VX-244 traces (both arms) + red-on-old Mac pins (the cell menu made inspectable, behaviour unchanged):
+  BOTH ARMS REAL, traced apart. The cell menu (`TakesCellView.menuSpecs`, `TakesShared.swift`) appended
+  "Show take ▸" wherever `projection.fans[blockID].count > 1`, never consulting the cell's COLUMN.
+  (a) THE TAKES ARTICLE: its cells carry `TakesColumn(id: "takes-main", kind: .main)`
+  (`TakesBoardView.mainColumn`), an id that never lives in the model's `columns` (those are the
+  memory's/UUID-minted columns; no `columns.append` or re-point ever writes a literal id) — so each child
+  row's `pick(columnID: "takes-main", …)` returned at its first `guard … firstIndex … else { return }`:
+  no state, no status — the silent door. (b) THE LENSES CHOSEN COLUMN: a real `.main` column; each child
+  reached `pick`'s `.main` arm, which only refuses (`chosenColumnHasNoPickNote`, J38) — a door that can
+  never act. Precedent for the fix: the column's ‹ › switcher already renders only for
+  `column.kind != .main` (`LensesBoardView.pickSwitcher`), and VX-227 made switcher + "Show take ▸" one
+  road. Seam: `menuSpecs(resolved:)` private → internal (visibility only). Pins (Mac
+  `ShowTakeDoorTests`, NEW, compiled ✓ `build-for-testing` into `DerivedData/vx440-b2`, RUNS PENDING):
+  `theTakesArticleCellOffersNoShowTake` (RED ON OLD — the mechanism asserted green-both-sides: a pick on
+  the article's column says nothing and moves nothing), `theLensesChosenColumnOffersNoShowTake` (RED ON
+  OLD — the mechanism: the pick refuses with J38's words), `aScratchColumnKeepsShowTakeAndItActs`
+  (control, green both sides: two rows, a press moves the scratch pick). DONE (this commit — the PRE-FIX
+  tree: the red-on-old SHA).
 - B2-4 VX-244 fix: NOT STARTED.
 - B2-5 core: bring a commit back as a take (the op, mirroring `branchVariant`'s posture) + state-transition tests: NOT STARTED.
 - B2-6 the pane at rest: calm one-line rows that expand; explainers behind (i); header counts: NOT STARTED.
