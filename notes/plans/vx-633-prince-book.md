@@ -83,8 +83,8 @@ Flags riding the draft for her: the TAG name ("machiavelli" proposed; "the princ
 3. Front-note draft → her edit pass. → WITH HER (the draft section above; plus items 6–8 below feed the same pass)
 4. VX-292 instruction append (after U2's sherlock-reference grep). → OWED
 5. The Pro carry-over prompt. → OWED (last)
-6. **The Petrarch-stanza fan (checker finding):** Marriott prints XXVI's closing stanza IN ITALIAN, so that block's fan is two near-identical Italian stanzas with no English. RECOMMENDED: keep Marriott's printing as chosen, "il principe 1532" as take 2, and add **Dacre's 1640 English verse as a third take** ("english · dacre 1640") — a wide fan on the book's final block. NOT BUILT pending her word. → HER CALL
-7. **Ricci take label** (unruled): proposed **"ricci 1903"**, the "il principe 1532" pattern. → HER CALL (U2 builds with the proposal as PROVISIONAL)
+6. **The Petrarch-stanza fan (checker finding):** Marriott prints XXVI's closing stanza IN ITALIAN, so that block's fan is two near-identical Italian stanzas with no English. RECOMMENDED: keep Marriott's printing as chosen, "il principe 1532" as take 2, and add **Dacre's 1640 English verse as a third take** ("english · dacre 1640") — a wide fan on the book's final block. → RULED R-633-13 (Dacre approved, label "dacre 1640"); U2 BUILDING (the U2 record).
+7. **Ricci take label:** proposed **"ricci 1903"**, the "il principe 1532" pattern. → RULED R-633-14 ("ricci 1903" ratified).
 8. **EN verse line breaks** (checker finding): the EN resource's one-paragraph-per-line format flattens XXVI's stanza and XVII's couplet on the English side; U2 restores both blocks' line breaks post-import (the same autosave road the takes use). → U2 BUILDS
 
 ## U1 cold checks + assembly (the orchestrator, 2026-10-28)
@@ -183,3 +183,21 @@ Each Ricci text is the span rendering the SAME Marriott paragraph, cut from Ricc
 
 ### Files touched by U1
 Committed (pushed): `notes/plans/vx-633-prince-book.md` (this record; 94ecf8378, cad1ae7b0, 38f3e5bd3), `notes/source/prince-italiano-aligned.txt` (cad1ae7b0 — now superseded), `notes/source/prince-extract.py`, `App/Variorum/Shared/SampleLibrary/ThePrince.txt`, `App/Variorum/Shared/SampleLibrary/ThePrinceItaliano.txt` (38f3e5bd3). On disk, uncommitted, for the orchestrator's batch: `notes/source/prince-aligned/` (27 files), `notes/source/prince-extract.py` (per-section layout + Ricci + JSON), `notes/source/prince-famous-lines.json`, and this record's edits.
+
+## U2 record
+
+**NOT DONE (first line, per the contract — kept current):** no `xcodebuild test`, no walk, no GUI and no Release build were run (the AIR FENCES; the Mac and simulator suites, the Debug-store seed walkthrough and the ladder ride the Pro absorption — R-633-11); no `notes/QUESTIONS.md` entry was written (the shared ledger is touched only at merge moments — the PROVISIONALs below are for the orchestrator to carry there); the front note's text is the plan's draft VERBATIM pending her edit pass (`// HER EDIT PASS PENDING` marks it). Everything else: see LIVE STATUS.
+
+Implementer: Opus (opus-implementer), 2026-10-28, branch `vx-633-prince-book`, the Air. Scope: the seeder (`App/Variorum/Shared/SampleLibrary/`), its launch/restore/arrangement callers, the Help door, the pins, this section. Zero `Sources/VariorumCore/Sync/`, zero dedupe-facts wiring (the Prince stays out of `dedupeCovered`).
+
+### Rulings received mid-unit (relayed by the orchestrator, 2026-10-28 — verbatim-faithful; the orchestrator formalizes the rulings lines at the next boundary)
+
+- **R-633-13 — the Dacre third take APPROVED.** Her words: "iagree with adding Dacre's 1640 English verse as a third take." Built as: on XXVI's closing Petrarch-stanza block (the book's last block) a third take carrying Edward Dacre's 1640 English verse — the four lines at raw Marriott lines 3690–3693, line breaks kept, the "Edward Dacre, 1640." attribution line NOT in the take — labelled **"dacre 1640"**, never chosen; a constant in `SampleLibraryPrinceBook.swift` pinned against the raw source text. Ledger item 6 → BUILT when it lands.
+- **R-633-14 — the Ricci label "ricci 1903" RATIFIED.** Her words: "Ricci's take label - I think that's fine honestly." Ledger item 7 → ruled; no PROVISIONAL marker.
+
+### LIVE STATUS
+- P1 `SampleLibraryPrinceBook.swift` (constants, the four parts, the front note, the verse restorations, the Ricci + Dacre third takes, the Italian parser, the per-note take pass) — IN-PROGRESS.
+- P2 the seeding road (`Book.prince`, part sections by name, the bilingual pass in the note's own runner turn) — NOT-STARTED.
+- P3 the swap (`launchSet = [.prince]`, `Book.all`, the launch's birth decision on the launch book, the Welcome arrangement extended, the phone's first-write seed, Help ▸ Restore "the prince") — NOT-STARTED.
+- P4 the pins (the Prince seed-shape suite, the resource-pair pin, the swap pin, mechanical updates) — NOT-STARTED.
+- P5 this record's decisions, the sherlock-reference list, the evidence and the Pro's suite list — NOT-STARTED.
