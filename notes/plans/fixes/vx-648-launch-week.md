@@ -56,6 +56,7 @@ Application notes (the skill's precisions) bind too: P-1's scope is the ROUTED v
 - **VX-440** (live, parallel): the book navigator + Book Settings (batch 4's surface, and VX-639's Book Settings adjacency). Closeouts SERIALIZE — first-ready merges first; the second merges main in and re-runs the overlap suites before its merge ask. The coordinator intersects merged files at every merge.
 - **VX-601** (live, in its batch-C windows → Fable ladder → merge → a RELEASE at her word): the editor seam (`PaneTextView`, `EditorTextView`, `PaneSurface`, the Takes board). Batch 1 (VX-647/649) is the likely collision; the coordinator asked to be told EARLY which editor files batch 1 touches — the batch-1 implementer reports its touched-file list as soon as the trace names them, and the orchestrator forwards it.
 - Shared ledgers (master plan, TICKETS.md, QUESTIONS.md, AppSpecRecord) are touched only at merge moments, on latest main, by the merging session. The in-flight row landed at kickoff (commit on main).
+- **Migration number v1_34 is RESERVED to this run** (oct27coordinator, 2026-10-28): any other branch minting a migration this week takes v1_35+ and merges after us; neither VX-601 nor VX-440 declares a schema change. The release that carries this run states "local-only migration v1_34" as a release fact (a closeout-handoff line).
 
 ## Stage protocol (oct27coordinator, 2026-10-28)
 
