@@ -87,10 +87,34 @@ Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by P
 **Not done (first line, kept current):** nothing closed yet — trace in progress. No stage claim held; no app-target suite, no live walk run by this batch so far.
 
 LIVE STATUS (per piece):
-- B1-0 — required reading (TEXTKIT2_NOTES in full, SurfaceContracts §The note, AppSpec §7 Return paragraph + §9, OverallModel §5, resiliency protocol): DONE (this commit).
-- B1-1 — VX-647 headless fixture: cost of `newBlock` / `deleteBlock` / the editor structural roads' queries vs M deleted blocks: NOT-STARTED.
-- B1-2 — VX-647 view-side trace (which observation/query re-runs per structural act, its cost vs M): NOT-STARTED.
-- B1-3 — VX-647 pin (red-on-old) + fix, or deferral case: NOT-STARTED.
+- B1-0 — required reading (TEXTKIT2_NOTES in full, SurfaceContracts §The note, AppSpec §7 Return paragraph + §9, OverallModel §5, resiliency protocol): DONE (a1a1211de).
+- B1-1 — VX-647 headless fixture: cost of `newBlock` / `deleteBlock` / the editor structural roads' queries vs M deleted blocks: DONE (this commit — `Tests/VariorumCoreTests/VX647DeletedHistoryProbeTests.swift`, gated `VX647_PROBE=1`; numbers in "VX-647 TRACE" below).
+- B1-2 — VX-647 view-side trace (which observation/query re-runs per structural act, its cost vs M): DONE (this commit — mechanism named below; headless, no app run needed for the mechanism).
+- B1-3 — VX-647 pin (red-on-old) + fix, or deferral case: IN-PROGRESS — the fix is a LOCAL index migration (a schema change, outside this batch's brief): proposal sent to the orchestrator for the go; meanwhile the red pins are being written against the pre-fix tree.
+
+### VX-647 TRACE (2026-10-28)
+
+**Mechanism (named, measured).** An open note in Write holds the tray door's badge observation: `PaneHost.watchTray` → `AppDatabase.observeTrayCounts` → `Queries.trayCounts` (`Sources/VariorumCore/Queries/PoolAndTray.swift`). Its `deleted_count` arm walks every tombstoned block whose `last_container_id` is the note (inside the 30-day window) and, PER ROW, runs the cascade-victim fence `NOT EXISTS (SELECT 1 FROM container_block cb JOIN container cc … WHERE cb.block_id = b.id AND cb.deleted_at = b.deleted_at AND cc.deleted_at = b.deleted_at)`. No index can serve a TOMBSTONED placement by `block_id` (`uq_cblock_ownership` is partial `WHERE deleted_at IS NULL`; `idx_cblock_order` leads with `container_id`), so the captured plan is `CORRELATED SCALAR SUBQUERY 1 / SCAN cb` — a full scan of the whole store's `container_block` table for every deleted block of the note: **cost ∝ M (the note's deleted blocks) × C (every placement row in the library, live and dead)** — P1's forbidden shape. `Queries.trayBlocks` (the tray's deleted listing, and Blocks mode's `observeTray`) carries the same fence and the same plan.
+
+**Why it lands on her keystrokes (the amplifier).** `AppDatabase.observe` is `ValueObservation.tracking { }`, which GRDB 7.11 runs in `.nonConstantRegionRecordedFromSelection` mode — and in that mode `ValueConcurrentObserver.databaseDidCommit` re-runs the fetch SYNCHRONOUSLY ON THE WRITER CONNECTION after every commit that touches the observation's region (`.build/checkouts/GRDB.swift/GRDB/ValueObservation/Observers/ValueConcurrentObserver.swift`, the `.nonConstantRegionRecordedFromSelection` arm: "fetch from the writer connection"). `trayCounts` reads `block`, `container_block`, `container` and `purge_intent`, so EVERY structural write (newBlock, deleteBlock, merge, divide) AND every autosave (`registerTextChange` writes the `container` row) waits for one full `trayCounts` before the write returns. A typed ⏎ is `runStructural`: flush (an autosave write if dirty) → the op's write → the fresh `renderPost` read; each write pays the badge. And every ⏎-then-⌫-on-the-empty-block round ADDS one tombstoned block (the carve is `deleteBlock(requiring: .emptyWithNothingUnshown)`), so the lag grows the more she edits the note — "when a note has a lot of deleted blocks", literally the tray door's count.
+
+**Measured (keyed on-disk store — SQLCipher, the shipped shape; median of 3–5; the probe's `writeLatencyWithHeldObservations`).** One carve round = the two writes of ⏎ at a block end + ⌫ in the empty block; "held" = the open Write note's held set (renderPost, header, presentations, comments, unplacedOrigins, trayCounts, noteStamps, title), "tray only" = trayCounts alone held:
+
+| corpus (blocks) | M (deleted blocks in the note) | carve round bare | carve round held | autosave bare | autosave held | carve, trayCounts only held |
+|---|---|---|---|---|---|---|
+| ~4k (200×20) | 0 | 4.96 ms | 18.2 ms | 2.12 ms | 10.5 ms | 14.3 ms |
+| ~4k | 100 | 4.70 | 58.1 | 2.11 | 28.7 | 53.3 |
+| ~4k | 300 | 4.77 | 137.4 | 2.33 | 69.4 | 133.2 |
+| ~4k | 600 | 4.63 | 268.2 | 2.11 | 130.1 | 265.4 |
+| ~20k (1000×20) | 0 | 4.69 | 26.0 | 2.15 | 12.9 | 25.3 |
+| ~20k | 300 | 5.05 | 542.0 | 2.13 | 273.6 | 547.8 |
+| ~20k | 600 | 4.59 | **1071.4** | 2.04 | **548.0** | **1073.8** |
+
+Bare writes are flat; the held cost is ≈ trayCounts alone and is linear in M × C (5× corpus → ≈4× cost). A typed ⏎ that pays two or three such writes on a library of tens of thousands of blocks and a note with several hundred carved blocks is her "3–5 seconds". The direct (unheld) read: `trayCounts` 0.62 → 17.5 → 51.8 → 180 ms at M = 0/100/300/600 on the ~4k corpus.
+
+**The candidate fix, measured in place** (`VX647_WITH_INDEX=1` creates `container_block(block_id, deleted_at)` in the probe store): the ~20k corpus at M=600 → carve round held **1071 → 19.6 ms**, autosave held **548 → 9.1 ms**, trayCounts-only **1074 → 12.9 ms** — FLAT in M (17.4 / 19.7 / 19.6 ms at M = 0/300/600). The fence becomes a seek; nothing else changes.
+
+**Second finding (same class, different door — recorded, NOT her reported road):** a note's SEAM history (⏎ mid-paragraph = divide, ⌫ at the seam = merge; each round releases two live-unplaced originals with lineage) makes two reads super-linear in the rounds R: `Queries.preservedOriginals` (its `released_at` subquery scans the note's whole placement history per original via `idx_cblock_order`) 9.6 → 77.8 → 5,843 ms at R = 100/300/600, and `Queries.originalsStrandedBy` (the recursive lineage CTE's `fam(origin, id)` pairs are O(L²) in lineage depth) 58 → 570 → 13,067 ms. Neither is held by an open Write note: `preservedOriginals` is held only by the TRAY PANEL while it is open (`TrayPanel.swift` `start()`, beside `originFamilyClocks` and `trayTakes`), and `originalsStrandedBy` is the one-shot read behind the Delete Block / pick-delete / whole-block-delete receipts (`StrandedOriginals.note`), run AFTER the flight lands — but awaited in the keystroke compound chain on the whole-block-delete road, where it holds the deferred-keystroke replay. The local index above serves `preservedOriginals`' subquery too only if that subquery is re-shaped to seek by block; the lineage CTE needs a rewrite (O(L) reachability). Proposed as their own ticket — see the proposal sent to the orchestrator.
 - B1-4 — VX-649 trace (the list door's road; shared cause with VX-647?): NOT-STARTED.
 - B1-5 — VX-649 pin + fix, or deferral case: NOT-STARTED.
 - B1-6 — close: `swift test` green on touched core; app-target/walk needs listed; self-assessment: NOT-STARTED.
