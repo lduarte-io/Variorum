@@ -3779,3 +3779,23 @@ store (expected). HER HANDS: two stray walk notes sit in Home's Trash (the walke
 and nobody routed around it — they age out in 30 days, or your Delete Now takes them); the REAL store's field-guide
 re-seed (the guide's new MCP sentences reach your library only through Help ▸ Restore Field Guide…, your window); the
 release that carries this run states "local-only migration v1_34" as a release fact.
+
+#249 — **THE VX-440 BUNDLE (the binding record is `notes/plans/fixes/vx-440-sheets-history-clarity.md`; the handoff
+`notes/handoffs/vx-440-handoff.md` carries the same list with the walk shots).** The run's provisionals, hers at
+leisure: **P-440-1** a version's full-size open writes NO per-note memories (always opens at the start, read-only) ·
+**P-440-2** Compare seats ordinary peers first, then saved versions newest-first · **P-440-3** a brought-back take
+wears the commit's name as its label · **P-440-4** bring-back speaks a quiet receipt, no structural-undo entry
+(branchVariant's posture) · **P-440-5** the promote confirm's copy ("Stop counting this as a version?" / "It becomes
+a regular note — unarchived, unsealed, wearing the note's current tags." / Promote) · **P-440-6** the version
+column's and band's wording ("a saved version of this note"; "A saved version of ‹title› · ‹date›") · **P-440-7**
+after Promote from the band, the pane shows the promoted note as a note · **P-440-8** where a restore lands and
+washes (Write's detail and the Takes board; elsewhere receipt-only; the wash ignores the mode-switch flash setting)
+— PLUS its W-1 consequence: after a restore beside Takes/Lenses the ring is OFF the restored take's pane until she
+clicks back in · **P-440-9** the resting commit row is stamp · name · a quiet ◦ (automatic only) — FLAGGED: an
+unnamed commit at rest shows only a time, none of its words · **P-440-10/-11** the new Mac wording (joins VX-234's
+copy pass) · **P-440-12** VX-356's Study mark is the navigator's viewed-chapter face · **P-440-13** VX-611's one
+rule reached every Trash/Put-back sentence (beyond the two sighted). Open beside them: `show_in_app` still REFUSES
+version ids (kept deliberately — the app state now exists, so opening it is a one-line MCP decision at her word);
+VX-664 (High) wants her ruling on the P-3 live-pane exception (the outside-change class behind the walk's W-1);
+VX-668 is the read-in-full sheet's lost landing (order fixed, the landing itself ticketed with the trace plan).
+**Status: PROVISIONAL-and-built; nothing gates the core.**

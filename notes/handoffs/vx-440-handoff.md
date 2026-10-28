@@ -26,7 +26,14 @@ Record: `notes/plans/fixes/vx-440-sheets-history-clarity.md` · Ladder: `notes/p
 5. **`show_in_app` and version ids** — the wire still REFUSES a version id (kept deliberately; the app
    state now exists, so opening it is a one-line MCP decision whenever you want it). Say the word and it's
    a ticket.
-6. **VX-642-adjacent, not this run's:** nothing here touched Private/Seal/Own.
+6. **VX-668 (the one shipped gap, named):** the read-in-full sheet's Restore applies the words in the right
+   order but doesn't LAND (caret at the block's end, no wash) — the row road lands perfectly. Traced by
+   elimination to the editor's onChange push missing the parcel across the inspector-sheet teardown; the
+   trace plan and fix shape are on the ticket. Everything else on both restore roads is film-verified.
+7. **VX-642-adjacent, not this run's:** nothing here touched Private/Seal/Own.
+
+The full provisional bundle is **QUESTIONS #249**; the W-1 ring consequence and P-440-9's unnamed-commit
+flag live there too.
 
 ## What shipped (members, all PENDING(Done-flip) at the merge)
 
@@ -73,5 +80,11 @@ Record: `notes/plans/fixes/vx-440-sheets-history-clarity.md` · Ladder: `notes/p
 
 ## Mechanical state
 
-PENDING(canon-size line) · PENDING(mobile parity line) · PENDING(QUESTIONS bundle number) ·
-PENDING(in-flight row retired, worktree removed, branch deleted, debris swept).
+Canon: AppSpec §9 (`bringBackCommitAsTake`), SurfaceContracts (The note ×2 lines, The Bookcase ×4), MCPSpec
+(the gathering place doors, superseding P-VX185-2) — all applied on the branch; `Tools/canon-size` at the
+final tip: **126,682 / 150,000 (headroom 23,318)**. QUESTIONS bundle: **#249**. MOBILE PARITY: **PL-62**
+(the gathering kind word's phone half owed behind the defaulted seams; the phone's Block History could offer
+Bring back as a take — the shared op shipped; the landing wash likely n/a on the phone). Merges: vx-601 and
+VX-648 both merged IN (the second-merger rule); the final gate was the WHOLE VariorumTests target at the
+merged tree. Post-merge: in-flight row retired, AppSpecRecord entry appended, worktree removed, branch
+deleted, DerivedData/walk debris swept.
