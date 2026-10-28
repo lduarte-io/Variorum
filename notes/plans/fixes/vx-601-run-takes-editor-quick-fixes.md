@@ -933,9 +933,15 @@ No behavioural revert is in flight.
   unreachable from this session (re-auth) — the ticket bodies were read from this file only.
 - Trace — DONE (below): the PROBE (13 standalone offscreen binaries) found ONE AppKit mechanism
   that is BOTH members' symptom; the scout's hypothesis is FALSIFIED by measurement.
-- Pins — IN PROGRESS (`VariorumTests/CaretPressTests.swift`).
-- Fix — NOT STARTED (the settled design below).
-- Builds / red-green / walk — PENDING.
+- Pins — DONE (this commit): `VariorumTests/CaretPressTests.swift`, 21 tests in 3 suites —
+  `PaneCaretPressTests` (VX-429: 3 red-on-old + 4 guards), `EditorCaretPressTests` (VX-592 in
+  Write: 2 red-on-old + 2 guards), `CaretPressRuleTests` (the pure rule: 10, green by
+  construction). The rule type `Surface/CaretPress.swift` lands in the same commit UNWIRED, so this
+  commit's tree IS the pre tree.
+- Build `DerivedData/vx601a2-pre` (this commit's tree: pins + rule, no wire) — DONE,
+  build-for-testing GREEN (`DerivedData/logs/a2-pre-build.log`).
+- Fix (the two wires) — NOT STARTED.
+- Builds post / rev429 / rev592, red-green runs, walk — PENDING.
 
 **THE PROBE (standalone `swiftc` binaries in the session scratchpad, copies kept in the gitignored
 `App/Variorum/DerivedData/a2probe/` — never the app, no store, no screen: windows at −20 000 never
