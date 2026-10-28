@@ -770,6 +770,14 @@ three suites carry their own.
 **LIVE STATUS (this follow-up):**
 - Trace + verdict — DONE (above).
 - Rig fix — DONE (this commit); `DerivedData/vx601a-post` rebuilt, build-for-testing GREEN.
-- Rebuild of `vx601a-pre`, `vx601a-rev421`, `vx601a-rev248` with the fixed rig — NOT-STARTED (next
-  commit; reverts committed-first, restored by checkout, as before).
-- The red runs on all three + the green tiers — PENDING the coordinator's next window.
+- Rebuild of `vx601a-pre`, `vx601a-rev421`, `vx601a-rev248` with the fixed rig — DONE: each revert
+  committed-first (from e007ac1a), built, restored by `git checkout -- …/PaneSurface.swift`; all three
+  build-for-testing GREEN (logs `rebuild-{pre,rev421,rev248}-gate.log`); every test bundle postdates the
+  rig source (pre 20:20:59 · post 20:18:49 · rev421 20:22:12 · rev248 20:23:24; the source 20:17:44).
+  No revert in flight; the source is HEAD.
+- The red runs on all three + the green tiers — PENDING the coordinator's next window (the
+  READY-FOR-SUITES commands and the prediction table stand unchanged; the pre run's 20:03 result —
+  12 tests, 9 red exactly as predicted, the 3 guards green — matched the table and is re-run on the
+  rebuilt tree with the rest).
+- Expected cost of the gate in a window: one wait per test process, ≤ ~1–2 s when the host opens
+  normally (the half-second tail included); 20 s at most if the host cannot open.
