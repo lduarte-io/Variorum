@@ -1,6 +1,6 @@
 # VX-440 — Sheets & history clarity: books, Block History, versions
 
-**STATUS: OPEN — kicked off 2026-10-28 (overnight, `/architect-phase`).**
+**STATUS: CLOSED 2026-10-28 (kickoff to merge in one overnight run; PR #201, merge commit on main; the handoff `notes/handoffs/vx-440-handoff.md`).**
 Ticket: **VX-440** (Umbrella) · Project: v1 release readiness · Branch: `vx-440-sheets-history-clarity` ·
 Worktree: `~/dev/variorum-vx-440` (the Pro) · PR: `VX-440: …` (merge commit only).
 Orchestrator: Fable (session name `VX-440`). Stage: via **oct27coordinator** — REQUEST → READY → GO protocol
@@ -1369,6 +1369,27 @@ chromeLabel idiom (:680/:921/:968/:1006). A fresh round re-reading a one-line di
 - Teardown: the reshoot note to the Trash, two walk-added keys deleted by exact key, three launch-rewritten
   values re-imported, prefs diff EXIT 0 (2599/2599), voice restored, nothing purged, app quit by bundle id,
   her /Applications app never ran.
+
+### vx440-final (2026-10-28, claimed 08:28:58 → renewed 09:13:52 at the coordinator's word → released 09:16:28)
+
+- **The WHOLE VariorumTests target at the merged tip `1f436387c`** (both main merges in — vx-601's at the
+  batch 2→3 seam, VX-648's with the two one-line-bullet canon conflicts resolved as main's lines + this run's
+  insertions re-applied): **5,572 tests in 978 suites, 0 restarts** — 4 standing VX-665 warnings, 14
+  known-issue annotations, and TWO real failures, both dispositioned:
+  - **ShellChromeTests.theSidebarToggleIsDeclaredOnItsTwoDoors — MAIN'S OWN RED, not this run's:** main's
+    `RootView.surfaceCapabilities` is `[.toggleSidebar, .switchWing]` (VX-648/VX-644's deliberate surface
+    wing switcher) while main's pin still expected `[.toggleSidebar]`; this branch had ZERO diff on the test
+    file. Fixed HERE at the coordinator's explicit GO (road 1): the pin names the full declared set, the
+    commit crediting VX-648/VX-644; ShellChromeTests then "6 tests in 1 suite PASSED" in its own run. Main
+    had been red on this pin since `edc7a901b`.
+  - **DestructiveUndoWarningTests.redoNeverAsks — VX-608's standing order/state-dependent flake** (red on
+    main since 10-27, pre-dating this run): failed in the whole-target run, PASSED solo, then FAILED solo
+    again with the same 3 issues — flaky both directions even alone; both sightings + a VX-666
+    defaults-pollution hypothesis commented on VX-608. Not this run's regression (the diff doesn't touch the
+    undo-warning paths).
+- The only non-notes delta between the whole-target tree and the branch tip is the one test file's pin line,
+  verified green post-rebuild in its own run. Guards at release: zero instances, no Problem Reporter, no new
+  `.ips`, no sims, worktree clean.
 
 ## THE WALK PLAN (claim `vx440-walk` — runs only after a green vx440-tests window, on the coordinator's GO)
 
