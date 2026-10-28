@@ -54,7 +54,7 @@ Pieces:
 - U2-5 — the gated probe (`VX653_PROBE=1`) + "UNIT 2 MEASUREMENTS" below: PENDING.
 - U2-6 — full headless `swift test` at unit end: PENDING.
 
-Revert state: **no behavioral revert in flight.**
+Revert state: **BEHAVIORAL REVERTS STARTING (announced this commit; both from a committed tree, restored by `git checkout --`):** (R1) `Sources/VariorumCore/Queries/Trash.swift` ← its body at 50d8aa6ed (the old `originalsStrandedBy`), expect the VX-654 step pin RED and every rows pin GREEN; restore from f1066ac8a. (R2) `Sources/VariorumCore/Persistence/Migrations.swift` ← v1_34's body replaced by a no-op (index withheld — the VX-653 measurement's tree), expect the two VX-653 guards RED; restore from HEAD. If a session dies mid-revert: `git diff --stat` shows which file is reverted; `git checkout -- <file>` is the safe restore.
 
 ## LIVE STATUS (flip per piece, same commit)
 
