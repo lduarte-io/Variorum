@@ -1311,3 +1311,27 @@ and was restored by its exact key to **29** (`defaults write -int 29`, read back
 before; every other library's counter unchanged against the before-export); remaining CHANGED =
 bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`). Final export
 `/tmp/vx601a2-prefs-final2.plist`. F-A2W-1 is CLOSED by this leg.
+
+## BATCH B RECORD — the board and its doors: VX-428 + VX-577 + VX-594 (implementer: opus-implementer, 2026-10-27)
+
+**NOT DONE (first line, kept current):** everything below is IN PROGRESS — the suite window and
+the USE walk are the orchestrator's (this session never runs `xcodebuild test`, never launches the
+app, never claims the stage); every red/green claim is a PREDICTION, PENDING that window. No
+behavioural revert is in flight.
+
+**LIVE STATUS**
+- Reading — DONE: this file (the sitting record R-601-2/R-601-4, members VX-428/VX-577/VX-594,
+  batches, ENVIRONMENT TRAPS, BATCH A + A2 records incl. the rig diagnosis and the launch gate
+  `HostLaunchSettle`), `notes/SurfaceContracts.md` "The note", `notes/TEXTKIT2_NOTES.md` in full,
+  `notes/SessionResiliencyProtocol.md`, the live tickets VX-428/VX-594 (body + her triage comment +
+  the pricing scout) read through Linear (read-only); code: `EditorRouter`, `TakesBoardLayout`,
+  `TakesViewModel` (lifecycle, adopt, focus/blur/park, expansion forwards, reveals, the R73 key
+  family), `TakesChoreographer` (landings), `TakesBoardView` (init, header, articleRow, the slot-split
+  bloom, cards, the routed handler), `TakesLensFilterController`, `TakesFindController.land`,
+  `TakesShared` (cell menu, `TakeCardActs`/`TakeCardMenu`), `WriteTakesPanel`, `LensesBoardView`'s
+  ⌘T arm, `TakesBottomBar`'s take doors, `CapabilityRegistry`'s take family + `Capability`, the
+  pins `TakeCardDoorTests`, `TakesBoardTests`, `TakesArticleScrollTests`, `TakesBoardSoakTests`,
+  `TutorialWalkTests.branchOnAClosedFanRevealsTheNewTake`.
+- Trace / probe — IN PROGRESS (below).
+- VX-428 — NOT-STARTED. VX-577 — NOT-STARTED. VX-594 — NOT-STARTED.
+- Builds / READY-FOR-SUITES / walk rows / self-assessment — NOT-STARTED.
