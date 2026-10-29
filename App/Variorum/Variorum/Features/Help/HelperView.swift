@@ -26,6 +26,9 @@ struct HelperView: View {
     }
 
     var body: some View {
+        #if DEBUG  // F-FW-2's pin door (`HelperViewOracle`): what this body drew in
+        let _ = HelperViewOracle.drew(tokens, theme: themeStore)
+        #endif
         TabView {
             shortcutsTab
                 .tabItem { Text("Shortcuts") }

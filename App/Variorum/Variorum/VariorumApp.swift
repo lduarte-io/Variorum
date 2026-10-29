@@ -479,7 +479,8 @@ struct VariorumApp: App {
         // Sitting 9 (R73/R91): the shortcut helper + dictionary window
         // (⌘/, Help menu, the status bars' "?").
         Window("Shortcuts & Dictionary", id: "variorum-helper") {
-            HelperView()
+            // F-FW-2 (the VX-677 run): the window's content, moved out so a pin mounts exactly this.
+            HelperSceneContent(state: bootstrap.state)
         }
         // VX-572 (PROVISIONAL P-572-2): wider and taller by default — the
         // chord column is a fixed 190 pt now, and the descriptions read in
