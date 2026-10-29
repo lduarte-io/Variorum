@@ -1581,3 +1581,47 @@ Every other row (C1–C3, C6–C11) is unmoved by this round: no test in them ch
 - **F-FR-2 — TICKETED as VX-705 (Bug · Suspected · MCP · Low):** the agent's move-at-once road adopts its target with no liveness check — reaching it needs a deletion racing the call (the wire's read found the target readable moments before), the same tombstone-open class F-L2 closed on the press roads. The ticket carries the pointer here.
 
 **Next per the sequence:** merge main IN (`5bc040cf5` — #206's WalkKit line + the notes-only vx-669 addendum), then the ONE product rebuild at the final tip (the rebuild list in "READY-FOR-THE-STAGE — claim C": every product + the walk app, each revert re-applied and binary-panel verified, now incl. `revFL2` and the `vx677-b1` pair), then claim C through the coordinator, then the closeout.
+
+### FINAL REBUILD 2 RECORD (post-ladder, at the merged tip; implementer: Opus, fresh session)
+
+**NOT DONE (first line, kept current):** no `xcodebuild test`, no app launch, no walk, no stage claim, no subagent. Every claim C verdict (C1–C15) and the claim-C walk rows stay the orchestrator's window. Not one tracked file except this record is edited by this unit; every revert is a transient working-tree state, restored by `git checkout --` and never committed. NOT rebuilt (not in claim C's product list): `vx677-b2/*`, `vx677-b3/rev675`, `vx677-b4/rev572`, `vx677-b1/rev656`. *(Kept current below: IN PROGRESS — the products are being built.)*
+
+*Read in this session's own context before any build (never delegated): CLAUDE.md and its auto-loaded canon; `notes/SessionResiliencyProtocol.md`; this file's rails, environment traps, coordinator protocol and LIVE LEDGER; the FINAL-WINDOW REBUILD BRIEF + FINAL REBUILD RECORD (the pattern this unit repeats); the WALK RESULTS — vx677-final; the FIXES BRIEF + FIXES RECORD (rev668's and revFW2's recipes, F-5's products); "READY-FOR-THE-STAGE — claim C" in full (the products, its bold rebuild paragraph, C12/C13's binary check, C14's recipe); the LADDER ROUND 1 — FIX RECORD; the LADDER CLOSE.*
+
+**The tree being built.** The tip is `e32ea95b4` (committed 2026-10-29 04:38:03 −0600); its code is the merge `c7ed522ab` (main `5bc040cf5` merged in; `e32ea95b4` changes only this record). Since claim C's products were last built (`1d960469e`), the code moved three ways, so every product rebuilds: the #204 merge `161399ce2` (the Prince seed — `Shared/SampleLibrary/*`, `LaunchFurniture`, `TutorialSeeder`, the registry, `MobileFirstWriteFurniture` and their tests), ladder round 1's fix round (`MCPDoor.swift`, `MCPPaneCopy.swift`, `MCPShowOfferFacesTests`, `OutsideWriteLivePaneTests`, `RestoreLandingInspectorTests`), and the main merge `c7ed522ab` (`Tools/WalkKit/first-run-walk.sh`, the handoff addendum, and ONE app resource the merge's subject line does not name: `Features/WhatsNew/ReleaseNotes-0.10.5.md`).
+
+**Where each recipe's exact text comes from** (nothing re-authored): `rev664` — the final rebuild's `final-rebuild/rev664.sh` (the dispositions session's perl, verbatim); `rev676` — batch 3's `reverts/rev676.py`; `rev674` — the final rebuild's `final-rebuild/rev674.py` (batch 4's python, verbatim); `rev668` and `revFW2` — the FIXES RECORD F-5 lines, each scripted here as ONE exact-match replacement (`final-rebuild-2/rev668.py`: `        if parkedRestoreLanding != nil {` → `        if false { // VX677-REVERT`; `final-rebuild-2/revFW2.py`: `            .environment(theme)` → `            // .environment(theme) // VX677-REVERT`); `revFL2` — C14's three edits, scripted as exact-match replacements (`final-rebuild-2/revFL2.py`: `        return stands` → `        return true // VX677-REVERT` · `        if delivery == .unfinished { session.status.refuse(words) }` → `        if false { session.status.refuse(words) } // VX677-REVERT` · `            session.status.refuse(MCPReceiptCopy.noWindow)` → `            // session.status.refuse(MCPReceiptCopy.noWindow) // VX677-REVERT`). Every script asserts its old text occurs EXACTLY ONCE before it writes. (Paths relative to this session's scratchpad; the recipes' text is the record's, so a successor needs only this record.)
+
+**Dry run at the merged tip, before any tree edit** — every recipe applied to scratch COPIES and diffed; each matched its recorded shape exactly, and the three single-file reverts `swiftc -parse` clean:
+
+| Recipe | Lines changed | Markers | Files |
+|---|---|---|---|
+| `rev664` | +3 | 3 | `PaneTextAuthority.swift` (+2), `PaneSurface.swift` (+1) |
+| `rev676` | +2 −6 | 2 | `MCPShowTool.swift` (+1 −5, the dial switch collapsed), `MCPDoor.swift` (1 replaced) |
+| `rev674` | +1 | 1 | `BlockHistoryPane.swift` |
+| `rev668` | +1 −1 | 1 | `EditorViewModel.swift` |
+| `revFW2` | +1 −1 | 1 | `HelperSceneContent.swift` |
+| `revFL2` | +3 −3 | 3 | `MCPDoor.swift` (each of C14's three lines unique in the file — `grep -cF` 1 each) |
+
+**The binary panel** is the final rebuild's `panel-c.py` (its 15 rows) plus three rows for revFL2's functions — `MCPDoor.placeStands` (with its async partials), `static MCPDoor.deliverHerPress` (likewise) and `MCPDoor.openShow` — as `final-rebuild-2/panel-2.py`. Validated before any build on the pre-rebuild `vx677-b5/post` + `vx677-c/rev668` (both at `1d960469e`): it reproduces `panel-rev668.txt` row for row (`adoptRewrite` 324 → 142, every other row equal); the new rows read `placeStands` 0 (0) and `deliverHerPress` 0 (0) there (the functions did not exist yet) and `openShow` 211 (its pre-fix-round form). A revert product must differ from its `post` twin ONLY in its own member's rows, and every rebuilt `post` must agree with every other.
+
+**REVERT BUILDS ANNOUNCED (before any starts; the tip is committed, so `git checkout -- <files>` is an exact restore; nothing is ever committed mid-revert):**
+- `vx677-b1/rev664` (in place): batch 1's three-line revert re-applied (`rev664.sh`).
+- `vx677-b3/rev676` (in place): batch 3's `rev676.py`, two edits.
+- `vx677-b4/rev674` (in place): batch 4's `rev674.py`, one line.
+- `vx677-c/rev668` (in place — the dir the fixes unit cloned from `vx677-b5/post`): the fix's one line.
+- `vx677-c/revFW2` (in place — the dir the fixes unit cloned from `vx677-b4/post`): the fix's one line.
+- `vx677-c/revFL2` (NEW — an APFS clone, `cp -c -R`, of `vx677-b3/post` AFTER that product is rebuilt at this tip): C14's three edits.
+
+The procedure for each, one at a time: apply over the clean committed tip → `git diff --stat` matches the dry run → `build-for-testing` into the product dir → restore by `git checkout --` → `git status` empty and no `VX677-REVERT` marker under `App/`, `Sources/` or `Tests/` → only then this record, the commit and the push. Every build: from `App/Variorum/`, `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<product> build-for-testing`, the log under the product's `logs/` with `EXIT <status>` appended; the walk app `xcodebuild -scheme Variorum -configuration Debug -destination 'platform=macOS' -derivedDataPath DerivedData/vx677-app build` (the earlier builds' own line), built only, never launched.
+
+**LIVE STATUS** (flipped in the same commit as each piece)
+- FR2-0 — preflight, the recipes recovered + dry-run, the panel extended + validated, this record: DONE (this commit).
+- FR2-1 — `vx677-b1/post` + `vx677-b1/rev664` + C12/C13's binary check: NOT STARTED.
+- FR2-2 — `vx677-b3/post` + `vx677-b3/rev676`: NOT STARTED.
+- FR2-3 — `vx677-b4/post` + `vx677-b4/rev674`: NOT STARTED.
+- FR2-4 — `vx677-b5/post` + `vx677-c/rev668`: NOT STARTED.
+- FR2-5 — `vx677-c/revFW2`: NOT STARTED.
+- FR2-6 — `vx677-c/revFL2` (NEW): NOT STARTED.
+- FR2-7 — the walk app `DerivedData/vx677-app` + its provenance: NOT STARTED.
+- FR2-8 — the whole panel at the end + the tree-clean check: NOT STARTED.
