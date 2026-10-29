@@ -157,6 +157,14 @@ struct OutsideWriteLivePaneTests {
     /// tree it still read her pre-edit words, editable — her next key would
     /// have written them back over the AI's edit (the door's flush-first rule
     /// had already landed her typing; nothing ended the ring).
+    ///
+    /// **Its two fixture predicates are PLAIN closures bound to locals** (the
+    /// VX-677 ladder round 1, F-L1 — VX-692): they sat inside
+    /// `#expect(await settle { … })`, the exact shape that merged its Lenses
+    /// sibling's first predicate with its decisive one (D-1). Here it compiled
+    /// honestly only by numbering — the first fixture predicate and the
+    /// decisive `shows` held ADJACENT discriminators (#2 / #3), one closure
+    /// away from sharing a body. The bodies are byte-unchanged.
     @Test func aLiveTakesArticleShowsAnAIsEditToItsOwnTake() async throws {
         try await withWorld { w, theme in
             let target = w.blocks[2]
@@ -167,14 +175,16 @@ struct OutsideWriteLivePaneTests {
             let hosting = mountBoard(
                 TakesBoardView(session: w.session, postID: w.postID, model: model),
                 theme: theme, in: window)
-            #expect(await Self.settle(window, hosting) {
+            let showsTheTake = await Self.settle(window, hosting) {
                 Self.pane("article", take, in: hosting)?.string == Self.prose(3)
-            }, "fixture: the article shows the take")
+            }
+            #expect(showsTheTake, "fixture: the article shows the take")
             model.focus(TakesViewModel.PaneKey(
                 columnID: TakesViewModel.takesMainColumnID, blockID: target, variantID: take))
-            #expect(await Self.settle(window, hosting) {
+            let isLive = await Self.settle(window, hosting) {
                 Self.pane("article", take, in: hosting)?.isEditable == true
-            }, "fixture: the pane is LIVE")
+            }
+            #expect(isLive, "fixture: the pane is LIVE")
 
             let words = Self.aiWords
             try w.session.operations.editTakeUnderInsurance(

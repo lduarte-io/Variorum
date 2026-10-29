@@ -1465,7 +1465,7 @@ Per suite: 2 · 1 · 5 · 2 · 4.
 **LIVE STATUS** (flipped in the same commit as each piece)
 - L-0 — this record's head: DONE (this commit).
 - L-1 — F-L4, the two-line comment tidy: DONE (this commit — `RestoreLandingInspectorTests.swift`'s header: the trace clauses become "the walk's DEBUG trace named the failed step (S4 — F-1), served, and was removed; the fix's pin is `RestoreLandingRewriteHopTests`, and these stay the green guard"; comment-only, +4 −4; `grep VX668-TRACE|VX668Trace|vx668Road` over `App/Variorum/{Variorum,VariorumTests,Shared}` + `Sources`: 0).
-- L-2 — F-L1, the Takes twin's predicates bound to locals: PENDING.
+- L-2 — F-L1, the Takes twin's predicates bound to locals: DONE (this commit — `OutsideWriteLivePaneTests.aLiveTakesArticleShowsAnAIsEditToItsOwnTake`: the two fixture predicates leave `#expect(await settle {…})` for `let showsTheTake = await Self.settle(…) {…}` / `let isLive = …` + `#expect(showsTheTake, …)` / `#expect(isLive, …)` — D-1's steps 2–3, every closure body and both messages byte-unchanged; the decisive `shows`, its three expectations and the Lenses test untouched; the doc gains the why. Test-only, no pin owed). Binary re-check and the red/green runs: L-6 and claim C (C12/C13 below).
 - L-3 — F-L2, the three fixture repairs (staging only): PENDING.
 - L-4 — F-L2, the pins + guards on the PRE-FIX tree: PENDING.
 - L-5 — F-L2, the fix (the take, the receipt road, the words): PENDING.
