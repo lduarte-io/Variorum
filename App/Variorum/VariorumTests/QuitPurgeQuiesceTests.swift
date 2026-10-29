@@ -136,7 +136,6 @@ struct QuitPurgeQuiesceTests {
         }
     }
 
-    /// **The sync half:** `SyncSession.quiesceForExit()` blocks on the
     /// **The stop() road (ladder R1, MINOR-3):** `AppServices.stop()` — the
     /// lock teardown, a sign-out's reconfigure — ends an in-flight sweep by
     /// a NON-AWAITING cancel (`AppSession.cancelLocalPurgeSweeps`, the one
