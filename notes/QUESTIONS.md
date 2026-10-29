@@ -1817,7 +1817,7 @@ the orchestrator's arbitrated call (the crossing's stamps are bounded by delayed
 unpushed-outbox arm covers longer offline gaps on its own):** hers to widen or narrow.
 **RATIFIED — 2026-09-22, the same word ("yeah ratify both"): the bounded revival stands as
 RULED behavior, the ONE-HOUR width ratified as set (still hers to move later if use argues);
-recorded at SyncSpec §7's dedupe bullet, dated.** *(Process note: she asked for plainer
+recorded at SyncSpec §7's dedupe bullet, dated.** **SUPERSEDED 2026-10-28 (VX-669, her ruling at the sitting — "Remove the defense leg"): the bounded revival is removed whole; a deliberate delete is never second-guessed at any distance; the ruled matrix's PASS rows are untouched. Record: `notes/plans/fixes/vx-678-trash-purge-resurrection.md`; pins: the her-scenario pair in `SyncReconciliationProbeTests`.** *(Process note: she asked for plainer
 explanations of both halves at the sitting — given — then ratified both.)* *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
 is a length floor, not an entropy floor; whether to pair it with a strength check is on the
 checkpoint bundle, propose-only — **DECLINED by her at the 2026-09-22 morning sitting ("decline");
@@ -3726,7 +3726,7 @@ layer's 4.5 floor in Terminal light). RIDERS still open while the code is warm: 
 triaged: VX-624 (the pre-existing 4-s landing watchdog spin, Suspected) · VX-629 (the follower wiring consolidates,
 Debt) · VX-630 (Index → Outline carry loses the caret's block, pre-existing Confirmed) · VX-631 (the "12 storys"
 receipt, Wording). **Status on the headline item, 2026-10-27 (her word, same evening): P-562-8 waits on her LIVE look — "hmm i'll have to see this live before deciding, good to have it noted though." As-built (the symmetric 8-pt band) stands until she rules; the wider leave-band remains the recorded alternative.**
-**2026-10-28 (her pass from the VX-620 thread):** P-562-1 → VX-646 (the navigator scrolls itself — the Open list's follow idiom) · P-562-2 → VX-645 (the follow-highlight in Book and Read modes) — both to be built, at her word.
+**2026-10-28 (her pass from the VX-620 thread):** P-562-1 → VX-646 (the navigator scrolls itself — the Open list's follow idiom) · P-562-2 → VX-645 (the follow-highlight in Book and Read modes) — both to be built, at her word (SHIPPED at VX-648: VX-646 / VX-645). **Status 2026-10-28 (her live look, the afternoon sitting): P-562-8 STANDS AS BUILT — her verdict: defensible, since at the bottom the last three notes are all on screen and a small scroll up shows the fourth-from-last for the first time. What she saw: stepping up from the bottom "goes straight from the last one to the fourth from last one" while going down steps one by one — R-562-D/D′'s stated cost, seen in reverse. She doesn't yet know what she'd want instead → the exploration ticket VX-682, unseated at her word.** **2026-10-28, her final pass (the sitting, after plain-words walkthroughs of P-562-5, P-562-7 and R-562-D's stated cost): "I think that is fine on all of those three items" — and with them #246 is FULLY RATIFIED as built, every remaining ratify-or-redirect row included. The bundle is CLOSED; the one live remainder is the deliberately parked exploration VX-682.**
 
 #247 — **THE VX-601 BUNDLE (the binding record is `notes/plans/fixes/vx-601-run-takes-editor-quick-fixes.md` — THE
 SITTING RECORD R-601-1…6, the four batch records, the walk records W/A/B/C, the ladder
@@ -3778,7 +3778,7 @@ carved history outlives its own Delete Now as N empty-block Trash rows; the fiel
 store (expected). HER HANDS: two stray walk notes sit in Home's Trash (the walker's Delete Now was classifier-DENIED
 and nobody routed around it — they age out in 30 days, or your Delete Now takes them); the REAL store's field-guide
 re-seed (the guide's new MCP sentences reach your library only through Help ▸ Restore Field Guide…, your window); the
-release that carries this run states "local-only migration v1_34" as a release fact.
+release that carries this run states "local-only migration v1_34" as a release fact. **Status 2026-10-28 (her sitting, the question sheet): RATIFIED WHOLESALE — A-648-5 · A-648-6 · A-648-8 · B2-P1…P5 · B3-P1…P5 · B4-P3; plus her word on B3-P1: the phone's Starred page gets a proper design pass someday (→ MobileSoul PL-63). P-B4-1 → the block-precise Outline landing RULED and ticketed (VX-680, seated in the VX-677 editor run). B4-P4 explained, pending her word. The offers: VX-653/VX-654 seated in VX-678; VX-655 left as is (her word); VX-663 and VX-662 seated in VX-677. Her-hands items stand: the stray walk notes (age out or her Delete Now), the real store's field-guide re-seed at the next release install.**
 
 #249 — **THE VX-440 BUNDLE (the binding record is `notes/plans/fixes/vx-440-sheets-history-clarity.md`; the handoff
 `notes/handoffs/vx-440-handoff.md` carries the same list with the walk shots).** The run's provisionals, hers at
@@ -3799,3 +3799,35 @@ version ids (kept deliberately — the app state now exists, so opening it is a 
 VX-664 (High) wants her ruling on the P-3 live-pane exception (the outside-change class behind the walk's W-1);
 VX-668 is the read-in-full sheet's lost landing (order fixed, the landing itself ticketed with the trace plan).
 **Status: PROVISIONAL-and-built; nothing gates the core.**
+
+#250 — **THE VX-678 BUNDLE (the binding record is `notes/plans/fixes/vx-678-trash-purge-resurrection.md`; the handoff
+`notes/handoffs/vx-678-handoff.md`).** **(a) P-671-1..6 — the Trash multi-select's shapes (each built to the most
+spec-defensible option, all working):** the bulk Put back order (books → notes/groups → blocks → originals); an
+original whose family came back in the same press is not re-placed; partial results speak in the refusal slot with
+both facts; bulk Delete Now is one atomic intent batch; the bulk row appears at 2+ picked; the wording — including
+"preserved original(s)", spelled three ways today (the ladder's NIT) — hers to tune. **(b) P-670-WF2 — the Trash's
+untitled-note name:** the Trash names an untitled note by its DAY (a deliberate 13l Act 7 decision, pinned) while the
+Library and Open list lead with first words (VX-580), so several deleted quick notes read identically and defeat the
+multi-select; the walk's finding. Options: (i) first words lead, the date as the row's secondary fact (needs a new
+core read — a deleted note's opening on its exact stamp; the live-only word read returns nothing for Trash rows);
+(ii) keep the date-name (SHIPPED today, nothing changed); (iii) the date stays the name, first words join as a quiet
+second line. **Status: OPEN (filed at the VX-678 closeout, 2026-10-28).**
+
+#251 — **THE VX-633/#204 BUNDLE (the binding record is `notes/plans/vx-633-prince-book.md` — the U1/U2/U2b
+records and the ladder files; everything below is BUILT and working, her ratify-or-redirect).** **(a) P-633-F1 — the
+phone's joined-account latch (ladder R1 F1, the dispute upheld and the real road fixed):** a phone session that JOINED
+an account after its launch-time fresh read never spends that stale fact — it declines and records — so a signed-out-
+after-join first write can't seed the Prince into a pulled library. Options: (i) the latch, as built; (ii) re-run the
+store read at spend time (rejected: declines every fresh phone); (iii) a durable library fact (custody-adjacent, not
+built). The final call's named sub-case rides: a sign-in-then-out-before-first-write user loses the Prince even when
+nothing pulled (no phone restore door exists) — inherent to the launch-fact design. The starter Journal's own
+pre-existing sibling is VM-35. **(b) U1's apparatus strips (built (a)):** Marriott's two unmarked apparatus blocks —
+XVIII's proverb epigraph and the Dacre verse block — are stripped like his footnotes (the Dacre verse returned as
+XXVI's third take, R-633-13); options (b)/(c) in the U1 record. **(c) The note-title format (U1, flagged):**
+`<roman>. <chapter title in sentence case>`, the dedication note titled `Dedication` — hers to retitle. **(d) U2b's
+"what is a fresh store" (decision 1, options a/b/c — built (a)):** never held writing AND the device's launch not
+settled; store truth alone or marks alone are the alternatives. **(e) U2b decision 2:** each platform judges at its
+own moment (the Mac at the seeder's deciding reads — an account store by what its first clean round brought; the
+phone by the prime-time fact, an untaken fact never a guess). **(f) The F3 wording note (the round-1 final call):**
+"each own their notes if none of them lives in another book" reads the fork-free condition jointly across both books
+— the rule is per book; hers at the copy pass. **Status: OPEN (filed at the #204 merge, 2026-10-29).**

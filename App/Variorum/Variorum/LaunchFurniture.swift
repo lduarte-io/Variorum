@@ -28,7 +28,13 @@
 //      books, in order — Sherlock, then *Encryption Explained* (its own
 //      mark, so an existing store seeds only the new one); 18l-c U6 adds
 //      Jekyll. 13i-d U7: Sherlock's outcome decides whether this launch is a
-//      FRESH store's birth (below).
+//      FRESH store's birth (below). VX-633: the launch seeds *The Prince*,
+//      bilingual, in Sherlock's place (`Book.launchSet`), and the launch
+//      book's outcome (`Book.launchBook`) is the one that decides the birth.
+//      U2b (R-633-16, "FRESH STORES ONLY"): ON A FRESH STORE ONLY — a store
+//      this device settled, or one that has held writing, declines it
+//      (`.existingStore`, recorded) and so is never arranged either; its road
+//      is Help ▸ Restore “the prince” (`SampleLibraryFreshStore`).
 //    · 13i-b U4 (P-13ib-4): the STARRED-NOTES gathering — an ordinary
 //      gathering on ★, seeded once per store (fresh AND existing), her
 //      deletion honoured; same occasion, same gate, its own mark.
@@ -70,9 +76,10 @@ enum LaunchFurniture {
     }
 
     /// Every seed a launch runs, in the launch's order. Answers the Welcome
-    /// arrangement's launch decision (nil only if `Book.launchSet` ever
-    /// stopped carrying Sherlock). Silent by design — every outcome is
-    /// logged by its own seeder, none is ever surfaced.
+    /// arrangement's launch decision (nil only if `Book.launchSet` were ever
+    /// empty — VX-633: the decision reads the LAUNCH BOOK's outcome, the
+    /// Prince's since Sherlock left the launch). Silent by design — every
+    /// outcome is logged by its own seeder, none is ever surfaced.
     /// 17y B-DEDUPE (R-17y-8): the loop iterates the LAUNCH SET — Jekyll
     /// left the default seed; the Restore doors still mint it from
     /// `Book.all`.
@@ -84,7 +91,17 @@ enum LaunchFurniture {
         marks: Marks = .production,
         firstRoundWait: Duration? = nil
     ) async -> SampleLibraryWelcome.LaunchOutcome? {
-        var sherlockOutcome: SampleLibrarySeeder.Outcome?
+        var birthOutcome: SampleLibrarySeeder.Outcome?
+        // VX-633 U2b (R-633-16, her word: "FRESH STORES ONLY"): the launch
+        // book seeds on a FRESH store's launch road only. A store this device
+        // already SETTLED (the Welcome mark, read as the arrangement reads it)
+        // is an existing store by the device's own record; otherwise the seed
+        // judges the store at its deciding reads, after the sync gate
+        // (`SampleLibraryFreshStore`). Read for a fresh-only book alone.
+        let loadWelcomeMark: () -> String? = marks.welcome?.load
+            ?? { SampleLibraryWelcome.storedLaunchMark(for: storeVariant) }
+        let freshness: SampleLibraryFreshness =
+            SampleLibraryWelcome.launchIsSettled(loadWelcomeMark()) ? .settled : .readAtDecision
         for book in SampleLibrarySeeder.Book.launchSet {
             let mark = marks.book?(book)
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
@@ -92,10 +109,11 @@ enum LaunchFurniture {
                 book: book,
                 storeVariant: storeVariant,
                 gate: gate,
+                freshness: freshness,
                 firstRoundWait: firstRoundWait,
                 loadMark: mark?.load,
                 saveMark: mark?.save)
-            if book == .sherlock { sherlockOutcome = outcome }
+            if book == SampleLibrarySeeder.Book.launchBook { birthOutcome = outcome }
         }
         await StarredGatheringSeeder.seedIfNeeded(
             session: session,
@@ -104,9 +122,9 @@ enum LaunchFurniture {
             firstRoundWait: firstRoundWait ?? SampleLibrarySeeder.firstRoundWait,
             loadMark: marks.starred?.load,
             saveMark: marks.starred?.save)
-        guard let sherlockOutcome else { return nil }
+        guard let birthOutcome else { return nil }
         return await SampleLibraryWelcome.arrangeAtLaunch(
-            session: session, sherlock: sherlockOutcome,
+            session: session, launchSeed: birthOutcome,
             storeVariant: storeVariant,
             guideName: TutorialSeeder.bookName,
             // 17y B-SEED: the field guide is born with the store, on the

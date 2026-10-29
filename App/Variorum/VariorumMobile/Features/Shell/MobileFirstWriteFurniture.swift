@@ -35,6 +35,9 @@
 //     is not seeding; what her ruling moved off the launch path is the
 //     MINT. This one gates the starter Journal only — the sample library
 //     is not new-user furniture (her Act 3 ruling: every reader's store).
+//     *(VX-633 U2b — R-633-16, "FRESH STORES ONLY": the launch book, the
+//     Prince, IS fresh-store furniture now; its own fact is taken here at
+//     launch beside this one, by the shared rule — `SampleLibraryFreshStore`.)*
 //  3. **Has this device seeded before?** — the per-store-variant marks,
 //     each seeder's own. Deleting the furniture keeps it deleted.
 //
@@ -50,6 +53,7 @@
 //
 
 import Foundation
+import Observation
 import OSLog
 import VariorumCore
 
@@ -86,7 +90,10 @@ final class MobileFirstWriteFurniture {
         /// The occasion ran. `journal` is nil when the launch verdict was
         /// never taken (`prime` never ran, or its read failed) — the
         /// starter Journal is skipped rather than guessed at, while the
-        /// sample library, which has no virgin-store guard, still runs.
+        /// sample library's seeder still runs (VX-633 U2b: with its own
+        /// launch-time fact untaken too, the fresh-only launch book reads
+        /// the store as not fresh — never a guess; ladder R1 F2: and decides
+        /// nothing — `.freshnessUntaken`, unrecorded, asked again next time).
         case ran(journal: MobileStarterJournal.Outcome?,
                  sample: SampleLibrarySeeder.Outcome)
     }
@@ -98,6 +105,28 @@ final class MobileFirstWriteFurniture {
 
     /// Fact 2, taken at launch and spent at the write. Nil until `prime`.
     private var storeWasEmptyAtLaunch: Bool?
+    /// **The launch book's fresh-store fact** (VX-633 U2b — R-633-16, her
+    /// word: "the phone mirrors: its first-write occasion seeds the launch
+    /// book on a fresh store only"), taken at launch beside fact 2 for the
+    /// same reason — by the write her own note exists. The SHARED rule
+    /// (`SampleLibraryFreshStore.storeIsFresh`), so the two platforms judge
+    /// one predicate; nil until `prime` (or when its read failed), which the
+    /// occasion spends as NOT fresh — never a guess that seeds — and as no
+    /// decision (`.untaken`, ladder R1 F2: nothing recorded).
+    private var storeWasFreshAtLaunch: Bool?
+    /// **Has this session JOINED AN ACCOUNT since `prime` took its facts?**
+    /// (VX-633 ladder R1 F1 — PROVISIONAL P-633-F1.) Latched the first time
+    /// the account gate reads true: at `prime`, or after any later change to
+    /// what it reads (`watchTheAccountGate`). The occasion's own first line
+    /// already answers a store that belongs to an account at the write
+    /// (`.accountOwned`). This latch covers the one road that line cannot see:
+    /// a session that signed in (the account's library landing by the pull)
+    /// and signed OUT again before her first write. Sign-out keeps the library
+    /// on the phone, the gate then reads no account, and the launch fact,
+    /// taken on the empty store before the join, would still say fresh and
+    /// seed the Prince into the library the pull brought. A latched session
+    /// never spends that fact: the launch book declines, recorded.
+    private(set) var joinedAnAccountSincePrime = false
     /// The one in-flight occasion. Held (rather than a bare bool) so a
     /// second door firing mid-seed joins the first instead of starting a
     /// second, and so a pin can await deterministically what production
@@ -140,8 +169,38 @@ final class MobileFirstWriteFurniture {
     ///
     /// A read that throws leaves the verdict UNTAKEN rather than guessing
     /// `true`: the guess that seeds is the one that duplicates her Journal.
+    /// VX-633 U2b (R-633-16): a second cheap read, the launch book's
+    /// fresh-store fact (`storeWasFreshAtLaunch`), on the same terms. VX-633
+    /// ladder R1 F1: and from here on, the account gate is watched — a fact
+    /// taken before the session joined an account is never spent after it.
     func prime() async {
         storeWasEmptyAtLaunch = try? await MobileStarterJournal.storeIsNew(session)
+        let launchBook = SampleLibrarySeeder.Book.launchBook.name
+        storeWasFreshAtLaunch = try? await session.database.read { db in
+            try SampleLibraryFreshStore.storeIsFresh(db, ownBook: launchBook)
+        }
+        watchTheAccountGate()
+    }
+
+    /// **VX-633 ladder R1 F1 (P-633-F1): the watch on the account gate.** One
+    /// observation of everything the gate reads — production's reads
+    /// `SyncSession.isConfigured` and `AccountState.variorum`, both
+    /// `@Observable` — re-armed after every change until the gate first
+    /// reads TRUE, which latches `joinedAnAccountSincePrime` for good. The
+    /// change callback runs BEFORE the change lands (Observation's
+    /// `willSet`), so the re-read hops onto the main actor and runs after it;
+    /// a sign-in and the sign-out that may follow are an account round
+    /// apart, never inside one hop. Held weakly: a lock ends the session and
+    /// drops the furniture (`VariorumMobileApp`'s `onWillLock`).
+    private func watchTheAccountGate() {
+        guard !joinedAnAccountSincePrime else { return }
+        let gate = self.gate
+        let joined = withObservationTracking {
+            gate.belongsToAnAccount()
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in self?.watchTheAccountGate() }
+        }
+        if joined { joinedAnAccountSincePrime = true }
     }
 
     /// **The signal.** Called by every door that puts content in the store;
@@ -197,7 +256,10 @@ final class MobileFirstWriteFurniture {
         // R-pre13u-8: the phone gets the sample library on the same
         // occasion, through the same gate — and with NO virgin-store guard,
         // exactly as the Mac has none (her Act 3 ruling is every reader's
-        // store, not every new reader's). `.unowned` again, for the reason
+        // store, not every new reader's). *(VX-633 U2b — R-633-16: except the
+        // launch book, the Prince, which seeds on a FRESH store only, on both
+        // platforms — judged here by the fact `prime` took at launch.)*
+        // `.unowned` again, for the reason
         // above, and it also makes the Mac's bounded wait structurally
         // unreachable from the phone: this occasion never waits.
         //
@@ -215,9 +277,29 @@ final class MobileFirstWriteFurniture {
         let session = self.session
         let storeVariant = self.storeVariant
         let marks = self.marks
+        // VX-633 U2b (R-633-16): the launch-time fact. The Prince's own
+        // partial copy (a first write's seed stopped by a lock) is still
+        // completed on every arm — `SampleLibraryFreshStore`.
+        // Ladder R1 F2: an UNTAKEN fact (`prime` never ran, or its read
+        // failed) is `.untaken` — not fresh, and not a decision either: the
+        // decline is never recorded, so the next occasion asks again (the
+        // Journal's never-a-guess rule above, same shape).
+        // Ladder R1 F1 (P-633-F1): a taken fact is never spent by a session
+        // that has joined an account since — what the pull brought is not
+        // what `prime` read; the launch book declines, recorded.
+        let freshness: SampleLibraryFreshness = storeWasFreshAtLaunch.map {
+            .takenAtLaunch(!joinedAnAccountSincePrime && $0)
+        } ?? .untaken
+        // VX-633 (R-633-6): the LAUNCH BOOK — *The Prince*, bilingual, in
+        // Sherlock's place on both platforms (the R-17y-8 precedent: a launch
+        // list names people's libraries, and a phone-seeded copy re-arrives
+        // everywhere by sync). This occasion used to name no book and so
+        // seeded Sherlock by the seeder's default; it reads the shared list
+        // now, so the two platforms can never drift.
         let sample = await Task(priority: .utility) { @MainActor in
             await SampleLibrarySeeder.seedIfNeeded(
-                session: session, storeVariant: storeVariant, gate: .unowned,
+                session: session, book: .launchBook, storeVariant: storeVariant, gate: .unowned,
+                freshness: freshness,
                 loadMark: marks.loadSample, saveMark: marks.saveSample,
                 pacing: { await Self.holdWhileWritingLands(session) })
         }.value

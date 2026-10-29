@@ -13,28 +13,27 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-677 — Run: editor, panes & the AI door** (eleven members by the sub-issue listing: VX-664 ring rule · VX-656 Write undo · VX-668 restore landing · VX-572 shortcuts pane · VX-674 commit preview · VX-675/VX-676 show_in_app · VX-663/VX-662/VX-680/VX-681 the navigation-carry family; the brief `notes/handoffs/vx-677-kickoff.md`, the record `notes/plans/fixes/vx-677-editor-panes-ai-door.md`). NO Sync/ (VX-678 holds the slot). Surfaces: the editor seam (`EditorTextView`, `PaneSurface`, `PaneTextAuthority`), Takes/Lenses boards, Block History, the MCP door (`show_in_app`, Settings ▸ MCP, `MCPSession.instructions`), book navigation carries (Index/Outline/Read), the ⌘/ shortcuts pane. Closeouts serialize with VX-678; no release at close (one after both merge). | VX-677 · `vx-677-run-editor-panes-the-ai-door` | `~/dev/variorum-vx-677` · Pro | In progress |
 
 ### Latest closeout
 
-**→ VX-440 CLOSED 2026-10-28 — SHEETS & HISTORY CLARITY: BOOKS, BLOCK HISTORY, VERSIONS (the record
-`notes/plans/fixes/vx-440-sheets-history-clarity.md`; the ladder `notes/plans/fixes/vx-440-ladder-round1.md`; her
-handoff `notes/handoffs/vx-440-handoff.md`; PR #201, merge 8f835f5b3; kickoff to merge in one overnight run).** Seven
-members + three sitting-seated riders, by the sub-issue listing. Versions & Compare became ONE design (VX-130/437/432):
-saved versions seat in Compare's auto-fill (date-titled, sealed, after ordinary peers), unmarking one PROMOTES after a
-confirm (the declassify leak pinned red-on-old and killed), "Compare with now" on Versions rows + "Compare with Latest
-Version" on File/note ▾/⌘K, and the full-size version under the identity band (Back + Promote; no per-note memories).
-Block History (VX-431 + riders VX-331/244): one-line rows opening in place, counts, (i) explainers, the read-in-full
-sheet with Restore + Bring back as a take (the shared op `bringBackCommitAsTake`, AppSpec §9), the restore landing with
-its wash — and the walk's W-1 catch: a restore beside a LIVE Takes/Lenses pane left the old words, which the next
-keystroke would have written back; fixed by ending the ring over the restored take (the general outside-change class
-→ VX-664, High — her P-3 ruling wanted). Gathering faces (VX-611/616/189 + rider VX-356): the kind word at every
-delete/Trash/Put-back sentence, the foot's "+ new chapter" removed at her word, book-parity Shared-with doors
-(MCPSpec's P-VX185-2 superseded), the Book Panel's Study open-note mark. Evidence: one Fable ladder round (no
-BLOCKER/MAJOR); SIX red-on-old stage runs exact; the WHOLE VariorumTests target 5,572/978 at the final gate — which
-caught MAIN'S OWN red (VX-648's `.switchWing` vs the unupdated ShellChromeTests pin; fixed at the coordinator's GO)
-and re-sighted VX-608's flake; a full walk + a reshoot verified every face in both voices, the dev store restored to a
-zero prefs diff each time. Born: VX-659/660/661/664/665/666/667/668, all triaged. Her bundle: QUESTIONS #249. MOBILE
-PARITY: MobileSoul PL-62. Canon 126,682/150,000. One shipped gap, NAMED: VX-668 (the read-in-full sheet's landing).
+**→ VX-633 CLOSED 2026-10-29 — THE BILINGUAL PRINCE SEED BOOK (the record `notes/plans/vx-633-prince-book.md`
+— rulings R-633-1..21, the U1/U2/U2b records, the ladder files; built on the Air at her sitting, absorbed and closed
+on the Pro by the VX-678 orchestrator; PR #204, merge SHA in memory + the ticket).** The launch seed is now *The
+Prince*: 27 chapters + the front note, every paragraph Marriott 1908 (chosen) + "il principe 1532" (the 1814
+Wikisource printing re-paragraphed to Marriott's breaks, words untouched), six standout lines a "ricci 1903" third
+take, XXVI's Petrarch stanza a "dacres 1640" English verse, saved lenses per chapter (marriott · il principe ·
+ricci/dacres), the R-633-21 comment pair on XVIII, the four parts + the Dedication's own chapter (R-633-17), owned on
+Welcome with #classics + #machiavelli; FRESH STORES ONLY (R-633-16 — existing stores' road is Help ▸ Restore "the
+prince"; sherlock joins jekyll restore-only). Verified: suites-a (168 tests + the two U2b reverts red-as-predicted),
+tests-b (Mac 5,615/983 CLEAN; phone 849/139), the both-voices reset walkthrough (fresh birth 9 PASS + 1 ticketed
+PARTIAL; the existing-store leg proving the decline LIVE and the restore door whole; VX-671's multi-select exercised
+on a real store), a two-round ladder (R1: 1 MAJOR + 3 MINOR + 1 NIT — F1's named road disputed, UPHELD, and the real
+signed-out-after-join road latched as P-633-F1; R2: clean, no round 3), the fixes verification window (all pins
+observed green, four reverts red exactly), and the final whole targets at the tip (Mac 5,616/983, phone 852/139 —
+reds all pre-ticketed flakes/standing: VX-701 born, VM-34 unchanged). Canon: the SurfaceContracts seed-set line,
+QUESTIONS #251, MobileSoul PL-65. Born: VX-696..701 (the walk's five + the focus flake), VM-33/34/35. NO release at
+this close — VX-677 merges last of the three and mints the one release (her word), the Prince riding it.
 
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)

@@ -688,6 +688,7 @@ if [[ $ARM != join ]]; then
   reset_account prestep
 
   step P4 "sign in"
+  waitfor "Sign in…" 30 || { capture row; stop "no 'Sign in…' on screen after 30 s" }
   sign_in
 
   step P5 "the row says not-yet; the twelve words' look (Settings ▸ Protection), copied and stashed"

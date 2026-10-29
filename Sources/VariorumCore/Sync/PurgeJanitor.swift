@@ -107,6 +107,29 @@ public struct PurgeJanitor: Sendable {
 
     @discardableResult
     public func sweep() async throws -> SweepReport {
+        try await sweep(afterFamily: nil)
+    }
+
+    /// **VX-657 — the quit guard's core half: the sweep honors task
+    /// cancellation BETWEEN families, never inside one.** ⌘Q used to exit
+    /// the process over an in-flight GRDB reader (the SIGSEGV in the
+    /// page-decrypt teardown — her crash report): nothing cancelled or
+    /// awaited a sweep at `applicationShouldTerminate`. The quit door now
+    /// cancels-and-awaits (`SyncScheduler.retire` + `awaitIdle`; the app
+    /// session's exit quiesce for the local road), and this is what makes
+    /// that await PROMPT and CLEAN: a cancelled sweep returns the report
+    /// of what it completed at the next family boundary — completed
+    /// families stay completed, the next family never starts, and no
+    /// pruning intents are minted. A cancel that lands INSIDE a family's
+    /// own transaction aborts it whole (GRDB rolls a cancelled write
+    /// back), which for the synced arm is the already-documented
+    /// mirror-purged/local-pending interrupt: re-collected next pass,
+    /// idempotent. `afterFamily` is an internal test seam — called after
+    /// each root's outcome lands with the count so far, it is the
+    /// deterministic cancellation point the boundary pins stand on;
+    /// production passes nothing.
+    @discardableResult
+    func sweep(afterFamily: (@Sendable (Int) -> Void)?) async throws -> SweepReport {
         // The engine's own preflight discipline, in the engine's order.
         let (keyID, signer) = try await preflight()
 
@@ -151,7 +174,12 @@ public struct PurgeJanitor: Sendable {
         // entries may be skipped by this advance; those families re-collect
         // through the 30-day road and converge there.
         var processed: Set<SyncPurgeTarget> = []
+        var familiesHandled = 0
         for (root, localOnlyIntent) in roots {
+            // VX-657: the family boundary is the one cancellation point —
+            // a quit's cancel stops the sweep HERE, with everything it
+            // completed standing and nothing half-done.
+            if Task.isCancelled { return report }
             // B9: a root already taken by an earlier family this pass
             // (an intent on a 31-day tombstone is collected by BOTH arms)
             // is done — never a second executePurge, never double-counted.
@@ -218,7 +246,13 @@ public struct PurgeJanitor: Sendable {
                 report.rowsPurgedLocally += removed
                 processed.formUnion(expansion.rows)
             }
+            familiesHandled += 1
+            afterFamily?(familiesHandled)
         }
+
+        // VX-657: a cancelled sweep mints no pruning intents — the quit's
+        // await ends at the boundary above or here, never inside the mint.
+        if Task.isCancelled { return report }
 
         // 5. SAVEPOINT PRUNING (memo §4d): mint intents for prunable quiet
         // savepoints — Standard mode only; the setting is consulted before
@@ -932,6 +966,19 @@ public struct LocalPurge: Sendable {
 
     @discardableResult
     public func sweep() async throws -> SweepReport {
+        try await sweep(afterFamily: nil)
+    }
+
+    /// VX-657 — the transported sweep's rule, on the local road (the full
+    /// rationale is on `PurgeJanitor.sweep(afterFamily:)`): cancellation
+    /// is honored BETWEEN families, so the quit door's cancel-and-await
+    /// (`AppSession.quiesceLocalPurgeForExit`) returns promptly with
+    /// completed families standing and nothing half-done — a cancel
+    /// landing inside a family's transaction rolls it back whole, and a
+    /// local family that did not purge is simply re-collected next sweep.
+    /// `afterFamily` is the internal test seam, production passes nothing.
+    @discardableResult
+    func sweep(afterFamily: (@Sendable (Int) -> Void)?) async throws -> SweepReport {
         var report = SweepReport()
         let now = date.now
         let roots = try await database.read { db in
@@ -939,7 +986,10 @@ public struct LocalPurge: Sendable {
             try PurgeJanitor.collectRoots(db, horizon: 0, now: now)
         }
         var processed: Set<SyncPurgeTarget> = []
+        var familiesHandled = 0
         for (root, _) in roots {
+            // VX-657: the family boundary is the one cancellation point.
+            if Task.isCancelled { return report }
             if processed.contains(root) { continue }
             let stamp = DateFormatter.variorumISO8601.string(from: now)
             let outcome: (verdict: PurgeJanitor.FamilyVerdict, rows: Int, stale: Int) =
@@ -976,7 +1026,12 @@ public struct LocalPurge: Sendable {
                 report.rowsPurgedLocally += outcome.rows
                 processed.insert(root)
             }
+            familiesHandled += 1
+            afterFamily?(familiesHandled)
         }
+
+        // VX-657: a cancelled sweep mints no pruning intents.
+        if Task.isCancelled { return report }
 
         // Pruning by the one brain (memo §4d) — a local install's minted
         // intents are themselves never-synced, so the NEXT local sweep

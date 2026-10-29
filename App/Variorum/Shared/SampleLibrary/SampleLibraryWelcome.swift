@@ -58,6 +58,19 @@
 //  Both sides read the same constant, so the skip and the seed's own act can
 //  never drift. (P-13id-U7-1's two-book-tag stand-in is superseded.)
 //
+//  ── VX-633 — THE PRINCE JOINS THE ARRANGEMENT (R-633-6) ─────────────────
+//  *The Prince*, bilingual, replaced Sherlock in the launch. The arrangement
+//  treats it exactly as it treats Sherlock: OWNED by the same fork-free-only
+//  rule (below), shelved on Welcome, its shipped notes wearing `#classics`.
+//  The fresh-birth decision reads the LAUNCH BOOK's outcome
+//  (`Book.launchBook` — the Prince's now) rather than Sherlock's. Sherlock
+//  keeps every arrangement step on a store that has it (a restored copy, the
+//  installed base). U2b (R-633-16, "FRESH STORES ONLY"): the Prince seeds on
+//  a fresh store's launch road only, so its launch outcome on an existing
+//  store is `.existingStore` — declined here, nothing arranged; the restore
+//  door ("Help ▸ Restore “the prince”") composes this arrangement after it,
+//  which is how an existing store gets the Prince owned and on Welcome.
+//
 //  ── SHERLOCK OWNED, FORK-FREE ONLY (PROVISIONAL P-13id-U7-3) ────────────
 //  `setReadingOwned` FORKS a member that also lives in another book. A copy
 //  "only ever happens because you asked for one" (lesson 2), so the
@@ -91,6 +104,7 @@ nonisolated enum SampleLibraryWelcome {
     /// today; the phone's guide is its own seeder's).
     static func seededBookNames(guideName: String?) -> [String] {
         [guideName,
+         SampleLibrarySeeder.Book.prince.name,
          SampleLibrarySeeder.Book.sherlock.name,
          SampleLibrarySeeder.Book.jekyllAndHyde.name,
          SampleLibrarySeeder.Book.encryptionExplained.name,
@@ -103,13 +117,23 @@ nonisolated enum SampleLibraryWelcome {
     }
 
     /// The books whose SHIPPED notes wear `#classics` (her §7 triad: Sherlock
-    /// owned, Jekyll plain, both tagged).
-    static let classicBooks: [SampleLibrarySeeder.Book] = [.sherlock, .jekyllAndHyde]
+    /// owned, Jekyll plain, both tagged; VX-633 — R-633-6, "tagged (own tag +
+    /// #classics)": the Prince too). The Prince is NOT dedupe-covered, so its
+    /// application needs no seed-tag declaration (`seedTagPaths` exists only
+    /// for the pristine classifier, which never judges it — Jekyll's case).
+    static let classicBooks: [SampleLibrarySeeder.Book] = [.sherlock, .jekyllAndHyde, .prince]
+
+    /// The seeded books the arrangement OWNS, each by the fork-free-only rule
+    /// (P-13id-U7-3): Sherlock (13i-d U7) and, since VX-633, the Prince
+    /// (R-633-6, "seeded owned").
+    static let ownedBooks: [SampleLibrarySeeder.Book] = [.sherlock, .prince]
 
     // MARK: - What one arrangement did
 
+    /// What the arrangement did about one OWNED seeded book (Sherlock, the
+    /// Prince). The name is the type's history — it covers both books.
     enum SherlockOwnership: Equatable, Sendable {
-        /// Owned now — every member was Sherlock's alone.
+        /// Owned now — every member was the book's alone.
         case owned
         /// Already owned (a second arrangement, or her own door).
         case alreadyOwned
@@ -117,7 +141,8 @@ nonisolated enum SampleLibraryWelcome {
         case leftPlainShared(Int)
         /// Left plain: the book is finished or sealed (owning refuses there).
         case leftPlainFrozen
-        /// No live Sherlock book in Home (deleted, renamed, or moved away).
+        /// No live copy of the book in Home (deleted, renamed, moved away —
+        /// or, since VX-633, Sherlock never seeded: it is restore-only).
         case absent
     }
 
@@ -125,6 +150,8 @@ nonisolated enum SampleLibraryWelcome {
         /// The Welcome shelf — adopted or minted.
         var welcome: Operations.WelcomeShelfEnsure
         var sherlock: SherlockOwnership
+        /// VX-633: the Prince, by the same rule.
+        var prince: SherlockOwnership
         /// How many shipped classic notes THIS arrangement tagged `#classics`.
         var taggedClassics: Int
         /// The seeded readings this arrangement put onto Welcome now (they
@@ -136,7 +163,7 @@ nonisolated enum SampleLibraryWelcome {
         /// Whether anything at all was written — a door that did nothing
         /// speaks a refusal (§12's message kinds), one that did a receipt.
         var didAnything: Bool {
-            welcome.minted || sherlock == .owned || taggedClassics > 0
+            welcome.minted || sherlock == .owned || prince == .owned || taggedClassics > 0
                 || !shelved.isEmpty
         }
     }
@@ -161,20 +188,25 @@ nonisolated enum SampleLibraryWelcome {
         // (1) Welcome — adopted (the R5 keeper's keep) or minted.
         let welcome = try ops.ensureWelcomeShelf(wingID: "")
 
-        // (2) Sherlock OWNED — fork-free only (P-13id-U7-3).
-        let sherlockName = SampleLibrarySeeder.Book.sherlock.name
-        let sherlockBooks = try homeReadings(database, named: sherlockName).filter { $0.kind == .book }
-        var sherlock = SherlockOwnership.absent
-        for book in sherlockBooks {
-            if book.owned { sherlock = .alreadyOwned; continue }
-            if book.locked || book.sealedAt != nil { sherlock = .leftPlainFrozen; continue }
-            let shared = try database.read { db in
-                try Queries.sharedMembers(db, readingID: book.id).count
+        // (2) Sherlock — and since VX-633 the Prince — OWNED, fork-free only
+        // (P-13id-U7-3), each by the same body.
+        func own(_ seeded: SampleLibrarySeeder.Book) throws -> SherlockOwnership {
+            let books = try homeReadings(database, named: seeded.name).filter { $0.kind == .book }
+            var outcome = SherlockOwnership.absent
+            for book in books {
+                if book.owned { outcome = .alreadyOwned; continue }
+                if book.locked || book.sealedAt != nil { outcome = .leftPlainFrozen; continue }
+                let shared = try database.read { db in
+                    try Queries.sharedMembers(db, readingID: book.id).count
+                }
+                if shared > 0 { outcome = .leftPlainShared(shared); continue }
+                _ = try ops.setReadingOwned(book.id, owned: true)
+                outcome = .owned
             }
-            if shared > 0 { sherlock = .leftPlainShared(shared); continue }
-            _ = try ops.setReadingOwned(book.id, owned: true)
-            sherlock = .owned
+            return outcome
         }
+        let sherlock = try own(.sherlock)
+        let prince = try own(.prince)
 
         // (3) #classics — THE RULED LETTER. Every SHIPPED note of each classic
         // book in Home (a live member wearing the book's reserved tag — the
@@ -245,7 +277,7 @@ nonisolated enum SampleLibraryWelcome {
         // reserved title above stays the installed base's fold identity.
 
         return Arrangement(
-            welcome: welcome, sherlock: sherlock,
+            welcome: welcome, sherlock: sherlock, prince: prince,
             taggedClassics: taggedClassics, shelved: shelved)
     }
 
@@ -314,13 +346,31 @@ nonisolated enum SampleLibraryWelcome {
         "SampleLibraryWelcome.\(variant.rawValue)"
     }
 
+    /// The launch mark as production reads it (`arrangeAtLaunch`'s default).
+    static func storedLaunchMark(for variant: AppDatabase.StoreVariant) -> String? {
+        UserDefaults.standard.string(forKey: launchMarkKey(for: variant))
+    }
+
+    /// **Whether this device already SETTLED the store's launch** — `done` or
+    /// `declined`: `decide`'s first arm, named so the Mac's launch hands a
+    /// fresh-only seed the SAME reading (VX-633 U2b — R-633-16: a settled
+    /// store is an existing store by the device's own record, and the Prince
+    /// never seeds into it; `SampleLibraryFreshStore`).
+    static func launchIsSettled(_ mark: String?) -> Bool {
+        mark == "done" || mark == "declined"
+    }
+
     private static let log = Logger(subsystem: "io.lduarte.Variorum", category: "sample-library")
 
     /// **A FRESH STORE'S BIRTH.** The store is fresh when THIS launch's
-    /// Sherlock seed minted every story — the sample library was born here
-    /// now. Marked `pending` before arranging (a window closed mid-arrange
-    /// resumes at the next launch), `done` after. Any other Sherlock outcome
-    /// on an undecided store marks `declined` and writes nothing.
+    /// seed of the LAUNCH BOOK minted every note — the sample library was
+    /// born here now (13i-d U7 read Sherlock's outcome; VX-633: the LAUNCH
+    /// BOOK's — `Book.launchBook`, the Prince — so `launchSeed` is that
+    /// book's outcome and the minted count is compared with ITS titles).
+    /// Marked `pending` before arranging (a
+    /// window closed mid-arrange resumes at the next launch), `done` after.
+    /// Any other outcome on an undecided store marks `declined` and writes
+    /// nothing.
     ///
     /// **`beforeArranging`** (17y B-SEED — item (q)): the platform's OWN
     /// seeded furniture that must exist before the arrangement shelves it —
@@ -336,7 +386,7 @@ nonisolated enum SampleLibraryWelcome {
     @discardableResult
     static func arrangeAtLaunch(
         session: AppSession,
-        sherlock outcome: SampleLibrarySeeder.Outcome,
+        launchSeed outcome: SampleLibrarySeeder.Outcome,
         storeVariant: AppDatabase.StoreVariant = .real,
         guideName: String?,
         beforeArranging: (@MainActor () async -> Void)? = nil,
@@ -346,7 +396,7 @@ nonisolated enum SampleLibraryWelcome {
         let key = launchMarkKey(for: storeVariant)
         let load = loadMark ?? { UserDefaults.standard.string(forKey: key) }
         let save = saveMark ?? { UserDefaults.standard.set($0, forKey: key) }
-        let decided = await decide(mark: load(), sherlock: outcome, save: save)
+        let decided = await decide(mark: load(), launchSeed: outcome, save: save)
         guard decided == nil else {
             log.notice("welcome arrangement: \(String(describing: decided!), privacy: .public)")
             return decided!
@@ -367,21 +417,19 @@ nonisolated enum SampleLibraryWelcome {
     /// store fresh and marked it `pending`); otherwise the decided outcome.
     @MainActor
     private static func decide(
-        mark: String?, sherlock outcome: SampleLibrarySeeder.Outcome, save: (String) -> Void
+        mark: String?, launchSeed outcome: SampleLibrarySeeder.Outcome, save: (String) -> Void
     ) async -> LaunchOutcome? {
-        switch mark {
-        case "done", "declined": return .alreadySettled
-        case "pending": return nil
-        default: break
-        }
+        let book = SampleLibrarySeeder.Book.launchBook
+        if launchIsSettled(mark) { return .alreadySettled }
+        if mark == "pending" { return nil }
         switch outcome {
         case .seeded(_, let minted):
             let expected: Int
             do {
                 let stories = try await Task.detached(priority: .utility) {
-                    try SampleLibrarySeeder.loadStories(for: .sherlock)
+                    try SampleLibrarySeeder.loadStories(for: book)
                 }.value
-                expected = SampleLibrarySeeder.expectedTitles(for: .sherlock, stories: stories).count
+                expected = SampleLibrarySeeder.expectedTitles(for: book, stories: stories).count
             } catch {
                 return .undecided
             }
@@ -391,9 +439,14 @@ nonisolated enum SampleLibraryWelcome {
             }
             save("pending")
             return nil
-        case .awaitingFirstSync, .refused:
+        // VX-633 ladder R1 F2: `.freshnessUntaken` is the phone's (the Mac
+        // never hands `.untaken`) — like the two beside it, not yet knowable,
+        // nothing recorded, asked again.
+        case .awaitingFirstSync, .refused, .freshnessUntaken:
             return .undecided
-        case .alreadySeeded, .alreadyPresent, .deletedByTheReader:
+        // VX-633 U2b (R-633-16): the launch book declined an EXISTING store —
+        // not a birth, exactly as a library already here is not.
+        case .alreadySeeded, .alreadyPresent, .deletedByTheReader, .existingStore:
             save("declined")
             return .declined
         }

@@ -160,8 +160,10 @@ struct LaunchFurnitureTests {
             // edit, 17y B-DEDUPE R-17y-8: Jekyll left the DEFAULT seed;
             // justified again at 13s-b U1b, R-13s-5/37: *Encryption
             // Explained* and the classics gathering left it too — the final
-            // set's own pin is aFreshLaunchSeedsTheFinalSet below.)
-            for name in [SampleLibrarySeeder.Book.sherlock.name] {
+            // set's own pin is aFreshLaunchSeedsTheFinalSet below. VX-633
+            // (R-633-6): the launch's book is the Prince now — read from the
+            // launch set itself, so the next swap needs no edit here.)
+            for name in SampleLibrarySeeder.Book.launchSet.map(\.name) {
                 #expect(try await reading(db, named: name)?.shelfId == welcome, "\(name) on Welcome")
             }
             // Silent furniture: nothing spoken, nothing asked, nothing on ⌥⌘Z.
@@ -184,29 +186,53 @@ struct LaunchFurnitureTests {
     /// gathering… quicknotes and journal are created at first mint"; the
     /// example snippet joins at her Q17 disposition).** A fresh store's
     /// first launch leaves EXACTLY: the field guide (the birth pin above) ·
-    /// Sherlock, OWNED · the starred-notes gathering, empty · the example
-    /// snippet. And NOTHING of the retired seed — no Jekyll (R-17y-8), no
-    /// *Encryption Explained*, no classics gathering, no Quicknotes, no
-    /// seeded quicknote; none of them minted-then-removed either. RED ON
-    /// OLD, per retired fact: the old launch seeded EE, and the old
-    /// arrangement minted the classics gathering and the quicknote (which
+    /// the launch's seeded book, OWNED · the starred-notes gathering, empty ·
+    /// the example snippet. And NOTHING of the retired seed — no Jekyll
+    /// (R-17y-8), no *Encryption Explained*, no classics gathering, no
+    /// Quicknotes, no seeded quicknote; none of them minted-then-removed
+    /// either. RED ON OLD, per retired fact: the old launch seeded EE, and the
+    /// old arrangement minted the classics gathering and the quicknote (which
     /// minted Quicknotes); the old tree had no example snippet.
+    /// **JUSTIFIED EDIT (VX-633, R-633-6 — "sherlock and jekyll and hyde are
+    /// still restorable"):** the launch's book is *The Prince*, bilingual,
+    /// OWNED and on Welcome, its notes wearing #classics; Sherlock joins the
+    /// retired list (absent, never minted — restore-only). RED ON OLD: the
+    /// old launch seeded Sherlock and no Prince existed.
     @Test func aFreshLaunchSeedsTheFinalSet() async throws {
         try await withLaunchWorld { session, db in
             let device = DeviceMarks()
             _ = await LaunchFurniture.seed(
                 session: session, storeVariant: .dev,
                 gate: gate(account: false, clean: true), marks: device.marks)
-            let sherlock = try #require(
-                try await reading(db, named: SampleLibrarySeeder.Book.sherlock.name),
-                "Sherlock still seeds")
-            #expect(sherlock.owned, "…owned (the §7 ladder)")
+            let prince = try #require(
+                try await reading(db, named: SampleLibrarySeeder.Book.prince.name),
+                "the Prince seeds (R-633-6)")
+            #expect(prince.owned, "…owned (the §7 ladder, extended to the Prince)")
+            let welcome = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT id FROM shelf WHERE role = 'welcome' AND deleted_at IS NULL")
+            }
+            #expect(prince.shelfId != nil && prince.shelfId == welcome, "…on Welcome")
+            let unclassic = try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM reading_post rp
+                        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                          AND NOT EXISTS (SELECT 1 FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                                          WHERE pt.post_id = rp.post_id AND t.path = ?
+                                            AND pt.deleted_at IS NULL AND t.deleted_at IS NULL)
+                        """,
+                    arguments: [prince.id, SampleLibrarySeeder.classicsTagPath]) ?? -1
+            }
+            #expect(unclassic == 0, "…every note wearing #classics")
             let starred = try #require(
                 try await reading(db, named: Operations.starredNotesGatheringName),
                 "the starred-notes gathering seeds")
             #expect(starred.kind == .gathering && starred.shelfId == nil)
             // The retired seed: absent, and never minted at all.
-            for name in [SampleLibrarySeeder.Book.jekyllAndHyde.name,
+            for name in [SampleLibrarySeeder.Book.sherlock.name,
+                         SampleLibrarySeeder.Book.jekyllAndHyde.name,
                          SampleLibrarySeeder.Book.encryptionExplained.name,
                          SampleLibraryWelcome.classicsGatheringName,
                          Operations.defaultQuicknoteBookName] {
@@ -249,9 +275,10 @@ struct LaunchFurnitureTests {
                     "one snippet, the standard disclaimer line, byte-exact")
             // The retired books stay in `Book.all` — the dedupe facts' and
             // the surviving doors' vocabulary for the installed base.
+            #expect(SampleLibrarySeeder.Book.all.contains(.sherlock), "Sherlock stays restorable (R-633-6)")
             #expect(SampleLibrarySeeder.Book.all.contains(.jekyllAndHyde))
             #expect(SampleLibrarySeeder.Book.all.contains(.encryptionExplained))
-            #expect(SampleLibrarySeeder.Book.launchSet == [.sherlock])
+            #expect(SampleLibrarySeeder.Book.launchSet == [.prince])
         }
     }
 
@@ -444,6 +471,15 @@ struct LaunchFurnitureTests {
     /// stands ALONE. (c) An account whose corpus holds a guide but no
     /// Sherlock reads fresh — and the birth seed finds her guide and seeds
     /// none: one guide, now on Welcome.
+    /// **JUSTIFIED EDIT of (c) (VX-633 U2b — R-633-16, her word: "FRESH
+    /// STORES ONLY … existing stores are untouched"):** (c) read "fresh" off
+    /// the LAUNCH BOOK's absence, which held while every library carried
+    /// Sherlock; now every existing library lacks the launch book, so that
+    /// reading would seed the Prince into her account's library and ARRANGE
+    /// it on any new device. An account corpus holding anything — here, her
+    /// guide — is an EXISTING library: the launch declines it (`declined`,
+    /// recorded), no Prince is minted, nothing is arranged, and her guide
+    /// stands alone. RED ON OLD: `.arranged`, the Prince minted and owned.
     @Test func theSignedInRoadMintsNoGuideAheadOfItsCorpus() async throws {
         try await withLaunchWorld { session, db in
             let device = DeviceMarks()
@@ -473,16 +509,18 @@ struct LaunchFurnitureTests {
         try await withLaunchWorld { session, db in
             let hers = try await TutorialSeeder.restore(session: session)
             let device = DeviceMarks()
-            let arranged = await LaunchFurniture.seed(
+            let declined = await LaunchFurniture.seed(
                 session: session, storeVariant: .dev,
                 gate: gate(account: true, clean: true), marks: device.marks)
-            guard case .arranged = arranged else {
-                Issue.record("no Sherlock in the corpus reads fresh: \(String(describing: arranged))")
-                return
-            }
+            #expect(declined == .declined, "a corpus holding writing is an existing library (R-633-16)")
+            #expect(device.welcome == "declined")
+            #expect(device.books[SampleLibrarySeeder.Book.prince.name] == true,
+                    "the launch book's decision is recorded")
+            #expect(try await reading(db, named: SampleLibrarySeeder.Book.prince.name) == nil,
+                    "no Prince minted into her library")
             let facts = try await guideFacts(db)
             #expect(facts.guides.map(\.id) == [hers], "never a second guide beside hers")
-            #expect(facts.guides.first?.shelfId == facts.welcomeIDs.first, "hers, on Welcome")
+            #expect(facts.welcomeIDs.isEmpty, "nothing arranged — her guide stands where it was")
         }
     }
 

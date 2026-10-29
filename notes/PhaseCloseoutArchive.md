@@ -1356,3 +1356,46 @@ against the diff (the MAJOR it surfaced is pre-existing → VX-656). Born VX-634
 
 
 ---
+
+**→ VX-440 CLOSED 2026-10-28 — SHEETS & HISTORY CLARITY: BOOKS, BLOCK HISTORY, VERSIONS (the record
+`notes/plans/fixes/vx-440-sheets-history-clarity.md`; the ladder `notes/plans/fixes/vx-440-ladder-round1.md`; her
+handoff `notes/handoffs/vx-440-handoff.md`; PR #201, merge 8f835f5b3; kickoff to merge in one overnight run).** Seven
+members + three sitting-seated riders, by the sub-issue listing. Versions & Compare became ONE design (VX-130/437/432):
+saved versions seat in Compare's auto-fill (date-titled, sealed, after ordinary peers), unmarking one PROMOTES after a
+confirm (the declassify leak pinned red-on-old and killed), "Compare with now" on Versions rows + "Compare with Latest
+Version" on File/note ▾/⌘K, and the full-size version under the identity band (Back + Promote; no per-note memories).
+Block History (VX-431 + riders VX-331/244): one-line rows opening in place, counts, (i) explainers, the read-in-full
+sheet with Restore + Bring back as a take (the shared op `bringBackCommitAsTake`, AppSpec §9), the restore landing with
+its wash — and the walk's W-1 catch: a restore beside a LIVE Takes/Lenses pane left the old words, which the next
+keystroke would have written back; fixed by ending the ring over the restored take (the general outside-change class
+→ VX-664, High — her P-3 ruling wanted). Gathering faces (VX-611/616/189 + rider VX-356): the kind word at every
+delete/Trash/Put-back sentence, the foot's "+ new chapter" removed at her word, book-parity Shared-with doors
+(MCPSpec's P-VX185-2 superseded), the Book Panel's Study open-note mark. Evidence: one Fable ladder round (no
+BLOCKER/MAJOR); SIX red-on-old stage runs exact; the WHOLE VariorumTests target 5,572/978 at the final gate — which
+caught MAIN'S OWN red (VX-648's `.switchWing` vs the unupdated ShellChromeTests pin; fixed at the coordinator's GO)
+and re-sighted VX-608's flake; a full walk + a reshoot verified every face in both voices, the dev store restored to a
+zero prefs diff each time. Born: VX-659/660/661/664/665/666/667/668, all triaged. Her bundle: QUESTIONS #249. MOBILE
+PARITY: MobileSoul PL-62. Canon 126,682/150,000. One shipped gap, NAMED: VX-668 (the read-in-full sheet's landing).
+
+**→ VX-678 CLOSED 2026-10-28 — RUN: TRASH, PURGE & RESURRECTION (the record
+`notes/plans/fixes/vx-678-trash-purge-resurrection.md`; the ladder `notes/plans/fixes/vx-678-ladder-round1.md` +
+`-round2.md`; her handoff `notes/handoffs/vx-678-handoff.md`; PR number at the handoff's merge slot; kickoff to merge
+in one day).** Six members by the sub-issue listing. VX-669: the sample-dedupe DEFENSE LEG removed whole (her ruling,
+option B — a deliberate cross-device delete is never second-guessed; the crossing race's accepted cost is a
+recoverable Trash trip), her-scenario convergence pins red-on-old (the deleted copies returned alive on both fake
+clients, her exact report), the orphaned verdict markers swept by LOCAL-ONLY `v1_35` (no §12 event, marker 14), the
+purge-staleness net verified GREEN (record-only). VX-657: sweeps cancellation-aware between families; the quit door
+quiesces the purge road + sync chain on the proceed path only; `stop()` cancels without refusing future sweeps; the
+real ⌘Q walk-proven clean; the test host's runner-exit face stays by construction → VX-691. VX-654/653 + VX-670's
+roots: the quadratic lineage class gone — `originalsStrandedBy` 23 s→88.6 ms, `strandedOriginals` 27.6 s→108.7 ms,
+`originFamilyClocks` 18.4 s→70.3 ms at 600 seam rounds (VX-653 hollow at HEAD — v1_34 already carried it; guard pins)
+— plus `observeTrash` moved off the writer (named-region tracking; the phone inherits). VX-670 live-verified: listing
+28.5 s→rows at +0.48 s · Put back 5.5 s→+0.1 s · Delete Now 11.3 s→+0.64 s; the walk's empty-flash finding fixed
+(loading-vs-empty state). VX-671: multi-select with bulk Put back/Delete Now through the per-row roads, honest
+partial-result refusals. Evidence: a two-round ladder (1 MAJOR test-honesty + 3 MINOR, all applied; no round 3), the
+pins claim 21/3 green with BOTH revert observations red exactly as predicted, window-1's whole target 5,585/980 and
+the FINAL re-test at the tip — whole target 5,593/981 + the branch's first FULL VariorumMobileTests 846/139, every
+red control-proven pre-existing (VX-695, VM-34). Canon: SyncSpec §7's dedupe bullet, #143(b) superseded, the
+SurfaceContracts Trash lines, #250, MobileSoul PL-64. Born: VX-685/690/691/695 (tests & tooling), VM-33/VM-34
+(mobile). NO release at this close — one release after VX-678 + VX-677 + PR #204 all merge (her word; the last merger
+mints, notes carrying v1_34 + v1_35).

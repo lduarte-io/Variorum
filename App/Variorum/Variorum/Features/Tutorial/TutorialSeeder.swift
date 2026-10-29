@@ -163,14 +163,34 @@ enum TutorialSeeder {
     /// rule — before it promises the rest is untouched (PROVISIONAL wording).
     /// 13s-b U1b: the arrangement no longer makes the classics gathering or
     /// a quick note (R-13s-5/37), so the disclosure stopped claiming it.
+    /// VX-633 ladder R1 F3: the arrangement OWNS every book in
+    /// `SampleLibraryWelcome.ownedBooks` (the Prince joined Sherlock), so the
+    /// ownership clause names each one — derived from that list, so a change
+    /// to the launch set can never leave the confirm under-disclosing again.
     nonisolated static let replaceDetail =
         "This replaces the tutorial with a fresh copy: every note tagged exactly "
         + "\u{201C}\(tagName)\u{201D}, every pool named \u{201C}\(scrapPoolTitle)\u{201D}, and every book "
         + "named \u{201C}\(bookName)\u{201D} are deleted and re-seeded. It also sets up the "
         + "\(Operations.welcomeShelfName) shelf the books chapter walks: the seeded books that sit "
         + "unshelved go onto it, the classic books' shipped notes are tagged "
-        + "#\(SampleLibrarySeeder.classicsTagPath), and \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} owns its "
-        + "notes if none of them lives in another book. Nothing else is touched."
+        + "#\(SampleLibrarySeeder.classicsTagPath)\(ownershipClause). Nothing else is touched."
+
+    /// The confirm's ownership clause, one name per book the arrangement can
+    /// own (`SampleLibraryWelcome.ownedBooks`, in its order): ", and “a” owns
+    /// its notes if …" for one book, ", and “a” and “b” each own their notes
+    /// if …" for two, a serial list beyond. Empty when the arrangement owns
+    /// nothing.
+    nonisolated private static var ownershipClause: String {
+        let names = SampleLibraryWelcome.ownedBooks.map { "\u{201C}\($0.name)\u{201D}" }
+        guard let last = names.last else { return "" }
+        let condition = "if none of them lives in another book"
+        switch names.count {
+        case 1: return ", and \(last) owns its notes \(condition)"
+        case 2: return ", and \(names[0]) and \(last) each own their notes \(condition)"
+        default:
+            return ", and \(names.dropLast().joined(separator: ", ")), and \(last) each own their notes \(condition)"
+        }
+    }
 
     // MARK: - The lesson plan (the coverage CONTRACT, walk-asserted)
 

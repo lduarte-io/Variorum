@@ -146,6 +146,8 @@ struct EditorCommands: Commands {
         // pre-13u Act 10: the sample library's restore, beside the
         // tutorial's (the tenth-wave ruling). (Encryption Explained's left
         // at 13s-b U1b — R-13s-37: not restorable.)
+        // VX-633: the Prince's restore (the launch's book), first of the books.
+        .restorePrinceBook,
         .restoreSampleLibrary,
         // 18l-c U6: the takemania book's restore, beside Sherlock's.
         .restoreJekyllBook,
@@ -1152,6 +1154,12 @@ struct EditorCommands: Commands {
                 .disabled(!canReachCreationTarget)
             Button(verb(.restoreTutorial)) { creationActions()?.restoreTutorial() }
                 .disabled(!canReachCreationTarget)
+            // VX-633 (R-633-6): the Prince's restore — the launch's seeded
+            // book, first of the book doors.
+            Button(verb(.restorePrinceBook)) {
+                creationActions()?.restorePrinceBook()
+            }
+            .disabled(!canReachCreationTarget)
             Button(verb(.restoreSampleLibrary)) {
                 creationActions()?.restoreSampleLibrary()
             }

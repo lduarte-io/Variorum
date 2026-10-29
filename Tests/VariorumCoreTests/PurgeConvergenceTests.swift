@@ -699,6 +699,136 @@ struct PurgeConvergenceTests {
         #expect(try a.syncedDump() == b.syncedDump())
     }
 
+    // MARK: - 10c. VX-669 (the VX-678 run): a revived BOOK FAMILY with
+    // pending intents reads .stale — the net holds where a revival
+    // could not void
+
+    /// **VX-669's fix-run obligation (the kickoff brief): the janitor's
+    /// staleness net protects a revived BOOK FAMILY from its own pending
+    /// purge intents.** Her scenario's purge leg: Delete Now on a
+    /// Sherlock book + member notes minted purge intents; before the
+    /// horizon let them execute, the (since-removed) defense leg revived
+    /// the whole family by flipping `deleted_at` back exact-stamp —
+    /// deliberately NOT voiding intents ("none exist on this road by
+    /// construction", which turned false the moment a deliberate Delete
+    /// Now was the kill being defended). Had a later sweep honored the
+    /// standing intents, the revived books would have been purged under
+    /// her feet — data loss, with no Trash row left to put back. This pin
+    /// verifies the designed second net at book grain: `familyVerdict`
+    /// reads `.stale` on the first live row whatever the horizon says,
+    /// the sweep COMPLETES every intent without honoring it, and nothing
+    /// is purged locally or on the mirror. The revival is simulated by
+    /// the exact-stamp SQL flip (`reviveSampleCopy`'s shape) so the pin
+    /// outlives the leg's removal: it covers ANY revival that cannot
+    /// void its intents (a peer's restore racing the intent's arrival is
+    /// the same class — tests 10/10b at block and comment grain).
+    @Test func aRevivedBookFamilyWithPendingIntentsReadsStaleAndNothingPurges() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+
+        // A book family: a book with two member notes (her Sherlock shape).
+        let (bookID, noteIDs): (String, [String]) = try a.with { ops, _ in
+            let book = try ops.createReading(
+                name: "the adventures of sherlock holmes", kind: .book, profile: "book")
+            var notes: [String] = []
+            for title in ["A Scandal in Bohemia", "The Red-Headed League"] {
+                let minted = try ops.importPost(
+                    title: title, text: "Words of \(title).", undoLabel: "Seed")
+                _ = try ops.addPostToReading(minted.container.id, to: book.id)
+                notes.append(minted.container.id)
+            }
+            return (book.id, notes)
+        }
+        try await syncToQuiescence(a, b, server: server)
+
+        // Her Delete Now: the notes and the book tombstone, and an intent
+        // is minted for every root (the Trash door's shape).
+        try a.with { ops, _ in
+            for note in noteIDs { try ops.deleteContainer(note) }
+            try ops.deleteReading(bookID)
+            _ = try ops.requestPurge(
+                noteIDs.map { SyncPurgeTarget(table: "container", rowID: $0) }
+                    + [SyncPurgeTarget(table: "reading", rowID: bookID)])
+        }
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+
+        // THE REVIVAL THAT COULD NOT VOID: every family tombstone flips
+        // back exact-stamp by direct SQL while the published intents
+        // stand — the one window the restore-side belt cannot cover.
+        try await a.db.write { db in
+            var stamps: Set<String> = []
+            if let stamp = try String.fetchOne(
+                db, sql: "SELECT deleted_at FROM reading WHERE id = ?", arguments: [bookID]) {
+                stamps.insert(stamp)
+            }
+            for note in noteIDs {
+                if let stamp = try String.fetchOne(
+                    db, sql: "SELECT deleted_at FROM container WHERE id = ?", arguments: [note]) {
+                    stamps.insert(stamp)
+                }
+            }
+            for table in SyncSchema.tables where table.hasTombstone {
+                for stamp in stamps {
+                    try db.execute(
+                        sql: "UPDATE \(table.name) SET deleted_at = NULL WHERE deleted_at = ?",
+                        arguments: [stamp])
+                }
+            }
+        }
+
+        // The verdict itself, per root: .stale on the first live row,
+        // whatever the horizon says.
+        let verdicts: [PurgeJanitor.FamilyVerdict] = try await a.db.read { db in
+            let roots = [SyncPurgeTarget(table: "reading", rowID: bookID)]
+                + noteIDs.map { SyncPurgeTarget(table: "container", rowID: $0) }
+            return try roots.map { root in
+                let family = try PurgeFamily.expand(db, roots: [root])
+                return try PurgeJanitor.familyVerdict(
+                    db, family, horizon: Int64.max, road: .transported)
+            }
+        }
+        #expect(verdicts == [.stale, .stale, .stale],
+                "a revived family reads .stale at every root — never eligible")
+
+        // The sweep completes the intents WITHOUT honoring them; nothing
+        // is purged anywhere.
+        let report = try await sweep(a, server)
+        #expect(report.familiesPurged == 0, "nothing purges — the net holds")
+        #expect(report.rowsPurgedLocally == 0)
+        #expect(report.staleIntentsCompleted == 3,
+                "every pending intent completes WITHOUT being honored")
+        #expect(await server.purgedLedgerCount() == 0, "no mirror purge ran")
+        #expect(await server.currentRow(table: "reading", rowID: bookID) != nil,
+                "the mirror still holds the family")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM reading WHERE id = ? AND deleted_at IS NULL", [bookID]) == 1,
+                "the revived book is still live locally")
+        for note in noteIDs {
+            #expect(try a.db.fetchInt(
+                "SELECT COUNT(*) FROM container WHERE id = ? AND deleted_at IS NULL", [note]) == 1,
+                    "the revived note is still live locally")
+        }
+        #expect(try a.db.fetchInt(
+            """
+            SELECT COUNT(*) FROM purge_intent
+            WHERE deleted_at IS NULL AND (row_id = ? OR row_id IN (
+                SELECT id FROM container WHERE id IN (SELECT post_id FROM reading_post WHERE reading_id = ?)))
+            """, [bookID, bookID]) == 0,
+                "no live intent survives to claim a later re-delete")
+
+        // A second sweep is quiet, and the revival converges to B.
+        let again = try await sweep(a, server)
+        #expect(again.familiesPurged == 0 && again.staleIntentsCompleted == 0)
+        try await syncToQuiescence(a, b, server: server)
+        #expect(try a.syncedDump() == b.syncedDump())
+        #expect(try b.db.fetchInt(
+            "SELECT COUNT(*) FROM reading WHERE id = ? AND deleted_at IS NULL", [bookID]) == 1,
+                "the revival propagated — B holds the live family too")
+    }
+
     // MARK: - 11. 13j ladder B (B3, her round-11 ruling): the LOCAL road
 
     @Test func aNeverSyncedFamilyPurgesLocallyWithNoLedgerAndNoMirrorContact() async throws {
@@ -1031,6 +1161,129 @@ struct PurgeConvergenceTests {
         let pull = try await a.pull()
         #expect(!pull.stalled)
         #expect(try familyRowCount(b, post: family.post) == 0, "B converged to the purge")
+        #expect(try a.syncedDump() == b.syncedDump())
+    }
+
+    // MARK: - VX-657 (the VX-678 run): the quit guard's core half — sweeps
+    // honor cancellation at family boundaries
+
+    /// **VX-657 pin 1: a sweep whose task is ALREADY cancelled purges
+    /// nothing.** The quit door cancels-and-awaits the in-flight sweep; a
+    /// sweep that starts after the cancel (or is cancelled before its first
+    /// family) must complete zero families and leave every row standing —
+    /// the boundary check fires before family 1, or GRDB's own cancellation
+    /// throws before any family write; either way nothing is removed.
+    @Test func aPreCancelledLocalSweepPurgesNothing() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let family = try buildAndDeleteFamily(a)
+        try a.with { ops, _ in
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: family.post)])
+        }
+        let report: LocalPurge.SweepReport? = try await a.withAsync { db in
+            let purge = LocalPurge(database: db)
+            let task = Task { () -> LocalPurge.SweepReport? in
+                withUnsafeCurrentTask { $0?.cancel() }
+                return try? await purge.sweep()
+            }
+            return await task.value
+        }
+        if let report {
+            #expect(report.familiesPurged == 0 && report.rowsPurgedLocally == 0,
+                    "a pre-cancelled sweep completes nothing")
+        }
+        #expect(try familyRowCount(a, post: family.post) > 0,
+                "every family row still stands — the cancel left nothing half-done")
+    }
+
+    /// **VX-657 pin 2 (the LOCAL road): a cancel landing at the family
+    /// boundary stops the sweep there — completed families stay completed,
+    /// the next family never starts, nothing is half-done.** Driven through
+    /// the sweep's internal `afterFamily` seam (the deterministic
+    /// cancellation point): family 1 purges, the hook cancels the sweep's
+    /// own task, and the boundary check returns the one-family report —
+    /// exactly one of the two families is gone WHOLE, the other stands
+    /// WHOLE, and no pruning intent was minted after the cancel.
+    @Test func aCancelledLocalSweepStopsAtTheFamilyBoundary() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let first = try buildAndDeleteFamily(a)
+        let second = try buildAndDeleteFamily(a)
+        try a.with { ops, _ in
+            _ = try ops.requestPurge([
+                SyncPurgeTarget(table: "container", rowID: first.post),
+                SyncPurgeTarget(table: "container", rowID: second.post),
+            ])
+        }
+        let report: LocalPurge.SweepReport = try await a.withAsync { db in
+            let purge = LocalPurge(database: db)
+            let task = Task {
+                try await purge.sweep(afterFamily: { _ in
+                    withUnsafeCurrentTask { $0?.cancel() }
+                })
+            }
+            return try await task.value
+        }
+        #expect(report.familiesPurged == 1,
+                "the cancelled sweep returns what it completed — one family, no more")
+        #expect(report.pruneIntentsMinted == 0, "a cancelled sweep mints nothing")
+        let counts = [try familyRowCount(a, post: first.post),
+                      try familyRowCount(a, post: second.post)]
+        #expect(counts.filter { $0 == 0 }.count == 1,
+                "exactly ONE family is gone — whole, not half")
+        #expect(counts.filter { $0 > 0 }.count == 1,
+                "the other family stands whole — the boundary held")
+    }
+
+    /// **VX-657 pin 3 (the TRANSPORTED road): the janitor's sweep stops at
+    /// the family boundary the same way** — the completed family is purged
+    /// mirror-and-local, the next family is untouched on BOTH sides, and a
+    /// later uncancelled sweep takes it (resumable, never partial).
+    @Test func aCancelledJanitorSweepStopsAtTheFamilyBoundary() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+        let first = try buildAndDeleteFamily(a)
+        try backdate(a, from: first.deletedStamp, to: oldStamp)
+        let second = try buildAndDeleteFamily(a)
+        try backdate(a, from: second.deletedStamp, to: "2026-05-02T00:00:00.000Z")
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+
+        let report: PurgeJanitor.SweepReport = try await a.withAsync { _ in
+            let janitor = PurgeJanitor(transport: server, keyProvider: a.keyProvider)
+            let task = Task {
+                try await janitor.sweep(afterFamily: { _ in
+                    withUnsafeCurrentTask { $0?.cancel() }
+                })
+            }
+            return try await task.value
+        }
+        #expect(report.familiesPurged == 1,
+                "the cancelled sweep completed exactly one family")
+        let locals = [try familyRowCount(a, post: first.post),
+                      try familyRowCount(a, post: second.post)]
+        #expect(locals.filter { $0 == 0 }.count == 1, "one family gone whole locally")
+        #expect(locals.filter { $0 > 0 }.count == 1, "the other stands whole locally")
+        let mirrors = [await server.currentRow(table: "container", rowID: first.post),
+                       await server.currentRow(table: "container", rowID: second.post)]
+        #expect(mirrors.filter { $0 == nil }.count == 1, "one family purged on the mirror")
+        #expect(mirrors.filter { $0 != nil }.count == 1,
+                "the other's mirror rows are untouched — no executePurge ran for it")
+
+        // Resumable, never partial: the next (uncancelled) sweep takes the
+        // survivor, and the pair converges.
+        let again = try await sweep(a, server)
+        #expect(again.familiesPurged >= 1, "the survivor is re-collected and purged")
+        #expect(try familyRowCount(a, post: first.post) == 0)
+        #expect(try familyRowCount(a, post: second.post) == 0)
+        _ = try await b.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: b.keyProvider).reconcileLedger()
+        }
+        try await round(b)
+        try await round(a)
+        try await round(b)
         #expect(try a.syncedDump() == b.syncedDump())
     }
 }
