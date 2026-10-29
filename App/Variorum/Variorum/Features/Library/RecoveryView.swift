@@ -904,12 +904,14 @@ struct RecoveryView: View {
                 Task { await model.putBackSelection(order: order) }
             }
             .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+            .lineLimit(1)
             .fixedSize()
             if !taken.isEmpty {
                 Button(RecoveryCopy.bulkDeleteNowLabel(taken), role: .destructive) {
                     model.requestDeleteSelection(order: order)
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                .lineLimit(1)
                 .fixedSize()
                 .help("Skips the rest of the \(TrashWindow.days) days for every one — asked to confirm every time")
             }
