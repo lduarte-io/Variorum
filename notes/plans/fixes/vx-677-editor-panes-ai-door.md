@@ -1420,6 +1420,9 @@ Per suite: 2 · 1 · 5 · 2 · 4. *(The scanners walk the source tree at run tim
 
 **— LADDER ROUND 1's rows (the fix round, 2026-10-29; the final call `notes/plans/fixes/vx-677-ladder-round1.md`) —**
 
+**C11. GREEN — `vx677-b5/post`, the #204 capability/tutorial overlap suites on the merged tree** (the coordinator's named set, expanded into TYPE names per F-RB2-1 — the orchestrator's call, proposed to the coordinator at READY; expect 182 tests in 25 suites, 0 failures):
+`T=(CapabilityRegistryTests ShellChromeTests HelpMenuNamingTests TutorialBooksLessonTests TutorialBooksRitualTests TutorialCurrencyTests TutorialMCPChapterTests TourScriptTests TourSpotlightTests TourEngineTests TourPoolTuckTests TourEntryTests TourEndCardTests TourEndCardAsideGateTests TutorialBookShapeTests TutorialDoorTests TutorialWritingActsTests TutorialTakesActsTests TutorialStructureActsTests TutorialLookingActsTests TutorialLibraryActsTests TutorialDeletionActsTests TutorialWherePlacesActsTests TutorialPrivacyChapterTests TutorialFannedMatrixTests)` — the seven named types (78) + `TourTests.swift`'s seven (23) + `TutorialWalkTests.swift`'s eleven (81; the acceptance spine rides as ever). Per-suite counts in F-RB2-1. A red here is a #204-overlap regression — record, name the suite, STOP before the walks.
+
 **C12. RED-ON-OLD — `vx677-b1/rev664`, F-L1's twin re-run** (rebuilt at the final tip; expect 2 tests, EXACTLY 2 failures):
 ```zsh
 T=(OutsideWriteLivePaneTests)
