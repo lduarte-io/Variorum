@@ -74,6 +74,47 @@ struct TrashFirstPaintTests {
         }
     }
 
+    /// **Ladder R1 MINOR-1 — RED ON THE PRE-FIX CODE.** The total restarts
+    /// with the WING (`.task(id: session.wing.currentID)`); until the new
+    /// wing's total answers, a filtered empty line must not speak from the
+    /// OLD wing's unfiltered truth. Driven deterministically: the restart is
+    /// a task cancelled before it starts, so the body runs and its
+    /// observation delivers NOTHING (GRDB's default `.task` scheduling
+    /// delivers even the first value asynchronously; a cancelled consumer's
+    /// stream finishes empty) — exactly the gap between a wing switch and the
+    /// new total's first value. Pre-fix, `trashTotalLoaded` stayed raised
+    /// and the old wing's sentence stood ("…other things are waiting here"
+    /// over a Trash that holds nothing). Then a real restart answers, and
+    /// the line speaks the NEW truth.
+    @Test func aWingSwitchNeverLetsTheOldWingsTotalSpeak() async throws {
+        try await withEditor { editor in
+            let model = RecoveryViewModel(session: editor.session)
+            model.kindFilter = .book
+            model.adopt(archived: [], trash: [])
+            model.adoptTrashTotalIsEmpty(false)  // the OLD wing held other kinds
+            let oldWingsSentence = RecoveryCopy.trashEmptyLine(filteredBy: .book, holdsOtherKinds: true)
+            #expect(model.trashEmptyStateLine == oldWingsSentence)
+
+            let restart = Task { await model.startTrashTotal() }
+            restart.cancel()
+            await restart.value
+            #expect(!model.trashTotalLoaded, "the new wing's total has not answered")
+            #expect(model.trashEmptyStateLine == nil,
+                    "the old wing's truth must not speak for the new one")
+
+            let total = Task { await model.startTrashTotal() }
+            defer { total.cancel() }
+            for _ in 0..<400 {
+                if model.trashTotalLoaded { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(model.trashTotalLoaded)
+            #expect(model.trashEmptyStateLine == "The Trash is empty.",
+                    "the new wing's own truth: nothing waits here")
+        }
+    }
+
     /// Under a kind filter the empty sentence reads the UNFILTERED truth, so
     /// it waits for that too: a filtered listing that answered empty says
     /// nothing until the total has answered, then the two-facts sentence.

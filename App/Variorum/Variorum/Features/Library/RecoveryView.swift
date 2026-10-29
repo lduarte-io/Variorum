@@ -326,6 +326,11 @@ final class RecoveryViewModel {
     /// touches it, which is exactly why it can answer for the Trash as a
     /// whole while `startTrash` answers for the view.
     func startTrashTotal() async {
+        // Ladder R1 MINOR-1: this observation restarts with the wing, and a
+        // NEW wing's total has not answered yet — until it has, a filtered
+        // empty line must not speak from the old wing's truth (WF-1's rule,
+        // applied to the total as `startTrash` applies it to the listing).
+        trashTotalLoaded = false
         do {
             for try await value in session.database.observeTrash(
                 now: session.now, kinds: TrashScope.listedKinds,
