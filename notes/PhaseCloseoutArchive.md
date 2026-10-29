@@ -1356,3 +1356,23 @@ against the diff (the MAJOR it surfaced is pre-existing → VX-656). Born VX-634
 
 
 ---
+
+**→ VX-440 CLOSED 2026-10-28 — SHEETS & HISTORY CLARITY: BOOKS, BLOCK HISTORY, VERSIONS (the record
+`notes/plans/fixes/vx-440-sheets-history-clarity.md`; the ladder `notes/plans/fixes/vx-440-ladder-round1.md`; her
+handoff `notes/handoffs/vx-440-handoff.md`; PR #201, merge 8f835f5b3; kickoff to merge in one overnight run).** Seven
+members + three sitting-seated riders, by the sub-issue listing. Versions & Compare became ONE design (VX-130/437/432):
+saved versions seat in Compare's auto-fill (date-titled, sealed, after ordinary peers), unmarking one PROMOTES after a
+confirm (the declassify leak pinned red-on-old and killed), "Compare with now" on Versions rows + "Compare with Latest
+Version" on File/note ▾/⌘K, and the full-size version under the identity band (Back + Promote; no per-note memories).
+Block History (VX-431 + riders VX-331/244): one-line rows opening in place, counts, (i) explainers, the read-in-full
+sheet with Restore + Bring back as a take (the shared op `bringBackCommitAsTake`, AppSpec §9), the restore landing with
+its wash — and the walk's W-1 catch: a restore beside a LIVE Takes/Lenses pane left the old words, which the next
+keystroke would have written back; fixed by ending the ring over the restored take (the general outside-change class
+→ VX-664, High — her P-3 ruling wanted). Gathering faces (VX-611/616/189 + rider VX-356): the kind word at every
+delete/Trash/Put-back sentence, the foot's "+ new chapter" removed at her word, book-parity Shared-with doors
+(MCPSpec's P-VX185-2 superseded), the Book Panel's Study open-note mark. Evidence: one Fable ladder round (no
+BLOCKER/MAJOR); SIX red-on-old stage runs exact; the WHOLE VariorumTests target 5,572/978 at the final gate — which
+caught MAIN'S OWN red (VX-648's `.switchWing` vs the unupdated ShellChromeTests pin; fixed at the coordinator's GO)
+and re-sighted VX-608's flake; a full walk + a reshoot verified every face in both voices, the dev store restored to a
+zero prefs diff each time. Born: VX-659/660/661/664/665/666/667/668, all triaged. Her bundle: QUESTIONS #249. MOBILE
+PARITY: MobileSoul PL-62. Canon 126,682/150,000. One shipped gap, NAMED: VX-668 (the read-in-full sheet's landing).

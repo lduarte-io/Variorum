@@ -336,3 +336,4 @@ are planned against this document + the ledger above.
   sentence's phone wording when a leave face lands (F-PH-2 — the sweep exemption list says which face makes each
   reachable); (d) the phone CANNOT SYNC against marker 14 until its VM-8 build installs — her accepted word ("it's
   ok if the phone doesn't sync for a day after the switch").
+- **PL-64 (2026-10-28, VX-678):** the Trash's speed fixes reach the phone through shared core (the O(L) lineage rewrites + `observeTrash`'s named-region observation — its listing re-fetches on a reader now, not the writer); Mac-only remainders: multi-select, the honest empty state (the phone's own flash is **VM-33**), and the quit quiesce (no ⌘Q exists there). VM-34 records the caret pin's standing red on the current sim runtime, found by this run's full mobile sweep.

@@ -372,9 +372,11 @@ extension SyncEngine {
     /// correction); its shield is the never-accepted guard alone: every
     /// pull-applied row gets `recordSeq` inside the same apply, so an
     /// arrived copy always ranks `> 0` and the guard below declines.
-    /// A self-retirement never records kill evidence
-    /// (`writeResolvedRow` is not on this road), so the #143(b) defense
-    /// cannot revive what this leg retires — by construction.
+    /// (The #143(b) defense leg that once sat beside this road is REMOVED
+    /// — VX-669, her 2026-10-28 ruling: a deliberate cross-device delete
+    /// is never second-guessed — so nothing revives what any retirement
+    /// leg retires; a retirement is ordinary tombstones and Put back is
+    /// the road home.)
     private func retireSignedOutCopyIfOutranked(
         _ db: Database, facts: SampleLibraryDedupeFacts, liveCopyID: String,
         touched: TouchedRows
@@ -430,313 +432,22 @@ extension SyncEngine {
         }
     }
 
-    /// **RUN B B2 row 15 Part 2 — THE DEFENSE LEG** (F-1, the
-    /// double-retirement race; the orchestrator's row-15 ruling): a
-    /// same-name sample copy killed by an ARRIVING retirement in the
-    /// two-copy meeting context revives, exact-stamp and enqueued, when
-    /// the ruled matrix says it must survive ("an edited copy is NEVER
-    /// silently retired" — R-pre13u-8; err toward EDITED). ONE evidence
-    /// arm — **the kill-time verdict**: the REAL classifier, read at the
-    /// moment the retirement's first family death landed (the copy's rows
-    /// still whole — `TouchedRows.sampleCopyKills` carries the verdict),
-    /// says EDITED. This is the ruled classification itself, so the
-    /// both-edited row of the matrix is reachable even when this device's
-    /// edit already pushed — and the ruling's constraint ("repair
-    /// bookkeeping can NEVER self-justify a revival") holds BY
-    /// CONSTRUCTION: the classifier reads domain rows and never the
-    /// outbox. An INDETERMINATE verdict never defends (deferring to the
-    /// retiring side's complete evidence is loop-free; revive-on-doubt
-    /// could ping-pong against the other device's pass forever).
-    ///
-    /// **The ruled PRE-BATCH-DIRT arm is deliberately ABSENT — its
-    /// unsoundness is pin-proven, recorded for the orchestrator:** the
-    /// batch-start snapshot excludes in-apply enqueues (the constraint's
-    /// letter) but NOT a PRIOR batch's repair enqueues, which are the
-    /// same bookkeeping one pull earlier — in
-    /// `theMarkerIsSpentWhenTheOtherDevicesRetirementLands` (both copies
-    /// PRISTINE), the tag-collision repair's re-pointed applications of
-    /// the arriving copy's own notes sat in the snapshot and revived the
-    /// correctly-retired copy: the constraint's exact degradation
-    /// scenario, by the ruled mechanism itself. The classifier arm is
-    /// STRICTLY stronger against that scenario (no outbox evidence at
-    /// all) and the classifier-blind residual (a chapter rename) remains
-    /// exactly the pre-existing R2-5 declined-leg class, unchanged.
-    ///
-    /// A device's OWN pass can never trip the defense: self-retirements
-    /// write directly and never pass through `writeResolvedRow`, so no
-    /// kill is recorded for them — the constraint's degradation scenario
-    /// (reviving the copy the device just correctly retired) is dead by
-    /// construction, and the ordinary both-pristine convergence keeps its
-    /// pinned 3-round cadence (`p5c…`).
-    /// The kill-time recorder (`writeResolvedRow`'s hook body): resolves
-    /// the arriving tombstone to a LIVE same-name copy — a `reading` row
-    /// directly, a `container` row through its live membership — checks
-    /// the two-copy meeting context, and records ONE verdict per copy per
-    /// batch, read by the REAL classifier while the copy is still whole
-    /// (the first family death is the last such moment). Nothing is
-    /// decided or written here.
-    func recordSampleCopyKillEvidence(
-        _ db: Database, arriving row: SyncRow, stamp: String, touched: inout TouchedRows
-    ) throws {
-        let copyID: String?
-        if row.table == "reading" {
-            copyID = row.rowID
-        } else {
-            // LADDER R1 F-R6 (the cleanliness half; the defect half was
-            // pin-dismissed as hollow — a full retirement's reading row
-            // resolves directly, so evidence is never wholly missed): the
-            // resolution filters to readings wearing an injected facts
-            // NAME and orders deterministically. Correctness must not
-            // ride SQLite's plan — a post also living in a personal
-            // collection resolved to an ARBITRARY reading under the bare
-            // `LIMIT 1`, and under F-R3's persisted first-death verdict a
-            // wrong batch-1 resolution would skip the marker and re-open
-            // the split-revival it closes.
-            copyID = try String.fetchOne(
-                db,
-                sql: """
-                    SELECT r.id FROM reading r
-                    JOIN reading_post rp ON rp.reading_id = r.id AND rp.deleted_at IS NULL
-                    WHERE rp.post_id = ? AND r.deleted_at IS NULL
-                      AND r.name IN (SELECT value FROM json_each(?))
-                      AND EXISTS (SELECT 1 FROM container c
-                                  WHERE c.id = rp.post_id AND c.deleted_at IS NULL)
-                    ORDER BY r.id
-                    LIMIT 1
-                    """,
-                arguments: [row.rowID, jsonArray(Set(sampleLibraryFacts.map(\.bookName)))])
-        }
-        guard let copyID,
-              !touched.sampleCopyKills.contains(where: { $0.copyID == copyID }),
-              let copy = try Reading.fetchOne(db, key: copyID), copy.deletedAt == nil
-        else { return }
-        for facts in sampleLibraryFacts where copy.name == facts.bookName {
-            guard try meetingStands(db, bookName: facts.bookName, copyID: copyID, killStamp: stamp)
-            else { continue }
-            touched.sampleCopyKills.append((
-                copyID: copyID, stamp: stamp,
-                verdict: try SampleCopyClassifier.classify(db, copyID: copyID, facts: facts)))
-            return
-        }
-    }
-
-    /// **The meeting context, BOUNDED (LADDER R1 F-R2).** The first predicate
-    /// counted DEAD readings — so a retired loser's tombstone kept the
-    /// "meeting" open for its whole tombstone lifetime (30-day window +
-    /// horizon), and a deliberate cross-device delete of the kept,
-    /// ever-engaged copy was REVIVED for a month after any meeting: the
-    /// row-15 ruling's own premise ("can never fire outside the
-    /// once-per-store-life meeting window") falsified, and a resurrected
-    /// deliberate delete is exactly the class the row-17 ruling rejected
-    /// Shape C over. The meeting now stands only under one of three arms,
-    /// each strictly NARROWER than the old any-row-any-age predicate —
-    /// this bound can only ever suppress a revival, never widen one:
-    ///
-    ///  1. another same-name copy's reading row is LIVE here — the true
-    ///     two-copy state (carries both-edited: the peer kept its own copy);
-    ///  2. another same-name copy is dead AND its reading row still sits in
-    ///     THIS device's outbox — my own retirement not yet acked: the
-    ///     meeting is unsettled from this device's standpoint whatever the
-    ///     stamps say (carries the delayed-push crossing, offline gaps
-    ///     included);
-    ///  3. another same-name copy died within the SETTLE WINDOW of the
-    ///     arriving kill — |kill stamp − loser's deleted_at| ≤ 1 h, two
-    ///     EVENT stamps minted at their acts (receipt time never enters;
-    ///     wall stamps are display/domain data and this is a bounded-window
-    ///     heuristic, never an ordering authority — the 30-day Trash window's
-    ///     own idiom). The crossing's two pass stamps are bounded by delayed
-    ///     pushes + the A5 band + round cadence (seconds-to-minutes real);
-    ///     an hour covers generously; the month-scale tombstone lifetime is
-    ///     three orders beyond. An unparseable stamp reads as OUTSIDE the
-    ///     window — the narrow direction.
-    ///
-    /// Residual, stated: a deliberate delete INSIDE a real meeting's settle
-    /// window still defends — that is QUESTIONS #143(b)'s accepted corner,
-    /// now actually bounded the way the ruling believed it was.
-    private static let meetingSettleWindow: TimeInterval = 3600
-    private func meetingStands(
-        _ db: Database, bookName: String, copyID: String, killStamp: String
-    ) throws -> Bool {
-        let others = try Row.fetchAll(
-            db,
-            sql: "SELECT id, deleted_at FROM reading WHERE name = ? AND id <> ?",
-            arguments: [bookName, copyID])
-        guard !others.isEmpty else { return false }
-        if others.contains(where: { ($0["deleted_at"] as String?) == nil }) { return true }
-        let killDate = DateFormatter.variorumISO8601.date(from: killStamp)
-        for other in others {
-            let otherID: String = other["id"]
-            if try isEnqueued(db, table: "reading", rowID: otherID) { return true }
-            if let killDate,
-               let stamp = other["deleted_at"] as String?,
-               let otherDate = DateFormatter.variorumISO8601.date(from: stamp),
-               abs(killDate.timeIntervalSince(otherDate)) <= Self.meetingSettleWindow {
-                return true
-            }
-        }
-        return false
-    }
-
-    func defendEditedSampleCopies(_ db: Database, touched: TouchedRows) throws -> Int {
-        var repairs = 0
-        var defended: Set<String> = []
-        for kill in touched.sampleCopyKills where !defended.contains(kill.copyID) {
-            // The copy's READING must itself have died, under the recorded
-            // retirement stamp: a lone member-note deletion records
-            // evidence at its first death but is an ordinary delete — the
-            // book stands, nothing is defended.
-            guard try String.fetchOne(
-                db, sql: "SELECT deleted_at FROM reading WHERE id = ?",
-                arguments: [kill.copyID]) == kill.stamp
-            else {
-                // LADDER R1 F-R3: the first-death fence was per-batch, but
-                // ONE retirement can reach this device in TWO applies (a
-                // chunk boundary between the member containers and the
-                // reading row, crossed by the A5 band or a mid-drain cut).
-                // Discarding this batch's verdict re-opened the exact
-                // hazard the fence exists for: the NEXT batch's verdict,
-                // taken at the reading's own tombstone, reads a
-                // HALF-KILLED copy (dead members = "her pruning" = EDITED)
-                // and revives a correctly-retired pristine copy. The
-                // verdict therefore becomes DURABLE across the split — a
-                // local-only one-shot (the R2-3 marker idiom; sync_state,
-                // never synced, written inside the apply transaction so a
-                // rollback unwinds it) keyed copy+stamp, consumed when the
-                // reading's death arrives. INSERT OR IGNORE keeps the
-                // FIRST verdict — the earliest death saw the wholest copy.
-                // A verdict for a retirement whose reading never dies (a
-                // lone member-note deletion) lingers inert, bounded by
-                // meeting-context kill events, and is cleared whenever a
-                // later kill of the same copy consumes.
-                try persistKillVerdict(
-                    db, copyID: kill.copyID, stamp: kill.stamp, verdict: kill.verdict)
-                continue
-            }
-            // F-R3's consumption: a persisted first-death verdict for this
-            // exact (copy, stamp) OUTRANKS the current batch's re-read —
-            // the earlier moment saw the copy whole; this batch may be
-            // seeing it half-killed. INDETERMINATE consumes literally
-            // (deferring to the retiring side's complete evidence stays
-            // loop-free — never revive-on-doubt).
-            let verdict = try consumeKillVerdict(
-                db, copyID: kill.copyID, stamp: kill.stamp) ?? kill.verdict
-            guard verdict == .edited else { continue }
-            defended.insert(kill.copyID)
-            repairs += try reviveSampleCopy(db, copyID: kill.copyID, stamp: kill.stamp)
-        }
-        return repairs
-    }
-
-    /// F-R3's one-shot verdict marker (local-only; `sync_state`).
-    static func killVerdictKey(copyID: String, stamp: String) -> String {
-        "sample_kill_verdict:\(copyID):\(stamp)"
-    }
-
-    private func persistKillVerdict(
-        _ db: Database, copyID: String, stamp: String, verdict: SampleCopyVerdict
-    ) throws {
-        let raw: String
-        switch verdict {
-        case .pristine: raw = "pristine"
-        case .edited: raw = "edited"
-        case .indeterminate: raw = "indeterminate"
-        }
-        try db.execute(
-            sql: "INSERT OR IGNORE INTO sync_state (key, value) VALUES (?, ?)",
-            arguments: [Self.killVerdictKey(copyID: copyID, stamp: stamp), raw])
-    }
-
-    /// Reads-and-spends the persisted verdict for (copy, stamp) — and
-    /// clears EVERY lingering verdict for the copy while it is at it (the
-    /// reading died: any other stamp's marker is stale bookkeeping).
-    private func consumeKillVerdict(
-        _ db: Database, copyID: String, stamp: String
-    ) throws -> SampleCopyVerdict? {
-        let value = try String.fetchOne(
-            db, sql: "SELECT value FROM sync_state WHERE key = ?",
-            arguments: [Self.killVerdictKey(copyID: copyID, stamp: stamp)])
-        try db.execute(
-            sql: "DELETE FROM sync_state WHERE key LIKE ?",
-            arguments: ["sample_kill_verdict:\(copyID):%"])
-        switch value {
-        case "pristine": return .pristine
-        case "edited": return .edited
-        case "indeterminate": return .indeterminate
-        default: return nil
-        }
-    }
-
-    /// The exact-stamp revival: flips `deleted_at` back to NULL on every
-    /// family row carrying the retirement's stamp — the retirement was
-    /// tombstones-only, so the flip alone restores the copy as it stood —
-    /// and enqueues every flipped row explicitly (SyncSpec §7: the
-    /// revival must PUSH, or the defending device diverges silently).
-    /// Rows with a different stamp (an earlier delete's own clock) are
-    /// never touched. Purge intents naming revived rows are deliberately
-    /// NOT voided here: none exist on this road by construction, and the
-    /// sweep-time staleness net (`familyVerdict` → `.stale`) is the
-    /// designed second net for revives that cannot void (the standing
-    /// note at `voidPurgeIntents`).
-    private func reviveSampleCopy(
-        _ db: Database, copyID: String, stamp: String
-    ) throws -> Int {
-        var repairs = 0
-        func flip(
-            _ table: String, where clause: String, _ args: [String]
-        ) throws -> [String] {
-            let ids = try String.fetchAll(
-                db,
-                sql: "SELECT id FROM \(table) WHERE \(clause) AND deleted_at = ?",
-                arguments: StatementArguments(args + [stamp]))
-            for id in ids {
-                try db.execute(
-                    sql: "UPDATE \(table) SET deleted_at = NULL WHERE id = ?",
-                    arguments: [id])
-                try enqueueExplicitly(db, table: table, rowID: id)
-                repairs += 1
-            }
-            return ids
-        }
-        _ = try flip("reading", where: "id = ?", [copyID])
-        _ = try flip("reading_section", where: "reading_id = ?", [copyID])
-        _ = try flip("reading_post", where: "reading_id = ?", [copyID])
-        let posts = try String.fetchAll(
-            db,
-            sql: "SELECT post_id FROM reading_post WHERE reading_id = ?",
-            arguments: [copyID])
-        for postID in posts {
-            _ = try flip("container", where: "id = ?", [postID])
-            let placements = try flip("container_block", where: "container_id = ?", [postID])
-            if !placements.isEmpty {
-                let blocks = try String.fetchAll(
-                    db,
-                    sql: """
-                        SELECT DISTINCT block_id FROM container_block
-                        WHERE container_id = ?
-                        """,
-                    arguments: [postID])
-                for blockID in blocks {
-                    _ = try flip("block", where: "id = ?", [blockID])
-                    _ = try flip("variant", where: "block_id = ?", [blockID])
-                    _ = try flip("block_comment", where: "block_id = ?", [blockID])
-                    _ = try flip("block_tag", where: "block_id = ?", [blockID])
-                    _ = try flip("canvas_layout", where: "block_id = ?", [blockID])
-                    _ = try flip("lens_choice", where: "block_id = ?", [blockID])
-                    _ = try flip(
-                        "edge", where: "(source_block_id = ? OR target_block_id = ?)",
-                        [blockID, blockID])
-                }
-            }
-            _ = try flip("post_tag", where: "post_id = ?", [postID])
-            _ = try flip("reference", where: "container_id = ?", [postID])
-            _ = try flip("canvas_layout", where: "container_id = ?", [postID])
-            let lenses = try flip("lens", where: "container_id = ?", [postID])
-            for lensID in lenses {
-                _ = try flip("lens_choice", where: "lens_id = ?", [lensID])
-            }
-        }
-        return repairs
-    }
+    // THE DEFENSE LEG IS REMOVED (VX-669, her 2026-10-28 ruling; the
+    // record: notes/plans/fixes/vx-678-trash-purge-resurrection.md).
+    // RUN B row 15 Part 2 stood here: kill-time verdicts recorded at an
+    // arriving retirement's first family death (`recordSampleCopyKillEvidence`),
+    // a bounded meeting predicate (`meetingStands` — live twin · own
+    // unpushed retirement · one-hour settle window), persisted F-R3
+    // verdicts in `sync_state`, and an exact-stamp family revival
+    // (`reviveSampleCopy`). Its standing-live-twin arm held FOREVER in a
+    // settled both-edited library, so every deliberate cross-device
+    // delete of either copy was second-guessed and revived — her
+    // Sherlock books were mutually undeletable from any second device.
+    // Now: a retirement or deliberate delete is ordinary tombstones,
+    // visible in the Trash, Put back real; the crossing race's accepted
+    // cost is a recoverable Trash trip (QUESTIONS #143(b), amended at
+    // this run's closeout). Migration v1_35 sweeps the orphaned
+    // `sample_kill_verdict:` markers.
 
     /// Retires one copy, family-complete: the book (its cascade takes the
     /// memberships and chapters at this exact stamp), then each member note

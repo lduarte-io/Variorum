@@ -248,6 +248,11 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
+                        // VX-657: the quit door's quiesce reaches the
+                        // services through the delegate (wired beside
+                        // `appDelegate.session`; weak, so a re-lock's fresh
+                        // services replace it here on the next ready).
+                        appDelegate.services = fresh
                         // VX-308 U1 (P-VX308-U1-F1): the Account sheet's Delete Account also runs the protection
                         // half (the open library stops naming the deleted account — rule 16's local leave); and the
                         // account section's *Sign out…* signs out through this one session. VX-510 D-A1: the
