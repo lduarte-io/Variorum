@@ -1456,6 +1456,22 @@ Per suite: 2 · 1 · 5 · 2 · 4.
 
 *(P-680-1/2 keep their PROVISIONAL numbers in the QUESTIONS bundle — the drafted line states the as-built (a) arms the bundle asks her to ratify; if her answer moves an arm, the line moves with it at that later closeout, as ever. Batch 4's already-drafted candidate stands beside these: §The note's Block History line also gains "an unnamed commit rests on its first words" — one touch at closeout applies both Block History changes together.)*
 
+### LADDER ROUND 1 — FIX RECORD (implementer: Opus, the step-1 session continued into step 2, 2026-10-29)
+
+**NOT DONE (first line, kept current):** NO `xcodebuild test`, NO app launch, NO walk, NO stage claim — every new and edited pin is compiled at most (one scratch `build-for-testing`, below), never RUN; every red/green is PREDICTED by mechanism and owed to claim C (the C-row table below is the window's). No run product (`vx677-*`) is rebuilt — the one product rebuild is the orchestrator's, after this round, at the final tip. No canon edit (the contract-line drafts are below for the closeout); no QUESTIONS number (the PROVISIONALs are listed here for the bundle); no ticket moved. In progress: everything below marked PENDING.
+
+*The final call this round applies: `notes/plans/fixes/vx-677-ladder-round1.md` (`81ddad305`), read in full before any edit. F-L3 DISMISSED as deliberate (no code); F-L5 the orchestrator's (done — `1dbb30a57`, `059118574`, `81ddad305`).*
+
+**LIVE STATUS** (flipped in the same commit as each piece)
+- L-0 — this record's head: DONE (this commit).
+- L-1 — F-L4, the two-line comment tidy: PENDING.
+- L-2 — F-L1, the Takes twin's predicates bound to locals: PENDING.
+- L-3 — F-L2, the three fixture repairs (staging only): PENDING.
+- L-4 — F-L2, the pins + guards on the PRE-FIX tree: PENDING.
+- L-5 — F-L2, the fix (the take, the receipt road, the words): PENDING.
+- L-6 — the scratch compile + the binary re-check + the headless suites: PENDING.
+- L-7 — the claim C deltas (exact), the drafts, the self-assessment: PENDING.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
