@@ -518,6 +518,15 @@ struct ShellActions {
     /// it restores AND opens the book; failures speak.
     func restoreSampleLibrary() { restoreSeededBook(.sherlock) }
 
+    /// VX-633 (R-633-6) — **Help ▸ Restore “the prince”**: the launch's
+    /// seeded book through the same door. Mints only what is MISSING — a
+    /// deleted chapter comes back fresh with its Italian (and third) takes;
+    /// a chapter she is still working in is never touched — then composes
+    /// the Welcome arrangement (the Prince owned when fork-free, on Welcome,
+    /// its notes `#classics`). The receipt's unit is "chapters" (each note is
+    /// one).
+    func restorePrinceBook() { restoreSeededBook(.prince) }
+
     // (Help ▸ Restore “Encryption Explained” — pre-13x 5a — REMOVED at
     // 13s-b U1b, R-13s-37, her word: "encryption explained not present and
     // not restorable". The book's content stays in `Book.all` as the
@@ -833,6 +842,8 @@ struct ShellActions {
         // pre-13u Act 10: the sample library's restore, typeable like the
         // tutorial's. (The Encryption Explained row left at 13s-b U1b —
         // R-13s-37: not restorable.)
+        // VX-633: the Prince's restore, typeable like the others.
+        .restorePrinceBook,
         .restoreSampleLibrary,
         // 18l-c U6: the takemania book's restore, typeable like the others.
         .restoreJekyllBook,
@@ -1015,6 +1026,7 @@ struct ShellActions {
         case .duplicateNoteWithTags: return { duplicateNote(tags: .applied) }
         case .duplicateNoteWithoutTags: return { duplicateNote(tags: .none) }
         case .restoreTutorial: return { restoreTutorial() }
+        case .restorePrinceBook: return { restorePrinceBook() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
         case .restoreJekyllBook: return { restoreJekyllBook() }
         case .restoreClassicsGathering: return { restoreClassicsGathering() }

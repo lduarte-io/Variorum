@@ -2391,6 +2391,17 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // VX-633 (R-633-6): the Prince's restore — the same
+        // mint-what's-missing road; the verb follows the one name constant
+        // (the Jekyll door's spelling), and the front note names it verbatim
+        // (`PrinceSeedTests` pins the match).
+        Capability(
+            id: .restorePrinceBook,
+            verb: "Restore \u{201C}\(SampleLibraryPrinceBook.name)\u{201D}",
+            scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
         // pre-13u Act 10 (the tenth-wave ruling): the sample library's
         // restore — mint-what's-missing, never a replace, so no confirm.
         Capability(

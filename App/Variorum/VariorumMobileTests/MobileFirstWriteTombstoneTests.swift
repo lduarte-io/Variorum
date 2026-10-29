@@ -35,14 +35,17 @@ struct MobileFirstWriteTombstoneTests {
     /// the pin rode *Encryption Explained*, which left the phone's default
     /// seed at R-13s-5/37 — the SUBJECT (the tombstone honoured through the
     /// one shared brain) is unchanged and now rides SHERLOCK, the remaining
-    /// first-write book, through the same `seedIfNeeded` road.
+    /// first-write book, through the same `seedIfNeeded` road. **JUSTIFIED
+    /// VEHICLE EDIT AGAIN (VX-633, R-633-6):** the first-write book is the
+    /// LAUNCH BOOK — the Prince — so the pin rides it; the subject is
+    /// unchanged.
     @Test func aDeletedSeededBookIsNotReMintedByTheFirstWrite() async throws {
         try await withEditorWorld { session, db in
             // Both session leaves injected — a headless run never writes the
             // test host's defaults (RUN A A2 row 8's rule).
             session.seededBookMarkIsSet = { _ in false }
             session.markSeededBook = { _ in }
-            let book = SampleLibrarySeeder.Book.sherlock
+            let book = SampleLibrarySeeder.Book.launchBook
 
             // The book ARRIVED (the seeder's own mint, no mark written) and
             // the reader then deleted it.
