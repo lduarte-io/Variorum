@@ -2834,8 +2834,7 @@ enum TutorialSeeder {
             + "tags, and your original never changes. Because "
             + "each block of the copy remembers the block it came from, Compare "
             + "(\u{2318}5) lines the two up row by row. Ask your AI to show you the "
-            + "two side by side and, while Variorum is the app in front, it opens "
-            + "Compare on them.",
+            + "two side by side, and Variorum offers to open Compare on them.",
 
             "For a long job, like translating a whole book, ask your AI to check "
             + "its work as it goes. It can read a long note a page at a time "
@@ -2891,10 +2890,20 @@ enum TutorialSeeder {
             + "\u{2325}\u{2318}Z takes a client's act back, one act at a time, and "
             + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take.",
 
-            // VX-197 U8b — Compare from the wire (VX-298).
-            "A client is told to move your window only when you ask it to show you "
-            + "something, and it can only while Variorum is the app in front; it "
-            + "never brings a window forward. Asked to show you a note beside "
+            // VX-197 U8b — Compare from the wire (VX-298). VX-676 (the VX-677
+            // run — her sitting + mid-run amendment, 2026-10-28): a show LANDS
+            // AS AN OFFER by default; the dial's words are the pane's own.
+            "A client is told to show you something only when you ask it to, and "
+            + "by default it asks first: a line pops up at the bottom of the window "
+            + "naming the client and what it wants to show you, with "
+            + "\(MCPReceiptCopy.openDoor) to go and look. After a few seconds the line "
+            + "waits at the bottom of the window until you open it "
+            + "(\u{2325}\u{2318}O opens it too), dismiss it with \u{2715}, or the "
+            + "client disconnects. Nothing ever brings a window forward. In Settings "
+            + "\u{25B8} MCP, \u{201C}\(MCPPaneCopy.showDialTitle)\u{201D} can be set to "
+            + "\(MCPPaneCopy.showDialChoice(.moveAtOnce)) instead (only while Variorum "
+            + "is the app in front; if you've been away, it still asks) or to "
+            + "\(MCPPaneCopy.showDialChoice(.never)). Asked to show you a note beside "
             + "another, it opens Compare with them side by side.",
         ])
 

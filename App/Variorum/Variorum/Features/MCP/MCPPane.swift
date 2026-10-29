@@ -252,6 +252,20 @@ struct MCPPane: View {
                 if Self.saysClientsBelongToTheLibrary(door.snapshot) {
                     ExplainerLine(line: MCPPaneCopy.libraryClientsSummary, detail: MCPPaneCopy.libraryClientsDetail)
                 }
+                // VX-676 (her ruling (3) — PROVISIONAL P-676-1, the placement):
+                // THE SHOW DIAL, global, beside the server switch above the tabs —
+                // how a client's show_in_app lands (move at once · ask · never;
+                // the ask by default). One picker, its line, the whole text
+                // behind its (i).
+                Picker(SettingsCatalog.title("mcpShowDial"), selection: Binding(
+                    get: { door.snapshot.showDial },
+                    set: { door.setShowDial($0) })) {
+                    ForEach(MCPShowDial.allCases, id: \.self) { dial in
+                        Text(MCPPaneCopy.showDialChoice(dial)).tag(dial)
+                    }
+                }
+                .lineLimit(1)
+                ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)
                 // A refusal from any act lands where she is looking first
                 // (the walk's second finding: a caption at the form's foot
                 // sat below the fold).

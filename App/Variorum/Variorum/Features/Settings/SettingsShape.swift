@@ -386,6 +386,18 @@ nonisolated enum SettingsCatalog {
                        "server", "client", "share", "grant", "socket",
                        "anthropic", "openai", "chatgpt", "gpt", "cursor", "gemini", "copilot",
                        "windsurf", "ollama"]),
+        // VX-676 (her ruling (3)): THE SHOW DIAL — how a client's show_in_app
+        // lands; its row sits above the tabs beside the switch (PROVISIONAL
+        // P-676-1), so a finding lands on no tab. Blurb and keywords are
+        // search words (VX-234 re-voices the blurb).
+        SettingsRow(
+            id: "mcpShowDial", pane: .mcp, title: MCPPaneCopy.showDialTitle,
+            blurb: "When a client asks to show you something: ask first \u{2014} it waits at the bottom of "
+                + "the window for one press \u{2014} move there at once (only while Variorum is in front), "
+                + "or never.",
+            // No "ask", "open" or "client": Waiting, the open book and Clients
+            // keep those words' first findings (the rank's catalog-order tie).
+            keywords: ["show", "show in app", "navigate", "move", "jump", "offer", "never", "mcp", "ai"]),
         // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
         // its icon; ⌥⌘, opens the pane there.
         SettingsRow(
