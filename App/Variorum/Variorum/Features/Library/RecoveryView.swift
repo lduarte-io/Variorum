@@ -225,6 +225,34 @@ final class RecoveryViewModel {
     /// summoned surface, never a keystroke road (the `poolHomes` argument,
     /// one property up).
     private(set) var trashIsEmptyUnfiltered = true
+
+    /// **HAS THE LISTING ANSWERED YET?** (the VX-678 acceptance walk's
+    /// finding 1 — VX-670's honesty bar.) `trash` starts as `[]`, and the
+    /// surface drew "The Trash is empty." whenever it was empty — so every
+    /// opening of a non-empty Trash read that false sentence for the moment
+    /// before `observeTrash`'s first value arrived (filmed: ~0.4 s, 3/3, both
+    /// wings). An empty array cannot say "not yet" and "nothing" at once; this
+    /// says which. Lowered whenever the listing's query restarts (a filter, a
+    /// sort, a wing), raised by the value that answers it.
+    private(set) var trashListingLoaded = false
+    /// …and the unfiltered total's (`startTrashTotal`), which a FILTERED empty
+    /// line reads to say whether other kinds are waiting. A failed total
+    /// never raises it: the filtered line then stays unsaid rather than guess.
+    private(set) var trashTotalLoaded = false
+
+    /// **The empty-state sentence, or nil while there is nothing true to
+    /// say.** Before the listing's first value it is nil — never the false
+    /// "The Trash is empty." (the face draws nothing in its place: calm, no
+    /// spinner). After a genuinely empty first value it is
+    /// `RecoveryCopy.trashEmptyLine`'s answer; under a filter that answer
+    /// also waits for the unfiltered total, because its wording depends on it.
+    var trashEmptyStateLine: String? {
+        guard trashListingLoaded, trash.isEmpty else { return nil }
+        if kindFilter != nil, !trashTotalLoaded { return nil }
+        return RecoveryCopy.trashEmptyLine(
+            filteredBy: kindFilter, holdsOtherKinds: !trashIsEmptyUnfiltered)
+    }
+
     private(set) var lastError: String?
     /// A successful Put back's own words (the tray's receipts, from their one
     /// home) — kept apart from `lastError` so a success is never rendered in
@@ -272,6 +300,9 @@ final class RecoveryViewModel {
     /// surface's; one decision now answers for both platforms.
     func startTrash() async {
         let kinds = TrashScope.kinds(filter: kindFilter)
+        // Walk finding 1: a new query has not answered yet — whatever rows
+        // the last one left stay drawn, but no empty sentence speaks for it.
+        trashListingLoaded = false
         do {
             // 13i-d U5: the CURRENT WING's Trash (her per-library ruling).
             for try await value in session.database.observeTrash(
@@ -280,6 +311,7 @@ final class RecoveryViewModel {
             ) {
                 (trash, trashTruncated) = TrashListing.windowed(
                     value, window: Self.window)
+                trashListingLoaded = true
                 await refreshPoolHomes()
                 await refreshBookNoteCounts()
             }
@@ -300,6 +332,7 @@ final class RecoveryViewModel {
                 oldestFirst: false, limit: 1, wingID: session.wing.currentID
             ) {
                 trashIsEmptyUnfiltered = value.isEmpty
+                trashTotalLoaded = true
             }
         } catch is CancellationError {
         } catch {
@@ -311,9 +344,11 @@ final class RecoveryViewModel {
         }
     }
 
-    /// Tests drive this listing the `adopt` way.
+    /// Tests drive this listing the `adopt` way — a delivered value, so it
+    /// has answered (walk finding 1).
     func adoptTrashTotalIsEmpty(_ empty: Bool) {
         trashIsEmptyUnfiltered = empty
+        trashTotalLoaded = true
     }
 
     // MARK: A scrap's home is a POOL, and the surface says so (13l, §8b's
@@ -402,6 +437,8 @@ final class RecoveryViewModel {
     func adopt(archived: [Queries.TimelineItem], trash: [Queries.TrashItem]) {
         self.archived = archived
         self.trash = trash
+        // A delivered listing has answered (walk finding 1).
+        trashListingLoaded = true
     }
 
     /// **"N days left"** for a row, read against the session's clock.
@@ -820,12 +857,13 @@ struct RecoveryView: View {
                 if model.selectedRows.count > 1 {
                     bulkRow
                 }
-                if model.trash.isEmpty {
-                    // Ledger row 2: an empty VIEW is not an empty Trash, and
-                    // the sentence now knows the difference.
-                    Text(tokens.chromeLabel(RecoveryCopy.trashEmptyLine(
-                        filteredBy: model.kindFilter,
-                        holdsOtherKinds: !model.trashIsEmptyUnfiltered)))
+                // Ledger row 2: an empty VIEW is not an empty Trash, and the
+                // sentence knows the difference. Walk finding 1: and a listing
+                // that has not answered yet is not empty either — the model
+                // withholds the sentence until it has (`trashEmptyStateLine`),
+                // and nothing draws in its place.
+                if let emptyLine = model.trashEmptyStateLine {
+                    Text(tokens.chromeLabel(emptyLine))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                 }
