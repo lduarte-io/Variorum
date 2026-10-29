@@ -108,12 +108,19 @@ nonisolated enum SampleLibraryPrinceBook {
     /// italian") — names the WORK; the 1814 printing is disclosed in the
     /// front note (R-633-10).
     static let italianTakeLabel = "il principe 1532"
-    /// R-633-14 — ratified ("I think that's fine honestly"), its year
-    /// CORRECTED to 1909 at U2b (the author's front-note edit, confirmed by
-    /// the primary source: PG #57037's title page reads "OXFORD UNIVERSITY
-    /// PRESS … 1909", `notes/source/prince-ricci-pg57037.txt` ~line 54; the
-    /// earlier 1903 was an unverified recollection). It names the Ricci LENS
-    /// too (the take-label pattern).
+    /// **R-633-19 — "ricci 1903", the translation's own date.** The history:
+    /// R-633-14 ratified "ricci 1903" ("I think that's fine honestly"); U2b
+    /// changed it to 1909, the date of the printing PG #57037 transcribes (its
+    /// title page reads "OXFORD UNIVERSITY PRESS … 1909",
+    /// `notes/source/prince-ricci-pg57037.txt` ~line 54); the fact-check
+    /// sitting then superseded that back to 1903. The label convention carries
+    /// the TEXT's own date, never a printing's ("il principe 1532" over the
+    /// 1814 printing; "marriott 1908"), and Ricci's translation was first
+    /// published in 1903 (Grant Richards, The World's Classics). The 1909
+    /// Oxford printing is the source edition's fact, not the label's (the
+    /// front note's credits cite eBook #57037 and "first published 1903"). It
+    /// names the Ricci LENS too (the take-label pattern); `PrinceSeedTests`
+    /// pins the value with this reason.
     static let ricciTakeLabel = "ricci 1903"
     /// R-633-13 — the ruled label pattern.
     static let dacreTakeLabel = "dacres 1640"
