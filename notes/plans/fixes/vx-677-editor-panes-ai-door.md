@@ -1187,6 +1187,17 @@ Per suite: 3 · 6 · 11 · 4 · 22 · 4 · 4 · 2 · 2 · 1 · 5 · 2 · 1 · 4 
 - **False positives:** `DestructiveUndoWarningTests` and `WindowsTests` (a local `quiesce` helper); `DebugOracleScopingTests` and `TakesBoardSoakTests` (the word "quiescence" in prose).
 - **Whole-tree source scanners** (`NoLiteralColourTests`, `ChromeLineLimitTests` and their family): they read `VariorumApp.swift` among every app file and are already in batch 4's run 4.
 
+### WINDOW vx677-final-suites — CLAIM A VERDICTS (the orchestrator, 2026-10-28 23:37–00:08; logs `DerivedData/vx677-final/logs/R*.log`; TESTED SHA 092909955, containing main 5aad3e378)
+
+EXACT/GREEN (eleven): R1 30/EXACTLY 21 — the repaired Lenses pin honestly red on the revert; R2 34/0 — and green on post: **anomaly A closed clean** · R3 6/EXACTLY 2 · R4 71/0 (the row-first fix's green family) · R5 31/EXACTLY 12 · R8 150/0 · R11 52/0 + the gated skip · R12 358/0 (the F-D-1 MCPShareFaces red did NOT recur on the rebuilt binary — the VX-692 merge is BUILD-SENSITIVE; for that ticket at closeout) · R13 **ALL THREE GREEN — VX-668 does not reproduce in-host; the trace walk decides** · R14 118/0 (**VX-695's test GREEN post-scrub**) · R15 the overlap run 132/0.
+
+DISPOSITIONS BORN (three):
+- **DA-1 (batch 3): `afterTheToastFadesTheAskHoldsTheQuietLine` RED ON POST** (R7: 104 executed, this one test, 2 issues — `line?.text → nil` after the fade in-host; also red inside R6's 13/2, consistent). First-ever run of the mounted offer pins. Fix-or-pin disposition; claim B's W-676 fade row is the live probe (the W-680-2 pattern).
+- **DA-2 (batch 4): R9 NO VERDICT — the rev674 host crashed 3× (EXC_BAD_ACCESS; .ips 23:52:14/19/23), retry-shed 12→11→10→4.** Before the first crash: the 2 predicted reds + ONE unpredicted (`CommitsPageLedgerTests.theDefiningSentenceSurvivesAndThePaneBlurbIsGone`). The crash exists ONLY on the revert product (the same suites green on post in R11) — a revert-stub artifact is the lead; disposition, then the honest re-run in claim C.
+- **DA-3 (batch 4, record-only candidate): R10 = 17 executed, 8 of the 10 predicted reds** (the 6 catalog + 2 face); `everyChordCellFitsItsColumnOnOneLine` and `theDescriptionReadsInTheVoicesFaceAndTheChordsInItsMono` GREEN on the revert = hollow as revert evidence (guards of face code the revert keeps). VX-572's red-on-old stands on the 8.
+
+Window hygiene: zero instances by path + no Problem Reporter at release (five hosts + a dialog were teardown-lag, self-cleared); prefs diffed against this claim's own pre-export — ten fixture per-note keys the mounted suites wrote were deleted at zero instances (`currentBlock.…028D`, `surfaceSize.flow.…0010`, `surfaceSize.flow.70F5BFD6…`, seven `surfaceSize.outline.…`); two PRE-EXISTING fixture surfaceSize keys changed values, untouched; the three 23:52 .ips are DA-2's evidence, nothing else newer than the 19:48 baseline.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
