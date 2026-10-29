@@ -185,6 +185,9 @@ hard-stopped), make sure it cleaned up, and finish what it missed:
   TakesEntryBandTests reds (VX-695). The scrub, at zero instances: `defaults export` a backup to
   `~/.variorum/`, then `defaults delete` the per-note shapes only. It is a reset, not a fix, because
   hosts re-write ~100 keys per whole-target run.
+- **Cloning a DerivedData product dir (APFS clone) deletes outputs from its SOURCE** through the
+  shared build database (VX-677, 10-29; it looked like Xcode refusing the build). After cloning,
+  rebuild the source in place, or build fresh dirs.
 - **Never run an act a session's harness refused, unless she tells you to** (permission
   laundering). Route it to her.
 - **The release's step-0 walk has three environment traps** (the whole-folder slot set-aside, the
