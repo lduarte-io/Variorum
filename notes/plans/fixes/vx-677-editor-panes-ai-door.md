@@ -1628,7 +1628,11 @@ The procedure for each, one at a time: apply over the clean committed tip → `g
   - `rev676`: `logs/build-rev676-4.log`, TEST BUILD SUCCEEDED, EXIT 0 (04:57:59–05:01:08). Diff +1 −5 in `MCPShowTool.swift` and 1 line replaced in `MCPDoor.swift` (2 markers), as dry-run. Restored by `git checkout --`; `git status` empty, `git diff` empty, no marker.
   - Panel (`logs/panel-2-b3.txt`): `rev676` differs from `post` ONLY in its two functions (`MCPShowRule.verdict` 82 → 40, `MCPDoor.agentShow` 664 → 614 — the final rebuild's and the fixes unit's own numbers); every other row equal, the FL2 rows included. `vx677-b3/post` equals `vx677-b1/post` on every row.
   - Provenance: both carry the four content markers (F-L2's two receipt sentences, "marriott 1908", the pin `aShowThatCannotFinishOrFindsNoWindowSaysSo`).
-- FR2-3 — `vx677-b4/post` + `vx677-b4/rev674`: NOT STARTED.
+- FR2-3 — `vx677-b4/post` + `vx677-b4/rev674`: DONE (this commit).
+  - `post`: `DerivedData/vx677-b4/logs/build-post-7.log`, TEST BUILD SUCCEEDED, EXIT 0 (05:02:02–05:05:07); binaries 05:05:06.
+  - `rev674`: `logs/build-rev674-5.log`, TEST BUILD SUCCEEDED, EXIT 0 (05:05:22–05:08:27). Diff +1 in `BlockHistoryPane.swift` (1 marker), as dry-run. Restored by `git checkout --`; `git status` empty, `git diff` empty, no marker.
+  - Panel (`logs/panel-2-b4.txt`): `rev674` differs from `post` ONLY in `CommitRowFace.restingWords` (99 → 16 — batch 4's own numbers); every other row equal. `vx677-b4/post` equals `vx677-b1/post` on every row.
+  - Provenance: both carry the four content markers.
 - FR2-4 — `vx677-b5/post` + `vx677-c/rev668`: NOT STARTED.
 - FR2-5 — `vx677-c/revFW2`: NOT STARTED.
 - FR2-6 — `vx677-c/revFL2` (NEW): NOT STARTED.
