@@ -120,6 +120,15 @@ in main's own delta since then (`git diff --name-only <tested> <tip> | grep -v
 <SHA>, merge it in before your merge" to every open effort. Batch the merge commit
 with its on-main ledger and handoff commits into one broadcast where you can, and send
 the merge SHA alone only when a waiting run can start its merge-in early.
+- **The tested tree is the LAST WHOLE-TARGET run's tree**, not the last pin claim's. Ladder fixes
+  land product code after it. When `git diff --stat <last-whole-target> <tip> -- . ':!notes'`
+  touches code many suites construct (`Shared/AppSession`, `AppServices`, the seeders), hold the
+  merge GO for one more whole-target window. When `App/Variorum/Shared/` changed, that window adds
+  the phone suites, since every Shared/ file compiles into VariorumMobile.
+- **At every merge, intersect the merged code files with each open branch, then trial-merge**
+  (`git merge-tree --write-tree <a> <b>`). Two branches that both add to
+  `Registry/Capability*.swift` is the VX-648 trap: the later merger re-runs CapabilityRegistryTests
+  and ShellChromeTests after its merge-in.
 
 ## /Applications refreshes (her real store)
 - Prefer ONE folded refresh from merged main, run by the last merger of a burst. If
@@ -149,6 +158,41 @@ hard-stopped), make sure it cleaned up, and finish what it missed:
   Backups, or the dev store's W-style repro copies she hasn't dispositioned.
 - Close only what you KNOW closed. Live or exploratory worktrees stay untouched, even
   when idle. When unsure, list it in the handoff for her.
+- A live run's per-batch DerivedData can pass 50 GB (VX-677's batches ran 9–20 GB each). When
+  free space falls under ~40 GiB, ask the live session to drop the batch dirs its later rebuild
+  superseded. It knows which ones its runs still read.
+
+## Traps the 2026-10-27/28/29 windows taught (check every result line against them)
+- **Executed counts or no verdict.** `-only-testing` silently drops FILE names
+  (`TutorialBooksChapterTests` is a file holding two types), and the list must be a zsh ARRAY.
+  "Executed 0" with TEST EXECUTE SUCCEEDED is no verdict. On the simulator, a back-to-back boot can
+  refuse the launch (SpringBoard "Busy / failed preflight", 0 executed): a fresh boot plus a settle
+  recovers it.
+- **Sessions miss the screen.** A Problem Reporter window can stay up after a session reports
+  "none". Run `pgrep -fl "Problem Reporter"` yourself and read every new
+  `~/Library/Logs/DiagnosticReports/Variorum-*.ips`; close a leftover dialog with
+  `osascript -e 'tell application "Problem Reporter" to quit'`.
+- **Read the crash's faulting thread before accepting a session's label.** SIGSEGV at a stack
+  guard page inside `ABI.EncodedEvent.encode` → `JSONEncoder` → `Dictionary.reserveCapacity` is
+  swift-testing's own event encoder (VX-661's class). It is not product code. It trips when failing
+  tests emit large issue payloads, so the cure is to split the run, not to fix product code.
+- **Times run fast,** the sessions' and your own. Stamp memory lines with `$(date +%H:%M)` and
+  correct release lines to `stage.log`. `Tools/stage renew` RESETS the clock to now+N; it doesn't
+  add. Sessions forget a pre-approved renew and the claim lapses mid-run, so pre-approve it at T−10
+  and spell out the N.
+- **The Debug defaults domain bloats.** Test hosts write per-note keys (`surfaceSize.outline.*`,
+  `currentBlock.*`, `postMode.*`, …) into `io.lduarte.Variorum.debug`. Past ~2,700 keys,
+  TakesEntryBandTests reds (VX-695). The scrub, at zero instances: `defaults export` a backup to
+  `~/.variorum/`, then `defaults delete` the per-note shapes only. It is a reset, not a fix, because
+  hosts re-write ~100 keys per whole-target run.
+- **Never run an act a session's harness refused, unless she tells you to** (permission
+  laundering). Route it to her.
+- **The release's step-0 walk has three environment traps** (the whole-folder slot set-aside, the
+  signed-in session a stopped run leaves behind, the surviving seed marks). They're written up in
+  `Tools/WalkKit/README.md`, "Step-0 environment traps". Re-check them in every release GO.
+- **The dev store's CONTENT belongs to the agents** (her rule, 2026-10-28): no as-found keep-lists
+  and no her-word asks about content. Still binding: the stage discipline, signed out and never
+  pressing Resume, `dev-castle.env`, the prod-test-road fences, and the A1 rail on her real store.
 
 ## The stage ambient (VX-458)
 `Tools/ambient on|off|status|next|log` puts a 1-bit scene (a koi pond first) on the built-in screen

@@ -360,6 +360,21 @@ resolved auth user's email byte-equal to the allowlist's entry — with one atom
 minus the auth user and the entitlement, the before/after reads printed and logged. Quit or sign out any walk instance
 signed in to the account first (a signed-in app mints challenge rows on its own, so the reset would end not at rest).
 
+**Step-0 environment traps (the 0.10.5 release, 2026-10-29 — three stops, one chain, none of them the product):**
+- **Set the dev slot aside WHOLE, by one rename of `Variorum-dev/`, never by moving its files.** The slot's
+  `variorum-restore-hold.json` is store-ADJACENT, not library-keyed: left behind, it HOLDS the walk's fresh library
+  (`RestoreHoldModel.markerGate` reads it beside whatever store sits there; every sync round refuses), and P5 stops on the
+  row's idle face "Not synced yet" instead of "Sync isn't on for this library yet" (VX-697). Restore by the reverse rename
+  and md5 the library files and the marker against a log taken before the set-aside.
+- **A STOPPED run leaves the walk app SIGNED IN.** A stop never reaches THE END's sign-out, so the test account's session
+  stays in the Debug keychain across launches. The next run then opens on the not-yet face, which carries a "Protection…"
+  door and NO "Sign in…" (`Shared/SyncStatusViews.swift`'s face table), and P4 stops. Before any rerun, sign the walk app
+  out through its Account sheet, confirm the row's signed-out face, and quit it.
+- **The fresh birth seeds NOTHING** while the dev scope's seed marks stand (the bullet above): step 0 exercises an EMPTY
+  fresh store. A first-launch measurement (VX-704) must delete the marks first.
+- **The words guard's `-25200` withholds every capture on some builds** (VX-658's class): a stopped run's evidence is its
+  log, `prod-state-at-stop.log` and a full-screen diagnostic shot taken by the investigator.
+
 **guard.sh exit 8** (VX-536): the on-this-Space check compiles its `wl2` helper from `wl2.swift` when absent or stale and
 REFUSES when it cannot (or the helper answers nonsense) — it never passes silently. The pin:
 `zsh Tools/WalkKit/pins/guard-space-helper.zsh` (headless).
