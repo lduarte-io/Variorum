@@ -682,6 +682,11 @@ struct BlockHistoryPane: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    #if DEBUG
+    /// This pane's own name in `BlockHistoryPaneOracle` (VX-668's pin door;
+    /// the 18k C4 owner shape).
+    @State private var oracleOwner = UUID()
+    #endif
 
     init(
         session: AppSession, request: BlockHistoryRequest,
@@ -766,6 +771,13 @@ struct BlockHistoryPane: View {
         .task { await model.start() }
         // Row 69: the note's seal, watched for as long as this pane is up.
         .task { await model.watchSeal() }
+        #if DEBUG
+        // VX-668 (the VX-677 run, batch 5): the pin door — the model THIS
+        // pane holds in its own `@State` (the inspector builds the pane with
+        // none of its own), published while the pane stands.
+        .onAppear { BlockHistoryPaneOracle.publish(model, owner: oracleOwner) }
+        .onDisappear { BlockHistoryPaneOracle.release(owner: oracleOwner) }
+        #endif
         .onChange(of: model.loaded) { _, loaded in
             guard loaded, !seededExpansion else { return }
             seededExpansion = true
@@ -1436,6 +1448,10 @@ struct CommitReadingSheet: View {
     let onBringBack: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var confirmingRestore = false
+    #if DEBUG
+    /// This sheet's own name in `BlockHistoryPaneOracle` (VX-668's pin door).
+    @State private var oracleOwner = UUID()
+    #endif
 
     /// The sheet's measure — a reading width, never the pane's narrow column.
     static let idealWidth: CGFloat = 560
@@ -1488,14 +1504,7 @@ struct CommitReadingSheet: View {
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                 .help(BlockHistoryPath.bringBackAsTakeHelp)
-                Button(tokens.chromeLabel(BlockHistoryCopy.restoreVerb)) {
-                    if predatesSplit {
-                        confirmingRestore = true
-                    } else {
-                        onRestore(false)
-                        dismiss()
-                    }
-                }
+                Button(tokens.chromeLabel(BlockHistoryCopy.restoreVerb)) { pressRestore() }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                 .help(CommitRowView.restoreHelp)
             }
@@ -1505,6 +1514,16 @@ struct CommitReadingSheet: View {
             minWidth: 420, idealWidth: Self.idealWidth, maxWidth: 820,
             minHeight: 320, idealHeight: 520)
         .background(tokens.surface)
+        #if DEBUG
+        // VX-668's pin door: the Restore button's OWN action, so a pin presses
+        // exactly what the button does — the act handed over, then THIS
+        // sheet's `dismiss` (no in-process road reaches a SwiftUI button).
+        .onAppear {
+            BlockHistoryPaneOracle.publishSheetRestore(
+                commitID: commit.id, owner: oracleOwner) { pressRestore() }
+        }
+        .onDisappear { BlockHistoryPaneOracle.release(owner: oracleOwner) }
+        #endif
         .alert(BlockHistoryCopy.predatesSplitTitle, isPresented: $confirmingRestore) {
             Button(BlockHistoryCopy.restoreAnyway, role: .destructive) {
                 onRestore(true)
@@ -1515,7 +1534,63 @@ struct CommitReadingSheet: View {
             Text(BlockHistoryCopy.predatesSplitDetail)
         }
     }
+
+    /// The foot's Restore, as its button runs it — W-2's order: the act handed
+    /// over FIRST, then the sheet goes (a pre-split moment asks here first).
+    /// One function so VX-668's pin door presses exactly what the button does.
+    private func pressRestore() {
+        if predatesSplit {
+            confirmingRestore = true
+        } else {
+            onRestore(false)
+            dismiss()
+        }
+    }
 }
+
+#if DEBUG
+/// **VX-668's PIN DOORS** (the VX-677 run, batch 5 — `notes/plans/fixes/
+/// vx-677-editor-panes-ai-door.md`, BATCH 5 RECORD). The app builds the Block
+/// History pane in the post detail's INSPECTOR with no model of its own, so
+/// the pane's model lives in the pane's `@State`, out of a pin's reach; and
+/// the read-in-full sheet's Restore is a SwiftUI button, which no in-process
+/// pin can press (SwiftUI builds no accessibility nodes in-process —
+/// `ComposedSliders`' finding). So the mounted pane publishes its model and
+/// the mounted sheet publishes its Restore button's OWN action
+/// (`CommitReadingSheet.pressRestore` — the act handed over, then the
+/// sheet's own `dismiss`). Read by pins only; decides nothing. Keyed by the
+/// note (the model) and by the commit (the sheet), owner-stamped (18k C4 —
+/// a teardown takes only its own).
+@MainActor
+enum BlockHistoryPaneOracle {
+    private static var models = OwnedRegistrations<String, BlockHistoryModel>()
+    private static var sheetRestores = OwnedRegistrations<String, @MainActor () -> Void>()
+
+    /// The model of the newest pane standing on this note.
+    static func model(forPost postID: String) -> BlockHistoryModel? { models[postID] }
+
+    /// The Restore button's action of the read-in-full sheet showing this
+    /// commit, while that sheet stands.
+    static func sheetRestore(forCommit commitID: String) -> (@MainActor () -> Void)? {
+        sheetRestores[commitID]
+    }
+
+    static func publish(_ model: BlockHistoryModel, owner: UUID) {
+        models.publish(model, for: model.postID, owner: owner)
+    }
+
+    static func publishSheetRestore(
+        commitID: String, owner: UUID, _ press: @escaping @MainActor () -> Void
+    ) {
+        sheetRestores.publish(press, for: commitID, owner: owner)
+    }
+
+    static func release(owner: UUID) {
+        models.release(owner: owner)
+        sheetRestores.release(owner: owner)
+    }
+}
+#endif
 
 /// **A REGION'S HEADER** (VX-431 — the clarity pass): the region's name with
 /// its COUNT beside it, and ONE line of meaning with the whole sentence
