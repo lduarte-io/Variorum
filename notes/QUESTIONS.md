@@ -3812,3 +3812,22 @@ multi-select; the walk's finding. Options: (i) first words lead, the date as the
 core read — a deleted note's opening on its exact stamp; the live-only word read returns nothing for Trash rows);
 (ii) keep the date-name (SHIPPED today, nothing changed); (iii) the date stays the name, first words join as a quiet
 second line. **Status: OPEN (filed at the VX-678 closeout, 2026-10-28).**
+
+#251 — **THE VX-633/#204 BUNDLE (the binding record is `notes/plans/vx-633-prince-book.md` — the U1/U2/U2b
+records and the ladder files; everything below is BUILT and working, her ratify-or-redirect).** **(a) P-633-F1 — the
+phone's joined-account latch (ladder R1 F1, the dispute upheld and the real road fixed):** a phone session that JOINED
+an account after its launch-time fresh read never spends that stale fact — it declines and records — so a signed-out-
+after-join first write can't seed the Prince into a pulled library. Options: (i) the latch, as built; (ii) re-run the
+store read at spend time (rejected: declines every fresh phone); (iii) a durable library fact (custody-adjacent, not
+built). The final call's named sub-case rides: a sign-in-then-out-before-first-write user loses the Prince even when
+nothing pulled (no phone restore door exists) — inherent to the launch-fact design. The starter Journal's own
+pre-existing sibling is VM-35. **(b) U1's apparatus strips (built (a)):** Marriott's two unmarked apparatus blocks —
+XVIII's proverb epigraph and the Dacre verse block — are stripped like his footnotes (the Dacre verse returned as
+XXVI's third take, R-633-13); options (b)/(c) in the U1 record. **(c) The note-title format (U1, flagged):**
+`<roman>. <chapter title in sentence case>`, the dedication note titled `Dedication` — hers to retitle. **(d) U2b's
+"what is a fresh store" (decision 1, options a/b/c — built (a)):** never held writing AND the device's launch not
+settled; store truth alone or marks alone are the alternatives. **(e) U2b decision 2:** each platform judges at its
+own moment (the Mac at the seeder's deciding reads — an account store by what its first clean round brought; the
+phone by the prime-time fact, an untaken fact never a guess). **(f) The F3 wording note (the round-1 final call):**
+"each own their notes if none of them lives in another book" reads the fork-free condition jointly across both books
+— the rule is per book; hers at the copy pass. **Status: OPEN (filed at the #204 merge, 2026-10-29).**

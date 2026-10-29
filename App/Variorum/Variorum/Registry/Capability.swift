@@ -956,6 +956,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// (`SampleLibrarySeeder`'s resumable seed) — nothing of hers is ever
     /// deleted, so no confirm gates it.
     case restoreSampleLibrary
+    /// VX-633 (R-633-6 — "restore door"): *The Prince*, bilingual — the
+    /// launch's seeded book since Sherlock left the launch — through the same
+    /// mint-what's-missing door. A note deleted from it comes back FRESH,
+    /// its takes with it (the take pass runs on every fresh import).
+    case restorePrinceBook
     // (`restoreEncryptionBook` — pre-13x 5a — RETIRED at 13s-b U1b,
     // R-13s-37: "encryption explained not present and not restorable".)
     /// 18l-c U6 (R-18l-11): the Jekyll book's restore — the same

@@ -58,10 +58,17 @@ struct EncryptionExplainedDrillTests {
 
     /// The Mac's launch shape, headless: the tutorial (the seed road Help ▸
     /// Restore Tutorial takes), then both books — in seeding order.
+    /// **JUSTIFIED EDIT (VX-633 U2b — R-633-16, "FRESH STORES ONLY"):** the
+    /// books FIRST, the launch set leading, and the tutorial after them — the
+    /// real launch's own order (the launch book, then the guide at birth).
+    /// The Prince seeds on a fresh store's launch road only, so seeded after
+    /// the guide (or after Sherlock) it would now — correctly — decline a
+    /// store that already holds writing, and this world wants every door's
+    /// book. Nothing below reads the order.
     private func seedEverything(_ session: AppSession) async throws -> [String: String] {
-        _ = try await TutorialSeeder.restore(session: session)
         var books: [String: String] = [:]  // keyed by the book's reserved name
-        for book in SampleLibrarySeeder.Book.all {
+        let launchSet = SampleLibrarySeeder.Book.launchSet
+        for book in launchSet + SampleLibrarySeeder.Book.all.filter({ !launchSet.contains($0) }) {
             let mark = DrillMark()
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
                 session: session, book: book, loadMark: mark.load, saveMark: mark.save)
@@ -71,6 +78,7 @@ struct EncryptionExplainedDrillTests {
             }
             books[book.name] = bookID
         }
+        _ = try await TutorialSeeder.restore(session: session)
         return books
     }
 
@@ -80,8 +88,9 @@ struct EncryptionExplainedDrillTests {
             let books = try await seedEverything(session)
             // 18l-c U6 (re-armed, a changed fact of that unit): `Book.all`
             // grew a THIRD seeded book — the takemania book — so the Mac's
-            // launch shape seeds three.
-            #expect(books.count == SampleLibrarySeeder.Book.all.count && books.count == 3)
+            // launch shape seeds three. VX-633 (re-armed again): a FOURTH —
+            // the Prince — so the doors' vocabulary seeds four.
+            #expect(books.count == SampleLibrarySeeder.Book.all.count && books.count == 4)
 
             // THE SHELF: the field guide + the seeded books.
             let shelf = try await db.read { db in try Queries.readings(db).map(\.name) }
