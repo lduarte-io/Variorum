@@ -923,17 +923,20 @@ struct SyncReconciliationProbeTests {
     /// (the pristine tombstoned baseline over the dirty row; rescue
     /// block-dead-skipped; outbox cleared).
     ///
-    /// THE RULED MATRIX, now pinned green (the orchestrator's row-15
-    /// ruling): **exactly-one-edited ⇒ the EDITED copy survives LIVE on
-    /// both devices with its edit intact; the pristine copy stays
-    /// retired.** Two repairs land it: Part 1 (the merge's ride-the-row
-    /// rescue keeps the edit's bytes AND its outbox entry alive through
-    /// the retirement batch) and Part 2 (the dedupe's defense leg: a
-    /// same-name copy killed by an ARRIVING retirement, in the two-copy
-    /// meeting context, whose family carries PRE-BATCH outbox dirt —
-    /// unpushed local intent the retiring device could never have seen —
-    /// revives exact-stamp and pushes).
-    @Test func p5bTheDoubleRetirementRaceKeepsTheEditedCopyAliveWithItsEdit() async throws {
+    /// THE OUTCOME SINCE VX-669 (her 2026-10-28 ruling removed the row-15
+    /// defense leg — a deliberate cross-device delete is never
+    /// second-guessed, so no revival machinery exists): **the crossing
+    /// retirements BOTH land — both copies end in the Trash on both
+    /// devices, every byte intact, Put back real.** Part 1 (the merge's
+    /// ride-the-row rescue) still carries the unpushed edit's bytes onto
+    /// the tombstoned row and keeps it enqueued, so nothing is ever lost —
+    /// the race's accepted cost is a visible, recoverable Trash trip
+    /// (QUESTIONS #143(b) as amended at the VX-678 closeout). The ruled
+    /// matrix itself is untouched: a TRUE meeting (both edits landed
+    /// before a pass runs) still keeps the edited copy — the suite's
+    /// `anEditedCopySurvivesAndThePristineOneRetiresWhateverTheIDs` and
+    /// the settled-pair pins below carry that.
+    @Test func p5bTheDoubleRetirementRaceCostsATrashTripButNeverBytes() async throws {
         let (a, b, server) = try dedupePair()
         let copyA = try seedCopy(a)
         let copyB = try seedCopy(b)
@@ -954,8 +957,8 @@ struct SyncReconciliationProbeTests {
                 "B kept the edited copy and retired the pristine one — the ruled outcome, on B's evidence")
 
         // A's pass: both pristine (the edit is still only in B's outbox)
-        // → copyB retired on A — correct on A's evidence; the defense is
-        // what un-crosses it when the evidence lands.
+        // → copyB retired on A — correct on A's evidence. Nothing
+        // un-crosses the race any more; tombstones win both ways.
         _ = try await a.pull()
         _ = try await a.pull()
         #expect(try liveCopyIDs(a) == [copyA.bookID],
@@ -965,34 +968,51 @@ struct SyncReconciliationProbeTests {
         try await productionQuiescence(a, b, server: server, maxRounds: 16)
         #expect(try a.syncedDump() == b.syncedDump(), "the stores converge")
 
-        // THE RULED MATRIX: the edited copy alive everywhere, edit intact,
-        // the pristine copy retired. (Red on old: both copies dead and the
-        // bytes gone — B1's reproduction, wrapped until this fix.)
+        // THE ACCEPTED OUTCOME (VX-669): both copies in the Trash on both
+        // devices; the edit's bytes ride the dead row (Part 1), lost
+        // nowhere.
         for client in [a, b] {
-            #expect(try liveCopyIDs(client) == [copyB.bookID],
-                    "\(client.name): the EDITED copy survives — never silently retired (R-pre13u-8)")
+            #expect(try liveCopyIDs(client).isEmpty,
+                    "\(client.name): the crossing retirements both land — a Trash trip, never a revival")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil, "\(client.name)")
+            #expect(try client.db.deletedAt("reading", copyB.bookID) != nil, "\(client.name)")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE working_text = ?",
+                ["Rewritten in her own words."]) == 1,
+                "\(client.name): the edit's bytes ride the Trash row — §6's forbidden outcome still held off")
+        }
+
+        // Put back is real: restoring the edited note revives its family
+        // with the ridden text live, and the revival converges.
+        try b.with { ops, _ in try ops.restoreContainer(editedPost) }
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try client.db.deletedAt("container", editedPost) == nil,
+                    "\(client.name): Put back returned the note")
             #expect(try client.db.fetchInt(
                 """
                 SELECT COUNT(*) FROM variant
                 WHERE working_text = 'Rewritten in her own words.' AND deleted_at IS NULL
                 """) == 1,
-                "\(client.name): the edit lives on the surviving copy (§6's forbidden outcome held off)")
-            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil,
-                    "\(client.name): the pristine copy stays retired — one library, hers")
+                "\(client.name): the edit came back live")
         }
     }
 
-    /// **Row 15's BOTH-EDITED variant (the ruled matrix's second row):**
-    /// each device edits ITS OWN copy before the crossing; each side's
-    /// pass correctly keeps its own and retires the other on its local
-    /// evidence; the retirements cross — and BOTH copies survive, each
-    /// defended at its kill moment by the classifier's own EDITED verdict
-    /// (reachable even though each device's edit has PUSHED by the time
-    /// the peer's retirement arrives — the reason the defense reads the
-    /// classifier at the kill, never the outbox). The settled state is
-    /// then the pass's own both-edited row: two live copies, both edited,
-    /// nothing retired.
-    @Test func p5bBothEditedMeansBothCopiesSurvive() async throws {
+    /// **The BOTH-EDITED CROSSING, post-VX-669:** each device edits ITS
+    /// OWN copy AFTER the seeds pushed, so each edit sits unpushed while
+    /// each side's pass correctly keeps its own copy and retires the
+    /// other on its local evidence; the retirements CROSS. With the
+    /// defense leg removed (her 2026-10-28 ruling) nothing un-crosses the
+    /// race: **both copies land in the Trash on both devices**, each
+    /// side's edit riding its own dead row (Part 1's ride-the-row rescue,
+    /// untouched), the dumps converged, nothing revived — the accepted
+    /// recoverable cost, twice over. The ruled matrix's TRUE both-edited
+    /// row — both edits LANDED before any pass ran — is a different
+    /// scenario and is untouched: `SampleLibraryDedupeRepairTests.
+    /// twoEditedCopiesBothSurvive` and the settled-pair helper's own
+    /// precondition below pin that both copies live on.
+    @Test func p5bBothEditedCrossingRetirementsBothLandInTheTrashButNeverLoseBytes() async throws {
         let (a, b, server) = try dedupePair()
         let copyA = try seedCopy(a)
         let copyB = try seedCopy(b)
@@ -1020,23 +1040,40 @@ struct SyncReconciliationProbeTests {
         try await productionQuiescence(a, b, server: server, maxRounds: 20)
         #expect(try a.syncedDump() == b.syncedDump())
         for client in [a, b] {
-            #expect(try liveCopyIDs(client) == [copyA.bookID, copyB.bookID].sorted(),
-                    "\(client.name): both-edited ⇒ BOTH survive (the documented concurrent-divide class)")
-            for text in ["In A's own words.", "In B's own words."] {
+            #expect(try liveCopyIDs(client).isEmpty,
+                    "\(client.name): the crossing retirements BOTH land — a double Trash trip, never a revival (VX-669)")
+            for (bookID, text) in [(copyA.bookID, "In A's own words."),
+                                   (copyB.bookID, "In B's own words.")] {
+                #expect(try client.db.deletedAt("reading", bookID) != nil, "\(client.name)")
                 #expect(try client.db.fetchInt(
-                    "SELECT COUNT(*) FROM variant WHERE working_text = ? AND deleted_at IS NULL",
-                    [text]) == 1,
-                    "\(client.name): each side's edit lives on its own surviving copy")
+                    "SELECT COUNT(*) FROM variant WHERE working_text = ?", [text]) == 1,
+                    "\(client.name): each side's edit rides its own dead row — bytes never lost")
             }
+        }
+
+        // Put back is real on either half: restoring A's edited note
+        // revives it with the ridden text live, and the revival converges.
+        let editedPostA = copyA.postIDs["A Scandal in Bohemia"]!
+        try a.with { ops, _ in try ops.restoreContainer(editedPostA) }
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try client.db.deletedAt("container", editedPostA) == nil,
+                    "\(client.name): Put back returned the note")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE working_text = ? AND deleted_at IS NULL",
+                ["In A's own words."]) == 1,
+                "\(client.name): the edit came back live")
         }
     }
 
-    /// **Row 15's NO-DEFENSE guard:** her deliberate delete of the sample
-    /// library with NO second copy anywhere — the overwhelmingly normal
-    /// state — is never defended: no meeting context, no kill recorded,
-    /// the deletion stands (rule 1). The other device's unpushed edit
-    /// still rides the row into the Trash (Part 1) — bytes never lost,
-    /// copy never resurrected.
+    /// **The no-second-copy case (stronger since VX-669):** her deliberate
+    /// delete of the sample library with NO second copy anywhere — the
+    /// overwhelmingly normal state — stands on every device. It always
+    /// did (no meeting context existed even while the defense leg ran);
+    /// now no defense machinery exists at all, so the pin is structural.
+    /// The other device's unpushed edit still rides the row into the
+    /// Trash (Part 1) — bytes never lost, copy never resurrected.
     @Test func aDeliberateDeleteWithNoSecondCopyIsNeverDefended() async throws {
         let (a, b, server) = try dedupePair()
         let copy = try seedCopy(a)
@@ -1066,24 +1103,22 @@ struct SyncReconciliationProbeTests {
             "the unpushed edit rode the row into the Trash — Part 1's bytes, no resurrection")
     }
 
-    /// **LADDER R1 F-R3: a retirement SPLIT across two applies never
-    /// revives the correctly-retired PRISTINE copy.** The kill-time
-    /// verdict's first-death fence was per-batch (`TouchedRows`), but one
-    /// retirement can reach the puller in TWO pulls (the drain's chunk
-    /// boundary between the member containers and the reading row — the
-    /// everyday A2(c) cut, or the A5 band between two chunk commits).
-    /// Batch 1: the containers die; the verdict — PRISTINE, taken at the
-    /// first death with the copy whole — was recorded and then DISCARDED
-    /// with the batch (the reading had not died). Batch 2: the reading's
-    /// tombstone is a fresh batch's first family death, the memberships
-    /// are still locally live, their POSTS are dead — the classifier's
-    /// own leg reads the half-killed copy as EDITED, and the defense
-    /// revived the whole family on the retirement's one stamp: a
-    /// correctly-retired pristine copy returned, pushed, and churned
-    /// (the peer re-retires on a fresh stamp). The fix persists the
-    /// first-death verdict as a local one-shot keyed copy+stamp; the
-    /// reading's later death CONSUMES that whole-copy verdict instead of
-    /// re-classifying a half-killed one.
+    /// **A retirement SPLIT across two applies never revives the
+    /// correctly-retired PRISTINE copy (LADDER R1 F-R3's scenario; the
+    /// pin stands since VX-669 as the split-retirement convergence
+    /// pin).** One retirement can reach the puller in TWO pulls (the
+    /// drain's chunk boundary between the member containers and the
+    /// reading row — the everyday A2(c) cut, or the A5 band between two
+    /// chunk commits), so the puller holds a half-killed copy (dead
+    /// posts under live memberships) until the reading's own tombstone
+    /// lands. While the defense leg ran, that half-killed state was its
+    /// hardest corner — a kill-time re-read said EDITED and revived the
+    /// copy; F-R3's persisted first-death verdict closed it. The verdict
+    /// machinery is GONE with the leg (VX-669: no classifier runs at any
+    /// death) and the pinned outcome is unchanged: the keeper lives, the
+    /// loser stays retired through the split, the stores converge
+    /// without churn, and the marker count below is trivially zero (no
+    /// writer exists).
     @Test func aRetirementSplitAtTheReadingBoundaryNeverRevivesThePristineCopy() async throws {
         let server = FakeSyncServer()
         let aFault = FaultInjectingTransport(server: server)
@@ -1110,9 +1145,9 @@ struct SyncReconciliationProbeTests {
         // in A's outbox.
         try await pushSplitAtBoundary(a, table: "reading", transport: aFault)
 
-        // B's round BETWEEN the halves: batch 1 kills the member notes.
-        // The first-death verdict (PRISTINE — the copy still whole) is
-        // recorded; the reading has not died, so nothing is defended.
+        // B's round BETWEEN the halves: batch 1 kills the member notes;
+        // the reading's tombstone is still held back, so the copy sits
+        // half-killed on B until A's drain resumes.
         _ = try await productionRound(b)
         #expect(try b.db.deletedAt("reading", copyB.bookID) == nil,
                 "the reading's tombstone is still held back — the copy is half-killed")
@@ -1122,9 +1157,8 @@ struct SyncReconciliationProbeTests {
         _ = try await productionRound(a)
 
         // B applies the reading's death. THE PIN'S TOOTH: the half-killed
-        // re-read (dead posts under live memberships ⇒ EDITED) must NOT
-        // revive the copy — the persisted first-death verdict (PRISTINE)
-        // outranks it.
+        // state must NOT revive the copy — nothing may second-guess the
+        // retirement (VX-669: no machinery exists to).
         _ = try await productionRound(b)
         #expect(try liveCopyIDs(b) == [copyA.bookID],
                 "the correctly-retired pristine copy STAYS retired — no half-killed EDITED misread")
@@ -1141,23 +1175,19 @@ struct SyncReconciliationProbeTests {
         }
         #expect(try b.db.fetchInt(
             "SELECT COUNT(*) FROM sync_state WHERE key LIKE 'sample_kill_verdict:%'") == 0,
-            "the one-shot verdict was consumed, not leaked")
+            "no verdict machinery exists any more — the marker count is trivially zero (VX-669)")
     }
 
-    /// **LADDER R1 F-R2: the meeting is BOUNDED — a deliberate delete
-    /// AFTER the meeting settled is never defended.** The defense's
-    /// meeting predicate counted DEAD readings, so the retired loser's
+    /// **A deliberate delete AFTER the meeting settled stands (LADDER R1
+    /// F-R2's scenario, stronger since VX-669).** This pin was born red
+    /// on the defense leg's first predicate — a retired loser's
     /// tombstone kept the "meeting context" open for its whole tombstone
-    /// lifetime (a month+): a deliberate cross-device `deleteReading` of
-    /// the kept, ever-engaged copy arrived as the batch's only family
-    /// death (the reading itself — the stamp check trivially matches),
-    /// the kill-time classifier read any engagement ever as EDITED, and
-    /// her deleted book reappeared on every device — resurrecting a
-    /// deliberate delete, the class the row-17 ruling rejected Shape C
-    /// over. The fixed meeting stands only while the other copy is LIVE,
-    /// or its retirement is this device's own UNPUSHED act, or its
-    /// tombstone sits within the settle window of the arriving kill —
-    /// each arm strictly narrower than the old any-row-any-age predicate.
+    /// lifetime, so a deliberate cross-device `deleteReading` of the
+    /// kept, ever-engaged copy was revived a month later (the class the
+    /// row-17 ruling rejected Shape C over). F-R2 bounded the meeting;
+    /// VX-669 then removed the defense leg whole (her 2026-10-28
+    /// ruling), so today NOTHING can second-guess the delete — the pin
+    /// stands as the plain convergence fact.
     @Test func aDeliberateDeleteAfterTheMeetingSettledIsNeverDefended() async throws {
         let (a, b, server) = try dedupePair()
         let copyA = try seedCopy(a)
@@ -1207,20 +1237,147 @@ struct SyncReconciliationProbeTests {
         }
     }
 
-    /// **LADDER R1 F-R6 (the pin-first CONFIRM): a sample post living in a
-    /// SECOND book still gets its kill evidence recorded — the ruled
-    /// matrix holds in the two-book configuration.** The container→copy
-    /// resolution carried `LIMIT 1` with no ORDER BY and no name filter,
-    /// so a post with two live memberships resolved to whichever reading
-    /// SQLite's plan returned. The finding's loss shape (the defense
-    /// silently missing its kill) is structurally tempered — a full
-    /// retirement's READING row resolves directly, no query — and this
-    /// pin is the confirm: red proves the loss road; green on both sides
-    /// dismisses the defect half as hollow, with the deterministic
-    /// name-filtered resolution landing as the cleanliness half (it is
-    /// load-bearing for F-R3's persisted first-death verdict, which a
-    /// wrong batch-1 resolution would skip).
-    @Test func aSamplePostInASecondBookStillRecordsItsKillEvidence() async throws {
+    // MARK: - VX-669: deliberate deletes of a STANDING both-edited pair stick
+
+    /// The SETTLED two-copy state her library lives in (the 2026-10-28
+    /// report): both copies edited BEFORE either push, so every pass reads
+    /// both-edited and the ruled matrix keeps both — no retirement, no
+    /// defense, the same settled pair on old and new code.
+    private func settledBothEditedPair() async throws -> (
+        a: SyncClient, b: SyncClient, server: FakeSyncServer,
+        copyA: (bookID: String, postIDs: [String: String]),
+        copyB: (bookID: String, postIDs: [String: String])
+    ) {
+        let (a, b, server) = try dedupePair()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        let variantA = try firstVariantID(a, postID: copyA.postIDs["A Scandal in Bohemia"]!)
+        let variantB = try firstVariantID(b, postID: copyB.postIDs["A Scandal in Bohemia"]!)
+        try a.with { ops, _ in
+            try ops.autosave(variantA, text: "In A's own words.", charDelta: 10)
+        }
+        try b.with { ops, _ in
+            try ops.autosave(variantB, text: "In B's own words.", charDelta: 10)
+        }
+        try await a.push()
+        try await b.push()
+        _ = try await a.pull()
+        _ = try await a.pull()
+        _ = try await b.pull()
+        _ = try await b.pull()
+        try await productionQuiescence(a, b, server: server, maxRounds: 20)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID, copyB.bookID].sorted(),
+                    "\(client.name): the settled standing pair — both edited, both live")
+        }
+        return (a, b, server, copyA, copyB)
+    }
+
+    /// **VX-669 pin 1 — HER SCENARIO, red-on-old:** a settled both-edited
+    /// pair, then a deliberate delete of BOTH books (notes first, then the
+    /// book — the family-tombstones shape her door mints) on one device.
+    /// The deletes must STAND everywhere: no same-name revival, every byte
+    /// on the Trash rows, Put back real. (Old code: the receiving device's
+    /// kill-time classifier read each copy EDITED while its twin's reading
+    /// row was still live — the standing-twin meeting arm — and revived
+    /// both families exact-stamp; her books "restored themselves from the
+    /// trash".)
+    ///
+    /// **The ONE STAMP is load-bearing (ladder R1, MAJOR-1):** this pin
+    /// first ran its deletes under the harness's ticking clock, so every
+    /// tombstone carried its own stamp — and on the OLD code the defense's
+    /// stamp guard (`reading.deleted_at == kill.stamp`, the kill recorded
+    /// at the FIRST arriving family death) never matched: the old code
+    /// merely persisted an inert verdict marker, and the revival
+    /// expectations were GREEN on old (only the marker count was red; pin
+    /// 2 below carried the true revival red). The `.constant` date (pin
+    /// 2's idiom, a distinct value) kills the whole family on one stamp —
+    /// her real door's shape ("Her Mac deletes both books (11:47 AM) →
+    /// ordinary family tombstones push"), where the recorded kill's stamp
+    /// IS the reading's — re-observed RED on the old code for the revival
+    /// itself under the two-file scratch revert.
+    @Test func aDeliberateDeleteOfBothStandingEditedCopiesSticksEverywhere() async throws {
+        let (a, b, server, copyA, copyB) = try await settledBothEditedPair()
+        let herDeleteMoment = Date(timeIntervalSince1970: 1_785_628_800)  // 2026-08-02T00:00:00Z
+        try a.with { ops, _ in
+            try withDependencies {
+                $0.date = .constant(herDeleteMoment)
+            } operation: {
+                for copy in [copyA, copyB] {
+                    for postID in copy.postIDs.values.sorted() {
+                        try ops.deleteContainer(postID)
+                    }
+                    try ops.deleteReading(copy.bookID)
+                }
+            }
+        }
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client).isEmpty,
+                    "\(client.name): her deliberate deletes STAND — nothing revives (VX-669)")
+            for (bookID, text) in [(copyA.bookID, "In A's own words."),
+                                   (copyB.bookID, "In B's own words.")] {
+                #expect(try client.db.deletedAt("reading", bookID) != nil, "\(client.name)")
+                #expect(try client.db.fetchInt(
+                    "SELECT COUNT(*) FROM variant WHERE working_text = ?", [text]) == 1,
+                    "\(client.name): every byte rides the Trash rows — recoverable, never lost")
+            }
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM sync_state WHERE key LIKE 'sample_kill_verdict:%'") == 0,
+                "\(client.name): no defense bookkeeping is written")
+        }
+    }
+
+    /// **VX-669 pin 2 — the standing-twin arm alone, red-on-old:** the same
+    /// settled pair, then a deliberate delete of ONE copy a MONTH later —
+    /// far outside any settle window, this device's own act long pushed, so
+    /// the ONLY thing the old meeting predicate could stand on was the
+    /// twin's live reading row — which a settled both-edited library holds
+    /// FOREVER. The delete must stand beside the live twin. (Old code: the
+    /// copies were mutually undeletable from any second device.)
+    @Test func aDeliberateDeleteOfOneCopyBesideItsLiveTwinSticks() async throws {
+        let (a, b, server, copyA, copyB) = try await settledBothEditedPair()
+        let aMonthOn = Date(timeIntervalSince1970: 1_785_542_400)  // 2026-08-01T00:00:00Z
+        try a.with { ops, _ in
+            try withDependencies {
+                $0.date = .constant(aMonthOn)
+            } operation: {
+                for postID in copyB.postIDs.values.sorted() {
+                    try ops.deleteContainer(postID)
+                }
+                try ops.deleteReading(copyB.bookID)
+            }
+        }
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID],
+                    "\(client.name): the delete stands beside the live twin — no standing meeting (VX-669)")
+            #expect(try client.db.deletedAt("reading", copyB.bookID) != nil, "\(client.name)")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE working_text = ?", ["In B's own words."]) == 1,
+                "\(client.name): the deleted copy's edit is in the Trash, not lost")
+        }
+    }
+
+    /// **The crossing beside a SECOND LIVE MEMBERSHIP (post-VX-669):** B
+    /// files the edited sample note into a PERSONAL collection too (the
+    /// non-exclusive membership default) before the crossing. This pin
+    /// began life as LADDER R1 F-R6's confirm — the kill-evidence
+    /// resolution under two memberships — and that machinery is gone
+    /// with the defense leg, so what it pins now is the crossing's
+    /// outcome in the two-book configuration: both sample copies land in
+    /// the Trash, the edit's bytes ride a dead row exactly once, the
+    /// note's membership in her collection dies as an ordinary cascade
+    /// victim (Put back returns it), and HER COLLECTION itself — her own
+    /// book, never a sample copy — stands live through the whole race.
+    @Test func aCrossingBesideASecondBookNeverTakesHerCollectionDown() async throws {
         let (a, b, server) = try dedupePair()
         let copyA = try seedCopy(a)
         let copyB = try seedCopy(b)
@@ -1232,11 +1389,12 @@ struct SyncReconciliationProbeTests {
         // delayed — the p5b crossing with a second live membership.
         let editedPost = copyB.postIDs["A Scandal in Bohemia"]!
         let editedVariant = try firstVariantID(b, postID: editedPost)
-        try b.with { ops, _ in
+        let personalID: String = try b.with { ops, _ in
             let personal = try ops.createReading(
                 name: "her collection", kind: .book, profile: "collection")
             _ = try ops.addPostToReading(editedPost, to: personal.id)
             try ops.autosave(editedVariant, text: "Rewritten in her own words.", charDelta: 20)
+            return personal.id
         }
         _ = try await b.pull()
         _ = try await b.pull()
@@ -1248,14 +1406,28 @@ struct SyncReconciliationProbeTests {
         try await productionQuiescence(a, b, server: server, maxRounds: 20)
         #expect(try a.syncedDump() == b.syncedDump())
         for client in [a, b] {
-            #expect(try liveCopyIDs(client) == [copyB.bookID],
-                    "\(client.name): the engaged copy survives — the second membership never hides the kill")
+            #expect(try liveCopyIDs(client).isEmpty,
+                    "\(client.name): the crossing retirements both land — both copies in the Trash (VX-669)")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil, "\(client.name)")
+            #expect(try client.db.deletedAt("reading", copyB.bookID) != nil, "\(client.name)")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE working_text = ?",
+                ["Rewritten in her own words."]) == 1,
+                "\(client.name): the edit's bytes survive exactly once")
             #expect(try client.db.fetchInt(
                 """
                 SELECT COUNT(*) FROM variant
-                WHERE working_text = 'Rewritten in her own words.' AND deleted_at IS NULL
+                WHERE working_text = 'Rewritten in her own words.' AND deleted_at IS NOT NULL
                 """) == 1,
-                "\(client.name): the edit lives on the surviving copy")
+                "\(client.name): and they ride a DEAD row — the Trash, not a revival")
+            #expect(try client.db.deletedAt("reading", personalID) == nil,
+                    "\(client.name): her collection — her own book — stands through the race")
+            #expect(try client.db.fetchInt(
+                """
+                SELECT COUNT(*) FROM reading_post
+                WHERE reading_id = ? AND deleted_at IS NOT NULL
+                """, [personalID]) == 1,
+                "\(client.name): the note's membership died as a cascade victim of the note, nothing more")
         }
     }
 

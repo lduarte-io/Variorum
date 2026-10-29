@@ -246,7 +246,8 @@ final class SyncSession {
     /// windows it completed staged for the next round, while a save already
     /// running finishes (ladder R3, R3-1 — a lock then waits for it on the
     /// writer); nothing here awaits it. Chain REPLACEMENT goes through
-    /// `configure`, which drains.
+    /// `configure`, which drains. The QUIT door's teardown is
+    /// `quiesceForExit()` below — the same retire, AWAITED.
     /// Retiring closes the stale-trigger door here too.
     func stop() {
         stopObservations()
@@ -254,6 +255,26 @@ final class SyncSession {
         scheduler = nil
         if let old {
             Task { await old.retire() }
+        }
+    }
+
+    /// **VX-657 — the quit door's sync half: `stop()`'s retire, AWAITED.**
+    /// ⌘Q used to exit the process over an in-flight round's GRDB access
+    /// (the transported janitor rides `runOneRound`, and nothing awaited
+    /// it). This retires the chain — the round in flight is cancelled
+    /// between pull windows, a save already running finishes shielded
+    /// (R3-1), and the janitor's sweep stops at its next family boundary
+    /// (`PurgeJanitor.sweep`) — then waits for the loop to actually end,
+    /// so the process never exits over one. `configure`'s drain is the
+    /// same two calls; this is the quit's form of it (no new chain
+    /// follows). Idempotent; a session with no chain returns at once.
+    func quiesceForExit() async {
+        stopObservations()
+        let old = scheduler
+        scheduler = nil
+        if let old {
+            await old.retire()
+            await old.awaitIdle()
         }
     }
 

@@ -1111,6 +1111,19 @@ extension AppDatabase {
                   WHERE deleted_at IS NOT NULL;
                 """)
         }
+        // VX-669 (the VX-678 run): the sample-dedupe DEFENSE LEG is removed
+        // (her 2026-10-28 ruling — notes/plans/fixes/vx-678-trash-purge-
+        // resurrection.md), and with it `consumeKillVerdict`, the only
+        // reader of the F-R3 one-shot verdict markers. This sweeps the
+        // orphaned markers a store accumulated while the leg ran. LOCAL-ONLY
+        // and NOT a SyncSpec §12 lockstep event: `sync_state` never syncs
+        // (SyncSpec §3); no synced table or column changes, the marker stays
+        // 14, no mirror artifact — v1_34's class exactly (the precedents
+        // annotated above).
+        migrator.registerMigration("v1_35_sweep_kill_verdict_markers") { db in
+            try db.execute(
+                sql: "DELETE FROM sync_state WHERE key LIKE 'sample_kill_verdict:%'")
+        }
         return migrator
     }
 }
