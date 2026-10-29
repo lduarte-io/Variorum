@@ -1144,7 +1144,11 @@ Nothing is ever committed mid-revert. The plain-tip products (`vx677-b1/post`, `
   - `rev676`: `logs/build-rev676-2.log`, TEST BUILD SUCCEEDED, EXIT 0 (23:02–23:06). Diff +1 −5 in `MCPShowTool.swift` and 1 line replaced in `MCPDoor.swift` (2 markers), as dry-run. Restored; tree clean.
   - `rev675`: `logs/build-rev675-2.log`, TEST BUILD SUCCEEDED, EXIT 0 (23:06–23:10). Diff +1 in `MCPShowTool.swift` and 2 lines replaced in `MCPNavigator.swift` (2 markers), as dry-run. Restored; tree clean.
   - Panel: `rev676` differs from `post` ONLY in its two functions (`MCPShowRule.verdict` 82 → 40, `MCPDoor.agentShow` 664 → 614). `rev675` differs ONLY in its two (`MCPShowTool.decide` 1426 → 1268, `MCPNavigator.deliver` 1699 → 1655). Every other row is equal, and `vx677-b1/post`, `vx677-b2/post` and `vx677-b3/post` agree on every row. Batch 3 had run no Mac binary check, so this panel is its first.
-- FR-4: `vx677-b4/post` + `vx677-b4/rev674` + `vx677-b4/rev572`. PENDING.
+- FR-4: `vx677-b4/post` + `vx677-b4/rev674` + `vx677-b4/rev572`. DONE (this commit).
+  - `post`: `DerivedData/vx677-b4/logs/build-post-5.log`, TEST BUILD SUCCEEDED, EXIT 0 (23:10–23:14).
+  - `rev674`: `logs/build-rev674-3.log`, TEST BUILD SUCCEEDED, EXIT 0 (23:14–23:17). Diff +1 in `BlockHistoryPane.swift` (1 marker), as dry-run. Restored; tree clean.
+  - `rev572`: `logs/build-rev572-3.log`, TEST BUILD SUCCEEDED, EXIT 0 (23:18–23:21). Diff +1 in `ShortcutCatalog.swift` and +2 −5 in `ShortcutsTab.swift` (3 markers), as dry-run. Restored; tree clean.
+  - Panel: `rev674` differs from `post` ONLY in `restingWords` (99 → 16, batch 4's own numbers). `rev572` differs ONLY in its three edits (`sections` 430 → 75, batch 4's own numbers; the chord cell 119 → 258; the row's content closure 407 → 369). Every other row is equal. `vx677-b5/post` (FR-5, not rebuilt) agrees with all four rebuilt `post` products on every row.
 - FR-5: `vx677-b5/post` VERIFIED AT THE TIP, no rebuild. Its test binary (22:30:46) is newer than every file under `App/`, `Sources/`, `Package.swift` and `Tests/`. Its `logs/build-post-3.log` (TEST BUILD SUCCEEDED) compiled `RestoreLandingInspectorTests.swift`, the one source file `092909955` touched. Every commit since `092909955` touches only this record.
 - FR-6: the walk app `DerivedData/vx677-app` (Debug) and the `VX668-TRACE` strings check. PENDING. The existing app (17:48) predates the merge and carries no trace string (`grep -c` 0).
 - FR-7: the overlap run. PENDING.
