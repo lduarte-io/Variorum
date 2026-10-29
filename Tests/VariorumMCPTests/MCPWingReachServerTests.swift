@@ -29,14 +29,15 @@ private func call(
 
 /// A fake app standing where the test says, applying the RULE, recording what
 /// it would have delivered (`MCPHostHooks.show`'s contract).
+/// VX-676 (A JUSTIFIED EDIT, the ritual): the hook takes the request and its dial.
 private final class FakeApp: @unchecked Sendable {
     let standing = LockIsolated(MCPShowRule.Standing.frontmostMainWindow)
     let delivered = LockIsolated<[MCPShowTarget]>([])
 
-    var hook: @Sendable (MCPShowTarget) async -> MCPShowRule.Verdict {
-        { [self] target in
-            let verdict = MCPShowRule.verdict(standing.value)
-            if verdict == .navigate { delivered.withValue { $0.append(target) } }
+    var hook: @Sendable (MCPShowRequest) async -> MCPShowRule.Verdict {
+        { [self] request in
+            let verdict = MCPShowRule.verdict(standing.value, dial: request.dial)
+            if verdict == .navigate { delivered.withValue { $0.append(request.target) } }
             return verdict
         }
     }
@@ -68,6 +69,7 @@ struct MCPWingReachServerTests {
         let app = FakeApp()
         h.host.hooks.show = app.hook
         try await h.within {
+            try h.operations.setMCPShowDial(.moveAtOnce)  // VX-676: the move's road (A JUSTIFIED EDIT)
             let variorum = try h.operations.createWing(name: "variorum")
             let studio = try h.operations.createWing(name: "studio")
             let studioBook = try h.operations.createReading(name: "sketches", kind: .book, wingId: studio.id)
@@ -83,10 +85,12 @@ struct MCPWingReachServerTests {
                     "the wing, its name, and who asked — the receipt says it")
             #expect(try consumedAt(h, once) == nil, "a show never spends a once grant")
 
+            // VX-676 (A JUSTIFIED EDIT — the retired refusal): away, it is offered.
             app.standing.setValue(.notFrontmost)
             let away = try await call(connection, "show_in_app",
                                       ["target": .string("wing"), "wing_id": .string(variorum.id)])
-            #expect(away.isError == true && text(away) == MCPShowRule.notFrontmostWords)
+            let awayOffered = try json(away)["offered"] as? Bool
+            #expect(away.isError != true && awayOffered == true, "\(text(away))")
             app.standing.setValue(.frontmostMainWindow)
 
             // A book or note grant in a wing never reaches the WING.
@@ -169,6 +173,7 @@ struct MCPWingReachServerTests {
         let app = FakeApp()
         h.host.hooks.show = app.hook
         try await h.within {
+            try h.operations.setMCPShowDial(.moveAtOnce)  // VX-676: the move's road (A JUSTIFIED EDIT)
             let g = try gathered(h)
             let connection = try await h.connect(as: "claude-code")
             let bookGrant = try #require(try h.approve("claude-code", spec(.edit, .book, g.book.id)))

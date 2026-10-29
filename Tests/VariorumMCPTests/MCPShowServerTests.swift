@@ -28,16 +28,17 @@ private func call(
     try await connection.client.callTool(name: name, arguments: arguments)
 }
 
-/// A fake app: stands where the test says, applies the RULE, records what it
-/// would have delivered — the contract `MCPHostHooks.show` states.
+/// A fake app: stands where the test says, applies the RULE with the request's
+/// dial, records what it would have delivered — the contract `MCPHostHooks.show`
+/// states. VX-676 (A JUSTIFIED EDIT, the ritual): the hook takes the request.
 private final class FakeApp: @unchecked Sendable {
     let standing = LockIsolated(MCPShowRule.Standing.frontmostMainWindow)
     let delivered = LockIsolated<[MCPShowTarget]>([])
 
-    var hook: @Sendable (MCPShowTarget) async -> MCPShowRule.Verdict {
-        { [self] target in
-            let verdict = MCPShowRule.verdict(standing.value)
-            if verdict == .navigate { delivered.withValue { $0.append(target) } }
+    var hook: @Sendable (MCPShowRequest) async -> MCPShowRule.Verdict {
+        { [self] request in
+            let verdict = MCPShowRule.verdict(standing.value, dial: request.dial)
+            if verdict == .navigate { delivered.withValue { $0.append(request.target) } }
             return verdict
         }
     }
@@ -47,12 +48,17 @@ private final class FakeApp: @unchecked Sendable {
 struct MCPShowServerTests {
     // MARK: - The decision seam (pure)
 
+    /// VX-676 (A JUSTIFIED EDIT, the ritual — her mid-run amendment RETIRED the
+    /// frontmost-only refusal this pin asserted): the move happens only at move
+    /// at once, in front, in a full window; everywhere else it is the ask, under
+    /// every dial value but never; never refuses wherever she stands. The whole
+    /// table is `MCPShowOfferServerTests.theRuleIsTheWholeTable`.
     @Test func theMoveDialMovesOnlyWhenVariorumIsInFrontInItsMainWindow() {
-        #expect(MCPShowRule.verdict(.frontmostMainWindow) == .navigate)
-        #expect(MCPShowRule.verdict(.notFrontmost) == .refuse(MCPShowRule.notFrontmostWords),
-                "never while she isn't at the app — refused, never queued")
-        #expect(MCPShowRule.verdict(.frontmostOtherWindow) == .refuse(MCPShowRule.otherWindowWords),
-                "never by raising another window")
+        #expect(MCPShowRule.verdict(.frontmostMainWindow, dial: .moveAtOnce) == .navigate)
+        #expect(MCPShowRule.verdict(.notFrontmost, dial: .moveAtOnce) == .offer,
+                "never moved while she isn't at the app — and never refused for it: the ask")
+        #expect(MCPShowRule.verdict(.frontmostOtherWindow, dial: .moveAtOnce) == .offer,
+                "never by raising another window — the ask")
     }
 
     // MARK: - End to end
@@ -63,6 +69,9 @@ struct MCPShowServerTests {
         let app = FakeApp()
         h.host.hooks.show = app.hook
         try await h.within {
+            // VX-676 (A JUSTIFIED EDIT): this pin is the MOVE's road — the dial
+            // set to move at once (her default, the ask, is the offer suite's).
+            try h.operations.setMCPShowDial(.moveAtOnce)
             let note = try h.operations.createPost(title: "shared once")
             let block = try h.operations.newBlock(in: note.id, text: "Read me here.", registeringUndo: false)
             let other = try h.operations.createPost(title: "not shared")
@@ -77,12 +86,16 @@ struct MCPShowServerTests {
             #expect(app.delivered.value == [.note(noteID: note.id, blockID: block.block.id, select: "Read me")],
                     "the 13o landing road's three facts: the note, the block, the words")
 
+            // VX-676 (A JUSTIFIED EDIT — the retired refusal): away, or in front
+            // in another window, the call is OFFERED, never refused.
             app.standing.setValue(.notFrontmost)
             let away = try await call(connection, "show_in_app", ["note_id": .string(note.id)])
-            #expect(away.isError == true && text(away) == MCPShowRule.notFrontmostWords)
+            let awayOffered = try json(away)["offered"] as? Bool
+            #expect(away.isError != true && awayOffered == true, "\(text(away))")
             app.standing.setValue(.frontmostOtherWindow)
             let otherWindow = try await call(connection, "show_in_app", ["note_id": .string(note.id)])
-            #expect(otherWindow.isError == true && text(otherWindow) == MCPShowRule.otherWindowWords)
+            let otherWindowOffered = try json(otherWindow)["offered"] as? Bool
+            #expect(otherWindow.isError != true && otherWindowOffered == true)
             #expect(app.delivered.value.count == 1, "nothing moved while she was away")
             app.standing.setValue(.frontmostMainWindow)
 
@@ -106,6 +119,7 @@ struct MCPShowServerTests {
         let app = FakeApp()
         h.host.hooks.show = app.hook
         try await h.within {
+            try h.operations.setMCPShowDial(.moveAtOnce)  // VX-676: the move's road (A JUSTIFIED EDIT)
             let book = try h.operations.createReading(name: "lessons", kind: .book)
             let chapter = try h.operations.createSection(in: book.id, name: "1")
             let otherBook = try h.operations.createReading(name: "other", kind: .book)

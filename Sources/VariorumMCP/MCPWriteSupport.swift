@@ -126,11 +126,12 @@ public struct MCPHostHooks: Sendable {
     /// wall clock; a test's is its world's).
     public var now: @Sendable () -> Date
     /// 13n-b U4 (AF-11 F-3): `show_in_app`'s delivery. The app reads where it
-    /// stands ON THE MAIN ACTOR, asks `MCPShowRule.verdict`, delivers ONLY on
-    /// `.navigate` (in that same hop — nothing can move between the look and
-    /// the move), and answers the verdict it applied. Nil = no app around the
-    /// host (a headless host shows nothing).
-    public var show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)?
+    /// stands ON THE MAIN ACTOR, asks `MCPShowRule.verdict` with the request's
+    /// dial, delivers ONLY on `.navigate` (in that same hop — nothing can move
+    /// between the look and the move), OFFERS on `.offer` (VX-676 — on her
+    /// status seam, never raising a window), and answers the verdict it
+    /// applied. Nil = no app around the host (a headless host shows nothing).
+    public var show: (@Sendable (MCPShowRequest) async -> MCPShowRule.Verdict)?
     /// 13n-c U6: her Move to Wing door's OWN sentence for a note held by a
     /// finished or sealed book (`WingCopy.frozen(title, book:)` on the Mac —
     /// the mockup §9's "in her own words"), so `move_note_to_wing` refuses
@@ -157,7 +158,7 @@ public struct MCPHostHooks: Sendable {
         onAsk: (@Sendable (MCPAsk) -> Void)? = nil,
         onWrite: (@Sendable (MCPWriteReceipt) -> Void)? = nil,
         now: @escaping @Sendable () -> Date = { Date() },
-        show: (@Sendable (MCPShowTarget) async -> MCPShowRule.Verdict)? = nil,
+        show: (@Sendable (MCPShowRequest) async -> MCPShowRule.Verdict)? = nil,
         wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil,
         beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil
     ) {

@@ -483,7 +483,10 @@ public final class MCPServerHost: @unchecked Sendable {
     /// clients, the grants' stamps, the switches (the grants store is small
     /// and bounded — the pending room and the log are capped). VX-258: and
     /// each decided client's binding — her Allow of a waiting setup changes
-    /// it, and the waiting connection is told its tools changed.
+    /// it, and the waiting connection is told its tools changed. VX-676: the
+    /// show dial's row is NOT among them — the tool list never depends on it
+    /// (show_in_app is listed under every dial value), so turning it announces
+    /// nothing to a connected client.
     static func grantsFingerprint(_ db: Database) throws -> String {
         try String.fetchOne(
             db,
@@ -493,7 +496,7 @@ public final class MCPServerHost: @unchecked Sendable {
                    FROM mcp_client WHERE state <> 'pending')
                   || '|' || (SELECT COUNT(*) || ':' || IFNULL(MAX(created_at), '') || ':'
                              || IFNULL(MAX(revoked_at), '') || ':' || IFNULL(MAX(consumed_at), '') FROM mcp_grant)
-                  || '|' || (SELECT IFNULL(group_concat(key || value, ','), '') FROM mcp_switch)
-                """) ?? ""
+                  || '|' || (SELECT IFNULL(group_concat(key || value, ','), '') FROM mcp_switch WHERE key <> ?)
+                """, arguments: [Queries.mcpShowDialKey]) ?? ""
     }
 }

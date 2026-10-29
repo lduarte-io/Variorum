@@ -210,6 +210,13 @@ final class MCPSession: @unchecked Sendable {
     /// as an example and without a provider's name — O-4's net
     /// (`MCPProviderNeutralityTests`) bans names, not the command. No trade: her
     /// bound rose to 3,100 for it (below). PROVISIONAL words.
+    ///
+    /// VX-676 (the VX-677 run, batch 3 — her sitting + mid-run amendment,
+    /// 2026-10-28): show_in_app's sentence says the new truth — the call lands as
+    /// an OFFER by default (her one press opens it), so the model neither races
+    /// her to the app nor calls again to check. The pinned clause ("Never call
+    /// show_in_app unless the author asks") is unchanged. 3,011 → 3,061, inside
+    /// 3,100 — her standing allowance (up to 3,250) not used. PROVISIONAL.
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, \
@@ -247,7 +254,8 @@ final class MCPSession: @unchecked Sendable {
         not exist.
         If a call is refused, don't retry around it: tell the author what you need (Variorum may \
         already have asked them). If an answer is lost, list_my_activity shows whether the call landed.
-        Never call show_in_app unless the author asks to see something.
+        Never call show_in_app unless the author asks to see something; by default it's offered for one \
+        press, not moved.
         Every change you make is one undo for the author, named after you; commits stay.
         The guide to this door: https://stargazing.tech/variorum/mcp
         """

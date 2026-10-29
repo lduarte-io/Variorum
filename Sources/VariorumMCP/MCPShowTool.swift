@@ -26,15 +26,68 @@ public enum MCPShowTarget: Sendable, Equatable {
     /// would offer — no link required (1). A SIGNAL with no posture (P-4): the
     /// board decides "related blocks only" from its own projection (F-8 (a)).
     case compare(noteID: String, peerIDs: [String])
+    /// **VX-675 (#249's open item, her word 2026-10-28):** one of `noteID`'s
+    /// SAVED VERSIONS, full size — the VX-440 page (R-440-2: the identity band
+    /// "A saved version of ‹title› · ‹date›", Back to the note · Promote;
+    /// read-only, opening at its start, no per-note memory written — P-440-1).
+    /// `read_note`'s own pair (`note_id` + `version_id`), so the decision is
+    /// the NOTE's read decision, as `read_note`'s version road is.
+    case version(noteID: String, versionID: String)
 }
 
-/// **THE MOVE DIAL's ETIQUETTE — her law, as one pure decision** (R-13nb-23,
+/// **One `show_in_app` call, as the app is handed it** (VX-676): the target,
+/// who asked, the titles the decision read (so the ask can say what it would
+/// show, and Activity can log her take on the row the ask was logged on), and
+/// the dial the store held in the decision's own read. A SIGNAL with no
+/// decision (P-4): the app applies `MCPShowRule` to it, on the main actor, in
+/// the hop that would move anything.
+public struct MCPShowRequest: Sendable, Equatable {
+    public let target: MCPShowTarget
+    public let clientName: String
+    /// The title the decision read for the target's place — the note's (for a
+    /// version, its note's; for compare, the anchor's), the book's, the wing's;
+    /// nil when none resolved.
+    public let title: String?
+    /// Compare's peers' titles, in column order (empty for every other target).
+    public let peerTitles: [String?]
+    /// How the author set `show_in_app` to land (Settings ▸ MCP), read with the
+    /// decision.
+    public let dial: MCPShowDial
+    /// The Activity row's target the call was logged on — her take of an ask
+    /// is logged on the same one.
+    public let activityKind: String
+    public let activityID: String
+
+    public init(
+        target: MCPShowTarget, clientName: String, title: String? = nil, peerTitles: [String?] = [],
+        dial: MCPShowDial, activityKind: String = "note", activityID: String = ""
+    ) {
+        self.target = target
+        self.clientName = clientName
+        self.title = title
+        self.peerTitles = peerTitles
+        self.dial = dial
+        self.activityKind = activityKind
+        self.activityID = activityID
+    }
+}
+
+/// **HOW A SHOW LANDS — her law, as one pure decision** (R-13nb-23's etiquette,
 /// her words: *"moving should not be done while you aren't at the app, should
-/// not be done automatically"*; AF-11 F-3). The app reads where it stands —
-/// ON THE MAIN ACTOR, in the same hop as any delivery — and asks this; only
-/// `.navigate` may move anything. Never queued: a refusal is the whole answer
-/// (the offer door and "Show the AI's last change" are her deliberate roads
-/// back).
+/// not be done automatically"*; AF-11 F-3 — AMENDED by VX-676, her sitting and
+/// her mid-run ruling of 2026-10-28). The app reads where it stands — ON THE
+/// MAIN ACTOR, in the same hop as any delivery — and asks this with the dial;
+/// only `.navigate` may move anything, and nothing ever raises a window.
+///
+/// - **never** — nothing is shown or offered (the call answers in words).
+/// - **ask** (the default) — OFFERED on her status seam: the toast at its full
+///   prominence, then the standing quiet line, taken by her one press.
+/// - **move at once** — moves her view ONLY while Variorum is in front in a
+///   full window; anywhere else it is the ask. The frontmost-only REFUSAL is
+///   retired into the ask (her amendment), and a background arrival is the ask
+///   under every dial value but never — RATIFIED: *"I agree with doing the ask,
+///   even if you've approved auto move. if you've been out of the screen it
+///   would be weird to suddenly be looking at something new."*
 public enum MCPShowRule {
     /// Where the app stands at the moment of the call.
     public enum Standing: Sendable, Equatable {
@@ -43,52 +96,70 @@ public enum MCPShowRule {
         case frontmostMainWindow
         /// Variorum is frontmost but its key window is a note-only or quick-
         /// note window — moving would mean raising ANOTHER window, which her
-        /// etiquette rules out.
+        /// etiquette rules out, so it is the ask.
         case frontmostOtherWindow
-        /// Another app is frontmost (or Variorum has no window at all).
+        /// Another app is frontmost (or Variorum has no window at all): the ask.
         case notFrontmost
     }
 
+    /// What the app DID with the call — the answer the wire speaks.
     public enum Verdict: Sendable, Equatable {
+        /// Her view moved.
         case navigate
+        /// It is offered on her status seam; nothing moved.
+        case offer
+        /// Nothing was shown or offered, and this says why.
         case refuse(String)
     }
 
-    public static func verdict(_ standing: Standing) -> Verdict {
-        switch standing {
-        case .frontmostMainWindow: .navigate
-        case .frontmostOtherWindow: .refuse(otherWindowWords)
-        case .notFrontmost: .refuse(notFrontmostWords)
+    public static func verdict(_ standing: Standing, dial: MCPShowDial) -> Verdict {
+        switch dial {
+        case .never: .refuse(neverWords)
+        case .ask: .offer
+        case .moveAtOnce: standing == .frontmostMainWindow ? .navigate : .offer
         }
     }
 
-    /// The words (technical register — the MCP room's, P-13n-1; 13s-a
-    /// sweepable).
-    public static let notFrontmostWords =
-        "The author isn't at Variorum right now, so nothing was moved — showing happens only while "
-        + "Variorum is the app in front. Ask them to switch to it, then call again."
-    public static let otherWindowWords =
-        "Variorum's main window isn't the one in front, so nothing was moved — ask the author to "
-        + "bring it forward, then call again."
+    // The words (technical register — the MCP room's, P-13n-1; PROVISIONAL,
+    // her copy pass — VX-234).
+
+    /// VX-676 ruling (4) — the offered answer's words: answered at once,
+    /// fire-and-forget, nothing told later.
+    public static let offeredWords =
+        "Offered \u{2014} the author can open it with one press, whenever they like. Nothing moved, "
+        + "and nothing follows when they open it."
+    /// VX-676 — the never dial's answer (PROVISIONAL P-676-2).
+    public static let neverWords =
+        "The author has set Variorum never to show things for an AI (Settings \u{25B8} MCP), so nothing "
+        + "was shown or offered \u{2014} tell them where it is instead."
     public static let unavailableWords =
-        "This Variorum can't show things — there is no app window to move."
-    /// Ladder round 1, F-4: a delivery that could not FINISH (the note opened
-    /// but the takes/lens landing never arrived, or the author left the app
-    /// mid-delivery) answers honestly instead of claiming shown. 13s-a
-    /// sweepable.
+        "This Variorum can't show things \u{2014} there is no app window to move."
+    /// Ladder round 1, F-4: a delivery that could not FINISH while she was at
+    /// the app (the note opened but the takes/lens/compare landing never
+    /// arrived) answers honestly instead of claiming shown. VX-676: no longer
+    /// coaches "while the author is at the app" (her amendment — a call again
+    /// is offered, never raced); a delivery she LEFT mid-way lands as the ask.
     public static let partialShowWords =
-        "Variorum opened the note, but the rest of the show didn't land — nothing more was moved. "
-        + "Call again while the author is at the app."
+        "Variorum opened the note, but the rest of the show didn't land \u{2014} nothing more was moved."
 }
 
 /// **`show_in_app`** — the READ rung's one navigation tool (AF-11 F-3):
 /// decided at READ on the TARGET (a client shows only what it may read),
 /// never spending a once grant (a show discloses and changes nothing), then
-/// handed to the app's `show` hook — which applies `MCPShowRule` on the main
-/// actor and delivers only on `.navigate`. A target the client cannot read
-/// answers the ONE `notShared` (no existence oracle); an address that does
-/// not belong to its note (a block, a lens, a chapter) answers after the
-/// decision, so it discloses nothing the client could not already read.
+/// handed to the app's `show` hook as an `MCPShowRequest` carrying the dial
+/// read in the SAME read — the app applies `MCPShowRule` on the main actor,
+/// moves only on `.navigate`, offers on `.offer`. A target the client cannot
+/// read answers the ONE `notShared` (no existence oracle); an address that
+/// does not belong to its note (a block, a lens, a chapter) answers after the
+/// decision, so it discloses nothing the client could not already read — and
+/// a `version_id` that is not one of the note's saved versions answers the ONE
+/// not-shared shape too (VX-675: hidden = missing, no version-existence oracle).
+///
+/// **VX-676 ruling (4) — answered at once, fire-and-forget:** `{"shown": true}`
+/// when her view moved, `{"offered": true, "shown": false, "landed": …}` when it
+/// is offered — and nothing ever follows (no callback on a later take). The ask
+/// is logged as its own Activity row (`MCPShowActivity.offeredAct`); a move
+/// keeps `show_in_app`'s row; her take is the app's to log.
 struct MCPShowTool: Sendable {
     let database: AppDatabase
     let operations: Operations
@@ -104,26 +175,40 @@ struct MCPShowTool: Sendable {
         let args = arguments ?? [:]
         do {
             let parsed = try parse(args)
-            let decided = try await database.read { db in try decide(db, parsed, clientName: clientName) }
+            // VX-676: the dial is read in the decision's own read — the store's
+            // truth at wire time, handed to the app with the call.
+            let (decided, dial) = try await database.read { db in
+                (try decide(db, parsed, clientName: clientName), try Queries.mcpShowDial(db))
+            }
             var target = parsed
             // The wing's name and who asked ride the target (the decision
             // read the name; the client is this session's).
-            if case .wing(let wingID, _, _) = target, case .allowed(_, _, let title) = decided {
+            if case .wing(let wingID, _, _) = target, case .allowed(_, _, let title, _) = decided {
                 target = .wing(wingID: wingID, name: title ?? Queries.mcpHomeWingName, shownBy: clientName)
             }
             switch decided {
             case .refused(let outcome, let kind, let id, let title):
                 try log(clientName, kind, id, title, allowed: false)
                 return outcome
-            case .allowed(let kind, let id, let title):
+            case .allowed(let kind, let id, let title, let peerTitles):
                 guard let show = hooks.show else {
                     try log(clientName, kind, id, title, allowed: false)
                     return Outcome(text: MCPShowRule.unavailableWords, isError: true)
                 }
-                switch await show(target) {
+                let request = MCPShowRequest(
+                    target: target, clientName: clientName, title: title, peerTitles: peerTitles, dial: dial,
+                    activityKind: kind, activityID: id)
+                switch await show(request) {
                 case .navigate:
                     try log(clientName, kind, id, title, allowed: true)
                     return Outcome(text: try encode(["shown": true]), isError: false)
+                case .offer:
+                    // VX-676 (4): the ask is its own Activity row — the client's
+                    // call, allowed, nothing moved — and the answer is at once.
+                    try log(clientName, kind, id, title, allowed: true, act: MCPShowActivity.offeredAct)
+                    return Outcome(
+                        text: try encode(["shown": false, "offered": true, "landed": MCPShowRule.offeredWords]),
+                        isError: false)
                 case .refuse(let words):
                     try log(clientName, kind, id, title, allowed: false)
                     return Outcome(text: words, isError: true)
@@ -147,6 +232,12 @@ struct MCPShowTool: Sendable {
             return text
         }
         let target = try string("target") ?? "note"
+        // VX-675: a saved version is its own target — `version_id` with any other
+        // (the default note included) would silently show the live note, so it
+        // refuses here, before any read (independent of any target — no oracle).
+        if target != "version", let value = args["version_id"], value != .null {
+            throw ArgumentFailure(message: Self.versionNeedsItsTargetWords)
+        }
         switch target {
         case "note":
             guard let note = try string("note_id") else { throw ArgumentFailure(message: "note_id is required.") }
@@ -177,11 +268,25 @@ struct MCPShowTool: Sendable {
             return .wing(wingID: wing, name: "", shownBy: "")
         case "compare":
             return try parseCompare(args, string)
+        case "version":
+            // VX-675: `read_note`'s own pair — the note, and one of its saved
+            // versions (its `with_versions` lists them).
+            guard let note = try string("note_id"), let version = try string("version_id") else {
+                throw ArgumentFailure(message: Self.versionNeedsWords)
+            }
+            return .version(noteID: note, versionID: version)
         default:
             throw ArgumentFailure(
-                message: "target must be \"note\", \"takes\", \"lens\", \"book\", \"wing\" or \"compare\".")
+                message: "target must be \"note\", \"takes\", \"lens\", \"book\", \"wing\", \"compare\" or \"version\".")
         }
     }
+
+    // The version target's words (the MCP room's technical register, P-13n-1;
+    // PROVISIONAL, her copy pass — VX-234).
+    static let versionNeedsWords =
+        "target version needs note_id and version_id (read_note's with_versions lists a note's saved versions)."
+    static let versionNeedsItsTargetWords =
+        "version_id goes with target \"version\" (note_id + version_id: that saved version, full size)."
 
     /// VX-298 (P-VX298-3, F-6 (a)): `note_id` + `peer_ids` — one to three OTHER
     /// notes (her board holds four columns, `addPeerSlot`'s cap), in column
@@ -225,7 +330,8 @@ struct MCPShowTool: Sendable {
     // MARK: - The decision (read, on the target, never spending)
 
     private enum Decided {
-        case allowed(kind: String, id: String, title: String?)
+        /// `peerTitles`: compare's peers, in column order (empty otherwise).
+        case allowed(kind: String, id: String, title: String?, peerTitles: [String?] = [])
         case refused(Outcome, kind: String, id: String, title: String?)
     }
 
@@ -234,6 +340,23 @@ struct MCPShowTool: Sendable {
         switch target {
         case .note(let noteID, _, _), .takes(let noteID, _), .lens(let noteID, _):
             return try decideNote(db, target, noteID: noteID, standing: standing)
+        case .version(let noteID, let versionID):
+            // VX-675: the NOTE's read decision (a saved version is that note's
+            // past — the note is the disclosure unit, R-13nb-12; `read_note`'s
+            // `version_id` road decides exactly so), never spending. Only once
+            // the note is allowed is the version asked — and an id that is not
+            // one of THIS note's saved versions (nothing, a live note, another
+            // note's version, a promoted or deleted one) answers the ONE
+            // not-shared shape, decided over no facts: byte-identical to an
+            // unreadable note's answer (hidden = missing; `read_note`'s lens_id
+            // precedent), logged refused on the note.
+            let decided = try decideNote(db, target, noteID: noteID, standing: standing)
+            guard case .allowed(_, _, let title, _) = decided else { return decided }
+            guard try Queries.isVersionHistory(db, versionID, of: noteID) else {
+                let none = MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false)
+                return .refused(refusal(none, .note), kind: "note", id: noteID, title: title)
+            }
+            return decided
         case .compare(let noteID, let peerIDs):
             return try decideCompare(db, noteID: noteID, peerIDs: peerIDs, standing: standing)
         case .book(let bookID, let sectionID):
@@ -334,7 +457,9 @@ struct MCPShowTool: Sendable {
             return .refused(Outcome(text: Self.compareArchivedWords(titles[peer]), isError: true),
                             kind: "note", id: peer, title: titles[peer])
         }
-        return .allowed(kind: "note", id: noteID, title: titles[noteID])
+        // VX-676: the peers' titles ride along, so an ask can name what it
+        // would line up (every one decided readable above).
+        return .allowed(kind: "note", id: noteID, title: titles[noteID], peerTitles: peerIDs.map { titles[$0] })
     }
 
     private func refusal(_ decision: MCPGrantRule.Decision, _ target: MCPRefusalCopy.Target) -> Outcome {
@@ -342,10 +467,14 @@ struct MCPShowTool: Sendable {
         return Outcome(text: MCPRefusalCopy.words(reason, target), isError: true)
     }
 
-    private func log(_ clientName: String, _ kind: String, _ id: String, _ title: String?, allowed: Bool) throws {
+    /// `act`: the tool's own (a move, a refusal) — or, VX-676, the ask's.
+    private func log(
+        _ clientName: String, _ kind: String, _ id: String, _ title: String?, allowed: Bool,
+        act: String = MCPToolCatalog.showInApp.name
+    ) throws {
         try database.write { db in
             try operations.recordMCPActivity(
-                db, clientName: clientName, act: MCPToolCatalog.showInApp.name, targetKind: kind, targetID: id,
+                db, clientName: clientName, act: act, targetKind: kind, targetID: id,
                 targetTitle: title, allowed: allowed)
         }
     }

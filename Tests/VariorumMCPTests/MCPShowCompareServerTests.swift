@@ -50,16 +50,17 @@ func showCompareParts(_ target: MCPShowTarget?) -> [String]? {
     return [note] + peers
 }
 
-/// A fake app: stands where the test says, applies the RULE, records what it would have
-/// delivered — the contract `MCPHostHooks.show` states (`MCPShowServerTests`' own).
+/// A fake app: stands where the test says, applies the RULE with the request's dial, records
+/// what it would have delivered — the contract `MCPHostHooks.show` states (`MCPShowServerTests`'
+/// own). VX-676 (A JUSTIFIED EDIT, the ritual): the hook takes the request.
 private final class FakeApp: @unchecked Sendable {
     let standing = LockIsolated(MCPShowRule.Standing.frontmostMainWindow)
     let delivered = LockIsolated<[MCPShowTarget]>([])
 
-    var hook: @Sendable (MCPShowTarget) async -> MCPShowRule.Verdict {
-        { [self] target in
-            let verdict = MCPShowRule.verdict(standing.value)
-            if verdict == .navigate { delivered.withValue { $0.append(target) } }
+    var hook: @Sendable (MCPShowRequest) async -> MCPShowRule.Verdict {
+        { [self] request in
+            let verdict = MCPShowRule.verdict(standing.value, dial: request.dial)
+            if verdict == .navigate { delivered.withValue { $0.append(request.target) } }
             return verdict
         }
     }
@@ -85,6 +86,7 @@ struct MCPShowCompareServerTests {
         let app = FakeApp()
         h.host.hooks.show = app.hook
         try await h.within {
+            try h.operations.setMCPShowDial(.moveAtOnce)  // VX-676: the move's road (A JUSTIFIED EDIT)
             let a = try note(h, "a"), b = try note(h, "b"), c = try note(h, "c"), d = try note(h, "d")
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.read, .note, a.id, .once))
@@ -181,6 +183,7 @@ struct MCPShowCompareServerTests {
         let app = FakeApp()
         h.host.hooks.show = app.hook
         try await h.within {
+            try h.operations.setMCPShowDial(.moveAtOnce)  // VX-676: the move's road (A JUSTIFIED EDIT)
             let elsewhere = try h.operations.createWing(name: "elsewhere")
             let a = try note(h, "a"), shelved = try note(h, "shelved"), hidden = try note(h, "hidden")
             let far = try note(h, "far", wing: elsewhere.id)
@@ -210,20 +213,23 @@ struct MCPShowCompareServerTests {
         }
     }
 
-    /// Her etiquette: not frontmost, nothing moves — the same words as every target.
-    /// **RED on old:** the parse refused first.
+    /// Her etiquette: not frontmost, nothing moves — under move at once too. VX-676 (A
+    /// JUSTIFIED EDIT — her amendment retired the refusal this pin asserted): the call away is
+    /// OFFERED, as every target's is, never refused. **RED on old:** the parse refused first.
     @Test func aCompareShowMovesNothingWhileSheIsAway() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let app = FakeApp()
         h.host.hooks.show = app.hook
         try await h.within {
+            try h.operations.setMCPShowDial(.moveAtOnce)
             let a = try note(h, "a"), b = try note(h, "b")
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.read, .wing, ""))
             app.standing.setValue(.notFrontmost)
             let away = try await call(connection, "show_in_app", compare(a.id, [b.id]))
-            #expect(away.isError == true && text(away) == MCPShowRule.notFrontmostWords)
+            let awayOffered = try json(away)["offered"] as? Bool
+            #expect(away.isError != true && awayOffered == true, "\(text(away))")
             #expect(app.delivered.value.isEmpty)
             await h.hangUp(connection)
         }

@@ -406,7 +406,8 @@ enum MCPToolCatalog {
             What this client did in Variorum, newest first, from its activity log: each act's \
             tool, whether it was allowed or refused, when, and the id it named (for a note or book \
             it made, the book or wing it was made in). An allowed act also says what its target was \
-            called at the time; a refused one never does, and names only an id you sent. Use it \
+            called at the time; a refused one never does, and names only an id you sent; a \
+            show_in_app that was offered rather than shown says offered: true. Use it \
             after a dropped call or a lost context to learn whether a call landed — for a made \
             note, look for its title with list_notes (two rows with one title mean two notes). It \
             lists every session under this client's name since the author last approved it, never \
@@ -1868,12 +1869,20 @@ enum MCPToolCatalog {
 
     // MARK: - U4 — navigation (R-13nb-23 + R-13nb-26 (g); AF-11 F-3)
 
+    /// VX-676 (her sitting + mid-run amendment, 2026-10-28): the description
+    /// says the OFFER — the default ask, the dial's two other values, the
+    /// at-once answer with nothing following — and VX-675's version target.
+    /// Truth-pinned in `MCPShowOfferServerTests`. PROVISIONAL words (VX-234).
     static let showInApp = MCPToolDeclaration(
         name: "show_in_app", rung: .read, title: "Show in Variorum",
         description: """
-            Move the author's Variorum window to something you want them to see — ONLY when they \
-            ask you to show them, never on your own (it moves nothing unless Variorum is the app \
-            in front, and never raises a window). target "note" (note_id; block_id lands on that \
+            Show the author something in Variorum — ONLY when they ask you to show them, never on \
+            your own. By default it is OFFERED: Variorum says what you asked to show, and the author \
+            opens it with one press whenever they like. They may set Variorum to move their view at \
+            once instead (only while Variorum is the app in front; otherwise it is offered) or never \
+            to show. It never raises a window. It answers at once — {"shown": true} if it moved, \
+            {"offered": true} if it was offered — and nothing follows when they open it, so don't \
+            call again to check. target "note" (note_id; block_id lands on that \
             block, and select — words in that block's shown take — selects them with the find \
             bar ready), "takes" (note_id + block_id: the note's Takes, that block's takes open), \
             "lens" (note_id + lens_id: the Lenses board showing that lens), "book" (book_id, \
@@ -1881,19 +1890,24 @@ enum MCPToolCatalog {
             to that wing, as its own wing switcher does) or "compare" (note_id + peer_ids — one to \
             three other notes in the same wing: Variorum's Compare with note_id first and each peer \
             beside it, replacing the columns open; rows line up where the notes share history, as \
-            duplicate_note's copies do, and "related blocks only" opens off when they don't). \
-            Returns JSON, or why nothing moved.
+            duplicate_note's copies do, and "related blocks only" opens off when they don't), or \
+            "version" (note_id + version_id — one of the note's saved versions, as read_note's \
+            with_versions lists them: that version full size, read-only). Returns JSON, or why \
+            nothing was shown.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "target": .object(["type": "string",
-                                   "enum": .array(["note", "takes", "lens", "book", "wing", "compare"]),
+                                   "enum": .array(["note", "takes", "lens", "book", "wing", "compare", "version"]),
                                    "description": "What to show (default note)."]),
                 "note_id": .object(["type": "string"]),
                 "block_id": .object(["type": "string"]),
                 "select": .object(["type": "string", "description": "Words to select in the block's shown take."]),
                 "lens_id": .object(["type": "string"]),
+                // VX-675: one of note_id's saved versions (target version).
+                "version_id": .object(["type": "string",
+                                       "description": "target version: a saved version of note_id (read_note's with_versions lists them)."]),
                 "book_id": .object(["type": "string"]),
                 "section_id": .object(["type": "string", "description": "A chapter of the book."]),
                 "wing_id": .object(["type": "string",
