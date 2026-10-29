@@ -1079,7 +1079,7 @@ Deliverables: every build's log path + result line in a "FINAL REBUILD RECORD" s
 
 ### FINAL REBUILD RECORD (implementer: Opus, fresh session, 2026-10-28)
 
-**NOT DONE (first line, kept current):** nothing is built yet: every product below is PENDING. This unit has no `xcodebuild test`, no app launch, no stage claim and no subagent; no production or test line changes; no behavioural revert is in flight (the tree is clean at `5d91444ea`, no `VX677-REVERT` marker).
+**NOT DONE (first line, kept current):** no test ran and no app launched. Every verdict on these products, and the overlap run itself, is the final window's. No stage was claimed, no subagent was used, and not one production or test line changed (every commit of this unit touches only this record). Everything in the brief is DONE: eleven products rebuilt (`vx677-b5/post` verified at the tip, not rebuilt), the walk app rebuilt with the trace confirmed, the overlap run named. No behavioural revert is in flight: after the last restore `git status` is empty and no `VX677-REVERT` marker exists under `App/Variorum/Variorum`, `Shared`, `VariorumTests` or `Sources`.
 
 *Read in this session's own context before any build (never delegated): CLAUDE.md and its auto-loaded canon; this file's rails, environment traps, coordinator protocol and LIVE LEDGER; every batch record's revert table (BATCH 1's rev664, the DISPOSITIONS RECORD's revB, BATCH 3's rev676 and rev675, BATCH 4's rev674 and rev572); BATCH 5's product line; the brief above.*
 
@@ -1155,7 +1155,36 @@ Nothing is ever committed mid-revert. The plain-tip products (`vx677-b1/post`, `
   - The app: `DerivedData/vx677-app/Build/Products/Debug/Variorum.app`, bundle id `io.lduarte.Variorum.debug`; `Variorum` and `Variorum.debug.dylib` stamped 23:23. Before this build the app (17:48) predated the merge and carried no trace string.
   - **The trace is in it.** `strings -a` on `Variorum.debug.dylib` finds `VX668-TRACE t=%.3f %@`, the one `NSLog` format of `VX668Trace.line` (`Features/Tray/VX668Trace.swift:59`). Every probed call-site message is present once: `takes-consume board=`, `takes-consume-took board=`, `restore-begin road=`, `restore-flushed road=`, `post road=`, `restore-refused road=`. The 60-KB `Variorum` stub carries none, as expected (the code lives in the debug dylib).
   - The embedded `variorum-mcp` shim kept its 17:48 stamp: Xcode did not relink it. It imports only `VariorumMCPSocket` (with Darwin and Foundation), which has no commits since 17:48, and no shim source is newer than it, so it is current by dependency. The walk's MCP leg drives this shim.
-- FR-7: the overlap run. PENDING.
+- FR-7: the overlap run. DONE (this commit); see "THE OVERLAP RUN" below.
+
+#### THE OVERLAP RUN (the VX-678 merge's one overlap file, `App/Variorum/Variorum/VariorumApp.swift`)
+
+**What overlaps.** VX-678 added one line at ~:255, `appDelegate.services = fresh` (VX-657: the quit door's quiesce reaches the services through `VariorumAppDelegate`'s `weak var services`). VX-572's line is the helper `Window`'s `defaultSize` (~:476). The two are textually apart.
+
+**How the set was found.** I grepped `App/Variorum/VariorumTests` for `VariorumAppDelegate`, the word `VariorumApp`, the path `VariorumApp.swift` / `VariorumAppDelegate.swift`, and `applicationShouldTerminate` / `quiesce`, then read every hit's lines. Every suite type in a hit file is in the run. In the three two-suite files the source pin is the `…CompositionTests` type and its sibling is the behavioural half of the same rule. All 23 types were confirmed present in the compiled bundle (`nominal type descriptor for <Type>` in `vx677-b5/post`'s `VariorumTests`). Counts are `@Test` functions, from the source and cross-checked against a raw `@Test` grep per file (132 = 132).
+
+**What each suite does:**
+
+| Kind | Suites (`@Test` count) |
+|---|---|
+| (a) Drive the delegate whose services the merged line wires (`VariorumAppDelegate()` + its `applicationShouldTerminate`) | `QuitDoorTests` 3 · `QuickNoteParkTests` 6 · `LandingOffsetTests` 11 |
+| (b) The merged line's consumer road, VX-678's own VX-657 pin (`AppServices` / `SyncSession.quiesceForExit()`) | `QuitPurgeQuiesceTests` 4 |
+| (c) Source pins over `VariorumApp.swift` or `VariorumAppDelegate.swift` text | `MCPAsksWaitTests` 22 · `OneRefreshAuthorityCompositionTests` 4 + `OneRefreshAuthorityRaceTests` 4 · `EmptySlotDoorsSurfaceTests` 2 · `HoldBannerAccountFactTests` 2 + `HoldBannerAccountCompositionTests` 1 · `NotOnYetWordsTests` 5 · `WhatsNewWaitsAfterAdoptionTests` 2 + `WhatsNewWaitsCompositionTests` 1 · `WordsConcealedClipboardTests` 4 |
+| (d) Compose the app's launch or services exactly as `VariorumApp` does | `LaunchFurnitureTests` 9 · `LaunchSeedTombstoneTests` 7 · `LibraryPortabilityDoorTests` 6 · `MCPStopRoadsDoorTests` 3 · `Phase9cAuthWiringTests` 14 · `FirstRoundAfterTheActTests` 5 · `FirstRoundAfterTheReopenTests` 3 · `FirstRunDrillTests` 11 · `QuickEntryLaunchFocusTests` 3 |
+
+**The run** (from `App/Variorum/`, `test-without-building`, on any rebuilt `post`; every `post` agrees on the panel, and `vx677-b5/post` is the default). Expect **132 tests in 23 suites, 0 failures, 0 skipped** (no suite- or test-level gate in any of them). `NotOnYetWordsTests` and `LaunchSeedTombstoneTests` carry parameterized tests, which count as one test each.
+```zsh
+T=(QuitDoorTests QuickNoteParkTests LandingOffsetTests QuitPurgeQuiesceTests MCPAsksWaitTests OneRefreshAuthorityCompositionTests OneRefreshAuthorityRaceTests EmptySlotDoorsSurfaceTests HoldBannerAccountFactTests HoldBannerAccountCompositionTests NotOnYetWordsTests WhatsNewWaitsAfterAdoptionTests WhatsNewWaitsCompositionTests WordsConcealedClipboardTests LaunchFurnitureTests LaunchSeedTombstoneTests LibraryPortabilityDoorTests MCPStopRoadsDoorTests Phase9cAuthWiringTests FirstRoundAfterTheActTests FirstRoundAfterTheReopenTests FirstRunDrillTests QuickEntryLaunchFocusTests)
+A=(); for s in $T; do A+=(-only-testing:VariorumTests/$s); done; xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx677-b5/post test-without-building "${A[@]}"
+```
+Per suite: 3 · 6 · 11 · 4 · 22 · 4 · 4 · 2 · 2 · 1 · 5 · 2 · 1 · 4 · 9 · 7 · 6 · 3 · 14 · 5 · 3 · 11 · 3 (sum 132).
+
+`MCPAsksWaitTests` (22) is also in batch 4's run 3; one run of it on a merged-tip `post` serves both. Eight of the suites are Protection-side (`Protection/…`). They are tests only and touch no store.
+
+**Considered, not in the run (named so the orchestrator can add them):**
+- **Compose `AppServices` directly but never `VariorumApp` or its delegate** (outside the brief's grep): `FirstRoundRoadTests`, `ProdTestRoadTests`, `SyncWalkFenceTests`, `TierAndOnboardingTests`.
+- **False positives:** `DestructiveUndoWarningTests` and `WindowsTests` (a local `quiesce` helper); `DebugOracleScopingTests` and `TakesBoardSoakTests` (the word "quiescence" in prose).
+- **Whole-tree source scanners** (`NoLiteralColourTests`, `ChromeLineLimitTests` and their family): they read `VariorumApp.swift` among every app file and are already in batch 4's run 4.
 
 ## Rulings log
 
