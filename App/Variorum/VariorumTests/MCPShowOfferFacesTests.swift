@@ -92,6 +92,61 @@ private struct Rig {
     }
 }
 
+// MARK: - A place that EXISTS (the VX-677 ladder round 1, F-L2)
+
+/// Her press re-reads the place an ask (or a receipt) names before it opens it (F-L2 — the grant
+/// ask's own road), so a pin's ask must name a place that EXISTS, as a real ask always does (the
+/// wire's read found it readable). These stage the rows under the pins' OWN literal ids, so every
+/// assertion naming them stays byte-unchanged. Rows only: no operation, no undo, no behaviour.
+private let stagedStamp = DateFormatter.variorumISO8601.string(from: Date(timeIntervalSince1970: 1_782_864_000))
+
+private func stageNote(_ db: AppDatabase, _ id: String, title: String) async throws {
+    try await db.write { db in
+        try db.execute(
+            sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+            arguments: [id, title, stagedStamp, stagedStamp])
+    }
+}
+
+private func stageBook(_ db: AppDatabase, _ id: String, name: String) async throws {
+    try await db.write { db in
+        try db.execute(
+            sql: "INSERT INTO reading (id, name, kind, created_at, updated_at) VALUES (?, ?, 'book', ?, ?)",
+            arguments: [id, name, stagedStamp, stagedStamp])
+    }
+}
+
+/// `note` and ONE saved version of it — born archived (`archived_at = created_at`) and linked block to
+/// block by a live `version_of` edge: exactly `Queries.versionHistoryPredicate`'s facts.
+private func stageVersion(_ db: AppDatabase, note: String, version: String) async throws {
+    try await stageNote(db, note, title: "draft")
+    try await db.write { db in
+        try db.execute(
+            sql: """
+                INSERT INTO container (id, kind, title, created_at, updated_at, archived_at)
+                VALUES (?, 'post', 'draft', ?, ?, ?)
+                """,
+            arguments: [version, stagedStamp, stagedStamp, stagedStamp])
+        for (container, block) in [(note, "\(note)-block"), (version, "\(version)-block")] {
+            try db.execute(
+                sql: "INSERT INTO block (id, created_at, updated_at) VALUES (?, ?, ?)",
+                arguments: [block, stagedStamp, stagedStamp])
+            try db.execute(
+                sql: """
+                    INSERT INTO container_block (id, container_id, block_id, position, created_at, updated_at)
+                    VALUES (?, ?, ?, 'a0', ?, ?)
+                    """,
+                arguments: ["\(block)-placement", container, block, stagedStamp, stagedStamp])
+        }
+        try db.execute(
+            sql: """
+                INSERT INTO edge (id, source_block_id, target_block_id, type, created_at)
+                VALUES (?, ?, ?, 'version_of', ?)
+                """,
+            arguments: ["\(version)-edge", "\(note)-block", "\(version)-block", stagedStamp])
+    }
+}
+
 @MainActor
 @Suite("VX-676 + VX-675 — the ask on the status seam, its doors, ⌥⌘O, a saved version", .serialized)
 struct MCPShowOfferFacesTests {
@@ -228,6 +283,9 @@ struct MCPShowOfferFacesTests {
     /// client's name, on the row its ask named. **RED on `rev676`.**
     @Test func takingTheAskOpensItAndLogsTheTake() async throws {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            // F-L2 (the VX-677 ladder round 1) — STAGING ONLY, assertions unchanged: the ask names
+            // a book that exists, as a real ask does (her press now re-reads its place).
+            try await stageBook(db, "r1", name: "lessons")
             let rig = Rig(session)
             defer { rig.door.detach() }
             let request = MCPShowRequest(
@@ -257,7 +315,11 @@ struct MCPShowOfferFacesTests {
     /// takes it on arrival") — it acts with only an ask standing — and with none, the AI's
     /// last change opens as before. **RED on `rev676`** (no ask: the chord stays grey).
     @Test func commandOptionOTakesAStandingAskFirstThenTheLastChange() async throws {
-        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            // F-L2 (the VX-677 ladder round 1) — STAGING ONLY, assertions unchanged: the ask's note
+            // and the change's book exist, as real ones do (her press now re-reads the place).
+            try await stageNote(db, "asked", title: "asked")
+            try await stageBook(db, "written-book", name: "w")
             let rig = Rig(session)
             defer { rig.door.detach() }
             #expect(!session.commandRouter.isEnabled(.showLastAIChange))
@@ -299,7 +361,11 @@ struct MCPShowOfferFacesTests {
     /// (`.noteVersion`), never the note's editor — moved at once in front, and from an ask by
     /// her take. **RED on `rev675`.**
     @Test func aVersionTargetOpensTheFullSizePage() async throws {
-        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            // F-L2 (the VX-677 ladder round 1) — STAGING ONLY, assertions unchanged: the take half's
+            // version is one of its note's saved versions, as a real ask's is (her press now re-reads
+            // it). The move half never meets the read (the agent road is unchanged).
+            try await stageVersion(db, note: "n2", version: "v2")
             let rig = Rig(session, standing: .frontmostMainWindow)
             defer { rig.door.detach() }
             let target = MCPShowTarget.version(noteID: "n1", versionID: "v1")
