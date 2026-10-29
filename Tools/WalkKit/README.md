@@ -373,7 +373,12 @@ signed in to the account first (a signed-in app mints challenge rows on its own,
 - **The fresh birth seeds NOTHING** while the dev scope's seed marks stand (the bullet above): step 0 exercises an EMPTY
   fresh store. A first-launch measurement (VX-704) must delete the marks first.
 - **The words guard's `-25200` withholds every capture on some builds** (VX-658's class): a stopped run's evidence is its
-  log, `prod-state-at-stop.log` and a full-screen diagnostic shot taken by the investigator.
+  log, `prod-state-at-stop.log` and a full-screen diagnostic shot taken by the investigator. On macOS 27.0.1 it can NEVER
+  pass while a text view is on screen (F-CW-1, VX-677). Never hand-roll a relaxed copy; the kit fix is ticketed.
+- **Two folders are named `Variorum-dev`.** The dev slot is the DEBUG container's
+  (`~/Library/Containers/io.lduarte.Variorum.debug/…/Application Support/Variorum-dev/`). Her REAL container
+  (`io.lduarte.Variorum`) also holds a July-era relic `Variorum-dev/` beside her live `Variorum/`. The 0.10.6 walk renamed
+  the relic first; G7 refused fail-closed and the rename was reversed. Never touch anything in the real container.
 
 **guard.sh exit 8** (VX-536): the on-this-Space check compiles its `wl2` helper from `wl2.swift` when absent or stale and
 REFUSES when it cannot (or the helper answers nonsense) — it never passes silently. The pin:
