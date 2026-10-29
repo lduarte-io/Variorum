@@ -309,7 +309,8 @@ struct PrinceSeedTests {
         let text = PB.aboutThisText
         #expect(text.contains("Help \u{25B8} " + CapabilityRegistry.capability(.restorePrinceBook).verb))
         #expect(CapabilityRegistry.capability(.restorePrinceBook).verb == "Restore \u{201C}the prince\u{201D}")
-        #expect(text.contains("\u{201C}\(PB.tagName)\u{201D}"), "the tag sentence")
+        // Her FINAL text (landed 2026-10-28) deliberately carries no tag
+        // sentence — the old draft's tag expectation retired with it.
         #expect(!text.contains("\n\n"), "no stored blank lines")
         #expect(text.components(separatedBy: "\n").allSatisfy {
             !$0.isEmpty && $0 == $0.trimmingCharacters(in: .whitespaces)
@@ -452,6 +453,28 @@ struct PrinceSeedTests {
                 #expect(try lensPicks(db, noteID: seventeen).map(\.name) == ["marriott 1908", "il principe 1532", "ricci 1903"])
                 #expect(try lensPicks(db, noteID: twentySix).map(\.name) == ["marriott 1908", "il principe 1532", "dacres 1640"])
                 #expect(try lensPicks(db, noteID: two).map(\.name) == ["marriott 1908", "il principe 1532"])
+                // THE SEEDED COMMENTS (her edit-pass ruling): Marriott's
+                // footnote then the editor's note, in gutter order, on
+                // XVIII's against-faith block — and nowhere else in the book.
+                let eighteen = try #require(byTitle["XVIII. Concerning the way in which princes should keep faith"])
+                let xviiiBlocks = try Self.blocks(db, noteID: eighteen, title: "XVIII")
+                let commentRows = try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT bc.block_id, bc.text FROM block_comment bc
+                        JOIN container_block cb ON cb.block_id = bc.block_id AND cb.deleted_at IS NULL
+                        JOIN reading_post rp ON rp.post_id = cb.container_id AND rp.deleted_at IS NULL
+                        WHERE rp.reading_id = ? AND bc.deleted_at IS NULL
+                        ORDER BY bc.created_at, bc.id
+                        """,
+                    arguments: [bookID])
+                let seeded = try #require(PB.seededComments.first)
+                #expect(commentRows.count == seeded.texts.count, "the book's only comments are XVIII's pair")
+                #expect(commentRows.map { $0["text"] as String } == seeded.texts, "footnote first, editor's note second")
+                let anchor = xviiiBlocks[seeded.paragraphIndex].takes[0].blockId
+                #expect(commentRows.allSatisfy { ($0["block_id"] as String) == anchor }, "both on the against-faith block")
+                #expect(seeded.texts.first?.contains("papal authorities") == true
+                    && seeded.texts.last?.contains("Gerber") == true, "the attributed quote, then the answer")
 
                 // THE THIRD TAKES — on their blocks, word for word.
                 for third in PB.thirdTakes {

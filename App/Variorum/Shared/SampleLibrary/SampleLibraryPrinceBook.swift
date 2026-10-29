@@ -168,37 +168,88 @@ nonisolated enum SampleLibraryPrinceBook {
 
     // MARK: - The front note
 
-    // HER EDIT PASS PENDING — the plan's draft section ("The front-note
-    // draft"), VERBATIM in its words; set in the seeded books' typography
-    // (curly quotes and apostrophes, `\u{25B8}` for ▸ — the Sherlock and
-    // Jekyll front notes' own), so the Help door it names is the registry's
-    // spelling exactly (`restorePrinceBook`'s verb; the seed-shape suite
-    // pins the match). Paragraphs are separated by ONE newline, so each lands
-    // as a block with no stored blank line (the Jekyll book's design call 4).
-    // The draft predates R-633-13: it does not mention Dacre's take on the
-    // last block (flagged for her pass in the U2 record). It also predates
-    // R-633-18 (U2b): its two-copies paragraph is ruled OUT — her edited text,
-    // which drops it, replaces this whole constant in a later commit.
+    // HER FINAL TEXT (the edit pass of 2026-10-28, landed verbatim in its
+    // words; the typography normalized to the seeded books' own — curly
+    // quotes and apostrophes, `\u{25B8}` for ▸, single spacing — exactly as
+    // she blessed: "normalization of those items is good"). The Help door it
+    // names is the registry's spelling (`restorePrinceBook`'s verb; the
+    // seed-shape suite pins the match). Paragraphs are separated by ONE
+    // newline, so each lands as a block with no stored blank line (the
+    // Jekyll book's design call 4). The easter-egg paragraph's claims are
+    // fact-checked (the plan's fact-check round: the Testina's dates, the
+    // XVIII omissions collated in our own sources); the tutorial-restore
+    // sentence is her knowing forward-promise on VX-292 (the plan's U3). The
+    // two-copies paragraph is ruled OUT (R-633-18).
     static let aboutThisText = """
-        \u{201C}The Prince\u{201D} by Niccol\u{F2} Machiavelli, written around 1513 and published in \
-        1532. Every note here is a chapter, and every paragraph carries two takes: W. K. \
-        Marriott\u{2019}s 1908 English translation, which the book opens on, and \
-        Machiavelli\u{2019}s Italian beneath it \u{2014} open a paragraph\u{2019}s fan to read the \
-        other take, or choose it and the page reads Italian from then on.
-        A few of the most quoted lines \u{2014} whether it is better to be loved or feared, the lion \
-        and the fox \u{2014} carry a third take from Luigi Ricci\u{2019}s translation, three \
-        renderings of one sentence side by side.
-        The English comes from Project Gutenberg\u{2019}s edition (eBook #1232), the Italian from \
-        Wikisource\u{2019}s transcription of an 1814 printing, and Ricci from eBook #57037; all \
-        three are in the public domain, with headers and licence matter removed and the hard line \
-        wrapping undone so each paragraph is one block.
-        If you use Variorum on more than one device, this book can appear twice: each device sets \
-        it up on its own. To keep just one, delete the copy you don\u{2019}t want \u{2014} it goes \
-        to the Trash like anything else.
-        Every note is tagged \u{201C}\(tagName)\u{201D} \u{2014} delete the book, or everything \
-        wearing that tag, and it will not come back. For a fresh copy later, choose Help \u{25B8} \
-        Restore \u{201C}\(name)\u{201D}.
+        This book is \u{201C}The Prince\u{201D} by Niccol\u{F2} Machiavelli, seeded here as an \
+        example to show some of the capabilities of Variorum. True to the definition of variorum, \
+        this is a literary work with variant readings across different languages and times. Every \
+        chapter is a single note within the book and every paragraph carries at least two takes: \
+        W. K. Marriott\u{2019}s 1908 English translation, which is the chosen take throughout the \
+        book, and Machiavelli\u{2019}s original Italian beside it. While it was originally \
+        published in 1532, the Italian version is from an 1814 printing.
+        One easter egg in chapter XVIII shows how editions can differ in substance. The Italian \
+        text here shares the same omissions as the clandestine printings \u{2014} the \
+        \u{201C}Testina\u{201D} \u{2014} made while the book was banned in the 1600s. One such \
+        omission is the missing \u{201C}contro alla fede\u{201D} (\u{201C}against \
+        faith\u{201D}) in Machiavelli\u{2019}s list of what a prince must be ready to work \
+        against. A few lines later, Machiavelli announces that a prince should *seem* to have \
+        five qualities, but in Italian only four are listed \u{2014} faith is omitted again.
+        Feel free to explore all the different ways to work with the same text \u{2014} the \
+        tutorial walks you through much of it, but you can read these notes in the context of \
+        their book or click into each note to experience the Write, Takes, Read, Lenses, \
+        Compare, and Blocks modes. If you dismissed the tutorial offer, you can always begin it \
+        under Help in the top menu bar.
+        Each chapter has at least two saved lenses: in Lenses, the column titled \
+        \u{201C}il principe 1532\u{201D} lets you see the whole chapter in Italian beside the \
+        English. If you prefer to read in Italian, the Lenses page allows you to make that lens \
+        the chosen reading. Some of the most famous lines \u{2014} whether it is better to be \
+        loved or feared, for example \u{2014} also have a third take from Luigi Ricci\u{2019}s \
+        1903 translation, and the closing stanza of Petrarch has Edward Dacres\u{2019} 1640 \
+        verse due to Marriott\u{2019}s decision to keep that stanza in Italian.
+        Credits: Marriott\u{2019}s English translation comes from Project Gutenberg\u{2019}s \
+        eBook #1232 (published 1908), the Italian from Wikisource\u{2019}s transcription of an \
+        1814 printing, Ricci (first published 1903) from Project Gutenberg\u{2019}s eBook \
+        #57037, and Dacres\u{2019} verse from Marriott\u{2019}s own apparatus. All works are in \
+        the public domain, with headers and license matter removed and the line wrapping edited \
+        so each paragraph is one block. If you delete the book and want it back, it can always \
+        be restored via the top bar\u{2019}s Help \u{25B8} Restore \u{201C}\(name)\u{201D}. \
+        Restarting the tutorial will restore this book to its default state as well.
         """
+
+    // MARK: - The seeded comments (her ruling at the edit-pass sitting,
+    // 2026-10-28: Marriott's footnote and the editor's answer, two comments
+    // in order on the block where the easter-egg hunt ends — "having
+    // Marriott's footnote and then our own response in two comments shows
+    // how comment chains can function". The quote is her trim of footnote
+    // [4] (the raw source's words; his papal-sanction claim stays INSIDE the
+    // attributed quote); the editor's note is her sentence with the (a)
+    // citation form she picked ("study of the Testina editions").
+
+    struct SeededComments: Sendable, Equatable {
+        var noteTitle: String
+        var paragraphIndex: Int
+        /// In gutter order — minted a second apart on the book's clock.
+        var texts: [String]
+    }
+
+    static let seededComments = [
+        SeededComments(
+            noteTitle: "XVIII. Concerning the way in which princes should keep faith",
+            paragraphIndex: 3,
+            texts: [
+                "Marriott\u{2019}s 1908 footnote: \u{201C}It is noteworthy that these two "
+                    + "phrases, \u{2018}contro alla fede\u{2019} and \u{2018}tutto fede,\u{2019} "
+                    + "were omitted in the Testina edition, which was published with the "
+                    + "sanction of the papal authorities. It may be that the meaning attached "
+                    + "to the word \u{2018}fede\u{2019} was \u{2018}the faith,\u{2019} i.e. the "
+                    + "Catholic creed.\u{201D}",
+                "Editor\u{2019}s note: it should be noted that modern scholars dispute "
+                    + "Marriott\u{2019}s claim of papal sanction. Refer to Adolph "
+                    + "Gerber\u{2019}s 1906 study of the Testina editions to discover more "
+                    + "about this history.",
+            ])
+    ]
 
     // MARK: - The English verse, line-broken again (the plan's ledger item 8)
 
@@ -432,6 +483,8 @@ nonisolated enum SampleLibraryPrinceBook {
         var versesRestored = 0
         /// The saved lenses minted, by name, in minting order.
         var lenses: [String] = []
+        /// The seeded comments minted (the XVIII footnote pair).
+        var comments = 0
         /// Non-empty only when something did not match (and was skipped):
         /// a DEBUG build has already stopped on it.
         var skipped: [String] = []
@@ -445,8 +498,9 @@ nonisolated enum SampleLibraryPrinceBook {
     /// paragraphs. The English each block holds is read from the STORE (the
     /// same ambient database the facade writes through — `Takemania`'s
     /// `liveActiveFan` precedent), never assumed from the resource. Its last
-    /// act is the note's saved lenses (R-633-15), so a note present implies
-    /// its takes AND its lenses present (cancellation lands only between
+    /// acts are the note's saved lenses (R-633-15) and XVIII's seeded
+    /// comment pair (her edit-pass ruling), so a note present implies its
+    /// takes, lenses AND comments present (cancellation lands only between
     /// turns).
     ///
     /// A mismatch never writes and never crashes a Release seed: a missing
@@ -535,6 +589,26 @@ nonisolated enum SampleLibraryPrinceBook {
                 _ = try ops.saveLens(post: noteID, name: lens.name, picks: lens.picks, undoLabel: undoLabel)
             }
             report.lenses.append(lens.name)
+        }
+        // The seeded comments (her edit-pass ruling): minted LAST, a second
+        // apart from ten seconds past the lenses' stamps, so the gutter
+        // reads footnote-then-editor's-note on every device. Same skip
+        // discipline as the takes: a block that is not where the table says
+        // skips loudly in DEBUG and quietly in Release.
+        for entry in seededComments where entry.noteTitle == title {
+            guard blockIDs.indices.contains(entry.paragraphIndex) else {
+                skip("\(title): no ¶\(entry.paragraphIndex) for the seeded comments")
+                continue
+            }
+            let blockID = blockIDs[entry.paragraphIndex]
+            for (offset, text) in entry.texts.enumerated() {
+                try withDependencies {
+                    $0.date = .constant(base.addingTimeInterval(Double(10 + offset)))
+                } operation: {
+                    _ = try ops.addBlockComment(to: blockID, text: text)
+                }
+                report.comments += 1
+            }
         }
         return report
     }
