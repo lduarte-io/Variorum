@@ -1170,9 +1170,19 @@ struct BookIndexToOutlineBlockLandingTests {
         }
     }
 
-    /// **The guard — minimal, never a forced top.** A carried block ALREADY on
-    /// the page when the note's row lands (block 2, near the row's top): the
-    /// page does not move for it — the row stays at the top. Green on both.
+    /// **The guard — minimal, never a forced top; and the row first.** A
+    /// carried block ALREADY on the page when the note's row lands (block 2,
+    /// near the row's top): the page does not move for it — the row stays at
+    /// the top.
+    ///
+    /// RED ON THE AS-BUILT VX-680 HAND-OVER (`vx677-b2/revB`; observed red at
+    /// window vx677-b2 on post61 and rev662, `row-top=97`): in this small
+    /// book the column briefly measures shorter than the page while the
+    /// editor mounts, the page clamps and the row falls 97 pt back down; the
+    /// block, still on the page, read as home and the row was never corrected
+    /// (the VX-677 dispositions record, D-2). GREEN on `rev680` (no block
+    /// home — the row's own correction) and on the fix (the row first while
+    /// the block fits below it — `OutlineBlockLanding.homeIsTheRow`).
     @Test func aBlockAlreadyOnThePageMovesNothing() async throws {
         try await withLongNoteBook { session, db, book in
             let x = book.postIDs[0]

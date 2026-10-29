@@ -19,8 +19,10 @@
 //  editor has laid the block out, the landing aims and reports the note's row
 //  exactly as before (the row must realize and mount its editor first); once
 //  the block's geometry exists, the row's reports carry the block's residual
-//  and a correction reveals it. Same hold, same quiet interval, same budget,
-//  same watchdog, same signpost — no second loop.
+//  and a correction reveals it — UNLESS the block would be wholly on the page
+//  with the row at its top, when the home stays the row's top (the row first —
+//  `homeIsTheRow`, the VX-677 dispositions record's D-2). Same hold, same
+//  quiet interval, same budget, same watchdog, same signpost — no second loop.
 //
 //  ── THE TEXTKIT 2 RAILS (TEXTKIT2_NOTES §3, binding) ────────────────────
 //  - **No layout is ever forced.** The block's frame is read with
@@ -71,6 +73,24 @@ nonisolated enum OutlineBlockLanding {
             rowFrame: CGRect(x: 0, y: targetTop, width: 1, height: targetHeight),
             viewportHeight: viewportHeight)
     }
+
+    /// **The row first — which home the landing converges on** (P-680-2(a):
+    /// *"reached inside the arrival's one landing (the row first, the block
+    /// within about a second)"*; the VX-677 dispositions record, D-2). While
+    /// the reveal's target would be wholly on the page WITH THE NOTE'S ROW AT
+    /// THE PAGE'S TOP, the home is the ROW's top — the Outline landing exactly
+    /// as it always was, its drift corrected by the row's own `scrollTo` —
+    /// and only a target that would NOT fit below the row homes on its own
+    /// minimal reveal. Without this, a row knocked off its top while the
+    /// block stayed visible (a content collapse that clamps the page) read as
+    /// "home" and was never corrected. `targetTop` and `rowTop` are both
+    /// relative to the page's top edge; the answer depends only on where the
+    /// target sits INSIDE the row, so no scroll can flip it.
+    static func homeIsTheRow(
+        targetTop: CGFloat, targetHeight: CGFloat, rowTop: CGFloat, viewportHeight: CGFloat
+    ) -> Bool {
+        residual(targetTop: targetTop - rowTop, targetHeight: targetHeight, viewportHeight: viewportHeight) == 0
+    }
 }
 
 /// What the live editor can say about the carried block right now.
@@ -85,6 +105,15 @@ struct OutlineBlockSighting {
     var residual: CGFloat {
         OutlineBlockLanding.residual(
             targetTop: topInViewport, targetHeight: target.height, viewportHeight: viewportHeight)
+    }
+
+    /// The row first (`OutlineBlockLanding.homeIsTheRow`): with the note's row
+    /// `rowTop` below the page's top edge, is the landing's home still the
+    /// row's top?
+    func homeIsTheRow(rowTop: CGFloat) -> Bool {
+        OutlineBlockLanding.homeIsTheRow(
+            targetTop: topInViewport, targetHeight: target.height, rowTop: rowTop,
+            viewportHeight: viewportHeight)
     }
 
     /// The block's place in `textView`, read from layout TextKit ALREADY

@@ -1827,12 +1827,15 @@ struct BookView: View {
             // instead of correcting into an immovable page until the watchdog.
             reach: { [box] in Self.outlineReach(box) }
         ) { [box] id in
-            // VX-680: homing on a block the live editor has laid out, the act
-            // is the block's minimal reveal (AppKit's own scroll up the clip
-            // chain — the caret road the inline editor already scrolls this
-            // page by); until then, and on every other landing, the row's
-            // unanimated top.
-            if let seen = Self.blockSighting(box, anchor: id, session: session) {
+            // VX-680: homing on a block the live editor has laid out that would
+            // NOT fit below the row at the page's top, the act is the block's
+            // minimal reveal (AppKit's own scroll up the clip chain — the caret
+            // road the inline editor already scrolls this page by); until then,
+            // while the block fits below the row (the row first — D-2, the same
+            // rule the report below asks), and on every other landing, the
+            // row's unanimated top.
+            if let seen = Self.blockSighting(box, anchor: id, session: session),
+               !(box.page.tops[id].map { seen.sighting.homeIsTheRow(rowTop: $0) } ?? false) {
                 seen.textView.scrollToVisible(seen.sighting.target)
             } else {
                 proxy.scrollTo(id, anchor: .top)
@@ -1935,16 +1938,23 @@ struct BookView: View {
         // block's minimal-reveal residual once the live editor has laid it out
         // (the row's own report is the moment anything that moves the block on
         // the page has moved: her page's scroll, the row's top, the editor's
-        // height). Every other report — every other row, every other landing —
-        // is the row's top, exactly as before. Read only for the target row
-        // while it lands (P1: one block's fragments, never per row).
+        // height) — unless the block would be wholly on the page with the row
+        // at its top: then the home is still the ROW's top, and a row knocked
+        // off it (a content collapse that clamps the page) is corrected as
+        // every Outline landing's is (the row first — the VX-677 dispositions
+        // record, D-2; the act above asks the same rule). Every other report —
+        // every other row, every other landing — is the row's top, exactly as
+        // before. Read only for the target row while it lands (P1: one block's
+        // fragments, never per row).
         if landing.anchor == anchorID, landingBox.blockHome?.anchor == anchorID,
            let seen = Self.blockSighting(landingBox, anchor: anchorID, session: session) {
+            let rowFirst = seen.sighting.homeIsTheRow(rowTop: top)
             #if DEBUG
             BookOutlineGeometry.trace.append(
-                "\(anchorID) block-home residual=\(Int(seen.sighting.residual)) row-top=\(Int(top))")
+                "\(anchorID) block-home residual=\(Int(seen.sighting.residual)) row-top=\(Int(top))"
+                    + (rowFirst ? " row-first" : ""))
             #endif
-            landing.noteTop(anchorID, seen.sighting.residual)
+            landing.noteTop(anchorID, rowFirst ? top : seen.sighting.residual)
             return
         }
         landing.noteTop(anchorID, top)

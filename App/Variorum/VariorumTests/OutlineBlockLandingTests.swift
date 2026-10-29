@@ -58,4 +58,52 @@ struct OutlineBlockLandingTests {
         #expect(OutlineBlockLanding.residual(targetTop: 900, targetHeight: 1_000, viewportHeight: 700) == 900,
                 "a target taller than the page: its top to the head")
     }
+
+    /// **The row first** (P-680-2(a)'s "the row first, the block within about
+    /// a second"; the VX-677 dispositions record, D-2 — anomaly B): while the
+    /// target would be wholly on the page with the note's ROW at the page's
+    /// top, the landing's home is the row's top (its drift corrected, as every
+    /// Outline landing's is); only a target that would not fit below the row
+    /// homes on its own minimal reveal. Every value is bound to a local before
+    /// an `#expect` reads it (VX-692).
+    ///
+    /// RED ON OLD (`vx677-b2/revB` — the rule answering "never the row", the
+    /// as-built hand-over): the four "the row's top" lines.
+    @Test func theRowComesFirstWhileTheBlockFitsBelowIt() {
+        let page: CGFloat = 774
+        // The guard's own shape (vx677-b2 post61: `block-home residual=0
+        // row-top=97`): block 2 sits ~130 pt below its row's top, the row was
+        // knocked 97 pt down by a content clamp, and the block is still on the
+        // page — so the minimal reveal alone called it home and the row stayed
+        // 97 pt low. With the row at the top it fits: the home is the row's top.
+        let knockedDown = OutlineBlockLanding.homeIsTheRow(
+            targetTop: 227, targetHeight: 70, rowTop: 97, viewportHeight: page)
+        #expect(knockedDown, "the guard's shape: the row's top is the home — the 97 pt is corrected")
+        let atHome = OutlineBlockLanding.homeIsTheRow(
+            targetTop: 130, targetHeight: 70, rowTop: 0, viewportHeight: page)
+        #expect(atHome, "the row at the top, the block below it on the page: home is the row (nothing moves)")
+        let flushAtTheFoot = OutlineBlockLanding.homeIsTheRow(
+            targetTop: 674, targetHeight: 100, rowTop: 0, viewportHeight: page)
+        #expect(flushAtTheFoot, "the block's bottom exactly at the foot with the row at the top still fits")
+        // Where the block sits inside the row decides — never where the page
+        // stands: the same row and block scrolled 497 pt answer the same.
+        let scrolled = OutlineBlockLanding.homeIsTheRow(
+            targetTop: 227 - 497, targetHeight: 70, rowTop: 97 - 497, viewportHeight: page)
+        #expect(scrolled, "a scroll never flips which home applies (the act cannot oscillate)")
+
+        // A block that would NOT fit below the row homes on its own minimal
+        // reveal — VX-680 as built (the far block's `residual=1660`).
+        let pastTheFoot = OutlineBlockLanding.homeIsTheRow(
+            targetTop: 675, targetHeight: 100, rowTop: 0, viewportHeight: page)
+        #expect(!pastTheFoot, "one point past the foot with the row at the top: the block's own reveal")
+        let farBlock = OutlineBlockLanding.homeIsTheRow(
+            targetTop: 2_360, targetHeight: 74, rowTop: 97, viewportHeight: page)
+        #expect(!farBlock, "the far block (2,263 pt below its row): the block's minimal reveal")
+        let deepButVisible = OutlineBlockLanding.homeIsTheRow(
+            targetTop: 300, targetHeight: 50, rowTop: -500, viewportHeight: page)
+        #expect(!deepButVisible,
+                "a block on the page only because the page stands deep in the note: its own reveal (residual 0 — nothing moves)")
+        let farResidual = OutlineBlockLanding.residual(targetTop: 2_360, targetHeight: 74, viewportHeight: page)
+        #expect(farResidual == 1_660, "…and that reveal's number is byte-unchanged (2,434 − 774)")
+    }
 }
