@@ -1034,7 +1034,8 @@ struct BookView: View {
     /// the words; idle it takes no hits.
     private var pageFootReceipt: some View {
         let hosting = quietReceiptHome == .pageFoot
-        let speaking = hosting && session.status.quietLine != nil
+        // VX-676: the line speaks a receipt, or a standing ask to show her something.
+        let speaking = hosting && session.status.lineItem != nil
         return QuietReceiptLine(status: session.status, tokens: tokens)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
