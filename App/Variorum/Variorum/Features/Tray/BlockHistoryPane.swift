@@ -1110,6 +1110,11 @@ struct BlockHistoryPane: View {
 /// resting row. A press opens the row in place: a LONGER capped preview of
 /// the moment (paragraphs kept), the details words, and the row's other doors
 /// ("read in full", the name door). PROVISIONAL anatomy (P-440-9).
+///
+/// **VX-674 (her ruling on P-440-9's flagged gap):** an UNNAMED commit's
+/// resting line carries its first words, muted, after the stamp
+/// (`restingWords`) — so the line is when · the name, or else the moment's
+/// first words · the kind's glyph. A named commit keeps its name alone.
 nonisolated enum CommitRowFace {
     /// **The open row's preview cap** — characters, cheap, far past the lines
     /// the open row draws (`expandedLines`), so the view's tail truncation is
@@ -1128,6 +1133,43 @@ nonisolated enum CommitRowFace {
         let body = text.drop { $0.isWhitespace }
         guard !body.isEmpty else { return BlockPastCopy.emptyTake }
         return String(body.prefix(expandedCap))
+    }
+
+    /// **VX-674 (her ruling on P-440-9's flagged gap, QUESTIONS #249) — an
+    /// UNNAMED commit's resting words.** At rest an unnamed commit was a time
+    /// and (if quiet) a glyph — none of her words until she opened it. Ruled:
+    /// the resting line carries a few words of the moment as a MUTED preview
+    /// after the stamp; a NAMED commit keeps its name alone (nil here); the
+    /// quiet ◦ is unchanged.
+    ///
+    /// Cheap and bounded, from the row's already-loaded text (P1 — a cost
+    /// of the moment's first `restingCap` characters, never its length):
+    /// leading blank lines and spaces are dropped, the FIRST LINE only (a
+    /// second paragraph never reaches the resting line — the open row and the
+    /// read-in-full sheet carry the rest), capped by `Character` so a cut can
+    /// never split a grapheme, trailing spaces trimmed. The face appends NO
+    /// ellipsis of its own (VX-144's "…had.…" lesson): the view's one-line
+    /// tail truncation is the only one, so how many words show is the
+    /// layout's. An empty moment says so in the open row's own words
+    /// (PROVISIONAL P-674-1).
+    static func restingWords(_ commit: CommitPoint) -> String? {
+        guard SavepointRowFace.name(commit) == nil else { return nil }
+        return restingPreview(commit.text)
+    }
+
+    /// The resting preview's character cap — far past what one line of the
+    /// inspector column shows (≈ 40 characters at its default width), so the
+    /// layout's truncation is what the eye meets; the bound is the cost's.
+    static let restingCap = 160
+
+    /// The resting preview over a moment's text (see `restingWords`).
+    static func restingPreview(_ text: String) -> String {
+        let body = text.drop { $0.isWhitespace }
+        guard !body.isEmpty else { return BlockPastCopy.emptyTake }
+        let line = body.prefix(restingCap).prefix { !$0.isNewline }
+        var words = String(line)
+        while let last = words.last, last.isWhitespace { words.removeLast() }
+        return words
     }
 
     /// **The kind's glyph on the resting line** — a QUIET commit's mark; a
@@ -1276,8 +1318,9 @@ struct CommitRowView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// **THE RESTING LINE** — when · name · glyph, the press that opens the
-    /// row, and Restore at the end.
+    /// **THE RESTING LINE** — when · name (unnamed: the moment's first words,
+    /// muted — VX-674) · glyph, the press that opens the row, and Restore at
+    /// the end.
     private var restingLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             // Row 64's generous-target rule: the whole line (but Restore)
@@ -1294,6 +1337,17 @@ struct CommitRowView: View {
                         Text(name)
                             .font(Self.nameFont(tokens))
                             .foregroundStyle(tokens.ink)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    } else if let words = CommitRowFace.restingWords(commit) {
+                        // VX-674: an unnamed moment's first words, muted —
+                        // her prose, so never case-folded by the voice's
+                        // chrome rule; one line, the layout's truncation the
+                        // only ellipsis (the stamp and the glyph keep their
+                        // widths — this is what yields).
+                        Text(words)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
