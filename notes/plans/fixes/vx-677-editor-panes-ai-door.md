@@ -692,6 +692,19 @@ Three items, trace FIRST on every one:
 
 **Deliverables:** dispositions written under each item in the DISPOSITIONS RECORD; the affected pins' products rebuilt in place (name which); the re-run leg's expected counts updated for batch 3's window (the 34-set and rev664's expectation if the Lenses pin was repaired or retired; post61's if the guard pin changed); the DIAG line gone; ledger untouched (these are batch 1/2 facts, already flipped); everything pushed.
 
+### DISPOSITIONS RECORD (implementer: Opus, fresh session, 2026-10-28)
+
+**NOT DONE (first line, kept current):** everything below is IN-PROGRESS — no disposition is written yet; no pin or production line has changed; no product is rebuilt. NO `xcodebuild test`, NO app launch, NO stage in this session (headless only). No behavioural revert is in flight.
+
+*Read in this session's own context before any trace (never delegated): CLAUDE.md + its auto-loaded canon; this file in full (the rails, every batch record, both windows' verdicts, both walks, F-B3-1's repro, this brief); `notes/SessionResiliencyProtocol.md`; `notes/TEXTKIT2_NOTES.md` in full (the VX-246 and 18l findings — the estimated-offset class).*
+
+**LIVE STATUS** (flipped in the same commit as each piece; every unverified claim PENDING)
+- D-0 — preflight + this record: DONE (this commit).
+- D-1 — anomaly A (the hollow mounted Lenses pin; R-B1's answer; the DIAG line): NOT-STARTED.
+- D-2 — anomaly B (the 97-pt guard; F-B3-1 checked first): NOT-STARTED.
+- D-3 — F-B2W-1 (the Study mis-landing): NOT-STARTED.
+- D-4 — rebuilt products + the re-run leg's expected counts: NOT-STARTED.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
