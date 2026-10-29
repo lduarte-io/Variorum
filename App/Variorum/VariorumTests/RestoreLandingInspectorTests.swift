@@ -179,8 +179,10 @@ struct RestoreLandingInspectorTests {
         return hosting
     }
 
-    private static func editor(_ hosting: NSView) -> EditorTextView? {
-        views(EditorTextView.self, in: hosting).first
+    /// Write's own text view — the editor model's (in the shell there are
+    /// other text surfaces in the window), else the first in the tree.
+    private static func editor(_ w: World, _ hosting: NSView) -> EditorTextView? {
+        writeModel(w)?.textView ?? views(EditorTextView.self, in: hosting).first
     }
 
     /// The Write detail's EditorViewModel (the router's active editor).
@@ -233,7 +235,7 @@ struct RestoreLandingInspectorTests {
     /// history door, answered by the mounted detail's INSPECTOR.
     private func stage(_ w: World, _ window: NSWindow, _ hosting: NSView) async throws -> Staged {
         let arrived = await Self.settle(window, hosting) {
-            guard let e = Self.editor(hosting) else { return false }
+            guard let e = Self.editor(w, hosting) else { return false }
             return e.string.contains(Self.prose(w.blocks.count)) && w.router.activeMode == .write
         }
         try #require(arrived, "fixture: Write mounts and fills")
@@ -245,7 +247,7 @@ struct RestoreLandingInspectorTests {
 
         // Her caret at the END of the block, and words typed there through
         // the editor's own road — the coordinator dirty, as on the walk.
-        let foundEditor = Self.editor(hosting)
+        let foundEditor = Self.editor(w, hosting)
         let editor = try #require(foundEditor)
         window.makeFirstResponder(editor)
         let range = try await blockRange(w, Self.targetIndex)
@@ -264,10 +266,18 @@ struct RestoreLandingInspectorTests {
         let caretBlock = writeModel.caretBlockID
         #expect(caretBlock == target, "fixture: her caret is in the block she will restore")
         writeModel.requestBlockHistory()
+        // The pane is the INSPECTOR's: the router took the request (Write's own
+        // fallback sheet — `blockHistoryRequest` — never armed) and no sheet
+        // hangs on the window. Session-scoped facts only, so a parallel
+        // suite's detail on the process-wide `PostDetailOracle` cannot answer.
         let paneUp = await Self.settle(window, hosting) {
             BlockHistoryPaneOracle.model(forPost: w.postID)?.blockID == target
-                && PostDetailOracle.inspectorPanel?.isBlockHistory == true
+                && writeModel.blockHistoryRequest == nil
+                && window.attachedSheet == nil
         }
+        let inspectorSaid = PostDetailOracle.inspectorPanel.map { "\($0)" } ?? "nil"
+        print("VX668-PIN door: paneUp=\(paneUp) fallbackArmed=\(writeModel.blockHistoryRequest != nil) "
+            + "sheet=\(window.attachedSheet != nil) PostDetailOracle.inspectorPanel=\(inspectorSaid)")
         try #require(paneUp, "fixture: the pane stands in the detail's INSPECTOR, on her block")
         let foundHistory = BlockHistoryPaneOracle.model(forPost: w.postID)
         let history = try #require(foundHistory)
@@ -293,7 +303,7 @@ struct RestoreLandingInspectorTests {
             (Self.writeModel(w)?.restoreLandings ?? 0) > s.before
         }
         let restored = try await blockRange(w, Self.targetIndex)
-        let caret = Self.editor(hosting)?.selectedRange().location ?? -1
+        let caret = Self.editor(w, hosting)?.selectedRange().location ?? -1
         let parcelLeft = w.router.pendingRestoreLanding?.id.uuidString.prefix(8) ?? "nil"
         let lastLanding = Self.writeModel(w)?.lastRestoreLanding?.offset ?? -1
         let sheetGone = window.attachedSheet == nil
