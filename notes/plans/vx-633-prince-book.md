@@ -374,3 +374,5 @@ Cross-model flow: each finding's agree/dispute line below returns to the reviewe
 
 ### Commits (this ladder's fixes, all pushed to `vx-633-prince-book`)
 147172c85 record opened · 1952505be F1 · e4c8d6b5e F2 · 3c67839d4 F3 · fae8220d5 F4 · da4cae78c F5 · (this record's close).
+
+**VERIFICATION WINDOW (vx-633-fixes @f475e104b): reverts starting** — the four LADDER R1 FIXES recipes run now, one at a time, F1 → F2 (sim side, interleaved greens) then F3 → F4 (Mac side); the pre-revert state is the committed tree; results land here.
