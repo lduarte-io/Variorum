@@ -40,8 +40,18 @@ wherever they need to be, that things are all set for a new coordinator".
      project)" line.
    - The commit-msg hook that strips AI trailers for every worktree. The classifier refused it to vx-664, so it's your
      hand or nobody's.
-5. **Disk.** Free space was 39 GiB at your close-out word. After the sweep it is **PENDING-DF**. What was cleared is listed
-   below.
+5. **Disk.** Free space was 39 GiB at your close-out word. After the sweep it is **94 GiB**. What was cleared is listed
+   below. Two things are yours to decide:
+   - `~/Library/Developer/Variorum/Releases/` holds 4.3 GB: every release's archive and dSYMs from 0.9.0 to 0.10.6, plus
+     the feed. Those dSYMs are what symbolicate a crash report from that build. I kept them all. Pruning the 0.9.x ones
+     would free about 2.2 GB.
+   - The classifier REFUSED my deletion of seven branches that are already merged into main. You can run it if you want:
+     `git branch -d vx-177-cards-icon vx-177-jadeite-icon vx-7-13s-voice-onboarding vx-7-handoff-finals
+     vx-99-post-merge-review vx-99-pro-castle-apple-wrap` and `git push origin --delete vx-156-grant-ux-design
+     vx-177-cards-icon vx-177-jadeite-icon vx-7-13s-voice-onboarding vx-7-handoff-finals vx-99-post-merge-review
+     vx-99-pro-castle-apple-wrap`. Each one is `--is-ancestor` of main, checked 10-29.
+   - Still open for you: the coordinator handoff PRs #203 (this one), #195, #175 and #168.
+   - `vx-105-readme-letter` (unmerged, touched 10-29) is someone's live work, so I left it.
 6. **The stage** is released, and nobody holds it. The next coordinator starts from the skill (updated in this PR) and the
    memory index.
 
@@ -119,11 +129,51 @@ re-claimed at 21:45:53), **0 steals, 0 forced releases**, and **1 renew** (the 0
 
 ## Cleanup done at close
 
-PENDING-CLEANUP: worktrees, branches, DerivedData (each run's, the main worktree's `App/Variorum/DerivedData`), walk
-debris, dev-store copies, `/tmp`, and A1 pruning, each with its size.
+Every item was verified on disk at close.
+
+**Worktrees and branches.** `variorum-vx-678`, `variorum-vx-633` and `variorum-vx-677` are removed, and the branches
+`vx-678-…`, `vx-633-prince-book`, `vx-703-walk-p4-wait` and `vx-677-…` are deleted locally and on origin. Each session did
+its own; the classifier allowed theirs. Only `~/dev/variorum` (main) and this handoff's `variorum-coord-1027b` remain.
+Remove the latter after you merge #203.
+
+**Build output.**
+- VX-677's worktree DerivedData, about 60 GB. vx-664 freed 29 GB mid-run and the rest went with the worktree.
+- The main worktree's `App/Variorum/DerivedData/`: `release/` (1.4 GB), `vx510/` (the walk app, 1.9 GB), and
+  `first-run-walk/`'s run folders and debris. I kept `first-run-walk/bin` (the walk's helpers) and `prod-reset/` (4 KB).
+  The next release rebuilds the rest.
+- No orphan global DerivedData.
+
+**Copies and scratch.**
+- Dev-store copies: VX-678's and VX-633's slot copies, deleted at their merges.
+- `/tmp/claude-501`: vx-669 cleared about 2.5 GB and vx-664 its own. I cleared closed VX-439's 2.5 GB scratchpad (Swift
+  probe builds only). Total now 153 MB.
+
+**Settings and safety copies.**
+- The Debug defaults scrub at your word: 2,622 per-note keys. The domain is 274 keys now, and the hosts re-grow it (VX-695).
+- A1: only `variorum-a1-0.10.6-release-20261029T124534Z` remains.
+
+**For your eye.** `/Users/Shared/vx677-walk-shots/` (251 MB, 555 PNGs): VX-677's walk films and the VX-572 Study shots,
+trimmed by vx-664 to images only. Delete it when you've looked.
 
 ## Process notes for the next coordinator
 
-- **The dev store (e11e5233), as of close:** PENDING-POSTURE. Its content is the agents' (your rule).
+- **The dev store (e11e5233), as of close.** Its content is the agents' (your rule).
+  - The library is restored byte-exact after the 0.10.6 walk and HELD by its Oct-20 banner (never press Resume). It is
+    signed out, and the vxtest accounts are at rest.
+  - v1_34 and v1_35 are applied.
+  - App Appearance is Dark (`appearanceChoice` = dark), and macOS is Light.
+  - MCP: the server is OFF and claude-code is approved with no grants. Its key binding may be orphaned and re-binds at the
+    next setup copy. A denied `vx677-walk` client row also stands.
+  - Trash and leftovers:
+    - Home's Trash holds walk residue, Sherlock and its 13 notes among it.
+    - A live `#classics` tag stays in Home.
+    - WK Book sits in the Walk Wing's Trash.
+  - The Debug prefs are 274 keys and include the `the-prince` decline mark.
+- **Step-0 walk traps:** read `Tools/WalkKit/README.md`, "Step-0 environment traps", before any release GO. There are five:
+  - set the whole folder aside;
+  - sign out after a stop;
+  - empty-store seeding;
+  - the words guard;
+  - the two `Variorum-dev` folders.
 - Read `oct27coordinator-resume-state.md` only as history. Start fresh from the skill.
 - The commit trailer: sessions still need reminding. No hook exists yet (item 4 above).
