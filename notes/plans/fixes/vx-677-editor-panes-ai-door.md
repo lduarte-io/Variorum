@@ -1311,6 +1311,7 @@ Deliverables: the WHY + fixes with pins; rebuilt products — `vx677-b5/post` (t
   - `vx677-c/revFW2` (NEW dir, an APFS clone of `vx677-b4/post`): `HelperThemedRoot.body`'s `.environment(theme)` → `// .environment(theme) // VX677-REVERT` — the fix's ONE line.
   - `vx677-b4/rev674` (in place, so claim C's R9 runs on this tree): batch 4's own `rev674.py`, unchanged (one line).
   - Plain-tip products, no revert: `vx677-b5/post` (DONE — `logs/build-post-9.log` IS this tree), `vx677-b3/post`, `vx677-b4/post`, and the walk app `DerivedData/vx677-app` (Debug `build`).
+  - **`vx677-c/rev668` — DONE (this commit):** the clone took a near-full rebuild (the path changed — 2,064 compile steps), `App/Variorum/DerivedData/vx677-c/logs/build-rev668.log` TEST BUILD SUCCEEDED, EXIT 0 (01:37–01:41). Diff +1 −1 in `EditorViewModel.swift` (1 marker), as announced. Restored by `git checkout --`; `git status` empty, no marker. **Binary panel** (`logs/panel-c.py` = the final rebuild's panel + two rows; `logs/panel-rev668.txt`): `EditorViewModel.adoptRewrite` 324 → 142 instructions; every other row equal to `vx677-b5/post`.
 
 #### F-1 — VX-668: THE WHY (answered from the code, the walk's raw lines and two offscreen probes)
 
