@@ -12,6 +12,12 @@ import AppKit
 @MainActor
 final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     weak var session: AppSession?
+    /// VX-657: the services, for the quit door's proceed-path quiesce
+    /// (`AppServices.quiesceForExit` — the purge sweeps and the sync
+    /// chain cancelled-and-awaited before the process exits). Wired
+    /// beside `session`; weak for the same reason — a re-lock composes
+    /// fresh services and the old ones must be collectable.
+    weak var services: AppServices?
 
     /// 18j (her R-Q12): **the app's ONE appearance owner** — follow system ·
     /// light · dark, applied as `NSApp.appearance` so every window, sheet,
@@ -162,7 +168,18 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
             // (its quit closure went with the window), so this road consults
             // the park too — otherwise the one case the park exists for
             // would quit straight past it.
-            return declineQuitIfACaptureStands() ? .terminateCancel : .terminateNow
+            if declineQuitIfACaptureStands() { return .terminateCancel }
+            // VX-657: the quit is really proceeding — quiesce the purge
+            // sweeps and the sync chain (cancel-and-await; nothing exits
+            // over an in-flight GRDB access), then reply. The quiesce runs
+            // AFTER the decline decision only: a declined quit must keep
+            // everything running.
+            guard let services else { return .terminateNow }
+            Task { @MainActor in
+                await services.quiesceForExit()
+                sender.reply(toApplicationShouldTerminate: true)
+            }
+            return .terminateLater
         }
         Task { @MainActor in
             if let pendingEditor { await pendingEditor.value }
@@ -170,8 +187,13 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
             // it is what ARMS the park — so the decision below must come
             // after `finalizeAll`, never before it.
             if let registry { await registry.finalizeAll() }
-            sender.reply(
-                toApplicationShouldTerminate: !self.declineQuitIfACaptureStands())
+            let proceed = !self.declineQuitIfACaptureStands()
+            // VX-657: the destructive retire runs only once the decline
+            // decision says the app is really exiting (`finalizeAll` runs
+            // even when the quit is then DECLINED by the capture park, so
+            // the quiesce must not).
+            if proceed { await self.services?.quiesceForExit() }
+            sender.reply(toApplicationShouldTerminate: proceed)
         }
         return .terminateLater
     }

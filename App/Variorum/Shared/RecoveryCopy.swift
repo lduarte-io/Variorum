@@ -641,6 +641,185 @@ nonisolated enum RecoveryCopy {
         return head + "the app's own cleanup removes the bytes."
     }
 
+    // MARK: Several rows at once (VX-671 — her report: *"i also should be
+    // able to select multiple items to delete."*)
+
+    /// The plural word for rows like `item` — the kind filter's own words,
+    /// lowercased, with a gathering and a saved version named as themselves
+    /// (VX-611; the polish round's ledger row 23), exactly as `rowKind(_:)`
+    /// names one.
+    static func rowKindPlural(_ item: Queries.TrashItem) -> String {
+        if item.isVersion { return "\(VersionsPath.trashRowKind)s" }
+        if item.kind == .book, item.isGathering { return "\(gatheringRowKind)s" }
+        return kindLabel(item.kind).lowercased()
+    }
+
+    /// **What a set of rows IS, kind by kind** — "2 notes, 1 gathering and 3
+    /// blocks". The order is the Empty Trash confirm's (notes, then the saved
+    /// versions read right after them, books, gatherings, blocks, snippet
+    /// groups, originals), every kind present named, so a count can never
+    /// hide a kind it took (row 66's lesson).
+    static func trashCount(_ items: [Queries.TrashItem]) -> String {
+        let order = [
+            rowKind(.note), VersionsPath.trashRowKind, rowKind(.book), gatheringRowKind,
+            rowKind(.block), rowKind(.snippetGroup), rowKind(.preservedOriginal), rowKind(.take),
+        ]
+        var counts: [String: (count: Int, plural: String)] = [:]
+        for item in items {
+            counts[rowKind(item), default: (0, rowKindPlural(item))].count += 1
+        }
+        let parts = order.compactMap { singular -> String? in
+            guard let entry = counts[singular] else { return nil }
+            return entry.count == 1 ? "1 \(singular)" : "\(entry.count) \(entry.plural)"
+        }
+        return naturalList(parts)
+    }
+
+    /// "a", "a and b", "a, b and c".
+    static func naturalList(_ parts: [String]) -> String {
+        switch parts.count {
+        case 0: return ""
+        case 1: return parts[0]
+        default: return parts.dropLast().joined(separator: ", ") + " and " + parts[parts.count - 1]
+        }
+    }
+
+    /// The noun a bulk door counts in: the kind's own plural when every row is
+    /// one kind ("3 notes"), else "things" — the Empty Trash confirm's word.
+    static func trashRowsNoun(_ items: [Queries.TrashItem]) -> String {
+        let kinds = Set(items.map { rowKind($0) })
+        if kinds.count == 1, let first = items.first {
+            return items.count == 1 ? rowKind(first) : rowKindPlural(first)
+        }
+        return items.count == 1 ? "thing" : "things"
+    }
+
+    /// The bulk row's count line ("2 notes and 1 block selected" — the
+    /// Library's "N notes selected", told kind by kind).
+    static func trashSelected(_ items: [Queries.TrashItem]) -> String {
+        "\(trashCount(items)) selected"
+    }
+
+    /// The bulk doors' labels — the one verb each row already wears, with the
+    /// count it acts on. Delete's count is the rows it TAKES (an original
+    /// rides its family and is never taken on its own); its ellipsis is the
+    /// confirm it asks, every time (round 10).
+    static func bulkPutBackLabel(_ items: [Queries.TrashItem]) -> String {
+        "\(putBackVerb) \(items.count) \(trashRowsNoun(items))"
+    }
+
+    static func bulkDeleteNowLabel(_ taken: [Queries.TrashItem]) -> String {
+        "Delete \(taken.count) \(trashRowsNoun(taken)) now\u{2026}"
+    }
+
+    /// **The bulk Delete Now's confirm — the full count by kind, and what it
+    /// does NOT take** (her round-8 count rule and the LR1-4 / G6 principle,
+    /// applied to a selection). One taken row reads exactly as that row's own
+    /// Delete Now confirm. `versionsLeft`: saved versions of the taken notes
+    /// that sit in the Trash UNSELECTED — a note's purge never takes another
+    /// container, so they stay, and the door says so. `ridingOriginals`: the
+    /// preserved originals in the selection — never purged on their own.
+    static func bulkDeleteNowConfirm(
+        _ taken: [Queries.TrashItem], versionsLeft: Int = 0, ridingOriginals: Int = 0
+    ) -> String {
+        var sentence: String
+        if taken.count == 1, let only = taken.first {
+            sentence = deleteNowConfirm(
+                only.kind, isVersion: only.isVersion, savedVersions: versionsLeft,
+                isGathering: only.isGathering)
+        } else {
+            sentence = "Delete these \(taken.count) for good? \(capitalizedFirst(trashCount(taken))) "
+                + "skip the rest of their \(TrashWindow.days) days — there's no putting them back."
+            if versionsLeft > 0 {
+                let one = versionsLeft == 1
+                sentence += " \(versionsLeft) saved version\(one ? "" : "s") of these notes "
+                    + "\(one ? "isn't" : "aren't") taken with them — "
+                    + "\(one ? "it stays" : "they stay") in the Trash with the "
+                    + "\(TrashWindow.days) days \(one ? "it has" : "they have") left."
+            }
+        }
+        if ridingOriginals > 0 {
+            let one = ridingOriginals == 1
+            sentence += " The \(one ? "preserved original" : "\(ridingOriginals) preserved originals") "
+                + "you picked \(one ? "isn't" : "aren't") deleted on \(one ? "its" : "their") own — "
+                + "\(one ? "it rides its family" : "each rides its family")."
+        }
+        return sentence
+    }
+
+    /// The bulk Delete Now's receipt — the per-row receipt's three
+    /// populations (13j ladder B, B3 + R2-M1), over what the act really took
+    /// (re-read at act time). One row reads exactly as that row's own receipt.
+    static func bulkDeleteNowReceipt(
+        _ taken: [Queries.TrashItem], synced: Bool, anyFamilyEverSynced: Bool = false
+    ) -> String {
+        if taken.count == 1, let only = taken.first {
+            return deleteNowReceipt(
+                only.kind, synced: synced, familyEverSynced: anyFamilyEverSynced,
+                isGathering: only.isGathering)
+        }
+        let head = "\(capitalizedFirst(trashCount(taken))) are gone from the app now — "
+        if synced { return head + "the bytes follow once every synced device has caught up." }
+        if anyFamilyEverSynced {
+            return head + "anything that once synced finishes clearing after you "
+                + "next sign in; the rest the app cleans up now."
+        }
+        return head + "the app's own cleanup removes the bytes."
+    }
+
+    /// The bulk Delete Now found nothing of the selection still in the Trash
+    /// at act time (all put back, or already purged, in the pause) — the door
+    /// did nothing, so it says so (a refusal; `purgeTargetNotDeleted`'s rule).
+    static let bulkDeleteNowNothingLeft =
+        "None of those are in the \(trashSection) any more — only things in the "
+        + "\(trashSection) can be deleted for good."
+
+    /// **The bulk Put back's receipt.** The count by kind of what is back —
+    /// rows that came back WITH an earlier one in the same press (a book's
+    /// notes, a family's original) included, because they are back — then
+    /// each row's own news, never repeated: a book that came back whole says
+    /// so in its own words (`bookPutBackWhole` — the contract's "came back
+    /// whole"), a block that could not land where it was says where it went.
+    static func bulkPutBackReceipt(_ back: [Queries.TrashItem], news: [String] = []) -> String {
+        ([capitalizedFirst(trashCount(back)) + " put back."] + news).joined(separator: " ")
+    }
+
+    /// Some rows came back and some refused: both facts in one sentence, in
+    /// the refusal slot (something she asked for did not happen).
+    static func bulkPutBackPartial(
+        _ back: [Queries.TrashItem], news: [String] = [], refused: Int, reason: String
+    ) -> String {
+        bulkPutBackReceipt(back, news: news) + " \(refused) couldn't be: \(reason)"
+    }
+
+    /// Nothing came back. One refusal reads as itself; several lead with the
+    /// count and the first reason.
+    static func bulkPutBackRefused(_ refused: Int, reason: String) -> String {
+        refused == 1 ? reason : "None of these \(refused) could be put back: \(reason)"
+    }
+
+    /// Every picked row was already out of the Trash before its turn — by
+    /// another hand, in the pause. Nothing happened, so it is a refusal.
+    static let bulkPutBackAllAlreadyBack = "Those are already back."
+
+    /// A picked original whose family was deleted for good in the pause
+    /// (ladder R1 MINOR-2) — never counted as put back.
+    static let bulkOriginalGoneForGood =
+        "That original went for good with its family — there's no putting it back."
+
+    /// The bulk Delete Now pressed over a pick it cannot take (only preserved
+    /// originals — the door is not rendered then; this answers the race).
+    static let bulkDeleteNowNothingTakes =
+        "Nothing picked can be deleted on its own — a preserved original rides its family."
+
+    /// A bulk door pressed with nothing picked (the race's answer — the row
+    /// of doors is not drawn then).
+    static let bulkNothingSelected = "Nothing is selected."
+
+    static func capitalizedFirst(_ text: String) -> String {
+        text.prefix(1).uppercased() + text.dropFirst()
+    }
+
     // MARK: Move-to-Trash (the ordinary deletion doors' promise)
 
     /// **What "Delete" means everywhere OUTSIDE the Trash** — a tombstone,
