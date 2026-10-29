@@ -700,7 +700,7 @@ Three items, trace FIRST on every one:
 
 **LIVE STATUS** (flipped in the same commit as each piece; every unverified claim PENDING)
 - D-0 — preflight + this record: DONE (this commit).
-- D-1 — anomaly A (the hollow mounted Lenses pin; R-B1's answer; the DIAG line): TRACED (this commit — "D-1 — anomaly A" below: VX-692's merge, PROVEN from the compiled binary; R-B1 ANSWERED). NEXT: the DIAG line out (its own commit), then the pin's repair (the predicates hoisted out of the macros), then the two vx677-b1 products rebuilt and their binaries re-checked.
+- D-1 — anomaly A (the hollow mounted Lenses pin; R-B1's answer; the DIAG line): TRACED (`8406b47e4` — "D-1 — anomaly A" below: VX-692's merge, PROVEN from the compiled binary; R-B1 ANSWERED) · the DIAG line REMOVED in its own commit (`d1f72f488`) · the pin REPAIRED (`a9dfdf806` — "The repair" below) · `vx677-b1/post` REBUILT in place (`logs/build-post-7.log`, TEST BUILD SUCCEEDED) and its binary RE-CHECKED: five bodies for five closures, the decisive `settle` calls its own predicate. NEXT: `vx677-b1/rev664` rebuilt with batch 1's revert re-applied (D-4, after item 2's trace — one rebuild pass if item 2 moves production code).
 - D-2 — anomaly B (the 97-pt guard; F-B3-1 checked first): NOT-STARTED.
 - D-3 — F-B2W-1 (the Study mis-landing): NOT-STARTED.
 - D-4 — rebuilt products + the re-run leg's expected counts: NOT-STARTED.
@@ -716,6 +716,20 @@ Three items, trace FIRST on every one:
 **What the evidence of record for VX-664's sync-pull road is, today:** the model-level twin `OutsideWriteRingEndTests.lensesRingEndsWhenASyncPullWritesItsTake` (red on `rev664`, green on `post` — exact in BOTH windows; its body has no closure-bearing macro shape on the asserted read) plus the walk's W-664-1/2 on film (the ring-end and the read pane's adoption, live, on the MCP and restore roads). The mounted Lenses pin has proven nothing in either window.
 
 **The binary-level detector (a lead for VX-692, not a sweep):** an explicit closure's partial-apply forwarder carrying an LLVM uniquing suffix (`…fU<n>_TA.<k>`) marks a site where two source closures share one name. Over the whole `vx677-b2/post` test binary (`nm | grep '^_\$s13VariorumTests' | grep -E 'fU[0-9]*_TA\.[0-9]+$'`) it finds exactly TWO such sites: this pin's, and `MCPShareFacesTests.theIndicatorSaysOnlyWhatIsTrue()`'s `closure #2` (F-B3-1's exact `#expect(try await db.read {…})`-then-`db.read {…}` shape). It sees CAPTURING closures only — a merged non-capturing closure (F-B3-1's own repro) emits no thunk to duplicate — so it is a lead list for VX-692's sweep, never a census. Nothing outside this unit's three items is touched.
+
+**The disposition: REPAIRED (not retired) — the pin's logic was sound; its compiled form was not.** Once every predicate is its own body, what was written holds: on `rev664` nothing ends the ring, the live cell keeps the old words (a live pane never adopts — P-3), so the awaited condition waits out its 4-s timeout → RED; on `post` the model-level twin proves the authority ends the ring on this exact road and the mounted Takes twin proves the read pane then adopts the stored words → GREEN predicted (PENDING the window — no honest run of this mounted cell exists in either window, since both ran the merged form).
+
+**The repair, line by line (`a9dfdf806`, `OutsideWriteLivePaneTests.swift`):**
+1. `let column = try #require(model.columns.first { $0.kind == .main })` → `let mainColumn = model.columns.first { $0.kind == .main }` + `let column = try #require(mainColumn)` — the closure leaves the macro (same value; the merge rule needs a closure inside a macro).
+2. `#expect(await Self.settle(window, hosting) { …string == prose(2) }, "fixture: …")` → `let showsTheTake = await Self.settle(…) { …same body… }` + `#expect(showsTheTake, "fixture: …")` — the first fixture predicate, the one whose body the decisive `settle` had been running, is now a plain closure.
+3. The same for the LIVE fixture (`let isLive = …` + `#expect(isLive, …)`).
+4. NEW `let stored = try await storeText(w, take)` + `#expect(stored == remote, "fixture: the pull's write stands in the store")` — non-vacuity, as the Takes twin has it (`storeText` is a plain function; no closure at the call site); green on both trees by construction (an SQL write). It separates "the ring did not end" from "the staged pull did not land" on a red.
+5. The decisive `ended` predicate: body BYTE-UNCHANGED.
+6. The final `#expect(ended, …)`'s message reads the pane once into `cellNow` (no behaviour change; the message only).
+7. The comment block that claimed "on this host the cell already reads the pulled words BEFORE that ring-end, on both trees" is REPLACED — that claim was the merge's illusion — by the true mechanism on each tree; the test's doc gains a paragraph saying why closure-bearing expressions stay out of the macros here.
+8. The DIAG helper and its call (`d1f72f488`, its own commit): gone.
+
+**The rebuilt binary says what the source says (`vx677-b1/post`, 20:15, `build-post-7.log`):** the Lenses test's explicit closures are now #1 (`kind == .main`), #2 (`string`, `prose` — fixture 1), #3 (`isEditable` — fixture 2), #4 (the apply-mode write), #5 (`string`, `isEditable`, `remoteWords` — the decisive predicate), each with ONE thunk; the three `settle` sites hand it `partial apply for closure #2` → body #2, `#3` → body #3, and (`TY11_`, `ended`) `#5` → body #5. The whole-binary detector now finds only the MCP lead above.
 
 ## Rulings log
 
