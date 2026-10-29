@@ -194,24 +194,36 @@ struct OutsideWriteLivePaneTests {
     /// cell shows the remote words, read.** Consumed UI-side from the store's
     /// own delivery; the pull's row write is staged in apply mode (SyncSpec
     /// §3) — no `Sync/` source is touched or called.
+    ///
+    /// **Every closure here is a PLAIN closure bound to a local before any
+    /// macro reads it** (the dispositions record, D-1 — VX-692): the earlier
+    /// form wrapped the two fixture predicates in `#expect(await settle { … })`,
+    /// and this toolchain gave the first of them and the decisive predicate
+    /// below ONE closure discriminator, emitting one body for both — the
+    /// decisive `settle` ran "the cell still reads the old words" and passed
+    /// at its first look on both trees (proven in the compiled binary). Keep
+    /// closure-bearing expressions out of `#expect`/`#require` in this test.
     @Test func aLiveLensesCellShowsASyncPullToItsOwnTake() async throws {
         try await withWorld { w, theme in
             let target = w.blocks[1]
             let take = try await chosen(w, target)
             let model = try await model(w, host: .lenses)
-            let column = try #require(model.columns.first { $0.kind == .main })
+            let mainColumn = model.columns.first { $0.kind == .main }
+            let column = try #require(mainColumn)
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = mountBoard(
                 LensesBoardView(session: w.session, postID: w.postID, model: model),
                 theme: theme, in: window)
-            #expect(await Self.settle(window, hosting) {
+            let showsTheTake = await Self.settle(window, hosting) {
                 Self.pane("cell", take, in: hosting)?.string == Self.prose(2)
-            }, "fixture: the Chosen column shows the take")
+            }
+            #expect(showsTheTake, "fixture: the Chosen column shows the take")
             model.focus(TakesViewModel.PaneKey(columnID: column.id, blockID: target, variantID: take))
-            #expect(await Self.settle(window, hosting) {
+            let isLive = await Self.settle(window, hosting) {
                 Self.pane("cell", take, in: hosting)?.isEditable == true
-            }, "fixture: the cell is LIVE")
+            }
+            #expect(isLive, "fixture: the cell is LIVE")
 
             let remote = Self.remoteWords
             try await w.session.database.write { db in
@@ -220,19 +232,21 @@ struct OutsideWriteLivePaneTests {
                     sql: "UPDATE variant SET working_text = ? WHERE id = ?", arguments: [remote, take])
                 try db.execute(sql: "DELETE FROM _sync_applying")
             }
-            // **The decisive line, awaited as ONE condition** (the vx677-b1
-            // window's red-on-both finding, traced in the record): the ring
-            // over the take ENDS — the cell READ, showing the pulled words. The
-            // ring-end follows a fresh confirming read (`OutsideWriteConfirmation`),
-            // and on this host the cell already reads the pulled words BEFORE
-            // that ring-end, on both trees — so the first form (wait for the
-            // text, then read the editability at that same instant) raced the
-            // confirmation and was red on the fixed tree too.
+            let stored = try await storeText(w, take)
+            #expect(stored == remote, "fixture: the pull's write stands in the store")
+            // **The decisive line, awaited as ONE condition:** the ring over the
+            // take ENDS — the cell READ, showing the pulled words. The ring-end
+            // follows a fresh confirming read (`OutsideWriteConfirmation`), then
+            // the read pane adopts the stored words through its read arm; on
+            // the old tree nothing ends the ring and the live cell keeps the
+            // old words (a live pane never adopts — P-3), so this waits out
+            // its timeout.
             let ended = await Self.settle(window, hosting, timeout: 4) {
                 guard let cell = Self.pane("cell", take, in: hosting) else { return false }
                 return cell.string == Self.remoteWords && !cell.isEditable
             }
-            #expect(ended, "RED ON OLD: the live cell's ring never ended over the pulled words — it reads \(Self.pane("cell", take, in: hosting)?.string ?? "nil"), editable: \(Self.pane("cell", take, in: hosting)?.isEditable == true)")
+            let cellNow = Self.pane("cell", take, in: hosting)
+            #expect(ended, "RED ON OLD: the live cell's ring never ended over the pulled words — it reads \(cellNow?.string ?? "nil"), editable: \(cellNow?.isEditable == true)")
         }
     }
 }
