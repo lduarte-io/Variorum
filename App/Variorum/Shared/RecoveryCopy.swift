@@ -802,6 +802,11 @@ nonisolated enum RecoveryCopy {
     /// another hand, in the pause. Nothing happened, so it is a refusal.
     static let bulkPutBackAllAlreadyBack = "Those are already back."
 
+    /// A picked original whose family was deleted for good in the pause
+    /// (ladder R1 MINOR-2) — never counted as put back.
+    static let bulkOriginalGoneForGood =
+        "That original went for good with its family — there's no putting it back."
+
     /// The bulk Delete Now pressed over a pick it cannot take (only preserved
     /// originals — the door is not rendered then; this answers the race).
     static let bulkDeleteNowNothingTakes =

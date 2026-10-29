@@ -206,6 +206,113 @@ struct TrashMultiSelectTests {
         }
     }
 
+    // MARK: - Ladder R1 MINOR-2: gone for good is never "put back"
+
+    /// The one rule over a picked original's fate and its own block row.
+    /// Absent from the fates alone is NOT "kept": a purged family's original
+    /// is physically gone too, and a missing row reads absent.
+    @Test func anOriginalsStandingReadsItsFateAndItsOwnRow() {
+        #expect(TrashBulk.standing(fate: .counting("2026-07-01T00:10:00.000Z"), rowExists: true, rowLive: true)
+                == .onTheClock)
+        #expect(TrashBulk.standing(fate: .gone, rowExists: true, rowLive: true) == .goneForGood,
+                "a standing intent or an expired window: gone for good")
+        #expect(TrashBulk.standing(fate: nil, rowExists: true, rowLive: true) == .kept,
+                "its family lives again (P-671-2)")
+        #expect(TrashBulk.standing(fate: nil, rowExists: false, rowLive: false) == .goneForGood,
+                "purged with its family — the row itself is gone")
+        #expect(TrashBulk.standing(fate: nil, rowExists: true, rowLive: false) == .unknown,
+                "tombstoned on its own: its own road answers")
+    }
+
+    /// A Put back's stale pick: a deleted note and a stranded original whose
+    /// family got a purge intent in the pause (Delete Now from another door).
+    /// **RED ON THE PRE-FIX CODE** (traced): the original read "not on the
+    /// clock" → `.alreadyBack` → counted, and the receipt said "1 note and 1
+    /// preserved original put back." for a row gone forever.
+    @Test func aBulkPutBackNeverCountsAnOriginalWhoseFamilyWasPurgedInThePause() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Beta one."]) { editor in
+            let original = try #require(editor.model.slots.first?.blockID)
+            let variant = try #require(try await editor.database.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT default_variant_id FROM block WHERE id = ?", arguments: [original])
+            })
+            let ids: (s1: String, s2: String, note: String) = try await editor.session.runner.run { (ops: Operations) in
+                let take2 = try ops.branchVariant(original, from: variant)
+                let w = try ops.divideW(original, cuts: [variant: 10, take2.id: 10])
+                try ops.deleteBlock(w.first.block.id)
+                try ops.deleteBlock(w.second.block.id)
+                let note = try ops.createPost(title: "a note")
+                try ops.deleteContainer(note.id)
+                return (w.first.block.id, w.second.block.id, note.id)
+            }
+            let rows = try await listing(editor)
+            let model = RecoveryViewModel(session: editor.session)
+            model.adopt(archived: [], trash: rows)
+            let order = RecoveryView.visibleRowIDs(TrashGrouping.entries(rows), collapsed: [])
+            model.clickRow(original, modifiers: .command_, order: order)
+            model.clickRow(ids.note, modifiers: .command_, order: order)
+            #expect(model.selectedRows == [original, ids.note])
+
+            // The pause: the family's last successor gets a purge intent.
+            try await editor.session.runner.run { (ops: Operations) in
+                _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: ids.s2)])
+            }
+            await model.putBackSelection(order: order)
+            #expect(model.receipt == nil)
+            #expect(model.lastError == "1 note put back. 1 couldn't be: \(RecoveryCopy.bulkOriginalGoneForGood)")
+            #expect(try await live(editor, "container", ids.note))
+            let placed: Int = try await editor.database.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM container_block WHERE block_id = ? AND deleted_at IS NULL",
+                    arguments: [original]) ?? 0
+            }
+            #expect(placed == 0, "nothing placed a purged family's original")
+        }
+    }
+
+    /// The same stale pick, but the local sweep FINISHED in the pause: the
+    /// family's bytes are gone and the original with them, so its fate reads
+    /// ABSENT — the case "absent means kept" got wrong. **RED ON THE PRE-FIX
+    /// CODE** (traced): counted "put back".
+    @Test func aBulkPutBackNeverCountsAnOriginalPurgedWithItsFamilyAsPutBack() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Beta one."]) { editor in
+            let original = try #require(editor.model.slots.first?.blockID)
+            let variant = try #require(try await editor.database.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT default_variant_id FROM block WHERE id = ?", arguments: [original])
+            })
+            let ids: (s1: String, s2: String, note: String) = try await editor.session.runner.run { (ops: Operations) in
+                let take2 = try ops.branchVariant(original, from: variant)
+                let w = try ops.divideW(original, cuts: [variant: 10, take2.id: 10])
+                try ops.deleteBlock(w.first.block.id)
+                try ops.deleteBlock(w.second.block.id)
+                let note = try ops.createPost(title: "a note")
+                try ops.deleteContainer(note.id)
+                return (w.first.block.id, w.second.block.id, note.id)
+            }
+            let rows = try await listing(editor)
+            let model = RecoveryViewModel(session: editor.session)
+            model.adopt(archived: [], trash: rows)
+            let order = RecoveryView.visibleRowIDs(TrashGrouping.entries(rows), collapsed: [])
+            model.clickRow(original, modifiers: .command_, order: order)
+            model.clickRow(ids.note, modifiers: .command_, order: order)
+
+            try await editor.session.runner.run { (ops: Operations) in
+                _ = try ops.requestPurge([
+                    SyncPurgeTarget(table: "block", rowID: ids.s1),
+                    SyncPurgeTarget(table: "block", rowID: ids.s2),
+                ])
+            }
+            await editor.session.sweepLocalPurge()
+            #expect(try await exists(editor, "block", original) == false,
+                    "the original went with its family's bytes")
+
+            await model.putBackSelection(order: order)
+            #expect(model.receipt == nil)
+            #expect(model.lastError == "1 note put back. 1 couldn't be: \(RecoveryCopy.bulkOriginalGoneForGood)")
+        }
+    }
+
     // MARK: - Bulk Delete Now
 
     /// Picked: a note, a block, and a stranded original (whose family is NOT

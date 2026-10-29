@@ -35,6 +35,7 @@
 //
 
 import Foundation
+import GRDB  // TrashBulk's one row read (ladder R1 MINOR-2)
 import VariorumCore
 
 /// A recovery refusal that is not an `OperationError` — nothing was even
@@ -607,8 +608,45 @@ enum TrashBulk {
         /// refused only to say "already back" (its transaction changed
         /// nothing).
         case alreadyBack
+        /// The row left the Trash FOR GOOD before its turn (ladder R1
+        /// MINOR-2): a picked original whose family was deleted for good in
+        /// the pause — a purge intent stands, the window expired, or the
+        /// family's bytes are already gone with the original among them.
+        /// Never counted as back; a refusal-side line.
+        case goneForGood
         /// The row's road refused; each platform words it in its own voice.
         case refused(any Error)
+    }
+
+    /// Where a picked original stands at its turn (ladder R1 MINOR-2).
+    nonisolated enum OriginalStanding: Equatable {
+        /// Still stranded on its family's clock — still a Trash row: its own
+        /// road runs.
+        case onTheClock
+        /// Off the clock because its family lives again — kept in its note's
+        /// tray (P-671-2: not placed; counted as back).
+        case kept
+        /// Gone for good with its family (never counted as back).
+        case goneForGood
+        /// Nothing this read can say (a failed read, an original tombstoned on
+        /// its own): its own road runs and answers for itself.
+        case unknown
+    }
+
+    /// **The one rule** over the original's fate (`originFamilyClocks`) and
+    /// its own block row. ABSENT from the fates is NOT enough to call it
+    /// kept: once the local sweep has taken a purged family, the original —
+    /// a member of the purge family — is physically gone too, and a missing
+    /// row also reads as absent.
+    nonisolated static func standing(
+        fate: Queries.OriginFamilyFate?, rowExists: Bool, rowLive: Bool
+    ) -> OriginalStanding {
+        guard rowExists else { return .goneForGood }
+        switch fate {
+        case .counting?: return .onTheClock
+        case .gone?: return .goneForGood
+        case nil: return rowLive ? .kept : .unknown
+        }
     }
 
     /// Runs every picked row's own Put back, in `putBackOrder`.
@@ -617,11 +655,17 @@ enum TrashBulk {
     ) async -> [(item: Queries.TrashItem, outcome: RowOutcome)] {
         var outcomes: [(item: Queries.TrashItem, outcome: RowOutcome)] = []
         for item in putBackOrder(picked) {
-            if item.kind == .preservedOriginal,
-               let noteID = item.noteID,
-               !(await stillOnTheClock(session: session, original: item.id, noteID: noteID)) {
-                outcomes.append((item, .alreadyBack))
-                continue
+            if item.kind == .preservedOriginal, let noteID = item.noteID {
+                switch await standing(session: session, original: item.id, noteID: noteID) {
+                case .kept:
+                    outcomes.append((item, .alreadyBack))
+                    continue
+                case .goneForGood:
+                    outcomes.append((item, .goneForGood))
+                    continue
+                case .onTheClock, .unknown:
+                    break  // its own road runs and answers
+                }
             }
             do {
                 outcomes.append((item, .landed(try await TrashPutBack.run(session: session, item: item))))
@@ -634,22 +678,29 @@ enum TrashBulk {
         return outcomes
     }
 
-    /// Is this original still stranded on its family's clock — still a Trash
-    /// row? The tray's own read of its note's fates (`originFamilyClocks`,
-    /// linear since VX-670). A read that fails says yes, so the row's own
-    /// road runs and answers for itself.
-    private static func stillOnTheClock(
+    /// Where this original stands now: the tray's own read of its note's
+    /// fates (`originFamilyClocks`, linear since VX-670) and its own block
+    /// row, in one read, classified by `standing(fate:rowExists:rowLive:)`.
+    /// A read that fails is `.unknown`, so the row's own road runs and
+    /// answers for itself.
+    private static func standing(
         session: AppSession, original: String, noteID: String
-    ) async -> Bool {
+    ) async -> OriginalStanding {
         let now = session.now
-        // The whole map, not the one entry: `try?` would flatten an absent
-        // entry (no longer stranded — NOT on the clock) into a failed read.
-        let fates = try? await session.database.read { db in
-            try Queries.originFamilyClocks(db, postID: noteID, now: now)
+        // A tuple, never a bare optional: `try?` would flatten an absent
+        // entry (not stranded) into a failed read.
+        let read = try? await session.database.read {
+            db -> (fate: Queries.OriginFamilyFate?, exists: Bool, live: Bool) in
+            let total = try Int.fetchOne(
+                db, sql: "SELECT COUNT(*) FROM block WHERE id = ?", arguments: [original]) ?? 0
+            let live = try Int.fetchOne(
+                db, sql: "SELECT COUNT(*) FROM block WHERE id = ? AND deleted_at IS NULL",
+                arguments: [original]) ?? 0
+            return (try Queries.originFamilyClocks(db, postID: noteID, now: now)[original],
+                    total > 0, live > 0)
         }
-        guard let fates else { return true }
-        if case .counting = fates[original] { return true }
-        return false
+        guard let read else { return .unknown }
+        return standing(fate: read.fate, rowExists: read.exists, rowLive: read.live)
     }
 
     /// A per-row road's "it's not deleted" — the row is already back.
@@ -688,6 +739,9 @@ enum TrashBulk {
                 if !plain.contains(receipt), !news.contains(receipt) { news.append(receipt) }
             case .alreadyBack:
                 back.append(item)
+            case .goneForGood:
+                // Ladder R1 MINOR-2: gone forever is never "put back".
+                refusals.append(RecoveryCopy.bulkOriginalGoneForGood)
             case .refused(let error):
                 refusals.append(voice(error))
             }

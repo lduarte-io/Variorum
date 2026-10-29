@@ -199,6 +199,40 @@ struct TrashBulkTransitionTests {
         }
     }
 
+    /// Ladder R1 MINOR-2 — the store facts a picked original's standing reads
+    /// (`TrashBulk.standing`, app-side): a purge intent on its family turns
+    /// its fate `.gone`; once the local sweep takes the family, the original
+    /// is physically gone with it and its fate reads ABSENT — so "absent"
+    /// alone can never mean "kept", the row's existence decides.
+    @Test func anOriginalWhoseFamilyIsPurgedReadsGoneThenLeavesWithItsFamily() async throws {
+        try await withOperationsAsync { ops, db in
+            let note = try ops.createPost(title: "the note")
+            let fanned = try ops.seedBlock(in: note.id, text: "Alpha one. Beta one.")
+            let take2 = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+            let w = try ops.divideW(fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
+            try ops.deleteBlock(w.first.block.id)
+            try ops.deleteBlock(w.second.block.id)
+            let original = fanned.block.id
+            func fate() throws -> Queries.OriginFamilyFate? {
+                try db.read { try Queries.originFamilyClocks($0, postID: note.id, now: harnessNow) }[original]
+            }
+            guard case .counting? = try fate() else {
+                Issue.record("on the clock before the purge")
+                return
+            }
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: w.second.block.id)])
+            #expect(try fate() == .gone, "a standing intent on one member: gone for good")
+            #expect(try existing(db, "block", [original]) == [original], "…its row still here")
+
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: w.first.block.id)])
+            let report = try await LocalPurge(database: db).sweep()
+            #expect(report.familiesPurged >= 1)
+            #expect(try existing(db, "block", [original, w.first.block.id, w.second.block.id]).isEmpty,
+                    "the original went with its family's bytes")
+            #expect(try fate() == nil, "ABSENT — the same reading a living family gives")
+        }
+    }
+
     // MARK: - Bulk Delete Now
 
     /// Picked: a note, a block, a book and a stranded original; left alone:
