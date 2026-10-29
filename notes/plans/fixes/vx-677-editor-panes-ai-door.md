@@ -1355,7 +1355,7 @@ Deliverables: the WHY + fixes with pins; rebuilt products — `vx677-b5/post` (t
 
 #### READY-FOR-THE-STAGE — claim C (the orchestrator's window; from `App/Variorum/`; `test-without-building`, no rebuild)
 
-**Products** (all at the tip `1d960469e`'s sources — every later commit is record-only; the panel says each revert product differs from `post` only in its own function): `vx677-b5/post` (`logs/build-post-9.log`) · `vx677-c/rev668` · `vx677-b3/post` (`build-post-3.log`) · `vx677-b3/rev676` (`build-rev676-3.log`) · `vx677-b4/post` (`build-post-6.log`) · `vx677-c/revFW2` · `vx677-b4/rev674` (`build-rev674-4.log`); the walk app `DerivedData/vx677-app`.
+**Products** (all at the tip `1d960469e`'s sources — every later commit is record-only; the panel says each revert product differs from `post` only in its own function): `vx677-b5/post` (`logs/build-post-9.log`) · `vx677-c/rev668` · `vx677-b3/post` (`build-post-3.log`) · `vx677-b3/rev676` (`build-rev676-3.log`) · `vx677-b4/post` (`build-post-6.log`) · `vx677-c/revFW2` · `vx677-b4/rev674` (`build-rev674-4.log`); the walk app `DerivedData/vx677-app`. **LADDER ROUND 1's fix round moved app sources (`MCPDoor.swift`, `MCPPaneCopy.swift`) and three test files, so EVERY product above rebuilds once at the FINAL tip (the orchestrator's one rebuild), each revert re-applied as recorded; the round adds `vx677-c/revFL2` (C14 — its recipe below) and needs `vx677-b1/post` + `vx677-b1/rev664` rebuilt too (C12/C13 — rev664 = batch 1's three-line revert re-applied). C4 and C5 below carry the round's counts; C12–C15 are its rows.**
 
 Each run: set `T` to the zsh array, then `A=(); for s in $T; do A+=(-only-testing:VariorumTests/$s); done; xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<product> test-without-building "${A[@]}"` — suite TYPE names (each confirmed as a nominal type descriptor in every product's test bundle), zsh arrays, never a quoted string. Confirm the "Test run with N tests" line and read the `skipped:` lines (0 ran = no verdict). Counts are `@Test` functions. After EVERY run check the SCREEN for the Problem Reporter dialog (the standing window condition), not only the process list.
 
@@ -1373,17 +1373,17 @@ T=(RestoreLandingTests BlockHistoryPaneTests BlockHistoryClarityTests BlockHisto
 ```
 Per suite: 9 · 18 · 6 · 2 · 4 · 7 · 5 · 18 · 11 · 30 · 5 · 3. A red in `TakesEntryBandTests.aFarEntryRestsTwoLinesAboveTheFootNeverAtTheEdge` alone is VX-695 (isolate, then a control tree, never a blind verdict).
 
-**C4. RED-ON-OLD — `vx677-b3/rev676`** (R5's array; expect 31 tests, EXACTLY 12 failures — batch 3's list unchanged):
+**C4. RED-ON-OLD — `vx677-b3/rev676`** (R5's array; expect **36 tests, EXACTLY 15 failures** — batch 3's 12 plus ladder round 1's three; was 31/12 before the fix round):
 ```zsh
 T=(MCPShowOfferFacesTests MCPNavigationTests MCPWingFacesTests)
 ```
-The repaired `afterTheToastFadesTheAskHoldsTheQuietLine` is among the 9 `MCPShowOfferFacesTests` reds: its premise holds (the door hears the server ON), then the old etiquette refuses the away ask (`verdict == .refuse`) and no line stands.
+The repaired `afterTheToastFadesTheAskHoldsTheQuietLine` is among the `MCPShowOfferFacesTests` reds: its premise holds (the door hears the server ON), then the old etiquette refuses the away ask (`verdict == .refuse`) and no line stands. **The fix round's three NEW reds here are each a staged ask's own `#require`** (they stage through `agentShow` away, which the old etiquette refuses, so no ask stands): `aTakeWhoseTargetIsGoneSaysSoAndOpensNothing` at "fixture: the ask stands (note)", `aTakeWhoseTargetStandsStillOpensIt` at its first `#require(session.status.lineItem?.action)`, `aShowThatCannotFinishOrFindsNoWindowSaysSo` at its arm 1's `#require(session.status.lineItem?.action)`. The two receipt-road tests (`aReceiptsOpenOnAGoneChangeSaysSoAndOpensNothing`, `aReceiptsOpenOnAStandingChangeStillOpensIt`) never meet the etiquette and PASS here; the three staging-repaired pins keep their batch-3 reds. So `MCPShowOfferFacesTests` 12 of 18 red, `MCPNavigationTests` 2 of 8, `MCPWingFacesTests` 1 of 10.
 
-**C5. GREEN — `vx677-b3/post`, R7's re-run** (expect 104 tests, 0 failures):
+**C5. GREEN — `vx677-b3/post`, R7's re-run** (expect **109 tests, 0 failures**; was 104 before the fix round):
 ```zsh
 T=(MCPShowOfferFacesTests MCPNavigationTests MCPWingFacesTests MCPCompareLandingTests CapabilityRegistryTests MCPPaneTabsTests MCPPaneTests TutorialMCPChapterTests)
 ```
-Per suite: 13 · 8 · 10 · 11 · 30 · 14 · 10 · 8. **DA-1's pin green here closes DA-1**; red on it alone = the repair's mechanism wrong — record it with its log, touch nothing.
+Per suite: **18** · 8 · 10 · 11 · 30 · 14 · 10 · 8. **DA-1's pin green here closes DA-1**; red on it alone = the repair's mechanism wrong — record it with its log, touch nothing. **F-L2's three pins and two guards green here are the fix's green** (with C14's reds); the three staging-repaired pins green here prove the repairs changed staging only. A red on a GUARD alone (`aTakeWhoseTargetStandsStillOpensIt`, `aReceiptsOpenOnAStandingChangeStillOpensIt`) = the gone-check refusing a standing place — record it, touch nothing.
 
 **C6. R9's SPLIT re-run — `vx677-b4/rev674`, TWO SEPARATE invocations** (VX-661's mitigation: fewer red-rich suites per invocation, so swift-testing's event encoder is never overloaded):
 ```zsh
@@ -1416,7 +1416,29 @@ T=(QuitDoorTests QuickNoteParkTests LandingOffsetTests QuitPurgeQuiesceTests MCP
 ```zsh
 T=(NoLiteralColourTests ChromeLineLimitTests ChromeMinHeightTests ChromeMenuRowSizeTests DeadVocabularyTests)
 ```
-Per suite: 2 · 1 · 5 · 2 · 4.
+Per suite: 2 · 1 · 5 · 2 · 4. *(The scanners walk the source tree at run time, so at the final tip they read the fix round's new words in `MCPPaneCopy.swift` too.)*
+
+**— LADDER ROUND 1's rows (the fix round, 2026-10-29; the final call `notes/plans/fixes/vx-677-ladder-round1.md`) —**
+
+**C12. RED-ON-OLD — `vx677-b1/rev664`, F-L1's twin re-run** (rebuilt at the final tip; expect 2 tests, EXACTLY 2 failures):
+```zsh
+T=(OutsideWriteLivePaneTests)
+```
+Fail: `aLiveTakesArticleShowsAnAIsEditToItsOwnTake` — its decisive `shows` after the 4-s wait ("RED ON OLD: the live pane still reads …") and its editability line ("the ring over the old words ended"); `aLiveLensesCellShowsASyncPullToItsOwnTake` — its `#expect(ended, …)` after ~4 s. Every fixture line passes (the two now-bound Takes fixtures, the Lenses fixtures, the store lines). R1's 30/EXACTLY 21 over its full array is the equivalent wider run if the window prefers it.
+
+**C13. GREEN — `vx677-b1/post`, the same** (expect 2 tests, 0 failures; each well under 4 s — the Takes twin's ~0.4 s is the reference). **Before C12/C13, the rebuilt bundle's binary check** (the fix round did it on its scratch product — L-6 — and it holds by source, but the window's verdict is the rebuilt product's): the Takes twin's three predicates are three distinct bodies — `closure #1` → `prose`, `#2` → `isEditable`, `#3` → `aiWords` — and its `settle` partials `TY3_`/`TY5_`/`TY7_` load the forwarders of #1/#2/#3 in that order; the detector (`nm … | grep '^_\$s13VariorumTests' | grep -E 'fU[0-9]*_TA\.[0-9]+$'`) still finds ONLY the standing MCP lead (`MCPShareFacesTests.theIndicatorSaysOnlyWhatIsTrue`). A merged twin = C12/C13 NO VERDICT, report it.
+
+**C14. RED-ON-OLD — `vx677-c/revFL2`, F-L2's revert** (NEW product: an APFS clone of `vx677-b3/post` rebuilt at the final tip, then this revert, `build-for-testing`, restored by `git checkout --`; expect 18 tests, EXACTLY 3 failures):
+```zsh
+T=(MCPShowOfferFacesTests)
+```
+**The revert, three one-line edits in `Features/MCP/MCPDoor.swift`, each marked `VX677-REVERT`** (the whole of F-L2's behaviour; the copy and `ShownChange` stay, so it compiles; two unused-value warnings are expected): (1) `placeStands` (the line `return stands`, unique in the file) → `return true // VX677-REVERT` (the gone-check off on every press road); (2) `deliverHerPress` (the one-line `if delivery == .unfinished { session.status.refuse(words) }`, unique) → `if false { session.status.refuse(words) } // VX677-REVERT` (the unfinished line off — the marker AFTER the brace, never inside the line); (3) `openShow` (the line `session.status.refuse(MCPReceiptCopy.noWindow)`, unique) → `// session.status.refuse(MCPReceiptCopy.noWindow) // VX677-REVERT` (the nil-router arm silent again; its `return` stays). The binary panel: `revFL2` differs from `post` only in `MCPDoor.placeStands`, `MCPDoor.deliverHerPress` and `MCPDoor.openShow`. **Fail:** `aTakeWhoseTargetIsGoneSaysSoAndOpensNothing` (6 issues — per target: the refusal line, "the dead note opened", "a take was logged"), `aReceiptsOpenOnAGoneChangeSaysSoAndOpensNothing` (8 issues — per arm: the refusal line, the dead note opened, the change not retired, ⌥⌘O still lit), `aShowThatCannotFinishOrFindsNoWindowSaysSo` (3 issues — one per arm). **Pass:** the two guards and the 13 others (the three staging-repaired pins included). **A pin GREEN here = HOLLOW: record it, never fix it.**
+
+**C15. GREEN — `vx677-b3/post`, the receipt road's neighbours** (the fold-in changed `landReceipt` and `openShow`, the road every MCP write's receipt rides: batch 3's R4 array — the status seam, the quiet line's every host, every MCP face suite — plus `MCPAskAndReceiptTests`, the receipt run's coalescing; expect 163 tests in 24 suites, 0 failures):
+```zsh
+T=(StatusCenterTests StatusToastPlacementRuleTests StatusToastPlacementShellTests StatusSeamVocabularyTests ConfirmationsSettingTests VX385PoolQuietReceiptTests VX385PoolReceiptFootRuleTests VocabularySweepTests DocumentImportDoorTests VersionDoorsTests MCPSharingFaceTests MCPSetupMenuTests MCPRebindFaceTests MCPDoorErgonomicsFacesTests MCPDeliberateFacesTests MCPEditFacesTests MCPConnectionEndDoorTests MCPLibraryParityFacesTests MCPStarFacesTests MCPGatheringBookActsFacesTests MCPEditParityFacesTests MCPDuplicateFilingFacesTests MCPSetupKeyFacesTests MCPAskAndReceiptTests)
+```
+Per suite (`@Test` functions, counted at the fix round's tip): 10 · 5 · 3 · 2 · 18 · 3 · 1 · 19 · 16 · 11 · 5 · 14 · 8 · 4 · 4 · 4 · 3 · 4 · 4 · 3 · 4 · 2 · 3 · 13 (R4's 150 unchanged + 13).
 
 **Not re-run, said why:** R6 (`rev675`, 13/2) — its one predicted failure was exact; its extra was DA-1's own mechanism (F-2), so VX-675's revert verdict stands and `vx677-b3/rev675` was not rebuilt (it carries the old form of the DA-1 pin). R1–R4, R8, R12 — nothing they exercise changed in this unit beyond what C3/C9/C10 re-read.
 
@@ -1458,7 +1480,7 @@ Per suite: 2 · 1 · 5 · 2 · 4.
 
 ### LADDER ROUND 1 — FIX RECORD (implementer: Opus, the step-1 session continued into step 2, 2026-10-29)
 
-**NOT DONE (first line, kept current):** NO `xcodebuild test`, NO app launch, NO walk, NO stage claim — every new and edited pin is compiled at most (one scratch `build-for-testing`, below), never RUN; every red/green is PREDICTED by mechanism and owed to claim C (the C-row table below is the window's). No run product (`vx677-*`) is rebuilt — the one product rebuild is the orchestrator's, after this round, at the final tip. No canon edit (the contract-line drafts are below for the closeout); no QUESTIONS number (the PROVISIONALs are listed here for the bundle); no ticket moved. In progress: everything below marked PENDING.
+**NOT DONE (first line, kept current):** NO `xcodebuild test`, NO app launch, NO walk, NO stage claim — every new and edited pin is COMPILED (one scratch `build-for-testing`, L-6) and binary-checked, never RUN; every red/green is PREDICTED by mechanism and owed to claim C (C4/C5 updated and C12–C15 added in "READY-FOR-THE-STAGE — claim C" above — the window's). No run product (`vx677-*`) was rebuilt or written — the one product rebuild is the orchestrator's, at the final tip, and it now includes `vx677-c/revFL2` and the `vx677-b1` pair. No canon edit (the contract-line drafts are below for the closeout); no QUESTIONS number (P-FL2-1…3 below wait for the bundle); no ticket moved or filed. F-L3 has no code (dismissed as deliberate).
 
 *The final call this round applies: `notes/plans/fixes/vx-677-ladder-round1.md` (`81ddad305`), read in full before any edit. F-L3 DISMISSED as deliberate (no code); F-L5 the orchestrator's (done — `1dbb30a57`, `059118574`, `81ddad305`).*
 
@@ -1480,8 +1502,54 @@ Per suite: 2 · 1 · 5 · 2 · 4.
   - **`deliverHerPress`** — the navigator's delivery unchanged, and a genuine `.unfinished` speaks HER words (never `partialShowWords`).
   - **The last change becomes one fact** — `ShownChange` (target · the receipt's client · its title, so a gone refusal names both without a second read); `lastChange` is the stored, observed value and `lastShow` its computed target (every reader — the registry's `aiLastChangeAvailable`, the pins — unchanged); `landReceipt` mints it, `detach` clears it, `showLastChange` opens it.
   `MCPPaneCopy.swift` (PROVISIONAL P-FL2-2, VX-234's pass — `MCPAskCopy.gone`'s shape: sentence case, the place quoted, the client named, the ASCII apostrophe of the precedent): `MCPShowOfferCopy.gone` "‹place› is gone, so ‹client›'s ask was let go." · `.unfinished` "‹place› opened, but the rest of what ‹client› asked to show didn't land." · `.place` (the note; "The saved version of “X”"; the book; "The wing “W”" / "The Home wing"; nil titles "That note" / "That saved version" / "That book") · `MCPReceiptCopy.noWindow` "Open a Variorum window to see it." · `.gone` "‹place› is gone, so ‹client›'s change can't be opened." · `.unfinished` "‹place› opened, but the rest of ‹client›'s change didn't land."
-- L-6 — the scratch compile + the binary re-check + the headless suites: PENDING.
-- L-7 — the claim C deltas (exact), the drafts, the self-assessment: PENDING.
+- L-6 — the scratch compile + the binary re-check + the headless suites: DONE (this commit).
+  - **ONE scratch `build-for-testing`** (the orchestrator's allowance — never a run-product dir): an APFS clone of `vx677-b5/post` into this session's scratchpad (`…/scratchpad/dd-fl2`, so its SourcePackages needed no network), built at the tree of `982aaa5c2` (every source edit preceded the build), 04:06:59 → 04:10:53: **TEST BUILD SUCCEEDED, EXIT 0**; no compiler warning in any touched file. Xcode's "stale file … outside of the allowed root paths" lines name the cloned state's own paths into `vx677-b5/post` — it REFUSED to touch them; verified after: `vx677-b5/post`'s test binary and debug dylib keep their 01:35:38 stamps and no file under it changed in the window.
+  - **The binary re-check (F-L1, the final call's list)** on the scratch test bundle (04:10:51): the Takes twin's predicates are three distinct `() -> Bool` bodies — `closure #1` (calls `prose`), `#2` (`isEditable`), `#3` (`aiWords`) — each with ONE forwarder; its `settle` partials `TY3_` (`showsTheTake`) / `TY5_` (`isLive`) / `TY7_` (`shows`) load the forwarders of #1 / #2 / #3 respectively (adrp+add at `…eb86c` / `…eb87c` / `…ebac4`) — the decisive `shows` runs its own `aiWords` body. The VX-692 detector over the whole bundle finds ONLY the standing MCP lead (`MCPShareFacesTests.theIndicatorSaysOnlyWhatIsTrue` closure #2) — none in the five new tests or the twin. The five new tests and their words are in the bundle (`strings`).
+  - **A THROWAWAY core probe** (the batch-3 precedent — `Tests/VariorumCoreTests/ZZProbeFL2.swift`, run and REMOVED, never committed): the Mac stagers' exact SQL over a fresh in-memory store with every migration — all rows insert; and the gone table's four queries answer as the table says (`mcpNoteFacts`: a staged note and the staged version's note stand, the version id as a note does NOT, a created-then-`deleteContainer`ed note goes; `isVersionHistory`: the staged `v2` is `n2`'s version; `Queries.reading`: a book and a gathering stand, a missing id goes; `wingIsLive`: Home stands, an unknown wing goes) — 1/1 green.
+  - **Headless at the committed tip:** `swift build --build-tests` Build complete; the wire's show suites `MCPShowOfferServerTests|MCPShowServerTests|MCPShowCompareServerTests` **21/21** and `MCPGrantOperationsTests` **17/17** green (the reviewer's own numbers — the wire is untouched). `git diff 81ddad305..HEAD --stat -- Sources Package.swift App/Variorum/Shared App/Variorum/VariorumMobile`: EMPTY (so `MCPShowTool` zero diff). The C14 revert recipe was parse-checked on a scratch COPY of `MCPDoor.swift` (`swiftc -parse` OK, three markers; the tree untouched).
+- L-7 — the claim C deltas (exact), the drafts, the self-assessment: DONE (this commit — below, and in the claim C table above).
+
+#### The claim C deltas, as committed (the table above is the window's; this is the summary)
+
+| Row | Product | Array | Expect | Was |
+|---|---|---|---|---|
+| C4 | `vx677-b3/rev676` | `MCPShowOfferFacesTests MCPNavigationTests MCPWingFacesTests` | **36 tests, EXACTLY 15 failures** (batch 3's 12 + the three new tests that stage through `agentShow`, each red at its staged ask's own `#require`) | 31 / 12 |
+| C5 | `vx677-b3/post` | R7's 8 suites | **109 tests, 0 failures** (`MCPShowOfferFacesTests` 18) | 104 / 0 |
+| C12 | `vx677-b1/rev664` (rebuilt at the final tip) | `OutsideWriteLivePaneTests` | 2 tests, EXACTLY 2 failures (both decisive lines after ~4 s) | new |
+| C13 | `vx677-b1/post` (rebuilt) | `OutsideWriteLivePaneTests` | 2 / 0 (+ the binary check first) | new |
+| C14 | NEW `vx677-c/revFL2` | `MCPShowOfferFacesTests` | 18 tests, EXACTLY 3 failures (6 · 8 · 3 issues) | new |
+| C15 | `vx677-b3/post` | R4's 23 suites + `MCPAskAndReceiptTests` | 163 tests in 24 suites, 0 failures | new |
+
+Every other row (C1–C3, C6–C11) is unmoved by this round: no test in them changed, and no production file they exercise changed except `MCPDoor`/`MCPPaneCopy` — whose only C-row suites are the ones above (C11's `CapabilityRegistryTests`/`TutorialMCPChapterTests` touch neither the take nor the receipt road; no capability, registry door or guide word changed).
+
+#### Canon — the contract lines DRAFTED for the closeout (F-L2; nothing in canon is edited here)
+
+- **MCPSpec** — inside batch 3's drafted `show_in_app` line, after "…with no callback on a later take;": "**her press re-reads the place first** (the ask's Open ›, ⌥⌘O, a write receipt's Open ›) — a place gone since (a deleted note or book, a dead wing, a version no longer one; Compare's anchor) says so where she pressed (“X” is gone, so ‹client›'s ask was let go. · …'s change can't be opened.), opens nothing and logs no take, the ask let go and a gone last change no longer lighting ⌥⌘O; a show that cannot finish says so in her words; a receipt's Open › with no full window says so (the VX-677 ladder round 1, F-L2 — the grant ask's own rule; PROVISIONAL P-FL2-1/2) —".
+- **SurfaceContracts §The app (the status-seam bullet)** — after batch 3's drafted ask sentence: "Her press on an ask or an AI receipt whose place has gone says so, names it and opens nothing (F-L2)."
+
+#### PROVISIONALs and the one unruled question (for the closeout bundle beside P-676-1…7; the orchestrator numbers them)
+
+- **P-FL2-1 — a gone last change and ⌥⌘O:** (a) BUILT: when her press (a receipt's Open › or ⌥⌘O) finds the change's place gone, that change stops being the last one — the chord greys until the next AI write (only a last change naming that same place retires); (b) keep it — the chord stays lit and refuses each press; (c) retire it the moment its place dies (the door would have to watch the place).
+- **P-FL2-2 — the words** (VX-234's pass): "“X” is gone, so ‹client›'s ask was let go." · "“X” is gone, so ‹client›'s change can't be opened." · "“X” opened, but the rest of what ‹client› asked to show didn't land." · "“X” opened, but the rest of ‹client›'s change didn't land." · "Open a Variorum window to see it." · the places ("The saved version of “X”", "The wing “W”", "The Home wing"; untitled: "That note", "That saved version", "That book").
+- **P-FL2-3 — UNRULED, hers (the reviewer's adjacent question, the final call's routing): should a standing ask END, or re-say itself, when its place dies before any press?** (a) as built: it stands until pressed, and the press says gone and lets it go (the grant ask's precedent); (b) end it when its place dies — the door would need to hear the death: `.variorumNotesDeleted` covers her Delete and a wire `delete_note`, but not a sync removal or a book's or wing's death, so a whole answer is an observation of the ask's one place (∝ one row); (c) keep it standing but re-word its line to say the place is gone (a door shown that can only refuse — P-2's tension).
+
+#### SELF-ASSESSMENT (the fix round — the first of the two reviews, the implementer's)
+
+- **What each piece is worth today:** F-L4 and the three staging repairs are comment- and staging-only (`git diff` shows no assertion line moved); F-L1 is proven in the compiled binary (three bodies, each `settle` site its own); F-L2's pins, guards and fix are compiled and their queries probe-verified headless, but every red/green is PREDICTED by mechanism and owed to C4, C5, C14 and C15. No walk row is owed by this round (no face changed beyond refusal words on an existing seam); her verdict on the words is P-FL2-2.
+- **Where I would want the round-2 reviewer to stare:**
+  1. **The take still ends the ask AT THE PRESS** (byte-identical to before), then re-reads — so "let go" holds by construction on the gone arm, and a double press finds no ask. The cost: a read that FAILS answers standing and takes today's road (a dead place could then still open) — chosen so the standing road never changes; the alternative (refuse when the store can't be read) is not built.
+  2. **`creationRouter()` is still called BEFORE the re-read** — it raises a full window when a note-only window is key, so a gone place's refusal can follow that raise. Kept so the `noWindow` arm (and its ask-kept rule) stays byte-identical; it is her own press's raise, as every Open › does.
+  3. **The unfinished line speaks on EVERY `.unfinished`** — including `requestMode`'s refusal arms, which already speak through the router's `refuse` hook; there her line replaces the router's (one message at a time). Practically unreachable right after `open()` succeeded (the stale arm needs a different post mounting in between); recorded, not built around.
+  4. **`mcpNoteFacts` as the note test** — the door's one derivation site (`askStanding`'s rule): it also answers gone for a `.note` target naming a born-archived version id, which no wire decision ever hands over (the version target is its own arm).
+  5. **`lastShow` is now computed from `lastChange`** — the registry's `aiLastChangeAvailable` and every pin read it unchanged; the observation is the stored `lastChange`'s.
+  6. **The pins live in a bare-router rig**: `aShowThatCannotFinishOrFindsNoWindowSaysSo`'s arms 1–2 rely on the rig never registering a detail (the honest `.unfinished` the reviewer's round-1 note named); the gone pins do NOT depend on it — post-fix the re-read refuses before any delivery, and the guards prove a standing place still opens (the takes guard with a registered detail).
+  7. **The staging stagers write raw rows** under the pins' literal ids (so the ruled "assertions byte-unchanged" holds) — validated against the full migration set by the throwaway probe; a constraint added later to those tables would surface there first.
+- **Rails kept:** ZERO lines under `Sources/` (`Sync/` included), `App/Variorum/Shared/` or `VariorumMobile/`; the wire untouched (`MCPShowTool` zero diff; `MCPSession.instructions` untouched — 3,061 of 3,100); no schema, operation, query, capability, registry door or guide word; no new dependency; no literal colour; the editor seam untouched. **MOBILE PARITY: nothing mobile-visible** (`MCPDoor` and its copy are Mac-only).
+
+#### FINDINGS RECORDED, NOT FIXED (the fix round — for the orchestrator to ticket or dismiss)
+
+- **F-FR-1 (Suspected · MCP, suggest Low — the residual named in the gone table's doc):** her press checks the note, the book or the wing — never a takes target's block, a lens or a book's chapter (Compare's dead peer is ruled the board's business). What each landing does with a dead block, lens or chapter was not traced here.
+- **F-FR-2 (Suspected · MCP, suggest Low):** the AGENT road (`agentShow`'s move at once) adopts its target the same way — no liveness gate — but only right after the wire's own read found it readable, so a dead id there needs a deletion racing the call. Not touched (the wire's decision is the fence; out of this finding's scope).
 
 ## Rulings log
 
