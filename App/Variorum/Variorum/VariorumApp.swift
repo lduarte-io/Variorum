@@ -476,7 +476,10 @@ struct VariorumApp: App {
         Window("Shortcuts & Dictionary", id: "variorum-helper") {
             HelperView()
         }
-        .defaultSize(width: 680, height: 560)
+        // VX-572 (PROVISIONAL P-572-2): wider and taller by default — the
+        // chord column is a fixed 190 pt now, and the descriptions read in
+        // the voice's own face (the minimum stays 640 × 480).
+        .defaultSize(width: 760, height: 620)
         // 13s-b U1a, piece 4 (R-13s-24/25): the About window — the mark, the
         // lowercase serif wordmark, the version (`AboutView`). A singleton,
         // sized to its content, like the system panel it replaces.

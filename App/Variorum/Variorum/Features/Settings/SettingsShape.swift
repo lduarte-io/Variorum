@@ -550,8 +550,8 @@ extension SettingsSearch {
     /// and its dictionary.**
     ///
     /// The last two are read from `HelperView`'s OWN statics, never copied:
-    /// the shortcut list is hand-maintained prose in her voice and is held
-    /// to the registry by `everyDeclaredShortcutIsFindableInTheHelper`, so
+    /// the shortcut list is the registry's own (`ShortcutCatalog` — VX-572:
+    /// her prose, every chord read from its act's declaration), so
     /// every DECLARED chord is in this index by construction — and a
     /// keyless door named only in prose (Format ▸ Outdent, Tab in a list)
     /// is findable here for exactly the same reason.
