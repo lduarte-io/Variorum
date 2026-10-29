@@ -123,7 +123,9 @@ struct ShortcutsTabFaceTests {
                 let size = Self.fitted(ShortcutChordCell(chords: row.tokens, tokens: tokens), width: column)
                 if size.width > widest.1 { widest = (row.keysText, size.width) }
                 #expect(size.width <= column, "\(tokens.voice) \(row.keysText): \(size.width) pt wide")
-                #expect(size.height <= oneLine.height + 0.5,
+                // +1 pt: a fallback glyph (⎋ draws from Menlo) may move a
+                // line's metrics by a fraction; a second line is ~15 pt.
+                #expect(size.height <= oneLine.height + 1,
                         "\(tokens.voice) \(row.keysText): one line (\(size.height) vs \(oneLine.height))")
             }
             print("[VX-572] \(tokens.voice) widest chord cell: \(widest.0) \(widest.1) pt of \(column); one line \(oneLine.height) pt")
