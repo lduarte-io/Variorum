@@ -125,12 +125,27 @@ struct MCPShowOfferFacesTests {
     /// After the toast fades the ask HOLDS the quiet line — past the receipt clock, and under
     /// receipt style OFF too (it is an offer, never a receipt) — with its door and its ✕.
     /// **RED on `rev676`.**
+    ///
+    /// **Staged as an ask can only arrive: the server ON, the asking client CONNECTED** (DA-1,
+    /// the VX-677 fixes unit — the record's FIXES RECORD, F-2). The first form asked from a
+    /// client that was never connected on a store whose server switch was OFF, and the door's
+    /// first snapshot then did exactly what it must: `reconcileServer` stopped the (absent)
+    /// server and `adoptConnected([])` ended the ask — "its client is gone" (ruling (2)) — so
+    /// the line read nil after the 300-ms wait while every other offer pin, reading before
+    /// that first snapshot, passed. Live (the final walk's W-676-1, both voices) the line held
+    /// to +21.5 / +25.5 s with the server on and claude-code connected.
     @Test func afterTheToastFadesTheAskHoldsTheQuietLine() async throws {
         try await withSession { (session: AppSession, _: AppDatabase) async throws in
             session.status.dismissAfter = .milliseconds(60)
             session.status.receiptStyle = .off
+            try session.operations.setMCPSwitch(.server, on: true)
             let rig = Rig(session)
             defer { rig.door.detach() }
+            // The door has heard its switch (the snapshot an ask's end would ride), and the
+            // asking client is connected, as the host would report it.
+            let heard = await eventually { rig.door.snapshot.enabled }
+            try #require(heard, "fixture: the door adopted its first snapshot — the server ON")
+            rig.door.previewConnected(["claude-code"])
             let request = MCPShowRequest.pin(.book(bookID: "r1", sectionID: nil), dial: .moveAtOnce, title: "lessons")
 
             let verdict = await rig.door.agentShow(request)
@@ -142,6 +157,8 @@ struct MCPShowOfferFacesTests {
             #expect(line?.text == "claude-code asks to show you \u{201C}lessons\u{201D}", "it holds the line")
             #expect(line?.kind == .offer && line?.action != nil && line?.dismiss != nil)
             #expect(session.status.spoken == line, "on screen")
+            let stillStanding = rig.door.showOffer != nil
+            #expect(stillStanding, "the ask still stands on the door — nothing ended it")
         }
     }
 
