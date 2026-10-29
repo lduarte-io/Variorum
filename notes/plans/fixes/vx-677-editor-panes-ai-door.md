@@ -1617,7 +1617,12 @@ The procedure for each, one at a time: apply over the clean committed tip → `g
 
 **LIVE STATUS** (flipped in the same commit as each piece)
 - FR2-0 — preflight, the recipes recovered + dry-run, the panel extended + validated, this record: DONE (this commit).
-- FR2-1 — `vx677-b1/post` + `vx677-b1/rev664` + C12/C13's binary check: NOT STARTED.
+- FR2-1 — `vx677-b1/post` + `vx677-b1/rev664` + C12/C13's binary check: DONE (this commit).
+  - `post`: `DerivedData/vx677-b1/logs/build-post-10.log`, TEST BUILD SUCCEEDED, EXIT 0 (04:44:32–04:47:40); dylib + test binary 04:47:39.
+  - `rev664`: `logs/build-rev664-5.log`, TEST BUILD SUCCEEDED, EXIT 0 (04:49:56–04:53:14). The revert's diff was +2 in `PaneTextAuthority.swift` and +1 in `PaneSurface.swift` (3 markers), as dry-run. Restored by `git checkout --`; `git status` empty, `git diff` empty, no `VX677-REVERT` marker.
+  - Panel (`logs/panel-2-b1.txt`): `rev664` differs from `post` ONLY in its three rows — `suspectsOutsideWrite` 232 → 40, `confirmsOutsideWrite` 225 → 26, `completeReadAdoptionIfGoingLive` 77 → 26 (the final rebuild's own numbers). Every other row equal, including the three new FL2 rows (`placeStands` 179, `deliverHerPress` 234, `openShow` 300 — the fix round's code is in both).
+  - **C12/C13's pre-run binary check, on BOTH test bundles** (`final-rebuild-2/b1-check.py`; `logs/binary-check-post-10.txt`, `logs/binary-check-rev664-5.txt` — identical verdicts): the Takes twin's predicates are three distinct bodies, each with ONE forwarder (`…_TA`, no uniquing suffix) — `closure #1` calls `prose`, `#2` `isEditable`, `#3` `aiWords`; its `settle` partials load the forwarders in order — `TY3_` → #1, `TY5_` → #2, `TY7_` → #3 (adrp+add targets 0x32eb854 / 0x32eb864 / 0x32ebaac); the VX-692 detector (`nm -j | grep '^_$s13VariorumTests' | grep -E 'fU[0-9]*_TA\.[0-9]+$'`) finds exactly ONE hit, the standing MCP lead — `partial apply for closure #2 in closure #1 in MCPShareFacesTests.theIndicatorSaysOnlyWhatIsTrue()`. **No merged twin: C12/C13 have a verdict to give.**
+  - Provenance by content (`final-rebuild-2/prov.sh`): both dylibs carry F-L2's receipt words ("…'s change can't be opened." and "Open a Variorum window to see it.") and the Prince seed ("marriott 1908"), and both test bundles carry F-L2's pin `aShowThatCannotFinishOrFindsNoWindowSaysSo`; the not-yet-rebuilt `vx677-b3/post` (01:46) carries none of the four — the markers discriminate.
 - FR2-2 — `vx677-b3/post` + `vx677-b3/rev676`: NOT STARTED.
 - FR2-3 — `vx677-b4/post` + `vx677-b4/rev674`: NOT STARTED.
 - FR2-4 — `vx677-b5/post` + `vx677-c/rev668`: NOT STARTED.
