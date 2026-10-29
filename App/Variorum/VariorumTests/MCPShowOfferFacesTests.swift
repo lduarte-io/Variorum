@@ -355,6 +355,279 @@ struct MCPShowOfferFacesTests {
         }
     }
 
+    // MARK: - Her press re-reads the place (the VX-677 ladder round 1, F-L2)
+    //
+    // Every read below is bound to a local BEFORE a macro reads it — no closure, `&&` or `??`
+    // inside `#expect`/`#require` (VX-692).
+
+    /// **F-L2 — RED ON OLD: her TAKE of an ask whose place is GONE.** Nothing ends an ask whose
+    /// target dies while it stands (a wire `delete_note`, her own Delete, a sync removal), and the
+    /// old take ended the ask and delivered anyway: the shell adopts any id (no liveness gate on
+    /// adopt → select → the detail), so a pane stood on a TOMBSTONE, the take was logged, and
+    /// nothing was said. Now her press re-reads the place off the main actor — the grant ask's own
+    /// road (`refreshAsk` → `askStanding`): gone ⇒ the ask is let go and a refusal names the place
+    /// and the client; nothing opens; no take row. The note target and a takes target (the takes
+    /// arm's wait shrunk — the old road waited it out). Staged through `agentShow`, away (the
+    /// suite's real-road rule). Old: three failing expectations per target.
+    @Test func aTakeWhoseTargetIsGoneSaysSoAndOpensNothing() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let restoreWait = MCPNavigator.mountWait
+            MCPNavigator.mountWait = .milliseconds(40)
+            defer { MCPNavigator.mountWait = restoreWait }
+            for kind in ["note", "takes"] {
+                let title = "gone \(kind)"
+                let post = try session.operations.createPost(title: title)
+                let block = try session.operations.newBlock(in: post.id, text: "words").block.id
+                let target: MCPShowTarget = kind == "note"
+                    ? .note(noteID: post.id, blockID: nil, select: nil)
+                    : .takes(noteID: post.id, blockID: block)
+                let rig = Rig(session)
+                defer { rig.door.detach() }
+                let resting = rig.router.workspace.focusedSelection
+                _ = await rig.door.agentShow(MCPShowRequest(
+                    target: target, clientName: "claude-code", title: title, dial: .ask,
+                    activityKind: "note", activityID: post.id))
+                let stood = rig.door.showOffer != nil
+                try #require(stood, "fixture: the ask stands (\(kind))")
+                try session.operations.deleteContainer(post.id)  // the place dies while the ask stands
+                session.status.clear()  // the toast's ✕: the ask goes to the line
+                let take = try #require(session.status.lineItem?.action)
+                take.perform()  // her press
+
+                let refused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+                try? await Task.sleep(for: .milliseconds(150))  // past the old road's delivery and its log
+                let words = session.status.current?.text ?? "nothing"
+                let saidIt = refused && words == "\u{201C}\(title)\u{201D} is gone, so claude-code's ask was let go."
+                let selection = rig.router.workspace.focusedSelection
+                let openedNothing = selection == resting
+                let rows = try await db.read { try Queries.mcpActivity($0) }
+                let takeRows = rows.filter { $0.act == MCPShowActivity.takenAct }.count
+                let noTakeRow = takeRows == 0
+                let letGo = rig.door.showOffer == nil
+                let noStaleItem = session.status.standing == nil
+                #expect(saidIt, "RED ON OLD: a refusal naming the place and the client (\(kind)) — said: \(words)")
+                #expect(openedNothing, "RED ON OLD: the dead note opened (\(kind)) — \(String(describing: selection))")
+                #expect(noTakeRow, "RED ON OLD: a take was logged for a place that is gone (\(kind)): \(takeRows)")
+                #expect(letGo, "the ask is let go (\(kind))")
+                #expect(noStaleItem, "no stale item on the seam (\(kind))")
+                session.status.clear()
+            }
+        }
+    }
+
+    /// **F-L2 — the GUARD: her take of an ask whose place STANDS opens it exactly as before** — the
+    /// note target in place, and a takes target on its mounted note (her see-takes landing) — logs
+    /// each take and says nothing. Green on both trees: it keeps the pin above able to tell a dead
+    /// place from a live one (a fix that refused every take would fail here).
+    @Test func aTakeWhoseTargetStandsStillOpensIt() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "standing note")
+            let block = try session.operations.newBlock(in: post.id, text: "words").block.id
+            let noteID = post.id
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: noteID, blockID: nil, select: nil), clientName: "claude-code",
+                title: "standing note", dial: .ask, activityKind: "note", activityID: noteID))
+            session.status.clear()
+            let take = try #require(session.status.lineItem?.action)
+            take.perform()
+            let opened = await eventually { rig.router.workspace.focusedSelection == .post(noteID) }
+            let loggedOnce = await eventually {
+                let rows = (try? await db.read { try Queries.mcpActivity($0) }) ?? []
+                return rows.filter { $0.act == MCPShowActivity.takenAct }.count == 1
+            }
+            let quiet = session.status.current == nil
+            #expect(opened, "her take opened the note")
+            #expect(loggedOnce, "the take is its own row")
+            #expect(quiet, "nothing refused")
+
+            var applied: [PostMode] = []
+            let token = session.commandRouter.registerDetail(postID: noteID, mode: .write) { applied.append($0) }
+            defer { session.commandRouter.unregisterDetail(token) }
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .takes(noteID: noteID, blockID: block), clientName: "claude-code",
+                title: "standing note", dial: .ask, activityKind: "note", activityID: noteID))
+            session.status.clear()
+            let takeTakes = try #require(session.status.lineItem?.action)
+            takeTakes.perform()
+            let landed = await eventually {
+                session.commandRouter.pendingTakesLanding == .bloom(postID: noteID, blockID: block)
+            }
+            let loggedTwice = await eventually {
+                let rows = (try? await db.read { try Queries.mcpActivity($0) }) ?? []
+                return rows.filter { $0.act == MCPShowActivity.takenAct }.count == 2
+            }
+            let modes = applied
+            let stillQuiet = session.status.current == nil
+            #expect(landed, "her see-takes landing, parked for the mounted note")
+            #expect(modes == [.takes], "the mode, as her own door switches it")
+            #expect(loggedTwice, "the second take is logged too")
+            #expect(stillQuiet, "nothing refused")
+        }
+    }
+
+    /// **F-L2 (batch 3's F-B3-2 folded in) — RED ON OLD: a write receipt's Open ›, and ⌥⌘O's
+    /// last-change arm, on a change whose place is GONE.** The receipt road shared the take's hole:
+    /// an AI's write landed, its note died, and her Open › (or ⌥⌘O) still adopted the dead id — a
+    /// pane on a tombstone, nothing said. Now the same re-read: gone ⇒ a refusal naming the place
+    /// and the client, nothing opens, and the gone change is no longer the last change ⌥⌘O can open
+    /// — the chord greys (PROVISIONAL P-FL2-1: a door whose only press refuses is a dead door).
+    /// Old: four failing expectations per arm.
+    @Test func aReceiptsOpenOnAGoneChangeSaysSoAndOpensNothing() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+            let resting = rig.router.workspace.focusedSelection
+
+            // The receipt line's own Open ›.
+            let first = try session.operations.createPost(title: "gone change")
+            let firstID = first.id
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: firstID, targetTitle: "gone change",
+                show: .note(noteID: firstID, blockID: nil, select: nil)))
+            let open = try #require(session.status.quietLine?.action)
+            try session.operations.deleteContainer(firstID)  // the change's place dies
+            open.perform()
+            let lineRefused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            try? await Task.sleep(for: .milliseconds(100))  // past the old road's delivery
+            let lineWords = session.status.current?.text ?? "nothing"
+            let lineSaid = lineRefused
+                && lineWords == "\u{201C}gone change\u{201D} is gone, so claude-code's change can't be opened."
+            let afterLine = rig.router.workspace.focusedSelection
+            let lineOpenedNothing = afterLine == resting
+            let lineRetired = rig.door.lastShow == nil
+            let lineGreyed = !session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(lineSaid, "RED ON OLD: a refusal naming the place and the client — said: \(lineWords)")
+            #expect(lineOpenedNothing, "RED ON OLD: the dead note opened — \(String(describing: afterLine))")
+            #expect(lineRetired, "RED ON OLD: the gone change is still the last change (PROVISIONAL P-FL2-1)")
+            #expect(lineGreyed, "RED ON OLD: ⌥⌘O still offers a door that can only refuse")
+            session.status.clear()
+
+            // ⌥⌘O's last-change arm.
+            let second = try session.operations.createPost(title: "gone too")
+            let secondID = second.id
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "codex", act: .take, targetID: secondID, targetTitle: "gone too",
+                show: .note(noteID: secondID, blockID: nil, select: nil)))
+            session.status.clear()
+            try session.operations.deleteContainer(secondID)
+            let beforeChord = rig.router.workspace.focusedSelection
+            rig.door.showLastChange()
+            let chordRefused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            try? await Task.sleep(for: .milliseconds(100))
+            let chordWords = session.status.current?.text ?? "nothing"
+            let chordSaid = chordRefused
+                && chordWords == "\u{201C}gone too\u{201D} is gone, so codex's change can't be opened."
+            let afterChord = rig.router.workspace.focusedSelection
+            let chordOpenedNothing = afterChord == beforeChord
+            let chordRetired = rig.door.lastShow == nil
+            let chordGreyed = !session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(chordSaid, "RED ON OLD: ⌥⌘O's refusal naming the place and the client — said: \(chordWords)")
+            #expect(chordOpenedNothing, "RED ON OLD: ⌥⌘O opened the dead note — \(String(describing: afterChord))")
+            #expect(chordRetired, "RED ON OLD: the gone change is still the last change (PROVISIONAL P-FL2-1)")
+            #expect(chordGreyed, "RED ON OLD: ⌥⌘O stays lit over a door that can only refuse")
+        }
+    }
+
+    /// **F-L2 (the fold-in) — the GUARD: a receipt's Open › and ⌥⌘O on a change whose place
+    /// STANDS open it exactly as before**, say nothing, and keep it ⌥⌘O's last change (the chord
+    /// lit). Green on both trees.
+    @Test func aReceiptsOpenOnAStandingChangeStillOpensIt() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "standing change")
+            let noteID = post.id
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+            let target = MCPShowTarget.note(noteID: noteID, blockID: nil, select: nil)
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: noteID, targetTitle: "standing change",
+                show: target))
+            let open = try #require(session.status.quietLine?.action)
+            open.perform()
+            let opened = await eventually { rig.router.workspace.focusedSelection == .post(noteID) }
+            let quiet = session.status.current == nil
+            let kept = rig.door.lastShow == target
+            let lit = session.commandRouter.isEnabled(.showLastAIChange)
+            #expect(opened, "her Open › opened the note")
+            #expect(quiet, "nothing refused")
+            #expect(kept, "it stays the last change")
+            #expect(lit, "⌥⌘O stays lit")
+
+            rig.router.adopt(.library)
+            rig.door.showLastChange()
+            let reopened = await eventually { rig.router.workspace.focusedSelection == .post(noteID) }
+            let stillQuiet = session.status.current == nil
+            #expect(reopened, "⌥⌘O opens it again")
+            #expect(stillQuiet, "nothing refused")
+        }
+    }
+
+    /// **F-L2 — RED ON OLD: a show that cannot FINISH, or finds no full window, SAYS so.** Her take
+    /// of a takes ask (and a receipt's Open › to a block's takes) opens the note, but the rest never
+    /// lands when the note's detail never registers inside the wait (here a bare router, the wait
+    /// shrunk) — and the old roads said nothing. Her words now say so (never the wire's
+    /// `partialShowWords`, which speaks to the client). And a receipt's Open › with every full window
+    /// closed (batch 3's F-B3-2) speaks the take's `noWindow` sibling instead of doing nothing.
+    /// Old: one failing expectation per arm (three).
+    @Test func aShowThatCannotFinishOrFindsNoWindowSaysSo() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let restoreWait = MCPNavigator.mountWait
+            MCPNavigator.mountWait = .milliseconds(40)
+            defer { MCPNavigator.mountWait = restoreWait }
+            let post = try session.operations.createPost(title: "half shown")
+            let block = try session.operations.newBlock(in: post.id, text: "words").block.id
+            let noteID = post.id
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+
+            // 1 — her take of a takes ask: the note opens, the takes never land.
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .takes(noteID: noteID, blockID: block), clientName: "claude-code", title: "half shown",
+                dial: .ask, activityKind: "note", activityID: noteID))
+            session.status.clear()
+            let take = try #require(session.status.lineItem?.action)
+            take.perform()
+            let takeRefused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            let takeWords = session.status.current?.text ?? "nothing"
+            let takeSaid = takeRefused
+                && takeWords == "\u{201C}half shown\u{201D} opened, but the rest of what claude-code asked to show didn't land."
+            let takeOpened = rig.router.workspace.focusedSelection == .post(noteID)
+            #expect(takeSaid, "RED ON OLD: the unfinished take said nothing — said: \(takeWords)")
+            #expect(takeOpened, "the note itself opened (non-vacuity)")
+            session.status.clear()
+
+            // 2 — a receipt's Open › to the same block's takes: the same, in the change's words.
+            rig.door.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: noteID, targetTitle: "half shown",
+                show: .takes(noteID: noteID, blockID: block)))
+            let open = try #require(session.status.quietLine?.action)
+            open.perform()
+            let lineRefused = await eventually(.milliseconds(800)) { session.status.current?.kind == .refusal }
+            let lineWords = session.status.current?.text ?? "nothing"
+            let lineSaid = lineRefused
+                && lineWords == "\u{201C}half shown\u{201D} opened, but the rest of claude-code's change didn't land."
+            #expect(lineSaid, "RED ON OLD: the unfinished Open › said nothing — said: \(lineWords)")
+            session.status.clear()
+
+            // 3 — a receipt's Open › with no full window at all (F-B3-2).
+            let noWindows = WindowRegistry()
+            let lone = MCPDoor(serverAllowed: false)
+            lone.attach(session: session, windows: noWindows)
+            defer { lone.detach() }
+            lone.landReceipt(MCPWriteReceipt(
+                clientName: "claude-code", act: .take, targetID: noteID, targetTitle: "half shown",
+                show: .note(noteID: noteID, blockID: nil, select: nil)))
+            let loneOpen = try #require(session.status.quietLine?.action)
+            loneOpen.perform()
+            let loneRefused = session.status.current?.kind == .refusal
+            let loneWords = session.status.current?.text ?? "nothing"
+            let loneSaid = loneRefused && loneWords == "Open a Variorum window to see it."
+            #expect(loneSaid, "RED ON OLD (F-B3-2): an Open › with no full window did nothing, silently — said: \(loneWords)")
+        }
+    }
+
     // MARK: - VX-675: a saved version, full size
 
     /// A version target opens the VX-440 full-size page — its own destination
