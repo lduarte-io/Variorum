@@ -64,3 +64,15 @@
 
 - The REVIEW_PROMPT's "Review foci" hook: no `Review foci` section exists in the run record or the kickoff brief; the implementers' SELF-ASSESSMENT FLAG lists were treated as foci and each named item was checked (the Trash arm's seed exactness, the one window scan, phase 2's Σ|family| bound and its documented Swift-DP upgrade, the MATERIALIZED/CROSS JOIN load-bearing directives — guarded by the plan/library pins — the named-region growth rule, the +82 handshake, the FKs-off fixtures, `try?`-flattening avoidance in `stillOnTheClock` (verified — the whole map is read), and the `confirmSelection`/`confirm` split).
 - Reviewer's verification runs: 169/169 targeted core tests green on this tree; the two-file Sync/ revert runs quoted under MAJOR-1 (scratch clone, never this worktree; the worktree was left untouched and `git status` clean).
+
+---
+
+## DISPOSITIONS (the orchestrator, 2026-10-28 — repo-first, before any fix session reads them)
+
+- **MAJOR-1 — CONFIRMED (same-model arbitration; the reviewer's revert evidence verified the mechanism).** The arbitration against the spec: the hallucination guard demands the pin be red FOR THE MECHANISM, and pin 1's red was the inert marker count — the revival expectations passed on old code because per-op stamps kept the first family death off the reading's stamp. Pin 2 is the true red-on-old, so the FIX stands; pin 1 and the Unit-1 record sentence overstate. FIX (test+record only, Unit 1's implementer): pin 1 adopts ONE stamp (pin 2's `.constant` date idiom around both books' deletes — her real door deletes a family on one stamp), the revival expectations re-observed RED by the same two-file scratch revert (never on the live tree), the pin's doc and the Unit-1 record's "observed RED (the revival itself)" sentence corrected to name pin 2 as the original true red and pin 1's correction.
+- **MINOR-1 — CONFIRMED (Unit 3, cross-model: verbatim to the implementer, agree/dispute back to the reviewer's final call).** Lower `trashTotalLoaded` at `startTrashTotal`'s restart; pin red on current code.
+- **MINOR-2 — CONFIRMED (Unit 3, cross-model, same flow).** `.gone` distinguished from absent in `TrashBulk.stillOnTheClock`; the receipt never counts a forever-gone row as "put back"; pin red on current code.
+- **MINOR-3 — CONFIRMED AS A SMALL FIX, not doc-only (same-model arbitration — the reviewer's hazard half stays SPECULATIVE, but the asymmetry is real):** `AppServices.stop()` (lock teardown, sign-out) gains a NON-AWAITING cancel of the held sweep (the sweeps are boundary-cancellation-aware since d5bd1bda7, so the cancel is prompt and safe), plus the doc sentence naming the two roads (stop() cancels; quit quiesces). Pin only if cheap at the model seam; otherwise the doc + the existing boundary pins carry it.
+- **NIT-1 — RECORD-ONLY:** the three spellings ride the #250 bundle beside P-671-6 (wording is hers).
+
+Round 2 (a FRESH reviewer) re-reviews the fixes once they land; cap three rounds.
