@@ -1633,7 +1633,11 @@ The procedure for each, one at a time: apply over the clean committed tip → `g
   - `rev674`: `logs/build-rev674-5.log`, TEST BUILD SUCCEEDED, EXIT 0 (05:05:22–05:08:27). Diff +1 in `BlockHistoryPane.swift` (1 marker), as dry-run. Restored by `git checkout --`; `git status` empty, `git diff` empty, no marker.
   - Panel (`logs/panel-2-b4.txt`): `rev674` differs from `post` ONLY in `CommitRowFace.restingWords` (99 → 16 — batch 4's own numbers); every other row equal. `vx677-b4/post` equals `vx677-b1/post` on every row.
   - Provenance: both carry the four content markers.
-- FR2-4 — `vx677-b5/post` + `vx677-c/rev668`: NOT STARTED.
+- FR2-4 — `vx677-b5/post` + `vx677-c/rev668`: DONE (this commit).
+  - `post`: `DerivedData/vx677-b5/logs/build-post-10.log`, TEST BUILD SUCCEEDED, EXIT 0 (05:09:15–05:12:30); binaries 05:12:29; `strings` finds 0 `VX668-TRACE` (the trace stays removed).
+  - `rev668` (in place in the fixes unit's dir): `DerivedData/vx677-c/logs/build-rev668-2.log`, TEST BUILD SUCCEEDED, EXIT 0 (05:12:40–05:16:08). Diff +1 −1 in `EditorViewModel.swift` (1 marker), as dry-run. Restored by `git checkout --`; `git status` empty, `git diff` empty, no marker.
+  - Panel (`vx677-c/logs/panel-2-rev668.txt`): `rev668` differs from `post` ONLY in `EditorViewModel.adoptRewrite` (324 → 142 — the fixes unit's own numbers); every other row equal. `vx677-b5/post` equals `vx677-b1/post` on every row.
+  - Provenance: both carry the four content markers.
 - FR2-5 — `vx677-c/revFW2`: NOT STARTED.
 - FR2-6 — `vx677-c/revFL2` (NEW): NOT STARTED.
 - FR2-7 — the walk app `DerivedData/vx677-app` + its provenance: NOT STARTED.
