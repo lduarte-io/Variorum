@@ -1309,11 +1309,19 @@ final class TakesViewModel {
     /// have no article landing), and only a parcel for THIS note; the Lenses
     /// board leaves the parcel where it is (inert — heard on change only).
     func consumeRestoreLanding() {
+        #if DEBUG  // VX668-TRACE — another consumer of the same parcel
+        VX668Trace.line("takes-consume board=\(VX668Trace.object(self)) host=\(host) "
+            + "landingEnabled=\(landingEnabled) post=\(VX668Trace.id(postID)) "
+            + "parcel=\(VX668Trace.parcel(session.commandRouter.pendingRestoreLanding))")
+        #endif
         guard let landing = session.commandRouter.pendingRestoreLanding,
               landing.postID == postID
         else { return }
         if authority.livePane?.variantID == landing.variantID { blur() }
         guard host == .takes, landingEnabled else { return }
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.line("takes-consume-took board=\(VX668Trace.object(self)) parcel=\(VX668Trace.parcel(landing))")
+        #endif
         session.commandRouter.pendingRestoreLanding = nil
         parkedRestoreLanding = (landing, Date().addingTimeInterval(RestoreLanding.patience))
         landParkedRestore(in: projection)

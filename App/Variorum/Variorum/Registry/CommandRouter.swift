@@ -52,6 +52,11 @@ final class CommandRouter {
         showVersions: (() -> Void)? = nil
     ) -> UUID {
         let token = UUID()
+        #if DEBUG  // VX668-TRACE — a detail (re)registering after a mark
+        VX668Trace.windowed("register-detail post=\(VX668Trace.id(postID)) mode=\(mode) "
+            + "token=\(VX668Trace.id(token.uuidString)) was=\(VX668Trace.id(activePostID)) "
+            + "parcel=\(VX668Trace.parcel(pendingRestoreLanding))")
+        #endif
         detailToken = token
         // A DIFFERENT note arriving makes the remembered caret a fact about
         // somewhere else (ledger row 33): the live fact becomes THAT note's
@@ -134,12 +139,20 @@ final class CommandRouter {
             pendingCompareLanding = nil
         }
         if let landing = pendingRestoreLanding, landing.postID != postID {
+            #if DEBUG  // VX668-TRACE — the router's clear (another note arrived)
+            VX668Trace.line("router-clear why=register-other parcel=\(VX668Trace.parcel(landing)) "
+                + "arriving=\(VX668Trace.id(postID))")
+            #endif
             pendingRestoreLanding = nil
         }
         return token
     }
 
     func unregisterDetail(_ token: UUID) {
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.windowed("unregister-detail token=\(VX668Trace.id(token.uuidString)) "
+            + "current=\(token == detailToken) parcel=\(VX668Trace.parcel(pendingRestoreLanding))")
+        #endif
         guard token == detailToken else { return }  // a stale teardown after the next mount
         detailToken = nil
         applyMode = nil
@@ -160,6 +173,11 @@ final class CommandRouter {
         pendingTakesLanding = nil
         pendingLensLanding = nil
         pendingCompareLanding = nil
+        #if DEBUG  // VX668-TRACE — the router's clear (the detail left)
+        if let landing = pendingRestoreLanding {
+            VX668Trace.line("router-clear why=unregister parcel=\(VX668Trace.parcel(landing))")
+        }
+        #endif
         pendingRestoreLanding = nil
         pendingTrayRequest = nil
         focusedBlockIdentity = nil
@@ -806,7 +824,17 @@ final class CommandRouter {
     /// VX-431 (the VX-440 run): a confirmed Block History restore's landing —
     /// observed, and consumed only on CHANGE by a writing surface already
     /// mounted (`RestoreLanding` carries the whole contract).
-    var pendingRestoreLanding: RestoreLanding?
+    var pendingRestoreLanding: RestoreLanding? {
+        didSet {  // VX668-TRACE (the observer exists for the trace alone; remove it with the trace)
+            #if DEBUG  // VX668-TRACE — EVERY write of the parcel, with its writer's frames
+            VX668Trace.line("parcel-set old=\(VX668Trace.parcel(oldValue)) "
+                + "new=\(VX668Trace.parcel(pendingRestoreLanding)) by="
+                + Thread.callStackSymbols.dropFirst(1).prefix(4)
+                    .map { $0.split(separator: " ", omittingEmptySubsequences: true).dropFirst(3).joined(separator: " ") }
+                    .joined(separator: " | "))
+            #endif
+        }
+    }
 
     /// **VX-440 batch 1 — her own doors onto the Compare landing** (R-440-1:
     /// a Versions row's "Compare with now", the one-press "Compare with Latest

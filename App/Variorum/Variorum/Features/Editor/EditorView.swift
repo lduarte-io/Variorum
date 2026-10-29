@@ -152,6 +152,13 @@ struct EditorView: View {
 
     var body: some View {
         @Bindable var model = model
+        #if DEBUG  // VX668-TRACE — did this body re-run, and what parcel did it read?
+        let _ = VX668Trace.windowed(
+            "editor-body editor=\(VX668Trace.object(model)) post=\(VX668Trace.id(postID)) "
+                + "inline=\(inline) "
+                + "parcel=\(VX668Trace.parcel(session.commandRouter.pendingRestoreLanding)) "
+                + VX668Trace.windowState(model.textView))
+        #endif
         Group {
             if case .inSidebarBox = barPlacement {
                 // 18d batch 1: no bar here at all — the doors are in the
@@ -192,7 +199,12 @@ struct EditorView: View {
         // VX-431 (the VX-440 run): a Block History restore beside this
         // editor says where it landed — heard on CHANGE only, so a parcel
         // posted before this editor mounted is never taken at an arrival.
-        .onChange(of: session.commandRouter.pendingRestoreLanding) { _, _ in
+        .onChange(of: session.commandRouter.pendingRestoreLanding) { old, new in
+            #if DEBUG  // VX668-TRACE — (b): the push fired, with these values
+            VX668Trace.line("onChange editor=\(VX668Trace.object(model)) post=\(VX668Trace.id(postID)) "
+                + "inline=\(inline) old=\(VX668Trace.parcel(old)) new=\(VX668Trace.parcel(new)) "
+                + VX668Trace.windowState(model.textView))
+            #endif
             model.consumeRestoreLanding()
         }
         .onDisappear { model.teardown() }

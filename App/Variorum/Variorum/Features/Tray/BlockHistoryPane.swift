@@ -413,7 +413,16 @@ final class BlockHistoryModel {
         }
         pendingRestore = nil
         status = nil
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.mark()
+        VX668Trace.line("restore-begin road=\(vx668Road) post=\(VX668Trace.id(postID)) "
+            + "block=\(VX668Trace.id(blockID)) take=\(VX668Trace.id(variantID)) "
+            + "commit=\(VX668Trace.id(commit.id))")
+        #endif
         await session.flushExistingAutosave(forPost: postID)
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.line("restore-flushed road=\(vx668Road)")
+        #endif
         do {
             try await session.runner.run { ops in
                 try ops.restoreCommit(variantID, commitID: commit.id)
@@ -424,12 +433,32 @@ final class BlockHistoryModel {
             // surface decides about for itself).
             session.commandRouter.pendingRestoreLanding = RestoreLanding(
                 postID: postID, blockID: blockID, variantID: variantID, text: commit.text)
+            #if DEBUG  // VX668-TRACE
+            VX668Trace.mark()
+            VX668Trace.line("post road=\(vx668Road) "
+                + "parcel=\(VX668Trace.parcel(session.commandRouter.pendingRestoreLanding)) "
+                + "post=\(VX668Trace.id(postID)) block=\(VX668Trace.id(blockID)) "
+                + "take=\(VX668Trace.id(variantID)) textLen=\((commit.text as NSString).length) "
+                + "routerDetailPost=\(VX668Trace.id(session.commandRouter.activePostID)) "
+                + "routerMode=\(session.commandRouter.activeMode.map { "\($0)" } ?? "nil")")
+            #endif
         } catch let error as OperationError {
             status = .refusal(TrayRefusalCopy.message(for: error))
+            #if DEBUG  // VX668-TRACE
+            VX668Trace.line("restore-refused road=\(vx668Road) error=\(error)")
+            #endif
         } catch {
             status = .refusal(DeletionRefusal.fallback(error))
+            #if DEBUG  // VX668-TRACE
+            VX668Trace.line("restore-refused road=\(vx668Road) error=\(error)")
+            #endif
         }
     }
+
+    #if DEBUG  // VX668-TRACE
+    /// Which road the restore in flight came by — the trace's word only.
+    @ObservationIgnored private var vx668Road = "row"
+    #endif
 
     func confirmPendingRestore(_ pending: PendingRestore) async {
         await restore(pending.commit, of: pending.variantID, confirmed: true)
@@ -522,6 +551,10 @@ final class BlockHistoryModel {
     /// road's window: one landing behaviour.
     func readingFootPressed(_ act: ReadingAct, for reading: CommitReading) {
         pendingReadingAct = (act, reading)
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.mark()
+        VX668Trace.line("sheet-foot act=\(act) commit=\(VX668Trace.id(reading.commit.id))")
+        #endif
     }
 
     /// The sheet is gone (the pane's `.sheet(onDismiss:)`): the act a foot
@@ -529,6 +562,11 @@ final class BlockHistoryModel {
     /// ⎋ hands nothing over and nothing runs.
     func readingSheetDismissed() async {
         readingTrace.append(.dismissed)
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.mark()
+        VX668Trace.line("sheet-dismissed pending=\(pendingReadingAct != nil) "
+            + "parcelOnRouter=\(VX668Trace.parcel(session.commandRouter.pendingRestoreLanding))")
+        #endif
         guard let pending = pendingReadingAct else { return }
         pendingReadingAct = nil
         await runReadingAct(pending.act, for: pending.reading)
@@ -538,6 +576,10 @@ final class BlockHistoryModel {
         readingTrace.append(.acted)
         switch act {
         case .restore(let confirmed):
+            #if DEBUG  // VX668-TRACE
+            vx668Road = "sheet"
+            defer { vx668Road = "row" }
+            #endif
             await restore(reading.commit, of: reading.variantID, confirmed: confirmed)
         case .bringBack:
             await bringBackAsTake(reading.commit)
@@ -805,7 +847,13 @@ struct BlockHistoryPane: View {
             item: Binding(
                 get: { model.reading },
                 set: { model.reading = $0 }),
-            onDismiss: { Task { await model.readingSheetDismissed() } }
+            onDismiss: {
+                #if DEBUG  // VX668-TRACE
+                VX668Trace.mark()
+                VX668Trace.line("sheet-onDismiss (SwiftUI's call; the act runs in the Task it starts)")
+                #endif
+                Task { await model.readingSheetDismissed() }
+            }
         ) { reading in
             CommitReadingSheet(
                 reading: reading, tokens: tokens, now: session.now,

@@ -592,6 +592,9 @@ final class EditorViewModel {
 
     /// Runs for the editor's lifetime: header + slots + decorations, live.
     func start() async {
+        #if DEBUG  // VX668-TRACE — a (re)mount after a mark is a new editor id
+        VX668Trace.windowed("editor-start editor=\(VX668Trace.object(self)) post=\(VX668Trace.id(postID))")
+        #endif
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.observeHeader() }
             group.addTask { await self.observeSlots() }
@@ -683,6 +686,10 @@ final class EditorViewModel {
     /// tests can await text safety deterministically (Phase 10 Step 3).
     @discardableResult
     func teardown() -> Task<Void, Never>? {
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.windowed("editor-teardown editor=\(VX668Trace.object(self)) post=\(VX668Trace.id(postID)) "
+            + "parked=\(VX668Trace.parcel(parkedRestoreLanding?.landing))")
+        #endif
         // 18l U0c: the page she leaves, WITH ITS PLACE (`EditorRouter.scrollPlaces`
         // — a re-open restores it exactly). Only a loaded full-document editor
         // speaks for the page: a surface torn down before its first render (a
@@ -939,6 +946,14 @@ final class EditorViewModel {
             delivery: fromDelivery,
             matchesSurface: ledger.matches(new, entries: index.entries),
             sameSequence: new.map(\.blockID) == index.entries.map(\.blockID))
+        #if DEBUG  // VX668-TRACE — the delivery around the restore's rewrite
+        VX668Trace.windowed("projection editor=\(VX668Trace.object(self)) decision=\(decision) "
+            + "delivery=\(fromDelivery) dirty=\(autosave.isDirty) caret=\(VX668Trace.caret(textView))")
+        defer {
+            VX668Trace.windowed("projection-done editor=\(VX668Trace.object(self)) decision=\(decision) "
+                + "caret=\(VX668Trace.caret(textView))")
+        }
+        #endif
         switch decision {
         case .initialRender:
             // First render: there is no local tail yet — the pre-load
@@ -2720,12 +2735,23 @@ final class EditorViewModel {
     /// scroll in their host and own no reveal (`revealLanding`'s rule) — and
     /// only a parcel for THIS note.
     func consumeRestoreLanding() {
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.line("consume editor=\(VX668Trace.object(self)) post=\(VX668Trace.id(postID)) "
+            + "scroll=\(scrollView != nil) "
+            + "parcel=\(VX668Trace.parcel(session.commandRouter.pendingRestoreLanding)) "
+            + "parcelPost=\(VX668Trace.id(session.commandRouter.pendingRestoreLanding?.postID)) "
+            + "caret=\(VX668Trace.caret(textView))")
+        #endif
         guard scrollView != nil,
               let landing = session.commandRouter.pendingRestoreLanding,
               landing.postID == postID
         else { return }
         session.commandRouter.pendingRestoreLanding = nil
         parkedRestoreLanding = (landing, Date().addingTimeInterval(RestoreLanding.patience))
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.mark()
+        VX668Trace.line("consume-took editor=\(VX668Trace.object(self)) parcel=\(VX668Trace.parcel(landing))")
+        #endif
         landRestoreIfShown()
     }
 
@@ -2742,8 +2768,20 @@ final class EditorViewModel {
     /// answer to "which part came back" (PROVISIONAL P-440-8); Reduce Motion's
     /// discreet variant holds (the sink's plan).
     private func landRestoreIfShown() {
-        guard let parked = parkedRestoreLanding else { return }
+        guard let parked = parkedRestoreLanding else {
+            #if DEBUG  // VX668-TRACE
+            VX668Trace.windowed("land editor=\(VX668Trace.object(self)) outcome=nothing-parked "
+                + "routerParcel=\(VX668Trace.parcel(session.commandRouter.pendingRestoreLanding)) "
+                + "caret=\(VX668Trace.caret(textView))")
+            #endif
+            return
+        }
         guard Date() < parked.until, !autosave.isDirty else {
+            #if DEBUG  // VX668-TRACE
+            VX668Trace.line("land editor=\(VX668Trace.object(self)) outcome=dropped "
+                + "expired=\(Date() >= parked.until) dirty=\(autosave.isDirty) "
+                + "parcel=\(VX668Trace.parcel(parked.landing))")
+            #endif
             parkedRestoreLanding = nil
             return
         }
@@ -2754,6 +2792,10 @@ final class EditorViewModel {
             // The block is not in this note's page, or the page renders
             // another of its takes: there is nothing of the restored words
             // here to wash (the restore's receipt said what happened).
+            #if DEBUG  // VX668-TRACE
+            VX668Trace.line("land editor=\(VX668Trace.object(self)) outcome=absent "
+                + "parcel=\(VX668Trace.parcel(landing))")
+            #endif
             parkedRestoreLanding = nil
             return
         }
@@ -2761,12 +2803,25 @@ final class EditorViewModel {
         // the surface — the settle hop after its rewrite tries again.
         guard slots.first(where: { $0.blockID == landing.blockID })?.text == landing.text,
               let textView, let scrollView
-        else { return }
+        else {
+            #if DEBUG  // VX668-TRACE
+            let shown = slots.first(where: { $0.blockID == landing.blockID })?.text == landing.text
+            VX668Trace.line("land editor=\(VX668Trace.object(self)) outcome=not-yet "
+                + "shown=\(shown) textView=\(self.textView != nil) scroll=\(self.scrollView != nil) "
+                + "parcel=\(VX668Trace.parcel(landing)) caret=\(VX668Trace.caret(self.textView))")
+            #endif
+            return
+        }
         parkedRestoreLanding = nil
         let start = index.range(ofEntryAt: i).location
         textView.setSelectedRange(NSRange(location: start, length: 0))
         updateCaretContext()
         restCaretLineInTheBand(start, textView: textView, scrollView: scrollView)
+        #if DEBUG  // VX668-TRACE
+        VX668Trace.line("land editor=\(VX668Trace.object(self)) outcome=landed start=\(start) "
+            + "caret=\(VX668Trace.caret(textView)) parcel=\(VX668Trace.parcel(landing)) "
+            + VX668Trace.windowState(textView))
+        #endif
         guard let span = JumpPrimitive.lineSpan(ofOffset: start, in: textView) else { return }
         lastRestoreLanding = (start, span)
         restoreLandings += 1
@@ -3988,6 +4043,13 @@ final class EditorViewModel {
             // 18l-c U8 (a): a mode switch's landing has rested — its caret's
             // line flashes now, never before the page is where it will stay.
             consumeModeSwitchArrival(deliveredBy: generation)
+            #if DEBUG  // VX668-TRACE — (c): the settle hop, and what it holds
+            VX668Trace.windowed("settle-hop editor=\(VX668Trace.object(self)) gen=\(generation) "
+                + "parked=\(VX668Trace.parcel(parkedRestoreLanding?.landing)) "
+                + "routerParcel=\(VX668Trace.parcel(session.commandRouter.pendingRestoreLanding)) "
+                + "dirty=\(autosave.isDirty) caret=\(VX668Trace.caret(textView)) "
+                + VX668Trace.windowState(textView))
+            #endif
             // VX-431: a restore's landing waiting for its words to be shown
             // — this hop is the first moment after the rewrite that its
             // block's line is the restored words' line.
