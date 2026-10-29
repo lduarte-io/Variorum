@@ -1477,6 +1477,36 @@ nonisolated enum MCPShowOfferCopy {
         }
     }
 
+    /// **The VX-677 ladder round 1, F-L2 — her take of an ask whose place is GONE**
+    /// (the note deleted while the ask stood, the book or wing gone, the version no
+    /// longer one): said where she pressed, in the grant ask's own shape
+    /// (`MCPAskCopy.gone`), and the ask is let go. PROVISIONAL (P-FL2-2), VX-234's
+    /// pass.
+    static func gone(_ request: MCPShowRequest) -> String {
+        "\(place(request.target, title: request.title)) is gone, so \(request.clientName)'s ask was let go."
+    }
+
+    /// F-L2: her take opened the note, but the rest (the takes, a lens, Compare)
+    /// never landed — said in HER words; the wire's `partialShowWords` speaks to
+    /// the client. PROVISIONAL (P-FL2-2).
+    static func unfinished(_ request: MCPShowRequest) -> String {
+        "\(place(request.target, title: request.title)) opened, but the rest of what \(request.clientName) "
+            + "asked to show didn't land."
+    }
+
+    /// F-L2: the place a show names, at a sentence's head — the note (a takes,
+    /// lens or compare target's note; for compare, its anchor), a note's saved
+    /// version, the book, the wing (Home a place-name, never quoted).
+    static func place(_ target: MCPShowTarget, title: String?) -> String {
+        let named = title.map(quoted)
+        switch target {
+        case .note, .takes, .lens, .compare: return named ?? "That note"
+        case .version: return named.map { "The saved version of \($0)" } ?? "That saved version"
+        case .book: return named ?? "That book"
+        case .wing(let wingID, let name, _): return wingID.isEmpty ? "The Home wing" : "The wing \(quoted(name))"
+        }
+    }
+
     private static func quoted(_ text: String) -> String { "\u{201C}\(text)\u{201D}" }
 }
 
@@ -1485,6 +1515,24 @@ nonisolated enum MCPReceiptCopy {
     /// 13n-b U4 (R-13nb-23 (a)): the receipt's one-press door — her "… —
     /// Open ›". App voice (P-13n-1), 13s-a sweepable.
     static let openDoor = "Open \u{203A}"
+
+    /// **The VX-677 ladder round 1, F-L2 — batch 3's F-B3-2:** a receipt's Open ›
+    /// (or ⌥⌘O) with every full window closed SAYS so — the take's `noWindow`
+    /// sibling, with no ask to keep. PROVISIONAL (P-FL2-2).
+    static let noWindow = "Open a Variorum window to see it."
+
+    /// F-L2: a receipt's Open › (or ⌥⌘O) on a change whose place has GONE since it
+    /// landed — the place and the client named, as the take's refusal does.
+    /// PROVISIONAL (P-FL2-2).
+    static func gone(_ target: MCPShowTarget, title: String?, client: String) -> String {
+        "\(MCPShowOfferCopy.place(target, title: title)) is gone, so \(client)'s change can't be opened."
+    }
+
+    /// F-L2: the change's note opened, but the rest of its landing never did.
+    /// PROVISIONAL (P-FL2-2).
+    static func unfinished(_ target: MCPShowTarget, title: String?, client: String) -> String {
+        "\(MCPShowOfferCopy.place(target, title: title)) opened, but the rest of \(client)'s change didn't land."
+    }
 
     static func line(_ run: [MCPWriteReceipt]) -> String {
         guard let first = run.first else { return "" }
