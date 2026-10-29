@@ -15,9 +15,12 @@
 //  final walk filmed the tab in Terminal's mono and lowercase headings while
 //  the app was in Study (S-572-1/2), defeating VX-572's "the description column
 //  in the voice's face" in Study. The in-host face pin stayed green because it
-//  hands the tab its tokens itself. THIS COMMIT IS THE SEAM ONLY (behaviour
-//  unchanged — the content is still the bare `HelperView()`), so the pin that
-//  mounts it (`HelperWindowThemeTests`) is red here, on the pre-fix tree.
+//  hands the tab its tokens itself. Every other window root (`RootView`,
+//  `NoteWindowView`, `QuickNoteView`, `AppSettingsView`) owns a `ThemeStore`
+//  over the open session, starts it for the window's life and puts it in the
+//  environment; this root now does the same (`HelperThemedRoot`). With no
+//  open library there is no voice to read, and the helper keeps the fallback
+//  face it always had. Pinned: `HelperWindowThemeTests`.
 //
 
 import SwiftUI
@@ -27,7 +30,36 @@ struct HelperSceneContent: View {
     let state: AppBootstrap.State
 
     var body: some View {
+        if case .ready(let session) = state {
+            HelperThemedRoot(session: session)
+                // A new library is a new voice: a fresh store for it.
+                .id(ObjectIdentifier(session))
+        } else {
+            HelperView()
+        }
+    }
+}
+
+/// The open library's voice, carried exactly as the other window roots carry
+/// it: a `ThemeStore` of the window's own over the session, started for the
+/// window's life, in the environment `HelperView` reads.
+private struct HelperThemedRoot: View {
+    let session: AppSession
+    @State private var theme: ThemeStore
+
+    init(session: AppSession) {
+        self.session = session
+        _theme = State(initialValue: ThemeStore(session: session))
+    }
+
+    var body: some View {
         HelperView()
+            .environment(theme)
+            .task { await theme.start() }
+            #if DEBUG
+            .onAppear { HelperViewOracle.root(theme, for: session) }
+            .onDisappear { HelperViewOracle.release(session) }
+            #endif
     }
 }
 
