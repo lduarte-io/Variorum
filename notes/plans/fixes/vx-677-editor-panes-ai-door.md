@@ -1638,7 +1638,10 @@ The procedure for each, one at a time: apply over the clean committed tip → `g
   - `rev668` (in place in the fixes unit's dir): `DerivedData/vx677-c/logs/build-rev668-2.log`, TEST BUILD SUCCEEDED, EXIT 0 (05:12:40–05:16:08). Diff +1 −1 in `EditorViewModel.swift` (1 marker), as dry-run. Restored by `git checkout --`; `git status` empty, `git diff` empty, no marker.
   - Panel (`vx677-c/logs/panel-2-rev668.txt`): `rev668` differs from `post` ONLY in `EditorViewModel.adoptRewrite` (324 → 142 — the fixes unit's own numbers); every other row equal. `vx677-b5/post` equals `vx677-b1/post` on every row.
   - Provenance: both carry the four content markers.
-- FR2-5 — `vx677-c/revFW2`: NOT STARTED.
+- FR2-5 — `vx677-c/revFW2`: DONE (this commit).
+  - `revFW2` (in place in the fixes unit's dir; its green twin is `vx677-b4/post`, FR2-3): `DerivedData/vx677-c/logs/build-revFW2-2.log`, TEST BUILD SUCCEEDED, EXIT 0 (05:17:00–05:19:42). Diff +1 −1 in `HelperSceneContent.swift` (1 marker), as dry-run. Restored by `git checkout --`; `git status` empty, `git diff` empty, no marker.
+  - Panel (`vx677-c/logs/panel-2-revFW2.txt`): `revFW2` differs from `vx677-b4/post` ONLY in `HelperThemedRoot.body` (733 → 641 — the fixes unit's own numbers); every other row equal.
+  - Provenance: the four content markers present.
 - FR2-6 — `vx677-c/revFL2` (NEW): NOT STARTED.
 - FR2-7 — the walk app `DerivedData/vx677-app` + its provenance: NOT STARTED.
 - FR2-8 — the whole panel at the end + the tree-clean check: NOT STARTED.
