@@ -1293,6 +1293,20 @@ Four items:
 
 Deliverables: the WHY + fixes with pins; rebuilt products — `vx677-b5/post` (the fix + trace removal), a `vx677-c/rev668` (the fix's one-line revert), `vx677-b3/post` + `rev676` ONLY if DA-1's pin changed, `vx677-b4/post` + a `vx677-c/revFW2` for F-FW-2; CLAIM C's run table (R9's split re-run per VX-661's mitigation — the two suites in SEPARATE invocations; R7's re-run; the new pins' red/green runs; expected counts EXACT); the walk rows for claim C's short walk (the 668 live re-verify on the sheet road; S-572 Study re-shots on the themed window); the ledger row 11 flipped on the fix; everything pushed.
 
+### FIXES RECORD (implementer: Opus, fresh session, 2026-10-29)
+
+**NOT DONE (first line, kept current):** everything below is IN PROGRESS — no `xcodebuild test`, no app launch, no stage in this session (claim C's). No behavioural revert is in flight.
+
+*Read in this session's own context before any code (never delegated): CLAUDE.md + its auto-loaded canon; this file in full (every batch record, both windows' verdicts, the three walks, the CLAIM A VERDICTS, the FIXES BRIEF); `notes/SessionResiliencyProtocol.md`; `notes/TEXTKIT2_NOTES.md` in full; the VX-440 record's WALK FIXES + "W-2, second pass" whole; the raw stderr trace logs `.vx677-walk-shots/final/trace-sheet-study.log`, `trace-row-study.log` and every other `VX668-TRACE` line of `app-stderr.log`.*
+
+**LIVE STATUS** (flipped in the same commit as each piece; every unverified claim PENDING)
+- F-0 — preflight + this record: DONE (this commit).
+- F-1 — VX-668: the WHY, the pin (red-on-old on the pre-fix tree), the fix: NOT-STARTED.
+- F-2 — DA-1: the quiet-line pin's trace and disposition: NOT-STARTED.
+- F-3 — F-FW-2: the helper window's theme, its pin, the fix: NOT-STARTED.
+- F-4 — the VX668-TRACE removal: NOT-STARTED (after F-1's pin is red-on-old).
+- F-5 — products rebuilt, CLAIM C's run table, the walk rows, ledger row 11: NOT-STARTED.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
