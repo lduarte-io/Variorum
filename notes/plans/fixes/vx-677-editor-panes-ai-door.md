@@ -1077,6 +1077,68 @@ Rebuild list (each `build-for-testing`, TEST BUILD SUCCEEDED logged):
 
 Deliverables: every build's log path + result line in a "FINAL REBUILD RECORD" section; the overlap run's array; the tree clean, no revert residue (`git status` + no `VX677-REVERT` marker); everything pushed.
 
+### FINAL REBUILD RECORD (implementer: Opus, fresh session, 2026-10-28)
+
+**NOT DONE (first line, kept current):** nothing is built yet: every product below is PENDING. This unit has no `xcodebuild test`, no app launch, no stage claim and no subagent; no production or test line changes; no behavioural revert is in flight (the tree is clean at `5d91444ea`, no `VX677-REVERT` marker).
+
+*Read in this session's own context before any build (never delegated): CLAUDE.md and its auto-loaded canon; this file's rails, environment traps, coordinator protocol and LIVE LEDGER; every batch record's revert table (BATCH 1's rev664, the DISPOSITIONS RECORD's revB, BATCH 3's rev676 and rev675, BATCH 4's rev674 and rev572); BATCH 5's product line; the brief above.*
+
+**Where each recipe's exact text comes from.** The tables give the edits in words. The exact text is the scripts the batches themselves ran, recovered VERBATIM from their sessions; nothing is re-authored here:
+- `rev676` and `rev675`: batch 3's own scripts, still in the run's scratchpad (`reverts/rev676.py`, `reverts/rev675.py`).
+- `rev664` and `revB`: the dispositions session's perl one-liners, recovered from its tool calls (02:45:55Z and 02:36:36Z).
+- `rev674` and `rev572`: batch 4's python heredocs, recovered from its tool calls (03:34:31Z and 03:38:57Z).
+
+The only change of my own is a `${ROOT:-<worktree>}` prefix on the two shell scripts' `cd` lines, so they could be dry-run on copies; the perl itself is untouched.
+
+**Dry run at the merged tip, before any tree edit.** Every recipe was applied to scratch COPIES of its files and diffed, and each matched its table exactly:
+
+| Recipe | Lines changed | Markers | Files |
+|---|---|---|---|
+| `rev664` | +3 | 3 | `PaneTextAuthority.swift`, `PaneSurface.swift` |
+| `revB` | 1 replaced | 1 | `OutlineBlockLanding.swift` |
+| `rev676` | +2 −6 (the dial switch collapsed) | 2 | `MCPShowTool.swift`, `MCPDoor.swift` |
+| `rev675` | +3 −2 | 2 | `MCPShowTool.swift`, `MCPNavigator.swift` |
+| `rev674` | +1 | 1 | `BlockHistoryPane.swift` |
+| `rev572` | +3 −5 | 3 | `ShortcutCatalog.swift`, `ShortcutsTab.swift` |
+
+**The binary panel (the check for "each revert product reverts only its member").** For every product, a script totals the instructions of each reverted member's own functions in `Variorum.debug.dylib`: a function's entry plus its async partials, with closures and thunks excluded. Batch 4's `objdump` method, widened to every member. The functions measured:
+- 664: `suspectsOutsideWrite`, `confirmsOutsideWrite`, `completeReadAdoptionIfGoingLive`
+- B: `homeIsTheRow` (static)
+- 676: `MCPShowRule.verdict`, `MCPDoor.agentShow`
+- 675: `MCPShowTool.decide`, `MCPNavigator.deliver`
+- 674: `CommitRowFace.restingWords`
+- 572: `ShortcutCatalogFilter.sections`, `ShortcutChordCell.body`, and the `HStack` content closure of `ShortcutRowView.body`
+
+Validated on batch 4's pre-merge products before any build: the panel reproduces the recorded numbers (`restingWords` 99 / 16, `sections` 430 / 75, `confirmsOutsideWrite` 225 in `post`). It also sees all three `rev572` edits: `sections` 430 → 75, the chord cell 119 → 258, the row's content closure 407 → 369. A revert product must differ from `post` ONLY in its own member's rows, and every `post` must agree with every other.
+
+**REVERT BUILDS ANNOUNCED (before any starts; the tip is committed, so `git checkout -- <files>` is an exact restore):**
+- `vx677-b1/rev664`: batch 1's three-line revert, in place.
+- `vx677-b2/revB`: D-2's one-line revert, in place.
+- `vx677-b3/rev676`: the two-edit revert, in place.
+- `vx677-b3/rev675`: the two-edit revert, in place.
+- `vx677-b4/rev674`: the one-line revert, in place.
+- `vx677-b4/rev572`: the three-edit revert, in place.
+
+The procedure for each, one at a time:
+1. Apply the revert over the clean committed tip.
+2. Check `git diff --stat` matches the dry run.
+3. Run `build-for-testing` into the EXISTING product dir.
+4. Restore by `git checkout --`.
+5. Verify `git status` is empty and no `VX677-REVERT` marker remains.
+6. Only then update this record, commit and push.
+
+Nothing is ever committed mid-revert. The plain-tip products (`vx677-b1/post`, `vx677-b2/post`, `vx677-b3/post`, `vx677-b4/post`) and the walk app (`DerivedData/vx677-app`, Debug `build`) are built with no revert.
+
+**LIVE STATUS** (flipped in the same commit as each piece)
+- FR-0: preflight, the recipes recovered and dry-run, the panel validated, this record. DONE (this commit).
+- FR-1: `vx677-b1/post` + `vx677-b1/rev664`. PENDING.
+- FR-2: `vx677-b2/post` + `vx677-b2/revB`. PENDING.
+- FR-3: `vx677-b3/post` + `vx677-b3/rev676` + `vx677-b3/rev675`. PENDING.
+- FR-4: `vx677-b4/post` + `vx677-b4/rev674` + `vx677-b4/rev572`. PENDING.
+- FR-5: `vx677-b5/post` VERIFIED AT THE TIP, no rebuild. Its test binary (22:30:46) is newer than every file under `App/`, `Sources/`, `Package.swift` and `Tests/`. Its `logs/build-post-3.log` (TEST BUILD SUCCEEDED) compiled `RestoreLandingInspectorTests.swift`, the one source file `092909955` touched. Every commit since `092909955` touches only this record.
+- FR-6: the walk app `DerivedData/vx677-app` (Debug) and the `VX668-TRACE` strings check. PENDING. The existing app (17:48) predates the merge and carries no trace string (`grep -c` 0).
+- FR-7: the overlap run. PENDING.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
