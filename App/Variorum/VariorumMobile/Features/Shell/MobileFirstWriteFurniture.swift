@@ -53,6 +53,7 @@
 //
 
 import Foundation
+import Observation
 import OSLog
 import VariorumCore
 
@@ -111,6 +112,19 @@ final class MobileFirstWriteFurniture {
     /// one predicate; nil until `prime` (or when its read failed), which the
     /// occasion spends as NOT fresh — never a guess that seeds.
     private var storeWasFreshAtLaunch: Bool?
+    /// **Has this session JOINED AN ACCOUNT since `prime` took its facts?**
+    /// (VX-633 ladder R1 F1 — PROVISIONAL P-633-F1.) Latched the first time
+    /// the account gate reads true: at `prime`, or after any later change to
+    /// what it reads (`watchTheAccountGate`). The occasion's own first line
+    /// already answers a store that belongs to an account at the write
+    /// (`.accountOwned`). This latch covers the one road that line cannot see:
+    /// a session that signed in (the account's library landing by the pull)
+    /// and signed OUT again before her first write. Sign-out keeps the library
+    /// on the phone, the gate then reads no account, and the launch fact,
+    /// taken on the empty store before the join, would still say fresh and
+    /// seed the Prince into the library the pull brought. A latched session
+    /// never spends that fact: the launch book declines, recorded.
+    private(set) var joinedAnAccountSincePrime = false
     /// The one in-flight occasion. Held (rather than a bare bool) so a
     /// second door firing mid-seed joins the first instead of starting a
     /// second, and so a pin can await deterministically what production
@@ -154,13 +168,37 @@ final class MobileFirstWriteFurniture {
     /// A read that throws leaves the verdict UNTAKEN rather than guessing
     /// `true`: the guess that seeds is the one that duplicates her Journal.
     /// VX-633 U2b (R-633-16): a second cheap read, the launch book's
-    /// fresh-store fact (`storeWasFreshAtLaunch`), on the same terms.
+    /// fresh-store fact (`storeWasFreshAtLaunch`), on the same terms. VX-633
+    /// ladder R1 F1: and from here on, the account gate is watched — a fact
+    /// taken before the session joined an account is never spent after it.
     func prime() async {
         storeWasEmptyAtLaunch = try? await MobileStarterJournal.storeIsNew(session)
         let launchBook = SampleLibrarySeeder.Book.launchBook.name
         storeWasFreshAtLaunch = try? await session.database.read { db in
             try SampleLibraryFreshStore.storeIsFresh(db, ownBook: launchBook)
         }
+        watchTheAccountGate()
+    }
+
+    /// **VX-633 ladder R1 F1 (P-633-F1): the watch on the account gate.** One
+    /// observation of everything the gate reads — production's reads
+    /// `SyncSession.isConfigured` and `AccountState.variorum`, both
+    /// `@Observable` — re-armed after every change until the gate first
+    /// reads TRUE, which latches `joinedAnAccountSincePrime` for good. The
+    /// change callback runs BEFORE the change lands (Observation's
+    /// `willSet`), so the re-read hops onto the main actor and runs after it;
+    /// a sign-in and the sign-out that may follow are an account round
+    /// apart, never inside one hop. Held weakly: a lock ends the session and
+    /// drops the furniture (`VariorumMobileApp`'s `onWillLock`).
+    private func watchTheAccountGate() {
+        guard !joinedAnAccountSincePrime else { return }
+        let gate = self.gate
+        let joined = withObservationTracking {
+            gate.belongsToAnAccount()
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in self?.watchTheAccountGate() }
+        }
+        if joined { joinedAnAccountSincePrime = true }
     }
 
     /// **The signal.** Called by every door that puts content in the store;
@@ -240,7 +278,11 @@ final class MobileFirstWriteFurniture {
         // VX-633 U2b (R-633-16): the launch-time fact, untaken read as NOT
         // fresh. The Prince's own partial copy (a first write's seed stopped
         // by a lock) is still completed — `SampleLibraryFreshStore`.
-        let freshness = SampleLibraryFreshness.takenAtLaunch(storeWasFreshAtLaunch ?? false)
+        // VX-633 ladder R1 F1 (P-633-F1): never spent by a session that has
+        // joined an account since the fact was taken — what the pull brought
+        // is not what `prime` read; the launch book declines, recorded.
+        let freshness = SampleLibraryFreshness.takenAtLaunch(
+            !joinedAnAccountSincePrime && (storeWasFreshAtLaunch ?? false))
         // VX-633 (R-633-6): the LAUNCH BOOK — *The Prince*, bilingual, in
         // Sherlock's place on both platforms (the R-17y-8 precedent: a launch
         // list names people's libraries, and a phone-seeded copy re-arrives

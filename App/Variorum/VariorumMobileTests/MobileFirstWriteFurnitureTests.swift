@@ -14,11 +14,17 @@
 
 import Foundation
 import GRDB
+import Observation
 import Testing
 import VariorumCore
 @testable import VariorumMobile
 
+/// `@Observable` (VX-633 ladder R1 F1) because production's gate reads
+/// observable state and the furniture WATCHES it from `prime` on; a fake
+/// flipped mid-session must be seen the same way. Pins that set it before
+/// constructing the furniture read exactly as before.
 @MainActor
+@Observable
 private final class FakeAccount {
     var belongsToAnAccount = false
     var gate: MobileStarterJournal.SyncGate {
@@ -477,6 +483,105 @@ struct MobileFirstWriteFurnitureTests {
                 try Queries.assembleReading(db, readingID: readingID).count
             }
             #expect(members == 28, "the whole book")
+        }
+    }
+
+    // MARK: VX-633 ladder R1 F1 (P-633-F1) — a session that joined an account
+
+    /// **RED ON OLD — A SESSION THAT JOINED AN ACCOUNT NEVER SPENDS ITS LAUNCH
+    /// FACT** (VX-633 ladder R1 F1, PROVISIONAL P-633-F1). A fresh install
+    /// opens on an empty store (`prime`: fresh) and signs in. The account's
+    /// first round lands HER LIBRARY (a book holding a note — the pull's
+    /// stand-in). She signs OUT before her first write, in the same session:
+    /// sign-out keeps the library on the phone, and the gate then reads no
+    /// account, so the occasion's account line lets the write through. The
+    /// launch fact must not be spent: the Prince declines, recorded, and her
+    /// library is exactly as the pull left it. (Signed in at the write, the
+    /// occasion answers `.accountOwned` before any seed —
+    /// `anAccountOwnedStoreSeedsNothing`.)
+    /// *Old:* `.seeded` — the stale fact seeded the Prince into the library the
+    /// pull brought, to push at her next sign-in. *Revert:* drop
+    /// `!joinedAnAccountSincePrime &&` from `perform`'s spend.
+    @Test func aSessionThatJoinedAnAccountNeverSpendsItsLaunchFact() async throws {
+        try await withEditorWorld { session, db in
+            let marks = Marks()
+            // The starter Journal's own launch fact rides this road too; its
+            // live guard is its own subject (flagged in the plan's ladder R1
+            // record), so its occasion is spent here and the pin watches the
+            // Prince alone.
+            marks.journal = true
+            let account = FakeAccount()
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, gate: account.gate, marks: marks.both)
+            await furniture.prime()
+            #expect(!furniture.joinedAnAccountSincePrime, "signed out at launch")
+
+            // She signs in…
+            account.belongsToAnAccount = true
+            let seen = ContinuousClock.now.advanced(by: .seconds(2))
+            while !furniture.joinedAnAccountSincePrime, ContinuousClock.now < seen {
+                await Task.yield()
+                try await Task.sleep(for: .milliseconds(5))
+            }
+            #expect(furniture.joinedAnAccountSincePrime, "the furniture saw the session join")
+            // …the account's first round lands her library…
+            let (herBook, herNote) = try await session.runner.run { ops in
+                let book = try ops.createReading(name: "her reading notes", kind: .book)
+                let note = try ops.createPost(title: "from her other devices")
+                _ = try ops.newBlock(in: note.id, text: "Synced.")
+                _ = try ops.addPostToReading(note.id, to: book.id)
+                return (book.id, note.id)
+            }
+            // …and she signs out before writing anything here.
+            account.belongsToAnAccount = false
+
+            guard case .ran(_, let sample) = await furniture.run() else {
+                Issue.record("expected the occasion to run — the gate reads no account at the write")
+                return
+            }
+            #expect(sample == .existingStore, "\(sample)")
+            #expect(marks.sample, "the decision is recorded on this device")
+            let (names, princeEver, members) = try await db.read { db in
+                (try Queries.readings(db).map(\.name),
+                 try Queries.readingTombstoneExists(db, name: SampleLibrarySeeder.Book.launchBook.name),
+                 try Queries.assembleReading(db, readingID: herBook).map(\.postID))
+            }
+            #expect(!names.contains(SampleLibrarySeeder.Book.launchBook.name) && !princeEver,
+                    "no Prince — not a row of its name")
+            #expect(members == [herNote], "her library exactly as the pull left it")
+        }
+    }
+
+    /// **GUARD (green on both trees) — the same moves WITHOUT an account are a
+    /// fresh store's first write.** `prime` reads the empty store; her first
+    /// write makes a book holding a note (a book is one of the doors that
+    /// fires the occasion); the occasion seeds the Prince, as it does after a
+    /// first note (`theSampleSeedWaitsForPendingWritingToLand`). This is the
+    /// ladder finding's literal pin recipe, which names no account. Pinned so
+    /// F1's fix can never widen into a store re-read that would decline every
+    /// fresh user at the very write that summoned the furniture.
+    @Test func aFreshStoresFirstWriteOfABookStillGetsThePrince() async throws {
+        try await withEditorWorld { session, _ in
+            let marks = Marks()
+            marks.journal = true
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            await furniture.prime()
+            try await session.runner.run { ops in
+                let book = try ops.createReading(name: "my first book", kind: .book)
+                let note = try ops.createPost(title: "my first note")
+                _ = try ops.newBlock(in: note.id, text: "Hello.")
+                _ = try ops.addPostToReading(note.id, to: book.id)
+            }
+            guard case .ran(_, let sample) = await furniture.run(),
+                  case .seeded(_, let stories) = sample
+            else {
+                Issue.record("a fresh store's first write still gets the Prince")
+                return
+            }
+            #expect(stories == 27)
+            #expect(marks.sample)
+            #expect(!furniture.joinedAnAccountSincePrime, "no account was ever in this session")
         }
     }
 
