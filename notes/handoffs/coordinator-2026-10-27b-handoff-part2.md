@@ -9,20 +9,27 @@ wherever they need to be, that things are all set for a new coordinator".
 ## Your checklist
 
 1. **Your real store and the installed app.**
-   - Installed: `/Applications` is **PENDING-677-RELEASE**.
+   - Installed: `/Applications` is **0.10.6 (10414)**, release 2, 10-29 07:02. I checked codesign deep/strict myself, and
+     spctl says "Notarized Developer ID". The appcast leads with 10414 and the DMG is live.
    - Release 1 was **0.10.5 (10271)** on 10-29 04:14 (VX-648 · VX-440 · VX-678 · VX-633). It was notarized and published,
      the appcast verified, codesign checked staged and installed, and spctl reports "Notarized Developer ID".
-   - The ONLY safety copy is **PENDING-A1**, cmp-verified against the live store with no instance running. Older copies
-     are pruned.
+   - The ONLY safety copy is **`variorum-a1-0.10.6-release-20261029T124534Z`**, which I cmp-verified (5 files SAME)
+     against the live store with no instance running. The 0.10.4 and 0.10.5 copies are pruned.
+   - One near miss, harmless: the 0.10.6 walk first renamed the July-era relic `Variorum-dev/` that sits in your REAL
+     container beside `Variorum/`. The walk's G7 guard refused fail-closed, the rename was reversed, and your `Variorum/`
+     was never touched (cmp above). It is now a written trap.
 2. **The releases ran as you split them** ("i actually want VX-669 to do a release now … and then VX-664 can also do its
    own release").
    - 0.10.5's notes are at `App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-0.10.5.md`. They state both local-only
      migrations, v1_34 and v1_35.
-   - VX-677's release: **PENDING-677-RELEASE**.
+   - VX-677's release is **0.10.6 (10414)**, its notes at `ReleaseNotes-0.10.6.md`. Step 0 passed on the first real run,
+     with the three traps applied. Your walk screenshots for VX-572 are at `/Users/Shared/vx677-walk-shots`.
 3. **Your bundles.**
    - QUESTIONS #250 (VX-678), #251 (VX-633/#204, including P-633-F1), #252 (VX-677).
    - Each run's handoff: `notes/handoffs/vx-678-handoff.md` (with its 0.10.5 addendum), the VX-633 entry in its plan
-     record, and VX-677's **PENDING**.
+     record, and `notes/handoffs/vx-677-handoff.md`. VX-677's names the one-window words-guard relaxation, F-CW-1.
+   - VX-661 (swift-testing's encoder crash) grew tonight: it now fires on green, single-test runs of rebuilt binaries.
+     I'd raise its priority; that's your call.
 4. **Calls still yours.**
    - VX-689: the JOIN road, where a fresh signed-out Prince could travel into your library. You called it "not a big deal".
    - VX-704: first-launch feel. Its premise fell, because the Prince never seeded tonight's walk births. The measurement
@@ -45,19 +52,20 @@ wherever they need to be, that things are all set for a new coordinator".
 | VX-678 (Trash resurrection and responsiveness, held the Sync/ slot) | #205 | `5aad3e378` | 10-28 21:50 | #250 · PL-64 · canon 126,641/150,000 |
 | VX-633 (the Prince seed book, absorbed by vx-669 at your word) | #204 | `039aededb` | 10-29 02:22 | #251 · PL-65 |
 | VX-703 (the walk's P4 wait; Tools only, your option (a)) | #206 | `b5e809c36` | 10-29 ~03:55 | harmless, not the cure (see traps) |
-| VX-677 (editor seam, panes, the AI door) | PENDING | PENDING | PENDING | #252 · PL-66; runs release 2 |
+| VX-677 (editor seam, panes, the AI door) | #207 | `c78806aa1` | 10-29 06:4x | #252 (no PL row, nothing mobile-visible); ran release 2 |
 
 ## Stage numbers and timeline (`~/.variorum/stage.log`, from 09:30 10-28)
 
-**PENDING-COUNT session grants**, **1 expiry** (`vx-678-final` at 21:45:30, mid phone leg; I held it `HOLD FOR` and it
+**16 session grants**, **1 expiry** (`vx-678-final` at 21:45:30, mid phone leg; I held it `HOLD FOR` and it
 re-claimed at 21:45:53), **0 steals, 0 forced releases**, and **1 renew** (the 0.10.5 release, asked first).
 
 | Run | Windows |
 |---|---|
-| VX-677 | vx677-b1 15:26–16:02 · b2 18:41–19:38 · final-suites 23:37–00:08 · final-walks 00:10–00:54 · PENDING claim C |
+| VX-677 | vx677-b1 15:26–16:02 · b2 18:41–19:38 · final-suites 23:37–00:08 · final-walks 00:10–00:54 · c-suites 05:39–06:13 · c-walks 06:13–06:36 |
 | VX-678 | window-1 17:37–18:39 · pins 19:45–19:50 · final 20:14–21:46 (lapse + re-claim) |
 | VX-633 (#204) | suites-a 19:51–20:08 · tests-b 21:58–23:02 · walk 23:03–23:36 · fixes 00:54–01:12 · final 01:13–02:20 |
 | Release 0.10.5 | 03:14–04:14 (A1 → release.sh 8 min → step 0 ×4 → refresh → publish → prune) |
+| Release 0.10.6 | 06:45–07:02 (A1 → release.sh → step 0, one G7 refusal then PASS → refresh → publish → prune) |
 | Coordinator | the Debug-prefs scrub at your word, 21:47–21:48 |
 
 ## Calls I made
