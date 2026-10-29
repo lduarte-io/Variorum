@@ -1301,7 +1301,7 @@ Deliverables: the WHY + fixes with pins; rebuilt products — `vx677-b5/post` (t
 
 **LIVE STATUS** (flipped in the same commit as each piece; every unverified claim PENDING)
 - F-0 — preflight + this record: DONE (this commit).
-- F-1 — VX-668: the WHY, the pin (red-on-old on the pre-fix tree), the fix: NOT-STARTED.
+- F-1 — VX-668: the WHY DONE (`b38cb0919`, below). The PIN on the PRE-FIX tree: DONE (this commit — production untouched; NEW `VariorumTests/RestoreLandingRewriteHopTests.swift`, suite `RestoreLandingRewriteHopTests`, 2 tests: the pin `aLandingTakenBeforeAFrameConstantRewriteLandsWhenTheWordsArrive` + the guard `aLandingWhoseWordsAreAlreadyShownLandsAtOnce`); compiled into `DerivedData/vx677-b5/post` (`logs/build-post-4.log`, TEST BUILD SUCCEEDED, no warning in the new file; the VX-692 detector finds only F-D-1's MCP lead). Its RED run (this tree / `rev668`) PENDING claim C. The fix: NOT-STARTED.
 - F-2 — DA-1: the quiet-line pin's trace and disposition: NOT-STARTED.
 - F-3 — F-FW-2: the helper window's theme, its pin, the fix: NOT-STARTED.
 - F-4 — the VX668-TRACE removal: NOT-STARTED (after F-1's pin is red-on-old).
