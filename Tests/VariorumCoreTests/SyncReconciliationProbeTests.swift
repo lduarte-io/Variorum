@@ -1283,14 +1283,33 @@ struct SyncReconciliationProbeTests {
     /// row was still live — the standing-twin meeting arm — and revived
     /// both families exact-stamp; her books "restored themselves from the
     /// trash".)
+    ///
+    /// **The ONE STAMP is load-bearing (ladder R1, MAJOR-1):** this pin
+    /// first ran its deletes under the harness's ticking clock, so every
+    /// tombstone carried its own stamp — and on the OLD code the defense's
+    /// stamp guard (`reading.deleted_at == kill.stamp`, the kill recorded
+    /// at the FIRST arriving family death) never matched: the old code
+    /// merely persisted an inert verdict marker, and the revival
+    /// expectations were GREEN on old (only the marker count was red; pin
+    /// 2 below carried the true revival red). The `.constant` date (pin
+    /// 2's idiom, a distinct value) kills the whole family on one stamp —
+    /// her real door's shape ("Her Mac deletes both books (11:47 AM) →
+    /// ordinary family tombstones push"), where the recorded kill's stamp
+    /// IS the reading's — re-observed RED on the old code for the revival
+    /// itself under the two-file scratch revert.
     @Test func aDeliberateDeleteOfBothStandingEditedCopiesSticksEverywhere() async throws {
         let (a, b, server, copyA, copyB) = try await settledBothEditedPair()
+        let herDeleteMoment = Date(timeIntervalSince1970: 1_785_628_800)  // 2026-08-02T00:00:00Z
         try a.with { ops, _ in
-            for copy in [copyA, copyB] {
-                for postID in copy.postIDs.values.sorted() {
-                    try ops.deleteContainer(postID)
+            try withDependencies {
+                $0.date = .constant(herDeleteMoment)
+            } operation: {
+                for copy in [copyA, copyB] {
+                    for postID in copy.postIDs.values.sorted() {
+                        try ops.deleteContainer(postID)
+                    }
+                    try ops.deleteReading(copy.bookID)
                 }
-                try ops.deleteReading(copy.bookID)
             }
         }
         _ = try await productionRound(a)
