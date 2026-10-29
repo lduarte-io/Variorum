@@ -33,3 +33,16 @@ The query rewrites and the observation fix carry to the phone through shared cor
 
 ## PENDING at the merge moment
 PR #205 · merge SHA: in memory + the run ticket (post-merge) · member tickets → Done: PENDING · in-flight row retired + closeout paragraph: PENDING · #250 landed (numbering verified on latest main) · MobileSoul PL-64 landed · evidence cleanup (walk screenshots, logs, DerivedData, the dev-store copy after merge): PENDING.
+
+---
+
+## Release addendum — 0.10.5 (build 10271) SHIPPED 2026-10-29 (this session, at her direct word)
+
+**Out and verified:** DMG live at dl.stargazing.tech/variorum/Variorum-0.10.5.dmg (31,642,380 bytes, sha256 63b9251d…146c8d, bytes-identical verify PASS) · appcast live and byte-identical (first item 10271, edSignature verifies, verify PASS) · app + DMG both notarized Accepted · /Applications refreshed from the shipped DMG at a zero-instance window (codesign + Gatekeeper verified staged and installed; nothing launched) · A1 `variorum-a1-0.10.5-release-2026-10-29T091411Z` stands, the 0.10.4 copy pruned after the refresh · site repo d30afda. Notes commit 652ce53b5 is the stamped main; VX-703 (b5e809c36) is Tools-only, post-stamp.
+
+**The step-0 walk saga (three stops, two environment causes, zero product findings):**
+1. P5 stop — the dev slot's orphaned Oct-20 `variorum-restore-hold.json` rode beside the walk's fresh library and held its rounds (**VX-697 now Confirmed** — the marker is store-adjacent, not library-keyed).
+2. Two P4 stops — a stopped walk never reaches its own sign-out leg, the session lives in the debug keychain across launches, and the sync row shows 'Sign in…' only on the signed-out face; the next runs' virgin stores came up on the not-yet face instead. Cure: sign out (resting posture), re-run. **VX-703** (the 30 s P4 wait, merged, kept as a defensive guard — trued: not the cure) · the final run **PASSED whole** (run-20261029T100915Z-std).
+3. Facts worth her eye: the Prince **never seeds** on walk-road virgin births (the seed marks live in the debug defaults domain and survive slot wipes) — the step-0 walk exercises an EMPTY fresh store, and whether it should walk the seeded face is an open choice; **VX-704** holds the first-launch-feel measurement question (no Sherlock baseline survives).
+
+**Posture at close:** dev slot = e11e5233 restored byte-exact (six md5s incl. the hold marker) · vxtest account at rest · zero instances · stage released · walk debris consolidated under `App/Variorum/DerivedData/first-run-walk/debris-20261029-0328/`.
