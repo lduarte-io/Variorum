@@ -588,11 +588,19 @@ struct SampleLibraryWelcomeTests {
     /// Stage 2 ladder's MINOR-D3/D4 rule — the disclosure is EXACT about
     /// scope — applies to what this unit added. RED ON OLD: the shipped
     /// detail named none of it.
+    /// **STRENGTHENED (VX-633 ladder R1 F3):** the arrangement owns EVERY book
+    /// in `SampleLibraryWelcome.ownedBooks` — the Prince beside Sherlock since
+    /// VX-633 — so the confirm names each, quoted. RED ON OLD: the copy named
+    /// Sherlock alone, so a store holding an unowned Prince had it owned by a
+    /// door whose dialog said "Nothing else is touched."
     @Test func theRestoreConfirmDisclosesTheWelcomeArrangement() {
         let detail = TutorialSeeder.replaceDetail
         #expect(detail.contains(Operations.welcomeShelfName), "it names the Welcome shelf")
-        #expect(detail.contains(SampleLibrarySeeder.Book.sherlock.name),
-                "…the one book whose state the arrangement can change")
+        #expect(!SampleLibraryWelcome.ownedBooks.isEmpty)
+        for book in SampleLibraryWelcome.ownedBooks {
+            #expect(detail.contains("\u{201C}\(book.name)\u{201D}"),
+                    "…every book whose state the arrangement can change: \(book.name)")
+        }
         // 13s-b U1b: the arrangement no longer makes the gathering or a
         // quick note, so the disclosure must not claim either (the same
         // MINOR-D3/D4 exact-scope rule, pointing the other way).
