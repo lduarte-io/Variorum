@@ -410,6 +410,22 @@ extension Operations {
         try db.execute(sql: "UPDATE mcp_client SET last_seen_at = ? WHERE name = ?", arguments: [now, clientName])
     }
 
+    /// **VX-676 ruling (4) — HER TAKE of a client's ask, logged as its own row**
+    /// (`MCPShowActivity.takenAct`), under the asking client's name and on the
+    /// target its ask was logged on. Her act, so `list_my_activity` never lists
+    /// it (`MCPOwnActivity.listedActs` names tools and the ask only). One short
+    /// write; the log's cap prunes as every row does.
+    public func recordMCPShowTaken(
+        clientName: String, targetKind: String?, targetID: String?, targetTitle: String?
+    ) throws {
+        try database.write { db in
+            try insertMCPActivity(
+                db, clientName: clientName, act: MCPShowActivity.takenAct, targetKind: targetKind,
+                targetID: targetID, targetTitle: targetTitle, allowed: true,
+                at: DateFormatter.variorumISO8601.string(from: date.now))
+        }
+    }
+
     private func insertMCPActivity(
         _ db: Database, clientName: String, act: String, targetKind: String?, targetID: String?,
         targetTitle: String?, allowed: Bool, at: String
@@ -490,6 +506,23 @@ extension Operations {
                     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
                     """,
                 arguments: [key.rawValue, on ? "1" : "0", DateFormatter.variorumISO8601.string(from: date.now)])
+        }
+    }
+
+    /// **VX-676 — the show dial** (her ruling (3): Settings ▸ MCP, move at once ·
+    /// ask · never). One row of the local-only key/value family, no-op-guarded
+    /// (asking for the dial it already reads writes nothing — the ask included,
+    /// while no row exists yet).
+    public func setMCPShowDial(_ dial: MCPShowDial) throws {
+        try database.write { db in
+            guard try Queries.mcpShowDial(db) != dial else { return }
+            try db.execute(
+                sql: """
+                    INSERT INTO mcp_switch (key, value, updated_at) VALUES (?, ?, ?)
+                    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+                    """,
+                arguments: [Queries.mcpShowDialKey, dial.rawValue,
+                            DateFormatter.variorumISO8601.string(from: date.now)])
         }
     }
 }

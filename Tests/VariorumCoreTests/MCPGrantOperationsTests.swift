@@ -243,6 +243,63 @@ struct MCPGrantOperationsTests {
         }
     }
 
+    /// **VX-676 — the show dial's store truth** (her ruling (3) + (1): one global
+    /// dial, DEFAULT ask): no row reads as the ask; each value round-trips; a no-op
+    /// writes nothing (the ask with no row included); a value this build can't
+    /// name reads as the ask; the row is the local-only key/value family's own, so
+    /// no switch reads it.
+    @Test func theShowDialReadsAskUntilSetEachValueRoundTripsAndANoOpWritesNothing() throws {
+        try withOperations { ops, db in
+            let rows = { try self.count(db, "SELECT COUNT(*) FROM mcp_switch WHERE key = 'show_dial'") }
+            #expect(try db.read { try Queries.mcpShowDial($0) } == .ask, "her default: the ask")
+            try ops.setMCPShowDial(.ask)
+            #expect(try rows() == 0, "asking for the dial it already reads writes nothing")
+            for dial in [MCPShowDial.moveAtOnce, .never, .ask] {
+                try ops.setMCPShowDial(dial)
+                #expect(try db.read { try Queries.mcpShowDial($0) } == dial)
+            }
+            #expect(try rows() == 1)
+            let stamp = try db.read {
+                try String.fetchOne($0, sql: "SELECT updated_at FROM mcp_switch WHERE key = 'show_dial'")
+            }
+            try ops.setMCPShowDial(.ask)
+            #expect(try db.read {
+                try String.fetchOne($0, sql: "SELECT updated_at FROM mcp_switch WHERE key = 'show_dial'")
+            } == stamp)
+            #expect(try db.read {
+                try String.fetchOne($0, sql: "SELECT value FROM mcp_switch WHERE key = 'show_dial'")
+            } == "ask")
+            try db.write { try $0.execute(sql: "UPDATE mcp_switch SET value = 'someday' WHERE key = 'show_dial'") }
+            #expect(try db.read { try Queries.mcpShowDial($0) } == .ask, "a value this build can't name reads as the ask")
+            for key in MCPSwitch.allCases {
+                #expect(try db.read { try Queries.mcpSwitch($0, key) } == false, "the dial is no switch")
+            }
+            #expect(MCPShowDial.allCases.map(\.rawValue) == ["move", "ask", "never"])
+        }
+    }
+
+    /// **VX-676 ruling (4) — her take is its own Activity row**, under the asking
+    /// client's name, on the target its ask named, allowed — and a client's
+    /// own-activity read over the tools and the ask never lists it.
+    @Test func herTakeIsLoggedAsItsOwnRowAndNoClientsOwnActivityListsIt() throws {
+        try withOperations { ops, db in
+            try ops.recordMCPShowTaken(clientName: "claude-code", targetKind: "note", targetID: "n1", targetTitle: "ch 1")
+            // F-B3-1 (the batch 3 record): a `#require(try db.read { … })` followed by
+            // another `db.read { … }` in the same closure runs the FIRST closure's body
+            // twice on this toolchain — so the read is bound before it is required.
+            let rows = try db.read { try Queries.mcpActivity($0) }
+            let row = try #require(rows.first)
+            #expect(row.clientName == "claude-code" && row.act == MCPShowActivity.takenAct && row.allowed)
+            #expect(row.targetKind == "note" && row.targetID == "n1" && row.targetTitle == "ch 1")
+            let listed = try db.read {
+                try Queries.mcpOwnActivity(
+                    $0, clientName: "claude-code", since: "", acts: ["show_in_app", MCPShowActivity.offeredAct],
+                    before: nil, limit: 50)
+            }
+            #expect(listed.isEmpty, "the take is hers, never the client's act: \(listed.map(\.act))")
+        }
+    }
+
     // MARK: - THE FACTS (the fence's legs in one place — R-13nb-1)
 
     @Test func theJournalLegsFenceExactlyAsRuled() throws {
