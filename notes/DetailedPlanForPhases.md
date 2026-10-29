@@ -12,34 +12,28 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| **VX-633 — the bilingual Prince seed book** (her kickoff 2026-10-28, the Air sitting; rulings R-633-1..21 in `notes/plans/vx-633-prince-book.md`). Surfaces: `App/Variorum/Shared/SampleLibrary/`, `notes/source/` extract scripts — NO `Sync/`. BUILD COMPLETE (PR #204); **ABSORBED by the VX-678 orchestrator (the vx-669 session) at her word, 2026-10-28 evening**: verification (the suites windows + the reset walkthrough), the cross-model ladder, the merge-in and closeout run on the Pro. #204 merges when its own gates close (no VX-678 gate — the hold verified hollow); the one release waits for ALL THREE (VX-678 · VX-677 · #204), last merger mints. | VX-633 · `vx-633-prince-book` | `~/dev/variorum-vx-633` · Pro (absorption) | In verification |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 | **VX-677 — Run: editor, panes & the AI door** (eleven members by the sub-issue listing: VX-664 ring rule · VX-656 Write undo · VX-668 restore landing · VX-572 shortcuts pane · VX-674 commit preview · VX-675/VX-676 show_in_app · VX-663/VX-662/VX-680/VX-681 the navigation-carry family; the brief `notes/handoffs/vx-677-kickoff.md`, the record `notes/plans/fixes/vx-677-editor-panes-ai-door.md`). NO Sync/ (VX-678 holds the slot). Surfaces: the editor seam (`EditorTextView`, `PaneSurface`, `PaneTextAuthority`), Takes/Lenses boards, Block History, the MCP door (`show_in_app`, Settings ▸ MCP, `MCPSession.instructions`), book navigation carries (Index/Outline/Read), the ⌘/ shortcuts pane. Closeouts serialize with VX-678; no release at close (one after both merge). | VX-677 · `vx-677-run-editor-panes-the-ai-door` | `~/dev/variorum-vx-677` · Pro | In progress |
 
 ### Latest closeout
 
-**→ VX-678 CLOSED 2026-10-28 — RUN: TRASH, PURGE & RESURRECTION (the record
-`notes/plans/fixes/vx-678-trash-purge-resurrection.md`; the ladder `notes/plans/fixes/vx-678-ladder-round1.md` +
-`-round2.md`; her handoff `notes/handoffs/vx-678-handoff.md`; PR number at the handoff's merge slot; kickoff to merge
-in one day).** Six members by the sub-issue listing. VX-669: the sample-dedupe DEFENSE LEG removed whole (her ruling,
-option B — a deliberate cross-device delete is never second-guessed; the crossing race's accepted cost is a
-recoverable Trash trip), her-scenario convergence pins red-on-old (the deleted copies returned alive on both fake
-clients, her exact report), the orphaned verdict markers swept by LOCAL-ONLY `v1_35` (no §12 event, marker 14), the
-purge-staleness net verified GREEN (record-only). VX-657: sweeps cancellation-aware between families; the quit door
-quiesces the purge road + sync chain on the proceed path only; `stop()` cancels without refusing future sweeps; the
-real ⌘Q walk-proven clean; the test host's runner-exit face stays by construction → VX-691. VX-654/653 + VX-670's
-roots: the quadratic lineage class gone — `originalsStrandedBy` 23 s→88.6 ms, `strandedOriginals` 27.6 s→108.7 ms,
-`originFamilyClocks` 18.4 s→70.3 ms at 600 seam rounds (VX-653 hollow at HEAD — v1_34 already carried it; guard pins)
-— plus `observeTrash` moved off the writer (named-region tracking; the phone inherits). VX-670 live-verified: listing
-28.5 s→rows at +0.48 s · Put back 5.5 s→+0.1 s · Delete Now 11.3 s→+0.64 s; the walk's empty-flash finding fixed
-(loading-vs-empty state). VX-671: multi-select with bulk Put back/Delete Now through the per-row roads, honest
-partial-result refusals. Evidence: a two-round ladder (1 MAJOR test-honesty + 3 MINOR, all applied; no round 3), the
-pins claim 21/3 green with BOTH revert observations red exactly as predicted, window-1's whole target 5,585/980 and
-the FINAL re-test at the tip — whole target 5,593/981 + the branch's first FULL VariorumMobileTests 846/139, every
-red control-proven pre-existing (VX-695, VM-34). Canon: SyncSpec §7's dedupe bullet, #143(b) superseded, the
-SurfaceContracts Trash lines, #250, MobileSoul PL-64. Born: VX-685/690/691/695 (tests & tooling), VM-33/VM-34
-(mobile). NO release at this close — one release after VX-678 + VX-677 + PR #204 all merge (her word; the last merger
-mints, notes carrying v1_34 + v1_35).
+**→ VX-633 CLOSED 2026-10-29 — THE BILINGUAL PRINCE SEED BOOK (the record `notes/plans/vx-633-prince-book.md`
+— rulings R-633-1..21, the U1/U2/U2b records, the ladder files; built on the Air at her sitting, absorbed and closed
+on the Pro by the VX-678 orchestrator; PR #204, merge SHA in memory + the ticket).** The launch seed is now *The
+Prince*: 27 chapters + the front note, every paragraph Marriott 1908 (chosen) + "il principe 1532" (the 1814
+Wikisource printing re-paragraphed to Marriott's breaks, words untouched), six standout lines a "ricci 1903" third
+take, XXVI's Petrarch stanza a "dacres 1640" English verse, saved lenses per chapter (marriott · il principe ·
+ricci/dacres), the R-633-21 comment pair on XVIII, the four parts + the Dedication's own chapter (R-633-17), owned on
+Welcome with #classics + #machiavelli; FRESH STORES ONLY (R-633-16 — existing stores' road is Help ▸ Restore "the
+prince"; sherlock joins jekyll restore-only). Verified: suites-a (168 tests + the two U2b reverts red-as-predicted),
+tests-b (Mac 5,615/983 CLEAN; phone 849/139), the both-voices reset walkthrough (fresh birth 9 PASS + 1 ticketed
+PARTIAL; the existing-store leg proving the decline LIVE and the restore door whole; VX-671's multi-select exercised
+on a real store), a two-round ladder (R1: 1 MAJOR + 3 MINOR + 1 NIT — F1's named road disputed, UPHELD, and the real
+signed-out-after-join road latched as P-633-F1; R2: clean, no round 3), the fixes verification window (all pins
+observed green, four reverts red exactly), and the final whole targets at the tip (Mac 5,616/983, phone 852/139 —
+reds all pre-ticketed flakes/standing: VX-701 born, VM-34 unchanged). Canon: the SurfaceContracts seed-set line,
+QUESTIONS #251, MobileSoul PL-65. Born: VX-696..701 (the walk's five + the focus flake), VM-33/34/35. NO release at
+this close — VX-677 merges last of the three and mints the one release (her word), the Prince riding it.
 
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
