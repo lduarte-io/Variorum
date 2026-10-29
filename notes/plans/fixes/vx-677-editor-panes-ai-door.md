@@ -1464,7 +1464,7 @@ Per suite: 2 · 1 · 5 · 2 · 4.
 
 **LIVE STATUS** (flipped in the same commit as each piece)
 - L-0 — this record's head: DONE (this commit).
-- L-1 — F-L4, the two-line comment tidy: PENDING.
+- L-1 — F-L4, the two-line comment tidy: DONE (this commit — `RestoreLandingInspectorTests.swift`'s header: the trace clauses become "the walk's DEBUG trace named the failed step (S4 — F-1), served, and was removed; the fix's pin is `RestoreLandingRewriteHopTests`, and these stay the green guard"; comment-only, +4 −4; `grep VX668-TRACE|VX668Trace|vx668Road` over `App/Variorum/{Variorum,VariorumTests,Shared}` + `Sources`: 0).
 - L-2 — F-L1, the Takes twin's predicates bound to locals: PENDING.
 - L-3 — F-L2, the three fixture repairs (staging only): PENDING.
 - L-4 — F-L2, the pins + guards on the PRE-FIX tree: PENDING.

@@ -38,10 +38,10 @@
 //
 //  **RED here = VX-668 reproduced in-host** (the pin the fix needs, red on the
 //  pre-fix tree). GREEN here = the host still does not reproduce the app's
-//  miss — then the walk's DEBUG trace (`VX668-TRACE`, the record's
-//  READY-FOR-THE-STAGE) is the road that names the failed step. Either way
-//  each test prints one `VX668-PIN` line with what happened, and the run's
-//  log carries the `VX668-TRACE` lines of the act.
+//  miss — and it never did: the walk's DEBUG trace named the failed step
+//  (S4 — the record's FIXES RECORD, F-1), served, and was removed; the fix's
+//  pin is `RestoreLandingRewriteHopTests`, and these stay the green guard.
+//  Each test prints one `VX668-PIN` line with what happened.
 //
 //  The control (`aRowRestoreFromTheInspectorLandsAtTheBlocksStart`) is the
 //  walk's own control on the same staging: the pane row's Restore. Green on
