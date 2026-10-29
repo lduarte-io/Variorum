@@ -138,8 +138,10 @@ struct MobileFirstWriteFurnitureTests {
     /// (the guess that seeds is the one that duplicates her book) while
     /// still running the sample library's seeder. (VX-633 U2b: that seeder
     /// now reads its own untaken launch fact as NOT fresh for the fresh-only
-    /// Prince — `anExistingPhoneStoreNeverGainsThePrince` pins the decline;
-    /// here its mark short-circuits first, as before.)
+    /// Prince — and, ladder R1 F2, declines it without recording,
+    /// `.freshnessUntaken`: `anUnprimedOccasionSeedsNoPrince` and
+    /// `anUntakenFactNeverBurnsThePrince` pin it; here its mark
+    /// short-circuits first, as before.)
     @Test func anUnprimedOccasionSkipsTheJournalOnly() async throws {
         try await withEditorWorld { session, db in
             let marks = Marks()
@@ -428,8 +430,12 @@ struct MobileFirstWriteFurnitureTests {
     /// **RED ON OLD — NEVER A GUESS THAT SEEDS.** An occasion whose launch
     /// facts were never taken (`prime` never ran, or its read failed) reads
     /// the store as NOT fresh — the starter Journal's never-a-guess rule —
-    /// so even an empty store gets no Prince from it: `.existingStore`.
+    /// so even an empty store gets no Prince from it.
     /// *Old:* the Prince seeded regardless (no guard).
+    /// **JUSTIFIED EDIT (VX-633 ladder R1 F2):** the decline stays; what it
+    /// answers changes from `.existingStore` (RECORDED) to
+    /// `.freshnessUntaken` (NOT recorded) — a missing fact is no decision.
+    /// `anUntakenFactNeverBurnsThePrince` pins why that matters.
     @Test func anUnprimedOccasionSeedsNoPrince() async throws {
         try await withEditorWorld { session, db in
             let marks = Marks()
@@ -440,9 +446,56 @@ struct MobileFirstWriteFurnitureTests {
                 return
             }
             #expect(journal == nil, "no verdict, no Journal")
-            #expect(sample == .existingStore, "\(sample)")
+            #expect(sample == .freshnessUntaken, "\(sample)")
+            #expect(!marks.sample, "and no decision recorded")
             let books = try await db.read { db in try Queries.readings(db) }
             #expect(books.isEmpty, "nothing minted")
+        }
+    }
+
+    /// **RED ON OLD — AN UNTAKEN FACT NEVER BURNS THE PRINCE** (VX-633 ladder
+    /// R1 F2). One launch's facts were never taken (its `prime` never ran or
+    /// its read failed): its first write declines the Prince WITHOUT
+    /// recording anything. The NEXT launch primes the same, still-empty store
+    /// and its first write seeds the whole book — a phone-only store keeps its
+    /// road to the Prince, which it would otherwise have lost for good (the
+    /// phone has no seeded-book restore door).
+    /// *Old:* the first occasion answered `.existingStore` and RECORDED it, so
+    /// the next launch's seeder short-circuited on the mark before any read:
+    /// `.alreadySeeded`, no Prince ever. *Revert:* spend an untaken fact as
+    /// `.takenAtLaunch(false)` in `perform` (the U2b line, `?? .untaken` →
+    /// `?? .takenAtLaunch(false)`) → both occasions' assertions red.
+    @Test func anUntakenFactNeverBurnsThePrince() async throws {
+        try await withEditorWorld { session, db in
+            let marks = Marks()
+            // Launch one: its facts never taken.
+            let unprimed = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            guard case .ran(_, let first) = await unprimed.run() else {
+                Issue.record("expected the first occasion to run")
+                return
+            }
+            #expect(first == .freshnessUntaken, "\(first)")
+            #expect(!marks.sample, "nothing decided")
+            #expect(try await db.read { db in try Queries.readings(db) }.isEmpty)
+
+            // Launch two (a fresh furniture — one occasion per launch): the
+            // same empty store, primed this time.
+            let primed = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            await primed.prime()
+            guard case .ran(_, let second) = await primed.run(),
+                  case .seeded(let readingID, let stories) = second
+            else {
+                Issue.record("the next primed launch seeds the Prince")
+                return
+            }
+            #expect(stories == 27)
+            #expect(marks.sample, "decided — and recorded — this time")
+            let members = try await db.read { db in
+                try Queries.assembleReading(db, readingID: readingID).count
+            }
+            #expect(members == 28, "the whole book")
         }
     }
 

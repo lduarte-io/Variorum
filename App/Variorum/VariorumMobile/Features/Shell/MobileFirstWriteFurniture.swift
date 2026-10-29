@@ -92,7 +92,8 @@ final class MobileFirstWriteFurniture {
         /// starter Journal is skipped rather than guessed at, while the
         /// sample library's seeder still runs (VX-633 U2b: with its own
         /// launch-time fact untaken too, the fresh-only launch book reads
-        /// the store as existing — `.existingStore` — never a guess).
+        /// the store as not fresh — never a guess; ladder R1 F2: and decides
+        /// nothing — `.freshnessUntaken`, unrecorded, asked again next time).
         case ran(journal: MobileStarterJournal.Outcome?,
                  sample: SampleLibrarySeeder.Outcome)
     }
@@ -110,7 +111,8 @@ final class MobileFirstWriteFurniture {
     /// same reason — by the write her own note exists. The SHARED rule
     /// (`SampleLibraryFreshStore.storeIsFresh`), so the two platforms judge
     /// one predicate; nil until `prime` (or when its read failed), which the
-    /// occasion spends as NOT fresh — never a guess that seeds.
+    /// occasion spends as NOT fresh — never a guess that seeds — and as no
+    /// decision (`.untaken`, ladder R1 F2: nothing recorded).
     private var storeWasFreshAtLaunch: Bool?
     /// **Has this session JOINED AN ACCOUNT since `prime` took its facts?**
     /// (VX-633 ladder R1 F1 — PROVISIONAL P-633-F1.) Latched the first time
@@ -275,14 +277,19 @@ final class MobileFirstWriteFurniture {
         let session = self.session
         let storeVariant = self.storeVariant
         let marks = self.marks
-        // VX-633 U2b (R-633-16): the launch-time fact, untaken read as NOT
-        // fresh. The Prince's own partial copy (a first write's seed stopped
-        // by a lock) is still completed — `SampleLibraryFreshStore`.
-        // VX-633 ladder R1 F1 (P-633-F1): never spent by a session that has
-        // joined an account since the fact was taken — what the pull brought
-        // is not what `prime` read; the launch book declines, recorded.
-        let freshness = SampleLibraryFreshness.takenAtLaunch(
-            !joinedAnAccountSincePrime && (storeWasFreshAtLaunch ?? false))
+        // VX-633 U2b (R-633-16): the launch-time fact. The Prince's own
+        // partial copy (a first write's seed stopped by a lock) is still
+        // completed on every arm — `SampleLibraryFreshStore`.
+        // Ladder R1 F2: an UNTAKEN fact (`prime` never ran, or its read
+        // failed) is `.untaken` — not fresh, and not a decision either: the
+        // decline is never recorded, so the next occasion asks again (the
+        // Journal's never-a-guess rule above, same shape).
+        // Ladder R1 F1 (P-633-F1): a taken fact is never spent by a session
+        // that has joined an account since — what the pull brought is not
+        // what `prime` read; the launch book declines, recorded.
+        let freshness: SampleLibraryFreshness = storeWasFreshAtLaunch.map {
+            .takenAtLaunch(!joinedAnAccountSincePrime && $0)
+        } ?? .untaken
         // VX-633 (R-633-6): the LAUNCH BOOK — *The Prince*, bilingual, in
         // Sherlock's place on both platforms (the R-17y-8 precedent: a launch
         // list names people's libraries, and a phone-seeded copy re-arrives

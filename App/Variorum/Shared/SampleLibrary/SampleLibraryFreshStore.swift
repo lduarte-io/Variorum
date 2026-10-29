@@ -56,7 +56,9 @@
 //      own note already exists, so its fact is taken at LAUNCH
 //      (`MobileFirstWriteFurniture.prime`) — the starter Journal's precedent.
 //      An untaken fact (the read failed, or `prime` never ran) is not fresh:
-//      never a guess that seeds.
+//      never a guess that seeds — and never a decision either (ladder R1 F2,
+//      `.untaken`): that decline is NOT recorded, so the next occasion, its
+//      fact taken, asks again (the starter Journal's rule).
 //
 //  ── RESUMING the seed's own partial copy ─────────────────────────────────
 //  A fresh store's launch can stop partway (the Mac window closed, the phone
@@ -93,6 +95,14 @@ nonisolated enum SampleLibraryFreshness: Sendable, Equatable {
     /// Taken at LAUNCH, before her first write — the phone's first-write
     /// occasion (`MobileFirstWriteFurniture.prime`).
     case takenAtLaunch(Bool)
+    /// **The phone's launch-time fact was NEVER TAKEN** (`prime` never ran, or
+    /// its read failed) — VX-633 ladder R1 F2. Not fresh (never a guess that
+    /// seeds), and NOT A DECISION either: the decline is never recorded
+    /// (`SampleLibrarySeeder.Outcome.freshnessUntaken`), so the next
+    /// occasion, its fact taken, asks again — the starter Journal's
+    /// never-a-guess rule, which skips without deciding. The seed's own
+    /// partial copy still completes (store truth, read at the decision).
+    case untaken
     /// This device already SETTLED the store's launch (the Mac's Welcome
     /// arrangement mark is `done` or `declined`) — an existing store by the
     /// device's own record; nothing is judged.
@@ -132,6 +142,7 @@ nonisolated enum SampleLibraryFreshStore {
         switch freshness {
         case .settled: return false
         case .takenAtLaunch(let fresh): return resuming || fresh
+        case .untaken: return resuming
         case .readAtDecision: return try resuming || storeIsFresh()
         }
     }

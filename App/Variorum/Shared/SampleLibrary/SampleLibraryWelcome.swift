@@ -439,7 +439,10 @@ nonisolated enum SampleLibraryWelcome {
             }
             save("pending")
             return nil
-        case .awaitingFirstSync, .refused:
+        // VX-633 ladder R1 F2: `.freshnessUntaken` is the phone's (the Mac
+        // never hands `.untaken`) — like the two beside it, not yet knowable,
+        // nothing recorded, asked again.
+        case .awaitingFirstSync, .refused, .freshnessUntaken:
             return .undecided
         // VX-633 U2b (R-633-16): the launch book declined an EXISTING store —
         // not a birth, exactly as a library already here is not.

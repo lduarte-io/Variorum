@@ -1043,6 +1043,14 @@ enum SampleLibrarySeeder {
         /// launches short-circuit before the parse. Help ▸ Restore is an
         /// existing store's road, and never reads the mark.
         case existingStore
+        /// **VX-633 ladder R1 F2:** a fresh-only book whose launch-time fact
+        /// was NEVER TAKEN (`SampleLibraryFreshness.untaken` — the phone's
+        /// `prime` never ran, or its read failed) met a store holding no
+        /// partial copy of its own. Nothing minted and — unlike
+        /// `.existingStore` — NOTHING RECORDED: never a guess that seeds, and
+        /// never a decision either (the starter Journal's never-a-guess rule),
+        /// so the next occasion, its fact taken, asks again.
+        case freshnessUntaken
         /// The store said no. Recorded, never surfaced.
         case refused(String)
     }
@@ -1175,23 +1183,33 @@ enum SampleLibrarySeeder {
     /// (`SampleLibraryFreshStore.mayMint` answered no: a settled store, or one
     /// that has held writing and holds no partial copy of this book's own to
     /// complete). Always false for every other book, whose reads are
-    /// byte-unchanged (nothing more is read for them).
+    /// byte-unchanged (nothing more is read for them). Ladder R1 F2: when
+    /// that "no" rests on an UNTAKEN launch fact (`.untaken`), it is
+    /// `freshnessUntaken` instead — a decline that decides nothing.
     nonisolated private static func facts(
         _ db: Database, book: Book, titles: [String], freshness: SampleLibraryFreshness
-    ) throws -> (existing: Existing, readerDeleted: Bool, existingStore: Bool) {
+    ) throws -> Facts {
         let existing = try discover(db, book: book)
         let readerDeleted = try readerDeletedTheBook(db, book: book)
         var existingStore = false
+        var freshnessUntaken = false
         if book.seedsFreshStoresOnly {
             let resuming = SampleLibraryFreshStore.isResuming(
                 bookExists: existing.bookID != nil, presentTitles: existing.presentTitles,
                 shippedTitles: [book.frontMatterTitle] + titles)
-            existingStore = try !SampleLibraryFreshStore.mayMint(freshness, resuming: resuming) {
+            let mayMint = try SampleLibraryFreshStore.mayMint(freshness, resuming: resuming) {
                 try SampleLibraryFreshStore.storeIsFresh(db, ownBook: book.name)
             }
+            if !mayMint {
+                if freshness == .untaken { freshnessUntaken = true } else { existingStore = true }
+            }
         }
-        return (existing, readerDeleted, existingStore)
+        return (existing, readerDeleted, existingStore, freshnessUntaken)
     }
+
+    /// What `facts` read, in one transaction.
+    private typealias Facts = (
+        existing: Existing, readerDeleted: Bool, existingStore: Bool, freshnessUntaken: Bool)
 
     /// **What the facts decide WITHOUT a mint — asked at both of the launch's
     /// reads.** A whole copy is present, first: nothing to mint, whatever an
@@ -1208,10 +1226,13 @@ enum SampleLibrarySeeder {
     /// either on request. **VX-633 U2b (R-633-16):** then, for a book that
     /// seeds fresh stores alone, an EXISTING store declines — recorded the
     /// same way — AFTER both answers above, so a whole copy still reads
-    /// present and her deletion still reads as hers. `nil` = nothing decided:
-    /// seed what is missing.
+    /// present and her deletion still reads as hers. **Ladder R1 F2:** last,
+    /// a fresh-only book whose launch fact was never taken declines WITHOUT
+    /// recording (`.freshnessUntaken`) — the store answers above still record,
+    /// being store truth, but a missing fact is no decision. `nil` = nothing
+    /// decided: seed what is missing.
     private static func decidedWithoutMinting(
-        _ facts: (existing: Existing, readerDeleted: Bool, existingStore: Bool),
+        _ facts: Facts,
         titles: [String],
         save: (Bool) -> Void
     ) -> Outcome? {
@@ -1226,6 +1247,9 @@ enum SampleLibrarySeeder {
         if facts.existingStore {
             save(true)
             return .existingStore
+        }
+        if facts.freshnessUntaken {
+            return .freshnessUntaken
         }
         return nil
     }

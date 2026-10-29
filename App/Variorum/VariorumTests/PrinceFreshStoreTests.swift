@@ -181,6 +181,12 @@ struct PrinceFreshStoreTests {
         #expect(R.mayMint(.takenAtLaunch(true), resuming: false) { false }, "the phone's fact, not a read")
         #expect(!R.mayMint(.takenAtLaunch(false), resuming: false) { true })
         #expect(R.mayMint(.takenAtLaunch(false), resuming: true) { false })
+        // Ladder R1 F2: an UNTAKEN fact is never a guess that seeds — not even
+        // on a store that would read fresh (the read is never asked) — while
+        // the seed's own partial copy still completes. (That its decline is
+        // NOT recorded is the phone pins': `anUntakenFactNeverBurnsThePrince`.)
+        #expect(!R.mayMint(.untaken, resuming: false) { true }, "never a guess")
+        #expect(R.mayMint(.untaken, resuming: true) { false }, "the seed's own partial copy completes")
         #expect(R.isResuming(bookExists: true, presentTitles: ["about this text"], shippedTitles: ["about this text", "Dedication"]))
         #expect(!R.isResuming(bookExists: true, presentTitles: ["her note"], shippedTitles: ["about this text", "Dedication"]),
                 "a book of hers sharing the name is not the seed's copy")
