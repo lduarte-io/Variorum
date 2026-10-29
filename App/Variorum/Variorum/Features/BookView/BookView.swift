@@ -1034,7 +1034,8 @@ struct BookView: View {
     /// the words; idle it takes no hits.
     private var pageFootReceipt: some View {
         let hosting = quietReceiptHome == .pageFoot
-        let speaking = hosting && session.status.quietLine != nil
+        // VX-676: the line speaks a receipt, or a standing ask to show her something.
+        let speaking = hosting && session.status.lineItem != nil
         return QuietReceiptLine(status: session.status, tokens: tokens)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
@@ -1583,6 +1584,22 @@ struct BookView: View {
         /// turn. The rows and the scroll position are emptied when the
         /// Outline leaves, so a return never reads the old page.
         var page = BookOutlineViewed.Page()
+        /// **VX-624 — has the scroll's own geometry reported in this
+        /// appearance?** `page.scroll` reads zeros until the observer's first
+        /// pass and after the Outline leaves (`forgetViewedPair`), and a
+        /// landing's REACH must never read those zeros as "the page can move
+        /// no further" — so it is unknown (`nil`, the pre-VX-624 decision)
+        /// until a report has landed.
+        var scrollReported = false
+        /// **VX-680 — the pending landing's HOME is a block inside the live
+        /// editor** (an Index → Outline click-over carried her block —
+        /// `BookViewModel.takeOutlineBlockLanding`): the landing's anchor (the
+        /// note's row), the note and the block. While set, the row's reports
+        /// carry the block's minimal-reveal residual once the editor has laid
+        /// the block out (`OutlineBlockSighting`), and a correction reveals it.
+        /// Set only by `landOutline`; cleared when its landing ends (any way)
+        /// and when the Outline leaves.
+        var blockHome: (anchor: String, postID: String, blockID: String)?
         /// **VX-562 — the follower's ADOPT / RELEASE state** (R-562-A,
         /// R-562-C; ladder round 1 finding 6): the one value that decides,
         /// fed by the acts below — a landing's start (`adoptLandingTarget`),
@@ -1707,6 +1724,12 @@ struct BookView: View {
     private func forgetViewedPair() {
         landingBox.page = BookOutlineViewed.Page(
             scroll: BookOutlineViewed.Scroll(viewport: landingBox.page.scroll.viewport))
+        // VX-624: the scroll position went with the page — a landing's reach
+        // is unknown again until the returning scroll reports.
+        landingBox.scrollReported = false
+        // VX-680: the landing died with the page (`landing.end()`, silent),
+        // and with it any block it was homing on.
+        landingBox.blockHome = nil
         landingBox.follower.forget()
         model.noteOutlineViewed(.nothingViewed)
     }
@@ -1763,18 +1786,27 @@ struct BookView: View {
     /// authority's**; what stays here is this surface's own act (the scroll)
     /// and what only this surface knows (its manifest's facts about the
     /// column, and the per-landing height log).
-    private func landOutline(_ anchorID: String, _ proxy: ScrollViewProxy) {
+    private func landOutline(
+        _ anchorID: String, _ proxy: ScrollViewProxy,
+        homingOnBlock block: (postID: String, blockID: String)? = nil
+    ) {
         #if DEBUG
         landingBox.rowHeights = [:]
         #endif
+        // VX-680: this landing's home — the carried block's minimal reveal, or
+        // (every other landing) the row's top. A new landing supersedes any
+        // block an earlier one was homing on.
+        landingBox.blockHome = block.map { (anchor: anchorID, postID: $0.postID, blockID: $0.blockID) }
         // VX-562: the landing's END asks the follower again — once, with the
         // authority already idle (`finish` calls this last): the adopted
         // target stands if it is on the page, else the rule (R-562-A). Weak on
         // the landing: it is the closure's own holder.
         let box = landingBox, model = model, structure = structure, authority = landing
-        authority.onFinish = { [weak authority] _, _ in
+        let session = session
+        authority.onFinish = { [weak authority] ended, outcome in
             guard let authority else { return }
             Self.deriveViewedPair(box: box, landing: authority, model: model, structure: structure)
+            Self.finishBlockHome(box: box, landing: authority, session: session, ended: ended, outcome: outcome)
         }
         // R-562-A: the follower adopts the TARGET at the click — before the
         // aim, so the freeze holds the target, never the page she left.
@@ -1786,10 +1818,86 @@ struct BookView: View {
             // arithmetic over the rows in hand — ∝ entries, measured at
             // 1.16 ms for the 400-row window cap and ~0.08 ms at Sherlock's
             // 26 — paid once per click.
-            facts: LandingFacts(manifest: outlineHeightManifest, anchor: anchorID)
-        ) { id in
-            proxy.scrollTo(id, anchor: .top)
+            facts: LandingFacts(manifest: outlineHeightManifest, anchor: anchorID),
+            // VX-624: how far the page can still move, read off the scroll's
+            // own last report at every look (`OutlineScrollFacts`: the derived
+            // offset from 0 to the REACHABLE travel — VX-562's trace-walk
+            // arithmetic). A target in the book's last screenful that the
+            // page cannot bring any nearer the top settles there at the hold
+            // instead of correcting into an immovable page until the watchdog.
+            reach: { [box] in Self.outlineReach(box) }
+        ) { [box] id in
+            // VX-680: homing on a block the live editor has laid out that would
+            // NOT fit below the row at the page's top, the act is the block's
+            // minimal reveal (AppKit's own scroll up the clip chain — the caret
+            // road the inline editor already scrolls this page by); until then,
+            // while the block fits below the row (the row first — D-2, the same
+            // rule the report below asks), and on every other landing, the
+            // row's unanimated top.
+            if let seen = Self.blockSighting(box, anchor: id, session: session),
+               !(box.page.tops[id].map { seen.sighting.homeIsTheRow(rowTop: $0) } ?? false) {
+                seen.textView.scrollToVisible(seen.sighting.target)
+            } else {
+                proxy.scrollTo(id, anchor: .top)
+            }
         }
+    }
+
+    /// **VX-680 — what the live editor can say about the block this landing
+    /// homes on**, or nil (no block home for `anchor`, the note's live editor
+    /// not the one under the caret yet, or the block not laid out — the
+    /// landing then aims and reports the row exactly as before).
+    private static func blockSighting(
+        _ box: OutlineLandingBox, anchor: String, session: AppSession
+    ) -> (sighting: OutlineBlockSighting, textView: NSTextView)? {
+        // The editor under the caret, for THIS note, and an INLINE one (no
+        // scroll view of its own — the book's live editor, scrolled by this
+        // page; never Write's detail editor of the same note elsewhere).
+        guard let home = box.blockHome, home.anchor == anchor,
+              let editor = session.editorRouter.editing, editor.postID == home.postID,
+              editor.scrollView == nil,
+              let textView = editor.textView,
+              let sighting = OutlineBlockSighting.read(
+                blockID: home.blockID, textView: textView, index: editor.index)
+        else { return nil }
+        return (sighting, textView)
+    }
+
+    /// **VX-680 — the block-homing landing ENDED** (settled, given up or
+    /// handed over — never at `end()`, which is the Outline leaving and
+    /// clears the home itself). Two duties, then the home goes:
+    /// - the authority's seed table gets the ROW's true top back (its reports
+    ///   carried the block's residual while it homed — a later landing on the
+    ///   row must seed from where the row is, never from that number);
+    /// - a landing that ended without her hand (`settled` / `gaveup`) while
+    ///   the block is still not wholly on the page — it settled on the row's
+    ///   reports before the editor's geometry reached it, or the watchdog
+    ///   ended it — reveals the block ONCE now. Her scroll (`handedover`)
+    ///   reveals nothing: a landing never fights her hand.
+    private static func finishBlockHome(
+        box: OutlineLandingBox, landing: LandingAuthority, session: AppSession,
+        ended: String, outcome: LandingOutcome
+    ) {
+        guard let home = box.blockHome, home.anchor == ended else { return }
+        defer { box.blockHome = nil }
+        if let top = box.page.tops[ended] { landing.noteTop(ended, top) }
+        guard outcome != .handedover,
+              let seen = blockSighting(box, anchor: ended, session: session),
+              abs(seen.sighting.residual) > LandingPolicy.bookOutline.tolerance
+        else { return }
+        #if DEBUG
+        BookOutlineGeometry.trace.append(
+            "\(ended) BLOCK-REVEAL at the landing's end (residual \(Int(seen.sighting.residual)))")
+        #endif
+        seen.textView.scrollToVisible(seen.sighting.target)
+    }
+
+    /// **VX-624 — the Outline page's reach** (`LandingReach`), or nil before
+    /// its scroll has reported in this appearance (never the zeros the box
+    /// holds until then).
+    private static func outlineReach(_ box: OutlineLandingBox) -> LandingReach? {
+        guard box.scrollReported else { return nil }
+        return LandingReach(offset: box.page.scroll.offset, maxOffset: box.page.scroll.travel)
     }
 
     /// A realized anchor reported where it sits. Every report feeds the
@@ -1826,6 +1934,29 @@ struct BookView: View {
             BookOutlineGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
         }
         #endif
+        // VX-680: the PENDING landing homing on a carried block hears the
+        // block's minimal-reveal residual once the live editor has laid it out
+        // (the row's own report is the moment anything that moves the block on
+        // the page has moved: her page's scroll, the row's top, the editor's
+        // height) — unless the block would be wholly on the page with the row
+        // at its top: then the home is still the ROW's top, and a row knocked
+        // off it (a content collapse that clamps the page) is corrected as
+        // every Outline landing's is (the row first — the VX-677 dispositions
+        // record, D-2; the act above asks the same rule). Every other report —
+        // every other row, every other landing — is the row's top, exactly as
+        // before. Read only for the target row while it lands (P1: one block's
+        // fragments, never per row).
+        if landing.anchor == anchorID, landingBox.blockHome?.anchor == anchorID,
+           let seen = Self.blockSighting(landingBox, anchor: anchorID, session: session) {
+            let rowFirst = seen.sighting.homeIsTheRow(rowTop: top)
+            #if DEBUG
+            BookOutlineGeometry.trace.append(
+                "\(anchorID) block-home residual=\(Int(seen.sighting.residual)) row-top=\(Int(top))"
+                    + (rowFirst ? " row-first" : ""))
+            #endif
+            landing.noteTop(anchorID, rowFirst ? top : seen.sighting.residual)
+            return
+        }
         landing.noteTop(anchorID, top)
     }
 
@@ -1861,6 +1992,7 @@ struct BookView: View {
     ) {
         landingBox.page.scroll.offset = new.offset
         landingBox.page.scroll.travel = new.travel
+        landingBox.scrollReported = true
         if old.contentHeight != new.contentHeight {
             outlineContentResized(new.contentHeight, proxy)
         }
@@ -2417,8 +2549,15 @@ struct BookView: View {
             if !model.entries.isEmpty { model.consumeReveal() }
             return
         }
+        // VX-680: an Index → Outline click-over parked her block beside the
+        // note (VX-630 focused the note at it): this landing homes on that
+        // block's minimal reveal, so the page shows her block — not only the
+        // note's row. Taken once; any other reveal lands the row as always.
+        let block = model.takeOutlineBlockLanding(for: postID)
         model.consumeReveal()
-        landOutline(BookOutlineRows.Row.noteAnchor(postID), proxy)
+        landOutline(
+            BookOutlineRows.Row.noteAnchor(postID), proxy,
+            homingOnBlock: block.map { (postID: postID, blockID: $0) })
     }
 
     /// Row 82 (the correction round, batch G): the paged Read's paragraph

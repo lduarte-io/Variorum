@@ -1157,11 +1157,17 @@ nonisolated enum CapabilityRegistry {
         // be a lying road). App scope, beside its veto (⌥⌘Z) in the Edit
         // menu; grey until an AI write has landed this session. ⌥⌘O: THE
         // COLLISION SWEEP is recorded at `EditorCommands.keyEquivalent`.
+        // VX-676 (her "the ⌥⌘O family takes it from the keyboard" — and "⌥⌘O
+        // takes it on arrival"): a STANDING ASK to show her something is what
+        // it takes first, so the fact is "an ask stands, or an AI change has
+        // landed" (`MCPDoor.attach` wires it); the verb is kept (PROVISIONAL
+        // P-676-7), the note says both.
         Capability(
             id: .showLastAIChange, verb: "Show the AI\u{2019}s Last Change", scope: .app,
             doors: [.menuBar],
             shortcutLabel: "⌥⌘O", takesAccess: nil,
-            unavailableNote: "No AI change to show yet — nothing a connected client wrote has landed this session.",
+            unavailableNote: "No AI change or ask to show yet \u{2014} nothing a connected client wrote or asked "
+                + "to show you has landed this session.",
             availability: { ctx in ctx.aiLastChangeAvailable ? .act : .unavailable }),
 
         // MARK: Post scope
@@ -2693,6 +2699,24 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "A client's new setup waits for you in Settings \u{25B8} MCP \u{25B8} Waiting.",
+            availability: always),
+        // VX-676 — the STANDING ASK's two doors (a client's show_in_app that
+        // landed as an offer): each item carries its ask, so `always` is
+        // honest; they render only while an ask stands (P-2 — a calm seam
+        // draws nothing). PROVISIONAL words (VX-234).
+        Capability(
+            id: .mcpTakeShowAsk, verb: MCPShowOfferCopy.takeVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's ask to show you something opens from its line at the bottom of the "
+                + "window, or with \u{2325}\u{2318}O.",
+            availability: always),
+        Capability(
+            id: .mcpDismissShowAsk, verb: MCPShowOfferCopy.dismissVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "A client's ask to show you something is dismissed from its line at the bottom "
+                + "of the window.",
             availability: always),
         Capability(
             id: .mcpOpenAsk, verb: "Answer\u{2026}", scope: .app,

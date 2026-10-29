@@ -636,6 +636,11 @@ struct CapabilityRegistryTests {
             // a new line): the just-in-time ASK SHEET renders its answer and
             // is its only renderer (AF-6).
             .union(MCPAskSheet.surfaceCapabilities)
+            // VX-676 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the STATUS SEAM renders the standing ask's two doors
+            // (Open › on the toast and the line; the line's ✕), carried on the
+            // item the door builds — the door's list names them.
+            .union(MCPDoor.statusSeamCapabilities)
             // 13n-c U3 (A JUSTIFIED EDIT, the same class — a new renderer is
             // a new line): the in-note MCP indicator (VX-164) renders the ONE
             // shared icon (`.mcpShowSharing` + its popover's Change… / Revoke)

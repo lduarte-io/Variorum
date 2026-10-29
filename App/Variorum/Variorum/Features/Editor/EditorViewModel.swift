@@ -711,6 +711,15 @@ final class EditorViewModel {
         // model that has let go must not re-take `active` if its view is
         // re-parented on the way out.
         textView?.onWindowChange = nil
+        // VX-656: the editor's typing history ends with the surface (the
+        // dismantle's `EditorSurfaceDelegate.endUndoHistory` is the exact
+        // road; this is the model's own belt). Only the editor's OWN manager
+        // is ever cleared here: a text view whose delegate has already let go
+        // falls back to the WINDOW's manager, which holds other text's history.
+        if let textView, let manager = textView.undoManager,
+           manager !== textView.window?.undoManager {
+            manager.removeAllActions()
+        }
         canary.disarm()
         // 13c 1E: the phantom fix's debounce dies with the surface it was
         // measuring (its geometry world goes with the text view).
@@ -1067,6 +1076,20 @@ final class EditorViewModel {
         // flip) are covered here by one line — every executor writes the
         // storage BEFORE it adopts, so the projection is settled by now.
         auditIdentityProjection()
+        // VX-668 (the VX-677 run, F-1): a restore's landing PARKED because the
+        // page did not show its words yet is asked again only at the settle
+        // hop after the rewrite that brings them — and that hop is armed by
+        // the text view's OWN display pass (`viewWillDraw`). TextKit 2 draws
+        // its text in its own subviews: a rewrite that leaves the text view's
+        // frame where it was (a short note, floored at the page — the walk's)
+        // never displays the text view itself (measured, macOS 27.0.1), so
+        // the landing waited forever. The rewrite makes that pass CERTAIN
+        // while a landing waits — VX-282 R1-2's road (`settleMarkdownCaret`),
+        // never a direct hop, which could run before the pass lays the words
+        // out. Nothing parked, nothing armed.
+        if parkedRestoreLanding != nil {
+            textView?.needsDisplay = true
+        }
     }
 
     /// Holds the idle-mint clock for a structural flight (re-arm via

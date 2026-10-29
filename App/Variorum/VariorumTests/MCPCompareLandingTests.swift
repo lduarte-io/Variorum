@@ -189,7 +189,7 @@ struct MCPCompareLandingTests {
             let token = session.commandRouter.registerDetail(postID: "n1", mode: .write) { applied.append($0) }
             defer { session.commandRouter.unregisterDetail(token) }
 
-            #expect(await door.agentShow(.compare(noteID: "n1", peerIDs: ["n2", "n3"])) == .navigate)
+            #expect(await door.agentShow(.pin(.compare(noteID: "n1", peerIDs: ["n2", "n3"]), dial: .moveAtOnce)) == .navigate)
             #expect(session.commandRouter.pendingCompareLanding == CompareLanding(postID: "n1", peerIDs: ["n2", "n3"]))
             #expect(applied == [.compare], "the landing, then her Compare mode")
             session.commandRouter.pendingCompareLanding = nil
@@ -197,7 +197,7 @@ struct MCPCompareLandingTests {
             let restoreWait = MCPNavigator.mountWait
             MCPNavigator.mountWait = .milliseconds(40)
             defer { MCPNavigator.mountWait = restoreWait }
-            #expect(await door.agentShow(.compare(noteID: "n9", peerIDs: ["n2"]))
+            #expect(await door.agentShow(.pin(.compare(noteID: "n9", peerIDs: ["n2"]), dial: .moveAtOnce))
                     == .refuse(MCPShowRule.partialShowWords))
             #expect(session.commandRouter.pendingCompareLanding == nil, "no landing parked for a failed show")
             #expect(applied == [.compare], "the mode never switched behind her back")
@@ -260,7 +260,7 @@ struct MCPCompareLandingTests {
             defer { session.commandRouter.unregisterDetail(token) }
             let parked = CompareLanding(postID: world.anchor, peerIDs: [world.stranger])
 
-            #expect(await door.agentShow(.compare(noteID: world.anchor, peerIDs: [world.stranger])) == .navigate)
+            #expect(await door.agentShow(.pin(.compare(noteID: world.anchor, peerIDs: [world.stranger]), dial: .moveAtOnce)) == .navigate)
             #expect(applied == [.compare])
             session.commandRouter.noteMode(.compare)
             #expect(session.commandRouter.pendingCompareLanding == parked,
@@ -294,7 +294,7 @@ struct MCPCompareLandingTests {
 
             // (i) Another note's detail registers before the board mounts.
             let first = session.commandRouter.registerDetail(postID: world.anchor, mode: .write) { _ in }
-            #expect(await door.agentShow(.compare(noteID: world.anchor, peerIDs: [world.stranger])) == .navigate)
+            #expect(await door.agentShow(.pin(.compare(noteID: world.anchor, peerIDs: [world.stranger]), dial: .moveAtOnce)) == .navigate)
             #expect(session.commandRouter.pendingCompareLanding != nil, "parked")
             let elsewhere = session.commandRouter.registerDetail(postID: world.other, mode: .write) { _ in }
             #expect(session.commandRouter.pendingCompareLanding == nil,
@@ -311,7 +311,7 @@ struct MCPCompareLandingTests {
             afterSwitch.teardown()
 
             // (ii) The detail tears down with no successor before the board mounts.
-            #expect(await door.agentShow(.compare(noteID: world.anchor, peerIDs: [world.stranger])) == .navigate)
+            #expect(await door.agentShow(.pin(.compare(noteID: world.anchor, peerIDs: [world.stranger]), dial: .moveAtOnce)) == .navigate)
             #expect(session.commandRouter.pendingCompareLanding != nil, "parked again")
             session.commandRouter.unregisterDetail(back)
             #expect(session.commandRouter.pendingCompareLanding == nil,

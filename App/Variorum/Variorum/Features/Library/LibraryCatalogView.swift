@@ -547,7 +547,8 @@ struct LibraryCatalogView: View {
     @ViewBuilder private var messageRow: some View {
         switch Self.messageSlot(
             error: model.lastError ?? library.lastError, receipt: library.receipt,
-            quietReceipt: session.status.quietLine != nil) {
+            // VX-676: a standing ask to show her something holds the line too.
+            quietReceipt: session.status.lineItem != nil) {
         case .quiet:
             // 13i-d U6 (j) — KnownIssues row 103's LIBRARY half (F-U5-8: the
             // move/copy-to-wing receipts, the row menus' Remove/Release, every

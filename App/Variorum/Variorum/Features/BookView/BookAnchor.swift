@@ -16,16 +16,18 @@
 //  It is ONE pure rule — "which post is this mode at" — over facts the modes
 //  ALREADY hold. It invents no state: Outline's place is the book's focused
 //  post, Book's is its spread, Read ▸ Pages' is its (post, page-in-post)
-//  address. The one fact a mode does not hold is Read ▸ Scroll's scroll
-//  position: `ReadingFlowView` tracks none, and per-row visibility reporting
-//  is precisely the machinery 13c 2A deleted on her A6 ruling ("it seems a
-//  bit buggy… remove it fully for now"). So leaving the scroll carries the
-//  book's STANDING anchor — where she arrived — rather than re-adding a
-//  subsystem she asked to have removed. Recorded, never implied. (VX-645
-//  since gave the flow VX-562's follow-highlight — the note its page SHOWS,
-//  `BookViewModel.viewedFlowPair`, for the navigator and ⌘↑/⌘↓ — but this
-//  carry was not asked to read it and still leaves from the standing anchor;
-//  reading it here is a recorded follow-up, not built.)
+//  address. Read ▸ Scroll's place was, until VX-645, the one fact no mode
+//  held: `ReadingFlowView` tracked no position (13c 2A's per-row visibility
+//  brain was deleted on her A6 ruling — "it seems a bit buggy… remove it
+//  fully for now"), so leaving the scroll carried the book's STANDING anchor
+//  — where she arrived. VX-645 gave the flow VX-562's follow-highlight (the
+//  note its page SHOWS — `BookViewModel.viewedFlowPair`, derived from the
+//  geometry the flow's landing already takes; no bar, no progress number —
+//  A6 is not re-opened), and **VX-681 (B4-P4, ruled in at #248) carries from
+//  it**: leaving Read ▸ Scroll lands the next mode on the story on screen.
+//  With nothing viewed — she never scrolled and nothing has reported, the
+//  flow's title holds the page, or an empty chapter's heading names no note
+//  — the standing anchor answers, exactly as before.
 //
 
 import Foundation
@@ -47,6 +49,10 @@ nonisolated enum BookAnchor {
         /// Where the book was last carried TO — the answer for a surface
         /// that tracks no position of its own.
         var standingPostID: String?
+        /// **VX-681 — Read ▸ Scroll's viewed note**: the story its page shows
+        /// (VX-645's follower — `BookViewModel.viewedFlowPair.postID`), nil
+        /// when nothing is viewed.
+        var flowViewedPostID: String? = nil
         /// VX-304: Outline's LIVE note and the block her caret stands in —
         /// read from the editor under the caret at the switch (`BookView
         /// .switchMode`), only when it is the book's live note. VX-630: the
@@ -85,8 +91,9 @@ nonisolated enum BookAnchor {
             case .pages:
                 return place.pagedPostID ?? place.standingPostID
             case .flow:
-                // The one surface that knows nothing (see the header).
-                return place.standingPostID
+                // VX-681: the story its page shows (VX-645's follower); with
+                // nothing viewed, where she arrived (see the header).
+                return place.flowViewedPostID ?? place.standingPostID
             }
         case .index:
             // The index's place is its selected note (reported, like the

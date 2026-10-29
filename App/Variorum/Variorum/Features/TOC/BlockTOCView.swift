@@ -191,7 +191,14 @@ final class BlockTOCViewModel {
     func adopt(facts: [Queries.WorkbenchRow]) {
         self.facts = facts
         picked.prune(to: Set(facts.map(\.blockID)))
-        authority.settle(isPending: { autosave.pending[$0] != nil })
+        // VX-664 (A-677-1): settle, and hear whether the ring's OWN take was
+        // written from outside (suspected here, confirmed on a fresh read).
+        let liveIncoming = authority.livePane.flatMap { live in
+            facts.first { $0.variantID == live.variantID }?.text
+        }
+        let suspect = authority.settle(
+            isPending: { autosave.pending[$0] != nil }, liveIncoming: liveIncoming)
+        endRingIfWrittenFromOutside(suspect)
     }
 
     func startTray() async {
@@ -223,7 +230,37 @@ final class BlockTOCViewModel {
     /// with no pending autosave drop, so external edits reach the rows.
     func adopt(rows: [Queries.TOCRow]) {
         self.rows = rows
-        authority.settle(isPending: { autosave.pending[$0] != nil })
+        // VX-664 (A-677-1): settle, and hear whether the ring's OWN take was
+        // written from outside (suspected here, confirmed on a fresh read).
+        let liveIncoming = authority.livePane.flatMap { live in
+            rows.first { $0.variantID == live.variantID }?.text
+        }
+        let suspect = authority.settle(
+            isPending: { autosave.pending[$0] != nil }, liveIncoming: liveIncoming)
+        endRingIfWrittenFromOutside(suspect)
+    }
+
+    /// **VX-664 — the ring's own take was written from OUTSIDE** (A-677-1):
+    /// confirmed on a fresh read, the ring ends by this model's own `blur()` —
+    /// VX-222/VX-440's shape. Read ▸ edit renders its pane only while live, so
+    /// its row returns to the read-cheap face showing the stored words; the
+    /// workbench's panel pane goes read and adopts them.
+    private func endRingIfWrittenFromOutside(_ suspect: PaneTextAuthority.PaneKey?) {
+        OutsideWriteConfirmation.endRing(
+            ifConfirmed: suspect, in: session.database,
+            authority: { [weak self] in self?.authority },
+            isPending: { [weak self] in self?.autosave.pending[$0] != nil },
+            endRing: { [weak self] in self?.blur() })
+    }
+
+    /// VX-664 (A-677-1): what the pane shows as it takes the ring — the list
+    /// its host renders (the workbench's facts where this model observes
+    /// them, Read ▸ edit's rows otherwise), under the buffer overlay.
+    private func shownText(of variantID: String) -> String? {
+        let stored = facts.isEmpty
+            ? rows.first { $0.variantID == variantID }?.text
+            : facts.first { $0.variantID == variantID }?.text
+        return stored.map { authority.text(variantID: variantID, storeText: $0) }
     }
     func adopt(tray: [Queries.TrayItem]) {
         // A6: the probe-row window (the `TrayViewModel.adopt` shape) — the
@@ -276,7 +313,7 @@ final class BlockTOCViewModel {
         if let clickOffset {
             paneCaretLanding = (variantID: variantID, landing: .offset(clickOffset))
         }
-        switch authority.focus(key) {
+        switch authority.focus(key, showing: shownText(of: variantID)) {
         case .unchanged:
             return
         case .migrated:

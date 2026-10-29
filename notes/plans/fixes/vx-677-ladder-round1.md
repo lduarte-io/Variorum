@@ -1,0 +1,246 @@
+# VX-677 — ladder ROUND 1 (cold review, Fable, 2026-10-29)
+
+**Scope:** the run's whole diff, `git diff origin/main...HEAD` at tip `3cf128fed` (merge base `039aededb`; the tested
+SHA for the final window's evidence was `092909955` — every source change since is record-only, verified by
+`git diff --stat` over non-notes paths). Reviewed cold per `notes/REVIEW_PROMPT.md`: the run record read in full,
+MCPSpec in full, TEXTKIT2_NOTES §0/§3–4, SurfaceContracts in full (the app · the Bookcase and books · the note ·
+doors), every product file of the diff read line by line, the new pin files read, the three changed MCP wire suites
+re-run headless by the reviewer (21/21 green). No BLOCKER, no MAJOR found. Findings below, severity-ranked; the
+clean bill after them. Dispositions column to be filled by the cross-model flow (findings → the implementer
+verbatim → agree/dispute → the reviewer's final call).
+
+---
+
+## Findings
+
+**F-L1 [MINOR] · App/Variorum/VariorumTests/OutsideWriteLivePaneTests.swift:170,175,183 · the Takes twin keeps the
+exact VX-692 donor/recipient closure shape that hollowed its Lenses sibling for two windows.**
+`aLiveTakesArticleShowsAnAIsEditToItsOwnTake` wraps its two fixture predicates in
+`#expect(await Self.settle(window, hosting) { … })` (:170, :175) and then, in the same enclosing `withWorld`
+closure, binds the same-typed plain closure `let shows = await Self.settle(…, timeout: 4) { …aiWords }` (:183) —
+byte-for-byte the shape D-1 proved merged in this very file (`closure #5` emitted once for the Lenses pin's c1 and
+c3). The twin compiled honestly at `1d960469e` (the binary panel), but the merge is BUILD-SENSITIVE — the run's own
+lesson (R12: the MCPShareFaces merge did NOT recur on a rebuilt binary; the handoff: "a red can vanish on
+rebuild"). *Mechanism if it merges:* `shows` runs the `prose(2/3)` fixture body — on `post` the pane shows the AI's
+words, the predicate never turns true, the 4-s timeout makes a FALSE RED at any future window; on `rev664` the
+decisive assertion goes hollow (the red-on-old survives only via the editability line). *Fix:* bind the two fixture
+predicates to locals first (the D-1 Lenses repair's steps 2–3, applied to the twin). Test-only — no pin owed; the
+general sweep stays VX-692's (High, ticketed), but this file is the run's own new pin file and its sibling already
+bit twice, so the two-edit fix belongs in this run's fix round.
+
+**F-L2 [MINOR] · App/Variorum/Variorum/Features/MCP/MCPDoor.swift:1095–1112 (`takeShowOffer`) · her TAKE of an ask
+can end the ask and then do nothing, silently — against the status seam's "a door that did nothing speaks a
+refusal" (SurfaceContracts §The app).**
+*Mechanism:* `takeShowOffer` runs `endShowOffer()` first, then
+`Task { await MCPNavigator(session:).deliver(offer.request.target, into: router) }` (:1102) with the three-state
+`Delivery` result DISCARDED. An ask stands indefinitely while its client is connected, and nothing ends it when its
+TARGET dies — so a takes/lens/compare ask whose note is deleted while the ask stands (a wire `delete_note`, her own
+Delete, a sync removal) delivers `.unfinished` (`open(noteID)` never mounts the dead note's detail inside
+`mountWait`): the ask is gone from the seam, nothing opened, nothing spoken. The no-window arm of the same function
+speaks AND keeps the ask (`MCPShowOfferCopy.noWindow`); this arm is silent. The sibling silence on the receipt road
+is already recorded (batch 3's F-B3-2, `openShow`); the ask's take is a NEW door built this run, so the contract
+binds it directly. *Pin (red-on-old):* stage a standing ask on a takes target, delete the note, `takeShowOffer()` →
+expect a spoken refusal (old: `status.current == nil`, nothing said). *Fix shape:* speak on `.unfinished` from the
+take road (the navigator already answers the three states — e.g. `session.status.refuse(MCPShowRule
+.partialShowWords)` or its own sentence), and fold F-B3-2's `openShow` line into the same touch. *Adjacent product
+question, unruled — QUESTIONS candidate for the P-676 bundle:* should an ask END (or re-say itself) when its target
+dies, rather than keep offering a dead thing? Not a ruling for this ladder to make.
+
+**F-L3 [NIT] · App/Variorum/Variorum/Features/MCP/MCPDoor.swift:1108 · her take's Activity row is best-effort
+(`try? await runner.run { recordMCPShowTaken … }`), silently droppable.**
+Ruling (4) says Activity logs the ask AND the take; the take's row is the only ruled Activity row written with a
+swallowed error (the comment owns it: "a lost line never undoes what she opened" — a defensible posture, and a red
+pin would need a failing store). Recorded so the orchestrator can dismiss it deliberately rather than by silence.
+
+**F-L4 [NIT] · App/Variorum/VariorumTests/RestoreLandingInspectorTests.swift:41,44 · two stale comment lines still
+name the removed `VX668-TRACE`** (the handoff's own two-line tidy — confirming it has not landed yet; the only
+`VX668`-trace references left in the tree, verified by grep over App + Sources).
+
+**F-L5 [NIT] · the record (canon deltas owed) · batch 2's carry family and VX-668's sheet-road landing have NO
+drafted contract lines in the record** — batch 3 drafted its MCPSpec/SurfaceContracts lines and batch 4 named its
+Block History line, but VX-663/VX-662/VX-681/VX-680/VX-624's SurfaceContracts §Bookcase lines and §The note's
+"(the read-in-full sheet's own landing is VX-668)" pointer (which must become the landed fact: the sheet road lands
+at the block's start as the row road does) exist only as the closeout checklist's one line. Draft them before the
+closeout applies the two-file rule, so nothing lands from memory.
+
+---
+
+## Merge gates the ladder CONFIRMS (already the plan's; restated as the reviewer's own line)
+
+- **C1** (`vx677-c/rev668`, EXACTLY 1 failure) is the VX-668 fix's owed red-on-old — the fix landed with its pin
+  revert-verified by BUILD only; the merge correctly waits on the run (the record's F-4 names the deviation
+  honestly).
+- **C7** (`vx677-c/revFW2`, EXACTLY 1 failure) is F-FW-2's owed red — the pin is "red by mechanism" only, never yet
+  run; **C4/C5** are DA-1's repaired pin's red/green. A hollow green on any of these follows the record's own rule:
+  record it, never fix it.
+- The **W-668-V1 ×3** sheet-road walk is the landing half's evidence of record (the post/rewrite race falls either
+  way per press — one green press is not the verdict).
+
+## Review foci (the handoff's standing ladder eyes), each addressed
+
+1. **Batch 2's six stare points** — all examined against the code: (i) the authority's home-switch is sound AFTER
+   D-2 (the row-first rule consulted at both the report and the act; the end-of-landing re-seed restores the row's
+   true top); (ii) `scrollToVisible` as the block's act is justified (a block is not a SwiftUI view) and is not a
+   second loop — one landing, one authority; (iii) the second-inline-editor-same-note edge is recorded, filtered by
+   `editing.postID` + `scrollView == nil`, acceptable; (iv) the widened Index observer fires per scroll but its new
+   body is two assignments — Release-safe; (v) VX-662's pick (a) is not a product fork (the road table holds: (b)
+   and (c) each leave a stale road (a) closes); (vi) VX-663's `landingAt:` outranks the identity re-anchor on the
+   FIRST adoption only — later `.onChange` adoptions pass none, `theAddressSurvivesMembershipAndOrderChangesByIdentity`
+   unmodified.
+2. **P-680-2(a)'s reading (D-2)** — the reviewer CONCURS with the dispositions record: the row-first rule is the
+   design's own words ("the row first, the block within about a second"; the guard's contract), not a new product
+   decision; the dissenting reading would leave the Outline landing's standing drift correction off exactly where
+   nothing else corrects it (the live Study walk met the 37-pt drift and the fix corrected it). P-680-2 stays in
+   her bundle with the row-first arm noted, as the closeout checklist already says.
+3. **F-B5-1** — the old VX-440 sheet pin stays the ORDER pin; `RestoreLandingRewriteHopTests` is the landing pin;
+   no conflict.
+4. **The `clear()` / refusal-toast / ⌥⌘O trio** — verified in `StatusCenter` + `MCPDoor`: `clear()` never ends a
+   standing ask (that is what makes "the toast's ✕ sends it to the line" true); a refusal toasting beside a
+   standing ask shows two messages in two places (deliberate — the 18i one-message comment stays true of
+   `current`/`quietLine`; `lineItem` is the one new rule); ⌥⌘O takes a standing ask first and the registry fact
+   (`aiLastChangeAvailable`) includes it; a quiet receipt takes the line for its six seconds, then the ask is back
+   (P-676-3(a) as built — the receipt's `deliver` sweeps the ask's TOAST under the one-message rule, the ask holds
+   the line: consistent with the ruling). The named hazard (a future "silence everything" caller missing
+   `endStanding`) stands recorded, not built around — agreed.
+5. **VX-692's macro hazard** — addressed as F-L1 (one proven-shape site left in the run's own new pins); the new
+   fixes-unit and batch 4/5 pins honor the bind-to-locals rule (checked: `RestoreLandingRewriteHopTests`,
+   `HelperWindowThemeTests`, `MCPShowOfferFacesTests`, `CommitRestingPreviewTests` carry no closure-bearing
+   expression inside a macro; the plain-function-body helpers (`chosen`) are the recorded-safe shape).
+6. **Trailer discipline** — verified: 0 `Co-Authored-By`/`Claude-Session` lines over the branch's 102 commits.
+
+## Clean bill (load-bearing things specifically checked and found solid)
+
+- **The fences:** `git diff origin/main...HEAD` over `Sources/VariorumCore/Sync`, `Server/`,
+  `Sources/VariorumCore/Protection`, `App/Variorum/Shared/Protection` is EMPTY; no schema change, no migration, no
+  new dependency, no literal colour; `Package.swift` untouched. Mobile parity: no `Shared/` or `VariorumMobile/`
+  file in the diff; the two new core files (`MCPShowDial`, the grants ops/queries rows) are additive types the
+  phone never reads — "nothing mobile-visible" holds.
+- **VX-664 (the editor seam's High):** the pure rule is right — suspicion computed BEFORE `settle` drops buffers,
+  judged against what the pane HOLDS (`liveHeld`: the focus's `showing:` baseline, then her keystrokes), her own
+  text compared through `StoredText.stripped`; nothing pending wins every race (the typed-in-the-gap confirm is
+  declined via `isPending`, same main-actor hop from confirm to `endRing`); the confirmation is one row by key,
+  off-main (P1/P2), weak-owner-safe. Every owner wired at its existing settle seam with the INCOMING delivery's raw
+  stored text (verified per owner — Takes/Lenses/Write's panel from `new`, Compare from the new face's
+  `workingText`/slot text, Canvas from the new projection, the TOC model from the delivered rows/facts, the book
+  Index context-gated per note); every focus door passes its host's resolution as the baseline. P-3 whole: the live
+  pane never adopts — it stops being live; `liveHeld` is a mirror, never a second liveness answer. The sweep table
+  S1–S21 read against the code: the SAFE rows' mechanisms hold (new rows, released sources, non-text acts, the
+  full-document editor's own discipline), the residuals are honestly ticketed (VX-683) and guarded
+  (`anOutsideWriteRacingHerPendingTypingLeavesTheRing`).
+- **B2-i (A-677-2, ratified):** one factored adoption body (`adoptProjectionText`) for both read roads; the go-live
+  completion gated to the read→live transition with a moved projection (TRACE 1a's native record); the click place
+  handed to the landing as a re-bind's; the four-writer comment corrected.
+- **VX-656:** the delegate-owned `UndoManager` answered only for the wired view; history ended at BOTH dismantles
+  and belted at `teardown()` with a guard that can never clear the window's manager; every existing
+  `textView.undoManager` reader resolves through the delegate's answer (WHEN unchanged, WHERE moved); the undo-hint
+  comment corrected for per-editor histories. No TK1 API, nothing on the live storage, `BlockRangeIndex`/
+  `runStructural` untouched.
+- **VX-668:** the WHY is a measured TK2 fact (frame-constant storage edits never run the text view's own
+  `viewWillDraw` on 27.0.1 — offscreen probes, 0-vs-2 calls), consistent with the live trace (S4) and with R13's
+  in-host green (the long note's rewrite moves the frame); the fix is ONE guarded `needsDisplay = true` at
+  `adoptRewrite` (the one tiling-write door), VX-282 R1-2's precedent, never a direct hop; the pin stages the
+  interleaving deterministically with `#require`d premises (taken-before-the-rewrite; frame unchanged) so drift
+  fails as fixture, never as a hollow green. The wider class is ticketed (VX-702) and the TEXTKIT2_NOTES §3 entry
+  drafted (F-FX-2). The trace is fully removed (grep 0 over App + Sources; `strings` 0 per the record).
+- **VX-676/675, the wire:** the dial read in the decision's OWN read; `never` decided AFTER the target's read
+  decision (an unreadable target answers the ONE not-shared shape under every dial — no oracle; the version arm's
+  refusal is `decide(standing, note: nil, …)` over no facts, byte-identical, walk-verified as JSON); the version
+  target rides the NOTE's read decision + `isVersionHistory`, never spending; `version_id` with any other target
+  refuses pre-read; the schema and descriptions updated (VX-606 held); the answer is fire-and-forget
+  (`list_my_activity` maps `show_in_app_offered` back to `show_in_app` with `offered: true`, never lists her take;
+  refused rows carry no title at the wire — `entry` gates `title` on `allowed`); `grantsFingerprint` excludes the
+  dial's row (no tool re-announce — deliberate and commented); `MCPSession.instructions` 3,061/3,100 (the 3,250
+  allowance unused), the pinned never-call clause kept. The reviewer re-ran `MCPShowOfferServerTests` +
+  `MCPShowServerTests` + `MCPShowCompareServerTests` headless at the tip: 21/21 green; `MCPGrantOperationsTests`
+  17/17 green.
+- **VX-676, the app:** the standing slot's lifecycle is exactly the ruling — present at the toast's full prominence,
+  the toast's own clock fades only the toast, `clear()` never ends it, the line's ✕ / the take / a newer ask / the
+  client's disconnect / the library's close end it (`adoptConnected` runs on the host's report, on `stopServer`,
+  on `previewConnected`, so a server stop and a lock end asks too); one ask at a time, doors id-named so an older
+  ask's door never acts on a newer one; her take opens through `creationRouter` (her press's rule — never raises a
+  window on the agent's side); the two doors are declared in the registry (P-1) and the three line homes gate on
+  `lineItem`. Activity rows as ruled (the ask the wire's, the take the app's, a dismissal logging nothing).
+- **DA-1:** the mechanism is real in the code (`reconcileServer`'s server-off arm → `stopServer` →
+  `adoptConnected([])` → the ask ends — correct door behaviour on the pin's old staging); the repair changes staging
+  only (server ON + `previewConnected`), assertions byte-identical plus one non-vacuity line; the live probe held
+  the line to +21.5/+25.5 s in both voices.
+- **VX-624:** `LandingReach` is read live per look through a closure (never frozen — TEXTKIT2 §3's rule);
+  `scrollReported` keeps the boxes' zeros from ever reading as a floor; a floored target still finishes by the
+  at-home rules (hold, veto, watchdog); nil-reach surfaces decide byte-identically; the per-surface sweep's SAFE
+  rows match the code's own residual clamps.
+- **VX-680 + D-2:** the park is a strict one-shot (set only by `carryPlace`'s Outline arm; spent once; dropped by
+  focus, collapse, collapse-all, reveal, chapter reveal, block landing, and the Outline leaving); the row-first rule
+  is consulted at both decision points from the same sighting; the end-of-landing net re-seeds the row's true top
+  and reveals at most once, never after `handedover`; `OutlineBlockSighting.read` honors every TK2 rail (`options:
+  []`, `.layoutAvailable` only, no forced layout, no `layoutViewport`, `BlockRangeIndex` read-only, cost ∝ the one
+  block + one index pass, target row only while pending).
+- **VX-681 / VX-663 / VX-662:** the `.read .flow` arm's fallback-by-nil-default keeps every existing `Place`
+  spelling; the carry reads the follower's slot at the switch (the flow clears it after — `switchMode` carries
+  first); `adopt(landingAt:)` resolves against the adoption's own entries, outranks the identity re-anchor on the
+  first adoption only, drops a foreign place; the carried-reveal arm's `report: true` closes the stale-anchor class
+  by W21's own rule while the cold-open seed stays unreported (18d kept).
+- **VX-674:** `restingWords` is nil exactly when a name stands (one normalisation, `SavepointRowFace.name`); first
+  line only, 160-`Character` cap (never mid-grapheme), no face ellipsis; muted small face with `lineLimit(1)`; the
+  open row, the sheet and the phone untouched.
+- **VX-572:** the migration keeps her words and reads every chord from its declaration; the ID-level registry walk
+  replaces the string guard both ways; the filter and chord reader are correct pure logic (exact modifier set with
+  a key, superset for modifiers-only, digit spans, accent/case folding; her folding never overwritten by a search —
+  `searchCollapsed` emptied per query); P-8 held (`fixedSize` + `lineLimit` on every chrome text in the new files);
+  `HelperView.groups` survives as the one projection for Settings and the older pins.
+- **F-FW-2:** `HelperSceneContent`/`HelperThemedRoot` are the other window roots' exact shape (own `ThemeStore`,
+  `.environment`, `.task { start() }`, `.id(session)`); `VariorumApp` touched in the ONE helper-window region
+  (VX-678's `appDelegate.services` line untouched — verified in the diff); the no-library fallback kept; the pin
+  mounts the WINDOW's root, which is exactly why the old face pin was blind (its five tests stay green on the
+  revert — said in C7's expectations).
+- **Process:** red-on-old discipline held throughout (behavioural-revert products binary-panel-verified to differ
+  only in their member; hollow pins recorded and repaired rather than patched — anomaly A; a real defect found
+  behind a "pin artifact" suspicion — anomaly B); the hallucination guard honored (D-3/F-B2W-1 deferred to a ticket
+  with a stage-trace plan instead of a blind fix); findings-not-fixed lists kept per batch; QUESTIONS/PROVISIONALs
+  accumulated for her bundle, no invented product behavior found anywhere in the diff.
+
+— round 1 reviewer (Fable), 2026-10-29
+
+---
+
+## Cross-model dispositions — STEP 1: the implementer's agree/dispute (Opus, fresh session, 2026-10-29; read-only — nothing edited or built; recorded by the orchestrator from its handback. The reviewer's FINAL CALL below closes each.)
+
+**F-L1 — AGREE (fix it), one premise corrected.** The shape is confirmed at :170/:175/:183 (D-1's Lenses shape minus its leading `#require`), and it breaks the rule the file's own Lenses doc states. It compiles honestly today **by numbering**: in `vx677-b5/post` c1 is closure #2, c3 #3, c2 #8, each with one forwarder; the detector finds only the standing MCP lead. Premise correction: "BUILD-SENSITIVE" is imprecise — discriminators are deterministic per source+toolchain; the MCP lead's merged thunk is present in EVERY product checked (R12's green means the merged body didn't change that run's outcome, not that the merge vanished). The real hazard: c1/c3 sit on ADJACENT discriminators (#2/#3) — one closure added/removed in the numbering context, or a toolchain update, collides them (D-1's form had exactly one more macro-wrapped closure). Consequence if merged: as the reviewer stated. **Fix:** D-1's steps 2–3 on the twin (bind `showsTheTake` + `isLive` to locals). Test-only, no pin owed. **Evidence owed:** rebuilt binary re-checked (three bodies; `shows` calling its own `aiWords` body); the twin's red/green re-run (R1/R2 predate the edit) — claim C rows: `vx677-b1/rev664` `T=(OutsideWriteLivePaneTests)` 2 tests/EXACTLY 2 failures (both decisive lines ~4 s); `vx677-b1/post` 2/0; both products rebuilt at the final tip (rev664 = batch 1's three-line revert re-applied).
+
+**F-L2 — AGREE the defect; DISPUTE the mechanism, the fix shape and the pin shape.** The reviewer's premise that nothing ends a standing ask when its target dies is CORRECT, and the take does the wrong thing silently — but `.unfinished` is not what happens live. The traced live road: `takeShowOffer` ends the ask then delivers; the `.note` arm `router.adopt(.post(dead))` returns `.delivered` AT ONCE; the takes/lens/compare arms' `open()` adopts the same way; `WorkspaceModel.select` has no liveness check; `RootView.paneDetail`'s `.post` arm mounts `PostDetailView` unconditionally; its `.onAppear` → `registerDetail` has no liveness gate, so `activePostID` becomes the dead id and `open()` returns true → `.delivered`. The navigate-away (`.variorumNotesDeleted` → `notesDeleted`) fires only AT the deletion moment; nothing bounces a later adopt of a dead id; MCPDoor never hears deletions. **What she sees live:** the ask ends and the TOMBSTONED note's empty page opens (writes refused by `liveContainer` — store safe); the dead id joins the Open list; the take row logs; nothing is said — a pane standing on a tombstone, the exact state 13l Act 2's navigate-away and MCPSpec's "a pane showing a dead note goes to the Library IN PLACE" exist to prevent. **Why the reviewer's fix+pin would be hollow:** speaking on `.unfinished` changes nothing live and misses the commonest target (`.note`) entirely; the suite's `Rig` mounts no shell, so EVERY takes/lens/compare take ends `.unfinished` after `mountWait`, dead or alive — the proposed pin goes green-for-the-wrong-reason and cannot tell dead from alive; `partialShowWords` is the wire's sentence, false for a dead note and addressed to the wrong reader. **Counter-proposal (the door's own precedent — the grant ask's press):** her press re-reads the target off-main (P2; `refreshAsk` → `askStanding`, 13n-c Stage B R2-1(a)); when the place is GONE the ask is let go and a refusal naming it is said where she pressed (`MCPAskCopy.gone` — "“X” is gone, so ‹client›'s ask was let go.", P-13nc-SB-5's precedent). Gone per target: note/takes/lens/compare = the note (compare's anchor) not a live note; version = that, or not a version; book = not a live book/gathering; wing = deleted (Home never). Gone ⇒ refusal in words, nothing opened, NO take row, ask let go (the P-2 dead-door rule). Standing ⇒ today's road. ALSO speak on a genuine `.unfinished` from the take, in her words (not `partialShowWords`). Words PROVISIONAL for VX-234's pass. Whether an ask should end UNPRESSED the moment its target dies stays a QUESTIONS candidate (the press-time let-go is the existing grant-ask rule, not that question). **Existing-pin repairs owed by the gone-check:** three take pins stage asks on ids that never existed (`takingTheAskOpensItAndLogsTheTake` `.book("r1")`; `commandOptionOTakesAStandingAskFirstThenTheLastChange` `.note("asked")`; `aVersionTargetOpensTheFullSizePage`'s take half) — fixtures get real rows, assertions unchanged (justified: a real ask names a target the wire's read found readable). **F-B3-2/`openShow`:** the receipt road (Open › + ⌥⌘O's last-change arm) has the same dead-target problem plus F-B3-2's nil-router silence (pre-existing; not in the board snapshot). Implementer's lean: FOLD IN (same surface, same helper, one more pin, the ⌥⌘O pin's `.book("written-book")` made real); alternative a ticket — **the reviewer's call.** **Proposed pin** (app target, `MCPShowOfferFacesTests`, reads bound to locals): `aTakeWhoseTargetIsGoneSaysSoAndOpensNothing` — for `.note(n)` and `.takes(n2,b2)` (fresh real notes): rig away → `agentShow(.pin(target, dial: .ask, …))` → `#require` ask stands → `operations.deleteContainer` → `status.clear()` to the line → take the line's Open › → wait the read hop; expect selection unchanged, a refusal naming place+client, no `show_in_app_taken` row, `showOffer == nil`. **Exact red on pre-fix, per target:** `focusedSelection == .post(n)` (tombstone opened), `status.current == nil` (nothing said), a take row logged — three failing expectations per target (the let-go line passes on old: the old take ended the ask too). **Guard:** `aTakeWhoseTargetStandsStillOpensIt` (same staging, no delete) — green on both; keeps the pin able to tell dead from alive. **Claim C deltas:** NEW `vx677-c/revFL2` (gone-check reverted) `T=(MCPShowOfferFacesTests)` 15 tests/EXACTLY 1 failure (the pin, 6 issues); C5 post 104→106 (suite 13→15); C4 `rev676` 31/12 → 33/EXACTLY 14 (the two new tests stage through `agentShow` away → the old etiquette refuses both at their `#require` — the same reason the 9 offer pins are red there; staging via `presentShowOffer` would keep 33/12, but the suite's rule is "the door's real road" — implementer recommends `agentShow`). If `openShow` folds in: one more pin + guard.
+
+**F-L3 — AGREE it is a NIT; recommend DISMISS as deliberate.** The `try?` matches the app's only other Activity writer (`recordLibraryClosing` → `try?`, "A failed write is quiet"); the wire's 39 sites use `try` because they have a caller to answer — her take has none, and a refusal after it opened would be false. Ruling (4) is met on every reachable road; the only gap is a store write failing in that instant (the connection-end precedent's race) — unpinnable, no seam. No code; the existing comment is the record. Under F-L2's fix the row writes only when the target stands.
+
+**F-L4 — AGREE.** :41/:44 are the only `VX668-TRACE` references left in App + Sources (grep). Two-line comment tidy (the trace served and was removed; the fix + `RestoreLandingRewriteHopTests` are the road now). No pin, no run owed.
+
+**F-L5 — AGREE (true at the reviewed tip); answered by `1dbb30a57`.** Drafts checked against batch 2's as-built records: VX-680 (with D-2), VX-663, VX-681, VX-662 read right. Two precisions: ① the VX-624 draft line overclaimed ("settles at once … instead of holding for the watchdog") — as built the floored target is HOME, "DONE at the hold under the surface's veto, the watchdog still binding"; corrected wording applied by the orchestrator in the record's draft section. ② Gate reminder: the Block History fact line lands only once C1/C2 and W-668-V1 ×3 are in (the closeout is after claim C — the gate holds by construction).
+
+**Step-2 process question (the implementer's, answered by the orchestrator):** one `xcodebuild build-for-testing` into a SCRATCH DerivedData dir is ALLOWED for the compile check + binary re-check — a build is not a test run and needs no stage (this run's own batch precedent); never into the run-product dirs, never `xcodebuild test`, never an app launch.
+
+---
+
+## FINAL CALL — round 1 (the reviewer, Fable, 2026-10-29; recorded verbatim by the orchestrator)
+
+I pulled `059118574`, read STEP 1 in full, and re-verified the disputed F-L2 trace in the code myself before ruling: `MCPNavigator.open` polls only `commandRouter.activePostID` (adopt → wait), `registerDetail` sets `activePostID` from the given id with no liveness gate, the `.note` arm returns `.delivered` unconditionally, and `.variorumNotesDeleted` fires only at the deletion moment (`NoteDeletion.swift:192`) — so the implementer's live-road trace is CORRECT and my `.unfinished` mechanism was the test rig's shadow, not the app's. The grant-ask precedent is real (`MCPDoor.refreshAsk` → `askStanding` → `MCPAskCopy.gone`). Calls, one per finding:
+
+**F-L1 — CONFIRMED as proposed, with the premise correction ADOPTED.** Grounds: the correction is right and sharper — discriminators are deterministic per source+toolchain and the hazard is the ADJACENT #2/#3 numbering (my "build-sensitive" overread R12: the MCPShareFaces thunk persists in every product; its green meant the merged body didn't change that outcome). The fix is unchanged (D-1's steps 2–3 on the twin: bind `showsTheTake` + `isLive` to locals), test-only, no pin owed. The claim C rows as stated: rebuilt-binary re-check (three bodies, `shows` calling its own `aiWords` body, the detector still finding only the MCP lead) + `vx677-b1/rev664` `T=(OutsideWriteLivePaneTests)` 2 tests/EXACTLY 2 failures and `vx677-b1/post` 2/0, both products rebuilt at the final tip.
+
+**F-L2 — CONFIRMED-with-the-counter-shape, fold-in INCLUDED.** Grounds: the dispute is verified in the code (above); my fix would have missed the commonest target (`.note`) entirely and my pin could not tell dead from alive — the counter-shape is the door's own precedent and strictly stronger. Ruled specifics for step 2:
+- Fix shape: her press re-reads the target off-main (P2); GONE ⇒ the ask let go, a refusal naming the place in `MCPAskCopy.gone`'s shape (words PROVISIONAL for VX-234), nothing opened, NO take row; STANDING ⇒ today's road byte-unchanged; PLUS a spoken line on a genuine `.unfinished` from the take, in her words, never `partialShowWords` (the wire's sentence, wrong reader). The gone table as proposed (note/takes/lens/compare = the note / compare's anchor live; version = that + `isVersionHistory`; book = a live book/gathering; wing = deleted, Home never). Compare checks the ANCHOR only — a dead PEER is accepted as the board's own business (it replaces its columns and decides from its projection); record that residual in one line.
+- Pin + guard: as proposed (`aTakeWhoseTargetIsGoneSaysSoAndOpensNothing` on `.note` + `.takes` with REAL rows, the three exact reds per target on pre-fix; `aTakeWhoseTargetStandsStillOpensIt` green on both). The three fixture repairs (real rows for `.book("r1")`, `.note("asked")`, the version take half) are CONFIRMED as justified edits — assertions byte-unchanged, said at the line.
+- Staging road: `agentShow` (the suite's real-road rule outranks keeping C4's count); C4 becomes `rev676` 33/EXACTLY 14, the two new reds being the staged asks' own `#require`s — named in the C-row table exactly as the 9 offer pins' reds are.
+- openShow / F-B3-2 — FOLD IN. Grounds: same surface, same helper, and batch 3's record already called it "one line to align at the next touch"; shipping two adjacent doors with different dead-target behaviour is its own confusion class. The receipt's Open › and ⌥⌘O's last-change arm get the same gone-check (GONE ⇒ the spoken refusal; whether a gone `lastShow` then retires so ⌥⌘O greys is the implementer's build call, marked PROVISIONAL for the bundle) and the nil-router arm SPEAKS (F-B3-2's line, the `noWindow` shape's sibling). One more pin + guard; the ⌥⌘O pin's `.book("written-book")` made real.
+- Claim C deltas: the shapes as proposed (NEW `vx677-c/revFL2`; C5 grows with the suite) — exact counts restated by the implementer at build time since the fold-in moves them; EXACT numbers land in the record's C-row table before the window.
+- The unpressed edge (should an ask end or re-say when its target dies, before any press) goes to the QUESTIONS bundle beside P-676-1…7 — the press-time let-go is the grant-ask precedent applied, never that ruling.
+
+**F-L3 — DISMISSED as deliberate.** Grounds: the `try?` matches the app's one other Activity-writer posture (`recordLibraryClosing`), her take has no caller to answer and a refusal after a successful open would be false; unpinnable (no seam); under F-L2's fix the row writes only when the target stands. The record keeps the line as the deliberate-dismissal note.
+
+**F-L4 — CONFIRMED.** Two-line comment tidy in step 2 (`RestoreLandingInspectorTests.swift:41,44`); no pin, no run.
+
+**F-L5 — CONFIRMED; the drafts read right, with ONE wording correction.** The §Bookcase mode-row draft matches the as-built family exactly (D-2's row-first arm, the foot rest, the caret line, VX-663/681/662, and the corrected VX-624 wording — "home at the page's floor and settles at the hold" is the code's truth; the implementer's ① correction stands). The §The note Block History tail is right in substance; correction: the pointer should be **"(VX-668)"**, not "(vx-677)" — the contract-line convention points at the member ticket/fix record, and VX-668 is the precise one. The batch-4 rider note (both Block History changes in one touch) is right. Gate reminder ② confirmed: the line lands only after C1/C2 + W-668-V1 ×3.
+
+**Nothing is FINDER-FIXES** — both confirmed code fixes (F-L1, F-L2) are the implementer's, neither touches `Sync/`, and no fix here needs the reviewer's own hands. I stayed read-only this step.
+
+**What round 2's fresh reviewer must re-check, per confirmed fix:**
+- F-L1: the twin's two predicates bound to locals with bodies byte-unchanged; the rebuilt test binary's closure bodies (three distinct, `shows` → its own `aiWords` body; the detector still finds only the MCP lead); the new C rows' red/green (rev664 2/EXACTLY 2, post 2/0).
+- F-L2: the gone table against every target arm (version's `isVersionHistory` leg, book-vs-gathering, wing's Home-never); GONE ⇒ no `show_in_app_taken` row AND the row still written on a standing take; the let-go leaves `showOffer == nil` with `endStanding` run (no stale seam item); the re-read off-main (P2 — no main-actor store read); the refusal's words against the copy conventions (sentence case, the place quoted, client named; PROVISIONAL marked); the `agentShow` staging's two new C4 reds being exactly the `#require` lines; the three fixture repairs changing staging only (assertions diffed byte-level); the fold-in keeping every existing receipt-road pin green and the nil-router arm now speaking; the pin/guard pair red/green as predicted on `revFL2`/post; and that the fix touched nothing on the wire (`MCPShowTool` zero diff in step 2 — the answer shapes stay byte-unchanged).
+- F-L4/F-L5: comment-only and draft-only — round 2 confirms the tidy carries no code and the drafts still match post-fix behaviour (the canon application itself is the closeout's, after claim C's gates).

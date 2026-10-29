@@ -360,7 +360,8 @@ struct PoolPostsView: View {
             // the Pool's own (its error) does. VX-121's band rule applies if a
             // quick-entry band is ever added here.
             if PoolReceiptFoot.shows(
-                error: model.lastError, quietReceipt: session.status.quietLine != nil)
+                // VX-676: a standing ask to show her something holds it too.
+                error: model.lastError, quietReceipt: session.status.lineItem != nil)
             {
                 Divider().overlay(tokens.line)
                 QuietReceiptLine(status: session.status, tokens: tokens)

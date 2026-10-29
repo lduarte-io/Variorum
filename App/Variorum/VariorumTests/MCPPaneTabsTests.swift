@@ -235,7 +235,8 @@ struct MCPPaneTabsTests {
         // VX-281 ladder R1-4 (A JUSTIFIED EDIT, the ritual): Connect's row joins.
         // Ladder R2-3 (A JUSTIFIED EDIT, the ritual): the Clients tab's row joins.
         #expect(AppSettingsView.rowIDsRendered[.mcp]
-                    == ["mcpServer", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"])
+                    == ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
+                "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpConnect")) == .connect)
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpClients")) == .clients)
         #expect(SettingsCatalog.title("mcpClients") == MCPPaneTab.clients.label,
@@ -308,6 +309,8 @@ struct MCPPaneTabsTests {
             (MCPPaneCopy.clientBoundarySummary, MCPPaneCopy.clientBoundary),
             (MCPPaneCopy.keySummary, MCPPaneCopy.keyLine),
             (MCPPaneCopy.stdioSummary, MCPPaneCopy.stdioLine),
+            // VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's line.
+            (MCPPaneCopy.showDialSummary, MCPPaneCopy.showDialDetail),
         ]
         for client in MCPSetupClient.allCases { pairs.append((client.summary, client.sentence)) }
         for (line, whole) in pairs {

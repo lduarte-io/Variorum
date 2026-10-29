@@ -35,10 +35,18 @@ enum MCPOwnActivity {
     /// rung's (`list_books`, `list_notes`, `read_note`, `export_note`,
     /// `search`, `show_in_app`) only when asked (F-261-5 (a)). Never a
     /// connection row (`connect_*`, the setup waits) — they are not tools.
+    ///
+    /// **VX-676:** a `show_in_app` that landed as an ASK is the client's call
+    /// too, logged under its own act (`MCPShowActivity.offeredAct`) — listed with
+    /// the reads, answered as `show_in_app` with `offered: true` (`entry`), what
+    /// the client was told at act time. Her TAKE (`takenAct`) is hers and never
+    /// listed: the wire is fire-and-forget, and polling this tool must not tell
+    /// a client she opened what it offered.
     static func listedActs(includeReads: Bool) -> [String] {
-        MCPToolCatalog.all
+        let tools = MCPToolCatalog.all
             .filter { $0.name != MCPToolCatalog.listMyActivity.name && (includeReads || $0.rung != .read) }
             .map(\.name)
+        return includeReads ? tools + [MCPShowActivity.offeredAct] : tools
     }
 
     /// The refused rows whose logged target is resolved, not sent.
@@ -56,8 +64,15 @@ enum MCPOwnActivity {
     /// One row, as logged (D-261-2): `tool`, `outcome`, `at`, the target when
     /// the row has one (and `hidesTarget` allows), and `title` on an allowed
     /// row that has one.
+    /// VX-676: an ask's row answers as the tool it was (`show_in_app`), with
+    /// `offered: true`; every other entry is byte-unchanged.
     static func entry(_ row: MCPActivityRow) -> [String: Any] {
-        var entry: [String: Any] = ["tool": row.act, "outcome": row.allowed ? "allowed" : "refused", "at": row.at]
+        let offered = row.act == MCPShowActivity.offeredAct
+        var entry: [String: Any] = [
+            "tool": offered ? MCPToolCatalog.showInApp.name : row.act,
+            "outcome": row.allowed ? "allowed" : "refused", "at": row.at,
+        ]
+        if offered { entry["offered"] = true }
         if !hidesTarget(row) {
             if let kind = row.targetKind { entry["target_kind"] = kind }
             if let id = row.targetID { entry["target_id"] = id }

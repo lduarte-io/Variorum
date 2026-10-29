@@ -265,13 +265,19 @@ struct CommitsPageLedgerTests {
         #expect(CommitRowFace.notes(quiet, predatesSplit: true)
             == [CommitRowFace.quietMark, BlockHistoryCopy.predatesSplitMark])
 
-        // The moment's words are NOT on the resting row; they are on the open one.
+        // A NAMED moment's words are NOT on the resting row; they are on the
+        // open one. JUSTIFIED PIN EDIT (VX-674, the VX-677 run — her ruling on
+        // P-440-9's flagged gap): this half held the clarity pass's "no words
+        // at rest" for an UNNAMED commit, and the ruling gives an unnamed
+        // commit's resting line its first words (`CommitRestingPreviewTests`
+        // holds that); a named commit keeps its name alone, which is what
+        // this half now says — same fixture words, named.
         let words = "A sentence only the open row shows."
-        let resting = Self.row(Self.commit(words), tokens: .studyLight)
+        let resting = Self.row(Self.commit(words, message: "a name"), tokens: .studyLight)
         var dumped = ""
         dump(resting.body, to: &dumped, maxDepth: 120)
-        #expect(!dumped.contains(words), "the resting line carries no preview")
-        let open = Self.row(Self.commit(words), tokens: .studyLight, expanded: true)
+        #expect(!dumped.contains(words), "a named commit's resting line carries no preview")
+        let open = Self.row(Self.commit(words, message: "a name"), tokens: .studyLight, expanded: true)
         dumped = ""
         dump(open.body, to: &dumped, maxDepth: 120)
         #expect(dumped.contains(words), "the open row does")

@@ -3,9 +3,10 @@
 //  VariorumTests (Mac)
 //
 //  13n-b U4 — NAVIGATION's app half (R-13nb-23 + R-13nb-26 (g); AF-11 F-2/
-//  F-3): `show_in_app` refused unless Variorum is frontmost in a FULL window
-//  (pinned at the decision seam — `MCPDoor.agentShow` applying
-//  `MCPShowRule` — with nothing moved on a refusal), each target delivered
+//  F-3): `show_in_app` MOVES only while Variorum is frontmost in a FULL window
+//  (pinned at the decision seam — `MCPDoor.agentShow` applying `MCPShowRule`;
+//  VX-676: under move at once, away it is the ASK — never refused, nothing
+//  moved; the ask's faces are `MCPShowOfferFacesTests`), each target delivered
 //  through her own roads (the shell's adoption door + the block landing + the
 //  13o find seed; the see-takes landing; the Lenses board's lens landing;
 //  Outline's chapter landing), the receipts' "Open ›" and the session's
@@ -58,15 +59,20 @@ struct MCPNavigationTests {
             let resting = router.workspace.focusedSelection
             let target = MCPShowTarget.note(noteID: "n1", blockID: "b1", select: "words")
 
+            // VX-676 (A JUSTIFIED EDIT — her amendment RETIRED the refusal these
+            // two lines asserted): under move at once, away or in another window
+            // the show is the ASK — offered, never refused, nothing moved.
+            let request = MCPShowRequest.pin(target, dial: .moveAtOnce)
             door.standingProvider = { (.notFrontmost, router) }
-            #expect(await door.agentShow(target) == .refuse(MCPShowRule.notFrontmostWords))
+            #expect(await door.agentShow(request) == .offer)
             door.standingProvider = { (.frontmostOtherWindow, router) }
-            #expect(await door.agentShow(target) == .refuse(MCPShowRule.otherWindowWords))
+            #expect(await door.agentShow(request) == .offer)
             #expect(router.workspace.focusedSelection == resting && router.blockLanding == nil,
-                    "nothing moved — refused, never queued")
+                    "nothing moved — offered, never moved")
+            #expect(door.showOffer?.request == request, "the ask stands")
 
             door.standingProvider = { (.frontmostMainWindow, router) }
-            #expect(await door.agentShow(target) == .navigate)
+            #expect(await door.agentShow(request) == .navigate)
             #expect(router.workspace.focusedSelection == .post("n1"))
             #expect(router.blockLanding == ShellRouter.BlockLanding(
                 containerID: "n1", blockID: "b1", find: EditorFindSeed(needle: "words", steps: true)),
@@ -81,10 +87,10 @@ struct MCPNavigationTests {
             defer { door.detach() }
             let router = ShellRouter()
             door.standingProvider = { (.frontmostMainWindow, router) }
-            #expect(await door.agentShow(.book(bookID: "r1", sectionID: "s1")) == .navigate)
+            #expect(await door.agentShow(.pin(.book(bookID: "r1", sectionID: "s1"), dial: .moveAtOnce)) == .navigate)
             #expect(router.workspace.focusedSelection == .reading("r1"))
             #expect(router.pendingBookChapter == ShellRouter.BookChapterLanding(bookID: "r1", sectionID: "s1"))
-            #expect(await door.agentShow(.book(bookID: "r2", sectionID: nil)) == .navigate)
+            #expect(await door.agentShow(.pin(.book(bookID: "r2", sectionID: nil), dial: .moveAtOnce)) == .navigate)
             #expect(router.pendingBookChapter == nil, "a whole-book show parks no chapter")
         }
     }
@@ -100,12 +106,12 @@ struct MCPNavigationTests {
             let token = session.commandRouter.registerDetail(postID: "n1", mode: .write) { applied.append($0) }
             defer { session.commandRouter.unregisterDetail(token) }
 
-            #expect(await door.agentShow(.takes(noteID: "n1", blockID: "b1")) == .navigate)
+            #expect(await door.agentShow(.pin(.takes(noteID: "n1", blockID: "b1"), dial: .moveAtOnce)) == .navigate)
             #expect(session.commandRouter.pendingTakesLanding == .bloom(postID: "n1", blockID: "b1"))
             #expect(applied == [.takes], "her see-takes door: the landing, then the mode")
             session.commandRouter.pendingTakesLanding = nil
 
-            #expect(await door.agentShow(.lens(noteID: "n1", lensID: "L1")) == .navigate)
+            #expect(await door.agentShow(.pin(.lens(noteID: "n1", lensID: "L1"), dial: .moveAtOnce)) == .navigate)
             #expect(session.commandRouter.pendingLensLanding == LensLanding(postID: "n1", lensID: "L1"))
             #expect(applied == [.takes, .lenses])
         }
@@ -128,7 +134,7 @@ struct MCPNavigationTests {
             MCPNavigator.mountWait = .milliseconds(40)
             defer { MCPNavigator.mountWait = restoreWait }
             door.standingProvider = { (.frontmostMainWindow, router) }
-            #expect(await door.agentShow(.takes(noteID: "n1", blockID: "b1"))
+            #expect(await door.agentShow(.pin(.takes(noteID: "n1", blockID: "b1"), dial: .moveAtOnce))
                     == .refuse(MCPShowRule.partialShowWords))
             #expect(session.commandRouter.pendingTakesLanding == nil, "no landing parked for a failed show")
 
@@ -142,10 +148,13 @@ struct MCPNavigationTests {
                 standingCalls += 1
                 return (standingCalls == 1 ? .frontmostMainWindow : .notFrontmost, router)
             }
-            #expect(await door.agentShow(.takes(noteID: "n2", blockID: "b2"))
-                    == .refuse(MCPShowRule.partialShowWords))
+            // VX-676 (A JUSTIFIED EDIT — PROVISIONAL P-676-4, her amendment's
+            // letter): she left mid-delivery, so the rest is the ASK — offered,
+            // nothing more moved — where it was refused before.
+            #expect(await door.agentShow(.pin(.takes(noteID: "n2", blockID: "b2"), dial: .moveAtOnce)) == .offer)
             #expect(session.commandRouter.pendingTakesLanding == nil && applied.isEmpty,
                     "the mode never switched behind her back")
+            #expect(door.showOffer?.request.target == .takes(noteID: "n2", blockID: "b2"), "the rest waits as the ask")
         }
     }
 

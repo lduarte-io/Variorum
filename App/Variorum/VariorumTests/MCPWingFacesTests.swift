@@ -100,11 +100,17 @@ struct MCPWingFacesTests {
             let resting = router.workspace.focusedSelection
             door.standingProvider = { (.notFrontmost, router) }
             let target = MCPShowTarget.wing(wingID: "w1", name: "variorum", shownBy: "claude-code")
-            #expect(await door.agentShow(target) == .refuse(MCPShowRule.notFrontmostWords))
+            // VX-676 (A JUSTIFIED EDIT — the retired refusal): behind, it is the
+            // ASK — nothing moved, no receipt; the ask is dismissed before the
+            // move's own lines below.
+            let request = MCPShowRequest.pin(target, dial: .moveAtOnce)
+            #expect(await door.agentShow(request) == .offer)
             #expect(session.wing.currentID == "" && session.status.quietLine == nil, "behind: nothing moved, nothing said")
+            let asked = try #require(door.showOffer)
+            door.dismissShowOffer(asked.itemID)
 
             door.standingProvider = { (.frontmostMainWindow, router) }
-            #expect(await door.agentShow(target) == .navigate)
+            #expect(await door.agentShow(request) == .navigate)
             #expect(session.wing.currentID == "w1")
             let line = try #require(session.status.quietLine)
             #expect(line.text == "Now in \u{201C}variorum\u{201D} \u{2014} claude-code showed you this wing.")
@@ -112,10 +118,10 @@ struct MCPWingFacesTests {
             #expect(router.workspace.focusedSelection == resting, "no pane moved: a wing scopes listings")
 
             session.status.clear()
-            #expect(await door.agentShow(target) == .navigate)
+            #expect(await door.agentShow(request) == .navigate)
             #expect(session.status.quietLine == nil, "already there: nothing moves, nothing is said")
 
-            #expect(await door.agentShow(.wing(wingID: "", name: "Home", shownBy: "codex")) == .navigate)
+            #expect(await door.agentShow(.pin(.wing(wingID: "", name: "Home", shownBy: "codex"), dial: .moveAtOnce)) == .navigate)
             #expect(session.wing.currentID == "")
             #expect(session.status.quietLine?.text == "Now in Home \u{2014} codex showed you this wing.")
         }

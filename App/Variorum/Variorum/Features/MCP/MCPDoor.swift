@@ -82,6 +82,10 @@ final class MCPDoor {
         /// them all. Reading the table here is what puts it in the snapshot's
         /// observed region (GRDB tracks what the fetch reads).
         var rebinds: [MCPRebindRequest] = []
+        /// **VX-676 — the show dial** (her ruling (3): Settings ▸ MCP, move at
+        /// once · ask · never) as the store holds it — the pane's picker reads
+        /// it; `show_in_app` reads the store itself, in its decision's read.
+        var showDial: MCPShowDial = .default
 
         /// The shown acts' rows (each act's titled members) — the shape the
         /// pane's pins have read since 13n-b.
@@ -226,16 +230,51 @@ final class MCPDoor {
         clearConnectNote()
     }
 
+    /// **One AI change her press can open** (the VX-677 ladder round 1, F-L2): where
+    /// (the act's landing), and whom and what to name if that place has gone — the
+    /// receipt's own client and title, never a second read. `nonisolated`, as
+    /// `ShowOffer` is.
+    nonisolated struct ShownChange: Equatable, Sendable {
+        let target: MCPShowTarget
+        let clientName: String
+        let title: String?
+    }
+
     /// U4 (R-13nb-23 (a), AF-11 F-2) — THE AI's LAST CHANGE this session:
     /// where the most recent write receipt's "Open ›" goes. Observable, so
     /// "Show the AI's Last Change" (⌥⌘O) greys and ungreys with it;
     /// session-scoped (cleared at detach — R-13nb-19's session-bounded twin).
-    private(set) var lastShow: MCPShowTarget?
+    /// F-L2: retired when her press finds its place gone (PROVISIONAL P-FL2-1).
+    private(set) var lastChange: ShownChange?
+    /// The last change's landing — what ⌥⌘O opens.
+    var lastShow: MCPShowTarget? { lastChange?.target }
     /// U4 (AF-11 F-3): the windows `show_in_app` may move — set at attach.
     @ObservationIgnored private weak var windows: WindowRegistry?
     /// U4 (AF-11 F-3): where the app stands, asked ON THE MAIN ACTOR in the
     /// delivery's own hop (injectable for the pins).
     @ObservationIgnored var standingProvider: (@MainActor () -> (MCPShowRule.Standing, ShellRouter?))?
+
+    /// **VX-676 — THE STANDING ASK** (her sitting 2026-10-28 + her mid-run
+    /// amendment): a client's `show_in_app` that landed as an OFFER, waiting for
+    /// her one press. ONE at a time — a newer ask replaces it; it ends when she
+    /// takes it (the toast's or the line's Open ›, or ⌥⌘O), when her ✕ on the
+    /// line kills it, when its client disconnects (no live session under its
+    /// name), and when the library closes. Session-scoped, never stored: the
+    /// wire was answered at once and nothing waits on her answer. Observable,
+    /// so ⌥⌘O ungreys with it. Its face is the status seam's standing offer
+    /// (`StatusCenter.stand`); `itemID` names that item.
+    nonisolated struct ShowOffer: Equatable, Sendable {
+        let request: MCPShowRequest
+        let itemID: UUID
+    }
+    private(set) var showOffer: ShowOffer?
+
+    /// **P-1 — the doors the door hands the STATUS SEAM** (VX-676): the standing
+    /// ask's Open › and the line's ✕, declared `.surface` and rendered by the
+    /// seam's two generic faces (`StatusToast`, `QuietReceiptLine`) only while an
+    /// ask stands — the item carries the registry's own verbs
+    /// (`presentShowOffer`), and the registry walk names this list.
+    static let statusSeamCapabilities: [CapabilityID] = [.mcpTakeShowAsk, .mcpDismissShowAsk]
 
     /// U2 — the receipt RUN: consecutive acts by one client on one target
     /// within the window speak as one coalesced line (her fact-check's
@@ -317,8 +356,11 @@ final class MCPDoor {
         self.session = session
         database = session.database
         runner = session.runner
-        // U4 (AF-11 F-2): the registry's fact for "Show the AI's Last Change".
-        session.commandRouter.aiLastChangeAvailable = { [weak self] in self?.lastShow != nil }
+        // U4 (AF-11 F-2): the registry's fact for "Show the AI's Last Change" —
+        // VX-676: a standing ask is what ⌥⌘O takes first.
+        session.commandRouter.aiLastChangeAvailable = { [weak self] in
+            self?.showOffer != nil || self?.lastShow != nil
+        }
         guard let storeURL, let hold = LibraryRestoreHold.read(besideStore: storeURL) else {
             observe(session.database)
             return
@@ -386,9 +428,11 @@ final class MCPDoor {
         // A closed library's asks die with it (and so does every glyph — and
         // the ask watch, which an empty queue stops).
         adoptQueue(MCPAskQueue())
+        // VX-676: and so does a standing ask to show her something.
+        endShowOffer()
         answering = []
         receiptRun = []
-        lastShow = nil
+        lastChange = nil
         // A locked library shows no share face (VX-272's gate reads no store).
         if hasApprovedClient { hasApprovedClient = false }
         session = nil
@@ -445,9 +489,10 @@ final class MCPDoor {
             // killed (THE ONE navigate-away road), then speaks its receipt.
             onWrite: { [weak self] receipt in Task { @MainActor in self?.landWireWrite(receipt) } },
             // U4 (AF-11 F-3): the move dial's delivery — the rule applied on
-            // the main actor, in the same hop as any move.
-            show: { [weak self] target in
-                await self?.agentShow(target) ?? .refuse(MCPShowRule.unavailableWords)
+            // the main actor, in the same hop as any move. VX-676: the request
+            // carries the dial and who asked; an ask is offered here.
+            show: { [weak self] request in
+                await self?.agentShow(request) ?? .refuse(MCPShowRule.unavailableWords)
             },
             // 13n-c U6: her Move to Wing door's own sentence for a frozen book
             // (the server speaks it where the client can read the book).
@@ -498,7 +543,7 @@ final class MCPDoor {
         }
         host = nil
         starting = false
-        connected = []
+        adoptConnected([])
     }
 
     /// **VX-394 (VX-348 U5) — the library is about to lock or close: say each
@@ -517,14 +562,23 @@ final class MCPDoor {
     }
 
     private func refreshConnected() {
-        connected = host?.connectedClientNames ?? []
+        adoptConnected(host?.connectedClientNames ?? [])
+    }
+
+    /// The live names, adopted — and **VX-676 (her ruling (2)): a standing ask
+    /// ends when its client disconnects** — no live session left under its
+    /// name (a name's sessions count as one, the while-connected grant's rule).
+    private func adoptConnected(_ names: Set<String>) {
+        if connected != names { connected = names }
+        if let offer = showOffer, !names.contains(offer.request.clientName) { endShowOffer() }
     }
 
     #if DEBUG
     /// The capture harness's seam (13n-c U2 — DEBUG only): who reads as
     /// connected, so an offscreen render can show "while connected" and the
-    /// WHO row's "connected now" without a live client.
-    func previewConnected(_ names: Set<String>) { connected = names }
+    /// WHO row's "connected now" without a live client. VX-676: adopted as the
+    /// host's own report is, so a pin can disconnect an asking client.
+    func previewConnected(_ names: Set<String>) { adoptConnected(names) }
     #endif
 
     // MARK: - The pane's acts (operations, through the runner)
@@ -535,6 +589,11 @@ final class MCPDoor {
 
     func setOpenBook(_ on: Bool) {
         act { try $0.setMCPSwitch(.openBook, on: on) }
+    }
+
+    /// **VX-676 — the show dial** (Settings ▸ MCP's picker).
+    func setShowDial(_ dial: MCPShowDial) {
+        act { try $0.setMCPShowDial(dial) }
     }
 
     /// Approve a request (or a denied client). 13n-c UX walk W-UX-2 (her
@@ -953,9 +1012,12 @@ final class MCPDoor {
         // receipt_style governs it) and grows the one-press door — "Open ›"
         // to the act's landing; the same target is the session's last AI
         // change, which ⌥⌘O opens after the line has faded (or never showed).
-        if let show = receipt.show { lastShow = show }
-        let door = receipt.show.map { target in
-            StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(target) }
+        let change = receipt.show.map {
+            ShownChange(target: $0, clientName: receipt.clientName, title: receipt.targetTitle)
+        }
+        if let change { lastChange = change }
+        let door = change.map { change in
+            StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(change) }
         }
         session.status.deliver(MCPReceiptCopy.line(receiptRun), kind: .receipt, action: door)
     }
@@ -980,47 +1042,226 @@ final class MCPDoor {
         return (.frontmostMainWindow, entry.router)
     }
 
-    /// **`show_in_app`'s delivery** — her etiquette FIRST (`MCPShowRule`,
-    /// one pure verdict), and the move only on `.navigate`, into the key
-    /// window, never raising another. Never automatic: only a client's
-    /// explicit call reaches here.
+    /// **`show_in_app`'s delivery** — her etiquette FIRST (`MCPShowRule`, one
+    /// pure verdict over where she stands and the request's dial), then:
+    /// `.navigate` moves into the key window, never raising another; `.offer`
+    /// puts the ask on her status seam (VX-676 — never refused for where she
+    /// stands, never raising a window); `.refuse` is the never dial's words.
+    /// Never automatic: only a client's explicit call reaches here.
     ///
-    /// Ladder round 1, F-4: the delivery's ANSWER is the delivery's TRUTH —
-    /// a takes/lens landing that never arrived (the note's detail did not
-    /// register in time, or she left the app during the wait: the
-    /// `stillStanding` re-check after the suspension) refuses
-    /// `partialShowWords` instead of claiming shown.
-    func agentShow(_ target: MCPShowTarget) async -> MCPShowRule.Verdict {
+    /// Ladder round 1, F-4: the delivery's ANSWER is the delivery's TRUTH — a
+    /// takes/lens/compare landing that never arrived refuses `partialShowWords`
+    /// instead of claiming shown. VX-676: a delivery she LEFT mid-way (the
+    /// `stillStanding` re-check after the wait's suspension) lands the rest as
+    /// the ask — her amendment's letter (PROVISIONAL P-676-4).
+    func agentShow(_ request: MCPShowRequest) async -> MCPShowRule.Verdict {
         let (standing, router) = currentStanding()
-        let verdict = MCPShowRule.verdict(standing)
-        guard verdict == .navigate, let session, let router else {
-            return verdict == .navigate ? .refuse(MCPShowRule.unavailableWords) : verdict
+        let verdict = MCPShowRule.verdict(standing, dial: request.dial)
+        switch verdict {
+        case .refuse:
+            return verdict
+        case .offer:
+            return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.unavailableWords)
+        case .navigate:
+            guard let session, let router else { return .refuse(MCPShowRule.unavailableWords) }
+            let delivery = await MCPNavigator(session: session).deliver(
+                request.target, into: router,
+                stillStanding: { [weak self] in
+                    guard let self else { return false }
+                    return MCPShowRule.verdict(self.currentStanding().0, dial: request.dial) == .navigate
+                })
+            switch delivery {
+            case .delivered: return .navigate
+            case .unfinished: return .refuse(MCPShowRule.partialShowWords)
+            case .interrupted:
+                return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.partialShowWords)
+            }
         }
-        let delivered = await MCPNavigator(session: session).deliver(
-            target, into: router,
-            stillStanding: { [weak self] in
-                guard let self else { return false }
-                return MCPShowRule.verdict(self.currentStanding().0) == .navigate
-            })
-        return delivered ? .navigate : .refuse(MCPShowRule.partialShowWords)
     }
 
-    /// HER press — a receipt's "Open ›" or ⌥⌘O: she is at the app, so no
-    /// etiquette gate; the window that can show it is used (and raised when
-    /// a note-only window is key — `creationRouter`, her creation doors'
-    /// own rule).
-    func openShow(_ target: MCPShowTarget) {
-        guard let session, let router = windows?.creationRouter() else { return }
-        Task { @MainActor in await MCPNavigator(session: session).deliver(target, into: router) }
+    /// **VX-676 — an ask, presented** (her rulings (1)+(2)): at the toast's full
+    /// prominence (the offer kind — under every receipt style), then standing on
+    /// the quiet line until it ends; a newer ask replaces it. False with no
+    /// library (nowhere to say it). Its two doors name THIS ask's item, so an
+    /// older ask's door can never act on a newer one.
+    @discardableResult
+    func presentShowOffer(_ request: MCPShowRequest) -> Bool {
+        guard let session else { return false }
+        let itemID = UUID()
+        let take = StatusCenter.Item.Action(label: CapabilityRegistry.capability(.mcpTakeShowAsk).verb) {
+            [weak self] in self?.takeShowOffer(itemID)
+        }
+        let dismiss = StatusCenter.Item.Action(label: CapabilityRegistry.capability(.mcpDismissShowAsk).verb) {
+            [weak self] in self?.dismissShowOffer(itemID)
+        }
+        guard session.status.stand(MCPShowOfferCopy.line(request), id: itemID, action: take, dismiss: dismiss) != nil
+        else { return false }
+        showOffer = ShowOffer(request: request, itemID: itemID)
+        return true
+    }
+
+    /// **VX-676 — HER TAKE** (the toast's or the line's Open ›, or ⌥⌘O — nil
+    /// names whatever ask stands): she is at the app, so no etiquette gate —
+    /// her own press opens it, through the navigator, in the window that can
+    /// show it (`creationRouter`, her creation doors' rule — a full window,
+    /// raised by HER press when a note-only window is key). The ask ends, and
+    /// the take is logged as its own Activity row (ruling (4)) — nothing is
+    /// told to the client. With no full window to show it in, it says so and
+    /// keeps the ask standing.
+    ///
+    /// **F-L2 (the VX-677 ladder round 1) — her press re-reads the ask's PLACE
+    /// first**, off the main actor (P2) — the grant ask's own road (`refreshAsk`
+    /// → `askStanding`). Nothing ends an ask whose target dies while it stands,
+    /// and the shell adopts any id (no liveness gate on adopt → select → the
+    /// detail), so without it a dead note's tombstone opened in a pane, the take
+    /// was logged, and nothing was said. GONE ⇒ the ask is let go (ended at the
+    /// press, as before) and a refusal names the place and the client — nothing
+    /// opens, NO take row (PROVISIONAL words, P-FL2-2). STANDING ⇒ today's road:
+    /// the take logged, the navigator's delivery — and a delivery that cannot
+    /// finish says so in her words.
+    func takeShowOffer(_ itemID: UUID? = nil) {
+        guard let offer = showOffer, itemID == nil || offer.itemID == itemID, let session else { return }
+        guard let router = windows?.creationRouter() else {
+            session.status.refuse(MCPShowOfferCopy.noWindow)
+            return
+        }
+        endShowOffer()
+        let request = offer.request
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard await self.placeStands(request.target) else {
+                session.status.refuse(MCPShowOfferCopy.gone(request))
+                return
+            }
+            self.logShowTaken(request)
+            await Self.deliverHerPress(
+                request.target, session: session, into: router,
+                unfinished: MCPShowOfferCopy.unfinished(request))
+        }
+    }
+
+    /// Her take's own Activity row (ruling (4)) — under the asking client's name,
+    /// on the row its ask was logged on.
+    private func logShowTaken(_ request: MCPShowRequest) {
+        guard let runner else { return }
+        Task {
+            // Best-effort, off the main thread (P2): a lost line never undoes
+            // what she opened.
+            try? await runner.run { ops in
+                try ops.recordMCPShowTaken(
+                    clientName: request.clientName, targetKind: request.activityKind,
+                    targetID: request.activityID, targetTitle: request.title)
+            }
+        }
+    }
+
+    /// **F-L2 — her press's one re-read of a show's place** (the take, a receipt's
+    /// Open ›, ⌥⌘O), off the main actor (P2). A read that learns nothing (it
+    /// failed, or no library is open) answers STANDING, so her press takes
+    /// today's road.
+    private func placeStands(_ target: MCPShowTarget) async -> Bool {
+        guard let stands = await read({ try MCPDoor.showTargetStands($0, target) }) else { return true }
+        return stands
+    }
+
+    /// **F-L2 — her press's delivery**: the navigator's road, unchanged, and a
+    /// delivery that could not FINISH while she was there (the note opened, the
+    /// rest never landed) says so in HER words — never the wire's
+    /// `partialShowWords`, which speaks to the client.
+    private static func deliverHerPress(
+        _ target: MCPShowTarget, session: AppSession, into router: ShellRouter, unfinished words: String
+    ) async {
+        let delivery = await MCPNavigator(session: session).deliver(target, into: router)
+        if delivery == .unfinished { session.status.refuse(words) }
+    }
+
+    /// **F-L2 — THE GONE TABLE** (the VX-677 ladder round 1's final call): does the
+    /// place a show would open still stand? Read through the door's own derivation
+    /// sites, never re-derived (`askStanding`'s rule), ∝ one target (P1): a note —
+    /// and a takes, lens or compare target's note — while it is a live note
+    /// (`mcpNoteFacts`: live, a post, never a saved version); a saved version while
+    /// its note stands AND it is still that note's version (`isVersionHistory` —
+    /// promoted or deleted, it is gone); a book while it is a live book or
+    /// gathering (`Queries.reading`); a wing while its row lives, Home always
+    /// (`wingIsLive`).
+    ///
+    /// **The residual, recorded:** Compare checks its ANCHOR only — a dead PEER is
+    /// the board's own business (it replaces its columns and decides from its own
+    /// projection); a takes target's block, a lens and a book's chapter are likewise
+    /// not read here (the note-level check the final call rules).
+    nonisolated static func showTargetStands(_ db: Database, _ target: MCPShowTarget) throws -> Bool {
+        switch target {
+        case .note(let noteID, _, _), .takes(let noteID, _), .lens(let noteID, _), .compare(let noteID, _):
+            return try Queries.mcpNoteFacts(db, noteID: noteID) != nil
+        case .version(let noteID, let versionID):
+            guard try Queries.mcpNoteFacts(db, noteID: noteID) != nil else { return false }
+            return try Queries.isVersionHistory(db, versionID, of: noteID)
+        case .book(let bookID, _):
+            return try Queries.reading(db, id: bookID) != nil
+        case .wing(let wingID, _, _):
+            return try Queries.wingIsLive(db, id: wingID)
+        }
+    }
+
+    /// **VX-676 — her ✕ on the line**: the ask ends, nothing opened, nothing
+    /// logged (the ruling names the ask and the take).
+    func dismissShowOffer(_ itemID: UUID) {
+        guard showOffer?.itemID == itemID else { return }
+        endShowOffer()
+    }
+
+    /// The standing ask ends — gone from the door and from the status seam.
+    private func endShowOffer() {
+        guard let offer = showOffer else { return }
+        showOffer = nil
+        session?.status.endStanding(offer.itemID)
+    }
+
+    /// HER press — a receipt's "Open ›" (and ⌥⌘O's last-change arm): she is at
+    /// the app, so no etiquette gate; the window that can show it is used (and
+    /// raised when a note-only window is key — `creationRouter`, her creation
+    /// doors' own rule).
+    ///
+    /// **F-L2 (the VX-677 ladder round 1 — batch 3's F-B3-2 folded in):** with no
+    /// full window it SAYS so (the take's `noWindow` sibling — there is no ask to
+    /// keep); the change's place is re-read first, as her take's is: GONE ⇒ a
+    /// refusal names the place and the client, nothing opens, and the change stops
+    /// being the last one ⌥⌘O can open — the chord greys (PROVISIONAL P-FL2-1: a
+    /// door whose only press refuses is a dead door); STANDING ⇒ the delivery as
+    /// before, and one that cannot finish says so.
+    func openShow(_ change: ShownChange) {
+        guard let session else { return }
+        guard let router = windows?.creationRouter() else {
+            session.status.refuse(MCPReceiptCopy.noWindow)
+            return
+        }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard await self.placeStands(change.target) else {
+                if self.lastChange?.target == change.target { self.lastChange = nil }
+                session.status.refuse(MCPReceiptCopy.gone(change.target, title: change.title, client: change.clientName))
+                return
+            }
+            await Self.deliverHerPress(
+                change.target, session: session, into: router,
+                unfinished: MCPReceiptCopy.unfinished(change.target, title: change.title, client: change.clientName))
+        }
     }
 
     /// ⌥⌘O — "Show the AI's Last Change" (session-scoped; grey when none).
+    /// VX-676 (her ruling (2): "the ⌥⌘O family takes it from the keyboard"; her
+    /// amendment: "⌥⌘O takes it on arrival"): a STANDING ASK is taken first;
+    /// with none, the AI's last change opens as before.
     func showLastChange() {
-        guard let lastShow else {
+        if showOffer != nil {
+            takeShowOffer()
+            return
+        }
+        guard let lastChange else {
             session?.status.refuse(CapabilityRegistry.capability(.showLastAIChange).unavailableNote)
             return
         }
-        openShow(lastShow)
+        openShow(lastChange)
     }
 
     // MARK: - The full lists ("all N ›") and the sheet's choices
@@ -1176,7 +1417,8 @@ final class MCPDoor {
             activity: Array(MCPActivityFace.lines(try Queries.mcpActivity(db, limit: activityWindow))
                 .prefix(activityCap)),
             activityCount: try Queries.mcpActivityCount(db),
-            rebinds: try Queries.mcpRebindRequests(db))
+            rebinds: try Queries.mcpRebindRequests(db),
+            showDial: try Queries.mcpShowDial(db))
     }
 
     /// One client's row (13n-c U2, R2-3): its reaching and inert grants.

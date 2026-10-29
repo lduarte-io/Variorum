@@ -211,6 +211,8 @@ struct ReadingFlowView: View {
                     follow.page.scroll = BookOutlineViewed.Scroll(
                         viewport: new.viewport, offset: new.follow.offset,
                         travel: new.follow.travel)
+                    // VX-624: the landing's reach reads these from now on.
+                    follow.scrollReported = true
                     Self.queueLook(follow, authority)
                 }
                 .onScrollPhaseChange { _, phase in
@@ -221,9 +223,9 @@ struct ReadingFlowView: View {
                 // rows already report to the landing (her ask, P-562-2 → VX-645).
                 // That is not the 13b 4F progress/visibility brain 13c 2A
                 // deleted with Outline's bottom bar on her A6 ruling (no bar,
-                // no progress number returns). The mode carry out of the scroll
-                // still leaves from the book's standing anchor (`BookAnchor` —
-                // unchanged by VX-645).
+                // no progress number returns). Since VX-681 the mode carry out
+                // of the scroll leaves from it too (`BookAnchor`'s `.read .flow`
+                // arm — the standing anchor only while nothing is viewed).
                 .onAppear {
                     startFollowing()
                     land(proxy)
@@ -508,7 +510,18 @@ struct ReadingFlowView: View {
             facts: LandingFacts(manifest: heightManifest, anchor: anchor),
             // The flow's own veto: every near story above the target has SAID
             // it settled (`StableSurface.settled` — geometry, never a clock).
-            mayFinish: { landing.aboveTargetSettled() }
+            mayFinish: { landing.aboveTargetSettled() },
+            // VX-624: how far the page can still move, off the scroll's own
+            // last report at every look (the follower's facts — the Outline's
+            // reachable-travel arithmetic). The book's last story, short, can
+            // never reach the top: it settles at the page's floor at the hold
+            // (the veto still binding) rather than spending the budget and
+            // waiting out the watchdog.
+            reach: { [box] in
+                box.scrollReported
+                    ? LandingReach(offset: box.page.scroll.offset, maxOffset: box.page.scroll.travel)
+                    : nil
+            }
         ) { id in
             proxy.scrollTo(id, anchor: .top)
         }
@@ -618,6 +631,7 @@ struct ReadingFlowView: View {
         follow.live = false
         follow.follower.forget()
         follow.page = BookOutlineViewed.Page()
+        follow.scrollReported = false
         onViewed?(.nothingViewed)
     }
 
@@ -680,6 +694,10 @@ nonisolated struct FlowScrollFacts: Equatable, Sendable {
 @MainActor
 final class FlowFollowBox {
     var page = BookOutlineViewed.Page()
+    /// VX-624: the scroll's geometry has reported since the flow appeared —
+    /// until it has, `page.scroll` holds zeros, and a landing's reach is
+    /// unknown (`nil`), never "the page can move no further".
+    var scrollReported = false
     var follower = BookOutlineFollower()
     var rows: [BookOutlineRows.Row] = []
     /// One look per run-loop turn (the Outline's coalescing).

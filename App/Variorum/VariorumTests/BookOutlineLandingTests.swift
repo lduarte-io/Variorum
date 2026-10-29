@@ -2464,3 +2464,201 @@ extension BookOutlineLandingTests {
         }
     }
 }
+
+// MARK: - VX-624 (the VX-677 run, batch 2) — a landing settles at the page's floor
+
+extension BookOutlineLandingTests {
+    /// The landing story's numbers — "… after N hops, M ms" — off a DONE line.
+    private func hopsAndMilliseconds(_ done: String) -> (hops: Int, ms: Int)? {
+        guard let after = done.range(of: "after ", options: .backwards) else { return nil }
+        let words = done[after.upperBound...].split(separator: " ")
+        guard words.count >= 3, let hops = Int(words[0]),
+              let ms = Int(words[2].trimmingCharacters(in: .punctuationCharacters)) else { return nil }
+        return (hops, ms)
+    }
+
+    /// **VX-624 — a landing whose target cannot reach the top settles at the
+    /// page's floor, at the hold.** The book's LAST note, a collapsed card: the
+    /// column's foot follows it, so the page's maximum offset leaves it well
+    /// below the top (F-1's shape — VX-562's trace). Old: the authority
+    /// corrected into the immovable page every 0.25 s until the four-second
+    /// watchdog (`gave up at top=… after ~15 hops, ~4100 ms`). New: the page's
+    /// reach says it can move no further, so the landing is DONE where the
+    /// target rests, within its one-second hold and with at most a correction
+    /// or two spent.
+    ///
+    /// RED ON OLD (behavioural revert `rev624`: `decide` ignores the reach):
+    /// the `settled` line, the hops line and the time line. The premises are
+    /// `#require`s that say so if the geometry does not make the floor shape.
+    @Test func aLandingThatCannotReachTheTopSettlesAtThePagesFloorWithinItsHold() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: {
+                anchorTop(BookOutlineRows.Row.noteAnchor(postIDs[0])) != nil
+            })
+
+            let last = postIDs[29]
+            let anchor = BookOutlineRows.Row.noteAnchor(last)
+            let asked = Date()
+            model.requestReveal(last)
+            var endedAfter: TimeInterval?
+            for _ in 0..<320 {
+                await settle(window, hosting, watchdog: watchdog, until: { true }, maxTurns: 1)
+                if landingEnded(anchor) {
+                    endedAfter = Date().timeIntervalSince(asked)
+                    break
+                }
+            }
+            let done = BookOutlineGeometry.trace.last { $0.hasPrefix("\(anchor) DONE:") } ?? "no DONE"
+            print("VX-624 FLOOR: \(done) — ended \(String(describing: endedAfter)) s after the ask;",
+                  scrollFacts(hosting))
+            try #require(endedAfter != nil, "the landing ended at all")
+
+            // The premise: the floor shape — the last note stops below the top.
+            let top = try #require(anchorTop(anchor), "the last note reports")
+            try #require(top > BookView.landingTolerance,
+                         "the premise: the page cannot bring the last note to the top (it stops \(top) pt down)")
+
+            #expect(done.contains("DONE: settled"),
+                    "RED ON OLD: the landing SETTLED at the page's floor — never the watchdog's give-up: \(done)")
+            #expect(done.contains("the page's floor"), "and its story says where it rests: \(done)")
+            let numbers = hopsAndMilliseconds(done)
+            #expect((numbers?.hops ?? .max) <= 2,
+                    "RED ON OLD: at most a correction or two against a page that cannot move: \(done)")
+            #expect((numbers?.ms ?? .max) < 2_500,
+                    "RED ON OLD: within the hold (1 s) and a quiet look or two, not the 4-s watchdog: \(done)")
+        }
+    }
+}
+
+// MARK: - VX-681 (the VX-677 run, batch 2) — leaving Read ▸ Scroll carries the story on screen
+
+extension BookOutlineLandingTests {
+    /// The flow, mounted in a 30-note chaptered book, entered at note 3 and
+    /// scrolled by HER (the clip road) to a later story — what the page now
+    /// shows (`viewedFlowPair`, VX-645's follower) is returned.
+    private func flowEnteredAtNote3AndScrolled(
+        _ window: NSWindow, _ hosting: NSView, watchdog: MainThreadWatchdog,
+        model: BookViewModel, structure: BookStructureModel, postIDs: [String]
+    ) async throws -> String {
+        await settle(window, hosting, watchdog: watchdog, until: {
+            ReadingFlowGeometry.anchorTops[postIDs[0]] != nil
+        }, maxTurns: 120)
+        try #require(ReadingFlowGeometry.anchorTops[postIDs[0]] != nil, "the flow drew its first note")
+        // She enters at note 3 (the carried place a mode switch lands).
+        let entered = postIDs[3]
+        let anchor = FlowRows.landingAnchor(for: entered, grouped: structure.grouped(entries: model.entries))
+        model.requestReveal(entered)
+        await settle(window, hosting, watchdog: watchdog, until: { flowLanded(anchor) }, maxTurns: 300)
+        try #require(flowLanded(anchor), "the premise: the flow landed note 3")
+        try #require(model.standingAnchorPostID == entered, "the premise: the standing anchor is where she arrived")
+        // …and reads down: her own scroll (no landing).
+        let moved = try await scrollPage(window, hosting, watchdog: watchdog, by: 1_400)
+        try #require(moved > 1_000, "the harness premise: the page moved (\(moved) pt)")
+        await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 6)
+        let shown = try #require(model.viewedFlowPair.postID, "the premise: the page shows a story")
+        let ordinal = try #require(postIDs.firstIndex(of: shown))
+        try #require(ordinal > 3 && ordinal < 22,
+                     "the premise: a later story, clear of the book's last screenful (note \(ordinal))")
+        print("VX-681 FLOW: entered note 3, the page shows note \(ordinal) after \(moved) pt")
+        return shown
+    }
+
+    /// **VX-681 — Read ▸ Scroll → Outline lands the story the page SHOWS.**
+    /// She entered the flow at note 3 and read down; the mode door's carry
+    /// (`switchMode` → `carryPlace`) names the story on screen, and the
+    /// Outline lands it (its follower adopts the landing's target at the
+    /// start — R-562-A). RED ON OLD (`rev681`): note 3, where she arrived.
+    @Test func leavingReadScrollForOutlineLandsTheStoryItsPageShows() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .read
+            structure.readForm = .flow
+            ReadingFlowGeometry.forgetAnchorTops()
+            ReadingFlowGeometry.trace = []
+            BookOutlineGeometry.forgetAnchorTops()
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let shown = try await flowEnteredAtNote3AndScrolled(
+                window, hosting, watchdog: watchdog, model: model, structure: structure, postIDs: postIDs)
+#if DEBUG
+            let modeDoor = try #require(BookOutlineGeometry.modeDoors[readingID], "the book published its mode door")
+            modeDoor(.outline)
+            #expect(model.standingAnchorPostID == shown,
+                    "RED ON OLD: the carry names the story on screen, not note 3 (\(String(describing: model.standingAnchorPostID)))")
+            let anchor = BookOutlineRows.Row.noteAnchor(shown)
+            await settle(window, hosting, watchdog: watchdog, until: { landingEnded(anchor) }, maxTurns: 300)
+            #expect(structure.mode == .outline, "the click-over arrived in Outline")
+            #expect(landingEnded(anchor), "RED ON OLD: the Outline landed the story on screen")
+            #expect(model.viewedOutlinePair.postID == shown,
+                    "RED ON OLD: and it is what the Outline shows (\(model.viewedOutlinePair))")
+            let top = anchorTop(anchor)
+            #expect(top.map { abs($0) <= 4 } == true,
+                    "RED ON OLD: its row at the top of the page, not \(String(describing: top))")
+#endif
+        }
+    }
+
+    /// **VX-681 + VX-663 — Read ▸ Scroll → Pages opens at the story the page
+    /// shows.** The read-form switch is the same carry (`switchReadForm`'s two
+    /// statements, replayed — the precedent of the Index row menu's road):
+    /// the paged reader opens at the shown story. RED on `rev681` (the reader
+    /// opens at note 3) AND on `rev663` (the reader opens at page one) — the
+    /// family's joint leg.
+    @Test func leavingReadScrollForPagesOpensAtTheStoryItsPageShows() async throws {
+        try await withLandingBook(posts: 30, longAt: [], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .read
+            structure.readForm = .flow
+            ReadingFlowGeometry.forgetAnchorTops()
+            ReadingFlowGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let shown = try await flowEnteredAtNote3AndScrolled(
+                window, hosting, watchdog: watchdog, model: model, structure: structure, postIDs: postIDs)
+            // `BookView.switchReadForm(to: .pages)`, verbatim.
+            model.carryPlace(from: structure.mode, readForm: structure.readForm)
+            structure.readForm = .pages
+            await settle(window, hosting, watchdog: watchdog, until: {
+                model.pagedAnchorPostID != nil
+            }, maxTurns: 160)
+            #expect(model.pagedAnchorPostID == shown,
+                    "RED ON rev681 (note 3) AND rev663 (page one): the reader opens at the story on screen — reported \(String(describing: model.pagedAnchorPostID))")
+        }
+    }
+}

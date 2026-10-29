@@ -86,6 +86,12 @@ final class StatusCenter {
         /// backup-folder ask's Set Up… / Not Now pair. Defaulted, so every
         /// shipped construction and pin reads unchanged; only an offer sets it.
         var secondary: Action? = nil
+        /// **VX-676 — a STANDING offer's own small ✕** (her sitting's ruling
+        /// (2): "the line carries its own small dismiss"): drawn by the quiet
+        /// line beside the item's door, and it ENDS the offer — distinct from
+        /// the toast's ✕, which only sends a standing offer to the line.
+        /// Defaulted, so every other item reads unchanged.
+        var dismiss: Action? = nil
 
         struct Action: Equatable {
             let label: String
@@ -106,6 +112,32 @@ final class StatusCenter {
     /// and register, never a different lifetime.
     private(set) var quietLine: Item?
 
+    /// **VX-676 — THE STANDING OFFER** (her sitting 2026-10-28, ruling (2),
+    /// settled at her afternoon pass: *"killing an active ask taking two
+    /// presses is not the worst issue ever … why do you not want to see what
+    /// the AI brought you"*). An offer that OUTLIVES its toast: it first shows
+    /// at the toast's full prominence (it IS `current` then), and once the toast
+    /// has gone — its fade, its ✕, or a newer toast — it HOLDS the quiet line at
+    /// the bottom bar's trailing end until its owner ends it (taken, replaced
+    /// by a newer one, its client gone) or her ✕ on the line does. No snooze
+    /// fork: the standing line IS the snoozed state.
+    ///
+    /// One at a time; never cleared by `clear()` (a toast's ✕ must send it to
+    /// the line, not kill it) — only `stand(_:)`'s replacement and
+    /// `endStanding(_:)` move it. A quiet RECEIPT that lands while it stands
+    /// takes the line for its own six seconds, then the offer is back
+    /// (PROVISIONAL P-676-3 — her receipt style keeps its meaning).
+    private(set) var standing: Item?
+
+    /// **What the quiet line shows** (the one view, `QuietReceiptLine`): a
+    /// receipt under `.quiet` while one speaks; else the standing offer — unless
+    /// the toast is showing that very offer (one message, one place).
+    var lineItem: Item? {
+        if let quietLine { return quietLine }
+        guard let standing, current?.id != standing.id else { return nil }
+        return standing
+    }
+
     /// **The last thing said, wherever it landed.** A pin that asserts THE
     /// WORDS reads this and stays kind-agnostic; the pins that assert WHICH
     /// SLOT (`StatusCenterTests`) read `current`/`quietLine` directly. At
@@ -119,7 +151,8 @@ final class StatusCenter {
     /// "nothing is showing", which under `.off` is true of every receipt in
     /// the app; if such a pin is ever run under that style it is hollow. Read
     /// `lastDroppedReceipt` to tell "dropped" from "never produced".
-    var spoken: Item? { current ?? quietLine }
+    /// VX-676: a standing offer the line shows is on screen too.
+    var spoken: Item? { current ?? lineItem }
 
     /// **What a RECEIPT does** — adopted by `ThemeStore` from the LANDED
     /// settings (the 18d ladder's lesson: a settings value is adopted where
@@ -252,6 +285,41 @@ final class StatusCenter {
             if self.current?.id == item.id { self.current = nil }
             if self.quietLine?.id == item.id { self.quietLine = nil }
         }
+    }
+
+    /// **VX-676 — present a STANDING offer**: at the toast's full prominence
+    /// now (an offer, so under every receipt style — the toast's own clock), and
+    /// standing on the quiet line from the moment the toast is gone, until
+    /// `endStanding`. A newer one REPLACES it (her ruling's "replaced by a newer
+    /// ask"). `action` is its door; `dismiss` its line's ✕.
+    /// `id` is the item's — a caller whose doors must name their own offer
+    /// (so an older offer's door never acts on a newer one) mints it first.
+    @discardableResult
+    func stand(_ text: String, id: UUID = UUID(), action: Item.Action, dismiss: Item.Action) -> UUID? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let item = Item(id: id, text: trimmed, action: action, kind: .offer, dismiss: dismiss)
+        standing = item
+        current = item
+        quietLine = nil
+        dismissTask?.cancel()
+        dismissTask = Task { [weak self, dismissAfter] in
+            try? await Task.sleep(for: dismissAfter)
+            guard !Task.isCancelled, let self else { return }
+            // The toast goes; the offer stays standing — the line holds it now.
+            if self.current?.id == item.id { self.current = nil }
+        }
+        return item.id
+    }
+
+    /// **VX-676 — the standing offer ends** (taken, its line's ✕, its client
+    /// gone, the library closing): gone from the line and, if it is still the
+    /// toast, from the toast too. Only the offer named ends — a newer one that
+    /// replaced it is never ended by the older one's road.
+    func endStanding(_ id: UUID) {
+        guard standing?.id == id else { return }
+        standing = nil
+        if current?.id == id { current = nil }
     }
 
     private enum Slot { case toast, quiet }

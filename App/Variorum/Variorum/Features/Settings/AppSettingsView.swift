@@ -153,7 +153,8 @@ struct AppSettingsView: View {
         // VX-281 ladder R1-4: the Connect tab's section ("Connect a client"),
         // where a search for the setup's words lands. Ladder R2-3: the Clients
         // tab (its label is the row's title), where "client"/"clients" land.
-        .mcp: ["mcpServer", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
+        // VX-676: the show dial sits above the tabs, beside the server switch.
+        .mcp: ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],
@@ -995,8 +996,10 @@ private struct WritingSettingsPane: View {
 
 /// The keyboard map, in Settings — **the same grouped list the ⌘/ helper
 /// shows**, read from `HelperView.groups` rather than copied, because two
-/// copies of a list is two lists (and that one is already held to the
-/// registry by `everyDeclaredShortcutIsFindableInTheHelper`).
+/// copies of a list is two lists (and that one is the registry's own since
+/// VX-572 — `ShortcutCatalog`, its chords read from the declarations). Its
+/// face stays this pane's cards (PROVISIONAL P-572-4); the ⌘/ tab is the
+/// searchable, folded one.
 ///
 /// Her item 5's other half lands here: *"how are things unindented? that's
 /// further proof that I need a better formatting shortcut menu."* The

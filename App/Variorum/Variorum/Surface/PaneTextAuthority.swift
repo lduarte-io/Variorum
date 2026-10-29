@@ -37,6 +37,14 @@
 //    staler text than that buffer: the overlay applies to every resolver
 //    path, not just the live pane (the frozen-article class, closed at
 //    the root — including the stack style's bypass, N2's sibling).
+//  - A LIVE pane whose OWN take's stored words change from OUTSIDE it stops
+//    being live (VX-664 — her ruling, option (a) scoped; the architect's
+//    A-677-1): the authority knows what the live pane HOLDS (`liveHeld` —
+//    what it showed when it took the ring, then her every keystroke), and a
+//    delivery whose stored text for that take differs from it, with nothing
+//    of hers pending, names the pane (`settle(isPending:liveIncoming:)`); the
+//    owner confirms on a fresh read (`confirmsOutsideWrite`) and runs its own
+//    ring-end. The live pane never adopts — it stops being live.
 //
 //  Pure Swift: no AppKit, no store, no observation machinery — the owning
 //  @Observable view model stores one authority value, so every mutation
@@ -87,16 +95,30 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
         case migrated(from: PaneKey?)
     }
 
+    /// **What the LIVE pane holds, as far as the authority knows** (VX-664 —
+    /// A-677-1): the text the pane SHOWED when it took the ring (`focus`'s
+    /// `showing:`), then each of her keystrokes (`bufferEdited`). Nil = not
+    /// known (a focus that passed nothing): the next delivery that names the
+    /// take is adopted as the baseline, never judged. It is a mirror of the
+    /// pane's characters for ONE take, the buffer overlay's own kind — never
+    /// a second liveness answer.
+    private(set) var liveHeld: String?
+
+    /// `showing` — the text the pane shows as it takes the ring (the owner's
+    /// own resolution: the buffer overlay over the stored text). A migration
+    /// re-bases what the live pane holds; `.unchanged` keeps it.
     @discardableResult
-    mutating func focus(_ pane: PaneKey) -> FocusOutcome {
+    mutating func focus(_ pane: PaneKey, showing: String? = nil) -> FocusOutcome {
         guard livePane != pane else { return .unchanged }
         let leaving = livePane
         livePane = pane
+        liveHeld = showing
         return .migrated(from: leaving)
     }
 
     mutating func blur() {
         livePane = nil
+        liveHeld = nil
     }
 
     /// The surface's liveness answer — and its adopt guard: a live pane's
@@ -123,6 +145,7 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
     /// A live pane's keystroke: the buffer is authoritative while dirty.
     mutating func bufferEdited(variantID: String, text: String) {
         buffers[variantID] = text
+        if livePane?.variantID == variantID { liveHeld = text }
     }
 
     /// The projection caught up with this variant (its autosave landed and
@@ -140,6 +163,68 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
         for variantID in buffers.keys where !isPending(variantID) {
             catchUp(variantID: variantID)
         }
+    }
+
+    // MARK: - An outside write on the live pane's own take (VX-664 — A-677-1)
+
+    /// **THE ring owners' ONE delivery door** (VX-664 — her ruling, option (a)
+    /// scoped: the ring ends ONLY when an outside write lands on the live
+    /// pane's OWN take; P-3's buffer authority never bends; no clean-buffer
+    /// adoption. The architect's A-677-1: the store's own delivery is the
+    /// signal, this rule the decision). Settles exactly as `settle(isPending:)`
+    /// does, and answers the live pane when this delivery carries stored words
+    /// for ITS take that differ from what it holds while nothing of hers is
+    /// pending there — a write that did not come from this pane's typing: a
+    /// restore, an AI's `edit_take`, a sync apply, another window, a
+    /// structural act that rewrote the take, any road at all, named or not.
+    ///
+    /// `liveIncoming` is the delivered STORED text of the live pane's take
+    /// (nil: this delivery does not carry it — nothing is judged). Her own
+    /// pending keystrokes win the race by construction (the buffer is
+    /// authoritative while pending — the flush-first rule and the bracket
+    /// savepoints insure the roads that meet them; VX-683 is the one road
+    /// that cannot flush). Her own words are compared as the store keeps them
+    /// (`StoredText.stripped` — the autosave's own transform), so her own
+    /// pasted U+0000 never reads as somebody else's write.
+    ///
+    /// A SUSPICION, never yet the verdict: a delivery may be a photograph
+    /// fetched before her own last write landed (the 13e E15 class — consumed
+    /// after the settle, it would carry words she has since replaced), so the
+    /// owner confirms on a FRESH read of the take (`confirmsOutsideWrite`) and
+    /// only then ends the ring with its own blur.
+    mutating func settle(
+        isPending: (String) -> Bool, liveIncoming: String?
+    ) -> PaneKey? {
+        let suspect = suspectsOutsideWrite(liveIncoming: liveIncoming, isPending: isPending)
+        settle(isPending: isPending)
+        return suspect
+    }
+
+    private mutating func suspectsOutsideWrite(
+        liveIncoming incoming: String?, isPending: (String) -> Bool
+    ) -> PaneKey? {
+        guard let live = livePane, let incoming, !isPending(live.variantID) else { return nil }
+        guard let held = liveHeld else {
+            // Not known what the pane holds (a focus that passed nothing):
+            // this delivery becomes the baseline — never a verdict.
+            liveHeld = incoming
+            return nil
+        }
+        return StoredText.stripped(held) == incoming ? nil : live
+    }
+
+    /// The suspicion CONFIRMED on a fresh read of the take: the same pane is
+    /// still the live one, nothing of hers is pending for its take, and the
+    /// take's stored words — read after the fact, so no photograph can
+    /// answer — still differ from what the pane holds. The owner then ends
+    /// the ring (VX-222/VX-440's shape: its blur, whose flush is provably
+    /// empty; the pane goes read and adopts through the surface's read arm).
+    func confirmsOutsideWrite(
+        _ suspect: PaneKey, storedText: String, isPending: (String) -> Bool
+    ) -> Bool {
+        guard livePane == suspect, !isPending(suspect.variantID), let held = liveHeld
+        else { return false }
+        return StoredText.stripped(held) != storedText
     }
 
     /// What a pane shows for a variant: the live buffer where one is
