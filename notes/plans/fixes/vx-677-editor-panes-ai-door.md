@@ -1062,6 +1062,21 @@ Per suite: 9 · 18 · 6 · 2 · 4 · 7 · 5 · 18 · 11 · 30 · 5 · 3. **A red
 
 - **F-B5-1 (no ticket needed — a pin-shape note):** VX-440's `RestoreLandingTests.aSheetRestoreLandsWhereTheRowRestoreDoesAfterTheSheetIsGone` dismisses its sheet by writing `history.reading = nil`, never through the sheet's own `dismiss()`, with the pane beside the detail; it holds the W-2 ORDER (its red-on-old was the order line) and stays. If `RestoreLandingInspectorTests` reds, it is the LANDING half's pin and the old pin's caret line is the weaker twin.
 
+### FINAL-WINDOW REBUILD BRIEF (mechanical; implementer: Opus, fresh session — no product decisions)
+
+**Work from `~/dev/variorum-vx-677` (pull first; the tip holds batches 1–5 + the main merge). PURPOSE: every stage product and the walk app rebuilt at THE MERGED TIP so the final window's verdicts are on the tree that merges. Headless only; no stage; no subagents; foreground waits; NO trailers; NOT ONE production or test line changed — reverts are applied EXACTLY per each batch's documented recipe, binary-checked as each batch did, and restored by `git checkout --` with the tree verified clean after each (announce each revert in the record BEFORE applying it; commit nothing mid-revert).**
+
+Rebuild list (each `build-for-testing`, TEST BUILD SUCCEEDED logged):
+1. `vx677-b1/post` (plain tip) and `vx677-b1/rev664` (batch 1's three-line revert — BATCH 1 RECORD's revert table).
+2. `vx677-b2/post` (plain tip) and `vx677-b2/revB` (D-2's one-line revert — DISPOSITIONS RECORD).
+3. `vx677-b3/post` · `vx677-b3/rev676` (two lines) · `vx677-b3/rev675` (two lines) — BATCH 3 RECORD's table.
+4. `vx677-b4/post` · `vx677-b4/rev674` · `vx677-b4/rev572` — BATCH 4 RECORD's table.
+5. `vx677-b5/post` — verify it is already at the tip (rebuild only if not).
+6. The walk app `DerivedData/vx677-app` (Debug), and confirm the trace is in it: `strings` on the binary finds `VX668-TRACE`.
+7. NAME the app-launch/services overlap suites (the VX-678 merge's one overlap file): grep the test targets for `appDelegate.services` / `VariorumApp` readers, list the @Suite TYPE names + their @Test counts in the record as "the overlap run".
+
+Deliverables: every build's log path + result line in a "FINAL REBUILD RECORD" section; the overlap run's array; the tree clean, no revert residue (`git status` + no `VX677-REVERT` marker); everything pushed.
+
 ## Rulings log
 
 *(anything needing her lands here PROVISIONAL-and-continue, bundled for the closeout checklist; anything gating the core STOPS)*
