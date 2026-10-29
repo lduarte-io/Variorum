@@ -1131,7 +1131,10 @@ Nothing is ever committed mid-revert. The plain-tip products (`vx677-b1/post`, `
 
 **LIVE STATUS** (flipped in the same commit as each piece)
 - FR-0: preflight, the recipes recovered and dry-run, the panel validated, this record. DONE (this commit).
-- FR-1: `vx677-b1/post` + `vx677-b1/rev664`. PENDING.
+- FR-1: `vx677-b1/post` + `vx677-b1/rev664`. DONE (this commit).
+  - `post`: `DerivedData/vx677-b1/logs/build-post-9.log`, TEST BUILD SUCCEEDED, EXIT 0 (22:43–22:46).
+  - `rev664`: `logs/build-rev664-4.log`, TEST BUILD SUCCEEDED, EXIT 0 (22:47–22:50). The revert's diff was +2 in `PaneTextAuthority.swift` and +1 in `PaneSurface.swift` (3 markers), as dry-run. Restored by `git checkout --`; tree clean, no marker.
+  - Panel: `rev664` differs from `post` ONLY in its three rows (`suspectsOutsideWrite` 232 → 40, `confirmsOutsideWrite` 225 → 26, the dispositions session's own check; `completeReadAdoptionIfGoingLive` 77 → 26). Every other member's row is equal.
 - FR-2: `vx677-b2/post` + `vx677-b2/revB`. PENDING.
 - FR-3: `vx677-b3/post` + `vx677-b3/rev676` + `vx677-b3/rev675`. PENDING.
 - FR-4: `vx677-b4/post` + `vx677-b4/rev674` + `vx677-b4/rev572`. PENDING.
