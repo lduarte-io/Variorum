@@ -1399,3 +1399,21 @@ red control-proven pre-existing (VX-695, VM-34). Canon: SyncSpec §7's dedupe bu
 SurfaceContracts Trash lines, #250, MobileSoul PL-64. Born: VX-685/690/691/695 (tests & tooling), VM-33/VM-34
 (mobile). NO release at this close — one release after VX-678 + VX-677 + PR #204 all merge (her word; the last merger
 mints, notes carrying v1_34 + v1_35).
+
+**→ VX-633 CLOSED 2026-10-29 — THE BILINGUAL PRINCE SEED BOOK (the record `notes/plans/vx-633-prince-book.md`
+— rulings R-633-1..21, the U1/U2/U2b records, the ladder files; built on the Air at her sitting, absorbed and closed
+on the Pro by the VX-678 orchestrator; PR #204, merge SHA in memory + the ticket).** The launch seed is now *The
+Prince*: 27 chapters + the front note, every paragraph Marriott 1908 (chosen) + "il principe 1532" (the 1814
+Wikisource printing re-paragraphed to Marriott's breaks, words untouched), six standout lines a "ricci 1903" third
+take, XXVI's Petrarch stanza a "dacres 1640" English verse, saved lenses per chapter (marriott · il principe ·
+ricci/dacres), the R-633-21 comment pair on XVIII, the four parts + the Dedication's own chapter (R-633-17), owned on
+Welcome with #classics + #machiavelli; FRESH STORES ONLY (R-633-16 — existing stores' road is Help ▸ Restore "the
+prince"; sherlock joins jekyll restore-only). Verified: suites-a (168 tests + the two U2b reverts red-as-predicted),
+tests-b (Mac 5,615/983 CLEAN; phone 849/139), the both-voices reset walkthrough (fresh birth 9 PASS + 1 ticketed
+PARTIAL; the existing-store leg proving the decline LIVE and the restore door whole; VX-671's multi-select exercised
+on a real store), a two-round ladder (R1: 1 MAJOR + 3 MINOR + 1 NIT — F1's named road disputed, UPHELD, and the real
+signed-out-after-join road latched as P-633-F1; R2: clean, no round 3), the fixes verification window (all pins
+observed green, four reverts red exactly), and the final whole targets at the tip (Mac 5,616/983, phone 852/139 —
+reds all pre-ticketed flakes/standing: VX-701 born, VM-34 unchanged). Canon: the SurfaceContracts seed-set line,
+QUESTIONS #251, MobileSoul PL-65. Born: VX-696..701 (the walk's five + the focus flake), VM-33/34/35. NO release at
+this close — VX-677 merges last of the three and mints the one release (her word), the Prince riding it.

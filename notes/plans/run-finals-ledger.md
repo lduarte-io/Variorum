@@ -137,3 +137,12 @@ Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 �
   main's signed line intact).
 - Born: VX-603 · VX-604 · VX-608 · VX-614 · VX-615 · VX-616 · VX-617 · VX-618 (triaged at filing). Her bundle:
   QUESTIONS #244. The release 0.10.3 at her in-session word, run after this entry.
+
+## VX-677 — Run: editor, panes & the AI door (CLOSED 2026-10-29; PR #207, merge commit — SHA recorded at merge in memory + the ticket)
+
+- Twelve members, five batches, the architect shape; the record `notes/plans/fixes/vx-677-editor-panes-ai-door.md`.
+- The ladder: round 1 (`vx-677-ladder-round1.md`, 2 MINOR + 3 NIT; F-L2's mechanism corrected by the implementer's trace, the counter-shape confirmed with the openShow fold-in) → fixes → round 2 clean (`vx-677-ladder-round2.md`); closed at 2 of the cap 3.
+- Claim C: fifteen suite rows all EXACT (C1 = VX-668's red-on-old observed — the merge gate; C11 = the 190-test #204 overlap clean); the walks all WORKS-AS-RULED (W-668-V1 ×3 all landed at START; S-572 Study re-shots on the themed window).
+- Canon: MCPSpec (the offer dial · the version target · the gone-check · 3,061/3,100) + SurfaceContracts (doors · status seam · the mode-row carry family · Block History) + TEXTKIT2_NOTES §3 (the frame-constant display rule). Bundle QUESTIONS #252; MobileSoul not minted.
+- Born: VX-683 · VX-686(grown) · VX-687 · VX-688 · VX-692(High, grown twice) · VX-694 · VX-702 · VX-705 · VX-706 · VX-707; VX-693 fixed in-run; VX-661 grown twice.
+- Her live rulings this run: VX-624 seated · A-677-1/2/3 + B2-i ratified · VX-676's amendment + background-asks ratified · the trailer cleanup · the two-release amendment (vx-669 now, this run its own) · release.sh pre-approved. The release: 0.10.6, this run's, right after the merge.
