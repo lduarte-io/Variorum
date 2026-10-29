@@ -285,6 +285,13 @@ final class AppServices {
         backup?.stop()
         localPurgeTask?.cancel()
         localPurgeTask = nil
+        // VX-657 / ladder R1 MINOR-3: the held sweep's NON-AWAITING cancel —
+        // before the VX-657 reshape the clock's cancel reached an in-flight
+        // sweep through the structured await, and the held Task broke that;
+        // this restores stop()'s early-abort (prompt and safe: the sweeps
+        // stop at the next family boundary). The QUIT door's road is the
+        // awaited quiesce below; stop() never refuses future sweeps.
+        session.cancelLocalPurgeSweeps()
     }
 
     /// **VX-657 — the quit door's one quiesce**, run on the PROCEED path

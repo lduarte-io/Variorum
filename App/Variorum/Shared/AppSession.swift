@@ -145,6 +145,16 @@ final class AppSession {
     /// family boundary (`LocalPurge.sweep` — completed families stay
     /// completed, nothing half-done). Once quiescing, new sweeps refuse —
     /// an hourly tick landing mid-quit is a quiet no-op.
+    ///
+    /// **TWO roads end an in-flight sweep (ladder R1, MINOR-3):**
+    /// `AppServices.stop()` — the lock teardown, a sign-out's reconfigure —
+    /// CANCELS without awaiting (`cancelLocalPurgeSweeps`: the process
+    /// lives on, and later sweeps stay welcome), while the QUIT door's
+    /// proceed path QUIESCES (cancel AND await, new sweeps refused — the
+    /// process is exiting). Before the VX-657 reshape, stop()'s
+    /// cancellation of the hourly clock reached an in-flight sweep through
+    /// the structured await; the held unstructured Task broke that
+    /// propagation, and the stop() road restores it deliberately.
     func sweepLocalPurge() async {
         guard !quiescingForExit, !syncConfigured() else { return }
         let body = localPurgeSweepBody ?? { [database] in
@@ -185,6 +195,19 @@ final class AppSession {
         for task in tasks { task.cancel() }
         for task in tasks { await task.value }
         localPurgeSweeps.removeAll()
+    }
+
+    /// **VX-657 / ladder R1 MINOR-3 — the stop() road's cancel:** end the
+    /// in-flight sweeps WITHOUT awaiting and WITHOUT refusing future ones.
+    /// `AppServices.stop()` (the lock teardown, a sign-out's reconfigure)
+    /// is the caller: the cancel is prompt and safe because the sweeps are
+    /// boundary-cancellation-aware (they stop at the next family boundary;
+    /// a family mid-transaction rolls back whole), and each held entry
+    /// cleans itself up through its own awaiting `sweepLocalPurge` call.
+    /// The exit flag is deliberately untouched — that refusal is the quit
+    /// door's alone.
+    func cancelLocalPurgeSweeps() {
+        for task in localPurgeSweeps.values { task.cancel() }
     }
     /// The session-scoped structural undo stack (AppSpec §9) — in-memory,
     /// never persisted. (On the Mac it wires to the Edit menu; the phone

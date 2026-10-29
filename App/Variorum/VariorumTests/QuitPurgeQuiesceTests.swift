@@ -137,6 +137,44 @@ struct QuitPurgeQuiesceTests {
     }
 
     /// **The sync half:** `SyncSession.quiesceForExit()` blocks on the
+    /// **The stop() road (ladder R1, MINOR-3):** `AppServices.stop()` — the
+    /// lock teardown, a sign-out's reconfigure — ends an in-flight sweep by
+    /// a NON-AWAITING cancel (`AppSession.cancelLocalPurgeSweeps`, the one
+    /// line stop() calls), and unlike the quit road it never refuses future
+    /// sweeps: the process lives on. Driven at the model seam with the same
+    /// spy body; the wiring in `stop()` is one call to exactly this.
+    @Test func stopsCancelRoadCancelsWithoutRefusingFutureSweeps() async throws {
+        try await withQuiesceWorld { session, _ in
+            let started = LockIsolated(false)
+            let sawCancel = LockIsolated(false)
+            session.localPurgeSweepBody = {
+                started.setValue(true)
+                try? await Task.sleep(for: .seconds(60))
+                sawCancel.setValue(Task.isCancelled)
+            }
+            let sweep = Task { await session.sweepLocalPurge() }
+            for _ in 0..<2000 {
+                if started.value && session.localPurgeSweepsInFlight == 1 { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(started.value && session.localPurgeSweepsInFlight == 1)
+
+            session.cancelLocalPurgeSweeps()
+            await sweep.value
+            #expect(sawCancel.value, "the stop() road's cancel reached the in-flight sweep")
+            #expect(session.localPurgeSweepsInFlight == 0,
+                    "the entry cleaned itself up through its own awaiting call")
+
+            // Unlike the quit road, future sweeps stay welcome.
+            let ranAgain = LockIsolated(false)
+            session.localPurgeSweepBody = { ranAgain.setValue(true) }
+            await session.sweepLocalPurge()
+            #expect(ranAgain.value, "stop() never refuses later sweeps — only the quit door does")
+        }
+    }
+
+    /// **The sync half:** `SyncSession.quiesceForExit()` blocks on the
     /// round in flight (the transported janitor rides it) and returns once
     /// the retired loop actually ends — `stop()`'s retire, awaited. An
     /// unconfigured session returns at once, and the quiesce is idempotent.
