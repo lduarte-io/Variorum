@@ -64,8 +64,10 @@
 //  A fresh store's launch can stop partway (the Mac window closed, the phone
 //  locked) and leave the book half minted — and its own rows then read as
 //  writing. The book's OWN partial copy (its reserved name holding at least
-//  one title it ships — never a book of hers that merely shares the name) is
-//  completed, exactly as before, on every road except a settled one.
+//  one of the seed's FINGERPRINTS — its front note or a numbered chapter
+//  title, never a generic title like "Dedication" (ladder R1 F4) — and so
+//  never a book of hers that merely shares the name) is completed, exactly
+//  as before, on every road except a settled one.
 //
 //  ── RECORDED residuals (not built) ───────────────────────────────────────
 //    · A process death INSIDE the skeleton turn after the book row and before
@@ -126,10 +128,25 @@ nonisolated enum SampleLibraryFreshStore {
     }
 
     /// **The seed's own partial copy stands**: its book (found by the reserved
-    /// name) holds at least one title it ships — the front matter or a
-    /// chapter. A book of hers that merely shares the name holds none.
+    /// name) holds at least one of the seed's FINGERPRINTS
+    /// (`resumeFingerprints` — the caller hands those, never every shipped
+    /// title). A book of hers that merely shares the name holds none.
     static func isResuming(bookExists: Bool, presentTitles: Set<String>, shippedTitles: [String]) -> Bool {
         bookExists && shippedTitles.contains { presentTitles.contains($0) }
+    }
+
+    /// **The titles only the seed's own copy would hold** (VX-633 ladder R1
+    /// F4): its FRONT NOTE — the skeleton turn mints it before any chapter, so
+    /// every genuine partial copy holds it — and every NUMBERED chapter title
+    /// it ships ("XVIII. Concerning the way in which princes should keep
+    /// faith" — `SampleLibraryPrinceBook.chapterNumber`). Never a generic
+    /// title: the Prince ships one, "Dedication", and a book of hers named
+    /// "the prince" holding her own note "Dedication" is HER book. It would
+    /// otherwise read as resuming, which bypasses the fresh-store rule
+    /// entirely, and the launch would pour the seed into it. A fresh-only
+    /// book whose chapters carry no numerals resumes by its front note alone.
+    static func resumeFingerprints(frontMatterTitle: String, titles: [String]) -> [String] {
+        [frontMatterTitle] + titles.filter { SampleLibraryPrinceBook.chapterNumber(of: $0) != nil }
     }
 
     /// **May the launch road mint a fresh-only book here?** A settled store:

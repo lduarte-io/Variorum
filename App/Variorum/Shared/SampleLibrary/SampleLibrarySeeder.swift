@@ -1194,9 +1194,12 @@ enum SampleLibrarySeeder {
         var existingStore = false
         var freshnessUntaken = false
         if book.seedsFreshStoresOnly {
+            // Ladder R1 F4: the seed's FINGERPRINTS only — never a generic
+            // shipped title ("Dedication") that a book of hers could hold.
             let resuming = SampleLibraryFreshStore.isResuming(
                 bookExists: existing.bookID != nil, presentTitles: existing.presentTitles,
-                shippedTitles: [book.frontMatterTitle] + titles)
+                shippedTitles: SampleLibraryFreshStore.resumeFingerprints(
+                    frontMatterTitle: book.frontMatterTitle, titles: titles))
             let mayMint = try SampleLibraryFreshStore.mayMint(freshness, resuming: resuming) {
                 try SampleLibraryFreshStore.storeIsFresh(db, ownBook: book.name)
             }

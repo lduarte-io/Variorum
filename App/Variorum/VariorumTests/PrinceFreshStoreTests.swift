@@ -332,6 +332,54 @@ struct PrinceFreshStoreTests {
         }
     }
 
+    /// **RED ON OLD (VX-633 ladder R1 F4) — HER OWN BOOK HOLDING A
+    /// "DEDICATION".** The Prince ships one generic title, "Dedication". Her
+    /// own book named "the prince" holding her own note titled "Dedication",
+    /// on a device with no settled marks (a reinstall, a store moved to a new
+    /// Mac), is still HER book. The seed's fingerprints are its front note and
+    /// its numbered chapter titles, and she holds neither, so the store is
+    /// judged by the fresh-store rule — it has held writing — and the Prince
+    /// declines, recorded, her book exactly as she left it.
+    /// *Old:* the shared title read as the seed's own partial copy
+    /// (`isResuming` true, which bypasses the rule), so the launch poured the
+    /// front note and the 26 chapters — takes, lenses, the comment pair, the
+    /// tag — into her book. *Revert:* hand `isResuming` every shipped title
+    /// again in `facts` (`[book.frontMatterTitle] + titles`).
+    @Test func herOwnBookHoldingADedicationIsNeverFilled() async throws {
+        let titles = SampleLibrarySeeder.expectedTitles(
+            for: prince, stories: try SampleLibrarySeeder.loadStories(for: prince))
+        #expect(titles.contains("Dedication"), "the generic title the seed really ships")
+        // The predicate: fingerprints are the front note and the numbered titles.
+        let fingerprints = SampleLibraryFreshStore.resumeFingerprints(
+            frontMatterTitle: prince.frontMatterTitle, titles: titles)
+        #expect(!fingerprints.contains("Dedication"))
+        #expect(fingerprints.count == 1 + 26, "the front note and the twenty-six numbered chapters")
+        #expect(!SampleLibraryFreshStore.isResuming(
+            bookExists: true, presentTitles: ["Dedication"], shippedTitles: fingerprints))
+        #expect(SampleLibraryFreshStore.isResuming(
+            bookExists: true, presentTitles: [prince.frontMatterTitle, "Dedication"], shippedTitles: fingerprints),
+            "the seed's own partial copy still resumes — it holds the front note")
+
+        try await withFreshStoreWorld { session, db in
+            let ops = session.operations
+            let hers = try ops.createReading(name: prince.name, kind: .book)
+            let note = try ops.createPost(title: "Dedication")
+            _ = try ops.newBlock(in: note.id, text: "For my students, who read it with me.", registeringUndo: false)
+            _ = try ops.addPostToReading(note.id, to: hers.id)
+            let device = Device()
+
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: prince, freshness: .readAtDecision,
+                loadMark: device.load(prince), saveMark: device.save(prince))
+            #expect(outcome == .existingStore, "\(outcome)")
+            #expect(device.books[prince.name] == true, "the decision is recorded")
+            let members = try await db.read { db in
+                try Queries.assembleReading(db, readingID: hers.id).map(\.postID)
+            }
+            #expect(members == [note.id], "her book, exactly as she left it")
+        }
+    }
+
     // MARK: - The account road (judged after the sync gate)
 
     /// **RED ON OLD — THE EARLY READ DECLINES.** An account store already
