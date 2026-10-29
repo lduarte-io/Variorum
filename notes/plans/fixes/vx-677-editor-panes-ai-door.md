@@ -1135,7 +1135,10 @@ Nothing is ever committed mid-revert. The plain-tip products (`vx677-b1/post`, `
   - `post`: `DerivedData/vx677-b1/logs/build-post-9.log`, TEST BUILD SUCCEEDED, EXIT 0 (22:43–22:46).
   - `rev664`: `logs/build-rev664-4.log`, TEST BUILD SUCCEEDED, EXIT 0 (22:47–22:50). The revert's diff was +2 in `PaneTextAuthority.swift` and +1 in `PaneSurface.swift` (3 markers), as dry-run. Restored by `git checkout --`; tree clean, no marker.
   - Panel: `rev664` differs from `post` ONLY in its three rows (`suspectsOutsideWrite` 232 → 40, `confirmsOutsideWrite` 225 → 26, the dispositions session's own check; `completeReadAdoptionIfGoingLive` 77 → 26). Every other member's row is equal.
-- FR-2: `vx677-b2/post` + `vx677-b2/revB`. PENDING.
+- FR-2: `vx677-b2/post` + `vx677-b2/revB`. DONE (this commit).
+  - `post`: `DerivedData/vx677-b2/logs/build-post-12.log`, TEST BUILD SUCCEEDED, EXIT 0 (22:51–22:54).
+  - `revB`: `logs/build-revB-2.log`, TEST BUILD SUCCEEDED, EXIT 0 (22:55–22:58). The revert's diff was 1 line replaced in `OutlineBlockLanding.swift` (1 marker), as dry-run. Restored; tree clean, no marker.
+  - Panel: `revB` differs from `post` ONLY in `homeIsTheRow` (25 → 17). The dispositions session's own call check agrees: `post` calls `OutlineBlockLanding.residual(targetTop:targetHeight:viewportHeight:)` and `revB` calls nothing (the constant).
 - FR-3: `vx677-b3/post` + `vx677-b3/rev676` + `vx677-b3/rev675`. PENDING.
 - FR-4: `vx677-b4/post` + `vx677-b4/rev674` + `vx677-b4/rev572`. PENDING.
 - FR-5: `vx677-b5/post` VERIFIED AT THE TIP, no rebuild. Its test binary (22:30:46) is newer than every file under `App/`, `Sources/`, `Package.swift` and `Tests/`. Its `logs/build-post-3.log` (TEST BUILD SUCCEEDED) compiled `RestoreLandingInspectorTests.swift`, the one source file `092909955` touched. Every commit since `092909955` touches only this record.
