@@ -32,4 +32,4 @@ The query rewrites and the observation fix carry to the phone through shared cor
 - `Tools/canon-size` at the closeout: **126,641 total (harness limit 150,000, headroom 23,359)** — no crossing.
 
 ## PENDING at the merge moment
-PR number: PENDING · merge SHA: PENDING · member tickets → Done: PENDING · in-flight row retired + closeout paragraph: PENDING · #250 landed (numbering verified on latest main) · MobileSoul PL-64 landed · evidence cleanup (walk screenshots, logs, DerivedData, the dev-store copy after merge): PENDING.
+PR #205 · merge SHA: in memory + the run ticket (post-merge) · member tickets → Done: PENDING · in-flight row retired + closeout paragraph: PENDING · #250 landed (numbering verified on latest main) · MobileSoul PL-64 landed · evidence cleanup (walk screenshots, logs, DerivedData, the dev-store copy after merge): PENDING.
