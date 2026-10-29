@@ -29,7 +29,7 @@ The query rewrites and the observation fix carry to the phone through shared cor
 - QUESTIONS #143(b): the bounded-revival ruling superseded — the defense leg removed at VX-678.
 - SurfaceContracts, the Trash lines: multi-select + bulk doors + the honest empty state (+ pointer).
 - AppSpecRecord: the dated entry (her words, the ladder, the cast, the born tickets, the PR).
-- `Tools/canon-size` at the closeout; its line goes here: PENDING.
+- `Tools/canon-size` at the closeout: **126,641 total (harness limit 150,000, headroom 23,359)** — no crossing.
 
 ## PENDING at the merge moment
-PR number: PENDING · merge SHA: PENDING · member tickets → Done: PENDING · in-flight row retired + closeout paragraph: PENDING · #250 numbering verified on latest main: PENDING · evidence cleanup (walk screenshots, logs, DerivedData, the dev-store copy after merge): PENDING.
+PR number: PENDING · merge SHA: PENDING · member tickets → Done: PENDING · in-flight row retired + closeout paragraph: PENDING · #250 landed (numbering verified on latest main) · MobileSoul PL-64 landed · evidence cleanup (walk screenshots, logs, DerivedData, the dev-store copy after merge): PENDING.

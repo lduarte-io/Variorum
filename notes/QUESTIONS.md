@@ -1817,7 +1817,7 @@ the orchestrator's arbitrated call (the crossing's stamps are bounded by delayed
 unpushed-outbox arm covers longer offline gaps on its own):** hers to widen or narrow.
 **RATIFIED — 2026-09-22, the same word ("yeah ratify both"): the bounded revival stands as
 RULED behavior, the ONE-HOUR width ratified as set (still hers to move later if use argues);
-recorded at SyncSpec §7's dedupe bullet, dated.** *(Process note: she asked for plainer
+recorded at SyncSpec §7's dedupe bullet, dated.** **SUPERSEDED 2026-10-28 (VX-669, her ruling at the sitting — "Remove the defense leg"): the bounded revival is removed whole; a deliberate delete is never second-guessed at any distance; the ruled matrix's PASS rows are untouched. Record: `notes/plans/fixes/vx-678-trash-purge-resurrection.md`; pins: the her-scenario pair in `SyncReconciliationProbeTests`.** *(Process note: she asked for plainer
 explanations of both halves at the sitting — given — then ratified both.)* *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
 is a length floor, not an entropy floor; whether to pair it with a strength check is on the
 checkpoint bundle, propose-only — **DECLINED by her at the 2026-09-22 morning sitting ("decline");
@@ -3799,3 +3799,16 @@ version ids (kept deliberately — the app state now exists, so opening it is a 
 VX-664 (High) wants her ruling on the P-3 live-pane exception (the outside-change class behind the walk's W-1);
 VX-668 is the read-in-full sheet's lost landing (order fixed, the landing itself ticketed with the trace plan).
 **Status: PROVISIONAL-and-built; nothing gates the core.**
+
+#250 — **THE VX-678 BUNDLE (the binding record is `notes/plans/fixes/vx-678-trash-purge-resurrection.md`; the handoff
+`notes/handoffs/vx-678-handoff.md`).** **(a) P-671-1..6 — the Trash multi-select's shapes (each built to the most
+spec-defensible option, all working):** the bulk Put back order (books → notes/groups → blocks → originals); an
+original whose family came back in the same press is not re-placed; partial results speak in the refusal slot with
+both facts; bulk Delete Now is one atomic intent batch; the bulk row appears at 2+ picked; the wording — including
+"preserved original(s)", spelled three ways today (the ladder's NIT) — hers to tune. **(b) P-670-WF2 — the Trash's
+untitled-note name:** the Trash names an untitled note by its DAY (a deliberate 13l Act 7 decision, pinned) while the
+Library and Open list lead with first words (VX-580), so several deleted quick notes read identically and defeat the
+multi-select; the walk's finding. Options: (i) first words lead, the date as the row's secondary fact (needs a new
+core read — a deleted note's opening on its exact stamp; the live-only word read returns nothing for Trash rows);
+(ii) keep the date-name (SHIPPED today, nothing changed); (iii) the date stays the name, first words join as a quiet
+second line. **Status: OPEN (filed at the VX-678 closeout, 2026-10-28).**
