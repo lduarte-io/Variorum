@@ -198,6 +198,27 @@ extension Queries {
             arguments: [postID]) ?? false
     }
 
+    /// **VX-292 ladder round 1 — the deletion EVIDENCE for the tour's mend**
+    /// (the reviewer's final call on the MAJOR): the titles of notes DELETED
+    /// while this book held them — a tombstoned note (`container.deleted_at`)
+    /// tied to this book by a tombstoned MEMBER row. A dead membership with a
+    /// LIVE note is a release, a move or a diverge — her edit — and never
+    /// counts; a dismissed arrival was never a membership and never counts.
+    /// No stamp equality between the two tombstones: a note released and
+    /// later deleted is still a deletion (her final act governs). A purged
+    /// row (Delete Now, Empty Trash past the horizon) is gone and is evidence
+    /// of nothing — the recorded floor. Bounded by ONE book's own rows (P1).
+    public static func deletedMemberTitles(_ db: Database, readingID: String) throws -> Set<String> {
+        Set(try String.fetchAll(
+            db, sql: """
+                SELECT DISTINCT c.title FROM reading_post rp
+                JOIN container c ON c.id = rp.post_id
+                WHERE rp.reading_id = ? AND rp.deleted_at IS NOT NULL AND rp.status = 'member'
+                  AND c.deleted_at IS NOT NULL AND c.kind = 'post' AND c.title IS NOT NULL
+                """,
+            arguments: [readingID]))
+    }
+
     /// The book's first live member note (book order) carrying a fanned block.
     static func firstFannedMember(_ db: Database, readingID: String) throws -> String? {
         try String.fetchOne(

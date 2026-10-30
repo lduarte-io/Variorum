@@ -245,6 +245,53 @@ struct TourQueriesTests {
         }
     }
 
+    /// **VX-292 ladder round 1 (the MAJOR's final call) — deletion EVIDENCE,
+    /// never an edit.** A note deleted while the book held it names its
+    /// title; a RELEASED note (its membership dead, the note live) does not;
+    /// released and LATER deleted does (no stamp equality — her final act
+    /// governs); a renamed-then-deleted note names its NEW title, never the
+    /// shipped one; a dismissed arrival was never a membership; a note put
+    /// back from the Trash is no longer deleted. RED ON OLD by construction
+    /// (the read did not exist: the tour's mend could not tell a deletion
+    /// from a rename or a release).
+    @Test func deletionEvidenceNamesOnlyNotesDeletedWhileTheBookHeldThem() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "the prince", kind: .book)
+            func member(_ title: String) throws -> String {
+                let note = try ops.createPost(title: title)
+                try ops.addPostToReading(note.id, to: book.id)
+                return note.id
+            }
+            func evidence() throws -> Set<String> {
+                try db.read { try Queries.deletedMemberTitles($0, readingID: book.id) }
+            }
+            let deleted = try member("XVII")
+            let released = try member("XVIII")
+            let releasedThenDeleted = try member("XIX")
+            let renamedThenDeleted = try member("XX")
+            let putBack = try member("XXI")
+            _ = try member("XXII")   // stands
+
+            try ops.deleteContainer(deleted)
+            _ = try ops.removePostFromReading(released, from: book.id)
+            _ = try ops.removePostFromReading(releasedThenDeleted, from: book.id)
+            try ops.deleteContainer(releasedThenDeleted)
+            try ops.renameContainer(renamedThenDeleted, title: "her own title")
+            try ops.deleteContainer(renamedThenDeleted)
+            try ops.deleteContainer(putBack)
+            try ops.restoreContainer(putBack)
+
+            #expect(try evidence() == ["XVII", "XIX", "her own title"],
+                    "deleted (directly, or after a release) only; never a release, never a shipped title she renamed away")
+            // Another book's deletions are not this book's evidence.
+            let other = try ops.createReading(name: "other", kind: .book)
+            let elsewhere = try ops.createPost(title: "XXIII")
+            try ops.addPostToReading(elsewhere.id, to: other.id)
+            try ops.deleteContainer(elsewhere.id)
+            #expect(try evidence().contains("XXIII") == false)
+        }
+    }
+
     @Test func aNotesFactsCountItsLiveTagsAndItsBookMembershipsOnly() throws {
         try withOperations { ops, db in
             let note = try ops.createPost(title: "mine")
