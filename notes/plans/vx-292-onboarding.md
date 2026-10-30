@@ -375,7 +375,7 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 | 1 The tutorial wins, as a reducer rule (mode corrections on arrival; `TourWalkTests` hostile cases; the engine's door; Mac pins) | DONE (5895b589a) — core 34/34 at the piece; **red-on-old WATCHED headlessly** (`Tour.drive` returning at its top: exactly the 6 behaviour pins red, 26 issues; the table pin and `theDesignedRoadDrivesNothing` green on both sides by design; `aModeSheChoosesOnTheSameNoteIsNeverOverruled` green on both sides — it guards against an over-eager drive); restored, clean. Mac RUN and the mounted pin's watch PENDING the stage window. |
 | 2 Scroll-into-view for rung rows (step 3's XVII) | DONE (e0d4c50c1) to the architect's A-292-1..3 — core 36/36 at the piece; **red-on-old WATCHED headlessly** (`Tour.arrivalReveal` → nil: exactly the 2 reveal pins red, 6 issues, the other 34 green); restored, clean. Mac RUN, the mounted pins' watch and the A-292-2 parity run PENDING the stage window. |
 | 3 The missing-book restore at tour start, + the R-292-17 amendment (broken props) | DONE (59f8a937a; amended d370fd28b) — core 42/42 (TourWalkTests + TourQueriesTests); **R-292-17's read red-on-old WATCHED headlessly** (the fallback block disabled: exactly the 2 new query pins red, 5 issues; the 4 old green); restored, clean. Mac RUN and watch PENDING the stage window. PROVISIONAL P-292-7 (amended by R-292-17). |
-| 4 Record close | DONE (this commit) — READY-FOR-STAGE (the U2 SELF-ASSESSMENT below). No revert in flight. |
+| 4 Record close | DONE (ca99bf3e6) — READY-FOR-STAGE (the U2 SELF-ASSESSMENT below). No revert in flight. |
 
 ### Piece 1 — the settled design (trace first)
 
