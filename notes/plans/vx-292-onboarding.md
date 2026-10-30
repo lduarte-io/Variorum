@@ -201,3 +201,18 @@ cd <home>/dev/variorum-vx-292/App/Variorum && xcodebuild -scheme Variorum -desti
 ```
 
 Expected: TourScriptTests [8] · TourEngineTests [5] · TourEntryTests [1] · TourEndCardTests [1] · CaptureTourFocusTests [1] · TutorialBooksLessonTests [13] · TutorialBooksRitualTests [5] · TutorialCurrencyTests [13] · HelpMenuNamingTests [4] · PrinceSeedTests [12] · the eleven `TutorialWalkTests.swift` types [10 · 10 · 2 · 5 · 7 · 7 · 9 · 2 · 13 · 6 · 10 = 81] — "Test run with 144 tests … passed". The touched pins are TourScriptTests, TourEntryTests, CaptureTourFocusTests, TutorialBooksLessonTests, TutorialBooksRitualTests, TutorialCurrencyTests, HelpMenuNamingTests; the rest are regression riders for the files those pins sit beside (the tour engine, the Prince's constant, every lesson's acts). `TourEntryTests` and `CaptureTourFocusTests` drive a real window (pointer-free) and read the dev app's real `bookcase.collapsed` default (restored as found) — an idle machine, as every app-suite run. The tree has built for testing at `515bb2b40` (later commits are this file only), so `test-without-building` with the same arguments is equivalent.
+
+## U-THEME RECORD
+
+**NOT DONE (first line, kept current):** the unit has just opened — no piece is built yet; no `xcodebuild test` run (stage-window only), no walk, no GUI, no QUESTIONS.md entry (the shared ledger is the merging session's — this unit's PROVISIONALs are listed here for the orchestrator to carry).
+
+Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-292`, branch `vx-292-onboarding` (on top of U1's close, `8a1742d14`), the Pro. Scope: the four pieces of the U-THEME BRIEF (R-292-14, VX-710); zero `Sources/VariorumCore/Sync/`, zero editor seam, zero schema (`theme_palette` is a synced setting VALUE — a new enum token, no DDL, no SyncSpec §12 event).
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 1 The preset: `ThemePalette.seaglass`, derived from #C2DDD3 through the one rule (+ `PaletteDerivationTests`) | NOT STARTED — settled design: ONE seed (the icon's own background fill, `AppIcon.icon/icon.json` = #C2DDD3), the BOLD depth (PROVISIONAL P-292-4 below — the soft depth lands within 1.011:1 of Mint's room), label "Sea glass" |
+| 2 The default flip — a read-time default, never a migration (+ the core pins) | NOT STARTED — settled design: `ThemeSettings.unsetStorePalette = .seaglass`, applied in `Queries.themeSettings` only (the 13s-b Study-flip shape); the storeless placeholder stays `.default`; an unrecognized stored value keeps reading `.default` (today's fallback, the brief's letter) |
+| 3 The Settings face: the strip, the label that stops being true, the search blurb's count (+ the face pins) | NOT STARTED |
+| 4 Record close: self-assessment, stage commands, headless evidence | NOT STARTED |
