@@ -281,8 +281,9 @@ struct TourOfferCard: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// The small V (R-13s-24/25 — the faithful two-tone edition on its tile,
-    /// the Dock icon's own proportions; 13s-b U1a piece 4's asset).
+    /// The small V — the app's one mark, the asset About draws too
+    /// (`TourOfferCopy.markAssetName`; `AppMarkTests` holds the two
+    /// placements to one asset).
     private var mark: some View {
         Image(TourOfferCopy.markAssetName)
             .resizable()
