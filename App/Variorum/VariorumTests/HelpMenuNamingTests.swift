@@ -95,12 +95,23 @@ struct HelpMenuNamingTests {
         #expect(!(try source("Registry/CapabilityRegistry.swift")).contains("\"Restore Tutorial"))
     }
 
-    /// A-439-9's boundary, stated: the guide's own lessons still say the old
+    /// A-439-9's boundary, stated: the guide's own lessons still said the old
     /// door name (three lines, flagged for her — a re-seed is hers to order).
     /// When she rules the content edit, this pin flips with it.
+    /// **VX-105 — FLIPPED FOR ONE LINE** (R-105-5 gave the first chapter's
+    /// re-wording to this effort; the VX-105/VX-292 boundary ruling 1: "DERIVE
+    /// the door name from the menu door's constant"): the "start here" lesson
+    /// names the door by the registry's own verb, so it can never go stale
+    /// again. The other two lines stand as seeded — the parallel VX-292
+    /// effort's to fix (this count follows when it lands). RED ON OLD: three.
     @Test func theGuidesSeededContentIsNotReworded() throws {
         let seeder = try source("Features/Tutorial/TutorialSeeder.swift")
-        #expect(seeder.components(separatedBy: "Restore Tutorial\\u{2026}").count - 1 == 3,
-                "the three lesson lines stand as seeded (morning bundle 3)")
+        #expect(seeder.components(separatedBy: "Restore Tutorial\\u{2026}").count - 1 == 2,
+                "two lesson lines stand as seeded (VX-292's); the start here lesson's left with VX-105")
+        let startHere = try #require(seeder.components(separatedBy: "lesson(welcome, \"start here\", [").dropFirst().first?
+            .components(separatedBy: "lesson(welcome, \"getting around\"").first)
+        #expect(startHere.contains("CapabilityRegistry.capability(.restoreTutorial).verb"),
+                "the start here lesson reads the door's own verb")
+        #expect(!startHere.contains("Restore Tutorial"), "and spells no retired name")
     }
 }

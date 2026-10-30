@@ -150,7 +150,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   `TutorialSeeder.swift` footprint is now exactly: the "start here" lesson (piece 5) + the key lesson's ONE reference
   line (`ReadmeSeeder.startHerePassages` → `startHerePassages`, forced by the re-home — the readme no longer owns them)
   and the two comment lines above it. Nothing else in the seeder moves.
-- **Piece 4 — the pins:** DONE (this commit — hash at the next). WRITTEN and COMPILING (`build-for-testing` EXIT 0);
+- **Piece 4 — the pins:** DONE (`e5ef30a7c`). WRITTEN and COMPILING (`build-for-testing` EXIT 0);
   RUN status PENDING the stage window. Per pin, with its red-on-old:
 
   | Pin (suite TYPE · test) | Asserts | Red on old |
@@ -167,11 +167,80 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
 
   The "nothing seeds after the readme" pin STAYS (inside (b)+(c), re-keyed from `created_at` — which now carries her
   October moment — to the readme's first block's mint).
-- **Piece 5 — the first-chapter interweave (R-105-5):** NOT-STARTED.
+- **Piece 5 — the first-chapter interweave (R-105-5 · R-105-7 · boundary ruling 1):** DONE (this commit — hash at
+  the next). **GUIDE CONTENT CHANGED — the "start here" lesson (chapter "welcome", the guide's first lesson): the
+  closeout must RE-SEED her real store's guide via the product door behind the A1 rail.** `TutorialSeeder.swift`
+  footprint: that lesson only (plus the key lesson's one reference line, see the re-home). The lesson, 13 blocks:
+  1. her welcome — verbatim from her draft;
+  2. the beliefs block — its leading "Welcome. " dropped, the rest byte-identical (script-checked);
+  3. "This book is Variorum teaching itself with itself. …" — byte-identical (script-checked);
+  4. the safety promise — **no longer byte-identical (boundary ruling 1):** "Help ▸ " + `CapabilityRegistry.capability(
+     .restoreTutorial).verb` + " replaces the whole book with a pristine copy whenever you want one. Nothing you do
+     here can touch your own writing." — renders "Help ▸ Restore Field Guide… replaces …", the door's own constant,
+     never a retyped label (`HelpMenuNamingTests`' stale-name count flips 3 → 2 with it; the other two lines are
+     vx-292's);
+  5. her take-icon block — verbatim; TAKES (real, fan order original · 1 · 2): "You found it! :D" (verbatim) · "Now
+     click on Open Takes mode in the top bar of this modal." (see F-2);
+  6. her Write/Takes block — verbatim;
+  7. her "so what?" block — verbatim; TAKES: her shortcuts take, its chords in the guide's idiom (`⌘2`, `⌘/` for her
+     "Command 2", "Command /"; her em dash is hers) · her style take, verbatim;
+  8. "Two companions to know from the start. …" — byte-identical (script-checked);
+  9–12. **the four Start Here passages (R-105-7)** — `+ startHerePassages +`, the ONE constant, byte-identical by
+     construction; placed where the architect put them (after the companions, before the closer — no shift: the
+     companions end on ⌘/'s plain-language helper, the passages are self-introducing, and the closer then hands her
+     the chapter list);
+  13. the closer — the brief's text ("…listed on the left, each an interactive guide. …").
+
+  Her takes are minted second-take-first because `branchVariant` seats each branch right after its parent (the old
+  readme seeder's own finding); pinned as original · 1 · 2. A script compared every woven block against the old lesson
+  and her reference draft (all as stated above). Pins: `TutorialCurrencyTests` ·
+  `theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages` (all 13 blocks, both fans, the passages' order, the
+  door verb from the registry, the chords from `PostMode` / the helper's registry shortcut, the key lesson still
+  leading with the four; RED ON OLD by construction) and `theStartHereLessonsChromeWordsAreTheBuildsOwn` (the H
+  pattern: each chrome word read from its own source home — a currency net, green on both sides by design);
+  `HelpMenuNamingTests` · `theGuidesSeededContentIsNotReworded` (flipped 3 → 2; the lesson reads the verb; RED ON OLD:
+  three). Nothing pinned "no takes in the welcome chapter" (it already held "three ways of working"'s fan).
 - **Piece 6 — this record's closing sections:** IN-PROGRESS (LIVE STATUS kept from the first commit).
 
 Compile evidence so far: `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` (compile-only —
 app AND test target, nothing run) EXIT 0 after piece 1 and after piece 2.
+
+### BUILD-VERIFY resolutions (piece 5 — her draft's chrome words against the build)
+
+- **Block 5 / take 2 — "Open Takes mode in the top bar of this modal":** REAL, kept. Write's take icon is the ⑂n
+  corner badge at the block's top-right (`EditorView.swift` `BadgeOverlayController` — `x: proseRight + 6`, "the
+  prose COLUMN's edge"), whose click (`model.openFan`) presents `WriteTakesPanel` in a SHEET (a modal); the panel's
+  header row carries `Button("Open Takes mode")` (`WriteTakesPanel.swift`, help "The full board — every block's takes
+  at once (⌘2)"). Her sentence stands word for word.
+- **Block 5 — "The icon to the right of this block is the take icon":** REAL (the ⑂ badge, right of the block).
+- **Block 6 — “expand all” at the top of Takes:** REAL, kept. `TakesBoardView.headerControls`:
+  `Button(tokens.chromeLabel("expand all"))`, offered in every fan style (`offersExpandAll`, VX-577).
+- **Block 7 / take 1 — "Command 2" / "Command /":** ⌘2 IS Takes (`PostMode` order Write · Takes · …, ⌘1–⌘7); ⌘/ IS
+  Shortcuts & Dictionary (`.helper`'s `shortcutLabel`). Spelled in the guide's idiom (`\u{2318}2`, `\u{2318}/`).
+  "expand or collapse any take block with the button to the right of it" — REAL (Takes' per-block ⑂ badge at the
+  block's top-right, `fanBadge`); "the button at the top" — expand all / close all.
+- **Block 7 / take 2 — “style” at the top bar, four ways, "margin grid":** REAL, kept. Takes' header menu reads
+  `style: <name>` with exactly four options (Stack · Carousel · Margin grid · Slot split; `FanStyle.allCases.count ==
+  4`); "margin grid" is a real style's name.
+- **Block 4 — the Help door:** resolved by boundary ruling 1 (the registry's verb, "Restore Field Guide…").
+
+### Flags (piece 5 — adjustments beyond the BUILD-VERIFY chrome words)
+
+- **F-2 — one period added:** her draft's take "Now click on Open Takes mode in the top bar of this modal" has no
+  terminal period; the seeded take ends with one (R-105-5's freedom: "make sure that the voice sounds good"). One-byte
+  revert if unwanted: drop the "." in `TutorialSeeder.swift`'s take and in the pin.
+- **F-1 (superseded):** block 4's stale door name — first noticed here, then RULED by boundary ruling 1 (no longer a
+  flag).
+- **Her draft's own oddity, left as hers:** block 7 says the best use cases "are in the takes of this paragraph", while
+  its two takes teach expand/collapse and styles — her text, not chrome; R-105-5's freedom could reword it, but no
+  rewording was needed for the chrome to be true, so it stands.
+
+### Observations for the architect (not built)
+
+- **O-1 — the tour's end card says "readme, a short welcome note, is waiting in your Library."**
+  (`TourScript.endAside`, approved copy; boundary ruling 4 keeps the title, which this effort did). Her readme is
+  ~1,800 words in 17 blocks — "a short welcome note" may read as untrue now. Tour copy is vx-292's / hers; nothing
+  changed here.
 
 ### Left for vx-292 (boundary ruling 2 — listed, NOT touched)
 

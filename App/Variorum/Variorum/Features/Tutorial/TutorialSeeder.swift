@@ -615,13 +615,31 @@ enum TutorialSeeder {
 
         // ————————————————————————————— welcome —————————————————————————————
 
-        _ = try lesson(welcome, "start here", [
+        // VX-105 — R-105-5, her word: "interweave the relevant parts of
+        // 'Lillian's Start Here' that are important / good into the first
+        // chapter of the field guide. if the first chapter of the field guide
+        // has stuff that 'Lillian's Start Here' is missing, then go ahead and
+        // keep the field guide portion … you have a lot of freedom to edit that
+        // as you see fit". Her draft's welcome and its takes moment (her words,
+        // with her alternates as REAL takes) woven into this lesson's vision,
+        // safety, companions and closer; her draft's unfinished second half
+        // stays out. R-105-7, her word: "…the four Castle passages are still in
+        // the first thing that someone reads" — they follow the companions,
+        // read from the ONE constant (`startHerePassages`), byte-identical to
+        // the protection chapter's lead, which is unchanged (they read twice in
+        // the guide, her accepted state). Block 4 names the Help door by the
+        // registry's own verb (the VX-105/VX-292 boundary ruling 1 — never a
+        // retyped label). Her draft's chrome words were checked against the
+        // build (the U1 RECORD's BUILD-VERIFY list).
+        let startHere = try lesson(welcome, "start here", [
+            "Welcome to Variorum! I'm Lillian, the developer behind this app, and "
+            + "I'm excited that you've downloaded it.",
+
             // 13s-b triage landing (R-13s-30 — her “I'll add some vision upfront
-            // too”): the guide opens on what the app believes, in the product's own
-            // canon words (choices kept open, nothing destroyed, a family tree not a
-            // court record) — a NEW first block; the four that follow are the old
-            // lesson, re-voiced.
-            "Welcome. Variorum is built on a few beliefs about writing. A "
+            // too”): what the app believes, in the product's own canon words
+            // (choices kept open, nothing destroyed, a family tree not a court
+            // record). VX-105: its "Welcome." went to her welcome above.
+            "Variorum is built on a few beliefs about writing. A "
             + "paragraph should be able to hold more than one version of itself, "
             + "side by side, for as long as you want. Nothing you write should "
             + "ever be destroyed: deleting, dividing and merging are all moves "
@@ -637,20 +655,58 @@ enum TutorialSeeder {
             + "own text.",
 
             "Everything in this book is safe to play with. Cut it up, rewrite "
-            + "it, delete it. Help \u{25B8} Restore Tutorial\u{2026} replaces the "
-            + "whole book with a pristine copy whenever you want one. Nothing you "
-            + "do here can touch your own writing.",
+            + "it, delete it. Help \u{25B8} "
+            + CapabilityRegistry.capability(.restoreTutorial).verb
+            + " replaces the whole book with a pristine copy whenever you want "
+            + "one. Nothing you do here can touch your own writing.",
+
+            // Her take-icon block (its two takes are minted below).
+            "I built Variorum with a simple goal: to be able to create multiple "
+            + "different versions of a block of text. I call these versions "
+            + "takes, borrowing from the film world. The icon to the right of "
+            + "this block is the take icon - click on it.",
+
+            "While Write is meant to behave like a simple and elegant editor, "
+            + "Takes is where complexity thrives. Click on \u{201C}expand "
+            + "all\u{201D} at the top of Takes.",
+
+            // Her "so what?" block (its two takes are minted below).
+            "This is the point at which you might be thinking \"cool, but so "
+            + "what?\", unless you're a writer that understands the pain of "
+            + "reworking a particular paragraph to the point of madness. If that "
+            + "isn't you, some of the best use cases I've found for it are in the "
+            + "takes of this paragraph.",
 
             "Two companions to know from the start. When the app answers you (a "
             + "result, a refusal, an undo report), the answer appears briefly at "
             + "the bottom of the window. And \u{2318}/ opens the Shortcuts & "
             + "Dictionary helper: every key the app listens for, and every word "
             + "it uses, in plain language.",
-
-            "The chapters of this book are listed on the left. Read in order, "
-            + "or jump to what itches. When something in a lesson doesn't behave "
-            + "as the words promise, that is a bug in the app, not in you.",
+        ] + startHerePassages + [
+            "The chapters of this book are listed on the left, each an "
+            + "interactive guide. Read in order, or jump to what itches. When "
+            + "something in a lesson doesn't behave as the words promise, that "
+            + "is a bug in the app, not in you.",
         ])
+        // Her alternates, as REAL takes (her draft's "--- Alternates ---"
+        // sections). `branchVariant` seats a branch right AFTER the take it
+        // branched from, so each block's SECOND take is minted first: the fan
+        // reads original, take 1, take 2 — her draft's order.
+        try take(on: startHere.blocks[4],
+                 "Now click on Open Takes mode in the top bar of this modal.")
+        try take(on: startHere.blocks[4], "You found it! :D")
+        try take(on: startHere.blocks[6],
+                 "There are four different ways to see your takes and work with "
+                 + "them. Test each of them out now by changing \u{201C}style\u{201D} "
+                 + "at the top bar of this note. While each is useful for "
+                 + "something different, I\u{2019}m particularly fond of margin "
+                 + "grid for quick notes.")
+        try take(on: startHere.blocks[6],
+                 "This is where things get really fun! You can expand or collapse "
+                 + "any take block with the button to the right of it, or use the "
+                 + "button at the top. Navigation is fully supported by keyboard "
+                 + "shortcuts\u{2014}you can also get to Takes with \u{2318}2. "
+                 + "Check out all the shortcuts at \u{2318}/.")
 
         _ = try lesson(welcome, "getting around", [
             // 13i-d U7 (F-U1-5): the sidebar area is the BOOKCASE (§7).
