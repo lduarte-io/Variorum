@@ -808,6 +808,41 @@ final class CommandRouter {
     /// mounted (`RestoreLanding` carries the whole contract).
     var pendingRestoreLanding: RestoreLanding?
 
+    // MARK: - VX-292 U3 — what the onboarding tour reads and asks
+
+    /// **What the mounted Lenses board shows**: its note and how many
+    /// columns stand there (the onboarding tour's step 9 waits for a second
+    /// column beside the note's own). Written by the board's model as its
+    /// columns change, cleared when the board leaves; a fact, never a door.
+    struct LensBoardReport: Equatable {
+        let postID: String
+        let columns: Int
+    }
+
+    private(set) var lensBoard: LensBoardReport?
+
+    /// The Lenses board for `postID` says how many columns it shows (nil: the
+    /// board left — cleared only if the standing report is that note's, so a
+    /// board arriving for another note is never wiped by one leaving).
+    func reportLensBoard(postID: String, columns: Int?) {
+        if let columns {
+            let report = LensBoardReport(postID: postID, columns: columns)
+            if lensBoard != report { lensBoard = report }
+        } else if lensBoard?.postID == postID {
+            lensBoard = nil
+        }
+    }
+
+    /// **Settings, asked to open on its General pane** (the tour's Settings
+    /// stop — VX-292 U3, R-292-8). A counter, adopted once per window — the
+    /// ⌥⌘, MCP request's own shape (`MCPDoor.settingsRequest`): a Settings
+    /// window already up on another pane turns to General; a fresh one opens
+    /// there anyway.
+    private(set) var generalSettingsRequest = 0
+    @ObservationIgnored var generalSettingsRequestAdopted = 0
+
+    func requestGeneralSettings() { generalSettingsRequest += 1 }
+
     /// **VX-440 batch 1 — her own doors onto the Compare landing** (R-440-1:
     /// a Versions row's "Compare with now", the one-press "Compare with Latest
     /// Version"): the road `MCPNavigator`'s compare target takes once its note

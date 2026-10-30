@@ -51,7 +51,10 @@ struct TourOverlay: View {
             selection: sources.selection(), detail: sources.noteDetail(),
             caret: sources.caret(), bookNoteLive: sources.bookNoteLive(),
             bookNoteSelected: sources.bookNoteSelected(),
-            note: engine.noteFacts, isStarred: sources.isStarred)
+            note: engine.noteFacts, isStarred: sources.isStarred,
+            // VX-292 U3: steps 7, 9 and 11's facts.
+            bookMode: sources.bookMode(), lensBoard: sources.lensBoard(),
+            block: engine.flipFacts)
     }
 
     /// The ⑂ badge the current step points at, if any (by its block).
@@ -98,6 +101,8 @@ struct TourOverlay: View {
         }
         .onDisappear { engine.spotlight.panelCard = nil }
         .task(id: engine.noteOfInterest) { await engine.watchNoteFacts() }
+        // VX-292 U3: step 7's block, watched while the step asks.
+        .task(id: engine.flipInterestKey) { await engine.watchFlipFacts() }
         .task(id: badgeBlockID) { await followBadge() }
         #if DEBUG
         .onAppear { TourOracle.overlay = engine }
@@ -144,7 +149,8 @@ struct TourOverlay: View {
     @ViewBuilder
     private func coachCard(width: CGFloat?) -> some View {
         let step = engine.state.step
-        if let words = TourScript.card(step, takeCount: takeCount) {
+        if let words = TourScript.card(
+            step, takeCount: takeCount, namedChapter: engine.firstStoryIsNamed) {
             TourCoachCard(
                 tokens: tokens, scheme: scheme,
                 label: TourScript.label(Tour.position(of: step)),

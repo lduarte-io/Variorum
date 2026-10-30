@@ -230,6 +230,22 @@ struct AppSettingsView: View {
         // on a window already up (the request changing).
         .onAppear { adoptProtectionRequest() }
         .onChange(of: protection?.settingsRequest) { _, _ in adoptProtectionRequest() }
+        // VX-292 U3 (R-292-8) — the tour's Settings stop: the pane OPENS at
+        // General, on a fresh window and on one already up.
+        .onAppear { adoptGeneralRequest() }
+        .onChange(of: session.commandRouter.generalSettingsRequest) { _, _ in adoptGeneralRequest() }
+    }
+
+    /// The tour's request, adopted once each (the router's counter and this
+    /// window's "seen" mark — `CommandRouter.generalSettingsRequest`).
+    private func adoptGeneralRequest() {
+        let router = session.commandRouter
+        guard Self.adopts(
+            request: router.generalSettingsRequest, adopted: router.generalSettingsRequestAdopted)
+        else { return }
+        router.generalSettingsRequestAdopted = router.generalSettingsRequest
+        query = ""
+        pane = .general
     }
 
     /// VX-206 — the ceremony's request, adopted once each (the controller's

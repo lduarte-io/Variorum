@@ -2449,9 +2449,10 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "", availability: always),
 
         // 13s-b U1a (R-13s-2/6/13): the tour's one entry. Its verb IS the
-        // Help menu's name for it (`TourOfferCopy.menuTitle` — the help-road
-        // sentence reads the same constant, so the three can never drift).
-        // Doors: the offer line's "yes" (`.surface`) and Help ▸ Take the Tour
+        // Help menu's name for it (`TourOfferCopy.menuTitle`; the offer
+        // card's help-road sentence reads THIS row's verb, so the three can
+        // never drift). Doors: the offer card's "yes" (`.surface` — VX-292
+        // U4's band card, the quiet line before it) and Help ▸ Take the Tour
         // (`.menuBar`, piece 5) — both run `RootView.startTour()`, which is
         // the U2 engine's real entry (step 1, no resume — Q12). No palette
         // row: the palette's acts are `ShellActions`', and the tour's entry

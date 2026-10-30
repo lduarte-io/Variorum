@@ -7,7 +7,7 @@
 //  is the walk; what a pin can hold is the part taste cannot check by eye —
 //  that every preset AND every hex she might type produces chrome that
 //  READS (F-8's contrast floor), that R51 survives a palette, that the rule
-//  is one rule over a table rather than fifteen special cases, and that the
+//  is one rule over a table rather than sixteen special cases, and that the
 //  shipped numbers are the ones recorded in the batch's record.
 //
 
@@ -28,7 +28,7 @@ struct PaletteDerivationTests {
 
     // MARK: F-8 — the contrast floor
 
-    /// **THE FLOOR, FOR ALL FIFTEEN, BOTH APPEARANCES.** Her R-Q13 asks for
+    /// **THE FLOOR, FOR EVERY PRESET, BOTH APPEARANCES.** Her R-Q13 asks for
     /// an accent *"deep and saturated enough to read as ink on the room"*.
     /// The accent is chrome ink on the ROOM ("this note", "commit ⌘S"), it
     /// is selected-row ink on the WASH, and it labels take cards on the
@@ -112,25 +112,95 @@ struct PaletteDerivationTests {
 
     // MARK: The rule is a rule
 
-    /// The fifteen presets are exactly the fifteen named palettes — no
-    /// sixteenth hiding in the table, and no named palette without one.
+    /// The sixteen presets are exactly the sixteen named palettes — no
+    /// seventeenth hiding in the table, and no named palette without one.
     /// (`default` means no palette; `custom` reads her hex.)
-    @Test func theTableNamesExactlyTheFifteenBuilds() {
+    ///
+    /// *(VX-710: fifteen → sixteen — the sea-glass joined. JUSTIFIED EDIT:
+    /// the batches below are unchanged; the sea-glass is pinned apart, by
+    /// the shape no batch has.)*
+    @Test func theTableNamesExactlyTheSixteenBuilds() {
         let named = Set(ThemePalette.allCases).subtracting([.default, .custom])
         #expect(Set(PalettePreset.all.keys) == named)
-        #expect(named.count == 15)
+        #expect(named.count == 16)
         // Her three batches, by the shape that distinguishes them: a pastel
-        // has ONE seed; a two-tone build has two at the soft level; a bold
-        // build has two at the bold level.
-        let pastels = PalettePreset.all.values.filter { $0.accentSeed == nil }
-        let twoTone = PalettePreset.all.values.filter {
-            $0.accentSeed != nil && $0.intensity == .soft
-        }
-        let bold = PalettePreset.all.values.filter { $0.intensity == .bold }
+        // has ONE seed at the soft level; a two-tone build has two at the
+        // soft level; a bold build has two at the bold level.
+        let batches = PalettePreset.all.filter { $0.key != .seaglass }.values
+        let pastels = batches.filter { $0.accentSeed == nil }
+        let twoTone = batches.filter { $0.accentSeed != nil && $0.intensity == .soft }
+        let bold = batches.filter { $0.intensity == .bold }
         #expect(pastels.count == 4)
+        #expect(pastels.allSatisfy { $0.intensity == .soft })
         #expect(twoTone.count == 6)
         #expect(bold.count == 5)
         #expect(bold.allSatisfy { $0.accentSeed != nil })
+        // VX-710: the sea-glass is ONE seed at the BOLD depth (PROVISIONAL
+        // P-292-4) — its accent is its own hue deepened, like a pastel's.
+        let seaglass = PalettePreset.all[.seaglass]
+        #expect(seaglass?.accentSeed == nil)
+        #expect(seaglass?.intensity == .bold)
+    }
+
+    /// **THE SEA-GLASS IS THE ICON'S OWN COLOUR** (VX-710 — her R-292-14:
+    /// *"the same seaglass color as the icon"*). The seed is read against
+    /// the icon's own definition — `AppIcon.icon/icon.json`'s background
+    /// fill, every appearance — never against a hex retyped here, so a
+    /// recoloured icon turns this red rather than leaving a palette that
+    /// quietly stopped matching it. And the colour is SPELLED ONCE in the
+    /// app's code: the preset table, the token layer's one home for a value.
+    @Test func theSeaGlassIsTheIconsOwnColour() throws {
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+        let iconFile = appRoot.appendingPathComponent("Variorum/AppIcon.icon/icon.json")
+        let json = try #require(
+            try JSONSerialization.jsonObject(with: Data(contentsOf: iconFile)) as? [String: Any])
+        let fills = try #require(json["fill-specializations"] as? [[String: Any]])
+        let colours: [UInt32] = try fills.map { fill in
+            let value = try #require(fill["value"] as? [String: Any])
+            let solid = try #require(value["solid"] as? String)
+            #expect(solid.hasPrefix("srgb:"), "the icon's fill is an sRGB solid: \(solid)")
+            let parts = solid.dropFirst("srgb:".count).split(separator: ",")
+                .compactMap { Double($0) }
+            try #require(parts.count == 4, "r, g, b, a: \(solid)")
+            #expect(parts[3] == 1, "an opaque fill")
+            func byte(_ component: Double) -> UInt32 { UInt32((component * 255).rounded()) }
+            return (byte(parts[0]) << 16) | (byte(parts[1]) << 8) | byte(parts[2])
+        }
+        let icon = try #require(colours.first)
+        #expect(colours.allSatisfy { $0 == icon }, "one colour in every appearance")
+        let seed = try #require(PalettePreset.all[.seaglass]).roomSeed
+        #expect(seed == icon,
+                "the sea-glass seed #\(String(format: "%06X", seed)) is the icon's #\(String(format: "%06X", icon))")
+
+        // Spelled once: every Swift source the apps and the core compile,
+        // code lines only (a comment naming the colour is not a value).
+        let needle = String(format: "%06X", icon)
+        let roots = ["Variorum", "Shared", "VariorumMobile"].map { appRoot.appendingPathComponent($0) }
+            + [appRoot.deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Sources")]
+        var spellings: [String] = []
+        for root in roots {
+            guard let walker = FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: nil) else {
+                Issue.record("root missing: \(root.path)")
+                continue
+            }
+            for case let file as URL in walker where file.pathExtension == "swift" {
+                let source = try String(contentsOf: file, encoding: .utf8)
+                for (index, line) in source.split(separator: "\n", omittingEmptySubsequences: false)
+                    .enumerated() {
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    guard !trimmed.hasPrefix("//"), !trimmed.hasPrefix("*") else { continue }
+                    if line.uppercased().contains(needle) {
+                        spellings.append("\(file.lastPathComponent):\(index + 1)")
+                    }
+                }
+            }
+        }
+        #expect(spellings.count == 1 && spellings.first?.hasPrefix("PaletteDerivation.swift:") == true,
+                "the icon's colour is spelled once, in the preset table: \(spellings)")
     }
 
     /// A pastel's accent is the ROOM's own hue, deepened — her R-Q13's
@@ -216,6 +286,8 @@ struct PaletteDerivationTests {
             (.butterAndCobalt, false, 0xFAF4DB, 0xF3E7BA, 0x1C47BA),
             (.roseAndMoss, false, 0xFADBE1, 0xF3BAC5, 0x3C5D23),
             (.tealAndRust, false, 0xE1F4F2, 0xC3EAE6, 0xAE4028),
+            // VX-710: the sea-glass, one seed at the bold depth (P-292-4).
+            (.seaglass, false, 0xE5F0EC, 0xCBE2D9, 0x3B6A59),
             // DARK (the room is black in every row — R51, pinned above too)
             (.lavender, true, 0x000000, 0x1D113C, 0x9A80DB),
             (.mint, true, 0x000000, 0x163728, 0x8AD1B0),
@@ -232,6 +304,7 @@ struct PaletteDerivationTests {
             (.butterAndCobalt, true, 0x000000, 0x4A3E0D, 0x8EA8EE),
             (.roseAndMoss, true, 0x000000, 0x4A0D19, 0xA3D081),
             (.tealAndRust, true, 0x000000, 0x16403C, 0xE08D7B),
+            (.seaglass, true, 0x000000, 0x1F382F, 0x90C1AF),
         ]
         for (palette, dark, room, wash, accent) in expected {
             let family = PaletteDerivation.derive(PalettePreset.all[palette]!, dark: dark)
@@ -246,13 +319,23 @@ struct PaletteDerivationTests {
     }
 
     /// The FACE's grouping covers every palette exactly once — her three
-    /// batches plus the two that are not builds. A sixteenth preset added
-    /// to the enum without a home in the strip would be invisible in
-    /// Settings; this is what says so.
+    /// batches plus the rows that are not batches. A preset added to the
+    /// enum without a home in the strip would be invisible in Settings; this
+    /// is what says so. *(VX-710: the sea-glass's arrival was this pin's
+    /// job exactly — red on the piece-1 tree, where it had a label and no
+    /// row. JUSTIFIED EDIT below: the Default row now holds the sea-glass,
+    /// and the voice's own colours have the Classic row.)*
     @Test func theSwatchStripShowsEveryPaletteExactlyOnce() {
         let shown = PaletteCopy.Group.allCases.flatMap(\.palettes)
         #expect(Set(shown) == Set(ThemePalette.allCases))
         #expect(shown.count == ThemePalette.allCases.count, "no palette in two groups")
+        #expect(PaletteCopy.Group.shipped.palettes == [.seaglass])
+        // The voice's own colours: a row of their own, titled by their label
+        // (found by content, not by case name, so this file still compiles
+        // against the piece-2 face for the red-on-old watch).
+        let classicRow = PaletteCopy.Group.allCases.first { $0.palettes.contains(.default) }
+        #expect(classicRow?.palettes == [.default])
+        #expect(classicRow?.title == PaletteCopy.label(.default))
         #expect(PaletteCopy.Group.pastels.palettes.count == 4)
         #expect(PaletteCopy.Group.twoTone.palettes.count == 6)
         #expect(PaletteCopy.Group.bold.palettes.count == 5)
@@ -263,6 +346,51 @@ struct PaletteDerivationTests {
             #expect(label != palette.rawValue || palette == .custom || palette == .default,
                     "a build's label is app words, not its stored token")
         }
+    }
+
+    /// **THE WORD "DEFAULT" NAMES WHAT A STORE WITH NO PALETTE WEARS — and
+    /// nothing else** (VX-710: her *"make that the default theme"*). The flip
+    /// moved the unset read to the sea-glass, so the strip's Default row must
+    /// hold it (and nothing else), no palette but it may be labelled
+    /// "Default", and the seedless-custom note — which really does look like
+    /// the voice's own colours — must name THOSE, not "the default". RED on
+    /// the piece-2 tree: the Default row held `.default`, labelled "Default",
+    /// while a store with no palette wore the sea-glass; and the note said
+    /// "looks like the default" over the voice's own colours.
+    @Test func theWordDefaultNamesThePaletteAStoreWithNoPaletteWears() {
+        let unset = Queries.ThemeSettings.unsetStorePalette
+        #expect(PaletteCopy.Group.shipped.title == "Default")
+        #expect(PaletteCopy.Group.shipped.palettes == [unset],
+                "the Default row holds exactly what a store with no palette wears")
+        for palette in ThemePalette.allCases where palette != unset {
+            #expect(!PaletteCopy.label(palette).lowercased().contains("default"),
+                    "\(palette.rawValue) is labelled \(PaletteCopy.label(palette)) — not the default")
+        }
+        for group in PaletteCopy.Group.allCases where group != .shipped {
+            #expect(!group.title.lowercased().contains("default"),
+                    "the \(group.title) row is not the default's")
+        }
+        // A seedless custom resolves to no palette — the voice's own
+        // colours — so its note names that palette, by its label.
+        #expect(PalettePreset.resolved(.custom, tint: .none) == nil)
+        #expect(PaletteCopy.needsASeedNote.contains(PaletteCopy.label(.default)))
+        #expect(!PaletteCopy.needsASeedNote.lowercased().contains("default"))
+    }
+
+    /// The Settings search's palette blurb COUNTS the palettes, so the count
+    /// must be the strip's: every palette but her own hex (which the blurb
+    /// names apart, "plus your own hex"). Spelled the way the blurb spells
+    /// it, so a seventeenth-to-eighteenth change cannot leave it stale. RED
+    /// on the piece-2 tree ("Sixteen" beside seventeen palettes).
+    @Test func theSearchBlurbCountsThePalettesTheStripShows() throws {
+        let row = try #require(SettingsCatalog.paneRows.first { $0.id == "palette" })
+        let palettes = ThemePalette.allCases.filter { $0 != .custom }.count
+        let speller = NumberFormatter()
+        speller.locale = Locale(identifier: "en_US")
+        speller.numberStyle = .spellOut
+        let word = try #require(speller.string(from: NSNumber(value: palettes)))
+        #expect(row.blurb.lowercased().hasPrefix("\(word) palettes plus your own hex"),
+                "the blurb says \(row.blurb.prefix(30))… over \(palettes) palettes")
     }
 
     /// **The dirty-field rule** (18g ladder R1-2): what the row consults

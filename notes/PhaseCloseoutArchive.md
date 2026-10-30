@@ -1419,3 +1419,26 @@ QUESTIONS #251, MobileSoul PL-65. Born: VX-696..701 (the walk's five + the focus
 this close — VX-677 merges last of the three and mints the one release (her word), the Prince riding it.
 
 - **VX-105 — her finished readme seeds (closed 2026-10-30, overnight at her word; the record `notes/plans/fixes/vx-105-readme-letter.md` + ladders round1/2/3; PR #209, merge commit):** her letter (readme+letter converged, 17 blocks, trimmed at R-105-6, interior bytes manifest-exact) replaces the 13s placeholder whole — `readme`, standalone, born starred, created Oct 29 2026 4:44 am local, edited-at-birth, seeded last (R-13s-29 kept); Help ▸ Restore “readme” (CapabilityID.restoreReadme, one mint body, refuses-and-opens on live, mints past a delete); "Restore the Sample Library" retitled Restore “the adventures of sherlock holmes” (R-105-4 — per-book doors complete); the guide's first lesson weaves her welcome + takes play and TEACHES the book→note move first (R-105-5/-7/-10), the Castle passages before the closer and still opening the protection chapter. Ladder 3 rounds (1 MAJOR → R-105-10; 1 BLOCKER — the version fence's corpus walk, rewritten candidate-driven, plan-pinned; r3 clean at cap, line-by-line checked). Finals: 125/12 + 5,739/1,000 green modulo VX-714 (solo-proven flake) at 2a42ea7de; the reset walkthrough 4/4 PASS, dev slot md5-identical, prefs 412=412, the VX-697 hold marker carried whole. Canon: the SurfaceContracts seed-set line; AppSpecRecord 2026-10-30; QUESTIONS #253/#254. Born VX-711..715; VX-635 closed superseded; VX-712/713 absorbed by VX-292. MOBILE PARITY: nothing mobile-visible. The ONE folded release (with vx-292) runs at her overnight word — vx-292 merges later and runs it, this effort's four public bullets in its record.
+
+
+## Rolled 2026-10-30 (at the VX-292 closeout)
+
+**→ VX-677 CLOSED 2026-10-29 — RUN: EDITOR, PANES & THE AI DOOR (the record
+`notes/plans/fixes/vx-677-editor-panes-ai-door.md`; the ladder files `vx-677-ladder-round1/2.md`; PR #207, merge
+SHA in memory + the ticket).** Twelve members in five batches under the architect shape: the editor seam's two
+Highs (the ring-end on every outside-change road per her ruling — one pure rule at the authority's settle seam,
+sweep-verified S1–S21; editor-owned undo), the navigation-carry family of five (Pages arrivals, block-precise
+Outline landings row-first, the Scroll carry, the stale anchor, floor-settling landings), the AI door pair
+(show_in_app as an offer under the one global dial, background always asks — her amendment; the version target;
+plus the ladder's gone-check on every press road, fixing VX-693), the resting faces (the ⌘/ pane rebuilt on the
+registry; unnamed commits resting on their first words), and VX-668 traced LIVE to a measured TK2 fact
+(frame-constant edits never fire `viewWillDraw`; one guarded display pass; the class → VX-702). One Fable ladder,
+closed at round 2 of 3 with no new findings; claim C all fifteen suite rows exact (the VX-668 red-on-old observed;
+the 190-test #204 overlap clean) and every walk row works as ruled (the three live sheet presses all landed).
+The fences held whole-branch (zero Sync/, Server/, Protection/, Shared/, mobile; the Sources/ diff is the wire's
+own member work). Canon: MCPSpec + SurfaceContracts + TEXTKIT2_NOTES lines as drafted; bundle QUESTIONS #252;
+canon-size 126,641/150,000. Born: VX-683/686/687/688/692(High)/694/702/705/706/707 (VX-693 fixed in-run);
+VX-661 grown (the encoder class now fires on green/single-test/post-product runs — priority raise recommended,
+her call). Released as **0.10.6** at her word right after the merge (notes = this run's members; the site
+published and verified) — the second of her two-release amendment (vx-669 shipped 0.10.5 hours earlier). Next:
+her #252 pass; the orientation (hers); VX-692/VX-661 at her priority word.

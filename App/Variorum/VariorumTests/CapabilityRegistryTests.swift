@@ -642,8 +642,10 @@ struct CapabilityRegistryTests {
             .union(DiagnosticsPane.surfaceCapabilities)
             // 13s-b U1a (A JUSTIFIED EDIT, the same class — a new renderer is
             // a new line): the Bookcase's first-open TOUR OFFER renders the
-            // tour's inline door, its "yes" (`.takeTour`).
-            .union(TourOfferLine.surfaceCapabilities)
+            // tour's inline door, its "yes" (`.takeTour`). VX-292 U4 (A
+            // JUSTIFIED EDIT — the same renderer, renamed): the quiet line
+            // became the band's CARD; it renders the same one act.
+            .union(TourOfferCard.surfaceCapabilities)
             // 13n-a (A JUSTIFIED EDIT, the same class — a new renderer is a
             // new line): the BOOKCASE's file drop renders the import door
             // (`.importFiles` — a folder becomes a book).

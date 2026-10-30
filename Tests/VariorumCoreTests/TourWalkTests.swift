@@ -76,6 +76,38 @@ struct TourWalkTests {
             note: Tour.NoteFacts(noteID: id, starred: starred, tagCount: tags, bookCount: books))
     }
 
+    // VX-292 U3 — the flip's block: Marriott's English (chosen), her own take
+    // from step 5, and the Italian the card names.
+    static let english = "take-marriott"
+    static let hers = "take-hers"
+    static let italian = "take-italian"
+
+    /// Step 7's block as the store says it, in Takes.
+    static func flip(
+        _ chosen: String, block: String = middle, note: String = scandal,
+        takes: [String] = [english, hers, italian], named: String? = italian
+    ) -> Tour.Facts {
+        Tour.Facts(
+            place: .note(note), noteMode: .takes,
+            block: Tour.BlockFacts(
+                noteID: note, blockID: block, chosenTakeID: chosen, takeIDs: takes,
+                namedTakeID: named))
+    }
+
+    /// The note on its Lenses board, `columns` wide.
+    static func lenses(_ columns: Int?, note: String = scandal) -> Tour.Facts {
+        Tour.Facts(place: .note(note), noteMode: .lenses, lensColumns: columns)
+    }
+
+    /// The seeded book in a mode.
+    static func book(
+        _ mode: Tour.BookMode?, live: Bool = false, selected: Bool = false,
+        id: String = sherlock
+    ) -> Tour.Facts {
+        Tour.Facts(
+            place: .book(id), bookNoteLive: live, bookNoteSelected: selected, bookMode: mode)
+    }
+
     /// Walk the main leg to a named step, the way she would.
     static func walk(to target: Tour.Step) -> Walker {
         var w = Walker()
@@ -94,15 +126,27 @@ struct TourWalkTests {
         w.report(write(middle, ordinal: 40, takes: 2, panel: true))      // → takeIcon
         if at(target) { return w }
         w.report(.init(place: .note(scandal), noteMode: .takes))          // → takesMode
+        w.report(flip(english))
         if at(target) { return w }
-        w.send(.next)                                                     // → deeperModes
+        w.report(flip(italian))                                           // → takesFlipBack
         if at(target) { return w }
-        w.send(.next)                                                     // → placeFollows
+        w.report(flip(english))                                           // → readInNote
         if at(target) { return w }
-        w.report(.init(place: .book(sherlock)))
-        w.send(.next)                                                     // → downAndUp
+        w.report(.init(place: .note(scandal), noteMode: .read))
+        w.send(.next)                                                     // → lensesLive
         if at(target) { return w }
-        w.report(.init(place: .book(sherlock), bookNoteLive: true))       // → home
+        w.report(lenses(1))
+        w.report(lenses(2))                                               // → deeperModes
+        if at(target) { return w }
+        w.send(.next)                                                     // → upToBook
+        if at(target) { return w }
+        w.report(book(.outline))
+        w.send(.next)                                                     // → bookAndRead
+        if at(target) { return w }
+        w.report(book(.book))
+        w.report(book(.read))                                             // → downAndUp
+        if at(target) { return w }
+        w.report(book(.index, live: true))                                // → home
         if at(target) { return w }
         w.report(.init(place: .area(.bookcase)))                          // → ownNote
         if at(target) { return w }
@@ -152,25 +196,60 @@ struct TourWalkTests {
 
         w.report(.init(place: .note(Self.scandal), noteMode: .takes))
         #expect(w.step == .takesMode)
-        #expect(w.rings == [[.takesBlock(Self.middle)]])
+        #expect(w.rings == [[.takesBlock(Self.middle)]], "the block, until the store says its takes")
+        // VX-292 U3 — step 7's flip: the Italian's choose band, then back.
+        w.report(Self.flip(Self.english))
+        #expect(w.step == .takesMode, "seeing the block is not the act")
+        #expect(w.rings == [[.takeChoose(Self.italian), .takesBlock(Self.middle)]],
+                "the take the card names, the block behind it (\(w.rings))")
+        w.report(Self.flip(Self.italian))
+        #expect(w.step == .takesFlipBack, "the page reads Italian")
+        #expect(w.rings == [[.takeChoose(Self.english), .takesBlock(Self.middle)]],
+                "the English take brings it back")
+        w.report(Self.flip(Self.english))
+        #expect(w.step == .readInNote)
+
+        // Step 8 — Read in the note: the rail's Read, then its switch.
+        #expect(w.rings == [[.sidebarMode(.read)]])
+        w.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(w.step == .readInNote, "step 8 teaches; only next moves it")
+        #expect(w.rings == [[.readFaceSwitch]])
         w.send(.next)
-        #expect(w.step == .deeperModes)
+
+        // Step 9 — Lenses, live: the rail's Lenses, then the ＋ column door.
+        #expect(w.step == .lensesLive)
         #expect(w.rings == [[.sidebarMode(.lenses)]])
+        w.report(Self.lenses(1))
+        #expect(w.step == .lensesLive)
+        #expect(w.rings == [[.lensAddColumn]])
+        w.report(Self.lenses(2))
+        #expect(w.step == .deeperModes, "a column beside the note's own is the act")
+
+        // Step 10 — Compare and Blocks, briefly.
+        #expect(w.rings == [[.sidebarMode(.compare)]])
         w.send(.next)
-        #expect(w.step == .placeFollows)
+
+        // Step 11 — the book arc (R-292-10): up, Book then Read, down and up.
+        #expect(w.step == .upToBook)
         #expect(w.rings == [[.contextBarBook]], "in the note, the ring is the climb's door")
-        w.report(.init(place: .book(Self.sherlock)))
-        #expect(w.rings == [[.indexNoteRow(Self.scandal), .bookModeTab(.index)]])
-        #expect(w.step == .placeFollows, "step 9 teaches; only next moves it")
-        // F-U2-W-3 (justified fixture edit): the box holding the carried
-        // note is now a SAID fact — the edit-here ring stands on it; the
-        // empty-box world has its own pin below.
-        w.report(.init(place: .book(Self.sherlock), bookNoteSelected: true))
+        w.report(Self.book(.outline))
+        #expect(w.step == .upToBook, "the first beat describes the book; only next moves it")
+        #expect(w.rings == [], "nothing to ring: the card describes the views along the top")
         w.send(.next)
+        #expect(w.step == .bookAndRead)
+        #expect(w.rings == [[.bookModeTab(.book)]])
+        w.report(Self.book(.book))
+        #expect(w.step == .bookAndRead)
+        #expect(w.rings == [[.bookModeTab(.read)]])
+        w.report(Self.book(.read))
         #expect(w.step == .downAndUp)
+        // F-U2-W-3: in Read the box holds nothing, so the ring is the toured
+        // note's Index row with the Index tab behind it (the road back).
+        #expect(w.rings == [[.indexNoteRow(Self.scandal), .bookModeTab(.index)]])
+        w.report(Self.book(.index, selected: true))
         #expect(w.rings == [[.noteBoxEditHere]])
 
-        w.report(.init(place: .book(Self.sherlock), bookNoteLive: true))
+        w.report(Self.book(.index, live: true))
         #expect(w.step == .home)
         #expect(w.rings == [[.sidebarArea(.bookcase)]])
         w.report(.init(place: .area(.bookcase)))
@@ -189,7 +268,7 @@ struct TourWalkTests {
         #expect(w.rings == [])
     }
 
-    @Test func theKeepGoingLegVisitsItsFourStopsAndEndsAtTheFieldGuide() {
+    @Test func theKeepGoingLegVisitsItsFiveStopsAndEndsAtTheFieldGuide() {
         var w = Self.walk(to: .endCard)
         #expect(w.step == .endCard)
         w.effects = []
@@ -219,6 +298,19 @@ struct TourWalkTests {
         w.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.snippets)))
         #expect(w.rings == [[.firstSnippetCard]])
 
+        // VX-292 U3 (R-292-8) — leg 5, the Settings stop: Settings opens on
+        // its General pane (its own window — nothing here rings), the card
+        // stays and carries next.
+        w.effects = []
+        w.send(.next)
+        #expect(w.step == .legSettings)
+        #expect(w.effects == [.openSettings], "Settings opens, once (\(w.effects))")
+        #expect(w.rings == [])
+        #expect(w.state.map(Tour.isRoadBack) == false)
+        w.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.library)))
+        #expect(w.step == .legSettings, "only next moves the Settings stop")
+        #expect(w.effects == [.openSettings], "never asked twice")
+
         w.send(.next)
         #expect(w.step == .legEnd)
         #expect(w.effects.last == .navigate(.area(.bookcase)))
@@ -232,27 +324,35 @@ struct TourWalkTests {
         #expect(w.effects.last == .finish(completed: true))
     }
 
-    @Test func theCountsReadAsTheMockupsCards() {
-        let main: [(Tour.Step, Int, Bool)] = [
-            (.navigation, 1, false), (.seededBook, 2, false), (.insideBook, 3, false),
-            (.write, 4, false), (.makeTake, 5, false), (.takeIcon, 6, false),
-            (.takesMode, 7, false), (.deeperModes, 8, false), (.placeFollows, 9, false),
-            (.downAndUp, 10, false), (.home, 10, true), (.ownNote, 11, false),
+    /// VX-292 U3 — R-292-13's approved flow, as the cards count it: thirteen
+    /// main steps (7 in two beats, 11 in three), a five-stop leg.
+    @Test func theCountsReadAsTheApprovedFlow() {
+        let main: [(Tour.Step, Int, Int)] = [
+            (.navigation, 1, 1), (.seededBook, 2, 1), (.insideBook, 3, 1),
+            (.write, 4, 1), (.makeTake, 5, 1), (.takeIcon, 6, 1),
+            (.takesMode, 7, 1), (.takesFlipBack, 7, 2), (.readInNote, 8, 1),
+            (.lensesLive, 9, 1), (.deeperModes, 10, 1),
+            (.upToBook, 11, 1), (.bookAndRead, 11, 2), (.downAndUp, 11, 3),
+            (.home, 12, 1), (.ownNote, 13, 1),
         ]
         for (step, number, beat) in main {
-            #expect(Tour.position(of: step) == .main(number: number, secondBeat: beat))
+            #expect(Tour.position(of: step) == .main(number: number, beat: beat), "\(step)")
         }
-        #expect(Tour.mainStepCount == 11)
+        #expect(main.count == Tour.Step.allCases.firstIndex(of: .endCard),
+                "the table is every main card, in the enum's order")
+        #expect(Tour.mainStepCount == 13)
+        #expect(Set(main.map(\.1)) == Set(1...Tour.mainStepCount), "every number, none skipped")
         #expect(Tour.position(of: .endCard) == .endCard)
-        let leg: [Tour.Step] = [.legStar, .legTags, .legBook, .legSnippets]
+        let leg: [Tour.Step] = [.legStar, .legTags, .legBook, .legSnippets, .legSettings]
         for (i, step) in leg.enumerated() {
             #expect(Tour.position(of: step) == .leg(number: i + 1))
         }
-        #expect(Tour.legStopCount == 4)
+        #expect(Tour.legStopCount == 5)
         #expect(Tour.position(of: .legEnd) == .legEnd)
         // The cards that teach carry next; every other card waits for her act.
         let nexting = Set(Tour.Step.allCases.filter(Tour.hasNext))
-        #expect(nexting == [.navigation, .takesMode, .deeperModes, .placeFollows, .legSnippets])
+        #expect(nexting == [.navigation, .takesMode, .takesFlipBack, .readInNote, .deeperModes,
+                            .upToBook, .legSnippets, .legSettings])
         // End tour is always present — every coach card; the end card is the fork.
         #expect(Tour.Step.allCases.filter { !Tour.hasEndTour($0) } == [.endCard])
     }
@@ -260,7 +360,8 @@ struct TourWalkTests {
     // MARK: - How it ends
 
     @Test func endTourBeforeTheEndCardEndsItAndAfterItTheTourCountsAsCompleted() {
-        for step in [Tour.Step.navigation, .write, .takesMode, .ownNote] {
+        for step in [Tour.Step.navigation, .write, .takesMode, .takesFlipBack, .readInNote,
+                     .lensesLive, .upToBook, .bookAndRead, .ownNote] {
             var w = Self.walk(to: step)
             #expect(w.step == step)
             w.effects = []
@@ -268,14 +369,15 @@ struct TourWalkTests {
             #expect(w.state == nil)
             #expect(w.effects == [.finish(completed: false)], "\(step): ended, never completed")
         }
-        for step in [Tour.Step.legStar, .legBook, .legEnd] {
+        for step in [Tour.Step.legStar, .legBook, .legSettings, .legEnd] {
             var w = Self.walk(to: .endCard)
             w.send(.choose(.keepGoing))
             if step != .legStar { w.report(Self.ownNote(starred: true, tags: 1)) }
-            if step == .legEnd {
+            if step == .legSettings || step == .legEnd {
                 w.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
                 w.send(.next)
             }
+            if step == .legEnd { w.send(.next) }
             #expect(w.step == step)
             w.effects = []
             w.send(.endTour)
@@ -340,12 +442,29 @@ struct TourWalkTests {
         #expect(v.state.map(Tour.isRoadBack) == true, "out of Write: the rail's Write is the way back")
         #expect(v.rings == [[.sidebarMode(.write)]])
 
-        let u = Self.walk(to: .placeFollows)
-        #expect(u.state.map(Tour.isRoadBack) == false, "step 9's book icon is its own road")
+        let u = Self.walk(to: .upToBook)
+        #expect(u.state.map(Tour.isRoadBack) == false, "step 11's book icon is its own road")
         var t = Self.walk(to: .home)
-        #expect(t.state.map(Tour.isRoadBack) == false, "10b's Bookcase IS the step")
+        #expect(t.state.map(Tour.isRoadBack) == false, "step 12's Bookcase IS the step")
         t.report(.init(place: .area(.library)))
         #expect(t.state.map(Tour.isRoadBack) == false)
+        // VX-292 U3: the rail's Read and Lenses are steps 8 and 9's own doors.
+        var r = Self.walk(to: .readInNote)
+        #expect(r.rings == [[.sidebarMode(.read)]])
+        #expect(r.state.map(Tour.isRoadBack) == false, "the rail's Read is step 8's own door")
+        r.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(r.rings == [[.readFaceSwitch]])
+        #expect(r.state.map(Tour.isRoadBack) == false)
+        var l = Self.walk(to: .lensesLive)
+        l.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(l.rings == [[.sidebarMode(.lenses)]])
+        #expect(l.state.map(Tour.isRoadBack) == false, "the rail's Lenses is step 9's own door")
+        // Step 11's second beat, down in the note: the book icon is the way
+        // back up, and the card says so.
+        var b = Self.walk(to: .bookAndRead)
+        b.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(b.rings == [[.contextBarBook]])
+        #expect(b.state.map(Tour.isRoadBack) == true)
     }
 
     @Test func anyNoteServesStepThreeAndTheTourFollowsTheNoteSheTook() {
@@ -422,36 +541,47 @@ struct TourWalkTests {
         #expect(w.step == .takesMode)
     }
 
-    @Test func stepTenWaitsForItsOwnEdgeAndAcceptsEitherRoadDown() {
-        // A box already live when the card arrives is not her act.
-        var w = Self.walk(to: .placeFollows)
-        w.report(.init(place: .book(Self.sherlock), bookNoteLive: true))
-        w.send(.next)
-        #expect(w.step == .downAndUp)
-        w.report(.init(place: .book(Self.sherlock), bookNoteLive: true))
-        #expect(w.step == .downAndUp)
-        w.report(.init(place: .book(Self.sherlock), bookNoteLive: false))
-        w.report(.init(place: .book(Self.sherlock), bookNoteLive: true))
-        #expect(w.step == .home)
+    /// Step 11's last beat (the old step 10, its card verbatim): it waits
+    /// for its OWN edge — the box going live, or down to the note's page from
+    /// the book — and either road down counts.
+    @Test func stepElevensLastBeatWaitsForItsOwnEdgeAndAcceptsEitherRoadDown() {
+        // A box already live when the beat arrives is not her act. In the app
+        // the second beat ends in the book's Read, whose box is empty, so the
+        // first report after it that shows a live box IS her edge; the rule's
+        // own guard (a box live on the report the beat arrived with waits)
+        // is held below with a box reported live through the arrival.
+        var w = Self.walk(to: .downAndUp)
+        w.report(Self.book(.index, live: true))
+        #expect(w.step == .home, "from Read (no box) to a live box IS the edge")
+        var x = Self.walk(to: .bookAndRead)
+        x.report(Self.book(.book, live: true))
+        x.report(Self.book(.read, live: true))
+        #expect(x.step == .downAndUp)
+        x.report(Self.book(.read, live: true))
+        #expect(x.step == .downAndUp, "a box live when the beat arrived waits for her act")
+        x.report(Self.book(.index, live: false))
+        x.report(Self.book(.index, live: true))
+        #expect(x.step == .home)
         // Down to the note's own page from the book counts too.
         var v = Self.walk(to: .downAndUp)
         v.report(.init(place: .note(Self.scandal), noteMode: .write))
         #expect(v.step == .home)
-        // A "next" never finds a stale edge.
-        var u = Self.walk(to: .placeFollows)
-        u.report(.init(place: .book(Self.sherlock)))
+        // A beat that ends in the note (her road down, before Read) never
+        // leaves a stale edge for the next one.
+        var u = Self.walk(to: .bookAndRead)
         u.report(.init(place: .note(Self.scandal), noteMode: .write))
-        u.send(.next)
-        #expect(u.step == .downAndUp)
+        u.report(Self.book(.read))
+        #expect(u.step == .downAndUp, "back up and Read: the second beat's act")
+        #expect(u.step != .home, "the climb back up is not the way down")
     }
 
-    @Test func goingHomeDuringStepTenSkipsTheHomeBeat() {
+    @Test func goingHomeDuringStepElevenSkipsTheHomeStep() {
         var w = Self.walk(to: .downAndUp)
         w.report(.init(place: .area(.bookcase)))
         #expect(w.step == .ownNote)
     }
 
-    @Test func leavingSnippetsByAnyRoadEndsTheLegsLastStop() {
+    @Test func leavingSnippetsByAnyRoadEndsTheSnippetsStop() {
         var w = Self.walk(to: .endCard)
         w.send(.choose(.keepGoing))
         w.report(Self.ownNote(starred: true, tags: 1))
@@ -459,8 +589,8 @@ struct TourWalkTests {
         w.report(.init(place: .area(.snippets)))
         #expect(w.step == .legSnippets)
         w.report(.init(place: .snippetGroup("group")))
-        #expect(w.step == .legEnd)
-        #expect(w.effects.last == .navigate(.area(.bookcase)))
+        #expect(w.step == .legSettings, "VX-292 U3: the Settings stop is next")
+        #expect(w.effects.last == .openSettings)
     }
 
     /// Round 1 MINOR-1 (the U2 ladder): wandering off the NOTE entirely
@@ -471,8 +601,8 @@ struct TourWalkTests {
     /// implementer's refinement at the round-1 exchange: A7's contradiction,
     /// inverted, must not appear).
     @Test func anAreaWanderDuringTheMiddleStepsRingsTheRoadBackToTheNote() {
-        for step in [Tour.Step.write, .makeTake, .takeIcon, .takesMode, .deeperModes,
-                     .placeFollows] {
+        for step in [Tour.Step.write, .makeTake, .takeIcon, .takesMode, .takesFlipBack,
+                     .readInNote, .lensesLive, .deeperModes, .upToBook, .bookAndRead] {
             var w = Self.walk(to: step)
             w.report(.init(place: .area(.library)))
             #expect(w.step == step)
@@ -480,8 +610,8 @@ struct TourWalkTests {
                     "\(step): the Open row is the road back (\(w.rings))")
             #expect(w.state.map(Tour.isRoadBack) == true, "\(step): the card says so")
         }
-        // Step 10 wanders to a non-Bookcase area the same way (the Bookcase
-        // itself advances the step — the home skip, pinned elsewhere).
+        // Step 11's last beat wanders to a non-Bookcase area the same way
+        // (the Bookcase itself advances it — the home skip, pinned elsewhere).
         var t = Self.walk(to: .downAndUp)
         t.report(.init(place: .area(.library)))
         #expect(t.step == .downAndUp)
@@ -520,8 +650,9 @@ struct TourWalkTests {
         w.report(.init(place: .book(Self.guide)))
         #expect(w.state == nil)
         #expect(w.effects == [.finish(completed: true)],
-                "no navigate off the guide: \(w.effects)")
-        // A non-guide exit still heads home as designed.
+                "no navigate off the guide, and no Settings raised over it: \(w.effects)")
+        // A non-guide exit moves on as designed — VX-292 U3: to the Settings
+        // stop (Settings opens), whose next heads home.
         var v = Self.walk(to: .endCard)
         v.send(.choose(.keepGoing))
         v.report(Self.ownNote(starred: true, tags: 1))
@@ -529,8 +660,22 @@ struct TourWalkTests {
         v.report(.init(place: .area(.snippets)))
         v.effects = []
         v.report(.init(place: .book(Self.sherlock)))
+        #expect(v.step == .legSettings)
+        #expect(v.effects == [.openSettings])
+        v.send(.next)
         #expect(v.step == .legEnd)
-        #expect(v.effects == [.navigate(.area(.bookcase))])
+        #expect(v.effects == [.openSettings, .navigate(.area(.bookcase))])
+        // …and opening the guide at the Settings stop finishes there too.
+        var s = Self.walk(to: .endCard)
+        s.send(.choose(.keepGoing))
+        s.report(Self.ownNote(starred: true, tags: 1))
+        s.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
+        s.send(.next)
+        #expect(s.step == .legSettings)
+        s.effects = []
+        s.report(.init(place: .book(Self.guide)))
+        #expect(s.state == nil)
+        #expect(s.effects == [.finish(completed: true)])
     }
 
     /// Round 2 (the U2 ladder): the `.next` road into the leg's end while she
@@ -553,7 +698,8 @@ struct TourWalkTests {
         #expect(w.state == nil)
         #expect(w.effects == [.finish(completed: true)],
                 "finish, not a stall: \(w.effects)")
-        // At Snippets, the same press keeps the designed yank home (P-U2-7).
+        // At Snippets, the same press moves on to the Settings stop (VX-292
+        // U3), and ITS next keeps the designed yank home (P-U2-7).
         var v = Self.walk(to: .endCard)
         v.send(.choose(.keepGoing))
         v.report(Self.ownNote(starred: true, tags: 1))
@@ -561,8 +707,11 @@ struct TourWalkTests {
         v.report(.init(place: .area(.snippets)))
         v.effects = []
         v.send(.next)
+        #expect(v.step == .legSettings)
+        #expect(v.effects == [.openSettings])
+        v.send(.next)
         #expect(v.step == .legEnd)
-        #expect(v.effects == [.navigate(.area(.bookcase))])
+        #expect(v.effects == [.openSettings, .navigate(.area(.bookcase))])
     }
 
     /// F-U2-W-3 (the fresh-store walk, round 2's fix): at step 10 in a book
@@ -573,7 +722,7 @@ struct TourWalkTests {
     /// advances), with the Index tab behind it for the other book modes,
     /// and the road-back line is earned. With the box holding a note, the
     /// step's own edit-here ring stands and nothing extra is said.
-    @Test func stepTenInABookWithAnEmptyNoteBoxRingsTheNotesIndexRow() {
+    @Test func stepElevensLastBeatInABookWithAnEmptyNoteBoxRingsTheNotesIndexRow() {
         var w = Self.walk(to: .downAndUp)
         w.report(.init(place: .book(Self.sherlock)))
         #expect(w.step == .downAndUp)
@@ -589,7 +738,8 @@ struct TourWalkTests {
     }
 
     @Test func nextIsInertOnACardThatWaitsForHerAct() {
-        for step in [Tour.Step.seededBook, .write, .makeTake, .downAndUp, .ownNote] {
+        for step in [Tour.Step.seededBook, .write, .makeTake, .lensesLive, .bookAndRead,
+                     .downAndUp, .ownNote] {
             var w = Self.walk(to: step)
             w.send(.next)
             #expect(w.step == step, "\(step) has no next")
@@ -608,6 +758,406 @@ struct TourWalkTests {
         w.send(.choose(.keepGoing))
         w.report(.init(place: .area(.library)))
         #expect(w.state.flatMap(Tour.noteOfInterest) == Self.mine)
+    }
+
+    // MARK: - The tutorial wins by driving (VX-292 R-292-11)
+
+    /// Every moded navigate a walk asked for (the drives), in order.
+    static func drives(_ effects: [Tour.Effect]) -> [Tour.Effect] {
+        effects.filter {
+            if case .navigate(_, let mode) = $0 { return mode != nil }
+            return false
+        }
+    }
+
+    /// The table IS the rule's data: steps 4–6 teach in Write, step 7's two
+    /// beats in Takes (VX-292 U3: the flip's choose bands are the board's),
+    /// and no other step drives a mode (steps 8–9 ask HER to switch — a drive
+    /// would do her act for her; step 10 only names two modes; step 11 and
+    /// the leg work from any mode).
+    @Test func theStepsThatTeachInAModeAreExactlyStepsFourToSeven() {
+        var table: [Tour.Step: Tour.NoteMode] = [:]
+        for step in Tour.Step.allCases {
+            if let mode = Tour.expectedNoteMode(step) { table[step] = mode }
+        }
+        #expect(table == [.write: .write, .makeTake: .write, .takeIcon: .write,
+                          .takesMode: .takes, .takesFlipBack: .takes])
+    }
+
+    /// Her words: *"if you were in takes on some chapter in the prince where
+    /// the tutorial expects you to be in write, the tutorial wins."* The
+    /// toured chapter ARRIVES in the mode its own memory remembers (a road
+    /// that is not the card's door — the Open row, the Library, ⌘K): the
+    /// tour drives it to Write, once, and the step still waits for her click.
+    @Test func aChapterRememberedInAnotherModeIsDrivenToWriteWhenItArrives() {
+        for remembered in Tour.NoteMode.allCases where remembered != .write {
+            var w = Self.walk(to: .insideBook)
+            w.effects = []
+            w.report(.init(place: .note(Self.scandal), noteMode: remembered))
+            #expect(w.step == .write, "\(remembered): any note serves step 3, as ever")
+            #expect(w.effects == [.navigate(.note(Self.scandal), mode: .write)],
+                    "\(remembered): ONE drive, to Write (\(w.effects))")
+            // The same report again (the drive has not landed yet): never
+            // asked twice.
+            w.report(.init(place: .note(Self.scandal), noteMode: remembered))
+            #expect(Self.drives(w.effects).count == 1, "\(remembered): no second ask")
+            // It lands: Write, and step 4 waits for her click as designed.
+            w.report(Self.write(Self.first, ordinal: 1))
+            #expect(w.step == .write)
+            #expect(Self.drives(w.effects).count == 1)
+            w.report(Self.write(Self.middle, ordinal: 40))
+            #expect(w.step == .makeTake)
+        }
+    }
+
+    /// The window can report the note a beat before its detail registers
+    /// (no mode yet): the arrival waits and is judged when its mode comes.
+    @Test func anArrivalWhoseModeComesLaterIsJudgedWhenItComes() {
+        var w = Self.walk(to: .insideBook)
+        w.effects = []
+        w.report(.init(place: .note(Self.scandal)))
+        #expect(w.step == .write)
+        #expect(w.effects == [], "nothing to judge until the note says its mode")
+        w.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(w.effects == [.navigate(.note(Self.scandal), mode: .write)])
+    }
+
+    /// A mode she picks HERSELF on the note she is in is hers: no arrival,
+    /// so nothing is judged — the rail's road back stays the answer (the
+    /// off-target tolerance, unchanged). Only a LANDING is driven.
+    @Test func aModeSheChoosesOnTheSameNoteIsNeverOverruled() {
+        var w = Self.walk(to: .write)
+        w.effects = []
+        w.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(w.effects == [], "her own switch: no drive (\(w.effects))")
+        #expect(w.rings == [[.sidebarMode(.write)]])
+        #expect(w.state.map(Tour.isRoadBack) == true)
+        w.report(.init(place: .note(Self.scandal), noteMode: .lenses))
+        #expect(w.effects == [])
+
+        var v = Self.walk(to: .takesMode)
+        v.effects = []
+        v.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(v.effects == [], "step 7's own note, switched by her: no drive")
+        #expect(v.rings == [[.sidebarMode(.takes)]])
+    }
+
+    /// Wandering is never chased (the off-target tolerance must not die):
+    /// a place that is not a note judges nothing and asks for nothing —
+    /// including mid-correction, before the drive has landed. Coming back
+    /// to the note IS an arrival, and is judged when it lands.
+    @Test func wanderingIsNeverChasedAndComingBackIsJudged() {
+        var w = Self.walk(to: .write)
+        w.effects = []
+        for place: Tour.Place in [.area(.library), .book(Self.sherlock), .area(.pool), .elsewhere] {
+            w.report(.init(place: place))
+            #expect(w.effects == [], "\(place): wandering asks for nothing")
+            #expect(w.step == .write)
+        }
+        // Back through the Open row: the note remembers Read.
+        w.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(w.effects == [.navigate(.note(Self.scandal), mode: .write)])
+
+        // Mid-correction: the drive is asked, and before it lands she leaves.
+        var v = Self.walk(to: .insideBook)
+        v.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(Self.drives(v.effects).count == 1)
+        v.report(.init(place: .area(.library)))
+        v.report(.init(place: .book(Self.sherlock)))
+        #expect(Self.drives(v.effects).count == 1, "her wandering is hers, mid-drive too")
+        #expect(v.step == .write)
+    }
+
+    /// Step 7 teaches in TAKES: a return to the toured note that lands in
+    /// Write is driven back to Takes. The steps that teach in no particular
+    /// mode never drive, whatever the note arrives in.
+    @Test func stepSevenDrivesToTakesAndTheOtherStepsLeaveTheModeAlone() {
+        var w = Self.walk(to: .takesMode)
+        w.effects = []
+        w.report(.init(place: .area(.library)))
+        w.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(w.effects == [.navigate(.note(Self.scandal), mode: .takes)])
+
+        for step in [Tour.Step.readInNote, .lensesLive, .deeperModes, .upToBook, .bookAndRead] {
+            var v = Self.walk(to: step)
+            v.effects = []
+            v.report(.init(place: .area(.library)))
+            v.report(.init(place: .note(Self.scandal), noteMode: .compare))
+            #expect(v.effects == [], "\(step) teaches in any mode (\(v.effects))")
+        }
+        // Step 6 reached by a landing ALREADY in Takes is the act itself
+        // (the card asks for Takes mode): it advances, nothing is driven.
+        var u = Self.walk(to: .takeIcon)
+        u.effects = []
+        u.report(.init(place: .area(.library)))
+        u.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(u.step == .takesMode)
+        #expect(u.effects == [])
+        // …and in Read, it is driven to Write, where the ⑂ badge lives.
+        var t = Self.walk(to: .takeIcon)
+        t.effects = []
+        t.report(.init(place: .area(.library)))
+        t.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(t.step == .takeIcon)
+        #expect(t.effects == [.navigate(.note(Self.scandal), mode: .write)])
+    }
+
+    /// A RE-RUN after a completed tour: the first run left the toured
+    /// chapter in Takes (step 7), so the second meets the remembered mode —
+    /// the hostile case her words name. It is driven; and a note she takes
+    /// in place of the chapter is driven the same way (the tour follows the
+    /// note she took).
+    @Test func aReRunAfterCompletionIsDrivenAndSoIsAnyNoteSheTakes() {
+        var first = Self.walk(to: .endCard)
+        first.send(.choose(.done))
+        #expect(first.state == nil)
+
+        var again = Walker()
+        again.send(.next)
+        again.report(.init(place: .book(Self.sherlock)))
+        again.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(Self.drives(again.effects) == [.navigate(.note(Self.scandal), mode: .write)])
+
+        var other = Self.walk(to: .insideBook)
+        other.effects = []
+        other.report(.init(place: .note(Self.league), noteMode: .read))
+        #expect(other.state?.tourNoteID == Self.league)
+        #expect(other.effects == [.navigate(.note(Self.league), mode: .write)])
+    }
+
+    /// The designed road drives nothing: the card's own door lands in Write
+    /// (VX-303), so a walk of the whole tour — main leg, end card, the leg —
+    /// asks for no drive at all. A book never drives (it keeps no mode
+    /// memory; Outline is its arrival).
+    @Test func theDesignedRoadDrivesNothing() {
+        var w = Self.walk(to: .endCard)
+        w.send(.choose(.keepGoing))
+        w.report(Self.ownNote(starred: true))
+        w.report(Self.ownNote(starred: true, tags: 1))
+        w.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
+        w.report(.init(place: .area(.snippets)))
+        w.send(.next)
+        #expect(w.step == .legSettings)
+        w.send(.next)
+        #expect(w.step == .legEnd)
+        w.report(.init(place: .area(.bookcase)))
+        w.report(.init(place: .book(Self.guide)))
+        #expect(w.state == nil)
+        #expect(Self.drives(w.effects) == [], "\(w.effects)")
+    }
+
+    // MARK: - The grown tour's new cards (VX-292 U3 — R-292-3/7/8/10/13)
+
+    /// Step 7, the flip (R-292-3, VX-633's *"the dual language example is
+    /// great"*): the first beat rings the choose band of the take the card
+    /// NAMES; any change of the shown take is the act (she may choose her own
+    /// take instead — the page still flips); the second beat rings the take
+    /// the step first saw and waits for it to be shown again. Reports about
+    /// another block or another note are not this flip's; next moves on from
+    /// either beat (the flip is offered, never required — P-292-8).
+    @Test func stepSevensFlipAsksForTheNamedTakeAndBringsTheOriginalBack() {
+        // Her own take chosen instead of the Italian: still a flip.
+        var own = Self.walk(to: .takesMode)
+        own.report(Self.flip(Self.hers))
+        #expect(own.step == .takesFlipBack)
+        #expect(own.rings == [[.takeChoose(Self.english), .takesBlock(Self.middle)]])
+
+        // Another block's or another note's report is not this flip's.
+        var other = Self.walk(to: .takesMode)
+        other.report(Self.flip(Self.italian, block: "block-9"))
+        #expect(other.step == .takesMode, "another block flipping is not the toured one")
+        var stale = Self.flip(Self.italian)
+        stale.block?.noteID = Self.league
+        other.report(stale)
+        #expect(other.step == .takesMode, "a report about another note's block is not hers")
+
+        // Next skips the flip from either beat.
+        var skip = Self.walk(to: .takesMode)
+        skip.send(.next)
+        #expect(skip.step == .readInNote)
+        var half = Self.walk(to: .takesFlipBack)
+        half.send(.next)
+        #expect(half.step == .readInNote, "the page may stay Italian: her choice")
+
+        // A block with no take wearing the card's name (a note that is not
+        // the Prince's): the first other take, in fan order.
+        var plain = Self.walk(to: .takeIcon)
+        plain.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        plain.report(Self.flip(Self.english, takes: [Self.english, Self.hers], named: nil))
+        #expect(plain.rings == [[.takeChoose(Self.hers), .takesBlock(Self.middle)]])
+
+        // The Italian already shown when the step arrives (an earlier run's
+        // skipped flip): the flip goes the other way, and back.
+        var flipped = Self.walk(to: .takeIcon)
+        flipped.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        flipped.report(Self.flip(Self.italian))
+        #expect(flipped.rings == [[.takeChoose(Self.english), .takesBlock(Self.middle)]])
+        flipped.report(Self.flip(Self.english))
+        #expect(flipped.step == .takesFlipBack)
+        #expect(flipped.rings == [[.takeChoose(Self.italian), .takesBlock(Self.middle)]])
+        flipped.report(Self.flip(Self.italian))
+        #expect(flipped.step == .readInNote)
+
+        // The second beat teaches in Takes too: a return in Write is driven.
+        var back = Self.walk(to: .takesFlipBack)
+        back.effects = []
+        back.report(.init(place: .area(.library)))
+        back.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(back.effects == [.navigate(.note(Self.scandal), mode: .takes)])
+    }
+
+    /// The app watches exactly the flip's block: the toured note, preferring
+    /// the block she made a take of — once the step has seen its block, that
+    /// block — and nothing outside step 7.
+    @Test func theFlipWatchesTheToursNoteAndItsBlockOnlyAtStepSeven() {
+        let before = Self.walk(to: .takeIcon)
+        #expect(before.state.flatMap(Tour.flipInterest) == nil)
+        var w = Self.walk(to: .takeIcon)
+        w.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(w.step == .takesMode)
+        #expect(w.state.flatMap(Tour.flipInterest).map { [$0.noteID, $0.blockID] }
+                == [Self.scandal, Self.middle])
+        // The store's answer named a fallback block (the toured one lost its
+        // fan): the step follows that block from then on.
+        w.report(Self.flip(Self.english, block: "block-3"))
+        #expect(w.state.flatMap(Tour.flipInterest).map { [$0.noteID, $0.blockID] }
+                == [Self.scandal, "block-3"])
+        #expect(w.rings == [[.takeChoose(Self.italian), .takesBlock("block-3")]])
+        let after = Self.walk(to: .readInNote)
+        #expect(after.state.flatMap(Tour.flipInterest) == nil)
+    }
+
+    /// Step 8, Read in the note (R-292-7): a next card — the rail's Read,
+    /// then the switch; it never drives (switching is her act) and it never
+    /// advances by itself, so the card's words stay up while she reads.
+    @Test func stepEightShowsReadAndItsSwitchAndWaitsForNext() {
+        var w = Self.walk(to: .readInNote)
+        w.effects = []
+        w.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(w.rings == [[.sidebarMode(.read)]])
+        w.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(w.rings == [[.readFaceSwitch]])
+        #expect(w.step == .readInNote)
+        #expect(w.effects == [], "no drive: Read is hers to open")
+        w.send(.next)
+        #expect(w.step == .lensesLive)
+    }
+
+    /// Step 9, Lenses live: the act is a second column beside the note's own
+    /// on the note's Lenses board; a board her memory left two columns wide
+    /// (an earlier run) advances the moment she arrives in Lenses — a step
+    /// she did ahead of the card.
+    @Test func stepNineAdvancesOnASecondColumnOnTheLensesBoard() {
+        var w = Self.walk(to: .lensesLive)
+        w.report(.init(place: .note(Self.scandal), noteMode: .read, lensColumns: 2))
+        #expect(w.step == .lensesLive, "only the Lenses board's columns count")
+        w.report(Self.lenses(nil))
+        #expect(w.step == .lensesLive, "a board that has not said its columns yet")
+        #expect(w.rings == [[.lensAddColumn]])
+        w.report(Self.lenses(3))
+        #expect(w.step == .deeperModes)
+
+        var again = Self.walk(to: .lensesLive)
+        again.report(Self.lenses(2))
+        #expect(again.step == .deeperModes, "an earlier run's column: done on arrival")
+    }
+
+    /// Step 11's second beat (R-292-10: "what book mode is" and Read in the
+    /// book): the Book tab, then Read; Read reached directly is the act too.
+    @Test func stepElevensSecondBeatRingsBookThenReadAndReadIsTheAct() {
+        var w = Self.walk(to: .bookAndRead)
+        w.report(Self.book(nil))
+        #expect(w.rings == [[.bookModeTab(.book)]], "a book that has not said its mode")
+        w.report(Self.book(.index))
+        #expect(w.rings == [[.bookModeTab(.book)]])
+        w.report(Self.book(.read))
+        #expect(w.step == .downAndUp, "straight to Read is the beat's act")
+        // The first beat's next before she climbed: the book icon, said as
+        // the road back up.
+        var early = Self.walk(to: .deeperModes)
+        early.send(.next)
+        #expect(early.step == .upToBook)
+        early.send(.next)
+        #expect(early.step == .bookAndRead)
+        #expect(early.rings == [[.contextBarBook]])
+        #expect(early.state.map(Tour.isRoadBack) == true)
+    }
+
+    // MARK: - Step 3 brings its ring on screen (VX-292 U2 — A-292-1/3)
+
+    /// Every reveal a walk asked for, in order.
+    static func reveals(_ effects: [Tour.Effect]) -> [Tour.Effect] {
+        effects.filter {
+            if case .reveal = $0 { return true }
+            return false
+        }
+    }
+
+    /// The architect's A-292-3: step 3's ARRIVAL in the seeded book lands
+    /// the toured chapter's Outline card — ALWAYS, once per arrival (the far
+    /// card is often not drawn at all until it is landed, so no visibility
+    /// check could decide it). Her moves inside the book are never chased;
+    /// leaving and coming back is a new arrival.
+    @Test func stepThreesArrivalInTheSeededBookLandsTheChapterOncePerArrival() {
+        var w = Self.walk(to: .seededBook)
+        w.effects = []
+        w.report(.init(place: .book(Self.sherlock)))
+        #expect(w.step == .insideBook)
+        #expect(w.effects == [.reveal(.outlineCard(Self.scandal), in: .book(Self.sherlock))],
+                "ONE reveal of the ringed chapter, in the book she is in (\(w.effects))")
+        #expect(w.rings == [[.outlineCard(Self.scandal)]], "the ring is the card it lands")
+        // Inside the book (the box, the page): no new arrival, nothing more.
+        w.report(.init(place: .book(Self.sherlock), bookNoteSelected: true))
+        w.report(.init(place: .book(Self.sherlock), bookNoteLive: true))
+        #expect(Self.reveals(w.effects).count == 1, "her moves in the book are hers")
+        // Home and back: a new arrival, a new landing.
+        w.report(.init(place: .area(.bookcase)))
+        #expect(Self.reveals(w.effects).count == 1, "the Bookcase lands nothing")
+        w.report(.init(place: .book(Self.sherlock)))
+        #expect(Self.reveals(w.effects).count == 2, "leaving and returning is a new arrival")
+        // Into the chapter: step 4, and the note's own judgment as ever.
+        w.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(w.step == .write)
+        #expect(Self.reveals(w.effects).count == 2)
+        #expect(Self.drives(w.effects) == [])
+    }
+
+    /// Only the SEEDED book at STEP 3, with its chapter known: another book
+    /// (the guide) lands nothing; a missing landmark has nothing to land; the
+    /// later steps' book visits keep their own roads (step 9's Index carries
+    /// the toured note itself).
+    @Test func onlyTheSeededBookAtStepThreeLandsAnything() {
+        var other = Self.walk(to: .insideBook)
+        other.effects = []
+        other.report(.init(place: .area(.bookcase)))
+        other.report(.init(place: .book(Self.guide)))
+        #expect(other.step == .insideBook)
+        #expect(other.effects == [], "another book is not the toured chapter's (\(other.effects))")
+
+        var missing = Walker(seededBookID: nil, firstStoryID: nil)
+        missing.send(.next)
+        missing.report(.init(place: .book("any-book")))
+        #expect(missing.step == .insideBook)
+        #expect(Self.reveals(missing.effects) == [], "no landmark, nothing to land")
+
+        var noChapter = Walker(firstStoryID: nil)
+        noChapter.send(.next)
+        noChapter.report(.init(place: .book(Self.sherlock)))
+        #expect(noChapter.step == .insideBook)
+        #expect(Self.reveals(noChapter.effects) == [], "a chapter she deleted is hers")
+
+        for step in [Tour.Step.upToBook, .bookAndRead, .downAndUp] {
+            var later = Self.walk(to: step)
+            later.effects = []
+            later.report(.init(place: .area(.library)))
+            later.report(.init(place: .book(Self.sherlock), bookNoteSelected: true))
+            #expect(Self.reveals(later.effects) == [], "\(step): the book's own carry serves it")
+        }
+        // The whole designed road lands exactly once: step 3's arrival.
+        var whole = Self.walk(to: .endCard)
+        whole.send(.choose(.done))
+        #expect(Self.reveals(whole.effects)
+                == [.reveal(.outlineCard(Self.scandal), in: .book(Self.sherlock))])
     }
 
     // MARK: - Where a card sits
@@ -709,6 +1259,7 @@ struct TourWalkTests {
             .indexNoteRow("n"), .noteBoxEditHere, .barTakes, .panelNewTake,
             .panelOpenTakesMode, .takeBadge("k"), .takesBlock("k"), .contextBarBook,
             .mastheadTagDoor, .poolAddToBook("n"), .firstSnippetCard,
+            .takeChoose("t"), .readFaceSwitch, .lensAddColumn,
         ]
         #expect(all.filter(\.isInPanel) == [.panelNewTake, .panelOpenTakesMode])
         #expect(all.filter(\.isAppKit) == [.takeBadge("k")])

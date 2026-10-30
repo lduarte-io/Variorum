@@ -108,10 +108,9 @@ struct RootView: View {
     // "a navigation expires the park" rule has one home and one pin.)
     /// 13f W10b: the released original the lineage door asked to see; the
     /// recovery surface reveals it and consumes the request.
-    /// 13f W20(a) — THE ASCENT: the post a book was asked to open AT. One
-    /// shot, keyed by book so a stale request can never land in another
-    /// book (the `blockLanding` guard's shape).
-    @State private var bookAscent: BookAscent?
+    // (13f W20(a)'s ascent park LEFT this view at VX-292 U2, A-292-2: it is
+    // `ShellRouter.pendingBookAscent` now — `pendingBookChapter`'s shape, so
+    // the tour's reveal door reaches it without holding the view.)
     /// **18d batch 1 (her U-10) — THE SIDEBAR'S NOTE BOX, composed here.**
     /// The focused pane's book publishes a VALUE and a DOOR; this view builds
     /// the box's content — the facts from the published id, the bar from the
@@ -125,6 +124,15 @@ struct RootView: View {
     /// exactly as its `router` is.
     @State private var noteBoxReport: NoteBoxReport?
     @State private var noteBoxDoor: NoteBoxDoor?
+    /// **VX-292 U3 — the focused book's mode, as it said it** (the tour's
+    /// step 11 fact: the Book tab, then Read). Per window; read only through
+    /// the focused-book gate (`tourBookMode`).
+    @State private var bookModeReport: BookModeReport?
+
+    struct BookModeReport: Equatable {
+        let bookID: String
+        let mode: BookStructureModel.ViewMode
+    }
     @State private var noteBoxFacts = NoteBoxFactsModel()
     /// **VX-141 — the book that has said "no box"** while it was the focused
     /// pane's book (Read, which shows none). Without this the window cannot
@@ -132,11 +140,6 @@ struct RootView: View {
     /// that has spoken and shows nothing. A book that LEAVES the pane takes
     /// its word with it, so its next visit holds the slot again.
     @State private var noteBoxDeclinedBy: String?
-
-    struct BookAscent: Equatable {
-        let bookID: String
-        let postID: String
-    }
 
     /// Phase 13 (B1): the live voice — tokens + idioms, environment-fed.
     @State private var theme: ThemeStore
@@ -492,7 +495,7 @@ struct RootView: View {
             router.whatsNewRequested = false
         }
         // 13s-b U1a, piece 5 — Help ▸ Take the Tour: the same one entry the
-        // offer line's "yes" calls.
+        // offer card's "yes" calls (VX-292 U4).
         .onChange(of: router.tourRequested) { _, requested in
             guard requested else { return }
             router.tourRequested = false
@@ -1080,12 +1083,14 @@ struct RootView: View {
 
     // MARK: - The tour (13s-b U1a — R-13s-2/6/13; U2 builds the engine)
 
-    /// The offer line for the Bookcase's slot: a row exactly when the model
-    /// keeps one this process (`TourOfferModel.holdsRow` — an offer to make,
-    /// or one that retired since launch and keeps its height so nothing moves).
-    private var tourOfferLine: AnyView? {
-        guard let tourOffer, tourOffer.holdsRow else { return nil }
-        return AnyView(TourOfferLine(model: tourOffer, onTakeTour: startTour))
+    /// VX-292 U4 (VX-559; R-292-5/12) — the offer CARD for the Bookcase's
+    /// band: handed whenever the app's one model exists, the words card's
+    /// idiom — the card draws itself only while the rule has something to
+    /// say (`TourOffer.line(in:)`: the offer, then the help-road sentence),
+    /// which is exactly when the retired quiet line drew.
+    private var tourOfferCard: AnyView? {
+        guard let tourOffer else { return nil }
+        return AnyView(TourOfferCard(model: tourOffer, onTakeTour: startTour))
     }
 
     /// VX-307 U2b — the card above the quick entry for the Bookcase's band (the new road only): the card renders
@@ -1103,27 +1108,54 @@ struct RootView: View {
         return { TourEndLibraryModel(standing: standing) }
     }
 
-    /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and Help ▸ Take the
-    /// Tour (U1a piece 5, through `router.tourRequested`). 13s-b U2 fills it:
+    /// **THE TOUR'S ONE ENTRY** — the offer card's "yes" (VX-292 U4; the
+    /// quiet line's before it) and Help ▸ Take the Onboarding Tutorial (U1a
+    /// piece 5, through `router.tourRequested`). 13s-b U2 fills it:
     /// a start is ALWAYS step 1 (Q12 — a tour already running starts over; no
     /// resume), on the Bookcase, and the tour's layer releases the window's
     /// first responder the moment it arrives in the window (`TourOverlay` —
     /// the U1a walk's W-U1a-1: "yes" left the caret in the quick entry, where
-    /// a keystroke would mint a note). The line steps aside now; the engine
+    /// a keystroke would mint a note). The card steps aside now; the engine
     /// retires it at the end
     /// (`TourOfferModel.tourEnded(completed:)` — completed at the end card,
     /// ended by End tour before it, nothing at all if the app quits mid-way).
+    ///
+    /// **VX-292 U2 (R-292-11, R-292-17) — a missing Prince, or one whose
+    /// props deletions broke, is mended first.** When the landmarks find no
+    /// seeded book, or find it with its toured chapter gone or no fan left
+    /// and a chapter the road can mint back (`TourEngine.restoresLaunchBook`
+    /// says exactly when), the start runs the book's own Help ▸ Restore road and
+    /// AWAITS it — the door's latch, brain, Welcome arrangement, words and
+    /// (absent) undo, all unchanged; only its opening of the book is left out
+    /// (`opening: false` — the tour's step 1 stands on the Bookcase, where
+    /// step 2 rings the restored row) — then reads the landmarks again. A
+    /// refused or failed restore says so in the door's own words and the
+    /// tour starts as it always has (no seeded book: "any book"). The window's
+    /// place is read when the engine is made, after every await, so the
+    /// start's "take her to the Bookcase" judges where she IS.
     private func startTour() {
+        let slot = tourSlot
+        // A press while a start is on its way is that same start.
+        guard !slot.starting else { return }
+        slot.starting = true
         tourOffer?.tourStarted()
         let session = session
-        let place = TourPlaces.place(router.workspace.focusedSelection)
+        let router = router
         let doors = tourDoors
-        let slot = tourSlot
         Task {
-            let landmarks = await TourEngine.landmarks(session: session)
+            var landmarks = await TourEngine.landmarks(session: session)
+            if TourEngine.restoresLaunchBook(
+                landmarks: landmarks, wingID: session.wing.currentID,
+                store: await TourEngine.launchBookFacts(session: session, landmarks: landmarks)) {
+                await ShellActions(session: session, shell: router)
+                    .restoreSeededBook(.launchBook, opening: false).value
+                landmarks = await TourEngine.landmarks(session: session)
+            }
+            let place = TourPlaces.place(router.workspace.focusedSelection)
             slot.engine = TourEngine(
                 session: session, landmarks: landmarks, facts: Tour.Facts(place: place),
                 doors: doors)
+            slot.starting = false
         }
     }
 
@@ -1134,6 +1166,7 @@ struct RootView: View {
     private var tourDoors: TourEngine.Doors {
         let router = router
         let session = session
+        let openSettings = openSettings
         let offer = tourOffer
         let slot = tourSlot
         let pool = poolPosts
@@ -1162,7 +1195,51 @@ struct RootView: View {
             // F-U2-W-2 (option A, ruled): leg 3 opens the Pool's "in
             // gatherings" run — the masthead's own "show", on this window's
             // Pool model — so her starred (and so tucked) note is on screen.
-            showPoolTucked: { Task { await pool.showTucked() } })
+            showPoolTucked: { Task { await pool.showTucked() } },
+            // VX-292 R-292-11 — THE TUTORIAL WINS BY DRIVING: a note that
+            // arrived in a mode its step does not teach in (its remembered
+            // Takes or Read, `Tour.drive`) is taken to the step's mode
+            // through the roads that already force one — never erasing, the
+            // only write being the one every mode switch makes.
+            drive: { place, mode in
+                guard case .note(let noteID) = place else { return }
+                let postMode = TourPlaces.postMode(mode)
+                if session.commandRouter.activePostID == noteID {
+                    // The note's detail is mounted: the sidebar rail's own act
+                    // (`SidebarView.railGroup`), which speaks if it cannot.
+                    session.commandRouter.requestMode(postMode, postID: noteID)
+                } else if case .focusedExistingPane = router.adopt(
+                    .post(noteID), in: router.workspace.focusedPane, mode: postMode) {
+                    // Not mounted (yet): the book open door's road (VX-303,
+                    // `ShellRouter.ModeLanding`) parks the mode for the mount;
+                    // the same-note rule speaks in its one voice.
+                    session.status.refuse(
+                        WorkspaceNaming.sameNoteNote(router.workspace.label(for: .post(noteID))))
+                }
+            },
+            // VX-292 U2 (A-292-1/2/3) — step 3's arrival in the seeded book
+            // lands the toured chapter's Outline card through the book's own
+            // ASCENT road (`requestReveal` → Outline's landing: the card at the
+            // page's top, no focus, no expansion), naming Outline first so a
+            // book that arrived in Read is turned to it. Parked only for the
+            // book the focused pane SHOWS, so it can never land later on a
+            // book she left. Every other anchor has no reveal road (recorded).
+            reveal: { anchor, place in
+                guard case .outlineCard(let noteID) = anchor, case .book(let bookID) = place,
+                      router.workspace.focusedSelection == .reading(bookID)
+                else { return }
+                router.pendingBookAscent = ShellRouter.BookAscent(
+                    bookID: bookID, postID: noteID, landsInOutline: true)
+            },
+            // VX-292 U3 (R-292-8) — the leg's Settings stop: Settings ON ITS
+            // GENERAL PANE, through the shell's own road (⌘,'s — the scene's
+            // `openSettings`), the pane asked for first so a window already up
+            // on another pane turns to General (the ⌥⌘, MCP request's shape).
+            // Settings is its own window; the tour's card stays in this one.
+            openSettings: {
+                session.commandRouter.requestGeneralSettings()
+                openSettings()
+            })
     }
 
     /// The window's facts, as readers the tour's overlay evaluates in ITS
@@ -1176,6 +1253,7 @@ struct RootView: View {
         let stars = stars
         let bookNoteLive = tourBookNoteLive
         let bookNoteSelected = tourBookNoteSelected
+        let bookMode = tourBookMode
         return TourFactSources(
             selection: { router.workspace.focusedSelection },
             noteDetail: {
@@ -1194,7 +1272,23 @@ struct RootView: View {
             },
             bookNoteLive: { bookNoteLive },
             bookNoteSelected: { bookNoteSelected },
-            isStarred: { stars.isStarred(.post($0)) })
+            isStarred: { stars.isStarred(.post($0)) },
+            // VX-292 U3: the focused book's mode (step 11) and the mounted
+            // Lenses board's columns (step 9 — read in the overlay's body, so
+            // the observation lands there).
+            bookMode: { bookMode },
+            lensBoard: {
+                session.commandRouter.lensBoard.map { ($0.postID, $0.columns) }
+            })
+    }
+
+    /// VX-292 U3 — the focused pane's book's mode, in the tour's words: only
+    /// the book the focused pane SHOWS (the note box's gate).
+    private var tourBookMode: Tour.BookMode? {
+        guard let showing = focusedReadingID, let report = bookModeReport,
+              report.bookID == showing
+        else { return nil }
+        return BookView.tourMode(report.mode)
     }
 
     /// Whether the focused pane's BOOK has its note box live — the "edit
@@ -1282,9 +1376,10 @@ struct RootView: View {
                 onOpen: openHere,
                 onTodaysEntry: { openToday(in: pane) },
                 starDoor: starDoor, wings: wings,
-                // 13s-b U1a: the tour offer's row — built HERE (composition)
-                // and rendered by the Bookcase alone ("Bookcase only").
-                offerLine: tourOfferLine,
+                // VX-292 U4: the tour offer's CARD — built HERE (composition)
+                // and rendered by the Bookcase alone ("Bookcase only"), in
+                // its band above the words card.
+                offerCard: tourOfferCard,
                 wordsBand: wordsBand,
                 // VX-332: the Bookcase's quick entry stands down during a tour.
                 tourRunning: tourSlot.engine != nil,
@@ -1388,8 +1483,13 @@ struct RootView: View {
                 onPaneFocusRequest: { router.workspace.focus(pane) },
                 // 13f W20(a): the ascent's landing, handed to the book it
                 // named and to no other.
-                revealPostID: bookAscent?.bookID == readingID ? bookAscent?.postID : nil,
-                onRevealConsumed: { bookAscent = nil },
+                revealPostID: router.pendingBookAscent?.bookID == readingID
+                    ? router.pendingBookAscent?.postID : nil,
+                // VX-292 U2 (A-292-1): the tour's step-3 ascent shows the
+                // Outline first; every other ascent leaves the mode alone.
+                revealInOutline: router.pendingBookAscent?.bookID == readingID
+                    && router.pendingBookAscent?.landsInOutline == true,
+                onRevealConsumed: { router.pendingBookAscent = nil },
                 // 13n-b U4 (AF-11 F-3): an agent's show / a receipt's "Open ›"
                 // at a chapter — parked on the router, handed to its book.
                 revealSectionID: router.pendingBookChapter?.bookID == readingID
@@ -1404,6 +1504,15 @@ struct RootView: View {
                 // 18d batch 1: the book publishes what its sidebar box shows.
                 onNoteBox: { bookID, report, door in
                     adoptNoteBox(bookID, report, door)
+                },
+                // VX-292 U3: the focused book says its mode (the tour reads it).
+                onBookMode: { bookID, mode in
+                    if let mode {
+                        let report = BookModeReport(bookID: bookID, mode: mode)
+                        if bookModeReport != report { bookModeReport = report }
+                    } else if bookModeReport?.bookID == bookID {
+                        bookModeReport = nil
+                    }
                 },
                 // 13o U3 (the architect's F1): a book's search passage lands
                 // exactly as the Library's — Write at its block, find seeded.
@@ -1513,7 +1622,7 @@ struct RootView: View {
     /// post; this parks the landing and navigates through the ONE adoption
     /// door, so the pane's history is pushed and ⌥⌘[ returns to the note.
     private func openBook(_ bookID: String, at postID: String, in pane: PaneID) {
-        bookAscent = BookAscent(bookID: bookID, postID: postID)
+        router.pendingBookAscent = ShellRouter.BookAscent(bookID: bookID, postID: postID)
         adopt(.reading(bookID), in: pane)
     }
 

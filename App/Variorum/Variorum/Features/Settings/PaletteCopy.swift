@@ -22,12 +22,22 @@ import VariorumCore
 nonisolated enum PaletteCopy {
     static let title = "Colour palette"
 
-    /// The three batches she ruled, plus the two that are not builds: the
-    /// shipped default and her own hex. The GROUPING is presentation — the
-    /// brain knows seeds and intensity, not headings — so it lives here,
-    /// and a pin asserts it covers every case exactly once.
+    /// The three batches she ruled, plus the rows that are not batches: the
+    /// shipped default, the voice's own colours, and her own hex. The
+    /// GROUPING is presentation — the brain knows seeds and intensity, not
+    /// headings — so it lives here, and a pin asserts it covers every case
+    /// exactly once.
+    ///
+    /// **VX-710 (her R-292-14 — the sea-glass "and make that the default
+    /// theme"):** the row titled Default holds what a store with no palette
+    /// wears — the sea-glass now (`Queries.ThemeSettings.unsetStorePalette`;
+    /// a pin holds the two equal) — and the voice's own colours, which that
+    /// row used to hold under the word "Default", move to a row of their own
+    /// one line below, named Classic. PROVISIONAL P-292-5 (placement and the
+    /// word, both hers at the walk).
     enum Group: String, CaseIterable {
         case shipped
+        case classic
         case pastels
         case twoTone
         case bold
@@ -36,6 +46,7 @@ nonisolated enum PaletteCopy {
         var title: String {
             switch self {
             case .shipped: return "Default"
+            case .classic: return PaletteCopy.label(.default)
             case .pastels: return "Pastels"
             case .twoTone: return "Two-tone"
             case .bold: return "Bold"
@@ -45,7 +56,8 @@ nonisolated enum PaletteCopy {
 
         var palettes: [ThemePalette] {
             switch self {
-            case .shipped: return [.default]
+            case .shipped: return [Queries.ThemeSettings.unsetStorePalette]
+            case .classic: return [.default]
             case .pastels: return [.lavender, .mint, .pink, .blue]
             case .twoTone:
                 return [.goldAndBlack, .sageAndTerracotta, .slateAndAmber,
@@ -60,7 +72,10 @@ nonisolated enum PaletteCopy {
 
     static func label(_ palette: ThemePalette) -> String {
         switch palette {
-        case .default: return "Default"
+        // VX-710: was "Default" — no longer true once the sea-glass is what a
+        // store with no palette wears. "Classic": the colours each voice
+        // shipped with (PROVISIONAL P-292-5; the stored token stays `default`).
+        case .default: return "Classic"
         case .lavender: return "Lavender"
         case .mint: return "Mint"
         case .pink: return "Pink"
@@ -76,6 +91,9 @@ nonisolated enum PaletteCopy {
         case .butterAndCobalt: return "Butter & cobalt"
         case .roseAndMoss: return "Rose & moss"
         case .tealAndRust: return "Teal & rust"
+        // VX-710: the icon's colour, in the noun's ordinary spelling (the
+        // 0.9.5 notes' "sea-glass" is the adjective). Sentence case.
+        case .seaglass: return "Sea glass"
         case .custom: return "Custom"
         }
     }
@@ -97,8 +115,11 @@ nonisolated enum PaletteCopy {
         + "to read on them. Type a second colour if you want the chrome words in a "
         + "different hue; leave it empty and they take your colour, deepened."
 
+    /// VX-710: a seedless custom resolves to the voice's OWN colours (nil from
+    /// `PalettePreset.resolved`), which stopped being "the default" when the
+    /// sea-glass became it — so the note names that palette by its label.
     static let needsASeedNote =
-        "Type a colour above to see it \u{2014} until then this looks like the default."
+        "Type a colour above to see it \u{2014} until then this looks like \(label(.default))."
 
     /// The receipt-shaped line the pane shows after a colour lands. Not a
     /// `StatusCenter` receipt: the Settings scene mounts no status toast

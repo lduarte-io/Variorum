@@ -1779,7 +1779,9 @@ struct TakesBoardView: View {
                     // cards out HORIZONTALLY, so earlier/later read as ◀ ▶.
                     reorder: reorderDoors(take: take, slot: slot, axis: .horizontal),
                     // 13u3 UNIT H: the card's four acts, where the take is seen.
-                    acts: cardActs(take: take))
+                    acts: cardActs(take: take),
+                    // VX-292 U3: the tour's step 7 rings this take's band.
+                    tourTakeID: take.id)
                 if capped {
                     ScrollView(.vertical) {
                         miniPaneSurface(take: take, slot: slot, reportsHeight: reportsHeight)
@@ -1904,6 +1906,17 @@ struct TakeChooseHeader: View {
     /// it, which is how one addition reaches all four fan styles.
     var acts: TakeCardActs?
 
+    /// **The band's two words** — "choose" on a take the note does not show,
+    /// "✓ chosen" on the one it does. Named once so the onboarding tour's
+    /// step 7 quotes the door it rings (VX-292 U3; 13u4 UNIT S3's rule).
+    nonisolated static let chooseWord = "choose"
+    nonisolated static let chosenWord = "\u{2713} chosen"
+    /// **VX-292 U3 — the tour's anchor on this band**: the take it chooses,
+    /// so step 7's ring lights exactly the band the card names. nil (every
+    /// host that passes nothing) is inert, and the anchor itself is inert
+    /// outside a tour.
+    var tourTakeID: String?
+
     /// The band's act sentences — byte-identical to what the band said before
     /// VX-352's fix leg (a take with no label still hears exactly these).
     static let chooseHelp = "Choose this take — the note shows it (everywhere); ⌘⏎ from the keyboard"
@@ -1930,7 +1943,7 @@ struct TakeChooseHeader: View {
         HStack(spacing: 4) {
             Button(action: onChoose) {
                 HStack(spacing: 4) {
-                    Text(tokens.chromeLabel(isChosen ? "✓ chosen" : "choose"))
+                    Text(tokens.chromeLabel(isChosen ? Self.chosenWord : Self.chooseWord))
                         .font(tokens.small)
                         .foregroundStyle(isChosen ? tokens.chosen : tokens.muted)
                     if let label {
@@ -1950,6 +1963,8 @@ struct TakeChooseHeader: View {
             // ONE hover carries the whole label, then the choose sentence —
             // a `.help` on the label inside this button was subsumed by it.
             .help(Self.bandHelp(isChosen: isChosen, label: label))
+            // VX-292 U3: step 7's flip rings the band of the take to choose.
+            .tourAnchor(tourTakeID.map { Tour.Anchor.takeChoose($0) }, cornerRadius: 4)
             if let reorder {
                 Button(reorder.axis == .vertical ? "▲" : "◀") { reorder.move(-1) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
@@ -2203,7 +2218,9 @@ private struct CollapsibleTakeCard: View {
                     // header band here too — one checkmark, ever.
                     TakeChooseHeader(
                         tokens: tokens, isChosen: isChosen, label: take.label,
-                        onChoose: onChoose, reorder: reorder, acts: acts)
+                        onChoose: onChoose, reorder: reorder, acts: acts,
+                        // VX-292 U3: the tour's step 7 rings this take's band.
+                        tourTakeID: take.id)
                 }
                 if collapsed {
                     Text(text.split(separator: "\n").first.map(String.init) ?? "(empty)")

@@ -38,8 +38,8 @@ final class ShellRouter {
     var whatsNewRequested = false
     /// 13s-b U1a, piece 5: Help ▸ Take the Tour — a REQUEST the shell adopts
     /// (the tour runs over this window), `whatsNewRequested`'s shape exactly.
-    /// The shell answers it with the ONE tour entry the offer line's "yes"
-    /// calls (`RootView.startTour()`).
+    /// The shell answers it with the ONE tour entry the offer card's "yes"
+    /// calls (`RootView.startTour()`; VX-292 U4's card replaced the line).
     var tourRequested = false
     /// 13n-c U3 — THE GRANT SHEET, pre-filled (⌥⌘A's no-history road, the
     /// receipts' Change…, every place-door through the window's
@@ -74,6 +74,29 @@ final class ShellRouter {
         let sectionID: String
     }
     var pendingBookChapter: BookChapterLanding?
+    /// **13f W20(a) — THE ASCENT: the note a book was asked to open AT.** One
+    /// shot, keyed by book so a stale request can never land in another book
+    /// (the `blockLanding` guard's shape); the book it names takes it —
+    /// whether already showing (`onChange`) or opened by the ascent
+    /// (`onAppear`) — through `BookViewModel.requestReveal`, and clears it.
+    ///
+    /// VX-292 U2 (A-292-2): it lived on `RootView` as `@State` and moved HERE,
+    /// `pendingBookChapter`'s exact shape, so the tour's reveal door can park
+    /// it without holding the view (the engine holds its doors). The three
+    /// ascent doors — the membership chip's broadcast, the context bar's book
+    /// icon, the Library panel's outline row — park exactly what they parked.
+    struct BookAscent: Equatable, Sendable {
+        let bookID: String
+        let postID: String
+        /// **A-292-1's arm** (the tour's step-3 reveal only): the book shows
+        /// its OUTLINE before it lands the note — the mode road its tabs take
+        /// (`BookView.switchMode`), a no-op when it is already there — so a
+        /// book that arrived in Read (a finished one) is turned to the page the
+        /// card teaches. false for every other ascent: they land "in whatever
+        /// mode the book opens in", as they always have.
+        var landsInOutline = false
+    }
+    var pendingBookAscent: BookAscent?
     /// **VX-570 (the VX-439 run) — ⌥⌘N's request**: mint a member of THIS
     /// book through its own foot act. The book the focused pane shows takes
     /// it (only that pane's `BookView` is handed it) and clears it — the

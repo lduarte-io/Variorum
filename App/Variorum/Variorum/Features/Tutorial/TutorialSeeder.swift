@@ -10,7 +10,7 @@
 //  spec: `TutorialWalkTests` executes every lesson's acts headlessly, and
 //  the scripted screenshot walk drives them in the real app.
 //
-//  Seeding is a PRODUCT DOOR (Help ▸ Restore Tutorial…, registry-declared,
+//  Seeding is a PRODUCT DOOR (Help ▸ Restore Field Guide…, registry-declared,
 //  fire-and-DO): idempotent, replace-wholesale after a spoken confirm,
 //  everything deletable like any post or book. Identity is the app's own
 //  machinery — every lesson post wears the `tutorial` tag, the book and
@@ -1535,11 +1535,16 @@ enum TutorialSeeder {
             + "anything for good, which is why the Trash is worth visiting once "
             + "before you need it.",
 
+            // VX-292 U1 (R-292-9, amended at the vx-105 resolution): the door
+            // has read "Restore Field Guide…" since VX-602; the menu's own
+            // title is quoted from the registry, so the next rename moves
+            // the lesson with it.
             "Practice, and it is safe: go to the Library, right-click this very "
             + "lesson \u{25B8} Delete, then open the Trash and Put back the row "
             + "you find there. The lesson comes back into this book, in this "
             + "chapter, in its place. (And if you ever lose your nerve, Help "
-            + "\u{25B8} Restore Tutorial\u{2026} rebuilds the whole book.)",
+            + "\u{25B8} \(CapabilityRegistry.capability(.restoreTutorial).verb) "
+            + "rebuilds the whole book.)",
         ])
 
         let past = try lesson(deleting, "what a block leaves behind", [
@@ -2102,9 +2107,12 @@ enum TutorialSeeder {
             + "in Settings (\u{2318},), where Make a Gathering\u{2026} turns a "
             + "tag into a gathering that shows everything wearing it.",
 
+            // VX-292 U1 (R-292-9): the door's name from the registry (VX-602's
+            // "Restore Field Guide…").
             "Full disclosure: every lesson note wears the "
             + "\u{201C}tutorial\u{201D} tag. That is exactly how Help \u{25B8} "
-            + "Restore Tutorial\u{2026} finds what to replace. Your own notes "
+            + "\(CapabilityRegistry.capability(.restoreTutorial).verb) finds "
+            + "what to replace. Your own notes "
             + "never wear it unless you put it there; everything else in your "
             + "library is invisible to the restore.",
         ])
@@ -2222,7 +2230,7 @@ enum TutorialSeeder {
         // step — the mobile catch-up's, on row 55's own precedent), and the
         // seeded group's name `scrapPoolTitle`, which is a RESERVED IDENTITY
         // the restore door's discovery filters on: renaming it would orphan
-        // every already-seeded store's group from Restore Tutorial, which is
+        // every already-seeded store's group from Restore Field Guide, which is
         // a behaviour change wearing a copy change's clothes.
         let scraps = try lesson(library, "pool & scraps", [
             "Not everything starts as a note. The Pool (sidebar) holds notes "
@@ -2351,16 +2359,21 @@ enum TutorialSeeder {
             + "members. An owned book is the only place its notes live.",
 
             // 17y B-DEDUPE (R-17y-8): Jekyll left the default seed, so the
-            // lesson teaches with what stands — Sherlock (owned), this guide
-            // (a plain book), the classics gathering — and carries her
-            // intake's own sentence: Jekyll is one Restore press away, an
-            // example you choose. Words functional, 13s re-voices.
+            // lesson teaches with what stands — the owned seeded book (Sherlock
+            // then; the Prince since VX-292 U1), this guide (a plain book), the
+            // classics gathering — and carries her intake's own sentence:
+            // Jekyll is one Restore press away, an example you choose. Words
+            // functional, 13s re-voices.
             // 13s-b triage landing (R-13s-37's launch seed): the classics gathering
             // left the fresh seed, so the gathering act is RESTAGED onto the seeded,
             // unshelved starred notes gathering (a rule on the star) — the reader still
             // does the thing with each of the three kinds.
+            // VX-292 U1 (R-292-1): the launch seeds the Prince since VX-633 (owned,
+            // on Welcome, its notes #classics); Sherlock is restore-only, so the
+            // owned book waiting here is the Prince. Its name is written plainly
+            // (the H pattern) and pinned from `Book.prince`.
             "Two of the three are waiting on the Welcome shelf: this guide, a "
-            + "plain book, and the adventures of sherlock holmes, an owned book. "
+            + "plain book, and the prince, an owned book. "
             + "The third kind is with your unshelved books: the starred notes "
             + "gathering. A gathering is made from a rule and holds nothing, and "
             + "this one's rule is the star. Star any lesson (right-click it "
@@ -2371,24 +2384,35 @@ enum TutorialSeeder {
             // claim the shipped build made false (the LANDING RECORD's LC-2/LC-3):
             // the mark lives OUTSIDE its book (`OwnershipBadgeFace.badge` — inside,
             // `.inBook` draws only the shared mark), and a restored Jekyll is a PLAIN
-            // book (the arrangement owns Sherlock alone — `classicBooks`); the two
-            // doors are named by their shipped Help titles.
-            "Look closer at Sherlock: anywhere outside its book (the Library, "
+            // book (the arrangement owns only `SampleLibraryWelcome.ownedBooks` — the
+            // Prince and a restored Sherlock, never Jekyll); the doors are named by
+            // their shipped Help titles.
+            // VX-292 U1 (R-292-1): the owned book is the Prince now, and Sherlock's
+            // door JOINED the classics doors (with the Prince in the launch it adds
+            // a classic instead of restoring the present one), so "two more" became
+            // three (PROVISIONAL P-292-3, the U1 RECORD). Sherlock's door is quoted
+            // from its REGISTRY verb, never a literal: vx-105 retitles that label
+            // (R-105-4) and the sentence must converge with it at the merge. Its
+            // grammar reads with either title ("Restore the Sample Library" today,
+            // Restore “the adventures of sherlock holmes” after vx-105).
+            "Look closer at the prince: anywhere outside its book (the Library, "
             + "say), each of its notes wears a quiet \u{201C}owned by\u{201D} "
             + "mark naming its book. That book owns its notes. They live there "
             + "and nowhere else. This guide is the plain kind: a book whose notes "
-            + "are ordinary members, free to live in other books too. Sherlock's "
-            + "notes also all wear the tag #classics, and the Help menu has two "
-            + "more classics doors: Restore "
-            + "\u{201C}\(SampleLibraryJekyllBook.name)\u{201D} adds a second "
-            + "classic whose notes arrive wearing the same tag, and Restore the "
+            + "are ordinary members, free to live in other books too. The "
+            + "prince's notes also all wear the tag #classics, and the Help menu "
+            + "has three more classics doors: "
+            + "\(CapabilityRegistry.capability(.restoreSampleLibrary).verb) and "
+            + "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D} each add "
+            + "another classic whose notes arrive wearing the same tag (the first "
+            + "owned like the prince, the second plain), and Restore the "
             + "\u{201C}classics\u{201D} Gathering adds a gathering made from that "
             + "tag, which shows every note wearing it without holding a single "
             + "one of them.",
 
-            "Click a Sherlock note's mark and you land in its book, at that "
-            + "very note. A gathering is a window onto notes that live somewhere; "
-            + "the mark is the door to where they live.",
+            "Click the mark on one of the prince's notes and you land in its "
+            + "book, at that very note. A gathering is a window onto notes that "
+            + "live somewhere; the mark is the door to where they live.",
         ])
 
         // The old "books & the shelf" lesson's working paragraphs, swept

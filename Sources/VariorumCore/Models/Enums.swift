@@ -137,8 +137,11 @@ public enum ThemeVoice: String, Codable, Sendable, CaseIterable, DatabaseValueCo
 /// malformed resolves as `default`: a palette can never leave the app
 /// half-coloured.
 public enum ThemePalette: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
-    /// Each voice's shipped colours, byte-identical. The default, and the
-    /// parity proof the token pins ride (`ThemeTokenTests`).
+    /// Each voice's shipped colours, byte-identical. The storeless
+    /// placeholder, the fallback for a stored token this build does not know,
+    /// and the parity proof the token pins ride (`ThemeTokenTests`). Until
+    /// VX-710 it was also what a store with no palette read; that is now the
+    /// sea-glass (`Queries.ThemeSettings.unsetStorePalette`).
     case `default`
 
     // ── The four PASTELS (her R-Q11: *"yeah those look good, I like
@@ -171,6 +174,22 @@ public enum ThemePalette: String, Codable, Sendable, CaseIterable, DatabaseValue
     case butterAndCobalt = "butter_cobalt"
     case roseAndMoss = "rose_moss"
     case tealAndRust = "teal_rust"
+
+    /// **THE SEA-GLASS — the app icon's own colour, as a palette** (VX-710,
+    /// her R-292-14: *"can you add a theme to the app that is the same
+    /// seaglass color as the icon?"*; the icon is VX-192's sea-glass). ONE
+    /// seed — the icon's background fill — through the same rule as every
+    /// build; its seed and depth live beside the others in the app's token
+    /// layer (`PalettePreset.all`), never here. **It is also the palette a
+    /// store reads when it carries none** (her *"and make that the default
+    /// theme?"* — `Queries.ThemeSettings.unsetStorePalette`, a read-time
+    /// default; `default` below stays the voice's own colours, a store's
+    /// explicit pick of them kept). A new token is not a schema
+    /// event: a client from before this case reads the stored "seaglass" as
+    /// a value it does not know, which `Queries.themeSettings` has always
+    /// read as `.default` — that build's shipped colours, never a crash and
+    /// never half a palette.
+    case seaglass
 
     /// Her own hex (R-Q13: *"I can also still put in one hex and what's
     /// the 'brain' that'll take care of the second value?"*) — ONE seed,

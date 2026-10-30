@@ -104,18 +104,21 @@ struct BookcaseQuickEntryPlacementTests {
                 window.close()
             }
 
+            // VX-292 U4 (A JUSTIFIED EDIT — the U4 stage window's finding): the reserved
+            // keys are read SESSION-SCOPED, so the test host's own Bookcase (the dev-store
+            // app's live window) can never answer for this pin's board.
             let first = ids.first
             await settle(window, hosting) {
-                BookcaseRowOracle.frame(BookcaseRowOracle.entryKey) != nil
-                    && BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey) != nil
+                BookcaseRowOracle.frame(BookcaseRowOracle.entryKey, in: session) != nil
+                    && BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey, in: session) != nil
                     && (first.map { BookcaseRowOracle.frame($0) != nil } ?? true)
             }
             // A few more turns so the board's async load has landed every row
             // it is going to draw.
             await settle(window, hosting, turns: 30) { false }
             let rows = ids.compactMap { BookcaseRowOracle.frame($0) }
-            let entry = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.entryKey))
-            let hint = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey))
+            let entry = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.entryKey, in: session))
+            let hint = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey, in: session))
             let board = try #require(root.frame, "the mounted root reported its frame")
             print("[13s U1a entry placement] books \(bookCount) · root \(board) · entry \(entry) · bar \(hint) · window frame \(window.frame.size) · content \(window.contentView?.bounds.size ?? .zero)")
             try body(rows, entry, hint, board)

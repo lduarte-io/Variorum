@@ -83,17 +83,20 @@ struct ShelfView: View {
     /// the composition root and handed in). nil in harness mounts: the
     /// masthead then reads "Bookcase" alone, exactly as before.
     var wings: WingsModel? = nil
-    /// 13s-b U1a (R-13s-2/6/13) — **the first-open tour offer's row**, built
-    /// by the composition root and RENDERED here, between the quick-entry box
-    /// and the bottom bar (her R-13s-3: "the tutorial offer can live above
-    /// that bar on the right side"). The Bookcase never holds the onboarding
-    /// feature's model — it draws the view it is handed (the sidebar note
-    /// box's road). nil (harness mounts, a retired offer at launch): no row.
-    var offerLine: AnyView? = nil
+    /// VX-292 U4 (VX-559; R-292-5/12) — **the first-open tour offer's CARD**,
+    /// built by the composition root and RENDERED here, in the band between
+    /// the shelf listing and the quick entry, ABOVE the words card when both
+    /// stand (PROVISIONAL P-292-13). It replaced 13s-b U1a's quiet line and
+    /// its held row below the box (R-13s-3's spot — beta testers never saw
+    /// it). The Bookcase never holds the onboarding feature's model — it
+    /// draws the view it is handed (the sidebar note box's road), and the
+    /// card draws itself only while it has something to say. nil (harness
+    /// mounts): no card.
+    var offerCard: AnyView? = nil
     /// VX-307 U2b (VX-412 — `notes/CastleRules.md` rules 2 and 3 as amended; her drawing
     /// `notes/plans/vx-307/her-cards-area-2026-10-18.png`): **the card above the quick entry** — the twelve words'
     /// offer and rule 3's reminder, between the shelf listing and the quick-entry line, the main column's full width.
-    /// Built by the composition root (the protection faces are the bootstrap's) and RENDERED here, the offer line's
+    /// Built by the composition root (the protection faces are the bootstrap's) and RENDERED here, the offer card's
     /// road. nil (no protection faces yet, harness mounts): no card — the first open stays calm either way.
     var wordsBand: AnyView? = nil
     /// VX-332 (the VX-439 run) — a tour is running in this window: the quick
@@ -191,7 +194,7 @@ struct ShelfView: View {
                 .tourKeepClear()
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, owner: oracleOwner)
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, in: session, owner: oracleOwner)
                 }
                 #endif
             ScrollView {
@@ -245,29 +248,27 @@ struct ShelfView: View {
                         .allowsHitTesting(false)
                 }
             }
-            // VX-307 U2b: the card above the quick entry (her drawing) — between the listing and the entry line.
+            // THE BAND (her drawing, VX-307 U2b; VX-292 U4): the cards between the listing and the entry line, the
+            // main column's full width. The tour offer's card on top (PROVISIONAL P-292-13 — the band's top card is
+            // the one whose leaving moves nothing under it: the listing above takes its height), the words card under
+            // it, the quick entry under both.
+            if let offerCard {
+                offerCard
+            }
             if let wordsBand {
                 wordsBand
             }
             entryBar
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.entryKey, $0, owner: oracleOwner)
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.entryKey, $0, in: session, owner: oracleOwner)
                 }
                 #endif
-            if let offerLine {
-                offerLine
-                    #if DEBUG
-                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                        BookcaseRowOracle.recordFrame(BookcaseRowOracle.offerRowKey, $0, owner: oracleOwner)
-                    }
-                    #endif
-            }
             hintBar
                 .tourKeepClear()
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintBarKey, $0, owner: oracleOwner)
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintBarKey, $0, in: session, owner: oracleOwner)
                 }
                 #endif
         }
@@ -292,7 +293,7 @@ struct ShelfView: View {
                             #if DEBUG
                             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                                 BookcaseRowOracle.recordFrame(
-                                    BookcaseRowOracle.censusPanelKey, $0, owner: oracleOwner)
+                                    BookcaseRowOracle.censusPanelKey, $0, in: session, owner: oracleOwner)
                             }
                             #endif
                             .padding(.leading, max(0, rect.minX - Self.popoverTextInset))
@@ -304,7 +305,7 @@ struct ShelfView: View {
                             #if DEBUG
                             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                                 BookcaseRowOracle.recordFrame(
-                                    BookcaseRowOracle.orderPanelKey, $0, owner: oracleOwner)
+                                    BookcaseRowOracle.orderPanelKey, $0, in: session, owner: oracleOwner)
                             }
                             #endif
                             .padding(.leading, max(0, rect.minX + Self.orderLabelInset - Self.popoverTextInset))
@@ -1244,13 +1245,42 @@ enum BookcaseRowOracle {
         frames.publish(frame, for: readingID, owner: owner)
     }
 
+    /// **VX-292 U4 (the U4 stage window's finding, 2026-10-30) — THE RESERVED
+    /// KEYS ARE SCOPED BY THE BOARD'S SESSION.** The strip, the quick entry,
+    /// the bottom bar and the two masthead panels are CONSTANT keys every
+    /// Bookcase in the process writes — and the test host IS the dev-store
+    /// app, whose own window opens on its own Bookcase while a suite runs.
+    /// Its board published its entry frame AFTER a pin's `forgetAll()`
+    /// (the host finishing its launch during the run's first mounted test),
+    /// and the C4 rule's answer for a key is its most recent registrant, so
+    /// the pin read the HOST's entry (231, 706, 1009, 68 — a 1,240-pt window
+    /// with its sidebar) inside its own 900-pt window. That is the residual
+    /// `DebugOracleOwnership` names ("two LIVE owners in two different TESTS
+    /// on one unscoped slot"), and 13u2 UNIT E's rule closes it: scope the
+    /// slot by the `AppSession` the board belongs to (`debugProbeScope`), a
+    /// thing the pin already holds and no other world can share. Reading ids
+    /// stay subject-keyed (`recordFrame(_:_:owner:)` above): the host's ids
+    /// are random, so its rows cannot meet a test world's.
+    static func frame(_ key: String, in session: AppSession) -> CGRect? {
+        frames.current[scoped(key, session)]
+    }
+
+    static func recordFrame(_ key: String, _ frame: CGRect, in session: AppSession, owner: UUID) {
+        frames.publish(frame, for: scoped(key, session), owner: owner)
+    }
+
+    private static func scoped(_ key: String, _ session: AppSession) -> String {
+        "\(session.debugProbeScope)\u{2016}\(key)"
+    }
+
     static func release(owner: UUID) {
         store.release(owner: owner)
         frames.release(owner: owner)
     }
 
     /// 17y B3 (r): the reserved keys the strip and the № panel record their
-    /// frames under (never a reading id — those are UUIDs).
+    /// frames under (never a reading id — those are UUIDs). Since VX-292 U4
+    /// they are written and read ONLY session-scoped (`frame(_:in:)`).
     static let stripKey = "\u{2116}strip"
     static let censusPanelKey = "\u{2116}panel"
     /// librarywalkpolish VR-115: the order popover's frame.
@@ -1259,8 +1289,9 @@ enum BookcaseRowOracle {
     /// bar's, so a pin can read where the box sits (`BookcaseQuickEntryPlacementTests`).
     static let entryKey = "\u{2116}entry"
     static let hintBarKey = "\u{2116}hint"
-    /// 13s-b U1a (R-13s-2/6/13): the tour offer's row, when it has one.
-    static let offerRowKey = "\u{2116}offer"
+    // (13s-b U1a's `offerRowKey` — the tour offer line's held row — retired
+    // with the line at VX-292 U4; the offer card reports its own paper,
+    // `TourOfferCardOracle`.)
 
     /// A pin's door: start from empty.
     static func forgetAll() {

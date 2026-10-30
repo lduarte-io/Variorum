@@ -386,6 +386,8 @@ struct ReadModeView: View {
             .fixedSize()
             .help("edit: the index beside the text — click a block to write in it. "
                 + "read: the note as a page, nothing to edit")
+            // VX-292 U3: the onboarding tour's step 8 rings the switch.
+            .tourAnchor(.readFaceSwitch, cornerRadius: 6)
             if face == .read {
                 Picker("", selection: $form) {
                     Text(tokens.chromeLabel("continuous")).tag(Form.continuous)

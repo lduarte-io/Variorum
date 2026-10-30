@@ -24,7 +24,10 @@ struct HelpMenuNamingTests {
         #expect(CapabilityRegistry.capability(.restoreTutorial).verb == "Restore Field Guide\u{2026}")
         #expect(HelpMenuCopy.openFieldGuide == "Open the Field Guide")
         #expect(CapabilityRegistry.capability(.takeTour).verb == "Take the Onboarding Tutorial")
-        #expect(TourOfferCopy.helpRoad == "Run it any time from Help \u{25B8} Take the Onboarding Tutorial.")
+        // VX-292 U4 (R-292-5, her words: "if they choose no, just show 'this
+        // can always be started via help'") — the card's help line, re-worded
+        // with its door's name kept.
+        #expect(TourOfferCopy.helpRoad == "This can always be started from Help \u{25B8} Take the Onboarding Tutorial.")
         // "tutorial" names ONE Help door now, the tour; the two field-guide
         // doors never say it.
         let doors = [
@@ -97,23 +100,29 @@ struct HelpMenuNamingTests {
         #expect(!(try source("Registry/CapabilityRegistry.swift")).contains("\"Restore Tutorial"))
     }
 
-    /// A-439-9's boundary, stated: the guide's own lessons still said the old
-    /// door name (three lines, flagged for her — a re-seed is hers to order).
-    /// When she rules the content edit, this pin flips with it.
-    /// **VX-105 — FLIPPED FOR ONE LINE** (R-105-5 gave the first chapter's
-    /// re-wording to this effort; the VX-105/VX-292 boundary ruling 1: "DERIVE
-    /// the door name from the menu door's constant"): the "start here" lesson
-    /// names the door by the registry's own verb, so it can never go stale
-    /// again. The other two lines stand as seeded — the parallel VX-292
-    /// effort's to fix (this count follows when it lands). RED ON OLD: three.
-    @Test func theGuidesSeededContentIsNotReworded() throws {
+    /// A-439-9's boundary, FLIPPED as it asked ("when she rules the content
+    /// edit, this pin flips with it"): her coordinator raised the three stale
+    /// lesson lines at the VX-292 kickoff ("we should fix it"), R-292-9
+    /// routed them here, and the vx-105 resolution split them (Option B):
+    /// VX-292 U1 derives "the tray & the Trash" and "comments & tags"; the
+    /// first lesson's line rode vx-105's rewrite. BOTH branches have merged,
+    /// so the old literal is gone from the seeder ENTIRELY — the second
+    /// merger resolved the two editions of this pin to zero, as both
+    /// records asked. The seeded TRUTH is
+    /// `TutorialCurrencyTests.theLessonsNameTheRestoreDoorByItsMenuTitle`.
+    @Test func theGuideNamesTheRestoreDoorByItsRegistryVerb() throws {
         let seeder = try source("Features/Tutorial/TutorialSeeder.swift")
-        #expect(seeder.components(separatedBy: "Restore Tutorial\\u{2026}").count - 1 == 2,
-                "two lesson lines stand as seeded (VX-292's); the start here lesson's left with VX-105")
+        let old = "Restore Tutorial\\u{2026}"
+        #expect(!seeder.contains(old), "no lesson says the old name")
         let startHere = try #require(seeder.components(separatedBy: "lesson(welcome, \"start here\", [").dropFirst().first?
             .components(separatedBy: "lesson(welcome, \"getting around\"").first)
         #expect(startHere.contains("CapabilityRegistry.capability(.restoreTutorial).verb"),
                 "the start here lesson reads the door's own verb")
         #expect(!startHere.contains("Restore Tutorial"), "and spells no retired name")
+        let afterTheFirstLesson = try #require(
+            seeder.components(separatedBy: "lesson(welcome, \"getting around\"").last)
+        #expect(afterTheFirstLesson.components(
+            separatedBy: "\\(CapabilityRegistry.capability(.restoreTutorial).verb)").count - 1 == 2,
+                "the two later lessons quote the registry's verb")
     }
 }

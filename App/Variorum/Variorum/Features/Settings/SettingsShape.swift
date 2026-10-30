@@ -206,10 +206,13 @@ nonisolated enum SettingsCatalog {
                        "monospace", "font", "typeface", "look", "style"]),
         SettingsRow(
             id: "palette", pane: .general, title: PaletteCopy.title,
-            blurb: "Sixteen palettes plus your own hex — the room, the wash, the accent and "
+            // VX-710: the sea-glass made it seventeen (a pin holds the count
+            // word to the palettes the strip shows), and its name and the
+            // voice's own colours' new name are search words.
+            blurb: "Seventeen palettes plus your own hex — the room, the wash, the accent and "
                 + "the take tints, under either voice.",
             keywords: ["colour", "color", "palette", "tint", "accent", "hex", "pastel",
-                       "custom", "background"]),
+                       "custom", "background", "sea glass", "seaglass", "classic"]),
         SettingsRow(
             id: "appearance", pane: .general, title: "Appearance",
             blurb: "Follow system, light, or dark. Dark is a fully black room in both voices. "

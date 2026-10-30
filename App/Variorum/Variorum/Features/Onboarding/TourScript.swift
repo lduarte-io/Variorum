@@ -20,7 +20,17 @@
 //  · leg 1 — a note has no masthead star; the star lives on the note's
 //    rows (P-U2-5);
 //  · leg 4 — the note-side panel's name is its door's, "Scraps"
-//    (BUILD-VERIFY 2, P-U2-2's sibling).
+//    (BUILD-VERIFY 2, P-U2-2's sibling);
+//  · steps 2–3 — VX-292 U1 (R-292-1): the launch seeds *The Prince* since
+//    VX-633, so the two Sherlock cards carry the architect's U1 COPY DRAFTS
+//    (`notes/plans/vx-292-onboarding.md`), the book and its toured chapter
+//    read from the Prince's own constants (chapter XVII, PROVISIONAL
+//    P-292-1);
+//  · steps 7–11 and leg 5 — VX-292 U3 (R-292-3/7/8/10/13): the grown tour's
+//    cards carry the architect's U3 COPY DRAFTS, each departure a real-app
+//    fact recorded in the plan's U3 RECORD with its alternative (the mode
+//    list's home is the sidebar's "this note" section, not a "rail"; choosing
+//    a take flips ONE paragraph, not the page).
 //
 //  The words that NAME a door quote the door's own constant, so a rename can
 //  never leave the tour describing a door that is gone (13u4 UNIT S3's rule).
@@ -51,12 +61,14 @@ enum TourScript {
     static let roadBack = "Follow the ring back."
 
     /// The small count line (the mockup's "STEP 1 OF 11", in sentence case —
-    /// her caps ban, R-13s-30, and rendered text is sentence case).
+    /// her caps ban, R-13s-30, and rendered text is sentence case). VX-292
+    /// U3: a step's beats share its number (step 7's flip and its way back,
+    /// step 11's book arc); the mockup's "· and home" beat retired when home
+    /// became step 12 of its own (R-292-13's flow).
     static func label(_ position: Tour.Position) -> String? {
         switch position {
-        case .main(let number, let secondBeat):
-            let count = "Step \(number) of \(Tour.mainStepCount)"
-            return secondBeat ? "\(count) \u{00B7} and home" : count
+        case .main(let number, _):
+            return "Step \(number) of \(Tour.mainStepCount)"
         case .endCard:
             return nil
         case .leg(let number):
@@ -68,31 +80,86 @@ enum TourScript {
 
     // MARK: - Facts the words depend on
 
-    /// Step 3's story — also how the tour finds it (`Queries.tourLandmarks`).
-    static let firstStoryTitle = "A Scandal in Bohemia"
+    /// **Step 2's book** — the book the launch seeds (VX-292 R-292-1: *The
+    /// Prince* since VX-633), by its reserved name from the book's own
+    /// constants; step 2's card says it, and the tour finds the book by it
+    /// (`Queries.tourLandmarks`, an exact match). `TourScriptTests` pins it to
+    /// `Book.launchBook`, so a future launch swap turns the tour red rather
+    /// than leaving it naming a book a fresh store does not hold.
+    static let seededBookName = SampleLibraryPrinceBook.name
+
+    /// **Step 3's chapter** — XVII, whether it is better to be loved or
+    /// feared (PROVISIONAL P-292-1: famous, eight paragraphs so the note has
+    /// a real middle for step 4, and it carries a Ricci third take; the
+    /// alternative is chapter III). The note's exact seeded title, read from
+    /// the book's constants; also how the tour finds it
+    /// (`Queries.tourLandmarks`). The card names it by its question, not its
+    /// title (a roman numeral would read as shouted caps on a card).
+    static let firstStoryTitle = SampleLibraryPrinceBook.lovedOrFearedChapterTitle
 
     /// **The take badge's glyph** — Write's margin badge reads `⑂N`
     /// (`BadgeOverlayController`, pinned by `TourScriptTests`); the tour's
     /// badge locator and step 6's sentence both read this one constant.
     static let takeBadgeGlyph = "\u{2442}"
 
+    /// **Step 7's take and step 9's column** (VX-292 U3) — the Prince's
+    /// Italian: every paragraph's second take wears this label, and every
+    /// chapter's saved lens of the whole Italian is named by it (R-633-15).
+    /// Read from the book's constants; the tour's flip query looks the take
+    /// up by it (`Queries.tourFlipFacts`).
+    static let italianName = SampleLibraryPrinceBook.italianTakeLabel
+
+    /// **The palettes Settings offers, spelled** (VX-292 U3, the Settings
+    /// stop): every palette but Custom (your own hex), counted from the enum
+    /// the strip renders — the search blurb's own count
+    /// (`PaletteDerivationTests.theSearchBlurbCountsThePalettesTheStripShows`),
+    /// so a new preset can never leave the card a number behind.
+    static var paletteCountWord: String {
+        let count = ThemePalette.allCases.filter { $0 != .custom }.count
+        let speller = NumberFormatter()
+        speller.locale = Locale(identifier: "en_US")
+        speller.numberStyle = .spellOut
+        return speller.string(from: NSNumber(value: count)) ?? "\(count)"
+    }
+
+    /// **Step 3's last sentence when the ring is NOT on the chapter the
+    /// approved sentence names** (VX-292 U3 — the U2 RECORD's copy note:
+    /// R-292-17's fallback can ring another fanned chapter when XVII stands
+    /// without its fan). NEW WORDS, PROVISIONAL P-292-11 — hers to strike;
+    /// the alternative is the approved sentence always (a ring and a sentence
+    /// that disagree in that one case).
+    static let insideBookRingedChapter = "Click into the chapter the ring marks."
+
     // MARK: - The cards
 
     // swiftlint:disable line_length
-    static func card(_ step: Tour.Step, takeCount: Int = 2) -> Card? {
+    /// `namedChapter` (VX-292 U3): whether step 3's ring is on the chapter
+    /// its approved last sentence names (`Queries.TourLandmarks.firstStoryIsNamed`).
+    static func card(_ step: Tour.Step, takeCount: Int = 2, namedChapter: Bool = true) -> Card? {
         switch step {
         case .navigation:
             return Card(
                 title: "Navigation",
                 body: "Everything lives in one of the places on the left. Bookcase holds your books. Library is everything, searchable. Pool holds notes that aren't in a book, and Snippets keeps pieces of text you reuse between notes.")
         case .seededBook:
+            // VX-292 U1 (R-292-1): the U1 COPY DRAFT, the book's name read
+            // from its constant (it opens the sentence in the shelf's
+            // lowercase, the end card's "readme" precedent).
             return Card(
-                title: "Sherlock Holmes, in Variorum",
-                body: "The adventures of sherlock holmes comes with the app, so you can try everything on real writing. Click into it.")
+                title: "The Prince, in Variorum",
+                body: "\(seededBookName) comes with the app, so you can try everything on real writing. Machiavelli's Italian rides under every paragraph. Click into it.")
         case .insideBook:
+            // VX-292 U1: the approved first three sentences verbatim; the
+            // last names the toured chapter (`firstStoryTitle`) by its
+            // question, the U1 COPY DRAFT.
+            // VX-292 U3 (P-292-11): when R-292-17's fallback rings another
+            // chapter, the last sentence names the ring, not XVII.
+            let last = namedChapter
+                ? "Click into the chapter on whether it is better to be loved or feared."
+                : insideBookRingedChapter
             return Card(
                 title: "Inside a book",
-                body: "A book opens on its Outline: every chapter, and the beginning of every note. A book works like a scrapbook. Put a note in and it stays there. Click into \(firstStoryTitle).")
+                body: "A book opens on its Outline: every chapter, and the beginning of every note. A book works like a scrapbook. Put a note in and it stays there. \(last)")
         case .write:
             // R-13s-32: "savepoint" stays here, the explanation of the word
             // commit (her word: "keep it").
@@ -108,23 +175,54 @@ enum TourScript {
             return Card(
                 title: "The take icon",
                 body: "The \(takeBadgeGlyph)\(max(2, takeCount)) in the margin marks any block that keeps more than one version. Click into it any time to see them. Click into it now, then Open Takes mode.")
-        case .takesMode:
-            // BUILD-VERIFY 1 (P-U2-2): the board's card chooses with its
-            // header band ("choose" / "✓ chosen" — `TakeChooseHeader`), not a ✓.
+        case .takesMode, .takesFlipBack:
+            // VX-292 U3 — the flip (both beats, one card: it names both acts
+            // in order, and the ring moves from the Italian's band to the
+            // English take's). BUILD-VERIFY 1 (P-U2-2) stands: the board's
+            // card chooses with its header band (`TakeChooseHeader`'s
+            // words, quoted). Departure (a real-app fact): choosing a take
+            // flips ONE paragraph, so "this paragraph", not "the page".
             return Card(
                 title: "Both takes, side by side",
-                body: "This is Takes mode: the whole note, with every version of every block. The \u{2713} take is what the note says. Click into a take to work in it; choose, at the top of its card, makes it the one the page shows. The original keeps its own card.")
+                body: "This is Takes mode: the whole note, with every version of every block. The \u{2713} take is what the note says. Find the take named \(italianName) and press \(TakeChooseHeader.chooseWord): this paragraph now reads Italian. Choose the English take to bring it back. Choosing decides what the note says; clicking into a take just works in it.")
+        case .readInNote:
+            // VX-292 U3 (R-292-7). BUILD-VERIFY: Read's switch opens on
+            // `edit` (`ReadModeView.rememberedFace`'s default — her ruling;
+            // a note she flipped to `read` before remembers it). Departure: the
+            // mode list sits in the sidebar's "this note" section — "the rail"
+            // is the code's word, never the app's.
+            return Card(
+                title: PostMode.read.rawValue,
+                body: "Click \(PostMode.read.rawValue) in the sidebar. It opens on edit, an outline of the note you can type in; flip the switch to read for the calm page. When you want to write again, click any sentence and you land back at that very block.")
+        case .lensesLive:
+            // VX-292 U3 (R-292-3, VX-633's lens direction). BUILD-VERIFY: a
+            // note opens in Lenses on its own one column, with the dashed
+            // "＋ column" door beside it whose menu opens each saved lens
+            // (`LensesBoardView.addColumnStub`); every Prince chapter saves a
+            // lens of the whole Italian, named by its take label.
+            return Card(
+                title: PostMode.lenses.rawValue,
+                body: "\(PostMode.lenses.rawValue) shows different takes of this note side by side. Click \(PostMode.lenses.rawValue) in the sidebar, then open the column named \(italianName): the whole chapter in Italian beside the English. Same note, two readings.")
         case .deeperModes:
+            // VX-292 U3: reworked — Lenses is a live visit now (step 9).
             return Card(
-                title: "Three more, for later",
-                body: "Lenses shows different takes of this note side by side. Compare sets other notes beside this one. Blocks is a workbench for many blocks at once. The field guide teaches each of them.")
-        case .placeFollows:
-            // BUILD-VERIFY 3 (P-U2-3): the Index arrives with the NOTE
-            // selected (the mode switch carries the note, not the block); the
-            // paragraph comes back at step 10's "edit here".
+                title: "Two more, for later",
+                body: "\(PostMode.compare.rawValue) sets other notes beside this one. \(PostMode.blocks.rawValue) is a workbench for many blocks at once. The field guide teaches each of them.")
+        case .upToBook:
+            // VX-292 U3 — the book arc's first beat (R-292-10; reworks
+            // step 9's climb). BUILD-VERIFY: the book icon's ascent lands the
+            // note's own card at the Outline's top (`requestReveal`), the
+            // book's four tabs quoted from the row that draws them.
+            let tabs = BookView.tabOrder.map(BookView.tabLabel)
             return Card(
-                title: "Your place follows you",
-                body: "Bounce between Write (\u{2318}1) and Takes (\u{2318}2) as you like. Then click the book icon and pick Index, the book's own view of its notes. Your note is still selected there, one level up. Your place follows you everywhere.")
+                title: "Up to the book",
+                body: "Click the book icon: you're back in \(seededBookName), one level up, with your chapter in view. A book has four views of its own along the top: \(tabs[0]), \(tabs[1]), \(tabs[2]) and \(tabs[3]).")
+        case .bookAndRead:
+            // VX-292 U3 — the second beat: the book's Book tab (the spread —
+            // each note a page), then its Read.
+            return Card(
+                title: "\(BookView.tabLabel(.spread)) and \(BookView.tabLabel(.read))",
+                body: "Click \(BookView.tabLabel(.spread)): the chapters become pages, like a bound copy. Then click \(BookView.tabLabel(.read)) to read straight through. Books are for reading whole; notes are where you write.")
         case .downAndUp:
             return Card(
                 title: "Down and up",
@@ -160,6 +258,15 @@ enum TourScript {
             return Card(
                 title: "Snippets",
                 body: "Pieces of text you reuse between notes live here: a phrase, a quote, a line you cut. From inside any note, the \(PostDetailView.scrapsDoorTitle) panel brings them alongside so you can pull one in. The snippet stays for next time.")
+        case .legSettings:
+            // VX-292 U3 (R-292-8) — the Settings stop: the U3 COPY DRAFT, its
+            // facts read from their homes (the palettes counted from the
+            // strip's enum, the default's name its label, the pane its
+            // title). Settings opens on General in its own window; this card
+            // stays here with next (PROVISIONAL P-292-10).
+            return Card(
+                title: "Make it yours",
+                body: "Settings holds the look: two voices, light and dark, and \(paletteCountWord) colour palettes, \(PaletteCopy.label(Queries.ThemeSettings.unsetStorePalette).lowercased()) leading. The \(SettingsPane.mcp.title) pane connects an AI to your library if you ever want one; nothing connects unless you turn it on. Have a look, then come back.")
         case .legEnd:
             return Card(
                 title: "The field guide",
@@ -173,8 +280,10 @@ enum TourScript {
     static let endBody = "Navigation on the left. Books on the Bookcase. Takes on any block. Your place follows you."
     /// R-13s-28/39: the readme sentence stands although readme seeds later.
     /// A5: no time promise on the main leg — "two more minutes" lives on the
-    /// fork's first door only.
-    static let endAside = "readme, a short welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one."
+    /// fork's first door only. VX-713 (absorbed by VX-292 U3): "a short
+    /// welcome note" became "a welcome note" — the readme VX-105 seeded is her
+    /// letter, about 1,800 words, and the sentence must stay true of it.
+    static let endAside = "\(ReadmeSeeder.title), a welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one."
     /// The no-readme form (the extra-pass MINOR-1 honesty gate, PROVISIONAL):
     /// an existing store that predates the seeded readme must not be promised
     /// one, so the aside keeps only the journal sentence — the approved

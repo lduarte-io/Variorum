@@ -151,6 +151,16 @@ nonisolated enum SampleLibraryPrinceBook {
         ("the state of italy and conclusion", 26),
     ]
 
+    /// **Chapter XVII's note title** — `ThePrince.txt`'s own `%%%` line,
+    /// named once (the import stores the line as the note's title, exactly).
+    /// The Dido couplet's restoration reads it, and so does the onboarding
+    /// tour, which rings this chapter at its step 3 (VX-292, PROVISIONAL
+    /// P-292-1 — `TourScript.firstStoryTitle`); `TourScriptTests` pins it
+    /// against the bundled resource, so a re-extracted title cannot strand
+    /// either reader.
+    static let lovedOrFearedChapterTitle =
+        "XVII. Concerning cruelty and clemency, and whether it is better to be loved than feared"
+
     /// The chapter a note's title belongs in. A title without a roman
     /// numeral — the Dedication — has its own (R-633-17).
     static func part(for title: String) -> String {
@@ -278,7 +288,7 @@ nonisolated enum SampleLibraryPrinceBook {
     static let verseRestorations: [VerseRestoration] = [
         // XVII — Dido's couplet (Virgil, *Aeneid* I.563–4), as Marriott sets it.
         VerseRestoration(
-            noteTitle: "XVII. Concerning cruelty and clemency, and whether it is better to be loved than feared",
+            noteTitle: lovedOrFearedChapterTitle,
             paragraphIndex: 2,
             text: "\u{201C}Res dura, et regni novitas me talia cogunt\n"
                 + "Moliri, et late fines custode tueri.\u{201D}"),
