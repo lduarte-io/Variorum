@@ -113,6 +113,14 @@ final class TourEngine {
         /// the door's own "already whole"). Read only when it decides
         /// anything (the props are broken); true otherwise.
         var isComplete: Bool
+        /// **The book ADMITS new chapters** — the operations layer's own
+        /// admission gate for exactly this road (`assertReadingAcceptsPosts`:
+        /// not Finished or Sealed, not at its note cap). The window of
+        /// 2026-10-30 found the gap: a Finished Prince with broken props ran
+        /// the road at every start and ate its `lockedReading` refusal. A
+        /// book that refuses is beyond the road's reach — the floor stands.
+        /// Read only when it decides anything; true otherwise.
+        var acceptsChapters: Bool = true
     }
 
     /// **Whether a tour's start runs the launch book's own restore road
@@ -132,7 +140,10 @@ final class TourEngine {
     ///    are broken (`TourLandmarks.seededBookPropsBroken` — the named
     ///    chapter gone, or no live chapter carrying a fan) AND the door can
     ///    REACH a mend: the book is the one the road acts on and it is
-    ///    INCOMPLETE (a shipped chapter is not a live member). The road mints
+    ///    INCOMPLETE (a shipped chapter is not a live member) and it ADMITS
+    ///    new chapters (not Finished, Sealed or at its note cap — her
+    ///    deliberate acts, never undone by a tour; the door would only
+    ///    refuse, at every start). The road mints
     ///    exactly the missing chapters, each fresh with its takes and lenses
     ///    (the seeder's own bilingual pass, in the chapter's own turn), and
     ///    never touches a chapter that stands. What it cannot reach — every
@@ -145,7 +156,8 @@ final class TourEngine {
     ) -> Bool {
         guard wingID.isEmpty, let store else { return false }
         guard let seeded = landmarks.seededBookID else { return store.liveBookID == nil }
-        return landmarks.seededBookPropsBroken && store.liveBookID == seeded && !store.isComplete
+        return landmarks.seededBookPropsBroken && store.liveBookID == seeded
+            && !store.isComplete && store.acceptsChapters
     }
 
     /// The store's facts for `restoresLaunchBook` (nil: unreadable — no
@@ -159,14 +171,21 @@ final class TourEngine {
             try SampleLibrarySeeder.discover(db, book: .launchBook)
         }) else { return nil }
         var complete = true
-        if landmarks.seededBookPropsBroken, found.bookID != nil,
-           let stories = try? await Task.detached(priority: .utility, operation: {
-               try SampleLibrarySeeder.loadStories(for: .launchBook)
-           }).value {
-            complete = found.isComplete(
-                for: SampleLibrarySeeder.expectedTitles(for: .launchBook, stories: stories))
+        var accepts = true
+        if landmarks.seededBookPropsBroken, let bookID = found.bookID {
+            // The door's own admission gate, run where every operation runs
+            // (the serialized runner — off the main thread, P2).
+            accepts = (try? await session.runner.run { ops in
+                try ops.assertReadingAcceptsPosts(bookID)
+            }) != nil
+            if accepts, let stories = try? await Task.detached(priority: .utility, operation: {
+                try SampleLibrarySeeder.loadStories(for: .launchBook)
+            }).value {
+                complete = found.isComplete(
+                    for: SampleLibrarySeeder.expectedTitles(for: .launchBook, stories: stories))
+            }
         }
-        return LaunchBookFacts(liveBookID: found.bookID, isComplete: complete)
+        return LaunchBookFacts(liveBookID: found.bookID, isComplete: complete, acceptsChapters: accepts)
     }
 
     // MARK: - Events
