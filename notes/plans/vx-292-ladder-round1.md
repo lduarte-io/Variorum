@@ -38,3 +38,18 @@ The grown flow matches R-292-13 byte-for-byte; the drive's once-per-arrival tole
 5. **PRODUCT RECORD: ratified** — read against her words the rulings stop conflicting (R-292-17 is about deletions; rename/release are edits R-292-11 protects); the QUESTIONS/handoff entry carries alternative (b), the purge floor, and the arrangeWelcome reach for her eye.
 
 **Disposition of the MAJOR: CONFIRMED-WITH-SHAPE; the U2 implementer applies with the five pins; round 2's fresh reviewer re-checks the applied fix.**
+
+# LADDER ROUND 2 (fresh fable-reviewer, 2026-10-30, fix diff 344886088..86cb411dc) — NO NEW BLOCKER/MAJOR; THE LADDER CLOSES
+
+**[MINOR] · TourQueries.swift:209–219 + TourEngine.swift:248–261 · stale deletion evidence survives a mend: a delete → mend → RENAME chain on the same shipped title re-opens the MAJOR's corner** (verbatim mechanism in the review report: tombstones are forever and the evidence read has no recency bound, so after a mend the old tombstones still testify; renaming the MENDED chapter then mints a twin. The symmetric release-after-mend chain is SAFE — the stray conjunct floors it — bounding the corner to the rename leg. Judged a residual of the CONFIRMED call's own evidence shape, implemented to the letter, three acts deep on one title: MINOR, not a round-3 MAJOR.)
+- **Disposition: RECORD-ONLY, accepted as proposed.** One line joins P-292-7's re-amended text and the QUESTIONS/handoff entry ("evidence is per-title and un-aged: a chapter deleted, mended and then renamed mends again as a twin"); the complete fix is a provenance marker on seed-minted notes — NEW SCHEMA, out of this effort's scope — **filed as a ticket at the closeout** (Bug · Suspected · Settings & onboarding · Low, pointing at this entry).
+
+**[NIT] · TourQueriesTests.swift:248–291 · the evidence pin's dismissed-arrival exclusion is untested** (the `rp.status = 'member'` conjunct has no arrival-class row in the fixture). **Disposition: RECORDED** — rides a future member; the claim line in the pin's doc stands as design intent.
+
+**[NIT] · RootView.swift:1145–1153 + SeededBookRestore.swift:130–143 · gate-to-press window** (the gate judges a snapshot; the road re-discovers at press; a concurrent sync apply between them is mended un-judged — milliseconds, inherent to the confirmed placement, the isComplete/discover split's standing class). **Disposition: RECORDED** — the standing class; nothing new to build.
+
+**VERDICT ON THE PART CONDITION: IN** (the reviewer verified the seeder's real section handling — live-sections-only discovery keyed by exact name, so a renamed part would get a shipped-name twin; a deleted part alone never reaches the gate; flooring both errs in the recorded safe direction). Already recorded in the fix record and P-292-7.
+
+**CLEAN BILL (abridged; full text in the review report):** every final-call binding holds line by line (evidence shape, front-note sweep with its BUILD-VERIFY true, stray floor load-bearing, tag-guard ordering correct, arms untouched, mend pin untouched, layering/P1/P2/fail-closed); the five pins honest with the compile-honesty correction accurate and W8 coherent arm by arm; NO bypass (four callers: the tour's gated entry + three Help doors gate-free by design); the arrangement item exactly as ruled. Still owed: the stage window's Mac run (gate A 25 over TourEngineTests+TourEntryTests) + the W8 watch — the closeout window carries them.
+
+**THE LADDER'S VERDICT: CLOSED at round 2** (cap 3 unneeded). Round-2 findings carry no fix work; the round-1 MAJOR's fix stands as applied and re-reviewed.
