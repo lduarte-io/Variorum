@@ -177,6 +177,8 @@ mostly documented in the STTextView Apple-bug list — reword/re-verify per OS v
 
 ---
 
+- **macOS 27.0.1 — the text view's own display pass never runs after a frame-constant storage edit (VX-677/VX-668, measured).** A TK2 `NSTextView` renders its text in its own subviews (`_NSTextContentView` → one `_NSTextViewportElementView` per laid-out fragment, beside `_NSTextSelectionView` and `_NSTextRenderingSurfacesGroupView`); a storage edit that leaves the text view's frame unchanged — a programmatic replace or `insertText` — never runs the text view's own `viewWillDraw` and never sets its `needsDisplay` (probed: 0 calls over five display passes; a frame-growing edit: 2). Setting `needsDisplay = true` makes the next run-loop display cycle run it. **The rule: a consumer of the text view's own display pass must make that pass certain after an edit it waits on.** (The N14 settle hop's consumers are the class — VX-702; the probes are quoted in `notes/plans/fixes/vx-677-editor-panes-ai-door.md`.)
+
 ## 4. Defensive practices & flags — set these from the first editor commit
 
 1. **Opt into TK2 explicitly at init**: use the `NSTextView(..., usingTextLayoutManager: true)`

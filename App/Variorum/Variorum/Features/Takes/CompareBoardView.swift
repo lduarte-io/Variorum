@@ -417,12 +417,16 @@ final class CompareViewModel {
         projection = new
         // The convergence half of the buffer-authoritative discipline —
         // across the UNION of this board's coordinators (a buffer stays
-        // authoritative while pending in ITS post's pipeline).
-        authority.settle(isPending: { variantID in
-            mountedPostIDs.contains {
-                coordinator(for: $0).pending[variantID] != nil
-            }
-        })
+        // authoritative while pending in ITS post's pipeline). VX-664
+        // (A-677-1): the same door hears whether the ring's OWN take was
+        // written from outside — suspected here, confirmed on a fresh read,
+        // and then the ring ends (`endRingIfWrittenFromOutside`).
+        let liveIncoming = authority.livePane.flatMap {
+            storeText(postID: $0.context, variantID: $0.variantID)
+        }
+        let suspect = authority.settle(
+            isPending: { variantID in isPending(variantID) }, liveIncoming: liveIncoming)
+        endRingIfWrittenFromOutside(suspect)
         if !autoFilled, peerSlots.first?.postID == nil,
            let first = new.versionPeers.first {
             autoFilled = true
@@ -538,10 +542,31 @@ final class CompareViewModel {
         return face.slots.first { $0.variantID == variantID }?.text
     }
 
+    /// A buffer stays authoritative while pending in ANY of this board's
+    /// post pipelines — the settle's own union, named once.
+    private func isPending(_ variantID: String) -> Bool {
+        mountedPostIDs.contains { coordinator(for: $0).pending[variantID] != nil }
+    }
+
+    /// **VX-664 — the ring's own take was written from OUTSIDE** (A-677-1):
+    /// confirmed on a fresh read, the ring ends by this board's own `blur()` —
+    /// VX-222/VX-440's shape (the pane goes read and adopts the stored words).
+    private func endRingIfWrittenFromOutside(_ suspect: PaneTextAuthority.PaneKey?) {
+        OutsideWriteConfirmation.endRing(
+            ifConfirmed: suspect, in: session.database,
+            authority: { [weak self] in self?.authority },
+            isPending: { [weak self] in self?.isPending($0) ?? false },
+            endRing: { [weak self] in self?.blur() })
+    }
+
     // MARK: Focus + edits (the ONE ring migrates — across posts)
 
     func focus(_ pane: PaneTextAuthority.PaneKey) {
-        switch authority.focus(pane) {
+        // VX-664 (A-677-1): what the pane shows as it takes the ring.
+        let shown = storeText(postID: pane.context, variantID: pane.variantID).map {
+            authority.text(variantID: pane.variantID, storeText: $0)
+        }
+        switch authority.focus(pane, showing: shown) {
         case .unchanged:
             return
         case .migrated(let leaving):

@@ -381,6 +381,18 @@ extension Queries {
     /// Not a switch: a stamp, beside the switches it governs.
     public static let mcpAdoptionAckKey = "adoption_hold_ack"
 
+    /// **VX-676 — the show dial's row** in the same key/value family (A-6's
+    /// boundary-state home; local-only, no migration): `move` · `ask` · `never`.
+    /// Not a switch (three values): read only through `mcpShowDial`.
+    public static let mcpShowDialKey = "show_dial"
+
+    /// **VX-676 — how a client's `show_in_app` lands** (her ruling (3)). No row
+    /// (or a value this build can't name) reads as the ask (`MCPShowDial.default`).
+    public static func mcpShowDial(_ db: Database) throws -> MCPShowDial {
+        MCPShowDial(stored: try String.fetchOne(
+            db, sql: "SELECT value FROM mcp_switch WHERE key = ?", arguments: [mcpShowDialKey]))
+    }
+
     // MARK: - Activity
 
     public static func mcpActivity(_ db: Database, limit: Int? = nil) throws -> [MCPActivityRow] {

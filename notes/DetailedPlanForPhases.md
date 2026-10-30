@@ -13,27 +13,28 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-677 — Run: editor, panes & the AI door** (eleven members by the sub-issue listing: VX-664 ring rule · VX-656 Write undo · VX-668 restore landing · VX-572 shortcuts pane · VX-674 commit preview · VX-675/VX-676 show_in_app · VX-663/VX-662/VX-680/VX-681 the navigation-carry family; the brief `notes/handoffs/vx-677-kickoff.md`, the record `notes/plans/fixes/vx-677-editor-panes-ai-door.md`). NO Sync/ (VX-678 holds the slot). Surfaces: the editor seam (`EditorTextView`, `PaneSurface`, `PaneTextAuthority`), Takes/Lenses boards, Block History, the MCP door (`show_in_app`, Settings ▸ MCP, `MCPSession.instructions`), book navigation carries (Index/Outline/Read), the ⌘/ shortcuts pane. Closeouts serialize with VX-678; no release at close (one after both merge). | VX-677 · `vx-677-run-editor-panes-the-ai-door` | `~/dev/variorum-vx-677` · Pro | In progress |
 
 ### Latest closeout
 
-**→ VX-633 CLOSED 2026-10-29 — THE BILINGUAL PRINCE SEED BOOK (the record `notes/plans/vx-633-prince-book.md`
-— rulings R-633-1..21, the U1/U2/U2b records, the ladder files; built on the Air at her sitting, absorbed and closed
-on the Pro by the VX-678 orchestrator; PR #204, merge SHA in memory + the ticket).** The launch seed is now *The
-Prince*: 27 chapters + the front note, every paragraph Marriott 1908 (chosen) + "il principe 1532" (the 1814
-Wikisource printing re-paragraphed to Marriott's breaks, words untouched), six standout lines a "ricci 1903" third
-take, XXVI's Petrarch stanza a "dacres 1640" English verse, saved lenses per chapter (marriott · il principe ·
-ricci/dacres), the R-633-21 comment pair on XVIII, the four parts + the Dedication's own chapter (R-633-17), owned on
-Welcome with #classics + #machiavelli; FRESH STORES ONLY (R-633-16 — existing stores' road is Help ▸ Restore "the
-prince"; sherlock joins jekyll restore-only). Verified: suites-a (168 tests + the two U2b reverts red-as-predicted),
-tests-b (Mac 5,615/983 CLEAN; phone 849/139), the both-voices reset walkthrough (fresh birth 9 PASS + 1 ticketed
-PARTIAL; the existing-store leg proving the decline LIVE and the restore door whole; VX-671's multi-select exercised
-on a real store), a two-round ladder (R1: 1 MAJOR + 3 MINOR + 1 NIT — F1's named road disputed, UPHELD, and the real
-signed-out-after-join road latched as P-633-F1; R2: clean, no round 3), the fixes verification window (all pins
-observed green, four reverts red exactly), and the final whole targets at the tip (Mac 5,616/983, phone 852/139 —
-reds all pre-ticketed flakes/standing: VX-701 born, VM-34 unchanged). Canon: the SurfaceContracts seed-set line,
-QUESTIONS #251, MobileSoul PL-65. Born: VX-696..701 (the walk's five + the focus flake), VM-33/34/35. NO release at
-this close — VX-677 merges last of the three and mints the one release (her word), the Prince riding it.
+**→ VX-677 CLOSED 2026-10-29 — RUN: EDITOR, PANES & THE AI DOOR (the record
+`notes/plans/fixes/vx-677-editor-panes-ai-door.md`; the ladder files `vx-677-ladder-round1/2.md`; PR #207, merge
+SHA in memory + the ticket).** Twelve members in five batches under the architect shape: the editor seam's two
+Highs (the ring-end on every outside-change road per her ruling — one pure rule at the authority's settle seam,
+sweep-verified S1–S21; editor-owned undo), the navigation-carry family of five (Pages arrivals, block-precise
+Outline landings row-first, the Scroll carry, the stale anchor, floor-settling landings), the AI door pair
+(show_in_app as an offer under the one global dial, background always asks — her amendment; the version target;
+plus the ladder's gone-check on every press road, fixing VX-693), the resting faces (the ⌘/ pane rebuilt on the
+registry; unnamed commits resting on their first words), and VX-668 traced LIVE to a measured TK2 fact
+(frame-constant edits never fire `viewWillDraw`; one guarded display pass; the class → VX-702). One Fable ladder,
+closed at round 2 of 3 with no new findings; claim C all fifteen suite rows exact (the VX-668 red-on-old observed;
+the 190-test #204 overlap clean) and every walk row works as ruled (the three live sheet presses all landed).
+The fences held whole-branch (zero Sync/, Server/, Protection/, Shared/, mobile; the Sources/ diff is the wire's
+own member work). Canon: MCPSpec + SurfaceContracts + TEXTKIT2_NOTES lines as drafted; bundle QUESTIONS #252;
+canon-size 126,641/150,000. Born: VX-683/686/687/688/692(High)/694/702/705/706/707 (VX-693 fixed in-run);
+VX-661 grown (the encoder class now fires on green/single-test/post-product runs — priority raise recommended,
+her call). Released as **0.10.6** at her word right after the merge (notes = this run's members; the site
+published and verified) — the second of her two-release amendment (vx-669 shipped 0.10.5 hours earlier). Next:
+her #252 pass; the orientation (hers); VX-692/VX-661 at her priority word.
 
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)

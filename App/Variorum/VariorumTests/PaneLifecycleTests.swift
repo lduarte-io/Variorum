@@ -734,3 +734,58 @@ struct CanvasSwitcherRebindTests {
         }
     }
 }
+
+// MARK: - VX-664 — A-677-2 (B2-i, RATIFIED by her 2026-10-28)
+
+/// **The go-live render completes the read adoption** (the VX-677 run, batch
+/// 1). A pane that turns live in the SAME render that carries a changed
+/// projection text — an outside write's delivery landing in her click's turn —
+/// used to keep its old characters: the adopt arm runs only for a READ pane,
+/// and the live arm writes nothing. Her ratification: *"it's still not two
+/// items editing the same live pane, so doesn't seem like it introduces the
+/// clobbering risk."* The guard beside it holds the line her ruling keeps: a
+/// pane ALREADY live never adopts (P-3; no clean-buffer adoption).
+@MainActor
+@Suite("VX-664 — a pane turning live completes its read adoption first (A-677-2)", .serialized)
+struct PaneGoLiveAdoptionTests {
+    /// **RED ON OLD (`rev664`).** One render: the delivery's new words AND her
+    /// click's liveness. The pane shows the new words, live, and her first key
+    /// types into THEM.
+    @Test func aPaneTurnedLiveInTheRenderThatChangesItsTextShowsTheNewText() async throws {
+        let before = "The words before an AI's edit."
+        let after = "An AI's edit, delivered as she clicked."
+        let first = LifecyclePane(text: before, variantID: "take-a")
+        let rig = LifecycleRig(first: first)
+        defer { rig.close() }
+        await rig.settle()
+        let pane = try #require(rig.pane("first"), "the pane mounted")
+        #expect(!pane.isEditable && pane.string == before, "fixture: a read pane on the old words")
+
+        first.text = after   // the delivery…
+        first.isLive = true  // …and her click, in one turn: ONE render carries both
+        await rig.settle()
+        #expect(pane.isEditable, "non-vacuity: the pane went live")
+        #expect(pane.string == after,
+                "RED ON OLD: the pane went live on the OLD words (shows: \(pane.string))")
+
+        rig.type("!", into: pane)
+        await rig.settle()
+        #expect(first.edits.last == .init(variantID: "take-a", text: after + "!"),
+                "her first key types into the new words, never back over them")
+    }
+
+    /// GUARD (both sides) — **a pane already LIVE never adopts projection
+    /// text** (P-3's buffer authority, her "no clean-buffer adoption"): the
+    /// completion is the read → live transition's alone.
+    @Test func aLivePaneStillNeverAdoptsProjectionText() async throws {
+        let first = LifecyclePane(text: "Her words, live.", variantID: "take-a", isLive: true)
+        let rig = LifecycleRig(first: first)
+        defer { rig.close() }
+        await rig.settle()
+        let pane = try #require(rig.pane("first"))
+        #expect(pane.isEditable)
+        first.text = "Words handed to the pane while it is live."
+        await rig.settle()
+        #expect(pane.string == "Her words, live.", "a live pane is buffer-authoritative")
+    }
+}

@@ -15,7 +15,9 @@
 # read from its source). The notes STAY in the feed directory: generate_appcast re-embeds every item from
 # the files beside the DMGs at each run, and an item whose notes file is missing loses its description.
 # Release mode REQUIRES --notes; an existing notes file with DIFFERENT bytes is refused (a published item's
-# notes change only by a deliberate hand edit of the feed copy, never silently).
+# notes change only by a deliberate hand edit of the feed copy, never silently). A notes file carrying
+# PROCESS TEXT — a ticket id or a draft marker, notes-guard.sh's one shape (VX-708) — is refused BEFORE
+# the DMG joins the feed: the notes are public copy.
 #
 # THE TWO FEEDS NEVER MIX:
 #   --release  feed dir  $VARIORUM_RELEASES_DIR/feed (default ~/Library/Developer/Variorum/Releases/feed):
@@ -45,6 +47,7 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "${HERE}/../.." && pwd)"
+source "${HERE}/notes-guard.sh"   # VX-708: notes_carry_process_text — the one public-copy shape
 RELEASES="${VARIORUM_RELEASES_DIR:-${HOME}/Library/Developer/Variorum/Releases}"
 RELEASE_PREFIX="https://dl.stargazing.tech/variorum/"
 # F2 (ladder round 1): the verification key is READ FROM THE ONE BAKED SOURCE — the partial
@@ -108,6 +111,20 @@ elif [ -d "${RELEASES}/feed" ] && [ "$FEED" = "$(cd "${RELEASES}/feed" && pwd)" 
   refuse "a walk build may not enter the RELEASE feed"
 fi
 
+# ------------------------------------------------------------- the release notes preflight (U3-A · VX-708)
+# BEFORE the DMG joins the feed: a notes refusal must leave the feed untouched — a stray DMG with no .md
+# beside it would ride into the next version's generate_appcast scan as a descriptionless item whose
+# enclosure was never uploaded.
+if [ -n "$NOTES" ]; then
+  [ -s "$NOTES" ] || refuse "no such notes file (or empty): ${NOTES}"
+  # VX-708: the notes are embedded verbatim as the item's public description — no ticket id, no draft
+  # marker, no process line (notes-guard.sh holds the one shape; release.sh refuses it in its own
+  # release preflight, and this covers the separable appcast-only road).
+  if [ "$MODE" = release ] && notes_carry_process_text "$NOTES"; then
+    refuse "${NOTES} carries process text (a ticket id or a draft/process marker): release notes are public copy (VX-708)"
+  fi
+fi
+
 # ------------------------------------------------------------------ the DMG joins the feed (immutable names)
 if [ -e "${FEED}/${NAME}" ]; then
   cmp -s "$DMG" "${FEED}/${NAME}" || refuse "${FEED}/${NAME} already exists with DIFFERENT bytes. A published DMG name is IMMUTABLE once an appcast references it (the site-side report): cut a new version instead."
@@ -120,7 +137,6 @@ fi
 # ------------------------------------------------------------------ the release notes join it (U3-A)
 NOTES_NAME="Variorum-${VERSION}.md"
 if [ -n "$NOTES" ]; then
-  [ -s "$NOTES" ] || refuse "no such notes file (or empty): ${NOTES}"
   if [ -e "${FEED}/${NOTES_NAME}" ]; then
     cmp -s "$NOTES" "${FEED}/${NOTES_NAME}" || refuse "${FEED}/${NOTES_NAME} already exists with DIFFERENT text — a published item's notes change only by a deliberate hand edit of that copy"
   else

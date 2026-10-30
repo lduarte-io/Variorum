@@ -10,6 +10,9 @@
 //  sentence at the top as the map). Reached via ⌘/, the Help menu, and the
 //  "?" in the status bars (hover = the quick cheat sheet).
 //
+//  VX-572 (the VX-677 run, batch 4): the Shortcuts tab is `ShortcutsTab` —
+//  searchable, folded headings — over `ShortcutCatalog`, the registry's list.
+//
 
 import SwiftUI
 import VariorumCore
@@ -23,6 +26,9 @@ struct HelperView: View {
     }
 
     var body: some View {
+        #if DEBUG  // F-FW-2's pin door (`HelperViewOracle`): what this body drew in
+        let _ = HelperViewOracle.drew(tokens, theme: themeStore)
+        #endif
         TabView {
             shortcutsTab
                 .tabItem { Text("Shortcuts") }
@@ -35,352 +41,41 @@ struct HelperView: View {
 
     // MARK: - Shortcuts
 
+    /// **VX-572 (the VX-677 run, batch 4) — the tab renders FROM THE REGISTRY
+    /// (P-1).** The rows, their order, their headings and every chord are
+    /// `ShortcutCatalog`'s (`Registry/ShortcutCatalog.swift`): the words are
+    /// still hers, kept verbatim, but a chord is READ from the declaration it
+    /// names, never typed a second time — the hand-kept list (13g L1's) and
+    /// its string-match guard are retired into the catalog and an ID-level
+    /// registry walk (`ShortcutCatalogTests`). The face is `ShortcutsTab`.
+    @State private var shortcuts = ShortcutsTabModel()
+
     struct ShortcutGroup: Identifiable {
         let title: String
         let items: [(keys: String, does: String)]
         var id: String { title }
     }
 
-    /// **13g L1 (WT-1).** This list is HAND-MAINTAINED, and that is exactly
-    /// how the whole 13f workspace shipped invisible: the registry declared
-    /// every act (P-1 held), and no discoverability surface was extended, so
-    /// ⌘⇧1–9, ⌘[ / ⌘], ⌘⇧I and ⌘⇧N — plus ⇧⌥⌘Z, ⌥⌘C and the take-page keys
-    /// before them — existed and could not be found. Her report, verbatim:
-    /// *"i don't even konw how to get to any of the things that built last
-    /// phase."*
-    ///
-    /// It stays hand-maintained on purpose (the words are prose, in her
-    /// voice — a generated list would read like a key table), and
-    /// `HelperCoverageTests` is the drift guard that makes hand-maintenance
-    /// safe: every `shortcutLabel` the registry declares must appear here,
-    /// so an invisible shortcut is now a red test rather than a phase's
-    /// silent omission. A row may pair keys with " / " — the guard splits
-    /// on it and matches each token exactly.
-    static let groups: [ShortcutGroup] = [
-        ShortcutGroup(title: "Takes", items: [
-            ("⌘⇧T", "open/close takes at the block you're in"),
-            ("⎋", "close all takes — back to the plain page"),
-            ("⌘T", "new take (starts as a copy of what's shown)"),
-            ("⌥⌘T", "new blank take (not chosen until you ✓ it)"),
-            ("⇧⌥⌘T", "new blank take AND choose it — the power gesture"),
-            ("⌘⏎", "choose the take you're in (the note shows it)"),
-            ("⌃⌘← / ⌃⌘→", "step through a block's takes"),
-            ("⌘⇧A", "archive the take you're in"),
-            ("⌘⇧L", "save current choices as a lens"),
-            ("⌥⌘← / ⌥⌘→", "previous / next page of takes (on the Takes board)"),
-            // 13e E6 (A21's clipboard half).
-            ("⌘⇧C", "copy this block's takes — the shown one, then its alternates "
-                + "(⌘C is still ordinary copy)"),
-            // 13e batch 3 (A20/A21's second half): the take↔block pair. Both
-            // lines name where the ORIGINAL goes, because that is the thing
-            // she would otherwise have to discover.
-            ("⌥⌘⏎", "move the take you're in into its own block below — the "
-                + "original is archived on this block"),
-            ("⇧⌥⌘⏎", "turn ALL of this block's takes into blocks below it — the "
-                + "block keeps showing what it showed; the originals are archived on it"),
-        ]),
-        ShortcutGroup(title: "Writing", items: [
-            // 13u3 UNIT D (item 14): the two-key road, said in the two
-            // keys — ⏎ on the empty field is the fast one.
-            // 13s-b U4 (R-13s-31): the definition rides the app's plain
-            // gloss, the saved moment — "commit" defining itself would read
-            // twice (her R-13s-32 note; PROVISIONAL P-U4-1).
-            // VX-347 (PROVISIONAL words, P-VX347-4): every way out of the
-            // field but ⎋ commits, so ⏎ is no longer the only road.
-            ("⌘S", "commit — an immutable saved moment of the take you're in; "
-                + "name it or press ⏎ — any way out of the field but ⎋ commits it"),
-            // The post-13l polish round (rows 16/23): the pairing IS the
-            // lesson — this take's moment, and this note's.
-            ("⌘⇧S", "save a version — the whole note as it is, in Versions"),
-            // VX-125 (the VX-439 run): the third grain — the note OUT, as a file.
-            ("\u{2325}\u{2318}S", "export this note as a Markdown file in the Variorum simple "
-                + "format \u{2014} exactly what Copy full text copies, takes and tags included, "
-                + "so File \u{25B8} Import\u{2026} reads it back"),
-            ("⌘Z", "text undo (typing only)"),
-            ("⌥⌘Z", "structural undo (splits, merges, moves — never text)"),
-            ("⇧⌥⌘Z", "structural redo — puts back what ⌥⌘Z undid"),
-            // (⌥⌘O and ⌥⌘A moved to the MCP group below — 13n-c U4.)
-            ("⌃⌘↑ / ⌃⌘↓", "jump to the previous / next block"),
-            ("⌘⇧'", "the block's comments"),
-            ("⌥⌘C", "callout frame on this block (again to remove it)"),
-            ("⌘⇧B", "toggle block seams (dotted lines between blocks)"),
-        ]),
-        // 13n-c U4 (the brief's item 5; her kickoff: "make sure the keyboard
-        // shortcuts pane is updated") — THE MCP GROUP: every chord the MCP
-        // door answers to, together, in the order she meets them (where it is
-        // set up and where asks wait · sharing the note she is in · seeing
-        // and undoing what a client did). Settings ▸ Shortcuts and its search
-        // read this same list.
-        ShortcutGroup(title: "MCP", items: [
-            ("⌥⌘,", "MCP settings \u{2014} opens at Waiting when a client's ask waits "
-                + "for your answer"),
-            // 13n-c U3 (the brief §4, D1): the share chord.
-            ("⌥⌘A", "share the note you're in with the client you granted last \u{2014} "
-                + "until it disconnects if it's connected, else once (never always)"),
-            // 13n-b U4 (AF-11 F-2): the offer door's keyboard road.
-            ("⌥⌘O", "show the AI's last change (what a connected client last wrote)"),
-            // The client-named undo (13n-b, AF-3): the one structural undo,
-            // said here because an AI's change is where she reaches for it.
-            // 13n-c O-4 (her ask — no provider hardwired): the Edit menu's words
-            // in their PLACEHOLDER form, never one provider's client name
-            // (PROVISIONAL, her copy pass).
-            ("⌥⌘Z", "undo a client's change \u{2014} the Edit menu names the client "
-                + "(\u{201C}Undo \u{2039}name\u{203A}'s take\u{201D})"),
-            // 13n-c U4 (arrival X): the one face an ask has outside Settings.
-            // Stage B fix pass (O-3): the mark is named by its ROLE, never its
-            // shape (O-1 changed the glyph once; the guide teaches it the same way).
-            ("a small mark beside a note, book or wing", "a client's ask waits there \u{2014} "
-                + "hover to see who and what, press to answer it (nothing ever pops up "
-                + "by itself)"),
-        ]),
-        ShortcutGroup(title: "Structure", items: [
-            ("⌘⇧D", "divide the block at the cursor — a block with takes cuts "
-                + "the take you're in and leaves the others whole on the first block"),
-            ("⌥⌘⇧D", "divide choosing takes — pick where the other takes go, "
-                + "or place each cut by hand"),
-            ("⌘⇧E", "extract the selection into its own block"),
-            ("⌘⇧K", "make a block from the selection"),
-            ("⌘⇧M", "merge blocks — every take comes along"),
-            ("⌥⌘⇧M", "merge choosing takes — bring every take, only the shown "
-                + "ones, or pair them by hand"),
-            ("⌘⇧⏎", "new block below the one you're in (Write and Takes alike)"),
-        ]),
-        // 13g batch 3 (L8): the formatting acts. The two chords her ruling
-        // named, plus the five menu-first doors by their MENU PATH — the
-        // group's framing line ("every shortcut here is also a menu item")
-        // has to read both ways, and these are doors with no key.
-        ShortcutGroup(title: "Formatting", items: [
-            ("⌘B", "bold — wraps the selection in ** ** (again to take it off)"),
-            ("⌘I", "italic — the same, with * *"),
-            ("Format ▸ Strikethrough", "~~like this~~"),
-            ("Format ▸ Inline Code", "`like this`"),
-            ("Format ▸ Heading", "heading 1, 2 or 3 — the line gains #, ## or ###"),
-            ("Format ▸ Bullet List", "the line becomes \"- item\""),
-            ("Format ▸ Checklist", "the line becomes \"- [ ] item\" — click the box to tick it"),
-            // 13g batch 4 (L10): the link act and BOTH of its click rules,
-            // which differ by surface and so have to be written down.
-            ("Format ▸ Add Link", "[text](address) around the selection, cursor in the "
-                + "parentheses ready for the address"),
-            ("⌘-click a link", "opens it — in a writing surface, where a plain click "
-                + "places the cursor; in Read a plain click opens it"),
-            // 13k K7: the toolbar is a THIRD door onto the same eight acts,
-            // and a door nobody is told about is the WT-1 finding all over
-            // again — so the bar is named here beside the menu paths.
-            ("the bottom bar", "B · I · S · ` · link · H · • · ☐ — the same eight acts "
-                + "as the Format menu, on the text you're writing in"),
-            // 13k K8: BOTH doors in prose, because neither can carry a
-            // shortcut label — Tab must never become a menu key equivalent
-            // (it would be taken from every control in the app), so the
-            // registry's drift guard cannot see this pair and only the
-            // written line can.
-            ("Tab / ⇧Tab in a list", "indent / outdent the list item you're in "
-                + "(Format ▸ Indent and Format ▸ Outdent do the same); "
-                + "outside a list, Tab is the key it always was"),
-            // 13u4 UNIT S1 (her item 5, verbatim: *"how are things
-            // unindented? that's further proof that I need a better
-            // formatting shortcut menu"*). The list-level chords Apple Notes
-            // and Pages use, on the rows that already did the act — so the
-            // answer is a key AND a menu item, not only a key Tab cannot
-            // advertise. Back/forward moved to ⌥⌘[ / ⌥⌘], where Apple Notes
-            // puts them too.
-            // THE WALK'S FINDING (13u4 UNIT S1): her own word for this is
-            // UNINDENT — *"I thought it unindented things … how are things
-            // unindented?"* — and the app's word is "outdent", so Settings'
-            // search found nothing for the exact word she typed. The row
-            // says both. (A pin could not have caught it: the pin searched
-            // the app's word, which is the whole trap.)
-            ("⌘] / ⌘[", "indent / outdent — unindent, if that's your word for it — "
-                + "the list item you're in; the same act as Tab / ⇧Tab, on keys the "
-                + "Format menu can show you"),
-        ]),
-        // QoL batch 3 (L6): the in-post find family. Deliberately its own
-        // group and deliberately worded against ⌘K's row below — one searches
-        // the library, the other searches the post you are in.
-        ShortcutGroup(title: "Find in a note", items: [
-            ("⌘F", "find text in the note you're in (the chosen takes)"),
-            ("⌥⌘F", "find and replace in this note"),
-            ("⌘G / ⇧⌘G", "next / previous match"),
-            ("⌘E", "search for whatever is selected"),
-        ]),
-        ShortcutGroup(title: "Navigation", items: [
-            // 17y B2 (p): the BUILD's row — Canvas is Debug-only.
-            (PostMode.keyLabel(), "note modes: " + PostMode.modeList()),
-            ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
-            ("⌘N", "new note"),
-            // VX-570 (the VX-439 run): the book's own "+ new note", from the keys.
-            ("\u{2325}\u{2318}N", "new note inside the book you have open \u{2014} the book's own "
-                + "+ new note (an entry in a journal book; in a gathering, a note wearing what its "
-                + "rule asks)"),
-            // VX-563 (her kickoff ruling; A-648-6 — PROVISIONAL words): the
-            // registry's `alternateShortcutLabel`s for the book's step, VX-560's
-            // reading-vs-typing rule said the way its row says it.
-            ("\u{2318}\u{2191} / \u{2318}\u{2193}", "the note before / after the one you're reading, in a "
-                + "book's Outline, Read or Book \u{2014} except while you're typing in text, where "
-                + "they keep going to the start and the end"),
-            ("⌘J", "today's journal entry"),
-            // 13n-c U4 — VX-157 (her ratified chord, VX-157).
-            ("⌘L", "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
-                + "and tap L to step, release to go; clicking the wing's name in the "
-                + "Bookcase or Library masthead steps to the next one"
-                // VX-644 (PROVISIONAL words): the "in ‹wing›" label is the
-                // switcher's door too.
-                + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} beside New Note "
-                + "opens this switcher"),
-            // VX-632 (her #245 RB-6 ruling; PROVISIONAL words): ⌘L's two ⌥
-            // variants, VX-377's selector from the keys.
-            ("\u{2325}\u{2318}L", "move the note or book you're in to another wing \u{2014} "
-                + "type a few letters of the wing and \u{23CE}"),
-            ("\u{21E7}\u{2325}\u{2318}L", "copy the note you're in to another wing, the same way"),
-            ("⌘,", "settings (voice, seams, takes options, tags)"),
-            ("⌘/", "this helper"),
-        ]),
-        // 13g L1 (WT-1): the WORKSPACE — everything Phase 13f built, which
-        // until now had no entry on any surface she could read. The rows
-        // WITHOUT a chord are named by their MENU PATH, because the group's
-        // framing line above ("every shortcut here is also a menu item")
-        // means the reverse has to be findable too: a door with no key is
-        // still a door, and this is where she looks for it.
-        ShortcutGroup(title: "Windows & panes", items: [
-            ("⌘⇧1–9", "jump to the 1st–9th note in the sidebar's Open list"),
-            // VX-287 (the VX-283 run): her chord, and her reason for the
-            // landing — "that way you can close them all quickly".
-            ("⌘⇧W", "close the note you're in \u{2014} its row leaves the Open list and the "
-                + "pane moves on to the next note, so pressing it again closes the next "
-                + "(\u{2318}W still closes the window)"),
-            // VX-289: the keyless sibling, by its menu path and its right-click.
-            ("View ▸ Close All Notes", "empty the Open list \u{2014} also on any Open row's "
-                + "right-click; the notes themselves are untouched"),
-            // The Act 10 correction round, batch A (row 2): the sidebar is
-            // the app's own now (`ShellSplit`), so its toggle is a declared
-            // door with the platform's chord — and a row here, where every
-            // declared shortcut must be findable.
-            ("⌃⌘S", "show or hide the sidebar (the leading toolbar button is the same door)"),
-            // VX-329 U1 — P-VX309-U1c-4 (b): Lock Library Now's chord, declared at last, with its row (PROVISIONAL
-            // words, P-VX329-U1-7 — her copy pass).
-            ("⌃⌘L", "lock the library now \u{2014} in Castle, where it can lock; it closes and forgets its key "
-                + "until you unlock it again"),
-            // 13k round 2 (R2-1): the glyphs are INTERPOLATED from the bar's
-            // own constants, so this row can never again describe a door the
-            // bar stopped wearing (it read "← and ›" after R4-1 shipped →).
-            // 13u4 UNIT S1 (her item 5): the KEYS moved to ⌥⌘[ / ⌥⌘] so the
-            // plain brackets can change a list's level, as they do in Apple
-            // Notes and Pages — which is also where ⌥ + brackets navigate.
-            ("⌥⌘[ / ⌥⌘]", "back / forward, in the pane you're in — the "
-                + "\(ContextBarDoors.backGlyph) and \(ContextBarDoors.forwardGlyph) "
-                + "on the context bar are the same two doors"),
-            // VX-560 (A-439-12): the browser's keys for the same two acts —
-            // the registry's `alternateShortcutLabel`s, shown here.
-            ("⌘← / ⌘→", "back / forward too, like a browser — anywhere except while you're typing "
-                + "in text, where they keep going to the start and the end of the line"),
-            // The Act 10 correction round (row 15): ⌘⇧I tags the note — the
-            // masthead's ＃ opens the same inline field; the fold is gone.
-            ("⌘⇧I", "tag this note — the field slides out in the masthead with the cursor "
-                + "in it (the ＃ beside the tag cards is the same door)"),
-            ("⌘⇧N", "the quick note — a floating pad, from anywhere in Variorum"),
-            // 13e E14 (W26): the SYSTEM chord. Its own row, because it is a
-            // genuinely different promise from the one above — this one works
-            // while another app is frontmost, and a key that reaches her from
-            // outside the app is exactly the key she most needs written down.
-            ("⌃⌥⌘N", "the quick note from ANY app — Variorum need not be in front "
-                + "(the menu-bar \u{25FB} does the same with a click)"),
-            // 13u3 UNIT C (her R-13u-4): the two keys INSIDE a capture box —
-            // the quick-note pad and the shelf/Library new-note box answer
-            // the same pair, which is the whole point of the ruling.
-            ("\u{23CE} / \u{21E7}\u{23CE} in a capture box",
-             "\u{23CE} files what you have written \u{2014} the quick note keeps it and "
-                + "closes; the new-note box on the Bookcase files it and opens it. "
-                + "\u{21E7}\u{23CE} adds another paragraph instead, so a capture can be "
-                + "as long as the thought is"),
-            ("View ▸ Open Beside", "put a second note beside this one (right-click a "
-                + "note row for that note; the menu takes the most recent other one)"),
-            ("View ▸ Close Split", "fold the window back to one pane"),
-            ("File ▸ New Window", "a second full window; right-click a note row ▸ "
-                + "Open in New Window for a note on its own"),
-            // The final round's finding 2: the right-click rows wear
-            // StarCopy.starRow ("Star"/"Unstar"); ONLY the ⌘K act wears
-            // StarCopy.verb — the helper must not join the two.
-            ("right-click ▸ \(StarCopy.starRow)", "star a note or book — the Starred "
-                + "section sits at the sidebar's top; \u{2318}K's "
-                + "\u{201C}\(StarCopy.verb)\u{201D} is the same act"),
-        ]),
-        // 13g batch 7 (R6-1/R6-2): the two things that MOVED. Her round-1
-        // finding was that a door which moves without a line here is a door
-        // she cannot find — so the tag chips and the bar's two groups get
-        // their rows the same day they ship.
-        ShortcutGroup(title: "The note's bars", items: [
-            // VR-122's routed J-15, verified and fixed at the orchestrator's
-            // seam: the fold is RETIRED (the Act 10 note above — "the fold is
-            // gone") and the cards live in the MASTHEAD — this row still
-            // taught the old home and the fold while the ⌘⇧I row and the
-            // "context bar" dictionary entry already said the true thing.
-            ("tag cards (masthead)", "a note's tags live in the masthead's right edge "
-                + "as coloured cards: the \u{FF03} (or \u{2318}\u{21E7}I) opens the tag "
-                + "field with the cursor in it — type a path (\u{201C}/\u{201D} nests), "
-                + "\u{23CE} applies; \u{2715} on a card takes it off"),
-            ("block \u{25BE} (bottom bar)", "divide · extract · make block · merge · "
-                + "\u{FF0B} new block below · \u{2212} delete this block"),
-            // 13s-b U4 round 2 (the NIT adopted in-ladder): this group's own
-            // rule — a door that moves gets a line — for the door that left
-            // `note ▾` at the post-13l polish round and lost its line here at
-            // U4's round 1. Block History is the BLOCK's, on both bars, beside
-            // commit; the face's name and the door's word are their constants.
-            ("\(BlockHistoryPath.doorLabel) (bottom bar)", "\(BlockHistoryPath.name), beside "
-                + "commit: everything the block you're in has been \u{2014} each take's "
-                + "commits, the takes it set aside or deleted, and the block it came out of"),
-            // 13s-b U4 round 1 (MINOR-2): the row taught a "history" door
-            // this menu has not carried since the post-13l polish round
-            // (Block History sits beside commit — her F2: "it's unclear that
-            // history is under Note"). It now lists the menu's own doors,
-            // each from its constant, in the menu's order (the wing doors
-            // render only while another wing exists, so they stay unsaid).
-            ("note \u{25BE} (bottom bar)", "\(VersionsPath.saveVerb.lowercased()) · "
-                + "\(VersionsPath.menuLabel.lowercased()) · "
-                + "\(SplitAtNewlinesCopy.noteDoor.lowercased()) · seal / unseal · "
-                + "the note's date · \(RecoveryCopy.deleteNoteTitle.lowercased())"),
-        ]),
-    ]
+    /// The catalog as the older readers see it — Settings ▸ Shortcuts, its
+    /// search, and the pins that read rows by their keys and words. A
+    /// PROJECTION of `ShortcutCatalog`, never a second list: a row's `keys`
+    /// is its chord column ("⌘G / ⇧⌘G"), read from the declarations.
+    static var groups: [ShortcutGroup] {
+        ShortcutCatalog.Group.allCases.map { group in
+            ShortcutGroup(
+                title: group.title,
+                items: ShortcutCatalog.rows(in: group).map { (keys: $0.keysText, does: $0.words) })
+        }
+    }
 
-    /// The keys this helper actually shows, as single tokens — a row may
-    /// pair two with `" / "`. The drift guard (13g L1) reads this.
-    ///
-    /// The separator is SPACE-slash-SPACE, not a bare slash: ⌘/ is itself a
-    /// shortcut (this helper's own), and a bare split turned it into "⌘" and
-    /// "" — caught by the guard on its first run, which is the guard doing
-    /// its job on the way in.
+    /// The keys this helper actually shows, as single tokens — each row's
+    /// chord-column tokens (a pair is two). The drift guards read this.
     static var shortcutKeysShown: Set<String> {
-        Set(groups.flatMap(\.items).flatMap { item in
-            item.keys.components(separatedBy: " / ").map {
-                $0.trimmingCharacters(in: .whitespaces)
-            }
-        })
+        Set(ShortcutCatalog.rows.flatMap(\.tokens))
     }
 
     private var shortcutsTab: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("Every shortcut here is also a menu item — the menus are the map.")
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                ForEach(Self.groups) { group in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(group.title.lowercased())
-                            .font(tokens.small.weight(.bold))
-                            .foregroundStyle(tokens.accent)
-                        ForEach(group.items, id: \.keys) { item in
-                            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                                Text(item.keys)
-                                    .font(.system(.body, design: .monospaced))
-                                    .frame(width: 130, alignment: .leading)
-                                Text(item.does)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        ShortcutsTab(tokens: tokens, model: shortcuts)
     }
 
     // MARK: - Dictionary (the app's words, in hers)

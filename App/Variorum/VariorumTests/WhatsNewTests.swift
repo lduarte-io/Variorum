@@ -97,6 +97,32 @@ struct WhatsNewTests {
         #expect(ReleaseNotes.source(for: "0.0.0-no-such-version") == nil)
     }
 
+    /// VX-708 — release notes are PUBLIC COPY: every notes file ships verbatim
+    /// in the What's New sheet and the appcast's update alert, so no ticket id,
+    /// draft marker or process line may land in ANY of them, not just the
+    /// running version's (the release scripts refuse the same shape at the
+    /// release window via `Tools/Release/notes-guard.sh`; this pins it at
+    /// closeout time, over the source files themselves).
+    @Test func noReleaseNotesFileCarriesProcessText() throws {
+        let folder = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Variorum/Features/WhatsNew")
+        let files = try FileManager.default
+            .contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+            .filter { $0.lastPathComponent.hasPrefix("ReleaseNotes-") && $0.pathExtension == "md" }
+        #expect(files.count >= 16, "the WhatsNew folder should hold every release's notes file")
+        let ticketID = #/(?i)\b(vx|vm)-[0-9]/#
+        let draftMarker = #/(?im)^\*?draft(ed)?\b|one line per bullet|her rewrite/#
+        for file in files.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            #expect(text.firstMatch(of: ticketID) == nil,
+                    "\(file.lastPathComponent) names a ticket — public copy never does (VX-708)")
+            #expect(text.firstMatch(of: draftMarker) == nil,
+                    "\(file.lastPathComponent) carries a draft/process marker (VX-708)")
+        }
+    }
+
     @Test func theGrammarIsHeadingsBulletsAndJoinedParagraphs() {
         let blocks = ReleaseNotes.blocks(from: """
             First line

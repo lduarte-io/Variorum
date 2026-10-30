@@ -80,11 +80,13 @@ struct BookAnchorTests {
             mode: .read, readForm: .pages, place: place(focused: "a", standing: "d")) == "d",
                 "no address yet ⇒ the standing anchor, not the focus of another mode")
 
-        // Read ▸ Scroll: the one surface that tracks nothing.
+        // Read ▸ Scroll, its page VIEWING NOTHING (VX-681 — the viewed arm is
+        // `theFlowsPlaceIsTheStoryItsPageShows` below; these two lines are
+        // its fallback, wording edited, assertions unchanged).
         #expect(BookAnchor.currentPost(
             mode: .read, readForm: .flow,
             place: place(focused: "a", spread: ["b"], paged: "c", standing: "d")) == "d",
-                "the flow's place is where she ARRIVED — recorded, not implied")
+                "nothing viewed: the flow's place is where she ARRIVED")
         #expect(BookAnchor.currentPost(
             mode: .read, readForm: .flow, place: place(focused: "a")) == nil,
                 "and with nothing carried yet it honestly has no place at all")
@@ -97,6 +99,28 @@ struct BookAnchorTests {
         #expect(BookAnchor.currentPost(
             mode: .index, readForm: .flow, place: place(focused: "a", standing: "d")) == "d",
                 "nothing selected yet ⇒ the standing anchor, not another mode's focus")
+    }
+
+    /// **VX-681 — Read ▸ Scroll's place is the story its page SHOWS** (the
+    /// flow's follower, VX-645), the standing anchor only while it views
+    /// nothing; no other arm reads it. RED on `rev681` (the arm reading the
+    /// standing anchor alone).
+    @Test func theFlowsPlaceIsTheStoryItsPageShows() {
+        var viewing = place(focused: "a", spread: ["b"], paged: "c", index: "e", standing: "d")
+        viewing.flowViewedPostID = "f"
+        #expect(BookAnchor.currentPost(mode: .read, readForm: .flow, place: viewing) == "f",
+                "RED on rev681: the story on screen, never where she arrived")
+        #expect(BookAnchor.landing(mode: .read, readForm: .flow, place: viewing)
+                == LandingTarget(postID: "f"), "RED on rev681: the click-over lands it (the note alone, the read arm's letter)")
+        var arrived = viewing
+        arrived.flowViewedPostID = nil
+        #expect(BookAnchor.currentPost(mode: .read, readForm: .flow, place: arrived) == "d",
+                "nothing viewed: where she arrived")
+        // The viewed note is the flow's alone.
+        #expect(BookAnchor.currentPost(mode: .read, readForm: .pages, place: viewing) == "c")
+        #expect(BookAnchor.currentPost(mode: .outline, readForm: .flow, place: viewing) == "a")
+        #expect(BookAnchor.currentPost(mode: .spread, readForm: .flow, place: viewing) == "b")
+        #expect(BookAnchor.currentPost(mode: .index, readForm: .flow, place: viewing) == "e")
     }
 }
 
@@ -154,8 +178,10 @@ struct BookCarryTests {
         #expect(model.pendingReveal == "p1")
     }
 
-    /// Leaving READ ▸ SCROLL carries where she ARRIVED — the recorded gap,
-    /// pinned as behaviour so it can never become a silent surprise.
+    /// Leaving READ ▸ SCROLL with its page VIEWING NOTHING (no follower report
+    /// — this model mounts no flow) carries where she ARRIVED. (VX-681 made
+    /// the viewed story the carry — `leavingTheReadingFlowCarriesTheStoryItsPageShows`
+    /// below; this pin, unchanged, is now its fallback.)
     @Test func leavingTheReadingFlowCarriesWhereSheArrived() async {
         let model = await model(entries: ["p0", "p1", "p2"])
         model.focus("p2")
@@ -163,7 +189,50 @@ struct BookCarryTests {
         model.consumeReveal()                               // the flow landed
         model.carryPlace(from: .read, readForm: .flow)      // read → book
         #expect(model.pendingReveal == "p2",
-                "the flow tracks no scroll position, so the arrival is the place")
+                "nothing viewed, so the arrival is the place")
+    }
+
+    /// **VX-681 (B4-P4, RULED IN at #248) — leaving READ ▸ SCROLL carries the
+    /// story ON SCREEN**: the flow's follower already knows it (VX-645's
+    /// `viewedFlowPair`, the note its page shows). She entered at note 3,
+    /// read down to note 12, switched: the carry names note 12 — never where
+    /// she arrived. RED ON OLD: note 3 (`BookAnchor`'s `.read .flow` arm read
+    /// the standing anchor alone).
+    @Test func leavingTheReadingFlowCarriesTheStoryItsPageShows() async {
+        let model = await model(entries: (0..<14).map { "p\($0)" })
+        model.requestReveal("p3")                       // she entered the flow at note 3
+        model.consumeReveal()                           // …the flow landed it
+        model.noteFlowViewed(.init(sectionID: "c4", postID: "p12"))   // her scroll — the follower's report
+        model.carryPlace(from: .read, to: .outline, readForm: .flow)
+        #expect(model.pendingReveal == "p12",
+                "RED ON OLD: the story the page shows, not where she arrived (\(String(describing: model.pendingReveal)))")
+        #expect(model.standingAnchorPostID == "p12")
+        // Scroll ↔ Pages is the same carry (`switchReadForm`).
+        model.consumeReveal()
+        model.noteFlowViewed(.init(sectionID: "c4", postID: "p11"))
+        model.carryPlace(from: .read, readForm: .flow)
+        #expect(model.pendingReveal == "p11", "RED ON OLD: Scroll → Pages carries the shown story too")
+    }
+
+    /// **VX-681 — an EMPTY follower slot falls back to the standing anchor**
+    /// (the brief's line, said in a pin): she never scrolled, no geometry has
+    /// reported, the flow's title holds the page (`nothingViewed`), or the
+    /// page shows an EMPTY chapter's heading (a chapter alone, no note) — the
+    /// carry is where she arrived, exactly as before.
+    @Test func anEmptyFlowSlotCarriesWhereSheArrived() async {
+        let model = await model(entries: (0..<14).map { "p\($0)" })
+        model.requestReveal("p3")
+        model.consumeReveal()
+        model.carryPlace(from: .read, readForm: .flow)
+        #expect(model.pendingReveal == "p3", "no report yet: the standing anchor")
+        model.consumeReveal()
+        model.noteFlowViewed(.nothingViewed)
+        model.carryPlace(from: .read, readForm: .flow)
+        #expect(model.pendingReveal == "p3", "the title on screen: the standing anchor")
+        model.consumeReveal()
+        model.noteFlowViewed(.init(sectionID: "an-empty-chapter", postID: nil))
+        model.carryPlace(from: .read, readForm: .flow)
+        #expect(model.pendingReveal == "p3", "an empty chapter's heading names no note: the standing anchor")
     }
 
     /// Leaving INDEX carries the column's reported selection (wave 2c —

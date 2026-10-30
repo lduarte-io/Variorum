@@ -45,6 +45,34 @@ nonisolated enum MCPPaneCopy {
         + "client changes your text only where you grant it edit, and when it rewrites a take, the "
         + "take's words before and after are kept as commits."
 
+    // MARK: - The show dial (VX-676 — her ruling (3); PROVISIONAL words and
+    // placement, P-676-1 — VX-234's pass; settings-class wording: "client",
+    // never "AI" (VX-272); no provider (O-4))
+
+    /// The dial's row title — the catalog's (`mcpShowDial`) and the picker's.
+    static let showDialTitle = "When a client shows you something"
+
+    /// Her three values, in her order (move at once · ask · never).
+    static func showDialChoice(_ dial: MCPShowDial) -> String {
+        switch dial {
+        case .moveAtOnce: "Move at once"
+        case .ask: "Ask"
+        case .never: "Never"
+        }
+    }
+
+    /// The dial's one line (its whole text: `showDialDetail`).
+    static let showDialSummary = "Ask offers it for one press; away from Variorum, it always asks."
+    /// The dial's whole text, behind its (i).
+    static let showDialDetail =
+        "When a client asks to show you something \u{2014} a note, a book, two notes side by side in "
+        + "Compare \u{2014} Variorum can ask first, move there at once, or never show it. Ask, the default, "
+        + "says what the client wants to show you at the bottom of the window, with Open \u{203A} (or "
+        + "\u{2325}\u{2318}O); it waits there until you open it, dismiss it with \u{2715}, or the client "
+        + "disconnects. Move at once moves only while Variorum is the app in front, in a full window "
+        + "\u{2014} otherwise it asks, so you're never moved somewhere new while you were away. Nothing ever "
+        + "brings a window forward. Never shows and offers nothing, and the client is told so."
+
     // MARK: - The one-line explainers (VX-281 U1 — R-VX184-6)
     //
     // Her ruling: "every explainer cut to one line with the full text behind
@@ -338,6 +366,7 @@ nonisolated enum MCPPaneCopy {
         let target = line.targetTitle.map { "\u{201C}\($0)\u{201D}" }
         if let setup = rebindPhrase(line) { return setup }
         if let ended = connectionEndPhrase(line) { return ended }
+        if let show = showOfferPhrase(line, target: target) { return show }
         guard line.allowed else {
             let times = line.count > 1 ? " (\(line.count) times)" : ""
             return "\(line.clientName) was refused "
@@ -364,6 +393,23 @@ nonisolated enum MCPPaneCopy {
                 + (replaced ? ", which replaced its earlier one" : "") + times
         case MCPSetupKeyRule.rebindDeclinedAct:
             return "\(line.clientName)\u{2019}s new setup wasn\u{2019}t allowed" + times
+        default:
+            return nil
+        }
+    }
+
+    /// **VX-676 ruling (4) — "the activity log records the ask and the take"**,
+    /// each its own line in words (PROVISIONAL words, VX-234's pass): the
+    /// client's call that landed as an ask, and HER take of it (her act, so the
+    /// line's subject is her). nil for any other act.
+    private static func showOfferPhrase(_ line: MCPActivityFace.Line, target: String?) -> String? {
+        let times = line.count > 1 ? " (\(line.count) times)" : ""
+        switch line.act {
+        case MCPShowActivity.offeredAct:
+            return "\(line.clientName) asked to show you \(target ?? fallbackNoun(line.targetKind))" + times
+        case MCPShowActivity.takenAct:
+            guard let target else { return "You opened what \(line.clientName) asked to show you" + times }
+            return "You opened \(target), which \(line.clientName) asked to show you" + times
         default:
             return nil
         }
@@ -1394,11 +1440,99 @@ nonisolated enum MCPAskCopy {
 /// takes and saved the lens “english readings” · ⌥⌘Z undoes"). An APP-WIDE
 /// face, so the app's voice (P-13n-1), sentence case; the client's own name
 /// verbatim. A RUN of acts by one client on one target speaks as one line.
+/// **VX-676 — THE ASK's words** (her sitting 2026-10-28: "‹client› asks to
+/// show you ‹thing› · Open ›"; PROVISIONAL words, VX-234's copy pass — P-676-6).
+/// One line per `show_in_app` target, built from the request the wire handed
+/// over (the decision's own titles — never a second read); sentence case, the
+/// app's voice (P-13n-1).
+nonisolated enum MCPShowOfferCopy {
+    /// The ask's door — the receipt's own face (one idiom: "Open ›").
+    static let takeVerb = MCPReceiptCopy.openDoor
+    /// The line's own ✕ — its help and accessibility name.
+    static let dismissVerb = "Dismiss"
+    /// Her take found no full window to open it in (all closed): said, and the
+    /// ask stays standing.
+    static let noWindow = "Open a Variorum window to see it \u{2014} the ask is still waiting."
+
+    static func line(_ request: MCPShowRequest) -> String {
+        "\(request.clientName) asks to show you \(thing(request))"
+    }
+
+    /// What the ask would show, said from what the decision read.
+    static func thing(_ request: MCPShowRequest) -> String {
+        let title = request.title.map(quoted)
+        switch request.target {
+        case .note: return title ?? "a note"
+        case .takes: return "the takes in \(title ?? "a note")"
+        case .lens: return "a lens of \(title ?? "a note")"
+        case .book(_, let section): return section == nil ? title ?? "a book" : "a chapter of \(title ?? "a book")"
+        // Home is a place-name, never quoted (`WingFollow.nowIn`'s rule).
+        case .wing(let wingID, let name, _): return wingID.isEmpty ? "the Home wing" : "the wing \(quoted(name))"
+        case .compare(_, let peerIDs):
+            let anchor = title ?? "a note"
+            guard peerIDs.count == 1 else { return "\(anchor) beside \(peerIDs.count) other notes in Compare" }
+            let peer = (request.peerTitles.first ?? nil).map(quoted) ?? "another note"
+            return "\(anchor) beside \(peer) in Compare"
+        case .version: return "a saved version of \(title ?? "a note")"
+        }
+    }
+
+    /// **The VX-677 ladder round 1, F-L2 — her take of an ask whose place is GONE**
+    /// (the note deleted while the ask stood, the book or wing gone, the version no
+    /// longer one): said where she pressed, in the grant ask's own shape
+    /// (`MCPAskCopy.gone`), and the ask is let go. PROVISIONAL (P-FL2-2), VX-234's
+    /// pass.
+    static func gone(_ request: MCPShowRequest) -> String {
+        "\(place(request.target, title: request.title)) is gone, so \(request.clientName)'s ask was let go."
+    }
+
+    /// F-L2: her take opened the note, but the rest (the takes, a lens, Compare)
+    /// never landed — said in HER words; the wire's `partialShowWords` speaks to
+    /// the client. PROVISIONAL (P-FL2-2).
+    static func unfinished(_ request: MCPShowRequest) -> String {
+        "\(place(request.target, title: request.title)) opened, but the rest of what \(request.clientName) "
+            + "asked to show didn't land."
+    }
+
+    /// F-L2: the place a show names, at a sentence's head — the note (a takes,
+    /// lens or compare target's note; for compare, its anchor), a note's saved
+    /// version, the book, the wing (Home a place-name, never quoted).
+    static func place(_ target: MCPShowTarget, title: String?) -> String {
+        let named = title.map(quoted)
+        switch target {
+        case .note, .takes, .lens, .compare: return named ?? "That note"
+        case .version: return named.map { "The saved version of \($0)" } ?? "That saved version"
+        case .book: return named ?? "That book"
+        case .wing(let wingID, let name, _): return wingID.isEmpty ? "The Home wing" : "The wing \(quoted(name))"
+        }
+    }
+
+    private static func quoted(_ text: String) -> String { "\u{201C}\(text)\u{201D}" }
+}
+
 nonisolated enum MCPReceiptCopy {
     static let undoes = "\u{2325}\u{2318}Z undoes"
     /// 13n-b U4 (R-13nb-23 (a)): the receipt's one-press door — her "… —
     /// Open ›". App voice (P-13n-1), 13s-a sweepable.
     static let openDoor = "Open \u{203A}"
+
+    /// **The VX-677 ladder round 1, F-L2 — batch 3's F-B3-2:** a receipt's Open ›
+    /// (or ⌥⌘O) with every full window closed SAYS so — the take's `noWindow`
+    /// sibling, with no ask to keep. PROVISIONAL (P-FL2-2).
+    static let noWindow = "Open a Variorum window to see it."
+
+    /// F-L2: a receipt's Open › (or ⌥⌘O) on a change whose place has GONE since it
+    /// landed — the place and the client named, as the take's refusal does.
+    /// PROVISIONAL (P-FL2-2).
+    static func gone(_ target: MCPShowTarget, title: String?, client: String) -> String {
+        "\(MCPShowOfferCopy.place(target, title: title)) is gone, so \(client)'s change can't be opened."
+    }
+
+    /// F-L2: the change's note opened, but the rest of its landing never did.
+    /// PROVISIONAL (P-FL2-2).
+    static func unfinished(_ target: MCPShowTarget, title: String?, client: String) -> String {
+        "\(MCPShowOfferCopy.place(target, title: title)) opened, but the rest of \(client)'s change didn't land."
+    }
 
     static func line(_ run: [MCPWriteReceipt]) -> String {
         guard let first = run.first else { return "" }

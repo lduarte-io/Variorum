@@ -70,10 +70,20 @@ final class BookIndexEditModel {
     /// offset under her pointer, `ReadTierClickTarget`). Nil — a pane's own
     /// focus request — arms nothing, and its pane keeps `.leave`. A LANDING
     /// goes live through `takePendingLiveBlock`, which arms the block's START.
-    func makeLive(postID: String, blockID: String, variantID: String, clickOffset: Int? = nil) {
+    ///
+    /// **VX-664 (A-677-1) — `storedText`: the row's stored text** as the note's
+    /// pane renders it (this model holds no rows; the note's observation
+    /// does), so the authority knows what the pane shows as it takes the ring.
+    /// Nil — a caller with no row in hand — makes the next delivery the
+    /// baseline instead.
+    func makeLive(
+        postID: String, blockID: String, variantID: String, clickOffset: Int? = nil,
+        storedText: String? = nil
+    ) {
         goLive(
             postID: postID, blockID: blockID, variantID: variantID,
-            caret: clickOffset.map(PaneCaretLanding.offset), placedByHer: true)
+            caret: clickOffset.map(PaneCaretLanding.offset), placedByHer: true,
+            storedText: storedText)
     }
 
     /// THIS block goes live, its pane handed `caret` for that take (nil ⇒
@@ -82,7 +92,7 @@ final class BookIndexEditModel {
     /// surface's (`caretReportIsHers`).
     private func goLive(
         postID: String, blockID: String, variantID: String, caret: PaneCaretLanding?,
-        placedByHer: Bool
+        placedByHer: Bool, storedText: String?
     ) {
         paneCaretLanding = caret.map { (variantID: variantID, landing: $0) }
         // VX-303: the pane about to mount places its caret itself — armed
@@ -92,7 +102,8 @@ final class BookIndexEditModel {
         }
         let key = PaneTextAuthority.PaneKey(
             columnID: Self.columnID, blockID: blockID, variantID: variantID, context: postID)
-        switch authority.focus(key) {
+        let shown = storedText.map { authority.text(variantID: variantID, storeText: $0) }
+        switch authority.focus(key, showing: shown) {
         case .unchanged:
             // Already live: no pane mounts, so no placement will report.
             arrivalPlacement = nil
@@ -238,6 +249,29 @@ final class BookIndexEditModel {
         })
     }
 
+    /// **VX-664 (A-677-1) — the note's delivery, with its rows in hand**: the
+    /// same settle, and the authority hears whether the ring's OWN take was
+    /// written from outside when the live pane is in THIS note (suspected
+    /// here, confirmed on a fresh read, then the ring ends by `blur()` — the
+    /// live-only pane unmounts and the read-cheap row shows the stored words).
+    func settle(postID: String, rows: [Queries.TOCRow]) {
+        let liveIncoming = authority.livePane.flatMap { live in
+            live.context == postID ? rows.first { $0.variantID == live.variantID }?.text : nil
+        }
+        let suspect = authority.settle(
+            isPending: { [weak self] in self?.isPending($0) ?? false },
+            liveIncoming: liveIncoming)
+        OutsideWriteConfirmation.endRing(
+            ifConfirmed: suspect, in: session.database,
+            authority: { [weak self] in self?.authority },
+            isPending: { [weak self] in self?.isPending($0) ?? false },
+            endRing: { [weak self] in self?.blur() })
+    }
+
+    private func isPending(_ variantID: String) -> Bool {
+        coordinators.values.contains { $0.pending[variantID] != nil }
+    }
+
     // MARK: - The landing (row 38)
 
     /// Ask for a block to go live once its note's rows are in hand.
@@ -282,7 +316,8 @@ final class BookIndexEditModel {
                 session.commandRouter.currentBlock(for: postID), block: row.blockID
             ) ?? .start,
             // VX-303: a landing's place is the surface's, never hers.
-            placedByHer: false
+            placedByHer: false,
+            storedText: row.text
         )
         return row.blockID
     }

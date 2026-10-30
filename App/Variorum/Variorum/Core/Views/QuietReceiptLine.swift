@@ -12,7 +12,11 @@
 //  What it renders: `StatusCenter.quietLine` — a RECEIPT under her `.quiet`
 //  setting. Refusals and offers never reach it (they are the shell toast's,
 //  under every setting), and under `.toast` or `.off` this slot stays empty
-//  by construction, because the centre never writes it.
+//  by construction, because the centre never writes it. **VX-676's one
+//  exception:** a STANDING offer (an AI's ask to show her something) holds
+//  this line once its toast is gone, with its door and its own small ✕
+//  (`StatusCenter.lineItem` — under every receipt style, since it is an offer,
+//  never a receipt).
 //
 //  ── WHY IT IS ALWAYS MOUNTED, AND FADES RATHER THAN APPEARING ────────────
 //  A `Text` that comes and goes changes a bar's layout six seconds after
@@ -86,7 +90,10 @@ struct QuietReceiptLine: View {
     var separated = false
 
     var body: some View {
-        let item = status.quietLine
+        // VX-676: the line shows a quiet receipt while one speaks, else a
+        // STANDING offer once its toast is gone (`StatusCenter.lineItem` — the
+        // one rule; the AI's ask to show her something holds here).
+        let item = status.lineItem
         HStack(spacing: 6) {
             Text(item?.text ?? "")
                 .font(tokens.small)
@@ -134,6 +141,24 @@ struct QuietReceiptLine: View {
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
                 .fixedSize()
+            }
+            // VX-676 (her ruling (2) — "the line carries its own small
+            // dismiss"): a STANDING offer's ✕, after its door, in the toast's
+            // own face (muted, small). It ENDS the offer; nothing else here
+            // draws one, so an idle or receipt line still asks for nothing more.
+            if let dismiss = item?.dismiss {
+                Button {
+                    dismiss.perform()
+                } label: {
+                    Text("\u{2715}")
+                }
+                .buttonStyle(.plain)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .fixedSize()
+                .help(dismiss.label)
+                .accessibilityLabel(dismiss.label)
             }
             if separated, item != nil {
                 Rectangle()

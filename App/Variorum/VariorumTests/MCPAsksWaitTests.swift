@@ -580,7 +580,13 @@ struct MCPAsksWaitTests {
         #expect(HelperView.shortcutKeysShown.isSuperset(of: ["\u{2318}L", "\u{2325}\u{2318},"]))
         // Stage B fix pass (O-3): the ask's mark is named by its ROLE, never
         // its shape — the glyph may change (O-1 did once); the row stays true.
-        #expect(mcp?.items.contains { $0.keys == "a small mark beside a note, book or wing" } == true)
+        // JUSTIFIED PIN EDIT (VX-572, the VX-677 run — her "no mid-name
+        // breaks in the chord column"): the chord column carries the mark's
+        // NAME ("a small mark", the guide's own words) and where it sits
+        // leads the description — the 40-character key could not fit the
+        // column on one line. The role-naming this pin holds is unchanged.
+        let markRow = mcp?.items.first { $0.keys == "a small mark" }
+        #expect(markRow?.does.hasPrefix("beside a note, book or wing") == true)
         #expect(mcp?.items.allSatisfy { !$0.keys.contains("filled") && !$0.does.contains("filled") } == true)
     }
 

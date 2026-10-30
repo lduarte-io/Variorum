@@ -111,8 +111,11 @@ struct MCPWireNeutralityTests {
             }
         }
         sentences += [
-            MCPShowRule.notFrontmostWords, MCPShowRule.otherWindowWords,
+            // VX-676 (A JUSTIFIED EDIT): the frontmost refusals are retired; the
+            // offered answer's words and the never dial's join.
+            MCPShowRule.offeredWords, MCPShowRule.neverWords,
             MCPShowRule.unavailableWords, MCPShowRule.partialShowWords,
+            MCPShowTool.versionNeedsWords, MCPShowTool.versionNeedsItsTargetWords,
         ]
         let errors: [OperationError] = [
             .postNotInReading(postID: "n", readingID: "r"), .sectionNotFound(id: "s"),

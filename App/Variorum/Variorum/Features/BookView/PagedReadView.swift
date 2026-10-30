@@ -111,8 +111,13 @@ struct PagedReadView: View {
             // before `adopt` so a later delivery cannot re-land it.
             let landing = model.pendingReveal
             if landing != nil { model.consumeReveal() }
-            pages.seed(fromFocus: landing ?? model.focusedPostID)
-            await pages.adopt(entries: model.entries, chapterOpeners: chapterOpeners)
+            // VX-663: the place rides INTO the first adoption. Seeding it
+            // before (the old order) asked a reader holding NO entries yet
+            // where the note was — it found nothing, and every arrival opened
+            // at the book's first page.
+            await pages.adopt(
+                entries: model.entries, chapterOpeners: chapterOpeners,
+                landingAt: landing ?? model.focusedPostID)
             model.notePagedAnchor(pages.currentPostID)
         }
         // 13f W21: a reveal arriving while Pages is already on screen.

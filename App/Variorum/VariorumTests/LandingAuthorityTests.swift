@@ -168,6 +168,147 @@ struct LandingAuthorityTests {
     }
 }
 
+// MARK: - VX-624 — the page's floor
+
+/// **VX-624 (Bug · Suspected → confirmed headless on the real pre-fix
+/// `decide`): a landing settles AT ONCE when the page cannot move any further**
+/// (VX-562's F-1, the ticket's option b′ — `notes/plans/fixes/vx-677-editor-
+/// panes-ai-door.md`, BATCH 2 RECORD). The trace: a navigator click on a row in
+/// the book's last screenful cannot bring it to the top (the column's foot
+/// follows it), so `decide` answered `.correct` every 0.25 s against a page
+/// that could not move — measured on the pre-fix source, 16 corrections and a
+/// give-up at 4.25 s. The fix: the surface hands the authority the page's
+/// REACH (read live at every look); a reported target the page cannot bring
+/// any nearer is home, and the landing finishes by the at-home rules.
+///
+/// RED ON OLD (behavioural revert: `decide` ignores `reach`): every floor line
+/// below; the guards (room left ⇒ a correction, no reach ⇒ byte-unchanged, an
+/// unreported target, the arithmetic) stay green.
+@Suite("VX-624 — a landing settles at the page's floor")
+struct LandingFloorTests {
+    private let outline = LandingPolicy.bookOutline
+    private let flow = LandingPolicy.readingFlow
+    private let index = LandingPolicy.bookIndex
+    /// A page at its maximum offset (F-1's shape: the Outline's walked 1983).
+    private let floor = LandingReach(offset: 1983, maxOffset: 1983)
+    private let roomy = LandingReach(offset: 0, maxOffset: 1983)
+
+    private func waited(_ decision: LandingDecision) -> TimeInterval? {
+        if case .wait(let delay) = decision { return delay }
+        return nil
+    }
+    private func isNear(_ value: TimeInterval?, _ expected: TimeInterval) -> Bool {
+        guard let value else { return false }
+        return abs(value - expected) < 1e-9
+    }
+
+    /// The immovable page: inside the hold it waits the hold out — never a
+    /// correction — and past the hold it is DONE where the target rests.
+    @Test func aTargetThePageCannotBringNearerIsHome() {
+        #expect(isNear(waited(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline, reach: floor)), 0.7),
+            "RED ON OLD: at the floor inside the hold, the rest of the hold — not a correction")
+        #expect(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 1.2, mayFinish: true, policy: outline, reach: floor)
+            == .done(top: 519), "RED ON OLD: past the hold, done where it rests")
+        // The floor is the policy's tolerance: room the landing would never
+        // call a difference is no room.
+        #expect(isNear(waited(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline,
+            reach: LandingReach(down: 2, up: 900))), 0.7), "RED ON OLD: 2 pt of room on a 2-pt tolerance is the floor")
+        // A target ABOVE the top asks the page up: its floor is the page's top.
+        #expect(LandingSettle.decide(
+            top: -50, corrections: 0, elapsed: 1.2, mayFinish: true, policy: outline,
+            reach: LandingReach(down: 400, up: 0)) == .done(top: -50),
+            "RED ON OLD: above the top with the page at its own top — home")
+    }
+
+    /// **The spin, driven as the authority drives it** (the confirm's own
+    /// road, `LandingAuthority.look`): against an immovable page the landing
+    /// settles at the hold with no correction spent. Old: 16 corrections,
+    /// then the watchdog at 4.25 s.
+    @Test func theSpinAgainstAnImmovablePageEndsAtTheHold() {
+        var corrections = 0
+        var elapsed: TimeInterval = 0.25
+        var ended: LandingDecision?
+        for _ in 0..<100 {
+            let decision = LandingSettle.decide(
+                top: 519, corrections: corrections, elapsed: elapsed,
+                mayFinish: true, policy: outline, reach: floor)
+            switch decision {
+            case .correct:
+                corrections += 1
+                elapsed += outline.pause(elapsed: elapsed)
+            case .wait(let delay):
+                elapsed += delay
+            case .done, .giveUp:
+                ended = decision
+            }
+            if ended != nil { break }
+        }
+        #expect(ended == .done(top: 519), "RED ON OLD: settled, never given up (\(String(describing: ended)))")
+        #expect(corrections == 0, "RED ON OLD: no correction against an immovable page (\(corrections))")
+        #expect(elapsed <= outline.minimumHold + 1e-9, "RED ON OLD: at the hold, not the watchdog (\(elapsed) s)")
+    }
+
+    /// Every adopter that hands a reach settles at its floor by its own rules:
+    /// the flow's veto still holds it open, and the watchdog still ends it.
+    @Test func eachPolicySettlesAtItsFloorByItsOwnRules() {
+        #expect(LandingSettle.decide(
+            top: 300, corrections: 0, elapsed: 1.2, mayFinish: true, policy: flow, reach: floor)
+            == .done(top: 300), "RED ON OLD: the flow, done at its floor")
+        #expect(LandingSettle.decide(
+            top: 300, corrections: 1, elapsed: 1.2, mayFinish: true, policy: index, reach: floor)
+            == .done(top: 300), "RED ON OLD: the Index, done at its floor")
+        #expect(isNear(waited(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 2.0, mayFinish: false, policy: flow, reach: floor)),
+            flow.settleInterval), "RED ON OLD: the flow's veto holds a floor landing open")
+        #expect(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 4.5, mayFinish: false, policy: flow, reach: floor)
+            == .giveUp(top: 519), "and the watchdog still ends it")
+    }
+
+    /// The guards — green on both sides: a page with room corrects; no reach
+    /// decides exactly as before; an unreported target is never at a floor.
+    @Test func roomLeftNoReachAndAnUnreportedTargetDecideAsBefore() {
+        #expect(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline,
+            reach: LandingReach(offset: 1683, maxOffset: 1983)) == .correct, "300 pt of room: a correction")
+        #expect(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline, reach: roomy) == .correct)
+        #expect(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline,
+            reach: LandingReach(down: 2.5, up: 900)) == .correct, "2.5 pt of room: still a correction")
+        #expect(LandingSettle.decide(
+            top: -50, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline,
+            reach: LandingReach(down: 0, up: 400)) == .correct,
+            "above the top with room up — the floor below is not its floor")
+        #expect(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline) == .correct,
+            "no reach handed: byte-unchanged")
+        #expect(LandingSettle.decide(
+            top: 519, corrections: 0, elapsed: 4.5, mayFinish: true, policy: outline) == .giveUp(top: 519),
+            "no reach handed: the watchdog, byte-unchanged")
+        #expect(LandingSettle.decide(
+            top: nil, corrections: 0, elapsed: 0.3, mayFinish: true, policy: outline, reach: floor) == .correct,
+            "an unreported target, Outline: a blind correction as before")
+        #expect(isNear(waited(LandingSettle.decide(
+            top: nil, corrections: 0, elapsed: 0.3, mayFinish: true, policy: flow, reach: floor)), 0.7),
+            "an unreported target, flow: it waits as before")
+    }
+
+    /// The reach's own arithmetic, from where the page stands.
+    @Test func theReachIsThePagesRoomEachWay() {
+        #expect(LandingReach(offset: 1983, maxOffset: 1983) == LandingReach(down: 0, up: 1983))
+        #expect(LandingReach(offset: 2000, maxOffset: 1983).down == 0, "an overscroll past the bottom: no room down")
+        #expect(LandingReach(offset: -10, maxOffset: 1983).up == 0, "an overscroll past the top: no room up")
+        #expect(LandingReach(offset: 100, minOffset: 0, maxOffset: 1983) == LandingReach(down: 1883, up: 100))
+        #expect(LandingReach(down: 0, up: 0).cannotClose(519, tolerance: 2))
+        #expect(!LandingReach(down: 3, up: 0).cannotClose(519, tolerance: 2))
+        #expect(LandingReach(down: 900, up: 0).cannotClose(-519, tolerance: 2), "the sign is the direction")
+    }
+}
+
 // MARK: - The SIGNPOST
 
 @Suite("The Release landing signpost is content-free (13u2b UNIT 2)")

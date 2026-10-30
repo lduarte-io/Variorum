@@ -1023,6 +1023,9 @@ final class BookViewModel {
         caretSeed = postID == nil ? nil : (caret ?? 0)
         caretSeedIsHers = postID != nil && caret != nil
         caretBlockSeed = nil
+        // VX-680: a later focus is a later navigation — a parked block landing
+        // never outlives it.
+        pendingOutlineBlockLanding = nil
         fanSeed = fanBlock
         focusedPostID = postID
         if let postID {
@@ -1061,6 +1064,7 @@ final class BookViewModel {
     /// text through the per-post coordinator, the Stage 1a machinery).
     func collapse(_ postID: String) {
         expandedPosts.remove(postID)
+        if pendingOutlineBlockLanding?.postID == postID { pendingOutlineBlockLanding = nil }
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
@@ -1079,6 +1083,7 @@ final class BookViewModel {
     func collapseAll() {
         let wereOpen = Array(expandedPosts)
         expandedPosts.removeAll()
+        pendingOutlineBlockLanding = nil
         focusedPostID = nil
         caretSeed = nil
         caretSeedIsHers = false
@@ -1108,8 +1113,9 @@ final class BookViewModel {
     /// Index's selected note, REPORTED by the index column (wave 2c — the
     /// same pattern, same reason).
     private(set) var indexAnchorPostID: String?
-    /// Where the book was last carried to — the fallback for a surface that
-    /// tracks no position (Read ▸ Scroll; see `BookAnchor`'s header).
+    /// Where the book was last carried to — every arm's fallback, and Read ▸
+    /// Scroll's answer while its page views nothing (VX-681; see `BookAnchor`'s
+    /// header).
     private(set) var standingAnchorPostID: String?
     /// The post a mode switch asked the ARRIVING surface to land on. One
     /// slot, consumed by whichever surface mounts — never a queue, because a
@@ -1129,8 +1135,10 @@ final class BookViewModel {
     /// **The index column's SELECTION** (18d batch 1 — the walk's second
     /// finding). Deliberately NOT `indexAnchorPostID`: that one is W21's
     /// CARRY ("if you clicked over to another mode, where would you land"),
-    /// and the index writes it only on a selection SHE makes — the arrival's
-    /// own seed passes `report: false`, so a book opened straight into Index
+    /// and the index writes it only on a selection SHE makes or a place a
+    /// carry brought her to (VX-662 — the carried reveal reports, so the
+    /// anchor is never an earlier visit's click) — the cold-open seed passes
+    /// `report: false`, so a book opened straight into Index
     /// has a highlighted row, a scrolled pane, and a nil anchor. The box's
     /// question is "is a note selected right now", which the seeded row
     /// answers yes to; so it gets its own report and the carry's cadence is
@@ -1225,7 +1233,10 @@ final class BookViewModel {
             spreadPostIDs: spreadEntries.map(\.postID),
             pagedPostID: pagedAnchorPostID,
             indexPostID: indexAnchorPostID,
-            standingPostID: standingAnchorPostID)
+            standingPostID: standingAnchorPostID,
+            // VX-681: Read ▸ Scroll's place is the story its page shows — the
+            // flow's own slot (empty whenever the flow is not on screen).
+            flowViewedPostID: viewedFlowPair.postID)
     }
 
     /// THE CARRY (her round-8 ruling): capture where the DEPARTING mode is
@@ -1271,7 +1282,30 @@ final class BookViewModel {
         // VX-630: …and the Outline consumes a block as a focus at it.
         if arriving == .outline, let block = target.blockID {
             focus(target.postID, atBlock: block)
+            // VX-680: …and its PAGE lands the block, not only the note's row
+            // (after the focus — `focus` drops any parked block landing).
+            pendingOutlineBlockLanding = target
         }
+    }
+
+    // MARK: - VX-680 — the Outline arrival's carried block (its landing's home)
+
+    /// **The block an Index → Outline click-over asked the arriving Outline's
+    /// landing to bring into view** (VX-680, P-B4-1's second option, ruled at
+    /// #248). Set ONLY by `carryPlace`'s Outline arm, beside VX-630's focus at
+    /// that block; taken ONCE by the Outline's landing of that very note
+    /// (`takeOutlineBlockLanding`); dropped by any later navigation in the book
+    /// — a focus, a collapse, a reveal, a block or chapter landing — so it can
+    /// never land on a later visit. Not observed (no view reads it; the
+    /// Outline takes it in its landing's own call).
+    @ObservationIgnored private(set) var pendingOutlineBlockLanding: LandingTarget?
+
+    /// The Outline's landing of `postID` takes the parked block — its blockID
+    /// when the park names that note, else nil. The park is spent either way.
+    func takeOutlineBlockLanding(for postID: String) -> String? {
+        guard let parked = pendingOutlineBlockLanding else { return nil }
+        pendingOutlineBlockLanding = nil
+        return parked.postID == postID ? parked.blockID : nil
     }
 
     /// An outside door (W20's ascent) asking this book to open AT a post.
@@ -1279,6 +1313,7 @@ final class BookViewModel {
         standingAnchorPostID = postID
         pendingReveal = postID
         pendingLanding = nil
+        pendingOutlineBlockLanding = nil   // VX-680: a new navigation
     }
 
     /// The arriving surface took the landing. Idempotent. A block-precise
@@ -1303,6 +1338,7 @@ final class BookViewModel {
         standingAnchorPostID = target.postID
         pendingReveal = target.postID
         pendingLanding = target
+        pendingOutlineBlockLanding = nil   // VX-680: a new navigation
     }
 
     // MARK: - Outline's CHAPTER landing (the Act 10 correction round, rows
@@ -1319,6 +1355,7 @@ final class BookViewModel {
 
     func requestChapterReveal(_ sectionID: String) {
         pendingChapterReveal = sectionID
+        pendingOutlineBlockLanding = nil   // VX-680: a new navigation
     }
 
     /// Outline took the chapter landing. Idempotent.
@@ -1364,10 +1401,13 @@ final class BookViewModel {
     /// written ONLY through `noteFlowViewed`. Its own slot, never the
     /// Outline's: the Outline's clears when the Outline leaves (VX-562's
     /// pins), and the two pages are never on screen together. Read by the
-    /// navigator's marks in Read ▸ Scroll and by ⌘↑/⌘↓'s seam
+    /// navigator's marks in Read ▸ Scroll, by ⌘↑/⌘↓'s seam
     /// (`BookNoteStep.viewedNote`, A-648-6 (2) — the interim standing-anchor
-    /// source replaced). A report, never a decision: it reaches no focus, no
-    /// reveal and no landing's aim.
+    /// source replaced) and, since VX-681, by the mode carry out of the scroll
+    /// (`anchorPlace` → `BookAnchor`'s `.read .flow` arm). A report, never a
+    /// decision: it reaches no focus, no reveal and no landing's aim — the
+    /// carry reads it at the switch, exactly as it reads the paged reader's
+    /// reported address.
     private(set) var viewedFlowPair = BookOutlineViewed.Pair.nothingViewed
 
     /// The flow's report — equality-gated against the slot itself.

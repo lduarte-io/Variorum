@@ -1125,8 +1125,10 @@ struct TutorialMCPChapterTests {
                 """
             #expect(text.contains(revisionRecipe))
             #expect(compareKey == 5)
-            #expect(text.contains("Ask your AI to show you the two side by side and, while Variorum is the app in "
-                                  + "front, it opens \(PostMode.compare.rawValue) on them."))
+            // VX-676 (A JUSTIFIED EDIT, the ritual — her sitting + amendment): a
+            // show lands as an offer, so the recipe says Variorum offers Compare.
+            #expect(text.contains("Ask your AI to show you the two side by side, and Variorum offers to open "
+                                  + "\(PostMode.compare.rawValue) on them."))
             #expect(try tool("duplicate_note").description.contains("Needs read on the note and write new on its wing"))
             #expect(try tool("show_in_app").description.contains("or \"compare\" (note_id + peer_ids"),
                     "the show road has a Compare target (VX-298)")
@@ -1266,7 +1268,19 @@ struct TutorialMCPChapterTests {
                 for: Operations.MCPWriteAct.take.undoLabel(client: "\u{2039}name\u{203A}"))
             #expect(text.contains("the Edit menu names it after the client: \(placeholder)."))
             #expect(!text.localizedCaseInsensitiveContains("claude"))
-            #expect(text.contains("only while Variorum is the app in front; it never brings a window forward"))
+            // VX-676 (A JUSTIFIED EDIT, the ritual — her sitting 2026-10-28 and her
+            // mid-run amendment): the frontmost-only sentence is retired; the
+            // lesson says the ask, its line, its two ends, ⌥⌘O, and the dial in
+            // the pane's own words (RED ON OLD by absence).
+            #expect(!text.contains("it can only while Variorum is the app in front"), "the retired rule")
+            #expect(text.contains("by default it asks first: a line pops up at the bottom of the window naming the "
+                                  + "client and what it wants to show you, with \(MCPReceiptCopy.openDoor) to go and look"))
+            #expect(text.contains("waits at the bottom of the window until you open it (\u{2325}\u{2318}O opens it "
+                                  + "too), dismiss it with \u{2715}, or the client disconnects"))
+            #expect(text.contains("Nothing ever brings a window forward."))
+            #expect(text.contains("\u{201C}\(MCPPaneCopy.showDialTitle)\u{201D} can be set to "
+                                  + "\(MCPPaneCopy.showDialChoice(.moveAtOnce)) instead (only while Variorum is the app "
+                                  + "in front; if you've been away, it still asks) or to \(MCPPaneCopy.showDialChoice(.never))."))
             // VX-197 U8b — Compare from the wire (VX-298) and link_versions'
             // receipt (VX-187 at VX-336 U6a): both land in Compare. The landing
             // itself is U6a's `MCPCompareLandingTests` (the Mac batch). RED ON OLD.
