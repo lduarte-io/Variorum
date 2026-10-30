@@ -42,6 +42,11 @@ Main leg (was 11 steps; proposed ~13): 1 navigation · 2 the Prince (was Sherloc
 - **R-292-12 — the offer card's doors are yes · no ONLY.** No → the card briefly shows the Help road then retires forever. No ✕, no snooze — this supersedes the VX-559 ruling's "an x, snoozeable". (Amends R-13s-6/13's "not now" vocabulary; the never-returns law stands.)
 - **R-292-13 — the proposed flow approved as drafted.** Main leg ~13 steps (Read-in-note and Lenses as LIVE visits; Compare & Blocks one brief card; the book arc; quick entry last); the Settings stop (theme pane shown, MCP pane named) rides the keep-going leg.
 
+## LATER RULINGS (same sitting, her follow-up messages — verbatim-faithful)
+
+- **R-292-14 — THE SEA-GLASS THEME, and it becomes the default (VX-710).** Her words: *"can you add a theme to the app that is the same seaglass color as the icon? and make that the default theme? I think that would be nicer honestly, it's what i want to use for recording the product gifs too."* The icon's sea-glass is #C2DDD3 (VX-192). Built as the U-THEME unit below.
+- **R-292-15 — no riders; direct resolution with VX-105.** Her words: *"no riders for now - i want everything to just get done asap"* and *"honestly just send a message to session vx-105 and let it know what you're thinking and reach resolution on the plan with them."* VX-707/VX-343/VX-71 stay on the board untouched; the VX-105 boundary is settled session-to-session (the exchange lands in OVERLAP / COORDINATION below).
+
 ## U1 COPY DRAFTS (the architect's, in her register — VERBATIM into `TourScript` unless a real-app fact forces a departure; every departure recorded in the U1 RECORD with its alternative)
 
 - **`.seededBook`** — title: `The Prince, in Variorum` · body: `the prince comes with the app, so you can try everything on real writing. Machiavelli's Italian rides under every paragraph. Click into it.`
@@ -71,6 +76,18 @@ The pieces, each its own commit:
 
 OUT OF SCOPE (later units'): step structure and new steps (U3), navigation/driving machinery and scroll-into-view (U2), the offer line/card (U4), `.restoreSampleLibrary`'s verb (a wording call, hers). If a piece turns out to need author-only input or a fenced seam, STOP that piece, record why, continue with the rest.
 
+### U-THEME BRIEF — the sea-glass palette preset + the default flip (VX-710; SPAWN-READY, runs after U1)
+
+**Seat, Pro rules, discipline, fences: EXACTLY as the U1 BRIEF's header (same worktree, same branch, commit per piece, push every commit, LIVE STATUS in a "## U-THEME RECORD" section of this file, READY-FOR-STAGE with suite TYPE names + expected executed counts; -only-testing matches suite TYPES, never file names).** Required reading: this plan WHOLE; `App/Variorum/Shared/Theme/PaletteDerivation.swift` (the one pure rule — WCAG-AA-stepped accent; the preset pattern, e.g. mint/lavender); `Sources/VariorumCore/Models/Enums.swift:139` (`ThemePalette`); `Sources/VariorumCore/Queries/AppearanceQueries.swift` (~118, the `theme_palette` read-time default); `App/Variorum/Variorum/Features/Settings/PaletteSettingsRow.swift`; `App/Variorum/VariorumTests/PaletteDerivationTests.swift`.
+
+The pieces, each its own commit:
+1. **The preset:** `ThemePalette.seaglass` + its derivation from **#C2DDD3** (the icon's sea-glass, VX-192) through the one pure rule — room, wash, accent, take tints, hairline; the accent AA-stepped; dark stays the fully black room under it (the standing contract); both voices. No literal colour outside the token layer (the preset table IS the token layer). An unknown/unparseable stored value must still read as today's fallback (check, don't assume — sync can hand an old client this new value).
+2. **The default flip** (the Study-flip precedent — a READ-TIME default change, never a migration): the unset `theme_palette` read becomes `seaglass`. Stores with an explicit palette choice keep it. **PROVISIONAL P-292-2:** alternative (a) fresh-stores-only via a birth-written setting; built as the read-time flip because her words are "make that the default theme" and the Study flip is the recorded precedent. Say in the record what the DEV store carries (explicit value or unset) — her real store is never read.
+3. **The Settings face:** seaglass joins the palette picker; placement beside the other presets follows the file's existing order logic (flag the chosen position for her eye at the walk). Pins: `PaletteDerivationTests` (AA + the derivation), the default-read pin, `NoLiteralColourTests`, `PaletteReachTests` if it enumerates presets.
+4. **Record close** per the U1 brief's piece-5 shape.
+
+OUT OF SCOPE: the app icon (already sea-glass), the voices, the tour (other units'), any migration or `Sync/` change (`theme_palette` is a synced setting VALUE — adding an enum case is not a schema event; touch no DDL, no `Sources/VariorumCore/Sync/`).
+
 ## OVERLAP / COORDINATION
 
 - **VX-105** (her readme/letter seed session, running now): shares TutorialSeeder's first lesson, the Help menu registry, the first-open band. Closeouts serialize via `oct29coordinator`; the later merge rebases and re-greps the shared seams (the three stale labels, the end card's readme aside — the aside stays TRUE once VX-105 lands "readme").
@@ -87,8 +104,10 @@ OUT OF SCOPE (later units'): step structure and new steps (U3), navigation/drivi
 | 4 | U3 more stops | NOT STARTED (shape pends her markup) |
 | 5 | U4 offer card (VX-559) | NOT STARTED (doors pend Q-292-3) |
 | 6 | VX-415 close as superseded by VX-559 | OWED at closeout |
-| 7 | Riders check (open Low/Med in Settings & onboarding): VX-71 (currency-test tighten, parked), VX-707 (Settings search placeholder unthemed in Study), VX-343 (What's New wrap bug) | OFFERED at the sitting |
+| 7 | Riders check (VX-71, VX-707, VX-343) | DECLINED (R-292-15: "no riders for now") — they stay on the board |
 | 8 | Release + site publish | AT HER WORD after merge |
+| 9 | U-THEME sea-glass preset + default flip (VX-710) | NOT STARTED — runs after U1 |
+| 10 | VX-105 boundary resolution (session-to-session, R-292-15) | IN FLIGHT — message sent, answer lands in OVERLAP / COORDINATION |
 
 ## U1 RECORD
 
