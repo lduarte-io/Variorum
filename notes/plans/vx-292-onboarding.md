@@ -681,3 +681,7 @@ Expected: TakeCardDoorTests [16] · TakeLabelLineTests [4] · ReadModeTests [6] 
 ### A-292-4 — VX-712 ADJUDICATED TO THE PIN (the architect, 2026-10-30, on U3's departure)
 
 U3's trace of VX-712 is accepted as concrete: the "getting around" lesson's own instruction leads with ⌘K, whose top row for the lesson opens it as `.post(id)` — the note's own page OUTSIDE the book — where ⌘2/⌘1 work; the ticket's premise (the roads refuse on the book surface the lesson is read from) misread the lesson's road. Per the hallucination guard the pin is the confirm: `TutorialCurrencyTests.gettingAroundsModeKeysFollowARoadThatLeavesTheBook` runs at U3's window — GREEN ⇒ VX-712 closes as HOLLOW at the closeout (the trace recorded on the ticket, no reword; the drafted reword stays in the record unused); RED ⇒ the drafted reword applies before the window closes (a narrow continuation of U3 or the orchestrator's line-fix, per size). The absorbed-ticket note in ABSORBED MID-EFFORT amends accordingly at the verdict.
+
+## U3 STAGE WINDOW (the orchestrator, 2026-10-30 ~06:57, claim vx-292-u3 — LIVE; the record completes at the close)
+
+**IN FLIGHT: the six Mac watches W1–W6, in-place edits of ONE file each, never committed** — a dead session's dirty file names the watch (W1 `ReadModeView.swift` · W2 `BookView.swift` · W3 `LensesBoardView.swift` · W4/W5 `TourEngine.swift` · W6 `TourScript.swift`); restore `git checkout -- <file>`. Then gates A (132) and B (122), then the ten walk rows both voices.
