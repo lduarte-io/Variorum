@@ -133,8 +133,9 @@ enum LaunchFurniture {
             // 13s-b U1b: the example snippet FIRST (the oldest group is the
             // Snippets rail's first card — R-13s-26), then the guide, then
             // the readme LAST — the newest thing a fresh Library leads
-            // with (R-13s-29/39). The readme carries its Start Here passages
-            // on every store (VX-329: every store opens on the new road).
+            // with (R-13s-29/39). VX-105: the readme is her letter alone —
+            // the Start Here passages left it for the field guide's first
+            // chapter and its protection chapter (R-105-7).
             beforeArranging: {
                 _ = await ExampleSnippetSeeder.seedAtBirth(session: session)
                 _ = await TutorialSeeder.seedAtBirth(session: session)

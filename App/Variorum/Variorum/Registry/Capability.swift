@@ -951,7 +951,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case toggleSeams, helper
     case restoreTutorial
     /// pre-13u Act 10 (the tenth wave's ruling — "Restore door - yes,
-    /// let's do it"): the sample library's tutorial-style restore. Unlike
+    /// let's do it"): Sherlock's tutorial-style restore — rendered Restore
+    /// “the adventures of sherlock holmes” since VX-105 (R-105-4: the
+    /// "sample library" label retired; the id keeps its name). Unlike
     /// the tutorial's replace, this door only MINTS WHAT IS MISSING
     /// (`SampleLibrarySeeder`'s resumable seed) — nothing of hers is ever
     /// deleted, so no confirm gates it.
@@ -969,6 +971,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// comes back FRESH, history and all (the front matter's R-18l-12
     /// promise).
     case restoreJekyllBook
+    /// VX-105 (R-105-8 — "add a 'restore readme' door … match everything
+    /// else"): the readme's restore — Help ▸ Restore “readme”, the seeded
+    /// doors' rule: a live readme refuses; otherwise the one mint makes the
+    /// seeded shape again (a tombstone ignored — a press is her word).
+    case restoreReadme
     /// 13s-b U1b (R-13s-37, "classics restorable"): the classics
     /// GATHERING's restore — adopt-or-mint on Welcome from the `#classics`
     /// tag, the retired arrangement step's shape behind an explicit door.

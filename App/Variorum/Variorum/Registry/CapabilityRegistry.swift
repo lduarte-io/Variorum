@@ -2402,10 +2402,16 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
-        // pre-13u Act 10 (the tenth-wave ruling): the sample library's
-        // restore — mint-what's-missing, never a replace, so no confirm.
+        // pre-13u Act 10 (the tenth-wave ruling): Sherlock's restore —
+        // mint-what's-missing, never a replace, so no confirm. VX-105
+        // (R-105-4, her words: "they should be able to restore sherlock,
+        // jeyll and hyde, the prince, etc. each individual. the sample
+        // library is too confusing we don't need that"): the door names its
+        // BOOK, the Jekyll/Prince doors' idiom — the verb follows the one
+        // name constant, lowercase (R-13s-38). The act is unchanged.
         Capability(
-            id: .restoreSampleLibrary, verb: "Restore the Sample Library",
+            id: .restoreSampleLibrary,
+            verb: "Restore \u{201C}\(SampleLibrarySeeder.bookName)\u{201D}",
             scope: .app,
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
@@ -2418,6 +2424,15 @@ nonisolated enum CapabilityRegistry {
         Capability(
             id: .restoreJekyllBook,
             verb: "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}",
+            scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
+        // VX-105 (R-105-8): the readme's restore — the book doors' idiom,
+        // the verb following the one title constant (lowercase, her word).
+        Capability(
+            id: .restoreReadme,
+            verb: "Restore \u{201C}\(ReadmeSeeder.title)\u{201D}",
             scope: .app,
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,

@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **Onboarding overhaul** — the tour made mechanically accurate (the Prince), always-goes-well machinery, new stops (book modes, Read, Lenses, Settings), VX-559's offer card | VX-292 (+ VX-559 sub-issue) · `vx-292-onboarding` | `~/dev/variorum-vx-292` · the Pro | KICKED OFF 2026-10-30 (architect shape; plan `notes/plans/vx-292-onboarding.md`). Surfaces: Features/Onboarding, Domain/Tour, TutorialSeeder (field guide lessons), the first-open band, Settings pane (tour anchors only). OVERLAPS VX-105 (seeder, field guide ch. 1, Help menu) — closeouts serialize; stage via oct29coordinator. |
-| **VX-105 readme/letter seed** (her session, running 2026-10-30) | VX-105 · `vx-105-readme-letter` | `~/dev/variorum-vx-105` · the Pro | In flight beside onboarding; merge order via oct29coordinator. |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout

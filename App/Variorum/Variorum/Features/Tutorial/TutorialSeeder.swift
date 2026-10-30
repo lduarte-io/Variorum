@@ -615,13 +615,33 @@ enum TutorialSeeder {
 
         // ————————————————————————————— welcome —————————————————————————————
 
-        _ = try lesson(welcome, "start here", [
+        // VX-105 — R-105-5, her word: "interweave the relevant parts of
+        // 'Lillian's Start Here' that are important / good into the first
+        // chapter of the field guide. if the first chapter of the field guide
+        // has stuff that 'Lillian's Start Here' is missing, then go ahead and
+        // keep the field guide portion … you have a lot of freedom to edit that
+        // as you see fit". Her draft's welcome and its takes moment (her words,
+        // with her alternates as REAL takes) woven into this lesson's vision,
+        // safety, companions and closer; her draft's unfinished second half
+        // stays out. R-105-7, her word: "…the four Castle passages are still in
+        // the first thing that someone reads" — they follow the companions,
+        // read from the ONE constant (`startHerePassages`), byte-identical to
+        // the protection chapter's lead, which is unchanged (they read twice in
+        // the guide, her accepted state). The safety block names the Help door
+        // by the registry's own verb (the VX-105/VX-292 boundary ruling 1 —
+        // never a retyped label). Her draft's chrome words were checked against
+        // the build (the U1 RECORD's BUILD-VERIFY list), and — R-105-10 — the
+        // lesson's first ask is the move from the book into this note, so her
+        // takes moment is read where it works.
+        let startHere = try lesson(welcome, "start here", [
+            "Welcome to Variorum! I'm Lillian, the developer behind this app, and "
+            + "I'm excited that you've downloaded it.",
+
             // 13s-b triage landing (R-13s-30 — her “I'll add some vision upfront
-            // too”): the guide opens on what the app believes, in the product's own
-            // canon words (choices kept open, nothing destroyed, a family tree not a
-            // court record) — a NEW first block; the four that follow are the old
-            // lesson, re-voiced.
-            "Welcome. Variorum is built on a few beliefs about writing. A "
+            // too”): what the app believes, in the product's own canon words
+            // (choices kept open, nothing destroyed, a family tree not a court
+            // record). VX-105: its "Welcome." went to her welcome above.
+            "Variorum is built on a few beliefs about writing. A "
             + "paragraph should be able to hold more than one version of itself, "
             + "side by side, for as long as you want. Nothing you write should "
             + "ever be destroyed: deleting, dividing and merging are all moves "
@@ -636,21 +656,110 @@ enum TutorialSeeder {
             + "lesson asks you to do the thing it describes, right here in its "
             + "own text.",
 
+            // VX-105 R-105-10, her word: "if the guide opens as a book in
+            // outline, the first thing it should direct you to do is probably
+            // to open the note itself. i think moving from book -> note is one
+            // of the flows that is hardest for a user to understand". The
+            // lesson's FIRST ask, before any other: open this note from the
+            // book. The guide opens on its OUTLINE (`BookStructureModel
+            // .defaultMode`), where each note is a card whose body and
+            // "open ↗" (`NoteBoxCopy.openDoor`, the book's one word for its
+            // open door) land the note in Write on its own page; there her
+            // takes moment below works as she wrote it. A reader who stays in
+            // the Outline still gets the take icon and its panel (only the
+            // panel's "Open Takes mode" refuses there, saying a note must be
+            // open first). Ladder round 1, MAJOR-1, reshaped by R-105-10.
+            "The first move to learn is the one from a book into a note. In the "
+            + "book's Outline each note is a card, and clicking it, or "
+            + NoteBoxCopy.openDoor + " beside its title, opens the note itself "
+            + "in the full editor. Open this lesson that way now if it isn't open "
+            + "already: the rest of it happens inside the note.",
+
             "Everything in this book is safe to play with. Cut it up, rewrite "
-            + "it, delete it. Help \u{25B8} Restore Tutorial\u{2026} replaces the "
-            + "whole book with a pristine copy whenever you want one. Nothing you "
-            + "do here can touch your own writing.",
+            + "it, delete it. Help \u{25B8} "
+            + CapabilityRegistry.capability(.restoreTutorial).verb
+            + " replaces the whole book with a pristine copy whenever you want "
+            + "one. Nothing you do here can touch your own writing.",
+
+            // Her take-icon block (its two takes are minted below), verbatim:
+            // read in the opened note (R-105-10's first ask), every step of
+            // her takes moment holds as she wrote it.
+            "I built Variorum with a simple goal: to be able to create multiple "
+            + "different versions of a block of text. I call these versions "
+            + "takes, borrowing from the film world. The icon to the right of "
+            + "this block is the take icon - click on it.",
+
+            "While Write is meant to behave like a simple and elegant editor, "
+            + "Takes is where complexity thrives. Click on \u{201C}expand "
+            + "all\u{201D} at the top of Takes.",
+
+            // Her "so what?" block (its two takes are minted below).
+            "This is the point at which you might be thinking \"cool, but so "
+            + "what?\", unless you're a writer that understands the pain of "
+            + "reworking a particular paragraph to the point of madness. If that "
+            + "isn't you, some of the best use cases I've found for it are in the "
+            + "takes of this paragraph.",
 
             "Two companions to know from the start. When the app answers you (a "
             + "result, a refusal, an undo report), the answer appears briefly at "
             + "the bottom of the window. And \u{2318}/ opens the Shortcuts & "
             + "Dictionary helper: every key the app listens for, and every word "
             + "it uses, in plain language.",
-
-            "The chapters of this book are listed on the left. Read in order, "
-            + "or jump to what itches. When something in a lesson doesn't behave "
-            + "as the words promise, that is a bug in the app, not in you.",
+        ] + startHerePassages + [
+            // R-105-10's consequence (flagged F-3 in the ladder record): a
+            // reader on the happy path reaches this closer INSIDE the note,
+            // where the left side is the app's sidebar, not the book's chapter
+            // list — so it names where the list is and the way back (the note
+            // context bar's book glyph opens its one book at that note,
+            // `ContextBarDoors.bookClick`; "the workspace" teaches the same
+            // glyph). True from the Outline too.
+            "In the book itself, the chapters are listed on the left, each an "
+            + "interactive guide, and from inside a note the book glyph above the "
+            + "page takes you back there, at that very note. Read in order, or "
+            + "jump to what itches. When something in a lesson doesn't behave as "
+            + "the words promise, that is a bug in the app, not in you.",
         ])
+        // Her alternates, as REAL takes (her draft's "--- Alternates ---"
+        // sections). `branchVariant` seats a branch right AFTER the take it
+        // branched from, so each block's SECOND take is minted first: the fan
+        // reads original, take 1, take 2 — her draft's order.
+        //
+        // VX-105 ladder round 1, NIT-2: a take attaches to its block by the
+        // block's index AND the opening of its text, so an edit above them
+        // (this lesson is the one R-105-5 lets keep changing) can never move
+        // her takes onto the wrong block. A mismatch REFUSES the attach —
+        // loudly in DEBUG (`assertionFailure`: the seed's own suites trip on
+        // it), and in Release no take lands rather than a wrong one.
+        func fanned(_ index: Int, opening: String) -> Operations.NewBlockResult? {
+            guard startHere.blocks.indices.contains(index),
+                  startHere.blocks[index].variant.workingText.hasPrefix(opening)
+            else {
+                assertionFailure(
+                    "\u{201C}start here\u{201D}: block \(index + 1) no longer opens "
+                    + "\u{201C}\(opening)\u{201D}; her takes were not attached")
+                return nil
+            }
+            return startHere.blocks[index]
+        }
+        if let takeIcon = fanned(5, opening: "I built Variorum with a simple goal") {
+            try take(on: takeIcon,
+                     "Now click on Open Takes mode in the top bar of this modal.")
+            try take(on: takeIcon, "You found it! :D")
+        }
+        if let soWhat = fanned(7, opening: "This is the point at which you might be thinking") {
+            try take(on: soWhat,
+                     "There are four different ways to see your takes and work with "
+                     + "them. Test each of them out now by changing \u{201C}style\u{201D} "
+                     + "at the top bar of this note. While each is useful for "
+                     + "something different, I\u{2019}m particularly fond of margin "
+                     + "grid for quick notes.")
+            try take(on: soWhat,
+                     "This is where things get really fun! You can expand or collapse "
+                     + "any take block with the button to the right of it, or use the "
+                     + "button at the top. Navigation is fully supported by keyboard "
+                     + "shortcuts\u{2014}you can also get to Takes with \u{2318}2. "
+                     + "Check out all the shortcuts at \u{2318}/.")
+        }
 
         _ = try lesson(welcome, "getting around", [
             // 13i-d U7 (F-U1-5): the sidebar area is the BOOKCASE (§7).
@@ -2492,14 +2601,14 @@ enum TutorialSeeder {
         // ————————————————————————— keeping it private —————————————————————
         //
         // VX-309 U2 — THE CHAPTER (VX-379; #235): the rules as built. Lesson 1
-        // LEADS with the readme's four Start Here passages, verbatim (one text,
-        // two homes), then what sync seals (VX-204's approved sentences) and
+        // LEADS with the four Start Here passages, verbatim (`startHerePassages`,
+        // the guide's one copy since VX-105), then what sync seals (VX-204's approved sentences) and
         // what open means; lesson 2 the postures; lesson 3 the copies as VX-309
         // built them. 13s-b triage landing: minted LAST (the chapter moved
         // last; a membership's position is its mint order). VX-329: every store
         // opens on the new road, so copy §7's two lessons (and VX-209's
         // older-copy warning) went with today's road.
-        let keyLesson = ReadmeSeeder.startHerePassages + [
+        let keyLesson = startHerePassages + [
             ProtectionWords.guideSyncSentence + " " + ProtectionCopy.privacyServerSeesShapeSentence,
             ProtectionCopy.keystoneAccountPassword, ProtectionWords.guideOpenMeansReadable,
         ]

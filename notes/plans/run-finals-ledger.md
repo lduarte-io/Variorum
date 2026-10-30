@@ -146,3 +146,10 @@ Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 �
 - Canon: MCPSpec (the offer dial · the version target · the gone-check · 3,061/3,100) + SurfaceContracts (doors · status seam · the mode-row carry family · Block History) + TEXTKIT2_NOTES §3 (the frame-constant display rule). Bundle QUESTIONS #252; MobileSoul not minted.
 - Born: VX-683 · VX-686(grown) · VX-687 · VX-688 · VX-692(High, grown twice) · VX-694 · VX-702 · VX-705 · VX-706 · VX-707; VX-693 fixed in-run; VX-661 grown twice.
 - Her live rulings this run: VX-624 seated · A-677-1/2/3 + B2-i ratified · VX-676's amendment + background-asks ratified · the trailer cleanup · the two-release amendment (vx-669 now, this run its own) · release.sh pre-approved. The release: 0.10.6, this run's, right after the merge.
+
+## VX-105 — her finished readme seeds (2026-10-30, PR #209)
+- Cast: Fable orchestrated (architect shape); Opus implemented (one session + resumed tails); Opus cold-reviewed (three fresh rounds, same-model — the orchestrator arbitrated; her word lifted the cap if a new MAJOR appeared; unused).
+- Claims: vx-105-tests (targeted 125/12 green 102 s; full 5,739/1,000, 21 issues = 4 warn + 14 known + 3 real all one test, solo-proven green → VX-714; tree 2a42ea7de) · vx-105-walk (legs 1–4 PASS; slot md5-identical; prefs 412=412, 8 added keys deleted by name; the Oct-20 hold marker byte-identical; posture Standard/signed out/unlocked).
+- Canon: SurfaceContracts seed-set line · AppSpecRecord 2026-10-30 · QUESTIONS #253/#254. MobileSoul not minted (nothing mobile-visible, R-105-2).
+- Born: VX-711 (Low) · VX-712 (Medium → VX-292) · VX-713 (Low → VX-292) · VX-714 (Low) · VX-715 (Low). Closed superseded: VX-635.
+- Her live rulings this run: R-105-1..10 (the record, verbatim) + S-1 accepted on the Prince precedent + the overnight release word (one folded release, notes public-only, the morning handoff bundles everything).

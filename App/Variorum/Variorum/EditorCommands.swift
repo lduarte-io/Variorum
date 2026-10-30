@@ -143,14 +143,16 @@ struct EditorCommands: Commands {
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
         // 13s-b U1a, piece 5: Help ▸ Take the Tour.
         .takeTour,
-        // pre-13u Act 10: the sample library's restore, beside the
-        // tutorial's (the tenth-wave ruling). (Encryption Explained's left
+        // pre-13u Act 10: Sherlock's restore (VX-105: named by its book),
+        // beside the tutorial's (the tenth-wave ruling). (Encryption Explained's left
         // at 13s-b U1b — R-13s-37: not restorable.)
         // VX-633: the Prince's restore (the launch's book), first of the books.
         .restorePrinceBook,
         .restoreSampleLibrary,
         // 18l-c U6: the takemania book's restore, beside Sherlock's.
         .restoreJekyllBook,
+        // VX-105 (R-105-8): the readme's restore, after the books'.
+        .restoreReadme,
         // 13s-b U1b (R-13s-37): the classics gathering's restore.
         .restoreClassicsGathering,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
@@ -1169,6 +1171,11 @@ struct EditorCommands: Commands {
             // 18l-c U6: the takemania book's restore, beside Sherlock's.
             Button(verb(.restoreJekyllBook)) {
                 creationActions()?.restoreJekyllBook()
+            }
+            .disabled(!canReachCreationTarget)
+            // VX-105 (R-105-8): the readme's restore, after the books'.
+            Button(verb(.restoreReadme)) {
+                creationActions()?.restoreReadme()
             }
             .disabled(!canReachCreationTarget)
             // 13s-b U1b (R-13s-37): the classics gathering's restore.

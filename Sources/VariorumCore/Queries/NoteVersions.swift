@@ -338,6 +338,87 @@ extension Queries {
             arguments: ["version": versionID, "note": postID]) ?? false
     }
 
+    /// **Is this container a live saved version of ANY live note?** The
+    /// question `isVersionHistory` asks of one named note, asked of every
+    /// live note at once — the answer the `.anyLiveNote` reading gives (the
+    /// fence the Library, Archived, search and the wing move read;
+    /// `versionHistoryPredicate`, LR1-5: one classifier, read by every scope).
+    /// Public so an app read that must not count a saved moment as a note (a
+    /// version keeps its note's title — V6, no title mutation) asks exactly
+    /// what those surfaces ask, never a hand-copied classifier: the readme
+    /// door's live-readme read (VX-105 ladder round 1, MINOR-1).
+    ///
+    /// **CANDIDATE-DRIVEN** (VX-105 ladder round 2, BLOCKER-1 — the round-1
+    /// form asked the `.anyLiveNote` predicate of this one row, and SQLite
+    /// drove that EXISTS from every live post: `SEARCH peer USING INDEX
+    /// idx_container_kind`, linear in the notes). The `noteVersionStamps`
+    /// shape, from the other side: the notes this container could be a
+    /// moment OF are reached from its OWN placements (tombstoned included — the
+    /// classifier reads both sides' placements past their tombstones, LR1-1),
+    /// through its `version_of` links in both directions (`idx_edge_source` /
+    /// `idx_edge_target`), to the other endpoint's placements (live through
+    /// `uq_cblock_ownership`, tombstoned through `idx_cblock_dead_block`), kept
+    /// only when that note is a live post other than this one — exactly the
+    /// peers the `.anyLiveNote` arm ranges over, and a superset of the ones it
+    /// can name. The gather filters only the link's type and the peer's own
+    /// identity and liveness (a live post, not this container); it leaves to
+    /// the classifier the edge fence (a live link, or one cascade-dead with its
+    /// endpoint) and this container's own checks (live, born archived — and
+    /// `theirs.block_id <> mine.block_id`). Then the ONE
+    /// classifier decides, per linked note (`isVersionHistory`): the answer is
+    /// `versionHistoryPredicate(.anyLiveNote)`'s exactly (pinned equal across
+    /// the note-side shapes in `NoteVersionsTests`).
+    ///
+    /// **Cost:** this container's own placements and their `version_of`
+    /// links (index seeks — never a walk of the notes, pinned on the plan),
+    /// plus one `isVersionHistory` per live note it is linked to. That older
+    /// read's plan has SQLite build an AUTOMATIC covering index for its `edge`
+    /// join on every execution, and the build reads EVERY row of `edge`, of
+    /// every type (the partial `type = 'version_of'` only filters which rows
+    /// enter it) — so each linked note's check scales with the whole edge
+    /// table, every divide, merge, extract and copy in the corpus (about 2 ms
+    /// at 60k edges; VX-105 ladder round 3, MINOR-1). A candidate that fails
+    /// the born-archived check short-circuits before the build. Fine for this
+    /// read's occasion-bounded caller (a birth seed, a Help press); NOT for a
+    /// per-row road (a listing, a badge). The step is pre-existing and left as
+    /// it is (the round-2 record's recorded non-action). A container with no
+    /// version links answers after its placements alone.
+    public static func isVersionOfAnyLiveNote(
+        _ db: Database, _ containerID: String
+    ) throws -> Bool {
+        // Four arms: the link's two directions × the other endpoint's
+        // placement LIVE (`uq_cblock_ownership`, partial on live rows) or DEAD
+        // (`idx_cblock_dead_block`, partial on dead rows) — the two partial
+        // indexes together cover every placement by block, and neither alone
+        // can serve "live or tombstoned". CROSS JOIN pins the loop order
+        // (SQLite never reorders across it): left to its own choice, the
+        // planner (no ANALYZE stats) drove `note` from `idx_container_kind` —
+        // every live post — ahead of `theirs`.
+        func arm(from mineEnd: String, to otherEnd: String, placement liveness: String) -> String {
+            """
+            SELECT note.id
+              FROM container_block mine
+              CROSS JOIN edge e
+                ON e.\(mineEnd) = mine.block_id AND e.type = 'version_of'
+              CROSS JOIN container_block theirs
+                ON theirs.block_id = e.\(otherEnd) AND theirs.deleted_at \(liveness)
+              CROSS JOIN container note ON note.id = theirs.container_id
+             WHERE mine.container_id = :container
+               AND note.id <> :container AND note.kind = 'post' AND note.deleted_at IS NULL
+            """
+        }
+        let linkedNotes = try String.fetchAll(
+            db,
+            sql: [
+                arm(from: "source_block_id", to: "target_block_id", placement: "IS NULL"),
+                arm(from: "source_block_id", to: "target_block_id", placement: "IS NOT NULL"),
+                arm(from: "target_block_id", to: "source_block_id", placement: "IS NULL"),
+                arm(from: "target_block_id", to: "source_block_id", placement: "IS NOT NULL"),
+            ].joined(separator: "\nUNION\n"),
+            arguments: ["container": containerID])
+        return try linkedNotes.contains { try isVersionHistory(db, containerID, of: $0) }
+    }
+
     /// **The versions that died WITH this note** (V2's restore half): born
     /// archived, version-linked to it, and carrying its EXACT `deleted_at`
     /// stamp — the 13l exact-stamp doctrine, so a version she deleted on its
