@@ -217,3 +217,12 @@ candidate-driven, uses index seeks only in the gather, lets the one classifier d
 an equality pin. Its semantics are exact. What remains is the accuracy of the corrected cost line (MINOR-1, words) and
 the equality pin's blind half (MINOR-2, test shapes). The ladder is at its cap: these are the orchestrator's to
 arbitrate and check line by line.
+
+## Round 3 arbitration (the orchestrator; the ladder is at cap — these fixes get the orchestrator's line-by-line check)
+
+- **MINOR-1 — CONFIRMED (wording only).** The Cost doc says plainly that each `isVersionHistory` call's automatic index reads the whole `edge` table (every type), so the per-call cost scales with the edge table and the read is not for per-row use. The pin's "no table is scanned whole" message is corrected to what the check actually proves (no EXPLAIN-QUERY-PLAN SCAN; the automatic-index pass is labelled SEARCH and deliberately out of the check's reach — say so). The round-2 record's "no table scan" line gets a bracketed round-3 correction in place, never a silent edit.
+- **MINOR-2 — CONFIRMED.** The equality pin gains the reviewer's two shapes (E: save a moment of N1, mark it a version of a later note N2, unmark it from N1 · G: E, then merge away N2's linked block) so the source-side union branches are exercised. Evidence requirement: each described mutant applied temporarily turns the extended pin RED, then the tree restored clean (commit before mutating; the resiliency rules' revert discipline).
+- **NIT-1 — CONFIRMED.** The doc clause states precisely what the gather filters (link type plus the peer's own liveness/identity checks) and what it leaves to the classifier (the edge fence and the candidate's own checks).
+- **The observed K-statements cost** (flat in the corpus, linear in the note's own history) is P1-conformant and recorded; no action.
+
+No new BLOCKER or MAJOR: the ladder CLOSES at round 3. The author's conditional extra-review authorization is not triggered.
