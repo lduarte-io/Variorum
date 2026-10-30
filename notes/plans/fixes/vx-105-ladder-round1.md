@@ -95,3 +95,23 @@ Correctly not changed here (tour copy is hers / vx-292's), but an observation in
 - **NIT-3 — CONFIRMED as a ticket.** The end card is tour copy (vx-292's surface): ticketed, not fixed here.
 
 Tickets minted at this arbitration: see the record's closeout section (the getting-around sibling; the end-card wording). Fix round: a FRESH implementer session applies the confirmed fixes with red-on-old pins; round 2 re-reviews the fixes.
+
+## FIX ROUND 1 RECORD (a fresh Opus implementer, 2026-10-30 — the arbitration above is the work order)
+
+**What this round did NOT do (first line, per the contract):** no Mac suite was RUN (stage window only — every Mac pin
+below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `/Applications` touch; nothing under
+`Sources/VariorumCore/Sync/`. Her readme text (the 17 blocks) is untouched by every commit here.
+
+### LIVE STATUS
+
+- **MINOR-1** (a saved version is never "a live readme") — NOT-STARTED. Settled design: a small public core query
+  `Queries.isVersionOfAnyLiveNote(_:_:)` (the one classifier, `versionHistoryPredicate(…, of: .anyLiveNote)`) beside
+  `isVersionHistory`; `ReadmeSeeder.liveReadmeID` skips a candidate the classifier names. Pins: a core test (headless)
+  + `LaunchFurnitureTests` (save version → rename → press → fresh mint).
+- **MINOR-2** (the birth seed decides inside its mint's runner turn) — NOT-STARTED. Settled design: `performBirthSeed`'s
+  two reads move into the `runner.run` body (the door's shape); the header's "No door latch" line rewritten.
+- **MINOR-4** (stale comments; the fold pin's "never") — NOT-STARTED.
+- **MAJOR-1** (lesson 1's takes moment from the book's Outline) — NOT-STARTED.
+- **NIT-2** (the take attachments check their blocks) — NOT-STARTED.
+- **NIT-1** (the one-transaction road) — NOT-STARTED.
+- **MINOR-3** (PROVISIONAL, no code) · **NIT-3** (VX-713, no code) — NOT-STARTED (record lines only).
