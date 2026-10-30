@@ -213,7 +213,7 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 | piece | status |
 |---|---|
 | 1 The preset: `ThemePalette.seaglass`, derived from #C2DDD3 through the one rule (+ `PaletteDerivationTests`) | DONE (8e9531879) — core `swift build` + Mac `build-for-testing` TEST BUILD SUCCEEDED (no warning in a touched file); the Mac pins' RUN is PENDING the stage window. KNOWN RED BY DESIGN until piece 3: `PaletteDerivationTests.theSwatchStripShowsEveryPaletteExactlyOnce` (the sea-glass has a label but no home in the strip yet — that pin's own job) |
-| 2 The default flip — a read-time default, never a migration (+ the core pins) | DONE (PIECE2HASH) — core `swift test --filter AppearanceSettingsTests` RED on the piece-1 tree (2 issues: exactly the two unset-read lines), then **13/13 passed** after the flip; Mac `build-for-testing` TEST BUILD SUCCEEDED; phone `VariorumMobile` generic-iOS build BUILD SUCCEEDED |
+| 2 The default flip — a read-time default, never a migration (+ the core pins) | DONE (c3f8dfe92) — core `swift test --filter AppearanceSettingsTests` RED on the piece-1 tree (2 issues: exactly the two unset-read lines), then **13/13 passed** after the flip; Mac `build-for-testing` TEST BUILD SUCCEEDED; phone `VariorumMobile` generic-iOS build BUILD SUCCEEDED |
 | 3 The Settings face: the strip, the label that stops being true, the search blurb's count (+ the face pins) | NOT STARTED |
 | 4 Record close: self-assessment, stage commands, headless evidence | NOT STARTED |
 
