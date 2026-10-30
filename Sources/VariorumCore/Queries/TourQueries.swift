@@ -27,16 +27,24 @@ extension Queries {
         /// case — no book at all). The app's start asks the book's own
         /// restore road to mend what it can reach (`TourEngine`).
         public var seededBookPropsBroken: Bool
+        /// **VX-292 U3 — the toured chapter IS the one the card names**
+        /// (`firstStoryTitle`). false when R-292-17's fallback chose another
+        /// chapter (the named one unfanned or gone), so step 3's card can
+        /// stop naming a chapter its ring is not on (the U2 RECORD's copy
+        /// note). Defaulted true: a fixture's own first story is its named one.
+        public var firstStoryIsNamed: Bool
 
         public init(
             seededBookID: String?, firstStoryID: String?, fieldGuideID: String?,
-            readmeNoteExists: Bool = false, seededBookPropsBroken: Bool = false
+            readmeNoteExists: Bool = false, seededBookPropsBroken: Bool = false,
+            firstStoryIsNamed: Bool = true
         ) {
             self.seededBookID = seededBookID
             self.firstStoryID = firstStoryID
             self.fieldGuideID = fieldGuideID
             self.readmeNoteExists = readmeNoteExists
             self.seededBookPropsBroken = seededBookPropsBroken
+            self.firstStoryIsNamed = firstStoryIsNamed
         }
     }
 
@@ -101,7 +109,74 @@ extension Queries {
         return TourLandmarks(
             seededBookID: seeded, firstStoryID: firstStory,
             fieldGuideID: try book(named: fieldGuideName),
-            readmeNoteExists: readmeExists, seededBookPropsBroken: propsBroken)
+            readmeNoteExists: readmeExists, seededBookPropsBroken: propsBroken,
+            firstStoryIsNamed: firstStory == nil || firstStory == named)
+    }
+
+    /// **VX-292 U3 — the block step 7 flips, as the store says it.** The
+    /// PREFERRED block (the one she made a take of at step 5) while it is
+    /// placed in the note and carries a fan (two or more live, active takes —
+    /// Write's ⑂ condition), else the note's FIRST placed block that does
+    /// (R-292-17's fallback shape), else nil. Its shown take resolves exactly
+    /// as rendering does (the placement's chosen while it is a live, active
+    /// take of the block, else the block's default, else the fan's first);
+    /// `namedTakeID` is the take wearing `namedLabel` (the Prince's Italian),
+    /// when the block carries one. Bounded by ONE note's placements and ONE
+    /// block's takes — never the corpus (P1).
+    public static func tourFlipFacts(
+        _ db: Database, postID: String, preferBlockID: String?, namedLabel: String?
+    ) throws -> Tour.BlockFacts? {
+        let fanCount = """
+            (SELECT COUNT(*) FROM variant v
+             WHERE v.block_id = cb.block_id AND v.deleted_at IS NULL AND v.status = 'active')
+            """
+        var blockID: String?
+        if let preferBlockID {
+            blockID = try String.fetchOne(
+                db, sql: """
+                    SELECT cb.block_id FROM container_block cb
+                    JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                    WHERE cb.container_id = ? AND cb.block_id = ? AND cb.deleted_at IS NULL
+                      AND \(fanCount) >= 2
+                    """,
+                arguments: [postID, preferBlockID])
+        }
+        if blockID == nil {
+            blockID = try String.fetchOne(
+                db, sql: """
+                    SELECT cb.block_id FROM container_block cb
+                    JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL AND \(fanCount) >= 2
+                    ORDER BY cb.position, cb.id LIMIT 1
+                    """,
+                arguments: [postID])
+        }
+        guard let blockID else { return nil }
+        let takes = try Row.fetchAll(
+            db, sql: """
+                SELECT id, label FROM variant
+                WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                ORDER BY fan_position, id
+                """,
+            arguments: [blockID])
+        let takeIDs: [String] = takes.map { $0["id"] }
+        let pointers = try Row.fetchOne(
+            db, sql: """
+                SELECT cb.chosen_variant_id AS chosen, b.default_variant_id AS fallback
+                FROM container_block cb JOIN block b ON b.id = cb.block_id
+                WHERE cb.container_id = ? AND cb.block_id = ? AND cb.deleted_at IS NULL
+                """,
+            arguments: [postID, blockID])
+        let chosen: String? = pointers?["chosen"]
+        let fallback: String? = pointers?["fallback"]
+        let shown = [chosen, fallback].compactMap { $0 }.first { takeIDs.contains($0) }
+            ?? takeIDs.first
+        let named: String? = namedLabel.flatMap { label in
+            takes.first { ($0["label"] as String?) == label }?["id"]
+        }
+        return Tour.BlockFacts(
+            noteID: postID, blockID: blockID, chosenTakeID: shown, takeIDs: takeIDs,
+            namedTakeID: named)
     }
 
     /// The fan the tour teaches with: a live block placed in the note whose

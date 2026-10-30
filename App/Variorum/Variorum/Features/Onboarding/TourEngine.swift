@@ -57,6 +57,9 @@ final class TourEngine {
         /// performs it through the book's ascent road; an anchor with no
         /// road does nothing (its card keeps its corner). Defaulted.
         var reveal: (Tour.Anchor, Tour.Place) -> Void = { _, _ in }
+        /// **VX-292 U3 (R-292-8) — open Settings on its General pane** (the
+        /// leg's fifth stop): the shell's own Settings road. Defaulted.
+        var openSettings: () -> Void = {}
     }
 
     @ObservationIgnored private let doors: Doors
@@ -221,6 +224,7 @@ final class TourEngine {
             case .recordCompleted: doors.recordCompleted()
             case .showPoolTucked: doors.showPoolTucked()
             case .reveal(let anchor, let place): doors.reveal(anchor, place)
+            case .openSettings: doors.openSettings()
             case .finish(let completed):
                 guard !over else { continue }
                 over = true

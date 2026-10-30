@@ -165,6 +165,86 @@ struct TourQueriesTests {
         }
     }
 
+    /// VX-292 U3 — the carried copy note (the U2 RECORD): step 3's card names
+    /// a chapter, so the landmarks say whether the toured chapter IS that
+    /// one. Under R-292-17's fallback (the named chapter unfanned or gone, a
+    /// fanned one rung instead) the answer is false, and the card stops
+    /// naming a chapter its ring is not on. RED ON OLD by construction (the
+    /// field did not exist).
+    @Test func theLandmarksSayWhetherTheTouredChapterIsTheNamedOne() throws {
+        try withOperations { ops, db in
+            #expect(try landmarks(db).firstStoryIsNamed, "no book: the card keeps its words")
+            let book = try ops.createReading(name: "the adventures of sherlock holmes", kind: .book)
+            func chapter(_ title: String) throws -> (note: String, take: String) {
+                let note = try ops.createPost(title: title)
+                let block = try ops.newBlock(in: note.id, text: "a line.", at: .end)
+                try ops.addPostToReading(note.id, to: book.id)
+                return (note.id, try ops.branchVariant(block.block.id, from: block.variant.id).id)
+            }
+            let early = try chapter("A Case of Identity")
+            let scandal = try chapter("A Scandal in Bohemia")
+            var found = try landmarks(db)
+            #expect(found.firstStoryID == scandal.note && found.firstStoryIsNamed)
+            try ops.archiveVariant(scandal.take)
+            found = try landmarks(db)
+            #expect(found.firstStoryID == early.note)
+            #expect(!found.firstStoryIsNamed, "the ring sits on another chapter: say so")
+            try ops.deleteContainer(scandal.note)
+            #expect(!(try landmarks(db).firstStoryIsNamed))
+        }
+    }
+
+    /// VX-292 U3 — step 7's block, as the store says it: the PREFERRED block
+    /// (the one she made a take of) while it is placed and fanned, else the
+    /// note's first placed fanned block, else nil; its SHOWN take resolved as
+    /// rendering resolves it (the placement's chosen while it is a live,
+    /// active take, else the block's default); the takes in fan order; the
+    /// take wearing the card's label. RED ON OLD by construction (no read).
+    @Test func theFlipFactsNameTheBlockItsShownTakeAndTheTakeTheCardNames() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "XVII")
+            let plain = try ops.newBlock(in: note.id, text: "an opening line.", at: .end)
+            let toured = try ops.newBlock(in: note.id, text: "Upon this a question arises.", at: .end)
+            let later = try ops.newBlock(in: note.id, text: "Men love at their own will.", at: .end)
+            func facts(prefer: String?) throws -> Tour.BlockFacts? {
+                try db.read {
+                    try Queries.tourFlipFacts(
+                        $0, postID: note.id, preferBlockID: prefer, namedLabel: "il principe 1532")
+                }
+            }
+            #expect(try facts(prefer: toured.block.id) == nil, "no fan anywhere: nothing to flip")
+
+            let italian = try ops.branchVariant(toured.block.id, from: toured.variant.id)
+            try ops.setTakeLabel(italian.id, label: "il principe 1532")
+            let laterTake = try ops.branchVariant(later.block.id, from: later.variant.id)
+            var found = try #require(try facts(prefer: toured.block.id))
+            #expect(found == Tour.BlockFacts(
+                noteID: note.id, blockID: toured.block.id, chosenTakeID: toured.variant.id,
+                takeIDs: [toured.variant.id, italian.id], namedTakeID: italian.id))
+
+            // Choosing the Italian: the shown take is it.
+            try ops.chooseVariant(toured.block.id, variantID: italian.id)
+            found = try #require(try facts(prefer: toured.block.id))
+            #expect(found.chosenTakeID == italian.id)
+
+            // An unfanned or unknown preference: the note's first fanned block.
+            #expect(try facts(prefer: plain.block.id)?.blockID == toured.block.id)
+            #expect(try facts(prefer: nil)?.blockID == toured.block.id)
+            #expect(try facts(prefer: "gone")?.blockID == toured.block.id)
+
+            // The Italian archived (out of the fan): the toured block is
+            // unfanned, so the next fanned block — and the chosen pointer at
+            // an archived take falls back to the block's default.
+            try ops.chooseVariant(toured.block.id, variantID: toured.variant.id)
+            try ops.archiveVariant(italian.id)
+            found = try #require(try facts(prefer: toured.block.id))
+            #expect(found.blockID == later.block.id)
+            #expect(found.takeIDs == [later.variant.id, laterTake.id])
+            #expect(found.namedTakeID == nil, "no take wears the card's label here")
+            #expect(found.chosenTakeID == later.variant.id)
+        }
+    }
+
     @Test func aNotesFactsCountItsLiveTagsAndItsBookMembershipsOnly() throws {
         try withOperations { ops, db in
             let note = try ops.createPost(title: "mine")

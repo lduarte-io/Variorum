@@ -40,25 +40,29 @@ import VariorumCore
 @Suite("13s-b U2 — the tour's words")
 struct TourScriptTests {
     /// The approved fifth draft, VERBATIM from mockup v5's frames
-    /// (`notes/plans/13s-mockups/onboarding-tour.html`) — title and body.
-    static let approved: [Tour.Step: (String, String)] = [
-        .navigation: ("Navigation", "Everything lives in one of the places on the left. Bookcase holds your books. Library is everything, searchable. Pool holds notes that aren't in a book, and Snippets keeps pieces of text you reuse between notes."),
-        .seededBook: ("Sherlock Holmes, in Variorum", "The adventures of sherlock holmes comes with the app, so you can try everything on real writing. Click into it."),
-        .insideBook: ("Inside a book", "A book opens on its Outline: every chapter, and the beginning of every note. A book works like a scrapbook. Put a note in and it stays there. Click into A Scandal in Bohemia."),
-        .write: ("Write", "Notes open in Write. Everything autosaves as you type; commit \u{2318}S in the bottom bar keeps a savepoint of a moment worth keeping. Scroll to the middle of the note and click into a paragraph there."),
-        .makeTake: ("Make a take", "A block can keep more than one version of itself. These are takes, like takes in film, and they are the heart of Variorum. Click Takes in the bottom bar, then \u{FF0B} new take (branch), and change a few words."),
-        .takeIcon: ("The take icon", "The \u{03C8}2 in the margin marks any block that keeps more than one version. Click into it any time to see them. Click into it now, then Open Takes mode."),
-        .takesMode: ("Both takes, side by side", "This is Takes mode: the whole note, with every version of every block. The \u{2713} take is what the note says. Click into a take to work in it; its \u{2713} makes it the one the page shows. The original keeps its own card."),
-        .deeperModes: ("Three more, for later", "Lenses shows different takes of this note side by side. Compare sets other notes beside this one. Blocks is a workbench for many blocks at once. The field guide teaches each of them."),
-        .placeFollows: ("Your place follows you", "Bounce between Write (\u{2318}1) and Takes (\u{2318}2) as you like. Then click the book icon and pick Index, the book's own view of its notes. Your paragraph is still in focus, one level up. Your place follows you everywhere."),
-        .downAndUp: ("Down and up", "In a book, the selected note's edit here door drops you back into it, and the book icon brings you up again. The ladder runs both directions. Click into it."),
-        .home: ("Head home", "When you're done exploring, Bookcase in the sidebar heads home. Click into it."),
-        .ownNote: ("One of your own", "The dashed line at the bottom reads new note, just start typing. Type a first line and press \u{23CE} to open your first note. No book needed; it waits in the Pool until you give it one."),
-        .legStar: ("Star a note", "Click the star. Starred notes rise to the top of the sidebar, and the starred notes gathering on your Bookcase collects them automatically."),
-        .legTags: ("Organize with tags", "The \u{FF03} on the masthead adds a tag. Tag a note ideas, and a gathering made from ideas shows it on its own. Make the tag."),
-        .legBook: ("Put it in a book", "Your note has been waiting here in the Pool. Click into add to book, or make a new book around it. A note can sit in more than one book."),
-        .legSnippets: ("Snippets", "Pieces of text you reuse between notes live here: a phrase, a quote, a line you cut. From inside any note, the snippets panel brings them alongside so you can pull one in. The snippet stays for next time."),
-        .legEnd: ("The field guide", "Everything deeper lives in the field guide: takes in depth, divide and merge, books that collect, privacy. Interactive lessons, in order or as needed. That's the tour. Go write."),
+    /// (`notes/plans/13s-mockups/onboarding-tour.html`) — title and body,
+    /// keyed by the MOCKUP's step names (VX-292 U3: three of them —
+    /// `takesMode`, `deeperModes`, `placeFollows` — were reworked into the
+    /// grown tour's cards, so the table stands as the mockup's text and the
+    /// U3 drafts table below carries what replaced them).
+    static let approved: [String: (String, String)] = [
+        "navigation": ("Navigation", "Everything lives in one of the places on the left. Bookcase holds your books. Library is everything, searchable. Pool holds notes that aren't in a book, and Snippets keeps pieces of text you reuse between notes."),
+        "seededBook": ("Sherlock Holmes, in Variorum", "The adventures of sherlock holmes comes with the app, so you can try everything on real writing. Click into it."),
+        "insideBook": ("Inside a book", "A book opens on its Outline: every chapter, and the beginning of every note. A book works like a scrapbook. Put a note in and it stays there. Click into A Scandal in Bohemia."),
+        "write": ("Write", "Notes open in Write. Everything autosaves as you type; commit \u{2318}S in the bottom bar keeps a savepoint of a moment worth keeping. Scroll to the middle of the note and click into a paragraph there."),
+        "makeTake": ("Make a take", "A block can keep more than one version of itself. These are takes, like takes in film, and they are the heart of Variorum. Click Takes in the bottom bar, then \u{FF0B} new take (branch), and change a few words."),
+        "takeIcon": ("The take icon", "The \u{03C8}2 in the margin marks any block that keeps more than one version. Click into it any time to see them. Click into it now, then Open Takes mode."),
+        "takesMode": ("Both takes, side by side", "This is Takes mode: the whole note, with every version of every block. The \u{2713} take is what the note says. Click into a take to work in it; its \u{2713} makes it the one the page shows. The original keeps its own card."),
+        "deeperModes": ("Three more, for later", "Lenses shows different takes of this note side by side. Compare sets other notes beside this one. Blocks is a workbench for many blocks at once. The field guide teaches each of them."),
+        "placeFollows": ("Your place follows you", "Bounce between Write (\u{2318}1) and Takes (\u{2318}2) as you like. Then click the book icon and pick Index, the book's own view of its notes. Your paragraph is still in focus, one level up. Your place follows you everywhere."),
+        "downAndUp": ("Down and up", "In a book, the selected note's edit here door drops you back into it, and the book icon brings you up again. The ladder runs both directions. Click into it."),
+        "home": ("Head home", "When you're done exploring, Bookcase in the sidebar heads home. Click into it."),
+        "ownNote": ("One of your own", "The dashed line at the bottom reads new note, just start typing. Type a first line and press \u{23CE} to open your first note. No book needed; it waits in the Pool until you give it one."),
+        "legStar": ("Star a note", "Click the star. Starred notes rise to the top of the sidebar, and the starred notes gathering on your Bookcase collects them automatically."),
+        "legTags": ("Organize with tags", "The \u{FF03} on the masthead adds a tag. Tag a note ideas, and a gathering made from ideas shows it on its own. Make the tag."),
+        "legBook": ("Put it in a book", "Your note has been waiting here in the Pool. Click into add to book, or make a new book around it. A note can sit in more than one book."),
+        "legSnippets": ("Snippets", "Pieces of text you reuse between notes live here: a phrase, a quote, a line you cut. From inside any note, the snippets panel brings them alongside so you can pull one in. The snippet stays for next time."),
+        "legEnd": ("The field guide", "Everything deeper lives in the field guide: takes in depth, divide and merge, books that collect, privacy. Interactive lessons, in order or as needed. That's the tour. Go write."),
     ]
 
     /// **The only departures from the frozen copy** — each a BUILD-VERIFY
@@ -68,39 +72,80 @@ struct TourScriptTests {
     /// VX-633): steps 2 and 3 carry the plan's U1 COPY DRAFTS — step 2's body
     /// whole (with its title, below), step 3's last sentence. The approved
     /// table above stays mockup v5's text, so its mockup pin still reads it.
-    static let departures: [Tour.Step: (from: String, to: String)] = [
-        .seededBook: (
+    static let departures: [String: (from: String, to: String)] = [
+        "seededBook": (
             "The adventures of sherlock holmes comes with the app, so you can try everything on real writing. Click into it.",
             "the prince comes with the app, so you can try everything on real writing. Machiavelli's Italian rides under every paragraph. Click into it."),
-        .insideBook: ("Click into A Scandal in Bohemia.",
-                      "Click into the chapter on whether it is better to be loved or feared."),
-        .takeIcon: ("The \u{03C8}2 in the margin", "The \u{2442}2 in the margin"),
-        .takesMode: ("its \u{2713} makes it the one the page shows",
-                     "choose, at the top of its card, makes it the one the page shows"),
-        .placeFollows: ("Your paragraph is still in focus, one level up.",
-                        "Your note is still selected there, one level up."),
-        .legStar: ("Click the star.", "Right-click your note under Open in the sidebar and choose Star."),
-        .legSnippets: ("the snippets panel", "the Scraps panel"),
+        "insideBook": ("Click into A Scandal in Bohemia.",
+                       "Click into the chapter on whether it is better to be loved or feared."),
+        "takeIcon": ("The \u{03C8}2 in the margin", "The \u{2442}2 in the margin"),
+        "legStar": ("Click the star.", "Right-click your note under Open in the sidebar and choose Star."),
+        "legSnippets": ("the snippets panel", "the Scraps panel"),
     ]
 
     /// The one TITLE departure (VX-292 U1, R-292-1): step 2 names the book
     /// the launch seeds now.
-    static let titleDepartures: [Tour.Step: (from: String, to: String)] = [
-        .seededBook: ("Sherlock Holmes, in Variorum", "The Prince, in Variorum"),
+    static let titleDepartures: [String: (from: String, to: String)] = [
+        "seededBook": ("Sherlock Holmes, in Variorum", "The Prince, in Variorum"),
     ]
 
+    /// **VX-292 U3 — the grown tour's cards, the architect's U3 COPY DRAFTS
+    /// VERBATIM** (`notes/plans/vx-292-onboarding.md` §U3 COPY DRAFTS — a
+    /// pin below holds this table to that text). Step 7's two beats share
+    /// one card; step 11's third beat is the mockup's `downAndUp`, verbatim.
+    static let u3Drafts: [Tour.Step: (String, String)] = {
+        let flip = ("Both takes, side by side", "This is Takes mode: the whole note, with every version of every block. The \u{2713} take is what the note says. Find the take named il principe 1532 and press choose: the page now reads Italian. Choose the English take to bring it back. Choosing decides what the note says; clicking into a take just works in it.")
+        return [
+            .takesMode: flip,
+            .takesFlipBack: flip,
+            .readInNote: ("Read", "Click Read in the rail. It opens on edit, an outline of the note you can type in; flip the switch to read for the calm page. When you want to write again, click any sentence and you land back at that very block."),
+            .lensesLive: ("Lenses", "Lenses shows different takes of this note side by side. Click Lenses in the rail, then open the column named il principe 1532: the whole chapter in Italian beside the English. Same note, two readings."),
+            .deeperModes: ("Two more, for later", "Compare sets other notes beside this one. Blocks is a workbench for many blocks at once. The field guide teaches each of them."),
+            .upToBook: ("Up to the book", "Click the book icon: you're back in the prince, one level up, with your chapter in view. A book has four views of its own along the top: Outline, Index, Book and Read."),
+            .bookAndRead: ("Book and Read", "Click Book: the chapters become pages, like a bound copy. Then click Read to read straight through. Books are for reading whole; notes are where you write."),
+            .legSettings: ("Make it yours", "Settings holds the look: two voices, light and dark, and seventeen colour palettes, sea glass leading. The MCP pane connects an AI to your library if you ever want one; nothing connects unless you turn it on. Have a look, then come back."),
+        ]
+    }()
+
+    /// **VX-292 U3's departures from its drafts** — each a real-app fact,
+    /// recorded in the U3 RECORD with its alternative: the mode list's home
+    /// is the sidebar's "this note" section ("the rail" is the code's word,
+    /// never the app's), and choosing a take flips ONE paragraph, not the page.
+    static let u3Departures: [Tour.Step: [(from: String, to: String)]] = [
+        .takesMode: [("the page now reads Italian", "this paragraph now reads Italian")],
+        .takesFlipBack: [("the page now reads Italian", "this paragraph now reads Italian")],
+        .readInNote: [("in the rail", "in the sidebar")],
+        .lensesLive: [("in the rail", "in the sidebar")],
+    ]
+
+    /// Every card is its draft — mockup v5's approved text with the
+    /// recorded departures, or (VX-292 U3) the U3 drafts with theirs. Every
+    /// step is covered by exactly one of the two tables.
     @Test func everyCardIsTheApprovedDraftExceptTheRecordedDepartures() throws {
         for step in Tour.Step.allCases where step != .endCard {
-            let (approvedTitle, approvedBody) = try #require(Self.approved[step], "\(step) has approved words")
             let card = try #require(TourScript.card(step), "\(step) has a card")
+            if let (draftTitle, draftBody) = Self.u3Drafts[step] {
+                #expect(Self.approved[step.rawValue] == nil || [.takesMode, .deeperModes].contains(step),
+                        "\(step): one table speaks for each card")
+                var expected = draftBody
+                for departure in Self.u3Departures[step] ?? [] {
+                    #expect(expected.contains(departure.from), "\(step): the departure names real words")
+                    expected = expected.replacingOccurrences(of: departure.from, with: departure.to)
+                }
+                #expect(card.title == draftTitle, "\(step): the title is the draft's")
+                #expect(card.body == expected, "\(step): \(card.body)")
+                continue
+            }
+            let (approvedTitle, approvedBody) = try #require(
+                Self.approved[step.rawValue], "\(step) has approved words")
             var title = approvedTitle
-            if let departure = Self.titleDepartures[step] {
+            if let departure = Self.titleDepartures[step.rawValue] {
                 #expect(approvedTitle == departure.from, "\(step): the title departure names the approved title")
                 title = departure.to
             }
             #expect(card.title == title, "\(step): the title is the approved one")
             var expected = approvedBody
-            if let departure = Self.departures[step] {
+            if let departure = Self.departures[step.rawValue] {
                 #expect(approvedBody.contains(departure.from), "\(step): the departure names real words")
                 expected = approvedBody.replacingOccurrences(of: departure.from, with: departure.to)
             }
@@ -118,6 +163,39 @@ struct TourScriptTests {
         #expect(TourScript.done == "Done, go write")
     }
 
+    /// **VX-292 U3 — the U3 drafts table IS the plan's own text** (the mockup
+    /// pin's twin): every draft's title and body appear verbatim in the
+    /// plan's §U3 COPY DRAFTS, so a drift in either is caught here.
+    @Test func theU3TableIsThePlansOwnDrafts() throws {
+        let plan = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .deletingLastPathComponent()  // App
+            .deletingLastPathComponent()  // the repo
+            .appendingPathComponent("notes/plans/vx-292-onboarding.md")
+        guard let text = try? String(contentsOf: plan, encoding: .utf8) else { return }
+        let drafts = try #require(text.components(separatedBy: "## U3 COPY DRAFTS").dropFirst().first)
+        for (step, words) in Self.u3Drafts {
+            #expect(drafts.contains("`\(words.0)`"), "\(step)'s title is the plan's draft")
+            #expect(drafts.contains("`\(words.1)`"), "\(step)'s body is the plan's draft")
+        }
+    }
+
+    /// **VX-292 U3 (P-292-11) — step 3 says the ring's chapter when it is
+    /// not XVII.** Under R-292-17's fallback the ring sits on another fanned
+    /// chapter, and the approved sentence would name one the ring is not on.
+    @Test func stepThreeNamesTheRingsChapterWhenItIsNotTheNamedOne() throws {
+        let named = try #require(TourScript.card(.insideBook, namedChapter: true))
+        let ringed = try #require(TourScript.card(.insideBook, namedChapter: false))
+        #expect(named.body.hasSuffix("Click into the chapter on whether it is better to be loved or feared."))
+        #expect(ringed.body.hasSuffix(" " + TourScript.insideBookRingedChapter))
+        #expect(TourScript.insideBookRingedChapter == "Click into the chapter the ring marks.")
+        #expect(named.body.replacingOccurrences(
+            of: "Click into the chapter on whether it is better to be loved or feared.",
+            with: TourScript.insideBookRingedChapter) == ringed.body,
+                "only the last sentence changes")
+    }
+
     /// The departures quote the doors they name — a rename cannot strand them.
     @Test func theDeparturesQuoteTheDoorsTheyName() throws {
         #expect(PostDetailView.scrapsDoorTitle == "Scraps")
@@ -129,6 +207,30 @@ struct TourScriptTests {
         #expect(try #require(TourScript.card(.downAndUp)).body.contains(NoteBoxCopy.editDoor))
         // Step 6 says the badge's REAL count.
         #expect(try #require(TourScript.card(.takeIcon, takeCount: 3)).body.hasPrefix("The \u{2442}3 "))
+        // VX-292 U3: the grown tour's words name doors by their constants.
+        #expect(TakeChooseHeader.chooseWord == "choose")
+        #expect(TakeChooseHeader.chosenWord == "\u{2713} chosen")
+        #expect(try #require(TourScript.card(.takesMode)).body
+                .contains("press \(TakeChooseHeader.chooseWord):"))
+        #expect(TourScript.italianName == SampleLibraryPrinceBook.italianTakeLabel)
+        #expect(TourScript.italianName == "il principe 1532")
+        for step in [Tour.Step.takesMode, .lensesLive] {
+            #expect(try #require(TourScript.card(step)).body.contains(TourScript.italianName))
+        }
+        #expect(PostMode.read.rawValue == "Read" && PostMode.lenses.rawValue == "Lenses")
+        #expect(PostMode.compare.rawValue == "Compare" && PostMode.blocks.rawValue == "Blocks")
+        #expect(BookView.tabOrder.map(BookView.tabLabel) == ["Outline", "Index", "Book", "Read"])
+        #expect(try #require(TourScript.card(.upToBook)).body
+                .hasSuffix("along the top: Outline, Index, Book and Read."))
+        #expect(try #require(TourScript.card(.upToBook)).body
+                .contains("back in \(SampleLibraryPrinceBook.name),"))
+        // The Settings stop: the count is the strip's, the leading palette
+        // is the one a store with no palette wears, the pane its title.
+        #expect(SettingsPane.mcp.title == "MCP")
+        #expect(TourScript.paletteCountWord == "seventeen")
+        #expect(PaletteCopy.label(Queries.ThemeSettings.unsetStorePalette) == PaletteCopy.label(.seaglass))
+        #expect(try #require(TourScript.card(.legSettings)).body
+                .contains("\(TourScript.paletteCountWord) colour palettes, sea glass leading."))
     }
 
     /// **VX-292 U1 (R-292-1) — steps 2 and 3 name what a fresh store
@@ -195,14 +297,21 @@ struct TourScriptTests {
     }
 
     @Test func theCountLineReadsInSentenceCase() {
-        #expect(TourScript.label(.main(number: 1, secondBeat: false)) == "Step 1 of 11")
-        #expect(TourScript.label(.main(number: 10, secondBeat: true)) == "Step 10 of 11 \u{00B7} and home")
-        #expect(TourScript.label(.leg(number: 1)) == "Keep going \u{00B7} 1 of 4")
+        #expect(TourScript.label(.main(number: 1, beat: 1)) == "Step 1 of 13")
+        // VX-292 U3: a step's beats share its number (the mockup's "· and
+        // home" beat retired when home became step 12 of its own).
+        #expect(TourScript.label(.main(number: 7, beat: 2)) == "Step 7 of 13")
+        #expect(TourScript.label(.main(number: 11, beat: 3)) == "Step 11 of 13")
+        #expect(TourScript.label(.leg(number: 1)) == "Keep going \u{00B7} 1 of 5")
         #expect(TourScript.label(.legEnd) == "The end")
         #expect(TourScript.label(.endCard) == nil)
         #expect(TourScript.next == "next \u{27F6}")
         #expect(TourScript.endTour == "End tour")
     }
+
+    /// The all-capitals words that are names, not shouts (VX-292 U3's
+    /// Settings stop names the MCP pane and an AI).
+    static let acronyms: Set<String> = ["MCP", "AI"]
 
     /// R-13s-22 (no em dashes, no emoji, her calm register), her caps ban
     /// (R-13s-30 — sentence case, never a shouted word), and A5 (no time
@@ -222,7 +331,10 @@ struct TourScriptTests {
             #expect(!text.contains("\u{2014}"), "no em dash: \(text)")
             #expect(!text.unicodeScalars.contains { $0.properties.isEmojiPresentation },
                     "no emoji: \(text)")
+            // VX-292 U3: an acronym the app names a thing by (the MCP pane,
+            // an AI) is a name, not a shout.
             for word in text.split(whereSeparator: { !$0.isLetter }) where word.count >= 2 {
+                guard !Self.acronyms.contains(String(word)) else { continue }
                 #expect(word != word.uppercased() || word.lowercased() == word.uppercased(),
                         "no shouting caps: \(word) in \(text)")
             }
@@ -601,11 +713,7 @@ struct TourEngineTests {
             engine.observe(write("b40", 40))
             engine.observe(write("b40", 40, takes: 2))
             engine.observe(.init(place: .note("scandal"), noteMode: .takes))
-            engine.next()
-            engine.next()
-            engine.next()
-            engine.observe(.init(place: .book("sherlock"), bookNoteLive: true))
-            engine.observe(.init(place: .area(.bookcase)))
+            walkFromTakesToTheBookcase(engine)
             #expect(engine.state.step == .ownNote)
             engine.observe(.init(
                 place: .note("mine"), noteMode: .write,
@@ -637,11 +745,7 @@ struct TourEngineTests {
             engine.observe(write("b40", 40))
             engine.observe(write("b40", 40, takes: 2))
             engine.observe(.init(place: .note("scandal"), noteMode: .takes))
-            engine.next()
-            engine.next()
-            engine.next()
-            engine.observe(.init(place: .book("sherlock"), bookNoteLive: true))
-            engine.observe(.init(place: .area(.bookcase)))
+            walkFromTakesToTheBookcase(engine)
             func mine(starred: Bool, tags: Int) -> Tour.Facts {
                 .init(place: .note("mine"), noteMode: .write,
                       note: .init(noteID: "mine", starred: starred, tagCount: tags, bookCount: 0))
@@ -1556,11 +1660,7 @@ struct TourEndCardTests {
         engine.observe(write("b40", 40))
         engine.observe(write("b40", 40, takes: 2))
         engine.observe(.init(place: .note("scandal"), noteMode: .takes))
-        engine.next()
-        engine.next()
-        engine.next()
-        engine.observe(.init(place: .book("sherlock"), bookNoteLive: true))
-        engine.observe(.init(place: .area(.bookcase)))
+        walkFromTakesToTheBookcase(engine)
         engine.observe(.init(
             place: .note("mine"), noteMode: .write,
             note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0)))
@@ -1588,6 +1688,26 @@ private struct LiveEndCardRig: View {
             }
             .environment(\.colorScheme, scheme)
     }
+}
+
+// MARK: - VX-292 U3 — the grown tour's middle, walked by facts
+
+/// **Steps 7 to 12, the designed road** (R-292-13's flow): from Takes mode,
+/// next past the flip (offered, never required — P-292-8), next past Read,
+/// a second Lenses column, next past Compare and Blocks, up to the book and
+/// next, its Read, then down through a live box and home to the Bookcase —
+/// where step 13 waits for her own note.
+@MainActor
+private func walkFromTakesToTheBookcase(_ engine: TourEngine) {
+    engine.next()
+    engine.next()
+    engine.observe(.init(place: .note("scandal"), noteMode: .lenses, lensColumns: 2))
+    engine.next()
+    engine.observe(.init(place: .book("sherlock"), bookMode: .outline))
+    engine.next()
+    engine.observe(.init(place: .book("sherlock"), bookMode: .read))
+    engine.observe(.init(place: .book("sherlock"), bookNoteLive: true, bookMode: .index))
+    engine.observe(.init(place: .area(.bookcase)))
 }
 
 // MARK: - VX-292 U2's world helpers (the 2026-10-30 window)

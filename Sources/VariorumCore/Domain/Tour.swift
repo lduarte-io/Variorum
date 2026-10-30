@@ -6,8 +6,9 @@ import Foundation
 ///
 /// Coach marks over the REAL app: a ring on the thing to touch (never a dim —
 /// R-13s-12), a small card saying one idea, her real click advancing, End tour
-/// always there, the step count visible. Eleven steps (step 10 has two beats),
-/// an end card over the note she just opened, a four-stop "keep going" leg, and
+/// always there, the step count visible. Thirteen steps since VX-292 U3
+/// (R-292-13's approved flow — step 7 has two beats, step 11 three), an end
+/// card over the note she just opened, a five-stop "keep going" leg, and
 /// both roads ending at the field guide (R-13s-1).
 ///
 /// This file is the tour's WHOLE decision, pure, so every step is walked
@@ -35,24 +36,32 @@ public enum Tour {
     // MARK: - The steps
 
     public enum Step: String, CaseIterable, Sendable {
-        // The main leg (mockup v5 steps 1–11; step 10 is two beats).
-        case navigation, seededBook, insideBook, write, makeTake, takeIcon, takesMode
-        case deeperModes, placeFollows, downAndUp, home, ownNote
+        // The main leg (VX-292 U3 — R-292-13's approved flow, thirteen steps):
+        // 1–6 as mockup v5; 7 the take flip in two beats (`takesMode`, then
+        // `takesFlipBack`); 8 Read in the note; 9 Lenses, live; 10 Compare
+        // and Blocks, briefly; 11 the book arc in three beats (`upToBook`,
+        // `bookAndRead`, `downAndUp` — R-292-10); 12 home; 13 one of her own.
+        case navigation, seededBook, insideBook, write, makeTake, takeIcon
+        case takesMode, takesFlipBack, readInNote, lensesLive, deeperModes
+        case upToBook, bookAndRead, downAndUp, home, ownNote
         /// "That's the tour." — over the note she just opened (A3).
         case endCard
-        // The keep-going leg (R-13s-1's optional leg; Q13's four stops) and its end.
-        case legStar, legTags, legBook, legSnippets, legEnd
+        // The keep-going leg (R-13s-1's optional leg; Q13's four stops, and
+        // VX-292 R-292-8's fifth — the Settings stop) and its end.
+        case legStar, legTags, legBook, legSnippets, legSettings, legEnd
     }
 
-    /// The main leg's count, as the cards say it ("Step 1 of 11").
-    public static let mainStepCount = 11
-    /// The leg's count ("Keep going · 1 of 4").
-    public static let legStopCount = 4
+    /// The main leg's count, as the cards say it ("Step 1 of 13").
+    public static let mainStepCount = 13
+    /// The leg's count ("Keep going · 1 of 5").
+    public static let legStopCount = 5
 
     /// Where a card sits in the count — what its small label says.
     public enum Position: Equatable, Sendable {
-        /// `number` of `mainStepCount`; `secondBeat` is step 10's "and home".
-        case main(number: Int, secondBeat: Bool)
+        /// `number` of `mainStepCount`; `beat` (1-based) is which card of a
+        /// step that has more than one (step 7's flip and its way back, step
+        /// 11's book arc). The label says the number alone.
+        case main(number: Int, beat: Int)
         /// The end card carries no count.
         case endCard
         /// `number` of `legStopCount`.
@@ -63,35 +72,49 @@ public enum Tour {
 
     public static func position(of step: Step) -> Position {
         switch step {
-        case .navigation: .main(number: 1, secondBeat: false)
-        case .seededBook: .main(number: 2, secondBeat: false)
-        case .insideBook: .main(number: 3, secondBeat: false)
-        case .write: .main(number: 4, secondBeat: false)
-        case .makeTake: .main(number: 5, secondBeat: false)
-        case .takeIcon: .main(number: 6, secondBeat: false)
-        case .takesMode: .main(number: 7, secondBeat: false)
-        case .deeperModes: .main(number: 8, secondBeat: false)
-        case .placeFollows: .main(number: 9, secondBeat: false)
-        case .downAndUp: .main(number: 10, secondBeat: false)
-        case .home: .main(number: 10, secondBeat: true)
-        case .ownNote: .main(number: 11, secondBeat: false)
+        case .navigation: .main(number: 1, beat: 1)
+        case .seededBook: .main(number: 2, beat: 1)
+        case .insideBook: .main(number: 3, beat: 1)
+        case .write: .main(number: 4, beat: 1)
+        case .makeTake: .main(number: 5, beat: 1)
+        case .takeIcon: .main(number: 6, beat: 1)
+        case .takesMode: .main(number: 7, beat: 1)
+        case .takesFlipBack: .main(number: 7, beat: 2)
+        case .readInNote: .main(number: 8, beat: 1)
+        case .lensesLive: .main(number: 9, beat: 1)
+        case .deeperModes: .main(number: 10, beat: 1)
+        case .upToBook: .main(number: 11, beat: 1)
+        case .bookAndRead: .main(number: 11, beat: 2)
+        case .downAndUp: .main(number: 11, beat: 3)
+        case .home: .main(number: 12, beat: 1)
+        case .ownNote: .main(number: 13, beat: 1)
         case .endCard: .endCard
         case .legStar: .leg(number: 1)
         case .legTags: .leg(number: 2)
         case .legBook: .leg(number: 3)
         case .legSnippets: .leg(number: 4)
+        case .legSettings: .leg(number: 5)
         case .legEnd: .legEnd
         }
     }
 
-    /// Whether the card carries a "next" door. The mockup's cards that teach
-    /// without asking for an act carry it (steps 1, 7, 8, 9); every other card
-    /// advances on her act. **Leg 4 carries it too (PROVISIONAL P-U2-4):** its
-    /// copy asks for no act, and the real app's snippet click OPENS the snippet
-    /// — the mockup's ring-click advance would yank her out of what she opened.
+    /// Whether the card carries a "next" door. The cards that teach without
+    /// asking for an act carry it (steps 1, 8, 10, and 11's first beat); every
+    /// other card advances on her act. **Leg 4 carries it too (PROVISIONAL
+    /// P-U2-4):** its copy asks for no act, and the real app's snippet click
+    /// OPENS the snippet — the mockup's ring-click advance would yank her out
+    /// of what she opened.
+    ///
+    /// VX-292 U3: step 7's two beats keep the next step 7 always had (a flip
+    /// is offered, never required — PROVISIONAL P-292-8); step 8 is a next
+    /// card (Read is visited and its switch shown, PROVISIONAL P-292-9); step
+    /// 11's first beat describes the book she arrives in, so it waits for her
+    /// next like the step it reworks (`placeFollows`); and the Settings stop
+    /// carries next because Settings is its own window (PROVISIONAL P-292-10).
     public static func hasNext(_ step: Step) -> Bool {
         switch step {
-        case .navigation, .takesMode, .deeperModes, .placeFollows, .legSnippets: true
+        case .navigation, .takesMode, .takesFlipBack, .readInNote, .deeperModes, .upToBook,
+             .legSnippets, .legSettings: true
         default: false
         }
     }
@@ -171,6 +194,37 @@ public enum Tour {
         }
     }
 
+    /// **The store's facts about the block step 7 flips** (VX-292 U3 — the
+    /// take flip, R-292-3/13: *"choosing the Italian take visibly flips the
+    /// page's language"*). The block is the toured paragraph — the one she
+    /// made a take of at step 5 — while it carries a fan, else the toured
+    /// note's first fanned block (R-292-17's fallback shape;
+    /// `Queries.tourFlipFacts`). nil until the store answered, or when the
+    /// note carries no fan at all.
+    public struct BlockFacts: Equatable, Sendable {
+        public var noteID: String
+        public var blockID: String
+        /// The take the note shows at this block (the placement's chosen,
+        /// falling back to the block's default exactly as rendering does).
+        public var chosenTakeID: String?
+        /// The block's live, active takes, in fan order.
+        public var takeIDs: [String]
+        /// The take the card NAMES (the Prince's "il principe 1532"), when
+        /// the block carries one — the flip's preferred target.
+        public var namedTakeID: String?
+
+        public init(
+            noteID: String, blockID: String, chosenTakeID: String?, takeIDs: [String],
+            namedTakeID: String? = nil
+        ) {
+            self.noteID = noteID
+            self.blockID = blockID
+            self.chosenTakeID = chosenTakeID
+            self.takeIDs = takeIDs
+            self.namedTakeID = namedTakeID
+        }
+    }
+
     /// One report of what the window shows.
     public struct Facts: Equatable, Sendable {
         public var place: Place
@@ -186,11 +240,22 @@ public enum Tour {
         public var bookNoteSelected: Bool
         /// Facts about `noteOfInterest` (nil until the store answered).
         public var note: NoteFacts?
+        /// **The focused book's mode** (VX-292 U3 — step 11's book arc: the
+        /// Book tab, then Read). nil unless `place` is a book that said it.
+        public var bookMode: BookMode?
+        /// **How many columns the note's Lenses board shows** (VX-292 U3 —
+        /// step 9: a second column opened beside the note's own is the act).
+        /// nil unless `place` is a note whose Lenses board is up.
+        public var lensColumns: Int?
+        /// Facts about the block step 7 flips (`flipInterest`; nil until the
+        /// store answered).
+        public var block: BlockFacts?
 
         public init(
             place: Place, noteMode: NoteMode? = nil, caret: Caret? = nil,
             bookNoteLive: Bool = false, bookNoteSelected: Bool = false,
-            note: NoteFacts? = nil
+            note: NoteFacts? = nil, bookMode: BookMode? = nil, lensColumns: Int? = nil,
+            block: BlockFacts? = nil
         ) {
             self.place = place
             self.noteMode = noteMode
@@ -198,6 +263,9 @@ public enum Tour {
             self.bookNoteLive = bookNoteLive
             self.bookNoteSelected = bookNoteSelected
             self.note = note
+            self.bookMode = bookMode
+            self.lensColumns = lensColumns
+            self.block = block
         }
 
         /// Where a fresh tour begins before the window has said anything.
@@ -235,6 +303,12 @@ public enum Tour {
         /// rest there — a count that GROWS is the act (a block that already
         /// had takes, from an earlier tour, must not count as made).
         var takeBaseline: TakeBaseline?
+        /// Step 7 (VX-292 U3 — the flip): the take the note showed at the
+        /// flip's block when the step first saw it ("the English take" her
+        /// second beat brings back), and that block. Set once per run of
+        /// step 7's first beat; its second beat reads them.
+        var flipOriginalTakeID: String?
+        var flipBlockID: String?
         /// The place before the latest report — for "arrived from".
         var previousPlace: Place?
         /// The note box's liveness before the latest report — step 10's edge.
@@ -306,6 +380,12 @@ public enum Tour {
         case recordCompleted
         /// The tour is over (`completed` says how it ended).
         case finish(completed: Bool)
+        /// **Open Settings on its General pane** (VX-292 U3 — R-292-8: *"show
+        /// people the settings pane for theme and how to connect their mcp"*):
+        /// the leg's fifth stop, through the shell's own Settings road.
+        /// Settings is its own window; the card stays in this one and carries
+        /// next (PROVISIONAL P-292-10).
+        case openSettings
         /// **Open the Pool's "in gatherings" run** (F-U2-W-2, option A —
         /// ruled 2026-10-08): leg 1's star makes her note a starred-notes
         /// match, so the Pool TUCKS it behind its masthead's "show"; leg 3
@@ -364,9 +444,11 @@ public enum Tour {
             // THIS road too — a "next" pressed while she already sits at the
             // field guide (her report outran the leg's navigate) must finish,
             // not stall with `enter`'s navigate skipped and nothing said.
-            // Mirrors the `.facts` arm below; only leg 4's next can land here
-            // (`settle` cannot cascade through leg 4 without a fresh report).
-            if state.step == .legEnd, let finished = finishAtGuide(state) {
+            // Mirrors the `.facts` arm below; only leg 4's and leg 5's nexts
+            // can land here (`settle` cannot cascade through either without a
+            // fresh report). VX-292 U3: the guide finishes from the Settings
+            // stop too — the leg's destination reached ahead of its card.
+            if finishesAtGuide(state.step), let finished = finishAtGuide(state) {
                 return Outcome(state: nil, effects: effects + finished)
             }
             return Outcome(state: state, effects: effects)
@@ -393,21 +475,35 @@ public enum Tour {
             state.facts = facts
             settle(&state, &effects, freshReport: true)
             drive(&state, &effects)
-            if state.step == .legEnd, let finished = finishAtGuide(state) {
+            if finishesAtGuide(state.step), let finished = finishAtGuide(state) {
                 return Outcome(state: nil, effects: effects + finished)
             }
             return Outcome(state: state, effects: effects)
         }
     }
 
-    /// The step after a "next" (only the next-bearing steps ask).
+    /// The steps at which opening the field guide FINISHES the tour: the
+    /// leg's end, whose ring is the guide's row — and (VX-292 U3) the
+    /// Settings stop before it, so the leg's destination reached ahead of its
+    /// card is the finish there too (the guide is where both roads end,
+    /// R-13s-1; the Round 1 MINOR-2 rule: never navigate off the guide she
+    /// just opened).
+    static func finishesAtGuide(_ step: Step) -> Bool {
+        step == .legEnd || step == .legSettings
+    }
+
+    /// The step after a "next" (only the next-bearing steps ask). Step 7's
+    /// next, from either beat, moves on to step 8: the flip is offered, never
+    /// required (PROVISIONAL P-292-8).
     static func nextStep(after step: Step) -> Step? {
         switch step {
         case .navigation: .seededBook
-        case .takesMode: .deeperModes
-        case .deeperModes: .placeFollows
-        case .placeFollows: .downAndUp
-        case .legSnippets: .legEnd
+        case .takesMode, .takesFlipBack: .readInNote
+        case .readInNote: .lensesLive
+        case .deeperModes: .upToBook
+        case .upToBook: .bookAndRead
+        case .legSnippets: .legSettings
+        case .legSettings: .legEnd
         default: nil
         }
     }
@@ -445,7 +541,7 @@ public enum Tour {
     static func advance(_ state: State, freshReport: Bool) -> Step? {
         let facts = state.facts
         switch state.step {
-        case .navigation, .takesMode, .deeperModes, .placeFollows, .endCard:
+        case .navigation, .readInNote, .deeperModes, .upToBook, .endCard:
             return nil  // "next" (or the end card's choices) only
 
         case .seededBook:
@@ -482,6 +578,37 @@ public enum Tour {
             guard case .note = facts.place, facts.noteMode == .takes else { return nil }
             return .takesMode
 
+        case .takesMode:
+            // VX-292 U3 — the flip: the take the note shows at the flip's
+            // block CHANGED from the one the step first saw (she chose the
+            // Italian). "next" moves on without it.
+            guard let shown = flipShown(state), let original = state.flipOriginalTakeID,
+                  shown != original
+            else { return nil }
+            return .takesFlipBack
+
+        case .takesFlipBack:
+            // …and back: the take the step first saw is shown again.
+            guard let shown = flipShown(state), shown == state.flipOriginalTakeID
+            else { return nil }
+            return .readInNote
+
+        case .lensesLive:
+            // VX-292 U3 — Lenses, live: a second column stands beside the
+            // note's own on the note's Lenses board (the saved "il principe
+            // 1532" column the card names, or any other she opens — a note
+            // with no saved lens still has the door's own new-lens rows).
+            guard case .note = facts.place, facts.noteMode == .lenses,
+                  (facts.lensColumns ?? 0) >= 2
+            else { return nil }
+            return .deeperModes
+
+        case .bookAndRead:
+            // VX-292 U3 — the book arc's second beat (R-292-10): the book
+            // reads straight through, in its own Read.
+            guard case .book = facts.place, facts.bookMode == .read else { return nil }
+            return .downAndUp
+
         case .downAndUp:
             // Home first is the next beat already done.
             if facts.place == .area(.bookcase) { return .ownNote }
@@ -516,12 +643,53 @@ public enum Tour {
             // own click opens it).
             if freshReport, state.previousPlace == .area(.snippets),
                facts.place != .area(.snippets) {
-                return .legEnd
+                return .legSettings
             }
             return nil
 
+        case .legSettings:
+            return nil  // "next" — Settings is its own window (P-292-10)
+
         case .legEnd:
             return nil  // finishes at the field guide (`finishAtGuide`)
+        }
+    }
+
+    /// **The take the note shows at the flip's block** — read only for the
+    /// block the step first saw (a report about another block, or another
+    /// note, is not this flip's).
+    static func flipShown(_ state: State) -> String? {
+        guard let block = state.facts.block, block.blockID == state.flipBlockID,
+              block.noteID == state.tourNoteID
+        else { return nil }
+        return block.chosenTakeID
+    }
+
+    /// **The take step 7's first beat asks her to choose**: the one the card
+    /// names (the Italian) when the block carries it and it is not already
+    /// the shown one; else the first other take in fan order (a note that is
+    /// not the Prince's — the step still flips something real).
+    static func flipTarget(_ state: State) -> String? {
+        guard let block = state.facts.block, block.blockID == state.flipBlockID,
+              let original = state.flipOriginalTakeID
+        else { return nil }
+        if let named = block.namedTakeID, named != original, block.takeIDs.contains(named) {
+            return named
+        }
+        return block.takeIDs.first { $0 != original }
+    }
+
+    /// **The block step 7 watches, and in which note** (the app observes
+    /// exactly this one, `Queries.tourFlipFacts`): the toured note, preferring
+    /// the block she made a take of at step 5 — or, once the step has seen
+    /// its block, that block. nil outside step 7.
+    public static func flipInterest(_ state: State) -> (noteID: String, blockID: String?)? {
+        switch state.step {
+        case .takesMode, .takesFlipBack:
+            guard let note = state.tourNoteID else { return nil }
+            return (note, state.flipBlockID ?? state.tourBlockID)
+        default:
+            return nil
         }
     }
 
@@ -555,6 +723,13 @@ public enum Tour {
         state.step = step
         state.writeBaseline = nil
         state.takeBaseline = nil
+        // VX-292 U3: step 7's first beat sees its block afresh (a run that
+        // pressed next mid-flip and came back by a restart starts over); its
+        // second beat keeps what the first saw.
+        if step == .takesMode {
+            state.flipOriginalTakeID = nil
+            state.flipBlockID = nil
+        }
         // R-292-11: a step's entry is a landing of the tour's own — judged
         // on the next report at a note that carries a mode (`drive`).
         state.arrivalUnjudged = true
@@ -568,6 +743,12 @@ public enum Tour {
             effects.append(.showPoolTucked)
         case .legSnippets:
             if place != .area(.snippets) { effects.append(.navigate(.area(.snippets))) }
+        case .legSettings:
+            // VX-292 U3 (R-292-8): Settings opens on its General pane — unless
+            // she has already opened the field guide, the leg's destination
+            // (it finishes there, `finishesAtGuide`; never a window raised
+            // over the guide she just opened).
+            if finishAtGuide(state) == nil { effects.append(.openSettings) }
         case .legEnd:
             // Round 1 MINOR-2 (the U2 ladder): landing AT the field guide IS
             // the leg's finish — `finishAtGuide` accepts this very report —
@@ -587,14 +768,16 @@ public enum Tour {
     /// (R-292-11: *"the tour DRIVES; state untouched … landings force the
     /// mode the step expects — the tutorial wins by driving, never by
     /// erasing"*). Steps 4–6 teach in WRITE (the caret, the bar's Takes and
-    /// the ⑂ badge are Write's); step 7 teaches in TAKES. nil: any mode — step
-    /// 8 only names the modes, step 9's bouncing is hers to do, and step 10's
-    /// ladder and the leg's acts work from every mode. Every step listed is
-    /// one of `followsTheNote`'s, so the note it judges is the toured note.
+    /// the ⑂ badge are Write's); step 7's two beats teach in TAKES (the
+    /// choose bands are the board's). nil: any mode — steps 8 and 9 ask HER
+    /// to switch (Read, Lenses: driving there would do her act for her), step
+    /// 10 only names two modes, and step 11's ladder and the leg's acts work
+    /// from every mode. Every step listed is one of `followsTheNote`'s, so the
+    /// note it judges is the toured note.
     public static func expectedNoteMode(_ step: Step) -> NoteMode? {
         switch step {
         case .write, .makeTake, .takeIcon: .write
-        case .takesMode: .takes
+        case .takesMode, .takesFlipBack: .takes
         default: nil
         }
     }
@@ -652,20 +835,28 @@ public enum Tour {
 
     /// The steps whose toured note is the note she is in.
     static let followsTheNote: Set<Step> = [
-        .insideBook, .write, .makeTake, .takeIcon, .takesMode, .deeperModes, .placeFollows,
-        .downAndUp,
+        .insideBook, .write, .makeTake, .takeIcon, .takesMode, .takesFlipBack, .readInNote,
+        .lensesLive, .deeperModes, .upToBook, .bookAndRead, .downAndUp,
     ]
 
     /// Fold the latest facts into the step's memories.
     static func remember(_ state: inout State) {
         let facts = state.facts
-        // The toured note is whichever note she is in from step 3 to step 10:
+        // The toured note is whichever note she is in from step 3 to step 11:
         // the card asks for the first story, but every later step serves any
         // note, so the ring follows the one she actually took.
         if case .note(let id) = facts.place, followsTheNote.contains(state.step) {
             state.tourNoteID = id
         }
         switch state.step {
+        case .takesMode:
+            // VX-292 U3: the flip's block and the take it showed, the first
+            // time the store says them for the toured note.
+            if state.flipOriginalTakeID == nil, let block = facts.block,
+               block.noteID == state.tourNoteID, let shown = block.chosenTakeID {
+                state.flipBlockID = block.blockID
+                state.flipOriginalTakeID = shown
+            }
         case .write:
             if state.writeBaseline == nil, facts.noteMode == .write, let caret = facts.caret,
                case .note(let noteID) = facts.place, caret.noteID == noteID {
@@ -689,7 +880,7 @@ public enum Tour {
         case .ownNote:
             if case .note(let id) = state.facts.place, id != state.tourNoteID { return id }
             return nil
-        case .endCard, .legStar, .legTags, .legBook, .legSnippets, .legEnd:
+        case .endCard, .legStar, .legTags, .legBook, .legSnippets, .legSettings, .legEnd:
             return state.ownNoteID
         default:
             return nil
@@ -732,6 +923,15 @@ public enum Tour {
         case takeBadge(String)
         /// A block's row on the Takes board (a block id).
         case takesBlock(String)
+        /// **A take's choose band on the Takes board** (a take id — VX-292
+        /// U3, step 7's flip: "choose" / "✓ chosen", `TakeChooseHeader`).
+        case takeChoose(String)
+        /// **Read's `edit · read` switch** (VX-292 U3, step 8 — the face bar's
+        /// segmented control, `ReadModeView`).
+        case readFaceSwitch
+        /// **Lenses' "＋ column" door** (VX-292 U3, step 9 — the dashed stub
+        /// beside the note's one column, whose menu opens a saved lens).
+        case lensAddColumn
         /// The pane's book icon (the ascent).
         case contextBarBook
         /// The note masthead's ＃ tag door.
@@ -802,18 +1002,45 @@ public enum Tour {
             if facts.caret?.panelOpen == true { return [[.panelOpenTakesMode]] }
             if facts.noteMode != .write { return [[.sidebarMode(.write)]] }
             return [state.tourBlockID.map { [.takeBadge($0)] } ?? []]
-        case .takesMode:
+        case .takesMode, .takesFlipBack:
             guard case .note = facts.place else { return [roadBackRow(state)] }
             if facts.noteMode != .takes { return [[.sidebarMode(.takes)]] }
-            return [state.tourBlockID.map { [.takesBlock($0)] } ?? []]
-        case .deeperModes:
+            // VX-292 U3 — the flip: the choose band of the take to choose
+            // (the Italian first, the original on the way back), the block's
+            // own row behind it (a closed fan draws no bands — its row is
+            // still the place to look).
+            let take = state.step == .takesMode ? flipTarget(state) : state.flipOriginalTakeID
+            let block = state.flipBlockID ?? state.tourBlockID
+            return [(take.map { [Anchor.takeChoose($0)] } ?? [])
+                    + (block.map { [Anchor.takesBlock($0)] } ?? [])]
+        case .readInNote:
+            // VX-292 U3 (R-292-7): the rail's Read, then — in Read — its
+            // `edit · read` switch.
             guard case .note = facts.place else { return [roadBackRow(state)] }
-            return [[.sidebarMode(.lenses)]]
-        case .placeFollows:
+            return facts.noteMode == .read ? [[.readFaceSwitch]] : [[.sidebarMode(.read)]]
+        case .lensesLive:
+            // VX-292 U3: the rail's Lenses, then — in Lenses — its "＋ column"
+            // door (the saved lens opens from its menu).
+            guard case .note = facts.place else { return [roadBackRow(state)] }
+            return facts.noteMode == .lenses ? [[.lensAddColumn]] : [[.sidebarMode(.lenses)]]
+        case .deeperModes:
+            // VX-292 U3: Compare and Blocks, named; the ring on the first.
+            guard case .note = facts.place else { return [roadBackRow(state)] }
+            return [[.sidebarMode(.compare)]]
+        case .upToBook:
+            // VX-292 U3 — the book arc's first beat (R-292-10; it reworks
+            // step 9's climb): the book icon. In the book the card describes
+            // what she sees and waits for her next; nothing to ring there.
+            switch facts.place {
+            case .book: return []
+            case .note: return [[.contextBarBook]]
+            default: return [roadBackRow(state)]
+            }
+        case .bookAndRead:
+            // VX-292 U3 — the second beat: Book, then Read.
             switch facts.place {
             case .book:
-                return [(state.tourNoteID.map { [Anchor.indexNoteRow($0)] } ?? [])
-                        + [.bookModeTab(.index)]]
+                return facts.bookMode == .book ? [[.bookModeTab(.read)]] : [[.bookModeTab(.book)]]
             case .note:
                 return [[.contextBarBook]]
             default:
@@ -850,6 +1077,9 @@ public enum Tour {
         case .legSnippets:
             return facts.place == .area(.snippets)
                 ? [[.firstSnippetCard]] : [[.sidebarArea(.snippets)]]
+        case .legSettings:
+            // Settings is its own window: nothing in this one to ring.
+            return []
         case .legEnd:
             guard facts.place == .area(.bookcase) else { return [[bookcase]] }
             return [state.fieldGuideID.map { [.bookcaseRow($0)] } ?? []]
@@ -871,8 +1101,8 @@ public enum Tour {
     /// The card then adds one muted sentence (A7 of the U2 UI assessment,
     /// PROVISIONAL P-U2-15) so the ring and the words never contradict. The
     /// branches mirror `ringGroups`' fallbacks exactly; a step's own road
-    /// (step 9's book icon, step 10b's Bookcase, leg 1's Open row) is never a
-    /// road back.
+    /// (step 11's book icon, step 12's Bookcase, leg 1's Open row, the rail's
+    /// Read and Lenses at steps 8–9) is never a road back.
     public static func isRoadBack(_ state: State) -> Bool {
         let place = state.facts.place
         switch state.step {
@@ -885,17 +1115,21 @@ public enum Tour {
             // Round 1 MINOR-1: off the note, the Open row is the road back.
             if case .note = place { return state.facts.noteMode != .write }
             return true
-        case .takesMode:
+        case .takesMode, .takesFlipBack:
             if case .note = place { return state.facts.noteMode != .takes }
             return true
-        case .deeperModes:
+        case .readInNote, .lensesLive, .deeperModes:
             if case .note = place { return false }
             return true
-        case .placeFollows:
+        case .upToBook:
             switch place {
             case .book, .note: return false
             default: return true
             }
+        case .bookAndRead:
+            // In the note, the book icon is the way back up to the book.
+            if case .book = place { return false }
+            return true
         case .downAndUp:
             // F-U2-W-3: in a book, the ring is the step's own edit-here only
             // while the box holds a note; an empty box's row ring is the
@@ -909,7 +1143,7 @@ public enum Tour {
             return place != .area(.pool)
         case .legSnippets:
             return place != .area(.snippets)
-        case .navigation, .home, .endCard, .legStar:
+        case .navigation, .home, .endCard, .legStar, .legSettings:
             return false
         }
     }

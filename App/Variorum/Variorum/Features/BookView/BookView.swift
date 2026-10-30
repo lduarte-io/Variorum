@@ -651,10 +651,9 @@ struct BookView: View {
             // Outline · Index · Book · Read — Index sits beside the
             // writing surface, mirroring the note row's Write · Takes ·
             // Index · Read shape (her cohesion mandate, W8-2).
-            modeTab("Outline", .outline)
-            modeTab("Index", .index)
-            modeTab("Book", .spread)
-            modeTab("Read", .read)
+            ForEach(Self.tabOrder, id: \.self) { mode in
+                modeTab(Self.tabLabel(mode), mode)
+            }
         }
         // 13c 2C: READ's pair of faces (her direction — "the
         // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
@@ -714,6 +713,20 @@ struct BookView: View {
         .help(modeHelp(mode))
         // 13s-b U2: step 9's climb ends on the Index tab.
         .tourAnchor(.bookModeTab(Self.tourMode(mode)), cornerRadius: 5)
+    }
+
+    /// **The book's mode row, in order, and each tab's word** — named once
+    /// so the onboarding tour's step 11 quotes the four views it teaches
+    /// (VX-292 U3; 13u4 UNIT S3's rule — a door's name is its constant).
+    static let tabOrder: [BookStructureModel.ViewMode] = [.outline, .index, .spread, .read]
+
+    static func tabLabel(_ mode: BookStructureModel.ViewMode) -> String {
+        switch mode {
+        case .outline: "Outline"
+        case .index: "Index"
+        case .spread: "Book"
+        case .read: "Read"
+        }
     }
 
     /// 13s-b U2: a book mode in the tour's vocabulary.
