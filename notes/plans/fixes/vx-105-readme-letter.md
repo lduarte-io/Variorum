@@ -1,6 +1,6 @@
 # VX-105 — her finished readme seeds (replaces the 13s placeholder)
 
-**STATUS: BUILDING (kicked off 2026-10-30, /architect-phase on the Pro; branch `vx-105-readme-letter`, worktree `~/dev/variorum-vx-105`). The 13b constitution (P-1…P-9, `.claude/skills/architect-phase/SKILL.md`) binds by reference. No `Sync/`, no custody, no editor seam — opus-reviewer qualifies for the ladder.**
+**STATUS: CLOSED 2026-10-30 (PR #209, merge commit on main; the ladder closed at round 3; batch A 125/12 + 5,739/1,000 green modulo VX-714's solo-proven flake; batch B's walkthrough 4/4 PASS; born VX-711..715; VX-635 closed superseded; the folded release rides vx-292's close at her overnight word). The 13b constitution (P-1…P-9) bound by reference; no `Sync/`, no custody, no editor seam — opus-reviewer ran the ladder.**
 
 ## What this is
 
