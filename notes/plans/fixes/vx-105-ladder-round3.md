@@ -280,3 +280,7 @@ UNCHANGED (`vx-105-ladder-round1.md`, "Stage-window expectation"): the same suit
 red. This tail touched only core tests and docs, run headless above. Commits: `a71034494` MINOR-1 (did not compile: see
 its machinery note) · `cd99e73e0` the compile fix · `cd41e7bc5` NIT-1 · `758294da1` MINOR-2's shapes · this commit,
 MINOR-2's evidence.
+
+## The orchestrator's line-by-line check of the round-3 tail (no later round reads these)
+
+Checked against each finding in the committed diff (70d60d2cd..05458e2c8): MINOR-1's Cost doc, pin message and comment say exactly the arbitrated truth (the automatic edge-index build reads every edge row, SEARCH-labelled, outside the SCAN check's reach; occasion-bounded callers only); the round-2 record's correction is bracketed in place; NIT-1's clause now states the gather/classifier split precisely; MINOR-2's E and G shapes land inside the equality pin with the source side ASSERTED (`link.sourceBlockId == momentBlock` — the harness's id ordering is self-checking, not assumed), both mutants shown RED with restores verified clean. The honestly-reported non-compiling commit (a71034494) is cured by cd99e73e0 and the versions pins ran 37/2 green headless. VERDICT: the tail lands as arbitrated; the ladder record closes. Next gate: the stage window (suites, then the walkthrough).
