@@ -505,3 +505,10 @@ session sees them; the fix rounds' records are appended to the same files)
   guide's "getting around" lesson teaches ⌘2 / ⌘1 as working in the book, where a mode request refuses (the MAJOR-1
   sibling; Medium · Bug · Confirmed); **VX-713** — the tour's end card calls the readme "a short welcome note" (NIT-3,
   O-1; Low · Wording · Confirmed). Triage them at the closeout with the effort's other filed tickets (VX-711, S-1).
+
+## Release-notes bullets (public copy; to the release runner at the merge — one folded ReleaseNotes file, VX-708's shape)
+
+- A welcome letter from Lillian now arrives in every new library as the note "readme", starred and at the top of your Library.
+- Help ▸ Restore "readme" brings the welcome note back whenever you want it.
+- Each sample book now has its own restore door in Help — "the adventures of sherlock holmes" included — replacing the old Restore the Sample Library item.
+- The field guide's first chapter now begins with the move from a book into a note, and covers your library's keys and safety up front.
