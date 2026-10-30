@@ -25,8 +25,13 @@
 //  (R-13r-11 — furniture never speaks; one log line each), and one read
 //  decides: a live copy wins, then her deletion (a tombstoned container of
 //  the reserved title — the `pending`-resume window is the only road a
-//  deletion can precede this seed on), else the mint. No door latch: these
-//  objects have no doors to race.
+//  deletion can precede this seed on), else the mint. No door latch is
+//  needed, for two different reasons: the example snippet has no door at
+//  all; the readme HAS one (Help ▸ Restore “readme”, VX-105 R-105-8), so its
+//  birth seed decides INSIDE its mint's serialized runner turn — the door's
+//  own shape — and a press queued ahead of the birth's turn is seen by it
+//  (ladder round 1, MINOR-2). The tutorial's latch exists because its
+//  doors' confirm road spans several turns; the readme's door is one turn.
 //
 //  MOBILE PARITY: the phone seeds neither (its onboarding furniture is the
 //  mobile project's own) — recorded, never built here. Like the guide's,
@@ -332,28 +337,36 @@ enum ReadmeSeeder {
         return try candidates.first { try !Queries.isVersionOfAnyLiveNote(db, $0) }
     }
 
+    /// **The decision and the mint share ONE runner turn** (ladder round 1,
+    /// MINOR-2 — the door's shape, `restore`). The reads used to run on
+    /// `session.database.read` with the mint queued as a LATER turn: a Help ▸
+    /// Restore “readme” press queued between the two (a first launch, the
+    /// runner busy with the guide's seed turns) minted one readme and the
+    /// birth's mint a second. Inside one serialized turn nothing can land
+    /// between the reads and the mint.
     private static func performBirthSeed(session: AppSession) async -> BirthSeed {
+        let writtenAt = Self.writtenAt()
         do {
-            let (liveID, tombstoned) = try await session.database.read { db in
-                (try liveReadmeID(db),
-                 try Bool.fetchOne(
-                    db,
-                    sql: """
-                        SELECT EXISTS (SELECT 1 FROM container
-                                       WHERE kind = 'post' AND title = ?
-                                         AND deleted_at IS NOT NULL)
-                        """,
-                    arguments: [title]) ?? false)
+            return try await session.runner.run { _ -> BirthSeed in
+                @Dependency(\.database) var database
+                let (liveID, tombstoned) = try database.read { db in
+                    (try liveReadmeID(db),
+                     try Bool.fetchOne(
+                        db,
+                        sql: """
+                            SELECT EXISTS (SELECT 1 FROM container
+                                           WHERE kind = 'post' AND title = ?
+                                             AND deleted_at IS NOT NULL)
+                            """,
+                        arguments: [title]) ?? false)
+                }
+                if liveID != nil { return .alreadyPresent }
+                // The birth road honours her deletion quietly (the
+                // `pending`-resume window); the DOOR does not — a press is her
+                // word (`restore`).
+                if tombstoned { return .deletedByTheReader }
+                return .seeded(postID: try mint(ops: Operations(undoStack: nil), writtenAt: writtenAt))
             }
-            if liveID != nil { return .alreadyPresent }
-            // The birth road honours her deletion quietly (the `pending`-resume
-            // window); the DOOR does not — a press is her word (`restore`).
-            if tombstoned { return .deletedByTheReader }
-            let writtenAt = Self.writtenAt()
-            let postID = try await session.runner.run { _ -> String in
-                try mint(ops: Operations(undoStack: nil), writtenAt: writtenAt)
-            }
-            return .seeded(postID: postID)
         } catch {
             return .refused(String(describing: error))
         }

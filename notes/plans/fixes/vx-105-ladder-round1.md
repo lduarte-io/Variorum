@@ -121,8 +121,23 @@ below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `
   answering `.alreadyPresent(fresh)`. RED ON OLD by revert recipe: restore `liveReadmeID`'s bare `SELECT … ORDER BY id
   LIMIT 1` → the moment is the only live "readme" → `.alreadyPresent(moment)` → the refusal speaks and
   `pendingSelection == .post(moment)` (the receipt and `fresh != moment` expectations fail).
-- **MINOR-2** (the birth seed decides inside its mint's runner turn) — NOT-STARTED. Settled design: `performBirthSeed`'s
-  two reads move into the `runner.run` body (the door's shape); the header's "No door latch" line rewritten.
+- **MINOR-2** (the birth seed decides inside its mint's runner turn) — DONE (the commit carrying this line). The fix:
+  `ReadmeSeeder.performBirthSeed`'s two decide-reads (the live read, the tombstone read) moved INTO the `runner.run`
+  body that mints — `@Dependency(\.database)` read in the turn, exactly `restore`'s shape — so nothing can land between
+  the decision and the mint. The header's "No door latch: these objects have no doors to race." is rewritten to the
+  truth (the snippet has no door; the readme has one and decides in its mint's turn; why the tutorial needs a latch
+  and the readme does not). The example snippet's seeder is unchanged (no door — no race). Pins, both WRITTEN and
+  compiling, RUN PENDING the stage window: (1) `LaunchFurnitureTests.aDoorPressInTheBirthSeedsGapNeverMakesTwoReadmes`
+  — the interleave forced by HOLDING the runner (a turn waiting on a semaphore, bounded at 10 s so it can never hang
+  the suite): the door's turn queues behind the hold, the birth seed runs, the hold lets go → exactly one of the two
+  minted, one live readme. RED ON OLD by revert recipe (restore the `session.database.read` before `runner.run`): the
+  birth's read runs while the runner is held, sees nothing, and queues its mint behind the door's → two readmes, both
+  minted. HONEST LABEL: the red side relies on the runner taking its queued turns in order (the door's queued ~100 ms
+  before the birth's mint — FIFO in practice, not promised by the language); the green side is order-independent
+  (either order leaves one). (2) `LaunchFurnitureTests.theBirthSeedReadsNothingOutsideItsMintsTurn` — the
+  DETERMINISTIC shape pin: `performBirthSeed`'s source holds no `session.database` read, and inside it the
+  `session.runner.run` precedes the live read, which precedes the mint. RED ON OLD by construction (the old body read
+  on `session.database.read` ahead of `runner.run`). Residual, recorded: none in the readme; the snippet has no door.
 - **MINOR-4** (stale comments; the fold pin's "never") — NOT-STARTED.
 - **MAJOR-1** (lesson 1's takes moment from the book's Outline) — NOT-STARTED.
 - **NIT-2** (the take attachments check their blocks) — NOT-STARTED.

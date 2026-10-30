@@ -721,6 +721,76 @@ struct LaunchFurnitureTests {
         }
     }
 
+    /// **A PRESS IN THE BIRTH SEED'S GAP NEVER MAKES TWO README** (ladder round
+    /// 1, MINOR-2). The birth seed now decides INSIDE its mint's runner turn
+    /// (the door's shape), so a Help ▸ Restore “readme” press queued ahead of
+    /// the birth's turn is seen by it. The interleave is forced by HOLDING the
+    /// serialized runner (a turn that waits on a semaphore, bounded so the pin
+    /// can never hang the suite): the door's turn queues behind the hold, then
+    /// the birth seed runs, then the hold lets go. ONE readme — the door's —
+    /// and the birth seed names what it found. RED ON OLD (revert
+    /// `performBirthSeed` to read on `session.database.read` before its
+    /// `runner.run`): the birth's read ran while the runner was held, saw no
+    /// readme, and queued its mint behind the door's — two readmes, the birth
+    /// answering `.seeded`. Honest label: the red side leans on the runner
+    /// taking its queued turns in order (the door's queued ~100 ms before the
+    /// birth's mint); the GREEN side does not — under the fix either order
+    /// leaves one readme. `theBirthSeedReadsNothingOutsideItsMintsTurn` below
+    /// is the deterministic shape pin beside it.
+    @Test func aDoorPressInTheBirthSeedsGapNeverMakesTwoReadmes() async throws {
+        try await withLaunchWorld { session, db in
+            let runner = session.runner
+            let release = DispatchSemaphore(value: 0)
+            let holding = LockIsolated(false)
+            let hold = Task {
+                try await runner.run { _ in
+                    holding.setValue(true)
+                    _ = release.wait(timeout: .now() + 10)
+                }
+            }
+            defer { release.signal() }
+            await pollUntil { holding.value }
+            #expect(holding.value, "the runner is held")
+
+            let door = Task { @MainActor in try await ReadmeSeeder.restore(session: session) }
+            try await Task.sleep(for: .milliseconds(100))   // the door's turn queues behind the hold
+            let birth = Task { @MainActor in await ReadmeSeeder.seedAtBirth(session: session) }
+            try await Task.sleep(for: .milliseconds(300))   // the birth seed reaches the runner
+            release.signal()
+            try await hold.value
+
+            let doorOutcome = try await door.value
+            let birthOutcome = await birth.value
+            let doorMinted = if case .restored = doorOutcome { true } else { false }
+            let birthMinted = if case .seeded = birthOutcome { true } else { false }
+            #expect(doorMinted != birthMinted,
+                    "exactly one of the two minted (door \(doorOutcome), birth \(birthOutcome))")
+            #expect(try await liveReadmeCount(db) == 1, "one readme, never two")
+        }
+    }
+
+    /// **THE SHAPE, DETERMINISTICALLY** (MINOR-2's companion pin): the birth
+    /// seed's decision reads live INSIDE the `runner.run` body that mints —
+    /// nothing in `performBirthSeed` reads on `session.database`, and the live
+    /// read precedes the mint in the one body. RED ON OLD: the reads ran on
+    /// `session.database.read`, ahead of the `runner.run` that minted.
+    @Test func theBirthSeedReadsNothingOutsideItsMintsTurn() throws {
+        let url = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Variorum/Features/Onboarding/BirthFurnitureSeeders.swift")
+        let source = try String(contentsOf: url, encoding: .utf8)
+        let start = try #require(source.range(of: "private static func performBirthSeed("))
+        let end = try #require(source.range(of: "/// **THE ONE MINT**", range: start.upperBound..<source.endIndex))
+        let body = String(source[start.upperBound..<end.lowerBound])
+        #expect(!body.contains("session.database"), "no read outside the runner turn")
+        let turn = try #require(body.range(of: "session.runner.run"), "the seed has one runner turn")
+        let read = try #require(body.range(of: "liveReadmeID(db)"))
+        let mint = try #require(body.range(of: "mint(ops:"))
+        #expect(turn.upperBound <= read.lowerBound && read.upperBound <= mint.lowerBound,
+                "the live read, then the mint — both inside the turn")
+    }
+
     /// **NEVER A RETROFIT** (the `declined` mark's contract). An existing
     /// store that already had its library is declined at launch and grows no
     /// guide; a store born on an earlier build (`done`, no guide) stays as it
