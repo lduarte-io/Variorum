@@ -265,6 +265,26 @@ enum ReadmeSeeder {
         "Lillian",
     ]
 
+    /// **Her moment: October 29, 2026, 4:44 am** (her words: *"maybe 4:44am
+    /// on Oct 29th?"* … *"i agree on the date / time."*; R-105-3, "created
+    /// 4:44, edited at birth"). The note's `created_at` — the day and time
+    /// every created face reads (the Library's `created` stamp and sort, the
+    /// masthead's created face — `Queries.noteStamps.createdAt`). READ IN
+    /// THE SEEDING DEVICE'S LOCAL CALENDAR (PROVISIONAL, recorded): every
+    /// reader sees 4:44 am on her own clock, whatever her zone — so the stored
+    /// UTC instant differs by zone. Gregorian always, never `Calendar.current`
+    /// (a device on another calendar would read year 2026 in its own era).
+    nonisolated static let writtenAtLocal = DateComponents(
+        year: 2026, month: 10, day: 29, hour: 4, minute: 44, second: 0)
+
+    nonisolated static func writtenAt(in timeZone: TimeZone = .current) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        // The fallback (4:44 in UTC) is reachable only if the calendar
+        // refused a date it has always made; it keeps her day.
+        return calendar.date(from: writtenAtLocal) ?? Date(timeIntervalSince1970: 1_793_249_040)
+    }
+
     enum BirthSeed: Equatable {
         case seeded(postID: String)
         case alreadyPresent
@@ -305,15 +325,37 @@ enum ReadmeSeeder {
             }
             if liveID != nil { return .alreadyPresent }
             if tombstoned { return .deletedByTheReader }
+            let writtenAt = Self.writtenAt()
             let postID = try await session.runner.run { _ -> String in
                 let ops = Operations(undoStack: nil)
-                let note = try ops.createPost(title: title, wingId: "")
-                // One block per paragraph, in order, each stored exactly as
-                // given (`newBlock` keeps every byte but U+0000). Furniture
-                // never lands on her ⌥⌘Z (the quiet facade, and no entry).
+                // R-105-3, "created 4:44, edited at birth" — the split stamp,
+                // through operations alone (no row is ever re-stamped):
+                // the NOTE is created at her moment, under the operations
+                // layer's own time seam (the Sherlock/Prince fixed-clock
+                // precedent, scoped to this one mint) …
+                let note = try withDependencies {
+                    $0.date = .constant(writtenAt)
+                } operation: {
+                    try ops.createPost(title: title, wingId: "")
+                }
+                // … and its words are set down at the seed moment, on the
+                // ambient clock: one block per paragraph, in order, each
+                // stored exactly as given (`newBlock` keeps every byte but
+                // U+0000), whose touch and churn stamp `last_touched_at`,
+                // `last_major_revision_at` and `updated_at` — so the readme
+                // seeded LAST tops the Library's edited-newest sort
+                // (R-13s-29). Furniture never lands on her ⌥⌘Z (the quiet
+                // facade, and no entry).
                 for text in blocks {
                     _ = try ops.newBlock(in: note.id, text: text, at: .end, registeringUndo: false)
                 }
+                // Born STARRED (her ruling: "yeah make it born starred"),
+                // through the ONE star write, in the same seed act. Starring
+                // a note is an applying act; on a fresh store no living book
+                // carries a star rule, and the seeded starred-notes GATHERING
+                // assembles it at read (a gathering holds nothing — the
+                // readme stays bookless).
+                try ops.setStarred(.post(note.id), starred: true)
                 return note.id
             }
             return .seeded(postID: postID)

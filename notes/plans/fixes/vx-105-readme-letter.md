@@ -60,7 +60,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
 
 ### LIVE STATUS (implementer, Opus — one session)
 
-- **Piece 1 — the seeder content swap:** DONE (this commit — see `git log`; hash filled at the next commit).
+- **Piece 1 — the seeder content swap:** DONE (`99231c04b`).
   `ReadmeSeeder.paragraphs` = her 17 blocks, literals generated from `read-me.txt` with the trailing space restored per
   the manifest, then the literals AS WRITTEN IN THE SEEDER SOURCE extracted, compiled with `swift` and hashed:
   **GREEN — all 17 SHA-256 == the manifest's 17 values** (13 blocks end with one space; 2, 12, 16, 17 do not). No
@@ -71,14 +71,65 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   to `TutorialSeeder.startHerePassages` (a script compared the old and new declarations: BYTE-IDENTICAL MOVE); the key
   lesson reads it from there, so the guide's lesson text is unchanged by a byte. Test files touched compile-only
   (marked in place); their real rework is piece 4.
-- **Piece 2 — born starred + the stamps (R-105-3):** NOT-STARTED.
+- **Piece 2 — born starred + the stamps (R-105-3):** DONE (this commit — hash at the next). The split stamp is landed
+  by OPERATIONS ALONE, no row ever re-stamped: `createPost` runs under `withDependencies { $0.date = .constant(4:44) }`
+  (the Sherlock/Prince fixed-clock precedent, scoped to the one mint), then the 17 `newBlock`s run on the ambient clock
+  and their own touch + churn stamp the edited columns; then `setStarred(.post(id), true)` — the one star write — in the
+  same runner turn. See the stamp table and **S-1 (the star meets the fold — a structural surprise, ARCHITECT'S
+  RULING NEEDED)** below.
 - **Piece 3 — the Sherlock door retitle (R-105-4):** NOT-STARTED.
 - **Piece 4 — the pins:** NOT-STARTED.
 - **Piece 5 — the first-chapter interweave (R-105-5):** NOT-STARTED.
 - **Piece 6 — this record's closing sections:** IN-PROGRESS (LIVE STATUS kept from the first commit).
 
 Compile evidence so far: `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` (compile-only —
-app AND test target, nothing run) EXIT 0 after piece 1.
+app AND test target, nothing run) EXIT 0 after piece 1 and after piece 2.
+
+### The stamp-column table (R-105-3 — "created 4:44, edited at birth")
+
+| Row | Column | Carries | Why |
+|-----|--------|---------|-----|
+| `container` (the readme) | `created_at` | **2026-10-29 04:44:00.000 in the seeding device's local zone** (Gregorian, `TimeZone.current`), stored as that instant in UTC by the canonical formatter | The created face everywhere: `Queries.noteStamps.createdAt` (the masthead's created flip), the Library's `created` sort and row stamp (`LibrarySortFace.rowStamp(.createdAt)` reads `hit.createdAt`). Minted under the 4:44 clock by `createPost`. PROVISIONAL reading (R-105-3's): every reader sees 4:44 am on her own clock, so the UTC instant differs by zone (Los Angeles 11:44Z, Tokyo the 28th 19:44Z). |
+| `container` | `last_touched_at` | the seed moment (the last block's mint) | `newBlock`'s `registerTextChange` touch — the Library's DEFAULT sort (`.lastTouched`, edited newest first) reads it; seeded last, so the readme tops it (R-13s-29). Also the masthead's edited face (`noteStamps.editedAt`). |
+| `container` | `last_major_revision_at` | the seed moment (the first block's churn crossing — `baseline_length` 0, so block 1 crosses at once) | `newBlock`'s churn; the timeline's sort. |
+| `container` | `updated_at` | the seed moment (the last block's mint) | `registerTextChange` writes it with the touch. (`createPost` first wrote 4:44 here; the text's landing supersedes it — "edited at birth".) |
+| `container` | `entry_date` | NULL | `importPost`'s shape kept. VERIFIED the worn date needs no `entry_date`: the readme is TITLED, so `DisplayTitle.note` never reaches its date chain; the Library's day filter is "edited on this day" (`last_touched_at` ∪ savepoints), not `entry_date`; and the furniture fold reads a set `entry_date` as HER engagement. |
+| `block`, `variant`, `container_block` (17 each) | `created_at`, `updated_at` | the seed moment, per block | The words were set down at the device's birth; only the note's own `created_at` carries her moment. No face reads these for the readme today (no savepoints, one take each). |
+| `setting` `'starred'` | (no stamp column) | the readme's `post:` key appended | Born starred through `setStarred` — the one star write (VX-643: no cap). |
+
+The ALTERNATIVE (not built): mint every row under the 4:44 clock (the Prince's whole-scope shape), then re-stamp
+`last_touched_at` / `last_major_revision_at` / `updated_at` to the seed moment. Rejected because no public operation
+moves `last_major_revision_at` without a text change or a MANUAL commit (a manual savepoint is fold engagement and a
+visible "commit" in her history), so it would need a raw row write — the operations-as-API rule's one forbidden road.
+Recorded property, unchanged in kind from the old seeder: the mint is 19 transactions in ONE serialized runner turn
+(the guide's own shape; the old readme's takes pass was likewise separate transactions) — `importPost`'s single
+transaction is unavailable because it trims her bytes.
+
+### S-1 — STRUCTURAL SURPRISE: the born star reads as HER ENGAGEMENT in the furniture fold (architect's ruling needed)
+
+**Traced mechanism.** `SeededFurnitureClassifier.noteVerdict` (`Sources/VariorumCore/Sync/SeededFurnitureDedupe.swift`,
+the note grain) returns `.engaged` whenever the synced `'starred'` list contains the note's id (*"HER STAR is engagement
+on every grain"* — 13s U1b ladder round 1, MAJOR-1, #186(a)). The readme is now born starred, so EVERY fresh mint reads
+`.engaged`, never `.foldable`. Consequence: two fresh Macs, each seeded signed-out, later joined to one account keep
+TWO readmes forever (R-13s-5's release constraint — "every seeded object of the final set folds on sign-in" — no
+longer holds for the readme). Worse, the `'starred'` setting is one server-wins CAS row, so after the pair meets one
+device's star list wins: one readme starred, one not, and the unstarred one is still not foldable alone. The
+REAL-SEED drift guard `TutorialFurnitureFoldTests.theRealReadmeAndExampleSnippetAreFoldableAndTwoMintsAgree` WILL READ
+RED at the stage window by construction (the readme arm) — it is the net doing its job, and it is left standing until
+the ruling. Gatherings already have the answer's shape (`Gathering.bornStarred`: the seed's own flag is identity, the
+flag OFF the seed's value is engagement); `ReservedContainer` has no such field.
+
+**Options (the architect rules; nothing beyond the ruled star is built):**
+- **(A) A Sync/ unit (Fable work, its own ticket):** `ReservedContainer` gains `bornStarred`; the note grain reads the
+  star as IDENTITY when it equals the seed's value and folds the pair, RE-POINTING the star list to the keeper (the
+  gatherings' `designationKey` re-point precedent) so the server-wins list collision cannot strand the survivor
+  unstarred. Spec-defensible (BLOCKER-1: seed-authored state rides the identity), but `Sync/` and outside this unit.
+- **(B) Accept for launch, record the residual (RECOMMENDED for this unit):** the double-readme case needs two fresh
+  Macs, each seeded signed-out, joined later to one account (her letter places the paid sync option with the mobile
+  release); both copies stay live and visible, either deletable (the LaunchFurniture header's "RESIDUAL, NAMED"
+  class). The drift guard's readme arm flips to assert `.engaged` WITH this reason, and (A) is ticketed for the
+  sync launch. One-line pin change; the example-snippet arm stays the net.
+- **(C) Not born starred** — contradicts her ruling; listed only to be ruled out.
 
 ## The ladder
 
