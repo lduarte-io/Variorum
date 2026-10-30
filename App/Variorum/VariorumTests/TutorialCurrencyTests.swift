@@ -453,4 +453,28 @@ struct TutorialCurrencyTests {
             #expect(text.contains("\u{2318}\u{21E7}'"), "the panel's key, unchanged")
         }
     }
+
+    /// **VX-292 U1 (R-292-9, amended at the vx-105 resolution) — the guide
+    /// names the restore door by the menu's own title.** The Help menu has
+    /// said "Restore Field Guide…" since VX-602, and two lessons still sent
+    /// her to "Help ▸ Restore Tutorial…", a door that is not there. RED ON
+    /// OLD: both lessons said the old name. The first lesson ("start here")
+    /// is vx-105's rewrite (Option B) and is the one lesson this pin leaves
+    /// out — the second merger tightens it to every lesson once both land.
+    @Test func theLessonsNameTheRestoreDoorByItsMenuTitle() async throws {
+        let door = "Help \u{25B8} \(CapabilityRegistry.capability(.restoreTutorial).verb)"
+        #expect(CapabilityRegistry.capability(.restoreTutorial).doors.contains(.menuBar),
+                "the door the lessons name is on the menu bar")
+        try await withGuide { _, db, guideID in
+            for title in ["the tray & the Trash", "comments & tags"] {
+                let text = try await prose(db, guideID, title)
+                #expect(text.contains(door), "\(title) names \(door)")
+            }
+            let lessons = try await everyLesson(db, guideID)
+            #expect(lessons.count > 30, "the whole guide is read")
+            for (title, text) in lessons where title != "start here" {
+                #expect(!text.contains("Restore Tutorial"), "\(title) names a door the menu no longer has")
+            }
+        }
+    }
 }

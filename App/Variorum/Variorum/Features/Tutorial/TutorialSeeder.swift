@@ -10,7 +10,7 @@
 //  spec: `TutorialWalkTests` executes every lesson's acts headlessly, and
 //  the scripted screenshot walk drives them in the real app.
 //
-//  Seeding is a PRODUCT DOOR (Help ▸ Restore Tutorial…, registry-declared,
+//  Seeding is a PRODUCT DOOR (Help ▸ Restore Field Guide…, registry-declared,
 //  fire-and-DO): idempotent, replace-wholesale after a spoken confirm,
 //  everything deletable like any post or book. Identity is the app's own
 //  machinery — every lesson post wears the `tutorial` tag, the book and
@@ -1426,11 +1426,16 @@ enum TutorialSeeder {
             + "anything for good, which is why the Trash is worth visiting once "
             + "before you need it.",
 
+            // VX-292 U1 (R-292-9, amended at the vx-105 resolution): the door
+            // has read "Restore Field Guide…" since VX-602; the menu's own
+            // title is quoted from the registry, so the next rename moves
+            // the lesson with it.
             "Practice, and it is safe: go to the Library, right-click this very "
             + "lesson \u{25B8} Delete, then open the Trash and Put back the row "
             + "you find there. The lesson comes back into this book, in this "
             + "chapter, in its place. (And if you ever lose your nerve, Help "
-            + "\u{25B8} Restore Tutorial\u{2026} rebuilds the whole book.)",
+            + "\u{25B8} \(CapabilityRegistry.capability(.restoreTutorial).verb) "
+            + "rebuilds the whole book.)",
         ])
 
         let past = try lesson(deleting, "what a block leaves behind", [
@@ -1993,9 +1998,12 @@ enum TutorialSeeder {
             + "in Settings (\u{2318},), where Make a Gathering\u{2026} turns a "
             + "tag into a gathering that shows everything wearing it.",
 
+            // VX-292 U1 (R-292-9): the door's name from the registry (VX-602's
+            // "Restore Field Guide…").
             "Full disclosure: every lesson note wears the "
             + "\u{201C}tutorial\u{201D} tag. That is exactly how Help \u{25B8} "
-            + "Restore Tutorial\u{2026} finds what to replace. Your own notes "
+            + "\(CapabilityRegistry.capability(.restoreTutorial).verb) finds "
+            + "what to replace. Your own notes "
             + "never wear it unless you put it there; everything else in your "
             + "library is invisible to the restore.",
         ])
@@ -2113,7 +2121,7 @@ enum TutorialSeeder {
         // step — the mobile catch-up's, on row 55's own precedent), and the
         // seeded group's name `scrapPoolTitle`, which is a RESERVED IDENTITY
         // the restore door's discovery filters on: renaming it would orphan
-        // every already-seeded store's group from Restore Tutorial, which is
+        // every already-seeded store's group from Restore Field Guide, which is
         // a behaviour change wearing a copy change's clothes.
         let scraps = try lesson(library, "pool & scraps", [
             "Not everything starts as a note. The Pool (sidebar) holds notes "

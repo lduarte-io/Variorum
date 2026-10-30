@@ -60,12 +60,26 @@ struct HelpMenuNamingTests {
         #expect(!(try source("Registry/CapabilityRegistry.swift")).contains("\"Restore Tutorial"))
     }
 
-    /// A-439-9's boundary, stated: the guide's own lessons still say the old
-    /// door name (three lines, flagged for her — a re-seed is hers to order).
-    /// When she rules the content edit, this pin flips with it.
-    @Test func theGuidesSeededContentIsNotReworded() throws {
+    /// A-439-9's boundary, FLIPPED as it asked ("when she rules the content
+    /// edit, this pin flips with it"): her coordinator raised the three stale
+    /// lesson lines at the VX-292 kickoff ("we should fix it"), R-292-9
+    /// routed them here, and the vx-105 resolution split them (Option B): the
+    /// guide names the door by its REGISTRY verb from here on — VX-292 U1
+    /// derives "the tray & the Trash" and "comments & tags"; the first
+    /// lesson's line ("start here") is vx-105's rewrite, so it is the ONLY
+    /// place the old literal may still stand. After both merges none does —
+    /// this pin holds on either side of vx-105's merge. The seeded TRUTH is
+    /// `TutorialCurrencyTests.theLessonsNameTheRestoreDoorByItsMenuTitle`.
+    @Test func theGuideNamesTheRestoreDoorByItsRegistryVerb() throws {
         let seeder = try source("Features/Tutorial/TutorialSeeder.swift")
-        #expect(seeder.components(separatedBy: "Restore Tutorial\\u{2026}").count - 1 == 3,
-                "the three lesson lines stand as seeded (morning bundle 3)")
+        let old = "Restore Tutorial\\u{2026}"
+        #expect(seeder.components(separatedBy: old).count - 1 <= 1,
+                "at most the first lesson's line (vx-105's) still says the old name")
+        let afterTheFirstLesson = try #require(
+            seeder.components(separatedBy: "lesson(welcome, \"getting around\"").last)
+        #expect(!afterTheFirstLesson.contains(old), "no later lesson says the old name")
+        #expect(afterTheFirstLesson.components(
+            separatedBy: "\\(CapabilityRegistry.capability(.restoreTutorial).verb)").count - 1 == 2,
+                "the two lessons quote the registry's verb")
     }
 }
