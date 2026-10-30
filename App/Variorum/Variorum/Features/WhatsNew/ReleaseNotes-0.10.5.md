@@ -1,7 +1,5 @@
 # Variorum 0.10.5
 
-*Drafted at the VX-678 + VX-633 close (her standing word covers this release's notes; her rewrite welcome any time). One line per bullet.*
-
 ## A new book comes with Variorum
 
 - Machiavelli's *The Prince* is now the seeded book: every paragraph is English on the page with the 1532 Italian one fan away.

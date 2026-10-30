@@ -1,7 +1,5 @@
 # Variorum 0.10.6
 
-*Drafted at the VX-677 close (her release amendment covers this release; her rewrite welcome any time). One line per bullet.*
-
 ## The editor holds its ground
 
 - An edit arriving from outside the pane you're writing in — an AI client, another window, a restore — now ends your live session there cleanly instead of being overwritten by your next keystroke.
