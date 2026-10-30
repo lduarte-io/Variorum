@@ -11,7 +11,9 @@
 #   0. preflight   clean tree (a release is ONE commit's build) · ZERO Variorum instances (pgrep, by PATH)
 #                  · the Sparkle tools verified by digest · the notary credential answers · this host may
 #                  script Finder (the DMG window's layout — U3-A) · the version's RELEASE NOTES exist
-#                  (U3-A: release mode REFUSES without them; a walk build may lack them) · release mode:
+#                  (U3-A: release mode REFUSES without them; a walk build may lack them) and carry NO
+#                  PROCESS TEXT (VX-708, notes-guard.sh's one shape: public copy — no ticket ids, no
+#                  draft markers) · release mode:
 #                  the version is unpublished (no local feed copy, and dl.stargazing.tech answers 404)
 #   1. stamp       MARKETING_VERSION = --version · CURRENT_PROJECT_VERSION = `git rev-list --count HEAD`
 #                  (R-13r-6's number; command-line overrides, never a build configuration). Since U3-A the
@@ -52,6 +54,7 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "${HERE}/../.." && pwd)"
+source "${HERE}/notes-guard.sh"   # VX-708: notes_carry_process_text — the one public-copy shape
 RELEASES="${VARIORUM_RELEASES_DIR:-${HOME}/Library/Developer/Variorum/Releases}"
 NOTARY_PROFILE="VariorumNotary"
 DMG_HOST_PREFIX="https://dl.stargazing.tech/variorum/"
@@ -107,10 +110,11 @@ NOTES_SRC="${REPO}/App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-${VERSIO
 if [ -s "$NOTES_SRC" ]; then
   say "release notes: ${NOTES_SRC#"${REPO}/"}"
   # VX-708: the notes file is PUBLIC COPY — the in-app What's New sheet and the appcast's update alert
-  # both render it verbatim. No ticket id and no draft marker may ship; anything addressed to HER rides
-  # the handoff, never this file. Refused HERE, before the archive and an hour of notarization.
-  if grep -qE '(VX|VM)-[0-9]|[Dd]rafted' "$NOTES_SRC"; then
-    refuse "ReleaseNotes-${VERSION}.md carries process text (a ticket id or a draft marker): the file is public copy — move any note-to-her into the handoff (VX-708)"
+  # both render it verbatim. No ticket id, draft marker or process line may ship; anything addressed to
+  # HER rides the handoff, never this file. The one shape lives in notes-guard.sh (make-appcast.sh
+  # refuses it too, on its separable road). Refused HERE, before the archive and an hour of notarization.
+  if notes_carry_process_text "$NOTES_SRC"; then
+    refuse "ReleaseNotes-${VERSION}.md carries process text (a ticket id or a draft/process marker): the file is public copy — move any note-to-her into the handoff (VX-708)"
   fi
 elif [ "$MODE" = release ]; then
   refuse "no release notes for ${VERSION}: write App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-${VERSION}.md and commit it (What's New and the appcast both read it)"
