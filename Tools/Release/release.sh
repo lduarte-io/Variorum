@@ -106,6 +106,12 @@ say "this host may script Finder (the DMG window's layout)"
 NOTES_SRC="${REPO}/App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-${VERSION}.md"
 if [ -s "$NOTES_SRC" ]; then
   say "release notes: ${NOTES_SRC#"${REPO}/"}"
+  # VX-708: the notes file is PUBLIC COPY — the in-app What's New sheet and the appcast's update alert
+  # both render it verbatim. No ticket id and no draft marker may ship; anything addressed to HER rides
+  # the handoff, never this file. Refused HERE, before the archive and an hour of notarization.
+  if grep -qE '(VX|VM)-[0-9]|[Dd]rafted' "$NOTES_SRC"; then
+    refuse "ReleaseNotes-${VERSION}.md carries process text (a ticket id or a draft marker): the file is public copy — move any note-to-her into the handoff (VX-708)"
+  fi
 elif [ "$MODE" = release ]; then
   refuse "no release notes for ${VERSION}: write App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes-${VERSION}.md and commit it (What's New and the appcast both read it)"
 else

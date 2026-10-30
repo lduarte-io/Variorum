@@ -121,6 +121,11 @@ fi
 NOTES_NAME="Variorum-${VERSION}.md"
 if [ -n "$NOTES" ]; then
   [ -s "$NOTES" ] || refuse "no such notes file (or empty): ${NOTES}"
+  # VX-708: the notes are embedded verbatim as the item's public description — no ticket id, no draft
+  # marker (release.sh refuses the same shape earlier; this covers the separable appcast-only road).
+  if [ "$MODE" = release ] && grep -qE '(VX|VM)-[0-9]|[Dd]rafted' "$NOTES"; then
+    refuse "${NOTES} carries process text (a ticket id or a draft marker): release notes are public copy (VX-708)"
+  fi
   if [ -e "${FEED}/${NOTES_NAME}" ]; then
     cmp -s "$NOTES" "${FEED}/${NOTES_NAME}" || refuse "${FEED}/${NOTES_NAME} already exists with DIFFERENT text — a published item's notes change only by a deliberate hand edit of that copy"
   else
