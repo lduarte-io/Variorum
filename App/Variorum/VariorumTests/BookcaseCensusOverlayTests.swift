@@ -107,8 +107,11 @@ struct BookcaseCensusOverlayTests {
             // own inset — a dropdown, never a panel over the masthead (the
             // first walk of the fix found it drawn ABOVE the strip: the push
             // half of this pin was green while the face was wrong).
-            let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey))
-            let panel = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey),
+            // VX-292 U4 (A JUSTIFIED EDIT — the U4 stage window's finding): the reserved
+            // keys are read SESSION-SCOPED, so the test host's own Bookcase (the dev-store
+            // app's live window) can never answer for this pin's board.
+            let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey, in: session))
+            let panel = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey, in: session),
                                      "the open panel recorded its frame")
             // JUSTIFIED EDIT (librarywalkpolish VR-115, R-LWP-1 amended): the
             // panel is now the ONE masthead popover, SEATED UNDER № (its rows'

@@ -184,6 +184,11 @@ struct TourOfferCard: View {
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    #if DEBUG
+    /// This card's own name in its oracle (the 18k C4 rule: the registrant
+    /// names itself, and its teardown clears only what it still owns).
+    @State private var oracleOwner = UUID()
+    #endif
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -239,11 +244,11 @@ struct TourOfferCard: View {
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
         #if DEBUG
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-            TourOfferCardOracle.cardFrame = $0
+            TourOfferCardOracle.recordFrame($0, for: model, owner: oracleOwner)
         }
-        .onAppear { TourOfferCardOracle.drawn = line }
-        .onChange(of: line) { _, now in TourOfferCardOracle.drawn = now }
-        .onDisappear { TourOfferCardOracle.forget() }
+        .onAppear { TourOfferCardOracle.record(line, for: model, owner: oracleOwner) }
+        .onChange(of: line) { _, now in TourOfferCardOracle.record(now, for: model, owner: oracleOwner) }
+        .onDisappear { TourOfferCardOracle.release(owner: oracleOwner) }
         #endif
         // The board's own gutter (the shelf listing's and the words card's).
         .padding(.horizontal, 28)
@@ -295,16 +300,48 @@ struct TourOfferCard: View {
 
 #if DEBUG
 /// What the offer card last DREW and where its paper sat (`.global`) — the
-/// chrome pins' oracle (`TourOfferCardTests`). One card per process is
-/// enough for the pins (each mounts one Bookcase).
+/// chrome pins' oracle (`TourOfferCardTests`, `TourEntryTests`).
+///
+/// **Scoped by the card's MODEL, owned by the card** (VX-292 U4, the U4 stage
+/// window's finding): the test host IS the dev-store app, and its own window
+/// draws the app delegate's card on its own Bookcase whenever the dev store's
+/// record is unset — a process-global slot would let that live card answer a
+/// pin's read. A pin builds its own `TourOfferModel`, which no other world can
+/// share (the 13u2 UNIT E rule — scope by an object the pin holds), and reads
+/// by it; within a model the C4 rule stands (the most recent card answers,
+/// and a card's teardown takes only its own entry).
 @MainActor
 enum TourOfferCardOracle {
-    static var drawn: TourOffer.Line?
-    static var cardFrame: CGRect?
+    private static var drawnStore = OwnedRegistrations<ObjectIdentifier, TourOffer.Line>()
+    private static var frameStore = OwnedRegistrations<ObjectIdentifier, CGRect>()
 
-    static func forget() {
-        drawn = nil
-        cardFrame = nil
+    /// What `model`'s card is drawing now (nil: no card of `model` in a band).
+    static func drawn(for model: TourOfferModel) -> TourOffer.Line? {
+        drawnStore[ObjectIdentifier(model)]
+    }
+
+    /// Where `model`'s card's paper sits (nil: no card of `model` in a band).
+    static func cardFrame(for model: TourOfferModel) -> CGRect? {
+        frameStore[ObjectIdentifier(model)]
+    }
+
+    static func record(_ line: TourOffer.Line, for model: TourOfferModel, owner: UUID) {
+        drawnStore.publish(line, for: ObjectIdentifier(model), owner: owner)
+    }
+
+    static func recordFrame(_ frame: CGRect, for model: TourOfferModel, owner: UUID) {
+        frameStore.publish(frame, for: ObjectIdentifier(model), owner: owner)
+    }
+
+    static func release(owner: UUID) {
+        drawnStore.release(owner: owner)
+        frameStore.release(owner: owner)
+    }
+
+    /// A pin's door: start from empty.
+    static func forgetAll() {
+        drawnStore.forgetAll()
+        frameStore.forgetAll()
     }
 }
 #endif

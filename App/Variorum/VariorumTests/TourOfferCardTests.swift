@@ -313,9 +313,18 @@ struct TourOfferCardTests {
                 let offer = TourOfferModel(defaults: defaults, helpRoadDuration: .milliseconds(300))
                 var tourAsked = 0
                 let card = TourOfferCard(model: offer) { tourAsked += 1 }
-                BookcaseRowOracle.forgetAll()
-                TourOfferCardOracle.forget()
-                WordsCardStandIn.frame = nil
+                // VX-292 U4 — the U4 window's finding: every read below is
+                // SCOPED to this world (the board's session, the card's model,
+                // the stand-in's own id), so the test host's own window — the
+                // dev-store app's Bookcase, live while the suite runs — can
+                // never answer for this pin's board.
+                let standIn = WordsCardStandIn(id: UUID())
+                @MainActor func stripFrame() -> CGRect? { BookcaseRowOracle.frame(BookcaseRowOracle.stripKey, in: session) }
+                @MainActor func entryFrame() -> CGRect? { BookcaseRowOracle.frame(BookcaseRowOracle.entryKey, in: session) }
+                @MainActor func hintFrame() -> CGRect? { BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey, in: session) }
+                @MainActor func drawn() -> TourOffer.Line? { TourOfferCardOracle.drawn(for: offer) }
+                @MainActor func cardFrame() -> CGRect? { TourOfferCardOracle.cardFrame(for: offer) }
+                @MainActor func wordsFrame() -> CGRect? { WordsCardStandIn.frames[standIn.id] }
 
                 let window = NSWindow(
                     contentRect: NSRect(x: 60, y: 60, width: 900, height: 640),
@@ -326,7 +335,7 @@ struct TourOfferCardTests {
                     readings: ReadingsViewModel(session: session),
                     onOpen: { _ in }, onTodaysEntry: {},
                     offerCard: AnyView(card),
-                    wordsBand: withWordsCard ? AnyView(WordsCardStandIn()) : nil))
+                    wordsBand: withWordsCard ? AnyView(standIn) : nil))
                 window.contentView = hosting
                 window.orderFrontRegardless()
                 defer {
@@ -335,19 +344,23 @@ struct TourOfferCardTests {
                 }
 
                 await settle(window, hosting) {
-                    TourOfferCardOracle.drawn == .offer
-                        && TourOfferCardOracle.cardFrame.map { $0.width > 100 } == true
-                        && (!withWordsCard || WordsCardStandIn.frame != nil)
-                        && BookcaseRowOracle.frame(BookcaseRowOracle.stripKey) != nil
-                        && BookcaseRowOracle.frame(BookcaseRowOracle.entryKey) != nil
-                        && BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey) != nil
+                    drawn() == .offer
+                        && cardFrame().map { $0.width > 100 } == true
+                        && (!withWordsCard || wordsFrame() != nil)
+                        && stripFrame() != nil && entryFrame() != nil && hintFrame() != nil
                 }
                 await settle(window, hosting, turns: 20) { false }
-                let paper = try #require(TourOfferCardOracle.cardFrame)
-                let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey))
-                let entry = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.entryKey))
-                let hint = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.hintBarKey))
+                let paper = try #require(cardFrame())
+                let strip = try #require(stripFrame())
+                let entry = try #require(entryFrame())
+                let hint = try #require(hintFrame())
                 let width = window.contentView?.bounds.width ?? 0
+                // Every frame is THIS window's: inside its content (the U4
+                // window's red bound a 1,009-pt entry in a 900-pt window).
+                for (name, frame) in [("card", paper), ("strip", strip), ("entry", entry), ("bar", hint)] {
+                    #expect(frame.minX >= -0.5 && frame.maxX <= width + 0.5,
+                            "the \(name)'s frame is this window's (\(frame), width \(width))")
+                }
 
                 // In the band: under the strip and the listing, over the entry.
                 #expect(paper.minY > strip.maxY, "under the strip (card \(paper), strip \(strip))")
@@ -362,7 +375,7 @@ struct TourOfferCardTests {
                         "nothing between the entry and the bottom bar (entry \(entry), bar \(hint))")
                 var words: CGRect?
                 if withWordsCard {
-                    let band = try #require(WordsCardStandIn.frame)
+                    let band = try #require(wordsFrame())
                     words = band
                     // P-292-13: the tour card ABOVE the words card, one band.
                     #expect(paper.maxY <= band.minY + 0.5,
@@ -381,16 +394,16 @@ struct TourOfferCardTests {
                 switch road {
                 case .no:
                     card.press(.no)
-                    await settle(window, hosting, turns: 60) { TourOfferCardOracle.drawn == .helpRoad }
+                    await settle(window, hosting, turns: 60) { drawn() == .helpRoad }
                     await settle(window, hosting, turns: 10) { false }
-                    #expect(TourOfferCardOracle.drawn == .helpRoad)
-                    let during = try #require(TourOfferCardOracle.cardFrame)
+                    #expect(drawn() == .helpRoad)
+                    let during = try #require(cardFrame())
                     #expect(abs(during.minY - paper.minY) < 0.5 && abs(during.height - paper.height) < 0.5,
                             "the swap keeps the card's frame (\(paper) → \(during))")
-                    let duringEntry = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.entryKey))
+                    let duringEntry = try #require(entryFrame())
                     #expect(abs(duringEntry.minY - entry.minY) < 0.5, "the swap moves nothing")
                     if let words {
-                        let duringWords = try #require(WordsCardStandIn.frame)
+                        let duringWords = try #require(wordsFrame())
                         #expect(abs(duringWords.minY - words.minY) < 0.5, "nor the words card")
                     }
                     await settle(window, hosting, turns: 120) { offer.phase == .retired }
@@ -401,21 +414,21 @@ struct TourOfferCardTests {
                     // The tour's entry (`RootView.startTour`) steps the card
                     // aside; the tour's end retires it (`tourDoors`).
                     offer.tourStarted()
-                    await settle(window, hosting, turns: 120) { TourOfferCardOracle.drawn == nil }
+                    await settle(window, hosting, turns: 120) { drawn() == nil }
                     offer.tourEnded(completed: true)
                     #expect(offer.phase == .retired)
                 }
 
                 // The card leaves the band, and nothing under it moves.
-                await settle(window, hosting, turns: 120) { TourOfferCardOracle.drawn == nil }
+                await settle(window, hosting, turns: 120) { drawn() == nil }
                 await settle(window, hosting, turns: 40) { false }
-                #expect(TourOfferCardOracle.drawn == nil, "the card has left the band")
-                #expect(TourOfferCardOracle.cardFrame == nil)
-                let afterEntry = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.entryKey))
+                #expect(drawn() == nil, "the card has left the band")
+                #expect(cardFrame() == nil)
+                let afterEntry = try #require(entryFrame())
                 #expect(abs(afterEntry.minY - entry.minY) < 0.5,
                         "its leaving moves nothing: the entry is where it was")
                 if let words {
-                    let afterWords = try #require(WordsCardStandIn.frame)
+                    let afterWords = try #require(wordsFrame())
                     #expect(abs(afterWords.minY - words.minY) < 0.5,
                             "nor the words card under it (\(words) → \(afterWords))")
                 }
@@ -430,16 +443,19 @@ struct TourOfferCardTests {
 #if DEBUG
 /// A stand-in for the words card in the band's slot: a card's height inside
 /// the words card's own gutter and paddings (`WordsBandCard`: 28 pt sides, 4
-/// above, 8 below), reporting where the slot drew it.
+/// above, 8 below), reporting where the slot drew it — under ITS OWN id, so a
+/// closed window's late layout pass can never answer for a live one.
 private struct WordsCardStandIn: View {
-    @MainActor static var frame: CGRect?
+    @MainActor static var frames: [UUID: CGRect] = [:]
+
+    let id: UUID
 
     var body: some View {
         Color.clear
             .frame(maxWidth: .infinity)
             .frame(height: 56)
-            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                WordsCardStandIn.frame = $0
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { [id] frame in
+                WordsCardStandIn.frames[id] = frame
             }
             .padding(.horizontal, 28)
             .padding(.top, 4)

@@ -1234,7 +1234,6 @@ struct TourEntryTests {
             let guide = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
             let offer = TourOfferModel(defaults: defaults)
             let router = ShellRouter()
-            TourOfferCardOracle.forget()
 
             let window = NSWindow(
                 contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
@@ -1256,9 +1255,10 @@ struct TourEntryTests {
             // the old pin moved): a never-answered device's REAL Bookcase
             // draws the offer CARD in its band (the shell hands it; the caret
             // stays in the quick entry beneath it, as just seen), and the
-            // tour's start steps it aside (below).
-            await settle(window, hosting) { TourOfferCardOracle.drawn == .offer }
-            #expect(TourOfferCardOracle.drawn == .offer,
+            // tour's start steps it aside (below). Read by THIS world's model
+            // (the U4 window's finding: the host's own card never answers).
+            await settle(window, hosting) { TourOfferCardOracle.drawn(for: offer) == .offer }
+            #expect(TourOfferCardOracle.drawn(for: offer) == .offer,
                     "the real shell's Bookcase draws the offer card")
 
             await endAnyStaleTour(window, hosting)
@@ -1271,8 +1271,9 @@ struct TourEntryTests {
             #expect(engine.state.fieldGuideID == guide.id)
             #expect(offer.phase == .touring, "the card steps aside; nothing is remembered yet")
             #expect(defaults.string(forKey: TourOfferModel.recordKey) == nil)
-            await settle(window, hosting) { TourOfferCardOracle.drawn == nil }
-            #expect(TourOfferCardOracle.drawn == nil, "the card has left the band while she tours")
+            await settle(window, hosting) { TourOfferCardOracle.drawn(for: offer) == nil }
+            #expect(TourOfferCardOracle.drawn(for: offer) == nil,
+                    "the card has left the band while she tours")
             #expect(!(window.firstResponder is NSTextView),
                     "W-U1a-1: the quick entry's caret is released (\(String(describing: window.firstResponder)))")
 

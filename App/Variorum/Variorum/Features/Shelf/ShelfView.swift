@@ -194,7 +194,7 @@ struct ShelfView: View {
                 .tourKeepClear()
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, owner: oracleOwner)
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.stripKey, $0, in: session, owner: oracleOwner)
                 }
                 #endif
             ScrollView {
@@ -261,14 +261,14 @@ struct ShelfView: View {
             entryBar
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.entryKey, $0, owner: oracleOwner)
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.entryKey, $0, in: session, owner: oracleOwner)
                 }
                 #endif
             hintBar
                 .tourKeepClear()
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintBarKey, $0, owner: oracleOwner)
+                    BookcaseRowOracle.recordFrame(BookcaseRowOracle.hintBarKey, $0, in: session, owner: oracleOwner)
                 }
                 #endif
         }
@@ -293,7 +293,7 @@ struct ShelfView: View {
                             #if DEBUG
                             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                                 BookcaseRowOracle.recordFrame(
-                                    BookcaseRowOracle.censusPanelKey, $0, owner: oracleOwner)
+                                    BookcaseRowOracle.censusPanelKey, $0, in: session, owner: oracleOwner)
                             }
                             #endif
                             .padding(.leading, max(0, rect.minX - Self.popoverTextInset))
@@ -305,7 +305,7 @@ struct ShelfView: View {
                             #if DEBUG
                             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                                 BookcaseRowOracle.recordFrame(
-                                    BookcaseRowOracle.orderPanelKey, $0, owner: oracleOwner)
+                                    BookcaseRowOracle.orderPanelKey, $0, in: session, owner: oracleOwner)
                             }
                             #endif
                             .padding(.leading, max(0, rect.minX + Self.orderLabelInset - Self.popoverTextInset))
@@ -1245,13 +1245,42 @@ enum BookcaseRowOracle {
         frames.publish(frame, for: readingID, owner: owner)
     }
 
+    /// **VX-292 U4 (the U4 stage window's finding, 2026-10-30) — THE RESERVED
+    /// KEYS ARE SCOPED BY THE BOARD'S SESSION.** The strip, the quick entry,
+    /// the bottom bar and the two masthead panels are CONSTANT keys every
+    /// Bookcase in the process writes — and the test host IS the dev-store
+    /// app, whose own window opens on its own Bookcase while a suite runs.
+    /// Its board published its entry frame AFTER a pin's `forgetAll()`
+    /// (the host finishing its launch during the run's first mounted test),
+    /// and the C4 rule's answer for a key is its most recent registrant, so
+    /// the pin read the HOST's entry (231, 706, 1009, 68 — a 1,240-pt window
+    /// with its sidebar) inside its own 900-pt window. That is the residual
+    /// `DebugOracleOwnership` names ("two LIVE owners in two different TESTS
+    /// on one unscoped slot"), and 13u2 UNIT E's rule closes it: scope the
+    /// slot by the `AppSession` the board belongs to (`debugProbeScope`), a
+    /// thing the pin already holds and no other world can share. Reading ids
+    /// stay subject-keyed (`recordFrame(_:_:owner:)` above): the host's ids
+    /// are random, so its rows cannot meet a test world's.
+    static func frame(_ key: String, in session: AppSession) -> CGRect? {
+        frames.current[scoped(key, session)]
+    }
+
+    static func recordFrame(_ key: String, _ frame: CGRect, in session: AppSession, owner: UUID) {
+        frames.publish(frame, for: scoped(key, session), owner: owner)
+    }
+
+    private static func scoped(_ key: String, _ session: AppSession) -> String {
+        "\(session.debugProbeScope)\u{2016}\(key)"
+    }
+
     static func release(owner: UUID) {
         store.release(owner: owner)
         frames.release(owner: owner)
     }
 
     /// 17y B3 (r): the reserved keys the strip and the № panel record their
-    /// frames under (never a reading id — those are UUIDs).
+    /// frames under (never a reading id — those are UUIDs). Since VX-292 U4
+    /// they are written and read ONLY session-scoped (`frame(_:in:)`).
     static let stripKey = "\u{2116}strip"
     static let censusPanelKey = "\u{2116}panel"
     /// librarywalkpolish VR-115: the order popover's frame.

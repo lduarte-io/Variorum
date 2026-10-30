@@ -245,18 +245,21 @@ struct BookcaseMastheadPopoverTests {
             }
             await settle(150) { BookcaseRowOracle.frame(book.id) != nil }
             let row = try #require(BookcaseRowOracle.frame(book.id))
-            let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey))
+            // VX-292 U4 (A JUSTIFIED EDIT — the U4 stage window's finding): the reserved
+            // keys are read SESSION-SCOPED, so the test host's own Bookcase (the dev-store
+            // app's live window) can never answer for this pin's board.
+            let strip = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.stripKey, in: session))
 
             model.toggleCensus()
-            await settle { BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey) != nil }
-            let census = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey))
+            await settle { BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey, in: session) != nil }
+            let census = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.censusPanelKey, in: session))
             #expect(census.minY > strip.minY + 10 && census.minY <= strip.maxY + 1.5,
                     "the census hangs under its control, inside the strip's foot (strip \(strip), panel \(census))")
             #expect(census.maxX <= strip.maxX, "it stays on the board")
 
             model.toggleOrder()
-            await settle { BookcaseRowOracle.frame(BookcaseRowOracle.orderPanelKey) != nil }
-            let order = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.orderPanelKey))
+            await settle { BookcaseRowOracle.frame(BookcaseRowOracle.orderPanelKey, in: session) != nil }
+            let order = try #require(BookcaseRowOracle.frame(BookcaseRowOracle.orderPanelKey, in: session))
             #expect(!model.censusOpen)
             #expect(order.minY > strip.minY + 10 && order.minY <= strip.maxY + 1.5,
                     "the order popover hangs under order ▾ (strip \(strip), panel \(order))")
