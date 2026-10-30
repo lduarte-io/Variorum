@@ -88,6 +88,18 @@ The pieces, each its own commit:
 
 OUT OF SCOPE: the app icon (already sea-glass), the voices, the tour (other units'), any migration or `Sync/` change (`theme_palette` is a synced setting VALUE — adding an enum case is not a schema event; touch no DDL, no `Sources/VariorumCore/Sync/`).
 
+## U1 STAGE WINDOW + ACCEPTANCE RECORD (the orchestrator, 2026-10-30 02:15–02:31, claim vx-292-u1 — U1 CLOSED)
+
+- **Red-on-old** (TutorialSeeder + TourEngine reverted to 3824aa26b; 44 tests/6 suites): the run failed with 21 issues — **TourEntryTests · TutorialBooksLessonTests · TutorialCurrencyTests · HelpMenuNamingTests all RED as claimed.** Two greens, each with its mechanism: TourScriptTests (structural — copy and pin travel in one unreverted file the new engine references; no independent old side exists) and TutorialBooksRitualTests (its red-on-old axis is the test WORLD's seeding order, which lives inside the test file — the pin and its fixture move together; the lesson pins carry the prose guarantee and did red).
+- **The green gate** ("Test run with 144 tests in 21 suites", first-ever run of the Mac pins): ONE real failure, `lessonOneTheThreeKinds` — a PIN bug: the expectation interpolated the book's name after "the", demanding "the the prince's"; the prose rightly reads "one of the prince's notes" (the name carries its own article). Orchestrator adjudication fix **1c2af1c68** (pin-only); TutorialBooksLessonTests re-ran 13/13. The other 20 suites passed at the expected counts; the log's two "skipped" lines are appintents metadata (the 13s pattern).
+- **The walk** (dev store, Debug @41a5b0f6f): steps 1–4 dark + steps 1–2 light ALL CORRECT — the Prince card verbatim with the ring on its row; step 3's ring lit on XVII the moment the row came on screen (the re-anchoring rule live); click-in landed Write with ⑂2 badges everywhere and ⑂3 on the loved-or-feared block; light tokens clean; Help ▸ Take the Onboarding Tutorial restarted from step 1 after an end. The store was a HELD RESTOREE with no books — the Prince restored via its Help door first (landed Welcome, owned; it listed Unshelved for a beat while the arrangement finished — self-resolved). **Walk lore:** the restore receipt's toast sits exactly over the offer line's spot; a click meant for "yes" took the toast's open road into chapter I (recovered; capture 03). **Record-only:** step 4's corner card floats over the prose column mid-page (cosmetic, re-eye at U3's walk); XVII below the Outline fold until U2's scroll-into-view (accepted, P-292-1). Dev-store posture restored (dark room, quit, flag back to pre-walk "completed", defaults diff named: 2 caret-memory keys added, 7 routine counters changed). Captures: the session scratchpad's `vx292-u1-walk/` (13 frames; deleted at closeout per the standing rule).
+
+## ABSORBED MID-EFFORT (vx-105's ladder gifts, 2026-10-30 — both inside the mechanical-accuracy mandate; PROVISIONAL absorb, hers to eject)
+
+- **VX-712 (Medium, Bug)** — the guide's "getting around" lesson claims ⌘2/⌘1 roads that REFUSE on the book surface the guide is read from. Absorbed into U3 as a REWORD-ONLY fix (roads that work from where the lesson is read); the product question (should "Open Takes mode" over a book open the note?) stays vx-105's QUESTIONS entry, untouched here.
+- **VX-713 (Low, Wording)** — `TourScript.endAside`'s "a short welcome note" beside her ~1,800-word readme: the one-word trim rides U3's end-card pass, keeping the sentence true.
+- **Rebase note:** vx-105's fix round rewords lesson 1's blocks 5–7 once more before its merge — the second merger's lesson-1 re-grep stays owed.
+
 ## OVERLAP / COORDINATION
 
 - **VX-105** (her readme/letter seed session, running now): shares TutorialSeeder's first lesson, the Help menu registry, the first-open band. Closeouts serialize via `oct29coordinator`; the later merge rebases and re-greps the shared seams (the three stale labels, the end card's readme aside — the aside stays TRUE once VX-105 lands "readme").
@@ -101,7 +113,7 @@ OUT OF SCOPE: the app icon (already sea-glass), the voices, the tour (other unit
 | # | item | status |
 |---|---|---|
 | 1 | Sitting questions Q-292-1…4 | ASKED 2026-10-30 — answers land here |
-| 2 | U1 Prince sweep + stale labels | NOT STARTED |
+| 2 | U1 Prince sweep + stale labels | **CLOSED 2026-10-30** — built @41a5b0f6f, window green (144/21 after the 1c2af1c68 pin fix), red-on-old verdicts recorded, walk accepted |
 | 3 | U2 always-goes-well machinery | NOT STARTED (mechanism pends Q-292-2) |
 | 4 | U3 more stops | NOT STARTED (shape pends her markup) |
 | 5 | U4 offer card (VX-559) | NOT STARTED (doors pend Q-292-3) |
