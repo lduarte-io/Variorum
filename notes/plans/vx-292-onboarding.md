@@ -100,6 +100,18 @@ OUT OF SCOPE: the app icon (already sea-glass), the voices, the tour (other unit
 - **VX-713 (Low, Wording)** — `TourScript.endAside`'s "a short welcome note" beside her ~1,800-word readme: the one-word trim rides U3's end-card pass, keeping the sentence true.
 - **Rebase note:** vx-105's fix round rewords lesson 1's blocks 5–7 once more before its merge — the second merger's lesson-1 re-grep stays owed.
 
+### U2 BRIEF — the tour always goes well: driving, scroll-into-view, the missing-book restore (R-292-11; SPAWN-READY)
+
+**Seat, Pro rules, discipline, fences: EXACTLY as the U1 BRIEF's header (same worktree/branch; commit per piece; LIVE STATUS in a "## U2 RECORD" section here; READY-FOR-STAGE with suite TYPE names + expected executed counts).** Required reading beyond the U1 header's: `Sources/VariorumCore/Domain/Tour.swift` WHOLE (the reducer, Facts, Effect, ringGroups — your changes live here first), `TourEngine.swift` + `TourOverlay.swift` (the doors, the probe), `notes/plans/fixes/vx-562-outline-follow.md` and SurfaceContracts §The Bookcase and books' landing lines (VX-630/VX-680 — the REVEAL-ROAD precedents: the book surfaces already know how to bring a row/block on screen through one landing), and `notes/TEXTKIT2_NOTES.md` IF anything editor-adjacent is touched (expected: NOTHING — reveals route through existing landing roads, never the editor seam; a reveal that would need an editor-seam change is a STOP-and-report).
+
+The pieces, each its own commit:
+1. **The tutorial wins, as a reducer rule.** When Facts report the step's own target open in a MODE the step does not expect (the mode-memory fight — e.g. the toured chapter opens in Takes where step 4 teaches Write), the pure rule emits a corrective `Effect.navigate` to the expected place+mode; the engine's doors perform it through the existing landing roads (which already force mode — the BookOpenDoor precedent). The rule is data in `Tour.swift` (per-step expected place/mode), pinned headlessly in `TourWalkTests` (the hostile cases: remembered Takes, remembered Read, a re-run after completion, wandering mid-correction — wandering must NOT trigger corrections; only the step's own target in a wrong mode does, or the off-target tolerance would die). Her words are the spec: *"if you were in takes on some chapter in the prince where the tutorial expects you to be in write, the tutorial wins."* Corrections never ERASE state (no memory writes beyond what the landing itself does).
+2. **Scroll-into-view for rung rows** (the old P-U2-14, promoted to MUST by R-292-11): a step whose ring's first candidate is REGISTERED but off screen brings it on screen — TRACE the real reveal road per rung surface first (the Outline's landing/reveal, the Bookcase's row reveal) and route through those existing roads; say each resolution in the record BEFORE building it. The known case that must work: step 3's chapter XVII below the Outline fold on a default window (U1's walk record). A surface with no existing road is recorded, not improvised (the card-without-ring degradation stays its fallback).
+3. **The missing-book restore at tour start.** `startTour()` finding no seeded book (the landmarks' nil) runs the Prince's existing restore road first — the "yes"/Help press is the consent; the restore door's own receipt and undo posture kept exactly (trace, follow, don't invent). The tour starts with landmarks re-read after it. A refused or failed restore degrades exactly as today. KNOWN HAZARD from U1's walk record: the restore receipt's TOAST sits exactly over the offer line's band — say in the record what a tour-start restore does with its toast (the tour's cards must not fight it).
+4. **Record close** per the U1 shape (self-assessment, PROVISIONALs with alternatives, stage commands with suite TYPES + per-suite expected counts, full core `swift test` at the END).
+
+OUT OF SCOPE: new steps and copy (U3), the offer card (U4), `TourScript` wording, any `Sync/`, any editor-seam internals.
+
 ## OVERLAP / COORDINATION
 
 - **VX-105** (her readme/letter seed session, running now): shares TutorialSeeder's first lesson, the Help menu registry, the first-open band. Closeouts serialize via `oct29coordinator`; the later merge rebases and re-greps the shared seams (the three stale labels, the end card's readme aside — the aside stays TRUE once VX-105 lands "readme").
@@ -120,7 +132,7 @@ OUT OF SCOPE: the app icon (already sea-glass), the voices, the tour (other unit
 | 6 | VX-415 close as superseded by VX-559 | OWED at closeout |
 | 7 | Riders check (VX-71, VX-707, VX-343) | DECLINED (R-292-15: "no riders for now") — they stay on the board |
 | 8 | Release + site publish | AT HER WORD after merge |
-| 9 | U-THEME sea-glass preset + default flip (VX-710) | BUILT 2026-10-30 — READY-FOR-STAGE (Mac pins + red-on-old watch + the walk PENDING; see U-THEME RECORD) |
+| 9 | U-THEME sea-glass preset + default flip (VX-710) | **CLOSED 2026-10-30** — built @b55cddef0; window green (red-on-old exactly 3/16, gate 86/10 first pass); walk good (the unset dev store woke in sea glass; Classic restores the old look; search finds it; Terminal + Study, light + dark verified); her eye on P-292-4/5 in-app post-merge |
 | 10 | VX-105 boundary resolution (session-to-session, R-292-15) | IN FLIGHT — message sent, answer lands in OVERLAP / COORDINATION |
 
 ## U1 RECORD
