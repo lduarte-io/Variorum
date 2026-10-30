@@ -131,6 +131,24 @@ final class TourEngine {
         /// book that refuses is beyond the road's reach — the floor stands.
         /// Read only when it decides anything; true otherwise.
         var acceptsChapters: Bool = true
+        /// **Everything the road would do is undoing DELETIONS** (the VX-292
+        /// ladder's round-1 MAJOR, the reviewer's final call). The road is
+        /// all-or-nothing — whenever it runs it places EVERY absent shipped
+        /// title (the front-matter note included, which `isComplete` never
+        /// counts), re-members every live tagged stray (a chapter she
+        /// RELEASED), mints a fresh twin of every chapter she RENAMED away,
+        /// re-creates a part she deleted or renamed, and re-mints a reserved
+        /// tag she deleted. So case 2 runs only when every absent shipped
+        /// title was DELETED while this book held it (`Queries.
+        /// deletedMemberTitles` — a tombstoned note tied by a tombstoned
+        /// member row, no stamp equality), none is a live stray, its part is
+        /// live by name, and the reserved tag is live. Anything else is an
+        /// edit of hers the road would undo — R-292-11's "her edits to the
+        /// Prince survive" — and the tour walks on the floor. A PURGED deletion
+        /// leaves no evidence and mends nothing (the recorded floor). Read only
+        /// when it decides anything (broken props, an admitting, incomplete
+        /// book); true otherwise.
+        var roadOnlyUndoesDeletions: Bool = true
     }
 
     /// **Whether a tour's start runs the launch book's own restore road
@@ -160,14 +178,17 @@ final class TourEngine {
     ///    chapter standing with its fans emptied inside — it is NOT asked
     ///    (it would only refuse "already whole"): the tour walks on the
     ///    landmarks' fallback, its floor (the U2 RECORD). An intact or merely
-    ///    edited book is never touched.
+    ///    edited book is never touched: the road runs only when ALL it would do
+    ///    is undo deletions (`LaunchBookFacts.roadOnlyUndoesDeletions` — the
+    ///    ladder's round-1 MAJOR: a renamed or released chapter read as
+    ///    "missing", and the all-or-nothing road duplicated or re-membered it).
     nonisolated static func restoresLaunchBook(
         landmarks: Queries.TourLandmarks, wingID: String, store: LaunchBookFacts?
     ) -> Bool {
         guard wingID.isEmpty, let store else { return false }
         guard let seeded = landmarks.seededBookID else { return store.liveBookID == nil }
         return landmarks.seededBookPropsBroken && store.liveBookID == seeded
-            && !store.isComplete && store.acceptsChapters
+            && !store.isComplete && store.acceptsChapters && store.roadOnlyUndoesDeletions
     }
 
     /// The store's facts for `restoresLaunchBook` (nil: unreadable — no
@@ -182,6 +203,7 @@ final class TourEngine {
         }) else { return nil }
         var complete = true
         var accepts = true
+        var undoes = true
         if landmarks.seededBookPropsBroken, let bookID = found.bookID {
             // The door's own admission gate, run where every operation runs
             // (the serialized runner — off the main thread, P2).
@@ -191,11 +213,51 @@ final class TourEngine {
             if accepts, let stories = try? await Task.detached(priority: .utility, operation: {
                 try SampleLibrarySeeder.loadStories(for: .launchBook)
             }).value {
-                complete = found.isComplete(
-                    for: SampleLibrarySeeder.expectedTitles(for: .launchBook, stories: stories))
+                let expected = SampleLibrarySeeder.expectedTitles(for: .launchBook, stories: stories)
+                complete = found.isComplete(for: expected)
+                if !complete {
+                    // The layered facts (the W7 lesson): each read only when
+                    // the one before it still leaves the gate open — the
+                    // evidence last, and only for an admitting, incomplete book.
+                    let deleted = try? await session.database.read { db in
+                        try Queries.deletedMemberTitles(db, readingID: bookID)
+                    }
+                    undoes = deleted.map {
+                        roadOnlyUndoesDeletions(found: found, expected: expected, deletedTitles: $0)
+                    } ?? false
+                }
             }
         }
-        return LaunchBookFacts(liveBookID: found.bookID, isComplete: complete, acceptsChapters: accepts)
+        return LaunchBookFacts(
+            liveBookID: found.bookID, isComplete: complete, acceptsChapters: accepts,
+            roadOnlyUndoesDeletions: undoes)
+    }
+
+    /// **The road's whole effect, judged** (the ladder's round-1 MAJOR, the
+    /// reviewer's final call) — pure over the road's own discovery, so the
+    /// pins read exactly what the start decides. Every title the road would
+    /// PLACE is a shipped title absent from the book's live members —
+    /// `expectedTitles` plus the front-matter note (the seed's skeleton turn
+    /// mints it whenever `!present.contains(frontTitle)`, which `isComplete`
+    /// never counts). Each must have been DELETED while the book held it, must
+    /// not be a live tagged stray (the road would RE-MEMBER a chapter she
+    /// released), and its part must be live by name (the road would re-create
+    /// a part she deleted, or a twin of one she renamed — a trace finding
+    /// beyond the call's letter, in its direction). The reserved tag must be
+    /// live (the road would re-mint a tag she deleted).
+    nonisolated static func roadOnlyUndoesDeletions(
+        found: SampleLibrarySeeder.Existing, expected: [String], deletedTitles: Set<String>
+    ) -> Bool {
+        let book = SampleLibrarySeeder.Book.launchBook
+        guard found.tagID != nil else { return false }
+        let absent = (expected + [book.frontMatterTitle]).filter { !found.presentTitles.contains($0) }
+        return absent.allSatisfy { title in
+            let part = title == book.frontMatterTitle
+                ? book.frontMatterChapter : book.grouping.chapter(for: title)
+            return deletedTitles.contains(title)
+                && found.strayNoteIDsByTitle[title] == nil
+                && found.chapterIDsByName[part] != nil
+        }
     }
 
     // MARK: - Events

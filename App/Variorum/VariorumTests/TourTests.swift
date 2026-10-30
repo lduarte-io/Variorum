@@ -907,10 +907,70 @@ struct TourEngineTests {
         #expect(!restores(marks("prince", broken: true),
                           Facts(liveBookID: "prince", isComplete: false, acceptsChapters: false)),
                 "a Finished, Sealed or full book is left as it is: the floor")
+        // The ladder's round-1 MAJOR: the road is all-or-nothing, so it runs
+        // only when ALL it would do is undo deletions — a renamed, released or
+        // mixed absence is an edit of hers it would undo: the floor.
+        #expect(!restores(marks("prince", broken: true),
+                          Facts(liveBookID: "prince", isComplete: false, acceptsChapters: true,
+                                roadOnlyUndoesDeletions: false)),
+                "a rename, a release or a mixed absence: never touched")
+        #expect(restores(marks("prince", broken: true),
+                         Facts(liveBookID: "prince", isComplete: false, acceptsChapters: true,
+                               roadOnlyUndoesDeletions: true)),
+                "every absence a deletion: the mend")
         #expect(!restores(marks("prince", broken: true), wing: "wing-b",
                           Facts(liveBookID: "prince", isComplete: false)),
                 "a book in another wing is respected")
         #expect(!restores(marks(nil), nil), "an unreadable store attempts nothing")
+    }
+
+    /// **The ladder's round-1 MAJOR — the road's WHOLE effect, judged**
+    /// (`TourEngine.roadOnlyUndoesDeletions`, pure over the road's own
+    /// discovery). The road places every absent shipped title — the
+    /// front-matter note INCLUDED — re-members every live tagged stray,
+    /// re-creates a missing part and re-mints a deleted reserved tag; it may
+    /// run only when every absence was a DELETION. RED ON OLD by construction
+    /// (no such judgment: d370fd28b ran the road on any absence).
+    @Test func theRoadRunsOnlyWhenAllItWouldDoIsUndoDeletions() {
+        let xvii = SampleLibraryPrinceBook.lovedOrFearedChapterTitle
+        let first = "I. How many kinds of principalities there are"
+        let front = SampleLibrarySeeder.Book.launchBook.frontMatterTitle
+        let expected = [first, xvii]
+        func world(
+            present: Set<String>, strays: [String: String] = [:], tag: String? = "tag",
+            parts: Set<String> = ["types of principalities", "rulership, conduct, and virtue",
+                                  SampleLibrarySeeder.Book.launchBook.frontMatterChapter]
+        ) -> SampleLibrarySeeder.Existing {
+            var found = SampleLibrarySeeder.Existing()
+            found.bookID = "prince"
+            found.tagID = tag
+            found.presentTitles = present
+            found.strayNoteIDsByTitle = strays
+            found.chapterIDsByName = Dictionary(uniqueKeysWithValues: parts.map { ($0, "s-\($0)") })
+            return found
+        }
+        func undoes(_ found: SampleLibrarySeeder.Existing, deleted: Set<String>) -> Bool {
+            TourEngine.roadOnlyUndoesDeletions(found: found, expected: expected, deletedTitles: deleted)
+        }
+        let xviiGone = world(present: [first, front])
+        #expect(undoes(xviiGone, deleted: [xvii]), "XVII deleted: the mend")
+        #expect(!undoes(xviiGone, deleted: []), "XVII RENAMED away (or purged): no evidence, the floor")
+        #expect(!undoes(world(present: [first, front], strays: [xvii: "n"]), deleted: [xvii]),
+                "XVII RELEASED (a live tagged stray): the road would re-member it")
+        #expect(!undoes(world(present: [front]), deleted: [xvii]),
+                "MIXED: XVII deleted, chapter I renamed — the road would twin it")
+        #expect(undoes(world(present: [front]), deleted: [xvii, first]), "both deleted: the mend")
+        #expect(!undoes(world(present: [first, xvii]), deleted: []),
+                "the FRONT NOTE renamed away: the road would re-mint it")
+        #expect(undoes(world(present: [first]), deleted: [xvii, front]),
+                "the front note deleted with XVII: the mend")
+        #expect(!undoes(world(present: [first, front], tag: nil), deleted: [xvii]),
+                "the reserved tag deleted: the road would re-mint it")
+        #expect(!undoes(world(present: [first, front],
+                              parts: ["types of principalities",
+                                      SampleLibrarySeeder.Book.launchBook.frontMatterChapter]),
+                        deleted: [xvii]),
+                "XVII's part deleted or renamed: the road would re-create it")
     }
 
     /// VX-292 U2 (A-292-1/3): step 3's arrival in the seeded book reaches
@@ -1793,6 +1853,126 @@ struct TourEntryTests {
                     "nothing attempted, nothing said (\(String(describing: session.status.spoken?.text)))")
             #expect(try await db.read { try Queries.assembleReading($0, readingID: prince.id).count }
                     == membersBefore, "nothing minted into her Finished book")
+
+            engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
+        }
+        #endif
+    }
+
+    /// **The ladder's round-1 MAJOR, pin 1 — a RENAMED toured chapter is her
+    /// edit.** The real Prince, every fan intact, XVII retitled: its shipped
+    /// title is "missing" by exact title, so the props read broken — and the
+    /// all-or-nothing road would mint a TWIN XVII beside hers. The start
+    /// never asks: nothing minted, nothing said; the tour walks on the
+    /// fallback. RED ON OLD (d370fd28b..the fix): the road ran — "Restored
+    /// “the prince” — 1 chapter came back."
+    @Test func aRenamedTouredChapterIsHerEditAndNothingIsMinted() async throws {
+        try await editedPrinceWalk { ops, _, entries in
+            let xvii = try #require(entries.first { $0.title == TourScript.firstStoryTitle }?.postID)
+            try ops.renameContainer(xvii, title: "whether it is better to be loved or feared, my way")
+        }
+    }
+
+    /// **Pin 2 — a RELEASED toured chapter is her edit.** XVII released from
+    /// the book (live, bookless, still wearing the reserved tag): the road
+    /// would RE-MEMBER it (its stray rule). Nothing re-membered, nothing said.
+    /// RED ON OLD: the road re-membered it, with its receipt.
+    @Test func aReleasedTouredChapterStaysReleased() async throws {
+        try await editedPrinceWalk { ops, princeID, entries in
+            let xvii = try #require(entries.first { $0.title == TourScript.firstStoryTitle }?.postID)
+            _ = try ops.removePostFromReading(xvii, from: princeID)
+        }
+    }
+
+    /// **Pin 3 — MIXED: XVII deleted, another chapter renamed.** The deletion
+    /// alone would be mended (pin 5, the mend pin, stays green) — but the road
+    /// is all-or-nothing and would also twin the renamed chapter, so the start
+    /// never asks: the floor (the fallback rings a fanned chapter), nothing
+    /// minted, nothing said. RED ON OLD: both minted, the receipt said.
+    @Test func aDeletionBesideARenameIsLeftForTheFloor() async throws {
+        try await editedPrinceWalk { ops, _, entries in
+            let xvii = try #require(entries.first { $0.title == TourScript.firstStoryTitle }?.postID)
+            let first = try #require(entries.first { $0.title?.hasPrefix("I. ") == true }?.postID)
+            try ops.deleteContainer(xvii)
+            try ops.renameContainer(first, title: "my own first chapter")
+        }
+    }
+
+    /// The three pins' one walk: the REAL Prince seeded in memory through its
+    /// own road, her edit applied, the premises read through the start's own
+    /// functions (the props read broken; the book is incomplete and ADMITS —
+    /// so the whole-effect judgment alone stands between her edit and the
+    /// road), then a tour start that mints, re-members and says NOTHING.
+    private func editedPrinceWalk(
+        _ edit: @MainActor (Operations, String, [Queries.ReadingEntry]) throws -> Void
+    ) async throws {
+        #if DEBUG
+        let suite = "tour-edited-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            session.markSeededBook = { _ in }
+            session.status.dismissAfter = .seconds(600)
+            _ = try await SeededBookRestore.restore(session: session, book: .launchBook)
+            _ = try session.operations.createReading(name: TutorialSeeder.bookName, kind: .book)
+            let princeName = TourScript.seededBookName
+            let princeID = try #require(try await db.read { db in
+                try Queries.readings(db).first { $0.name == princeName && $0.deletedAt == nil }?.id
+            })
+            func members() async throws -> Set<String> {
+                Set(try await db.read { try Queries.assembleReading($0, readingID: princeID) }.map(\.postID))
+            }
+            let entries = try await db.read { try Queries.assembleReading($0, readingID: princeID) }
+            try edit(session.operations, princeID, entries)
+            let edited = try await members()
+
+            // The premises: broken props, an incomplete admitting book — and
+            // the whole-effect judgment says the road would undo her edit.
+            let marks = await TourEngine.landmarks(session: session)
+            #expect(marks.seededBookID == princeID && marks.seededBookPropsBroken,
+                    "the premise: the props read broken")
+            let facts = await TourEngine.launchBookFacts(session: session, landmarks: marks)
+            #expect(facts?.isComplete == false && facts?.acceptsChapters == true,
+                    "the premise: only the whole-effect judgment stands in the road's way")
+            #expect(facts?.roadOnlyUndoesDeletions == false, "her edit is not a deletion")
+            session.status.clear()
+
+            let offer = TourOfferModel(defaults: defaults)
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: RootView(
+                session: session, router: router, tourOffer: offer))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, turns: 40) { false }
+            session.status.clear()
+
+            await endAnyStaleTour(window, hosting)
+            router.tourRequested = true
+            await settle(window, hosting, turns: 1500) {
+                TourOracle.overlay?.state.seededBookID == princeID
+            }
+            let engine = try #require(TourOracle.overlay, "the tour started")
+            await settle(window, hosting, turns: 30) { false }
+            #expect(try await members() == edited, "nothing minted, nothing re-membered: her edit stands")
+            #expect(session.status.spoken == nil,
+                    "nothing attempted, nothing said (\(String(describing: session.status.spoken?.text)))")
+            #expect(engine.state.firstStoryID != nil, "the floor: the fallback rings a chapter")
 
             engine.endTour()
             await settle(window, hosting) { TourOracle.overlay == nil }
