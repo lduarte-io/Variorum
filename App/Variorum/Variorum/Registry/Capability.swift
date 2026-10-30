@@ -981,7 +981,8 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// tag, the retired arrangement step's shape behind an explicit door.
     case restoreClassicsGathering
     /// 13s-b U1a (R-13s-2/6/13): **the tour's ONE entry** — the first-open
-    /// offer line's "yes" (`.surface`) and Help ▸ Take the Tour (`.menuBar`,
+    /// offer's "yes" (`.surface` — the band card since VX-292 U4, the quiet
+    /// line before it) and Help ▸ Take the Onboarding Tutorial (`.menuBar`,
     /// piece 5). App scope; always available as an act — it starts the U2
     /// tour engine at step 1 (Q12: a mid-tour request starts over; no
     /// resume state exists).

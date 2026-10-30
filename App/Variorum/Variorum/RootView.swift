@@ -495,7 +495,7 @@ struct RootView: View {
             router.whatsNewRequested = false
         }
         // 13s-b U1a, piece 5 — Help ▸ Take the Tour: the same one entry the
-        // offer line's "yes" calls.
+        // offer card's "yes" calls (VX-292 U4).
         .onChange(of: router.tourRequested) { _, requested in
             guard requested else { return }
             router.tourRequested = false
@@ -1083,12 +1083,14 @@ struct RootView: View {
 
     // MARK: - The tour (13s-b U1a — R-13s-2/6/13; U2 builds the engine)
 
-    /// The offer line for the Bookcase's slot: a row exactly when the model
-    /// keeps one this process (`TourOfferModel.holdsRow` — an offer to make,
-    /// or one that retired since launch and keeps its height so nothing moves).
-    private var tourOfferLine: AnyView? {
-        guard let tourOffer, tourOffer.holdsRow else { return nil }
-        return AnyView(TourOfferLine(model: tourOffer, onTakeTour: startTour))
+    /// VX-292 U4 (VX-559; R-292-5/12) — the offer CARD for the Bookcase's
+    /// band: handed whenever the app's one model exists, the words card's
+    /// idiom — the card draws itself only while the rule has something to
+    /// say (`TourOffer.line(in:)`: the offer, then the help-road sentence),
+    /// which is exactly when the retired quiet line drew.
+    private var tourOfferCard: AnyView? {
+        guard let tourOffer else { return nil }
+        return AnyView(TourOfferCard(model: tourOffer, onTakeTour: startTour))
     }
 
     /// VX-307 U2b — the card above the quick entry for the Bookcase's band (the new road only): the card renders
@@ -1106,13 +1108,14 @@ struct RootView: View {
         return { TourEndLibraryModel(standing: standing) }
     }
 
-    /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and Help ▸ Take the
-    /// Tour (U1a piece 5, through `router.tourRequested`). 13s-b U2 fills it:
+    /// **THE TOUR'S ONE ENTRY** — the offer card's "yes" (VX-292 U4; the
+    /// quiet line's before it) and Help ▸ Take the Onboarding Tutorial (U1a
+    /// piece 5, through `router.tourRequested`). 13s-b U2 fills it:
     /// a start is ALWAYS step 1 (Q12 — a tour already running starts over; no
     /// resume), on the Bookcase, and the tour's layer releases the window's
     /// first responder the moment it arrives in the window (`TourOverlay` —
     /// the U1a walk's W-U1a-1: "yes" left the caret in the quick entry, where
-    /// a keystroke would mint a note). The line steps aside now; the engine
+    /// a keystroke would mint a note). The card steps aside now; the engine
     /// retires it at the end
     /// (`TourOfferModel.tourEnded(completed:)` — completed at the end card,
     /// ended by End tour before it, nothing at all if the app quits mid-way).
@@ -1373,9 +1376,10 @@ struct RootView: View {
                 onOpen: openHere,
                 onTodaysEntry: { openToday(in: pane) },
                 starDoor: starDoor, wings: wings,
-                // 13s-b U1a: the tour offer's row — built HERE (composition)
-                // and rendered by the Bookcase alone ("Bookcase only").
-                offerLine: tourOfferLine,
+                // VX-292 U4: the tour offer's CARD — built HERE (composition)
+                // and rendered by the Bookcase alone ("Bookcase only"), in
+                // its band above the words card.
+                offerCard: tourOfferCard,
                 wordsBand: wordsBand,
                 // VX-332: the Bookcase's quick entry stands down during a tour.
                 tourRunning: tourSlot.engine != nil,

@@ -1137,8 +1137,8 @@ struct EditorCommands: Commands {
                 .disabled(!canReachCreationTarget)
             // 13s-b U1a, piece 5 (R-13s-6/13 — "they can find it under
             // help"): the tour's standing door, beside the field guide's. Its
-            // name is the registry's verb, which the offer line's help-road
-            // sentence reads too (`TourOfferCopy.menuTitle`): "Tutorial" is
+            // name is the registry's verb, which the offer card's help-road
+            // sentence reads too (`TourOfferCopy.helpRoad`): "Tutorial" is
             // taken by the field guide's door one line up, so the tour's is
             // "Take the Tour" (PROVISIONAL P-U1a-9). A request the window
             // adopts, the What's New road (the tour runs over a window).

@@ -2,27 +2,29 @@ import Foundation
 
 /// **THE FIRST-OPEN TOUR OFFER'S LIFECYCLE** (13s-b U1a — her rulings
 /// R-13s-2, R-13s-6 and R-13s-13; mockup v5's "first open" and "not now"
-/// frames, `notes/plans/13s-mockups/onboarding-tour.html`).
+/// frames, `notes/plans/13s-mockups/onboarding-tour.html`; its face rebuilt
+/// at VX-292 U4 — VX-559, R-292-5 and R-292-12 — with this rule unchanged).
 ///
-/// One quiet line on the Bookcase, above the bottom bar: *"Welcome to
-/// Variorum. Take the tour?  yes · not now"*. "not now" swaps it, for a few
-/// seconds, to the sentence naming the Help menu's standing door, and then it
-/// is gone — **and it never comes back** (R-13s-13, her words: *"i think the
-/// tour offer just shouldn't come back - they can find it under help."*).
-/// "yes" starts the tour; COMPLETING or ENDING the tour retires the line too
-/// (the U2 brief). A tour abandoned by quitting mid-way retires nothing: the
+/// One card in the Bookcase's band, above the quick entry (13s-b's quiet
+/// line below the box until VX-292 U4): *"Welcome to Variorum."* and one
+/// sentence, doors *yes · no* (R-292-12: nothing else). "no" swaps it, for a
+/// few seconds, to the sentence naming the Help menu's standing door, and
+/// then it is gone — **and it never comes back** (R-13s-13, her words: *"i
+/// think the tour offer just shouldn't come back - they can find it under
+/// help."*). "yes" starts the tour; COMPLETING or ENDING the tour retires the
+/// offer too (the U2 brief). A tour abandoned by quitting mid-way retires nothing: the
 /// next launch offers again, and the tour starts from step 1 (Q12 — no resume
 /// state).
 ///
 /// Pure, so the rule is pinned headlessly; the app holds the one record and
-/// draws the line. The record is a LOCAL, per-device preference and never
+/// draws the card. The record is a LOCAL, per-device preference and never
 /// the store's: the offer is chrome, not document state, so it does not sync
 /// (PROVISIONAL — the U1a RECORD carries the alternative).
 public enum TourOffer {
     /// What the device remembers once the offer has been answered. Absent
-    /// means never answered; ANY present value retires the line.
+    /// means never answered; ANY present value retires the offer.
     public enum Record: String, Sendable, CaseIterable {
-        /// "not now".
+        /// "no" (the card's door; "not now" on the 13s line — the same record).
         case declined
         /// The tour ran to its end (U2's engine reports it).
         case completed
@@ -30,13 +32,13 @@ public enum TourOffer {
         case ended
     }
 
-    /// Where the line is in its life.
+    /// Where the offer is in its life.
     public enum Phase: Equatable, Sendable {
-        /// The offer itself: "Welcome to Variorum. Take the tour?  yes · not now".
+        /// The offer itself: the card's title, sentence and its yes · no.
         case offering
-        /// The few seconds after "not now": the sentence naming Help's door.
+        /// The few seconds after "no": the sentence naming Help's door.
         case helpRoad
-        /// A tour is running: the line steps aside (it is not offered to
+        /// A tour is running: the card steps aside (it is not offered to
         /// someone already taking it), and nothing is remembered yet.
         case touring
         /// Gone for good (R-13s-13 — absolute).
@@ -45,9 +47,11 @@ public enum TourOffer {
 
     /// What can happen to it.
     public enum Event: Equatable, Sendable {
-        /// The line's "not now".
+        /// The card's "no" (VX-292 U4 renamed the FACE's word from 13s's "not
+        /// now"; the event, its table and the record it writes are unchanged,
+        /// so every device's earlier answer holds).
         case notNow
-        /// The tour began — the line's "yes", or the Help menu's door.
+        /// The tour began — the card's "yes", or the Help menu's door.
         case tourStarted
         /// The help-road sentence has had its few seconds.
         case helpRoadElapsed
@@ -103,7 +107,7 @@ public enum TourOffer {
         case (.touring, .notNow), (.touring, .tourStarted), (.touring, .helpRoadElapsed):
             return Step(phase: .touring)
 
-        // A tour's end retires the line from wherever it stood, and says how.
+        // A tour's end retires the offer from wherever it stood, and says how.
         case (.offering, .tourEnded(let completed)),
              (.helpRoad, .tourEnded(let completed)),
              (.touring, .tourEnded(let completed)):
@@ -115,8 +119,8 @@ public enum TourOffer {
         }
     }
 
-    /// What the line SAYS in a phase: the offer, the help-road sentence, or
-    /// nothing at all.
+    /// What the offer SAYS in a phase: the offer, the help-road sentence, or
+    /// nothing at all (the card is then not in the band).
     public enum Line: Equatable, Sendable {
         case offer
         case helpRoad

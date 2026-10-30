@@ -24,7 +24,10 @@ struct HelpMenuNamingTests {
         #expect(CapabilityRegistry.capability(.restoreTutorial).verb == "Restore Field Guide\u{2026}")
         #expect(HelpMenuCopy.openFieldGuide == "Open the Field Guide")
         #expect(CapabilityRegistry.capability(.takeTour).verb == "Take the Onboarding Tutorial")
-        #expect(TourOfferCopy.helpRoad == "Run it any time from Help \u{25B8} Take the Onboarding Tutorial.")
+        // VX-292 U4 (R-292-5, her words: "if they choose no, just show 'this
+        // can always be started via help'") — the card's help line, re-worded
+        // with its door's name kept.
+        #expect(TourOfferCopy.helpRoad == "This can always be started from Help \u{25B8} Take the Onboarding Tutorial.")
         // "tutorial" names ONE Help door now, the tour; the two field-guide
         // doors never say it.
         let doors = [

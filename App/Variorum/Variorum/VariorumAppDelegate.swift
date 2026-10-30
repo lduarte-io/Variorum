@@ -48,7 +48,8 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
 
     /// 13s-b U1a (R-13s-2/6/13): **the first-open tour offer's one model** —
     /// one per app for the `whatsNew` reason (decided once at launch from the
-    /// device's local record); every window's Bookcase draws its line.
+    /// device's local record); every window's Bookcase draws its card
+    /// (VX-292 U4).
     let tourOffer = TourOfferModel.forThisApp()
 
     /// 13r U3-B — R-13r-5: **the app's ONE crash-reporting owner** (MetricKit,

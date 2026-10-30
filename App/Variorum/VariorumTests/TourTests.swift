@@ -22,7 +22,7 @@
 //    request starts over (Q12).
 //
 //  Every offer model sits on a throwaway defaults suite (the test host IS the
-//  dev-store app — `TourOfferLineTests`' reason).
+//  dev-store app — `TourOfferCardTests`' reason).
 //
 
 import AppKit

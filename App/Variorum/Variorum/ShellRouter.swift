@@ -38,8 +38,8 @@ final class ShellRouter {
     var whatsNewRequested = false
     /// 13s-b U1a, piece 5: Help ▸ Take the Tour — a REQUEST the shell adopts
     /// (the tour runs over this window), `whatsNewRequested`'s shape exactly.
-    /// The shell answers it with the ONE tour entry the offer line's "yes"
-    /// calls (`RootView.startTour()`).
+    /// The shell answers it with the ONE tour entry the offer card's "yes"
+    /// calls (`RootView.startTour()`; VX-292 U4's card replaced the line).
     var tourRequested = false
     /// 13n-c U3 — THE GRANT SHEET, pre-filled (⌥⌘A's no-history road, the
     /// receipts' Change…, every place-door through the window's
