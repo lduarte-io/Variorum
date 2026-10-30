@@ -175,3 +175,10 @@ line per round file (`vx-105-ladder-round1.md`, `vx-105-ladder-round2.md`). No p
 **STATUS: ROUND 2 COMPLETE — 1 BLOCKER · 1 MINOR.** BLOCKER-1 is new in this round (MINOR-1's fix introduced the read),
 so under the ladder it earns a round 3 unless the arbitration rules otherwise against the review prompt's
 corpus-scale rule. Every round-1 disposition otherwise landed as ruled.
+
+## Round 2 arbitration (the orchestrator, same-model ladder)
+
+- **BLOCKER-1 — CONFIRMED, fixed this round, earns round 3.** The fix is the finding's own: `isVersionOfAnyLiveNote` drives from the CANDIDATE'S own placements/version links (the `noteVersionStamps` shape) and lets the one classifier decide per linked note; both false doc lines corrected to the real cost; the plan pin (no `SEARCH peer USING INDEX idx_container_kind`) red-on-old on this tree, paired with the equality pin across the note-side shapes. The finding's "older context" (the title read's kind-index walk; the automatic edge index inside the existing `isVersionHistory`) is PRE-EXISTING and occasion-bounded (a birth seed and a deliberate Help press) — recorded here, deliberately not fixed in this effort; it joins the record as a noted non-action, ticketable if the class ever meets a hot path.
+- **MINOR-1 — CONFIRMED whole.** The record gains: VX-712 and VX-713 named with one pointer each; the two QUESTIONS entries owed at the merge as explicit closeout checklist lines (the "Open Takes mode over a book" question; P-105-8's door star); the P-105-1..8 PROVISIONALs listed for the merge-time QUESTIONS bundle; "## The ladder" filled with pointers to the two round files.
+
+Round 3 (fresh reviewer) re-checks the BLOCKER fix; hard cap three rounds.
