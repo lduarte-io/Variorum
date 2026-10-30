@@ -373,7 +373,7 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 | piece | status |
 |---|---|
 | 1 The tutorial wins, as a reducer rule (mode corrections on arrival; `TourWalkTests` hostile cases; the engine's door; Mac pins) | DONE (5895b589a) — core `swift test --filter TourWalkTests` **34/34** passed; **red-on-old WATCHED headlessly** (`Tour.drive` returning at its top on the committed tree: exactly the 6 behaviour pins red, 26 issues; the table pin and `theDesignedRoadDrivesNothing` green on both sides by design — a data pin and a negative-space guard; `aModeSheChoosesOnTheSameNoteIsNeverOverruled` green on both sides — it guards against an over-eager drive); restored by `git checkout`, tree clean, 34/34 again. Mac `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN PENDING the stage window. No revert in flight. |
-| 2 Scroll-into-view for rung rows (step 3's XVII) | **WAITING ON THE ARCHITECT** — traced (every rung surface resolved below); the Outline road FORKS (§Piece 2: options (a)/(b), (c) hollow); proposal (a). Nothing built. |
+| 2 Scroll-into-view for rung rows (step 3's XVII) | BUILT (e0d4c50c1) to the architect's A-292-1..3 — core 36/36; Mac `build-for-testing` SUCCEEDED; Mac RUN PENDING the stage window. **REVERT IN FLIGHT (headless watch):** `Tour.arrivalReveal` returns nil on the committed tree; restore = `git checkout -- Sources/VariorumCore/Domain/Tour.swift` |
 | 3 The missing-book restore at tour start | DONE (59f8a937a) — Mac `build` + `build-for-testing` SUCCEEDED; pins written (the gate's table, the toast keep-clear rig, the real-shell restore); RUN and red-on-old WATCH PENDING the stage window. PROVISIONAL P-292-7 (the gate). |
 | 4 Record close | NOT-STARTED — after piece 2's ruling and build |
 
