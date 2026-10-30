@@ -20,7 +20,12 @@
 //  · leg 1 — a note has no masthead star; the star lives on the note's
 //    rows (P-U2-5);
 //  · leg 4 — the note-side panel's name is its door's, "Scraps"
-//    (BUILD-VERIFY 2, P-U2-2's sibling).
+//    (BUILD-VERIFY 2, P-U2-2's sibling);
+//  · steps 2–3 — VX-292 U1 (R-292-1): the launch seeds *The Prince* since
+//    VX-633, so the two Sherlock cards carry the architect's U1 COPY DRAFTS
+//    (`notes/plans/vx-292-onboarding.md`), the book and its toured chapter
+//    read from the Prince's own constants (chapter XVII, PROVISIONAL
+//    P-292-1).
 //
 //  The words that NAME a door quote the door's own constant, so a rename can
 //  never leave the tour describing a door that is gone (13u4 UNIT S3's rule).
@@ -68,8 +73,22 @@ enum TourScript {
 
     // MARK: - Facts the words depend on
 
-    /// Step 3's story — also how the tour finds it (`Queries.tourLandmarks`).
-    static let firstStoryTitle = "A Scandal in Bohemia"
+    /// **Step 2's book** — the book the launch seeds (VX-292 R-292-1: *The
+    /// Prince* since VX-633), by its reserved name from the book's own
+    /// constants; step 2's card says it, and the tour finds the book by it
+    /// (`Queries.tourLandmarks`, an exact match). `TourScriptTests` pins it to
+    /// `Book.launchBook`, so a future launch swap turns the tour red rather
+    /// than leaving it naming a book a fresh store does not hold.
+    static let seededBookName = SampleLibraryPrinceBook.name
+
+    /// **Step 3's chapter** — XVII, whether it is better to be loved or
+    /// feared (PROVISIONAL P-292-1: famous, eight paragraphs so the note has
+    /// a real middle for step 4, and it carries a Ricci third take; the
+    /// alternative is chapter III). The note's exact seeded title, read from
+    /// the book's constants; also how the tour finds it
+    /// (`Queries.tourLandmarks`). The card names it by its question, not its
+    /// title (a roman numeral would read as shouted caps on a card).
+    static let firstStoryTitle = SampleLibraryPrinceBook.lovedOrFearedChapterTitle
 
     /// **The take badge's glyph** — Write's margin badge reads `⑂N`
     /// (`BadgeOverlayController`, pinned by `TourScriptTests`); the tour's
@@ -86,13 +105,19 @@ enum TourScript {
                 title: "Navigation",
                 body: "Everything lives in one of the places on the left. Bookcase holds your books. Library is everything, searchable. Pool holds notes that aren't in a book, and Snippets keeps pieces of text you reuse between notes.")
         case .seededBook:
+            // VX-292 U1 (R-292-1): the U1 COPY DRAFT, the book's name read
+            // from its constant (it opens the sentence in the shelf's
+            // lowercase, the end card's "readme" precedent).
             return Card(
-                title: "Sherlock Holmes, in Variorum",
-                body: "The adventures of sherlock holmes comes with the app, so you can try everything on real writing. Click into it.")
+                title: "The Prince, in Variorum",
+                body: "\(seededBookName) comes with the app, so you can try everything on real writing. Machiavelli's Italian rides under every paragraph. Click into it.")
         case .insideBook:
+            // VX-292 U1: the approved first three sentences verbatim; the
+            // last names the toured chapter (`firstStoryTitle`) by its
+            // question, the U1 COPY DRAFT.
             return Card(
                 title: "Inside a book",
-                body: "A book opens on its Outline: every chapter, and the beginning of every note. A book works like a scrapbook. Put a note in and it stays there. Click into \(firstStoryTitle).")
+                body: "A book opens on its Outline: every chapter, and the beginning of every note. A book works like a scrapbook. Put a note in and it stays there. Click into the chapter on whether it is better to be loved or feared.")
         case .write:
             // R-13s-32: "savepoint" stays here, the explanation of the word
             // commit (her word: "keep it").

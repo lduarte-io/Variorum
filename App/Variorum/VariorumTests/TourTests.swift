@@ -7,9 +7,10 @@
 //  (`TourWalkTests`); these pin what only the app can show:
 //
 //  · the WORDS — every card equals the approved fifth draft exactly, except
-//    the five departures the U2 RECORD carries (each pinned as the one
-//    replacement it is), and the tone rules hold (no em dash, no emoji, no
-//    shouting caps, no main-leg time promise — A5);
+//    the five departures the U2 RECORD carries and VX-292 U1's two Prince
+//    cards (each pinned as the one replacement it is), and the tone rules
+//    hold (no em dash, no emoji, no shouting caps, no main-leg time promise —
+//    A5);
 //  · the RING — an anchored door rings itself only while lit, registers with
 //    a tour that starts after it appeared, and leaves when it leaves; Write's
 //    ⑂ badge is found read-only by the editor's own identifier convention;
@@ -62,7 +63,16 @@ struct TourScriptTests {
     /// **The only departures from the frozen copy** — each a BUILD-VERIFY
     /// resolution or a fact the real app forced, each recorded in the U2
     /// RECORD with its alternative (P-U2-1/2/3/5 and BUILD-VERIFY 2).
+    /// VX-292 U1 (R-292-1, the Prince replaced Sherlock in the launch at
+    /// VX-633): steps 2 and 3 carry the plan's U1 COPY DRAFTS — step 2's body
+    /// whole (with its title, below), step 3's last sentence. The approved
+    /// table above stays mockup v5's text, so its mockup pin still reads it.
     static let departures: [Tour.Step: (from: String, to: String)] = [
+        .seededBook: (
+            "The adventures of sherlock holmes comes with the app, so you can try everything on real writing. Click into it.",
+            "the prince comes with the app, so you can try everything on real writing. Machiavelli's Italian rides under every paragraph. Click into it."),
+        .insideBook: ("Click into A Scandal in Bohemia.",
+                      "Click into the chapter on whether it is better to be loved or feared."),
         .takeIcon: ("The \u{03C8}2 in the margin", "The \u{2442}2 in the margin"),
         .takesMode: ("its \u{2713} makes it the one the page shows",
                      "choose, at the top of its card, makes it the one the page shows"),
@@ -72,10 +82,21 @@ struct TourScriptTests {
         .legSnippets: ("the snippets panel", "the Scraps panel"),
     ]
 
+    /// The one TITLE departure (VX-292 U1, R-292-1): step 2 names the book
+    /// the launch seeds now.
+    static let titleDepartures: [Tour.Step: (from: String, to: String)] = [
+        .seededBook: ("Sherlock Holmes, in Variorum", "The Prince, in Variorum"),
+    ]
+
     @Test func everyCardIsTheApprovedDraftExceptTheRecordedDepartures() throws {
         for step in Tour.Step.allCases where step != .endCard {
-            let (title, approvedBody) = try #require(Self.approved[step], "\(step) has approved words")
+            let (approvedTitle, approvedBody) = try #require(Self.approved[step], "\(step) has approved words")
             let card = try #require(TourScript.card(step), "\(step) has a card")
+            var title = approvedTitle
+            if let departure = Self.titleDepartures[step] {
+                #expect(approvedTitle == departure.from, "\(step): the title departure names the approved title")
+                title = departure.to
+            }
             #expect(card.title == title, "\(step): the title is the approved one")
             var expected = approvedBody
             if let departure = Self.departures[step] {
@@ -107,6 +128,42 @@ struct TourScriptTests {
         #expect(try #require(TourScript.card(.downAndUp)).body.contains(NoteBoxCopy.editDoor))
         // Step 6 says the badge's REAL count.
         #expect(try #require(TourScript.card(.takeIcon, takeCount: 3)).body.hasPrefix("The \u{2442}3 "))
+    }
+
+    /// **VX-292 U1 (R-292-1) — steps 2 and 3 name what a fresh store
+    /// holds.** The launch seeds *The Prince* (VX-633); the tour said
+    /// Sherlock, so on a fresh store its words named a book that was not
+    /// there and its rings found nothing. RED ON OLD: the old card says
+    /// Sherlock and the old landmark title ("A Scandal in Bohemia") is no
+    /// Prince note. The book's name and the chapter's title are read from the
+    /// Prince's constants, and both are proven real here: the name is the
+    /// LAUNCH book's, and the title is a `%%%` line of the bundled text — the
+    /// title the import stores — so neither can drift away from the seed.
+    @Test func stepsTwoAndThreeNameTheBookTheLaunchSeeds() throws {
+        #expect(TourScript.seededBookName == SampleLibrarySeeder.Book.launchBook.name,
+                "the tour's book is the one a fresh store is born with")
+        #expect(TourScript.seededBookName == SampleLibraryPrinceBook.name)
+        let two = try #require(TourScript.card(.seededBook))
+        #expect(two.body.hasPrefix("\(SampleLibraryPrinceBook.name) comes with the app"),
+                "the card says the book's own name")
+        #expect(two.title.lowercased().hasPrefix(SampleLibraryPrinceBook.name),
+                "the title names the same book")
+        // The toured chapter: a real seeded note title, chapter XVII.
+        let titles = try SampleLibrarySeeder.loadStories(for: .prince).map(\.title)
+        #expect(titles.contains(TourScript.firstStoryTitle),
+                "the landmark title is a note the Prince seeds: \(TourScript.firstStoryTitle)")
+        #expect(SampleLibraryPrinceBook.chapterNumber(of: TourScript.firstStoryTitle) == 17)
+        #expect(TourScript.firstStoryTitle.hasSuffix("whether it is better to be loved than feared"),
+                "the card's question is this chapter's")
+        #expect(try #require(TourScript.card(.insideBook)).body
+                .hasSuffix("Click into the chapter on whether it is better to be loved or feared."))
+        // P-292-1's reasons, held: a real middle to scroll to (step 4 asks for
+        // the middle), and a Ricci third take in the chapter.
+        let blocks = try SampleLibrarySeeder.loadStories(for: .prince)
+            .first { $0.title == TourScript.firstStoryTitle }?.text
+            .split(separator: "\n").count
+        #expect(blocks == 8, "XVII seeds eight paragraphs")
+        #expect(SampleLibraryPrinceBook.famousLines.contains { $0.noteTitle == TourScript.firstStoryTitle })
     }
 
     /// When the mockup is in the tree, the approved table above IS its text
