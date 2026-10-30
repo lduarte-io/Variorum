@@ -324,7 +324,7 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 
 | piece | status |
 |---|---|
-| 1 The tutorial wins, as a reducer rule (mode corrections on arrival; `TourWalkTests` hostile cases; the engine's door; Mac pins) | IN-PROGRESS — design settled below; code not yet written |
+| 1 The tutorial wins, as a reducer rule (mode corrections on arrival; `TourWalkTests` hostile cases; the engine's door; Mac pins) | BUILT (5895b589a) — core `swift test --filter TourWalkTests` **34/34** passed; Mac `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN PENDING the stage window. **REVERT IN FLIGHT (headless watch):** `Tour.drive` returns at its top on the committed tree; restore = `git checkout -- Sources/VariorumCore/Domain/Tour.swift` |
 | 2 Scroll-into-view for rung rows (step 3's XVII) | NOT-STARTED — trace in progress |
 | 3 The missing-book restore at tour start | NOT-STARTED — trace in progress |
 | 4 Record close | NOT-STARTED |
