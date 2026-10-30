@@ -243,6 +243,29 @@ struct TourOfferCardTests {
 
     // MARK: - The card in the band
 
+    /// **The band's ORDER in the Bookcase's own code** (P-292-13; the words
+    /// card's composition pin's shape, `WordsBandSurfaceTests`): the listing,
+    /// then the tour card, then the words card, then the quick entry, then
+    /// the bottom bar — and no slot between the entry and the bar any more
+    /// (the quiet line's row retired). The geometry pin below proves the same
+    /// on a mounted Bookcase; this one names the order where it is written.
+    @Test func theBandDrawsTheTourCardThenTheWordsCardThenTheEntry() throws {
+        let shelf = try Self.code("Features/Shelf/ShelfView.swift")
+        let body = try #require(shelf.range(of: "var body: some View {"))
+        let tail = shelf[body.upperBound...]
+        let listing = try #require(tail.range(of: "ScrollView {"))
+        let tour = try #require(tail.range(of: "if let offerCard {"))
+        let words = try #require(tail.range(of: "if let wordsBand {"))
+        let entry = try #require(tail.range(of: "entryBar\n"))
+        let bar = try #require(tail.range(of: "hintBar\n"))
+        #expect(listing.upperBound < tour.lowerBound, "the listing, then the tour card")
+        #expect(tour.upperBound < words.lowerBound, "the tour card ABOVE the words card")
+        #expect(words.upperBound < entry.lowerBound, "the words card above the quick entry")
+        #expect(entry.upperBound < bar.lowerBound, "the quick entry above the bottom bar")
+        #expect(!tail[entry.upperBound..<bar.lowerBound].contains("if let"),
+                "no slot between the quick entry and the bottom bar")
+    }
+
     /// The two roads out of the card.
     enum Road: CaseIterable, Sendable, CustomStringConvertible {
         /// "no": the help-road sentence in the same frame, then the card goes.
