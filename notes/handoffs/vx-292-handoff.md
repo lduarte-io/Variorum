@@ -13,6 +13,7 @@ Good morning. The onboarding overhaul is merged and released to stargazing.tech 
 7. **The tour-mend's recorded edges (#255's P-292-7)** — three things to know exist, none urgent: a tour-start mend also runs the Welcome arrangement (its standing re-own/re-tag reach, same as your own Help presses); purged deletions mend nothing (the floor); and the delete→mend→rename chain can re-mint a twin (three deliberate acts deep — the complete fix is VX-716, Parked).
 8. **The #255 pass** when you have energy: thirteen P-292 items + four copy observations (two wording departures the real app forced; the end card's keep-going line doesn't name the Settings stop; step 8's "It opens on edit" is wrong on a note left on read). All taste-sized.
 9. **Declined riders still open:** VX-707, VX-343, VX-71 (your "no riders for now" stands; they're untouched).
+10. **One leftover, one command:** the merged branch `vx-292-onboarding` still exists locally and on GitHub (my delete was permission-blocked; the worktree itself is removed). `git branch -d vx-292-onboarding && git push origin --delete vx-292-onboarding` when you like.
 
 ## WHAT SHIPPED (one breath each)
 
