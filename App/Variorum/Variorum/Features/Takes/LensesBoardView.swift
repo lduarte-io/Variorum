@@ -165,6 +165,12 @@ struct LensesBoardView: View {
         .onChange(of: session.commandRouter.pendingLensLanding) { _, _ in
             model.consumePendingLensLanding()
         }
+        // VX-292 U3: the board says how many columns it shows (the tour's
+        // step 9 fact — a second column beside the note's own); it takes the
+        // report with it when it leaves.
+        .onChange(of: model.columns.count, initial: true) { _, count in
+            session.commandRouter.reportLensBoard(postID: postID, columns: count)
+        }
         // VX-431 W-1 (the VX-440 walk): a Block History restore beside this
         // board ends a ring that was typing over the restored take's old
         // words, so its cell adopts the restored ones (no landing here — the
@@ -176,6 +182,7 @@ struct LensesBoardView: View {
             if let commandToken {
                 session.commandRouter.unregisterHandler(commandToken)
             }
+            session.commandRouter.reportLensBoard(postID: postID, columns: nil)
             model.teardown()
         }
         .sheet(item: $diffPresentation) { diff in
@@ -475,6 +482,9 @@ struct LensesBoardView: View {
                 .strokeBorder(
                     tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
         .lensesGeometryProbe(.stub)
+        // VX-292 U3: the onboarding tour's step 9 rings this door — its menu
+        // opens the note's saved lenses, the Italian among them.
+        .tourAnchor(.lensAddColumn, cornerRadius: 8)
         // The rows' content padding is `boardInset` on every side; the stub's
         // top sits on the header cards' top, and it keeps the same trailing
         // edge the rows keep.

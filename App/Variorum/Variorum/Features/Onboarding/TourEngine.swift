@@ -67,6 +67,12 @@ final class TourEngine {
     /// The readme honesty gate (extra-pass MINOR-1), read once with the
     /// landmarks: the end card's readme sentence renders only when true.
     @ObservationIgnored let readmeNoteExists: Bool
+    /// VX-292 U3 (P-292-11): the toured chapter IS the one step 3's card
+    /// names — read once with the landmarks; false under R-292-17's fallback.
+    @ObservationIgnored let firstStoryIsNamed: Bool
+    /// **VX-292 U3 — the store's answer about step 7's block**
+    /// (`Tour.flipInterest`; nil outside step 7 and until it answers).
+    private(set) var flipFacts: Tour.BlockFacts?
     /// Whether the tour has ended (a second end is a no-op).
     @ObservationIgnored private var over = false
 
@@ -76,6 +82,7 @@ final class TourEngine {
         self.session = session
         self.doors = doors
         self.readmeNoteExists = landmarks.readmeNoteExists
+        self.firstStoryIsNamed = landmarks.firstStoryIsNamed
         let begun = Tour.start(
             seededBookID: landmarks.seededBookID, firstStoryID: landmarks.firstStoryID,
             fieldGuideID: landmarks.fieldGuideID, facts: facts)
@@ -234,6 +241,37 @@ final class TourEngine {
         }
     }
 
+    // MARK: - The block step 7 flips (VX-292 U3)
+
+    /// What the flip watch is keyed by — the overlay's `.task(id:)` restarts
+    /// the observation when it changes (nil outside step 7).
+    var flipInterestKey: String? {
+        Tour.flipInterest(state).map { "\($0.noteID)|\($0.blockID ?? "")" }
+    }
+
+    /// Watch step 7's block — its shown take and its takes — for as long as
+    /// the step asks: one block's rows, and at most one note's placements to
+    /// find it (P1). The card names the Prince's Italian, so its label is the
+    /// take the query marks.
+    func watchFlipFacts() async {
+        guard let interest = Tour.flipInterest(state) else {
+            flipFacts = nil
+            return
+        }
+        let label = TourScript.italianName
+        do {
+            for try await value in session.database.observe({ db in
+                try Queries.tourFlipFacts(
+                    db, postID: interest.noteID, preferBlockID: interest.blockID,
+                    namedLabel: label)
+            }) {
+                flipFacts = value
+            }
+        } catch {
+            // A failed observation leaves the flip waiting; next is on the card.
+        }
+    }
+
     // MARK: - The note the step waits on
 
     /// The note whose store facts the current step needs (nil: none).
@@ -301,6 +339,13 @@ struct TourFactSources {
     var bookNoteSelected: () -> Bool = { false }
     /// The star (the window's stars model — store state).
     var isStarred: (String) -> Bool
+    /// **VX-292 U3 — the focused book's mode** (step 11's book arc; the
+    /// composition root keeps what the book published). Defaulted: a
+    /// fixture without a book reads nil, the honest unknown.
+    var bookMode: () -> Tour.BookMode? = { nil }
+    /// **VX-292 U3 — the mounted Lenses board's note and column count**
+    /// (step 9; `CommandRouter.lensBoard`). Defaulted nil.
+    var lensBoard: () -> (postID: String, columns: Int)? = { nil }
 }
 
 /// What Write's editor says about its caret.
@@ -369,16 +414,26 @@ enum TourPlaces {
     }
 
     /// The window's facts, assembled (pure over what the sources read).
+    /// VX-292 U3: the book's mode speaks only for a book; the Lenses board's
+    /// columns only for the note it shows, while that note is IN Lenses; the
+    /// flip's block facts ride as the store said them (the rule checks whose
+    /// they are).
     static func facts(
         selection: SidebarSelection?, detail: (postID: String?, mode: PostMode?),
         caret: TourCaretReading?, bookNoteLive: Bool, bookNoteSelected: Bool = false,
-        note: (id: String, facts: Queries.TourNoteFacts)?, isStarred: (String) -> Bool
+        note: (id: String, facts: Queries.TourNoteFacts)?, isStarred: (String) -> Bool,
+        bookMode: Tour.BookMode? = nil, lensBoard: (postID: String, columns: Int)? = nil,
+        block: Tour.BlockFacts? = nil
     ) -> Tour.Facts {
         let place = place(selection)
         var noteMode: Tour.NoteMode?
         var tourCaret: Tour.Caret?
+        var lensColumns: Int?
         if case .note(let noteID) = place {
             if detail.postID == noteID, let mode = detail.mode { noteMode = self.mode(mode) }
+            if noteMode == .lenses, let lensBoard, lensBoard.postID == noteID {
+                lensColumns = lensBoard.columns
+            }
             if noteMode == .write, let caret, caret.postID == noteID,
                let blockID = caret.blockID, let ordinal = caret.ordinal {
                 tourCaret = Tour.Caret(
@@ -389,10 +444,12 @@ enum TourPlaces {
         }
         var bookLive = false
         var bookSelected = false
+        var tourBookMode: Tour.BookMode?
         if case .book = place {
             bookLive = bookNoteLive
             // F-U2-W-3: live is holding too (the one box state order).
             bookSelected = bookNoteSelected || bookNoteLive
+            tourBookMode = bookMode
         }
         let noteFacts = note.map {
             Tour.NoteFacts(
@@ -401,6 +458,7 @@ enum TourPlaces {
         }
         return Tour.Facts(
             place: place, noteMode: noteMode, caret: tourCaret,
-            bookNoteLive: bookLive, bookNoteSelected: bookSelected, note: noteFacts)
+            bookNoteLive: bookLive, bookNoteSelected: bookSelected, note: noteFacts,
+            bookMode: tourBookMode, lensColumns: lensColumns, block: block)
     }
 }

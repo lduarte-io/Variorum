@@ -344,6 +344,68 @@ struct TourScriptTests {
         }
     }
 
+    /// **VX-292 U3 — every ring the rule names is worn by a door in the
+    /// app** (P-6: a step whose ring no door wears is a regression by
+    /// definition). The switch below is exhaustive, so a new anchor case
+    /// must say its name here; each name must appear inside a `.tourAnchor(`
+    /// call in the app's sources — except the ⑂ badge, which the overlay
+    /// finds itself (AppKit). RED ON OLD by mechanism for the three new rings
+    /// (no door wore them).
+    @Test func everyRingTheRuleNamesIsWornByADoorInTheApp() throws {
+        func name(_ anchor: Tour.Anchor) -> String {
+            switch anchor {
+            case .sidebarAreas: "sidebarAreas"
+            case .sidebarArea: "sidebarArea"
+            case .sidebarMode: "sidebarMode"
+            case .sidebarOpenRow: "sidebarOpenRow"
+            case .bookcaseRow: "bookcaseRow"
+            case .quickEntry: "quickEntry"
+            case .outlineCard: "outlineCard"
+            case .bookModeTab: "bookModeTab"
+            case .indexNoteRow: "indexNoteRow"
+            case .noteBoxEditHere: "noteBoxEditHere"
+            case .barTakes: "barTakes"
+            case .panelNewTake: "panelNewTake"
+            case .panelOpenTakesMode: "panelOpenTakesMode"
+            case .takeBadge: "takeBadge"
+            case .takesBlock: "takesBlock"
+            case .takeChoose: "takeChoose"
+            case .readFaceSwitch: "readFaceSwitch"
+            case .lensAddColumn: "lensAddColumn"
+            case .contextBarBook: "contextBarBook"
+            case .mastheadTagDoor: "mastheadTagDoor"
+            case .poolAddToBook: "poolAddToBook"
+            case .firstSnippetCard: "firstSnippetCard"
+            }
+        }
+        let all: [Tour.Anchor] = [
+            .sidebarAreas, .sidebarArea(.bookcase), .sidebarMode(.read), .sidebarOpenRow("n"),
+            .bookcaseRow("b"), .quickEntry, .outlineCard("n"), .bookModeTab(.book),
+            .indexNoteRow("n"), .noteBoxEditHere, .barTakes, .panelNewTake, .panelOpenTakesMode,
+            .takeBadge("k"), .takesBlock("k"), .takeChoose("t"), .readFaceSwitch, .lensAddColumn,
+            .contextBarBook, .mastheadTagDoor, .poolAddToBook("n"), .firstSnippetCard,
+        ]
+        let app = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Variorum")
+        let files = try #require(FileManager.default.enumerator(at: app, includingPropertiesForKeys: nil))
+        var windows: [String] = []
+        for case let url as URL in files where url.pathExtension == "swift" {
+            let text = try String(contentsOf: url, encoding: .utf8)
+            var rest = text[...]
+            while let hit = rest.range(of: ".tourAnchor(") {
+                windows.append(String(rest[hit.upperBound...].prefix(160)))
+                rest = rest[hit.upperBound...]
+            }
+        }
+        #expect(!windows.isEmpty, "non-vacuity: the app's doors were read")
+        for anchor in all where !anchor.isAppKit {
+            let word = name(anchor)
+            #expect(windows.contains { $0.contains(".\(word)") },
+                    "\(word): no door in the app wears this ring")
+        }
+    }
+
     /// **The ⑂ badge coupling** — the locator finds Write's badge by the two
     /// facts the editor's badge overlay gives it (the block id as its
     /// identifier, a `⑂N` title). Pinned at the source so a change there
@@ -623,6 +685,8 @@ struct TourEngineTests {
         var completions = 0
         var finishes: [Bool] = []
         var poolReveals = 0
+        /// VX-292 U3: how many times the Settings stop asked for Settings.
+        var settingsOpened = 0
         /// VX-292 R-292-11: the drives the engine asked for, in order.
         var drives: [Drive] = []
         /// VX-292 U2 (A-292-1/3): the reveals the engine asked for, in order.
@@ -646,7 +710,8 @@ struct TourEngineTests {
                 finished: { self.finishes.append($0) },
                 showPoolTucked: { self.poolReveals += 1 },
                 drive: { self.drives.append(Drive(place: $0, mode: $1)) },
-                reveal: { self.reveals.append(Reveal(anchor: $0, place: $1)) })
+                reveal: { self.reveals.append(Reveal(anchor: $0, place: $1)) },
+                openSettings: { self.settingsOpened += 1 })
         }
     }
 
@@ -885,6 +950,139 @@ struct TourEngineTests {
             plain.nameModeBeforeTheSeed(.outline)
             #expect(plain.mode == .read, "after the seed, naming does nothing")
         }
+    }
+
+    /// **VX-292 U3 (R-292-8) — the Settings stop reaches the Settings door
+    /// exactly once** (Settings opens on General through the shell's road),
+    /// never a navigate; its next heads home as the leg's end always did.
+    /// RED ON OLD by construction (no stop, no door).
+    @Test func theSettingsStopReachesTheSettingsDoorOnce() async throws {
+        try await withSession { session in
+            let log = DoorLog()
+            let engine = TourEngine(
+                session: session, landmarks: Self.landmarks,
+                facts: Tour.Facts(place: .area(.bookcase)), doors: log.doors)
+            engine.next()
+            engine.observe(.init(place: .book("sherlock")))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write))
+            func write(_ block: String, _ ordinal: Int, takes: Int = 1) -> Tour.Facts {
+                .init(place: .note("scandal"), noteMode: .write,
+                      caret: .init(noteID: "scandal", blockID: block, ordinal: ordinal, takeCount: takes))
+            }
+            engine.observe(write("b1", 1))
+            engine.observe(write("b40", 40))
+            engine.observe(write("b40", 40, takes: 2))
+            engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+            walkFromTakesToTheBookcase(engine)
+            func mine(starred: Bool, tags: Int, books: Int = 0, at place: Tour.Place = .note("mine")) -> Tour.Facts {
+                .init(place: place, noteMode: .write,
+                      note: .init(noteID: "mine", starred: starred, tagCount: tags, bookCount: books))
+            }
+            engine.observe(mine(starred: false, tags: 0))
+            #expect(engine.state.step == .endCard)
+            engine.choose(.keepGoing)
+            engine.observe(mine(starred: true, tags: 0))
+            engine.observe(mine(starred: true, tags: 1))
+            engine.observe(mine(starred: true, tags: 1, books: 1, at: .area(.pool)))
+            #expect(engine.state.step == .legSnippets)
+            #expect(log.settingsOpened == 0, "not before the stop")
+            let navigationsBefore = log.navigations.count
+            engine.next()
+            #expect(engine.state.step == .legSettings)
+            #expect(log.settingsOpened == 1, "Settings opens, once")
+            #expect(log.navigations.count == navigationsBefore, "the window stays where she is")
+            engine.observe(mine(starred: true, tags: 1, books: 1, at: .area(.library)))
+            #expect(log.settingsOpened == 1, "never asked twice")
+            engine.next()
+            #expect(engine.state.step == .legEnd)
+            #expect(log.navigations.last == .area(.bookcase))
+            #expect(log.settingsOpened == 1)
+        }
+    }
+
+    /// **VX-292 U3 — step 7 watches its block in the store.** The engine,
+    /// walked to the flip with a real note, observes the toured block: its
+    /// shown take, its takes in fan order, and the take wearing the Prince's
+    /// Italian label; choosing the Italian is seen. RED ON OLD by
+    /// construction (no watch, no read).
+    @Test func theFlipWatchReadsTheToursBlockFromTheStore() async throws {
+        try await withSession { session in
+            let ops = session.operations
+            let note = try ops.createPost(title: "XVII")
+            let first = try ops.newBlock(in: note.id, text: "Upon this a question arises.", at: .end)
+            let toured = try ops.newBlock(in: note.id, text: "One ought to be both.", at: .end)
+            let italian = try ops.branchVariant(toured.block.id, from: toured.variant.id)
+            try ops.setTakeLabel(italian.id, label: TourScript.italianName)
+            let engine = TourEngine(
+                session: session,
+                landmarks: .init(seededBookID: "book", firstStoryID: note.id, fieldGuideID: nil),
+                facts: Tour.Facts(place: .area(.bookcase)), doors: DoorLog().doors)
+            func write(_ block: String, _ ordinal: Int, takes: Int) -> Tour.Facts {
+                .init(place: .note(note.id), noteMode: .write,
+                      caret: .init(noteID: note.id, blockID: block, ordinal: ordinal, takeCount: takes))
+            }
+            engine.next()
+            engine.observe(.init(place: .book("book")))
+            engine.observe(write(first.block.id, 1, takes: 1))
+            engine.observe(write(toured.block.id, 2, takes: 2))
+            engine.observe(write(toured.block.id, 2, takes: 3))
+            engine.observe(.init(place: .note(note.id), noteMode: .takes))
+            #expect(engine.state.step == .takesMode)
+            #expect(engine.flipInterestKey == "\(note.id)|\(toured.block.id)")
+            let watch = Task { await engine.watchFlipFacts() }
+            defer { watch.cancel() }
+            for _ in 0..<200 where engine.flipFacts == nil { try await Task.sleep(for: .milliseconds(10)) }
+            #expect(engine.flipFacts == Tour.BlockFacts(
+                noteID: note.id, blockID: toured.block.id, chosenTakeID: toured.variant.id,
+                takeIDs: [toured.variant.id, italian.id], namedTakeID: italian.id))
+            try ops.chooseVariant(toured.block.id, variantID: italian.id)
+            for _ in 0..<200 where engine.flipFacts?.chosenTakeID != italian.id {
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            #expect(engine.flipFacts?.chosenTakeID == italian.id, "the choose is seen")
+        }
+    }
+
+    /// **VX-292 U3 — the grown tour's facts speak only where they belong:**
+    /// the book's mode for a book; the Lenses board's columns for the note it
+    /// shows, while that note IS in Lenses; the flip's block as the store
+    /// said it. And the router's board report leaves with its own board only.
+    @Test func theGrownToursFactsSpeakOnlyWhereTheyBelong() {
+        let inBook = TourPlaces.facts(
+            selection: .reading("r"), detail: (nil, nil), caret: nil, bookNoteLive: false,
+            note: nil, isStarred: { _ in false }, bookMode: .read, lensBoard: ("n", 2))
+        #expect(inBook.bookMode == .read)
+        #expect(inBook.lensColumns == nil, "a book has no Lenses board")
+        let inLenses = TourPlaces.facts(
+            selection: .post("n"), detail: ("n", .lenses), caret: nil, bookNoteLive: false,
+            note: nil, isStarred: { _ in false }, bookMode: .book, lensBoard: ("n", 2))
+        #expect(inLenses.lensColumns == 2)
+        #expect(inLenses.bookMode == nil, "the book's mode speaks only for a book")
+        let inWrite = TourPlaces.facts(
+            selection: .post("n"), detail: ("n", .write), caret: nil, bookNoteLive: false,
+            note: nil, isStarred: { _ in false }, lensBoard: ("n", 2))
+        #expect(inWrite.lensColumns == nil, "a board left standing is not the mode she is in")
+        let otherNote = TourPlaces.facts(
+            selection: .post("m"), detail: ("m", .lenses), caret: nil, bookNoteLive: false,
+            note: nil, isStarred: { _ in false }, lensBoard: ("n", 2))
+        #expect(otherNote.lensColumns == nil, "another note's board is not hers")
+        let block = Tour.BlockFacts(noteID: "n", blockID: "b", chosenTakeID: "t", takeIDs: ["t", "u"])
+        #expect(TourPlaces.facts(
+            selection: .post("n"), detail: ("n", .takes), caret: nil, bookNoteLive: false,
+            note: nil, isStarred: { _ in false }, block: block).block == block)
+
+        let router = CommandRouter()
+        router.reportLensBoard(postID: "n", columns: 1)
+        #expect(router.lensBoard == .init(postID: "n", columns: 1))
+        router.reportLensBoard(postID: "m", columns: nil)
+        #expect(router.lensBoard?.postID == "n", "another board leaving never wipes this one")
+        router.reportLensBoard(postID: "n", columns: nil)
+        #expect(router.lensBoard == nil)
+        let asked = router.generalSettingsRequest
+        router.requestGeneralSettings()
+        #expect(router.generalSettingsRequest == asked + 1)
+        #expect(AppSettingsView.adopts(
+            request: router.generalSettingsRequest, adopted: router.generalSettingsRequestAdopted))
     }
 
     /// The drive door names the app's mode for the rule's — every one, both
@@ -1195,6 +1393,93 @@ struct TourEntryTests {
             session.commandRouter.requestMode(.takes, postID: chapter.id)
             await settle(window, hosting, turns: 40) { false }
             #expect(session.commandRouter.activeMode == .takes, "never overruled on the same note")
+
+            engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
+        }
+        #endif
+    }
+
+    /// **VX-292 U3 — the book's mode and the Lenses board's columns reach
+    /// the tour, in the REAL shell.** The focused book says its tab (Outline,
+    /// then Read through the tabs' own act), and a note in Lenses says how
+    /// many columns stand beside its own (one, then two when a saved lens
+    /// opens through the board's own landing road) — the facts steps 9 and
+    /// 11 advance on. RED ON OLD by mechanism: neither surface published, so
+    /// both facts read nil.
+    @Test func theBooksModeAndTheLensBoardReachTheToursFactsInTheRealShell() async throws {
+        #if DEBUG
+        let suite = "tour-facts-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            // LIVE uuids: the Lenses board's column memory and the note's mode
+            // memory are REAL defaults keys in the test host (the dev app).
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            session.markSeededBook = { _ in }
+            let ops = session.operations
+            let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
+            let chapter = try ops.createPost(title: TourScript.firstStoryTitle)
+            let minted = try ops.newBlock(in: chapter.id, text: "Upon this a question arises.", at: .end)
+            let italian = try ops.branchVariant(minted.block.id, from: minted.variant.id)
+            try ops.addPostToReading(chapter.id, to: prince.id)
+            let lens = try ops.saveLens(
+                post: chapter.id, name: TourScript.italianName,
+                picks: [minted.block.id: italian.id], undoLabel: "Save Lens")
+            _ = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
+            let memoryKeys = [
+                "postMode.\(chapter.id)", TakesViewMemory.defaultsKeyPrefix + chapter.id,
+            ]
+            defer {
+                for key in memoryKeys { UserDefaults.standard.removeObject(forKey: key) }
+                session.commandRouter.forgetCurrentBlock(for: chapter.id)
+            }
+            let offer = TourOfferModel(defaults: defaults)
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: RootView(
+                session: session, router: router, tourOffer: offer))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, turns: 40) { false }
+
+            await endAnyStaleTour(window, hosting)
+            router.tourRequested = true
+            await settle(window, hosting) { TourOracle.overlay?.state.seededBookID == prince.id }
+            let engine = try #require(TourOracle.overlay, "the request started a tour")
+
+            // The book says its mode.
+            router.adopt(.reading(prince.id), in: router.workspace.focusedPane)
+            await settle(window, hosting, turns: 300) { engine.state.facts.bookMode == .outline }
+            #expect(engine.state.facts.place == .book(prince.id))
+            #expect(engine.state.facts.bookMode == .outline, "the book's arrival tab")
+            let modeDoor = try #require(BookOutlineGeometry.modeDoors[prince.id], "the book published its mode door")
+            modeDoor(.read)
+            await settle(window, hosting, turns: 300) { engine.state.facts.bookMode == .read }
+            #expect(engine.state.facts.bookMode == .read, "the tabs' own act, heard")
+
+            // The note in Lenses says its columns.
+            router.adopt(.post(chapter.id), in: router.workspace.focusedPane, mode: .lenses)
+            await settle(window, hosting, turns: 300) { engine.state.facts.lensColumns == 1 }
+            #expect(engine.state.facts.noteMode == .lenses)
+            #expect(engine.state.facts.lensColumns == 1, "the note's own column")
+            #expect(engine.state.facts.bookMode == nil, "a book's mode speaks only for a book")
+            session.commandRouter.pendingLensLanding = LensLanding(postID: chapter.id, lensID: lens.id)
+            await settle(window, hosting, turns: 300) { engine.state.facts.lensColumns == 2 }
+            #expect(engine.state.facts.lensColumns == 2, "the saved lens beside it")
 
             engine.endTour()
             await settle(window, hosting) { TourOracle.overlay == nil }

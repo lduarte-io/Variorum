@@ -124,6 +124,15 @@ struct RootView: View {
     /// exactly as its `router` is.
     @State private var noteBoxReport: NoteBoxReport?
     @State private var noteBoxDoor: NoteBoxDoor?
+    /// **VX-292 U3 — the focused book's mode, as it said it** (the tour's
+    /// step 11 fact: the Book tab, then Read). Per window; read only through
+    /// the focused-book gate (`tourBookMode`).
+    @State private var bookModeReport: BookModeReport?
+
+    struct BookModeReport: Equatable {
+        let bookID: String
+        let mode: BookStructureModel.ViewMode
+    }
     @State private var noteBoxFacts = NoteBoxFactsModel()
     /// **VX-141 — the book that has said "no box"** while it was the focused
     /// pane's book (Read, which shows none). Without this the window cannot
@@ -1154,6 +1163,7 @@ struct RootView: View {
     private var tourDoors: TourEngine.Doors {
         let router = router
         let session = session
+        let openSettings = openSettings
         let offer = tourOffer
         let slot = tourSlot
         let pool = poolPosts
@@ -1217,6 +1227,15 @@ struct RootView: View {
                 else { return }
                 router.pendingBookAscent = ShellRouter.BookAscent(
                     bookID: bookID, postID: noteID, landsInOutline: true)
+            },
+            // VX-292 U3 (R-292-8) — the leg's Settings stop: Settings ON ITS
+            // GENERAL PANE, through the shell's own road (⌘,'s — the scene's
+            // `openSettings`), the pane asked for first so a window already up
+            // on another pane turns to General (the ⌥⌘, MCP request's shape).
+            // Settings is its own window; the tour's card stays in this one.
+            openSettings: {
+                session.commandRouter.requestGeneralSettings()
+                openSettings()
             })
     }
 
@@ -1231,6 +1250,7 @@ struct RootView: View {
         let stars = stars
         let bookNoteLive = tourBookNoteLive
         let bookNoteSelected = tourBookNoteSelected
+        let bookMode = tourBookMode
         return TourFactSources(
             selection: { router.workspace.focusedSelection },
             noteDetail: {
@@ -1249,7 +1269,23 @@ struct RootView: View {
             },
             bookNoteLive: { bookNoteLive },
             bookNoteSelected: { bookNoteSelected },
-            isStarred: { stars.isStarred(.post($0)) })
+            isStarred: { stars.isStarred(.post($0)) },
+            // VX-292 U3: the focused book's mode (step 11) and the mounted
+            // Lenses board's columns (step 9 — read in the overlay's body, so
+            // the observation lands there).
+            bookMode: { bookMode },
+            lensBoard: {
+                session.commandRouter.lensBoard.map { ($0.postID, $0.columns) }
+            })
+    }
+
+    /// VX-292 U3 — the focused pane's book's mode, in the tour's words: only
+    /// the book the focused pane SHOWS (the note box's gate).
+    private var tourBookMode: Tour.BookMode? {
+        guard let showing = focusedReadingID, let report = bookModeReport,
+              report.bookID == showing
+        else { return nil }
+        return BookView.tourMode(report.mode)
     }
 
     /// Whether the focused pane's BOOK has its note box live — the "edit
@@ -1464,6 +1500,15 @@ struct RootView: View {
                 // 18d batch 1: the book publishes what its sidebar box shows.
                 onNoteBox: { bookID, report, door in
                     adoptNoteBox(bookID, report, door)
+                },
+                // VX-292 U3: the focused book says its mode (the tour reads it).
+                onBookMode: { bookID, mode in
+                    if let mode {
+                        let report = BookModeReport(bookID: bookID, mode: mode)
+                        if bookModeReport != report { bookModeReport = report }
+                    } else if bookModeReport?.bookID == bookID {
+                        bookModeReport = nil
+                    }
                 },
                 // 13o U3 (the architect's F1): a book's search passage lands
                 // exactly as the Library's — Write at its block, find seeded.

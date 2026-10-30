@@ -86,6 +86,13 @@ struct BookView: View {
     /// departing one, so an unstamped clear would erase the box the next book
     /// just filled (the `CommandRouter.unregisterDetail` token, one seam over).
     var onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)?
+    /// **VX-292 U3 — this book's mode, for the composition root** (the
+    /// onboarding tour's step 11 waits for the book's Read and rings its
+    /// Book tab first). Only the FOCUSED pane publishes (`onNoteBox`'s
+    /// rule); the publisher's `readingID` rides every call, including the
+    /// nil of its departure (the arriving book mounts before the departing
+    /// one unmounts). A fact, never a door.
+    var onBookMode: ((String, BookStructureModel.ViewMode?) -> Void)?
     /// **13o U3 — where a search passage lands** (the architect's F1:
     /// "landing identical to the Library's"): the note opens IN WRITE AT ITS
     /// BLOCK with the find seed, through the shell's caret-precise road —
@@ -145,6 +152,7 @@ struct BookView: View {
         mintRequest: UUID? = nil,
         onMintRequestConsumed: (() -> Void)? = nil,
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
+        onBookMode: ((String, BookStructureModel.ViewMode?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
         onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil
     ) {
@@ -161,6 +169,7 @@ struct BookView: View {
         self.mintRequest = mintRequest
         self.onMintRequestConsumed = onMintRequestConsumed
         self.onNoteBox = onNoteBox
+        self.onBookMode = onBookMode
         self.onOpenSearchHit = onOpenSearchHit
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
         for postID in initiallyExpanded { resolved.expand(postID) }
@@ -451,6 +460,8 @@ struct BookView: View {
             // report is computed against the settled pass; `publishNoteBox()`
             // alone — the note-place channel has its own cadence.
             if focused { publishNoteBox() }
+            // VX-292 U3: …and its mode, on the same gain-only rule.
+            if focused { onBookMode?(readingID, structure.mode) }
         }
         // 18d batch 1 (her U-10): publish this book's note box. `.onAppear`
         // and `.onChange` together, because the box must be right on the
@@ -458,6 +469,8 @@ struct BookView: View {
         // clears it, so a book leaving the pane takes its box with it.
         .onAppear {
             publishNoteBox()
+            // VX-292 U3: the book's mode, for the tour's step 11 (focused only).
+            if paneFocused { onBookMode?(readingID, structure.mode) }
             // 18o U4 (R-18k-6): the book's leaving road, wired before the
             // first report (the trail starts empty, so the first can leave
             // nothing).
@@ -488,11 +501,14 @@ struct BookView: View {
         // — the VX-143 gain-only rule's reason: an unfocused pane's report is
         // nil, and its nil landing for a book the focused pane also shows
         // would decline the box under the focused pane.
-        .onChange(of: structure.mode) { _, _ in
+        .onChange(of: structure.mode) { _, mode in
             if paneFocused { publishNoteBox() }
+            // VX-292 U3: the book's mode, for the tour's step 11.
+            if paneFocused { onBookMode?(readingID, mode) }
         }
         .onDisappear {
             onNoteBox?(readingID, nil, nil)
+            onBookMode?(readingID, nil)
             // 18o U4 (R-18k-6): the book leaving its pane is a leaving for the
             // note she was in (the pane shows something else, the split
             // closes, another book takes the pane, the window goes).
