@@ -330,8 +330,18 @@ enum ReadmeSeeder {
     /// counted her saved moment of the readme as "a live readme" (the door
     /// refused and opened the hidden moment). Each candidate is asked the
     /// Library's own question through the one core classifier
-    /// (`Queries.isVersionOfAnyLiveNote`), never a hand-copied one. Candidates
-    /// are the posts titled "readme" — a handful at most.
+    /// (`Queries.isVersionOfAnyLiveNote`), never a hand-copied one.
+    ///
+    /// **Cost, said truly** (ladder round 2, BLOCKER-1): the candidates are
+    /// every live post titled "readme" — her readme AND every saved version of
+    /// it (a version keeps the title), so K saves mean up to K + 1 candidates,
+    /// asked in id order until one is not a version. Each ask is the
+    /// classifier's CANDIDATE-DRIVEN read: that candidate's own placements and
+    /// version links, plus one `isVersionHistory` per note it is linked to —
+    /// never a walk of the notes. The title read itself walks the posts by
+    /// kind (pre-existing since U1, the fold engine's reserved-title shape);
+    /// it runs only at a birth seed and a deliberate Help press, and is left as
+    /// it is (the round-2 arbitration's recorded non-action).
     nonisolated static func liveReadmeID(_ db: Database) throws -> String? {
         let candidates = try String.fetchAll(
             db,

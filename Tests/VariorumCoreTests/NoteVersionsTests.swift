@@ -945,4 +945,173 @@ struct NoteVersionsTests {
                     "a moment rides its note's deletion — no live version is left")
         }
     }
+
+    // MARK: - VX-105 ladder round 2, BLOCKER-1 — read from the candidate, never the notes
+
+    /// **CANDIDATE-DRIVEN, NEVER A WALK OF THE NOTES** (P1). The round-1 form
+    /// asked `versionHistoryPredicate(.anyLiveNote)` of one container, and
+    /// SQLite drove that correlated EXISTS from `peer` — `SEARCH peer USING
+    /// INDEX idx_container_kind`, every live post in the store (14.4 ms at
+    /// 3,000 notes, linear). The read now starts from the candidate's OWN
+    /// placements and seeks its version links through the edge indexes, so the
+    /// notes it reaches are only the ones it is linked to. Pinned on the plans
+    /// SQLite chooses for every statement the call runs (the
+    /// `VersionsInCompareTests.theStampsReadIsDrivenFromTheNotesOwnPlacements`
+    /// shape). RED ON THE ROUND-1 TREE: its one statement's plan held exactly
+    /// `SEARCH peer USING INDEX idx_container_kind`.
+    @Test func anyLiveNotesVersionIsReadFromTheCandidateNeverTheNotes() throws {
+        try withOperations { ops, db in
+            for index in 0..<4 {
+                let other = try ops.createPost(title: "another note \(index)")
+                _ = try ops.newBlock(in: other.id, text: "More prose.")
+            }
+            let note = try ops.createPost(title: "readme")
+            _ = try ops.newBlock(in: note.id, text: "One.")
+            _ = try ops.newBlock(in: note.id, text: "Two.")
+            let moment = try ops.saveNoteVersion(note.id).post
+
+            var named = false
+            let plan = try explainedPlans(db) { db in
+                named = try Queries.isVersionOfAnyLiveNote(db, moment.id)
+            }
+            #expect(named, "the read still names the moment")
+            #expect(!plan.isEmpty, "the call's statements were captured")
+            #expect(!plan.contains { $0.contains("USING INDEX idx_container_kind") },
+                    "never a walk of the notes by kind: \(plan)")
+            #expect(plan.contains { $0.hasPrefix("SEARCH mine USING INDEX idx_cblock_order") },
+                    "the read starts from the candidate's own placements: \(plan)")
+            #expect(plan.contains { $0.contains("idx_edge_source") }
+                    && plan.contains { $0.contains("idx_edge_target") },
+                    "both link directions seek: \(plan)")
+            #expect(plan.contains { $0.hasPrefix("SEARCH theirs USING INDEX uq_cblock_ownership") }
+                    && plan.contains { $0.hasPrefix("SEARCH theirs USING INDEX idx_cblock_dead_block") },
+                    "the note's placements by block, live and tombstoned alike (LR1-1): \(plan)")
+            #expect(plan.contains { $0.hasPrefix("SEARCH note USING INDEX sqlite_autoindex_container_1") },
+                    "each linked note is a seek by id: \(plan)")
+            // (`SCAN CONSTANT ROW` is an `EXISTS (…)` wrapper's one row, not a table.)
+            #expect(!plan.contains { $0.hasPrefix("SCAN") && $0 != "SCAN CONSTANT ROW" },
+                    "no table is scanned whole: \(plan)")
+        }
+    }
+
+    /// **THE CANDIDATE-DRIVEN READ ANSWERS EXACTLY WHAT THE CLASSIFIER
+    /// ANSWERS** — across the note-side shapes LR1-1 rescued (the anchor block
+    /// merged away, divided, archived, deleted), a deliberate unmark, a
+    /// promote, a live fork (a version LINK born live), a renamed note, and the
+    /// note deleted (its moments ride it): for EVERY container in the store,
+    /// `isVersionOfAnyLiveNote` equals `versionHistoryPredicate(alias: "v",
+    /// of: .anyLiveNote)` asked directly — the one classifier, never a
+    /// hand-copied one. Green on both sides by design (the round-1 form WAS
+    /// that predicate): it holds the rewrite to the classifier's semantics.
+    @Test func anyLiveNotesVersionAgreesWithTheClassifierAcrossTheNoteSideShapes() throws {
+        try withOperations { ops, db in
+            var momentsThatStayVersions: [String] = []
+
+            let merged = try ops.createPost(title: "merged")
+            let m1 = try ops.newBlock(in: merged.id, text: "One.")
+            let m2 = try ops.newBlock(in: merged.id, text: "Two.")
+            momentsThatStayVersions.append(try ops.saveNoteVersion(merged.id).post.id)
+            _ = try ops.merge(m1.block.id, m2.block.id)
+
+            let divided = try ops.createPost(title: "divided")
+            let d1 = try ops.newBlock(in: divided.id, text: "One two. Three four.")
+            momentsThatStayVersions.append(try ops.saveNoteVersion(divided.id).post.id)
+            _ = try ops.divide(d1.block.id, cut: 9)
+
+            let archived = try ops.createPost(title: "archived")
+            let a1 = try ops.newBlock(in: archived.id, text: "One.")
+            _ = try ops.newBlock(in: archived.id, text: "Two.")
+            momentsThatStayVersions.append(try ops.saveNoteVersion(archived.id).post.id)
+            try ops.archiveBlock(a1.block.id)
+
+            let deletedAnchor = try ops.createPost(title: "deleted anchor")
+            let x1 = try ops.newBlock(in: deletedAnchor.id, text: "One.")
+            _ = try ops.newBlock(in: deletedAnchor.id, text: "Two.")
+            momentsThatStayVersions.append(try ops.saveNoteVersion(deletedAnchor.id).post.id)
+            try ops.deleteBlock(x1.block.id)
+
+            let note = try ops.createPost(title: "readme")
+            _ = try ops.newBlock(in: note.id, text: "Prose.")
+            momentsThatStayVersions.append(try ops.saveNoteVersion(note.id).post.id)
+            let unmarked = try ops.saveNoteVersion(note.id).post
+            try ops.unmarkPostsAsVersions(note.id, unmarked.id)
+            let promoted = try ops.saveNoteVersion(note.id).post
+            try ops.promoteNoteVersion(promoted.id, of: note.id)
+            _ = try ops.duplicateAsVersion(note.id)
+            try ops.renameContainer(note.id, title: "mine")
+
+            let gone = try ops.createPost(title: "gone")
+            _ = try ops.newBlock(in: gone.id, text: "Prose.")
+            let rodeTheDeletion = try ops.saveNoteVersion(gone.id).post
+            try ops.deleteContainer(gone.id)
+
+            let every = try allContainerIDs(db)
+            var named: Set<String> = []
+            for id in every {
+                let candidateDriven = try candidateDrivenAnswer(db, id)
+                #expect(candidateDriven == (try classifierAnswer(db, id)),
+                        "container \(id): the read and the classifier disagree")
+                if candidateDriven { named.insert(id) }
+            }
+            #expect(named == Set(momentsThatStayVersions),
+                    "exactly the moments that stay their note's past: \(named)")
+            #expect(!named.contains(unmarked.id) && !named.contains(promoted.id)
+                    && !named.contains(rodeTheDeletion.id))
+        }
+    }
+}
+
+// MARK: - The round-2 pins' helpers (separate functions, so no two same-typed
+// closures share a test body — the VX-692 toolchain hazard)
+
+private func allContainerIDs(_ db: AppDatabase) throws -> [String] {
+    try db.read { db in try String.fetchAll(db, sql: "SELECT id FROM container ORDER BY id") }
+}
+
+private func candidateDrivenAnswer(_ db: AppDatabase, _ id: String) throws -> Bool {
+    try db.read { try Queries.isVersionOfAnyLiveNote($0, id) }
+}
+
+/// The ONE classifier asked directly — the `.anyLiveNote` fence the Library,
+/// Archived and search read.
+private func classifierAnswer(_ db: AppDatabase, _ id: String) throws -> Bool {
+    try db.read { db in
+        try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (
+                  SELECT 1 FROM container v
+                  WHERE v.id = :container AND v.deleted_at IS NULL
+                    AND \(Queries.versionHistoryPredicate(alias: "v", of: .anyLiveNote)))
+                """,
+            arguments: ["container": id]) ?? false
+    }
+}
+
+/// Every statement `body` runs, traced with its bound values inlined, then
+/// asked for its plan: the details SQLite chose, across all of them.
+private func explainedPlans(
+    _ db: AppDatabase, _ body: (Database) throws -> Void
+) throws -> [String] {
+    try db.read { db -> [String] in
+        let capture = StatementCapture()
+        db.trace { event in
+            if case .statement(let statement) = event { capture.append(statement.expandedSQL) }
+        }
+        try body(db)
+        db.trace(options: [], nil)
+        var details: [String] = []
+        for sql in capture.statements {
+            for row in try Row.fetchAll(db, sql: "EXPLAIN QUERY PLAN " + sql) {
+                details.append(row["detail"] ?? "")
+            }
+        }
+        return details
+    }
+}
+
+/// A box the trace closure can write into (the closure is `@Sendable`).
+private final class StatementCapture: @unchecked Sendable {
+    private(set) var statements: [String] = []
+    func append(_ sql: String) { statements.append(sql) }
 }

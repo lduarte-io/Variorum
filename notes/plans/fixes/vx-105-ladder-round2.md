@@ -182,3 +182,69 @@ corpus-scale rule. Every round-1 disposition otherwise landed as ruled.
 - **MINOR-1 — CONFIRMED whole.** The record gains: VX-712 and VX-713 named with one pointer each; the two QUESTIONS entries owed at the merge as explicit closeout checklist lines (the "Open Takes mode over a book" question; P-105-8's door star); the P-105-1..8 PROVISIONALs listed for the merge-time QUESTIONS bundle; "## The ladder" filled with pointers to the two round files.
 
 Round 3 (fresh reviewer) re-checks the BLOCKER fix; hard cap three rounds.
+
+## FIX ROUND 2 RECORD (the fix-round implementer, resumed for this tail, 2026-10-30)
+
+**What this round did NOT do (first line):** no Mac suite was RUN (stage window only); no walk, no app launch, no
+`/Applications`; nothing under `Sources/VariorumCore/Sync/`. The arbitration's pre-existing context — the title read's
+kind walk, and the automatic edge index inside the existing `isVersionHistory` — is untouched, as ruled. Her readme
+text is untouched.
+
+### LIVE STATUS
+
+- **BLOCKER-1** (`Queries.isVersionOfAnyLiveNote` walked every live note) — DONE (the commit carrying this line).
+  **The fix:** the read is now CANDIDATE-DRIVEN, the `noteVersionStamps` shape from the other side. One statement of
+  FOUR UNION arms (the link's two directions × the other endpoint's placement live or dead) reaches, from the
+  candidate's OWN placements (`mine`, live or tombstoned, `idx_cblock_order`), its `version_of` links
+  (`idx_edge_source` / `idx_edge_target`) and the other endpoint's placements — LIVE through `uq_cblock_ownership`,
+  TOMBSTONED through `idx_cblock_dead_block` (the two partial indexes together cover every placement by block; LR1-1
+  needs both) — keeping each note that is a live post other than the candidate (a seek by id). Then the ONE classifier
+  decides per linked note: `isVersionHistory(db, candidate, of: note)`. No classifier text is copied: the link query
+  only GATHERS peers (every filter but the link type is left to the classifier, so its peer set is a superset of the
+  ones `.anyLiveNote` can name), and the `.anyLiveNote` answer is exactly "some live post p ≠ v with
+  `isVersionHistory(v, of: p)`". `CROSS JOIN` pins the loop order. Without it the planner (no ANALYZE stats) chose
+  `SEARCH note USING INDEX idx_container_kind` again (the second red below); with one combined `theirs` arm it scanned
+  `container_block` (the third). **Both false doc lines corrected:** the query's own "Cost:" (now the candidate's
+  placements and links by index seeks, plus one `isVersionHistory` per linked live note, whose older plan builds the
+  automatic `version_of` covering index — named as the round-2 record's pre-existing, occasion-bounded context), and
+  `ReadmeSeeder.liveReadmeID`'s "a handful at most" (now: her readme and every saved version of it, K saves → up to
+  K + 1 candidates, each asked through the candidate-driven read; the title read's kind walk named as pre-existing and
+  left, per the arbitration).
+  **The plan the fix runs** (printed by a throwaway test, run and deleted — never committed): four arms of `SEARCH mine
+  USING INDEX idx_cblock_order (container_id=?)` → `SEARCH e USING INDEX idx_edge_source|idx_edge_target (…=? AND
+  type=?)` → `SEARCH theirs USING INDEX uq_cblock_ownership (block_id=?)` | `… idx_cblock_dead_block (block_id=? AND
+  deleted_at>?)` → `SEARCH note USING INDEX sqlite_autoindex_container_1 (id=?)`, merged by UNION; then, per linked
+  note, `isVersionHistory`'s unchanged plan (`SEARCH v` by id, `mine`/`theirs` by `idx_cblock_order`, the automatic
+  partial covering index on `e`). No `idx_container_kind`, no table scan.
+  **Pins** (core, `Tests/VariorumCoreTests/NoteVersionsTests.swift`, HEADLESS):
+  1. `anyLiveNotesVersionIsReadFromTheCandidateNeverTheNotes` — the plan pin in the
+     `VersionsInCompareTests.theStampsReadIsDrivenFromTheNotesOwnPlacements` shape: every statement the call runs is
+     traced (bound values inlined, `expandedSQL`), `EXPLAIN QUERY PLAN`ned, and the details asserted. No line uses
+     `idx_container_kind`; `mine` seeks `idx_cblock_order`; both edge indexes seek; `theirs` seeks `uq_cblock_ownership`
+     AND `idx_cblock_dead_block`; `note` seeks by id; no table `SCAN` (`SCAN CONSTANT ROW`, an `EXISTS` wrapper's one
+     row, excepted). Four other notes in the store, so a kind walk would have somewhere to go. **RED THEN GREEN,
+     observed in this session, in this order:**
+     - **(a) RED on the round-1 tree, before any fix:** `!plan.contains { $0.contains("USING INDEX
+       idx_container_kind") }` failed, the plan reading `… "SEARCH peer USING INDEX idx_container_kind (kind=?)" …` —
+       exactly the finding's line; the edge-index expectation failed too (`SEARCH e USING AUTOMATIC PARTIAL COVERING
+       INDEX`).
+     - **(b) RED on a first candidate-driven draft with plain JOINs:** `SEARCH note USING INDEX idx_container_kind
+       (kind=?)` — the planner re-chose the walk.
+     - **(c) RED on a CROSS JOIN draft with one combined `theirs`:** `SCAN theirs` (no single index serves live and
+       tombstoned placements).
+     - **(d) GREEN on the four-arm form:** `swift test --filter anyLiveNotesVersion` — 3 passed.
+  2. `anyLiveNotesVersionAgreesWithTheClassifierAcrossTheNoteSideShapes` — the equality pin. Shapes: the anchor block
+     merged away, divided, archived, deleted (LR1-1); a deliberate unmark; a promote; a live fork (`duplicateAsVersion`
+     — a version LINK born live); the note renamed; a note deleted (its moment rides it). For EVERY container in the
+     store, `isVersionOfAnyLiveNote` == `versionHistoryPredicate(alias: "v", of: .anyLiveNote)` asked directly; and the
+     set named is exactly the five moments that stay their note's past (unmarked, promoted and rode-the-deletion not
+     among them). Green on both sides by design (the round-1 form WAS the predicate) — it holds the rewrite to the
+     classifier. Its helpers are separate functions, so no two same-typed closures share a body (the VX-692 hazard).
+  3. `anyLiveNotesVersionIsNamedAndNothingElseIs` (round 1's behaviour pin) — unchanged, GREEN.
+  **Headless runs:** `swift test --filter "NoteVersionsTests|VersionsInCompareTests"` — 37 tests in 2 suites PASSED
+  (incl. `theStampsReadIsDrivenFromTheNotesOwnPlacements`, unchanged). `xcodebuild … build-for-testing -quiet` EXIT 0
+  (the app's `liveReadmeID` doc edit; the app door pins `LaunchFurnitureTests.aSavedVersionOfTheReadmeIsNeverALiveReadme`
+  and the round-1 door arms compile — they are Mac suites, RUN PENDING the stage window; their behaviour is the core
+  read's, which the equality pin holds to the classifier).
+- **MINOR-1** (record hygiene) — NOT-STARTED. Settled: the effort record gains VX-712/VX-713 pointers, the two
+  merge-owed QUESTIONS lines and the P-105-1..8 bundle in the closeout checklist, and "## The ladder" pointers.
