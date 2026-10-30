@@ -95,6 +95,76 @@ struct TourQueriesTests {
         }
     }
 
+    /// **VX-292 R-292-17 — a half-gutted seeded book walks on real props.**
+    /// Her words: *"what if they've deleted all the takes in the prince?
+    /// wouldn't that ruin the tutorial?"* The toured chapter PREFERS the
+    /// named one while it carries a fanned block (a live block with two or
+    /// more live, active takes), else the FIRST live member (book order)
+    /// that still does, else the named one as it stands; and the props are
+    /// BROKEN — the start's cue to ask the book's own restore road — when
+    /// the named chapter is not a live member or no live member carries a
+    /// fan. RED ON OLD: the old read answered the named title or nothing,
+    /// and said nothing about props.
+    @Test func theTouredChapterPrefersTheNamedOneWhileItCarriesAFan() throws {
+        try withOperations { ops, db in
+            let book = try ops.createReading(name: "the adventures of sherlock holmes", kind: .book)
+            func chapter(_ title: String, fanned: Bool) throws -> (id: String, take: String?) {
+                let note = try ops.createPost(title: title)
+                _ = try ops.newBlock(in: note.id, text: "an opening line.", at: .end)
+                let block = try ops.newBlock(in: note.id, text: "a middle line.", at: .end)
+                try ops.addPostToReading(note.id, to: book.id)
+                let take = fanned
+                    ? try ops.branchVariant(block.block.id, from: block.variant.id).id : nil
+                return (note.id, take)
+            }
+            let about = try chapter("About this book", fanned: false)
+            let early = try chapter("A Case of Identity", fanned: true)
+            let scandal = try chapter("A Scandal in Bohemia", fanned: true)
+            let late = try chapter("The Red-Headed League", fanned: true)
+            _ = (about, late)
+
+            var found = try landmarks(db)
+            #expect(found.firstStoryID == scandal.id, "the named chapter, fanned: it")
+            #expect(found.seededBookPropsBroken == false)
+
+            // Its fan archived (out of the fan, kept): the FIRST fanned member.
+            try ops.archiveVariant(try #require(scandal.take))
+            found = try landmarks(db)
+            #expect(found.firstStoryID == early.id, "the first live member still carrying a fan")
+            #expect(found.seededBookPropsBroken == false, "a fanned chapter stands: the props hold")
+
+            // The named chapter deleted: still the fanned one — and broken.
+            try ops.deleteContainer(scandal.id)
+            found = try landmarks(db)
+            #expect(found.firstStoryID == early.id)
+            #expect(found.seededBookPropsBroken == true, "the named chapter is gone")
+
+            // Every fan gone (a deleted take, a member removed): nothing fanned.
+            try ops.deleteVariant(try #require(early.take))
+            _ = try ops.removePostFromReading(late.id, from: book.id)
+            found = try landmarks(db)
+            #expect(found.firstStoryID == nil, "no named chapter, no fan: any note serves")
+            #expect(found.seededBookPropsBroken == true)
+        }
+    }
+
+    /// The named chapter live but unfanned with no fan anywhere: it is the
+    /// tour's chapter as it stands (the mechanics need any note; step 5
+    /// makes the take) — and the props are broken. No seeded book: nothing
+    /// is broken (the other case — no book at all).
+    @Test func aBookWithNoFanToursTheNamedChapterAndSaysItsPropsAreBroken() throws {
+        try withOperations { ops, db in
+            #expect(try landmarks(db).seededBookPropsBroken == false, "no book: not this case")
+            let book = try ops.createReading(name: "the adventures of sherlock holmes", kind: .book)
+            let scandal = try ops.createPost(title: "A Scandal in Bohemia")
+            _ = try ops.newBlock(in: scandal.id, text: "one line.", at: .end)
+            try ops.addPostToReading(scandal.id, to: book.id)
+            let found = try landmarks(db)
+            #expect(found.firstStoryID == scandal.id)
+            #expect(found.seededBookPropsBroken == true)
+        }
+    }
+
     @Test func aNotesFactsCountItsLiveTagsAndItsBookMembershipsOnly() throws {
         try withOperations { ops, db in
             let note = try ops.createPost(title: "mine")

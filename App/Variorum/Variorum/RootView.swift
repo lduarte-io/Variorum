@@ -1108,9 +1108,11 @@ struct RootView: View {
     /// (`TourOfferModel.tourEnded(completed:)` — completed at the end card,
     /// ended by End tour before it, nothing at all if the app quits mid-way).
     ///
-    /// **VX-292 U2 (R-292-11) — a missing Prince comes back first.** When the
-    /// landmarks find no seeded book (`TourEngine.restoresLaunchBook` says
-    /// exactly when), the start runs the book's own Help ▸ Restore road and
+    /// **VX-292 U2 (R-292-11, R-292-17) — a missing Prince, or one whose
+    /// props deletions broke, is mended first.** When the landmarks find no
+    /// seeded book, or find it with its toured chapter gone or no fan left
+    /// and a chapter the road can mint back (`TourEngine.restoresLaunchBook`
+    /// says exactly when), the start runs the book's own Help ▸ Restore road and
     /// AWAITS it — the door's latch, brain, Welcome arrangement, words and
     /// (absent) undo, all unchanged; only its opening of the book is left out
     /// (`opening: false` — the tour's step 1 stands on the Bookcase, where
@@ -1132,7 +1134,7 @@ struct RootView: View {
             var landmarks = await TourEngine.landmarks(session: session)
             if TourEngine.restoresLaunchBook(
                 landmarks: landmarks, wingID: session.wing.currentID,
-                storeHoldsIt: await TourEngine.storeHoldsLaunchBook(session: session)) {
+                store: await TourEngine.launchBookFacts(session: session, landmarks: landmarks)) {
                 await ShellActions(session: session, shell: router)
                     .restoreSeededBook(.launchBook, opening: false).value
                 landmarks = await TourEngine.landmarks(session: session)

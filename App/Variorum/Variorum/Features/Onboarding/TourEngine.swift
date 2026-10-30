@@ -101,37 +101,72 @@ final class TourEngine {
         return found ?? .init(seededBookID: nil, firstStoryID: nil, fieldGuideID: nil)
     }
 
-    // MARK: - VX-292 U2 (R-292-11) — a missing Prince comes back at the start
+    // MARK: - VX-292 U2 (R-292-11, R-292-17) — the start ensures its PROPS
 
-    /// **Whether a tour's start restores the launch's book first** — her
-    /// ruling (R-292-11): *"A missing Prince is restored through the existing
-    /// restore road at tour start."* The "yes" / Help press is the consent.
-    /// Pure, so the pin reads exactly what the start decides.
-    ///
-    /// Only when ALL of: the landmarks found no seeded book (the brief's
-    /// trigger); the window is in HOME (the launch's book is Home's — a
-    /// restore mints there, so from another wing it would land where this
-    /// tour cannot see it, and the tour there has no landmarks of Home's
-    /// anyway); and the STORE holds no live copy of it in any wing (the
-    /// restore's own discovery is wing-agnostic: a Prince she MOVED to
-    /// another wing would answer the door's "already whole" refusal, or have
-    /// chapters she deleted there minted back — her edits, which the tour
-    /// never touches). PROVISIONAL P-292-7 (the record's alternatives).
-    nonisolated static func restoresLaunchBook(
-        landmarks: Queries.TourLandmarks, wingID: String, storeHoldsIt: Bool
-    ) -> Bool {
-        landmarks.seededBookID == nil && wingID.isEmpty && !storeHoldsIt
+    /// **What the store says about the launch's book**, read with the restore
+    /// road's own discovery (`SampleLibrarySeeder.discover` — wing-agnostic)
+    /// so the start and the road can never disagree about "missing".
+    struct LaunchBookFacts: Equatable, Sendable {
+        /// The live launch book the restore would act on, in ANY wing.
+        var liveBookID: String?
+        /// Every shipped chapter is a live member (`Existing.isComplete` —
+        /// the door's own "already whole"). Read only when it decides
+        /// anything (the props are broken); true otherwise.
+        var isComplete: Bool
     }
 
-    /// Whether the store holds a live launch book in ANY wing — the restore
-    /// road's own discovery (`SampleLibrarySeeder.discover`), so the start
-    /// and the road can never disagree about what "missing" means. An
-    /// unreadable store answers "holds it" (no restore is attempted).
-    static func storeHoldsLaunchBook(session: AppSession) async -> Bool {
-        let held = try? await session.database.read { db in
-            try SampleLibrarySeeder.discover(db, book: .launchBook).bookID != nil
+    /// **Whether a tour's start runs the launch book's own restore road
+    /// first** (the "yes" / Help press is the consent). Pure, so the pins
+    /// read exactly what the start decides. Never outside HOME (the launch's
+    /// book is Home's: a restore from another wing would mint where this
+    /// tour cannot see it, and a Prince she MOVED to another wing is her
+    /// deliberate act — respected); never on an unreadable store. Two cases:
+    ///
+    /// 1. **No book** (R-292-11, PROVISIONAL P-292-7): the landmarks found no
+    ///    seeded book and the store holds no live copy in any wing (a moved
+    ///    one would only answer the door's "already whole" refusal, or have
+    ///    chapters she deleted there minted back).
+    /// 2. **Broken props** (R-292-17, her words: *"what if they've deleted all
+    ///    the takes in the prince? wouldn't that ruin the tutorial?… maybe it
+    ///    should still be restored"*): the book stands here but its props
+    ///    are broken (`TourLandmarks.seededBookPropsBroken` — the named
+    ///    chapter gone, or no live chapter carrying a fan) AND the door can
+    ///    REACH a mend: the book is the one the road acts on and it is
+    ///    INCOMPLETE (a shipped chapter is not a live member). The road mints
+    ///    exactly the missing chapters, each fresh with its takes and lenses
+    ///    (the seeder's own bilingual pass, in the chapter's own turn), and
+    ///    never touches a chapter that stands. What it cannot reach — every
+    ///    chapter standing with its fans emptied inside — it is NOT asked
+    ///    (it would only refuse "already whole"): the tour walks on the
+    ///    landmarks' fallback, its floor (the U2 RECORD). An intact or merely
+    ///    edited book is never touched.
+    nonisolated static func restoresLaunchBook(
+        landmarks: Queries.TourLandmarks, wingID: String, store: LaunchBookFacts?
+    ) -> Bool {
+        guard wingID.isEmpty, let store else { return false }
+        guard let seeded = landmarks.seededBookID else { return store.liveBookID == nil }
+        return landmarks.seededBookPropsBroken && store.liveBookID == seeded && !store.isComplete
+    }
+
+    /// The store's facts for `restoresLaunchBook` (nil: unreadable — no
+    /// restore is attempted). Completeness is read only when it could decide
+    /// anything (broken props in Home): it needs the shipped chapter list,
+    /// parsed from the bundled text off the main actor.
+    static func launchBookFacts(
+        session: AppSession, landmarks: Queries.TourLandmarks
+    ) async -> LaunchBookFacts? {
+        guard let found = try? await session.database.read({ db in
+            try SampleLibrarySeeder.discover(db, book: .launchBook)
+        }) else { return nil }
+        var complete = true
+        if landmarks.seededBookPropsBroken, found.bookID != nil,
+           let stories = try? await Task.detached(priority: .utility, operation: {
+               try SampleLibrarySeeder.loadStories(for: .launchBook)
+           }).value {
+            complete = found.isComplete(
+                for: SampleLibrarySeeder.expectedTitles(for: .launchBook, stories: stories))
         }
-        return held ?? true
+        return LaunchBookFacts(liveBookID: found.bookID, isComplete: complete)
     }
 
     // MARK: - Events

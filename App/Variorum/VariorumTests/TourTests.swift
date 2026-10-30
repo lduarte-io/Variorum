@@ -28,6 +28,7 @@
 import AppKit
 import Dependencies
 import Foundation
+import GRDB
 import SwiftUI
 import Testing
 import VariorumCore
@@ -679,25 +680,47 @@ struct TourEngineTests {
         }
     }
 
-    /// VX-292 U2 (R-292-11) — "A missing Prince is restored through the
-    /// existing restore road at tour start", and ONLY then: no seeded book in
-    /// the landmarks, the window in Home (where a restore mints it), and no
-    /// live copy anywhere in the store (one she moved to another wing is
-    /// hers — the restore would refuse "already whole" or re-mint chapters
-    /// she deleted there). PROVISIONAL P-292-7.
-    @Test func aTourStartRestoresTheLaunchBookOnlyWhenTheStoreHasNone() {
-        let missing = Queries.TourLandmarks(seededBookID: nil, firstStoryID: nil, fieldGuideID: "guide")
-        let found = Queries.TourLandmarks(seededBookID: "prince", firstStoryID: "xvii", fieldGuideID: "guide")
-        #expect(TourEngine.restoresLaunchBook(landmarks: missing, wingID: "", storeHoldsIt: false))
-        #expect(!TourEngine.restoresLaunchBook(landmarks: found, wingID: "", storeHoldsIt: true),
-                "the book is here: nothing to restore")
-        #expect(!TourEngine.restoresLaunchBook(landmarks: missing, wingID: "", storeHoldsIt: true),
+    /// VX-292 U2 — the start's restore gate, as one table. **Case 1**
+    /// (R-292-11, P-292-7): no seeded book in the landmarks, Home, and no
+    /// live copy in any wing. **Case 2** (R-292-17 — her *"what if they've
+    /// deleted all the takes in the prince?"*): the book stands here with its
+    /// props broken AND the road can reach a mend (it is the book the road
+    /// acts on, and a shipped chapter is missing). Never: an intact or merely
+    /// edited book, props the road cannot reach (every chapter standing, its
+    /// fans emptied inside), a book she moved to another wing, any window
+    /// outside Home, an unreadable store. RED ON OLD for case 2 by mechanism:
+    /// the old gate restored only a book that was not there.
+    @Test func aTourStartRestoresOnlyWhatDeletionsBrokeAndTheRoadCanReach() {
+        func marks(_ book: String?, broken: Bool = false) -> Queries.TourLandmarks {
+            Queries.TourLandmarks(
+                seededBookID: book, firstStoryID: book == nil ? nil : "xvii",
+                fieldGuideID: "guide", seededBookPropsBroken: broken)
+        }
+        typealias Facts = TourEngine.LaunchBookFacts
+        func restores(_ m: Queries.TourLandmarks, wing: String = "", _ f: Facts?) -> Bool {
+            TourEngine.restoresLaunchBook(landmarks: m, wingID: wing, store: f)
+        }
+        // Case 1 — no book.
+        #expect(restores(marks(nil), Facts(liveBookID: nil, isComplete: true)))
+        #expect(!restores(marks(nil), Facts(liveBookID: "moved", isComplete: true)),
                 "a Prince she moved to another wing is hers")
-        #expect(!TourEngine.restoresLaunchBook(landmarks: missing, wingID: "wing-b", storeHoldsIt: false),
+        #expect(!restores(marks(nil), wing: "wing-b", Facts(liveBookID: nil, isComplete: true)),
                 "outside Home a restore would land where this tour cannot see it")
-        // A chapter she deleted is her edit: the book's presence alone decides.
-        let chapterGone = Queries.TourLandmarks(seededBookID: "prince", firstStoryID: nil, fieldGuideID: "guide")
-        #expect(!TourEngine.restoresLaunchBook(landmarks: chapterGone, wingID: "", storeHoldsIt: true))
+        // Case 2 — broken props the road can reach.
+        #expect(restores(marks("prince", broken: true), Facts(liveBookID: "prince", isComplete: false)),
+                "a chapter gone: the road mints it back with its takes")
+        #expect(!restores(marks("prince", broken: true), Facts(liveBookID: "prince", isComplete: true)),
+                "every chapter standing, fans emptied inside: beyond the road (it would only refuse)")
+        #expect(!restores(marks("prince", broken: false), Facts(liveBookID: "prince", isComplete: false)),
+                "a chapter she deleted while the props hold: her edit, untouched")
+        #expect(!restores(marks("prince"), Facts(liveBookID: "prince", isComplete: true)),
+                "an intact book is never touched")
+        #expect(!restores(marks("prince", broken: true), Facts(liveBookID: "other", isComplete: false)),
+                "the road would act on another copy than the one this tour stands on")
+        #expect(!restores(marks("prince", broken: true), wing: "wing-b",
+                          Facts(liveBookID: "prince", isComplete: false)),
+                "a book in another wing is respected")
+        #expect(!restores(marks(nil), nil), "an unreadable store attempts nothing")
     }
 
     /// VX-292 U2 (A-292-1/3): step 3's arrival in the seeded book reaches
@@ -1099,7 +1122,10 @@ struct TourEntryTests {
                 window.close()
             }
             await settle(window, hosting, turns: 40) { false }
-            #expect(await !TourEngine.storeHoldsLaunchBook(session: session),
+            #expect(await TourEngine.launchBookFacts(
+                        session: session,
+                        landmarks: .init(seededBookID: nil, firstStoryID: nil, fieldGuideID: nil)
+                    )?.liveBookID == nil,
                     "the premise: no Prince in the store")
 
             router.tourRequested = true
@@ -1131,6 +1157,109 @@ struct TourEntryTests {
                     "the door's own receipt (\(String(describing: session.status.spoken?.text)))")
 
             engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
+        }
+        #endif
+    }
+
+    /// **VX-292 R-292-17 — a Prince whose toured chapter was deleted is
+    /// mended at the start, in place.** Her words: *"what if they've deleted
+    /// all the takes in the prince? wouldn't that ruin the tutorial?… maybe
+    /// it should still be restored"*. The REAL Prince (seeded through its own
+    /// restore road into an in-memory store), chapter XVII deleted to the
+    /// Trash: the tour's start runs the book's road, which mints exactly that
+    /// chapter back — FRESH, through the seeder's bilingual pass, so it
+    /// carries its fans — into the same book; every chapter that stood is
+    /// the same note; the door's receipt is said; and the tour rings the
+    /// mended chapter. A second start finds the props whole and restores
+    /// nothing (an intact book is never touched).
+    ///
+    /// RED ON OLD by mechanism: the old start restored only a book that was
+    /// not there, and the old landmarks named XVII or nothing — so
+    /// `firstStoryID` was nil (the gate reverted alone: the new fallback
+    /// rings the first fanned chapter instead, not XVII — red at the title).
+    @Test func aPrinceMissingItsTouredChapterHasItMintedBackWithItsTakes() async throws {
+        #if DEBUG
+        let suite = "tour-mend-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            session.markSeededBook = { _ in }
+            session.status.dismissAfter = .seconds(600)
+            _ = try await SeededBookRestore.restore(session: session, book: .launchBook)
+            _ = try session.operations.createReading(name: TutorialSeeder.bookName, kind: .book)
+            let princeName = TourScript.seededBookName
+            let chapterTitle = TourScript.firstStoryTitle
+            let princeID = try #require(try await db.read { db in
+                try Queries.readings(db).first { $0.name == princeName && $0.deletedAt == nil }?.id
+            })
+            func entries() async throws -> [Queries.ReadingEntry] {
+                try await db.read { try Queries.assembleReading($0, readingID: princeID) }
+            }
+            let before = try await entries()
+            let oldChapter = try #require(before.first { $0.title == chapterTitle }?.postID)
+            let standing = before.map(\.postID).filter { $0 != oldChapter }
+            try session.operations.deleteContainer(oldChapter)
+            session.status.clear()
+
+            let offer = TourOfferModel(defaults: defaults)
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: RootView(
+                session: session, router: router, tourOffer: offer))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, turns: 40) { false }
+
+            router.tourRequested = true
+            await settle(window, hosting, turns: 1500) { TourOracle.overlay != nil }
+            let engine = try #require(TourOracle.overlay, "the tour started after the mend")
+            #expect(engine.state.seededBookID == princeID, "the same book, mended in place")
+            let mended = try #require(engine.state.firstStoryID, "the tour rings a chapter")
+            let after = try await entries()
+            #expect(mended != oldChapter, "a fresh chapter (the deleted one stays in the Trash)")
+            #expect(after.first { $0.postID == mended }?.title == chapterTitle,
+                    "the toured chapter is XVII again")
+            #expect(Set(standing).isSubset(of: Set(after.map(\.postID))),
+                    "every chapter that stood is the same note, untouched")
+            let fannedBlocks = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container_block cb
+                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                      AND (SELECT COUNT(*) FROM variant v WHERE v.block_id = cb.block_id
+                           AND v.deleted_at IS NULL AND v.status = 'active') >= 2
+                    """, arguments: [mended]) ?? 0
+            }
+            #expect(fannedBlocks > 0, "minted through the bilingual pass: its fans came with it")
+            #expect(session.status.spoken?.text.hasPrefix(
+                "Restored \u{201C}\(princeName)\u{201D}") == true,
+                    "the door's own receipt (\(String(describing: session.status.spoken?.text)))")
+
+            // Whole again: a second start touches nothing and says nothing.
+            engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
+            session.status.clear()
+            router.tourRequested = true
+            await settle(window, hosting) { TourOracle.overlay != nil }
+            let again = try #require(TourOracle.overlay)
+            #expect(again.state.firstStoryID == mended)
+            #expect(try await entries().count == after.count, "nothing minted")
+            #expect(session.status.spoken == nil, "nothing restored, nothing said")
+            again.endTour()
             await settle(window, hosting) { TourOracle.overlay == nil }
         }
         #endif
