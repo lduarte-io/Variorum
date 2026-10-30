@@ -521,13 +521,19 @@ struct TutorialCurrencyTests {
                     + "delete it. Help \u{25B8} \(restoreDoor) replaces the whole book with a pristine copy "
                     + "whenever you want one. Nothing you do here can touch your own writing.",
                     "the safety promise names the door she will find")
+            // Ladder round 1, MAJOR-1: one sentence before her click walks a
+            // reader in the book's Outline through the book's own open door
+            // first (RED ON OLD: the block had no road out of the Outline).
+            #expect(NoteBoxCopy.openDoor == "open \u{2197}")
             #expect(lesson[4] == [
                 "I built Variorum with a simple goal: to be able to create multiple different versions of "
-                    + "a block of text. I call these versions takes, borrowing from the film world. The icon "
-                    + "to the right of this block is the take icon - click on it.",
+                    + "a block of text. I call these versions takes, borrowing from the film world. If you're "
+                    + "reading this in the book's Outline, click \(NoteBoxCopy.openDoor) beside this note's "
+                    + "title first, so it opens in the full editor. The icon to the right of this block is "
+                    + "the take icon - click on it.",
                 "You found it! :D",
                 "Now click on Open Takes mode in the top bar of this modal.",
-            ], "her take-icon block and her two takes, in her order")
+            ], "her take-icon block (the Outline's road first) and her two takes, in her order")
             #expect(shown[5] == "While Write is meant to behave like a simple and elegant editor, Takes is "
                     + "where complexity thrives. Click on \u{201C}expand all\u{201D} at the top of Takes.")
             let takesOrdinal = try #require(PostMode.allCases.firstIndex(of: .takes)) + 1
@@ -578,5 +584,39 @@ struct TutorialCurrencyTests {
         let editor = try AppSource.read("Variorum/Features/Editor/EditorView.swift")
         #expect(editor.contains("model.openFan(blockID: blockID)"), "Write's take icon opens the take panel")
         #expect(editor.contains("WriteTakesPanel("), "…which is the panel with the Takes door")
+    }
+
+    /// **The road out of the book's Outline, from each door's own home**
+    /// (ladder round 1, MAJOR-1 — the BUILD-VERIFY done from the Outline this
+    /// time). The guide opens on its OUTLINE (a working book's default mode);
+    /// there no note detail is mounted, so the take panel's "Open Takes mode"
+    /// and ⌘2 refuse ("the modes live inside a note" — `requestMode`'s arm with
+    /// no `applyMode`); the panel offers neither "expand all" nor "style" (its
+    /// top bar is the title, Open Takes mode and Close). So her takes moment
+    /// needs the full editor, and the lesson names the book's own open door:
+    /// "open ↗" beside each note's title (the expanded header and the card),
+    /// which lands in Write on the note's own page. A currency net — RED if the
+    /// door is renamed or moved, if the guide stops opening on its Outline, or
+    /// if `requestMode` stops refusing without a mounted note (then the
+    /// lesson's road sentence is no longer needed: revisit it).
+    @Test func theStartHereLessonsRoadOutOfTheOutlineIsTheBuildsOwn() async throws {
+        try await withGuide { _, db, guideID in
+            let guide = try #require(try await db.read { try Reading.fetchOne($0, key: guideID) })
+            #expect(BookStructureModel.defaultMode(for: guide) == .outline,
+                    "the guide opens on its Outline (a working book)")
+        }
+        #expect(NoteBoxCopy.openDoor == "open \u{2197}", "the book's word for its open door")
+        let book = try AppSource.read("Variorum/Features/BookView/BookView.swift")
+        #expect(book.contains("Button(tokens.chromeLabel(\"open \u{2197}\")) { onOpenInWrite(entry.postID) }"),
+                "the open door stands beside each note's title in the Outline")
+        #expect(book.contains("road(BookOpenDoor.Landing(postID: postID, mode: .write))"),
+                "…and lands in Write, on the note's own page")
+        #expect(book.contains("Open this note in the full editor"), "the door's own help says \u{201C}full editor\u{201D}")
+        let router = try AppSource.read("Variorum/Registry/CommandRouter.swift")
+        #expect(router.contains("guard let applyMode else {\n            refuse?(CapabilityRegistry.capability(.switchMode).unavailableNote)"),
+                "without a mounted note a mode request refuses — why the road is needed")
+        let panel = try AppSource.read("Variorum/Features/Takes/WriteTakesPanel.swift")
+        #expect(!panel.contains("expand all") && !panel.contains("label: \"style:"),
+                "the in-place take panel offers neither expand all nor the style menu")
     }
 }

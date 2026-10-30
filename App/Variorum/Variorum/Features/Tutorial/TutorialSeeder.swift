@@ -661,10 +661,22 @@ enum TutorialSeeder {
             + "one. Nothing you do here can touch your own writing.",
 
             // Her take-icon block (its two takes are minted below).
+            // VX-105 ladder round 1, MAJOR-1: the guide opens on its OUTLINE
+            // (`BookStructureModel.defaultMode`), and no note detail is
+            // mounted inside a book, so the take panel's "Open Takes mode"
+            // (and ⌘2) refuse there — "the modes live inside a note". One
+            // sentence, inserted before her click, walks a reader in the
+            // Outline through the book's own open door into the full editor
+            // first (`NoteBoxCopy.openDoor` — the "open ↗" by each note's
+            // title; it lands in Write), where every step of her takes moment
+            // works as she wrote it. Her own sentences are unchanged around it
+            // (R-105-5's grant).
             "I built Variorum with a simple goal: to be able to create multiple "
             + "different versions of a block of text. I call these versions "
-            + "takes, borrowing from the film world. The icon to the right of "
-            + "this block is the take icon - click on it.",
+            + "takes, borrowing from the film world. If you're reading this in "
+            + "the book's Outline, click " + NoteBoxCopy.openDoor + " beside "
+            + "this note's title first, so it opens in the full editor. The "
+            + "icon to the right of this block is the take icon - click on it.",
 
             "While Write is meant to behave like a simple and elegant editor, "
             + "Takes is where complexity thrives. Click on \u{201C}expand "
