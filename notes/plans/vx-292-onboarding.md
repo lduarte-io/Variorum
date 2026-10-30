@@ -120,7 +120,7 @@ OUT OF SCOPE: the app icon (already sea-glass), the voices, the tour (other unit
 | 6 | VX-415 close as superseded by VX-559 | OWED at closeout |
 | 7 | Riders check (VX-71, VX-707, VX-343) | DECLINED (R-292-15: "no riders for now") — they stay on the board |
 | 8 | Release + site publish | AT HER WORD after merge |
-| 9 | U-THEME sea-glass preset + default flip (VX-710) | NOT STARTED — runs after U1 |
+| 9 | U-THEME sea-glass preset + default flip (VX-710) | BUILT 2026-10-30 — READY-FOR-STAGE (Mac pins + red-on-old watch + the walk PENDING; see U-THEME RECORD) |
 | 10 | VX-105 boundary resolution (session-to-session, R-292-15) | IN FLIGHT — message sent, answer lands in OVERLAP / COORDINATION |
 
 ## U1 RECORD
@@ -204,7 +204,7 @@ Expected: TourScriptTests [8] · TourEngineTests [5] · TourEntryTests [1] · To
 
 ## U-THEME RECORD
 
-**REVERT IN FLIGHT (compile-only check, headless):** `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift` + `SettingsShape.swift` checked out from `c3f8dfe92` (the piece-2 face) to prove the red-on-old watch compiles; both are committed at HEAD, so a successor restores with `git checkout HEAD -- App/Variorum/Variorum/Features/Settings/PaletteCopy.swift App/Variorum/Variorum/Features/Settings/SettingsShape.swift` and then re-runs `build-for-testing` (the DerivedData would otherwise hold the reverted build). **NOT DONE (first line, kept current):** piece 4 (record close) not yet written; no `xcodebuild test` run (stage-window only), no walk, no GUI, no QUESTIONS.md entry (the shared ledger is the merging session's — this unit's PROVISIONALs are listed here for the orchestrator to carry).
+**NOT DONE (first line, kept current):** no `xcodebuild test` run (stage-window only — the exact commands are in the U-THEME SELF-ASSESSMENT below), so every Mac pin's RUN and the face pins' red-on-old WATCH are PENDING; no walk (the use-shaped evidence this unit owes — the four rows below, both voices, PENDING the stage window), so the dev store's `theme_palette` state and her eye on the depth (P-292-4) and the face (P-292-5) are PENDING; no GUI; no QUESTIONS.md entry (the shared ledger is the merging session's — P-292-2/4/5 are for the orchestrator to carry); no canon edit (the delta is listed for U5). The compile-only revert check is DONE and restored (byte-identical, `diff`-verified; the tree rebuilt for testing at HEAD after it).
 
 Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-292`, branch `vx-292-onboarding` (on top of U1's close, `8a1742d14`), the Pro. Scope: the four pieces of the U-THEME BRIEF (R-292-14, VX-710); zero `Sources/VariorumCore/Sync/`, zero editor seam, zero schema (`theme_palette` is a synced setting VALUE — a new enum token, no DDL, no SyncSpec §12 event).
 
@@ -215,7 +215,7 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 | 1 The preset: `ThemePalette.seaglass`, derived from #C2DDD3 through the one rule (+ `PaletteDerivationTests`) | DONE (8e9531879) — core `swift build` + Mac `build-for-testing` TEST BUILD SUCCEEDED (no warning in a touched file); the Mac pins' RUN is PENDING the stage window. KNOWN RED BY DESIGN until piece 3: `PaletteDerivationTests.theSwatchStripShowsEveryPaletteExactlyOnce` (the sea-glass has a label but no home in the strip yet — that pin's own job) |
 | 2 The default flip — a read-time default, never a migration (+ the core pins) | DONE (c3f8dfe92) — core `swift test --filter AppearanceSettingsTests` RED on the piece-1 tree (2 issues: exactly the two unset-read lines), then **13/13 passed** after the flip; Mac `build-for-testing` TEST BUILD SUCCEEDED; phone `VariorumMobile` generic-iOS build BUILD SUCCEEDED |
 | 3 The Settings face: the strip, the label that stops being true, the search blurb's count (+ the face pins) | DONE (87a6379de) — Mac `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN (and their red-on-old WATCH, command below) is PENDING the stage window; the face's LOOK is PENDING the walk |
-| 4 Record close: self-assessment, stage commands, headless evidence | NOT STARTED |
+| 4 Record close: self-assessment, stage commands, headless evidence | DONE (PIECE4HASH) — READY-FOR-STAGE (the U-THEME SELF-ASSESSMENT below) |
 
 ### Piece 1 — the preset
 
@@ -243,3 +243,54 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 - **The search catalog (Settings ▸ search):** the palette row's blurb said "Sixteen palettes plus your own hex" — counting the 15 builds and the default; now **"Seventeen palettes…"**; keywords gain "sea glass", "seaglass", "classic" (so the old look is findable by its new name).
 - **The pins (`PaletteDerivationTests`):** `theSwatchStripShowsEveryPaletteExactlyOnce` — JUSTIFIED EDIT (the Default row holds the sea-glass; the voice's colours' row is found by CONTENT and must be titled by its label — written without naming the new `.classic` case so this file compiles against the piece-2 face). NEW `theWordDefaultNamesThePaletteAStoreWithNoPaletteWears` (the Default row holds exactly the unset store's palette; no other palette's label and no other row's title says "default"; the seedless-custom note names the voice's own colours by their label). NEW `theSearchBlurbCountsThePalettesTheStripShows` (the blurb's spelled count — `NumberFormatter.spellOut`, en_US — equals every palette but Custom). **Red on old, by mechanism:** on the piece-2 face (`c3f8dfe92`'s `PaletteCopy.swift` + `SettingsShape.swift`) all three are red — the strip lacks the sea-glass; the Default row holds `.default` labelled "Default" while an unset store wears the sea-glass, and the note says "the default"; the blurb says "sixteen" over seventeen palettes. The watch command is in the self-assessment.
 - **Not touched, said so:** `PaletteSettingsRow.swift` (it renders `Group.allCases` — the new row arrives by data); the voices; the tour; the field guide (no palette words in it — grepped); canon. **Canon delta OWED TO U5** (the closeout applies it, two-file rule): `notes/SurfaceContracts.md` The app, the palette sentence — "sixteen presets plus custom hex" → "seventeen presets plus custom hex", and "`default` is each voice's shipped colours" → "`default` (Classic) is each voice's shipped colours; a store with no palette wears the sea-glass, the icon's colour (VX-710, PROVISIONALs P-292-2/4/5)"; AppSpec §7's `setting` comment lists `theme_palette` among the read-time defaults (its default value is not named there — check at closeout); the dated narrative to `notes/AppSpecRecord.md`.
+
+### U-THEME SELF-ASSESSMENT (READY-FOR-STAGE)
+
+**Built (commits on `vx-292-onboarding`, each pushed):** `1a0cf7135` record opened · `8e9531879` piece 1 (`ThemePalette.seaglass`; `PalettePreset.all[.seaglass]` = the icon's fill, one seed, bold; the "Sea glass" label; `PaletteDerivationTests`: sixteen builds, the icon pin, the finals rows) · `c3f8dfe92` piece 2 (`ThemeSettings.unsetStorePalette = .seaglass` applied in `Queries.themeSettings`; unknown tokens keep reading `.default`; the core pins) · `87a6379de` piece 3 (the strip: Default = the sea-glass, Classic = the voice's own colours; the seedless-custom note; the search blurb's count and keywords; the face pins) · this commit, piece 4 (plus hash-flip and revert-announcement commits, notes only). Files: `Sources/VariorumCore/Models/Enums.swift` (one case + docs), `Sources/VariorumCore/Queries/AppearanceQueries.swift` (the default + the read), `App/Variorum/Shared/Theme/PaletteDerivation.swift` (one table row + docs), `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift`, `App/Variorum/Variorum/Features/Settings/SettingsShape.swift` (the palette row's blurb + keywords), and the pins in `Tests/VariorumCoreTests/ThemeAndShelfQueryTests.swift` and `App/Variorum/VariorumTests/PaletteDerivationTests.swift`. Zero `Sync/`, zero editor seam, zero schema, no registry capability (the coordinator's overlap fact (1): nothing to tell), no U1 file touched.
+
+**Headless evidence (the Pro, at the final tree):** core `swift build` clean; Mac `build-for-testing` TEST BUILD SUCCEEDED after every piece and again at HEAD after the revert check (no warning in a touched file); phone `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build` BUILD SUCCEEDED (core enum + shared derivation changed); `swift test --filter AppearanceSettingsTests` RED on the piece-1 tree at exactly the two unset-read lines, then 13/13 after the flip; the compile-only red-on-old configuration (`c3f8dfe92`'s face files under HEAD's pins) TEST BUILD SUCCEEDED, so the window's watch below runs; the full core `swift test` at the end: VariorumCoreTests **3,556 tests in 477 suites passed** (5 known issues — U1's 3,554 plus this unit's two new core tests), StringsWorkbookTests **32 passed**, VariorumMCPTests **468 tests, 1 issue** — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`'s `< 15 s` bound under the full parallel run (U1's identical flake, no MCP line in this diff), re-run alone **3/3 passed in 2.2 s**.
+
+**PENDING, and why:** (1) every Mac pin's RUN — `xcodebuild test` is stage-window only; (2) the red-on-old WATCH of the three face pins (red by mechanism on the piece-2 face — piece 3's notes); piece 1's two pins are red on old by construction (no `.seaglass` case — a compile failure, not a watch); piece 2's were watched headlessly; (3) the USE evidence — the walk below; (4) the dev store's `theme_palette` row state (encrypted store; the walk's first capture answers it); (5) her eye on P-292-4 (the depth) and P-292-5 (the face and the word).
+
+**PROVISIONALs (for `notes/QUESTIONS.md` at the merge):** **P-292-2** (the brief's) — the read-time flip; alt: fresh stores only via a birth-written row. **P-292-4** (this unit's) — the sea-glass at the BOLD depth (light room #E5F0EC, wash #CBE2D9, accent #3B6A59); alt (a) soft, which lands within 1.011:1 of Mint; alt (b) a third, deeper table so the room is the icon colour itself (a per-preset special case). **P-292-5** (this unit's) — the Default row holds the sea-glass, the voice's own colours become "Classic" in their own row; alts: one shared Default row; the sea-glass in Bold or Pastels; the word "Original" or "Plain". **Recorded decisions, not PROVISIONAL:** an unknown stored token reads `.default`, not the sea-glass (the brief's letter; every build agrees — a deliberate divergence from the voice, whose unreadable value reads the store default); the storeless placeholder stays `.default` (the voice's precedent); the label "Sea glass" (the noun's spelling); the raw token "seaglass" (the brief's); the Default row DERIVED from `unsetStorePalette`.
+
+**For U5 (the closeout) — owed, not done here:** the canon delta (piece 3's last bullet: SurfaceContracts' palette sentence, the record entry); **the release notes must say it** (drafted for her, public copy, no ticket ids): a library that never picked a palette changes colour on update — the app now wears the icon's sea glass — and Settings ▸ General ▸ Colour palette ▸ Classic brings the old colours back. MOBILE PARITY: nothing mobile-visible (the phone draws no palette — its road is palette-less). U3's Settings stop, if its copy names palettes, quotes `PaletteCopy.label(.seaglass)` / `label(.default)` rather than retyping them. No ticket filed by this unit.
+
+**THE STAGE WINDOW — exact commands (Swift Testing suite TYPE names; expected executed counts in brackets).** Run (A) FIRST if the red-on-old watch is wanted, then (B), which rebuilds:
+
+(A) the face pins' red-on-old watch (one suite, against the piece-2 face):
+
+```
+cd <home>/dev/variorum-vx-292 && git checkout c3f8dfe92 -- App/Variorum/Variorum/Features/Settings/PaletteCopy.swift App/Variorum/Variorum/Features/Settings/SettingsShape.swift
+cd App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS' test -only-testing:VariorumTests/PaletteDerivationTests
+cd <home>/dev/variorum-vx-292 && git checkout HEAD -- App/Variorum/Variorum/Features/Settings/PaletteCopy.swift App/Variorum/Variorum/Features/Settings/SettingsShape.swift && git status -sb
+```
+
+Expected: 16 tests, exactly THREE red — `theSwatchStripShowsEveryPaletteExactlyOnce` (the sea-glass has no row), `theWordDefaultNamesThePaletteAStoreWithNoPaletteWears` (the Default row holds `.default` labelled "Default"; the note says "the default"), `theSearchBlurbCountsThePalettesTheStripShows` ("sixteen" over seventeen) — the other 13 green. The restore must leave `git status` clean.
+
+(B) the green gate (one invocation; total 86):
+
+```
+cd <home>/dev/variorum-vx-292/App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/PaletteDerivationTests \
+  -only-testing:VariorumTests/ThemeTokenTests \
+  -only-testing:VariorumTests/PaletteReachTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/BookOutlineViewedTests \
+  -only-testing:VariorumTests/ReadPageRoomTests \
+  -only-testing:VariorumTests/SettingsShapeTests \
+  -only-testing:VariorumTests/VX176LibraryTintTests \
+  -only-testing:VariorumTests/LibraryListFaceTests \
+  -only-testing:VariorumTests/VX349ListHeaderRestTests
+```
+
+Expected: PaletteDerivationTests [16] · ThemeTokenTests [9] · PaletteReachTests [8] · NoLiteralColourTests [2] · BookOutlineViewedTests [31] · ReadPageRoomTests [2] · SettingsShapeTests [15] · VX176LibraryTintTests [1] · LibraryListFaceTests [1] · VX349ListHeaderRestTests [1] — "Test run with 86 tests … passed" (a parameterized test counts once). The touched pins are PaletteDerivationTests (and the core's AppearanceSettingsTests, already green headlessly); ThemeTokenTests and BookOutlineViewedTests enumerate every palette (the sea-glass joins them with no edit — piece 1's computed floors say they pass); PaletteReachTests, NoLiteralColourTests, ReadPageRoomTests are the brief's named palette pins; SettingsShapeTests covers the edited search row; the last three start a REAL `ThemeStore` on a fresh store — which now lands the sea-glass — and sample pixels or the resolved accent (regression riders for the flip; they mount windows, so an idle machine, as every app-suite run).
+
+(C) THE WALK (the use-shaped evidence; dev-store Debug build at HEAD, one capture per row, both voices where noted):
+
+1. **First launch, Settings ▸ General** — capture the palette row as it opens: WHICH swatch is selected names the dev store's state (Sea glass ⇒ no `theme_palette` row, the flip live; Classic ⇒ an explicit `default`; anything else ⇒ an explicit pick — record it).
+2. **The strip** — rows Default · Classic · Pastels · Two-tone · Bold · Your own; hover Default's swatch ("Sea glass") and Classic's; the header reads the selected label. Note the pane's fold (one more swatch row).
+3. **The sea-glass applied, both voices × both appearances** (Terminal light/dark, Study light/dark): the main window on the Bookcase and on a note in Write — light: a sea-glass room, wash and accent; dark: the black room (R51) with the sea-glass paper, wash and accent. Her eye: is this "the same seaglass color as the icon" (P-292-4)? Hold the Dock icon in frame for one capture.
+4. **The way back and the truth lines** — click Classic: the voice's own colours return; click Custom with no seed: the note reads "…until then this looks like Classic."; Settings search "sea glass" and "classic" each find the palette row, whose blurb begins "Seventeen palettes plus your own hex".
+
+Posture: a `setting` row is upsert-only, so any swatch click leaves the dev store with an EXPLICIT palette row (there is no door back to "no row"); restore the palette and voice found at row 1 (if row 1 showed Sea glass, end on Sea glass — same look; the dev store's content is the agents' per her 2026-10-28 rule). Dark/light back to what was found.
