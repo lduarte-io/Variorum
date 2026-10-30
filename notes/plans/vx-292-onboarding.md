@@ -697,3 +697,26 @@ U3's trace of VX-712 is accepted as concrete: the "getting around" lesson's own 
 - **Posture:** app quit ⌘Q; Study · dark · the explicit sea-glass row as found; the tour record stayed "completed". Dev-store walk artifacts (content is the agents'): two Pool-born notes ("inight thoughts", "ideasevening" — the stray prefixes are the walk's typing slips), both starred, the second tagged `ideas` (+ a stray `iasia` tag on the Prince from pass 1), both added to the Prince (now 30 notes); XVII carries two extra branched takes and three remembered Lenses columns; the Settings window frame moved to (420,315).
 
 ### U3 ADJUDICATION COMMIT (in-window): the tab-table pin fix — see Gate A above; commit message "VX-292 U3 window adjudication: theBookLessonCountsEveryViewTheToggleHas reads the tab TABLE".
+
+## U4 RECORD
+
+**NOT DONE (first line, kept current):** nothing built yet (the record opens before any code); no `xcodebuild test` run (stage-window only); no walk; no GUI; no QUESTIONS.md entry (the merging session's ledger); no canon edit (the delta is listed for U5).
+
+Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-292`, branch `vx-292-onboarding` (on top of U3's close, `0cae8c066`), the Pro. Scope: the three pieces of the U4 BRIEF (VX-559; R-292-5, R-292-12); zero `Sources/VariorumCore/Sync/`, zero editor seam, zero schema, no registry capability (the card renders the existing `.takeTour`). Read in my own context before any code: this plan whole (rulings, every unit record and window record, the U4 BRIEF), `notes/SessionResiliencyProtocol.md`, SurfaceContracts §The app, `TourOfferLine.swift`, `Domain/TourOffer.swift` + `TourOfferTests`, `WordsBandCard.swift` (+ `WordsBandModel.visible`), `TourOfferLineTests.swift`, `ShelfView`'s band composition, `RootView`'s offer/words-band builders and `startTour`/`tourDoors` (the tour's end retirement), `CalmAsks.swift`'s header, `StatusToast.swift`'s keep-clear rule, the registry's `.takeTour` row and `CapabilityRegistryTests`' renderer walk, `HelpMenuNamingTests`.
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 1 The card: `TourOfferCard` in the band, above the words card; the line and its row retire; the help line derived from the registry verb | NOT-STARTED — settled design below |
+| 2 The pins: `TourOfferLineTests` → `TourOfferCardTests` (the oracle moves), the band's composition, the registry walk's renderer line | NOT-STARTED |
+| 3 Record close (self-assessment, PROVISIONALs, stage commands, watches, walk rows, full core suite) | NOT-STARTED |
+
+### The settled design (traced before building)
+
+- **The rule is KEPT whole** (`Domain/TourOffer`): phases, events, records, `line(in:)`. The card shows exactly when the line showed — `TourOffer.line(in: phase) != nil` (`.offer` or `.helpRoad`), i.e. every device whose local record `variorum.tour.offer` is unset (a never-answered device) until it answers. The stored values (`declined` · `completed` · `ended`) are untouched, so every existing answer holds and nothing re-offers. The event `.notNow` keeps its identifier (its face, the card's door, says "no"; the record it writes is still `declined`) — a rename would move the core's table and its pins for no behaviour.
+- **Where it sits:** `ShelfView`'s band — between the shelf listing and the quick entry, the main column's full width (`WordsBandCard`'s idiom: card paper, hairline, radius 8, the board's 28-pt gutter) — ABOVE the words card when both stand. The line's slot below the entry and its held row RETIRE (`TourOfferModel.holdsRow` goes): the listing above the band is the flexible part of the Bookcase, so a card leaving the band gives its height to the listing and nothing under it moves — the words card and the quick entry stay put (pinnable).
+- **The doors:** `yes` (the tour's one entry, `RootView.startTour`, the line's road unchanged) · `no` (`decline()` → the rule's `.notNow`: the record written AT the press, the card's content swaps to the help line in the same frame, then after the help road's few seconds (4 s, the line's PROVISIONAL timer, kept) the card leaves the band for good). No ✕, no snooze (R-292-12).
+- **The help line:** "This can always be started from Help ▸ ‹verb›." — the brief's shape, the verb read from the registry's `.takeTour` row (the menu draws `verb(.takeTour)`), so a rename of the door moves the sentence.
+- **The tour's end and Help's re-entry** are the existing machinery, followed not changed: `tourDoors.recordCompleted`/`finished` → `tourEnded(completed:)`; Help ▸ Take the Onboarding Tutorial → `router.tourRequested` → `startTour` → `tourStarted()`.
+- **Coexistence (the execution plan's U4 line):** `CalmAsks` governs the app's POPUP asks (the update ask, the backup-folder toast) by day-of-use; neither the line nor the band's cards ever registered with it — the band is not a popup and the first-open card is the one thing a first open is allowed to offer (SurfaceContracts §The app). The words card's own rules (`WordsBandModel.visible`) are untouched; the two cards are two independent views in one band, each dismissible by its own doors.
