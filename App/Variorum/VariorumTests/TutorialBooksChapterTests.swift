@@ -249,7 +249,11 @@ struct TutorialBooksLessonTests {
             let sherlockDoor = CapabilityRegistry.capability(.restoreSampleLibrary)
             #expect(text.contains("\(sherlockDoor.verb) and Restore"), "Sherlock's door, by its own Help title")
             #expect(sherlockDoor.doors.contains(.menuBar), "…a door the Help menu really shows")
-            #expect(text.contains("Click the mark on one of the \(prince)'s notes"))
+            // The book's name carries its own article ("the prince"), so the
+            // prose reads "one of the prince's notes" — interpolating after a
+            // second "the" demanded a double article the prose rightly lacks
+            // (the U1 stage window's one red, fixed by the orchestrator).
+            #expect(text.contains("Click the mark on one of \(prince)'s notes"))
 
             // THE TRUTH, kind by kind.
             let readings = try await db.read { try Queries.readings($0) }
