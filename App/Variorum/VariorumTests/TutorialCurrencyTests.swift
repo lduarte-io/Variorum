@@ -271,14 +271,14 @@ struct TutorialCurrencyTests {
     /// said "Three views of a book share the toggle at the top" and taught
     /// Outline · Book · Read; the toggle is Outline · Index · Book · Read
     /// (`BookView.bookMasthead` — the book INDEX since pre-13u Act 10 wave
-    /// 2c, editable in place since the correction round). The tabs are inline
-    /// literals, so the count and the names are scanned from the masthead.
-    /// RED ON OLD: "Three views", no INDEX.
+    /// 2c, editable in place since the correction round). The tabs are drawn
+    /// from the one table since VX-292 U3 (`BookView.tabOrder`/`tabLabel`),
+    /// so the count and the names read the table itself — the second
+    /// merger's adjudication fix: the old source scan matched the retired
+    /// inline literals and read zero. RED ON OLD: "Three views", no INDEX.
     @Test func theBookLessonCountsEveryViewTheToggleHas() async throws {
         try await withGuide { _, db, guideID in
-            let view = try AppSource.read("Variorum/Features/BookView/BookView.swift")
-            let tab = try Regex(#"modeTab\("([A-Za-z]+)", \."#)
-            let labels = view.matches(of: tab).compactMap { $0.output[1].substring.map(String.init) }
+            let labels = BookView.tabOrder.map(BookView.tabLabel)
             #expect(labels == ["Outline", "Index", "Book", "Read"], "the masthead's own tabs")
             let text = try await prose(db, guideID, "a book from the inside")
             let count = countWord(labels.count)
