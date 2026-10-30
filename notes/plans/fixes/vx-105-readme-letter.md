@@ -167,8 +167,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
 
   The "nothing seeds after the readme" pin STAYS (inside (b)+(c), re-keyed from `created_at` — which now carries her
   October moment — to the readme's first block's mint).
-- **Piece 5 — the first-chapter interweave (R-105-5 · R-105-7 · boundary ruling 1):** DONE (this commit — hash at
-  the next). **GUIDE CONTENT CHANGED — the "start here" lesson (chapter "welcome", the guide's first lesson): the
+- **Piece 5 — the first-chapter interweave (R-105-5 · R-105-7 · boundary ruling 1):** DONE (`363ac91ed`). **GUIDE CONTENT CHANGED — the "start here" lesson (chapter "welcome", the guide's first lesson): the
   closeout must RE-SEED her real store's guide via the product door behind the A1 rail.** `TutorialSeeder.swift`
   footprint: that lesson only (plus the key lesson's one reference line, see the re-home). The lesson, 13 blocks:
   1. her welcome — verbatim from her draft;
@@ -200,10 +199,71 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   pattern: each chrome word read from its own source home — a currency net, green on both sides by design);
   `HelpMenuNamingTests` · `theGuidesSeededContentIsNotReworded` (flipped 3 → 2; the lesson reads the verb; RED ON OLD:
   three). Nothing pinned "no takes in the welcome chapter" (it already held "three ways of working"'s fan).
-- **Piece 6 — this record's closing sections:** IN-PROGRESS (LIVE STATUS kept from the first commit).
+- **Piece 6 — this record:** DONE (this commit). UNIT STATE: **READY-FOR-STAGE** — every piece built, compiled and
+  pushed; every Mac pin WRITTEN, RUN status PENDING the stage window; S-1 awaits the architect's ruling.
 
-Compile evidence so far: `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` (compile-only —
-app AND test target, nothing run) EXIT 0 after piece 1 and after piece 2.
+**Commits, in order:** `99231c04b` piece 1 · `9998e4931` piece 2 · `ca2f7d939` piece 1 rework (R-105-6) ·
+`9d6b31f64` piece 3 · `60b4b1635` the passages' re-home (boundary ruling 4) · `e5ef30a7c` piece 4 · `363ac91ed`
+piece 5 · this record commit.
+
+**Compile evidence:** `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing -quiet` from
+`App/Variorum/` (compile-only — the app AND the test target, NOTHING run, no test host launched; `build-for-testing`
+is the compile half of `test`, chosen so the stage window meets compiling pins) EXIT 0 after pieces 1, 2, 4, the
+re-home and 5; `build` EXIT 0 after piece 3. No warning in any touched file.
+
+**Headless evidence (the core package — UNTOUCHED by this unit: `git diff 43d2763cb -- Sources Package.swift` is
+empty):** `swift build` EXIT 0; `swift test --filter SeededFurniture` — 20 tests in 1 suite PASSED, 0 skipped (the
+fold's own core suite, including `herStarKeepsBothCopiesOnEveryGrain`, the rule S-1 meets). Her text, by script (the
+literals AS WRITTEN in the seeder source, compiled with `swift`): GREEN — all 17 == `read-me.txt`'s paragraphs; GREEN —
+interior fidelity vs the manifest (bare on 2, 12, 16, 17; one space short on the rest).
+
+### PROVISIONALs (each with its alternatives — for QUESTIONS at the merge; implementers in a worktree never touch the
+shared ledger, CLAUDE.md "Parallel sessions")
+
+- **P-105-1 — "4:44 am" is the seeding device's LOCAL 4:44** (R-105-3's own PROVISIONAL reading, built as ruled).
+  Alternatives: (b) one fixed instant — 4:44 am in her own zone, every other reader seeing it converted (7:44 am in New
+  York); (c) 4:44 UTC. Built (a): every reader sees 4:44 am. Pinned as instants per zone.
+- **P-105-2 — the split stamp's reach:** only the note's `created_at` carries her moment; `last_touched_at`,
+  `last_major_revision_at`, `updated_at` and every block/take/placement row carry the seed moment. Alternative: every
+  row born at 4:44 (the Prince's whole-scope shape) with the three edited columns re-stamped after — needs a raw row
+  write (no operation moves `last_major_revision_at` without a text change or a manual commit), so not built.
+- **P-105-3 — the passages' home:** `TutorialStartHerePassages.swift`, an `extension TutorialSeeder` (the brief's
+  "move or re-home" call, shaped by boundary ruling 4). Alternatives: `ProtectionWords` (Shared — but it compiles into
+  the phone too and is a scanned copy home), or back inside `TutorialSeeder.swift` (the boundary forbids).
+- **P-105-4 — `herBlocks` DELETED, not demoted to a test fixture** (the brief's call, made): her draft's useful parts
+  live in the guide's first lesson now, the frozen reference file keeps the draft whole as history, and no pin needs
+  the old five.
+- **P-105-5 — the R-105-6 oracle is the IN-REPO FILE**, read by the test at run time (her ruling's "your call"): the
+  package her text arrived in stays the one source, never a second transcription; the manifest stays as
+  interior-fidelity evidence beside it.
+- **F-2** (the added period) — above.
+- Kept names: the capability case `.restoreSampleLibrary` and `ShellActions.restoreSampleLibrary()` keep their
+  identifiers (boundary ruling 3: a retitle; never rendered).
+
+### Stage-window commands (READY-FOR-STAGE — run from `App/Variorum/` under a held `Tools/stage` claim; `-only-testing`
+takes SUITE TYPE names — it silently drops file names)
+
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/LaunchFurnitureTests \
+  -only-testing:VariorumTests/ReadmeStartHerePlanTests \
+  -only-testing:VariorumTests/TutorialNewRoadChapterTests \
+  -only-testing:VariorumTests/TutorialFurnitureFoldTests \
+  -only-testing:VariorumTests/HelpMenuNamingTests \
+  -only-testing:VariorumTests/TutorialCurrencyTests \
+  -only-testing:VariorumTests/TutorialBookShapeTests \
+  -only-testing:VariorumTests/TutorialTakesActsTests \
+  -only-testing:VariorumTests/PrinceSeedTests \
+  -only-testing:VariorumTests/PrinceFreshStoreTests \
+  -only-testing:VariorumTests/TourScriptTests
+```
+
+then the full `VariorumTests` (the closeout's). **Expected at the window:** every listed suite green EXCEPT
+`TutorialFurnitureFoldTests/theRealReadmeIsFoldableAndTwoMintsAgree` — RED by S-1's mechanism until the architect rules
+(a pass there would mean the born star did not land — investigate, don't celebrate). Verify the suite TYPE names in
+`TutorialWalkTests.swift` before running — CONFIRMED: `TutorialBookShapeTests` and `TutorialTakesActsTests` are two
+of its `@Suite` types; every other type above was grepped (`struct <Name> {`); `TourScriptTests` is the tour's words
+suite in `TourTests.swift` (it pins the end card's readme sentence).
 
 ### BUILD-VERIFY resolutions (piece 5 — her draft's chrome words against the build)
 
