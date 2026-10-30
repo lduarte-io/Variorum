@@ -319,13 +319,23 @@ struct PaletteDerivationTests {
     }
 
     /// The FACE's grouping covers every palette exactly once — her three
-    /// batches plus the two that are not builds. A sixteenth preset added
-    /// to the enum without a home in the strip would be invisible in
-    /// Settings; this is what says so.
+    /// batches plus the rows that are not batches. A preset added to the
+    /// enum without a home in the strip would be invisible in Settings; this
+    /// is what says so. *(VX-710: the sea-glass's arrival was this pin's
+    /// job exactly — red on the piece-1 tree, where it had a label and no
+    /// row. JUSTIFIED EDIT below: the Default row now holds the sea-glass,
+    /// and the voice's own colours have the Classic row.)*
     @Test func theSwatchStripShowsEveryPaletteExactlyOnce() {
         let shown = PaletteCopy.Group.allCases.flatMap(\.palettes)
         #expect(Set(shown) == Set(ThemePalette.allCases))
         #expect(shown.count == ThemePalette.allCases.count, "no palette in two groups")
+        #expect(PaletteCopy.Group.shipped.palettes == [.seaglass])
+        // The voice's own colours: a row of their own, titled by their label
+        // (found by content, not by case name, so this file still compiles
+        // against the piece-2 face for the red-on-old watch).
+        let classicRow = PaletteCopy.Group.allCases.first { $0.palettes.contains(.default) }
+        #expect(classicRow?.palettes == [.default])
+        #expect(classicRow?.title == PaletteCopy.label(.default))
         #expect(PaletteCopy.Group.pastels.palettes.count == 4)
         #expect(PaletteCopy.Group.twoTone.palettes.count == 6)
         #expect(PaletteCopy.Group.bold.palettes.count == 5)
@@ -336,6 +346,51 @@ struct PaletteDerivationTests {
             #expect(label != palette.rawValue || palette == .custom || palette == .default,
                     "a build's label is app words, not its stored token")
         }
+    }
+
+    /// **THE WORD "DEFAULT" NAMES WHAT A STORE WITH NO PALETTE WEARS — and
+    /// nothing else** (VX-710: her *"make that the default theme"*). The flip
+    /// moved the unset read to the sea-glass, so the strip's Default row must
+    /// hold it (and nothing else), no palette but it may be labelled
+    /// "Default", and the seedless-custom note — which really does look like
+    /// the voice's own colours — must name THOSE, not "the default". RED on
+    /// the piece-2 tree: the Default row held `.default`, labelled "Default",
+    /// while a store with no palette wore the sea-glass; and the note said
+    /// "looks like the default" over the voice's own colours.
+    @Test func theWordDefaultNamesThePaletteAStoreWithNoPaletteWears() {
+        let unset = Queries.ThemeSettings.unsetStorePalette
+        #expect(PaletteCopy.Group.shipped.title == "Default")
+        #expect(PaletteCopy.Group.shipped.palettes == [unset],
+                "the Default row holds exactly what a store with no palette wears")
+        for palette in ThemePalette.allCases where palette != unset {
+            #expect(!PaletteCopy.label(palette).lowercased().contains("default"),
+                    "\(palette.rawValue) is labelled \(PaletteCopy.label(palette)) — not the default")
+        }
+        for group in PaletteCopy.Group.allCases where group != .shipped {
+            #expect(!group.title.lowercased().contains("default"),
+                    "the \(group.title) row is not the default's")
+        }
+        // A seedless custom resolves to no palette — the voice's own
+        // colours — so its note names that palette, by its label.
+        #expect(PalettePreset.resolved(.custom, tint: .none) == nil)
+        #expect(PaletteCopy.needsASeedNote.contains(PaletteCopy.label(.default)))
+        #expect(!PaletteCopy.needsASeedNote.lowercased().contains("default"))
+    }
+
+    /// The Settings search's palette blurb COUNTS the palettes, so the count
+    /// must be the strip's: every palette but her own hex (which the blurb
+    /// names apart, "plus your own hex"). Spelled the way the blurb spells
+    /// it, so a seventeenth-to-eighteenth change cannot leave it stale. RED
+    /// on the piece-2 tree ("Sixteen" beside seventeen palettes).
+    @Test func theSearchBlurbCountsThePalettesTheStripShows() throws {
+        let row = try #require(SettingsCatalog.paneRows.first { $0.id == "palette" })
+        let palettes = ThemePalette.allCases.filter { $0 != .custom }.count
+        let speller = NumberFormatter()
+        speller.locale = Locale(identifier: "en_US")
+        speller.numberStyle = .spellOut
+        let word = try #require(speller.string(from: NSNumber(value: palettes)))
+        #expect(row.blurb.lowercased().hasPrefix("\(word) palettes plus your own hex"),
+                "the blurb says \(row.blurb.prefix(30))… over \(palettes) palettes")
     }
 
     /// **The dirty-field rule** (18g ladder R1-2): what the row consults
