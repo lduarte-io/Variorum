@@ -298,6 +298,16 @@ shared ledger, CLAUDE.md "Parallel sessions")
   shape); alternative: the current wing (`importPost`'s quick-entry rule); (iv) the refusal still OPENS her readme
   (the books' already-whole arm navigates to the book); (v) a readme she RENAMED is no longer "a post titled readme",
   so a press mints a fresh one beside it.
+- **P-105-8 — the door's born star is HEARD** (ladder round 1, MINOR-3 — the arbitration: recorded behavior, no code
+  change). The mint stars through the ONE application road (`setStarred` → `writeStar` → `intakeAfterStarring`), so in
+  an EXISTING store a living Home book whose rule references the star (e.g. a starred-notes gathering she bound into a
+  book — binding keeps `query_spec`) SEATS the restored readme, or bells it under the `arrivals` dial, exactly as her
+  own star would: intake is event-driven by design. "Bookless" in R-105-8 describes the fresh-store seed, where no
+  living book exists at birth (the birth road is exactly as pinned). Alternative: (b) UNHEARD — the door's star read
+  as the seed's identity, like a replay's exact revival; needs a public quiet form of the star write (the core's
+  `writeStar(…, heard: false)` is internal, VX-596). The QUESTIONS entry ("should the door's born star be a
+  non-event?") is the orchestrator's at the merge. A pin is owed only if (b) is ruled (a Home living book on
+  `{"star":true}`, press the door, assert no `reading_post` row for the new readme — this tree: a member row).
 - **S-1 → option B, RULED** (not provisional): the born-starred readme never folds while starred (a fresh pair keeps both; once neither copy is starred the pair folds — corrected at ladder round 1, MINOR-4); option A is VX-711. See S-1.
 - **F-2** (the added period) — KEPT, ruled; above.
 - Kept names: the capability case `.restoreSampleLibrary` and `ShellActions.restoreSampleLibrary()` keep their
@@ -365,7 +375,7 @@ suite in `TourTests.swift` (it pins the end card's readme sentence).
 - **O-1 — the tour's end card says "readme, a short welcome note, is waiting in your Library."**
   (`TourScript.endAside`, approved copy; boundary ruling 4 keeps the title, which this effort did). Her readme is
   ~1,800 words in 17 blocks — "a short welcome note" may read as untrue now. Tour copy is vx-292's / hers; nothing
-  changed here.
+  changed here. **Ticketed as VX-713** at the round-1 arbitration (NIT-3), so her answer has a home.
 
 ### Left for vx-292 (boundary ruling 2 — listed, NOT touched)
 
@@ -396,9 +406,19 @@ The ALTERNATIVE (not built): mint every row under the 4:44 clock (the Prince's w
 `last_touched_at` / `last_major_revision_at` / `updated_at` to the seed moment. Rejected because no public operation
 moves `last_major_revision_at` without a text change or a MANUAL commit (a manual savepoint is fold engagement and a
 visible "commit" in her history), so it would need a raw row write — the operations-as-API rule's one forbidden road.
-Recorded property, unchanged in kind from the old seeder: the mint is 19 transactions in ONE serialized runner turn
-(the guide's own shape; the old readme's takes pass was likewise separate transactions) — `importPost`'s single
-transaction is unavailable because it lands the note and its words on one clock (the split stamp needs two).
+Recorded property — CORRECTED at ladder round 1 (NIT-1): it was written here as "unchanged in kind from the old
+seeder", and it is NOT. The mint is 19 transactions in ONE serialized runner turn: `createPost` (the note, at her
+moment), 17 `newBlock`s (her words, one each), `setStarred`. The OLD seeder landed every word in ONE `importPost`
+transaction (only its takes pass was separate), so its worst partial state was "her text, missing takes". THIS mint's
+worst partial state — an error or a process death between its transactions — is a live, UNSTARRED "readme" holding a
+PREFIX of her letter, which `seedAtBirth` (`.alreadyPresent`) and the door (its refusal) both then treat as present;
+recovery is hers: delete it and press Help ▸ Restore “readme”. The window is the sub-second mint. Accepted because the
+split stamp under operations-only (P-105-2) needs the note minted apart from its words: the one-transaction road
+(`importPost` under the 4:44 clock + an edited-stamps finish) was evaluated at round 1 and NOT taken — her text DOES
+survive `importPost`'s `.paragraph` segmentation byte for byte (joined by single newlines; checked), but no operation
+can then move `last_major_revision_at` to the seed moment (only a churn-crossing text change or a MANUAL commit writes
+it), so the finish would need a raw row write, a visible savepoint, or a faked churn report
+(`notes/plans/fixes/vx-105-ladder-round1.md`, FIX ROUND 1 RECORD, NIT-1).
 
 ### S-1 — STRUCTURAL SURPRISE: the born star reads as HER ENGAGEMENT in the furniture fold (RULED: option B, VX-711)
 

@@ -223,5 +223,38 @@ below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `
   `TutorialCurrencyTests.theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages` asserts both fans on their
   blocks in fan order; NIT-2 is hardening against a FUTURE edit (no misattachment exists today), so no red-on-old pin
   can exist for it — recorded, not hollow. Compiles (`build-for-testing` EXIT 0).
-- **NIT-1** (the one-transaction road) — NOT-STARTED.
-- **MINOR-3** (PROVISIONAL, no code) · **NIT-3** (VX-713, no code) — NOT-STARTED (record lines only).
+- **NIT-1** (the one-transaction road) — DONE as the arbitration's FALLBACK (the commit carrying this line): the road
+  was evaluated and NOT TAKEN; today's mint shape is kept; the U1 record's "unchanged in kind" claim is corrected in
+  place. The evaluation, each half against the code:
+  1. **Byte-exactness — HOLDS (checked).** A throwaway core test (run headless, then deleted — never committed) read
+     `read-me.txt` as the U1 pin does and ran the bulk segmenter: `SegmentationRules.bulkSegments(paragraphs.joined(
+     separator: "\n"), mode: .paragraph)` == her 17 paragraphs, byte for byte (one line per paragraph; `trimmedPiece`
+     trims nothing from her already-trimmed blocks). Joined by "\n\n" instead, 16 of 17 blocks gain a trailing "\n"
+     (the blank-run rule keeps k−1 newlines as content) — not exact; and `importPost`'s default reads the READER's
+     segmentation (one-block → 1 block, sentence → 81), so the road would have to pass `.paragraph` explicitly.
+  2. **The edited-stamps finish — CANNOT BE DONE THROUGH OPERATIONS.** `importPost` under the 4:44 clock lands
+     `created_at`, `updated_at`, `last_touched_at` AND `last_major_revision_at` at 4:44 (its `mintSegments` stamp touch
+     + churn per block on the same clock). R-105-3 needs `last_touched_at` / `last_major_revision_at` at the seed
+     moment (the readme tops the edited sort, R-13s-29). The ONLY writer of `last_major_revision_at` is
+     `registerTextChange` (`Operations+Variant.swift:688`), reached by a churn-crossing text change or by
+     `forceMajorRevision: true`, which only a MANUAL `commit` passes (`:65`). So the finish would need a raw row write
+     (operations-as-API forbids it — P-105-2's own reason), a manual savepoint (a visible commit in her readme's
+     history AND fold engagement — `noteVerdict` reads a manual `commit_point` as hers), or `autosave` of unchanged
+     text with an invented `charDelta` (a false churn report). None is spec-defensible → per the brief's STOP rule the
+     road is abandoned, not re-designed.
+  **Not built — an option for the orchestrator only:** a two-phase clock scoped to `importPost` (4:44 for its FIRST
+  `date.now` read — `insertPost`'s — and the ambient clock for every later read — `mintSegments`') would land today's
+  exact stamp shape in ONE transaction. It is a different design from the arbitrated one and couples the seed to
+  `importPost`'s internal read order (a stamp pin would guard it), so it is named here and not built.
+  Record corrected: the U1 record's stamp-table coda now states what changed (the text is no longer atomic: the worst
+  partial state is a live, unstarred readme holding a PREFIX of her letter, which both roads then treat as present —
+  recovery is delete + the door) and why it was accepted (the split stamp under operations-only). No pin (a crash
+  injection would be the only one — hollow as a bug pin, as the finding says).
+- **MINOR-3** (the door's born star is heard) — DONE as recorded behavior (the commit carrying this line), NO code
+  change: **P-105-8** in the U1 record's PROVISIONALs states the built behavior (the star rides the one application
+  road; an existing store's living Home book that wants starred notes hears the door's star, as it would hers;
+  "bookless" in R-105-8 describes the fresh-store seed), the alternative (b) unheard with what it would need (a public
+  quiet star write — `writeStar(…, heard: false)` is internal), and the pin owed only if (b) is ruled. The QUESTIONS
+  entry is the orchestrator's at the merge (a worktree implementer never touches the shared ledger).
+- **NIT-3** (the end card's "a short welcome note") — DONE as a ticket: VX-713 (the arbitration's), noted on the U1
+  record's O-1. No code change (tour copy is vx-292's surface).
