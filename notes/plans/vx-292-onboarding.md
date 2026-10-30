@@ -377,6 +377,7 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 | 3 The missing-book restore at tour start, + the R-292-17 amendment (broken props) | DONE (59f8a937a; amended d370fd28b) — core 42/42 (TourWalkTests + TourQueriesTests); **R-292-17's read red-on-old WATCHED headlessly** (the fallback block disabled: exactly the 2 new query pins red, 5 issues; the 4 old green); restored, clean. Mac RUN and watch PENDING the stage window. PROVISIONAL P-292-7 (amended by R-292-17). |
 | 3′ The window fix (2026-10-30): the gate's admission arm + TRUE fixture worlds + own-engine reads | DONE (5b825bc2d gate · 6c5930791 pins) — Mac `build-for-testing` TEST BUILD SUCCEEDED; core 42/42 (no core line moved); the Mac RUN, all six watches and the walk PENDING the re-run window. |
 | 4 Record close | DONE (ca99bf3e6) — READY-FOR-STAGE (the U2 SELF-ASSESSMENT below). No revert in flight. |
+| 5 The ladder's round-1 MAJOR (the whole-effect gate — §LADDER ROUND-1 FIX below) | IN-PROGRESS — built (880e02598 core read · 90681e2fe gate + pins); **REVERT IN FLIGHT (headless watch):** `Queries.deletedMemberTitles`'s `AND c.deleted_at IS NOT NULL` removed on the committed tree; restore = `git checkout -- Sources/VariorumCore/Queries/TourQueries.swift` |
 
 ### Piece 1 — the settled design (trace first)
 
