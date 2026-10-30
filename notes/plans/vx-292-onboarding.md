@@ -212,7 +212,7 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 
 | piece | status |
 |---|---|
-| 1 The preset: `ThemePalette.seaglass`, derived from #C2DDD3 through the one rule (+ `PaletteDerivationTests`) | DONE (PIECE1HASH) — core `swift build` + Mac `build-for-testing` TEST BUILD SUCCEEDED (no warning in a touched file); the Mac pins' RUN is PENDING the stage window. KNOWN RED BY DESIGN until piece 3: `PaletteDerivationTests.theSwatchStripShowsEveryPaletteExactlyOnce` (the sea-glass has a label but no home in the strip yet — that pin's own job) |
+| 1 The preset: `ThemePalette.seaglass`, derived from #C2DDD3 through the one rule (+ `PaletteDerivationTests`) | DONE (8e9531879) — core `swift build` + Mac `build-for-testing` TEST BUILD SUCCEEDED (no warning in a touched file); the Mac pins' RUN is PENDING the stage window. KNOWN RED BY DESIGN until piece 3: `PaletteDerivationTests.theSwatchStripShowsEveryPaletteExactlyOnce` (the sea-glass has a label but no home in the strip yet — that pin's own job) |
 | 2 The default flip — a read-time default, never a migration (+ the core pins) | NOT STARTED — settled design: `ThemeSettings.unsetStorePalette = .seaglass`, applied in `Queries.themeSettings` only (the 13s-b Study-flip shape); the storeless placeholder stays `.default`; an unrecognized stored value keeps reading `.default` (today's fallback, the brief's letter) |
 | 3 The Settings face: the strip, the label that stops being true, the search blurb's count (+ the face pins) | NOT STARTED |
 | 4 Record close: self-assessment, stage commands, headless evidence | NOT STARTED |
