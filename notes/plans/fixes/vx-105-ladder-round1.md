@@ -214,6 +214,14 @@ below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `
   is the real road back. Candidate for the sibling ticket or a round-2 call.
   The closeout walkthrough (the orchestrator's) should start from the Bookcase: the guide → Outline → ▸ "start here" →
   read to block 5 → open ↗ → the ⑂ on block 5 → take 1 → take 2's Open Takes mode → expand all → block 7's takes.
-- **NIT-2** (the take attachments check their blocks) — NOT-STARTED.
+- **NIT-2** (the take attachments check their blocks) — DONE (the commit carrying this line). The fix: a nested
+  `fanned(_:opening:)` in the "start here" lesson resolves each take target by its index AND the opening of its text
+  ("I built Variorum with a simple goal" for block 5, "This is the point at which you might be thinking" for block
+  7); a mismatch REFUSES the attach — `assertionFailure` in DEBUG (loud: every suite that seeds the guide trips it),
+  and in Release no take lands rather than a wrong one. Her four takes' texts and their mint order are unchanged
+  (byte-identical literals, moved inside the two `if let`s). Pin: none new, as the finding says — the existing
+  `TutorialCurrencyTests.theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages` asserts both fans on their
+  blocks in fan order; NIT-2 is hardening against a FUTURE edit (no misattachment exists today), so no red-on-old pin
+  can exist for it — recorded, not hollow. Compiles (`build-for-testing` EXIT 0).
 - **NIT-1** (the one-transaction road) — NOT-STARTED.
 - **MINOR-3** (PROVISIONAL, no code) · **NIT-3** (VX-713, no code) — NOT-STARTED (record lines only).

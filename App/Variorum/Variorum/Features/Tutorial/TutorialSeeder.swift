@@ -704,21 +704,43 @@ enum TutorialSeeder {
         // sections). `branchVariant` seats a branch right AFTER the take it
         // branched from, so each block's SECOND take is minted first: the fan
         // reads original, take 1, take 2 — her draft's order.
-        try take(on: startHere.blocks[4],
-                 "Now click on Open Takes mode in the top bar of this modal.")
-        try take(on: startHere.blocks[4], "You found it! :D")
-        try take(on: startHere.blocks[6],
-                 "There are four different ways to see your takes and work with "
-                 + "them. Test each of them out now by changing \u{201C}style\u{201D} "
-                 + "at the top bar of this note. While each is useful for "
-                 + "something different, I\u{2019}m particularly fond of margin "
-                 + "grid for quick notes.")
-        try take(on: startHere.blocks[6],
-                 "This is where things get really fun! You can expand or collapse "
-                 + "any take block with the button to the right of it, or use the "
-                 + "button at the top. Navigation is fully supported by keyboard "
-                 + "shortcuts\u{2014}you can also get to Takes with \u{2318}2. "
-                 + "Check out all the shortcuts at \u{2318}/.")
+        //
+        // VX-105 ladder round 1, NIT-2: a take attaches to its block by the
+        // block's index AND the opening of its text, so an edit above them
+        // (this lesson is the one R-105-5 lets keep changing) can never move
+        // her takes onto the wrong block. A mismatch REFUSES the attach —
+        // loudly in DEBUG (`assertionFailure`: the seed's own suites trip on
+        // it), and in Release no take lands rather than a wrong one.
+        func fanned(_ index: Int, opening: String) -> Operations.NewBlockResult? {
+            guard startHere.blocks.indices.contains(index),
+                  startHere.blocks[index].variant.workingText.hasPrefix(opening)
+            else {
+                assertionFailure(
+                    "\u{201C}start here\u{201D}: block \(index + 1) no longer opens "
+                    + "\u{201C}\(opening)\u{201D}; her takes were not attached")
+                return nil
+            }
+            return startHere.blocks[index]
+        }
+        if let takeIcon = fanned(4, opening: "I built Variorum with a simple goal") {
+            try take(on: takeIcon,
+                     "Now click on Open Takes mode in the top bar of this modal.")
+            try take(on: takeIcon, "You found it! :D")
+        }
+        if let soWhat = fanned(6, opening: "This is the point at which you might be thinking") {
+            try take(on: soWhat,
+                     "There are four different ways to see your takes and work with "
+                     + "them. Test each of them out now by changing \u{201C}style\u{201D} "
+                     + "at the top bar of this note. While each is useful for "
+                     + "something different, I\u{2019}m particularly fond of margin "
+                     + "grid for quick notes.")
+            try take(on: soWhat,
+                     "This is where things get really fun! You can expand or collapse "
+                     + "any take block with the button to the right of it, or use the "
+                     + "button at the top. Navigation is fully supported by keyboard "
+                     + "shortcuts\u{2014}you can also get to Takes with \u{2318}2. "
+                     + "Check out all the shortcuts at \u{2318}/.")
+        }
 
         _ = try lesson(welcome, "getting around", [
             // 13i-d U7 (F-U1-5): the sidebar area is the BOOKCASE (§7).
