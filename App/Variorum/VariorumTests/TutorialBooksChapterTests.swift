@@ -31,8 +31,16 @@ import VariorumCore
 // MARK: - The world
 
 /// A store with the field guide seeded and the Welcome arrangement made —
-/// and, when `library`, the three seeded books first (the classics lesson's
+/// and, when `library`, the seeded books first (the classics lesson's
 /// subject). Marks are injected; nothing touches the test host's defaults.
+///
+/// **VX-292 U1 — A JUSTIFIED EDIT (R-292-1):** the books seed LAUNCH SET
+/// FIRST, then the rest of `Book.all` (the `SampleLibraryWelcomeTests`
+/// `launchSeeds` precedent). In `Book.all`'s order Sherlock filled the empty
+/// store first and the Prince — fresh stores only (R-633-16) — then declined
+/// it, so this world held no Prince although the lesson now teaches it; the
+/// real launch seeds the Prince into the empty store, and a restore press
+/// adds Sherlock and Jekyll after it, which is what this order builds.
 @MainActor
 private func withChapterWorld<T>(
     library: Bool = false,
@@ -57,7 +65,8 @@ private func withChapterWorld<T>(
         session.seededBookMarkIsSet = { _ in false }
         session.markSeededBook = { _ in }
         if library {
-            for book in SampleLibrarySeeder.Book.all {
+            let launch = SampleLibrarySeeder.Book.launchSet
+            for book in launch + SampleLibrarySeeder.Book.all.filter({ !launch.contains($0) }) {
                 _ = await SampleLibrarySeeder.seedIfNeeded(
                     session: session, book: book, loadMark: { false }, saveMark: { _ in })
             }
@@ -66,12 +75,16 @@ private func withChapterWorld<T>(
         try await SampleLibraryWelcome.arrange(session: session, guideName: TutorialSeeder.bookName)
         // 13s-b triage landing — U1b's JUSTIFIED WORLD EDIT RETIRED, as it
         // asked ("if the landing forgets, the staged world is the tell"): the
-        // lessons now teach the LAUNCH seed, so this world IS the launch
-        // seed — the guide, the arrangement, and the starred notes gathering
-        // the launch seeds beside them (`StarredGatheringSeeder`'s one call,
-        // the gathering lesson 1 walks). The classics gathering and a quick
-        // note are the READER's acts now, executed by the pins that teach
-        // them (the Help door's brain; the pad's own mint).
+        // lessons teach the LAUNCH seed. This world is its FURNITURE — the
+        // guide, the arrangement, and the starred notes gathering the launch
+        // seeds beside them (`StarredGatheringSeeder`'s one call, the
+        // gathering lesson 1 walks). VX-292 U1 (the VX-633 record's flag:
+        // "this world IS the launch seed" stopped holding when the Prince
+        // joined the launch): the launch's BOOK is not in it unless `library`
+        // seeds it (the classics lesson's world — the launch set first, then
+        // the restore doors' books). The classics gathering and a quick note
+        // are the READER's acts, executed by the pins that teach them (the
+        // Help door's brain; the pad's own mint).
         _ = try await session.runner.run { ops in ops.ensureStarredNotesGathering() }
         return try await body(session, db, guideID)
     }
@@ -219,21 +232,43 @@ struct TutorialBooksLessonTests {
             #expect(text.contains(CapabilityRegistry.capability(.restoreClassicsGathering).verb),
                     "the classics gathering's door, by its own Help title")
             #expect(!text.contains("owned classic"), "LC-2: a restored Jekyll is a PLAIN book")
+            // VX-292 U1 (R-292-1) — A JUSTIFIED EDIT, RED ON OLD: the launch
+            // seeds the Prince (VX-633), so the owned book the lesson points at
+            // is the Prince, by the book's own name; the old prose named
+            // Sherlock there and said "two more classics doors". Sherlock's door
+            // joined the classics doors (it ADDS a classic now), quoted from its
+            // registry verb so vx-105's retitle (R-105-4) carries into the
+            // lesson — the prose interpolates it, so the non-vacuous half is
+            // that the door it names is really on the Help menu.
+            let prince = SampleLibrarySeeder.Book.prince.name
+            #expect(text.contains("and \(prince), an owned book."), "the Prince waits on Welcome, owned")
+            #expect(text.contains("Look closer at \(prince):"))
+            #expect(!text.contains(SampleLibrarySeeder.Book.sherlock.name + ", an owned book"),
+                    "Sherlock is restore-only: a fresh store does not hold it")
+            #expect(text.contains("three more classics doors"))
+            let sherlockDoor = CapabilityRegistry.capability(.restoreSampleLibrary)
+            #expect(text.contains("\(sherlockDoor.verb) and Restore"), "Sherlock's door, by its own Help title")
+            #expect(sherlockDoor.doors.contains(.menuBar), "…a door the Help menu really shows")
+            #expect(text.contains("Click the mark on one of the \(prince)'s notes"))
 
             // THE TRUTH, kind by kind.
             let readings = try await db.read { try Queries.readings($0) }
             let starred = try #require(readings.first { $0.name == Operations.starredNotesGatheringName })
             let jekyll = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.jekyllAndHyde.name })
+            let princeBook = try #require(readings.first { $0.name == prince }, "the launch seeded the Prince")
             let sherlock = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.sherlock.name })
             let guide = try #require(readings.first { $0.id == guideID })
             let welcome = try #require(try await db.read { db in
                 try Shelf.fetchOne(db, sql: "SELECT * FROM shelf WHERE role = 'welcome' AND deleted_at IS NULL")
             })
             // "Two of the three are waiting on the Welcome shelf: this guide, a
-            // plain book, and the adventures of sherlock holmes, an owned book."
-            #expect(guide.shelfId == welcome.id && sherlock.shelfId == welcome.id)
-            #expect(text.contains(SampleLibrarySeeder.Book.sherlock.name), "Sherlock, by its own name")
-            #expect(sherlock.owned && !guide.owned)
+            // plain book, and the prince, an owned book."
+            #expect(guide.shelfId == welcome.id && princeBook.shelfId == welcome.id)
+            #expect(princeBook.owned && !guide.owned)
+            // "…three more classics doors: [Sherlock's] and Restore “jekyll”
+            // each add another classic … (the first owned like the prince, the
+            // second plain)" — this world holds both restored copies.
+            #expect(sherlock.owned, "a restored Sherlock is owned like the Prince")
             #expect(!(try await memberIDs(db, guideID)).isEmpty,
                     "the guide is a plain book holding members")
             // "The third kind is with your unshelved books: the starred notes
@@ -268,7 +303,7 @@ struct TutorialBooksLessonTests {
                     "a book holds its notes as members — what it shows IS its rows")
             // LC-2: the restored Jekyll (this world holds the restored copy —
             // the Restore press's shape) is a PLAIN book.
-            #expect(!jekyll.owned, "the arrangement owns Sherlock alone")
+            #expect(!jekyll.owned, "the arrangement owns the Prince and Sherlock, never Jekyll")
 
             // "Restore the “classics” Gathering adds a gathering made from that
             // tag, which shows every note wearing it without holding a single
@@ -280,24 +315,28 @@ struct TutorialBooksLessonTests {
             #expect(classics.kind == .gathering)
             #expect(try await memberIDs(db, classicsID).isEmpty, "it holds nothing…")
             let classicsShown = Set(try await shown(db, classicsID))
+            let princeMembers = try await memberIDs(db, princeBook.id)
             let sherlockMembers = try await memberIDs(db, sherlock.id)
-            #expect(Set(sherlockMembers).isSubset(of: classicsShown) && Set(jekyllMembers).isSubset(of: classicsShown),
-                    "…yet shows every note wearing the tag, Sherlock's and the restored Jekyll's")
+            #expect(!princeMembers.isEmpty)
+            #expect(Set(princeMembers).isSubset(of: classicsShown)
+                        && Set(sherlockMembers).isSubset(of: classicsShown)
+                        && Set(jekyllMembers).isSubset(of: classicsShown),
+                    "…yet shows every note wearing the tag: the Prince's and the restored classics'")
 
             // LC-3 — "anywhere outside its book … each of its notes wears a
             // quiet “owned by” mark": the mark lives OUTSIDE (the badge rule),
             // and inside its own book the owned note wears none.
-            let story = try #require(sherlockMembers.last)
+            let story = try #require(princeMembers.last)
             let (outside, inside) = try await db.read { db in
                 (try Queries.ownershipFacts(db, postIDs: [story]),
-                 try Queries.ownershipFacts(db, postIDs: [story], inBook: sherlock.id))
+                 try Queries.ownershipFacts(db, postIDs: [story], inBook: princeBook.id))
             }
             guard case .ownedBy(let owner)? = OwnershipBadgeFace.badge(
                 outside[story], placement: .outside, badgesOn: true) else {
-                Issue.record("a Sherlock note wears the owned mark outside its book")
+                Issue.record("a Prince note wears the owned mark outside its book")
                 return
             }
-            #expect(owner.id == sherlock.id)
+            #expect(owner.id == princeBook.id)
             #expect(OwnershipBadgeFace.badge(inside[story], placement: .inBook, badgesOn: true) == nil,
                     "inside its own book, no owned-by mark — why the lesson says OUTSIDE")
 
@@ -849,6 +888,12 @@ struct TutorialBooksRitualTests {
     /// ("Restore the “classics” Gathering adds a gathering made from that
     /// tag"), so the walk PRESSES that door first — its own brain, which mints
     /// on Welcome — and then walks her ritual exactly as before.
+    ///
+    /// **VX-292 U1 — A JUSTIFIED EDIT (R-292-1):** the owned book the lesson
+    /// teaches is the Prince (the launch's book since VX-633; Sherlock is
+    /// restore-only), so the walk opens one of the PRINCE's notes through its
+    /// mark ("Click the mark on one of the prince's notes"). RED ON OLD: the
+    /// old world (`Book.all`'s order) held no Prince at all.
     @Test func ritualOneTheClassicsWalk() async throws {
         try await withChapterWorld(library: true) { session, db, _ in
             _ = try await session.runner.run { _ in
@@ -856,25 +901,26 @@ struct TutorialBooksRitualTests {
             }
             let readings = try await db.read { try Queries.readings($0) }
             let classics = try #require(readings.first { $0.name == SampleLibraryWelcome.classicsGatheringName })
-            let sherlock = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.sherlock.name })
+            let prince = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.prince.name })
             let jekyll = try #require(readings.first { $0.name == SampleLibrarySeeder.Book.jekyllAndHyde.name })
             let welcome = try #require(try await db.read { db in
                 try Shelf.fetchOne(db, sql: "SELECT * FROM shelf WHERE role = 'welcome' AND deleted_at IS NULL")
             })
             #expect(classics.shelfId == welcome.id, "the classics gathering sits on Welcome")
             let seen = Set(try await shown(db, classics.id))
-            let sherlockNotes = Set(try await memberIDs(db, sherlock.id))
+            let princeNotes = Set(try await memberIDs(db, prince.id))
             let jekyllNotes = Set(try await memberIDs(db, jekyll.id))
-            #expect(sherlockNotes.isSubset(of: seen) && jekyllNotes.isSubset(of: seen),
+            #expect(!princeNotes.isEmpty)
+            #expect(princeNotes.isSubset(of: seen) && jekyllNotes.isSubset(of: seen),
                     "both books' notes, side by side")
             let facts = try await db.read { try Queries.ownershipFacts($0, postIDs: Array(seen)) }
-            let story = try #require(sherlockNotes.first)
+            let story = try #require(princeNotes.first)
             let badge = OwnershipBadgeFace.badge(facts[story], placement: .outside, badgesOn: true)
             guard case .ownedBy(let owner)? = badge else {
-                Issue.record("a Sherlock note wears the owned mark in a gathering: \(String(describing: badge))")
+                Issue.record("a Prince note wears the owned mark in a gathering: \(String(describing: badge))")
                 return
             }
-            #expect(owner.id == sherlock.id)
+            #expect(owner.id == prince.id)
             for id in jekyllNotes {
                 #expect(OwnershipBadgeFace.badge(facts[id], placement: .outside, badgesOn: true) == nil,
                         "Jekyll's wear none")
@@ -891,7 +937,7 @@ struct TutorialBooksRitualTests {
             }
             defer { NotificationCenter.default.removeObserver(token) }
             MembershipChip.ascend(bookID: owner.id, postID: story)
-            #expect(landed.value["bookID"] == sherlock.id)
+            #expect(landed.value["bookID"] == prince.id)
             #expect(landed.value["postID"] == story)
         }
     }
