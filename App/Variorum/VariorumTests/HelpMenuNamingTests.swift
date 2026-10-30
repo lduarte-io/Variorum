@@ -46,9 +46,10 @@ struct HelpMenuNamingTests {
     /// too confusing we don't need that.")** — Help's book doors each name
     /// their book, the Sherlock door included: Restore “the adventures of
     /// sherlock holmes”, over the one name constant (the Jekyll and Prince
-    /// doors' idiom). Four restore-a-seeded-thing doors on Help, no fifth, and
-    /// no door anywhere says "sample library". RED ON OLD: the verb read
-    /// "Restore the Sample Library".
+    /// doors' idiom). The seeded doors on Help — the three books, the classics
+    /// gathering and (R-105-8) the readme — each name their thing, and no door
+    /// anywhere says "sample library". RED ON OLD: the verb read "Restore the
+    /// Sample Library".
     @Test func theSherlockDoorNamesItsBookAndNoDoorSaysSampleLibrary() throws {
         #expect(CapabilityRegistry.capability(.restoreSampleLibrary).verb
                 == "Restore \u{201C}the adventures of sherlock holmes\u{201D}")
@@ -60,6 +61,7 @@ struct HelpMenuNamingTests {
                 == "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}")
         let seededDoors: [CapabilityID] = [
             .restorePrinceBook, .restoreSampleLibrary, .restoreJekyllBook, .restoreClassicsGathering,
+            .restoreReadme,
         ]
         for id in seededDoors {
             #expect(CapabilityRegistry.capability(id).doors.contains(.menuBar), "\(id) on the Help menu")

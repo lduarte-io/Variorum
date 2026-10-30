@@ -125,6 +125,15 @@ private func reading(_ db: AppDatabase, named name: String) async throws -> Read
     try await db.read { db in try Queries.readings(db).first { $0.name == name } }
 }
 
+@MainActor
+private func pollUntil(_ condition: @MainActor () -> Bool, turns: Int = 600) async {
+    for _ in 0..<turns {
+        if condition() { return }
+        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(5))
+    }
+}
+
 /// The live readme's id, if one seeded.
 private func readmeID(_ db: AppDatabase) async throws -> String? {
     try await db.read { db in
@@ -548,6 +557,127 @@ struct LaunchFurnitureTests {
         }
         #expect(pages.count == AppDatabase.StoreVariant.allCases.count)
         #expect(pages[.real] == pages[.dev], "the real variant's readme is the dev variant's, byte for byte")
+    }
+
+    // MARK: - VX-105 (R-105-8) — Help ▸ Restore “readme”
+
+    /// The readme's seed shape, as the store holds it — what the birth seed
+    /// and the door must both leave (one mint body).
+    private func readmeShape(_ db: AppDatabase, _ id: String) async throws -> (
+        blocks: [String], oneTakeEach: Bool, starred: Bool, created: String,
+        membered: Bool, tagged: Bool, wing: String
+    ) {
+        try await db.read { db in
+            let blockIDs = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT block_id FROM container_block
+                    WHERE container_id = ? AND deleted_at IS NULL ORDER BY position, id
+                    """,
+                arguments: [id])
+            let takeCounts = try blockIDs.map { blockID in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL",
+                    arguments: [blockID]) ?? 0
+            }
+            let created = try String.fetchOne(
+                db, sql: "SELECT created_at FROM container WHERE id = ?", arguments: [id]) ?? ""
+            return (
+                try Queries.renderedText(db, containerID: id).components(separatedBy: "\n\n"),
+                takeCounts.allSatisfy { $0 == 1 },
+                try Queries.starred(db).contains { $0.target == .post(id) },
+                created,
+                try Bool.fetchOne(
+                    db, sql: "SELECT EXISTS (SELECT 1 FROM reading_post WHERE post_id = ? AND deleted_at IS NULL)",
+                    arguments: [id]) ?? true,
+                try Bool.fetchOne(
+                    db, sql: "SELECT EXISTS (SELECT 1 FROM post_tag WHERE post_id = ? AND deleted_at IS NULL)",
+                    arguments: [id]) ?? true,
+                try String.fetchOne(db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [id]) ?? "?")
+        }
+    }
+
+    private func liveReadmeCount(_ db: AppDatabase) async throws -> Int {
+        try await db.read { db in
+            try Int.fetchOne(
+                db,
+                sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND title = ? AND deleted_at IS NULL",
+                arguments: [ReadmeSeeder.title]) ?? -1
+        }
+    }
+
+    /// **THE DOOR'S MINT ARM — her deletion does not stop a press** (R-105-8:
+    /// "a deleted chapter comes back fresh" is the seeded doors' rule). She
+    /// deletes the seeded readme: the BIRTH road keeps honouring that quietly
+    /// (`seedAtBirth` answers `.deletedByTheReader`), but Help ▸ Restore
+    /// “readme” MINTS the exact seed shape anew — her seventeen blocks, one take
+    /// each, starred, created at her 4:44 moment, bookless, untagged, Home —
+    /// opens it, and speaks the receipt; the deleted copy stays in the Trash.
+    /// RED ON OLD by construction: no such door (`.restoreReadme`) existed.
+    @Test func theReadmeDoorMintsTheSeedShapeEvenAfterHerDeletion() async throws {
+        let file = try herReadmeFileParagraphs()
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let seeded = try #require(try await readmeID(db))
+            try session.operations.deleteContainer(seeded)
+            #expect(await ReadmeSeeder.seedAtBirth(session: session) == .deletedByTheReader,
+                    "the birth road still honours her deletion quietly")
+            #expect(try await liveReadmeCount(db) == 0)
+
+            let shell = ShellRouter()
+            ShellActions(session: session, shell: shell).restoreReadme()
+            await pollUntil { session.status.spoken != nil }
+            #expect(session.status.spoken?.text == ReadmeDoorCopy.restored())
+            #expect(session.status.spoken?.kind == .receipt, "a mint is a receipt")
+            let fresh = try #require(try await readmeID(db), "the door minted a readme")
+            #expect(fresh != seeded, "a fresh note — the deleted one stays deleted")
+            #expect(shell.pendingSelection == .post(fresh), "fire-and-DO: the door opens it")
+            #expect(try await liveReadmeCount(db) == 1)
+            let shape = try await readmeShape(db, fresh)
+            #expect(shape.blocks == file, "her seventeen blocks, byte for byte")
+            #expect(shape.oneTakeEach && shape.starred && !shape.membered && !shape.tagged && shape.wing == "",
+                    "one take each, starred, standalone, Home")
+            #expect(shape.created == DateFormatter.variorumISO8601.string(from: ReadmeSeeder.writtenAt()),
+                    "created at her moment, like the seed's")
+            #expect(session.undoStack.depth == 0, "no ⌥⌘Z entry, like every restore door")
+        }
+    }
+
+    /// **THE DOOR'S REFUSAL ARM.** While a live readme stands the door changes
+    /// nothing: no second readme, a refusal in the family's voice, and the
+    /// existing note opened. RED ON OLD by construction (no such door).
+    @Test func theReadmeDoorRefusesWhileALiveReadmeStands() async throws {
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let standing = try #require(try await readmeID(db))
+            let shell = ShellRouter()
+            ShellActions(session: session, shell: shell).restoreReadme()
+            await pollUntil { session.status.spoken != nil }
+            #expect(session.status.spoken?.text == ReadmeDoorCopy.alreadyPresent())
+            #expect(session.status.spoken?.kind == .refusal, "a door that did nothing speaks a refusal")
+            #expect(shell.pendingSelection == .post(standing), "…and still opens the readme she has")
+            #expect(try await liveReadmeCount(db) == 1, "never a second readme")
+        }
+    }
+
+    /// **TWO QUICK PRESSES MINT ONE** — the door's read and its mint share one
+    /// serialized runner turn, so a second press finds the first's readme.
+    /// RED ON OLD by construction (no such door).
+    @Test func twoQuickPressesOfTheReadmeDoorMintOne() async throws {
+        try await withLaunchWorld { session, db in
+            let first = Task { @MainActor in try await ReadmeSeeder.restore(session: session) }
+            let second = Task { @MainActor in try await ReadmeSeeder.restore(session: session) }
+            let outcomes = [try await first.value, try await second.value]
+            let minted = outcomes.filter { if case .restored = $0 { true } else { false } }
+            #expect(minted.count == 1, "exactly one press mints: \(outcomes)")
+            #expect(try await liveReadmeCount(db) == 1)
+        }
     }
 
     /// **NEVER A RETROFIT** (the `declined` mark's contract). An existing

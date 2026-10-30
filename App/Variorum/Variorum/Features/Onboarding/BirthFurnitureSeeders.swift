@@ -302,23 +302,30 @@ enum ReadmeSeeder {
 
     @discardableResult
     static func seedAtBirth(session: AppSession) async -> BirthSeed {
-        let outcome = await perform(session: session, blocks: Self.paragraphs)
+        let outcome = await performBirthSeed(session: session)
         log.notice(
             "readme at a fresh store's birth: \(String(describing: outcome), privacy: .public)")
         return outcome
     }
 
-    private static func perform(session: AppSession, blocks: [String]) async -> BirthSeed {
+    /// The live readme — a live post wearing the reserved title, in any wing,
+    /// archived or not (the smallest id when several stand). The birth seed
+    /// and the door ask the same question.
+    nonisolated static func liveReadmeID(_ db: Database) throws -> String? {
+        try String.fetchOne(
+            db,
+            sql: """
+                SELECT id FROM container
+                WHERE kind = 'post' AND title = ? AND deleted_at IS NULL
+                ORDER BY id LIMIT 1
+                """,
+            arguments: [title])
+    }
+
+    private static func performBirthSeed(session: AppSession) async -> BirthSeed {
         do {
             let (liveID, tombstoned) = try await session.database.read { db in
-                (try String.fetchOne(
-                    db,
-                    sql: """
-                        SELECT id FROM container
-                        WHERE kind = 'post' AND title = ? AND deleted_at IS NULL
-                        ORDER BY id LIMIT 1
-                        """,
-                    arguments: [title]),
+                (try liveReadmeID(db),
                  try Bool.fetchOne(
                     db,
                     sql: """
@@ -329,44 +336,95 @@ enum ReadmeSeeder {
                     arguments: [title]) ?? false)
             }
             if liveID != nil { return .alreadyPresent }
+            // The birth road honours her deletion quietly (the `pending`-resume
+            // window); the DOOR does not — a press is her word (`restore`).
             if tombstoned { return .deletedByTheReader }
             let writtenAt = Self.writtenAt()
             let postID = try await session.runner.run { _ -> String in
-                let ops = Operations(undoStack: nil)
-                // R-105-3, "created 4:44, edited at birth" — the split stamp,
-                // through operations alone (no row is ever re-stamped):
-                // the NOTE is created at her moment, under the operations
-                // layer's own time seam (the Sherlock/Prince fixed-clock
-                // precedent, scoped to this one mint) …
-                let note = try withDependencies {
-                    $0.date = .constant(writtenAt)
-                } operation: {
-                    try ops.createPost(title: title, wingId: "")
-                }
-                // … and its words are set down at the seed moment, on the
-                // ambient clock: one block per paragraph, in order, each
-                // stored exactly as given (`newBlock` keeps every byte but
-                // U+0000), whose touch and churn stamp `last_touched_at`,
-                // `last_major_revision_at` and `updated_at` — so the readme
-                // seeded LAST tops the Library's edited-newest sort
-                // (R-13s-29). Furniture never lands on her ⌥⌘Z (the quiet
-                // facade, and no entry).
-                for text in blocks {
-                    _ = try ops.newBlock(in: note.id, text: text, at: .end, registeringUndo: false)
-                }
-                // Born STARRED (her ruling: "yeah make it born starred"),
-                // through the ONE star write, in the same seed act. Starring
-                // a note is an applying act; on a fresh store no living book
-                // carries a star rule, and the seeded starred-notes GATHERING
-                // assembles it at read (a gathering holds nothing — the
-                // readme stays bookless).
-                try ops.setStarred(.post(note.id), starred: true)
-                return note.id
+                try mint(ops: Operations(undoStack: nil), writtenAt: writtenAt)
             }
             return .seeded(postID: postID)
         } catch {
             return .refused(String(describing: error))
         }
+    }
+
+    /// **THE ONE MINT** (VX-105 — R-105-8: "ONE shared mint body between
+    /// seedAtBirth and the door"): the readme's exact seed shape, run INSIDE a
+    /// serialized runner turn on the QUIET facade (nothing on her ⌥⌘Z — the
+    /// caller passes `Operations(undoStack: nil)`).
+    ///
+    /// R-105-3, "created 4:44, edited at birth" — the split stamp, through
+    /// operations alone (no row is ever re-stamped): the NOTE is created at her
+    /// moment, under the operations layer's own time seam (the Sherlock/Prince
+    /// fixed-clock precedent, scoped to this one mint); its words are then set
+    /// down on the AMBIENT clock — one block per paragraph, in order, each
+    /// stored exactly as given (`newBlock` keeps every byte but U+0000), whose
+    /// touch and churn stamp `last_touched_at`, `last_major_revision_at` and
+    /// `updated_at`, so a readme seeded LAST tops the Library's edited-newest
+    /// sort (R-13s-29). Born STARRED (her ruling: "yeah make it born starred"),
+    /// through the ONE star write, in the same act: starring a note is an
+    /// applying act, and the seeded starred-notes GATHERING assembles it at read
+    /// (a gathering holds nothing — the readme stays bookless). Home wing,
+    /// untagged, undated.
+    nonisolated static func mint(ops: Operations, writtenAt: Date) throws -> String {
+        let note = try withDependencies {
+            $0.date = .constant(writtenAt)
+        } operation: {
+            try ops.createPost(title: title, wingId: "")
+        }
+        for text in paragraphs {
+            _ = try ops.newBlock(in: note.id, text: text, at: .end, registeringUndo: false)
+        }
+        try ops.setStarred(.post(note.id), starred: true)
+        return note.id
+    }
+
+    // MARK: - Help ▸ Restore “readme” (VX-105 — R-105-8)
+
+    /// What the door did.
+    enum DoorOutcome: Equatable, Sendable {
+        /// Minted fresh — the exact seed shape (`mint`).
+        case restored(postID: String)
+        /// A live readme already stands; nothing was minted.
+        case alreadyPresent(postID: String)
+    }
+
+    /// **The door's brain** (R-105-8, her words: *"just tell the readme session
+    /// to add a 'restore readme' door. why not just do that and match
+    /// everything else"*). The seeded-book doors' rule: a LIVE readme (any
+    /// wing, archived included — `liveReadmeID`) means the door has nothing
+    /// to do; otherwise it MINTS the exact seed shape, and a TOMBSTONE is
+    /// IGNORED — a deliberate press is her word ("a deleted chapter comes back
+    /// fresh"), unlike the birth road's quiet deletion-respect. Its Trash copy
+    /// stays where it is (PROVISIONAL P-105-7). The read and the mint share ONE
+    /// runner turn, so two quick presses can never mint two.
+    static func restore(session: AppSession) async throws -> DoorOutcome {
+        let writtenAt = Self.writtenAt()
+        return try await session.runner.run { _ -> DoorOutcome in
+            @Dependency(\.database) var database
+            if let live = try database.read({ db in try liveReadmeID(db) }) {
+                return .alreadyPresent(postID: live)
+            }
+            return .restored(postID: try mint(ops: Operations(undoStack: nil), writtenAt: writtenAt))
+        }
+    }
+}
+
+/// **The readme door's words** (VX-105 — R-105-8; the seeded-book doors'
+/// voice, without their dashes — PROVISIONAL wording, P-105-6). A mint is a
+/// receipt; a door that did nothing is a refusal (the status seam's rule).
+nonisolated enum ReadmeDoorCopy {
+    static func restored(title: String = ReadmeSeeder.title) -> String {
+        "Restored \u{201C}\(title)\u{201D} to your Library."
+    }
+
+    static func alreadyPresent(title: String = ReadmeSeeder.title) -> String {
+        "You already have \u{201C}\(title)\u{201D}, so nothing was restored."
+    }
+
+    static func failed(_ line: String, title: String = ReadmeSeeder.title) -> String {
+        "Restoring \u{201C}\(title)\u{201D} failed: " + line
     }
 }
 

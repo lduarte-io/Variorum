@@ -971,6 +971,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// comes back FRESH, history and all (the front matter's R-18l-12
     /// promise).
     case restoreJekyllBook
+    /// VX-105 (R-105-8 — "add a 'restore readme' door … match everything
+    /// else"): the readme's restore — Help ▸ Restore “readme”, the seeded
+    /// doors' rule: a live readme refuses; otherwise the one mint makes the
+    /// seeded shape again (a tombstone ignored — a press is her word).
+    case restoreReadme
     /// 13s-b U1b (R-13s-37, "classics restorable"): the classics
     /// GATHERING's restore — adopt-or-mint on Welcome from the `#classics`
     /// tag, the retired arrangement step's shape behind an explicit door.

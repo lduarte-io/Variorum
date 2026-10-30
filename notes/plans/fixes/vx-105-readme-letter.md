@@ -66,6 +66,27 @@ branch `vx-292-onboarding`; closeouts serialize) — recorded as relayed:**
 4. Scope fence restated for the rebase story: your TutorialSeeder footprint is the "start here" lesson ONLY (plus the
    boundary hits you list but don't touch). The title "readme" must not change (vx-292's tour end card quotes it).
 
+**Two more rulings from the author (2026-10-30, relayed via oct29coordinator at her instruction):**
+
+**R-105-8 — A RESTORE DOOR FOR THE README** (her verbatim: *"uh just tell the readme session to add a \"restore
+readme\" door. why not just do that and match everything else"*). Build **Help ▸ Restore “readme”** in the per-book
+restore doors' exact idiom — label quoting ReadmeSeeder.title lowercase, a NEW registry capability + ShellActions func
++ every home .restoreJekyllBook has (Help menu, palette, registry; check the ⌘/ dictionary), fire-and-DO. Behavior, the
+doors' precedent: a LIVE post titled "readme" → refusal (the door changed nothing — say so in the family's voice);
+otherwise MINT the exact seed shape (her 17 trimmed blocks, standalone, bookless, untagged, starred, created 2026-10-29
+04:44 local + edited-at-mint). A deliberate press IGNORES a tombstone — "a deleted chapter comes back fresh" is the
+family rule — while seedAtBirth keeps its quiet deletion-respect for the birth road only. ONE shared mint body between
+seedAtBirth and the door (no second copy of her text). Mark thin-precedent choices PROVISIONAL in the record. Pins: the
+door's mint + refusal arms (red-on-old: no such capability existed), the registry walk, CapabilityRegistryTests. REPORT
+THE CAPABILITY'S NAME prominently in your summary — the coordinator trial-merges against vx-292 and needs it.
+(This supersedes, for the readme door alone, boundary ruling 3's "No new registry capability is added by this
+effort"; the Sherlock door stays a retitle.)
+
+**R-105-9 — the closeout sheds two acts** (her word): the real-store headless mint is STRUCK (R-105-1 superseded — she
+presses the new door herself after the release), and the field-guide re-seed is STRUCK (her verbatim: *"i can do that
+myself after release on the air"*). Edit the record's closeout checklist accordingly: no real-store act, no guide
+re-seed; the A1 zero-instance window at the end is the /Applications refresh only.
+
 ## U1 BRIEF (one implementer session, one acceptance unit)
 
 Seat: worktree `<home>/dev/variorum-vx-105`, branch `vx-105-readme-letter` (`git status -sb` first; expect clean; pull --ff-only). Read IN FULL before touching code: this file; `notes/plans/vx-105-letter-content/README.md` + `read-me.txt`; `App/Variorum/Variorum/Features/Onboarding/BirthFurnitureSeeders.swift`; the readme pins (`App/Variorum/VariorumTests/LaunchFurnitureTests.swift` readme section, `App/Variorum/VariorumTests/Protection/ReadmeStartHerePlanTests.swift`, `App/Variorum/VariorumTests/Protection/TutorialNewRoadChapterTests.swift`, `App/Variorum/VariorumTests/TutorialFurnitureFoldTests.swift`); `App/Variorum/Variorum/Registry/ShellActions.swift` restore-door region (~500–620) + the registry/menu/palette homes of `.restoreSampleLibrary`; `TutorialSeeder.swift:2502`'s key-lesson use of `startHerePassages`. The resiliency protocol binds (`notes/SessionResiliencyProtocol.md`): commit per piece, push after each, LIVE STATUS in the "## U1 RECORD" below from the first commit, foreground waits only, no subagents.
@@ -94,8 +115,8 @@ FENCES: no `xcodebuild test` at your seat (stage window only); no walks, no app 
 ## U1 RECORD
 
 **What this unit did NOT do (first line, per the contract):** no Mac suite was RUN (stage window only — the suites are
-WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/Applications` touch, no real-store mint
-(R-105-1 is the closeout's); nothing under `Sources/VariorumCore/Sync/`. PENDING items are marked as such below.
+WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/Applications` touch, no real-store act
+(R-105-1's mint is STRUCK by R-105-9 — she presses the new door herself); nothing under `Sources/VariorumCore/Sync/`. PENDING items are marked as such below.
 
 ### LIVE STATUS (implementer, Opus — one session)
 
@@ -167,8 +188,9 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
 
   The "nothing seeds after the readme" pin STAYS (inside (b)+(c), re-keyed from `created_at` — which now carries her
   October moment — to the readme's first block's mint).
-- **Piece 5 — the first-chapter interweave (R-105-5 · R-105-7 · boundary ruling 1):** DONE (`363ac91ed`). **GUIDE CONTENT CHANGED — the "start here" lesson (chapter "welcome", the guide's first lesson): the
-  closeout must RE-SEED her real store's guide via the product door behind the A1 rail.** `TutorialSeeder.swift`
+- **Piece 5 — the first-chapter interweave (R-105-5 · R-105-7 · boundary ruling 1):** DONE (`363ac91ed`). **GUIDE CONTENT CHANGED — the "start here" lesson (chapter "welcome", the guide's first lesson).** Her real
+  store's seeded guide is stale by this lesson; the closeout's re-seed is STRUCK (R-105-9 — she re-seeds it herself on
+  the Air after the release). `TutorialSeeder.swift`
   footprint: that lesson only (plus the key lesson's one reference line, see the re-home). The lesson, 13 blocks:
   1. her welcome — verbatim from her draft;
   2. the beliefs block — its leading "Welcome. " dropped, the rest byte-identical (script-checked);
@@ -199,12 +221,39 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   pattern: each chrome word read from its own source home — a currency net, green on both sides by design);
   `HelpMenuNamingTests` · `theGuidesSeededContentIsNotReworded` (flipped 3 → 2; the lesson reads the verb; RED ON OLD:
   three). Nothing pinned "no takes in the welcome chapter" (it already held "three ways of working"'s fan).
-- **Piece 6 — this record:** DONE (this commit). UNIT STATE: **READY-FOR-STAGE** — every piece built, compiled and
-  pushed; every Mac pin WRITTEN, RUN status PENDING the stage window; S-1 awaits the architect's ruling.
+- **Piece 6 — this record:** DONE (`846e5ecfa`).
+- **Piece 7 — Help ▸ Restore “readme” (R-105-8):** DONE (this commit — hash at the next). **The capability:
+  `CapabilityID.restoreReadme`** (a NEW case; registry verb `Restore \u{201C}\(ReadmeSeeder.title)\u{201D}` →
+  rendered **Restore “readme”**; app scope; doors `.menuBar` + `.palette`; no key; always available — the
+  `.restoreJekyllBook` declaration exactly). Every home `.restoreJekyllBook` has: `Registry/Capability.swift` (the
+  case), `Registry/CapabilityRegistry.swift` (the declaration), `EditorCommands.swift` (`menuRendered` + the Help
+  menu `Button(verb(.restoreReadme))`, after the books' doors, before the classics gathering's),
+  `Registry/ShellActions.swift` (`func restoreReadme()`, `paletteActs`, `paletteAction(for:)`). The ⌘/ dictionary
+  lists no restore door (its rows are the chord catalogue and the vocabulary), so nothing to add there.
+  **ONE mint body:** `ReadmeSeeder.mint(ops:writtenAt:)` — the birth seed (`performBirthSeed`) and the door
+  (`ReadmeSeeder.restore(session:)`) both call it; her text exists once (`ReadmeSeeder.paragraphs`).
+  **The door's rule:** a LIVE post titled "readme" (`liveReadmeID` — any wing, archived included, the birth seed's own
+  read) → `.alreadyPresent` → a REFUSAL ("You already have “readme”, so nothing was restored.") that still opens the
+  note; otherwise → `.restored` → the exact seed shape (17 trimmed blocks, one take each, starred, created 4:44 local,
+  edited at mint, Home, bookless, untagged) → a RECEIPT ("Restored “readme” to your Library.") and the note opened. A
+  TOMBSTONE is IGNORED (a press is her word); `seedAtBirth` keeps answering `.deletedByTheReader` on the birth road. The
+  live read and the mint share ONE runner turn, so two quick presses mint one. Quiet facade: no ⌥⌘Z entry, like every
+  restore door. Failure: "Restoring “readme” failed: " + the seeded doors' `failureLine`. Pins:
+  `CapabilityRegistryTests` · `theReadmeRestoreDoorIsDeclaredLikeTheSeededBookDoors` (verb, declaration = Jekyll's,
+  menu + palette, declared once; the existing walks `theMenuBarRendersExactlyTheDeclaredMenuDoors` /
+  `thePaletteRendersExactlyTheDeclaredPaletteDoors` cover the sets); `LaunchFurnitureTests` ·
+  `theReadmeDoorMintsTheSeedShapeEvenAfterHerDeletion` (the mint arm: deleted → birth road says
+  `.deletedByTheReader`, the door mints a fresh note of the seed shape, receipt, opened, no undo entry),
+  `theReadmeDoorRefusesWhileALiveReadmeStands` (the refusal arm: one readme, refusal kind, opened),
+  `twoQuickPressesOfTheReadmeDoorMintOne`; `HelpMenuNamingTests` · the seeded-doors list gains `.restoreReadme`. RED ON
+  OLD: by construction — no `.restoreReadme` capability, no `ReadmeSeeder.restore` existed. `build-for-testing` EXIT 0,
+  no warning in a touched file.
+  UNIT STATE: **READY-FOR-STAGE** — every piece built, compiled and pushed; every Mac pin WRITTEN, RUN status PENDING
+  the stage window; S-1 awaits the architect's ruling.
 
 **Commits, in order:** `99231c04b` piece 1 · `9998e4931` piece 2 · `ca2f7d939` piece 1 rework (R-105-6) ·
 `9d6b31f64` piece 3 · `60b4b1635` the passages' re-home (boundary ruling 4) · `e5ef30a7c` piece 4 · `363ac91ed`
-piece 5 · this record commit.
+piece 5 · `846e5ecfa` piece 6 (the record) · piece 7 (the readme door, R-105-8) next.
 
 **Compile evidence:** `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing -quiet` from
 `App/Variorum/` (compile-only — the app AND the test target, NOTHING run, no test host launched; `build-for-testing`
@@ -236,6 +285,19 @@ shared ledger, CLAUDE.md "Parallel sessions")
 - **P-105-5 — the R-105-6 oracle is the IN-REPO FILE**, read by the test at run time (her ruling's "your call"): the
   package her text arrived in stays the one source, never a second transcription; the manifest stays as
   interior-fidelity evidence beside it.
+- **P-105-6 — the door's words** (thin precedent: the book doors speak "Restored “X” — n stories came back." and
+  "“X” is already whole — it's on your Bookcase.", with dashes this effort may not author): receipt "Restored “readme”
+  to your Library."; refusal "You already have “readme”, so nothing was restored." (true whether it sits in the
+  Library or Archived); failure "Restoring “readme” failed: …". Alternatives: "“readme” is already in your Library."
+  (untrue for an archived readme); the books' dashed shapes (a new em dash in authored copy).
+- **P-105-7 — the door's edges** (thin precedent): (i) "live" = any live post titled "readme" in ANY wing, archived
+  included — the birth seed's own read; alternative: Home-only or unarchived-only (an archived or other-wing readme
+  would then get a twin); (ii) a press after her deletion mints a FRESH note and leaves the deleted one in the Trash
+  (the books' "comes back fresh"); alternative: un-delete the tombstoned note (`restoreContainer`) — but it may carry
+  her edits, and the family mints fresh; (iii) the fresh readme lands in HOME whatever wing she stands in (the seed
+  shape); alternative: the current wing (`importPost`'s quick-entry rule); (iv) the refusal still OPENS her readme
+  (the books' already-whole arm navigates to the book); (v) a readme she RENAMED is no longer "a post titled readme",
+  so a press mints a fresh one beside it.
 - **F-2** (the added period) — above.
 - Kept names: the capability case `.restoreSampleLibrary` and `ShellActions.restoreSampleLibrary()` keep their
   identifiers (boundary ruling 3: a retitle; never rendered).
@@ -250,6 +312,7 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
   -only-testing:VariorumTests/TutorialNewRoadChapterTests \
   -only-testing:VariorumTests/TutorialFurnitureFoldTests \
   -only-testing:VariorumTests/HelpMenuNamingTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
   -only-testing:VariorumTests/TutorialCurrencyTests \
   -only-testing:VariorumTests/TutorialBookShapeTests \
   -only-testing:VariorumTests/TutorialTakesActsTests \
@@ -368,9 +431,9 @@ flag OFF the seed's value is engagement); `ReservedContainer` has no such field.
 ## Closeout checklist (the orchestrator's)
 
 - Stage window via oct29coordinator (REQUEST→READY→GO): the Mac suites (the readme/launch/tutorial/registry suites + full VariorumTests), then the fresh-birth reset walkthrough (the VX-633 road: clear the THREE seed marks in the DEBUG defaults domain deliberately; md5 the five dev-slot files before, restore byte-exact after; watch for an orphaned `variorum-restore-hold.json` — VX-697).
-- Walkthrough asserts: her 17 blocks byte-exact on the page, starred, standalone, created Oct 29 4:44 am, tops the Library; the old placeholder content gone; Help shows the four per-book doors and no "Restore the Sample Library"; the Sherlock door restores the book.
-- Her real store: the headless mint (R-105-1) behind the A1 rail at a zero-instance window; the guide RE-SEED is now certain (R-105-5 changes the first chapter) — the product door behind the A1 rail, same window.
+- Walkthrough asserts: her 17 blocks byte-exact on the page, starred, standalone, created Oct 29 4:44 am, tops the Library; the old placeholder content gone; Help shows the per-book doors, Restore “readme” (R-105-8), and no "Restore the Sample Library"; the Sherlock door restores the book; Restore “readme” refuses while the readme stands and mints it fresh after it is deleted.
+- ~~Her real store: the headless mint (R-105-1) …; the guide RE-SEED …~~ — **STRUCK by R-105-9**: no real-store act and no guide re-seed at this closeout (she presses Help ▸ Restore “readme” herself after the release, and re-seeds the guide herself on the Air). The only zero-instance window is the `/Applications` refresh below.
 - Canon deltas (two-file rule): SurfaceContracts "The app" seed-set line (readme = her letter text, 17 blocks, starred, dated; sherlock door named; sample-library label retired) + keyboard/doors lines if touched; AppSpecRecord dated entry with her words; QUESTIONS #234's P-VX306-W-1 noted superseded-in-part (the passages' readme home ended; the guide home stands).
 - VX-105 Done rides the PR merge ("VX-105: …", merge commit); **VX-635 closed as superseded** (her disposition 3); in-flight row retired; worktree + branch deleted; canon-size line in the handoff.
-- Release: Release build, DMG + appcast to stargazing.tech (the cross-repo road) — notes DRAFTED FOR HER IN CHAT first (never a meta line in the file, VX-708); /Applications refresh at a zero-instance window (A1 first).
+- Release: Release build, DMG + appcast to stargazing.tech (the cross-repo road) — notes DRAFTED FOR HER IN CHAT first (never a meta line in the file, VX-708); /Applications refresh at a zero-instance window (A1 first). — the window's ONLY act (R-105-9).
 - MOBILE PARITY: nothing mobile-visible (R-105-2).

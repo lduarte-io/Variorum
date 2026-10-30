@@ -2428,6 +2428,15 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // VX-105 (R-105-8): the readme's restore — the book doors' idiom,
+        // the verb following the one title constant (lowercase, her word).
+        Capability(
+            id: .restoreReadme,
+            verb: "Restore \u{201C}\(ReadmeSeeder.title)\u{201D}",
+            scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
         // 13s-b U1b (R-13s-37, "classics restorable"): the classics
         // gathering's restore — adopt-or-mint on Welcome; the verb's
         // wording is the implementer's (PROVISIONAL P-U1b-3).
