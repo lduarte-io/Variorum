@@ -358,10 +358,13 @@ extension Queries {
     /// through its `version_of` links in both directions (`idx_edge_source` /
     /// `idx_edge_target`), to the other endpoint's placements (live through
     /// `uq_cblock_ownership`, tombstoned through `idx_cblock_dead_block`), kept
-    /// only when that note is a
-    /// live post other than this one — exactly the peers the `.anyLiveNote`
-    /// arm ranges over, and a superset of the ones it can name, since every
-    /// filter but the link type is left to the classifier. Then the ONE
+    /// only when that note is a live post other than this one — exactly the
+    /// peers the `.anyLiveNote` arm ranges over, and a superset of the ones it
+    /// can name. The gather filters only the link's type and the peer's own
+    /// identity and liveness (a live post, not this container); it leaves to
+    /// the classifier the edge fence (a live link, or one cascade-dead with its
+    /// endpoint) and this container's own checks (live, born archived — and
+    /// `theirs.block_id <> mine.block_id`). Then the ONE
     /// classifier decides, per linked note (`isVersionHistory`): the answer is
     /// `versionHistoryPredicate(.anyLiveNote)`'s exactly (pinned equal across
     /// the note-side shapes in `NoteVersionsTests`).

@@ -248,6 +248,10 @@ The read's pre-existing automatic edge-index pass is described, not changed (the
   `Comment` parameter does not accept — the test target did NOT compile at that commit (my verifying grep printed
   nothing and I committed anyway). The next commit joins the message into one literal; `swift test --filter
   anyLiveNotesVersion` then passed 3/3. No other file was affected.
-- **NIT-1** (the gather's filters, stated exactly) — NOT-STARTED.
+- **NIT-1** (the gather's filters, stated exactly) — DONE (the commit carrying this line). The doc's "since every
+  filter but the link type is left to the classifier" is replaced: the gather filters only the link's type and the
+  peer's own identity and liveness (a live post, not this container); it leaves to the classifier the edge fence (a
+  live link, or one cascade-dead with its endpoint) and this container's own checks (live, born archived — and
+  `theirs.block_id <> mine.block_id`). The broken line wrap round 2 left in the same sentence is mended. Doc only.
 - **MINOR-2** (the equality pin's source side) — NOT-STARTED. Settled: shapes E and G; the two mutants applied
   temporarily AFTER a commit, each shown RED, the tree restored with `git checkout --` and `git diff --quiet` clean.
