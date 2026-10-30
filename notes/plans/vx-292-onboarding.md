@@ -494,3 +494,20 @@ Expected: TourScriptTests [8] · TourSpotlightTests [8] · TourEngineTests [10] 
 ## U2 STAGE WINDOW (the orchestrator, 2026-10-30 ~04:55, claim vx-292-u2 — LIVE; the record completes at the window's close)
 
 **IN FLIGHT: the six Mac red-on-old watches W1–W6, each an in-place edit of ONE file, run, then `git checkout -- <file>` restore.** If this session dies mid-watch, the one dirty file in `git status` names the watch (W1/W2 `Domain/Tour.swift` · W3 `BookStructureModel.swift` · W4 `RootView.swift` · W5 `TourEngine.swift` · W6 `StatusToast.swift`) — restore it with `git checkout -- <file>`; no watch edit is ever committed. Then the green gate (22 types / 140) and the walk.
+
+### WINDOW FINDING 2026-10-30 04:55–05:05 — THE GATE'S BASELINE IS RED; the window PAUSES, back to the implementer (the stage released to vx-105-walk meanwhile)
+
+**Four Mac pins fail on the CLEAN tree at 622a5bdb4** (`TourEngineTests` + `TourEntryTests`, 16 executed / 2 suites, run twice — once under W1's edit, once clean; identical baseline failures; logs in the session scratchpad `w1.log` / `w1-clean.log`):
+
+- `helpsDoorStartsTheTourAtStepOneAndEndTourRetiresTheOffer` — `firstStoryID` → fixture note `…0019`, expected `chapter.id` `…0001`.
+- `aChapterRememberedInTakesIsDrivenToWriteWhenTheTourMeetsIt` — same line (1046): `firstStoryID` another note than `chapter.id`. (Its DRIVE assertions pass clean — the drive itself works.)
+- `stepThreeLandsTheFarChapterOnThePage` — `firstStoryID` = an EARLY note (`40E693BE…`, outline target=3), expected the 25th (`EF72C903…`); the reveal/ring machinery then landed and lit the WRONG note perfectly (the lit anchor equals `firstStoryID`), so the road works and the LANDMARK choice is what diverges.
+- `aFinishedSeededBookIsTurnedToItsOutlineAndTheChapterLanded` — same, PLUS the log line `[tutorial] restore the prince failed: lockedReading(id: …)` — **the R-292-17 case-2 gate FIRED on a Finished book** (the fixture's props read broken) **and the restore road refused `lockedReading`.**
+
+**The shared mechanism (the orchestrator's read — the implementer confirms or corrects):** the R-292-17 landmark read prefers the named chapter only WHILE IT CARRIES A FAN, else falls to the first fanned live member — and the real-shell fixture worlds mint notes whose fans do not match the real Prince (every real paragraph is born fanned), so the read picks a different note than the pin names. The piece-2 fixtures (`stepThreeLands…`, `aFinishedSeededBook…`) predate d370fd28b's read change and could never run headlessly (Mac-only). The headless `TourQueriesTests` pinned the read itself and pass — the divergence is fixtures-vs-read, not the rule's own table.
+
+**A product finding beyond the fixtures:** `restoresLaunchBook` case 2 does not consider a LOCKED (Finished) seeded book. On a real Finished Prince whose props deletions broke, every tour start would run the restore and eat its `lockedReading` refusal (a failure line at every start). Finished is her deliberate act — the gate should treat a locked seeded book as beyond the road's reach (the recorded floor), or the implementer proposes better. P-292-7's text amends with the decision.
+
+**W1's partial verdict, for the record:** under W1's edit the two expected reds fired exactly (`aDriveReaches…` 2 issues, `aChapterRemembered…` +2 drive issues over its baseline 1) and nothing else moved — but NO watch verdict is formal until the baseline is green; all six watches re-run after the fix. Tree restored clean (verified `git status`).
+
+**Back to the implementer:** fix the fixture worlds to TRUE worlds (the named chapter carries the fan the real Prince's chapters carry, where the pin's meaning is "the toured chapter is the named one"; the finished-book fixture decides what it is actually testing — a Finished book with INTACT props must not trip the restore gate at all), decide and build the locked-gate arm, re-pin, headless evidence, hand back READY-FOR-STAGE again. The stage window re-runs whole (W1–W6, the gate, the walk).
