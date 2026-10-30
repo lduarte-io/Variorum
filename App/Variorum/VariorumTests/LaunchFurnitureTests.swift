@@ -355,7 +355,7 @@ struct LaunchFurnitureTests {
             }
             #expect(fans.count == ReadmeSeeder.paragraphs.count, "her five blocks + the four Start Here passages (VX-306, P-VX306-W-1)")
             for (index, texts) in fans {
-                let expected = [ReadmeSeeder.paragraphs[index]] + (ReadmeSeeder.takes[index] ?? [])
+                let expected = [ReadmeSeeder.paragraphs[index]]  // VX-105 piece 1: compile-only (piece 4 reworks)
                 #expect(texts == expected, "block \(index)'s fan, chosen first, byte-exact")
             }
             // Seeded LAST: the newest seeded thing a fresh Library meets —
@@ -396,8 +396,7 @@ struct LaunchFurnitureTests {
     /// today's road (the first run after the switch read it red: nine blocks, as designed). The four passages' static
     /// fact is `ReadmeStartHerePlanTests.theFourPassagesSeedInEveryStore`; this is the behavioural one.
     @Test func aFreshStoreOfEitherVariantSeedsHerFiveThenTheFourPassages() async throws {
-        let nine = ReadmeSeeder.herBlocks + ReadmeSeeder.startHerePassages
-        #expect(ReadmeSeeder.herBlocks.count == 5 && ReadmeSeeder.startHerePassages.count == 4)
+        let nine = ReadmeSeeder.paragraphs  // VX-105 piece 1: compile-only (piece 4 reworks)
         var pages: [AppDatabase.StoreVariant: String] = [:]
         for variant in AppDatabase.StoreVariant.allCases {
             pages[variant] = try await withLaunchWorld { session, db -> String in

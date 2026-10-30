@@ -111,8 +111,8 @@ struct TutorialNewRoadChapterTests {
             }
             let byTitle = Dictionary(seeded.map { ($0.title, $0.text) }, uniquingKeysWith: { first, _ in first })
             let key = try #require(byTitle[ProtectionWords.guideKeyLessonTitle])
-            #expect(key.hasPrefix(ReadmeSeeder.startHerePassages[0]), "lesson 1 LEADS with the Start Here passages")
-            for passage in ReadmeSeeder.startHerePassages {
+            #expect(key.hasPrefix(TutorialSeeder.startHerePassages[0]), "lesson 1 LEADS with the Start Here passages")
+            for passage in TutorialSeeder.startHerePassages {
                 #expect(key.contains(passage), "verbatim — one text, two homes: \(passage.prefix(40))")
             }
             #expect(key.contains(ProtectionWords.guideSyncSentence + " " + ProtectionCopy.privacyServerSeesShapeSentence))

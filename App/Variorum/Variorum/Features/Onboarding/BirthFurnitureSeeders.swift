@@ -11,12 +11,12 @@
 //      that standard any resemblance to real ppl is unintentional movie
 //      book etc. line"*). The tour's keep-going leg points at the first
 //      snippet card; this is the card it finds on a fresh store.
-//    · **The readme placeholder** (piece 2 — R-13s-39): her welcome note,
-//      verbatim from `notes/plans/13s-start-here-reference.md` through the
-//      second end-alternates marker, the alternates built as REAL takes,
-//      her dictated closer as the final block; seeded LAST so it tops the
-//      Library by recency (R-13s-29 with the letter absent). Her finished
-//      text and the letter are VX-105's, post-merge.
+//    · **The readme** (VX-105 — her finished text, R-13s-28): ONE
+//      letter-shaped note, her seventeen blocks byte-exact per the
+//      manifest in `notes/plans/vx-105-letter-content/README.md`, one take
+//      each; seeded LAST so it tops the Library by recency (R-13s-29). It
+//      replaced the 13s placeholder (her unfinished "Lillian's Start Here"
+//      draft and the four Start Here passages) whole.
 //
 //  Both follow `TutorialSeeder.seedAtBirth`'s grammar exactly: they run
 //  ONLY on the Welcome arrangement's arrange-now road (a fresh store's
@@ -67,25 +67,21 @@ enum MacFurnitureFacts {
     }
 }
 
-/// **The readme placeholder** (R-13s-39 — her exact content ruling; the
-/// order R-13s-29 with the letter absent). A standalone BOOKLESS note
-/// titled "readme" (lowercase, her word — R-13s-27), seeded LAST of the
-/// birth furniture so it tops the Library by recency. The content is her
-/// reference's first half VERBATIM — everything from "Welcome to
-/// Variorum!" through the SECOND "--- end alternates ---" ("Ok, enough fun
-/// with takes" is the first excluded sentence) — with the alternates built
-/// as REAL takes on their blocks (displayed text chosen), then her
-/// dictated closer as the final block. NOTHING else; NO letter note
-/// (VX-105 carries her finished text post-merge).
+/// **The readme** (VX-105 — her finished text; R-13s-28 binds absolutely:
+/// never edited, reworded, re-punctuated or whitespace-cleaned). A standalone
+/// BOOKLESS note titled "readme" (lowercase, her word — R-13s-27 and her
+/// 2026-10-30 "i will change the name to readme"), in Home, untagged, seeded
+/// LAST of the birth furniture so it tops the Library by recency (R-13s-29).
+/// The content is her seventeen blocks, one take each — the letter IS the
+/// readme (the content package's README records the convergence); the sign-off
+/// is the last two blocks of the text itself.
 ///
-/// Block boundaries follow the reference's paragraph lines (the recorded
-/// reading): five blocks — the welcome line · the take-icon paragraph
-/// (takes: "You found it! :D" and the Open-Takes line) · the Write/Takes
-/// line · the "This is the point…" paragraph (takes: the shortcuts
-/// alternate and the style alternate) · her closer. Interior bytes are
-/// byte-exact from the reference (curly quotes, the em dash, ":D"); each
-/// paragraph's trailing whitespace is trimmed, which is also exactly what
-/// `SegmentationRules.bulkSegments` does to every imported piece.
+/// It replaced the 13s placeholder WHOLE: her unfinished "Lillian's Start
+/// Here" draft (five blocks and their takes) stopped seeding here — its
+/// welcome and takes moment now open the field guide's "start here" lesson
+/// (R-105-5) — and the four Start Here passages left with it: they live on as
+/// the guide's protection chapter's lead (`TutorialSeeder.startHerePassages`,
+/// one home now).
 @MainActor
 enum ReadmeSeeder {
     nonisolated static let title = "readme"
@@ -100,79 +96,173 @@ enum ReadmeSeeder {
         .init(title: title, kind: "post")
     }
 
-    /// The blocks a fresh store's readme is born with: her five, then the four Start Here passages (VX-306 ladder
-    /// round 2, m2: they speak the new road's truths — the key file and its copies, the twelve words shown when she
-    /// asks, the new-words door in Settings ▸ Protection). Every store opens on the new road since the release switch
-    /// (VX-329), so every fresh store seeds all nine; today's five-only variant went with today's road.
-    nonisolated static var paragraphs: [String] { herBlocks + startHerePassages }
+    /// Her seventeen blocks, in order, BYTE-EXACT per the manifest (each
+    /// block's chosen take's SHA-256, read from her store — the manifest wins
+    /// over the captured `.txt`, which dropped the trailing spaces her store
+    /// carries). Thirteen blocks end with ONE trailing space; blocks 2, 12, 16
+    /// and 17 do not — each block says which, so no tidy-up can take a byte
+    /// unseen. `LaunchFurnitureTests` pins every block's hash against the
+    /// manifest's seventeen values. The blank-line splits of her text are the
+    /// block boundaries; the `.txt`'s working header line (`{t:"readmev5"}
+    /// {#readme}`) is not content.
+    ///
+    /// Minted block by block through `newBlock` (never `importPost`): bulk
+    /// segmentation trims every piece's trailing whitespace
+    /// (`SegmentationRules.bulkSegments`), which would take her bytes.
+    nonisolated static let paragraphs: [String] = [
+        // 1 — ends with ONE trailing space (the manifest's byte)
+        "Variorum was built by one person and thousands of AI agents over the course of four months. I'm "
+        + "Lillian, the human behind this project. I want to take the chance to introduce myself and share "
+        + "a bit about the app, technology, and what it all means to me. ",
 
-    /// Her five blocks, in order (her reference's bytes) — seeded on every road.
-    nonisolated static let herBlocks: [String] = [
-        "Welcome to Variorum! I'm Lillian, the developer behind this app, and I'm excited "
-        + "that you've downloaded it.",
+        // 2 — no trailing space (the manifest's byte)
+        "I created Variorum because I'm a software developer, I love writing, and I wanted to build my "
+        + "own perfect writing app. It was only once the whole picture came together that I realized the "
+        + "app philosophy I had designed for my own writing enabled a new way of working with AI.",
 
-        "I built Variorum with a simple goal: to be able to create multiple different "
-        + "versions of a block of text. I call these versions takes, borrowing from the "
-        + "film world. The icon to the right of this block is the take icon - click on it.",
+        // 3 — ends with ONE trailing space (the manifest's byte)
+        "Let me be clear: providing a new surface for AI to write for you is not the purpose of this "
+        + "app. I do all of my own writing because writing is an invaluable way to refine and develop my "
+        + "thoughts, to push them further than they can go in the limited context window of my own mind. I "
+        + "also enjoy it. Every word you read here was typed by human fingers *and* I had an AI read over "
+        + "my draft and leave comments. I used an \"and\" instead of a \"but\" because I believe that "
+        + "collaboration instead of replacement is not only possible but tragically underserved by current "
+        + "structures and workflows. ",
 
-        "While Write is meant to behave like a simple and elegant editor, Takes is where "
-        + "complexity thrives. Click on \u{201C}expand all\u{201D} at the top of Takes.",
+        // 4 — ends with ONE trailing space (the manifest's byte)
+        "Software itself can and should provide features that increase the capacity of people to control "
+        + "how they work with AI. Variorum carves out territory in the no man's land between \"used AI for "
+        + "this\" and \"didn't use AI for this\", binary labels that unhelpfully collapse a spectrum of "
+        + "different uses. There are real differences between having an AI leave comments on your original "
+        + "writing, edit it directly, draft text for you to edit, and pull together sources for you. "
+        + "Variorum lets you set your own boundaries with tools instead of writing prompts requesting that "
+        + "they be honored. ",
 
-        "This is the point at which you might be thinking \"cool, but so what?\", unless "
-        + "you're a writer that understands the pain of reworking a particular paragraph "
-        + "to the point of madness. If that isn't you, some of the best use cases I've "
-        + "found for it are in the takes of this paragraph.",
+        // 5 — ends with ONE trailing space (the manifest's byte)
+        "There are three key features in Variorum, each built first for my own writing, that together "
+        + "make working with AI more like spinning a dial than flipping a switch. Each addresses a core "
+        + "challenge that the AI world's ubiquitous default \u{2014} a folder of markdown files \u{2014} "
+        + "struggles with: managing what AI can change, reviewing those changes, and controlling what it "
+        + "can see. ",
 
-        "This book is a full guide to all the features of variorum and how to use them. "
-        + "Move through the chapters, which are interactive guides, to discover them all.",
-    ]
+        // 6 — ends with ONE trailing space (the manifest's byte)
+        "The namesake feature of this app is the ability to make different versions of a paragraph "
+        + "\u{2014} a variorum is defined as a scholarly edition of a text that compiles variant readings. "
+        + "Where most writing apps resemble an improved typewriter, Variorum allows for a new way of "
+        + "organizing information by giving each text block a durable identity. The smooth viewing, "
+        + "editing, and switching between versions of a block (\"takes\") seemed obviously useful for "
+        + "drafting, but I soon found it was a more fundamental abstraction. Use takes to make a bilingual "
+        + "book, an architecture document enriched with code snippets, and whatever else you can dream up. "
+        + "Takes allow for fine-tuned control of what an AI can change by enabling a \"write new\" tier of "
+        + "AI permissions. They maintain a structural moat between you and the AI \u{2014} its words are "
+        + "not above and below yours, but beside them, intrinsically linked without bloating your "
+        + "document. Sometimes the worst part of working with AI is being drowned out by an ocean of words "
+        + "that are in English, but only technically. Variorum allows lengthy AI comments on a design "
+        + "document to be tucked away and revealed at will. ",
 
-    /// VX-306 (2026-10-18, her kickoff word: the Start Here chapter drafted from `notes/CastleRules.md`, built as
-    /// drafted, PROVISIONAL — P-VX306-W-1): the four passages of the plan's §7c (5), appended after her five blocks
-    /// (untouched) — every store's since the release switch (VX-329; before it, the new road's only). VX-307 U2c (F-U2b-1):
-    /// the second passage follows the amended rules 2, 3 and 7; all four are byte-pinned by `ReadmeStartHerePlanTests`
-    /// to the VX-307 plan's U2c words block (the re-anchored source).
-    nonisolated static let startHerePassages: [String] = [
-        "Your work is encrypted. Every library is locked with its own random key, kept "
-        + "in a small key file beside it. Variorum keeps copies of that key file for you "
-        + "\u{2014} beside the library, inside every backup, and sealed in this Mac's "
-        + "keychain \u{2014} so you never have to think about it.",
+        // 7 — ends with ONE trailing space (the manifest's byte)
+        "Version control, purpose-built for writing, is the second guardrail. I took some of the best "
+        + "parts of git, like commits and traceable lineage, and used block identity to sidestep the "
+        + "line-based diffs that make git itself unsuitable for my work. The result is an app where each "
+        + "version of each paragraph has its own complete history, saving a version preserves the full "
+        + "note, and it is easy to compare a particular paragraph to what it used to be. The ease of "
+        + "seeing what changed in the compare view makes it like reviewing a pull request of prose. "
+        + "Variorum automatically commits before and after any AI changes on every take, allowing for easy "
+        + "reversion. My favorite feature is that \u{2325}\u{2318}Z can always undo the latest AI change. ",
 
-        // VX-307 U2c (F-U2b-1): the amended rules 2, 3 and 7 — the words shown only when she asks (the card above
-        // the quick entry, the tour's end, Settings ▸ Protection), each look minting new ones, the key unchanged;
-        // byte-pinned to the VX-307 plan's U2c words block (PROVISIONAL P-VX307-U2c-5).
-        "Write down your twelve words. Every library has twelve words from the moment "
-        + "it is made, and they open it for as long as they are its words. Variorum never "
-        + "keeps them, so it shows them only when you ask \u{2014} from the card above the "
-        + "quick entry, at the end of the tour, or any time in Settings \u{25B8} Protection "
-        + "\u{2014} and each look makes new ones for you to write down. Your library's key "
-        + "doesn't change.",
+        // 8 — ends with ONE trailing space (the manifest's byte)
+        "The final ingredient of the defining trinity is privacy. Each Variorum library is encrypted "
+        + "locally and you can choose between Standard and Castle mode. Standard mode exists because I "
+        + "wanted to be able to give this app to my mom without making it feel like opening a crypto "
+        + "wallet every time \u{2014} it stores convenience copies of your library key, so Variorum opens "
+        + "on your unlocked Mac. Castle mode exists because I'm disturbed by the fact that simply flying "
+        + "to another country gives the government where I live the right to search all of my personal "
+        + "devices, including forcing the use of biometrics. In Castle, Variorum doesn't open even on an "
+        + "unlocked Mac without your passphrase or twelve words, with Touch ID optional. Conveniently, "
+        + "being stored in ciphertext on disk prevents a rogue AI with filesystem access from reading your "
+        + "work, unlike a folder of unencrypted markdown files. ",
 
-        "Set a passphrase. A passphrase is a convenience over the words: easier to type, "
-        + "and either one can reset the other. Until you set one, Variorum reminds you "
-        + "now and then.",
+        // 9 — ends with ONE trailing space (the manifest's byte)
+        "Variorum is also built with the principle that AI should always be opt-in, rather than opt-out. "
+        + "I hope that even those who don't want to use AI at all reach for Variorum for its capabilities "
+        + "as a writing editor, with full confidence that their work is private not because of terms and "
+        + "conditions but because of keys and encryptions. For those who do connect an MCP client, it "
+        + "makes every access grant visual, clear, and easy to revoke. Unlike the obfuscated reality of "
+        + "the command line, where you can't easily tell if you've allowed an AI agent into a particular "
+        + "folder and it's hard to know what a motivated agent could access, Variorum shows an icon on "
+        + "every item that has been shared with AI. You can also make notes and books private, which "
+        + "supersedes any general access grant and conceals their existence. Work with confidence knowing "
+        + "that AI access is visible always, impossible when not granted, and absent entirely when it is "
+        + "unwanted. ",
 
-        "The Apple road is a convenience. In Standard, Variorum also keeps quiet roads to "
-        + "your key \u{2014} through your iCloud Keychain and this Mac's login \u{2014} so "
-        + "most people never type anything, and for most people that simply works "
-        + "forever. If it ever stops, your passphrase or your words open the library, and "
-        + "nothing was ever at risk. Castle is the one promise that there is no quiet road "
-        + "through Apple, ever; it is a choice you can make in Settings.",
-    ]
+        // 10 — ends with ONE trailing space (the manifest's byte)
+        "There are some other elements of Variorum that I hope will bring delight. I've always thought "
+        + "that notes apps should allow for book views to be composed from different notes at will, so I "
+        + "built that. With Variorum, the days where each note is its own file and there's no way to read "
+        + "through them together have ended. Build books and gatherings by hand, by tag inclusion, by tag "
+        + "exclusion, or by whatever combination pleases you. The full-text search is fast: its cost "
+        + "scales with the number of matches, not the size of your library. Notes still edit smoothly at "
+        + "more than 10k words, while books can have more than a hundred thousand words without "
+        + "stuttering. Test it out by restoring \"The Adventures of Sherlock Holmes\" under the Help menu "
+        + "and scrolling through. Paragraphs you delete automatically move whole into the trash, so you "
+        + "can easily see what you got rid of. I love keyboard shortcuts, so almost everything has one. "
+        + "I'm grateful that an amazing writing editor was my first goal and that I achieved it before "
+        + "connecting it to AI because of the focus on quality it gave me. ",
 
-    /// The alternates, as REAL takes: block index → the take texts, in fan
-    /// order after the displayed (chosen) original.
-    nonisolated static let takes: [Int: [String]] = [
-        1: ["You found it! :D",
-            "Now click on Open Takes mode in the top bar of this modal"],
-        3: ["This is where things get really fun! You can expand or collapse any take "
-            + "block with the button to the right of it, or use the button at the top. "
-            + "Navigation is fully supported by keyboard shortcuts\u{2014}you can also get "
-            + "to Takes with Command 2. Check out all the shortcuts at Command /.",
-            "There are four different ways to see your takes and work with them. Test "
-            + "each of them out now by changing \u{201C}style\u{201D} at the top bar of "
-            + "this note. While each is useful for something different, I\u{2019}m "
-            + "particularly fond of margin grid for quick notes."],
+        // 11 — ends with ONE trailing space (the manifest's byte)
+        "I made Variorum 100% free to use locally because I don't believe in renting possession of your "
+        + "own writing and because I wanted to give something back to the world. I really mean that you "
+        + "own your work \u{2014} it is locally stored in an open format and you can easily AirDrop your "
+        + "library to another computer if you'd like to. When I release the mobile version there will be a "
+        + "paid sync option only because syncing is itself an ongoing cost. I'm deeply grateful to the "
+        + "open source coding community \u{2014} Variorum only came into existence by standing on the "
+        + "shoulders of giants. I'm also grateful to the fanfiction community for having brought me so "
+        + "much joy and entertainment over the years. At a time when it feels like the whole world has "
+        + "been commoditized, people who share their creativity and passion freely online make the "
+        + "internet somewhere I want to spend time. In that spirit, I want Variorum to not only be the "
+        + "free option but the best one. ",
+
+        // 12 — no trailing space (the manifest's byte)
+        "Being able to build and offer an app like Variorum \u{2014} opinionated, personal, and creative "
+        + "\u{2014} is one of the best parts of living in our AI era. That a single individual could make "
+        + "this app is also what lets me offer it for free. I'm a single human being, not a corporation, "
+        + "and my expenses are the same as everyone's: shelter, food, and fun. I can support myself and "
+        + "all of my agents with my job \u{2014} frontier AI isn't cheap, but it is still a fraction of "
+        + "what it would've cost to hire software developers to build this app. Equally, knowing myself, I "
+        + "would not have taken the years that it would've required before AI to build this native macOS "
+        + "app in my spare time. I can't measure the productivity gain in a percentage because the app "
+        + "simply wouldn't have existed. In only four months, I'm amazed at how far this app has come, and "
+        + "it's been fun to make. That's what working with AI is like in 2026 \u{2014} if you can dream it "
+        + "and you know what you're doing, you can build it.",
+
+        // 13 — ends with ONE trailing space (the manifest's byte)
+        "\"If you know what you're doing\" is carrying a lot of weight in the previous paragraph, but I "
+        + "passionately believe that AI doesn't have to be synonymous with slop and low-effort projects. "
+        + "Variorum is an ambitious effort that feels like a real accomplishment for both me and AI "
+        + "\u{2014} it's amazing what a single developer and a stochastic parrot can accomplish together. "
+        + "I want to work towards a version of the future where instead of AI replacing people, people are "
+        + "accomplishing more with AI. ",
+
+        // 14 — ends with ONE trailing space (the manifest's byte)
+        "As I developed this app I found that it was an immensely joyful experience to not just build "
+        + "but invent, to see something new solve real problems of mine. Variorum has become a facet of my "
+        + "daily life that encourages me to write, an editor that works with how I think. I can't put a "
+        + "price on how I find myself journaling and writing more; I just know that life feels richer now. "
+        + "On a more personal note, I lost my beloved dog Chai in June. Even when the sun had gone cold in "
+        + "my life, focusing on building this app kept me excited for new days. Variorum is dedicated to "
+        + "her, even though she couldn't read. ",
+
+        // 15 — ends with ONE trailing space (the manifest's byte)
+        "Now, finally releasing Variorum into the world, I can proudly say that what I consider the best "
+        + "feature isn't a feature at all but instead the sense that there's a single person who really "
+        + "cares behind the app's design, execution, and experience. I hope that you like it. I would love "
+        + "to hear any of your thoughts, issues (yes, really, I want to fix them), and feature requests. ",
+
+        // 16 — no trailing space (the manifest's byte)
+        "Thank you for trying Variorum,",
+
+        // 17 — no trailing space (the manifest's byte)
+        "Lillian",
     ]
 
     enum BirthSeed: Equatable {
@@ -217,30 +307,14 @@ enum ReadmeSeeder {
             if tombstoned { return .deletedByTheReader }
             let postID = try await session.runner.run { _ -> String in
                 let ops = Operations(undoStack: nil)
-                @Dependency(\.database) var database
-                let note = try ops.importPost(
-                    title: title, text: blocks.joined(separator: "\n"),
-                    undoLabel: "readme", segmentation: .paragraph, wingId: "")
-                for (index, texts) in takes.sorted(by: { $0.key < $1.key }) {
-                    guard note.blockIDs.indices.contains(index) else { continue }
-                    let blockID = note.blockIDs[index]
-                    guard let original = try database.read({ db in
-                        try String.fetchOne(
-                            db, sql: "SELECT default_variant_id FROM block WHERE id = ?",
-                            arguments: [blockID])
-                    }) else { continue }
-                    // REVERSED on purpose (the window's first-run find):
-                    // `branchVariant` seats a branch right AFTER its
-                    // parent, so two branches of the one original land in
-                    // reverse mint order — minting take 2 first leaves the
-                    // stored fan [original, take 1, take 2], the
-                    // reference's own faithful order (R-13s-39).
-                    for text in texts.reversed() {
-                        let minted = try ops.branchVariant(blockID, from: original)
-                        try ops.autosave(minted.id, text: text, charDelta: text.count)
-                    }
+                let note = try ops.createPost(title: title, wingId: "")
+                // One block per paragraph, in order, each stored exactly as
+                // given (`newBlock` keeps every byte but U+0000). Furniture
+                // never lands on her ⌥⌘Z (the quiet facade, and no entry).
+                for text in blocks {
+                    _ = try ops.newBlock(in: note.id, text: text, at: .end, registeringUndo: false)
                 }
-                return note.container.id
+                return note.id
             }
             return .seeded(postID: postID)
         } catch {

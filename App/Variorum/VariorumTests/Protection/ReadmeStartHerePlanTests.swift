@@ -66,8 +66,7 @@ struct ReadmeStartHerePlanTests {
     /// new-words door). Until VX-329 they seeded only where a store opened on the new road (the dev store in a Debug
     /// build); with the switch flipped and today's road gone, every store's readme is her five blocks and the four.
     @Test func theFourPassagesSeedInEveryStore() {
-        #expect(ReadmeSeeder.herBlocks.count == 5 && ReadmeSeeder.startHerePassages.count == 4)
-        #expect(ReadmeSeeder.paragraphs == ReadmeSeeder.herBlocks + ReadmeSeeder.startHerePassages)
+        #expect(TutorialSeeder.startHerePassages.count == 4)  // VX-105 piece 1: compile-only (piece 4 re-anchors)
         #expect(ProtectionRoad.newRoadIsLive && ProtectionRoad.live(debug: false), "every build, every store")
     }
 

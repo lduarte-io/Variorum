@@ -54,7 +54,31 @@ FENCES: no `xcodebuild test` at your seat (stage window only); no walks, no app 
 
 ## U1 RECORD
 
-(implementer fills; LIVE STATUS from the first commit)
+**What this unit did NOT do (first line, per the contract):** no Mac suite was RUN (stage window only — the suites are
+WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/Applications` touch, no real-store mint
+(R-105-1 is the closeout's); nothing under `Sources/VariorumCore/Sync/`. PENDING items are marked as such below.
+
+### LIVE STATUS (implementer, Opus — one session)
+
+- **Piece 1 — the seeder content swap:** DONE (this commit — see `git log`; hash filled at the next commit).
+  `ReadmeSeeder.paragraphs` = her 17 blocks, literals generated from `read-me.txt` with the trailing space restored per
+  the manifest, then the literals AS WRITTEN IN THE SEEDER SOURCE extracted, compiled with `swift` and hashed:
+  **GREEN — all 17 SHA-256 == the manifest's 17 values** (13 blocks end with one space; 2, 12, 16, 17 do not). No
+  takes (the `takes` map is deleted). Minted through `createPost` + `newBlock` per block, NOT `importPost`: bulk
+  segmentation trims every piece's trailing whitespace (`SegmentationRules.bulkSegments` → `trimmedPiece`), which would
+  have taken 13 of her bytes. `herBlocks` DELETED (not demoted — her draft's useful parts move into the guide's first
+  lesson at piece 5; the frozen reference file keeps the draft as history). `startHerePassages` RE-HOMED byte for byte
+  to `TutorialSeeder.startHerePassages` (a script compared the old and new declarations: BYTE-IDENTICAL MOVE); the key
+  lesson reads it from there, so the guide's lesson text is unchanged by a byte. Test files touched compile-only
+  (marked in place); their real rework is piece 4.
+- **Piece 2 — born starred + the stamps (R-105-3):** NOT-STARTED.
+- **Piece 3 — the Sherlock door retitle (R-105-4):** NOT-STARTED.
+- **Piece 4 — the pins:** NOT-STARTED.
+- **Piece 5 — the first-chapter interweave (R-105-5):** NOT-STARTED.
+- **Piece 6 — this record's closing sections:** IN-PROGRESS (LIVE STATUS kept from the first commit).
+
+Compile evidence so far: `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` (compile-only —
+app AND test target, nothing run) EXIT 0 after piece 1.
 
 ## The ladder
 
