@@ -184,7 +184,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   | (d) `HelpMenuNamingTests` · `theSherlockDoorNamesItsBookAndNoDoorSaysSampleLibrary` | The verb == `Restore “the adventures of sherlock holmes”` and == the one-constant interpolation; the Prince and Jekyll doors' verbs by their constants; the four seeded doors (prince · sherlock · jekyll · classics) on Help and in ⌘K; NO capability verb in `CapabilityRegistry.all` says "sample library"; no "\"Restore the Sample Library" literal in the menu, registry or palette sources; the menu renders `verb(.restoreSampleLibrary)`. | By construction: the old verb was "Restore the Sample Library". |
   | (e) `ReadmeStartHerePlanTests` · `theFourPassagesAreThePlansByteForByte` · `noShoutyCapsAndNoMarkdownRideIntoTheSeed` · `theReadmeCarriesNoneOfThePassagesAndTheRoadIsEveryStores` · `theFourPassagesAreSpelledOnceInTheGuideAndNeverInTheReadme` | The four byte-pins stand against the VX-307 plan's words block (now `TutorialSeeder.startHerePassages`); readme membership assertions REMOVED; the readme carries none of the four; source: declared once in `TutorialStartHerePassages.swift`, never re-declared or re-spelled in `TutorialSeeder.swift` (R-105-7's "via the shared constant"), never spelled or read in the readme's seeder; the launch's one road unchanged. Suite TYPE name kept (stage commands and history). | `theReadmeCarriesNone…` and the source pin are red on old (the readme's `paragraphs` ended with all four; the declaration lived in the readme's seeder). The byte-pins are unchanged facts (green both sides by design — the GUIDE's text did not move a byte). |
   | (f) `TutorialNewRoadChapterTests` · `everyStoresGuideSeedsTheRoadsChapter` | Unchanged assertions (the key lesson LEADS with the four, verbatim) reading the re-homed constant. | Unchanged fact — green both sides by design (the key lesson's text must not change). |
-  | (f) `TutorialFurnitureFoldTests` · `theRealExampleSnippetIsFoldableAndTwoMintsAgree` · `theBornStarredReadmeNeverFoldsByDesign` | The old one test SPLIT per object. The readme arm, after S-1's ruling (option B): both fresh mints classify `.engaged` — the born-starred readme never folds, by design (the Prince precedent; VX-711 carries option A). | Snippet: unchanged fact. Readme: red on old by construction (the old readme was unstarred and foldable); red if the born star stops landing. |
+  | (f) `TutorialFurnitureFoldTests` · `theRealExampleSnippetIsFoldableAndTwoMintsAgree` · `theBornStarredReadmeNeverFoldsWhileStarred` (renamed at ladder round 1, MINOR-4, from `…NeverFoldsByDesign`) · `theReadmeFoldsOnceNeitherCopyIsStarredAndTwoMintsAgree` (restored at round 1) | The old one test SPLIT per object. The readme arm, after S-1's ruling (option B): both fresh mints classify `.engaged` — the born-starred readme never folds WHILE STARRED (the Prince precedent; VX-711 carries option A); un-starred, both mints read pristine with equal signatures and the pair folds (the content drift net). | Snippet: unchanged fact. Readme: red on old by construction (the old readme was unstarred and foldable); red if the born star stops landing. |
 
   The "nothing seeds after the readme" pin STAYS (inside (b)+(c), re-keyed from `created_at` — which now carries her
   October moment — to the readme's first block's mint).
@@ -298,7 +298,7 @@ shared ledger, CLAUDE.md "Parallel sessions")
   shape); alternative: the current wing (`importPost`'s quick-entry rule); (iv) the refusal still OPENS her readme
   (the books' already-whole arm navigates to the book); (v) a readme she RENAMED is no longer "a post titled readme",
   so a press mints a fresh one beside it.
-- **S-1 → option B, RULED** (not provisional): the born-starred readme never folds; option A is VX-711. See S-1.
+- **S-1 → option B, RULED** (not provisional): the born-starred readme never folds while starred (a fresh pair keeps both; once neither copy is starred the pair folds — corrected at ladder round 1, MINOR-4); option A is VX-711. See S-1.
 - **F-2** (the added period) — KEPT, ruled; above.
 - Kept names: the capability case `.restoreSampleLibrary` and `ShellActions.restoreSampleLibrary()` keep their
   identifiers (boundary ruling 3: a retitle; never rendered).
@@ -323,7 +323,7 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
 ```
 
 then the full `VariorumTests` (the closeout's). **Expected at the window: everything should pass — no expected red**
-(S-1 ruled option B; its arm is now `TutorialFurnitureFoldTests/theBornStarredReadmeNeverFoldsByDesign`, green). Verify the suite TYPE names in
+(S-1 ruled option B; its arm is now `TutorialFurnitureFoldTests/theBornStarredReadmeNeverFoldsWhileStarred`, green — renamed at ladder round 1). Verify the suite TYPE names in
 `TutorialWalkTests.swift` before running — CONFIRMED: `TutorialBookShapeTests` and `TutorialTakesActsTests` are two
 of its `@Suite` types; every other type above was grepped (`struct <Name> {`); `TourScriptTests` is the tour's words
 suite in `TourTests.swift` (it pins the end card's readme sentence).
@@ -431,7 +431,7 @@ pre-sync join is the Prince's ACCEPTED precedent exactly (R-633-7's analysis —
 dedupe and two seeds both keep; the deliberate delete sticks post-VX-678), and Option A opens the dedupe engine
 (Fable/Sync-adjacent work) in launch week for a corner only multi-device sign-in reaches. **Option A is ticketed as
 VX-711** (Backlog, Low, Improvement · Confirmed · Castle & sync). Built: the failing arm is now a pin of the accepted
-truth — `TutorialFurnitureFoldTests.theBornStarredReadmeNeverFoldsByDesign` (both fresh mints classify `.engaged`; its
+truth — `TutorialFurnitureFoldTests.theBornStarredReadmeNeverFoldsWhileStarred` (renamed at ladder round 1, MINOR-4: "never" alone was false — once neither copy is starred the pair folds, which the restored `theReadmeFoldsOnceNeitherCopyIsStarredAndTwoMintsAgree` pins; both fresh mints classify `.engaged`; its
 comment names S-1, the Prince precedent and VX-711; RED if the star stops landing). The snippet arm stays as split.
 
 ## The ladder

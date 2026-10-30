@@ -55,9 +55,13 @@ import VariorumCore
 /// still-mintable objects: Quicknotes mints at every store's first capture,
 /// the classics gathering behind its door, and stores born before this
 /// build carry the rest) + the GUIDE half + the two birth-furniture
-/// containers this unit seeded, so EVERY seeded object of the final set
-/// folds on sign-in (R-13s-5's release constraint; the 17y B-DEDUPE rules
-/// bind each grain).
+/// containers this unit seeded, so every seeded object of the final set is
+/// KNOWN to the fold (R-13s-5's release constraint; the 17y B-DEDUPE rules
+/// bind each grain). One known exception to "folds on sign-in", ruled: the
+/// readme is born STARRED (VX-105), and the note grain reads a star as her
+/// engagement, so a fresh pair keeps both readmes; it folds only once
+/// neither copy is starred (S-1 option B — the Prince's precedent; teaching
+/// the fold a born star is VX-711).
 @MainActor
 enum MacFurnitureFacts {
     nonisolated static func compose() -> SeededFurnitureDedupeFacts {
@@ -92,11 +96,14 @@ enum ReadmeSeeder {
     nonisolated static let title = "readme"
 
     /// The furniture fold's identity for the readme (13s-b U1b piece 5):
-    /// a reserved-titled BOOKLESS note — two fresh devices' seeds fold at
-    /// the container grain, content-identical and unengaged only (any tag,
+    /// a reserved-titled BOOKLESS note — two devices' copies fold at the
+    /// container grain, content-identical and unengaged only (any tag,
     /// membership, savepoint or edit of hers keeps both — the standing
-    /// B-DEDUPE rules). No seed-authored tag paths: a tag on the readme is
-    /// always her hand.
+    /// B-DEDUPE rules). VX-105: the readme is born STARRED and a star is
+    /// engagement on the note grain, so two FRESH seeds both keep; the pair
+    /// folds only once neither copy is starred (S-1 option B, ruled; a born
+    /// star read as identity is VX-711). No seed-authored tag paths: a tag on
+    /// the readme is always her hand.
     nonisolated static var furnitureFact: SeededFurnitureDedupeFacts.ReservedContainer {
         .init(title: title, kind: "post")
     }

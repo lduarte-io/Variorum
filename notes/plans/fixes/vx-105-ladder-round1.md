@@ -138,7 +138,21 @@ below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `
   DETERMINISTIC shape pin: `performBirthSeed`'s source holds no `session.database` read, and inside it the
   `session.runner.run` precedes the live read, which precedes the mint. RED ON OLD by construction (the old body read
   on `session.database.read` ahead of `runner.run`). Residual, recorded: none in the readme; the snippet has no door.
-- **MINOR-4** (stale comments; the fold pin's "never") — NOT-STARTED.
+- **MINOR-4** (stale comments; the fold pin's "never") — DONE (the commit carrying this line). The stale lines, each
+  now the built truth: `LaunchFurniture.swift` (the readme "carries its Start Here passages" → the readme is her letter
+  alone; the passages live in the guide's first and protection chapters, R-105-7); `BirthFurnitureSeeders.swift`
+  `MacFurnitureFacts` ("EVERY seeded object … folds on sign-in" → every seeded object is KNOWN to the fold, with the
+  readme's ruled exception: born starred, a fresh pair keeps both, folds once neither copy is starred — S-1, VX-711)
+  and `ReadmeSeeder.furnitureFact` (the same correction at the fact); the header's "No door latch" line (done at
+  MINOR-2); `VariorumApp.swift` ("the birth furniture's folds" → facts, with the readme's "only once neither copy is
+  starred"); and the wiring pin's message in `TutorialFurnitureFoldTests`. The pin RENAMED and reworded:
+  `theBornStarredReadmeNeverFoldsByDesign` → **`theBornStarredReadmeNeverFoldsWhileStarred`** (assertions unchanged:
+  both fresh mints `.engaged`). The drift net RESTORED: **`theReadmeFoldsOnceNeitherCopyIsStarredAndTwoMintsAgree`** —
+  both mints un-starred through the one star write (`setStarred(.post(id), starred: false)`), both classify
+  `.foldable` with EQUAL signatures. Honestly labelled a CURRENCY NET: green on both sides today by design; red only if
+  the readme's seed stops being deterministic or an un-starred readme picks up an engagement leg. The U1 record's four
+  "never folds" lines (its pin table, P-list, stage expectation, S-1 RULED paragraph) corrected in place, each naming
+  the round. WRITTEN, compiling (`build-for-testing` EXIT 0), RUN PENDING the stage window.
 - **MAJOR-1** (lesson 1's takes moment from the book's Outline) — NOT-STARTED.
 - **NIT-2** (the take attachments check their blocks) — NOT-STARTED.
 - **NIT-1** (the one-transaction road) — NOT-STARTED.
