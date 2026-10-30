@@ -242,7 +242,9 @@ struct VariorumApp: App {
                             // alone — its pocket guide is the parity row).
                             // 13s-b U1b: composed in ONE named, pinnable
                             // place — and it now carries the readme and the
-                            // example snippet (the birth furniture's folds).
+                            // example snippet (the birth furniture's facts;
+                            // the born-starred readme folds only once
+                            // neither copy is starred — VX-105 S-1, VX-711).
                             furnitureFacts: MacFurnitureFacts.compose(),
                             // The retired-credential sweep — REQUIRED at the
                             // seam (pre-13x 1a); production names the real one.

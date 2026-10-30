@@ -138,8 +138,10 @@ struct TutorialFurnitureFoldTests {
 
     // MARK: - 13s-b U1b piece 5 — the birth furniture joins the fold
 
+    /// `unstarringTheReadme`: her un-star of the seeded readme before the
+    /// verdict (ladder round 1, MINOR-4 — the content drift net's road).
     private func mintAndJudgeBirthFurniture(
-        seed: UInt64
+        seed: UInt64, unstarringTheReadme: Bool = false
     ) async throws -> (readme: SeededFurnitureClassifier.Verdict,
                        scrap: SeededFurnitureClassifier.Verdict) {
         try await withSeedWorld(seed: seed) { session, db in
@@ -148,6 +150,9 @@ struct TutorialFurnitureFoldTests {
             }
             guard case .seeded(let readmeID) = await ReadmeSeeder.seedAtBirth(session: session) else {
                 throw ChapterWorldError.seedRefused("readme")
+            }
+            if unstarringTheReadme {
+                try Operations(undoStack: nil).setStarred(.post(readmeID), starred: false)
             }
             return try await db.read { db in
                 let scrapID = try String.fetchOne(
@@ -166,25 +171,16 @@ struct TutorialFurnitureFoldTests {
     }
 
     /// **The REAL-SEED drift guard for the 13s-b birth furniture** (the
-    /// BLOCKER-1 net's shape exactly): the shipped readme — five blocks,
-    /// two of them fanned — and the example snippet group, each minted by
-    /// their real seeders, classify FOLDABLE, and two fresh mints carry
-    /// EQUAL signatures, or a fresh install's sign-in keeps two of each
-    /// forever. RED ON OLD by construction (the old tree seeds neither);
-    /// the per-fact behavioural revert at the stage window is the WIRING
-    /// pin below (drop a fact and the engine never looks at the title).
-    @Test func theRealReadmeAndExampleSnippetAreFoldableAndTwoMintsAgree() async throws {
+    /// BLOCKER-1 net's shape exactly), ONE ARM PER OBJECT (VX-105 split them,
+    /// so a red on one can never mask the other's verdict): the example snippet
+    /// group, minted by its real seeder, classifies FOLDABLE and two fresh
+    /// mints carry EQUAL signatures, or a fresh install's sign-in keeps two
+    /// forever. RED ON OLD by construction (the old tree seeds none); the
+    /// per-fact behavioural revert at the stage window is the WIRING pin below
+    /// (drop a fact and the engine never looks at the title).
+    @Test func theRealExampleSnippetIsFoldableAndTwoMintsAgree() async throws {
         let first = try await mintAndJudgeBirthFurniture(seed: 1886)
         let second = try await mintAndJudgeBirthFurniture(seed: 1892)
-
-        guard case .foldable(let readmeA) = first.readme,
-              case .foldable(let readmeB) = second.readme
-        else {
-            Issue.record("the shipped readme must classify FOLDABLE: \(String(describing: first.readme)) / \(String(describing: second.readme))")
-            return
-        }
-        #expect(readmeA == readmeB, "two fresh readme mints are the SAME seed — they must fold")
-
         guard case .foldable(let scrapA) = first.scrap,
               case .foldable(let scrapB) = second.scrap
         else {
@@ -192,6 +188,47 @@ struct TutorialFurnitureFoldTests {
             return
         }
         #expect(scrapA == scrapB)
+    }
+
+    /// **The readme's arm — it never folds WHILE STARRED** (VX-105 S-1, RULED
+    /// option B; reworded at ladder round 1, MINOR-4 — "never" alone was
+    /// false). Her readme is BORN STARRED, and the classifier reads a note's
+    /// star as HER engagement (`SeededFurnitureClassifier.noteVerdict`'s star
+    /// axis — "HER STAR is engagement on every grain"), so every fresh readme
+    /// classifies `.engaged` and two devices' fresh seeds both keep. That is
+    /// the ACCEPTED truth: the Prince's precedent exactly (R-633-7 — outside
+    /// the pristine dedupe, two seeds both keep; the deliberate delete sticks
+    /// since VX-678), and teaching the fold a born star (the seed's own star as
+    /// identity, re-pointed to the keeper) is VX-711's — never this arm's. The
+    /// fact stays registered, so once neither copy is starred the pair DOES
+    /// fold (the drift net below). RED if the star stops landing (the readme
+    /// would read foldable at birth again).
+    @Test func theBornStarredReadmeNeverFoldsWhileStarred() async throws {
+        let first = try await mintAndJudgeBirthFurniture(seed: 1886)
+        let second = try await mintAndJudgeBirthFurniture(seed: 1892)
+        #expect(first.readme == .engaged, "the born star reads as engagement: \(String(describing: first.readme))")
+        #expect(second.readme == .engaged, "…on every fresh mint: \(String(describing: second.readme))")
+    }
+
+    /// **The readme's CONTENT drift net, restored** (ladder round 1, MINOR-4 —
+    /// the round that split the arms had dropped the readme's equal-signature
+    /// check). Un-starred — the state two met devices reach once neither copy
+    /// wears the star (the `'starred'` list is one server-wins row, and her
+    /// one un-star is enough) — both fresh mints read PRISTINE and carry EQUAL
+    /// signatures, so the identical pair folds. A currency net, green on both
+    /// sides today by design (labelled so): it goes RED only if the readme's
+    /// seed stops being deterministic or an un-starred readme picks up an
+    /// engagement leg — exactly the drift the BLOCKER-1 net exists to catch.
+    @Test func theReadmeFoldsOnceNeitherCopyIsStarredAndTwoMintsAgree() async throws {
+        let first = try await mintAndJudgeBirthFurniture(seed: 1886, unstarringTheReadme: true)
+        let second = try await mintAndJudgeBirthFurniture(seed: 1892, unstarringTheReadme: true)
+        guard case .foldable(let readmeA) = first.readme,
+              case .foldable(let readmeB) = second.readme
+        else {
+            Issue.record("an un-starred fresh readme must classify FOLDABLE: \(String(describing: first.readme)) / \(String(describing: second.readme))")
+            return
+        }
+        #expect(readmeA == readmeB, "two fresh mints are the SAME seed — un-starred, they fold")
     }
 
     /// **The WIRING pin (per changed fact — the stage window's behavioural
@@ -210,7 +247,7 @@ struct TutorialFurnitureFoldTests {
         #expect(containers.contains { $0 == (TutorialSeeder.scrapPoolTitle, "pool") })
         #expect(containers.contains { $0 == (TutorialSeeder.twinTitle, "post") })
         #expect(containers.contains { $0 == (ReadmeSeeder.title, "post") },
-                "the readme folds on sign-in (R-13s-5's release constraint)")
+                "the readme's fact stays registered — it folds once neither copy is starred (VX-105 S-1)")
         #expect(containers.contains { $0 == (ExampleSnippetSeeder.groupTitle, "pool") },
                 "the example snippet group folds on sign-in")
         #expect(containers.contains { $0 == (SampleLibraryWelcome.quicknoteTitle, "post") },

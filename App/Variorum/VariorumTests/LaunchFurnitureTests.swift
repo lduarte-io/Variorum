@@ -126,6 +126,67 @@ private func reading(_ db: AppDatabase, named name: String) async throws -> Read
 }
 
 @MainActor
+private func pollUntil(_ condition: @MainActor () -> Bool, turns: Int = 600) async {
+    for _ in 0..<turns {
+        if condition() { return }
+        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(5))
+    }
+}
+
+/// The live readme's id, if one seeded.
+private func readmeID(_ db: AppDatabase) async throws -> String? {
+    try await db.read { db in
+        try String.fetchOne(
+            db,
+            sql: "SELECT id FROM container WHERE kind = 'post' AND title = ? AND deleted_at IS NULL",
+            arguments: [ReadmeSeeder.title])
+    }
+}
+
+/// **Her text, from the package it arrived in** (VX-105, R-105-6 — "the
+/// read-me.txt paragraphs as the file carries them"): `read-me.txt` in the
+/// repo, its working header line (`{t:"readmev5"} {#readme}`) dropped, split
+/// at its blank lines. The test reads the FILE rather than a transcription, so
+/// the oracle is the package itself.
+private func herReadmeFileParagraphs() throws -> [String] {
+    let url = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+        .deletingLastPathComponent()  // VariorumTests
+        .deletingLastPathComponent()  // App/Variorum
+        .deletingLastPathComponent()  // App
+        .deletingLastPathComponent()  // the repo
+        .appendingPathComponent("notes/plans/vx-105-letter-content/read-me.txt")
+    var lines = try String(contentsOf: url, encoding: .utf8).components(separatedBy: "\n")
+    let header = lines.removeFirst()
+    #expect(header.hasPrefix("{t:\"readmev5\"}"), "the file still opens on its working header line")
+    return lines.joined(separator: "\n").trimmingCharacters(in: .newlines).components(separatedBy: "\n\n")
+}
+
+/// **Her store's manifest** — each block's chosen take's SHA-256 as the
+/// package README records it (note `DC4D224B-…`, captured 2026-10-29), in
+/// block order. Taken WITH the trailing space her store carried on all but
+/// blocks 2, 12, 16, 17 — interior-fidelity evidence since R-105-6.
+private let herStoresManifest: [String] = [
+    "16abee4da8b6a06f26cbd9ea8f8a0a8b1cc5666c9d453e482c625bf515761029",  // 1
+    "ccc3c95f6e13fc2d38de5be8625922adffa68f5fbe7db0e6503b49ac0fa213f0",  // 2
+    "b684f8384171bc9ca84de39494b22578fa21fae1f1b15ee4d18dc3c5ae6925d4",  // 3
+    "1a4ea53a08d9a69cb1ce7013dfe07028e69f51df46fa638bbd8663e6271cb1fb",  // 4
+    "3bfd662c51e944e7f11180ac43ec9a39cbe8bf604fab36fcc2edd6f31e561e9c",  // 5
+    "1a1a15367fd80dda20c95f30a9599352f82c12ad2d4aacadaec9bdd43d4ba4df",  // 6
+    "9b1070bdd6642cd65c1598a51da3d62d96ef2d6e9ddedd72474341a7e558ca3a",  // 7
+    "26212229de860063770888effdbf1bda8ed67d5b90828218e69a409f1495db66",  // 8
+    "5f3b8ae589fa4dbe8006d51e73f6af96d9946b246c13b941872df87621f3cd12",  // 9
+    "c8c5d42ff67d2d23bd81a9df84f2a06d850b5357a8c71babf4c963b2be8b536b",  // 10
+    "aa946c04fca9b97aab94694b0a1bba3fb62cc2e802c16328000dda03bb8fc66f",  // 11
+    "4f0f248de944d3bd9a24a0067f8547cdbade1da3f565e34ed6564a49e4005cdb",  // 12
+    "6f643c73a5b89846e6c46db0c56a05b6483e28b7d075c32b5f78daba1e6728b0",  // 13
+    "d957a9205336a3314f324f0d73805c7545ee1f121713626ee060daacea690482",  // 14
+    "c4b9b25f51055411afd0f1bfc62cae145c27dd09384c494a0bccf4c56531696a",  // 15
+    "16f428caf18e8e6fa5eeb16fbca497fdef6669045b63b15c98cc9fa075d83d5a",  // 16
+    "eabcdcdaaff8c65b717b1223c99c02c84d890935b8309357ac391d2c46217aa6",  // 17
+]
+
+@MainActor
 @Suite("The launch's furniture — the field guide at a fresh store's birth (17y B-SEED)")
 struct LaunchFurnitureTests {
 
@@ -282,122 +343,198 @@ struct LaunchFurnitureTests {
         }
     }
 
-    /// **THE README PLACEHOLDER (13s-b U1b — R-13s-39, her exact content;
-    /// R-13s-27 the lowercase title; R-13s-29's order with the letter
-    /// absent).** A fresh launch leaves ONE bookless Home note titled
-    /// "readme", seeded LAST so it tops the Library by recency: her
-    /// reference's first half as five blocks, the alternates as REAL takes
-    /// on the take-icon block and the "This is the point…" block (displayed
-    /// text chosen), her dictated closer the final block — and NOTHING else
-    /// (no letter note). RED ON OLD by construction: the old tree seeded no
-    /// readme.
-    @Test func aFreshLaunchSeedsTheReadmePlaceholderLastWithItsTakes() async throws {
+    /// **HER README, WHOLE (VX-105 — R-13s-28; R-105-6 trimmed; the
+    /// standalone shape, her disposition 3).** A fresh launch leaves ONE
+    /// bookless, untagged Home note titled "readme" whose seventeen blocks are
+    /// `read-me.txt`'s paragraphs BYTE FOR BYTE (the oracle is the IN-REPO FILE,
+    /// read here — the package her text arrived in, never a second transcription),
+    /// ONE take each, chosen, nothing archived; the page is those seventeen
+    /// joined. RED ON OLD by construction: the old seeder seeded nine blocks
+    /// (her placeholder's five, the four Start Here passages) with takes on two.
+    @Test func aFreshLaunchSeedsHerReadmeByteForByteOneTakePerBlock() async throws {
+        let file = try herReadmeFileParagraphs()
+        #expect(file.count == 17, "her text is seventeen blocks")
+        #expect(ReadmeSeeder.paragraphs == file, "the seeder's literals ARE the file's paragraphs")
         try await withLaunchWorld { session, db in
             let device = DeviceMarks()
             _ = await LaunchFurniture.seed(
                 session: session, storeVariant: .dev,
                 gate: gate(account: false, clean: true), marks: device.marks)
-            let readme = try await db.read { db -> (id: String, created: String)? in
-                try Row.fetchOne(
-                    db,
-                    sql: """
-                        SELECT id, created_at FROM container
-                        WHERE kind = 'post' AND title = ? AND deleted_at IS NULL
-                        """,
-                    arguments: [ReadmeSeeder.title]
-                ).map { (id: $0["id"] as String, created: $0["created_at"] as String) }
-            }
-            let (id, created) = try #require(readme, "the readme placeholder seeds")
-            // Bookless, undated, in Home — a standalone note (R-13s-27).
-            let (membered, entryDate, wing, rendered) = try await db.read { db in
+            let id = try #require(try await readmeID(db), "the readme seeds")
+            let shape = try await db.read { db -> (membered: Bool, tagged: Bool, entryDate: String?, wing: String,
+                                                    title: String?, rendered: String) in
                 (try Bool.fetchOne(
                     db,
                     sql: "SELECT EXISTS (SELECT 1 FROM reading_post WHERE post_id = ? AND deleted_at IS NULL)",
                     arguments: [id]) ?? false,
-                 try String.fetchOne(
-                    db, sql: "SELECT entry_date FROM container WHERE id = ?", arguments: [id]),
-                 try String.fetchOne(
-                    db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [id]) ?? "",
+                 try Bool.fetchOne(
+                    db,
+                    sql: "SELECT EXISTS (SELECT 1 FROM post_tag WHERE post_id = ? AND deleted_at IS NULL)",
+                    arguments: [id]) ?? false,
+                 try String.fetchOne(db, sql: "SELECT entry_date FROM container WHERE id = ?", arguments: [id]),
+                 try String.fetchOne(db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [id]) ?? "?",
+                 try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = ?", arguments: [id]),
                  try Queries.renderedText(db, containerID: id))
             }
-            #expect(!membered, "bookless — Pool/Library, no book")
-            #expect(entryDate == nil && wing == "")
-            // The DISPLAYED page is the five paragraphs, byte-exact (the
-            // chosen takes are the originals). The window's first run
-            // corrected this ORACLE: `renderedText` joins blocks with a
-            // BLANK line (`joinRenderedTexts`' separator — the page reads
-            // with paragraph breaks), not "\n"; the stored text was
-            // byte-exact all along.
-            #expect(rendered == ReadmeSeeder.paragraphs.joined(separator: "\n\n"))
-            // The alternates are REAL takes on their ruled blocks, in fan
-            // order after the chosen original, byte-exact.
-            let fans = try await db.read { db -> [Int: [String]] in
-                let blocks = try String.fetchAll(
+            #expect(shape.title == "readme", "her word, lowercase")
+            #expect(!shape.membered, "standalone: no book memberships (her disposition 3)")
+            #expect(!shape.tagged, "standalone: no tags")
+            #expect(shape.entryDate == nil, "undated — the created stamp carries her moment")
+            #expect(shape.wing == "", "in Home")
+            // `renderedText` joins blocks with a blank line (`joinRenderedTexts`).
+            #expect(shape.rendered == file.joined(separator: "\n\n"), "the page is her text")
+            // Block by block: ONE live take each (no fan, nothing archived), the
+            // chosen one, its stored bytes the file's paragraph.
+            let blocks = try await db.read { db -> [(texts: [String], chosenIsIt: Bool)] in
+                let rows = try Row.fetchAll(
                     db,
                     sql: """
-                        SELECT block_id FROM container_block
-                        WHERE container_id = ? AND deleted_at IS NULL
-                        ORDER BY position, id
+                        SELECT block_id, chosen_variant_id FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL ORDER BY position, id
                         """,
                     arguments: [id])
-                var fans: [Int: [String]] = [:]
-                for (index, blockID) in blocks.enumerated() {
-                    fans[index] = try String.fetchAll(
+                return try rows.map { row in
+                    let blockID: String = row["block_id"]
+                    let takes = try Row.fetchAll(
                         db,
-                        sql: """
-                            SELECT working_text FROM variant
-                            WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
-                            ORDER BY fan_position, id
-                            """,
+                        sql: "SELECT id, working_text FROM variant WHERE block_id = ? AND deleted_at IS NULL",
                         arguments: [blockID])
+                    return (takes.map { $0["working_text"] as String },
+                            takes.count == 1 && (takes.first?["id"] as String?) == (row["chosen_variant_id"] as String?))
                 }
-                return fans
             }
-            #expect(fans.count == ReadmeSeeder.paragraphs.count, "her five blocks + the four Start Here passages (VX-306, P-VX306-W-1)")
-            for (index, texts) in fans {
-                let expected = [ReadmeSeeder.paragraphs[index]] + (ReadmeSeeder.takes[index] ?? [])
-                #expect(texts == expected, "block \(index)'s fan, chosen first, byte-exact")
+            #expect(blocks.count == file.count, "seventeen blocks")
+            for (index, block) in blocks.enumerated() where index < file.count {
+                #expect(block.texts == [file[index]], "block \(index + 1): one take, byte for byte the file's")
+                #expect(block.chosenIsIt, "block \(index + 1): its one take is the chosen one")
             }
-            // Seeded LAST: the newest seeded thing a fresh Library meets —
-            // every other container of the seed was created strictly before.
-            let newest = try await db.read { db in
-                try String.fetchOne(
-                    db,
-                    sql: """
-                        SELECT MAX(created_at) FROM container
-                        WHERE deleted_at IS NULL AND id <> ?
-                        """,
-                    arguments: [id])
-            }
-            #expect(newest.map { $0 < created } == true, "the readme tops the Library by recency")
-            // And no letter note (R-13s-39: "no letter and nothing else").
-            let posts = try await db.read { db in
-                try String.fetchAll(
-                    db,
-                    sql: """
-                        SELECT COALESCE(title, '') FROM container
-                        WHERE kind = 'post' AND deleted_at IS NULL
-                          AND created_at >= ?
-                        """,
-                    arguments: [created])
-            }
-            #expect(posts == [ReadmeSeeder.title], "nothing seeds after the readme")
         }
     }
 
-    /// **EVERY STORE SEEDS THE SAME NINE (VX-329 — the release switch).** Before the switch, a store of the real variant
-    /// (every Release build's) kept today's road and was born with her five blocks alone — the four Start Here passages
-    /// speak the new road's truths (VX-306 ladder round 2, m2), false on today's road. The switch put every store on the
-    /// new road and deleted that fork with today's road (U1, `c3d939c9e`: `ReadmeSeeder.paragraphs` is every store's), so
-    /// a fresh store of EITHER variant is born with her five blocks, byte-exact and first, then the four passages — the
-    /// real variant's page identical to the dev variant's. Driven through the PRODUCTION composition per variant, each in
-    /// its own fresh world (the marks injected — no defaults are touched). It replaces the pre-switch pin
-    /// `aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone`, whose subject — today's road's five-only readme — went with
-    /// today's road (the first run after the switch read it red: nine blocks, as designed). The four passages' static
-    /// fact is `ReadmeStartHerePlanTests.theFourPassagesSeedInEveryStore`; this is the behavioural one.
-    @Test func aFreshStoreOfEitherVariantSeedsHerFiveThenTheFourPassages() async throws {
-        let nine = ReadmeSeeder.herBlocks + ReadmeSeeder.startHerePassages
-        #expect(ReadmeSeeder.herBlocks.count == 5 && ReadmeSeeder.startHerePassages.count == 4)
+    /// **THE MANIFEST IS INTERIOR-FIDELITY EVIDENCE ONLY (R-105-6).** The
+    /// package README's SHA-256s were read from her store, whose blocks carried
+    /// ONE trailing space on all but blocks 2, 12, 16 and 17; her ruling seeds
+    /// them trimmed. So each seeded block hashes to its manifest value AS-IS on
+    /// exactly those four, and WITH the one space her store carried on the other
+    /// thirteen — every interior byte hers, the bare mismatch EXPECTED and never
+    /// drift. RED ON OLD by construction (the old literals were her placeholder);
+    /// a single interior byte off on any block reds it.
+    @Test func herReadmesInteriorBytesAreHerStoresPerTheManifest() {
+        let blocks = ReadmeSeeder.paragraphs
+        #expect(blocks.count == herStoresManifest.count)
+        var bare: [Int] = []
+        for (index, (block, hash)) in zip(blocks, herStoresManifest).enumerated() {
+            let asIs = BridgeHash.body(block) == hash
+            let withTheStoresSpace = BridgeHash.body(block + " ") == hash
+            #expect(asIs || withTheStoresSpace, "block \(index + 1): an interior byte differs from her store")
+            #expect(block == block.trimmingCharacters(in: .whitespaces), "block \(index + 1) lands trimmed (R-105-6)")
+            if asIs { bare.append(index + 1) }
+        }
+        #expect(bare == [2, 12, 16, 17], "the four blocks her store kept bare; the other thirteen lost only a space")
+    }
+
+    /// **BORN STARRED, CREATED AT HER MOMENT, EDITED AT BIRTH, SEEDED LAST
+    /// (VX-105 — her "yeah make it born starred"; R-105-3).** The readme's
+    /// `created_at` is October 29, 2026, 4:44:00 am in THIS device's zone
+    /// (Gregorian); its edited stamps are the seed moment — `last_touched_at`
+    /// the last block's mint, `last_major_revision_at` one of its blocks' mints
+    /// (the churn crossing), `updated_at` with the touch; it is starred through
+    /// the one star list; and it is the FIRST note of the Library's default
+    /// sort (edited, newest first) — nothing the launch seeds comes after it.
+    /// RED ON OLD per fact: the old seed stamped `created_at` at the seed moment
+    /// (revert: drop the `withDependencies` scope around `createPost`) and never
+    /// starred (revert: drop the `setStarred` line).
+    @Test func theReadmeIsBornStarredCreatedAtHerMomentAndSeededLast() async throws {
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let id = try #require(try await readmeID(db), "the readme seeds")
+            let stamps = try await db.read { db -> (created: String, touched: String?, major: String?, updated: String,
+                                                     blockStamps: [String], starred: Bool, first: String?) in
+                let row = try #require(try Row.fetchOne(
+                    db,
+                    sql: """
+                        SELECT created_at, last_touched_at, last_major_revision_at, updated_at
+                        FROM container WHERE id = ?
+                        """,
+                    arguments: [id]))
+                let blockStamps = try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT created_at FROM container_block
+                        WHERE container_id = ? AND deleted_at IS NULL ORDER BY position, id
+                        """,
+                    arguments: [id])
+                return (row["created_at"], row["last_touched_at"], row["last_major_revision_at"], row["updated_at"],
+                        blockStamps,
+                        try Queries.starred(db).contains { $0.target == .post(id) },
+                        try Queries.catalogNotesPage(db, query: "", limit: 1).hits.first?.id)
+            }
+            // Created at her moment, read in this device's own calendar.
+            #expect(stamps.created == DateFormatter.variorumISO8601.string(from: ReadmeSeeder.writtenAt()))
+            let created = try #require(DateFormatter.variorumISO8601.date(from: stamps.created))
+            var gregorian = Calendar(identifier: .gregorian)
+            gregorian.timeZone = .current
+            let local = gregorian.dateComponents([.year, .month, .day, .hour, .minute, .second], from: created)
+            #expect(local.year == 2026 && local.month == 10 && local.day == 29, "October 29, 2026")
+            #expect(local.hour == 4 && local.minute == 44 && local.second == 0, "4:44 am, local")
+            // Edited at birth: the text's landing, never her moment.
+            #expect(stamps.blockStamps.count == 17)
+            #expect(stamps.touched == stamps.blockStamps.last, "last_touched_at is the last block's mint")
+            #expect(stamps.updated == stamps.blockStamps.last, "updated_at rides the touch")
+            #expect(stamps.major.map { stamps.blockStamps.contains($0) } == true,
+                    "last_major_revision_at is a block's mint (the churn crossing)")
+            #expect(stamps.touched != stamps.created && stamps.major != stamps.created)
+            // Born starred, through the one star list.
+            #expect(stamps.starred, "born starred (her ruling)")
+            // Seeded LAST and topping the Library's default sort.
+            #expect(stamps.first == id, "the readme leads the Library (edited, newest first — R-13s-29)")
+            let (later, newerTouch) = try await db.read { db in
+                (try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT COALESCE(title, '') FROM container
+                        WHERE deleted_at IS NULL AND id <> ? AND created_at >= ?
+                        """,
+                    arguments: [id, stamps.blockStamps.first ?? ""]),
+                 try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM container
+                        WHERE deleted_at IS NULL AND id <> ? AND last_touched_at >= ?
+                        """,
+                    arguments: [id, stamps.touched ?? ""]) ?? -1)
+            }
+            #expect(later.isEmpty, "nothing seeds after the readme: \(later)")
+            #expect(newerTouch == 0, "no note was touched after the readme's last block")
+        }
+    }
+
+    /// **"EVERY READER SEES 4:44 AM" — the local reading of R-105-3
+    /// (PROVISIONAL), stated as instants.** The same wall time in three zones
+    /// is three UTC stamps; Gregorian whatever the device's own calendar. RED ON
+    /// OLD by construction (no such moment existed).
+    @Test func herMomentIsFourFortyFourOnEachReadersOwnClock() throws {
+        func stamp(_ zone: String) throws -> String {
+            DateFormatter.variorumISO8601.string(
+                from: ReadmeSeeder.writtenAt(in: try #require(TimeZone(identifier: zone))))
+        }
+        #expect(try stamp("UTC") == "2026-10-29T04:44:00.000Z")
+        #expect(try stamp("America/Los_Angeles") == "2026-10-29T11:44:00.000Z")
+        #expect(try stamp("Asia/Tokyo") == "2026-10-28T19:44:00.000Z")
+    }
+
+    /// **EVERY STORE SEEDS THE SAME README (VX-329's both-variants pin, carried
+    /// to VX-105's text).** The release switch put every store on one road
+    /// (`ReadmeSeeder.paragraphs` is every store's), so a fresh store of EITHER
+    /// variant is born with her seventeen blocks, the real variant's page
+    /// byte-identical to the dev variant's. Driven through the PRODUCTION
+    /// composition per variant, each in its own fresh world (the marks injected
+    /// — no defaults are touched). RED ON OLD by construction (nine blocks).
+    @Test func aFreshStoreOfEitherVariantSeedsHerSameSeventeenBlocks() async throws {
+        let file = try herReadmeFileParagraphs()
         var pages: [AppDatabase.StoreVariant: String] = [:]
         for variant in AppDatabase.StoreVariant.allCases {
             pages[variant] = try await withLaunchWorld { session, db -> String in
@@ -405,13 +542,7 @@ struct LaunchFurnitureTests {
                 _ = await LaunchFurniture.seed(
                     session: session, storeVariant: variant,
                     gate: gate(account: false, clean: true), marks: device.marks)
-                let readme = try await db.read { db in
-                    try String.fetchOne(
-                        db,
-                        sql: "SELECT id FROM container WHERE kind = 'post' AND title = ? AND deleted_at IS NULL",
-                        arguments: [ReadmeSeeder.title])
-                }
-                let id = try #require(readme, "the readme placeholder seeds on the \(variant) variant")
+                let id = try #require(try await readmeID(db), "the readme seeds on the \(variant) variant")
                 let (blocks, rendered) = try await db.read { db in
                     (try Int.fetchOne(
                         db,
@@ -419,14 +550,245 @@ struct LaunchFurnitureTests {
                         arguments: [id]) ?? 0,
                      try Queries.renderedText(db, containerID: id))
                 }
-                #expect(blocks == nine.count, "the \(variant) variant seeded \(blocks) blocks — every store seeds nine")
-                #expect(rendered == nine.joined(separator: "\n\n"),
-                        "the \(variant) variant: her five blocks byte-exact and first, then the four passages")
+                #expect(blocks == file.count, "the \(variant) variant seeded \(blocks) blocks — every store seeds 17")
+                #expect(rendered == file.joined(separator: "\n\n"), "the \(variant) variant: her text, byte for byte")
                 return rendered
             }
         }
         #expect(pages.count == AppDatabase.StoreVariant.allCases.count)
         #expect(pages[.real] == pages[.dev], "the real variant's readme is the dev variant's, byte for byte")
+    }
+
+    // MARK: - VX-105 (R-105-8) — Help ▸ Restore “readme”
+
+    /// The readme's seed shape, as the store holds it — what the birth seed
+    /// and the door must both leave (one mint body).
+    private func readmeShape(_ db: AppDatabase, _ id: String) async throws -> (
+        blocks: [String], oneTakeEach: Bool, starred: Bool, created: String,
+        membered: Bool, tagged: Bool, wing: String
+    ) {
+        try await db.read { db in
+            let blockIDs = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT block_id FROM container_block
+                    WHERE container_id = ? AND deleted_at IS NULL ORDER BY position, id
+                    """,
+                arguments: [id])
+            let takeCounts = try blockIDs.map { blockID in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL",
+                    arguments: [blockID]) ?? 0
+            }
+            let created = try String.fetchOne(
+                db, sql: "SELECT created_at FROM container WHERE id = ?", arguments: [id]) ?? ""
+            return (
+                try Queries.renderedText(db, containerID: id).components(separatedBy: "\n\n"),
+                takeCounts.allSatisfy { $0 == 1 },
+                try Queries.starred(db).contains { $0.target == .post(id) },
+                created,
+                try Bool.fetchOne(
+                    db, sql: "SELECT EXISTS (SELECT 1 FROM reading_post WHERE post_id = ? AND deleted_at IS NULL)",
+                    arguments: [id]) ?? true,
+                try Bool.fetchOne(
+                    db, sql: "SELECT EXISTS (SELECT 1 FROM post_tag WHERE post_id = ? AND deleted_at IS NULL)",
+                    arguments: [id]) ?? true,
+                try String.fetchOne(db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [id]) ?? "?")
+        }
+    }
+
+    private func liveReadmeCount(_ db: AppDatabase) async throws -> Int {
+        try await db.read { db in
+            try Int.fetchOne(
+                db,
+                sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND title = ? AND deleted_at IS NULL",
+                arguments: [ReadmeSeeder.title]) ?? -1
+        }
+    }
+
+    /// **THE DOOR'S MINT ARM — her deletion does not stop a press** (R-105-8:
+    /// "a deleted chapter comes back fresh" is the seeded doors' rule). She
+    /// deletes the seeded readme: the BIRTH road keeps honouring that quietly
+    /// (`seedAtBirth` answers `.deletedByTheReader`), but Help ▸ Restore
+    /// “readme” MINTS the exact seed shape anew — her seventeen blocks, one take
+    /// each, starred, created at her 4:44 moment, bookless, untagged, Home —
+    /// opens it, and speaks the receipt; the deleted copy stays in the Trash.
+    /// RED ON OLD by construction: no such door (`.restoreReadme`) existed.
+    @Test func theReadmeDoorMintsTheSeedShapeEvenAfterHerDeletion() async throws {
+        let file = try herReadmeFileParagraphs()
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let seeded = try #require(try await readmeID(db))
+            try session.operations.deleteContainer(seeded)
+            #expect(await ReadmeSeeder.seedAtBirth(session: session) == .deletedByTheReader,
+                    "the birth road still honours her deletion quietly")
+            #expect(try await liveReadmeCount(db) == 0)
+
+            let shell = ShellRouter()
+            ShellActions(session: session, shell: shell).restoreReadme()
+            await pollUntil { session.status.spoken != nil }
+            #expect(session.status.spoken?.text == ReadmeDoorCopy.restored())
+            #expect(session.status.spoken?.kind == .receipt, "a mint is a receipt")
+            let fresh = try #require(try await readmeID(db), "the door minted a readme")
+            #expect(fresh != seeded, "a fresh note — the deleted one stays deleted")
+            #expect(shell.pendingSelection == .post(fresh), "fire-and-DO: the door opens it")
+            #expect(try await liveReadmeCount(db) == 1)
+            let shape = try await readmeShape(db, fresh)
+            #expect(shape.blocks == file, "her seventeen blocks, byte for byte")
+            #expect(shape.oneTakeEach && shape.starred && !shape.membered && !shape.tagged && shape.wing == "",
+                    "one take each, starred, standalone, Home")
+            #expect(shape.created == DateFormatter.variorumISO8601.string(from: ReadmeSeeder.writtenAt()),
+                    "created at her moment, like the seed's")
+            #expect(session.undoStack.depth == 0, "no ⌥⌘Z entry, like every restore door")
+        }
+    }
+
+    /// **THE DOOR'S REFUSAL ARM.** While a live readme stands the door changes
+    /// nothing: no second readme, a refusal in the family's voice, and the
+    /// existing note opened. RED ON OLD by construction (no such door).
+    @Test func theReadmeDoorRefusesWhileALiveReadmeStands() async throws {
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .dev,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let standing = try #require(try await readmeID(db))
+            let shell = ShellRouter()
+            ShellActions(session: session, shell: shell).restoreReadme()
+            await pollUntil { session.status.spoken != nil }
+            #expect(session.status.spoken?.text == ReadmeDoorCopy.alreadyPresent())
+            #expect(session.status.spoken?.kind == .refusal, "a door that did nothing speaks a refusal")
+            #expect(shell.pendingSelection == .post(standing), "…and still opens the readme she has")
+            #expect(try await liveReadmeCount(db) == 1, "never a second readme")
+        }
+    }
+
+    /// **TWO QUICK PRESSES MINT ONE** — the door's read and its mint share one
+    /// serialized runner turn, so a second press finds the first's readme.
+    /// RED ON OLD by construction (no such door).
+    @Test func twoQuickPressesOfTheReadmeDoorMintOne() async throws {
+        try await withLaunchWorld { session, db in
+            let first = Task { @MainActor in try await ReadmeSeeder.restore(session: session) }
+            let second = Task { @MainActor in try await ReadmeSeeder.restore(session: session) }
+            let outcomes = [try await first.value, try await second.value]
+            let minted = outcomes.filter { if case .restored = $0 { true } else { false } }
+            #expect(minted.count == 1, "exactly one press mints: \(outcomes)")
+            #expect(try await liveReadmeCount(db) == 1)
+        }
+    }
+
+    /// **A SAVED VERSION OF THE README IS NEVER "A LIVE README"** (ladder
+    /// round 1, MINOR-1). `saveNoteVersion` mints a full family copy that keeps
+    /// the title (V6): a live post titled "readme", born archived and sealed,
+    /// whose one home is Note ▸ Versions. She saves a moment of her readme,
+    /// renames the readme, and presses Help ▸ Restore “readme”: the door MINTS
+    /// a fresh readme (P-105-7(v): a renamed readme is no longer a readme) and
+    /// opens THAT — never refusing on the hidden moment, never opening it; a
+    /// second press then finds the fresh readme, still never the moment. RED ON
+    /// OLD (`liveReadmeID` was a bare title read): the moment matched, the
+    /// refusal spoke, and `pendingSelection == .post(momentID)`.
+    @Test func aSavedVersionOfTheReadmeIsNeverALiveReadme() async throws {
+        let file = try herReadmeFileParagraphs()
+        try await withLaunchWorld { session, db in
+            guard case .seeded(let original) = await ReadmeSeeder.seedAtBirth(session: session) else {
+                Issue.record("a fresh store seeds the readme")
+                return
+            }
+            let moment = try session.operations.saveNoteVersion(original).post.id
+            try session.operations.renameContainer(original, title: "mine")
+            #expect(try await db.read { try Queries.isVersionOfAnyLiveNote($0, moment) },
+                    "the moment is her readme's saved version, still titled readme")
+
+            let shell = ShellRouter()
+            ShellActions(session: session, shell: shell).restoreReadme()
+            await pollUntil { session.status.spoken != nil }
+            #expect(session.status.spoken?.text == ReadmeDoorCopy.restored(),
+                    "the door minted: \(String(describing: session.status.spoken?.text))")
+            #expect(session.status.spoken?.kind == .receipt)
+            guard case .post(let fresh)? = shell.pendingSelection else {
+                Issue.record("the door opens what it minted: \(String(describing: shell.pendingSelection))")
+                return
+            }
+            #expect(fresh != moment, "never the hidden moment")
+            #expect(fresh != original, "a fresh note beside the renamed one")
+            #expect(try await readmeShape(db, fresh).blocks == file, "the seed shape, her seventeen blocks")
+
+            #expect(try await ReadmeSeeder.restore(session: session) == .alreadyPresent(postID: fresh),
+                    "a second press finds the fresh readme, never the moment")
+        }
+    }
+
+    /// **A PRESS IN THE BIRTH SEED'S GAP NEVER MAKES TWO README** (ladder round
+    /// 1, MINOR-2). The birth seed now decides INSIDE its mint's runner turn
+    /// (the door's shape), so a Help ▸ Restore “readme” press queued ahead of
+    /// the birth's turn is seen by it. The interleave is forced by HOLDING the
+    /// serialized runner (a turn that waits on a semaphore, bounded so the pin
+    /// can never hang the suite): the door's turn queues behind the hold, then
+    /// the birth seed runs, then the hold lets go. ONE readme — the door's —
+    /// and the birth seed names what it found. RED ON OLD (revert
+    /// `performBirthSeed` to read on `session.database.read` before its
+    /// `runner.run`): the birth's read ran while the runner was held, saw no
+    /// readme, and queued its mint behind the door's — two readmes, the birth
+    /// answering `.seeded`. Honest label: the red side leans on the runner
+    /// taking its queued turns in order (the door's queued ~100 ms before the
+    /// birth's mint); the GREEN side does not — under the fix either order
+    /// leaves one readme. `theBirthSeedReadsNothingOutsideItsMintsTurn` below
+    /// is the deterministic shape pin beside it.
+    @Test func aDoorPressInTheBirthSeedsGapNeverMakesTwoReadmes() async throws {
+        try await withLaunchWorld { session, db in
+            let runner = session.runner
+            let release = DispatchSemaphore(value: 0)
+            let holding = LockIsolated(false)
+            let hold = Task {
+                try await runner.run { _ in
+                    holding.setValue(true)
+                    _ = release.wait(timeout: .now() + 10)
+                }
+            }
+            defer { release.signal() }
+            await pollUntil { holding.value }
+            #expect(holding.value, "the runner is held")
+
+            let door = Task { @MainActor in try await ReadmeSeeder.restore(session: session) }
+            try await Task.sleep(for: .milliseconds(100))   // the door's turn queues behind the hold
+            let birth = Task { @MainActor in await ReadmeSeeder.seedAtBirth(session: session) }
+            try await Task.sleep(for: .milliseconds(300))   // the birth seed reaches the runner
+            release.signal()
+            try await hold.value
+
+            let doorOutcome = try await door.value
+            let birthOutcome = await birth.value
+            let doorMinted = if case .restored = doorOutcome { true } else { false }
+            let birthMinted = if case .seeded = birthOutcome { true } else { false }
+            #expect(doorMinted != birthMinted,
+                    "exactly one of the two minted (door \(doorOutcome), birth \(birthOutcome))")
+            #expect(try await liveReadmeCount(db) == 1, "one readme, never two")
+        }
+    }
+
+    /// **THE SHAPE, DETERMINISTICALLY** (MINOR-2's companion pin): the birth
+    /// seed's decision reads live INSIDE the `runner.run` body that mints —
+    /// nothing in `performBirthSeed` reads on `session.database`, and the live
+    /// read precedes the mint in the one body. RED ON OLD: the reads ran on
+    /// `session.database.read`, ahead of the `runner.run` that minted.
+    @Test func theBirthSeedReadsNothingOutsideItsMintsTurn() throws {
+        let url = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Variorum/Features/Onboarding/BirthFurnitureSeeders.swift")
+        let source = try String(contentsOf: url, encoding: .utf8)
+        let start = try #require(source.range(of: "private static func performBirthSeed("))
+        let end = try #require(source.range(of: "/// **THE ONE MINT**", range: start.upperBound..<source.endIndex))
+        let body = String(source[start.upperBound..<end.lowerBound])
+        #expect(!body.contains("session.database"), "no read outside the runner turn")
+        let turn = try #require(body.range(of: "session.runner.run"), "the seed has one runner turn")
+        let read = try #require(body.range(of: "liveReadmeID(db)"))
+        let mint = try #require(body.range(of: "mint(ops:"))
+        #expect(turn.upperBound <= read.lowerBound && read.upperBound <= mint.lowerBound,
+                "the live read, then the mint — both inside the turn")
     }
 
     /// **NEVER A RETROFIT** (the `declined` mark's contract). An existing

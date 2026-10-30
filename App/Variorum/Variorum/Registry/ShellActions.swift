@@ -506,9 +506,12 @@ struct ShellActions {
         }
     }
 
-    /// **Help ▸ Restore the Sample Library** (pre-13u Act 10 — the
-    /// tenth-wave ruling: *"Restore door - yes, let's do it"*; Sherlock is
-    /// field-guide-class seeded content, and the field guide has restore).
+    /// **Help ▸ Restore “the adventures of sherlock holmes”** (pre-13u Act
+    /// 10 — the tenth-wave ruling: *"Restore door - yes, let's do it"*;
+    /// Sherlock is field-guide-class seeded content, and the field guide has
+    /// restore). VX-105 (R-105-4): the door names its book like its siblings
+    /// — the "Sample Library" label is retired; the act, and this function's
+    /// name, are unchanged.
     ///
     /// Deliberately UNLIKE the tutorial's replace: `SampleLibrarySeeder`'s
     /// seed is RESUMABLE — it mints only what is MISSING (a deleted book
@@ -540,6 +543,32 @@ struct ShellActions {
     /// (the front matter's R-18l-12 promise), while a takemania she is
     /// still playing with is never touched.
     func restoreJekyllBook() { restoreSeededBook(.jekyllAndHyde) }
+
+    /// VX-105 (R-105-8, her words: "just tell the readme session to add a
+    /// 'restore readme' door. why not just do that and match everything
+    /// else") — **Help ▸ Restore “readme”**: the readme through the seeded
+    /// doors' own rule. Fire-and-DO: a live readme is a refusal (the door
+    /// changed nothing) that still opens it; otherwise the ONE mint
+    /// (`ReadmeSeeder.mint`, the birth seed's body) makes it whole again —
+    /// her text, starred, created at her moment — a tombstone ignored (a press
+    /// is her word), and opens it. No ⌥⌘Z entry, like every restore door.
+    func restoreReadme() {
+        Task { @MainActor in
+            do {
+                switch try await ReadmeSeeder.restore(session: session) {
+                case .alreadyPresent(let postID):
+                    shell.pendingSelection = .post(postID)
+                    status.refuse(ReadmeDoorCopy.alreadyPresent())
+                case .restored(let postID):
+                    shell.pendingSelection = .post(postID)
+                    status.receipt(ReadmeDoorCopy.restored())
+                }
+            } catch {
+                Self.log.error("restore readme failed: \(String(describing: error), privacy: .public)")
+                status.refuse(ReadmeDoorCopy.failed(SeededBookRestore.failureLine(for: error)))
+            }
+        }
+    }
 
     /// 13s-b U1b (R-13s-37, her word: "classics restorable") — **Help ▸
     /// Restore the “classics” Gathering** (the menu title is the
@@ -852,14 +881,16 @@ struct ShellActions {
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
-        // pre-13u Act 10: the sample library's restore, typeable like the
-        // tutorial's. (The Encryption Explained row left at 13s-b U1b —
+        // pre-13u Act 10: Sherlock's restore (VX-105: named by its book),
+        // typeable like the tutorial's. (The Encryption Explained row left at 13s-b U1b —
         // R-13s-37: not restorable.)
         // VX-633: the Prince's restore, typeable like the others.
         .restorePrinceBook,
         .restoreSampleLibrary,
         // 18l-c U6: the takemania book's restore, typeable like the others.
         .restoreJekyllBook,
+        // VX-105 (R-105-8): the readme's restore, typeable like the books'.
+        .restoreReadme,
         // 13s-b U1b (R-13s-37): the classics gathering's restore.
         .restoreClassicsGathering,
         // The Act 10 correction round (row 15): TAG NOTE, typeable — ⌘⇧I's
@@ -1042,6 +1073,7 @@ struct ShellActions {
         case .restorePrinceBook: return { restorePrinceBook() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
         case .restoreJekyllBook: return { restoreJekyllBook() }
+        case .restoreReadme: return { restoreReadme() }
         case .restoreClassicsGathering: return { restoreClassicsGathering() }
         // VX-377: the three wing acts open the keyboard wing selector.
         case .moveNoteToWing, .copyNoteToWing, .moveBookToWing: return { openWingDestination(id) }

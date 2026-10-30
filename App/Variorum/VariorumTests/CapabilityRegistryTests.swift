@@ -331,6 +331,26 @@ struct CapabilityRegistryTests {
                 == LibraryOpenCopy.handOffDoor)
     }
 
+    /// **VX-105 (R-105-8, her words: "just tell the readme session to add a
+    /// 'restore readme' door. why not just do that and match everything
+    /// else")** — Help ▸ Restore “readme” is declared exactly like the seeded
+    /// book doors: app scope, the Help menu and ⌘K, no key, always available,
+    /// its verb following the one title constant (lowercase); the menu and the
+    /// palette render it (the two walks above hold the sets). RED ON OLD: no
+    /// `.restoreReadme` capability existed.
+    @Test func theReadmeRestoreDoorIsDeclaredLikeTheSeededBookDoors() throws {
+        let readme = CapabilityRegistry.capability(.restoreReadme)
+        let jekyll = CapabilityRegistry.capability(.restoreJekyllBook)
+        #expect(readme.verb == "Restore \u{201C}readme\u{201D}")
+        #expect(readme.verb == "Restore \u{201C}\(ReadmeSeeder.title)\u{201D}", "the one title constant")
+        #expect(readme.scope == jekyll.scope && Set(readme.doors) == Set(jekyll.doors),
+                "the book doors' declaration: \(readme.doors)")
+        #expect(readme.shortcutLabel == nil)
+        #expect(EditorCommands.menuRendered.contains(.restoreReadme), "on the Help menu")
+        #expect(ShellActions.paletteActs.contains(.restoreReadme), "typeable in \u{2318}K")
+        #expect(CapabilityRegistry.all.filter { $0.id == .restoreReadme }.count == 1, "declared once")
+    }
+
     @Test func thePaletteRendersExactlyTheDeclaredPaletteDoors() {
         // findAnything IS the palette; it needs no row inside itself.
         #expect(Set(ShellActions.paletteActs) == CapabilityRegistry.doored(.palette))

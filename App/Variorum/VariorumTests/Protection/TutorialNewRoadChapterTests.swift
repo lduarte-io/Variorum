@@ -5,7 +5,8 @@
 //  VX-309 U2 piece 7 — THE FIELD GUIDE'S PROTECTION CHAPTER ON THE NEW ROAD (VX-379's acceptance; QUESTIONS #235:
 //  "written here"; the brief is §5d of notes/plans/vx-309-copies-and-words.md, the record its U2 RECORD). The guide's
 //  "keeping it private" chapter is re-seeded against the rules AS BUILT — three lessons, the first LEADING with the
-//  readme's four Start Here passages verbatim. VX-329 U1 — THE RELEASE SWITCH: the road is the only road, so EVERY store
+//  four Start Here passages verbatim (`TutorialSeeder.startHerePassages` — the readme's too until VX-105; the guide's
+//  alone since, and R-105-7 puts them in the first chapter as well: the key lesson's lead is UNCHANGED). VX-329 U1 — THE RELEASE SWITCH: the road is the only road, so EVERY store
 //  (the dev store and the real store's variant alike — the dev-store fence dissolved) seeds this chapter; copy §7's
 //  chapter and VX-209's older-copy warning left with today's road. The words themselves are pinned headless by
 //  `U2WordsTests`; this suite pins the SEED: the book's shape against `plan`, every paragraph landed, the export
@@ -97,7 +98,7 @@ struct TutorialNewRoadChapterTests {
     }
 
     /// Every store's guide — the dev store's and the real store's variant alike — matches the plan exactly, and the
-    /// chapter says every paragraph — lesson 1 LEADING with the readme's Start Here passages.
+    /// chapter says every paragraph — lesson 1 LEADING with the Start Here passages.
     @Test(arguments: [AppDatabase.StoreVariant.dev, .real])
     func everyStoresGuideSeedsTheRoadsChapter(_ variant: AppDatabase.StoreVariant) async throws {
         try await withGuide(variant: variant) { db, guideID in
@@ -111,9 +112,9 @@ struct TutorialNewRoadChapterTests {
             }
             let byTitle = Dictionary(seeded.map { ($0.title, $0.text) }, uniquingKeysWith: { first, _ in first })
             let key = try #require(byTitle[ProtectionWords.guideKeyLessonTitle])
-            #expect(key.hasPrefix(ReadmeSeeder.startHerePassages[0]), "lesson 1 LEADS with the Start Here passages")
-            for passage in ReadmeSeeder.startHerePassages {
-                #expect(key.contains(passage), "verbatim — one text, two homes: \(passage.prefix(40))")
+            #expect(key.hasPrefix(TutorialSeeder.startHerePassages[0]), "lesson 1 LEADS with the Start Here passages")
+            for passage in TutorialSeeder.startHerePassages {
+                #expect(key.contains(passage), "verbatim — the guide's one constant: \(passage.prefix(40))")
             }
             #expect(key.contains(ProtectionWords.guideSyncSentence + " " + ProtectionCopy.privacyServerSeesShapeSentence))
             #expect(key.contains(ProtectionCopy.keystoneAccountPassword) && key.contains(ProtectionWords.guideOpenMeansReadable))

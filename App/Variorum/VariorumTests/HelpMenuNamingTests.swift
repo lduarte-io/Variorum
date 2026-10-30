@@ -41,6 +41,43 @@ struct HelpMenuNamingTests {
         #expect(TutorialSeeder.replaceQuestion == "Restore the field guide?")
     }
 
+    /// **VX-105 (R-105-4, her words: "they should be able to restore sherlock,
+    /// jeyll and hyde, the prince, etc. each individual. the sample library is
+    /// too confusing we don't need that.")** — Help's book doors each name
+    /// their book, the Sherlock door included: Restore “the adventures of
+    /// sherlock holmes”, over the one name constant (the Jekyll and Prince
+    /// doors' idiom). The seeded doors on Help — the three books, the classics
+    /// gathering and (R-105-8) the readme — each name their thing, and no door
+    /// anywhere says "sample library". RED ON OLD: the verb read "Restore the
+    /// Sample Library".
+    @Test func theSherlockDoorNamesItsBookAndNoDoorSaysSampleLibrary() throws {
+        #expect(CapabilityRegistry.capability(.restoreSampleLibrary).verb
+                == "Restore \u{201C}the adventures of sherlock holmes\u{201D}")
+        #expect(CapabilityRegistry.capability(.restoreSampleLibrary).verb
+                == "Restore \u{201C}\(SampleLibrarySeeder.bookName)\u{201D}", "one name constant")
+        #expect(CapabilityRegistry.capability(.restorePrinceBook).verb
+                == "Restore \u{201C}\(SampleLibraryPrinceBook.name)\u{201D}")
+        #expect(CapabilityRegistry.capability(.restoreJekyllBook).verb
+                == "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}")
+        let seededDoors: [CapabilityID] = [
+            .restorePrinceBook, .restoreSampleLibrary, .restoreJekyllBook, .restoreClassicsGathering,
+            .restoreReadme,
+        ]
+        for id in seededDoors {
+            #expect(CapabilityRegistry.capability(id).doors.contains(.menuBar), "\(id) on the Help menu")
+            #expect(ShellActions.paletteActs.contains(id), "\(id) typeable in \u{2318}K")
+        }
+        for capability in CapabilityRegistry.all {
+            #expect(!capability.verb.localizedCaseInsensitiveContains("sample library"),
+                    "no door says sample library: \(capability.verb)")
+        }
+        // The menu and the palette render the registry's verb — no literal of the old name anywhere they read.
+        for file in ["EditorCommands.swift", "Registry/CapabilityRegistry.swift", "Registry/ShellActions.swift"] {
+            #expect(!(try source(file)).contains("\"Restore the Sample Library"), "\(file) spells no old name")
+        }
+        #expect(try source("EditorCommands.swift").contains("Button(verb(.restoreSampleLibrary))"))
+    }
+
     private func source(_ path: String) throws -> String {
         try String(
             contentsOf: URL(fileURLWithPath: #filePath)
@@ -63,23 +100,26 @@ struct HelpMenuNamingTests {
     /// A-439-9's boundary, FLIPPED as it asked ("when she rules the content
     /// edit, this pin flips with it"): her coordinator raised the three stale
     /// lesson lines at the VX-292 kickoff ("we should fix it"), R-292-9
-    /// routed them here, and the vx-105 resolution split them (Option B): the
-    /// guide names the door by its REGISTRY verb from here on — VX-292 U1
-    /// derives "the tray & the Trash" and "comments & tags"; the first
-    /// lesson's line ("start here") is vx-105's rewrite, so it is the ONLY
-    /// place the old literal may still stand. After both merges none does —
-    /// this pin holds on either side of vx-105's merge. The seeded TRUTH is
+    /// routed them here, and the vx-105 resolution split them (Option B):
+    /// VX-292 U1 derives "the tray & the Trash" and "comments & tags"; the
+    /// first lesson's line rode vx-105's rewrite. BOTH branches have merged,
+    /// so the old literal is gone from the seeder ENTIRELY — the second
+    /// merger resolved the two editions of this pin to zero, as both
+    /// records asked. The seeded TRUTH is
     /// `TutorialCurrencyTests.theLessonsNameTheRestoreDoorByItsMenuTitle`.
     @Test func theGuideNamesTheRestoreDoorByItsRegistryVerb() throws {
         let seeder = try source("Features/Tutorial/TutorialSeeder.swift")
         let old = "Restore Tutorial\\u{2026}"
-        #expect(seeder.components(separatedBy: old).count - 1 <= 1,
-                "at most the first lesson's line (vx-105's) still says the old name")
+        #expect(!seeder.contains(old), "no lesson says the old name")
+        let startHere = try #require(seeder.components(separatedBy: "lesson(welcome, \"start here\", [").dropFirst().first?
+            .components(separatedBy: "lesson(welcome, \"getting around\"").first)
+        #expect(startHere.contains("CapabilityRegistry.capability(.restoreTutorial).verb"),
+                "the start here lesson reads the door's own verb")
+        #expect(!startHere.contains("Restore Tutorial"), "and spells no retired name")
         let afterTheFirstLesson = try #require(
             seeder.components(separatedBy: "lesson(welcome, \"getting around\"").last)
-        #expect(!afterTheFirstLesson.contains(old), "no later lesson says the old name")
         #expect(afterTheFirstLesson.components(
             separatedBy: "\\(CapabilityRegistry.capability(.restoreTutorial).verb)").count - 1 == 2,
-                "the two lessons quote the registry's verb")
+                "the two later lessons quote the registry's verb")
     }
 }
