@@ -24,6 +24,12 @@ import Foundation
 /// (`ringGroups`). Nothing here depends on board state she can mutate: the
 /// seeded book and its first story are looked up when the tour starts, and a
 /// missing one degrades to "any book" / "any note".
+///
+/// **The tutorial wins by driving** (VX-292 R-292-11): a note that ARRIVES in
+/// a mode its step does not teach in — a remembered Takes or Read winning the
+/// note's own memory — is driven to the step's mode, once per arrival
+/// (`expectedNoteMode`, `drive`). Wandering is never chased; nothing is
+/// erased.
 public enum Tour {
 
     // MARK: - The steps
@@ -233,6 +239,13 @@ public enum Tour {
         var previousPlace: Place?
         /// The note box's liveness before the latest report — step 10's edge.
         var previousBookNoteLive: Bool
+        /// **An ARRIVAL waiting to be judged** (VX-292 R-292-11 — the
+        /// tutorial wins by driving): set at every step's entry and whenever
+        /// the reported place changes; spent by the first report at a note
+        /// that carries a mode (`drive`). One judgment per arrival — so a
+        /// mode she picks herself on the same note is hers, and a correction
+        /// that does not take is never asked twice.
+        var arrivalUnjudged: Bool
 
         struct TakeBaseline: Equatable, Sendable {
             var blockID: String
@@ -248,6 +261,7 @@ public enum Tour {
             self.facts = facts
             self.previousPlace = nil
             self.previousBookNoteLive = facts.bookNoteLive
+            self.arrivalUnjudged = true
         }
     }
 
@@ -277,7 +291,14 @@ public enum Tour {
     public enum Effect: Equatable, Sendable {
         /// Take the focused pane here (the tour's own choreography — the start
         /// on the Bookcase and the leg's stops; done visibly, P-2).
-        case navigate(Place)
+        ///
+        /// **`mode`** (VX-292 R-292-11 — her words: *"if you were in takes on
+        /// some chapter in the prince where the tutorial expects you to be in
+        /// write, the tutorial wins"*): a NOTE arrived in a mode its step does
+        /// not teach in, and the tour drives it to the one it does
+        /// (`expectedNoteMode`, `drive`). nil — every other navigate — leaves
+        /// the mode to the note, exactly as before.
+        case navigate(Place, mode: NoteMode? = nil)
         /// Open the field guide (the Help menu's own door).
         case openFieldGuide
         /// The end card was reached: retire the offer as COMPLETED now, so a
@@ -330,6 +351,7 @@ public enum Tour {
             }
             enter(following, &state, &effects)
             settle(&state, &effects, freshReport: false)
+            drive(&state, &effects)
             // Round 2 (the U2 ladder): the leg's end finishes at the guide on
             // THIS road too — a "next" pressed while she already sits at the
             // field guide (her report outran the leg's navigate) must finish,
@@ -347,6 +369,7 @@ public enum Tour {
             case .keepGoing:
                 enter(.legStar, &state, &effects)
                 settle(&state, &effects, freshReport: false)
+                drive(&state, &effects)
                 return Outcome(state: state, effects: effects)
             case .fieldGuide:
                 return Outcome(state: nil, effects: [.openFieldGuide, .finish(completed: true)])
@@ -357,8 +380,11 @@ public enum Tour {
         case .facts(let facts):
             state.previousPlace = state.facts.place
             state.previousBookNoteLive = state.facts.bookNoteLive
+            // R-292-11: a new place is a new arrival, judged by `drive`.
+            if facts.place != state.facts.place { state.arrivalUnjudged = true }
             state.facts = facts
             settle(&state, &effects, freshReport: true)
+            drive(&state, &effects)
             if state.step == .legEnd, let finished = finishAtGuide(state) {
                 return Outcome(state: nil, effects: effects + finished)
             }
@@ -521,6 +547,9 @@ public enum Tour {
         state.step = step
         state.writeBaseline = nil
         state.takeBaseline = nil
+        // R-292-11: a step's entry is a landing of the tour's own — judged
+        // on the next report at a note that carries a mode (`drive`).
+        state.arrivalUnjudged = true
         remember(&state)
         let place = state.facts.place
         switch step {
@@ -542,6 +571,51 @@ public enum Tour {
         default:
             break
         }
+    }
+
+    // MARK: - The tutorial wins (VX-292 R-292-11)
+
+    /// **The note mode a step teaches in** — the tour's half of her ruling
+    /// (R-292-11: *"the tour DRIVES; state untouched … landings force the
+    /// mode the step expects — the tutorial wins by driving, never by
+    /// erasing"*). Steps 4–6 teach in WRITE (the caret, the bar's Takes and
+    /// the ⑂ badge are Write's); step 7 teaches in TAKES. nil: any mode — step
+    /// 8 only names the modes, step 9's bouncing is hers to do, and step 10's
+    /// ladder and the leg's acts work from every mode. Every step listed is
+    /// one of `followsTheNote`'s, so the note it judges is the toured note.
+    public static func expectedNoteMode(_ step: Step) -> NoteMode? {
+        switch step {
+        case .write, .makeTake, .takeIcon: .write
+        case .takesMode: .takes
+        default: nil
+        }
+    }
+
+    /// **Judge the arrival, once** (R-292-11). On the first report at a note
+    /// that carries a mode after a step's entry or a change of place: when
+    /// the step teaches in another mode, ONE corrective navigate to the same
+    /// note in the step's mode — the road a note's remembered mode would
+    /// otherwise win (the toured chapter left in Takes by an earlier tour, a
+    /// chapter she reads in Read). Either way the arrival is then judged:
+    ///
+    /// - a mode she switches to herself on the same note is hers (no report
+    ///   changes the place, so nothing is judged — the ring's road back on
+    ///   the rail stays the answer, `isRoadBack`);
+    /// - a correction that does not take is never asked again (no loop);
+    /// - wandering judges nothing: a place that is not a note carries no
+    ///   mode, so the arrival waits — and coming back to the note is judged
+    ///   when it lands, which is the point;
+    /// - nothing is erased: the effect is a navigation, whose only write is
+    ///   the one a mode switch always makes (the note's remembered mode).
+    static func drive(_ state: inout State, _ effects: inout [Effect]) {
+        guard state.arrivalUnjudged, case .note(let noteID) = state.facts.place,
+              let mode = state.facts.noteMode
+        else { return }
+        state.arrivalUnjudged = false
+        guard let expected = expectedNoteMode(state.step), mode != expected,
+              noteID == state.tourNoteID
+        else { return }
+        effects.append(.navigate(.note(noteID), mode: expected))
     }
 
     /// The steps whose toured note is the note she is in.

@@ -461,6 +461,13 @@ struct TourEngineTests {
         var completions = 0
         var finishes: [Bool] = []
         var poolReveals = 0
+        /// VX-292 R-292-11: the drives the engine asked for, in order.
+        var drives: [Drive] = []
+
+        struct Drive: Equatable {
+            let place: Tour.Place
+            let mode: Tour.NoteMode
+        }
 
         var doors: TourEngine.Doors {
             TourEngine.Doors(
@@ -468,7 +475,8 @@ struct TourEngineTests {
                 openFieldGuide: { self.fieldGuides += 1 },
                 recordCompleted: { self.completions += 1 },
                 finished: { self.finishes.append($0) },
-                showPoolTucked: { self.poolReveals += 1 })
+                showPoolTucked: { self.poolReveals += 1 },
+                drive: { self.drives.append(Drive(place: $0, mode: $1)) })
         }
     }
 
@@ -588,6 +596,40 @@ struct TourEngineTests {
             #expect(engine.state.step == .legBook)
             #expect(log.navigations.last == .area(.pool))
             #expect(log.poolReveals == 1, "her tucked note's row is opened for the leg's door")
+        }
+    }
+
+    /// VX-292 R-292-11 — the tutorial wins by driving: a chapter that
+    /// arrives in a remembered mode its step does not teach in reaches the
+    /// DRIVE door — once, with the step's mode — and never the plain
+    /// navigate door (which would leave the note's memory to win again).
+    @Test func aDriveReachesTheDriveDoorOnceAndNeverThePlainNavigate() async throws {
+        try await withSession { session in
+            let log = DoorLog()
+            let engine = TourEngine(
+                session: session, landmarks: Self.landmarks,
+                facts: Tour.Facts(place: .area(.bookcase)), doors: log.doors)
+            engine.next()
+            engine.observe(.init(place: .book("sherlock")))
+            engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+            #expect(engine.state.step == .write)
+            #expect(log.drives == [.init(place: .note("scandal"), mode: .write)])
+            #expect(log.navigations.isEmpty, "a drive is not a plain navigate")
+            // Landed in Write: nothing more; her own switch later is hers.
+            engine.observe(.init(place: .note("scandal"), noteMode: .write))
+            engine.observe(.init(place: .note("scandal"), noteMode: .lenses))
+            #expect(log.drives.count == 1)
+        }
+    }
+
+    /// The drive door names the app's mode for the rule's — every one, both
+    /// ways (`TourPlaces.postMode` is `mode(_:)`'s inverse).
+    @Test func everyRuleModeNamesItsAppModeBothWays() {
+        for mode in Tour.NoteMode.allCases {
+            #expect(TourPlaces.mode(TourPlaces.postMode(mode)) == mode)
+        }
+        for mode in PostMode.allCases {
+            #expect(TourPlaces.postMode(TourPlaces.mode(mode)) == mode)
         }
     }
 
@@ -779,6 +821,104 @@ struct TourEntryTests {
                     == TourOffer.Record.ended.rawValue)
             #expect(TourOfferModel(defaults: defaults).phase == .retired,
                     "ended before the end: the offer never comes back (R-13s-13)")
+        }
+        #endif
+    }
+
+    /// **VX-292 R-292-11 — the tutorial wins, in the REAL shell.** Her words:
+    /// *"if you were in takes on some chapter in the prince where the
+    /// tutorial expects you to be in write, the tutorial wins."* The toured
+    /// chapter remembers TAKES (`postMode.<id>`, the memory an earlier tour's
+    /// step 7 leaves); at step 3 she takes it by a road that is not the
+    /// card's door (the Open row's: a plain adoption, no mode named), so the
+    /// note mounts in Takes — and the tour drives it to Write through the
+    /// rail's own act, the step waiting for her click as designed. Nothing
+    /// is refused; the only memory written is the switch's own; and a mode
+    /// she then picks herself on the same note is left alone.
+    ///
+    /// RED ON OLD by mechanism: without `Tour.drive` (or the shell's drive
+    /// door) nothing switches the mounted detail, so it stays in Takes.
+    @Test func aChapterRememberedInTakesIsDrivenToWriteWhenTheTourMeetsIt() async throws {
+        #if DEBUG
+        let suite = "tour-drive-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            // LIVE uuids: the chapter's mode memory is a REAL defaults key in
+            // the test host (the dev app), so it must never collide with a
+            // parallel suite's incrementing ids (`BookOpenDoorTests`' reason).
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let ops = session.operations
+            let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
+            let chapter = try ops.createPost(title: TourScript.firstStoryTitle)
+            // Blocks, or the detail's blockless guard would open it in Write
+            // by itself and the pin would be hollow.
+            for text in ["Upon this a question arises.", "One ought to be both.", "Men love at their own will."] {
+                _ = try ops.newBlock(in: chapter.id, text: text, at: .end)
+            }
+            try ops.addPostToReading(chapter.id, to: prince.id)
+            _ = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
+            let memoryKey = "postMode.\(chapter.id)"
+            UserDefaults.standard.set(PostMode.takes.rawValue, forKey: memoryKey)
+            defer {
+                UserDefaults.standard.removeObject(forKey: memoryKey)
+                session.commandRouter.forgetCurrentBlock(for: chapter.id)
+            }
+            let offer = TourOfferModel(defaults: defaults)
+            let router = ShellRouter()
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: RootView(
+                session: session, router: router, tourOffer: offer))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, turns: 40) { false }
+
+            router.tourRequested = true
+            await settle(window, hosting) { TourOracle.overlay != nil }
+            let engine = try #require(TourOracle.overlay, "the request started a tour")
+            #expect(engine.state.firstStoryID == chapter.id)
+            engine.next()
+            router.adopt(.reading(prince.id), in: router.workspace.focusedPane)
+            await settle(window, hosting) { engine.state.step == .insideBook }
+            #expect(engine.state.step == .insideBook)
+
+            // The Open row's road: a plain adoption — the note's memory wins
+            // the mount (Takes), as it does for every door but the card's.
+            router.adopt(.post(chapter.id), in: router.workspace.focusedPane)
+            await settle(window, hosting) {
+                session.commandRouter.activePostID == chapter.id
+                    && session.commandRouter.activeMode == .write
+            }
+            #expect(session.commandRouter.activePostID == chapter.id)
+            #expect(session.commandRouter.activeMode == .write,
+                    "the tutorial won: Takes was driven to Write (\(String(describing: session.commandRouter.activeMode)))")
+            #expect(engine.state.step == .write, "step 4 waits for her click, as designed")
+            #expect(UserDefaults.standard.string(forKey: memoryKey) == PostMode.write.rawValue,
+                    "the only write is the switch's own memory, as any mode switch writes it")
+            #expect(session.status.current == nil,
+                    "nothing refused (\(String(describing: session.status.current?.text)))")
+
+            // Her own switch on the same note afterwards is hers.
+            session.commandRouter.requestMode(.takes, postID: chapter.id)
+            await settle(window, hosting, turns: 40) { false }
+            #expect(session.commandRouter.activeMode == .takes, "never overruled on the same note")
+
+            engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
         }
         #endif
     }

@@ -44,6 +44,13 @@ final class TourEngine {
         var finished: (_ completed: Bool) -> Void
         /// Open the Pool's "in gatherings" run (F-U2-W-2, option A — leg 3).
         var showPoolTucked: () -> Void = {}
+        /// **VX-292 R-292-11 — the tutorial wins by driving**: take the
+        /// focused pane to this NOTE in this mode (a note arrived in a mode
+        /// its step does not teach in — `Tour.drive`). The composition root
+        /// performs it through the existing landing roads: the rail's own
+        /// mode switch on the mounted note, else the book open door's mode
+        /// landing. Defaulted so a fixture that never drives needs nothing.
+        var drive: (Tour.Place, Tour.NoteMode) -> Void = { _, _ in }
     }
 
     @ObservationIgnored private let doors: Doors
@@ -113,7 +120,10 @@ final class TourEngine {
     private func perform(_ effects: [Tour.Effect]) {
         for effect in effects {
             switch effect {
-            case .navigate(let place): doors.navigate(place)
+            case .navigate(let place, let mode):
+                // R-292-11: a moded navigate is the tour DRIVING a note to the
+                // mode its step teaches in; every other one is a plain place.
+                if let mode { doors.drive(place, mode) } else { doors.navigate(place) }
             case .openFieldGuide: doors.openFieldGuide()
             case .recordCompleted: doors.recordCompleted()
             case .showPoolTucked: doors.showPoolTucked()
@@ -228,6 +238,20 @@ enum TourPlaces {
     }
 
     static func mode(_ mode: PostMode) -> Tour.NoteMode {
+        switch mode {
+        case .write: .write
+        case .takes: .takes
+        case .read: .read
+        case .lenses: .lenses
+        case .compare: .compare
+        case .blocks: .blocks
+        case .canvas: .canvas
+        }
+    }
+
+    /// The rule's mode, in the app's words — `mode(_:)`'s inverse (VX-292
+    /// R-292-11: the drive door names the mode the step teaches in).
+    static func postMode(_ mode: Tour.NoteMode) -> PostMode {
         switch mode {
         case .write: .write
         case .takes: .takes

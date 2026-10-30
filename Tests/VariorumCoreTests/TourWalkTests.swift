@@ -610,6 +610,186 @@ struct TourWalkTests {
         #expect(w.state.flatMap(Tour.noteOfInterest) == Self.mine)
     }
 
+    // MARK: - The tutorial wins by driving (VX-292 R-292-11)
+
+    /// Every moded navigate a walk asked for (the drives), in order.
+    static func drives(_ effects: [Tour.Effect]) -> [Tour.Effect] {
+        effects.filter {
+            if case .navigate(_, let mode) = $0 { return mode != nil }
+            return false
+        }
+    }
+
+    /// The table IS the rule's data: steps 4–6 teach in Write, step 7 in
+    /// Takes, and no other step drives a mode (step 8 only names the modes,
+    /// step 9's bouncing is hers, step 10 and the leg work from any mode).
+    @Test func theStepsThatTeachInAModeAreExactlyStepsFourToSeven() {
+        var table: [Tour.Step: Tour.NoteMode] = [:]
+        for step in Tour.Step.allCases {
+            if let mode = Tour.expectedNoteMode(step) { table[step] = mode }
+        }
+        #expect(table == [.write: .write, .makeTake: .write, .takeIcon: .write, .takesMode: .takes])
+    }
+
+    /// Her words: *"if you were in takes on some chapter in the prince where
+    /// the tutorial expects you to be in write, the tutorial wins."* The
+    /// toured chapter ARRIVES in the mode its own memory remembers (a road
+    /// that is not the card's door — the Open row, the Library, ⌘K): the
+    /// tour drives it to Write, once, and the step still waits for her click.
+    @Test func aChapterRememberedInAnotherModeIsDrivenToWriteWhenItArrives() {
+        for remembered in Tour.NoteMode.allCases where remembered != .write {
+            var w = Self.walk(to: .insideBook)
+            w.effects = []
+            w.report(.init(place: .note(Self.scandal), noteMode: remembered))
+            #expect(w.step == .write, "\(remembered): any note serves step 3, as ever")
+            #expect(w.effects == [.navigate(.note(Self.scandal), mode: .write)],
+                    "\(remembered): ONE drive, to Write (\(w.effects))")
+            // The same report again (the drive has not landed yet): never
+            // asked twice.
+            w.report(.init(place: .note(Self.scandal), noteMode: remembered))
+            #expect(Self.drives(w.effects).count == 1, "\(remembered): no second ask")
+            // It lands: Write, and step 4 waits for her click as designed.
+            w.report(Self.write(Self.first, ordinal: 1))
+            #expect(w.step == .write)
+            #expect(Self.drives(w.effects).count == 1)
+            w.report(Self.write(Self.middle, ordinal: 40))
+            #expect(w.step == .makeTake)
+        }
+    }
+
+    /// The window can report the note a beat before its detail registers
+    /// (no mode yet): the arrival waits and is judged when its mode comes.
+    @Test func anArrivalWhoseModeComesLaterIsJudgedWhenItComes() {
+        var w = Self.walk(to: .insideBook)
+        w.effects = []
+        w.report(.init(place: .note(Self.scandal)))
+        #expect(w.step == .write)
+        #expect(w.effects == [], "nothing to judge until the note says its mode")
+        w.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(w.effects == [.navigate(.note(Self.scandal), mode: .write)])
+    }
+
+    /// A mode she picks HERSELF on the note she is in is hers: no arrival,
+    /// so nothing is judged — the rail's road back stays the answer (the
+    /// off-target tolerance, unchanged). Only a LANDING is driven.
+    @Test func aModeSheChoosesOnTheSameNoteIsNeverOverruled() {
+        var w = Self.walk(to: .write)
+        w.effects = []
+        w.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(w.effects == [], "her own switch: no drive (\(w.effects))")
+        #expect(w.rings == [[.sidebarMode(.write)]])
+        #expect(w.state.map(Tour.isRoadBack) == true)
+        w.report(.init(place: .note(Self.scandal), noteMode: .lenses))
+        #expect(w.effects == [])
+
+        var v = Self.walk(to: .takesMode)
+        v.effects = []
+        v.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(v.effects == [], "step 7's own note, switched by her: no drive")
+        #expect(v.rings == [[.sidebarMode(.takes)]])
+    }
+
+    /// Wandering is never chased (the off-target tolerance must not die):
+    /// a place that is not a note judges nothing and asks for nothing —
+    /// including mid-correction, before the drive has landed. Coming back
+    /// to the note IS an arrival, and is judged when it lands.
+    @Test func wanderingIsNeverChasedAndComingBackIsJudged() {
+        var w = Self.walk(to: .write)
+        w.effects = []
+        for place: Tour.Place in [.area(.library), .book(Self.sherlock), .area(.pool), .elsewhere] {
+            w.report(.init(place: place))
+            #expect(w.effects == [], "\(place): wandering asks for nothing")
+            #expect(w.step == .write)
+        }
+        // Back through the Open row: the note remembers Read.
+        w.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(w.effects == [.navigate(.note(Self.scandal), mode: .write)])
+
+        // Mid-correction: the drive is asked, and before it lands she leaves.
+        var v = Self.walk(to: .insideBook)
+        v.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(Self.drives(v.effects).count == 1)
+        v.report(.init(place: .area(.library)))
+        v.report(.init(place: .book(Self.sherlock)))
+        #expect(Self.drives(v.effects).count == 1, "her wandering is hers, mid-drive too")
+        #expect(v.step == .write)
+    }
+
+    /// Step 7 teaches in TAKES: a return to the toured note that lands in
+    /// Write is driven back to Takes. The steps that teach in no particular
+    /// mode never drive, whatever the note arrives in.
+    @Test func stepSevenDrivesToTakesAndTheOtherStepsLeaveTheModeAlone() {
+        var w = Self.walk(to: .takesMode)
+        w.effects = []
+        w.report(.init(place: .area(.library)))
+        w.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(w.effects == [.navigate(.note(Self.scandal), mode: .takes)])
+
+        for step in [Tour.Step.deeperModes, .placeFollows] {
+            var v = Self.walk(to: step)
+            v.effects = []
+            v.report(.init(place: .area(.library)))
+            v.report(.init(place: .note(Self.scandal), noteMode: .lenses))
+            #expect(v.effects == [], "\(step) teaches in any mode (\(v.effects))")
+        }
+        // Step 6 reached by a landing ALREADY in Takes is the act itself
+        // (the card asks for Takes mode): it advances, nothing is driven.
+        var u = Self.walk(to: .takeIcon)
+        u.effects = []
+        u.report(.init(place: .area(.library)))
+        u.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(u.step == .takesMode)
+        #expect(u.effects == [])
+        // …and in Read, it is driven to Write, where the ⑂ badge lives.
+        var t = Self.walk(to: .takeIcon)
+        t.effects = []
+        t.report(.init(place: .area(.library)))
+        t.report(.init(place: .note(Self.scandal), noteMode: .read))
+        #expect(t.step == .takeIcon)
+        #expect(t.effects == [.navigate(.note(Self.scandal), mode: .write)])
+    }
+
+    /// A RE-RUN after a completed tour: the first run left the toured
+    /// chapter in Takes (step 7), so the second meets the remembered mode —
+    /// the hostile case her words name. It is driven; and a note she takes
+    /// in place of the chapter is driven the same way (the tour follows the
+    /// note she took).
+    @Test func aReRunAfterCompletionIsDrivenAndSoIsAnyNoteSheTakes() {
+        var first = Self.walk(to: .endCard)
+        first.send(.choose(.done))
+        #expect(first.state == nil)
+
+        var again = Walker()
+        again.send(.next)
+        again.report(.init(place: .book(Self.sherlock)))
+        again.report(.init(place: .note(Self.scandal), noteMode: .takes))
+        #expect(Self.drives(again.effects) == [.navigate(.note(Self.scandal), mode: .write)])
+
+        var other = Self.walk(to: .insideBook)
+        other.effects = []
+        other.report(.init(place: .note(Self.league), noteMode: .read))
+        #expect(other.state?.tourNoteID == Self.league)
+        #expect(other.effects == [.navigate(.note(Self.league), mode: .write)])
+    }
+
+    /// The designed road drives nothing: the card's own door lands in Write
+    /// (VX-303), so a walk of the whole tour — main leg, end card, the leg —
+    /// asks for no drive at all. A book never drives (it keeps no mode
+    /// memory; Outline is its arrival).
+    @Test func theDesignedRoadDrivesNothing() {
+        var w = Self.walk(to: .endCard)
+        w.send(.choose(.keepGoing))
+        w.report(Self.ownNote(starred: true))
+        w.report(Self.ownNote(starred: true, tags: 1))
+        w.report(Self.ownNote(starred: true, tags: 1, books: 1, place: .area(.pool)))
+        w.report(.init(place: .area(.snippets)))
+        w.send(.next)
+        w.report(.init(place: .area(.bookcase)))
+        w.report(.init(place: .book(Self.guide)))
+        #expect(w.state == nil)
+        #expect(Self.drives(w.effects) == [], "\(w.effects)")
+    }
+
     // MARK: - Where a card sits
 
     @Test func aCardSitsBesideItsAnchorInsideTheWindowAndNeverOverIt() {

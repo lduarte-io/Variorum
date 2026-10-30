@@ -1162,7 +1162,28 @@ struct RootView: View {
             // F-U2-W-2 (option A, ruled): leg 3 opens the Pool's "in
             // gatherings" run — the masthead's own "show", on this window's
             // Pool model — so her starred (and so tucked) note is on screen.
-            showPoolTucked: { Task { await pool.showTucked() } })
+            showPoolTucked: { Task { await pool.showTucked() } },
+            // VX-292 R-292-11 — THE TUTORIAL WINS BY DRIVING: a note that
+            // arrived in a mode its step does not teach in (its remembered
+            // Takes or Read, `Tour.drive`) is taken to the step's mode
+            // through the roads that already force one — never erasing, the
+            // only write being the one every mode switch makes.
+            drive: { place, mode in
+                guard case .note(let noteID) = place else { return }
+                let postMode = TourPlaces.postMode(mode)
+                if session.commandRouter.activePostID == noteID {
+                    // The note's detail is mounted: the sidebar rail's own act
+                    // (`SidebarView.railGroup`), which speaks if it cannot.
+                    session.commandRouter.requestMode(postMode, postID: noteID)
+                } else if case .focusedExistingPane = router.adopt(
+                    .post(noteID), in: router.workspace.focusedPane, mode: postMode) {
+                    // Not mounted (yet): the book open door's road (VX-303,
+                    // `ShellRouter.ModeLanding`) parks the mode for the mount;
+                    // the same-note rule speaks in its one voice.
+                    session.status.refuse(
+                        WorkspaceNaming.sameNoteNote(router.workspace.label(for: .post(noteID))))
+                }
+            })
     }
 
     /// The window's facts, as readers the tour's overlay evaluates in ITS
