@@ -108,10 +108,9 @@ struct RootView: View {
     // "a navigation expires the park" rule has one home and one pin.)
     /// 13f W10b: the released original the lineage door asked to see; the
     /// recovery surface reveals it and consumes the request.
-    /// 13f W20(a) — THE ASCENT: the post a book was asked to open AT. One
-    /// shot, keyed by book so a stale request can never land in another
-    /// book (the `blockLanding` guard's shape).
-    @State private var bookAscent: BookAscent?
+    // (13f W20(a)'s ascent park LEFT this view at VX-292 U2, A-292-2: it is
+    // `ShellRouter.pendingBookAscent` now — `pendingBookChapter`'s shape, so
+    // the tour's reveal door reaches it without holding the view.)
     /// **18d batch 1 (her U-10) — THE SIDEBAR'S NOTE BOX, composed here.**
     /// The focused pane's book publishes a VALUE and a DOOR; this view builds
     /// the box's content — the facts from the published id, the bar from the
@@ -132,11 +131,6 @@ struct RootView: View {
     /// that has spoken and shows nothing. A book that LEAVES the pane takes
     /// its word with it, so its next visit holds the slot again.
     @State private var noteBoxDeclinedBy: String?
-
-    struct BookAscent: Equatable {
-        let bookID: String
-        let postID: String
-    }
 
     /// Phase 13 (B1): the live voice — tokens + idioms, environment-fed.
     @State private var theme: ThemeStore
@@ -1207,6 +1201,20 @@ struct RootView: View {
                     session.status.refuse(
                         WorkspaceNaming.sameNoteNote(router.workspace.label(for: .post(noteID))))
                 }
+            },
+            // VX-292 U2 (A-292-1/2/3) — step 3's arrival in the seeded book
+            // lands the toured chapter's Outline card through the book's own
+            // ASCENT road (`requestReveal` → Outline's landing: the card at the
+            // page's top, no focus, no expansion), naming Outline first so a
+            // book that arrived in Read is turned to it. Parked only for the
+            // book the focused pane SHOWS, so it can never land later on a
+            // book she left. Every other anchor has no reveal road (recorded).
+            reveal: { anchor, place in
+                guard case .outlineCard(let noteID) = anchor, case .book(let bookID) = place,
+                      router.workspace.focusedSelection == .reading(bookID)
+                else { return }
+                router.pendingBookAscent = ShellRouter.BookAscent(
+                    bookID: bookID, postID: noteID, landsInOutline: true)
             })
     }
 
@@ -1433,8 +1441,13 @@ struct RootView: View {
                 onPaneFocusRequest: { router.workspace.focus(pane) },
                 // 13f W20(a): the ascent's landing, handed to the book it
                 // named and to no other.
-                revealPostID: bookAscent?.bookID == readingID ? bookAscent?.postID : nil,
-                onRevealConsumed: { bookAscent = nil },
+                revealPostID: router.pendingBookAscent?.bookID == readingID
+                    ? router.pendingBookAscent?.postID : nil,
+                // VX-292 U2 (A-292-1): the tour's step-3 ascent shows the
+                // Outline first; every other ascent leaves the mode alone.
+                revealInOutline: router.pendingBookAscent?.bookID == readingID
+                    && router.pendingBookAscent?.landsInOutline == true,
+                onRevealConsumed: { router.pendingBookAscent = nil },
                 // 13n-b U4 (AF-11 F-3): an agent's show / a receipt's "Open ›"
                 // at a chapter — parked on the router, handed to its book.
                 revealSectionID: router.pendingBookChapter?.bookID == readingID
@@ -1558,7 +1571,7 @@ struct RootView: View {
     /// post; this parks the landing and navigates through the ONE adoption
     /// door, so the pane's history is pushed and ⌥⌘[ returns to the note.
     private func openBook(_ bookID: String, at postID: String, in pane: PaneID) {
-        bookAscent = BookAscent(bookID: bookID, postID: postID)
+        router.pendingBookAscent = ShellRouter.BookAscent(bookID: bookID, postID: postID)
         adopt(.reading(bookID), in: pane)
     }
 

@@ -55,6 +55,12 @@ struct BookView: View {
     /// itself is W21's brain, so the ascent lands in whatever mode the book
     /// opens in, revealed.
     var revealPostID: String?
+    /// **VX-292 U2 (A-292-1's arm)** — the ascent names OUTLINE: the book
+    /// shows its Outline (the tabs' own mode road, `switchMode`; a no-op when
+    /// it is there already) before the reveal lands. Only the tour's step-3
+    /// reveal names it; every other ascent lands in whatever mode the book
+    /// opens in, as before.
+    var revealInOutline = false
     var onRevealConsumed: (() -> Void)?
     /// 13n-b U4 (AF-11 F-3) — a CHAPTER landing: the shell asks this book to
     /// show a chapter (`show_in_app`'s book target, a receipt's "Open ›").
@@ -132,6 +138,7 @@ struct BookView: View {
         paneFocused: Bool = true,
         onPaneFocusRequest: (() -> Void)? = nil,
         revealPostID: String? = nil,
+        revealInOutline: Bool = false,
         onRevealConsumed: (() -> Void)? = nil,
         revealSectionID: String? = nil,
         onRevealSectionConsumed: (() -> Void)? = nil,
@@ -147,6 +154,7 @@ struct BookView: View {
         self.paneFocused = paneFocused
         self.onPaneFocusRequest = onPaneFocusRequest
         self.revealPostID = revealPostID
+        self.revealInOutline = revealInOutline
         self.onRevealConsumed = onRevealConsumed
         self.revealSectionID = revealSectionID
         self.onRevealSectionConsumed = onRevealSectionConsumed
@@ -1271,6 +1279,22 @@ struct BookView: View {
     /// consumed by whichever surface the book opens in.
     private func takeAscentRequest() {
         guard let revealPostID else { return }
+        // VX-292 U2 (A-292-1): the tour's ascent turns a book that arrived in
+        // another mode (a finished book opens in Read — R2) to its Outline
+        // FIRST, so the reveal below is parked for the Outline it names (the
+        // chapter landing's `takeChapterRequest` order). A book whose first
+        // row has not landed yet — the usual case, the ascent arrives in the
+        // pass the book mounts — has not seeded its mode, and the seed would
+        // overrule a plain switch a beat later; it is NAMED instead (the
+        // seed's own guard). Once seeded, the tabs' own road. Neither road
+        // refuses: every book has an Outline.
+        if revealInOutline {
+            if structure.reading == nil {
+                structure.nameModeBeforeTheSeed(.outline)
+            } else {
+                switchMode(to: .outline)
+            }
+        }
         model.requestReveal(revealPostID)
         onRevealConsumed?()
     }

@@ -512,6 +512,13 @@ struct TourEngineTests {
         var poolReveals = 0
         /// VX-292 R-292-11: the drives the engine asked for, in order.
         var drives: [Drive] = []
+        /// VX-292 U2 (A-292-1/3): the reveals the engine asked for, in order.
+        var reveals: [Reveal] = []
+
+        struct Reveal: Equatable {
+            let anchor: Tour.Anchor
+            let place: Tour.Place
+        }
 
         struct Drive: Equatable {
             let place: Tour.Place
@@ -525,7 +532,8 @@ struct TourEngineTests {
                 recordCompleted: { self.completions += 1 },
                 finished: { self.finishes.append($0) },
                 showPoolTucked: { self.poolReveals += 1 },
-                drive: { self.drives.append(Drive(place: $0, mode: $1)) })
+                drive: { self.drives.append(Drive(place: $0, mode: $1)) },
+                reveal: { self.reveals.append(Reveal(anchor: $0, place: $1)) })
         }
     }
 
@@ -690,6 +698,58 @@ struct TourEngineTests {
         // A chapter she deleted is her edit: the book's presence alone decides.
         let chapterGone = Queries.TourLandmarks(seededBookID: "prince", firstStoryID: nil, fieldGuideID: "guide")
         #expect(!TourEngine.restoresLaunchBook(landmarks: chapterGone, wingID: "", storeHoldsIt: true))
+    }
+
+    /// VX-292 U2 (A-292-1/3): step 3's arrival in the seeded book reaches
+    /// the REVEAL door — once, naming the toured chapter's card in that book
+    /// — and never the navigate or drive doors; home and back is a new
+    /// arrival.
+    @Test func stepThreesArrivalReachesTheRevealDoorOncePerArrival() async throws {
+        try await withSession { session in
+            let log = DoorLog()
+            let engine = TourEngine(
+                session: session, landmarks: Self.landmarks,
+                facts: Tour.Facts(place: .area(.bookcase)), doors: log.doors)
+            engine.next()
+            engine.observe(.init(place: .book("sherlock")))
+            #expect(engine.state.step == .insideBook)
+            #expect(log.reveals == [.init(anchor: .outlineCard("scandal"), place: .book("sherlock"))])
+            #expect(log.navigations.isEmpty && log.drives.isEmpty)
+            engine.observe(.init(place: .book("sherlock"), bookNoteSelected: true))
+            #expect(log.reveals.count == 1, "her moves in the book are hers")
+            engine.observe(.init(place: .area(.bookcase)))
+            engine.observe(.init(place: .book("sherlock")))
+            #expect(log.reveals.count == 2, "a new arrival, a new landing")
+        }
+    }
+
+    /// VX-292 U2 (A-292-1's arm): the Outline a door NAMES while the book is
+    /// still arriving outlives the seed — a finished book seeds READ (R2) at
+    /// its first row, which would otherwise overrule it a beat later and lose
+    /// the reveal with the Outline. Once seeded, naming does nothing (the
+    /// tabs' own road serves then). RED ON OLD by mechanism: no naming
+    /// existed, and the seed turned the book to Read.
+    @Test func anOutlineNamedBeforeTheSeedOutlivesAFinishedBooksSeed() async throws {
+        try await withSession { session in
+            let now = Date(timeIntervalSince1970: 1_782_864_000)
+            let finished = Reading(
+                id: "prince", name: "the prince", kind: .book, locked: true,
+                createdAt: now, updatedAt: now)
+            #expect(BookStructureModel.defaultMode(for: finished) == .read, "the premise: R2")
+            let snapshot = BookStructureModel.Snapshot(
+                reading: finished, sections: [], deletedSections: [], assignments: [:])
+
+            let named = BookStructureModel(session: session, readingID: "prince")
+            named.nameModeBeforeTheSeed(.outline)
+            named.adopt(snapshot)
+            #expect(named.mode == .outline, "the named Outline stands through the seed")
+
+            let plain = BookStructureModel(session: session, readingID: "prince")
+            plain.adopt(snapshot)
+            #expect(plain.mode == .read, "unnamed, the seed is R2's as ever")
+            plain.nameModeBeforeTheSeed(.outline)
+            #expect(plain.mode == .read, "after the seed, naming does nothing")
+        }
     }
 
     /// The drive door names the app's mode for the rule's — every one, both
@@ -1069,6 +1129,103 @@ struct TourEntryTests {
             #expect(session.status.spoken?.text.hasPrefix(
                 "Restored \u{201C}\(princeName)\u{201D}") == true,
                     "the door's own receipt (\(String(describing: session.status.spoken?.text)))")
+
+            engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
+        }
+        #endif
+    }
+
+    /// **VX-292 U2 (A-292-1/3) — step 3 brings the toured chapter ON THE
+    /// PAGE, in the REAL shell.** A book of thirty notes whose toured chapter
+    /// is the twenty-fifth: its collapsed Outline card lies far below the
+    /// fold — beyond the Outline's near band, so it is not even DRAWN at the
+    /// book's arrival (no registration, no ring — U1's walk). The tour's
+    /// arrival reveal lands it through the book's own ascent road: the page
+    /// travels, the card is drawn and LIT inside the window, and the park is
+    /// spent. RED ON OLD by mechanism: with no reveal the page stays at its
+    /// top and the far card never mounts, so nothing is lit.
+    @Test func stepThreeLandsTheFarChapterOnThePage() async throws {
+        try await revealWalk(finished: false)
+    }
+
+    /// …and A-292-1's arm: a FINISHED seeded book opens in Read (R2), where
+    /// no Outline card exists; the tour's ascent turns it to its Outline
+    /// through the tabs' own mode road first, then lands the chapter. RED ON
+    /// OLD: the book stays in Read and nothing is lit.
+    @Test func aFinishedSeededBookIsTurnedToItsOutlineAndTheChapterLanded() async throws {
+        try await revealWalk(finished: true)
+    }
+
+    private func revealWalk(finished: Bool) async throws {
+        #if DEBUG
+        let suite = "tour-reveal-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            // LIVE uuids: the Outline oracles are keyed by the book's id and
+            // suites run in parallel (`BookOpenDoorTests`' reason).
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let ops = session.operations
+            let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
+            let prose = "Upon this a question arises: whether it be better to be loved than "
+                + "feared or feared than loved? It may be answered that one should wish to be "
+                + "both, but, because it is difficult to unite them in one person, it is much "
+                + "safer to be feared than loved, when, of the two, either must be dispensed with."
+            var target = ""
+            for index in 0..<30 {
+                let title = index == 24 ? TourScript.firstStoryTitle : "chapter \(index + 1)"
+                let note = try ops.createPost(title: title)
+                for _ in 0..<2 { _ = try ops.newBlock(in: note.id, text: prose, at: .end) }
+                try ops.addPostToReading(note.id, to: prince.id)
+                if index == 24 { target = note.id }
+            }
+            if finished { try ops.lockReading(prince.id) }
+            _ = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
+            let offer = TourOfferModel(defaults: defaults)
+            let router = ShellRouter()
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: RootView(
+                session: session, router: router, tourOffer: offer))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, turns: 40) { false }
+
+            router.tourRequested = true
+            await settle(window, hosting) { TourOracle.overlay != nil }
+            let engine = try #require(TourOracle.overlay, "the request started a tour")
+            #expect(engine.state.firstStoryID == target)
+            engine.next()
+            router.adopt(.reading(prince.id), in: router.workspace.focusedPane)
+            await settle(window, hosting, turns: 400) {
+                engine.spotlight.lit == [.outlineCard(target)]
+                    && engine.spotlight.frames[.outlineCard(target)] != nil
+            }
+            #expect(engine.state.step == .insideBook)
+            #expect(engine.spotlight.lit == [.outlineCard(target)],
+                    "the far card is drawn and ringed (\(engine.spotlight.lit))")
+            let card = try #require(engine.spotlight.frames[.outlineCard(target)])
+            let content = try #require(window.contentView).bounds
+            #expect(card.minY >= 0 && card.minY < content.height,
+                    "the card's top is inside the window (\(card) in \(content))")
+            let page = BookOutlineGeometry.outlineScrolls[prince.id]
+            #expect((page?.offset ?? 0) > 1_000,
+                    "the page travelled to it — it began far below the fold (\(String(describing: page)))")
+            #expect(router.pendingBookAscent == nil, "the park is spent")
 
             engine.endTour()
             await settle(window, hosting) { TourOracle.overlay == nil }

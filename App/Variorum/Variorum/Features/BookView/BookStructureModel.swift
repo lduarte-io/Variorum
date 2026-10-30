@@ -134,6 +134,21 @@ final class BookStructureModel {
         }
     }
 
+    /// **VX-292 U2 (A-292-1's arm) — a door NAMED this book's mode before
+    /// its first row landed.** The seed above runs once, at the first
+    /// observed row, and a finished book seeds READ (R2) — so a mode named
+    /// while the book is still arriving (the tour's step-3 ascent, which
+    /// lands in the same pass the book mounts) would be overruled a beat
+    /// later and its reveal lost with the Outline. Naming it marks the seed
+    /// done. The only caller is `BookView.takeAscentRequest`'s Outline arm,
+    /// and only before the book's row exists (after it, the tabs' own
+    /// `switchMode` road is taken).
+    func nameModeBeforeTheSeed(_ named: ViewMode) {
+        guard !modeSeeded else { return }
+        mode = named
+        modeSeeded = true
+    }
+
     /// R2: a FINISHED book is nothing but the text — it opens into the
     /// reading flow; a working book opens into OUTLINE, which is where the
     /// book is written (13c 2A, A39).

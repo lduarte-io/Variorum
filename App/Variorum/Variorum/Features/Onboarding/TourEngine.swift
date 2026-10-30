@@ -51,6 +51,12 @@ final class TourEngine {
         /// mode switch on the mounted note, else the book open door's mode
         /// landing. Defaulted so a fixture that never drives needs nothing.
         var drive: (Tour.Place, Tour.NoteMode) -> Void = { _, _ in }
+        /// **VX-292 U2 (A-292-1/3) — bring this ring on screen in this
+        /// place** (`Tour.arrivalReveal`: step 3's arrival in the seeded book
+        /// lands the toured chapter's Outline card). The composition root
+        /// performs it through the book's ascent road; an anchor with no
+        /// road does nothing (its card keeps its corner). Defaulted.
+        var reveal: (Tour.Anchor, Tour.Place) -> Void = { _, _ in }
     }
 
     @ObservationIgnored private let doors: Doors
@@ -160,6 +166,7 @@ final class TourEngine {
             case .openFieldGuide: doors.openFieldGuide()
             case .recordCompleted: doors.recordCompleted()
             case .showPoolTucked: doors.showPoolTucked()
+            case .reveal(let anchor, let place): doors.reveal(anchor, place)
             case .finish(let completed):
                 guard !over else { continue }
                 over = true

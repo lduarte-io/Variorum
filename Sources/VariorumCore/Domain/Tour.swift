@@ -313,6 +313,14 @@ public enum Tour {
         /// and its add to book are on screen. Tour-scoped: leaving the Pool
         /// tucks it again, as every visit does.
         case showPoolTucked
+        /// **Bring this ring on screen, in this place** (VX-292 U2 —
+        /// A-292-1/3): step 3's ARRIVAL in the seeded book asks the book to
+        /// land the toured chapter's Outline card at the top of its page —
+        /// once per arrival (`arrivalReveal`), through the book's own ascent
+        /// road, which turns a book that arrived in Read to its Outline first
+        /// (the tutorial wins at the book level). The Outline virtualizes its
+        /// far rows, so the card is often not even drawn until it is landed.
+        case reveal(Anchor, in: Place)
     }
 
     /// One step of the rule: the state after (nil = the tour is over) and
@@ -608,14 +616,38 @@ public enum Tour {
     /// - nothing is erased: the effect is a navigation, whose only write is
     ///   the one a mode switch always makes (the note's remembered mode).
     static func drive(_ state: inout State, _ effects: inout [Effect]) {
-        guard state.arrivalUnjudged, case .note(let noteID) = state.facts.place,
-              let mode = state.facts.noteMode
+        guard state.arrivalUnjudged else { return }
+        // VX-292 U2 (A-292-1/3): a book arrival that brings a ring on
+        // screen — judged at once (a book reports no mode to wait for).
+        if let (anchor, place) = arrivalReveal(state) {
+            state.arrivalUnjudged = false
+            effects.append(.reveal(anchor, in: place))
+            return
+        }
+        guard case .note(let noteID) = state.facts.place, let mode = state.facts.noteMode
         else { return }
         state.arrivalUnjudged = false
         guard let expected = expectedNoteMode(state.step), mode != expected,
               noteID == state.tourNoteID
         else { return }
         effects.append(.navigate(.note(noteID), mode: expected))
+    }
+
+    /// **The ring a step's ARRIVAL brings on screen** (VX-292 U2 — the
+    /// architect's A-292-1/3, the in-batch fork answered): step 3 in the
+    /// SEEDED book lands the toured chapter's Outline card — always, once
+    /// per arrival, never a delayed "is it visible yet?" check (the Outline
+    /// draws a far card only once it is near the page, so at the arrival the
+    /// card usually does not exist to be measured). She scrolls freely after;
+    /// leaving the book and coming back is a new arrival. With no seeded book
+    /// or no toured chapter (a missing landmark — "any book" / "any note")
+    /// there is nothing to land. Every other step's ring is on screen by
+    /// construction or keeps its recorded fallback (the plan's U2 RECORD).
+    static func arrivalReveal(_ state: State) -> (Anchor, Place)? {
+        guard state.step == .insideBook, case .book(let bookID) = state.facts.place,
+              bookID == state.seededBookID, let story = state.firstStoryID
+        else { return nil }
+        return (.outlineCard(story), .book(bookID))
     }
 
     /// The steps whose toured note is the note she is in.

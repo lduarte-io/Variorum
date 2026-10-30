@@ -790,6 +790,83 @@ struct TourWalkTests {
         #expect(Self.drives(w.effects) == [], "\(w.effects)")
     }
 
+    // MARK: - Step 3 brings its ring on screen (VX-292 U2 — A-292-1/3)
+
+    /// Every reveal a walk asked for, in order.
+    static func reveals(_ effects: [Tour.Effect]) -> [Tour.Effect] {
+        effects.filter {
+            if case .reveal = $0 { return true }
+            return false
+        }
+    }
+
+    /// The architect's A-292-3: step 3's ARRIVAL in the seeded book lands
+    /// the toured chapter's Outline card — ALWAYS, once per arrival (the far
+    /// card is often not drawn at all until it is landed, so no visibility
+    /// check could decide it). Her moves inside the book are never chased;
+    /// leaving and coming back is a new arrival.
+    @Test func stepThreesArrivalInTheSeededBookLandsTheChapterOncePerArrival() {
+        var w = Self.walk(to: .seededBook)
+        w.effects = []
+        w.report(.init(place: .book(Self.sherlock)))
+        #expect(w.step == .insideBook)
+        #expect(w.effects == [.reveal(.outlineCard(Self.scandal), in: .book(Self.sherlock))],
+                "ONE reveal of the ringed chapter, in the book she is in (\(w.effects))")
+        #expect(w.rings == [[.outlineCard(Self.scandal)]], "the ring is the card it lands")
+        // Inside the book (the box, the page): no new arrival, nothing more.
+        w.report(.init(place: .book(Self.sherlock), bookNoteSelected: true))
+        w.report(.init(place: .book(Self.sherlock), bookNoteLive: true))
+        #expect(Self.reveals(w.effects).count == 1, "her moves in the book are hers")
+        // Home and back: a new arrival, a new landing.
+        w.report(.init(place: .area(.bookcase)))
+        #expect(Self.reveals(w.effects).count == 1, "the Bookcase lands nothing")
+        w.report(.init(place: .book(Self.sherlock)))
+        #expect(Self.reveals(w.effects).count == 2, "leaving and returning is a new arrival")
+        // Into the chapter: step 4, and the note's own judgment as ever.
+        w.report(.init(place: .note(Self.scandal), noteMode: .write))
+        #expect(w.step == .write)
+        #expect(Self.reveals(w.effects).count == 2)
+        #expect(Self.drives(w.effects) == [])
+    }
+
+    /// Only the SEEDED book at STEP 3, with its chapter known: another book
+    /// (the guide) lands nothing; a missing landmark has nothing to land; the
+    /// later steps' book visits keep their own roads (step 9's Index carries
+    /// the toured note itself).
+    @Test func onlyTheSeededBookAtStepThreeLandsAnything() {
+        var other = Self.walk(to: .insideBook)
+        other.effects = []
+        other.report(.init(place: .area(.bookcase)))
+        other.report(.init(place: .book(Self.guide)))
+        #expect(other.step == .insideBook)
+        #expect(other.effects == [], "another book is not the toured chapter's (\(other.effects))")
+
+        var missing = Walker(seededBookID: nil, firstStoryID: nil)
+        missing.send(.next)
+        missing.report(.init(place: .book("any-book")))
+        #expect(missing.step == .insideBook)
+        #expect(Self.reveals(missing.effects) == [], "no landmark, nothing to land")
+
+        var noChapter = Walker(firstStoryID: nil)
+        noChapter.send(.next)
+        noChapter.report(.init(place: .book(Self.sherlock)))
+        #expect(noChapter.step == .insideBook)
+        #expect(Self.reveals(noChapter.effects) == [], "a chapter she deleted is hers")
+
+        for step in [Tour.Step.placeFollows, .downAndUp] {
+            var later = Self.walk(to: step)
+            later.effects = []
+            later.report(.init(place: .area(.library)))
+            later.report(.init(place: .book(Self.sherlock), bookNoteSelected: true))
+            #expect(Self.reveals(later.effects) == [], "\(step): the book's own carry serves it")
+        }
+        // The whole designed road lands exactly once: step 3's arrival.
+        var whole = Self.walk(to: .endCard)
+        whole.send(.choose(.done))
+        #expect(Self.reveals(whole.effects)
+                == [.reveal(.outlineCard(Self.scandal), in: .book(Self.sherlock))])
+    }
+
     // MARK: - Where a card sits
 
     @Test func aCardSitsBesideItsAnchorInsideTheWindowAndNeverOverIt() {
