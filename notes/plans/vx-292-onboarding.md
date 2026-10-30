@@ -490,3 +490,7 @@ Expected: TourScriptTests [8] · TourSpotlightTests [8] · TourEngineTests [10] 
 3. **A finished Prince:** mark the Prince Finished (book settings), start, step 3 → the book shows its Outline with XVII landed (not Read). Then reopen it (Finished off).
 4. **A missing Prince:** delete the Prince (to the Trash), Help ▸ Take the Onboarding Tutorial → a short pause, the restore's receipt ("Restored “the prince” — …"), the tour at step 1 on the Bookcase with the Prince ringed at step 2. No card over the receipt's words.
 5. **A gutted Prince (R-292-17):** delete chapter XVII only (to the Trash), start → XVII comes back (one chapter, its Italian take on every paragraph), the tour rings it at step 3. Start again → nothing restored, nothing said.
+
+## U2 STAGE WINDOW (the orchestrator, 2026-10-30 ~04:55, claim vx-292-u2 — LIVE; the record completes at the window's close)
+
+**IN FLIGHT: the six Mac red-on-old watches W1–W6, each an in-place edit of ONE file, run, then `git checkout -- <file>` restore.** If this session dies mid-watch, the one dirty file in `git status` names the watch (W1/W2 `Domain/Tour.swift` · W3 `BookStructureModel.swift` · W4 `RootView.swift` · W5 `TourEngine.swift` · W6 `StatusToast.swift`) — restore it with `git checkout -- <file>`; no watch edit is ever committed. Then the green gate (22 types / 140) and the walk.
