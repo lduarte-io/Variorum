@@ -68,11 +68,15 @@ final class TourEngine {
         perform(begun.effects)
     }
 
-    /// The tour's landmarks in the wing she is in (the seeded book, its
-    /// first story, the field guide) — read once, at the start.
+    /// The tour's landmarks in the wing she is in (the seeded book, the
+    /// chapter step 3 rings, the field guide) — read once, at the start.
+    /// VX-292 U1 (R-292-1): the seeded book is the launch's, *The Prince*
+    /// (`TourScript.seededBookName`, pinned to `Book.launchBook`); it read
+    /// Sherlock's name, which a fresh store no longer holds, so steps 2–3
+    /// rang nothing there.
     static func landmarks(session: AppSession) async -> Queries.TourLandmarks {
         let wing = session.wing.currentID
-        let seeded = SampleLibrarySeeder.bookName
+        let seeded = TourScript.seededBookName
         let story = TourScript.firstStoryTitle
         let guide = TutorialSeeder.bookName
         let found = try? await session.database.read { db in

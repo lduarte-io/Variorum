@@ -202,10 +202,11 @@ public enum Tour {
 
     public struct State: Equatable, Sendable {
         public internal(set) var step: Step
-        /// The seeded book (*the adventures of sherlock holmes*), looked up at
-        /// the start; nil ⇒ the tour accepts any book at step 2.
+        /// The seeded book (*the prince* since VX-292 U1 — the launch's book),
+        /// looked up at the start; nil ⇒ the tour accepts any book at step 2.
         public let seededBookID: String?
-        /// Its first story (*A Scandal in Bohemia*) — step 3's ring.
+        /// The chapter step 3 rings (*The Prince*'s XVII, whether it is better
+        /// to be loved or feared — the app names it, VX-292 P-292-1).
         public let firstStoryID: String?
         /// The field guide — the leg end's ring and its finish.
         public let fieldGuideID: String?

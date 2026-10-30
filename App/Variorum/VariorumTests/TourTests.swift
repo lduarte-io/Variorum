@@ -698,9 +698,13 @@ struct TourEntryTests {
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let ops = session.operations
-            let sherlock = try ops.createReading(name: SampleLibrarySeeder.bookName, kind: .book)
-            let scandal = try ops.createPost(title: TourScript.firstStoryTitle)
-            try ops.addPostToReading(scandal.id, to: sherlock.id)
+            // VX-292 U1 (R-292-1) — A JUSTIFIED EDIT, RED ON OLD: the world
+            // holds the LAUNCH's book (the Prince, by the tour's own constant)
+            // and its toured chapter; the old engine looked Sherlock's name up,
+            // so `seededBookID` below read nil and step 2 rang nothing.
+            let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
+            let chapter = try ops.createPost(title: TourScript.firstStoryTitle)
+            try ops.addPostToReading(chapter.id, to: prince.id)
             let guide = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
             let offer = TourOfferModel(defaults: defaults)
             let router = ShellRouter()
@@ -726,8 +730,8 @@ struct TourEntryTests {
             await settle(window, hosting) { TourOracle.overlay != nil }
             let engine = try #require(TourOracle.overlay, "the request started a tour")
             #expect(engine.state.step == .navigation)
-            #expect(engine.state.seededBookID == sherlock.id)
-            #expect(engine.state.firstStoryID == scandal.id)
+            #expect(engine.state.seededBookID == prince.id)
+            #expect(engine.state.firstStoryID == chapter.id)
             #expect(engine.state.fieldGuideID == guide.id)
             #expect(offer.phase == .touring, "the line steps aside; nothing is remembered yet")
             #expect(defaults.string(forKey: TourOfferModel.recordKey) == nil)
@@ -746,12 +750,12 @@ struct TourEntryTests {
             // Step 2 rings the REAL Bookcase row of the seeded book.
             engine.next()
             await settle(window, hosting) {
-                engine.spotlight.frames[.bookcaseRow(sherlock.id)] != nil
+                engine.spotlight.frames[.bookcaseRow(prince.id)] != nil
             }
             #expect(engine.state.step == .seededBook)
-            #expect(engine.spotlight.lit == [.bookcaseRow(sherlock.id)])
+            #expect(engine.spotlight.lit == [.bookcaseRow(prince.id)])
             await settle(window, hosting, turns: 30) { false }
-            let row = try #require(engine.spotlight.frames[.bookcaseRow(sherlock.id)])
+            let row = try #require(engine.spotlight.frames[.bookcaseRow(prince.id)])
             let card2 = try #require(TourOracle.cardFrame)
             #expect(!card2.intersects(row), "the card sits off the ringed row (\(card2) vs \(row))")
             let content = try #require(window.contentView).bounds

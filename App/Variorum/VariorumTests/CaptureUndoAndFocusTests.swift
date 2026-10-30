@@ -546,9 +546,13 @@ struct CaptureTourFocusTests {
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let ops = session.operations
-            let sherlock = try ops.createReading(name: SampleLibrarySeeder.bookName, kind: .book)
-            let scandal = try ops.createPost(title: TourScript.firstStoryTitle)
-            try ops.addPostToReading(scandal.id, to: sherlock.id)
+            // VX-292 U1 (R-292-1) — A JUSTIFIED EDIT: the tour finds the
+            // LAUNCH's book now (the Prince, by the tour's own constant);
+            // Sherlock's name would leave `seededBookID` nil and this pin's
+            // "ours" probe would never see its tour.
+            let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
+            let chapter = try ops.createPost(title: TourScript.firstStoryTitle)
+            try ops.addPostToReading(chapter.id, to: prince.id)
             _ = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
             let offer = TourOfferModel(defaults: defaults)
             let router = ShellRouter()
@@ -571,7 +575,7 @@ struct CaptureTourFocusTests {
             #expect(inQuickEntry(), "the precondition: the Bookcase put the caret in its quick entry")
 
             router.tourRequested = true
-            let ours = { TourOracle.overlay?.state.seededBookID == sherlock.id }
+            let ours = { TourOracle.overlay?.state.seededBookID == prince.id }
             await CaptureRig.settle(window, turns: 200, until: ours)
             let engine = try #require(ours() ? TourOracle.overlay : nil, "the request started a tour")
             #expect(engine.state.step == .navigation)
