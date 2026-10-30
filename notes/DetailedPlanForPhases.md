@@ -12,30 +12,32 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| **Onboarding overhaul** — the tour made mechanically accurate (the Prince), always-goes-well machinery, new stops (book modes, Read, Lenses, Settings), VX-559's offer card | VX-292 (+ VX-559 sub-issue) · `vx-292-onboarding` | `~/dev/variorum-vx-292` · the Pro | KICKED OFF 2026-10-30 (architect shape; plan `notes/plans/vx-292-onboarding.md`). Surfaces: Features/Onboarding, Domain/Tour, TutorialSeeder (field guide lessons), the first-open band, Settings pane (tour anchors only). OVERLAPS VX-105 (seeder, field guide ch. 1, Help menu) — closeouts serialize; stage via oct29coordinator. |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-677 CLOSED 2026-10-29 — RUN: EDITOR, PANES & THE AI DOOR (the record
-`notes/plans/fixes/vx-677-editor-panes-ai-door.md`; the ladder files `vx-677-ladder-round1/2.md`; PR #207, merge
-SHA in memory + the ticket).** Twelve members in five batches under the architect shape: the editor seam's two
-Highs (the ring-end on every outside-change road per her ruling — one pure rule at the authority's settle seam,
-sweep-verified S1–S21; editor-owned undo), the navigation-carry family of five (Pages arrivals, block-precise
-Outline landings row-first, the Scroll carry, the stale anchor, floor-settling landings), the AI door pair
-(show_in_app as an offer under the one global dial, background always asks — her amendment; the version target;
-plus the ladder's gone-check on every press road, fixing VX-693), the resting faces (the ⌘/ pane rebuilt on the
-registry; unnamed commits resting on their first words), and VX-668 traced LIVE to a measured TK2 fact
-(frame-constant edits never fire `viewWillDraw`; one guarded display pass; the class → VX-702). One Fable ladder,
-closed at round 2 of 3 with no new findings; claim C all fifteen suite rows exact (the VX-668 red-on-old observed;
-the 190-test #204 overlap clean) and every walk row works as ruled (the three live sheet presses all landed).
-The fences held whole-branch (zero Sync/, Server/, Protection/, Shared/, mobile; the Sources/ diff is the wire's
-own member work). Canon: MCPSpec + SurfaceContracts + TEXTKIT2_NOTES lines as drafted; bundle QUESTIONS #252;
-canon-size 126,641/150,000. Born: VX-683/686/687/688/692(High)/694/702/705/706/707 (VX-693 fixed in-run);
-VX-661 grown (the encoder class now fires on green/single-test/post-product runs — priority raise recommended,
-her call). Released as **0.10.6** at her word right after the merge (notes = this run's members; the site
-published and verified) — the second of her two-release amendment (vx-669 shipped 0.10.5 hours earlier). Next:
-her #252 pass; the orientation (hers); VX-692/VX-661 at her priority word.
+**→ VX-292 (+ VX-559) CLOSED 2026-10-30 — THE ONBOARDING OVERHAUL (the plan + every unit/window record
+`notes/plans/vx-292-onboarding.md`; the ladder `notes/plans/vx-292-ladder-round1.md`; PR at the merge; the
+handoff `notes/handoffs/vx-292-handoff.md`).** Architect shape, one overnight, her advance release word
+(R-292-16). The tour rebuilt around the Prince and grown to thirteen steps + a five-stop leg (the flip and back,
+Read, Lenses live, Compare & Blocks, the book arc, the Settings stop); the tour now DRIVES (landings forced to
+the step's mode once per arrival, step 3's chapter landed through the book's own ascent, her own switches never
+overruled) and MENDS a missing or deletion-broken Prince through its own restore door — after the ladder, only
+where everything the road would do is undoing deletions. The offer line became the band's welcome card
+(yes · no only; the no road names the Help door; never-returns law kept). Sea glass (the icon's #C2DDD3) joined
+as the seventeenth palette and the unset-store default (read-time flip; the voice's colours live on as Classic).
+The Prince swept Sherlock from tour + the guide's classics walk; the two stale Restore-Tutorial labels now quote
+the registry verb. Five units (U1 · U-THEME · U2 · U3 · U4), each closed through a coordinator-granted stage
+window with in-place red-on-old watches and dev-store walks — the windows caught four never-run fixture pins,
+the locked-book gate hole, the test-host's Bookcase polluting unscoped test oracles, and one stale tab-table pin
+(each fixed same-window). One Fable ladder, closed at round 2: the one MAJOR (the mend gate fired on
+renamed/released chapters — edits, not deletions) fixed by the whole-effect gate with five pins; residuals
+recorded (QUESTIONS #255). Merged SECOND after vx-105 (the foreseen pin conflicts resolved to the combined
+truth); the folded 0.10.7 release carried both efforts' public bullets to stargazing.tech. Canon: the two-file
+deltas as drafted; bundle QUESTIONS #255; VX-712 closed hollow by its trace pin, VX-713 fixed, VX-415 superseded
+by VX-559. Born: VX-716/717/718 (all Parked with reasons). HELD FOR HER: the Prince front-note sentence,
+P-292-4/5 (sea-glass depth; Default/Classic naming), the words-card toast observation, the #255 pass. Next: her
+morning checklist in the handoff; the wording-only tour pass at her word (R-292-4's second half).
 
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
