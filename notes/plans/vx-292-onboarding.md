@@ -120,8 +120,15 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 
 | piece | status |
 |---|---|
-| 1 TourScript's Prince cards + `firstStoryTitle` (+ `TourScriptTests` re-pinned) | NOT-STARTED |
-| 2 TourEngine landmarks → the Prince + XVII (+ `TourEngineTests`/`TourEntryTests`/`CaptureTourFocusTests`) | NOT-STARTED |
-| 3 TutorialSeeder's ownership lesson → the Prince (+ `TutorialBooksLessonTests`/`TutorialBooksRitualTests`) | NOT-STARTED |
-| 4 The three stale "Restore Tutorial…" labels → the registry verb (+ the pins) | NOT-STARTED |
+| 1 TourScript's Prince cards + `firstStoryTitle` (+ `TourScriptTests` re-pinned) | DONE (15a2d95c3) — `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN is PENDING the stage window |
+| 2 TourEngine landmarks → the Prince + XVII (+ `TourEngineTests`/`TourEntryTests`/`CaptureTourFocusTests`) | NOT-STARTED — `TourEngine.landmarks` reads `TourScript.seededBookName`; the three fixtures mint the Prince's name |
+| 3 TutorialSeeder's ownership lesson → the Prince (+ `TutorialBooksLessonTests`/`TutorialBooksRitualTests`) | NOT-STARTED — Sherlock's restore door named by its registry constant (the vx-105 resolution (iii)) |
+| 4 The TWO stale "Restore Tutorial…" labels (~1433, ~1998; ~640 is vx-105's) → the registry verb (+ the pins) | NOT-STARTED |
 | 5 Record close: self-assessment, stage commands, headless evidence | NOT-STARTED |
+
+### Piece 1 — BUILD-VERIFY resolutions and decisions
+
+- **Chapter XVII's exact seeded note title:** `XVII. Concerning cruelty and clemency, and whether it is better to be loved than feared` — `ThePrince.txt:167`'s `%%%` line (no trailing bytes); `SampleLibrarySeeder.parse` trims only surrounding whitespace, and `importPost` → `insertPost` stores it verbatim (`StoredText.stripped` removes U+0000 only). It had no constant of its own (two retyped literals in `SampleLibraryPrinceBook`'s tables), so it gained one: `SampleLibraryPrinceBook.lovedOrFearedChapterTitle`, which the Dido couplet's restoration now reads too; the generated `famousLines` table keeps its literal (generated from `notes/source/prince-famous-lines.json` and drift-pinned against it — hand-editing a generated table was the worse trade). `TourScript.firstStoryTitle` reads the constant; `TourScriptTests.stepsTwoAndThreeNameTheBookTheLaunchSeeds` proves it is a `%%%` title of the BUNDLED resource, chapter 17, eight paragraphs, carrying a Ricci take.
+- **The book-name constant:** `SampleLibraryPrinceBook.name` ("the prince"), surfaced as `TourScript.seededBookName` and pinned EQUAL to `SampleLibrarySeeder.Book.launchBook.name`, so a future launch swap turns the tour red instead of leaving it naming a book a fresh store does not hold. `Queries.tourLandmarks` takes both names as parameters (an exact match), so the core needs no change; its own suite (`TourQueriesTests`) passes Sherlock-era literals as generic fixtures and is left as it is.
+- **The copy:** both U1 COPY DRAFTS landed VERBATIM (no departure). The `.seededBook` body opens on the book's name in the shelf's lowercase, interpolated from the constant (the end card's "readme" precedent for a sentence opening on a name). The title "The Prince, in Variorum" is a literal (title case is the card's typography, not the constant's) and is drift-pinned: its lowercase must begin with the book's name.
+- **The pins (`TourScriptTests`):** mockup v5's approved table stays untouched (its mockup pin still reads it); steps 2–3 join the `departures` table (step 2's body whole, step 3's last sentence) and a new `titleDepartures` table carries step 2's title. Observation for her wording pass, NOT a departure: "rides under every paragraph" is true of every chapter and the Dedication; the front note "about this text" has no Italian (it is the edition's note, not Machiavelli's text).
