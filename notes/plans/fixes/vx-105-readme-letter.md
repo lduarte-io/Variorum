@@ -222,7 +222,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   `HelpMenuNamingTests` · `theGuidesSeededContentIsNotReworded` (flipped 3 → 2; the lesson reads the verb; RED ON OLD:
   three). Nothing pinned "no takes in the welcome chapter" (it already held "three ways of working"'s fan).
 - **Piece 6 — this record:** DONE (`846e5ecfa`).
-- **Piece 7 — Help ▸ Restore “readme” (R-105-8):** DONE (this commit — hash at the next). **The capability:
+- **Piece 7 — Help ▸ Restore “readme” (R-105-8):** DONE (`1cd5e7cde`). **The capability:
   `CapabilityID.restoreReadme`** (a NEW case; registry verb `Restore \u{201C}\(ReadmeSeeder.title)\u{201D}` →
   rendered **Restore “readme”**; app scope; doors `.menuBar` + `.palette`; no key; always available — the
   `.restoreJekyllBook` declaration exactly). Every home `.restoreJekyllBook` has: `Registry/Capability.swift` (the
@@ -253,7 +253,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
 
 **Commits, in order:** `99231c04b` piece 1 · `9998e4931` piece 2 · `ca2f7d939` piece 1 rework (R-105-6) ·
 `9d6b31f64` piece 3 · `60b4b1635` the passages' re-home (boundary ruling 4) · `e5ef30a7c` piece 4 · `363ac91ed`
-piece 5 · `846e5ecfa` piece 6 (the record) · piece 7 (the readme door, R-105-8) next.
+piece 5 · `846e5ecfa` piece 6 (the record) · `1cd5e7cde` piece 7 (the readme door, R-105-8) · this hash fill.
 
 **Compile evidence:** `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing -quiet` from
 `App/Variorum/` (compile-only — the app AND the test target, NOTHING run, no test host launched; `build-for-testing`
