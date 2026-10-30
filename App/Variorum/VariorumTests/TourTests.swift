@@ -687,9 +687,11 @@ struct TourEngineTests {
     /// props broken AND the road can reach a mend (it is the book the road
     /// acts on, and a shipped chapter is missing). Never: an intact or merely
     /// edited book, props the road cannot reach (every chapter standing, its
-    /// fans emptied inside), a book she moved to another wing, any window
-    /// outside Home, an unreadable store. RED ON OLD for case 2 by mechanism:
-    /// the old gate restored only a book that was not there.
+    /// fans emptied inside), a book that does not admit new chapters
+    /// (Finished, Sealed, at its note cap), a book she moved to another wing,
+    /// any window outside Home, an unreadable store. RED ON OLD for case 2 by
+    /// mechanism: the old gate restored only a book that was not there; the
+    /// admission line was red at d370fd28b (the window of 2026-10-30).
     @Test func aTourStartRestoresOnlyWhatDeletionsBrokeAndTheRoadCanReach() {
         func marks(_ book: String?, broken: Bool = false) -> Queries.TourLandmarks {
             Queries.TourLandmarks(
@@ -717,6 +719,12 @@ struct TourEngineTests {
                 "an intact book is never touched")
         #expect(!restores(marks("prince", broken: true), Facts(liveBookID: "other", isComplete: false)),
                 "the road would act on another copy than the one this tour stands on")
+        // The 2026-10-30 window's gap: a book that does not ADMIT new chapters
+        // (Finished, Sealed, at its note cap — her deliberate acts) is beyond
+        // the road's reach; the door would only refuse, at every start.
+        #expect(!restores(marks("prince", broken: true),
+                          Facts(liveBookID: "prince", isComplete: false, acceptsChapters: false)),
+                "a Finished, Sealed or full book is left as it is: the floor")
         #expect(!restores(marks("prince", broken: true), wing: "wing-b",
                           Facts(liveBookID: "prince", isComplete: false)),
                 "a book in another wing is respected")
@@ -892,6 +900,9 @@ struct TourEntryTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
         } operation: { @MainActor in
             let session = AppSession(database: db)
+            // VX-292 U2 (the 2026-10-30 window): the seeded-book mark is the
+            // dev app's REAL defaults — never written by a pin.
+            session.markSeededBook = { _ in }
             let ops = session.operations
             // VX-292 U1 (R-292-1) — A JUSTIFIED EDIT, RED ON OLD: the world
             // holds the LAUNCH's book (the Prince, by the tour's own constant)
@@ -899,6 +910,11 @@ struct TourEntryTests {
             // so `seededBookID` below read nil and step 2 rang nothing.
             let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
             let chapter = try ops.createPost(title: TourScript.firstStoryTitle)
+            // VX-292 U2 — A JUSTIFIED EDIT (the 2026-10-30 window): a TRUE
+            // Prince chapter is born FANNED. Under R-292-17's read a bare
+            // chapter reads as broken props, so the start ran the restore road
+            // into this world and the tour rang a minted chapter instead.
+            try mintFannedBlock(ops, in: chapter.id)
             try ops.addPostToReading(chapter.id, to: prince.id)
             let guide = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
             let offer = TourOfferModel(defaults: defaults)
@@ -921,8 +937,9 @@ struct TourEntryTests {
             #expect(window.firstResponder is NSTextView,
                     "the precondition W-U1a-1 is about: the Bookcase put the caret in its quick entry")
 
+            await endAnyStaleTour(window, hosting)
             router.tourRequested = true
-            await settle(window, hosting) { TourOracle.overlay != nil }
+            await settle(window, hosting) { TourOracle.overlay?.state.seededBookID == prince.id }
             let engine = try #require(TourOracle.overlay, "the request started a tour")
             #expect(engine.state.step == .navigation)
             #expect(engine.state.seededBookID == prince.id)
@@ -1007,6 +1024,7 @@ struct TourEntryTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
         } operation: { @MainActor in
             let session = AppSession(database: db)
+            session.markSeededBook = { _ in }
             let ops = session.operations
             let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
             let chapter = try ops.createPost(title: TourScript.firstStoryTitle)
@@ -1015,6 +1033,9 @@ struct TourEntryTests {
             for text in ["Upon this a question arises.", "One ought to be both.", "Men love at their own will."] {
                 _ = try ops.newBlock(in: chapter.id, text: text, at: .end)
             }
+            // The 2026-10-30 window: a TRUE Prince chapter carries its fan
+            // (R-292-17's read prefers the named chapter only while it does).
+            try mintFannedBlock(ops, in: chapter.id)
             try ops.addPostToReading(chapter.id, to: prince.id)
             _ = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
             let memoryKey = "postMode.\(chapter.id)"
@@ -1040,8 +1061,9 @@ struct TourEntryTests {
             }
             await settle(window, hosting, turns: 40) { false }
 
+            await endAnyStaleTour(window, hosting)
             router.tourRequested = true
-            await settle(window, hosting) { TourOracle.overlay != nil }
+            await settle(window, hosting) { TourOracle.overlay?.state.seededBookID == prince.id }
             let engine = try #require(TourOracle.overlay, "the request started a tour")
             #expect(engine.state.firstStoryID == chapter.id)
             engine.next()
@@ -1128,6 +1150,7 @@ struct TourEntryTests {
                     )?.liveBookID == nil,
                     "the premise: no Prince in the store")
 
+            await endAnyStaleTour(window, hosting)
             router.tourRequested = true
             await settle(window, hosting, turns: 10) { false }
             router.tourRequested = true   // a second press, mid-restore
@@ -1225,8 +1248,11 @@ struct TourEntryTests {
             }
             await settle(window, hosting, turns: 40) { false }
 
+            await endAnyStaleTour(window, hosting)
             router.tourRequested = true
-            await settle(window, hosting, turns: 1500) { TourOracle.overlay != nil }
+            await settle(window, hosting, turns: 1500) {
+                TourOracle.overlay?.state.seededBookID == princeID
+            }
             let engine = try #require(TourOracle.overlay, "the tour started after the mend")
             #expect(engine.state.seededBookID == princeID, "the same book, mended in place")
             let mended = try #require(engine.state.firstStoryID, "the tour rings a chapter")
@@ -1286,6 +1312,80 @@ struct TourEntryTests {
         try await revealWalk(finished: true)
     }
 
+    /// **The 2026-10-30 window's gap, closed.** A FINISHED Prince whose
+    /// props deletions broke (its named chapter unfanned, no fan anywhere,
+    /// shipped chapters missing): the restore road would refuse it
+    /// (`lockedReading`), so the start never asks — the Finished state is her
+    /// deliberate act and the tour walks on the floor (the named chapter as
+    /// it stands). Nothing is minted and NOTHING IS SAID (no failure line at
+    /// every start). RED ON OLD (d370fd28b's gate): the road ran, refused,
+    /// and its failure line was spoken.
+    @Test func aFinishedPrinceWithBrokenPropsIsLeftAsItIsAndNothingIsSaid() async throws {
+        #if DEBUG
+        let suite = "tour-finished-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            session.markSeededBook = { _ in }
+            session.status.dismissAfter = .seconds(600)
+            let ops = session.operations
+            let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
+            let chapter = try ops.createPost(title: TourScript.firstStoryTitle)
+            _ = try ops.newBlock(in: chapter.id, text: "One ought to be both.", at: .end)
+            try ops.addPostToReading(chapter.id, to: prince.id)
+            try ops.lockReading(prince.id)
+            _ = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
+            // The premises: broken props, a book the road cannot reach.
+            let marks = await TourEngine.landmarks(session: session)
+            #expect(marks.seededBookID == prince.id && marks.seededBookPropsBroken,
+                    "the premise: the props read broken")
+            let facts = await TourEngine.launchBookFacts(session: session, landmarks: marks)
+            #expect(facts?.acceptsChapters == false, "the premise: a Finished book admits nothing")
+            let membersBefore = try await db.read { try Queries.assembleReading($0, readingID: prince.id).count }
+
+            let offer = TourOfferModel(defaults: defaults)
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: RootView(
+                session: session, router: router, tourOffer: offer))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, turns: 40) { false }
+            session.status.clear()
+
+            await endAnyStaleTour(window, hosting)
+            router.tourRequested = true
+            await settle(window, hosting, turns: 600) {
+                TourOracle.overlay?.state.seededBookID == prince.id
+            }
+            let engine = try #require(TourOracle.overlay, "the tour started")
+            #expect(engine.state.firstStoryID == chapter.id, "the floor: the named chapter as it stands")
+            await settle(window, hosting, turns: 30) { false }
+            #expect(session.status.spoken == nil,
+                    "nothing attempted, nothing said (\(String(describing: session.status.spoken?.text)))")
+            #expect(try await db.read { try Queries.assembleReading($0, readingID: prince.id).count }
+                    == membersBefore, "nothing minted into her Finished book")
+
+            engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
+        }
+        #endif
+    }
+
     private func revealWalk(finished: Bool) async throws {
         #if DEBUG
         let suite = "tour-reveal-\(UUID().uuidString)"
@@ -1301,6 +1401,8 @@ struct TourEntryTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
         } operation: { @MainActor in
             let session = AppSession(database: db)
+            session.markSeededBook = { _ in }
+            session.status.dismissAfter = .seconds(600)
             let ops = session.operations
             let prince = try ops.createReading(name: TourScript.seededBookName, kind: .book)
             let prose = "Upon this a question arises: whether it be better to be loved than "
@@ -1312,6 +1414,10 @@ struct TourEntryTests {
                 let title = index == 24 ? TourScript.firstStoryTitle : "chapter \(index + 1)"
                 let note = try ops.createPost(title: title)
                 for _ in 0..<2 { _ = try ops.newBlock(in: note.id, text: prose, at: .end) }
+                // A TRUE Prince world (the 2026-10-30 window): every chapter is
+                // born fanned, so the props read whole and the named chapter
+                // is the toured one — the restore road is never asked.
+                try mintFannedBlock(ops, in: note.id)
                 try ops.addPostToReading(note.id, to: prince.id)
                 if index == 24 { target = note.id }
             }
@@ -1333,11 +1439,15 @@ struct TourEntryTests {
                 window.close()
             }
             await settle(window, hosting, turns: 40) { false }
+            session.status.clear()
 
+            await endAnyStaleTour(window, hosting)
             router.tourRequested = true
-            await settle(window, hosting) { TourOracle.overlay != nil }
+            await settle(window, hosting) { TourOracle.overlay?.state.seededBookID == prince.id }
             let engine = try #require(TourOracle.overlay, "the request started a tour")
             #expect(engine.state.firstStoryID == target)
+            #expect(session.status.spoken == nil,
+                    "whole props: the restore road is never asked, nothing is said (\(String(describing: session.status.spoken?.text)))")
             engine.next()
             router.adopt(.reading(prince.id), in: router.workspace.focusedPane)
             await settle(window, hosting, turns: 400) {
@@ -1478,6 +1588,30 @@ private struct LiveEndCardRig: View {
             }
             .environment(\.colorScheme, scheme)
     }
+}
+
+// MARK: - VX-292 U2's world helpers (the 2026-10-30 window)
+
+/// A block carrying a SECOND take — the fan every real Prince chapter is born
+/// with (R-292-17's read prefers the named chapter only while it carries
+/// one; a bare chapter reads as broken props and the start would run the
+/// restore road into a pin's world).
+@MainActor
+private func mintFannedBlock(_ ops: Operations, in noteID: String) throws {
+    let minted = try ops.newBlock(in: noteID, text: "Men love at their own will.", at: .end)
+    _ = try ops.branchVariant(minted.block.id, from: minted.variant.id)
+}
+
+/// A pin that stopped early (a failed `#require`) leaves its tour's engine
+/// alive in `TourOracle` — the window's finding: the next pin read the
+/// previous pin's engine. End it, so the next read is this pin's own.
+@MainActor
+private func endAnyStaleTour(_ window: NSWindow, _ hosting: NSView) async {
+    #if DEBUG
+    guard let stale = TourOracle.overlay else { return }
+    stale.endTour()
+    await settle(window, hosting) { TourOracle.overlay == nil }
+    #endif
 }
 
 // MARK: - The settle loop (the U1a pins' own shape)
