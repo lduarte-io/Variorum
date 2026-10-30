@@ -1002,8 +1002,10 @@ struct NoteVersionsTests {
     /// **THE CANDIDATE-DRIVEN READ ANSWERS EXACTLY WHAT THE CLASSIFIER
     /// ANSWERS** — across the note-side shapes LR1-1 rescued (the anchor block
     /// merged away, divided, archived, deleted), a deliberate unmark, a
-    /// promote, a live fork (a version LINK born live), a renamed note, and the
-    /// note deleted (its moments ride it): for EVERY container in the store,
+    /// promote, a live fork (a version LINK born live), a renamed note, the
+    /// note deleted (its moments ride it), and — ladder round 3, MINOR-2 — a
+    /// moment on its link's SOURCE side, with the note's placement live (E) and
+    /// merged away (G): for EVERY container in the store,
     /// `isVersionOfAnyLiveNote` equals `versionHistoryPredicate(alias: "v",
     /// of: .anyLiveNote)` asked directly — the one classifier, never a
     /// hand-copied one. Green on both sides by design (the round-1 form WAS
@@ -1049,6 +1051,33 @@ struct NoteVersionsTests {
             _ = try ops.newBlock(in: gone.id, text: "Prose.")
             let rodeTheDeletion = try ops.saveNoteVersion(gone.id).post
             try ops.deleteContainer(gone.id)
+
+            // Ladder round 3, MINOR-2 — the SOURCE side. A `version_of` edge is
+            // stored canonically as (min, max) of its block ids, and this
+            // harness's ids increase, so every moment above sits on its links'
+            // TARGET side and the gather's two source→target arms decided
+            // nothing here. E: a moment of N1, marked a version of a LATER note
+            // N2, then unmarked from N1 — its one witnessing link has it on the
+            // SOURCE side, the note's placement live. G: E, then N2's linked
+            // block merged away — the same link, the note's placement
+            // tombstoned (the source→target DEAD arm, the everyday LR1-1 rescue
+            // on that side).
+            for mergesTheNotesBlockAway in [false, true] {
+                let earlier = try ops.createPost(title: "earlier")
+                _ = try ops.newBlock(in: earlier.id, text: "Prose.")
+                let saved = try ops.saveNoteVersion(earlier.id)
+                let momentBlock = try #require(saved.blockCopies.first?.copy)
+                let later = try ops.createPost(title: "later")
+                let linked = try ops.newBlock(in: later.id, text: "Linked.")
+                let neighbour = try ops.newBlock(in: later.id, text: "Neighbour.")
+                let link = try ops.markVersionOf(momentBlock, linked.block.id)
+                #expect(link.sourceBlockId == momentBlock, "the moment sits on its link's SOURCE side")
+                try ops.unmarkPostsAsVersions(earlier.id, saved.post.id)
+                if mergesTheNotesBlockAway {
+                    _ = try ops.merge(linked.block.id, neighbour.block.id)
+                }
+                momentsThatStayVersions.append(saved.post.id)
+            }
 
             let every = try allContainerIDs(db)
             var named: Set<String> = []

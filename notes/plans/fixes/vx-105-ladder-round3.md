@@ -253,5 +253,8 @@ The read's pre-existing automatic edge-index pass is described, not changed (the
   peer's own identity and liveness (a live post, not this container); it leaves to the classifier the edge fence (a
   live link, or one cascade-dead with its endpoint) and this container's own checks (live, born archived — and
   `theirs.block_id <> mine.block_id`). The broken line wrap round 2 left in the same sentence is mended. Doc only.
-- **MINOR-2** (the equality pin's source side) — NOT-STARTED. Settled: shapes E and G; the two mutants applied
-  temporarily AFTER a commit, each shown RED, the tree restored with `git checkout --` and `git diff --quiet` clean.
+- **MINOR-2** (the equality pin's source side) — IN-PROGRESS. Shapes E and G are added to
+  `anyLiveNotesVersionAgreesWithTheClassifierAcrossTheNoteSideShapes` and the extended pin is GREEN on the shipped read
+  (`swift test --filter anyLiveNotesVersion`: 3/3) — committed with this line, BEFORE any mutant. NEXT: the two
+  mutants, applied one at a time to `NoteVersions.swift` only, each run and then restored by `git checkout --` from
+  this commit. **No revert is in flight at this commit.**
