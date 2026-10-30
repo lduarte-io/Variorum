@@ -89,3 +89,19 @@ OUT OF SCOPE (later units'): step structure and new steps (U3), navigation/drivi
 | 6 | VX-415 close as superseded by VX-559 | OWED at closeout |
 | 7 | Riders check (open Low/Med in Settings & onboarding): VX-71 (currency-test tighten, parked), VX-707 (Settings search placeholder unthemed in Study), VX-343 (What's New wrap bug) | OFFERED at the sitting |
 | 8 | Release + site publish | AT HER WORD after merge |
+
+## U1 RECORD
+
+**NOT DONE (first line, kept current):** no `xcodebuild test` run (stage-window only, the orchestrator's to arrange), no walk, no GUI, no QUESTIONS.md entry (the shared ledger is the merging session's; the PROVISIONALs below are for the orchestrator to carry).
+
+Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-292`, branch `vx-292-onboarding`, the Pro. Scope: the five pieces of the U1 BRIEF; zero `Sources/VariorumCore/Sync/`, zero editor seam. Machinery note: the orchestrator's doc commit `2d43ae878` (coordination facts, this file only) landed while this unit was reading; adopted as-is, nothing of it overlaps the pieces.
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 1 TourScript's Prince cards + `firstStoryTitle` (+ `TourScriptTests` re-pinned) | NOT-STARTED |
+| 2 TourEngine landmarks → the Prince + XVII (+ `TourEngineTests`/`TourEntryTests`/`CaptureTourFocusTests`) | NOT-STARTED |
+| 3 TutorialSeeder's ownership lesson → the Prince (+ `TutorialBooksLessonTests`/`TutorialBooksRitualTests`) | NOT-STARTED |
+| 4 The three stale "Restore Tutorial…" labels → the registry verb (+ the pins) | NOT-STARTED |
+| 5 Record close: self-assessment, stage commands, headless evidence | NOT-STARTED |
