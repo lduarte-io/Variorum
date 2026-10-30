@@ -177,8 +177,13 @@ struct AppearanceSettingsTests {
     /// which is the one reading that can never leave the app half-coloured.
     @Test func thePaletteRoundTripsAndGarbageReadsAsTheDefault() throws {
         try withOperations { ops, db in
-            #expect(try db.read { try Queries.themeSettings($0) }.palette == .default,
-                    "R-Q6: default = each voice's shipped colours")
+            // VX-710 (her R-292-14 — *"make that the default theme"*): a store
+            // that carries no palette reads the SEA-GLASS. JUSTIFIED EDIT: this
+            // line pinned `.default` here; the flip moved the UNSET read and
+            // nothing else — the garbage line at the end is unchanged (the next
+            // test pins the flip's whole shape).
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .seaglass,
+                    "VX-710: an unset store wears the sea-glass")
 
             try ops.setThemePalette(.lavender)
             #expect(try db.read { try Queries.themeSettings($0) }.palette == .lavender)
@@ -198,6 +203,66 @@ struct AppearanceSettingsTests {
             #expect(try db.read { try Queries.themeSettings($0) }.palette == .default,
                     "an unrecognized palette reads as the shipped colours")
         }
+    }
+
+    // MARK: - The sea-glass as the unset store's palette (VX-710 — her R-292-14)
+
+    /// **The flip is the UNSET read and nothing else** — the 13s-b Study
+    /// flip's shape exactly (her words, R-292-14: *"can you add a theme to
+    /// the app that is the same seaglass color as the icon? and make that the
+    /// default theme?"*). A store with no `theme_palette` row wears the
+    /// sea-glass; the read writes nothing (no seed, no outbox row — a
+    /// migration in disguise would be both); and a store that CARRIES a
+    /// palette keeps it — **`default` included**: her explicit pick of the
+    /// voice's own colours is a choice, and it must survive the flip.
+    ///
+    /// An UNRECOGNIZED stored value keeps reading `.default` (the brief's
+    /// letter: "today's fallback") — not the unset store's sea-glass. Every
+    /// build since 18g reads a token it does not know that way (a client
+    /// from before VX-710 reads "seaglass" itself so), so a palette from a
+    /// newer build lands the same on every build that cannot draw it.
+    @Test func anUnsetStoreWearsTheSeaGlassAndAStoreThatCarriesAPaletteKeepsIt() throws {
+        try withOperations { ops, db in
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .seaglass,
+                    "VX-710: an unset store wears the sea-glass")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'theme_palette'") == 0,
+                    "no seed: the default lives in the read")
+            #expect(try !db.outboxContains("setting", "theme_palette"),
+                    "reading the default wrote nothing to sync")
+
+            try ops.setThemePalette(.default)
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .default,
+                    "a store that CHOSE the voice's own colours keeps them")
+            try ops.setThemePalette(.lavender)
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .lavender)
+            try ops.setThemePalette(.seaglass)
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .seaglass)
+            #expect(try db.fetchString(
+                "SELECT value FROM setting WHERE key = 'theme_palette'") == "seaglass",
+                    "E2EE-clean: the stored value is a token, never prose")
+            #expect(try db.outboxContains("setting", "theme_palette"),
+                    "an explicit pick is synced document semantics")
+
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE setting SET value = 'sea_foam' WHERE key = 'theme_palette'")
+            }
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .default,
+                    "a palette this build cannot draw reads as the shipped colours, as on every build")
+        }
+    }
+
+    /// The two palette defaults are NAMED apart, the voice's precedent
+    /// (`theUnsetStoreVoiceIsStudyAndThePlaceholderStaysTheLeadingVoice`):
+    /// the palette an unanswered STORE reads (the sea-glass, her R-292-14)
+    /// and the placeholder a host draws before any store has answered — or
+    /// forever, with no store at all — which stays `.default`, the voice's
+    /// own colours byte-identical (the parity road the token pins ride).
+    @Test func theUnsetStorePaletteIsTheSeaGlassAndThePlaceholderStaysTheShippedColours() {
+        #expect(Queries.ThemeSettings.unsetStorePalette == .seaglass)
+        #expect(Queries.ThemeSettings().palette == .default,
+                "the pre-landing / storeless placeholder is unchanged")
     }
 
     /// **Her R-Q13's custom pair, validated on BOTH sides.** The setter

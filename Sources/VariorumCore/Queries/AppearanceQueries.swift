@@ -8,7 +8,9 @@ extension Queries {
     /// The resolved appearance settings, defaults applied where unseeded.
     /// Defaults are the sittings' letter: a store with no voice reads STUDY
     /// (13s-b U1a — her 2026-10-05 ruling, `unsetStoreVoice` below; R1's
-    /// Terminal stays the PLACEHOLDER `voice` holds before a store answers), seams
+    /// Terminal stays the PLACEHOLDER `voice` holds before a store answers), a
+    /// store with no palette wears the SEA-GLASS (VX-710, `unsetStorePalette`
+    /// — the same shape, the placeholder `palette` staying `.default`), seams
     /// hidden at rest (§12/R42), editing indicator OFF (R14/R22), margin
     /// comments (R7 — inline is the opt-in), follow-the-scroll off until
     /// asked for (R25 is an OPTION), receipts QUIET (18i — her R-Q5:
@@ -32,6 +34,10 @@ extension Queries {
         public var receiptStyle: ReceiptStyle = .quiet
         /// 18g (R-Q6/R-Q11/R-Q13): the colour palette layered UNDER the
         /// voice. `.default` is each voice's shipped colours, byte-identical.
+        /// **The PLACEHOLDER palette** — what a host draws before any store
+        /// has answered, or with no store at all — exactly as `voice` is the
+        /// placeholder voice. NOT what a store reads when it carries none:
+        /// that is `unsetStorePalette`, applied by `themeSettings(_:)` alone.
         public var palette: ThemePalette = .default
         /// 18g: the `custom` palette's ROOM seed — six hex digits, or nil.
         /// Validated on the read through the ONE rule (`ThemeTint`), so a
@@ -80,6 +86,31 @@ extension Queries {
         /// re-voice every host that has no store to ask.
         public static let unsetStoreVoice: ThemeVoice = .study
 
+        /// **THE PALETTE A STORE READS WHEN IT CARRIES NONE: THE SEA-GLASS**
+        /// (VX-710 — her R-292-14, verbatim: *"can you add a theme to the app
+        /// that is the same seaglass color as the icon? and make that the
+        /// default theme?"*; the record is `notes/plans/vx-292-onboarding.md`'s
+        /// U-THEME RECORD). The `unsetStoreVoice` flip's shape exactly: a
+        /// READ-TIME default, never a migration — nothing is written, no
+        /// `setting` row is seeded, nothing syncs; a store that CARRIES a
+        /// palette keeps it, `default` included (her explicit pick of the
+        /// voice's own colours is a choice). The consequence, said plainly:
+        /// an EXISTING store that never chose a palette (no row — it read the
+        /// voice's own colours until this build) wears the sea-glass from this
+        /// build on. PROVISIONAL P-292-2 (the alternative: fresh stores only,
+        /// through a birth-written setting).
+        ///
+        /// Deliberately NOT the memberwise `palette` default above, for the
+        /// voice's reason: that is the storeless placeholder, and moving it
+        /// would recolour every host with no store to ask (and the parity
+        /// pins that ride `.default`'s byte-identical road).
+        ///
+        /// An UNRECOGNIZED stored value does NOT read this: it reads `.default`
+        /// (`themeSettings(_:)`), the fallback every build since 18g applies to
+        /// a token it does not know — so a palette from a newer build lands
+        /// the same on every build that cannot draw it.
+        public static let unsetStorePalette: ThemePalette = .seaglass
+
         public init() {}
     }
 
@@ -97,6 +128,9 @@ extension Queries {
         var settings = ThemeSettings()
         // 13s-b U1a: the store's own default (no row, or an unreadable one).
         settings.voice = ThemeSettings.unsetStoreVoice
+        // VX-710: the store's own palette when it carries NO row (an
+        // unreadable one reads `.default` below — the 18g fallback, kept).
+        settings.palette = ThemeSettings.unsetStorePalette
         for row in rows {
             let value: String = row["value"]
             switch row["key"] as String {
@@ -116,7 +150,10 @@ extension Queries {
             case "receipt_style":
                 settings.receiptStyle = ReceiptStyle(rawValue: value) ?? settings.receiptStyle
             case "theme_palette":
-                settings.palette = ThemePalette(rawValue: value) ?? settings.palette
+                // VX-710: an unrecognized token reads `.default`, NOT the unset
+                // store's sea-glass — the fallback every build since 18g gives
+                // a palette it cannot draw (`unsetStorePalette` says why).
+                settings.palette = ThemePalette(rawValue: value) ?? .default
             // 18g: the two seeds go through the ONE validation rule on the
             // way IN, so nothing downstream ever has to ask whether a
             // stored tint is a colour (`ThemeTint` carries the reasoning).
