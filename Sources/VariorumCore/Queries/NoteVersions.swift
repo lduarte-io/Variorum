@@ -338,6 +338,30 @@ extension Queries {
             arguments: ["version": versionID, "note": postID]) ?? false
     }
 
+    /// **Is this container a live saved version of ANY live note?** The
+    /// question `isVersionHistory` asks of one named note, asked of every
+    /// live note at once — the `.anyLiveNote` reading the Library, Archived,
+    /// search and the wing move already fence with (`versionHistoryPredicate`,
+    /// LR1-5: one classifier, read by every scope). Public so an app read that
+    /// must not count a saved moment as a note (a version keeps its note's
+    /// title — V6, no title mutation) asks exactly what those surfaces ask,
+    /// never a hand-copied classifier: the readme door's live-readme read
+    /// (VX-105 ladder round 1, MINOR-1). Cost: this container's own
+    /// placements and their version links — never the corpus.
+    public static func isVersionOfAnyLiveNote(
+        _ db: Database, _ containerID: String
+    ) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (
+                  SELECT 1 FROM container v
+                  WHERE v.id = :container AND v.deleted_at IS NULL
+                    AND \(versionHistoryPredicate(alias: "v", of: .anyLiveNote)))
+                """,
+            arguments: ["container": containerID]) ?? false
+    }
+
     /// **The versions that died WITH this note** (V2's restore half): born
     /// archived, version-linked to it, and carrying its EXACT `deleted_at`
     /// stamp — the 13l exact-stamp doctrine, so a version she deleted on its

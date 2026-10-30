@@ -311,15 +311,25 @@ enum ReadmeSeeder {
     /// The live readme — a live post wearing the reserved title, in any wing,
     /// archived or not (the smallest id when several stand). The birth seed
     /// and the door ask the same question.
+    ///
+    /// **A saved VERSION is never the readme** (ladder round 1, MINOR-1): a
+    /// version keeps its note's title (V6) and is a live post, born archived
+    /// and sealed, whose one home is Note ▸ Versions — so a title read alone
+    /// counted her saved moment of the readme as "a live readme" (the door
+    /// refused and opened the hidden moment). Each candidate is asked the
+    /// Library's own question through the one core classifier
+    /// (`Queries.isVersionOfAnyLiveNote`), never a hand-copied one. Candidates
+    /// are the posts titled "readme" — a handful at most.
     nonisolated static func liveReadmeID(_ db: Database) throws -> String? {
-        try String.fetchOne(
+        let candidates = try String.fetchAll(
             db,
             sql: """
                 SELECT id FROM container
                 WHERE kind = 'post' AND title = ? AND deleted_at IS NULL
-                ORDER BY id LIMIT 1
+                ORDER BY id
                 """,
             arguments: [title])
+        return try candidates.first { try !Queries.isVersionOfAnyLiveNote(db, $0) }
     }
 
     private static func performBirthSeed(session: AppSession) async -> BirthSeed {

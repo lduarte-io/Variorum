@@ -680,6 +680,47 @@ struct LaunchFurnitureTests {
         }
     }
 
+    /// **A SAVED VERSION OF THE README IS NEVER "A LIVE README"** (ladder
+    /// round 1, MINOR-1). `saveNoteVersion` mints a full family copy that keeps
+    /// the title (V6): a live post titled "readme", born archived and sealed,
+    /// whose one home is Note ▸ Versions. She saves a moment of her readme,
+    /// renames the readme, and presses Help ▸ Restore “readme”: the door MINTS
+    /// a fresh readme (P-105-7(v): a renamed readme is no longer a readme) and
+    /// opens THAT — never refusing on the hidden moment, never opening it; a
+    /// second press then finds the fresh readme, still never the moment. RED ON
+    /// OLD (`liveReadmeID` was a bare title read): the moment matched, the
+    /// refusal spoke, and `pendingSelection == .post(momentID)`.
+    @Test func aSavedVersionOfTheReadmeIsNeverALiveReadme() async throws {
+        let file = try herReadmeFileParagraphs()
+        try await withLaunchWorld { session, db in
+            guard case .seeded(let original) = await ReadmeSeeder.seedAtBirth(session: session) else {
+                Issue.record("a fresh store seeds the readme")
+                return
+            }
+            let moment = try session.operations.saveNoteVersion(original).post.id
+            try session.operations.renameContainer(original, title: "mine")
+            #expect(try await db.read { try Queries.isVersionOfAnyLiveNote($0, moment) },
+                    "the moment is her readme's saved version, still titled readme")
+
+            let shell = ShellRouter()
+            ShellActions(session: session, shell: shell).restoreReadme()
+            await pollUntil { session.status.spoken != nil }
+            #expect(session.status.spoken?.text == ReadmeDoorCopy.restored(),
+                    "the door minted: \(String(describing: session.status.spoken?.text))")
+            #expect(session.status.spoken?.kind == .receipt)
+            guard case .post(let fresh)? = shell.pendingSelection else {
+                Issue.record("the door opens what it minted: \(String(describing: shell.pendingSelection))")
+                return
+            }
+            #expect(fresh != moment, "never the hidden moment")
+            #expect(fresh != original, "a fresh note beside the renamed one")
+            #expect(try await readmeShape(db, fresh).blocks == file, "the seed shape, her seventeen blocks")
+
+            #expect(try await ReadmeSeeder.restore(session: session) == .alreadyPresent(postID: fresh),
+                    "a second press finds the fresh readme, never the moment")
+        }
+    }
+
     /// **NEVER A RETROFIT** (the `declined` mark's contract). An existing
     /// store that already had its library is declined at launch and grows no
     /// guide; a store born on an earlier build (`done`, no guide) stays as it

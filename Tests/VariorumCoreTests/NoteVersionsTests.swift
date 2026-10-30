@@ -891,4 +891,58 @@ struct NoteVersionsTests {
                 "what is left of it is an ordinary archived note")
         }
     }
+
+    // MARK: - VX-105 ladder round 1, MINOR-1 — "any live note's version", public
+
+    /// **THE ONE CLASSIFIER, ASKED OF ONE CONTAINER AGAINST EVERY LIVE NOTE**
+    /// (`isVersionOfAnyLiveNote` — the Library/Archived/search `.anyLiveNote`
+    /// fence, public for the app's readme door). A saved version KEEPS its
+    /// note's title (V6), so a read that finds "the live post titled X" finds
+    /// the moment too unless it asks this — the mechanism MINOR-1 traced: save
+    /// a moment of "readme", rename the note, and the only live post still
+    /// titled "readme" besides a plain one is the sealed archived moment. The
+    /// classifier names the moment, and never the note, a plain post, an
+    /// archived WORK, or a moment she deliberately came apart from (the
+    /// unmark). RED ON OLD by construction: no public form existed (the
+    /// predicate is internal to the core).
+    @Test func anyLiveNotesVersionIsNamedAndNothingElseIs() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "readme")
+            _ = try ops.newBlock(in: note.id, text: "Prose.")
+            let plain = try ops.createPost(title: "readme")
+            _ = try ops.newBlock(in: plain.id, text: "Other prose.")
+            let work = try ops.createPost(title: "a work I set aside")
+            _ = try ops.newBlock(in: work.id, text: "More prose.")
+            try ops.archiveContainer(work.id)
+
+            let moment = try ops.saveNoteVersion(note.id).post
+            try ops.renameContainer(note.id, title: "mine")
+
+            let titledReadme = try db.read { db in
+                try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT id FROM container
+                        WHERE kind = 'post' AND title = 'readme' AND deleted_at IS NULL
+                        """)
+            }
+            #expect(Set(titledReadme) == [moment.id, plain.id],
+                    "the mechanism: a title read finds the moment as a live post")
+            #expect(try db.read { try Queries.isVersionOfAnyLiveNote($0, moment.id) },
+                    "the moment is a live note's saved version")
+            for id in [note.id, plain.id, work.id] {
+                #expect(!(try db.read { try Queries.isVersionOfAnyLiveNote($0, id) }),
+                        "a note, a plain post or an archived work is never a version")
+            }
+
+            let unmarked = try ops.saveNoteVersion(note.id).post
+            try ops.unmarkPostsAsVersions(note.id, unmarked.id)
+            #expect(!(try db.read { try Queries.isVersionOfAnyLiveNote($0, unmarked.id) }),
+                    "a pair she came apart is not version history any more")
+
+            try ops.deleteContainer(note.id)
+            #expect(!(try db.read { try Queries.isVersionOfAnyLiveNote($0, moment.id) }),
+                    "a moment rides its note's deletion — no live version is left")
+        }
+    }
 }
