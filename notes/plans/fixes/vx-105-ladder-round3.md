@@ -243,7 +243,11 @@ The read's pre-existing automatic edge-index pass is described, not changed (the
   is a `SCAN` — and that the automatic edge-index build is a full pass the plan labels SEARCH, deliberately outside the
   check (a comment above it says the same). The round-2 record's "No `idx_container_kind`, no table scan." keeps its
   words and gains a bracketed round-3 correction in place. The optional `liveReadmeID` clause (the finding's item 4)
-  is NOT added — the arbitration did not order it; the diff stays as scoped.
+  is NOT added — the arbitration did not order it; the diff stays as scoped. **Machinery honesty:** `a71034494`
+  landed this piece with the pin's message split across two string literals joined by `+`, which Swift Testing's
+  `Comment` parameter does not accept — the test target did NOT compile at that commit (my verifying grep printed
+  nothing and I committed anyway). The next commit joins the message into one literal; `swift test --filter
+  anyLiveNotesVersion` then passed 3/3. No other file was affected.
 - **NIT-1** (the gather's filters, stated exactly) — NOT-STARTED.
 - **MINOR-2** (the equality pin's source side) — NOT-STARTED. Settled: shapes E and G; the two mutants applied
   temporarily AFTER a commit, each shown RED, the tree restored with `git checkout --` and `git diff --quiet` clean.

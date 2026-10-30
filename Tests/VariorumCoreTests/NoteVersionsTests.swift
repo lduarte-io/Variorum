@@ -995,8 +995,7 @@ struct NoteVersionsTests {
             // the whole `edge` table, and the plan labels that step SEARCH, so it
             // is deliberately outside this check's reach (the read's Cost doc).
             #expect(!plan.contains { $0.hasPrefix("SCAN") && $0 != "SCAN CONSTANT ROW" },
-                    "no plan line is a SCAN (the classifier's automatic edge-index build, a full pass "
-                    + "the plan labels SEARCH, is outside this check): \(plan)")
+                    "no plan line is a SCAN (the classifier's automatic edge-index build, a full pass the plan labels SEARCH, is outside this check): \(plan)")
         }
     }
 
