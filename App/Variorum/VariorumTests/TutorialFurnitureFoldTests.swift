@@ -166,25 +166,16 @@ struct TutorialFurnitureFoldTests {
     }
 
     /// **The REAL-SEED drift guard for the 13s-b birth furniture** (the
-    /// BLOCKER-1 net's shape exactly): the shipped readme — five blocks,
-    /// two of them fanned — and the example snippet group, each minted by
-    /// their real seeders, classify FOLDABLE, and two fresh mints carry
-    /// EQUAL signatures, or a fresh install's sign-in keeps two of each
-    /// forever. RED ON OLD by construction (the old tree seeds neither);
-    /// the per-fact behavioural revert at the stage window is the WIRING
-    /// pin below (drop a fact and the engine never looks at the title).
-    @Test func theRealReadmeAndExampleSnippetAreFoldableAndTwoMintsAgree() async throws {
+    /// BLOCKER-1 net's shape exactly), ONE ARM PER OBJECT (VX-105 split them,
+    /// so a red on one can never mask the other's verdict): the example snippet
+    /// group, minted by its real seeder, classifies FOLDABLE and two fresh
+    /// mints carry EQUAL signatures, or a fresh install's sign-in keeps two
+    /// forever. RED ON OLD by construction (the old tree seeds none); the
+    /// per-fact behavioural revert at the stage window is the WIRING pin below
+    /// (drop a fact and the engine never looks at the title).
+    @Test func theRealExampleSnippetIsFoldableAndTwoMintsAgree() async throws {
         let first = try await mintAndJudgeBirthFurniture(seed: 1886)
         let second = try await mintAndJudgeBirthFurniture(seed: 1892)
-
-        guard case .foldable(let readmeA) = first.readme,
-              case .foldable(let readmeB) = second.readme
-        else {
-            Issue.record("the shipped readme must classify FOLDABLE: \(String(describing: first.readme)) / \(String(describing: second.readme))")
-            return
-        }
-        #expect(readmeA == readmeB, "two fresh readme mints are the SAME seed — they must fold")
-
         guard case .foldable(let scrapA) = first.scrap,
               case .foldable(let scrapB) = second.scrap
         else {
@@ -192,6 +183,28 @@ struct TutorialFurnitureFoldTests {
             return
         }
         #expect(scrapA == scrapB)
+    }
+
+    /// **The readme's arm** — her finished text since VX-105: seventeen
+    /// blocks, one take each, created at her 4:44 moment, BORN STARRED. The
+    /// net, left standing: the classifier reads a note's star as HER
+    /// engagement (`SeededFurnitureClassifier.noteVerdict`'s star axis), so
+    /// the born star makes every fresh readme `.engaged` and this arm READS
+    /// RED until the architect rules VX-105's S-1 (the record:
+    /// `notes/plans/fixes/vx-105-readme-letter.md` — (A) a `Sync/` unit that
+    /// makes the seed's own star identity and re-points it to the keeper, or
+    /// (B) accept the never-fold and flip this arm to assert `.engaged` with
+    /// the reason). Deliberately NOT pre-decided here.
+    @Test func theRealReadmeIsFoldableAndTwoMintsAgree() async throws {
+        let first = try await mintAndJudgeBirthFurniture(seed: 1886)
+        let second = try await mintAndJudgeBirthFurniture(seed: 1892)
+        guard case .foldable(let readmeA) = first.readme,
+              case .foldable(let readmeB) = second.readme
+        else {
+            Issue.record("the shipped readme must classify FOLDABLE: \(String(describing: first.readme)) / \(String(describing: second.readme))")
+            return
+        }
+        #expect(readmeA == readmeB, "two fresh readme mints are the SAME seed — they must fold")
     }
 
     /// **The WIRING pin (per changed fact — the stage window's behavioural

@@ -41,6 +41,41 @@ struct HelpMenuNamingTests {
         #expect(TutorialSeeder.replaceQuestion == "Restore the field guide?")
     }
 
+    /// **VX-105 (R-105-4, her words: "they should be able to restore sherlock,
+    /// jeyll and hyde, the prince, etc. each individual. the sample library is
+    /// too confusing we don't need that.")** — Help's book doors each name
+    /// their book, the Sherlock door included: Restore “the adventures of
+    /// sherlock holmes”, over the one name constant (the Jekyll and Prince
+    /// doors' idiom). Four restore-a-seeded-thing doors on Help, no fifth, and
+    /// no door anywhere says "sample library". RED ON OLD: the verb read
+    /// "Restore the Sample Library".
+    @Test func theSherlockDoorNamesItsBookAndNoDoorSaysSampleLibrary() throws {
+        #expect(CapabilityRegistry.capability(.restoreSampleLibrary).verb
+                == "Restore \u{201C}the adventures of sherlock holmes\u{201D}")
+        #expect(CapabilityRegistry.capability(.restoreSampleLibrary).verb
+                == "Restore \u{201C}\(SampleLibrarySeeder.bookName)\u{201D}", "one name constant")
+        #expect(CapabilityRegistry.capability(.restorePrinceBook).verb
+                == "Restore \u{201C}\(SampleLibraryPrinceBook.name)\u{201D}")
+        #expect(CapabilityRegistry.capability(.restoreJekyllBook).verb
+                == "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}")
+        let seededDoors: [CapabilityID] = [
+            .restorePrinceBook, .restoreSampleLibrary, .restoreJekyllBook, .restoreClassicsGathering,
+        ]
+        for id in seededDoors {
+            #expect(CapabilityRegistry.capability(id).doors.contains(.menuBar), "\(id) on the Help menu")
+            #expect(ShellActions.paletteActs.contains(id), "\(id) typeable in \u{2318}K")
+        }
+        for capability in CapabilityRegistry.all {
+            #expect(!capability.verb.localizedCaseInsensitiveContains("sample library"),
+                    "no door says sample library: \(capability.verb)")
+        }
+        // The menu and the palette render the registry's verb — no literal of the old name anywhere they read.
+        for file in ["EditorCommands.swift", "Registry/CapabilityRegistry.swift", "Registry/ShellActions.swift"] {
+            #expect(!(try source(file)).contains("\"Restore the Sample Library"), "\(file) spells no old name")
+        }
+        #expect(try source("EditorCommands.swift").contains("Button(verb(.restoreSampleLibrary))"))
+    }
+
     private func source(_ path: String) throws -> String {
         try String(
             contentsOf: URL(fileURLWithPath: #filePath)
