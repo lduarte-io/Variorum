@@ -318,3 +318,7 @@ regressed; a hang is impossible by construction.
 **Commits, in order:** `fb9c2a9ea` the record opens · `fa4187e79` MINOR-1 · `d895f34bb` MINOR-1's record line ·
 `a24e9477b` MINOR-2 · `85cfa64eb` MINOR-4 · `3a42c3f5b` MAJOR-1 first form (superseded) · `b04f47bae` NIT-2 ·
 `13257d389` NIT-1 + MINOR-3 + NIT-3 records · `198b94562` MAJOR-1 reshaped by R-105-10 · this close.
+
+## F-3 arbitration (the orchestrator)
+
+F-3 ACCEPTED: the closer's rewrite is within R-105-5's grant and required by R-105-10's happy path — the old "listed on the left" closer is false for a reader who followed the lesson's own instruction into the note. The currency net covering the book glyph's way back is the right harness for its claim. No revert.
