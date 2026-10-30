@@ -47,44 +47,6 @@ enum TutorialSeeder {
     /// furniture fold's reserved-title facts read the same spelling.
     nonisolated static let twinTitle = "compare & versions \u{2014} the twin"
 
-    /// **The four Start Here passages** — the protection chapter's key lesson
-    /// LEADS with them, verbatim. VX-306 (2026-10-18, her kickoff word: drafted
-    /// from `notes/CastleRules.md`, built as drafted, PROVISIONAL — P-VX306-W-1)
-    /// wrote them for the readme placeholder; VX-309 U2 made them the key
-    /// lesson's lead too ("one text, two homes"); VX-105 ended the readme home
-    /// (her finished readme replaced the placeholder whole), so the GUIDE is
-    /// their one home now — moved here byte for byte, the lesson's text
-    /// unchanged. VX-307 U2c (F-U2b-1): the second passage follows the amended
-    /// rules 2, 3 and 7; all four are byte-pinned by `ReadmeStartHerePlanTests`
-    /// to the VX-307 plan's U2c words block (the re-anchored source).
-    nonisolated static let startHerePassages: [String] = [
-        "Your work is encrypted. Every library is locked with its own random key, kept "
-        + "in a small key file beside it. Variorum keeps copies of that key file for you "
-        + "\u{2014} beside the library, inside every backup, and sealed in this Mac's "
-        + "keychain \u{2014} so you never have to think about it.",
-
-        // VX-307 U2c (F-U2b-1): the amended rules 2, 3 and 7 — the words shown only when she asks (the card above
-        // the quick entry, the tour's end, Settings ▸ Protection), each look minting new ones, the key unchanged;
-        // byte-pinned to the VX-307 plan's U2c words block (PROVISIONAL P-VX307-U2c-5).
-        "Write down your twelve words. Every library has twelve words from the moment "
-        + "it is made, and they open it for as long as they are its words. Variorum never "
-        + "keeps them, so it shows them only when you ask \u{2014} from the card above the "
-        + "quick entry, at the end of the tour, or any time in Settings \u{25B8} Protection "
-        + "\u{2014} and each look makes new ones for you to write down. Your library's key "
-        + "doesn't change.",
-
-        "Set a passphrase. A passphrase is a convenience over the words: easier to type, "
-        + "and either one can reset the other. Until you set one, Variorum reminds you "
-        + "now and then.",
-
-        "The Apple road is a convenience. In Standard, Variorum also keeps quiet roads to "
-        + "your key \u{2014} through your iCloud Keychain and this Mac's login \u{2014} so "
-        + "most people never type anything, and for most people that simply works "
-        + "forever. If it ever stops, your passphrase or your words open the library, and "
-        + "nothing was ever at risk. Castle is the one promise that there is no quiet road "
-        + "through Apple, ever; it is a choice you can make in Settings.",
-    ]
-
     /// **17y B-DEDUPE (R-17y-5): the GUIDE half of the furniture-fold
     /// facts** — appended to the shared half at the Mac's `AppServices`
     /// construction (the engine's `furnitureFacts`; the phone passes
@@ -2530,8 +2492,8 @@ enum TutorialSeeder {
         // ————————————————————————— keeping it private —————————————————————
         //
         // VX-309 U2 — THE CHAPTER (VX-379; #235): the rules as built. Lesson 1
-        // LEADS with the four Start Here passages, verbatim (`startHerePassages`
-        // — the readme's until VX-105, the guide's alone now), then what sync seals (VX-204's approved sentences) and
+        // LEADS with the four Start Here passages, verbatim (`startHerePassages`,
+        // the guide's one copy since VX-105), then what sync seals (VX-204's approved sentences) and
         // what open means; lesson 2 the postures; lesson 3 the copies as VX-309
         // built them. 13s-b triage landing: minted LAST (the chapter moved
         // last; a membership's position is its mint order). VX-329: every store

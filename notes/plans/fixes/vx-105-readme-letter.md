@@ -47,6 +47,25 @@ self-introducing. The protection chapter's lesson is UNCHANGED and still leads w
 TutorialNewRoadChapterTests pin stands); the passages now deliberately read twice in the guide, her accepted state.
 Update/extend the chapter-1 pins to cover their presence and order.
 
+**Boundary rulings with the parallel vx-292 onboarding session (2026-10-30, relayed by the coordinator; same Pro,
+branch `vx-292-onboarding`; closeouts serialize) — recorded as relayed:**
+
+1. The weave's block 4 is NO LONGER byte-identical: its door sentence must name the Help menu's REAL current label —
+   the guide doors read "Restore Field Guide…" since VX-602, so the old "Help ▸ Restore Tutorial…" wording at ~line 640
+   is stale. DERIVE the door name from the menu door's constant (quote the constant, never retype the string), keeping
+   the rest of the block's sentence shape ("… replaces the whole book with a pristine copy whenever you want one.
+   Nothing you do here can touch your own writing."). vx-292 fixes the OTHER two stale "Restore Tutorial…" labels
+   (~1433, ~1998) — do NOT touch those two, even though your piece-3 grep will find them.
+2. Piece 3's grep boundary: any "Restore the Sample Library" / sherlock-door occurrence INSIDE the books chapter's
+   ownership lesson (~lines 2225–2260 of TutorialSeeder.swift) is vx-292's (they are rewriting that lesson Sherlock → the
+   Prince). Leave those bytes untouched; LIST each such hit in your record under "left for vx-292" so their rebase
+   re-grep knows. Every other home of the old door label (registry, menu, palette, ⌘/ dictionary, other lessons,
+   rendered chrome) is yours.
+3. Reaffirming the brief: the Sherlock door is a RETITLE of the existing .restoreSampleLibrary capability — same case,
+   same act, label only. No new registry capability is added by this effort.
+4. Scope fence restated for the rebase story: your TutorialSeeder footprint is the "start here" lesson ONLY (plus the
+   boundary hits you list but don't touch). The title "readme" must not change (vx-292's tour end card quotes it).
+
 ## U1 BRIEF (one implementer session, one acceptance unit)
 
 Seat: worktree `<home>/dev/variorum-vx-105`, branch `vx-105-readme-letter` (`git status -sb` first; expect clean; pull --ff-only). Read IN FULL before touching code: this file; `notes/plans/vx-105-letter-content/README.md` + `read-me.txt`; `App/Variorum/Variorum/Features/Onboarding/BirthFurnitureSeeders.swift`; the readme pins (`App/Variorum/VariorumTests/LaunchFurnitureTests.swift` readme section, `App/Variorum/VariorumTests/Protection/ReadmeStartHerePlanTests.swift`, `App/Variorum/VariorumTests/Protection/TutorialNewRoadChapterTests.swift`, `App/Variorum/VariorumTests/TutorialFurnitureFoldTests.swift`); `App/Variorum/Variorum/Registry/ShellActions.swift` restore-door region (~500–620) + the registry/menu/palette homes of `.restoreSampleLibrary`; `TutorialSeeder.swift:2502`'s key-lesson use of `startHerePassages`. The resiliency protocol binds (`notes/SessionResiliencyProtocol.md`): commit per piece, push after each, LIVE STATUS in the "## U1 RECORD" below from the first commit, foreground waits only, no subagents.
@@ -102,7 +121,8 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   and their own touch + churn stamp the edited columns; then `setStarred(.post(id), true)` — the one star write — in the
   same runner turn. See the stamp table and **S-1 (the star meets the fold — a structural surprise, ARCHITECT'S
   RULING NEEDED)** below.
-- **Piece 3 — the Sherlock door retitle (R-105-4):** DONE (this commit — hash at the next). The registry's verb for
+- **Piece 3 — the Sherlock door retitle (R-105-4):** DONE (`9d6b31f64`) — a RETITLE only (boundary ruling 3): same
+  capability case, same act, no capability added. The registry's verb for
   `.restoreSampleLibrary` is now `Restore \u{201C}\(SampleLibrarySeeder.bookName)\u{201D}` — rendered **Restore
   “the adventures of sherlock holmes”**, the Jekyll/Prince doors' exact idiom over the one name constant. The act is
   unchanged (`restoreSeededBook(.sherlock)`); the capability id and the `ShellActions.restoreSampleLibrary()` function
@@ -123,12 +143,32 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   - **Guide/tour content:** NO lesson and no tour card names the door (`TutorialSeeder.swift` and `TourScript.swift`
     grep clean for "Sample Library"); so piece 3 changes no guide content. Her readme quotes the book in Title Case
     ("The Adventures of Sherlock Holmes" under the Help menu) and stands unchanged (her disposition 2).
-- **Piece 4 — the pins:** NOT-STARTED.
+- **Re-home for the vx-292 boundary (boundary ruling 4):** DONE (this commit — hash at the next).
+  `startHerePassages` moved OUT of `TutorialSeeder.swift` into its own file,
+  `App/Variorum/Variorum/Features/Tutorial/TutorialStartHerePassages.swift` (`extension TutorialSeeder`; the project's
+  synchronized folders pick it up), compared BYTE-IDENTICAL to the pre-VX-105 declaration by script. This effort's
+  `TutorialSeeder.swift` footprint is now exactly: the "start here" lesson (piece 5) + the key lesson's ONE reference
+  line (`ReadmeSeeder.startHerePassages` → `startHerePassages`, forced by the re-home — the readme no longer owns them)
+  and the two comment lines above it. Nothing else in the seeder moves.
+- **Piece 4 — the pins:** IN-PROGRESS — written, compiling (`build-for-testing` EXIT 0); commits next.
 - **Piece 5 — the first-chapter interweave (R-105-5):** NOT-STARTED.
 - **Piece 6 — this record's closing sections:** IN-PROGRESS (LIVE STATUS kept from the first commit).
 
 Compile evidence so far: `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` (compile-only —
 app AND test target, nothing run) EXIT 0 after piece 1 and after piece 2.
+
+### Left for vx-292 (boundary ruling 2 — listed, NOT touched)
+
+`grep -n -i 'sherlock|sample library|Restore Tutorial\u{2026}'` over `TutorialSeeder.swift` at this effort's tree:
+- `:1433` — `"\u{25B8} Restore Tutorial\u{2026} rebuilds the whole book.)"` (stale door label; vx-292 fixes it).
+- `:1998` — `"Restore Tutorial\u{2026} finds what to replace. …"` (stale door label; vx-292 fixes it).
+- The books chapter's ownership lesson "the classics walk" — `:2245` (comment: "Sherlock (owned), this guide"),
+  `:2254` ("…and the adventures of sherlock holmes, an owned book."), `:2265` (comment: "owns Sherlock alone"),
+  `:2267` ("Look closer at Sherlock: …"), `:2271` ("…Sherlock's notes also all wear the tag #classics…"), `:2280`
+  ("Click a Sherlock note's mark …"). None names the Sherlock RESTORE door (no "Sample Library" anywhere in the guide);
+  vx-292 is rewriting this lesson Sherlock → the Prince.
+- (`:167` is a doc comment on `SampleLibraryWelcome.ownedBooks`, not lesson text.)
+- `:640` (the "start here" lesson's block 4) is THIS effort's — piece 5 (boundary ruling 1).
 
 ### The stamp-column table (R-105-3 — "created 4:44, edited at birth")
 
