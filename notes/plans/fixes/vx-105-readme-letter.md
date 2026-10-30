@@ -27,6 +27,26 @@ Her finished readme text — ONE letter-shaped note (the ticket's old "readme + 
 
 **R-105-5 — the guide's first chapter interweaves her Start Here draft (her mid-turn word, 2026-10-30, verbatim):** *"I would say that you should interweave the relevant parts of 'Lillian's Start Here' that are important / good into the first chapter of the field guide. if the first chapter of the field guide has stuff that 'Lillian's Start Here' is missing, then go ahead and keep the field guide portion. we need to make sure that the voice sounds good and that it makes sense holistically so you have a lot of freedom to edit that as you see fit, but I didn't even know lillian's start here was going into new apps so I didn't realize we have to handle that."* The source is `notes/plans/13s-start-here-reference.md` (its first half; the unfinished annoyances half stays out — placeholder "xyz" fixes, not "important / good"). The editing freedom is HERS-GRANTED for this chapter — an explicit, recorded exception to R-13s-28's never-edit rule, scoped to the guide's first lesson only. Consequence: a guide content change stales her real store's seeded guide — the closeout re-seeds it via the product door behind the A1 rail. The four Castle passages are NOT part of this interweave: they stay in the protection chapter (the shared constant), and the orchestrator's recommendation to her is that chapter placement stands for launch (the new readme's own privacy block + the band card + the protection chapter cover the new user; no duplication into chapter 1).
 
+**Two rulings from the author mid-build (2026-10-30, relayed by the coordinator; they amend the U1 BRIEF):**
+
+**R-105-6 — NO trailing spaces** (her words: *"wait what's the deal with these trailing spaces? i don't think that it
+needs trailing spaces necessarily."*). The seeded blocks land TRIMMED — exactly the read-me.txt paragraphs as the file
+carries them (header line dropped), with NO trailing-space restoration. Interior bytes stay byte-exact as ever (curly
+quotes, em dashes, everything). This supersedes the brief's "restore the trailing single space" instruction in piece 1.
+The pin changes accordingly: assert per-block byte equality against the read-me.txt paragraphs (literals or reading the
+in-repo file — your call, say which); the package README's sha256 manifest becomes interior-fidelity evidence only (its
+hashes include the trailing spaces her store carried, so they no longer match the seeded form — note that plainly in
+the record so nobody reads the mismatch as drift).
+
+**R-105-7 — the four Castle passages JOIN the guide's first chapter** (her words: *"do we not need to update the first
+chapter of the field guide so that even though that removal happened, the four Castle passages are still in the first
+thing that someone reads?"*). Piece 5's weave gains the four startHerePassages, byte-identical via the shared constant,
+placed after the companions block and before the chapters-on-the-left closer (the architect's placement under R-105-5's
+freedom; you may shift them one slot for flow, saying so). No lead-in prose is added — the passages are
+self-introducing. The protection chapter's lesson is UNCHANGED and still leads with the same four (the
+TutorialNewRoadChapterTests pin stands); the passages now deliberately read twice in the guide, her accepted state.
+Update/extend the chapter-1 pins to cover their presence and order.
+
 ## U1 BRIEF (one implementer session, one acceptance unit)
 
 Seat: worktree `<home>/dev/variorum-vx-105`, branch `vx-105-readme-letter` (`git status -sb` first; expect clean; pull --ff-only). Read IN FULL before touching code: this file; `notes/plans/vx-105-letter-content/README.md` + `read-me.txt`; `App/Variorum/Variorum/Features/Onboarding/BirthFurnitureSeeders.swift`; the readme pins (`App/Variorum/VariorumTests/LaunchFurnitureTests.swift` readme section, `App/Variorum/VariorumTests/Protection/ReadmeStartHerePlanTests.swift`, `App/Variorum/VariorumTests/Protection/TutorialNewRoadChapterTests.swift`, `App/Variorum/VariorumTests/TutorialFurnitureFoldTests.swift`); `App/Variorum/Variorum/Registry/ShellActions.swift` restore-door region (~500–620) + the registry/menu/palette homes of `.restoreSampleLibrary`; `TutorialSeeder.swift:2502`'s key-lesson use of `startHerePassages`. The resiliency protocol binds (`notes/SessionResiliencyProtocol.md`): commit per piece, push after each, LIVE STATUS in the "## U1 RECORD" below from the first commit, foreground waits only, no subagents.
@@ -60,18 +80,23 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
 
 ### LIVE STATUS (implementer, Opus — one session)
 
-- **Piece 1 — the seeder content swap:** DONE (`99231c04b`).
-  `ReadmeSeeder.paragraphs` = her 17 blocks, literals generated from `read-me.txt` with the trailing space restored per
-  the manifest, then the literals AS WRITTEN IN THE SEEDER SOURCE extracted, compiled with `swift` and hashed:
-  **GREEN — all 17 SHA-256 == the manifest's 17 values** (13 blocks end with one space; 2, 12, 16, 17 do not). No
-  takes (the `takes` map is deleted). Minted through `createPost` + `newBlock` per block, NOT `importPost`: bulk
-  segmentation trims every piece's trailing whitespace (`SegmentationRules.bulkSegments` → `trimmedPiece`), which would
-  have taken 13 of her bytes. `herBlocks` DELETED (not demoted — her draft's useful parts move into the guide's first
+- **Piece 1 — the seeder content swap:** DONE (`99231c04b`), REWORKED to R-105-6 (this commit — hash at the next).
+  `ReadmeSeeder.paragraphs` = her 17 blocks exactly as `read-me.txt` carries them (header line dropped, blank-line
+  splits, NO trailing-space restoration — the first build restored the store's 13 trailing spaces per the brief; her
+  R-105-6 retired that and this rework removed them). Verification, the literals AS WRITTEN IN THE SEEDER SOURCE
+  extracted, compiled with `swift`, then checked: **GREEN (1) — all 17 blocks == the `read-me.txt` paragraphs, byte for
+  byte; GREEN (2) — interior fidelity vs her store: each block hashes to its manifest value as-is (blocks 2, 12, 16, 17)
+  or with the one trailing space her store carried (the other 13).** **The manifest mismatch is EXPECTED, not drift:**
+  the package README's SHA-256s were taken from her store WITH the trailing spaces, so 13 of the seeded blocks no longer
+  hash to their manifest value bare; the manifest is interior-fidelity evidence only (R-105-6). No takes (the `takes`
+  map is deleted). Minted through `createPost` + `newBlock` per block, NOT `importPost` — originally because bulk
+  segmentation trims trailing whitespace (moot under R-105-6), and still because the split stamp (piece 2) needs the
+  note's mint apart from its words, which `importPost`'s one clock cannot give. `herBlocks` DELETED (not demoted — her draft's useful parts move into the guide's first
   lesson at piece 5; the frozen reference file keeps the draft as history). `startHerePassages` RE-HOMED byte for byte
   to `TutorialSeeder.startHerePassages` (a script compared the old and new declarations: BYTE-IDENTICAL MOVE); the key
   lesson reads it from there, so the guide's lesson text is unchanged by a byte. Test files touched compile-only
   (marked in place); their real rework is piece 4.
-- **Piece 2 — born starred + the stamps (R-105-3):** DONE (this commit — hash at the next). The split stamp is landed
+- **Piece 2 — born starred + the stamps (R-105-3):** DONE (`9998e4931`). The split stamp is landed
   by OPERATIONS ALONE, no row ever re-stamped: `createPost` runs under `withDependencies { $0.date = .constant(4:44) }`
   (the Sherlock/Prince fixed-clock precedent, scoped to the one mint), then the 17 `newBlock`s run on the ambient clock
   and their own touch + churn stamp the edited columns; then `setStarred(.post(id), true)` — the one star write — in the
@@ -103,7 +128,7 @@ moves `last_major_revision_at` without a text change or a MANUAL commit (a manua
 visible "commit" in her history), so it would need a raw row write — the operations-as-API rule's one forbidden road.
 Recorded property, unchanged in kind from the old seeder: the mint is 19 transactions in ONE serialized runner turn
 (the guide's own shape; the old readme's takes pass was likewise separate transactions) — `importPost`'s single
-transaction is unavailable because it trims her bytes.
+transaction is unavailable because it lands the note and its words on one clock (the split stamp needs two).
 
 ### S-1 — STRUCTURAL SURPRISE: the born star reads as HER ENGAGEMENT in the furniture fold (architect's ruling needed)
 

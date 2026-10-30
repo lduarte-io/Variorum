@@ -12,9 +12,9 @@
 //      book etc. line"*). The tour's keep-going leg points at the first
 //      snippet card; this is the card it finds on a fresh store.
 //    · **The readme** (VX-105 — her finished text, R-13s-28): ONE
-//      letter-shaped note, her seventeen blocks byte-exact per the
-//      manifest in `notes/plans/vx-105-letter-content/README.md`, one take
-//      each; seeded LAST so it tops the Library by recency (R-13s-29). It
+//      letter-shaped note, her seventeen blocks byte-exact as
+//      `notes/plans/vx-105-letter-content/read-me.txt` carries them, one
+//      take each; seeded LAST so it tops the Library by recency (R-13s-29). It
 //      replaced the 13s placeholder (her unfinished "Lillian's Start Here"
 //      draft and the four Start Here passages) whole.
 //
@@ -96,56 +96,61 @@ enum ReadmeSeeder {
         .init(title: title, kind: "post")
     }
 
-    /// Her seventeen blocks, in order, BYTE-EXACT per the manifest (each
-    /// block's chosen take's SHA-256, read from her store — the manifest wins
-    /// over the captured `.txt`, which dropped the trailing spaces her store
-    /// carries). Thirteen blocks end with ONE trailing space; blocks 2, 12, 16
-    /// and 17 do not — each block says which, so no tidy-up can take a byte
-    /// unseen. `LaunchFurnitureTests` pins every block's hash against the
-    /// manifest's seventeen values. The blank-line splits of her text are the
-    /// block boundaries; the `.txt`'s working header line (`{t:"readmev5"}
-    /// {#readme}`) is not content.
+    /// Her seventeen blocks, in order, BYTE-EXACT as `read-me.txt` carries
+    /// them (`notes/plans/vx-105-letter-content/`): the blank-line splits of
+    /// her text are the block boundaries, the file's working header line
+    /// (`{t:"readmev5"} {#readme}`) is not content. TRIMMED by her ruling
+    /// (R-105-6, *"i don't think that it needs trailing spaces
+    /// necessarily"*): her store's blocks carried one trailing space on all
+    /// but blocks 2, 12, 16 and 17, and the seed does not restore it — so the
+    /// package README's SHA-256 manifest (taken WITH those spaces) is
+    /// interior-fidelity evidence only, never a drift alarm: each block below,
+    /// plus the one space her store carried where it carried one, hashes to
+    /// its manifest value. `LaunchFurnitureTests` pins both: byte equality
+    /// against the in-repo file, and the manifest's interior fidelity.
     ///
-    /// Minted block by block through `newBlock` (never `importPost`): bulk
-    /// segmentation trims every piece's trailing whitespace
-    /// (`SegmentationRules.bulkSegments`), which would take her bytes.
+    /// Minted block by block through `newBlock` (every byte stored as given),
+    /// AFTER the note's own mint: the split stamp (`writtenAt`) needs the note
+    /// created apart from its words, which `importPost`'s one clock cannot
+    /// give — and her text's shape is the file's paragraphs, never a reading
+    /// of the reader's segmentation setting.
     nonisolated static let paragraphs: [String] = [
-        // 1 — ends with ONE trailing space (the manifest's byte)
+        // 1
         "Variorum was built by one person and thousands of AI agents over the course of four months. I'm "
         + "Lillian, the human behind this project. I want to take the chance to introduce myself and share "
-        + "a bit about the app, technology, and what it all means to me. ",
+        + "a bit about the app, technology, and what it all means to me.",
 
-        // 2 — no trailing space (the manifest's byte)
+        // 2
         "I created Variorum because I'm a software developer, I love writing, and I wanted to build my "
         + "own perfect writing app. It was only once the whole picture came together that I realized the "
         + "app philosophy I had designed for my own writing enabled a new way of working with AI.",
 
-        // 3 — ends with ONE trailing space (the manifest's byte)
+        // 3
         "Let me be clear: providing a new surface for AI to write for you is not the purpose of this "
         + "app. I do all of my own writing because writing is an invaluable way to refine and develop my "
         + "thoughts, to push them further than they can go in the limited context window of my own mind. I "
         + "also enjoy it. Every word you read here was typed by human fingers *and* I had an AI read over "
         + "my draft and leave comments. I used an \"and\" instead of a \"but\" because I believe that "
         + "collaboration instead of replacement is not only possible but tragically underserved by current "
-        + "structures and workflows. ",
+        + "structures and workflows.",
 
-        // 4 — ends with ONE trailing space (the manifest's byte)
+        // 4
         "Software itself can and should provide features that increase the capacity of people to control "
         + "how they work with AI. Variorum carves out territory in the no man's land between \"used AI for "
         + "this\" and \"didn't use AI for this\", binary labels that unhelpfully collapse a spectrum of "
         + "different uses. There are real differences between having an AI leave comments on your original "
         + "writing, edit it directly, draft text for you to edit, and pull together sources for you. "
         + "Variorum lets you set your own boundaries with tools instead of writing prompts requesting that "
-        + "they be honored. ",
+        + "they be honored.",
 
-        // 5 — ends with ONE trailing space (the manifest's byte)
+        // 5
         "There are three key features in Variorum, each built first for my own writing, that together "
         + "make working with AI more like spinning a dial than flipping a switch. Each addresses a core "
         + "challenge that the AI world's ubiquitous default \u{2014} a folder of markdown files \u{2014} "
         + "struggles with: managing what AI can change, reviewing those changes, and controlling what it "
-        + "can see. ",
+        + "can see.",
 
-        // 6 — ends with ONE trailing space (the manifest's byte)
+        // 6
         "The namesake feature of this app is the ability to make different versions of a paragraph "
         + "\u{2014} a variorum is defined as a scholarly edition of a text that compiles variant readings. "
         + "Where most writing apps resemble an improved typewriter, Variorum allows for a new way of "
@@ -158,9 +163,9 @@ enum ReadmeSeeder {
         + "not above and below yours, but beside them, intrinsically linked without bloating your "
         + "document. Sometimes the worst part of working with AI is being drowned out by an ocean of words "
         + "that are in English, but only technically. Variorum allows lengthy AI comments on a design "
-        + "document to be tucked away and revealed at will. ",
+        + "document to be tucked away and revealed at will.",
 
-        // 7 — ends with ONE trailing space (the manifest's byte)
+        // 7
         "Version control, purpose-built for writing, is the second guardrail. I took some of the best "
         + "parts of git, like commits and traceable lineage, and used block identity to sidestep the "
         + "line-based diffs that make git itself unsuitable for my work. The result is an app where each "
@@ -168,9 +173,9 @@ enum ReadmeSeeder {
         + "note, and it is easy to compare a particular paragraph to what it used to be. The ease of "
         + "seeing what changed in the compare view makes it like reviewing a pull request of prose. "
         + "Variorum automatically commits before and after any AI changes on every take, allowing for easy "
-        + "reversion. My favorite feature is that \u{2325}\u{2318}Z can always undo the latest AI change. ",
+        + "reversion. My favorite feature is that \u{2325}\u{2318}Z can always undo the latest AI change.",
 
-        // 8 — ends with ONE trailing space (the manifest's byte)
+        // 8
         "The final ingredient of the defining trinity is privacy. Each Variorum library is encrypted "
         + "locally and you can choose between Standard and Castle mode. Standard mode exists because I "
         + "wanted to be able to give this app to my mom without making it feel like opening a crypto "
@@ -180,9 +185,9 @@ enum ReadmeSeeder {
         + "devices, including forcing the use of biometrics. In Castle, Variorum doesn't open even on an "
         + "unlocked Mac without your passphrase or twelve words, with Touch ID optional. Conveniently, "
         + "being stored in ciphertext on disk prevents a rogue AI with filesystem access from reading your "
-        + "work, unlike a folder of unencrypted markdown files. ",
+        + "work, unlike a folder of unencrypted markdown files.",
 
-        // 9 — ends with ONE trailing space (the manifest's byte)
+        // 9
         "Variorum is also built with the principle that AI should always be opt-in, rather than opt-out. "
         + "I hope that even those who don't want to use AI at all reach for Variorum for its capabilities "
         + "as a writing editor, with full confidence that their work is private not because of terms and "
@@ -193,9 +198,9 @@ enum ReadmeSeeder {
         + "every item that has been shared with AI. You can also make notes and books private, which "
         + "supersedes any general access grant and conceals their existence. Work with confidence knowing "
         + "that AI access is visible always, impossible when not granted, and absent entirely when it is "
-        + "unwanted. ",
+        + "unwanted.",
 
-        // 10 — ends with ONE trailing space (the manifest's byte)
+        // 10
         "There are some other elements of Variorum that I hope will bring delight. I've always thought "
         + "that notes apps should allow for book views to be composed from different notes at will, so I "
         + "built that. With Variorum, the days where each note is its own file and there's no way to read "
@@ -207,9 +212,9 @@ enum ReadmeSeeder {
         + "and scrolling through. Paragraphs you delete automatically move whole into the trash, so you "
         + "can easily see what you got rid of. I love keyboard shortcuts, so almost everything has one. "
         + "I'm grateful that an amazing writing editor was my first goal and that I achieved it before "
-        + "connecting it to AI because of the focus on quality it gave me. ",
+        + "connecting it to AI because of the focus on quality it gave me.",
 
-        // 11 — ends with ONE trailing space (the manifest's byte)
+        // 11
         "I made Variorum 100% free to use locally because I don't believe in renting possession of your "
         + "own writing and because I wanted to give something back to the world. I really mean that you "
         + "own your work \u{2014} it is locally stored in an open format and you can easily AirDrop your "
@@ -220,9 +225,9 @@ enum ReadmeSeeder {
         + "much joy and entertainment over the years. At a time when it feels like the whole world has "
         + "been commoditized, people who share their creativity and passion freely online make the "
         + "internet somewhere I want to spend time. In that spirit, I want Variorum to not only be the "
-        + "free option but the best one. ",
+        + "free option but the best one.",
 
-        // 12 — no trailing space (the manifest's byte)
+        // 12
         "Being able to build and offer an app like Variorum \u{2014} opinionated, personal, and creative "
         + "\u{2014} is one of the best parts of living in our AI era. That a single individual could make "
         + "this app is also what lets me offer it for free. I'm a single human being, not a corporation, "
@@ -235,33 +240,33 @@ enum ReadmeSeeder {
         + "it's been fun to make. That's what working with AI is like in 2026 \u{2014} if you can dream it "
         + "and you know what you're doing, you can build it.",
 
-        // 13 — ends with ONE trailing space (the manifest's byte)
+        // 13
         "\"If you know what you're doing\" is carrying a lot of weight in the previous paragraph, but I "
         + "passionately believe that AI doesn't have to be synonymous with slop and low-effort projects. "
         + "Variorum is an ambitious effort that feels like a real accomplishment for both me and AI "
         + "\u{2014} it's amazing what a single developer and a stochastic parrot can accomplish together. "
         + "I want to work towards a version of the future where instead of AI replacing people, people are "
-        + "accomplishing more with AI. ",
+        + "accomplishing more with AI.",
 
-        // 14 — ends with ONE trailing space (the manifest's byte)
+        // 14
         "As I developed this app I found that it was an immensely joyful experience to not just build "
         + "but invent, to see something new solve real problems of mine. Variorum has become a facet of my "
         + "daily life that encourages me to write, an editor that works with how I think. I can't put a "
         + "price on how I find myself journaling and writing more; I just know that life feels richer now. "
         + "On a more personal note, I lost my beloved dog Chai in June. Even when the sun had gone cold in "
         + "my life, focusing on building this app kept me excited for new days. Variorum is dedicated to "
-        + "her, even though she couldn't read. ",
+        + "her, even though she couldn't read.",
 
-        // 15 — ends with ONE trailing space (the manifest's byte)
+        // 15
         "Now, finally releasing Variorum into the world, I can proudly say that what I consider the best "
         + "feature isn't a feature at all but instead the sense that there's a single person who really "
         + "cares behind the app's design, execution, and experience. I hope that you like it. I would love "
-        + "to hear any of your thoughts, issues (yes, really, I want to fix them), and feature requests. ",
+        + "to hear any of your thoughts, issues (yes, really, I want to fix them), and feature requests.",
 
-        // 16 — no trailing space (the manifest's byte)
+        // 16
         "Thank you for trying Variorum,",
 
-        // 17 — no trailing space (the manifest's byte)
+        // 17
         "Lillian",
     ]
 
