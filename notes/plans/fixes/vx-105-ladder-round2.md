@@ -246,5 +246,16 @@ text is untouched.
   (the app's `liveReadmeID` doc edit; the app door pins `LaunchFurnitureTests.aSavedVersionOfTheReadmeIsNeverALiveReadme`
   and the round-1 door arms compile — they are Mac suites, RUN PENDING the stage window; their behaviour is the core
   read's, which the equality pin holds to the classifier).
-- **MINOR-1** (record hygiene) — NOT-STARTED. Settled: the effort record gains VX-712/VX-713 pointers, the two
-  merge-owed QUESTIONS lines and the P-105-1..8 bundle in the closeout checklist, and "## The ladder" pointers.
+- **MINOR-1** (record hygiene) — DONE (the commit carrying this line), records only, no pin (as the finding says). In
+  `notes/plans/fixes/vx-105-readme-letter.md`: "## The ladder" now points at both round files (round 1's counts and
+  its fix record; round 2's BLOCKER and its round-3 consequence); the closeout checklist gains (1) the two QUESTIONS
+  entries owed at the merge as explicit lines, each with its options — "Open Takes mode" (and ⌘1–⌘7) over a book, and
+  P-105-8's door star; (2) the PROVISIONALs bundle, P-105-1 … P-105-8 named for the merge-time QUESTIONS pass; (3)
+  VX-712 (the "getting around" ⌘2/⌘1 sibling) and VX-713 (the end card's wording) named once each, with their parent
+  VX-292, as tickets to triage at the closeout beside VX-711. VX-713's existing O-1 note stands.
+
+**ROUND STATE: READY-FOR-STAGE (and for ladder round 3).** Every round-2 finding dispositioned; the core pins RUN
+GREEN headless (the plan pin observed red first); the app compiles (`build-for-testing` EXIT 0). The stage-window
+expectation is UNCHANGED from round 1 (`vx-105-ladder-round1.md`, "Stage-window expectation"): the same suite types,
+everything passes, no expected red — this round added core tests only (headless, already run) and changed no Mac test.
+Commits: `c7624059f` BLOCKER-1 · this commit MINOR-1.

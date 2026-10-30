@@ -472,7 +472,14 @@ comment names S-1, the Prince precedent and VX-711; RED if the star stops landin
 
 ## The ladder
 
-(fresh opus-reviewer per round; findings land here before any fix session sees them)
+(fresh opus-reviewer per round; findings and the orchestrator's arbitration land in each round's file before any fix
+session sees them; the fix rounds' records are appended to the same files)
+
+- **Round 1** — `notes/plans/fixes/vx-105-ladder-round1.md`: 1 MAJOR · 4 MINOR · 3 NIT; the arbitration; the FIX ROUND
+  1 RECORD (MAJOR-1 reshaped by R-105-10; F-3 accepted).
+- **Round 2** — `notes/plans/fixes/vx-105-ladder-round2.md`: 1 BLOCKER (new — MINOR-1's read walked the notes) · 1
+  MINOR (this record's hygiene); the arbitration; the FIX ROUND 2 RECORD. BLOCKER-1 earns round 3 (a fresh reviewer
+  re-checks it; hard cap three).
 
 ## Closeout checklist (the orchestrator's)
 
@@ -483,3 +490,18 @@ comment names S-1, the Prince precedent and VX-711; RED if the star stops landin
 - VX-105 Done rides the PR merge ("VX-105: …", merge commit); **VX-635 closed as superseded** (her disposition 3); in-flight row retired; worktree + branch deleted; canon-size line in the handoff.
 - Release: Release build, DMG + appcast to stargazing.tech (the cross-repo road) — notes DRAFTED FOR HER IN CHAT first (never a meta line in the file, VX-708); /Applications refresh at a zero-instance window (A1 first). — the window's ONLY act (R-105-9).
 - MOBILE PARITY: nothing mobile-visible (R-105-2).
+- **QUESTIONS at the merge — the two owed entries** (the merging session, on latest main; the next free numbers):
+  (1) **"Open Takes mode" over a book** — should the take panel's "Open Takes mode" (and ⌘1–⌘7) pressed over a book
+  open that note in the mode instead of refusing "Open a note first — the modes live inside a note."? Options: (a)
+  refuse, as built (the lesson's first ask teaches the open, R-105-10); (b) open the note in that mode. R-105-10 ruled
+  the lesson, not the button (ladder round 1, MAJOR-1). (2) **P-105-8, the door's born star** — should Help ▸ Restore
+  “readme”'s star be a NON-event for intake? Options: (a) heard, as built; (b) unheard, needing a public quiet star
+  write (ladder round 1, MINOR-3).
+- **QUESTIONS at the merge — the PROVISIONALs bundle:** P-105-1 (4:44 is the seeding device's local 4:44) · P-105-2
+  (the split stamp's reach) · P-105-3 (the passages' home) · P-105-4 (`herBlocks` deleted) · P-105-5 (the R-105-6
+  oracle is the in-repo file) · P-105-6 (the door's words) · P-105-7 (the door's edges) · P-105-8 (the door's heard
+  star — also entry (2) above), each with its alternatives as recorded under "PROVISIONALs" above.
+- **Tickets this effort's ladder minted** (the round-1 arbitration's, both children of VX-292): **VX-712** — the field
+  guide's "getting around" lesson teaches ⌘2 / ⌘1 as working in the book, where a mode request refuses (the MAJOR-1
+  sibling; Medium · Bug · Confirmed); **VX-713** — the tour's end card calls the readme "a short welcome note" (NIT-3,
+  O-1; Low · Wording · Confirmed). Triage them at the closeout with the effort's other filed tickets (VX-711, S-1).
