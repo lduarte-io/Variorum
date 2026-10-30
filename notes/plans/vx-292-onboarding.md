@@ -204,7 +204,7 @@ Expected: TourScriptTests [8] · TourEngineTests [5] · TourEntryTests [1] · To
 
 ## U-THEME RECORD
 
-**NOT DONE (first line, kept current):** piece 4 (record close) not yet written; no `xcodebuild test` run (stage-window only), no walk, no GUI, no QUESTIONS.md entry (the shared ledger is the merging session's — this unit's PROVISIONALs are listed here for the orchestrator to carry).
+**REVERT IN FLIGHT (compile-only check, headless):** `App/Variorum/Variorum/Features/Settings/PaletteCopy.swift` + `SettingsShape.swift` checked out from `c3f8dfe92` (the piece-2 face) to prove the red-on-old watch compiles; both are committed at HEAD, so a successor restores with `git checkout HEAD -- App/Variorum/Variorum/Features/Settings/PaletteCopy.swift App/Variorum/Variorum/Features/Settings/SettingsShape.swift` and then re-runs `build-for-testing` (the DerivedData would otherwise hold the reverted build). **NOT DONE (first line, kept current):** piece 4 (record close) not yet written; no `xcodebuild test` run (stage-window only), no walk, no GUI, no QUESTIONS.md entry (the shared ledger is the merging session's — this unit's PROVISIONALs are listed here for the orchestrator to carry).
 
 Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-292`, branch `vx-292-onboarding` (on top of U1's close, `8a1742d14`), the Pro. Scope: the four pieces of the U-THEME BRIEF (R-292-14, VX-710); zero `Sources/VariorumCore/Sync/`, zero editor seam, zero schema (`theme_palette` is a synced setting VALUE — a new enum token, no DDL, no SyncSpec §12 event).
 
