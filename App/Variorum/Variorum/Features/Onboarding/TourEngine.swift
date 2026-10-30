@@ -95,6 +95,39 @@ final class TourEngine {
         return found ?? .init(seededBookID: nil, firstStoryID: nil, fieldGuideID: nil)
     }
 
+    // MARK: - VX-292 U2 (R-292-11) — a missing Prince comes back at the start
+
+    /// **Whether a tour's start restores the launch's book first** — her
+    /// ruling (R-292-11): *"A missing Prince is restored through the existing
+    /// restore road at tour start."* The "yes" / Help press is the consent.
+    /// Pure, so the pin reads exactly what the start decides.
+    ///
+    /// Only when ALL of: the landmarks found no seeded book (the brief's
+    /// trigger); the window is in HOME (the launch's book is Home's — a
+    /// restore mints there, so from another wing it would land where this
+    /// tour cannot see it, and the tour there has no landmarks of Home's
+    /// anyway); and the STORE holds no live copy of it in any wing (the
+    /// restore's own discovery is wing-agnostic: a Prince she MOVED to
+    /// another wing would answer the door's "already whole" refusal, or have
+    /// chapters she deleted there minted back — her edits, which the tour
+    /// never touches). PROVISIONAL P-292-7 (the record's alternatives).
+    nonisolated static func restoresLaunchBook(
+        landmarks: Queries.TourLandmarks, wingID: String, storeHoldsIt: Bool
+    ) -> Bool {
+        landmarks.seededBookID == nil && wingID.isEmpty && !storeHoldsIt
+    }
+
+    /// Whether the store holds a live launch book in ANY wing — the restore
+    /// road's own discovery (`SampleLibrarySeeder.discover`), so the start
+    /// and the road can never disagree about what "missing" means. An
+    /// unreadable store answers "holds it" (no restore is attempted).
+    static func storeHoldsLaunchBook(session: AppSession) async -> Bool {
+        let held = try? await session.database.read { db in
+            try SampleLibrarySeeder.discover(db, book: .launchBook).bookID != nil
+        }
+        return held ?? true
+    }
+
     // MARK: - Events
 
     func observe(_ facts: Tour.Facts) {
@@ -171,6 +204,13 @@ final class TourEngine {
 @Observable
 final class TourSlot {
     var engine: TourEngine?
+    /// VX-292 U2 (R-292-11): a start is on its way — reading the landmarks
+    /// and, when the launch's book is missing, restoring it. Set at the PRESS
+    /// (synchronously), cleared when the engine is made: a second press
+    /// meanwhile is that same start (never a second restore racing the first
+    /// through the seeder's latch into an "already whole" refusal). A press
+    /// once the tour runs is Q12's restart, as ever.
+    @ObservationIgnored var starting = false
 }
 
 // MARK: - The facts, read from the window

@@ -379,6 +379,36 @@ struct TourSpotlightTests {
         #expect(spotlight.keepClear.isEmpty, "a region that leaves is forgotten")
     }
 
+    /// VX-292 U2 (R-292-11): the STATUS TOAST is a region the tour's cards
+    /// never cover — a tour's start that restores the launch's book speaks
+    /// its receipt (or the door's refusal) there, and a card must not sit on
+    /// the words. Inert with no tour; it leaves when the toast does. RED ON
+    /// OLD by mechanism: the toast reported nothing to the spotlight.
+    @Test func theStatusToastIsARegionTheCardsNeverCover() async throws {
+        let holder = SpotlightHolder()
+        let window = NSWindow(
+            contentRect: NSRect(x: 40, y: 40, width: 620, height: 260),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: ToastKeepClearRig(holder: holder))
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        await settle(window, hosting, turns: 10) { false }
+        let spotlight = TourSpotlight()
+        holder.spotlight = spotlight
+        await settle(window, hosting) { spotlight.keepClear.count == 1 }
+        #expect(spotlight.keepClear.count == 1, "the toast reports itself while a tour runs")
+        let region = try #require(spotlight.keepClear.values.first)
+        #expect(region.width > 100 && region.height > 10, "the toast's own frame (\(region))")
+        holder.showsFirst = false
+        await settle(window, hosting) { spotlight.keepClear.isEmpty }
+        #expect(spotlight.keepClear.isEmpty, "a toast that leaves is forgotten")
+    }
+
     /// The ⑂ badge, found read-only by its identifier and glyph, in the
     /// probe's own space.
     @Test func theBadgeLocatorFindsOnlyTheBadgeOfTheBlockAsked() throws {
@@ -429,6 +459,25 @@ private struct KeepClearRig: View {
             }
         }
         .frame(width: 300, height: 200)
+        .environment(holder.spotlight)
+    }
+}
+
+/// VX-292 U2: the real `StatusToast` under a spotlight (its receipt's words).
+private struct ToastKeepClearRig: View {
+    let holder: SpotlightHolder
+
+    var body: some View {
+        VStack {
+            if holder.showsFirst {
+                StatusToast(
+                    item: StatusCenter.Item(
+                        id: UUID(), text: "Restored \u{201C}the prince\u{201D} \u{2014} 28 chapters came back.",
+                        action: nil, kind: .receipt),
+                    tokens: .fallback(for: .light), onDismiss: {})
+            }
+        }
+        .frame(width: 600, height: 200)
         .environment(holder.spotlight)
     }
 }
@@ -620,6 +669,27 @@ struct TourEngineTests {
             engine.observe(.init(place: .note("scandal"), noteMode: .lenses))
             #expect(log.drives.count == 1)
         }
+    }
+
+    /// VX-292 U2 (R-292-11) — "A missing Prince is restored through the
+    /// existing restore road at tour start", and ONLY then: no seeded book in
+    /// the landmarks, the window in Home (where a restore mints it), and no
+    /// live copy anywhere in the store (one she moved to another wing is
+    /// hers — the restore would refuse "already whole" or re-mint chapters
+    /// she deleted there). PROVISIONAL P-292-7.
+    @Test func aTourStartRestoresTheLaunchBookOnlyWhenTheStoreHasNone() {
+        let missing = Queries.TourLandmarks(seededBookID: nil, firstStoryID: nil, fieldGuideID: "guide")
+        let found = Queries.TourLandmarks(seededBookID: "prince", firstStoryID: "xvii", fieldGuideID: "guide")
+        #expect(TourEngine.restoresLaunchBook(landmarks: missing, wingID: "", storeHoldsIt: false))
+        #expect(!TourEngine.restoresLaunchBook(landmarks: found, wingID: "", storeHoldsIt: true),
+                "the book is here: nothing to restore")
+        #expect(!TourEngine.restoresLaunchBook(landmarks: missing, wingID: "", storeHoldsIt: true),
+                "a Prince she moved to another wing is hers")
+        #expect(!TourEngine.restoresLaunchBook(landmarks: missing, wingID: "wing-b", storeHoldsIt: false),
+                "outside Home a restore would land where this tour cannot see it")
+        // A chapter she deleted is her edit: the book's presence alone decides.
+        let chapterGone = Queries.TourLandmarks(seededBookID: "prince", firstStoryID: nil, fieldGuideID: "guide")
+        #expect(!TourEngine.restoresLaunchBook(landmarks: chapterGone, wingID: "", storeHoldsIt: true))
     }
 
     /// The drive door names the app's mode for the rule's — every one, both
@@ -916,6 +986,89 @@ struct TourEntryTests {
             session.commandRouter.requestMode(.takes, postID: chapter.id)
             await settle(window, hosting, turns: 40) { false }
             #expect(session.commandRouter.activeMode == .takes, "never overruled on the same note")
+
+            engine.endTour()
+            await settle(window, hosting) { TourOracle.overlay == nil }
+        }
+        #endif
+    }
+
+    /// **VX-292 U2 (R-292-11) — a missing Prince comes back at the start.**
+    /// The store holds the field guide and NO Prince (a held restoree — the
+    /// U1 walk's dev store exactly). Help's request runs the book's own
+    /// restore road FIRST, awaited: the book is minted whole (the toured
+    /// chapter with it), the door's own receipt is said, and the tour then
+    /// starts with its landmarks found — on the Bookcase, never inside the
+    /// book the door would have opened (`opening: false`). A second press
+    /// while the restore runs is that same start (one restore, one tour).
+    ///
+    /// RED ON OLD by mechanism: the old start read the landmarks once — nil —
+    /// and began with no seeded book; no restore ran, nothing was said.
+    @Test func aMissingPrinceIsRestoredBeforeTheTourStartsOnTheBookcase() async throws {
+        #if DEBUG
+        let suite = "tour-restore-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            // The seeded-book mark is the dev app's REAL defaults (the test
+            // host): never written by a pin (`PrinceFreshStoreTests`' stub).
+            session.markSeededBook = { _ in }
+            // The receipt must still be on screen when the pin reads it.
+            session.status.dismissAfter = .seconds(600)
+            _ = try session.operations.createReading(name: TutorialSeeder.bookName, kind: .book)
+            let offer = TourOfferModel(defaults: defaults)
+            let router = ShellRouter()
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: RootView(
+                session: session, router: router, tourOffer: offer))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, turns: 40) { false }
+            #expect(await !TourEngine.storeHoldsLaunchBook(session: session),
+                    "the premise: no Prince in the store")
+
+            router.tourRequested = true
+            await settle(window, hosting, turns: 10) { false }
+            router.tourRequested = true   // a second press, mid-restore
+            await settle(window, hosting, turns: 1500) { TourOracle.overlay != nil }
+            let engine = try #require(TourOracle.overlay, "the tour started after the restore")
+
+            let princeName = TourScript.seededBookName
+            let chapterTitle = TourScript.firstStoryTitle
+            let princes = try await db.read { db in
+                try Queries.readings(db).filter { $0.name == princeName && $0.deletedAt == nil }
+            }
+            #expect(princes.count == 1, "ONE restore, one book (\(princes.count))")
+            let prince = try #require(princes.first)
+            #expect(engine.state.seededBookID == prince.id, "the landmarks were read again after it")
+            let princeID = prince.id
+            let chapterID = try await db.read { db in
+                try Queries.assembleReading(db, readingID: princeID)
+                    .first { $0.title == chapterTitle }?.postID
+            }
+            #expect(chapterID != nil && engine.state.firstStoryID == chapterID,
+                    "the toured chapter came back with its book")
+            #expect(engine.state.step == .navigation)
+            #expect(TourPlaces.place(router.workspace.focusedSelection) == .area(.bookcase),
+                    "the tour stands on the Bookcase — the door's opening of the book is left out")
+            #expect(session.status.spoken?.text.hasPrefix(
+                "Restored \u{201C}\(princeName)\u{201D}") == true,
+                    "the door's own receipt (\(String(describing: session.status.spoken?.text)))")
 
             engine.endTour()
             await settle(window, hosting) { TourOracle.overlay == nil }

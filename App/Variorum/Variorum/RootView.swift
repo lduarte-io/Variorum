@@ -1113,17 +1113,41 @@ struct RootView: View {
     /// retires it at the end
     /// (`TourOfferModel.tourEnded(completed:)` — completed at the end card,
     /// ended by End tour before it, nothing at all if the app quits mid-way).
+    ///
+    /// **VX-292 U2 (R-292-11) — a missing Prince comes back first.** When the
+    /// landmarks find no seeded book (`TourEngine.restoresLaunchBook` says
+    /// exactly when), the start runs the book's own Help ▸ Restore road and
+    /// AWAITS it — the door's latch, brain, Welcome arrangement, words and
+    /// (absent) undo, all unchanged; only its opening of the book is left out
+    /// (`opening: false` — the tour's step 1 stands on the Bookcase, where
+    /// step 2 rings the restored row) — then reads the landmarks again. A
+    /// refused or failed restore says so in the door's own words and the
+    /// tour starts as it always has (no seeded book: "any book"). The window's
+    /// place is read when the engine is made, after every await, so the
+    /// start's "take her to the Bookcase" judges where she IS.
     private func startTour() {
+        let slot = tourSlot
+        // A press while a start is on its way is that same start.
+        guard !slot.starting else { return }
+        slot.starting = true
         tourOffer?.tourStarted()
         let session = session
-        let place = TourPlaces.place(router.workspace.focusedSelection)
+        let router = router
         let doors = tourDoors
-        let slot = tourSlot
         Task {
-            let landmarks = await TourEngine.landmarks(session: session)
+            var landmarks = await TourEngine.landmarks(session: session)
+            if TourEngine.restoresLaunchBook(
+                landmarks: landmarks, wingID: session.wing.currentID,
+                storeHoldsIt: await TourEngine.storeHoldsLaunchBook(session: session)) {
+                await ShellActions(session: session, shell: router)
+                    .restoreSeededBook(.launchBook, opening: false).value
+                landmarks = await TourEngine.landmarks(session: session)
+            }
+            let place = TourPlaces.place(router.workspace.focusedSelection)
             slot.engine = TourEngine(
                 session: session, landmarks: landmarks, facts: Tour.Facts(place: place),
                 doors: doors)
+            slot.starting = false
         }
     }
 

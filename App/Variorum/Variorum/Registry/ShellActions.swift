@@ -592,9 +592,22 @@ struct ShellActions {
     /// mint what is missing, open the book, speak the outcome. The unit in
     /// the receipt is the book's ("stories" for Sherlock, "chapters" for every
     /// other seeded book) — both forms spelled whole (VX-631, `SeededBookReceipt`).
-    private func restoreSeededBook(_ book: SampleLibrarySeeder.Book) {
+    ///
+    /// **VX-292 U2 (R-292-11) — the tour's start rides this same road** when
+    /// the launch's book is missing ("A missing Prince is restored through the
+    /// existing restore road at tour start"): it AWAITS the returned act, and
+    /// passes `opening: false` — its step 1 stands on the Bookcase and step 2
+    /// rings the restored book's row there, so opening the book would only be
+    /// undone by the tour's own start. Everything else is the door's, word for
+    /// word: the latch, the mint-only-what-is-missing brain, the Welcome
+    /// arrangement, the receipt or refusal, and no undo entry (the seed
+    /// registers none on either road).
+    @discardableResult
+    func restoreSeededBook(
+        _ book: SampleLibrarySeeder.Book, opening: Bool = true
+    ) -> Task<Void, Never> {
         let unit: SeededBookUnit = book == .sherlock ? .story : .chapter
-        Task { @MainActor in
+        return Task { @MainActor in
             do {
                 // F2 (MINOR-8): the brain hoisted to `SeededBookRestore`
                 // (Shared) — the phone's restore row and the tutorial door's
@@ -607,7 +620,7 @@ struct ShellActions {
                 let arranged = await Self.arrangeWelcome(session: session)
                 switch restored {
                 case .alreadyWhole(let bookID):
-                    shell.pendingSelection = .reading(bookID)
+                    if opening { shell.pendingSelection = .reading(bookID) }
                     // 18i ladder round 1, J33: nothing was minted, so this is
                     // a REFUSAL's voice and always shows — the same reading
                     // `SplitAtNewlinesCopy.acted` gives "already one
@@ -626,7 +639,7 @@ struct ShellActions {
                             "\u{201C}\(book.name)\u{201D} is already whole — it's on your Bookcase.")
                     }
                 case .restored(let readingID, let minted):
-                    shell.pendingSelection = .reading(readingID)
+                    if opening { shell.pendingSelection = .reading(readingID) }
                     status.receipt(
                         SeededBookReceipt.restored(book: book.name, unit: unit, minted: minted)
                         + WelcomeDoorCopy.onTheShelfSuffix(shelf: arranged?.welcome.shelf.name))

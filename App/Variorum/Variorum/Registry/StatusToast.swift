@@ -169,6 +169,11 @@ struct StatusToast: View {
         #endif
         .shadow(color: .black.opacity(0.18), radius: 8, y: 2)
         .frame(maxWidth: 560)
+        // VX-292 U2 (R-292-11): a toast is a region the tour's cards never
+        // cover — the restore a tour's start runs speaks its receipt or
+        // refusal here, and a card must not sit on the words (inert outside
+        // a tour: the spotlight is nil and nothing reports).
+        .tourKeepClear()
     }
 }
 
