@@ -185,26 +185,21 @@ struct TutorialFurnitureFoldTests {
         #expect(scrapA == scrapB)
     }
 
-    /// **The readme's arm** — her finished text since VX-105: seventeen
-    /// blocks, one take each, created at her 4:44 moment, BORN STARRED. The
-    /// net, left standing: the classifier reads a note's star as HER
-    /// engagement (`SeededFurnitureClassifier.noteVerdict`'s star axis), so
-    /// the born star makes every fresh readme `.engaged` and this arm READS
-    /// RED until the architect rules VX-105's S-1 (the record:
-    /// `notes/plans/fixes/vx-105-readme-letter.md` — (A) a `Sync/` unit that
-    /// makes the seed's own star identity and re-points it to the keeper, or
-    /// (B) accept the never-fold and flip this arm to assert `.engaged` with
-    /// the reason). Deliberately NOT pre-decided here.
-    @Test func theRealReadmeIsFoldableAndTwoMintsAgree() async throws {
+    /// **The readme's arm — it NEVER folds, by design** (VX-105 S-1, RULED
+    /// option B). Her readme is BORN STARRED, and the classifier reads a
+    /// note's star as HER engagement (`SeededFurnitureClassifier.noteVerdict`'s
+    /// star axis — "HER STAR is engagement on every grain"), so every fresh
+    /// readme classifies `.engaged` and two devices' seeds both keep. That is
+    /// the ACCEPTED truth: the Prince's precedent exactly (R-633-7 — outside
+    /// the pristine dedupe, two seeds both keep; the deliberate delete sticks
+    /// since VX-678), and teaching the fold a born star (the seed's own star as
+    /// identity, re-pointed to the keeper) is VX-711's — never this arm's. RED
+    /// if the star stops landing (the readme would read foldable again).
+    @Test func theBornStarredReadmeNeverFoldsByDesign() async throws {
         let first = try await mintAndJudgeBirthFurniture(seed: 1886)
         let second = try await mintAndJudgeBirthFurniture(seed: 1892)
-        guard case .foldable(let readmeA) = first.readme,
-              case .foldable(let readmeB) = second.readme
-        else {
-            Issue.record("the shipped readme must classify FOLDABLE: \(String(describing: first.readme)) / \(String(describing: second.readme))")
-            return
-        }
-        #expect(readmeA == readmeB, "two fresh readme mints are the SAME seed — they must fold")
+        #expect(first.readme == .engaged, "the born star reads as engagement: \(String(describing: first.readme))")
+        #expect(second.readme == .engaged, "…on every fresh mint: \(String(describing: second.readme))")
     }
 
     /// **The WIRING pin (per changed fact — the stage window's behavioural

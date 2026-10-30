@@ -184,7 +184,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   | (d) `HelpMenuNamingTests` · `theSherlockDoorNamesItsBookAndNoDoorSaysSampleLibrary` | The verb == `Restore “the adventures of sherlock holmes”` and == the one-constant interpolation; the Prince and Jekyll doors' verbs by their constants; the four seeded doors (prince · sherlock · jekyll · classics) on Help and in ⌘K; NO capability verb in `CapabilityRegistry.all` says "sample library"; no "\"Restore the Sample Library" literal in the menu, registry or palette sources; the menu renders `verb(.restoreSampleLibrary)`. | By construction: the old verb was "Restore the Sample Library". |
   | (e) `ReadmeStartHerePlanTests` · `theFourPassagesAreThePlansByteForByte` · `noShoutyCapsAndNoMarkdownRideIntoTheSeed` · `theReadmeCarriesNoneOfThePassagesAndTheRoadIsEveryStores` · `theFourPassagesAreSpelledOnceInTheGuideAndNeverInTheReadme` | The four byte-pins stand against the VX-307 plan's words block (now `TutorialSeeder.startHerePassages`); readme membership assertions REMOVED; the readme carries none of the four; source: declared once in `TutorialStartHerePassages.swift`, never re-declared or re-spelled in `TutorialSeeder.swift` (R-105-7's "via the shared constant"), never spelled or read in the readme's seeder; the launch's one road unchanged. Suite TYPE name kept (stage commands and history). | `theReadmeCarriesNone…` and the source pin are red on old (the readme's `paragraphs` ended with all four; the declaration lived in the readme's seeder). The byte-pins are unchanged facts (green both sides by design — the GUIDE's text did not move a byte). |
   | (f) `TutorialNewRoadChapterTests` · `everyStoresGuideSeedsTheRoadsChapter` | Unchanged assertions (the key lesson LEADS with the four, verbatim) reading the re-homed constant. | Unchanged fact — green both sides by design (the key lesson's text must not change). |
-  | (f) `TutorialFurnitureFoldTests` · `theRealExampleSnippetIsFoldableAndTwoMintsAgree` · `theRealReadmeIsFoldableAndTwoMintsAgree` | The old one test SPLIT per object so S-1's red cannot mask the snippet's verdict. The readme arm keeps the foldable assertion — **EXPECTED RED at the stage window until the architect rules S-1** (deliberately not pre-decided). | Snippet: unchanged fact. Readme: red NOW by S-1's mechanism (the born star). |
+  | (f) `TutorialFurnitureFoldTests` · `theRealExampleSnippetIsFoldableAndTwoMintsAgree` · `theBornStarredReadmeNeverFoldsByDesign` | The old one test SPLIT per object. The readme arm, after S-1's ruling (option B): both fresh mints classify `.engaged` — the born-starred readme never folds, by design (the Prince precedent; VX-711 carries option A). | Snippet: unchanged fact. Readme: red on old by construction (the old readme was unstarred and foldable); red if the born star stops landing. |
 
   The "nothing seeds after the readme" pin STAYS (inside (b)+(c), re-keyed from `created_at` — which now carries her
   October moment — to the readme's first block's mint).
@@ -249,7 +249,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   OLD: by construction — no `.restoreReadme` capability, no `ReadmeSeeder.restore` existed. `build-for-testing` EXIT 0,
   no warning in a touched file.
   UNIT STATE: **READY-FOR-STAGE** — every piece built, compiled and pushed; every Mac pin WRITTEN, RUN status PENDING
-  the stage window; S-1 awaits the architect's ruling.
+  the stage window; S-1 RULED (option B, VX-711).
 
 **Commits, in order:** `99231c04b` piece 1 · `9998e4931` piece 2 · `ca2f7d939` piece 1 rework (R-105-6) ·
 `9d6b31f64` piece 3 · `60b4b1635` the passages' re-home (boundary ruling 4) · `e5ef30a7c` piece 4 · `363ac91ed`
@@ -298,7 +298,8 @@ shared ledger, CLAUDE.md "Parallel sessions")
   shape); alternative: the current wing (`importPost`'s quick-entry rule); (iv) the refusal still OPENS her readme
   (the books' already-whole arm navigates to the book); (v) a readme she RENAMED is no longer "a post titled readme",
   so a press mints a fresh one beside it.
-- **F-2** (the added period) — above.
+- **S-1 → option B, RULED** (not provisional): the born-starred readme never folds; option A is VX-711. See S-1.
+- **F-2** (the added period) — KEPT, ruled; above.
 - Kept names: the capability case `.restoreSampleLibrary` and `ShellActions.restoreSampleLibrary()` keep their
   identifiers (boundary ruling 3: a retitle; never rendered).
 
@@ -321,9 +322,8 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
   -only-testing:VariorumTests/TourScriptTests
 ```
 
-then the full `VariorumTests` (the closeout's). **Expected at the window:** every listed suite green EXCEPT
-`TutorialFurnitureFoldTests/theRealReadmeIsFoldableAndTwoMintsAgree` — RED by S-1's mechanism until the architect rules
-(a pass there would mean the born star did not land — investigate, don't celebrate). Verify the suite TYPE names in
+then the full `VariorumTests` (the closeout's). **Expected at the window: everything should pass — no expected red**
+(S-1 ruled option B; its arm is now `TutorialFurnitureFoldTests/theBornStarredReadmeNeverFoldsByDesign`, green). Verify the suite TYPE names in
 `TutorialWalkTests.swift` before running — CONFIRMED: `TutorialBookShapeTests` and `TutorialTakesActsTests` are two
 of its `@Suite` types; every other type above was grepped (`struct <Name> {`); `TourScriptTests` is the tour's words
 suite in `TourTests.swift` (it pins the end card's readme sentence).
@@ -350,8 +350,10 @@ suite in `TourTests.swift` (it pins the end card's readme sentence).
 ### Flags (piece 5 — adjustments beyond the BUILD-VERIFY chrome words)
 
 - **F-2 — one period added:** her draft's take "Now click on Open Takes mode in the top bar of this modal" has no
-  terminal period; the seeded take ends with one (R-105-5's freedom: "make sure that the voice sounds good"). One-byte
-  revert if unwanted: drop the "." in `TutorialSeeder.swift`'s take and in the pin.
+  terminal period; the seeded take ends with one (R-105-5's freedom: "make sure that the voice sounds good").
+  **DISPOSITION (2026-10-30, the coordinator): KEPT** — the take now lives only in the guide's first lesson, where
+  R-105-5's editing freedom is hers-granted; the ⌘-style chord spellings (`⌘2`, `⌘/` for her "Command 2",
+  "Command /") ride the same grant.
 - **F-1 (superseded):** block 4's stale door name — first noticed here, then RULED by boundary ruling 1 (no longer a
   flag).
 - **Her draft's own oddity, left as hers:** block 7 says the best use cases "are in the takes of this paragraph", while
@@ -398,7 +400,7 @@ Recorded property, unchanged in kind from the old seeder: the mint is 19 transac
 (the guide's own shape; the old readme's takes pass was likewise separate transactions) — `importPost`'s single
 transaction is unavailable because it lands the note and its words on one clock (the split stamp needs two).
 
-### S-1 — STRUCTURAL SURPRISE: the born star reads as HER ENGAGEMENT in the furniture fold (architect's ruling needed)
+### S-1 — STRUCTURAL SURPRISE: the born star reads as HER ENGAGEMENT in the furniture fold (RULED: option B, VX-711)
 
 **Traced mechanism.** `SeededFurnitureClassifier.noteVerdict` (`Sources/VariorumCore/Sync/SeededFurnitureDedupe.swift`,
 the note grain) returns `.engaged` whenever the synced `'starred'` list contains the note's id (*"HER STAR is engagement
@@ -423,6 +425,14 @@ flag OFF the seed's value is engagement); `ReservedContainer` has no such field.
   class). The drift guard's readme arm flips to assert `.engaged` WITH this reason, and (A) is ticketed for the
   sync launch. One-line pin change; the example-snippet arm stays the net.
 - **(C) Not born starred** — contradicts her ruling; listed only to be ruled out.
+
+**S-1 — RULED (2026-10-30, the coordinator): OPTION B.** Rationale, as ruled: two copies surviving a two-device
+pre-sync join is the Prince's ACCEPTED precedent exactly (R-633-7's analysis — the Prince sits outside the pristine
+dedupe and two seeds both keep; the deliberate delete sticks post-VX-678), and Option A opens the dedupe engine
+(Fable/Sync-adjacent work) in launch week for a corner only multi-device sign-in reaches. **Option A is ticketed as
+VX-711** (Backlog, Low, Improvement · Confirmed · Castle & sync). Built: the failing arm is now a pin of the accepted
+truth — `TutorialFurnitureFoldTests.theBornStarredReadmeNeverFoldsByDesign` (both fresh mints classify `.engaged`; its
+comment names S-1, the Prince precedent and VX-711; RED if the star stops landing). The snippet arm stays as split.
 
 ## The ladder
 
