@@ -82,4 +82,96 @@ exactly that line. Pair it with an equality pin: across the LR1-1 note-side shap
 deleted; an unmark; the note deleted), the rewritten read answers exactly what `versionHistoryPredicate(.anyLiveNote)`
 answers. `anyLiveNotesVersionIsNamedAndNothingElseIs` stays as the behaviour pin.
 
-**STATUS: IN PROGRESS** (written incrementally).
+### MINOR-1 · `notes/plans/fixes/vx-105-readme-letter.md` "## The ladder" and "## Closeout checklist" · the round's owed merge-time acts are missing from the checklist the closeout walks, and the arbitration points at a section that does not hold them
+
+**Evidence.** The round-1 arbitration says *"Tickets minted at this arbitration: see the record's closeout section (the
+getting-around sibling; the end-card wording)"* (`vx-105-ladder-round1.md:97`). The closeout checklist
+(`vx-105-readme-letter.md:477–485`) names neither ticket. VX-713 is noted only on O-1. **VX-712**, the getting-around
+⌘2/⌘1 sibling (it exists on Linear: Medium · Bug · Confirmed, a child of VX-292), is named NOWHERE in the repo. The two
+QUESTIONS entries owed "at the merge" sit only in prose: R-105-10's "should 'Open Takes mode' (and ⌘1–⌘7) over a book
+open the note?" and P-105-8's "should the door's born star be a non-event?". The P-list header's "for QUESTIONS at the
+merge" also covers P-105-1…7. None of these is a checklist line. "## The ladder" (`:473–475`) is still the empty
+placeholder, although its own text says findings land there. Records only, nothing behavioural, but this is exactly
+what gets dropped at a serialized closeout, and CLAUDE.md routes undefined product behaviour to QUESTIONS.
+
+**Fix.** Add checklist lines: (1) the QUESTIONS entries — the Open-Takes-over-a-book question, P-105-8, and the
+P-105-1…7 PROVISIONALs; (2) VX-712 and VX-713 named, with their parent VX-292; (3) under "## The ladder", one pointer
+line per round file (`vx-105-ladder-round1.md`, `vx-105-ladder-round2.md`). No pin, because it is a record change.
+
+---
+
+## Clean bill (the round-1 dispositions, each checked against the code)
+
+- **MINOR-1 (a saved version is never "a live readme").** The behaviour is right. `liveReadmeID` now returns the first
+  candidate (in id order) that the one classifier does not name, so both arms of the round-1 mechanism are closed.
+  (i) She saves a version, renames the readme, presses: the only "readme" left is the moment → skipped → fresh mint.
+  (ii) The id-order coin flip between readme and moment is gone, because the moment is always skipped. The birth seed
+  and the door share the read. The app pin's red-on-old is credible: on the old bare read the moment is the only live
+  "readme", so the refusal speaks and `pendingSelection == .post(moment)`. The core pin RAN GREEN here, and its arms
+  discriminate: the note, plain, archived-work and unmarked arms would each read `true` if the first `db.read` body were
+  substituted (VX-692's toolchain hazard), so none can pass hollow. The final post-deletion arm is the same call as the
+  first, so the hazard cannot change it. (The cost of that classifier is BLOCKER-1, a separate matter.)
+- **MINOR-2 (the birth seed decides inside its mint's turn).** Both reads moved into the `session.runner.run` body
+  that mints. `@Dependency(\.database)` there resolves the caller task's dependency context, the same database the
+  quiet facade `Operations(undoStack: nil)` writes through. That is `restore`'s shape and
+  `SampleLibraryWelcome.arrange`'s (`:187`). It is now MORE consistent than the old `session.database` read beside an
+  ambient mint. Errors still land as `.refused`. The header's "no door latch" line is now true: the snippet has no
+  door, and the readme's door is one turn. `theBirthSeedReadsNothingOutsideItsMintsTurn` is deterministic and red on
+  old: its slice runs from `performBirthSeed(` to `/// **THE ONE MINT**`, both present, and the doc comment that names
+  `session.database.read` sits above the slice. The interleave pin's green side is order-independent. Its red side
+  leans on the actor taking same-priority turns in order, and the record labels that honestly. The pin's semaphore wait
+  is bounded and runs in a synchronous runner body, so it cannot hang the suite.
+- **MINOR-3 (the door's star is heard).** As arbitrated: no code change. P-105-8 states the built behaviour, the
+  alternative and the pin owed if (b) is ruled. The QUESTIONS line belongs to the merge (MINOR-1 above).
+- **MINOR-4 (the fold's words).** Every stale site is corrected: `LaunchFurniture.swift:136–138`, the header,
+  `MacFurnitureFacts`, `furnitureFact`, `VariorumApp.swift:245–247`, and the wiring pin's message. A grep for the old
+  claims ("every seeded … folds on sign-in", "carries its Start Here", "no doors to race") is clean. The rename is
+  done. The restored drift net is credible. I traced `noteVerdict` (`SeededFurnitureDedupe.swift:706–819`; read only,
+  `Sync/` untouched): it has no stamp leg, so the split stamp (created 4:44, edited at mint) never reads as engagement.
+  The star is the only leg the born readme trips (`:727`). Un-starring through the one star write removes it. The
+  signature (title, lock, comments, per-block take texts in fan order, chosen index) is equal across two mints. The
+  "currency net, green both sides" label is honest.
+- **MAJOR-1, reshaped by R-105-10 (the first ask is the move from the book into the note).** Every claim in the new
+  block and in the F-3 closer is true of the code:
+  - The guide opens on the BOOK (`openTutorial` → `.reading`), on `.outline` (`BookStructureModel.defaultMode`, the
+    guide is unlocked).
+  - Notes are collapsed CARDS by default (`expandedPosts` starts empty, her #43(a)).
+  - The card BODY is the open door (`BookView.swift:3861–3863`), and "open ↗" sits on the card's title row (`:3888`)
+    and beside the expanded title (`:3838`). Both carry the help "Open this note in the full editor (Write · Takes ·
+    Lenses · …)" and land in Write (`:1235`).
+  - Over a book a mode request refuses (`CommandRouter.swift:549–551`), and the take panel offers neither "expand all"
+    nor the style menu.
+  - The book navigator is the LEADING side (`BookView.swift:256`), so "the chapters are listed on the left" holds.
+  - "The book glyph above the page takes you back there, at that very note" matches `ContextBar`'s `.open` arm
+    ("open this book, revealed at this note") and "the workspace" lesson's own "Above the page sits the context bar".
+  - Every string the road pin scans is present byte for byte, including the router's 12-space indentation and the
+    card's multi-line `Button {` shape. The `label: "style:` absence check matches how Takes actually spells its menu,
+    so it is not vacuous.
+  - The new rendered text is sentence case, with no em dash and no emoji, and "open ↗" is interpolated from
+    `NoteBoxCopy.openDoor` (`nonisolated`, so it is legal in the nonisolated seed).
+  - Her take-icon block is verbatim again. A reader who clicks the card lands inside the note, where "if it isn't open
+    already" reads true.
+- **The 14th block's blast radius.** Only `TutorialCurrencyTests` and `HelpMenuNamingTests` read this lesson.
+  `theGuidesSeededContentIsNotReworded`'s source slice (start here → getting around) still reads the verb and spells
+  no retired name: the NIT-2 helper's message adds none. The tour points at Sherlock's first story, not this lesson.
+- **NIT-1.** The record now says what changed and why. Its evaluation's claims check out: the only writer of
+  `last_major_revision_at` is `registerTextChange` (`Operations+Variant.swift:688`), and `forceMajorRevision: true`
+  comes only from the manual `commit` (`:65`).
+- **NIT-2.** `fanned(_:opening:)` checks index 5 → "I built Variorum with a simple goal" and index 7 → "This is the
+  point at which you might be thinking", both true of the 14-block lesson. DEBUG asserts and Release attaches nothing.
+  Her four take texts and their mint order are byte-unchanged.
+- **NIT-3.** VX-713 exists on Linear (Low · Wording · Confirmed, a child of VX-292).
+- **Her text and the passages.** The `ReadmeSeeder.paragraphs` literal, `TutorialStartHerePassages.swift` and the
+  content package are untouched by `0bf9c0645..HEAD` (the hunks fall outside them).
+- **No other invariant reach.** No schema, no trigger, no `Sync/` line, no word-level tracking, no cross-entity text
+  copy. The core change is a read, and its one problem is BLOCKER-1.
+- **VX-692 exposure (the closure-merge toolchain hazard) of the new pins.** Two of them use the hazardous shape. The
+  road pin's `#require(try await db.read { Reading.fetchOne })` has no later same-typed closure. The MINOR-1 app pin's
+  `#expect(try await db.read { … })` has none either (`pollUntil`'s closure is a different type). The core pin is
+  covered above. None of the round's pins can pass hollow through it.
+- **Compiles.** `build-for-testing` EXIT 0, as the record claims. RUN status of every Mac pin remains PENDING the stage
+  window; nothing here substitutes for it.
+
+**STATUS: ROUND 2 COMPLETE — 1 BLOCKER · 1 MINOR.** BLOCKER-1 is new in this round (MINOR-1's fix introduced the read),
+so under the ladder it earns a round 3 unless the arbitration rules otherwise against the review prompt's
+corpus-scale rule. Every round-1 disposition otherwise landed as ruled.
