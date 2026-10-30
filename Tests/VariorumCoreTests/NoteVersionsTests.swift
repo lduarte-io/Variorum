@@ -989,8 +989,14 @@ struct NoteVersionsTests {
             #expect(plan.contains { $0.hasPrefix("SEARCH note USING INDEX sqlite_autoindex_container_1") },
                     "each linked note is a seek by id: \(plan)")
             // (`SCAN CONSTANT ROW` is an `EXISTS (…)` wrapper's one row, not a table.)
+            // What this proves, exactly (ladder round 3, MINOR-1): no EXPLAIN
+            // QUERY PLAN line is a SCAN. It does NOT prove no full pass — the
+            // classifier's pre-existing automatic edge index is built by reading
+            // the whole `edge` table, and the plan labels that step SEARCH, so it
+            // is deliberately outside this check's reach (the read's Cost doc).
             #expect(!plan.contains { $0.hasPrefix("SCAN") && $0 != "SCAN CONSTANT ROW" },
-                    "no table is scanned whole: \(plan)")
+                    "no plan line is a SCAN (the classifier's automatic edge-index build, a full pass "
+                    + "the plan labels SEARCH, is outside this check): \(plan)")
         }
     }
 

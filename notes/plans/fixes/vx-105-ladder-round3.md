@@ -226,3 +226,24 @@ arbitrate and check line by line.
 - **The observed K-statements cost** (flat in the corpus, linear in the note's own history) is P1-conformant and recorded; no action.
 
 No new BLOCKER or MAJOR: the ladder CLOSES at round 3. The author's conditional extra-review authorization is not triggered.
+
+## FIX ROUND 3 TAIL (the fix-round implementer, resumed for the arbitrated residuals, 2026-10-30)
+
+**What this tail did NOT do (first line):** no behavior change anywhere — docs, one pin message, one pin extension, one
+record correction. No Mac suite, no walk, no app launch, no `/Applications`, nothing under `Sources/VariorumCore/Sync/`.
+The read's pre-existing automatic edge-index pass is described, not changed (the round-2 non-action stands).
+
+### LIVE STATUS
+
+- **MINOR-1** (the cost words) — DONE (the commit carrying this line). `NoteVersions.swift`'s "**Cost:**" now says each
+  per-note `isVersionHistory` builds its automatic covering index by reading EVERY row of `edge` (every type; the
+  partial `type` only filters what enters it), so each check scales with the whole edge table (about 2 ms at 60k
+  edges), a born-archived failure short-circuits before the build, and the read is fine for its occasion-bounded
+  caller and NOT for a per-row road. The plan pin's message now says what its check proves — no EXPLAIN QUERY PLAN line
+  is a `SCAN` — and that the automatic edge-index build is a full pass the plan labels SEARCH, deliberately outside the
+  check (a comment above it says the same). The round-2 record's "No `idx_container_kind`, no table scan." keeps its
+  words and gains a bracketed round-3 correction in place. The optional `liveReadmeID` clause (the finding's item 4)
+  is NOT added — the arbitration did not order it; the diff stays as scoped.
+- **NIT-1** (the gather's filters, stated exactly) — NOT-STARTED.
+- **MINOR-2** (the equality pin's source side) — NOT-STARTED. Settled: shapes E and G; the two mutants applied
+  temporarily AFTER a commit, each shown RED, the tree restored with `git checkout --` and `git diff --quiet` clean.

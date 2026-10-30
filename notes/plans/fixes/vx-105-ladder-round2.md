@@ -215,7 +215,10 @@ text is untouched.
   type=?)` → `SEARCH theirs USING INDEX uq_cblock_ownership (block_id=?)` | `… idx_cblock_dead_block (block_id=? AND
   deleted_at>?)` → `SEARCH note USING INDEX sqlite_autoindex_container_1 (id=?)`, merged by UNION; then, per linked
   note, `isVersionHistory`'s unchanged plan (`SEARCH v` by id, `mine`/`theirs` by `idx_cblock_order`, the automatic
-  partial covering index on `e`). No `idx_container_kind`, no table scan.
+  partial covering index on `e`). No `idx_container_kind`, no table scan. [Round-3 correction (ladder round 3,
+  MINOR-1): "no table scan" means no `SCAN` line in the plan, and no more. The automatic partial covering index on
+  `e` is built on every `isVersionHistory` call by a full pass over the WHOLE `edge` table (every type); the plan
+  labels that step SEARCH. See `vx-105-ladder-round3.md`.]
   **Pins** (core, `Tests/VariorumCoreTests/NoteVersionsTests.swift`, HEADLESS):
   1. `anyLiveNotesVersionIsReadFromTheCandidateNeverTheNotes` — the plan pin in the
      `VersionsInCompareTests.theStampsReadIsDrivenFromTheNotesOwnPlacements` shape: every statement the call runs is

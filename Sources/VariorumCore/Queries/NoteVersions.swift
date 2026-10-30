@@ -369,10 +369,17 @@ extension Queries {
     /// **Cost:** this container's own placements and their `version_of`
     /// links (index seeks — never a walk of the notes, pinned on the plan),
     /// plus one `isVersionHistory` per live note it is linked to. That older
-    /// read's own plan has SQLite build an automatic covering index over the
-    /// `version_of` edges per execution (the round-2 record's pre-existing,
-    /// occasion-bounded context, deliberately left as it is). A container with
-    /// no version links answers after its placements alone.
+    /// read's plan has SQLite build an AUTOMATIC covering index for its `edge`
+    /// join on every execution, and the build reads EVERY row of `edge`, of
+    /// every type (the partial `type = 'version_of'` only filters which rows
+    /// enter it) — so each linked note's check scales with the whole edge
+    /// table, every divide, merge, extract and copy in the corpus (about 2 ms
+    /// at 60k edges; VX-105 ladder round 3, MINOR-1). A candidate that fails
+    /// the born-archived check short-circuits before the build. Fine for this
+    /// read's occasion-bounded caller (a birth seed, a Help press); NOT for a
+    /// per-row road (a listing, a badge). The step is pre-existing and left as
+    /// it is (the round-2 record's recorded non-action). A container with no
+    /// version links answers after its placements alone.
     public static func isVersionOfAnyLiveNote(
         _ db: Database, _ containerID: String
     ) throws -> Bool {
