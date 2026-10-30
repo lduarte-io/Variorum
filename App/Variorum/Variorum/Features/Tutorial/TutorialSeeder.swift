@@ -627,10 +627,12 @@ enum TutorialSeeder {
         // the first thing that someone reads" — they follow the companions,
         // read from the ONE constant (`startHerePassages`), byte-identical to
         // the protection chapter's lead, which is unchanged (they read twice in
-        // the guide, her accepted state). Block 4 names the Help door by the
-        // registry's own verb (the VX-105/VX-292 boundary ruling 1 — never a
-        // retyped label). Her draft's chrome words were checked against the
-        // build (the U1 RECORD's BUILD-VERIFY list).
+        // the guide, her accepted state). The safety block names the Help door
+        // by the registry's own verb (the VX-105/VX-292 boundary ruling 1 —
+        // never a retyped label). Her draft's chrome words were checked against
+        // the build (the U1 RECORD's BUILD-VERIFY list), and — R-105-10 — the
+        // lesson's first ask is the move from the book into this note, so her
+        // takes moment is read where it works.
         let startHere = try lesson(welcome, "start here", [
             "Welcome to Variorum! I'm Lillian, the developer behind this app, and "
             + "I'm excited that you've downloaded it.",
@@ -654,29 +656,38 @@ enum TutorialSeeder {
             + "lesson asks you to do the thing it describes, right here in its "
             + "own text.",
 
+            // VX-105 R-105-10, her word: "if the guide opens as a book in
+            // outline, the first thing it should direct you to do is probably
+            // to open the note itself. i think moving from book -> note is one
+            // of the flows that is hardest for a user to understand". The
+            // lesson's FIRST ask, before any other: open this note from the
+            // book. The guide opens on its OUTLINE (`BookStructureModel
+            // .defaultMode`), where each note is a card whose body and
+            // "open ↗" (`NoteBoxCopy.openDoor`, the book's one word for its
+            // open door) land the note in Write on its own page; there her
+            // takes moment below works as she wrote it. A reader who stays in
+            // the Outline still gets the take icon and its panel (only the
+            // panel's "Open Takes mode" refuses there, saying a note must be
+            // open first). Ladder round 1, MAJOR-1, reshaped by R-105-10.
+            "The first move to learn is the one from a book into a note. In the "
+            + "book's Outline each note is a card, and clicking it, or "
+            + NoteBoxCopy.openDoor + " beside its title, opens the note itself "
+            + "in the full editor. Open this lesson that way now if it isn't open "
+            + "already: the rest of it happens inside the note.",
+
             "Everything in this book is safe to play with. Cut it up, rewrite "
             + "it, delete it. Help \u{25B8} "
             + CapabilityRegistry.capability(.restoreTutorial).verb
             + " replaces the whole book with a pristine copy whenever you want "
             + "one. Nothing you do here can touch your own writing.",
 
-            // Her take-icon block (its two takes are minted below).
-            // VX-105 ladder round 1, MAJOR-1: the guide opens on its OUTLINE
-            // (`BookStructureModel.defaultMode`), and no note detail is
-            // mounted inside a book, so the take panel's "Open Takes mode"
-            // (and ⌘2) refuse there — "the modes live inside a note". One
-            // sentence, inserted before her click, walks a reader in the
-            // Outline through the book's own open door into the full editor
-            // first (`NoteBoxCopy.openDoor` — the "open ↗" by each note's
-            // title; it lands in Write), where every step of her takes moment
-            // works as she wrote it. Her own sentences are unchanged around it
-            // (R-105-5's grant).
+            // Her take-icon block (its two takes are minted below), verbatim:
+            // read in the opened note (R-105-10's first ask), every step of
+            // her takes moment holds as she wrote it.
             "I built Variorum with a simple goal: to be able to create multiple "
             + "different versions of a block of text. I call these versions "
-            + "takes, borrowing from the film world. If you're reading this in "
-            + "the book's Outline, click " + NoteBoxCopy.openDoor + " beside "
-            + "this note's title first, so it opens in the full editor. The "
-            + "icon to the right of this block is the take icon - click on it.",
+            + "takes, borrowing from the film world. The icon to the right of "
+            + "this block is the take icon - click on it.",
 
             "While Write is meant to behave like a simple and elegant editor, "
             + "Takes is where complexity thrives. Click on \u{201C}expand "
@@ -695,10 +706,18 @@ enum TutorialSeeder {
             + "Dictionary helper: every key the app listens for, and every word "
             + "it uses, in plain language.",
         ] + startHerePassages + [
-            "The chapters of this book are listed on the left, each an "
-            + "interactive guide. Read in order, or jump to what itches. When "
-            + "something in a lesson doesn't behave as the words promise, that "
-            + "is a bug in the app, not in you.",
+            // R-105-10's consequence (flagged F-3 in the ladder record): a
+            // reader on the happy path reaches this closer INSIDE the note,
+            // where the left side is the app's sidebar, not the book's chapter
+            // list — so it names where the list is and the way back (the note
+            // context bar's book glyph opens its one book at that note,
+            // `ContextBarDoors.bookClick`; "the workspace" teaches the same
+            // glyph). True from the Outline too.
+            "In the book itself, the chapters are listed on the left, each an "
+            + "interactive guide, and from inside a note the book glyph above the "
+            + "page takes you back there, at that very note. Read in order, or "
+            + "jump to what itches. When something in a lesson doesn't behave as "
+            + "the words promise, that is a bug in the app, not in you.",
         ])
         // Her alternates, as REAL takes (her draft's "--- Alternates ---"
         // sections). `branchVariant` seats a branch right AFTER the take it
@@ -722,12 +741,12 @@ enum TutorialSeeder {
             }
             return startHere.blocks[index]
         }
-        if let takeIcon = fanned(4, opening: "I built Variorum with a simple goal") {
+        if let takeIcon = fanned(5, opening: "I built Variorum with a simple goal") {
             try take(on: takeIcon,
                      "Now click on Open Takes mode in the top bar of this modal.")
             try take(on: takeIcon, "You found it! :D")
         }
-        if let soWhat = fanned(6, opening: "This is the point at which you might be thinking") {
+        if let soWhat = fanned(7, opening: "This is the point at which you might be thinking") {
             try take(on: soWhat,
                      "There are four different ways to see your takes and work with "
                      + "them. Test each of them out now by changing \u{201C}style\u{201D} "

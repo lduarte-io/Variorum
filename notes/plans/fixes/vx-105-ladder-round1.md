@@ -153,71 +153,92 @@ below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `
   the readme's seed stops being deterministic or an un-starred readme picks up an engagement leg. The U1 record's four
   "never folds" lines (its pin table, P-list, stage expectation, S-1 RULED paragraph) corrected in place, each naming
   the round. WRITTEN, compiling (`build-for-testing` EXIT 0), RUN PENDING the stage window.
-- **MAJOR-1** (lesson 1's takes moment from the book's Outline) — DONE (the commit carrying this line). GUIDE CONTENT
-  CHANGED AGAIN (the "start here" lesson, block 5 only) — her real store's seeded guide is stale by it, as R-105-9
-  already leaves to her (she re-seeds on the Air after the release). No behavior change anywhere.
-  **The reword — ONE sentence inserted in block 5, before her click sentence; every other block and all four takes
-  unchanged.** Block 5 now reads (rendered):
-  > I built Variorum with a simple goal: to be able to create multiple different versions of a block of text. I call
-  > these versions takes, borrowing from the film world. If you're reading this in the book's Outline, click open ↗
-  > beside this note's title first, so it opens in the full editor. The icon to the right of this block is the take
-  > icon - click on it.
+- **MAJOR-1** (lesson 1's takes moment from the book's Outline) — DONE, RESHAPED by **R-105-10** (her ruling, relayed
+  mid-round; recorded verbatim in the U1 record's rulings). GUIDE CONTENT CHANGED AGAIN (the "start here" lesson) —
+  her real store's seeded guide is stale by it, as R-105-9 already leaves to her (she re-seeds on the Air after the
+  release). No behavior change anywhere.
+  **First form (`3a42c3f5b`) — SUPERSEDED by R-105-10, kept as history:** one conditional sentence inside her
+  take-icon block ("If you're reading this in the book's Outline, click open ↗ beside this note's title first, so it
+  opens in the full editor."). R-105-10 moved the teaching EARLY and made it the lesson's first ask; her block is
+  verbatim again.
+  **The reshaped fix (the commit carrying this text) — the lesson is now FOURTEEN blocks:**
+  1. **A NEW block 4 (0-based 3), right after "This book is Variorum teaching itself with itself. You are reading a
+     note, inside a chapter, inside a book on your Bookcase … right here in its own text." — the lesson's FIRST ask,
+     before the safety block's "Cut it up, rewrite it, delete it" and before any take click.** Rendered:
+     > The first move to learn is the one from a book into a note. In the book's Outline each note is a card, and
+     > clicking it, or open ↗ beside its title, opens the note itself in the full editor. Open this lesson that way
+     > now if it isn't open already: the rest of it happens inside the note.
 
-  ("open ↗" is interpolated from `NoteBoxCopy.openDoor`, the book's one word for its open door — never retyped.) Her
-  play stands: take 1 "You found it! :D" (the hidden first take), take 2 "Now click on Open Takes mode in the top bar
-  of this modal." — both unchanged, because a reader who took the road reads them in the full editor, where the
-  panel's door works.
-  **BUILD-VERIFY, from the Outline this time (each against the code):**
-  1. The guide opens on its Outline: every guide road selects the BOOK (`ShellActions.openTutorial` →
-     `pendingSelection = .reading(bookID)`), and a working book's default mode is `.outline`
-     (`BookStructureModel.defaultMode(for:)` — `reading.locked ? .read : .outline`; the guide is not finished).
-  2. In the Outline a note is a collapsed CARD by default (`BookViewModel.expandedPosts`, her #43(a) ruling): its body
-     and its "open ↗" open the note in the full editor; its ▸ expands it in place. So a reader of block 5 has either
-     opened the note (her takes moment then works as written — no road needed) or expanded it in place (the read
-     surface, whose ⑂ badge does show — `ReadPostView.onBadgeTap` → `focus(…, fanBlock:)` → the inline editor's take
-     panel).
-  3. In place, the panel's "Open Takes mode" → `requestMode(.takes, postID:)`, whose `applyMode` only a mounted note
-     detail registers (`PostDetailView.registerDetail`); a book mounts none → the refusal "Open a note first — the
-     modes live inside a note." ⌘2 the same. (The reviewer's trace, re-verified line by line.)
-  4. The in-place road, checked and REJECTED: the panel over the Outline/Index is `WriteTakesPanel` itself — its top
-     bar is the title, "Open Takes mode" and "Close", then the take cards, the growth doors and the archived list. No
-     "expand all", no style menu — so blocks 6–7's steps cannot run in it.
-  5. The road taken — the book's own open door: `Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }`
-     beside the title in the expanded header (`postHeader`: ▾ · title · date · badge · open ↗) and on the collapsed
-     card's title row; lowercase in both voices (`chromeLabel`); help "Open this note in the full editor (Write ·
-     Takes · Lenses · …)" — the guide's own phrase ("a book from the inside": "clicking a card opens the note in the
-     full editor"). The press → `openInWrite` → `onOpenSearchHit` → `RootView.open(.post(id), mode: .write)` → the
-     note's own detail, in Write.
-  6. There, every later step works as her draft wrote it: the ⑂ badge at block 5's right → the panel → "Open Takes
-     mode" switches to Takes (bloomed on block 5); block 6's "expand all" at the top of Takes; block 7's takes (⌘2,
-     ⌘/, the expand/collapse buttons, "style" with its four styles) — U1's BUILD-VERIFY, still true there.
-  "the book's Outline" is the mode's own name (the toggle reads Outline · Index · Book · Read; the tour says "A book
-  opens on its Outline"). Not covered by the sentence, recorded: a reader who switched the book to Index or Book reads
-  block 5 off the default surface (Index's door says "Open in the full editor"; the spread's page header carries
-  "open ↗" too) — non-default modes, left as they are.
-  **Pins** (WRITTEN, compiling, RUN PENDING the stage window): `TutorialCurrencyTests.
-  theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages` — block 5's exact new text with `NoteBoxCopy.openDoor`
-  interpolated and asserted `== "open ↗"`; RED ON OLD by construction (the block had no road out of the Outline).
-  `TutorialCurrencyTests.theStartHereLessonsRoadOutOfTheOutlineIsTheBuildsOwn` (NEW, the H pattern — a currency net,
-  green both sides by design): the seeded guide's own row reads `defaultMode == .outline`; the BookView source carries
-  the "open ↗" button calling `onOpenInWrite`, its Write landing and its "full editor" help; `CommandRouter`'s
-  no-`applyMode` refusal arm stands (RED if a mode request ever works without a mounted note — then the lesson's road
-  sentence should be revisited); the take panel has no "expand all" and no style menu. The existing
-  `theStartHereLessonsChromeWordsAreTheBuildsOwn` stands unchanged. Headless sanity: a script checked every source
-  string the new pin reads — all present/absent as asserted.
-  **For the orchestrator at the merge (not built — the arbitration's):** the QUESTIONS entry (should "Open Takes mode"
-  and ⌘1–⌘7 over a book open the note in that mode instead of refusing); the "getting around" ⌘2/⌘1 sibling stays its
-  ticket. **O-2 (an observation, not fixed — outside the arbitrated scope of blocks 5–7):** the reader who follows the
-  takes moment is on the note's own page when she reaches the lesson's closer, "The chapters of this book are listed on
-  the left", which is true in the book (its navigator) and not on the note's own page (the app's sidebar). It was
-  already so for a reader who opened the card (pre-existing — the "getting around" class); the context bar's book glyph
-  is the real road back. Candidate for the sibling ticket or a round-2 call.
-  The closeout walkthrough (the orchestrator's) should start from the Bookcase: the guide → Outline → ▸ "start here" →
-  read to block 5 → open ↗ → the ⑂ on block 5 → take 1 → take 2's Open Takes mode → expand all → block 7's takes.
+     ("open ↗" interpolated from `NoteBoxCopy.openDoor`, the book's one word for its open door — never retyped. It
+     composes with block 3: block 3 says what the reader is looking at, block 4 is the move into it. "if it isn't open
+     already" keeps it true for the reader who clicked the card and is already inside — an ask, not a warning.)
+  2. **Her take-icon block (now block 6) VERBATIM again:** "I built Variorum with a simple goal: to be able to create
+     multiple different versions of a block of text. I call these versions takes, borrowing from the film world. The
+     icon to the right of this block is the take icon - click on it." Her takes, her Write/Takes block and her "so
+     what?" block with its takes — all as U1 seeded them (F-2's period and the ⌘2/⌘/ idiom stand, ruled).
+  3. **F-3 — the closer, adjusted (flagged; a consequence the new happy path required, under R-105-5's grant):** a
+     reader on the happy path now reaches the closer INSIDE the note, where "The chapters of this book are listed on
+     the left" was false (the left there is the app's sidebar, not the book's navigator — this was O-2 in the first
+     form, already true then for a reader who clicked the card). Rendered now:
+     > In the book itself, the chapters are listed on the left, each an interactive guide, and from inside a note the
+     > book glyph above the page takes you back there, at that very note. Read in order, or jump to what itches. When
+     > something in a lesson doesn't behave as the words promise, that is a bug in the app, not in you.
+
+     True from the Outline (the book's navigator) and from the note (a note's context bar wears the book glyph, whose
+     click opens its one book at that note — `ContextBarDoors.iconRow(isNote: true)`, `bookClick(bookCount: 1, …) ==
+     .open`; "the workspace" lesson teaches the same glyph). It completes her flow both ways (book → note is the first
+     ask; note → book is the closer). REVERT RECIPE if the orchestrator rules it out of scope: restore the U1 closer
+     text ("The chapters of this book are listed on the left, each an interactive guide. Read in order, …") and its
+     pin line — O-2 then returns as an observation.
+  **BUILD-VERIFY (each against the code):**
+  - What a reader on the guide's first lesson actually sees: every guide road selects the BOOK
+    (`ShellActions.openTutorial` → `pendingSelection = .reading(bookID)`), a working book opens on `.outline`
+    (`BookStructureModel.defaultMode(for:)`; the guide is not finished), and the Outline shows each note as a
+    collapsed CARD by default (`BookViewModel.expandedPosts`, her #43(a) ruling): title, a 40-word excerpt (her welcome
+    and the beliefs' opening), "open ↗" on the card's title row, ▸ to unfold. The card's BODY is the open door too
+    (`collapsedPostCard`: `Button { onOpenInWrite(entry.postID) }` — the tour's "Click into …" road). A reader who
+    unfolds the card in place (▸) reads the lesson in the Outline, where the expanded header carries "open ↗" right
+    beside the title (`postHeader`); the sidebar's note box carries the same word (`NoteBoxCopy.openDoor`, VX-304).
+  - Where the door lands: `openInWrite` → `onOpenSearchHit` → `RootView.open(.post(id), mode: .write)` → the note's
+    own detail in WRITE — at her caret's block when the note was live in the Outline (`BookOpenDoor.place`), else the
+    plain open's place (R-18l-1). Its help reads "Open this note in the full editor (Write · Takes · Lenses · …)"; "a
+    book from the inside" already says "clicking a card opens the note in the full editor".
+  - From the opened note, her take instructions re-verified (U1's BUILD-VERIFY was done in Write, the same surface):
+    the ⑂ badge at block 6's right (`BadgeOverlayController`, `x: proseRight + 6`) → `openFan` → `WriteTakesPanel` in
+    a sheet ("this modal") → take 1 "You found it! :D" → take 2's "Open Takes mode" in the panel's top bar →
+    `requestMode(.takes)` → the mounted `PostDetailView`'s `applyMode` → Takes, bloomed on the block; block 7's
+    "expand all" at the top of Takes (`TakesBoardView.headerControls`, every style); block 8's takes — ⌘2 is Takes,
+    ⌘/ the helper, the per-block ⑂ and the top button expand/collapse, "style:" with four styles incl. "Margin grid".
+    Every word of hers holds as written; none needed changing.
+  - The reader who stays in the Outline (graceful, no warning added): the read surface shows the ⑂ badge
+    (`ReadPostView.onBadgeTap` → `focus(…, fanBlock:)` → the inline editor's `WriteTakesPanel`), so the play still
+    plays — the icon, the panel, "You found it! :D"; only take 2's "Open Takes mode" refuses there, and the refusal
+    itself says why ("Open a note first — the modes live inside a note."), pointing back at the first ask; the panel
+    offers neither "expand all" nor "style", so blocks 7–8's Takes steps wait for the opened note.
+  **Pins** (WRITTEN, compiling — `build-for-testing` EXIT 0 — RUN PENDING the stage window):
+  `TutorialCurrencyTests.theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages` — now FOURTEEN blocks: the
+  first ask's exact text (with `NoteBoxCopy.openDoor` asserted `== "open ↗"`), her take-icon block verbatim with both
+  takes, the closer's new text, the passages at 10–13, single takes elsewhere; RED ON OLD by construction (no block
+  named a road into the note; 13 blocks). `TutorialCurrencyTests.theStartHereLessonsRoadOutOfTheOutlineIsTheBuildsOwn`
+  (the H pattern — a currency net, green both sides by design): the seeded guide's own row reads `defaultMode ==
+  .outline`; BookView's header "open ↗" calling `onOpenInWrite`, the card body's `Button { onOpenInWrite(…) }`, the
+  Write landing and the "full editor" help; `CommandRouter`'s no-`applyMode` refusal arm (RED if a mode request ever
+  works without a mounted note — then revisit the first ask); the take panel's lack of expand all / the style menu;
+  and the closer's way back (`ContextBarDoors`: a note wears the book glyph; one book → `.open`). The unchanged
+  `theStartHereLessonsChromeWordsAreTheBuildsOwn` still holds her chrome words. Headless sanity: a script checked
+  every source string the road pin reads — all present/absent as asserted.
+  **For the orchestrator at the merge (not built):** the QUESTIONS entry (should "Open Takes mode" and ⌘1–⌘7 over a
+  book open the note in that mode instead of refusing — R-105-10 rules the lesson, not the button); the "getting
+  around" ⌘2/⌘1 sibling stays its ticket (that lesson is another note, read wherever the reader is). The closeout
+  walkthrough (the orchestrator's) should start from the Bookcase: the guide → Outline → the "start here" card → the
+  first ask (card click AND, separately, ▸ then the header's open ↗) → block 6's ⑂ → take 1 → take 2's Open Takes
+  mode → expand all → block 8's takes → the closer's book glyph back to the book at the lesson; and once staying in
+  the Outline (▸ → ⑂ → the panel → take 2's refusal reads sensibly).
 - **NIT-2** (the take attachments check their blocks) — DONE (the commit carrying this line). The fix: a nested
   `fanned(_:opening:)` in the "start here" lesson resolves each take target by its index AND the opening of its text
-  ("I built Variorum with a simple goal" for block 5, "This is the point at which you might be thinking" for block
-  7); a mismatch REFUSES the attach — `assertionFailure` in DEBUG (loud: every suite that seeds the guide trips it),
+  ("I built Variorum with a simple goal" for block 6, "This is the point at which you might be thinking" for block
+  8 — blocks 5 and 7 when NIT-2 landed; R-105-10's first ask moved both down one, and the indices moved with them in
+  the same commit, which is exactly the edit NIT-2 guards); a mismatch REFUSES the attach — `assertionFailure` in DEBUG (loud: every suite that seeds the guide trips it),
   and in Release no take lands rather than a wrong one. Her four takes' texts and their mint order are unchanged
   (byte-identical literals, moved inside the two `if let`s). Pin: none new, as the finding says — the existing
   `TutorialCurrencyTests.theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages` asserts both fans on their

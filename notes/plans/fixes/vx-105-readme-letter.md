@@ -87,6 +87,18 @@ presses the new door herself after the release), and the field-guide re-seed is 
 myself after release on the air"*). Edit the record's closeout checklist accordingly: no real-store act, no guide
 re-seed; the A1 zero-instance window at the end is the /Applications refresh only.
 
+**R-105-10 — the guide's first ask is the move from the book into the note** (2026-10-30, her word, relayed by the
+coordinator during ladder round 1's fix round, verbatim): *"hmm. if the guide opens as a book in outline, the first
+thing it should direct you to do is probably to open the note itself. i think moving from book -> note is one of the
+flows that is hardest for a user to understand in teh app"*. It RESHAPES round 1's MAJOR-1 fix: instead of bending
+the take steps to Outline-compatible chrome, the "start here" lesson gains an EARLY instruction — before the take
+play's first click — directing the reader to open this note itself from the book through the real door, teaching the
+book → note flow deliberately; with the reader then in the full editor, her take instructions hold verbatim; a reader
+who stays in the Outline still meets a lesson that reads sensibly (no warnings — the happy path is the opened note).
+New prose under R-105-5's grant. The QUESTIONS entry (should "Open Takes mode" over a book open the note?) still goes
+in at the merge — this ruling is about the lesson's teaching, not that button's behavior. Built: the ladder record's
+FIX ROUND 1 RECORD, MAJOR-1.
+
 ## U1 BRIEF (one implementer session, one acceptance unit)
 
 Seat: worktree `<home>/dev/variorum-vx-105`, branch `vx-105-readme-letter` (`git status -sb` first; expect clean; pull --ff-only). Read IN FULL before touching code: this file; `notes/plans/vx-105-letter-content/README.md` + `read-me.txt`; `App/Variorum/Variorum/Features/Onboarding/BirthFurnitureSeeders.swift`; the readme pins (`App/Variorum/VariorumTests/LaunchFurnitureTests.swift` readme section, `App/Variorum/VariorumTests/Protection/ReadmeStartHerePlanTests.swift`, `App/Variorum/VariorumTests/Protection/TutorialNewRoadChapterTests.swift`, `App/Variorum/VariorumTests/TutorialFurnitureFoldTests.swift`); `App/Variorum/Variorum/Registry/ShellActions.swift` restore-door region (~500–620) + the registry/menu/palette homes of `.restoreSampleLibrary`; `TutorialSeeder.swift:2502`'s key-lesson use of `startHerePassages`. The resiliency protocol binds (`notes/SessionResiliencyProtocol.md`): commit per piece, push after each, LIVE STATUS in the "## U1 RECORD" below from the first commit, foreground waits only, no subagents.
@@ -211,6 +223,10 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
      companions end on ⌘/'s plain-language helper, the passages are self-introducing, and the closer then hands her
      the chapter list);
   13. the closer — the brief's text ("…listed on the left, each an interactive guide. …").
+  **(Reshaped at ladder round 1 by R-105-10: the lesson is now FOURTEEN blocks — a first ask, the move from the book
+  into this note, sits after block 3; her take-icon block is verbatim again; the closer names where the chapter list
+  is and the book glyph's way back. The current truth is `notes/plans/fixes/vx-105-ladder-round1.md`, FIX ROUND 1
+  RECORD, MAJOR-1.)**
 
   Her takes are minted second-take-first because `branchVariant` seats each branch right after its parent (the old
   readme seeder's own finding); pinned as original · 1 · 2. A script compared every woven block against the old lesson

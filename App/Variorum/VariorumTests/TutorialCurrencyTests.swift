@@ -492,54 +492,62 @@ struct TutorialCurrencyTests {
     /// **The woven "start here" (VX-105 — R-105-5, her word: "interweave the
     /// relevant parts of 'Lillian's Start Here' … into the first chapter of the
     /// field guide"; R-105-7, her word: "…the four Castle passages are still in
-    /// the first thing that someone reads").** The FIRST lesson of the FIRST
-    /// chapter, thirteen blocks in this order: her welcome · the beliefs (its
-    /// "Welcome." gone to hers) · the book teaching itself · the safety promise,
-    /// naming the field guide's Help door by the registry's own verb (boundary
-    /// ruling 1) · her take-icon block with her two takes · her Write/Takes
-    /// block · her "so what?" block with her two takes · the companions · the
-    /// four Start Here passages from the ONE constant, in order · the closer.
-    /// Every block but the two fanned ones holds exactly one take. RED ON OLD:
-    /// the old lesson opened "Welcome. Variorum is built…", five blocks, no
-    /// fan, no passages, and named "Restore Tutorial…".
+    /// the first thing that someone reads"; R-105-10, her word: "the first
+    /// thing it should direct you to do is probably to open the note
+    /// itself").** The FIRST lesson of the FIRST chapter, fourteen blocks in
+    /// this order: her welcome · the beliefs (its "Welcome." gone to hers) ·
+    /// the book teaching itself · the lesson's FIRST ask, the move from the
+    /// book into this note through the book's own open door (R-105-10) · the
+    /// safety promise, naming the field guide's Help door by the registry's own
+    /// verb (boundary ruling 1) · her take-icon block, VERBATIM, with her two
+    /// takes · her Write/Takes block · her "so what?" block with her two takes
+    /// · the companions · the four Start Here passages from the ONE constant,
+    /// in order · the closer, naming where the chapter list is and the book
+    /// glyph's way back (F-3). Every block but the two fanned ones holds exactly
+    /// one take. RED ON OLD: the old lesson opened "Welcome. Variorum is
+    /// built…", five blocks, no fan, no passages, no road into the note, and
+    /// named "Restore Tutorial…".
     @Test func theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages() async throws {
         #expect(TutorialSeeder.plan.first?.chapter == "welcome")
         #expect(TutorialSeeder.plan.first?.lessons.first == "start here", "the first thing someone reads")
         try await withGuide { _, db, guideID in
             let lesson = try await fans(db, guideID, "start here")
-            #expect(lesson.count == 13, "thirteen blocks: eight, the four passages, the closer")
-            guard lesson.count == 13 else { return }
+            #expect(lesson.count == 14, "fourteen blocks: nine, the four passages, the closer")
+            guard lesson.count == 14 else { return }
             let shown = lesson.map { $0.first ?? "" }
             #expect(shown[0] == "Welcome to Variorum! I'm Lillian, the developer behind this app, "
                     + "and I'm excited that you've downloaded it.", "her welcome, verbatim")
             #expect(shown[1].hasPrefix("Variorum is built on a few beliefs about writing. A paragraph "),
                     "the beliefs, its own \u{201C}Welcome.\u{201D} handed to hers")
             #expect(shown[2].hasPrefix("This book is Variorum teaching itself with itself."))
+            // R-105-10 (ladder round 1, MAJOR-1 reshaped): the lesson's first ask
+            // is the move from the book into this note, through the book's own
+            // open door (RED ON OLD: no lesson block named a road into the note).
+            #expect(NoteBoxCopy.openDoor == "open \u{2197}")
+            #expect(shown[3] == "The first move to learn is the one from a book into a note. In the book's "
+                    + "Outline each note is a card, and clicking it, or \(NoteBoxCopy.openDoor) beside its "
+                    + "title, opens the note itself in the full editor. Open this lesson that way now if it "
+                    + "isn't open already: the rest of it happens inside the note.",
+                    "the first ask: open this note from the book (R-105-10)")
             let restoreDoor = CapabilityRegistry.capability(.restoreTutorial).verb
             #expect(restoreDoor == "Restore Field Guide\u{2026}", "the Help menu's real label (VX-602)")
-            #expect(shown[3] == "Everything in this book is safe to play with. Cut it up, rewrite it, "
+            #expect(shown[4] == "Everything in this book is safe to play with. Cut it up, rewrite it, "
                     + "delete it. Help \u{25B8} \(restoreDoor) replaces the whole book with a pristine copy "
                     + "whenever you want one. Nothing you do here can touch your own writing.",
                     "the safety promise names the door she will find")
-            // Ladder round 1, MAJOR-1: one sentence before her click walks a
-            // reader in the book's Outline through the book's own open door
-            // first (RED ON OLD: the block had no road out of the Outline).
-            #expect(NoteBoxCopy.openDoor == "open \u{2197}")
-            #expect(lesson[4] == [
+            #expect(lesson[5] == [
                 "I built Variorum with a simple goal: to be able to create multiple different versions of "
-                    + "a block of text. I call these versions takes, borrowing from the film world. If you're "
-                    + "reading this in the book's Outline, click \(NoteBoxCopy.openDoor) beside this note's "
-                    + "title first, so it opens in the full editor. The icon to the right of this block is "
-                    + "the take icon - click on it.",
+                    + "a block of text. I call these versions takes, borrowing from the film world. The icon "
+                    + "to the right of this block is the take icon - click on it.",
                 "You found it! :D",
                 "Now click on Open Takes mode in the top bar of this modal.",
-            ], "her take-icon block (the Outline's road first) and her two takes, in her order")
-            #expect(shown[5] == "While Write is meant to behave like a simple and elegant editor, Takes is "
+            ], "her take-icon block, verbatim, and her two takes, in her order")
+            #expect(shown[6] == "While Write is meant to behave like a simple and elegant editor, Takes is "
                     + "where complexity thrives. Click on \u{201C}expand all\u{201D} at the top of Takes.")
             let takesOrdinal = try #require(PostMode.allCases.firstIndex(of: .takes)) + 1
             let takesKey = "\u{2318}\(takesOrdinal)"
             let helperKey = try #require(CapabilityRegistry.capability(.helper).shortcutLabel)
-            #expect(lesson[6] == [
+            #expect(lesson[7] == [
                 "This is the point at which you might be thinking \"cool, but so what?\", unless you're a "
                     + "writer that understands the pain of reworking a particular paragraph to the point of "
                     + "madness. If that isn't you, some of the best use cases I've found for it are in the "
@@ -552,13 +560,15 @@ struct TutorialCurrencyTests {
                     + "now by changing \u{201C}style\u{201D} at the top bar of this note. While each is useful "
                     + "for something different, I\u{2019}m particularly fond of margin grid for quick notes.",
             ], "her \u{201C}so what?\u{201D} block and her two takes, the chords the registry's")
-            #expect(shown[7].hasPrefix("Two companions to know from the start."))
-            #expect(Array(shown[8...11]) == TutorialSeeder.startHerePassages,
+            #expect(shown[8].hasPrefix("Two companions to know from the start."))
+            #expect(Array(shown[9...12]) == TutorialSeeder.startHerePassages,
                     "the four Start Here passages, byte for byte and in order (R-105-7)")
-            #expect(shown[12] == "The chapters of this book are listed on the left, each an interactive "
-                    + "guide. Read in order, or jump to what itches. When something in a lesson doesn't "
-                    + "behave as the words promise, that is a bug in the app, not in you.")
-            for (index, fan) in lesson.enumerated() where index != 4 && index != 6 {
+            #expect(shown[13] == "In the book itself, the chapters are listed on the left, each an interactive "
+                    + "guide, and from inside a note the book glyph above the page takes you back there, at "
+                    + "that very note. Read in order, or jump to what itches. When something in a lesson "
+                    + "doesn't behave as the words promise, that is a bug in the app, not in you.",
+                    "the closer reads true from inside the note too (F-3)")
+            for (index, fan) in lesson.enumerated() where index != 5 && index != 7 {
                 #expect(fan.count == 1, "block \(index + 1) holds one take")
             }
             // The protection chapter's lesson still LEADS with the same four (unchanged — they read twice).
@@ -586,19 +596,20 @@ struct TutorialCurrencyTests {
         #expect(editor.contains("WriteTakesPanel("), "…which is the panel with the Takes door")
     }
 
-    /// **The road out of the book's Outline, from each door's own home**
-    /// (ladder round 1, MAJOR-1 — the BUILD-VERIFY done from the Outline this
-    /// time). The guide opens on its OUTLINE (a working book's default mode);
-    /// there no note detail is mounted, so the take panel's "Open Takes mode"
-    /// and ⌘2 refuse ("the modes live inside a note" — `requestMode`'s arm with
-    /// no `applyMode`); the panel offers neither "expand all" nor "style" (its
-    /// top bar is the title, Open Takes mode and Close). So her takes moment
-    /// needs the full editor, and the lesson names the book's own open door:
-    /// "open ↗" beside each note's title (the expanded header and the card),
-    /// which lands in Write on the note's own page. A currency net — RED if the
-    /// door is renamed or moved, if the guide stops opening on its Outline, or
-    /// if `requestMode` stops refusing without a mounted note (then the
-    /// lesson's road sentence is no longer needed: revisit it).
+    /// **The road from the book into the note, from each door's own home**
+    /// (ladder round 1, MAJOR-1, reshaped by R-105-10 — the BUILD-VERIFY done
+    /// from the Outline). The guide opens on its OUTLINE (a working book's
+    /// default mode), where each note is a card whose body and "open ↗" open it
+    /// (the expanded header carries the same "open ↗" beside the title); the
+    /// door lands in Write, on the note's own page — the lesson's first ask.
+    /// Why the takes moment wants the note: in the book no note detail is
+    /// mounted, so the take panel's "Open Takes mode" and ⌘2 refuse ("the
+    /// modes live inside a note" — `requestMode`'s arm with no `applyMode`),
+    /// and the panel offers neither "expand all" nor "style". The closer's way
+    /// back: a note's context bar wears the book glyph, which opens its one
+    /// book at that note. A currency net — RED if a door is renamed or moved,
+    /// if the guide stops opening on its Outline, or if `requestMode` stops
+    /// refusing without a mounted note (then revisit the lesson's first ask).
     @Test func theStartHereLessonsRoadOutOfTheOutlineIsTheBuildsOwn() async throws {
         try await withGuide { _, db, guideID in
             let guide = try #require(try await db.read { try Reading.fetchOne($0, key: guideID) })
@@ -618,5 +629,10 @@ struct TutorialCurrencyTests {
         let panel = try AppSource.read("Variorum/Features/Takes/WriteTakesPanel.swift")
         #expect(!panel.contains("expand all") && !panel.contains("label: \"style:"),
                 "the in-place take panel offers neither expand all nor the style menu")
+        #expect(book.contains("Button {\n            onOpenInWrite(entry.postID)\n        } label: {"),
+                "the collapsed card's body is the open door too (\u{201C}clicking it\u{201D})")
+        #expect(ContextBarDoors.iconRow(isNote: true).contains(.book), "a note's context bar wears the book glyph")
+        #expect(ContextBarDoors.bookClick(bookCount: 1, commandHeld: false) == .open,
+                "…which opens its one book, at that note (the closer's way back)")
     }
 }
