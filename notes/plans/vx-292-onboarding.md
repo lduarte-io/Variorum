@@ -181,14 +181,14 @@ The pieces: (1) the card — `TourOfferCard` in the band (the WordsBandCard idio
 |---|---|---|
 | 1 | Sitting questions Q-292-1…4 | ASKED 2026-10-30 — answers land here |
 | 2 | U1 Prince sweep + stale labels | **CLOSED 2026-10-30** — built @41a5b0f6f, window green (144/21 after the 1c2af1c68 pin fix), red-on-old verdicts recorded, walk accepted |
-| 3 | U2 always-goes-well machinery | NOT STARTED (mechanism pends Q-292-2) |
-| 4 | U3 more stops | NOT STARTED (shape pends her markup) |
-| 5 | U4 offer card (VX-559) | NOT STARTED (doors pend Q-292-3) |
+| 3 | U2 always-goes-well machinery | READY-FOR-STAGE 2026-10-30 (built @622a5bdb4 to A-292-1..3 + R-292-17; hand-back spot-checked; window queued NEXT with oct29coordinator, claim vx-292-u2) |
+| 4 | U3 more stops | SPAWN-READY (R-292-13 approved the flow; brief + copy drafts in this file; carries VX-712 + VX-713) — after U2 closes |
+| 5 | U4 offer card (VX-559) | SPAWN-READY (R-292-5/12 settled the doors: yes · no only; brief in this file) — after U3 closes |
 | 6 | VX-415 close as superseded by VX-559 | OWED at closeout |
 | 7 | Riders check (VX-71, VX-707, VX-343) | DECLINED (R-292-15: "no riders for now") — they stay on the board |
 | 8 | Release + site publish | AT HER WORD after merge |
 | 9 | U-THEME sea-glass preset + default flip (VX-710) | **CLOSED 2026-10-30** — built @b55cddef0; window green (red-on-old exactly 3/16, gate 86/10 first pass); walk good (the unset dev store woke in sea glass; Classic restores the old look; search finds it; Terminal + Study, light + dark verified); her eye on P-292-4/5 in-app post-merge |
-| 10 | VX-105 boundary resolution (session-to-session, R-292-15) | IN FLIGHT — message sent, answer lands in OVERLAP / COORDINATION |
+| 10 | VX-105 boundary resolution (session-to-session, R-292-15) | RESOLVED 2026-10-30 — Option B on ~640, R-105-4 constants-quoting, the trial-merge runsheet; full record in OVERLAP / COORDINATION |
 
 ## U1 RECORD
 
