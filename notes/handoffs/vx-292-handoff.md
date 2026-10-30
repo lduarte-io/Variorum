@@ -34,4 +34,9 @@ Five units, each closed through a coordinator-granted stage window (red-on-old w
 
 ## THE RELEASE (filled at the release's end — read this before anything else if a line below says STOPPED)
 
-- (this section is completed by the release steps; if release.sh or the publish refused, the exact command and its refusal are here verbatim, per your rule)
+- **RELEASED AND LIVE: Variorum 0.10.7 (build 10595), from main e91a76b5f** (= the VX-292 merge c5ed35908 + the board snapshot). No command was refused; nothing stopped.
+- **A1 first:** `…/Variorum/Backups/safety-copies/variorum-a1-0.10.7-release-20261030T173601Z/` — all six files cmp-verified identical (the store was unwritten since Oct 25, as expected).
+- **The first-run gate:** FirstRunDrillTests 11/11 on this commit; the scripted first-run walk PASSED both arms on the prod test road (set-up then join; the vxtest account reset to rest by its own cleanup leg; signed out; zero instances). The dev slot was set aside WHOLE by one rename and restored the same way — the hold marker untouched (Oct 20), and the only store-file delta against my pre-drill md5 log is the drill's own test host opening the store at 11:47, before the set-aside (mtimes prove it; nothing touched the slot while aside).
+- **Installed:** /Applications/Variorum.app now 0.10.7 (CFBundleVersion 10595), staged beside the old, codesign --verify --deep --strict PASS before and after the swap, launched by nobody.
+- **Published, in the runbook's order:** the preflight busted-probe 404'd (the name unpublished) → the DMG to R2 (31,881,124 bytes) → verify-published dmg PASS (bytes identical, sha256 6881f8b7…) → the appcast to the site → verify-published appcast PASS (live feed byte-identical; the 0.10.7 enclosure reachable; no-cache header) → the page at stargazing.tech/variorum shows 0.10.7 with its download. The site repo carried your site agent's un-deployed round-3 nits — I merged and redeployed the combined tree, so both its nits and 0.10.7 are live.
+- **What's New in the app:** the folded notes (this effort's + the readme/classics bullets) ship in the appcast item and the app's What's New.
