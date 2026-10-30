@@ -811,3 +811,7 @@ Expected: TourOfferCardTests [8] · TourEntryTests [8] · HelpMenuNamingTests [5
 5. **A toast over the card (the observation).** With the card up, Help ▸ Restore “the prince” on a whole Prince (its refusal toasts "already whole") → capture where the toast sits against the card. Nothing to fix in the window — it is the orchestrator's call (the self-assessment's observation).
 6. **Two windows (one model).** With the card up, open a second window (File ▸ New Window) on the Bookcase: both show the card; no in one → both swap, both leave.
 
+
+## U4 STAGE WINDOW (the orchestrator, 2026-10-30, claim vx-292-u4 — LIVE; the record completes at the close)
+
+**IN FLIGHT: the five Mac watches W1–W5, in-place edits of ONE file each, never committed** — a dead session's dirty file names the watch (W1/W5 `ShelfView.swift` · W2/W4 `TourOfferCard.swift` · W3 `RootView.swift`); restore `git checkout -- <file>`. Then the 112 gate and the six walk rows.
