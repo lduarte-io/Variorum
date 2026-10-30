@@ -530,3 +530,15 @@ REPLACE the clause "the readme placeholder carries the author's Start Here text 
 ### Linear (at merge): VX-105 → Done rides the PR; VX-635 → closed superseded (her disposition 3); VX-711/714 stay Backlog (triaged); VX-712/713 live under VX-292.
 
 ### MOBILE PARITY: nothing mobile-visible (R-105-2 — the phone seeds nothing; the readme reaches a phone by sync).
+
+## BATCH B — the walkthrough record
+
+**LIVE STATUS (walker, Opus — IN PROGRESS, 2026-10-30 05:25 MDT):** the dev slot is SET ASIDE WHOLE as
+`…/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev-vx105-orig-20261030` (one rename, inode
+198725396 kept); the slot `Variorum-dev/` now holds the walk's FRESH library. Three dev-scope seed marks are DELETED
+from the Debug defaults domain (`SampleLibrarySeeded.Variorum-dev.the-prince`=1, `StarredGatheringSeeded.Variorum-dev`=1,
+`SampleLibraryWelcome.Variorum-dev`=done — restore to exactly these). The pre-walk defaults export is
+`~/.variorum/vx105-walk-pre.plist`; the pre-walk md5s are below. IF THIS SESSION DIES: quit the Debug instance by
+identity, rename `Variorum-dev` aside (e.g. `Variorum-dev-vx105-walk-20261030`), rename the `-orig-` folder back to
+`Variorum-dev`, re-write the three marks, md5-check against the table. Leg 1: PASS (evidence below at close). Legs 2–4:
+in progress.
