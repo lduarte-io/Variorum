@@ -104,10 +104,23 @@ below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `
 
 ### LIVE STATUS
 
-- **MINOR-1** (a saved version is never "a live readme") — NOT-STARTED. Settled design: a small public core query
-  `Queries.isVersionOfAnyLiveNote(_:_:)` (the one classifier, `versionHistoryPredicate(…, of: .anyLiveNote)`) beside
-  `isVersionHistory`; `ReadmeSeeder.liveReadmeID` skips a candidate the classifier names. Pins: a core test (headless)
-  + `LaunchFurnitureTests` (save version → rename → press → fresh mint).
+- **MINOR-1** (a saved version is never "a live readme") — DONE (`fa4187e79`; this record line followed one commit
+  later). The fix: a small public core query `Queries.isVersionOfAnyLiveNote(_:_:)`
+  (`Sources/VariorumCore/Queries/NoteVersions.swift`, beside `isVersionHistory`) — the ONE classifier,
+  `versionHistoryPredicate(alias: "v", of: .anyLiveNote)`, the Library/Archived/search/wing-move fence, asked of one
+  live container; `ReadmeSeeder.liveReadmeID` now reads the posts titled "readme" in id order and returns the first the
+  classifier does not name (the birth seed and the door share the read, so both are fixed). Not `Sync/`; no schema.
+  Pins: (1) core, HEADLESS, RUN GREEN — `NoteVersionsTests.anyLiveNotesVersionIsNamedAndNothingElseIs` (`swift test
+  --filter NoteVersionsTests`: 31 tests passed): the mechanism stated (save a moment of "readme", rename the note → a
+  title read finds the moment as a live post), the moment named; the note, a plain "readme" and an archived work never
+  named; an unmarked pair not named; a moment that rode its note's deletion not named. Red on old by construction (no
+  public form existed; the predicate is internal). (2) app, WRITTEN, compiles (`build-for-testing` EXIT 0), RUN
+  PENDING the stage window — `LaunchFurnitureTests.aSavedVersionOfTheReadmeIsNeverALiveReadme`: seed →
+  `saveNoteVersion(readme)` → `renameContainer(readme, "mine")` → Help ▸ Restore “readme” → a receipt,
+  `pendingSelection == .post(fresh)` with fresh ≠ moment ≠ original, the fresh note her 17 blocks, and a second press
+  answering `.alreadyPresent(fresh)`. RED ON OLD by revert recipe: restore `liveReadmeID`'s bare `SELECT … ORDER BY id
+  LIMIT 1` → the moment is the only live "readme" → `.alreadyPresent(moment)` → the refusal speaks and
+  `pendingSelection == .post(moment)` (the receipt and `fresh != moment` expectations fail).
 - **MINOR-2** (the birth seed decides inside its mint's runner turn) — NOT-STARTED. Settled design: `performBirthSeed`'s
   two reads move into the `runner.run` body (the door's shape); the header's "No door latch" line rewritten.
 - **MINOR-4** (stale comments; the fold pin's "never") — NOT-STARTED.
