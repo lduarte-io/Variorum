@@ -113,7 +113,7 @@ OUT OF SCOPE: the app icon (already sea-glass), the voices, the tour (other unit
 
 ## U1 RECORD
 
-**NOT DONE (first line, kept current):** no `xcodebuild test` run (stage-window only, the orchestrator's to arrange), no walk, no GUI, no QUESTIONS.md entry (the shared ledger is the merging session's; the PROVISIONALs below are for the orchestrator to carry).
+**NOT DONE (first line, kept current):** no `xcodebuild test` run (stage-window only, the orchestrator's to arrange — the exact command is in the U1 SELF-ASSESSMENT below), so every Mac pin's RUN and every red-on-old WATCH is PENDING; no walk (the execution plan's "fresh-store walk of steps 1–3" is the use-shaped evidence this unit still owes — PENDING the stage window), no GUI, no QUESTIONS.md entry (the shared ledger is the merging session's; PROVISIONALs P-292-1 and P-292-3 are for the orchestrator to carry).
 
 Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-292`, branch `vx-292-onboarding`, the Pro. Scope: the five pieces of the U1 BRIEF; zero `Sources/VariorumCore/Sync/`, zero editor seam. Machinery note: the orchestrator's doc commit `2d43ae878` (coordination facts, this file only) landed while this unit was reading; adopted as-is, nothing of it overlaps the pieces.
 
@@ -124,8 +124,8 @@ Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-29
 | 1 TourScript's Prince cards + `firstStoryTitle` (+ `TourScriptTests` re-pinned) | DONE (15a2d95c3) — `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN is PENDING the stage window |
 | 2 TourEngine landmarks → the Prince + XVII (+ `TourEntryTests`/`CaptureTourFocusTests`) | DONE (3f1d5dd2a) — `build-for-testing` TEST BUILD SUCCEEDED; core `swift test --filter TourWalkTests` 26/26 passed (incl. `aMissingSeededBookAcceptsAnyBook`); the Mac pins' RUN is PENDING the stage window |
 | 3 TutorialSeeder's ownership lesson → the Prince (+ `TutorialBooksLessonTests`/`TutorialBooksRitualTests`) | DONE (4b4605266) — `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN (and `TutorialWalkTests`) is PENDING the stage window |
-| 4 The TWO stale "Restore Tutorial…" labels (~1433, ~1998; ~640 is vx-105's) → the registry verb (+ the pins) | DONE (the commit "VX-292 U1 piece 4") — `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN is PENDING the stage window |
-| 5 Record close: self-assessment, stage commands, headless evidence | NOT-STARTED |
+| 4 The TWO stale "Restore Tutorial…" labels (~1433, ~1998; ~640 is vx-105's) → the registry verb (+ the pins) | DONE (515bb2b40) — `build-for-testing` TEST BUILD SUCCEEDED; the Mac pins' RUN is PENDING the stage window |
+| 5 Record close: self-assessment, stage commands, headless evidence | DONE (a7c3b9e20) — READY-FOR-STAGE (the U1 SELF-ASSESSMENT below) |
 
 ### Piece 1 — BUILD-VERIFY resolutions and decisions
 
