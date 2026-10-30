@@ -348,7 +348,7 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' test \
   -only-testing:VariorumTests/TourScriptTests
 ```
 
-then the full `VariorumTests` (the closeout's). **Expected at the window: everything should pass — no expected red**
+then the full `VariorumTests` (the closeout's). **Ladder round 1's fix round added and renamed tests inside these same suite types — its expectation line is `notes/plans/fixes/vx-105-ladder-round1.md`, "Stage-window expectation".** **Expected at the window: everything should pass — no expected red**
 (S-1 ruled option B; its arm is now `TutorialFurnitureFoldTests/theBornStarredReadmeNeverFoldsWhileStarred`, green — renamed at ladder round 1). Verify the suite TYPE names in
 `TutorialWalkTests.swift` before running — CONFIRMED: `TutorialBookShapeTests` and `TutorialTakesActsTests` are two
 of its `@Suite` types; every other type above was grepped (`struct <Name> {`); `TourScriptTests` is the tour's words

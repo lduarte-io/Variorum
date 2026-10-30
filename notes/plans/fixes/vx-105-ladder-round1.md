@@ -100,7 +100,12 @@ Tickets minted at this arbitration: see the record's closeout section (the getti
 
 **What this round did NOT do (first line, per the contract):** no Mac suite was RUN (stage window only — every Mac pin
 below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `/Applications` touch; nothing under
-`Sources/VariorumCore/Sync/`. Her readme text (the 17 blocks) is untouched by every commit here.
+`Sources/VariorumCore/Sync/`. Her readme text (the 17 blocks) is untouched by every commit here (checked at the end:
+the `ReadmeSeeder.paragraphs` literal is identical between the round's base `2b83ecf71` and its last commit).
+
+**ROUND STATE: READY-FOR-STAGE** — every finding dispositioned below; every Mac pin WRITTEN and compiling
+(`xcodebuild … build-for-testing` EXIT 0, no warning in a touched file); the core's one change (a public query) RUN
+GREEN headless; the full core suite's end-of-round run is recorded in "Headless evidence" below.
 
 ### LIVE STATUS
 
@@ -279,3 +284,37 @@ below is WRITTEN and compiles; RUN status PENDING); no walk, no app launch, no `
   entry is the orchestrator's at the merge (a worktree implementer never touches the shared ledger).
 - **NIT-3** (the end card's "a short welcome note") — DONE as a ticket: VX-713 (the arbitration's), noted on the U1
   record's O-1. No code change (tour copy is vx-292's surface).
+
+### Headless evidence (end of round)
+
+- `swift build` EXIT 0. The full core package `swift test` at the end: **VariorumCoreTests — 3,555 tests in 477 suites
+  PASSED (5 known issues, the standing `PairInvariantPinsTests` ones)**; a third target 32/32 passed;
+  **VariorumMCPTests — 468 tests, ONE issue: `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnect
+  NamedAndBounded` (a wall-clock bound, `elapsed < 15 s`, measured 27 s while the whole package ran in parallel)**.
+  Re-run alone: PASSED in 1.05 s. A load-bound timing flake in the MCP socket harness, untouched by this round (it
+  never reaches `Queries.isVersionOfAnyLiveNote`, the round's only core change). Recorded, not fixed.
+- `NoteVersionsTests` (31, incl. the new MINOR-1 pin) PASSED.
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing -quiet` (compile-only — app AND test
+  target, nothing run, no test host launched) EXIT 0 after every code commit; no warning in a touched file.
+- Her text: the `ReadmeSeeder.paragraphs` literal is byte-identical between `2b83ecf71` and the round's last commit
+  (scripted comparison).
+- NIT-1's byte check: a throwaway core test, run and deleted (never committed) — see NIT-1.
+
+### Stage-window expectation (updated for this round)
+
+The U1 record's stage command list stands — every suite TYPE this round touched is already on it
+(`LaunchFurnitureTests`, `TutorialFurnitureFoldTests`, `TutorialCurrencyTests`); no new suite type. **Expected at the
+window: everything passes — no expected red.** The round's new/renamed Mac tests, by suite type:
+`LaunchFurnitureTests` · `aSavedVersionOfTheReadmeIsNeverALiveReadme` (MINOR-1) ·
+`aDoorPressInTheBirthSeedsGapNeverMakesTwoReadmes` (MINOR-2 — it HOLDS the session runner on a bounded semaphore wait
+for ~0.4 s, blocking one cooperative-pool thread; it can never hang past 10 s) ·
+`theBirthSeedReadsNothingOutsideItsMintsTurn` (MINOR-2); `TutorialFurnitureFoldTests` ·
+`theBornStarredReadmeNeverFoldsWhileStarred` (renamed) · `theReadmeFoldsOnceNeitherCopyIsStarredAndTwoMintsAgree`
+(restored, MINOR-4); `TutorialCurrencyTests` · `theStartHereLessonWeavesHerWelcomeHerTakesAndTheFourPassages`
+(fourteen blocks now) · `theStartHereLessonsRoadOutOfTheOutlineIsTheBuildsOwn` (MAJOR-1/R-105-10). If the MINOR-2
+interleave pin reads red, read its message first: "exactly one of the two minted" false with BOTH minted means the fix
+regressed; a hang is impossible by construction.
+
+**Commits, in order:** `fb9c2a9ea` the record opens · `fa4187e79` MINOR-1 · `d895f34bb` MINOR-1's record line ·
+`a24e9477b` MINOR-2 · `85cfa64eb` MINOR-4 · `3a42c3f5b` MAJOR-1 first form (superseded) · `b04f47bae` NIT-2 ·
+`13257d389` NIT-1 + MINOR-3 + NIT-3 records · `198b94562` MAJOR-1 reshaped by R-105-10 · this close.
