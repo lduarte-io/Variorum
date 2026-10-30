@@ -533,12 +533,182 @@ REPLACE the clause "the readme placeholder carries the author's Start Here text 
 
 ## BATCH B — the walkthrough record
 
-**LIVE STATUS (walker, Opus — IN PROGRESS, 2026-10-30 05:25 MDT):** the dev slot is SET ASIDE WHOLE as
-`…/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev-vx105-orig-20261030` (one rename, inode
-198725396 kept); the slot `Variorum-dev/` now holds the walk's FRESH library. Three dev-scope seed marks are DELETED
-from the Debug defaults domain (`SampleLibrarySeeded.Variorum-dev.the-prince`=1, `StarredGatheringSeeded.Variorum-dev`=1,
-`SampleLibraryWelcome.Variorum-dev`=done — restore to exactly these). The pre-walk defaults export is
-`~/.variorum/vx105-walk-pre.plist`; the pre-walk md5s are below. IF THIS SESSION DIES: quit the Debug instance by
-identity, rename `Variorum-dev` aside (e.g. `Variorum-dev-vx105-walk-20261030`), rename the `-orig-` folder back to
-`Variorum-dev`, re-write the three marks, md5-check against the table. Leg 1: PASS (evidence below at close). Legs 2–4:
-in progress.
+**What this walk did NOT do (first line, per the contract):** leg 2 (the lesson), leg 3 (Help/⌘K) and leg 4 (the readme
+door) were walked in the TERMINAL voice only. Leg 1 was walked in both voices. The Sherlock door was NOT pressed (the
+closeout checklist's "the Sherlock door restores the book" is not one of this walk's five legs). Arm 2's fresh copy had
+its created stamp read only as "created yesterday" (masthead and Library row); the exact "4:44 AM" hover would not redraw
+for synthetic pointer moves a second time, and it was read exactly on the BIRTH copy, which shares the one mint body
+(`ReadmeSeeder.mint`). The deleted readme was not looked up in the Trash. Read mode was not opened. No test suite ran.
+Nothing outside the Debug container and the Debug defaults domain was touched. `/Applications/Variorum.app` was not
+running and was never touched.
+
+**Walker:** Opus, one session, 2026-10-30 05:03–05:24 MDT, under the orchestrator's stage claim `vx-105-walk` (never
+claimed, renewed or released by the walker). Build: the worktree's Debug app
+(`~/Library/Developer/Xcode/DerivedData/Variorum-acumnjtycnvmopgtkuqmilzaoeuz/…/Debug/Variorum.app`,
+`io.lduarte.Variorum.debug`, 0.10.4), an incremental `xcodebuild … -configuration Debug build` at `2906f8c33` (no App/
+Sources diff since `2a42ea7de`), EXIT 0. GUI grants checked by a compiled probe first: `AX: true SCREEN: true`. One
+launch: `open -n --env VARIORUM_SEED_GATE_UNOWNED=1 --env OS_ACTIVITY_DT_MODE=YES` (the README's documented seed-gate
+road). Pid 21123, window 1240×840 at (244,155). No What's New sheet appeared (the domain's `whatsNew.lastVersion` was
+already 0.10.4), so there was nothing to dismiss. No Castle or lock screen appeared, and no `dev-castle.env` value was
+used. Resume was never pressed. No account act was taken: the sidebar read "Sync off (dev store)" throughout.
+Captures: 63 files in the gitignored `notes/plans/vis-walks/vx105-walk-shots/` (`.gitignore:48`), plus `run.log`
+(the app's stderr). The words guard withheld (`AXError -25200`, the known VX-658 / F-CW-1 class on macOS 27.0.1), so
+NO Settings window was ever captured. The voice was flipped through Accessibility and read back as radio values.
+
+### The rails: before and after
+
+**Dev slot md5s** (`~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/`,
+taken before the set-aside, re-taken after the reverse rename; `diff` empty, **MD5 IDENTICAL, 9 of 9**):
+
+| File | md5 (before = after) |
+|---|---|
+| `variorum.sqlite` | `e30ef432181f2b8d84d99af2914c0402` |
+| `variorum.sqlite-wal` | `446322613b16c22e6fff33048cee4bb5` |
+| `variorum.sqlite-shm` | `64d0b13387607e5127a4064a66c4b9cc` |
+| `variorum-library-keys.json` | `e456db10da491880afd08740a3847b20` |
+| `variorum-library-lived-here` | `d8995f307fd99727fb99fb0a5fc9e619` |
+| `variorum-restore-hold.json` | `e5ce71ecf894b7b2ea96d23fcfc7bf57` |
+| `variorum-keys-1787a29ea0d545b9.json` | `e9b955941498cf09792f2b4e91c12687` |
+| `variorum-keys-3f3a561c436e6d3a.stale-1792486410.json` | `79e6f5734aaf3d34cab92be28c27d125` |
+| `variorum-keys-881730135471ec9f.stale-1792344917.json` | `d10677a27e8809fc7800bcd4258537c8` |
+
+The set-aside was ONE whole-folder rename (`Variorum-dev` → `Variorum-dev-vx105-orig-20261030`, inode 198725396 kept),
+and the restore was the reverse rename (inode 198725396 again). `Backups/` and `Previous Libraries/` travelled inside
+the folder. The walk's own fresh library is set aside beside it as
+`…/Application Support/Variorum-dev-vx105-walk-20261030/` (5.6 MB: its store, key file, stub and its one launch backup
+`Backups/564f1cc9/372f4708/variorum-backup-2026-10-30-110605-51eb62f8.sqlite`). It is kept, not deleted (dev-store
+content, the agents' to remove), and no other copy of that backup exists (a `find` over the Debug container,
+`~/Library/Mobile Documents` and the group containers found only this one).
+
+**The hold marker (VX-697):** PRESENT before (`{"asOf":"2026-10-20T08:41:03Z","heldAt":"2026-10-20T08:53:29Z"}`, the
+dev slot's own, dated Oct 20). It travelled aside with the whole folder, so the walk's fresh library was never held.
+That library never grew a marker of its own. It is PRESENT after, byte-identical (md5 above), with the same content.
+Whether it is "orphaned" is not this walk's call: it sits beside the store it has held since Oct 20.
+
+**The seed marks:** deleted deliberately before the launch, three of them, exactly the launch's reads
+(`LaunchFurniture.seed`):
+`SampleLibrarySeeded.Variorum-dev.the-prince` = 1, `StarredGatheringSeeded.Variorum-dev` = 1,
+`SampleLibraryWelcome.Variorum-dev` = done. The Sherlock mark `SampleLibrarySeeded.Variorum-dev` (restore-only since
+VX-633, not read by the launch) and the real-variant marks `SampleLibrarySeeded.Variorum` /
+`SampleLibrarySeeded.Variorum.the-prince` were left untouched. The fresh birth re-wrote the three to the same values,
+and they are confirmed by `defaults read` after.
+**The coordinator's mid-walk FYI (recorded as asked):** vx-292's 04:52 test window had written the Debug domain's
+REAL-variant Prince mark (`SampleLibrarySeeded.Variorum.the-prince`, two unstubbed pins). It was present in this walk's
+pre-walk export (= 1). It did NOT affect this walk. The dev-store app reads the `Variorum-dev` variant's mark, which this
+walk cleared, and the Prince seeded at birth (`run.log`: `sample library (the prince): seeded(… stories: 27)`; the
+Bookcase lists "the prince", 28 notes, owned). So nothing was re-birthed, and the mark stands exactly as the export
+shows (= 1).
+
+**The prefs diff (Debug domain, post-walk export vs `~/.variorum/vx105-walk-pre.plist`, before the restore):** 412 → 420
+keys.
+- ADDED (8): `currentBlock.3E34F4F7-C14E-4D2B-BAAD-3AFDD6E4E5CF`, `currentBlock.CEF06277-EA75-4813-B747-383A92B4E9B1`,
+  `currentBlock.ED91AED7-3DD1-4A62-A31B-F191C1A72E84` (per-note caret memory for the walk library's birth readme, its
+  restored readme and "start here"); `postMode.3E34F4F7-…`, `postMode.ED91AED7-…` (per-note mode memory);
+  `surfaceSize.outline.ED91AED7-…` (the Outline's measured surface); `mastheadStampFace` = created (the walker's
+  *[removed for publication]*
+  calm-ask counter, keyed by its library id).
+- CHANGED (4): `IdleCommitSweepMark.Variorum-dev` (08:58:13Z → 09:06:05Z, the walk library's launch sweep);
+  `openNotes.remembered.ids` / `openNotes.remembered.recency` (the Open list now named walk-library notes);
+  `variorum.backup.log` (the newest entry was the walk library's launch backup, written into the walk slot).
+- REMOVED: none.
+**Restored:** `defaults import` of the pre-walk export (proven on a throwaway domain to MERGE, not replace, so it
+restores the four CHANGED keys), then `defaults delete` of the eight ADDED keys by name. The re-export
+(`~/.variorum/vx105-walk-restored.plist`) compared to the pre export: **NO differences, 412 = 412 keys.** The throwaway
+test domain (`io.lduarte.vx105walk.scratchtest`) was deleted along with its plist file.
+
+**Posture left:** the Debug app QUIT by identity (`tell application id "io.lduarte.Variorum.debug" to quit`;
+`pgrep` then showed no Variorum instance). The dev store is the as-found library, not launched after the restore, so it
+is CLOSED (unlocked as at rest). By its key file's field names alone (values never read) it is **STANDARD**: an Apple
+leg is present beside the passphrase and words legs, and Castle keeps no Apple road. It is **SIGNED OUT** as far as this
+walk could see (no account face, "Sync off (dev store)", no account act taken). It is still **HELD** by its Oct 20
+restore-hold marker, so sync rounds refuse until Resume, which this walk never pressed. The voice and appearance in the
+walk were the walk library's own: the voice moved Study → Terminal inside the set-aside library, and `appearanceChoice`
+stayed `dark` throughout.
+
+### Per-leg verdicts
+
+**Leg 1 — fresh birth, the readme as a new user finds it: PASS (both voices).**
+- The birth (`run.log`): the Prince (27 stories) → the starred gathering → the example snippet → the field guide →
+  `readme at a fresh store's birth: seeded(postID: "3E34F4F7-…")` → `welcome arrangement: arranged`. The readme was
+  seeded LAST. It landed on the **Bookcase** (Home; unshelved "starred notes", 1 note · 1,821w; Welcome holds the field
+  guide and the prince) with **readme ★** in the sidebar's Starred list (`l1-w0.png`).
+- Library, default edited-newest: **readme tops the notes**, untagged ("+" only), "edited today 5:06 AM"
+  (`l1-library-study.png`, `l1-library-terminal.png`).
+- The note: "in no book · 1 gathering", **block 1/17**, **1,821w**, no take badge on any block
+  (`l1-readme-study-top.png`, s1/s2, `l1-readme-terminal-top.png`). The Takes board (⌘2) shows only the "⑂+" add
+  affordance on every block and "close all" greyed: **no fans** (`l1-readme-takes-study.png`,
+  `l1-readme-takes-terminal.png`).
+- The sign-off: **block 16/17** = "Thank you for trying Variorum," (5w) and **block 17/17** = "Lillian" (1w)
+  (`l1-readme-study-end.png`, `l1-block16-bar.png`, `l1-block17-bar.png`; Terminal: `l1-readme-takes-terminal.png`).
+- The worn date: the masthead's created flip reads "created yesterday", and its hover reads **"Created Oct 29, 2026 at
+  4:44 AM"** (Study: `l1-created-hover-study.png`). In Terminal the Library row under the created sort reads "created
+  yesterday", and its hover reads **"Created Oct 29, 2026 at 4:44 AM"** (`l1-library-created-search-terminal.png`,
+  `l1-row-created-hover-terminal.png`). **Edited at birth:** the masthead's edited face and the Library row read "edited
+  today 5:06 AM" (the seed moment).
+
+**Leg 2 — the field guide's first lesson, followed literally: PASS (Terminal).**
+- The Bookcase → "the field guide" **opens in Outline** ("outline" lit; "start here" a collapsed card whose excerpt
+  opens on her welcome; `l2-guide-outline-terminal.png`). Unfolded in place (▸), the lesson reads her welcome, the
+  beliefs, "This book is Variorum teaching itself…", then **the first ask naming the road**: "…In the book's Outline
+  each note is a card, and clicking it, or open ↗ beside its title, opens the note itself in the full editor. Open this
+  lesson that way now if it isn't open already: the rest of it happens inside the note." Then the safety block, with
+  "Help ▸ Restore Field Guide…" (`l2-start-here-unfolded-terminal.png`).
+- **open ↗ lands in Write**: "start here", "~/the field guide", mode write, block 1/14 (`l2-open-lands-write-terminal.png`).
+- **The take icon** (⑂3, right of her block 6) opens the modal "Takes — block 6/14": her block chosen, then **"You
+  found it! :D"**, then "Now click on Open Takes mode in the top bar of this modal." (`l2-take-panel-terminal.png`).
+- **"Open Takes mode"** (the modal's top bar) → Takes, bloomed on block 6 (`l2-open-takes-mode-terminal.png`).
+- **"expand all"** (top of Takes) → pressed. The "so what?" block's fan opens too: the shortcuts take ("…get to Takes
+  with ⌘2. Check out all the shortcuts at ⌘/.") and the style take ("…changing “style” at the top bar of this note…
+  margin grid…") (`l2-expand-all-terminal.png`, `l2-expand-all-below-terminal.png`).
+- **⌘2** from inside the note: ⌘1 → write, ⌘2 → takes (`l2-cmd1-write-terminal.png`, `l2-cmd2-takes-terminal.png`).
+- **"style"**: "style: stack ▾" offers exactly Stack · Carousel · Margin grid · Slot split. Margin grid renders the
+  takes beside each block (`l2-style-menu-terminal.png`, `l2-style-margin-grid-terminal.png`).
+- **The four Castle passages before the closer**, in order after the companions block: "Your work is encrypted…" →
+  "Write down your twelve words…" → "Set a passphrase…" → "The Apple road is a convenience…" → the closer "In the book
+  itself, the chapters are listed on the left, … the book glyph above the page takes you back there, at that very
+  note…" (`l2-open-lands-write-terminal.png` bottom, `l2-passages-terminal-a.png`, `-c`).
+- **The closer's book-glyph road back**: the glyph above the page → the field guide's Outline with the header "note 1
+  of 50 · welcome" and the navigator marking "› start here" (`l2-book-glyph-back-terminal.png`).
+
+**Leg 3 — Help carries exactly the per-book doors, and nothing says "Sample Library": PASS (Terminal).**
+- Help, read by Accessibility and captured open (`l3-help-menu-terminal.png`): Variorum Dev Help · Shortcuts &
+  Dictionary · Open the Field Guide · Take the Onboarding Tutorial · What’s New · **Restore Field Guide… · Restore “the
+  prince” · Restore “the adventures of sherlock holmes” · Restore “the strange case of dr jekyll and mr hyde” · Restore
+  “readme” · Restore the “classics” Gathering** · Send Feedback…
+- Every top-level menu scanned by Accessibility (189 items): **no item contains "ample"**, and the only "Restore" items
+  are the six above.
+- ⌘K "sample library" → no command, only "All matches in the Library ›" (`l3-palette-sample-library.png`). ⌘K
+  "restore" → the same six commands (`l3-palette-restore.png`).
+
+**Leg 4 — Restore “readme”, both arms: PASS (Terminal; arm 2's exact time see the first line).**
+- **Arm 1, the live copy (⌘K → Restore “readme”):** a toast reads **"You already have “readme”, so nothing was
+  restored."** and the readme OPENS (`l4-refusal-a.png`).
+- **Arm 2, after Delete Note** (note ▾ → Delete Note… → the confirm "The note goes to the Trash for 30 days…" →
+  Delete; receipt "Note moved to the Trash — 30 days to put it back."; the Starred list empties; the Library loses the
+  readme. See `l4-note-menu.png`, `l4-delete-confirm.png`, `l4-after-delete.png`): Help ▸ Restore “readme” **mints
+  fresh and opens it**. **★ in Starred** again, "in no book · 1 gathering", **block 1/17**, **1,821w**, "edited today
+  5:19 am", and the quiet receipt reads "Restored “readme” to y…" (see F-W-1) (`l4-restored-a.png`). It tops the
+  Library ("edited today 5:19 am", untagged; `l4-library-after-restore.png`). Its created stamp reads "created
+  yesterday" on the masthead and the row (`l4-restored-created-hover.png`, `l4-library-created-search.png`). It is a
+  NEW note id (`CEF06277-…`; the deleted birth copy was `3E34F4F7-…`, per the prefs keys above), so a press past a
+  deletion mints fresh (P-105-7 (ii)).
+
+**Leg 5 — off-brief findings (recorded with screenshots, nothing touched):**
+- **F-W-1 — the readme door's quiet receipt is clipped in a note's bottom bar.** With the restored note open, the
+  receipt line at the bar's trailing end reads "Restored “readme” to y…": the ruled sentence ("…to your Library.") is
+  cut by the bar's width (`l4-restored-a.png`, bottom right). This is the shared `QuietReceiptLine` layout, not this
+  effort's copy. It may be the line's ordinary truncation; noting it for the orchestrator's triage.
+- **O-W-1 — her readme's `*and*` shows its asterisks in Write.** Block 3's "…typed by human fingers *and* I had an AI
+  read…" renders in the live editor as italic "and" with both asterisks visible, in both voices
+  (`l1-readme-study-top.png`, `l1-readme-terminal-top.png`). This is presumably the live editor's ruled markdown face
+  (AppSpec §12), not a defect. It was not compared in Read. Listed because a new user's first read of the letter
+  meets it.
+- **O-W-2 — already owned, not new:** the guide's "comments & tags" lesson still says "Help ▸ Restore Tutorial…"
+  (seen as a ⌘K passage hit, `l3-palette-restore.png`). This is one of the two stale labels this record lists under
+  "Left for vx-292".
+- **O-W-3 — the unfolded "start here" card was collapsed again** on returning through the book glyph
+  (`l2-book-glyph-back-terminal.png`). This is consistent with the Outline's cards-collapsed-by-default rule (her
+  #43(a)), so it is noted only.
+- **Walk mechanics (not product):** AppKit tooltips drew for synthetic hovers only intermittently (two of six tries).
+  Two region captures (`l1-row-created-hover-terminal.png`, `l4-restored-*hover.png`) extend past the window's right
+  edge and show part of the desktop. They are local and gitignored, and hold nothing of the store.
