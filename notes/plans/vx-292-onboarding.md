@@ -119,6 +119,15 @@ The pieces, each its own commit:
 
 OUT OF SCOPE: new steps and copy (U3), the offer card (U4), `TourScript` wording, any `Sync/`, any editor-seam internals.
 
+### U2 PIECE-2 RULING (the architect, 2026-10-30 — the in-batch fork answered; the implementer builds to this)
+
+- **A-292-1 — the ascent road, as the HYBRID.** Step 3's arrival in the seeded book runs ONE reveal through the ascent road ((a): `requestReveal(XVII)` → `landOutlineReveal` — XVII's own card at the page top, the VX-562 navigator highlight following), with one extra arm: a seeded book that ARRIVES IN READ (a Finished Prince) is first switched to Outline through the existing mode road — the tutorial wins at the book level exactly as piece 1 wins at the note level — then revealed; if the mode road refuses, today's corner-card degradation stands. Reason against (b): it half-solves the one case that must work (XVII can stay below the fold on a short window; the navigator highlights XV), and the tour's card names XVII, not the part.
+- **A-292-2 — the plumbing is approved:** `bookAscent` moves from RootView `@State` to `ShellRouter.pendingBookAscent`, the `pendingBookChapter` shape; the three existing ascent doors keep byte-identical behavior (parity: their existing pins pass unmodified — say so in the record). The broadcast alternative is rejected with the implementer (P-4: broadcasts carry signals, never decisions).
+- **A-292-3 — reveal ALWAYS on step-3 arrival,** never a delayed visible-check (state computed before layout settles is the starved-host class; determinism beats cleverness). She scrolls freely after; leaving and returning is a new arrival (the implementer's reading, ratified).
+- **The Bookcase/Pool rung rows' recorded no-road fallback stands** (no improvisation); the Index carry already serves steps 9–10.
+- **P-292-7 (the restore trigger: no seeded book in the landmarks + Home + no live Prince in any wing) ACCEPTED as built**; the alternatives stay logged.
+- **HELD FOR HER (the handoff bundle):** the Prince front note's sentence "Restarting the tutorial will restore this book to its default state as well." is her seeded text and is FALSE under R-292-11 (the tour never resets her book). Her call: trim, keep, or approve a corrected sentence; nothing acts meanwhile.
+
 ## OVERLAP / COORDINATION
 
 - **VX-105** (her readme/letter seed session, running now): shares TutorialSeeder's first lesson, the Help menu registry, the first-open band. Closeouts serialize via `oct29coordinator`; the later merge rebases and re-greps the shared seams (the three stale labels, the end card's readme aside — the aside stays TRUE once VX-105 lands "readme").
