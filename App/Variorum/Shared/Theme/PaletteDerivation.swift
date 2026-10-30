@@ -21,6 +21,11 @@
 //  .400; they collapse into the soft table here, within seven values out of
 //  255. The batch record says so; the ladder's R1-5 corrected both numbers.)
 //
+//  VX-710 (her R-292-14) added a sixteenth: THE SEA-GLASS, the app icon's
+//  own colour, one seed at the bold depth — the same rule, no new table
+//  (`PalettePreset.all` says why that depth; `notes/plans/vx-292-onboarding.md`'s
+//  U-THEME RECORD holds the measurements).
+//
 
 import Foundation
 import VariorumCore
@@ -57,6 +62,8 @@ nonisolated struct PaletteFamily: Equatable, Sendable {
 /// batches are: the pastels and the two-tone builds share one (soft), and
 /// the bold builds — *"the color themes don't also have to be so pastel,
 /// you can add a little more personality to them"* — share the other.
+/// (The sea-glass — VX-710 — is one seed at the bold depth: the depth and
+/// the seed count are independent knobs of the one rule, not a third kind.)
 nonisolated enum PaletteIntensity: Sendable {
     case soft
     case bold
@@ -140,7 +147,8 @@ nonisolated struct PalettePreset: Equatable, Sendable {
 extension PalettePreset {
     /// **The fifteen named seed pairs** (her R-Q11 · R-Q13; the seeds are
     /// the mockup's, which she approved — *"nice I like it, we'll start
-    /// with that and I'll change them later if I feel like it"*).
+    /// with that and I'll change them later if I feel like it"*), **and the
+    /// sea-glass** (VX-710), the sixteenth.
     ///
     /// `.default` and `.custom` are deliberately absent: the first means
     /// "no palette" and the second reads her own hex.
@@ -163,6 +171,18 @@ extension PalettePreset {
         .butterAndCobalt: PalettePreset(room: 0xF2D45C, accent: 0x1F4FCF, intensity: .bold),
         .roseAndMoss: PalettePreset(room: 0xF08CA0, accent: 0x4F7A2E, intensity: .bold),
         .tealAndRust: PalettePreset(room: 0x3FB5A8, accent: 0xB5432A, intensity: .bold),
+        // THE SEA-GLASS (VX-710 — her R-292-14: *"the same seaglass color as
+        // the icon"*). The seed IS the icon's background fill (VX-192), the
+        // ONE spelling of that colour in the app's code — a pin reads the
+        // icon's own `icon.json` and holds the two equal, so a recoloured icon
+        // turns the suite red instead of leaving a palette that no longer
+        // matches it. ONE seed, so the accent is the sea-glass deepened (the
+        // pastel mechanics); the BOLD depth (PROVISIONAL P-292-4), because the
+        // seed is a low-saturation green whose soft-depth family lands within
+        // a hair of Mint's (rooms 1.011:1, accents 1.015:1 — a duplicate, and
+        // a whisper of the icon), while the bold depth brings the room and the
+        // wash toward the icon itself (the wash within 1.06:1 of it).
+        .seaglass: PalettePreset(room: 0xC2DDD3, intensity: .bold),
     ]
 
     /// The preset a stored setting names, or **nil for "no palette"** —

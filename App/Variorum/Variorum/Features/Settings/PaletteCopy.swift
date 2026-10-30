@@ -76,6 +76,9 @@ nonisolated enum PaletteCopy {
         case .butterAndCobalt: return "Butter & cobalt"
         case .roseAndMoss: return "Rose & moss"
         case .tealAndRust: return "Teal & rust"
+        // VX-710: the icon's colour, in the noun's ordinary spelling (the
+        // 0.9.5 notes' "sea-glass" is the adjective). Sentence case.
+        case .seaglass: return "Sea glass"
         case .custom: return "Custom"
         }
     }

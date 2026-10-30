@@ -172,6 +172,18 @@ public enum ThemePalette: String, Codable, Sendable, CaseIterable, DatabaseValue
     case roseAndMoss = "rose_moss"
     case tealAndRust = "teal_rust"
 
+    /// **THE SEA-GLASS — the app icon's own colour, as a palette** (VX-710,
+    /// her R-292-14: *"can you add a theme to the app that is the same
+    /// seaglass color as the icon?"*; the icon is VX-192's sea-glass). ONE
+    /// seed — the icon's background fill — through the same rule as every
+    /// build; its seed and depth live beside the others in the app's token
+    /// layer (`PalettePreset.all`), never here. A new token is not a schema
+    /// event: a client from before this case reads the stored "seaglass" as
+    /// a value it does not know, which `Queries.themeSettings` has always
+    /// read as `.default` — that build's shipped colours, never a crash and
+    /// never half a palette.
+    case seaglass
+
     /// Her own hex (R-Q13: *"I can also still put in one hex and what's
     /// the 'brain' that'll take care of the second value?"*) — ONE seed,
     /// with an optional second for the accent. The same brain, fed her
