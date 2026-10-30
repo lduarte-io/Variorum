@@ -83,6 +83,12 @@ struct TourScriptTests {
         "legSnippets": ("the snippets panel", "the Scraps panel"),
     ]
 
+    /// **The end card's one departure** (VX-713, absorbed by VX-292 U3): the
+    /// mockup's aside, and what it says now.
+    static let endAsideDeparture = (
+        from: "readme, a short welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one.",
+        to: "readme, a welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one.")
+
     /// The one TITLE departure (VX-292 U1, R-292-1): step 2 names the book
     /// the launch seeds now.
     static let titleDepartures: [String: (from: String, to: String)] = [
@@ -156,8 +162,15 @@ struct TourScriptTests {
         #expect(TourScript.endTitle == "That's the tour.")
         #expect(TourScript.endBody
                 == "Navigation on the left. Books on the Bookcase. Takes on any block. Your place follows you.")
+        // VX-713 (absorbed by VX-292 U3) — the mockup's "a short welcome
+        // note" is the one departure on the end card (her readme is a ~1,800
+        // word letter); the note it names is the seeded readme's own title.
         #expect(TourScript.endAside
-                == "readme, a short welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one.")
+                == "readme, a welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one.")
+        #expect(TourScript.endAside.hasPrefix("\(ReadmeSeeder.title), "),
+                "the aside names the note the seed mints, by its title")
+        #expect(Self.endAsideDeparture.from.replacingOccurrences(
+            of: "a short welcome note", with: "a welcome note") == TourScript.endAside)
         #expect(TourScript.keepGoing == "Keep going: two more minutes on stars, tags, books and snippets")
         #expect(TourScript.openFieldGuide == "Open the field guide, every feature as a lesson")
         #expect(TourScript.done == "Done, go write")
@@ -284,7 +297,7 @@ struct TourScriptTests {
             #expect(html.contains("\"\(words.0)\""), "\(step)'s title is the mockup's")
             #expect(html.contains("`\(words.1)`"), "\(step)'s body is the mockup's")
         }
-        for words in [TourScript.endTitle, TourScript.endBody, TourScript.endAside,
+        for words in [TourScript.endTitle, TourScript.endBody, Self.endAsideDeparture.from,
                       TourScript.keepGoing, TourScript.openFieldGuide, TourScript.done] {
             #expect(html.contains(words), "the end card's \"\(words)\" is the mockup's")
         }

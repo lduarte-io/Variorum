@@ -280,8 +280,10 @@ enum TourScript {
     static let endBody = "Navigation on the left. Books on the Bookcase. Takes on any block. Your place follows you."
     /// R-13s-28/39: the readme sentence stands although readme seeds later.
     /// A5: no time promise on the main leg — "two more minutes" lives on the
-    /// fork's first door only.
-    static let endAside = "readme, a short welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one."
+    /// fork's first door only. VX-713 (absorbed by VX-292 U3): "a short
+    /// welcome note" became "a welcome note" — the readme VX-105 seeded is her
+    /// letter, about 1,800 words, and the sentence must stay true of it.
+    static let endAside = "\(ReadmeSeeder.title), a welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one."
     /// The no-readme form (the extra-pass MINOR-1 honesty gate, PROVISIONAL):
     /// an existing store that predates the seeded readme must not be promised
     /// one, so the aside keeps only the journal sentence — the approved

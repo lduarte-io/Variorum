@@ -658,4 +658,48 @@ struct TutorialCurrencyTests {
         #expect(ContextBarDoors.bookClick(bookCount: 1, commandHeld: false) == .open,
                 "…which opens its one book, at that note (the closer's way back)")
     }
+
+    // MARK: - VX-712 (absorbed by VX-292 U3) — "getting around"'s mode keys
+
+    /// **VX-712 — traced, and HOLLOW as filed.** The ticket: "the guide's
+    /// 'getting around' lesson claims ⌘2/⌘1 roads that REFUSE on the book
+    /// surface the guide is read from." The lesson's own words put a road
+    /// FIRST: "press ⌘K, type “getting”, and ⏎ back to this very lesson. Then
+    /// press ⌘2 for Takes and ⌘1 for Write". ⌘K's top row for that word —
+    /// the row ⏎ opens — is the lesson itself, and the palette opens a note
+    /// row as the NOTE'S OWN PAGE (`.post`), out of the book, where the mode
+    /// keys act (the refusal "Open a note first — the modes live inside a
+    /// note" is a BOOK surface's). So the keys the lesson teaches work on the
+    /// road it teaches; only a reader who skips the ⌘K step meets the
+    /// refusal, which the lesson never asks of her. This pin follows the
+    /// road on the seeded guide; it is GREEN on the unreworded lesson (the
+    /// hallucination guard's verdict: hollow — recorded, not reworded).
+    @Test func gettingAroundsModeKeysFollowARoadThatLeavesTheBook() async throws {
+        try await withGuide { session, db, guideID in
+            let text = try await prose(db, guideID, "getting around")
+            let road = try #require(text.range(of: "press \u{2318}K, type \u{201C}getting\u{201D}"),
+                                    "the lesson names the ⌘K road")
+            let keys = try #require(text.range(of: "press \u{2318}2 for Takes"),
+                                    "the lesson names the mode keys")
+            #expect(road.upperBound <= keys.lowerBound, "the road comes first")
+
+            let lessonID: String = try await db.read { db in
+                try String.fetchOne(
+                    db, sql: """
+                        SELECT c.id FROM reading_post rp
+                        JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND c.title = ?
+                        """,
+                    arguments: [guideID, "getting around"]) ?? ""
+            }
+            let model = PaletteModel(session: session)
+            model.query = "getting"
+            await model.refresh()
+            let top = try #require(model.items.first, "⌘K answers the word")
+            var opened: SidebarSelection?
+            model.execute(top) { selection, _ in opened = selection }
+            #expect(opened == .post(lessonID),
+                    "⏎ opens THIS lesson as a note page, where ⌘2 and ⌘1 act (\(String(describing: opened)))")
+        }
+    }
 }
