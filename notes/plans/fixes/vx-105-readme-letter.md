@@ -80,7 +80,7 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
 
 ### LIVE STATUS (implementer, Opus — one session)
 
-- **Piece 1 — the seeder content swap:** DONE (`99231c04b`), REWORKED to R-105-6 (this commit — hash at the next).
+- **Piece 1 — the seeder content swap:** DONE (`99231c04b`), REWORKED to R-105-6 (`ca2f7d939`).
   `ReadmeSeeder.paragraphs` = her 17 blocks exactly as `read-me.txt` carries them (header line dropped, blank-line
   splits, NO trailing-space restoration — the first build restored the store's 13 trailing spaces per the brief; her
   R-105-6 retired that and this rework removed them). Verification, the literals AS WRITTEN IN THE SEEDER SOURCE
@@ -102,7 +102,27 @@ WRITTEN and compile under `build-for-testing`); no walk, no app launch, no `/App
   and their own touch + churn stamp the edited columns; then `setStarred(.post(id), true)` — the one star write — in the
   same runner turn. See the stamp table and **S-1 (the star meets the fold — a structural surprise, ARCHITECT'S
   RULING NEEDED)** below.
-- **Piece 3 — the Sherlock door retitle (R-105-4):** NOT-STARTED.
+- **Piece 3 — the Sherlock door retitle (R-105-4):** DONE (this commit — hash at the next). The registry's verb for
+  `.restoreSampleLibrary` is now `Restore \u{201C}\(SampleLibrarySeeder.bookName)\u{201D}` — rendered **Restore
+  “the adventures of sherlock holmes”**, the Jekyll/Prince doors' exact idiom over the one name constant. The act is
+  unchanged (`restoreSeededBook(.sherlock)`); the capability id and the `ShellActions.restoreSampleLibrary()` function
+  keep their names (internal identifiers, never rendered — renaming them would churn every pin for no reader). No door
+  added or removed; Encryption Explained stays gone (R-13s-37). App build EXIT 0.
+
+  **The door-copy grep (every home, `grep -rIn 'restoreSampleLibrary|Sample Library|sample library'` over `App/` and
+  `Sources/`):**
+  - RENDERED — the ONE string: `Registry/CapabilityRegistry.swift` (the verb). It renders through
+    `EditorCommands.swift` (Help menu: `Button(verb(.restoreSampleLibrary))`) and the ⌘K palette
+    (`ShellActions.paletteActs` reads the registry's verb). The ⌘/ dictionary lists no restore door (shortcut-less
+    capabilities are not its rows). The phone has no such door (`MobileSettingsView` carries only the pocket guide's).
+  - NOT RENDERED, left as is: `SampleLibrarySeeder.undoLabel = "Sample Library"` (the label of entries registered on the
+    QUIET facade, `Operations(undoStack: nil)` — never on her ⌥⌘Z, never shown); the seeder's two `log` lines (OSLog);
+    the many code comments that say "the sample library" as the subsystem's name (`SampleLibrarySeeder`,
+    `Shared/SampleLibrary/`), which is the code's vocabulary, not chrome.
+  - Doc comments updated to the new name: `Capability.swift`, `ShellActions.swift` (×2), `EditorCommands.swift`.
+  - **Guide/tour content:** NO lesson and no tour card names the door (`TutorialSeeder.swift` and `TourScript.swift`
+    grep clean for "Sample Library"); so piece 3 changes no guide content. Her readme quotes the book in Title Case
+    ("The Adventures of Sherlock Holmes" under the Help menu) and stands unchanged (her disposition 2).
 - **Piece 4 — the pins:** NOT-STARTED.
 - **Piece 5 — the first-chapter interweave (R-105-5):** NOT-STARTED.
 - **Piece 6 — this record's closing sections:** IN-PROGRESS (LIVE STATUS kept from the first commit).

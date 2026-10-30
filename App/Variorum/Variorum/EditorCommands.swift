@@ -143,8 +143,8 @@ struct EditorCommands: Commands {
         .toggleSeams, .switchMode, .helper, .restoreTutorial,
         // 13s-b U1a, piece 5: Help ▸ Take the Tour.
         .takeTour,
-        // pre-13u Act 10: the sample library's restore, beside the
-        // tutorial's (the tenth-wave ruling). (Encryption Explained's left
+        // pre-13u Act 10: Sherlock's restore (VX-105: named by its book),
+        // beside the tutorial's (the tenth-wave ruling). (Encryption Explained's left
         // at 13s-b U1b — R-13s-37: not restorable.)
         // VX-633: the Prince's restore (the launch's book), first of the books.
         .restorePrinceBook,

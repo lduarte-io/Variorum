@@ -506,9 +506,12 @@ struct ShellActions {
         }
     }
 
-    /// **Help ▸ Restore the Sample Library** (pre-13u Act 10 — the
-    /// tenth-wave ruling: *"Restore door - yes, let's do it"*; Sherlock is
-    /// field-guide-class seeded content, and the field guide has restore).
+    /// **Help ▸ Restore “the adventures of sherlock holmes”** (pre-13u Act
+    /// 10 — the tenth-wave ruling: *"Restore door - yes, let's do it"*;
+    /// Sherlock is field-guide-class seeded content, and the field guide has
+    /// restore). VX-105 (R-105-4): the door names its book like its siblings
+    /// — the "Sample Library" label is retired; the act, and this function's
+    /// name, are unchanged.
     ///
     /// Deliberately UNLIKE the tutorial's replace: `SampleLibrarySeeder`'s
     /// seed is RESUMABLE — it mints only what is MISSING (a deleted book
@@ -839,8 +842,8 @@ struct ShellActions {
         .divide, .extract, .makeBlock, .merge, .addBlockAtEnd, .insertBlockBelow, .deleteBlock,
         .showTakes, .newTake, .blankTake, .chooseTake,
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
-        // pre-13u Act 10: the sample library's restore, typeable like the
-        // tutorial's. (The Encryption Explained row left at 13s-b U1b —
+        // pre-13u Act 10: Sherlock's restore (VX-105: named by its book),
+        // typeable like the tutorial's. (The Encryption Explained row left at 13s-b U1b —
         // R-13s-37: not restorable.)
         // VX-633: the Prince's restore, typeable like the others.
         .restorePrinceBook,
