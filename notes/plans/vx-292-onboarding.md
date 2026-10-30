@@ -547,3 +547,18 @@ Expected: TourScriptTests [8] · TourSpotlightTests [8] · TourEngineTests [10] 
 - Each sample book now has its own restore door in Help — "the adventures of sherlock holmes" included — replacing the old Restore the Sample Library item.
 - The field guide's first chapter now begins with the move from a book into a note, and covers your library's keys and safety up front.
 Runner notes from the coordinator: read the whole ReleaseNotes file once against VX-708's shape BEFORE the stamp (a notes change after release.sh stamps = a fresh run); verify-published's appcast pass must see the old 0.10.5/0.10.6 meta lines re-embedded clean.
+
+## U3 RECORD
+
+**NOT DONE (first line, kept current):** everything below is IN PROGRESS — no piece is built yet; no `xcodebuild test` run (stage-window only), no walk, no GUI, no QUESTIONS.md entry (the merging session's ledger), no canon edit (owed to U5).
+
+Implementer: Opus (opus-implementer), 2026-10-30, worktree `~/dev/variorum-vx-292`, branch `vx-292-onboarding` (on top of the vx-105 merge-in, `404932a4f`), the Pro. Scope: the four pieces of the U3 BRIEF (R-292-3/7/8/10/13) and its COPY DRAFTS; zero `Sources/VariorumCore/Sync/`, zero editor seam (every new anchor sits on chrome: a tab, a door, a column stub, a choose band, a segmented switch). Read in my own context before any code: this plan whole (rulings, the U1/U-THEME/U2 records and both U2 window records, the U3 BRIEF and COPY DRAFTS), `notes/SessionResiliencyProtocol.md`, `Domain/Tour.swift` whole, `TourEngine.swift`, `TourOverlay.swift`, `TourScript.swift`, `Core/Views/TourSpotlight.swift`, `TourWalkTests` and `TourTests` whole, `TourQueries.swift`, SurfaceContracts §The app, §The Bookcase and books and §The note, and the roads traced in the pieces below.
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 1 The rule's new steps (`Domain/Tour.swift`, `TourQueries`, `TourWalkTests`) | IN-PROGRESS — design traced (below) |
+| 2 The chrome (anchors, facts' sources, the Settings stop's door, the build-verifies; Mac pins) | NOT-STARTED |
+| 3 The absorbed tickets (VX-712, VX-713) | NOT-STARTED |
+| 4 Record close (self-assessment, PROVISIONALs, stage commands, walk rows, full core suite) | NOT-STARTED |
