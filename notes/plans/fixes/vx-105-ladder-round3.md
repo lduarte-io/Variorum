@@ -253,8 +253,30 @@ The read's pre-existing automatic edge-index pass is described, not changed (the
   peer's own identity and liveness (a live post, not this container); it leaves to the classifier the edge fence (a
   live link, or one cascade-dead with its endpoint) and this container's own checks (live, born archived — and
   `theirs.block_id <> mine.block_id`). The broken line wrap round 2 left in the same sentence is mended. Doc only.
-- **MINOR-2** (the equality pin's source side) — IN-PROGRESS. Shapes E and G are added to
-  `anyLiveNotesVersionAgreesWithTheClassifierAcrossTheNoteSideShapes` and the extended pin is GREEN on the shipped read
-  (`swift test --filter anyLiveNotesVersion`: 3/3) — committed with this line, BEFORE any mutant. NEXT: the two
-  mutants, applied one at a time to `NoteVersions.swift` only, each run and then restored by `git checkout --` from
-  this commit. **No revert is in flight at this commit.**
+- **MINOR-2** (the equality pin's source side) — DONE. Shapes E and G were added to
+  `anyLiveNotesVersionAgreesWithTheClassifierAcrossTheNoteSideShapes` (`758294da1`, committed BEFORE any mutant):
+  - **E:** a moment of N1 is marked a version of a LATER note N2 (`markVersionOf(momentBlock, n2Block)`), then
+    unmarked from N1. Its one witnessing link has it on the SOURCE side, and the pin asserts
+    `link.sourceBlockId == momentBlock`. The note's placement is live.
+  - **G:** E, then N2's linked block is merged with its neighbour, so the note's placement is tombstoned.
+
+  Both moments join the expected named set. The extended pin is GREEN on the shipped read.
+  **Mutant evidence.** I applied each mutant temporarily to `Sources/VariorumCore/Queries/NoteVersions.swift` only, ran
+  `swift test --filter anyLiveNotesVersionAgrees`, and restored with `git checkout --` from `758294da1`. One at a time,
+  in this order:
+  1. **Drop both source→target arms** (the `from: "source_block_id"` live and dead arms; `git diff --stat`: 2
+     deletions). **RED, 3 issues:** two `candidateDriven == classifierAnswer` disagreements (E's and G's moments) and
+     `named == Set(momentsThatStayVersions)`. Restored, then `git diff --quiet` was clean.
+  2. **Drop only the source→target DEAD arm** (`from: "source_block_id"`, `placement: "IS NOT NULL"`; 1 deletion).
+     **RED, 2 issues:** one disagreement (G's moment, whose note-side placement the merge tombstoned) and the named-set
+     expectation. Restored, then **`git diff --quiet`: CLEAN** and `git status -sb` was level with origin.
+
+  These two mutants are the bold rows of the reviewer's table, GREEN on the round-2 pin. They now turn RED, so the
+  source-side arms are held. **No revert is in flight; the tree is clean.** Final headless run:
+  `swift test --filter "NoteVersionsTests|VersionsInCompareTests"` passed 37 tests in 2 suites.
+
+**ROUND STATE: READY-FOR-STAGE.** All three residuals are done, and none changes behavior. The stage-window expectation is
+UNCHANGED (`vx-105-ladder-round1.md`, "Stage-window expectation"): the same suite types, everything passes, no expected
+red. This tail touched only core tests and docs, run headless above. Commits: `a71034494` MINOR-1 (did not compile: see
+its machinery note) · `cd99e73e0` the compile fix · `cd41e7bc5` NIT-1 · `758294da1` MINOR-2's shapes · this commit,
+MINOR-2's evidence.
