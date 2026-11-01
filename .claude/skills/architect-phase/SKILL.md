@@ -214,6 +214,7 @@ At closeout, after the PR merges: retire the in-flight row and **remove the effo
 
 ## Records (the discipline that makes everything else safe)
 
+- **A record's first section is FOR A LATER READER** (CLAUDE.md's rule): the closeout writes it last, from the settled facts, and a later session reads that section in place of the file. The orchestrator's handoff points at it, never at the whole file, unless the fix is being reopened — a cutover successor inside the same open effort still reads whole.
 - **The plan file is the ONE running record:** status banner, binding
   principles, a running LEDGER (numbered rows: item → status, every
   row owned), per-batch records, sitting records, stage closeouts.

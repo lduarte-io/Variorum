@@ -323,3 +323,16 @@ implementer"). Two companion rules from the same message: CLAUDE.md carries no "
 include things like RULED anymore in the claude.md … it's supposed to just be the essentials that any new session needs
 to know, which does not include what time those decisions were made") — the dated history is this file's; and the
 architect skill's matching bullet is a POINTER at CLAUDE.md's rule ("so the two can't drift again").
+
+**Three conventions added the same evening (2026-11-01, at her word — recommendations she took from another session
+and asked the VX-500 orchestrator to land, flagging any issue).** (1) CLAUDE.md Environment: ask for the materially
+better road that needs her hands (a `!` command, an account, a device, a decision), naming the road and its cost in one
+line, rather than taking a weaker road silently; the weaker road runs only at her word; "I can do this alone" is never
+the reason. The orchestrator added one clause so the line and the skills' away-run rule agree: in an away run the ask
+is HELD and bundled while independent work continues. (2) CLAUDE.md Build workflow: every fix or run record opens with
+a FOR A LATER READER section (mechanism, the fix per piece, rulings by id, the evidence lines, open items — a page),
+written at closeout; everything below it is the working record a later session never reads unless reopening the fix; a
+kickoff naming a record means that section, "whole" only under revision — the orchestrator added that a cutover inside
+a still-open effort always says whole. (3) Both phase skills carry the identical pointer line (architect-phase's Records
+section; run-phase's closeout item). Write-side only — binding at every closeout from now on, no retrofit of old
+records; the one worth retrofitting by hand is VX-494's (the next sync session reads it), at her word.
