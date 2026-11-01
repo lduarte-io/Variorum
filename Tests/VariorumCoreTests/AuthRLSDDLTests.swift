@@ -157,11 +157,15 @@ struct AuthRLSDDLTests {
     /// and the catch-up count. A MAINTENANCE artifact (no marker move — the wire is byte-identical), deployed AFTER
     /// the belt; it re-creates `sync_pull` and creates `sync_pull_remaining`, so the bodies the deployed server RUNS
     /// for those two are ITS — `finalBody(of:)` lays it over the lockstep composition (the ladder-overlay precedent).
-    private static let vx495PullKeysetFile = "maintenance/vx495-pull-keyset.sql"
+    static let vx495PullKeysetFile = "maintenance/vx495-pull-keyset.sql"
 
     /// The maintenance artifacts that DEFINE functions after the whole lockstep chain, in deploy order — what
-    /// `finalBody(of:)` reads past the chain.
-    private static let postChainFunctionArtifacts = [vx495PullKeysetFile]
+    /// `finalBody(of:)` reads past the chain. THE ONE LIST (the server-half ladder's F2): the attacker suite's arm 9
+    /// (`MultiTenantSyncAttackerTests.noOwnershipChangeInstructionExistsOnTheWire`) derives the files it reads after
+    /// the numbered chain from HERE — internal, not private, so a future post-chain artifact added to this list is
+    /// scanned by both suites at once, never by one (the silent-coverage drift the round traced: a forbidden parameter
+    /// in a newer body unscanned by arm 9, or `finalBody` asserting against a superseded body).
+    static let postChainFunctionArtifacts = [vx495PullKeysetFile]
 
     /// The body the deployed server actually runs: the LAST
     /// `create or replace function <name>(` in deploy order, up to its

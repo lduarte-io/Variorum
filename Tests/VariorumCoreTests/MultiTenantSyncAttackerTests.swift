@@ -179,11 +179,15 @@ extension MultiTenantSyncTests {
         var sqlFiles = try FileManager.default.contentsOfDirectory(at: sqlDir, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension == "sql" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
         #expect(sqlFiles.count >= 11, "the numbered chain — the pin isn't vacuous")
-        // VX-495/VX-496 (VX-500 U1a): the ONE maintenance artifact that DEFINES functions after the whole chain
-        // (`AuthRLSDDLTests.postChainFunctionArtifacts`' precedent) is read last, by name — never the maintenance
-        // folder wholesale, whose historical overlays (the pre-13x ladder guard, 13j's in-window rename) would
-        // overwrite the chain's FINAL parameter lists with older ones.
-        sqlFiles.append(sqlDir.appendingPathComponent("maintenance/vx495-pull-keyset.sql"))
+        // VX-495/VX-496 (VX-500 U1a; the server-half ladder's F2): the maintenance artifacts that DEFINE functions
+        // after the whole chain are read last, in deploy order, FROM THE ONE LIST `AuthRLSDDLTests.postChainFunctionArtifacts`
+        // (the same module's single source of truth — `finalBody(of:)` reads past the chain through it too) — never
+        // the maintenance folder wholesale, whose historical overlays (the pre-13x ladder guard, 13j's in-window
+        // rename) would overwrite the chain's FINAL parameter lists with older ones.
+        #expect(!AuthRLSDDLTests.postChainFunctionArtifacts.isEmpty, "the post-chain list — the appended scan isn't vacuous")
+        for artifact in AuthRLSDDLTests.postChainFunctionArtifacts {
+            sqlFiles.append(sqlDir.appendingPathComponent(artifact))
+        }
         var deployed: [String: String] = [:]  // name → the LAST parameter list deployed
         let signature = try NSRegularExpression(pattern: #"create or replace function ([a-z_]+)\(([^)]*)\)"#)
         for file in sqlFiles {
