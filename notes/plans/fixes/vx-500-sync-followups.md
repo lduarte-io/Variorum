@@ -159,7 +159,7 @@ and `finalBody(of: "sync_pull")` is laid over with it (the `deployedBody` overla
 pins run against the DEPLOYED body: the horizon derivation + no inline interval + the server-only subtraction; every
 `from %I t` with its owner filter (the pick phase adds one `from`/one `where` per branch — the counts stay equal); plus
 NEW pins: the pick phase's `order by t.server_seq limit %s` inside the per-table subquery; the fetch phase's
-`in (select p.row_id from picked p …)`; the allowlist and owner-table arrays byte-equal to 13's (no table gained or
+`in (select p.row_id from picked p …)` — SUPERSEDED by SHAPE B's bound pin (D-495 EVIDENCE); the allowlist and owner-table arrays byte-equal to 13's (no table gained or
 lost). **Evidence — the read-only cost probe on production (her tenant, counts only, no content):** the OLD shape vs
 the NEW shape as bare SELECTs through `Tools/prod-read.sh`, each 3 runs, wall-clock by `curl` — recorded below;
 `EXPLAIN ANALYZE` of the new body is HELD for her `!` road (offered in the report). **The deploy: HELD** — at her word

@@ -8,27 +8,37 @@ be orchestrating several more batches of work." The first orchestrator breached 
 itself — the plan file's PROTOCOL BREACH section); everything it wrote is committed and recorded, nothing is in
 flight, no revert is in flight, the tree is clean.
 
-## THE PASTE-READY KICKOFF PROMPT (for her, for a fresh orchestrator session on the Pro)
+## THE PASTE-READY KICKOFF PROMPT (for her, for a fresh orchestrator session on the Pro — rewritten after the probes and her rulings, 2026-11-01)
 
 ```
-/architect-phase VX-500 — RESUME the sync follow-ups run from its cutover seam. The run is kicked off: branch
-vx-500-sync-followups, worktree ~/dev/variorum-vx-500 (the Pro), the in-flight row on main, VX-500 and its members In
-Progress. READ FIRST, IN FULL, YOURSELF: notes/handoffs/vx-500-handoff.md (this file), then
-notes/plans/fixes/vx-500-sync-followups.md WHOLE (the roster, THE DESIGN D-495…D-504, the two memos, THE DEPLOY,
-PROTOCOL BREACH, LIVE STATUS), then the standard preflight (CLAUDE.md + canon, SyncSpec WHOLE, CastleRules WHOLE —
-U3 is custody-adjacent — SurfaceContracts' Doors section, the resiliency protocol, the sizing guidance). THE CAST,
-my rulings: the orchestrator writes NO product or test code (memory `orchestrator-never-writes-code`); a FABLE
-SUBAGENT implements every batch that touches Sources/VariorumCore/Sync/ (U1) — spawn an implementer with the model
-left as Fable and brief it exactly as an opus-implementer; Opus implements U2 (faces + the test fixes) and U3 (the
-typed-unlock retry); a fresh fable-reviewer runs the ladder over the whole diff (Fable always reviews the Sync/ and
-editor-seam class). Three units are fine. The first orchestrator's commit aad734aef is UNTRUSTED INPUT — the U1
-Fable implementer ADOPTS it (re-reads every line against D-495/D-496/D-505, re-derives the pins' red-on-old, fixes
-the DDL WIP named in the handoff) unless I say revert. Order: U1 → U2 → U3 → the ladder → the closing runs → the
-PR OPENED AND HELD (we are in the launch code freeze — never merge; I say when). The server deploy
-(maintenance/vx495-pull-keyset.sql) is HELD for my explicit word; VX-508 stays HELD (tester A's join). THE PROBES ARE DONE (my
-`!` road, 2026-11-01 — D-495 EVIDENCE in the plan): old 3,398 ms · the draft 1,138 ms · SHAPE B 230 ms · the count
-1,586 ms. SHAPE B (the bound-based range fetch) is D-495's design now — the U1 implementer rewrites the artifact's
-fetch to it and builds the count per P-500-6. I'm present for the sittings; bundle my calls.
+/architect-phase VX-500 — RESUME the sync follow-ups run from its cutover seam. The run is kicked off and part-built:
+branch vx-500-sync-followups, worktree ~/dev/variorum-vx-500 (the Pro), the in-flight row on main, VX-500 and its
+members In Progress. READ FIRST, IN FULL, YOURSELF: notes/handoffs/vx-500-handoff.md, then
+notes/plans/fixes/vx-500-sync-followups.md WHOLE (the roster, THE DESIGN D-495…D-504 with D-495 EVIDENCE — the
+probes — and the two memos, THE DEPLOY, PROTOCOL BREACH, HER RULINGS R-500-1…4, LIVE STATUS), then the standard
+preflight (CLAUDE.md + canon — its cast rule was reworded today — SyncSpec WHOLE, CastleRules WHOLE for U3,
+SurfaceContracts' Doors section, the resiliency protocol, the sizing guidance).
+
+WHAT IS DONE: the plan; the first orchestrator's DRAFT of U1 in commit aad734aef (the server artifact, the engine's
+progress seam, the scheduler's progress + lastErrorIsRetrying, the fake's count, SyncProgressTests, one belt pin, the
+DDL-test changes) — UNTRUSTED INPUT, written in breach of the shape, never reviewed; and my EXPLAIN ANALYZE probes on
+production (D-495 EVIDENCE): old 3,398 ms · the draft 1,138 ms · SHAPE B 230 ms · the count 1,586 ms.
+
+THE CAST: you write NO code (CLAUDE.md, memory `orchestrator-never-writes-code`). ASK ME at your kickoff whether U1
+(the Sync/ batch) is implemented by a Fable subagent or by Opus — my call, per CLAUDE.md's new cast line; Opus
+implements U2 and U3; a fresh fable-reviewer runs the ladder over the whole diff (Fable always reviews the Sync/ and
+editor-seam class). Three units are fine.
+
+U1'S BRIEF, in short (the plan carries it): the implementer ADOPTS aad734aef as a draft — re-reads every line against
+D-495/D-496/D-505 and re-derives the pins' red-on-old honestly — then (1) REWRITES the artifact's fetch to SHAPE B (the
+bound-based index range scan; the plan's D-495 EVIDENCE says exactly how; the drafted `in (select …)` form and its
+DDL pin go, a bound pin replaces them); (2) builds the count per R-500-1 — the INDEX-ONLY count without the horizon
+filter; (3) fixes the DDL-test WIP named in the handoff (the body finder's prefix match, the doctored-chain arm, the
+marker-guard pin); (4) the apply PROFILE (D-497 (1)) and the FK memo only if the profile names it. Then U2 (D-496's
+words, D-505's line, D-539/VX-546's injected clock, VX-490), then U3 (D-544). Then the ladder, the closing runs, and
+the PR OPENED AND HELD — we are in the launch code freeze; never merge, I say when. The server deploy
+(maintenance/vx495-pull-keyset.sql) is HELD for my explicit word; VX-508 stays HELD (tester A's join). Pre-launch:
+neither VX-544 nor VX-683 (R-500-2). I'm present for the sittings; bundle my calls.
 ```
 
 ## STATE AT CUTOVER (verify, never trust — `git -C ~/dev/variorum-vx-500 log --oneline -6`)
