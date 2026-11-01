@@ -657,6 +657,80 @@ message's "green" claims are observations only — every suite named here is re-
 9. **The `(` in the body finders** (`AuthRLSDDLTests.lastBody`/`finalBody`) — every `create or replace function <name>(` in the chain is written without a space before the paren and without a `public.` prefix; I checked by the suite going 82/82 (an unmatched name records an Issue). A future artifact writing `function public.name (` would be invisible to the finders exactly as before this change.
 10. **Not probed live**: the artifact has never run on a Postgres — the DDL pins are string pins. The deploy (HELD) is where the SQL first executes; the checklist's "pg_get_functiondef reads the new body" and a first live round are the real evidence. A rehearsal on a throwaway is her hands.
 
+#### The orchestrator's verification of U1a (2026-11-01 ~14:25 MDT; verify-not-trust)
+
+- The seven commits `6155ba7fb` · `7d645688f` · `1e8d24286` · `917189ccd` · `86b097934` · `95ed95220` · `9a2b3dfc7` are on the
+  branch tip, pushed, tree clean. The artifact read by the orchestrator: the pick yields seqs only, `bound as (select
+  max(server_seq) as seq from picked)`, both fetch branches `and t.server_seq <= (select seq from bound)`, the count body
+  `where t.owner_id = %L and t.server_seq > %s` with no horizon term — SHAPE B and R-500-1 as ruled.
+- The orchestrator's OWN run: `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|AuthRLSDDLTests|MultiTenantSyncAttackerTests"`
+  → **"Test run with 120 tests in 6 suites passed after 11.572 seconds"** (the implementer's 118 + the grown wire pin's 2).
+- Accepted into the run's diff; the ladder reads it whole. The implementer's self-assessment items 1, 2, 4, 7 are the
+  cold reviewer's to press (named in the ladder brief); items 5 and 8 (the two un-pinned scenes — the stall's `done <
+  total`, the engine under a non-zero horizon) are the reviewer's call to demand; item 6 (the refused follow-up corner
+  of `lastErrorIsRetrying`) rides into U2's brief as a known corner and into HELD FOR HER (P-500-7 below); item 3 and
+  item 10 (nothing has run on a Postgres; the index-only shape unprobed live) are THE DEPLOY checklist's — step 3 gains
+  an `EXPLAIN` of the count once live.
+- **For her triage (not fixed, not ticketed yet):** two NEW load-shaped flakes seen once each in a full core run and
+  green alone — `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds(.clientHangsUp)` and
+  `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` — candidates for the traps' named-flake list or one
+  Test-only ticket (Tests & tooling, Low).
+- The USE-SHAPED evidence owed for a sync unit (one live two-device round) rides her held deploy window — OWED, not
+  claimed (THE DEPLOY).
+
+### U1b BRIEF — the apply PROFILE at scale (D-497 (1)), the profile-gated FK memo (D-497 (2)), the chunking memo trued (a FABLE implementer; a SYNC batch only if the profile names the memo)
+
+**Who you are.** The implementer for U1b of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
+contract binds you point for point (you are Fable at her R-500-5 word). This is a MEASUREMENT unit first: its
+deliverable is numbers and a trued memo; it becomes a code unit ONLY if the profile names the FK introspection as a
+measurable share — then `Sources/VariorumCore/Sync/SyncEngine.swift` is yours for exactly that one change. The
+orchestrator writes nothing that ships. Worktree `<home>/dev/variorum-vx-500`, branch
+`vx-500-sync-followups`, headless only (no store, no server, no stage).
+
+**Read first, in full:** `CLAUDE.md` + its canon · THIS FILE WHOLE (D-497, THE CHUNKING MEMO, the U1a RECORD — U1a's
+engine lines are the tree you profile) · `notes/SyncSpec.md` §5 and §7 · `notes/SessionResiliencyProtocol.md`
+§implementer · `Sync/SyncEngine.swift`'s `pullRound` apply (the belt, the straggler FIXPOINT with `foreignKeysSatisfiable`
+→ `foreignKeyColumns` at ~:792/:967/:979, the row loop, `runPostApplyRepairs`) · the gating precedents for a
+measurement that lives in the test target but never runs by default: `Tests/VariorumCoreTests/SearchForkMeasurementTests.swift`
+(`VARIORUM_SEARCH_MEASURE`) and `VX647DeletedHistoryProbeTests.swift` (`VX647_PROBE`, env-read sizes) · the corpus-
+seeding and two-client helpers `SyncProgressTests` / `ResumableCatchUpTests` already use (`SyncClient`, `seedCorpus`,
+`FakeSyncServer`).
+
+**The pieces:**
+
+1. **The profile instrument** — `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift`, gated by
+   `VARIORUM_APPLY_PROFILE=1` (skipped otherwise, so the suite's count is untouched by default; sizes env-overridable
+   with the D-497 defaults): client A seeds ~1,200 posts × 30 blocks and pushes over the fake; client B pulls ONCE from
+   zero with the production window size, and the APPLY is timed by phase — the belt + plan, the straggler fixpoint, the
+   row loop (merge/write + recordSeq), the post-apply repairs, the cursor/stage clear. Phase timing needs seams the
+   engine may not expose: prefer `os_signpost`/`ContinuousClock` reads around the existing phase boundaries behind a
+   DEBUG-only, nil-by-default hook (the `SampleLibraryDedupeFacts`-style injected seam — nil = inert, pinned) over
+   restructuring the apply; if even that is more than a few lines, time the WHOLE apply and the fixpoint separately by
+   running the fixpoint's `foreignKeysSatisfiable` over the batch standalone, and say so. Debug build; three runs;
+   RELATIVE shares recorded (percent per phase), absolute numbers labelled as this Mac's Debug figures, never promises.
+   Also count how many `PRAGMA foreign_key_list` calls the fixpoint issues for the batch (a counter on the hook).
+2. **The FK memo — ONLY if the profile names it** (a measurable share: the record states the threshold you used before
+   you measure; D-497 suggests the introspection runs once per ROW): memoize `foreignKeyColumns` per apply transaction
+   (a per-table cache inside `pullRound`'s apply — the schema cannot change inside the transaction, so the cache is
+   pure; zero semantics). Evidence: the sync suites green unchanged (`swift test --filter "Sync|Catch|Convergence|
+   Repair|Straggler|Attacker|Tenant"` — read what matches) + the profile's before/after shares. If the profile does NOT
+   name it, write that down with the numbers and change no engine line.
+3. **THE CHUNKING MEMO trued** — append a "The numbers (U1b)" paragraph under THE CHUNKING MEMO: where the time goes,
+   what chunking would and would not buy against it, and whether any edge in the memo's list changes shape in light
+   of the profile. Recommendation unchanged unless the numbers overturn it (say so if they do; the memo stays hers to
+   rule — no build).
+4. **Close.** `swift build`; the gated instrument run with the env set (its lines in the record); the ungated filtered
+   suites green (`SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests` — the last
+   skipping); if an engine line changed, the broad core `swift test` in the foreground with the traps' flake list in
+   mind (the two new candidates above included). SELF-ASSESSMENT at the end.
+
+**Your record:** `### U1b RECORD` under UNIT RECORDS — LIVE STATUS from the first commit, the measured table, the
+threshold stated before the measure, the FK decision, the memo's trued paragraph pointer, the close's lines, the
+self-assessment; first line = what you did NOT do. Flip the orchestrator's LIVE STATUS row 3. Commit messages
+`VX-500 U1b: … Part of VX-497`; no trailers; pull --rebase before each push; foreground waits only.
+
+**Not yours:** U2, U3, the ladder, the deploy, the PR. **ENVIRONMENT TRAPS — the section above, binding verbatim.**
+
 ## LIVE STATUS (the orchestrator's; flipped per piece)
 
 | # | Piece | Status |
@@ -665,7 +739,7 @@ message's "green" claims are observations only — every suite named here is re-
 | 0b | RESUME (the second orchestrator, 2026-11-01 ~13:30 MDT): the handoff + this file + the standard preflight read whole (SyncSpec, CastleRules, SurfaceContracts' Doors, the resiliency protocol, the sizing guidance, the master plan, QUESTIONS' tail); main merged into the branch (`c64211270`); the stage claimed; the roster re-listed via Linear (11 sub-issues — matches); R-500-5 ruled; the U1 split; the U1a brief | DONE (this commit) |
 | 1 | U1a — the server artifact (D-495 SHAPE B + the count per R-500-1) + the DDL pins | DONE (`6155ba7fb` SHAPE B · `7d645688f` the count · `1e8d24286` the DDL pins · `917189ccd` the red-on-old) — U1a; the record is `### U1a RECORD` |
 | 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | DONE (`86b097934` the ownership pass, one change; the close commit the wire pin) — U1a; the draft `aad734aef` adopted line by line |
-| 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | NOT STARTED (a second Fable session after U1a) |
+| 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | IN PROGRESS — the Fable implementer, briefed §U1b BRIEF |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
 | 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
@@ -683,4 +757,10 @@ message's "green" claims are observations only — every suite named here is re-
 - **The riders:** VX-546 and VX-490 seated provisionally; VX-76 as VX-496's duplicate; VX-491 not seated.
 - **The flags:** VX-683 (data-loss class, two-device same-take edits — her priority call; a `Sync/` design memo run),
   VX-672 (the phone's slow post-purge round — profile on her phone after VM-32), both outside this run.
+- **P-500-7 (U1a's finding, for U2 and her):** on a REFUSED belt follow-up (the double-refusal corner — two rounds racing
+  one store, a non-production shape) `lastErrorIsRetrying` is FALSE by design and the row still shows the engine's belt
+  sentence under `.error` until the next trigger; options: (a) leave it (the shape is not reachable in production); (b) a
+  second typed fact "the belt refused and nothing follows" with its own line. U2 builds (a) PROVISIONAL unless she says.
+- **Two load-flake candidates** (U1a's broad runs, green alone): `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytes…`,
+  `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` — the traps list or one Test-only ticket, her call.
 - ~~**Pre-launch labels:** VX-544 (her call — Castle typed-road users offline); VX-683 (her call).~~ RULED R-500-2: neither is Pre-launch.
