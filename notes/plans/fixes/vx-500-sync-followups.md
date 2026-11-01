@@ -166,6 +166,32 @@ the NEW shape as bare SELECTs through `Tools/prod-read.sh`, each 3 runs, wall-cl
 only (SyncSpec §12's procedure for a function body: the mirror first; no client lockstep since nothing on the wire
 changes); the checklist is in THE DEPLOY section below.
 
+#### D-495 EVIDENCE — her `EXPLAIN ANALYZE` probes on production (2026-11-01, her `!` road; read-only; her tenant
+*[removed for publication]*
+
+- **THE OLD SHAPE (13's body):** `Execution Time: 3398.374 ms`. Parallel Append of Seq Scans on every large table
+  (`block` 21,963 rows · `variant` 17,113 × 2 workers · `commit_point` 29,680 · `container_block` 21,957 · `lens_choice`
+  8,373 …; ~122k rows filtered and `to_jsonb`'d), then a top-N heapsort, then the Limit. Buffers 11,538. The ticket's
+  mechanism, measured: the page costs the rows still ahead.
+- **THE NEW SHAPE AS WRITTEN IN `aad734aef` (pick by id, fetch by PK probe):** `Execution Time: 1137.617 ms` — 3×
+  faster, and the PICK is exactly as designed: a `Merge Append` of per-table `Index Scan using idx_owner_seq_<table>`
+  each under its own `Limit`, **37 ms, 241 buffers** for the whole page. The FETCH is the cost: each branch is a Nested
+  Loop of per-row PK probes (`Index Scan using block_pkey … actual time=0.468 rows=1 loops=431`; variant 0.585 ms × 539;
+  commit_point 0.55 ms × 443) — ~0.5 ms a probe on this instance, ~1,100 ms for the 2,000 probes. The cost is now
+  O(page) rather than O(rows ahead) — the ceiling is gone — but a constant ~1.1 s per window would make the END of a
+  catch-up slower than today's ~0.4 s windows, and her 56-window catch-up only ~1.7× faster in sum.
+- **THE REFINEMENT (recorded for the Fable implementer; NOT written by the orchestrator) — SHAPE B, the bound-based
+  fetch:** the page's picked rows per table are exactly that table's rows with `server_seq` in `(since, S]` where `S`
+  is the page's LAST seq (the pick takes the globally smallest 2,000 seqs; per-tenant seqs are unique, so no ties), so
+  the fetch needs NO per-row probes: `picked` yields only seqs, `bound as (select max(server_seq) from picked)`, and
+  every fetch branch is ONE index RANGE scan `where t.owner_id = caller and t.server_seq > since and t.server_seq <=
+  (select seq from bound) and <horizon>` off `idx_owner_seq_<table>` — `to_jsonb` on exactly the page's rows, sequential
+  within each index. Expected ≈ the pick's 37 ms + the JSON of 2,000 rows. The probe `new-shape-b.sql` is written;
+  her run decides (below). Either way the A5/owner pins' shape (`from %I t` + `where t.owner_id = %L` per branch, the
+  derived horizon, the two subtraction branches) holds.
+- **SHAPE B's result:** PENDING her run.
+- **The count shape (`sync_pull_remaining`):** PENDING her run.
+
 ### D-496 — the progress line (U1: the engine + the count RPC; U2: the words)
 
 **Mechanism.** The scheduler publishes `isSyncing` once; the engine's ~55-window download and its minutes-long save
