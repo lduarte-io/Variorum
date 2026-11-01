@@ -167,6 +167,12 @@ struct AuthRLSDDLTests {
     /// in a newer body unscanned by arm 9, or `finalBody` asserting against a superseded body).
     static let postChainFunctionArtifacts = [vx495PullKeysetFile]
 
+    /// THE ROLLBACK (R-500-6 (2); the server-half fix session): 13's `sync_pull` restored byte for byte, the count
+    /// dropped, the belt's list re-asserted — the road back from the keyset deploy, written and pinned BEFORE it. NEVER
+    /// in `postChainFunctionArtifacts` or `searchPathDeployOrder`: it is not deployed truth, it is what her word runs if
+    /// the live round after the deploy refuses (the rollback pin below holds both facts).
+    private static let vx495RollbackFile = "maintenance/vx495-rollback.sql"
+
     /// The body the deployed server actually runs: the LAST
     /// `create or replace function <name>(` in deploy order, up to its
     /// terminating `$$;` — the lockstep chain, then the post-chain
@@ -735,6 +741,69 @@ struct AuthRLSDDLTests {
         let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
         #expect(sweep.contains("('sync_pull_remaining(bigint,text,text,text)',"),
                 "the post-deploy sweep expects the new function's posture")
+    }
+
+    /// THE ROLLBACK PIN (R-500-6 (2); `maintenance/vx495-rollback.sql` — the server-half fix session, OWED BEFORE THE
+    /// DEPLOY): (a) its `sync_pull` is 13's §3a BYTE-FOR-BYTE — the whole `create or replace function sync_pull(` …
+    /// `$$;` text of the RAW files on both sides (the signature, the header's `returns jsonb` / `language plpgsql
+    /// security definer` / `set search_path = public`, the body and every comment line inside it; nothing stripped,
+    /// nothing trimmed) equal to `lastBody(of:in:)` over 13 itself; (b) it is NEVER part of the deployed chain — not in
+    /// `postChainFunctionArtifacts` (so `finalBody` keeps reading SHAPE B) nor in `searchPathDeployOrder` (so the
+    /// resolver and its doctored-chain arm never read it) — yet laid over the deployed composition it resolves
+    /// `sync_pull` back to 13's body, and run AFTER the keyset artifact it leaves every definer path ending in `pg_temp`
+    /// (the belt's state restored through its own alter) with `sync_pull_remaining` gone; (c) it writes no marker, reads
+    /// it for its own guard name, re-asserts the belt's list, the non-bypass owner and 12's grants on `sync_pull`, drops
+    /// the count by exact signature and grants it to nobody, in one transaction.
+    @Test func theRollbackRestoresThirteensPullByteForByteAndNeverJoinsTheDeployedChain() throws {
+        // (a) BYTE-EQUALITY, raw text on both sides.
+        let rollbackRaw = try Self.sqlFile(Self.vx495RollbackFile)
+        let thirteenRaw = try Self.sqlFile("13_phase13i_wings.sql")
+        let rollbackPull = try #require(Self.lastBody(of: "sync_pull", in: rollbackRaw))
+        let thirteenPull = try #require(Self.lastBody(of: "sync_pull", in: thirteenRaw))
+        #expect(rollbackPull == thirteenPull, "the rollback's sync_pull is 13's §3a byte for byte")
+        #expect(rollbackPull.contains("order by raw.server_seq limit %s) u"), "13's one-page shape — the pre-VX-495 body")
+        #expect(!rollbackPull.contains("with picked as ("), "…and nothing of SHAPE B")
+        let rollback = Self.strippingComments(rollbackRaw)
+        #expect(rollback.components(separatedBy: "create or replace function ").count - 1 == 1,
+                "the rollback defines exactly one function")
+        #expect(Self.lastBody(of: "sync_pull_remaining", in: rollback) == nil, "it never re-creates the count")
+
+        // (b) NEVER IN THE DEPLOYED CHAIN — yet the road back when laid over it.
+        #expect(!Self.postChainFunctionArtifacts.contains(Self.vx495RollbackFile),
+                "finalBody keeps reading the keyset artifact's SHAPE B — the rollback is not deployed truth")
+        #expect(!Self.searchPathDeployOrder.contains(Self.vx495RollbackFile),
+                "the search-path resolver and its doctored-chain arm never read the rollback")
+        #expect(try Self.finalBody(of: "sync_pull").contains("with picked as ("), "the deployed body stays SHAPE B")
+        let rolledBack = try ([Self.composedSQL()] + (Self.postChainFunctionArtifacts + [Self.vx495RollbackFile])
+            .map { try Self.strippingComments(Self.sqlFile($0)) }).joined(separator: "\n")
+        #expect(Self.lastBody(of: "sync_pull", in: rolledBack)
+                    == Self.lastBody(of: "sync_pull", in: Self.strippingComments(thirteenRaw)),
+                "laid over the chain and the keyset artifact, the last sync_pull is 13's again")
+        let afterRollback = Self.searchPathResolution(
+            deploy: try Self.searchPathDeploy(Self.searchPathDeployOrder + [Self.vx495RollbackFile]),
+            furniture: Set(Self.pgTempBeltFurniture.keys))
+        #expect(afterRollback.problems.isEmpty,
+                "run after the keyset artifact, the rollback leaves every definer path ending in pg_temp: \(afterRollback.problems.sorted())")
+        #expect(afterRollback.checked.contains("sync_pull(bigint, text, text, text, integer, text)"),
+                "sync_pull is live and checked after the rollback")
+        #expect(!afterRollback.checked.contains("sync_pull_remaining(bigint, text, text, text)"),
+                "the resolver sees the count dropped")
+
+        // (c) NO MARKER WRITE; the guard, the belt's list, the owner, the grants, the drop — by exact text.
+        #expect(rollback.contains("VARIORUM_VX495_ROLLBACK_NEEDS_14"), "its own guard name, the keyset artifact's shape")
+        #expect(rollback.contains("from sync_meta where key = 'lockstep_version'"), "the guard reads the deployed marker")
+        #expect(!rollback.lowercased().contains("update sync_meta") && !rollback.lowercased().contains("insert into sync_meta"),
+                "no marker move — a maintenance artifact never writes sync_meta")
+        #expect(rollback.contains("alter function sync_pull(bigint, text, text, text, int, text) set search_path = public, pg_temp;"),
+                "the belt's list re-asserted — a create or replace resets the SET clause to 13's bare `public`")
+        #expect(rollback.contains("alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;"))
+        #expect(rollback.contains("revoke execute on function sync_pull(bigint, text, text, text, int, text) from public, anon;"))
+        #expect(rollback.contains("grant execute on function sync_pull(bigint, text, text, text, int, text) to authenticated, service_role;"))
+        #expect(rollback.contains("drop function if exists sync_pull_remaining(bigint, text, text, text);"),
+                "the count dropped by its exact signature")
+        #expect(!rollback.contains("sync_pull_remaining(bigint, text, text, text) to"), "…and granted to nobody")
+        let statements = rollback.trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(statements.hasPrefix("begin;") && statements.hasSuffix("commit;"), "one transaction")
     }
 
     // MARK: - The §12 version-check mechanism (Phase 11, A1)

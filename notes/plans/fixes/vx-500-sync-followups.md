@@ -1234,7 +1234,7 @@ defensive outer `limit` on the fetch output (DECLINED there — the pin suffices
 |---|---|---|
 | 1 | F1 — the outer-limit pin: ONE `#expect` in the bound pin (`theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesUpToTheBound`) on the outer global cut's exact text — `from (%s) raw` · `order by raw.server_seq` · `limit %s),` · `bound as`, the artifact's whitespace (9 · 9 · 9 · 7 spaces); its honest red by the doctored-body pattern | DONE (`f87ad1d53` the pin + the record opened, 84/2 green; this commit the honest red — 1 issue, the new assertion alone, against the limit-less body; the doctoring restored, tree clean) |
 | 2 | F2 — ONE post-chain artifact list: `AuthRLSDDLTests.postChainFunctionArtifacts` (+ the path constant `vx495PullKeysetFile`) become internal `static let`s; arm 9 (`MultiTenantSyncAttackerTests.noOwnershipChangeInstructionExistsOnTheWire`) derives its appended files from that list — the inline path goes | DONE (this commit) — `private` dropped on the two `static let`s (same test module; `AuthRLSDDLTests` is an internal struct, so `AuthRLSDDLTests.postChainFunctionArtifacts` resolves from the attacker extension); arm 9 appends `sqlDir/<artifact>` for each entry of the list, in order, with one non-vacuity `#expect(!list.isEmpty)` so an emptied list can never silently shrink the scan; `grep` across `Tests/ Sources/ Server/ Tools/` finds the path `maintenance/vx495-pull-keyset.sql` as CODE in exactly one place now (`AuthRLSDDLTests:160`; every other hit is prose — a comment, the sweep's row comment, the transport's MARK). No product pin (test structure, as THE FINAL CALLS say); `swift test --skip-build --filter "AuthRLSDDLTests\|MultiTenantSyncAttackerTests"` → "Test run with 84 tests in 2 suites passed after 0.316 seconds" |
-| 3 | THE ROLLBACK ARTIFACT `Server/supabase/maintenance/vx495-rollback.sql` (R-500-6 (2)): 13's §3a `sync_pull` copied BYTE-FOR-BYTE (never retyped), re-owned, the belt's list re-asserted, the keyset artifact's grants for `sync_pull`, `drop function if exists sync_pull_remaining(bigint, text, text, text)`, its own marker ≥ 14 guard (`VARIORUM_VX495_ROLLBACK_NEEDS_14`), one transaction, idempotent; the pins (a) byte-equality to `lastBody(of: "sync_pull", in: 13)`, (b) never in `postChainFunctionArtifacts` nor `searchPathDeployOrder`, (c) no marker WRITE + the belt's list on `sync_pull`; (a)'s honest red (one byte changed in a scratch doctoring) | NOT-STARTED |
+| 3 | THE ROLLBACK ARTIFACT `Server/supabase/maintenance/vx495-rollback.sql` (R-500-6 (2)): 13's §3a `sync_pull` copied BYTE-FOR-BYTE (never retyped), re-owned, the belt's list re-asserted, the keyset artifact's grants for `sync_pull`, `drop function if exists sync_pull_remaining(bigint, text, text, text)`, its own marker ≥ 14 guard (`VARIORUM_VX495_ROLLBACK_NEEDS_14`), one transaction, idempotent; the pins (a) byte-equality to `lastBody(of: "sync_pull", in: 13)`, (b) never in `postChainFunctionArtifacts` nor `searchPathDeployOrder`, (c) no marker WRITE + the belt's list on `sync_pull`; (a)'s honest red (one byte changed in a scratch doctoring) | IN-PROGRESS — the artifact and the one pin `theRollbackRestoresThirteensPullByteForByteAndNeverJoinsTheDeployedChain` landed (this commit; the suites' line below); (a)'s honest red PENDING (the next commit, at this committed tip) |
 | 4 | Close: `swift build`; `swift test --filter "AuthRLSDDLTests\|MultiTenantSyncAttackerTests"` with the count; the self-assessment; the NOT DONE line final | NOT-STARTED |
 
 #### F1 — the outer-limit pin (piece 1)
@@ -1272,6 +1272,63 @@ lines (it doubled the `),` on the `limit` line and deleted the `bound as (…)` 
 issues" — mine at :674 AND the bound assertion at :676 — a DIFFERENT red (it shows the bound assertion bites when the
 bound CTE goes, nothing about F1); restored clean the same way before the second, correct run above. Nothing of either
 doctoring is committed.
+
+#### F2 — one post-chain list (piece 2)
+
+The LIVE STATUS row carries the whole of it: two `private` keywords dropped (`vx495PullKeysetFile`,
+`postChainFunctionArtifacts` — internal `static let`s, the same test module), arm 9 appends `sqlDir/<artifact>` for each
+entry of the list in order with one non-vacuity `#expect(!list.isEmpty)`, the inline path gone. The drift the round traced
+(a post-chain artifact added to one list and not the other — arm 9's forbidden-word scan over a stale parameter list, or
+`finalBody` asserting against a superseded body) now cannot happen: there is one list. No product pin (test structure);
+the suites green at `f16249fe8`. Nothing of `Sources/` touched.
+
+#### THE ROLLBACK ARTIFACT (piece 3) — `Server/supabase/maintenance/vx495-rollback.sql`
+
+**What `sync_pull`'s deployed state IS today (read from the chain, not assumed):** three artifacts' work in deploy order —
+13's §3a `create or replace` (12's body with wing + shelf in both arrays, header `set search_path = public`; 13 re-asserts
+neither owner nor grants — `grep` over 13 finds no `alter function`/`grant execute` lines, so the owner and the grants are
+12's, KEPT across the replace, as Postgres keeps them: `variorum_definer`, `authenticated + service_role`, `public`/`anon`
+revoked); then the belt (`vx213-pg-temp-search-path.sql`): `alter function sync_pull(…) set search_path = public,
+pg_temp`. 17 (`17_phase_vx307_vault.sql`) does not touch `sync_pull` (`grep sync_pull 17` → nothing). The keyset artifact
+replaces exactly that state; the rollback restores exactly that state.
+
+**The artifact (219 lines):** the header (when it runs — a refused live round after the keyset deploy, THE DEPLOY §4; what it
+restores and why each piece; the count DROPPED and what the BRANCH's sweep reads afterwards — `sync_pull_remaining` MISSING
+until the keyset artifact re-runs, main's sweep clean; re-running the keyset artifact afterwards LEGAL, both idempotent,
+neither touching `sync_meta`; the guard; harmless on a mirror that never received the keyset artifact) · `begin;` · the
+marker ≥ 14 guard, the keyset artifact's shape under its own name `VARIORUM_VX495_ROLLBACK_NEEDS_14` · **13's lines
+184–291 copied by `sed -n '184,291p'`, never retyped** — `diff` against 13's same lines: identical · `drop function if
+exists sync_pull_remaining(bigint, text, text, text);` · `alter … owner to variorum_definer;` · `alter … set search_path =
+public, pg_temp;` (load-bearing: the copied header says `public`, and a `create or replace` resets the SET clause — the
+belt's own finding — so without this line the rollback would UNDO the belt on `sync_pull`) · the revoke/grant pair byte-
+identical to the keyset artifact's for `sync_pull` · `commit;` · a read-only VERIFY tail (the body carries `order by
+raw.server_seq limit %s) u` and no `with picked as`; one `pg_proc` row for the pair, `{search_path=public, pg_temp}`; the
+sweep from MAIN).
+
+**The pin `theRollbackRestoresThirteensPullByteForByteAndNeverJoinsTheDeployedChain` (`AuthRLSDDLTests`) — exactly what
+is compared.** (a) `lastBody(of: "sync_pull", in: <the rollback file RAW>) == lastBody(of: "sync_pull", in: <13 RAW>)` —
+`lastBody` takes the LAST `create or replace function sync_pull(` through its `$$;`, so the compared text is the signature,
+the header (`returns jsonb` · `language plpgsql security definer` · `set search_path = public`) and the whole body INCLUDING
+every comment line inside it; nothing stripped, nothing trimmed, on either side — the strongest reading of "byte for
+byte". Beside it: the body carries 13's one-page `order by raw.server_seq limit %s) u` and no `with picked as (`; the
+stripped artifact holds exactly ONE `create or replace function ` and no `sync_pull_remaining` body. (b)
+`!postChainFunctionArtifacts.contains(rollback)` and `!searchPathDeployOrder.contains(rollback)` (never deployed truth;
+the doctored-chain arm filters `searchPathDeployOrder`, so it ignores the rollback by construction) and `finalBody(of:
+"sync_pull")` still carries `with picked as (` — PLUS the positive half: the rollback laid over `composedSQL() + the
+post-chain artifacts` resolves `sync_pull` to 13's stripped body again, and `searchPathResolution(searchPathDeployOrder +
+[rollback])` reads ZERO problems with `sync_pull(bigint, text, text, text, integer, text)` checked and `sync_pull_remaining(
+bigint, text, text, text)` NOT checked — the resolver's own rules (a create's header sets `[public]`, the alter must equal
+the list in force + `pg_temp`, a `drop function if exists` retires the signature) say the rollback restores the belt's state
+and drops the count. (c) by exact text on the stripped artifact: the guard name; the marker READ present; no `update
+sync_meta`/`insert into sync_meta`; the search_path alter, the owner alter, the revoke, the grant; the drop by exact
+signature; no `sync_pull_remaining(…) to` grant; `begin;` … `commit;` first and last statements.
+
+**Green (the suites, at this commit):** `swift build --build-tests` → "Build complete!"; `swift test --skip-build --filter
+"AuthRLSDDLTests|MultiTenantSyncAttackerTests"` → **"Test run with 85 tests in 2 suites passed after 0.303 seconds"** —
+the round's 84 plus this one pin.
+
+**(a)'s honest red (one byte changed in a scratch doctoring at the committed tip, restored by `git checkout --`):**
+PENDING — the next commit.
 
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
