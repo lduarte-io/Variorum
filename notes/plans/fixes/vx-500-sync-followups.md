@@ -440,6 +440,23 @@ observations, not as the unit's evidence.
 the orchestrator never writes product or test code — not `Sync/`, not "small" — it briefs, verifies, adjudicates and
 records; the cast's model rules name which AGENT types, never the orchestrator.
 
+## HER RULINGS AT THE CUTOVER SITTING (2026-11-01, after the probes; verbatim-faithful)
+
+- **R-500-1 — the count's shape (P-500-6 RULED):** the question tool's "Index-only count (Recommended)" — drop the
+  2-second horizon filter from `sync_pull_remaining` only, so each table's count runs off `idx_owner_seq_<table>`
+  without heap visits; exact to within the last two seconds of writes; still asked once per long round. The exact
+  horizon-filtered count (1.6 s), the O(1) head ceiling and "no total" were the declined alternatives.
+- **R-500-2 — Pre-launch:** "no one is going to have a phone at launch, so VX-683 does not need to be pre-launch.
+  VX-544 I've already decided is fine to not have at launch as well." Neither carries the label.
+- **R-500-3 — the cast rule, for CLAUDE.md (her words):** "I would fix CLAUDE.md to say that changes inside of Sync
+  require Fable review, instead of being Fable work. I would also say that I'll decide at kickoff time or in the plan
+  file for if it will be Fable implemented or Opus implemented. … the claude.md should also be clear that Fable always
+  reviews the Sync and Editor Seam class". No `fable-implementer` agent definition for now ("it's rare that I use
+  one"). For THIS run: U1's implementer is decided at the new orchestrator's kickoff with her (the handoff's prompt
+  names it as her call), the reviewer is Fable.
+- **R-500-4 — the recovery shape:** her word — finish, commit, hand off to a fresh orchestrator; three units stand;
+  the probes ran at her `!` road (D-495 EVIDENCE).
+
 ## LIVE STATUS (the orchestrator's; flipped per piece)
 
 | # | Piece | Status |
@@ -459,10 +476,10 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
 - **The merge** (the freeze) and **the server deploy** (D-495 + the count RPC) — each at her explicit word.
 *[removed for publication]*
 - **The words:** P-500-1 the progress lines (her example leads), P-500-2 the sheet's count, P-500-3 the belt's line
-  (her draft), the locked row unchanged.
+  (her draft), the locked row unchanged. P-500-6 (the count's shape) RULED — R-500-1.
 - **The directions:** P-500-4 (the retained derived secret over a door), P-500-5 (the reachability trigger), D-497's
   FK memo (zero semantics — built only if the profile names it), the two memos (compaction, chunking) for a sitting.
 - **The riders:** VX-546 and VX-490 seated provisionally; VX-76 as VX-496's duplicate; VX-491 not seated.
 - **The flags:** VX-683 (data-loss class, two-device same-take edits — her priority call; a `Sync/` design memo run),
   VX-672 (the phone's slow post-purge round — profile on her phone after VM-32), both outside this run.
-- **Pre-launch labels:** VX-544 (her call — Castle typed-road users offline); VX-683 (her call).
+- ~~**Pre-launch labels:** VX-544 (her call — Castle typed-road users offline); VX-683 (her call).~~ RULED R-500-2: neither is Pre-launch.
