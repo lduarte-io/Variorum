@@ -1420,6 +1420,29 @@ committed.
   the rollback restores the exact pre-deploy state; the sweep's note in the header says so. Round 2 reads F1, F2 and the
   rollback artifact; items 1, 2, 4 and 7 of the self-assessment are its to weigh.
 
+### SERVER-HALF ROUND 2 — THE FINAL CALLS (the orchestrator, same-model arbitration, 2026-11-01 ~17:15 MDT)
+
+The round's record is `notes/plans/fixes/vx-500-server-half-round2.md` (a fresh `fable-reviewer`: round 1's F1/F2/F3
+CLOSED as fixed; the rollback artifact SOUND and pinned, its byte-identity to 13 re-verified by the reviewer's own diff;
+**0 BLOCKER · 0 MAJOR · 2 NEW MINOR; no round 3 earned**; its run 85/2). Dispositions:
+
+- **F-R2-1 [MINOR] — CONFIRMED, LANDED BY THE ORCHESTRATOR (this commit; CLAUDE.md's loosened rule — a small
+  adjudication fix fully specified by the round's final call, one `#expect`, no design choice, read by the whole-diff
+  ladder):** the bound pin pins the `format()` tuple `pick_sql, max_rows, fetch_sql)` by exact text (the needle is unique
+  in the artifact). Honest red at the committed tip with the artifact doctored to `pick_sql, 500, fetch_sql)`: "Test run
+  with 1 test in 1 suite failed … with 1 issue" at `AuthRLSDDLTests.swift:689` alone; restored.
+- **F-R2-2 [MINOR] — CONFIRMED, LANDED BY THE ORCHESTRATOR (same commit, same rule):** a new one-directional cross-pin
+  `everyPostChainFunctionArtifactIsPositionedInTheSearchPathDeployOrder` (every `postChainFunctionArtifacts` entry ∈
+  `searchPathDeployOrder`). Honest red with the keyset file dropped from the `after` map: "… failed … with 1 issue" at
+  `:3282`, the message naming the file; restored. The suites after both: `AuthRLSDDLTests|MultiTenantSyncAttackerTests`
+  → **"Test run with 86 tests in 2 suites passed"**.
+- **The reviewer's dismissals — ACCEPTED as recorded** (the whitespace-exact family; the never-run-on-Postgres class; the
+  resolver's SET-clause model; the raw equality over 13's comments; the hollow rollback-without-keyset scene; the count's
+  DROP).
+- **THE PRE-DEPLOY GATE IS OPEN:** the server half (`vx495-pull-keyset.sql`, `vx495-rollback.sql`, the sweep row, the
+  pins) is reviewed as a deployable unit — two rounds, every finding dispositioned. The deploy waits for HER EXPLICIT
+  WORD (`notes/plans/vx495-deploy-checklist.md`).
+
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
 **Who you are.** The implementer for U2 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
@@ -1624,7 +1647,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 1 | U1a — the server artifact (D-495 SHAPE B + the count per R-500-1) + the DDL pins | DONE (`6155ba7fb` SHAPE B · `7d645688f` the count · `1e8d24286` the DDL pins · `917189ccd` the red-on-old) — U1a; the record is `### U1a RECORD` |
 | 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | DONE (`86b097934` the ownership pass, one change; the close commit the wire pin) — U1a; the draft `aad734aef` adopted line by line |
 | 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
-| 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 IN PROGRESS (`vx-500-server-half-round2.md`) · the deploy HELD for her word (THE DEPLOY) | IN PROGRESS |
+| 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 (`vx-500-server-half-round2.md`, 0/0/2 MINOR, no round 3) DONE — its two one-line pins landed by the orchestrator under the loosened rule (86/2) · **THE GATE IS OPEN; the deploy HELD for her word** (`notes/plans/vx495-deploy-checklist.md`) | GATE OPEN |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
 | 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
 | 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |

@@ -683,6 +683,11 @@ struct AuthRLSDDLTests {
         // other assertion of this pin stays green against that body (the finding's walk), so this line holds it.
         #expect(body.contains("from (%s) raw\n         order by raw.server_seq\n         limit %s),\n       bound as"),
                 "the pick's union is cut to ONE page before the bound")
+        // F-R2-1 (the server-half ladder, round 2 — `vx-500-server-half-round2.md`): the TEMPLATE above is fed by ONE
+        // `format()` tuple; a doctored `pick_sql, 500, fetch_sql)` keeps every other assertion green while the deployed
+        // page stops honoring the caller's `max_rows`. The tuple is pinned by its exact text.
+        #expect(body.contains("pick_sql, max_rows, fetch_sql)"),
+                "the caller's max_rows feeds the outer cut — the format() tuple, not only the template")
         #expect(body.contains("bound as (select max(server_seq) as seq from picked)"),
                 "the bound is the page's last seq")
         #expect(body.components(separatedBy: "and t.server_seq <= (select seq from bound)").count - 1 == 2,
@@ -3266,6 +3271,18 @@ struct AuthRLSDDLTests {
     }
 
     /// The doctored-fixture proof that the resolver BITES (the `aDoctoredDeployShapeIsFlaggedByTheCheck` pattern).
+    /// F-R2-2 (the server-half ladder, round 2): every post-chain function artifact `finalBody`/arm 9 read is ALSO
+    /// positioned in the search-path deploy order — a future artifact added to one list but not the other would be read
+    /// as deployed truth by the body finders yet never resolved by the pg_temp check, so a bare `public` header in it
+    /// would escape `everyDefinerPathEndsInPgTempOnceTheBeltIsRead` silently. One direction suffices: the deploy order
+    /// may carry artifacts that define no function.
+    @Test func everyPostChainFunctionArtifactIsPositionedInTheSearchPathDeployOrder() {
+        let order = Self.searchPathDeployOrder
+        for file in Self.postChainFunctionArtifacts {
+            #expect(order.contains(file), "\(file) is read as deployed truth but never resolved for its search_path")
+        }
+    }
+
     @Test func aDoctoredChainIsFlaggedByTheSearchPathCheck() throws {
         let furniture = Set(Self.pgTempBeltFurniture.keys)
         let order = Self.searchPathDeployOrder

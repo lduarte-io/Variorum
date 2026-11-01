@@ -6,7 +6,7 @@ The rollback: `Server/supabase/maintenance/vx495-rollback.sql`. Both idempotent,
 `sync_meta`. NOT a lockstep event: the wire is byte-identical (signature, output shape, order), so no client install
 follows — every 0.10.7 device gets the cheaper pages at its next catch-up; the count RPC sits unused (authenticated-only)
 until the client half ships with the held PR. The pre-deploy gate: the SERVER-HALF ROUND closed (round 1
-`vx-500-server-half-round1.md` 0/0/3 MINOR, fixed; round 2 `vx-500-server-half-round2.md` — PENDING).
+`vx-500-server-half-round1.md` 0/0/3 MINOR, fixed; round 2 `vx-500-server-half-round2.md` 0/0/2 MINOR, both landed, no round 3) — **THE GATE IS OPEN (2026-11-01 ~17:15 MDT); the run waits for her word.**
 
 ## Preflight (read-only; DONE 2026-11-01 ~16:55 MDT by the orchestrator through `Tools/prod-read.sh`, from `~/dev/variorum`)
 
