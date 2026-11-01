@@ -773,7 +773,7 @@ built and validated small; the MEASURE at scale, the FK decision, the memo's par
 |---|---|---|
 | 1 | The profile INSTRUMENT: the seam (`Sources/VariorumCore/Sync/ApplyProfile.swift` — `ApplyProfileHook`, nil-inert, on `SyncEngine.init`; eight laps at `pullRound`'s existing phase boundaries; the timed `PRAGMA foreign_key_list` read in `foreignKeyColumns`), the harness hook (`SyncClient.applyProfile`), the gated bench `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (`VARIORUM_APPLY_PROFILE=1`; sizes/runs/store env-overridable) + the ungated seam pins (`ApplyProfileSeamTests`, 2) | DONE (this commit) — build green; the seam pins "Test run with 2 tests in 1 suite passed"; the bench skips without the env ("3 tests in 2 suites passed", 1 skipped); validated at 40×10 (the dry run's lines below — NOT the measure) |
 | 1b | THE MEASURE at scale: 1,200 × 30 (≈109k rows), THREE runs, B on a keyed on-disk store, Debug, window 2,000 | DONE (this commit) — `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3 swift test --skip-build --filter ApplyProfileMeasurementTests` → "Test run with 3 tests in 2 suites passed after 1096.750 seconds"; the table below (THE MEASURE) |
-| 1c | Extra columns (after 1b): a STATEMENT-LEVEL trace of one apply (`VARIORUM_APPLY_PROFILE_TRACE=1` — GRDB's `.profile` trace on B's writer, bench-side only, zero engine lines); a standalone FTS5 insert probe; ONE `-c release` run | IN-PROGRESS — the trace DONE (this commit; THE TRACE below — it names the mechanism: the variant INSERT's search-index capture); the FTS5 probe and the Release run next; the in-memory run DROPPED as uninformative now that the cost is named |
+| 1c | Extra columns (after 1b): the STATEMENT-LEVEL trace of one apply (`VARIORUM_APPLY_PROFILE_TRACE=1`); the standalone FTS5 probe (`ApplyProfileFTSProbeTests`); the trigger-set BISECTION on the real schema (`ApplyProfileBisectionTests`, arms A–G); the candidate fix MEASURED at scale (`VARIORUM_APPLY_PROFILE_INDEX_FIX=1`) | IN-PROGRESS — trace, FTS5 probe and bisection DONE (this commit): THE MECHANISM below — the deferred-FK child scan over the unindexed `block(default_variant_id)`, O(N²), NOT the search capture (my trace reading corrected); the index-fix scale run next; the Release run and the in-memory run DROPPED (the mechanism is independent of both) |
 | 2 | The FK memo (`foreignKeyColumns` memoized per apply transaction) — ONLY if the measure crosses the threshold below; else "not named", with the numbers, and no engine line changes for it | DONE (this commit) — **NOT NAMED**: the introspection is 0.5% of the apply (1,784 ms of 330,231 ms, median of three) against the 5% threshold; the fixpoint whole is 0.6%. No engine line changes for it (THE FK DECISION below) |
 | 3 | THE CHUNKING MEMO trued: "The numbers (U1b)" appended under THE CHUNKING MEMO | NOT-STARTED |
 | 4 | Close: `swift build`; the gated run's lines; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`; the BROAD core run (OWED whatever the FK decision — the seam's laps ARE engine lines, so the broad run is this unit's regardless); the self-assessment; the orchestrator's LIVE STATUS row 3 flipped | NOT-STARTED |
@@ -858,28 +858,64 @@ the part a Release build shrinks).
 | 24 ms | 0.0% | 1,200 | 20 µs | `INSERT INTO container (…)` |
 | the rest | < 0.1% | | | the inline repairs' probes (`container_block` collision, I10's variant checks, the Journal legs), `PRAGMA data_version` ×37,201 (FTS5's change check), 57 `BEGIN IMMEDIATE` |
 
-**THE FINDING — where a first catch-up's save goes:** one statement shape is 98% of the apply's SQL and ~74% of its
-wall: **`INSERT INTO variant` costs 7.0 ms a row, against 5.4 µs for `INSERT INTO block` and 5.9 µs for
-`INSERT INTO container_block` — ~1,300× its siblings.** The three tables have the same outbox trigger (its body muted
-under `_sync_applying`) and no cascade fires on an INSERT; what distinguishes `variant` is the DERIVED SEARCH-INDEX
-CAPTURE (R-13o-4, `Persistence/SearchIndex.swift` `createCaptureTriggers`): `search_variant_take_insert` fires `WHEN
-NEW.working_text IS NOT NULL` (every take) — a `search_doc` DELETE + upsert on `uq_search_doc_src` (cheap) and then
-**`INSERT INTO search_fts (rowid, body) …`** — while `block`'s own capture (`search_block_block_name_insert`, `WHEN
-NEW.name IS NOT NULL`) never fires on an unnamed block, and `search_variant_take_label_insert` never fires on an
-unlabeled take. The FTS5 shadow-table statements that write landed as their own shapes and total ~0.15 s, so the 7 ms
-is spent INSIDE FTS5's write path (tokenizing — `unicode61 remove_diacritics 2` with `prefix = '2 3'`, three index
-entries a token — the pending hash, segment flush and merge), not in SQL this code wrote. Two checks follow before the
-claim is final: a standalone FTS5 insert probe (is 7 ms inherent to this table shape in this build?) and the Release
-run (is any of it Debug's unoptimized C?). **Already a flag for her, in the priority she asked for at kickoff:** the
-save's length is not the transaction's shape, not the fixpoint, not the repairs — it is the search index being built
-one take at a time as the rows land. The same per-take cost sits on every bulk `variant` road: a first catch-up (her
-own ~4 min; the phone's slower, suspendable one — VM-8), `importBook`/`importDocument`, `restoreNoteVersion`'s family
-copies, `duplicateReading(deep:)` — and the DELETE arm (`search_variant_take_delete`'s FTS `'delete'` command per
-take) rides the purge janitor's physical removal, which makes it a SUSPECT for VX-672's minutes-long post-purge phone
-round (suspected from the shape, not measured). The index is REBUILDABLE from truth by R-13o-4's own doctrine
-(`Operations.rebuildSearchIndex`), so a design that lets a bulk apply land its rows with the capture quiet and rebuilds
-(or bulk-inserts) the index once afterwards is the obvious candidate — a ticket's design, not this unit's build (the
-trigger is `Persistence/`, the apply is `Sync/`, and either is a product-shaped change for her sitting).
+**THE FINDING (the facts; the first reading below them corrected in THE MECHANISM):** one statement shape is 98% of
+the apply's SQL and ~74% of its wall: **`INSERT INTO variant` costs 7.0 ms a row, against 5.4 µs for `INSERT INTO
+block` and 5.9 µs for `INSERT INTO container_block` — ~1,300× its siblings.** My FIRST reading of that number was the
+derived search-index capture (`search_variant_take_insert` → the FTS5 write — the one trigger duty that distinguishes
+`variant` from `block`, whose own capture never fires on an unnamed block); the FTS5 shadow writes traced cheap, so I
+put the time inside FTS5's write path. **That reading was WRONG** — the standalone FTS5 probe and the bisection on the
+real schema (THE MECHANISM, next) show the capture at ~5 µs and name the real cause: SQLite's deferred-FK child scan.
+The committed line in commit `482991724`'s message ("the derived search-index capture") is superseded by this section.
+
+#### THE MECHANISM (piece 1c, continued) — the probes that found it (`ApplyProfileFTSProbeTests` · `ApplyProfileBisectionTests`, both gated with the bench)
+
+**The FTS5 probe** (four arms, 3,000 inserts each in one transaction, the FTS insert statements timed alone; log
+`u1b-fts-debug.log`): the shipped shape (external content over the view, `remove_diacritics 2`, `prefix '2 3'`) with
+~18-char bodies **13.2 µs** an insert; the same with ~400-char paragraph bodies 15.7 µs; no prefix index 11.4 µs; a
+plain FTS5 table 13.5 µs. **FTS5 is not 7 ms; it is 13 µs.**
+
+**The bisection** — the same `INSERT INTO variant` on the REAL migrated schema (`AppDatabase.inMemory()` /
+`openStore`, every trigger, in apply mode exactly as under a pull), N takes each under a block, one transaction, the
+variant INSERTs timed alone (logs `u1b-bisect-debug.log` · `u1b-bisect-disk.log` · `u1b-bisect-efg.log`). The
+triggers `sqlite_master` holds on `variant` (8): `outbox_variant_insert/update`, `search_variant_take_insert/update/
+delete`, `search_variant_take_label_insert/update/delete`.
+
+| Arm | per `INSERT INTO variant` | what it says |
+|---|---|---|
+| A. every trigger standing, blocks and takes interleaved (in-memory 2k · in-memory 10k · ON-DISK keyed 20k) | 11.4 · 10.8 · **12.1 µs** | the trigger set is not it; disk + SQLCipher + the 2 MiB cache are not it either |
+| B. the two search-capture triggers dropped | 6.2 · 6.2 · 7.3 µs | the capture costs ~5 µs |
+| C. every trigger on `variant` dropped | 4.5 · 4.5 · 5.6 µs | the bare insert |
+| D. as B, the capture's three statements by hand | search_doc 7 µs · **search_fts 4.6 µs** | the FTS write against the REAL `search_fts`: 4.6 µs |
+| **E. THE APPLY'S SHAPE** — `PRAGMA defer_foreign_keys = ON` (what `applyingRemoteWithDeferredFKs` sets), ALL blocks landed first with `default_variant_id` naming a take not yet inserted (the feed's registry order), then the takes (in-memory, 10k) | **316 µs** | **30× arm A — the mechanism reproduced** |
+| F. as E, plus `CREATE INDEX ON block(default_variant_id)` | **20.2 µs** | the fix candidate: the scan becomes an index probe |
+| G. as E, but every block's `default_variant_id` NULL (no pending violation) | 19.4 µs | the pragma alone costs nothing; the scan runs only while violations are PENDING |
+
+**The mechanism, stated:** under `PRAGMA defer_foreign_keys = ON`, once ANY deferred violation is pending (the
+counter > 0), every INSERT into a table that is a PARENT in some FK makes SQLite search each CHILD table for rows that
+name the new key, to settle the counter — an index probe where the child column is indexed, a FULL SCAN where it is
+not (SQLite's own FK documentation says exactly this about parent-key inserts under pending deferred constraints).
+`block.default_variant_id → variant(id)` has NO index (AppSpec §7; the migrations index only `last_container_id` on
+`block`). A from-zero catch-up's feed arrives in registry order — every `block` (each `default_variant_id` dangling
+until its take lands) before any `variant` — so the counter sits at ~N_blocks through the whole variant run and each
+of the N variant inserts scans the N-row `block` table: **O(N²)**. In memory at 10k that scan is ~0.3 ms; on her
+~36k-block library on disk under SQLCipher with the default 2 MiB page cache it is ~2,500 encrypted page reads —
+the measured 7.0 ms — 36,000 times: **~252 s of the 330 s apply, ~75% of her first catch-up's save.** It vanishes at
+small N (a new user's small library never feels it; a user crossing a large library onto a second device gets the
+whole square), and it grows faster than linear — the shape of "it was fine, then it wasn't". The same class waits
+on the SECOND unindexed child column, `container_block.chosen_variant_id → variant(id)`: empty on a fresh device's
+first catch-up (placements land after takes), but on a device that already holds a library every arriving take
+scans its whole `container_block` table — a large library pulling many takes (another device's import, a book
+restore) pays it too.
+
+**The candidate fix (a TICKET's build, not this unit's — a `Persistence/` migration is outside the U1b brief):**
+`CREATE INDEX idx_block_default_variant ON block(default_variant_id)` and `CREATE INDEX idx_cblock_chosen_variant ON
+container_block(chosen_variant_id)` — two LOCAL-ONLY indexes in a v1_35 migration, zero semantics, nothing on the
+wire and no lockstep marker move (the VX-647 `idx_cblock_dead_block` precedent, v1_34). Arm E → F is the pin's
+red-on-old shape (316 µs → 20 µs; a bound of, say, < 50 µs a take at 10k blocks under the apply's pragma). The
+expected gain at her scale is measured next (the bench's `VARIORUM_APPLY_PROFILE_INDEX_FIX=1` creates the two indexes
+on B's store before the pull — bench-side, not a migration). Everything D-497 and the chunking memo weighed — the
+transaction's shape, the fixpoint, the repairs, chunking — is beside this: a chunked apply would pay the same N
+scans of an ever-larger `block` table.
 
 #### THE FK DECISION (piece 2) — NOT NAMED
 
