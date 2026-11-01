@@ -273,3 +273,38 @@ Domain rules land with Swift Testing tests; operations get exact state-transitio
 - Walks: `cliclick` + `Tools/WalkKit/` on the DEV-STORE Debug build only (`io.lduarte.Variorum.debug`), under a held `Tools/stage` claim.
 - The DEV store's Castle passphrase + twelve words live in `~/.variorum/dev-castle.env` on the Pro (`source` it). Any walk moving the dev store into or out of Castle, or meeting its lock screen, uses exactly those values; never invent new ones (if one must change, update the file in the same window). The dev store holds only replaceable content. Never write the values into a commit or record, and never the real store's credentials (her ruling 2026-10-13).
 - If the author's help is needed (GUI, signing, Supabase, a device, an adjudication), pause and ask rather than work around it.
+
+
+---
+
+## 2026-11-01 — the `Sync/` cast rule, reworded at the VX-500 breach
+
+**What happened:** the VX-500 orchestrator (Fable) read CLAUDE.md's "Any change inside `Sources/VariorumCore/Sync/` is
+Fable work" as licence to write U1's engine, scheduler, server artifact and tests itself; she stopped it ("Stop - you
+are not supposed to even be writing the Sync code. read what /architect-phase entails - you are supposed to only be the
+orchestrator of several subagents that write code, cold review, etc. record this breach in protocol as well"), and
+noted it "has happened a couple of times, always when there's Fable work". The record:
+`notes/plans/fixes/vx-500-sync-followups.md`, PROTOCOL BREACH.
+
+**Her rewording (verbatim):** "I would fix CLAUDE.md to say that changes inside of Sync require Fable review, instead
+of being Fable work. I would also say that I'll decide at kickoff time or in the plan file for if it will be Fable
+implemented or Opus implemented. I won't add a fable implementer definition right now becaues it's rare that I use one,
+but I'll keep that suggestion in mind. … the claude.md should also be clear that Fable always reviews the Sync and
+Editor Seam class, and that should be clear".
+
+**The lines, before → after.** CLAUDE.md's cast bullet: "Any change inside `Sources/VariorumCore/Sync/` is Fable work."
+→ "Fable ALWAYS cold-reviews the `Sync/` and editor-seam class. Any change inside `Sources/VariorumCore/Sync/`
+REQUIRES that Fable review — it is never 'Fable work' for the orchestrator's own hands; whether a Fable subagent or
+Opus IMPLEMENTS a `Sync/` batch is the author's call, made at kickoff or written in the plan file's cast line. The
+orchestrator never writes product or test code — it briefs, verifies, adjudicates and records." The architect skill's
+"You may write small amounts of code yourself (fixes at adjudication, record commits, environment acts)" → "You write NO
+product or test code yourself … an adjudication fix goes to the implementer, or to the reviewer under FINDER-FIXES."
+The memory rule `orchestrator-never-writes-code` carries the same words for every session.
+
+**Refined the same day (her words, verbatim):** "I don't want orchestrators to not be able to write ANY code, I just
+want to ensure that code that is going into the app goes through the normal implementer -> cold review etc. cycle,
+and the orchestrator stays an orchestrator." The axis is SHIPS versus DOESN'T SHIP, never size: the orchestrator
+writes nothing under `Sources/`, `App/`, `Tests/` or `Server/` and no fix at adjudication, but may write throwaway
+instruments that produce evidence or records and never enter the PR (the VX-500 `EXPLAIN ANALYZE` probe files and
+their runner were the worked example — legitimate; the engine, scheduler, artifact and pins were not). CLAUDE.md's
+cast bullet and the architect skill carry the refined line.
