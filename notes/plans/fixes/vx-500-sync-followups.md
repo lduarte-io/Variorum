@@ -1,6 +1,6 @@
 # VX-500 — Run: the 0.10 window follow-ups (the sync follow-ups)
 
-**STATUS: OPEN — IN PROGRESS since 2026-11-01 (kickoff ~12:30 MDT).** Ticket VX-500 (Umbrella, project 18a — Sync
+**STATUS: OPEN — CUTOVER 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). The cast from here, her ruling: a FABLE SUBAGENT implements U1 (`Sync/`), Opus implements U2/U3, a fresh `fable-reviewer` runs the ladder; the orchestrator writes no code. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
 considerations) · branch `vx-500-sync-followups` · worktree `~/dev/variorum-vx-500` · the Pro. Architect shape
 (`/architect-phase VX-500`); the cast is CLAUDE.md's standing default — **Fable orchestrates, writes every `Sync/`
 and server line, and cold-reviews (`fable-reviewer`); Opus implements the faces, the tests and the custody road under
@@ -402,7 +402,7 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
 | 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
 | 7 | Closing runs (core debug + release; the Mac suites over every changed source; the phone build) | NOT STARTED |
-| 8 | The PR opened — HELD OPEN at her word; the handoff; memory; the canon deltas DRAFTED for the merge moment | NOT STARTED |
+| 8 | The PR opened — HELD OPEN at her word; the handoff; memory; the canon deltas DRAFTED for the merge moment | NOT STARTED (the CUTOVER handoff `notes/handoffs/vx-500-handoff.md` written 2026-11-01) |
 
 ## HELD FOR HER (bundled; nothing here is improvised around)
 
