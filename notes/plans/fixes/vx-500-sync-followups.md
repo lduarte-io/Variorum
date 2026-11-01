@@ -190,7 +190,18 @@ changes); the checklist is in THE DEPLOY section below.
   her run decides (below). Either way the A5/owner pins' shape (`from %I t` + `where t.owner_id = %L` per branch, the
   derived horizon, the two subtraction branches) holds.
 - **SHAPE B's result:** PENDING her run.
-- **The count shape (`sync_pull_remaining`):** PENDING her run.
+- **The count shape (`sync_pull_remaining`), her run:** `Execution Time: 1586.109 ms` — twenty-one `count(*)`
+  InitPlans, each a Seq Scan with the owner + seq + horizon filter (`block` 21,963 rows 477 ms · `variant` 34,226 rows
+  319 ms · `commit_point` 29,680 rows 304 ms · `container_block` 21,957 rows 333 ms …; 6,819 buffers). EXACT, and
+  inherently O(rows remaining) — a count from zero touches every row — so it is asked ONCE per long round (the design's
+  gate: only after a first full window), never per window; at her scale 1.6 s once per catch-up is acceptable, but an
+  account ~3× hers would sit near the 8 s statement timeout. **Two cheaper shapes recorded for the Fable implementer
+  (her exactness call — P-500-6):** (i) drop the horizon filter from the COUNT only — `where t.owner_id = caller and
+  t.server_seq > since` is an index-only count off `idx_owner_seq_<table>` (no heap visits where the visibility map is
+  set), exact to within the last two seconds of writes, which a progress total never needs; (ii) the O(1) ceiling —
+  `sync_tenant_seq.last_seq − since` (the tenant's head is the counter; updates re-stamp rows, so it OVERSTATES rows
+  remaining — honest only as "at most N", never as "of N"). The default to build: (i), with the client's words saying
+  "of N" as today; (ii) only if she prefers zero server cost over exactness.
 
 ### D-496 — the progress line (U1: the engine + the count RPC; U2: the words)
 
