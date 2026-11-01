@@ -531,6 +531,10 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   deferred-FK child scan; VX-720) runs IN THIS RUN as **U4** — "Seat it in this run as U4" — a Fable implementer session
   after U2/U3 and before the whole-diff ladder; it rides the held PR. **Pre-launch: "No"** (her call per ticket). The
   declined alternatives: its own later run; seating it ahead of U2/U3.
+- **R-500-8 — THE DEPLOY'S WORD (2026-11-01 ~17:20 MDT; the question tool): "Run it through the stored PAT now"** —
+  the orchestrator executes `notes/plans/vx495-deploy-checklist.md`'s run and verify steps through the stored PAT (the
+  13i-c / 13n-b precedent), then tells her to open the Pro; her Pro's Variorum stays closed until then. The declined
+  alternatives: her own `!` line; holding the deploy.
 - **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
   line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
   all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
