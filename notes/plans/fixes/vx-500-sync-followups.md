@@ -401,7 +401,14 @@ patch.
 3. Verify: `select pg_get_functiondef('sync_pull(bigint,text,text,text,int,text)'::regprocedure)` reads the new body;
    `sync_pull_remaining` exists; the grant sweep (`maintenance/14c-post-deploy-grant-sweep.sql`) reads 62 OK · 4 INFO
    · 0 fail PLUS one row for the new function; her first round runs clean; the row shows the count on a long round.
-4. No client install is needed for the deploy (the wire is unchanged); the client half (progress) rides the PR.
+4. NO client install follows (R-500-6): the wire is unchanged, every 0.10.7 device gets the cheaper pages at its next
+   catch-up, and `sync_pull_remaining` sits unused (authenticated-only) until the client half (the progress line) ships
+   with the PR after the freeze. **Acceptance:** her Pro's next round runs clean ("Synced …"); her Air's next crossing is
+   the first large catch-up on SHAPE B. **Rollback:** `Server/supabase/maintenance/vx495-rollback.sql` (the server-half
+   fix session's deliverable — 13's §3a body + the belt's `pg_temp`, idempotent) at her word if the live round refuses;
+   the count function may stay or be dropped by the same artifact. **Pre-deploy gate:** the SERVER-HALF ROUND closed
+   (every finding dispositioned, its fixes re-read). Step 3 gains: `EXPLAIN (ANALYZE, BUFFERS)` of the count's shape
+   once live (her `!` road) — the index-only claim is the planner's, unprobed (U1a's self-assessment item 3).
 
 ## ENVIRONMENT TRAPS (carried verbatim into every brief)
 
@@ -465,6 +472,25 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   names it as her call), the reviewer is Fable.
 - **R-500-4 — the recovery shape:** her word — finish, commit, hand off to a fresh orchestrator; three units stand;
   the probes ran at her `!` road (D-495 EVIDENCE).
+- **R-500-6 — THE SERVER HALF SHIPS EARLY (2026-11-01 ~15:10 MDT; her words, verbatim-faithful; the question tool's
+  "Yes, split the ladder and deploy early"):** "if we can get this change out to users before launch without changing the
+  code, I think it would be worth doing so." The first orchestrator's points she carried: "The server half can ship
+  during the freeze. Shape B changes nothing on the wire, so once U1's artifact has been rewritten and has passed the
+  ladder, deploying it does not need the PR merged or a client release. Every existing 0.10.7 device would get the
+  cheaper pages immediately … the client's progress line can follow whenever the freeze lifts because it tolerates the
+  count RPC being absent." … "The only line there that changes is step 4: no client install follows, and the count RPC
+  sits unused until the client ships. … the ladder reviews the artifact as a deployable unit rather than a part of the
+  PR." **The shape, as ruled with the orchestrator's four additions:** (1) the ladder SPLITS — a SERVER-HALF ROUND (a
+  fresh `fable-reviewer` over `Server/supabase/maintenance/vx495-pull-keyset.sql`, its `AuthRLSDDLTests` pins and the
+  grown wire pin, REVIEW_PROMPT verbatim) runs right after U1b closes, its findings fixed by a fresh Fable implementer
+  and re-read by a fresh round 2 (the standing ladder rules; cap three), BEFORE the deploy; the WHOLE-DIFF ladder runs
+  after U3 as planned, with the server-half rounds' records as its anchor for those files; (2) a ROLLBACK ARTIFACT
+  (13's §3a `sync_pull` body + the belt's `pg_temp` re-assertion, re-runnable alone, its own marker guard) is a planned
+  item of the server-half fix session — the artifact's SQL has never executed on a Postgres (the DDL pins are string
+  pins; her probe was a bare SELECT of the shape, not the PL/pgSQL body), and the 13j 42702 class is caught only live;
+  (3) the deploy stays at HER EXPLICIT WORD, with her Pro's next round as the acceptance (refusal ⇒ the rollback runs);
+  (4) the gain is honest: catch-ups (a new device's join, a crossing), not everyday rounds at the head. The PR stays
+  held. THE DEPLOY §4 is rewritten below.
 - **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
   line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
   all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
