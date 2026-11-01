@@ -137,7 +137,7 @@ statement timeout on its FIRST window whatever the page size (the record's D1 ce
 never feel it; a user crossing a second device onto a large library does (her own case took 11.6 min of download at the
 200-row window; 56 calls at 2,000).
 
-**The build — `Server/supabase/maintenance/vx495-pull-keyset.sql`:** a maintenance artifact (NO marker move — the wire
+**The build — `Server/supabase/maintenance/vx495-pull-keyset.sql` (AS DRAFTED in `aad734aef`; the FETCH is superseded by SHAPE B below — the bound-based range scan — at her 2026-11-01 probes):** a maintenance artifact (NO marker move — the wire
 shape, parameters and semantics are byte-identical; a client sees only a faster answer), redefining `sync_pull` with the
 SAME signature in two phases inside one dynamic statement: **THE PICK** — per table, `(select 'tbl', t.server_seq,
 t.<pk>::text as row_id from tbl t where t.owner_id = caller and t.server_seq > since and <the A5 horizon filter> order
@@ -189,7 +189,20 @@ changes); the checklist is in THE DEPLOY section below.
   within each index. Expected ≈ the pick's 37 ms + the JSON of 2,000 rows. The probe `new-shape-b.sql` is written;
   her run decides (below). Either way the A5/owner pins' shape (`from %I t` + `where t.owner_id = %L` per branch, the
   derived horizon, the two subtraction branches) holds.
-- **SHAPE B's result:** PENDING her run.
+- **SHAPE B's result, her run: `Execution Time: 230.158 ms`** — 15× the old shape, 5× the draft. The pick as before
+  (a `Merge Append` of per-table index scans under their limits, 108 ms this run — the pick's time varies 37–108 ms
+  between runs on this instance); the FETCH is now an index RANGE scan per table off `idx_owner_seq_<table>` (`block`
+  431 rows 7.9 ms · `variant` 539 rows 45 ms · `commit_point` 443 rows 27.5 ms · `container_block` 432 rows 7.7 ms; the
+  only Seq Scans are the one-page tables `canvas_layout`/`setting`, the planner's correct choice); 969 buffers in
+  all against the old shape's 11,538. **SHAPE B IS THE DESIGN (D-495 as it stands from here):** `picked` yields seqs
+  only, `bound` is `max(server_seq) over picked`, every fetch branch is `… and t.server_seq <= (select seq from
+  bound)` — no per-row probes, no `in (select …)`. The Fable implementer REWRITES the artifact's fetch to it (the
+  drafted `in (select p.row_id from picked p …)` form and its pin in `AuthRLSDDLTests` go; a bound pin replaces them;
+  the A5/owner pins' per-branch `from %I t` + `where t.owner_id = %L` shape is unchanged — the pick phase keeps the
+  owner filter too, so the counts still match). Correctness unchanged from the draft's argument: per-tenant seqs are
+  unique (`next_tenant_seq` per write), so "the page's rows" ≡ "every table's rows with seq ≤ the page's last seq".
+  The page may hold FEWER than `max_rows` only at the head — then `bound` is the head and the fetch returns everything
+  left, as today.
 - **The count shape (`sync_pull_remaining`), her run:** `Execution Time: 1586.109 ms` — twenty-one `count(*)`
   InitPlans, each a Seq Scan with the owner + seq + horizon filter (`block` 21,963 rows 477 ms · `variant` 34,226 rows
   319 ms · `commit_point` 29,680 rows 304 ms · `container_block` 21,957 rows 333 ms …; 6,819 buffers). EXACT, and
@@ -432,7 +445,7 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight whole; worktree + branch; the in-flight row on main (`24c413138`); VX-500 In Progress; this file | DONE (this commit) |
-| 1 | U1 — the server artifact (D-495 + the count RPC) + the DDL pins + the read-only cost probe | BREACH — drafted by the orchestrator in `aad734aef` (see PROTOCOL BREACH); HELD for her road (a) revert or (b) adopt |
+| 1 | U1 — the server artifact (D-495 + the count RPC) + the DDL pins + the cost probe | BREACH — drafted by the orchestrator in `aad734aef`; **THE PROBES RAN (her `!` road, 2026-11-01): old 3,398 ms · draft 1,138 ms · SHAPE B 230 ms · count 1,586 ms** — D-495 EVIDENCE; the Fable implementer adopts the draft, rewrites the fetch to SHAPE B and the count per P-500-6, fixes the DDL WIP |
 | 2 | U1 — the engine's progress seam (D-496) + the belt flag (D-505) + the FK memo (D-497 (2), profile-gated) + pins | BREACH — the seam and its pins drafted by the orchestrator in `aad734aef`; HELD for her road; the FK memo untouched |
 | 3 | U1 — the apply PROFILE at scale (D-497 (1)); the memo above trued with the numbers | NOT STARTED |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
