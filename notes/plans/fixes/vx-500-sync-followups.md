@@ -773,7 +773,7 @@ built and validated small; the MEASURE at scale, the FK decision, the memo's par
 |---|---|---|
 | 1 | The profile INSTRUMENT: the seam (`Sources/VariorumCore/Sync/ApplyProfile.swift` — `ApplyProfileHook`, nil-inert, on `SyncEngine.init`; eight laps at `pullRound`'s existing phase boundaries; the timed `PRAGMA foreign_key_list` read in `foreignKeyColumns`), the harness hook (`SyncClient.applyProfile`), the gated bench `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (`VARIORUM_APPLY_PROFILE=1`; sizes/runs/store env-overridable) + the ungated seam pins (`ApplyProfileSeamTests`, 2) | DONE (this commit) — build green; the seam pins "Test run with 2 tests in 1 suite passed"; the bench skips without the env ("3 tests in 2 suites passed", 1 skipped); validated at 40×10 (the dry run's lines below — NOT the measure) |
 | 1b | THE MEASURE at scale: 1,200 × 30 (≈109k rows), THREE runs, B on a keyed on-disk store, Debug, window 2,000 | DONE (this commit) — `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3 swift test --skip-build --filter ApplyProfileMeasurementTests` → "Test run with 3 tests in 2 suites passed after 1096.750 seconds"; the table below (THE MEASURE) |
-| 1c | Extra columns (optional, after 1b): a STATEMENT-LEVEL trace of one apply (GRDB's profile trace on B's writer, bench-side only — zero engine lines), ONE in-memory run, ONE `-c release` run | NOT-STARTED |
+| 1c | Extra columns (after 1b): a STATEMENT-LEVEL trace of one apply (`VARIORUM_APPLY_PROFILE_TRACE=1` — GRDB's `.profile` trace on B's writer, bench-side only, zero engine lines); a standalone FTS5 insert probe; ONE `-c release` run | IN-PROGRESS — the trace DONE (this commit; THE TRACE below — it names the mechanism: the variant INSERT's search-index capture); the FTS5 probe and the Release run next; the in-memory run DROPPED as uninformative now that the cost is named |
 | 2 | The FK memo (`foreignKeyColumns` memoized per apply transaction) — ONLY if the measure crosses the threshold below; else "not named", with the numbers, and no engine line changes for it | DONE (this commit) — **NOT NAMED**: the introspection is 0.5% of the apply (1,784 ms of 330,231 ms, median of three) against the 5% threshold; the fixpoint whole is 0.6%. No engine line changes for it (THE FK DECISION below) |
 | 3 | THE CHUNKING MEMO trued: "The numbers (U1b)" appended under THE CHUNKING MEMO | NOT-STARTED |
 | 4 | Close: `swift build`; the gated run's lines; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`; the BROAD core run (OWED whatever the FK decision — the seam's laps ARE engine lines, so the broad run is this unit's regardless); the self-assessment; the orchestrator's LIVE STATUS row 3 flipped | NOT-STARTED |
@@ -827,6 +827,59 @@ relation for the memo:** 331 rows/s here in DEBUG against her Pro's ~420 rows/s 
 their triggers — the tombstone cascades, the muted outbox capture, the derived search-index capture on `variant` and
 `container` — the inline repair and orphan probes, the two bookkeeping statements). Piece 1c's statement-level trace
 is how that claim gets checked rather than inferred.
+
+#### THE TRACE (piece 1c) — every statement of one apply, as SQLite timed it (one traced on-disk Debug run, 109,203 rows)
+
+`VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=1 VARIORUM_APPLY_PROFILE_TRACE=1 swift test --skip-build --filter
+ApplyProfileMeasurementTests` → "Test run with 3 tests in 2 suites passed after 428.058 seconds" (log `u1b-scale-trace.log`).
+The bench installs GRDB's `Database.trace(options: .profile)` on B's WRITER connection before the pull (connection state;
+a pool has one writer) and aggregates by unexpanded SQL shape; SQLite's profile time for a statement INCLUDES the
+triggers it fired, while a virtual table's own statements (FTS5's shadow-table writes) are traced as their own shapes.
+The traced apply was 342,518 ms (319 rows/s; +3.7% over the untraced median — the trace's own cost); its phases read as
+the clean runs' (rowLoop 97.9% · repairs 1.3% · fixpoint 0.6%). **SQLite measured 256,940 ms over 1,291,324
+statements in 43 shapes** (≈ 11.8 statements a row); the row loop's other ~78 s (335.4 − 256.9) is Swift-side per-row
+work in Debug (`SyncRow` decoding and dictionary building, the repairs' Swift, GRDB argument binding — ~0.7 ms a row,
+the part a Release build shrinks).
+
+| SQL time | share | count | each | shape |
+|---|---|---|---|---|
+| **252,376 ms** | **98.2%** | 36,000 | **7,010 µs** | **`INSERT INTO variant (…)`** |
+| 1,451 ms | 0.6% | 36,000 | 40.3 µs | `UPDATE variant SET … WHERE id = ?` (the upsert's miss on a fresh store) |
+| 516 ms | 0.2% | 109,203 | 4.7 µs | `PRAGMA foreign_key_list(<table>)` (the fixpoint's; the hook's 18 µs a call includes GRDB's Row decoding) |
+| 485 ms | 0.2% | 72,000 | 6.7 µs | `SELECT deleted_at FROM block WHERE id = ? AND deleted_at IS NOT NULL` (the orphan check's dead-parent probe) |
+| 305 ms | 0.1% | 109,203 | 2.8 µs | `SELECT EXISTS (… sync_outbox …)` (`isEnqueued`) |
+| 252 ms | 0.1% | 57 | 4,421 µs | `COMMIT TRANSACTION` (55 stage windows + the apply + 1) |
+| 235 ms | 0.1% | 1 | — | `DELETE FROM sync_pull_stage` |
+| 212 ms | 0.1% | 36,000 | 5.9 µs | `INSERT INTO container_block (…)` |
+| 194 ms | 0.1% | 36,000 | 5.4 µs | `INSERT INTO block (…)` |
+| 169 ms | 0.1% | 109,203 | 1.5 µs | `INSERT OR REPLACE INTO sync_row_seq …` (`recordSeq`) |
+| 90 ms | 0.0% | 109,203 | 0.8 µs | the stage's upsert (the download's writes) |
+| 58 + 30 + 26 + 19 + 17 ms | 0.1% | 115,941 · 37,200 · 41,028 · 40,221 · 40,221 | ≤ 0.8 µs | FTS5's own shadow writes (`search_fts_data`, `_docsize`, `_idx` REPLACE/INSERT/DELETE) |
+| 24 ms | 0.0% | 1,200 | 20 µs | `INSERT INTO container (…)` |
+| the rest | < 0.1% | | | the inline repairs' probes (`container_block` collision, I10's variant checks, the Journal legs), `PRAGMA data_version` ×37,201 (FTS5's change check), 57 `BEGIN IMMEDIATE` |
+
+**THE FINDING — where a first catch-up's save goes:** one statement shape is 98% of the apply's SQL and ~74% of its
+wall: **`INSERT INTO variant` costs 7.0 ms a row, against 5.4 µs for `INSERT INTO block` and 5.9 µs for
+`INSERT INTO container_block` — ~1,300× its siblings.** The three tables have the same outbox trigger (its body muted
+under `_sync_applying`) and no cascade fires on an INSERT; what distinguishes `variant` is the DERIVED SEARCH-INDEX
+CAPTURE (R-13o-4, `Persistence/SearchIndex.swift` `createCaptureTriggers`): `search_variant_take_insert` fires `WHEN
+NEW.working_text IS NOT NULL` (every take) — a `search_doc` DELETE + upsert on `uq_search_doc_src` (cheap) and then
+**`INSERT INTO search_fts (rowid, body) …`** — while `block`'s own capture (`search_block_block_name_insert`, `WHEN
+NEW.name IS NOT NULL`) never fires on an unnamed block, and `search_variant_take_label_insert` never fires on an
+unlabeled take. The FTS5 shadow-table statements that write landed as their own shapes and total ~0.15 s, so the 7 ms
+is spent INSIDE FTS5's write path (tokenizing — `unicode61 remove_diacritics 2` with `prefix = '2 3'`, three index
+entries a token — the pending hash, segment flush and merge), not in SQL this code wrote. Two checks follow before the
+claim is final: a standalone FTS5 insert probe (is 7 ms inherent to this table shape in this build?) and the Release
+run (is any of it Debug's unoptimized C?). **Already a flag for her, in the priority she asked for at kickoff:** the
+save's length is not the transaction's shape, not the fixpoint, not the repairs — it is the search index being built
+one take at a time as the rows land. The same per-take cost sits on every bulk `variant` road: a first catch-up (her
+own ~4 min; the phone's slower, suspendable one — VM-8), `importBook`/`importDocument`, `restoreNoteVersion`'s family
+copies, `duplicateReading(deep:)` — and the DELETE arm (`search_variant_take_delete`'s FTS `'delete'` command per
+take) rides the purge janitor's physical removal, which makes it a SUSPECT for VX-672's minutes-long post-purge phone
+round (suspected from the shape, not measured). The index is REBUILDABLE from truth by R-13o-4's own doctrine
+(`Operations.rebuildSearchIndex`), so a design that lets a bulk apply land its rows with the capture quiet and rebuilds
+(or bulk-inserts) the index once afterwards is the obvious candidate — a ticket's design, not this unit's build (the
+trigger is `Persistence/`, the apply is `Sync/`, and either is a product-shaped change for her sitting).
 
 #### THE FK DECISION (piece 2) — NOT NAMED
 
