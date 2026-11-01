@@ -226,7 +226,7 @@ struct ApplyProfileMeasurementTests {
                 name: "B\(run)", prefix: String(format: "B%X", run), transport: server, seed: UInt64(run + 1),
                 storeURL: onDisk ? scratch.appendingPathComponent("b\(run).sqlite") : nil)
             if indexFix {
-                try b.db.write { db in
+                try await b.db.write { db in
                     try db.execute(sql: """
                         CREATE INDEX idx_probe_block_default_variant ON block(default_variant_id);
                         CREATE INDEX idx_probe_cblock_chosen_variant ON container_block(chosen_variant_id);

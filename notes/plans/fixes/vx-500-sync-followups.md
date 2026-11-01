@@ -392,6 +392,33 @@ lands"; a product-flavored change for her eye). **Recommendation:** profile firs
 a convergence-suite extension (the fake harness driving a K-row chunked apply through every repair suite) — never a
 patch.
 
+
+**The numbers (U1b, 2026-11-01 — the apply profile at scale; the record is `### U1b RECORD`).** Where the time goes,
+measured (109,203 rows, a fresh keyed on-disk store, Debug, window 2,000; medians): the apply is **the row loop —
+98.2% of 330 s**; the straggler fixpoint 0.6%, the post-apply repairs 1.0%, the cursor/stage clear 0.1%, the
+transaction's own begin/COMMIT 0.1%; the download (55 windows against the in-process fake) and the stage's decode
+together ~3% of the pull. Inside the row loop ONE mechanism was ~252 s of the 324: **SQLite's deferred-FK child
+scan** — under `PRAGMA defer_foreign_keys = ON`, while any violation is pending, every INSERT into a parent table
+scans each child table lacking an index on the FK column; `block.default_variant_id → variant` has none, and the feed's
+registry order lands every block (its default pointer dangling) before any take, so each of N take inserts scans N
+blocks — O(N²), 7 ms a take at her size on disk under SQLCipher (THE MECHANISM in the record). With two local-only
+indexes the same apply measures **85 s (3.9×)**, and what remains is per-row Swift work that Release compiles down.
+**What chunking would and would not buy against this:** nothing of the 252 s — the scans are per row, not per
+transaction, and K-row chunks would scan the same ever-larger `block` table; the index buys it whole. Chunking's
+own gains stand as written (the writer held in bites, a lock or a phone suspension costing one chunk, a cursor that
+moves) — against a smaller remainder than the memo assumed. **One edge the memo lacked, now first on its list:** a
+chunk's COMMIT must find ZERO pending deferred violations (SQLite refuses the commit otherwise), and in this feed
+order a chunk boundary anywhere inside the block run leaves every block's `default_variant_id` dangling until the
+takes arrive ~N rows later; today's straggler fixpoint, which reads "arriving" as the batch, would stall the chunk at
+its first block and the round would re-fetch the same chunk forever. So a K-row chunked apply in feed order is
+UN-COMMITTABLE as sketched; it needs one of: chunk boundaries by FK closure (hopeless here — the first block's
+closure reaches the last take), a two-phase landing of the circular pointers (land `default_variant_id` NULL, re-point
+after the takes — a semantics change inside the apply, and `chosen_variant_id`'s RESTRICT has the same shape), or FK
+enforcement off for the apply (a safety change). The other listed edges stand. **Recommendation, unchanged and
+strengthened:** no chunking now; the index migration is the first-order fix for VX-497's save and should go first as its
+own ticket; the memo's design question re-opens only after it, against the remainder, with the un-committable-chunk
+edge decided on paper before any build.
+
 ## THE DEPLOY (HELD — at her explicit word only; SyncSpec §12's procedure for a server-side body; NOT a marker event)
 
 1. Rehearse? The throwaway project was deleted 2026-10-27; a new throwaway is her hands (or she accepts the read-only
@@ -773,9 +800,9 @@ built and validated small; the MEASURE at scale, the FK decision, the memo's par
 |---|---|---|
 | 1 | The profile INSTRUMENT: the seam (`Sources/VariorumCore/Sync/ApplyProfile.swift` — `ApplyProfileHook`, nil-inert, on `SyncEngine.init`; eight laps at `pullRound`'s existing phase boundaries; the timed `PRAGMA foreign_key_list` read in `foreignKeyColumns`), the harness hook (`SyncClient.applyProfile`), the gated bench `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (`VARIORUM_APPLY_PROFILE=1`; sizes/runs/store env-overridable) + the ungated seam pins (`ApplyProfileSeamTests`, 2) | DONE (this commit) — build green; the seam pins "Test run with 2 tests in 1 suite passed"; the bench skips without the env ("3 tests in 2 suites passed", 1 skipped); validated at 40×10 (the dry run's lines below — NOT the measure) |
 | 1b | THE MEASURE at scale: 1,200 × 30 (≈109k rows), THREE runs, B on a keyed on-disk store, Debug, window 2,000 | DONE (this commit) — `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3 swift test --skip-build --filter ApplyProfileMeasurementTests` → "Test run with 3 tests in 2 suites passed after 1096.750 seconds"; the table below (THE MEASURE) |
-| 1c | Extra columns (after 1b): the STATEMENT-LEVEL trace of one apply (`VARIORUM_APPLY_PROFILE_TRACE=1`); the standalone FTS5 probe (`ApplyProfileFTSProbeTests`); the trigger-set BISECTION on the real schema (`ApplyProfileBisectionTests`, arms A–G); the candidate fix MEASURED at scale (`VARIORUM_APPLY_PROFILE_INDEX_FIX=1`) | IN-PROGRESS — trace, FTS5 probe and bisection DONE (this commit): THE MECHANISM below — the deferred-FK child scan over the unindexed `block(default_variant_id)`, O(N²), NOT the search capture (my trace reading corrected); the index-fix scale run next; the Release run and the in-memory run DROPPED (the mechanism is independent of both) |
+| 1c | Extra columns (after 1b): the STATEMENT-LEVEL trace of one apply (`VARIORUM_APPLY_PROFILE_TRACE=1`); the standalone FTS5 probe (`ApplyProfileFTSProbeTests`); the trigger-set BISECTION on the real schema (`ApplyProfileBisectionTests`, arms A–G); the candidate fix MEASURED at scale (`VARIORUM_APPLY_PROFILE_INDEX_FIX=1`) | DONE (this commit) — THE MECHANISM: the deferred-FK child scan over the unindexed `block(default_variant_id)`, O(N²) (my trace reading corrected); THE CANDIDATE FIX MEASURED: **the apply 330,231 → 85,315 ms (3.9×), 331 → 1,280 rows/s** at 109k rows, Debug, on-disk ("Test run with 5 tests in 4 suites passed after 268.638 seconds" — the filter matches by file, so the probes ran too); the Release run and the in-memory run DROPPED (the mechanism is independent of both) |
 | 2 | The FK memo (`foreignKeyColumns` memoized per apply transaction) — ONLY if the measure crosses the threshold below; else "not named", with the numbers, and no engine line changes for it | DONE (this commit) — **NOT NAMED**: the introspection is 0.5% of the apply (1,784 ms of 330,231 ms, median of three) against the 5% threshold; the fixpoint whole is 0.6%. No engine line changes for it (THE FK DECISION below) |
-| 3 | THE CHUNKING MEMO trued: "The numbers (U1b)" appended under THE CHUNKING MEMO | NOT-STARTED |
+| 3 | THE CHUNKING MEMO trued: "The numbers (U1b)" appended under THE CHUNKING MEMO | DONE (this commit) — where the time goes; what chunking would and would not buy; ONE NEW EDGE the memo lacked (a K-row chunk cannot COMMIT under deferred FKs while a `block.default_variant_id` dangles, and this feed order dangles every block's until the takes land); the recommendation unchanged and strengthened — the index first |
 | 4 | Close: `swift build`; the gated run's lines; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`; the BROAD core run (OWED whatever the FK decision — the seam's laps ARE engine lines, so the broad run is this unit's regardless); the self-assessment; the orchestrator's LIVE STATUS row 3 flipped | NOT-STARTED |
 
 #### THE THRESHOLD (stated BEFORE the measure, as the brief asks)
@@ -916,6 +943,44 @@ expected gain at her scale is measured next (the bench's `VARIORUM_APPLY_PROFILE
 on B's store before the pull — bench-side, not a migration). Everything D-497 and the chunking memo weighed — the
 transaction's shape, the fixpoint, the repairs, chunking — is beside this: a chunked apply would pay the same N
 scans of an ever-larger `block` table.
+
+#### THE CANDIDATE FIX MEASURED (piece 1c, the last column) — the two indexes on B's store before the pull, bench-side
+
+`VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=2 VARIORUM_APPLY_PROFILE_INDEX_FIX=1 swift test --skip-build --filter
+ApplyProfileMeasurementTests` → "Test run with 5 tests in 4 suites passed after 268.638 seconds" (log `u1b-scale-indexfix.log`;
+the bench runs `CREATE INDEX idx_probe_block_default_variant ON block(default_variant_id); CREATE INDEX
+idx_probe_cblock_chosen_variant ON container_block(chosen_variant_id)` on B's fresh store, then pulls as before — no
+migration, nothing in `Persistence/` changes). Same corpus, same window, same Mac, Debug, on-disk:
+
+| | baseline (median of 3) | with the two indexes (median of 2) | |
+|---|---|---|---|
+| **apply (`applyTransaction`)** | **330,231 ms · 331 rows/s** | **85,315 ms · 1,280 rows/s** | **3.9× faster** |
+| rowLoop | 324,374 ms (98.2%) | 79,266 ms (92.9%) | −245 s — the scans gone; what remains is ~0.73 ms a row of Swift-side Debug work (the trace's non-SQL remainder) plus ~0.1 ms of SQL |
+| fixpoint | 1,995 ms (0.6%) | 2,128 ms (2.5%) | unchanged in time; a larger share of a smaller whole |
+| repairs | 3,432 ms (1.0%) | 3,498 ms (4.1%) | unchanged |
+| commitPrep · txn overhead | 224 · 205 ms | 248 · 174 ms | unchanged |
+| download · stageDecode (outside) | 7,350 · 3,041 ms | 7,878 · 3,303 ms | unchanged |
+| PRAGMA foreign_key_list | 1,784 ms (0.5%) | 1,914 ms (2.2%) | unchanged in time — the FK memo stays NOT NAMED (2.2% of the faster apply is still under the 5% bar) |
+| pull wall | 340,716 ms | 96,454 ms | 3.5× |
+
+**Read for her:** her Pro's real first catch-up saved ~4 min 20 s in Release (~420 rows/s, the VX-494 record). The
+Debug bench reproduces that order (331 rows/s) and, with the two indexes, lands at 1,280 rows/s with the row loop now
+dominated by per-row Swift work that Release compiles down — so the Release save should fall from minutes to well under
+one; the download (D-495's business) becomes the catch-up's long pole. **The ticket this unit hands the orchestrator
+(not filed by me — the orchestrator's Linear hands; proposed labels Bug · Confirmed · Performance · High, Pre-launch
+HER call — it is the second-device-on-a-large-library shape she and the testers met, and it grows as the square of
+the library):** "A first catch-up's apply is O(N²): under `defer_foreign_keys`, every take insert scans the unindexed
+`block(default_variant_id)` while the feed's registry order keeps every block's default pointer dangling" — fix: a
+v1_35 migration adding the two local-only indexes (`idx_block_default_variant`, `idx_cblock_chosen_variant`; the
+v1_34 `idx_cblock_dead_block` precedent — no wire change, no lockstep marker move; `SyncSchema` completeness walk
+untouched since indexes are not columns); pin: the bisection's arm E/F shape as a red-on-old (a bound on the per-take
+insert under the apply's pragma with N blocks first); evidence: this table, re-run through the gated bench once the
+migration exists (`VARIORUM_APPLY_PROFILE=1` without the knob should then read as the right column). Beside it, the
+corrected suspect list for VX-672 (the phone's slow post-purge round): the purge janitor's physical DELETEs run under
+the same apply-mode road — a `DELETE FROM variant` is a PARENT-row delete, which SQLite answers with the same child
+scan on `block(default_variant_id)` and `container_block(chosen_variant_id)` whether FKs are deferred or not (a
+parent delete always has to look for children) — the same two indexes would serve; suspected from the shape, not
+measured here.
 
 #### THE FK DECISION (piece 2) — NOT NAMED
 
