@@ -437,7 +437,9 @@ edge decided on paper before any build.
    macbook pro for a week, and that means it's actually quite behind. so this would be a great improvement to catching it
    up." So: her Pro's Variorum stays CLOSED until the deploy lands (an open before it spends the test on the old shape);
    the orchestrator's read-only probe (`Tools/prod-read.sh`, counts only) reads the rows past her Pro's `device_cursor`
-   first, so the catch-up's size is known and its time honest — a week-behind catch-up is the Air's week of writes, not a
+   first, so the catch-up's size is known and its time honest — **PROBED 2026-11-01 ~16:55: 22,905 rows past the Pro's cursor
+   (`7e7609fa…` at 245,728; the head 355,236), ~12 windows; the index-only count answered in 0.64 s live; the checklist
+   `notes/plans/vx495-deploy-checklist.md` carries the per-table counts, the `!` command lines, the verify and the rollback** — a week-behind catch-up is the Air's week of writes, not a
    from-zero one, so the gain is real but modest; the dramatic case stays a new device's join (her Air's next crossing). **Rollback:** `Server/supabase/maintenance/vx495-rollback.sql` (the server-half
    fix session's deliverable — 13's §3a body + the belt's `pg_temp`, idempotent) at her word if the live round refuses;
    the count function may stay or be dropped by the same artifact. **Pre-deploy gate:** the SERVER-HALF ROUND closed
