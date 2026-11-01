@@ -731,6 +731,81 @@ self-assessment; first line = what you did NOT do. Flip the orchestrator's LIVE 
 
 **Not yours:** U2, U3, the ladder, the deploy, the PR. **ENVIRONMENT TRAPS — the section above, binding verbatim.**
 
+### U1b RECORD (the Fable implementer, 2026-11-01; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+**NOT DONE (the record's first line) — PENDING, rewritten at the close.** At this first commit: the instrument is
+built and validated small; the MEASURE at scale, the FK decision, the memo's paragraph and the close are not yet done
+(the LIVE STATUS below). NOT this unit's: U2, U3, the ladder, the deploy, the PR, any store, any server, any stage.
+
+#### LIVE STATUS (U1b; flipped per piece, in the piece's own commit)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The profile INSTRUMENT: the seam (`Sources/VariorumCore/Sync/ApplyProfile.swift` — `ApplyProfileHook`, nil-inert, on `SyncEngine.init`; eight laps at `pullRound`'s existing phase boundaries; the timed `PRAGMA foreign_key_list` read in `foreignKeyColumns`), the harness hook (`SyncClient.applyProfile`), the gated bench `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (`VARIORUM_APPLY_PROFILE=1`; sizes/runs/store env-overridable) + the ungated seam pins (`ApplyProfileSeamTests`, 2) | DONE (this commit) — build green; the seam pins "Test run with 2 tests in 1 suite passed"; the bench skips without the env ("3 tests in 2 suites passed", 1 skipped); validated at 40×10 (the dry run's lines below — NOT the measure) |
+| 1b | THE MEASURE at scale: 1,200 × 30 (≈109k rows), THREE runs, B on a keyed on-disk store, Debug, window 2,000; then, as extra columns if time allows, ONE in-memory run and ONE `-c release` run | NOT-STARTED — runs after this commit (the threshold below is stated FIRST) |
+| 2 | The FK memo (`foreignKeyColumns` memoized per apply transaction) — ONLY if the measure crosses the threshold below; else "not named", with the numbers, and no engine line changes for it | NOT-STARTED — decided by 1b |
+| 3 | THE CHUNKING MEMO trued: "The numbers (U1b)" appended under THE CHUNKING MEMO | NOT-STARTED |
+| 4 | Close: `swift build`; the gated run's lines; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`; the BROAD core run (OWED whatever the FK decision — the seam's laps ARE engine lines, so the broad run is this unit's regardless); the self-assessment; the orchestrator's LIVE STATUS row 3 flipped | NOT-STARTED |
+
+#### THE THRESHOLD (stated BEFORE the measure, as the brief asks)
+
+**The FK memo is NAMED iff the summed `PRAGMA foreign_key_list` time — the hook's `foreignKeyList` durations over
+B's one pull, exactly the quantity a per-table memo would remove — is ≥ 5% of the apply transaction's wall time
+(`applyTransaction`), taken as the MEDIAN of the three on-disk Debug runs.** Below 5% it is not a "measurable share"
+in D-497's sense: her standing word is "don't fix it right now", the window is a code freeze, and a `Sync/` change
+inside the apply that buys under a twentieth of its time is not worth its review cost now. The fixpoint phase's WHOLE
+share is recorded beside it as context — on a from-zero pull it is the PRAGMA reads plus the arriving-set dictionary
+lookups and ZERO `EXISTS` probes (every referent arrives in the batch), so the introspection should be nearly all of
+it. **My prior, written before the run:** small — ~1–3% at scale. The dry run at 1,243 rows read 2.2% (17.7 µs a
+call); the row loop's per-row cost grows with the store (B-tree inserts into ever-larger indexes) while the PRAGMA's
+is constant per call, so the share should FALL as the corpus grows. The measure decides, not the prior.
+
+#### The instrument (piece 1) — what was built, and why that shape
+
+- **The seam** (`Sync/ApplyProfile.swift`): `public struct ApplyProfileHook: Sendable` — `phase: (Phase, Duration)`
+  and `foreignKeyList: (Duration)` closures; `Phase` = download · stageDecode · belt · fixpoint · rowLoop · repairs ·
+  commitPrep · applyTransaction. `SyncEngine.init` gains `applyProfile: ApplyProfileHook? = nil` as its LAST
+  defaulted parameter (every existing call site — `SyncSession.configure`, the harness, every suite — compiles
+  byte-unchanged). The brief's named precedent (`SampleLibraryDedupeFacts`, `keyProvider`) is an UNCONDITIONAL
+  nil-inert value, so this one is too — deliberately NOT `#if DEBUG`: the inert default costs one optional check per
+  lap, and an unconditional type lets the SAME instrument run under `-c release` for a production-shaped share (a
+  Debug-only type would foreclose it). A reviewer who wants `#if DEBUG` flips the type and wraps the bench; said in
+  the self-assessment.
+- **Nil = inert, by construction:** `ApplyProfileMarks.init(nil)` reads no clock (`last` stays nil); `lap` returns on
+  a nil hook before any `ContinuousClock` read; `foreignKeyColumns` reads the clock only when the hook stands. With
+  a hook, every lap is a clock read plus one closure call; the round's SEMANTICS are byte-identical either way — the
+  one structural change is `return try await applyingRemoteShieldedFromCancellation {…}` becoming `let saved = …;
+  marks.lap(.applyTransaction); return saved` (the same value returned).
+- **The laps, at the existing boundaries (no restructuring of the apply):** `marks` created before the window loop;
+  `.download` after the inner window loop ends; `.stageDecode` after `PullStage.rows` lands the batch; inside the
+  apply closure `inner` created at entry, `.belt` after `verifyRoundsStage`, `.fixpoint` after the fixpoint loop,
+  `.rowLoop` before `runPostApplyRepairs`, `.repairs` after it, `.commitPrep` before `return report` (it spans the
+  save's last publish, the cursor write, the stage clear and a stall's naming); `.applyTransaction` after the
+  shielded await returns (its begin, the hop onto the writer, the deferred-FK pragma, the five phases, the COMMIT and
+  the hop back — minus the five, the transaction's own overhead). A refetch after an undecodable stage would report
+  `.download` twice (the bench never meets it; the seam pin asserts once).
+- **The PRAGMA counter:** `foreignKeyColumns` is reached from exactly four places (`SyncEngine.swift`: the push
+  reject's `foreignKeysSatisfiable` at :369, the fixpoint's at :731, the stall's naming at :808, and
+  `foreignKeysSatisfiable` itself at :986) — on a clean from-zero pull the count is the fixpoint's alone.
+- **The seam pins** (`ApplyProfileSeamTests`, ungated, cheap): `theDefaultEngineCarriesNoHook` (nil by default —
+  production never wires one) and `aWiredHookHearsEveryPhaseOnceAndOnePragmaPerRowOfTheFixpoint` (a 3 × 4 corpus,
+  one window: each of the eight phases reported exactly once per round; `foreignKeyList` calls == rows applied +
+  merged — **D-497's "once per ROW" claim, now a pin**; the five inner phases ≤ the transaction's wall; the
+  introspection's time ≤ the fixpoint's; download and stageDecode non-zero). NEW-API pins: on the old tree they fail
+  by compile (`ApplyProfileHook` does not exist), which proves nothing about behavior — said plainly, as U1a said of
+  its own. The bench's suite skips without the env, so the default suite's count grows by the two seam pins only.
+- **The bench** (`ApplyProfileMeasurementTests.aFirstCatchUpsApplyTimedByPhase`, gated): A seeds `posts × blocks`
+  journal posts of one-line blocks (the shape `SyncProgressTests` seeds — 3 synced rows a block + 1 a post) and
+  pushes once; each run opens a FRESH B (prefix `B1`, `B2`, … — its own UUID space; a keyed on-disk store under a
+  scratch folder by default, `VARIORUM_APPLY_PROFILE_STORE=memory` for the in-memory column) with the recorder's
+  hook and pulls ONCE at window 2,000 (the production size `ResumableCatchUpTests` pins); asserts no stall, the cursor
+  at the server's head, every phase reported once; prints one `[vx497-profile]` block per run and a MEDIAN block.
+- **The dry run (40 × 10 = 1,243 rows, 2 on-disk runs — the instrument VALIDATED, not the measure):** apply 1,003 ms
+  (1,239 rows/s): download 20 ms · stageDecode 38 ms (outside the apply); belt 0.0% · fixpoint 2.4% · rowLoop 93.5%
+  · repairs 3.8% · commitPrep 0.0% · txn overhead 0.4%; PRAGMA foreign_key_list 1,243 calls · 22 ms · 17.7 µs each =
+  2.2% of the apply, 92% of the fixpoint. One lesson from the first attempt, recorded: `String(format: "%10s", aSwiftString)`
+  reads the String as a C pointer and SIGSEGVs the test host — the bench pads by hand.
+
 ## LIVE STATUS (the orchestrator's; flipped per piece)
 
 | # | Piece | Status |

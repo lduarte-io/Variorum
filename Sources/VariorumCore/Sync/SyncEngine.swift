@@ -120,6 +120,11 @@ public struct SyncEngine: Sendable {
     /// (an unbound library or a signed-out session is some other state's
     /// business, never this gate's).
     public let accountBinding: SyncAccountBinding?
+    /// VX-497 (VX-500 U1b, D-497 (1)) — THE APPLY PROFILE SEAM (`ApplyProfile.swift`; the `keyProvider` pattern —
+    /// nil = INERT): where a measurement hears a pull round's phases and its `PRAGMA foreign_key_list` reads. Nil in
+    /// production and on every unwired engine — no clock is read, nothing is called; only the gated bench
+    /// (`ApplyProfileMeasurementTests`) wires one. The engine reports; it never decides anything from the numbers.
+    public let applyProfile: ApplyProfileHook?
 
     public init(
         transport: any SyncTransport, batchSize: Int = 200, pullWindowSize: Int = 2_000,
@@ -127,7 +132,8 @@ public struct SyncEngine: Sendable {
         keyProvider: any SyncKeyProviding = UnenrolledKeyProvider(),
         sampleLibraryFacts: [SampleLibraryDedupeFacts] = [],
         furnitureFacts: SeededFurnitureDedupeFacts? = nil,
-        accountBinding: SyncAccountBinding? = nil
+        accountBinding: SyncAccountBinding? = nil,
+        applyProfile: ApplyProfileHook? = nil
     ) {
         self.transport = transport
         self.batchSize = batchSize
@@ -137,6 +143,7 @@ public struct SyncEngine: Sendable {
         self.sampleLibraryFacts = sampleLibraryFacts
         self.furnitureFacts = furnitureFacts
         self.accountBinding = accountBinding
+        self.applyProfile = applyProfile
     }
 
     /// VX-314's gate, in the round-entry refusal cascade (after the re-key
@@ -578,6 +585,8 @@ public struct SyncEngine: Sendable {
             downloaded = try await database.read { try PullStage.stagedRowCount($0) }
             reportsProgress = progress != nil
         }
+        // VX-497 (U1b): the profile seam's lap marks — a nil hook reads no clock (`ApplyProfile.swift`).
+        var marks = ApplyProfileMarks(applyProfile)
         var pulled: [SyncPulledRow]
         while true {
             while true {
@@ -630,12 +639,14 @@ public struct SyncEngine: Sendable {
                     }
                 }
             }
+            marks.lap(.download)
             // The batch: every staged row in `server_seq` order — each row
             // once, at its newest staged seq: what a fresh round from the base
             // would fetch — now including windows an earlier, interrupted round
             // already downloaded.
             if let rows = try await database.read({ try PullStage.rows($0) }) {
                 pulled = rows
+                marks.lap(.stageDecode)
                 break
             }
             // F1 (2): a staged row nobody can read is a stage nobody can vouch
@@ -685,12 +696,13 @@ public struct SyncEngine: Sendable {
         saveProgress?(0, batch.count)
         // Ladder R3, R3-1: the save runs to its end once it starts — a retire
         // (D3) stops the download above, never this transaction.
-        return try await applyingRemoteShieldedFromCancellation { db in
+        let saved = try await applyingRemoteShieldedFromCancellation { db in
             // Ladder R1, N2 — THE ONE-WRITER BELT (`PullStage`'s doc): the
             // stage extends the cursor this round started from; if another
             // round committed under this one, saving now could move the
             // cursor past rows nobody applied. Refuse before any write — the
             // stage stays, the next round re-plans from the new cursor.
+            var inner = ApplyProfileMarks(applyProfile)
             let committed = try cursor(db)
             guard committed == since else {
                 throw PullStage.CursorMovedUnderRound(roundBase: since, committed: committed)
@@ -701,6 +713,7 @@ public struct SyncEngine: Sendable {
             // stage — its identity, reaching exactly this round's fetch cursor.
             try PullStage.verifyRoundsStage(
                 db, base: since, keyID: keyID, deviceID: deviceID, reach: reach)
+            inner.lap(.belt)
             var report = PullReport()
             // Straggler guard, to a FIXPOINT: rows apply in seq order up to
             // the first row whose FK closure is satisfiable neither locally
@@ -723,6 +736,7 @@ public struct SyncEngine: Sendable {
                 if shrunk == stopIndex { break }
                 stopIndex = shrunk
             }
+            inner.lap(.fixpoint)
 
             // A pull's apply: the sample-library dedupe's one firing road
             // (the ladder's R2-1 — the push path's per-chunk pass never
@@ -768,7 +782,9 @@ public struct SyncEngine: Sendable {
                     report.applied += 1
                 }
             }
+            inner.lap(.rowLoop)
             report.repairs = try runPostApplyRepairs(db, touched: touched) + touched.inlineRepairs
+            inner.lap(.repairs)
             saveProgress?(stopIndex, batch.count)
             let newCursor = stopIndex > 0 ? batch[stopIndex - 1].serverSeq : since
             try setCursor(db, newCursor)
@@ -815,8 +831,11 @@ public struct SyncEngine: Sendable {
                     tombstoneStamp: stamp, missingReferents: missing,
                     presentReferents: present)
             }
+            inner.lap(.commitPrep)
             return report
         }
+        marks.lap(.applyTransaction)
+        return saved
     }
 
     // MARK: - Wipe-and-repush re-initialization (Phase 14b, ruling R-2)
@@ -979,7 +998,10 @@ public struct SyncEngine: Sendable {
     private func foreignKeyColumns(
         _ db: Database, table: String
     ) throws -> [(column: String, targetTable: String, targetPrimaryKey: String)] {
-        try Row.fetchAll(db, sql: "PRAGMA foreign_key_list(\(table))").compactMap { fk in
+        // VX-497 (U1b): the profile seam times each introspection read — a nil hook reads no clock.
+        let started = applyProfile == nil ? nil : ContinuousClock.now
+        defer { if let started { applyProfile?.foreignKeyList(ContinuousClock.now - started) } }
+        return try Row.fetchAll(db, sql: "PRAGMA foreign_key_list(\(table))").compactMap { fk in
             let targetTable: String = fk["table"]
             guard let target = SyncSchema.table(named: targetTable) else { return nil }
             return (fk["from"], targetTable, target.primaryKey)
