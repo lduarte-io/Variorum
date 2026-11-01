@@ -124,9 +124,12 @@ struct AuthRLSDDLTests {
     }
 
     /// The body a text runs for `functionName`: the LAST `create or replace
-    /// function <name>` in it, up to its terminating `$$;`.
+    /// function <name>(` in it, up to its terminating `$$;`. The opening
+    /// paren is part of the marker (VX-500 U1a): without it a name that is a
+    /// PREFIX of another's resolves to the wrong body — `sync_pull` found
+    /// `sync_pull_remaining`'s once the VX-495 artifact defined both.
     private static func lastBody(of functionName: String, in sql: String) -> String? {
-        let marker = "create or replace function \(functionName)"
+        let marker = "create or replace function \(functionName)("
         guard let start = sql.range(of: marker, options: .backwards),
               let end = sql.range(of: "$$;", range: start.upperBound..<sql.endIndex)
         else { return nil }
@@ -161,13 +164,14 @@ struct AuthRLSDDLTests {
     private static let postChainFunctionArtifacts = [vx495PullKeysetFile]
 
     /// The body the deployed server actually runs: the LAST
-    /// `create or replace function <name>` in deploy order, up to its
+    /// `create or replace function <name>(` in deploy order, up to its
     /// terminating `$$;` — the lockstep chain, then the post-chain
-    /// function artifacts (VX-495).
+    /// function artifacts (VX-495). The opening paren rides the marker
+    /// (the `lastBody` note: a prefix name must never match a longer one).
     private static func finalBody(of functionName: String) throws -> String {
         let sql = try ([composedSQL()] + postChainFunctionArtifacts.map { try strippingComments(sqlFile($0)) })
             .joined(separator: "\n")
-        let marker = "create or replace function \(functionName)"
+        let marker = "create or replace function \(functionName)("
         guard let start = sql.range(of: marker, options: .backwards) else {
             Issue.record("no create-or-replace for \(functionName) in the composition")
             return ""
@@ -646,20 +650,30 @@ struct AuthRLSDDLTests {
 
     // MARK: - VX-495 / VX-496 — the keyset pull and the catch-up count (VX-500 U1)
 
-    /// THE SHAPE PIN (D-495): the deployed `sync_pull` assembles its page in two phases — THE PICK (per table, the
-    /// first `max_rows` seqs past the cursor in index order, never the rows' JSON) and THE FETCH (13's two branches
-    /// narrowed to the picked ids by primary key) — with 13's allowlist and owner-table set byte-equal, the device
-    /// cursor upsert, both gates and the derived horizon kept. The A5 and owner-filter pins above run against this
-    /// same final body, unchanged — that is the point of laying the artifact over the chain.
-    @Test func theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesExactlyThatPage() throws {
+    /// THE SHAPE PIN (D-495, SHAPE B — the record's D-495 EVIDENCE, her 230 ms probe): the deployed `sync_pull`
+    /// assembles its page in two phases — THE PICK (per table, the first `max_rows` SEQS past the cursor in index
+    /// order; seqs only, never a row's id or JSON), THE BOUND (`max(server_seq)` over the pick) and THE FETCH (13's
+    /// two branches, each one index RANGE scan up to the bound — no per-row probe, no `in (select …)`) — with 13's
+    /// allowlist and owner-table set byte-equal, the device cursor upsert, both gates and the derived horizon kept on
+    /// every branch (pick and fetch alike — three `from %I t`, three owner filters, three horizon filters). The A5 and
+    /// owner-filter pins above run against this same final body, unchanged — that is the point of laying the
+    /// artifact over the chain.
+    @Test func theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesUpToTheBound() throws {
         let body = try Self.finalBody(of: "sync_pull")
         #expect(body.contains("with picked as ("), "the page is picked first")
+        #expect(body.contains("$q$(select t.server_seq\n          from %I t"),
+                "the pick yields seqs only — never a row's id or JSON")
         #expect(body.contains("order by t.server_seq\n          limit %s)"),
                 "the pick walks each table's (owner_id, server_seq) index and stops at the page")
-        #expect(body.contains("in (select p.row_id from picked p where p.tbl = %L)"),
-                "the fetch reads exactly the picked ids by primary key")
-        #expect(body.components(separatedBy: "in (select p.row_id from picked p where p.tbl = %L)").count - 1 == 2,
-                "both fetch branches (owner-carrying, mirror-only) are narrowed")
+        #expect(body.contains("bound as (select max(server_seq) as seq from picked)"),
+                "the bound is the page's last seq")
+        #expect(body.components(separatedBy: "and t.server_seq <= (select seq from bound)").count - 1 == 2,
+                "both fetch branches (owner-carrying, mirror-only) are bounded — one index range scan each")
+        #expect(!body.contains("in (select"), "no per-row probe survives — SHAPE B replaced the pick-by-id draft")
+        #expect(body.components(separatedBy: "sync_table_pk(tbl)").count - 1 == 2,
+                "the primary key is read for the two fetch branches' row_id only — the pick needs none")
+        #expect(body.components(separatedBy: "t.server_written_at <= clock_timestamp() - %L::interval").count - 1 == 3,
+                "the derived horizon filters the pick and both fetch branches (the per-branch clock is harmless — the header)")
         #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull');"))
         #expect(body.contains("VARIORUM_NO_ENTITLEMENT"))
         #expect(body.contains("on conflict (owner_id, device_id) do update"), "the device cursor upsert stays")
@@ -671,18 +685,24 @@ struct AuthRLSDDLTests {
         #expect(body.contains("set search_path = public, pg_temp"), "the belt's list, asserted in the header too")
     }
 
-    /// THE COUNT PIN (D-496): `sync_pull_remaining` is a READ under the pull's own gates — the challenge-verified key
-    /// gate under its OWN rpc name, the entitlement gate, the derived horizon (no inline literal), the same allowlist —
-    /// and the artifact grants it to `authenticated` only (sync_horizon's posture), re-owns both functions to the
-    /// non-bypass definer, re-asserts both search_paths, guards below marker 14, and the grant sweep expects its row.
-    @Test func theCatchUpCountIsAReadUnderThePullsGatesForAuthenticatedOnly() throws {
+    /// THE COUNT PIN (D-496; the shape ruled R-500-1): `sync_pull_remaining` is a READ under the pull's own gates — the
+    /// challenge-verified key gate under its OWN rpc name, the entitlement gate, the same allowlist — and its count is
+    /// INDEX-ONLY: owner + seq per table, NO horizon filter (so no `server_written_at`, no interval of any spelling —
+    /// the count runs off `idx_owner_seq_<table>` without heap visits; exact to within the horizon's two seconds, which
+    /// a progress total never needs). The artifact grants it to `authenticated` only (sync_horizon's posture), re-owns
+    /// both functions to the non-bypass definer, re-asserts both search_paths, guards below marker 14 (a READ of the
+    /// marker — never a WRITE: a maintenance artifact moves no marker), and the grant sweep expects its row.
+    @Test func theCatchUpCountIsAnIndexOnlyReadUnderThePullsGatesForAuthenticatedOnly() throws {
         let body = try Self.finalBody(of: "sync_pull_remaining")
         #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull_remaining');"))
         #expect(body.contains("VARIORUM_NO_ENTITLEMENT"))
-        #expect(body.contains("sync_visibility_horizon_ms()") && !body.contains("interval '"),
-                "the count sees exactly the rows the feed serves")
-        #expect(body.contains("select count(*) from %I t"))
-        #expect(body.contains("where t.owner_id = %L"))
+        #expect(body.contains("(select count(*) from %I t\n          where t.owner_id = %L\n            and t.server_seq > %s)"),
+                "each table's term is owner + seq and nothing else — the index-only count (R-500-1)")
+        #expect(!body.contains("server_written_at") && !body.contains("interval"),
+                "no horizon filter in the count — it would force a heap visit per row (the measured 1,586 ms shape)")
+        #expect(body.components(separatedBy: "from %I t").count - 1
+                    == body.components(separatedBy: "where t.owner_id = %L").count - 1,
+                "every counted table is tenant-scoped")
         let pull = try Self.finalBody(of: "sync_pull")
         #expect(Self.namedArray("allowed", in: body) == Self.namedArray("allowed", in: pull),
                 "the count sums the pull's own allowlist")
@@ -696,7 +716,10 @@ struct AuthRLSDDLTests {
         #expect(artifact.contains("grant execute on function sync_pull_remaining(bigint, text, text, text) to authenticated;"))
         #expect(!artifact.contains("sync_pull_remaining(bigint, text, text, text) to authenticated, service_role"),
                 "never the service role — a read's posture")
-        #expect(!artifact.contains("lockstep_version'"), "no marker move — a maintenance artifact")
+        // The guard READS the marker (`select value::int … where key = 'lockstep_version'`); nothing WRITES it.
+        #expect(artifact.contains("from sync_meta where key = 'lockstep_version'"), "the guard reads the deployed marker")
+        #expect(!artifact.lowercased().contains("update sync_meta") && !artifact.lowercased().contains("insert into sync_meta"),
+                "no marker move — a maintenance artifact never writes sync_meta")
         let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
         #expect(sweep.contains("('sync_pull_remaining(bigint,text,text,text)',"),
                 "the post-deploy sweep expects the new function's posture")
@@ -3166,9 +3189,14 @@ struct AuthRLSDDLTests {
         let furniture = Set(Self.pgTempBeltFurniture.keys)
         let order = Self.searchPathDeployOrder
 
-        // The belt unread: every checked function is flagged — the chain alone leaves bare lists.
+        // The belt unread — and with it the one post-belt artifact that re-asserts `pg_temp` ITSELF (VX-495's keyset
+        // pull re-creates `sync_pull` and creates `sync_pull_remaining` with `public, pg_temp` in their headers, so
+        // read alone it would leave those two clean): every checked function is flagged — the chain alone leaves
+        // bare lists.
         let unbelted = Self.searchPathResolution(
-            deploy: try Self.searchPathDeploy(order.filter { $0 != Self.pgTempBeltFile }), furniture: furniture)
+            deploy: try Self.searchPathDeploy(
+                order.filter { $0 != Self.pgTempBeltFile && $0 != Self.vx495PullKeysetFile }),
+            furniture: furniture)
         #expect(unbelted.checked.count >= 18)
         for signature in unbelted.checked {
             #expect(unbelted.problems.contains("no-trailing-pg_temp:\(signature)"),
