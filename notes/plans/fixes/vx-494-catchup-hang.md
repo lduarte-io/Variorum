@@ -12,6 +12,68 @@ the window session) returned 0 BLOCKER · 0 MAJOR · 2 MINOR · 3 NIT and indepe
 hitting the safeguards"). The charter is `notes/handoffs/vx-494-kickoff.md`; the morning handoff
 `notes/handoffs/vx-494-handoff.md`. Pin-before-fix; commits say `Part of VX-494`; NO trailers.
 
+## FOR A LATER READER (written 2026-11-01 under CLAUDE.md's record rule, from the settled facts below; a kickoff that names this record means this section — read the rest only to reopen the fix)
+
+**The mechanism, as settled (THE EVIDENCE · HER EXPERIMENT'S RESULT).** A from-zero catch-up was ALL-OR-NOTHING: the
+engine fetched the whole feed into memory (~550 windows of 200 rows on her ~108k-row corpus, 11 min 36 s), then ran ONE
+apply transaction (~4 min 20 s at ~420 rows/s), and committed the cursor only with it. Any interruption before that
+commit — Castle's 10-minute idle lock (longer than the download alone), a quit, a sleep — discarded everything and the
+next round began again at 0, silently ("Syncing…" throughout). Left alone it did land (her real crossing committed at
+04:12, cursor 229159 = her head): there was no second mechanism. The server's per-call cost grows with the rows still
+ahead of the cursor (Seq Scan → to_jsonb of every eligible row → sort → limit; 2,934 ms at LIMIT 200, 1,477 ms at
+LIMIT 2,000; the `authenticated` statement timeout 8 s) — that is VX-495's, not this fix's.
+
+**The fix, as built (one pointer per piece; the apply transaction's body stayed byte-identical, SyncSpec §5–§7
+untouched).**
+- **D1 — the pull window is its own size, 2,000 rows** (`SyncEngine.pullWindowSize`; `c1583de0b`): ~56 calls instead of
+  ~550; the push chunk keeps 200.
+- **D2 — the download is STAGED and resumable** (`Sync/PullStage.swift`; the local-only `sync_pull_stage` table, migration
+  `v1_32` `f6658017b`, registered in `SyncSchema.localOnlyTables` + `LocalMachineryRecreation`, dropped by the export; the
+  header under `sync_state` key `pull_stage`): each completed window lands in the stage in its own small write; the apply
+  reads the stage (each row once at its newest seq) and empties it in the transaction that moves the cursor. A round
+  RESUMES only when the header matches — the committed cursor (`base`), the fetch position (`seq`), the corpus key id,
+  the device id, the stage `format`, the lockstep marker (F1) and the purge-ledger scan point (R2-1) — else it discards
+  and fetches fresh; an undecodable staged row discards the whole stage (F1 (2)); `resyncReinitialize` clears it.
+  Continuity + the one-writer belt (R2-2/N2): `stage` refuses unless the window continues the header, and the apply
+  refuses (`CursorMovedUnderRound` / `StageMovedUnderRound`) when the committed cursor or the stage moved under the round
+  — the scheduler then runs ONE follow-up round (`nextRoundIsBeltFollowUp`, R2-6), never a loop. A resumed round's
+  windows carry NO device id (the 13j rule kept: only a committed cursor is reported — R-494-4 (b)).
+- **D3 — a stopped session never strands "Syncing…"** (`c33f18f09`; `SyncScheduler.retire()` cancels the round, the fetch
+  loop checks cancellation between windows, `SyncSession.stop()` clears the published flag) **and the SAVE is shielded
+  from that cancellation** (R3-1, `SyncEngine.applyingRemoteShieldedFromCancellation`, `a0d3428cb`): a retire or lock
+  mid-download costs nothing (the stage resumes); a lock mid-save WAITS for the save (minutes), as before D3 — her
+  R-494-4 (h) "Agreed."
+- The scan-point key has ONE reader, `PurgeJanitor.ledgerScanPoint` (R3-4); `PullStage.rows` decodes through a cursor
+  (R3-5).
+
+**Her rulings by id (HER RULINGS carries the words).** R-494-1 the cast waiver (Opus wrote `Sync/`, three fresh
+`opus-reviewer` rounds; a post-merge Fable cold review at her word, R-494-5: 0 BLOCKER · 0 MAJOR · 2 MINOR · 3 NIT,
+`notes/plans/fixes/vx-494-fable-cold-review.md`) · R-494-2 the scope (D1–D3 here; VX-495 the server query and VX-496 the
+progress line minted as their own tickets) · R-494-4 (a)–(i) the window sitting: VX-502 (v1_32 makes 9093's exports
+un-importable) · keep the 13j device rule · O-2's disk slack accepted for 0.10 → VX-504 · O-1's Touch ID prompt → VX-503
+(Done) · VX-492/VX-493 closed as resolved here · VX-495/VX-496 Pre-launch · VX-497 (the all-or-nothing save) deferred,
+"don't close it" · VX-505 (the belt's words) + the umbrella **VX-500** · the shield stays · VX-498 stands; M1 (c): a typed
+unlock holds the sync keys in session → VX-501 (built at VX-510) · R-494-6 VX-506 (the pre-join locked line's wording) ·
+*[removed for publication]*
+*[removed for publication]*
+act); VM-8 deferred behind the first-run sync run (VX-510); QUESTIONS #239 holds the bundle.
+
+**The evidence lines that matter.** THE LIVE PROOF on the throwaway at her corpus's scale (~110k rows): 56 data windows,
+16.9 MB, ~70 s; a `kill -9` DURING the save → relaunch → zero data windows, the save from the stage (~7 min), L2's
+`device_cursor` = 110,424 = the head, the Bookcase whole. Pins: `ResumableCatchUpTests` 18/18 (D1, D2, D3, F1 ×2, F2,
+F3 ×2, N2/R2-2 continuity, R2-1 the ledger scan point, R2-6 the follow-up, R3-1 the shield), each red-on-old by behavioral
+revert (RV1–RV5 red on their own pins; RV6 — the between-window `checkCancellation` — HOLLOW, kept as a belt, not claimed;
+RV-R3a red). Closing runs on the final tree `ae6d1bf90`: core debug 3326/434, release 3297/429; the full Mac suite
+5118/898 with one order-shaped flake (`MastheadLayoutTests`, green alone → VX-499); the phone 808/126. Merged PR #185
+(`44226636b`), installed as 0.10 (9162); the canon lines: AppSpec §7's local-only block, SyncSpec §3 + §5.
+
+**Open at close, and where each went.** The umbrella VX-500 (VX-495 · 496 · 497 · 498 · 501 · 502 · 503 · 504 · 505 ·
+506 · 507 · 508 — most since closed by VX-510/VX-529; the sync follow-ups run `notes/plans/fixes/vx-500-sync-followups.md`
+carries 495/496/497/505/504/508) · the stage's disk slack (79 → 150 MB after a first catch-up; VX-504's compaction memo)
+· R2-3 (a device that only ever resumes never refreshes `seen_at` — accepted, R-494-4 (b)) · FB-5 of the Fable review
+*[removed for publication]*
+by VX-507.
+
 ## LIVE STATUS (flip per piece, same commit; unverified claims marked PENDING)
 
 | # | Piece | Status |
