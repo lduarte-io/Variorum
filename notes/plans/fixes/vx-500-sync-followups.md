@@ -790,9 +790,18 @@ self-assessment; first line = what you did NOT do. Flip the orchestrator's LIVE 
 
 ### U1b RECORD (the Fable implementer, 2026-11-01; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
 
-**NOT DONE (the record's first line) — PENDING, rewritten at the close.** At this first commit: the instrument is
-built and validated small; the MEASURE at scale, the FK decision, the memo's paragraph and the close are not yet done
-(the LIVE STATUS below). NOT this unit's: U2, U3, the ladder, the deploy, the PR, any store, any server, any stage.
+**NOT DONE (the record's first line).** NOT BUILT, deliberately — **the index migration** (the two local-only indexes
+on `block(default_variant_id)` and `container_block(chosen_variant_id)` that THE MECHANISM names and THE CANDIDATE FIX
+MEASURED prices at 3.9× on the apply): a `Persistence/` migration is outside the U1b brief and a different change
+class from the one the brief gated (the FK-introspection memo) — it is handed to the orchestrator as a TICKET with its
+design, its pin shape and its measured gain, not "also done". NOT BUILT because NOT NAMED — the FK memo (0.5% of the
+apply against the 5% bar; THE FK DECISION). NOT RUN — a `-c release` bench and an in-memory column (both dropped once the
+mechanism proved independent of optimization level and of the store medium — the bisection reproduces it in memory and
+the index removes it on disk). NOT MEASURED, only reasoned from the mechanism — the `container_block(chosen_variant_id)`
+scan on a NON-fresh device, and VX-672's purge-side suspicion (a parent DELETE's child scan). NOT this unit's: a live
+round, any store, any server, any stage, U2, U3, the ladder, the deploy, the PR. ONE commit message is WRONG and stands
+(history is never rewritten): `482991724` names the search-index capture as the mechanism; THE FINDING paragraph and THE
+MECHANISM correct it in the record.
 
 #### LIVE STATUS (U1b; flipped per piece, in the piece's own commit)
 
@@ -803,7 +812,7 @@ built and validated small; the MEASURE at scale, the FK decision, the memo's par
 | 1c | Extra columns (after 1b): the STATEMENT-LEVEL trace of one apply (`VARIORUM_APPLY_PROFILE_TRACE=1`); the standalone FTS5 probe (`ApplyProfileFTSProbeTests`); the trigger-set BISECTION on the real schema (`ApplyProfileBisectionTests`, arms A–G); the candidate fix MEASURED at scale (`VARIORUM_APPLY_PROFILE_INDEX_FIX=1`) | DONE (this commit) — THE MECHANISM: the deferred-FK child scan over the unindexed `block(default_variant_id)`, O(N²) (my trace reading corrected); THE CANDIDATE FIX MEASURED: **the apply 330,231 → 85,315 ms (3.9×), 331 → 1,280 rows/s** at 109k rows, Debug, on-disk ("Test run with 5 tests in 4 suites passed after 268.638 seconds" — the filter matches by file, so the probes ran too); the Release run and the in-memory run DROPPED (the mechanism is independent of both) |
 | 2 | The FK memo (`foreignKeyColumns` memoized per apply transaction) — ONLY if the measure crosses the threshold below; else "not named", with the numbers, and no engine line changes for it | DONE (this commit) — **NOT NAMED**: the introspection is 0.5% of the apply (1,784 ms of 330,231 ms, median of three) against the 5% threshold; the fixpoint whole is 0.6%. No engine line changes for it (THE FK DECISION below) |
 | 3 | THE CHUNKING MEMO trued: "The numbers (U1b)" appended under THE CHUNKING MEMO | DONE (this commit) — where the time goes; what chunking would and would not buy; ONE NEW EDGE the memo lacked (a K-row chunk cannot COMMIT under deferred FKs while a `block.default_variant_id` dangles, and this feed order dangles every block's until the takes land); the recommendation unchanged and strengthened — the index first |
-| 4 | Close: `swift build`; the gated run's lines; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`; the BROAD core run (OWED whatever the FK decision — the seam's laps ARE engine lines, so the broad run is this unit's regardless); the self-assessment; the orchestrator's LIVE STATUS row 3 flipped | NOT-STARTED |
+| 4 | Close: `swift build`; the gated run's lines; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`; the BROAD core run (OWED whatever the FK decision — the seam's laps ARE engine lines, so the broad run is this unit's regardless); the self-assessment; the orchestrator's LIVE STATUS row 3 flipped | DONE (this commit) — the filtered suites "Test run with 41 tests in 8 suites passed after 11.497 seconds" (the three gated tests skipped, as designed); the broad core run: core "3594 tests in 482 suites passed … with 5 known issues", StringsWorkbook 32/4 passed, MCP 468/85 with the ONE named load-flake (passes alone); the self-assessment written; the orchestrator's row 3 flipped |
 
 #### THE THRESHOLD (stated BEFORE the measure, as the brief asks)
 
@@ -1039,6 +1048,85 @@ change inside `pullRound`'s apply, pure because the schema cannot change inside 
   2.2% of the apply, 92% of the fixpoint. One lesson from the first attempt, recorded: `String(format: "%10s", aSwiftString)`
   reads the String as a C pointer and SIGSEGVs the test host — the bench pads by hand.
 
+#### The close (piece 4)
+
+- `swift build --build-tests` → "Build complete!" at every piece; the last at the close commit's tree.
+- The gated runs' lines: THE MEASURE (3 on-disk runs, "Test run with 3 tests in 2 suites passed after 1096.750
+  seconds"), THE TRACE (1 run, 428.058 s), the FTS5 probe and the bisection (seconds), THE CANDIDATE FIX MEASURED (2
+  runs, "Test run with 5 tests in 4 suites passed after 268.638 seconds"). Note for the next session: `--filter
+  ApplyProfileMeasurementTests` matches by SOURCE FILE, so it runs every suite in the file (the bench, the two probes,
+  the seam pins) — the gated three skip without the env, the two seam pins run always.
+- `swift test --skip-build --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`
+  → **"Test run with 41 tests in 8 suites passed after 11.497 seconds"** — the three gated tests skipped, the two seam
+  pins and every U1a suite green.
+- **The broad core `swift test` (debug)**, three targets, detached and foreground-polled (15:32–15:37):
+  - `VariorumCoreTests`: **"Test run with 3594 tests in 482 suites passed after 241.988 seconds with 5 known issues"** —
+    U1a's 3,589 + this unit's 5 (the bench, the FTS5 probe and the bisection — gated, skipped, counted — and the two
+    seam pins); the 5 known issues are the Castle pair suites' pre-existing `withKnownIssue` arms (`PairCatchUpTests` ×1,
+    `PairInvariantPinsTests` ×4), untouched. No real failure.
+  - `StringsWorkbookTests`: "Test run with 32 tests in 4 suites passed after 29.729 seconds".
+  - `VariorumMCPTests`: "Test run with 468 tests in 85 suites failed after 42.603 seconds with 1 issue" — the ONE issue is
+    the traps' named load-flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+    (`ContinuousClock.now - started < .seconds(15)` → 29.8 s under full-suite load); alone → "Test run with 1 test in 1
+    suite passed after 1.054 seconds". Recorded, never fixed here, as the traps say. U1a's two other load-flake candidates
+    did not recur this run.
+- **The verdict of the close:** every suite this unit touches is green; the broad run's only issue is the named flake.
+
+#### SELF-ASSESSMENT (the first of the two reviews — what I am least sure of; what the cold reviewer should press on)
+
+1. **The seam's production cost and shape** (`Sync/ApplyProfile.swift`; `SyncEngine.swift` — `marks`/`inner` and
+   `foreignKeyColumns`). Eight `lap` calls and ~109k optional checks per apply, no clock read with a nil hook — the
+   inert default's whole cost. I chose the brief's named precedent (an UNCONDITIONAL nil-inert value, like
+   `SampleLibraryDedupeFacts`) over `#if DEBUG` so the instrument can also run under `-c release`; `ApplyProfileHook`
+   is therefore `public` API on the core package (a `public init`'s parameter type must be). A reviewer who wants the
+   type DEBUG-only flips it and wraps the bench file; nothing else changes. Press on: that no lap sits where a
+   `throw` could skip a required bookkeeping line (none does — laps are reads; a thrown round reports nothing).
+2. **The one structural line:** `return try await applyingRemoteShieldedFromCancellation {…}` became `let saved = …;
+   marks.lap(.applyTransaction); return saved` (`SyncEngine.swift`, `pullRound`'s tail). Same value, same throw path.
+   Press on it anyway: it is the only non-additive edit in `Sync/`.
+3. **The inner `var inner = ApplyProfileMarks(applyProfile)` lives INSIDE the `@Sendable` apply closure** — a local
+   mutable, never captured; it compiled under the package's strict-concurrency settings. Press on: nothing else in the
+   closure captured `marks` (the outer one) — it is used only after the await.
+4. **The seam pin `foreignKeyListCalls == rows`** (`ApplyProfileSeamTests`) holds because the fixpoint makes exactly ONE
+   pass on a stall-free feed and `foreignKeyColumns`'s other callers (the push reject at :369, the stall's naming at
+   :808) never run in that scene. If a future change made the fixpoint re-scan or the stall name FKs on a clean pull,
+   the pin would go red for the right reason — but a reviewer should agree the equality is the right strength.
+5. **THE MECHANISM rests on the probe arms, not on SQLite's source.** The amalgamation is not vendored as text, so the
+   deferred-FK parent-insert child-scan rule is asserted from the probes (E 316 µs vs F 20 µs vs G 19 µs) and from
+   SQLite's FK documentation as I remember it (parent-key inserts search the child table while deferred violations are
+   pending; an index on the child column turns the scan into a probe). Press on: read sqlite.org/foreignkeys.html
+   §4.1–4.2 and `fkScanChildren`/`OP_FkIfZero` in `fkey.c` — if the rule is narrower than I state, the probes still
+   stand as measurements but the prose should be tightened. The "~2,500 encrypted page reads" for the on-disk scan is
+   arithmetic (36k rows × ~280 B ÷ 4 KiB), not a measured count; the measured facts are 0.3 ms in memory at 10k and 7 ms
+   on disk at 36k.
+6. **The FTS5 attribution I first wrote (and committed in `482991724`'s message) was WRONG.** The trace was right that
+   the time sits inside `INSERT INTO variant`; my reading of WHY was an inference from "what distinguishes variant from
+   block" that the probes falsified within the hour. The record says so in THE FINDING and THE MECHANISM; the commit
+   message stands (no history rewrite). A reviewer reading commits alone would be misled — hence this item.
+7. **The index-fix measurement is bench-side** (two `CREATE INDEX` on B's fresh store before the pull), not a migration.
+   For a fresh store the effect is identical to a v1_35 migration; for an EXISTING store the migration pays a one-time
+   index build at the upgrade open (O(N), ms for 36k blocks) — the ticket should say so. Press on: whether any DDL
+   completeness pin enumerates indexes (the A6 walk is about columns; `SyncSchemaTests` should be read once) so the
+   ticket's implementer knows what else moves.
+8. **Not measured, reasoned:** the `container_block(chosen_variant_id)` scan bites a NON-fresh device (its placements
+   exist when takes arrive); VX-672's purge DELETEs (a parent-row delete always searches its children, deferred or
+   not). Both follow from the mechanism; neither has a number here.
+9. **The corpus is thin:** journal posts of one-line blocks — no commit_points (her ~29k), comments, tags, readings or
+   edges — so the repairs' and the search capture's shares are lower bounds and the index-fix remainder (0.73 ms a
+   row of Swift-side Debug work) is for THIS row mix. The mechanism is shape-independent (it keys on the block→variant
+   FK and the registry order), but the ticket's acceptance run should use the real seed or her real library's shape.
+10. **The chunking memo's new edge** (a K-row chunk is un-committable under deferred FKs while a `default_variant_id`
+    dangles) is reasoned from SQLite's commit rule (pending deferred violations fail the COMMIT) and the fixpoint's
+    `arriving`-is-the-batch reading — not driven through the fake. It is a design observation for her sitting, not a
+    pinned fact; say so if it is cited elsewhere.
+11. **The threshold and the prior were written before the measure** (commit `bf33a5d10` precedes every number); the
+    measure then sat a tenth below the bar. Press on whether 5% was the right bar — it was mine, stated in advance, and a
+    reviewer may think a 2.2%-of-the-fixed-apply introspection (1.9 s) is worth the five-line cache after all; I did not
+    build it because the brief gates it on the measure and her word is "not now".
+12. **The profile's stability:** three on-disk runs within ±0.8% of each other on the apply; the traced run +3.7%; the
+    index-fix runs within ±0.3%. The Mac was otherwise idle (polls only). The Debug/Release gap is NOT measured here (the
+    Release run was dropped); her Pro's Release 420 rows/s on the real catch-up brackets the baseline.
+
 ## LIVE STATUS (the orchestrator's; flipped per piece)
 
 | # | Piece | Status |
@@ -1047,7 +1135,7 @@ change inside `pullRound`'s apply, pure because the schema cannot change inside 
 | 0b | RESUME (the second orchestrator, 2026-11-01 ~13:30 MDT): the handoff + this file + the standard preflight read whole (SyncSpec, CastleRules, SurfaceContracts' Doors, the resiliency protocol, the sizing guidance, the master plan, QUESTIONS' tail); main merged into the branch (`c64211270`); the stage claimed; the roster re-listed via Linear (11 sub-issues — matches); R-500-5 ruled; the U1 split; the U1a brief | DONE (this commit) |
 | 1 | U1a — the server artifact (D-495 SHAPE B + the count per R-500-1) + the DDL pins | DONE (`6155ba7fb` SHAPE B · `7d645688f` the count · `1e8d24286` the DDL pins · `917189ccd` the red-on-old) — U1a; the record is `### U1a RECORD` |
 | 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | DONE (`86b097934` the ownership pass, one change; the close commit the wire pin) — U1a; the draft `aad734aef` adopted line by line |
-| 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | IN PROGRESS — the Fable implementer, briefed §U1b BRIEF |
+| 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
 | 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
