@@ -150,11 +150,23 @@ struct AuthRLSDDLTests {
         return try finalBody(of: functionName)
     }
 
+    /// VX-495 / VX-496 (VX-500 U1 — `notes/plans/fixes/vx-500-sync-followups.md`, D-495/D-496): the keyset pull
+    /// and the catch-up count. A MAINTENANCE artifact (no marker move — the wire is byte-identical), deployed AFTER
+    /// the belt; it re-creates `sync_pull` and creates `sync_pull_remaining`, so the bodies the deployed server RUNS
+    /// for those two are ITS — `finalBody(of:)` lays it over the lockstep composition (the ladder-overlay precedent).
+    private static let vx495PullKeysetFile = "maintenance/vx495-pull-keyset.sql"
+
+    /// The maintenance artifacts that DEFINE functions after the whole lockstep chain, in deploy order — what
+    /// `finalBody(of:)` reads past the chain.
+    private static let postChainFunctionArtifacts = [vx495PullKeysetFile]
+
     /// The body the deployed server actually runs: the LAST
     /// `create or replace function <name>` in deploy order, up to its
-    /// terminating `$$;`.
+    /// terminating `$$;` — the lockstep chain, then the post-chain
+    /// function artifacts (VX-495).
     private static func finalBody(of functionName: String) throws -> String {
-        let sql = try composedSQL()
+        let sql = try ([composedSQL()] + postChainFunctionArtifacts.map { try strippingComments(sqlFile($0)) })
+            .joined(separator: "\n")
         let marker = "create or replace function \(functionName)"
         guard let start = sql.range(of: marker, options: .backwards) else {
             Issue.record("no create-or-replace for \(functionName) in the composition")
@@ -630,6 +642,64 @@ struct AuthRLSDDLTests {
         let push = try Self.finalBody(of: "sync_push")
         #expect(push.contains("- 'sync_version' - 'server_seq' - 'server_written_at'"),
                 "the reject branch keeps subtracting server-only columns")
+    }
+
+    // MARK: - VX-495 / VX-496 — the keyset pull and the catch-up count (VX-500 U1)
+
+    /// THE SHAPE PIN (D-495): the deployed `sync_pull` assembles its page in two phases — THE PICK (per table, the
+    /// first `max_rows` seqs past the cursor in index order, never the rows' JSON) and THE FETCH (13's two branches
+    /// narrowed to the picked ids by primary key) — with 13's allowlist and owner-table set byte-equal, the device
+    /// cursor upsert, both gates and the derived horizon kept. The A5 and owner-filter pins above run against this
+    /// same final body, unchanged — that is the point of laying the artifact over the chain.
+    @Test func theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesExactlyThatPage() throws {
+        let body = try Self.finalBody(of: "sync_pull")
+        #expect(body.contains("with picked as ("), "the page is picked first")
+        #expect(body.contains("order by t.server_seq\n          limit %s)"),
+                "the pick walks each table's (owner_id, server_seq) index and stops at the page")
+        #expect(body.contains("in (select p.row_id from picked p where p.tbl = %L)"),
+                "the fetch reads exactly the picked ids by primary key")
+        #expect(body.components(separatedBy: "in (select p.row_id from picked p where p.tbl = %L)").count - 1 == 2,
+                "both fetch branches (owner-carrying, mirror-only) are narrowed")
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull');"))
+        #expect(body.contains("VARIORUM_NO_ENTITLEMENT"))
+        #expect(body.contains("on conflict (owner_id, device_id) do update"), "the device cursor upsert stays")
+        // The allowlist and the owner-table set are 13's, byte for byte.
+        let thirteen = Self.strippingComments(try Self.sqlFile("13_phase13i_wings.sql"))
+        let thirteenPull = try #require(Self.lastBody(of: "sync_pull", in: thirteen))
+        #expect(Self.namedArray("allowed", in: body) == Self.namedArray("allowed", in: thirteenPull))
+        #expect(Self.namedArray("owner_tables", in: body) == Self.namedArray("owner_tables", in: thirteenPull))
+        #expect(body.contains("set search_path = public, pg_temp"), "the belt's list, asserted in the header too")
+    }
+
+    /// THE COUNT PIN (D-496): `sync_pull_remaining` is a READ under the pull's own gates — the challenge-verified key
+    /// gate under its OWN rpc name, the entitlement gate, the derived horizon (no inline literal), the same allowlist —
+    /// and the artifact grants it to `authenticated` only (sync_horizon's posture), re-owns both functions to the
+    /// non-bypass definer, re-asserts both search_paths, guards below marker 14, and the grant sweep expects its row.
+    @Test func theCatchUpCountIsAReadUnderThePullsGatesForAuthenticatedOnly() throws {
+        let body = try Self.finalBody(of: "sync_pull_remaining")
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull_remaining');"))
+        #expect(body.contains("VARIORUM_NO_ENTITLEMENT"))
+        #expect(body.contains("sync_visibility_horizon_ms()") && !body.contains("interval '"),
+                "the count sees exactly the rows the feed serves")
+        #expect(body.contains("select count(*) from %I t"))
+        #expect(body.contains("where t.owner_id = %L"))
+        let pull = try Self.finalBody(of: "sync_pull")
+        #expect(Self.namedArray("allowed", in: body) == Self.namedArray("allowed", in: pull),
+                "the count sums the pull's own allowlist")
+        let artifact = Self.strippingComments(try Self.sqlFile(Self.vx495PullKeysetFile))
+        #expect(artifact.contains("VARIORUM_VX495_NEEDS_14"), "refuses below marker 14")
+        #expect(artifact.contains("alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;"))
+        #expect(artifact.contains("alter function sync_pull_remaining(bigint, text, text, text) owner to variorum_definer;"))
+        #expect(artifact.contains("revoke execute on function sync_pull(bigint, text, text, text, int, text) from public, anon;"))
+        #expect(artifact.contains("grant execute on function sync_pull(bigint, text, text, text, int, text) to authenticated, service_role;"))
+        #expect(artifact.contains("revoke execute on function sync_pull_remaining(bigint, text, text, text) from public, anon, service_role;"))
+        #expect(artifact.contains("grant execute on function sync_pull_remaining(bigint, text, text, text) to authenticated;"))
+        #expect(!artifact.contains("sync_pull_remaining(bigint, text, text, text) to authenticated, service_role"),
+                "never the service role — a read's posture")
+        #expect(!artifact.contains("lockstep_version'"), "no marker move — a maintenance artifact")
+        let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
+        #expect(sweep.contains("('sync_pull_remaining(bigint,text,text,text)',"),
+                "the post-deploy sweep expects the new function's posture")
     }
 
     // MARK: - The §12 version-check mechanism (Phase 11, A1)
@@ -2883,16 +2953,18 @@ struct AuthRLSDDLTests {
     /// the ladder overlay after 11, signup auto-entitlement after 12), the belt right after 17 — and every LATER
     /// lockstep file after the belt, so a future event's `create or replace` is resolved after it.
     private static var searchPathDeployOrder: [String] {
-        let after: [String: String] = [
-            "10_phase13j_purge.sql": "maintenance/13j-window-pull-rename.sql",
-            "11_pre13x_postures.sql": ladderOverlayFile,
-            "12_phase13y_tenant_seq.sql": "maintenance/beta-signup-auto-entitle.sql",
-            "17_phase_vx307_vault.sql": pgTempBeltFile,
+        // VX-495: the keyset pull deploys AFTER the belt (it re-creates `sync_pull` and re-asserts its
+        // `public, pg_temp` list itself — the resolver checks exactly that).
+        let after: [String: [String]] = [
+            "10_phase13j_purge.sql": ["maintenance/13j-window-pull-rename.sql"],
+            "11_pre13x_postures.sql": [ladderOverlayFile],
+            "12_phase13y_tenant_seq.sql": ["maintenance/beta-signup-auto-entitle.sql"],
+            "17_phase_vx307_vault.sql": [pgTempBeltFile, vx495PullKeysetFile],
         ]
         var order = ["01_mirror_schema.sql", "02_sync_rpc.sql", "03_visibility_horizon.sql", "04_auth_rls.sql"]
         for file in lockstepFiles {
             order.append(file)
-            if let next = after[file] { order.append(next) }
+            order.append(contentsOf: after[file] ?? [])
         }
         return order
     }

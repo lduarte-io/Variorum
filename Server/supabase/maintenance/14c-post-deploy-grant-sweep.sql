@@ -108,6 +108,9 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     ('account_purge()',                                                false, true,  false),
     ('sync_horizon(text,text,text)',                                   false, true,  false),
     ('sync_purge_ledger(bigint,text,text,text)',                       false, true,  false),
+    -- VX-496 (maintenance/vx495-pull-keyset.sql): the catch-up's row count —
+    -- a READ under sync_horizon's exact posture (authenticated only).
+    ('sync_pull_remaining(bigint,text,text,text)',                     false, true,  false),
     ('sync_purge_execute(jsonb,text,text,text)',                       false, true,  false),
     ('sync_reencrypt(jsonb,text,text,text)',                           false, true,  false),
     ('key_vault_update(jsonb,integer,text,text)',                      false, true,  false),

@@ -105,7 +105,7 @@ import Foundation
 /// with the suite key world's corpus key id AND proof hash — the fake twin
 /// of "setup wrote the vault before any round ran"); `connection(as:)`
 /// hands out per-account transports for the multi-tenant suites.
-actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
+actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport, SyncPullCountTransport {
     private struct StoredRow {
         var row: SyncRow          // payload; row.syncVersion == current version
         var serverSeq: Int64      // stamped on every accepted change
@@ -405,6 +405,12 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         try enrollKeyProof(
             legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID,
             as: Self.defaultUserID)
+    }
+
+    // MARK: SyncPullCountTransport (default account — VX-496)
+
+    func pullRemaining(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) throws -> Int64 {
+        try pullRemaining(since: since, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
     // MARK: SyncPurgeTransport (default account)
@@ -777,6 +783,18 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
                 .map { SyncPulledRow(row: $0.row, serverSeq: $0.serverSeq) })
     }
 
+    /// VX-496 — `sync_pull_remaining`'s twin: the rows past `since` the feed
+    /// would serve the caller (committed, past the horizon), summed over the
+    /// account's tables. Gated like the pull.
+    func pullRemaining(since: Int64, activeKeyID: String, keyProof: SyncKeyProof, as userID: String) throws -> Int64 {
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_pull_remaining")
+        return Int64(
+            account.tables.values
+                .flatMap { $0.values }
+                .filter { $0.committed && $0.serverSeq > since && $0.writtenAt <= clock - visibilityHorizon }
+                .count)
+    }
+
     // MARK: pre-13x — the rotation's write (the `sync_reencrypt` twin)
 
     /// Per row: the payload replaced where the version matches — a FRESH
@@ -1126,7 +1144,7 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
 /// A device's authenticated handle on the fake server: the same transport
 /// protocol, bound to one account — the fake twin of the JWT the real
 /// transport carries per call.
-struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
+struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport, SyncRotationTransport, SyncPullCountTransport {
     let server: FakeSyncServer
     let userID: String
 
@@ -1155,6 +1173,10 @@ struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport, SyncRotation
 
     func syncHorizon(activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
         try await server.syncHorizon(activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
+    }
+
+    func pullRemaining(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
+        try await server.pullRemaining(since: since, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
     func purgeLedger(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> SyncPurgeLedgerPage {
