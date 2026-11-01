@@ -50,9 +50,14 @@ At closeout, after the PR merges: retire the in-flight row and **remove the effo
   principles the phase's own plan adds by author ratification. Every
   phase run under this skill copies the constitution into its plan
   file as binding; deviations are recorded with reasons, never silent.
-- **You may write small amounts of code yourself** (fixes at
-  adjudication, record commits, environment acts) — unlike /run-phase's
-  coordinator — but batches belong to implementer sessions.
+- **You write NO product or test code yourself** — not `Sync/`, not
+  "small" (her ruling 2026-11-01 at the VX-500 breach; memory
+  `orchestrator-never-writes-code`): records, briefs, kickoff rows,
+  dispositions and environment acts are yours; an adjudication fix goes
+  to the implementer, or to the reviewer under FINDER-FIXES. Batches
+  belong to implementer sessions. A `Sync/` batch's implementer (a Fable
+  subagent or Opus) is HER call at kickoff or in the plan file's cast
+  line; its cold reviewer is always Fable (CLAUDE.md's cast rule).
 - **Rulings are settled, not undiscussable.** Author rulings recorded
   in the plan file are built, never re-litigated on no new grounds —
   but a newfound technical constraint, an unanswered question, or a
