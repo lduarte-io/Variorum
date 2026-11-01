@@ -583,6 +583,26 @@ way, stop, record, hand off.
 
 ## UNIT RECORDS (appended by each implementer; the orchestrator's verification notes follow each)
 
+### U1a RECORD (the Fable implementer, 2026-11-01; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+**NOT DONE (so far — this line is rewritten at the close):** pieces 2–6 below; nothing outside the U1a brief is touched
+(no profile, no faces, no typed-unlock retry, no deploy, no PR, no store, no stage).
+
+**The standing of the draft `aad734aef`, adopted:** every line of it is re-read against D-495 / D-496 / D-505 and
+SyncSpec §5 before this record closes; the ownership-pass lines (piece 5) say KEPT or CHANGED per item. Its commit
+message's "green" claims are observations only — every suite named here is re-run by this session.
+
+#### LIVE STATUS (U1a; flipped per piece, in the piece's own commit)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | SHAPE B in `maintenance/vx495-pull-keyset.sql` (D-495 EVIDENCE): the pick yields SEQS only; `bound as (select max(server_seq) as seq from picked)`; every fetch branch bounded by `t.server_seq <= (select seq from bound)` (the probe's exact predicate order: horizon, then bound); the header rewritten (SHAPE B, the correctness argument, the horizon-skew judgment, the measured numbers 3,398 · 1,138 · 230 ms); VERIFY names the bound text | DONE (this commit) — the horizon edge KEPT as per-branch `clock_timestamp()` and said harmless in the header (visibility only grows ⇒ picked-but-unfetched impossible; fetched-but-unpicked impossible under the per-tenant counter's write-order = seq-order, and harmless to the client if it ever were); the pinned filter text is byte-identical to 13's |
+| 2 | The count per R-500-1: `sync_pull_remaining` drops the horizon filter and the `horizon` local (an index-only count off `idx_owner_seq_<table>`); the fake's `pullRemaining` drops its horizon term too (keeps `committed` — Postgres visibility); `SyncProgressTests`' totals re-derived | NOT-STARTED |
+| 3 | The DDL pins (`AuthRLSDDLTests`): (a) `finalBody`/`lastBody` match `"create or replace function \(name)("`; (b) the count pin asserts no marker WRITE; (c) the doctored chain's unbelted arm drops the VX-495 artifact too; the drafted `in (select p.row_id …)` pin GOES, a BOUND pin replaces it; then every remaining issue read honestly | NOT-STARTED |
+| 4 | The pins' red-on-old, honestly (new-API pins said plainly; the DDL shape pins' honest red with `postChainFunctionArtifacts` emptied — run once, lines noted, restored) | NOT-STARTED |
+| 5 | The ownership pass over the adopted engine/scheduler lines (one KEPT/CHANGED line per item) | NOT-STARTED |
+| 6 | Close: `swift build`; the four named suites green with counts; the broad core `swift test` in the foreground; the self-assessment | NOT-STARTED |
+
 ## LIVE STATUS (the orchestrator's; flipped per piece)
 
 | # | Piece | Status |

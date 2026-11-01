@@ -12,8 +12,9 @@
 -- catch-up pays ≈ N²/page in all, and a tenant a few times hers would meet
 -- the timeout on its FIRST window whatever the page size (VX-495).
 --
--- THE SHAPE (VX-500 U1, the record `notes/plans/fixes/vx-500-sync-followups.md`,
--- D-495): the SAME signature, the SAME wire shape (a JSON array of
+-- THE SHAPE — SHAPE B, the bound-based fetch (VX-500 U1a; the record
+-- `notes/plans/fixes/vx-500-sync-followups.md`, D-495 and its EVIDENCE):
+-- the SAME signature, the SAME wire shape (a JSON array of
 -- {table,row_id,sync_version,server_seq,columns} ordered by server_seq), the
 -- SAME gates (the challenge-verified key gate, the entitlement gate), the
 -- SAME device-cursor upsert, the SAME A5 horizon derived from the one serving
@@ -21,21 +22,56 @@
 -- the page assembled in TWO phases inside one statement:
 --   THE PICK — per table, the first `max_rows` seqs past the cursor read
 --     off `idx_owner_seq_<table> (owner_id, server_seq)` in index order,
---     stopping after `max_rows` qualifying rows (small tuples: table, seq,
---     the row's id — never the row's JSON); the per-table picks `union all`,
---     then ONE `order by server_seq limit max_rows` over ≤ 21 × max_rows
---     tuples. Any row in the global first page is in its own table's first
---     page, so the pick's union always contains the page.
+--     stopping after `max_rows` qualifying rows — SEQS ONLY, never a row's
+--     id or JSON; the per-table picks `union all`, then ONE `order by
+--     server_seq limit max_rows` over ≤ 21 × max_rows bigints is the CTE
+--     `picked`. Any row in the global first page is in its own table's
+--     first page, so the pick's union always contains the page.
+--   THE BOUND — `bound` is `max(server_seq)` over `picked`: the page's LAST
+--     seq (NULL when nothing is past the cursor — then no branch matches
+--     and the page is `[]`, as before).
 --   THE FETCH — the two existing branches VERBATIM (owner-carrying keeps
---     owner_id; mirror-only subtracts it), each narrowed to the picked ids
---     of its table by primary key, so `to_jsonb(t)` runs exactly `max_rows`
---     times. The outer aggregate orders by server_seq exactly as before.
--- A row appears once (one PK per table) at its latest seq; the output is
--- byte-identical to 13's for every input, so the client and the fake server
--- (`FakeSyncServer.pull`, already an in-memory sort) change nothing and every
--- convergence suite stays the evidence. Nothing on the wire moves — hence a
--- maintenance artifact, not a lockstep event (SyncSpec §12 names the
--- procedure for a server body: the mirror first; clients need nothing).
+--     owner_id; mirror-only subtracts it; the same owner filter; the same
+--     derived horizon filter) with ONE added predicate each,
+--     `t.server_seq <= (select seq from bound)`, so every branch is one
+--     index RANGE scan off `idx_owner_seq_<table>` and `to_jsonb(t)` runs
+--     exactly for the page's rows, sequential within each index. The outer
+--     aggregate orders by server_seq exactly as before.
+-- WHY THE BOUND IS EXACT: a tenant's `server_seq`s are UNIQUE across all its
+-- tables (`next_tenant_seq`, the row-locked per-owner counter, stamps every
+-- write — 13y; the pre-13y global sequence was unique too), so "the page's
+-- rows" ≡ "every allowed table's rows with since < seq ≤ bound" — no row of
+-- any table can sit inside that range unpicked: were a row with seq s ≤
+-- bound outside its table's first `max_rows`, that table alone would hold
+-- `max_rows` rows below s, and the global `max_rows`-th seq would be below
+-- s too. Each row appears once (one PK per table) at its latest seq; the
+-- output is byte-identical to 13's for every input, so the client and the
+-- fake server (`FakeSyncServer.pull`, already an in-memory sort) change
+-- nothing and every convergence suite stays the evidence. The page may
+-- hold fewer than `max_rows` rows only at the head — then `bound` is the
+-- head and the fetch returns everything left, as today. Nothing on the wire
+-- moves — hence a maintenance artifact, not a lockstep event (SyncSpec §12
+-- names the procedure for a server body: the mirror first; clients need
+-- nothing).
+-- THE HORIZON ACROSS THE TWO PHASES: `clock_timestamp()` is evaluated per
+-- branch, so the fetch reads it microseconds after the pick. Harmless, and
+-- said so rather than hidden: visibility only GROWS with the clock, so a
+-- picked row can never go unfetched; a row fetched but unpicked would need
+-- a seq ≤ bound while still inside the horizon at the pick — impossible
+-- under the per-tenant counter (its lock serializes a tenant's commits, so
+-- write time is monotone in seq and the horizon excludes a SUFFIX of the
+-- seq order, every excluded seq above `bound`) — and were it ever to ride,
+-- the client reads a window of `max_rows` or more as full and the row
+-- lands at its proper place in seq order. The pinned filter text
+-- (`t.server_written_at <= clock_timestamp() - %L::interval`, every branch)
+-- therefore stays byte-identical to 13's.
+-- MEASURED (her `EXPLAIN (ANALYZE, BUFFERS)` probes on production, her
+-- tenant, since = 0, page 2,000, 2026-11-01 — the record's D-495 EVIDENCE):
+-- 13's body 3,398 ms (Parallel Append of Seq Scans, ~122k rows to_jsonb'd,
+-- 11,538 buffers) · the first draft's pick-by-id + per-row PK probes
+-- 1,138 ms (the pick 37 ms; ~0.5 ms a probe × 2,000) · SHAPE B 230 ms
+-- (the pick a Merge Append of per-table index scans under their limits; the
+-- fetch an index RANGE scan per table; 969 buffers).
 --
 -- AND THE COUNT (VX-496, the sync row's progress line — D-496): one new READ
 -- RPC, `sync_pull_remaining(since_seq, active_key_id, key_proof, challenge)`,
@@ -69,7 +105,8 @@ end;
 $guard$;
 
 -- ---------------------------------------------------------------------------
--- 1. sync_pull — 13's body with the page assembled by THE PICK + THE FETCH.
+-- 1. sync_pull — 13's body with the page assembled by THE PICK, THE BOUND
+--    and THE FETCH (SHAPE B).
 -- ---------------------------------------------------------------------------
 
 create or replace function sync_pull(since_seq bigint, active_key_id text, key_proof text, challenge text, max_rows int default 500, for_device text default null)
@@ -143,26 +180,25 @@ begin
   --
   -- VX-495 — THE PICK: per table, the first `max_rows` seqs past the
   -- cursor, in index order off (owner_id, server_seq), stopping after
-  -- `max_rows` qualifying rows. Small tuples only: the table, the seq and
-  -- the row's primary key — never the row's JSON.
+  -- `max_rows` qualifying rows. Seqs only — never a row's id or JSON.
   foreach tbl in array allowed loop
     if pick_sql <> '' then
       pick_sql := pick_sql || ' union all ';
     end if;
     pick_sql := pick_sql || format(
-      $q$(select %L::text as tbl, t.server_seq, t.%I::text as row_id
+      $q$(select t.server_seq
           from %I t
           where t.owner_id = %L
             and t.server_seq > %s
             and t.server_written_at <= clock_timestamp() - %L::interval
           order by t.server_seq
           limit %s)$q$,
-      tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon, max_rows);
+      tbl, caller, since_seq, horizon, max_rows);
   end loop;
 
-  -- VX-495 — THE FETCH: 13's two branches verbatim, each narrowed to its
-  -- table's picked ids by primary key, so `to_jsonb(t)` runs exactly
-  -- `max_rows` times per call.
+  -- VX-495 — THE FETCH: 13's two branches verbatim, each bounded to the
+  -- page's last seq (`bound`, below) — one index range scan per table, so
+  -- `to_jsonb(t)` runs exactly for the page's rows.
   foreach tbl in array allowed loop
     if fetch_sql <> '' then
       fetch_sql := fetch_sql || ' union all ';
@@ -177,8 +213,8 @@ begin
            where t.owner_id = %L
              and t.server_seq > %s
              and t.server_written_at <= clock_timestamp() - %L::interval
-             and t.%I in (select p.row_id from picked p where p.tbl = %L)$q$,
-        tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon, sync_table_pk(tbl), tbl);
+             and t.server_seq <= (select seq from bound)$q$,
+        tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon);
     else
       -- Mirror-only owner: subtract the stamped owner_id — the client
       -- has no home for it (the unknown-column refusal would fire).
@@ -190,20 +226,21 @@ begin
            where t.owner_id = %L
              and t.server_seq > %s
              and t.server_written_at <= clock_timestamp() - %L::interval
-             and t.%I in (select p.row_id from picked p where p.tbl = %L)$q$,
-        tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon, sync_table_pk(tbl), tbl);
+             and t.server_seq <= (select seq from bound)$q$,
+        tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon);
     end if;
   end loop;
 
-  -- The page: the pick's global first `max_rows` (the CTE is referenced by
-  -- every fetch branch, so Postgres materializes it once), then the fetch
-  -- of exactly those rows, aggregated in seq order as before.
+  -- The page: the pick's global first `max_rows` seqs, the bound as their
+  -- maximum (one row, read by every fetch branch), then the fetch of
+  -- exactly the rows up to it, aggregated in seq order as before.
   execute format(
     $q$with picked as (
-         select raw.tbl, raw.server_seq, raw.row_id
+         select raw.server_seq
          from (%s) raw
          order by raw.server_seq
-         limit %s)
+         limit %s),
+       bound as (select max(server_seq) as seq from picked)
        select coalesce(jsonb_agg(jsonb_build_object(
          'table', u.tbl, 'row_id', u.row_id,
          'sync_version', u.sync_version, 'server_seq', u.server_seq,
@@ -295,7 +332,9 @@ commit;
 
 -- VERIFY (read-only, after the deploy):
 --   select pg_get_functiondef('sync_pull(bigint,text,text,text,int,text)'::regprocedure);
---     — the body carries 'with picked as' and 'sync_pull_remaining' exists:
+--     — the body carries 'with picked as', 'bound as (select max(server_seq)'
+--     and 't.server_seq <= (select seq from bound)'; and 'sync_pull_remaining'
+--     exists:
 --   select proname, proconfig from pg_proc where proname in ('sync_pull', 'sync_pull_remaining');
 --     — each proconfig = {search_path=public, pg_temp};
 --   then `maintenance/14c-post-deploy-grant-sweep.sql` — every row OK, the
