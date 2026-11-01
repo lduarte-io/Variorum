@@ -24,7 +24,8 @@ progress seam, the scheduler's progress + lastErrorIsRetrying, the fake's count,
 DDL-test changes) — UNTRUSTED INPUT, written in breach of the shape, never reviewed; and my EXPLAIN ANALYZE probes on
 production (D-495 EVIDENCE): old 3,398 ms · the draft 1,138 ms · SHAPE B 230 ms · the count 1,586 ms.
 
-THE CAST: you write NO code (CLAUDE.md, memory `orchestrator-never-writes-code`). ASK ME at your kickoff whether U1
+THE CAST: you write nothing that ships — no file under Sources/, App/, Tests/ or Server/, no fix at adjudication;
+probes and scratch instruments are yours (CLAUDE.md's cast rule, refined 2026-11-01). ASK ME at your kickoff whether U1
 (the Sync/ batch) is implemented by a Fable subagent or by Opus — my call, per CLAUDE.md's new cast line; Opus
 implements U2 and U3; a fresh fable-reviewer runs the ladder over the whole diff (Fable always reviews the Sync/ and
 editor-seam class). Three units are fine.
