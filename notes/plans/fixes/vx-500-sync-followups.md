@@ -1,6 +1,6 @@
 # VX-500 — Run: the 0.10 window follow-ups (the sync follow-ups)
 
-**STATUS: OPEN — CUTOVER 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). The cast from here, her ruling: a FABLE SUBAGENT implements U1 (`Sync/`), Opus implements U2/U3, a fresh `fable-reviewer` runs the ladder; the orchestrator writes no code. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
+**STATUS: OPEN — CUTOVER 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). RESUMED 2026-11-01 ~13:30 MDT by the second orchestrator (stage claim `vx500-orchestrator`; main merged into the branch at `c64211270` so every brief reads the reworded CLAUDE.md). The cast from here, her ruling at the resume kickoff (R-500-5): FABLE SUBAGENTS implement EVERY unit — U1a · U1b · U2 · U3 — a fresh `fable-reviewer` runs the ladder (SAME-MODEL: the orchestrator arbitrates findings against the spec); the orchestrator writes nothing that ships. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
 considerations) · branch `vx-500-sync-followups` · worktree `~/dev/variorum-vx-500` · the Pro. Architect shape
 (`/architect-phase VX-500`); the cast is CLAUDE.md's standing default — **Fable orchestrates, writes every `Sync/`
 and server line, and cold-reviews (`fable-reviewer`); Opus implements the faces, the tests and the custody road under
@@ -78,6 +78,15 @@ the guidance's two. Said rather than split silently: the members were bundled at
 together, do that"), each unit is small, and the ladder covers the whole diff once with a Fable reviewer (the diff
 touches `Sync/` and custody). If she would rather split, U3 (VX-544) lifts out whole into its own ticket run; nothing
 in U1/U2 depends on it. The units run SEQUENTIALLY (one implementer at a time), U1 → U2 → U3.
+
+**The resume's refinement (the second orchestrator, 2026-11-01 — an architect's call, said here as the guidance asks):**
+U1 as handed is two acceptance units under one name — the sync/protocol unit (the server artifact + the engine's
+progress seam + the belt flag + their pins) and a MEASUREMENT unit (the apply profile at scale, with the FK memo built
+only if the profile names it). One unit per implementer session, so U1 runs as **U1a** (the artifact, the seam, the
+pins — the brief below) and **U1b** (the profile + the profile-gated FK memo + the chunking memo trued with the
+numbers), two Fable sessions in sequence. The order stays U1a → U1b → U2 → U3. The sync unit's USE-SHAPED evidence per
+the guidance is "the convergence suites for its shape + one live two-device round on the real mirror": the suites
+close U1a here; the LIVE ROUND rides her held deploy window and is recorded as OWED, not claimed (THE DEPLOY §3).
 
 ## PREFLIGHT FACTS (read at kickoff — the code as it stands on `main` 00e32497c; verify points for the implementers)
 
@@ -456,15 +465,133 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   names it as her call), the reviewer is Fable.
 - **R-500-4 — the recovery shape:** her word — finish, commit, hand off to a fresh orchestrator; three units stand;
   the probes ran at her `!` road (D-495 EVIDENCE).
+- **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
+  line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
+  all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
+  each a Fable implementer session; a fresh `fable-reviewer` runs the ladder; same-model, so the orchestrator
+  arbitrates against the spec (CLAUDE.md). The declined alternatives: Fable U1 + U3 with Opus U2; the handoff's shape
+  (Fable U1 only). Her kickoff words for this session, verbatim: "do not plan to merge your PR automatically at the end -
+  main is currently frozen in preparation for release"; "You have the stage on the macbook pro - there's currently no
+  coordinator, so claim the stage yourself, and I am off of it for any testing that you need to do"; "/architect-phase
+  discipline. Fable subagents implementing."
+
+
+## THE BRIEFS (one per unit; an implementer reads ITS brief, the sections it names, and nothing briefed from a transcript)
+
+### U1a BRIEF — the server artifact (SHAPE B + the count per R-500-1), the engine's progress seam, the belt flag, the pins (a FABLE implementer; a SYNC batch)
+
+**Who you are.** The implementer for U1a of VX-500, a Fable subagent at xhigh effort. `.claude/agents/opus-implementer.md`'s
+contract binds you point for point (its model line aside — you are Fable at her R-500-5 word): read everything named
+here yourself; one unit; pin before fix; no product invention; checkpoint discipline; no subagents but one read-only
+Sonnet lookup at a time for EXTERNAL facts; honest close. **This IS a sync batch: `Sources/VariorumCore/Sync/` and
+`Server/supabase/maintenance/` are yours to edit.** The orchestrator writes nothing that ships and will not fix your
+code at adjudication — what you leave unfinished stays unfinished until a fresh session. You work ONLY in the worktree
+`<home>/dev/variorum-vx-500` on branch `vx-500-sync-followups` (never the main checkout). No store is
+opened, no server is contacted, no stage is needed (headless `swift build`/`swift test` only).
+
+**Read first, in full, in this order:** `CLAUDE.md` and the canon it loads · THIS FILE WHOLE (the roster, PREFLIGHT
+FACTS, D-495 with its EVIDENCE, D-496, D-497, D-505, PROTOCOL BREACH, HER RULINGS R-500-1…5, ENVIRONMENT TRAPS, LIVE
+STATUS) · `notes/handoffs/vx-500-handoff.md` (the STATE AT CUTOVER table names the DDL WIP's exact causes) ·
+`notes/SyncSpec.md` WHOLE (§3, §5, §12 especially) · `notes/sync-postmortem-fragments.md` (AppSpec §15 risk 3: read
+before touching `Sync/`) · `notes/SessionResiliencyProtocol.md` §implementer · then `git show aad734aef` — THE DRAFT —
+and the three files it touches most (`Sync/SyncEngine.swift`, `Sync/SyncScheduler.swift`,
+`Server/supabase/maintenance/vx495-pull-keyset.sql`) as they stand on the tip, plus `Tests/VariorumCoreTests/AuthRLSDDLTests.swift`'s
+finders (`finalBody`, `lastBody`, `deployedBody`, `searchPathDeployOrder`, `aDoctoredChainIsFlaggedByTheSearchPathCheck`)
+and `Server/supabase/13_phase13i_wings.sql` §3a (the body SHAPE B replaces).
+
+**The standing of the draft.** `aad734aef` was written by the first orchestrator in breach of the shape (PROTOCOL
+BREACH) and has never been reviewed. You ADOPT it as a draft: every line of it is now yours to defend or change. Re-read
+each against D-495 / D-496 / D-505 and the engine's own invariants (SyncSpec §5: the apply is one transaction, the
+cursor moves at commit; the progress closure must never be able to fail or stall a round; the generation guard; the
+weak-self hop; `advances`' monotone rule; the save's stride publishes from INSIDE the write transaction — a Task per
+1,000 rows). Where the draft is right, keep it and say so in your record; where it is wrong, fix it and say why. Its
+commit message's "green" claims are observations, not your evidence — re-run everything yourself.
+
+**The pieces, in order (commit per piece, push after each, the record flipped in the same commit):**
+
+1. **SHAPE B in `maintenance/vx495-pull-keyset.sql` (D-495 EVIDENCE, her 230 ms probe — THE design).** The pick
+   yields SEQS only (drop `row_id` from the pick tuples — `sync_table_pk` is no longer needed there); add
+   `bound as (select max(server_seq) as seq from picked)`; every fetch branch's `and t.%I in (select p.row_id from
+   picked p where p.tbl = %L)` becomes `and t.server_seq <= (select seq from bound)`; the header comment is rewritten
+   to describe SHAPE B (and to name the probe numbers: old 3,398 ms · pick-by-id 1,138 ms · SHAPE B 230 ms); the
+   VERIFY comment's "carries 'with picked as'" stays true. Keep byte-identical everything D-495 lists as kept (the
+   signature, the gates, the device-cursor upsert, the derived horizon, the two subtraction branches, the owner filter
+   on every branch, the re-asserted owner/search_path/grants, the marker ≥ 14 guard). Correctness argument (write it
+   into the header): per-tenant seqs are unique, so "the page's rows" ≡ "every allowed table's rows with
+   since < seq ≤ bound". **One edge for YOUR judgment, recorded either way:** the horizon cutoff is
+   `clock_timestamp() - horizon`, evaluated per branch — between the pick and the fetch inside one statement the clock
+   advances by microseconds, so a row with seq ≤ bound that was inside the horizon at the pick could be outside it at
+   the fetch and ride the page unpicked (harmless to the client, which treats any count ≥ `max_rows` as a full
+   window; the reverse — picked but unfetched — cannot happen since visibility only grows). Either keep it and say
+   it is harmless, or read the cutoff ONCE into a `timestamptz` local used by both phases — but
+   `theVisibilityHorizonSurvivesEveryRework` pins the exact text `t.server_written_at <= clock_timestamp() - %L::interval`
+   and `!contains("interval '")`; if you change the shape, amend that pin's text WITH its reason in the same commit
+   and keep its three intents (derived from the one function, no inline literal, every branch filtered).
+2. **The count per R-500-1.** `sync_pull_remaining` DROPS the horizon filter (and the `horizon` local) — each table's
+   count is `where t.owner_id = %L and t.server_seq > %s`, an index-only count off `idx_owner_seq_<table>`; the header
+   says why (exact to within the last two seconds of writes, which a progress total never needs; her ruling R-500-1;
+   the measured alternative 1,586 ms with the filter). The fake server's `pullRemaining` mirrors the server EXACTLY —
+   drop its `writtenAt <= clock - visibilityHorizon` term too — then re-derive what `SyncProgressTests` asserts about
+   totals vs rows served (a count without the horizon can exceed the rows the feed serves while writes are inside the
+   horizon; confirm the fake's clock makes the pins' equalities honest, or loosen them to the true relation with the
+   reason). The sweep row (`14c-post-deploy-grant-sweep.sql`) and the grants stay as drafted.
+3. **The DDL pins (`AuthRLSDDLTests`) — the handoff's three known causes, then every remaining issue read honestly:**
+   (a) `finalBody(of:)` and `lastBody(of:in:)` match `"create or replace function \(name)"` as a PREFIX, so with the
+   artifact laid over, `sync_pull` resolves to `sync_pull_remaining`'s body — match `"create or replace function
+   \(name)("` in both; (b) the count pin's `!artifact.contains("lockstep_version'")` is wrong (the artifact's GUARD
+   reads the marker) — assert no marker WRITE instead (no `update sync_meta`, no `insert into sync_meta`); (c)
+   `aDoctoredChainIsFlaggedByTheSearchPathCheck`'s "unbelted" arm expects every checked signature flagged when the
+   belt is dropped, but `sync_pull` and `sync_pull_remaining` now receive `pg_temp` from the VX-495 artifact itself —
+   drop the post-belt artifact from that arm too (or exempt the two by name, with the reason). The drafted fetch pin
+   (`in (select p.row_id from picked p …)`, both branches) GOES; a BOUND pin replaces it (`with picked as`, `bound as
+   (select max(server_seq)`, `t.server_seq <= (select seq from bound)` in both branches, the pick's
+   `order by t.server_seq` + `limit %s`, no `row_id` in the pick). Then `swift test --filter AuthRLSDDLTests` and read
+   EVERY remaining issue — fix what the artifact or the test got wrong, never weaken a standing pin to pass.
+4. **The pins' red-on-old, honestly.** This unit's members are Improvements (VX-495, VX-496) and a Wording item
+   (VX-505): no bug-class pin is owed, and `SyncProgressTests` + the belt-flag pin are NEW-API pins (red on the old tree
+   by compile, which proves nothing about behavior). Record that plainly. For the DDL shape pins show the honest red:
+   with `postChainFunctionArtifacts` emptied, the bound pin and the count pin fail against 13's body (run it once, note
+   the failure lines, restore). Pin counts and names land in your record.
+5. **The engine's and scheduler's lines — your ownership pass.** For each of: `SyncProgress`, `pull(progress:)` /
+   `pullToHead(progress:)`, `countRemaining` (ONCE per round, through the round's signer, never able to throw),
+   `stagedRowCount` at plan time, the arming rule (a first window that came back full, or a resumed stage), the save's
+   stride and its first/last publishes, `Status.progress` cleared with `isSyncing`, the generation guard,
+   `advances`, `lastErrorIsRetrying` set exactly on `PullStage.isOneWriterRefusal` with a follow-up requested and
+   cleared at the next round's start — write one line in the record: KEPT (why right) or CHANGED (what, why). Check
+   in particular: does `Status.lastErrorIsRetrying` go FALSE when the follow-up itself is refused (D-505: "on a belt
+   refusal nothing follows" — read the `!isBeltFollowUp` guard) and does the face's contract (D-505's `Kind.retrying`,
+   U2) have the typed fact it needs? Does any new line read `String(describing:)` or match a sentence? (It must not.)
+6. **Close.** `swift build`; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|AuthRLSDDLTests"`
+   green with the counts in the record; then the broad core run `swift test` (debug) in the foreground, polling a log
+   per the traps — its exact "Test run with N tests" line and any failure named (the known load-flake
+   `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitialize…` is recorded, never fixed here). Write your
+   SELF-ASSESSMENT (the first of the two reviews: what you are least sure of, what the cold reviewer should press on,
+   with file:line) at the end of your record.
+
+**Your record.** Append `### U1a RECORD` under `## UNIT RECORDS` below, with a LIVE STATUS table (one row per piece:
+`DONE (hash)` · `IN-PROGRESS — what remains` · `NOT-STARTED`) written at your FIRST commit and flipped per piece; the
+ownership-pass lines (piece 5); the pins (names, counts, the honest red); the close's lines; the self-assessment; the
+first line of the record names anything you did NOT do. Flip rows 1 and 2 of the orchestrator's LIVE STATUS table to
+`DONE (hash) — U1a` when they are. Commit messages: `VX-500 U1a: …` with `Part of VX-495` / `Part of VX-496` /
+`Part of VX-505` as fits; NO trailers of any kind; `git pull --rebase` before each push.
+
+**Not yours:** the apply PROFILE and the FK memo (U1b, a later session); the faces and the words (U2); the typed-unlock
+retry (U3); the DEPLOY (held for her word); the PR; any `/Applications` act; any store. If a second unit stands in your
+way, stop, record, hand off.
+
+**ENVIRONMENT TRAPS — the section above, binding verbatim.**
+
+## UNIT RECORDS (appended by each implementer; the orchestrator's verification notes follow each)
 
 ## LIVE STATUS (the orchestrator's; flipped per piece)
 
 | # | Piece | Status |
 |---|---|---|
-| 0 | Kickoff: preflight whole; worktree + branch; the in-flight row on main (`24c413138`); VX-500 In Progress; this file | DONE (this commit) |
-| 1 | U1 — the server artifact (D-495 + the count RPC) + the DDL pins + the cost probe | BREACH — drafted by the orchestrator in `aad734aef`; **THE PROBES RAN (her `!` road, 2026-11-01): old 3,398 ms · draft 1,138 ms · SHAPE B 230 ms · count 1,586 ms** — D-495 EVIDENCE; the Fable implementer adopts the draft, rewrites the fetch to SHAPE B and the count per P-500-6, fixes the DDL WIP |
-| 2 | U1 — the engine's progress seam (D-496) + the belt flag (D-505) + the FK memo (D-497 (2), profile-gated) + pins | BREACH — the seam and its pins drafted by the orchestrator in `aad734aef`; HELD for her road; the FK memo untouched |
-| 3 | U1 — the apply PROFILE at scale (D-497 (1)); the memo above trued with the numbers | NOT STARTED |
+| 0 | Kickoff: preflight whole; worktree + branch; the in-flight row on main (`24c413138`); VX-500 In Progress; this file | DONE |
+| 0b | RESUME (the second orchestrator, 2026-11-01 ~13:30 MDT): the handoff + this file + the standard preflight read whole (SyncSpec, CastleRules, SurfaceContracts' Doors, the resiliency protocol, the sizing guidance, the master plan, QUESTIONS' tail); main merged into the branch (`c64211270`); the stage claimed; the roster re-listed via Linear (11 sub-issues — matches); R-500-5 ruled; the U1 split; the U1a brief | DONE (this commit) |
+| 1 | U1a — the server artifact (D-495 SHAPE B + the count per R-500-1) + the DDL pins | IN PROGRESS — the Fable implementer, briefed §U1a BRIEF (adopts `aad734aef`; the probes are D-495 EVIDENCE) |
+| 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | IN PROGRESS — the same U1a session (the FK memo moved to U1b) |
+| 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | NOT STARTED (a second Fable session after U1a) |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
 | 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
