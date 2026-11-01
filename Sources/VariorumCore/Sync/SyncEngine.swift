@@ -51,7 +51,10 @@ public struct SyncProgress: Equatable, Sendable {
     public var done: Int
     /// The whole catch-up's row count — the server's count past the committed cursor while downloading (nil when no
     /// transport could answer: a wrapper without the surface, a refusal, a 404 before the function is deployed), the
-    /// staged batch's size while saving (always known).
+    /// staged batch's size while saving (always known). Fixed for the phase once read: the download's total is the
+    /// count at the moment the report armed (R-500-1: index-only, exact to within the horizon's two seconds), so
+    /// `done` may END ABOVE it when the feed grew during a long download — a face must tolerate `done > total`; the
+    /// save's `done` may end BELOW its total on a straggler stall (the unapplied rows are fetched again next round).
     public var total: Int?
 
     public init(phase: Phase, done: Int, total: Int?) {
@@ -728,10 +731,16 @@ public struct SyncEngine: Sendable {
             for item in batch[..<stopIndex] where item.row.isTombstoned {
                 touched.arrivingDeadIDs[item.row.table, default: []].insert(item.row.rowID)
             }
+            // The save's total is the BATCH's count throughout (D-496: "the
+            // batch's count" — the rows the download ended on, the number the
+            // row has been showing), never the stall point: a denominator that
+            // moves mid-save would make the fraction jump. On a stall `done`
+            // ends at `stopIndex` below the total — honest: those rows are not
+            // applied this round and are fetched again by the next.
             var applied = 0
             for item in batch[..<stopIndex] {
                 applied += 1
-                if applied % Self.saveProgressStride == 0 { saveProgress?(applied, stopIndex) }
+                if applied % Self.saveProgressStride == 0 { saveProgress?(applied, batch.count) }
                 if try isEnqueued(db, table: item.row.table, rowID: item.row.rowID),
                    let table = SyncSchema.table(named: item.row.table),
                    let local = try SyncRow.fetch(db, table: table, rowID: item.row.rowID) {
@@ -760,7 +769,7 @@ public struct SyncEngine: Sendable {
                 }
             }
             report.repairs = try runPostApplyRepairs(db, touched: touched) + touched.inlineRepairs
-            saveProgress?(stopIndex, stopIndex)
+            saveProgress?(stopIndex, batch.count)
             let newCursor = stopIndex > 0 ? batch[stopIndex - 1].serverSeq : since
             try setCursor(db, newCursor)
             // VX-494 (D2): the stage leaves with the commit that moves the
