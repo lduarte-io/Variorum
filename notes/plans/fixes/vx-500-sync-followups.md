@@ -403,8 +403,12 @@ patch.
    · 0 fail PLUS one row for the new function; her first round runs clean; the row shows the count on a long round.
 4. NO client install follows (R-500-6): the wire is unchanged, every 0.10.7 device gets the cheaper pages at its next
    catch-up, and `sync_pull_remaining` sits unused (authenticated-only) until the client half (the progress line) ships
-   with the PR after the freeze. **Acceptance:** her Pro's next round runs clean ("Synced …"); her Air's next crossing is
-   the first large catch-up on SHAPE B. **Rollback:** `Server/supabase/maintenance/vx495-rollback.sql` (the server-half
+   with the PR after the freeze. **Acceptance — HER REAL-WORLD TEST (her words, 2026-11-01 ~15:15 MDT):** "I haven't opened my own variorum on the
+   macbook pro for a week, and that means it's actually quite behind. so this would be a great improvement to catching it
+   up." So: her Pro's Variorum stays CLOSED until the deploy lands (an open before it spends the test on the old shape);
+   the orchestrator's read-only probe (`Tools/prod-read.sh`, counts only) reads the rows past her Pro's `device_cursor`
+   first, so the catch-up's size is known and its time honest — a week-behind catch-up is the Air's week of writes, not a
+   from-zero one, so the gain is real but modest; the dramatic case stays a new device's join (her Air's next crossing). **Rollback:** `Server/supabase/maintenance/vx495-rollback.sql` (the server-half
    fix session's deliverable — 13's §3a body + the belt's `pg_temp`, idempotent) at her word if the live round refuses;
    the count function may stay or be dropped by the same artifact. **Pre-deploy gate:** the SERVER-HALF ROUND closed
    (every finding dispositioned, its fixes re-read). Step 3 gains: `EXPLAIN (ANALYZE, BUFFERS)` of the count's shape
