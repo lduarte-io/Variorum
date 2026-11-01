@@ -772,8 +772,9 @@ built and validated small; the MEASURE at scale, the FK decision, the memo's par
 | # | Piece | Status |
 |---|---|---|
 | 1 | The profile INSTRUMENT: the seam (`Sources/VariorumCore/Sync/ApplyProfile.swift` — `ApplyProfileHook`, nil-inert, on `SyncEngine.init`; eight laps at `pullRound`'s existing phase boundaries; the timed `PRAGMA foreign_key_list` read in `foreignKeyColumns`), the harness hook (`SyncClient.applyProfile`), the gated bench `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (`VARIORUM_APPLY_PROFILE=1`; sizes/runs/store env-overridable) + the ungated seam pins (`ApplyProfileSeamTests`, 2) | DONE (this commit) — build green; the seam pins "Test run with 2 tests in 1 suite passed"; the bench skips without the env ("3 tests in 2 suites passed", 1 skipped); validated at 40×10 (the dry run's lines below — NOT the measure) |
-| 1b | THE MEASURE at scale: 1,200 × 30 (≈109k rows), THREE runs, B on a keyed on-disk store, Debug, window 2,000; then, as extra columns if time allows, ONE in-memory run and ONE `-c release` run | NOT-STARTED — runs after this commit (the threshold below is stated FIRST) |
-| 2 | The FK memo (`foreignKeyColumns` memoized per apply transaction) — ONLY if the measure crosses the threshold below; else "not named", with the numbers, and no engine line changes for it | NOT-STARTED — decided by 1b |
+| 1b | THE MEASURE at scale: 1,200 × 30 (≈109k rows), THREE runs, B on a keyed on-disk store, Debug, window 2,000 | DONE (this commit) — `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3 swift test --skip-build --filter ApplyProfileMeasurementTests` → "Test run with 3 tests in 2 suites passed after 1096.750 seconds"; the table below (THE MEASURE) |
+| 1c | Extra columns (optional, after 1b): a STATEMENT-LEVEL trace of one apply (GRDB's profile trace on B's writer, bench-side only — zero engine lines), ONE in-memory run, ONE `-c release` run | NOT-STARTED |
+| 2 | The FK memo (`foreignKeyColumns` memoized per apply transaction) — ONLY if the measure crosses the threshold below; else "not named", with the numbers, and no engine line changes for it | DONE (this commit) — **NOT NAMED**: the introspection is 0.5% of the apply (1,784 ms of 330,231 ms, median of three) against the 5% threshold; the fixpoint whole is 0.6%. No engine line changes for it (THE FK DECISION below) |
 | 3 | THE CHUNKING MEMO trued: "The numbers (U1b)" appended under THE CHUNKING MEMO | NOT-STARTED |
 | 4 | Close: `swift build`; the gated run's lines; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|ApplyProfileMeasurementTests"`; the BROAD core run (OWED whatever the FK decision — the seam's laps ARE engine lines, so the broad run is this unit's regardless); the self-assessment; the orchestrator's LIVE STATUS row 3 flipped | NOT-STARTED |
 
@@ -789,6 +790,54 @@ lookups and ZERO `EXISTS` probes (every referent arrives in the batch), so the i
 it. **My prior, written before the run:** small — ~1–3% at scale. The dry run at 1,243 rows read 2.2% (17.7 µs a
 call); the row loop's per-row cost grows with the store (B-tree inserts into ever-larger indexes) while the PRAGMA's
 is constant per call, so the share should FALL as the corpus grows. The measure decides, not the prior.
+
+#### THE MEASURE (piece 1b) — 1,200 × 30 = 109,203 synced rows; B a FRESH device on a keyed on-disk SQLCipher store; Debug; window 2,000; the Pro, otherwise idle
+
+The command: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3 swift test --skip-build --filter ApplyProfileMeasurementTests`
+(launched 14:36:44, "Test run with 3 tests in 2 suites passed after 1096.750 seconds"; the full log in the session
+scratchpad `u1b-scale-disk.log`). A seeded in ~1 min, pushed 109,203 rows in one iteration; each run converged (the
+cursor at the server's head, no stall, every phase reported once). **The figures are THIS Mac's DEBUG figures —
+relative shares are the finding; the absolute numbers are not promises.**
+
+| Phase | run 1 | run 2 | run 3 | MEDIAN | share of the apply |
+|---|---|---|---|---|---|
+| download (outside the apply; the fake transport in-process, 55 windows: fetch · decrypt · encode · stage) | 7,211 ms | 7,419 ms | 7,350 ms | 7,350 ms | — |
+| stageDecode (outside; `PullStage.rows` — ~80 MB of staged JSON decoded into the batch) | 3,054 ms | 3,041 ms | 3,022 ms | 3,041 ms | — |
+| belt (cursor check + stage continuity) | 0 ms | 0 ms | 0 ms | 0 ms | 0.0% |
+| **fixpoint** (one pass over 109,203 rows; `shrunk == stopIndex` at once) | 1,985 ms | 1,995 ms | 1,999 ms | 1,995 ms | **0.6%** |
+| **rowLoop** (`isEnqueued` · `writeResolvedRow` with its inline repairs · `recordSeq`, per row) | 323,387 ms | 324,374 ms | 328,697 ms | 324,374 ms | **98.2%** |
+| repairs (`runPostApplyRepairs`) | 3,432 ms | 3,451 ms | 3,342 ms | 3,432 ms | 1.0% |
+| commitPrep (the last progress publish · the cursor · the stage clear) | 223 ms | 224 ms | 224 ms | 224 ms | 0.1% |
+| txn overhead (`applyTransaction` − the five: the writer hop, BEGIN, the deferred-FK pragma, COMMIT, the hop back) | 174 ms | 186 ms | 194 ms | 205 ms¹ | 0.1% |
+| **apply (`applyTransaction`)** | 329,201 ms | 330,231 ms | 334,456 ms | **330,231 ms** | 100% — **331 rows/s** |
+| pull wall (download + decode + apply) | 339,466 ms | 340,716 ms | 344,854 ms | 340,716 ms | — |
+| **`PRAGMA foreign_key_list`** | 109,203 calls · 1,768 ms · 16.2 µs | 109,203 · 1,786 ms · 16.4 µs | 109,203 · 1,784 ms · 16.3 µs | 1,784 ms | **0.5% of the apply · 89.4% of the fixpoint** |
+
+¹ the median block derives its overhead from the median phases, so it is not one run's figure.
+
+**Read plainly:** the apply IS the row loop — 98.2% of 330 s, **2.97 ms a row**. Everything D-497 suspected is
+small: the straggler fixpoint is 0.6% (2.0 s, of which the PRAGMA reads are 1.8 s and the arriving-set lookups the
+rest — zero `EXISTS` probes on a from-zero pull, every referent arrives in the batch), the post-apply repairs 1.0%, the
+commit itself ~0.1% (WAL pages are written as the transaction runs; the COMMIT is a header write — the "one
+all-or-nothing transaction" costs nothing extra at its end; what it costs is the WRITER held for its whole length).
+Outside the apply, the fake's 55 windows took 7.4 s (decrypt + JSON encode + the stage writes; the real server's
+per-call time is D-495's business) and decoding the stage back 3.0 s — together ~3% of the pull. **A striking
+relation for the memo:** 331 rows/s here in DEBUG against her Pro's ~420 rows/s in RELEASE on the real catch-up
+(the VX-494 record) — the row's ~3 ms is not Swift's debug overhead, it is the SQL work each row does (the writes,
+their triggers — the tombstone cascades, the muted outbox capture, the derived search-index capture on `variant` and
+`container` — the inline repair and orphan probes, the two bookkeeping statements). Piece 1c's statement-level trace
+is how that claim gets checked rather than inferred.
+
+#### THE FK DECISION (piece 2) — NOT NAMED
+
+The threshold was ≥ 5% of the apply (median of three); the measure is **0.5%** (1,784 ms of 330,231 ms), a tenth of
+the bar — below my own prior's floor. Per-table memoization of `foreignKeyColumns` would turn 109,203 PRAGMA reads into
+21 and save ~1.8 s of a 330 s apply on this corpus (~0.5%); even the whole fixpoint folded to nothing would save 0.6%.
+D-497 (2) asks for the change only when "the profile names it as a measurable share" — it does not. **No engine line
+changes for it; the memoization stays a recorded, declined candidate** (cheap, zero-semantics, and pointless at this
+share — if a later profile of a different shape ever puts the introspection on the clock, the cache is a five-line
+change inside `pullRound`'s apply, pure because the schema cannot change inside the transaction). The chunking memo's
+"where the time goes" is therefore the ROW LOOP, and only the row loop.
 
 #### The instrument (piece 1) — what was built, and why that shape
 
