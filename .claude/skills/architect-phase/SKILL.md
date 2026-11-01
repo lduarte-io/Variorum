@@ -50,14 +50,19 @@ At closeout, after the PR merges: retire the in-flight row and **remove the effo
   principles the phase's own plan adds by author ratification. Every
   phase run under this skill copies the constitution into its plan
   file as binding; deviations are recorded with reasons, never silent.
-- **You write NO product or test code yourself** — not `Sync/`, not
-  "small" (her ruling 2026-11-01 at the VX-500 breach; memory
-  `orchestrator-never-writes-code`): records, briefs, kickoff rows,
-  dispositions and environment acts are yours; an adjudication fix goes
-  to the implementer, or to the reviewer under FINDER-FIXES. Batches
-  belong to implementer sessions. A `Sync/` batch's implementer (a Fable
-  subagent or Opus) is HER call at kickoff or in the plan file's cast
-  line; its cold reviewer is always Fable (CLAUDE.md's cast rule).
+- **You write nothing that ships** — no file under `Sources/`, `App/`,
+  `Tests/` or `Server/`, however small, and no fix at adjudication (those
+  go to the implementer, or to the reviewer under FINDER-FIXES): code
+  that enters the app goes through the implementer → cold-review cycle
+  (her ruling 2026-11-01 at the VX-500 breach, refined the same day;
+  memory `orchestrator-never-writes-code`). You MAY write throwaway
+  instruments that produce evidence or records and never enter the PR —
+  probe queries, scratchpad scripts, record generation, environment acts
+  — and your records, briefs, kickoff rows and dispositions are yours.
+  Batches belong to implementer sessions. A `Sync/` batch's implementer
+  (a Fable subagent or Opus) is HER call at kickoff or in the plan
+  file's cast line; its cold reviewer is always Fable (CLAUDE.md's cast
+  rule).
 - **Rulings are settled, not undiscussable.** Author rulings recorded
   in the plan file are built, never re-litigated on no new grounds —
   but a newfound technical constraint, an unanswered question, or a

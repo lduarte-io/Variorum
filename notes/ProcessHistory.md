@@ -300,3 +300,11 @@ orchestrator never writes product or test code — it briefs, verifies, adjudica
 "You may write small amounts of code yourself (fixes at adjudication, record commits, environment acts)" → "You write NO
 product or test code yourself … an adjudication fix goes to the implementer, or to the reviewer under FINDER-FIXES."
 The memory rule `orchestrator-never-writes-code` carries the same words for every session.
+
+**Refined the same day (her words, verbatim):** "I don't want orchestrators to not be able to write ANY code, I just
+want to ensure that code that is going into the app goes through the normal implementer -> cold review etc. cycle,
+and the orchestrator stays an orchestrator." The axis is SHIPS versus DOESN'T SHIP, never size: the orchestrator
+writes nothing under `Sources/`, `App/`, `Tests/` or `Server/` and no fix at adjudication, but may write throwaway
+instruments that produce evidence or records and never enter the PR (the VX-500 `EXPLAIN ANALYZE` probe files and
+their runner were the worked example — legitimate; the engine, scheduler, artifact and pins were not). CLAUDE.md's
+cast bullet and the architect skill carry the refined line.
