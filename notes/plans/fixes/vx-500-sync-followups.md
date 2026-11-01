@@ -1232,7 +1232,7 @@ defensive outer `limit` on the fetch output (DECLINED there — the pin suffices
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | F1 — the outer-limit pin: ONE `#expect` in the bound pin (`theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesUpToTheBound`) on the outer global cut's exact text — `from (%s) raw` · `order by raw.server_seq` · `limit %s),` · `bound as`, the artifact's whitespace (9 · 9 · 9 · 7 spaces); its honest red by the doctored-body pattern | IN-PROGRESS — the pin landed (this commit; the suites' line below); the honest red PENDING (the next commit, at this committed tip) |
+| 1 | F1 — the outer-limit pin: ONE `#expect` in the bound pin (`theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesUpToTheBound`) on the outer global cut's exact text — `from (%s) raw` · `order by raw.server_seq` · `limit %s),` · `bound as`, the artifact's whitespace (9 · 9 · 9 · 7 spaces); its honest red by the doctored-body pattern | DONE (`f87ad1d53` the pin + the record opened, 84/2 green; this commit the honest red — 1 issue, the new assertion alone, against the limit-less body; the doctoring restored, tree clean) |
 | 2 | F2 — ONE post-chain artifact list: `AuthRLSDDLTests.postChainFunctionArtifacts` (+ the path constant `vx495PullKeysetFile`) become internal `static let`s; arm 9 (`MultiTenantSyncAttackerTests.noOwnershipChangeInstructionExistsOnTheWire`) derives its appended files from that list — the inline path goes | NOT-STARTED |
 | 3 | THE ROLLBACK ARTIFACT `Server/supabase/maintenance/vx495-rollback.sql` (R-500-6 (2)): 13's §3a `sync_pull` copied BYTE-FOR-BYTE (never retyped), re-owned, the belt's list re-asserted, the keyset artifact's grants for `sync_pull`, `drop function if exists sync_pull_remaining(bigint, text, text, text)`, its own marker ≥ 14 guard (`VARIORUM_VX495_ROLLBACK_NEEDS_14`), one transaction, idempotent; the pins (a) byte-equality to `lastBody(of: "sync_pull", in: 13)`, (b) never in `postChainFunctionArtifacts` nor `searchPathDeployOrder`, (c) no marker WRITE + the belt's list on `sync_pull`; (a)'s honest red (one byte changed in a scratch doctoring) | NOT-STARTED |
 | 4 | Close: `swift build`; `swift test --filter "AuthRLSDDLTests\|MultiTenantSyncAttackerTests"` with the count; the self-assessment; the NOT DONE line final | NOT-STARTED |
@@ -1259,8 +1259,19 @@ bound, which is the whole claim.
 "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` → **"Test run with 84 tests in 2 suites passed after 0.292 seconds"** (the
 same 84 the round's reviewer ran — the pin grew by one assertion, not one test).
 
-**The honest red (the doctored-body pattern, at the committed tip, restored by `git checkout --`):** PENDING — the next
-commit.
+**The honest red (the doctored-body pattern, at the committed tip `f87ad1d53`, restored by `git checkout --`):** the
+artifact doctored in place by a scratch `sed` to the reviewer's exact shape — the outer `limit %s),` line deleted and
+its `),` carried onto the `order by raw.server_seq` line, so `picked` reads `… from (%s) raw order by raw.server_seq),
+bound as (…)` — no rebuild (the pin reads the SQL file at run time); `swift test --skip-build --filter
+"theKeysetPull…UpToTheBound"` → **"Test run with 1 test in 1 suite failed after 0.016 seconds with 1 issue"** — the ONE
+issue `AuthRLSDDLTests.swift:674:9: Expectation failed: body.contains("from (%s) raw\n         order by raw.server_seq\n
+limit %s),\n       bound as")`; every other assertion of the pin green against that body — which is the finding's walk
+confirmed by the suite itself (before this line, the limit-less body was fully green). Restored by `git checkout --`;
+`git diff --exit-code` clean at `f87ad1d53`. **Said plainly, a mis-aimed first attempt:** my first `sed` hit the wrong
+lines (it doubled the `),` on the `limit` line and deleted the `bound as (…)` line instead) and read "failed … with 2
+issues" — mine at :674 AND the bound assertion at :676 — a DIFFERENT red (it shows the bound assertion bites when the
+bound CTE goes, nothing about F1); restored clean the same way before the second, correct run above. Nothing of either
+doctoring is committed.
 
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
