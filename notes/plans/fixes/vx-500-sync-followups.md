@@ -1218,6 +1218,50 @@ the belt `maintenance/vx213-pg-temp-search-path.sql` to see the FINAL deployed s
 
 **Not yours:** anything under `Sources/`; U2/U3/U4; the deploy. **ENVIRONMENT TRAPS — the section above, binding verbatim.**
 
+### SERVER-HALF FIX RECORD (the Fable implementer, 2026-11-01; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+**NOT DONE (the record's first line).** NOT this session's, by the brief: anything under `Sources/` (no engine line, no
+transport line), the faces, U2/U3/U4, the ladder's round 2, the deploy, the PR, any store, any server contact, any stage.
+NOT RUN ON A POSTGRES — the rollback artifact, exactly like the keyset artifact it reverses: both are STRING-pinned until
+her deploy window; the byte-equality pin proves the rollback's body IS 13's, not that 13's body runs (13's has run on
+production since marker 10 — that is the rollback's whole argument). NOT BUILT, by THE FINAL CALLS: F1's optional
+defensive outer `limit` on the fetch output (DECLINED there — the pin suffices; the body stays byte-minimal against
+13's). NOT FLIPPED: the orchestrator's LIVE STATUS row 3b (the orchestrator's row — this record is the fix session's).
+
+#### LIVE STATUS (the fix session; flipped per piece, in the piece's own commit)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | F1 — the outer-limit pin: ONE `#expect` in the bound pin (`theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesUpToTheBound`) on the outer global cut's exact text — `from (%s) raw` · `order by raw.server_seq` · `limit %s),` · `bound as`, the artifact's whitespace (9 · 9 · 9 · 7 spaces); its honest red by the doctored-body pattern | IN-PROGRESS — the pin landed (this commit; the suites' line below); the honest red PENDING (the next commit, at this committed tip) |
+| 2 | F2 — ONE post-chain artifact list: `AuthRLSDDLTests.postChainFunctionArtifacts` (+ the path constant `vx495PullKeysetFile`) become internal `static let`s; arm 9 (`MultiTenantSyncAttackerTests.noOwnershipChangeInstructionExistsOnTheWire`) derives its appended files from that list — the inline path goes | NOT-STARTED |
+| 3 | THE ROLLBACK ARTIFACT `Server/supabase/maintenance/vx495-rollback.sql` (R-500-6 (2)): 13's §3a `sync_pull` copied BYTE-FOR-BYTE (never retyped), re-owned, the belt's list re-asserted, the keyset artifact's grants for `sync_pull`, `drop function if exists sync_pull_remaining(bigint, text, text, text)`, its own marker ≥ 14 guard (`VARIORUM_VX495_ROLLBACK_NEEDS_14`), one transaction, idempotent; the pins (a) byte-equality to `lastBody(of: "sync_pull", in: 13)`, (b) never in `postChainFunctionArtifacts` nor `searchPathDeployOrder`, (c) no marker WRITE + the belt's list on `sync_pull`; (a)'s honest red (one byte changed in a scratch doctoring) | NOT-STARTED |
+| 4 | Close: `swift build`; `swift test --filter "AuthRLSDDLTests\|MultiTenantSyncAttackerTests"` with the count; the self-assessment; the NOT DONE line final | NOT-STARTED |
+
+#### F1 — the outer-limit pin (piece 1)
+
+**The mechanism, re-traced by me before the line was written.** `vx495-pull-keyset.sql`'s one `execute format(…)` builds
+`picked` as `select raw.server_seq from (<the 21 per-table picks>) raw order by raw.server_seq limit %s` — that outer
+`limit %s` is the ONLY place the 21 per-table pages (each ≤ `max_rows` seqs) become THE page. Delete it and the body
+stays a legal statement (`format()` ignores a surplus argument), `picked` holds up to 21 × `max_rows` seqs, `bound`
+their maximum, and each fetch branch's `t.server_seq <= (select seq from bound)` admits everything up to it: a window of
+up to ~42,000 rows at the production page of 2,000. I walked the bound pin's nine assertions against that body: `with
+picked as (` present · the seqs-only pick present · the PER-TABLE `order by t.server_seq\n          limit %s)` present ·
+the bound CTE present · both bounded branches present · no `in (select` · `sync_table_pk(tbl)` twice · the horizon
+thrice · the gates and the upsert — all green. The round's finding stands as stated; the fix is the one `#expect` on the
+outer cut's exact text, placed between the per-table-limit assertion and the bound assertion (the SQL's own order).
+
+**The text pinned (the artifact's bytes, lines 250–253; `finalBody` strips comment LINES only, so indentation and
+newlines reach the pin unchanged):** `"from (%s) raw\n         order by raw.server_seq\n         limit %s),\n       bound as"`
+— the union's alias, the global sort, the global cut, the bound CTE's start: the cut sits OVER the union and BEFORE the
+bound, which is the whole claim.
+
+**Green (the suites, at this commit):** `swift build --build-tests` → "Build complete!"; `swift test --skip-build --filter
+"AuthRLSDDLTests|MultiTenantSyncAttackerTests"` → **"Test run with 84 tests in 2 suites passed after 0.292 seconds"** (the
+same 84 the round's reviewer ran — the pin grew by one assertion, not one test).
+
+**The honest red (the doctored-body pattern, at the committed tip, restored by `git checkout --`):** PENDING — the next
+commit.
+
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
 **Who you are.** The implementer for U2 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s

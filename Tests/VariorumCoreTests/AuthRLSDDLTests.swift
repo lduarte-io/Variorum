@@ -652,7 +652,8 @@ struct AuthRLSDDLTests {
 
     /// THE SHAPE PIN (D-495, SHAPE B — the record's D-495 EVIDENCE, her 230 ms probe): the deployed `sync_pull`
     /// assembles its page in two phases — THE PICK (per table, the first `max_rows` SEQS past the cursor in index
-    /// order; seqs only, never a row's id or JSON), THE BOUND (`max(server_seq)` over the pick) and THE FETCH (13's
+    /// order; seqs only, never a row's id or JSON; the per-table pages `union all`ed and cut to ONE page by the outer
+    /// `order by … limit` BEFORE the bound reads them), THE BOUND (`max(server_seq)` over the pick) and THE FETCH (13's
     /// two branches, each one index RANGE scan up to the bound — no per-row probe, no `in (select …)`) — with 13's
     /// allowlist and owner-table set byte-equal, the device cursor upsert, both gates and the derived horizon kept on
     /// every branch (pick and fetch alike — three `from %I t`, three owner filters, three horizon filters). The A5 and
@@ -665,6 +666,13 @@ struct AuthRLSDDLTests {
                 "the pick yields seqs only — never a row's id or JSON")
         #expect(body.contains("order by t.server_seq\n          limit %s)"),
                 "the pick walks each table's (owner_id, server_seq) index and stops at the page")
+        // F1 (the server-half ladder, round 1 — `notes/plans/fixes/vx-500-server-half-round1.md`): the OUTER global
+        // cut — the per-table pages `union all`ed as `raw`, then ONE `order by … limit %s` BEFORE the bound reads
+        // their maximum. Without it `picked` is up to 21 × max_rows seqs, `bound` their maximum, and every fetch
+        // branch serves everything up to it — a window of up to ~42,000 rows at the production page, silently: every
+        // other assertion of this pin stays green against that body (the finding's walk), so this line holds it.
+        #expect(body.contains("from (%s) raw\n         order by raw.server_seq\n         limit %s),\n       bound as"),
+                "the pick's union is cut to ONE page before the bound")
         #expect(body.contains("bound as (select max(server_seq) as seq from picked)"),
                 "the bound is the page's last seq")
         #expect(body.components(separatedBy: "and t.server_seq <= (select seq from bound)").count - 1 == 2,
