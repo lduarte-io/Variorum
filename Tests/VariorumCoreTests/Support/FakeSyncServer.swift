@@ -783,15 +783,21 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport, 
                 .map { SyncPulledRow(row: $0.row, serverSeq: $0.serverSeq) })
     }
 
-    /// VX-496 — `sync_pull_remaining`'s twin: the rows past `since` the feed
-    /// would serve the caller (committed, past the horizon), summed over the
-    /// account's tables. Gated like the pull.
+    /// VX-496 — `sync_pull_remaining`'s twin, the INDEX-ONLY count (her
+    /// ruling R-500-1): the caller's committed rows past `since`, summed
+    /// over the account's tables — owner + seq only, NO horizon term, exactly
+    /// as the server's `where t.owner_id = caller and t.server_seq > since`
+    /// (`maintenance/vx495-pull-keyset.sql`). `committed` stays: it models
+    /// Postgres row visibility (an in-flight transaction's rows are invisible
+    /// to any read), not the A5 horizon. So the count may EXCEED what the feed
+    /// serves right now by the rows still inside the horizon — the server's
+    /// own relation, pinned in `SyncProgressTests`. Gated like the pull.
     func pullRemaining(since: Int64, activeKeyID: String, keyProof: SyncKeyProof, as userID: String) throws -> Int64 {
         let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_pull_remaining")
         return Int64(
             account.tables.values
                 .flatMap { $0.values }
-                .filter { $0.committed && $0.serverSeq > since && $0.writtenAt <= clock - visibilityHorizon }
+                .filter { $0.committed && $0.serverSeq > since }
                 .count)
     }
 

@@ -9,6 +9,13 @@ import Testing
 /// and the scheduler publishes it on its status: the download's rows so far with the server's count of the whole
 /// catch-up when the transport can answer it (`SyncPullCountTransport`), then the save's rows against its batch.
 /// An ordinary round — one window — reports nothing. VX-505's typed `lastErrorIsRetrying` rides the same status.
+///
+/// THE TOTAL'S RELATION TO THE FEED (her ruling R-500-1, VX-500 U1a): the server's count is INDEX-ONLY — owner + seq,
+/// no horizon filter — so it counts the rows still inside the two-second visibility horizon that the feed will serve a
+/// moment later: `total ≥ the rows served right now`, equal once the horizon has passed. The fake's count mirrors that
+/// exactly (`FakeSyncServer.pullRemaining`). The equalities the pins below assert (`done == total` at the download's
+/// end) are honest because these suites run the fake at its default horizon of 0 — nothing is ever inside it — and the
+/// relation itself is pinned under a non-zero horizon (`theCountIsIndexOnlyAndCountsRowsStillInsideTheHorizon`).
 @Suite("VX-496 — a long catch-up reports its download and its save; an ordinary round reports nothing")
 struct SyncProgressTests {
     private func seedCorpus(_ client: SyncClient, posts: Int, blocksPerPost: Int) throws {
@@ -138,6 +145,31 @@ struct SyncProgressTests {
         #expect(downloading.first?.done == staged + 40, "the first reading counts the stage plus the first new window")
         #expect(downloading.last?.done == total, "the download ended at the whole feed")
         #expect(try b.cursor() == (await server.headSeq), "converged")
+    }
+
+    /// R-500-1 — the count's relation to the feed, as the server has it: under a non-zero horizon the feed serves nothing
+    /// written inside it, while the INDEX-ONLY count counts every committed row past the cursor; once the horizon has
+    /// passed the feed serves exactly that many. The fake mirrors the server's shape (owner + seq, no horizon term), so a
+    /// progress total can run AHEAD of the rows served by the rows still inside the horizon — never behind.
+    @Test func theCountIsIndexOnlyAndCountsRowsStillInsideTheHorizon() async throws {
+        let server = FakeSyncServer(visibilityHorizon: 5)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        try seedCorpus(a, posts: 3, blocksPerPost: 3)
+        try await a.push()
+
+        let insideTheHorizon = try await server.pull(
+            since: 0, limit: 500, activeKeyID: SyncTestKeys.corpusKeyID,
+            keyProof: server.mintProof(rpc: "sync_pull"), deviceID: nil)
+        let countedAtOnce = try await feedCount(server)
+        #expect(insideTheHorizon.isEmpty, "every row was written inside the horizon — the feed serves none yet")
+        #expect(countedAtOnce > 0, "…while the index-only count already counts them all")
+
+        await server.advanceClock(by: 5)
+        let served = try await server.pull(
+            since: 0, limit: 500, activeKeyID: SyncTestKeys.corpusKeyID,
+            keyProof: server.mintProof(rpc: "sync_pull"), deviceID: nil)
+        #expect(served.count == countedAtOnce, "past the horizon the feed serves exactly what was counted")
+        #expect(try await feedCount(server) == countedAtOnce, "the count never moved — it never read the horizon")
     }
 
     /// VX-505 (D-505): an ordinary failed round — offline, a fault — is never flagged as retrying.

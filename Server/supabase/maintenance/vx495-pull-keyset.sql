@@ -75,12 +75,22 @@
 --
 -- AND THE COUNT (VX-496, the sync row's progress line — D-496): one new READ
 -- RPC, `sync_pull_remaining(since_seq, active_key_id, key_proof, challenge)`,
--- the rows past the cursor under the same horizon filter, summed over the
--- same allowlist off the same indexes — `sync_horizon`'s posture exactly
--- (challenge-gated, entitlement-gated, authenticated only). The client calls
--- it ONCE per round and only after a first window came back full, treats
--- any failure — a 404 before this deploys included — as "no total", and
--- never fails a round on it.
+-- the rows past the cursor summed over the same allowlist — `sync_horizon`'s
+-- posture exactly (challenge-gated, entitlement-gated, authenticated only).
+-- THE INDEX-ONLY SHAPE (her ruling R-500-1, 2026-11-01, the record's HER
+-- RULINGS): each table's count is `where t.owner_id = caller and
+-- t.server_seq > since` and NOTHING ELSE — no horizon filter, so the count
+-- runs off `idx_owner_seq_<table>` without heap visits (an index-only scan
+-- where the visibility map is set). It is therefore exact to within the
+-- last two seconds of writes (the rows the feed will serve a moment later —
+-- a progress TOTAL never needs them subtracted), and inherently
+-- O(rows remaining): asked ONCE per long round (the client's gate: only
+-- after a first window came back full), never per window. The measured
+-- alternative, the horizon-filtered count: 1,586 ms on her tenant — twenty-
+-- one Seq Scans with the horizon predicate, 6,819 buffers; near the 8 s
+-- statement timeout for an account ~3× hers. The client treats any failure
+-- — a 404 before this deploys included — as "no total", and never fails a
+-- round on it.
 --
 -- GUARD: refuses below marker 14 (the body it replaces is 13's, deployed at
 -- marker ≥ 10; today's mirror is 14). Idempotent — a re-run lands the same
@@ -254,7 +264,8 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- 2. sync_pull_remaining — the rows past the cursor (VX-496's total), a
---    READ under `sync_horizon`'s exact posture.
+--    READ under `sync_horizon`'s exact posture; the INDEX-ONLY count
+--    (R-500-1): owner + seq only, no horizon filter (the header says why).
 -- ---------------------------------------------------------------------------
 
 create or replace function sync_pull_remaining(since_seq bigint, active_key_id text, key_proof text, challenge text)
@@ -270,9 +281,6 @@ declare
     'post_tag', 'block_tag', 'reference', 'canvas_layout',
     'lens', 'lens_choice', 'block_comment', 'setting', 'purge_intent'];
   caller uuid;
-  -- The same derived A5 horizon as sync_pull's — the count sees exactly
-  -- the rows the feed will serve.
-  horizon interval := make_interval(secs => sync_visibility_horizon_ms() / 1000.0);
   tbl text;
   count_sql text := '';
   result bigint;
@@ -292,6 +300,10 @@ begin
     raise exception 'VARIORUM_NO_ENTITLEMENT: hosted sync is not active on this account';
   end if;
 
+  -- R-500-1 — THE INDEX-ONLY COUNT: owner + seq, nothing else, so each
+  -- term is a range count off idx_owner_seq_<table> with no heap visit;
+  -- exact to within the horizon's two seconds of writes, which a progress
+  -- total never needs subtracted.
   foreach tbl in array allowed loop
     if count_sql <> '' then
       count_sql := count_sql || ' + ';
@@ -299,9 +311,8 @@ begin
     count_sql := count_sql || format(
       $q$(select count(*) from %I t
           where t.owner_id = %L
-            and t.server_seq > %s
-            and t.server_written_at <= clock_timestamp() - %L::interval)$q$,
-      tbl, caller, since_seq, horizon);
+            and t.server_seq > %s)$q$,
+      tbl, caller, since_seq);
   end loop;
 
   execute 'select ' || count_sql into result;
