@@ -308,3 +308,18 @@ writes nothing under `Sources/`, `App/`, `Tests/` or `Server/` and no fix at adj
 instruments that produce evidence or records and never enter the PR (the VX-500 `EXPLAIN ANALYZE` probe files and
 their runner were the worked example — legitimate; the engine, scheduler, artifact and pins were not). CLAUDE.md's
 cast bullet and the architect skill carry the refined line.
+
+**Loosened the same evening (2026-11-01, the VX-500 resume session), at her word.** The resuming orchestrator reported
+that "no fix at adjudication" guarded file paths where the intent was the orchestrator's context and judgment; her
+reply: "I actually think that no fix at adjudication can be loosened a little - these lines were added to canon
+because the orchestrator started just doing the whole phase themselves directly. I've never had a problem with little
+changes, but the orchestrator needs to stay the orchestrator to preserve its context window & judgement." She then
+supplied the wording CLAUDE.md now carries ("The orchestrator never implements. … After a ladder round it MAY type a
+SMALL adjudication fix itself: a mechanical change fully specified by the round's final call, a few lines, no design
+choice, no new behavior, with its pin — read by the next round, or on a final round by one implementer sanity pass,
+never by its own eyes alone. Never its own hands on Sources/VariorumCore/Sync/, custody/keychain code or the editor
+seam … The tell is ORDER: code the orchestrator types before a reviewer asked for it is a batch — brief an
+implementer"). Two companion rules from the same message: CLAUDE.md carries no "ruled <date>" residue ("we don't
+include things like RULED anymore in the claude.md … it's supposed to just be the essentials that any new session needs
+to know, which does not include what time those decisions were made") — the dated history is this file's; and the
+architect skill's matching bullet is a POINTER at CLAUDE.md's rule ("so the two can't drift again").
