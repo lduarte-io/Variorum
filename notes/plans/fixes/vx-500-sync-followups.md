@@ -1404,6 +1404,20 @@ committed.
     test module — the standing precedent being the reverse direction (the attacker test cited AuthRLSDDL's constant by
     name in prose before; now it reads it).
 
+#### The orchestrator's verification of the server-half fixes (2026-11-01 ~16:45 MDT; verify-not-trust)
+
+- Five commits `f87ad1d53` · `0936e4ece` · `f16249fe8` · `77176cc14` · `a8038ad91` on the tip, pushed, tree clean; `git diff
+  --stat b9b97ad58..HEAD -- Sources/` EMPTY. The rollback artifact read by the orchestrator: its `sync_pull` is
+  diff-IDENTICAL to `13_phase13i_wings.sql` lines 184–291 (checked by `diff` of the two extracts); the guard reads
+  `lockstep_version` and nothing writes `sync_meta`; the count dropped by exact signature; owner `variorum_definer`,
+  `set search_path = public, pg_temp`, the revoke/grant pair; one `begin;`/`commit;`.
+- The orchestrator's OWN run: `swift test --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` → **"Test run with 85
+  tests in 2 suites passed"**.
+- Accepted into the server half. The implementer's self-assessment item 5 (the rollback DROPS the count, so the branch's
+  sweep reads it MISSING after a rollback until the keyset artifact re-runs) is the brief's letter and the right shape —
+  the rollback restores the exact pre-deploy state; the sweep's note in the header says so. Round 2 reads F1, F2 and the
+  rollback artifact; items 1, 2, 4 and 7 of the self-assessment are its to weigh.
+
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
 **Who you are.** The implementer for U2 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
@@ -1608,7 +1622,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 1 | U1a — the server artifact (D-495 SHAPE B + the count per R-500-1) + the DDL pins | DONE (`6155ba7fb` SHAPE B · `7d645688f` the count · `1e8d24286` the DDL pins · `917189ccd` the red-on-old) — U1a; the record is `### U1a RECORD` |
 | 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | DONE (`86b097934` the ownership pass, one change; the close commit the wire pin) — U1a; the draft `aad734aef` adopted line by line |
 | 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
-| 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact) IN PROGRESS — briefed §SERVER-HALF FIX BRIEF · round 2 NOT STARTED · the deploy HELD for her word (THE DEPLOY) | IN PROGRESS |
+| 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 IN PROGRESS (`vx-500-server-half-round2.md`) · the deploy HELD for her word (THE DEPLOY) | IN PROGRESS |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
 | 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
 | 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
