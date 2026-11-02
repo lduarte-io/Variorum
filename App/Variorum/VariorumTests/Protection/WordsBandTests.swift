@@ -328,6 +328,96 @@ struct WordsBandTests {
         #expect(again.look.phase == .asking)
     }
 
+    // MARK: VX-735 (VX-736 R-736-5) — the tour's closing cards show only while their asks are owed
+
+    /// **The words card is owed until the words are recorded — and only the BAND hears its own ✕ and *Later*.** Her
+    /// *"make sure that this pane doesn't show if they already recorded their 12 words"*: a look closed past its
+    /// warning at ANY home retires the tour's ask with the band's, and so does a landed account act
+    /// (`accountHoldsTheWords`); a band dismissal or snooze retires the band alone (PROVISIONAL P-736-2 — rule 2 names
+    /// the tutorial's last card as a home of its own); a read-only road owes nothing. RED on 2d82cb5a8 for the recorded
+    /// arm by mechanism (the tour's close read no ledger at all).
+    @Test func theToursWordsCardIsOwedUntilRecordedAndOnlyTheBandHearsItsCross() async {
+        let world = PlantedBand()
+        let band = world.band()
+        #expect(band.wordsLookOwed, "a fresh library owes the tour's words card")
+        band.later()
+        #expect(!band.offersWords && band.wordsLookOwed, "Later snoozes the band, not the tour's ask")
+        let crossed = world.band()
+        _ = crossed.dismiss()
+        #expect(world.ledger.dismissed(world.libraryID))
+        #expect(!crossed.offersWords && crossed.wordsLookOwed, "the ✕ retires the band, not the tour's ask (P-736-2)")
+        #expect(world.band().wordsLookOwed, "a reopen after the ✕ still owes it")
+        // The tour's own look closes past its warning: recorded — owed nowhere, now or after a reopen.
+        let tourLook = crossed.makeLook(
+            passphraseExists: { false }, mint: { _ in .minted((1...12).map { "w\($0)" }) }, copy: { _ in })
+        await tourLook.open()
+        tourLook.writtenDown()
+        #expect(crossed.wordsLookOwed, "the words still on screen: still owed until the close")
+        tourLook.close()
+        #expect(!crossed.wordsLookOwed, "recorded at the tour's card")
+        #expect(!world.band().wordsLookOwed, "and every later open")
+        // A landed account act retires it too; a read-only road never owes it.
+        let other = PlantedBand()
+        let synced = other.band()
+        synced.accountHoldsTheWords()
+        #expect(!synced.wordsLookOwed, "a landed account act: a look would replace the account's words")
+        #expect(!other.band(writes: false).wordsLookOwed, "a read-only road owes nothing")
+    }
+
+    /// **The five fixture worlds through the REAL road** — what the tour's facts read (`TourEndLibraryModel.asks`): FRESH
+    /// owes both; PASSPHRASE SET owes the words only (the passphrase arm was already this truth before VX-735 — green on
+    /// both sides); WORDS RECORDED owes the passphrase only; BOTH owes nothing (RED on 2d82cb5a8 for the two recorded
+    /// rows: the close offered the words door whatever the ledger said). The landed-account world is
+    /// `WordsCardAfterAccountActTests`' (the bootstrap's own landing).
+    @Test func theToursClosingAsksReadTheLibrarysOwnTruthsInEveryWorld() async throws {
+        func asks(passphrase: Bool, recorded: Bool) async throws -> Tour.ClosingAsks {
+            let road = PlantedRoad()
+            let (session, _) = try await road.created()
+            let store = ThrowawayDefaults()
+            defer { store.purge() }
+            if passphrase {
+                #expect(await ProtectionOpenRoad.setFirstPassphrase(session: session, new: "a passphrase") == .set)
+            }
+            if recorded, let id = session.library.record?.libraryID {
+                WordsCardLedger(defaults: store.defaults).record(id)
+            }
+            let standing = RoadStandingModel.make(
+                session, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
+            return TourEndLibraryModel.asks(standing)
+        }
+        #expect(try await asks(passphrase: false, recorded: false) == .init(passphrase: true, words: true), "fresh")
+        #expect(try await asks(passphrase: true, recorded: false) == .init(passphrase: false, words: true),
+                "passphrase set")
+        #expect(try await asks(passphrase: false, recorded: true) == .init(passphrase: true, words: false),
+                "words recorded")
+        #expect(try await asks(passphrase: true, recorded: true) == .init(passphrase: false, words: false), "both")
+    }
+
+    /// **The tour's close, answered on its own cards through the real road**: the passphrase set on the first card
+    /// retires its ask (the rule moves on to the words card) and is handed to the look (never asked twice); the look
+    /// closed past its warning retires the words' ask (the rule moves on to the end card). No faces: nothing owed.
+    @Test func theToursClosingAsksAreAnsweredOnTheirOwnCards() async throws {
+        let road = PlantedRoad()
+        let (session, _) = try await road.created()
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(
+            session, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
+        let card = TourEndLibraryModel(standing: standing)
+        #expect(TourEndLibraryModel.asks(standing) == .init(passphrase: true, words: true))
+        let ask = try #require(card.passphrase)
+        await ask.submit(passphrase: "chosen on the card", again: "chosen on the card")
+        #expect(TourEndLibraryModel.asks(standing) == .init(passphrase: false, words: true),
+                "the passphrase set on its card: the rule moves on to the words")
+        await card.showWords()
+        #expect(card.look.phase == .shown, "not asked twice")
+        card.look.writtenDown()
+        #expect(TourEndLibraryModel.asks(standing).words, "still owed while the words are on screen")
+        card.look.close()
+        #expect(TourEndLibraryModel.asks(standing) == .init(passphrase: false, words: false),
+                "the look closed past its warning: the rule moves on to the end card")
+    }
+
     /// The words first, the passphrase after (no passphrase yet): the look mints with nothing asked.
     @Test func theToursLastCardShowsTheWordsBeforeAnyPassphrase() async throws {
         let road = PlantedRoad()

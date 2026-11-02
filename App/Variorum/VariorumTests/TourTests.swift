@@ -841,6 +841,53 @@ struct TourEngineTests {
         }
     }
 
+    /// **VX-735 (VX-736 R-736-5) — the closing asks reach the rule through
+    /// the window's facts, wherever she stands** (the faces' truth is the
+    /// library's, never the place's), and an engine on a library owing both
+    /// lands step 13's own note on the PASSPHRASE card — completed once, at
+    /// once — whose next brings the words card, then the end card.
+    @Test func theClosingAsksReachTheRuleAndTheCloseWalksItsCards() async throws {
+        let owed = Tour.ClosingAsks(passphrase: true, words: true)
+        for selection: SidebarSelection in [.post("mine"), .shelf, .reading("r")] {
+            let facts = TourPlaces.facts(
+                selection: selection, detail: ("mine", .write), caret: nil, bookNoteLive: false,
+                note: nil, isStarred: { _ in false }, asks: owed)
+            #expect(facts.asks == owed, "\(selection): the asks ride every report")
+        }
+        #expect(TourPlaces.facts(
+            selection: .post("mine"), detail: ("mine", .write), caret: nil, bookNoteLive: false,
+            note: nil, isStarred: { _ in false }).asks == nil, "no faces: nothing said")
+        try await withSession { session in
+            let log = DoorLog()
+            let engine = TourEngine(
+                session: session, landmarks: Self.landmarks,
+                facts: Tour.Facts(place: .area(.bookcase)), doors: log.doors)
+            engine.next()
+            engine.observe(.init(place: .book("sherlock")))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write,
+                                 caret: .init(noteID: "scandal", blockID: "b1", ordinal: 1, takeCount: 1)))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write,
+                                 caret: .init(noteID: "scandal", blockID: "b40", ordinal: 40, takeCount: 1)))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write,
+                                 caret: .init(noteID: "scandal", blockID: "b40", ordinal: 40, takeCount: 2)))
+            engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+            walkFromTakesToTheBookcase(engine)
+            #expect(engine.state.step == .ownNote)
+            engine.observe(.init(
+                place: .note("mine"), noteMode: .write,
+                note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0), asks: owed))
+            #expect(engine.state.step == .protectPassphrase)
+            #expect(log.completions == 1, "the close completes the tour the moment it arrives")
+            #expect(engine.spotlight.groups.isEmpty, "a centred card: nothing rung")
+            engine.next()
+            #expect(engine.state.step == .protectWords)
+            engine.next()
+            #expect(engine.state.step == .endCard)
+            #expect(log.completions == 1, "once")
+        }
+    }
+
     /// F-U2-W-2 (option A, ruled): leg 3 brings her to the Pool AND opens its
     /// in-gatherings run — her starred note is tucked there — exactly once.
     @Test func legThreeOpensThePoolsTuckedRunOnArrival() async throws {

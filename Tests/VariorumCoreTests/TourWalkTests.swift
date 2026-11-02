@@ -434,6 +434,77 @@ struct TourWalkTests {
         }
     }
 
+    // MARK: - The suppression (VX-736 R-736-5 — a card shows only while its ask is owed)
+
+    /// **R-736-5 — her *"we also have to make sure that this pane doesn't
+    /// show if they already recorded their 12 words and stuff"*.** The five
+    /// fixture worlds, as the library's faces say them (`Facts.asks`): a
+    /// FRESH library owes both (the passphrase card first); a PASSPHRASE-SET
+    /// library owes only the words (the passphrase card is skipped); a
+    /// WORDS-RECORDED library owes only the passphrase (its next goes
+    /// straight to the end card); BOTH done owes nothing (the end card at
+    /// once); a LANDED ACCOUNT act marks the words recorded (the band's one
+    /// ledger — VX-511), so it reads as words-recorded; and no faces at all
+    /// (nil) skip both. Every world completes the tour once, at its close's
+    /// first card. RED-ON-OLD (headless watch, the record): with a closing
+    /// card's advance blind to the asks, every skipping row stays on a card
+    /// that should not show.
+    @Test func aClosingCardShowsOnlyWhileItsAskIsOwed() {
+        struct World {
+            let name: String
+            let asks: Tour.ClosingAsks?
+            /// The card step 13 lands on, then where next goes from it.
+            let lands: Tour.Step
+            let nextGoes: Tour.Step?
+        }
+        let worlds = [
+            World(name: "fresh", asks: .init(passphrase: true, words: true),
+                  lands: .protectPassphrase, nextGoes: .protectWords),
+            World(name: "passphrase set", asks: .init(passphrase: false, words: true),
+                  lands: .protectWords, nextGoes: .endCard),
+            World(name: "words recorded", asks: .init(passphrase: true, words: false),
+                  lands: .protectPassphrase, nextGoes: .endCard),
+            World(name: "both done", asks: .init(passphrase: false, words: false),
+                  lands: .endCard, nextGoes: nil),
+            World(name: "landed account (words recorded by the act; passphrase typed)",
+                  asks: .init(passphrase: false, words: false), lands: .endCard, nextGoes: nil),
+            World(name: "landed account, no passphrase typed here", asks: .init(passphrase: true, words: false),
+                  lands: .protectPassphrase, nextGoes: .endCard),
+            World(name: "no protection faces", asks: nil, lands: .endCard, nextGoes: nil),
+        ]
+        for world in worlds {
+            var w = Self.walk(to: .ownNote)
+            let before = w.effects.count
+            w.report(Self.ownNote(asks: world.asks))
+            #expect(w.step == world.lands, "\(world.name): lands on \(String(describing: w.step))")
+            #expect(Array(w.effects[before...]) == [.recordCompleted], "\(world.name): completed once, at once")
+            if let next = world.nextGoes {
+                w.send(.next)
+                #expect(w.step == next, "\(world.name): next goes to \(String(describing: w.step))")
+            }
+            #expect(w.effects.filter { $0 == .recordCompleted }.count == 1, "\(world.name): never twice")
+        }
+    }
+
+    /// **An ask answered on its own card moves on** (the tolerance rule: a
+    /// step already satisfied advances). The passphrase set here retires the
+    /// passphrase card — the words card follows; the look closing past its
+    /// warning records the words — the end card follows. A report that
+    /// still owes the card's ask keeps it, whatever else it says.
+    @Test func anAskAnsweredOnItsCardMovesOn() {
+        var w = Self.walk(to: .protectPassphrase)
+        #expect(w.step == .protectPassphrase)
+        w.report(Self.ownNote(asks: .init(passphrase: true, words: false)))
+        #expect(w.step == .protectPassphrase, "still owed: the words' state is not this card's")
+        w.report(Self.ownNote(asks: .init(passphrase: false, words: true)))
+        #expect(w.step == .protectWords, "the passphrase set here: on to the words")
+        w.report(Self.ownNote(asks: .init(passphrase: false, words: true)))
+        #expect(w.step == .protectWords, "the words card waits for her (the look, or next)")
+        w.report(Self.ownNote(asks: .init(passphrase: false, words: false)))
+        #expect(w.step == .endCard, "the words recorded here: on to the end card")
+        #expect(w.effects.filter { $0 == .recordCompleted }.count == 1)
+    }
+
     // MARK: - How it ends
 
     @Test func endTourBeforeTheEndCardEndsItAndAfterItTheTourCountsAsCompleted() {
