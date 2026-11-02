@@ -431,7 +431,7 @@ Counts by suite (declared `@Test`s; parameterized tests count once): FreshSideba
 
 ## B3 RECORD
 
-**NOT DONE (first line, kept current):** B3 is OPEN — the trace is done and named below; the pins, the fix, the stage window (the pins' red/green runs, the live confirmation, B2's camera list) are not yet run. No QUESTIONS.md entry, no canon edit (none expected; any canon touch is the closeout's).
+**NOT DONE (first line, kept current):** B3 is OPEN at READY-FOR-STAGE — the trace, the pins (on the pre-fix tree) and the fix are committed and built; NOT yet run: the pins' red run (pre-fix build) and Gate D's green run, the live confirmation, B2's camera list (the joint window). No QUESTIONS.md entry, no canon edit (none expected; any canon touch is the closeout's).
 
 Implementer: Opus (opus-implementer), 2026-11-02, worktree `~/dev/variorum-vx-736`, branch `vx-736-hotfix-101`, the Pro, from `dc17f71f7` (B2's close). Scope: §B3 BRIEF's three pieces, plus the run's JOINT WINDOW (my live confirmation + B2's standing camera list). Read in my own context before any code: this file's KICKOFF, SITTING RECORD, MEMBERS, CAST, §B3 BRIEF, §ENVIRONMENT TRAPS, B1's and B2's records (LIVE STATUS, the camera list); `notes/TEXTKIT2_NOTES.md` WHOLE; `notes/SessionResiliencyProtocol.md`; the architect skill's overlay/sink delivery law; the VX-729 ticket (and the class ticket VX-702, read-only); SurfaceContracts §The note ("A corner badge appears only on fanned blocks"); `FanBadgePlacementTests` and the badge's render path (`EditorViewModel.refreshBadges`, `BadgeOverlayController`, the N14 settle hop, the projection policy and executors, the inline coordinator's remeasure, the read tier's badge pass); the VX-677 record's F-1 / F-FX-1 / F-FX-2 (the VX-668 display-pass finding). Zero `Sync/`, zero custody/keychain code, zero schema; no line inside `EditorTextView`, `BlockRangeIndex` or `PaneSurface`.
 
@@ -440,9 +440,9 @@ Implementer: Opus (opus-implementer), 2026-11-02, worktree `~/dev/variorum-vx-73
 | piece | status |
 |---|---|
 | 1 Repro + trace | DONE (this commit) — the mechanism below, traced in the code and confirmed by an offscreen bare-TK2 probe on this machine (macOS 27.0.1, Xcode 27.1); the in-app repro is the pin's RED run (PENDING the stage) |
-| 2 Pin (red-on-old) | NOT-STARTED — the design below; committed on the pre-fix tree, built into `App/Variorum/DerivedData/vx736-b3-red` (gitignored) for the stage's red run |
-| 3 Fix | NOT-STARTED — the settled design below (one rule in the badge pass) |
-| 4 READY-FOR-STAGE | NOT-STARTED |
+| 2 Pin (red-on-old) | DONE (8ec0bc6ee, committed on the PRE-FIX tree) — `App/Variorum/VariorumTests/TakeChoiceBadgeTests.swift`, 5 tests (below); the pre-fix tree built (`build-for-testing` TEST BUILD SUCCEEDED, no warning in the file) and its products copied whole to `App/Variorum/DerivedData/vx736-b3-red/` (gitignored) for the stage's red run; RED run PENDING the stage |
+| 3 Fix | DONE (f4566578f) — the one rule in `EditorViewModel.refreshBadges` (below); `build-for-testing` TEST BUILD SUCCEEDED (no warning in a touched file); the fix's own premise probed offscreen (probe 2, below); GREEN run PENDING the stage |
+| 4 READY-FOR-STAGE | DONE (this commit) — the commands, predictions and walk plan below |
 | 5 Stage window: the pins red (pre-fix build) and green (fixed build), the live confirmation, B2's camera list | NOT-STARTED |
 | 6 Record close | NOT-STARTED |
 
@@ -468,3 +468,81 @@ D needsDisplay=true then 3 passes: willDraws=1
 ```
 
 **The fix, settled before typing (piece 3):** ONE rule in the badge pass (`EditorViewModel.refreshBadges` — the editor's decoration layer, the fence the brief draws): on Write's detail editor, a badge pass that runs AHEAD of its generation's settle (`overlayGenerationDelivered != overlayGeometryGeneration`) while the note holds a fan makes the next display pass CERTAIN — `textView.needsDisplay = true` (probe line D) — so the N14 hop re-runs the pass after TK2 has laid the rewrite out. The house's own road for exactly this certainty (VX-282 R1-2's `settleMarkdownCaret`; VX-668's `adoptRewrite`), and deliberately NOT a direct `overlayLayoutDidSettle()` (VX-282 R1-2's reason: a direct hop can run before the pass that lays the rewrite out and spend the generation on pre-layout frames). Terminates: the hop marks the generation delivered BEFORE its own `refreshBadges`, so that read asks for nothing. Scoped to the detail editor: the inline editor's badges follow its remeasure walk (an extra display per keystroke there would buy nothing). **Alternative recorded, not built:** the same `needsDisplay` at the rewrite door (`adoptRewrite`, generation-guarded — VX-668's door widened): rewrite roads only, every overlay consumer; not chosen because it sits in the tiling-write door rather than the badge layer and would not cover a badge read ahead of the settle on the echo road.
+
+**Probe 2 — the fix's own premise** (same rig, scratchpad `b3-probe/probe2.swift`): after the same frame-constant replace, `needsDisplay = true` then ONE display pass; a main-queue hop scheduled from the text view's `viewWillDraw` (N14's exact shape) reads the replaced paragraph:
+```
+after replace: state0 frame=(0.0, 0.0, 0.0, 0.0)
+hop reads after ONE pass: ["layoutAvailable"]
+```
+So the hop the rule makes certain meets the paragraph laid out — one pass is enough on 27.0.1.
+
+### Piece 2 — the pins, as built (8ec0bc6ee, on the PRE-FIX tree)
+
+`App/Variorum/VariorumTests/TakeChoiceBadgeTests.swift`, suite `TakeChoiceBadgeTests` (serialized), 5 tests. Each mounts Write's REAL surface in a window with the app's coordinator installed (the badge overlay, the decor overlay, the scroll anchor — `EditorSurface.Coordinator`, as `FanBadgePlacementTests` does), on her sighting's shape (a short three-block note, block 1 "You, I hope :)", every take ONE line). The shared shape: the badge home first (`#require` — laid out, at its own line, the face's button drawn); the act through the store; Write hears it as its observation does (`applyProjection(fromDelivery: true)` → the policy's fresh re-read → the render arm); then three `#require` premises — the rewrite landed, **the text view's frame did NOT move** (the frame-constant world; a moved frame runs the pass and heals the old tree too, which would make the pin hollow), the block is still fanned — and only then the verdict: within ~400 turns the badge is home again with the face's ⑂N button at its line.
+- `aTakeChosenInWritesPanelKeepsItsBadge` — HER REPORT through the panel's own road: a `TakesViewModel` scoped to the block exactly as `WriteTakesPanel` builds it (`writePanelBlockID`, a scratch `UserDefaults` suite), its `choose` (the card ✓'s call). Predicted RED on the pre-fix tree at the final `#expect`.
+- `archivingTheChosenTakeKeepsTheFansBadge` — sweep sibling: three takes, the CHOSEN one archived (the read-time default renders in its place — different words); ⑂3 → ⑂2. Predicted RED.
+- `anOutsideEditToAFannedBlocksShownTakeKeepsItsBadge` — sweep sibling: the shown take's words changed from outside (an MCP `edit_take`, a sync apply, a restored savepoint — all reach Write by this road). Predicted RED.
+- `aNewTakeRecountsTheBadgeWithoutARewrite` — the GUARD: a new take that changes no shown words → the echo arm (`.adoptEcho`), nothing rewritten, ⑂2 → ⑂3 at once. Predicted GREEN on both trees (the SAFE row's mechanism, measured).
+- `aBlockMovedFromOutsideKeepsTheFansBadge` — the FULL-RENDER characterization: a reorder from outside changes the sequence → `renderFull` (the whole storage replaced; the badges read after its anchor jump, which lays its landing out). Prediction: LEANING GREEN on both trees (the jump's own layout places the badge); recorded either way — RED on the pre-fix tree would put the full-render row in the fixed class.
+
+### Piece 3 — the fix, as built (f4566578f)
+
+`App/Variorum/Variorum/Features/Editor/EditorViewModel.swift`, `refreshBadges` only: a `holdsFan` flag set in the existing fan loop, and after the loop `if !wholePost, holdsFan, overlayGenerationDelivered != overlayGeometryGeneration { textView.needsDisplay = true }`, with the doc paragraph naming the mechanism, the house's precedents and the termination. Nothing else: no storage write, no selection, no `BlockRangeIndex`, nothing in `EditorTextView` / `PaneSurface`, no TK1 API, no attribute stamp, `runStructural` untouched. The red build and "the fix reverted" are the same bytes (`git diff 8ec0bc6ee f4566578f` touches only `EditorViewModel.swift`), so the red run on `DerivedData/vx736-b3-red` IS the revert verification.
+
+### THE SWEEP TABLE (the badge consumer × every act that changes a fan or its chosen take; Write's detail editor unless named)
+
+| # | act (doors) | road | verdict |
+|---|---|---|---|
+| 1 | ✓ in Write's take panel; ⌘⏎ in the panel (her report) | store → delivery → fresh re-read → `.differential` → `programmaticReplace` → synchronous read on an unlaid paragraph; hop not certain | **FIXED** — `aTakeChosenInWritesPanelKeepsItsBadge` (red PENDING) |
+| 2 | ✓ on the Takes / Compare / Canvas boards, a lens elevated, seen in Write in another pane or window | the same road (the door differs; Write's road does not) | **FIXED** by the same rule (row 1's road) |
+| 3 | ＋ blank & choose; the caret take shortcut minted as chosen (`mintCaretTake(asChosen:)`) | the chosen take's words change (to empty) → `.differential` | **FIXED** by the same rule (row 1's road) |
+| 4 | archive the CHOSEN take (panel ⋯, board, the wire's `archive_take`), the fan staying ≥ 2 | the default renders in its place → `.differential` | **FIXED** — `archivingTheChosenTakeKeepsTheFansBadge` (red PENDING) |
+| 5 | an MCP write landing on the shown take (`edit_take`, `choose_take`), a sync apply (a remote choose or the take's words), `restoreCommit` from Block History | store → delivery → `.differential` | **FIXED** — `anOutsideEditToAFannedBlocksShownTakeKeepsItsBadge` (red PENDING) |
+| 6 | a new take (＋ new take, branch, blank), Bring back as a take, a sync conflict take (S5) | the shown words unchanged → the echo arm (`.adoptEcho`): no storage edit, the paragraph stays laid out, the count re-read from the new slots | **SAFE** — `aNewTakeRecountsTheBadgeWithoutARewrite` (the guard; green-on-both PENDING) |
+| 7 | archive or delete an UNCHOSEN take | the same echo arm (count only); a fan dropping to one take rightly loses its badge | **SAFE** by row 6's mechanism |
+| 8 | lock / unlock a take | `matches` fails on editability, but `applyDifferential` replaces nothing whose words are equal → no storage edit, no generation bump, the read is on laid-out frames | **SAFE** (no edit — nothing to settle) |
+| 9 | a block moved, deleted or added from outside (sync, the wire, another window) | the sequence changes → `renderFull` (whole storage replaced) → the badges read after the anchor jump | **PENDING** — `aBlockMovedFromOutsideKeepsTheFansBadge` decides SAFE (green on both: the jump's own layout) or FIXED (red on the pre-fix tree); the rule covers it either way |
+| 10 | a structural gesture in Write (divide, merge, extract, the Return key's door) beside or on a fan | `applyStructural` → `applySeamEdit` → `adoptRewrite` → a synchronous read (`EditorSurfaceController.swift:3142`) after a storage edit — row 1's shape | **FIXED** by the same rule (same mechanism, same read; not separately pinned) |
+| 11 | the inline (book) editor — Index's in-place Takes sheet ✓, a book's note flipped from outside | every storage edit → `didProcessEditingNotification` → `remeasure` (lays the whole post out) → `refreshBadges` after the walk (VX-246 U4b) | **SAFE** — its own post-layout re-read; the rule deliberately leaves it out |
+| 12 | Read mode (the read tier's badges) | an edit re-measures (`PaneMeasurement`'s walk lays the post out) then reads (`ReadPostViewModel.swift:272/309`) | **SAFE** — its own walk |
+| 13 | the Takes board's ⑂ badge | SwiftUI, drawn from projection counts; no geometry | **SAFE** by construction |
+| 14 | typing in a short note, between the keystroke and its autosave echo (VX-702's typing road) | the badge pass is not re-run per keystroke; the echo's `.adoptEcho` read now makes the settle certain (the rule's reach, incidental) | **OUT OF SCOPE — VX-702** keeps the per-keystroke gap and the other N14 consumers (decorations, the deferred indicator, the long-block pass) on roads no fanned badge read rides |
+
+Rows: 14 — FIXED 7 (2 by pin + 1 by pin + 4 by the same rule), SAFE 6 (1 by pin, 5 by mechanism), PENDING 1 (the full-render characterization), OUT OF SCOPE 1 (to VX-702). (Counts close at the stage.)
+
+### READY-FOR-STAGE — B3's window and the run's JOINT WINDOW (all xcodebuild from `App/Variorum/`, under the HELD stage claim; suite TYPE names; read the "Test run with N" line and any `skipped:` line)
+
+Every piece is committed and pushed (`eb740a063` trace · `8ec0bc6ee` pins on the pre-fix tree · `f4566578f` fix · this commit). **No revert is in flight; the tree is clean.** The red products are a COPY (`DerivedData/vx736-b3-red/`), so the default DerivedData app (the walk's) is never built from reverted code.
+
+**R — the red run (the PRE-FIX build, `8ec0bc6ee`):**
+```
+xcodebuild test-without-building -destination 'platform=macOS' \
+  -xctestrun DerivedData/vx736-b3-red/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun \
+  -only-testing:VariorumTests/TakeChoiceBadgeTests
+```
+**Predicted:** `✘ Test run with 5 tests in 1 suite failed … with 3 issues` (plus the host launch's `«unknown»` date warnings, counted as "including N warnings"): RED exactly `aTakeChosenInWritesPanelKeepsItsBadge`, `archivingTheChosenTakeKeepsTheFansBadge`, `anOutsideEditToAFannedBlocksShownTakeKeepsItsBadge`, 1 issue each at the final `#expect` ("… lost its ⑂2 …", the model's badges empty for the block, no ⑂ button) — every `#require` premise GREEN (a premise failure is NOT the predicted red: it would mean the world was not frame-constant, and the record says so). GREEN: `aNewTakeRecountsTheBadgeWithoutARewrite`. RECORDED either way: `aBlockMovedFromOutsideKeepsTheFansBadge` (leaning green). B2's harness note applies (xcodebuild may relaunch after a failing run; the first run's line is the verdict).
+
+**G — Gate D (the FIXED build, HEAD; 57 tests in 10 suites):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/TakeChoiceBadgeTests \
+  -only-testing:VariorumTests/FanBadgePlacementTests \
+  -only-testing:VariorumTests/RestoreLandingRewriteHopTests \
+  -only-testing:VariorumTests/SettleRewrapOverlayTests \
+  -only-testing:VariorumTests/MarkdownCaretFaceTests \
+  -only-testing:VariorumTests/EditorDecorTransactionTests \
+  -only-testing:VariorumTests/InlineEditorWindowTests \
+  -only-testing:VariorumTests/TutorialWritingActsTests \
+  -only-testing:VariorumTests/LandingOffsetTests \
+  -only-testing:VariorumTests/LongBlockLayoutHostedTests
+```
+Expected `✔ Test run with 57 tests in 10 suites passed` — TakeChoiceBadge 5 · FanBadgePlacement 7 · RestoreLandingRewriteHop 2 (VX-668, the sibling display-pass road) · SettleRewrapOverlay 1 (VX-282 R1-2) · MarkdownCaretFace 8 (the generation-count pin) · EditorDecorTransaction 2 (the R1-1 oracle) · InlineEditorWindow 3 (the inline surface the rule leaves out) · TutorialWritingActs 7 (the freshly wired badge overlay) · LandingOffset 11 (the hop's landings) · LongBlockLayoutHosted 11 (the hop's long-block pass). No `.disabled`/`.enabled(if:)` in any of them; no parameterized tests.
+
+**THE JOINT WINDOW — the walk (after R and G).** The fixed Debug app only (`~/Library/Developer/Xcode/DerivedData/Variorum-fgxrmoxcocpyhcfppwgsbyumgzvl/Build/Products/Debug/Variorum.app`, bundle `io.lduarte.Variorum.debug`; never `/Applications`); `Tools/WalkKit/` (`guard.sh --author` first; `cliclick` for the pointer, `keys.sh`/System Events for every key, acts ≥ 2 s apart; quit by identity, never a keystroke); captures by window id into `notes/plans/vx736-screens/` as `b3-*.png` (gitignored); What's New dismissed after each launch; ⌘K for navigation.
+- **J0 — posture logged** (scratch file): `pgrep -fl 'Variorum.app/Contents/MacOS'` (her `/Applications` instance untouched whatever it is; no dev instance); the terminal host's Accessibility + Screen Recording (held for her if either is false); the dev domain's keys as found NOW: `shellSidebarWidth` = **230**, `NSWindow Frame variorum-main-AppWindow-1` = **"244 122 1240 840 0 0 1728 1084 "**, `appearanceChoice` = **dark**; the voice read from Settings at the first launch.
+- **J1 — B2's camera 1 (VX-737, the fresh default).** With no dev instance: delete ONLY `shellSidebarWidth` and the `NSWindow Frame variorum-main-AppWindow-*` keys; launch. Capture the window in **both voices**: the listing's bounds 1270 × 840; the column's line at x = 240 (pixel-read on the 2× capture); "in Home" / "in home" beside New Note ending clear of the line with air; hover it and capture the wash clear. Then drag the seam to ~200, quit by identity, relaunch: the dragged width restored (capture).
+- **J2 — B2's camera 2 (VX-738), both voices.** The Bookcase's quick-entry band and the Library's foot bar: no "in ‹wing›" at the trailing edge, the box otherwise unchanged (captures); a note typed into the band (System Events keystrokes) and ⏎ opens it; the toolbar's "in ‹wing›" still there and a press opens ⌘L's switcher (or speaks the one-wing note).
+- **J3 — MINE (VX-729's live confirmation), both voices.** Stage her shape through the band (the reliable typing road): a short note, first line "You, I hope :)" plus two short lines (bulk entry segments on entry). In Write, click into block 1, open the bottom bar's Takes (the take panel), press **＋ blank & choose** (the block reads empty; capture: ⑂2 still in the corner — row 3), then press **✓ on the original take** in the panel (the block flips back to "You, I hope :)" — her exact road: a frame-constant flip chosen with the panel's ✓), **Close** the panel → **capture: the ⑂2 at block 1's corner** (row 1). Flip the voice; in the panel ✓ the blank take, Close → capture the ⑂2 again. (The pre-fix behaviour is the pins' red run; the walk confirms USE on the fixed build.)
+- **J4 — B2's camera 4 (P-736-4).** The Library at the default window (1270 × 840 from J1), Terminal, the info panel closed: the controls row is ONE line (capture).
+- **J5 — B2's camera 3 (VX-727, optional — the pin carries it).** If time allows: a second wing (the dev store's content is ours), a note there ▸ Compare ▸ make outline note → the outline's wing names that wing, not Home (capture). Skipped is legal; the record says which.
+- **W-end — posture restored:** quit by identity; `defaults write io.lduarte.Variorum.debug shellSidebarWidth 230` (a float, as found) and the window-frame key back to its J0 value; `appearanceChoice` dark; the voice back to what J0 read (Settings); the walk's notes deleted (and the J5 wing, if made); `pgrep` shows no dev instance and her `/Applications` one untouched.
