@@ -124,10 +124,8 @@ struct LibraryCatalogView: View {
     /// 13i-d U5: the cross-wing note doors' brain (owned by the composition
     /// root); nil in harness mounts — the doors are then not drawn.
     var wings: WingsModel? = nil
-    /// **VX-644** — the quick-entry bar's "in ‹wing›" press: ⌘L's own act in
-    /// this window (`ShellActions.openWingSwitcher`), from the composition root.
-    /// nil (harness mounts): the label stays a plain label.
-    var onSwitchWing: (() -> Void)? = nil
+    // VX-738 (her R-736-7): the quick-entry bar's "in ‹wing›" label is gone,
+    // and with it this view's `onSwitchWing` (VX-644 — the label's press).
     // The tutorial door's property LEFT with the \u{22EF} menu (the post-13l
     // polish round, ledger row 7). It routed through the shell's fire-and-DO
     // act (`ShellActions.openTutorial`) — and still does, from Help \u{25B8}
@@ -251,12 +249,9 @@ struct LibraryCatalogView: View {
                 // quick-entry bar rides the Library too — type, ⏎, and the
                 // typed text IS a post, opened.
                 Divider().overlay(tokens.line)
-                // VX-552 (the VX-439 run): the wing a capture here lands in.
-                QuickEntryBar(
-                    session: session, onOpen: onOpen,
-                    wingName: wings?.currentName ?? WingWords.home,
-                    // VX-644: the label is the wing switcher's door.
-                    onWingLabel: onSwitchWing)
+                // VX-738 (her R-736-7): no "in ‹wing›" label on the bar — the
+                // toolbar names the wing beside New Note.
+                QuickEntryBar(session: session, onOpen: onOpen)
                     .libraryGeometryProbe(.quickEntry)
             }
             // VX-350: the LIST yields when the room is short — the panel takes

@@ -42,11 +42,19 @@ struct WordsCardAfterAccountActTests {
         try #require(world.bootstrap.roadStanding?.band, "the open library's card")
     }
 
-    /// Before the act: a fresh library's words were never recorded — the card offers them.
+    /// Before the act: a fresh library's words were never recorded — the card offers them (VX-735: and the tour's words
+    /// card is owed).
     static func expectOffering(_ world: FirstRoundWorld) throws {
         let id = try Self.libraryID(world)
         #expect(!Self.ledger.recorded(id) && !Self.ledger.dismissed(id), "precondition: nothing recorded")
         #expect(try Self.band(world).offersWords, "precondition: the card offers the words")
+        #expect(try Self.tourAsks(world).words, "precondition: the tour's words card is owed")
+    }
+
+    /// **VX-735 (VX-736 R-736-5)** — what the tour's closing cards owe, read from the open library's faces exactly as the
+    /// tour's facts read them.
+    static func tourAsks(_ world: FirstRoundWorld) throws -> Tour.ClosingAsks {
+        TourEndLibraryModel.asks(try #require(world.bootstrap.roadStanding, "the open library's faces"))
     }
 
     /// After a landed act: the card offers no words for the library the act landed, and its ledger says recorded (so the
@@ -56,6 +64,9 @@ struct WordsCardAfterAccountActTests {
         #expect(Self.ledger.recorded(id), "\(door): the library's words are recorded")
         #expect(try !Self.band(world).offersWords, "\(door): the card offers no look that would replace the account's words")
         #expect(!Self.ledger.dismissed(id), "\(door): recorded, never dismissed (the toast's road is hers)")
+        // VX-735 (VX-736 R-736-5 — the landed-account world): the tour's words card is skipped too — its look would mint
+        // fresh words and replace the account's (RED on 2d82cb5a8, where the tour's close always offered the words door).
+        #expect(try !Self.tourAsks(world).words, "\(door): the tour's words card is not owed")
     }
 
     // MARK: - The landings (RED on the pre-fix tree)

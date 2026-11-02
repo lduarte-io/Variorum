@@ -153,8 +153,13 @@ enum QuickEntryCopy {
 
     /// **VX-552 (the VX-439 run — her ask: the wing you're in always visible
     /// beside the New Note door, so a new note's landing place is never a
-    /// surprise).** The quiet line at the box's trailing edge: where what she
-    /// types here will live. Shown with ONE wing too (C-552-1 — her "always").
+    /// surprise).** The quiet "in ‹wing›" word: where a new note will live.
+    /// Shown with ONE wing too (C-552-1 — her "always"). Its one home is the
+    /// window toolbar, beside New Note (`RootView`), where it is also the wing
+    /// switcher's door (VX-644). **VX-738 (her R-736-7): it is OFF the
+    /// quick-entry bars** — "shouldn't be there at all. they can see the
+    /// swapper in the upper left corner." The words stay here, the bar's
+    /// copy, because they were born here.
     static func wingLabel(_ wingName: String) -> String { "in \(wingName)" }
     /// Its hover — the whole fact.
     static func wingHelp(_ wingName: String) -> String {
@@ -199,21 +204,11 @@ struct QuickEntryBar: View {
     /// tour runs, a mount does not ask at all; the tour's own arrival releases
     /// whatever held the keyboard, and nothing here takes it back.
     var standsDown = false
-    /// VX-552 (the VX-439 run): the wing a note filed here lands in — the
-    /// host's own `WingsModel.currentName` (the app's one wing, which follows
-    /// the focused note), never a second observation. nil draws no label (a
-    /// host with no wings model — a test, a preview).
-    var wingName: String?
-    /// **VX-644 (VX-552's remainder — her "the wing swap is not there and it
-    /// is supposed to be")**: the label IS the wing switcher's door. Its press
-    /// is the host's `onSwitchWing` — ⌘L's own act in the window
-    /// (`ShellActions.openWingSwitcher`: ⌘L's sheet, or its one-wing note
-    /// spoken), never a second picker. nil (a test, a preview): a plain label.
-    var onWingLabel: (() -> Void)? = nil
-
-    /// The `.surface` act this bar renders (P-1's declared ⇔ rendered walk):
-    /// the wing label's press, `.switchWing` (VX-644).
-    static let surfaceCapabilities: [CapabilityID] = [.switchWing]
+    // VX-738 (the VX-736 run, B2 — her R-736-7): the bar's "in ‹wing›" label
+    // is GONE, and with it the `wingName` and `onWingLabel` inputs and the
+    // bar's one `.surface` door (`.switchWing`, VX-644). The bar renders no
+    // act of its own; the toolbar's label beside New Note stays the wing
+    // switcher's door (`RootView.surfaceCapabilities`).
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -252,15 +247,11 @@ struct QuickEntryBar: View {
         session: AppSession,
         onOpen: @escaping (SidebarSelection) -> Void,
         autofocus: Bool = false,
-        standsDown: Bool = false,
-        wingName: String? = nil,
-        onWingLabel: (() -> Void)? = nil
+        standsDown: Bool = false
     ) {
         self.onOpen = onOpen
         self.autofocus = autofocus
         self.standsDown = standsDown
-        self.wingName = wingName
-        self.onWingLabel = onWingLabel
         _box = State(initialValue: QuickEntryModel(session: session))
     }
 
@@ -275,7 +266,6 @@ struct QuickEntryBar: View {
         // the box as the placeholder; typing replaces it.
         @Bindable var box = box
         return VStack(alignment: .leading, spacing: 4) {
-          HStack(alignment: .top, spacing: 10) {
             ZStack(alignment: .topLeading) {
                 if box.text.isEmpty {
                     HStack(spacing: 6) {
@@ -317,37 +307,6 @@ struct QuickEntryBar: View {
                     onFocusChange: { entryFocused = $0 },
                     onFile: { submit() })
             }
-            // VX-552: the wing she is filing into, beside the box she files
-            // in — on the box's first line, at its trailing edge, outside the
-            // text (so her typing never runs under it), visible while she types.
-            if let wingName {
-                let label = Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wingName)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                if let onWingLabel {
-                    // VX-644: the label IS the wing switcher's door — a voiced
-                    // word in the quiet role (the chrome vocabulary: no bezel,
-                    // a soft wash on hover). The style's insets are given back
-                    // around it, so its words rest exactly where the label's
-                    // did — on the box's first line, at its trailing edge.
-                    Button(action: onWingLabel) { label }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                        .frame(maxWidth: 180 + 2 * VoicedButtonStyle.labelInset, alignment: .trailing)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.trailing, -VoicedButtonStyle.labelInset)
-                        .padding(.top, Self.placeholderOrigin.y - VoicedButtonStyle.labelVerticalInset)
-                        .help(QuickEntryCopy.wingHelp(wingName))
-                } else {
-                    label
-                        .frame(maxWidth: 180, alignment: .trailing)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.top, Self.placeholderOrigin.y)
-                        .help(QuickEntryCopy.wingHelp(wingName))
-                }
-            }
-          }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .overlay(

@@ -2762,10 +2762,11 @@ nonisolated enum CapabilityRegistry {
         // the word does not cycle).
         //
         // VX-644 (VX-552's remainder; A-648-7): the "in ‹wing›" label — the
-        // window toolbar's beside New Note (`RootView`) and both quick-entry
-        // bars' (`QuickEntryBar`) — joins the `.surface` renderers: its press
-        // is THIS act in its window (`ShellActions.openWingSwitcher` — ⌘L's
-        // sheet; with one wing the note spoken, as ⌘L's chord does).
+        // window toolbar's beside New Note (`RootView`) — joins the `.surface`
+        // renderers: its press is THIS act in its window
+        // (`ShellActions.openWingSwitcher` — ⌘L's sheet; with one wing the
+        // note spoken, as ⌘L's chord does). VX-738 (her R-736-7): the
+        // quick-entry bars' twin of the label is gone; the toolbar's stays.
         Capability(
             id: .switchWing, verb: WingCopy.switchWingVerb, scope: .app,
             doors: [.menuBar, .surface],

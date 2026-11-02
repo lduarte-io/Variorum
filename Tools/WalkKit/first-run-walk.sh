@@ -127,7 +127,7 @@ allowlist_value() { (set -a; source $1 2>/dev/null; set +a; print -r -- "${VARIO
 # --- D-4 (VX-622): the WINDOW-FRAME GUARD, pure parts (the self-test feeds them fixtures) ----------------------------
 # The key, traced at VX-623 unit 1: SwiftUI autosaves the main WindowGroup's frame as "NSWindow Frame <id>-AppWindow-<n>"
 # in the dev defaults domain; the group's id is "variorum-main" (EditorCommands.mainWindowGroupID, EditorCommands.swift:1191;
-# the group at VariorumApp.swift:62, its .defaultSize 1240×840 at :94). The probe found exactly one such key,
+# the group at VariorumApp.swift:62, its .defaultSize at :97 — ShellSplit.defaultWindowSize, 1270×840 since VX-737). The probe found exactly one such key,
 # "NSWindow Frame variorum-main-AppWindow-1" = "60 144 1240 940 0 0 1728 1084". Pre-launch, ONLY those keys are deleted, so
 # the window comes up at its default size; nothing is restored (the dev store's frame is walk state, not hers).
 FRAME_KEY='NSWindow Frame variorum-main-AppWindow-[0-9]+'

@@ -16,7 +16,8 @@
 //      privacy-sensitive; *Copy* through the one clipboard rule (VX-448: concealed, cleared at lock and quit — the host's `copyWords`);
 //      "write these down now"; *I've written them down* → her warning, *Go back* · *Close*. No Return shortcut puts the
 //      words away (a stray Return must never).
-//    - `TourEndLibraryBlock` — the tour's last card's two asks side by side (rule 3): the passphrase and the words.
+//    - `TourPassphraseAsk` · `TourWordsAsk` — the tour's two closing asks (rule 3: the passphrase, then the words), each
+//      the face of a closing card of its own since VX-735 (they stood side by side on the end card before).
 //    - `WordsLookSection` — Settings ▸ Protection's door (the ✕'s toast names it; rule 7's "new-words door").
 //  All of it over the road's models (VX-329 U1: in every build — today's road, which rendered none of it, is gone).
 //
@@ -227,6 +228,11 @@ struct AccountPassphraseRow: View {
 struct WordsLookPanel: View {
     @Bindable var look: WordsLookModel
     let tokens: VoiceTokens
+    /// **VX-735 — the narrow card's layout**: the tour's words card is a centred card, not the main column's width, so
+    /// its shown words lay out top to bottom — the grid, then Copy with its clipboard caveat at the card's FULL width
+    /// under it (never a squished side column), then the warning on its own line and its doors on theirs, whole. The
+    /// band card and Settings keep the one-row layout (false).
+    var stacked = false
 
     @State private var passphrase = ""
 
@@ -258,7 +264,53 @@ struct WordsLookPanel: View {
 
     /// Rule 6: new words ask the passphrase where one exists. VX-308 U3 (F-U2-3): a synced library's look says, before
     /// anything is minted, that new words replace the account's words everywhere — her *Show my twelve words* is the yes.
+    @ViewBuilder
     private var asking: some View {
+        if stacked { askingStacked } else { askingInARow }
+    }
+
+    /// **VX-736 F-W3 (the walk's W3, adjudicated):** the narrow card's ask, top to bottom like its shown words — the field
+    /// on its own row at the card's width, then Cancel · Show my twelve words, whole (the one-row ask cut the primary door
+    /// to "Show my twelve w…" at the closing card's measure). The same lines and doors.
+    private var askingStacked: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if look.saysAccountWords {
+                Text(ProtectionWords.wordsLookReplacesAccountWords)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(ProtectionWords.wordsLookAsk)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            PeekableSecretField(label: ProtectionWords.wordsLookPassphraseField, text: $passphrase, onSubmit: submit)
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: .infinity)
+            HStack(spacing: 10) {
+                Spacer(minLength: 0)
+                Button {
+                    passphrase = ""
+                    look.cancel()
+                } label: {
+                    Text(ProtectionWords.wordsLookCancel).modifier(TourClosingDoorProbe(key: "cancel"))
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .lineLimit(1)  // a one-line door label, laid out whole (P-8)
+                .fixedSize()
+                Button { submit() } label: {
+                    Text(ProtectionWords.wordsLookShow).modifier(TourClosingDoorProbe(key: "show"))
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                .lineLimit(1)  // a one-line door label, laid out whole (P-8)
+                .fixedSize()
+                .disabled(passphrase.isEmpty)
+            }
+        }
+    }
+
+    /// The band card's and Settings' ask: the field and its two doors on one row.
+    private var askingInARow: some View {
         VStack(alignment: .leading, spacing: 8) {
             if look.saysAccountWords {
                 Text(ProtectionWords.wordsLookReplacesAccountWords)
@@ -274,12 +326,16 @@ struct WordsLookPanel: View {
                 PeekableSecretField(label: ProtectionWords.wordsLookPassphraseField, text: $passphrase, onSubmit: submit)
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 300)
-                Button(ProtectionWords.wordsLookCancel) {
+                Button {
                     passphrase = ""
                     look.cancel()
+                } label: {
+                    Text(ProtectionWords.wordsLookCancel).modifier(TourClosingDoorProbe(key: "cancel"))
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens))
-                Button(ProtectionWords.wordsLookShow) { submit() }
+                Button { submit() } label: {
+                    Text(ProtectionWords.wordsLookShow).modifier(TourClosingDoorProbe(key: "show"))
+                }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
                     .disabled(passphrase.isEmpty)
             }
@@ -287,7 +343,79 @@ struct WordsLookPanel: View {
     }
 
     /// The words, once: "write these down now", the two columns, Copy, and the close behind her warning.
+    @ViewBuilder
     private var shown: some View {
+        if stacked { shownStacked } else { shownInARow }
+    }
+
+    /// VX-735: the narrow card's words — the same lines and doors, top to bottom.
+    private var shownStacked: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(ProtectionWords.wordsLookLead)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            if look.saysRuleSix {
+                Text(ProtectionWords.wordsLookRuleSix)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            words
+            Button(ProtectionWords.wordsLookCopy) { look.copy() }
+                .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .lineLimit(1)  // a one-line door label, laid out whole (P-8)
+                .fixedSize()
+            if look.copied {
+                // The clipboard's caveat, under the grid at the card's whole width.
+                Text(ProtectionWords.wordsLookCopied)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    #if DEBUG
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                        TourClosingOracle.copiedCaveatFrame = $0
+                    }
+                    #endif
+            }
+            // No Return shortcut on purpose: a stray Return must never put the once-shown words away.
+            if look.phase == .warning {
+                Text(ProtectionWords.wordsLookWarning)
+                    .font(tokens.small.weight(.semibold))
+                    .foregroundStyle(tokens.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 10) {
+                    Spacer(minLength: 0)
+                    Button(ProtectionWords.wordsLookGoBack) { look.goBack() }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens))
+                        .lineLimit(1)  // a one-line door label, laid out whole (P-8)
+                        .fixedSize()
+                    Button(ProtectionWords.wordsLookClose) { look.close() }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                        .lineLimit(1)  // a one-line door label, laid out whole (P-8)
+                        .fixedSize()
+                }
+            } else {
+                HStack(spacing: 10) {
+                    Spacer(minLength: 0)
+                    Button(ProtectionWords.wordsLookWrittenDown) { look.writtenDown() }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                        .lineLimit(1)  // a one-line door label, laid out whole (P-8)
+                        .fixedSize()
+                }
+            }
+        }
+        #if DEBUG
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+            TourClosingOracle.stackedLookFrame = $0
+        }
+        #endif
+    }
+
+    /// The band card's and Settings' row: Copy, its caption and the close's doors on one line.
+    private var shownInARow: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(ProtectionWords.wordsLookLead)
                 .font(tokens.body)
@@ -363,9 +491,13 @@ struct WordsLookPanel: View {
     }
 }
 
-// MARK: - The tour's last card (rule 3: the passphrase ask and the words, side by side)
+// MARK: - The tour's closing asks (rule 3: the passphrase, then the words — VX-735: a card each)
 
-struct TourEndLibraryBlock: View {
+/// **The passphrase card's face** (rule 3's ask; the end card's passphrase half, moved whole by VX-735): the explainer
+/// sentence, the Passphrase/Again fields with the quiet hint, and Set passphrase. Once set here the card moves on (the
+/// tour's facts read the library's ask as answered) and the passphrase is handed to the words card's look, so she is
+/// never asked it twice.
+struct TourPassphraseAsk: View {
     @Bindable var model: TourEndLibraryModel
     let tokens: VoiceTokens
 
@@ -373,10 +505,71 @@ struct TourEndLibraryBlock: View {
     @State private var again = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let ask = model.passphrase {
-                passphraseAsk(ask)
+        if let ask = model.passphrase {
+            if model.passphraseSet {
+                Text(ProtectionWords.tourEndPassphraseSet)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(ProtectionWords.setPassphraseLead)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                    PeekableSecretField(label: ProtectionWords.setPassphraseField, text: $passphrase)
+                        .textFieldStyle(.roundedBorder)
+                    // VX-309 U2 — VX-211: the quiet line, in the card's own voice.
+                    if let hint = NewPassphraseRule.hint(passphrase) {
+                        Text(hint)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    PeekableSecretField(label: ProtectionWords.setPassphraseAgain, text: $again, onSubmit: submit)
+                        .textFieldStyle(.roundedBorder)
+                    HStack(spacing: 10) {
+                        if let refusal = ask.refusal {
+                            Text(refusal)
+                                .font(tokens.small)
+                                .alarmVoice()
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: 0)
+                        if ask.busy { TravellingDotsIndicator(ink: tokens.muted) }
+                        Button(ProtectionWords.setPassphraseButton) { submit() }
+                            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                            .lineLimit(1)  // a one-line door label, laid out whole (P-8)
+                            .fixedSize()
+                            .disabled(!ask.canSubmit(passphrase: passphrase, again: again))
+                    }
+                }
             }
+        }
+    }
+
+    private func submit() {
+        guard let ask = model.passphrase else { return }
+        let typed = passphrase
+        let twice = again
+        Task {
+            await ask.submit(passphrase: typed, again: twice)
+            if model.passphraseSet {
+                passphrase = ""
+                again = ""
+            }
+        }
+    }
+}
+
+/// **The words card's face** (rule 2's look; the end card's words half, moved whole by VX-735): rule 2's sentence as
+/// the door, then the look — asked where a passphrase exists (never when one was just set on the card before), the
+/// words once with Copy, her warning before the close — laid out for the narrow card (`WordsLookPanel(stacked:)`).
+struct TourWordsAsk: View {
+    @Bindable var model: TourEndLibraryModel
+    let tokens: VoiceTokens
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
             if model.look.phase == .closed {
                 Button {
                     Task { await model.showWords() }
@@ -396,62 +589,35 @@ struct TourEndLibraryBlock: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             } else {
-                WordsLookPanel(look: model.look, tokens: tokens)
+                WordsLookPanel(look: model.look, tokens: tokens, stacked: true)
             }
         }
     }
+}
 
-    @ViewBuilder
-    private func passphraseAsk(_ ask: SetPassphraseModel) -> some View {
-        if model.passphraseSet {
-            Text(ProtectionWords.tourEndPassphraseSet)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-        } else {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(ProtectionWords.setPassphraseLead)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.muted)
-                    .fixedSize(horizontal: false, vertical: true)
-                PeekableSecretField(label: ProtectionWords.setPassphraseField, text: $passphrase)
-                    .textFieldStyle(.roundedBorder)
-                // VX-309 U2 — VX-211: the quiet line, in the card's own voice.
-                if let hint = NewPassphraseRule.hint(passphrase) {
-                    Text(hint)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                PeekableSecretField(label: ProtectionWords.setPassphraseAgain, text: $again, onSubmit: submit)
-                    .textFieldStyle(.roundedBorder)
-                HStack(spacing: 10) {
-                    if let refusal = ask.refusal {
-                        Text(refusal)
-                            .font(tokens.small)
-                            .alarmVoice()
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    Spacer(minLength: 0)
-                    if ask.busy { TravellingDotsIndicator(ink: tokens.muted) }
-                    Button(ProtectionWords.setPassphraseButton) { submit() }
-                        .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
-                        .disabled(!ask.canSubmit(passphrase: passphrase, again: again))
-                }
-            }
-        }
-    }
+#if DEBUG
+/// The closing cards' frames for the pins (`TourClosingCardTests` — the geometry oracle of the layout row: the caveat
+/// at the card's full width, the doors whole).
+@MainActor
+enum TourClosingOracle {
+    static var copiedCaveatFrame: CGRect?
+    static var stackedLookFrame: CGRect?
+    /// The look's ASK doors' drawn words (by key: "cancel", "show") — F-W3's pin reads them against the words' own width.
+    static var askDoorFrames: [String: CGRect] = [:]
+}
+#endif
 
-    private func submit() {
-        guard let ask = model.passphrase else { return }
-        let typed = passphrase
-        let twice = again
-        Task {
-            await ask.submit(passphrase: typed, again: twice)
-            if model.passphraseSet {
-                passphrase = ""
-                again = ""
+/// Records a door's drawn words for the pins (DEBUG only; nothing in a release build).
+struct TourClosingDoorProbe: ViewModifier {
+    let key: String
+
+    func body(content: Content) -> some View {
+        content
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                TourClosingOracle.askDoorFrames[key] = $0
             }
-        }
+            #endif
     }
 }
 

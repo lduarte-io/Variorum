@@ -445,11 +445,15 @@ struct LibraryControlsStableWidthsTests {
 @MainActor
 @Suite("VX-175 — the Library's controls row fits the default window with the panel open", .serialized)
 struct LibraryControlsGeometryTests {
-    /// The library's width at the app's 1240-pt default window: the window −
-    /// the sidebar's ideal − its seam (`LibraryBulkRowGeometryTests.room`'s
-    /// arithmetic, one step earlier).
+    /// The library's width at the app's default window: the window − the
+    /// sidebar's ideal − its seam (`LibraryBulkRowGeometryTests.room`'s
+    /// arithmetic, one step earlier). VX-737 (P-736-4): the window is read
+    /// from the shell's own default (1270 since the sidebar's fresh width grew
+    /// to 240 — it was 1240 with 210), so the room stays the 1029 pt these
+    /// pins were measured at.
     static var defaultLibraryWidth: CGFloat {
-        1240 - CGFloat(ShellSplit<EmptyView, EmptyView>.idealWidth)
+        ShellSplit<EmptyView, EmptyView>.defaultWindowSize.width
+            - CGFloat(ShellSplit<EmptyView, EmptyView>.idealWidth)
             - ShellSplit<EmptyView, EmptyView>.dividerWidth
     }
 

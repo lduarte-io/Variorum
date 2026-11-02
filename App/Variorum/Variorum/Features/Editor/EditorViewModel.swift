@@ -4063,6 +4063,32 @@ final class EditorViewModel {
     ///   simply drawn once it has. This is `viewportBounds`' own contract
     ///   ("whole-post overlay work is the accepted inline cost model") made
     ///   literal; the decoration pass's region is unchanged (VX-327's).
+    ///
+    /// **VX-729 (Run VX-736 B3) — on Write's detail editor, a pass that reads
+    /// AHEAD of its settle makes the settle CERTAIN.** Her report: choose a
+    /// take in Write's take panel and the block's ⑂2 vanished, the block still
+    /// fanned. The take flip is a differential rewrite, and the executors read
+    /// this pass synchronously right after their storage edit, when TextKit 2
+    /// has the replaced paragraph unlaid (`.none`, a `.zero` frame — measured
+    /// on macOS 27.0.1), so the rule above rightly skips it and the overlay
+    /// takes the button down. The re-read is owed to the N14 settle hop, and
+    /// that hop's only trigger is the text view's OWN display pass, which TK2
+    /// never runs for a storage edit that keeps the text view's frame
+    /// (TEXTKIT2_NOTES §3, the 27.0.1 entry): a flip in a short note, or to a
+    /// take of the same line count, left the badge down until a scroll. So a
+    /// pass that runs while the overlay generation is undelivered (a storage
+    /// edit, an attach, a reflow or a restyle not yet followed by its post-
+    /// layout hop), on a note that holds a fan, asks for the next display pass
+    /// (`needsDisplay`); the hop then re-runs this pass on laid-out frames. The
+    /// house's road for this certainty (VX-282 R1-2's `settleMarkdownCaret`,
+    /// VX-668's `adoptRewrite`), never a direct `overlayLayoutDidSettle()`,
+    /// which can run before the pass that lays the rewrite out and spend the
+    /// generation on pre-layout frames. It terminates: the hop marks its
+    /// generation delivered BEFORE it calls this pass, so that read asks for
+    /// nothing. The inline surface is left out: its badges follow its own
+    /// remeasure walk (VX-246 U4b), and a display per keystroke there would buy
+    /// nothing. Pinned: `TakeChoiceBadgeTests`; the sweep table is the run
+    /// record's B3 RECORD.
     func refreshBadges() {
         defer { refreshDecorations() }  // the decor layer rides every badge
                                         // refresh trigger (scroll, layout,
@@ -4088,7 +4114,9 @@ final class EditorViewModel {
         // VX-246 U4b: the inline surface's region is the whole post (the doc
         // above) — no clip to a frame SwiftUI may not have grown yet.
         let wholePost = scrollView == nil
+        var holdsFan = false
         for (i, slot) in slots.enumerated() where slot.hasFan {
+            holdsFan = true
             guard i < ranges.count else { break }
             let range = ranges[i]
             guard let location = contentManager.location(
@@ -4114,6 +4142,11 @@ final class EditorViewModel {
                         frame: viewFrame))
                 }
             }
+        }
+        // VX-729: read ahead of this generation's settle — make the display
+        // pass that schedules it certain (the doc above).
+        if !wholePost, holdsFan, overlayGenerationDelivered != overlayGeometryGeneration {
+            textView.needsDisplay = true
         }
         if result != badges {
             badges = result

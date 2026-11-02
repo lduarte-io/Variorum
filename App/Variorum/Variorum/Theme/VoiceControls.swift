@@ -34,8 +34,8 @@ struct VoicedButtonStyle: ButtonStyle {
     /// comments panel's deleted fold).
     static let labelInset: CGFloat = 5
     /// …and its vertical inset, named for the same reason (VX-644 — the
-    /// quick-entry bar's wing label keeps its words on the box's first line
-    /// now that it is a voiced word).
+    /// quick-entry bar's wing label kept its words on the box's first line
+    /// as a voiced word; that label left the bar at VX-738).
     static let labelVerticalInset: CGFloat = 2
 
     func makeBody(configuration: Configuration) -> some View {

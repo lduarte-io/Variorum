@@ -408,6 +408,11 @@ struct TourFactSources {
     /// **VX-292 U3 — the mounted Lenses board's note and column count**
     /// (step 9; `CommandRouter.lensBoard`). Defaulted nil.
     var lensBoard: () -> (postID: String, columns: Int)? = { nil }
+    /// **VX-735 — what the closing cards still owe** (the open library's
+    /// protection faces, `TourEndLibraryModel.asks`). Defaulted nil: no
+    /// faces stand, so both closing cards are skipped — the end card drew
+    /// without its asks there.
+    var closingAsks: () -> Tour.ClosingAsks? = { nil }
 }
 
 /// What Write's editor says about its caret.
@@ -485,7 +490,7 @@ enum TourPlaces {
         caret: TourCaretReading?, bookNoteLive: Bool, bookNoteSelected: Bool = false,
         note: (id: String, facts: Queries.TourNoteFacts)?, isStarred: (String) -> Bool,
         bookMode: Tour.BookMode? = nil, lensBoard: (postID: String, columns: Int)? = nil,
-        block: Tour.BlockFacts? = nil
+        block: Tour.BlockFacts? = nil, asks: Tour.ClosingAsks? = nil
     ) -> Tour.Facts {
         let place = place(selection)
         var noteMode: Tour.NoteMode?
@@ -521,6 +526,6 @@ enum TourPlaces {
         return Tour.Facts(
             place: place, noteMode: noteMode, caret: tourCaret,
             bookNoteLive: bookLive, bookNoteSelected: bookSelected, note: noteFacts,
-            bookMode: tourBookMode, lensColumns: lensColumns, block: block)
+            bookMode: tourBookMode, lensColumns: lensColumns, block: block, asks: asks)
     }
 }
