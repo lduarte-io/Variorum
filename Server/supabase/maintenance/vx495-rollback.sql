@@ -51,6 +51,23 @@
 -- Run on a mirror that never received the keyset artifact it is harmless:
 -- 13's body replaces 13's body, the drop finds nothing, the alters and
 -- grants land the state already in force.
+-- THE DEFINER'S CREATE (VX-721; her ruling R-500-9): the keyset deploy's RUN 1
+-- refused whole — `42501 permission denied for schema public` — at a definer
+-- re-own, because both VX-495 artifacts had omitted the 10/14c idiom: CREATE
+-- on `public` OPENED for the ownership acquisition and CLOSED in the same
+-- transaction (14c:81/:101; 10, 11, 12, the 13j rename, the pre-13x overlay
+-- — Postgres requires the NEW owner to hold CREATE on the schema at `alter
+-- function … owner to` time, and the role is to end usage-only). This
+-- rollback carries the idiom too: `grant usage, create on schema public to
+-- variorum_definer;` as the first statement after the guard, `revoke create
+-- on schema public from variorum_definer;` right after its one re-own. The
+-- end state it leaves is the pre-deploy one EXACTLY — USAGE only, as 14c left
+-- it — so the rollback strips nothing and the keyset artifact's grant is not
+-- "its" to keep. (Its `sync_pull` re-own is owner-unchanged today — a no-op
+-- Postgres never privilege-checks — but the road back must never refuse
+-- where the road forward did, and a `sync_pull` ever met owned by the
+-- deploying role would need the bracket.) The grant sweep's two
+-- schema-privilege rows read OK after either artifact.
 -- DEPLOY: at her explicit word only (the record's THE DEPLOY section).
 -- ============================================================================
 
@@ -66,6 +83,11 @@ begin
   end if;
 end;
 $guard$;
+
+-- VX-721: the definer's CREATE on `public`, opened here for the re-own in
+-- section 3 and closed again right after it (the header's paragraph; the
+-- 10/14c idiom). Idempotent.
+grant usage, create on schema public to variorum_definer;
 
 -- ---------------------------------------------------------------------------
 -- 1. sync_pull — 13_phase13i_wings.sql §3a, lines 184–291 of that file,
@@ -198,10 +220,13 @@ drop function if exists sync_pull_remaining(bigint, text, text, text);
 --    artifact's letter: the `create or replace` above reset the SET clause to
 --    13's bare `public`, so the belt's `public, pg_temp` is re-landed HERE;
 --    the owner and the grants are idempotent and byte-identical to 12's and
---    to the keyset artifact's for this function).
+--    to the keyset artifact's for this function; the definer's CREATE on
+--    `public`, opened first after the guard, closes right after the re-own —
+--    VX-721, the header).
 -- ---------------------------------------------------------------------------
 
 alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;
+revoke create on schema public from variorum_definer;
 alter function sync_pull(bigint, text, text, text, int, text) set search_path = public, pg_temp;
 
 revoke execute on function sync_pull(bigint, text, text, text, int, text) from public, anon;

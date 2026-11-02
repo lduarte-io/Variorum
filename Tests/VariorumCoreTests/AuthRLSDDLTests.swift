@@ -200,6 +200,56 @@ struct AuthRLSDDLTests {
             .joined(separator: "\n")
     }
 
+    /// Every range of `needle` in `text`, in order (non-overlapping).
+    private static func ranges(of needle: String, in text: String) -> [Range<String.Index>] {
+        var found: [Range<String.Index>] = []
+        var from = text.startIndex
+        while let range = text.range(of: needle, range: from..<text.endIndex) {
+            found.append(range)
+            from = range.upperBound
+        }
+        return found
+    }
+
+    /// VX-721 (R-500-9; `notes/plans/vx495-deploy-checklist.md`'s RUN 1 — `42501 permission denied for schema public`):
+    /// THE 10/14c IDIOM in a re-owning maintenance artifact. Postgres requires the NEW owner to hold CREATE on the
+    /// schema at `alter function … owner to` time, and the definer role is to END usage-only ("owning functions it
+    /// could not re-create" — 14c:75–81 and :101; 10, 11, 12, the 13j rename and the pre-13x overlay carry the same
+    /// two lines around their re-owns). So: `grant usage, create on schema public to variorum_definer;` exactly once,
+    /// as the FIRST statement after the marker guard (nothing but whitespace between `$guard$;` and it; before any
+    /// `create or replace`), `revoke create on schema public from variorum_definer;` exactly once, AFTER the last
+    /// `owner to variorum_definer;` and before `commit;`. Returns the problems — empty means the bracket is closed.
+    /// `stripped` is the artifact with its comment lines removed (`strippingComments`).
+    private static func definerCreateBracketProblems(in stripped: String) -> [String] {
+        let grant = "grant usage, create on schema public to variorum_definer;"
+        let revoke = "revoke create on schema public from variorum_definer;"
+        var problems: [String] = []
+        let grants = ranges(of: grant, in: stripped)
+        let revokes = ranges(of: revoke, in: stripped)
+        if grants.count != 1 { problems.append("the schema grant appears \(grants.count) times, not once") }
+        if revokes.count != 1 { problems.append("the schema revoke appears \(revokes.count) times, not once") }
+        guard let grantRange = grants.first, let revokeRange = revokes.first else { return problems }
+        guard let guardEnd = stripped.range(of: "$guard$;") else { return problems + ["no marker guard"] }
+        let betweenGuardAndGrant = stripped[guardEnd.upperBound..<max(guardEnd.upperBound, grantRange.lowerBound)]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if grantRange.lowerBound < guardEnd.upperBound {
+            problems.append("the grant precedes the marker guard")
+        } else if !betweenGuardAndGrant.isEmpty {
+            problems.append("a statement sits between the guard and the grant: \(betweenGuardAndGrant.prefix(60))")
+        }
+        if let firstCreate = stripped.range(of: "create or replace function "), firstCreate.lowerBound < grantRange.upperBound {
+            problems.append("the grant is not the first statement after the guard — a create or replace precedes it")
+        }
+        let reowns = ranges(of: "owner to variorum_definer;", in: stripped)
+        guard let firstReown = reowns.first, let lastReown = reowns.last else { return problems + ["no re-own to bracket"] }
+        if firstReown.lowerBound < grantRange.upperBound { problems.append("a re-own precedes the grant") }
+        if revokeRange.lowerBound < lastReown.upperBound { problems.append("the revoke precedes the last re-own") }
+        if let commit = stripped.range(of: "\ncommit;"), commit.lowerBound < revokeRange.upperBound {
+            problems.append("the revoke follows commit")
+        }
+        return problems
+    }
+
     /// The client-side truth: which synced tables carry `owner_id`
     /// (introspected, never hardcoded — a future owner-carrying table that
     /// misses the mirror guards fails HERE).
@@ -743,6 +793,12 @@ struct AuthRLSDDLTests {
         #expect(artifact.contains("from sync_meta where key = 'lockstep_version'"), "the guard reads the deployed marker")
         #expect(!artifact.lowercased().contains("update sync_meta") && !artifact.lowercased().contains("insert into sync_meta"),
                 "no marker move — a maintenance artifact never writes sync_meta")
+        // VX-721 (R-500-9): the deploy's RUN 1 refused `42501 permission denied for schema public` at the re-own of
+        // `sync_pull_remaining` — a NEW function is born owned by the deploying role, and its handoff to the definer
+        // needs the 10/14c idiom's bracket (the grant first after the guard, the revoke after the last re-own; the role
+        // ends usage-only). The `sync_pull` re-own is owner-unchanged and never checked; this one is real.
+        #expect(Self.definerCreateBracketProblems(in: artifact).isEmpty,
+                "the keyset artifact's definer-CREATE bracket: \(Self.definerCreateBracketProblems(in: artifact))")
         let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
         #expect(sweep.contains("('sync_pull_remaining(bigint,text,text,text)',"),
                 "the post-deploy sweep expects the new function's posture")
@@ -807,6 +863,11 @@ struct AuthRLSDDLTests {
         #expect(rollback.contains("drop function if exists sync_pull_remaining(bigint, text, text, text);"),
                 "the count dropped by its exact signature")
         #expect(!rollback.contains("sync_pull_remaining(bigint, text, text, text) to"), "…and granted to nobody")
+        // VX-721 (R-500-9): the same bracket as the keyset artifact's — the road back must never refuse where the road
+        // forward did. Its one re-own is owner-unchanged today (a no-op Postgres never checks), but a rollback that meets
+        // `sync_pull` owned by the deploying role must still succeed, and the idiom's end state (usage-only) is kept.
+        #expect(Self.definerCreateBracketProblems(in: rollback).isEmpty,
+                "the rollback's definer-CREATE bracket: \(Self.definerCreateBracketProblems(in: rollback))")
         let statements = rollback.trimmingCharacters(in: .whitespacesAndNewlines)
         #expect(statements.hasPrefix("begin;") && statements.hasSuffix("commit;"), "one transaction")
     }

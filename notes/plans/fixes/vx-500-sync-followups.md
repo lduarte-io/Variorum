@@ -542,6 +542,18 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   and the rollback), plus a grant-sweep row that checks the privilege so the drift is caught next time; a fresh Fable
   implementer amends in repo (the 13j read-fix-re-run road), then the orchestrator re-runs. The declined alternatives: her
   own `!` grant with the artifacts unchanged; holding the deploy.
+- **R-500-10 — THE RUN'S SHAPE FROM THE DEPLOY ON (2026-11-01 ~18:20 MDT; her words, verbatim-faithful):** "I want you to
+  plan now to finish going through this deploy and such, and then writing a new kickoff prompt / separating the plan so
+  that the U2/U3/U4 and whole diff ladder can run under a new orchestrator … I think that this will be too much for just
+  you to carry through." The question tool: **U3 (VX-544) LIFTS OUT of VX-500** — "yes, split it out" — into its own ticket
+  run on its own branch with D-544 and the U3 brief moved to its own plan file, run AFTER VX-500's ladder closes; and
+  the plan file is **restructured IN PLACE** (one run, one branch, one PR, one record: a FOR A LATER READER section on
+  top as of the cutover, the remaining units next, the closed material below). Her follow-up: "my other session was
+  talking about VX-683 and I made it a higher priority. can VX-683 go with VX-544?" — the orchestrator's answer: not one
+  run (different kinds — a custody drill vs a `Sync/`+autosave-seam change with the convergence suites; VX-683 needs a
+  design memo and a sitting first); one successor orchestrator can carry VX-500's close → VX-683 → VX-544 as three
+  tickets, three branches, three PRs. On the 14c grant: KEPT — it is the ruled, deployed state the platform removed; the
+  sweep row catches the next rewrite. This session finishes the deploy and her Pro's catch-up, then hands off.
 - **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
   line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
   all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
@@ -1698,7 +1710,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 (`vx-500-server-half-round2.md`, 0/0/2 MINOR, no round 3) DONE — its two one-line pins landed by the orchestrator under the loosened rule (86/2) · **THE GATE IS OPEN; the deploy HELD for her word** (`notes/plans/vx495-deploy-checklist.md`) | GATE OPEN |
 | 3c | THE DEPLOY: RUN 1 REFUSED (42501 — VX-721, the definer's lost schema CREATE); R-500-9 — the DEPLOY-FIX session (both artifacts' grant line + the sweep row + pins) IN PROGRESS; then the orchestrator re-runs; the whole-diff ladder reads the fix | IN PROGRESS |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
-| 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
+| 5 | ~~U3 — the typed-unlock retry + the reachability trigger (D-544)~~ | LIFTED OUT (R-500-10): VX-544 runs as its own ticket run after VX-500's ladder closes; D-544 + the U3 brief move to `notes/plans/fixes/vx-544-offline-typed-unlock.md` at this session's cutover |
 | 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
 | 7 | Closing runs (core debug + release; the Mac suites over every changed source; the phone build) | NOT STARTED |

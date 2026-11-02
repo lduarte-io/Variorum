@@ -98,6 +98,28 @@
 -- `create or replace` resets a function's SET clause, so this artifact
 -- re-asserts `search_path = public, pg_temp` on both functions itself, and
 -- re-asserts the non-bypass owner and the grants (the 14c gate's letter).
+-- THE DEFINER'S CREATE (VX-721; her ruling R-500-9 — the record's HER RULINGS;
+-- `notes/plans/vx495-deploy-checklist.md`'s RUN 1, 2026-11-01 23:43 UTC): the
+-- first live run of this artifact refused WHOLE — `42501 permission denied
+-- for schema public` — at a definer re-own. Postgres requires the NEW owner
+-- to hold CREATE on the function's schema at `alter function … owner to`
+-- time, and `variorum_definer` holds USAGE only (the live ACL read
+-- `variorum_definer=U`). That is the 14c gate's deliberate END STATE, not a
+-- loss: every artifact that re-owns a function to the definer OPENS CREATE
+-- for the acquisition and CLOSES it in the same transaction — the 10/14c
+-- idiom (14c:81/:101; 10, 11, 12, the 13j rename, the pre-13x overlay —
+-- "the role ends usage-only, owning functions it could not re-create"). This
+-- artifact had omitted the bracket. The `sync_pull` re-own passes without it
+-- (a `create or replace` keeps the owner, and an owner-UNCHANGED alter is a
+-- no-op Postgres never privilege-checks — alter.c runs the checks only when
+-- the owner changes; 17's one re-own, 2026-10-22, is the same no-op);
+-- `sync_pull_remaining` is BORN owned by the deploying role, and its handoff
+-- is the real one. So, below: `grant usage, create on schema public to
+-- variorum_definer;` as the FIRST statement after the guard (R-500-9's
+-- letter) and `revoke create on schema public from variorum_definer;` right
+-- after the last re-own — the idiom whole, pinned in `AuthRLSDDLTests`; the
+-- grant sweep (`14c-post-deploy-grant-sweep.sql`) verifies the end state
+-- live: USAGE held, CREATE not.
 -- DEPLOY: at her explicit word only (the record's THE DEPLOY section).
 -- ============================================================================
 
@@ -113,6 +135,12 @@ begin
   end if;
 end;
 $guard$;
+
+-- VX-721: the definer's CREATE on `public`, opened here for the ownership
+-- acquisitions in section 3 and closed again right after them (the header's
+-- paragraph; the 10/14c idiom). Idempotent — a re-run re-grants what the
+-- previous run's revoke took back, and ends the same way.
+grant usage, create on schema public to variorum_definer;
 
 -- ---------------------------------------------------------------------------
 -- 1. sync_pull — 13's body with the page assembled by THE PICK, THE BOUND
@@ -324,11 +352,15 @@ $$;
 -- 3. Ownership, grants, search_path — re-asserted (a `create or replace`
 --    keeps the owner but resets the SET clause; the grants are idempotent;
 --    the 14c gate's non-bypass definer owner on every data function; the
---    13j `sync_horizon` posture on the count — authenticated only).
+--    13j `sync_horizon` posture on the count — authenticated only). The
+--    definer's CREATE on `public`, opened as the first statement after the
+--    guard, is closed again right after the two re-owns (VX-721 — the
+--    header; the role ends usage-only, as every re-owning artifact leaves it).
 -- ---------------------------------------------------------------------------
 
 alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;
 alter function sync_pull_remaining(bigint, text, text, text) owner to variorum_definer;
+revoke create on schema public from variorum_definer;
 
 alter function sync_pull(bigint, text, text, text, int, text)   set search_path = public, pg_temp;
 alter function sync_pull_remaining(bigint, text, text, text)   set search_path = public, pg_temp;
