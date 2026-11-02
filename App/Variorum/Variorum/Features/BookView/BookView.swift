@@ -2191,7 +2191,10 @@ struct BookView: View {
     // focused post mounts the ONE full-document editor, `BookViewModel` is
     // the single focus authority — 13b 3E's fold), no in-place TK2 text
     // folding (collapse is view state — TEXTKIT2 §3; AppSpec §12), and no
-    // bottom chrome (A6).
+    // scrub or progress chrome at the page's foot (A6 — the jump slider and
+    // the progress bar stay banned). The one bar there is the sanctioned
+    // position bar (`OutlineBottomBar`, VX-724 R-724-1, which amends A6's
+    // reach): a sibling below the page's scroll, never an inset on it.
 
     /// Row 53: the column is a plain `VStack` of SEGMENTS — each run of small
     /// rows (headings, cards) in its own `LazyVStack`, each expanded note a
@@ -2543,7 +2546,9 @@ struct BookView: View {
             // it fully for now, I'll add it later if I feel inclined").
             // If it is ever re-added, the bugginess she saw is investigated
             // FIRST — an observed defect parked by removal, not chased.
-            // Outline ends as a clean vertical scroll + the navigator.
+            // Outline ends as a clean vertical scroll + the navigator (VX-724,
+            // R-724-1: plus the position bar, a sibling BELOW this scroll —
+            // never an inset on it; the scrub/progress ban stands).
             // The model's scrub/progress brains stay (pure, pinned): the
             // Book spread and Read's paginated sub-mode both KEEP a bottom
             // bar, and 2B/2C are their owners.
