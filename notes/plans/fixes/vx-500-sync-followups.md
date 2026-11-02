@@ -556,6 +556,11 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   tickets, three branches, three PRs. On the 14c grant: SUPERSEDED the same evening — the deploy-fix implementer falsified the premise (the usage-only
   ACL is 14c's deliberate end state; every re-owning artifact brackets grant → re-own → revoke); the fix is the standing
   idiom, P-500-9's call hers (see the DEPLOY-FIX RECORD). This session finishes the deploy and her Pro's catch-up, then hands off.
+- **R-500-11 — THE BRACKET, AND RUN 2 (2026-11-01 ~18:45 MDT; the question tool): "Yes, the bracket as built"** — the
+  deploy-fix implementer's correction stands (the usage-only ACL is 14c's deliberate end state; the standing idiom grant →
+  re-own → revoke in both artifacts; the sweep expects USAGE held, CREATE not held — P-500-9 RESOLVED as the idiom); the
+  orchestrator re-runs the deploy through the stored PAT. R-500-9's "restore the grant" is honored for the ACT, not as a
+  standing grant. The declined alternative: a standing grant (my first framing).
 - **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
   line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
   all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
