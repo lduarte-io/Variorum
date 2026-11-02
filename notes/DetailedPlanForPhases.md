@@ -13,34 +13,25 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-500 — Run: the 0.10 window follow-ups** (sync follow-ups: VX-495 · VX-496 · VX-497 · VX-505 · VX-544 · VX-539 · VX-504; VX-508 HELD on tester A's join; riders VX-546 · VX-490 · VX-76 as dup) — architect shape, Fable orchestrates; the record `notes/plans/fixes/vx-500-sync-followups.md` | VX-500 · `vx-500-sync-followups` | `~/dev/variorum-vx-500` · the Pro | IN PROGRESS since 2026-11-01 — the ONE `Sync/`-and-custody slot; the PR is HELD OPEN at her word (launch code freeze), merge at her say-so |
-| **VX-724 — The book's position line moves to a bottom bar (+ the 1.0 release)** — architect shape, Fable orchestrates, Opus implements; her same-message release word: 1.0 to stargazing.tech once this lands; the record `notes/plans/fixes/vx-724-book-position-bottom-bar.md` | VX-724 · `vx-724-book-position-bottom-bar` | `~/dev/variorum-vx-724` · the Pro | IN PROGRESS since 2026-11-01 — surfaces: the book Outline's pinned line (`BookView.swift`, `BookOutlineViewed`), no Sync/, no editor seam |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-292 (+ VX-559) CLOSED 2026-10-30 — THE ONBOARDING OVERHAUL (the plan + every unit/window record
-`notes/plans/vx-292-onboarding.md`; the ladder `notes/plans/vx-292-ladder-round1.md`; PR at the merge; the
-handoff `notes/handoffs/vx-292-handoff.md`).** Architect shape, one overnight, her advance release word
-(R-292-16). The tour rebuilt around the Prince and grown to thirteen steps + a five-stop leg (the flip and back,
-Read, Lenses live, Compare & Blocks, the book arc, the Settings stop); the tour now DRIVES (landings forced to
-the step's mode once per arrival, step 3's chapter landed through the book's own ascent, her own switches never
-overruled) and MENDS a missing or deletion-broken Prince through its own restore door — after the ladder, only
-where everything the road would do is undoing deletions. The offer line became the band's welcome card
-(yes · no only; the no road names the Help door; never-returns law kept). Sea glass (the icon's #C2DDD3) joined
-as the seventeenth palette and the unset-store default (read-time flip; the voice's colours live on as Classic).
-The Prince swept Sherlock from tour + the guide's classics walk; the two stale Restore-Tutorial labels now quote
-the registry verb. Five units (U1 · U-THEME · U2 · U3 · U4), each closed through a coordinator-granted stage
-window with in-place red-on-old watches and dev-store walks — the windows caught four never-run fixture pins,
-the locked-book gate hole, the test-host's Bookcase polluting unscoped test oracles, and one stale tab-table pin
-(each fixed same-window). One Fable ladder, closed at round 2: the one MAJOR (the mend gate fired on
-renamed/released chapters — edits, not deletions) fixed by the whole-effect gate with five pins; residuals
-recorded (QUESTIONS #255). Merged SECOND after vx-105 (the foreseen pin conflicts resolved to the combined
-truth); the folded 0.10.7 release carried both efforts' public bullets to stargazing.tech. Canon: the two-file
-deltas as drafted; bundle QUESTIONS #255; VX-712 closed hollow by its trace pin, VX-713 fixed, VX-415 superseded
-by VX-559. Born: VX-716/717/718 (all Parked with reasons). HELD FOR HER: the Prince front-note sentence,
-P-292-4/5 (sea-glass depth; Default/Classic naming), the words-card toast observation, the #255 pass. Next: her
-morning checklist in the handoff; the wording-only tour pass at her word (R-292-4's second half).
-
+**→ VX-724 CLOSED 2026-11-01 — THE BOOK'S POSITION LINE MOVES TO A BOTTOM BAR, AND VARIORUM 1.0 SHIPS
+(the record `notes/plans/fixes/vx-724-book-position-bottom-bar.md`; PR #213; the handoff
+`notes/handoffs/vx-724-handoff.md`).** Architect shape at her word, one evening, her same-message release word.
+VX-562's pinned line left the top of the Outline and became `OutlineBottomBar` below the page (outside the
+scroll — landing geometry untouched): position words leading, the static counts trailing-right, separated; the
+joiner retired into the two-half `BookOutlineViewed.Bar` (one `NoteTotal`, the one-total law kept); the quiet
+receipt floats above the bar (R-724-2); full pane width (R-724-3); position wins the squeeze (R-724-4). R-724-1
+amends 13c A6's reach: the scrub/progress ban stands whole, one sanctioned position bar at the page's foot. One
+Opus ladder, closed at round 2: the one BLOCKER was the stale A6 pin itself, rescoped into
+`outlinesOnlyBottomChromeIsThePositionBar` with its teeth kept and the new placement arms revert-proven; R2's
+residuals deferred as VX-725/VX-726 (both Low). Evidence: 65 tests in 3 suites + the reviewer's 15-suite sweep
+green; the acceptance walk on the dev store's prince, the navigator's highlight agreeing with the bar. Canon:
+the SurfaceContracts nav-info line rewritten in place + the receipt rule's R-724-2 exception; the dated entry in
+AppSpecRecord. Nothing mobile-visible. **Version 1.0 released at her word right after the merge** — her notes
+verbatim ("Welcome to Variorum! This is version 1.0"), the release outcome in the handoff. Next: hers.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 

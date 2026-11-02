@@ -4,7 +4,15 @@
 
 ## FOR A LATER READER
 
-*(Written at closeout.)*
+**The mechanism as settled.** VX-562's `OutlinePinnedLine` (one counts-first sentence pinned above the book Outline's page) is now `OutlineBottomBar` (`BookView.swift`), a sibling BELOW the page's scroll — outside it, so landing geometry is untouched. Two halves from one pure value `BookOutlineViewed.Bar` via `bar(…)`: `position` (= `positionLine`, "note 7 of 30 · ‹chapter›", empty at rest) leading; `counts` (= `metaLine`, "book · 6 chapters · 30 notes") trailing. Both halves from ONE `NoteTotal` (VX-562 r1-f3's one-total law). The joiner `BookViewCopy.outlinePinLine`/`pinLine` is retired. The DEBUG oracle records the `Bar` value and the bar's frame under the old store names (`outlinePinLines`/`outlinePinFrames` — the rename is VX-725). Outline is still the only mode drawing it.
+
+**Her rulings:** R-724-1 (the move; counts right, separated; supersedes the at-the-top placement from her VX-562 beta ask; AMENDS 13c A6 — the scrub/progress ban stands, one sanctioned position bar at the page's foot) · R-724-2 (the quiet receipt keeps FLOATING at the page's foot above the bar; the Outline bar is the recorded exception to receipts-in-the-bar; `quietReceiptHome` stays `.pageFoot`) · R-724-3 (full pane width) · R-724-4 (position wins the width squeeze; counts truncate). P-562-3 survives whole (no duplication, no at-rest suppression). F-7 (Outline's bar looks different from Book/Read's flip bars): her word "that bottom look is fine for now."
+
+**The fix as built:** the bar + pins (`ab9eb595f`, coordinate fix `fbe571fcc`); the stale A6 pin `outlineCarriesNoBottomChrome` rescoped and renamed `outlinesOnlyBottomChromeIsThePositionBar` with A6's inset/progress arms kept verbatim and three placement arms (`b5b5e6b21`); the placement assertion folded there out of the follower pin (`e5876892f`); A6 comments fixed (`f045ca22f`); her notes verbatim in `ReleaseNotes-1.0.md` (`a20c23140`).
+
+**Evidence that matters:** 65 tests in 3 suites green (`OutlineWritingSurfaceTests` · `BookOutlineLandingTests` · `BookOutlineViewedTests`); both placement claims proven by behavioral revert (the bar moved back above the page — exactly the new arms red, record 3b and fix-pass 4b); the r1 reviewer's independent 15-suite Outline-mount sweep 59 green; the acceptance walk on the dev store's prince (THE WALK section).
+
+**Open items:** VX-725 (the four-names rename, Low) · VX-726 (the A6-successor pin's oracle hygiene — shared `.incrementing` key + unconditional forget, Low, matters only if suites ever interleave). No QUESTIONS entries owed. **The 1.0 release** rides this ticket after the merge; its outcome is appended below and in the handoff (`notes/handoffs/vx-724-handoff.md`).
 
 ## HER ASK (2026-11-01, verbatim)
 
