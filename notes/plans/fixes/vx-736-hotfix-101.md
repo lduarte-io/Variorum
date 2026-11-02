@@ -1,0 +1,120 @@
+# VX-736 — Run: the 1.0.1 hotfix — onboarding audit & quick fixes
+
+**STATUS: OPEN — kicked off 2026-11-02 ~3:15 AM (her sitting, /architect-phase vx-735 + her mid-kickoff additions). Branch `vx-736-hotfix-101`, worktree `~/dev/variorum-vx-736`, the Pro. The orchestrator holds the stage tonight (her word: "you're working on the pro and you have the stage completely"). Overnight run to a RELEASE: version 1.0.1, her advance word given at kickoff.**
+
+## FOR A LATER READER
+
+*(written at closeout; until then the sections below are the night's working record)*
+
+## KICKOFF (her words, verbatim, 2026-11-02 ~2:45–3:20 AM)
+
+> hi claude, so the hype news is that variorum is OUT and has been released already. unfortunately while walking it on a brand new mac user to test it thoroughly, i saw that there's this pretty annoying onboarding bug: [screenshot — the tour's final card overflowing]. so I want to get a quick hotfix out to change that hopefully before anyone downloads the app. there are also a few other high priority bugs that were recently minted - can you take a look to see if you think any of them should ride along with this change? I'll pre-write the release notes so that it can be released to the website when it's done. you're working on the pro and you have the stage completely. /architect-phase discipline. it's called VX-735 on that ticket, and you can let me know on the others. i want onboarding to be audited - there was another moment where it was a little unclear that you're supposed to scroll down within takes, and every user goes through that onboarding theoretically. we also have to make sure that this pane doesn't show if they already recorded their 12 words and stuff - any walks testing that kind of thing you normally need an opus subagent for. what release # would this be? 1.01? 1.1? […] i'm here for kickoff but i need this to run overnight and release as soon as it's done - hence the pre writing the notes on what changed. I think that all we really need to say is - minor bugfixes
+
+> yes I want this released overnight - the link for download is already live
+
+> oh there's two more things for you to make a ticket for that's been bothering me. 1. when i first downloaded the app, the sidebar wasn't wide enough, so "Home" crossed that verticle line. and 2. [screenshot — the Bookcase quick entry] as you can see in this image, Home in the bottom bar that is the live note creation bar is misaligned, but honestly shouldn't be there at all. they can see the swapper in the upper left corner to know where they are. fix these both in this run (maybe just make the sidebar start out wider for item #1)
+
+## SITTING RECORD (2026-11-02; rulings verbatim-faithful; R-736-N)
+
+- **R-736-1 — the riders.** Her question-tool picks: **VX-727 and VX-729 ride**; the Takes Medium cluster (VX-730/731/732/733) and VX-734 stay out for the next sweep. Her later message adds **VX-737 and VX-738** ("fix these both in this run").
+- **R-736-2 — the version is 1.0.1** (her pick, recommended over her floated 1.01: comparator ambiguity, and 1.0.1 keeps the literal "1.0" on its face).
+- **R-736-3 — the release notes are locked NOW, pre-approved:** one bullet, exactly **"Minor bug fixes."** — ships verbatim into `ReleaseNotes-1.0.1.md` (one line per bullet; the VX-708 guard; nothing else enters the file).
+- **R-736-4 — RELEASE OVERNIGHT AT HER WORD, given in advance:** *"yes I want this released overnight - the link for download is already live."* The run goes build → ladder → merge → release.sh → the stargazing.tech publish. If the harness refuses the unattended release.sh (the 10-24 precedent), the fallback is ruled: everything lands release-ready on main and the one command is handed to her for morning.
+- **R-736-5 — the onboarding AUDIT:** *"i want onboarding to be audited"*; the named finding *"there was another moment where it was a little unclear that you're supposed to scroll down within takes"*; and the suppression guarantee: *"we also have to make sure that this pane doesn't show if they already recorded their 12 words and stuff."* Castle-flavored walks run under an OPUS agent (her word + the standing Fable safeguard).
+- **R-736-6 — VX-737, the fresh-install sidebar width:** her suggested road rides — *"maybe just make the sidebar start out wider for item #1."*
+- **R-736-7 — VX-738, the quick-entry wing label comes OFF:** *"misaligned, but honestly shouldn't be there at all. they can see the swapper in the upper left corner."* Supersedes the quick-entry half of VX-552's contract line; the toolbar label (the wing-switcher door, VX-644) stays. The Pool's quick entry shares the bar component, so the removal reaches it too — **PROVISIONAL P-736-1** (alt: Bookcase band only), bundled for her morning.
+
+## MEMBERS (the sub-issue roster; re-listed before the ladder per the VX-548 rule)
+
+| Member | What | Batch |
+|---|---|---|
+| VX-735 | the overloaded final tour card (+ the audit, + the words-pane suppression) | B1 |
+| VX-727 | Compare's outline mints in Home, not the note's wing | B2 |
+| VX-737 | fresh-install sidebar too narrow | B2 |
+| VX-738 | the quick-entry bar's wing label off | B2 |
+| VX-729 | fanned block's take badge disappears after choosing a take | B3 |
+
+## CAST
+
+Fable orchestrates and cold-reviews (`fable-reviewer` — mandatory: VX-729 touches the editor's decoration seam and B1 touches a Castle face's content); `opus-implementer` per batch, one at a time, fresh per batch; the B1 acceptance walk runs under the OPUS implementer at an orchestrator-granted stage window (R-736-5). No Sync/, no custody code, no schema anywhere in this run.
+
+## THE PROTECTION FACTS (for B1 — traced by the orchestrator at kickoff)
+
+- The end card: `Tour.Step.endCard` (`Sources/VariorumCore/Domain/Tour.swift`); chrome `TourEndCard` in `App/Variorum/Variorum/Features/Onboarding/TourOverlay.swift` (~348–461): title + body + readme aside + `TourEndLibraryBlock(model:)` + the three doors (keepGoing · fieldGuide · done), doors `.disabled` while `holdsTheDoors`.
+- The protection block's brain: `TourEndLibraryModel` (`App/Variorum/Shared/Protection/WordsBand.swift` ~526–562): the passphrase half already gates on `standing.offersSetPassphrase` (nil when a passphrase stands); the words half is `standing.makeWordsLook()` → `WordsLookModel` (phases closed → asking → minting → shown → warning; `close()` records the look). Built at VX-307 U2b / VX-412 to CastleRules rules 2/3.
+- The band card's retirements (the suppression precedents): `WordsBandRule.offersWords(writes:dismissed:recorded:snoozed:)` + `WordsCardLedger` (`variorum.calmAsks.words.<libraryID>.dismissed/.recorded`); a LANDED set-up/join/move retires the words offer (CastleRules rule 2's third retirement, VX-511; a second look would MINT FRESH WORDS and replace the account's).
+- CastleRules rules that bind B1: 2 (words shown once; nothing stores them; the recorded/landed retirements), 3 (the tutorial's last card asks the passphrase; the ask, never a force), 6 (new words re-lock, never re-key). CastleRules is FROZEN design — B1 changes the card's SHAPE (her VX-735 direction: "splitting into two or three cards (tour close · passphrase · twelve words)"), never the when/what of the asks. The one-word canon touch ("last card" → the closing cards) lands at closeout with the VX-735 pointer and is flagged in her morning bundle.
+
+## B1 BRIEF — VX-735: the tour's closing cards + the suppression + the audit (SPAWN-READY)
+
+**Seat: worktree `<home>/dev/variorum-vx-736`, branch `vx-736-hotfix-101` (`git status -sb` first; expect clean or earlier batches' commits only). THE PRO RULES: headless `swift build` / `swift test` free; `xcodebuild -scheme Variorum -destination 'platform=macOS' build` and `build-for-testing` (from `App/Variorum/`) free; EVERY `xcodebuild test` run and EVERY live walk ONLY under a HELD `Tools/stage` claim arranged with the orchestrator (it holds the stage tonight — ask, you will get the window). Never quit or kill a real-store Variorum instance (instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'`, discriminate by PATH and STORE). Never touch `Sources/VariorumCore/Sync/`, custody/keychain code, or the editor seam (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, the read tier). `notes/SessionResiliencyProtocol.md` binds: commit per piece, push after EVERY commit, a LIVE STATUS table in the "## B1 RECORD" section of THIS file from the first commit, unverified claims PENDING, a self-assessment at the end. No attribution trailers on commits. Sentence case, no caps-for-emphasis, no em dashes, no emoji in rendered strings. Dev-store walks: the dev store's content is yours to manage; its Castle credentials, if a lock screen appears, are `~/.variorum/dev-castle.env` (source it; never invent values, never commit them); restore the dev store's posture before the batch closes.**
+
+Required reading before any code: this file's KICKOFF, SITTING RECORD and THE PROTECTION FACTS; `notes/CastleRules.md` WHOLE (rules 2/3/6 are your contract); `notes/plans/vx-292-onboarding.md` §THE CURRENT TOUR, §SITTING RECORD (R-292-11/13), §U3 BRIEF + U3 COPY DRAFTS (the step/anchor idiom you extend); QUESTIONS #255 (the tour's live PROVISIONALs); `Sources/VariorumCore/Domain/Tour.swift` WHOLE; `TourOverlay.swift` + `TourScript.swift` + `App/Variorum/Shared/Protection/WordsBand.swift` + `Features/Protection/WordsBandCard.swift` (the `TourEndLibraryBlock` face); `App/Variorum/VariorumTests/TourTests.swift`; SurfaceContracts §The app (the tour's contract line + the seed set).
+
+The pieces, each its own commit:
+
+1. **The split (VX-735).** The end card stops stacking everything. New step structure in the pure rule: after `.ownNote`, **`.protectPassphrase`** (rule 3's ask: the explainer sentence + the Passphrase/Again fields + Set passphrase, plus its own next door — skipping is legal, the band card remains the recurring home) → **`.protectWords`** (rule 2's look: the "Write these down now" framing, the look's phases, Copy with the clipboard caveat laid out FULL-WIDTH under the grid — never a squished side column — and the warning flow with un-truncated doors; the next door waits while `holdsWords`) → **`.endCard`** (title + body + readme aside + the three doors, NO protection block, `holdsTheDoors` logic retired from it). `mainStepCount` and positions updated; ring groups: these two cards are CENTERED CARDS like the end card, no ring (nothing to anchor). `TourWalkTests` walk the new sequence headlessly; `TourScriptTests` re-pin any moved words in the same commit. The existing approved sentences move VERBATIM — the explainer ("A passphrase is a convenience over your twelve words — easier to type, and either one can reset the other."), the words framing ("Write these down now. They open your library — on this Mac and on any copy of it — for as long as they are its words."), the caveat and warning sentences — no rewording beyond what the split forces; any forced departure recorded here with its alternative.
+2. **The suppression (R-736-5).** The step rule SKIPS what should not show, from Facts: `.protectPassphrase` renders only while `offersSetPassphrase` stands (today's model half, promoted to a step skip); `.protectWords` only while the words look is still OWED — trace `RoadStandingModel.makeWordsLook` and the band's retirements first, then gate on the same truths the band card uses: NOT `WordsCardLedger.recorded`, and NO landed account act (the VX-511 class — a landed set-up/join/move means a look would mint fresh words and replace the account's). A band-card DISMISSAL does not suppress the tour's ask (rule 2 names the tour as a words home; the dismissal retired the BAND, not the tour) — **PROVISIONAL P-736-2**, alternative: dismissal suppresses both. Both skips pinned headlessly as state-transition tests (fixture worlds: fresh · passphrase-set · words-recorded · both · landed-account), red-on-old where today's behavior differs. TRACE AND RECORD what today's build actually does in the words-recorded and landed-account states BEFORE building (the honest baseline; if the landed-account state is already suppressed by the look's own refusal, say so and pin it rather than double-gating).
+3. **The takes-scroll clarity (R-736-5's named finding).** Her moment: during the Takes step, the take named "il principe 1532" can sit below the fold and nothing says to scroll. Mechanical first: TRACE whether the Takes board has an existing reveal road (the U2 reveal precedents: `requestReveal`, the Takes article's entry-landing machinery — see the vx-292 U2 RECORD) that can bring the named take's row on screen on the step's arrival; if a road exists, route through it (the tour DRIVES, R-292-11); if none exists, DO NOT improvise one — fall back to one added sentence on the step's card naming the scroll ("Scroll down if you don't see it." — her register, one line to overturn) and record the no-road fact. Pin whichever lands.
+4. **The audit (R-736-5).** Walk the WHOLE tour's script against the real app headlessly and in the live walk: every card's words against what the screen actually shows at that step (the VX-712 class — a card that names a door that refuses, a fact that is false on arrival, a target that can be off screen with no reveal and no sentence). Every finding: FIX inline when it is mechanical and small (same evidence discipline), RECORD here when it is wording-only or taste (her morning bundle; R-292-4 reserved the wording pass to her). The audit's table lands in the B1 RECORD: step × claim × verdict (TRUE / FIXED / RECORDED).
+5. **The acceptance walk (YOU run it, at a stage window — you are Opus; the orchestrator must NOT run the Castle-face walk).** Dev store, Debug build, under the stage claim: (a) fresh-state tour end — passphrase card, words card (mint, copy, warning, close), end card, each laid out whole on a standard window, no truncation, no overflow — screenshot each; (b) set a passphrase first (the band/Settings road), re-run the tour — the passphrase card SKIPPED; (c) record the words first, re-run — the words card SKIPPED; (d) the landed-account state rides the HEADLESS pin alone (no prod road tonight); (e) the takes-scroll moment observed. Capture to a gitignored dir; posture restored (the walk's Castle state unwound, credentials from the env file only).
+6. **Record close** — self-assessment, every PENDING flipped, PROVISIONALs with alternatives, the audit table, the suite commands run and their counts, the walk evidence listed.
+
+OUT OF SCOPE: B2's and B3's members; TourScript rewording beyond the split's forced moves and the one clarity sentence; the offer card; the seeder; `Sync/`; the editor seam. A piece needing author-only input: STOP that piece, record, continue the rest.
+
+## B2 BRIEF — the chrome trio: VX-727 · VX-737 · VX-738 (SPAWN-READY after B1 lands; may run before B3)
+
+**Seat, Pro rules, discipline, fences: EXACTLY as the B1 header (same worktree/branch; "## B2 RECORD" in this file; stage only through the orchestrator).**
+
+Required reading: this file's SITTING RECORD; the three tickets' descriptions (quoted in MEMBERS + the Linear board); SurfaceContracts §The app (the VX-552 contract line being amended, the keyboard family) and §The Library (the controls row's stability law — the sidebar change must not disturb it).
+
+The pieces, each its own commit, pin-before-fix PER MEMBER:
+
+1. **VX-727 — the outline's wing.** The ticket carries the traced mechanism: `mintOutlinePost` (`Sources/VariorumCore/Operations/Operations+Versions.swift:386`) builds its `Container` without `wingId:`, taking the model default `""` = Home; the sibling at `:787` passes `wingId: destinationWing ?? source.wingId`. VERIFY the trace yourself (never adopt a ticket's mechanism unexamined), then: red-on-old state-transition pin (an outline minted from a note in a second wing lands in THAT wing), the one-argument fix, revert-verified.
+2. **VX-737 — the fresh-install sidebar width.** Trace where the sidebar's initial/default width comes from (the NavigationSplitView column width or the window restoration default — say which in the record), measure what width the fresh default IS and what "in Home" + the toolbar needs, and raise the DEFAULT so the fresh-install layout clears the divider with the longest seeded wing name ("Home"); her road is ruled (R-736-6): the default grows; user-resized widths are untouched (restoration wins). Pin: whatever is testable headlessly (the default constant + any clamp); the live proof rides the walk.
+3. **VX-738 — the label off the quick-entry bar.** `Features/Shelf/QuickEntryBar.swift` (+ its hosts `ShelfView`/`LibraryCatalogView`/`CaptureTextView` as the grep shows): the trailing "in ‹wing›" label comes OFF the bar (BOTH quick-entry hosts — P-736-1); the toolbar's "in ‹wing›" switcher door (VX-644) is untouched; any pin binding the bar's label flips to pin its ABSENCE. Check the capability registry and `TourScript`/guide for sentences naming the bar's label (derive-don't-retype rule: a sentence that described it must not go stale) — the tour's quick-entry step and the guide's capture lesson are the two likely speakers; fix what names it, record what you find.
+4. **Record close** per the B1 shape (self-assessment, pins run red-on-old, the walk needs listed for the joint window).
+
+OUT OF SCOPE: everything else. The walk evidence for VX-737/738 can ride B1's or B3's stage window (a fresh-profile-style check of the default width + the bar's face in both hosts) — coordinate with the orchestrator.
+
+## B3 BRIEF — VX-729: the disappearing take badge (SPAWN-READY after B2)
+
+**Seat, Pro rules, discipline, fences: EXACTLY as the B1 header ("## B3 RECORD" in this file).** THIS BATCH MAY TOUCH THE EDITOR'S DECORATION LAYER — read `notes/TEXTKIT2_NOTES.md` WHOLE first (the VX-246 U4 badge findings — `.layoutAvailable` or it is not a position; the layout-ahead poisoning; `FanBadgePlacementTests`) and the overlay/sink delivery law (the architect skill's application notes: equality-gated sinks deliver at wire time; overlay geometry refreshes trigger on EVERY input axis). The editor seam itself (`EditorTextView` internals, `BlockRangeIndex`) is still fenced: the badge is an OVERLAY consumer; if the trace leads INSIDE the seam, STOP and report to the orchestrator before writing.
+
+Required reading: the VX-729 ticket; TEXTKIT2_NOTES as above; `FanBadgePlacementTests` and the badge's render path (grep `fan badge`/`cornerBadge`/`FanBadge` from the test's subjects); SurfaceContracts §The note ("A corner badge appears only on fanned blocks").
+
+The pieces:
+
+1. **Repro + trace.** Reproduce headlessly or in the Debug app: a two-take block shows its badge in Write; choose a take via the Write take panel; close the panel; the badge is gone though the block is still fanned. Trace the concrete mechanism — the likely class is the overlay refresh missing an input axis (the take-choice write changes the chosen variant without a geometry/storage edit the badge pass listens to) or a stale equality gate; name the exact sink and the missing axis in the record. NO FIX WITHOUT THE TRACED MECHANISM.
+2. **Pin + fix.** Red-on-old pin at the traced seam (the badge set after a choose-take through the panel's road), the fix on the traced axis, revert-verified. If the fixed class has siblings (other acts that change fan/chosen state without storage edits: archive take, delete take, an MCP write landing), enumerate them in a small sweep table — each FIXED or provably SAFE with the mechanism stated.
+3. **Record close** per the B1 shape; the live confirmation rides a stage window (choose a take in the panel, badge stays; capture).
+
+## ENVIRONMENT TRAPS (every brief carries these by reference)
+
+Instance checks discriminate by PATH and by STORE; never quit/kill a real-store instance; no Release builds or `/Applications` refreshes while one lives. `build-for-testing` compiles without running. Mac tests from `App/Variorum/`, suite-level `-only-testing` only, confirm the "Test run with N tests" line and read `skipped:` lines before claiming a gated suite ran. zsh `pipestatus`. NEVER add a custom build configuration. Suites flash the test host's windows — stage claim held for every `xcodebuild test`. Backups WAL-safe into `Backups/safety-copies/` before any real-store touch (none is planned in this run). Screenshots in gitignored dirs. Never `git checkout` over uncommitted work. Push after every commit. The What's New parser wants each release-notes bullet on ONE line.
+
+## THE RELEASE PLAN (runs after the ladder closes — the orchestrator's, R-736-4)
+
+1. Merge gate: the suites exercising every changed source file (Tour*, WordsBand*, the ops suite for VX-727, the badge suites, the chrome hosts) + full `swift test` core; the PR (`VX-736: …`) merges to main as a MERGE COMMIT.
+2. `ReleaseNotes-1.0.1.md`: exactly one bullet, "Minor bug fixes." (R-736-3); MARKETING_VERSION → 1.0.1; committed before the release run (no repo commits DURING release.sh — the build number is the commit count).
+3. Zero-instance window (her app expected closed overnight; if a real-store instance lives, the release HOLDS for the morning — never quit it), then `Tools/Release/release.sh --version 1.0.1`; the site publish per the proven road (R2 DMG-first, verify, appcast, variorum.json, deploy, verify; transient per-POP 404s settle ~2 min, never re-upload).
+4. If the harness refuses the unattended release.sh: land everything release-ready, hand her the one command in the morning handoff (the ruled fallback).
+5. `/Applications` refresh at the same zero-instance window (A1 safety copy first), codesign verified.
+
+## LEDGER
+
+| # | Item | Status |
+|---|---|---|
+| 1 | B1 — VX-735 split + suppression + audit + walk | OPEN |
+| 2 | B2 — VX-727 · VX-737 · VX-738 | OPEN |
+| 3 | B3 — VX-729 | OPEN |
+| 4 | Ladder (fable-reviewer, whole diff) | OPEN |
+| 5 | Closeout: canon deltas (SurfaceContracts tour + VX-552 lines; the CastleRules one-word touch flagged), AppSpecRecord entry, master plan, tickets, handoff | OPEN |
+| 6 | Release 1.0.1 + site publish (R-736-4) | OPEN |
+
+## HELD FOR HER (the morning bundle — grows as the night runs)
+
+- P-736-1 — VX-738's removal reaches the Pool's quick entry too (the shared bar); alt: Bookcase band only.
+- P-736-2 — a band-card dismissal does NOT suppress the tour's words card (rule 2 reads the tour as its own words home); alt: dismissal suppresses both.
+- The CastleRules one-word reality ("the tutorial's last card" → the closing cards) — the canon touch lands at closeout with the VX-735 pointer; her eye on the wording.
+- The audit's RECORDED (wording-only) rows — B1's table.
