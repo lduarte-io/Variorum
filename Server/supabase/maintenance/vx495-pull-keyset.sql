@@ -381,4 +381,6 @@ commit;
 --   select proname, proconfig from pg_proc where proname in ('sync_pull', 'sync_pull_remaining');
 --     — each proconfig = {search_path=public, pg_temp};
 --   then `maintenance/14c-post-deploy-grant-sweep.sql` — every row OK, the
---   new function's row included.
+--   new function's row included, and VX-721's two schema-privilege rows:
+--   `variorum_definer` USAGE on public HELD, CREATE NOT held (the bracket
+--   closed) — 65 OK · 4 INFO · 0 fail on THE BRANCH's sweep.

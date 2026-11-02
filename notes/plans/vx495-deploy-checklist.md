@@ -58,8 +58,9 @@ variorum_definer;` as the artifacts' first statement — plus a sweep row for th
 - [ ] `select proname, proconfig, pg_get_userbyid(proowner) from pg_proc where proname in ('sync_pull','sync_pull_remaining')`
       — each `{search_path=public, pg_temp}`, owner `variorum_definer`; TWO rows.
 - [ ] The grant sweep — THE BRANCH'S `Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql` (it carries the new
-      function's expected row; main's sweep reads UNEXPECTED FUNCTION until the merge — not a finding): **63 OK · 4 INFO ·
-      0 fail**, the new row an OK.
+      function's expected row; main's sweep reads UNEXPECTED FUNCTION until the merge — not a finding): **65 OK · 4 INFO ·
+      0 fail** — the count's row and VX-721's two `schema-privilege` rows (`variorum_definer` USAGE on public HELD, CREATE NOT held —
+      the 10/14c idiom's end state; the CREATE expectation PROVISIONAL P-500-9, the DEPLOY-FIX RECORD) OK.
 - [ ] `EXPLAIN (ANALYZE, BUFFERS)` of the count's shape for her tenant from the Pro's cursor (her `!` road) — the index-only
       claim, read live (U1a's self-assessment item 3).
 

@@ -872,6 +872,35 @@ struct AuthRLSDDLTests {
         #expect(statements.hasPrefix("begin;") && statements.hasSuffix("commit;"), "one transaction")
     }
 
+    /// THE SCHEMA-PRIVILEGE ROWS (VX-721, R-500-9; the CREATE row's expectation is PROVISIONAL P-500-9 — the record
+    /// `notes/plans/fixes/vx-500-sync-followups.md`, DEPLOY-FIX RECORD): the post-deploy grant sweep verifies the definer
+    /// role's END STATE on `public` LIVE through `has_schema_privilege` (the 13y F-R2 precedent — the actual privilege
+    /// whichever mechanism supplies it, inheritance included): USAGE held (the definer bodies resolve `public`; lost,
+    /// every re-owned RPC refuses) and CREATE NOT held (the 10/14c idiom closes its grant in the same transaction — a held
+    /// CREATE is a leaked bracket or an inherited platform grant, a posture no sitting ruled). Fail-class wording in the
+    /// sweep's own vocabulary (`MISMATCH:<privilege> — <why>`), a sixth `ord` in the union. Two rows, both OK on the
+    /// idiom's end state: the sweep's expected totals move 63 → 65 OK · 4 INFO · 0 fail.
+    @Test func theGrantSweepVerifiesTheDefinersUsageOnlyPostureOnPublic() throws {
+        let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
+        #expect(sweep.contains("has_schema_privilege('variorum_definer', 'public', 'USAGE')"),
+                "the sweep reads the definer's USAGE on public live")
+        #expect(sweep.contains("has_schema_privilege('variorum_definer', 'public', 'CREATE')"),
+                "the sweep reads the definer's CREATE on public live")
+        // The expectations, by the rows' own text: USAGE true, CREATE false (P-500-9).
+        #expect(sweep.range(
+                    of: #"select 'USAGE'\s+as privilege,\s+has_schema_privilege\('variorum_definer', 'public', 'USAGE'\)\s+as observed,\s+true\s+as expected"#,
+                    options: .regularExpression) != nil,
+                "USAGE on public is expected HELD")
+        #expect(sweep.range(
+                    of: #"select 'CREATE',\s+has_schema_privilege\('variorum_definer', 'public', 'CREATE'\),\s+false,"#,
+                    options: .regularExpression) != nil,
+                "CREATE on public is expected NOT held — the 10/14c idiom's end state (P-500-9)")
+        #expect(sweep.contains("'schema-privilege'"), "its own row kind")
+        #expect(sweep.contains("'MISMATCH:' || lower(f.privilege)"),
+                "a fail-class verdict in the sweep's vocabulary when either disagrees")
+        #expect(sweep.contains("select 6 as ord, * from schema_privilege_rows"), "the rows join the sweep's union")
+    }
+
     // MARK: - The §12 version-check mechanism (Phase 11, A1)
 
     /// THE DRIFT PIN: the marker the LATEST lockstep file deploys must

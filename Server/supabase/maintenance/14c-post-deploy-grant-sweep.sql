@@ -24,7 +24,13 @@
 -- role's SCHEMA-USAGE reach on `extensions` (pgcrypto, for
 -- gen_random_bytes/hmac) and `vault` (the MAC secret) is now asserted LIVE
 -- via `has_schema_privilege` — the honest end-state check the grant line's
--- mere presence cannot be.
+-- mere presence cannot be. EXTENDED at VX-721 (2026-11-01, the VX-495 keyset
+-- deploy's RUN 1 — `42501 permission denied for schema public`): the definer
+-- role's END STATE on `public` — USAGE held, CREATE NOT held — as two
+-- `has_schema_privilege` rows (the 10/14c idiom opens CREATE for an ownership
+-- acquisition and closes it in the same transaction; RUN 1 refused because an
+-- artifact re-owned a new function without it; the CREATE row's expectation
+-- is PROVISIONAL P-500-9 in the VX-500 record).
 --
 -- WHAT IT IS: one READ-ONLY query, run IMMEDIATELY AFTER a lockstep deploy
 -- (09 at the 14c gate; 10 at the 13j window; 11 at the pre-13x window),
@@ -402,6 +408,44 @@ schema_usage_rows as (
       else 'MISMATCH:usage — the definer bodies cannot resolve this schema (extensions.hmac / vault.decrypted_secrets refuse)'
     end                                                                  as verdict
   from (values ('extensions'), ('vault')) as s(schema_name)
+),
+-- VX-721 (2026-11-01; `notes/plans/vx495-deploy-checklist.md`'s RUN 1 — `42501
+-- permission denied for schema public`; her ruling R-500-9; the CREATE row's
+-- expectation PROVISIONAL P-500-9): the definer role's privileges on `public`,
+-- verified LIVE as the END STATE of the 10/14c idiom. Postgres requires the
+-- NEW owner to hold CREATE on the schema at `alter function … owner to` time,
+-- so every artifact that re-owns a function to `variorum_definer` opens CREATE
+-- for the acquisition and closes it in the same transaction (14c:81/:101; 10,
+-- 11, 12, the 13j rename, the pre-13x overlay — "the role ends usage-only,
+-- owning functions it could not re-create"); RUN 1 refused because the keyset
+-- artifact re-owned a NEW function without that bracket. USAGE must be held
+-- (the definer bodies resolve `public`; lost, every re-owned RPC refuses);
+-- CREATE must NOT be — held, it is a bracket left open or a grant the role
+-- inherits, a widened posture no sitting ruled. `has_schema_privilege` reads
+-- the actual end state whichever mechanism supplies it (the F-R2 rows above).
+schema_privilege_rows as (
+  select
+    'schema-privilege'                                                   as kind,
+    'variorum_definer ' || f.privilege || ' on public'                   as object,
+    ''                                                                   as acl,
+    f.observed::text                                                     as observed,
+    f.expected::text                                                     as expected,
+    case
+      when f.observed is distinct from f.expected
+        then 'MISMATCH:' || lower(f.privilege) || ' — ' || f.why
+      else 'OK'
+    end                                                                  as verdict
+  from (
+    select 'USAGE' as privilege,
+           has_schema_privilege('variorum_definer', 'public', 'USAGE') as observed,
+           true as expected,
+           'the definer bodies cannot resolve public — every re-owned RPC refuses' as why
+    union all
+    select 'CREATE',
+           has_schema_privilege('variorum_definer', 'public', 'CREATE'),
+           false,
+           'the role must end usage-only (14c:101) — a re-owning artifact left its grant/revoke bracket open, or the role inherits CREATE'
+  ) as f
 )
 select * from (
   select 1 as ord, * from function_rows
@@ -413,5 +457,7 @@ select * from (
   select 4 as ord, * from vault_fact_rows
   union all
   select 5 as ord, * from schema_usage_rows
+  union all
+  select 6 as ord, * from schema_privilege_rows
 ) sweep
 order by ord, case when verdict = 'OK' or verdict = 'INFO' then 1 else 0 end, object;
