@@ -312,7 +312,7 @@ Dev-store Debug build only (the vx-736 DerivedData app, rebuilt on the clean tre
 
 ## B2 RECORD
 
-**NOT DONE (first line, kept current):** pieces 2–4 not yet built (below). No `xcodebuild test` run yet (the stage is the orchestrator's); no live walk (the joint window's — the camera list lands at the close).
+**NOT DONE (first line, kept current):** every Mac `xcodebuild test` run (Gate C and the watches W-737a, W-738, optional W-P736-4) is PENDING the orchestrator's stage window — the commands are in READY-FOR-STAGE below; the live look rides the joint window (the camera list below); no QUESTIONS.md entry and no canon edit (P-736-4 and the SurfaceContracts touches are for the merging session / the closeout).
 
 Implementer: Opus (opus-implementer), 2026-11-02, worktree `~/dev/variorum-vx-736`, branch `vx-736-hotfix-101`, the Pro, from `1b77e18e2` (B1's close). Scope: §B2 BRIEF's four pieces. Read in my own context before any code: this file's KICKOFF, SITTING RECORD, MEMBERS, CAST, §B2 BRIEF, §ENVIRONMENT TRAPS and B1's LIVE STATUS; `notes/SessionResiliencyProtocol.md`; the three tickets' descriptions (Linear, read-only); SurfaceContracts §The app (the VX-552/VX-644 line, the keyboard family) and §The Library (the controls row's law). Zero `Sync/`, zero custody/keychain code, zero editor seam, zero schema.
 
@@ -323,7 +323,7 @@ Implementer: Opus (opus-implementer), 2026-11-02, worktree `~/dev/variorum-vx-73
 | 1 VX-727 — the outline's wing | DONE (this commit) — core pin `OutlineMintTests.anOutlineIsBornInItsSourcesWing` RED on the pre-fix tree (4 issues, below), GREEN with the fix; `OutlineMintTests` + `WingMoveTests` + `WingOperationsTests` 26/26 |
 | 2 VX-737 — the fresh-install sidebar width | DONE (this commit) — `ShellSplit.idealWidth` 210 → 240, the window's default 1240 → 1270 (PROVISIONAL **P-736-4**, below); pins `FreshSidebarWidthTests` (4 tests, 5 cases) — Mac `build-for-testing` TEST BUILD SUCCEEDED; the RUN and the red-on-old watch W-737a PENDING the stage window |
 | 3 VX-738 — the label off the quick-entry bar | DONE (this commit) — the label, its two inputs and the bar's `.surface` door removed; both hosts and the composition root stop handing them; pins flipped to the ABSENCE (`QuickEntryWingLabelTests.neitherQuickEntryBarNamesTheWing`, `WingChordsAndLabelDoorTests` ×2, the registry walk's union line); the predicates dry-run RED on the pre-fix tree (15 of 15, below); Mac `build-for-testing` TEST BUILD SUCCEEDED; the RUN and watch W-738 PENDING the stage window |
-| 4 Record close | NOT-STARTED |
+| 4 Record close | IN-PROGRESS — the self-assessment below is written; its Mac counts are PENDING the stage window (READY-FOR-STAGE). Core `swift test` whole run on `1ee373a9e`: VariorumCoreTests **3,584 tests / 477 suites** (B1's 3,583 + the VX-727 pin) with 1 non-known issue — `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` exceeded its 60-s time limit at the run's 206-s mark (load); StringsWorkbook **32/32**; MCP 468 with 2 timing issues (`aQuitSaysNothingForAConnectionItEnds` "got no answer to its initialize", `aPeerThatNeverAnswersInitialize…` its 15-s bound) — **all three green alone** (`StarContextTests` 11/11, `MCPStopRoadsServerTests` + `MCPHarnessTimeLimitTests` 9/9); none touches a file this batch changed |
 
 ### Piece 1 — VX-727, traced and fixed
 
@@ -350,3 +350,61 @@ Implementer: Opus (opus-implementer), 2026-11-02, worktree `~/dev/variorum-vx-73
 - **Built:** `QuickEntryBar` — the trailing label block, the `wingName` / `onWingLabel` inputs and init parameters, and `static let surfaceCapabilities = [.switchWing]` removed; the body is BYTE-FOR-BYTE the pre-VX-552 shape again (the `HStack(alignment: .top, spacing: 10)` wrapper existed only for the label — checked against `a6afef06a`'s diff). `ShelfView` / `LibraryCatalogView` — the bar composed without them, and each view's `onSwitchWing` property removed (the house rule: a view that no longer renders a door does not carry its callback); `RootView` — the two `onSwitchWing:` hand-downs removed. **Untouched:** the toolbar's "in ‹wing›" beside New Note and its VX-644 door (`RootView.surfaceCapabilities` still `[.toggleSidebar, .switchWing]`), `QuickEntryCopy.wingLabel`/`wingHelp` (the toolbar's words; doc comment updated to say the toolbar is their one home), `VoicedButtonStyle.labelVerticalInset` (the style itself uses it; comment updated). Comments updated: the `.switchWing` capability's (`CapabilityRegistry.swift`), the walk union's justified-edit note (`CapabilityRegistryTests`).
 - **Sentences that named the bar's label (the derive-don't-retype check):** NONE. The tour's quick-entry step (`TourScript`, "The dashed line at the bottom reads new note, just start typing…") and the guide's capture sentence (`TutorialSeeder` "getting around": "a dashed box that reads “new note — just start typing”") name the box, never the label; the guide's wings lesson names "the Bookcase's masthead" as where the wing is shown (still true); the search lesson's "in: Home" is the search band's chip, not the bar. The capability registry's `.switchWing` comment was the one text naming the bars — updated. **Canon (the closeout's, not mine):** SurfaceContracts §The app's VX-552 sentence ("sits on both quick-entry bars and beside the window toolbar's New Note button") needs its bars half struck, with the VX-738 / R-736-7 pointer.
 - **The pins (flipped to the absence; red-on-old by construction — the label was there):** `QuickEntryWingLabelTests.neitherQuickEntryBarNamesTheWing` (was `bothQuickEntryHostsHandTheBarTheirCurrentWing`) — neither host hands the bar `wingName:` or `onWingLabel:`, the bar draws no `QuickEntryCopy.wingLabel(`/`wingHelp(` and takes no `var wingName`; `WingChordsAndLabelDoorTests.theLabelIsADeclaredSurfaceDoorOfSwitchWing` — the bar declares no `static let surfaceCapabilities` (the toolbar's declaration holds); `WingChordsAndLabelDoorTests.everyWingLabelRendersTheDoor` — the toolbar still presses ⌘L's act; `RootView` hands no host `onSwitchWing:`; no host carries `var onSwitchWing` or hands `onWingLabel:`; the bar renders no `Button(action: onWingLabel)`; `theToolbarsNewNoteButtonWearsTheWingLabel` unchanged (the toolbar stays). **Dry red-on-old (headless, a scratchpad script evaluating the pins' exact predicates against `git show 07fd0d50d:` of the four files): 15 of 15 predicates RED** — each host hands a wing, a label door, carries the callback (4 × 2); the bar draws the label, its hover, takes a wing, declares a surface door, renders the button, takes the door (6); `RootView` hands 2 hosts the act (1). The real run's watch W-738 rides the stage window (below).
+
+### READY-FOR-STAGE — B2's window (all from `App/Variorum/`, under the HELD stage claim; suite TYPE names; read the "Test run with N" line and any `skipped:` line)
+
+Every piece is committed and pushed (`0e1606934` · `07fd0d50d` · `1ee373a9e`); `build-for-testing` is green on `1ee373a9e`. **No revert is in flight; the tree is clean.**
+
+**Gate C — the B2 suites (one run; expect `Test run with 108 tests in 19 suites passed`, `CapabilityRegistryTests` carries gated cases — read its `skipped:` lines):**
+
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' test \
+  -only-testing:VariorumTests/FreshSidebarWidthTests \
+  -only-testing:VariorumTests/QuickEntryWingLabelTests \
+  -only-testing:VariorumTests/WingChordsAndLabelDoorTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/LibraryControlsFlowRuleTests \
+  -only-testing:VariorumTests/LibraryControlsStableWidthsTests \
+  -only-testing:VariorumTests/LibraryControlsGeometryTests \
+  -only-testing:VariorumTests/LibraryBulkRowGeometryTests \
+  -only-testing:VariorumTests/ShellChromeTests \
+  -only-testing:VariorumTests/SidebarLayoutTests \
+  -only-testing:VariorumTests/CaptureHostsUndoFilingTests \
+  -only-testing:VariorumTests/CaptureFocusReattachTests \
+  -only-testing:VariorumTests/CaptureTourFocusTests \
+  -only-testing:VariorumTests/CaptureOpeningFocusBoxTests \
+  -only-testing:VariorumTests/QuickEntryOpeningScopeTests \
+  -only-testing:VariorumTests/QuickEntryLaunchFocusTests \
+  -only-testing:VariorumTests/CaptureFocusReportTests \
+  -only-testing:VariorumTests/StatusToastPlacementRuleTests \
+  -only-testing:VariorumTests/StatusToastPlacementShellTests
+```
+
+Counts by suite (declared `@Test`s; parameterized tests count once): FreshSidebarWidth 4 · QuickEntryWingLabel 3 · WingChordsAndLabelDoor 8 · CapabilityRegistry 31 · LibraryControlsFlowRule 12 · LibraryControlsStableWidths 4 · LibraryControlsGeometry 7 · LibraryBulkRowGeometry 1 · ShellChrome 6 · SidebarLayout 6 · CaptureHostsUndoFiling 2 · CaptureFocusReattach 4 · CaptureTourFocus 1 · CaptureOpeningFocusBox 4 · QuickEntryOpeningScope 3 · QuickEntryLaunchFocus 3 · CaptureFocusReport 1 · StatusToastPlacementRule 5 · StatusToastPlacementShell 3 = **108 in 19**.
+
+**The watches (red-on-old by revert, each on the committed tree; record "reverts starting" first, restore with `git checkout HEAD -- <files>` and confirm `git status` clean before the next):**
+
+- **W-737a — the oracle's teeth.** In `Variorum/Workspace/ShellSplit.swift`: `static var idealWidth: Double { 240 }` → `{ 210 }`. Run `-only-testing:VariorumTests/FreshSidebarWidthTests` alone. **Predicted RED, `4 tests … with 4 issues`:** `theFreshColumnClearsTheToolbarsWingLabel` — 1 issue per voice (the wash line: Study ≈ 224.4 + 8 > 210, Terminal ≈ 229.8 + 8 > 210; the premise lines green); `theDefaultWindowGrowsWithTheSidebarSoTheLibraryKeepsItsRoom` — 2 issues (`defaultWindowSize == 1270 × 840` → 1240; the reason line, since a 1240 window with 210 is the old one-line room); `theCapturedOriginStillDescribesTheToolbar` and `aDraggedWidthStillWins` green. Restore `ShellSplit.swift`.
+- **W-738 — the absence pins' teeth.** `git checkout 07fd0d50d -- Variorum/Features/Shelf/QuickEntryBar.swift Variorum/Features/Shelf/ShelfView.swift Variorum/Features/Library/LibraryCatalogView.swift Variorum/RootView.swift` (the four production files back to the label, the flipped tests kept). Run `-only-testing:VariorumTests/QuickEntryWingLabelTests -only-testing:VariorumTests/WingChordsAndLabelDoorTests`. **Predicted RED, `11 tests … with 14 issues` in exactly three tests:** `neitherQuickEntryBarNamesTheWing` 7 (4 host + 3 bar), `theLabelIsADeclaredSurfaceDoorOfSwitchWing` 1, `everyWingLabelRendersTheDoor` 6 (root 1, hosts 4, bar 1); the other 8 green. Restore the four files from `HEAD`.
+- **W-P736-4 (optional — the PROVISIONAL's reason, measured mounted).** In `VariorumTests/LibraryControlsFlowTests.swift`, `defaultLibraryWidth`'s first term `ShellSplit<EmptyView, EmptyView>.defaultWindowSize.width` → `1240` (the wider column in an un-widened window). Run `-only-testing:VariorumTests/LibraryControlsGeometryTests`. **Predicted RED: `atTheDefaultWindowWithThePanelClosedTheRowIsOneLine` Terminal only** (Study one line). Restore the file.
+
+**The camera list for the joint window (live; not walked by me):**
+1. **VX-737, the fresh default.** Quit the Debug app; delete ONLY the dev domain's `shellSidebarWidth` key and its `NSWindow Frame variorum-main-AppWindow-*` keys (the first-run walk's D-4 idiom — the dev store's stored 230 would otherwise win: restoration wins by design); launch. Capture the top-left in **both voices**: the window comes up 1270 × 840, the column's line at x = 240, and "in Home" / "in home" beside New Note ends clear of the line with air (≈ 21 / 16 pt), its hover wash clear too (hover it). Then drag the seam to, say, 200 and relaunch: the dragged width is restored (restoration wins).
+2. **VX-738, the bar's face in both hosts, both voices.** The Bookcase's quick-entry band and the Library's foot bar: no "in ‹wing›" at the trailing edge; the placeholder line and the box otherwise unchanged; typing still files (⏎ opens the note). The toolbar's "in ‹wing›" still there and still opens ⌘L's switcher on a press (one wing: ⌘L's note spoken).
+3. **VX-727, Compare's outline (optional, the pin carries it).** In a second wing, a note ▸ Compare ▸ make outline note: the outline opens in a column; its row's wing (Open list hover or the toolbar's "in ‹wing›" when it is focused) names the SAME wing, not Home.
+4. **The Library at the new default window, Terminal, panel closed:** the controls row is one line (P-736-4's point).
+
+### B2 SELF-ASSESSMENT (record close — the Mac counts PENDING the stage window)
+
+**Built (commits on `vx-736-hotfix-101`, each pushed):** `0e1606934` piece 1 (VX-727) + the record opened · `07fd0d50d` piece 2 (VX-737) · `1ee373a9e` piece 3 (VX-738) · this commit (READY-FOR-STAGE + the close draft). Files: `Sources/VariorumCore/Operations/Operations+Versions.swift` (one argument); `App/Variorum/Variorum/Workspace/ShellSplit.swift`, `VariorumApp.swift`; `Features/Shelf/{QuickEntryBar,ShelfView}.swift`, `Features/Library/LibraryCatalogView.swift`, `RootView.swift`; comments in `Registry/CapabilityRegistry.swift`, `Theme/VoiceControls.swift`, `Tools/WalkKit/first-run-walk.sh`; pins in `Tests/VariorumCoreTests/SmartCollectAndOutlineTests.swift`, `App/Variorum/VariorumTests/{FreshSidebarWidthTests (new), QuickEntryWingLabelTests, WingChordsAndLabelDoorTests, CapabilityRegistryTests, LibraryControlsFlowTests, LibraryBulkRowGeometryTests}.swift`. **Zero `Sync/`, zero custody/keychain code, zero editor seam, zero schema; no registry capability added or removed** (`.switchWing` keeps its `.surface` door — the toolbar renders it); no rendered string added.
+
+**Rows dispositioned (final once the stage confirms):**
+- **VX-727 — FIXED.** Pin `OutlineMintTests.anOutlineIsBornInItsSourcesWing`: RED on the pre-fix tree (4 issues — `wingId ""`, Compare's split `otherWings [""]`), GREEN with the fix, **revert-verified** on the committed tree (red 4 → restored green). Headless; no stage needed.
+- **VX-737 — FIXED (PROVISIONAL P-736-4 on the window).** Pin `FreshSidebarWidthTests` (the geometry oracle from measured captures + the toolbar premise + restoration wins + the window rule). Mac RUN: PENDING; red-on-old watch W-737a: PENDING (predicted 4 issues in 2 tests). Live look: the joint window (camera item 1).
+- **VX-738 — FIXED (P-736-1 as built, its wording corrected: the Library's bar, not the Pool's).** Pins flipped to the absence; 15/15 predicates dry-run RED on the pre-fix tree; Mac RUN: PENDING; watch W-738: PENDING (predicted 14 issues in 3 tests). Live look: the joint window (camera item 2).
+
+**PROVISIONALs (for QUESTIONS at the merge — the merging session's):** **P-736-4** — the main window's fresh size grows with the fresh sidebar (1240 → 1270 × 840) so the Library's controls row keeps its one-line room at the default window in Terminal; alternatives: (b) the window stays 1240 and Terminal's closed row wraps at the default (contract line amended), (c) the column grows only to 214 (keeps the row, does not fix her bug). Accepted consequence of (a): an existing user who never dragged the seam also gets the wider column inside her restored window. **P-736-1** (the orchestrator's, built as ruled) — the removal reaches both hosts of the shared bar; correction: the second host is the Library's foot (the Pool has no quick entry).
+
+**For the closeout's canon touches (not mine):** SurfaceContracts §The app — the VX-552 sentence loses "sits on both quick-entry bars and" (VX-738 / R-736-7); §The Library — "At the 1240-pt default" becomes 1270 (VX-737 / P-736-4).
+
+**Machinery honesty:** no session death; the full core run's three failures were load-timing (each green alone, none in a touched file); the dry red-on-old for VX-738 is a script over the pins' exact predicates, not the Mac runner — the real teeth are W-738 at the stage.
