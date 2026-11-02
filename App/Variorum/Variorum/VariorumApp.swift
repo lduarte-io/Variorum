@@ -91,7 +91,10 @@ struct VariorumApp: App {
                 // host in this file may present one again — pinned by
                 // `MCPAsksWaitTests.noSceneHostsTheAskSheet`.)
         }
-        .defaultSize(width: 1240, height: 840)
+        // VX-737 (P-736-4): the sidebar's fresh width + its seam + the
+        // detail's measured room — 1270 × 840 (it was 1240 × 840 with a
+        // 210-pt sidebar; the detail's 1029 is unchanged).
+        .defaultSize(ShellSplit<EmptyView, EmptyView>.defaultWindowSize)
         // 13g L3 + L4 (her WT-3 and WT-4, which the screenshot proved are
         // ONE thing). Her words: *"i don't even konw if we need that empty
         // whitespace that says Variorum at the top - let's try getting rid

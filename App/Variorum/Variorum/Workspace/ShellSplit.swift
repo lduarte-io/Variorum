@@ -58,9 +58,36 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
 
     static var widthKey: String { "shellSidebarWidth" }
     static var minimumWidth: CGFloat { 180 }
-    static var idealWidth: Double { 210 }
+    /// **The fresh-install width** — the column's width until she drags the
+    /// seam (a dragged width is stored under `widthKey` and always wins).
+    ///
+    /// **VX-737 (the VX-736 run, B2 — her R-736-6: "maybe just make the
+    /// sidebar start out wider").** It was 210, and at 210 the window
+    /// toolbar's "in ‹wing›" label crossed the column's line: the toolbar's
+    /// leading items (the traffic lights, the sidebar toggle and New Note's
+    /// glass group, then the label) are laid out by the window, not by this
+    /// column — this shell is an `HStack`, not a split view, so nothing moves
+    /// them with the seam — and they reach x ≈ 223 pt with "in home" in
+    /// Terminal (≈ 219 in Study), measured on macOS 27.0.1. At 240 the label
+    /// and its hover wash clear the line in both voices
+    /// (`FreshSidebarWidthTests`).
+    static var idealWidth: Double { 240 }
     static var maximumWidth: CGFloat { 360 }
     static var dividerWidth: CGFloat { SeamGrip.lineWidth }
+    /// **The detail's width in a fresh window** — the room the Library's
+    /// controls row and bulk row are measured at (the VX-175 and 13n-c
+    /// geometry oracles: 1029 pt, which was 1240 − 210 − 1).
+    static var defaultDetailWidth: CGFloat { 1029 }
+    /// **The main window's fresh size** (`VariorumApp`'s `.defaultSize`):
+    /// the sidebar's fresh width, its seam, and the detail's. VX-737,
+    /// PROVISIONAL P-736-4: a wider fresh sidebar WIDENS THE WINDOW rather
+    /// than narrowing the detail, because the Library's controls row is one
+    /// line at the default window with the panel closed by only ≈ 4 pt in
+    /// Terminal (SurfaceContracts, The Library). So the window grew by the
+    /// sidebar's 30 pt (1240 → 1270) and the detail kept its 1029.
+    static var defaultWindowSize: CGSize {
+        CGSize(width: CGFloat(idealWidth) + dividerWidth + defaultDetailWidth, height: 840)
+    }
     /// **The seam's grip** (17o batch d, ledger row 9). Her words: *"the
     /// hitbox for adjusting the size of the left bar … too small … sometimes
     /// the I looking pointer."* It was 9 pt, and — worse — it was an
