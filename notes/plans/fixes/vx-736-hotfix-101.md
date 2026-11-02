@@ -118,3 +118,37 @@ Instance checks discriminate by PATH and by STORE; never quit/kill a real-store 
 - P-736-2 — a band-card dismissal does NOT suppress the tour's words card (rule 2 reads the tour as its own words home); alt: dismissal suppresses both.
 - The CastleRules one-word reality ("the tutorial's last card" → the closing cards) — the canon touch lands at closeout with the VX-735 pointer; her eye on the wording.
 - The audit's RECORDED (wording-only) rows — B1's table.
+
+## B1 RECORD
+
+**NOT DONE (first line, kept current):** everything below is IN PROGRESS — no Mac `xcodebuild test` run yet (stage-window only), no walk yet (stage-window only), no QUESTIONS.md entry (the shared ledger is the merging session's — P-736-2 and this batch's PROVISIONALs are for the orchestrator to carry), no canon edit (the CastleRules / SurfaceContracts touches are the closeout's).
+
+Implementer: Opus (opus-implementer), 2026-11-02, worktree `~/dev/variorum-vx-736`, branch `vx-736-hotfix-101`, the Pro. Scope: §B1 BRIEF's six pieces. Read in my own context before any code: this file whole; `notes/CastleRules.md` whole; `notes/SessionResiliencyProtocol.md`; `notes/plans/vx-292-onboarding.md` §THE CURRENT TOUR, §SITTING RECORD, §LATER RULINGS, the U2/U3 BRIEFs + U3 COPY DRAFTS and the U2/U3 RECORDs' pieces (the step/anchor/reveal idiom); `Sources/VariorumCore/Domain/Tour.swift` whole; `TourOverlay.swift`, `TourScript.swift`, `TourEngine.swift`; `Shared/Protection/WordsBand.swift`, `Features/Protection/WordsBandCard.swift`, `ProtectionOpenFaces.swift` (`RoadStandingModel`), `AppBootstrap.accountActHoldsTheWords`; `TourTests.swift` (the words, engine, entry and end-card suites), `TourWalkTests.swift`, `WordsBandTests` / `WordsBandSurfaceTests` / `WordsCardAfterAccountActTests`; SurfaceContracts §The app. Zero `Sync/`, zero custody/keychain code, zero editor seam.
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 1 The split (`.protectPassphrase` → `.protectWords` → `.endCard`) | NOT-STARTED — settled design below |
+| 2 The suppression (the two skips from Facts) | NOT-STARTED — baseline traced below (BEFORE building) |
+| 3 The takes-scroll clarity | NOT-STARTED — traced: NO take-level reveal road (below); the fallback sentence lands |
+| 4 The audit (step × claim × verdict) | NOT-STARTED |
+| 5 The acceptance walk (stage window) | NOT-STARTED — PENDING the orchestrator's window |
+| 6 Record close | NOT-STARTED |
+
+### Piece 2 — THE HONEST BASELINE (traced before building, as the brief asks)
+
+What today's build (338c39522) does at the tour's end, per state:
+
+- **The end card's protection block** is `TourEndLibraryBlock(model: TourEndLibraryModel(standing:))`, made ONCE when the end card first shows (`TourOverlay`, `.onChange(of: step)`), from RootView's `tourEndLibrary` factory (nil while no protection faces stand — harness mounts: the card draws without the block).
+- **Passphrase-set state — ALREADY SUPPRESSED (the passphrase half only):** `TourEndLibraryModel.init` builds the ask only while `standing.offersSetPassphrase` (`!passphraseExists()`), so a library with a passphrase gets no ask. Nothing to make red there; the split promotes the same truth to a step skip.
+- **Words-recorded state — NOT suppressed (the words half):** `TourEndLibraryBlock` draws rule 2's door (`ProtectionWords.wordsCardLine`) whenever `look.phase == .closed`, reading NO ledger. A library whose words were recorded (`WordsCardLedger.recorded`) is still offered the door; pressing it mints FRESH words through rule 6's act (re-lock, key unchanged) — the words she wrote down stop opening the library. RED-ON-OLD exists.
+- **Landed-account state — NOT suppressed, and NOT refused by the look either:** a landed set-up / join / Move writes the SAME ledger mark (`AppBootstrap.accountActHoldsTheWords` → `WordsCardLedger.record(libraryID)` — the one writer, VX-511; then `band.accountHoldsTheWords()` retires the live card). The tour's block ignores the ledger, so the door shows; pressing it on a synced library reaches the look's F-U2-3 ask (`saysAccountWords` — "new words replace the account's words everywhere") and, on the passphrase, MINTS words that replace the ACCOUNT's. That is an ask with a warning, not a refusal — so the look's own machinery does NOT suppress it. RED-ON-OLD exists.
+- **One truth carries both:** since VX-511 every landed account act marks the ledger `recorded`, so "not recorded" already means "no landed account act" — the gate reads the band's ledger once, never a second synced-flag gate (no double-gating). Observation (not acted on): a synced library whose ledger lacks the mark (an act landed before VX-511 shipped) is offered words by the BAND too; the tour now matches the band exactly.
+- **Dismissal (P-736-2):** the band's `offersWords` also folds in `dismissed` and the process snooze; the tour's gate deliberately does NOT (rule 2 names the tutorial's last card as a home of its own; a dismissal retired the band) — PROVISIONAL P-736-2 as the brief rules it.
+
+### Piece 3 — the trace (before building)
+
+- Step 7 is reached by Write's takes panel "Open Takes mode" (`WriteTakesPanel` → `CommandRouter.pendingTakesLanding = .bloom(postID:blockID:)`), consumed by `TakesChoreographer.consumeLandings` → `board.bloom(blockID)` + `board.landArticle(on: slot.placementID, kind: .bloom)`. The article's scroll anchors are PLACEMENT ids (one per block row — `TakesArticleScroll`'s "the identity IS the anchor"); a tall row lands by R-Q1's head/foot rule.
+- The default fan style is `.stack` (`AppearanceQueries.fanStyle = .stack`): a bloomed block draws its takes as cards STACKED under the article cell, so "il principe 1532"'s card (and its choose band, the step's ring) can sit below the fold inside the landed row.
+- `TakesViewModel.revealTake` exists but FOCUSES the take (puts the live editing ring on it — what she would type into) and pages a carousel; it is a mint's reveal, not a scroll-to-take, and focusing the Italian would change what she types into. No road brings ONE take's card on screen without that side effect. **NO-ROAD fact recorded; not improvised** — the brief's fallback sentence lands ("Scroll down if you don't see it."), PROVISIONAL, one line to overturn.
