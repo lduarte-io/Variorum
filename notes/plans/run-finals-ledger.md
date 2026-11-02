@@ -153,3 +153,11 @@ Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 �
 - Canon: SurfaceContracts seed-set line · AppSpecRecord 2026-10-30 · QUESTIONS #253/#254. MobileSoul not minted (nothing mobile-visible, R-105-2).
 - Born: VX-711 (Low) · VX-712 (Medium → VX-292) · VX-713 (Low → VX-292) · VX-714 (Low) · VX-715 (Low). Closed superseded: VX-635.
 - Her live rulings this run: R-105-1..10 (the record, verbatim) + S-1 accepted on the Prince precedent + the overnight release word (one folded release, notes public-only, the morning handoff bundles everything).
+
+## VX-736 — Run: the 1.0.1 hotfix — onboarding audit & quick fixes (2026-11-02, PR #214)
+- Cast: Fable orchestrated (architect shape, the overnight run at her advance release word); three fresh Opus implementers (B1 tour/Castle faces + the Castle-face walk at her word, B2 chrome trio, B3 badge + the joint walk); one fresh Fable cold review round (editor-decoration + Castle-face class) — closed at round 1, no BLOCKER/MAJOR.
+- Members: VX-735 · VX-727 · VX-729 · VX-737 · VX-738 (VX-737/738 seated mid-kickoff at her word).
+- Claims: vx736-orchestrator ×3 windows (B1 gates+walk ~04:10–04:50 incl. the Gate-B fixture stop and F-W3's test-first fix; B2 Gate C + three watches; B3 red run + Gate D + the joint walk 06:02–06:35). Gates 52/8 · 45/6 · 108/19 · 57/10; joint walk J0–J5 PASS both voices; dev slot restored md5-identical (211 files) after B1's fresh-slot walk.
+- Canon: SurfaceContracts the-tour line + the VX-552 line + §The Library 1270 · AppSpec First-open parenthetical · AppSpecRecord 2026-11-02 · QUESTIONS #256. The CastleRules one-word touch HELD for her. MobileSoul not minted (nothing mobile-visible; the shared WordsBand change is additive).
+- Born: VX-739 (Medium) · VX-740 (Medium, mechanism traced at the ladder) · VX-741 (Medium) · VX-745 (Medium, Castle & sync) · VX-742/743/744 (Low). Site: R-736-8 noindex off the four Variorum pages (stargazing-tech ac74b3a).
+- Her live rulings: R-736-1..8 (the record's SITTING RECORD verbatim) + the overnight release word given twice.

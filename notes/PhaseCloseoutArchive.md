@@ -1468,3 +1468,19 @@ deltas as drafted; bundle QUESTIONS #255; VX-712 closed hollow by its trace pin,
 by VX-559. Born: VX-716/717/718 (all Parked with reasons). HELD FOR HER: the Prince front-note sentence,
 P-292-4/5 (sea-glass depth; Default/Classic naming), the words-card toast observation, the #255 pass. Next: her
 morning checklist in the handoff; the wording-only tour pass at her word (R-292-4's second half).
+
+**→ VX-724 CLOSED 2026-11-01 — THE BOOK'S POSITION LINE MOVES TO A BOTTOM BAR, AND VARIORUM 1.0 SHIPS
+(the record `notes/plans/fixes/vx-724-book-position-bottom-bar.md`; PR #213; the handoff
+`notes/handoffs/vx-724-handoff.md`).** Architect shape at her word, one evening, her same-message release word.
+VX-562's pinned line left the top of the Outline and became `OutlineBottomBar` below the page (outside the
+scroll — landing geometry untouched): position words leading, the static counts trailing-right, separated; the
+joiner retired into the two-half `BookOutlineViewed.Bar` (one `NoteTotal`, the one-total law kept); the quiet
+receipt floats above the bar (R-724-2); full pane width (R-724-3); position wins the squeeze (R-724-4). R-724-1
+amends 13c A6's reach: the scrub/progress ban stands whole, one sanctioned position bar at the page's foot. One
+Opus ladder, closed at round 2: the one BLOCKER was the stale A6 pin itself, rescoped into
+`outlinesOnlyBottomChromeIsThePositionBar` with its teeth kept and the new placement arms revert-proven; R2's
+residuals deferred as VX-725/VX-726 (both Low). Evidence: 65 tests in 3 suites + the reviewer's 15-suite sweep
+green; the acceptance walk on the dev store's prince, the navigator's highlight agreeing with the bar. Canon:
+the SurfaceContracts nav-info line rewritten in place + the receipt rule's R-724-2 exception; the dated entry in
+AppSpecRecord. Nothing mobile-visible. **Version 1.0 released at her word right after the merge** — her notes
+verbatim ("Welcome to Variorum! This is version 1.0"), the release outcome in the handoff. Next: hers.

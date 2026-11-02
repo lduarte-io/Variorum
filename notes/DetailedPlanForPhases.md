@@ -13,26 +13,28 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-500 — Run: the 0.10 window follow-ups** (sync follow-ups: VX-495 · VX-496 · VX-497 · VX-505 · VX-544 · VX-539 · VX-504; VX-508 HELD on tester A's join; riders VX-546 · VX-490 · VX-76 as dup) — architect shape, Fable orchestrates; the record `notes/plans/fixes/vx-500-sync-followups.md` | VX-500 · `vx-500-sync-followups` | `~/dev/variorum-vx-500` · the Pro | IN PROGRESS since 2026-11-01 — the ONE `Sync/`-and-custody slot; the PR is HELD OPEN at her word (launch code freeze), merge at her say-so |
-| **VX-736 — Run: the 1.0.1 hotfix — onboarding audit & quick fixes** (VX-735 the overloaded final tour card + the tour audit and the words-pane suppression walk · VX-727 outline mints in Home · VX-729 take badge disappears) — architect shape, Fable orchestrates; the record `notes/plans/fixes/vx-736-hotfix-101.md` | VX-736 · `vx-736-hotfix-101` | `~/dev/variorum-vx-736` · the Pro | IN PROGRESS since 2026-11-02 — overnight run; releases as 1.0.1 at her advance word |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-724 CLOSED 2026-11-01 — THE BOOK'S POSITION LINE MOVES TO A BOTTOM BAR, AND VARIORUM 1.0 SHIPS
-(the record `notes/plans/fixes/vx-724-book-position-bottom-bar.md`; PR #213; the handoff
-`notes/handoffs/vx-724-handoff.md`).** Architect shape at her word, one evening, her same-message release word.
-VX-562's pinned line left the top of the Outline and became `OutlineBottomBar` below the page (outside the
-scroll — landing geometry untouched): position words leading, the static counts trailing-right, separated; the
-joiner retired into the two-half `BookOutlineViewed.Bar` (one `NoteTotal`, the one-total law kept); the quiet
-receipt floats above the bar (R-724-2); full pane width (R-724-3); position wins the squeeze (R-724-4). R-724-1
-amends 13c A6's reach: the scrub/progress ban stands whole, one sanctioned position bar at the page's foot. One
-Opus ladder, closed at round 2: the one BLOCKER was the stale A6 pin itself, rescoped into
-`outlinesOnlyBottomChromeIsThePositionBar` with its teeth kept and the new placement arms revert-proven; R2's
-residuals deferred as VX-725/VX-726 (both Low). Evidence: 65 tests in 3 suites + the reviewer's 15-suite sweep
-green; the acceptance walk on the dev store's prince, the navigator's highlight agreeing with the bar. Canon:
-the SurfaceContracts nav-info line rewritten in place + the receipt rule's R-724-2 exception; the dated entry in
-AppSpecRecord. Nothing mobile-visible. **Version 1.0 released at her word right after the merge** — her notes
-verbatim ("Welcome to Variorum! This is version 1.0"), the release outcome in the handoff. Next: hers.
+**→ VX-736 CLOSED 2026-11-02 — THE 1.0.1 HOTFIX: THE TOUR'S CLOSING CARDS AND THE QUICK FIVE
+(the record `notes/plans/fixes/vx-736-hotfix-101.md`, FOR A LATER READER at its top; PR #214; the handoff
+`notes/handoffs/vx-736-handoff.md`).** Her ~2:45 AM kickoff after her fresh-profile test of the shipped 1.0; one
+overnight /architect-phase run, five members under one run ticket. The tour's overflowing final card became the
+CLOSING CARDS — a passphrase card then a twelve-words card, each skipped while its ask is not owed (the band
+card's own ledger truths; the VX-511 landed-account class), then the clean end card — with the onboarding audit
+(29 rows), the step-7 scroll sentence, and F-W3's ask-state truncation fixed test-first (VX-735). VX-727's
+outline is born in its note's wing; VX-737's fresh sidebar is 240 pt inside a 1270 × 840 default window
+(P-736-4 — the Library's one-line row kept); VX-738's wing label is off both quick-entry bars (the toolbar
+switcher stays); VX-729's vanishing take badge traced to the confirmed VX-702 instance (no display pass after a
+frame-constant edit on 27.0.1) and fixed on the house's needsDisplay road with a 14-row sibling sweep. Three
+Opus batches; gates A–D green (52/8 · 45/6 · 108/19 · 57/10); every watch red exactly as predicted; the joint
+walk J0–J5 PASS in both voices. One Fable ladder round: no BLOCKER, no MAJOR — closed at round 1. Canon: the
+tour line and the VX-552 line rewritten in place, §The Library's default 1240 → 1270, AppSpec's First-open
+parenthetical; the CastleRules one-word touch HELD for her. Born: VX-739–745; R-736-8 took the site's noindex
+off the four Variorum pages (stargazing-tech ac74b3a, deployed with the publish). Nothing mobile-visible.
+**Released as 1.0.1 the same night at her advance word** (R-736-4; notes "Minor bug fixes."; the outcome in the
+handoff). Next: hers — the morning bundle is the handoff's checklist.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
