@@ -196,6 +196,11 @@ Cold reviewer: Opus (opus-reviewer), 2026-11-01. **No BLOCKER, no MAJOR ⇒ no r
 
 **Round-2 closeout obligations, gathered:** the walk (the acceptance unit's use-shaped evidence; F-7 and the P-724-1/-2 blessings ride it) · the Debt tickets — MINTED: **VX-726** (R2-F-1, oracle hygiene, Tests & tooling · Suspected · Low) and **VX-725** (F-6, the four-names rename, Books · Confirmed · Low) · QUESTIONS entries for any P-724 provisional she leaves unruled at the merge.
 
+**The blessings landed (her answers at the 2026-11-01 sitting, after the walk's screenshots, both options presented each):**
+- **R-724-3 — P-724-1 RULED:** "Full pane width (as built)." The bar runs the pane's width, position at its left edge, counts at its right.
+- **R-724-4 — P-724-2 RULED:** "Position wins (as built)." Under width pressure the position half keeps its words and the counts truncate.
+Every P-724 provisional is now ruled (R-724-2/-3/-4); NO QUESTIONS entry is owed at the merge. F-7 (the two bottom-bar looks across modes) was surfaced with the screenshots and awaits her word or stands as is — not a provisional, no entry owed.
+
 ## THE WALK (the orchestrator's acceptance evidence, 2026-11-01)
 
 Stage claimed (`vx-724`, 45 min, released after; no other Variorum instance before, during or after). Debug build of `611605f3d` from the worktree (`DerivedData/vx724walk`), launched on the dev store (`io.lduarte.Variorum.debug`, the only instance), the prince (6 chapters, 30 notes, owned) opened in Outline:
