@@ -1503,6 +1503,98 @@ and row shapes) · `AuthRLSDDLTests.swift`'s two VX-495 pins and the rollback pi
 **Not yours:** running anything on the server; `Sources/`; U2/U3/U4. **ENVIRONMENT TRAPS — the section above, binding
 verbatim.**
 
+### DEPLOY-FIX RECORD (the Fable implementer, 2026-11-01; VX-721; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+**NOT DONE (the record's first line; final at the close).** NOT RUN ON A POSTGRES — nothing here has: both artifacts and
+the sweep stay string-pinned until the orchestrator's re-run (the brief: no server contact of any kind). **NOT BUILT AS
+THE BRIEF READ IT** — the grant left STANDING and a sweep row failing when CREATE is NOT held: the repo's standing idiom
+closes that grant again in the same transaction (THE MECHANISM below — 14c:101 and five more artifacts), so this record
+builds the idiom WHOLE and marks the sweep row's expectation PROVISIONAL (P-500-9) — her one-line call either way before
+the re-run; the conversion to the brief's letter is minutes (P-500-9 names it). NOT TOUCHED: `Sources/`; the checklist's
+RUN 1 paragraph (the orchestrator's record — its "lost CREATE … a platform rewrite" premise is corrected HERE, not there);
+the orchestrator's LIVE STATUS row 3c and HELD FOR HER (flagged in the handback); U2/U4; the deploy; the PR. NOT
+PINNED: a chain-wide bracket pin (every artifact that re-owns to the definer carries the idiom) — 17 lacks it legitimately
+(its one re-own is a no-op), so such a pin needs a by-name exemption with its reason; named in the self-assessment, not
+built (scope). **MACHINERY HONESTY:** piece 1's three files were SWEPT INTO THE ORCHESTRATOR'S COMMIT `168d8cd4f`
+(R-500-10's entry) by a `git add -A` in the shared worktree while this session was mid-piece — complete on disk, the
+suites already green, the record not yet written (the Edit that would have opened it refused on the moved file). Nothing
+lost; verified by this session after the fact (the positions, the pins, 86/2 on HEAD) and recorded below as that hash.
+
+#### LIVE STATUS (the deploy-fix session; flipped per piece, in the piece's own commit)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | BOTH artifacts (`maintenance/vx495-pull-keyset.sql`, `maintenance/vx495-rollback.sql`): `grant usage, create on schema public to variorum_definer;` as the FIRST statement after the marker guard (R-500-9's letter) and `revoke create on schema public from variorum_definer;` right after the LAST `owner to variorum_definer;` — the 10/14c idiom whole; the headers' VX-721 paragraphs; the pins (`AuthRLSDDLTests.definerCreateBracketProblems` — exactly one of each, the grant after `$guard$;` with nothing but whitespace between on the stripped text and before any `create or replace`, the revoke after the last re-own and before `commit;`) added to the count pin and the rollback pin | DONE (`168d8cd4f` — the orchestrator's commit, the sweep-in above; this commit opens the record) — the honest red on the real pre-fix tree: with the two assertions written and the artifacts untouched, `swift test --skip-build --filter "theCatchUpCount…AuthenticatedOnly|theRollbackRestores…DeployedChain"` → "Test run with 2 tests in 1 suite failed after 0.048 seconds with 2 issues" — `AuthRLSDDLTests.swift:800:9: Expectation failed: Self.definerCreateBracketProblems(in: artifact).isEmpty` with `["the schema grant appears 0 times, not once", "the schema revoke appears 0 times, not once"]`, and `:869:9` the same for `rollback`; every other assertion of both pins green. Then the four artifact edits; `swift test --skip-build --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` → **"Test run with 86 tests in 2 suites passed after 0.310 seconds"** (round 2's 86 — assertions grew, not tests); re-run on HEAD `168d8cd4f` after the sweep-in: 86/2 passed, the lines at keyset :137 `$guard$;` → :143 grant · :361–:362 the re-owns → :363 revoke · :374 `commit;`; rollback :85 → :90 · :228 → :229 · :235 |
+| 2 | The grant sweep (`maintenance/14c-post-deploy-grant-sweep.sql`): a `schema-privilege` row family — `has_schema_privilege('variorum_definer', 'public', 'USAGE')` expected TRUE and `… 'CREATE')` expected FALSE (the idiom's end state; P-500-9), the sweep's own verdict vocabulary (`OK` / `MISMATCH:<privilege> — <why>`), a sixth `ord`; a pin that the sweep's text carries both checks with those expectations; the new totals stated here, in THE DEPLOY §3 and in the checklist's verify row | NOT-STARTED — the settled design is the row shape above; the expected totals move 63 OK · 4 INFO · 0 fail → **65 OK · 4 INFO · 0 fail** (two new OK rows) — PENDING until the row is written and the pin green |
+| 3 | Close: `swift build`; `swift test --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` with the count; the NOT DONE line final; the self-assessment | NOT-STARTED |
+
+#### THE MECHANISM, re-traced before the first line was written — what RUN 1 hit, and where the brief's premise and the repo part
+
+- **Postgres's rule** (ALTER FUNCTION … OWNER TO): the executing role must be able to SET ROLE to the new owner, and **the
+  new owner must hold CREATE on the function's schema**. The hosted `postgres` is non-superuser; it is a member of
+  `variorum_definer` (14c:73) and holds CREATE on `public` through `pg_database_owner` (the checklist's probe) — so the
+  grant itself is grantable by the deploying role, as it was at 14c, 10, 11 and 12.
+- **The live ACL** `variorum_definer=U` (RUN 1's probe) **is the 14c gate's deliberate END STATE, not a loss.** 14c:75–81
+  grants `usage, create` "only for the ownership acquisition below … It is revoked again before commit; the role ends
+  usage-only, owning functions it could not re-create", and 14c:101 revokes it. Every artifact since that re-owns a
+  function to the definer carries the same two lines around its re-owns — the repo's own name for it is "the 10/14c
+  idiom … opened and closed in the same transaction, usage untouched": `10_phase13j_purge.sql:715/:727`,
+  `11_pre13x_postures.sql:981/:994`, `12_phase13y_tenant_seq.sql:1729/:1744`, `maintenance/13j-window-pull-rename.sql:132/:134`,
+  `maintenance/pre13x-ladder-rotation-clearing-guard.sql:241/:243`, `maintenance/14c-gate-definer-owner.sql:81/:101`.
+  The 13j rename's comment records this exact refusal class live once before: "the live 42501 this file's first run hit
+  proved the revoke-after-deploy discipline is working". **VX-721 is that class's THIRD live occurrence** (14c's first
+  run; the 13j rename's first run; RUN 1) — each time an artifact re-owned without the bracket.
+- **Why 17 (2026-10-22) and the `sync_pull` re-own pass without a bracket:** `create or replace` keeps a function's owner,
+  and an owner-UNCHANGED `alter … owner to` is a no-op — Postgres's `AlterObjectOwner_internal` (alter.c) runs its
+  permission checks (can-set-role; CREATE on the namespace) only inside `if (old_ownerId != new_ownerId)`. 17:276 re-owns
+  `key_vault_update`, which 12 had already given the definer — a no-op, no check. In the keyset artifact `sync_pull`'s
+  re-own is the same no-op; **`sync_pull_remaining` is a NEW function, born owned by the deploying `postgres`, and its
+  handoff is the one real owner change — the line that refused.** (My reading of the source, not a Postgres run; RUN 1's
+  dry runs — whole, guard + both creates, whole minus BOTH re-owns — are consistent with it and never isolated the line.)
+- **Consequences for the brief's premise, said plainly:** (1) "`variorum_definer` lost CREATE on `public` since 14c
+  granted it … a platform upgrade or ACL rewrite between then and now is the likely thief" (the checklist's RUN 1; R-500-10's
+  "the ruled, deployed state the platform removed") — not supported by the repo: nothing drifted; the two VX-495 artifacts
+  omitted the idiom every creating artifact carries. (2) "The rollback artifact carries the same `owner to` line and would
+  fail identically" — doubtful: its one re-own is owner-unchanged today. The bracket is carried in the rollback anyway (the
+  road back must never refuse where the road forward did; a `sync_pull` ever met owned by the deploying role would need
+  it). (3) "14c accepted CREATE on public for it" — for the duration of one transaction, never as an end state. The
+  checklist's RUN 1 paragraph carries the premise; it is the orchestrator's record and is left for the orchestrator to amend
+  (the handback names it).
+
+#### THE PROVISIONAL — P-500-9 (hers; one line either way, BEFORE the re-run)
+
+**The question:** does the definer END the deploy holding CREATE on `public`, or usage-only? **The brief's letter (and
+R-500-10's restatement):** the grant standing (no revoke), and a sweep row that FAILS when CREATE is not held — i.e. CREATE
+held permanently, "so the drift is caught next time". **Built here, the most spec-defensible reading of her words "14c's
+exact letter":** the idiom — grant → re-owns → revoke — and sweep rows expecting USAGE = true, CREATE = **false**. The
+grant IS kept, exactly where R-500-9 puts it (first after the guard, both artifacts); what the idiom adds is its closing
+line, and what the fork decides is the sweep row's expected value. **The options:** (a) as built: least privilege; the six
+artifacts' letter and 14c's stated posture ("owning functions it could not re-create"); the sweep catches a LEAKED CREATE
+(an artifact whose bracket was left open, or a platform grant the role inherits) and a LOST USAGE (every definer body
+would refuse); the deploy-time class is caught by the deploy failing loudly (as RUN 1 did) and by the bracket pin on both
+artifacts at build time; the production posture after the re-run is byte-identical to the one it has held since
+2026-08-11. (b) the brief's: CREATE held — the definer is NOLOGIN, unreachable from any API, and the only code that ever
+runs AS it is the fixed SECURITY DEFINER bodies, whose dynamic SQL is `format(%I/%L)`-quoted over an allowlist — so the
+practical exposure is small; but it is a posture no sitting ruled, it contradicts the letter of every re-owning artifact,
+and a sweep row asserting it reads MISMATCH the day the next artifact follows the idiom. (c) the idiom plus a USAGE-only
+sweep row (CREATE unasserted, INFO) — sidesteps the fork, loses the leak check. **Conversion (a)→(b):** delete the two
+`revoke create …` lines, flip one `false` to `true` in the sweep's CREATE row, retune the bracket pin's revoke arm —
+minutes, no design. **Why (a) is the safe thing to have BUILT while she decides:** the re-run succeeds under either (the
+re-own runs while CREATE is held in both), and (a) changes nothing on production that (b) could not add later with one
+`grant`; (b) landed first would be a posture widening on a premise the repo contradicts.
+
+#### The pins (piece 1) — exactly what is asserted
+
+`AuthRLSDDLTests.definerCreateBracketProblems(in:)` over the STRIPPED artifact (comment lines removed, so a comment that
+quotes the lines never counts): the grant line exactly once; the revoke line exactly once; the grant AFTER `$guard$;` with
+nothing but whitespace between them and BEFORE the first `create or replace function ` (R-500-9's "first statement after
+the guard"); the revoke AFTER the last `owner to variorum_definer;` and BEFORE `\ncommit;`. Called from the count pin
+(`theCatchUpCountIsAnIndexOnlyReadUnderThePullsGatesForAuthenticatedOnly`, over the keyset artifact) and the rollback pin
+(`theRollbackRestoresThirteensPullByteForByteAndNeverJoinsTheDeployedChain`, over the rollback). The rollback's
+byte-equality (a) is untouched — the bracket sits outside the copied `create or replace … $$;` text; the search-path
+resolver ignores both lines (its regex matches only `create or replace function` / `drop function` / `alter function`),
+so the belt pins and the doctored-chain proof read exactly as before — the suites say so (86/2).
+
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
 **Who you are.** The implementer for U2 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
