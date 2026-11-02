@@ -1416,24 +1416,10 @@ extension BookOutlineLandingTests {
                         == BookOutlineViewed.Bar(position: "", counts: counts),
                     "the counts alone, in the trailing half: \(String(describing: BookOutlineGeometry.outlinePinLines[readingID]))")
             let pinAtRest = try #require(BookOutlineGeometry.outlinePinFrames[readingID])
-
-            // VX-724: the bar stands BELOW the page — a sibling under the
-            // page's scroll view, never above it (the old pinned line's
-            // place) and never inside it — and is the pane's foot. Both
-            // rectangles in the bar's own space: `.global` in this host is
-            // the WINDOW's top-left space, title bar included (measured: the
-            // bar's maxY is the window frame's height, the content view's
-            // is that less the title bar), so the page's AppKit rectangle
-            // (window base, bottom-left) flips by the window frame's height.
-            let page = try #require(outlineScroll(in: hosting), "the Outline's scroll view")
-            let windowHeight = window.frame.height
-            let pageBottom = windowHeight - page.convert(page.bounds, to: nil).minY
-            print("VX-724 BAR:", "bar=\(pinAtRest)", "page bottom=\(pageBottom)",
-                  "window height=\(windowHeight)", "content height=\(hosting.bounds.height)")
-            #expect(pinAtRest.minY >= pageBottom - 0.5,
-                    "the bar sits below the page: bar \(pinAtRest), page bottom \(pageBottom)")
-            #expect(abs(pinAtRest.maxY - windowHeight) <= 0.5,
-                    "the bar is the pane's foot: bar \(pinAtRest), window height \(windowHeight)")
+            // (WHERE the bar stands — below the page, the pane's foot — is
+            // pinned beside the A6 ruling R-724-1 amends:
+            // `OutlineWritingSurfaceTests.outlinesOnlyBottomChromeIsThePositionBar`.
+            // Here, what it says and that the page never moves it.)
 
             // The caret: the long story, live.
             let story = postIDs[4]
