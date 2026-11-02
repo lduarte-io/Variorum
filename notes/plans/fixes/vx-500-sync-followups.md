@@ -553,8 +553,9 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   talking about VX-683 and I made it a higher priority. can VX-683 go with VX-544?" — the orchestrator's answer: not one
   run (different kinds — a custody drill vs a `Sync/`+autosave-seam change with the convergence suites; VX-683 needs a
   design memo and a sitting first); one successor orchestrator can carry VX-500's close → VX-683 → VX-544 as three
-  tickets, three branches, three PRs. On the 14c grant: KEPT — it is the ruled, deployed state the platform removed; the
-  sweep row catches the next rewrite. This session finishes the deploy and her Pro's catch-up, then hands off.
+  tickets, three branches, three PRs. On the 14c grant: SUPERSEDED the same evening — the deploy-fix implementer falsified the premise (the usage-only
+  ACL is 14c's deliberate end state; every re-owning artifact brackets grant → re-own → revoke); the fix is the standing
+  idiom, P-500-9's call hers (see the DEPLOY-FIX RECORD). This session finishes the deploy and her Pro's catch-up, then hands off.
 - **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
   line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
   all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
