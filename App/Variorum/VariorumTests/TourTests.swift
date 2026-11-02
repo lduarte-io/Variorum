@@ -2263,6 +2263,163 @@ struct TourEndCardTests {
             note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0)))
         return engine
     }
+
+    /// VX-735: the same road, on a library that owes both closing asks — the
+    /// engine stands on the passphrase card.
+    static func engineAtTheClose(_ session: AppSession) -> TourEngine {
+        let engine = TourEngine(
+            session: session,
+            landmarks: .init(seededBookID: "sherlock", firstStoryID: "scandal", fieldGuideID: "guide"),
+            facts: Tour.Facts(place: .area(.bookcase)),
+            doors: TourEngine.Doors(
+                navigate: { _ in }, openFieldGuide: {}, recordCompleted: {}, finished: { _ in }))
+        func write(_ block: String, _ ordinal: Int, takes: Int = 1) -> Tour.Facts {
+            .init(place: .note("scandal"), noteMode: .write,
+                  caret: .init(noteID: "scandal", blockID: block, ordinal: ordinal, takeCount: takes))
+        }
+        engine.next()
+        engine.observe(.init(place: .book("sherlock")))
+        engine.observe(.init(place: .note("scandal"), noteMode: .write))
+        engine.observe(write("b1", 1))
+        engine.observe(write("b40", 40))
+        engine.observe(write("b40", 40, takes: 2))
+        engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+        walkFromTakesToTheBookcase(engine)
+        engine.observe(.init(
+            place: .note("mine"), noteMode: .write,
+            note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0),
+            asks: .init(passphrase: true, words: true)))
+        return engine
+    }
+}
+
+// MARK: - VX-735 — the closing cards, laid out whole through the live overlay
+
+@Suite("VX-735 — the closing cards lay out whole (the geometry oracle)", .serialized)
+@MainActor
+struct TourClosingCardTests {
+    /// **Her overflow, gone** (VX-735's screenshot: the end card stacked the
+    /// nav summary, the passphrase ask and the twelve words and ran off the
+    /// window). Through the LIVE overlay on a standard window (1100 × 720, the
+    /// end-card pin's), over the real road: the passphrase card and the words
+    /// card — the words shown, copied and at the warning, its tallest state —
+    /// each sit WHOLE inside the window; the words card's clipboard caveat is
+    /// laid out at the card's FULL width under the grid (never a squished side
+    /// column: as wide as the look itself), and its words whole. Both rooms.
+    @Test func theClosingCardsSitWholeOnAStandardWindowWithTheCaveatFullWidth() async throws {
+        #if DEBUG
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            try await Self.walkTheClose(session, scheme: .light)
+            try await Self.walkTheClose(session, scheme: .dark)
+        }
+        #endif
+    }
+
+    #if DEBUG
+    static func walkTheClose(_ session: AppSession, scheme: ColorScheme) async throws {
+        let road = PlantedRoad()
+        let created = try await road.created()
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(
+            created.0, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
+        let library = TourEndLibraryModel(standing: standing)
+        let engine = TourEndCardTests.engineAtTheClose(session)
+        #expect(engine.state.step == .protectPassphrase)
+        TourOracle.cardFrame = nil
+        TourClosingOracle.copiedCaveatFrame = nil
+        TourClosingOracle.stackedLookFrame = nil
+        let window = NSWindow(
+            contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: LiveClosingCardRig(
+            engine: engine, scheme: scheme, standing: standing, library: library))
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        // The passphrase card.
+        await settle(window, hosting) { TourOracle.cardFrame != nil }
+        await settle(window, hosting, turns: 20) { false }
+        try expectWhole("\(scheme) the passphrase card", in: hosting.bounds)
+        // Next → the words card; the look shown, copied, at its warning.
+        engine.next()
+        #expect(engine.state.step == .protectWords)
+        await library.showWords()
+        library.look.copy()
+        library.look.writtenDown()
+        #expect(library.look.phase == .warning && library.holdsTheDoors)
+        await settle(window, hosting) { TourClosingOracle.copiedCaveatFrame != nil }
+        await settle(window, hosting, turns: 30) { false }
+        try expectWhole("\(scheme) the words card at its warning", in: hosting.bounds)
+        let caveat = try #require(TourClosingOracle.copiedCaveatFrame, "\(scheme): the caveat drew")
+        let look = try #require(TourClosingOracle.stackedLookFrame, "\(scheme): the stacked look drew")
+        #expect(abs(caveat.width - look.width) <= 1,
+                "\(scheme): the caveat spans the look's full width (\(caveat.width) of \(look.width))")
+        let card = try #require(TourOracle.cardFrame)
+        #expect(caveat.width >= TourClosingCard.width - 60 - 1,
+                "\(scheme): the caveat has the card's whole measure, never a side column")
+        #expect(caveat.minX >= card.minX && caveat.maxX <= card.maxX + 0.5, "\(scheme): inside the card")
+        // Its words are laid out whole at that width (never truncated).
+        let free = NSHostingView(rootView: Text(ProtectionWords.wordsLookCopied)
+            .font(VoiceTokens.fallback(for: scheme).small)
+            .frame(width: caveat.width, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true))
+        #expect(caveat.height >= free.fittingSize.height - 0.5, "\(scheme): the caveat is whole")
+        library.look.close()
+    }
+
+    /// The card drew at its measure and sits wholly inside the window
+    /// (SwiftUI's global space is the window content's own, top-left origin —
+    /// the hosting view fills it).
+    static func expectWhole(_ what: String, in bounds: CGRect) throws {
+        let card = try #require(TourOracle.cardFrame, "\(what): the card drew")
+        #expect(card.width <= TourClosingCard.width + 0.5, "\(what): the card's measure")
+        #expect(card.height > 60, "\(what): a real card, \(card.height) pt")
+        #expect(card.minY >= -0.5 && card.maxY <= bounds.height + 0.5
+                && card.minX >= -0.5 && card.maxX <= bounds.width + 0.5,
+                "\(what): whole inside the window — \(card) in \(bounds)")
+    }
+    #endif
+}
+
+/// The closing cards' live composition: the real `TourOverlay` with the
+/// closing asks read from the real faces (`TourEndLibraryModel.asks`) and the
+/// overlay's factory handing back the test's own model (so the pin drives
+/// the look the card draws).
+private struct LiveClosingCardRig: View {
+    let engine: TourEngine
+    let scheme: ColorScheme
+    let standing: RoadStandingModel
+    let library: TourEndLibraryModel
+
+    var body: some View {
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay {
+                TourOverlay(
+                    engine: engine,
+                    sources: TourFactSources(
+                        selection: { .post("mine") },
+                        noteDetail: { ("mine", .write) },
+                        caret: { nil },
+                        bookNoteLive: { false },
+                        isStarred: { _ in false },
+                        closingAsks: { [standing] in TourEndLibraryModel.asks(standing) }),
+                    endLibrary: { [library] in library })
+            }
+            .environment(\.colorScheme, scheme)
+    }
 }
 
 /// The live composition the end card is drawn in: the real `TourOverlay`
