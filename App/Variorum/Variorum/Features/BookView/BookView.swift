@@ -3353,12 +3353,12 @@ private struct NavigatorMarkProbe: ViewModifier {
 
 /// **The bar that stays at the foot of the Outline while the page scrolls**
 /// — her beta ask (*"the navigation info (number of chapters and notes)
-/// stays fixed … while scrolling"*), widened by her improvements note
-/// (*"show during scroll what # note you're in, maybe what chapter you're
-/// in"*), and MOVED from above the page by her VX-724 ruling (R-724-1:
-/// *"please just move it to the bottom bar of the book view, instead of the
-/// top. also, I would change it so that the information that isn't changing
-/// is to the right, separated"*).
+/// stays fixed at the top while scrolling"*), widened by her improvements
+/// note (*"show during scroll what # note you're in, maybe what chapter
+/// you're in"*); its FIXED half stands, and its at-the-top half she moved
+/// (VX-724, R-724-1: *"please just move it to the bottom bar of the book
+/// view, instead of the top. also, I would change it so that the
+/// information that isn't changing is to the right, separated"*).
 ///
 /// - **Where:** a sibling BELOW the page's scroll view (`BookView.body`'s
 ///   `.outline` stack), never inside it — the landings measure every anchor's

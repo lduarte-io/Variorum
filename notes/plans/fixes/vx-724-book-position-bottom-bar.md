@@ -65,8 +65,10 @@ Implementer: Opus (opus-implementer), 2026-11-01, worktree `~/dev/variorum-vx-72
 | 1. The bar (BookView `.outline` arm, `OutlinePinnedLine` → `OutlineBottomBar`, receipt overlay onto `outlineBody`, oracle records the bar) | DONE (`ab9eb595f`) — compiles (`TEST BUILD SUCCEEDED`) |
 | 2. The pins (`BookOutlineViewedTests`, `BookOutlineLandingTests`) | DONE (`ab9eb595f`, the placement pin's coordinate fix `fbe571fcc`) |
 | 3. The two suites under a held stage claim | GREEN at `fbe571fcc`: `✔ Test run with 58 tests in 2 suites passed after 64.699 seconds with 4 warnings.` (0 skipped; the 4 warnings are the host app's swift-dependencies `Date.swift:37` unimplemented-date notices, «unknown» test, ambient). Run 1 (`ab9eb595f`): 58 tests, 1 issue — the placement pin's first coordinate conversion (fixed, see piece 2). |
-| 3b. Placement pin's teeth — behavioral revert | **REVERT IN FLIGHT** — `OutlineBottomBar` moved back ABOVE `outlineBody` in BookView.swift's `.outline` stack (the old placement); restore = `git checkout -- App/Variorum/Variorum/Features/BookView/BookView.swift` (clean at `fbe571fcc`+record). Expected: the two VX-724 placement expectations red, all else green. |
-| 4. Self-assessment | NOT-STARTED |
+| 3b. Placement pin's teeth — behavioral revert | DONE — **no revert in flight.** `OutlineBottomBar` moved back ABOVE `outlineBody` (the old placement), landing suite alone: `✘ Test run with 27 tests in 1 suite failed … with 6 issues (including 4 warnings)` — exactly the two VX-724 placement expectations red (`VX-724 BAR: bar=(191.0, 32.0, 1009.0, 26.0) page bottom=792.0 window height=792.0` — the bar just under the title bar, the page running to the window's foot), every other expectation green. Restored by `git checkout --` (tree clean). |
+| 3c. Neighbouring consumers (the grep: `metaLine` in `VocabularySweepTests`; `BookOutlineViewed` in `BookNavigatorFollowTests`' two suites) | GREEN: `✔ Test run with 23 tests in 3 suites passed after 0.180 seconds.` (`VocabularySweepTests`, `BookNavigatorFollowTests`, `BookNavigatorViewedPairTests`). No other test or app file names `OutlinePinnedLine` / `outlinePinLine` / `pinLine` (grep clean; mobile's `MobileBookDetails.metaLine` is an unrelated symbol). |
+| 3d. Final run, restored tree (`9a4349210`) | GREEN: `✔ Test run with 58 tests in 2 suites passed after 64.462 seconds with 4 warnings.` · `VX-724 BAR: bar=(191.0, 766.0, 1009.0, 26.0) page bottom=766.0 window height=792.0`. Stage released (`STAGE FREE`), no Variorum instance running. After it, ONE doc-comment-only edit (`OutlineBottomBar`'s header quotes her beta ask whole instead of with an ellipsis): `** TEST BUILD SUCCEEDED **`, no suite re-run (no code changed). |
+| 4. Self-assessment | DONE (below) |
 
 **The implementer's calls (brief points 5 and 6 left them to me):**
 
@@ -84,7 +86,37 @@ Implementer: Opus (opus-implementer), 2026-11-01, worktree `~/dev/variorum-vx-72
 - **C-3 — one placement assertion added** to the mounted pin that already reads the bar's frame
   (`theNavigatorFollowsWhatThePageShowsNeverTheCaret`): the bar stands BELOW the page's scroll view. This is the
   moved placement itself, so it is the red-on-old pin for "the line leaves the top" (on the old tree the pinned
-  line's frame sat above the scroll).
+  line's frame sat above the scroll). Plus its sibling: the bar is the pane's foot (its maxY is the window's). Both
+  read the bar's `.global` frame against the page's AppKit rectangle flipped by the WINDOW frame's height — run 1
+  measured that `.global` in this host is the window's top-left space with the title bar included (the bar's maxY
+  792 = the window frame; the content view is 760), so the first conversion (by the content height) was 32 pt off.
+
+**The changed pins, and why each new expectation is the design** (red-on-old: the new expectations are a `Bar`
+value the old tree does not have — the old one-sentence, counts-first shape cannot satisfy them, and the old
+strings cannot be compared with the new oracle; the placement pin was shown red by behavioral revert, 3b):
+
+| Pin | Old expectation | New expectation | Why it is the design |
+|---|---|---|---|
+| `BookOutlineViewedTests.atTheBottomTheLastNoteIsViewedAndNinePointsUpTheTopEdgeAnswers` (2 `pin(...)` lines) | `"book · 4 chapters · 12 notes · note 12 of 12 · chapter four"` (and note 9) | `Bar(position: "note 12 of 12 · chapter four", counts: "book · 4 chapters · 12 notes")` (and note 9) | Design 2: position leading, counts trailing — two halves, not one counts-first sentence. The clamp logic it pins is untouched. |
+| `BookOutlineViewedTests.thePinnedLineSaysOneTotalForBothHalves` (3 lines; red-on-old recipe re-pointed from `pinLine` to `bar`) | three joined sentences, counts first | the same three cases as `Bar`s; at rest `position: ""` | Design 2's last sentence: both halves from the ONE `NoteTotal` — the r1-finding-3 law kept ("300+" in both halves). |
+| `BookOutlineLandingTests.theNavigatorFollowsWhatThePageShowsNeverTheCaret` — the at-rest line | `== counts` | `== Bar(position: "", counts: counts)` | Design 6: "counts alone" survives, the counts in the trailing half. |
+| same test — `targetLine` | `counts + " · note 11 of 24 · chapter 3"` | `Bar(position: "note 11 of 24 · chapter 3", counts: counts)` | Design 2. |
+| same test — NEW: the bar below the page, the pane's foot | — (the old line was above the page) | `bar.minY ≥ page bottom`, `bar.maxY = window height` | Design 1: the line leaves the top; the bar is a sibling BELOW the scroll. Red on the old placement (3b). |
+| same test — "the pinned line stands still while the page scrolls" (frame) | unchanged | unchanged (passes) | Design 6: a bottom bar outside the scroll stands just as still. |
+| `aLandingHoldsItsTargetFromTheClickUntilItEnds` · `aLandingOnTheLastScreenfulEndsOnItsTargetNeverTheTopRow` · `herScrollToTheVeryEndClampsToTheLastNoteAndNinePointsUpTheTopEdgeAnswers` (`expectedLine` + `aboveLine`, now `BookOutlineViewed.bar(...)`) · `aNavigatorClickOnAShortNoteInTheLastScreenfulEndsOnThatNote` | counts-first sentences | `Bar(position: "note N of 30 · chapter K", counts: "book · 10 chapters · 30 notes")` | Design 2 + 6: the follower/adoption/clamp assertions unchanged; only the recorded shape moves. |
+
+**Self-assessment (the implementer's).** Built exactly THE DESIGN 1–7: the `.outline` stack is `BookArchivedLine` ·
+`outlineBody` (carrying the receipt overlay — point 4) · `OutlineBottomBar`; the bar is one `HStack` of the
+position (`layoutPriority(1)`, P-724-2) · `Spacer(minLength: 16)` · the counts, both `tokens.small` / `tokens.muted`
+/ `lineLimit(1)` / tail truncation, `.padding(.horizontal, 20)` `.padding(.vertical, 6)`, the `tokens.line` 1-pt
+hairline on its TOP edge, the pane's width (no `proseColumn` cap — P-724-1); the oracle records the bar's `Bar` value
+and frame (C-1, C-2). Untouched: the title block (no counts return), masthead, navigator, Index/Read/spread arms,
+`NoteBoxCopy`, `BookNoteBox.quietReceiptHome`, the follower/adoption machinery, `Sources/`, the editor seam, the
+capability registry. **Deviations: none.** The only number I chose is the 16-pt minimum gap between the halves
+("separated" — her word; the brief names no figure): the halves never touch however narrow the pane. **PENDING:**
+the hands-on screenshot walk (the orchestrator's); the canon delta (the orchestrator's at closeout — SurfaceContracts'
+"PINNED above the page" sentence and its joined-sentence description now read wrong against the build). No
+QUESTIONS entry: nothing the brief left open was product behavior.
 
 ## LADDER
 
