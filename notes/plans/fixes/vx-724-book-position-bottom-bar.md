@@ -152,10 +152,35 @@ landed here, with the next commit.)
 | Piece | State |
 |---|---|
 | 0. Read the brief, the F-1/F-4 dispositions, the A6 pin whole, the follower pin, the two BookView A6 comments | DONE |
-| 1. `BookViewTests` — `outlineCarriesNoBottomChrome` rescoped, renamed `outlinesOnlyBottomChromeIsThePositionBar` | WRITTEN (`b5b5e6b21`), not yet compiled |
-| 2. `BookOutlineLandingTests` — the C-3 placement assertion removed from `theNavigatorFollowsWhatThePageShowsNeverTheCaret` | WRITTEN (`e5876892f`), not yet compiled |
+| 1. `BookViewTests` — `outlineCarriesNoBottomChrome` rescoped, renamed `outlinesOnlyBottomChromeIsThePositionBar` | DONE (`b5b5e6b21`), green |
+| 2. `BookOutlineLandingTests` — the C-3 placement assertion removed from `theNavigatorFollowsWhatThePageShowsNeverTheCaret` | DONE (`e5876892f`), green |
 | 3. `BookView.swift` — the stale A6 comments, comment-only | DONE (`f045ca22f`) |
-| 4. The three suites under a held stage claim | NEXT |
+| 4. The three suites under a held stage claim | GREEN at `a51abe1c0` (code = `f045ca22f`): `✔ Test run with 65 tests in 3 suites passed after 67.742 seconds with 4 warnings.` (0 skipped; the 4 warnings the ambient `Date.swift:37` unimplemented-date notices, «unknown» test) · `VX-724 BAR (A6 successor): bar=(191.0, 806.0, 909.0, 26.0) page bottom=806.0 window height=832.0 below page=26.0` |
+| 4b. The rescoped pin's teeth — behavioral revert | DONE — **no revert in flight.** `OutlineBottomBar` moved back ABOVE `outlineBody` (the old placement), `OutlineWritingSurfaceTests` alone: `✘ Test run with 7 tests in 1 suite failed … with 7 issues (including 4 warnings)` — exactly the three new arms red (`below page=0.0` vs the bar's 26 pt; `bar=(191.0, 32.0, 909.0, 26.0) page bottom=832.0 window height=832.0`), the inset and progress arms and the suite's other six tests green. Restored by `git checkout --` (tree clean). |
+| 4c. Final run, restored tree | GREEN: `✔ Test run with 65 tests in 3 suites passed after 67.535 seconds with 4 warnings.` Stage released (`STAGE FREE`), no Variorum instance running. |
+
+**What changed, per piece:**
+
+- **Piece 1 — the rescoped pin, arm by arm.** KEPT UNCHANGED (A6's teeth, judged on what each asserts): the
+  `contentInsets.bottom == 0` arm over every scroll view (the restored `safeAreaInset` showed as a 54-pt bottom
+  content inset — the bar is a sibling below the scroll, never an inset, so this arm still bites a restored scrub
+  bar; its message re-worded "no bottom bar … nothing" → "no scrub chrome … no bottom inset", since a bar now
+  stands) and the `NSProgressIndicator == 0` arm (verbatim). CHANGED MEANING (the only one): the window-edge arm
+  becomes three — (a) in the hosting view's own space (the old arm's), the run below the page equals the bar's
+  height (the bar is the only chrome below the page; flip-agnostic, the bar's height only, so it needs no
+  coordinate conversion); (b) in `.global` (the conversion the landing suite proved), the page's bottom IS the bar's
+  top edge, two-sided (the moved C-3 arm was one-sided, `≥`); (c) the bar's maxY is the window frame's height (the
+  pane's foot, as moved). The pin now resets the oracle (`forgetOutlinePins`) and settles until the bar has
+  reported. Renamed — "no bottom chrome" lies beside a sanctioned bar; the doc comment keeps A6's provenance whole
+  and records R-724-1's amendment, the old name, and the bite; the suite's header bullet re-worded to match. No arm
+  was ambiguous, so none is kept conservatively.
+- **Piece 2.** The C-3 block (the `.global` conversion, the `VX-724 BAR` print, the two placement `#expect`s) left
+  the follower pin; a three-line comment points at the rescoped pin. `pinAtRest` stays (the stands-still check reads
+  it); the `Bar` strings and the stands-still frame check are untouched.
+- **Piece 3 — comment-only, one beyond the brief's letter.** The ~2190 sentence names the sanctioned bar with A6's
+  scrub/progress ban intact. Also the A6 block at ~2546 ("Outline ends as a clean vertical scroll + the navigator"),
+  the same stale claim in the same file: it now adds the position bar, a sibling below the scroll, the ban
+  standing. Comment-only, so no behavior change; say so if the next round would rather it reverted.
 
 ## THE RELEASE (the orchestrator's half, after the merge)
 
