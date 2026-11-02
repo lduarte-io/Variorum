@@ -342,11 +342,15 @@ struct WordsBandTests {
         #expect(band.wordsLookOwed, "a fresh library owes the tour's words card")
         band.later()
         #expect(!band.offersWords && band.wordsLookOwed, "Later snoozes the band, not the tour's ask")
-        let crossed = world.band()
-        _ = crossed.dismiss()
-        #expect(world.ledger.dismissed(world.libraryID))
+        // The ✕ on a band that is OFFERING — its own fresh world, before any snooze (a snoozed band's ✕ is a no-op by
+        // `dismiss()`'s own guard: the 2026-11-02 window's Gate B stop, adjudicated as this fixture's).
+        let crossedWorld = PlantedBand()
+        let crossed = crossedWorld.band()
+        #expect(crossed.offersWords, "precondition: the band offers the words, so its ✕ acts")
+        #expect(crossed.dismiss() == ProtectionWords.wordsCardDismissedToast, "the ✕ landed")
+        #expect(crossedWorld.ledger.dismissed(crossedWorld.libraryID), "the dismissal is in the ledger")
         #expect(!crossed.offersWords && crossed.wordsLookOwed, "the ✕ retires the band, not the tour's ask (P-736-2)")
-        #expect(world.band().wordsLookOwed, "a reopen after the ✕ still owes it")
+        #expect(crossedWorld.band().wordsLookOwed, "a reopen after the ✕ still owes it")
         // The tour's own look closes past its warning: recorded — owed nowhere, now or after a reopen.
         let tourLook = crossed.makeLook(
             passphraseExists: { false }, mint: { _ in .minted((1...12).map { "w\($0)" }) }, copy: { _ in })
@@ -355,7 +359,7 @@ struct WordsBandTests {
         #expect(crossed.wordsLookOwed, "the words still on screen: still owed until the close")
         tourLook.close()
         #expect(!crossed.wordsLookOwed, "recorded at the tour's card")
-        #expect(!world.band().wordsLookOwed, "and every later open")
+        #expect(!crossedWorld.band().wordsLookOwed, "and every later open")
         // A landed account act retires it too; a read-only road never owes it.
         let other = PlantedBand()
         let synced = other.band()
