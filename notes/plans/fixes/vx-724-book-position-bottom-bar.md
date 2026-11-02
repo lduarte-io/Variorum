@@ -182,6 +182,12 @@ landed here, with the next commit.)
   the same stale claim in the same file: it now adds the position bar, a sibling below the scroll, the ban
   standing. Comment-only, so no behavior change; say so if the next round would rather it reverted.
 
+**Orchestrator's round-1 fix-pass acceptance (2026-11-01):** pieces 1–3 verified against the F-1 disposition line by line (the kept arms, the three-way rescope, the rename, the removed C-3 block, both A6 comments); the ~2546 comment edit beyond the brief's letter is SANCTIONED (comment-only, the same stale claim, the same class as the brief's step 3 — it stays). One orchestrator adjudication fix typed after the round (the loosened rule: mechanical, fully specified by R-724-2, comment-only, no design choice, not `Sync/`/custody/editor seam, read by the next round): the two "PROVISIONAL P-724-3" code comments (`BookView.swift` ~343, ~1073) now say "P-724-3, ruled R-724-2".
+
+### Round 2 — fresh cold reviewer re-reviews the fixes
+
+*(Findings and dispositions land here.)*
+
 ## THE RELEASE (the orchestrator's half, after the merge)
 
 Version **1.0** (`release.sh --version 1.0` — the script stamps MARKETING_VERSION; X.Y is a legal shape). Her word is explicit and standing (this message); the notes are HERS to word ("I'll actually fix the wording notes myself") — the orchestrator drafts `ReleaseNotes-1.0.md` as clean public copy (one line per bullet, no draft/meta/process lines — VX-708's rule), presents it in chat, lands her fixes on the branch before the merge so main is release-ready. Then: PR merge (merge commit) → `Tools/Release/release.sh --version 1.0` at a zero-instance window, no repo commits while it runs → the site road per `~/dev/stargazing.tech/stargazing-tech/notes/variorum-releases.md` (DMG-first: R2 put → verify dmg → appcast copy → `variorum.json` bump → build+deploy → verify appcast) → A1 safety copy + `/Applications` refresh at a zero-instance window.

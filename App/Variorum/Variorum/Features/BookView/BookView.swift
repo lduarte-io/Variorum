@@ -340,7 +340,7 @@ struct BookView: View {
                     outlineBody
                         // WA-1: the receipt at the page's foot, trailing —
                         // on the PAGE, so it floats above the bar rather than
-                        // over its counts (PROVISIONAL P-724-3).
+                        // over its counts (P-724-3, ruled R-724-2).
                         .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                     OutlineBottomBar(
                         readingID: readingID, model: model, structure: structure,
@@ -1070,7 +1070,7 @@ struct BookView: View {
     /// bottom bar that hosts it, so the receipt sits at the main column's
     /// bottom TRAILING end, where every bar puts it; Outline's position bar,
     /// VX-724, holds no receipt slot — the receipt floats on the page just
-    /// above it, PROVISIONAL P-724-3). An OVERLAY, so nothing in the column
+    /// above it — P-724-3, ruled R-724-2). An OVERLAY, so nothing in the column
     /// moves for it (18i's always-mounted rule, kept: idle it is the empty
     /// line at zero width). While it speaks it backs itself with the page's
     /// own colour, so prose scrolled under the corner never reads through
