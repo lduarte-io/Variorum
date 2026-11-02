@@ -62,9 +62,10 @@ Implementer: Opus (opus-implementer), 2026-11-01, worktree `~/dev/variorum-vx-72
 | Piece | State |
 |---|---|
 | 0. Preflight read (CLAUDE.md + canon, this brief, SessionResiliencyProtocol, SurfaceContracts' VX-562 paragraph, the listed sources and both suites) | DONE |
-| 1. The bar (BookView `.outline` arm, `OutlinePinnedLine` → `OutlineBottomBar`, receipt overlay onto `outlineBody`, oracle records the bar) | WRITTEN, not yet compiled — PENDING build (this commit) |
-| 2. The pins (`BookOutlineViewedTests`, `BookOutlineLandingTests`) | WRITTEN, not yet compiled — PENDING build (this commit) |
-| 3. The two suites under a held stage claim | NOT-STARTED — PENDING |
+| 1. The bar (BookView `.outline` arm, `OutlinePinnedLine` → `OutlineBottomBar`, receipt overlay onto `outlineBody`, oracle records the bar) | DONE (`ab9eb595f`) — compiles (`TEST BUILD SUCCEEDED`) |
+| 2. The pins (`BookOutlineViewedTests`, `BookOutlineLandingTests`) | DONE (`ab9eb595f`, the placement pin's coordinate fix `fbe571fcc`) |
+| 3. The two suites under a held stage claim | GREEN at `fbe571fcc`: `✔ Test run with 58 tests in 2 suites passed after 64.699 seconds with 4 warnings.` (0 skipped; the 4 warnings are the host app's swift-dependencies `Date.swift:37` unimplemented-date notices, «unknown» test, ambient). Run 1 (`ab9eb595f`): 58 tests, 1 issue — the placement pin's first coordinate conversion (fixed, see piece 2). |
+| 3b. Placement pin's teeth — behavioral revert | **REVERT IN FLIGHT** — `OutlineBottomBar` moved back ABOVE `outlineBody` in BookView.swift's `.outline` stack (the old placement); restore = `git checkout -- App/Variorum/Variorum/Features/BookView/BookView.swift` (clean at `fbe571fcc`+record). Expected: the two VX-724 placement expectations red, all else green. |
 | 4. Self-assessment | NOT-STARTED |
 
 **The implementer's calls (brief points 5 and 6 left them to me):**
