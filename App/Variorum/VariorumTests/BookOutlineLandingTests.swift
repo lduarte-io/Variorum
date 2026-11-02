@@ -1419,18 +1419,21 @@ extension BookOutlineLandingTests {
 
             // VX-724: the bar stands BELOW the page — a sibling under the
             // page's scroll view, never above it (the old pinned line's
-            // place) and never inside it. Both rectangles in the window's
-            // top-left space (`.global` here is the hosting view's, which IS
-            // the window's content).
+            // place) and never inside it — and is the pane's foot. Both
+            // rectangles in the bar's own space: `.global` in this host is
+            // the WINDOW's top-left space, title bar included (measured: the
+            // bar's maxY is the window frame's height, the content view's
+            // is that less the title bar), so the page's AppKit rectangle
+            // (window base, bottom-left) flips by the window frame's height.
             let page = try #require(outlineScroll(in: hosting), "the Outline's scroll view")
-            let pageInWindow = page.convert(page.bounds, to: nil)
-            let pageBottom = hosting.bounds.height - pageInWindow.minY
+            let windowHeight = window.frame.height
+            let pageBottom = windowHeight - page.convert(page.bounds, to: nil).minY
             print("VX-724 BAR:", "bar=\(pinAtRest)", "page bottom=\(pageBottom)",
-                  "content height=\(hosting.bounds.height)")
+                  "window height=\(windowHeight)", "content height=\(hosting.bounds.height)")
             #expect(pinAtRest.minY >= pageBottom - 0.5,
                     "the bar sits below the page: bar \(pinAtRest), page bottom \(pageBottom)")
-            #expect(abs(pinAtRest.maxY - hosting.bounds.height) <= 0.5,
-                    "the bar is the pane's foot: bar \(pinAtRest), content height \(hosting.bounds.height)")
+            #expect(abs(pinAtRest.maxY - windowHeight) <= 0.5,
+                    "the bar is the pane's foot: bar \(pinAtRest), window height \(windowHeight)")
 
             // The caret: the long story, live.
             let story = postIDs[4]
