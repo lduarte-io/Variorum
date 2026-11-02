@@ -1506,7 +1506,7 @@ verbatim.**
 
 ### DEPLOY-FIX RECORD (the Fable implementer, 2026-11-01; VX-721; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
 
-**NOT DONE (the record's first line; final at the close).** NOT RUN ON A POSTGRES — nothing here has: both artifacts and
+**NOT DONE (the record's first line).** NOT RUN ON A POSTGRES — nothing here has: both artifacts and
 the sweep stay string-pinned until the orchestrator's re-run (the brief: no server contact of any kind). **NOT BUILT AS
 THE BRIEF READ IT** — the grant left STANDING and a sweep row failing when CREATE is NOT held: the repo's standing idiom
 closes that grant again in the same transaction (THE MECHANISM below — 14c:101 and five more artifacts), so this record
@@ -1527,7 +1527,7 @@ lost; verified by this session after the fact (the positions, the pins, 86/2 on 
 |---|---|---|
 | 1 | BOTH artifacts (`maintenance/vx495-pull-keyset.sql`, `maintenance/vx495-rollback.sql`): `grant usage, create on schema public to variorum_definer;` as the FIRST statement after the marker guard (R-500-9's letter) and `revoke create on schema public from variorum_definer;` right after the LAST `owner to variorum_definer;` — the 10/14c idiom whole; the headers' VX-721 paragraphs; the pins (`AuthRLSDDLTests.definerCreateBracketProblems` — exactly one of each, the grant after `$guard$;` with nothing but whitespace between on the stripped text and before any `create or replace`, the revoke after the last re-own and before `commit;`) added to the count pin and the rollback pin | DONE (`168d8cd4f` — the orchestrator's commit, the sweep-in above; this commit opens the record) — the honest red on the real pre-fix tree: with the two assertions written and the artifacts untouched, `swift test --skip-build --filter "theCatchUpCount…AuthenticatedOnly|theRollbackRestores…DeployedChain"` → "Test run with 2 tests in 1 suite failed after 0.048 seconds with 2 issues" — `AuthRLSDDLTests.swift:800:9: Expectation failed: Self.definerCreateBracketProblems(in: artifact).isEmpty` with `["the schema grant appears 0 times, not once", "the schema revoke appears 0 times, not once"]`, and `:869:9` the same for `rollback`; every other assertion of both pins green. Then the four artifact edits; `swift test --skip-build --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` → **"Test run with 86 tests in 2 suites passed after 0.310 seconds"** (round 2's 86 — assertions grew, not tests); re-run on HEAD `168d8cd4f` after the sweep-in: 86/2 passed, the lines at keyset :137 `$guard$;` → :143 grant · :361–:362 the re-owns → :363 revoke · :374 `commit;`; rollback :85 → :90 · :228 → :229 · :235 |
 | 2 | The grant sweep (`maintenance/14c-post-deploy-grant-sweep.sql`): a `schema-privilege` row family — `has_schema_privilege('variorum_definer', 'public', 'USAGE')` expected TRUE and `… 'CREATE')` expected FALSE (the idiom's end state; P-500-9), the sweep's own verdict vocabulary (`OK` / `MISMATCH:<privilege> — <why>`), a sixth `ord`; a pin that the sweep's text carries both checks with those expectations; the new totals stated here, in THE DEPLOY §3 and in the checklist's verify row | DONE (this commit) — the honest red on the unmodified sweep: `theGrantSweepVerifiesTheDefinersUsageOnlyPostureOnPublic` → "Test run with 1 test in 1 suite failed after 0.008 seconds with 7 issues" (every assertion — `:885` USAGE read · `:887` CREATE read · `:890` USAGE expected held · `:894` CREATE expected not held · `:898` the row kind · `:899` the MISMATCH verdict · `:901` the union's sixth arm); then the sweep's `schema_privilege_rows` CTE (two rows off `has_schema_privilege('variorum_definer', 'public', …)`: USAGE expected true, CREATE expected false; verdict `OK` or `MISMATCH:<privilege> — <why>`; `select 6 as ord, * from schema_privilege_rows` in the union) + its header's EXTENDED sentence; `swift test --skip-build --filter "AuthRLSDDLTests\|MultiTenantSyncAttackerTests"` → **"Test run with 87 tests in 2 suites passed after 0.335 seconds"** — the standing read-only/coverage sweep pin green over the grown file (no line starts with a writing verb). **THE NEW EXPECTATION: 65 OK · 4 INFO · 0 fail** on THE BRANCH's sweep (63 + the two schema-privilege rows; the count's row was already in the 63) — written into THE DEPLOY §3, the checklist's verify row and the keyset artifact's VERIFY tail. After a ROLLBACK the branch's sweep reads 64 OK · 4 INFO · 1 fail-class (the count's row MISSING, as its header says; the two schema-privilege rows OK — the rollback ends usage-only too) |
-| 3 | Close: `swift build`; `swift test --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` with the count; the NOT DONE line final; the self-assessment | NOT-STARTED |
+| 3 | Close: `swift build`; `swift test --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` with the count; the NOT DONE line final; the self-assessment | DONE (this commit) — `swift build` → "Build complete!"; the FULL run (not `--skip-build`) → **"Test run with 87 tests in 2 suites passed after 0.298 seconds"** (`AuthRLSDDLTests` 85 — round 2's 84 + the sweep pin; `MultiTenantSyncAttackerTests` 2); the session's diff since the brief's commit `f656c3d88`: six files, 310 insertions, **zero lines under `Sources/`**; the self-assessment below |
 
 #### THE MECHANISM, re-traced before the first line was written — what RUN 1 hit, and where the brief's premise and the repo part
 
@@ -1595,6 +1595,69 @@ the guard"); the revoke AFTER the last `owner to variorum_definer;` and BEFORE `
 byte-equality (a) is untouched — the bracket sits outside the copied `create or replace … $$;` text; the search-path
 resolver ignores both lines (its regex matches only `create or replace function` / `drop function` / `alter function`),
 so the belt pins and the doctored-chain proof read exactly as before — the suites say so (86/2).
+
+#### The close (piece 3)
+
+- `swift build` → "Build complete!" at the tip; `swift test --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"`, a FULL
+  run → **"Test run with 87 tests in 2 suites passed after 0.298 seconds"**.
+- The commits, in order: `168d8cd4f` (the orchestrator's R-500-10 entry, carrying piece 1's three files by the sweep-in —
+  the artifacts' brackets and the two pins) · `fe718be4d` (the record opened; the mechanism; P-500-9) · `97829ba41`
+  (the sweep's rows + pin; the totals in THE DEPLOY §3, the checklist, the keyset VERIFY tail) · this commit (the close).
+  Each pushed after `git pull --rebase`; no trailers; nothing doctored in any of them (the reds ran on the real pre-fix
+  tree — the pins written first, the files unchanged — never by a scratch doctoring).
+- `git diff --stat f656c3d88..HEAD`: `14c-post-deploy-grant-sweep.sql` +48 −1 · `vx495-pull-keyset.sql` +38 −2 ·
+  `vx495-rollback.sql` +27 −1 · `AuthRLSDDLTests.swift` +90 · this file · the checklist +5 −2; `-- Sources/` EMPTY. No
+  engine line, no transport line, no face. No broad core run: the diff bears on the two named suites only (the server-half
+  fix session's same reasoning); the whole-diff ladder reads everything regardless.
+- MOBILE PARITY: nothing mobile-visible (server artifacts and their pins).
+- **What the orchestrator's re-run should expect, under what was built:** the keyset artifact → `[]`; VERIFY: `sync_pull`
+  carries `with picked as (`; TWO `pg_proc` rows, both owner `variorum_definer`, both `{search_path=public, pg_temp}`;
+  THE BRANCH's sweep **65 OK · 4 INFO · 0 fail** with `variorum_definer USAGE on public` = true and `… CREATE on public` =
+  false. A refusal AT THE GRANT line itself (42501 on `grant usage, create on schema public`) would be a NEW class — the
+  deploying role no longer able to grant on `public` — not this fix's.
+
+#### SELF-ASSESSMENT (the first of the two reviews — what I am least sure of; what the orchestrator and the ladder should press on)
+
+1. **THE FORK IS THE ITEM (P-500-9).** I built the 10/14c idiom (the revoke after the re-owns; the sweep expecting CREATE
+   NOT held) where the brief and R-500-10's restatement read "the grant kept … the sweep row catches the next rewrite". I am
+   confident of the FACTS (14c:101 and five sibling brackets; 17's no-op re-own) and reasonably confident of the posture
+   call (least privilege; the sitting's stated end state; production unchanged from its August posture) — but it is HER
+   posture to rule, and the orchestrator should put the one line to her BEFORE the re-run. Both artifacts deploy
+   successfully under either answer; only the end state and the sweep's CREATE row differ. Conversion steps are in
+   P-500-9.
+2. **The no-op claim** (`Server/supabase/maintenance/vx495-pull-keyset.sql` header; THE MECHANISM): "an owner-unchanged
+   `alter … owner to` runs no privilege check" is my reading of Postgres's `AlterObjectOwner_internal` (alter.c) — the
+   permission block sits inside `if (old_ownerId != new_ownerId)`. It explains 17 and names `sync_pull_remaining`'s re-own
+   as RUN 1's failing line, but RUN 1's dry runs never isolated it and nothing here ran on a Postgres. Cheap to settle in
+   the re-run window if wanted: a `rollback;`-ended dry run of `alter function sync_pull(bigint, text, text, text, int,
+   text) owner to variorum_definer;` ALONE, CREATE un-granted → `[]` if the reading holds. The fix does not depend on it
+   (the bracket covers both re-owns).
+3. **The grant's own grantability** is assumed from 14c/10/11/12 having executed it as `postgres`, and from the checklist's
+   probe (postgres holds CREATE on `public` through `pg_database_owner`, the schema's owning role). If the platform had
+   also changed the schema's OWNER, the grant would refuse 42501 at ITS line — a different error at a different line than
+   RUN 1's; the close names it so the re-run reads it as new, not as this fix failing.
+4. **The bracket pin** (`AuthRLSDDLTests.definerCreateBracketProblems`): position-based, not whitespace-exact — a re-indent
+   passes. It keys on the literal `$guard$;` and `\ncommit;`; an artifact with a differently named guard tag reads "no
+   marker guard" (a loud, right failure for THESE two files, which share the tag). "Nothing but whitespace between the
+   guard and the grant" is judged on the STRIPPED text, so comment lines between them are legal — as both artifacts have.
+5. **The sweep has never run with the new CTE.** Its shape mirrors `vault_fact_rows`/`schema_usage_rows` column for column
+   (six text columns; `f.observed::text`/`f.expected::text`; `is distinct from` on booleans), and the read-only pin's
+   writing-verb scan passes over it — but a syntax slip would show only live, at the VERIFY step, as it would for any
+   sweep edit. The 65 is arithmetic (63 + 2), not a run.
+6. **After a ROLLBACK the branch's sweep reads 64 OK · 4 INFO · 1 MISSING** (the count's row — the rollback header's
+   standing note), the two schema-privilege rows OK. Said in LIVE STATUS row 2 so the verifier is not surprised.
+7. **The chain-wide bracket pin is NOT built** (NOT DONE): every file carrying `owner to variorum_definer;` should carry the
+   idiom, 17 exempt BY NAME with its reason (its one re-own is owner-unchanged). That pin would have caught VX-721 at
+   build time instead of at RUN 1 — the third live occurrence of this class — and is one function over `sqlDir`. A rider
+   or a Tests & tooling ticket; the orchestrator's call.
+8. **The sweep pin's two expectation assertions are whitespace-tolerant regexes**; its literals (`'MISMATCH:' ||
+   lower(f.privilege)`, `select 6 as ord, * from schema_privilege_rows`) are exact — the pin family's standing nature.
+9. **Two orchestrator records still carry the brief's premise** and are not mine to amend: the checklist's RUN 1 paragraph
+   ("lost CREATE … a platform upgrade or ACL rewrite … the rollback would fail identically") and R-500-10's "the ruled,
+   deployed state the platform removed". THE MECHANISM above corrects both; the handback asks for the amendment.
+10. **The sweep-in** (`168d8cd4f`): piece 1 lives in a commit whose message describes something else. The record says so
+    (MACHINERY HONESTY); a reader of commits alone would miss where the bracket landed — hence this item, and the close's
+    commit list.
 
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
