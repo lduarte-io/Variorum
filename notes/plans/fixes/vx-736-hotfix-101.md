@@ -1,6 +1,6 @@
 # VX-736 — Run: the 1.0.1 hotfix — onboarding audit & quick fixes
 
-**STATUS: OPEN — kicked off 2026-11-02 ~3:15 AM (her sitting, /architect-phase vx-735 + her mid-kickoff additions). Branch `vx-736-hotfix-101`, worktree `~/dev/variorum-vx-736`, the Pro. The orchestrator holds the stage tonight (her word: "you're working on the pro and you have the stage completely"). Overnight run to a RELEASE: version 1.0.1, her advance word given at kickoff.**
+**STATUS: CLOSED 2026-11-02 — merged (PR #214, merge 579f48c06) and RELEASED as 1.0.1 (build 10682), live and verified the same night. FOR A LATER READER below is the record; the handoff is `notes/handoffs/vx-736-handoff.md`.**
 
 ## FOR A LATER READER
 
