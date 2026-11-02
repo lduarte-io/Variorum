@@ -508,7 +508,7 @@ So the hop the rule makes certain meets the paragraph laid out — one pass is e
 | 13 | the Takes board's ⑂ badge | SwiftUI, drawn from projection counts; no geometry | **SAFE** by construction |
 | 14 | typing in a short note, between the keystroke and its autosave echo (VX-702's typing road) | the badge pass is not re-run per keystroke; the echo's `.adoptEcho` read now makes the settle certain (the rule's reach, incidental) | **OUT OF SCOPE — VX-702** keeps the per-keystroke gap and the other N14 consumers (decorations, the deferred indicator, the long-block pass) on roads no fanned badge read rides |
 
-Rows: 14 — FIXED 7 (2 by pin + 1 by pin + 4 by the same rule), SAFE 6 (1 by pin, 5 by mechanism), PENDING 1 (the full-render characterization), OUT OF SCOPE 1 (to VX-702). (Counts close at the stage.)
+Rows: 14 — FIXED 6 (3 by pin: rows 1, 4, 5; 3 by the same rule: rows 2, 3, 10), SAFE 6 (1 by pin: row 6; 5 by mechanism: rows 7, 8, 11, 12, 13), PENDING 1 (row 9, the full-render characterization), OUT OF SCOPE 1 (row 14, to VX-702). (Counts close at the stage.)
 
 ### READY-FOR-STAGE — B3's window and the run's JOINT WINDOW (all xcodebuild from `App/Variorum/`, under the HELD stage claim; suite TYPE names; read the "Test run with N" line and any `skipped:` line)
 
