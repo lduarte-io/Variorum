@@ -1,6 +1,6 @@
 # VX-495 / VX-496 — the keyset pull's server-half deploy checklist (a MAINTENANCE artifact; marker 14 stays)
 
-**Status: HELD — every row PENDING-UNTIL-LIVE; the run is at her EXPLICIT word only (R-500-6, `notes/plans/fixes/vx-500-sync-followups.md`).**
+**Status: RUN — the server half DEPLOYED 2026-11-02 00:41 UTC (run 2, after run 1's 42501 and the bracket fix — VX-721); every verify row DONE; the ACCEPTANCE (her week-behind Pro's catch-up) PENDING her open.**
 The artifact: `Server/supabase/maintenance/vx495-pull-keyset.sql` (SHAPE B — D-495 EVIDENCE; `sync_pull_remaining` per R-500-1).
 The rollback: `Server/supabase/maintenance/vx495-rollback.sql`. Both idempotent, both guarded ≥ marker 14, neither writes
 `sync_meta`. NOT a lockstep event: the wire is byte-identical (signature, output shape, order), so no client install
@@ -51,18 +51,22 @@ variorum_definer;` as the artifacts' first statement — plus a sweep row for th
       name shadowing or a `format()` arity slip would show here first (the DDL pins are string pins; this is the SQL's
       first execution on a Postgres).
 
+**RUN 2 (2026-11-02 00:41:05 UTC, the stored PAT at her word R-500-11; the tip `ac65c5383` — both artifacts carrying the
+10/14c bracket): `[]`, HTTP 201 — LANDED on the first run of the fixed artifact.**
+
 ## Verify (read-only, in the window)
 
-- [ ] `select pg_get_functiondef('sync_pull(bigint,text,text,text,int,text)'::regprocedure)` — the body carries `with picked
-      as (` and `bound as (select max(server_seq) as seq from picked)`.
-- [ ] `select proname, proconfig, pg_get_userbyid(proowner) from pg_proc where proname in ('sync_pull','sync_pull_remaining')`
-      — each `{search_path=public, pg_temp}`, owner `variorum_definer`; TWO rows.
+- [x] DONE 00:42 UTC — the body carries `with picked as`, `bound as (select max(server_seq) as seq from picked)`, no `in (select`.
+- [x] DONE — two rows, each owner `variorum_definer`, `{search_path=public, pg_temp}`; the definer's end state USAGE held,
+      CREATE not held (the bracket closed).
 - [ ] The grant sweep — THE BRANCH'S `Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql` (it carries the new
       function's expected row; main's sweep reads UNEXPECTED FUNCTION until the merge — not a finding): **65 OK · 4 INFO ·
       0 fail** — the count's row and VX-721's two `schema-privilege` rows (`variorum_definer` USAGE on public HELD, CREATE NOT held —
       the 10/14c idiom's end state; the CREATE expectation PROVISIONAL P-500-9, the DEPLOY-FIX RECORD) OK.
-- [ ] `EXPLAIN (ANALYZE, BUFFERS)` of the count's shape for her tenant from the Pro's cursor (her `!` road) — the index-only
-      claim, read live (U1a's self-assessment item 3).
+- [x] DONE — `EXPLAIN (ANALYZE, BUFFERS)` of the count's shape from the Pro's cursor: **18 Index Only Scans** off
+      `idx_owner_seq_<table>` (heap fetches present — the visibility map is not fully set on the hot tables), 3 Seq Scans on
+      the one-page tables (`canvas_layout`, `block_comment`, `setting`), **Execution Time 779 ms**, ~23k rows counted. The
+      index-only claim holds in shape; the from-zero case stays unprobed.
 
 ## The acceptance — HER REAL-WORLD TEST (her words: the week-behind Pro)
 
