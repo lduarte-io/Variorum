@@ -4,7 +4,19 @@
 
 ## FOR A LATER READER
 
-*(written at closeout; until then the sections below are the night's working record)*
+**What this run was.** The overnight hotfix after the 1.0 release (her kickoff 2026-11-02 ~2:45 AM, /architect-phase): five members under VX-736, shipped as **1.0.1** the same night at her advance word. Rulings R-736-1..8 in the SITTING RECORD below; PROVISIONALs P-736-1..4 in HELD FOR HER.
+
+**What shipped, one pointer each.**
+- **VX-735 — the tour's closing cards** (B1, @b929816bf..@1b77e18e2): the overflowing end card became three — `.protectPassphrase` (rule 3's ask; skipped while a passphrase stands) → `.protectWords` (rule 2's look, the caveat full width, the ask state stacked after F-W3; skipped while the look is not owed: `WordsBandModel.wordsLookOwed` = writes ∧ not `WordsCardLedger.recorded` — a landed account act writes the same mark, the VX-511 class) → the clean `.endCard`. Completion records at the first closing card (the old moment). CastleRules 2/3/6 substance untouched; the approved sentences moved verbatim; the one-word CastleRules reality ("last card" → closing cards) is HERS to land. The audit's table (29 rows) and the step-7 scroll sentence (P-736-3) are in the B1 RECORD.
+- **VX-727 — the outline's wing** (B2 @0e1606934): `mintOutlinePost` now passes `wingId: source.wingId`; pin `OutlineMintTests.anOutlineIsBornInItsSourcesWing`.
+- **VX-737 — the fresh sidebar** (B2 @07fd0d50d): `shellSidebarWidth`'s default 210 → 240 and the default window 1240×840 → **1270×840** (P-736-4 — keeps §The Library's one-line controls row; a dragged width always wins); pins `FreshSidebarWidthTests`.
+- **VX-738 — the wing label off the quick-entry bars** (B2 @1ee373a9e): both hosts (the Bookcase band, the Library's foot — the Pool has no quick entry); the toolbar's "in ‹wing›" switcher door (VX-644) stays; supersedes the bars half of VX-552's contract line.
+- **VX-729 — the disappearing take badge** (B3 @f4566578f): the confirmed instance of VX-702 — on macOS 27.0.1 a frame-constant storage edit never runs `viewWillDraw`, so the N14 settle hop never re-read and the honest VX-230 gate delivered the unlaid paragraph's absence. Fix: `refreshBadges` sets `textView.needsDisplay` while the overlay generation is undelivered (the house road; terminates). Pins `TakeChoiceBadgeTests` (red run: exactly the three bug pins); the 14-row sibling sweep is in the B3 RECORD. The rest of VX-702's class stays open.
+- **R-736-8 — the site's noindex off** the four Variorum pages (stargazing-tech @ac74b3a, deployed with this release's publish).
+
+**Evidence that matters.** Gates A 52/8 · B 45/6 · C 108/19 · D 57/10, all green; every watch red exactly as predicted and restored byte-verified; the joint walk J0–J5 all PASS in both voices; the suppression walked live (fresh · passphrase-set · words-recorded) with the landed-account world on Gate B's five VX-511 landing pins. Ladder: one Fable round, no BLOCKER/MAJOR (`notes/plans/fixes/vx-736-ladder-round1.md`).
+
+**Open after this run.** VX-740 (Compare's double outline column — mechanism traced in the ladder file, fix shape named, a design choice hers); VX-739 (the one-high word count, pre-existing, untraced); VX-741 (words-guard's -25200 on 27.0.1); F-W1 and the step-5 fold (tour cosmetics, Low); the stale-1240-comments Debt row; the E6 passphrase-ask question (audit row 19, Castle & sync, Suspected). The morning bundle is HELD FOR HER below.
 
 ## KICKOFF (her words, verbatim, 2026-11-02 ~2:45–3:20 AM)
 
@@ -105,19 +117,40 @@ Instance checks discriminate by PATH and by STORE; never quit/kill a real-store 
 
 | # | Item | Status |
 |---|---|---|
-| 1 | B1 — VX-735 split + suppression + audit + walk | OPEN |
-| 2 | B2 — VX-727 · VX-737 · VX-738 | OPEN |
-| 3 | B3 — VX-729 | OPEN |
-| 4 | Ladder (fable-reviewer, whole diff) | OPEN |
-| 5 | Closeout: canon deltas (SurfaceContracts tour + VX-552 lines; the CastleRules one-word touch flagged), AppSpecRecord entry, master plan, tickets, handoff | OPEN |
-| 6 | Release 1.0.1 + site publish (R-736-4) | OPEN |
+| 1 | B1 — VX-735 split + suppression + audit + walk | CLOSED @1b77e18e2 (gates 52/8 + 45/6; walk a/b/c/e PASS; F-W3 fixed test-first) |
+| 2 | B2 — VX-727 · VX-737 · VX-738 | CLOSED @dc17f71f7 (Gate C 108/19; watches ×3 red as predicted) |
+| 3 | B3 — VX-729 | CLOSED @dc2d52b52 (red run exact; Gate D 57/10; sweep 14 rows; joint walk J0–J5 all PASS) |
+| 4 | Ladder (fable-reviewer, whole diff) | CLOSED AT ROUND 1 @4c260bd24 — no BLOCKER, no MAJOR; dispositions below |
+| 5 | Closeout: canon deltas (SurfaceContracts tour line + VX-552 line + §The Library 1240→1270 + AppSpec's First-open tour parenthetical; the CastleRules one-word touch HELD for her), AppSpecRecord entry, master plan, tickets, handoff | OPEN |
+| 6 | Release 1.0.1 + site publish incl. the noindex removal (R-736-4, R-736-8 — the site commit ac74b3a stands ready in stargazing-tech) | OPEN |
+
+## LADDER — ROUND 1 DISPOSITIONS (the orchestrator, 2026-11-02; findings file `notes/plans/fixes/vx-736-ladder-round1.md` @4c260bd24; VERDICT: no BLOCKER, no MAJOR — the ladder CLOSES at round 1, there being no fixes for a round 2 to re-review)
+
+- **MINOR-1 (Compare seats two identical outline columns — the mint/auto-fill race; B3's J5 observation traced to mechanism):** → **VX-740**, upgraded Suspected → Confirmed with the reviewer's mechanism, fix shape (dedupe by `result.post.id` before seating) and named red-on-old pin written into the ticket. NOT fixed tonight: which seat yields is a design choice (the reviewer's own read) and the store is correct — display-only. Offered to her in the morning bundle as the next sweep's first rider. Pre-existing in Home; VX-727's correct fix made it reachable in every wing.
+- **MINOR-2 (the bottom bar's "in note" count one high after a second flip):** → **VX-739** (minted before the ladder), the reviewer's bounding appended to the ticket: PRE-EXISTING, not this diff's — the VX-729 fix touches only `refreshBadges`; the count rides `adoptSurfaceTextMap`/`publishPostWordCount` and the caret live-count arm, both untouched.
+- **NIT-1 (ledger rows stale; row 5's canon list missing the §The Library touch):** FIXED in this edit (the record is the orchestrator's to keep).
+- **NIT-2 (stale "1240-pt default" doc comments in StatusToastPlacementTests/LibraryControlsFlowTests):** → a Low Debt ticket (comment-only; no orchestrator code edit without an implementer's eyes — rides the next sweep).
+- **NIT-3 (tickets owed):** VX-739/740/741 minted before the ladder; F-W1 and the step-5 fold mint at this closeout (Low); audit row 19 (the E6 custody-adjacent passphrase-ask question) mints as Suspected, Castle & sync; the audit's wording-only RECORDED rows (7, 9, 22, 29) ride the handoff bundle — her reserved wording pass (R-292-4), never tickets.
+- **Cross-model note:** no finding asked for an implementer fix, so the agree/dispute leg had nothing to carry; the clean bill's eleven items stand as the reviewer wrote them.
+
+## R-736-8 (her word mid-run, ~5 AM): the Variorum pages' noindex comes off
+
+Her words: *"one more fix for when you push the new changes to the website - the page has a noindex robots tag, so search engines won't list it. Do you think thats worth removing? i imagine it is"*. Removed from all four pages — /variorum, /variorum/privacy, /variorum/mcp, /variorum/support (the pre-launch "unlisted" posture's crawl half; the no-nav-link half stands; the auth pages keep their own noindex). Site commit `ac74b3a` in stargazing-tech, PUSHED, deploys with this run's publish. Noted for her: no robots.txt or sitemap exists — a sitemap would speed discovery; her site agent's task if wanted.
 
 ## HELD FOR HER (the morning bundle — grows as the night runs)
 
 - P-736-1 — VX-738's removal reaches the Pool's quick entry too (the shared bar); alt: Bookcase band only.
 - P-736-2 — a band-card dismissal does NOT suppress the tour's words card (rule 2 reads the tour as its own words home); alt: dismissal suppresses both.
-- The CastleRules one-word reality ("the tutorial's last card" → the closing cards) — the canon touch lands at closeout with the VX-735 pointer; her eye on the wording.
-- The audit's RECORDED (wording-only) rows — B1's table.
+- P-736-3 — the step-7 scroll sentence ("Scroll down if you don't see it.") is one line to overturn; alt: show it only while the take is off screen (not built — no reveal road exists for one take inside a bloomed stack).
+- P-736-4's side effect — an existing user who never dragged the divider gets the 240 sidebar inside their restored 1240 window, where Terminal's Library controls row legally wraps to two lines (fresh windows open 1270 × 840 and stay one line).
+- The two closing cards' titles reuse the asks' existing approved constants ("Set a passphrase" · "Your twelve words"); alt: no titles. On the passphrase card, setting a passphrase moves straight on to the words card — the "Passphrase set." receipt shows only a frame.
+- The CastleRules one-word reality ("the tutorial's last card" → the closing cards, rules 2/3) — HELD: CastleRules is yours alone to amend; the rules' substance is untouched and the sentence is now one word stale. Say the word and the touch lands with the VX-735 pointer.
+- The audit's RECORDED (wording-only) rows — B1's table, rows 7 · 9 · 22 · 29 (step 7's "every version of every block" mockup frame; "the English take" where famous-line blocks hold two English takes; the end card's keep-going line not naming the Settings stop; the Prince front note's restart sentence, held since VX-292).
+- F-W1 (pre-existing since VX-292 U3, now ticketed): step 11's second beat's card covers the book's Read tab until Book is pressed.
+- The step-5 observation (ticketed): on a long paragraph the takes panel's "＋ new take (branch)" door sits below its fold, partly under the coach card.
+- VX-740 (Compare's double outline column, mechanism traced at the ladder): offered as the next sweep's first rider — the fix is small but which seat yields is a design choice, yours.
+- Long wing names still cross the 240 line ("in walk wing") — inherent to R-736-6's fixed-width road; a truncation/ellipsis rule would be a new call, yours.
+- A sitemap/robots.txt for stargazing.tech (R-736-8's tail) — her site agent's task if wanted.
 
 ## B1 RECORD
 
