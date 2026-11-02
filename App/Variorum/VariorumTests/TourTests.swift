@@ -117,9 +117,13 @@ struct TourScriptTests {
     /// recorded in the U3 RECORD with its alternative: the mode list's home
     /// is the sidebar's "this note" section ("the rail" is the code's word,
     /// never the app's), and choosing a take flips ONE paragraph, not the page.
+    /// VX-736 (R-736-5, her audit finding): step 7 says to scroll — the
+    /// take it names can sit below the fold with no road to reveal it.
     static let u3Departures: [Tour.Step: [(from: String, to: String)]] = [
-        .takesMode: [("the page now reads Italian", "this paragraph now reads Italian")],
-        .takesFlipBack: [("the page now reads Italian", "this paragraph now reads Italian")],
+        .takesMode: [("the page now reads Italian", "this paragraph now reads Italian"),
+                     ("now reads Italian. Choose", "now reads Italian. Scroll down if you don't see it. Choose")],
+        .takesFlipBack: [("the page now reads Italian", "this paragraph now reads Italian"),
+                         ("now reads Italian. Choose", "now reads Italian. Scroll down if you don't see it. Choose")],
         .readInNote: [("in the rail", "in the sidebar")],
         .lensesLive: [("in the rail", "in the sidebar")],
     ]
@@ -242,6 +246,25 @@ struct TourScriptTests {
             of: "Click into the chapter on whether it is better to be loved or feared.",
             with: TourScript.insideBookRingedChapter) == ringed.body,
                 "only the last sentence changes")
+    }
+
+    /// **VX-736 (R-736-5) — step 7 says to scroll, right after it names the
+    /// take.** Her finding: the take the card names ("il principe 1532") can
+    /// sit below the fold inside the bloomed block's stacked takes, and
+    /// nothing said to scroll. No road brings one take's card on screen (the
+    /// record's trace), so the card says it — one PROVISIONAL sentence, the
+    /// brief's own words. RED on 2d82cb5a8 (the card had no such sentence).
+    @Test func stepSevenSaysToScrollRightAfterItNamesTheTake() throws {
+        #expect(TourScript.takesScrollHint == "Scroll down if you don't see it.")
+        for step in [Tour.Step.takesMode, .takesFlipBack] {
+            let body = try #require(TourScript.card(step)).body
+            let names = try #require(body.range(of: "Find the take named \(TourScript.italianName)"))
+            let hint = try #require(body.range(of: " " + TourScript.takesScrollHint + " "),
+                                    "\(step): the card says to scroll")
+            let between = body[names.upperBound..<hint.lowerBound]
+            #expect(between.filter { $0 == "." }.count == 1,
+                    "\(step): the hint follows the sentence that names the take, so \"it\" is that take")
+        }
     }
 
     /// The departures quote the doors they name — a rename cannot strand them.

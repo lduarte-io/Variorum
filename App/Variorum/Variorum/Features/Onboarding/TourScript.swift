@@ -130,6 +130,18 @@ enum TourScript {
     /// that disagree in that one case).
     static let insideBookRingedChapter = "Click into the chapter the ring marks."
 
+    /// **Step 7's scroll sentence** (VX-736 R-736-5 — her audit finding:
+    /// *"there was another moment where it was a little unclear that you're
+    /// supposed to scroll down within takes"*). The Takes board blooms the
+    /// toured block's takes as cards STACKED under it (the default fan
+    /// style), so the take the card names can sit below the fold, and no road
+    /// brings one take's card on screen (the article's landings land a
+    /// block's ROW; `revealTake` would put the editing ring on the Italian —
+    /// the trace is the run's B1 RECORD). NEW WORDS, PROVISIONAL — the
+    /// brief's one line, hers to overturn; said right after the sentence that
+    /// names the take, so "it" is that take.
+    static let takesScrollHint = "Scroll down if you don't see it."
+
     // MARK: - The cards
 
     // swiftlint:disable line_length
@@ -182,9 +194,11 @@ enum TourScript {
             // card chooses with its header band (`TakeChooseHeader`'s
             // words, quoted). Departure (a real-app fact): choosing a take
             // flips ONE paragraph, so "this paragraph", not "the page".
+            // VX-736 (R-736-5): the scroll sentence after the sentence that
+            // names the take (no road reveals one take's card — the record).
             return Card(
                 title: "Both takes, side by side",
-                body: "This is Takes mode: the whole note, with every version of every block. The \u{2713} take is what the note says. Find the take named \(italianName) and press \(TakeChooseHeader.chooseWord): this paragraph now reads Italian. Choose the English take to bring it back. Choosing decides what the note says; clicking into a take just works in it.")
+                body: "This is Takes mode: the whole note, with every version of every block. The \u{2713} take is what the note says. Find the take named \(italianName) and press \(TakeChooseHeader.chooseWord): this paragraph now reads Italian. \(takesScrollHint) Choose the English take to bring it back. Choosing decides what the note says; clicking into a take just works in it.")
         case .readInNote:
             // VX-292 U3 (R-292-7). BUILD-VERIFY: Read's switch opens on
             // `edit` (`ReadModeView.rememberedFace`'s default — her ruling;
