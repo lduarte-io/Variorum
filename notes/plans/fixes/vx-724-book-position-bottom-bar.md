@@ -186,7 +186,15 @@ landed here, with the next commit.)
 
 ### Round 2 — fresh cold reviewer re-reviews the fixes
 
-*(Findings and dispositions land here.)*
+Cold reviewer: Opus (opus-reviewer), 2026-11-01. **No BLOCKER, no MAJOR ⇒ no round 3; the ladder ends here.** Every round-1 disposition verified HONORED (its clean bill names each); the green run reproduced under its own stage claim (41 tests in 3 suites; the bar's numbers byte-equal to the record's). Findings with dispositions:
+
+**R2-F-1 [MINOR, SPECULATIVE on frequency] — the rescoped A6 pin reads a shared DEBUG-oracle key (`withBookWorld`'s `.incrementing` UUIDs repeat the reading id across ~15 Outline-mounting suites) and opens with an unconditional `forgetOutlinePins()` (a three-store `forgetAll`, `outlineScrollStore` included) — both against the `OutlineRoomTests` precedent (live UUIDs; key-scoped forgets).** Under today's serial scheme (`parallelizable = "NO"` since July) the suites cannot interleave and the reviewer could not make it red — no failing-on-old pin can exist, so by the hallucination guard this is HYGIENE, not a bug. **Disposition: DEFERRED to a Debt ticket at closeout** (key-scoped forget + a `uuid:` parameter on this pin's world), per the reviewer's own fold-into-next-touch offer. Recorded, not fixed blind.
+
+**R2-F-2 [MINOR] — P-724-1 (the bar's width) and P-724-2 (which half wins under squeeze) are still PROVISIONAL with no QUESTIONS entry planned** (R-724-2 settled P-724-3; the implementer's "no QUESTIONS entry" line predates F-3). **Disposition: CONFIRMED — closeout obligation added:** both are put to her AT THE WALK (the screenshot shows exactly these two choices); any she blesses becomes a ruling here; any left unruled is logged in `notes/QUESTIONS.md` at the merge moment by the merging session.
+
+**R2-F-3 [NIT] — the rescoped pin's doc comment cites the wrong red-on-old evidence** (the first batch's revert and F-1's red run — both the other direction; the pin's own bite is the fix pass's 4b revert). **Disposition: CONFIRMED — orchestrator adjudication fix** (comment-only, fully specified: cite 4b), with one implementer sanity pass over the diff (the final-round rule: never the orchestrator's eyes alone).
+
+**Round-2 closeout obligations, gathered:** the walk (the acceptance unit's use-shaped evidence; F-7 and the P-724-1/-2 blessings ride it) · the Debt tickets at closeout triage: R2-F-1 (oracle hygiene, Tests & tooling) and F-6 (the four-names rename, Books) · QUESTIONS entries for any P-724 provisional she leaves unruled at the merge.
 
 ## THE RELEASE (the orchestrator's half, after the merge)
 

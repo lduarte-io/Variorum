@@ -624,10 +624,11 @@ struct OutlineWritingSurfaceTests {
     /// is the pane's foot, and the bar is the only chrome below the page. The
     /// placement half moved here from the landing suite's follower pin
     /// (ladder r1 F-1/F-4: one placement truth, beside the ruling it amends).
-    /// Red on the pre-VX-724 tree, where the pinned line stood ABOVE the page
-    /// and nothing stood below it (the first batch's behavioral revert of the
-    /// placement, and F-1's red run of the unrescoped arm — off by the bar's
-    /// 26 pt — are its bite).
+    /// Red on the old placement, where the line stood ABOVE the page and
+    /// nothing stood below it: the fix pass's behavioral revert (the VX-724
+    /// record's 4b) moved the bar back above the page and exactly these
+    /// three arms went red (`below page=0.0` against the bar's 26 pt; the
+    /// bar at y 32) — that run is this pin's bite.
     @Test func outlinesOnlyBottomChromeIsThePositionBar() async throws {
         BookOutlineGeometry.forgetOutlinePins()
         try await withHostedBook(posts: 6) { _, _, readingID, _, window, hosting, _ in
