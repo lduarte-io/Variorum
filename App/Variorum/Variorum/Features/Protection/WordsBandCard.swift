@@ -280,12 +280,16 @@ struct WordsLookPanel: View {
                 PeekableSecretField(label: ProtectionWords.wordsLookPassphraseField, text: $passphrase, onSubmit: submit)
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 300)
-                Button(ProtectionWords.wordsLookCancel) {
+                Button {
                     passphrase = ""
                     look.cancel()
+                } label: {
+                    Text(ProtectionWords.wordsLookCancel).modifier(TourClosingDoorProbe(key: "cancel"))
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens))
-                Button(ProtectionWords.wordsLookShow) { submit() }
+                Button { submit() } label: {
+                    Text(ProtectionWords.wordsLookShow).modifier(TourClosingDoorProbe(key: "show"))
+                }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
                     .disabled(passphrase.isEmpty)
             }
@@ -547,8 +551,24 @@ struct TourWordsAsk: View {
 enum TourClosingOracle {
     static var copiedCaveatFrame: CGRect?
     static var stackedLookFrame: CGRect?
+    /// The look's ASK doors' drawn words (by key: "cancel", "show") — F-W3's pin reads them against the words' own width.
+    static var askDoorFrames: [String: CGRect] = [:]
 }
 #endif
+
+/// Records a door's drawn words for the pins (DEBUG only; nothing in a release build).
+struct TourClosingDoorProbe: ViewModifier {
+    let key: String
+
+    func body(content: Content) -> some View {
+        content
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                TourClosingOracle.askDoorFrames[key] = $0
+            }
+            #endif
+    }
+}
 
 // MARK: - Settings ▸ Protection (the door the ✕'s toast names)
 

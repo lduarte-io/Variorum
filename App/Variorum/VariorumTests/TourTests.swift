@@ -2379,6 +2379,93 @@ struct TourClosingCardTests {
         library.look.close()
     }
 
+    /// **F-W3 (the 2026-11-02 walk, adjudicated FIX) — the words card's ASK
+    /// lays out whole, in both voices.** A library WITH a passphrase: the
+    /// passphrase card is skipped, and the words card's look asks the
+    /// passphrase first (rule 6). The walk's W3 found the one-row ask cutting
+    /// "Show my twelve words" to "Show my twelve w…" in Terminal's monospace
+    /// at the card's measure. Through the live overlay, each voice (a real
+    /// `ThemeStore` on the store's voice): the card whole in the window, and
+    /// both ask doors' words drawn at least as wide as the words themselves
+    /// (a truncated one-line label is narrower than its words) and inside the
+    /// card. RED on c50512c0d (the one-row ask) — the record quotes the line.
+    @Test func theWordsCardsAskForThePassphraseLaysOutWholeInBothVoices() async throws {
+        #if DEBUG
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            for voice in [ThemeVoice.terminal, .study] {
+                try await Self.walkTheAsk(session, voice: voice)
+            }
+        }
+        #endif
+    }
+
+    #if DEBUG
+    static func walkTheAsk(_ session: AppSession, voice: ThemeVoice) async throws {
+        try session.operations.setThemeVoice(voice)
+        let theme = ThemeStore(session: session)
+        let themeTask = Task { await theme.start() }
+        defer { themeTask.cancel() }
+        for _ in 0..<100 where theme.settings.voice != voice {
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(theme.settings.voice == voice, "precondition: the store wears \(voice)")
+        let road = PlantedRoad()
+        let created = try await road.created()
+        #expect(await ProtectionOpenRoad.setFirstPassphrase(session: created.0, new: "a passphrase") == .set)
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(
+            created.0, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
+        #expect(TourEndLibraryModel.asks(standing) == .init(passphrase: false, words: true))
+        let library = TourEndLibraryModel(standing: standing)
+        let engine = TourEndCardTests.engineAtTheClose(session)
+        TourOracle.cardFrame = nil
+        TourClosingOracle.askDoorFrames = [:]
+        let window = NSWindow(
+            contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: LiveClosingCardRig(
+            engine: engine, scheme: .light, standing: standing, library: library)
+            .environment(theme))
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        // The facts read the library: no passphrase card — the words card.
+        await settle(window, hosting) { engine.state.step == .protectWords }
+        #expect(engine.state.step == .protectWords, "\(voice): the passphrase card is skipped")
+        await library.showWords()
+        #expect(library.look.phase == .asking, "\(voice): the look asks the passphrase (rule 6)")
+        await settle(window, hosting) { TourClosingOracle.askDoorFrames.count == 2 }
+        await settle(window, hosting, turns: 30) { false }
+        try expectWhole("\(voice) the words card asking", in: hosting.bounds)
+        let card = try #require(TourOracle.cardFrame)
+        let tokens = theme.tokens(for: .light)
+        for (key, words, weight) in [("cancel", ProtectionWords.wordsLookCancel, Font.Weight.regular),
+                                     ("show", ProtectionWords.wordsLookShow, Font.Weight.semibold)] {
+            let drawn = try #require(TourClosingOracle.askDoorFrames[key], "\(voice) \(key): the door drew")
+            let free = NSHostingView(rootView: Text(words).font(tokens.small).fontWeight(weight).fixedSize())
+            let needed = free.fittingSize.width
+            #expect(drawn.width >= needed - 0.5,
+                    "\(voice) \(key): drawn \(drawn.width) pt, the words need \(needed) pt — truncated")
+            #expect(drawn.minX >= card.minX && drawn.maxX <= card.maxX + 0.5, "\(voice) \(key): inside the card")
+        }
+        library.look.cancel()
+    }
+    #endif
+
     /// The card drew at its measure and sits wholly inside the window
     /// (SwiftUI's global space is the window content's own, top-left origin —
     /// the hosting view fills it).
