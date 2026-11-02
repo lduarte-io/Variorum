@@ -241,10 +241,13 @@ struct WingChordsAndLabelDoorTests {
 
     // MARK: - VX-644 · the label IS the switcher's door
 
-    @Test func theLabelIsADeclaredSurfaceDoorOfSwitchWing() {
+    @Test func theLabelIsADeclaredSurfaceDoorOfSwitchWing() throws {
         #expect(CapabilityRegistry.capability(.switchWing).doors.contains(.surface))
         #expect(RootView.surfaceCapabilities.contains(.switchWing), "the toolbar's label")
-        #expect(QuickEntryBar.surfaceCapabilities == [.switchWing], "both quick-entry bars' label")
+        // VX-738 (her R-736-7): the quick-entry bars' label is gone — the bar
+        // declares (and renders) no `.surface` door of its own any more.
+        #expect(!(try source("Features/Shelf/QuickEntryBar.swift")).contains("static let surfaceCapabilities"),
+                "the bars render no door of their own")
     }
 
     /// The press is ⌘L's own act in its window: the switcher's request (the
@@ -273,6 +276,9 @@ struct WingChordsAndLabelDoorTests {
 
     /// Every label renders the door, and the hosts hand it the shell's act
     /// (composition by source — `QuickEntryWingLabelTests`' precedent).
+    /// VX-738 (the VX-736 run, B2 — her R-736-7): the toolbar's label is the
+    /// ONE label now; the quick-entry bars' twin and its plumbing are gone
+    /// (flipped: neither host is handed the act, the bar renders no button).
     @Test func everyWingLabelRendersTheDoor() throws {
         let root = try source("RootView.swift")
         let newNote = try #require(root.range(of: "Button(\"New Note\", systemImage: \"square.and.pencil\")"))
@@ -282,14 +288,15 @@ struct WingChordsAndLabelDoorTests {
         #expect(toolbar.contains(".buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))"),
                 "a quiet voiced word — the chrome vocabulary, no glass")
         #expect(toolbar.contains("QuickEntryCopy.wingLabel(wings.currentName)"), "still reads \u{201C}in \u{2039}wing\u{203A}\u{201D}")
-        #expect(root.components(separatedBy: "onSwitchWing: { ShellActions(session: session, shell: router).openWingSwitcher() }").count == 3,
-                "both quick-entry hosts get the act")
+        #expect(!root.contains("onSwitchWing:"), "no quick-entry host is handed the act (VX-738)")
         for host in ["Features/Shelf/ShelfView.swift", "Features/Library/LibraryCatalogView.swift"] {
             let text = try source(host)
             let start = try #require(text.range(of: "QuickEntryBar("))
-            #expect(text[start.lowerBound...].prefix(500).contains("onWingLabel: onSwitchWing"), "\(host) hands the bar the door")
+            #expect(!text[start.lowerBound...].prefix(500).contains("onWingLabel:"), "\(host) hands the bar no door")
+            #expect(!text.contains("var onSwitchWing"), "\(host) carries no label callback")
         }
         let bar = try source("Features/Shelf/QuickEntryBar.swift")
-        #expect(bar.contains("Button(action: onWingLabel) { label }"), "the bar's label is a button when a host hands the act")
+        #expect(!bar.contains("Button(action: onWingLabel)") && !bar.contains("var onWingLabel"),
+                "the bar renders no label button")
     }
 }

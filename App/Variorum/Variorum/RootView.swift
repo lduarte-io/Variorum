@@ -1387,9 +1387,7 @@ struct RootView: View {
                 offerCard: tourOfferCard,
                 wordsBand: wordsBand,
                 // VX-332: the Bookcase's quick entry stands down during a tour.
-                tourRunning: tourSlot.engine != nil,
-                // VX-644: the bar's "in ‹wing›" is the wing switcher's door.
-                onSwitchWing: { ShellActions(session: session, shell: router).openWingSwitcher() })
+                tourRunning: tourSlot.engine != nil)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
         case .library:
@@ -1406,9 +1404,7 @@ struct RootView: View {
                 // The correction round, batch E (row 33): the panel's book
                 // outline opens the book AT a note — the ascent's landing.
                 onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) },
-                starDoor: starDoor, wings: wings,
-                // VX-644: the bar's "in ‹wing›" is the wing switcher's door.
-                onSwitchWing: { ShellActions(session: session, shell: router).openWingSwitcher() })
+                starDoor: starDoor, wings: wings)
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts,
