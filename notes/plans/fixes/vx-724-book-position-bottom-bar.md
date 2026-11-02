@@ -143,6 +143,20 @@ QUESTIONS entry: nothing the brief left open was product behavior.
 
 ONE fix, F-1 (+F-4 folded): in `App/Variorum/VariorumTests/BookViewTests.swift`, rescope `OutlineWritingSurfaceTests.outlineCarriesNoBottomChrome` as the disposition above states (keep every arm that still holds — read the test first; only the window-edge arm changes meaning); in `BookOutlineLandingTests.swift`, remove the placement assertion from `theNavigatorFollowsWhatThePageShowsNeverTheCaret` and let the rescoped pin carry it (same `.global`/window-frame conversion, already proven); fix the stale "no bottom chrome (A6)" comment at `BookView.swift:~2190` to name the sanctioned bar (R-724-1) with A6's scrub/progress ban intact. Evidence: the rescoped suite green on the branch (`-only-testing:VariorumTests/OutlineWritingSurfaceTests` + the landing suite, under a held stage claim); the rescoped pin is inherently red-on-old (the old tree has no bar below the page — and F-1's red run on the unfixed branch is the pin's bite shown live). No other finding needs code.
 
+### Round 1 fix pass — LIVE STATUS
+
+Implementer: Opus (opus-implementer), 2026-11-01, worktree `~/dev/variorum-vx-724`. (`b5b5e6b21`'s message says the
+record's LIVE STATUS opened with it — it did not: the record edit collided with the orchestrator's `910a51298` and
+landed here, with the next commit.)
+
+| Piece | State |
+|---|---|
+| 0. Read the brief, the F-1/F-4 dispositions, the A6 pin whole, the follower pin, the two BookView A6 comments | DONE |
+| 1. `BookViewTests` — `outlineCarriesNoBottomChrome` rescoped, renamed `outlinesOnlyBottomChromeIsThePositionBar` | WRITTEN (`b5b5e6b21`), not yet compiled |
+| 2. `BookOutlineLandingTests` — the C-3 placement assertion removed from `theNavigatorFollowsWhatThePageShowsNeverTheCaret` | WRITTEN (`e5876892f`), not yet compiled |
+| 3. `BookView.swift` — the stale A6 comments, comment-only | DONE (`f045ca22f`) |
+| 4. The three suites under a held stage claim | NEXT |
+
 ## THE RELEASE (the orchestrator's half, after the merge)
 
 Version **1.0** (`release.sh --version 1.0` — the script stamps MARKETING_VERSION; X.Y is a legal shape). Her word is explicit and standing (this message); the notes are HERS to word ("I'll actually fix the wording notes myself") — the orchestrator drafts `ReleaseNotes-1.0.md` as clean public copy (one line per bullet, no draft/meta/process lines — VX-708's rule), presents it in chat, lands her fixes on the branch before the merge so main is release-ready. Then: PR merge (merge commit) → `Tools/Release/release.sh --version 1.0` at a zero-instance window, no repo commits while it runs → the site road per `~/dev/stargazing.tech/stargazing-tech/notes/variorum-releases.md` (DMG-first: R2 put → verify dmg → appcast copy → `variorum.json` bump → build+deploy → verify appcast) → A1 safety copy + `/Applications` refresh at a zero-instance window.
