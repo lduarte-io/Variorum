@@ -1,6 +1,6 @@
 # VX-495 / VX-496 — the keyset pull's server-half deploy checklist (a MAINTENANCE artifact; marker 14 stays)
 
-**Status: RUN — the server half DEPLOYED 2026-11-02 00:41 UTC (run 2, after run 1's 42501 and the bracket fix — VX-721); every verify row DONE; the ACCEPTANCE (her week-behind Pro's catch-up) PENDING her open.**
+**Status: RUN — the server half DEPLOYED 2026-11-02 00:41 UTC (run 2, after run 1's 42501 and the bracket fix — VX-721); every verify row DONE; the ACCEPTANCE DONE 00:57 UTC — her week-behind Pro caught up ~23k rows in ~64 s end to end. Open: the SyncSpec §12 maintenance entry for the deployed body lands at the MERGE moment (the shared-ledger rule).**
 The artifact: `Server/supabase/maintenance/vx495-pull-keyset.sql` (SHAPE B — D-495 EVIDENCE; `sync_pull_remaining` per R-500-1).
 The rollback: `Server/supabase/maintenance/vx495-rollback.sql`. Both idempotent, both guarded ≥ marker 14, neither writes
 `sync_meta`. NOT a lockstep event: the wire is byte-identical (signature, output shape, order), so no client install
@@ -70,12 +70,25 @@ variorum_definer;` as the artifacts' first statement — plus a sweep row for th
 
 ## The acceptance — HER REAL-WORLD TEST (her words: the week-behind Pro)
 
-- [ ] She opens Variorum on the Pro; the round runs. The orchestrator reads, read-only: `log show --last 30m --predicate
+**DONE 2026-11-02 00:56–00:57 UTC (her open at ~00:55; her report: "the sync finished after about a minute").** The server's
+two stamps: the Pro's `device_cursor` row (`7e7609fa…`) stamped `seen_at` 00:56:04.5 by the round's FIRST window (the 13j
+rule: `since` = the committed cursor 245,728), and `last_seq` = 356,699 = the head at 00:57:08.3 — **the whole round, download
++ save, ~64 s** for the rows past the cursor (~23k; the Air had kept writing — the head moved from 355,236 at the probe to
+356,699). The download/save split is NOT measured: `log show` on the Pro returned zero lines for the app's process and
+subsystem from this session (three predicates; the standing container/TCC class — her hands could read it). Against the
+honest expectation above: the download's ~12 calls could not have exceeded a few seconds either way; the save on her real
+store ran well under the bench's 331 rows/s figure would predict (~70 s for 23k) — the whole round was ~64 s, so the save
+was at most ~55 s on a store already holding ~21k blocks. Her side effect, traced: her Pro's palette flipped to sea glass
+~20 s in — the synced `setting` row `theme_palette = seaglass` (server_seq 354,514, written 2026-10-30 18:57 UTC on
+another device) arrived and won by server-wins, as the synced-settings design says; not a bug; whether the palette should
+be per-device is hers (offered as a ticket).
+
+- [x] She opened Variorum on the Pro; the round ran (the record above). The orchestrator reads, read-only: `log show --last 30m --predicate
       'process == "Variorum"'` for the CFNetwork task summaries (the window calls and their durations) and the app's own
       `io.lduarte.Variorum:protection` lines; the server's `device_cursor` for `7e7609fa…` advances to the head; the row
       says "Synced …". Record: calls, per-call time, download wall time, the save's wall time (CPU/WAL as at VX-494), vs
       the honest expectation above.
-- [ ] If the round REFUSES with a server error naming `sync_pull`: the ROLLBACK runs (the same `!` shape with
+- [x] Not needed — the round committed. If a later round REFUSES with a server error naming `sync_pull`: the ROLLBACK runs (the same `!` shape with
       `vx495-rollback.sql`), her next round confirms 13's body serves, the artifact is fixed in repo, round 3 of the
       server-half ladder reads the fix before any re-run.
 
