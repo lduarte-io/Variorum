@@ -518,8 +518,9 @@ struct BookFocusFoldTests {
 ///
 /// What these pin, and why each one is here rather than assumed:
 /// - the picker's three modes and the working-book default (the rename);
-/// - Outline carries NO bottom chrome (A6 — RED on the pre-2A code, where
-///   the `Slider` and `ProgressView` were a `safeAreaInset`);
+/// - Outline carries no scrub or progress chrome (A6 — RED on the pre-2A
+///   code, where the `Slider` and `ProgressView` were a `safeAreaInset`);
+///   its one bottom chrome is the position bar (VX-724, R-724-1);
 /// - the prose column is WRITE'S OWN MEASURE, measured off the realized
 ///   text surface rather than restated from the constant;
 /// - P3 holds with posts OPEN by default — the counter pin, load-bearing
@@ -604,15 +605,40 @@ struct OutlineWritingSurfaceTests {
     }
 
     /// A6, red-on-old by behavioral revert: restoring the `safeAreaInset`
-    /// block puts a bottom bar back — the page's scroll view takes a bottom
-    /// content inset, and a progress indicator returns to the hierarchy —
-    /// and this fails. (It counted an `NSSlider` until 18k C6: on macOS 27 a
-    /// SwiftUI `Slider` is no NSView, so that arm went hollow.) Her ruling covered BOTH controls — "it
-    /// makes no sense to have a horizontal scrollbar on a vertical page"
-    /// and "it seems a bit buggy… remove it fully for now".
-    @Test func outlineCarriesNoBottomChrome() async throws {
-        try await withHostedBook(posts: 6) { _, _, _, _, window, hosting, _ in
-            await settle(window, hosting, until: { countReadSurfaces(in: hosting) > 0 })
+    /// block puts the scrub chrome back — the page's scroll view takes a
+    /// bottom content inset, and a progress indicator returns to the
+    /// hierarchy — and this fails. (It counted an `NSSlider` until 18k C6:
+    /// on macOS 27 a SwiftUI `Slider` is no NSView, so that arm went
+    /// hollow.) Her ruling covered BOTH controls — "it makes no sense to
+    /// have a horizontal scrollbar on a vertical page" and "it seems a bit
+    /// buggy… remove it fully for now".
+    ///
+    /// **VX-724 — R-724-1 AMENDS A6's REACH** (a DELIBERATE SHAPE CHANGE;
+    /// this pin was `outlineCarriesNoBottomChrome`). Her *"please just move
+    /// it to the bottom bar of the book view, instead of the top"* sanctions
+    /// ONE bar at the page's foot — the position words leading, the counts
+    /// trailing (`OutlineBottomBar`). A6's scrub/progress ban stands whole:
+    /// the inset arm and the progress arm are unchanged. Only the window-edge
+    /// arm ("the page runs to the window's bottom edge") changes meaning, to
+    /// the new truth: the page runs to the BAR's top edge, the bar's bottom
+    /// is the pane's foot, and the bar is the only chrome below the page. The
+    /// placement half moved here from the landing suite's follower pin
+    /// (ladder r1 F-1/F-4: one placement truth, beside the ruling it amends).
+    /// Red on the old placement, where the line stood ABOVE the page and
+    /// nothing stood below it: the fix pass's behavioral revert (the VX-724
+    /// record's 4b) moved the bar back above the page and exactly these
+    /// three arms went red (`below page=0.0` against the bar's 26 pt; the
+    /// bar at y 32) — that run is this pin's bite.
+    @Test func outlinesOnlyBottomChromeIsThePositionBar() async throws {
+        BookOutlineGeometry.forgetOutlinePins()
+        try await withHostedBook(posts: 6) { _, _, readingID, _, window, hosting, _ in
+            await settle(window, hosting, until: {
+                countReadSurfaces(in: hosting) > 0
+                    && BookOutlineGeometry.outlinePinFrames[readingID] != nil
+            })
+            // The bar reports its frame on its first geometry pass; let the
+            // pane finish settling before reading the two rectangles.
+            await settle(window, hosting, until: { false }, maxTurns: 4)
             @MainActor func count<V: NSView>(_ type: V.Type, in view: NSView) -> Int {
                 var n = view is V ? 1 : 0
                 for sub in view.subviews { n += count(type, in: sub) }
@@ -633,20 +659,48 @@ struct OutlineWritingSurfaceTests {
             // at render time (measured hollow too). What her ruling actually
             // removed is the WHOLE bottom inset, and that is AppKit-visible
             // on the page's own scroll view: restored, the inset shows as a
-            // 54-pt bottom content inset; today it is 0 and the page reaches
-            // the window's bottom edge.
+            // 54-pt bottom content inset; today it is 0. (VX-724: the
+            // position bar is a SIBLING below the page's scroll, never an
+            // inset on it, so this arm keeps its teeth whole.)
             let scrollViews = views(NSScrollView.self, in: hosting)
             let page = try #require(
                 scrollViews.max { $0.bounds.width < $1.bounds.width },
                 "the outline page scrolls")
             #expect(scrollViews.allSatisfy { $0.contentInsets.bottom == 0 },
-                    "no bottom bar — no jump slider (a horizontal scrollbar on a vertical page), nothing: \(scrollViews.map(\.contentInsets.bottom))")
-            #expect(abs(page.convert(page.bounds, to: hosting).maxY - hosting.bounds.maxY) <= 1,
-                    "the page runs to the window's bottom edge")
+                    "no scrub chrome — no jump slider (a horizontal scrollbar on a vertical page), no bottom inset: \(scrollViews.map(\.contentInsets.bottom))")
             // The progress arm is unchanged: `ProgressView` is still an
             // `NSProgressIndicator` on 27 (measured), so it kept its teeth.
             #expect(count(NSProgressIndicator.self, in: hosting) == 0,
                     "no progress bar — she ruled it out fully, bugginess unchased")
+
+            // VX-724 (R-724-1) — the window-edge arm's successor. The bar's
+            // rectangle is the oracle's (`OutlineBottomBar` records it in
+            // `.global`); the page's is AppKit's.
+            let bar = try #require(
+                BookOutlineGeometry.outlinePinFrames[readingID], "the Outline drew its position bar")
+            // In the hosting view's own space (the old arm's space): the run
+            // below the page is exactly the bar's height — nothing else
+            // stands between the page and the pane's foot.
+            let pageInHosting = page.convert(page.bounds, to: hosting)
+            let belowPage = hosting.isFlipped
+                ? hosting.bounds.maxY - pageInHosting.maxY
+                : pageInHosting.minY - hosting.bounds.minY
+            #expect(abs(belowPage - bar.height) <= 1,
+                    "the bar is the only chrome below the page: \(belowPage) pt below it, the bar \(bar.height) pt")
+            // In the bar's own space: `.global` in this host is the WINDOW's
+            // top-left space, title bar included (measured by the landing
+            // suite: the bar's maxY is the window frame's height, the content
+            // view's is that less the title bar), so the page's AppKit
+            // rectangle (window base, bottom-left) flips by the window
+            // frame's height.
+            let windowHeight = window.frame.height
+            let pageBottom = windowHeight - page.convert(page.bounds, to: nil).minY
+            print("VX-724 BAR (A6 successor):", "bar=\(bar)", "page bottom=\(pageBottom)",
+                  "window height=\(windowHeight)", "below page=\(belowPage)")
+            #expect(abs(bar.minY - pageBottom) <= 0.5,
+                    "the page runs to the bar's top edge: bar \(bar), page bottom \(pageBottom)")
+            #expect(abs(bar.maxY - windowHeight) <= 0.5,
+                    "the bar's bottom is the pane's foot: bar \(bar), window height \(windowHeight)")
         }
     }
 

@@ -417,21 +417,41 @@ nonisolated enum BookOutlineViewed {
             total: total.count, totalIsAtLeast: total.isAtLeast)
     }
 
-    /// **The pinned line, whole** — the book's count line, then the position
-    /// words while a pair is viewed, BOTH from the one `total` (ladder round
-    /// 1, finding 3: past the 300-note window the line read "300 notes ·
-    /// note 12 of 300+" — two totals side by side). Pure, so the pin reads
-    /// the sentence the line draws.
-    static func pinLine(
+    /// **VX-724 — the Outline's bottom bar, its two halves** (her ruling
+    /// R-724-1: the book's position info moves to a bar at the page's foot,
+    /// the counts that never change at its RIGHT, separated): LEADING, where
+    /// she is (`positionLine` — empty at rest); TRAILING, the book's count
+    /// line (`BookViewCopy.metaLine`). One value, so the bar draws and the
+    /// DEBUG oracle records the same two halves, each by name.
+    struct Bar: Equatable, Sendable {
+        /// The changing half — *"note 5 of 13 · a scandal in bohemia"*; ""
+        /// while nothing is viewed.
+        var position: String
+        /// The static half — *"book · 13 chapters · 13 notes"*.
+        var counts: String
+
+        init(position: String, counts: String) {
+            self.position = position
+            self.counts = counts
+        }
+    }
+
+    /// **The bar, whole** — the position words while a pair is viewed and
+    /// the book's count line, BOTH from the one `total` (ladder round 1,
+    /// finding 3: past the 300-note window the line read "300 notes · note
+    /// 12 of 300+" — two totals side by side; VX-724 split the halves to the
+    /// bar's two ends and kept the law). Pure, so the pin reads the words the
+    /// bar draws.
+    static func bar(
         gathering: Bool, chapters: Int, archived: Int, total: NoteTotal,
         pair: Pair, rows: [BookOutlineRows.Row], chaptered: Bool, filtered: Bool
-    ) -> String {
-        let meta = BookViewCopy.metaLine(
-            gathering: gathering, chapters: chapters,
-            notes: total.count, notesAreAtLeast: total.isAtLeast, archived: archived)
-        let position = positionLine(
-            pair: pair, rows: rows, chaptered: chaptered, filtered: filtered, total: total)
-        return BookViewCopy.outlinePinLine(meta: meta, position: position)
+    ) -> Bar {
+        Bar(
+            position: positionLine(
+                pair: pair, rows: rows, chaptered: chaptered, filtered: filtered, total: total),
+            counts: BookViewCopy.metaLine(
+                gathering: gathering, chapters: chapters,
+                notes: total.count, notesAreAtLeast: total.isAtLeast, archived: archived))
     }
 }
 

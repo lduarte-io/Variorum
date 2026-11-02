@@ -1442,3 +1442,29 @@ VX-661 grown (the encoder class now fires on green/single-test/post-product runs
 her call). Released as **0.10.6** at her word right after the merge (notes = this run's members; the site
 published and verified) — the second of her two-release amendment (vx-669 shipped 0.10.5 hours earlier). Next:
 her #252 pass; the orientation (hers); VX-692/VX-661 at her priority word.
+
+
+## Rolled 2026-11-01 (at the VX-724 closeout) — the VX-292 (+ VX-559) closeout paragraph, verbatim
+
+**→ VX-292 (+ VX-559) CLOSED 2026-10-30 — THE ONBOARDING OVERHAUL (the plan + every unit/window record
+`notes/plans/vx-292-onboarding.md`; the ladder `notes/plans/vx-292-ladder-round1.md`; PR at the merge; the
+handoff `notes/handoffs/vx-292-handoff.md`).** Architect shape, one overnight, her advance release word
+(R-292-16). The tour rebuilt around the Prince and grown to thirteen steps + a five-stop leg (the flip and back,
+Read, Lenses live, Compare & Blocks, the book arc, the Settings stop); the tour now DRIVES (landings forced to
+the step's mode once per arrival, step 3's chapter landed through the book's own ascent, her own switches never
+overruled) and MENDS a missing or deletion-broken Prince through its own restore door — after the ladder, only
+where everything the road would do is undoing deletions. The offer line became the band's welcome card
+(yes · no only; the no road names the Help door; never-returns law kept). Sea glass (the icon's #C2DDD3) joined
+as the seventeenth palette and the unset-store default (read-time flip; the voice's colours live on as Classic).
+The Prince swept Sherlock from tour + the guide's classics walk; the two stale Restore-Tutorial labels now quote
+the registry verb. Five units (U1 · U-THEME · U2 · U3 · U4), each closed through a coordinator-granted stage
+window with in-place red-on-old watches and dev-store walks — the windows caught four never-run fixture pins,
+the locked-book gate hole, the test-host's Bookcase polluting unscoped test oracles, and one stale tab-table pin
+(each fixed same-window). One Fable ladder, closed at round 2: the one MAJOR (the mend gate fired on
+renamed/released chapters — edits, not deletions) fixed by the whole-effect gate with five pins; residuals
+recorded (QUESTIONS #255). Merged SECOND after vx-105 (the foreseen pin conflicts resolved to the combined
+truth); the folded 0.10.7 release carried both efforts' public bullets to stargazing.tech. Canon: the two-file
+deltas as drafted; bundle QUESTIONS #255; VX-712 closed hollow by its trace pin, VX-713 fixed, VX-415 superseded
+by VX-559. Born: VX-716/717/718 (all Parked with reasons). HELD FOR HER: the Prince front-note sentence,
+P-292-4/5 (sea-glass depth; Default/Classic naming), the words-card toast observation, the #255 pass. Next: her
+morning checklist in the handoff; the wording-only tour pass at her word (R-292-4's second half).
