@@ -425,12 +425,15 @@ struct BookOutlineViewedTests {
         let place: (Pair) -> Int = { pair in
             pair.postID.flatMap { BookOutlineViewed.noteOrdinal(of: $0, in: rows) } ?? 0
         }
-        let pin: (Pair) -> String = { pair in
-            BookOutlineViewed.pinLine(
+        // VX-724: the bar's two halves (`BookOutlineViewed.bar`) — the
+        // position leading, the counts trailing.
+        let pin: (Pair) -> BookOutlineViewed.Bar = { pair in
+            BookOutlineViewed.bar(
                 gathering: false, chapters: 4, archived: 0,
                 total: BookOutlineViewed.NoteTotal(count: 12), pair: pair, rows: rows,
                 chaptered: true, filtered: false)
         }
+        let counts = "book \u{B7} 4 chapters \u{B7} 12 notes"
         let last = Pair(sectionID: "s4", postID: "n11")
         let topRow = Pair(sectionID: "s3", postID: "n8")
 
@@ -451,7 +454,7 @@ struct BookOutlineViewedTests {
         #expect(viewed(travel - 8) == last, "eight points up: still in the band — the last note")
         #expect(viewed(travel + 30) == last, "an overscroll past the bottom: the last note")
         #expect(pin(viewed(travel))
-                == "book \u{B7} 4 chapters \u{B7} 12 notes \u{B7} note 12 of 12 \u{B7} chapter four",
+                == BookOutlineViewed.Bar(position: "note 12 of 12 \u{B7} chapter four", counts: counts),
                 "the pin says the last note and its chapter")
 
         // NINE POINTS UP — one point out of the band: the top edge answers.
@@ -459,7 +462,7 @@ struct BookOutlineViewedTests {
                 "nine points up: the top-edge answer — \(viewed(travel - 9))")
         #expect(viewed(travel - 9) == topRow, "n8, its top 9 pt down the page — never a note ahead of it")
         #expect(pin(viewed(travel - 9))
-                == "book \u{B7} 4 chapters \u{B7} 12 notes \u{B7} note 9 of 12 \u{B7} chapter three")
+                == BookOutlineViewed.Bar(position: "note 9 of 12 \u{B7} chapter three", counts: counts))
         // Everywhere above the band: exactly the top-edge rule — the pace
         // never changes and nothing leads the page.
         for offset in stride(from: CGFloat(0), to: travel - 8, by: 5) {
@@ -683,22 +686,32 @@ struct BookOutlineViewedTests {
     /// 300+" beside it. RED on the batch's composition, which handed the
     /// count line the window's bare count ("300 notes") beside the
     /// position's floor ("of 300+"). Red-on-old by behavioral revert: make
-    /// `pinLine` hand `metaLine` `notesAreAtLeast: false`.
+    /// `bar` hand `metaLine` `notesAreAtLeast: false`.
+    ///
+    /// VX-724 (R-724-1, DELIBERATE SHAPE CHANGE): the line became the
+    /// Outline's bottom bar — the position LEADING, the counts TRAILING,
+    /// separated — so the expectation is the two halves by name
+    /// (`BookOutlineViewed.Bar`), no longer one sentence with the counts
+    /// first. The law is the same: both halves from the one total.
     @Test func thePinnedLineSaysOneTotalForBothHalves() {
-        let line: (BookOutlineViewed.NoteTotal, Pair) -> String = { total, pair in
-            BookOutlineViewed.pinLine(
+        typealias Bar = BookOutlineViewed.Bar
+        let bar: (BookOutlineViewed.NoteTotal, Pair) -> Bar = { total, pair in
+            BookOutlineViewed.bar(
                 gathering: false, chapters: 2, archived: 0, total: total,
                 pair: pair, rows: self.chaptered, chaptered: true, filtered: false)
         }
         let windowed = BookOutlineViewed.NoteTotal(count: 300, isAtLeast: true)
         let c = Pair(sectionID: "s2", postID: "c")
-        #expect(line(windowed, c)
-                == "book \u{B7} 2 chapters \u{B7} 300+ notes \u{B7} note 3 of 300+ \u{B7} chapter two",
-                "the count line and the position say the same floor")
-        #expect(line(windowed, .nothingViewed) == "book \u{B7} 2 chapters \u{B7} 300+ notes",
-                "at rest: the counts alone, the floor said")
-        #expect(line(BookOutlineViewed.NoteTotal(count: 4), c)
-                == "book \u{B7} 2 chapters \u{B7} 4 notes \u{B7} note 3 of 4 \u{B7} chapter two",
+        #expect(bar(windowed, c)
+                == Bar(position: "note 3 of 300+ \u{B7} chapter two",
+                       counts: "book \u{B7} 2 chapters \u{B7} 300+ notes"),
+                "the count half and the position half say the same floor")
+        #expect(bar(windowed, .nothingViewed)
+                == Bar(position: "", counts: "book \u{B7} 2 chapters \u{B7} 300+ notes"),
+                "at rest: no position, the counts alone, the floor said")
+        #expect(bar(BookOutlineViewed.NoteTotal(count: 4), c)
+                == Bar(position: "note 3 of 4 \u{B7} chapter two",
+                       counts: "book \u{B7} 2 chapters \u{B7} 4 notes"),
                 "a book inside its window: the exact count, twice")
         // The count line's own words (its other callers pass no floor and
         // read exactly as before — `VocabularySweepTests`).

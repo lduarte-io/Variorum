@@ -326,22 +326,26 @@ struct BookView: View {
                 // visible in every mode, Outline included.
                 //
                 // VX-562 — THE PINNED NAV INFO (her ask: the chapters and
-                // notes counts "stay fixed at the top while scrolling", and
-                // "show during scroll what # note you're in, maybe what
-                // chapter you're in"): a SIBLING above the page, never inside
-                // its scroll — every landing measures its anchors' tops in
-                // the scroll's own space, and a header in the content would
-                // shift every one of them (the Index's archived-line
+                // notes counts stay fixed while scrolling, and "show during
+                // scroll what # note you're in, maybe what chapter you're
+                // in"), MOVED by VX-724 (R-724-1 — *"please just move it to
+                // the bottom bar of the book view, instead of the top"*) to a
+                // bar at the page's FOOT: a SIBLING below the page, never
+                // inside its scroll — every landing measures its anchors'
+                // tops in the scroll's own space, and chrome in the content
+                // would shift every one of them (the Index's archived-line
                 // convention, the same reason).
                 VStack(spacing: 0) {
                     BookArchivedLine(model: archived, structure: structure)
-                    OutlinePinnedLine(
+                    outlineBody
+                        // WA-1: the receipt at the page's foot, trailing —
+                        // on the PAGE, so it floats above the bar rather than
+                        // over its counts (PROVISIONAL P-724-3).
+                        .overlay(alignment: .bottomTrailing) { pageFootReceipt }
+                    OutlineBottomBar(
                         readingID: readingID, model: model, structure: structure,
                         archivedCount: archived.door.count, tokens: tokens)
-                    outlineBody
                 }
-                // WA-1: the receipt at the page's foot, trailing.
-                .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                 .overlay { searchAnswerOverlay }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
@@ -1063,8 +1067,10 @@ struct BookView: View {
     }
 
     /// **The page foot's quiet slot** (WA-1 — Outline and Read's flow have no
-    /// bottom bar, so the receipt sits at the main column's bottom TRAILING
-    /// end, where every bar puts it). An OVERLAY, so nothing in the column
+    /// bottom bar that hosts it, so the receipt sits at the main column's
+    /// bottom TRAILING end, where every bar puts it; Outline's position bar,
+    /// VX-724, holds no receipt slot — the receipt floats on the page just
+    /// above it, PROVISIONAL P-724-3). An OVERLAY, so nothing in the column
     /// moves for it (18i's always-mounted rule, kept: idle it is the empty
     /// line at zero width). While it speaks it backs itself with the page's
     /// own colour, so prose scrolled under the corner never reads through
@@ -2208,10 +2214,10 @@ struct BookView: View {
                             .foregroundStyle(tokens.ink)
                         // VX-562 (P-562-3): the count line that led this row
                         // ("book · N chapters · M notes") MOVED to the pinned
-                        // line above the page (`OutlinePinnedLine`) — her
-                        // "stays fixed at the top while scrolling". The row
-                        // keeps the two doors, and its height (the doors
-                        // were already its tallest members).
+                        // line — her "stays fixed while scrolling" — now the
+                        // bottom bar's trailing half (`OutlineBottomBar`,
+                        // VX-724). The row keeps the two doors, and its
+                        // height (the doors were already its tallest members).
                         HStack(spacing: 8) {
                             // Her #43(a) ruling (13d batch 1): the book opens
                             // as CARDS and "expand all" opens it whole in one
@@ -2847,7 +2853,7 @@ enum BookOutlineGeometry {
     private static var navigatorNoteRowStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorChapterMarkStore = OwnedRegistrations<String, Bool>()
     private static var navigatorNoteMarkStore = OwnedRegistrations<String, Bool>()
-    private static var outlinePinLineStore = OwnedRegistrations<String, String>()
+    private static var outlinePinLineStore = OwnedRegistrations<String, BookOutlineViewed.Bar>()
     private static var outlinePinFrameStore = OwnedRegistrations<String, CGRect>()
     private static var outlineScrollStore = OwnedRegistrations<String, BookOutlineViewed.Scroll>()
     private static var focusDoorStore = OwnedRegistrations<String, @MainActor (String?) -> Void>()
@@ -2897,11 +2903,13 @@ enum BookOutlineGeometry {
     /// ids, as the frames beside them are.
     static var navigatorChapterMarks: [String: Bool] { navigatorChapterMarkStore.current }
     static var navigatorNoteMarks: [String: Bool] { navigatorNoteMarkStore.current }
-    /// **VX-562 — the Outline's PINNED line**, keyed by the book: the words
-    /// it draws (`BookViewCopy.outlinePinLine`, as composed — before the
-    /// voice's case folding) and its rectangle in the window, so a pin can
-    /// assert both what it says and that the page's scroll never moves it.
-    static var outlinePinLines: [String: String] { outlinePinLineStore.current }
+    /// **VX-562 — the Outline's PINNED line** (VX-724: its bottom bar),
+    /// keyed by the book: the two halves it draws, by name
+    /// (`BookOutlineViewed.Bar` — leading `position`, trailing `counts`, as
+    /// composed, before the voice's case folding) and the bar's rectangle in
+    /// the window, so a pin can assert what it says, where it stands, and
+    /// that the page's scroll never moves it.
+    static var outlinePinLines: [String: BookOutlineViewed.Bar] { outlinePinLineStore.current }
     static var outlinePinFrames: [String: CGRect] { outlinePinFrameStore.current }
     /// **VX-562 r1 — where each mounted Outline's page stands in its scroll**
     /// (viewport, offset, travel — exactly what the follower reads: R-562-A's
@@ -2968,8 +2976,8 @@ enum BookOutlineGeometry {
         }
     }
 
-    static func recordOutlinePin(_ readingID: String, line: String, owner: UUID) {
-        outlinePinLineStore.publish(line, for: readingID, owner: owner)
+    static func recordOutlinePin(_ readingID: String, bar: BookOutlineViewed.Bar, owner: UUID) {
+        outlinePinLineStore.publish(bar, for: readingID, owner: owner)
     }
 
     static func recordOutlinePinFrame(_ readingID: String, _ frame: CGRect, owner: UUID) {
@@ -3341,31 +3349,37 @@ private struct NavigatorMarkProbe: ViewModifier {
 }
 #endif
 
-// MARK: - VX-562 — the Outline's pinned nav info
+// MARK: - VX-562 / VX-724 — the Outline's pinned nav info, a bottom bar
 
-/// **The line that stays at the top of the Outline while the page scrolls**
+/// **The bar that stays at the foot of the Outline while the page scrolls**
 /// — her beta ask (*"the navigation info (number of chapters and notes)
-/// stays fixed at the top while scrolling"*), widened by her improvements
-/// note (*"show during scroll what # note you're in, maybe what chapter
-/// you're in"*).
+/// stays fixed … while scrolling"*), widened by her improvements note
+/// (*"show during scroll what # note you're in, maybe what chapter you're
+/// in"*), and MOVED from above the page by her VX-724 ruling (R-724-1:
+/// *"please just move it to the bottom bar of the book view, instead of the
+/// top. also, I would change it so that the information that isn't changing
+/// is to the right, separated"*).
 ///
-/// - **Where:** a sibling ABOVE the page's scroll view (`BookView.body`'s
+/// - **Where:** a sibling BELOW the page's scroll view (`BookView.body`'s
 ///   `.outline` stack), never inside it — the landings measure every anchor's
-///   top in the scroll's own space, and content above them would move them
-///   all. On the prose column's measure and left edge, as the title below it.
-/// - **What:** the book's count line — kind + extent at a glance (batch 12),
-///   MOVED here from the scrolling title block (PROVISIONAL P-562-3 — no
-///   duplication) — then the position words for the viewed pair through the
+///   top in the scroll's own space, and chrome in the content would move
+///   them all. It runs the pane's width — a bottom bar, not a line caged to
+///   the prose column (PROVISIONAL P-724-1).
+/// - **What:** LEADING, the position words for the viewed pair through the
 ///   one wording brain (`BookOutlineViewed.positionLine` →
-///   `NoteBoxCopy.viewedLine`); the chapter only where chapters govern
-///   (PROVISIONAL P-562-4). Both halves say ONE note total
-///   (`BookOutlineViewed.pinLine` — ladder round 1, finding 3: the window's
-///   floor, "300+", in both). One line, muted, the chrome's small face; it
-///   truncates, never wraps (P-8).
-/// - **Cost:** its own view, so a viewed-pair change re-renders this line and
+///   `NoteBoxCopy.viewedLine`; the chapter only where chapters govern,
+///   PROVISIONAL P-562-4), nothing at rest; TRAILING, separated, the book's
+///   count line — kind + extent at a glance (batch 12), moved out of the
+///   scrolling title block (PROVISIONAL P-562-3 — no duplication). Both
+///   halves say ONE note total (`BookOutlineViewed.bar` — ladder round 1,
+///   finding 3: the window's floor, "300+", in both). Muted, the chrome's
+///   small face; neither half ever wraps (P-8) — under width pressure the
+///   POSITION wins and the counts truncate (PROVISIONAL P-724-2: the
+///   position is the half she reads while scrolling).
+/// - **Cost:** its own view, so a viewed-pair change re-renders this bar and
 ///   the navigator's marks, never the page. The rows are read only while a
 ///   pair is viewed.
-private struct OutlinePinnedLine: View {
+private struct OutlineBottomBar: View {
     let readingID: String
     let model: BookViewModel
     let structure: BookStructureModel
@@ -3378,44 +3392,45 @@ private struct OutlinePinnedLine: View {
     #endif
 
     var body: some View {
-        let line = BookOutlineViewed.pinLine(
+        let bar = BookOutlineViewed.bar(
             gathering: structure.reading?.kind == .gathering,
             chapters: structure.sections.count, archived: archivedCount,
             total: BookOutlineViewed.NoteTotal(
                 count: model.entries.count, isAtLeast: model.truncated),
             pair: model.viewedOutlinePair,
             // The rows are read only while a pair is viewed (the position's
-            // ordinal and chapter name); at rest the line is the counts alone.
+            // ordinal and chapter name); at rest the bar is the counts alone.
             rows: model.viewedOutlinePair == .nothingViewed
                 ? [] : BookView.outlineRows(structure: structure, entries: model.entries),
             chaptered: structure.chaptersActive,
             filtered: model.viewFilter != nil)
         HStack(spacing: 0) {
-            Spacer(minLength: 0)
-            Text(tokens.chromeLabel(line))
+            Text(tokens.chromeLabel(bar.position))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                // The prose column's measure and left edge — the page's own
-                // device (`outlineBody`: flexible margins either side of a
-                // `proseColumn`-capped column that claims its width first).
-                .frame(maxWidth: BookView.proseColumn, alignment: .leading)
                 .layoutPriority(1)
-            Spacer(minLength: 0)
+            // Separated (her word): the halves never touch, however narrow.
+            Spacer(minLength: 16)
+            Text(tokens.chromeLabel(bar.counts))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 6)
-        // The page's edge, drawn: the archived line's hairline idiom, so the
-        // stack above the page reads as one.
-        .overlay(alignment: .bottom) {
+        // The page's edge, drawn: the archived line's hairline idiom, now on
+        // the bar's TOP edge — the page's foot.
+        .overlay(alignment: .top) {
             Rectangle()
                 .fill(tokens.line)
                 .frame(height: 1)
         }
         #if DEBUG
-        .onAppear { record(line) }
-        .onChange(of: line) { _, new in record(new) }
+        .onAppear { record(bar) }
+        .onChange(of: bar) { _, new in record(new) }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
             BookOutlineGeometry.recordOutlinePinFrame(
                 readingID, frame, owner: owner ?? DebugOracleOwner.unowned)
@@ -3424,9 +3439,9 @@ private struct OutlinePinnedLine: View {
     }
 
     #if DEBUG
-    private func record(_ line: String) {
+    private func record(_ bar: BookOutlineViewed.Bar) {
         BookOutlineGeometry.recordOutlinePin(
-            readingID, line: line, owner: owner ?? DebugOracleOwner.unowned)
+            readingID, bar: bar, owner: owner ?? DebugOracleOwner.unowned)
     }
     #endif
 }
@@ -4195,8 +4210,8 @@ nonisolated enum BookViewCopy {
     ///
     /// VX-562 r1 (finding 3): `notesAreAtLeast` — the book's WINDOW is hiding
     /// later notes, so the count is a floor ("300+ notes"), the same total
-    /// the pinned line's "note N of 300+" says (`BookOutlineViewed.pinLine`
-    /// feeds both from one value).
+    /// the Outline bar's "note N of 300+" says (`BookOutlineViewed.bar`
+    /// feeds both halves from one value).
     static func metaLine(
         gathering: Bool, chapters: Int, notes: Int, notesAreAtLeast: Bool = false, archived: Int
     ) -> String {
@@ -4211,14 +4226,10 @@ nonisolated enum BookViewCopy {
         return parts.joined(separator: " \u{00B7} ")
     }
 
-    /// **VX-562 — the Outline's pinned line**: the count line, then — while
-    /// the page is showing a note or a chapter — where she is
-    /// (`BookOutlineViewed.positionLine`): *"book · 12 chapters · 12 notes ·
-    /// note 5 of 12 · a scandal in bohemia"*. No at-rest suppression
-    /// (PROVISIONAL P-562-3): the position says itself whenever one resolves.
-    static func outlinePinLine(meta: String, position: String) -> String {
-        position.isEmpty ? meta : meta + " \u{00B7} " + position
-    }
+    // (VX-724: `outlinePinLine` — the joiner that put the position words
+    // after this count line in one sentence above the Outline — is RETIRED.
+    // The two now stand at the two ends of the Outline's bottom bar
+    // (`BookOutlineViewed.bar`), so nothing joins them.)
 
     // (VX-217, her ruling 2026-10-13: the gathering's navigator FOOTER —
     // "gathering — it shows every note its rule matches and holds none of

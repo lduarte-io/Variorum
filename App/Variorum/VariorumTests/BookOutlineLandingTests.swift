@@ -1404,14 +1404,33 @@ extension BookOutlineLandingTests {
                 BookOutlineGeometry.outlinePinLines[readingID] != nil
                     && BookOutlineGeometry.outlinePinFrames[readingID] != nil
             })
+            // VX-724 (R-724-1, DELIBERATE SHAPE CHANGE): the pinned line is
+            // the Outline's BOTTOM BAR — the position words leading, the
+            // counts trailing, separated — recorded as its two halves by name.
             let counts = "book \u{B7} 8 chapters \u{B7} 24 notes"
 
             // At rest at the book's top the title block holds the page:
-            // nothing viewed, nothing marked, the pinned line says the counts.
+            // nothing viewed, nothing marked, the bar says the counts alone.
             #expect(model.viewedOutlinePair == .nothingViewed, "the title block holds the page at rest")
-            #expect(BookOutlineGeometry.outlinePinLines[readingID] == counts,
-                    "the counts, pinned: \(String(describing: BookOutlineGeometry.outlinePinLines[readingID]))")
+            #expect(BookOutlineGeometry.outlinePinLines[readingID]
+                        == BookOutlineViewed.Bar(position: "", counts: counts),
+                    "the counts alone, in the trailing half: \(String(describing: BookOutlineGeometry.outlinePinLines[readingID]))")
             let pinAtRest = try #require(BookOutlineGeometry.outlinePinFrames[readingID])
+
+            // VX-724: the bar stands BELOW the page — a sibling under the
+            // page's scroll view, never above it (the old pinned line's
+            // place) and never inside it. Both rectangles in the window's
+            // top-left space (`.global` here is the hosting view's, which IS
+            // the window's content).
+            let page = try #require(outlineScroll(in: hosting), "the Outline's scroll view")
+            let pageInWindow = page.convert(page.bounds, to: nil)
+            let pageBottom = hosting.bounds.height - pageInWindow.minY
+            print("VX-724 BAR:", "bar=\(pinAtRest)", "page bottom=\(pageBottom)",
+                  "content height=\(hosting.bounds.height)")
+            #expect(pinAtRest.minY >= pageBottom - 0.5,
+                    "the bar sits below the page: bar \(pinAtRest), page bottom \(pageBottom)")
+            #expect(abs(pinAtRest.maxY - hosting.bounds.height) <= 0.5,
+                    "the bar is the pane's foot: bar \(pinAtRest), content height \(hosting.bounds.height)")
 
             // The caret: the long story, live.
             let story = postIDs[4]
@@ -1424,7 +1443,7 @@ extension BookOutlineLandingTests {
             let target = postIDs[10]
             let anchor = BookOutlineRows.Row.noteAnchor(target)
             let adopted = BookOutlineViewed.Pair(sectionID: sectionIDs[3], postID: target)
-            let targetLine = counts + " \u{B7} note 11 of 24 \u{B7} chapter 3"
+            let targetLine = BookOutlineViewed.Bar(position: "note 11 of 24 \u{B7} chapter 3", counts: counts)
             model.requestReveal(target)
 
             // R-562-A: from the CLICK on, the target — before the landing ends.
@@ -1555,7 +1574,8 @@ extension BookOutlineLandingTests {
             let second = postIDs[13]
             let secondAnchor = BookOutlineRows.Row.noteAnchor(second)
             let target = BookOutlineViewed.Pair(sectionID: sectionIDs[4], postID: second)
-            let targetLine = "book \u{B7} 10 chapters \u{B7} 30 notes \u{B7} note 14 of 30 \u{B7} chapter 4"
+            let targetLine = BookOutlineViewed.Bar(
+                position: "note 14 of 30 \u{B7} chapter 4", counts: "book \u{B7} 10 chapters \u{B7} 30 notes")
             model.requestReveal(second)
             var beforeStart = 0
             var travelling = 0
@@ -1761,7 +1781,8 @@ extension BookOutlineLandingTests {
             let last = postIDs[27]
             let anchor = BookOutlineRows.Row.noteAnchor(last)
             let target = BookOutlineViewed.Pair(sectionID: sectionIDs[9], postID: last)
-            let targetLine = "book \u{B7} 10 chapters \u{B7} 30 notes \u{B7} note 28 of 30 \u{B7} chapter 9"
+            let targetLine = BookOutlineViewed.Bar(
+                position: "note 28 of 30 \u{B7} chapter 9", counts: "book \u{B7} 10 chapters \u{B7} 30 notes")
             model.requestReveal(last)
             var travelling = 0
             var strays: [String] = []
@@ -1897,7 +1918,8 @@ extension BookOutlineLandingTests {
             }
             let last = postIDs[29]
             let expected = BookOutlineViewed.Pair(sectionID: sectionIDs[9], postID: last)
-            let expectedLine = "book \u{B7} 10 chapters \u{B7} 30 notes \u{B7} note 30 of 30 \u{B7} chapter 9"
+            let expectedLine = BookOutlineViewed.Bar(
+                position: "note 30 of 30 \u{B7} chapter 9", counts: "book \u{B7} 10 chapters \u{B7} 30 notes")
             await settle(window, hosting, watchdog: watchdog, until: {
                 BookOutlineGeometry.outlinePinLines[readingID] == expectedLine
             }, maxTurns: 10)
@@ -1945,8 +1967,8 @@ extension BookOutlineLandingTests {
             try #require(edgeAbove != expected,
                          "the premise: the top edge names another row (\(edgeAbove))")
             // The pin's words for that row, through the view's own brain and
-            // inputs (`OutlinePinnedLine`).
-            let aboveLine = BookOutlineViewed.pinLine(
+            // inputs (`OutlineBottomBar`).
+            let aboveLine = BookOutlineViewed.bar(
                 gathering: structure.reading?.kind == .gathering,
                 chapters: structure.sections.count, archived: 0,
                 total: BookOutlineViewed.NoteTotal(count: model.entries.count, isAtLeast: model.truncated),
@@ -2117,7 +2139,8 @@ extension BookOutlineLandingTests {
             let clicked = postIDs[28]
             let anchor = BookOutlineRows.Row.noteAnchor(clicked)
             let expected = BookOutlineViewed.Pair(sectionID: sectionIDs[9], postID: clicked)
-            let expectedLine = "book \u{B7} 10 chapters \u{B7} 30 notes \u{B7} note 29 of 30 \u{B7} chapter 9"
+            let expectedLine = BookOutlineViewed.Bar(
+                position: "note 29 of 30 \u{B7} chapter 9", counts: "book \u{B7} 10 chapters \u{B7} 30 notes")
             let entry = try #require(model.entries.first { $0.postID == clicked }, "the note's entry")
             #expect(structure.mode == .outline, "the Outline's door")
             BookNavigatorDoor.noteRowClicked(entry, model: model, structure: structure)

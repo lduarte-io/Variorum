@@ -62,8 +62,8 @@ Implementer: Opus (opus-implementer), 2026-11-01, worktree `~/dev/variorum-vx-72
 | Piece | State |
 |---|---|
 | 0. Preflight read (CLAUDE.md + canon, this brief, SessionResiliencyProtocol, SurfaceContracts' VX-562 paragraph, the listed sources and both suites) | DONE |
-| 1. The bar (BookView `.outline` arm, `OutlinePinnedLine` → `OutlineBottomBar`, receipt overlay onto `outlineBody`, oracle records the bar) | IN-PROGRESS |
-| 2. The pins (`BookOutlineViewedTests`, `BookOutlineLandingTests`) | NOT-STARTED |
+| 1. The bar (BookView `.outline` arm, `OutlinePinnedLine` → `OutlineBottomBar`, receipt overlay onto `outlineBody`, oracle records the bar) | WRITTEN, not yet compiled — PENDING build (this commit) |
+| 2. The pins (`BookOutlineViewedTests`, `BookOutlineLandingTests`) | WRITTEN, not yet compiled — PENDING build (this commit) |
 | 3. The two suites under a held stage claim | NOT-STARTED — PENDING |
 | 4. Self-assessment | NOT-STARTED |
 
