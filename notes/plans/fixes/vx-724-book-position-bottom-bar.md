@@ -196,6 +196,15 @@ Cold reviewer: Opus (opus-reviewer), 2026-11-01. **No BLOCKER, no MAJOR ⇒ no r
 
 **Round-2 closeout obligations, gathered:** the walk (the acceptance unit's use-shaped evidence; F-7 and the P-724-1/-2 blessings ride it) · the Debt tickets — MINTED: **VX-726** (R2-F-1, oracle hygiene, Tests & tooling · Suspected · Low) and **VX-725** (F-6, the four-names rename, Books · Confirmed · Low) · QUESTIONS entries for any P-724 provisional she leaves unruled at the merge.
 
+## THE WALK (the orchestrator's acceptance evidence, 2026-11-01)
+
+Stage claimed (`vx-724`, 45 min, released after; no other Variorum instance before, during or after). Debug build of `611605f3d` from the worktree (`DerivedData/vx724walk`), launched on the dev store (`io.lduarte.Variorum.debug`, the only instance), the prince (6 chapters, 30 notes, owned) opened in Outline:
+- **At rest** (title block holding the page): the bottom bar shows the counts ALONE at the trailing end — "book · 6 chapters · 30 notes" — position half empty; the top of the book is title + expand/collapse only, clean. Exactly her ask.
+- **Scrolled** (notes V–X on the page): the bar reads "note 7 of 30 · types of principalities" leading + "book · 6 chapters · 30 notes" trailing, separated; the navigator's viewed highlight (note V, the page-order 7th note — about this text · dedication · I–IV before it) AGREES with the bar; hairline above the bar as the page's drawn foot.
+- **F-7 look** (the mode-switch seam): Book mode's flip bar (scrubber · "pages 1–2 of 30 …" · Write/Takes, `.bar` material) differs from Outline's muted 26-pt bar — different furniture for different jobs; not jarring on screen. Surfaced to her with the screenshots; hers to harmonize or leave.
+- Walk screenshots (session scratchpad, deleted at closeout per the ritual): shot1 (at rest) · shot2 (scrolled) · shot3 (Book mode).
+- The dev app quit after the walk (my own instance); dev-store posture unchanged (sync off, restore hold as found).
+
 ## THE RELEASE (the orchestrator's half, after the merge)
 
 Version **1.0** (`release.sh --version 1.0` — the script stamps MARKETING_VERSION; X.Y is a legal shape). Her word is explicit and standing (this message); the notes are HERS to word ("I'll actually fix the wording notes myself") — the orchestrator drafts `ReleaseNotes-1.0.md` as clean public copy (one line per bullet, no draft/meta/process lines — VX-708's rule), presents it in chat, lands her fixes on the branch before the merge so main is release-ready. Then: PR merge (merge commit) → `Tools/Release/release.sh --version 1.0` at a zero-instance window, no repo commits while it runs → the site road per `~/dev/stargazing.tech/stargazing-tech/notes/variorum-releases.md` (DMG-first: R2 put → verify dmg → appcast copy → `variorum.json` bump → build+deploy → verify appcast) → A1 safety copy + `/Applications` refresh at a zero-instance window.
