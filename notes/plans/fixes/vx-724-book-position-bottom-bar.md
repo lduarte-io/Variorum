@@ -12,7 +12,7 @@
 
 Same message, the release word: "I want to put the version 1.0 out into the world + on the website … I'll actually fix the wording notes myself for release once you're done with this page and then you'll put it straight on the stargazing.tech website (and this is version 1.0)."
 
-**Ruling recorded:** R-724-1 — the book's nav/position info moves from above the page to a bottom bar; the static counts sit at the bar's RIGHT, separated; the changing position info is the other, leading half. This supersedes the placement half of P-562-3 ("stays fixed at the top while scrolling" — the FIXED-while-scrolling half survives; the AT-THE-TOP half is hers to move and she moved it). The one-wording-brain and one-total laws (VX-562 r1 finding 3, `NoteBoxCopy.viewedLine`) are untouched.
+**Ruling recorded:** R-724-1 — the book's nav/position info moves from above the page to a bottom bar; the static counts sit at the bar's RIGHT, separated; the changing position info is the other, leading half. This supersedes the AT-THE-TOP placement, which was her VX-562 beta ask's ("the navigation info … stays fixed at the top while scrolling" — the FIXED-while-scrolling half survives; the at-the-top half is hers to move and she moved it) and SurfaceContracts' "PINNED above the page" line. *(Corrected at ladder r1 NIT-1: the kickoff text attributed "at the top" to P-562-3 — wrongly; P-562-3 is the no-duplication + no-at-rest-suppression provisional and SURVIVES WHOLE.)* R-724-1 also AMENDS the reach of 13c's A6 ruling ("no bottom chrome" on Outline): A6 removed the jump slider and progress bar and its investigate-first clause targets that scrub/progress chrome, which stays banned; a sanctioned position bar now stands at the page's foot (ladder r1 BLOCKER's supersession record). The one-wording-brain and one-total laws (VX-562 r1 finding 3, `NoteBoxCopy.viewedLine`) are untouched.
 
 ## THE SURFACE TODAY (read these, in this order)
 
@@ -120,7 +120,28 @@ QUESTIONS entry: nothing the brief left open was product behavior.
 
 ## LADDER
 
-*(Findings and dispositions land here before any fix session sees them.)*
+### Round 1 — cold reviewer: Opus (opus-reviewer), 2026-11-01. Findings with the orchestrator's dispositions (same-model ladder: the orchestrator arbitrates against the spec).
+
+**F-1 [BLOCKER] — `OutlineWritingSurfaceTests.outlineCarriesNoBottomChrome` (BookViewTests.swift:644) fails on the branch; the A6 collision was never recorded.** Reviewer's evidence: the suite run red — "the page runs to the window's bottom edge" off by 26.0 (the bar's height); 15 other Outline-mounting suites green (59 tests), this the only red. The pin guards 13c's A6 ruling ("no bottom chrome"), whose target was the jump slider / progress bar — her R-724-1 explicitly orders a bottom bar, so the PIN is stale, not the code; but the supersession must be recorded and the pin deliberately rescoped, and the stale "no bottom chrome (A6)" comment at BookView.swift:~2190 fixed. **Disposition: CONFIRMED — fix in round 1's fix pass** (a deliberate shape change, the changed-pins class, no red-on-old owed for the rescope itself): rescope the test to keep A6's teeth (no scrub/progress chrome; the page's scroll insets clean) and pin the NEW truth — the page runs to the BAR's top edge and the bar's bottom is the pane's foot, the bar the only chrome below the page; MOVE the placement assertion out of `theNavigatorFollowsWhatThePageShowsNeverTheCaret` into this rescoped pin (F-4 folded in — one placement truth beside the ruling it amends); fix the :2190 comment; the supersession line is recorded above (R-724-1's A6 amendment).
+
+**F-2 [MINOR] — the Outline is now the only book bottom bar not hosting the quiet receipt** (SpreadBookView and PagedReadView both host `QuietReceiptLine` at their bars' trailing end; SurfaceContracts' receipt rule says "at the bottom bar's trailing end"; P-724-3 keeps the receipt floating on the page and `quietReceiptHome == .pageFoot`). **Disposition: HERS — a taste call on her newly-decluttered bar** (receipt between the halves vs. floating above). Bundled into the sitting message; until her word the build stands as P-724-3; the options are recorded under P-724-3 below; goes to `notes/QUESTIONS.md` at the merge if she hasn't ruled by then.
+
+**F-3 [MINOR] — the three PROVISIONALs carried one option each, no alternatives recorded.** **Disposition: CONFIRMED — fixed here** (the options now stand under each):
+- **P-724-1 (the bar's width):** (a) the pane's width, a true bottom bar — BUILT (her words "bottom bar of the book view"); (b) the prose column's measure and left edge, as the old top line (quieter, but reads as a caption not a bar).
+- **P-724-2 (width pressure):** (a) the position wins, the counts truncate — BUILT (the position is the half she reads while scrolling; the counts are static and recoverable); (b) the counts win, the position truncates (the counts are the half she asked to the right).
+- **P-724-3 (the receipt):** (a) the receipt floats at the page's foot above the bar, `quietReceiptHome` untouched — BUILT (keeps the bar two-piece and calm); (b) the bar hosts `QuietReceiptLine` at its trailing end before the counts, `.outline` routed to `.modeBottomBar` (the Spread/Pages precedent and the receipt rule's letter). F-2 carries this to her.
+
+**F-4 [MINOR] — the placement assertion lives inside a follower-named test.** **Disposition: CONFIRMED — folded into F-1's rescope** (one placement truth in the A6-successor pin).
+
+**F-5 [NIT] — the record's R-724-1 line misattributed "at the top" to P-562-3.** **Disposition: CONFIRMED — corrected in place above** (P-562-3 survives whole).
+
+**F-6 [NIT] — four names for one thing ("pinned line" / "pin" / "bar" / `outlinePinLines: [String: Bar]`).** **Disposition: RECORDED, deferred to next touch** — a Low Debt ticket at closeout triage (rename `outlineBars`/`recordOutlineBar` or re-word the doc comments); not worth a fix round; C-2's name-keeping was deliberate.
+
+**F-7 [NIT] — two bottom-bar looks across the book's modes** (Outline: surface + hairline, 26 pt; Book/Read pages: `.bar` material, ~30 pt). **Disposition: ON THE WALK** — the orchestrator's screenshot pass looks at the mode-switch seam; surfaced to her with the screenshot; her call whether to harmonize (the brief dictated the Outline styling deliberately).
+
+### Round 1 fix pass — brief
+
+ONE fix, F-1 (+F-4 folded): in `App/Variorum/VariorumTests/BookViewTests.swift`, rescope `OutlineWritingSurfaceTests.outlineCarriesNoBottomChrome` as the disposition above states (keep every arm that still holds — read the test first; only the window-edge arm changes meaning); in `BookOutlineLandingTests.swift`, remove the placement assertion from `theNavigatorFollowsWhatThePageShowsNeverTheCaret` and let the rescoped pin carry it (same `.global`/window-frame conversion, already proven); fix the stale "no bottom chrome (A6)" comment at `BookView.swift:~2190` to name the sanctioned bar (R-724-1) with A6's scrub/progress ban intact. Evidence: the rescoped suite green on the branch (`-only-testing:VariorumTests/OutlineWritingSurfaceTests` + the landing suite, under a held stage claim); the rescoped pin is inherently red-on-old (the old tree has no bar below the page — and F-1's red run on the unfixed branch is the pin's bite shown live). No other finding needs code.
 
 ## THE RELEASE (the orchestrator's half, after the merge)
 
