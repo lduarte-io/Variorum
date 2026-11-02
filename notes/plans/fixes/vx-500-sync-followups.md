@@ -1,6 +1,6 @@
 # VX-500 — Run: the 0.10 window follow-ups (the sync follow-ups)
 
-**STATUS: OPEN — CUTOVER 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). RESUMED 2026-11-01 ~13:30 MDT by the second orchestrator (stage claim `vx500-orchestrator`; main merged into the branch at `c64211270` so every brief reads the reworded CLAUDE.md). The cast from here, her ruling at the resume kickoff (R-500-5): FABLE SUBAGENTS implement EVERY unit — U1a · U1b · U2 · U3 — a fresh `fable-reviewer` runs the ladder (SAME-MODEL: the orchestrator arbitrates findings against the spec); the orchestrator writes nothing that ships. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
+**STATUS: OPEN — SECOND CUTOVER 2026-11-01 ~19:10 MST (the second orchestrator hands off after the server half's DEPLOY and her acceptance; the kickoff prompt at the top of `notes/handoffs/vx-500-handoff.md`; read FOR A LATER READER first). The FIRST cutover 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). RESUMED 2026-11-01 ~13:30 MDT by the second orchestrator (stage claim `vx500-orchestrator`; main merged into the branch at `c64211270` so every brief reads the reworded CLAUDE.md). The cast from here, her ruling at the resume kickoff (R-500-5): FABLE SUBAGENTS implement EVERY unit — U1a · U1b · U2 · U3 — a fresh `fable-reviewer` runs the ladder (SAME-MODEL: the orchestrator arbitrates findings against the spec); the orchestrator writes nothing that ships. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
 considerations) · branch `vx-500-sync-followups` · worktree `~/dev/variorum-vx-500` · the Pro. Architect shape
 (`/architect-phase VX-500`); the cast is CLAUDE.md's standing default — **Fable orchestrates, writes every `Sync/`
 and server line, and cold-reviews (`fable-reviewer`); Opus implements the faces, the tests and the custody road under
@@ -25,6 +25,263 @@ so it is runnable from `main` today; its code is the seed dedupe's defense leg (
 which this run touches (this run changes the engine's progress plumbing, the server's pull query, the sync row, the
 typed-unlock key load and two tests). Same Area label, different code; no overlap.
 
+## FOR A LATER READER (CLAUDE.md's record rule; written at the second orchestrator's cutover, 2026-11-01 — CURRENT AS OF THAT CUTOVER, the successor's closeout rewrites it; a kickoff that names this record means this section, and the cutover successor reads WHOLE)
+
+**What this run is.** VX-500, the 0.10 window's sync follow-ups: the changefeed's quadratic page (VX-495), the sync row's
+missing progress (VX-496), the belt's internal error text (VX-505), the save's duration (VX-497 — profiled, not chunked),
+the retention tests' clock (VX-539/VX-546), a leaf's constraint (VX-490), the compaction memo (VX-504), and — born here —
+the deferred-FK index fix (VX-720). Umbrella VX-500; branch `vx-500-sync-followups`; the PR is HELD OPEN at the end (the
+launch code freeze — her word; she says when it merges). VX-508 HELD (tester A's join). VX-544 LIFTED OUT (R-500-10) to its
+own run, `notes/plans/fixes/vx-544-offline-typed-unlock.md`.
+
+**Settled so far (verify by the hashes, never trust).**
+- **The server half is DESIGNED, REVIEWED AND DEPLOYED (2026-11-02 00:41 UTC, run 2; the checklist `notes/plans/vx495-deploy-checklist.md`, RUN).** `Server/supabase/maintenance/vx495-pull-keyset.sql`: `sync_pull` redefined as SHAPE B (per-table
+  index picks of seqs → one global page cut → `bound` = the page's last seq → every fetch branch one index range scan up
+  to it; byte-identical wire; her probes old 3,398 ms · pick-by-id 1,138 ms · SHAPE B 230 ms — D-495 EVIDENCE), plus
+  `sync_pull_remaining` (the index-only count without the horizon — R-500-1). Its rollback
+  `maintenance/vx495-rollback.sql` restores 13's body byte for byte. Both carry the 10/14c re-own bracket (grant
+  CREATE → owner to the definer → revoke CREATE; the definer ends usage-only — 14c's letter) and the grant sweep checks that
+  end state (VX-721).
+  Two Fable cold-review rounds (`vx-500-server-half-round1.md`, `-round2.md`: 0 BLOCKER · 0 MAJOR · 3 + 2 MINOR, all
+  landed). Deploy run 1 refused (42501 — the artifacts had omitted the 10/14c re-own bracket, VX-721; fixed in the window);
+  run 2 landed `[]`; every verify row passed (the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans).
+  Her week-behind Pro's catch-up was the acceptance: ~23k rows in **~64 s end to end** (the server's two stamps; the
+  download/save split unmeasured — the log unreadable from the session).
+- **The engine's client half is BUILT, UNREVIEWED by a cold ladder** (U1a, commits `6155ba7fb`…`9a2b3dfc7`; the
+  breach draft `aad734aef` adopted line by line): `SyncProgress`, `pull(progress:)`, the once-per-round count through
+  `SyncPullCountTransport` (a 404 or absent surface ⇒ no total; the count never fails a round), `Status.progress`,
+  `Status.lastErrorIsRetrying` (typed, never string-matched), the save's progress against `batch.count`. Pins:
+  `SyncProgressTests` (7), the belt-flag pin, the grown wire pin. **The WHOLE-DIFF LADDER (Fable) is OWED over these
+  `Sync/` lines** — the successor runs it after U2 and U4.
+- **The apply PROFILE is MEASURED** (U1b, `bf33a5d10`…`5d8737765`; the gated bench `ApplyProfileMeasurementTests`,
+  `VARIORUM_APPLY_PROFILE=1`; the nil-inert `ApplyProfileHook` seam on `SyncEngine.init` — `Sync/` lines, the ladder's):
+  the save is 98% row loop; the FK introspection 0.5% (NOT memoized — the 5% threshold stated before the measure); the
+  real cost is SQLite's deferred-FK child scan over the unindexed `block.default_variant_id` (O(N²)); two local-only
+  indexes cut 109k rows from 330 s to 85 s — **VX-720, seated as U4**. The chunking memo is trued (chunking buys none of
+  it; an un-committable edge under deferred FKs). VX-497 stays open ("don't close it").
+
+**Her rulings by id:** R-500-1 the index-only count · R-500-2 VX-544/VX-683 not Pre-launch · R-500-3 the CLAUDE.md cast
+rule (then loosened the same evening: "The orchestrator never implements") · R-500-4 the recovery shape · R-500-5 Fable
+implements every unit · R-500-6 the server half ships early (the split ladder, the rollback artifact) · R-500-7 VX-720 as
+U4, not Pre-launch · R-500-8 the deploy through the PAT · R-500-9/R-500-11 the re-own bracket (the first framing corrected) · R-500-10 this
+session hands off after the deploy; U3 lifted out; one file restructured in place.
+
+**What remains for the successor (the kickoff prompt at the top of this file):** U2 (the faces — D-496's words, D-505's
+line, the retention clock, the leaf; its brief below) → U4 (VX-720's v1_35 migration; its brief) → the whole-diff Fable
+ladder (anchors: the two server-half rounds for those files; the U1a/U1b self-assessments) → closing runs (the Mac suites
+over every changed source; core debug + release; the phone build) → the PR OPENED AND HELD → the closeout's canon deltas
+DRAFTED for the merge moment (AppSpec §12 the row's progress line, SyncSpec §12 a maintenance entry for the deployed
+body, SurfaceContracts the row) → this section rewritten → the handoff. **Held for her:** the words P-500-1/-2/-3, the
+corner P-500-7, VX-508; the memos (compaction, chunking) for a sitting. **Tickets born here:** VX-720 (U4), VX-721 (the
+drift — closes with the deploy), VX-722/VX-723 (load flakes, Suspected).
+
+## THE REMAINING WORK (the successor orchestrator's — the kickoff prompt is `notes/handoffs/vx-500-handoff.md`'s top; read FOR A LATER READER first, then these briefs, then the ladder plan; the working record below is read once)
+
+### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
+
+**Who you are.** The implementer for U2 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
+contract binds you point for point (you are Fable at her R-500-5 word). This unit touches the SHARED faces
+(`App/Variorum/Shared/`), the protection pair road (`App/Variorum/Shared/Protection/`) and Mac tests — and ZERO lines
+under `Sources/VariorumCore/Sync/` (the seam is U1a's; its public surface — `SyncProgress`, `Status.progress`,
+`Status.lastErrorIsRetrying` — is what you consume). Worktree `<home>/dev/variorum-vx-500`, branch
+`vx-500-sync-followups`. The Mac suites need the STAGE: the orchestrator holds the claim `vx500-orchestrator` for this
+unit — run `Tools/stage status` before every `xcodebuild test` and STOP and report if it is not held by that name (never
+claim or steal yourself). The orchestrator writes nothing that ships.
+
+**Read first, in full:** `CLAUDE.md` + its canon · THIS FILE WHOLE (PREFLIGHT FACTS, D-496 "The words", D-505, D-539 +
+VX-546, D-490, the U1a RECORD's ownership-pass lines for `SyncProgress`/`lastErrorIsRetrying`, HELD FOR HER's P-500-7,
+ENVIRONMENT TRAPS) · `notes/SurfaceContracts.md` §"Doors to the outside" (the sync row's contract — the keys-locked and
+not-on-yet lines, the first-round sheet's one presentation source, VX-510 D-A2) · `notes/SessionResiliencyProtocol.md`
+§implementer · the code: `App/Variorum/Shared/SyncStatusViews.swift` (`SyncRowFace.Kind`, `face(...)`, `SyncStatusRow.line(for:lastSuccessAt:)`,
+the row body that reads `sync.status`) · `App/Variorum/Shared/Protection/RoadAccountModel.swift` `firstRoundLine` (:291)
++ `ProtectionWords.firstRoundProgress` (:1040) · `App/Variorum/VariorumTests/SyncLockedRowTests.swift`,
+`SyncStalledRowTests.swift`, `FirstRoundRoadTests.swift` (the standing face pins and their harness shape) ·
+`App/Variorum/Shared/Protection/ProtectionBackupPair.swift` (`takePair`/`takePairReporting`/`prune`'s `now: Date = Date()`
+at :57/:74/:114) + `ProtectionCopyCounts.read(now:)` (:24 — read whether it belongs to the same change) ·
+`App/Variorum/VariorumTests/Protection/ProtectionPairRetentionTests.swift` · `App/Variorum/Shared/Protection/ProtectionOpenRoad.swift`
+:728 and :1022 (`nonisolated(unsafe) let leaf` / `syncKeys` — VX-490's lines; `RoadInputs.live`'s parameter) +
+`App/Variorum/VariorumTests/Protection/OneSyncKeysLeafTests.swift`.
+
+**The pieces, in order (commit per piece, push after each, the record flipped in the same commit):**
+
+1. **D-496's words (P-500-1, PROVISIONAL — hers; her example "Syncing — 40,000 of 108,000" leads).** `SyncStatusRow.line`
+   gains the progress: `.syncing` with a downloading progress and a total → "Syncing — 40,000 of 108,000"; without a
+   total → "Syncing — 40,000 so far"; a saving progress → "Syncing — saving 12,000 of 108,000"; no progress → "Syncing…"
+   BYTE-UNCHANGED (every standing pin green unmodified). Numbers in the user's locale grouping (`formatted()`); the two
+   bounds U1a's `SyncProgress.total` doc names must render without nonsense: `done > total` reads as-is (the feed grew —
+   never clamp, never "of" a smaller number than done? — decide: show `done of total` honestly, or clamp the total up to
+   done; record the choice as PROVISIONAL P-500-8 with both options). ONE presentation source: the line function is where
+   the words live; the row renders it; nothing is re-typed view-side (VX-510 D-A2). The `.syncing` face keeps CF-15's
+   doors with a progress standing (pin).
+2. **D-496's sheet (P-500-2, PROVISIONAL):** `firstRoundLine` keeps `ProtectionWords.firstRoundProgress` as its sentence
+   and GAINS the same count beneath it when a progress stands (the words of piece 1's count part — one source, not a
+   second spelling); alt recorded: the sheet's sentence alone. Read how `firstRoundLine` receives the status today and
+   thread `progress` through the same road (no new global).
+3. **D-505's line (P-500-3, PROVISIONAL — her draft).** `SyncRowFace.Kind` gains `retrying`; `face(...)` gains
+   `lastErrorIsRetrying: Bool = false` and classifies it AFTER offline and BEFORE every other error class, rendered like
+   `.syncing` (the small spinner, CF-15's doors); the line: "Another change landed mid-sync — retrying." (sentence-cased
+   from her words "another change landed mid-sync — retrying."); the engine's sentence rides the hover as every paused
+   state's does (read how `.keysLocked` et al. carry theirs). The composition site passes `sync.status.lastErrorIsRetrying`.
+   An ordinary error keeps `.error` (pin). P-500-7 (the refused follow-up corner) is built as (a) — nothing extra —
+   and named in the record.
+4. **D-539 + VX-546 — the pair road on the injected clock.** `takePair`/`takePairReporting`/`prune`'s `now` default becomes
+   the injected clock (`@Dependency(\.date)` — read how the app's live clock resolves so production stays byte-identical;
+   the `ProtectionCopyCounts.read(now:)` default joins ONLY if it shares the mechanism, else leave it and say so). The
+   suite wraps planting AND the press in `withDependencies { $0.date = .constant(instant) }` — ONE instant per test,
+   plants relative to it. **THE RED-ON-OLD PIN (the one bug-class item of this unit):** one test pinned at a boundary
+   instant deep in the past (D-539 names 2026-01-04 00:20 UTC, a Sunday) — on the OLD code the road's live `Date()`
+   disagrees with the planted instant by months and the counts miss → RED deterministically; on the new code both clocks
+   are the instant → GREEN. Run the red on the pre-fix tree (the pin commit before the fix commit, or a `git stash`-free
+   revert of the road's lines named in the record before it runs — the traps' revert rule), record the failing lines,
+   then fix, then green. VX-546's two failing tests go green by the same change (its "real miscount" reading is falsified
+   by the pin — say so).
+5. **D-490 — the leaf constraint.** `RoadInputs.live`'s shared sync-keys leaf: `nonisolated(unsafe)` → `SyncKeysLeaf &
+   Sendable` as VX-490 states (the bootstrap's stored `any SyncKeysLeaf` retypes or drops; `OneSyncKeysLeafTests`'
+   literal moves). Zero behavior; the suites are the evidence; no pin claimed. If :1022's `syncKeys` line is the same
+   class, take it in the same commit; if not, leave it and say why.
+6. **Close.** `swift build` (the core package is untouched — confirm `git diff --stat main -- Sources/` shows only U1a's
+   files); the Mac suites from `App/Variorum/`: `xcodebuild -scheme Variorum -destination 'platform=macOS' test
+   -only-testing:VariorumTests/SyncLockedRowTests -only-testing:VariorumTests/SyncStalledRowTests
+   -only-testing:VariorumTests/FirstRoundRoadTests -only-testing:VariorumTests/ProtectionPairRetentionTests
+   -only-testing:VariorumTests/OneSyncKeysLeafTests` plus the NEW suite(s) you add (e.g. `SyncProgressRowTests`), and
+   every suite that names `SyncRowFace`, `SyncStatusRow`, `firstRoundLine`, `takePair` or `RoadInputs.live` (grep the tests
+   for the changed types — the closeout rule); confirm the "Test run with N tests" line per suite; the Mac run flashes
+   the test host — the stage is held for exactly this. A face walk is NOT owed here (the progress needs a live multi-
+   window round against a deployed count, which is her held window) — say so in the record; the pins are the evidence
+   for a shared-face Wording unit. SELF-ASSESSMENT at the end.
+
+**Your record:** `### U2 RECORD` under UNIT RECORDS — LIVE STATUS from the first commit; the words as built with their
+PROVISIONAL numbers (P-500-1/-2/-3, P-500-8 if minted — log each in `notes/QUESTIONS.md` as the next free number per
+CLAUDE.md's PROVISIONAL rule, options included); the red-on-old's failing lines; the close's lines; first line = what
+you did NOT do. Flip the orchestrator's LIVE STATUS row 4. Commits `VX-500 U2: … Part of VX-496` / `VX-505` / `VX-539`
+/ `VX-546` / `VX-490`; no trailers; pull --rebase before each push; foreground waits only. The MOBILE PARITY fact for the
+closeout: the row is shared, so the phone shows the new lines — name what you changed under `Shared/` so the parity line
+can say it.
+
+**Not yours:** any `Sync/` line (if the seam lacks something you need, STOP and record — the orchestrator briefs a Sync
+fix); U3; the ladder; the deploy; the PR. **ENVIRONMENT TRAPS — this file's section of that name, binding verbatim.**
+
+### U3 — LIFTED OUT (R-500-10)
+
+The offline typed-unlock retry (VX-544, D-544) runs as its own ticket run after VX-500 closes and after VX-683; its design
+and brief moved whole to `notes/plans/fixes/vx-544-offline-typed-unlock.md`. Nothing in U2/U4 depends on it.
+
+### U4 BRIEF — the two FK child indexes (VX-720; a v1_35 local-only migration + pin + the bench re-run) (a FABLE implementer; `Persistence/` only — no `Sync/` line)
+
+**Who you are.** The implementer for U4 of VX-500 (VX-720), a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
+contract binds you point for point (you are Fable at R-500-5). Scope: ONE migration, its pin, the bench re-run as evidence,
+the ticket's mechanism re-traced by you. Worktree `<home>/dev/variorum-vx-500`, branch `vx-500-sync-followups`,
+headless only.
+
+**Read first, in full:** `CLAUDE.md` + its canon (AppSpec §6–§7 — indexes are local, the schema's uniqueness and FK
+conventions) · THIS FILE: the U1b RECORD WHOLE (THE TRACE, THE MECHANISM with arms A–G, THE CANDIDATE FIX MEASURED, THE
+CHUNKING MEMO's "The numbers (U1b)"), R-500-7, ENVIRONMENT TRAPS · `notes/SyncSpec.md` §5 and §12 (why an INDEX is NOT a
+lockstep event: no mirror column, no wire change, no marker move — say so in the migration's doc, and confirm by reading
+`SyncSchema`'s completeness walk that an index adds no column) · `notes/SessionResiliencyProtocol.md` §implementer · the
+code: `Sources/VariorumCore/Persistence/` (the migration registry; the v1_34 `idx_cblock_dead_block` migration as the
+exact precedent — its shape, its test, how `knownMigrations`/the export's `applied == known` guard sees it (VX-502's
+record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a build with v1_35 refuses on an older build
+— the standing rule, say it in the record)) · `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (the bench and
+`ApplyProfileBisectionTests`' arms E/F — the pin's shape) · `Tests/VariorumCoreTests/SyncTestHarness.swift`.
+
+**The pieces:**
+
+1. **The migration, its own commit first** (CLAUDE.md: schema changes get their own commit before the code that uses
+   them): `v1_35` adding `CREATE INDEX idx_block_default_variant ON block(default_variant_id)` and `CREATE INDEX
+   idx_cblock_chosen_variant ON container_block(chosen_variant_id)`; registered wherever v1_34 is; the DDL doc comment
+   names the mechanism (SQLite's deferred-FK child scan — `sqlite.org/foreignkeys.html` §4 — while violations are
+   pending; the feed's registry order) and the measured gain. The `AuthRLSDDLTests`/schema pins that enumerate indexes
+   (if any) updated; the completeness walk green.
+2. **The pin (red-on-old, the bisection's arm E/F shape):** an UNGATED, fast test on an in-memory store at a size where
+   the scan is unmistakable but the test stays under a few seconds (U1b measured 316 µs vs 20 µs per take at 10k in memory
+   — pick the size so the old tree's time is ≥ 5× the new tree's and the assertion is a RATIO or an absolute bound with
+   margin, never a tight number): under `defer_foreign_keys = ON`, N blocks landed with dangling `default_variant_id`,
+   then N takes — the per-take insert cost bounded. RED on the pre-migration tree (run with the migration commit reverted
+   in a scratch doctoring; the lines in the record), GREEN with it. Say honestly how load-sensitive the bound is and why
+   the margin makes it a non-flake.
+3. **The bench re-run, the evidence:** `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3 swift test --filter
+   ApplyProfileMeasurementTests` on the migrated store (NO `INDEX_FIX` knob — the migration is the fix now; the knob may
+   be retired or made a no-op with a note): the apply's time vs U1b's 330,231 ms recorded as the table's new column.
+   Then the ticket's VX-672 note: ONE paragraph on whether a parent DELETE's child search (the purge/delete side) shares
+   the mechanism — reasoned from the same SQLite page, not measured; a Linear comment is the orchestrator's.
+4. **Close.** `swift build`; the sync suites (`swift test --filter "Sync|Catch|Purge|Convergence|Repair|Attacker|Tenant|Migration|Schema"`
+   — read what matches) green; the broad core `swift test` in the foreground (the traps' flake list + the two candidates in
+   HELD FOR HER); the record `### U4 RECORD` (LIVE STATUS, the pin's red lines, the bench table, the close, self-assessment);
+   flip the orchestrator's LIVE STATUS row 5b. Commits `VX-500 U4: … Part of VX-720`; no trailers; foreground waits only.
+
+**Not yours:** `Sync/` (if the migration needs an engine line, STOP and record), the faces, the deploy, the PR.
+**ENVIRONMENT TRAPS — this file's section of that name, binding verbatim.**
+
+### THE WHOLE-DIFF LADDER, THE CLOSING RUNS, THE HELD PR (the successor orchestrator's; after U2 and U4)
+
+- **The ladder:** a fresh `fable-reviewer` (Fable — the diff touches `Sync/`) over the branch's WHOLE diff against `main`
+  (`git diff main...HEAD`), REVIEW_PROMPT verbatim, zero framing; its anchors in the repo: the two server-half rounds for
+  the server files (`vx-500-server-half-round1.md`, `-round2.md`), the U1a / U1b / U2 / U4 records' self-assessments (U1a's
+  items 1, 2, 4, 7; U1b's seam shape; the engine lines the breach draft left — adopted, never cold-read until now). Record
+  files `vx-500-ladder-round1.md` …; the rules per CLAUDE.md (round 1 → fixes by a fresh Fable implementer → round 2
+  re-reads; a new BLOCKER/MAJOR earns round 3; cap three; same-model — the orchestrator arbitrates against the spec; a
+  final round's fixes get the orchestrator's line-by-line check; a one-line fully-specified fix may be the orchestrator's
+  own under CLAUDE.md's clause).
+- **The closing runs** (the stage claimed by the orchestrator): core debug `swift test` + the release split (the traps);
+  EVERY Mac suite that exercises a changed source (grep the tests for `SyncRowFace`, `SyncStatusRow`, `firstRoundLine`,
+  `takePair`, `RoadInputs.live`, the migration registry, …); the phone build (`VariorumMobile` scheme, build only — the
+  row is shared); the known load-flakes named (the traps + VX-722/VX-723).
+- **The PR:** opened against `main`, titled `VX-500: Run — the 0.10 window sync follow-ups`, body = the FOR A LATER READER
+  section + the ladder files; **HELD OPEN — never merged; she says when** (the launch freeze). The in-flight row stays.
+- **Drafted for the merge moment (the two-file rule; the shared ledgers are touched only then, on latest main):** AppSpec
+  §12 "The app" — the sync row's progress line and the retrying line (one pointer: this file); SyncSpec §12's running
+  record — a one-line MAINTENANCE entry: the production `sync_pull` body is SHAPE B since 2026-11-02 00:41 UTC and
+  `sync_pull_remaining` exists (not a marker event; `vx495-deploy-checklist.md`); SurfaceContracts §Doors — the row's
+  lines; AppSpecRecord — the dated entry with her rulings R-500-1…11; QUESTIONS — the PROVISIONALs bundle (P-500-1/-2/-3/
+  -7/-8 as minted). The MOBILE PARITY line: the shared row's new lines show on the phone (U2 names the files).
+- **The closeout:** this file's FOR A LATER READER rewritten to the closed state; the STATUS banner flipped; the handoff
+  `notes/handoffs/vx-500-handoff.md` with her checklist on top (the merge word; the deploy already live; VX-508; the
+  words; the palette-per-device question; VX-683 then VX-544 next); memory; the hard stop.
+
+## LIVE STATUS (the orchestrator's; flipped per piece)
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Kickoff: preflight whole; worktree + branch; the in-flight row on main (`24c413138`); VX-500 In Progress; this file | DONE |
+| 0b | RESUME (the second orchestrator, 2026-11-01 ~13:30 MDT): the handoff + this file + the standard preflight read whole (SyncSpec, CastleRules, SurfaceContracts' Doors, the resiliency protocol, the sizing guidance, the master plan, QUESTIONS' tail); main merged into the branch (`c64211270`); the stage claimed; the roster re-listed via Linear (11 sub-issues — matches); R-500-5 ruled; the U1 split; the U1a brief | DONE (this commit) |
+| 1 | U1a — the server artifact (D-495 SHAPE B + the count per R-500-1) + the DDL pins | DONE (`6155ba7fb` SHAPE B · `7d645688f` the count · `1e8d24286` the DDL pins · `917189ccd` the red-on-old) — U1a; the record is `### U1a RECORD` |
+| 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | DONE (`86b097934` the ownership pass, one change; the close commit the wire pin) — U1a; the draft `aad734aef` adopted line by line |
+| 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
+| 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 (`vx-500-server-half-round2.md`, 0/0/2 MINOR, no round 3) DONE — its two one-line pins landed by the orchestrator under the loosened rule (86/2) · **THE GATE IS OPEN; the deploy HELD for her word** (`notes/plans/vx495-deploy-checklist.md`) | GATE OPEN |
+| 3c | THE DEPLOY: run 1 REFUSED (42501 — the artifacts had omitted the 10/14c bracket, VX-721); the DEPLOY-FIX session landed the bracket + the sweep rows + pins (`e01bb7359`, verified 87/2); **run 2 LANDED 2026-11-02 00:41 UTC (`[]`)**; every verify DONE (SHAPE B body; both functions definer-owned with pg_temp; the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans, 779 ms); **the acceptance DONE 00:57 UTC — her week-behind Pro caught up ~23k rows in ~64 s end to end** (the checklist); the whole-diff ladder reads the bracket fix | DEPLOYED + ACCEPTED |
+| 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
+| 5 | ~~U3 — the typed-unlock retry + the reachability trigger (D-544)~~ | LIFTED OUT (R-500-10): VX-544 runs as its own ticket run after VX-500's ladder closes; D-544 + the U3 brief move to `notes/plans/fixes/vx-544-offline-typed-unlock.md` at this session's cutover |
+| 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
+| 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
+| 7 | Closing runs (core debug + release; the Mac suites over every changed source; the phone build) | NOT STARTED |
+| 8 | The PR opened — HELD OPEN at her word; the handoff; memory; the canon deltas DRAFTED for the merge moment | NOT STARTED (the successor's) |
+| 9 | SECOND CUTOVER (2026-11-01 ~19:10 MST): this file restructured in place (FOR A LATER READER, THE REMAINING WORK, the working record below); U3 lifted out to `vx-544-offline-typed-unlock.md`; the handoff's new top section with the paste-ready kickoff; memory | DONE (this commit) |
+
+## HELD FOR HER (bundled; nothing here is improvised around)
+
+- **The merge** (the freeze) — at her explicit word. ~~The server deploy~~ DONE 2026-11-02 00:41 UTC (R-500-8/-11).
+*[removed for publication]*
+- **The words:** P-500-1 the progress lines (her example leads), P-500-2 the sheet's count, P-500-3 the belt's line
+  (her draft), the locked row unchanged. P-500-6 (the count's shape) RULED — R-500-1.
+- **The directions:** P-500-4 (the retained derived secret over a door), P-500-5 (the reachability trigger), D-497's
+  FK memo (zero semantics — built only if the profile names it), the two memos (compaction, chunking) for a sitting.
+- **The riders:** VX-546 and VX-490 seated provisionally; VX-76 as VX-496's duplicate; VX-491 not seated.
+- **The flags:** VX-683 (data-loss class, two-device same-take edits — her priority call; a `Sync/` design memo run),
+  VX-672 (the phone's slow post-purge round — profile on her phone after VM-32), both outside this run.
+- **P-500-7 (U1a's finding, for U2 and her):** on a REFUSED belt follow-up (the double-refusal corner — two rounds racing
+  one store, a non-production shape) `lastErrorIsRetrying` is FALSE by design and the row still shows the engine's belt
+  sentence under `.error` until the next trigger; options: (a) leave it (the shape is not reachable in production); (b) a
+  second typed fact "the belt refused and nothing follows" with its own line. U2 builds (a) PROVISIONAL unless she says.
+- ~~Two load-flake candidates~~ TICKETED at her word (2026-11-01): **VX-722** (`MCPReaderAfterCloseTests.aReusedNumber…`) and
+  **VX-723** (`StarContextTests.aHeldObservation…`), Bug · Suspected · Tests & tooling · Low.
+- **The palette follows the account (her Pro flipped to sea glass at the catch-up):** the synced `theme_palette` setting won
+  by server-wins, as designed; whether the palette should be PER-DEVICE like appearance is a product call — a ticket at her
+  word.
+- **P-500-9 RESOLVED (R-500-11):** the re-own bracket, the definer usage-only. **VX-721's follow-up candidate:** a chain-wide
+  bracket pin in `AuthRLSDDLTests` (every `owner to variorum_definer` inside a grant/revoke bracket).
+- ~~**Pre-launch labels:** VX-544 (her call — Castle typed-road users offline); VX-683 (her call).~~ RULED R-500-2: neither is Pre-launch.
+## THE RECORD OF THE RUN SO FAR (the roster, the principles, the designs, the deploy, the rulings, the working record — in the order they were written)
+
 ## THE ROSTER (the sub-issue listing, read at kickoff 2026-11-01 — her VX-548 rule; re-listed before the ladder)
 
 | Member | Title (short) | Kind · Evidence · Area · Priority | This run |
@@ -33,11 +290,13 @@ typed-unlock key load and two tests). Same Area label, different code; no overla
 | VX-496 | the sync row shows no progress during a long download | Improvement · Confirmed · Castle & sync · High (Pre-launch, R-494-4 (f)) | **U1** (the engine's progress + the count RPC) + **U2** (the row's and the sheet's words) |
 | VX-497 | a first catch-up's save is one all-or-nothing transaction holding the writer for minutes | Improvement · Confirmed · Performance · Medium (her VM-8 word: "don't close it", not now) | **U1** — PROFILE first (headless, at scale); the zero-semantics win (the per-row FK introspection memoized per apply) if the profile names it; chunking = a DESIGN MEMO for her, no build |
 | VX-505 | the one-writer belt's refusal shows internal error text on the row | Improvement · Wording · Castle & sync · Low | **U1** (a typed status flag) + **U2** (the row's line, her draft) |
-| VX-544 | an offline TYPED unlock in Castle leaves sync locked for the session — no retry on reconnect | Bug · Confirmed · Castle & sync · Medium | **U3** — the retained typed-unlock secret in session memory + the retry at every trigger + the reachability trigger |
+| ~~VX-544~~ | an offline TYPED unlock in Castle leaves sync locked for the session | Bug · Confirmed · Castle & sync · Medium | **LIFTED OUT (R-500-10)** → its own run, `notes/plans/fixes/vx-544-offline-typed-unlock.md` |
 | VX-539 | ProtectionPairRetentionTests flakes at a week boundary — the tests read `Date()` | Bug · Test-only · Tests & tooling · Low | **U2** — the pair road and the suite on the injected clock |
 | VX-504 | a first catch-up leaves free pages about the library's size — design the compaction | Improvement · Confirmed · Performance · Low | **the architect's DESIGN MEMO** (below), no build — "its own small design sitting" |
 *[removed for publication]*
 | VX-503 | the Standard join's Touch ID prompt | — | Done before this run; nothing here |
+| **VX-721** (minted at the deploy) | the VX-495 artifacts omitted the 10/14c re-own bracket — run 1 refused 42501 | Bug · Confirmed · Castle & sync · High | FIXED in the deploy-fix session; proven live by run 2; closes at the merge |
+| **VX-722 · VX-723** (minted at her word) | two load-shaped core-suite flakes seen once each at U1a's broad runs | Bug · Suspected · Tests & tooling · Low | not this run's; the traps name them |
 | **VX-720** (minted 2026-11-01 at U1b's finding) | a first catch-up's save pays SQLite's deferred-FK child scan over the unindexed `block.default_variant_id` — O(N²); two local-only indexes cut the 109k-row save 330 s → 85 s | Bug · Confirmed · Performance · High (NOT Pre-launch — her word R-500-7) | **U4** — the v1_35 two-index migration + pin + the bench re-run (seated at her word R-500-7); VX-672 related |
 
 **Riders (the kickoff's Low/Medium sweep of Castle & sync + Performance; seated PROVISIONALLY since she is away —
@@ -420,7 +679,7 @@ strengthened:** no chunking now; the index migration is the first-order fix for 
 own ticket; the memo's design question re-opens only after it, against the remainder, with the un-committable-chunk
 edge decided on paper before any build.
 
-## THE DEPLOY (HELD — at her explicit word only; SyncSpec §12's procedure for a server-side body; NOT a marker event)
+## THE DEPLOY (DONE 2026-11-02 00:41 UTC at her word — the record is `notes/plans/vx495-deploy-checklist.md`; SyncSpec §12's procedure for a server-side body; NOT a marker event)
 
 1. Rehearse? The throwaway project was deleted 2026-10-27; a new throwaway is her hands (or she accepts the read-only
    production probe as the rehearsal — the body is a query rewrite under the same gates).
@@ -675,9 +934,9 @@ first line of the record names anything you did NOT do. Flip rows 1 and 2 of the
 retry (U3); the DEPLOY (held for her word); the PR; any `/Applications` act; any store. If a second unit stands in your
 way, stop, record, hand off.
 
-**ENVIRONMENT TRAPS — the section above, binding verbatim.**
+**ENVIRONMENT TRAPS — this file's section of that name, binding verbatim.**
 
-## UNIT RECORDS (appended by each implementer; the orchestrator's verification notes follow each)
+## THE WORKING RECORD — UNIT RECORDS, LADDER ROUNDS AND BRIEFS OF THE CLOSED UNITS (appended by each implementer; the orchestrator's verification notes follow each; a later session reads this only to reopen a fix)
 
 ### U1a RECORD (the Fable implementer, 2026-11-01; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
 
@@ -825,7 +1084,7 @@ threshold stated before the measure, the FK decision, the memo's trued paragraph
 self-assessment; first line = what you did NOT do. Flip the orchestrator's LIVE STATUS row 3. Commit messages
 `VX-500 U1b: … Part of VX-497`; no trailers; pull --rebase before each push; foreground waits only.
 
-**Not yours:** U2, U3, the ladder, the deploy, the PR. **ENVIRONMENT TRAPS — the section above, binding verbatim.**
+**Not yours:** U2, U3, the ladder, the deploy, the PR. **ENVIRONMENT TRAPS — this file's section of that name, binding verbatim.**
 
 ### U1b RECORD (the Fable implementer, 2026-11-01; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
 
@@ -1248,7 +1507,7 @@ the belt `maintenance/vx213-pg-temp-search-path.sql` to see the FINAL deployed s
    a short self-assessment); first line = what you did NOT do. Commits `VX-500 server-half fixes: … Part of VX-495`; no
    trailers; `git pull --rebase` before each push; foreground waits only.
 
-**Not yours:** anything under `Sources/`; U2/U3/U4; the deploy. **ENVIRONMENT TRAPS — the section above, binding verbatim.**
+**Not yours:** anything under `Sources/`; U2/U3/U4; the deploy. **ENVIRONMENT TRAPS — this file's section of that name, binding verbatim.**
 
 ### SERVER-HALF FIX RECORD (the Fable implementer, 2026-11-01; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
 
@@ -1507,7 +1766,7 @@ and row shapes) · `AuthRLSDDLTests.swift`'s two VX-495 pins and the rollback pi
    API; 14c accepted CREATE on public for it); first line = what you did NOT do. Commits `VX-500 deploy fix: … Part of
    VX-721`; no trailers; `git pull --rebase` before each push; foreground waits only.
 
-**Not yours:** running anything on the server; `Sources/`; U2/U3/U4. **ENVIRONMENT TRAPS — the section above, binding
+**Not yours:** running anything on the server; `Sources/`; U2/U3/U4. **ENVIRONMENT TRAPS — this file's section of that name, binding
 verbatim.**
 
 ### DEPLOY-FIX RECORD (the Fable implementer, 2026-11-01; VX-721; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
@@ -1665,234 +1924,3 @@ so the belt pins and the doctored-chain proof read exactly as before — the sui
     (MACHINERY HONESTY); a reader of commits alone would miss where the bracket landed — hence this item, and the close's
     commit list.
 
-### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
-
-**Who you are.** The implementer for U2 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
-contract binds you point for point (you are Fable at her R-500-5 word). This unit touches the SHARED faces
-(`App/Variorum/Shared/`), the protection pair road (`App/Variorum/Shared/Protection/`) and Mac tests — and ZERO lines
-under `Sources/VariorumCore/Sync/` (the seam is U1a's; its public surface — `SyncProgress`, `Status.progress`,
-`Status.lastErrorIsRetrying` — is what you consume). Worktree `<home>/dev/variorum-vx-500`, branch
-`vx-500-sync-followups`. The Mac suites need the STAGE: the orchestrator holds the claim `vx500-orchestrator` for this
-unit — run `Tools/stage status` before every `xcodebuild test` and STOP and report if it is not held by that name (never
-claim or steal yourself). The orchestrator writes nothing that ships.
-
-**Read first, in full:** `CLAUDE.md` + its canon · THIS FILE WHOLE (PREFLIGHT FACTS, D-496 "The words", D-505, D-539 +
-VX-546, D-490, the U1a RECORD's ownership-pass lines for `SyncProgress`/`lastErrorIsRetrying`, HELD FOR HER's P-500-7,
-ENVIRONMENT TRAPS) · `notes/SurfaceContracts.md` §"Doors to the outside" (the sync row's contract — the keys-locked and
-not-on-yet lines, the first-round sheet's one presentation source, VX-510 D-A2) · `notes/SessionResiliencyProtocol.md`
-§implementer · the code: `App/Variorum/Shared/SyncStatusViews.swift` (`SyncRowFace.Kind`, `face(...)`, `SyncStatusRow.line(for:lastSuccessAt:)`,
-the row body that reads `sync.status`) · `App/Variorum/Shared/Protection/RoadAccountModel.swift` `firstRoundLine` (:291)
-+ `ProtectionWords.firstRoundProgress` (:1040) · `App/Variorum/VariorumTests/SyncLockedRowTests.swift`,
-`SyncStalledRowTests.swift`, `FirstRoundRoadTests.swift` (the standing face pins and their harness shape) ·
-`App/Variorum/Shared/Protection/ProtectionBackupPair.swift` (`takePair`/`takePairReporting`/`prune`'s `now: Date = Date()`
-at :57/:74/:114) + `ProtectionCopyCounts.read(now:)` (:24 — read whether it belongs to the same change) ·
-`App/Variorum/VariorumTests/Protection/ProtectionPairRetentionTests.swift` · `App/Variorum/Shared/Protection/ProtectionOpenRoad.swift`
-:728 and :1022 (`nonisolated(unsafe) let leaf` / `syncKeys` — VX-490's lines; `RoadInputs.live`'s parameter) +
-`App/Variorum/VariorumTests/Protection/OneSyncKeysLeafTests.swift`.
-
-**The pieces, in order (commit per piece, push after each, the record flipped in the same commit):**
-
-1. **D-496's words (P-500-1, PROVISIONAL — hers; her example "Syncing — 40,000 of 108,000" leads).** `SyncStatusRow.line`
-   gains the progress: `.syncing` with a downloading progress and a total → "Syncing — 40,000 of 108,000"; without a
-   total → "Syncing — 40,000 so far"; a saving progress → "Syncing — saving 12,000 of 108,000"; no progress → "Syncing…"
-   BYTE-UNCHANGED (every standing pin green unmodified). Numbers in the user's locale grouping (`formatted()`); the two
-   bounds U1a's `SyncProgress.total` doc names must render without nonsense: `done > total` reads as-is (the feed grew —
-   never clamp, never "of" a smaller number than done? — decide: show `done of total` honestly, or clamp the total up to
-   done; record the choice as PROVISIONAL P-500-8 with both options). ONE presentation source: the line function is where
-   the words live; the row renders it; nothing is re-typed view-side (VX-510 D-A2). The `.syncing` face keeps CF-15's
-   doors with a progress standing (pin).
-2. **D-496's sheet (P-500-2, PROVISIONAL):** `firstRoundLine` keeps `ProtectionWords.firstRoundProgress` as its sentence
-   and GAINS the same count beneath it when a progress stands (the words of piece 1's count part — one source, not a
-   second spelling); alt recorded: the sheet's sentence alone. Read how `firstRoundLine` receives the status today and
-   thread `progress` through the same road (no new global).
-3. **D-505's line (P-500-3, PROVISIONAL — her draft).** `SyncRowFace.Kind` gains `retrying`; `face(...)` gains
-   `lastErrorIsRetrying: Bool = false` and classifies it AFTER offline and BEFORE every other error class, rendered like
-   `.syncing` (the small spinner, CF-15's doors); the line: "Another change landed mid-sync — retrying." (sentence-cased
-   from her words "another change landed mid-sync — retrying."); the engine's sentence rides the hover as every paused
-   state's does (read how `.keysLocked` et al. carry theirs). The composition site passes `sync.status.lastErrorIsRetrying`.
-   An ordinary error keeps `.error` (pin). P-500-7 (the refused follow-up corner) is built as (a) — nothing extra —
-   and named in the record.
-4. **D-539 + VX-546 — the pair road on the injected clock.** `takePair`/`takePairReporting`/`prune`'s `now` default becomes
-   the injected clock (`@Dependency(\.date)` — read how the app's live clock resolves so production stays byte-identical;
-   the `ProtectionCopyCounts.read(now:)` default joins ONLY if it shares the mechanism, else leave it and say so). The
-   suite wraps planting AND the press in `withDependencies { $0.date = .constant(instant) }` — ONE instant per test,
-   plants relative to it. **THE RED-ON-OLD PIN (the one bug-class item of this unit):** one test pinned at a boundary
-   instant deep in the past (D-539 names 2026-01-04 00:20 UTC, a Sunday) — on the OLD code the road's live `Date()`
-   disagrees with the planted instant by months and the counts miss → RED deterministically; on the new code both clocks
-   are the instant → GREEN. Run the red on the pre-fix tree (the pin commit before the fix commit, or a `git stash`-free
-   revert of the road's lines named in the record before it runs — the traps' revert rule), record the failing lines,
-   then fix, then green. VX-546's two failing tests go green by the same change (its "real miscount" reading is falsified
-   by the pin — say so).
-5. **D-490 — the leaf constraint.** `RoadInputs.live`'s shared sync-keys leaf: `nonisolated(unsafe)` → `SyncKeysLeaf &
-   Sendable` as VX-490 states (the bootstrap's stored `any SyncKeysLeaf` retypes or drops; `OneSyncKeysLeafTests`'
-   literal moves). Zero behavior; the suites are the evidence; no pin claimed. If :1022's `syncKeys` line is the same
-   class, take it in the same commit; if not, leave it and say why.
-6. **Close.** `swift build` (the core package is untouched — confirm `git diff --stat main -- Sources/` shows only U1a's
-   files); the Mac suites from `App/Variorum/`: `xcodebuild -scheme Variorum -destination 'platform=macOS' test
-   -only-testing:VariorumTests/SyncLockedRowTests -only-testing:VariorumTests/SyncStalledRowTests
-   -only-testing:VariorumTests/FirstRoundRoadTests -only-testing:VariorumTests/ProtectionPairRetentionTests
-   -only-testing:VariorumTests/OneSyncKeysLeafTests` plus the NEW suite(s) you add (e.g. `SyncProgressRowTests`), and
-   every suite that names `SyncRowFace`, `SyncStatusRow`, `firstRoundLine`, `takePair` or `RoadInputs.live` (grep the tests
-   for the changed types — the closeout rule); confirm the "Test run with N tests" line per suite; the Mac run flashes
-   the test host — the stage is held for exactly this. A face walk is NOT owed here (the progress needs a live multi-
-   window round against a deployed count, which is her held window) — say so in the record; the pins are the evidence
-   for a shared-face Wording unit. SELF-ASSESSMENT at the end.
-
-**Your record:** `### U2 RECORD` under UNIT RECORDS — LIVE STATUS from the first commit; the words as built with their
-PROVISIONAL numbers (P-500-1/-2/-3, P-500-8 if minted — log each in `notes/QUESTIONS.md` as the next free number per
-CLAUDE.md's PROVISIONAL rule, options included); the red-on-old's failing lines; the close's lines; first line = what
-you did NOT do. Flip the orchestrator's LIVE STATUS row 4. Commits `VX-500 U2: … Part of VX-496` / `VX-505` / `VX-539`
-/ `VX-546` / `VX-490`; no trailers; pull --rebase before each push; foreground waits only. The MOBILE PARITY fact for the
-closeout: the row is shared, so the phone shows the new lines — name what you changed under `Shared/` so the parity line
-can say it.
-
-**Not yours:** any `Sync/` line (if the seam lacks something you need, STOP and record — the orchestrator briefs a Sync
-fix); U3; the ladder; the deploy; the PR. **ENVIRONMENT TRAPS — the section above, binding verbatim.**
-
-### U3 BRIEF — the offline typed unlock's retained load + the retry + the reachability trigger (D-544) (a FABLE implementer; custody-adjacent — CastleRules read whole)
-
-**Who you are.** The implementer for U3 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
-contract binds you point for point (you are Fable at her R-500-5 word). Custody-adjacent: the typed unlock's DERIVED
-secret is retained in session MEMORY only — never disk, never keychain (CastleRules rule 9 is about the device; D-544's
-posture paragraph is the ruling you build to). ZERO lines under `Sources/VariorumCore/Sync/` and `Protection/`'s
-headless core unless the retry needs a seam there — then STOP and record. Worktree `<home>/dev/variorum-vx-500`,
-branch `vx-500-sync-followups`; the Mac suites need the stage held by `vx500-orchestrator` (check before every run;
-never claim or steal).
-
-**Read first, in full:** `CLAUDE.md` + its canon · THIS FILE WHOLE (PREFLIGHT FACTS — the typed-unlock load and the
-retention facts; D-544 whole; HELD FOR HER's P-500-4/-5; ENVIRONMENT TRAPS; the U1a and U2 records for the seam you
-join) · `notes/CastleRules.md` WHOLE · `notes/SurfaceContracts.md` §"Doors to the outside" (the protection bullet —
-VX-501's typed-unlock load sentence, VX-486/487's locked row) · `notes/SyncSpec.md` §3 (the keys-absent refusal grammar)
-· `notes/SessionResiliencyProtocol.md` §implementer · the code: `App/Variorum/Shared/Protection/ProtectionOpenRoad.swift`
-(`TypedUnlockSecret` :624, `loadSyncKeysAfterTypedUnlock` :654 and its exits, `holdInSession` :715, `openTyped`'s call
-site) · `ProtectionRoadSession.swift` · `ProtectionRoadLock.swift` (`dropSessionMemory` :56) · the sign-out road (grep
-`holdInSession(nil`) · `App/Variorum/Shared/SyncSession.swift` (`triggerSync` :195, `flush` :237, how rounds are
-triggered; the write-settle observation, became-active/launch, Sync now) · the Mac composition that wires `SyncSession`
-(grep `SyncSession.configure` and `AppServices`) · the standing planted-road pins for the typed unlock (grep
-`loadSyncKeysAfterTypedUnlock` under `App/Variorum/VariorumTests/`) and the scripted-scheduler precedent
-(`FirstRoundScheduling`, grep it).
-
-**The pieces, in order (commit per piece; the record flipped in each):**
-
-1. **The retained pending load.** `ProtectionRoadSession` gains `pendingSyncKeyLoad: PendingSyncKeyLoad?` — the account
-   and the `TypedUnlockSecret` (derived material only; `CustomStringConvertible` redacted — the existing shape), set by
-   `loadSyncKeysAfterTypedUnlock` ONLY on the vault read's `.failed`/`.timedOut` exits (every other exit leaves it nil —
-   loaded, no vault, signed out, a secret that opens the library but not the vault, a moved account), cleared on a
-   successful load, on `dropSessionMemory` (the relock), on sign-out, and by any act that loads the keys. **Pins
-   (red-on-old):** a typed unlock whose vault read fails offline leaves the pending standing and the keys unloaded (the
-   pending does not exist on the old tree — a new-API red by compile; make the BEHAVIORAL red honest by pinning the
-   observable: after the failed load, a later reachable vault read through the retry loads the keys — on the old tree
-   nothing can, so a pin that drives "fail, then vault reachable, then keys present" is red for a behavioral reason once
-   the retry entry point exists; say which pins are compile-red and which behavior-red); a relock clears it (guard); a
-   successful first load leaves none (guard).
-2. **The retry.** `ProtectionOpenRoad.retryPendingSyncKeyLoad(session, signIn:)` — the same function with the retained
-   secret, the same 10 s bound, the same log lines; idempotent; nil pending ⇒ nothing; success clears the pending; a
-   second failure keeps it. Pin: the retry with the vault reachable loads the keys and clears the pending.
-3. **The occasions.** (a) every sync trigger — `SyncSession.triggerSync()` and `flush()` gain an optional async
-   `beforeRound: (@MainActor () async -> Void)?` hook the Mac composition wires to the retry, run ONLY when the provider
-   cannot produce keys (one cheap `currentKeys()` try — an unlocked session pays nothing); the round then runs with the
-   keys loaded. Pin: the hook runs before a triggered round and only while keys are missing (a core-free Mac pin over a
-   scripted scheduler — the `FirstRoundScheduling` precedent). (b) THE REACHABILITY TRIGGER (P-500-5): `NWPathMonitor`
-   in the shared `SyncSession` (Network framework, both platforms) — a path transition to `.satisfied` from unsatisfied
-   runs `triggerSync()` once, debounced 2 s; a planted path publisher for the pin (fires once per satisfied transition;
-   never on launch's first reading alone — decide and record). The phone gets the trigger by sharing the file; its
-   retry hook is unwired there (no typed-unlock pending on the phone's road today — say so for the MOBILE PARITY line).
-4. **The words.** The row keeps saying locked until the keys load (VX-486's sentence, unchanged); "Sync now" and the
-   Protection door keep their roads; no new sentence (if one is needed, it is PROVISIONAL and goes to QUESTIONS).
-5. **Close.** `swift build`; the Mac suites: every suite that names `loadSyncKeysAfterTypedUnlock`, `ProtectionRoadSession`'s
-   session memory, `dropSessionMemory`, `SyncSession.triggerSync`/`flush`, plus the new suite(s) — `xcodebuild … test
-   -only-testing:VariorumTests/<Suite>` per suite, the "Test run with N tests" lines; the stage held by the
-   orchestrator. **The live confirmation is HER HANDS** (the two-Mac test's steps 8–9 on her Air) — record it as owed,
-   never claimed. SELF-ASSESSMENT at the end: say exactly where the derived secret lives, how long, and every road that
-   clears it.
-
-**Your record:** `### U3 RECORD` under UNIT RECORDS; LIVE STATUS from the first commit; the pins (compile-red vs
-behavior-red said plainly); the close's lines; first line = what you did NOT do. Flip the orchestrator's LIVE STATUS
-row 5. Commits `VX-500 U3: … Part of VX-544`; no trailers; pull --rebase before each push; foreground waits only.
-
-**Not yours:** `Sync/`; U1b/U2's files; the ladder; the deploy; the PR. **ENVIRONMENT TRAPS — the section above,
-binding verbatim.**
-
-
-### U4 BRIEF — the two FK child indexes (VX-720; a v1_35 local-only migration + pin + the bench re-run) (a FABLE implementer; `Persistence/` only — no `Sync/` line)
-
-**Who you are.** The implementer for U4 of VX-500 (VX-720), a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
-contract binds you point for point (you are Fable at R-500-5). Scope: ONE migration, its pin, the bench re-run as evidence,
-the ticket's mechanism re-traced by you. Worktree `<home>/dev/variorum-vx-500`, branch `vx-500-sync-followups`,
-headless only.
-
-**Read first, in full:** `CLAUDE.md` + its canon (AppSpec §6–§7 — indexes are local, the schema's uniqueness and FK
-conventions) · THIS FILE: the U1b RECORD WHOLE (THE TRACE, THE MECHANISM with arms A–G, THE CANDIDATE FIX MEASURED, THE
-CHUNKING MEMO's "The numbers (U1b)"), R-500-7, ENVIRONMENT TRAPS · `notes/SyncSpec.md` §5 and §12 (why an INDEX is NOT a
-lockstep event: no mirror column, no wire change, no marker move — say so in the migration's doc, and confirm by reading
-`SyncSchema`'s completeness walk that an index adds no column) · `notes/SessionResiliencyProtocol.md` §implementer · the
-code: `Sources/VariorumCore/Persistence/` (the migration registry; the v1_34 `idx_cblock_dead_block` migration as the
-exact precedent — its shape, its test, how `knownMigrations`/the export's `applied == known` guard sees it (VX-502's
-record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a build with v1_35 refuses on an older build
-— the standing rule, say it in the record)) · `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (the bench and
-`ApplyProfileBisectionTests`' arms E/F — the pin's shape) · `Tests/VariorumCoreTests/SyncTestHarness.swift`.
-
-**The pieces:**
-
-1. **The migration, its own commit first** (CLAUDE.md: schema changes get their own commit before the code that uses
-   them): `v1_35` adding `CREATE INDEX idx_block_default_variant ON block(default_variant_id)` and `CREATE INDEX
-   idx_cblock_chosen_variant ON container_block(chosen_variant_id)`; registered wherever v1_34 is; the DDL doc comment
-   names the mechanism (SQLite's deferred-FK child scan — `sqlite.org/foreignkeys.html` §4 — while violations are
-   pending; the feed's registry order) and the measured gain. The `AuthRLSDDLTests`/schema pins that enumerate indexes
-   (if any) updated; the completeness walk green.
-2. **The pin (red-on-old, the bisection's arm E/F shape):** an UNGATED, fast test on an in-memory store at a size where
-   the scan is unmistakable but the test stays under a few seconds (U1b measured 316 µs vs 20 µs per take at 10k in memory
-   — pick the size so the old tree's time is ≥ 5× the new tree's and the assertion is a RATIO or an absolute bound with
-   margin, never a tight number): under `defer_foreign_keys = ON`, N blocks landed with dangling `default_variant_id`,
-   then N takes — the per-take insert cost bounded. RED on the pre-migration tree (run with the migration commit reverted
-   in a scratch doctoring; the lines in the record), GREEN with it. Say honestly how load-sensitive the bound is and why
-   the margin makes it a non-flake.
-3. **The bench re-run, the evidence:** `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3 swift test --filter
-   ApplyProfileMeasurementTests` on the migrated store (NO `INDEX_FIX` knob — the migration is the fix now; the knob may
-   be retired or made a no-op with a note): the apply's time vs U1b's 330,231 ms recorded as the table's new column.
-   Then the ticket's VX-672 note: ONE paragraph on whether a parent DELETE's child search (the purge/delete side) shares
-   the mechanism — reasoned from the same SQLite page, not measured; a Linear comment is the orchestrator's.
-4. **Close.** `swift build`; the sync suites (`swift test --filter "Sync|Catch|Purge|Convergence|Repair|Attacker|Tenant|Migration|Schema"`
-   — read what matches) green; the broad core `swift test` in the foreground (the traps' flake list + the two candidates in
-   HELD FOR HER); the record `### U4 RECORD` (LIVE STATUS, the pin's red lines, the bench table, the close, self-assessment);
-   flip the orchestrator's LIVE STATUS row 5b. Commits `VX-500 U4: … Part of VX-720`; no trailers; foreground waits only.
-
-**Not yours:** `Sync/` (if the migration needs an engine line, STOP and record), the faces, the deploy, the PR.
-**ENVIRONMENT TRAPS — the section above, binding verbatim.**
-
-## LIVE STATUS (the orchestrator's; flipped per piece)
-
-| # | Piece | Status |
-|---|---|---|
-| 0 | Kickoff: preflight whole; worktree + branch; the in-flight row on main (`24c413138`); VX-500 In Progress; this file | DONE |
-| 0b | RESUME (the second orchestrator, 2026-11-01 ~13:30 MDT): the handoff + this file + the standard preflight read whole (SyncSpec, CastleRules, SurfaceContracts' Doors, the resiliency protocol, the sizing guidance, the master plan, QUESTIONS' tail); main merged into the branch (`c64211270`); the stage claimed; the roster re-listed via Linear (11 sub-issues — matches); R-500-5 ruled; the U1 split; the U1a brief | DONE (this commit) |
-| 1 | U1a — the server artifact (D-495 SHAPE B + the count per R-500-1) + the DDL pins | DONE (`6155ba7fb` SHAPE B · `7d645688f` the count · `1e8d24286` the DDL pins · `917189ccd` the red-on-old) — U1a; the record is `### U1a RECORD` |
-| 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | DONE (`86b097934` the ownership pass, one change; the close commit the wire pin) — U1a; the draft `aad734aef` adopted line by line |
-| 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
-| 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 (`vx-500-server-half-round2.md`, 0/0/2 MINOR, no round 3) DONE — its two one-line pins landed by the orchestrator under the loosened rule (86/2) · **THE GATE IS OPEN; the deploy HELD for her word** (`notes/plans/vx495-deploy-checklist.md`) | GATE OPEN |
-| 3c | THE DEPLOY: run 1 REFUSED (42501 — the artifacts had omitted the 10/14c bracket, VX-721); the DEPLOY-FIX session landed the bracket + the sweep rows + pins (`e01bb7359`, verified 87/2); **run 2 LANDED 2026-11-02 00:41 UTC (`[]`)**; every verify DONE (SHAPE B body; both functions definer-owned with pg_temp; the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans, 779 ms); **the acceptance DONE 00:57 UTC — her week-behind Pro caught up ~23k rows in ~64 s end to end** (the checklist); the whole-diff ladder reads the bracket fix | DEPLOYED + ACCEPTED |
-| 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
-| 5 | ~~U3 — the typed-unlock retry + the reachability trigger (D-544)~~ | LIFTED OUT (R-500-10): VX-544 runs as its own ticket run after VX-500's ladder closes; D-544 + the U3 brief move to `notes/plans/fixes/vx-544-offline-typed-unlock.md` at this session's cutover |
-| 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
-| 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
-| 7 | Closing runs (core debug + release; the Mac suites over every changed source; the phone build) | NOT STARTED |
-| 8 | The PR opened — HELD OPEN at her word; the handoff; memory; the canon deltas DRAFTED for the merge moment | NOT STARTED (the CUTOVER handoff `notes/handoffs/vx-500-handoff.md` written 2026-11-01) |
-
-## HELD FOR HER (bundled; nothing here is improvised around)
-
-- **The merge** (the freeze) and **the server deploy** (D-495 + the count RPC) — each at her explicit word.
-*[removed for publication]*
-- **The words:** P-500-1 the progress lines (her example leads), P-500-2 the sheet's count, P-500-3 the belt's line
-  (her draft), the locked row unchanged. P-500-6 (the count's shape) RULED — R-500-1.
-- **The directions:** P-500-4 (the retained derived secret over a door), P-500-5 (the reachability trigger), D-497's
-  FK memo (zero semantics — built only if the profile names it), the two memos (compaction, chunking) for a sitting.
-- **The riders:** VX-546 and VX-490 seated provisionally; VX-76 as VX-496's duplicate; VX-491 not seated.
-- **The flags:** VX-683 (data-loss class, two-device same-take edits — her priority call; a `Sync/` design memo run),
-  VX-672 (the phone's slow post-purge round — profile on her phone after VM-32), both outside this run.
-- **P-500-7 (U1a's finding, for U2 and her):** on a REFUSED belt follow-up (the double-refusal corner — two rounds racing
-  one store, a non-production shape) `lastErrorIsRetrying` is FALSE by design and the row still shows the engine's belt
-  sentence under `.error` until the next trigger; options: (a) leave it (the shape is not reachable in production); (b) a
-  second typed fact "the belt refused and nothing follows" with its own line. U2 builds (a) PROVISIONAL unless she says.
-- **Two load-flake candidates** (U1a's broad runs, green alone): `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytes…`,
-  `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` — the traps list or one Test-only ticket, her call.
-- ~~**Pre-launch labels:** VX-544 (her call — Castle typed-road users offline); VX-683 (her call).~~ RULED R-500-2: neither is Pre-launch.

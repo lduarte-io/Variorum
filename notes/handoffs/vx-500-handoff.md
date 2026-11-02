@@ -1,3 +1,80 @@
+# VX-500 — the SECOND orchestrator handoff (2026-11-01 ~19:15 MST; the server half deployed, the client half remains)
+
+**Her checklist (bundled; nothing improvised around):**
+- [ ] **The merge word** — the PR will be opened and HELD by the successor; you say when (the launch freeze). Your 1.0
+      release from `main` is untouched by this branch; the deployed server body is wire-identical for every client.
+- [ ] **The words** P-500-1 (the progress lines), P-500-2 (the sheet's count), P-500-3 (the belt's line) — ratify or
+      reword when U2 lands them; **P-500-7** (the refused-follow-up corner — a second line, or leave it).
+- [ ] **The palette follows the account** (your Pro flipped to sea glass at the catch-up — the synced `theme_palette` row,
+      by design): per-device instead? a ticket at your word.
+- [ ] **VX-508** stays held (tester A's join). **VX-683** next after VX-500 closes (a design memo + sitting first), then
+      **VX-544** (its plan file is ready: `notes/plans/fixes/vx-544-offline-typed-unlock.md`).
+- [ ] **The deploy's SyncSpec §12 maintenance line** lands at the MERGE moment (the shared-ledger rule) — the successor's.
+
+## THE PASTE-READY KICKOFF PROMPT (for a fresh orchestrator on the Pro)
+
+```
+/architect-phase VX-500 — RESUME the sync follow-ups run from its SECOND cutover seam (the deploy done; the client half
+remains). READ FIRST, IN FULL, YOURSELF: notes/handoffs/vx-500-handoff.md (this cutover's section at its top), then
+notes/plans/fixes/vx-500-sync-followups.md WHOLE (FOR A LATER READER first — the state as of the cutover; then THE
+REMAINING UNITS with the U2 and U4 briefs and THE LADDER; the closed material below is the working record you read once
+and never again unless reopening), then the standard preflight (CLAUDE.md + canon — "The orchestrator never implements"
+is the rule, with its small-adjudication-fix clause — SyncSpec WHOLE, SurfaceContracts' Doors section, the resiliency
+protocol, the sizing guidance, the master plan's in-flight table, notes/TICKETS.md, QUESTIONS' tail).
+
+STATE: branch vx-500-sync-followups, worktree ~/dev/variorum-vx-500 (the Pro); U1a + U1b DONE and verified; the SERVER
+HALF DEPLOYED 2026-11-02 00:41 UTC and ACCEPTED (her Pro's ~23k-row catch-up in ~64 s) at her word (the checklist notes/plans/vx495-deploy-checklist.md); VX-544 lifted out (its own plan
+file); VX-720 seated as U4. The PR is HELD at the end — the launch freeze; never merge, she says when.
+
+THE CAST (R-500-5, hers): FABLE implements every unit (Agent general-purpose, model fable, effort xhigh, briefed by the
+plan file's section — never from your context); a fresh fable-reviewer per ladder round; same-model, so you arbitrate
+against the spec. You write nothing that ships beyond CLAUDE.md's small-adjudication-fix clause. ONE agent at a time.
+The worktree is SHARED with your implementers: write nothing in it while one is live (drafts in your scratchpad;
+pathspec adds only — never `git add -A`).
+
+THE ORDER: U2 (§U2 BRIEF — the faces consume U1a's seam; the Mac suites need the stage: claim it yourself,
+`Tools/stage claim --who <you> --reason … --minutes 240`, no coordinator unless she names one) → U4 (§U4 BRIEF — the
+v1_35 two-index migration, its own commit first, the pin red-on-old, the bench re-run) → THE WHOLE-DIFF LADDER (a fresh
+fable-reviewer over the branch's whole diff against main; its anchors the two server-half rounds for those files; the
+U1a/U1b/U2/U4 records' self-assessments; rounds per CLAUDE.md, cap three) → the closing runs (core debug + release split
+as the traps say; EVERY Mac suite that exercises a changed source; the phone build) → the PR opened and HELD → the
+closeout's canon deltas drafted for the merge moment → the FOR A LATER READER section rewritten to the closed state →
+the handoff notes/handoffs/vx-500-handoff.md (her checklist on top). Bundle her calls: the words P-500-1/-2/-3, the
+corner P-500-7, VX-508. After VX-500 closes: VX-683 (a design memo + sitting first — her priority raise), then VX-544
+(its plan file is ready) — each its own ticket run, branch and PR.
+```
+
+## STATE AT THIS CUTOVER (verify, never trust — `git -C ~/dev/variorum-vx-500 log --oneline -30`)
+
+- The plan `notes/plans/fixes/vx-500-sync-followups.md` is restructured: FOR A LATER READER (the settled state) · THE
+  REMAINING WORK (the U2 and U4 briefs, the U3 pointer, the ladder/closing/PR plan) · LIVE STATUS · HELD FOR HER · then the
+  run's record in the order written. Read it WHOLE (a cutover inside an open effort).
+- DONE and verified: U1a (`6155ba7fb`…`9a2b3dfc7`), U1b (`bf33a5d10`…`5d8737765`), the server-half fixes (`f87ad1d53`…
+  `a8038ad91`), the two server-half rounds (`vx-500-server-half-round1.md`, `-round2.md`), the deploy fix (`fe718be4d`…
+  `e01bb7359`; piece 1 inside the orchestrator's `168d8cd4f` by a shared-worktree sweep — recorded), the DEPLOY (run 2,
+  `[]`, 2026-11-02 00:41 UTC; `notes/plans/vx495-deploy-checklist.md` RUN) and her acceptance (~64 s). Tree clean, pushed.
+- NOT started: U2, U4, the whole-diff ladder, the closing runs, the PR, the closeout. VX-544 lifted out (Todo in Linear).
+- Linear: VX-500 In Progress; members 495/496/497/505/539/546/490/720/721 In Progress; VX-504 Todo (the memo); VX-508 Todo
+  (held); VX-544 Todo (its own run); VX-722/723 Backlog (Suspected flakes). Never set an assignee (one slipped in via the
+  GitHub linking on VX-721 and was cleared).
+- The stage is FREE (released for her release session); the successor claims it for U2's Mac suites.
+
+## MACHINERY LESSONS (this session's)
+
+- **Two writers, one worktree:** the orchestrator's `git add -A` swept a live implementer's uncommitted piece into a
+  record commit. While any agent is live in the worktree the orchestrator writes nothing there (drafts in the scratchpad;
+  pathspec adds only). Memory `subagent-infra-lessons` carries it.
+- **Verify a premise before a ruling rides on it:** the "platform drift" read of the 42501 was wrong; 14c's letter is the
+  bracket. The implementer's falsification was the correct outcome of the shape — say so in the record, re-ask her.
+- `log show` for the real app's process returned nothing from this session (three predicates) — the download/save split
+  of a live round needs her hands or an in-app timing line.
+- `Tools/prod-read.sh` refuses the words CREATE/`createrole` in a probe; a privilege probe runs as a plain select through
+  the management endpoint instead.
+- The management API's `database/query` endpoint runs as `postgres` (non-superuser, a member of `variorum_definer`); a
+  rollback-only dry run (`commit;` → `rollback;`) is a safe way to bisect an artifact's live refusal.
+
+---
+
 # VX-500 — the orchestrator handoff at the cutover (2026-11-01, ~14:00 MDT; written at her word)
 
 **Why a handoff now (her words, verbatim):** "it might be best for you to just finish you work, wrap it up to the
