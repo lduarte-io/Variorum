@@ -54,7 +54,36 @@ Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by p
 
 ## LIVE STATUS
 
-*(The implementer's table, from the first commit.)*
+**NOT done by the implementer: the hands-on screenshot walk** (the orchestrator's, per TESTS & EVIDENCE); no
+SurfaceContracts/AppSpec edit (the orchestrator's at closeout).
+
+Implementer: Opus (opus-implementer), 2026-11-01, worktree `~/dev/variorum-vx-724`.
+
+| Piece | State |
+|---|---|
+| 0. Preflight read (CLAUDE.md + canon, this brief, SessionResiliencyProtocol, SurfaceContracts' VX-562 paragraph, the listed sources and both suites) | DONE |
+| 1. The bar (BookView `.outline` arm, `OutlinePinnedLine` → `OutlineBottomBar`, receipt overlay onto `outlineBody`, oracle records the bar) | IN-PROGRESS |
+| 2. The pins (`BookOutlineViewedTests`, `BookOutlineLandingTests`) | NOT-STARTED |
+| 3. The two suites under a held stage claim | NOT-STARTED — PENDING |
+| 4. Self-assessment | NOT-STARTED |
+
+**The implementer's calls (brief points 5 and 6 left them to me):**
+
+- **C-1 (point 5) — `pinLine` and `outlinePinLine` RETIRE.** The oracle no longer wants one joined sentence: a joined
+  string cannot say where the position half ends and the counts half begins (both halves join their own pieces with
+  " · "), so the bar's two halves become ONE pure value, `BookOutlineViewed.Bar { position, counts }`, from ONE pure
+  composer `BookOutlineViewed.bar(…)` that takes `pinLine`'s exact inputs and feeds BOTH halves from the ONE
+  `NoteTotal` (the r1-finding-3 law, unchanged and still pinned). It mints no words: `position` is
+  `positionLine` (empty at rest), `counts` is `metaLine`, both as-is. The joiner `BookViewCopy.outlinePinLine` has no
+  consumer left and is deleted; its pins move to the `Bar` shape deliberately (piece 2).
+- **C-2 (point 6) — the oracle records the `Bar` value itself**, the very value the bar renders (leading ←
+  `position`, trailing ← `counts`), so a pin compares both halves by name and can never confuse them. The store keeps
+  its names (`recordOutlinePin` / `outlinePinLines`, `recordOutlinePinFrame` / `outlinePinFrames` — still the line
+  that stays put while the page scrolls); its value type is `Bar`; the frame is the bar's.
+- **C-3 — one placement assertion added** to the mounted pin that already reads the bar's frame
+  (`theNavigatorFollowsWhatThePageShowsNeverTheCaret`): the bar stands BELOW the page's scroll view. This is the
+  moved placement itself, so it is the red-on-old pin for "the line leaves the top" (on the old tree the pinned
+  line's frame sat above the scroll).
 
 ## LADDER
 
