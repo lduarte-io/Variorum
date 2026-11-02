@@ -264,7 +264,51 @@ struct WordsLookPanel: View {
 
     /// Rule 6: new words ask the passphrase where one exists. VX-308 U3 (F-U2-3): a synced library's look says, before
     /// anything is minted, that new words replace the account's words everywhere — her *Show my twelve words* is the yes.
+    @ViewBuilder
     private var asking: some View {
+        if stacked { askingStacked } else { askingInARow }
+    }
+
+    /// **VX-736 F-W3 (the walk's W3, adjudicated):** the narrow card's ask, top to bottom like its shown words — the field
+    /// on its own row at the card's width, then Cancel · Show my twelve words, whole (the one-row ask cut the primary door
+    /// to "Show my twelve w…" at the closing card's measure). The same lines and doors.
+    private var askingStacked: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if look.saysAccountWords {
+                Text(ProtectionWords.wordsLookReplacesAccountWords)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(ProtectionWords.wordsLookAsk)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            PeekableSecretField(label: ProtectionWords.wordsLookPassphraseField, text: $passphrase, onSubmit: submit)
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: .infinity)
+            HStack(spacing: 10) {
+                Spacer(minLength: 0)
+                Button {
+                    passphrase = ""
+                    look.cancel()
+                } label: {
+                    Text(ProtectionWords.wordsLookCancel).modifier(TourClosingDoorProbe(key: "cancel"))
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .fixedSize()
+                Button { submit() } label: {
+                    Text(ProtectionWords.wordsLookShow).modifier(TourClosingDoorProbe(key: "show"))
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                .fixedSize()
+                .disabled(passphrase.isEmpty)
+            }
+        }
+    }
+
+    /// The band card's and Settings' ask: the field and its two doors on one row.
+    private var askingInARow: some View {
         VStack(alignment: .leading, spacing: 8) {
             if look.saysAccountWords {
                 Text(ProtectionWords.wordsLookReplacesAccountWords)
