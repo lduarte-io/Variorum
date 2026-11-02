@@ -408,3 +408,8 @@ Counts by suite (declared `@Test`s; parameterized tests count once): FreshSideba
 **For the closeout's canon touches (not mine):** SurfaceContracts §The app — the VX-552 sentence loses "sits on both quick-entry bars and" (VX-738 / R-736-7); §The Library — "At the 1240-pt default" becomes 1270 (VX-737 / P-736-4).
 
 **Machinery honesty:** no session death; the full core run's three failures were load-timing (each green alone, none in a touched file); the dry red-on-old for VX-738 is a script over the pins' exact predicates, not the Mac runner — the real teeth are W-738 at the stage.
+
+### ADJUDICATIONS (the coordinator's, at the B2 stage window — claim `vx736-orchestrator`, 2026-11-02 05:24)
+
+- **P-736-4 — ACCEPTED AS BUILT, option (a):** the default window grows to 1270 × 840 with the 240 sidebar. The reason as ruled: the alternatives either leave her bug standing (c) or break the pinned one-line contract (b). **The side effect goes to her morning bundle:** an existing never-dragged user gets 240 inside her restored 1240 window, where Terminal's Library row legally wraps to two lines (still stable — typing, sorting and searching never change the count). **The §The Library canon touch (1240 → 1270) is noted for the closeout.**
+- **P-736-1 — the framing corrects to what B2 found:** the bar's two hosts are the Bookcase band and the Library's foot (the Pool has no quick entry); both lose the label. **Still PROVISIONAL for her morning**, since her screenshot was the Bookcase alone (alt: the Bookcase band only).
