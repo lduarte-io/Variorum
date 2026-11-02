@@ -523,13 +523,23 @@ final class WordsBandModel {
     }
 }
 
-// MARK: - The tour's last card (rule 3: "The tutorial's last card asks, and shows the twelve words beside the ask")
+// MARK: - The tour's close (rule 3: "The tutorial's last card asks, and shows the twelve words beside the ask")
 
-/// The end card's two asks, side by side: the passphrase (rule 3's — only while the library has none) and the words
-/// (rule 2's look). A passphrase set here a moment before the look is handed to it, so she is never asked it twice.
+/// The tour's two closing asks: the passphrase (rule 3's — only while the library has none) and the words (rule 2's
+/// look). VX-735 split them out of the end card into two cards of their own, in the same order (the passphrase, then the
+/// words), ONE model across both, so a passphrase set on the first card a moment before the look is handed to it and
+/// she is never asked it twice.
 @MainActor
 @Observable
 final class TourEndLibraryModel {
+    /// **VX-735 — what the closing cards still owe**, read from the open library's faces (the tour's facts carry it,
+    /// so a card whose ask is not owed is skipped and one whose ask is answered moves on). The passphrase: rule 3's ask
+    /// while the library has no passphrase (`offersSetPassphrase` — the set row's own truth, which this model's ask
+    /// always gated on).
+    static func asks(_ standing: RoadStandingModel) -> Tour.ClosingAsks {
+        Tour.ClosingAsks(passphrase: standing.offersSetPassphrase, words: true)
+    }
+
     /// The passphrase ask (nil: the library already had one when the card opened).
     let passphrase: SetPassphraseModel?
     /// The passphrase was set at this card.
@@ -556,7 +566,7 @@ final class TourEndLibraryModel {
         if look.phase != .closed { justSet = nil }
     }
 
-    /// The end card's three doors wait while words are on screen (closing the card would put them away without the
-    /// warning).
+    /// The closing card's doors (next, End tour) wait while words are on screen (leaving would put them away without
+    /// the warning) and while a passphrase is being set.
     var holdsTheDoors: Bool { look.holdsWords || passphrase?.busy == true }
 }

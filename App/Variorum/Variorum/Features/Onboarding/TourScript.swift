@@ -69,7 +69,7 @@ enum TourScript {
         switch position {
         case .main(let number, _):
             return "Step \(number) of \(Tour.mainStepCount)"
-        case .endCard:
+        case .closing, .endCard:
             return nil
         case .leg(let number):
             return "Keep going \u{00B7} \(number) of \(Tour.legStopCount)"
@@ -235,7 +235,10 @@ enum TourScript {
             return Card(
                 title: "One of your own",
                 body: "The dashed line at the bottom reads new note, just start typing. Type a first line and press \u{23CE} to open your first note. No book needed; it waits in the Pool until you give it one.")
-        case .endCard:
+        case .protectPassphrase, .protectWords, .endCard:
+            // The closing cards' words are the Castle faces' own approved
+            // sentences (`ProtectionWords`, drawn by `TourClosingCard`), and
+            // the end card has its own below.
             return nil
         case .legStar:
             // P-U2-5: there is no star on a note's masthead — the star is a
@@ -273,6 +276,19 @@ enum TourScript {
                 body: "Everything deeper lives in the field guide: takes in depth, divide and merge, books that collect, privacy. Interactive lessons, in order or as needed. That's the tour. Go write.")
         }
     }
+
+    // MARK: - The closing cards (VX-735 — the end card's two asks, split)
+
+    /// **The passphrase card's title** — the set-passphrase sheet's own,
+    /// quoted (`ProtectionWords.setPassphraseTitle`). A forced departure of
+    /// the split (recorded in the run's B1 RECORD with its alternative, no
+    /// title): the ask stood under the end card's title; standing alone it
+    /// wears the title this same ask already carries elsewhere — never new
+    /// words. Everything else on the card is the end card's block, verbatim.
+    static let protectPassphraseTitle = ProtectionWords.setPassphraseTitle
+    /// **The words card's title** — Settings ▸ Protection's words section's
+    /// own (`ProtectionWords.wordsSectionTitle`), quoted, for the same reason.
+    static let protectWordsTitle = ProtectionWords.wordsSectionTitle
 
     // MARK: - The end card (the fork, restaged over her own note — A3)
 

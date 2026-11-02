@@ -128,7 +128,7 @@ struct TourScriptTests {
     /// recorded departures, or (VX-292 U3) the U3 drafts with theirs. Every
     /// step is covered by exactly one of the two tables.
     @Test func everyCardIsTheApprovedDraftExceptTheRecordedDepartures() throws {
-        for step in Tour.Step.allCases where step != .endCard {
+        for step in Tour.Step.allCases where !Self.closeSteps.contains(step) {
             let card = try #require(TourScript.card(step), "\(step) has a card")
             if let (draftTitle, draftBody) = Self.u3Drafts[step] {
                 #expect(Self.approved[step.rawValue] == nil || [.takesMode, .deeperModes].contains(step),
@@ -158,6 +158,8 @@ struct TourScriptTests {
             #expect(card.body == expected, "\(step): \(card.body)")
         }
         #expect(TourScript.card(.endCard) == nil, "the end card has its own words")
+        #expect(TourScript.card(.protectPassphrase) == nil && TourScript.card(.protectWords) == nil,
+                "the closing cards' words are the Castle faces' (VX-735)")
         // The end card, verbatim (A3's restaged fork; A6's ⌘J line).
         #expect(TourScript.endTitle == "That's the tour.")
         #expect(TourScript.endBody
@@ -174,6 +176,39 @@ struct TourScriptTests {
         #expect(TourScript.keepGoing == "Keep going: two more minutes on stars, tags, books and snippets")
         #expect(TourScript.openFieldGuide == "Open the field guide, every feature as a lesson")
         #expect(TourScript.done == "Done, go write")
+    }
+
+    /// The steps whose words are not a coach card's: the end card and
+    /// (VX-735) the two closing cards before it.
+    static let closeSteps: Set<Tour.Step> = [.protectPassphrase, .protectWords, .endCard]
+
+    /// **VX-735 — the closing cards say the end card's asks VERBATIM.** The
+    /// split changes the shape, never the words (CastleRules rules 2, 3 and
+    /// 6 are the contract): each card's title is the ask's own approved title
+    /// elsewhere (the set-passphrase sheet's, Settings ▸ Protection's words
+    /// section's — quoted, never new words: the split's one forced
+    /// departure), and every sentence the end card's block said is the same
+    /// constant, byte for byte, as it stood (pinned here by value so a drift
+    /// in the Castle copy is a visible change).
+    @Test func theClosingCardsSayTheEndCardsAsksVerbatim() {
+        #expect(TourScript.protectPassphraseTitle == ProtectionWords.setPassphraseTitle)
+        #expect(TourScript.protectWordsTitle == ProtectionWords.wordsSectionTitle)
+        #expect(TourScript.protectPassphraseTitle == "Set a passphrase")
+        #expect(TourScript.protectWordsTitle == "Your twelve words")
+        #expect(ProtectionWords.setPassphraseLead
+                == "A passphrase is a convenience over your twelve words \u{2014} easier to type, and either one can reset the other.")
+        #expect(ProtectionWords.setPassphraseField == "Passphrase" && ProtectionWords.setPassphraseAgain == "Again")
+        #expect(ProtectionWords.setPassphraseButton == "Set passphrase")
+        #expect(ProtectionWords.wordsCardLine
+                == "Your library is encrypted \u{2014} click here to record the twelve words that are its key.")
+        #expect(ProtectionWords.wordsLookLead
+                == "Write these down now. They open your library \u{2014} on this \(ProtectionCopy.deviceName) and on any copy of it \u{2014} for as long as they are its words.")
+        #expect(ProtectionWords.wordsLookCopied
+                == "Copied. Your clipboard keeps them until you copy something else, your library locks or Variorum quits.")
+        #expect(ProtectionWords.wordsLookWarning == "These words won't be shown again.")
+        #expect(ProtectionWords.wordsLookWrittenDown == "I've written them down")
+        #expect(ProtectionWords.wordsLookGoBack == "Go back" && ProtectionWords.wordsLookClose == "Close")
+        #expect(TourScript.label(.closing) == nil, "a closing card carries no count")
     }
 
     /// **VX-292 U3 — the U3 drafts table IS the plan's own text** (the mockup
@@ -331,10 +366,12 @@ struct TourScriptTests {
     /// promise on the main leg; "two more minutes" lives on the fork's first
     /// door only).
     @Test func theToneRulesHoldOnEveryRenderedString() {
+        // VX-735: the closing cards' titles are the tour's to say (their
+        // bodies are the Castle faces' approved copy, pinned verbatim above).
         var strings: [String] = [
             TourScript.endTitle, TourScript.endBody, TourScript.endAside, TourScript.keepGoing,
             TourScript.openFieldGuide, TourScript.done, TourScript.next, TourScript.endTour,
-            TourScript.roadBack,
+            TourScript.roadBack, TourScript.protectPassphraseTitle, TourScript.protectWordsTitle,
         ]
         for step in Tour.Step.allCases {
             if let card = TourScript.card(step) { strings += [card.title, card.body] }

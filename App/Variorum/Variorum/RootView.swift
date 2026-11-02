@@ -1101,8 +1101,9 @@ struct RootView: View {
         return AnyView(WordsBandCard(standing: standing, band: band, direct: { session.status.direct($0) }))
     }
 
-    /// VX-307 U2b — the tour's last card's two asks (rule 3: the passphrase and the words, side by side): a fresh
-    /// model each time the end card shows (nil while no protection faces stand — the end card draws without the asks).
+    /// VX-307 U2b — the tour's closing asks (rule 3: the passphrase, then the words — VX-735 split them into two cards
+    /// of their own): a fresh model each time the close first shows (nil while no protection faces stand — the cards
+    /// are skipped).
     private var tourEndLibrary: (@MainActor () -> TourEndLibraryModel)? {
         guard let standing = protectionFaces else { return nil }
         return { TourEndLibraryModel(standing: standing) }
@@ -1279,7 +1280,11 @@ struct RootView: View {
             bookMode: { bookMode },
             lensBoard: {
                 session.commandRouter.lensBoard.map { ($0.postID, $0.columns) }
-            })
+            },
+            // VX-735 (R-736-5): what the closing cards still owe — the open
+            // library's protection faces (read in the overlay's body, so the
+            // observation lands there); nil while none stand.
+            closingAsks: { [protectionFaces] in protectionFaces.map(TourEndLibraryModel.asks) })
     }
 
     /// VX-292 U3 — the focused pane's book's mode, in the tour's words: only

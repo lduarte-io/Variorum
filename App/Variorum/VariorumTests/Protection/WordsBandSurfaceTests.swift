@@ -4,8 +4,8 @@
 //  window (a face that crashes or cannot lay out fails here) in every state, and the composition pinned by source:
 //  the card sits BETWEEN the shelf listing and the quick-entry line (her drawing), rule 3's reminder left the bottom
 //  bar for the card (its one home), the look's face has no raw pasteboard road, never a popup, and no Return shortcut
-//  that could put the once-shown words away; the tour's last card carries the two asks on the new road and is exactly
-//  as it was without them. The logic is the models' (`WordsBandTests`, headless); this suite pins the composition.
+//  that could put the once-shown words away; the tour's two closing cards carry the two asks (VX-735 — they left the end
+//  card, which is exactly as it was without them). The logic is the models' (`WordsBandTests`, headless); this suite pins the composition.
 //  Mac only (hosting and the app's source tree).
 //
 
@@ -83,9 +83,10 @@ struct WordsBandSurfaceTests {
         #expect(root.contains("direct: { session.status.direct($0) }"))
     }
 
-    /// The tour's last card: with the two asks (the new road) and without (today's road) — both host; the doors wait
-    /// while the words are on screen.
-    @Test func theToursLastCardHostsWithAndWithoutTheTwoAsks() async throws {
+    /// The tour's close (VX-735 — the end card's two asks, each a card of its own): the end card alone, then the
+    /// passphrase card and the words card over the real road — every one hosts, in both rooms; the words card's doors
+    /// wait while the words are on screen.
+    @Test func theToursClosingCardsAndTheEndCardHost() async throws {
         let tokens = VoiceTokens.fallback(for: .light)
         await SurfaceComposition.host(
             TourEndCard(tokens: tokens, scheme: .light, readmeExists: true) { _ in },
@@ -97,14 +98,25 @@ struct WordsBandSurfaceTests {
         let standing = RoadStandingModel.make(
             session, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
         let library = TourEndLibraryModel(standing: standing)
-        await SurfaceComposition.host(
-            TourEndCard(tokens: tokens, scheme: .light, readmeExists: true, library: library) { _ in },
-            size: NSSize(width: 520, height: 900))
+        for scheme in [ColorScheme.light, .dark] {
+            let voiced = VoiceTokens.fallback(for: scheme)
+            for step in [Tour.Step.protectPassphrase, .protectWords] {
+                await SurfaceComposition.host(
+                    TourClosingCard(
+                        tokens: voiced, scheme: scheme, step: step, library: library, onNext: {}, onEnd: {}),
+                    size: NSSize(width: 520, height: 900))
+            }
+        }
         await library.showWords()
         #expect(library.holdsTheDoors)
         await SurfaceComposition.host(
-            TourEndCard(tokens: tokens, scheme: .dark, readmeExists: false, library: library) { _ in },
+            TourClosingCard(
+                tokens: VoiceTokens.fallback(for: .dark), scheme: .dark, step: .protectWords, library: library,
+                onNext: {}, onEnd: {}),
             size: NSSize(width: 520, height: 900))
+        await SurfaceComposition.host(
+            TourEndCard(tokens: tokens, scheme: .dark, readmeExists: false) { _ in },
+            size: NSSize(width: 520, height: 520))
     }
 
     /// Settings ▸ Protection's words section hosts (the door the ✕'s toast names).
