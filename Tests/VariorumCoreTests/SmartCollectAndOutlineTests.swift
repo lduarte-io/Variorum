@@ -251,4 +251,30 @@ struct OutlineMintTests {
             }
         }
     }
+
+    /// **VX-727 (the VX-736 run, B2) — RED ON OLD.** Compare's "make outline
+    /// note" on a note in a second wing landed "outline of ‹title›" in Home
+    /// (her readme in the Variorum wing, 2026-11-01: the outline said "in
+    /// Home"). The mechanism: `mintOutlinePost` built its `Container` without
+    /// `wingId:`, so the row took the model's default `""` (Home), while every
+    /// sibling mint names its wing (`copyPost` passes the source's). The
+    /// outline is a copy door, never a wing crossing (§9's total isolation):
+    /// it is born in its source's wing, and Compare's split reads it as a
+    /// same-wing peer rather than an "other wing" version.
+    @Test func anOutlineIsBornInItsSourcesWing() throws {
+        try withOperations { ops, db in
+            let wing = try ops.createWing(name: "Variorum")
+            let post = try ops.createPost(title: "readme", wingId: wing.id)
+            _ = try ops.newBlock(in: post.id, text: "A letter. It goes on.")
+
+            let result = try ops.mintOutlinePost(of: post.id)
+            #expect(result.post.wingId == wing.id, "the returned row names the source's wing")
+            let stored = try db.fetchString(
+                "SELECT wing_id FROM container WHERE id = ?", [result.post.id])
+            #expect(stored == wing.id, "the stored row lives in the source's wing, not Home")
+            let split = try db.read { db in try Queries.versionPeerSplit(db, of: post.id) }
+            #expect(split.sameWing == [result.post.id], "Compare reads it as a same-wing peer")
+            #expect(split.otherWings.isEmpty, "no \u{201C}other wing\u{201D} version appears")
+        }
+    }
 }

@@ -309,3 +309,24 @@ Dev-store Debug build only (the vx-736 DerivedData app, rebuilt on the clean tre
 - **Gate A re-run whole on the fixed tree: `✔ Test run with 52 tests in 8 suites passed after 48.666 seconds with 4 warnings`** (51 + the new case; the warnings are the host launch's). **Gate B re-run too** (the shared look panel changed shape on its narrow host): `✔ Test run with 45 tests in 6 suites passed`.
 
 **B1 final line (the self-assessment's close):** B1 CLOSED at b076c3acf + this record commit — VX-735 FIXED (pieces 1 + F-W3), R-736-5 suppression FIXED, takes-scroll FIXED, audit DONE; Gate A 52/8, Gate B 45/6, core 3,583 whole + tour 54/54, four watches each red exactly as predicted and restored, the walk (a)(b)(c)(e) PASS with (d) headless and F-W3's state covered by its pin at the orchestrator's waiver; posture restored and md5-verified. Nothing from B2's scope was touched.
+
+## B2 RECORD
+
+**NOT DONE (first line, kept current):** pieces 2–4 not yet built (below). No `xcodebuild test` run yet (the stage is the orchestrator's); no live walk (the joint window's — the camera list lands at the close).
+
+Implementer: Opus (opus-implementer), 2026-11-02, worktree `~/dev/variorum-vx-736`, branch `vx-736-hotfix-101`, the Pro, from `1b77e18e2` (B1's close). Scope: §B2 BRIEF's four pieces. Read in my own context before any code: this file's KICKOFF, SITTING RECORD, MEMBERS, CAST, §B2 BRIEF, §ENVIRONMENT TRAPS and B1's LIVE STATUS; `notes/SessionResiliencyProtocol.md`; the three tickets' descriptions (Linear, read-only); SurfaceContracts §The app (the VX-552/VX-644 line, the keyboard family) and §The Library (the controls row's law). Zero `Sync/`, zero custody/keychain code, zero editor seam, zero schema.
+
+### LIVE STATUS
+
+| piece | status |
+|---|---|
+| 1 VX-727 — the outline's wing | DONE (this commit) — core pin `OutlineMintTests.anOutlineIsBornInItsSourcesWing` RED on the pre-fix tree (4 issues, below), GREEN with the fix; `OutlineMintTests` + `WingMoveTests` + `WingOperationsTests` 26/26 |
+| 2 VX-737 — the fresh-install sidebar width | NOT-STARTED — trace done (below); the design: `ShellSplit.idealWidth` 210 → 240 with the window's default growing by the same 30 (PROVISIONAL P-736-4, below) |
+| 3 VX-738 — the label off the quick-entry bar | NOT-STARTED — hosts traced: the Bookcase (`ShelfView.entryBar`) and the Library (`LibraryCatalogView`); the Pool has NO quick entry (P-736-1's "Pool" is the Library's bar — see piece 3) |
+| 4 Record close | NOT-STARTED |
+
+### Piece 1 — VX-727, traced and fixed
+
+- **The trace (verified, not adopted):** `mintOutlinePost` (`Sources/VariorumCore/Operations/Operations+Versions.swift:383`) built its `Container` without `wingId:`; `Container.init`'s `wingId` defaults to `""` (`Models/Container.swift:64`) — Home. The sibling `copyPost` (`:791`) passes `wingId: destinationWing ?? source.wingId`. **Sweep of every post-minting road in Operations** (each `Container(` construction and each `insertPost(` caller): `insertPost` itself (`createPost`'s wing), the daily entry (`""` deliberately — #169(b)), `addNewPostToReading` / `collectNewPost` (the book's wing), `importPost` / `importDocument` (the passed wing), `copyPost` (source or destination), the ownership fork and the wing-move bare copy (their wings) — **the outline mint was the only one without a wing.** Compare's symptom: `Queries.versionPeerSplit` read the outline as an other-wing version `[""]` (Home), not a same-wing peer.
+- **The pin (red-on-old, run on the pre-fix tree before the fix was typed):** `Tests/VariorumCoreTests/SmartCollectAndOutlineTests.swift` `OutlineMintTests.anOutlineIsBornInItsSourcesWing` — a note in a second wing, its outline minted: `✘ … failed after 0.247 seconds with 4 issues` — `result.post.wingId → ""`, the stored `wing_id → ""`, `split.sameWing → []`, `split.otherWings → [""]`.
+- **The fix:** one argument, `wingId: source.wingId`, in `mintOutlinePost`'s `Container(…)`. GREEN: `✔ Test run with 26 tests in 4 suites passed` (`OutlineMintTests|WingMoveTests|WingOperationsTests`). Revert-verification on the committed tree: PENDING (the next commit records it).

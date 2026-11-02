@@ -385,12 +385,15 @@ extension Operations {
             let source = try livePost(db, postID)
             let now = date.now
             let sourceTitle = source.title?.isEmpty == false ? source.title! : "untitled"
+            // VX-727: born in the SOURCE's wing, as `copyPost` births every
+            // copy — a copy door is never a wing crossing (§9). Without it
+            // the row took the model default `""` and landed in Home.
             let outline = Container(
                 id: newID(), ownerId: currentOwnerID(), kind: .post,
                 title: "outline of \(sourceTitle)",
                 profile: nil, entryDate: nil, locked: false, floatingNotes: nil,
                 segmentationDefault: source.segmentationDefault,
-                lastTouchedAt: now, createdAt: now, updatedAt: now)
+                lastTouchedAt: now, wingId: source.wingId, createdAt: now, updatedAt: now)
             try outline.insert(db)
 
             let placements = try ContainerBlock
