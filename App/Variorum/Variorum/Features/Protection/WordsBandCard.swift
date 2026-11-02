@@ -296,11 +296,13 @@ struct WordsLookPanel: View {
                     Text(ProtectionWords.wordsLookCancel).modifier(TourClosingDoorProbe(key: "cancel"))
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .lineLimit(1)  // a one-line door label, laid out whole (P-8)
                 .fixedSize()
                 Button { submit() } label: {
                     Text(ProtectionWords.wordsLookShow).modifier(TourClosingDoorProbe(key: "show"))
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                .lineLimit(1)  // a one-line door label, laid out whole (P-8)
                 .fixedSize()
                 .disabled(passphrase.isEmpty)
             }
@@ -362,6 +364,7 @@ struct WordsLookPanel: View {
             words
             Button(ProtectionWords.wordsLookCopy) { look.copy() }
                 .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .lineLimit(1)  // a one-line door label, laid out whole (P-8)
                 .fixedSize()
             if look.copied {
                 // The clipboard's caveat, under the grid at the card's whole width.
@@ -387,9 +390,11 @@ struct WordsLookPanel: View {
                     Spacer(minLength: 0)
                     Button(ProtectionWords.wordsLookGoBack) { look.goBack() }
                         .buttonStyle(CalmButtonStyle(tokens: tokens))
+                        .lineLimit(1)  // a one-line door label, laid out whole (P-8)
                         .fixedSize()
                     Button(ProtectionWords.wordsLookClose) { look.close() }
                         .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                        .lineLimit(1)  // a one-line door label, laid out whole (P-8)
                         .fixedSize()
                 }
             } else {
@@ -397,6 +402,7 @@ struct WordsLookPanel: View {
                     Spacer(minLength: 0)
                     Button(ProtectionWords.wordsLookWrittenDown) { look.writtenDown() }
                         .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                        .lineLimit(1)  // a one-line door label, laid out whole (P-8)
                         .fixedSize()
                 }
             }
@@ -532,6 +538,7 @@ struct TourPassphraseAsk: View {
                         if ask.busy { TravellingDotsIndicator(ink: tokens.muted) }
                         Button(ProtectionWords.setPassphraseButton) { submit() }
                             .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                            .lineLimit(1)  // a one-line door label, laid out whole (P-8)
                             .fixedSize()
                             .disabled(!ask.canSubmit(passphrase: passphrase, again: again))
                     }
