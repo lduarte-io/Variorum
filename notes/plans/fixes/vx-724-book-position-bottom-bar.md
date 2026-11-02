@@ -1,6 +1,6 @@
 # VX-724 — The book's position line moves to a bottom bar (+ the 1.0 release)
 
-**STATUS: OPEN — kickoff 2026-11-01.** Branch `vx-724-book-position-bottom-bar`, worktree `~/dev/variorum-vx-724`, the Pro. Architect shape (her word: "/architect-phase discipline"); Fable orchestrates, Opus implements, Opus cold-reviews (no editor seam, no `Sync/`, no custody, no default's-meaning content). The 1.0 release rides this ticket and runs AFTER the merge, at the standing release road.
+**STATUS: CLOSED 2026-11-01 — merged (PR #213, merge `53493f1ca`) and RELEASED AS VARIORUM 1.0 (build 10632) the same evening.** Branch `vx-724-book-position-bottom-bar`, worktree `~/dev/variorum-vx-724`, the Pro. Architect shape (her word: "/architect-phase discipline"); Fable orchestrates, Opus implements, Opus cold-reviews (no editor seam, no `Sync/`, no custody, no default's-meaning content). The 1.0 release rides this ticket and runs AFTER the merge, at the standing release road.
 
 ## FOR A LATER READER
 
@@ -12,7 +12,7 @@
 
 **Evidence that matters:** 65 tests in 3 suites green (`OutlineWritingSurfaceTests` · `BookOutlineLandingTests` · `BookOutlineViewedTests`); both placement claims proven by behavioral revert (the bar moved back above the page — exactly the new arms red, record 3b and fix-pass 4b); the r1 reviewer's independent 15-suite Outline-mount sweep 59 green; the acceptance walk on the dev store's prince (THE WALK section).
 
-**Open items:** VX-725 (the four-names rename, Low) · VX-726 (the A6-successor pin's oracle hygiene — shared `.incrementing` key + unconditional forget, Low, matters only if suites ever interleave). No QUESTIONS entries owed. **The 1.0 release** rides this ticket after the merge; its outcome is appended below and in the handoff (`notes/handoffs/vx-724-handoff.md`).
+**Open items:** VX-725 (the four-names rename, Low) · VX-726 (the A6-successor pin's oracle hygiene — shared `.incrementing` key + unconditional forget, Low, matters only if suites ever interleave). No QUESTIONS entries owed. **The 1.0 release — DONE 2026-11-01 evening:** step-0 gate PASSED (FirstRunDrillTests 11/11; the self-resetting both-arms first-run walk PASSED on the prod test road, dev slot restored byte-identical, production at rest); `release.sh --version 1.0` exit 0 (build 10632; app and DMG notarized + stapled; appcast verify all PASS, her notes verbatim); site legs per the runbook — DMG to R2 and VERIFIED byte-identical at https://dl.stargazing.tech/variorum/Variorum-1.0.dmg (sha256 6d260e12…), appcast live and byte-identical, `variorum.json` 1.0, deploy verified; A1 safety copy `variorum-a1-1.0-release-20261102T030334Z` then the shipped DMG's app installed to /Applications (1.0 / 10632, Notarized Developer ID, accepted); A1 pruned to newest; debris tidied; dSYMs retained under `~/Library/Developer/Variorum/Releases/1.0/`. One slip, disclosed: a version-print probe launched the freshly installed app against the real store for ~a minute; it quit gracefully, zero instances after, the A1 copy predates it. The handoff: `notes/handoffs/vx-724-handoff.md`.
 
 ## HER ASK (2026-11-01, verbatim)
 
