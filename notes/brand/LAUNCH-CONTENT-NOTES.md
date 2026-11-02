@@ -1,5 +1,9 @@
 # Launch-content continuity notes
 
+> **LAUNCHED 2026-11-01:** Variorum 1.0 is public and the stargazing.tech
+> product page, letter, about and policy pages are live. The claim rules
+> below still bind all future marketing copy; the "owed" items are history.
+
 The session-independent record of the marketing/launch-content work
 (2026-09-26 → 2026-10-08): what exists, the standing rules decided along the
 way, and what's still owed. Written so a fresh session can pick up fine-tuning
