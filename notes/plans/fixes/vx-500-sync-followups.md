@@ -535,6 +535,13 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   the orchestrator executes `notes/plans/vx495-deploy-checklist.md`'s run and verify steps through the stored PAT (the
   13i-c / 13n-b precedent), then tells her to open the Pro; her Pro's Variorum stays closed until then. The declined
   alternatives: her own `!` line; holding the deploy.
+- **R-500-9 — THE DEPLOY'S LIVE FINDING AND ITS FIX (2026-11-01 ~17:55 MDT; the question tool): "Yes, restore the grant
+  and re-run"** — RUN 1 refused whole (`42501 permission denied for schema public`: `variorum_definer` lost CREATE on
+  `public` since 14c granted it — VX-721; the checklist's RUN 1 record). The fix: `grant usage, create on schema public to
+  variorum_definer;` (14c's exact letter, idempotent) as the FIRST statement after the guard in BOTH artifacts (the keyset
+  and the rollback), plus a grant-sweep row that checks the privilege so the drift is caught next time; a fresh Fable
+  implementer amends in repo (the 13j read-fix-re-run road), then the orchestrator re-runs. The declined alternatives: her
+  own `!` grant with the artifacts unchanged; holding the deploy.
 - **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
   line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
   all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
@@ -1447,6 +1454,43 @@ CLOSED as fixed; the rollback artifact SOUND and pinned, its byte-identity to 13
   pins) is reviewed as a deployable unit — two rounds, every finding dispositioned. The deploy waits for HER EXPLICIT
   WORD (`notes/plans/vx495-deploy-checklist.md`).
 
+### DEPLOY-FIX BRIEF — the definer's schema CREATE restored in both artifacts + the sweep row (VX-721; a FABLE implementer; `Server/` + its DDL pins only)
+
+**Who you are.** The implementer for the deploy fix of VX-500 (VX-721), a Fable subagent at xhigh effort;
+`.claude/agents/opus-implementer.md`'s contract binds you (you are Fable at R-500-5). Scope: THREE items in `Server/supabase/maintenance/`
+and `Tests/VariorumCoreTests/AuthRLSDDLTests.swift`; nothing else. Worktree `<home>/dev/variorum-vx-500`,
+branch `vx-500-sync-followups`, headless, no server contact (the orchestrator re-runs the deploy).
+
+**Read first, in full:** `CLAUDE.md` + its canon · THIS FILE: R-500-6, R-500-8, R-500-9, THE DEPLOY, the SERVER-HALF FIX
+RECORD, SERVER-HALF ROUND 2 — THE FINAL CALLS · `notes/plans/vx495-deploy-checklist.md` WHOLE (RUN 1's record: the error,
+the probes, the dry runs — the mechanism you are fixing) · `Server/supabase/maintenance/14c-gate-definer-owner.sql` (lines
+70–97: the definer role's creation and grants — the letter you restore) · `Server/supabase/maintenance/vx495-pull-keyset.sql`
+and `vx495-rollback.sql` whole · `Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql` whole (its verdict logic
+and row shapes) · `AuthRLSDDLTests.swift`'s two VX-495 pins and the rollback pin · `notes/SyncSpec.md` §12.
+
+**The pieces (commit per piece, push after each):**
+
+1. **Both artifacts gain, as the FIRST statement after the marker guard's `do` block:** `grant usage, create on schema
+   public to variorum_definer;` — 14c's exact letter (idempotent; Postgres requires the new owner to hold CREATE on the
+   schema for `alter function … owner to`), with a comment naming VX-721 and the live finding (the ACL read
+   `variorum_definer=U`; the platform rewrite since 2026-10-22). The rollback keeps restoring the exact pre-deploy state
+   PLUS this grant (say so in its header: the grant is 14c's deployed state, not the keyset's — a rollback must not strip
+   it). Pins: both artifacts carry the grant line by exact text BEFORE their first `alter function … owner to`
+   (string-position assertions), added to the existing bound/count/rollback pins.
+2. **The grant sweep gains a SCHEMA-PRIVILEGE row:** `14c-post-deploy-grant-sweep.sql` checks
+   `has_schema_privilege('variorum_definer','public','CREATE')` and `…'USAGE'` and reports a fail-class row when either is
+   false (read the sweep's existing verdict vocabulary and reuse it; the expected totals move from 63 OK · 4 INFO · 0 fail
+   to 64 — or whatever the sweep's counting yields; state the new expectation in the record and in THE DEPLOY §3 +
+   the checklist's verify row). A pin that the sweep's text carries the privilege check.
+3. **Close.** `swift build`; `swift test --filter "AuthRLSDDLTests|MultiTenantSyncAttackerTests"` with the count; the
+   record `### DEPLOY-FIX RECORD` under UNIT RECORDS (LIVE STATUS, the pins, the close, a short self-assessment — name
+   anything about the grant's security posture a reviewer should weigh: the definer is NOLOGIN and unreachable from any
+   API; 14c accepted CREATE on public for it); first line = what you did NOT do. Commits `VX-500 deploy fix: … Part of
+   VX-721`; no trailers; `git pull --rebase` before each push; foreground waits only.
+
+**Not yours:** running anything on the server; `Sources/`; U2/U3/U4. **ENVIRONMENT TRAPS — the section above, binding
+verbatim.**
+
 ### U2 BRIEF — the faces (D-496's words, D-505's line), the retention tests on the injected clock (D-539 + VX-546), the leaf constraint (D-490) (a FABLE implementer; a Mac-app unit — NO `Sync/` line)
 
 **Who you are.** The implementer for U2 of VX-500, a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
@@ -1652,6 +1696,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 2 | U1a — the engine's progress seam (D-496) + the belt flag (D-505) + pins | DONE (`86b097934` the ownership pass, one change; the close commit the wire pin) — U1a; the draft `aad734aef` adopted line by line |
 | 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
 | 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 (`vx-500-server-half-round2.md`, 0/0/2 MINOR, no round 3) DONE — its two one-line pins landed by the orchestrator under the loosened rule (86/2) · **THE GATE IS OPEN; the deploy HELD for her word** (`notes/plans/vx495-deploy-checklist.md`) | GATE OPEN |
+| 3c | THE DEPLOY: RUN 1 REFUSED (42501 — VX-721, the definer's lost schema CREATE); R-500-9 — the DEPLOY-FIX session (both artifacts' grant line + the sweep row + pins) IN PROGRESS; then the orchestrator re-runs; the whole-diff ladder reads the fix | IN PROGRESS |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
 | 5 | U3 — the typed-unlock retry + the reachability trigger (D-544) | NOT STARTED |
 | 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
