@@ -31,6 +31,22 @@ until the client half ships with the held PR. The pre-deploy gate: the SERVER-HA
 ! cd ~/dev/variorum && set -a && source .env.supabase.local && set +a && REF=$(echo "$VARIORUM_SUPABASE_URL" | sed -E 's|https://([a-z0-9]+)\.supabase\.co.*|\1|') && jq -Rs '{query: .}' < ~/dev/variorum-vx-500/Server/supabase/maintenance/vx495-pull-keyset.sql | curl -s -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" -d @-
 ```
 (The artifact is on the BRANCH's worktree — the PR is held, so main does not carry it yet.) Expected: `[]` on the first run.
+
+**RUN 1 (2026-11-01 23:43 UTC, the stored PAT at her word R-500-8) — REFUSED WHOLE: `ERROR: 42501: permission denied for
+schema public`, HTTP 400.** Nothing landed (read-only after: `sync_pull`'s body has no `with picked as`; no
+`sync_pull_remaining`). THE CAUSE, settled by probes (the management endpoint runs as `postgres`, non-superuser, a member
+of `variorum_definer`, CREATE on public via `pg_database_owner`): **`variorum_definer` has USAGE but NOT CREATE on schema
+`public`** — the ACL reads `{pg_database_owner=UC/…, postgres=U/…, anon=U, authenticated=U, service_role=U,
+variorum_definer=U}` — while `maintenance/14c-gate-definer-owner.sql:81` granted it `usage, create`. Postgres requires
+the NEW owner to hold CREATE on the schema for `alter function … owner to`, so both `owner to variorum_definer` lines
+fail. Dry runs (the artifact with `commit;` → `rollback;`, nothing landing): whole → the same error; the guard + both
+`create or replace` → `[]`; the whole minus the two `owner to` lines → `[]`. The last re-own that succeeded live was 17's
+(2026-10-22); the server now reports Postgres 17.6 — a platform upgrade or ACL rewrite between then and now is the
+likely thief. The rollback artifact carries the same `owner to` line and would fail identically. **A `create or replace`
+keeps the existing owner** (dry run B: `sync_pull` stays `variorum_definer`), so the pull alone could land — but the NEW
+count function would be owned by `postgres` (BYPASSRLS), which the 14c two-layer net forbids for a data function. The
+fix is her call (the question put at ~17:50): restore 14c's letter — `grant usage, create on schema public to
+variorum_definer;` as the artifacts' first statement — plus a sweep row for the privilege.
 - [ ] On any error: READ it, fix the artifact IN REPO (never live-only), re-run — the 13j read-fix-re-run road. A 42702-class
       name shadowing or a `format()` arity slip would show here first (the DDL pins are string pins; this is the SQL's
       first execution on a Postgres).
