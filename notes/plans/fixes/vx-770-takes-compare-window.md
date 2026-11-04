@@ -1787,9 +1787,10 @@ and the batch's other rows); the cold ladder.
 | B · VX-739 fix (196fdb145) | DONE — CONDITIONAL on the window's red run (green on rev ⇒ revert this one commit, record-only) |
 | C · VX-638 trace + pins (this commit) | DONE — `TakesPagerAfterCloseTests` (6 pure layout transitions); red/green PENDING the window |
 | C · VX-638 fix (4f1884d72) | DONE — `TakesBoardLayout.forgetPages(ofClosed:)` from the three close doors; red/green PENDING the window |
-| D · VX-652 | premise re-checked; the AppKit-anchoring fork being written (one Sonnet lookup for the external facts, returned) |
+| D · VX-652 | **FORK RETURNED — NOT BUILT** (B5-F1 below): the premise HOLDS at every width; the only working fix is a new AppKit-anchored pull-down — the orchestrator's call |
 | E · VX-634 sweep + pins (this commit) | DONE — `UndoLabelVocabularyTests` (core): `swift test` on the pre-fix source **RED, real** — "3 tests in 1 suite failed … with 3 issues": the behaviour pin both directions (⌥⌘Z and ⇧⌥⌘Z read "Delete Variant"), the fence's one offender `Operations+Deletion.swift:144 — "Delete Variant"`; the matcher control GREEN |
-| E · VX-634 fix | NEXT |
+| E · VX-634 fix (595e7369e) | DONE — `swift test` **GREEN, real** (49 tests, 4 suites: the new pins + `UndoStackTests` + `RedoStackTests` with their four label lines edited). **Behavioural revert, real:** `Operations+Deletion.swift` written back to c3a1d6d4a's bytes by `git show >` (working tree ONLY — the index stayed clean, verified `git diff --cached --quiet`), the pins **RED** ("3 tests in 1 suite failed … with 3 issues"), restored from HEAD, sha256 `0c7c0a0b…3ce8` = the pre-revert copy, `cmp` identical, `git status` clean |
+| `DerivedData/vx770-b5` build-for-testing (HEAD) | NEXT |
 | C · VX-638 | NOT STARTED |
 | D · VX-652 | NOT STARTED |
 | E · VX-634 + the sweep | NOT STARTED |
@@ -2010,3 +2011,48 @@ every literal undo label scanned from the shipped source; no whole-word variant(
 container · reading(s) · section(s) · savepoint(s); a NAMED allow-list (one entry: "Archive Variant",
 with its reason) whose entries must still exist — so the day the sibling is fixed, the list must shrink
 and the fence closes over it. Non-vacuity: the scan must find > 25 labels and "Delete Block".
+
+### D · VX-652 — THE PREMISE RE-CHECK, and B5-F1 (the fork, returned; NOT built)
+
+**The premise at today's 1270-pt default — STILL REACHABLE, and at EVERY width.** The "+ column ▾" door is
+Lenses' header `VoicedMenu` (`LensesBoardView.swift:375–410, 434–440`), placed after a `Spacer()`, so it
+is pinned to the board's TRAILING edge (12-pt `boardInset` + the control's own 5-pt padding from the
+board's right edge — the window's right edge whenever no inspector or Book Panel stands beside the
+board). `VoicedMenu` is a SwiftUI `Menu` (`Theme/VoiceControls.swift:136–170`) — an `NSPopUpButton`
+pull-down underneath — which pops its menu with the MENU'S LEFT EDGE AT THE CONTROL'S LEFT EDGE and
+constrains it only to the SCREEN, never the window. So the overflow past the window's right edge is
+(the menu's width) − (the control's width + ~17 pt): its items ("New lens — arrange existing takes",
+"New lens — write new takes", "Open “‹lens›”"…) make a menu of roughly 250–300 pt against a ~70-pt
+control — on the order of ~190 pt past the edge — **independent of the window's width**: the 1240 →
+1270 growth (VX-737) moves the control with the edge and changes nothing; a user-narrowed window
+reaches it exactly the same. (It disappears only where the window's right edge IS the screen's: AppKit
+then shifts the menu left onto the screen.) No pin reaches a tracking menu's frame headlessly or in the
+mounted harness (a popped menu runs its own tracking loop) — the numbers above are the code's geometry,
+not a capture; W18 is the eye.
+
+**The fix needs a mechanism the app does not have (the external facts, one Sonnet lookup — Apple's
+`Menu`, `menuStyle`, `NSPopUpButton.preferredEdge`, `NSMenu.popUp(positioning:at:in:)`, `NSMenu.size`
+pages and the HIG pull-down page):** there is NO SwiftUI API that aligns a `Menu`'s popped menu on macOS
+(through macOS 26; none found); `NSPopUpButton.preferredEdge` is a screen-space FALLBACK for pull-downs,
+not an alignment; the HIG says nothing about window edges. The one working road is AppKit's
+`NSMenu.popUp(positioning: nil, at: (bounds.maxX − menu.size.width, the control's bottom), in: view)` —
+with two facts only a live run settles (the flipped-vs-unflipped y, and whether `menu.size` before the
+first display matches the drawn width). Nothing in the app pops a menu that way today (searched).
+
+**B5-F1 — the options (the orchestrator's call; logged for the closeout's QUESTIONS bundle):**
+- **(A) A trailing-anchored pull-down for THIS door only.** The header door becomes a SwiftUI button
+  styled exactly as `VoicedMenu`'s label, over a zero-size AppKit anchor that pops an `NSMenu` whose
+  right edge meets the control's; the add-column items become ONE data list both doors render (the
+  dashed stub keeps its SwiftUI `Menu` over the same list — "one body behind both doors" kept, the tour's
+  step-9 anchor on the stub untouched). Pins: the pure anchor geometry, the two doors' item parity; W18
+  live for the frame. Cost ~100 lines; a second pull-down mechanism beside the chrome's one menu.
+- **(B) `VoicedMenu` learns `opensToward: .leading`** (the same AppKit pop inside the shared control) —
+  every trailing-pinned `VoicedMenu` in the app could take it; larger blast radius (app-wide chrome).
+- **(C) Record-only — AppKit's own behaviour.** The menu is fully on screen and fully usable; macOS
+  pull-downs routinely hang past a window's edge; the overflow is cosmetic. Close VX-652 with this
+  geometry argument (her taste call).
+- **My recommendation:** (A) if she wants it fixed (the narrowest change that answers the ticket, and it
+  keeps one item list), built by a session that can walk it the same night — the geometry's two open
+  facts make a headless build a blind one, which this batch's discipline rules out; (C) otherwise.
+  **Not built here** — the record's honest line, not a deferral by default: the fix needs a mechanism and
+  a live check this headless batch cannot give it.
