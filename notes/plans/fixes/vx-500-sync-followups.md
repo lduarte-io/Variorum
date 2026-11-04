@@ -2731,3 +2731,23 @@ depth settle, and `approvingRuns…` already waits on the receipt.
    samples were green on an idle machine). The probe reproduces the identical end state through the identical door, so
    I treat the orchestrator's xcresult as the red's record; if a doubt stands, the probe file's content is quoted in
    this record and rebuilds in one paste.
+
+**The stage legs (the resumed window, 05:05–06:25 MST; counts quoted from xcodebuild's summary line — the canonical
+convention; the xcresult's parameterized-case numbers are labeled where used):**
+- **FULL `VariorumTests` RE-RUN on the fixed tip `65594de55` (the merge ask's citable whole-target Mac run):**
+  **"Test run with 5804 tests in 1006 suites passed after 2574.458 seconds with 2 warnings and 14 known issues"** —
+  zero failures. (The first full run, pre-fix, was the same 5,804/1,006 with the one redoNeverAsks red — the REDO
+  REGRESSION RECORD carries its trace: TEST-ONLY, pre-existing, the P33 latch race, fixed at `65594de55` under the
+  VX-539/546 class.)
+- **The phone leg — FULL `VariorumMobileTests` on a fresh iPhone 17 Pro (iOS 26.2) simulator boot** (the build is the
+  run's own; the sim shut down after): **"Test run with 852 tests in 139 suites failed after 474.950 seconds with 6
+  issues (including 4 known issues)"** — the 2 real issues are ONE parameterized test, `MobileMarkdownCaretTests.
+  aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` (`desyncRecoveryCount == 0` missing for "hi" and
+  "hello there"; the third case passes), **DETERMINISTIC AND RED ON MAIN** (`81e175985`, same simulator, same minutes,
+  lone runs both trees: branch 4/1 failed 2 issues · main 4/1 failed 2 issues, byte-identical lines) — PRE-EXISTING,
+  not this branch's (its only mobile line is MobileProtectionScreen's count caption); **ticketed VM-38** (Bug ·
+  Medium). The leg's verdict for the gate: the phone target fails exactly as main fails and nowhere else.
+- **The dev-store v1_36 note (the coordinator's observation, for her bundle):** the closing window's test hosts (the
+  dev-store app, no XCTest gate at its entry) migrated the SHARED dev store to v1_36 (~04:32), so until this PR merges,
+  Debug builds without v1_36 — main's, the other efforts' — refuse the dev store; the merge unblocks them, and the
+  general parallel-branch hazard is the coordinator's handoff item.
