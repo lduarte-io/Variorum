@@ -528,6 +528,265 @@ struct TakesExpansionRemountTests {
     }
 }
 
+// MARK: - VX-756 — her shape: open takes, another block in Write, back to Takes
+
+/// One sample of the returning board's page, taken once per turn — the
+/// trajectory the pin judges (and prints as `VX756-TRACE`).
+private struct LandingSample {
+    let ms: Int
+    let offset: CGFloat
+    let content: CGFloat
+    /// Her block's top in the VIEWPORT's space (0 = the viewport's top edge),
+    /// nil while no pane of her block is drawn on the page.
+    let herTop: CGFloat?
+    let aims: Int
+    let hops: Int
+}
+
+/// **The motion a harness can observe, judged:** once her block has been drawn
+/// on the page AND held still for a quiet interval (the watch's own 0.25 s),
+/// any later move of it — or its leaving the page — is a SECOND landing: the
+/// hop her eye reads as "jumps around". Returns the later moves.
+private func movesAfterARest(_ samples: [LandingSample], quietMillis: Int = 250) -> [LandingSample] {
+    /// The first sample of the current still run (its top is the anchor every
+    /// later sample of the run is compared against, so a slow drift adds up).
+    var stillSince: LandingSample?
+    /// Her block has held still for a quiet interval: the next move is a
+    /// second landing. Before the first rest, motion is the landing's travel.
+    var rested = false
+    var later: [LandingSample] = []
+    for sample in samples {
+        if let since = stillSince, let anchor = since.herTop, let top = sample.herTop,
+           abs(top - anchor) <= (rested ? 2 : 1) {
+            if sample.ms - since.ms >= quietMillis { rested = true }
+            continue
+        }
+        // It moved, or left the page.
+        if rested { later.append(sample) }
+        rested = false
+        stillSince = sample.herTop == nil ? nil : sample
+    }
+    return later
+}
+
+/// **VX-756 (her report, verbatim):** *"i've noticed somewhat severe jumping
+/// around when takes are open and you switch into write, then navigate to a
+/// block with takes, then go back to takes."* R-770-1: the takes STAY open.
+///
+/// THE TRACED MECHANISM (the run record's BATCH 1 RECORD): her block changed
+/// while she was away, so R-Q20 settles the restore and the page starts at the
+/// mount's top; the ENTRY landing alone carries it to her block, on ONE aim
+/// issued at the column's first row report; the seeded open fans make the
+/// column's rows bimodal (closed vs open), so the lazy column's estimate under
+/// that aim swings and the row comes to rest off home; only the watch can
+/// correct it — from quiet, ≥ 0.25 s later — so the page HOPS. Measured on
+/// VX-428's own landing pin (stack / margin grid: one hop at ~0.55–0.6 s, the
+/// column's height 5190 → 2121 → 5190 inside the landing).
+@MainActor
+@Suite("VX-756 — open takes, another block in Write, back to Takes: one settled landing (mounted)", .serialized)
+struct TakesSeededEntryLandingTests {
+
+    private func pump(_ seconds: TimeInterval = 0.02) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    /// One turn of the app's loop. The `await`s matter: a run loop nested in a
+    /// main-actor test runs NO main-queue hop (TEXTKIT2 §3, the VX-246 harness
+    /// fact) — the watch's looks and the projection's `.task` need them.
+    private func turn(_ window: NSWindow, _ hosting: NSView) async {
+        hosting.layoutSubtreeIfNeeded()
+        window.layoutIfNeeded()
+        window.displayIfNeeded()
+        pump()
+        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(20))
+    }
+
+    private func wait(
+        _ window: NSWindow, _ hosting: NSView, seconds: TimeInterval, until predicate: () -> Bool
+    ) async {
+        let deadline = Date().addingTimeInterval(seconds)
+        repeat { await turn(window, hosting) } while !predicate() && Date() < deadline
+    }
+
+    /// The board the way `PostDetailView` mounts it: a BARE model, which
+    /// `TakesBoardView.init` makes THE takes board (the seed), and whose
+    /// projection arrives on the view's own `.task`, after the first layout —
+    /// the app's order (`TakesArticleScrollTests.aPageLeftAtRestComesBack…`'s
+    /// road), never the harness order that adopts before mounting.
+    private func mount(
+        _ model: TakesViewModel, _ world: ExpansionWorld
+    ) -> (NSWindow, NSHostingView<TakesBoardView>) {
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 1100, height: 700),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(
+            rootView: TakesBoardView(session: world.session, postID: world.postID, model: model))
+        hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 700)
+        window.contentView = hosting
+        window.makeKeyAndOrderFront(nil)
+        return (window, hosting)
+    }
+
+    private func leave(_ window: NSWindow, _ model: TakesViewModel) {
+        window.contentView = nil
+        model.teardown()
+        window.orderOut(nil)
+        window.close()
+    }
+
+    private func articleScrollView(in root: NSView) -> NSScrollView? {
+        guard let pane = TakesExpansionRemountTests.panes(in: root).first else { return nil }
+        var outermost: NSScrollView?
+        var current: NSView? = pane.superview
+        while let node = current, node != root {
+            if let scroll = node as? NSScrollView { outermost = scroll }
+            current = node.superview
+        }
+        return outermost
+    }
+
+    /// Her block's top on the page: its ARTICLE pane, or — where slot split's
+    /// bloom replaced the cell — the split card of the same take. Nil while
+    /// neither is drawn on the page.
+    private func herTop(_ chosen: String, _ hosting: NSView, _ article: NSScrollView) -> CGFloat? {
+        let all = TakesExpansionRemountTests.panes(in: hosting)
+        guard let pane = all.first(where: { $0.identifier?.rawValue == "pane:article|\(chosen)" })
+            ?? all.first(where: { $0.identifier?.rawValue == "pane:mini|\(chosen)" })
+        else { return nil }
+        let rect = pane.convert(pane.bounds, to: article.contentView)
+        let visible = article.contentView.bounds
+        guard rect.maxY > visible.minY, rect.minY < visible.maxY else { return nil }
+        return rect.minY - visible.minY
+    }
+
+    /// **RED ON THE PRE-FIX TREE (predicted for stack — the default — and
+    /// margin grid, the arms VX-428's own pin measured hopping; slot split and
+    /// carousel are the window's to say).** Her exact shape, both showings on
+    /// the app's road: in Takes on block X she opens the takes (expand all —
+    /// the opening of the note has none, the working stretch every other
+    /// block); she leaves on a row; in Write she moves to another block with
+    /// takes, Y; back to Takes. The contract (SurfaceContracts, The note —
+    /// Takes): the open fans are in place from the first geometry (R-601-2,
+    /// R-770-1 — they STAY), the entry landing OUTRANKS the remembered page
+    /// (her block changed), and the board lands ONCE: the watch never has to
+    /// correct it, her block never moves again after it has come to rest, and
+    /// it rests home.
+    @Test(arguments: [FanStyle.stack, .marginGrid, .slotSplit, .carousel])
+    func openTakesEnteredOnAnotherBlockLandOnceAndStay(style: FanStyle) async throws {
+        await HostLaunchSettle.wait()
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        try await withExpansionWorld(
+            blocks: 40, style: style, fanned: { $0 >= 12 && $0 % 2 == 0 }
+        ) { world in
+            let router = world.session.commandRouter
+            router.forgetCurrentBlock(for: world.postID)
+            let token = router.registerDetail(postID: world.postID, mode: .write) { _ in }
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: world.postID)
+            }
+            let x = world.blocks[34], y = world.blocks[24]
+            #expect(x.spare != nil && y.spare != nil, "non-vacuity: both blocks have takes")
+
+            // SHOWING 1 — into Takes from Write on block X; the takes opened.
+            router.noteFocusedBlock(x.block, variantID: x.chosen, postID: world.postID, utf16Offset: 0)
+            let first = TakesViewModel(
+                session: world.session, postID: world.postID, defaults: world.defaults)
+            let (windowA, hostingA) = mount(first, world)
+            await wait(windowA, hostingA, seconds: 5) { first.loaded }
+            await wait(windowA, hostingA, seconds: 6) { first.articleLanding == nil }
+            #expect(first.authority.livePane?.blockID == x.block,
+                    "non-vacuity: showing 1's entry ring is on block X")
+            first.expandAllFans()
+            await wait(windowA, hostingA, seconds: 1) { false }
+            #expect(world.remembered == world.fannedBlockIDs,
+                    "non-vacuity: the takes are open, remembered for the session")
+            #expect(world.session.editorRouter.takesArticleCurrentRows[world.postID] != nil,
+                    "non-vacuity: showing 1 recorded its current block")
+            #expect(world.session.editorRouter.takesArticlePlaces[world.postID]?.rowID != nil,
+                    "non-vacuity: she leaves the page on a ROW — there is a memory to outrank")
+            leave(windowA, first)
+            await wait(windowA, hostingA, seconds: 0.2) { false }
+
+            // WRITE — she moves to another block with takes.
+            router.noteFocusedBlock(y.block, variantID: y.chosen, postID: world.postID, utf16Offset: 0)
+
+            // SHOWING 2 — back to Takes, recorded from its first turn.
+            let second = TakesViewModel(
+                session: world.session, postID: world.postID, defaults: world.defaults)
+            let (windowB, hostingB) = mount(second, world)
+            defer { leave(windowB, second) }
+            #expect(second.expandedBlocks == world.fannedBlockIDs,
+                    "R-770-1: the board is born with her takes open (before its first geometry)")
+            var samples: [LandingSample] = []
+            let start = Date()
+            var sawLanding = false
+            var endedAt: Date?
+            while Date().timeIntervalSince(start) < 6 {
+                await turn(windowB, hostingB)
+                if second.articleLanding != nil { sawLanding = true }
+                if sawLanding, endedAt == nil, second.articleLanding == nil { endedAt = Date() }
+                if let article = articleScrollView(in: hostingB) {
+                    samples.append(LandingSample(
+                        ms: Int(Date().timeIntervalSince(start) * 1000),
+                        offset: article.contentView.bounds.minY,
+                        content: article.documentView?.frame.height ?? 0,
+                        herTop: herTop(y.chosen, hostingB, article),
+                        aims: second.articleLandingAims, hops: second.articleLandingCorrections))
+                }
+                if let endedAt, Date().timeIntervalSince(endedAt) > 0.6 { break }
+            }
+            var previous: LandingSample?
+            for sample in samples {
+                if let previous, previous.offset == sample.offset, previous.content == sample.content,
+                   previous.herTop == sample.herTop, previous.aims == sample.aims,
+                   previous.hops == sample.hops { continue }
+                print(String(
+                    format: "VX756-TRACE style=%@ t=%dms offset=%.1f content=%.1f her=%@ aims=%d hops=%d",
+                    "\(style)", sample.ms, sample.offset, sample.content,
+                    sample.herTop.map { String(format: "%.1f", $0) } ?? "-", sample.aims, sample.hops))
+                previous = sample
+            }
+            let later = movesAfterARest(samples)
+            print("VX756-SUMMARY style=\(style) aims=\(second.articleLandingAims) "
+                  + "hops=\(second.articleLandingCorrections) restoreAims=\(second.board.articleRestoreAims) "
+                  + "laterMoves=\(later.map { "\($0.ms)ms:\($0.herTop.map { String(format: "%.1f", $0) } ?? "off")" })")
+            #if DEBUG
+            print("VX756-STORY style=\(style) \(second.board.article.landingStory.lines.suffix(16))")
+            #endif
+
+            #expect(second.authority.livePane?.blockID == y.block,
+                    "non-vacuity: the entry ring is on the block she came from (Y)")
+            #expect(second.board.articleRestore == .settled,
+                    "R-Q20: her block changed, so the landing outranked the remembered page")
+            #expect(second.articleLandingAims > 0, "non-vacuity: the entry landing aimed the page")
+            #expect(endedAt != nil, "the landing ended inside the window")
+            #expect(second.articleLandingCorrections == 0,
+                    """
+                    \(style): ONE settled landing — the watch never had to correct it \
+                    (\(second.articleLandingCorrections) hops; red on the pre-fix tree: the row \
+                    rests off home and hops a quiet interval later)
+                    """)
+            #expect(later.isEmpty,
+                    """
+                    \(style): her block never moves again once it has come to rest — no \
+                    intermediate jumping (later moves at \(later.map { "\($0.ms) ms" }))
+                    """)
+            #expect(samples.last?.herTop.map { $0 >= -2 } == true,
+                    "\(style): her block ends ON the page, its top on screen")
+            #if DEBUG
+            #expect(second.board.article.landingStory.lines.last?.contains("DONE: settled at top=0.0") == true,
+                    "\(style): the landing settled HOME — inside the entry band (\(second.board.article.landingStory.lines.suffix(3)))")
+            #endif
+            #expect(second.expandedBlocks == world.fannedBlockIDs && world.remembered == world.fannedBlockIDs,
+                    "R-770-1: her takes STAYED open — the fix lands the page, never closes a fan")
+        }
+    }
+}
+
 // MARK: - VX-577 — expand all in slot split
 
 @MainActor

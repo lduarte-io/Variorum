@@ -308,7 +308,7 @@ stage); the use walk (her repro by hand, both voices); the cold ladder.
 |---|---|
 | Reading (this file whole; TEXTKIT2_NOTES in full; SurfaceContracts › The note; the vx-601 VX-428 section + batch B record; the SessionResiliencyProtocol) | DONE |
 | Trace (code read + the unified log's measured landing stories) | DONE — written below, before any code |
-| Red-on-old pin | NOT-STARTED |
+| Red-on-old pin (`TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay` ×4 styles, in `TakesExpansionMemoryTests.swift`) | DONE (this commit) — compiles on the pre-fix tree (`DerivedData/vx756-post` build-for-testing, log `App/Variorum/DerivedData/logs/vx756-pin-build.log`); red PENDING the window |
 | Fix | NOT-STARTED |
 | Build-for-testing (post tree + behavioural-revert tree) | NOT-STARTED |
 | Red/green runs, the P-8 numbers | PENDING (the orchestrator's window) |
