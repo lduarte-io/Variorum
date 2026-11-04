@@ -110,7 +110,8 @@ struct MCPWriteTools: Sendable {
         /// the source's wing (`MCPWriteTools+DuplicateNote`). VX-371 (VX-383
         /// U2): `with_tags` (default true) and the book road (`book_id`, with
         /// an optional `section_id`).
-        case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?)
+        /// VX-766 (the VX-771 run): `brief` — the answer's ids and counts only.
+        case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?, brief: Bool)
         /// VX-596: her star on the wire — a note or a book, starred or not
         /// (`MCPWriteTools+Star`).
         case setStarred(target: StarTarget, starred: Bool)
@@ -603,10 +604,10 @@ struct MCPWriteTools: Sendable {
         case .insertBlocks(let noteID, let place, let blocks):
             return try performInsertBlocks(
                 noteID: noteID, place: place, blocks: blocks, job: job, ops: ops, clientName: clientName)
-        case .duplicateNote(let noteID, let withTags, let bookID, let sectionID):
+        case .duplicateNote(let noteID, let withTags, let bookID, let sectionID, let brief):
             return try performDuplicateNote(
-                noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, job: job, ops: ops,
-                clientName: clientName)
+                noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, brief: brief, job: job,
+                ops: ops, clientName: clientName)
         case .setStarred(let target, let starred):
             return try performSetStarred(target, starred: starred, job: job, ops: ops, clientName: clientName)
         }

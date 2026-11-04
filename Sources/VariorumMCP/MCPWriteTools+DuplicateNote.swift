@@ -77,14 +77,24 @@ extension MCPWriteTools {
         let bookID = try optionalString(args, "book_id")
         let sectionID = try optionalString(args, "section_id")
         if sectionID != nil, bookID == nil { throw ArgumentFailure(message: Self.sectionWithoutBookWords) }
-        return .duplicateNote(noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID)
+        return .duplicateNote(
+            noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, brief: try parseBrief(args))
+    }
+
+    /// VX-766: `brief` (a boolean, default false — `with_tags`' sentence for
+    /// anything else). Shared with `copy_note_to_wing` (VX-765), whose answer
+    /// is always the brief shape and so takes no `brief`.
+    func parseBrief(_ args: [String: Value]) throws -> Bool {
+        guard let value = args["brief"], value != .null else { return false }
+        guard let bool = value.boolValue else { throw ArgumentFailure(message: "brief must be true or false.") }
+        return bool
     }
 
     // MARK: - The serial body
 
     func performDuplicateNote(
-        noteID: String, withTags: Bool, bookID: String?, sectionID: String?, job: Job, ops: Operations,
-        clientName: String
+        noteID: String, withTags: Bool, bookID: String?, sectionID: String?, brief: Bool, job: Job,
+        ops: Operations, clientName: String
     ) throws -> Result<Landed, Refused> {
         let (standing, facts, title, wingName) = try database.read { db in
             let facts = try Queries.mcpNoteFacts(db, noteID: noteID)
@@ -134,7 +144,7 @@ extension MCPWriteTools {
                     guardedBy: guardDuplicate(clientName, noteID: noteID, bookID: bookID))
                 return try duplicateAnswer(
                     made, sourceID: noteID, filing: filing, bookName: bookName, poolWords: "",
-                    standing: standing, clientName: clientName)
+                    standing: standing, clientName: clientName, brief: brief)
             }
         }
 
@@ -155,7 +165,7 @@ extension MCPWriteTools {
             return try duplicateAnswer(
                 made, sourceID: noteID, filing: nil, bookName: nil,
                 poolWords: Self.landedWords(wingTitle: wingName ?? Queries.mcpHomeWingName, isHome: wingID.isEmpty),
-                standing: standing, clientName: clientName)
+                standing: standing, clientName: clientName, brief: brief)
         }
     }
 
@@ -165,9 +175,15 @@ extension MCPWriteTools {
     /// read inside the act), the `book_id`/`section_id` given, and `landed`.
     /// The receipt targets the COPY (Open › opens it — P-VX311-3) and names the
     /// book it was filed into. P1: ∝ the copy and its books.
+    ///
+    /// **VX-766 — `brief`:** the same act and receipt; the answer keeps the
+    /// copy's ids and counts (`briefCopyAnswer`) and drops `block_ids` and the
+    /// per-block records. Without it the answer is byte-unchanged (pinned
+    /// against the pre-VX-766 bytes, `MCPDuplicateBriefServerTests`).
     private func duplicateAnswer(
         _ made: Operations.MCPDuplicate, sourceID: String, filing: Operations.DuplicateFiling?,
-        bookName: String?, poolWords: String, standing: MCPGrantAuthority.Standing, clientName: String
+        bookName: String?, poolWords: String, standing: MCPGrantAuthority.Standing, clientName: String,
+        brief: Bool
     ) throws -> Act {
         let copy = made.copy
         let others = made.memberBookIDs.filter { $0 != filing?.bookID }
@@ -186,14 +202,22 @@ extension MCPWriteTools {
             }
             return (try Queries.mcpScopeTitle(db, kind: .note, id: copy.post.id, calendar: calendar), chapter, named)
         }
-        var answer: [String: Any] = [
-            "note_id": copy.post.id, "source_note_id": sourceID,
-            "block_ids": copy.blocks.map(\.blockID), "blocks": MCPMintedBlocks.records(copy.blocks),
-            "tag_ids": made.tagIDs, "tags": made.tagPaths,
-            "landed": Self.duplicateLandedWords(
-                filedIn: filing.map { _ in bookName ?? "the book" }, chapter: chapterName, poolWords: poolWords,
-                alsoIn: named.compactMap { $0 }, unnamed: named.filter { $0 == nil }.count),
-        ]
+        let landed = Self.duplicateLandedWords(
+            filedIn: filing.map { _ in bookName ?? "the book" }, chapter: chapterName, poolWords: poolWords,
+            alsoIn: named.compactMap { $0 }, unnamed: named.filter { $0 == nil }.count)
+        var answer: [String: Any]
+        if brief {
+            answer = Self.briefCopyAnswer(
+                noteID: copy.post.id, sourceID: sourceID, blocks: copy.blocks, tagIDs: made.tagIDs,
+                tagPaths: made.tagPaths, landed: landed)
+        } else {
+            answer = [
+                "note_id": copy.post.id, "source_note_id": sourceID,
+                "block_ids": copy.blocks.map(\.blockID), "blocks": MCPMintedBlocks.records(copy.blocks),
+                "tag_ids": made.tagIDs, "tags": made.tagPaths,
+                "landed": landed,
+            ]
+        }
         if let filing {
             answer["book_id"] = filing.bookID
             if let sectionID = filing.sectionID { answer["section_id"] = sectionID }
@@ -202,6 +226,24 @@ extension MCPWriteTools {
             clientName: clientName, act: .duplicate, targetID: copy.post.id, targetTitle: copyTitle,
             detail: filing == nil ? nil : bookName,
             show: .note(noteID: copy.post.id, blockID: nil, select: nil)))
+    }
+
+    /// **THE BRIEF COPY ANSWER** (VX-766 — the VX-771 run, batch 1): what a
+    /// copy is, in ids and counts, with no per-block records — `duplicate_note`
+    /// with `brief: true`, and (VX-765) `copy_note_to_wing` always. `block_count`
+    /// counts the copied blocks and `take_count` every take in their fans —
+    /// exactly the takes the full form's records list (the copy's ACTIVE takes;
+    /// archived ones ride the note outside the fan, as `read_note` has them).
+    /// Built from the act's own record of what it minted, never a second read.
+    static func briefCopyAnswer(
+        noteID: String, sourceID: String, blocks: [Operations.MintedBlockTakes], tagIDs: [String],
+        tagPaths: [String], landed: String
+    ) -> [String: Any] {
+        [
+            "note_id": noteID, "source_note_id": sourceID,
+            "tag_ids": tagIDs, "tags": tagPaths, "landed": landed,
+            "block_count": blocks.count, "take_count": blocks.reduce(0) { $0 + $1.takes.count },
+        ]
     }
 
     /// **Where the copy is, in words** (VX-371 — PROVISIONAL P-U2-1, VX-234's

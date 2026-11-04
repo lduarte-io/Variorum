@@ -1116,7 +1116,11 @@ enum MCPToolCatalog {
             fan order (take_id, label where it has one, and sha256 — equal to its source take's), \
             as create_note answers them — its tag_ids and tags (their paths: every tag the copy \
             wears once it lands, a book's outflow included), the book_id and section_id you gave, \
-            and landed: where the copy is. \(digestSentence)
+            and landed: where the copy is. \(digestSentence) For a long note pass brief: true — the \
+            answer is then only the copy's note_id, the source_note_id, its tag_ids and tags, the \
+            book_id and section_id you gave, landed, block_count and take_count (every take in its \
+            blocks' fans), with no per-block records; read_note with ids_only gives those when you \
+            need them.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1125,6 +1129,10 @@ enum MCPToolCatalog {
                 "with_tags": .object([
                     "type": "boolean",
                     "description": "Apply the note's tags to the copy (default true); false copies none.",
+                ]),
+                "brief": .object([
+                    "type": "boolean",
+                    "description": "Answer only the copy's ids and counts, no per-block records (default false).",
                 ]),
                 "book_id": .object([
                     "type": "string",
