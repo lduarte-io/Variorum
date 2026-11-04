@@ -2213,7 +2213,7 @@ boundary is v1_36**: an export from this build refuses on every build before thi
 |---|---|---|
 | 1 | The migration, its own commit FIRST: `v1_36_fk_child_indexes` (the two plain FK child indexes), registered after v1_35; the DDL doc names the mechanism (sqlite.org/foreignkeys.html §4, the feed's registry order), the measured gain (330,231 → 85,315 ms, 3.9×), why NOT a §12 lockstep event (SyncSpec §2 — mirrors carry no indexes; the completeness walk classifies COLUMNS, an index adds none; marker stays 14), and the VX-502 export line; the index-enumerating schema pins updated (`MigrationTests.expectedIndexes`, the `theDaySearchIndexArrivesForAnOlderStore` subtracting set, the new arrival test `theDeferredFKChildIndexesArriveForAnOlderStore` on the v1_34 precedent's shape) | DONE (this commit) — `swift build` green; `swift test --filter MigrationTests` → "Test run with 29 tests in 3 suites passed" (ONE consequential pin edit, annotated in place per the ritual: `theDeadPlacementByBlockIndexArrivesForAnOlderStore` migrates v1_33 → head, so its subtraction now carries v1_36's two beside v1_34's one — v1_34's own claim unchanged) |
 | 2 | The pin (red-on-old, the bisection's arm E/F shape): UNGATED, fast, in-memory — `DeferredFKChildScanPinTests`, a RATIO bound (the pending-violations arm vs the no-pending control) | DONE (this commit) — green on the migrated tree: "[vx720-pin] 8000 takes: pending 0.180538782 seconds · control 0.17602559 seconds · ratio 1.03× (bound 4)", "Test run with 1 test in 1 suite passed after 0.537 seconds". The red-on-old run is next (the named revert below); its lines land in the following commit |
-| 3 | The bench re-run, the evidence: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3` on the migrated store; the INDEX_FIX knob RETIRED (the migration is the fix); the table's new column vs U1b's 330,231 ms; the VX-672 one-paragraph reasoning | IN-PROGRESS (this commit) — THE RED-ON-OLD RUN and the knob retirement landed (below); the long bench run is next, its table PENDING |
+| 3 | The bench re-run, the evidence: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3` on the migrated store; the INDEX_FIX knob RETIRED (the migration is the fix); the table's new column vs U1b's 330,231 ms; the VX-672 one-paragraph reasoning | DONE (this commit) — the red-on-old + knob retirement in the previous commit (`b757a43f1`); THE BENCH RE-RUN below: **the migrated store's apply 89,187 ms median · 1,224 rows/s (U1b baseline 330,231 ms · 331 rows/s — 3.7×)**, "Test run with 5 tests in 4 suites passed after 410.388 seconds"; the VX-672 paragraph below |
 | 4 | Close: `swift build`; the sync suites filter; the broad core `swift test` foreground (the traps' flake + VX-722/VX-723 named if seen); self-assessment; the orchestrator's LIVE STATUS row 5b flipped | NOT-STARTED |
 
 #### The pieces (filled per commit)
@@ -2271,6 +2271,40 @@ boundary is v1_36**: an export from this build refuses on every build before thi
   duplicate index — the probes print, assert nothing, and keep their historical doc. Ungated file run after the
   retirement: "Test run with 5 tests in 4 suites passed after 0.120 seconds" (3 gated skipped-but-counted, the two
   seam pins green).
+- **Piece 3, THE BENCH RE-RUN (this commit) — the evidence, the U1b table's new column.** `VARIORUM_APPLY_PROFILE=1
+  VARIORUM_APPLY_PROFILE_RUNS=3 swift test --skip-build --filter ApplyProfileMeasurementTests` on the MIGRATED store
+  (no knob — v1_36 is the store's own shape now) → "Test run with 5 tests in 4 suites passed after 410.388 seconds"
+  (log `u4-bench-migrated.log`, session scratchpad). Same corpus (1,200 × 30 = 109,203 rows), same window (2,000),
+  same Mac, Debug, keyed on-disk:
+
+  | | U1b baseline (median of 3) | U1b's bench-side knob (median of 2) | **v1_36 MIGRATED (median of 3, this run)** |
+  |---|---|---|---|
+  | **apply (`applyTransaction`)** | **330,231 ms · 331 rows/s** | 85,315 ms · 1,280 rows/s | **89,187 ms · 1,224 rows/s — 3.7×** |
+  | rowLoop | 324,374 ms (98.2%) | 79,266 ms (92.9%) | 83,037 ms (93.1%) |
+  | fixpoint | 1,995 ms (0.6%) | 2,128 ms (2.5%) | 2,144 ms (2.4%) |
+  | repairs | 3,432 ms (1.0%) | 3,498 ms (4.1%) | 3,593 ms (4.0%) |
+  | commitPrep · txn overhead | 224 · 205 ms | 248 · 174 ms | 269 · 144 ms |
+  | download · stageDecode (outside) | 7,350 · 3,041 ms | 7,878 · 3,303 ms | 8,068 · 3,302 ms |
+  | PRAGMA foreign_key_list | 1,784 ms (0.5%) | 1,914 ms (2.2%) | 1,930 ms (2.2%) — the FK memo stays NOT NAMED (under the 5% bar) |
+  | pull wall | 340,716 ms | 96,454 ms | 103,734 ms (3.3×) |
+
+  The migration reproduces the knob's column within ~5% (89.2 vs 85.3 s — the three runs spread 84,849 / 92,328 /
+  89,187 ms, ±4% where U1b's baseline sat ±0.8%; tonight's Mac carries the session's own polls and builds, and the
+  scan it removed is two orders above the spread either way). Reading for her: the O(N²) deferred-FK child scan is
+  gone from the shipped store's own shape — what remains of the row loop is per-row Swift work a Release build
+  compiles down (her Pro's real Release catch-up ran ~420 rows/s pre-fix; the Debug bench now reads 1,224).
+- **Piece 3, the VX-672 note (ONE paragraph, reasoned from sqlite.org/foreignkeys.html, not measured — a Linear
+  comment is the orchestrator's):** the purge/delete side SHARES the mechanism's shape, by a different trigger
+  condition. A `DELETE FROM variant` is a PARENT-row delete for both FKs these indexes serve —
+  `block.default_variant_id → variant(id)` (ON DELETE SET NULL) and `container_block.chosen_variant_id → variant(id)`
+  (ON DELETE RESTRICT) — and SQLite answers EVERY parent delete with a child-key search: SET NULL must find the child
+  rows to rewrite, and RESTRICT is checked immediately even when the constraint is deferred (the page's own special
+  case), so the search runs whether violations are pending or not — unlike the insert-side scan, which runs only
+  while a deferred violation is pending. Without the indexes each search is a full scan of `block` and
+  `container_block`, so the purge janitor's batch of M physical variant deletes on an N-row library paid the same
+  O(M·N) class the apply did. v1_36's two indexes turn both searches into probes, so if VX-672's slow post-purge
+  round was this mechanism, it is served by this migration — unverified (the ticket also notes it may have dissolved
+  with VX-669); the profile on her phone after VM-32 remains the test.
 
 ### THE CLOSING WINDOW AS CONDITIONED BY TONIGHT'S COORDINATOR (nov3coordinator, 2026-11-04 — supersedes the closing-runs bullet's narrower Mac-suites line; accepted after the orchestrator verified the diff)
 
