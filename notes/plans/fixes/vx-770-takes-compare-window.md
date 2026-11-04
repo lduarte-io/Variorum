@@ -3169,3 +3169,26 @@ read the `skipped:` lines; keep every `W2-TRACE` / `W2-SUMMARY` / `W2-STORY` lin
   on the landing) could now spend the pocket where it used to hop once; the green delta's landing family
   and W2/W1's re-walk are where that would show. (c) Terminal-only staging: Study's taller lines change
   which rows fit the band; the walk hopped in both voices, the pin stages one.
+
+## THE W2 CYCLE — THE WINDOW'S VERDICTS + ROUND 3 CLOSE (the orchestrator)
+
+**The mounted runs (logs `vx770-w2-red.log` / `vx770-w2-green.log`): the fix is red-on-old and
+green-on-new, BOTH SIDES EXECUTED.** The prediction table's actual mix (R3-O2's fill): the PURE
+mechanism pin red ×2 on rev (0.018 s — the timing-free red burden); `theWalksNote` P23→P33 RED
+on rev (hops=1, the live story); P25→P35 and P35→P23 GREEN on rev with honest traces (the card
+growth landed IN-STORM — 110→330 between aims 6 and 7 — where batch 1's road already answers;
+kept as guards); the stack control GREEN; **batch 1's own marginGrid arm RED on rev (hops=1)**
+— the anomaly vs b5gate's green resolved by round 3 as CORROBORATION: that green was
+timing-lucky (report coalescing reached the blind spot even in the short-take world) and the
+fix cures the flakiness at the root. On the FIX tree: 9/9 GREEN, zero hops every style, batch
+1's family green beside the new pins. **Pins NOTE (R3-O1's owed doc line, recorded here where
+a later reader reads):** in the W2 summaries the `hops=` counter is the load-bearing finding
+line; `laterMoves`/`movesAfterARest` samples at its own 250-ms boundary and can half-miss a
+hop that comes ~250–330 ms after rest — read `hops=`, never the pair as contradicting.
+**ROUND 3 (fable, `notes/plans/fixes/vx-770-ladder-round3.md`, 680c71e83): NO new BLOCKER or
+MAJOR — the fix SHIPS; the ladder is CLOSED FINALLY** (three NITs: R3-O1 above, R3-O2 this
+fill, R3-O3 speculative-recorded). Pins discipline note for the evidence: the w2/w2-rev PAIR
+resolved the SAME (upgraded) package set — internally consistent, so the behavioral red/green
+stands; the merge gate's whole-target runs on a committed-pins tree (`vx770-gatef`, mg's
+clean-input recipe; the full pin saga is R-770-T1's ticket data, incl. gate/gate2's flag
+attempts and the lockfile rewrite-on-build pattern).
