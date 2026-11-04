@@ -458,10 +458,28 @@ CONFIRMED, not hollow; rows 1–4 red on rev.**
 
 | # | Test | `vx756-rev` (fix reverted) | `vx756-post` |
 |---|---|---|---|
-| 1 | `TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay(style: .stack)` | **RED (ran 02:37)** | G predicted — tier 1 pending |
-| 2 | `…(style: .marginGrid)` | **RED (ran 02:37)** | G predicted — tier 1 pending |
-| 3 | `…(style: .slotSplit)` | **RED (ran 02:37)** — the uncertainty resolved red | G predicted — tier 1 pending |
-| 4 | `…(style: .carousel)` | **RED (ran 02:37)** — as #3 | G predicted — tier 1 pending |
+| 1 | `TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay(style: .stack)` | **RED (ran 02:37)** | **GREEN (tier 1, 02:43)** |
+| 2 | `…(style: .marginGrid)` | **RED (ran 02:37)** | **GREEN** |
+| 3 | `…(style: .slotSplit)` | **RED (ran 02:37)** — the uncertainty resolved red | **GREEN** |
+| 4 | `…(style: .carousel)` | **RED (ran 02:37)** — as #3 | **GREEN** |
+
+**THE WINDOW'S VERDICT (the orchestrator, claim `vx-770-tests-b1`, 02:36–02:45): VX-756 is FIXED
+by the red/green standard** — red on all four styles on the revert, green on all four on HEAD,
+"Test run with 382 tests in 51 suites passed after 372.819 seconds with 2 warnings and 1 known
+issue" (51 of 51 requested suite types executed; log `App/Variorum/DerivedData/logs/vx756-tier1.log`).
+Rows 5–7: GREEN (the VX-428 family, the landing/restore family, the board family, the tutorial
+spine all passed). The skips: one deliberate capture-harness suite ("Margin grid captures
+(VX-136)", trait-gated — the known shape). The 1 known issue: `TakesFindBoardTests.
+escWithNoBuiltPaneForTheRingIsANamedBoundary` — the PRE-EXISTING R1-M1 (b) honest boundary
+(QUESTIONS #157 (7)), fired as designed; not this diff's. Observations for the record: (a) the
+log's find-board landing story shows `hops=1` on a FIND-road landing on post — that is residue
+R-756-2's class, deliberately outside this fix's scope (the find step is excluded by design),
+observed live; (b) one "[SwiftUI] Modifying state during view update" warning during
+`TakesFindBoardTests` ⌘G — provenance unknown (these suites were green at VX-736's gates too),
+recorded not chased; the ladder's reviewer can weigh it. P-8: `VX428-MEASURE` seed 1.6–3.4 µs
+across the shapes — inside batch B's measured 1.2–4.0 µs bar; open-below-fold realizes what
+closed does (article=19 cards=0). Remaining for VX-756: the use walk (W1–W4) and the ladder.
+Trees `vx756-rev`/`vx756-post` deleted after this flip (logs kept).
 | 5 | the VX-428 family (`TakesExpansionMemoryTests`, `TakesExpansionRemountTests`, `TakesSlotSplitExpandAllTests`) | G | G — the stay-open memory is untouched |
 | 6 | `TakesExpansionCostTests` | — | G, with its `VX428-MEASURE` lines (the seed's numbers must match batch B's: seed 1.2–4.0 µs; 25 fans below the fold realize what 0 do) |
 | 7 | the landing/restore family (`TakesArticleScrollTests`, `TakesArticleWatchTests`, `TakesEntryBandTests`, …) | G | G — predicted; the risk is named in the self-assessment |
