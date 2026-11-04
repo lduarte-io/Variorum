@@ -176,6 +176,21 @@ enum MCPToolCatalog {
         landed byte for byte.
         """
 
+    /// A-771-2 (the VX-771 run, batch 1 — PROVISIONAL P-771-8): THE FAN DIGEST
+    /// SENTENCE, said once by every tool whose BRIEF answer carries it
+    /// (`duplicate_note` with `brief: true`, `copy_note_to_wing`) — it SPELLS the
+    /// exact text form, since the description is the contract a client checks
+    /// against (`MCPTextDigest.fanText`, whose key it reads, never retypes).
+    static let fanDigestSentence = """
+        \(MCPTextDigest.fanKey) proves the copy whole: the SHA-256 (lowercase hex, of the UTF-8 \
+        bytes) of a text with one line per block in note order, each line that block's take \
+        sha256s in fan order separated by single spaces, the shown take's prefixed with *, the \
+        lines joined by \\n with no trailing newline (no blocks: the empty text). Spell the same \
+        text from read_note with ids_only: true on the source (each take's sha256 in order, \
+        chosen marking the shown one; a paged read's blocks in page order) — equal digests mean \
+        the copy is the note.
+        """
+
     /// VX-357 (VX-348 U1 — her ruling 2026-10-15: strip it, and on this door
     /// always say it): THE NULL SENTENCE, said once and shared by every tool
     /// that answers the sha256 of text the client SENT (`add_take`,
@@ -1122,8 +1137,8 @@ enum MCPToolCatalog {
             and landed: where the copy is. \(digestSentence) For a long note pass brief: true — the \
             answer is then only the copy's note_id, the source_note_id, its tag_ids and tags, the \
             book_id and section_id you gave, landed, block_count and take_count (every take in its \
-            blocks' fans), with no per-block records; read_note with ids_only gives those when you \
-            need them.
+            blocks' fans) and \(MCPTextDigest.fanKey), with no per-block records; read_note with \
+            ids_only gives those when you need them. \(fanDigestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -1171,9 +1186,9 @@ enum MCPToolCatalog {
             new on the wing it goes to; to copy a note within its own wing use duplicate_note. A note \
             shared with you only per ask can't be copied. One undo for the author removes the copy. \
             Returns JSON: the copy's note_id, the source_note_id, the wing_id, its tag_ids and tags \
-            (their paths in that wing), landed: where the copy is, and block_count and take_count \
-            (every take in its blocks' fans) — no per-block records; read_note with ids_only gives \
-            those.
+            (their paths in that wing), landed: where the copy is, block_count and take_count (every \
+            take in its blocks' fans) and \(MCPTextDigest.fanKey) — no per-block records; read_note \
+            with ids_only gives those. \(fanDigestSentence)
             """,
         inputSchema: .object([
             "type": "object",

@@ -235,6 +235,9 @@ extension MCPWriteTools {
     /// exactly the takes the full form's records list (the copy's ACTIVE takes;
     /// archived ones ride the note outside the fan, as `read_note` has them).
     /// Built from the act's own record of what it minted, never a second read.
+    /// A-771-2 (P-771-8): it ALWAYS carries `fan_sha256` (`MCPTextDigest.fanSHA256`)
+    /// — the archive proof the dropped records held — so no brief answer comes
+    /// without it.
     static func briefCopyAnswer(
         noteID: String, sourceID: String, blocks: [Operations.MintedBlockTakes], tagIDs: [String],
         tagPaths: [String], landed: String
@@ -243,6 +246,7 @@ extension MCPWriteTools {
             "note_id": noteID, "source_note_id": sourceID,
             "tag_ids": tagIDs, "tags": tagPaths, "landed": landed,
             "block_count": blocks.count, "take_count": blocks.reduce(0) { $0 + $1.takes.count },
+            MCPTextDigest.fanKey: MCPTextDigest.fanSHA256(blocks),
         ]
     }
 

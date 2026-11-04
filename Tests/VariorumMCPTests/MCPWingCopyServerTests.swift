@@ -107,7 +107,8 @@ struct MCPWingCopyServerTests {
             #expect(copied.isError != true, "\(text(copied))")
             let answer = try json(copied)
             #expect(Set(answer.keys) == ["note_id", "source_note_id", "wing_id", "tag_ids", "tags", "landed",
-                                         "block_count", "take_count"], "the brief record — no per-block dump")
+                                         "block_count", "take_count", "fan_sha256"],
+                    "the brief record (A-771-2: its fan digest always present) — no per-block dump")
             let copyID = try #require(answer["note_id"] as? String)
             #expect(copyID != source.id && answer["source_note_id"] as? String == source.id)
             #expect(answer["wing_id"] as? String == research.id)
@@ -183,6 +184,9 @@ struct MCPWingCopyServerTests {
             let answer = try json(copied)
             #expect(answer["landed"] as? String == "the Pool of Home")
             #expect(answer["block_count"] as? Int == 0 && answer["take_count"] as? Int == 0)
+            #expect(answer["fan_sha256"] as? String
+                    == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                    "no blocks: the SHA-256 of the empty text")
             let copyID = try #require(answer["note_id"] as? String)
             #expect(try await h.database.read { db in
                 try String.fetchOne(db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [copyID])

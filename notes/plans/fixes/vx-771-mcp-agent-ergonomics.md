@@ -106,7 +106,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | # | Member | Batch | Status |
 |---|---|---|---|
 | 1 | VX-759 duplicate dating (flagship) | 1 | FIXED — 3f2f650d4 (P-771-1); A-771-1 extends it to her Copy to Wing (the commit "Part of VX-759 (A-771-1): …") |
-| 2 | VX-766 duplicate brief form | 1 | PARTIAL — brief form 2fe408519; the digest half awaits fork F-2 |
+| 2 | VX-766 duplicate brief form | 1 | FIXED — brief form 2fe408519 + the fan digest (A-771-2, P-771-8; the commit "Part of VX-766 (A-771-2): …") |
 | 3 | VX-765 copy_note_to_wing | 1 | BUILT — 43806305a; A-771-1: the copy keeps an undated, untitled source's day (app words PENDING the Mac window) |
 | 4 | VX-760 mismatch honesty | 2 | NOT-STARTED |
 | 5 | VX-761 replace form | 2 | NOT-STARTED |
@@ -146,7 +146,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | Member | Status |
 |---|---|
 | VX-759 duplicate dating (P-771-1) | DONE (3f2f650d4); A-771-1's extension to `copyNoteToWing` DONE (the commit "Part of VX-759 (A-771-1): …") |
-| VX-766 duplicate brief form | IN-PROGRESS — the brief form DONE (2fe408519); the digest half RULED (A-771-2, P-771-8) — building next |
+| VX-766 duplicate brief form | DONE — the brief form (2fe408519) + `fan_sha256` (A-771-2, the commit "Part of VX-766 (A-771-2): …") |
 | VX-765 copy_note_to_wing | DONE (43806305a); red on old by behavioural revert DONE (restored, green) |
 | End-of-batch suites | DONE — see "End-of-batch suites" below (core 3,590 / 478 green; MCP 484 / 88 with ONE pre-existing whole-module timing flake, green alone) |
 
@@ -190,6 +190,13 @@ No revert is in flight.
 - **Docs:** the tool's description teaches it (when to use it vs `duplicate_note`, the reach, the fence, the answer). `MCPSession.instructions` UNTOUCHED (MCPSpec records it at 3,061 of its 3,100 cap — no sentence fits with room to spare; the brief's preference). The field guide's MCP chapter (lesson 3's write-new card, seeded by `TutorialSeeder`) is UNTOUCHED — the card is not exhaustive (it names neither `save_version` nor `import_document`), so it is an open item for the closeout, not a gap pin.
 - **Pins** — `Tests/VariorumMCPTests/MCPWingCopyServerTests.swift` (10): `theCopyLandsBooklessInTheOtherWingsPoolAndAnswersBrief` (the brief key set; the copy in the wing, bookless; tags adopted — the destination's same-path id — and minted, all the destination's; a living book there collecting the adopted tag neither seats nor bells it; same words; counts = `read_note ids_only`; the source's wing/book untouched; one client-named entry; the receipt; ⌥⌘Z / ⇧⌥⌘Z) · `aCopyIntoHomeAndAnEmptyNotesBareCopy` · `theNotesOwnWingRefusesInWordsAndAsksNothing` (once grant unspent) · `anUnreachableSourceAnswersTheOneNotSharedShapeAndMintsNothing` (missing, tombstoned, a version, scraps, an unshared wing's note, an unreached Private note — byte-identical) · `aDestinationWithoutWingWriteNewHearsTheWingsRefusalAndAsksForTheWing` (read on the wing + write new on a book there → rungTooLow + the wing's ask; an unshared wing and a missing id byte-identical) · `aFencedSourceUnderAPerAskGrantRefusesInOneSentenceAndMintsNothing` · `onceGrantsOnBothSidesSpendAsOneAndARefusedActSpendsNothing` · `anUndeclaredArgumentRefusesBeforeAnyDecision` (VX-606 at the call door: `brief` refused, both once grants unspent, nothing logged/asked/minted) · `aCallMissingANoteOrAWingIsRefusedAtTheParse` · `itIsListedOnlyWhereItCanLand`. Justified edit: `MCPServerTests`' exact write-new set gains the tool.
 - **Red on old — behavioural revert** (record-first: the revert was named in commit 43806305a's record, the pre-revert state committed): the tool's one line in `MCPToolCatalog.writeNew` removed → all 10 tests red, 17 issues ("Unknown tool: copy_note_to_wing." at every call); restored by `git checkout --`, 10/10 green.
+
+#### A-771-2 — `fan_sha256` on the brief form (fork F-2, PROVISIONAL P-771-8)
+
+- **Built exactly as proposed and ruled:** `MCPTextDigest.fanSHA256` / `fanText` (`Sources/VariorumMCP/MCPTextDigest.swift`, the wire's one digest home) — the SHA-256 (lowercase hex, UTF-8) of one line per block in note order, each line that block's take sha256s in fan order separated by single spaces, the shown take's prefixed `*`, lines joined by `\n`, no trailing newline (no blocks: the empty text, `e3b0c442…b855`). `briefCopyAnswer` ALWAYS sets it, so `duplicate_note` with `brief: true` and every `copy_note_to_wing` answer carry it; the full form is untouched. Built from the minted records (∝ the copy's takes, no second read).
+- **The description spells it:** `MCPToolCatalog.fanDigestSentence`, said once and read by both tools' descriptions (the key read from `MCPTextDigest.fanKey`, never retyped).
+- **Pins** — `MCPDuplicateBriefServerTests`: `theFanDigestIsTheSHA256OfTheSpelledText` (the text built from LITERAL take digests, its SHA-256 by CryptoKit in the test — never the server's code; the client's road from `read_note ids_only` on the SOURCE spells the same text; her ✓ on another take changes the digest — the `*` is load-bearing) · `theDescriptionsSpellTheFanText` · the key sets of `briefAnswersTheCopysIdsAndCountsOnly`, `briefOnTheBookRoadEchoesTheBookAndItsChapter`, `aLongNotesBriefAnswerStaysSmall` (a 64-hex digest present; still < 400 characters) and `MCPWingCopyServerTests`' two landing pins (the bare copy's digest = the empty text's) gain `fan_sha256` — a brief answer without it fails. `withoutBriefTheFullAnswerIsByteUnchanged` (both cases) stays green.
+- **Red on old** (the pins run on the tree before the digest was written): 6 tests / 7 issues, each a missing `fan_sha256`; the client-road spelling check and the byte-unchanged golden green on both sides (the guards). After: 18 / 2 green.
 
 #### A-771-1 — P-771-1 extended to her Copy to Wing (fork F-1, option (b))
 

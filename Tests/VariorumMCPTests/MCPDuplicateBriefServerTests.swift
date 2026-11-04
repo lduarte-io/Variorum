@@ -1,3 +1,4 @@
+import CryptoKit
 import Dependencies
 import Foundation
 import GRDB
@@ -89,9 +90,11 @@ struct MCPDuplicateBriefServerTests {
                 name: "duplicate_note", arguments: ["note_id": .string(sourceID), "brief": .bool(true)])
             #expect(duplicated.isError != true, "\(text(duplicated))")
             let answer = try json(duplicated)
+            // A-771-2 (P-771-8): the brief form ALWAYS carries fan_sha256 — never a brief answer without it.
             #expect(Set(answer.keys)
-                    == ["note_id", "source_note_id", "tag_ids", "tags", "landed", "block_count", "take_count"],
-                    "ids and counts — no block_ids, no per-block records")
+                    == ["note_id", "source_note_id", "tag_ids", "tags", "landed", "block_count", "take_count",
+                        "fan_sha256"],
+                    "ids, counts and the fan digest — no block_ids, no per-block records")
             let copyID = try #require(answer["note_id"] as? String)
             #expect(copyID != sourceID && answer["source_note_id"] as? String == sourceID)
             #expect(answer["landed"] as? String == "the Pool of Home")
@@ -135,7 +138,7 @@ struct MCPDuplicateBriefServerTests {
             #expect(duplicated.isError != true, "\(text(duplicated))")
             let answer = try json(duplicated)
             #expect(Set(answer.keys) == ["note_id", "source_note_id", "tag_ids", "tags", "landed", "block_count",
-                                         "take_count", "book_id", "section_id"])
+                                         "take_count", "fan_sha256", "book_id", "section_id"])
             #expect(answer["book_id"] as? String == book.id && answer["section_id"] as? String == chapter.id)
             #expect(answer["landed"] as? String == "the end of \u{201C}drafts\u{201D}, in its chapter \u{201C}part one\u{201D}")
             #expect(answer["block_count"] as? Int == 3 && answer["take_count"] as? Int == 4)
@@ -164,7 +167,77 @@ struct MCPDuplicateBriefServerTests {
             #expect(full.count > 20 * text(brief).count, "the full form carries every block's record")
             let counts = try json(brief)
             #expect(counts["block_count"] as? Int == 120 && counts["take_count"] as? Int == 120)
+            #expect((counts["fan_sha256"] as? String)?.count == 64, "the digest rides the long note's brief answer too")
             await h.hangUp(connection)
+        }
+    }
+
+    /// **A-771-2 (fork F-2 — PROVISIONAL P-771-8): `fan_sha256`, computed BY HAND.** The text
+    /// the description spells — one line per block in note order, each line that block's take
+    /// sha256s in fan order separated by single spaces, the SHOWN take's prefixed `*`, lines
+    /// joined by `\n`, no trailing newline — and its SHA-256, lowercase hex of the UTF-8 bytes,
+    /// computed here with CryptoKit from LITERAL take digests (never the server's code). The
+    /// client's road gives the same text from `read_note ids_only` on the SOURCE, and the `*`
+    /// marker is load-bearing: choosing another take changes the digest.
+    /// **RED ON OLD:** the brief answer carried no `fan_sha256`.
+    @Test func theFanDigestIsTheSHA256OfTheSpelledText() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let sourceID = try seed(h)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .wing, ""))
+            func sha256(_ text: String) -> String {
+                SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
+            }
+            // The seed's takes, digested by hand (the same values the full form's golden carries).
+            let one = "70277bfc409b502132d7a48b2a3b386294264b31f7bf024a5fb0cafabb8ac122"    // "One."
+            let two = "1eb32d1ee4458814f94f8b92d1bd3e06e16dca6fab43d53f700840321f27fdf4"    // "Two."
+            let again = "5c70ad9e0d5befba10f7f51a9220133ee069baa71f7720e09af2f05a2ec889d1"  // "Two, again." — shown
+            let three = "43c4d94ea2cd4fbece4f396e10852401108971f22e2f37707fbbb688ddc7fe3c"  // "Three."
+            #expect([sha256("One."), sha256("Two."), sha256("Two, again."), sha256("Three.")]
+                    == [one, two, again, three], "the literal digests are the takes' own")
+            let spelled = "*\(one)\n\(two) *\(again)\n*\(three)"
+
+            let duplicated = try await connection.client.callTool(
+                name: "duplicate_note", arguments: ["note_id": .string(sourceID), "brief": .bool(true)])
+            #expect(duplicated.isError != true, "\(text(duplicated))")
+            #expect(try json(duplicated)["fan_sha256"] as? String == sha256(spelled))
+
+            // The client's road: read_note ids_only on the SOURCE spells the very same text.
+            let read = try json(try await connection.client.callTool(
+                name: "read_note", arguments: ["note_id": .string(sourceID), "ids_only": .bool(true)]))
+            let blocks = read["blocks"] as? [[String: Any]] ?? []
+            let fromTheSource = blocks.map { block in
+                (block["takes"] as? [[String: Any]] ?? []).map { take in
+                    ((take["chosen"] as? Bool) == true ? "*" : "") + (take["sha256"] as? String ?? "")
+                }.joined(separator: " ")
+            }.joined(separator: "\n")
+            #expect(fromTheSource == spelled, "computable client-side from the source")
+
+            // The shown take is in the digest: her ✓ on the other take changes it.
+            let middle = try #require(blocks.count == 3 ? blocks[1] : nil)
+            let first = try #require((middle["takes"] as? [[String: Any]])?.first?["take_id"] as? String)
+            try h.operations.chooseVariant(try #require(middle["block_id"] as? String), variantID: first)
+            let rechosen = try await connection.client.callTool(
+                name: "duplicate_note", arguments: ["note_id": .string(sourceID), "brief": .bool(true)])
+            #expect(try json(rechosen)["fan_sha256"] as? String
+                    == sha256("*\(one)\n*\(two) \(again)\n*\(three)"))
+            await h.hangUp(connection)
+        }
+    }
+
+    /// A-771-2: the DESCRIPTION is the contract a client checks against, so both tools whose
+    /// brief answer carries the digest spell its text form, word for word the shared sentence.
+    @Test func theDescriptionsSpellTheFanText() throws {
+        let sentence = MCPToolCatalog.fanDigestSentence
+        for fragment in ["fan_sha256 proves the copy whole", "one line per block in note order",
+                         "take sha256s in fan order separated by single spaces", "the shown take's prefixed with *",
+                         "lines joined by \\n with no trailing newline", "read_note with ids_only: true on the source"] {
+            #expect(sentence.contains(fragment), "the sentence spells: \(fragment)")
+        }
+        for tool in [MCPToolCatalog.duplicateNote, MCPToolCatalog.copyNoteToWing] {
+            #expect(tool.description.contains(sentence), "\(tool.name) spells the fan text")
         }
     }
 
