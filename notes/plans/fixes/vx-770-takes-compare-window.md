@@ -235,8 +235,8 @@ rushed (members are sub-issues; they close one by one).
 | 4 | VX-728 Compare comments (R-770-2) | Batch 2 | BUILT — P-770-3 (option B, PROVISIONAL): the width-only lane, the live feed, the shared face; red/green + walk PENDING; the taste cost to her bundle |
 | 5 | VX-732 undo leaves comments drawn | Batch 3 | BUILT — traced (c9c1163df), pins (86d3652ec), fix (ca980e24b): the live per-note feed + the panel's seat; red/green + walk PENDING the window |
 | 6 | VX-733 undo leaves the fan wash | Batch 3 | BUILT — traced (c9c1163df), pins (86d3652ec), fix (e7f9cefc2): `TakesOpenFanRule`, both roads; B3-P1/B3-P2 PROVISIONAL to her bundle; red/green + walk PENDING the window |
-| 7 | VX-757 track-paragraphs flicker | Batch 4 | NOT STARTED |
-| 8 | VX-740 double outline column (P-770-1) | Batch 4 | NOT STARTED |
+| 7 | VX-757 track-paragraphs flicker | Batch 4 | BUILT — traced (b268ccf46: the toggles re-key rows and switch their arm, re-making every pane), pins (8c87bcd0c), fix (eefd41c78: row spine identity + one row structure); red/green + walk W15 PENDING the window |
+| 8 | VX-740 double outline column (P-770-1) | Batch 4 | BUILT — re-located (b268ccf46), pin (b9d0e1b24), fix (a5718b23e: the resume yields to the auto-fill's seat); red/green + walk W16 PENDING the window |
 | 9 | VX-758 created-sort fallback | Batch 5 | NOT STARTED |
 | 10 | VX-739 word count (pin-first) | Batch 5 | NOT STARTED |
 | 11 | VX-638 pager label | Batch 5 | NOT STARTED |
@@ -1474,8 +1474,8 @@ the use walk (W15–W16, both voices); the cold ladder.
 | VX-757 pins (`VariorumTests/CompareToggleIdentityTests.swift`, pre-existing API only) | DONE (8c87bcd0c) — compile PENDING the b4 build |
 | VX-757 fix (`CompareRow.spineID` + one row structure in `rowView`/`peerColumn`) | DONE (eefd41c78) |
 | Build-for-testing `DerivedData/vx770-b4` at HEAD | DONE — TEST BUILD SUCCEEDED (logs `App/Variorum/DerivedData/logs/vx770-b4-build.log` — the first pass, red on three test-file concurrency errors, fixed in the next commit — and `vx770-b4-build2.log`); no new warning in a touched file |
-| **Behavioural revert — ANNOUNCED HERE BEFORE IT STARTS:** the one behaviour file (`Features/Takes/CompareBoardView.swift`, which carries BOTH fixes) restored to b9d0e1b24 (the VX-740 pin commit — its copy is the pre-fix source for both members) by `git checkout b9d0e1b24 --`; the two pin files stay at HEAD. Copy + sha256 first in `App/Variorum/DerivedData/vx770-b4-prerevert/` (gitignored); built into `DerivedData/vx770-b4-rev`; then `git checkout HEAD --` and verified by `git diff` + `shasum -c` | IN PROGRESS |
-| READY-FOR-SUITES, prediction table, walk rows, residue, self-assessment | PENDING |
+| **Behavioural revert** (announced 41274886d before it started; ran 04:38–04:42): `Features/Takes/CompareBoardView.swift` — the one behaviour file, carrying BOTH fixes — restored to b9d0e1b24 (the VX-740 pin commit; its copy is byte-equal to the batch's starting HEAD 7c98fcc5f, `git diff 7c98fcc5f` empty) by `git checkout b9d0e1b24 --`, the two pin files at HEAD; built into `DerivedData/vx770-b4-rev` (TEST BUILD SUCCEEDED, log `App/Variorum/DerivedData/logs/vx770-b4-rev-build.log` — the pins compile against the pre-fix behaviour); then `git checkout HEAD --` | DONE — **no revert in flight; the source is HEAD**: `git diff HEAD` empty, `git status` clean, `shasum -a 256 -c …/vx770-b4-prerevert/sha256-head.txt` OK, byte-identical (`cmp`) to the prerevert copy. The two binaries differ as intended: `nm` finds `spineID` 8× in `vx770-b4`'s `Variorum.debug.dylib`, 0× in `vx770-b4-rev`'s |
+| READY-FOR-SUITES, prediction table, walk rows, residue, self-assessment | DONE (this commit) |
 
 ### THE TRACE — VX-740 (re-located at HEAD; the vx-736 ladder's mechanism, confirmed by code read)
 
@@ -1586,3 +1586,166 @@ store is very likely migrated past this branch's schema and `LibraryClassifier` 
    `variorum-restore-hold.json` must ride the rename), md5 the library files + marker first, walk
    the fresh store this build seeds (empty is fine — the walk mints its own repro content), and
    at release restore by the reverse rename with the md5 check. Declared to the coordinator.
+
+### AS BUILT
+
+Commits: traces b268ccf46 · VX-740 pin b9d0e1b24 · VX-740 fix a5718b23e · VX-757 pins 8c87bcd0c · VX-757 fix
+eefd41c78 · the pins' compile fix cd65658ea · LIVE STATUS 41274886d + this record.
+- **VX-740 — the pin** (`App/Variorum/VariorumTests/CompareOutlineMintColumnTests.swift`, pre-existing API
+  only): `anOutlineTheAutoFillSeatsWhileTheMintIsInFlightOpensOneColumn` — a two-block draft with no version
+  peer, its first projection adopted (the offer band); `MidMintDelivery` installs the session undo stack's
+  change observer, which fires once on the runner's thread inside the mint's registration (after its write
+  commits, before `run` returns) and hops to main SYNCHRONOUSLY to adopt a fresh `CompareViewModel.read` —
+  the store observation's delivery, landed where her race landed it; then the REAL `makeOutlinePost`
+  resumes. Premise lines: the delivery ran mid-act and the auto-fill seated the outline. Assertions: ONE
+  column, holding the outline, in the auto-fill's slot (same slot id — P-770-1's "the seat stands"). Guards:
+  `theOrdinaryOrderSeatsTheOutlineInTheEmptySlot`; `anOutlineMintedBesideAnOpenNoteStillOpensItsOwnColumn`
+  (a board already showing the twin, the same mid-act delivery: the outline still opens beside it — the
+  dedupe yields only to the SAME note).
+- **VX-740 — the fix** (`Features/Takes/CompareBoardView.swift`, `makeOutlinePost`): after `autoFilled = true`,
+  a slot already holding `result.post.id` returns — the auto-fill's seat stands. Nothing else changes
+  (the empty-slot seat, the append beside other notes, the full board's words).
+- **VX-757 — the pins** (`App/Variorum/VariorumTests/CompareToggleIdentityTests.swift`, pre-existing API only;
+  a mounted `CompareBoardView` at 1100 pt, the batch-2 rig's shape): every Compare pane's OBJECT, by its
+  identifier `pane:compare|‹take›`, read before and after each toggle — `followingTheNotesOrderOffAndOnRemakesNoPaneOnASameOrderPair`
+  (a six-block draft + its duplicate-as-version twin; premise: every row aligned ON, every row free OFF) and
+  `relatedBlocksOnlyOffAndOnKeepsThePanesThatStay` (draft [a1 a2 a3 b] + twin [a1' a2' a3' x]; premise: the
+  toggle changed the composition's rows; the panes that stay, `b`'s among them, must be the same panes).
+  Guards (the trace's inert arms, green on both trees): `lineageColorsOffAndOnRemakesNoPane`,
+  `aPairWithNoLineageIsInertUnderTheOrderToggle` (premise: the same rows in both arms). Each flip PRINTS six
+  `VX757-TRACE` lines (panes · re-made · panes rendering off their own measurement · height range) —
+  diagnostics for the window, never asserted.
+- **VX-757 — the fix** (`Features/Takes/CompareBoardView.swift` only): `CompareRow.spineID` (`a:‹anchor block›`,
+  else `p‹column›:‹first peer block›`) keys the board's `ForEach`; `CompareRow.anchorBlockID` /
+  `peerBlocks(_:)` / `peerMoved(_:)` / `isFree` feed ONE row structure (`rowView` + `peerColumn`): the anchor
+  cell, then per peer column a `VStack` — the "moved" line (aligned only, as before), the free arm's 1-pt
+  clear space when the column is empty (as `cellOrSpace` drew it), the column's blocks in a `ForEach` keyed
+  by block id — the same frames and spacing each arm drew before. `CompareRow.id` stays (the type's
+  `Identifiable`; nothing reads its spelling). Untouched: `CompareCellView` (the lane, the gutter face,
+  the drop targets), the DEBUG oracle mount, `CompareComposition` and its pins, the projection, every op.
+- Untouched by the batch: `Sync/`, schema, `Shared/` (no `App/Variorum/Shared/` file in the diff), the
+  capability registry, `PaneSurface`, `EditorTextView`, `BlockRangeIndex`, every Takes file. No TK1 API, no
+  attribute stamp. **MOBILE PARITY: nothing mobile-visible** (the Mac Compare board only). **Canon delta: none
+  proposed** — one press opening one column, and a display toggle changing only the display, are what the
+  contract already says; P-770-1 rides the orchestrator's QUESTIONS bundle as logged. No new PROVISIONAL.
+
+### THE PREDICTION TABLE (PENDING the window)
+
+| # | Test | `vx770-b4-rev` (CompareBoardView.swift at b9d0e1b24) | `vx770-b4` (HEAD) |
+|---|---|---|---|
+| 1 | `CompareOutlineMintColumnTests/anOutlineTheAutoFillSeatsWhileTheMintIsInFlightOpensOneColumn` | **R** — columns `[outline, outline]`, 2 slots; premise lines G | G |
+| 2 | `…/theOrdinaryOrderSeatsTheOutlineInTheEmptySlot` (GUARD) | G | G |
+| 3 | `…/anOutlineMintedBesideAnOpenNoteStillOpensItsOwnColumn` (GUARD) | G | G |
+| 4 | `CompareToggleIdentityTests/followingTheNotesOrderOffAndOnRemakesNoPaneOnASameOrderPair` | **R** — re-made 12 of 12 on each flip; premise lines G | G |
+| 5 | `…/relatedBlocksOnlyOffAndOnKeepsThePanesThatStay` | **R** — re-made: `b`'s pane (its free row's id carried the peer side), on each flip | G |
+| 6 | `…/lineageColorsOffAndOnRemakesNoPane` (GUARD) | G | G |
+| 7 | `…/aPairWithNoLineageIsInertUnderTheOrderToggle` (GUARD) | G | G |
+| 8 | the Compare-exercising families + the spine (READY-FOR-SUITES 2) | — | G — predicted; risks in the self-assessment |
+
+**Reading the runs:** rows 1, 4, 5 red on rev and green on HEAD = the member is FIXED by the red/green
+standard. Row 1 GREEN on rev = the staging did not reproduce the race (read its premise lines first — a
+premise red means the delivery did not run mid-act); never "fixed blind". Rows 4/5 GREEN on rev = the harness
+does not re-make panes on the toggle, so the trace's mechanism is wrong for this harness — VX-757 then falls
+to RECORD-ONLY with W15 as its evidence, and the fix is reverted or held at the orchestrator's word. The
+`VX757-TRACE` lines on rev are the harness's view of the wrong-height turns (the `diverged` column); they are
+evidence, not a gate.
+
+### P-8 — the costs
+
+- **VX-740:** one `contains` over at most three slots, once per press.
+- **VX-757:** `spineID` is O(columns) per composed row, computed where SwiftUI diffs the rows the
+  composition already produced each pass (the composition itself is unchanged — one pass over the shown
+  notes' blocks, P1's class). The win is the other way round: a toggle on a lineage-sharing pair no longer
+  dismantles and re-makes every realized pane (each re-make a fresh TK2 view, its install measure and its
+  width-hook re-measure) — a toggle now costs a re-diff and a re-layout of the rows on screen.
+
+### THE USE WALK — batch 4 rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug from `DerivedData/vx770-b4`; both voices; never Resume Sync)
+
+- **W15 (VX-757 — her toggle):** a walk note of ~8 paragraphs (several wrapping at a Compare column), and its
+  Duplicate with Tags twin; Compare the note with the twin (the auto-fill seats it). Toggle "follow this note's
+  order" off and on five times, then "related blocks only" off and on five times — capture a short screen
+  recording (or a 10-frame burst per press) at the top of the board AND scrolled to the middle: **no flicker,
+  no row collapsing and re-growing, the page does not jump**. Then edit the twin so its tail differs (add a
+  paragraph only it has): "related blocks only" off/on → only that paragraph comes and goes. Look-only line:
+  re-order one twin paragraph (drag ⠿) and toggle "follow" — the moved paragraph's own cell re-makes (R-B4-1,
+  expected), nothing else should.
+- **W16 (VX-740):** three fresh notes with no versions, each: Compare → the offer band's "make outline note" →
+  exactly ONE "outline of …" column every time (the race is timing — three tries); the Library lists one outline
+  per note. Then on a note already beside its twin, the header's "make outline note" → the outline opens as a
+  second column beside the twin.
+
+## READY-FOR-SUITES — batch 4 (the orchestrator's window; from `App/Variorum/`)
+
+Both trees are built: `DerivedData/vx770-b4` (HEAD's source — logs `DerivedData/logs/vx770-b4-build.log` (the first
+pass, three test-file errors) + `vx770-b4-build2.log` (TEST BUILD SUCCEEDED)) and `DerivedData/vx770-b4-rev`
+(log `vx770-b4-rev-build.log`, TEST BUILD SUCCEEDED); 2.8 GB each; 42 GiB free after both. Run
+`test-without-building`: `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building <args>`.
+Confirm the "Test run with N tests" line and read the `skipped:` lines; keep the `VX757-TRACE` lines.
+
+1. **THE RED RUN** on `vx770-b4-rev` (≈ 1–2 min): `-only-testing:VariorumTests/CompareOutlineMintColumnTests -only-testing:VariorumTests/CompareToggleIdentityTests`
+   — expect 7 test functions in 2 suites; the prediction table's rev column (rows 1, 4, 5 red; 2, 3, 6, 7 green).
+2. **THE GREEN RUN** on `vx770-b4` — 55 suite types: the two new suites; every suite type in a test file that
+   exercises the one changed source, `CompareBoardView.swift` (the Compare model/board/composition, versions,
+   gutter, leaving-savepoint, landing, ring-end, outline/scrub, soak, registry, savepoint-door, VX-347, workspace
+   navigation and post-detail families, `VersionDoorsTests` and `SealedBookMemberDoorTests` — the two that land
+   in Compare mode); and the acceptance spine (every suite type in `TutorialWalkTests.swift` + `TutorialCurrencyTests`):
+   `-only-testing:VariorumTests/CompareOutlineMintColumnTests -only-testing:VariorumTests/CompareToggleIdentityTests -only-testing:VariorumTests/VersionDoorsTests -only-testing:VariorumTests/CompareCompositionTests -only-testing:VariorumTests/CompareViewModelTests -only-testing:VariorumTests/CompareVersionsTests -only-testing:VariorumTests/CompareAnchorWholeTests -only-testing:VariorumTests/CompareLensesAlignmentTests -only-testing:VariorumTests/CompareOnePlacementTests -only-testing:VariorumTests/CompareCommentGutterTests -only-testing:VariorumTests/BoardCommentGutterRuleTests -only-testing:VariorumTests/TakesCommentGutterTests -only-testing:VariorumTests/CompareLeavingSavepointTests -only-testing:VariorumTests/BookLeavingRegistryTests -only-testing:VariorumTests/BookLeavingSavepointTests -only-testing:VariorumTests/MCPCompareLandingTests -only-testing:VariorumTests/OutsideWriteRingEndTests -only-testing:VariorumTests/ScrubAndOutlineTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/CapabilityRegistryTests -only-testing:VariorumTests/AutosaveRegistryLifecycleTests -only-testing:VariorumTests/AutosaveRegistryReleaseGuardTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointNameCopyTests -only-testing:VariorumTests/SavepointNameFaceTests -only-testing:VariorumTests/SavepointRenameDoorTests -only-testing:VariorumTests/SavepointSealedDoorTests -only-testing:VariorumTests/SavepointTakesDoorTests -only-testing:VariorumTests/VX347AskedTakeFilingTests -only-testing:VariorumTests/VX347LeaveRuleTests -only-testing:VariorumTests/VX347LeavingBoxTests -only-testing:VariorumTests/VX347OneCommitPerFieldTests -only-testing:VariorumTests/NavigationDoorsTests -only-testing:VariorumTests/NavigationHistoryTests -only-testing:VariorumTests/OpenNotesTests -only-testing:VariorumTests/WorkspaceModelTests -only-testing:VariorumTests/WorkspaceNamingTests -only-testing:VariorumTests/PostDetailModeMemoryTests -only-testing:VariorumTests/PostDetailRoutingTests -only-testing:VariorumTests/SidebarSmokeTests -only-testing:VariorumTests/WriteTakesPanelTests -only-testing:VariorumTests/SealedBookMemberDoorTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialCurrencyTests -only-testing:VariorumTests/TutorialDeletionActsTests -only-testing:VariorumTests/TutorialDoorTests -only-testing:VariorumTests/TutorialFannedMatrixTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/TutorialLookingActsTests -only-testing:VariorumTests/TutorialPrivacyChapterTests -only-testing:VariorumTests/TutorialStructureActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialWritingActsTests`
+   **The DELTA, stated honestly:** `CompareOutlineMintColumnTests`, `CompareToggleIdentityTests` and
+   `VersionDoorsTests` have run in no window of this run; the other 52 are in batch 3's / the reconciliation's
+   157 set but that run's tree (`vx770-recon-post`) lacks batch 4's `CompareBoardView.swift`, so they re-run
+   here against it. **Every OTHER suite of the 157 set exercises no file batch 4 touched** (the diff is
+   `CompareBoardView.swift` + two new test files), so the 157 run on `vx770-recon-post` covers them. **An
+   option, the orchestrator's call:** `vx770-b4` carries batch 3 + the reconciliation + batch 4, so if the 157
+   run has NOT yet happened, one run of the 157 set ∪ the three delta suites on `vx770-b4` covers both READY
+   lists (batch 3's red run still needs `vx770-b3-rev`).
+   Known shapes as before: VX-337's two load-dependent flakes (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt`
+   — not in this list); the defaults domain first on an unexpected `TakesEntryBandTests` red (not in this list);
+   the one capture-harness skip.
+3. Results into the prediction table; then `vx770-b4-rev` and `vx770-b4-prerevert` may be deleted (`vx770-b4` stays
+   for the walk). `vx770-b3-rev` and `vx770-recon-post` were left exactly as found (not deleted, not reused).
+
+### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
+
+- **R-B4-1 (re-ordered pairs keep a partial rebuild):** on a pair whose kin sit in a different order, "follow this
+  note's order" re-pairs peer blocks into other rows, and a SwiftUI view cannot move between parents — those peer
+  cells (only those) are still re-made. Inherent to the toggle re-arranging; the walk's look-only line.
+- **R-B4-2 (the class under VX-757, every pane surface):** any freshly made `PaneSurfaceView` is born at
+  `@State height = 24` and measured at install before it has width; its real height arrives a turn later through
+  the width hook and the publisher's heal. Every lazy column that realizes a row (scrolling, any re-key) pays that
+  two-pass on each new pane — the Takes article and the lenses included. A seed taken from a width-known
+  measurement would close the class at the root, but that is `PaneSurface` (P-3's one component) — not this
+  batch's surface. Ticket candidate (Takes & Lenses / Performance), Suspected.
+- **R-B4-3 (the header door double-press):** "make outline note" mints on every press — two quick presses make two
+  outline notes and open both. By design (each press is an act; ⌥⌘Z undoes one), noted only because W16 should
+  press once per note.
+- **R-B4-4:** `CompareRow.id` is now read by nothing on screen (the board keys by `spineID`); it stays the type's
+  `Identifiable` id. Harmless; retire at a later touch if the reviewer prefers one identity.
+
+## SELF-ASSESSMENT — batch 4 (the first of the two reviews — the implementer's)
+
+- **What is proven, and how far.** Headless only: both trees compile (the pins against the pre-fix behaviour and
+  against the fixes), the revert is verified restored, and the binaries differ as intended. VX-740's mechanism is
+  the ladder's, re-located and confirmed by code read; its pin stages the race deterministically through the REAL
+  act. VX-757's mechanism is code-traced from the chip to the re-made pane; the painted flicker itself is not
+  observable headlessly — the pins read the state transition the trace names (the toggle re-making panes), and
+  the `VX757-TRACE` prints will show the window whether a wrong-height turn is visible in the harness. Every
+  red/green line is a prediction.
+- **VX-757 — the honesty question, answered in advance.** Her word is "track paragraphs"; I mapped it to "follow
+  this note's order" by its help text and pinned "related blocks only" too, since both re-key rows. If W15 finds
+  the flicker on a control the trace says is inert (lineage colors), or on a no-lineage pair, the mechanism is
+  wrong or incomplete — the record says so and the member does not close on these pins.
+- **Why these shapes.** VX-740: P-770-1 verbatim — one `contains` before seating, nothing else. VX-757: the defect
+  is identity, so the fix is identity — no animation suppression, no curtain, no change to `PaneSurface` (R-B4-2
+  names the deeper class and leaves it). The composition brain, its pins and `CompareCellView` are byte-unchanged.
+- **What could regress, and why I think it does not.** (1) *Duplicate row ids* (undefined `ForEach` behaviour):
+  unique by construction — each block sits in one note (I2), each column shows a block once, the anchor is never a
+  peer, and even a doubled peer column (VX-740's own bug, now fixed) keys its peer-only rows by the first column.
+  (2) *Layout drift:* the uniform structure reproduces each arm's frames (a free peer cell now sits in a one-child
+  `VStack` with the same `maxWidth`/alignment; an empty free column keeps its 1-pt clear space); the Compare
+  alignment/geometry pins (`CompareLensesAlignmentTests` et al.) and batch 2's gutter pins in the green run guard
+  it. (3) *Kept state where a rebuild used to reset it:* a kept cell keeps its pane's measured height (the point),
+  its live ring (the authority decides liveness, not view identity), and its comment face (batch 2's oracle now
+  sees no disappear/appear on a toggle). (4) *The VX-740 pin's hop:* `DispatchQueue.main.sync` from the runner's
+  thread needs main idle — it is (the test awaits the act); a hang there would show as a timeout, not a pass.
+- **Scope kept.** Two members, one source file. No gutter-lane or oracle change (the brief's STOP line was never
+  reached). No `Shared/`, `Sync/`, schema, registry or `PaneSurface` change.
