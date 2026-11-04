@@ -242,8 +242,8 @@ No revert is in flight.
 
 | Piece | Status |
 |---|---|
-| 0 — this record: the traces, the designs, VX-761's proposed seam | DONE (this commit) |
-| 1 — VX-760 pins, red on the old tree | NOT-STARTED — the design below |
+| 0 — this record: the traces, the designs, VX-761's proposed seam | DONE (58d2e7f5b — committed, unpushed: GitHub incident) |
+| 1 — VX-760 pins, red on the old tree | DONE (this commit) — NEW `Tests/VariorumMCPTests/MCPExpectedTextMismatchServerTests.swift` (8 tests): RED on the pre-fix tree, "Test run with 8 tests in 1 suite failed … with 22 issues" — the six fact-pattern pins red (5 · 4 · 3 · 4 · 4 · 2), the old answer `Refused: bufferChangedSinceGesture(variantID: "…")` (the harness's hook); the two guards (`aMatchingNoOpAnswersAsBefore`, `aMatchingEditLandsAsBefore`) green on both sides by design |
 | 2 — VX-760 fix | NOT-STARTED |
 | 3 — VX-761 Domain rule + op arm + core pins | NOT-STARTED — the seam below |
 | 4 — VX-761 wire (parse, schema, description, words) + wire pins | NOT-STARTED |
