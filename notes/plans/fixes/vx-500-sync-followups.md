@@ -2580,3 +2580,17 @@ the PR, the merge at the coordinator's all-clear.
   whole-target Mac/phone runs below.
 - The stage legs (FULL `VariorumTests` + phone build + FULL `VariorumMobileTests` on the simulator) follow under the
   coordinator's window — the next rows.
+
+**THE MAC LEG'S ONE REAL FAILURE (the closing window, 2026-11-04 ~04:30 MST; under trace):** FULL `VariorumTests` →
+"Test run with 5804 tests in 1006 suites failed after 2546.917 seconds with 19 issues (including 2 warnings and 14
+known issues)"; the xcresult reads 5,931 passed · 30 skipped · 8 expected failures · **2 failed**: the runtime-warning
+aggregation bucket ("Issues recorded without an associated test or suite" — the BindDoorTests geometry warnings, the
+same 2 warnings main shows) and **`DestructiveUndoWarningTests.redoNeverAsks()`** — after a confirmed destructive undo
+of a divide, the redo DOES NOT run: slots stay merged, `redoDepth` stays 1, no "Redid" receipt (:141–:143). RED ALONE
+on the branch (5.9 s, 3 issues, deterministic); **GREEN ON MAIN** (`81e175985`, same machine, same minute, 7/1 passed in
+1.4 s); **v1_36 EXONERATED** — the suite is still red with the migration registration scratch-reverted (named revert at
+the committed tip, restored, `git diff --exit-code` clean). The suspects left are the branch's remaining Sources lines
+(the `Sync/` six — scheduler/engine timing on the test host's main actor) and the App lines (AppBootstrap's test init,
+the pair road's injected clock, the faces). The redo door's refusal arms (`ShellActions.structuralRedo`): the flight
+guard (`anotherIsLanding`), `redoFoundNothing` (retires the entry — but depth stayed 1), `nothingToRedo`, `redoFailed`
+(keeps the entry). A FRESH implementer traces the mechanism and fixes with red-on-old; the sim leg waits on it.
