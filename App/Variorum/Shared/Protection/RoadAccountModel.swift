@@ -329,7 +329,8 @@ final class RoadAccountConfirmModel: Identifiable {
     static func rowFace(_ status: SyncScheduler.Status) -> SyncRowFace {
         SyncRowFace.face(
             allowsSync: true, isConfigured: true, signedIn: true, isSyncing: status.isSyncing,
-            lastError: status.lastError, lastErrorIsOffline: status.lastErrorIsOffline, stalled: status.pullStalled)
+            lastError: status.lastError, lastErrorIsOffline: status.lastErrorIsOffline,
+            lastErrorIsRetrying: status.lastErrorIsRetrying, stalled: status.pullStalled)
     }
 
     /// The confirm's way out — nothing written. (With the moment standing the act already landed: its way out is the
