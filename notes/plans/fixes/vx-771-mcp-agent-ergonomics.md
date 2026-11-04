@@ -121,9 +121,9 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | 8 | VX-769 gathering mint | 3 | BUILT — wire pins red on old ea12991a0, the build (the commit "Part of VX-769: the build …"); P-771-2 as built in the BATCH 3 RECORD; app words PENDING the closing Mac window |
 | 9 | VX-767 section_id verify | 3 | ALREADY BUILT — VX-566 (VX-620 batch 3); standing pins `MCPImportSectionServerTests` (5), green |
 | 10 | VX-768 book-form sha256 verify | 3 | ALREADY BUILT — VX-567 (RB-4; VX-620 batch 3); standing pins `MCPBookImportRecordsServerTests` (2), green |
-| 11 | VX-762 drop verify + B2 | 4 | NOT-STARTED |
-| 12 | VX-763 grant rows | 4 | NOT-STARTED |
-| 13 | VX-400 stop ends grants (rider) | 4 | NOT-STARTED |
+| 11 | VX-762 drop verify + B2 | 4 | IN-PROGRESS (BATCH 4 RECORD); the verify walk PENDING — Road A (waits on VX-500's merge) |
+| 12 | VX-763 grant rows | 4 | IN-PROGRESS (BATCH 4 RECORD) |
+| 13 | VX-400 stop ends grants (rider) | 4 | IN-PROGRESS (BATCH 4 RECORD) |
 | 14 | VX-774 null-only edit_take empties the take (found in-run, batch 2 O-1; seated as a sub-issue) | 3 | FIXED — pin red on old f620fbac3, the fix (the commit "Part of VX-774: the fix …") |
 
 ## Environment traps (every batch brief carries this section VERBATIM)
@@ -390,6 +390,32 @@ No revert is in flight.
 
 - **VX-767 — ALREADY BUILT (VX-566, the VX-620 run's batch 3; pins red-on-old at 6721d651c).** Code: the parse (`MCPWriteTools.parseImport` — `section_id` with `book_id` only on the one-document form, `sectionWithoutBookWords` otherwise; the whole-book form refuses one in `bookFormSectionWords`); the act (`.importNote` → `into(place, …, admitsGathering: true)` → `ops.importNote(named, in:, section: sectionID, …)`, the book decided first, any id that is not a live chapter of THAT book the one chapter sentence); the schema (`MCPToolCatalog.importDocument` declares `section_id`) and the description ("section_id (with book_id) files the document's note under one of that book's chapters in the same call, as create_note does"). Standing pins, `MCPImportSectionServerTests` (5): `oneDocumentFilesUnderItsChapterInTheSameCallAndTheSameUndo` (filed, echoed, ONE client-named undo, the redo returns it filed, no key without it), `everySectionIDThatIsntALiveChapterOfTheBookAnswersTheOneSentenceAndMintsNothing`, `sectionIDWithoutABookIsRefusedAtTheParseInCreateNotesWords`, `aWholeBookRefusesASectionIDItsChaptersComeFromTheBook`, `theCatalogDeclaresSectionIDAndSaysBothForms` — green on this tree. The feedback item predates the fix; nothing to build.
 - **VX-768 — ALREADY BUILT (VX-567, RB-4 ratified 2026-10-27 at #245; the VX-620 run's batch 3; pins red-on-old at 8d34b3f34).** Code: `MCPWriteTools.perform` `.importBook` answers `book_id`, `note_ids`, `chapter_ids` and `notes` — per minted note, in `note_ids`' order, `note_id`, `block_ids` and `blocks` through `MCPMintedBlocks.records` (each block's `block_id`, `shown_take_id`, every take in fan order as `{take_id, label?, sha256}` — no text), from what the act minted; the description says so. Standing pins, `MCPBookImportRecordsServerTests` (2): `aWholeBookAnswersEveryNotesRecordsWithEachTakesDigest` (the key set exact; one record per note in order; the records equal `read_note with_ids`; each take's `sha256` = CryptoKit's SHA-256 of the words SENT for it; no text rides) and `theDescriptionSaysTheBookFormsRecords`; with `MCPWriteDigestServerTests` / `MCPMintedAnswerServerTests` (the one-document records) and core `MCPMintedBlocksActsTests` (the minted records at the op) — green on this tree. The feedback item predates the fix; nothing to build.
+
+### BATCH 4 RECORD — the door's lifecycle (VX-762 · VX-763 · rider VX-400)
+
+**NOT DONE in this batch (first, as the protocol asks):** *(kept current — the closing line is written at the batch's end)* (1) **the VX-762 verify WALK is PENDING — Road A** (the stage coordinator's re-sequencing, 2026-11-04, mid-batch): the shared dev store is very likely already on v1_36 (VX-500's test hosts migrated it), so a Debug build from this branch would refuse it (`newerSchema`); the walk runs only AFTER VX-500 merges to `main` and `main` is merged into this branch, under a stage GO relayed by the orchestrator, driven by a later session (this one resumed, or a successor) from the committed script of record. This batch launches NO app, preps NO Debug app and touches NO store; (2) no Mac app build or suites (headless only — the closing Mac window's); (3) no canon edit (proposed lines below, at the batch's end).
+
+**Implementer:** opus-implementer (one fresh session), 2026-11-04. Headless core only (`swift build` / `swift test --filter`), no stage, no xcodebuild. Started at `9f09220c5` (`git pull --ff-only`: already up to date).
+
+#### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| 0 — this record (skeleton + LIVE STATUS) | DONE (this commit) |
+| 1 — VX-400: the trace, the pin red on old, the fix | NOT-STARTED — mechanism traced (below); fix: the serve task's `else` arm ends the client's while-connected grants through the session's own store |
+| 2 — VX-762 B2 part one: the shim's stderr line at the app's close (pin red on old, build) | NOT-STARTED |
+| 3 — VX-762 B2 part two: the close-reason line — mechanics PROPOSED here before any build | NOT-STARTED |
+| 4 — VX-763: the investigation (index · listing · v1_30's merge · the listing's WHERE), the pin, the verdict | NOT-STARTED |
+| 5 — VX-762 verify walk: the script of record committed | NOT-STARTED |
+| 6 — VX-762 verify walk: driven | **PENDING — Road A: waits on VX-500's merge + `main` merged in; a later session drives it under the stage GO** |
+| 7 — end-of-batch suites | NOT-STARTED |
+
+No revert is in flight.
+
+#### VX-400 — the trace (read before any code)
+
+- **The mechanism.** `MCPServerHost.serve` (`Sources/VariorumMCP/MCPServerHost.swift`) runs each session on a `Task { [weak self] in … }`: when `run()` returns, a LIVE host takes `ended(session)` — deregister, close, the end line, and, when that was the client's last connection, `operations.endMCPConnectionGrants(clientID:)` (R-13n-4). A host ALREADY LET GO takes the `else` arm — `closeConnection()` + `writeEndLine()` (VX-348 U5's fix leg) — and never ends the grants. The app's door stops its host and drops it in the same breath (`MCPDoor.stopServer`: `host?.stop(ending:)` / `stopWithTheProcess()`, then `host = nil`), and the host's accept thread holds it only while it listens, so EVERY door stop — her switch OFF, the lock road's `detach()`, the quit — ends its sessions on the `else` arm: each client's "until it disconnects" grants stay live (`revoked_at IS NULL`) until the next start's sweep (`sweepMCPConnectionGrants`). No wire exposure (the sweep runs before the next listener binds — the VX-348 ladder's argument, re-checked: `start()` sweeps first), but Settings ▸ MCP ▸ Shared with AI lists the grant as live while the server is off.
+- **Why the old pins stayed green:** `ServerHarness` holds its host strongly, so every headless stop took `ended()` — the U5 fix leg's harness-realism gap, once more.
 
 ## Morning bundle (grows all night; the closeout moves it to the handoff)
 
