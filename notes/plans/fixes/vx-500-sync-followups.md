@@ -2497,7 +2497,7 @@ incident — Git Operations degraded); unpushed commits noted per row and pushed
 | 2 | F2 — `SyncPullCountTransport`'s doc to R-500-1's index-only shape | DONE (this commit) — the protocol summary's "under the feed's own horizon filter" replaced with the index-only shape (owner + seq, NO horizon; may exceed what the feed serves right now) pointing at `SyncProgress.total`'s doc; the method-level doc, already right, untouched; doc-class, no pin (THE FINAL CALLS). F1's commit `630a7b6d2`: committed, unpushed — GitHub incident (one attempt per the amendment) |
 | 3 | F3 — `stagedRowCount` read only when `progress != nil` | DONE (this commit) — the reviewer's named shape (`if case .resume = plan, progress != nil`), `reportsProgress = true` inside (byte-equivalent: progress is non-nil there); the seam/scene suites say nothing changed — `swift test --filter "SyncProgressTests\|ResumableCatchUpTests\|SyncSchedulerTests"` → "Test run with 37 tests in 4 suites passed after 12.381 seconds". F1/F2 pushed after all (the F2 window's push landed `8992c4c68..85456ac1a` — the incident is intermittent); F1's row's unpushed note is history, kept verbatim |
 | 4 | F4 — the ratio pin's arithmetic by Duration division, no attosecond Int64 | DONE (this commit) — `let ratio = pending / control` (Duration's own `/ → Double`); the overflow trap is gone BY CONSTRUCTION (no Int64 exists to overflow; Double division cannot trap — a zero control reads +inf, 0/0 NaN, and either FAILS the bound with forensics, replacing the old `max(1, …)` guard honestly); bound 4 and the printed forensics unchanged; run once green — `[vx720-pin] 8000 takes: pending 0.184003081 seconds · control 0.18114227 seconds · ratio 1.02× (bound 4)` · "Test run with 1 test in 1 suite passed after 0.557 seconds". F3's commit `bdb58f83d`: committed, unpushed — GitHub incident (one attempt) |
-| 5 | Close — build, the brief's filter run with its count, the self-assessment | PENDING |
+| 5 | Close — build, the brief's filter run with its count, the self-assessment | DONE (this commit) — the close block below |
 
 #### F1 — the red line on the pre-fix tree (piece 1)
 
@@ -2513,8 +2513,36 @@ seconds" (the discard road's standing pins unmoved).
 
 #### The close (piece 5)
 
-PENDING.
+- `swift build` → "Build complete! (0.80 sec)" (the tip).
+- `swift test --skip-build --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|DeferredFKChildScanPinTests|MigrationTests|AuthRLSDDLTests|MultiTenantSyncAttackerTests"`
+  → **"Test run with 154 tests in 10 suites passed after 15.256 seconds"**, no skipped lines (the traps' read). The
+  reviewer's round-1 158/14 included the `ApplyProfile*` suites its wider filter named (their gated tests skipped by
+  design); this run's filter is the brief's, and its delta over the pre-fix tree is +1 (the F1 pin).
+- The four commits: F1 `630a7b6d2` · F2 `85456ac1a` · F3 `bdb58f83d` · F4 `48063464a` (+ this close commit). Pushes
+  under the GitHub incident, one attempt per piece per the orchestrator's amendment: the F2 window's push landed
+  F1+F2 on origin; F3's and F4's attempts failed; everything pushed at the close (the close commit's own attempt,
+  retried at the all-clear if it fails — the LIVE STATUS rows carry the per-piece outcomes verbatim).
 
-#### SELF-ASSESSMENT (the first of the two reviews)
+#### SELF-ASSESSMENT (the first of the two reviews — what round 2 should press on)
 
-PENDING.
+1. **F1's pin runs the discard road over a transport WITHOUT the count surface** (`FaultInjectingTransport`), so every
+   reading's `total` is nil and the pin asserts `done` against the fake's own feed count. The double-count mechanism is
+   independent of the count surface, and the fix touches neither `askedForTotal` nor `remaining` — but no scene drives
+   discard-then-refetch with a LIVE total, where the P-500-8 clamp would read "total of total" mid-refetch on the old
+   code. Display-only either way; round 2's call whether that scene is owed.
+2. **F1 resets `downloaded` to 0, not to a re-read of the (now empty) stage** — right by construction (the stage was
+   just cleared inside this round; nothing can restage before the refetch loop), but a future road that discards
+   WITHOUT clearing would silently double-count again; the comment in the branch says why 0 is honest today.
+3. **F3's reshape makes `reportsProgress = true` unconditional inside the guard** (progress is non-nil there) — byte-
+   equivalent to the old `reportsProgress = progress != nil` under the added condition; stated so round 2 need not
+   re-derive it. The engine-side readings under the fix can DIP across the discard (raw hops; the scheduler's
+   `advances` rule is what the UI sees, and equal-done re-publishes are deliberate) — the pin reads the raw closure,
+   so it asserts the last reading, never monotonicity.
+4. **F4 keeps the `#expect(control > .zero)` non-vacuity line AND drops the `max(1, …)` divisor guard** — a zero
+   control now reads +inf/NaN and fails the bound with forensics instead of being nursed to a finite ratio; that is a
+   strictly more honest failure, but it IS a behavior change in the zero-control corner (previously ratio ≈ huge but
+   finite; both fail). Named in case round 2 reads the guard's loss as accidental.
+5. **Sharpest item: the F1 pin's `staged == 200` premise** rides `armFailPull(atCall: 6)` and the 40-row window — the
+   same fixture three standing scenes use; if the corpus seeding ever changes row counts, the pin's non-vacuity line
+   (`staged == 200`) fails loudly rather than the assertion going hollow. Deliberate; a round-2 reviewer should
+   confirm the pin still exercises BOTH passes (stage + refetch) by its red lines (750 = 2 × 375), not by the green.
