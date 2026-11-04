@@ -615,6 +615,7 @@ build-for-testing, no DerivedData tree yet. `Shared/` is not in the diff (record
 | Takes build plan (T1–T6) | WRITTEN — proceeding on the orchestrator's word |
 | Seam → pins → fix → behavioural revert → build-for-testing | NOT STARTED |
 | READY-FOR-SUITES, self-assessment | NOT STARTED |
+| Push | push refused (GitHub incident, `Permission denied (publickey)` at 42a38f9e4) — commits local-only until the remote catches up (the orchestrator's background retry); retried once per commit, never looped |
 
 ### THE SURVEY (written before any code)
 
