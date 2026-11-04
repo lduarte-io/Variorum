@@ -1568,3 +1568,20 @@ each arm drew before, so a cell's identity is (row spine, column, block) in both
 the toggle then re-makes nothing; on a re-ordered pair only the peer cells that change rows are re-made (a
 cell cannot keep its view across parents). Untouched: `CompareCellView`, the comment lane and its gutter
 face (batch 2), the DEBUG oracle mount, the composition brain and its pins, the projection, every op.
+
+## ENVIRONMENT HAZARD — the dev store is likely v1_36 (the coordinator, ~04:4x; this branch knows v1_35)
+
+VX-500's test hosts have carried `v1_36_fk_child_indexes` since 03:36 and the shared dev store
+was written at 04:32; `VariorumApp` builds the live `AppBootstrap()` at every host launch, so the
+store is very likely migrated past this branch's schema and `LibraryClassifier` would refuse it
+(`.newerSchema`). Consequences for this run:
+1. **The b3r window (and any later gate):** most suites inject stores, but the set includes the
+   tutorial spine — an UNEXPECTED red in any suite that mounts the real app shell is suspected as
+   the dev store's newer-schema refusal BEFORE the diff, and reported to nov3coordinator. It
+   would look like a regression and isn't one.
+2. **The walk: ROAD B, decided now** (content-only walk, no Castle — independent of GitHub's
+   incident and VX-500's merge): set `Variorum-dev/` aside WHOLE by ONE rename per
+   `Tools/WalkKit/README.md` Step-0 traps (never file-by-file — the store-adjacent
+   `variorum-restore-hold.json` must ride the rename), md5 the library files + marker first, walk
+   the fresh store this build seeds (empty is fine — the walk mints its own repro content), and
+   at release restore by the reverse rename with the md5 check. Declared to the coordinator.
