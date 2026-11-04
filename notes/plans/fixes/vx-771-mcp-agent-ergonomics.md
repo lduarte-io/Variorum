@@ -98,9 +98,9 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 
 | # | Member | Batch | Status |
 |---|---|---|---|
-| 1 | VX-759 duplicate dating (flagship) | 1 | NOT-STARTED |
-| 2 | VX-766 duplicate brief form | 1 | NOT-STARTED |
-| 3 | VX-765 copy_note_to_wing | 1 | NOT-STARTED |
+| 1 | VX-759 duplicate dating (flagship) | 1 | FIXED — 3f2f650d4 (P-771-1; fork F-1 open on its reach) |
+| 2 | VX-766 duplicate brief form | 1 | PARTIAL — brief form 2fe408519; the digest half awaits fork F-2 |
+| 3 | VX-765 copy_note_to_wing | 1 | BUILT — 43806305a (app words PENDING the Mac window) |
 | 4 | VX-760 mismatch honesty | 2 | NOT-STARTED |
 | 5 | VX-761 replace form | 2 | NOT-STARTED |
 | 6 | VX-369 error sweep (rider) | 2 | NOT-STARTED |
@@ -130,6 +130,8 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 
 ### BATCH 1 RECORD — the duplicate family (VX-759 · VX-766 · VX-765)
 
+**NOT DONE in this batch (first, as the protocol asks):** (1) VX-766's archive-proof DIGEST half — proposed as fork F-2, awaiting the orchestrator, not built; (2) P-771-1's reach beyond the duplicate body (her ⇧⌥⌘L Copy to Wing and the other copy roads still re-date an undated, untitled note) — fork F-1; (3) the Mac app's build and suites over the one app file this batch touched (`App/Variorum/Variorum/Features/MCP/MCPPaneCopy.swift`, Mac-only — NO `Shared/` file) — the brief kept this batch headless (no stage, no xcodebuild), so it is the closing Mac window's; (4) no walk captures — a headless batch by the brief; (5) the canon lines — proposed below for the closeout, not applied; (6) the field guide's MCP chapter — untouched (open item). No fence was approached: nothing in `Sources/VariorumCore/Sync/`, `ProtectionController.swift`, `AppBootstrap.swift`, `MacWillLock.swift`, `Registry/`, custody or keychain code; no schema change, no migration.
+
 **Implementer:** opus-implementer (one session), 2026-11-04. Headless core only (`swift build` / `swift test --filter`), no stage, no xcodebuild.
 
 #### LIVE STATUS
@@ -139,7 +141,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | VX-759 duplicate dating (P-771-1) | DONE — the commit "Part of VX-759: …" (hash in the next flip); pins red on the pre-fix tree, green after |
 | VX-766 duplicate brief form | IN-PROGRESS — the brief form DONE (the commit "Part of VX-766: …"); the digest half WAITS on fork F-2 (proposed below, not built) |
 | VX-765 copy_note_to_wing | DONE (43806305a); red on old by behavioural revert DONE (restored, green) |
-| End-of-batch suites | IN-PROGRESS — the whole `VariorumMCPTests` module, then the whole `VariorumCoreTests` module (counts PENDING) |
+| End-of-batch suites | DONE — see "End-of-batch suites" below (core 3,590 / 478 green; MCP 484 / 88 with ONE pre-existing whole-module timing flake, green alone) |
 
 No revert is in flight.
 
@@ -181,6 +183,12 @@ No revert is in flight.
 - **Docs:** the tool's description teaches it (when to use it vs `duplicate_note`, the reach, the fence, the answer). `MCPSession.instructions` UNTOUCHED (MCPSpec records it at 3,061 of its 3,100 cap — no sentence fits with room to spare; the brief's preference). The field guide's MCP chapter (lesson 3's write-new card, seeded by `TutorialSeeder`) is UNTOUCHED — the card is not exhaustive (it names neither `save_version` nor `import_document`), so it is an open item for the closeout, not a gap pin.
 - **Pins** — `Tests/VariorumMCPTests/MCPWingCopyServerTests.swift` (10): `theCopyLandsBooklessInTheOtherWingsPoolAndAnswersBrief` (the brief key set; the copy in the wing, bookless; tags adopted — the destination's same-path id — and minted, all the destination's; a living book there collecting the adopted tag neither seats nor bells it; same words; counts = `read_note ids_only`; the source's wing/book untouched; one client-named entry; the receipt; ⌥⌘Z / ⇧⌥⌘Z) · `aCopyIntoHomeAndAnEmptyNotesBareCopy` · `theNotesOwnWingRefusesInWordsAndAsksNothing` (once grant unspent) · `anUnreachableSourceAnswersTheOneNotSharedShapeAndMintsNothing` (missing, tombstoned, a version, scraps, an unshared wing's note, an unreached Private note — byte-identical) · `aDestinationWithoutWingWriteNewHearsTheWingsRefusalAndAsksForTheWing` (read on the wing + write new on a book there → rungTooLow + the wing's ask; an unshared wing and a missing id byte-identical) · `aFencedSourceUnderAPerAskGrantRefusesInOneSentenceAndMintsNothing` · `onceGrantsOnBothSidesSpendAsOneAndARefusedActSpendsNothing` · `anUndeclaredArgumentRefusesBeforeAnyDecision` (VX-606 at the call door: `brief` refused, both once grants unspent, nothing logged/asked/minted) · `aCallMissingANoteOrAWingIsRefusedAtTheParse` · `itIsListedOnlyWhereItCanLand`. Justified edit: `MCPServerTests`' exact write-new set gains the tool.
 - **Red on old — behavioural revert** (record-first: the revert was named in commit 43806305a's record, the pre-revert state committed): the tool's one line in `MCPToolCatalog.writeNew` removed → all 10 tests red, 17 issues ("Unknown tool: copy_note_to_wing." at every call); restored by `git checkout --`, 10/10 green.
+
+#### End-of-batch suites (headless, the worktree, at 30c2a3d4d + the two justified edits below)
+
+- `swift test --filter VariorumCoreTests` — **3,590 tests in 478 suites PASSED** (256 s), 5 KNOWN issues (pre-existing `withKnownIssue` pins in `PairCatchUpTests` / `PairInvariantPinsTests` — Castle, untouched); 15 gated measurement suites SKIPPED (counted in the 3,590 — Swift Testing counts skipped tests).
+- `swift test --filter VariorumMCPTests` — **484 tests in 88 suites; 483 pass**, 0 skipped. The first run found two catalog walks the new tool owed a JUSTIFIED EDIT (the ritual), both made: `MCPListWingsServerTests.everyToolThatTakesAWingIDSaysWhereItComesFrom` (the exact set of tools taking a `wing_id` gains `copy_note_to_wing`, whose description points at `list_wings`) and `MCPWriteServerTests.aSuggestGrantProvablyCannotModifyAnExistingTake` (the proof's walk gains a `copy_note_to_wing` call aimed at her note and a real other wing, refusing at the rung). The ONE remaining failure is `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (its `< 15 s` bound, 29 s under the whole module's parallel load) — **PRE-EXISTING**: the same whole-module run on the pre-batch tree (caf04cfa6, a throwaway `git archive` copy) fails it twice (26.8 s, 27.1 s); it passes alone on this tree (`MCPListWingsServerTests|MCPWriteServerTests|MCPHarnessTimeLimitTests` — 21 / 3 green). Not this batch's to change — a ticket candidate for the orchestrator (the bound is load-sensitive under the full module).
+- **Mac app suites: NOT RUN** (the brief). The app file touched (`MCPPaneCopy.swift`) owes the closing window: `MCPWingFacesTests` (every tool's Activity in words), `MCPAskAndReceiptTests` / `MCPDoorErgonomicsFacesTests` (receipt lines), `TutorialMCPChapterTests` (catalog facts), plus the Mac build itself (`MCPReceiptCopy.phrase` switches exhaustively over `MCPWriteAct`, which gained `.wingCopy`).
 
 #### PROVISIONALs born in batch 1 (for QUESTIONS #257's bundle — the run ledger above carries them)
 

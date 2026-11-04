@@ -326,6 +326,11 @@ struct MCPWriteServerTests {
             // grows with the catalog): VX-311's duplicate_note, aimed at her
             // note, refusing at the rung (a copy is a write new in the wing).
             calls.append(("duplicate_note", ["note_id": .string(note.id)]))
+            // VX-765 (the VX-771 run, batch 1 — justified edit, the ritual: the
+            // proof's completeness grows with the catalog): her Copy to Wing,
+            // aimed at her note and a real other wing, refusing at the rung.
+            let elsewhere = try h.operations.createWing(name: "elsewhere")
+            calls.append(("copy_note_to_wing", ["note_id": .string(note.id), "wing_id": .string(elsewhere.id)]))
             // VX-596 (justified edit, the ritual — the proof's completeness
             // grows with the catalog): her star, aimed at her note and her
             // book, refusing at the rung.

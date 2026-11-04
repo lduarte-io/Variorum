@@ -328,8 +328,10 @@ struct MCPListWingsServerTests {
             let said = declaration.description + (wing.objectValue?["description"]?.stringValue ?? "")
             #expect(said.contains("list_wings"), "\(declaration.name) takes a wing_id and must point at list_wings")
         }
+        // VX-765 (the VX-771 run, batch 1 — justified edit, the ritual):
+        // copy_note_to_wing takes the wing its copy goes to.
         #expect(Set(taking) == ["list_notes", "create_note", "import_document", "create_book", "move_note_to_wing",
-                                "show_in_app"], "the tools that take a wing_id: \(taking)")
+                                "show_in_app", "copy_note_to_wing"], "the tools that take a wing_id: \(taking)")
         #expect(MCPToolCatalog.listWings.rung == .read && MCPToolCatalog.listWings.scopes == [.wing])
         #expect(MCPToolCatalog.listWings.grantOnly && !MCPToolCatalog.listWings.listedWhenApproved)
     }
