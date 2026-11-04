@@ -2327,11 +2327,11 @@ reviewer) re-checks the fixes. F3 is record-only (the reviewer's own disposition
 | piece | state |
 |---|---|
 | Reading (the findings file whole; this record's ROUND 1 section, batch 2 + its reconciliation, batch 3, batch 5 › C + AS BUILT; the environment traps) | DONE |
-| Agree/dispute per finding, each mechanism traced by my own code read (below) | DONE (this commit) |
-| F4 — the rename (behaviour-neutral, its own commit, BEFORE the pins so the rev tree carries it) | PENDING |
-| Pins — F1's Compare seat twin, F2's collapse-under-follow transition | PENDING |
-| Fix — F1 (Compare always mounts the face where a lane stands) | PENDING |
-| Fix — F2 (the collapse door forgets even while the row is on screen) | PENDING |
+| Agree/dispute per finding, each mechanism traced by my own code read (below) | DONE (165691c39) |
+| F4 — the rename (behaviour-neutral, its own commit, BEFORE the pins so the rev tree carries it) | DONE (f4ba0bb77) — compile PENDING the lf build |
+| Pins — F1's Compare seat twin (e84a1c48e), F2's collapse-under-follow transition (098b72626 — **the pre-fix commit**: pins + F4, no fix) | DONE — compile PENDING the lf build; red/green PREDICTED (Mac target, the window's) |
+| Fix — F1 (Compare always mounts the face where a lane stands) | DONE (3667c843e) |
+| Fix — F2 (the collapse door forgets even while the row is on screen) | DONE (5035c4e3e) |
 | `DerivedData/vx770-lf` build-for-testing at HEAD | PENDING |
 | `DerivedData/vx770-lf-rev` (the pre-fix behaviour, from a `git clone --shared` in the scratchpad — the shared worktree and its index never move) | PENDING |
 | READY-FOR-SUITES — ladder fixes · SELF-ASSESSMENT | PENDING |
