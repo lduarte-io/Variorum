@@ -999,3 +999,23 @@ closeout ticket candidates (R-B2-1 and R-B2-2 are contract deviations predating 
 - **Scope kept.** No `Sync/`, schema, `Shared/`, `PaneSurface`, `EditorTextView`, `BlockRangeIndex`
   or registry change; VX-696 not fixed; VX-732's per-row staleness untouched; R-B2-1/2 (Takes
   callout one-law deviations) noticed, not fixed.
+
+### THE GREEN RUN (the orchestrator, window `vx-770-tests-b2`, 03:34): 86 OF 87 SUITES GREEN; ONE
+RED, ADJUDICATED ENTANGLED WITH VX-732 (batch 3)
+
+"Test run with 610 tests in 87 suites failed after 452.261 seconds with 15 issues (including 4
+warnings and 10 known issues)" (log `App/Variorum/DerivedData/logs/vx770-b2-green.log`; 87 of 87
+requested types executed). The 10 known issues are pre-existing annotated guards (the VX-229
+comments-host lifecycle suite et al.), the skips the VX-136 capture harness. **The ONE red:**
+`aCommentNeverMovesTheTakesProse` at BoardCommentGutterTests.swift:417 — the guard's DELETION arm
+(`oracle.face(commented.block) == nil` after the comments are deleted) — **red on BOTH trees.**
+Mechanism, adjudicated from the log: the face survives the deletion because the Takes feed is
+ONE-SHOT per realized row (the batch's own recorded residue R-B2-5) — the assertion describes the
+world VX-732's fix (batch 3, in flight) builds, a batch early. Not hollow (the measure arms of
+the guard pass; the deletion arm is honest about a real staleness she reported as VX-732) but
+MIS-SEATED: the resolution is owed BEFORE the ladder — after batch 3 lands, batch 2's implementer
+reconciles (either the live feed makes the line green as-is, or the deletion arm moves to batch
+3's pins and the guard keeps its measure arms) and the batch 2 suites re-run in a short window.
+**Observation for the implementer:** the run's 4 "[SwiftUI] Modifying state during view update"
+warnings cluster inside the new BoardCommentGutter suites — the DEBUG face oracle (written to
+during render?) is the suspect; assess at the reconciliation.
