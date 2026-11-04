@@ -303,13 +303,13 @@ struct RedoStackTests {
                 ("block", a.block.id),
             ])
 
-            #expect(try stack.undo(with: ops) == "Delete Variant")
+            #expect(try stack.undo(with: ops) == "Delete Take")  // VX-634 — the label speaks the app's word
             #expect(try db.deletedAt("variant", a.variant.id) == nil)
             #expect(try db.fetchString(
                 "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
                 == a.variant.id, "the pre-image default came back")
 
-            #expect(try stack.redo(with: ops) == "Delete Variant")
+            #expect(try stack.redo(with: ops) == "Delete Take")  // VX-634 — the label speaks the app's word
             #expect(try db.deletedAt("variant", a.variant.id) != nil)
             #expect(try db.fetchString(
                 "SELECT default_variant_id FROM block WHERE id = ?", [a.block.id])
