@@ -229,7 +229,7 @@ rushed (members are sub-issues; they close one by one).
 
 | # | Item | Owner | Status |
 |---|---|---|---|
-| 1 | VX-756 flagship trace + fix | Batch 1 | NOT STARTED |
+| 1 | VX-756 flagship trace + fix | Batch 1 | BUILT — traced (994fa8877), pin (9e8955f9b), fix (91554271e); red/green + walk PENDING the window |
 | 2 | VX-730 stack comments whole | Batch 2 | NOT STARTED |
 | 3 | VX-731 slot split + carousel comments | Batch 2 | NOT STARTED |
 | 4 | VX-728 Compare comments (R-770-2) | Batch 2 | NOT STARTED |
@@ -527,7 +527,7 @@ Confirm each "Test run with N tests in M suites" line and read the `skipped:` li
    suspect the defaults domain first (the environment traps).
 3. **Results** land in this record's prediction table (rows flipped from PENDING), with the trace
    lines of the red run copied under THE TRACE as its on-screen evidence. Then the DerivedData
-   dirs (`vx756-post` ≈ 3 GB, `vx756-rev` ≈ 12 GB) may be deleted once batch 2 supersedes them.
+   dirs (`vx756-post` 2.8 GB, `vx756-rev` 3.1 GB) may be deleted once batch 2 supersedes them.
 
 ## SELF-ASSESSMENT — batch 1 (the first of the two reviews — the implementer's)
 
