@@ -29,7 +29,9 @@ The curated edition is the METHOD, separated from the PRODUCT canon. It is publi
 
 **OUT (until/unless the full open-sourcing):** `SurfaceContracts.md`, the bulk of `AppSpecRecord.md`, `SyncSpec.md`, `CastleRules.md`, `MCPSpec.md`, the ~650 plan files, the 121 handoffs, `notes/TICKETS.md`, `notes/source/` (ESPECIALLY the GitHub-issues export — testers' words are not hers to publish), anything carrying her home path/email, and any security detail whose ticket is still open.
 
-**Pass rules for every published excerpt:** no tester words; her verbatim quotes only where she approves each; no `~/.variorum` machinery, test-account roads or prod operational detail; public copy rules apply (sentence case, no ticket-id soup in prose).
+**Pass rules for every published excerpt:** no tester words WITHOUT their consent (her 2026-11-03 plan: ask each tester for written permission; non-responders' words are excised; anonymizing is the middle offer); her verbatim quotes only where she approves each; no `~/.variorum` machinery, test-account roads or prod operational detail; public copy rules apply (sentence case, no ticket-id soup in prose).
+
+**Day-one shape (her call 2026-11-03): the SHORT post ships with the release; the deep writeup and video TRAIL it.** Day one needs exactly three written things: the short post (what this is, why I'm sharing it — the letter already carries most of the why), the README-of-the-record (the map: what's where, how it was built, how to verify the claims), and the LICENSE. The tour posts, the full blog writeup and the video land on their own schedule afterward and each gets its own attention bump pointing back at the repo.
 
 ## 3. The video fact sheet — her level of effort, with receipts
 
@@ -65,7 +67,7 @@ The video's thesis as she framed it: *"I want open source; I put a ton of work i
 
 1. **Full-history privacy & secrets audit** — gitleaks/trufflehog over all 10.7k commits; inventory of tester content (the GitHub-issues export above all), her personal paths/email, credential-adjacent files ever committed; a per-file keep/excise/redact verdict list.
 2. **History excision rehearsal** — targeted `git filter-repo` from the verdict list, rehearsed on a clone, preserving the trail; the publish-the-real-history question answered with evidence.
-3. **License + trademark package** — her final license call (AGPL lean); LICENSE in repo; per-dependency compatibility check (GRDB SQLCipher fork, swift-dependencies, MCP swift-sdk, CArgon2, the BIP-39 wordlist); the TRADEMARK FILING (her hands, before any code drop).
+*[removed for publication]*
 4. **Security pass over open tickets & records** — no still-open Castle/sync/MCP finding may ship as a public roadmap; fix or defer each before the records go out.
 5. **Public repo mechanics** — README stance (open source, closed contribution), CONTRIBUTING + PR auto-close, SECURITY.md disclosure contact, the outsider build road (no sync, no signing, no stage).
 6. **Curated record assembly** — §2's IN list built, her editorial pass, the worked examples chosen.
