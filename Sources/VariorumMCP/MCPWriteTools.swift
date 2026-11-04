@@ -63,7 +63,9 @@ struct MCPWriteTools: Sendable {
         } catch let failure as ArgumentFailure {
             return Outcome(text: failure.message, isError: true)
         } catch {
-            return Outcome(text: "Variorum couldn't complete \(name): \(error)", isError: true)
+            // VX-369: through the one chain — never the raw error.
+            return Outcome(
+                text: MCPWireRefusalCopy.unexpected(error, tool: name, appWords: hooks.refusalWords), isError: true)
         }
     }
 
