@@ -135,6 +135,11 @@ final class TakesViewModel {
     /// projection stay here — so nothing about observation or invalidation
     /// changes with the move. Lazy so the composition can reference `self`.
     @ObservationIgnored private(set) lazy var structure = TakesStructureController(model: self)
+    /// **VX-732 — the article's comments, live** (`TakesCommentFeed`): filled
+    /// by `observeComments`, which only THE takes board starts (Write's panel
+    /// and the Lenses board draw no comments). The feed is its own observable;
+    /// each row's face reads it.
+    @ObservationIgnored let commentFeed = TakesCommentFeed()
     /// Fanned blocks currently bloomed — the board's (forwarded).
     var expandedBlocks: Set<String> { board.expandedBlocks }
     /// The board's transient outcome line, **CLASSED** (the post-13l polish
@@ -390,6 +395,27 @@ final class TakesViewModel {
         } catch is CancellationError {
         } catch {
             setRefusal("Takes observation failed: \(error)")
+        }
+    }
+
+    /// **VX-732 — the note's comments, one live read for the board's lifetime**
+    /// (THE takes board's `.task`, beside `start()`): `Queries.containerComments`,
+    /// Write's own feed (`EditorViewModel.observeComments`) — so a comment that
+    /// leaves the store by any road (⌥⌘Z of an AI's batch, another window, a
+    /// sync apply) leaves the gutter at the next value. Wakes on comment and
+    /// placement writes only; each value ∝ the note's own comments (P1).
+    func observeComments() async {
+        do {
+            for try await value in session.database.observe({ [postID] db in
+                try Queries.containerComments(db, containerID: postID).mapValues { comments in
+                    comments.map { BlockDecor.CommentBrief(id: $0.id, text: $0.text) }
+                }
+            }) {
+                commentFeed.adopt(value)
+            }
+        } catch is CancellationError {
+        } catch {
+            setRefusal("Comment observation failed: \(error)")
         }
     }
 

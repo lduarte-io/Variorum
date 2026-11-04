@@ -788,7 +788,7 @@ struct LineageStripe: View {
 
 /// Batch 14 — the takes article's LEFT-MARGIN comment note (her placement
 /// suggestion; the round-2 margin-comment idiom, takes-side), click for the
-/// full panel. Fetched per visible row (LazyVStack — cost ∝ viewport).
+/// full panel.
 ///
 /// **VX-770 batch 2 (T3/T4 — VX-730, VX-731): the note draws through WRITE'S
 /// machinery now** (P-3). It used to be a face of its own — the first comment
@@ -800,36 +800,35 @@ struct LineageStripe: View {
 /// Write's face (`CommentGutterFace`). It rides the ROW, not the cell, so a
 /// slot-split bloom — which replaces the cell — keeps its gutter (VX-731).
 ///
-/// The FEED is unchanged, deliberately: one read per realized row on appear
-/// and again after her panel closes — cost ∝ rows drawn (P1/P-8), and not live
-/// (a store change the board did not make waits for the next appear: VX-732's
-/// class, its own fix). The door is unchanged: her comments panel, its editing
-/// and its unsubmitted-comment park rule are the panel's.
+/// **VX-732 (VX-770 batch 3): the FEED is live.** It used to be one read per
+/// realized row (`.task(id: blockID)`), re-read only after its own panel closed
+/// — a copy keyed on the block id alone, so the comments an undo, the AI or
+/// another window took stayed drawn until the board remounted (her recording:
+/// until the mode switch). The note now draws its block's entries from the
+/// board's one live per-note feed (`TakesCommentFeed`, Write's own query), read
+/// HERE, in its own body, so a comment change re-renders the realized notes
+/// and nothing else. The door is unchanged: her comments panel, its editing and
+/// its unsubmitted-comment park rule are the panel's (and the face keeps its
+/// seat under the open panel — `CommentGutterFace`).
 struct CommentMarginNote: View {
     let session: AppSession
     let blockID: String
     let tokens: VoiceTokens
     /// Where this row's gutter is — the board's answer.
     let gutter: TakesCommentGutter
-    @State private var comments: [BlockComment] = []
+    /// The board's live comment feed (VX-732).
+    let feed: TakesCommentFeed
 
     var body: some View {
+        let entries = feed.entries(for: blockID)
         // The row's own size (an overlay is proposed its host's): the card
         // grows to the row and never past it.
         GeometryReader { proxy in
             CommentGutterFace(
                 session: session, blockID: blockID,
-                entries: comments.map(\.text), tokens: tokens,
-                geometry: gutter.geometry(rowHeight: proxy.size.height),
-                onPanelClosed: { Task { await refresh() } })
+                entries: entries, tokens: tokens,
+                geometry: gutter.geometry(rowHeight: proxy.size.height))
         }
-        .task(id: blockID) { await refresh() }
-    }
-
-    private func refresh() async {
-        comments = (try? await session.database.read { [blockID] db in
-            try Queries.blockComments(db, blockID: blockID)
-        }) ?? []
     }
 }
 

@@ -38,10 +38,16 @@ struct CommentGutterFace: View {
     let entries: [String]
     let tokens: VoiceTokens
     let geometry: Geometry
-    /// Called when her comments panel closes (a host whose feed is not live
-    /// re-reads then — the Takes row's shipped refresh).
-    var onPanelClosed: () -> Void = {}
     @State private var panelShown = false
+    /// **The face's SEAT under her open panel (VX-732, VX-770 batch 3).** The
+    /// face is her comments panel's door AND its popover's anchor, and every
+    /// host's feed is live (Compare's projection, the Takes board's
+    /// `TakesCommentFeed`) — so deleting the block's LAST comment inside the
+    /// panel would empty the face and tear the panel down under her, deleted
+    /// fold and Restore included. While the panel is open the face keeps the
+    /// entries it showed when she opened it if the live ones run out; once the
+    /// panel closes it follows the store again.
+    @State private var seat: [String] = []
 
     /// **Where the gutter is, in the host's own terms** — the ladder's inputs.
     struct Geometry: Equatable {
@@ -68,18 +74,19 @@ struct CommentGutterFace: View {
 
     var body: some View {
         let face = geometry.face
-        if !entries.isEmpty, let rect = face.rect {
+        let shown = panelShown && entries.isEmpty ? seat : entries
+        if !shown.isEmpty, let rect = face.rect {
             CommentCardFaceView(
-                face: face, entries: entries, tokens: tokens, identity: blockID,
-                onClick: { panelShown = true })
+                face: face, entries: shown, tokens: tokens, identity: blockID,
+                onClick: {
+                    seat = shown
+                    panelShown = true
+                })
                 .frame(width: rect.width, height: rect.height)
                 .popover(isPresented: $panelShown) {
                     CommentsPanel(session: session, blockID: blockID)
                 }
-                .onChange(of: panelShown) { _, shown in
-                    if !shown { onPanelClosed() }
-                }
-                .recordsBoardCommentFace(blockID: blockID, Self.oracleFace(face, entries: entries))
+                .recordsBoardCommentFace(blockID: blockID, Self.oracleFace(face, entries: shown))
                 // The rect is in GUTTER coordinates; the overlay's origin is
                 // the host's leading edge.
                 .offset(x: rect.minX - geometry.hostLeading, y: rect.minY)

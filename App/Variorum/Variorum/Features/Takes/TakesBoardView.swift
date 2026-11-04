@@ -277,6 +277,9 @@ struct TakesBoardView: View {
         .reportsMenuLifeEnds { model.lensFilter.closeMenu() }
         .debugProbeScope(session)
         .task { await model.start() }
+        // VX-732: the article's comments, live for this board's lifetime — the
+        // one board that draws them starts the one per-note read.
+        .task { await model.observeComments() }
         // 13b Stage 3 (3D — N1): the archived listing is its own read
         // (the fans query stays active-only), refreshed at projection
         // cadence — the WriteTakesPanel precedent.
@@ -1146,7 +1149,8 @@ struct TakesBoardView: View {
             .overlay(alignment: .topLeading) {
                 CommentMarginNote(
                     session: session, blockID: slot.blockID, tokens: tokens,
-                    gutter: commentGutter(slot: slot, commentRoom: commentRoom))
+                    gutter: commentGutter(slot: slot, commentRoom: commentRoom),
+                    feed: model.commentFeed)
             }
             if style == .marginGrid, bloomed {
                 // VX-136: this block's OWN column count (her choice, else
