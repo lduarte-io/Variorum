@@ -2867,7 +2867,7 @@ both voices.
 
 ### THE W2 RE-WALK (the W2 cycle's acceptance — an Opus re-walker under the orchestrator's HELD claim `vx-770-final`, 2026-11-04)
 
-**NOT DONE (first line, kept current):** IN PROGRESS — trial 1 walked; trials 2–3, the control, the posture end PENDING.
+**NOT DONE (first line, kept current):** IN PROGRESS — trials 1–2 walked; trial 3 (Terminal), the control, the posture end PENDING.
 
 Build: `App/Variorum/DerivedData/vx770-gatef/Build/Products/Debug/Variorum.app` (FINAL bytes — `nm` finds the W2
 fix's `landingTargetJustMoved` ×6 in its `Variorum.debug.dylib`; branch head 4f0874651). The fix under watch: THE W2
@@ -2878,7 +2878,8 @@ ONE settled landing — the burst shows no second movement after rest, and the a
 |---|---|
 | posture as found (pre-launch) | DONE (below) |
 | W2-R trial 1 (Study, margin grid, P25 → P35) | **PASS — 0 hops, one landing** |
-| W2-R trial 2 · 3 | PENDING |
+| W2-R trial 2 (Study, margin grid, P35 → P23) | **PASS — 0 hops, one landing** |
+| W2-R trial 3 (Terminal) | PENDING |
 | W1-R control (stack) | PENDING |
 | look line: her open fans stay open (R-770-1) | PENDING |
 | posture at the end | PENDING |
@@ -2904,6 +2905,15 @@ already at the top, washed, its rail open (chosen + choose)**; frames 23–66 (�
 ≤ 0.13 — the scroller indicator's fade), so no second movement. The story, verbatim:
 `TakesArticle landing — 0E4DB9F6-0D04-4E62-BE1A-563A0812E582 LAND | manifest rows=40 target=34 offset=-1 total=1988 derived=39 exactAbove=N | content=2757 | content=2763 | content=4189 | content=4312 | content=4174 | content=4636 | content=4720 | content=4785 | 0E4DB9F6-0D04-4E62-BE1A-563A0812E582 DONE: settled at top=0.0 after 0 hops, 1010 ms`
 (the same target as the original walk's W2 #1 — `target=34`, there `HOP 1 at 600 ms (top was 34.6)`).
+
+**W2-R trial 2 — Study, margin grid, P35 → P23 (12 above): PASS.** From trial 1's landing (P35 current); ⌘1; in
+Write scrolled up and clicked into **P23** (bar "block 23/40"); ⌘2 with the burst (`rewalk/t2-study-margin-p35-p23/`,
+`contact.png`). Frame 19 the empty-state face; **frame 21 the first board picture — P23 near the top (P22's tail
+above), washed, its rail open**; frame 24 the arrival flash's ring on P23's card in place (`boarddiff`: a 9 k-px change
+inside P23's own card box, shift 0); frames 22–66 shift 0 (the caret blink and the scroller's fade the only changes) —
+no second movement. The story, verbatim:
+`TakesArticle landing — 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 LAND | manifest rows=40 target=22 offset=-1 total=1988 derived=39 exactAbove=N | content=2757 | content=4138 | content=4570 | content=4671 | content=4978 | content=5089 | content=5446 | content=5724 | content=5915 | 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 DONE: settled at top=0.0 after 0 hops, 1015 ms`
+(the original walk's W2 #2 on the same target: `HOP 1 at 525 ms (top was 24.0)`).
 
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
