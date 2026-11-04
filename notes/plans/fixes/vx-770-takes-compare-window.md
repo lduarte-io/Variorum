@@ -1858,3 +1858,16 @@ order door (stored order only). So the ONE place the order is decided is
 Stage released 05:12, the three trees deleted after release, 50 GiB free. Remaining suite story:
 batch 5's gate (its delta + anything its diff touches) at the pre-ladder run; then the ladder,
 the ROAD-B walk, closeout.
+
+## INCIDENT — the index sweep at a63e88c9f (the orchestrator, 05:04; healed by the implementer's restore commit)
+
+My ledger-flip commit swept in batch 5's STAGED mid-revert `ReadingAssembly.swift` (its
+`git checkout <commit> -- <file>` stages as a side effect; my plain `git commit` after a
+pathspec `git add` committed the whole index), so HEAD briefly carried the VX-758 fix REVERSED
+while the implementer's working tree and prerevert copies stayed correct. No history rewrite:
+the implementer was told the same minute and commits the restored file explicitly (sha256
+against its prerevert copy AND its fix commit's blob), which heals HEAD. Rev trees built from
+the working tree were never affected. **The rule this writes (binding on the orchestrator for
+the rest of this run and recorded for every shared-worktree session): record commits beside a
+live implementer use PATHSPEC COMMITS (`git commit <file> -m …`), never a bare `git commit` —
+a peer's staged state is invisible to a pathspec add and rides a bare commit silently.**
