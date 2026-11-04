@@ -1829,3 +1829,30 @@ order door (stored order only). So the ONE place the order is decided is
   "a post that never crossed the churn threshold shouldn't lead a by-revision book") although the
   Library falls back to `created_at` there too — residue line, not built. Read-side only: no
   Operations, schema or `Sync/` change; the stored `sort_field` is untouched.
+
+## WINDOW b3r — THE CONSOLIDATED RUNS (the orchestrator, claim `vx-770-tests-b3r`, 04:52–05:12, at VX-500's seam)
+
+**All three legs verdict-clean; batches 1–4 + the reconciliation are now red/green VERIFIED.**
+1. **b3-rev red** (log `App/Variorum/DerivedData/logs/vx770-b3-red.log`): EXECUTED 10 tests / 4
+   of 4 suites — RED exactly on the five pinned behaviors: `anUndoneAIsCommentsLeaveTheGutter` ×4
+   styles (VX-732), `anUndoneAIsTakesCloseTheFansTheyCollapsed` ×4 (VX-733),
+   `aCommentChangedFromOutsideTheBoardFollowsTheStore`,
+   `aFanThatCollapsesWhileTheBoardIsAwayComesBackClosed`, `deletingAnOpenFansSecondTakeClosesIt`.
+   Every guard GREEN on rev as designed: the archive road (B3-P1), her open panel's seat, the
+   first-take door (R72), `onlyACollapsedFanCloses`, the pure rule. Both members red-on-old
+   VERIFIED, the across-mode-switch arm included.
+2. **b4-rev red** (`vx770-b4-red.log`): EXECUTED 7 tests / 2 of 2 suites — RED on VX-740's mint
+   pin (`columns == [outline]` failed: two columns on old; `peerSlots.count == 1` failed) and on
+   BOTH VX-757 toggle pins (`remade(...).isEmpty` failed both arms) — **VX-757's reading rule
+   resolves to FIXED, not record-only: the pane-remake mechanism is real and red-on-old.**
+   Guards green on rev: no-lineage inert, lineage colors, the ordinary order, beside-open-note.
+3. **The consolidated green on vx770-b4** (`vx770-green-consolidated.log`): "Test run with 1060
+   tests in 156 suites passed after 544.269 seconds with 4 warnings and 10 known issues" — 157
+   requested types (the sheet's honest dedupe of the quoted 160), 156 counted (the gap is the
+   trait-skipped VX-136 capture harness), ZERO failures; the 4 warnings are the standing
+   `@Dependency(\.date)` lines, the 10 known issues the pre-existing annotated guards. Batches
+   2/3's seven own suite types verified present and green BY NAME. The v1_36 newer-schema hazard
+   did not bite (no shell-mount reds).
+Stage released 05:12, the three trees deleted after release, 50 GiB free. Remaining suite story:
+batch 5's gate (its delta + anything its diff touches) at the pre-ladder run; then the ladder,
+the ROAD-B walk, closeout.
