@@ -85,6 +85,37 @@ struct TakesPagerAfterCloseTests {
         #expect(layout.pageOffset("a", limit: 1) == 0)
     }
 
+    /// **RED ON OLD — the ladder's round 1, F2: the collapse door forgets
+    /// even while the row is on screen.** Follow-the-scroll's bloom (R25)
+    /// holds a block that is fanned AND on screen; a collapsed fan holds one
+    /// take, so the scroll's arm no longer holds it — its strip unmounts with
+    /// the close whether or not the row is visible, and a fan that grows back
+    /// (⇧⌥⌘Z re-adding the takes, a new second take) re-blooms as a NEW strip
+    /// born at its leading edge. The old rule kept a visible block's page on
+    /// every close door, so that strip's caption read the page its
+    /// predecessor left. The visibility exception is the hand-close doors'
+    /// only (their block still holds its fan, so the scroll keeps the strip —
+    /// `aFanFollowTheScrollKeepsBloomedKeepsItsPage`).
+    @Test func aCollapsedFanForgetsItsPageEvenWhileFollowTheScrollShowsItsRow() {
+        let layout = TakesBoardLayout()
+        layout.followTheScroll = true
+        layout.rowAppeared("a")
+        layout.expandAll(fannedBlockIDs: ["a"])
+        let rail = TakesBoardLayout.railPageKey("a")
+        layout.stepPage("a", by: 1, limit: 1)
+        layout.setPage(rail, to: 2, limit: 3)
+        #expect(layout.isRowVisible("a"), "premise: the row is on screen")
+        #expect(layout.pageOffset("a", limit: 1) == 1 && layout.pageOffset(rail, limit: 3) == 2,
+                "premise: the split and the rail are paged")
+
+        layout.closeCollapsedFans(["a"])
+        #expect(!layout.expandedBlocks.contains("a"), "premise: the collapse closed it")
+        #expect(layout.pageOffset("a", limit: 1) == 0,
+                "a collapsed fan's split page goes with it, on screen or not")
+        #expect(layout.pageOffset(rail, limit: 3) == 0,
+                "…and its rail's page too")
+    }
+
     /// GUARD — a page on a fan that stays open is the strip's live state:
     /// paging, an unrelated expand all, nothing else resets it.
     @Test func aFanThatStaysOpenKeepsItsPage() {
