@@ -1503,3 +1503,19 @@ parenthetical; the CastleRules one-word touch HELD for her. Born: VX-739–745; 
 off the four Variorum pages (stargazing-tech ac74b3a, deployed with the publish). Nothing mobile-visible.
 **Released as 1.0.1 the same night at her advance word** (R-736-4; notes "Minor bug fixes."; the outcome in the
 handoff). Next: hers — the morning bundle is the handoff's checklist.
+
+**→ VX-500 CLOSED 2026-11-04 — THE 0.10 WINDOW SYNC FOLLOW-UPS
+(the record `notes/plans/fixes/vx-500-sync-followups.md`, FOR A LATER READER at its top; PR #215; the handoff
+`notes/handoffs/vx-500-handoff.md`).** The run that made a first catch-up fast and visible: the changefeed page is
+O(page) (SHAPE B + the index-only count, DEPLOYED mid-run 2026-11-02 at her word and accepted — her week-behind Pro's
+~23k rows in ~64 s; a maintenance deploy, marker untouched), the sync row speaks a long round's progress and the
+belt's retrying state (one presentation source, both platforms, both sheets), the apply's O(N²) deferred-FK child
+scan was found by a measured profile and fixed by `v1_36_fk_child_indexes` (330 s → 89 s at 109k rows; the v1_35
+slot was main's VX-669 sweep, so v1_36 is the export boundary), the retention suite rides the injected clock, and
+the leaf constraint landed. Three Fable orchestrators (a protocol-breach cutover, a deploy cutover, the close),
+Fable implementers throughout (R-500-5), two server-half rounds + a two-round whole-diff ladder closing CLEAN.
+The closing runs: debug core 3,605/483; FULL VariorumTests 5,804/1,006 passed on the final tip; FULL
+VariorumMobileTests 852/139 with its only real red pre-existing on main (VM-38). Born: VX-720/721 (fixed in-run),
+VX-722/723/772 (load-flakes), VX-773 (the release-config TEST split, pre-existing), VM-38. PROVISIONALs →
+QUESTIONS #257; her rulings R-500-1…12 in the record; NO RELEASE at her word (R-500-12 — she accumulates PRs).
+Next: VX-683 (a Sync/ design memo + sitting first), then VX-544 (plan ready).

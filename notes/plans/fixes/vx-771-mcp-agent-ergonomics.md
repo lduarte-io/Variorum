@@ -2,7 +2,7 @@
 
 **Ticket: VX-771 · Project: 13n — The MCP door · Branch: `vx-771-mcp-agent-ergonomics` · Worktree: `~/dev/variorum-vx-771` · the Pro**
 
-**STATUS: OPEN — kicked off 2026-11-04 (overnight away run, her second session of the night).**
+**STATUS: CLOSED 2026-11-04 — all 14 members landed; one ladder round (no BLOCKER/MAJOR); the Mac close 287/42 green; the walk's stop-road verify live, the lock road's field check in her handoff. The morning bundle moved to `notes/handoffs/vx-771-handoff.md`.**
 Her away word, verbatim: *"excellent, i'm stepping away for the night, rule provisionally and I will await my morning bundle."*
 
 ## FOR A LATER READER
