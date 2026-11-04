@@ -190,7 +190,10 @@ extension Operations {
     /// DUPLICATE AS VERSION: the post EXACTLY as it is — its own chosen +
     /// whole fans; ignores columns and lenses; unambiguous from anywhere
     /// (round 5's ruling, superseding the round-4 unification). Copies the
-    /// container row (title/profile/entry_date/notes/segmentation verbatim;
+    /// container row (title/profile/entry_date/notes/segmentation verbatim —
+    /// save VX-759's one exception, P-771-1: an undated, untitled, non-journal
+    /// source's copy takes the source's creation day as its `entry_date`
+    /// (`DuplicateDay`), so it is named and sorted as its source is;
     /// never born locked — the poolDragCopy copy doctrine), every live slot
     /// (whole live fan, archived takes riding with statuses preserved,
     /// commits never copied, parent trees remapped, block names copied),
@@ -311,7 +314,9 @@ extension Operations {
                 }
             }
         }
-        let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+        // VX-759 (P-771-1): the copy keeps the day its undated, untitled source
+        // is named for (`DuplicateDay`) — her doors and the wire alike, the one body.
+        let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true, keepingNamedDay: true)
         if let filing {
             var membership = try addPostToReading(db, copy.post.id, to: filing.bookID, at: .end)
             if let sectionID = filing.sectionID {
@@ -775,12 +780,23 @@ extension Operations {
     /// W23 is that the copy and the membership swap are one act, so the
     /// copy body cannot be reached through `duplicateAsVersion` (which
     /// opens its own write and registers its own undo entry).
+    ///
+    /// `keepingNamedDay` (VX-759, PROVISIONAL P-771-1): the copy's
+    /// `entry_date` by `DuplicateDay` — an undated, untitled, non-journal
+    /// source's copy takes the source's creation day, so it is named and
+    /// sorted as its source is; any other source's stays verbatim. Only the
+    /// duplicate road passes `true`; every other copy door is byte-unchanged.
     func copyPost(
         _ db: Database, sourceID: String, chosenPicks: [String: String]?, carryFans: Bool,
-        intoWing destinationWing: String? = nil
+        intoWing destinationWing: String? = nil, keepingNamedDay: Bool = false
     ) throws -> PostCopyResult {
         let source = try livePost(db, sourceID)
         let now = date.now
+        let entryDate = keepingNamedDay
+            ? DuplicateDay.entryDate(
+                title: source.title, entryDate: source.entryDate, profile: source.profile,
+                createdAt: source.createdAt)
+            : source.entryDate
 
         // 13i-c U2: the copy is born in the SOURCE's wing — a copy door is
         // never a wing crossing (the sitting record §9's total isolation).
@@ -788,7 +804,7 @@ extension Operations {
         // destination (`intoWing`); every other copy door passes nil.
         var copy = Container(
             id: newID(), ownerId: currentOwnerID(), kind: .post,
-            title: source.title, profile: source.profile, entryDate: source.entryDate,
+            title: source.title, profile: source.profile, entryDate: entryDate,
             locked: false, floatingNotes: source.floatingNotes,
             segmentationDefault: source.segmentationDefault,
             lastTouchedAt: now, wingId: destinationWing ?? source.wingId,
