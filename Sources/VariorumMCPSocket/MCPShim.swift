@@ -40,7 +40,7 @@ public enum MCPShim {
     public static func run(
         executable: URL, home: String?,
         environment: [String: String] = ProcessInfo.processInfo.environment,
-        input: Int32 = STDIN_FILENO, output: Int32 = STDOUT_FILENO
+        input: Int32 = STDIN_FILENO, output: Int32 = STDOUT_FILENO, errorOutput: Int32 = STDERR_FILENO
     ) -> Outcome {
         guard let bundleID = MCPSocketRoad.bundleIdentifier(ofAppContaining: executable), let home else {
             respondToFirstRequest(input: input, output: output, message: notInsideAppMessage(executable))
@@ -49,7 +49,7 @@ public enum MCPShim {
         let directory = MCPSocketRoad.containerDataDirectory(bundleIdentifier: bundleID, realHome: home)
         switch MCPSocketRoad.connect(directory: directory) {
         case .success(let socket):
-            serve(socket: socket, environment: environment, input: input, output: output)
+            serve(socket: socket, environment: environment, input: input, output: output, errorOutput: errorOutput)
             close(socket)
             return .pumped
         case .failure(let failure):
@@ -80,6 +80,16 @@ public enum MCPShim {
         "variorum-mcp must run from inside Variorum.app (Contents/MacOS); it was started from "
             + "\(executable.path)."
     }
+
+    /// **VX-762 (B2, PROVISIONAL P-771-3 — the VX-771 run's batch 4): the app
+    /// ended the connection.** The ONE line the shim writes on stderr when the
+    /// APP ends the socket while the client is still there (`pump`) — the
+    /// client otherwise sees only that its server exited ("MCP server
+    /// disconnected"), with nothing saying Variorum did it or what to do. A
+    /// stdio client keeps a server's stderr as its log (Claude Code's MCP
+    /// logs), never as protocol. Provider-neutral beyond the command (O-4's net
+    /// bans names, not "/mcp" — VX-640). Her copy pass owns the words.
+    public static let appClosedMessage = "Variorum closed the connection — reconnect with /mcp once it's back."
 
     private static func describe(_ code: Int32) -> String {
         "\(String(cString: strerror(code))), errno \(code)"
@@ -142,11 +152,14 @@ public enum MCPShim {
     /// Connected: the preamble first (when the environment carries a key —
     /// one line, never parsed by anyone but the app), then the pump. A bare
     /// shim writes nothing of its own.
-    public static func serve(socket: Int32, environment: [String: String], input: Int32, output: Int32) {
+    public static func serve(
+        socket: Int32, environment: [String: String], input: Int32, output: Int32,
+        errorOutput: Int32 = STDERR_FILENO
+    ) {
         if let key = MCPPreamble.key(inEnvironment: environment) {
             writeAll(socket, MCPPreamble.line(key: key))
         }
-        pump(input: input, output: output, socket: socket)
+        pump(input: input, output: output, socket: socket, errorOutput: errorOutput)
     }
 
     // MARK: - The pump
@@ -155,22 +168,65 @@ public enum MCPShim {
     /// this one, verbatim, until the socket closes. The client hanging up
     /// (EOF on `input`) half-closes the socket so the app sees the session
     /// end; the app hanging up ends the run.
-    public static func pump(input: Int32, output: Int32, socket: Int32) {
-        let upstream = Thread {
-            copy(from: input, to: socket)
-            shutdown(socket, SHUT_WR)
-        }
-        upstream.start()
-        copy(from: socket, to: output)
+    ///
+    /// **VX-762 (B2): the app's end is said.** When the downstream ends on the
+    /// SOCKET's side (EOF or a read error) and the client's input had not ended
+    /// first, the app ended the connection: ONE line on `errorOutput`
+    /// (`appClosedMessage`). The client's own end says nothing — its input's
+    /// EOF is marked before the half-close, so the app's answering close always
+    /// finds the mark — and neither does a failed write to `output` (the client
+    /// is gone). Only the input's own end marks it: a write to the socket that
+    /// fails is the app's close seen from the upstream side.
+    public static func pump(input: Int32, output: Int32, socket: Int32, errorOutput: Int32 = STDERR_FILENO) {
+        pump(input: input, output: output, socket: socket, errorOutput: errorOutput, onUpstreamEnd: nil)
     }
 
-    static func copy(from source: Int32, to destination: Int32) {
+    /// The pump, with a TEST seam: `onUpstreamEnd` runs after the upstream
+    /// thread's last act (its half-close), so a test can close the socket only
+    /// once nothing can touch its number again (VX-132's straggler lesson — the
+    /// upstream outlives the run whenever the app ends first).
+    static func pump(
+        input: Int32, output: Int32, socket: Int32, errorOutput: Int32,
+        onUpstreamEnd: (@Sendable () -> Void)?
+    ) {
+        let clientEnded = ClientEnd()
+        let upstream = Thread {
+            if copy(from: input, to: socket) == .sourceEnded { clientEnded.mark() }
+            shutdown(socket, SHUT_WR)
+            onUpstreamEnd?()
+        }
+        upstream.start()
+        let downstream = copy(from: socket, to: output)
+        if downstream == .sourceEnded, !clientEnded.isMarked {
+            writeAll(errorOutput, Data((appClosedMessage + "\n").utf8))
+        }
+    }
+
+    /// How a `copy` loop ended.
+    enum CopyEnd: Equatable, Sendable {
+        /// The source's read ended — EOF, or an error.
+        case sourceEnded
+        /// A write to the destination failed.
+        case destinationFailed
+    }
+
+    /// "The client's input ended" — set by the upstream thread, read by the
+    /// downstream one (VX-762).
+    private final class ClientEnd: @unchecked Sendable {
+        private let lock = NSLock()
+        private var marked = false
+        func mark() { lock.withLock { marked = true } }
+        var isMarked: Bool { lock.withLock { marked } }
+    }
+
+    @discardableResult
+    static func copy(from source: Int32, to destination: Int32) -> CopyEnd {
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
         while true {
             let count = buffer.withUnsafeMutableBytes { read(source, $0.baseAddress, $0.count) }
             if count < 0, errno == EINTR { continue }
-            guard count > 0 else { return }
-            guard writeAll(destination, Data(buffer[0..<count])) else { return }
+            guard count > 0 else { return .sourceEnded }
+            guard writeAll(destination, Data(buffer[0..<count])) else { return .destinationFailed }
         }
     }
 
