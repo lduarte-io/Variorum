@@ -2625,7 +2625,7 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 | W12 R-770-1 three takes, delete one → stays open | PASS (Study) |
 | W13 B3-P1 archive road | PASS (Study) |
 | W14 the seat — Takes AND Compare (F1) | PASS — Takes (card press, Study; bar door, Terminal) and Compare (card press, Study) |
-| W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PASS (Study, top + mid: zero board pixels change); Terminal PENDING |
+| W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PASS — both voices, top + mid/deep board: zero board pixels change on any press |
 | W16 VX-740 make outline note ×3 → one column each | PASS (Study) — 3 of 3 one column; one outline per note in the palette |
 | W17 VX-739 the word count after two take flips | PASS — both voices: 11w → 8w → **11w** → **8w** |
 
@@ -2812,6 +2812,11 @@ window (`scratchpad/walk/boarddiff.py`, |Δ| > 40 of 255): any pixel the toggle 
   `w15-reorder-small.png`; burst `.walkshots-vx770/w15-study-reordered/`, `contact.png`): follow OFF → the twin column
   shows its own order (C4 above C3), the "moved" line goes and the anchor's rows close up by its height; ON → back.
   Each change lands in ONE frame (≈80 ms after the chip) and the next frame is identical — the layout changes as it
+- **Terminal, a 40-block lineage-sharing pair** (`vx770 landing walk` + its Duplicate-with-Tags twin, auto-seated as
+  "versions"; many paragraphs wrapping in the column; `w15t-0-small.png`): the same 14 presses at the TOP
+  (`.walkshots-vx770/w15-terminal-top/`, 553 frames) and DEEP in the board (P32–P35 on screen, `w15t-mid-small.png`;
+  `.walkshots-vx770/w15-terminal-mid/`): **only the chip row changes, on every press; not one board pixel at any frame.**
+  **W15: PASS in both voices** — no flicker, no pane rebuild visible, no jump.
   should, in one step, nothing re-grows.
 
 ### W16 — VX-740, make outline note (Study)
