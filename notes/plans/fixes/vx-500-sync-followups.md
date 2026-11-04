@@ -2546,3 +2546,15 @@ seconds" (the discard road's standing pins unmoved).
    same fixture three standing scenes use; if the corpus seeding ever changes row counts, the pin's non-vacuity line
    (`staged == 200`) fails loudly rather than the assertion going hollow. Deliberate; a round-2 reviewer should
    confirm the pin still exercises BOTH passes (stage + refetch) by its red lines (750 = 2 × 375), not by the green.
+
+### WHOLE-DIFF LADDER ROUND 2 — THE FINAL CALLS (the orchestrator, 2026-11-04 ~04:40 MST): THE LADDER IS CLOSED
+
+The round's record is `notes/plans/fixes/vx-500-ladder-round2.md` (a fresh `fable-reviewer`): **ZERO findings at any
+severity; F1–F4 each CLOSED as fixed** — F1's red independently REPRODUCED by the reviewer in a scratch clone (the
+recorded 750-vs-375 lines exactly), F3's byte-equivalence re-derived, F4's zero-control corner accepted as deliberate;
+the fix session's self-assessment items weighed and dispositioned in the record; the clean bill covers the fix range's
+whole blast radius (stat-verified file set, SyncSpec conformance, the empty-refetch corner, the brief's filter re-run
+byte-matching). No round 3 earned; the cap stands at two rounds. The ladder's remaining duty is the orchestrator's
+line-by-line check of a FINAL round's fixes — NOT owed here, because round 2 re-read round 1's fixes and closed clean
+(the "final round's fixes no later round reads" case never arose). NEXT: the closing runs (the conditioned window),
+the PR, the merge at the coordinator's all-clear.
