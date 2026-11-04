@@ -529,4 +529,60 @@ struct TakesCollapsedFanRoadsTests {
     }
 }
 
+// MARK: - VX-733 — the rule itself (pure)
+
+/// A slot with the counts the rule reads; `gap` is a sync race's missing row.
+nonisolated private func ruleSlot(
+    _ id: String, active: Int, live: Int, gap: Bool = false
+) -> Queries.RenderedBlock {
+    Queries.RenderedBlock(
+        blockID: id, placementID: "p-\(id)", position: "a\(id)",
+        variantID: gap ? nil : "v-\(id)", text: gap ? nil : "words",
+        activeVariantCount: gap ? 0 : active, liveVariantCount: gap ? 0 : live,
+        commentCount: 0, variantLocked: false)
+}
+
+@Suite("VX-733 — when an open fan has collapsed (TakesOpenFanRule, pure)")
+struct TakesOpenFanRuleTests {
+
+    /// What the board remembers having seen: open blocks holding MORE than one
+    /// take, archived ones counted (B3-P1 (a)); a gap holds nothing; nothing is
+    /// scanned while nothing is open.
+    @Test func whatAnOpenBlockHolds() {
+        let slots = [
+            ruleSlot("fan", active: 2, live: 2),
+            ruleSlot("one", active: 1, live: 1),
+            ruleSlot("archived", active: 1, live: 2),
+            ruleSlot("closed", active: 3, live: 3),
+            ruleSlot("gap", active: 0, live: 0, gap: true),
+        ]
+        #expect(TakesOpenFanRule.holdingTakes(["fan", "one", "archived", "gap"], in: slots)
+                == ["fan", "archived"])
+        #expect(TakesOpenFanRule.holdingTakes([], in: slots).isEmpty)
+    }
+
+    /// The collapse: open, held takes at the last sight, now in the note
+    /// holding exactly one. Every other shape stays open.
+    @Test func onlyACollapsedFanCloses() {
+        let now = [
+            ruleSlot("collapsed", active: 1, live: 1),       // an undo took its takes
+            ruleSlot("stillFanned", active: 2, live: 2),     // R-770-1
+            ruleSlot("archivedRoad", active: 1, live: 2),    // B3-P1 (a)
+            ruleSlot("firstTakeDoor", active: 1, live: 1),   // R72 — never held two
+            ruleSlot("gap", active: 0, live: 0, gap: true),  // no evidence
+            ruleSlot("closedFan", active: 1, live: 1),       // not open — nothing to close
+        ]
+        let open: Set<String> = [
+            "collapsed", "stillFanned", "archivedRoad", "firstTakeDoor", "gap", "leftTheNote",
+        ]
+        let heldBefore: Set<String> = [
+            "collapsed", "stillFanned", "archivedRoad", "gap", "leftTheNote", "closedFan",
+        ]
+        #expect(TakesOpenFanRule.collapsed(open: open, heldBefore: heldBefore, in: now)
+                == ["collapsed"])
+        #expect(TakesOpenFanRule.collapsed(open: open, heldBefore: [], in: now).isEmpty,
+                "with no last sight, nothing is a collapse")
+    }
+}
+
 #endif

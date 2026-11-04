@@ -348,7 +348,9 @@ final class TakesBoardLayout {
     // MARK: - Expansion (per-note session memory — VX-428)
 
     /// Fanned blocks currently bloomed: fans stay open once expanded,
-    /// close-all resets, nothing persists past the session, nothing syncs.
+    /// close-all resets, nothing persists past the session, nothing syncs —
+    /// and a fan that collapses to its one take closes (VX-733,
+    /// `closeCollapsedFans`; a first-take door she opened is not a collapse).
     ///
     /// **VX-428 (her ruling R-601-2, the R-VX170-5 road) supersedes the Takes
     /// plan's MOUNT-ONLY letter** that used to stand here ("session-only …
@@ -391,6 +393,19 @@ final class TakesBoardLayout {
     /// projection). Reports only when something left.
     func pruneExpansion(to blockIDs: Set<String>) {
         let kept = expandedBlocks.intersection(blockIDs)
+        guard kept.count != expandedBlocks.count else { return }
+        expandedBlocks = kept
+        expansionChanged()
+    }
+
+    /// **VX-733: closes the open blocks whose fans COLLAPSED** — the
+    /// conductor hands over the set `TakesOpenFanRule.collapsed` decided (this
+    /// component never reads the projection). The open state belonged to takes
+    /// that are gone, so the block's wash and bloom go with them; reported like
+    /// any change, so the session memory follows. Reports only when something
+    /// closed.
+    func closeCollapsedFans(_ blockIDs: Set<String>) {
+        let kept = expandedBlocks.subtracting(blockIDs)
         guard kept.count != expandedBlocks.count else { return }
         expandedBlocks = kept
         expansionChanged()
