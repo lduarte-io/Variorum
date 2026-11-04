@@ -145,12 +145,12 @@ private func tempDirectory(_ prefix: String) -> URL {
 }
 
 /// A raw client on `directory`'s socket that names itself (its key's preamble, an
-/// `initialize`, the answer read under a 5 s receive bound).
+/// `initialize`, the answer read under the harness's receive bound — `HarnessDeadline.seconds`, O-7).
 private func namedClient(_ directory: URL, key: String, as name: String) throws -> Int32 {
     guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
         throw HarnessFailure("could not connect as \(name)")
     }
-    var timeout = timeval(tv_sec: 5, tv_usec: 0)
+    var timeout = timeval(tv_sec: Int(HarnessDeadline.seconds.rounded(.up)), tv_usec: 0)
     _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
     var opening = MCPPreamble.line(key: key)
     let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
@@ -240,7 +240,7 @@ struct MCPCloseReasonServerTests {
             throw HarnessFailure("could not connect")
         }
         defer { close(fd) }
-        var timeout = timeval(tv_sec: 5, tv_usec: 0)
+        var timeout = timeval(tv_sec: Int(HarnessDeadline.seconds.rounded(.up)), tv_usec: 0)
         _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         let nobodyNamed = h.host.connectedClientNames.isEmpty
         #expect(nobodyNamed, "nothing named itself")

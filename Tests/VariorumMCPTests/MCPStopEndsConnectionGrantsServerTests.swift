@@ -24,13 +24,13 @@ private func tempDirectory(_ prefix: String) -> URL {
 }
 
 /// A raw client on `directory`'s socket that NAMES ITSELF (its setup key's
-/// preamble, then an `initialize` as `name`, the answer read under a 5 s receive
-/// bound). The caller closes the descriptor.
+/// preamble, then an `initialize` as `name`, the answer read under a receive
+/// bound — `HarnessDeadline.seconds`, the harness's own, O-7). The caller closes the descriptor.
 private func namedClient(_ directory: URL, key: String, as name: String) throws -> Int32 {
     guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
         throw HarnessFailure("could not connect as \(name)")
     }
-    var timeout = timeval(tv_sec: 5, tv_usec: 0)
+    var timeout = timeval(tv_sec: Int(HarnessDeadline.seconds.rounded(.up)), tv_usec: 0)
     _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
     var opening = MCPPreamble.line(key: key)
     let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
@@ -43,7 +43,7 @@ private func namedClient(_ directory: URL, key: String, as name: String) throws 
     return fd
 }
 
-/// The server hung this connection up: reading reaches EOF within the 5 s bound.
+/// The server hung this connection up: reading reaches EOF within the receive bound.
 private func reachesEOF(_ fd: Int32) -> Bool {
     var buffer = [UInt8](repeating: 0, count: 4096)
     while true {
@@ -198,7 +198,7 @@ private func bareClient(_ directory: URL, declaring name: String) throws -> Int3
     guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
         throw HarnessFailure("could not connect")
     }
-    var timeout = timeval(tv_sec: 5, tv_usec: 0)
+    var timeout = timeval(tv_sec: Int(HarnessDeadline.seconds.rounded(.up)), tv_usec: 0)
     _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
     let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
     _ = MCPShim.writeAll(fd, Data((initialize + "\n").utf8))
