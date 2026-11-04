@@ -2812,12 +2812,12 @@ window (`scratchpad/walk/boarddiff.py`, |Δ| > 40 of 255): any pixel the toggle 
   `w15-reorder-small.png`; burst `.walkshots-vx770/w15-study-reordered/`, `contact.png`): follow OFF → the twin column
   shows its own order (C4 above C3), the "moved" line goes and the anchor's rows close up by its height; ON → back.
   Each change lands in ONE frame (≈80 ms after the chip) and the next frame is identical — the layout changes as it
+  should, in one step, nothing re-grows.
 - **Terminal, a 40-block lineage-sharing pair** (`vx770 landing walk` + its Duplicate-with-Tags twin, auto-seated as
   "versions"; many paragraphs wrapping in the column; `w15t-0-small.png`): the same 14 presses at the TOP
   (`.walkshots-vx770/w15-terminal-top/`, 553 frames) and DEEP in the board (P32–P35 on screen, `w15t-mid-small.png`;
   `.walkshots-vx770/w15-terminal-mid/`): **only the chip row changes, on every press; not one board pixel at any frame.**
   **W15: PASS in both voices** — no flicker, no pane rebuild visible, no jump.
-  should, in one step, nothing re-grows.
 
 ### W16 — VX-740, make outline note (Study)
 Three fresh notes with no versions (`vx770 outline one/two/three`, imported); each: ⌘5 → the offer band (`compare with a
