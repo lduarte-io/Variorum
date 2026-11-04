@@ -69,7 +69,7 @@ U4, not Pre-launch · R-500-8 the deploy through the PAT · R-500-9/R-500-11 the
 session hands off after the deploy; U3 lifted out; one file restructured in place.
 
 **What remains for the successor (the kickoff prompt at the top of this file):** U2 (the faces — D-496's words, D-505's
-line, the retention clock, the leaf; its brief below) → U4 (VX-720's v1_35 migration; its brief) → the whole-diff Fable
+line, the retention clock, the leaf; its brief below) → U4 (VX-720's index migration — landed as v1_36, the v1_35 slot taken by main's VX-669 sweep; its brief) → the whole-diff Fable
 ladder (anchors: the two server-half rounds for those files; the U1a/U1b self-assessments) → closing runs (the Mac suites
 over every changed source; core debug + release; the phone build) → the PR OPENED AND HELD → the closeout's canon deltas
 DRAFTED for the merge moment (AppSpec §12 the row's progress line, SyncSpec §12 a maintenance entry for the deployed
@@ -168,7 +168,7 @@ fix); U3; the ladder; the deploy; the PR. **ENVIRONMENT TRAPS — this file's se
 The offline typed-unlock retry (VX-544, D-544) runs as its own ticket run after VX-500 closes and after VX-683; its design
 and brief moved whole to `notes/plans/fixes/vx-544-offline-typed-unlock.md`. Nothing in U2/U4 depends on it.
 
-### U4 BRIEF — the two FK child indexes (VX-720; a v1_35 local-only migration + pin + the bench re-run) (a FABLE implementer; `Persistence/` only — no `Sync/` line)
+### U4 BRIEF — the two FK child indexes (VX-720; a local-only index migration + pin + the bench re-run — LANDED AS v1_36: the brief's v1_35 slot was taken by main's VX-669 sweep, shipped in 1.0.1) (a FABLE implementer; `Persistence/` only — no `Sync/` line)
 
 **Who you are.** The implementer for U4 of VX-500 (VX-720), a Fable subagent at xhigh effort; `.claude/agents/opus-implementer.md`'s
 contract binds you point for point (you are Fable at R-500-5). Scope: ONE migration, its pin, the bench re-run as evidence,
@@ -182,14 +182,14 @@ lockstep event: no mirror column, no wire change, no marker move — say so in t
 `SyncSchema`'s completeness walk that an index adds no column) · `notes/SessionResiliencyProtocol.md` §implementer · the
 code: `Sources/VariorumCore/Persistence/` (the migration registry; the v1_34 `idx_cblock_dead_block` migration as the
 exact precedent — its shape, its test, how `knownMigrations`/the export's `applied == known` guard sees it (VX-502's
-record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a build with v1_35 refuses on an older build
-— the standing rule, say it in the record)) · `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (the bench and
+record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a build with v1_36 refuses on an older build
+— the standing rule, say it in the record; 1.0.1 already knows v1_35, so v1_36 is the refusing boundary)) · `Tests/VariorumCoreTests/ApplyProfileMeasurementTests.swift` (the bench and
 `ApplyProfileBisectionTests`' arms E/F — the pin's shape) · `Tests/VariorumCoreTests/SyncTestHarness.swift`.
 
 **The pieces:**
 
 1. **The migration, its own commit first** (CLAUDE.md: schema changes get their own commit before the code that uses
-   them): `v1_35` adding `CREATE INDEX idx_block_default_variant ON block(default_variant_id)` and `CREATE INDEX
+   them): `v1_36` (as landed; the brief originally said v1_35) adding `CREATE INDEX idx_block_default_variant ON block(default_variant_id)` and `CREATE INDEX
    idx_cblock_chosen_variant ON container_block(chosen_variant_id)`; registered wherever v1_34 is; the DDL doc comment
    names the mechanism (SQLite's deferred-FK child scan — `sqlite.org/foreignkeys.html` §4 — while violations are
    pending; the feed's registry order) and the measured gain. The `AuthRLSDDLTests`/schema pins that enumerate indexes
@@ -253,7 +253,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 3c | THE DEPLOY: run 1 REFUSED (42501 — the artifacts had omitted the 10/14c bracket, VX-721); the DEPLOY-FIX session landed the bracket + the sweep rows + pins (`e01bb7359`, verified 87/2); **run 2 LANDED 2026-11-02 00:41 UTC (`[]`)**; every verify DONE (SHAPE B body; both functions definer-owned with pg_temp; the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans, 779 ms); **the acceptance DONE 00:57 UTC — her week-behind Pro caught up ~23k rows in ~64 s end to end** (the checklist); the whole-diff ladder reads the bracket fix | DEPLOYED + ACCEPTED |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | DONE (`8c409ba63` P-500-1 · `de88ecc77` P-500-2 · `918bb6df6` P-500-3/P-500-7(a) · `31e1ce752`+`6b4c4825e` the injected clock + the red-on-old · `fcbd86286` VX-490) — the record is `### U2 RECORD`; the close set "Test run with 225 tests in 49 suites passed" |
 | 5 | ~~U3 — the typed-unlock retry + the reachability trigger (D-544)~~ | LIFTED OUT (R-500-10): VX-544 runs as its own ticket run after VX-500's ladder closes; D-544 + the U3 brief move to `notes/plans/fixes/vx-544-offline-typed-unlock.md` at this session's cutover |
-| 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | DONE (`2a1b6e600` the migration — **v1_36**, the brief's v1_35 slot taken by main's sweep · `91cc5a656` the pin · `b757a43f1` the red-on-old (ratio 12.44× on the reverted tree) + the knob retired · `809cf898f` the bench re-run: apply 330,231 → 89,187 ms median, 3.7×, + the VX-672 paragraph · the close commit) — the record is `### U4 RECORD`; broad core 3,604/483 passed, sync suites 522/110 passed |
+| 5b | U4 — VX-720: the two-index migration (v1_36 as landed) + pin + the bench re-run (R-500-7) | DONE (`2a1b6e600` the migration — **v1_36**, the brief's v1_35 slot taken by main's sweep · `91cc5a656` the pin · `b757a43f1` the red-on-old (ratio 12.44× on the reverted tree) + the knob retired · `809cf898f` the bench re-run: apply 330,231 → 89,187 ms median, 3.7×, + the VX-672 paragraph · the close commit) — the record is `### U4 RECORD`; broad core 3,604/483 passed, sync suites 522/110 passed |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
 | 7 | Closing runs (core debug + release; the Mac suites over every changed source; the phone build) | NOT STARTED |
 | 8 | The PR opened — HELD OPEN at her word; the handoff; memory; the canon deltas DRAFTED for the merge moment | NOT STARTED (the successor's) |
@@ -301,7 +301,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | VX-503 | the Standard join's Touch ID prompt | — | Done before this run; nothing here |
 | **VX-721** (minted at the deploy) | the VX-495 artifacts omitted the 10/14c re-own bracket — run 1 refused 42501 | Bug · Confirmed · Castle & sync · High | FIXED in the deploy-fix session; proven live by run 2; closes at the merge |
 | **VX-722 · VX-723** (minted at her word) | two load-shaped core-suite flakes seen once each at U1a's broad runs | Bug · Suspected · Tests & tooling · Low | not this run's; the traps name them |
-| **VX-720** (minted 2026-11-01 at U1b's finding) | a first catch-up's save pays SQLite's deferred-FK child scan over the unindexed `block.default_variant_id` — O(N²); two local-only indexes cut the 109k-row save 330 s → 85 s | Bug · Confirmed · Performance · High (NOT Pre-launch — her word R-500-7) | **U4** — the v1_35 two-index migration + pin + the bench re-run (seated at her word R-500-7); VX-672 related |
+| **VX-720** (minted 2026-11-01 at U1b's finding) | a first catch-up's save pays SQLite's deferred-FK child scan over the unindexed `block.default_variant_id` — O(N²); two local-only indexes cut the 109k-row save 330 s → 85 s | Bug · Confirmed · Performance · High (NOT Pre-launch — her word R-500-7) | **U4** — the v1_36 two-index migration + pin + the bench re-run (seated at her word R-500-7); VX-672 related |
 
 **Riders (the kickoff's Low/Medium sweep of Castle & sync + Performance; seated PROVISIONALLY since she is away —
 one line each to unseat):** **VX-546** (ProtectionPairRetentionTests red on main at VM-8's stage batch, "possibly
@@ -1255,7 +1255,7 @@ restore) pays it too.
 
 **The candidate fix (a TICKET's build, not this unit's — a `Persistence/` migration is outside the U1b brief):**
 `CREATE INDEX idx_block_default_variant ON block(default_variant_id)` and `CREATE INDEX idx_cblock_chosen_variant ON
-container_block(chosen_variant_id)` — two LOCAL-ONLY indexes in a v1_35 migration, zero semantics, nothing on the
+container_block(chosen_variant_id)` — two LOCAL-ONLY indexes in a v1_35 migration *(landed as `v1_36_fk_child_indexes` — the U4 RECORD)*, zero semantics, nothing on the
 wire and no lockstep marker move (the VX-647 `idx_cblock_dead_block` precedent, v1_34). Arm E → F is the pin's
 red-on-old shape (316 µs → 20 µs; a bound of, say, < 50 µs a take at 10k blocks under the apply's pragma). The
 expected gain at her scale is measured next (the bench's `VARIORUM_APPLY_PROFILE_INDEX_FIX=1` creates the two indexes
@@ -1290,7 +1290,7 @@ one; the download (D-495's business) becomes the catch-up's long pole. **The tic
 HER call — it is the second-device-on-a-large-library shape she and the testers met, and it grows as the square of
 the library):** "A first catch-up's apply is O(N²): under `defer_foreign_keys`, every take insert scans the unindexed
 `block(default_variant_id)` while the feed's registry order keeps every block's default pointer dangling" — fix: a
-v1_35 migration adding the two local-only indexes (`idx_block_default_variant`, `idx_cblock_chosen_variant`; the
+v1_35 migration *(landed as v1_36 — U4)* adding the two local-only indexes (`idx_block_default_variant`, `idx_cblock_chosen_variant`; the
 v1_34 `idx_cblock_dead_block` precedent — no wire change, no lockstep marker move; `SyncSchema` completeness walk
 untouched since indexes are not columns); pin: the bisection's arm E/F shape as a red-on-old (a bound on the per-take
 insert under the apply's pragma with N blocks first); evidence: this table, re-run through the gated bench once the
@@ -1414,7 +1414,7 @@ change inside `pullRound`'s apply, pure because the schema cannot change inside 
    block" that the probes falsified within the hour. The record says so in THE FINDING and THE MECHANISM; the commit
    message stands (no history rewrite). A reviewer reading commits alone would be misled — hence this item.
 7. **The index-fix measurement is bench-side** (two `CREATE INDEX` on B's fresh store before the pull), not a migration.
-   For a fresh store the effect is identical to a v1_35 migration; for an EXISTING store the migration pays a one-time
+   For a fresh store the effect is identical to the migration (v1_36 as landed); for an EXISTING store the migration pays a one-time
    index build at the upgrade open (O(N), ms for 36k blocks) — the ticket should say so. Press on: whether any DDL
    completeness pin enumerates indexes (the A6 walk is about columns; `SyncSchemaTests` should be read once) so the
    ticket's implementer knows what else moves.
@@ -2386,3 +2386,34 @@ The stage protocol stands: READY-ping to the coordinator, claim `vx500-orchestra
 T−10, `--minutes 120`, RESETS not adds); merge serialization through the coordinator (gate: branch contains origin/main;
 the cross-branch trial is the coordinator's). Her /Applications REFRESH tonight is authorized as the COORDINATOR's
 end-of-burst call — never a release (R-500-12).
+
+#### U2 red-on-old ADDENDUM (the orchestrator, 2026-11-04 — the coordinator's screen check at the U2 stage release; recorded so two `.ips` files never read as an unexplained mystery)
+
+Two test-host crash reports landed during U2's red-on-old window (the VX-661 class, NOT product code):
+`~/Library/Logs/DiagnosticReports/Variorum-2026-11-04-013915.ips` and `…-014054.ips` — both SIGSEGV at a stack guard
+page inside swift-testing's ABI event encoder (`ABI.EncodedEvent.encode` / `ABI.Record.encode`; the second stack passes
+`Issue.record`), the encoder overflowing while encoding the cycle's DELIBERATE failures. The coordinator read both
+faulting threads. Standing: the red WAS a genuine recorded assertion before the encoder died, so the red-on-old verdict
+stands; anything scheduled after a crash in those red runs never executed and is counted neither way; the green close
+set (225/49, all types executed) is independent of both. The lingering Problem Reporter dialog was closed by the
+coordinator. The closing window's tripwire: a short executed count beside TEST EXECUTE SUCCEEDED means split and re-run,
+never a product-code hunt.
+
+#### The orchestrator's verification of U4 (2026-11-04 ~03:10 MST; verify-not-trust)
+
+- The five commits `2a1b6e600` · `91cc5a656` · `b757a43f1` · `809cf898f` · `8a9b0e74c` on the tip, pushed, tree clean;
+  the Sources diff against main grew by `Persistence/Migrations.swift` ONLY (no `Sync/` line, as the brief demands).
+  The migration read by the orchestrator: `v1_36_fk_child_indexes` registered after main's `v1_35_sweep_kill_verdict_markers`
+  with the naming comment; the two plain single-column indexes; the DDL doc carries the mechanism, the 3.9×, the
+  not-a-§12 reasoning and the v1_36 export boundary.
+- The orchestrator's OWN run: `swift test --filter "MigrationTests|DeferredFKChildScanPinTests|SyncProgressTests|ResumableCatchUpTests|AuthRLSDDLTests|MultiTenantSyncAttackerTests"`
+  → **"Test run with 143 tests in 8 suites passed after 16.963 seconds"**.
+- Accepted into the run's diff; the ladder reads it whole. The red-on-old is honest (ratio 12.44× against the bound 4 on
+  the migration-reverted tree, restored clean). Self-assessment items 1 (the timing ratio's load sensitivity), 2 (the pin
+  times statement loops, the gated bench is the engine witness) and 6 (the RESTRICT-immediate clause from documentation
+  memory) are named in the ladder brief as press-on points. The stale v1_35 references in this file are TRUED as of this
+  commit (v1_36 as landed; the U4 record's deviation section is the narrative).
+- **A THIRD load-flake candidate for the closeout's triage (the VX-722/723 class):** `MCPStopRoadsServerTests.aQuitSaysNothingForAConnectionItEnds`
+  (":93, claude-code got no answer to its initialize" under the full MCP suite's load; alone 0.499 s) — seen once at
+  U4's broad run; VX-722's and VX-723's own candidates did not recur. Ticketed at the closeout beside the handoff's
+  triage list.
