@@ -1,6 +1,6 @@
 # VX-500 — Run: the 0.10 window follow-ups (the sync follow-ups)
 
-**STATUS: CLOSED 2026-11-04 (the third orchestrator; PR #PENDING-PR, merged at the coordinator's GO; no release — R-500-12). Read FOR A LATER READER below; everything under THE RECORD OF THE RUN is the night's working record.**
+**STATUS: CLOSED 2026-11-04 (the third orchestrator; PR #215, merged at the coordinator's GO; no release — R-500-12). Read FOR A LATER READER below; everything under THE RECORD OF THE RUN is the night's working record.**
 
 **The resume (2026-11-04 ~01:00 MST, the third orchestrator):** her resume word (R-500-12) lifted the PR hold — the completed PR merges (serialized through `nov3coordinator`), a RELEASE stays withheld. Main (1.0 + 1.0.1) merged into the branch at `5b66640ad`, clean.
 
@@ -31,7 +31,7 @@ typed-unlock key load and two tests). Same Area label, different code; no overla
 
 ## FOR A LATER READER (CLAUDE.md's record rule; rewritten at the close, 2026-11-04 — the run's settled state; a later session reads THIS and nothing below unless reopening)
 
-**What this run was.** VX-500, the 0.10 window's sync follow-ups, CLOSED 2026-11-04 (PR #PENDING-PR; no release —
+**What this run was.** VX-500, the 0.10 window's sync follow-ups, CLOSED 2026-11-04 (PR #215; no release —
 R-500-12): the changefeed's quadratic page (VX-495 — SHAPE B, deployed mid-run 2026-11-02 00:41 UTC and accepted at
 ~23k rows in ~64 s; `Server/supabase/maintenance/vx495-pull-keyset.sql` + `vx495-rollback.sql`), the sync row's
 progress (VX-496 — the engine's `SyncProgress` seam + the index-only count RPC + the row's and both sheets' words),

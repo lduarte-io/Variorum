@@ -1,4 +1,4 @@
-# VX-500 — the closeout handoff (2026-11-04; the run CLOSED; PR #PENDING-PR merged; NO release at your word)
+# VX-500 — the closeout handoff (2026-11-04; the run CLOSED; PR #215 merged; NO release at your word)
 
 **Her checklist (bundled from the away run; nothing improvised around):**
 

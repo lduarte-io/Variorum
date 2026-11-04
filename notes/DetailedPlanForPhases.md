@@ -19,7 +19,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 ### Latest closeout
 
 **→ VX-500 CLOSED 2026-11-04 — THE 0.10 WINDOW SYNC FOLLOW-UPS
-(the record `notes/plans/fixes/vx-500-sync-followups.md`, FOR A LATER READER at its top; PR #PENDING-PR; the handoff
+(the record `notes/plans/fixes/vx-500-sync-followups.md`, FOR A LATER READER at its top; PR #215; the handoff
 `notes/handoffs/vx-500-handoff.md`).** The run that made a first catch-up fast and visible: the changefeed page is
 O(page) (SHAPE B + the index-only count, DEPLOYED mid-run 2026-11-02 at her word and accepted — her week-behind Pro's
 ~23k rows in ~64 s; a maintenance deploy, marker untouched), the sync row speaks a long round's progress and the

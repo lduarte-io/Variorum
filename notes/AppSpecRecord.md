@@ -1254,7 +1254,7 @@ Her report, on finding the shipped 0.10.5/0.10.6 notes opening with "*Drafted at
 **The run.** Architect shape, overnight, her advance release word; Fable orchestrated and cold-reviewed (one round, no BLOCKER/MAJOR, closed at round 1 — the two MINORs dispositioned as tickets: VX-740 upgraded Confirmed with the Compare mint/auto-fill race fully traced and deliberately NOT fixed, which seat yields being hers; VX-739 bounded pre-existing); three fresh Opus implementers; the B1 Gate-B stop was a fixture error in the batch's own new pin, fixed test-first with the teeth proof (the dismissal-read mutation went red exactly). Gates A–D 52/8 · 45/6 · 108/19 · 57/10; every watch red exactly as predicted and restored byte-verified; the joint walk J0–J5 PASS in both voices. Born: VX-739/740/741 (walk observations), VX-742/743 (tour cosmetics), VX-744 (stale comments), VX-745 (the E6 ask). PROVISIONALs: QUESTIONS #256. Released as **1.0.1** ("Minor bug fixes.") the same night; the site publish carried R-736-8's noindex removal.
 
 
-## 2026-11-04 — VX-500, Run: the 0.10 window sync follow-ups (§9 Sync · §12 The app/Doors; branch `vx-500-sync-followups`, PR #PENDING-PR)
+## 2026-11-04 — VX-500, Run: the 0.10 window sync follow-ups (§9 Sync · §12 The app/Doors; branch `vx-500-sync-followups`, PR #215)
 
 **The cast and shape.** Architect shape; THREE Fable orchestrators in sequence (the first cut over after the
 PROTOCOL BREACH — it wrote U1's code itself, her stop verbatim in the plan; the second after the server-half
