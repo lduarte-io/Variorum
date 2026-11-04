@@ -2621,10 +2621,10 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 | W8 VX-728 Compare card at 2 columns, badge at 3; add/delete never moves the prose | PASS — both voices; add/delete live, prose pixel-identical |
 | W9 look-only: VX-696's short-block clip | look line: seen (C5's one-line card; Terminal Compare C2's second entry) |
 | W10 VX-732 comments leave the gutter at once | PENDING |
-| W11 VX-733 the collapsed fan's wash goes; a still-fanned block keeps its wash | PENDING |
-| W12 R-770-1 three takes, delete one → stays open | PENDING |
-| W13 B3-P1 archive road | PENDING |
-| W14 the seat — Takes AND Compare (F1) | PENDING |
+| W11 VX-733 the collapsed fan's wash goes; a still-fanned block keeps its wash | PASS — both voices (no-MCP road: Move Selection into a New Take, ⌥⌘Z) |
+| W12 R-770-1 three takes, delete one → stays open | PASS (Study) |
+| W13 B3-P1 archive road | PASS (Study) |
+| W14 the seat — Takes AND Compare (F1) | Compare PASS (card press, Study); Takes: panel-door PASS, card-press re-run PENDING |
 | W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PENDING |
 | W16 VX-740 make outline note ×3 → one column each | PENDING |
 | W17 VX-739 the word count after two take flips | PENDING |
@@ -2745,3 +2745,38 @@ comment ending `END-OF-C5`; all three added from Write's comments panel ⌘⇧' 
   "END-OF-C5" below the card's fold (`w8-dup.png`, carousel Study); and Terminal Compare's C2 card clips its SECOND
   entry at "own line. END-OF-" at the row's foot (`w8-terminal-2col.png`) — VX-696's bounded card (text height + 24,
   inner scroll), inherited by design (T6). Noted, nothing more.
+
+### W10–W14 — the post-undo pair and the seat (`vx770 undo walk`: U1–U6; U2 and U6 two takes, U5 three; comments
+added in Write's panel: U2 "alpha … END-ALPHA" + "beta … END-BETA", U3 "lone … END-LONE" — `u-u2-panel.png`,
+`u-commented.png`). **The MCP road is unavailable by posture** (MCP switch OFF, never turned on), so every row runs
+its named any-road staging.
+- **W11 (VX-733, slot split, the no-MCP road) — PASS, both voices.** Terminal: Write, U4's last sentence drag-selected
+  → bottom bar block ▾ → "Move Selection into a New Take" (Edit menu then names "Undo Move into a New Take") → ⌘2,
+  slot split, expand all: U4 open as a split (chosen | "bridges rung before … own."), washed, beside U5's 3-take
+  split and U6's (`w11-terminal-before.png`). **⌥⌘Z** (no confirm dialog — the buffer was not edited since) → receipt
+  "Undid: Move into a New Take"; U4 instantly back to ONE closed, UNWASHED row with its ⑂+ door and its full text,
+  while U5 and U6 stay open, washed, their splits intact (`w11-terminal-after.png`). ⌘1 ⌘2 → U4 still closed and
+  unwashed, U5/U6 still open (`w11-terminal-roundtrip.png`). Study: the same act on the same block in STACK style
+  (U4 opened by its ⑂2 badge, washed, both takes listed — `w11-study-before.png`) → ⌥⌘Z → U4 closed, unwashed, ⑂+;
+  U5 still open and washed with its three cards (`w11-study-after.png`); ⌘1 ⌘2 → unchanged
+  (`w11-study-roundtrip-small.png`).
+- **W12 (R-770-1) — PASS (Study, stack).** U5 (three takes, open) → alt three's ⌄ → "Delete this take" (no dialog) →
+  U5 shows ⑂2 and stays OPEN and WASHED with chosen + alt two (`w12-menu-small.png`, `w12-after-small.png`).
+- **W13 (B3-P1, the archive road) — PASS (Study, stack).** U5's alt two ⌄ → "Archive this take (⌘⇧A)" → U5 stays open
+  and washed with its growth doors and **"▸ archived · 1"** under it; receipt "Take archived — never gone: “archived ·
+  n” under this block's takes brings it back." (`w13-archived-small.png`). The fold opened shows the archived take
+  with "Unarchive" · "Delete this take" (`w13-fold-small.png`; the door's word is "Delete this take", not "Delete
+  forever"); pressing it → U5 CLOSES (no wash, ⑂+), U6 still open (`w13-deleted-small.png`).
+- **W14 (the seat) — Compare: PASS (Study; F1's fix walked).** Compare on the undo note (the offer band; one note
+  column + "choose a note" = the two-column card lane): U3's card in the lane; a press on it opened the comments
+  panel ON the card (`w14-compare-panel-small.png`); "Delete" on its only comment → **the panel STAYED** with "Comment
+  deleted — it's under Deleted below, restorable." and "▸ Deleted (1)", the card still seated beneath it
+  (`w14-compare-deleted-small.png`); the fold shows Restore · Delete forever… (`w14-compare-pair.png`, top); Close →
+  U3's card is GONE, U2's stays (`w14-compare-pair.png`, bottom). **Takes, through the bar-door panel (⌘⇧'):** Terminal
+  carousel, U3 current, its only comment deleted from the open panel → the panel stayed (deleted notice, "▸ deleted
+  (1)", restore · delete forever…) — `w14-takes-deleted.png`, `w14-fold.png`; Restore → the comment back; close →
+  the card back in the gutter (`w14-closed.png`). The card-PRESS road in Takes is re-run below.
+- **W10 (VX-732, live comments) — first evidence, Terminal carousel:** with U2's two comments drawn in the Takes
+  gutter, its comments panel opened from the bar (⌘⇧') and "beta" deleted there → the gutter's card dropped the beta
+  entry within ~1.2 s, alpha alone remaining, no mode switch (`w10-u2-gutter-pair.png`, from `w10-u2-before.png` /
+  `w10-u2-after.png`); ⌘1 shows the same. The two-window road (delete from a SECOND window in Write) is re-run below.
