@@ -2880,7 +2880,8 @@ ONE settled landing — the burst shows no second movement after rest, and the a
 | W2-R trial 1 (Study, margin grid, P25 → P35) | **PASS — 0 hops, one landing** |
 | W2-R trial 2 (Study, margin grid, P35 → P23) | **PASS — 0 hops, one landing** |
 | W2-R trial 3 (Terminal, margin grid, P23 → P33) | **PASS — 0 hops, no movement after rest; LOOK LINE: a 56-pt in-storm correction one frame after first paint** |
-| W2-R trial 3b (Terminal, margin grid — corroboration) | PENDING |
+| W2-R trial 3b (Terminal, margin grid, P33 → P23 — corroboration) | **PASS — 0 hops, first paint = rest** |
+| W2-R trial 3c (Terminal, margin grid, P23 → P33 — trial 3's exact shape again) | PENDING |
 | W1-R control (stack) | PENDING |
 | look line: her open fans stay open (R-770-1) | PENDING |
 | posture at the end | PENDING |
@@ -2932,6 +2933,14 @@ orchestrator:** the 56-pt correction came one frame after the first paint — th
 storm (the fix's road: no `HOP` in the story, no rest before it), which is the shape of the original W2's own
 frame 18 → 19 in-landing move, not of its post-rest hop; but it IS a visible correction at first paint in this one
 trial (≤ 87 ms of the off-home picture), where trials 1–2 painted home first. Corroborating trial below.
+
+**W2-R trial 3b — Terminal, margin grid, P33 → P23 (10 above; corroboration): PASS.** From trial 3's landing; ⌘1; in
+Write scrolled up and clicked into **P23** (bar "block 23/40"); ⌘2 with the burst
+(`rewalk/t3b-terminal-margin-p33-p23/`, `f21-f50.png`). Frame 19 the empty-state face; **frame 21 the first board
+picture — P23 home (P22 above), its rail's two cards ALREADY at full measured height**; frames 21–67 pixel-identical in
+the board's row profile (frame 24 the arrival ring in place; 28–29 the scroller's fade and the caret) — `f21-f50.png`
+shows the first paint and the rest side by side, the same picture. The story, verbatim:
+`TakesArticle landing — 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 LAND | manifest rows=40 target=22 offset=-1 total=1999 derived=39 exactAbove=N | content=2826 | content=4311 | content=4732 | content=5328 | content=5755 | 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 DONE: settled at top=0.0 after 0 hops, 1013 ms`
 
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
