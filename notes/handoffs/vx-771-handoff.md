@@ -28,5 +28,5 @@ duplicate_note keeps an undated source's day (P-771-1) and takes `brief` + `fan_
 - The Mac close, canonical: "✔ Test run with 287 tests in 42 suites passed after 84.999 seconds with 4 warnings." (42/42 executed; the warnings are the dependencies date warning). Core on the merged tree: 3,637/489 green. MCP module whole: the pre-existing timing family only, each green alone.
 - The walk: found = ended posture (Standard, HELD, unlocked, MCP switch OFF); `vx771-walk` denied, binding released; dev-castle.env untouched; prefs clean (735 keys, zero added/removed).
 - Canon: MCPSpec's ten contract lines + AppSpec §9's duplicate-day line, one pointer each; `Tools/canon-size`: 129,905 of 150,000 (headroom 20,095) — no crossing.
-- PROVISIONALs: QUESTIONS #257 (P-771-1..12). Mobile parity: the duplicate-day rule rides the shared operation, so any phone duplicate door heals identically; everything else is the Mac-only door.
+- PROVISIONALs: QUESTIONS #258 (P-771-1..12). Mobile parity: the duplicate-day rule rides the shared operation, so any phone duplicate door heals identically; everything else is the Mac-only door.
 - NO release (your word). The PR merged at the coordinator-serialized moment; the branch and worktree are gone; main's board snapshot refreshed.

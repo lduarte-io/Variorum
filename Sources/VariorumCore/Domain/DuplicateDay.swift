@@ -1,7 +1,7 @@
 import Foundation
 
 /// **THE DAY A DUPLICATE KEEPS** — VX-759 (the VX-771 run, batch 1;
-/// PROVISIONAL P-771-1, QUESTIONS #257's bundle).
+/// PROVISIONAL P-771-1, QUESTIONS #258's bundle).
 ///
 /// A note with no typed title and no `entry_date` is NAMED by the day it was
 /// born (`DisplayTitle.note`: the title, else the date, else the day of

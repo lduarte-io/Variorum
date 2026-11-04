@@ -1,7 +1,7 @@
 import Foundation
 
 /// **ONE PASSAGE, REPLACED WHERE IT STANDS** — VX-761 (the VX-771 run, batch 2;
-/// PROVISIONAL P-771-10, QUESTIONS #257's bundle): the rule under `edit_take`'s
+/// PROVISIONAL P-771-10, QUESTIONS #258's bundle): the rule under `edit_take`'s
 /// replace form (`old_str` → `new_str`), run by the operation INSIDE its own
 /// transaction over the take's stored text (`Operations.editTakeUnderInsurance`'s
 /// `.replacing` arm), so the read, the replacement and the write are one act.
