@@ -2170,3 +2170,36 @@ on the phone (shared files, compiled there — the phone build above).
 8. **The four `Date.swift:37` warnings** (the close block): attributed, pre-existing, unverified against the pre-U2
    tree (a warning, not a failure; the lines are not this unit's). A reviewer wanting certainty re-runs
    `EmptySlotMakeMineRouteTests` at `a0132252a`.
+
+#### The orchestrator's verification of U2 (2026-11-04 ~02:05 MST; verify-not-trust)
+
+- The seven commits `8c409ba63` · `de88ecc77` · `918bb6df6` · `31e1ce752` · `fcbd86286` · `6b4c4825e` · `42f32fedb` on the
+  tip, pushed, tree clean; `git diff --stat origin/main...HEAD -- Sources/` shows U1a's six `Sync/` files ONLY — zero U2
+  core lines, as the brief demands. The App diff read by the orchestrator: the row's one line function with `progressCount`
+  as the ONE count spelling; `Kind.retrying` classified after offline and before every text classifier; the bootstrap's
+  never-read stored leaf dropped (the comment moved to the composition site); the pair road's `now` defaults reading the
+  injected `\.date`.
+- The orchestrator's OWN Mac runs under the held claim: the brief's five suites + the three new ones → "Test run with 36
+  tests in 7 suites passed after 2.139 seconds with 4 warnings", plus the two leaf TYPES by name → "Test run with 3 tests
+  in 2 suites passed" — the `-only-testing` FILE-name trap bit the first attempt exactly as the traps say (the file is
+  `OneSyncKeysLeafTests.swift`, the TYPES are `OneSyncKeysLeafCompositionTests`/`OneSyncKeysLeafRoadTests`); recorded so
+  the closing window's list carries the TYPE names.
+- Accepted into the run's diff; the ladder reads it whole. The implementer's self-assessment items 1 (P-500-8's clamp),
+  2 (retrying keeps Sync now disabled — CF-15 verbatim; a product corner beside P-500-7) ride HELD FOR HER; item 4 (the
+  hand-derived week math) and item 6 (the `.syncing` guard leaning on the scheduler's clearing order) are named in the
+  ladder brief as press-on points. The 4 close-set warnings are pre-existing (a swift-dependencies host-app read in
+  `EmptySlotMakeMineRouteTests`) — a Tests & tooling note for the closeout's triage, not this run's to fix.
+
+### THE CLOSING WINDOW AS CONDITIONED BY TONIGHT'S COORDINATOR (nov3coordinator, 2026-11-04 — supersedes the closing-runs bullet's narrower Mac-suites line; accepted after the orchestrator verified the diff)
+
+The branch now touches `Shared/AppBootstrap.swift` (the test init every suite host constructs), `Shared/Protection/
+ProtectionOpenFaces.swift`/`ProtectionOpenRoad.swift`, the Mac `RoadAccountSheet`, and the phone's own
+`MobileProtectionScreen.swift` — the widely-constructed-code trigger (the VX-106 lesson; VX-292's and VX-736's merge
+gates are the precedent). So: **the merge-gate closing window is FULL `VariorumTests` + FULL `VariorumMobileTests` on
+the simulator, after the LAST code change (both targets' whole-target runs postdate every ladder fix), with a SEAM ping
+between the Mac leg and the phone leg; `-only-testing` lists name TYPES in a zsh array; executed counts read per leg; a
+SpringBoard "Busy/failed preflight" refusal gets a fresh boot + settle; the simulator is shut down at the window's end.**
+The stage protocol stands: READY-ping to the coordinator, claim `vx500-orchestrator` (240 max; renew pre-approved at
+T−10, `--minutes 120`, RESETS not adds); merge serialization through the coordinator (gate: branch contains origin/main;
+the cross-branch trial is the coordinator's). Her /Applications REFRESH tonight is authorized as the COORDINATOR's
+end-of-burst call — never a release (R-500-12).
