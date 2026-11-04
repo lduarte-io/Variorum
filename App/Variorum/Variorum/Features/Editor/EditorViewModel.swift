@@ -3844,7 +3844,24 @@ final class EditorViewModel {
             : nil
         // The live buffer's caret-block count keeps the post TOTAL current
         // between projections (R11).
-        if let caretVariantID, let fresh = caretBlockWordCount,
+        //
+        // **NEVER FROM INSIDE A PROGRAMMATIC SURFACE WRITE (VX-739).** AppKit
+        // moves the caret and posts the selection change INSIDE a storage
+        // transaction (measured, macOS 27.0.1: a take flip's "" → 14
+        // characters at the caret moves it 0 → 14 before `endEditing`
+        // returns), so this runs while `index` still tiles the text BEFORE the
+        // write: the caret resolves onto a NEIGHBOUR's entry and its count is
+        // taken over a misaligned range — and the ledger's text-keyed cache
+        // then keeps that wrong count through every later adopt, because the
+        // neighbour's own text never changed (her "12w in note" for 11 after a
+        // second flip, one high from then on). Every write primitive raises
+        // `suppressEditProcessing`; the rewrite's executor adopts the new
+        // tiling and calls this again itself, and `adopt` counts every changed
+        // text — so the live arm loses nothing it exists for (typing's
+        // selection change arrives after `storageDidEdit` has applied the edit
+        // to the index, outside any suppression).
+        if !suppressEditProcessing,
+           let caretVariantID, let fresh = caretBlockWordCount,
            ledger.setLiveWordCount(variantID: caretVariantID, count: fresh) {
             publishPostWordCount()
         }
