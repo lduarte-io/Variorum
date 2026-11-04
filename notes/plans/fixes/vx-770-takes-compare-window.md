@@ -2611,8 +2611,8 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 
 | row | verdict |
 |---|---|
-| W1 her VX-756 repro, stack, both voices (+ F3's look-only eye) | Study PASS · Terminal PENDING |
-| W2 the same, margin grid | **FINDING** (Study, ×2): one watch hop of 24–35 pt ~0.25 s after the first rest |
+| W1 her VX-756 repro, stack, both voices (+ F3's look-only eye) | PASS — Study ×2, Terminal ×1: one landing, 0 hops |
+| W2 the same, margin grid | **FINDING** — 3 of 3 trials (Study ×2, Terminal ×1): one watch hop of 20–35 pt ~0.25 s after the first rest |
 | W3 R-770-1 round trip, fans stay open | PASS |
 | W4 R-756-2 look-only (block off the page) | look line: 2 hops on the reveal |
 | W5 VX-730 stack comments whole | PENDING |
@@ -2678,6 +2678,18 @@ in both stories are monotonic — NOT F3's revisited-height corner. The stack st
 (W3) show 0 hops on the same build. The harness's margin-grid pin
 (`openTakesEnteredOnAnotherBlockLandOnceAndStay(style: .marginGrid)`) was green on post — the live app's
 margin-grid landing is not what that pin stages. For the orchestrator: a byte change means the gate re-builds.
+
+**W1, more trials.** Study, second trial (stack; P23 current → Write → P33 → ⌘2; `.walkshots-vx770/w1b-study-stack/`):
+first paint at P33, then no motion; story `target=32 … content=3243 | 3912 | 4164 | 4170 | 6482 | 5234 | 6102 | DONE:
+settled at top=0.0 after 0 hops, 1006 ms`. **Terminal** (voice flipped in Settings ▸ General ▸ Theme; stack; P33
+current → Write → P23 → ⌘2; `.walkshots-vx770/w1-terminal-stack/`, landed `t-w1-landed.png`): one picture at P23
+(P21's open fan and P22 above, P23 washed, its fan open), then no motion; story `target=22 … content=3254 | 3746 |
+6016 | 5499 | 6340 | DONE: settled at top=0.0 after 0 hops, 1012 ms`. **W1: PASS in both voices** (3 landings,
+0 hops; no revisited height in any storm).
+**W2, Terminal** (margin grid; P23 → Write → P33 → ⌘2; `.walkshots-vx770/w2-terminal-margin/`): first rest, then a
+pure 39-px (19.5-pt) scroll at frame 22, ~0.33 s after the first paint; story `target=32 … content=3917 | 4336 |
+4671 | 5413 | 5679 | HOP 1 at 611 ms (top was 19.6) | content=5710 | 5728 | DONE … after 1 hops, 1156 ms`.
+**The W2 finding holds in both voices, 3 of 3.**
 
 ### W3 — R-770-1 + regression: ⌘1 ⌘2 with nothing clicked — **PASS**
 From the W2b page (P23 current, its rail open) ⌘1 ⌘2, burst `.walkshots-vx770/w3-study-margin/`; before/after
