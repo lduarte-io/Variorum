@@ -2867,7 +2867,7 @@ both voices.
 
 ### THE W2 RE-WALK (the W2 cycle's acceptance — an Opus re-walker under the orchestrator's HELD claim `vx-770-final`, 2026-11-04)
 
-**NOT DONE (first line, kept current):** IN PROGRESS — trials 1–2 walked; trial 3 (Terminal), the control, the posture end PENDING.
+**NOT DONE (first line, kept current):** IN PROGRESS — trials 1–3 walked; a corroborating Terminal margin-grid trial, the control, the posture end PENDING.
 
 Build: `App/Variorum/DerivedData/vx770-gatef/Build/Products/Debug/Variorum.app` (FINAL bytes — `nm` finds the W2
 fix's `landingTargetJustMoved` ×6 in its `Variorum.debug.dylib`; branch head 4f0874651). The fix under watch: THE W2
@@ -2879,7 +2879,8 @@ ONE settled landing — the burst shows no second movement after rest, and the a
 | posture as found (pre-launch) | DONE (below) |
 | W2-R trial 1 (Study, margin grid, P25 → P35) | **PASS — 0 hops, one landing** |
 | W2-R trial 2 (Study, margin grid, P35 → P23) | **PASS — 0 hops, one landing** |
-| W2-R trial 3 (Terminal) | PENDING |
+| W2-R trial 3 (Terminal, margin grid, P23 → P33) | **PASS — 0 hops, no movement after rest; LOOK LINE: a 56-pt in-storm correction one frame after first paint** |
+| W2-R trial 3b (Terminal, margin grid — corroboration) | PENDING |
 | W1-R control (stack) | PENDING |
 | look line: her open fans stay open (R-770-1) | PENDING |
 | posture at the end | PENDING |
@@ -2914,6 +2915,23 @@ inside P23's own card box, shift 0); frames 22–66 shift 0 (the caret blink and
 no second movement. The story, verbatim:
 `TakesArticle landing — 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 LAND | manifest rows=40 target=22 offset=-1 total=1988 derived=39 exactAbove=N | content=2757 | content=4138 | content=4570 | content=4671 | content=4978 | content=5089 | content=5446 | content=5724 | content=5915 | 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 DONE: settled at top=0.0 after 0 hops, 1015 ms`
 (the original walk's W2 #2 on the same target: `HOP 1 at 525 ms (top was 24.0)`).
+
+**W2-R trial 3 — Terminal, margin grid, P23 → P33 (10 below): PASS by the acceptance, with ONE in-storm look line.**
+Voice flipped Study → Terminal through Accessibility (Settings ▸ General ▸ Theme, `radio button 1` — read back
+`Terminal v=1`; no Settings capture, the words-guard class); Settings closed. From trial 2's landing (P23 current, its
+rail open); ⌘1; in Write scrolled down and clicked into **P33** (bar "block 33/40"); ⌘2 with the burst
+(`rewalk/t3-terminal-margin-p23-p33/`, `contact.png`). Frame 19 the empty-state face; **frame 22 (t=1.987) the first
+board picture — P33 washed and its rail open, but its row ≈ 56 pt BELOW home** (P33's wash band at y 478–544 px, P32's
+tail above it) **with P33's alternate card still at its pre-measure height** (clipped mid-sentence — "…is the began
+nobody of"); **frame 23 (t=2.074, the very next sample, +87 ms) the alternate card grown to its full height and P33 at
+home** (wash band 366–432 px, P34 below); frames 24–57 (≈3.0 s) P33's band at 366–432 px in every frame (shift 0;
+frame 26 the arrival ring in place, then the scroller's fade) — no second movement. The story, verbatim:
+`TakesArticle landing — 032317C0-D3D2-4582-B7E4-32D57388D91C LAND | manifest rows=40 target=32 offset=-1 total=1999 derived=39 exactAbove=N | content=2826 | content=2833 | content=4427 | content=4284 | content=4376 | content=4560 | content=4988 | 032317C0-D3D2-4582-B7E4-32D57388D91C DONE: settled at top=0.0 after 0 hops, 1010 ms`
+(the original walk's Terminal W2 on the same target: `HOP 1 at 611 ms (top was 19.6)`). **The look line, for the
+orchestrator:** the 56-pt correction came one frame after the first paint — the late card growth re-aimed inside the
+storm (the fix's road: no `HOP` in the story, no rest before it), which is the shape of the original W2's own
+frame 18 → 19 in-landing move, not of its post-rest hop; but it IS a visible correction at first paint in this one
+trial (≤ 87 ms of the off-home picture), where trials 1–2 painted home first. Corroborating trial below.
 
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
