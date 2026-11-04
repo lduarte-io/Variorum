@@ -1782,7 +1782,8 @@ and the batch's other rows); the cold ladder.
 | A · VX-758 pins (a6a4ff83a) | DONE — `swift test` on the pre-fix source: **RED, real** — "Test run with 27 tests in 2 suites failed … with 9 issues": every entry-date pin (override ↑/↓, stored ↑/↓, chapter, gathering, Library-agreement ↑/↓, the re-shaped old pin); the Created characterization ↑/↓ GREEN. Old asc order observed: `[d01, d10, u05, u20, u05late]` (the dated notes, then the undated pile in id order) |
 | A · VX-758 fix (630631af6) | DONE — `swift test`: the pins **GREEN, real** (27 tests, 2 suites); the WHOLE core package: 3,590 tests in 478 suites passed (5 known issues) + the second product 467 of 468 — the one red `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (connect bounded < 15 s, took 29.4 s under full-package load) passes alone (3 tests, 2.2 s): load, not the diff |
 | A · VX-758 behavioural revert (announced 25846caac before it started; ran 05:04–05:06): `ReadingAssembly.swift` restored to a6a4ff83a (= the pre-fix source) by `git checkout a6a4ff83a --`, copy + sha256 first in `scratchpad/vx758-prerevert/` | DONE — **RED on the revert, real**: "Test run with 27 tests in 2 suites failed after 3.086 seconds with 9 issues" (the same nine as the pre-fix run). **THE INDEX-SWEEP INCIDENT (recorded, healed):** the orchestrator's ledger commit a63e88c9f (05:04:50, pushed) swept the revert's STAGED file into its own commit, so HEAD briefly held the pre-fix `ReadingAssembly.swift` and my `git checkout HEAD --` restored that shape (sha mismatch caught it: 0067a228… ≠ bf8aaba8…). **HEALED at 1e295451f** (no history rewritten): the file re-taken from 630631af6, verified three ways — working file = 630631af6's blob = the pre-revert copy, sha256 `bf8aaba8…71ce`, `cmp` identical — the pins GREEN on it (27 tests, 2 suites), committed by PATHSPEC, pushed; HEAD's blob now = the fix's blob. No revert in flight; the source is HEAD. Lesson applied on my side too: every later commit of mine is a pathspec commit, and later reverts run on an APFS clone, never in the shared index |
-| B · VX-739 pin-first | NOT STARTED |
+| B · VX-739 trace (code read + two bare-rig probes, written below before any code) | DONE (this commit) |
+| B · VX-739 pin / fix | NEXT |
 | C · VX-638 | NOT STARTED |
 | D · VX-652 | NOT STARTED |
 | E · VX-634 + the sweep | NOT STARTED |
@@ -1871,3 +1872,67 @@ the working tree were never affected. **The rule this writes (binding on the orc
 the rest of this run and recorded for every shared-worktree session): record commits beside a
 live implementer use PATHSPEC COMMITS (`git commit <file> -m …`), never a bare `git commit` —
 a peer's staged state is invisible to a pathspec add and rides a bare commit silently.**
+
+### B · VX-739 — THE TRACE (written before any code; two bare-rig probes, throwaway, never in the PR)
+
+**Her sighting's numbers (the VX-736 J3 walk, `notes/plans/fixes/vx-736-hotfix-101.md` :594–595):** the
+note "You, I hope :)" (3 words) / "A second short block of prose." (6) / "A third." (2) = 11. Caret in
+block 1; Write's take panel ＋ blank & choose → "0w block · 8w in note" (right); ✓ the original →
+**"3w block · 12w in note"** (should be 11); later ✓ the blank → **"0w block · 9w in note"** (should be
+8). The block count is right, the TOTAL is one high, from the SECOND flip on, and stays one high.
+
+**The road (code read, HEAD).** The panel's choose is a store write; Write hears it as a delivery →
+the fresh re-read → `.differential` → `EditorSurfaceController.applyDifferential`
+(`EditorSurfaceController.swift:124–151`): it rewrites each changed slot through
+`programmaticReplace` (`EditorViewModel.swift:4449–4483`, inside `suppressEditProcessing`) and only
+AFTER the loop adopts the new tiling (`adoptRewrite` → `adoptSurfaceTextMap` → `ledger.adopt`), then
+calls `updateCaretContext()` itself. The total is `EditorSurfaceLedger.totalWords(over: slots)` — a sum
+of CACHED per-variant counts (`App/Variorum/Shared/EditorBrain/EditorProjectionEngine.swift:28–78`).
+Two writers fill that cache: `adopt` (counts a projection's text, REUSING the cached count whenever the
+text equals `textByVariant` — :49–51) and the caret's live arm `setLiveWordCount` (`updateCaretContext`,
+`EditorViewModel.swift:3845–3850`), which writes a count WITHOUT the text it counted.
+
+**The AppKit fact the trace rests on — MEASURED (macOS 27.0.1, a bare offscreen TK2 `NSTextView`,
+`EditorSurfaceStorage.replace`'s exact begin · replace · setAttributes · end):** a programmatic replace
+moves the caret AND posts `textViewDidChangeSelection` INSIDE the storage transaction —
+- flip 1 shape (block 1's 14 characters → ""), caret at block 1's end / middle / start → `{0, 0}`,
+  the delegate fired with `insideWrite=true`, storage already 40 long;
+- flip 2 shape ("" → the 14 characters at 0), caret at 0 → **`{14, 0}`** (pushed past the insertion),
+  the delegate fired with `insideWrite=true`, storage already 54 long.
+
+**So, step by step:** the delegate (`EditorView.swift:937–945`) runs `updateCaretContext()` INSIDE
+`programmaticReplace`, while `index` still tiles the PRE-write text.
+1. *Flip 1:* the caret (0) resolves to the old entry 0 (the original take, length 14) and counts the
+   new text's `(0, 14)` = "\nA second shor" = 3 words — the original's own count, so the cache does not
+   move, and the original leaves the slots at the adopt anyway. Harmless, by luck. Total 8 — right.
+2. *Flip 2:* the caret (14) resolves against the OLD tiling `[b1 len 0][b2 len 30][b3 len 8]` to
+   **entry 1 — block 2** — and counts the new text's `(1, 30)` = **"ou, I hope :)\nA second short b" =
+   7 words** (computed with the app's own `.byWords` enumeration), so `setLiveWordCount(block 2's take, 7)`
+   overwrites block 2's true 6. Then `adopt`: block 2's text did not change, so it KEEPS the cached 7;
+   the original is re-counted (3). **3 + 7 + 2 = 12** — her number. The executor's trailing
+   `updateCaretContext()` fixes the BLOCK figure (3, on the right tiling) and never touches block 2.
+3. *Every later flip:* block 2's text still equals the cached text, so its 7 rides every adopt —
+   **0 + 7 + 2 = 9** at the next blank, her number. It heals only when block 2's own text changes.
+
+**The mechanism, in one line:** the caret's live word count is a typing fact written from a
+selection change AppKit posts in the middle of a programmatic surface rewrite, when the index still
+describes the text before it; it lands on a NEIGHBOUR's take, and the ledger's text-keyed cache keeps
+it. Not tokenization; not the badge road (VX-729's `refreshBadges` writes no count). The same stale
+read also reports the neighbour to `noteFocusedBlock` for that moment, but the executor's trailing
+call overwrites it (last write wins) — only the ledger cache OUTLIVES the rewrite.
+
+**The fix's shape (decided from the trace):** the live arm writes only while the index describes the
+storage — never from inside a programmatic surface write (`suppressEditProcessing`, the flag every
+storage-write primitive already raises: `setSurfaceContent`, `applySeamEdit`, `programmaticReplace`).
+The executors' own trailing `updateCaretContext()` (after the adopt) is the authoritative report, and
+`adopt` already counts every changed text — so the live arm loses nothing it exists for (keeping the
+total current BETWEEN projections while she types: the typing road's selection change arrives after
+`storageDidEdit` has applied the edit to the index — outside any suppression). One guard in the Mac's
+`updateCaretContext`; the shared ledger (`Shared/EditorBrain`) is NOT touched (no phone-suite trigger).
+
+**The pin-first discipline, given a headless implementer:** the pin (`WriteWordCountFlipTests`) stages
+J3 exactly through the panel's own road and Write's delivery road; it cannot run here. Its red is a
+PREDICTION backed by the measured AppKit fact and the computed counts; the fix rides it CONDITIONALLY —
+**if the window's run of the pin on the revert tree is GREEN, the fix commit is reverted and VX-739
+falls to record-only (the pin kept as the characterization, W17 the eye)**; red on rev + green on HEAD
+= FIXED.
