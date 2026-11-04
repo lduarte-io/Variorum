@@ -337,10 +337,43 @@ struct MCPHerEditorServerTests {
                 "expected_text": .string("Her line."),
             ])
             #expect(edited.isError == true, "the client's read is stale against what she typed: \(edited.text)")
-            #expect(edited.text.contains("bufferChangedSinceGesture"), "the op's own refusal: \(edited.text)")
+            // VX-760 (A JUSTIFIED EDIT, the ritual — the VX-771 run, batch 2):
+            // the op's own precondition still refuses; the wire now says the fact
+            // pattern the two texts prove — the client's text is the start of
+            // hers — keeping the "it has grown since" reading, never the raw case.
+            #expect(edited.text.contains("expected_text matches only the start of the take"), "\(edited.text)")
+            #expect(edited.text.contains("if you read it earlier, it has grown since"), "\(edited.text)")
+            #expect(!edited.text.contains("bufferChangedSinceGesture"), "never the raw case: \(edited.text)")
             w.editor.flush()
             #expect(try await w.text(ofTake: block.variant.id) == "Her line. Still typing.")
             #expect(h.undoStack.depth == 0, "nothing landed, nothing to undo")
+        }
+    }
+
+    /// VX-761 (the VX-771 run, batch 2): the REPLACE form meets her latest
+    /// text too — the same job, so the same flush, in its own turn ahead of the
+    /// act — and its passage is found in the words she just typed. **RED on
+    /// old:** the old parse knows no `old_str` (no text, so it refuses).
+    @Test func aWirePassageReplacementMeetsHerLatestTextFirst() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try World(h)
+            let note = try h.operations.createPost(title: "ch 1")
+            let block = try h.operations.newBlock(in: note.id, text: "Her line.", registeringUndo: false)
+            w.editor.type(block.variant.id, "Her line. Still typing.")
+
+            let edited = await w.call("edit_take", [
+                "take_id": .string(block.variant.id), "old_str": .string("Still typing."),
+                "new_str": .string("Done typing."),
+            ])
+            #expect(edited.isError != true, "the passage is in what she typed: \(edited.text)")
+            #expect(w.log.value == ["flush:edit_take", "act"], "her flush first, in its own turn")
+            #expect(try await w.text(ofTake: block.variant.id) == "Her line. Done typing.")
+            w.editor.flush()
+            #expect(w.editor.pending.value.isEmpty)
+            #expect(try await w.text(ofTake: block.variant.id) == "Her line. Done typing.",
+                    "her debounce cannot write her old buffer back over the act")
         }
     }
 
@@ -518,6 +551,34 @@ struct MCPHerEditorServerTests {
             #expect(duplicated.isError != true, "\(duplicated.text)")
             #expect(w.log.value == ["flush:duplicate_note", "act"], "her flush, THEN the act's own turn")
             let copyID = try #require(try w.json(duplicated)["note_id"] as? String)
+            #expect(try await w.rendered(copyID) == "Her line. Her last words.", "the copy carries her latest words")
+            #expect(try await w.rendered(note.id) == "Her line. Her last words.")
+        }
+    }
+
+    // MARK: - COPY: copy_note_to_wing (VX-765 — the VX-771 ladder, round 1's MINOR; APPENDED)
+
+    /// Her Copy to Wing COPIES every take exactly as her Duplicate does
+    /// (`copyPost`), so the wire's flushes first too, in its own turn before
+    /// the act's (`Job.flushesHerEditorFirst`'s `.copyNoteToWing` arm). The
+    /// behaviour was already right; this pin closes the coverage hole the
+    /// ladder found — GREEN-ONLY by design (no red-on-old is owed: nothing was
+    /// broken).
+    @Test func aWireWingCopyAsksForHerFlushAndCopiesHerLatestText() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try World(h)
+            let research = try h.operations.createWing(name: "research")
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.writeNew, .wing, research.id))
+            let note = try h.operations.createPost(title: "ch 1")
+            let block = try h.operations.newBlock(in: note.id, text: "Her line.", registeringUndo: false)
+            w.editor.type(block.variant.id, "Her line. Her last words.")
+
+            let copied = await w.call("copy_note_to_wing", ["note_id": .string(note.id), "wing_id": .string(research.id)])
+            #expect(copied.isError != true, "\(copied.text)")
+            #expect(w.log.value == ["flush:copy_note_to_wing", "act"], "her flush, THEN the act's own turn")
+            let copyID = try #require(try w.json(copied)["note_id"] as? String)
             #expect(try await w.rendered(copyID) == "Her line. Her last words.", "the copy carries her latest words")
             #expect(try await w.rendered(note.id) == "Her line. Her last words.")
         }

@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import VariorumCore
 
 /// **THE WIRE'S ONE DIGEST** (VX-254, VX-336 U7 — the run record
 /// `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md`, U7 UNIT RECORD
@@ -34,4 +35,33 @@ enum MCPTextDigest {
     /// otherwise, so every other answer is byte-unchanged. Read by the two
     /// answers and by the descriptions' sentence, never retyped.
     static let spellingDiffersKey = "stored_text_normalization_differs"
+
+    /// **THE FAN DIGEST** (A-771-2, the VX-771 run's batch 1 — fork F-2;
+    /// PROVISIONAL P-771-8): the archive proof a BRIEF copy answer carries in
+    /// place of its per-block records (`duplicate_note` with `brief: true`,
+    /// `copy_note_to_wing`). The SHA-256 (this file's `sha256`) of a text with
+    /// ONE LINE PER BLOCK in note order — each line that block's take digests
+    /// in fan order, separated by single spaces, the SHOWN take's prefixed
+    /// `*` — the lines joined by `\n`, no trailing newline (no blocks: the
+    /// empty text). A client spells the same text from `read_note` with
+    /// `ids_only: true` on the SOURCE (each take's `sha256`, `chosen` marking
+    /// the shown one), so equal digests prove the copy is the note: its words,
+    /// their order, the block boundaries and which take each block shows.
+    /// Labels stay out (they ride verbatim; free text would need escaping).
+    /// Built from what the act minted — ∝ the copy's takes, no second read.
+    static func fanSHA256(_ blocks: [Operations.MintedBlockTakes]) -> String {
+        sha256(fanText(blocks))
+    }
+
+    /// The text `fanSHA256` digests, spelled once.
+    static func fanText(_ blocks: [Operations.MintedBlockTakes]) -> String {
+        blocks.map { block in
+            block.takes.map { take in
+                (take.id == block.shownTakeID ? "*" : "") + sha256(take.text)
+            }.joined(separator: " ")
+        }.joined(separator: "\n")
+    }
+
+    /// The answer key, read by the answer and the descriptions, never retyped.
+    static let fanKey = "fan_sha256"
 }

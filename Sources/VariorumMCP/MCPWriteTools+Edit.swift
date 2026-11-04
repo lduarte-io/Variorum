@@ -22,7 +22,9 @@ import VariorumCore
 /// never be written past; the act refuses whole and rolls back.
 extension MCPWriteTools {
     enum EditJob: Sendable {
-        case editTake(takeID: String, text: String, expectedText: String)
+        /// VX-761: either form — the whole text against the whole text read,
+        /// or one passage replaced (`Operations.MCPTakeRewrite`).
+        case editTake(takeID: String, rewrite: Operations.MCPTakeRewrite)
         case divide(blockID: String, secondHalfStartsWith: String)
         case merge(firstBlockID: String, secondBlockID: String)
         case move(blockID: String, target: MoveTarget)
@@ -68,6 +70,34 @@ extension MCPWriteTools {
     static let editTakeBlankRefusal =
         "edit_take never empties a take. For a blank take, use add_take with an empty text."
 
+    /// VX-761 — the call door's words for edit_take's two forms (PROVISIONAL
+    /// P-771-10): one form, never both; a half form; an empty passage; none.
+    static let editTakeOneFormWords =
+        "Pass text with expected_text (the take's whole new text) or old_str with new_str (one passage of it), not both."
+    static let editTakeNoFormWords =
+        "Pass text with expected_text (the take's whole new text), or old_str with new_str (one passage of it)."
+    static let editTakeNewStrWords =
+        "new_str is required with old_str: the passage's replacement (\"\" removes it)."
+    static let editTakeOldStrWords =
+        "old_str is required with new_str: the exact passage to replace, as it stands in the take."
+    static let editTakeEmptyOldStrWords =
+        "old_str can't be empty: it is the exact passage to replace, as it stands in the take."
+
+    /// VX-761 — the replace form's refusals, said through the one chain
+    /// (`MCPWireRefusalCopy.words`): the count named, or the blank sentence.
+    static func replacementWords(_ refusal: Operations.MCPTakeReplacementRefusal) -> String {
+        switch refusal {
+        case .occurrences(0):
+            return "old_str doesn't occur in the take's current text (0 times) — it must match the stored "
+                + "text exactly, byte for byte (read_note with with_ids: true gives it). Nothing was written."
+        case .occurrences(let count):
+            return "old_str occurs \(count) times in the take's current text — it must occur exactly once, so "
+                + "give more of the text around it. Nothing was written."
+        case .wouldEmptyTake:
+            return editTakeBlankRefusal
+        }
+    }
+
     /// Where `move_block` puts the block.
     enum MoveTarget: Sendable, Equatable {
         case after(blockID: String)
@@ -80,6 +110,26 @@ extension MCPWriteTools {
     func parseEdit(_ name: String, _ args: [String: Value]) throws -> EditJob? {
         switch name {
         case MCPToolCatalog.editTake.name:
+            // VX-761 (PROVISIONAL P-771-10): two forms, never both — said at the
+            // parse, before any decision (nothing read, written, asked, spent
+            // or logged). The whole form's own sentences below are unchanged.
+            let wholeForm = args["text"].map { $0 != .null } == true || args["expected_text"].map { $0 != .null } == true
+            let oldStr = try optionalString(args, "old_str")
+            let newStr = try optionalString(args, "new_str")
+            switch (wholeForm, oldStr != nil || newStr != nil) {
+            case (true, true):
+                throw ArgumentFailure(message: Self.editTakeOneFormWords)
+            case (false, false):
+                throw ArgumentFailure(message: Self.editTakeNoFormWords)
+            case (false, true):
+                guard let oldStr else { throw ArgumentFailure(message: Self.editTakeOldStrWords) }
+                guard let newStr else { throw ArgumentFailure(message: Self.editTakeNewStrWords) }
+                guard !oldStr.isEmpty else { throw ArgumentFailure(message: Self.editTakeEmptyOldStrWords) }
+                return .editTake(
+                    takeID: try requiredString(args, "take_id"), rewrite: .replacing(old: oldStr, new: newStr))
+            case (true, false):
+                break
+            }
             guard let text = try optionalString(args, "text") else {
                 throw ArgumentFailure(message: "text is required (the take's whole new text).")
             }
@@ -90,13 +140,18 @@ extension MCPWriteTools {
             // standing refusal under it (the probe pin landed the clear and
             // both brackets on the pre-unit tree); this line makes it true.
             // Whitespace alone is blank too (PROVISIONAL P-VX168-U3-2).
-            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            // VX-774 (the VX-771 run, batch 3): blank AS IT WOULD BE STORED —
+            // the op removes every U+0000 (VX-357, `StoredText.stripped`), so a
+            // text of only null characters is the empty take, refused here
+            // exactly as the replace form's stripped result is (`wouldEmptyTake`).
+            guard !StoredText.stripped(text).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 throw ArgumentFailure(message: Self.editTakeBlankRefusal)
             }
             guard let expected = try optionalString(args, "expected_text") else {
                 throw ArgumentFailure(message: "expected_text is required: the take's text exactly as you read it.")
             }
-            return .editTake(takeID: try requiredString(args, "take_id"), text: text, expectedText: expected)
+            return .editTake(
+                takeID: try requiredString(args, "take_id"), rewrite: .whole(text: text, expectedText: expected))
         case MCPToolCatalog.divideBlock.name:
             return .divide(
                 blockID: try requiredString(args, "block_id"),
@@ -156,14 +211,28 @@ extension MCPWriteTools {
     func performEdit(_ edit: EditJob, job: Job, ops: Operations, clientName: String) throws -> Result<Landed, Refused> {
         let label = { (act: Operations.MCPWriteAct) in act.undoLabel(client: clientName) }
         switch edit {
-        case .editTake(let takeID, let text, let expected):
+        case .editTake(let takeID, let rewrite):
             let noteID = try database.read { try Queries.mcpContainerOf(take: takeID, $0) } ?? ""
             return try onNote(noteID, rung: .edit, job: job, clientName: clientName,
                               logged: ("take", takeID), spendsAfter: false) { title in
-                let edit = try ops.editTakeUnderInsurance(
-                    takeID, text: text, expectedText: expected, client: clientName,
-                    undoLabel: label(.edit),
-                    guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(take: takeID, db)] })
+                let edit: Operations.MCPTakeEdit
+                do {
+                    // VX-761: either form is the ONE act — the replace form's
+                    // passage is resolved inside the act's own transaction.
+                    edit = try ops.editTakeUnderInsurance(
+                        takeID, rewrite: rewrite, client: clientName,
+                        undoLabel: label(.edit),
+                        guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(take: takeID, db)] })
+                } catch OperationError.bufferChangedSinceGesture(let refusedID) where refusedID == takeID {
+                    // VX-760: say what the two texts prove — in front of the
+                    // chain's table sentence, which stands where the door can
+                    // prove nothing.
+                    if case .whole(_, let expected) = rewrite, let mismatch = try expectedTextMismatch(
+                        takeID: takeID, noteID: noteID, sent: expected, clientName: clientName) {
+                        throw mismatch
+                    }
+                    throw OperationError.bufferChangedSinceGesture(variantID: refusedID)
+                }
                 // VX-254 (D-254-2): the digest of the take's text as it now
                 // stands — the new text, or (`changed: false`, nothing
                 // written) the text it already held.
@@ -345,6 +414,33 @@ extension MCPWriteTools {
                 standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .writeNew, consumes: true)
             guard case .allow(let grantID, let consumesOnce) = decision else { throw Self.refused(decision, .book) }
             if consumesOnce, let grantID { try grants.consumeMCPOnceGrant(db, grantID) }
+        }
+    }
+
+    /// **VX-760 — what the door can PROVE about a refused `expected_text`**
+    /// (PROVISIONAL P-771-9): read in ONE snapshot, right after the act's
+    /// transaction rolled back (still inside the session's one serial body),
+    /// the take's text as stored now — only while the take still lives in the
+    /// note the act decided on and this client still reaches that note at
+    /// EDIT (decided through the pure rule, never consuming: a refused act
+    /// spends nothing). Nil — the op's own refusal then speaks through the
+    /// chain — when any of that fails, or when the stored text now reads as
+    /// the client sent it (then it truly changed while the act was landing).
+    /// The facts are two lengths and where the texts first differ — what
+    /// `divide_block`'s anchor already tells the same reach (AF-10 (c)).
+    func expectedTextMismatch(
+        takeID: String, noteID: String, sent: String, clientName: String
+    ) throws -> MCPExpectedTextMismatch? {
+        try database.read { db in
+            guard try Queries.mcpContainerOf(take: takeID, db) == noteID,
+                  let stored = try String.fetchOne(
+                      db, sql: "SELECT working_text FROM variant WHERE id = ?", arguments: [takeID])
+            else { return nil }
+            let decision = MCPGrantAuthority.decide(
+                try MCPGrantAuthority.standing(db, clientName: clientName),
+                note: try Queries.mcpNoteFacts(db, noteID: noteID), rung: .edit, consumes: true)
+            guard decision.isAllowed else { return nil }
+            return MCPExpectedTextMismatch.diagnose(sent: sent, stored: stored)
         }
     }
 

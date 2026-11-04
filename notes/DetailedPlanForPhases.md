@@ -13,26 +13,23 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-770 — Run: takes & compare after 1.0** (flagship VX-756 — the takes-open mode-switch jumping, trace first, the stay-open behavior itself stays at her word; members VX-757 · VX-740 · VX-730 · VX-731 · VX-732 · VX-733 · VX-728 (ruled YES: Compare shows comments) · VX-758 + riders VX-739 · VX-638 · VX-652 · VX-634) — architect shape, Fable orchestrates, `fable-reviewer` (the editor seam rides); the record `notes/plans/fixes/vx-770-takes-compare-window.md` | VX-770 · `vx-770-takes-compare-window` | `~/dev/variorum-vx-770` · the Pro | IN PROGRESS since 2026-11-04 — overnight away run; no Sync/, no custody, no schema; stage via nov3coordinator; NO release; the PR may merge |
-| **VX-771 — Run: MCP agent ergonomics** (the planetlillian agent's feedback as tickets: flagship bug VX-759; VX-760 · VX-761 · VX-762 · VX-763 · VX-764 · VX-765 · VX-766 · VX-767 · VX-768 · VX-769 + riders VX-369 · VX-400; her rulings on VX-764/VX-769/VX-762 recorded on the tickets; the kickoff brief at the foot of VX-771's description) | VX-771 · `vx-771-mcp-agent-ergonomics` | `~/dev/variorum-vx-771` · the Pro | IN PROGRESS since 2026-11-04 — overnight away run (orchestrator seated, row confirmed); MCPSpec preflight done; no Sync/, no custody, no schema expected; stage via nov3coordinator; NO release; the PR may merge |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-500 CLOSED 2026-11-04 — THE 0.10 WINDOW SYNC FOLLOW-UPS
-(the record `notes/plans/fixes/vx-500-sync-followups.md`, FOR A LATER READER at its top; PR #215; the handoff
-`notes/handoffs/vx-500-handoff.md`).** The run that made a first catch-up fast and visible: the changefeed page is
-O(page) (SHAPE B + the index-only count, DEPLOYED mid-run 2026-11-02 at her word and accepted — her week-behind Pro's
-~23k rows in ~64 s; a maintenance deploy, marker untouched), the sync row speaks a long round's progress and the
-belt's retrying state (one presentation source, both platforms, both sheets), the apply's O(N²) deferred-FK child
-scan was found by a measured profile and fixed by `v1_36_fk_child_indexes` (330 s → 89 s at 109k rows; the v1_35
-slot was main's VX-669 sweep, so v1_36 is the export boundary), the retention suite rides the injected clock, and
-the leaf constraint landed. Three Fable orchestrators (a protocol-breach cutover, a deploy cutover, the close),
-Fable implementers throughout (R-500-5), two server-half rounds + a two-round whole-diff ladder closing CLEAN.
-The closing runs: debug core 3,605/483; FULL VariorumTests 5,804/1,006 passed on the final tip; FULL
-VariorumMobileTests 852/139 with its only real red pre-existing on main (VM-38). Born: VX-720/721 (fixed in-run),
-VX-722/723/772 (load-flakes), VX-773 (the release-config TEST split, pre-existing), VM-38. PROVISIONALs →
-QUESTIONS #257; her rulings R-500-1…12 in the record; NO RELEASE at her word (R-500-12 — she accumulates PRs).
-Next: VX-683 (a Sync/ design memo + sitting first), then VX-544 (plan ready).
+**→ VX-771 CLOSED 2026-11-04 — RUN: MCP AGENT ERGONOMICS (the record `notes/plans/fixes/vx-771-mcp-agent-ergonomics.md`,
+FOR A LATER READER at its top; the handoff `notes/handoffs/vx-771-handoff.md`).** The planetlillian agent's field
+reports built in one overnight away run under her "rule provisionally": the duplicate-day flagship (P-771-1, the
+shared body + Copy to Wing), duplicate_note's brief form + fan_sha256, copy_note_to_wing, edit_take's honest
+mismatch + the old_str/new_str replace form, the 19-row error sweep (store failures worded), remove_tag's
+still_in_books (the eviction dial DECLINED, R-771-A), create_gathering (R-771-B), B2's close-reason road (the shim's
+stderr + the 0x1E line, A-771-3), VX-763's kind-reverted listing fix (her sighting = the fixed VX-393 class, third
+filing), VX-400's stop-ends-grants, VX-774's null-only guard; VX-767/768 verified already shipped. Four Opus
+batches; one Fable ladder round — no BLOCKER, no MAJOR, closed at round 1. The walk: the dev library found STANDARD,
+so the stop road verified live end to end and the lock road rides her Air check (the handoff); the Mac close
+"287 tests in 42 suites passed", 42/42 executed; core 3,637/489 green on the merged tree. Canon: MCPSpec's ten lines
++ AppSpec §9's duplicate-day line; PROVISIONALs #257. Born VX-774–778. Nothing mobile-visible beyond the shared-op
+heal (the duplicate-day rule). NO release (her word). Next: hers — the morning bundle is the handoff's checklist.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 

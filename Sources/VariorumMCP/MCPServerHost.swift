@@ -126,7 +126,7 @@ public final class MCPServerHost: @unchecked Sendable {
     /// closing road the door has already said it, before the store closed
     /// (`recordConnectionEnds`), and the line is never said twice.
     public func stop(ending reason: MCPConnectionEnd = .serverOff) {
-        halt { $0.markEnding(reason) }
+        halt(saying: MCPCloseWords.line(for: reason)) { $0.markEnding(reason) }
     }
 
     /// **THE APP QUITS** (VX-394 — VX-548 batch 2b; P-VX394-5, "a QUIT logs
@@ -139,7 +139,7 @@ public final class MCPServerHost: @unchecked Sendable {
     /// locked or closed" on some quits, nothing on others. A connection whose
     /// client had already left keeps its own line (it was said first).
     public func stopWithTheProcess() {
-        halt { $0.forgoEndLine() }
+        halt(saying: MCPCloseWords.quitLine) { $0.forgoEndLine() }
     }
 
     /// **The one stop** (`stop` · `stopWithTheProcess`): close the listener,
@@ -159,7 +159,12 @@ public final class MCPServerHost: @unchecked Sendable {
     ///     one accepted while the server stops is ended with the rest. It was
     ///     listed before, and a client accepted in between outlived the stop —
     ///     served on with the switch OFF, its end never said.
-    private func halt(ending: (MCPSession) -> Void) {
+    ///
+    /// **VX-762 (B2 part two, A-771-3): `closeLine` is said INSIDE the hang-up**
+    /// — each connection's last line, naming why, just before its shutdown
+    /// (`MCPSession.hangUp(saying:)`); no step of the stop is added, moved or
+    /// reordered, and the line never waits on a frame mid-write.
+    private func halt(saying closeLine: Data?, ending: (MCPSession) -> Void) {
         let (fd, wake, done, watcher): (Int32, (read: Int32, write: Int32), DispatchSemaphore?, Task<Void, Never>?) =
             lock.withLock {
                 let snapshot = (listenFD, wakePipe, acceptDone, observation)
@@ -188,7 +193,10 @@ public final class MCPServerHost: @unchecked Sendable {
         let live = lock.withLock { Array(sessions.values) }
         for session in live {
             ending(session)
-            session.hangUp()
+            #if DEBUG
+            hangUpProbe?(session)
+            #endif
+            session.hangUp(saying: closeLine)
         }
     }
 
@@ -197,6 +205,11 @@ public final class MCPServerHost: @unchecked Sendable {
     /// state is taken and BEFORE the accept loop is woken — the window a
     /// client connecting just as the server stops can land in.
     var stopWindowProbe: (() -> Void)?
+
+    /// TEST-ONLY (VX-762, A-771-3 (2)): runs inside a stop just before each
+    /// session's hang-up — where a pin holds the transport's write lock as a
+    /// frame mid-write would.
+    var hangUpProbe: ((MCPSession) -> Void)?
     #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
@@ -391,11 +404,15 @@ public final class MCPServerHost: @unchecked Sendable {
             // snapshots the sessions afterwards never sees it.
             // VX-394's fix leg: a host already let go of (the door's stop drops
             // it at once) still has its session's end said — by the session.
+            // VX-400: and its client's while-connected grants end with it — a
+            // let-go host was stopped, and a stop ends every connection it
+            // served, so this end is the client's last on it.
             if let self {
                 self.ended(session)
             } else {
                 session.closeConnection()
                 session.writeEndLine()
+                session.endWhileConnectedGrants()
             }
         }
     }
@@ -453,10 +470,7 @@ public final class MCPServerHost: @unchecked Sendable {
         // else the client's own close. Quiet when the store is already gone
         // (the library's closing road said it first, while it was open).
         session.writeEndLine()
-        if let name, !stillConnected,
-           let client = try? database.read({ try Queries.mcpClient($0, name: name) }) {
-            try? operations.endMCPConnectionGrants(clientID: client.id)
-        }
+        if name != nil, !stillConnected { session.endWhileConnectedGrants() }
         onConnectionsChanged?()
     }
 

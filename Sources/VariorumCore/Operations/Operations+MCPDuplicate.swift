@@ -18,7 +18,8 @@ import GRDB
 extension Operations {
     /// **`duplicate_note`'s act** — her Duplicate as Version exactly
     /// (`duplicateAsVersionBody`: the note's container row copied — title,
-    /// profile, entry date, notes, segmentation — never born locked; every live
+    /// profile, entry date, notes, segmentation; VX-759's P-771-1: an undated,
+    /// untitled source's copy dated by its source's creation day — never born locked; every live
     /// slot with its whole live fan, archived takes riding with their statuses,
     /// commits never copied, parent trees remapped, comments, presentation and
     /// block names riding; one `derived_from` edge per copied block and ONE
