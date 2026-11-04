@@ -86,6 +86,9 @@ struct MCPWriteTools: Sendable {
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
         case createBook(name: String, wingID: String)
+        /// VX-769 (the VX-771 run, batch 3 — R-771-B): a gathering minted with
+        /// its rule, at write new on the wing (`MCPWriteTools+CreateGathering`).
+        case createGathering(name: String, wingID: String, rule: RuleTerm)
         case addNoteToBook(noteID: String, bookID: String, sectionID: String?)
         /// U3: the edit rung's jobs and `create_section` (`MCPWriteTools+Edit`).
         case edit(EditJob)
@@ -139,6 +142,7 @@ struct MCPWriteTools: Sendable {
             case .importNote, .importBook: "import_document"
             case .applyTag: "apply_tag"
             case .createBook: "create_book"
+            case .createGathering: "create_gathering"
             case .addNoteToBook: "add_note_to_book"
             case .insertBlocks: "insert_blocks"
             case .duplicateNote: "duplicate_note"
@@ -169,6 +173,10 @@ struct MCPWriteTools: Sendable {
             // no take's text: her flush lands where she typed it.
             case .addTake, .addComment, .saveLens, .createNote, .importNote, .importBook, .applyTag,
                  .createBook, .addNoteToBook, .deleteComment, .removeTag, .linkVersions:
+                false
+            // VX-769: a gathering is a rule — no take's text read, rewritten,
+            // copied, frozen or tombstoned.
+            case .createGathering:
                 false
             // VX-255 (the run record's D8): new blocks, and no take's text
             // read, rewritten, copied, frozen or tombstoned. Her caret's block
@@ -275,6 +283,8 @@ struct MCPWriteTools: Sendable {
                 throw ArgumentFailure(message: "wing_id is required (\"\" is Home).")
             }
             return .createBook(name: try requiredText(args, "name"), wingID: wingID)
+        case MCPToolCatalog.createGathering.name:
+            return try parseCreateGathering(args)
         case MCPToolCatalog.addNoteToBook.name:
             return .addNoteToBook(
                 noteID: try requiredString(args, "note_id"), bookID: try requiredString(args, "book_id"),
@@ -577,6 +587,9 @@ struct MCPWriteTools: Sendable {
                         MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name,
                                         show: .book(bookID: book.id, sectionID: nil)))
             }
+        case .createGathering(let name, let wingID, let rule):
+            return try performCreateGathering(
+                name: name, wingID: wingID, rule: rule, job: job, ops: ops, clientName: clientName)
         case .addNoteToBook(let noteID, let bookID, let sectionID):
             return try noteIntoBook(noteID, bookID, job: job, clientName: clientName) { title, bookName in
                 let added = try ops.addNoteToBookForClient(

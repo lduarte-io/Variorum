@@ -296,13 +296,7 @@ extension Operations {
             let before = MCPCollectingColumns(
                 querySpec: reading.querySpec, autoTagIDs: reading.autoTagIds, intakeSeating: reading.intakeSeating)
             var adoption = TagAdoption(wing: try Queries.wingIsLive(db, id: reading.wingId) ? reading.wingId : "")
-            func resolve(_ path: String) throws -> String {
-                let segments = TagPath.segments(path)
-                guard !segments.isEmpty,
-                      let tag = try adoptPath(db, segments.joined(separator: "/"), &adoption)
-                else { throw OperationError.invalidTagName(name: path) }
-                return tag.id
-            }
+            func resolve(_ path: String) throws -> String { try resolveTagPath(db, path, &adoption) }
             if let seating = write.seating, seating != (reading.intakeSeating ?? .auto) {
                 try writeReadingIntakeSeating(db, readingID, seating)
             }
@@ -360,6 +354,75 @@ extension Operations {
                 })
         }
         return result
+    }
+
+    /// **A wire rule's tag PATH → the tag's id in the adoption's wing** — the
+    /// live same-path tag adopted, else its missing chain minted there (her
+    /// editor's make-in-place; `adoptPath`'s one rule); a path with no segment
+    /// refuses `invalidTagName`. `set_book_rule`'s rule and outflow, and
+    /// (VX-769) `create_gathering`'s birth rule — one resolution, never two.
+    func resolveTagPath(_ db: Database, _ path: String, _ adoption: inout TagAdoption) throws -> String {
+        let segments = TagPath.segments(path)
+        guard !segments.isEmpty,
+              let tag = try adoptPath(db, segments.joined(separator: "/"), &adoption)
+        else { throw OperationError.invalidTagName(name: path) }
+        return tag.id
+    }
+
+    // MARK: - WRITE NEW: a gathering (VX-769 — the VX-771 run, batch 3; R-771-B)
+
+    /// What `createGatheringForClient` minted.
+    public struct MCPGatheringMint: Equatable, Sendable {
+        public let gathering: Reading
+        /// Tags the act minted because a rule's path named none (adopt-or-mint).
+        public let mintedTags: Int
+    }
+
+    /// **A new GATHERING in a wing, born with its rule** (R-771-B; PROVISIONAL
+    /// P-771-2's `create_gathering`). HER mint door's row through her one
+    /// body (`insertReading`, `kind: .gathering` with her Mint gathering
+    /// sheet's defaults — no profile, manual order, no extents, no outflow;
+    /// unshelved, as `createBook` lands: the wire has no solo'd shelf; never
+    /// starred, owned, archived or finished), in ONE transaction with the
+    /// wire's own two steps in front: the name (VX-357's strip, trimmed, the
+    /// placeholder when blank) checked by `requireBookNameFree` counting only
+    /// the readings `reach` admits (VX-259 — the wire passes what the client
+    /// can READ), and the rule's tag PATHS resolved in the wing
+    /// (`resolveTagPath` — `set_book_rule`'s road: adopted, or minted). The
+    /// rule is REQUIRED (R-13ic-4 — the type takes one; her body's
+    /// `gatheringRequiresRule` guard stands behind it). NOT an applying act: a
+    /// gathering assembles at read, so nothing seats and nothing bells
+    /// (`insertReading`'s sweep is silent for a gathering). ONE undo entry,
+    /// `createBook`'s exactly: the gathering tombstoned, the redo reviving
+    /// that stamp; a minted tag stays as vocabulary.
+    @discardableResult
+    public func createGatheringForClient(
+        named name: String, inWing wingId: String, rule: RuleTerm, undoLabel: String,
+        namesCountedBy reach: BookNameReach? = nil
+    ) throws -> MCPGatheringMint {
+        let mint: MCPGatheringMint = try database.write { db in
+            try requireLiveWing(db, wingId)
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
+            let gatheringName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
+            try requireBookNameFree(db, gatheringName, counting: reach)
+            var adoption = TagAdoption(wing: wingId)
+            let resolved = try rule.mappingTags { try resolveTagPath(db, $0, &adoption) }
+            let gathering = try insertReading(
+                db, name: gatheringName, kind: .gathering, querySpec: try RuleGrammar.encode(resolved),
+                wingId: wingId, now: date.now)
+            return MCPGatheringMint(gathering: gathering, mintedTags: adoption.minted)
+        }
+        let readingID = mint.gathering.id
+        let undoneOn = LockIsolated<String?>(nil)
+        undoStack?.register(
+            label: undoLabel,
+            inverse: { ops in
+                guard let stamp = try ops.revertImportedBook(readingID, posts: []) else { return false }
+                undoneOn.setValue(stamp)
+                return true
+            },
+            redo: { try $0.reapplyImportedBook(readingID, posts: [], undoneOn: undoneOn.value) })
+        return mint
     }
 
     /// The three collecting columns, as parts of one entry (VX-246 U2).

@@ -130,6 +130,9 @@ enum MCPToolCatalog {
         // VX-771 batch 1 — VX-765: her Copy to Wing (read on the note, write
         // new on ANOTHER wing — the copy lands bookless in that wing's Pool).
         copyNoteToWing,
+        // VX-771 batch 3 — VX-769 (R-771-B): a gathering minted with its rule
+        // (write new on the wing — create_book's decision).
+        createGathering,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
@@ -805,6 +808,35 @@ enum MCPToolCatalog {
                 "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
             ]),
             "required": .array(["name", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.wing])
+
+    /// VX-769 (the VX-771 run, batch 3 — R-771-B; PROVISIONAL P-771-2: its
+    /// own tool, `create_book`'s shape untouched): a gathering born with its
+    /// rule, in `set_book_rule`'s grammar; the rule the author's after birth.
+    static let createGathering = MCPToolDeclaration(
+        name: "create_gathering", rung: .writeNew, title: "Create a gathering",
+        description: """
+            Create a gathering in a shared wing ("" is Home; list_wings gives the wing_id of every \
+            wing shared with you): a saved rule that shows every note of the wing it matches and \
+            holds none of its own — a note joins when it comes to match (apply_tag) and leaves \
+            when it no longer does (remove_tag), so it is the place for a board. rule is required, \
+            written as set_book_rule writes one: tags by path, e.g. {"or": [{"tag": "board"}, \
+            {"tag": "board/doing"}]}; {"star": true} for starred; {"not": …}. A missing tag is \
+            created in the wing. Making it moves no note into or out of any book. After this its \
+            rule is the author's: set_book_rule doesn't change a gathering's rule. One undo for \
+            the author. Returns JSON with the gathering_id, its rule as stored and notes — how many \
+            notes it gathers that you can read, as list_books counts them.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "name": .object(["type": "string", "description": "The gathering's name."]),
+                "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "rule": .object(["description": "What it gathers: the rule (one term), as set_book_rule takes it."]),
+            ]),
+            "required": .array(["name", "wing_id", "rule"]),
             "additionalProperties": false,
         ]),
         scopes: [.wing])

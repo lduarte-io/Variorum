@@ -330,8 +330,11 @@ struct MCPListWingsServerTests {
         }
         // VX-765 (the VX-771 run, batch 1 — justified edit, the ritual):
         // copy_note_to_wing takes the wing its copy goes to.
+        // VX-769 (the VX-771 run, batch 3 — justified edit, the ritual):
+        // create_gathering takes the wing the gathering is made in.
         #expect(Set(taking) == ["list_notes", "create_note", "import_document", "create_book", "move_note_to_wing",
-                                "show_in_app", "copy_note_to_wing"], "the tools that take a wing_id: \(taking)")
+                                "show_in_app", "copy_note_to_wing", "create_gathering"],
+                "the tools that take a wing_id: \(taking)")
         #expect(MCPToolCatalog.listWings.rung == .read && MCPToolCatalog.listWings.scopes == [.wing])
         #expect(MCPToolCatalog.listWings.grantOnly && !MCPToolCatalog.listWings.listedWhenApproved)
     }

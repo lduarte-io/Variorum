@@ -198,6 +198,9 @@ struct MCPCreateGatheringServerTests {
                 .object([:]), .object(["and": .array([])]), .object(["tag": .string(" ")]),
                 .object(["star": .bool(false)]), .object(["profile": .string("journal")]),
                 .object(["colour": .string("blue")]), .string("board"),
+                // A path with no segment parses, then the op's resolution
+                // refuses it — the one resolution, the one chain's words.
+                .object(["or": .array([.object(["star": .bool(true)]), .object(["tag": .string("/")])])]),
             ]
             for rule in malformed {
                 let refused = try await call(connection, "create_gathering", [

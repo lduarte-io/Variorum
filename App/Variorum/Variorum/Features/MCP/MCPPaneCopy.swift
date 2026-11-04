@@ -471,6 +471,9 @@ nonisolated enum MCPPaneCopy {
         case "import_document": return "importing a document into \(at)"
         case "apply_tag": return "tagging \(at)"
         case "create_book": return "making a book in \(at)"
+        // VX-769 (the VX-771 run, batch 3) — a gathering minted in a wing, the
+        // wing logged as create_book's is (PROVISIONAL words, her copy pass).
+        case "create_gathering": return "making a gathering in \(at)"
         case "add_note_to_book": return kind == "book" ? "adding a note to \(at)" : "adding \(at) to a book"
         case "create_section": return "adding a chapter to \(at)"
         case "save_version": return "saving a version of \(at)"
@@ -608,6 +611,9 @@ nonisolated enum MCPPaneCopy {
             return n == 1 ? target.map { "imported \($0)" } ?? "imported a document" : "imported \(n) documents"
         case "apply_tag": return "tagged \(at)" + times
         case "create_book": return n == 1 ? target.map { "made the book \($0)" } ?? "made a book" : "made \(n) books"
+        // VX-769: create_book's line, in a gathering's words (PROVISIONAL).
+        case "create_gathering":
+            return n == 1 ? target.map { "made the gathering \($0)" } ?? "made a gathering" : "made \(n) gatherings"
         case "add_note_to_book": return "added \(at) to a book" + times
         case "create_section": return n == 1 ? "added a chapter to \(at)" : "added \(n) chapters to \(at)"
         case "edit_take": return n == 1 ? "edited \(at)" : "made \(n) edits in \(at)"
@@ -1787,6 +1793,10 @@ nonisolated enum MCPReceiptCopy {
             return n == 1 ? "unarchived \(quoted(receipts[0].targetTitle))" : "unarchived \(n) gatherings"
         case .gatheringDelete:
             return n == 1 ? "deleted the gathering \(quoted(receipts[0].targetTitle))" : "deleted \(n) gatherings"
+        // VX-769 (the VX-771 run, batch 3) — a gathering minted on the wire,
+        // `.book`'s line in a gathering's words (PROVISIONAL, her copy pass).
+        case .gathering:
+            return n == 1 ? "made the gathering \(quoted(receipts[0].targetTitle))" : "made \(n) gatherings"
         }
     }
 

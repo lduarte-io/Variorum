@@ -87,6 +87,8 @@ extension MCPWriteTools.Job {
         case .importBook(let book, _): MCPNullCharacters.count(book)
         case .applyTag(_, let path): MCPNullCharacters.count(path)
         case .createBook(let name, _): MCPNullCharacters.count(name)
+        // VX-769: the name, and every path the rule names (it adopts or mints a tag).
+        case .createGathering(let name, _, let rule): MCPNullCharacters.count(name) + MCPNullCharacters.count(rule)
         case .insertBlocks(_, _, let blocks): MCPNullCharacters.count(blocks)
         case .edit(let job): job.nullCharactersWritten
         case .carriage(let job): job.nullCharactersWritten

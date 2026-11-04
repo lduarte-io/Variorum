@@ -134,6 +134,10 @@ extension Operations {
         case gatheringArchive = "gathering archiving"
         case gatheringUnarchive = "gathering unarchiving"
         case gatheringDelete = "gathering deletion"
+        // VX-769 (the VX-771 run, batch 3 — R-771-B): a gathering MINTED at
+        // write new — `book`'s twin, in a gathering's words ("Undo
+        // claude-code's gathering"). PROVISIONAL words, her copy pass.
+        case gathering
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 

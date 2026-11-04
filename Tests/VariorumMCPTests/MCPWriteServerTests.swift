@@ -331,6 +331,11 @@ struct MCPWriteServerTests {
             // aimed at her note and a real other wing, refusing at the rung.
             let elsewhere = try h.operations.createWing(name: "elsewhere")
             calls.append(("copy_note_to_wing", ["note_id": .string(note.id), "wing_id": .string(elsewhere.id)]))
+            // VX-769 (the VX-771 run, batch 3 — justified edit, the ritual: the
+            // proof's completeness grows with the catalog): a gathering minted
+            // in her note's wing, refusing at the rung (a mint is a write new).
+            calls.append(("create_gathering", ["name": .string("x"), "wing_id": .string(""),
+                                               "rule": .object(["star": .bool(true)])]))
             // VX-596 (justified edit, the ritual — the proof's completeness
             // grows with the catalog): her star, aimed at her note and her
             // book, refusing at the rung.
