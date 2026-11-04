@@ -2236,3 +2236,22 @@ Confirm the "Test run with N tests" line and read the `skipped:` lines; keep the
 - **Scope kept.** Five members; four built, one returned as a fork with the geometry argument. No product
   decision taken: VX-758 builds her sentence with the Library's existing rule; VX-652's options are hers or
   the orchestrator's.
+
+### B5-F1 — THE RULING (the orchestrator, ~05:55)
+
+**Option (C) FOR THIS RUN: VX-652 is not built tonight.** The trace stands and is the ticket's
+new truth (the overflow is reachable at EVERY width — a SwiftUI Menu pops left-aligned and
+screen-constrained only; no SwiftUI alignment API exists; the one road is an AppKit-anchored
+pull-down at a computed x). Building a NEW control at the night's edge, walk-gated, for a Low
+rider is the wrong trade; the member re-owns at closeout carrying this design, with option (A)
+(the one-door trailing-anchored pull-down, two doors sharing one item list) RECOMMENDED to her
+over (B) app-wide (taste, hers) — W18's look-only capture is dropped from this run's walk.
+**HER BUNDLE (+3):** R-B5-5 (her words said "creation date"; the broken arm is the ENTRY DATE
+sort — confirm that is what she meant; the fix orders every note either way); the proposed canon
+line (SurfaceContracts, The Bookcase and books: a book's date order sorts every note by its
+entry date, else the day it was written); R-B5-4 (the undo-label wording-drift ticket: Archive
+Variant · Pool Copy · Convert to Book · Sample Library, one Wording ticket at closeout).
+**The pre-ladder gate ADOPTS the implementer's recommendation:** red run (2 suites on
+vx770-b5-rev), then ONE WHOLE `VariorumTests` run on vx770-b5 — batch 5's green, the 45
+never-run suites, and the closeout's changed-source coverage in one verdict (updateCaretContext
+runs under every mounted Write editor, so the whole target is the honest gate).
