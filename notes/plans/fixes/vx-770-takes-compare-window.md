@@ -2593,3 +2593,38 @@ simulator shut down after. **Pins discipline:** `vx770-lf` resolved UPWARD (buil
 dirty lockfile — the coordinator's cache read) and is CITED FOR NOTHING; `vx770-mg` and
 `vx770-lf-rev` resolved to the committed pins. The stickiness evidence goes into R-770-T1's
 ticket at closeout.
+
+## THE WALK RECORD — VX-770 (W1–W17)
+
+**NOT DONE (first line, kept current):** the walk is IN PROGRESS — rows below carry PENDING until
+their verdict lands.
+
+Walker: opus (the use walker), under the orchestrator's HELD claim `vx-770-final` (never claimed,
+renewed or released by the walker). Build: `App/Variorum/DerivedData/vx770-mg/Build/Products/Debug/Variorum.app`
+(the dev-store Debug app, `io.lduarte.Variorum.debug`), branch head a41aadd3d. Captures:
+`<home>/dev/variorum-vx-770/.walkshots-vx770/` (gitignored by `.walkshots-*/`).
+
+**Posture AS FOUND (pre-launch, 07:43):** zero Variorum instances (`pgrep -fl 'Variorum.app/Contents/MacOS'`
+empty); the dev slot's restore marker `variorum-restore-hold.json` inode **191598619** (mtime Oct 20 02:53);
+`appearanceChoice` = `dark` (local pref — left as found, never changed by this walk); the dev defaults
+domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
+
+| row | verdict |
+|---|---|
+| W1 her VX-756 repro, stack, both voices (+ F3's look-only eye) | PENDING |
+| W2 the same, margin grid | PENDING |
+| W3 R-770-1 round trip, fans stay open | PENDING |
+| W4 R-756-2 look-only (block off the page) | PENDING |
+| W5 VX-730 stack comments whole | PENDING |
+| W6 VX-731 slot split keeps the card | PENDING |
+| W7 VX-731 carousel keeps the card; Study narrow → "#1" badge | PENDING |
+| W8 VX-728 Compare card at 2 columns, badge at 3; add/delete never moves the prose | PENDING |
+| W9 look-only: VX-696's short-block clip | PENDING |
+| W10 VX-732 comments leave the gutter at once | PENDING |
+| W11 VX-733 the collapsed fan's wash goes; a still-fanned block keeps its wash | PENDING |
+| W12 R-770-1 three takes, delete one → stays open | PENDING |
+| W13 B3-P1 archive road | PENDING |
+| W14 the seat — Takes AND Compare (F1) | PENDING |
+| W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PENDING |
+| W16 VX-740 make outline note ×3 → one column each | PENDING |
+| W17 VX-739 the word count after two take flips | PENDING |
