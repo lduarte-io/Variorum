@@ -79,6 +79,14 @@ nonisolated struct SyncRowFace: Equatable {
         /// but "Synced <time>" would be saying "fine" while nothing new
         /// can come in. Same doors as idle; an honest line instead.
         case stalled
+        /// VX-505 (VX-500 U2, P-500-3): the one-writer belt's refusal with
+        /// its follow-up round already requested — a mid-answer moment
+        /// (seconds), never an error face showing the engine's internal
+        /// sentence. Rendered like `.syncing` (the small spinner, CF-15's
+        /// doors); the engine's sentence rides the hover as every paused
+        /// state's does. The fact is TYPED (`Status.lastErrorIsRetrying`,
+        /// set via `PullStage.isOneWriterRefusal`) — never string-matched.
+        case retrying
         #if DEBUG
         /// VX-510 D-B3 — the prod test road refused the signed-in account (it is not a listed test account): no chain,
         /// and the row says why — never "Sync off (dev store)" alone, never silent. DEBUG walk machinery only.
@@ -131,6 +139,7 @@ nonisolated struct SyncRowFace: Equatable {
         isSyncing: Bool,
         lastError: String?,
         lastErrorIsOffline: Bool,
+        lastErrorIsRetrying: Bool = false,
         stalled: Bool = false,
         canCheckForUpdates: Bool = false,
         canOpenProtection: Bool = false,
@@ -160,6 +169,21 @@ nonisolated struct SyncRowFace: Equatable {
                 // error face.
                 return SyncRowFace(kind: .offline, doors: [
                     Door(label: "Sync now", act: .syncNow),
+                ])
+            }
+            if lastErrorIsRetrying {
+                // VX-505 (P-500-3): the belt's refusal, its follow-up round
+                // already requested — classified AFTER offline (a dead wire
+                // outranks a mid-answer face) and BEFORE every other error
+                // class (the typed fact outranks the text classifiers), and
+                // rendered like `.syncing`: CF-15's doors stand in place.
+                // The REFUSED follow-up corner (two rounds racing one store,
+                // not a production shape) deliberately keeps `.error` — the
+                // flag is false there by the scheduler's design (P-500-7 (a);
+                // HELD FOR HER in the run record).
+                return SyncRowFace(kind: .retrying, doors: [
+                    Door(label: "Sync now", act: .syncNow, enabled: false),
+                    Door(label: "Account…", act: .openAccount(.account)),
                 ])
             }
             if Self.isKeysLockedError(error) {
@@ -445,6 +469,7 @@ struct SyncStatusRow: View {
             isSyncing: sync.status.isSyncing,
             lastError: sync.status.lastError,
             lastErrorIsOffline: sync.status.lastErrorIsOffline,
+            lastErrorIsRetrying: sync.status.lastErrorIsRetrying,
             stalled: sync.status.pullStalled,
             canCheckForUpdates: checkForUpdatesDoor != nil,
             canOpenProtection: protectionPaneDoor != nil,
@@ -552,8 +577,8 @@ struct SyncStatusRow: View {
     @ViewBuilder
     private func rowLabel(for kind: SyncRowFace.Kind) -> some View {
         // VX-510 D-A2: every line is `line(for:)`'s — the one presentation source the account act's first-round sheet
-        // says too.
-        let line = Self.line(for: kind, lastSuccessAt: sync.status.lastSuccessAt)
+        // says too. VX-496 (P-500-1): the running catch-up's numbers ride the same call; only `.syncing` reads them.
+        let line = Self.line(for: kind, lastSuccessAt: sync.status.lastSuccessAt, progress: sync.status.progress)
         switch kind {
         case .devStore, .signedOut, .syncOff:
             Text(line)
@@ -562,6 +587,13 @@ struct SyncStatusRow: View {
             // CF-15: the indicator rides BESIDE the label; the doors stay.
             ProgressView().controlSize(.small)
             Text(line)
+        case .retrying:
+            // VX-505 (P-500-3): rendered like `.syncing` — the small spinner
+            // beside the line — with the engine's own sentence in the hover,
+            // as every paused state carries its cause.
+            ProgressView().controlSize(.small)
+            Text(line)
+                .help(sync.status.lastError ?? "")
         case .offline:
             Text(line)
                 .pageCaption(pageStyle)
@@ -628,13 +660,17 @@ struct SyncStatusRow: View {
 
     /// **VX-510 D-A2 — THE ROW'S LINE, in words: ONE presentation source.** The row renders exactly this for each face,
     /// and an account act's first-round sheet says it for what blocks the round (never re-typed there). `lastSuccessAt`
-    /// is the idle line's stamp.
-    static func line(for kind: SyncRowFace.Kind, lastSuccessAt: Date?) -> String {
+    /// is the idle line's stamp. `progress` (VX-496, P-500-1 — hers; her example "Syncing — 40,000 of 108,000" leads) is
+    /// the running catch-up's numbers (`Status.progress`): only the `.syncing` line reads it, and with none the line is
+    /// "Syncing…" byte-unchanged (every ordinary round — the engine arms a progress only past a first full window).
+    static func line(for kind: SyncRowFace.Kind, lastSuccessAt: Date?, progress: SyncProgress? = nil) -> String {
         switch kind {
         case .devStore: return "Sync off (dev store)"
         case .signedOut: return "Signed out"
         case .syncOff: return "Sync is off"
-        case .syncing: return "Syncing\u{2026}"
+        case .syncing:
+            guard let progress else { return "Syncing\u{2026}" }
+            return "Syncing \u{2014} \(progressCount(progress))"
         case .offline: return offlineLabel
         case .keysLocked: return lockedLabel
         case .notOnYet: return notOnYetLabel
@@ -642,6 +678,7 @@ struct SyncStatusRow: View {
         case .accountMismatch: return accountMismatchLabel
         case .notEntitled: return HostedSyncTier.rowLabel
         case .stalled: return stalledLabel
+        case .retrying: return retryingLabel
         case .appOutOfDate: return SyncRowFace.appOutOfDateLabel
         case .error: return "Sync error"
         case .idle:
@@ -651,6 +688,22 @@ struct SyncStatusRow: View {
         case .notOnTheProdTestRoad: return notOnTheProdTestRoadLabel
         #endif
         }
+    }
+
+    /// **VX-496 (P-500-1) — THE COUNT, one spelling for every surface**: the row's `.syncing` line says it after its dash,
+    /// and the account act's first-round sheet says the same string beneath its own sentence (P-500-2) — never a second
+    /// spelling (the D-A2 rule). Numbers in the user's locale grouping. Downloading with the server's total →
+    /// "40,000 of 108,000"; without one (no count surface, a refusal, the RPC not deployed) → "40,000 so far"; saving →
+    /// "saving 12,000 of 108,000". The two bounds `SyncProgress.total` names render without nonsense: `done > total`
+    /// (the feed grew during a long download) shows the total RISEN TO `done` — "at most what's done" is never claimed —
+    /// (PROVISIONAL P-500-8: the honest "40,200 of 40,000" is the recorded alternative); the save's `done` may end below
+    /// its total on a straggler stall, which reads plainly. A nil-total save (no engine publishes one today) falls back
+    /// to the "so far" shape rather than inventing a denominator.
+    static func progressCount(_ progress: SyncProgress) -> String {
+        let done = progress.done.formatted()
+        let saving = progress.phase == .saving ? "saving " : ""
+        guard let total = progress.total else { return "\(saving)\(done) so far" }
+        return "\(saving)\(done) of \(max(total, progress.done).formatted())"
     }
 
     @ViewBuilder
@@ -722,6 +775,13 @@ struct SyncStatusRow: View {
     /// different account than the signed-in one; the door beside it opens
     /// the Account tab (sign in, or the Move road).
     static let accountMismatchLabel = "Sync paused — this library belongs to a different account"
+
+    /// VX-505 (VX-500 U2) — the belt's line, sentence-cased from her draft
+    /// ("another change landed mid-sync — retrying."); the terminal period is
+    /// dropped to the row's own idiom (no sibling line carries one, and the
+    /// first-round sheet's blocked form appends its own). PROVISIONAL
+    /// (P-500-3), hers to reword.
+    static let retryingLabel = "Another change landed mid-sync \u{2014} retrying"
 
     /// The offline presentation's one string (Step A0's row letter),
     /// exposed for the presented-state pin.

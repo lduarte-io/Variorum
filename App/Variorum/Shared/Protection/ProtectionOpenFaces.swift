@@ -461,7 +461,11 @@ final class RoadStandingModel {
                 return library.keyFile?.fingerprint == library.fingerprint
             },
             takeBackupPair: {
-                await Task.detached(priority: .utility) { ProtectionBackupHook.takePair(session) == .written }.value
+                // VX-539: the live clock, passed explicitly — task-locals (the injected \.date) never ride a
+                // detached task, and this closure's clock was always the wall clock. Byte-identical behavior.
+                await Task.detached(priority: .utility) {
+                    ProtectionBackupHook.takePair(session, now: Date()) == .written
+                }.value
             },
             copyCounts: {
                 await Task.detached(priority: .utility) { ProtectionCopyCounts.read(session) }.value

@@ -104,10 +104,10 @@ struct ProtectionBackupHookTests {
         defer { world.scope.purge() }
         let (session, _) = try await world.created()
         session.system.backups.pauseCopies()
-        #expect(ProtectionBackupHook.takePair(session) == .paused)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .paused)
         #expect(pairs(world, session).isEmpty)
         session.system.backups.resumeCopies()
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
     }
 
     @Test func aLiveKeyFileOfAnotherKeyTakesNoPair() async throws {
@@ -116,7 +116,7 @@ struct ProtectionBackupHookTests {
         let (session, _) = try await world.created()
         let stranger = try LobbyFixture.liveKeyFile(passphrase: false)
         try world.system().leaves.keyFiles.writeLiveKeyFile(stranger)
-        #expect(ProtectionBackupHook.takePair(session) == .noKeyFileOfTheKey)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .noKeyFileOfTheKey)
         #expect(pairs(world, session).isEmpty)
     }
 

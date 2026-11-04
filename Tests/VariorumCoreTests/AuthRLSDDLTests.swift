@@ -124,9 +124,12 @@ struct AuthRLSDDLTests {
     }
 
     /// The body a text runs for `functionName`: the LAST `create or replace
-    /// function <name>` in it, up to its terminating `$$;`.
+    /// function <name>(` in it, up to its terminating `$$;`. The opening
+    /// paren is part of the marker (VX-500 U1a): without it a name that is a
+    /// PREFIX of another's resolves to the wrong body — `sync_pull` found
+    /// `sync_pull_remaining`'s once the VX-495 artifact defined both.
     private static func lastBody(of functionName: String, in sql: String) -> String? {
-        let marker = "create or replace function \(functionName)"
+        let marker = "create or replace function \(functionName)("
         guard let start = sql.range(of: marker, options: .backwards),
               let end = sql.range(of: "$$;", range: start.upperBound..<sql.endIndex)
         else { return nil }
@@ -150,12 +153,35 @@ struct AuthRLSDDLTests {
         return try finalBody(of: functionName)
     }
 
+    /// VX-495 / VX-496 (VX-500 U1 — `notes/plans/fixes/vx-500-sync-followups.md`, D-495/D-496): the keyset pull
+    /// and the catch-up count. A MAINTENANCE artifact (no marker move — the wire is byte-identical), deployed AFTER
+    /// the belt; it re-creates `sync_pull` and creates `sync_pull_remaining`, so the bodies the deployed server RUNS
+    /// for those two are ITS — `finalBody(of:)` lays it over the lockstep composition (the ladder-overlay precedent).
+    static let vx495PullKeysetFile = "maintenance/vx495-pull-keyset.sql"
+
+    /// The maintenance artifacts that DEFINE functions after the whole lockstep chain, in deploy order — what
+    /// `finalBody(of:)` reads past the chain. THE ONE LIST (the server-half ladder's F2): the attacker suite's arm 9
+    /// (`MultiTenantSyncAttackerTests.noOwnershipChangeInstructionExistsOnTheWire`) derives the files it reads after
+    /// the numbered chain from HERE — internal, not private, so a future post-chain artifact added to this list is
+    /// scanned by both suites at once, never by one (the silent-coverage drift the round traced: a forbidden parameter
+    /// in a newer body unscanned by arm 9, or `finalBody` asserting against a superseded body).
+    static let postChainFunctionArtifacts = [vx495PullKeysetFile]
+
+    /// THE ROLLBACK (R-500-6 (2); the server-half fix session): 13's `sync_pull` restored byte for byte, the count
+    /// dropped, the belt's list re-asserted — the road back from the keyset deploy, written and pinned BEFORE it. NEVER
+    /// in `postChainFunctionArtifacts` or `searchPathDeployOrder`: it is not deployed truth, it is what her word runs if
+    /// the live round after the deploy refuses (the rollback pin below holds both facts).
+    private static let vx495RollbackFile = "maintenance/vx495-rollback.sql"
+
     /// The body the deployed server actually runs: the LAST
-    /// `create or replace function <name>` in deploy order, up to its
-    /// terminating `$$;`.
+    /// `create or replace function <name>(` in deploy order, up to its
+    /// terminating `$$;` — the lockstep chain, then the post-chain
+    /// function artifacts (VX-495). The opening paren rides the marker
+    /// (the `lastBody` note: a prefix name must never match a longer one).
     private static func finalBody(of functionName: String) throws -> String {
-        let sql = try composedSQL()
-        let marker = "create or replace function \(functionName)"
+        let sql = try ([composedSQL()] + postChainFunctionArtifacts.map { try strippingComments(sqlFile($0)) })
+            .joined(separator: "\n")
+        let marker = "create or replace function \(functionName)("
         guard let start = sql.range(of: marker, options: .backwards) else {
             Issue.record("no create-or-replace for \(functionName) in the composition")
             return ""
@@ -172,6 +198,56 @@ struct AuthRLSDDLTests {
         sql.split(separator: "\n", omittingEmptySubsequences: false)
             .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("--") }
             .joined(separator: "\n")
+    }
+
+    /// Every range of `needle` in `text`, in order (non-overlapping).
+    private static func ranges(of needle: String, in text: String) -> [Range<String.Index>] {
+        var found: [Range<String.Index>] = []
+        var from = text.startIndex
+        while let range = text.range(of: needle, range: from..<text.endIndex) {
+            found.append(range)
+            from = range.upperBound
+        }
+        return found
+    }
+
+    /// VX-721 (R-500-9; `notes/plans/vx495-deploy-checklist.md`'s RUN 1 — `42501 permission denied for schema public`):
+    /// THE 10/14c IDIOM in a re-owning maintenance artifact. Postgres requires the NEW owner to hold CREATE on the
+    /// schema at `alter function … owner to` time, and the definer role is to END usage-only ("owning functions it
+    /// could not re-create" — 14c:75–81 and :101; 10, 11, 12, the 13j rename and the pre-13x overlay carry the same
+    /// two lines around their re-owns). So: `grant usage, create on schema public to variorum_definer;` exactly once,
+    /// as the FIRST statement after the marker guard (nothing but whitespace between `$guard$;` and it; before any
+    /// `create or replace`), `revoke create on schema public from variorum_definer;` exactly once, AFTER the last
+    /// `owner to variorum_definer;` and before `commit;`. Returns the problems — empty means the bracket is closed.
+    /// `stripped` is the artifact with its comment lines removed (`strippingComments`).
+    private static func definerCreateBracketProblems(in stripped: String) -> [String] {
+        let grant = "grant usage, create on schema public to variorum_definer;"
+        let revoke = "revoke create on schema public from variorum_definer;"
+        var problems: [String] = []
+        let grants = ranges(of: grant, in: stripped)
+        let revokes = ranges(of: revoke, in: stripped)
+        if grants.count != 1 { problems.append("the schema grant appears \(grants.count) times, not once") }
+        if revokes.count != 1 { problems.append("the schema revoke appears \(revokes.count) times, not once") }
+        guard let grantRange = grants.first, let revokeRange = revokes.first else { return problems }
+        guard let guardEnd = stripped.range(of: "$guard$;") else { return problems + ["no marker guard"] }
+        let betweenGuardAndGrant = stripped[guardEnd.upperBound..<max(guardEnd.upperBound, grantRange.lowerBound)]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if grantRange.lowerBound < guardEnd.upperBound {
+            problems.append("the grant precedes the marker guard")
+        } else if !betweenGuardAndGrant.isEmpty {
+            problems.append("a statement sits between the guard and the grant: \(betweenGuardAndGrant.prefix(60))")
+        }
+        if let firstCreate = stripped.range(of: "create or replace function "), firstCreate.lowerBound < grantRange.upperBound {
+            problems.append("the grant is not the first statement after the guard — a create or replace precedes it")
+        }
+        let reowns = ranges(of: "owner to variorum_definer;", in: stripped)
+        guard let firstReown = reowns.first, let lastReown = reowns.last else { return problems + ["no re-own to bracket"] }
+        if firstReown.lowerBound < grantRange.upperBound { problems.append("a re-own precedes the grant") }
+        if revokeRange.lowerBound < lastReown.upperBound { problems.append("the revoke precedes the last re-own") }
+        if let commit = stripped.range(of: "\ncommit;"), commit.lowerBound < revokeRange.upperBound {
+            problems.append("the revoke follows commit")
+        }
+        return problems
     }
 
     /// The client-side truth: which synced tables carry `owner_id`
@@ -630,6 +706,199 @@ struct AuthRLSDDLTests {
         let push = try Self.finalBody(of: "sync_push")
         #expect(push.contains("- 'sync_version' - 'server_seq' - 'server_written_at'"),
                 "the reject branch keeps subtracting server-only columns")
+    }
+
+    // MARK: - VX-495 / VX-496 — the keyset pull and the catch-up count (VX-500 U1)
+
+    /// THE SHAPE PIN (D-495, SHAPE B — the record's D-495 EVIDENCE, her 230 ms probe): the deployed `sync_pull`
+    /// assembles its page in two phases — THE PICK (per table, the first `max_rows` SEQS past the cursor in index
+    /// order; seqs only, never a row's id or JSON; the per-table pages `union all`ed and cut to ONE page by the outer
+    /// `order by … limit` BEFORE the bound reads them), THE BOUND (`max(server_seq)` over the pick) and THE FETCH (13's
+    /// two branches, each one index RANGE scan up to the bound — no per-row probe, no `in (select …)`) — with 13's
+    /// allowlist and owner-table set byte-equal, the device cursor upsert, both gates and the derived horizon kept on
+    /// every branch (pick and fetch alike — three `from %I t`, three owner filters, three horizon filters). The A5 and
+    /// owner-filter pins above run against this same final body, unchanged — that is the point of laying the
+    /// artifact over the chain.
+    @Test func theKeysetPullPicksEachTablesPageOffItsIndexThenFetchesUpToTheBound() throws {
+        let body = try Self.finalBody(of: "sync_pull")
+        #expect(body.contains("with picked as ("), "the page is picked first")
+        #expect(body.contains("$q$(select t.server_seq\n          from %I t"),
+                "the pick yields seqs only — never a row's id or JSON")
+        #expect(body.contains("order by t.server_seq\n          limit %s)"),
+                "the pick walks each table's (owner_id, server_seq) index and stops at the page")
+        // F1 (the server-half ladder, round 1 — `notes/plans/fixes/vx-500-server-half-round1.md`): the OUTER global
+        // cut — the per-table pages `union all`ed as `raw`, then ONE `order by … limit %s` BEFORE the bound reads
+        // their maximum. Without it `picked` is up to 21 × max_rows seqs, `bound` their maximum, and every fetch
+        // branch serves everything up to it — a window of up to ~42,000 rows at the production page, silently: every
+        // other assertion of this pin stays green against that body (the finding's walk), so this line holds it.
+        #expect(body.contains("from (%s) raw\n         order by raw.server_seq\n         limit %s),\n       bound as"),
+                "the pick's union is cut to ONE page before the bound")
+        // F-R2-1 (the server-half ladder, round 2 — `vx-500-server-half-round2.md`): the TEMPLATE above is fed by ONE
+        // `format()` tuple; a doctored `pick_sql, 500, fetch_sql)` keeps every other assertion green while the deployed
+        // page stops honoring the caller's `max_rows`. The tuple is pinned by its exact text.
+        #expect(body.contains("pick_sql, max_rows, fetch_sql)"),
+                "the caller's max_rows feeds the outer cut — the format() tuple, not only the template")
+        #expect(body.contains("bound as (select max(server_seq) as seq from picked)"),
+                "the bound is the page's last seq")
+        #expect(body.components(separatedBy: "and t.server_seq <= (select seq from bound)").count - 1 == 2,
+                "both fetch branches (owner-carrying, mirror-only) are bounded — one index range scan each")
+        #expect(!body.contains("in (select"), "no per-row probe survives — SHAPE B replaced the pick-by-id draft")
+        #expect(body.components(separatedBy: "sync_table_pk(tbl)").count - 1 == 2,
+                "the primary key is read for the two fetch branches' row_id only — the pick needs none")
+        #expect(body.components(separatedBy: "t.server_written_at <= clock_timestamp() - %L::interval").count - 1 == 3,
+                "the derived horizon filters the pick and both fetch branches (the per-branch clock is harmless — the header)")
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull');"))
+        #expect(body.contains("VARIORUM_NO_ENTITLEMENT"))
+        #expect(body.contains("on conflict (owner_id, device_id) do update"), "the device cursor upsert stays")
+        // The allowlist and the owner-table set are 13's, byte for byte.
+        let thirteen = Self.strippingComments(try Self.sqlFile("13_phase13i_wings.sql"))
+        let thirteenPull = try #require(Self.lastBody(of: "sync_pull", in: thirteen))
+        #expect(Self.namedArray("allowed", in: body) == Self.namedArray("allowed", in: thirteenPull))
+        #expect(Self.namedArray("owner_tables", in: body) == Self.namedArray("owner_tables", in: thirteenPull))
+        #expect(body.contains("set search_path = public, pg_temp"), "the belt's list, asserted in the header too")
+    }
+
+    /// THE COUNT PIN (D-496; the shape ruled R-500-1): `sync_pull_remaining` is a READ under the pull's own gates — the
+    /// challenge-verified key gate under its OWN rpc name, the entitlement gate, the same allowlist — and its count is
+    /// INDEX-ONLY: owner + seq per table, NO horizon filter (so no `server_written_at`, no interval of any spelling —
+    /// the count runs off `idx_owner_seq_<table>` without heap visits; exact to within the horizon's two seconds, which
+    /// a progress total never needs). The artifact grants it to `authenticated` only (sync_horizon's posture), re-owns
+    /// both functions to the non-bypass definer, re-asserts both search_paths, guards below marker 14 (a READ of the
+    /// marker — never a WRITE: a maintenance artifact moves no marker), and the grant sweep expects its row.
+    @Test func theCatchUpCountIsAnIndexOnlyReadUnderThePullsGatesForAuthenticatedOnly() throws {
+        let body = try Self.finalBody(of: "sync_pull_remaining")
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull_remaining');"))
+        #expect(body.contains("VARIORUM_NO_ENTITLEMENT"))
+        #expect(body.contains("(select count(*) from %I t\n          where t.owner_id = %L\n            and t.server_seq > %s)"),
+                "each table's term is owner + seq and nothing else — the index-only count (R-500-1)")
+        #expect(!body.contains("server_written_at") && !body.contains("interval"),
+                "no horizon filter in the count — it would force a heap visit per row (the measured 1,586 ms shape)")
+        #expect(body.components(separatedBy: "from %I t").count - 1
+                    == body.components(separatedBy: "where t.owner_id = %L").count - 1,
+                "every counted table is tenant-scoped")
+        let pull = try Self.finalBody(of: "sync_pull")
+        #expect(Self.namedArray("allowed", in: body) == Self.namedArray("allowed", in: pull),
+                "the count sums the pull's own allowlist")
+        let artifact = Self.strippingComments(try Self.sqlFile(Self.vx495PullKeysetFile))
+        #expect(artifact.contains("VARIORUM_VX495_NEEDS_14"), "refuses below marker 14")
+        #expect(artifact.contains("alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;"))
+        #expect(artifact.contains("alter function sync_pull_remaining(bigint, text, text, text) owner to variorum_definer;"))
+        #expect(artifact.contains("revoke execute on function sync_pull(bigint, text, text, text, int, text) from public, anon;"))
+        #expect(artifact.contains("grant execute on function sync_pull(bigint, text, text, text, int, text) to authenticated, service_role;"))
+        #expect(artifact.contains("revoke execute on function sync_pull_remaining(bigint, text, text, text) from public, anon, service_role;"))
+        #expect(artifact.contains("grant execute on function sync_pull_remaining(bigint, text, text, text) to authenticated;"))
+        #expect(!artifact.contains("sync_pull_remaining(bigint, text, text, text) to authenticated, service_role"),
+                "never the service role — a read's posture")
+        // The guard READS the marker (`select value::int … where key = 'lockstep_version'`); nothing WRITES it.
+        #expect(artifact.contains("from sync_meta where key = 'lockstep_version'"), "the guard reads the deployed marker")
+        #expect(!artifact.lowercased().contains("update sync_meta") && !artifact.lowercased().contains("insert into sync_meta"),
+                "no marker move — a maintenance artifact never writes sync_meta")
+        // VX-721 (R-500-9): the deploy's RUN 1 refused `42501 permission denied for schema public` at the re-own of
+        // `sync_pull_remaining` — a NEW function is born owned by the deploying role, and its handoff to the definer
+        // needs the 10/14c idiom's bracket (the grant first after the guard, the revoke after the last re-own; the role
+        // ends usage-only). The `sync_pull` re-own is owner-unchanged and never checked; this one is real.
+        #expect(Self.definerCreateBracketProblems(in: artifact).isEmpty,
+                "the keyset artifact's definer-CREATE bracket: \(Self.definerCreateBracketProblems(in: artifact))")
+        let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
+        #expect(sweep.contains("('sync_pull_remaining(bigint,text,text,text)',"),
+                "the post-deploy sweep expects the new function's posture")
+    }
+
+    /// THE ROLLBACK PIN (R-500-6 (2); `maintenance/vx495-rollback.sql` — the server-half fix session, OWED BEFORE THE
+    /// DEPLOY): (a) its `sync_pull` is 13's §3a BYTE-FOR-BYTE — the whole `create or replace function sync_pull(` …
+    /// `$$;` text of the RAW files on both sides (the signature, the header's `returns jsonb` / `language plpgsql
+    /// security definer` / `set search_path = public`, the body and every comment line inside it; nothing stripped,
+    /// nothing trimmed) equal to `lastBody(of:in:)` over 13 itself; (b) it is NEVER part of the deployed chain — not in
+    /// `postChainFunctionArtifacts` (so `finalBody` keeps reading SHAPE B) nor in `searchPathDeployOrder` (so the
+    /// resolver and its doctored-chain arm never read it) — yet laid over the deployed composition it resolves
+    /// `sync_pull` back to 13's body, and run AFTER the keyset artifact it leaves every definer path ending in `pg_temp`
+    /// (the belt's state restored through its own alter) with `sync_pull_remaining` gone; (c) it writes no marker, reads
+    /// it for its own guard name, re-asserts the belt's list, the non-bypass owner and 12's grants on `sync_pull`, drops
+    /// the count by exact signature and grants it to nobody, in one transaction.
+    @Test func theRollbackRestoresThirteensPullByteForByteAndNeverJoinsTheDeployedChain() throws {
+        // (a) BYTE-EQUALITY, raw text on both sides.
+        let rollbackRaw = try Self.sqlFile(Self.vx495RollbackFile)
+        let thirteenRaw = try Self.sqlFile("13_phase13i_wings.sql")
+        let rollbackPull = try #require(Self.lastBody(of: "sync_pull", in: rollbackRaw))
+        let thirteenPull = try #require(Self.lastBody(of: "sync_pull", in: thirteenRaw))
+        #expect(rollbackPull == thirteenPull, "the rollback's sync_pull is 13's §3a byte for byte")
+        #expect(rollbackPull.contains("order by raw.server_seq limit %s) u"), "13's one-page shape — the pre-VX-495 body")
+        #expect(!rollbackPull.contains("with picked as ("), "…and nothing of SHAPE B")
+        let rollback = Self.strippingComments(rollbackRaw)
+        #expect(rollback.components(separatedBy: "create or replace function ").count - 1 == 1,
+                "the rollback defines exactly one function")
+        #expect(Self.lastBody(of: "sync_pull_remaining", in: rollback) == nil, "it never re-creates the count")
+
+        // (b) NEVER IN THE DEPLOYED CHAIN — yet the road back when laid over it.
+        #expect(!Self.postChainFunctionArtifacts.contains(Self.vx495RollbackFile),
+                "finalBody keeps reading the keyset artifact's SHAPE B — the rollback is not deployed truth")
+        #expect(!Self.searchPathDeployOrder.contains(Self.vx495RollbackFile),
+                "the search-path resolver and its doctored-chain arm never read the rollback")
+        #expect(try Self.finalBody(of: "sync_pull").contains("with picked as ("), "the deployed body stays SHAPE B")
+        let rolledBack = try ([Self.composedSQL()] + (Self.postChainFunctionArtifacts + [Self.vx495RollbackFile])
+            .map { try Self.strippingComments(Self.sqlFile($0)) }).joined(separator: "\n")
+        #expect(Self.lastBody(of: "sync_pull", in: rolledBack)
+                    == Self.lastBody(of: "sync_pull", in: Self.strippingComments(thirteenRaw)),
+                "laid over the chain and the keyset artifact, the last sync_pull is 13's again")
+        let afterRollback = Self.searchPathResolution(
+            deploy: try Self.searchPathDeploy(Self.searchPathDeployOrder + [Self.vx495RollbackFile]),
+            furniture: Set(Self.pgTempBeltFurniture.keys))
+        #expect(afterRollback.problems.isEmpty,
+                "run after the keyset artifact, the rollback leaves every definer path ending in pg_temp: \(afterRollback.problems.sorted())")
+        #expect(afterRollback.checked.contains("sync_pull(bigint, text, text, text, integer, text)"),
+                "sync_pull is live and checked after the rollback")
+        #expect(!afterRollback.checked.contains("sync_pull_remaining(bigint, text, text, text)"),
+                "the resolver sees the count dropped")
+
+        // (c) NO MARKER WRITE; the guard, the belt's list, the owner, the grants, the drop — by exact text.
+        #expect(rollback.contains("VARIORUM_VX495_ROLLBACK_NEEDS_14"), "its own guard name, the keyset artifact's shape")
+        #expect(rollback.contains("from sync_meta where key = 'lockstep_version'"), "the guard reads the deployed marker")
+        #expect(!rollback.lowercased().contains("update sync_meta") && !rollback.lowercased().contains("insert into sync_meta"),
+                "no marker move — a maintenance artifact never writes sync_meta")
+        #expect(rollback.contains("alter function sync_pull(bigint, text, text, text, int, text) set search_path = public, pg_temp;"),
+                "the belt's list re-asserted — a create or replace resets the SET clause to 13's bare `public`")
+        #expect(rollback.contains("alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;"))
+        #expect(rollback.contains("revoke execute on function sync_pull(bigint, text, text, text, int, text) from public, anon;"))
+        #expect(rollback.contains("grant execute on function sync_pull(bigint, text, text, text, int, text) to authenticated, service_role;"))
+        #expect(rollback.contains("drop function if exists sync_pull_remaining(bigint, text, text, text);"),
+                "the count dropped by its exact signature")
+        #expect(!rollback.contains("sync_pull_remaining(bigint, text, text, text) to"), "…and granted to nobody")
+        // VX-721 (R-500-9): the same bracket as the keyset artifact's — the road back must never refuse where the road
+        // forward did. Its one re-own is owner-unchanged today (a no-op Postgres never checks), but a rollback that meets
+        // `sync_pull` owned by the deploying role must still succeed, and the idiom's end state (usage-only) is kept.
+        #expect(Self.definerCreateBracketProblems(in: rollback).isEmpty,
+                "the rollback's definer-CREATE bracket: \(Self.definerCreateBracketProblems(in: rollback))")
+        let statements = rollback.trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(statements.hasPrefix("begin;") && statements.hasSuffix("commit;"), "one transaction")
+    }
+
+    /// THE SCHEMA-PRIVILEGE ROWS (VX-721, R-500-9; the CREATE row's expectation is PROVISIONAL P-500-9 — the record
+    /// `notes/plans/fixes/vx-500-sync-followups.md`, DEPLOY-FIX RECORD): the post-deploy grant sweep verifies the definer
+    /// role's END STATE on `public` LIVE through `has_schema_privilege` (the 13y F-R2 precedent — the actual privilege
+    /// whichever mechanism supplies it, inheritance included): USAGE held (the definer bodies resolve `public`; lost,
+    /// every re-owned RPC refuses) and CREATE NOT held (the 10/14c idiom closes its grant in the same transaction — a held
+    /// CREATE is a leaked bracket or an inherited platform grant, a posture no sitting ruled). Fail-class wording in the
+    /// sweep's own vocabulary (`MISMATCH:<privilege> — <why>`), a sixth `ord` in the union. Two rows, both OK on the
+    /// idiom's end state: the sweep's expected totals move 63 → 65 OK · 4 INFO · 0 fail.
+    @Test func theGrantSweepVerifiesTheDefinersUsageOnlyPostureOnPublic() throws {
+        let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
+        #expect(sweep.contains("has_schema_privilege('variorum_definer', 'public', 'USAGE')"),
+                "the sweep reads the definer's USAGE on public live")
+        #expect(sweep.contains("has_schema_privilege('variorum_definer', 'public', 'CREATE')"),
+                "the sweep reads the definer's CREATE on public live")
+        // The expectations, by the rows' own text: USAGE true, CREATE false (P-500-9).
+        #expect(sweep.range(
+                    of: #"select 'USAGE'\s+as privilege,\s+has_schema_privilege\('variorum_definer', 'public', 'USAGE'\)\s+as observed,\s+true\s+as expected"#,
+                    options: .regularExpression) != nil,
+                "USAGE on public is expected HELD")
+        #expect(sweep.range(
+                    of: #"select 'CREATE',\s+has_schema_privilege\('variorum_definer', 'public', 'CREATE'\),\s+false,"#,
+                    options: .regularExpression) != nil,
+                "CREATE on public is expected NOT held — the 10/14c idiom's end state (P-500-9)")
+        #expect(sweep.contains("'schema-privilege'"), "its own row kind")
+        #expect(sweep.contains("'MISMATCH:' || lower(f.privilege)"),
+                "a fail-class verdict in the sweep's vocabulary when either disagrees")
+        #expect(sweep.contains("select 6 as ord, * from schema_privilege_rows"), "the rows join the sweep's union")
     }
 
     // MARK: - The §12 version-check mechanism (Phase 11, A1)
@@ -2883,16 +3152,18 @@ struct AuthRLSDDLTests {
     /// the ladder overlay after 11, signup auto-entitlement after 12), the belt right after 17 — and every LATER
     /// lockstep file after the belt, so a future event's `create or replace` is resolved after it.
     private static var searchPathDeployOrder: [String] {
-        let after: [String: String] = [
-            "10_phase13j_purge.sql": "maintenance/13j-window-pull-rename.sql",
-            "11_pre13x_postures.sql": ladderOverlayFile,
-            "12_phase13y_tenant_seq.sql": "maintenance/beta-signup-auto-entitle.sql",
-            "17_phase_vx307_vault.sql": pgTempBeltFile,
+        // VX-495: the keyset pull deploys AFTER the belt (it re-creates `sync_pull` and re-asserts its
+        // `public, pg_temp` list itself — the resolver checks exactly that).
+        let after: [String: [String]] = [
+            "10_phase13j_purge.sql": ["maintenance/13j-window-pull-rename.sql"],
+            "11_pre13x_postures.sql": [ladderOverlayFile],
+            "12_phase13y_tenant_seq.sql": ["maintenance/beta-signup-auto-entitle.sql"],
+            "17_phase_vx307_vault.sql": [pgTempBeltFile, vx495PullKeysetFile],
         ]
         var order = ["01_mirror_schema.sql", "02_sync_rpc.sql", "03_visibility_horizon.sql", "04_auth_rls.sql"]
         for file in lockstepFiles {
             order.append(file)
-            if let next = after[file] { order.append(next) }
+            order.append(contentsOf: after[file] ?? [])
         }
         return order
     }
@@ -3090,13 +3361,30 @@ struct AuthRLSDDLTests {
     }
 
     /// The doctored-fixture proof that the resolver BITES (the `aDoctoredDeployShapeIsFlaggedByTheCheck` pattern).
+    /// F-R2-2 (the server-half ladder, round 2): every post-chain function artifact `finalBody`/arm 9 read is ALSO
+    /// positioned in the search-path deploy order — a future artifact added to one list but not the other would be read
+    /// as deployed truth by the body finders yet never resolved by the pg_temp check, so a bare `public` header in it
+    /// would escape `everyDefinerPathEndsInPgTempOnceTheBeltIsRead` silently. One direction suffices: the deploy order
+    /// may carry artifacts that define no function.
+    @Test func everyPostChainFunctionArtifactIsPositionedInTheSearchPathDeployOrder() {
+        let order = Self.searchPathDeployOrder
+        for file in Self.postChainFunctionArtifacts {
+            #expect(order.contains(file), "\(file) is read as deployed truth but never resolved for its search_path")
+        }
+    }
+
     @Test func aDoctoredChainIsFlaggedByTheSearchPathCheck() throws {
         let furniture = Set(Self.pgTempBeltFurniture.keys)
         let order = Self.searchPathDeployOrder
 
-        // The belt unread: every checked function is flagged — the chain alone leaves bare lists.
+        // The belt unread — and with it the one post-belt artifact that re-asserts `pg_temp` ITSELF (VX-495's keyset
+        // pull re-creates `sync_pull` and creates `sync_pull_remaining` with `public, pg_temp` in their headers, so
+        // read alone it would leave those two clean): every checked function is flagged — the chain alone leaves
+        // bare lists.
         let unbelted = Self.searchPathResolution(
-            deploy: try Self.searchPathDeploy(order.filter { $0 != Self.pgTempBeltFile }), furniture: furniture)
+            deploy: try Self.searchPathDeploy(
+                order.filter { $0 != Self.pgTempBeltFile && $0 != Self.vx495PullKeysetFile }),
+            furniture: furniture)
         #expect(unbelted.checked.count >= 18)
         for signature in unbelted.checked {
             #expect(unbelted.problems.contains("no-trailing-pg_temp:\(signature)"),

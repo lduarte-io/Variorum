@@ -26,7 +26,7 @@ struct EmptySlotMakeMineRouteTests {
         // backup run can fire) — a pair of a never-migrated store exists only in a fixture, and the preflight's
         // schema read rightly refuses it (this suite's first Mac run caught exactly that).
         _ = try AppDatabase.onDisk(url: world.slotURL, key: created.key)
-        #expect(ProtectionBackupHook.takePair(created) == .written)
+        #expect(ProtectionBackupHook.takePair(created, now: Date()) == .written)
         ProtectionLibraryFiles.removeWithSidecars(world.slotURL)
         return (try #require(created.library.record?.libraryID), created.key, words)
     }

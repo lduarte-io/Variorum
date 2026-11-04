@@ -213,6 +213,27 @@ public protocol SyncPurgeTransport: Sendable {
     func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64
 }
 
+// MARK: - The pull count (VX-496 — the sync row's progress total)
+
+/// VX-496 (`notes/plans/fixes/vx-500-sync-followups.md`, D-496): the whole
+/// catch-up's row count — the count past the committed cursor, owner + seq
+/// only, NO horizon filter (R-500-1: index-only, so it may EXCEED what the
+/// feed serves right now by the rows still inside the visibility horizon;
+/// `SyncProgress.total`'s doc carries the bounds a face must tolerate)
+/// (`sync_pull_remaining`,
+/// `Server/supabase/maintenance/vx495-pull-keyset.sql`). A SEPARATE protocol
+/// (the 13j `SyncPurgeTransport` precedent): the engine reaches it by `as?`,
+/// calls it ONCE per round and only after a first window came back full, and
+/// treats a transport without it — or ANY failure, a 404 before the function
+/// is deployed included — as "no total": the count can never fail a round.
+/// The conformers' doctrine is the standing one: REQUIRED, no default —
+/// wrappers forward, fakes count.
+public protocol SyncPullCountTransport: Sendable {
+    /// Rows with `server_seq > since` the feed would serve the caller, summed
+    /// over every synced table. Proof-gated like `sync_horizon`.
+    func pullRemaining(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64
+}
+
 // MARK: - The rotation surface (pre-13x batch 1b — the design's §3.10,
 // decision 6: version-neutral re-encryption)
 
