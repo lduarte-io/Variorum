@@ -350,6 +350,33 @@ struct MCPHerEditorServerTests {
         }
     }
 
+    /// VX-761 (the VX-771 run, batch 2): the REPLACE form meets her latest
+    /// text too — the same job, so the same flush, in its own turn ahead of the
+    /// act — and its passage is found in the words she just typed. **RED on
+    /// old:** the old parse knows no `old_str` (no text, so it refuses).
+    @Test func aWirePassageReplacementMeetsHerLatestTextFirst() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try World(h)
+            let note = try h.operations.createPost(title: "ch 1")
+            let block = try h.operations.newBlock(in: note.id, text: "Her line.", registeringUndo: false)
+            w.editor.type(block.variant.id, "Her line. Still typing.")
+
+            let edited = await w.call("edit_take", [
+                "take_id": .string(block.variant.id), "old_str": .string("Still typing."),
+                "new_str": .string("Done typing."),
+            ])
+            #expect(edited.isError != true, "the passage is in what she typed: \(edited.text)")
+            #expect(w.log.value == ["flush:edit_take", "act"], "her flush first, in its own turn")
+            #expect(try await w.text(ofTake: block.variant.id) == "Her line. Done typing.")
+            w.editor.flush()
+            #expect(w.editor.pending.value.isEmpty)
+            #expect(try await w.text(ofTake: block.variant.id) == "Her line. Done typing.",
+                    "her debounce cannot write her old buffer back over the act")
+        }
+    }
+
     /// A restore over her pending typing: the "before" commit insures what she
     /// TYPED, the take reads the restored words, and her flush cannot undo the
     /// restore behind the client's back. **RED on old:** her debounce writes
