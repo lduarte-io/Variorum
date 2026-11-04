@@ -1,0 +1,296 @@
+# VX-770 — Run: takes & compare after 1.0
+
+**STATUS: OPEN — kicked off 2026-11-04 (overnight away run).**
+Ticket: VX-770 · Branch: `vx-770-takes-compare-window` · Worktree: `~/dev/variorum-vx-770` ·
+Machine: the Pro · Stage/walks via **nov3coordinator** (REQUEST → READY → GO; the stage is
+VX-500's until ~05:36 — this run's suites slot into seams, short-before-long).
+**NO release tonight (her word). The PR may merge when the run is genuinely done.**
+
+**Her kickoff words (2026-11-04, this session, verbatim):** *"there is a flicker when you open
+compare and turn 'track paragraphs' on and off sometimes"* · *"i've noticed somewhat severe
+jumping around when takes are open and you switch into write, then navigate to a block with
+takes, then go back to takes. i want that filed and tracked."* · *"I am keen on trying to track
+this moving between modes when takes is open bug, because we merged takes staying open and I
+noticed it then, but pushing towards release meant that we didn't ticket it at that point, but I
+think it is new from that. **I do want the behavior of takes staying open to stay though.**"* ·
+*"there's currently a sync effort, so we can't do anything in that area."* · *"in books, sorting
+by creation date doesn't seem to be diong anything unless items have an entry date - it should
+use their creation date if they don't have an entry date"* · *"do not release when done, but you
+can merge your PR."*
+
+**Cast:** Fable orchestrates (this session) and cold-reviews (`fable-reviewer` — the editor seam
+rides this run: VX-739 is `Features/Editor`, VX-756 likely touches `PaneSurface`/landing roads);
+`opus-implementer` per batch, fresh session each, xhigh (model alias `opus` = Opus 5.5 tonight).
+Cross-model ladder rules apply (the reviewer makes the final call; the implementer applies
+confirmed fixes; FINDER-FIXES per her 2026-10-13 ruling). Confirmed at kickoff.
+
+**The members (the SUB-ISSUE LISTING, read live at kickoff 2026-11-04 — the VX-548 lesson;
+THIRTEEN):** VX-756 (flagship) · VX-757 · VX-740 · VX-730 · VX-731 · VX-732 · VX-733 · VX-728 ·
+VX-758 + riders (her question-tool picks at the kickoff sitting) VX-739 · VX-638 · VX-652 ·
+VX-634. Pin-before-fix binds PER MEMBER; the cold review covers the whole diff. Re-list the
+sub-issues before the ladder.
+
+**Kickoff rulings (hers, 2026-11-04, this sitting):**
+- **R-770-1** — the takes stay-open behavior (VX-428, R-601-2) **STAYS**; VX-756 fixes the
+  landing, never the staying. Her words above, bolded sentence.
+- **R-770-2** — VX-728 ruled **"Yes, show them"** (the question tool): Compare renders block
+  comments in the gutter like other surfaces; the §12 every-surface contract line stands with no
+  Compare exception.
+- Riders seated by her picks: VX-739 + the trio VX-638/VX-652/VX-634; VX-673 and VX-650/651
+  deliberately NOT seated (offered, declined).
+
+**Concurrency (the in-flight table + nov3coordinator, 2026-11-04):** VX-500 holds the ONE
+Sync/-custody slot (PR held at her word) — this run touches NO `Sync/`, NO custody, NO schema;
+the coordinator verified ZERO file overlap (our faces are Mac-only: `Features/Takes`,
+`Features/Editor`, `Surface/` — `PaneSurface.swift`/`PaneTextAuthority.swift` live at
+`App/Variorum/Variorum/Surface/`, NOT `Shared/`, so the Shared/→phone-suites rule does not bind
+as scoped; the moment a real `Shared/` file enters the diff, tell nov3coordinator). VX-771 (MCP
+agent ergonomics) runs alongside — surfaces disjoint; the one shared risk is the capability
+registry (`Registry/Capability.swift`, `CapabilityRegistry.swift`): this run's registry delta is
+expected ZERO; if a batch declares a capability, flag the orchestrator, who flags the
+coordinator; whoever merges second re-runs `CapabilityRegistryTests` + `ShellChromeTests` after
+its merge-in. Closeouts serialize (VX-500 first in queue; shared ledgers only at merge moments).
+
+---
+
+## Binding principles — the 13b constitution (P-1…P-9, carried per the architect-phase skill)
+
+The skill's P-1…P-9 block and its application notes bind this run verbatim (the skill file is
+`.claude/skills/architect-phase/SKILL.md`). The ones this run leans on hardest:
+
+- **P-3 (one text surface, one liveness authority):** `PaneSurface` is the one pane component,
+  `PaneTextAuthority` the one liveness brain. VX-728's Compare comments and VX-730/731's board
+  comments extend the EXISTING gutter machinery — never a second comment-rendering mechanism
+  beside it.
+- **P-7 (find bugs before she does):** red-on-old pins verified by behavioral revert, per member;
+  SPECULATIVE findings build the pin FIRST as the confirm.
+- **P-8:** P1–P3 perf invariants bind — comment reads ∝ rows drawn, never the corpus; VX-756's
+  fix must keep the seeded expansion viewport-proportional (VX-428's own measured bar).
+- **The overlay/sink delivery law** (the skill's application notes): every equality-gated sink
+  delivers its stored state AT WIRE TIME; overlay geometry refreshes trigger on EVERY input axis.
+  VX-732/VX-733 smell like exactly this class — state frozen behind an equality gate or a missed
+  refresh axis.
+
+## Preflight (done 2026-11-04, this session — reading never delegated)
+
+CLAUDE.md + auto-loaded canon · the master plan incl. in-flight (+ the kickoff rows pushed,
+main 82b225601) · the workflow-transition record · `~/dev/variorum/notes/TICKETS.md` (main's
+copy, by absolute path — never regenerated from a worktree) · `notes/QUESTIONS.md` (open items
+checked; nothing blocking; this run's bundle lands under a fresh number at closeout) ·
+`notes/SessionResiliencyProtocol.md` · **`notes/SurfaceContracts.md` in full** (The note / Takes /
+Compare + The Bookcase and books are the touched surfaces) · **`notes/TEXTKIT2_NOTES.md` in
+full** (the editor seam; batch briefs name it required reading) · the vx-601 record's VX-428
+section + batch B record (the flagship's provenance). SyncSpec / MCPSpec / CastleRules: not
+touched by this run.
+
+**The two contract lines this run orbits (SurfaceContracts, The note — Takes):**
+1. *"Its article remembers the row at the top per note for the session; an entry landing
+   outranks the memory when the note's current block changed."*
+2. *"The open-fan set is a per-note session memory too — fans stay open across a mode switch and
+   back, the seeded set in place before the board's first geometry report, pruned to the note's
+   live blocks"* (R-601-2, R-601-6).
+And the comments line (The note — editor language): *"Comments and callouts render in the
+whitespace gutter outside the text area on every surface, stacked vertically, and the prose
+column's measure and left edge never move for a decoration (pinned per surface)."*
+
+---
+
+## The members — mechanism, plan, acceptance evidence
+
+### VX-756 — takes open: Write ↔ Takes jumps the view (FLAGSHIP · BUG · Confirmed · High · TRACE FIRST)
+**Her repro:** takes open → switch into Write → navigate to a block with takes → back to Takes →
+the view jumps around, somewhat severely. First noticed at VX-428's merge (the VX-601 run,
+PR #200, 0.10.4); reads as new from that change. **R-770-1: the stay-open behavior STAYS.**
+**Provenance (the vx-601 record, VX-428's section + batch B record):** the open-fan set lives on
+the session's `EditorRouter` (`takesExpandedBlocks: [String: Set<String>]`), seeded into
+`board.expandedBlocks` at `TakesViewModel` construction when `landingEnabled`, written back from
+the mutators/`teardown()`, pruned to the first projection's live blocks. The board remounts per
+mode switch (`PostDetailView.swift` ~430–479). A landing pin with a seeded set EXISTS (batch B's)
+— so her repro is outside its scenario: she CHANGES the current block in Write first, which by
+contract makes the entry landing outrank the article's remembered top row.
+**Hypothesis space (trace, don't assume):** (a) the remembered-row restore and the entry landing
+BOTH run — restore to the old row, seed expands fans (heights change), landing re-scrolls — two
+or three visible movements = "jumps around"; (b) the seeded expansion lands AFTER the first
+geometry report on this road (ordering broken only when a landing is pending), so the landing
+computes against pre-expansion heights and corrects; (c) a TK2 amplifier — the mid-document
+layout-ahead-of-unlaid-predecessors poisoning (TEXTKIT2, the VX-246 finding) re-basing rows under
+the landing. The fix follows the TRACED mechanism; the contract's precedence (landing outranks
+memory when the block changed) is the spec to build to.
+**Acceptance:** the traced mechanism written here; a red-on-old pin (revert-verified) staging her
+exact repro shape (open fans → mode switch → current block changed → return) asserting ONE
+settled landing at the right row with no intermediate jumps the harness can observe; the stay-open
+memory's own pins stay green; a measured note that seeding stays viewport-proportional (P-8).
+The walk re-runs her repro by hand.
+
+### VX-757 — Compare: "track paragraphs" toggle flickers (BUG · Confirmed · Medium · REPRO FIRST)
+Her words above. Find the toggle's owner in the Compare board; likely a whole-board re-derivation
+on toggle (every column rebuilt → a visible blank/paint pass) where a row-mapping change should
+re-layout in place. Repro first (she says "sometimes"); pin per the traced mechanism — the
+honest shape may be a state-transition pin on the toggle's path (no full rebuild) plus the walk's
+eye.
+
+### VX-740 — Compare: two outline columns after one "make outline note" (BUG · Confirmed · Medium · MECHANISM TRACED)
+**Traced at VX-736's ladder round 1** (`notes/plans/fixes/vx-736-ladder-round1.md`):
+`makeOutlinePost` awaits the mint; the store observation adopts the new projection first, whose
+auto-fill (`!autoFilled`, empty first slot, `versionPeers.first`) seats the fresh outline and
+sets `autoFilled`; the resumed `makeOutlinePost` finds no empty slot and APPENDS a second slot
+with the same id (`CompareBoardView.swift:974–992`, `:430–434`). Pre-existing in Home; VX-727's
+wing fix made it reachable everywhere.
+**P-770-1 (PROVISIONAL, orchestrator):** dedupe by `result.post.id` before seating — the
+auto-fill's seat STANDS and the resume's append YIELDS (one column, the note seated where the
+auto-fill put it). Most spec-defensible (no duplicate columns; no other behavior change); one
+line to overturn; logged in the closeout's QUESTIONS bundle.
+**Acceptance:** the ladder file's named red-on-old pin — adopt a projection carrying the minted
+id between mint and resume, assert one column — revert-verified.
+
+### VX-730 — Takes ▸ stack cuts comments short (BUG · Confirmed · Medium)
+### VX-731 — Takes ▸ slot split and carousel show no comments (BUG · Confirmed · Medium)
+### VX-728 — Compare shows block comments (ruled YES, R-770-2 · Improvement · Medium)
+One family: the gutter contract on the board surfaces. Stack truncates; slot split and carousel
+render none; Compare renders none (`CompareBoardView.swift`, `CompareModels.swift`,
+`PaneSurface.swift` read no comments today — the ticket's code read). Write's gutter is the
+reference rendering. Build on the EXISTING gutter/decoration machinery (P-3); the prose column's
+measure and left edge never move (pinned per surface — add the pin where the surface lacks one);
+comment reads scale with rows drawn (P1). Adjacent sibling for the walk's eye only: VX-696 (the
+Write gutter's own one-comment truncation — NOT a member; don't fix, don't regress).
+**Acceptance:** per-surface pins (stack shows whole text; slot split + carousel + Compare render
+the gutter) red-on-old by revert; the measure/left-edge pin; the walk sees comments whole on all
+four surfaces in both voices.
+
+### VX-732 — ⌥⌘Z on an AI's comments: "Undid" but the comments stay drawn in Takes (BUG · Confirmed · Medium)
+### VX-733 — Takes keeps the open-fan wash after ⌥⌘Z removes the extra takes (BUG · Confirmed · Medium)
+The post-undo staleness pair on the Takes board (her recordings, 2026-11-01: comments stayed ~7 s
+until a mode switch; the wash survived a round trip and cleared only at "close all"). Hypothesis
+space: the board's projections/overlays miss the undo road as a refresh axis (the overlay/sink
+delivery law), or the open-fan memory (VX-428's) prunes only at construction so a block whose fan
+collapsed keeps its id in `expandedBlocks` and the wash derives from it. TRACE each; the two may
+share one mechanism. Mind R-770-1: the fix prunes/refreshes honestly, never by closing fans she
+opened.
+**Acceptance:** red-on-old pins staging the undo while the board is mounted (comments leave the
+gutter; the wash leaves when a block's fan collapses to one take), revert-verified; stay-open
+pins stay green.
+
+### VX-758 — books: creation-date sort ignores undated notes (BUG · Confirmed · Medium)
+Her words above, verbatim in the header. Trace where the book's date sort consults `entry_date`
+and leaves undated notes unordered; the expected contract: **a note without an entry date sorts
+by its `created_at`** (the fallback), so the sort always orders every note. Reading.sort_field's
+'created_at' arm and the book read-side sort are the suspects; state the traced truth here before
+fixing (if the bug is actually the 'entry_date' sort's undated pile, say so and fix to her
+sentence — the fallback). Headless state-transition pins on the sort (dated + undated mix).
+
+### VX-739 — bottom-bar word count one high after a second take flip (BUG · Confirmed · Medium · EDITOR SEAM · TRACE FIRST)
+Bounded at VX-736's ladder: PRE-EXISTING; the count rides `adoptSurfaceTextMap` /
+`publishPostWordCount` (`EditorViewModel.swift:995–1005`) and the caret live-count arm
+(`:3845–3850`); root SPECULATIVE — likely a live-count vs adopted-count disagreement over the
+same shown text (tokenization or a stale live entry). TEXTKIT2_NOTES binds (the frame-constant
+display-pass class VX-702/VX-729 is adjacent — the badge road is already fixed; this is the
+counter's own listener). Build the pin first (the flip-twice shape); red confirms, green means
+record-only (the hallucination guard's SPECULATIVE arm).
+
+### VX-638 — slot split: pager label stale after close all → expand all (BUG · Confirmed · Low)
+"2–3 of 3" over cards 1–2; a mode round-trip corrects. Likely a stale per-key page offset in
+`TakesBoardLayout` reused across the close/expand cycle (within ONE mount — pre-existing, not
+VX-428's). State-transition pin on the layout's page-offset table.
+
+### VX-652 — Lenses "+ column ▾" menu opens past the window's right edge (BUG · Confirmed · Low)
+At the old 1240-pt default; the default window is 1270 since VX-737 — re-check the repro at
+today's default first, fix the menu's anchoring/edge behavior, pin where the harness can reach
+(geometry oracle or source pin), else the walk's eye.
+
+### VX-634 — "Undid: Delete Variant" → the app says "take" (WORDING · Confirmed · Low)
+The structural undo receipt's label (the label-fence precedent). One wording fix + the fence pin;
+sweep the undo-label table for any sibling "Variant" while in there (report, don't expand scope).
+
+---
+
+## The batches (one acceptance unit per implementer session; strictly sequential)
+
+- **BATCH 1 — THE FLAGSHIP: VX-756** (trace → fix → pins + the landing proof). Required reading
+  named in the brief: this file's header + VX-756 section + environment traps;
+  `notes/TEXTKIT2_NOTES.md` IN FULL; SurfaceContracts' The note (Takes) bullets; the vx-601
+  record's VX-428 section + batch B record (lines ~94–115, ~1315–1530).
+- **BATCH 2 — COMMENTS ON THE BOARDS: VX-730 + VX-731 + VX-728.** The gutter family; P-3/P-8.
+- **BATCH 3 — THE POST-UNDO STALENESS PAIR: VX-732 + VX-733.** May share one mechanism; trace
+  first; R-770-1 guard.
+- **BATCH 4 — THE COMPARE PAIR: VX-757 + VX-740.** The flicker repro + the traced dedupe
+  (P-770-1).
+- **BATCH 5 — SINGLES: VX-758 + VX-739 + VX-638 + VX-652 + VX-634.** Per-member pins; VX-739's
+  pin-first SPECULATIVE discipline.
+
+Gates per batch: `swift build`/`swift test` headless freely; Mac suites (stage-gated via
+nov3coordinator) cover every suite exercising the batch's changed SOURCE files + the acceptance
+spine `TutorialWalkTests`. Then ONE ladder over the whole diff (`fable-reviewer`, fresh per
+round, REVIEW_PROMPT verbatim; cap three rounds), the use walk (content-only, both voices, an
+OPUS walker under the claim — Fable never drives live pointer walks, her standing safeguard),
+closeout. Any member the night can't finish closes out honestly: re-owned at closeout, never
+rushed (members are sub-issues; they close one by one).
+
+## The ledger (every row owned; statuses live here)
+
+| # | Item | Owner | Status |
+|---|---|---|---|
+| 1 | VX-756 flagship trace + fix | Batch 1 | NOT STARTED |
+| 2 | VX-730 stack comments whole | Batch 2 | NOT STARTED |
+| 3 | VX-731 slot split + carousel comments | Batch 2 | NOT STARTED |
+| 4 | VX-728 Compare comments (R-770-2) | Batch 2 | NOT STARTED |
+| 5 | VX-732 undo leaves comments drawn | Batch 3 | NOT STARTED |
+| 6 | VX-733 undo leaves the fan wash | Batch 3 | NOT STARTED |
+| 7 | VX-757 track-paragraphs flicker | Batch 4 | NOT STARTED |
+| 8 | VX-740 double outline column (P-770-1) | Batch 4 | NOT STARTED |
+| 9 | VX-758 created-sort fallback | Batch 5 | NOT STARTED |
+| 10 | VX-739 word count (pin-first) | Batch 5 | NOT STARTED |
+| 11 | VX-638 pager label | Batch 5 | NOT STARTED |
+| 12 | VX-652 lenses menu edge | Batch 5 | NOT STARTED |
+| 13 | VX-634 "Variant" wording | Batch 5 | NOT STARTED |
+| 14 | The ladder (whole diff, fable-reviewer) | Orchestrator | NOT STARTED |
+| 15 | The use walk (content-only; Opus walker) | Orchestrator | NOT STARTED |
+| 16 | Closeout (canon deltas if any · tickets triaged · QUESTIONS bundle · handoff · merge) | Orchestrator | NOT STARTED |
+
+## Environment traps (every batch brief carries this section verbatim)
+
+- Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test
+  host matches mid-run). Real-store instances by STORE, never quit/kill one; no Release builds or
+  `/Applications` refreshes (NONE this run — her word, no release; the coordinator owns any
+  post-merge refresh).
+- Mac tests from `App/Variorum/`: `xcodebuild -scheme Variorum -destination 'platform=macOS' test`
+  with suite-level `-only-testing`; confirm the "Test run with N tests" line; Swift Testing's
+  count INCLUDES skipped tests — read the `skipped:` lines. `build-for-testing` compiles without
+  running. NEVER add a custom build configuration. zsh `pipestatus`.
+- **THE STAGE (nov3coordinator's protocol — binding; only the ORCHESTRATOR talks to the
+  coordinator; subagents relay through it):** every `xcodebuild test` run, walk, Debug launch and
+  dev-store act runs REQUEST → READY → GO; a FREE stage is never an invitation; RELEASE is
+  `Tools/stage release --who <claim>` plus one result line giving EXECUTED test counts, dev-store
+  posture, instance + sim state. Tell the coordinator BEFORE renewing. Headless
+  `swift build`/`swift test`/`build-for-testing` never need the stage. VX-500 holds the stage to
+  ~05:36; our suite sets are 30–45 min and slot into its seams at the coordinator's GO.
+- **The dev store this run:** CONTENT is ours to manage freely (her standing rule — no as-found
+  keep-lists); NO credential or posture change (no Castle, no keys, no reset — decided at
+  kickoff); the Debug app NEVER signs into her real account, resting posture signed out, nothing
+  presses Resume Sync. After any Debug launch, dismiss a What's New sheet if one shows. If Debug
+  prefs are imported, re-export and diff against the pre-window export (`defaults import` MERGES).
+- **The defaults domain:** `io.lduarte.Variorum.debug` held ~594 keys at kickoff; past ~2,700
+  `TakesEntryBandTests` goes red machine-wide. An unexpected TakesEntryBandTests red ⇒ suspect
+  the domain FIRST, tell the coordinator; never chase it as the diff's.
+- **Disk:** 61 GiB free at kickoff; per-batch DerivedData runs 9–20 GB — delete a batch's dirs
+  once later rebuilds supersede them; under ~40 GiB the coordinator asks for drops.
+- Walks: `cliclick` + `Tools/WalkKit/` on the DEV-STORE Debug build only
+  (`io.lduarte.Variorum.debug`), under this run's held claim — **pointer-injection walk steps are
+  driven by an OPUS walker under the claim** (Fable trips the classifier; her standing
+  safeguard); `pbcopy` in walks is allowed (her word); `Tools/WalkKit/README.md`'s driving
+  lessons first; screenshots in gitignored dirs.
+- Two sibling efforts are in flight (VX-500 — Sync/, stage-primary; VX-771 — MCP): all work from
+  THIS worktree only; `~/dev/variorum` stays main; shared ledgers only at merge moments by the
+  merging session; the capability registry is the one VX-771 contact point (flag the orchestrator
+  before declaring any capability). A `Shared/` file entering the diff is reported to the
+  orchestrator the same turn (the phone-suites rule would bind).
+- Commit per piece, push after every commit, NO attribution trailers (her rule). LIVE STATUS from
+  the first commit; records before final verification carry PENDING. Foreground waits only for
+  subagents (poll `grep -q … && break; sleep 5`, never `tail -f | grep -m1`). Never
+  `git checkout` over uncommitted work; commit before any behavioral revert.
+- TextKit 2: never touch TK1 APIs; attribute stamps clamp to the VERDICT's range; a frame read
+  with `options: []` is a position only in `.layoutAvailable`; `usageBoundsForTextContainer` is a
+  high-water mark (`PaneMeasurement` is the one measurement brain); a frame-constant storage edit
+  never runs the text view's display pass on 27.0.1 (the VX-702 class — make the pass certain);
+  never force layout from a mid-document location on a whole-post surface; a `@MainActor` test's
+  nested run loop runs NO main-queue hop (await instead). `notes/TEXTKIT2_NOTES.md` is required
+  reading for batches 1, 3 and 5 (VX-739), and any batch that touches pane geometry.
