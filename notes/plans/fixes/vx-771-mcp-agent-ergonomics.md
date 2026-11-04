@@ -104,6 +104,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 - **P-771-9 (VX-760, batch 2):** edit_take's mismatch answers the fact pattern the door can prove — four patterns, their words, UTF-16 characters, spoken under any live edit grant (the divide_block precedent) — each with its alternative in the BATCH 2 RECORD.
 - **P-771-10 (VX-761, batch 2):** the replace form's matching (byte-level, overlapping, the exact count), its blank-result and empty-passage rules — alternatives in the BATCH 2 RECORD.
 - **P-771-11 (VX-369, batch 2):** the store-failure words on the wire (SQLite's code and message, never the SQL; "may not have landed") — alternatives in the BATCH 2 RECORD.
+- **P-771-12 (VX-764, batch 3):** which books a landed `remove_tag` reports — the note's member rows in LIVING books whose readable rule names the removed tag POSITIVELY at-or-above it; named `{book_id, name}` where the client can read the book, else counted; both keys absent when nothing strands. Edges, each with its alternative in the BATCH 3 RECORD's VX-764 design: (a) a tag only under `not` is not reported (alt.: any reference); (b) reported whether or not the note still matches by another term (alt.: evaluate the rule); (c) living books only (alt.: every live book); (d) the description's words — her copy pass.
 - *(grows as batches land)*
 
 ## LEDGER (one row per member; flip at each batch close)
