@@ -2284,3 +2284,15 @@ issues (including 4 warnings)."**
   keeps its page; a fan that stays open keeps its page). Exactly the predicted shape.
 Every built member of the run is now red-on-old VERIFIED. The whole-target baseline run is in
 flight on vx770-b5; the ladder follows it.
+
+### b5gate — THE WHOLE-TARGET BASELINE (flipped at release, ~07:00)
+
+"Test run with 5824 tests in 1015 suites passed after 2535.980 seconds with 2 warnings and 14
+known issues" (log `App/Variorum/DerivedData/logs/vx770-b5-whole.log`) — ZERO failures; the
+counts sit exactly at VX-500's same-night reference (5,804/1,006) plus this run's own new
+suites; no silent drop, no host crash, the schema hazard never bit. **The PRE-LADDER BASELINE
+IS GREEN**: every batch red-on-old verified, the whole Mac target green on the final build
+bytes. Stage released ~07:00; b5 trees + the scratchpad rev-source clone deleted. Next: the
+ladder (round 1, fable-reviewer, REVIEW_PROMPT verbatim over 93a3ef88d..HEAD), then fixes if
+any, the merge-in of main (now holds VX-500's PR #215), the walk on the merged tree, the merge
+gate (whole target + the six phone suites), closeout.
