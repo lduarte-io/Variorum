@@ -442,14 +442,26 @@ construction: at most one aim per content-height change.
   the capability registry. No TK1 API, no attribute stamp. **MOBILE PARITY: nothing
   mobile-visible** (the Mac Takes board only).
 
-### THE PREDICTION TABLE (PENDING the window)
+### THE PREDICTION TABLE (the red run FLIPPED 2026-11-04 02:37, the orchestrator's window `vx-770-tests-b1`; post rows pending tier 1)
+
+**THE RED RUN (vx756-rev, log `App/Variorum/DerivedData/logs/vx756-red-run.log`): RED ON ALL FOUR
+STYLES — stronger than predicted** (rows 3–4's uncertainty resolved red: her 40-block shape hops in
+every style where the old 24-block shape hopped only in two). Executed shape confirmed: "Test run
+with 1 test in 1 suite failed … with 4 issues", the expectation `second.articleLandingCorrections == 0`
+failing per style. The four summary lines (the on-screen evidence the trace called for):
+`VX756-SUMMARY style=stack aims=3 hops=1 restoreAims=2 laterMoves=[]` ·
+`style=marginGrid aims=2 hops=1 restoreAims=2 laterMoves=[]` ·
+`style=slotSplit aims=3 hops=1 restoreAims=2 laterMoves=[]` ·
+`style=carousel aims=3 hops=1 restoreAims=2 laterMoves=[]` — exactly one watch-correction hop per
+style, no later motion: the traced mechanism, on her shape, in all four styles. **The finding is
+CONFIRMED, not hollow; rows 1–4 red on rev.**
 
 | # | Test | `vx756-rev` (fix reverted) | `vx756-post` |
 |---|---|---|---|
-| 1 | `TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay(style: .stack)` | **R** (the hop: VX-428's own pin hopped in stack) | G |
-| 2 | `…(style: .marginGrid)` | **R** (same) | G |
-| 3 | `…(style: .slotSplit)` | R? — the old 24-block shape did NOT hop in slot split; her shape may. A green here on rev is not hollow evidence for the row (stack is the default and her likely style), only a style the swing does not trip | G |
-| 4 | `…(style: .carousel)` | R? — as #3 | G |
+| 1 | `TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay(style: .stack)` | **RED (ran 02:37)** | G predicted — tier 1 pending |
+| 2 | `…(style: .marginGrid)` | **RED (ran 02:37)** | G predicted — tier 1 pending |
+| 3 | `…(style: .slotSplit)` | **RED (ran 02:37)** — the uncertainty resolved red | G predicted — tier 1 pending |
+| 4 | `…(style: .carousel)` | **RED (ran 02:37)** — as #3 | G predicted — tier 1 pending |
 | 5 | the VX-428 family (`TakesExpansionMemoryTests`, `TakesExpansionRemountTests`, `TakesSlotSplitExpandAllTests`) | G | G — the stay-open memory is untouched |
 | 6 | `TakesExpansionCostTests` | — | G, with its `VX428-MEASURE` lines (the seed's numbers must match batch B's: seed 1.2–4.0 µs; 25 fans below the fold realize what 0 do) |
 | 7 | the landing/restore family (`TakesArticleScrollTests`, `TakesArticleWatchTests`, `TakesEntryBandTests`, …) | G | G — predicted; the risk is named in the self-assessment |
