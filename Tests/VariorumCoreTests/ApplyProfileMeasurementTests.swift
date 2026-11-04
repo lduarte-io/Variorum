@@ -14,9 +14,10 @@
 //
 //  Knobs (environment): VARIORUM_APPLY_PROFILE_POSTS (default 1200) · VARIORUM_APPLY_PROFILE_BLOCKS (default 30) ·
 //  VARIORUM_APPLY_PROFILE_RUNS (default 3) · VARIORUM_APPLY_PROFILE_STORE = disk (default) | memory ·
-//  VARIORUM_APPLY_PROFILE_INDEX_FIX=1 (the candidate fix measured, bench-side: before B's pull, CREATE INDEX on the two
-//  unindexed FK child columns that point at `variant` — block(default_variant_id), container_block(chosen_variant_id) — so
-//  the deferred-FK child scan the bisection found becomes an index probe; NOT a migration, nothing in Persistence changes) ·
+//  VARIORUM_APPLY_PROFILE_INDEX_FIX — RETIRED at VX-500 U4: the v1_36 migration made the two FK child indexes
+//  (block(default_variant_id), container_block(chosen_variant_id)) the store's own, so every run now measures the
+//  fixed shape and the knob had nothing left to add; the pre-fix column survives in the U1b record
+//  (`notes/plans/fixes/vx-500-sync-followups.md`, THE CANDIDATE FIX MEASURED) ·
 //  VARIORUM_APPLY_PROFILE_TRACE=1 (a STATEMENT-LEVEL profile of each run's apply through GRDB's `.profile` trace on B's
 //  writer connection — bench-side only, zero engine lines; the top statement shapes by total time, trigger time included
 //  in the statement that fired them; it adds its own per-statement overhead, so a traced run is read for SHARES, never
@@ -198,9 +199,7 @@ struct ApplyProfileMeasurementTests {
         let runs = max(1, min(15, env("VARIORUM_APPLY_PROFILE_RUNS", 3)))
         let onDisk = (ProcessInfo.processInfo.environment["VARIORUM_APPLY_PROFILE_STORE"] ?? "disk") != "memory"
         let tracing = ProcessInfo.processInfo.environment["VARIORUM_APPLY_PROFILE_TRACE"] == "1"
-        let indexFix = ProcessInfo.processInfo.environment["VARIORUM_APPLY_PROFILE_INDEX_FIX"] == "1"
         let storeKind = (onDisk ? "keyed on-disk store" : "in-memory store") + (tracing ? ", statement-traced" : "")
-            + (indexFix ? ", the two FK child indexes added" : "")
         setvbuf(stdout, nil, _IOLBF, 0)  // line-buffered: a log being polled shows each run as it ends
         print("[vx497-profile] corpus \(n(posts)) posts × \(n(blocks)) blocks · \(runs) run(s) · B on a \(storeKind) · window 2,000")
 
@@ -225,14 +224,6 @@ struct ApplyProfileMeasurementTests {
             let b = try SyncClient(
                 name: "B\(run)", prefix: String(format: "B%X", run), transport: server, seed: UInt64(run + 1),
                 storeURL: onDisk ? scratch.appendingPathComponent("b\(run).sqlite") : nil)
-            if indexFix {
-                try await b.db.write { db in
-                    try db.execute(sql: """
-                        CREATE INDEX idx_probe_block_default_variant ON block(default_variant_id);
-                        CREATE INDEX idx_probe_cblock_chosen_variant ON container_block(chosen_variant_id);
-                        """)
-                }
-            }
             let recorder = ProfileRecorder()
             b.applyProfile = recorder.hook
             let trace = tracing ? StatementTrace() : nil

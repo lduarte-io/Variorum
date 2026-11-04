@@ -2213,7 +2213,7 @@ boundary is v1_36**: an export from this build refuses on every build before thi
 |---|---|---|
 | 1 | The migration, its own commit FIRST: `v1_36_fk_child_indexes` (the two plain FK child indexes), registered after v1_35; the DDL doc names the mechanism (sqlite.org/foreignkeys.html §4, the feed's registry order), the measured gain (330,231 → 85,315 ms, 3.9×), why NOT a §12 lockstep event (SyncSpec §2 — mirrors carry no indexes; the completeness walk classifies COLUMNS, an index adds none; marker stays 14), and the VX-502 export line; the index-enumerating schema pins updated (`MigrationTests.expectedIndexes`, the `theDaySearchIndexArrivesForAnOlderStore` subtracting set, the new arrival test `theDeferredFKChildIndexesArriveForAnOlderStore` on the v1_34 precedent's shape) | DONE (this commit) — `swift build` green; `swift test --filter MigrationTests` → "Test run with 29 tests in 3 suites passed" (ONE consequential pin edit, annotated in place per the ritual: `theDeadPlacementByBlockIndexArrivesForAnOlderStore` migrates v1_33 → head, so its subtraction now carries v1_36's two beside v1_34's one — v1_34's own claim unchanged) |
 | 2 | The pin (red-on-old, the bisection's arm E/F shape): UNGATED, fast, in-memory — `DeferredFKChildScanPinTests`, a RATIO bound (the pending-violations arm vs the no-pending control) | DONE (this commit) — green on the migrated tree: "[vx720-pin] 8000 takes: pending 0.180538782 seconds · control 0.17602559 seconds · ratio 1.03× (bound 4)", "Test run with 1 test in 1 suite passed after 0.537 seconds". The red-on-old run is next (the named revert below); its lines land in the following commit |
-| 3 | The bench re-run, the evidence: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3` on the migrated store; the INDEX_FIX knob RETIRED (the migration is the fix); the table's new column vs U1b's 330,231 ms; the VX-672 one-paragraph reasoning | NOT-STARTED |
+| 3 | The bench re-run, the evidence: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3` on the migrated store; the INDEX_FIX knob RETIRED (the migration is the fix); the table's new column vs U1b's 330,231 ms; the VX-672 one-paragraph reasoning | IN-PROGRESS (this commit) — THE RED-ON-OLD RUN and the knob retirement landed (below); the long bench run is next, its table PENDING |
 | 4 | Close: `swift build`; the sync suites filter; the broad core `swift test` foreground (the traps' flake + VX-722/VX-723 named if seen); self-assessment; the orchestrator's LIVE STATUS row 5b flipped | NOT-STARTED |
 
 #### The pieces (filled per commit)
@@ -2249,6 +2249,28 @@ boundary is v1_36**: an export from this build refuses on every build before thi
   `swift test --filter DeferredFKChildScanPinTests` → RED recorded; restore by `git checkout --`,
   `git diff --exit-code` clean; re-run → GREEN. (MigrationTests is NOT run under the revert — its enumerations
   name the two indexes by design and would read red for the structural reason, not the behavioral one.)
+  **THE RED-ON-OLD, RUN (2026-11-04, headless — no stage owed):** at the committed tip `91cc5a656` (tree clean), the
+  `v1_36_fk_child_indexes` registration scratch-reverted exactly as named, `swift test --filter
+  DeferredFKChildScanPinTests` → **RED deterministically**:
+  `[vx720-pin] 8000 takes: pending 2.063300253 seconds · control 0.165805461 seconds · ratio 12.44× (bound 4)`
+  `✘ Test aTakeInsertUnderPendingDeferredViolationsCostsLikeOneWithoutThem() recorded an issue at
+  DeferredFKChildScanPinTests.swift:78:9: Expectation failed: ratio < 4` (ratio → 12.44410311069308;
+  "✘ Test run with 1 test in 1 suite failed after 2.391 seconds with 1 issue") — 258 µs a take under the scan vs
+  21 µs the control, U1b's predicted band at N = 8,000. Restored by `git checkout -- Sources/VariorumCore/Persistence/
+  Migrations.swift`, `git diff --exit-code` CLEAN at `91cc5a656`; re-run `DeferredFKChildScanPinTests|MigrationTests`
+  → **"Test run with 30 tests in 4 suites passed after 2.781 seconds"**, the pin's green line reading
+  `[vx720-pin] 8000 takes: pending 0.172201231 seconds · control 0.269250938 seconds · ratio 0.64× (bound 4)` —
+  the green-side ratio WOBBLES under parallel-suite load (0.64–1.03 observed; here the load landed in the control
+  arm), an order of magnitude under the bound either way; the red side is 12.4×, three times over it.
+- **Piece 3, the knob retirement (this commit):** `VARIORUM_APPLY_PROFILE_INDEX_FIX` RETIRED from
+  `ApplyProfileMeasurementTests.swift` (the env read, the bench-side `CREATE INDEX idx_probe_…` block and the
+  store-kind suffix dropped; the header documents the retirement and points at the U1b record for the pre-fix
+  column) — the v1_36 migration makes every bench run measure the fixed shape, so the knob had nothing left to add.
+  A side-fact for a bench reader: the gated bisection's arm E now reads ≈ arm F on the real schema (the migration
+  gives E the index F used to add), and arm F's `CREATE INDEX idx_probe_block_default_variant` becomes a harmless
+  duplicate index — the probes print, assert nothing, and keep their historical doc. Ungated file run after the
+  retirement: "Test run with 5 tests in 4 suites passed after 0.120 seconds" (3 gated skipped-but-counted, the two
+  seam pins green).
 
 ### THE CLOSING WINDOW AS CONDITIONED BY TONIGHT'S COORDINATOR (nov3coordinator, 2026-11-04 — supersedes the closing-runs bullet's narrower Mac-suites line; accepted after the orchestrator verified the diff)
 
