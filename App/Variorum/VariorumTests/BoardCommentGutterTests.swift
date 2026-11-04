@@ -647,6 +647,59 @@ struct CompareCommentGutterTests {
                     "deleting it moves the prose not a point (\(after) vs \(before))")
         }
     }
+
+    /// **RED ON OLD — the ladder's round 1, F1: her open panel keeps its seat
+    /// in Compare too** (the Compare twin of
+    /// `TakesCommentFeedLivenessTests.herOpenPanelKeepsItsSeatWhenTheLastCommentLeaves`).
+    /// The seat lives in the one shared host (`CommentGutterFace` — while her
+    /// panel is open, a face whose live entries run out keeps the ones it
+    /// showed), and it can hold only while the host keeps the face MOUNTED.
+    /// Compare's cell built the face only while its block HAD comments, so
+    /// deleting the block's last comment from her open panel — the live feed's
+    /// next projection no longer naming the block — unmounted the face, its
+    /// state and the panel's popover anchor with it: the panel torn down
+    /// mid-act, its deleted fold and Restore gone. The face's door is pressed
+    /// as she presses it; the deletion is the panel's own operation; the
+    /// delivery is the projection read the board's observation runs (the test
+    /// host never fires `.task`, so the pin adopts it — every Compare pin's
+    /// road).
+    @Test func herOpenPanelKeepsItsSeatInCompareWhenTheLastCommentLeaves() async throws {
+        await HostLaunchSettle.wait()
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        try await withCompareCommentWorld(comments: []) { world in
+            let only = try world.session.operations.addBlockComment(
+                to: world.tall.block, text: shortComment)
+            let model = CompareViewModel(session: world.session, anchorPostID: world.anchor)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptCompare(model, world, peers: [world.twin])
+            BoardCommentFaceOracle.reader(world.session.debugProbeScope).reset()
+            let board = BoardCommentFaceOracle.reader(world.session.debugProbeScope, board: model)
+            let (window, hosting) = mountCompare(model, world, width: 1100)
+            defer {
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            let card = { cards(in: hosting).first { $0.identity == world.tall.block } }
+            await settle(window, hosting, until: { card() != nil })
+            try #require(board.face(world.tall.block)?.entries == [shortComment],
+                         "fixture: the two-column board's lane seats the comment's face")
+            let door = try #require(card()?.onClick, "fixture: the Compare face is a door")
+            door()  // her press: the comments panel opens on the face
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+
+            try world.session.operations.deleteBlockComment(only.id)  // as her panel's Delete does
+            try await adoptCompare(model, world, peers: [world.twin])
+            try #require(model.face(for: world.anchor)?.comments[world.tall.block] == nil,
+                         "premise: the live feed no longer names the block")
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            #expect(card() != nil,
+                    "the Compare face stays seated under her open panel when its last comment leaves")
+            #expect(board.face(world.tall.block)?.entries == [shortComment],
+                    "…showing what it showed when she opened the panel")
+        }
+    }
 }
 
 // MARK: - The shared rules (pure — no mount)
