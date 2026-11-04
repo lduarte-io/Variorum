@@ -2867,7 +2867,7 @@ both voices.
 
 ### THE W2 RE-WALK (the W2 cycle's acceptance — an Opus re-walker under the orchestrator's HELD claim `vx-770-final`, 2026-11-04)
 
-**NOT DONE (first line, kept current):** IN PROGRESS — five margin-grid trials walked (1, 2, 3, 3b, 3c); the control, the posture end PENDING.
+**NOT DONE (first line, kept current):** IN PROGRESS — all trials walked (five margin grid + the stack control) and the fans look; the voice restore, the quit and the posture end PENDING.
 
 Build: `App/Variorum/DerivedData/vx770-gatef/Build/Products/Debug/Variorum.app` (FINAL bytes — `nm` finds the W2
 fix's `landingTargetJustMoved` ×6 in its `Variorum.debug.dylib`; branch head 4f0874651). The fix under watch: THE W2
@@ -2882,8 +2882,8 @@ ONE settled landing — the burst shows no second movement after rest, and the a
 | W2-R trial 3 (Terminal, margin grid, P23 → P33) | **PASS — 0 hops, no movement after rest; LOOK LINE: a 56-pt in-storm correction one frame after first paint** |
 | W2-R trial 3b (Terminal, margin grid, P33 → P23 — corroboration) | **PASS — 0 hops, first paint = rest** |
 | W2-R trial 3c (Terminal, margin grid, P23 → P33 — trial 3's exact shape again) | **PASS — 0 hops, no movement after rest; the LOOK LINE REPRODUCES (a 166-pt in-storm correction one sample after first paint)** |
-| W1-R control (stack) | PENDING |
-| look line: her open fans stay open (R-770-1) | PENDING |
+| W1-R control (Terminal, stack, P33 → P23) | **PASS — 0 hops, first paint = rest** |
+| look line: her open fans stay open (R-770-1) | **HOLDS** — every return, and P27/P29 after the last |
 | posture at the end | PENDING |
 
 **Posture AS FOUND (pre-launch, 10:41):** zero Variorum instances (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty);
@@ -2961,6 +2961,21 @@ the burst cannot resolve finer), before any rest; the app counts it as no hop (t
 Every trial is still after that. For the orchestrator's adjudication: by the acceptance as written (a 0-hop story, no
 second movement after rest) all five margin-grid trials PASS; the first-paint correction is the original W2's
 frame 18 → 19 class (the in-landing move its walker did not count), now visible here at up to 166 pt in one shape.
+
+**W1-R control — Terminal, STACK, P33 → P23 (10 above; the original walk's Terminal W1 shape): PASS.** `style ▾` →
+**Stack** on the board (the found "Takes open as" value); from 3c's landing (P33 current); ⌘1; in Write scrolled up and
+clicked into **P23** (bar "block 23/40"); ⌘2 with the burst (`rewalk/ctl-terminal-stack-p33-p23/`, `f25-f60.png`,
+shift box x 800–2150 for the stack column). Frames 20–24 the empty-state face; **frame 25 the first board picture — P23
+washed near the top with its fan open (chosen + choose), P22 and P21's open fan above**; frame 28 the arrival ring in
+place; frames 25–68 shift 0 (the scroller's fade) — `f25-f60.png` shows the first paint and the rest identical. The
+story, verbatim:
+`TakesArticle landing — 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 LAND | manifest rows=40 target=22 offset=-1 total=1999 derived=39 exactAbove=N | content=3254 | content=3746 | content=6016 | content=5499 | content=6527 | content=6569 | 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 DONE: settled at top=0.0 after 0 hops, 1008 ms`
+
+**Look line — R-770-1, her open fans stay open through each return: HOLDS.** Every fan was opened once (expand all) at
+the start; after each of the six returns the landed page shows its fans open — P35's rail (trial 1), P23's (trials 2,
+3b), P33's and P31's (trials 3, 3c), P23's and P21's stacks (the control) — and after the last return a scroll down the
+stack board (`rewalk/look-fans-below.png`) shows P27 and P29 still open, washed, with their choose cards. Nothing was
+re-expanded between trials.
 
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
