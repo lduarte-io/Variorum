@@ -35,6 +35,11 @@ actor MCPSocketTransport: Transport {
     /// VX-394 (VX-348 U5): the read ended on a message past the cap (answered,
     /// then closed) — the session's end line says so.
     private(set) var endedOverLimit = false
+    /// **VX-762 (B2 part two, A-771-3): every write to the socket holds this
+    /// lock** — the SDK's frames (`send`), the over-cap answer, and the close
+    /// line (`sayClosing`) — so no line is ever written into the middle of a
+    /// frame. Uncontended except at a stop.
+    nonisolated let writeLock = NSLock()
 
     init(fd: Int32, replay: [Data] = []) {
         self.fd = fd
@@ -86,7 +91,8 @@ actor MCPSocketTransport: Transport {
         guard isConnected else { throw MCPError.transportError(POSIXError(.ENOTCONN)) }
         var framed = data
         framed.append(UInt8(ascii: "\n"))
-        guard MCPSocketTransport.writeAll(fd, framed) else {
+        let fd = self.fd
+        guard writeLock.withLock({ MCPSocketTransport.writeAll(fd, framed) }) else {
             throw MCPError.transportError(POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO))
         }
     }
@@ -100,7 +106,25 @@ actor MCPSocketTransport: Transport {
         endedOverLimit = true
         guard isConnected else { return }
         let sentence = MCPHandshake.overLimitRefusal(limit: Self.lineCap, beforeInitialize: false)
-        _ = Self.writeAll(fd, MCPShim.refusalResponse(toFirstLine: Data(), message: sentence))
+        let fd = self.fd
+        _ = writeLock.withLock { Self.writeAll(fd, MCPShim.refusalResponse(toFirstLine: Data(), message: sentence)) }
+    }
+
+    /// **The close line, as the connection ends** (VX-762 — B2 part two,
+    /// A-771-3): written by the session's hang-up just before its shutdown,
+    /// from whatever thread stops the server — so it NEVER WAITS: the write
+    /// lock is only TRIED (a frame mid-write keeps it, and the line is skipped),
+    /// and the line goes in ONE non-blocking send (a socket buffer that can't
+    /// take it whole tears or drops it). The shim honours only a COMPLETE close
+    /// line, so either miss falls back to its own sentence. True when the whole
+    /// line was written.
+    nonisolated func sayClosing(_ line: Data) -> Bool {
+        guard writeLock.try() else { return false }
+        defer { writeLock.unlock() }
+        let written = line.withUnsafeBytes { raw in
+            Darwin.send(fd, raw.baseAddress, raw.count, MSG_DONTWAIT)
+        }
+        return written == line.count
     }
 
     // MARK: - The blocking halves (pure over a descriptor — pinned headless)

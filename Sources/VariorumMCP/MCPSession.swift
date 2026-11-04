@@ -60,6 +60,12 @@ final class MCPSession: @unchecked Sendable {
     /// The name `initialize` declared, waiting or not.
     private var declaredName: String? { lock.withLock { name } }
 
+    /// **VX-762 (B2 part two)** — the transport, once the handshake has
+    /// admitted the connection: the close line (`hangUp(saying:)`) is written
+    /// through its write lock. nil while the opening is still being read (a
+    /// connection that hasn't named itself has nothing to be told).
+    private var transport: MCPSocketTransport?
+
     // MARK: - How the connection ended (VX-394 — VX-348 U5)
 
     /// The end the HOST said when it ended the connection (a stop, before its
@@ -359,6 +365,7 @@ final class MCPSession: @unchecked Sendable {
             lock.withLock { awaitingKey = opening.presentedKey.map(MCPSetupKeyRule.hash) }
         }
         let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
+        lock.withLock { self.transport = transport }
         await server.withMethodHandler(ListTools.self) { [weak self] _ in
             guard let self, let name = self.declaredName else { return .init(tools: []) }
             if try self.awaitsHerOK() { return .init(tools: []) }
@@ -443,12 +450,28 @@ final class MCPSession: @unchecked Sendable {
     /// End the connection (server stop): the reader unblocks, the loop ends.
     /// VX-279: a no-op once the session has closed its descriptor — the
     /// number may already be another socket's.
-    func hangUp() {
+    ///
+    /// **VX-762 (B2 part two, A-771-3): `line`, when given, is said first** —
+    /// the stop's close line (`MCPCloseWords`), the connection's last bytes,
+    /// through the transport's write lock without ever waiting on it
+    /// (`MCPSocketTransport.sayClosing`); then the SAME synchronous shutdown as
+    /// ever (the stop's order holds: every connection shut before the store
+    /// can close — VX-369's row 4). A connection still in its handshake (no
+    /// transport yet) is told nothing.
+    func hangUp(saying line: Data? = nil) {
+        let transport = lock.withLock { self.transport }
         connectionLock.withLock {
             guard !connectionClosed else { return }
+            if let line, let transport { _ = transport.sayClosing(line) }
             _ = shutdown(fd, SHUT_RDWR)
         }
     }
+
+    #if DEBUG
+    /// TEST-ONLY (VX-762, A-771-3 (2)): the transport's write lock, so a pin can
+    /// hold it as a frame mid-write would while the server stops.
+    var transportWriteLockForTesting: NSLock? { lock.withLock { transport?.writeLock } }
+    #endif
 
     /// The host's close of this session's descriptor once `run()` has
     /// returned and the host has let go of the session (VX-279): once, under

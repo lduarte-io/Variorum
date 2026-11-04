@@ -177,6 +177,13 @@ public enum MCPShim {
     /// finds the mark — and neither does a failed write to `output` (the client
     /// is gone). Only the input's own end marks it: a write to the socket that
     /// fails is the app's close seen from the upstream side.
+    ///
+    /// **B2 part two (A-771-3): the app's own words, when it said why.** The
+    /// downstream is a `relay`: every byte relayed verbatim and at once, except
+    /// a line opening with `MCPCloseLine.marker`, which never reaches `output`;
+    /// the stderr line is then the latest complete close line's words, else
+    /// `appClosedMessage` (none came, it could not be said, or the stream ended
+    /// inside one). Still ONE line per drop.
     public static func pump(input: Int32, output: Int32, socket: Int32, errorOutput: Int32 = STDERR_FILENO) {
         pump(input: input, output: output, socket: socket, errorOutput: errorOutput, onUpstreamEnd: nil)
     }
@@ -196,9 +203,26 @@ public enum MCPShim {
             onUpstreamEnd?()
         }
         upstream.start()
-        let downstream = copy(from: socket, to: output)
-        if downstream == .sourceEnded, !clientEnded.isMarked {
-            writeAll(errorOutput, Data((appClosedMessage + "\n").utf8))
+        let downstream = relay(from: socket, to: output)
+        if downstream.end == .sourceEnded, !clientEnded.isMarked {
+            writeAll(errorOutput, Data(((downstream.closingWords ?? appClosedMessage) + "\n").utf8))
+        }
+    }
+
+    /// **The downstream** (VX-762, B2 part two): `copy`'s loop — the same reads,
+    /// each relayed at once — with the close line kept off `destination`
+    /// (`MCPCloseLine.Relay`). How it ended, and what the app said about it.
+    static func relay(from source: Int32, to destination: Int32) -> (end: CopyEnd, closingWords: String?) {
+        var buffer = [UInt8](repeating: 0, count: 64 * 1024)
+        var state = MCPCloseLine.Relay()
+        while true {
+            let count = buffer.withUnsafeMutableBytes { read(source, $0.baseAddress, $0.count) }
+            if count < 0, errno == EINTR { continue }
+            guard count > 0 else { return (.sourceEnded, state.closingWords) }
+            let spans = buffer.withUnsafeBufferPointer { state.take(UnsafeBufferPointer(rebasing: $0[0..<count])) }
+            for span in spans where !span.isEmpty {
+                guard writeAll(destination, Data(buffer[span])) else { return (.destinationFailed, nil) }
+            }
         }
     }
 
