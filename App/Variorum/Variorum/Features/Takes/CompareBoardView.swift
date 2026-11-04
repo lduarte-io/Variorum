@@ -2133,9 +2133,18 @@ private struct CompareCellView: View {
                 // there (`CommentGutterFace`). An overlay: the cell's layout,
                 // and the prose's measure and left edge, are the same with and
                 // without comments.
+                //
+                // The face is built wherever a lane stands — comments or none,
+                // Takes' own shape (`CommentMarginNote`) — because the shared
+                // host keeps her open panel's SEAT (`CommentGutterFace`): built
+                // only while the block HAD comments, the face (its state, the
+                // panel's popover anchor) left with the last one deleted from
+                // her open panel, tearing the panel down mid-act (the VX-770
+                // ladder, round 1 F1). With no entries the host draws and
+                // records nothing.
                 .overlay(alignment: .topLeading) {
-                    if lane > 0, let entries = model.face(for: postID)?.comments[slot.blockID],
-                       !entries.isEmpty {
+                    if lane > 0 {
+                        let entries = model.face(for: postID)?.comments[slot.blockID] ?? []
                         GeometryReader { proxy in
                             CommentGutterFace(
                                 session: session, blockID: slot.blockID,
