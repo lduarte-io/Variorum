@@ -1,8 +1,10 @@
 # VX-500 — Run: the 0.10 window follow-ups (the sync follow-ups)
 
-**RESUMED 2026-11-04 ~01:00 MST by the THIRD orchestrator (the successor the second cutover's kickoff names). Her resume word (R-500-12 below) LIFTS the PR hold: the completed PR MAY MERGE (serialized through tonight's coordinator, `nov3coordinator`), while a RELEASE stays withheld — she accumulates PRs before minting one. Main (1.0 + 1.0.1) merged into the branch at `5b66640ad`, clean; the run's suites green on the merged tree (128/10).**
+**STATUS: CLOSED 2026-11-04 (the third orchestrator; PR #PENDING-PR, merged at the coordinator's GO; no release — R-500-12). Read FOR A LATER READER below; everything under THE RECORD OF THE RUN is the night's working record.**
 
-**STATUS: OPEN — SECOND CUTOVER 2026-11-01 ~19:10 MST (the second orchestrator hands off after the server half's DEPLOY and her acceptance; the kickoff prompt at the top of `notes/handoffs/vx-500-handoff.md`; read FOR A LATER READER first). The FIRST cutover 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). RESUMED 2026-11-01 ~13:30 MDT by the second orchestrator (stage claim `vx500-orchestrator`; main merged into the branch at `c64211270` so every brief reads the reworded CLAUDE.md). The cast from here, her ruling at the resume kickoff (R-500-5): FABLE SUBAGENTS implement EVERY unit — U1a · U1b · U2 · U3 — a fresh `fable-reviewer` runs the ladder (SAME-MODEL: the orchestrator arbitrates findings against the spec); the orchestrator writes nothing that ships. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
+**The resume (2026-11-04 ~01:00 MST, the third orchestrator):** her resume word (R-500-12) lifted the PR hold — the completed PR merges (serialized through `nov3coordinator`), a RELEASE stays withheld. Main (1.0 + 1.0.1) merged into the branch at `5b66640ad`, clean.
+
+**The SECOND CUTOVER banner it replaces (history): SECOND CUTOVER 2026-11-01 ~19:10 MST (the second orchestrator hands off after the server half's DEPLOY and her acceptance; the kickoff prompt at the top of `notes/handoffs/vx-500-handoff.md`; read FOR A LATER READER first). The FIRST cutover 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). RESUMED 2026-11-01 ~13:30 MDT by the second orchestrator (stage claim `vx500-orchestrator`; main merged into the branch at `c64211270` so every brief reads the reworded CLAUDE.md). The cast from here, her ruling at the resume kickoff (R-500-5): FABLE SUBAGENTS implement EVERY unit — U1a · U1b · U2 · U3 — a fresh `fable-reviewer` runs the ladder (SAME-MODEL: the orchestrator arbitrates findings against the spec); the orchestrator writes nothing that ships. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
 considerations) · branch `vx-500-sync-followups` · worktree `~/dev/variorum-vx-500` · the Pro. Architect shape
 (`/architect-phase VX-500`); the cast is CLAUDE.md's standing default — **Fable orchestrates, writes every `Sync/`
 and server line, and cold-reviews (`fable-reviewer`); Opus implements the faces, the tests and the custody road under
@@ -27,55 +29,41 @@ so it is runnable from `main` today; its code is the seed dedupe's defense leg (
 which this run touches (this run changes the engine's progress plumbing, the server's pull query, the sync row, the
 typed-unlock key load and two tests). Same Area label, different code; no overlap.
 
-## FOR A LATER READER (CLAUDE.md's record rule; written at the second orchestrator's cutover, 2026-11-01 — CURRENT AS OF THAT CUTOVER, the successor's closeout rewrites it; a kickoff that names this record means this section, and the cutover successor reads WHOLE)
+## FOR A LATER READER (CLAUDE.md's record rule; rewritten at the close, 2026-11-04 — the run's settled state; a later session reads THIS and nothing below unless reopening)
 
-**What this run is.** VX-500, the 0.10 window's sync follow-ups: the changefeed's quadratic page (VX-495), the sync row's
-missing progress (VX-496), the belt's internal error text (VX-505), the save's duration (VX-497 — profiled, not chunked),
-the retention tests' clock (VX-539/VX-546), a leaf's constraint (VX-490), the compaction memo (VX-504), and — born here —
-the deferred-FK index fix (VX-720). Umbrella VX-500; branch `vx-500-sync-followups`; the PR is HELD OPEN at the end (the
-launch code freeze — her word; she says when it merges). VX-508 HELD (tester A's join). VX-544 LIFTED OUT (R-500-10) to its
-own run, `notes/plans/fixes/vx-544-offline-typed-unlock.md`.
+**What this run was.** VX-500, the 0.10 window's sync follow-ups, CLOSED 2026-11-04 (PR #PENDING-PR; no release —
+R-500-12): the changefeed's quadratic page (VX-495 — SHAPE B, deployed mid-run 2026-11-02 00:41 UTC and accepted at
+~23k rows in ~64 s; `Server/supabase/maintenance/vx495-pull-keyset.sql` + `vx495-rollback.sql`), the sync row's
+progress (VX-496 — the engine's `SyncProgress` seam + the index-only count RPC + the row's and both sheets' words),
+the belt's internal error text (VX-505 — the typed `Kind.retrying` face), the save's duration (VX-497 — profiled at
+scale, stays open at her word; its measured mechanism became VX-720), the deferred-FK index fix (VX-720 —
+**`v1_36_fk_child_indexes`**: the brief's v1_35 slot was taken by main's VX-669 sweep, so the export-refusal boundary
+is v1_36; the 109k-row apply 330 s → 89 s, 3.7–3.9×), the retention tests' clock (VX-539/VX-546 — injected; the
+"real miscount" reading falsified twice independently), the leaf constraint (VX-490), and the deploy's bracket
+(VX-721 — the 10/14c idiom, proven live by deploy run 2; the sweep expects 65 OK · 4 INFO · 0 fail). VX-504 is the
+*[removed for publication]*
+VX-76 is proposed as VX-496's duplicate (her call, a comment on the ticket).
 
-**Settled so far (verify by the hashes, never trust).**
-- **The server half is DESIGNED, REVIEWED AND DEPLOYED (2026-11-02 00:41 UTC, run 2; the checklist `notes/plans/vx495-deploy-checklist.md`, RUN).** `Server/supabase/maintenance/vx495-pull-keyset.sql`: `sync_pull` redefined as SHAPE B (per-table
-  index picks of seqs → one global page cut → `bound` = the page's last seq → every fetch branch one index range scan up
-  to it; byte-identical wire; her probes old 3,398 ms · pick-by-id 1,138 ms · SHAPE B 230 ms — D-495 EVIDENCE), plus
-  `sync_pull_remaining` (the index-only count without the horizon — R-500-1). Its rollback
-  `maintenance/vx495-rollback.sql` restores 13's body byte for byte. Both carry the 10/14c re-own bracket (grant
-  CREATE → owner to the definer → revoke CREATE; the definer ends usage-only — 14c's letter) and the grant sweep checks that
-  end state (VX-721).
-  Two Fable cold-review rounds (`vx-500-server-half-round1.md`, `-round2.md`: 0 BLOCKER · 0 MAJOR · 3 + 2 MINOR, all
-  landed). Deploy run 1 refused (42501 — the artifacts had omitted the 10/14c re-own bracket, VX-721; fixed in the window);
-  run 2 landed `[]`; every verify row passed (the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans).
-  Her week-behind Pro's catch-up was the acceptance: ~23k rows in **~64 s end to end** (the server's two stamps; the
-  download/save split unmeasured — the log unreadable from the session).
-- **The engine's client half is BUILT, UNREVIEWED by a cold ladder** (U1a, commits `6155ba7fb`…`9a2b3dfc7`; the
-  breach draft `aad734aef` adopted line by line): `SyncProgress`, `pull(progress:)`, the once-per-round count through
-  `SyncPullCountTransport` (a 404 or absent surface ⇒ no total; the count never fails a round), `Status.progress`,
-  `Status.lastErrorIsRetrying` (typed, never string-matched), the save's progress against `batch.count`. Pins:
-  `SyncProgressTests` (7), the belt-flag pin, the grown wire pin. **The WHOLE-DIFF LADDER (Fable) is OWED over these
-  `Sync/` lines** — the successor runs it after U2 and U4.
-- **The apply PROFILE is MEASURED** (U1b, `bf33a5d10`…`5d8737765`; the gated bench `ApplyProfileMeasurementTests`,
-  `VARIORUM_APPLY_PROFILE=1`; the nil-inert `ApplyProfileHook` seam on `SyncEngine.init` — `Sync/` lines, the ladder's):
-  the save is 98% row loop; the FK introspection 0.5% (NOT memoized — the 5% threshold stated before the measure); the
-  real cost is SQLite's deferred-FK child scan over the unindexed `block.default_variant_id` (O(N²)); two local-only
-  indexes cut 109k rows from 330 s to 85 s — **VX-720, seated as U4**. The chunking memo is trued (chunking buys none of
-  it; an un-committable edge under deferred FKs). VX-497 stays open ("don't close it").
+**How it closed.** Three Fable orchestrators in sequence (the breach cutover, the deploy cutover, the closing
+resume); Fable implementers for every unit (R-500-5). The ladders: two server-half rounds pre-deploy
+(`vx-500-server-half-round1/2.md`), then the WHOLE-DIFF ladder — round 1 (0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT;
+`vx-500-ladder-round1.md`) → four fixes (the discard road's `downloaded` reset with its red-on-old pin 750-vs-375,
+the count doc, the guarded COUNT(*), the ratio arithmetic) → round 2 CLEAN (zero findings, F1–F4 closed; the
+reviewer reproduced F1's red independently; `vx-500-ladder-round2.md`). The closing runs: debug whole-core
+**3,605/483 passed** (5 known Castle-pair arms; the MCP load-flakes green alone); the release split's Sources
+compile green while its TEST target is PRE-EXISTING broken on main (VX-773); FULL `VariorumTests` on the final tip
+`65594de55` — **"Test run with 5804 tests in 1006 suites passed after 2574.458 seconds with 2 warnings and 14 known
+issues"** (its first pass caught `redoNeverAsks`, traced TEST-ONLY — the pre-existing P33 latch race, probe 21/30
+branch vs 27/30 MAIN — and fixed as the VX-539/546 class; the REDO REGRESSION RECORD); FULL `VariorumMobileTests`
+on a fresh simulator — **"Test run with 852 tests in 139 suites failed … with 6 issues (including 4 known issues)"**,
+the only real red PRE-EXISTING ON MAIN byte-identically (VM-38). The closing window's test hosts migrated the SHARED
+dev store to v1_36, so un-merged Debug builds refuse it until this merge lands (her bundle carries it).
 
-**Her rulings by id:** R-500-1 the index-only count · R-500-2 VX-544/VX-683 not Pre-launch · R-500-3 the CLAUDE.md cast
-rule (then loosened the same evening: "The orchestrator never implements") · R-500-4 the recovery shape · R-500-5 Fable
-implements every unit · R-500-6 the server half ships early (the split ladder, the rollback artifact) · R-500-7 VX-720 as
-U4, not Pre-launch · R-500-8 the deploy through the PAT · R-500-9/R-500-11 the re-own bracket (the first framing corrected) · R-500-10 this
-session hands off after the deploy; U3 lifted out; one file restructured in place.
-
-**What remains for the successor (the kickoff prompt at the top of this file):** U2 (the faces — D-496's words, D-505's
-line, the retention clock, the leaf; its brief below) → U4 (VX-720's index migration — landed as v1_36, the v1_35 slot taken by main's VX-669 sweep; its brief) → the whole-diff Fable
-ladder (anchors: the two server-half rounds for those files; the U1a/U1b self-assessments) → closing runs (the Mac suites
-over every changed source; core debug + release; the phone build) → the PR OPENED AND HELD → the closeout's canon deltas
-DRAFTED for the merge moment (AppSpec §12 the row's progress line, SyncSpec §12 a maintenance entry for the deployed
-body, SurfaceContracts the row) → this section rewritten → the handoff. **Held for her:** the words P-500-1/-2/-3, the
-corner P-500-7, VX-508; the memos (compaction, chunking) for a sitting. **Tickets born here:** VX-720 (U4), VX-721 (the
-drift — closes with the deploy), VX-722/VX-723 (load flakes, Suspected).
+**Her rulings by id:** R-500-1…12 (verbatim under HER RULINGS; R-500-12 is the resume word — merge yes, release no).
+**PROVISIONALs:** P-500-1/2/3/7(a)/8 → QUESTIONS #257 (plus the retrying face's disabled "Sync now" corner).
+**Tickets born:** VX-720/721 (fixed in-run), VX-722/723/772 (load-flakes, Backlog Low), VX-773 (the release split,
+Medium), VM-38 (the mobile caret pin red on main, Medium). **Next:** VX-683 (a `Sync/` design memo + sitting first —
+her priority raise), then VX-544 (its plan file is ready). The handoff: `notes/handoffs/vx-500-handoff.md`.
 
 ## THE REMAINING WORK (the successor orchestrator's — the kickoff prompt is `notes/handoffs/vx-500-handoff.md`'s top; read FOR A LATER READER first, then these briefs, then the ladder plan; the working record below is read once)
 

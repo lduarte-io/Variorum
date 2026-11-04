@@ -1484,3 +1484,22 @@ green; the acceptance walk on the dev store's prince, the navigator's highlight 
 the SurfaceContracts nav-info line rewritten in place + the receipt rule's R-724-2 exception; the dated entry in
 AppSpecRecord. Nothing mobile-visible. **Version 1.0 released at her word right after the merge** — her notes
 verbatim ("Welcome to Variorum! This is version 1.0"), the release outcome in the handoff. Next: hers.
+
+**→ VX-736 CLOSED 2026-11-02 — THE 1.0.1 HOTFIX: THE TOUR'S CLOSING CARDS AND THE QUICK FIVE
+(the record `notes/plans/fixes/vx-736-hotfix-101.md`, FOR A LATER READER at its top; PR #214; the handoff
+`notes/handoffs/vx-736-handoff.md`).** Her ~2:45 AM kickoff after her fresh-profile test of the shipped 1.0; one
+overnight /architect-phase run, five members under one run ticket. The tour's overflowing final card became the
+CLOSING CARDS — a passphrase card then a twelve-words card, each skipped while its ask is not owed (the band
+card's own ledger truths; the VX-511 landed-account class), then the clean end card — with the onboarding audit
+(29 rows), the step-7 scroll sentence, and F-W3's ask-state truncation fixed test-first (VX-735). VX-727's
+outline is born in its note's wing; VX-737's fresh sidebar is 240 pt inside a 1270 × 840 default window
+(P-736-4 — the Library's one-line row kept); VX-738's wing label is off both quick-entry bars (the toolbar
+switcher stays); VX-729's vanishing take badge traced to the confirmed VX-702 instance (no display pass after a
+frame-constant edit on 27.0.1) and fixed on the house's needsDisplay road with a 14-row sibling sweep. Three
+Opus batches; gates A–D green (52/8 · 45/6 · 108/19 · 57/10); every watch red exactly as predicted; the joint
+walk J0–J5 PASS in both voices. One Fable ladder round: no BLOCKER, no MAJOR — closed at round 1. Canon: the
+tour line and the VX-552 line rewritten in place, §The Library's default 1240 → 1270, AppSpec's First-open
+parenthetical; the CastleRules one-word touch HELD for her. Born: VX-739–745; R-736-8 took the site's noindex
+off the four Variorum pages (stargazing-tech ac74b3a, deployed with the publish). Nothing mobile-visible.
+**Released as 1.0.1 the same night at her advance word** (R-736-4; notes "Minor bug fixes."; the outcome in the
+handoff). Next: hers — the morning bundle is the handoff's checklist.
