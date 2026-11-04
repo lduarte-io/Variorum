@@ -110,7 +110,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | 1 | VX-759 duplicate dating (flagship) | 1 | FIXED — 3f2f650d4 (P-771-1); A-771-1 extends it to her Copy to Wing (the commit "Part of VX-759 (A-771-1): …") |
 | 2 | VX-766 duplicate brief form | 1 | FIXED — brief form 2fe408519 + the fan digest (A-771-2, P-771-8; the commit "Part of VX-766 (A-771-2): …") |
 | 3 | VX-765 copy_note_to_wing | 1 | BUILT — 43806305a; A-771-1: the copy keeps an undated, untitled source's day (app words PENDING the Mac window) |
-| 4 | VX-760 mismatch honesty | 2 | IN-PROGRESS — designed (BATCH 2 RECORD) |
+| 4 | VX-760 mismatch honesty | 2 | FIXED — pins red on old 363323398, fix in the commit "Part of VX-760: the fix …" (P-771-9) |
 | 5 | VX-761 replace form | 2 | IN-PROGRESS — the seam proposed (BATCH 2 RECORD) |
 | 6 | VX-369 error sweep (rider) | 2 | NOT-STARTED |
 | 7 | VX-764 remove_tag answer | 3 | NOT-STARTED |
@@ -243,8 +243,8 @@ No revert is in flight.
 | Piece | Status |
 |---|---|
 | 0 — this record: the traces, the designs, VX-761's proposed seam | DONE (58d2e7f5b — committed, unpushed: GitHub incident) |
-| 1 — VX-760 pins, red on the old tree | DONE (this commit) — NEW `Tests/VariorumMCPTests/MCPExpectedTextMismatchServerTests.swift` (8 tests): RED on the pre-fix tree, "Test run with 8 tests in 1 suite failed … with 22 issues" — the six fact-pattern pins red (5 · 4 · 3 · 4 · 4 · 2), the old answer `Refused: bufferChangedSinceGesture(variantID: "…")` (the harness's hook); the two guards (`aMatchingNoOpAnswersAsBefore`, `aMatchingEditLandsAsBefore`) green on both sides by design |
-| 2 — VX-760 fix | NOT-STARTED |
+| 1 — VX-760 pins, red on the old tree | DONE (363323398 — committed, unpushed: GitHub incident) — NEW `Tests/VariorumMCPTests/MCPExpectedTextMismatchServerTests.swift` (8 tests): RED on the pre-fix tree, "Test run with 8 tests in 1 suite failed … with 22 issues" — the six fact-pattern pins red (5 · 4 · 3 · 4 · 4 · 2), the old answer `Refused: bufferChangedSinceGesture(variantID: "…")` (the harness's hook); the two guards (`aMatchingNoOpAnswersAsBefore`, `aMatchingEditLandsAsBefore`) green on both sides by design |
+| 2 — VX-760 fix | DONE (this commit) — NEW `Sources/VariorumMCP/MCPExpectedTextMismatch.swift` (the pure `diagnose` + the words); `MCPWriteSupport.swift` `MCPWireRefusalCopy.words` speaks it FIRST in the chain; `MCPWriteTools+Edit.swift` — the `.editTake` arm catches `bufferChangedSinceGesture` naming this take and asks NEW `expectedTextMismatch(takeID:noteID:sent:clientName:)` (one read: the take still in the decided note, the client still reaching it at edit, the stored text still differing) — else rethrows the op's error unchanged. NEW `Tests/VariorumMCPTests/MCPExpectedTextMismatchRuleTests.swift` (5 — the rule's table, the UTF-16 offsets, no pattern claims a race, the chain's order, the door's four fallbacks). JUSTIFIED EDITS (the ritual comment in place): `MCPEditServerTests.editTakeLandsBracketedByTheNamedCommitsAndAStaleReadRefuses` and `MCPHerEditorServerTests.aWireTakeEditMeetsHerLatestTextAndRefusesAStaleRead` asserted the raw case in the stale answer — now the fact pattern. GREEN: `MCPExpectedTextMismatch*\|MCPEditServerTests\|MCPHerEditorServerTests\|MCPSpellingNoOpServerTests\|MCPNullCharacterServerTests\|MCPWriteDigestServerTests` — 63 tests / 7 suites passed. NO `Shared/` file; `OpsRefusalTable` untouched |
 | 3 — VX-761 Domain rule + op arm + core pins | NOT-STARTED — the seam below |
 | 4 — VX-761 wire (parse, schema, description, words) + wire pins | NOT-STARTED |
 | 5 — VX-369 the sweep table, its pins red on old, the words | NOT-STARTED |

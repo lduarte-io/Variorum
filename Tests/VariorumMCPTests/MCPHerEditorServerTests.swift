@@ -337,7 +337,13 @@ struct MCPHerEditorServerTests {
                 "expected_text": .string("Her line."),
             ])
             #expect(edited.isError == true, "the client's read is stale against what she typed: \(edited.text)")
-            #expect(edited.text.contains("bufferChangedSinceGesture"), "the op's own refusal: \(edited.text)")
+            // VX-760 (A JUSTIFIED EDIT, the ritual — the VX-771 run, batch 2):
+            // the op's own precondition still refuses; the wire now says the fact
+            // pattern the two texts prove — the client's text is the start of
+            // hers — keeping the "it has grown since" reading, never the raw case.
+            #expect(edited.text.contains("expected_text matches only the start of the take"), "\(edited.text)")
+            #expect(edited.text.contains("if you read it earlier, it has grown since"), "\(edited.text)")
+            #expect(!edited.text.contains("bufferChangedSinceGesture"), "never the raw case: \(edited.text)")
             w.editor.flush()
             #expect(try await w.text(ofTake: block.variant.id) == "Her line. Still typing.")
             #expect(h.undoStack.depth == 0, "nothing landed, nothing to undo")

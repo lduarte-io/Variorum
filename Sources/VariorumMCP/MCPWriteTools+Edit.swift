@@ -160,10 +160,22 @@ extension MCPWriteTools {
             let noteID = try database.read { try Queries.mcpContainerOf(take: takeID, $0) } ?? ""
             return try onNote(noteID, rung: .edit, job: job, clientName: clientName,
                               logged: ("take", takeID), spendsAfter: false) { title in
-                let edit = try ops.editTakeUnderInsurance(
-                    takeID, text: text, expectedText: expected, client: clientName,
-                    undoLabel: label(.edit),
-                    guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(take: takeID, db)] })
+                let edit: Operations.MCPTakeEdit
+                do {
+                    edit = try ops.editTakeUnderInsurance(
+                        takeID, text: text, expectedText: expected, client: clientName,
+                        undoLabel: label(.edit),
+                        guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(take: takeID, db)] })
+                } catch OperationError.bufferChangedSinceGesture(let refusedID) where refusedID == takeID {
+                    // VX-760: say what the two texts prove — in front of the
+                    // chain's table sentence, which stands where the door can
+                    // prove nothing.
+                    if let mismatch = try expectedTextMismatch(
+                        takeID: takeID, noteID: noteID, sent: expected, clientName: clientName) {
+                        throw mismatch
+                    }
+                    throw OperationError.bufferChangedSinceGesture(variantID: refusedID)
+                }
                 // VX-254 (D-254-2): the digest of the take's text as it now
                 // stands — the new text, or (`changed: false`, nothing
                 // written) the text it already held.
@@ -345,6 +357,33 @@ extension MCPWriteTools {
                 standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .writeNew, consumes: true)
             guard case .allow(let grantID, let consumesOnce) = decision else { throw Self.refused(decision, .book) }
             if consumesOnce, let grantID { try grants.consumeMCPOnceGrant(db, grantID) }
+        }
+    }
+
+    /// **VX-760 — what the door can PROVE about a refused `expected_text`**
+    /// (PROVISIONAL P-771-9): read in ONE snapshot, right after the act's
+    /// transaction rolled back (still inside the session's one serial body),
+    /// the take's text as stored now — only while the take still lives in the
+    /// note the act decided on and this client still reaches that note at
+    /// EDIT (decided through the pure rule, never consuming: a refused act
+    /// spends nothing). Nil — the op's own refusal then speaks through the
+    /// chain — when any of that fails, or when the stored text now reads as
+    /// the client sent it (then it truly changed while the act was landing).
+    /// The facts are two lengths and where the texts first differ — what
+    /// `divide_block`'s anchor already tells the same reach (AF-10 (c)).
+    func expectedTextMismatch(
+        takeID: String, noteID: String, sent: String, clientName: String
+    ) throws -> MCPExpectedTextMismatch? {
+        try database.read { db in
+            guard try Queries.mcpContainerOf(take: takeID, db) == noteID,
+                  let stored = try String.fetchOne(
+                      db, sql: "SELECT working_text FROM variant WHERE id = ?", arguments: [takeID])
+            else { return nil }
+            let decision = MCPGrantAuthority.decide(
+                try MCPGrantAuthority.standing(db, clientName: clientName),
+                note: try Queries.mcpNoteFacts(db, noteID: noteID), rung: .edit, consumes: true)
+            guard decision.isAllowed else { return nil }
+            return MCPExpectedTextMismatch.diagnose(sent: sent, stored: stored)
         }
     }
 

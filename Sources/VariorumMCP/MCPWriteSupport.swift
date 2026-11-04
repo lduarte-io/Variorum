@@ -196,6 +196,11 @@ enum MCPWireRefusalCopy {
     }
 
     static func words(_ error: Error) -> String? {
+        // VX-760 (the VX-771 run, batch 2): edit_take's mismatch, said as the
+        // fact pattern its door PROVED from the sent and stored texts — the
+        // door's richer answer, first in the chain (the app's table would read
+        // every mismatch as a race with the author).
+        if let mismatch = error as? MCPExpectedTextMismatch { return mismatch.words }
         guard let error = error as? OperationError else { return nil }
         switch error {
         case .postNotInReading:
