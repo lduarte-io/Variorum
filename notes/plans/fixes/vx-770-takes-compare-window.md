@@ -2867,7 +2867,7 @@ both voices.
 
 ### THE W2 RE-WALK (the W2 cycle's acceptance — an Opus re-walker under the orchestrator's HELD claim `vx-770-final`, 2026-11-04)
 
-**NOT DONE (first line, kept current):** IN PROGRESS — trials 1–3 walked; a corroborating Terminal margin-grid trial, the control, the posture end PENDING.
+**NOT DONE (first line, kept current):** IN PROGRESS — five margin-grid trials walked (1, 2, 3, 3b, 3c); the control, the posture end PENDING.
 
 Build: `App/Variorum/DerivedData/vx770-gatef/Build/Products/Debug/Variorum.app` (FINAL bytes — `nm` finds the W2
 fix's `landingTargetJustMoved` ×6 in its `Variorum.debug.dylib`; branch head 4f0874651). The fix under watch: THE W2
@@ -2881,7 +2881,7 @@ ONE settled landing — the burst shows no second movement after rest, and the a
 | W2-R trial 2 (Study, margin grid, P35 → P23) | **PASS — 0 hops, one landing** |
 | W2-R trial 3 (Terminal, margin grid, P23 → P33) | **PASS — 0 hops, no movement after rest; LOOK LINE: a 56-pt in-storm correction one frame after first paint** |
 | W2-R trial 3b (Terminal, margin grid, P33 → P23 — corroboration) | **PASS — 0 hops, first paint = rest** |
-| W2-R trial 3c (Terminal, margin grid, P23 → P33 — trial 3's exact shape again) | PENDING |
+| W2-R trial 3c (Terminal, margin grid, P23 → P33 — trial 3's exact shape again) | **PASS — 0 hops, no movement after rest; the LOOK LINE REPRODUCES (a 166-pt in-storm correction one sample after first paint)** |
 | W1-R control (stack) | PENDING |
 | look line: her open fans stay open (R-770-1) | PENDING |
 | posture at the end | PENDING |
@@ -2941,6 +2941,26 @@ picture — P23 home (P22 above), its rail's two cards ALREADY at full measured 
 the board's row profile (frame 24 the arrival ring in place; 28–29 the scroller's fade and the caret) — `f21-f50.png`
 shows the first paint and the rest side by side, the same picture. The story, verbatim:
 `TakesArticle landing — 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 LAND | manifest rows=40 target=22 offset=-1 total=1999 derived=39 exactAbove=N | content=2826 | content=4311 | content=4732 | content=5328 | content=5755 | 0BCD84EF-E966-439D-A6C3-F0E6A0A2A183 DONE: settled at top=0.0 after 0 hops, 1013 ms`
+
+**W2-R trial 3c — Terminal, margin grid, P23 → P33 again (trial 3's exact shape; corroboration of its look line): PASS
+by the acceptance; the look line REPRODUCES.** From 3b's landing (P23 current); ⌘1; the same Write page as trial 3,
+clicked into **P33** (bar "block 33/40"); ⌘2 with the burst (`rewalk/t3c-terminal-margin-p23-p33/`, `contact.png`).
+Frame 22 the empty-state face; **frame 23 (t=1.961) the first board picture — P33's wash band at y 832–897 px, ≈ 166 pt
+below where it rests, its alternate card again at the pre-measure height (clipped at "…is the began nobody of")**;
+**frame 24 (t=2.035, +74 ms) the card at full height and P33 at rest** (band 500–565 px, P32's tail above); frames 24–66
+(≈3.2 s) the band at 500–565 px in every frame (frame 27 the arrival ring in place, 31–32 the scroller's fade and the
+caret) — no second movement. The story, verbatim:
+`TakesArticle landing — 032317C0-D3D2-4582-B7E4-32D57388D91C LAND | manifest rows=40 target=32 offset=-1 total=1999 derived=39 exactAbove=N | content=2826 | content=2833 | content=4047 | content=4144 | content=4719 | content=4620 | content=4969 | 032317C0-D3D2-4582-B7E4-32D57388D91C DONE: settled at top=0.0 after 0 hops, 1000 ms`
+
+**The washed-row positions, measured (`walk/rewalk/wash.py` — the wash fill's rows in the left board column, capture
+px at 2 px/pt):** trial 1 first paint 378 = rest 378 · trial 2 522 = 522 · trial 3b 576 = 576 · **trial 3 478 → 366
+(−56 pt) one sample later, then still** · **trial 3c 832 → 500 (−166 pt) one sample later, then still**. So in the
+P23 → P33 shape (P33: a one-line chosen take beside a 63-word alternate whose rail card grows on the deferred measure)
+the FIRST paint lands off home with the card unmeasured and the correction follows within one burst sample (74–87 ms;
+the burst cannot resolve finer), before any rest; the app counts it as no hop (the in-storm re-aim, not the watch).
+Every trial is still after that. For the orchestrator's adjudication: by the acceptance as written (a 0-hop story, no
+second movement after rest) all five margin-grid trials PASS; the first-paint correction is the original W2's
+frame 18 → 19 class (the in-landing move its walker did not count), now visible here at up to 166 pt in one shape.
 
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
