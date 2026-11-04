@@ -63,7 +63,9 @@ struct MCPReadTools: Sendable {
         } catch let failure as ArgumentFailure {
             return Outcome(text: failure.message, isError: true)
         } catch {
-            return Outcome(text: "Variorum couldn't complete \(name): \(error)", isError: true)
+            // VX-369: through the one chain — never the raw error.
+            return Outcome(
+                text: MCPWireRefusalCopy.unexpected(error, tool: name, appWords: hooks.refusalWords), isError: true)
         }
     }
 
@@ -317,11 +319,7 @@ struct MCPReadTools: Sendable {
         guard let facts = try Queries.mcpGatheringFacts(db, readingID: id),
               MCPGrantAuthority.decide(standing, gathering: facts).isAllowed
         else { return nil }
-        let memberIDs = try Queries.assembleReading(db, readingID: id).map(\.postID)
-        let memberFacts = try Queries.mcpNoteFacts(db, noteIDs: memberIDs)
-        let readable = memberIDs.count { memberID in
-            MCPGrantAuthority.decide(standing, note: memberFacts[memberID], rung: .read, consumes: false).isAllowed
-        }
+        let readable = try Self.readableGatheringNoteCount(db, gatheringID: id, standing: standing)
         var entry: [String: Any] = [
             "id": id, "name": row["name"] as String, "kind": "gathering", "archived": row["archived"] as Bool,
             "wing": try Queries.mcpScopeTitle(db, kind: .wing, id: facts.wingID) ?? Queries.mcpHomeWingName,
@@ -331,6 +329,22 @@ struct MCPReadTools: Sendable {
         let bookFacts = try MCPBookFacts.facts(db, readingID: id)
         for key in ["rule", "rule_unreadable"] { entry[key] = bookFacts[key] }
         return entry
+    }
+
+    /// **A gathering's `notes` as `list_books` counts it** — its assembly (the
+    /// ONE membership function, through `assembleReading`) filtered note by
+    /// note through the one rule at read (a fenced member never counts). The
+    /// one count, shared since VX-769 by `create_gathering`'s answer, so the
+    /// mint's number is the resting listing's, never a second rule. ∝ the
+    /// gathering's assembly.
+    static func readableGatheringNoteCount(
+        _ db: Database, gatheringID: String, standing: MCPGrantAuthority.Standing
+    ) throws -> Int {
+        let memberIDs = try Queries.assembleReading(db, readingID: gatheringID).map(\.postID)
+        let memberFacts = try Queries.mcpNoteFacts(db, noteIDs: memberIDs)
+        return memberIDs.count { memberID in
+            MCPGrantAuthority.decide(standing, note: memberFacts[memberID], rung: .read, consumes: false).isAllowed
+        }
     }
 
     // MARK: - list_wings (VX-392 — VX-348 U5, her ruling R-VX348-5)

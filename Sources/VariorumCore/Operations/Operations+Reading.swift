@@ -28,6 +28,25 @@ extension Operations {
         // unmodified — the 3C parity proof), merged in front of the set.
         let outflow = (autoTagId.map { [$0] } ?? []) + autoTagIDs
         return try database.write { db -> Reading in
+            try insertReading(
+                db, name: name, kind: kind, profile: profile, sortField: sortField, sortDir: sortDir,
+                groupingTagId: groupingTagId, querySpec: querySpec, maxPosts: maxPosts, wordTarget: wordTarget,
+                wingId: wingId, intakeSeating: intakeSeating, outflow: outflow, shelfId: shelfId, now: now)
+        }
+    }
+
+    /// **`createReading`'s body inside a caller's transaction** (VX-769 — the
+    /// VX-771 run, batch 3: the wire's `create_gathering` mints HER row through
+    /// this one body, beside its own name guard and rule resolution; her doors'
+    /// behaviour byte-identical). Every check and the row as `createReading`
+    /// documents them.
+    func insertReading(
+        _ db: Database, name: String, kind: ReadingKind, profile: String? = nil,
+        sortField: SortField = .manual, sortDir: SortDirection = .asc, groupingTagId: String? = nil,
+        querySpec: String? = nil, maxPosts: Int? = nil, wordTarget: Int? = nil, wingId: String = "",
+        intakeSeating: IntakeSeating? = nil, outflow: [String] = [], shelfId: String? = nil, now: Date
+    ) throws -> Reading {
+        do {
             let id = newID()
             // 13i-b U1: the two Collecting settings are a BOOK's (a gathering
             // has no membership to seat and no notes written "here").

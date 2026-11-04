@@ -99,8 +99,7 @@ extension Queries {
             let titled = try act.members.prefix(max(memberTitles, 1)).map { member in
                 MCPSharedRow(
                     grant: member.grant, clientName: member.clientName,
-                    targetTitle: try mcpScopeTitle(
-                        db, kind: member.grant.scopeKind, id: member.grant.scopeID, calendar: calendar),
+                    targetTitle: try mcpGrantPlaceTitle(db, member.grant, calendar: calendar),
                     inertFence: try mcpGrantInertFence(db, member.grant))
             }
             return MCPSharedGroup(
@@ -134,7 +133,7 @@ extension Queries {
             else { return nil }
             return MCPSharedRow(
                 grant: grant, clientName: row["client_name"],
-                targetTitle: try mcpScopeTitle(db, kind: grant.scopeKind, id: grant.scopeID, calendar: calendar),
+                targetTitle: try mcpGrantPlaceTitle(db, grant, calendar: calendar),
                 inertFence: try mcpGrantInertFence(db, grant))
         }
     }

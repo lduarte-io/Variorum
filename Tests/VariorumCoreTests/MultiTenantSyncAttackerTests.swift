@@ -144,12 +144,18 @@ extension MultiTenantSyncTests {
         // challenge protocol's two roads; both scanned below like every
         // other, and the allowlist extends by EXACTLY them (UNIT A's
         // precedent: never a relaxation of the blanket scans).
+        // VX-496 (VX-500 U1a, D-496): `sync_pull_remaining` joined — the
+        // catch-up's row count, a READ under the pull's own gates
+        // (`since_seq` + the gate's three; `maintenance/vx495-pull-keyset.sql`,
+        // deployed AFTER the chain). Scanned below like every other; the
+        // allowlist extends by exactly it.
         #expect(clientRPCs == [
             "sync_push", "sync_pull", "sync_schema_version",
             "sync_horizon", "sync_purge_ledger", "sync_purge_execute", "sync_reencrypt",
             "key_vault_update", "account_data_truncate", "account_purge",
             "sync_visibility_horizon_ms",
             "sync_challenge", "key_proof_enroll",
+            "sync_pull_remaining",
         ], "the client's RPC set, by name — \(clientRPCs.sorted())")
 
         // THE TRANSPORT PROTOCOLS' requirements, exactly.
@@ -158,7 +164,9 @@ extension MultiTenantSyncTests {
                 == ["push", "pull", "schemaVersion", "syncHorizon", "purgeLedger", "executePurge", "reencrypt",
                     "visibilityHorizonMillis",
                     // 13y UNIT B: the challenge surface's two requirements.
-                    "fetchChallenges", "enrollKeyProof"])
+                    "fetchChallenges", "enrollKeyProof",
+                    // VX-496: the optional count surface's one requirement (`SyncPullCountTransport`).
+                    "pullRemaining"])
         let lifecycleProtocol = try #require(lifecycle.components(separatedBy: "public protocol AccountLifecycleProviding").dropFirst().first?
             .components(separatedBy: "\n}").first)
         #expect(try names(#"func ([a-zA-Z]+)\("#, in: lifecycleProtocol)
@@ -168,9 +176,18 @@ extension MultiTenantSyncTests {
         // no function's NAME or PARAMETER LIST names an owner, a transfer,
         // a move, an adoption or a hand-over — the owner is `auth.uid()`.
         let sqlDir = root.appendingPathComponent("Server/supabase")
-        let sqlFiles = try FileManager.default.contentsOfDirectory(at: sqlDir, includingPropertiesForKeys: nil)
+        var sqlFiles = try FileManager.default.contentsOfDirectory(at: sqlDir, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension == "sql" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
         #expect(sqlFiles.count >= 11, "the numbered chain — the pin isn't vacuous")
+        // VX-495/VX-496 (VX-500 U1a; the server-half ladder's F2): the maintenance artifacts that DEFINE functions
+        // after the whole chain are read last, in deploy order, FROM THE ONE LIST `AuthRLSDDLTests.postChainFunctionArtifacts`
+        // (the same module's single source of truth — `finalBody(of:)` reads past the chain through it too) — never
+        // the maintenance folder wholesale, whose historical overlays (the pre-13x ladder guard, 13j's in-window
+        // rename) would overwrite the chain's FINAL parameter lists with older ones.
+        #expect(!AuthRLSDDLTests.postChainFunctionArtifacts.isEmpty, "the post-chain list — the appended scan isn't vacuous")
+        for artifact in AuthRLSDDLTests.postChainFunctionArtifacts {
+            sqlFiles.append(sqlDir.appendingPathComponent(artifact))
+        }
         var deployed: [String: String] = [:]  // name → the LAST parameter list deployed
         let signature = try NSRegularExpression(pattern: #"create or replace function ([a-z_]+)\(([^)]*)\)"#)
         for file in sqlFiles {

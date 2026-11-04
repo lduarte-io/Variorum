@@ -1,4 +1,5 @@
 import Foundation
+import GRDB
 import VariorumCore
 
 /// **WHERE MCP WRITES RUN** (13n-b U2 — the orchestrator's concurrence, AF-8:
@@ -195,7 +196,47 @@ enum MCPWireRefusalCopy {
         words(error) ?? appWords(error) ?? String(describing: error)
     }
 
+    /// **A call's error that left its tool's body** (VX-369 — the VX-771 run's
+    /// SWEEP TABLE): each tool family's catch-all (`MCPWriteTools.call`,
+    /// `MCPReadTools.call`, `MCPShowTool.call`) speaks through THE ONE CHAIN —
+    /// the wire's words alone where it has them, otherwise the family's own
+    /// "Variorum couldn't complete ‹tool›:" before the app's words or, last,
+    /// the description. It used to interpolate the raw error: a store failure
+    /// in a refusal's own log write reached the client as GRDB's text.
+    static func unexpected(_ error: Error, tool: String, appWords: (Error) -> String?) -> String {
+        words(error) ?? "Variorum couldn't complete \(tool): \(appWords(error) ?? String(describing: error))"
+    }
+
+    /// **A STORE FAILURE, said** (VX-369 — PROVISIONAL P-771-11): the store
+    /// refused the work under the call — a full disk, a read-only volume, an
+    /// I/O error, a keyed connection that would not open. SQLite's code and its
+    /// own message, never the executed SQL GRDB's description carries; and no
+    /// claim about what landed, because a failure in the refusal's own log
+    /// write can follow an act that did.
+    static func storeFailureWords(_ detail: String?) -> String {
+        "Variorum's library store refused the work" + (detail.map { " (\($0))" } ?? "")
+            + ", so this call may not have landed — read what it touches before trying again."
+    }
+
     static func words(_ error: Error) -> String? {
+        // VX-369: a store failure (GRDB's `DatabaseError`; a keyed store's
+        // sanitized connection error) — the one non-`OperationError` class the
+        // sweep found reachable on the wire.
+        if let failure = error as? DatabaseError {
+            let message = failure.message.map { ": \($0)" } ?? ""
+            return storeFailureWords("SQLite error \(failure.resultCode.rawValue)\(message)")
+        }
+        if error is RedactedKeyedStatementError { return storeFailureWords(nil) }
+        // VX-760 (the VX-771 run, batch 2): edit_take's mismatch, said as the
+        // fact pattern its door PROVED from the sent and stored texts — the
+        // door's richer answer, first in the chain (the app's table would read
+        // every mismatch as a race with the author).
+        if let mismatch = error as? MCPExpectedTextMismatch { return mismatch.words }
+        // VX-761: edit_take's replace form — the passage's count, or the blank
+        // result (never an `OperationError`: no door of hers replaces a passage).
+        if let refusal = error as? Operations.MCPTakeReplacementRefusal {
+            return MCPWriteTools.replacementWords(refusal)
+        }
         guard let error = error as? OperationError else { return nil }
         switch error {
         case .postNotInReading:

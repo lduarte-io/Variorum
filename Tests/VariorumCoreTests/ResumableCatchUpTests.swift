@@ -674,6 +674,33 @@ struct ResumableCatchUpTests {
         #expect(missing.isEmpty)
     }
 
+    /// VX-505 (D-505; VX-500): the belt's refusal is a TYPED fact on the status — `lastErrorIsRetrying` is true exactly
+    /// on the refused round's end (its healing follow-up is about to run), and false once the follow-up ends clean. The
+    /// row's face reads the flag, never the engine's sentence.
+    @Test func theBeltsRefusalIsFlaggedRetryingUntilItsFollowUpHeals() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, seed: 2)
+        let feed = try await stragglerFeed(a, server: server)
+        let otherReport = await armAnotherRound(on: b, server: server, transport: transport, atCall: 3)
+        let scheduler = SyncScheduler(engine: b.engine(batchSize: 20))
+        let stream = await scheduler.statusUpdates()
+        try await b.withAsync { _ in await scheduler.trigger() }
+
+        var refused: SyncScheduler.Status?
+        var healed: SyncScheduler.Status?
+        for await status in stream where !status.isSyncing {
+            if status.roundsCompleted == 1 { refused = status }
+            if status.roundsCompleted == 2 { healed = status; break }
+        }
+        #expect(otherReport.value?.stalled == true && otherReport.value?.newCursor == feed.stallPoint,
+                "non-vacuous: the other writer committed under the scheduled round")
+        #expect(refused?.lastError != nil, "the refused round ended with the belt's words")
+        #expect(refused?.lastErrorIsRetrying == true, "…flagged as retrying: a follow-up is about to run")
+        #expect(healed?.lastError == nil && healed?.lastErrorIsRetrying == false, "the heal clears both")
+    }
+
     /// GUARD (R2-6's bound; red on the tip for another reason — there nothing refuses, so the raided round commits
     /// what it holds; teeth: the scheduler following every belt refusal). Another writer clears B's stage before each
     /// round's second window, three times: the belt refuses round 1, its ONE follow-up is refused too, and the

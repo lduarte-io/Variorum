@@ -110,7 +110,14 @@ struct MCPEditServerTests {
                 "take_id": .string(takeID), "text": .string("Overwrite."), "expected_text": .string(asRead),
             ])
             #expect(stale.isError == true, "the client's read is stale now — refused, nothing written")
-            #expect(text(stale).contains("bufferChangedSinceGesture"), "the operations layer's own refusal: \(text(stale))")
+            // VX-760 (A JUSTIFIED EDIT, the ritual — the VX-771 run, batch 2):
+            // the stale read still refuses on the op's own precondition, but the
+            // wire now says what the door can prove from the two texts instead of
+            // the raw case (`MCPExpectedTextMismatch`): here they differ from the
+            // first character.
+            #expect(text(stale).contains("they first differ at character 0 of expected_text"),
+                    "the door's fact pattern: \(text(stale))")
+            #expect(!text(stale).contains("bufferChangedSinceGesture"), "never the raw case: \(text(stale))")
             #expect(try await h.database.read { try Queries.renderedText($0, containerID: note.id) } == "A tighter opening.")
 
             #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's edit")

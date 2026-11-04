@@ -85,18 +85,71 @@ extension Operations {
         _ variantID: String, text newText: String, expectedText: String, client: String,
         undoLabel: String, guardedBy guardian: WriteGuard? = nil
     ) throws -> MCPTakeEdit {
+        try editTakeUnderInsurance(
+            variantID, rewrite: .whole(text: newText, expectedText: expectedText), client: client,
+            undoLabel: undoLabel, guardedBy: guardian)
+    }
+
+    /// **The two forms of `edit_take`'s rewrite** (VX-761 — the VX-771 run,
+    /// batch 2). `whole`: the take's whole new text, against the whole text
+    /// the client read (the precondition — `bufferChangedSinceGesture`
+    /// otherwise). `replacing`: ONE passage of the stored text replaced where
+    /// it stands — `old` must occur exactly once, byte for byte
+    /// (`UniqueReplacement`), resolved INSIDE the act's transaction, so the
+    /// read, the replacement and the write are one act.
+    public enum MCPTakeRewrite: Equatable, Sendable {
+        case whole(text: String, expectedText: String)
+        case replacing(old: String, new: String)
+    }
+
+    /// **Why the replace form wrote nothing** (VX-761). Never an
+    /// `OperationError` case: no door of hers replaces by a passage, so her
+    /// table never meets it — the wire words it (`MCPWireRefusalCopy`).
+    public enum MCPTakeReplacementRefusal: Error, Equatable, Sendable {
+        /// `old` occurs this many times in the stored text (0, or 2 or more).
+        case occurrences(Int)
+        /// The replacement would leave the take blank (whitespace alone is
+        /// blank) — `edit_take` never empties a take (R-VX171-2, the door's
+        /// rule, P-VX168-U3-2), and only the transaction knows the result.
+        case wouldEmptyTake
+    }
+
+    /// `edit_take`'s act in either form (above) — ONE body: the guard, the
+    /// editable take, the form's precondition and new text, then the shared
+    /// road (the canonical no-op, the bracket, the write, touch + churn, one
+    /// undo entry), byte for byte the same for both forms.
+    @discardableResult
+    public func editTakeUnderInsurance(
+        _ variantID: String, rewrite: MCPTakeRewrite, client: String,
+        undoLabel: String, guardedBy guardian: WriteGuard? = nil
+    ) throws -> MCPTakeEdit {
         let names = Self.mcpEditCommitNames(client: client)
-        // VX-357: the new text with U+0000 removed (`StoredText`) — the no-op
-        // check, the churn, the row, the after-commit, the entry's pre-image
-        // and the answer's digest all read what is stored. `expectedText`
-        // stays as sent: a precondition compares with the stored buffer,
-        // which never holds a null character.
-        let newText = StoredText.stripped(newText)
         let landed: (edit: MCPTakeEdit, preImage: TextPreImage?) = try database.write { db in
             try guardian?(db)
             var variant = try editableVariant(db, variantID)
-            guard variant.workingText == expectedText else {
-                throw OperationError.bufferChangedSinceGesture(variantID: variantID)
+            // VX-357: the new text with U+0000 removed (`StoredText`) — the
+            // no-op check, the churn, the row, the after-commit, the entry's
+            // pre-image and the answer's digest all read what is stored. The
+            // precondition (`expectedText`) and the passage (`old`) stay as
+            // sent: each is compared with the stored buffer, which never holds
+            // a null character.
+            let newText: String
+            switch rewrite {
+            case .whole(let text, let expectedText):
+                guard variant.workingText == expectedText else {
+                    throw OperationError.bufferChangedSinceGesture(variantID: variantID)
+                }
+                newText = StoredText.stripped(text)
+            case .replacing(let old, let new):
+                switch UniqueReplacement.apply(old, with: StoredText.stripped(new), in: variant.workingText) {
+                case .notUnique(let occurrences):
+                    throw MCPTakeReplacementRefusal.occurrences(occurrences)
+                case .replaced(let text):
+                    guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                        throw MCPTakeReplacementRefusal.wouldEmptyTake
+                    }
+                    newText = text
+                }
             }
             // The no-op rule is CANONICAL equality (Swift's `String ==`), kept
             // on purpose: an invisible re-normalization never rewrites prose,

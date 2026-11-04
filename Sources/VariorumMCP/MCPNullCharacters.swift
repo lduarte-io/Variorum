@@ -87,6 +87,8 @@ extension MCPWriteTools.Job {
         case .importBook(let book, _): MCPNullCharacters.count(book)
         case .applyTag(_, let path): MCPNullCharacters.count(path)
         case .createBook(let name, _): MCPNullCharacters.count(name)
+        // VX-769: the name, and every path the rule names (it adopts or mints a tag).
+        case .createGathering(let name, _, let rule): MCPNullCharacters.count(name) + MCPNullCharacters.count(rule)
         case .insertBlocks(_, _, let blocks): MCPNullCharacters.count(blocks)
         case .edit(let job): job.nullCharactersWritten
         case .carriage(let job): job.nullCharactersWritten
@@ -95,8 +97,10 @@ extension MCPWriteTools.Job {
         case .noteEdit(let job): job.nullCharactersWritten
         case .libraryEdit(let job): job.nullCharactersWritten
         // A membership, a deletion, a tag taken off by its path (a lookup),
-        // a version link, a copy of stored text, a star (VX-596): no text written.
-        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .duplicateNote, .setStarred: 0
+        // a version link, a copy of stored text, a star (VX-596), a copy into
+        // another wing (VX-765): no text written.
+        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .duplicateNote, .setStarred,
+             .copyNoteToWing: 0
         }
     }
 }
@@ -104,8 +108,11 @@ extension MCPWriteTools.Job {
 extension MCPWriteTools.EditJob {
     var nullCharactersWritten: Int {
         switch self {
-        // `expected_text` is a precondition, never written.
-        case .editTake(_, let text, _): MCPNullCharacters.count(text)
+        // `expected_text` is a precondition, never written; VX-761's `old_str`
+        // is a locator (it finds what is stored) — only the text that lands
+        // counts: the whole new text, or the passage's replacement.
+        case .editTake(_, .whole(let text, _)): MCPNullCharacters.count(text)
+        case .editTake(_, .replacing(_, let new)): MCPNullCharacters.count(new)
         case .name(_, let name): MCPNullCharacters.count(name)
         case .createSection(_, let name): MCPNullCharacters.count(name)
         // `second_half_starts_with` locates the cut in the stored text.

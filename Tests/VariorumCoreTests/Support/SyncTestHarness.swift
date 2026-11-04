@@ -62,6 +62,10 @@ final class SyncClient {
     /// 17y B-DEDUPE: the seeded-furniture fold's facts — nil by default,
     /// exactly like production's unwired engine (inert).
     var furnitureFacts: SeededFurnitureDedupeFacts?
+    /// VX-497 (U1b): the apply profile seam's hook — nil by default, exactly
+    /// like production (inert). The gated bench wires one; the next engine
+    /// call carries it.
+    var applyProfile: ApplyProfileHook?
 
     /// `prefix` must be exactly two hex characters (e.g. "AA", "BB") — it
     /// leads every UUID the device mints, so two devices can never collide.
@@ -154,7 +158,8 @@ final class SyncClient {
             keyProvider: ClientIdentityKeyProvider(inner: keyProvider, deviceID: deviceID),
             sampleLibraryFacts: (sampleLibraryFacts.map { [$0] } ?? []) + additionalSampleLibraryFacts,
             furnitureFacts: furnitureFacts,
-            accountBinding: accountBinding)
+            accountBinding: accountBinding,
+            applyProfile: applyProfile)
     }
 
     @discardableResult

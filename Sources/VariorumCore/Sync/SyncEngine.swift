@@ -35,6 +35,35 @@ public struct SyncAccountBinding: Sendable {
     }
 }
 
+/// VX-496 — a long catch-up's progress, as the engine sees it (`notes/plans/fixes/vx-500-sync-followups.md`,
+/// D-496): the download's rows so far — a resumed stage's included — with the server's count of the whole catch-up
+/// when a transport could answer it (`SyncPullCountTransport`), then the save's rows so far against its batch.
+/// Published ONLY once a round has needed a second window (a first window that came back full, or a resumed stage) —
+/// an everyday round never carries one. The engine reports numbers; the row's words are the app's (`SyncStatusRow`).
+public struct SyncProgress: Equatable, Sendable {
+    public enum Phase: Equatable, Sendable {
+        case downloading
+        case saving
+    }
+
+    public var phase: Phase
+    /// Rows downloaded so far (`.downloading`) or rows applied so far (`.saving`).
+    public var done: Int
+    /// The whole catch-up's row count — the server's count past the committed cursor while downloading (nil when no
+    /// transport could answer: a wrapper without the surface, a refusal, a 404 before the function is deployed), the
+    /// staged batch's size while saving (always known). Fixed for the phase once read: the download's total is the
+    /// count at the moment the report armed (R-500-1: index-only, exact to within the horizon's two seconds), so
+    /// `done` may END ABOVE it when the feed grew during a long download — a face must tolerate `done > total`; the
+    /// save's `done` may end BELOW its total on a straggler stall (the unapplied rows are fetched again next round).
+    public var total: Int?
+
+    public init(phase: Phase, done: Int, total: Int?) {
+        self.phase = phase
+        self.done = done
+        self.total = total
+    }
+}
+
 public struct SyncEngine: Sendable {
     @Dependency(\.database) var database
     @Dependency(\.date) var date
@@ -91,6 +120,11 @@ public struct SyncEngine: Sendable {
     /// (an unbound library or a signed-out session is some other state's
     /// business, never this gate's).
     public let accountBinding: SyncAccountBinding?
+    /// VX-497 (VX-500 U1b, D-497 (1)) — THE APPLY PROFILE SEAM (`ApplyProfile.swift`; the `keyProvider` pattern —
+    /// nil = INERT): where a measurement hears a pull round's phases and its `PRAGMA foreign_key_list` reads. Nil in
+    /// production and on every unwired engine — no clock is read, nothing is called; only the gated bench
+    /// (`ApplyProfileMeasurementTests`) wires one. The engine reports; it never decides anything from the numbers.
+    public let applyProfile: ApplyProfileHook?
 
     public init(
         transport: any SyncTransport, batchSize: Int = 200, pullWindowSize: Int = 2_000,
@@ -98,7 +132,8 @@ public struct SyncEngine: Sendable {
         keyProvider: any SyncKeyProviding = UnenrolledKeyProvider(),
         sampleLibraryFacts: [SampleLibraryDedupeFacts] = [],
         furnitureFacts: SeededFurnitureDedupeFacts? = nil,
-        accountBinding: SyncAccountBinding? = nil
+        accountBinding: SyncAccountBinding? = nil,
+        applyProfile: ApplyProfileHook? = nil
     ) {
         self.transport = transport
         self.batchSize = batchSize
@@ -108,6 +143,7 @@ public struct SyncEngine: Sendable {
         self.sampleLibraryFacts = sampleLibraryFacts
         self.furnitureFacts = furnitureFacts
         self.accountBinding = accountBinding
+        self.applyProfile = applyProfile
     }
 
     /// VX-314's gate, in the round-entry refusal cascade (after the re-key
@@ -131,10 +167,12 @@ public struct SyncEngine: Sendable {
     /// never un-stalls refuses typed (`pullStalled`) with the cursor where it
     /// holds.
     @discardableResult
-    public func pullToHead(maxAttempts: Int = 6) async throws -> PullReport {
+    public func pullToHead(
+        maxAttempts: Int = 6, progress: (@Sendable (SyncProgress) -> Void)? = nil
+    ) async throws -> PullReport {
         var last = PullReport()
         for _ in 0..<max(1, maxAttempts) {
-            last = try await pullRound()
+            last = try await pullRound(progress: progress)
             if !last.stalled { return last }
         }
         throw SyncError.pullStalled(cursor: last.newCursor)
@@ -461,15 +499,34 @@ public struct SyncEngine: Sendable {
     /// Repairs run inside the same transaction, after rows land. The cursor
     /// advances inside the transaction — a rollback rewinds it with
     /// everything else.
+    ///
+    /// `progress` (VX-496, D-496): where a LONG catch-up reports itself — after each window once the round has needed a
+    /// second one, and through the save every `saveProgressStride` rows; nil (the default) reports nothing. Called off
+    /// the actor that reads it (the scheduler hops); never awaited, never able to fail the round.
     @discardableResult
-    public func pull() async throws -> PullReport {
-        try await pullRound()
+    public func pull(progress: (@Sendable (SyncProgress) -> Void)? = nil) async throws -> PullReport {
+        try await pullRound(progress: progress)
+    }
+
+    /// VX-496: the save publishes its progress every this many applied rows (and at its start and end).
+    static let saveProgressStride = 1_000
+
+    /// VX-496 (D-496): the whole catch-up's row count from the transport that can answer it — ONCE per round, through
+    /// the round's own signer; a transport without the surface, a refusal, a 404 before `sync_pull_remaining` is
+    /// deployed, a cancelled call — each reads as "no total" and the round goes on. Never a thrown error: the count
+    /// can never fail a round.
+    private func countRemaining(since: Int64, keyID: String, signer: SyncChallengeSigner) async -> Int? {
+        guard let counting = transport as? any SyncPullCountTransport else { return nil }
+        let count = try? await signer.call(rpc: "sync_pull_remaining") { proof in
+            try await counting.pullRemaining(since: since, activeKeyID: keyID, keyProof: proof)
+        }
+        return count.map { Int(clamping: $0) }
     }
 
     /// The pull's body (`pull()` and `pullToHead` share it; the rotation
     /// marker guard that once sat between them left with today's road —
     /// VX-329 L1, nothing writes the marker any more).
-    private func pullRound() async throws -> PullReport {
+    private func pullRound(progress: (@Sendable (SyncProgress) -> Void)?) async throws -> PullReport {
         // VX-314: the push half's twin — here rather than `pull()` so
         // `pullToHead` is gated too (the binding is nil on every
         // deliberate-act engine, so only the live session's rounds feel it).
@@ -514,6 +571,25 @@ public struct SyncEngine: Sendable {
         // moment ago) — so one discard-and-refetch from the committed cursor,
         // then never again this round.
         var mayRefetch = plan != .fresh && plan != .discardThenFresh
+        // VX-496 (D-496): the download's progress. `downloaded` counts the rows
+        // this catch-up holds so far — a resumed stage's included — and the
+        // report ARMS only once the round has needed a second window (a first
+        // window that came back full, or a resumed stage: by definition long),
+        // so an everyday round never flashes numbers. The total is asked of the
+        // transport ONCE, when the report arms.
+        var downloaded = 0
+        var reportsProgress = false
+        var askedForTotal = false
+        var remaining: Int?
+        // Ladder round 1, F3: the COUNT(*) feeds only `downloaded`, which only
+        // the publishes read — a nil-progress caller (a deliberate-act engine,
+        // a `pullToHead` caller) pays nothing here.
+        if case .resume = plan, progress != nil {
+            downloaded = try await database.read { try PullStage.stagedRowCount($0) }
+            reportsProgress = true
+        }
+        // VX-497 (U1b): the profile seam's lap marks — a nil hook reads no clock (`ApplyProfile.swift`).
+        var marks = ApplyProfileMarks(applyProfile)
         var pulled: [SyncPulledRow]
         while true {
             while true {
@@ -554,13 +630,26 @@ public struct SyncEngine: Sendable {
                         from: windowSince, through: windowEnd)
                 }
                 fetchCursor = windowEnd
+                downloaded += window.count
+                if let progress {
+                    if !reportsProgress, window.count >= pullWindowSize { reportsProgress = true }
+                    if reportsProgress {
+                        if !askedForTotal {
+                            askedForTotal = true
+                            remaining = await countRemaining(since: since, keyID: keyID, signer: signer)
+                        }
+                        progress(SyncProgress(phase: .downloading, done: downloaded, total: remaining))
+                    }
+                }
             }
+            marks.lap(.download)
             // The batch: every staged row in `server_seq` order — each row
             // once, at its newest staged seq: what a fresh round from the base
             // would fetch — now including windows an earlier, interrupted round
             // already downloaded.
             if let rows = try await database.read({ try PullStage.rows($0) }) {
                 pulled = rows
+                marks.lap(.stageDecode)
                 break
             }
             // F1 (2): a staged row nobody can read is a stage nobody can vouch
@@ -571,6 +660,12 @@ public struct SyncEngine: Sendable {
                 "pull stage: a staged row would not decode; the stage was discarded and the download starts again from the committed cursor \(since, privacy: .public)")
             mayRefetch = false
             fetchCursor = since
+            // Ladder round 1, F1: the honest count restarts with the refetch —
+            // the discarded stage's rows are downloaded again and would
+            // otherwise count twice (`done` up to ~2× the feed).
+            // `askedForTotal`/`remaining` rightly stay: the total was counted
+            // from `since`, which is still the refetch's base.
+            downloaded = 0
         }
         var emptyReport = PullReport()
         emptyReport.newCursor = since
@@ -599,14 +694,24 @@ public struct SyncEngine: Sendable {
 
         let batch = pulled
         let reach = fetchCursor
+        // VX-496 (D-496): the save's progress — only on a round that reported
+        // its download (the stride keeps the hops rare); the batch's size is
+        // the exact, server-free total. The first publish lands BEFORE the
+        // straggler fixpoint so the row turns to "saving" at once.
+        let saveProgress: (@Sendable (Int, Int) -> Void)? = {
+            guard reportsProgress, let progress else { return nil }
+            return { done, total in progress(SyncProgress(phase: .saving, done: done, total: total)) }
+        }()
+        saveProgress?(0, batch.count)
         // Ladder R3, R3-1: the save runs to its end once it starts — a retire
         // (D3) stops the download above, never this transaction.
-        return try await applyingRemoteShieldedFromCancellation { db in
+        let saved = try await applyingRemoteShieldedFromCancellation { db in
             // Ladder R1, N2 — THE ONE-WRITER BELT (`PullStage`'s doc): the
             // stage extends the cursor this round started from; if another
             // round committed under this one, saving now could move the
             // cursor past rows nobody applied. Refuse before any write — the
             // stage stays, the next round re-plans from the new cursor.
+            var inner = ApplyProfileMarks(applyProfile)
             let committed = try cursor(db)
             guard committed == since else {
                 throw PullStage.CursorMovedUnderRound(roundBase: since, committed: committed)
@@ -617,6 +722,7 @@ public struct SyncEngine: Sendable {
             // stage — its identity, reaching exactly this round's fetch cursor.
             try PullStage.verifyRoundsStage(
                 db, base: since, keyID: keyID, deviceID: deviceID, reach: reach)
+            inner.lap(.belt)
             var report = PullReport()
             // Straggler guard, to a FIXPOINT: rows apply in seq order up to
             // the first row whose FK closure is satisfiable neither locally
@@ -639,6 +745,7 @@ public struct SyncEngine: Sendable {
                 if shrunk == stopIndex { break }
                 stopIndex = shrunk
             }
+            inner.lap(.fixpoint)
 
             // A pull's apply: the sample-library dedupe's one firing road
             // (the ladder's R2-1 — the push path's per-chunk pass never
@@ -647,7 +754,16 @@ public struct SyncEngine: Sendable {
             for item in batch[..<stopIndex] where item.row.isTombstoned {
                 touched.arrivingDeadIDs[item.row.table, default: []].insert(item.row.rowID)
             }
+            // The save's total is the BATCH's count throughout (D-496: "the
+            // batch's count" — the rows the download ended on, the number the
+            // row has been showing), never the stall point: a denominator that
+            // moves mid-save would make the fraction jump. On a stall `done`
+            // ends at `stopIndex` below the total — honest: those rows are not
+            // applied this round and are fetched again by the next.
+            var applied = 0
             for item in batch[..<stopIndex] {
+                applied += 1
+                if applied % Self.saveProgressStride == 0 { saveProgress?(applied, batch.count) }
                 if try isEnqueued(db, table: item.row.table, rowID: item.row.rowID),
                    let table = SyncSchema.table(named: item.row.table),
                    let local = try SyncRow.fetch(db, table: table, rowID: item.row.rowID) {
@@ -675,7 +791,10 @@ public struct SyncEngine: Sendable {
                     report.applied += 1
                 }
             }
+            inner.lap(.rowLoop)
             report.repairs = try runPostApplyRepairs(db, touched: touched) + touched.inlineRepairs
+            inner.lap(.repairs)
+            saveProgress?(stopIndex, batch.count)
             let newCursor = stopIndex > 0 ? batch[stopIndex - 1].serverSeq : since
             try setCursor(db, newCursor)
             // VX-494 (D2): the stage leaves with the commit that moves the
@@ -721,8 +840,11 @@ public struct SyncEngine: Sendable {
                     tombstoneStamp: stamp, missingReferents: missing,
                     presentReferents: present)
             }
+            inner.lap(.commitPrep)
             return report
         }
+        marks.lap(.applyTransaction)
+        return saved
     }
 
     // MARK: - Wipe-and-repush re-initialization (Phase 14b, ruling R-2)
@@ -885,7 +1007,10 @@ public struct SyncEngine: Sendable {
     private func foreignKeyColumns(
         _ db: Database, table: String
     ) throws -> [(column: String, targetTable: String, targetPrimaryKey: String)] {
-        try Row.fetchAll(db, sql: "PRAGMA foreign_key_list(\(table))").compactMap { fk in
+        // VX-497 (U1b): the profile seam times each introspection read — a nil hook reads no clock.
+        let started = applyProfile == nil ? nil : ContinuousClock.now
+        defer { if let started { applyProfile?.foreignKeyList(ContinuousClock.now - started) } }
+        return try Row.fetchAll(db, sql: "PRAGMA foreign_key_list(\(table))").compactMap { fk in
             let targetTable: String = fk["table"]
             guard let target = SyncSchema.table(named: targetTable) else { return nil }
             return (fk["from"], targetTable, target.primaryKey)

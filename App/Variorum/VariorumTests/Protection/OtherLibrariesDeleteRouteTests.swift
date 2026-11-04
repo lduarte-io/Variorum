@@ -22,7 +22,7 @@ struct OtherLibrariesDeleteRouteTests {
         let (bootstrap, words) = try await LockWorld.readyInStandard(road)
         let session = try #require(bootstrap.roadSession)
         let aID = try #require(session.library.record?.libraryID)
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
         let roads = try #require(bootstrap.copyDoorsRoads())
         let row = try #require(await roads.listing().thisLibrary.first)
         let pair = TypedSecrets(words: words)

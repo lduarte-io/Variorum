@@ -197,8 +197,9 @@ extension Operations {
     }
 
     /// Is the applied tag at-or-under any of the rule's referenced tags —
-    /// the subtree rule, wing-scoped exactly as `ruleSQL` is?
-    private func appliedTag(
+    /// the subtree rule, wing-scoped exactly as `ruleSQL` is? (VX-764: also
+    /// the un-tag's report below — the one subtree rule, never a second.)
+    func appliedTag(
         _ db: Database, _ appliedTagID: String, fallsUnderAnyOf roots: Set<String>
     ) throws -> Bool {
         guard !roots.isEmpty else { return false }
@@ -217,6 +218,42 @@ extension Operations {
                         OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/'))
                 """,
             arguments: StatementArguments(arguments)) ?? false
+    }
+
+    // MARK: - The un-tag's report (VX-764 — R-771-A (a); the dial DECLINED)
+
+    /// The note's MEMBER rows in LIVING books that carry a rule — live,
+    /// `kind = 'book'`, not finished, not archived (`IntakeDecision.intakeRuns`'
+    /// own facts; readability is the caller's decode) — in the order the note
+    /// joined them. Driven by the NOTE (`idx_reading_post_post`), each book by
+    /// its key — `CROSS JOIN` keeps the order (the house's P1 discipline) — so
+    /// ∝ the note's memberships, never the corpus (pinned on the plan).
+    static let livingRuledMembershipsSQL = """
+        SELECT r.id, r.query_spec FROM reading_post rp
+        CROSS JOIN reading r ON r.id = rp.reading_id
+        WHERE rp.post_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+          AND r.deleted_at IS NULL AND r.kind = 'book' AND r.locked = 0 AND r.archived_at IS NULL
+          AND r.query_spec IS NOT NULL
+        ORDER BY rp.created_at, rp.id
+        """
+
+    /// **The living books that collect by `tagID` and hold the note** — what
+    /// an un-tag leaves the note in (un-tagging is a NON-EVENT, §19: intake
+    /// never evicts, so a board-shaped book keeps the card). A book counts when
+    /// its readable rule names the tag POSITIVELY (`RuleGrammar.positiveTagIDs`
+    /// — the grammar's own walk; a tag only under `not` never collected the
+    /// note) at-or-above it by path (`appliedTag` — intake's subtree rule).
+    /// Whether the note still matches the rule by another term is not asked:
+    /// the fact is that the book holds it and collects by this tag. Reads
+    /// only; NOTHING lands on a book. ∝ the note's memberships.
+    func livingBooksHolding(_ db: Database, postID: String, collectingBy tagID: String) throws -> [String] {
+        var held: [String] = []
+        for row in try Row.fetchAll(db, sql: Self.livingRuledMembershipsSQL, arguments: [postID]) {
+            guard case .rule(let term) = RuleGrammar.read(row["query_spec"]) else { continue }
+            guard try appliedTag(db, tagID, fallsUnderAnyOf: Set(RuleGrammar.positiveTagIDs(of: term))) else { continue }
+            held.append(row["id"])
+        }
+        return held
     }
 
     func intakeBookFacts(_ db: Database, _ book: Reading) throws -> IntakeDecision.BookFacts {

@@ -73,6 +73,11 @@ extension Operations {
         // the wire): ONE entry ("Undo claude-code's duplicate"); the receipt
         // names the copy and opens it (PROVISIONAL words, her copy pass).
         case duplicate
+        // VX-765 (the VX-771 run) — her Copy to Wing on the wire
+        // (`copy_note_to_wing`): ONE entry ("Undo claude-code's wing copy");
+        // the receipt names the destination wing and opens the copy
+        // (PROVISIONAL words, her copy pass).
+        case wingCopy = "wing copy"
         // VX-184 U3 — VX-188's suggest-rung delete of a client's OWN comment
         // ("Undo claude-code's comment deletion").
         case commentDelete = "comment deletion"
@@ -129,6 +134,10 @@ extension Operations {
         case gatheringArchive = "gathering archiving"
         case gatheringUnarchive = "gathering unarchiving"
         case gatheringDelete = "gathering deletion"
+        // VX-769 (the VX-771 run, batch 3 — R-771-B): a gathering MINTED at
+        // write new — `book`'s twin, in a gathering's words ("Undo
+        // claude-code's gathering"). PROVISIONAL words, her copy pass.
+        case gathering
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 
@@ -790,6 +799,12 @@ extension Operations {
         public let tagID: String
         /// The tag's path as the library stores it.
         public let path: String
+        /// VX-764 (R-771-A (a)): the LIVING books that collect by this tag and
+        /// still hold the note as a member once it lands — un-tagging is a
+        /// non-event, so each keeps it (`livingBooksHolding`, read inside the
+        /// act's transaction, in the order the note joined them). Every id;
+        /// which the client may hear named is the wire's fence.
+        public let stillInBookIDs: [String]
     }
 
     /// **`remove_tag`'s act — her un-tag, by PATH**: the caller's guard first;
@@ -821,7 +836,10 @@ extension Operations {
             let applicationID = try removePostTagApplication(db, tagID: tagID, postID: postID)
             let removedAt = try String.fetchOne(
                 db, sql: "SELECT deleted_at FROM post_tag WHERE id = ?", arguments: [applicationID])
-            return (MCPTagRemoval(applicationID: applicationID, tagID: tagID, path: normalized), removedAt)
+            // VX-764: what the un-tag leaves the note in — a read, ∝ its memberships.
+            let stillIn = try livingBooksHolding(db, postID: postID, collectingBy: tagID)
+            return (MCPTagRemoval(applicationID: applicationID, tagID: tagID, path: normalized, stillInBookIDs: stillIn),
+                    removedAt)
         }
         let applicationID = removal.applicationID
         // VX-246 U2 — the mirror of `applyTagPath`'s entry: the undo revives

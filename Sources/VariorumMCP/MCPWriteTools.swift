@@ -63,7 +63,9 @@ struct MCPWriteTools: Sendable {
         } catch let failure as ArgumentFailure {
             return Outcome(text: failure.message, isError: true)
         } catch {
-            return Outcome(text: "Variorum couldn't complete \(name): \(error)", isError: true)
+            // VX-369: through the one chain — never the raw error.
+            return Outcome(
+                text: MCPWireRefusalCopy.unexpected(error, tool: name, appWords: hooks.refusalWords), isError: true)
         }
     }
 
@@ -84,6 +86,9 @@ struct MCPWriteTools: Sendable {
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
         case createBook(name: String, wingID: String)
+        /// VX-769 (the VX-771 run, batch 3 — R-771-B): a gathering minted with
+        /// its rule, at write new on the wing (`MCPWriteTools+CreateGathering`).
+        case createGathering(name: String, wingID: String, rule: RuleTerm)
         case addNoteToBook(noteID: String, bookID: String, sectionID: String?)
         /// U3: the edit rung's jobs and `create_section` (`MCPWriteTools+Edit`).
         case edit(EditJob)
@@ -110,7 +115,11 @@ struct MCPWriteTools: Sendable {
         /// the source's wing (`MCPWriteTools+DuplicateNote`). VX-371 (VX-383
         /// U2): `with_tags` (default true) and the book road (`book_id`, with
         /// an optional `section_id`).
-        case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?)
+        /// VX-766 (the VX-771 run): `brief` — the answer's ids and counts only.
+        case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?, brief: Bool)
+        /// VX-765 (the VX-771 run): her Copy to Wing on the wire — the copy
+        /// bookless in ANOTHER wing's Pool (`MCPWriteTools+WingCopy`).
+        case copyNoteToWing(noteID: String, wingID: String)
         /// VX-596: her star on the wire — a note or a book, starred or not
         /// (`MCPWriteTools+Star`).
         case setStarred(target: StarTarget, starred: Bool)
@@ -133,9 +142,11 @@ struct MCPWriteTools: Sendable {
             case .importNote, .importBook: "import_document"
             case .applyTag: "apply_tag"
             case .createBook: "create_book"
+            case .createGathering: "create_gathering"
             case .addNoteToBook: "add_note_to_book"
             case .insertBlocks: "insert_blocks"
             case .duplicateNote: "duplicate_note"
+            case .copyNoteToWing: "copy_note_to_wing"
             case .setStarred: "set_starred"
             }
         }
@@ -163,6 +174,10 @@ struct MCPWriteTools: Sendable {
             case .addTake, .addComment, .saveLens, .createNote, .importNote, .importBook, .applyTag,
                  .createBook, .addNoteToBook, .deleteComment, .removeTag, .linkVersions:
                 false
+            // VX-769: a gathering is a rule — no take's text read, rewritten,
+            // copied, frozen or tombstoned.
+            case .createGathering:
+                false
             // VX-255 (the run record's D8): new blocks, and no take's text
             // read, rewritten, copied, frozen or tombstoned. Her caret's block
             // survives the act (same take, live, unlocked, same place), so her
@@ -183,6 +198,10 @@ struct MCPWriteTools: Sendable {
             // 13e E10's "THE COPY FAMILY'S ONE ENTRY"). The same class as
             // `save_version`, so the same answer.
             case .duplicateNote:
+                true
+            // VX-765: her Copy to Wing COPIES every take of the note exactly as
+            // her Duplicate does (`copyPost`) — the same class, the same answer.
+            case .copyNoteToWing:
                 true
             }
         }
@@ -264,6 +283,8 @@ struct MCPWriteTools: Sendable {
                 throw ArgumentFailure(message: "wing_id is required (\"\" is Home).")
             }
             return .createBook(name: try requiredText(args, "name"), wingID: wingID)
+        case MCPToolCatalog.createGathering.name:
+            return try parseCreateGathering(args)
         case MCPToolCatalog.addNoteToBook.name:
             return .addNoteToBook(
                 noteID: try requiredString(args, "note_id"), bookID: try requiredString(args, "book_id"),
@@ -272,6 +293,8 @@ struct MCPWriteTools: Sendable {
             return try parseInsertBlocks(args)
         case MCPToolCatalog.duplicateNote.name:
             return try parseDuplicateNote(args)
+        case MCPToolCatalog.copyNoteToWing.name:
+            return try parseCopyNoteToWing(args)
         case MCPToolCatalog.setStarred.name:
             return try parseSetStarred(args)
         default:
@@ -564,6 +587,9 @@ struct MCPWriteTools: Sendable {
                         MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name,
                                         show: .book(bookID: book.id, sectionID: nil)))
             }
+        case .createGathering(let name, let wingID, let rule):
+            return try performCreateGathering(
+                name: name, wingID: wingID, rule: rule, job: job, ops: ops, clientName: clientName)
         case .addNoteToBook(let noteID, let bookID, let sectionID):
             return try noteIntoBook(noteID, bookID, job: job, clientName: clientName) { title, bookName in
                 let added = try ops.addNoteToBookForClient(
@@ -603,12 +629,14 @@ struct MCPWriteTools: Sendable {
         case .insertBlocks(let noteID, let place, let blocks):
             return try performInsertBlocks(
                 noteID: noteID, place: place, blocks: blocks, job: job, ops: ops, clientName: clientName)
-        case .duplicateNote(let noteID, let withTags, let bookID, let sectionID):
+        case .duplicateNote(let noteID, let withTags, let bookID, let sectionID, let brief):
             return try performDuplicateNote(
-                noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, job: job, ops: ops,
-                clientName: clientName)
+                noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, brief: brief, job: job,
+                ops: ops, clientName: clientName)
         case .setStarred(let target, let starred):
             return try performSetStarred(target, starred: starred, job: job, ops: ops, clientName: clientName)
+        case .copyNoteToWing(let noteID, let wingID):
+            return try performCopyNoteToWing(noteID: noteID, wingID: wingID, job: job, ops: ops, clientName: clientName)
         }
     }
 

@@ -127,6 +127,12 @@ enum MCPToolCatalog {
         // its wing — the copy lands bookless there; VX-371: or on a book of
         // that wing, the copy filed there).
         duplicateNote,
+        // VX-771 batch 1 — VX-765: her Copy to Wing (read on the note, write
+        // new on ANOTHER wing — the copy lands bookless in that wing's Pool).
+        copyNoteToWing,
+        // VX-771 batch 3 — VX-769 (R-771-B): a gathering minted with its rule
+        // (write new on the wing — create_book's decision).
+        createGathering,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
@@ -171,6 +177,21 @@ enum MCPToolCatalog {
         Each sha256 is the SHA-256 of that take's text exactly as stored, as UTF-8 bytes, in \
         lowercase hex — nothing normalized or trimmed — so a digest of your own text proves it \
         landed byte for byte.
+        """
+
+    /// A-771-2 (the VX-771 run, batch 1 — PROVISIONAL P-771-8): THE FAN DIGEST
+    /// SENTENCE, said once by every tool whose BRIEF answer carries it
+    /// (`duplicate_note` with `brief: true`, `copy_note_to_wing`) — it SPELLS the
+    /// exact text form, since the description is the contract a client checks
+    /// against (`MCPTextDigest.fanText`, whose key it reads, never retypes).
+    static let fanDigestSentence = """
+        \(MCPTextDigest.fanKey) proves the copy whole: the SHA-256 (lowercase hex, of the UTF-8 \
+        bytes) of a text with one line per block in note order, each line that block's take \
+        sha256s in fan order separated by single spaces, the shown take's prefixed with *, the \
+        lines joined by \\n with no trailing newline (no blocks: the empty text). Spell the same \
+        text from read_note with ids_only: true on the source (each take's sha256 in order, \
+        chosen marking the shown one; a paged read's blocks in page order) — equal digests mean \
+        the copy is the note.
         """
 
     /// VX-357 (VX-348 U1 — her ruling 2026-10-15: strip it, and on this door
@@ -791,6 +812,35 @@ enum MCPToolCatalog {
         ]),
         scopes: [.wing])
 
+    /// VX-769 (the VX-771 run, batch 3 — R-771-B; PROVISIONAL P-771-2: its
+    /// own tool, `create_book`'s shape untouched): a gathering born with its
+    /// rule, in `set_book_rule`'s grammar; the rule the author's after birth.
+    static let createGathering = MCPToolDeclaration(
+        name: "create_gathering", rung: .writeNew, title: "Create a gathering",
+        description: """
+            Create a gathering in a shared wing ("" is Home; list_wings gives the wing_id of every \
+            wing shared with you): a saved rule that shows every note of the wing it matches and \
+            holds none of its own — a note joins when it comes to match (apply_tag) and leaves \
+            when it no longer does (remove_tag), so it is the place for a board. rule is required, \
+            written as set_book_rule writes one: tags by path, e.g. {"or": [{"tag": "board"}, \
+            {"tag": "board/doing"}]}; {"star": true} for starred; {"not": …}. A missing tag is \
+            created in the wing. Making it moves no note into or out of any book. After this its \
+            rule is the author's: set_book_rule doesn't change a gathering's rule. One undo for \
+            the author. Returns JSON with the gathering_id, its rule as stored and notes — how many \
+            notes it gathers that you can read, as list_books counts them.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "name": .object(["type": "string", "description": "The gathering's name."]),
+                "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "rule": .object(["description": "What it gathers: the rule (one term), as set_book_rule takes it."]),
+            ]),
+            "required": .array(["name", "wing_id", "rule"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.wing])
+
     static let addNoteToBook = MCPToolDeclaration(
         name: "add_note_to_book", rung: .writeNew, title: "Add a note to a book",
         description: """
@@ -834,9 +884,15 @@ enum MCPToolCatalog {
     static let editTake = MCPToolDeclaration(
         name: "edit_take", rung: .edit, title: "Edit a take",
         description: """
-            Replace one take's text. expected_text must be the take's text EXACTLY as you read it \
-            (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
-            nothing is written; read again. Variorum first commits the words it replaces, named \
+            Change one take's text, in either of two forms. Pass one form, never both. WHOLE: text (the \
+            take's whole new text) with expected_text — the take's WHOLE text EXACTLY as you read it \
+            (read_note with with_ids: true), never a part of it; if it doesn't match (the author changed it \
+            since, or you sent only part of it), the edit is refused, nothing is written, and the refusal \
+            says how the two differ — read again. REPLACE: old_str and new_str — old_str must occur EXACTLY \
+            ONCE in the take's current text, matched byte for byte (none, or more than one, is refused naming \
+            the count — give more of the text around it), and new_str takes its place ("" removes it); it is \
+            found in the take as it stands when the edit lands, so the author's latest typing is included. \
+            A result that would leave the take blank is refused. Variorum first commits the words it replaces, named \
             "before <your client name>'s edit" (unless they are already the take's latest commit, or \
             the take is blank and was never committed — then the answer has no before_commit_id), and \
             then the new text, named "after <your client name>'s edit", so the author can always \
@@ -849,10 +905,26 @@ enum MCPToolCatalog {
             "type": "object",
             "properties": .object([
                 "take_id": .object(["type": "string", "description": "The take to edit."]),
-                "text": .object(["type": "string", "description": "The take's whole new text."]),
-                "expected_text": .object(["type": "string", "description": "The take's current text, exactly as read."]),
+                "text": .object([
+                    "type": "string", "description": "WHOLE form: the take's whole new text (with expected_text).",
+                ]),
+                "expected_text": .object([
+                    "type": "string",
+                    "description": "WHOLE form: the take's whole current text, exactly as read (with text).",
+                ]),
+                // VX-761 (the VX-771 run, batch 2 — PROVISIONAL P-771-10).
+                "old_str": .object([
+                    "type": "string",
+                    "description": "REPLACE form: the exact passage to replace — it must occur exactly once in the take (with new_str).",
+                ]),
+                "new_str": .object([
+                    "type": "string",
+                    "description": "REPLACE form: what takes the passage's place; \"\" removes it (with old_str).",
+                ]),
             ]),
-            "required": .array(["take_id", "text", "expected_text"]),
+            // VX-761: either form — only the take is always required; the call
+            // door refuses a mixed or half form in words.
+            "required": .array(["take_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -1116,7 +1188,11 @@ enum MCPToolCatalog {
             fan order (take_id, label where it has one, and sha256 — equal to its source take's), \
             as create_note answers them — its tag_ids and tags (their paths: every tag the copy \
             wears once it lands, a book's outflow included), the book_id and section_id you gave, \
-            and landed: where the copy is. \(digestSentence)
+            and landed: where the copy is. \(digestSentence) For a long note pass brief: true — the \
+            answer is then only the copy's note_id, the source_note_id, its tag_ids and tags, the \
+            book_id and section_id you gave, landed, block_count and take_count (every take in its \
+            blocks' fans) and \(MCPTextDigest.fanKey), with no per-block records; read_note with \
+            ids_only gives those when you need them. \(fanDigestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -1125,6 +1201,10 @@ enum MCPToolCatalog {
                 "with_tags": .object([
                     "type": "boolean",
                     "description": "Apply the note's tags to the copy (default true); false copies none.",
+                ]),
+                "brief": .object([
+                    "type": "boolean",
+                    "description": "Answer only the copy's ids and counts, no per-block records (default false).",
                 ]),
                 "book_id": .object([
                     "type": "string",
@@ -1139,16 +1219,59 @@ enum MCPToolCatalog {
         ]),
         scopes: [.book, .wing])
 
+    // MARK: - VX-771 batch 1 — VX-765 copy_note_to_wing
+
+    /// VX-765 (her ⇧⌥⌘L Copy to Wing — VX-632; VX-368's parity class): READ on
+    /// the note and WRITE NEW on the wing the copy goes to — `duplicate_note`'s
+    /// two-sided shape, landing in ANOTHER wing. Declared at write new under the
+    /// WING scope only: a wing grant is the one grant that can name where a
+    /// bookless copy lands (a note or book grant never does), so the tool is
+    /// listed only where it can act (P-2 on the wire). The answer is VX-766's
+    /// brief shape — the ticket's point was the full per-block answer.
+    static let copyNoteToWing = MCPToolDeclaration(
+        name: "copy_note_to_wing", rung: .writeNew, title: "Copy a note to another wing",
+        description: """
+            Copy a note into another wing (wing_id; "" is Home; list_wings gives every wing shared \
+            with you, empty ones too) — each wing is a separate library, so the copy lands bookless \
+            in that wing's Pool and the note itself stays where it is, untouched. It is the author's \
+            Copy to Wing: every block with every take (the chosen ones chosen), their comments and \
+            block names; the note's tags come with it (a tag the other wing lacks is made there by \
+            its path), and no book there takes the copy in by them. Needs read on the note and write \
+            new on the wing it goes to; to copy a note within its own wing use duplicate_note. A note \
+            shared with you only per ask can't be copied. One undo for the author removes the copy. \
+            Returns JSON: the copy's note_id, the source_note_id, the wing_id, its tag_ids and tags \
+            (their paths in that wing), landed: where the copy is, block_count and take_count (every \
+            take in its blocks' fans) and \(MCPTextDigest.fanKey) — no per-block records; read_note \
+            with ids_only gives those. \(fanDigestSentence)
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to copy."]),
+                "wing_id": .object(["type": "string", "description": "The wing the copy goes to (\"\" is Home)."]),
+            ]),
+            "required": .array(["note_id", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.wing])
+
     // MARK: - VX-184 U3 — VX-190 remove_tag
 
     /// VX-190: her un-tag — the application only, a non-event for intake.
+    /// VX-764 (the VX-771 run, batch 3 — R-771-A (a)): the answer names the
+    /// books the note stays in, and the description says why and where a
+    /// board-shaped flow belongs (a gathering).
     static let removeTag = MCPToolDeclaration(
         name: "remove_tag", rung: .edit, title: "Remove a tag from a note",
         description: """
             Remove a tag from a note, by its path (e.g. "percy/pt-en") — the note stops wearing \
             it; the tag itself stays in the library. As when the author removes one, nothing else \
-            moves: a book the tag brought the note into keeps it. One undo for the author puts the \
-            tag back. Returns JSON.
+            moves: a book the tag brought the note into keeps it, since removing a tag is never a \
+            way out of a book (remove_note_from_book takes it out; for a board a note should leave \
+            when its tag goes, use a gathering — create_gathering — which shows exactly what its \
+            rule matches). One undo for the author puts the tag back. Returns JSON; \
+            still_in_books names each book (book_id, name) that collects by the tag and still holds \
+            the note, and still_in_books_hidden_count counts any not shared with you.
             """,
         inputSchema: .object([
             "type": "object",
