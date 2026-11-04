@@ -127,6 +127,9 @@ enum MCPToolCatalog {
         // its wing — the copy lands bookless there; VX-371: or on a book of
         // that wing, the copy filed there).
         duplicateNote,
+        // VX-771 batch 1 — VX-765: her Copy to Wing (read on the note, write
+        // new on ANOTHER wing — the copy lands bookless in that wing's Pool).
+        copyNoteToWing,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
@@ -1146,6 +1149,42 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: [.book, .wing])
+
+    // MARK: - VX-771 batch 1 — VX-765 copy_note_to_wing
+
+    /// VX-765 (her ⇧⌥⌘L Copy to Wing — VX-632; VX-368's parity class): READ on
+    /// the note and WRITE NEW on the wing the copy goes to — `duplicate_note`'s
+    /// two-sided shape, landing in ANOTHER wing. Declared at write new under the
+    /// WING scope only: a wing grant is the one grant that can name where a
+    /// bookless copy lands (a note or book grant never does), so the tool is
+    /// listed only where it can act (P-2 on the wire). The answer is VX-766's
+    /// brief shape — the ticket's point was the full per-block answer.
+    static let copyNoteToWing = MCPToolDeclaration(
+        name: "copy_note_to_wing", rung: .writeNew, title: "Copy a note to another wing",
+        description: """
+            Copy a note into another wing (wing_id; "" is Home; list_wings gives every wing shared \
+            with you, empty ones too) — each wing is a separate library, so the copy lands bookless \
+            in that wing's Pool and the note itself stays where it is, untouched. It is the author's \
+            Copy to Wing: every block with every take (the chosen ones chosen), their comments and \
+            block names; the note's tags come with it (a tag the other wing lacks is made there by \
+            its path), and no book there takes the copy in by them. Needs read on the note and write \
+            new on the wing it goes to; to copy a note within its own wing use duplicate_note. A note \
+            shared with you only per ask can't be copied. One undo for the author removes the copy. \
+            Returns JSON: the copy's note_id, the source_note_id, the wing_id, its tag_ids and tags \
+            (their paths in that wing), landed: where the copy is, and block_count and take_count \
+            (every take in its blocks' fans) — no per-block records; read_note with ids_only gives \
+            those.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to copy."]),
+                "wing_id": .object(["type": "string", "description": "The wing the copy goes to (\"\" is Home)."]),
+            ]),
+            "required": .array(["note_id", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.wing])
 
     // MARK: - VX-184 U3 — VX-190 remove_tag
 

@@ -73,6 +73,11 @@ extension Operations {
         // the wire): ONE entry ("Undo claude-code's duplicate"); the receipt
         // names the copy and opens it (PROVISIONAL words, her copy pass).
         case duplicate
+        // VX-765 (the VX-771 run) — her Copy to Wing on the wire
+        // (`copy_note_to_wing`): ONE entry ("Undo claude-code's wing copy");
+        // the receipt names the destination wing and opens the copy
+        // (PROVISIONAL words, her copy pass).
+        case wingCopy = "wing copy"
         // VX-184 U3 — VX-188's suggest-rung delete of a client's OWN comment
         // ("Undo claude-code's comment deletion").
         case commentDelete = "comment deletion"

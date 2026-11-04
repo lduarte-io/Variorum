@@ -112,6 +112,9 @@ struct MCPWriteTools: Sendable {
         /// an optional `section_id`).
         /// VX-766 (the VX-771 run): `brief` — the answer's ids and counts only.
         case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?, brief: Bool)
+        /// VX-765 (the VX-771 run): her Copy to Wing on the wire — the copy
+        /// bookless in ANOTHER wing's Pool (`MCPWriteTools+WingCopy`).
+        case copyNoteToWing(noteID: String, wingID: String)
         /// VX-596: her star on the wire — a note or a book, starred or not
         /// (`MCPWriteTools+Star`).
         case setStarred(target: StarTarget, starred: Bool)
@@ -137,6 +140,7 @@ struct MCPWriteTools: Sendable {
             case .addNoteToBook: "add_note_to_book"
             case .insertBlocks: "insert_blocks"
             case .duplicateNote: "duplicate_note"
+            case .copyNoteToWing: "copy_note_to_wing"
             case .setStarred: "set_starred"
             }
         }
@@ -184,6 +188,10 @@ struct MCPWriteTools: Sendable {
             // 13e E10's "THE COPY FAMILY'S ONE ENTRY"). The same class as
             // `save_version`, so the same answer.
             case .duplicateNote:
+                true
+            // VX-765: her Copy to Wing COPIES every take of the note exactly as
+            // her Duplicate does (`copyPost`) — the same class, the same answer.
+            case .copyNoteToWing:
                 true
             }
         }
@@ -273,6 +281,8 @@ struct MCPWriteTools: Sendable {
             return try parseInsertBlocks(args)
         case MCPToolCatalog.duplicateNote.name:
             return try parseDuplicateNote(args)
+        case MCPToolCatalog.copyNoteToWing.name:
+            return try parseCopyNoteToWing(args)
         case MCPToolCatalog.setStarred.name:
             return try parseSetStarred(args)
         default:
@@ -610,6 +620,8 @@ struct MCPWriteTools: Sendable {
                 ops: ops, clientName: clientName)
         case .setStarred(let target, let starred):
             return try performSetStarred(target, starred: starred, job: job, ops: ops, clientName: clientName)
+        case .copyNoteToWing(let noteID, let wingID):
+            return try performCopyNoteToWing(noteID: noteID, wingID: wingID, job: job, ops: ops, clientName: clientName)
         }
     }
 

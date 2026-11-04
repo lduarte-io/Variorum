@@ -95,8 +95,10 @@ extension MCPWriteTools.Job {
         case .noteEdit(let job): job.nullCharactersWritten
         case .libraryEdit(let job): job.nullCharactersWritten
         // A membership, a deletion, a tag taken off by its path (a lookup),
-        // a version link, a copy of stored text, a star (VX-596): no text written.
-        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .duplicateNote, .setStarred: 0
+        // a version link, a copy of stored text, a star (VX-596), a copy into
+        // another wing (VX-765): no text written.
+        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .duplicateNote, .setStarred,
+             .copyNoteToWing: 0
         }
     }
 }

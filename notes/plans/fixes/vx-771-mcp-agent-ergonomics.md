@@ -137,7 +137,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 |---|---|
 | VX-759 duplicate dating (P-771-1) | DONE — the commit "Part of VX-759: …" (hash in the next flip); pins red on the pre-fix tree, green after |
 | VX-766 duplicate brief form | IN-PROGRESS — the brief form DONE (the commit "Part of VX-766: …"); the digest half WAITS on fork F-2 (proposed below, not built) |
-| VX-765 copy_note_to_wing | NOT-STARTED — wraps her `copyNoteToWing` body (`Operations+WingMove.swift`) |
+| VX-765 copy_note_to_wing | DONE — the commit "Part of VX-765: …"; red-on-old by behavioural revert PENDING (next: the tool's catalog entry removed, the suite run, restored by `git checkout --`) |
 | End-of-batch suites | NOT-STARTED |
 
 No revert is in flight.

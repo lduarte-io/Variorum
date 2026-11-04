@@ -178,50 +178,72 @@ extension Operations {
     /// real note — the Trash is the road).
     @discardableResult
     public func copyNoteToWing(_ postID: String, to wingID: String) throws -> Container {
-        try database.write { db in
-            let source = try livePost(db, postID)
-            try requireLiveWing(db, wingID)
-            guard try !sameEffectiveWing(db, source.wingId, wingID) else {
-                throw OperationError.postAlreadyInWing(postID: postID, wingID: wingID)
-            }
-            let now = date.now
-            let copy: Container
-            let copyable = try Bool.fetchOne(
-                db,
-                sql: """
-                    SELECT EXISTS (SELECT 1 FROM container_block cb
-                      JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
-                      JOIN variant v ON v.block_id = b.id AND v.deleted_at IS NULL
-                     WHERE cb.container_id = ? AND cb.deleted_at IS NULL)
-                    """,
-                arguments: [postID]) ?? false
-            if copyable {
-                copy = try copyPost(
-                    db, sourceID: postID, chosenPicks: nil, carryFans: true,
-                    intoWing: wingID
-                ).post
-            } else {
-                let bare = Container(
-                    id: newID(), ownerId: currentOwnerID(), kind: .post,
-                    title: source.title, profile: source.profile, entryDate: source.entryDate,
-                    locked: false, floatingNotes: source.floatingNotes,
-                    segmentationDefault: source.segmentationDefault,
-                    lastTouchedAt: now, wingId: wingID,
-                    createdAt: now, updatedAt: now)
-                try bare.insert(db)
-                copy = bare
-            }
-            var adoption = TagAdoption(wing: wingID)
-            for tag in try liveTagsWorn(db, postID: postID) {
-                let target = try adopt(db, tag, &adoption)
-                guard try liveApplication(db, table: "post_tag", tagID: target.id,
-                                          targetColumn: "post_id", targetID: copy.id) == nil
-                else { continue }
-                try PostTag(id: newID(), tagId: target.id, postId: copy.id, createdAt: now)
-                    .insert(db)
-            }
-            return copy
+        try database.write { db in try copyNoteToWing(db, postID, to: wingID).copy }
+    }
+
+    /// What one Copy to Wing minted (VX-765 — the VX-771 run, batch 1): the
+    /// copy, VX-252's records of its blocks (from `copyPost`'s own rows — empty
+    /// for the bare copy of an empty note), and the tags it wears in the
+    /// destination (adopted or minted by path, application order, each once).
+    struct NoteWingCopy: Sendable {
+        let copy: Container
+        let blocks: [MintedBlockTakes]
+        let tags: [Tag]
+    }
+
+    /// **Her door's body, inside the caller's transaction** (VX-765 — moved here
+    /// VERBATIM so the MCP door's `copy_note_to_wing` lands the very same act
+    /// and its refusals, the 13n-c U6 move's precedent; her public door above
+    /// calls it and is byte-identical). It additionally RETURNS what it minted —
+    /// read from the rows it just wrote, never a second read.
+    func copyNoteToWing(_ db: Database, _ postID: String, to wingID: String) throws -> NoteWingCopy {
+        let source = try livePost(db, postID)
+        try requireLiveWing(db, wingID)
+        guard try !sameEffectiveWing(db, source.wingId, wingID) else {
+            throw OperationError.postAlreadyInWing(postID: postID, wingID: wingID)
         }
+        let now = date.now
+        let copy: Container
+        var blocks: [MintedBlockTakes] = []
+        let copyable = try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (SELECT 1 FROM container_block cb
+                  JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                  JOIN variant v ON v.block_id = b.id AND v.deleted_at IS NULL
+                 WHERE cb.container_id = ? AND cb.deleted_at IS NULL)
+                """,
+            arguments: [postID]) ?? false
+        if copyable {
+            let copied = try copyPost(
+                db, sourceID: postID, chosenPicks: nil, carryFans: true,
+                intoWing: wingID
+            )
+            copy = copied.post
+            blocks = copied.blocks
+        } else {
+            let bare = Container(
+                id: newID(), ownerId: currentOwnerID(), kind: .post,
+                title: source.title, profile: source.profile, entryDate: source.entryDate,
+                locked: false, floatingNotes: source.floatingNotes,
+                segmentationDefault: source.segmentationDefault,
+                lastTouchedAt: now, wingId: wingID,
+                createdAt: now, updatedAt: now)
+            try bare.insert(db)
+            copy = bare
+        }
+        var adoption = TagAdoption(wing: wingID)
+        var worn: [Tag] = []
+        for tag in try liveTagsWorn(db, postID: postID) {
+            let target = try adopt(db, tag, &adoption)
+            if !worn.contains(where: { $0.id == target.id }) { worn.append(target) }
+            guard try liveApplication(db, table: "post_tag", tagID: target.id,
+                                      targetColumn: "post_id", targetID: copy.id) == nil
+            else { continue }
+            try PostTag(id: newID(), tagId: target.id, postId: copy.id, createdAt: now)
+                .insert(db)
+        }
+        return NoteWingCopy(copy: copy, blocks: blocks, tags: worn)
     }
 
     // MARK: - Internals (shared with the stopped book-move half when it lands)

@@ -486,6 +486,10 @@ nonisolated enum MCPPaneCopy {
         case "put_back": return "putting back a block in \(at)"
         case "set_entry_date": return "setting the date of \(at)"
         case "move_note_to_wing": return kind == "wing" ? "moving a note to \(at)" : "moving \(at) to another wing"
+        // VX-765 (the VX-771 run) — her Copy to Wing on the wire: TWO-SIDED
+        // (UXR1-1), the note at read and the destination wing at write new, so
+        // the line says the side that refused as itself (PROVISIONAL words).
+        case "copy_note_to_wing": return kind == "wing" ? "copying a note to \(at)" : "copying \(at) to another wing"
         // VX-168 U2 — the edit rung's deliberate acts (PROVISIONAL words, her
         // copy pass): VX-169's commit, VX-174's merge button.
         case "save_commit": return "committing a take in \(at)"
@@ -615,6 +619,8 @@ nonisolated enum MCPPaneCopy {
         // 13n-c U6: the wing move (the log's target is the NOTE) and the
         // navigation tool (its target a note, a book or — U6 — a wing).
         case "move_note_to_wing": return n == 1 ? "moved \(at) to another wing" : "moved \(at) between wings" + times
+        // VX-765: logged on the SOURCE note, as the wing move is (PROVISIONAL words).
+        case "copy_note_to_wing": return "copied \(at) to another wing" + times
         case "show_in_app": return "showed you \(at)" + times
         // 13n-c UX walk W-UX-13: the five acts this table never worded (they
         // fell to "used save_version").
@@ -1559,6 +1565,12 @@ nonisolated enum MCPReceiptCopy {
             let short = "\(first.clientName) \(wingMovePhrase(first, titled: false))\(tail)"
             if short.count <= budget { return short }
         }
+        // VX-765: ONE wing copy keeps WHERE THE COPY WENT — the wing — dropping
+        // only the note's title (Open › opens the copy), the wing move's rule.
+        if run.count == 1, first.act == .wingCopy {
+            let short = "\(first.clientName) copied a note to \(wingWords(first))\(tail)"
+            if short.count <= budget { return short }
+        }
         // VX-371 (VX-383 U2): ONE filed duplicate keeps WHERE THE COPY WENT —
         // the book — dropping only the note's title (Open › opens the copy),
         // the wing move's precedent above.
@@ -1650,6 +1662,13 @@ nonisolated enum MCPReceiptCopy {
         case .wingMove:
             return n == 1 ? wingMovePhrase(receipts[0], titled: true)
                 : "moved \(n) notes to \(wingWords(receipts[0]))"
+        // VX-765 — a note copied into another wing (her door's receipt's words,
+        // `WingCopy.copied`): keyed on the DESTINATION, so a run of copies to
+        // one wing reads as one line, the wing move's precedent (PROVISIONAL).
+        case .wingCopy:
+            guard n == 1 else { return "copied \(n) notes to \(wingWords(receipts[0]))" }
+            let note = receipts[0].detail.map { "\u{201C}\($0)\u{201D}" } ?? "a note"
+            return "copied \(note) to \(wingWords(receipts[0]))"
         // VX-168 U2 — the deliberate acts (P-13nb-U2-5's family, PROVISIONAL
         // words, 13s-a sweepable): VX-169's commit, VX-174's merge button —
         // her "✓ Make this the note" said back in her door's words.
