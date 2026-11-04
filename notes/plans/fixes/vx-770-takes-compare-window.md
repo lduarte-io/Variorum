@@ -294,3 +294,119 @@ rushed (members are sub-issues; they close one by one).
   never force layout from a mid-document location on a whole-post surface; a `@MainActor` test's
   nested run loop runs NO main-queue hop (await instead). `notes/TEXTKIT2_NOTES.md` is required
   reading for batches 1, 3 and 5 (VX-739), and any batch that touches pane geometry.
+
+---
+
+## BATCH 1 RECORD — VX-756, the takes-open mode-switch landing (implementer: opus-implementer, 2026-11-04)
+
+**NOT DONE (first line, kept current):** every mounted red/green claim below is a PREDICTION until the
+orchestrator's suite window (this session is headless — no `xcodebuild test`, no app launch, no
+stage); the use walk (her repro by hand, both voices); the cold ladder.
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (this file whole; TEXTKIT2_NOTES in full; SurfaceContracts › The note; the vx-601 VX-428 section + batch B record; the SessionResiliencyProtocol) | DONE |
+| Trace (code read + the unified log's measured landing stories) | DONE — written below, before any code |
+| Red-on-old pin | NOT-STARTED |
+| Fix | NOT-STARTED |
+| Build-for-testing (post tree + behavioural-revert tree) | NOT-STARTED |
+| Red/green runs, the P-8 numbers | PENDING (the orchestrator's window) |
+| Self-assessment | NOT-STARTED |
+
+### THE TRACE (written before the fix)
+
+**Her shape, as the code runs it (the app's order: a bare model, the projection from the view's
+`.task`).** Showing 1: the entry ring lands on block X and records X as this board's current row
+(`TakesViewModel.landAuthorityFocus` → `rememberArticleCurrentBlock`, `TakesViewModel.swift:2876-2880`);
+she opens fans (the open set goes to `EditorRouter.takesExpandedBlocks`); the page she leaves is
+remembered as a row (`takesArticlePlaces`). Write: her caret moves to block Y, so the note's current
+block is Y. Showing 2:
+1. `TakesBoardView.init` seeds the open fans before the first body (`TakesBoardView.swift:188-206`,
+   `TakesViewModel.openExpansionMemory`) — VX-428's contract, holding: the article's rows are born
+   with the fans she left open drawn.
+2. The first geometry (empty column) reads the memory (`consumeArticleGeometry`'s `.undecided`
+   branch, `TakesArticleScroll.swift:1366-1395`). The projection lands; `consumeLandings` rings Y and
+   lands the ENTRY on Y (`TakesChoreographer.swift:196-225`); `landArticle` consults the resolver,
+   and because Y ≠ X R-Q20 settles the restore at once (`TakesArticleScroll.swift:345-347, 397-407`,
+   `landingOutranks` `:468-474`). **The contract's precedence HOLDS in the code**: the remembered
+   page never places this page (the one pre-projection restore aim the first geometry issues is at
+   an id the empty column does not hold — the code's own recorded no-op, `TakesArticleScrollTests`
+   `theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip` arm (d)). So hypothesis (a) — the
+   double move — is NOT this road's mechanism by the code; the new pin records the page's whole
+   trajectory, so the window can falsify that reading if it is wrong.
+3. The page therefore starts where a fresh mount starts — the TOP — and the entry landing alone must
+   carry it to Y. Its FIRST decided step fires at the column's FIRST row report
+   (`TakesBoardView.swift:800-808` → `articleLandingReport` → `articleLandingStep`,
+   `TakesArticleScroll.swift:716-771`) — with ONE row realized (the signposts' `derived = rows − 1`)
+   — and issues ONE `scrollTo(Y, .bottom)` (Y unrealized → the shipped edge; `bandedSecondAim`
+   armed for Y's report AT that edge).
+4. **The lazy column places an unrealized row by ESTIMATING the rows above it from the rows it has
+   realized** — and the seeded fans make those rows bimodal: a closed block is one paragraph, an
+   open one is the paragraph plus its fan's cards. So the estimate the first aim rides is wrong by a
+   factor, and it SWINGS as the realized window moves between open and closed rows, re-basing the
+   page under the landing.
+5. From then on the landing has exactly one way to correct: the watch, from QUIET
+   (`LandingPolicy.takesArticle`: `.spacedByTheHold`, ≥ 0.25 s up to the 1 s hold, budget 3 —
+   `LandingAuthority.swift:287-291, 294-299, 381-417`). Once watched, every report is only a report
+   (`articleLandingReport`, `TakesArticleScroll.swift:801-830` — U2's rule), and the band's second
+   aim fires only if Y happens to report exactly AT the shipped edge, which a re-based page does not
+   give it. So the page comes to rest off home, holds still for the quiet interval, and then HOPS —
+   a second visible landing half a second later (and up to three). That is her "jumps around".
+6. **Why the plain round trip on the same seeded board is calm, and why the existing pins are
+   green.** With the SAME block, the restore runs (R-18l-13's ride-through), and the restore
+   re-aims its absolute anchor on EVERY geometry report inside the storm and then HOLDS
+   (`restoreStep`, `TakesArticleScroll.swift:1420-1483`, bounded 24, refilled at the hold) — it
+   converges inside the layout storm, and the ride-through entry then finds Y home and asks for
+   nothing. Her shape is the ONE road where the page must travel from the top through the seeded
+   column on the landing's single aim. VX-428's landing pin
+   (`anEntryLandingStillReachesAFarBlockWithFansOpenAboveIt`) stages that same road (a fresh
+   session: no memory, so the landing "outranks" trivially) but asserts only the END state — the
+   block on screen — so the hop never fails it.
+7. **Why it is new with VX-428:** before it, a remounted board was always all-closed, the rows
+   homogeneous, the first aim's estimate right, and a far entry landed with ZERO hops — the bar
+   `TakesEntryBandTests.aFarEntryRestsTwoLinesAboveTheFootNeverAtTheEdge` pins
+   (`articleLandingCorrections == 0`).
+
+**Measured evidence (the unified log — the Debug test host's own landing signposts and DEBUG
+stories, `/usr/bin/log show … category == "landing"`, pid 82840 = the 2026-11-02 VX-736 suite run;
+her real app's lines are not retained, so none of hers).** VX-428's own landing pin, its four arms
+(24 blocks, 8 fans open above the far block, the far block last; argument order stack · margin grid
+· slot split · carousel), at 07:21:52–57:
+- stack — `LAND total=5210 derived=23 | content=5190 | 2121 | 5190 | 5386 | 5984 | 6056 | HOP 1 at
+  551 ms (top was -37.0) | content=5244 | settled after 1 hops`
+- margin grid — `LAND total=8285 derived=23 | content=8265 | 2786 | 8265 | 8325 | HOP 1 at 607 ms
+  (top was -38.5) | content=7411 | settled after 1 hops`
+- slot split — `total=3835 | 3815 | 1913 | 3815 | 4095 | 4858 | 4911 | 0 hops`
+- carousel — `total=4085 | 4065 | 1958 | 4065 | 4540 | 5670 | 5775 | 0 hops`
+
+The seeded column's height swings by ~60 % and back inside ONE landing in every style (the
+estimate re-basing as the realized window crosses open/closed rows), and the default style (stack)
+and margin grid land OFF home and hop ~0.55–0.6 s later. The unseeded baseline of the same suite
+family, the same night: `aFarEntryRests…` (60 blocks, entered on 41) `content=2714 | 3110 | 3134 |
+3811 | settled after 0 hops` — growth only, no swing, no hop. The class is already on record for
+UNEVEN columns: U2's 260-block synthetic (40 short lines, long paragraphs below) — `HOP 1 at 477 ms
+(unreported)` in the same log; VX-428's seed makes every note with open fans an uneven column at
+mount time.
+
+**What the trace does NOT settle (stated, for the window):** the harness cannot show me the
+on-screen picture of the swing itself (only the content heights and the hop); the new pin prints
+the page's and Y's per-turn trajectory (`VX756-TRACE` lines) so the window's red run shows every
+movement of her shape on the pre-fix tree. Hypothesis (c) — a TK2 amplifier — is not this road: the
+swing is the SwiftUI lazy column's estimate, and the article's panes never force layout from a
+mid-document location (TEXTKIT2 §3, VX-246 — the read panes are per-block text views).
+
+**THE FIX'S SHAPE, decided from the trace (no product decision — the contract already says "one
+settled landing", the band, and the outrank):** the entry landing that starts from the mount's top
+(it outranked the memory, or there was none — never the ride-through entry, whose page the restore
+owns) re-aims INSIDE the storm the way the restore does: each change of the column's content height
+— the estimate re-basing — earns at most one re-aim, spent on the first report after that change
+that finds Y off home (blind for an unrealized Y, the restore's own road; for a realized Y only on
+a frame reported AFTER that change), through the ONE step (`articleLandingStep`), bounded by the
+restore's own pocket (24) inside the step's 64-aim fence. That is U8's own principle for the band's
+second aim ("the same layout storm, not a quiet interval later, so the landing reads as one
+motion"), generalised from "one aim at the edge report" to "the re-based row, re-aimed at the
+event". The watch stays the backstop. Nothing about the seed, the prune, the restore, the resolver,
+the band or the flash changes; no second mechanism (P-3): the step is the one aim, the watch the one
+lifetime. U2's measured failure (per-ROW-report re-aims spent 64 aims in ~70 ms) is excluded by
+construction: at most one aim per content-height change.
