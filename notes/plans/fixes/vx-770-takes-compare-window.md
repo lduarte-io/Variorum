@@ -2596,8 +2596,11 @@ ticket at closeout.
 
 ## THE WALK RECORD — VX-770 (W1–W17)
 
-**NOT DONE (first line, kept current):** the walk is IN PROGRESS — rows below carry PENDING until
-their verdict lands.
+**NOT DONE (first line):** W2 carries a FINDING (margin grid still hops once on her shape — 3 of 3 trials, both
+voices; the orchestrator decides; a byte change means the gate re-builds); W10's second-window staging and W14's
+"MCP road" were not walkable (the second window shows no Takes gutter; MCP is OFF by posture) — the any-road stagings
+ran instead; W12/W13/W16 walked in Study only (their rows name no second voice); W16's header-door-beside-a-twin
+variant not walked. Every other row PASS. The walk is CLOSED (08:56).
 
 Walker: opus (the use walker), under the orchestrator's HELD claim `vx-770-final` (never claimed,
 renewed or released by the walker). Build: `App/Variorum/DerivedData/vx770-mg/Build/Products/Debug/Variorum.app`
@@ -2839,3 +2842,25 @@ still 11w; reopen; **✓ the blank** → **"0w block · 8w in note"** (pre-fix 9
 `w17s-7-blank-chosen-small.png`; Terminal: `w17t-2-panel-small.png`, `w17t-3-blank-small.png`,
 `w17t-4-original-small.png`, `w17t-6-reopen-small.png`, `w17t-bars.png`. The count stayed true at every step in
 both voices.
+
+### POSTURE AT THE END (08:55–08:56, after the quit)
+- The dev instance (pid 51555, `vx770-mg`) quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`);
+  `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before launch and after the quit — no other Variorum instance ran at
+  any point (her `/Applications` app never running; the guard checked before every act).
+- Read back in-app just before the quit (Accessibility, no capture): Theme **Study** (restored — the walk flipped
+  Terminal ↔ Study for the both-voice rows), Appearance **Dark**, palette **Sea glass**, Confirmations "A quiet line…",
+  "Takes open as" **Stack**, "follow the scroll" **off**, MCP "Enable the MCP server" **off**, Protection **"You're in
+  Standard."**, Sync **"This library doesn't sync. Sign in to turn on sync."** (signed out), the HELD banner never
+  pressed (Resume Sync untouched). The main window back at 1240×840 at (244,155) as found.
+- On disk: `variorum-restore-hold.json` inode **191598619**, mtime Oct 20 02:53, 63 bytes — UNCHANGED;
+  `appearanceChoice` = `dark` (never written). The dev defaults domain 725 → **739 keys** (+14: walk UI state — window
+  frames incl. the second note window and the GoToSheet, the Open panel's size, the Open list now holding the walk's
+  notes ("Keep open notes across launches" is on), session memories) — for the coordinator's defaults diff.
+- Content minted and LEFT in the dev store (the agents' store): the eight imported `vx770 …` notes, the two
+  Duplicate-with-Tags twins (`vx770 comments walk`, `vx770 landing walk`), the three "outline of vx770 outline …"
+  notes, comments on the comments/undo notes, the takes and the archived/deleted takes the rows made. No book, tag,
+  wing or setting changed beyond the voice flips (restored).
+- Captures: `<home>/dev/variorum-vx-770/.walkshots-vx770/` (gitignored by `.walkshots-*/`, ~1.3 GB —
+  mostly the JPEG bursts; deletable after the orchestrator's read). Walk instruments (never in the PR):
+  `/private/tmp/claude-501/-<home>-dev-variorum/17b9e621-2e5d-4717-a2d1-529f5d285a91/scratchpad/walk/`
+  (`burst.py`, `shift.py`, `boarddiff.py`, `toggles.zsh`, `ax`, `wl`, the app's stderr `app.log` with every landing story).
