@@ -1953,7 +1953,7 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
 | 1 | D-496's words (P-500-1): `SyncStatusRow.line(for:lastSuccessAt:progress:)` + the one count spelling (`progressCount`); "Syncing…" byte-unchanged with no progress; P-500-8 decided (the shown denominator rises to `done`); the new suite `SyncProgressRowTests` | IN PROGRESS (this commit) — code + pins written; the suite's run PENDING the stage |
 | 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | DONE (this commit) — pins PENDING the stage |
 | 3 | D-505's line (P-500-3): `Kind.retrying` after offline, before every other error class; CF-15's doors; the hover carries the engine's sentence; P-500-7 built as (a) | DONE (this commit) — pins PENDING the stage |
-| 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | CODE DONE (this commit) — the RED-ON-OLD run and the suite's green PENDING the stage |
+| 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | DONE (`31e1ce752`; the red-on-old cycle run under the stage claim — the lines below) |
 | 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | DONE (this commit) — zero behavior; the suites are the evidence, PENDING the stage |
 | 6 | Close: `swift build`; the Mac suites under the stage; the self-assessment | NOT STARTED |
 
@@ -2055,6 +2055,20 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
   `App/Variorum/Shared/Protection/ProtectionBackupPair.swift`'s three `now:` defaults to `= Date()` (a scratch edit),
   run `-only-testing:VariorumTests/ProtectionPairRetentionTests/theWeekBoundaryInstantGovernsThePlantsAndThePressAlike`
   → RED recorded; restore by `git checkout --`, `git diff --exit-code` clean; re-run → GREEN.
+  **THE RED-ON-OLD, RUN (2026-11-04 ~01:38–01:45 MST, the stage HELD by `vx500-orchestrator`):** at the committed tip
+  `fcbd86286` (tree clean), the three `now:` defaults in `ProtectionBackupPair.swift` scratch-reverted to `= Date()`
+  (the named revert above), `-only-testing:VariorumTests/ProtectionPairRetentionTests` → **"Test run with 5 tests in
+  1 suite failed after 0.604 seconds with 11 issues"** — THE BOUNDARY PIN'S OWN LINES:
+  `✘ Test theWeekBoundaryInstantGovernsThePlantsAndThePressAlike() recorded an issue at
+  ProtectionPairRetentionTests.swift:234:9: Expectation failed: left.count == 19` and
+  `… at ProtectionPairRetentionTests.swift:238:13: Expectation failed: left.contains(name) == keptOffsets.contains(offset)`
+  (and, as predicted, the other four one-clock tests red: :116/:117 the container count and prefix-14, :142/:144/:150
+  the far count and kept set, :175/:176 the survival scene's counts, :202/:204 the immutable scene's counts — the whole
+  suite now stands on the one clock). Restored by `git checkout -- App/…/ProtectionBackupPair.swift`,
+  `git diff --exit-code` CLEAN at `fcbd86286`; re-run `ProtectionPairRetentionTests` + the DEBUG guard-mutation suite →
+  **"Test run with 6 tests in 2 suites passed after 0.814 seconds"**. VX-546's "real miscount" reading is falsified by
+  the pin (the planner is correct under one clock; the scene's truth at the week tail is 17, which the old suite's 18
+  assertion missed on those nights).
 - **Piece 5 (this commit):** `App/Variorum/Shared/Protection/ProtectionOpenRoad.swift` — `RoadInputs.live`'s parameter
   is `any SyncKeysLeaf & Sendable` and the `nonisolated(unsafe) let syncKeys = syncKeys` escape hatch (:1022) is GONE
   (the `@Sendable` `makeSystem` closure captures the Sendable existential legally; the production leaf
