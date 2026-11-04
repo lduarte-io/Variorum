@@ -2615,11 +2615,11 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 | W2 the same, margin grid | **FINDING** — 3 of 3 trials (Study ×2, Terminal ×1): one watch hop of 20–35 pt ~0.25 s after the first rest |
 | W3 R-770-1 round trip, fans stay open | PASS |
 | W4 R-756-2 look-only (block off the page) | look line: 2 hops on the reveal |
-| W5 VX-730 stack comments whole | PENDING |
-| W6 VX-731 slot split keeps the card | PENDING |
-| W7 VX-731 carousel keeps the card; Study narrow → "#1" badge | PENDING |
-| W8 VX-728 Compare card at 2 columns, badge at 3; add/delete never moves the prose | PENDING |
-| W9 look-only: VX-696's short-block clip | PENDING |
+| W5 VX-730 stack comments whole | PASS — both voices |
+| W6 VX-731 slot split keeps the card | PASS — both voices |
+| W7 VX-731 carousel keeps the card; Study narrow → "#1" badge | PASS — both voices; Study at 1000 pt: "#1" on C5, "#2" on C2 |
+| W8 VX-728 Compare card at 2 columns, badge at 3; add/delete never moves the prose | PASS — both voices; add/delete live, prose pixel-identical |
+| W9 look-only: VX-696's short-block clip | look line: seen (C5's one-line card; Terminal Compare C2's second entry) |
 | W10 VX-732 comments leave the gutter at once | PENDING |
 | W11 VX-733 the collapsed fan's wash goes; a still-fanned block keeps its wash | PENDING |
 | W12 R-770-1 three takes, delete one → stays open | PENDING |
@@ -2712,3 +2712,36 @@ by design) — recorded, no verdict.
 "Nothing here yet — make the first block here, or start writing." (with a "+ new block" door) for ≈0.3–0.4 s on a
 40-block note before the projection arrives — a false offer on a full note, every style (`w1-study-stack/contact-1.png`
 frames 15–19); in margin grid its header says "style: stack" for those frames.
+
+
+### W5–W9 — comments on the boards (`vx770 comments walk`; C2 = a 111-word paragraph with TWO comments — the
+first 313 characters ending `END-OF-FIRST`, the second ending `END-OF-SECOND` — C5 a one-line block with ONE
+comment ending `END-OF-C5`; all three added from Write's comments panel ⌘⇧' — `c-panel-2.png`, `c-panel-c5.png`)
+- **W5 (VX-730, stack) — PASS, both voices.** Terminal `w5-terminal-stack.png`, Study `w5-study-stack.png` /
+  `w5w6-study.png`: C2's card in the left gutter, the FIRST comment whole (to END-OF-FIRST), a hairline, the SECOND
+  whole (to END-OF-SECOND) — two entries as Write shows them; C2's prose starts where C1's and C3's do. A wheel with
+  the pointer over the card scrolled the PAGE (`w5-card-wheel.png` — the board moved, the card with it); a press on
+  the card opened the comments panel anchored on it with both comments (`w5-card-press.png`).
+- **W6 (VX-731, slot split) — PASS, both voices.** Expand all → C2's split (chosen | choose) with the card still in
+  the gutter beside it, both entries whole (Terminal `w6-terminal-slot-open.png`; Study `w6-study-slot-crop.png`).
+- **W7 (VX-731, carousel) — PASS, both voices.** Carousel with C2 open: the card stays, whole (Terminal
+  `w7-terminal-carousel.png`, Study `w7-study-carousel.png`). Study at a 1000-pt window (Settings-free resize
+  through AX, restored to 1240×840 after): C2 reads a **"#2"** badge and C5 a **"#1"** badge in the gutter — never an
+  empty mark (`w7-study-narrow.png`, `w7-study-narrow-c5.png`).
+- **W8 (VX-728, Compare) — PASS, both voices.** File ▸ Duplicate with Tags (receipt "Duplicated with tags — the copy
+  is in the Pool. Open ›"), ⌘5: the auto-fill seats the twin; at TWO columns each column carries a card lane with
+  C2's two comments as a card (Study `w8-compare.png`; Terminal `w8-terminal-2col.png`). A press on the anchor's card
+  opened the panel IN Compare (`w8-c2-panel-pop.png`); a THIRD comment added there appeared in the anchor card at
+  once (`w8-add-diff.png`), and deleting it from the panel took it out at once (the panel kept its seat: "Comment
+  deleted — it's under Deleted below, restorable.", `w8-after-delete-pop.png`). **The prose never moved:** a pixel
+  diff of the main window before add / after add / after delete over the anchor prose, the twin's lane and the
+  twin's prose regions is EMPTY (only the anchor lane's card region changed — `w8-before-add2.png`,
+  `w8-after-add.png`, `w8-after-delete.png`). "+ note" → three columns: both shown columns switch to the BADGE
+  ("#2" on C2) in the narrower lane (Study `w8-plusnote.png`, Terminal `w8-terminal-3col.png`). (Look line: Compare's
+  "Comments…" menu door and ⌘⇧' are disabled in Compare — the card's press is the only panel door there; a block
+  with no comment has no way to get its first one from Compare. Consistent with the registry's `takeFamily`
+  availability; not a finding of this run.)
+- **W9 (look only) — seen.** C5's one-line card shows "C5 note: one comment / on a one-line block." with its
+  "END-OF-C5" below the card's fold (`w8-dup.png`, carousel Study); and Terminal Compare's C2 card clips its SECOND
+  entry at "own line. END-OF-" at the row's foot (`w8-terminal-2col.png`) — VX-696's bounded card (text height + 24,
+  inner scroll), inherited by design (T6). Noted, nothing more.
