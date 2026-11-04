@@ -237,11 +237,11 @@ rushed (members are sub-issues; they close one by one).
 | 6 | VX-733 undo leaves the fan wash | Batch 3 | FIXED — red-on-old ×4 + across-mode-switch (window b3r) + green; B3-P1/B3-P2 in her bundle |
 | 7 | VX-757 track-paragraphs flicker | Batch 4 | FIXED — red-on-old both toggle pins (window b3r) + green; toggle-name confirm in her bundle; walk W15 |
 | 8 | VX-740 double outline column (P-770-1) | Batch 4 | FIXED — red-on-old (window b3r: two columns on old) + green; walk W16 |
-| 9 | VX-758 created-sort fallback | Batch 5 | BUILT — the Entry date arm was the broken one (the Created arm always ordered every note); fix 630631af6 (+ heal 1e295451f): the Library's COALESCE(entry_date, created_at); RED/GREEN + revert REAL (`swift test`); walk W20 PENDING |
-| 10 | VX-739 word count (pin-first) | Batch 5 | BUILT CONDITIONALLY — traced (005e50b93; the AppKit premise measured on a bare rig; her 12/9 reproduced by the trace), pin 7b7ab0566, fix 196fdb145; red/green PENDING the window (green on rev ⇒ revert the fix, record-only); walk W17 PENDING |
-| 11 | VX-638 pager label | Batch 5 | BUILT — traced + pins 357a2f970, fix 4f1884d72 (`forgetPages` on the three close doors); red/green PENDING the window; walk W19 PENDING |
-| 12 | VX-652 lenses menu edge | Batch 5 | NOT BUILT — premise reachable at EVERY width; fork B5-F1 returned (bc764ba40): a new AppKit-anchored pull-down only a live run can verify — options A/B/C, the orchestrator's call; W18 look-only |
-| 13 | VX-634 "Variant" wording | Batch 5 | BUILT — sweep + pins c3a1d6d4a, fix 595e7369e ("Delete Take"); RED/GREEN + revert REAL (`swift test`); siblings → one Wording ticket candidate (R-B5-4); walk W21 PENDING |
+| 9 | VX-758 created-sort fallback | Batch 5 | FIXED — the ENTRY DATE arm; COALESCE to created_at (the Library rule); real red→green by swift test, revert-verified; R-B5-5 + the canon line in her bundle |
+| 10 | VX-739 word count (pin-first) | Batch 5 | FIXED — pin red on rev at the b5gate window (the caret-context mid-write mechanism); the guard green |
+| 11 | VX-638 pager label | Batch 5 | FIXED — forgetPages on the three close doors; red on rev ×4 shapes at b5gate, keep-guards green |
+| 12 | VX-652 lenses menu edge | Batch 5 | NOT BUILT (B5-F1 option C) — reachable at every width, needs an AppKit-anchored pull-down; re-owns at closeout with the design, option A recommended to her |
+| 13 | VX-634 "Variant" wording | Batch 5 | FIXED — "Delete Take" + the label fence; real red→green by swift test, revert-verified; the drift sweep → one Wording ticket at closeout (R-B5-4) |
 | 14 | The ladder (whole diff, fable-reviewer) | Orchestrator | NOT STARTED |
 | 15 | The use walk (content-only; Opus walker) | Orchestrator | NOT STARTED |
 | 16 | Closeout (canon deltas if any · tickets triaged · QUESTIONS bundle · handoff · merge) | Orchestrator | NOT STARTED |
@@ -2267,3 +2267,20 @@ phone renders through the same core query; all six carry real date/sort/assembly
 grep, so the set stands untightened). The undo-label rename owes the phone nothing (the one
 phone hit already reads "Delete Take" on main). The b5gate's keep: a green whole-target baseline
 for the ladder to review against.
+
+## WINDOW b5gate — THE RED LEG FLIPPED (the orchestrator, claim `vx-770-tests-b5gate`, 06:04–; the whole target running)
+
+**The red run (vx770-b5-rev, log `App/Variorum/DerivedData/logs/vx770-b5-red.log`): EXECUTED 8
+tests / 2 of 2 suites — "Test run with 8 tests in 2 suites failed after 0.738 seconds with 16
+issues (including 4 warnings)."**
+- **VX-739: RED on rev both arms** (`flippingATakeTwiceKeepsTheNotesWordCountTrue(mounted:)` ×2)
+  — the conditional fix RESOLVES TO FIXED, not record-only; the caret-context trace (the
+  mid-write selection change against the old tiling, the cached 7-for-6) was the real mechanism.
+  The guard `aWordTypedIntoABlockMovesTheTotalAtOnce` GREEN on rev as designed. The 196fdb145
+  revert clause is dead; the fix stands.
+- **VX-638: RED on rev on all four stale-page shapes** (`aCollapsedFanForgetsItsPage`,
+  `closeAllForgetsTheRailsPageToo`, `closeAllThenExpandAllStartsTheSplitAtItsFirstPage`,
+  `closingOneFanForgetsOnlyItsOwnPage`); the two keep-guards GREEN on rev (follow-the-scroll
+  keeps its page; a fan that stays open keeps its page). Exactly the predicted shape.
+Every built member of the run is now red-on-old VERIFIED. The whole-target baseline run is in
+flight on vx770-b5; the ladder follows it.
