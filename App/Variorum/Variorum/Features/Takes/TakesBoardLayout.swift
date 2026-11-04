@@ -407,7 +407,10 @@ final class TakesBoardLayout {
     func closeCollapsedFans(_ blockIDs: Set<String>) {
         let kept = expandedBlocks.subtracting(blockIDs)
         guard kept.count != expandedBlocks.count else { return }
-        forgetPages(ofClosed: expandedBlocks.subtracting(kept))
+        // A collapsed fan holds one take, so no follow-the-scroll bloom (R25:
+        // fanned AND on screen) keeps its strip mounted — its pages go even
+        // while its row is visible (the VX-770 ladder, round 1 F2).
+        forgetPages(ofClosed: expandedBlocks.subtracting(kept), evenWhileOnScreen: true)
         expandedBlocks = kept
         expansionChanged()
     }
@@ -420,11 +423,16 @@ final class TakesBoardLayout {
     /// caption lie ("2–3 of 3" over cards 1–2, her slot-split sighting after
     /// close all → expand all). So the three close doors forget the closed
     /// blocks' pages, both keys (the block's and `rail-<block>`) — "close-all
-    /// resets", this component's own letter. A block follow-the-scroll still
-    /// blooms (R25: on screen, fanned) keeps its strip mounted, so it keeps
-    /// its page.
-    private func forgetPages(ofClosed blockIDs: Set<String>) {
-        for blockID in blockIDs where !(followTheScroll && isRowVisible(blockID)) {
+    /// resets", this component's own letter. On the two HAND-close doors (a
+    /// fan's own close, close all) a block follow-the-scroll still blooms (R25:
+    /// on screen, fanned) keeps its strip mounted, so it keeps its page. The
+    /// collapse door passes `evenWhileOnScreen`: a collapsed block is no longer
+    /// fanned, so the scroll's bloom never holds it and its strip unmounts on
+    /// screen or off — the visibility exception is the hand-close doors' only
+    /// (the VX-770 ladder, round 1 F2).
+    private func forgetPages(ofClosed blockIDs: Set<String>, evenWhileOnScreen: Bool = false) {
+        for blockID in blockIDs
+        where evenWhileOnScreen || !(followTheScroll && isRowVisible(blockID)) {
             pageOffsets[blockID] = nil
             pageOffsets[Self.railPageKey(blockID)] = nil
         }
