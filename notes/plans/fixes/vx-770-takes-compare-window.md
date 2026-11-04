@@ -2332,8 +2332,8 @@ reviewer) re-checks the fixes. F3 is record-only (the reviewer's own disposition
 | Pins — F1's Compare seat twin (e84a1c48e), F2's collapse-under-follow transition (098b72626 — **the pre-fix commit**: pins + F4, no fix) | DONE — compile PENDING the lf build; red/green PREDICTED (Mac target, the window's) |
 | Fix — F1 (Compare always mounts the face where a lane stands) | DONE (3667c843e) |
 | Fix — F2 (the collapse door forgets even while the row is on screen) | DONE (5035c4e3e) |
-| `DerivedData/vx770-lf` build-for-testing at HEAD | PENDING |
-| `DerivedData/vx770-lf-rev` (the pre-fix behaviour, from a `git clone --shared` in the scratchpad — the shared worktree and its index never move) | PENDING |
+| `DerivedData/vx770-lf` build-for-testing at HEAD | DONE — TEST BUILD SUCCEEDED at fbd2ee6c9 (behaviour source = 5035c4e3e) in 3 min (log `App/Variorum/DerivedData/logs/vx770-lf-build.log`; 2.8G); **F4 compiles** (dropping `Identifiable` broke nothing); the one warning in a touched file is the pre-existing geometry-probe `Sendable` line (`CompareBoardView.swift:1986`, batch 2's note) |
+| **Behavioural revert tree — ANNOUNCED HERE BEFORE IT STARTS:** a `git clone --shared` of this branch at HEAD into `scratchpad/vx770-lf-rev-src/` (its own index — the shared worktree and its index never move), with exactly the two behaviour files written there by `git show 098b72626:<path> >` (the pins commit = the pre-fix behaviour, F4 included): `Features/Takes/CompareBoardView.swift` (F1) and `Features/Takes/TakesBoardLayout.swift` (F2); every test file at HEAD; built into `App/Variorum/DerivedData/vx770-lf-rev`. HEAD's two files copied + sha256'd first in `App/Variorum/DerivedData/vx770-lf-prerevert/` (CompareBoardView `3abe3ade…f949`, TakesBoardLayout `fd7c3e4f…47e3`), re-checked against the worktree after the build | IN FLIGHT |
 | READY-FOR-SUITES — ladder fixes · SELF-ASSESSMENT | PENDING |
 
 ### AGREE / DISPUTE (each traced by my own read before any code — the hallucination guard)
