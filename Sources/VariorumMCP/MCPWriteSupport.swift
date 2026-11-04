@@ -201,6 +201,11 @@ enum MCPWireRefusalCopy {
         // door's richer answer, first in the chain (the app's table would read
         // every mismatch as a race with the author).
         if let mismatch = error as? MCPExpectedTextMismatch { return mismatch.words }
+        // VX-761: edit_take's replace form — the passage's count, or the blank
+        // result (never an `OperationError`: no door of hers replaces a passage).
+        if let refusal = error as? Operations.MCPTakeReplacementRefusal {
+            return MCPWriteTools.replacementWords(refusal)
+        }
         guard let error = error as? OperationError else { return nil }
         switch error {
         case .postNotInReading:

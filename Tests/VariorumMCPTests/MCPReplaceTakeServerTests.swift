@@ -294,6 +294,24 @@ struct MCPReplaceTakeServerTests {
         }
     }
 
+    /// The replace form's refusals are the wire's own words, FIRST in the one
+    /// chain — never the app hook's description of a type her table doesn't
+    /// know (the Mac's hook prints `String(describing:)` for it).
+    @Test func theReplaceRefusalsAreWordedFirstInTheOneChain() {
+        for refusal: Operations.MCPTakeReplacementRefusal in [.occurrences(0), .occurrences(2), .wouldEmptyTake] {
+            let spoken = MCPWireRefusalCopy.spoken(refusal) { String(describing: $0) }
+            #expect(spoken == MCPWriteTools.replacementWords(refusal), "\(refusal): \(spoken)")
+            #expect(!spoken.contains("occurrences(") && !spoken.contains("wouldEmptyTake"), "\(spoken)")
+        }
+        #expect(MCPWriteTools.replacementWords(.occurrences(2)).contains("old_str occurs 2 times"))
+        #expect(MCPWriteTools.replacementWords(.wouldEmptyTake) == MCPWriteTools.editTakeBlankRefusal)
+        // The literals the call-door pin spells are the door's own constants.
+        #expect([MCPWriteTools.editTakeOneFormWords, MCPWriteTools.editTakeNoFormWords,
+                  MCPWriteTools.editTakeNewStrWords, MCPWriteTools.editTakeOldStrWords,
+                  MCPWriteTools.editTakeEmptyOldStrWords]
+                == [oneFormWords, noFormWords, newStrWords, oldStrWords, emptyOldStrWords])
+    }
+
     // MARK: - The schema and the description teach both forms
 
     @Test func theSchemaDeclaresBothFormsAndTheDescriptionTeachesTheOccurOnceRule() throws {

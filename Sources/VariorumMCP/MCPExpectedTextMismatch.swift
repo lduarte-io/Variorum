@@ -88,12 +88,13 @@ struct MCPExpectedTextMismatch: Error, Equatable, Sendable {
         case .startOfTake:
             return "expected_text matches only the start of the take (\(lengths)): it must be the take's WHOLE "
                 + "current text, exactly as read_note gives it (with_ids: true). If you sent part of it, send "
-                + "all of it; if you read it earlier, it has grown since — read it again. Nothing was written."
+                + "all of it — or change just that passage with old_str and new_str; if you read it earlier, it "
+                + "has grown since — read it again. Nothing was written."
         case .passageOfTake:
             return "expected_text matches only a passage from inside the take (\(lengths)): it must be the "
                 + "take's WHOLE current text, exactly as read_note gives it (with_ids: true). If you sent part "
-                + "of it, send all of it; if you read it earlier, it has grown since — read it again. Nothing "
-                + "was written."
+                + "of it, send all of it — or change just that passage with old_str and new_str; if you read it "
+                + "earlier, it has grown since — read it again. Nothing was written."
         case .takeAndMore:
             return "expected_text holds the take's whole current text and more (\(lengths)): it must be exactly "
                 + "this one take's text, as read_note gives it — no other take's or block's. If you read it "

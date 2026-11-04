@@ -852,9 +852,15 @@ enum MCPToolCatalog {
     static let editTake = MCPToolDeclaration(
         name: "edit_take", rung: .edit, title: "Edit a take",
         description: """
-            Replace one take's text. expected_text must be the take's text EXACTLY as you read it \
-            (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
-            nothing is written; read again. Variorum first commits the words it replaces, named \
+            Change one take's text, in either of two forms. Pass one form, never both. WHOLE: text (the \
+            take's whole new text) with expected_text — the take's WHOLE text EXACTLY as you read it \
+            (read_note with with_ids: true), never a part of it; if it doesn't match (the author changed it \
+            since, or you sent only part of it), the edit is refused, nothing is written, and the refusal \
+            says how the two differ — read again. REPLACE: old_str and new_str — old_str must occur EXACTLY \
+            ONCE in the take's current text, matched byte for byte (none, or more than one, is refused naming \
+            the count — give more of the text around it), and new_str takes its place ("" removes it); it is \
+            found in the take as it stands when the edit lands, so the author's latest typing is included. \
+            A result that would leave the take blank is refused. Variorum first commits the words it replaces, named \
             "before <your client name>'s edit" (unless they are already the take's latest commit, or \
             the take is blank and was never committed — then the answer has no before_commit_id), and \
             then the new text, named "after <your client name>'s edit", so the author can always \
@@ -867,10 +873,26 @@ enum MCPToolCatalog {
             "type": "object",
             "properties": .object([
                 "take_id": .object(["type": "string", "description": "The take to edit."]),
-                "text": .object(["type": "string", "description": "The take's whole new text."]),
-                "expected_text": .object(["type": "string", "description": "The take's current text, exactly as read."]),
+                "text": .object([
+                    "type": "string", "description": "WHOLE form: the take's whole new text (with expected_text).",
+                ]),
+                "expected_text": .object([
+                    "type": "string",
+                    "description": "WHOLE form: the take's whole current text, exactly as read (with text).",
+                ]),
+                // VX-761 (the VX-771 run, batch 2 — PROVISIONAL P-771-10).
+                "old_str": .object([
+                    "type": "string",
+                    "description": "REPLACE form: the exact passage to replace — it must occur exactly once in the take (with new_str).",
+                ]),
+                "new_str": .object([
+                    "type": "string",
+                    "description": "REPLACE form: what takes the passage's place; \"\" removes it (with old_str).",
+                ]),
             ]),
-            "required": .array(["take_id", "text", "expected_text"]),
+            // VX-761: either form — only the take is always required; the call
+            // door refuses a mixed or half form in words.
+            "required": .array(["take_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

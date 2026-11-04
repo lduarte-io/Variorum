@@ -106,8 +106,11 @@ extension MCPWriteTools.Job {
 extension MCPWriteTools.EditJob {
     var nullCharactersWritten: Int {
         switch self {
-        // `expected_text` is a precondition, never written.
-        case .editTake(_, let text, _): MCPNullCharacters.count(text)
+        // `expected_text` is a precondition, never written; VX-761's `old_str`
+        // is a locator (it finds what is stored) — only the text that lands
+        // counts: the whole new text, or the passage's replacement.
+        case .editTake(_, .whole(let text, _)): MCPNullCharacters.count(text)
+        case .editTake(_, .replacing(_, let new)): MCPNullCharacters.count(new)
         case .name(_, let name): MCPNullCharacters.count(name)
         case .createSection(_, let name): MCPNullCharacters.count(name)
         // `second_half_starts_with` locates the cut in the stored text.
