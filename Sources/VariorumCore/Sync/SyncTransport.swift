@@ -215,9 +215,12 @@ public protocol SyncPurgeTransport: Sendable {
 
 // MARK: - The pull count (VX-496 — the sync row's progress total)
 
-/// VX-496 (`notes/plans/fixes/vx-500-sync-followups.md`, D-496): the rows a
-/// catch-up still has to download — the count past the committed cursor under
-/// the feed's own horizon filter (`sync_pull_remaining`,
+/// VX-496 (`notes/plans/fixes/vx-500-sync-followups.md`, D-496): the whole
+/// catch-up's row count — the count past the committed cursor, owner + seq
+/// only, NO horizon filter (R-500-1: index-only, so it may EXCEED what the
+/// feed serves right now by the rows still inside the visibility horizon;
+/// `SyncProgress.total`'s doc carries the bounds a face must tolerate)
+/// (`sync_pull_remaining`,
 /// `Server/supabase/maintenance/vx495-pull-keyset.sql`). A SEPARATE protocol
 /// (the 13j `SyncPurgeTransport` precedent): the engine reaches it by `as?`,
 /// calls it ONCE per round and only after a first window came back full, and

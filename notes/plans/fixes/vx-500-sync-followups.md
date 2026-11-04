@@ -2494,7 +2494,7 @@ incident — Git Operations degraded); unpushed commits noted per row and pushed
 | # | Piece | Status |
 |---|---|---|
 | 1 | F1 — `downloaded = 0` in the discard branch + the engine-scene pin (red-on-old) | DONE (this commit) — the pin `SyncProgressTests.aDiscardedUndecodableStageRestartsTheDownloadsProgressCount` (the F1 (2) fixture shape: the 5-window interrupt, one staged payload corrupted in place, `pull(progress:)` driven raw with a `LockIsolated` collector); RED at `8992c4c68` (750 vs 375 — the lines below), GREEN with the one-line reset; `askedForTotal`/`remaining` untouched |
-| 2 | F2 — `SyncPullCountTransport`'s doc to R-500-1's index-only shape | PENDING |
+| 2 | F2 — `SyncPullCountTransport`'s doc to R-500-1's index-only shape | DONE (this commit) — the protocol summary's "under the feed's own horizon filter" replaced with the index-only shape (owner + seq, NO horizon; may exceed what the feed serves right now) pointing at `SyncProgress.total`'s doc; the method-level doc, already right, untouched; doc-class, no pin (THE FINAL CALLS). F1's commit `630a7b6d2`: committed, unpushed — GitHub incident (one attempt per the amendment) |
 | 3 | F3 — `stagedRowCount` read only when `progress != nil` | PENDING |
 | 4 | F4 — the ratio pin's arithmetic by Duration division, no attosecond Int64 | PENDING |
 | 5 | Close — build, the brief's filter run with its count, the self-assessment | PENDING |
