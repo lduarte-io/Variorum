@@ -230,13 +230,13 @@ rushed (members are sub-issues; they close one by one).
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | VX-756 flagship trace + fix | Batch 1 | BUILT — traced (994fa8877), pin (9e8955f9b), fix (91554271e); red/green + walk PENDING the window |
-| 2 | VX-730 stack comments whole | Batch 2 | BUILT — seam 2dfd4a4a0, shared machinery 20773ef07, pins 1c4c21d8c, fix 9a02527ea; red/green + walk PENDING the window |
-| 3 | VX-731 slot split + carousel comments | Batch 2 | BUILT — the face rides the row (slot split); carousel: both roads fixed + pinned, note (a)'s verdict PENDING the red run |
-| 4 | VX-728 Compare comments (R-770-2) | Batch 2 | BUILT — P-770-3 (option B, PROVISIONAL): the width-only lane, the live feed, the shared face; red/green + walk PENDING; the taste cost to her bundle |
-| 5 | VX-732 undo leaves comments drawn | Batch 3 | BUILT — traced (c9c1163df), pins (86d3652ec), fix (ca980e24b): the live per-note feed + the panel's seat; red/green + walk PENDING the window |
-| 6 | VX-733 undo leaves the fan wash | Batch 3 | BUILT — traced (c9c1163df), pins (86d3652ec), fix (e7f9cefc2): `TakesOpenFanRule`, both roads; B3-P1/B3-P2 PROVISIONAL to her bundle; red/green + walk PENDING the window |
-| 7 | VX-757 track-paragraphs flicker | Batch 4 | BUILT — traced (b268ccf46: the toggles re-key rows and switch their arm, re-making every pane), pins (8c87bcd0c), fix (eefd41c78: row spine identity + one row structure); red/green + walk W15 PENDING the window |
-| 8 | VX-740 double outline column (P-770-1) | Batch 4 | BUILT — re-located (b268ccf46), pin (b9d0e1b24), fix (a5718b23e: the resume yields to the auto-fill's seat); red/green + walk W16 PENDING the window |
+| 2 | VX-730 stack comments whole | Batch 2 | FIXED — red-on-old (window b2) + green (b3r consolidated) |
+| 3 | VX-731 slot split + carousel comments | Batch 2 | FIXED — red-on-old (window b2; carousel = the empty-chip mechanism) + green (b3r) |
+| 4 | VX-728 Compare comments (R-770-2) | Batch 2 | FIXED — red-on-old (window b2) + green (b3r); P-770-3 lane, taste cost in her bundle |
+| 5 | VX-732 undo leaves comments drawn | Batch 3 | FIXED — red-on-old ×4 styles (window b3r) + green |
+| 6 | VX-733 undo leaves the fan wash | Batch 3 | FIXED — red-on-old ×4 + across-mode-switch (window b3r) + green; B3-P1/B3-P2 in her bundle |
+| 7 | VX-757 track-paragraphs flicker | Batch 4 | FIXED — red-on-old both toggle pins (window b3r) + green; toggle-name confirm in her bundle; walk W15 |
+| 8 | VX-740 double outline column (P-770-1) | Batch 4 | FIXED — red-on-old (window b3r: two columns on old) + green; walk W16 |
 | 9 | VX-758 created-sort fallback | Batch 5 | NOT STARTED |
 | 10 | VX-739 word count (pin-first) | Batch 5 | NOT STARTED |
 | 11 | VX-638 pager label | Batch 5 | NOT STARTED |

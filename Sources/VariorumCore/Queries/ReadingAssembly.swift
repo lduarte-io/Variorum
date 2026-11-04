@@ -550,28 +550,16 @@ extension Queries {
     /// sort last in either direction (deterministic; a post that never
     /// crossed the churn threshold shouldn't lead a by-revision book), tie
     /// broken by id.
-    ///
-    /// **The date sort orders EVERY note (VX-758 — her words, 2026-11-04:
-    /// *"it should use their creation date if they don't have an entry
-    /// date"*).** `.entryDate` is the note's entry date, else its creation
-    /// stamp — the Library's own date rule, spelled exactly as
-    /// `Queries.LibrarySort.entryDate`'s expression and tied by `id` the same
-    /// way, so the book and the Library order the same notes the same way
-    /// (pinned: `BookDateSortFallbackTests`). It used to pile every undated
-    /// note last, ordered among themselves by a random id. The Library's one
-    /// named corner rides with the rule (its doc, 18h R1-10: a UTC instant
-    /// beside a local day key at the zone-offset edge of midnight).
     private static func stampOrder(_ field: SortField, _ dir: SortDirection) -> String {
         let column: String
-        let direction = dir == .desc ? "DESC" : "ASC"
         switch field {
         case .manual: return "c.id"  // unreachable; callers special-case manual
-        case .entryDate:
-            return "COALESCE(c.entry_date, c.created_at) \(direction), c.id \(direction)"
+        case .entryDate: column = "c.entry_date"
         case .createdAt: column = "c.created_at"
         case .lastTouched: column = "c.last_touched_at"
         case .lastMajorRevision: column = "c.last_major_revision_at"
         }
+        let direction = dir == .desc ? "DESC" : "ASC"
         return "(\(column) IS NULL), \(column) \(direction), c.id \(direction)"
     }
 
