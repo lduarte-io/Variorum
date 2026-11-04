@@ -73,5 +73,18 @@ The video's thesis as she framed it: *"I want open source; I put a ton of work i
 *[removed for publication]*
 6. **Curated record assembly** — §2's IN list built, her editorial pass, the worked examples chosen.
 *[removed for publication]*
-- The ticket map: VX-748 audit · VX-749 history rehearsal · VX-750 license+trademark (Needs Lillian) · VX-751 security pass · VX-752 repo mechanics · VX-753 the tour (reframed) · VX-754 deep sweep · VX-747 the open format (rides 13m).
+8. **The beyond-repo share-set (VX-755)** — the repo already carries the method (CLAUDE.md, `.claude/skills` + agents + settings, `Tools/`); what lives outside it gets a deliberate verdict and packaging: the PRIVATE MEMORY REPO (`lduarte-io/claude-memory` — publish whole after its own sweep, excerpt, or keep private; her call), the prompt record (her call, timestamps strippable), the untracked `.git/hooks/commit-msg` trailer-stripper (if the story tells it, a copy lands in `Tools/githooks/`), transcripts (excerpts-only in the tour, never bulk).
+- The ticket map: VX-748 audit · VX-749 history rehearsal · VX-750 license+trademark (Needs Lillian) · VX-751 security pass · VX-752 repo mechanics · VX-753 the tour (reframed) · VX-754 deep sweep · VX-755 beyond-repo share-set · VX-747 the open format (rides 13m).
+
+## 5. Working in public — what changes and what doesn't (her 2026-11-03 ask, "is how I work going to have to change?")
+
+**Unchanged:** the entire build machinery — branches, PRs, ladders, pins, canon's two-file flow, the phase skills, Linear (stays private), the memory repo (stays private unless VX-755 rules otherwise), `~/.variorum`. The repo is the same repo; it just has readers.
+
+*[removed for publication]*
+
+**Two timing rules:** a SECURITY fix's record publishes WITH the fixed release, never before (the pin-before-fix discipline is unchanged; only the record's publication waits — standard coordinated disclosure); and release notes/commit messages are already written as public copy (the standing release-notes rule), so that habit just widens to everything.
+
+**Awareness, not rules:** `notes/QUESTIONS.md` and LIVE STATUS tables are now written knowing they'll be read — same candor, sweep-class hygiene (no tester names, no spend figures, no credentials paths) becomes a writing habit instead of a cleanup. A sensitive call can always be made on the private board instead.
+
+**Security posture (from the Castle sitting, same day):** the Castle rules are FROZEN at her word — outside proposals to redesign get "the design is settled; bugs in acts, doors and words get fixed," which is a complete answer. The response posture for any finding: confirm, pin, fix, write it up — reputation is built in the response, not the absence of findings. A paid independent audit of `Protection/` + the sync seam is ON OFFER as a ticket at her word; it is not a release gate unless she makes it one.
 *[removed for publication]*
