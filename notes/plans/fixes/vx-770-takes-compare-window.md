@@ -2572,3 +2572,24 @@ have built against upgraded pins locally, which the merge-gate's fresh run on th
 settles. Remaining: the walk (real dev store, post-merge build), the merge-gate window (whole
 target + six phone suites + the lf-rev red leg), closeout (QUESTIONS #259; the ledger numbers
 after both siblings' closeouts).
+
+## THE FINAL WINDOW SHEET (settled with nov3coordinator; one claim, walk → gate; GO carries 240 min)
+
+**The walk first — the REAL dev store as found:** Standard, HELD (restore-marker inode
+191598619 — NEVER press Resume), unlocked, MCP switch OFF, sync off, signed out throughout;
+Opus walker under the claim; What's New dismissed; content minting free (the agents' store);
+a changed voice/palette restored to found values; the coordinator snapshots Debug defaults
+before and diffs at release. If the walk changes ANY bytes, rebuild before the gate.
+**The gate, in order:** (1) WHOLE `VariorumTests` on `vx770-mg` (committed pins — VERIFY and
+RECORD the resolved pins from `vx770-mg/SourcePackages/workspace-state.json` in the evidence:
+this run also closes the night's pin gap for all three efforts, the siblings' caches being
+gone); (2) the EIGHTEEN phone types on a fresh simulator boot + settle (the coordinator's
+file-vs-type correction: MobileBooksTests and MobileTutorialWalkTests were FILES — 4 and 9
+types — and MobileLibrarySortTests, the sort suite VX-758 changes, was hiding in
+MobileLibraryTests.swift; executed count must be 18 less named trait-skips; all 18 verified
+declared in `App/Variorum/VariorumMobileTests/`); (3) the lf-rev RED LEG (2 suites —
+`CompareCommentGutterTests` + `TakesPagerAfterCloseTests`, both verified TYPE declarations);
+simulator shut down after. **Pins discipline:** `vx770-lf` resolved UPWARD (built beside the
+dirty lockfile — the coordinator's cache read) and is CITED FOR NOTHING; `vx770-mg` and
+`vx770-lf-rev` resolved to the committed pins. The stickiness evidence goes into R-770-T1's
+ticket at closeout.
