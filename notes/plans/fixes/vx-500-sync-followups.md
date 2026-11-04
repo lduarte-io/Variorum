@@ -2558,3 +2558,25 @@ byte-matching). No round 3 earned; the cap stands at two rounds. The ladder's re
 line-by-line check of a FINAL round's fixes — NOT owed here, because round 2 re-read round 1's fixes and closed clean
 (the "final round's fixes no later round reads" case never arose). NEXT: the closing runs (the conditioned window),
 the PR, the merge at the coordinator's all-clear.
+
+### THE CLOSING RUNS (the orchestrator, 2026-11-04)
+
+**The headless legs (04:10–05:25 MST; the log's key lines quoted here, the scratchpad log is session-local):**
+- **The broad core DEBUG run, whole:** `VariorumCoreTests` → **"Test run with 3605 tests in 483 suites passed after
+  288.568 seconds with 5 known issues"** (the Castle pair suites' pre-existing `withKnownIssue` arms; 3,605 = U4's
+  3,604 + the ladder's F1 pin) · `StringsWorkbookTests` → "Test run with 32 tests in 4 suites passed" ·
+  `VariorumMCPTests` → "Test run with 468 tests in 85 suites failed … with 2 issues" — BOTH known load-flakes (the
+  traps' `aPeerThatNeverAnswersInitialize…` at 37.6 s under load, and VX-772's `aQuitSaysNothing…`), re-run ALONE →
+  **"Test run with 2 tests in 2 suites passed after 1.091 seconds"**. VX-772 ticketed (Bug · Suspected · Tests &
+  tooling · Low — the VX-722/723 class's third member).
+- **The RELEASE split:** `swift build -c release --build-tests` — every `Sources/` target compiled GREEN (CastleRules
+  rule 24 held: the core compiles in both configurations), then **FAILED compiling the `VariorumMCPTests` TEST target:
+  PRE-EXISTING ON MAIN** — `MCPAcceptLoopServerTests.swift:64` (`acceptLoopFault`) and `MCPStopRoadsServerTests.swift:201`
+  (`stopWindowProbe`) reference `#if DEBUG` members of `MCPServerHost` unguarded; this branch's diff for both paths is
+  EMPTY (byte-identical to main), so the release split has been silently un-runnable since the hooks' birth (VX-612 /
+  VX-548 batch 2b, 2026-10-27–28) — **ticketed VX-773** (Bug · Confirmed · Tests & tooling · Medium), not fixed here
+  (not a member; pre-existing; test-target-only). The release-split evidence this run carries is the Sources-side
+  compile; the behavioral release evidence is the standing production fact (every shipped Release build) plus the
+  whole-target Mac/phone runs below.
+- The stage legs (FULL `VariorumTests` + phone build + FULL `VariorumMobileTests` on the simulator) follow under the
+  coordinator's window — the next rows.
