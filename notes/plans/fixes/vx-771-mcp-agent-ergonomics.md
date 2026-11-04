@@ -26,6 +26,8 @@ The planetlillian agent's field reports (`~/dev/planetlillian/variorum-mcp-feedb
 - Any `Shared/` file in the diff ⇒ phone suites join the merge gate (say so the moment one lands). `Shared/OpsRefusalTable.swift` is expected (VX-760's sentence lives at its line 279).
 - Registry: zero delta expected; if `Registry/CapabilityRegistry.swift` is touched, whoever merges second re-runs `CapabilityRegistryTests` + `ShellChromeTests` after merge-in.
 - Any schema change makes SyncSpec binding reading even for a local-only table; a migration needing Sync/ registration = STOP and ask the coordinator. Migration numbering (the coordinator's correction, 2026-11-04): `v1_35` is TAKEN on main (sweep-kill-verdict markers, shipped since 0.10.5); **`v1_36` is VX-500's tonight** (two local-only FK indexes, renumbered mid-run); **a VX-763 grants repair would be `v1_37`** (v1_34's no-mirror local-only class). Both runs append to `Migrations.swift`'s one registration list: whoever merges SECOND resolves the textual conflict, renumbers if the merge order flipped, and re-runs the migration suites after the merge-in; if VX-771 reaches its merge ask BEFORE VX-500 with a migration aboard, tell the coordinator first (registration order must stay contiguous). CONSEQUENCE for her bundle if any migration lands: an export from this build refuses to import on an older build (the vx-502 rule — `applied.isSubset(of: known)`).
+- **The closing Mac window owes (accumulating):** the batch-1 app file's build (`Features/MCP/MCPPaneCopy.swift`) + `MCPWingFacesTests`, `MCPAskAndReceiptTests`, `MCPDoorErgonomicsFacesTests`, `TutorialMCPChapterTests`, `MCPWireRefusalSweepTests`, `OutsideWriteRingEndTests`, `OutsideWriteLivePaneTests` (the last two call the kept `editTakeUnderInsurance(text:expectedText:)` forwarder), + whatever batches 3–4 add.
+- GitHub incident (from ~02:50, coordinator-verified: Git Operations/Pull Requests degraded; batch 1's "SSH agent lost" re-diagnosed as this): one push attempt per piece, no retry loops, no credential investigation; the orchestrator flushes backlogs; merges HELD by the coordinator until it clears.
 - The VX-762 walk's shim client is REVOKED/unbound at the walk's end (the coordinator's addition — no leftover walk grants carry into VX-770's later walk on the same dev store); the stage release line states it.
 
 ## Her rulings (verbatim-faithful, from the tickets)
@@ -121,6 +123,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | 11 | VX-762 drop verify + B2 | 4 | NOT-STARTED |
 | 12 | VX-763 grant rows | 4 | NOT-STARTED |
 | 13 | VX-400 stop ends grants (rider) | 4 | NOT-STARTED |
+| 14 | VX-774 null-only edit_take empties the take (found in-run, batch 2 O-1; seated as a sub-issue) | 3 | NOT-STARTED |
 
 ## Environment traps (every batch brief carries this section VERBATIM)
 
@@ -328,3 +331,7 @@ No revert is in flight.
 2. **P-771-1's residual, your eye:** a TYPED-TITLED undated source's copy stays undated — its name is faithful, but under the Library's entry-date sort (COALESCE) it sorts by its own birth day. The alternative (date every undated non-journal copy) invents a date for a titled note.
 3. **VX-685 sighting:** `MCPHarnessTimeLimitTests`' 15 s connect bound failed again under the whole-module run (29 s; green alone; red the same way on the pre-batch tree) — the standing VX-685 class, no new ticket minted.
 4. *(conditional — lands only if VX-763 ships a migration)* v1_37 means an export from this build refuses to import on an older build (the vx-502 subset rule).
+5. **VX-775, yours (Needs Lillian):** an Activity-write failure after a landed act answers the client an error for a write that landed — the new words say "may not have landed" (honest); whether that answer stops being an error, or the act and its log become one transaction, is your call.
+6. **Filed, no build:** VX-776 — a store read failure inside MCPSession's SDK handlers can answer raw text; no headless red pin is possible today (needs a harness seam). The VX-369 sweep closed every other row (19-row table in the BATCH 2 RECORD).
+7. **Found-in-run member, built under your "rule provisionally":** VX-774 (a whole-form edit_take of only U+0000 empties the take — R-VX171-2's refusal ran before the null strip) — seated as a VX-771 sub-issue and fixed in batch 3; one line + red pin, enforcing your existing ruling, no new behavior.
+8. **VX-722 sighting:** MCPReaderAfterCloseTests' premise failed once in one whole-module run (green ×3 alone, no socket code touched) — comment left on the ticket.
