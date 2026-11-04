@@ -71,8 +71,11 @@ struct DeferredFKChildScanPinTests {
         let control = try timedTakeInserts(count: count, pendingViolations: false)
         let pending = try timedTakeInserts(count: count, pendingViolations: true)
         #expect(control > .zero, "non-vacuous: the control arm did real work")
-        let ratio = Double(pending.components.attoseconds + pending.components.seconds * 1_000_000_000_000_000_000)
-            / Double(max(1, control.components.attoseconds + control.components.seconds * 1_000_000_000_000_000_000))
+        // Ladder round 1, F4: the ratio by Duration's own division — the attosecond Int64 arithmetic this replaces
+        // overflowed (a trap that crashed the test process, not a fail) once an arm exceeded ~9.2 s, which a loaded
+        // red-side run could reach. Double division cannot trap: a zero control reads +inf (NaN at 0/0) and either
+        // fails the bound below with its forensics printed.
+        let ratio = pending / control
         // Printed on every run (green included) so a future flake has its forensics in the log.
         print("[vx720-pin] \(count) takes: pending \(pending) · control \(control) · ratio \(String(format: "%.2f", ratio))× (bound 4)")
         #expect(ratio < 4,
