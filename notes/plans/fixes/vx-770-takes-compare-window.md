@@ -3341,3 +3341,30 @@ resolved the SAME (upgraded) package set — internally consistent, so the behav
 stands; the merge gate's whole-target runs on a committed-pins tree (`vx770-gatef`, mg's
 clean-input recipe; the full pin saga is R-770-T1's ticket data, incl. gate/gate2's flag
 attempts and the lockfile rewrite-on-build pattern).
+
+## THE FINAL WINDOW — CLOSED (the orchestrator, claim `vx-770-final`, 07:40–11:1x)
+
+**Every leg verdict-clean; the W2 re-walk 6/6 PASS.** The re-walk's look line ADJUDICATED,
+acceptance stands: in the P23→P33 Terminal shape the FIRST PAINT sits 56–166 pt low for ONE
+burst sample (74–87 ms) before the fix's own in-storm re-aim settles it — pre-rest, 0 hops, the
+designed convergence while margin grid's heights arrive (the class the original walk's frame
+18→19 showed uncounted); the curtain alternative stays refused as unruled product behavior
+(round 1's weighing). Tracked: a Low ticket at closeout (the R-W2 family) + one bundle line.
+**The gate evidence lines (canonical):**
+- Mac, merged tree, committed pins (`vx770-gatef` workspace-state: sqlcipher 4.18.0 ·
+  swift-dependencies 1.14.1 · swift-syntax 602.0.0 · no issue-reporting): **"Test run with 5846
+  tests in 1019 suites passed after 2615.603 seconds with 2 warnings and 14 known issues."**
+- Phone, 18 of 18 types, committed pins (`vx770-mg-ios` verified): **"Test run with 86 tests in
+  18 suites passed after 16.603 seconds with 2 known issues."** Fresh boot (iPhone 17 Pro,
+  iOS 26 runtime — the first attempt's 18.3.1 device was the runtime trap, no test ran), sim
+  shut down after.
+- The ladder fixes' red leg (`vx770-lf-rev`, committed pins): 11 tests / 2 of 2 suites, exactly
+  the two new pins red (F1's seat teardown; F2's surviving page keys).
+- The W2 red/green pair (earlier in the window; internally-consistent upgraded pins — cited
+  behaviorally only): red two ways on rev, 9/9 green on fix.
+- The re-walk (final bytes, `vx770-gatef`'s Debug app): 5 margin-grid trials + stack control,
+  every story "settled at top=0.0 after 0 hops"; R-770-1 holds; posture restored to found
+  (marker inode 191598619 unchanged; defaults 778→778, five walk/launch values).
+Package.resolved went dirty AGAIN under the gatef build (a committed-pins-resolving build still
+rewrites the file — R-770-T1 data); discarded again at this close. Trees: only `vx770-gatef` +
+logs remain. The run's BUILD AND EVIDENCE PHASE IS COMPLETE — closeout begins.
