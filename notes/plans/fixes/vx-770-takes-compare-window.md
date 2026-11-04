@@ -2315,3 +2315,88 @@ Housekeeping: an uncommitted Package.resolved artifact — resolve deliberately 
 **Flow (cross-model):** F1 + F2 to the fix implementer VERBATIM (+ F4's retire riding F1's
 file touch); agree/dispute returns to the reviewer for the final call on any dispute; the
 implementer applies confirmed fixes red-on-old; ROUND 2 (fresh reviewer) re-checks the fixes.
+
+## LADDER ROUND 1 — THE FIX LEG (implementer: opus-implementer, 2026-11-04; findings `notes/plans/fixes/vx-770-ladder-round1.md`)
+
+**NOT DONE (first line, kept current):** every Mac red/green claim below is a PREDICTION until the
+orchestrator's window (this session is headless — no `xcodebuild test`, no app, no stage; both
+pins live in the Mac test target, so neither is `swift test`-runnable); round 2 (a fresh
+reviewer) re-checks the fixes. F3 is record-only (the reviewer's own disposition; not this leg's).
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (the findings file whole; this record's ROUND 1 section, batch 2 + its reconciliation, batch 3, batch 5 › C + AS BUILT; the environment traps) | DONE |
+| Agree/dispute per finding, each mechanism traced by my own code read (below) | DONE (this commit) |
+| F4 — the rename (behaviour-neutral, its own commit, BEFORE the pins so the rev tree carries it) | PENDING |
+| Pins — F1's Compare seat twin, F2's collapse-under-follow transition | PENDING |
+| Fix — F1 (Compare always mounts the face where a lane stands) | PENDING |
+| Fix — F2 (the collapse door forgets even while the row is on screen) | PENDING |
+| `DerivedData/vx770-lf` build-for-testing at HEAD | PENDING |
+| `DerivedData/vx770-lf-rev` (the pre-fix behaviour, from a `git clone --shared` in the scratchpad — the shared worktree and its index never move) | PENDING |
+| READY-FOR-SUITES — ladder fixes · SELF-ASSESSMENT | PENDING |
+
+### AGREE / DISPUTE (each traced by my own read before any code — the hallucination guard)
+
+**F1 · MAJOR — AGREE.** Traced: `CompareCellView`'s overlay (`CompareBoardView.swift:2128–2138`)
+builds the `GeometryReader` + `CommentGutterFace` only inside `if lane > 0, let entries =
+model.face(for: postID)?.comments[slot.blockID], !entries.isEmpty`. The feed is
+`CompareViewModel.read` → `PostFace.comments = Queries.containerComments(…).mapValues(…)`, and
+`containerComments` is `Dictionary(grouping: rows, by: \.blockId)` over LIVE comments only
+(`CommentQueries.swift:48–63`, "Blocks with no comments are absent"). So: her press on the face →
+`onClick` writes `seat` and `panelShown = true` (the face's own `@State`, `CommentGutterFace.swift:
+41–50, 81–84`) and the panel is that view's `.popover` → she deletes the block's LAST comment →
+the projection's next delivery has no key for the block → the `if let` fails → SwiftUI removes the
+branch: the `CommentGutterFace` and its `@State` die, the popover's anchor goes, the panel is torn
+down mid-act (its deleted fold and Restore with it). The seat (`shown = panelShown &&
+entries.isEmpty ? seat : entries`) can only work in a host that keeps the face mounted while its
+entries run out; the Takes host does (`CommentMarginNote` builds the face unconditionally,
+`TakesShared.swift:822–832`), Compare's does not. Batch 3's AS BUILT line ("so Compare's
+already-live feed gets the same guard") and W14's "Same in Compare" are false as built. No pin
+covers it (the seat guard mounts the TAKES board only). The reviewer's fix shape is right: hoist
+only `lane > 0` (the lane is geometry — P-770-3's rider 1 — so the face may still go when the
+column narrows past the floor; that is geometry, not this finding), always build the face with
+`?? []`; the host renders and records nothing while `shown` is empty, exactly as on Takes.
+
+**F2 · MINOR — AGREE.** Traced: `closeCollapsedFans` (`TakesBoardLayout.swift:407–413`) hands the
+closed set to `forgetPages(ofClosed:)` (`:426–431`), which skips a block while `followTheScroll &&
+isRowVisible(blockID)`. The skip models "a strip that stays mounted keeps its page" — true for the
+two hand-close doors (`toggleExpanded`'s close, `closeAllFans`), whose block still holds its fan,
+so R25's arm (`isBloomed`: `followTheScroll && slot.hasFan && visible`, `:333–337`) keeps it
+bloomed and its strip mounted. It is false for the collapse door: `TakesOpenFanRule.collapsed`
+names only open blocks whose `liveVariantCount <= 1` (`TakesOpenFanRule.swift:62–72`), so
+`activeVariantCount <= 1` and `hasFan == false` (`PostRender.swift:57`) — R25's arm is false, the
+block leaves `expandedBlocks`, `isBloomed` is false, and every strip (slot split's and carousel's
+need `hasFan`; the margin grid's rail needs `bloomed`) unmounts whether or not the row is on
+screen — while both page keys survive in `pageOffsets`. When the fan returns (⇧⌥⌘Z re-adding the
+takes, a new second take) the row is fanned and on screen again, follow-the-scroll re-blooms it
+(or she re-opens it by hand), and the re-born strip — born at its leading edge — meets the stale
+offset, which `pageOffset(_:limit:)` keeps when the fan regrows to the same size: VX-638's
+"2–3 of 3" over cards 1–2, through the door the fix added. Corner conditions as the reviewer
+states (follow-the-scroll ON, the row visible at the collapse, the fan returns). Fix shape: the
+collapse door forgets unconditionally; the exception stays the hand-close doors' only.
+*Adjacent, NOT fixed (a record line):* a fan bloomed by follow-the-scroll ALONE (never in
+`expandedBlocks`) that collapses is not in `TakesOpenFanRule.collapsed`'s input (it reads the
+open set), so no door forgets its page either; its strip unmounts at the collapse and a regrown
+fan re-blooms over the stale page — the same "strip re-born without a close" class R-B5-1 already
+records (the root fix there, a strip honouring its page at birth, would cover both).
+
+**F4 · NIT — AGREE in direction; ONE PREMISE CORRECTED; built as a rename + delete.** Traced:
+the board keys rows by `spineID` (`ForEach(display.rows, id: \.spineID)`, `CompareBoardView.swift:
+1771`); `CompareRow.id` survives as the `Identifiable` conformance. **The finding's "nothing else
+reads `.id`" is not quite true:** `spineID`'s unreachable fallback returns `id`, and batch 4's own
+VX-757 pins read it as the COMPOSITION'S FINGERPRINT — `CompareToggleIdentityTests.swift:337/343`
+(the premise "the toggle changed the composition's rows") and `:404/408` (the guard "the same rows
+in both arms"). So a pure retire would change those two pins' comparators, and the reviewer's
+alternative ("make `Identifiable` use the spine") would be actively harmful: `rows.map(\.id)` would
+silently compare spine ids, which by VX-757's design do NOT change across the toggle — the :343
+premise would then fail on both trees. The mechanical shape that keeps every reader's meaning and
+leaves ONE identity on the type: **drop `Identifiable`** (nothing needs it — the one `ForEach`
+names `\.spineID`; the compiler will say if anything else did) and **rename `id` →
+`compositionKey`** with a doc line saying what it is (the composition's fingerprint, never the
+row's on-screen identity) — the fallback and the four pin lines follow the rename byte-for-byte.
+Ripple = one conformance deleted + one property renamed at six sites, all compile-checked: within
+the brief's "rename/delete" bound. Its own commit, behaviour-neutral, no pin (a NIT); one revert
+overturns it if round 2 prefers the literal retire.
+
+**F3 · NIT — not this leg's** (record-only by the reviewer's own disposition; no pin demanded).
