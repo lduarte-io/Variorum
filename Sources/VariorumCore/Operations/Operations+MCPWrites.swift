@@ -795,6 +795,12 @@ extension Operations {
         public let tagID: String
         /// The tag's path as the library stores it.
         public let path: String
+        /// VX-764 (R-771-A (a)): the LIVING books that collect by this tag and
+        /// still hold the note as a member once it lands — un-tagging is a
+        /// non-event, so each keeps it (`livingBooksHolding`, read inside the
+        /// act's transaction, in the order the note joined them). Every id;
+        /// which the client may hear named is the wire's fence.
+        public let stillInBookIDs: [String]
     }
 
     /// **`remove_tag`'s act — her un-tag, by PATH**: the caller's guard first;
@@ -826,7 +832,10 @@ extension Operations {
             let applicationID = try removePostTagApplication(db, tagID: tagID, postID: postID)
             let removedAt = try String.fetchOne(
                 db, sql: "SELECT deleted_at FROM post_tag WHERE id = ?", arguments: [applicationID])
-            return (MCPTagRemoval(applicationID: applicationID, tagID: tagID, path: normalized), removedAt)
+            // VX-764: what the un-tag leaves the note in — a read, ∝ its memberships.
+            let stillIn = try livingBooksHolding(db, postID: postID, collectingBy: tagID)
+            return (MCPTagRemoval(applicationID: applicationID, tagID: tagID, path: normalized, stillInBookIDs: stillIn),
+                    removedAt)
         }
         let applicationID = removal.applicationID
         // VX-246 U2 — the mirror of `applyTagPath`'s entry: the undo revives

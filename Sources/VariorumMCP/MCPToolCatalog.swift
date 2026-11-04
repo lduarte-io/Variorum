@@ -1226,13 +1226,20 @@ enum MCPToolCatalog {
     // MARK: - VX-184 U3 — VX-190 remove_tag
 
     /// VX-190: her un-tag — the application only, a non-event for intake.
+    /// VX-764 (the VX-771 run, batch 3 — R-771-A (a)): the answer names the
+    /// books the note stays in, and the description says why and where a
+    /// board-shaped flow belongs (a gathering).
     static let removeTag = MCPToolDeclaration(
         name: "remove_tag", rung: .edit, title: "Remove a tag from a note",
         description: """
             Remove a tag from a note, by its path (e.g. "percy/pt-en") — the note stops wearing \
             it; the tag itself stays in the library. As when the author removes one, nothing else \
-            moves: a book the tag brought the note into keeps it. One undo for the author puts the \
-            tag back. Returns JSON.
+            moves: a book the tag brought the note into keeps it, since removing a tag is never a \
+            way out of a book (remove_note_from_book takes it out; for a board a note should leave \
+            when its tag goes, use a gathering — create_gathering — which shows exactly what its \
+            rule matches). One undo for the author puts the tag back. Returns JSON; \
+            still_in_books names each book (book_id, name) that collects by the tag and still holds \
+            the note, and still_in_books_hidden_count counts any not shared with you.
             """,
         inputSchema: .object([
             "type": "object",
