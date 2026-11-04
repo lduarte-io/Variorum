@@ -391,11 +391,15 @@ public final class MCPServerHost: @unchecked Sendable {
             // snapshots the sessions afterwards never sees it.
             // VX-394's fix leg: a host already let go of (the door's stop drops
             // it at once) still has its session's end said — by the session.
+            // VX-400: and its client's while-connected grants end with it — a
+            // let-go host was stopped, and a stop ends every connection it
+            // served, so this end is the client's last on it.
             if let self {
                 self.ended(session)
             } else {
                 session.closeConnection()
                 session.writeEndLine()
+                session.endWhileConnectedGrants()
             }
         }
     }
@@ -453,10 +457,7 @@ public final class MCPServerHost: @unchecked Sendable {
         // else the client's own close. Quiet when the store is already gone
         // (the library's closing road said it first, while it was open).
         session.writeEndLine()
-        if let name, !stillConnected,
-           let client = try? database.read({ try Queries.mcpClient($0, name: name) }) {
-            try? operations.endMCPConnectionGrants(clientID: client.id)
-        }
+        if name != nil, !stillConnected { session.endWhileConnectedGrants() }
         onConnectionsChanged?()
     }
 

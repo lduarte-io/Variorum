@@ -125,6 +125,26 @@ final class MCPSession: @unchecked Sendable {
         }
     }
 
+    /// **"Until it disconnects" ends with this connection** (R-13n-4) — called
+    /// when this was its client's LAST connection on its server: the live host's
+    /// `ended` decides that among the sessions it still holds; a host already let
+    /// go was STOPPED (the door drops its host only after stopping it, and the
+    /// accept thread holds a host while it listens), and a stop ends every
+    /// connection it served, so each one's end is its client's last there
+    /// (VX-400 — that arm wrote the end line and skipped this, so the grants
+    /// outlived the stop until the next start's sweep). A connection that never
+    /// named itself — or whose key still waits for her OK — is no connection of
+    /// the client's (`clientName`'s rule) and ends nothing. Through the
+    /// session's OWN store, host or no host; quiet when the store is already
+    /// gone (the lock road — the next start sweeps first). Idempotent. Runs on
+    /// the session's own task, never the main thread (P2).
+    func endWhileConnectedGrants() {
+        guard let name = clientName,
+              let client = try? database.read({ try Queries.mcpClient($0, name: name) })
+        else { return }
+        try? operations.endMCPConnectionGrants(clientID: client.id)
+    }
+
     /// **VX-258 — does this connection still wait for her OK?** True while
     /// its key waits; it flips, once and for good, when the name's bound key
     /// IS this connection's key (her Allow). One indexed read per call.
