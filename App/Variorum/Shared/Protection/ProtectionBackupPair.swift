@@ -16,6 +16,7 @@
 //  today's road, and the backup clock's run (`StoreBackup`) records this road's legs (`ProtectionBackupHook.runPair`).
 //
 
+import Dependencies
 import Foundation
 import VariorumCore
 
@@ -46,6 +47,16 @@ enum ProtectionBackupHook {
     /// the two equal.
     nonisolated static let farInterval: TimeInterval = 24 * 60 * 60
 
+    /// **VX-539 (VX-500 U2) — THE PAIR ROAD'S ONE CLOCK**: the injected `\.date`, read where a caller leaves `now` to
+    /// the road (the defaults below), so a suite's `withDependencies { $0.date = .constant(instant) }` governs the
+    /// plant-relative scene and the press alike — the two-clocks drift at a day/week bucket boundary (VX-539's 00:20 UTC
+    /// Sunday; VX-546's VM-8 batch) cannot recur. Production is byte-identical: the live generator IS `Date()`, and the
+    /// backup clock's own runs never reach these defaults (`runPair` hands its run's `now` through explicitly).
+    nonisolated static var roadNow: Date {
+        @Dependency(\.date) var date
+        return date.now
+    }
+
     /// VX-309 U1a — ONE PAIR ROAD AT A TIME: a pair, its far copy and the prune after them run whole before another
     /// run's begins, so two runs never race for one free name, one far copy or one prune (the hook's runs and VX-447's
     /// "the backup follows" each reach here from their own detached task).
@@ -55,7 +66,7 @@ enum ProtectionBackupHook {
     /// the folder) — then, VX-309 U1a, the far leg (`now` the due-check's clock) and RETENTION (`guards` — every guard
     /// on in production; a DEBUG mutation pin turns one off).
     nonisolated static func takePair(
-        _ session: ProtectionRoadSession, now: Date = Date(), guards: ProtectionGuards = .all
+        _ session: ProtectionRoadSession, now: Date = ProtectionBackupHook.roadNow, guards: ProtectionGuards = .all
     ) -> PairOutcome {
         takePairReporting(session, now: now, guards: guards).pair
     }
@@ -72,7 +83,7 @@ enum ProtectionBackupHook {
     /// `takePair`, reporting every leg (VX-329 U1: the backup run's record is the pair road's own — `ProtectionBackupHook
     /// .runPair`).
     nonisolated static func takePairReporting(
-        _ session: ProtectionRoadSession, now: Date = Date(), guards: ProtectionGuards = .all
+        _ session: ProtectionRoadSession, now: Date = ProtectionBackupHook.roadNow, guards: ProtectionGuards = .all
     ) -> PairReport {
         oneAtATime.lock()
         defer { oneAtATime.unlock() }
@@ -112,7 +123,7 @@ enum ProtectionBackupHook {
     /// foreign names are never candidates); nothing here adds or removes a candidate. Returns the ids removed. Never raises.
     @discardableResult
     nonisolated static func prune(
-        _ session: ProtectionRoadSession, libraryID: String, deviceID: String, now: Date = Date(),
+        _ session: ProtectionRoadSession, libraryID: String, deviceID: String, now: Date = ProtectionBackupHook.roadNow,
         guards: ProtectionGuards = .all
     ) -> [String] {
         let plan = Retention.plan(

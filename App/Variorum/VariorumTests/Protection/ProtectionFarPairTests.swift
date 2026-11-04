@@ -74,7 +74,7 @@ struct ProtectionFarPairTests {
     @Test func aWrittenPairAlsoLandsInThePickedFolderByteForByte() async throws {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
         let container = FarPlant.ownContainer(road, session)
         let far = FarPlant.ownFar(road, session)
         let snapshot = try #require(FarPlant.snapshots(container).first)
@@ -99,8 +99,8 @@ struct ProtectionFarPairTests {
     @Test func aSecondPairWithinTheIntervalLandsNoSecondFarPair() async throws {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
-        #expect(ProtectionBackupHook.takePair(session) == .written)
-        #expect(ProtectionBackupHook.takePair(session) == .written)  // the next free stamp (the leaf steps a second on)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)  // the next free stamp (the leaf steps a second on)
         #expect(FarPlant.snapshots(FarPlant.ownContainer(road, session)).count == 2)
         #expect(FarPlant.snapshots(FarPlant.ownFar(road, session)).count == 1, "the far folder had today's pair already")
     }
@@ -116,7 +116,7 @@ struct ProtectionFarPairTests {
         let otherLibraryID = UUID().uuidString.lowercased()
         let otherLibrary = FarPlant.folder(FarPlant.farRoot(road), libraryID: otherLibraryID, deviceID: deviceID)
         let another = try FarPlant.pair(in: otherLibrary, libraryID: otherLibraryID, at: Date().addingTimeInterval(-3_600))
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
         #expect(FarPlant.snapshots(FarPlant.ownFar(road, session)).count == 1, "this Mac's own pair landed")
         #expect(FarPlant.snapshots(otherMac) == [theirs], "another Mac's copy untouched")
         #expect(FarPlant.snapshots(otherLibrary) == [another], "another library's copy untouched")
@@ -130,7 +130,7 @@ struct ProtectionFarPairTests {
             let (session, _) = try await road.created()
             let planted = try FarPlant.pair(
                 in: FarPlant.ownFar(road, session), libraryID: FarPlant.libraryID(session), at: Date().addingTimeInterval(age))
-            #expect(ProtectionBackupHook.takePair(session) == .written)
+            #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
             let far = FarPlant.snapshots(FarPlant.ownFar(road, session))
             #expect(far.contains(planted), "the planted pair stays")
             #expect(far.count == (due ? 2 : 1), "a pair stamped \(age) s from now: \(due ? "due" : "not due") — \(far)")
@@ -141,7 +141,7 @@ struct ProtectionFarPairTests {
     @Test func noPickedFolderLandsTheContainerPairOnly() async throws {
         let road = PlantedRoad()
         let (session, _) = try await road.created()
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
         #expect(FarPlant.snapshots(FarPlant.ownContainer(road, session)).count == 1)
         #expect(!FileManager.default.fileExists(atPath: road.slot.far.path), "no far folder was made")
     }
@@ -151,7 +151,7 @@ struct ProtectionFarPairTests {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
         try FileManager.default.removeItem(at: road.slot.far)
-        #expect(ProtectionBackupHook.takePair(session) == .written, "the container pair still lands")
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written, "the container pair still lands")
         #expect(!FileManager.default.fileExists(atPath: road.slot.far.path), "the vanished folder was not re-made")
     }
 
@@ -160,7 +160,7 @@ struct ProtectionFarPairTests {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
         session.system.backups.pauseCopies()
-        #expect(ProtectionBackupHook.takePair(session) == .paused)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .paused)
         #expect(FarPlant.names(FarPlant.ownFar(road, session)).isEmpty)
         session.system.backups.resumeCopies()
     }
@@ -213,7 +213,7 @@ struct ProtectionFarPairTests {
         let farRoot = FarPlant.farRoot(road)
         try FileManager.default.createDirectory(at: farRoot, withIntermediateDirectories: true)
         try Data("not a folder".utf8).write(to: farRoot.appendingPathComponent(CatalogNames.backupsFolderName))
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
         #expect(FarPlant.snapshots(FarPlant.ownContainer(road, session)).count == 1)
         #expect(FarPlant.names(farRoot) == [CatalogNames.backupsFolderName], "nothing else written there")
     }

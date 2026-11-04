@@ -30,7 +30,7 @@ struct MakeMineRouteTests {
                 return
             }
             // Rule 5's pair, by the backup hook's own road.
-            #expect(ProtectionBackupHook.takePair(session) == .written)
+            #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
             let roads = try #require(bootstrap.copyDoorsRoads(), "the doors exist on the new road at ready")
             let listing = await roads.listing()
             let row = try #require(listing.thisLibrary.first)
@@ -81,7 +81,7 @@ struct MakeMineRouteTests {
                 Issue.record("the library opens: \(bootstrap.state)")
                 return
             }
-            #expect(ProtectionBackupHook.takePair(session) == .written)
+            #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
             let roads = try #require(bootstrap.copyDoorsRoads())
             let listing = await roads.listing()
             let row = try #require(listing.thisLibrary.first)

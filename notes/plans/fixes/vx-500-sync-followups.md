@@ -1953,7 +1953,7 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
 | 1 | D-496's words (P-500-1): `SyncStatusRow.line(for:lastSuccessAt:progress:)` + the one count spelling (`progressCount`); "Syncing…" byte-unchanged with no progress; P-500-8 decided (the shown denominator rises to `done`); the new suite `SyncProgressRowTests` | IN PROGRESS (this commit) — code + pins written; the suite's run PENDING the stage |
 | 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | DONE (this commit) — pins PENDING the stage |
 | 3 | D-505's line (P-500-3): `Kind.retrying` after offline, before every other error class; CF-15's doors; the hover carries the engine's sentence; P-500-7 built as (a) | DONE (this commit) — pins PENDING the stage |
-| 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | NOT STARTED |
+| 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | CODE DONE (this commit) — the RED-ON-OLD run and the suite's green PENDING the stage |
 | 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | NOT STARTED |
 | 6 | Close: `swift build`; the Mac suites under the stage; the self-assessment | NOT STARTED |
 
@@ -2016,3 +2016,42 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
   since its kind is no longer `.error`). Pins: `SyncRetryingRowTests` (5) — the presented state + CF-15's doors, the
   order both ways (offline/syncing outrank; the flag outranks every text classifier), the ordinary error unchanged
   (P-500-7 (a)'s corner said in the pin), the sheet's line. PENDING: the runs (the stage).
+- **Piece 4 (this commit):** THE MECHANISM, as found in source (sharper than D-539's sentence): `Retention.plan`'s only
+  `now`-dependence is the trusted-stamp rule (18o U1 — a stamp past `now` claims no slot, is never pruned); the
+  day/week buckets are the STAMPS' own UTC indexes. So the live flakes had two arms: (i) the suite's scene was
+  RUNTIME-DEPENDENT — at a week-tail clock the 2…41-day far world holds only THREE uncovered weeks past the 14 dailies,
+  so the planner's true answer is 17 and the old `own.count == 18` assertion was wrong on those nights (VX-546's
+  Saturday; this falsifies VX-546's "real miscount" reading — the planner is CORRECT under one clock); (ii) the two
+  clocks (the suite's plant `Date()` vs the road's default `Date()`, and the leaf's stamp a third) drift across bucket
+  edges. THE FIX: `takePair`/`takePairReporting`/`prune`'s `now` defaults become the injected clock
+  (`ProtectionBackupHook.roadNow` — `@Dependency(\.date)`; the live generator IS `Date()`, so production is
+  byte-identical; the backup clock's `runPair` already hands its `now` through explicitly and never reaches the
+  defaults), and the suite runs each test under ONE FIXED instant (`withDependencies { $0.date = .constant(…) }`
+  wrapping planting AND the press): off-boundary 2026-01-07 12:00 UTC (Wednesday noon; the far answer is the full 18),
+  the boundary pin at D-539's named 2026-01-04 00:20 UTC (Sunday — the week tail; the true answer is 17). The FRESH
+  pair the press writes is stamped by the LEAF's wall clock (not injected — `FileBackupsLeaf.freeSnapshotName`; the
+  leaf serves ~20 suites that would all trip swift-dependencies' unimplemented-in-test report if it read `\.date`
+  un-injected), months past the fixed instants ⇒ a FUTURE stamp: kept, unslotted, never pruned — 18o U1's designed
+  posture (production has the same shape when a pair's stamp lands past its run's clock; `Retention.plan`'s own doc
+  names it), so every count assertion carries the fresh pair as +1 file outside the policy's slots.
+  **The boundary pin** (`theWeekBoundaryInstantGovernsThePlantsAndThePressAlike`): the 2…41-day far scene + ONE pair
+  planted an hour PAST the instant; asserts the exact kept set (offsets 2…15 dailies, 21 · 28 · 35 weeklies — three, the
+  week-tail truth), count 19, and the past-the-clock pair's survival. ON THE OLD ROAD (defaults `Date()`, months past
+  the instant) the past-the-clock pair reads trusted-newest, takes a daily slot, offset 15 is pruned and the count
+  lands at 18 — RED deterministically on any run date; both failure directions are now-dependent only through the
+  TRUST rule, so the red needs no boundary luck.
+  **Also in this commit:** `ProtectionOpenFaces.swift`'s `takeBackupPair` closure passes `now: Date()` explicitly
+  inside its `Task.detached` (task-locals never ride a detached task; byte-identical — the closure's clock was always
+  the wall clock); NINETEEN test call sites across 8 suites that used the old `Date()` default now pass `now: Date()`
+  explicitly (behavior-identical; an un-injected `\.date` read in a test process reports "no test implementation" —
+  the sweep keeps every other suite exactly as it was): ProtectionFarPairTests (9) · MakeMineRouteTests (2) ·
+  ProtectionBackupHookTests (3) · PreDesignLandingsRouteTests · WordsLedgerCarryRouteTests ·
+  OtherLibrariesDeleteRouteTests · ProtectionCopyCountsTests · EmptySlotMakeMineRouteTests (1 each).
+  **`ProtectionCopyCounts.read(now:)` LEFT on `Date()` as the brief allows:** it does NOT share the mechanism — its one
+  production read runs inside `Task.detached` (ProtectionOpenFaces:467, source-pinned by DataSafetyRoadCountsTests),
+  where the injected clock cannot reach, and it feeds a display count, never the planner. Said here as the brief asks.
+  PENDING: the red-on-old run (the behavioral revert below), the suite's green (the stage).
+  **The named behavioral revert (the traps' rule, BEFORE it runs):** at a committed tip, revert ONLY
+  `App/Variorum/Shared/Protection/ProtectionBackupPair.swift`'s three `now:` defaults to `= Date()` (a scratch edit),
+  run `-only-testing:VariorumTests/ProtectionPairRetentionTests/theWeekBoundaryInstantGovernsThePlantsAndThePressAlike`
+  → RED recorded; restore by `git checkout --`, `git diff --exit-code` clean; re-run → GREEN.
