@@ -2600,7 +2600,7 @@ ticket at closeout.
 voices; the orchestrator decides; a byte change means the gate re-builds); W10's second-window staging and W14's
 "MCP road" were not walkable (the second window shows no Takes gutter; MCP is OFF by posture) — the any-road stagings
 ran instead; W12/W13/W16 walked in Study only (their rows name no second voice); W16's header-door-beside-a-twin
-variant not walked. Every other row PASS. The walk is CLOSED (08:56).
+variant not walked. Every other row PASS. The walk is CLOSED (08:53).
 
 Walker: opus (the use walker), under the orchestrator's HELD claim `vx-770-final` (never claimed,
 renewed or released by the walker). Build: `App/Variorum/DerivedData/vx770-mg/Build/Products/Debug/Variorum.app`
@@ -2843,7 +2843,7 @@ still 11w; reopen; **✓ the blank** → **"0w block · 8w in note"** (pre-fix 9
 `w17t-4-original-small.png`, `w17t-6-reopen-small.png`, `w17t-bars.png`. The count stayed true at every step in
 both voices.
 
-### POSTURE AT THE END (08:55–08:56, after the quit)
+### POSTURE AT THE END (08:52–08:53, after the quit)
 - The dev instance (pid 51555, `vx770-mg`) quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`);
   `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before launch and after the quit — no other Variorum instance ran at
   any point (her `/Applications` app never running; the guard checked before every act).
