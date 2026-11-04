@@ -1954,7 +1954,7 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
 | 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | DONE (this commit) — pins PENDING the stage |
 | 3 | D-505's line (P-500-3): `Kind.retrying` after offline, before every other error class; CF-15's doors; the hover carries the engine's sentence; P-500-7 built as (a) | DONE (this commit) — pins PENDING the stage |
 | 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | CODE DONE (this commit) — the RED-ON-OLD run and the suite's green PENDING the stage |
-| 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | NOT STARTED |
+| 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | DONE (this commit) — zero behavior; the suites are the evidence, PENDING the stage |
 | 6 | Close: `swift build`; the Mac suites under the stage; the self-assessment | NOT STARTED |
 
 #### The PROVISIONALs (recorded here IN FULL — notes/QUESTIONS.md is the merging session's; the orchestrator lands these at the merge)
@@ -2055,3 +2055,18 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
   `App/Variorum/Shared/Protection/ProtectionBackupPair.swift`'s three `now:` defaults to `= Date()` (a scratch edit),
   run `-only-testing:VariorumTests/ProtectionPairRetentionTests/theWeekBoundaryInstantGovernsThePlantsAndThePressAlike`
   → RED recorded; restore by `git checkout --`, `git diff --exit-code` clean; re-run → GREEN.
+- **Piece 5 (this commit):** `App/Variorum/Shared/Protection/ProtectionOpenRoad.swift` — `RoadInputs.live`'s parameter
+  is `any SyncKeysLeaf & Sendable` and the `nonisolated(unsafe) let syncKeys = syncKeys` escape hatch (:1022) is GONE
+  (the `@Sendable` `makeSystem` closure captures the Sendable existential legally; the production leaf
+  `KeychainSyncKeysLeaf` is `@unchecked Sendable` already). `App/Variorum/Shared/AppBootstrap.swift` — the stored
+  `private let syncKeys: any SyncKeysLeaf` DROPS (VX-490's "retypes or drops": it was written in both inits and read
+  never; a retype would not compile, since the test init assigned it from `leaves.syncKeys`, a plain `any
+  SyncKeysLeaf`); the production init mints the one leaf as a local and hands it to `RoadInputs.live` on the same call
+  line (OneSyncKeysLeafCompositionTests' source literals hold: one `KeychainSyncKeysLeaf(` construction in
+  AppBootstrap.swift, the exact `RoadInputs.live(variant: variant, auth: auth, syncKeys: syncKeys)` call); the one-leaf
+  doc moved onto the mint. **The :728 sibling (`nonisolated(unsafe) let leaf` in `boundedVaultRead`) is LEFT, and why:**
+  it is NOT VX-490's line — a different leaf class (`any VaultLeaf`, not `SyncKeysLeaf`), and constraining it `&
+  Sendable` cascades: the four call sites pass `leaves.vault`, so core's `Leaves.vault: any VaultLeaf`
+  (`Sources/VariorumCore/.../Leaves.swift`) would retype — a core Protection seam this Mac-app unit does not own — and
+  core's test conformer `InterleavingVault` (VaultRaceTests) is not Sendable. A ticket-sized change of its own if
+  wanted. Zero behavior in this piece; no pin claimed (the brief); the suites are the evidence.

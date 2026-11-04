@@ -1017,9 +1017,13 @@ nonisolated struct RoadInputs: Sendable {
     /// mints a session of its own. VX-487 F-M1-1: and over `syncKeys`, the process's one sync-keys leaf (the bootstrap's),
     /// so session memory held through one composed system survives into the next — a re-keying act's reopen composes a
     /// fresh system, and the act's hold must reach the reopened session the engine reads.
-    static func live(variant: AppDatabase.StoreVariant, auth: AuthSession, syncKeys: any SyncKeysLeaf) -> RoadInputs {
+    /// VX-490 (VX-500 U2): the leaf parameter is `Sendable` BY TYPE — the `@Sendable` `makeSystem` closure captures it
+    /// legally with no `nonisolated(unsafe)` escape hatch; the one production leaf (`KeychainSyncKeysLeaf`) is
+    /// `@unchecked Sendable` already (its session memory behind its own lock).
+    static func live(
+        variant: AppDatabase.StoreVariant, auth: AuthSession, syncKeys: any SyncKeysLeaf & Sendable
+    ) -> RoadInputs {
         let scope = variant.rawValue
-        nonisolated(unsafe) let syncKeys = syncKeys
         return RoadInputs(
             makeSystem: { try? ProtectionSystem.live(variant: variant, session: auth, syncKeys: syncKeys) },
             sessionFact: {
