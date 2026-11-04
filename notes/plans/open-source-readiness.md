@@ -76,6 +76,15 @@ The video's thesis as she framed it: *"I want open source; I put a ton of work i
 8. **The beyond-repo share-set (VX-755)** — the repo already carries the method (CLAUDE.md, `.claude/skills` + agents + settings, `Tools/`); what lives outside it gets a deliberate verdict and packaging: the PRIVATE MEMORY REPO (`lduarte-io/claude-memory` — publish whole after its own sweep, excerpt, or keep private; her call), the prompt record (her call, timestamps strippable), the untracked `.git/hooks/commit-msg` trailer-stripper (if the story tells it, a copy lands in `Tools/githooks/`), transcripts (excerpts-only in the tour, never bulk).
 - The ticket map: VX-748 audit · VX-749 history rehearsal · VX-750 license+trademark (Needs Lillian) · VX-751 security pass · VX-752 repo mechanics · VX-753 the tour (reframed) · VX-754 deep sweep · VX-755 beyond-repo share-set · VX-747 the open format (rides 13m).
 
+## 6. The promise video (she may film 2026-11-03 tonight — the pre-flight)
+
+Announcing the commitment before the gates run is fine and is the story-first step; four rules keep the promise from outrunning the plan:
+1. **Promise the WHAT, never the WHEN.** No date, or a season at most — the sweeps (VX-748/754) take what they take, and "where's the source" nagging against a named date is self-inflicted. "It's coming when the privacy pass is done — other people's words are in that history" is an honest, likeable answer.
+2. **Decide the license one-liner before filming** — the comments will ask within the hour. Either say the lean ("copyleft — AGPL") and accept that saying it publicly effectively makes VX-750's call, or deflect gracefully ("copyleft; exact license with the release"). Her choice, made consciously, not on camera.
+3. **Nothing unswept on screen.** No scrolling the repo, the notes or the prompt history in the video — a screen-recorded paragraph is published before VX-754 ever runs. Swept excerpts or nothing.
+4. **Scope the promise to what's decided:** the source and the development record. The memory repo, the prompt record and the transcripts are VX-755's open verdicts — don't promise them by accident with an "everything" on camera.
+Also: the description carries the receipts (test count, the letter, the fact-sheet numbers) so the slop-reflex replies meet numbers immediately; response posture = answer good faith, never feed bait — same rule as the Castle one.
+
 ## 5. Working in public — what changes and what doesn't (her 2026-11-03 ask, "is how I work going to have to change?")
 
 **Unchanged:** the entire build machinery — branches, PRs, ladders, pins, canon's two-file flow, the phase skills, Linear (stays private), the memory repo (stays private unless VX-755 rules otherwise), `~/.variorum`. The repo is the same repo; it just has readers.
