@@ -57,6 +57,12 @@ nonisolated struct CompareProjection: Equatable, Sendable {
         /// nameless journal entry; a note's name is its day, everywhere.
         var displayTitle = ""
         var sealed = false
+        /// **VX-728 (R-770-2, P-770-3): the note's live comments per block**,
+        /// panel order — `Queries.containerComments`, Write's own feed: one
+        /// indexed pass over this note's placements, so the read scales with
+        /// the SHOWN notes' own comments, never the corpus (P1/P-8); live with
+        /// the projection, so Compare never shows a comment the store dropped.
+        var comments: [String: [String]] = [:]
     }
 
     var anchor = PostFace()
@@ -359,7 +365,9 @@ final class CompareViewModel {
                     db, blockIDs: slots.filter { !$0.isGap }.map(\.blockID)),
                 title: try Queries.containerTitle(db, id: id),
                 displayTitle: try Queries.noteDisplayTitle(db, id: id) ?? DisplayTitle.placeholder,
-                sealed: try Queries.containerHeader(db, containerID: id)?.locked == true)
+                sealed: try Queries.containerHeader(db, containerID: id)?.locked == true,
+                comments: try Queries.containerComments(db, containerID: id)
+                    .mapValues { $0.map(\.text) })
         }
         var peers: [String: CompareProjection.PostFace] = [:]
         var kinship: [String: [String: String]] = [:]
@@ -1686,30 +1694,42 @@ struct CompareBoardView: View {
     // MARK: Rows
 
     private func boardRows(_ display: CompareViewModel.Display) -> some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 8) {
-                ForEach(display.rows) { row in
-                    rowView(row)
+        // VX-728 (P-770-3): the comment LANE every cell carries — decided by
+        // the columns' width alone (`CompareGutter.lane`), never by comments.
+        GeometryReader { proxy in
+            let lane = CompareGutter.lane(columnWidth: CompareGutter.columnWidth(
+                boardWidth: proxy.size.width, columns: 1 + model.peerSlots.count,
+                inset: Self.boardInset, spacing: Self.columnSpacing))
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Self.rowSpacing) {
+                    ForEach(display.rows) { row in
+                        rowView(row, lane: lane)
+                    }
+                    endDropZones
                 }
-                endDropZones
+                .padding(Self.boardInset)
             }
-            .padding(Self.boardInset)
         }
     }
 
+    /// The board's spacing between columns and between rows (VX-728 names
+    /// them: the lane's column width and a cell card's bound read them).
+    static let columnSpacing: CGFloat = 8
+    static let rowSpacing: CGFloat = 8
+
     @ViewBuilder
-    private func rowView(_ row: CompareRow) -> some View {
-        HStack(alignment: .top, spacing: 8) {
+    private func rowView(_ row: CompareRow, lane: CGFloat) -> some View {
+        HStack(alignment: .top, spacing: Self.columnSpacing) {
             switch row {
             case .free(let anchor, let peers, _):
-                cellOrSpace(postID: postID, blockID: anchor)
+                cellOrSpace(postID: postID, blockID: anchor, lane: lane)
                 ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
                     cellOrSpace(
                         postID: slot.postID,
-                        blockID: i < peers.count ? peers[i] : nil)
+                        blockID: i < peers.count ? peers[i] : nil, lane: lane)
                 }
             case .aligned(let aligned):
-                cellOrSpace(postID: postID, blockID: aligned.anchorBlockID)
+                cellOrSpace(postID: postID, blockID: aligned.anchorBlockID, lane: lane)
                 ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
                     VStack(alignment: .leading, spacing: 4) {
                         if i < aligned.peerMoved.count, aligned.peerMoved[i],
@@ -1726,7 +1746,7 @@ struct CompareBoardView: View {
                         }
                         if i < aligned.peerKin.count {
                             ForEach(aligned.peerKin[i], id: \.self) { kinBlock in
-                                cellOrSpace(postID: slot.postID, blockID: kinBlock)
+                                cellOrSpace(postID: slot.postID, blockID: kinBlock, lane: lane)
                             }
                         }
                     }
@@ -1739,11 +1759,11 @@ struct CompareBoardView: View {
     /// A column's cell — or clear SPACE where this column has nothing in
     /// this row (never a "—" blank marker; N29).
     @ViewBuilder
-    private func cellOrSpace(postID: String?, blockID: String?) -> some View {
+    private func cellOrSpace(postID: String?, blockID: String?, lane: CGFloat) -> some View {
         if let postID, let blockID, let slot = model.slot(postID: postID, blockID: blockID) {
             CompareCellView(
-                model: model, tokens: tokens, indicator: indicator,
-                postID: postID, slot: slot,
+                model: model, session: session, tokens: tokens, indicator: indicator,
+                postID: postID, slot: slot, lane: lane,
                 dropTargetBlockID: $dropTargetBlockID)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
         } else {
@@ -1965,11 +1985,16 @@ private struct CompareOfferCard: View {
 /// post only), and the in-cell fan bloom (✓ stays the one choosing door).
 private struct CompareCellView: View {
     let model: CompareViewModel
+    /// VX-728: the comments panel's session (the face's door).
+    let session: AppSession
     let tokens: VoiceTokens
     /// 17o batch c (her U-7): pushed down to the panes, decided nowhere here.
     let indicator: EditingIndicatorStyle
     let postID: String
     let slot: Queries.RenderedBlock
+    /// VX-728 (P-770-3): this column's comment lane — the column's width
+    /// decided it, nothing else (`CompareGutter.lane`).
+    let lane: CGFloat
     @Binding var dropTargetBlockID: String?
 
     var body: some View {
@@ -1983,6 +2008,11 @@ private struct CompareCellView: View {
                     Rectangle().fill(tokens.ring).frame(height: 2)
                 }
                 HStack(alignment: .top, spacing: 4) {
+                    // VX-728 (P-770-3): the lane — whitespace of the column's
+                    // width's choosing, present whether or not a comment is.
+                    if lane > 0 {
+                        Color.clear.frame(width: lane, height: 1)
+                    }
                     rail
                     Text("⠿")
                         .font(tokens.small)
@@ -2017,6 +2047,22 @@ private struct CompareCellView: View {
                         }
                     }
                 }
+                // VX-728 (R-770-2): the block's comments IN THE LANE, through
+                // Write's machinery — Write's ladder seats Write's card or badge
+                // there (`CommentGutterFace`). An overlay: the cell's layout,
+                // and the prose's measure and left edge, are the same with and
+                // without comments.
+                .overlay(alignment: .topLeading) {
+                    if lane > 0, let entries = model.face(for: postID)?.comments[slot.blockID],
+                       !entries.isEmpty {
+                        GeometryReader { proxy in
+                            CommentGutterFace(
+                                session: session, blockID: slot.blockID,
+                                entries: entries, tokens: tokens,
+                                geometry: Self.gutter(lane: lane, cellHeight: proxy.size.height))
+                        }
+                    }
+                }
             }
             .contentShape(Rectangle())
             .dropDestination(for: String.self) { items, _ in
@@ -2040,6 +2086,22 @@ private struct CompareCellView: View {
                 }
             }
         }
+    }
+
+    /// **A Compare cell's gutter, as Write's ladder reads it** (P-770-3). The
+    /// lane IS the gutter: the cell's chrome (the rail, the handle, the pane)
+    /// starts where it ends, so from the face's side the lane's right edge is
+    /// where Write's prose would be (`textLeft`) — a card ends the ladder's
+    /// own clearance short of it, a badge its own air short of it, both inside
+    /// the lane. The face's top is the cell's first line; the card grows to
+    /// the cell and never past the row (`roomBelowInOwnRow`).
+    static func gutter(lane: CGFloat, cellHeight: CGFloat) -> CommentGutterFace.Geometry {
+        let top = PaneTextView.proseTopInset
+        return CommentGutterFace.Geometry(
+            textLeft: lane, hostLeading: 0, top: top,
+            blockHeight: max(0, cellHeight - 2 * top),
+            roomBelow: BlockDecor.roomBelowInOwnRow(
+                rowHeight: cellHeight, top: top, rowSpacing: CompareBoardView.rowSpacing))
     }
 
     @ViewBuilder
