@@ -1032,7 +1032,7 @@ during render?) is the suspect; assess at the reconciliation.
 | Part 1 — the oracle attributes each record to the board that wrote it (`BoardCommentFaceOracle.swift`: scope → block → mount; `reader(_:board:)`; the `boardCommentFaceMount` environment), each board root publishes its token (`TakesBoardView.swift`, `CompareBoardView.swift` — one DEBUG modifier line each, beside `debugProbeScope`), the guard reads each board by name + prints `VX770-RECON` | DONE (this commit) — compile PENDING the recon tree's build |
 | Part 3 — `DerivedData/vx770-recon-post` build-for-testing at reconciled HEAD (818b09aa7) | DONE — TEST BUILD SUCCEEDED 04:10–04:17 (log `App/Variorum/DerivedData/logs/vx770-recon-post-build.log`; 2.8G); the only warnings in a touched file are two that predate this run (`CompareBoardView`'s and `TakesBoardView`'s geometry-probe `Sendable` warnings, present in batch 1's build) — the reconciliation's compile is verified |
 | READY-FOR-SUITES — RECONCILIATION (at the end of this file) | DONE (this commit) |
-| Push | refused at every commit from this shell (33c8e2f62, 818b09aa7, this one) — no ssh agent here; git config untouched; the orchestrator sweeps |
+| Push | refused at 33c8e2f62 and 818b09aa7 (no ssh agent in this shell); the push at 8a3b3f930 LANDED — origin held HEAD with nothing ahead (every earlier local commit included); git config untouched |
 
 **Part 1 — the mechanism of `aCommentNeverMovesTheTakesProse`'s red at :417, CONCLUDED: R-B3-1 (an
 oracle read across a closed window), not the one-shot feed.** The line asks whether the SECOND board
