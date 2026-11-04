@@ -25,7 +25,8 @@ The planetlillian agent's field reports (`~/dev/planetlillian/variorum-mcp-feedb
 - `App/Variorum/Variorum/MacWillLock.swift` — order is LOAD-BEARING (the ruled teardown order, VX-394/VX-548 b2b). Changing that order = PROVISIONAL + a morning-bundle line, never silent. Aim: untouched.
 - Any `Shared/` file in the diff ⇒ phone suites join the merge gate (say so the moment one lands). `Shared/OpsRefusalTable.swift` is expected (VX-760's sentence lives at its line 279).
 - Registry: zero delta expected; if `Registry/CapabilityRegistry.swift` is touched, whoever merges second re-runs `CapabilityRegistryTests` + `ShellChromeTests` after merge-in.
-- Any schema change makes SyncSpec binding reading even for a local-only table; a migration needing Sync/ registration = STOP and ask the coordinator. Latest migration on main: `v1_35`; the MCP grants family is local-only, never synced (v1_34's no-mirror class).
+- Any schema change makes SyncSpec binding reading even for a local-only table; a migration needing Sync/ registration = STOP and ask the coordinator. Migration numbering (the coordinator's correction, 2026-11-04): `v1_35` is TAKEN on main (sweep-kill-verdict markers, shipped since 0.10.5); **`v1_36` is VX-500's tonight** (two local-only FK indexes, renumbered mid-run); **a VX-763 grants repair would be `v1_37`** (v1_34's no-mirror local-only class). Both runs append to `Migrations.swift`'s one registration list: whoever merges SECOND resolves the textual conflict, renumbers if the merge order flipped, and re-runs the migration suites after the merge-in; if VX-771 reaches its merge ask BEFORE VX-500 with a migration aboard, tell the coordinator first (registration order must stay contiguous). CONSEQUENCE for her bundle if any migration lands: an export from this build refuses to import on an older build (the vx-502 rule — `applied.isSubset(of: known)`).
+- The VX-762 walk's shim client is REVOKED/unbound at the walk's end (the coordinator's addition — no leftover walk grants carry into VX-770's later walk on the same dev store); the stage release line states it.
 
 ## Her rulings (verbatim-faithful, from the tickets)
 
@@ -33,6 +34,11 @@ The planetlillian agent's field reports (`~/dev/planetlillian/variorum-mcp-feedb
 - **R-771-B (VX-769, born from the same sitting):** the wire gains minting a gathering (create_book gains a kind, or a create_gathering tool — "Tool shape is the run's design call; MCPSpec binds"). A gathering evicts when the tag leaves by definition — exactly the board shape item #10 wanted.
 - **R-771-C (VX-762):** verify-first — "first verify a drop still happens on ≥0.10.6 and read its Activity line; the remaining build is the reconnect-ergonomics half (keep-alive/auto-reconnect proposal), not the server's honesty." The VX-394 trace is DONE (do not re-trace): drops are largely BY DESIGN (the door stops at store close, LOCK and quit; after unlock the server restarts but the client never reconnects without /mcp). Her PRIOR ruling at the VX-548 morning sitting: reconnect = **option C, docs only** (shipped as VX-619/VX-640); **"B ranked above A in the record's read, available later if docs prove thin."** The options A–D live in `notes/plans/fixes/vx-548-run-mcp-grant-pane-fixes.md` § RECONNECT ERGONOMICS.
 - **R-771-D (VX-759, the kickoff brief):** the agent's suggested behavior (copy the displayed title; an undated source's copy takes the source's creation day as entry_date) is the agent's PROPOSAL — "build the most spec-defensible shape, mark PROVISIONAL, log in QUESTIONS; the body is shared with the app's Duplicate doors (AppSpec §9)."
+
+## Orchestrator adjudications (repo-first, before any build proceeds)
+
+- **A-771-1 (batch 1, fork F-1 — P-771-1's reach):** option (b). `copyNoteToWing` passes `keepingNamedDay: true` too, so her ⇧⌥⌘L Copy to Wing and the wire's `copy_note_to_wing` heal with the duplicate doors — the feedback's own workflow (copy a note to another wing) was the reported class's home, so the new tool must not re-date. The remaining copy roads — `promoteLens`/`promotePicks`, `divergePostForReading`, the ownership forks — stay AS BUILT (verbatim copies that re-date an undated untitled source): they are her ceremonies' roads, farther from the reported class, and widening a PROVISIONAL there overnight buys nothing she asked for. Option (c) goes to the morning bundle as her call. The saved-version date-clearing (V3) and the journal-profile exclusion stand untouched.
+- **A-771-2 (batch 1, fork F-2 — VX-766's digest):** build the proposal exactly: `fan_sha256` on the BRIEF form only — the SHA-256 (lowercase hex, UTF-8) of a text with one line per block in note order, each line that block's take sha256s in fan order separated by single spaces, the shown take's digest prefixed `*`, lines joined by `\n`, no trailing newline. Client-computable from `read_note ids_only` on the source. The tool description SPELLS the exact text form (the description is the contract the client verifies against). PROVISIONAL **P-771-8**; alternatives recorded: a flat digest (blind to block boundaries and the shown take), none.
 
 ## Binding principles — the 13b constitution (copied per the architect-phase skill; byte-verbatim from the skill's text)
 
@@ -92,6 +98,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 - **P-771-2 (VX-769):** the mint is a separate `create_gathering` tool, not a `create_book` kind. Alternatives: `create_book(kind:)`; both.
 - **P-771-3 (VX-762):** B2 built as the next reconnect rung on the strength of "available later if docs prove thin" + the agent's standing friction; A (shim replay) and D (fewer locks) stay hers, restated in the bundle.
 - **P-771-4 … P-771-7 (VX-765, batch 1):** the tool's listing (write new, wing scope only), the same-wing refusal, its words, the answer without adopted/made counts — each with its alternative in the BATCH 1 RECORD.
+- **P-771-8 (VX-766, A-771-2):** the brief form's `fan_sha256` — structure-aware (block order, fan order, the shown take marked), the exact text form spelled in the tool description. Alternatives: a flat digest; none.
 - *(grows as batches land)*
 
 ## LEDGER (one row per member; flip at each batch close)
@@ -211,4 +218,7 @@ No revert is in flight.
 
 ## Morning bundle (grows all night; the closeout moves it to the handoff)
 
-1. *(placeholder — filled as items accrue)*
+1. **F-1(c), yours:** P-771-1 (an undated untitled source's copy takes the source's creation day) now covers the duplicate doors AND Copy to Wing (A-771-1). The remaining copy roads still re-date that class: promote (lens → note), diverge-for-reading, the ownership forks. Extend, or leave? (Saved versions deliberately stay date-cleared — V3.)
+2. **P-771-1's residual, your eye:** a TYPED-TITLED undated source's copy stays undated — its name is faithful, but under the Library's entry-date sort (COALESCE) it sorts by its own birth day. The alternative (date every undated non-journal copy) invents a date for a titled note.
+3. **VX-685 sighting:** `MCPHarnessTimeLimitTests`' 15 s connect bound failed again under the whole-module run (29 s; green alone; red the same way on the pre-batch tree) — the standing VX-685 class, no new ticket minted.
+4. *(conditional — lands only if VX-763 ships a migration)* v1_37 means an export from this build refuses to import on an older build (the vx-502 subset rule).
