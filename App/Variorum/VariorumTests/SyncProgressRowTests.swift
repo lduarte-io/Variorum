@@ -106,3 +106,71 @@ struct SyncProgressRowTests {
         }
     }
 }
+
+@MainActor
+@Suite("VX-496 — the first-round sheet's count beneath its sentence (P-500-2)")
+struct FirstRoundSheetCountTests {
+    static let words = (try? RecoveryPhrase.generate()) ?? []
+
+    static func syncing(_ progress: SyncProgress?) -> SyncScheduler.Status {
+        var status = SyncScheduler.Status()
+        status.isSyncing = true
+        status.roundsCompleted = 1
+        status.progress = progress
+        return status
+    }
+
+    /// The count stands exactly under the STILL-SYNCING outcome carrying a progress (F-R1-1's frozen face): the sheet's
+    /// sentence keeps `firstRoundProgress` BYTE-UNCHANGED (the F-R2-2 close-note equality holds) and the count beneath
+    /// it is the row's own spelling — one source, never a second one.
+    @Test func aStillSyncingOutcomeWithAProgressGainsTheCountBeneathTheSentence() {
+        let progress = SyncProgress(phase: .downloading, done: 40_000, total: 108_000)
+        let outcome = FirstRoundOutcome.ran(Self.syncing(progress))
+        #expect(RoadAccountConfirmModel.firstRoundLine(outcome, joins: false) == ProtectionWords.firstRoundProgress,
+                "the sentence is byte-unchanged — the count is a line beneath, never a reworded sentence")
+        #expect(RoadAccountConfirmModel.firstRoundCount(outcome) == SyncStatusRow.progressCount(progress))
+        #expect(RoadAccountConfirmModel.firstRoundCount(outcome)
+            == "\(40_000.formatted()) of \(108_000.formatted())")
+    }
+
+    /// No count anywhere else: a progress-less still-syncing outcome (the sentence alone, exactly as shipped), a clean
+    /// round, a blocked round (even were a stale progress left on its status), held and not configured.
+    @Test func everyOtherOutcomeSaysNoCount() {
+        #expect(RoadAccountConfirmModel.firstRoundCount(.ran(Self.syncing(nil))) == nil)
+        var clean = SyncScheduler.Status()
+        clean.lastSuccessAt = Date(timeIntervalSince1970: 1_782_864_000)
+        #expect(RoadAccountConfirmModel.firstRoundCount(.ran(clean)) == nil)
+        var blocked = SyncScheduler.Status()
+        blocked.lastError = String(describing: SyncError.encryptionKeysUnavailable)
+        blocked.progress = SyncProgress(phase: .downloading, done: 7, total: 9)
+        #expect(RoadAccountConfirmModel.firstRoundCount(.ran(blocked)) == nil,
+                "a blocked face never wears a count — the sentence names what blocks")
+        #expect(RoadAccountConfirmModel.firstRoundCount(.held) == nil)
+        #expect(RoadAccountConfirmModel.firstRoundCount(.notConfigured) == nil)
+    }
+
+    /// Through the confirm model (the road the sheet reads): a landed act whose round froze still syncing with a
+    /// progress shows the sentence (`roundLine`) and the count (`roundCountLine`); a clean round shows the success line
+    /// and no count.
+    @Test func theConfirmModelCarriesTheCountBesideItsLine() async throws {
+        let progress = SyncProgress(phase: .saving, done: 12_000, total: 108_000)
+        let frozen = RoadAccountConfirmModel(
+            door: PlantedAccountRoads.setUp(), act: { _ in .made(receipt: nil) },
+            firstRound: { .ran(Self.syncing(progress)) }, finished: { _ in })
+        await frozen.submit(
+            passphrase: "a new passphrase", again: "a new passphrase", words: Self.words.joined(separator: " "))
+        _ = await frozen.awaitFirstRound()
+        #expect(frozen.roundLine == ProtectionWords.firstRoundProgress)
+        #expect(frozen.roundCountLine == "saving \(12_000.formatted()) of \(108_000.formatted())")
+
+        var clean = SyncScheduler.Status()
+        clean.lastSuccessAt = Date(timeIntervalSince1970: 1_782_864_000)
+        let landed = RoadAccountConfirmModel(
+            door: PlantedAccountRoads.setUp(), act: { _ in .made(receipt: nil) },
+            firstRound: { .ran(clean) }, finished: { _ in })
+        await landed.submit(
+            passphrase: "a new passphrase", again: "a new passphrase", words: Self.words.joined(separator: " "))
+        _ = await landed.awaitFirstRound()
+        #expect(landed.roundCountLine == nil)
+    }
+}

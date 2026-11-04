@@ -243,6 +243,14 @@ struct RoadAccountConfirmSheet: View {
                 Text(line)
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
+                // VX-496 (P-500-2): the count beneath the frozen progress sentence — the sync row's own spelling
+                // (`SyncStatusRow.progressCount`, through the model); stands only under the still-syncing outcome.
+                if let count = model.roundCountLine {
+                    Text(count)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 // VX-510 ladder round 2, F-R2-2: a settle past the bound freezes the PROGRESS words as the outcome
                 // (F-R1-1's honest rare face) — the close note stays with them, so that face still says the road
                 // forward (the sync row finishes the story).

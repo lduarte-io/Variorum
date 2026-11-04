@@ -1951,7 +1951,7 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
 | # | Piece | Status |
 |---|---|---|
 | 1 | D-496's words (P-500-1): `SyncStatusRow.line(for:lastSuccessAt:progress:)` + the one count spelling (`progressCount`); "Syncing…" byte-unchanged with no progress; P-500-8 decided (the shown denominator rises to `done`); the new suite `SyncProgressRowTests` | IN PROGRESS (this commit) — code + pins written; the suite's run PENDING the stage |
-| 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | NOT STARTED |
+| 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | DONE (this commit) — pins PENDING the stage |
 | 3 | D-505's line (P-500-3): `Kind.retrying` after offline, before every other error class; CF-15's doors; the hover carries the engine's sentence; P-500-7 built as (a) | NOT STARTED |
 | 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | NOT STARTED |
 | 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | NOT STARTED |
@@ -1973,6 +1973,15 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
 
 #### The pieces (filled per commit)
 
+- **P-500-2 (PROVISIONAL, hers — the sheet's count).** Built: the first-round sheet keeps `ProtectionWords
+  .firstRoundProgress` as its sentence BYTE-UNCHANGED (the F-R2-2 close-note equality holds on both platforms) and
+  gains the row's own count string beneath it when the outcome's status wears the syncing face AND carries a progress
+  (`RoadAccountConfirmModel.firstRoundCount` → `SyncStatusRow.progressCount` — one spelling, the D-A2 rule). The
+  progress rides the outcome's own status (`FirstRoundOutcome.ran(status)` — the road `firstRoundLine` already
+  receives); no new global, no live observation: the count shows on the FROZEN still-syncing outcome (the settle past
+  its bound, F-R1-1's honest rare face) — the `.running` phase has no status by design and keeps the sentence alone.
+  Alternative recorded (the brief's): the sheet's sentence alone, no count anywhere.
+
 - **Piece 1 (this commit):** `App/Variorum/Shared/SyncStatusViews.swift` — `line(for:lastSuccessAt:progress: SyncProgress?
   = nil)` (every existing caller byte-unchanged; only `.syncing` reads the parameter), `progressCount(_:)` (the one
   count spelling, doc'd with P-500-1/P-500-8), the row's one `line` call passes `sync.status.progress`. The face
@@ -1980,3 +1989,10 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
   `App/Variorum/VariorumTests/SyncProgressRowTests.swift` (8 pins): the four shapes, her example byte-for-byte under
   en-US grouping, P-500-8's both directions, the one-spelling rule, CF-15's doors with a progress standing, and
   every other kind's line byte-identical under the new parameter. PENDING: the suite's first run (the stage).
+- **Piece 2 (this commit):** `App/Variorum/Shared/Protection/RoadAccountModel.swift` — `firstRoundCount(_:)` beside
+  `firstRoundLine` (the syncing face + a standing progress ⇒ the row's count string; nil everywhere else, a blocked
+  face's stale progress included) + `roundCountLine` (the sheet's read). `App/Variorum/Variorum/Features/Protection/
+  RoadAccountSheet.swift` and `App/Variorum/VariorumMobile/Features/Protection/MobileProtectionScreen.swift` — one
+  caption line beneath the frozen sentence, rendered from the model (nothing re-typed view-side). Pins: the suite
+  `FirstRoundSheetCountTests` (3) in `SyncProgressRowTests.swift` — the sentence byte-unchanged with the count beneath,
+  no count on any other outcome, and the confirm-model flow (frozen-syncing vs clean). PENDING: the runs (the stage).
