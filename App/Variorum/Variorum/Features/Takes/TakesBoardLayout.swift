@@ -407,8 +407,27 @@ final class TakesBoardLayout {
     func closeCollapsedFans(_ blockIDs: Set<String>) {
         let kept = expandedBlocks.subtracting(blockIDs)
         guard kept.count != expandedBlocks.count else { return }
+        forgetPages(ofClosed: expandedBlocks.subtracting(kept))
         expandedBlocks = kept
         expansionChanged()
+    }
+
+    /// **VX-638 — a fan that closes takes its page with it.** Every card strip
+    /// (slot split, carousel, the margin grid's rail) mounts only while its
+    /// block is bloomed, so a close tears the strip down and a re-open builds
+    /// a NEW one, born at its leading edge — while the pager's caption reads
+    /// `pageOffsets`. Left in the table, the old page made the re-born strip's
+    /// caption lie ("2–3 of 3" over cards 1–2, her slot-split sighting after
+    /// close all → expand all). So the three close doors forget the closed
+    /// blocks' pages, both keys (the block's and `rail-<block>`) — "close-all
+    /// resets", this component's own letter. A block follow-the-scroll still
+    /// blooms (R25: on screen, fanned) keeps its strip mounted, so it keeps
+    /// its page.
+    private func forgetPages(ofClosed blockIDs: Set<String>) {
+        for blockID in blockIDs where !(followTheScroll && isRowVisible(blockID)) {
+            pageOffsets[blockID] = nil
+            pageOffsets[Self.railPageKey(blockID)] = nil
+        }
     }
 
 
@@ -532,6 +551,7 @@ final class TakesBoardLayout {
 
     func toggleExpanded(_ blockID: String) {
         if expandedBlocks.contains(blockID) {
+            forgetPages(ofClosed: [blockID])  // VX-638
             expandedBlocks.remove(blockID)
         } else {
             expandedBlocks.insert(blockID)
@@ -551,6 +571,7 @@ final class TakesBoardLayout {
 
     func closeAllFans() {
         let changed = !expandedBlocks.isEmpty
+        forgetPages(ofClosed: expandedBlocks)  // VX-638
         expandedBlocks = []
         if changed { expansionChanged() }
     }
