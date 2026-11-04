@@ -2543,3 +2543,17 @@ evidence.
 - **Scope kept.** F1, F2, F4 only; F3 untouched (record-only by the reviewer). No `Sync/`, schema,
   custody, `Shared/`, editor-seam or registry file. The uncommitted `Package.resolved` artifact was
   neither committed nor reverted (pathspec commits only; the clone, not the worktree, took the revert).
+
+## THE LADDER — CLOSED AT ROUND 2 (the orchestrator, ~08:0x)
+
+Round 2 (fresh fable-reviewer, the file `notes/plans/fixes/vx-770-ladder-round2.md`, 248a1cda1):
+**F1 FIXED AS SPECIFIED · F2 FIXED AS SPECIFIED · F4 FIXED DIFFERENTLY BUT SOUNDLY (the
+corrected premise verified real at the base commit) · F3 correctly record-only. NO new findings
+at any severity → no round 3; the ladder closes at two rounds.** The fix-leg's evidence was
+re-verified by the reviewer's own hands (clone diff, nm symbol counts, byte-equal test files,
+build logs). No orchestrator line-by-line check is owed: the final round produced no fixes of
+its own — round 1's fixes had round 2 as their later reader. Record-only residue: R2-O1 (the F2
+pin's #expect premises — the prediction table's reading covers a hollow green), R2-O2
+(R-LF-1/R-LF-2 are pre-existing classes; closeout tickets). Still owed by the merge-gate
+window: the lf-rev red leg (rows 1 and 3 red predicted) — a whole-target run subsumes the green
+delta but never the red leg.
