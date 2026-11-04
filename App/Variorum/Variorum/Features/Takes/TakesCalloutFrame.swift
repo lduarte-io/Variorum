@@ -55,6 +55,10 @@ struct TakesCalloutFrame: ViewModifier {
     /// own numbers (`BlockDecor.calloutRect`'s ideal pad of 5, radius 8).
     static let pad: CGFloat = 5
     static let cornerRadius: CGFloat = 8
+    /// Where the emoji sits from the frame's top-leading corner — named
+    /// (VX-770 batch 2) so the row's comment face can stack UNDER it
+    /// (R-13u3-3) without a second copy of the number.
+    static let emojiOffset = CGSize(width: -18, height: 2)
 
     func body(content: Content) -> some View {
         if let presentation {
@@ -70,7 +74,7 @@ struct TakesCalloutFrame: ViewModifier {
                     if let emoji = presentation.emoji, !emoji.isEmpty {
                         Text(emoji)
                             .font(tokens.small)
-                            .offset(x: -18, y: 2)
+                            .offset(x: Self.emojiOffset.width, y: Self.emojiOffset.height)
                             .accessibilityHidden(true)
                     }
                 }

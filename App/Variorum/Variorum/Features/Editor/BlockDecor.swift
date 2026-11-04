@@ -416,7 +416,6 @@ nonisolated enum BlockDecor {
         guard !state.appearance.inlineComments else { return [:] }
         let items = state.frames.filter { !(state.comments[$0.blockID] ?? []).isEmpty }
         guard !items.isEmpty else { return [:] }
-        let fitsCards = gutterFitsCards(width: state.textLeft)
         let tops: [CGFloat] = items.map { item in
             commentFaceTop(
                 blockTop: item.frame.minY,
@@ -428,17 +427,49 @@ nonisolated enum BlockDecor {
         for (index, item) in items.enumerated() {
             let top = tops[index]
             let roomBelow = index + 1 < tops.count ? tops[index + 1] - top : nil
-            if fitsCards, let rect = leftCardRect(
+            faces[item.blockID] = commentFace(
                 textLeft: state.textLeft, top: top,
-                blockHeight: item.frame.height, roomBelow: roomBelow) {
-                faces[item.blockID] = .card(rect)
-            } else if let rect = commentBadgeRect(textLeft: state.textLeft, top: top) {
-                faces[item.blockID] = .badge(rect)
-            } else {
-                faces[item.blockID] = .yields
-            }
+                blockHeight: item.frame.height, roomBelow: roomBelow)
         }
         return faces
+    }
+
+    /// **ONE block's comment face — the ladder, asked once per block by every
+    /// host** (VX-770 batch 2, T1: the per-block arm of `commentGutterFaces`,
+    /// MOVED, not one number changed). A card where the gutter fits cards and
+    /// the rhythm leaves a card's worth of room; else the count badge; else
+    /// the decoration yields. `textLeft` is the prose container's left edge
+    /// measured from the gutter's own left edge, `top` the face's top (the
+    /// STACK's answer), `blockHeight` the block's text height, `roomBelow` how
+    /// far below `top` the next face begins (nil: nothing below).
+    ///
+    /// Write asks it through `commentGutterFaces`; the Takes board and Compare
+    /// ask it per row (`CommentGutterFace`) — so the three surfaces cannot
+    /// disagree about card versus badge versus nothing (P-3).
+    static func commentFace(
+        textLeft: CGFloat, top: CGFloat, blockHeight: CGFloat, roomBelow: CGFloat?
+    ) -> CommentFace {
+        if gutterFitsCards(width: textLeft), let rect = leftCardRect(
+            textLeft: textLeft, top: top, blockHeight: blockHeight, roomBelow: roomBelow) {
+            return .card(rect)
+        }
+        if let rect = commentBadgeRect(textLeft: textLeft, top: top) {
+            return .badge(rect)
+        }
+        return .yields
+    }
+
+    /// **The room below a face whose host draws ONE row** (VX-770 batch 2):
+    /// such a host cannot see whether the next row carries a face, so it
+    /// assumes it may — the next face could begin at the next row's own top,
+    /// `rowSpacing` below this row's bottom. Fed to `commentFace`, a card then
+    /// ends no lower than `rowSpacing − cardRhythmAir` past the row's own
+    /// bottom (Write's rhythm, taken conservatively): it never reaches the
+    /// face of the row below.
+    static func roomBelowInOwnRow(
+        rowHeight: CGFloat, top: CGFloat, rowSpacing: CGFloat
+    ) -> CGFloat {
+        max(0, rowHeight + rowSpacing - top)
     }
 
     /// The drop boundary nearest a drag Y: `index` = the entry the dragged
@@ -920,24 +951,17 @@ final class BlockDecorOverlayController {
                 // VX-179 U2 (R-VX179-1) each comment its own ENTRY, in the
                 // briefs' (= the panel's) order, scrolling inside the card
                 // when they outgrow it. The tooltip keeps the shipped joined
-                // string whole.
-                card.presentCard(CommentCardView.CardContent(
-                    entries: item.briefs.map(\.text),
-                    prefix: tokens.commentPrefix,
-                    ink: NSColor(tokens.commentInk),
-                    rule: NSColor(tokens.commentTint),
-                    separator: NSColor(tokens.line),
-                    fill: .clear,
-                    toolTip: tokens.commentPrefix + text))
+                // string whole. (VX-770 T2: the presentation is the face's
+                // ONE road, `presentGutterFace`, which the boards share.)
+                card.presentGutterFace(
+                    .card(rect), entries: item.briefs.map(\.text), tokens: tokens)
                 card.frame = rect
                 card.isHidden = false
             } else if case .badge(let rect) = faces[blockID] ?? .yields {
                 // Narrow gutter: the count badge — still a door, and now on
                 // the same side as the cards it stands in for.
-                card.present(
-                    text: "#\(item.briefs.count)",
-                    tint: NSColor(tokens.commentTint), ink: NSColor(tokens.commentInk),
-                    style: .badge)
+                card.presentGutterFace(
+                    .badge(rect), entries: item.briefs.map(\.text), tokens: tokens)
                 card.frame = rect
                 card.isHidden = false
             } else {
@@ -1189,6 +1213,45 @@ final class BlockDecorOverlayController {
         else { return }
         onMoveBlock?(from, boundary.index)
     }
+}
+
+// MARK: - The gutter face's ONE presentation (VX-770 batch 2, T2)
+
+extension CommentCardView {
+    /// **What a gutter face shows, in a voice — the one road every host takes**
+    /// (Write's `renderComments`, the Takes board, Compare). The card arm is
+    /// VX-179 U2's stacked entries — every comment its own wrapping entry in
+    /// the panel's order, the voice's mark hanging, the hairline between, the
+    /// joined string as the tooltip; the badge arm is the count. MOVED from
+    /// `renderComments` with not one value changed. The host sets the frame
+    /// (the rect inside `face`) and `onClick` (before this — `presentCard`
+    /// grants the inner scroller only to a face that is a door). `.yields`
+    /// presents nothing: the host draws no face at all there.
+    func presentGutterFace(
+        _ face: BlockDecor.CommentFace, entries: [String], tokens: VoiceTokens
+    ) {
+        switch face {
+        case .card:
+            presentCard(CardContent(
+                entries: entries,
+                prefix: tokens.commentPrefix,
+                ink: NSColor(tokens.commentInk),
+                rule: NSColor(tokens.commentTint),
+                separator: NSColor(tokens.line),
+                fill: .clear,
+                toolTip: tokens.commentPrefix + entries.joined(separator: "  ·  ")))
+        case .badge:
+            present(
+                text: Self.badgeText(count: entries.count),
+                tint: NSColor(tokens.commentTint), ink: NSColor(tokens.commentInk),
+                style: .badge)
+        case .yields:
+            break
+        }
+    }
+
+    /// The badge's words — the count (Write's shipped "#n").
+    nonisolated static func badgeText(count: Int) -> String { "#\(count)" }
 }
 
 // MARK: - Overlay views
