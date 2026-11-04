@@ -276,6 +276,9 @@ struct TakesBoardView: View {
         }
         .reportsMenuLifeEnds { model.lensFilter.closeMenu() }
         .debugProbeScope(session)
+        // VX-770 batch 2 (reconciliation): this board's comment faces are
+        // THIS board's in the DEBUG face oracle (`BoardCommentFaceOracle`).
+        .boardCommentFaceMount(model)
         .task { await model.start() }
         // VX-732: the article's comments, live for this board's lifetime — the
         // one board that draws them starts the one per-note read.

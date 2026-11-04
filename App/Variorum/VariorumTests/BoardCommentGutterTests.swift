@@ -380,18 +380,30 @@ struct TakesCommentGutterTests {
     /// by design).** A commented block's prose starts where an uncommented
     /// one's does, at the same measure, and deleting the comments moves
     /// neither.
+    ///
+    /// **Reconciled (VX-770 batch 2, after the window's red at the deletion
+    /// arm on both trees):** this pin mounts TWO boards in one session, so it
+    /// reads each board's own records (`BoardCommentFaceOracle.reader(_:board:)`).
+    /// The red was the first board's leftover — its window closed with its
+    /// hosting view alive, so its face never ran `onDisappear` — answering the
+    /// second board's question through a session-keyed oracle. The face lines
+    /// are the arms' NON-VACUITY (the first board drew the comments; the board
+    /// mounted after the deletion draws none); the position lines are the
+    /// guard.
     @Test func aCommentNeverMovesTheTakesProse() async throws {
         await HostLaunchSettle.wait()
         let pin = TerminalMetricsPin()
         defer { pin.restore() }
         try await withTakesCommentWorld(style: .stack, comments: [longComment, shortComment]) { world in
-            let oracle = BoardCommentFaceOracle.reader(world.session.debugProbeScope)
-            oracle.reset()
+            let scope = world.session.debugProbeScope
+            BoardCommentFaceOracle.reader(scope).reset()
             let first = try await world.boardModel()
+            let firstBoard = BoardCommentFaceOracle.reader(scope, board: first)
             let (windowA, hostingA) = mountTakes(first, world, width: 1100)
-            await settle(windowA, hostingA, until: { oracle.face(world.commented.block) != nil })
+            await settle(windowA, hostingA, until: { firstBoard.face(world.commented.block) != nil })
             await settle(windowA, hostingA, until: { false }, maxTurns: 8)
-            #expect(oracle.face(world.commented.block) != nil, "non-vacuity: the comments are drawn")
+            #expect(firstBoard.face(world.commented.block) != nil,
+                    "non-vacuity: the first board draws the comments")
             let commented = try #require(pane("article", variant: world.commented.chosen, in: hostingA))
             let plain = try #require(pane("article", variant: world.plain.chosen, in: hostingA))
             let withComments = proseColumn(commented)
@@ -408,13 +420,21 @@ struct TakesCommentGutterTests {
 
             for id in world.commentIDs { try world.session.operations.deleteBlockComment(id) }
             let second = try await world.boardModel()
+            let secondBoard = BoardCommentFaceOracle.reader(scope, board: second)
             let (windowB, hostingB) = mountTakes(second, world, width: 1100)
             defer { closeTakes(windowB, second) }
             await settle(windowB, hostingB, until: {
                 pane("article", variant: world.commented.chosen, in: hostingB) != nil
             })
             await settle(windowB, hostingB, until: { false }, maxTurns: 10)
-            #expect(oracle.face(world.commented.block) == nil, "non-vacuity: no comments, no face")
+            // The diagnostic the reconciliation asked for — never asserted:
+            // what the CLOSED first board's record says now (a leftover if its
+            // face never left; nil if its graph heard the deletion or the close).
+            print("VX770-RECON: the closed first board's record after the deletion = "
+                + (firstBoard.face(world.commented.block).map {
+                    "\($0.kind) \($0.entries.count) entries" } ?? "none"))
+            #expect(secondBoard.face(world.commented.block) == nil,
+                    "non-vacuity: the board mounted after the deletion draws no face")
             let after = proseColumn(try #require(
                 pane("article", variant: world.commented.chosen, in: hostingB)))
             #expect(abs(after.left - withComments.left) < 0.5 && abs(after.width - withComments.width) < 0.5,

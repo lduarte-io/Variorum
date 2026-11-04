@@ -1212,6 +1212,9 @@ struct CompareBoardView: View {
         // into this session's scope too — an environment set below a
         // modifier does not reach it.
         .debugProbeScope(session)
+        // VX-770 batch 2 (reconciliation): this board's comment faces are
+        // THIS board's in the DEBUG face oracle (`BoardCommentFaceOracle`).
+        .boardCommentFaceMount(model)
         .task { await model.start() }
         .onAppear {
             // 18o U4 (PROVISIONAL #163): the board's peers leave through the

@@ -1029,7 +1029,7 @@ during render?) is the suspect; assess at the reconciliation.
 | Reading (this record's window sections, the BATCH 3 RECORD whole, the window logs `vx770-b2-red-run.log` / `vx770-b2-green.log` / `vx756-tier1.log`) | DONE |
 | Part 1 — line 417's mechanism, concluded by code read (below) | DONE (this commit) |
 | Part 2 — the render-write warnings, attributed from the logs (below) | DONE (this commit) — NOT batch 2's; no change |
-| Part 1 — the oracle attributes each record to the board that wrote it; the guard reads each board by name | NEXT |
+| Part 1 — the oracle attributes each record to the board that wrote it (`BoardCommentFaceOracle.swift`: scope → block → mount; `reader(_:board:)`; the `boardCommentFaceMount` environment), each board root publishes its token (`TakesBoardView.swift`, `CompareBoardView.swift` — one DEBUG modifier line each, beside `debugProbeScope`), the guard reads each board by name + prints `VX770-RECON` | DONE (this commit) — compile PENDING the recon tree's build |
 | Part 3 — `DerivedData/vx770-recon-post` build-for-testing at reconciled HEAD; READY-FOR-SUITES — RECONCILIATION | NOT STARTED |
 
 **Part 1 — the mechanism of `aCommentNeverMovesTheTakesProse`'s red at :417, CONCLUDED: R-B3-1 (an
