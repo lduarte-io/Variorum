@@ -828,7 +828,30 @@ rev, the old carousel drew a face, so her "none" was the empty chip — pinned r
 (record it as the carousel arm's mechanism). If that presence line is RED on rev, carousel had its
 own road and the presence pin is its pin. PENDING.
 
-### THE PREDICTION TABLE (PENDING the window)
+### THE RED RUN FLIPPED (the orchestrator, window `vx-770-tests-b2`, 03:25; the green run pending)
+
+**The red run (vx770-b2-rev, log `App/Variorum/DerivedData/logs/vx770-b2-red-run.log`): "Test run
+with 11 tests in 3 suites failed … with 27 issues (including 4 warnings)" — red-on-old VERIFIED
+for all three members, one resolution and one honest prediction miss:**
+- **VX-730:** `stackShowsEveryCommentWhole` red both arms (entries ≠ all comments, a line cap
+  present, no card) — the first-comment/lineLimit-4 mechanism confirmed on the old tree.
+- **VX-731 slot split:** red at `face != nil` — the old open fan drew NO gutter, as surveyed.
+- **VX-731 carousel — NOTE (a) RESOLVED:** the presence line PASSED on rev (the old carousel DID
+  draw a face); the red is entries/cap/card. Her carousel "shows nothing" sighting WAS the empty
+  Study chip (R-B2-3's road), and `aOneCommentBlockStillSaysSoInStudyAtANarrowMargin` is
+  red-on-old (`!words.isEmpty` failed on rev) — the chip pin carries the carousel arm's
+  mechanism, exactly as the B2-F1 ruling's note (a) asked the oracle to decide.
+- **VX-728:** both Compare pins red (card: `face != nil`; badge: kind/label) — no gutter existed.
+- **The Compare add/delete guard:** red on rev ONLY at its non-vacuity line — as predicted.
+- **PREDICTION MISS, recorded honestly:** `aCommentNeverMovesTheTakesProse` was predicted green
+  on both and went RED on rev at `oracle.face(…) == nil` — the OLD margin note drew a face at a
+  geometry where the shared ladder YIELDS. Directionally correct red-on-old (the old road drew
+  where the new road deliberately does not), not a hollow pin; the reconciliation is the
+  implementer's at the next touch or the ladder's. The pure suites (`writesFacesAreTheOneDecision`
+  ×6, `compareLaneTable`, `aRowHostsCardStaysInItsRow`) were GREEN on rev as predicted — the
+  byte-identical moves proven.
+
+### THE PREDICTION TABLE (as the implementer wrote it; the observed red column is the section above)
 
 | # | Test | `vx770-b2-rev` (behaviour files at 1c4c21d8c) | `vx770-b2-post` |
 |---|---|---|---|
