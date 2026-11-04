@@ -1020,6 +1020,72 @@ reconciles (either the live feed makes the line green as-is, or the deletion arm
 warnings cluster inside the new BoardCommentGutter suites — the DEBUG face oracle (written to
 during render?) is the suspect; assess at the reconciliation.
 
+
+### RECONCILIATION (batch 2's implementer, resumed after batch 3 — written before any code)
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (this record's window sections, the BATCH 3 RECORD whole, the window logs `vx770-b2-red-run.log` / `vx770-b2-green.log` / `vx756-tier1.log`) | DONE |
+| Part 1 — line 417's mechanism, concluded by code read (below) | DONE (this commit) |
+| Part 2 — the render-write warnings, attributed from the logs (below) | DONE (this commit) — NOT batch 2's; no change |
+| Part 1 — the oracle attributes each record to the board that wrote it; the guard reads each board by name | NEXT |
+| Part 3 — `DerivedData/vx770-recon-post` build-for-testing at reconciled HEAD; READY-FOR-SUITES — RECONCILIATION | NOT STARTED |
+
+**Part 1 — the mechanism of `aCommentNeverMovesTheTakesProse`'s red at :417, CONCLUDED: R-B3-1 (an
+oracle read across a closed window), not the one-shot feed.** The line asks whether the SECOND board
+— a fresh `TakesBoardView` and model, mounted AFTER `deleteBlockComment` — draws a face for the block.
+By code read it cannot, on either tree: on the fix its note's one read (`.task(id: blockID)`) runs
+after the deletion and finds nothing, so `CommentGutterFace` draws nothing and records nothing; on the
+pre-fix tree the old note reads the same nothing and takes its `Color.clear` branch, which records
+nothing. Nothing else in the session writes that block's key. So the record the line found is the
+FIRST board's: written by its face's `onAppear`, and never erased — the oracle's only eraser is
+`.onDisappear`, and the test's close (`model.teardown()`, `orderOut`, `close()` on a window with
+`isReleasedWhenClosed = false`, its hosting view still the content view and still held by the test)
+does not take the face out of a live SwiftUI graph. The oracle was keyed per SESSION, so the second
+board's question was answered by the first board's leftover — which is also why the line read the
+same on both trees, and why the red run's note ("the old margin note drew a face at a geometry where
+the ladder yields") was this same leftover, not a geometry difference. The one-shot-feed reading
+needs a board alive across the deletion whose face the line means; the only such board is the closed
+one, which she cannot see. Batch 3's live feed might now clear the line by accident (if the closed
+window's graph still hears the feed, the face leaves and `.onDisappear` forgets) — which is exactly
+why the pin must not lean on it either way.
+
+**The fix (harness — DEBUG-only, no product code):** every record is attributed to the board that
+wrote it. Each board root (`TakesBoardView`, `CompareBoardView`) publishes a mount token — its model's
+identity — through the environment, beside its probe scope; the oracle keys records
+scope → block → mount; `reader(scope, mount:)` reads ONE board, and `reader(scope)` keeps the answer
+batch 3's pins rely on (the latest record any board of the session wrote — honest wherever one board
+is up). The guard reads its first board and its second board BY NAME, so a stale first-window record
+can neither satisfy nor fail the second board's question; it also prints what the first (closed)
+board's record says after the deletion (`VX770-RECON`, a diagnostic, never asserted), so the window's
+log shows which way the closed window went. **The deletion arm STAYS in the guard** (its home is "deleting
+the comments moves the prose not a point"); its face line is the deletion's non-vacuity, now about the
+board mounted after it. The staleness of a board alive across a deletion — VX-732 — is batch 3's
+`aCommentChangedFromOutsideTheBoardFollowsTheStore`, not duplicated here.
+
+**The reconciled guard's evidence story:** green on both trees by design. Its POSITION assertions
+are the guard (a commented block's prose at the plain block's left edge and measure; unmoved after
+the deletion). Its two non-vacuity lines say the guard measured what it claims: the first board drew
+the comments (that board's record), and the board mounted after the deletion draws none (its own
+record). A red there would now be a real fact about the named board.
+
+**Part 2 — the render-write warnings: NOT batch 2's (no change).** Two different things carry the word:
+- The Swift Testing summary's **"4 warnings"** are swift-dependencies' "`@Dependency(\.date)` has no
+  test implementation" (location `Variorum/AppSession.swift:833`), recorded against «unknown» at
+  03:26:13 during the seal-fallback suite (`vx770-b2-green.log` :532–578), before the batch's suites
+  began.
+- The SwiftUI console line **"Modifying state during view update"** prints 4,623 times in the green
+  log and 4,463 times in batch 1's tier-1 log (`vx756-tier1.log`, built before batch 2 existed), with
+  IDENTICAL per-suite counts in the suites both runs share (the scroll-memory suite 923, the soak 728,
+  the entry band 610, the margin grid 446 → 429…): every mounted Takes board prints it. In this
+  batch's own suites the count is identical on the pre-fix tree and on the fix — red run (rev): Takes
+  29, Compare 13; green run (post): 29, 13 — so neither the shared face nor the oracle adds one. (The
+  oracle writes a static, non-observed table from `onAppear`/`onChange` callbacks, never during a
+  body — R-B3-2's reading, confirmed by the counts.) **A candidate ticket for the orchestrator, not
+  this batch:** the mounted boards' own state write during update, pre-existing in every Takes and
+  Compare mount.
+
 ---
 
 ## BATCH 3 RECORD — VX-732 + VX-733, the post-undo staleness pair (implementer: opus-implementer, 2026-11-04)
