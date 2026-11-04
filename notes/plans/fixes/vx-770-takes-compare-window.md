@@ -2865,6 +2865,23 @@ both voices.
   `/private/tmp/claude-501/-<home>-dev-variorum/17b9e621-2e5d-4717-a2d1-529f5d285a91/scratchpad/walk/`
   (`burst.py`, `shift.py`, `boarddiff.py`, `toggles.zsh`, `ax`, `wl`, the app's stderr `app.log` with every landing story).
 
+### THE W2 RE-WALK (the W2 cycle's acceptance — an Opus re-walker under the orchestrator's HELD claim `vx-770-final`, 2026-11-04)
+
+**NOT DONE (first line, kept current):** IN PROGRESS — nothing walked yet.
+
+Build: `App/Variorum/DerivedData/vx770-gatef/Build/Products/Debug/Variorum.app` (FINAL bytes — `nm` finds the W2
+fix's `landingTargetJustMoved` ×6 in its `Variorum.debug.dylib`; branch head 4f0874651). The fix under watch: THE W2
+CYCLE below (a5fbc6151 — margin grid's late-measured growth re-aimed at her row's own report). Acceptance per trial:
+ONE settled landing — the burst shows no second movement after rest, and the app's story reads `after 0 hops`.
+
+| row | state |
+|---|---|
+| posture as found (pre-launch) | PENDING |
+| W2-R trial 1 · 2 · 3 (margin grid, her shape, both voices across the three) | PENDING |
+| W1-R control (stack) | PENDING |
+| look line: her open fans stay open (R-770-1) | PENDING |
+| posture at the end | PENDING |
+
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
 The walk record above stands: every member's rows PASS except **W2 — margin grid still hops
