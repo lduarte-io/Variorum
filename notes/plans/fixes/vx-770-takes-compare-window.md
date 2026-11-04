@@ -237,11 +237,11 @@ rushed (members are sub-issues; they close one by one).
 | 6 | VX-733 undo leaves the fan wash | Batch 3 | FIXED — red-on-old ×4 + across-mode-switch (window b3r) + green; B3-P1/B3-P2 in her bundle |
 | 7 | VX-757 track-paragraphs flicker | Batch 4 | FIXED — red-on-old both toggle pins (window b3r) + green; toggle-name confirm in her bundle; walk W15 |
 | 8 | VX-740 double outline column (P-770-1) | Batch 4 | FIXED — red-on-old (window b3r: two columns on old) + green; walk W16 |
-| 9 | VX-758 created-sort fallback | Batch 5 | NOT STARTED |
-| 10 | VX-739 word count (pin-first) | Batch 5 | NOT STARTED |
-| 11 | VX-638 pager label | Batch 5 | NOT STARTED |
-| 12 | VX-652 lenses menu edge | Batch 5 | NOT STARTED |
-| 13 | VX-634 "Variant" wording | Batch 5 | NOT STARTED |
+| 9 | VX-758 created-sort fallback | Batch 5 | BUILT — the Entry date arm was the broken one (the Created arm always ordered every note); fix 630631af6 (+ heal 1e295451f): the Library's COALESCE(entry_date, created_at); RED/GREEN + revert REAL (`swift test`); walk W20 PENDING |
+| 10 | VX-739 word count (pin-first) | Batch 5 | BUILT CONDITIONALLY — traced (005e50b93; the AppKit premise measured on a bare rig; her 12/9 reproduced by the trace), pin 7b7ab0566, fix 196fdb145; red/green PENDING the window (green on rev ⇒ revert the fix, record-only); walk W17 PENDING |
+| 11 | VX-638 pager label | Batch 5 | BUILT — traced + pins 357a2f970, fix 4f1884d72 (`forgetPages` on the three close doors); red/green PENDING the window; walk W19 PENDING |
+| 12 | VX-652 lenses menu edge | Batch 5 | NOT BUILT — premise reachable at EVERY width; fork B5-F1 returned (bc764ba40): a new AppKit-anchored pull-down only a live run can verify — options A/B/C, the orchestrator's call; W18 look-only |
+| 13 | VX-634 "Variant" wording | Batch 5 | BUILT — sweep + pins c3a1d6d4a, fix 595e7369e ("Delete Take"); RED/GREEN + revert REAL (`swift test`); siblings → one Wording ticket candidate (R-B5-4); walk W21 PENDING |
 | 14 | The ladder (whole diff, fable-reviewer) | Orchestrator | NOT STARTED |
 | 15 | The use walk (content-only; Opus walker) | Orchestrator | NOT STARTED |
 | 16 | Closeout (canon deltas if any · tickets triaged · QUESTIONS bundle · handoff · merge) | Orchestrator | NOT STARTED |
@@ -1769,10 +1769,12 @@ pair's re-key) fits a flicker on that toggle. CONFIRM with her that "track parag
 
 ## BATCH 5 RECORD — the singles: VX-758 · VX-739 · VX-638 · VX-652 · VX-634 (implementer: opus-implementer, 2026-11-04)
 
-**NOT DONE (first line, kept current):** every member is in progress; mounted red/green claims are
-PREDICTIONS until the orchestrator's suite window (this session is headless — no `xcodebuild test`,
-no app launch, no stage); core `swift test` results are REAL where stated; the use walk (W17–W18
-and the batch's other rows); the cold ladder.
+**NOT DONE (first line, kept current):** VX-652 is NOT BUILT (fork B5-F1 returned — the fix needs a new
+AppKit-anchored pull-down that only a live run can verify); VX-739's and VX-638's mounted red/green are
+PREDICTIONS until the orchestrator's window (VX-739's fix is CONDITIONAL on its red run); the use walk
+(W17–W21, both voices); the cold ladder. REAL results: VX-758 and VX-634 red → green by `swift test`,
+each revert-verified. No `Shared/`, `Sync/`, schema, capability-registry, `PaneSurface` or `BlockRangeIndex`
+file in the diff.
 
 **LIVE STATUS**
 | piece | state |
@@ -1791,7 +1793,8 @@ and the batch's other rows); the cold ladder.
 | E · VX-634 sweep + pins (this commit) | DONE — `UndoLabelVocabularyTests` (core): `swift test` on the pre-fix source **RED, real** — "3 tests in 1 suite failed … with 3 issues": the behaviour pin both directions (⌥⌘Z and ⇧⌥⌘Z read "Delete Variant"), the fence's one offender `Operations+Deletion.swift:144 — "Delete Variant"`; the matcher control GREEN |
 | E · VX-634 fix (595e7369e) | DONE — `swift test` **GREEN, real** (49 tests, 4 suites: the new pins + `UndoStackTests` + `RedoStackTests` with their four label lines edited). **Behavioural revert, real:** `Operations+Deletion.swift` written back to c3a1d6d4a's bytes by `git show >` (working tree ONLY — the index stayed clean, verified `git diff --cached --quiet`), the pins **RED** ("3 tests in 1 suite failed … with 3 issues"), restored from HEAD, sha256 `0c7c0a0b…3ce8` = the pre-revert copy, `cmp` identical, `git status` clean |
 | `DerivedData/vx770-b5` build-for-testing (HEAD) | DONE — TEST BUILD SUCCEEDED at 01f60b52f's source (log `App/Variorum/DerivedData/logs/vx770-b5-build2.log`; the first pass `vx770-b5-build.log` red on ONE test-file isolation error — the VX-739 pin's nested `deliver()` — fixed at 01f60b52f); no warning in a touched file |
-| **Behavioural revert tree — ANNOUNCED HERE BEFORE IT STARTS:** built from a CLEAN EXPORT of HEAD (`git archive` into `scratchpad/vx770-b5-rev-src/`, outside the shared worktree — nothing in the worktree or its index moves) with exactly two behaviour files at their pin commits: `Features/Editor/EditorViewModel.swift` at 7b7ab0566 (VX-739's pin commit = its pre-fix source) and `Features/Takes/TakesBoardLayout.swift` at 357a2f970 (VX-638's pin commit = its pre-fix source); every test file at HEAD; core at HEAD (VX-758 and VX-634 are proven red/green by `swift test` already); into `App/Variorum/DerivedData/vx770-b5-rev` | IN FLIGHT |
+| **Behavioural revert tree — ANNOUNCED HERE BEFORE IT STARTS:** built from a CLEAN EXPORT of HEAD (`git archive` into `scratchpad/vx770-b5-rev-src/`, outside the shared worktree — nothing in the worktree or its index moves) with exactly two behaviour files at their pin commits: `Features/Editor/EditorViewModel.swift` at 7b7ab0566 (VX-739's pin commit = its pre-fix source) and `Features/Takes/TakesBoardLayout.swift` at 357a2f970 (VX-638's pin commit = its pre-fix source); every test file at HEAD; core at HEAD (VX-758 and VX-634 are proven red/green by `swift test` already); into `App/Variorum/DerivedData/vx770-b5-rev` | DONE — the `git archive` export was refused by the build-number script (R-13r-6: "not a full git checkout"), so the tree was built from a `git clone --shared` of this branch at 34d196ca3 in `scratchpad/vx770-b5-rev-src/` (full, non-shallow, its own index), the two files written there by `git show`; its `git diff --stat` = exactly the two fixes reversed (19 + 21 lines); TEST BUILD SUCCEEDED (log `App/Variorum/DerivedData/logs/vx770-b5-rev-build.log`). **The binaries differ as intended:** `nm` finds `forgetPages` ×5 in `vx770-b5`'s `Variorum.debug.dylib`, ×0 in `vx770-b5-rev`'s. The shared worktree and its index never moved (`git status` clean before, during, after) |
+| READY-FOR-SUITES, prediction table, walk rows W17–W21, residue, ledger rows 9–13, self-assessment | DONE (this commit) |
 | C · VX-638 | NOT STARTED |
 | D · VX-652 | NOT STARTED |
 | E · VX-634 + the sweep | NOT STARTED |
@@ -2057,3 +2060,183 @@ first display matches the drawn width). Nothing in the app pops a menu that way 
   facts make a headless build a blind one, which this batch's discipline rules out; (C) otherwise.
   **Not built here** — the record's honest line, not a deferral by default: the fix needs a mechanism and
   a live check this headless batch cannot give it.
+
+### AS BUILT — batch 5
+
+Commits (in order): record c59958d55 · **VX-758** pins a6a4ff83a, fix 630631af6, the sweep's heal 1e295451f ·
+**VX-739** trace 005e50b93, pin 7b7ab0566 (+ its compile fix 01f60b52f), fix 196fdb145 · **VX-638** trace +
+pins 357a2f970, fix 4f1884d72 · **VX-634** sweep + pins c3a1d6d4a, fix 595e7369e · **VX-652** fork bc764ba40 ·
+LIVE STATUS commits between.
+- **VX-758** — `Sources/VariorumCore/Queries/ReadingAssembly.swift` `stampOrder`: the `.entryDate` arm is
+  `COALESCE(c.entry_date, c.created_at) DIR, c.id DIR` — the Library's own date rule verbatim. Pins
+  `Tests/VariorumCoreTests/BookDateSortFallbackTests.swift` (7 functions, 11 cases) + the old undated-last
+  pin re-shaped to her rule (`ReadingAssemblyQueryTests.entryDateSortOrdersJournalsAndUndatedNotesByTheirCreation`).
+- **VX-739** — `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` `updateCaretContext`: the live
+  word-count arm writes only when `!suppressEditProcessing`. Pin `App/Variorum/VariorumTests/WriteWordCountFlipTests.swift`.
+- **VX-638** — `App/Variorum/Variorum/Features/Takes/TakesBoardLayout.swift`: `forgetPages(ofClosed:)` from
+  `closeAllFans`, `toggleExpanded`'s close and `closeCollapsedFans`. Pins `App/Variorum/VariorumTests/TakesPagerAfterCloseTests.swift`.
+- **VX-634** — `Sources/VariorumCore/Operations/Operations+Deletion.swift`: "Delete Take"; the label's four
+  existing pins edited. Pins `Tests/VariorumCoreTests/UndoLabelVocabularyTests.swift` (behaviour + the fence).
+- **VX-652** — nothing built (B5-F1).
+- Untouched: `Sync/`, schema, `Shared/` (`TextMetrics` and the ledger are READ by the pin only), the
+  capability registry, `PaneSurface`, `EditorTextView`, `BlockRangeIndex`, batches 1–4's files except
+  `TakesBoardLayout.swift` (batch 3's `closeCollapsedFans` gained one line — the smallest change: the
+  collapse is one of the three close doors). No TK1 API, no attribute stamp. **Canon deltas PROPOSED for the
+  closeout** (SurfaceContracts, The Bookcase and books — the order ▾ sentence, in place): "a book's date
+  order sorts every note by its entry date, else the day it was written — the Library's date rule"
+  (+ VX-758). VX-739/VX-638/VX-634 need no line (the contract already says what they restore).
+  **MOBILE PARITY:** VX-758 and VX-634 are CORE changes, so the phone reads them too — its books show
+  their stored order through the same `stampOrder` (an entry-date journal's undated notes now sort by
+  creation instead of last; no phone code changed, no phone suite asserts undated order — read
+  `MobileShelfTodayDoorTests`/`MobileShellTests`), and the undo label is the same string on both
+  platforms. VX-739 and VX-638 are Mac-only. Whether a simulator run is owed is the orchestrator's call
+  under the coordinator's rule (no `Shared/` file is in the diff).
+
+### THE PREDICTION TABLE — batch 5's Mac pins (PENDING the window; the core rows are REAL, above)
+
+| # | Test | `vx770-b5-rev` | `vx770-b5` |
+|---|---|---|---|
+| 1 | `WriteWordCountFlipTests/flippingATakeTwiceKeepsTheNotesWordCountTrue(mounted: false)` | **R** — flip 1 G (8); flip 2 **12 for 11**, flip 3 **9 for 8** (four `#expect`s); `VX739-TRACE … STALE` lines at flip 2's write | G |
+| 2 | `…(mounted: true)` | **R** — the same | G |
+| 3 | `…/aWordTypedIntoABlockMovesTheTotalAtOnce` (GUARD) | G | G |
+| 4 | `TakesPagerAfterCloseTests/closeAllThenExpandAllStartsTheSplitAtItsFirstPage` | **R** — page 1 for 0 | G |
+| 5 | `…/closeAllForgetsTheRailsPageToo` | **R** — page 2 for 0 | G |
+| 6 | `…/closingOneFanForgetsOnlyItsOwnPage` | **R** on the re-open line; its guard line G | G |
+| 7 | `…/aCollapsedFanForgetsItsPage` | **R** | G |
+| 8 | `…/aFanThatStaysOpenKeepsItsPage` (GUARD) | G | G |
+| 9 | `…/aFanFollowTheScrollKeepsBloomedKeepsItsPage` (GUARD) | G | G |
+| 10 | the green list below | — | G — predicted; the risks are in the self-assessment |
+
+**Reading the runs:** rows 1–2 RED on rev and GREEN on b5 = VX-739 FIXED. **Rows 1–2 GREEN on rev = the
+harness does not reproduce the stale road: revert 196fdb145 (one commit), VX-739 falls to RECORD-ONLY with
+the pin kept as the characterization and W17 the eye** — read its `VX739-TRACE` lines first (no `STALE`
+line means AppKit posted no in-write selection change in the test host; a `#require` premise red means the
+flip never landed). Rows 4–7 red on rev + green on b5 = VX-638 FIXED (its rows are pure state transitions,
+so a green on rev would mean the trace is wrong — read before anything else).
+
+## READY-FOR-SUITES — batch 5 (the orchestrator's window; from `App/Variorum/`)
+
+Both trees are built (`DerivedData/vx770-b5` at HEAD's source, 01f60b52f — log `vx770-b5-build2.log`;
+`DerivedData/vx770-b5-rev` — log `vx770-b5-rev-build.log`; both TEST BUILD SUCCEEDED, 2.9 GB each; 45 GiB
+free after). Run `test-without-building`:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building <args>`.
+Confirm the "Test run with N tests" line and read the `skipped:` lines; keep the `VX739-TRACE` /
+`VX739-SUMMARY` lines.
+
+1. **THE RED RUN** on `vx770-b5-rev` (≈ 1–2 min):
+   `-only-testing:VariorumTests/WriteWordCountFlipTests -only-testing:VariorumTests/TakesPagerAfterCloseTests`
+   — expect "Test run with 8 tests in 2 suites" (one function parameterized ×2); the prediction table's
+   rev column (rows 1, 2, 4–7 red; 3, 8, 9 green).
+2. **THE GREEN RUN** on `vx770-b5` — 90 suite types: the two new suites; every suite type in a test file
+   that reads the Write word counts or drives Write's differential/flip/rewrite roads through
+   `EditorViewModel` (the changed `updateCaretContext`), plus the editor seam's caret-context families
+   (decor transaction, identity audit, markdown caret face, current-block continuity) and the tour suites
+   (their file drives Write); every Takes-board suite that pages, opens or closes fans (`TakesBoardLayout`);
+   every book suite that sorts or reads a book's order (`ReadingAssembly` — core); the two vocabulary pins
+   (`DeadVocabularyTests`, `StatusSeamVocabularyTests` — VX-634's string); and the acceptance spine (every
+   suite type in `TutorialWalkTests.swift` + `TutorialCurrencyTests`):
+   `-only-testing:VariorumTests/WriteWordCountFlipTests -only-testing:VariorumTests/TakesPagerAfterCloseTests -only-testing:VariorumTests/BlockHistoryPaletteDoorTests -only-testing:VariorumTests/BlockTOCStatusTests -only-testing:VariorumTests/CommandRouterTests -only-testing:VariorumTests/CommitFlowTests -only-testing:VariorumTests/ConfirmationsSettingTests -only-testing:VariorumTests/CrossBlockCompoundTests -only-testing:VariorumTests/EditorProjectionEngineTests -only-testing:VariorumTests/EditorSeamCostTests -only-testing:VariorumTests/EditorSeamMountedCostTests -only-testing:VariorumTests/EditorSessionTests -only-testing:VariorumTests/FanBadgePlacementTests -only-testing:VariorumTests/FanFlowTests -only-testing:VariorumTests/FannedDefaultsBoardTests -only-testing:VariorumTests/FannedDefaultsTests -only-testing:VariorumTests/InlineEditorWindowTests -only-testing:VariorumTests/MenuFlightDoorAwaitTests -only-testing:VariorumTests/MergeArrangementTests -only-testing:VariorumTests/MergeCeremonySheetTests -only-testing:VariorumTests/MoveAndExecuteTests -only-testing:VariorumTests/ProgrammaticReplaceFaceTests -only-testing:VariorumTests/ReturnKeyUndoSignTests -only-testing:VariorumTests/ReviewRoundFixTests -only-testing:VariorumTests/SealDoorTests -only-testing:VariorumTests/SpaceEaterTests -only-testing:VariorumTests/StaleWriteIntentTests -only-testing:VariorumTests/StatusCenterTests -only-testing:VariorumTests/TakeChoiceBadgeTests -only-testing:VariorumTests/TakesLandingTests -only-testing:VariorumTests/TakesWordCountTests -only-testing:VariorumTests/TourClosingCardTests -only-testing:VariorumTests/TourEndCardAsideGateTests -only-testing:VariorumTests/TourEndCardTests -only-testing:VariorumTests/TourEngineTests -only-testing:VariorumTests/TourEntryTests -only-testing:VariorumTests/TourPoolTuckTests -only-testing:VariorumTests/TourScriptTests -only-testing:VariorumTests/TourSpotlightTests -only-testing:VariorumTests/EditorDecorTransactionTests -only-testing:VariorumTests/IdentityProjectionAuditWalkTests -only-testing:VariorumTests/MacIdentityAuditWiringTests -only-testing:VariorumTests/MarkdownCaretFaceTests -only-testing:VariorumTests/PaneMarkdownCaretFaceTests -only-testing:VariorumTests/SettleRewrapOverlayTests -only-testing:VariorumTests/CurrentBlockContinuityTests -only-testing:VariorumTests/StatusSeamVocabularyTests -only-testing:VariorumTests/DeadVocabularyTests -only-testing:VariorumTests/LensesReorderTests -only-testing:VariorumTests/QuitFinalizeSurfacesTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/TakesBufferConvergenceTests -only-testing:VariorumTests/TakesCollapsedFanRoadsTests -only-testing:VariorumTests/TakesCollapsedFanWashTests -only-testing:VariorumTests/TakesCommentFeedLivenessTests -only-testing:VariorumTests/TakesExpansionCostTests -only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/TakesOpenFanRuleTests -only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/TakesRailPagingTests -only-testing:VariorumTests/TakesSeededEntryLandingTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/BindDoorTests -only-testing:VariorumTests/BookCollectingDoorsTests -only-testing:VariorumTests/BookDropTests -only-testing:VariorumTests/BookOrderConversionTests -only-testing:VariorumTests/BookPanelDragGateTests -only-testing:VariorumTests/BookStructureModelTests -only-testing:VariorumTests/BookViewDropGateTests -only-testing:VariorumTests/EncryptionExplainedSeedTests -only-testing:VariorumTests/JournalBooksTests -only-testing:VariorumTests/MembershipChoiceTests -only-testing:VariorumTests/SampleLibraryTests -only-testing:VariorumTests/TimelineAndReadingsTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialDeletionActsTests -only-testing:VariorumTests/TutorialDoorTests -only-testing:VariorumTests/TutorialFannedMatrixTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/TutorialLookingActsTests -only-testing:VariorumTests/TutorialPrivacyChapterTests -only-testing:VariorumTests/TutorialStructureActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialWritingActsTests -only-testing:VariorumTests/TutorialCurrencyTests`
+   **The DELTA, stated honestly.** 45 of the 90 are in the consolidated 160 set (window b3r, on `vx770-b4`) —
+   they re-run here ONLY because batch 5 changed a source under them (none of them failed there). **The other
+   45 have run in no window of this run:** `WriteWordCountFlipTests TakesPagerAfterCloseTests CommitFlowTests CrossBlockCompoundTests EditorProjectionEngineTests EditorSeamCostTests EditorSeamMountedCostTests EditorSessionTests FanBadgePlacementTests FanFlowTests InlineEditorWindowTests MenuFlightDoorAwaitTests MergeArrangementTests MergeCeremonySheetTests ProgrammaticReplaceFaceTests ReturnKeyUndoSignTests ReviewRoundFixTests SpaceEaterTests TourClosingCardTests TourEndCardAsideGateTests TourEndCardTests TourEngineTests TourEntryTests TourPoolTuckTests TourScriptTests TourSpotlightTests EditorDecorTransactionTests IdentityProjectionAuditWalkTests MacIdentityAuditWiringTests MarkdownCaretFaceTests PaneMarkdownCaretFaceTests SettleRewrapOverlayTests DeadVocabularyTests BindDoorTests BookCollectingDoorsTests BookDropTests BookOrderConversionTests BookPanelDragGateTests BookStructureModelTests BookViewDropGateTests EncryptionExplainedSeedTests JournalBooksTests MembershipChoiceTests SampleLibraryTests TimelineAndReadingsTests`.
+   **And the wider truth:** `updateCaretContext` runs on every caret move of every mounted Write editor, so
+   ~98 test files mount the changed function (`withEditor`) and ~215 files touch one of batch 5's four changed
+   sources; the 90 above are the ones whose ASSERTIONS can move (word counts, the rewrite roads, paging,
+   book order, labels). **Recommended pre-ladder gate (the orchestrator's call): ONE whole-`VariorumTests`
+   run on `vx770-b5`** — it subsumes every list of this run, and batch 5 is the batch that touched Write's
+   core and two core Queries/Operations files.
+   Known shapes: VX-337's two load-dependent flakes (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt`
+   among them — run alone first); an unexpected `TakesEntryBandTests` red → the defaults domain first; the
+   one capture-harness skip; the dev store's newer-schema hazard for suites that mount the app shell.
+3. **Core, already REAL (no window needed):** `swift test` — the whole package green but one load-timed
+   MCP harness test that passes alone (VX-758's fix commit message and LIVE STATUS); the VX-758 and VX-634
+   pins red on the pre-fix source and on their reverts, green at HEAD. Re-run `swift test` after any later
+   change to core.
+4. Results into the prediction table; then `vx770-b5-rev` and `scratchpad/vx770-b5-rev-src/` may be deleted
+   (`vx770-b5` stays for the walk).
+
+### THE USE WALK — batch 5 rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug from `DerivedData/vx770-b5`; both voices; never Resume Sync)
+
+- **W17 (VX-739 — her J3 shape):** a note through the band: "You, I hope :)" / "A second short block of
+  prose." / "A third."; Write, click into block 1 → the bottom bar "3w block · 11w in note"; the bottom bar's
+  Takes → the panel; **＋ blank & choose** → "0w · 8w"; **✓ the original** → **"3w block · 11w in note"**
+  (the pre-fix build said 12w); Close; open the panel, **✓ the blank** → **8w** (pre-fix 9w). Capture the
+  bottom bar at every step; both voices.
+- **W18 (VX-652 — the premise, LOOK ONLY; nothing was built):** Lenses at the 1270-pt default, "+ column ▾"
+  → capture the open menu against the window's right edge (expected: past it by roughly the menu's width
+  minus the control's); the same at a narrower window; and with the window's right edge against the screen's
+  (AppKit shifts it onto the screen). The capture is the evidence for B5-F1's ruling.
+- **W19 (VX-638):** slot split; a block with three takes; expand all → "◀ 1–2 of 3 ▶"; ▶ → "2–3 of 3"; close
+  all; expand all → **"1–2 of 3" over cards 1–2** (pre-fix: "2–3 of 3" over cards 1–2); the same through the
+  split's own close line and back. Look-only line (R-B5-1): ▶ to page 2, scroll the split's row far off the
+  page and back — note whether the caption and the cards agree.
+- **W20 (VX-758):** a book holding journal-dated notes (⌘J entries filed into it) and undated ones written on
+  different days (the dev store's content is ours); the navigator's order ▾ → **Entry date ↑ and ↓**: every
+  note in date order, the undated ones by the day they were written (their shown names ARE those days) — none
+  piled at the end; **Created ↑/↓** unchanged (creation order). Both voices.
+- **W21 (VX-634):** Takes, a fan's card ⌄ → Delete this take → ⌥⌘Z → the receipt **"Undid: Delete Take"**;
+  ⇧⌥⌘Z → **"Redid: Delete Take"** (receipt style quiet: the bottom bar's trailing line). Both voices.
+
+### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
+
+- **R-B5-1 (VX-638's class beyond the close doors):** a strip re-born while its block never closed — a lazy
+  row de-realized and re-realized, a follow-the-scroll bloom leaving and re-entering — still meets a
+  non-zero page with a strip born at its leading edge. The root fix is the strip honouring its page at birth
+  (a SwiftUI scroll on appear); not her road, not pinnable headlessly. W19's look line.
+- **R-B5-2 (VX-739's sibling, harmless as traced):** the same in-write selection change reports the
+  NEIGHBOUR block to `noteFocusedBlock` for that moment; the executor's trailing call overwrites it (last
+  write wins) and no persistent state was found — the VX-303 caret-placement bracket's class. A look line.
+- **R-B5-3 (the ledger's structural weakness):** `EditorSurfaceLedger.setLiveWordCount` writes a count
+  without the text it counted, and `adopt` trusts the cache by text equality — so ANY future road that writes
+  a wrong live count would persist the same way. The guard closes the one road found; a `Shared/` hardening
+  (record or verify the counted text) is a later candidate, deliberately not built (it couples to the echo
+  check, and `Shared/` would bind the phone suites).
+- **R-B5-4 (VX-634's sweep, one Wording ticket candidate):** "Archive Variant" (a model word — the fence's
+  one allow-listed entry, to be removed with the fix), "Pool Copy" (the area is Snippets), "Convert to Book"
+  (the door is "Bind into a Book…"), "Sample Library" (the restore doors are per-book) — her words to pick.
+- **R-B5-5 (VX-758, her bundle):** (a) her word was "creation date"; the broken arm was Entry date (the
+  Created arm always ordered every note) — confirm she meant the date order; (b) the Last touched / Major
+  revision arms keep NULL-last while the Library falls back to `created_at` there too — parity is hers to
+  want or not (the doc's reason: "a post that never crossed the churn threshold shouldn't lead a by-revision
+  book").
+- **R-B5-6 (process, healed):** the a63e88c9f index sweep (an in-flight `git checkout <commit> -- <file>`
+  revert STAGES the restored content; a plain `git commit` beside it sweeps it in). Healed at 1e295451f; this
+  batch's later reverts used `git show >` (working tree only) and a `git clone --shared` build tree.
+- **R-B5-7 (a load flake, not this diff's):** `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+  timed out at 29.4 s against its 15-s bound under the full-package `swift test` load; 3 of 3 green alone in
+  2.2 s. A flake-list candidate.
+
+## SELF-ASSESSMENT — batch 5 (the first of the two reviews — the implementer's)
+
+- **What is proven, and how far.** VX-758 and VX-634 are proven the full way here: traced, pinned, RED on the
+  pre-fix source and on a behavioural revert, GREEN at HEAD, by real `swift test` runs (VX-758 also over the
+  whole core package). VX-739's mechanism is traced end to end and its one AppKit premise is MEASURED on a
+  bare TK2 rig (the in-write selection change and the 0 → 14 caret move), and the trace reproduces her two
+  numbers exactly (12 and 9) — but its mounted pin is unrun, so its red is a prediction and the fix is
+  conditional on it. VX-638's pins are pure state transitions (predictable with high confidence), but the
+  claim that a re-born strip comes up at its leading edge rests on her capture, not on a measurement of
+  mine. VX-652 is not built.
+- **Why these shapes.** VX-758: the Library already had the rule — reusing its exact spelling makes the
+  two listings agree by construction. VX-739: the defect is WHEN the live arm writes, so the guard is on the
+  write, at the one flag every storage-write primitive raises; nothing in the shared ledger moved. VX-638:
+  "close-all resets" is the layout's own letter; the reset is scoped to the strips a close tears down, with
+  the follow-the-scroll exception that keeps a mounted strip's page. VX-634: the word is minted in core, so it
+  is fixed there, and the fence makes the next model word unshippable.
+- **What could regress, and why I think it does not.** (1) *VX-758:* any listing or pin that relied on
+  undated notes trailing an entry-date book — the core package is green; the app's entry-date pins were read
+  (the drag-gate pins read the shown order relatively; the others are all-dated); the phone shows the same
+  rule (MOBILE PARITY above). (2) *VX-739:* a road whose ONLY live-count write happened inside a suppressed
+  write — the executors all call `updateCaretContext` after adopting, and `adopt` counts every changed text,
+  so the total is right after every rewrite; the typing road is outside suppression (the guard pin). The
+  BLOCK figure (`caretBlockWordCount`) still updates mid-write and is corrected by the trailing call, as
+  before. (3) *VX-638:* a page lost where she expected it kept — only on the close doors, where the strip is
+  torn down anyway; no existing pin asserted a page across a close (searched). (4) *VX-634:* none — one string,
+  its four pins edited.
+- **Risks in the pins themselves.** The VX-739 pin waits on Write's DELIVERY road (an async fresh re-read)
+  with bounded polling; a `#require` premise names each landing. Its mounted arm installs the app's
+  coordinator (TakeChoiceBadgeTests' mount). Its `VX739-TRACE` observer is a second listener on the same
+  notification; it reads, never writes. The VX-758 pins write `created_at` directly as fixture setup (midday
+  UTC, so no time zone changes the expected order).
+- **Scope kept.** Five members; four built, one returned as a fork with the geometry argument. No product
+  decision taken: VX-758 builds her sentence with the Library's existing rule; VX-652's options are hers or
+  the orchestrator's.
