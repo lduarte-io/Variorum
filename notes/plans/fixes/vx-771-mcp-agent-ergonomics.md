@@ -99,6 +99,8 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 - **P-771-3 (VX-762):** B2 built as the next reconnect rung on the strength of "available later if docs prove thin" + the agent's standing friction; A (shim replay) and D (fewer locks) stay hers, restated in the bundle.
 - **P-771-4 … P-771-7 (VX-765, batch 1):** the tool's listing (write new, wing scope only), the same-wing refusal, its words, the answer without adopted/made counts — each with its alternative in the BATCH 1 RECORD.
 - **P-771-8 (VX-766, A-771-2):** the brief form's `fan_sha256` — structure-aware (block order, fan order, the shown take marked), the exact text form spelled in the tool description. Alternatives: a flat digest; none.
+- **P-771-9 (VX-760, batch 2):** edit_take's mismatch answers the fact pattern the door can prove — four patterns, their words, UTF-16 characters, spoken under any live edit grant (the divide_block precedent) — each with its alternative in the BATCH 2 RECORD.
+- **P-771-10 (VX-761, batch 2):** the replace form's matching (byte-level, overlapping, the exact count), its blank-result and empty-passage rules — alternatives in the BATCH 2 RECORD.
 - *(grows as batches land)*
 
 ## LEDGER (one row per member; flip at each batch close)
@@ -108,8 +110,8 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | 1 | VX-759 duplicate dating (flagship) | 1 | FIXED — 3f2f650d4 (P-771-1); A-771-1 extends it to her Copy to Wing (the commit "Part of VX-759 (A-771-1): …") |
 | 2 | VX-766 duplicate brief form | 1 | FIXED — brief form 2fe408519 + the fan digest (A-771-2, P-771-8; the commit "Part of VX-766 (A-771-2): …") |
 | 3 | VX-765 copy_note_to_wing | 1 | BUILT — 43806305a; A-771-1: the copy keeps an undated, untitled source's day (app words PENDING the Mac window) |
-| 4 | VX-760 mismatch honesty | 2 | NOT-STARTED |
-| 5 | VX-761 replace form | 2 | NOT-STARTED |
+| 4 | VX-760 mismatch honesty | 2 | IN-PROGRESS — designed (BATCH 2 RECORD) |
+| 5 | VX-761 replace form | 2 | IN-PROGRESS — the seam proposed (BATCH 2 RECORD) |
 | 6 | VX-369 error sweep (rider) | 2 | NOT-STARTED |
 | 7 | VX-764 remove_tag answer | 3 | NOT-STARTED |
 | 8 | VX-769 gathering mint | 3 | NOT-STARTED |
@@ -229,6 +231,50 @@ No revert is in flight.
 - **F-2 (VX-766's archive-proof digest — PROPOSED, NOT BUILT; the batch text's in-batch fork).** The brief form drops the per-take `sha256`s, so an archive caller loses its proof that the copy is its source byte for byte. Proposal — one key on the BRIEF form only (the full form stays byte-unchanged): **`fan_sha256`** = lowercase hex SHA-256 of the UTF-8 bytes of a canonical text with ONE LINE PER BLOCK in note order, each line the block's take digests (`MCPTextDigest.sha256`, the per-take `sha256` the full form answers) in fan order, separated by single spaces, the SHOWN take's digest prefixed with `*`; lines joined by `\n`, no trailing newline. It covers the words, their order, the block boundaries and which take each block shows; labels are left out (they ride verbatim, and free text would need escaping). A client computes the same value from `read_note` with `ids_only: true` on the SOURCE (each take's `sha256` in fan order and `chosen` marking the shown one; paged reads concatenate in page order; archived takes are out by default on both sides) — so "my source's digest == the copy's `fan_sha256`" proves the copy whole. Computed from the minted records (∝ the copy, no second read); `copy_note_to_wing` (VX-765) would answer it too, being the brief shape. Alternatives: (a) FLAT — SHA-256 over the per-take digests concatenated in block then fan order (simpler; blind to block boundaries and to which take is shown); (b) no digest — a caller wanting proof calls `read_note ids_only` on both notes and compares. Recommendation: the structured line form above. A second detail to rule: whether the description states the canonical form in full (my lean: yes, one sentence, so a model can compute it without guessing).
 
 - **F-1 (VX-759's reach).** P-771-1 is built in the DUPLICATE body only, as briefed. The same re-dating happens on every other `copyPost` road listed above — most visibly her ⇧⌥⌘L Copy to Wing (`copyNoteToWing`), which VX-765's `copy_note_to_wing` shares byte-for-byte, so an agent copying undated notes to another wing still re-dates them. Options: (a) leave the other roads verbatim (as built); (b) extend P-771-1 to `copyNoteToWing` (her door and the wire heal together — one flag in `copyPost`'s call there); (c) extend it to every `copyPost` road but the saved version (promote, diverge, the ownership forks too). Recommendation: (b) at least — a copy to another wing is a duplicate into another room, and the wire tool exists for the agent that reported #14.
+
+### BATCH 2 RECORD — edit_take truth & the error seam (VX-760 · VX-761 · rider VX-369)
+
+**NOT DONE in this batch (first, as the protocol asks):** *(kept current — the batch is open)* no walk captures (a headless batch by the brief: no stage, no xcodebuild); the Mac app suites and build are the closing window's; the canon lines are PROPOSED below, not applied.
+
+**Implementer:** opus-implementer (one fresh session), 2026-11-04. Headless core only (`swift build` / `swift test --filter`), no stage, no xcodebuild. Started at `79012d254` (`git pull --ff-only` failed on the GitHub incident; the local head is batch 1's last commit, as the brief names).
+
+#### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| 0 — this record: the traces, the designs, VX-761's proposed seam | DONE (this commit) |
+| 1 — VX-760 pins, red on the old tree | NOT-STARTED — the design below |
+| 2 — VX-760 fix | NOT-STARTED |
+| 3 — VX-761 Domain rule + op arm + core pins | NOT-STARTED — the seam below |
+| 4 — VX-761 wire (parse, schema, description, words) + wire pins | NOT-STARTED |
+| 5 — VX-369 the sweep table, its pins red on old, the words | NOT-STARTED |
+| 6 — end-of-batch suites | NOT-STARTED |
+
+No revert is in flight.
+
+#### VX-760 — the trace (read before any code)
+
+- **The mechanism.** `Operations.editTakeUnderInsurance` (`Operations+MCPEdits.swift:98`) refuses `OperationError.bufferChangedSinceGesture(variantID:)` for ANY `variant.workingText != expectedText` (Swift `String` equality — canonical). The refusal leaves the act's closure in `MCPWriteTools.land` (`MCPWriteTools.swift:879`) → `MCPWireRefusalCopy.spoken` (`MCPWriteSupport.swift:194`): `words` has no arm for it → `appWords` = the host's `refusalWords` (the Mac's `MCPDoor.swift:486` → `OpsRefusalCopy.message(for:)` → the shared table's `OpsRefusalTable.swift:279`, "The text changed while that gesture was landing — nothing was altered; try it again on the current text."). So a client that sent PART of the take (the common case under the flush-first design — her pending typing has already landed before the act, VX-275) hears a race with the author. The headless harness's hook prints "Refused: bufferChangedSinceGesture(variantID: …)".
+- **What the door can prove at refusal time.** Only the two texts: what was SENT and what is STORED now. The op's transaction rolled back (nothing written, no once grant spent — the guard's spend is inside it). The door runs inside the session's ONE serial executor body, so it can read the take again at once.
+
+#### VX-760 — the design
+
+- **The seam: the edit_take door, in front of the chain.** `MCPWriteTools+Edit.swift`'s `.editTake` arm catches `bufferChangedSinceGesture` naming THIS take; reads, in ONE read: the take's row, its note (`Queries.mcpContainerOf(take:)` must still be the note the act decided on) and the client's standing on that note at EDIT (`MCPGrantAuthority.decide`, never consuming); when all hold and the stored text still differs from the sent one, it throws NEW `MCPExpectedTextMismatch` (VariorumMCP — a wire error carrying the fact pattern), which `MCPWireRefusalCopy.words` speaks FIRST — the one chain, the door's words composed in front of the app table. Otherwise (the take gone, moved, out of reach, or now reading as sent — then it truly changed while landing) the op's own error is rethrown and the table's sentence stands. `OpsRefusalTable` untouched; NO `Shared/` file.
+- **The fact patterns** (pure `MCPExpectedTextMismatch.diagnose(sent:stored:)`; every comparison canonical, as the op's precondition is): (1) whitespace only at the ends; (2) part of the take — a proper prefix, or a passage from inside; (3) the take and more — the stored text inside the sent one; (4) otherwise: where they first differ. Each says both lengths. A "character" is a UTF-16 unit (the door's unit — `read_note`'s page budget, P-VX256-1); the first-difference index is the offset INTO THE SENT TEXT of the first grapheme that differs (canonically), so a client can slice its own string there.
+- **Never a race it can't prove:** (2) says "if you sent part of it, send all of it; if you read it earlier, it has grown since — read it again" — both readings, no blame; (4) keeps the buffer-moved reading available ("If you read the take earlier, it has changed since — the author's pending typing lands before every edit").
+- **Pins (red on old):** a partial expected_text (prefix; interior); a genuinely changed buffer (her typing landed first — the `MCPHerEditorServerTests` world); whitespace at the ends; the take and more; the fallbacks (the table's sentence when the door can prove nothing); a matching no-op unchanged (guard). Justified edits owed: `MCPEditServerTests.editTakeLandsBracketedByTheNamedCommitsAndAStaleReadRefuses` and `MCPHerEditorServerTests.aWireTakeEditMeetsHerLatestTextAndRefusesAStaleRead` assert the raw case name in the stale answer — exactly the face VX-760 replaces.
+
+#### VX-761 — the proposed seam (proposed here BEFORE building, the brief's ask)
+
+- **Domain** (pure, NEW `Sources/VariorumCore/Domain/UniqueReplacement.swift`): `UniqueReplacement.apply(_ old:, with new:, in text:) -> Outcome` — `.replaced(String)` when `old` occurs EXACTLY once, else `.notUnique(occurrences: n)`. Matching is BYTE-LEVEL over UTF-8 (never canonical: a passage is the stored bytes); occurrences OVERLAP (`"aa"` in `"aaa"` is 2 — an ambiguous place refuses); a UTF-8 match of a valid string starts and ends on scalar boundaries, so the splice is valid text; an empty `old` matches nowhere (0 — the door refuses it at the parse first).
+- **The op arm — inside the act's ONE transaction** (`Operations+MCPEdits.swift`): NEW `Operations.MCPTakeRewrite { case whole(text:, expectedText:); case replacing(old:, new:) }` and `editTakeUnderInsurance(_:rewrite:client:undoLabel:guardedBy:)` — THE one body; today's `(text:expectedText:…)` signature forwards `.whole`, so every caller is byte-unchanged. After the guard and `editableVariant` (locked take, archived take, sealed post refuse as ever): `.whole` — today's canonical precondition, the text `StoredText.stripped`; `.replacing` — the Domain rule over the STORED text read in this transaction, `new` stripped first: `.notUnique(n)` throws NEW `Operations.MCPTakeReplacementRefusal.occurrences(n)`; a result blank after the strip throws `.wouldEmptyTake` (R-VX171-2's door rule — only the transaction knows the result). Then the whole form's road byte for byte: the canonical no-op (`changed: false`, the VX-358 spelling flag), the before/after bracket deduped by `isDirty`, the write, touch + churn (`churnCost`), ONE `registerStructuralEntry` under the client's label. Read-compute-write race-free by construction; the flush lands first, in its own turn (`EditJob.flushesHerEditorFirst` — unchanged, the same job).
+- **Never an `OperationError` case**, so neither her table nor the Mac sweep pin's enum walk (`MCPWireRefusalSweepTests.declaredCases`) moves; `MCPWireRefusalCopy.words` words the new type (the one chain).
+- **The wire:** `EditJob.editTake(takeID:, rewrite:)`; `old_str` + `new_str` schema-declared, `required` becomes `["take_id"]`; the parse refuses both forms at once, a half form, an empty `old_str` (nothing read, written, asked, spent or logged — the call door); `null_characters_removed` counts `new_str` (`old_str` is a locator, never written — `expected_text`'s class); the answer is the whole form's keys exactly (`take_id`, `block_id`, `note_id`, `changed`, `sha256`, the commit ids, the spelling flag). The description teaches both forms and the occur-once rule; the pinned dedupe sentences stay verbatim.
+
+#### PROVISIONALs born in batch 2 (for QUESTIONS #257's bundle)
+
+- **P-771-9 (VX-760):** the four fact patterns and their words; a character is a UTF-16 unit and the index is into the sent text; the facts are spoken under ANY live grant at edit, an unspent once grant included — the `divide_block` precedent (AF-10 (c): its anchor already answers "isn't in" / "more than once" / "already begins there" under the same refused-act-never-spends rule, so a once holder can already probe a take's text without spending). Alternative: speak the facts only under a standing grant (a once grant hears the table's sentence).
+- **P-771-10 (VX-761):** byte-level matching with overlapping occurrences counted, the exact count named; a replacement leaving the take blank refuses in the whole form's blank sentence; an empty `old_str` refuses at the parse, an empty `new_str` removes the passage; a call with neither form names both. Alternatives: canonical matching (a client's NFC passage finds an NFD take); non-overlapping counting.
 
 ## Morning bundle (grows all night; the closeout moves it to the handoff)
 
