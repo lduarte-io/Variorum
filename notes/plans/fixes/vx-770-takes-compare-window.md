@@ -2328,13 +2328,14 @@ reviewer) re-checks the fixes. F3 is record-only (the reviewer's own disposition
 |---|---|
 | Reading (the findings file whole; this record's ROUND 1 section, batch 2 + its reconciliation, batch 3, batch 5 › C + AS BUILT; the environment traps) | DONE |
 | Agree/dispute per finding, each mechanism traced by my own code read (below) | DONE (165691c39) |
-| F4 — the rename (behaviour-neutral, its own commit, BEFORE the pins so the rev tree carries it) | DONE (f4ba0bb77) — compile PENDING the lf build |
-| Pins — F1's Compare seat twin (e84a1c48e), F2's collapse-under-follow transition (098b72626 — **the pre-fix commit**: pins + F4, no fix) | DONE — compile PENDING the lf build; red/green PREDICTED (Mac target, the window's) |
+| F4 — the rename (behaviour-neutral, its own commit, BEFORE the pins so the rev tree carries it) | DONE (f4ba0bb77) — compiles in both trees (`compositionKey` ×11 symbols in each dylib) |
+| Pins — F1's Compare seat twin (e84a1c48e), F2's collapse-under-follow transition (098b72626 — **the pre-fix commit**: pins + F4, no fix) | DONE — compile in BOTH trees (the pins build against the pre-fix behaviour and the fix); red/green PREDICTED (Mac target, the window's) |
 | Fix — F1 (Compare always mounts the face where a lane stands) | DONE (3667c843e) |
 | Fix — F2 (the collapse door forgets even while the row is on screen) | DONE (5035c4e3e) |
 | `DerivedData/vx770-lf` build-for-testing at HEAD | DONE — TEST BUILD SUCCEEDED at fbd2ee6c9 (behaviour source = 5035c4e3e) in 3 min (log `App/Variorum/DerivedData/logs/vx770-lf-build.log`; 2.8G); **F4 compiles** (dropping `Identifiable` broke nothing); the one warning in a touched file is the pre-existing geometry-probe `Sendable` line (`CompareBoardView.swift:1986`, batch 2's note) |
-| **Behavioural revert tree — ANNOUNCED HERE BEFORE IT STARTS:** a `git clone --shared` of this branch at HEAD into `scratchpad/vx770-lf-rev-src/` (its own index — the shared worktree and its index never move), with exactly the two behaviour files written there by `git show 098b72626:<path> >` (the pins commit = the pre-fix behaviour, F4 included): `Features/Takes/CompareBoardView.swift` (F1) and `Features/Takes/TakesBoardLayout.swift` (F2); every test file at HEAD; built into `App/Variorum/DerivedData/vx770-lf-rev`. HEAD's two files copied + sha256'd first in `App/Variorum/DerivedData/vx770-lf-prerevert/` (CompareBoardView `3abe3ade…f949`, TakesBoardLayout `fd7c3e4f…47e3`), re-checked against the worktree after the build | IN FLIGHT |
-| READY-FOR-SUITES — ladder fixes · SELF-ASSESSMENT | PENDING |
+| **Behavioural revert tree — ANNOUNCED HERE BEFORE IT STARTS:** a `git clone --shared` of this branch at HEAD into `scratchpad/vx770-lf-rev-src/` (its own index — the shared worktree and its index never move), with exactly the two behaviour files written there by `git show 098b72626:<path> >` (the pins commit = the pre-fix behaviour, F4 included): `Features/Takes/CompareBoardView.swift` (F1) and `Features/Takes/TakesBoardLayout.swift` (F2); every test file at HEAD; built into `App/Variorum/DerivedData/vx770-lf-rev`. HEAD's two files copied + sha256'd first in `App/Variorum/DerivedData/vx770-lf-prerevert/` (CompareBoardView `3abe3ade…f949`, TakesBoardLayout `fd7c3e4f…47e3`), re-checked against the worktree after the build | DONE — `vx770-lf-rev` TEST BUILD SUCCEEDED (log `App/Variorum/DerivedData/logs/vx770-lf-rev-build.log`; 2.9G); the clone's `git diff --stat` = exactly the two fixes reversed (13 + 20 lines); **the binaries differ as intended:** `nm` finds `evenWhileOnScreen` ×8 in `vx770-lf`'s `Variorum.debug.dylib`, ×0 in `vx770-lf-rev`'s (F1 is a view-body change — its revert is the source diff); **no revert in flight, the shared worktree never moved:** `shasum -a 256 -c …/vx770-lf-prerevert/sha256-head.txt` OK on both, `git diff HEAD` = only the untouched `Package.resolved` artifact |
+| AS BUILT · prediction table · READY-FOR-SUITES — ladder fixes · SELF-ASSESSMENT | DONE (this commit) |
+| Push | after every commit — every push LANDED this leg (origin in step after each) |
 
 ### AGREE / DISPUTE (each traced by my own read before any code — the hallucination guard)
 
@@ -2400,3 +2401,145 @@ the brief's "rename/delete" bound. Its own commit, behaviour-neutral, no pin (a 
 overturns it if round 2 prefers the literal retire.
 
 **F3 · NIT — not this leg's** (record-only by the reviewer's own disposition; no pin demanded).
+
+### AS BUILT — the fix leg
+
+Commits (in order): agree/dispute 165691c39 · **F4** f4ba0bb77 · **F1 pin** e84a1c48e · **F2 pin**
+098b72626 (= the pre-fix commit) · **F1 fix** 3667c843e · **F2 fix** 5035c4e3e · LIVE STATUS between.
+- **F1** — `App/Variorum/Variorum/Features/Takes/CompareBoardView.swift`, `CompareCellView`'s comment
+  overlay: only `lane > 0` gates it now; inside, `let entries = model.face(for: postID)?.comments[
+  slot.blockID] ?? []` (read in the cell's body, where the overlay closure is built, so the
+  observation tracks it as before), then the `GeometryReader` + `CommentGutterFace` exactly as they
+  were. With no entries the shared host draws nothing and records nothing (its `if !shown.isEmpty`
+  branch carries both the face and the oracle's record) — Takes' own shape (`CommentMarginNote`).
+  Cost: one realized-cell overlay more per uncommented cell (a `GeometryReader` with no content),
+  viewport-bounded by the rows' `LazyVStack` (P1/P-8 unchanged; the Takes board pays exactly this on
+  every row today). Pin: `CompareCommentGutterTests.herOpenPanelKeepsItsSeatInCompareWhenTheLastCommentLeaves`
+  (`App/Variorum/VariorumTests/BoardCommentGutterTests.swift`, the batch-2 Compare rig): one comment on
+  the anchor's tall block, two columns at 1100 pt (the card lane), the card's `onClick` pressed, the
+  only comment deleted with the operation her panel's Delete calls, the projection re-read through
+  `CompareViewModel.read` and adopted (the live feed's delivery — the test host never fires `.task`,
+  every Compare pin's road), a `#require` premise that the feed no longer names the block, then: the
+  card still in the hierarchy, and THIS board's oracle record (`reader(scope, board: model)`) still the
+  entries she opened the panel on.
+- **F2** — `App/Variorum/Variorum/Features/Takes/TakesBoardLayout.swift`: `forgetPages(ofClosed:
+  evenWhileOnScreen: Bool = false)`; `closeCollapsedFans` passes `true`; the two hand-close doors are
+  unchanged (the default). Doc comments state the exception is the hand-close doors' only. Pin:
+  `TakesPagerAfterCloseTests.aCollapsedFanForgetsItsPageEvenWhileFollowTheScrollShowsItsRow` (pure: follow
+  on, the row appeared, expand all, the split stepped to page 2 and the rail set to 3, collapse → both
+  keys 0). The keep-guard `aFanFollowTheScrollKeepsBloomedKeepsItsPage` (the hand-close arm) is untouched
+  and must stay green on both trees.
+- **F4** — `CompareBoardView.swift`: `CompareRow` is `Equatable` only (no `Identifiable`); `id` →
+  `compositionKey`, documented as the composition's fingerprint (never the on-screen identity — the
+  board's one `ForEach` names `\.spineID`); `spineID`'s unreachable fallback and
+  `CompareToggleIdentityTests.swift`'s four `rows.map(\.id)` reads follow the rename byte-for-byte (+ its
+  header's historical mention). Behaviour-neutral, no pin (a NIT).
+- Untouched: `Sync/`, schema, custody, `Shared/` (no `App/Variorum/Shared/` file), the capability
+  registry, `PaneSurface`, `EditorTextView`, `BlockRangeIndex`, `CommentGutterFace` itself, the oracle.
+  No TK1 API, no attribute stamp. **MOBILE PARITY:** nothing mobile-visible (Mac Compare and the Mac
+  Takes layout only). **Canon:** no delta — batch 3's AS BUILT line ("Compare's already-live feed gets
+  the same guard") and W14's "Same in Compare" are now TRUE as written.
+
+### THE PREDICTION TABLE — the fix leg (PENDING the window)
+
+| # | Test | `vx770-lf-rev` (F1/F2 behaviour at 098b72626) | `vx770-lf` |
+|---|---|---|---|
+| 1 | `CompareCommentGutterTests/herOpenPanelKeepsItsSeatInCompareWhenTheLastCommentLeaves` (F1) | **R** — both `#expect`s: no card for the block after the deletion, and no record (the unmounted face's `onDisappear` forgot it); its `#require`s green (the face drew, the door is a door, the feed dropped the block) | G |
+| 2 | `CompareCommentGutterTests` — batch 2's three | G | G |
+| 3 | `TakesPagerAfterCloseTests/aCollapsedFanForgetsItsPageEvenWhileFollowTheScrollShowsItsRow` (F2) | **R** — both page lines (1 for 0, 2 for 0); its premises green | G |
+| 4 | `TakesPagerAfterCloseTests` — batch 5's six (incl. the follow-the-scroll keep-guard) | G | G |
+
+**Reading the runs:** rows 1 and 3 RED on lf-rev and GREEN on lf = F1 / F2 FIXED. **Row 1 green on
+lf-rev** = the harness did not reproduce the teardown — read which line: a `#require` red on the
+premise means the projection still named the block (then the trace is wrong); both `#expect`s green
+would mean SwiftUI kept the conditional branch's view alive — record it, never "fixed blind". **Row 1
+red on lf** at `card() != nil` = the test host refused the popover and flipped `panelShown` back (the
+batch-3 risk; the Takes twin was green in the same host at b3r, so not expected) — read its lines,
+then W14's Compare line is the eye. **Row 3 green on lf-rev** = the trace is wrong (pure transition —
+read before anything else).
+
+## READY-FOR-SUITES — ladder fixes (for the merge-gate window; from `App/Variorum/`)
+
+Both trees are built (`DerivedData/vx770-lf` at HEAD's behaviour source 5035c4e3e — log
+`DerivedData/logs/vx770-lf-build.log`; `DerivedData/vx770-lf-rev` from the scratchpad clone — log
+`vx770-lf-rev-build.log`; both TEST BUILD SUCCEEDED, 2.8–2.9 GB each; ~52 GiB free after). Run
+`test-without-building`:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building <args>`.
+Confirm the "Test run with N tests" line and read the `skipped:` lines.
+
+1. **THE RED RUN** on `vx770-lf-rev` (≈ 1–2 min):
+   `-only-testing:VariorumTests/CompareCommentGutterTests -only-testing:VariorumTests/TakesPagerAfterCloseTests`
+   — expect "Test run with 11 tests in 2 suites" failing exactly TWO (rows 1 and 3); the other nine green.
+2. **THE GREEN DELTA** on `vx770-lf` — the two pins' suites, every suite in their files, F4's file, every
+   suite that MOUNTS `CompareBoardView` (F1's overlay) or reads `CompareRow`/the Compare model (F4's
+   type), and every suite that drives the open set's close doors or the pager through the board
+   (`TakesBoardLayout`'s close/page roads — F2) — 36 suite types:
+   `-only-testing:VariorumTests/CompareCommentGutterTests -only-testing:VariorumTests/TakesCommentGutterTests -only-testing:VariorumTests/BoardCommentGutterRuleTests -only-testing:VariorumTests/TakesPagerAfterCloseTests -only-testing:VariorumTests/CompareToggleIdentityTests -only-testing:VariorumTests/CompareCompositionTests -only-testing:VariorumTests/CompareViewModelTests -only-testing:VariorumTests/CompareAnchorWholeTests -only-testing:VariorumTests/CompareOnePlacementTests -only-testing:VariorumTests/CompareLensesAlignmentTests -only-testing:VariorumTests/CompareOutlineMintColumnTests -only-testing:VariorumTests/CompareVersionsTests -only-testing:VariorumTests/MCPCompareLandingTests -only-testing:VariorumTests/CompareLeavingSavepointTests -only-testing:VariorumTests/BookLeavingSavepointTests -only-testing:VariorumTests/BookLeavingRegistryTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/TakesCommentFeedLivenessTests -only-testing:VariorumTests/TakesCollapsedFanWashTests -only-testing:VariorumTests/TakesCollapsedFanRoadsTests -only-testing:VariorumTests/TakesOpenFanRuleTests -only-testing:VariorumTests/TakesRailPagingTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/QuitFinalizeSurfacesTests -only-testing:VariorumTests/TakesBufferConvergenceTests -only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/LensesReorderTests -only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSeededEntryLandingTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakesExpansionCostTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/CapabilityRegistryTests -only-testing:VariorumTests/ScrubAndOutlineTests`
+   — all green expected. Known shapes: VX-337's load-dependent flake in `TakesArticleScrollTests`
+   (`aShortRowStraddlingTheFoldComesBackAboveIt` — run alone first); an unexpected `TakesEntryBandTests`-class
+   red → the defaults domain first. **The merge gate's WHOLE `VariorumTests` run on the merged tree
+   subsumes this delta** (the remaining Compare-model readers — `AutosaveRegistryLifecycleTests`,
+   `OutsideWriteRingEndTests`, `SavepointNamingTests`, `VX347SavepointLeaveRuleTests`,
+   `WorkspaceNavigationTests` — see F4 only as a compile, already proven by both builds); if the window
+   runs only the whole target, the red run (1.) is still owed separately on `vx770-lf-rev`.
+3. **Core:** nothing changed under `Sources/` or `Tests/` this leg — no `swift test` owed.
+4. Results into the prediction table; then `vx770-lf-rev`, `vx770-lf-prerevert` and the scratchpad clone
+   (`/private/tmp/claude-501/-<home>-dev-variorum/17b9e621-2e5d-4717-a2d1-529f5d285a91/scratchpad/vx770-lf-rev-src/`)
+   may be deleted.
+
+**The walk (W14's Compare line, already written — batch 3):** "a Takes card with one comment; press
+it (the panel opens), delete the comment in the panel → the panel STAYS … Same in Compare." It now
+describes what was built; the walk on the merged tree carries it. F2's corner (follow-the-scroll ON,
+a paged fan collapsed by ⌥⌘Z then regrown by ⇧⌥⌘Z) is a look line at most — the pure pin is its
+evidence.
+
+### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
+
+- **R-LF-1 (F2's sibling, R-B5-1's class):** a fan bloomed by follow-the-scroll ALONE (never in the open
+  set) that collapses is not in `TakesOpenFanRule.collapsed`'s input, so no close door forgets its page;
+  its strip unmounts at the collapse, and a regrown fan re-blooms over the stale page. Same root as
+  R-B5-1 (a strip re-born without a close); the strip honouring its page at birth would heal both.
+- **R-LF-2 (F1's geometry edge, not this finding):** the Compare face still unmounts when the column
+  narrows below the lane's floor (`CompareGutter.lane` → 0 — e.g. a column added while her panel is
+  open on a ~160-pt column). That is P-770-3's geometry (the face yields where there is no room), so
+  the panel then goes with its anchor; the Takes host has the same shape below Write's badge floor.
+- **R-LF-3 (F4's premise):** the round-1 finding said nothing read `CompareRow.id`; the VX-757 pins
+  did (the composition fingerprint) — recorded so round 2 reads the rename, not a retire.
+
+## SELF-ASSESSMENT — the fix leg (the first of the two reviews — the implementer's)
+
+- **What is proven, and how far.** Both mechanisms are traced by my own code read from her act to the
+  line that decides (F1: the press → `@State` seat → the deletion → `containerComments` omits the block →
+  the conditional branch unmounts; F2: `collapsed` names only `liveVariantCount <= 1` blocks → `hasFan`
+  false → R25's arm cannot hold the block → the strip unmounts while `forgetPages`' visibility skip
+  keeps both keys). Both trees compile with the pins (against the pre-fix behaviour and against the
+  fix), the revert is exactly the two fixes reversed (the clone's diff; F2's symbol present in one
+  dylib and absent from the other), and the shared worktree never moved. **Every red/green line is a
+  prediction** — both pins live in the Mac test target (no `swift test` road), and this leg runs no
+  `xcodebuild test`.
+- **Why these shapes.** F1: the reviewer's own shape, which is Takes' — the seat is the shared host's
+  promise, so the host must be mounted wherever a face COULD stand (the lane), never only where one
+  does; the empty host is inert by its own code (no draw, no record). F2: the narrowest change that
+  makes the rule match the strips — a flag on the one helper, set only by the door whose block can no
+  longer be held by the scroll; the hand-close doors keep their default byte-for-byte. F4: the shape
+  that leaves ONE identity on the type without changing any reader's meaning (a literal retire would
+  have changed two verified pins' comparators; "Identifiable uses the spine" would have silently broken
+  the VX-757 premise).
+- **What could regress, and why I think it does not.** (1) *Hit-testing over uncommented Compare cells:*
+  each now carries an empty `GeometryReader` overlay over its row (the ⠿ handle, the pane, the drop
+  target). An empty `GeometryReader` holds nothing hit-testable; commented cells have carried the same
+  overlay since batch 2, and every Takes row carries it since batch 2 with the click, drag and soak
+  suites green — the green delta's Compare mounters (`CompareToggleIdentityTests`, the lenses-correction
+  family, `CompareLeavingSavepointTests`, the soak) re-check it. (2) *The oracle:* an uncommented cell's
+  face never records (the record rides the inner branch), so `oracle.face(other.block) == nil` lines stay
+  true — `aCommentedBlockShowsItsCommentsInItsColumn` is in the red run's suite on both trees. (3) *F2:*
+  only the collapse door's on-screen case changes; no existing pin asserted a collapsed fan's page kept
+  (searched). (4) *F4:* compile-proven in both trees; no runtime reader of `Identifiable` existed.
+- **Risks in the pins themselves.** F1's pin depends on the test host presenting (or at least not
+  un-presenting) a SwiftUI popover after a programmatic `onClick` — the same premise the Takes twin
+  carried and passed in the same host (b3r, b5gate). Its deletion is delivered by an explicit adopt of
+  the board's own read function (the host never fires `.task`), so it measures the cell's reaction to
+  the projection, which is the road the live observation drives in the app.
+- **Scope kept.** F1, F2, F4 only; F3 untouched (record-only by the reviewer). No `Sync/`, schema,
+  custody, `Shared/`, editor-seam or registry file. The uncommitted `Package.resolved` artifact was
+  neither committed nor reverted (pathspec commits only; the clone, not the worktree, took the revert).
