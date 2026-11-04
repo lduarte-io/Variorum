@@ -2557,3 +2557,18 @@ pin's #expect premises — the prediction table's reading covers a hollow green)
 (R-LF-1/R-LF-2 are pre-existing classes; closeout tickets). Still owed by the merge-gate
 window: the lf-rev red leg (rows 1 and 3 red predicted) — a whole-target run subsumes the green
 delta but never the red leg.
+
+## THE MERGE-IN + the Package.resolved disposition (the orchestrator, ~08:2x)
+
+Main merged in cleanly at eda543b96 (merge commit; main c2205da02 carried VX-500's PR #215 —
+v1_36, Shared/AppBootstrap — and VX-771's PR #216; the trial merge's CLEAN held). **The
+uncommitted Package.resolved artifact was a silent dependency-pin UPGRADE SET** (SQLCipher
+4.18→4.20, swift-dependencies 1.14.1→1.17.2, swift-syntax 602→604, + swift-issue-reporting;
+some xcodebuild invocation tonight re-resolved upward) — main carries the OLD committed pins
+(the siblings didn't adopt it), so it was DISCARDED (`git checkout --`), never committed.
+CLOSEOUT TICKET CANDIDATE (R-770-T1): find which build invocation ignores the committed
+lockfile — a future build could silently ship upgraded pins; tonight's DerivedData greens MAY
+have built against upgraded pins locally, which the merge-gate's fresh run on the committed set
+settles. Remaining: the walk (real dev store, post-merge build), the merge-gate window (whole
+target + six phone suites + the lf-rev red leg), closeout (QUESTIONS #259; the ledger numbers
+after both siblings' closeouts).
