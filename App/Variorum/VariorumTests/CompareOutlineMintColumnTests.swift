@@ -91,7 +91,8 @@ private final class MidMintDelivery: Sendable {
                     do {
                         let peers = model.peerSlots.compactMap(\.postID)
                         model.adopt(try freshProjection(db, anchor: anchor, peers: peers))
-                        slotsAfterDelivery.setValue(model.peerSlots.map { ($0.id, $0.postID) })
+                        let slots: [(String, String?)] = model.peerSlots.map { ($0.id, $0.postID) }
+                        slotsAfterDelivery.setValue(slots)
                     } catch {
                         failure.setValue("\(error)")
                     }

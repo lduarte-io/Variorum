@@ -139,8 +139,9 @@ private func withToggleWorld(
     } operation: { @MainActor in
         let session = AppSession(database: db)
         let pair = try build(session.operations)
-        let variants = try db.read { db in
-            try [pair.anchor, pair.peer].flatMap { id in
+        let ids = [pair.anchor, pair.peer]
+        let variants = try await db.read { db in
+            try ids.flatMap { id in
                 try Queries.renderPost(db, containerID: id).compactMap(\.variantID)
             }
         }
@@ -314,11 +315,13 @@ struct CompareToggleIdentityTests {
             _ = try ops.newBlock(in: twin.post.id, text: xText, at: .end)
             return (anchor.id, twin.post.id)
         }) { world in
-            let x = try #require(try world.db.read { db in
-                try Queries.renderPost(db, containerID: world.peer).last?.variantID
+            let peerID = world.peer
+            let anchorID = world.anchor
+            let x = try #require(try await world.db.read { db in
+                try Queries.renderPost(db, containerID: peerID).last?.variantID
             })
-            let b = try #require(try world.db.read { db in
-                try Queries.renderPost(db, containerID: world.anchor).last?.variantID
+            let b = try #require(try await world.db.read { db in
+                try Queries.renderPost(db, containerID: anchorID).last?.variantID
             })
             let filtered = world.shownVariants.filter { $0 != x }
             let (model, window, hosting) = try await mountedBoard(world, expecting: filtered)
