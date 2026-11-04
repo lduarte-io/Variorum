@@ -1779,7 +1779,9 @@ and the batch's other rows); the cold ladder.
 |---|---|
 | Reading (this file whole incl. batches 1–4 + the window re-scope; TEXTKIT2_NOTES in full; SurfaceContracts in full) | DONE |
 | A · VX-758 trace (code read, written below before any code) | DONE (this commit) |
-| A · VX-758 pins / fix / red-green | NEXT |
+| A · VX-758 pins (a6a4ff83a) | DONE — `swift test` on the pre-fix source: **RED, real** — "Test run with 27 tests in 2 suites failed … with 9 issues": every entry-date pin (override ↑/↓, stored ↑/↓, chapter, gathering, Library-agreement ↑/↓, the re-shaped old pin); the Created characterization ↑/↓ GREEN. Old asc order observed: `[d01, d10, u05, u20, u05late]` (the dated notes, then the undated pile in id order) |
+| A · VX-758 fix (630631af6) | DONE — `swift test`: the pins **GREEN, real** (27 tests, 2 suites); the WHOLE core package: 3,590 tests in 478 suites passed (5 known issues) + the second product 467 of 468 — the one red `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (connect bounded < 15 s, took 29.4 s under full-package load) passes alone (3 tests, 2.2 s): load, not the diff |
+| A · VX-758 behavioural revert — **ANNOUNCED HERE BEFORE IT STARTS:** `Sources/VariorumCore/Queries/ReadingAssembly.swift` restored to a6a4ff83a (the pins commit = the pre-fix source) by `git checkout a6a4ff83a --`; copy + sha256 first in `scratchpad/vx758-prerevert/`; the pins run; then `git checkout HEAD --` and verified by `git diff` + `shasum -c` | IN FLIGHT |
 | B · VX-739 pin-first | NOT STARTED |
 | C · VX-638 | NOT STARTED |
 | D · VX-652 | NOT STARTED |
