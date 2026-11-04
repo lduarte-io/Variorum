@@ -2620,11 +2620,11 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 | W7 VX-731 carousel keeps the card; Study narrow → "#1" badge | PASS — both voices; Study at 1000 pt: "#1" on C5, "#2" on C2 |
 | W8 VX-728 Compare card at 2 columns, badge at 3; add/delete never moves the prose | PASS — both voices; add/delete live, prose pixel-identical |
 | W9 look-only: VX-696's short-block clip | look line: seen (C5's one-line card; Terminal Compare C2's second entry) |
-| W10 VX-732 comments leave the gutter at once | PENDING |
+| W10 VX-732 comments leave the gutter at once | PASS — both voices, the bar-door panel road (MCP road off by posture; the second-window road not walkable — see the row) |
 | W11 VX-733 the collapsed fan's wash goes; a still-fanned block keeps its wash | PASS — both voices (no-MCP road: Move Selection into a New Take, ⌥⌘Z) |
 | W12 R-770-1 three takes, delete one → stays open | PASS (Study) |
 | W13 B3-P1 archive road | PASS (Study) |
-| W14 the seat — Takes AND Compare (F1) | Compare PASS (card press, Study); Takes: panel-door PASS, card-press re-run PENDING |
+| W14 the seat — Takes AND Compare (F1) | PASS — Takes (card press, Study; bar door, Terminal) and Compare (card press, Study) |
 | W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PENDING |
 | W16 VX-740 make outline note ×3 → one column each | PENDING |
 | W17 VX-739 the word count after two take flips | PENDING |
@@ -2780,3 +2780,16 @@ its named any-road staging.
   gutter, its comments panel opened from the bar (⌘⇧') and "beta" deleted there → the gutter's card dropped the beta
   entry within ~1.2 s, alpha alone remaining, no mode switch (`w10-u2-gutter-pair.png`, from `w10-u2-before.png` /
   `w10-u2-after.png`); ⌘1 shows the same. The two-window road (delete from a SECOND window in Write) is re-run below.
+- **W14, Takes by the card press — PASS (Study, stack).** U2's card (one comment left, "alpha") pressed → the panel
+  opened anchored at the card (`w14t-panel-small.png`); Delete → the panel STAYED ("Comment deleted — it's under
+  Deleted below, restorable.", "▸ Deleted (2)") and the card stayed seated under it (`w14t-deleted-small.png`); Close
+  → U2's card GONE from the gutter, the board otherwise unchanged (`w14t-closed-small.png`).
+- **W10, Study — PASS.** U1 given two comments from the Takes board's own panel (⌘⇧'): both appeared in the gutter
+  at once (`w10b-panel-small.png`); with the panel still open, "U1 two" deleted → the gutter card showed only "U1 one"
+  ~0.8 s later (`w10s-gutter-pair.png`). Both voices therefore show the board's gutter following the store while it
+  stays mounted (the pre-fix one-shot feed re-read only when the card's OWN popover closed; this is the bar-door
+  panel, so its update is the live feed's). **The prescribed second-window road is NOT walkable as written:** with the
+  same note open in a second window (Open ▸ "Open in New Window"), the window that is not key shows the note's
+  lightweight face — no header, no style bar, no gutter, open fans drawn inline as full-width cards
+  (`w10b-main-inactive-small.png`, `w10b-two.png`) — so no Takes gutter is mounted to watch while the other window
+  deletes. (A look line for the orchestrator: that face is the one-live-surface rule, presumably by design.)
