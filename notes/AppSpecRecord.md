@@ -1285,4 +1285,4 @@ pass caught the pre-existing P33 settle race — fixed, the VX-539/546 class); F
 with its only real red PRE-EXISTING on main (VM-38); the release split's TEST target pre-existing broken (VX-773).
 
 **Born:** VX-720/721 (fixed in-run) · VX-722/723/772 (load-flakes) · VX-773 · VM-38. **PROVISIONALs:** QUESTIONS
-#257. **Merged:** PENDING-MERGE-SHA (merge commit). The night's full narrative: `notes/plans/fixes/vx-500-sync-followups.md`.
+#257. **Merged:** `e30cdf3b2` (merge commit). The night's full narrative: `notes/plans/fixes/vx-500-sync-followups.md`.
