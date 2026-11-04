@@ -1764,3 +1764,68 @@ carries that name — batch 4 mapped it to "follow this note's order" by its hel
 pair's re-key) fits a flicker on that toggle. CONFIRM with her that "track paragraphs" meant
 "follow this note's order"; if she meant something else, VX-757 reopens on the right control
 (the fix stands on its own merits either way — it removes a real whole-board pane rebuild).
+
+---
+
+## BATCH 5 RECORD — the singles: VX-758 · VX-739 · VX-638 · VX-652 · VX-634 (implementer: opus-implementer, 2026-11-04)
+
+**NOT DONE (first line, kept current):** every member is in progress; mounted red/green claims are
+PREDICTIONS until the orchestrator's suite window (this session is headless — no `xcodebuild test`,
+no app launch, no stage); core `swift test` results are REAL where stated; the use walk (W17–W18
+and the batch's other rows); the cold ladder.
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (this file whole incl. batches 1–4 + the window re-scope; TEXTKIT2_NOTES in full; SurfaceContracts in full) | DONE |
+| A · VX-758 trace (code read, written below before any code) | DONE (this commit) |
+| A · VX-758 pins / fix / red-green | NEXT |
+| B · VX-739 pin-first | NOT STARTED |
+| C · VX-638 | NOT STARTED |
+| D · VX-652 | NOT STARTED |
+| E · VX-634 + the sweep | NOT STARTED |
+| `DerivedData/vx770-b5` build-for-testing | NOT STARTED |
+| READY-FOR-SUITES, walk rows, residue, self-assessment | NOT STARTED |
+
+### A · VX-758 — THE TRACE (written before any code)
+
+**Which sort option is broken — the truth, and it is NOT her sentence's surface reading.** The book's
+order ▾ (the navigator's `orderControl`, `BookView.swift:1502–1556`, the ONE list
+`BookOrderChoices.all`, `BookOrderAndConversion.swift:45–53`) offers Manual · Entry date ↑/↓ ·
+Created ↑/↓ · Last touched ↓ · Major revision ↓. A pick sets `BookViewModel.viewOrder`, the
+observation restarts (`observeReading(order:)`, `BookViewModel.swift:104–107`) and the rows are adopted
+verbatim; `BookStructureModel.grouped` keeps the query's order inside each chapter. The phone has no
+order door (stored order only). So the ONE place the order is decided is
+`Queries.assembleReading` → `stampOrder` (`Sources/VariorumCore/Queries/ReadingAssembly.swift:553–564`):
+`ORDER BY (col IS NULL), col DIR, c.id DIR`.
+- **Created ↑/↓ (`.createdAt` → `c.created_at`) — NOT broken by the code.** `container.created_at` is
+  `NOT NULL`, so the `IS NULL` term is always 0 and every note orders by its creation instant; entry
+  dates play no part. Pinned as a characterization (green on both trees, below).
+- **Entry date ↑/↓ (`.entryDate` → `c.entry_date`) — BROKEN for undated notes.** `entry_date` is NULL
+  on every note minted outside a journal door, so the `(c.entry_date IS NULL)` term piles EVERY undated
+  note last in both directions, and inside the pile the only key is `c.id` — a random UUID. The
+  undated notes therefore sit in an arbitrary order that no pick changes beyond flipping it: exactly
+  "doesn't seem to be doing anything unless items have an entry date". The pile was deliberate when
+  written (pinned: `ReadingAssemblyQueryTests.entryDateSortOrdersJournalsAndSortsUndatedLast`); her
+  sentence (the kickoff header, verbatim) overturns it.
+- **Her intent, built:** *"it should use their creation date if they don't have an entry date"* — the
+  entry-date arm's key becomes the note's entry date, else its creation stamp. **The precedent is the
+  Library's own date sort**, which has done exactly this since 18h: `Queries.LibrarySort.entryDate`'s
+  expression is `COALESCE(entry_date, created_at)`, tie broken by `id` in the same direction
+  (`Sources/VariorumCore/Queries/Timeline.swift`, `expression` + `library`'s `ORDER BY`). So the fix
+  is the Library's rule, reused verbatim in the book's arm — one date rule for both listings, no new
+  key. The narrow corner the Library already carries comes with it, named there (18h R1-10): the
+  fallback compares a UTC instant with a local day key, so an undated note created inside the
+  zone-offset window of midnight sorts by its UTC day while its displayed name is its local day. The
+  Library's record weighed `date(created_at, 'localtime')` and declined it (per-row time-zone
+  dependence, the `Calendar.current` mismatch); reusing the Library's spelling keeps the two listings
+  agreeing, which is the stronger property.
+- **What her word "creation date" means for the record:** she was looking through "Entry date" (the
+  arm that consults entry dates at all) — or she read the Created arm's result on a book whose notes
+  share creation stamps; the code admits only the first reading of "unless items have an entry date".
+  Built to the intent (every note always sorts; an undated note takes its created_at). Her bundle gets
+  one line (the label question is hers, not this batch's).
+- **Scope, kept:** the Last touched / Major revision arms keep `NULL` last (their own deliberate doc:
+  "a post that never crossed the churn threshold shouldn't lead a by-revision book") although the
+  Library falls back to `created_at` there too — residue line, not built. Read-side only: no
+  Operations, schema or `Sync/` change; the stored `sort_field` is untouched.
