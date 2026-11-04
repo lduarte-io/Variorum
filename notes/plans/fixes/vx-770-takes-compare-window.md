@@ -3076,7 +3076,7 @@ still hops once (her VX-756 repro) — the walk's three stories (`target=34/22/3
 their panes measure, a growth that is not a scroll; the batch-1 in-storm re-aim keys on the column's
 content height changing with her row's frame stamped at it — R1-1's scroll-step order — and a
 SwiftUI-laid-out growth reports her row first. Candidate fix: judge her row's own moved-frame report
-(a5fbc6151's shape). The harness gap: \\<what W2-TRACE showed\\>."* (Area: Takes & Lenses · Bug ·
+(a5fbc6151's shape). The harness gap: ‹what W2-TRACE showed›."* (Area: Takes & Lenses · Bug ·
 Confirmed.)
 
 ### P-8 — the W2 fix's cost
