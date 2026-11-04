@@ -1029,6 +1029,107 @@ struct TakesSeededEntryLandingTests {
     }
 }
 
+// MARK: - VX-770 W2 — the entry landing hears its row's own late re-measure (pure)
+
+/// **The mechanism the walk's margin-grid hop rides, on the pure brain** (the
+/// run record's THE W2 CYCLE, the trace). An entry landing that outranked the
+/// memory has put her row home in the band; then the row GROWS (margin grid's
+/// deferred measured-height turn — her own cards, or a card of a row above
+/// pushing her down) with no scroll. Batch 1's in-storm re-aim answers a growth
+/// only at a report where the column's content height has CHANGED and her
+/// row's frame was reported AT that height — the 17q ladder's R1-1 order for a
+/// SCROLL step (the column's report first, the rows after). A growth SwiftUI
+/// lays out itself reports the other way round — her row first, while the
+/// brain still holds the old content height, then the column (or, coalesced,
+/// no column report at all) — and on the merged head neither report aims: the
+/// row rests off home until the watch's quiet look corrects it, one hop later.
+@MainActor
+@Suite("VX-770 W2 — the entry landing hears its row's own late re-measure (pure board)", .serialized)
+struct TakesLateRemeasureReaimTests {
+    private let order = ["a", "b", "far"]
+
+    private func geometry(offset: CGFloat, content: CGFloat) -> TakesBoardLayout.ArticleGeometry {
+        TakesBoardLayout.ArticleGeometry(offset: offset, content: content, viewport: 619)
+    }
+
+    /// The landing as the merged head leaves it once its storm is over: entered
+    /// on "far" from the mount's top (no memory — the outranking road's page),
+    /// aimed at the shipped foot, the page scrolled there, her row reported HOME
+    /// mid-band at its first (sticky-carded) height of 300 pt.
+    private func landedHome() -> TakesArticleScroll {
+        let s = TakesArticleScroll()
+        _ = s.consumeArticleGeometry(
+            geometry(offset: 0, content: 6000), remembered: nil, positionedByUser: false)
+        s.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 60))
+        s.landArticle(on: "far")
+        #expect(s.articleLandingStep(order: order) == .reveal("far", .foot),
+                "non-vacuity: the entry landing's first decided step aims the shipped foot")
+        _ = s.consumeArticleGeometry(
+            geometry(offset: 3000, content: 6000), remembered: nil, positionedByUser: false)
+        #expect(s.articleLandingReport(order: order) == .wait)
+        s.noteArticleRowFrame("far", CGRect(x: 0, y: 200, width: 680, height: 300))
+        #expect(s.articleLandingReport(order: order) == .wait,
+                "non-vacuity: her row reported HOME (mid-band) — nothing to aim")
+        return s
+    }
+
+    enum LateGrowth: String, CaseIterable, Sendable, CustomTestStringConvertible {
+        /// Her own cards measured: 300 → 520 pt, her top where it was.
+        case herOwnCardsGrew
+        /// A card of a row above measured: she is pushed down 130 pt.
+        case aRowAboveGrew
+        var testDescription: String { rawValue }
+        var frame: CGRect {
+            switch self {
+            case .herOwnCardsGrew: CGRect(x: 0, y: 200, width: 680, height: 520)
+            case .aRowAboveGrew: CGRect(x: 0, y: 330, width: 680, height: 300)
+            }
+        }
+    }
+
+    /// **RED ON THE MERGED HEAD (both arms): `.wait` at her row's report AND at
+    /// the column's** — a row off home by 45–135 pt that nothing aims. With the
+    /// fix her row's OWN report is the evidence (it IS this pass's frame,
+    /// whatever the column has said yet): one aim there, and the column's report
+    /// that follows is only a report (one aim per event).
+    @Test(arguments: LateGrowth.allCases)
+    func aLateGrowthHerRowReportsFirstIsReaimedAtHerRowsReport(_ growth: LateGrowth) {
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        let s = landedHome()
+        s.noteArticleRowFrame("far", growth.frame)
+        let atHerRowsReport = s.articleLandingReport(order: order)
+        _ = s.consumeArticleGeometry(
+            geometry(offset: 3000, content: 6220), remembered: nil, positionedByUser: false)
+        let atTheColumnsReport = s.articleLandingReport(order: order)
+        #expect(atHerRowsReport == .reveal("far", .foot),
+                """
+                \(growth): her row grew off home with no scroll — re-aimed at its OWN report, inside \
+                the storm (\(atHerRowsReport); on the merged head `.wait`: the content height had not \
+                moved yet, and the watch hopped it a quiet interval later — the walk's W2)
+                """)
+        #expect(atTheColumnsReport == .wait,
+                "\(growth): …once — the column's report that follows is only a report (\(atTheColumnsReport))")
+    }
+
+    /// **GUARD (green on both trees): the order batch 1 was built for still
+    /// re-aims exactly once** — the column's report first (her row's frame there
+    /// is the previous pass's, never judged), then her row's, at the new height.
+    @Test func aLateGrowthTheColumnReportsFirstIsStillReaimedOnce() {
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        let s = landedHome()
+        _ = s.consumeArticleGeometry(
+            geometry(offset: 3000, content: 6220), remembered: nil, positionedByUser: false)
+        #expect(s.articleLandingReport(order: order) == .wait,
+                "the column's report: her row's frame is the previous pass's — not judged")
+        s.noteArticleRowFrame("far", LateGrowth.herOwnCardsGrew.frame)
+        #expect(s.articleLandingReport(order: order) == .reveal("far", .foot),
+                "her row's report at the new height: the one re-aim")
+        #expect(s.articleLandingReport(order: order) == .wait, "…once")
+    }
+}
+
 // MARK: - VX-577 — expand all in slot split
 
 @MainActor
