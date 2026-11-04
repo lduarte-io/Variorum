@@ -1455,3 +1455,116 @@ confirm the "Test run with N tests" line and read the `skipped:` lines.
 3. **Superseded, for deletion at the window:** `DerivedData/vx770-b2-post`, `vx770-b2-rev` and
    `vx770-b2-prerevert` (batch 2's trees; window b2 holds their runs). `vx770-b3-rev` stays for the red
    run; `vx770-b3-post` is superseded by `vx770-recon-post` for the green run (it lacks the reconciliation).
+
+---
+
+## BATCH 4 RECORD — VX-740 + VX-757, the Compare pair (implementer: opus-implementer, 2026-11-04)
+
+**NOT DONE (first line, kept current):** every mounted red/green claim below is a PREDICTION until the
+orchestrator's suite window (this session is headless — no `xcodebuild test`, no app launch, no stage);
+the use walk (W15–W16, both voices); the cold ladder.
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (this file whole; the vx-736 ladder round 1's VX-740 finding; SurfaceContracts › The note — Compare holds Outline, versions in Compare; VX-757 on Linear — no detail beyond her sentence) | DONE |
+| Trace, both members (code read at HEAD 7c98fcc5f; written below before any code) | DONE (this commit) |
+| VX-740 pin | PENDING |
+| VX-740 fix (P-770-1) | PENDING |
+| VX-757 pin | PENDING |
+| VX-757 fix | PENDING |
+| Build-for-testing: `DerivedData/vx770-b4` (HEAD) + `DerivedData/vx770-b4-rev` (the behavioural revert) | PENDING |
+| READY-FOR-SUITES, prediction table, walk rows, residue, self-assessment | PENDING |
+
+### THE TRACE — VX-740 (re-located at HEAD; the vx-736 ladder's mechanism, confirmed by code read)
+
+The file moved under batches 2/recon; the two sites are now `CompareBoardView.swift:438–442` (the
+auto-fill inside `adopt`) and `:982–1000` (`makeOutlinePost`).
+1. A note with no `version_of` peer opens Compare on the offer band: its first projection's
+   `versionPeers` is empty, so `adopt`'s auto-fill (`!autoFilled, peerSlots.first?.postID == nil,
+   let first = new.versionPeers.first`) does not fire and `autoFilled` stays false.
+2. She presses "make outline note" (the offer card or the header door). `makeOutlinePost` suspends on
+   `session.runner.run` — the runner is an actor; the mint's body runs on its executor, off main.
+3. Inside the body `mintOutlinePost` writes the outline (same wing — VX-727 — and ONE `version_of`
+   edge on the first pair, `Operations+Versions.swift:429–430`) and commits; GRDB's observation of the
+   board's projection (`restartObservation`, region includes `edge`/`container`) re-fetches on the commit
+   and delivers on the main actor. Then `registerMintedContainerEntry` registers the undo entry, the
+   body returns, and the continuation of `makeOutlinePost` is enqueued on main.
+4. Two main-actor jobs race: the observation's delivery and the resume. When the DELIVERY runs first
+   (J5's walk, 2026-11-02): `adopt` sees `versionPeers.first == the outline`, the auto-fill seats it in
+   slot 0 and sets `autoFilled`. The resume then finds NO empty slot and, with `peerSlots.count == 1 < 3`,
+   APPENDS a second `PeerSlot` holding the same id — two columns, one note, one Library row.
+5. When the RESUME runs first, it seats slot 0 and sets `autoFilled`; the later delivery's auto-fill
+   cannot fire — one column. Hence "sometimes", and why no pin saw it: no test calls `makeOutlinePost`.
+
+**The pin's staging (the ladder's named shape, made deterministic with no product seam):** the session's
+`UndoStack` change observer fires on the runner's thread from `registerMintedContainerEntry` — AFTER the
+mint's write has committed and BEFORE `run` returns. The pin installs its own observer that, once, hops
+to main SYNCHRONOUSLY (`DispatchQueue.main.sync` — main is idle, the test is awaiting) and adopts a fresh
+read of the board's projection — exactly the delivery of step 4, landed before the resume can run. Then
+the REAL `makeOutlinePost` resumes. Assert one column holding the outline, in the auto-fill's slot.
+**The fix (P-770-1, the orchestrator's PROVISIONAL, binding):** the resume looks for `result.post.id` in
+the slots first; found, it yields — the auto-fill's seat stands. No other arm changes (the full board's
+words, a different note seated by the auto-fill, the ordinary order).
+
+### THE TRACE — VX-757 (repro-first; code read at HEAD, nothing mounted)
+
+**Which toggle.** No control is called "track paragraphs". Compare's header carries three session-local
+chips (`CompareBoardView.swift:1305–1330`): "follow this note's order" (its help: *"the other columns
+arrange themselves to sit beside their related blocks, in this note's order"* — the one whose job is
+tracking paragraphs across the columns, so her most likely referent), "lineage colors", "related blocks
+only". The trace covers all three.
+
+**What one toggle does.** None of the three writes the store or touches the projection: each flips a
+model property; `body` re-reads `model.display`, which re-runs the pure composition
+(`CompareComposition.segments`, `CompareModels.swift:71–177`) and hands `ForEach(display.rows)`
+(`:1708`) a new row list. The rows are keyed by `CompareRow.id` (`:108–115`): an aligned row is
+`aligned-<anchor block>`, a free row `free-<index>-<anchor>-<peer blocks>`. And `rowView` (`:1724–1760`)
+draws the two kinds through a `switch` — two DIFFERENT view structures (the free arm's peer cells sit
+directly in the row's `HStack`; the aligned arm wraps them in a `VStack` with the "moved" line and a
+`ForEach` over the kin).
+- **"follow this note's order"** — ON composes aligned rows wherever lineage speaks; OFF collapses the
+  board to ONE free segment (`segments`' `guard followAnchorOrder … else { return wholeFree() }`). So on a
+  pair that SHARES lineage (a duplicate, an outline, a divided copy) every aligned row becomes a free row:
+  every row's id changes AND its cells move to the other arm of the `switch`. SwiftUI's identity is
+  structural: every realized row is torn down and rebuilt, and with it every `CompareCellView` and its
+  `PaneSurfaceView` — `dismantleNSView`, then a fresh `makeNSView` per cell.
+- **"related blocks only"** — aligned rows keep their ids (the anchor is exempt from the filter, kin
+  survive it), but a free row's id carries its peer blocks and its running index, so a free stretch whose
+  peer side the filter hides or shows is re-keyed and rebuilt (e.g. `free-0-b-x` ↔ `free-0-b-·`).
+- **"lineage colors"** — changes only `railKin`'s answer; no row id or arm changes; nothing is rebuilt.
+
+**Why a rebuilt pane is a visible flicker.** A made pane is born at `@State height = 24`
+(`PaneSurface.swift:1232`), and `makeNSView` measures it at install, BEFORE SwiftUI gives it width
+(`install`'s own comment, `:2013–2016`; `PaneTextView(usingTextLayoutManager:)` starts at a zero frame,
+`:811–836`), so its first frames carry the 24-pt seed or the zero-width measurement. Its real height
+arrives only from the width-gated layout hook (`layout()` → `onWidthChange` → `remeasure`, `:737–747`),
+whose `@State` write lands mid-update and is re-made by `PanePublisher`'s deferred heal turn
+(`:144–260`) — the "Modifying state during view update" lines the batch-2 reconciliation counted on every
+mounted board. A board whose every realized pane is made in one transaction therefore re-lays its whole
+column from wrong heights to right ones over the next turn(s): rows collapse/stretch and settle back —
+the flicker. The toggle she pressed changes NOTHING she should see on a same-order pair (the twin's
+blocks pair 1:1 either way), so the whole picture is a teardown and rebuild of an identical board.
+
+**The conditional arm — her "sometimes":** (1) the rebuild happens only when lineage connects the
+columns — a zero-lineage pair composes ONE free segment in both arms, identical ids, nothing rebuilt
+(the toggle is inert there); "related blocks only" rebuilds only the free stretches it changes;
+"lineage colors" never rebuilds. (2) Whether the wrong-height frame reaches the screen depends on whether
+the mid-update height write lands inside the same display cycle — timing the harness does not own.
+
+**What the harness CAN see, and what it cannot.** It can see the mechanism's state transition directly:
+the identity of every pane (`PaneTextView`, identifier `pane:compare|<variant>`) before and after the
+toggle — re-made objects on the old tree. It cannot see the painted frame; the pin PRINTS each turn's
+pane heights against their measurements after the toggle (`VX757-TRACE`) so the window's red run records
+whether a wrong-height turn is observable, never asserting a paint. The walk row (W15) is the eye.
+
+**The fix's shape (decided from the trace, no product behaviour):** the toggles stop re-making panes that
+stay put. (a) A row's identity is its SPINE — the anchor block it holds (`a:<block>`), else the first peer
+block it holds (`p<column>:<block>`) — never its kind or its running index; unique by construction (I2: a
+block sits in one column; each column holds a block once). (b) `rowView` draws both kinds through ONE
+structure: the anchor cell, then per peer column one `VStack` (the "moved" line when aligned, the column's
+blocks in a `ForEach` keyed by block id, the free arm's 1-pt clear spacer when empty) — the same layout
+each arm drew before, so a cell's identity is (row spine, column, block) in both arms. On a same-order pair
+the toggle then re-makes nothing; on a re-ordered pair only the peer cells that change rows are re-made (a
+cell cannot keep its view across parents). Untouched: `CompareCellView`, the comment lane and its gutter
+face (batch 2), the DEBUG oracle mount, the composition brain and its pins, the projection, every op.
